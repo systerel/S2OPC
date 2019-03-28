@@ -195,21 +195,6 @@ SOPC_ReturnStatus OpcUa_Node_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_Node_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_Node_EncodeableType = {"Node",
-                                                        OpcUaId_Node,
-                                                        OpcUaId_Node_Encoding_DefaultBinary,
-                                                        OpcUaId_Node_Encoding_DefaultXml,
-                                                        NULL,
-                                                        sizeof(OpcUa_Node),
-                                                        OpcUa_Node_Initialize,
-                                                        OpcUa_Node_Clear,
-                                                        NULL,
-                                                        OpcUa_Node_Encode,
-                                                        OpcUa_Node_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_InstanceNode
@@ -364,21 +349,6 @@ SOPC_ReturnStatus OpcUa_InstanceNode_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_InstanceNode_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_InstanceNode_EncodeableType = {"InstanceNode",
-                                                                OpcUaId_InstanceNode,
-                                                                OpcUaId_InstanceNode_Encoding_DefaultBinary,
-                                                                OpcUaId_InstanceNode_Encoding_DefaultXml,
-                                                                NULL,
-                                                                sizeof(OpcUa_InstanceNode),
-                                                                OpcUa_InstanceNode_Initialize,
-                                                                OpcUa_InstanceNode_Clear,
-                                                                NULL,
-                                                                OpcUa_InstanceNode_Encode,
-                                                                OpcUa_InstanceNode_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_TypeNode
@@ -533,21 +503,6 @@ SOPC_ReturnStatus OpcUa_TypeNode_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_TypeNode_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_TypeNode_EncodeableType = {"TypeNode",
-                                                            OpcUaId_TypeNode,
-                                                            OpcUaId_TypeNode_Encoding_DefaultBinary,
-                                                            OpcUaId_TypeNode_Encoding_DefaultXml,
-                                                            NULL,
-                                                            sizeof(OpcUa_TypeNode),
-                                                            OpcUa_TypeNode_Initialize,
-                                                            OpcUa_TypeNode_Clear,
-                                                            NULL,
-                                                            OpcUa_TypeNode_Encode,
-                                                            OpcUa_TypeNode_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ObjectNode
@@ -712,21 +667,6 @@ SOPC_ReturnStatus OpcUa_ObjectNode_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_ObjectNode_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_ObjectNode_EncodeableType = {"ObjectNode",
-                                                              OpcUaId_ObjectNode,
-                                                              OpcUaId_ObjectNode_Encoding_DefaultBinary,
-                                                              OpcUaId_ObjectNode_Encoding_DefaultXml,
-                                                              NULL,
-                                                              sizeof(OpcUa_ObjectNode),
-                                                              OpcUa_ObjectNode_Initialize,
-                                                              OpcUa_ObjectNode_Clear,
-                                                              NULL,
-                                                              OpcUa_ObjectNode_Encode,
-                                                              OpcUa_ObjectNode_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ObjectTypeNode
@@ -891,21 +831,6 @@ SOPC_ReturnStatus OpcUa_ObjectTypeNode_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_ObjectTypeNode_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_ObjectTypeNode_EncodeableType = {"ObjectTypeNode",
-                                                                  OpcUaId_ObjectTypeNode,
-                                                                  OpcUaId_ObjectTypeNode_Encoding_DefaultBinary,
-                                                                  OpcUaId_ObjectTypeNode_Encoding_DefaultXml,
-                                                                  NULL,
-                                                                  sizeof(OpcUa_ObjectTypeNode),
-                                                                  OpcUa_ObjectTypeNode_Initialize,
-                                                                  OpcUa_ObjectTypeNode_Clear,
-                                                                  NULL,
-                                                                  OpcUa_ObjectTypeNode_Encode,
-                                                                  OpcUa_ObjectTypeNode_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_VariableNode
@@ -1147,21 +1072,6 @@ SOPC_ReturnStatus OpcUa_VariableNode_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_VariableNode_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_VariableNode_EncodeableType = {"VariableNode",
-                                                                OpcUaId_VariableNode,
-                                                                OpcUaId_VariableNode_Encoding_DefaultBinary,
-                                                                OpcUaId_VariableNode_Encoding_DefaultXml,
-                                                                NULL,
-                                                                sizeof(OpcUa_VariableNode),
-                                                                OpcUa_VariableNode_Initialize,
-                                                                OpcUa_VariableNode_Clear,
-                                                                NULL,
-                                                                OpcUa_VariableNode_Encode,
-                                                                OpcUa_VariableNode_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_VariableTypeNode
@@ -1373,21 +1283,6 @@ SOPC_ReturnStatus OpcUa_VariableTypeNode_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_VariableTypeNode_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_VariableTypeNode_EncodeableType = {"VariableTypeNode",
-                                                                    OpcUaId_VariableTypeNode,
-                                                                    OpcUaId_VariableTypeNode_Encoding_DefaultBinary,
-                                                                    OpcUaId_VariableTypeNode_Encoding_DefaultXml,
-                                                                    NULL,
-                                                                    sizeof(OpcUa_VariableTypeNode),
-                                                                    OpcUa_VariableTypeNode_Initialize,
-                                                                    OpcUa_VariableTypeNode_Clear,
-                                                                    NULL,
-                                                                    OpcUa_VariableTypeNode_Encode,
-                                                                    OpcUa_VariableTypeNode_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ReferenceTypeNode
@@ -1572,21 +1467,6 @@ SOPC_ReturnStatus OpcUa_ReferenceTypeNode_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_ReferenceTypeNode_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_ReferenceTypeNode_EncodeableType = {"ReferenceTypeNode",
-                                                                     OpcUaId_ReferenceTypeNode,
-                                                                     OpcUaId_ReferenceTypeNode_Encoding_DefaultBinary,
-                                                                     OpcUaId_ReferenceTypeNode_Encoding_DefaultXml,
-                                                                     NULL,
-                                                                     sizeof(OpcUa_ReferenceTypeNode),
-                                                                     OpcUa_ReferenceTypeNode_Initialize,
-                                                                     OpcUa_ReferenceTypeNode_Clear,
-                                                                     NULL,
-                                                                     OpcUa_ReferenceTypeNode_Encode,
-                                                                     OpcUa_ReferenceTypeNode_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_MethodNode
@@ -1761,21 +1641,6 @@ SOPC_ReturnStatus OpcUa_MethodNode_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_MethodNode_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_MethodNode_EncodeableType = {"MethodNode",
-                                                              OpcUaId_MethodNode,
-                                                              OpcUaId_MethodNode_Encoding_DefaultBinary,
-                                                              OpcUaId_MethodNode_Encoding_DefaultXml,
-                                                              NULL,
-                                                              sizeof(OpcUa_MethodNode),
-                                                              OpcUa_MethodNode_Initialize,
-                                                              OpcUa_MethodNode_Clear,
-                                                              NULL,
-                                                              OpcUa_MethodNode_Encode,
-                                                              OpcUa_MethodNode_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ViewNode
@@ -1950,21 +1815,6 @@ SOPC_ReturnStatus OpcUa_ViewNode_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_ViewNode_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_ViewNode_EncodeableType = {"ViewNode",
-                                                            OpcUaId_ViewNode,
-                                                            OpcUaId_ViewNode_Encoding_DefaultBinary,
-                                                            OpcUaId_ViewNode_Encoding_DefaultXml,
-                                                            NULL,
-                                                            sizeof(OpcUa_ViewNode),
-                                                            OpcUa_ViewNode_Initialize,
-                                                            OpcUa_ViewNode_Clear,
-                                                            NULL,
-                                                            OpcUa_ViewNode_Encode,
-                                                            OpcUa_ViewNode_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_DataTypeNode
@@ -2129,21 +1979,6 @@ SOPC_ReturnStatus OpcUa_DataTypeNode_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_DataTypeNode_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_DataTypeNode_EncodeableType = {"DataTypeNode",
-                                                                OpcUaId_DataTypeNode,
-                                                                OpcUaId_DataTypeNode_Encoding_DefaultBinary,
-                                                                OpcUaId_DataTypeNode_Encoding_DefaultXml,
-                                                                NULL,
-                                                                sizeof(OpcUa_DataTypeNode),
-                                                                OpcUa_DataTypeNode_Initialize,
-                                                                OpcUa_DataTypeNode_Clear,
-                                                                NULL,
-                                                                OpcUa_DataTypeNode_Encode,
-                                                                OpcUa_DataTypeNode_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ReferenceNode
@@ -2240,21 +2075,6 @@ SOPC_ReturnStatus OpcUa_ReferenceNode_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_ReferenceNode_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_ReferenceNode_EncodeableType = {"ReferenceNode",
-                                                                 OpcUaId_ReferenceNode,
-                                                                 OpcUaId_ReferenceNode_Encoding_DefaultBinary,
-                                                                 OpcUaId_ReferenceNode_Encoding_DefaultXml,
-                                                                 NULL,
-                                                                 sizeof(OpcUa_ReferenceNode),
-                                                                 OpcUa_ReferenceNode_Initialize,
-                                                                 OpcUa_ReferenceNode_Clear,
-                                                                 NULL,
-                                                                 OpcUa_ReferenceNode_Encode,
-                                                                 OpcUa_ReferenceNode_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_Argument
@@ -2378,21 +2198,6 @@ SOPC_ReturnStatus OpcUa_Argument_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_Argument_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_Argument_EncodeableType = {"Argument",
-                                                            OpcUaId_Argument,
-                                                            OpcUaId_Argument_Encoding_DefaultBinary,
-                                                            OpcUaId_Argument_Encoding_DefaultXml,
-                                                            NULL,
-                                                            sizeof(OpcUa_Argument),
-                                                            OpcUa_Argument_Initialize,
-                                                            OpcUa_Argument_Clear,
-                                                            NULL,
-                                                            OpcUa_Argument_Encode,
-                                                            OpcUa_Argument_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_EnumValueType
@@ -2489,21 +2294,6 @@ SOPC_ReturnStatus OpcUa_EnumValueType_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_EnumValueType_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_EnumValueType_EncodeableType = {"EnumValueType",
-                                                                 OpcUaId_EnumValueType,
-                                                                 OpcUaId_EnumValueType_Encoding_DefaultBinary,
-                                                                 OpcUaId_EnumValueType_Encoding_DefaultXml,
-                                                                 NULL,
-                                                                 sizeof(OpcUa_EnumValueType),
-                                                                 OpcUa_EnumValueType_Initialize,
-                                                                 OpcUa_EnumValueType_Clear,
-                                                                 NULL,
-                                                                 OpcUa_EnumValueType_Encode,
-                                                                 OpcUa_EnumValueType_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_EnumField
@@ -2610,21 +2400,6 @@ SOPC_ReturnStatus OpcUa_EnumField_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_EnumField_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_EnumField_EncodeableType = {"EnumField",
-                                                             OpcUaId_EnumField,
-                                                             OpcUaId_EnumField_Encoding_DefaultBinary,
-                                                             OpcUaId_EnumField_Encoding_DefaultXml,
-                                                             NULL,
-                                                             sizeof(OpcUa_EnumField),
-                                                             OpcUa_EnumField_Initialize,
-                                                             OpcUa_EnumField_Clear,
-                                                             NULL,
-                                                             OpcUa_EnumField_Encode,
-                                                             OpcUa_EnumField_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_OptionSet
@@ -2711,21 +2486,6 @@ SOPC_ReturnStatus OpcUa_OptionSet_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_OptionSet_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_OptionSet_EncodeableType = {"OptionSet",
-                                                             OpcUaId_OptionSet,
-                                                             OpcUaId_OptionSet_Encoding_DefaultBinary,
-                                                             OpcUaId_OptionSet_Encoding_DefaultXml,
-                                                             NULL,
-                                                             sizeof(OpcUa_OptionSet),
-                                                             OpcUa_OptionSet_Initialize,
-                                                             OpcUa_OptionSet_Clear,
-                                                             NULL,
-                                                             OpcUa_OptionSet_Encode,
-                                                             OpcUa_OptionSet_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_TimeZoneDataType
@@ -2812,21 +2572,6 @@ SOPC_ReturnStatus OpcUa_TimeZoneDataType_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_TimeZoneDataType_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_TimeZoneDataType_EncodeableType = {"TimeZoneDataType",
-                                                                    OpcUaId_TimeZoneDataType,
-                                                                    OpcUaId_TimeZoneDataType_Encoding_DefaultBinary,
-                                                                    OpcUaId_TimeZoneDataType_Encoding_DefaultXml,
-                                                                    NULL,
-                                                                    sizeof(OpcUa_TimeZoneDataType),
-                                                                    OpcUa_TimeZoneDataType_Initialize,
-                                                                    OpcUa_TimeZoneDataType_Clear,
-                                                                    NULL,
-                                                                    OpcUa_TimeZoneDataType_Encode,
-                                                                    OpcUa_TimeZoneDataType_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ApplicationDescription
@@ -2970,22 +2715,6 @@ SOPC_ReturnStatus OpcUa_ApplicationDescription_Decode(void* pValue, SOPC_Buffer*
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_ApplicationDescription_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_ApplicationDescription_EncodeableType = {
-    "ApplicationDescription",
-    OpcUaId_ApplicationDescription,
-    OpcUaId_ApplicationDescription_Encoding_DefaultBinary,
-    OpcUaId_ApplicationDescription_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_ApplicationDescription),
-    OpcUa_ApplicationDescription_Initialize,
-    OpcUa_ApplicationDescription_Clear,
-    NULL,
-    OpcUa_ApplicationDescription_Encode,
-    OpcUa_ApplicationDescription_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_RequestHeader
@@ -3122,21 +2851,6 @@ SOPC_ReturnStatus OpcUa_RequestHeader_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_RequestHeader_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_RequestHeader_EncodeableType = {"RequestHeader",
-                                                                 OpcUaId_RequestHeader,
-                                                                 OpcUaId_RequestHeader_Encoding_DefaultBinary,
-                                                                 OpcUaId_RequestHeader_Encoding_DefaultXml,
-                                                                 NULL,
-                                                                 sizeof(OpcUa_RequestHeader),
-                                                                 OpcUa_RequestHeader_Initialize,
-                                                                 OpcUa_RequestHeader_Clear,
-                                                                 NULL,
-                                                                 OpcUa_RequestHeader_Encode,
-                                                                 OpcUa_RequestHeader_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ResponseHeader
@@ -3270,21 +2984,6 @@ SOPC_ReturnStatus OpcUa_ResponseHeader_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_ResponseHeader_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_ResponseHeader_EncodeableType = {"ResponseHeader",
-                                                                  OpcUaId_ResponseHeader,
-                                                                  OpcUaId_ResponseHeader_Encoding_DefaultBinary,
-                                                                  OpcUaId_ResponseHeader_Encoding_DefaultXml,
-                                                                  NULL,
-                                                                  sizeof(OpcUa_ResponseHeader),
-                                                                  OpcUa_ResponseHeader_Initialize,
-                                                                  OpcUa_ResponseHeader_Clear,
-                                                                  NULL,
-                                                                  OpcUa_ResponseHeader_Encode,
-                                                                  OpcUa_ResponseHeader_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ServiceFault
@@ -3351,21 +3050,6 @@ SOPC_ReturnStatus OpcUa_ServiceFault_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_ServiceFault_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_ServiceFault_EncodeableType = {"ServiceFault",
-                                                                OpcUaId_ServiceFault,
-                                                                OpcUaId_ServiceFault_Encoding_DefaultBinary,
-                                                                OpcUaId_ServiceFault_Encoding_DefaultXml,
-                                                                NULL,
-                                                                sizeof(OpcUa_ServiceFault),
-                                                                OpcUa_ServiceFault_Initialize,
-                                                                OpcUa_ServiceFault_Clear,
-                                                                NULL,
-                                                                OpcUa_ServiceFault_Encode,
-                                                                OpcUa_ServiceFault_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_FindServers
@@ -3477,21 +3161,6 @@ SOPC_ReturnStatus OpcUa_FindServersRequest_Decode(void* pValue, SOPC_Buffer* buf
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_FindServersRequest_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_FindServersRequest_EncodeableType = {"FindServersRequest",
-                                                                      OpcUaId_FindServersRequest,
-                                                                      OpcUaId_FindServersRequest_Encoding_DefaultBinary,
-                                                                      OpcUaId_FindServersRequest_Encoding_DefaultXml,
-                                                                      NULL,
-                                                                      sizeof(OpcUa_FindServersRequest),
-                                                                      OpcUa_FindServersRequest_Initialize,
-                                                                      OpcUa_FindServersRequest_Clear,
-                                                                      NULL,
-                                                                      OpcUa_FindServersRequest_Encode,
-                                                                      OpcUa_FindServersRequest_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_FindServersResponse
@@ -3578,22 +3247,6 @@ SOPC_ReturnStatus OpcUa_FindServersResponse_Decode(void* pValue, SOPC_Buffer* bu
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_FindServersResponse_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_FindServersResponse_EncodeableType = {
-    "FindServersResponse",
-    OpcUaId_FindServersResponse,
-    OpcUaId_FindServersResponse_Encoding_DefaultBinary,
-    OpcUaId_FindServersResponse_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_FindServersResponse),
-    OpcUa_FindServersResponse_Initialize,
-    OpcUa_FindServersResponse_Clear,
-    NULL,
-    OpcUa_FindServersResponse_Encode,
-    OpcUa_FindServersResponse_Decode};
 #endif
 #endif
 
@@ -3708,21 +3361,6 @@ SOPC_ReturnStatus OpcUa_ServerOnNetwork_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_ServerOnNetwork_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_ServerOnNetwork_EncodeableType = {"ServerOnNetwork",
-                                                                   OpcUaId_ServerOnNetwork,
-                                                                   OpcUaId_ServerOnNetwork_Encoding_DefaultBinary,
-                                                                   OpcUaId_ServerOnNetwork_Encoding_DefaultXml,
-                                                                   NULL,
-                                                                   sizeof(OpcUa_ServerOnNetwork),
-                                                                   OpcUa_ServerOnNetwork_Initialize,
-                                                                   OpcUa_ServerOnNetwork_Clear,
-                                                                   NULL,
-                                                                   OpcUa_ServerOnNetwork_Encode,
-                                                                   OpcUa_ServerOnNetwork_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_FindServersOnNetwork
@@ -3827,22 +3465,6 @@ SOPC_ReturnStatus OpcUa_FindServersOnNetworkRequest_Decode(void* pValue, SOPC_Bu
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_FindServersOnNetworkRequest_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_FindServersOnNetworkRequest_EncodeableType = {
-    "FindServersOnNetworkRequest",
-    OpcUaId_FindServersOnNetworkRequest,
-    OpcUaId_FindServersOnNetworkRequest_Encoding_DefaultBinary,
-    OpcUaId_FindServersOnNetworkRequest_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_FindServersOnNetworkRequest),
-    OpcUa_FindServersOnNetworkRequest_Initialize,
-    OpcUa_FindServersOnNetworkRequest_Clear,
-    NULL,
-    OpcUa_FindServersOnNetworkRequest_Encode,
-    OpcUa_FindServersOnNetworkRequest_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_FindServersOnNetworkResponse
@@ -3939,22 +3561,6 @@ SOPC_ReturnStatus OpcUa_FindServersOnNetworkResponse_Decode(void* pValue, SOPC_B
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_FindServersOnNetworkResponse_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_FindServersOnNetworkResponse_EncodeableType = {
-    "FindServersOnNetworkResponse",
-    OpcUaId_FindServersOnNetworkResponse,
-    OpcUaId_FindServersOnNetworkResponse_Encoding_DefaultBinary,
-    OpcUaId_FindServersOnNetworkResponse_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_FindServersOnNetworkResponse),
-    OpcUa_FindServersOnNetworkResponse_Initialize,
-    OpcUa_FindServersOnNetworkResponse_Clear,
-    NULL,
-    OpcUa_FindServersOnNetworkResponse_Encode,
-    OpcUa_FindServersOnNetworkResponse_Decode};
 #endif
 #endif
 
@@ -4072,21 +3678,6 @@ SOPC_ReturnStatus OpcUa_UserTokenPolicy_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_UserTokenPolicy_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_UserTokenPolicy_EncodeableType = {"UserTokenPolicy",
-                                                                   OpcUaId_UserTokenPolicy,
-                                                                   OpcUaId_UserTokenPolicy_Encoding_DefaultBinary,
-                                                                   OpcUaId_UserTokenPolicy_Encoding_DefaultXml,
-                                                                   NULL,
-                                                                   sizeof(OpcUa_UserTokenPolicy),
-                                                                   OpcUa_UserTokenPolicy_Initialize,
-                                                                   OpcUa_UserTokenPolicy_Clear,
-                                                                   NULL,
-                                                                   OpcUa_UserTokenPolicy_Encode,
-                                                                   OpcUa_UserTokenPolicy_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_EndpointDescription
@@ -4242,22 +3833,6 @@ SOPC_ReturnStatus OpcUa_EndpointDescription_Decode(void* pValue, SOPC_Buffer* bu
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_EndpointDescription_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_EndpointDescription_EncodeableType = {
-    "EndpointDescription",
-    OpcUaId_EndpointDescription,
-    OpcUaId_EndpointDescription_Encoding_DefaultBinary,
-    OpcUaId_EndpointDescription_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_EndpointDescription),
-    OpcUa_EndpointDescription_Initialize,
-    OpcUa_EndpointDescription_Clear,
-    NULL,
-    OpcUa_EndpointDescription_Encode,
-    OpcUa_EndpointDescription_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_GetEndpoints
@@ -4369,22 +3944,6 @@ SOPC_ReturnStatus OpcUa_GetEndpointsRequest_Decode(void* pValue, SOPC_Buffer* bu
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_GetEndpointsRequest_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_GetEndpointsRequest_EncodeableType = {
-    "GetEndpointsRequest",
-    OpcUaId_GetEndpointsRequest,
-    OpcUaId_GetEndpointsRequest_Encoding_DefaultBinary,
-    OpcUaId_GetEndpointsRequest_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_GetEndpointsRequest),
-    OpcUa_GetEndpointsRequest_Initialize,
-    OpcUa_GetEndpointsRequest_Clear,
-    NULL,
-    OpcUa_GetEndpointsRequest_Encode,
-    OpcUa_GetEndpointsRequest_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_GetEndpointsResponse
@@ -4472,22 +4031,6 @@ SOPC_ReturnStatus OpcUa_GetEndpointsResponse_Decode(void* pValue, SOPC_Buffer* b
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_GetEndpointsResponse_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_GetEndpointsResponse_EncodeableType = {
-    "GetEndpointsResponse",
-    OpcUaId_GetEndpointsResponse,
-    OpcUaId_GetEndpointsResponse_Encoding_DefaultBinary,
-    OpcUaId_GetEndpointsResponse_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_GetEndpointsResponse),
-    OpcUa_GetEndpointsResponse_Initialize,
-    OpcUa_GetEndpointsResponse_Clear,
-    NULL,
-    OpcUa_GetEndpointsResponse_Encode,
-    OpcUa_GetEndpointsResponse_Decode};
 #endif
 #endif
 
@@ -4650,21 +4193,6 @@ SOPC_ReturnStatus OpcUa_RegisteredServer_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_RegisteredServer_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_RegisteredServer_EncodeableType = {"RegisteredServer",
-                                                                    OpcUaId_RegisteredServer,
-                                                                    OpcUaId_RegisteredServer_Encoding_DefaultBinary,
-                                                                    OpcUaId_RegisteredServer_Encoding_DefaultXml,
-                                                                    NULL,
-                                                                    sizeof(OpcUa_RegisteredServer),
-                                                                    OpcUa_RegisteredServer_Initialize,
-                                                                    OpcUa_RegisteredServer_Clear,
-                                                                    NULL,
-                                                                    OpcUa_RegisteredServer_Encode,
-                                                                    OpcUa_RegisteredServer_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_RegisterServer
@@ -4742,22 +4270,6 @@ SOPC_ReturnStatus OpcUa_RegisterServerRequest_Decode(void* pValue, SOPC_Buffer* 
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_RegisterServerRequest_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_RegisterServerRequest_EncodeableType = {
-    "RegisterServerRequest",
-    OpcUaId_RegisterServerRequest,
-    OpcUaId_RegisterServerRequest_Encoding_DefaultBinary,
-    OpcUaId_RegisterServerRequest_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_RegisterServerRequest),
-    OpcUa_RegisterServerRequest_Initialize,
-    OpcUa_RegisterServerRequest_Clear,
-    NULL,
-    OpcUa_RegisterServerRequest_Encode,
-    OpcUa_RegisterServerRequest_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_RegisterServerResponse
@@ -4824,22 +4336,6 @@ SOPC_ReturnStatus OpcUa_RegisterServerResponse_Decode(void* pValue, SOPC_Buffer*
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_RegisterServerResponse_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_RegisterServerResponse_EncodeableType = {
-    "RegisterServerResponse",
-    OpcUaId_RegisterServerResponse,
-    OpcUaId_RegisterServerResponse_Encoding_DefaultBinary,
-    OpcUaId_RegisterServerResponse_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_RegisterServerResponse),
-    OpcUa_RegisterServerResponse_Initialize,
-    OpcUa_RegisterServerResponse_Clear,
-    NULL,
-    OpcUa_RegisterServerResponse_Encode,
-    OpcUa_RegisterServerResponse_Decode};
 #endif
 #endif
 
@@ -4934,22 +4430,6 @@ SOPC_ReturnStatus OpcUa_MdnsDiscoveryConfiguration_Decode(void* pValue, SOPC_Buf
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_MdnsDiscoveryConfiguration_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_MdnsDiscoveryConfiguration_EncodeableType = {
-    "MdnsDiscoveryConfiguration",
-    OpcUaId_MdnsDiscoveryConfiguration,
-    OpcUaId_MdnsDiscoveryConfiguration_Encoding_DefaultBinary,
-    OpcUaId_MdnsDiscoveryConfiguration_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_MdnsDiscoveryConfiguration),
-    OpcUa_MdnsDiscoveryConfiguration_Initialize,
-    OpcUa_MdnsDiscoveryConfiguration_Clear,
-    NULL,
-    OpcUa_MdnsDiscoveryConfiguration_Encode,
-    OpcUa_MdnsDiscoveryConfiguration_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_RegisterServer2
@@ -5046,22 +4526,6 @@ SOPC_ReturnStatus OpcUa_RegisterServer2Request_Decode(void* pValue, SOPC_Buffer*
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_RegisterServer2Request_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_RegisterServer2Request_EncodeableType = {
-    "RegisterServer2Request",
-    OpcUaId_RegisterServer2Request,
-    OpcUaId_RegisterServer2Request_Encoding_DefaultBinary,
-    OpcUaId_RegisterServer2Request_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_RegisterServer2Request),
-    OpcUa_RegisterServer2Request_Initialize,
-    OpcUa_RegisterServer2Request_Clear,
-    NULL,
-    OpcUa_RegisterServer2Request_Encode,
-    OpcUa_RegisterServer2Request_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_RegisterServer2Response
@@ -5167,22 +4631,6 @@ SOPC_ReturnStatus OpcUa_RegisterServer2Response_Decode(void* pValue, SOPC_Buffer
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_RegisterServer2Response_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_RegisterServer2Response_EncodeableType = {
-    "RegisterServer2Response",
-    OpcUaId_RegisterServer2Response,
-    OpcUaId_RegisterServer2Response_Encoding_DefaultBinary,
-    OpcUaId_RegisterServer2Response_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_RegisterServer2Response),
-    OpcUa_RegisterServer2Response_Initialize,
-    OpcUa_RegisterServer2Response_Clear,
-    NULL,
-    OpcUa_RegisterServer2Response_Encode,
-    OpcUa_RegisterServer2Response_Decode};
 #endif
 #endif
 
@@ -5290,22 +4738,6 @@ SOPC_ReturnStatus OpcUa_ChannelSecurityToken_Decode(void* pValue, SOPC_Buffer* b
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_ChannelSecurityToken_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_ChannelSecurityToken_EncodeableType = {
-    "ChannelSecurityToken",
-    OpcUaId_ChannelSecurityToken,
-    OpcUaId_ChannelSecurityToken_Encoding_DefaultBinary,
-    OpcUaId_ChannelSecurityToken_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_ChannelSecurityToken),
-    OpcUa_ChannelSecurityToken_Initialize,
-    OpcUa_ChannelSecurityToken_Clear,
-    NULL,
-    OpcUa_ChannelSecurityToken_Encode,
-    OpcUa_ChannelSecurityToken_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_OpenSecureChannel
@@ -5423,22 +4855,6 @@ SOPC_ReturnStatus OpcUa_OpenSecureChannelRequest_Decode(void* pValue, SOPC_Buffe
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_OpenSecureChannelRequest_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_OpenSecureChannelRequest_EncodeableType = {
-    "OpenSecureChannelRequest",
-    OpcUaId_OpenSecureChannelRequest,
-    OpcUaId_OpenSecureChannelRequest_Encoding_DefaultBinary,
-    OpcUaId_OpenSecureChannelRequest_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_OpenSecureChannelRequest),
-    OpcUa_OpenSecureChannelRequest_Initialize,
-    OpcUa_OpenSecureChannelRequest_Clear,
-    NULL,
-    OpcUa_OpenSecureChannelRequest_Encode,
-    OpcUa_OpenSecureChannelRequest_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_OpenSecureChannelResponse
@@ -5537,22 +4953,6 @@ SOPC_ReturnStatus OpcUa_OpenSecureChannelResponse_Decode(void* pValue, SOPC_Buff
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_OpenSecureChannelResponse_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_OpenSecureChannelResponse_EncodeableType = {
-    "OpenSecureChannelResponse",
-    OpcUaId_OpenSecureChannelResponse,
-    OpcUaId_OpenSecureChannelResponse_Encoding_DefaultBinary,
-    OpcUaId_OpenSecureChannelResponse_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_OpenSecureChannelResponse),
-    OpcUa_OpenSecureChannelResponse_Initialize,
-    OpcUa_OpenSecureChannelResponse_Clear,
-    NULL,
-    OpcUa_OpenSecureChannelResponse_Encode,
-    OpcUa_OpenSecureChannelResponse_Decode};
 #endif
 #endif
 
@@ -5619,22 +5019,6 @@ SOPC_ReturnStatus OpcUa_CloseSecureChannelRequest_Decode(void* pValue, SOPC_Buff
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_CloseSecureChannelRequest_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_CloseSecureChannelRequest_EncodeableType = {
-    "CloseSecureChannelRequest",
-    OpcUaId_CloseSecureChannelRequest,
-    OpcUaId_CloseSecureChannelRequest_Encoding_DefaultBinary,
-    OpcUaId_CloseSecureChannelRequest_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_CloseSecureChannelRequest),
-    OpcUa_CloseSecureChannelRequest_Initialize,
-    OpcUa_CloseSecureChannelRequest_Clear,
-    NULL,
-    OpcUa_CloseSecureChannelRequest_Encode,
-    OpcUa_CloseSecureChannelRequest_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_CloseSecureChannelResponse
@@ -5701,22 +5085,6 @@ SOPC_ReturnStatus OpcUa_CloseSecureChannelResponse_Decode(void* pValue, SOPC_Buf
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_CloseSecureChannelResponse_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_CloseSecureChannelResponse_EncodeableType = {
-    "CloseSecureChannelResponse",
-    OpcUaId_CloseSecureChannelResponse,
-    OpcUaId_CloseSecureChannelResponse_Encoding_DefaultBinary,
-    OpcUaId_CloseSecureChannelResponse_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_CloseSecureChannelResponse),
-    OpcUa_CloseSecureChannelResponse_Initialize,
-    OpcUa_CloseSecureChannelResponse_Clear,
-    NULL,
-    OpcUa_CloseSecureChannelResponse_Encode,
-    OpcUa_CloseSecureChannelResponse_Decode};
 #endif
 #endif
 
@@ -5804,22 +5172,6 @@ SOPC_ReturnStatus OpcUa_SignedSoftwareCertificate_Decode(void* pValue, SOPC_Buff
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_SignedSoftwareCertificate_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_SignedSoftwareCertificate_EncodeableType = {
-    "SignedSoftwareCertificate",
-    OpcUaId_SignedSoftwareCertificate,
-    OpcUaId_SignedSoftwareCertificate_Encoding_DefaultBinary,
-    OpcUaId_SignedSoftwareCertificate_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_SignedSoftwareCertificate),
-    OpcUa_SignedSoftwareCertificate_Initialize,
-    OpcUa_SignedSoftwareCertificate_Clear,
-    NULL,
-    OpcUa_SignedSoftwareCertificate_Encode,
-    OpcUa_SignedSoftwareCertificate_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_SignatureData
@@ -5906,21 +5258,6 @@ SOPC_ReturnStatus OpcUa_SignatureData_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_SignatureData_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_SignatureData_EncodeableType = {"SignatureData",
-                                                                 OpcUaId_SignatureData,
-                                                                 OpcUaId_SignatureData_Encoding_DefaultBinary,
-                                                                 OpcUaId_SignatureData_Encoding_DefaultXml,
-                                                                 NULL,
-                                                                 sizeof(OpcUa_SignatureData),
-                                                                 OpcUa_SignatureData_Initialize,
-                                                                 OpcUa_SignatureData_Clear,
-                                                                 NULL,
-                                                                 OpcUa_SignatureData_Encode,
-                                                                 OpcUa_SignatureData_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_CreateSession
@@ -6068,22 +5405,6 @@ SOPC_ReturnStatus OpcUa_CreateSessionRequest_Decode(void* pValue, SOPC_Buffer* b
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_CreateSessionRequest_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_CreateSessionRequest_EncodeableType = {
-    "CreateSessionRequest",
-    OpcUaId_CreateSessionRequest,
-    OpcUaId_CreateSessionRequest_Encoding_DefaultBinary,
-    OpcUaId_CreateSessionRequest_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_CreateSessionRequest),
-    OpcUa_CreateSessionRequest_Initialize,
-    OpcUa_CreateSessionRequest_Clear,
-    NULL,
-    OpcUa_CreateSessionRequest_Encode,
-    OpcUa_CreateSessionRequest_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_CreateSessionResponse
@@ -6264,22 +5585,6 @@ SOPC_ReturnStatus OpcUa_CreateSessionResponse_Decode(void* pValue, SOPC_Buffer* 
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_CreateSessionResponse_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_CreateSessionResponse_EncodeableType = {
-    "CreateSessionResponse",
-    OpcUaId_CreateSessionResponse,
-    OpcUaId_CreateSessionResponse_Encoding_DefaultBinary,
-    OpcUaId_CreateSessionResponse_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_CreateSessionResponse),
-    OpcUa_CreateSessionResponse_Initialize,
-    OpcUa_CreateSessionResponse_Clear,
-    NULL,
-    OpcUa_CreateSessionResponse_Encode,
-    OpcUa_CreateSessionResponse_Decode};
 #endif
 #endif
 
@@ -6357,21 +5662,6 @@ SOPC_ReturnStatus OpcUa_UserIdentityToken_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_UserIdentityToken_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_UserIdentityToken_EncodeableType = {"UserIdentityToken",
-                                                                     OpcUaId_UserIdentityToken,
-                                                                     OpcUaId_UserIdentityToken_Encoding_DefaultBinary,
-                                                                     OpcUaId_UserIdentityToken_Encoding_DefaultXml,
-                                                                     NULL,
-                                                                     sizeof(OpcUa_UserIdentityToken),
-                                                                     OpcUa_UserIdentityToken_Initialize,
-                                                                     OpcUa_UserIdentityToken_Clear,
-                                                                     NULL,
-                                                                     OpcUa_UserIdentityToken_Encode,
-                                                                     OpcUa_UserIdentityToken_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_AnonymousIdentityToken
@@ -6448,22 +5738,6 @@ SOPC_ReturnStatus OpcUa_AnonymousIdentityToken_Decode(void* pValue, SOPC_Buffer*
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_AnonymousIdentityToken_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_AnonymousIdentityToken_EncodeableType = {
-    "AnonymousIdentityToken",
-    OpcUaId_AnonymousIdentityToken,
-    OpcUaId_AnonymousIdentityToken_Encoding_DefaultBinary,
-    OpcUaId_AnonymousIdentityToken_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_AnonymousIdentityToken),
-    OpcUa_AnonymousIdentityToken_Initialize,
-    OpcUa_AnonymousIdentityToken_Clear,
-    NULL,
-    OpcUa_AnonymousIdentityToken_Encode,
-    OpcUa_AnonymousIdentityToken_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_UserNameIdentityToken
@@ -6570,22 +5844,6 @@ SOPC_ReturnStatus OpcUa_UserNameIdentityToken_Decode(void* pValue, SOPC_Buffer* 
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_UserNameIdentityToken_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_UserNameIdentityToken_EncodeableType = {
-    "UserNameIdentityToken",
-    OpcUaId_UserNameIdentityToken,
-    OpcUaId_UserNameIdentityToken_Encoding_DefaultBinary,
-    OpcUaId_UserNameIdentityToken_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_UserNameIdentityToken),
-    OpcUa_UserNameIdentityToken_Initialize,
-    OpcUa_UserNameIdentityToken_Clear,
-    NULL,
-    OpcUa_UserNameIdentityToken_Encode,
-    OpcUa_UserNameIdentityToken_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_X509IdentityToken
@@ -6672,21 +5930,6 @@ SOPC_ReturnStatus OpcUa_X509IdentityToken_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_X509IdentityToken_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_X509IdentityToken_EncodeableType = {"X509IdentityToken",
-                                                                     OpcUaId_X509IdentityToken,
-                                                                     OpcUaId_X509IdentityToken_Encoding_DefaultBinary,
-                                                                     OpcUaId_X509IdentityToken_Encoding_DefaultXml,
-                                                                     NULL,
-                                                                     sizeof(OpcUa_X509IdentityToken),
-                                                                     OpcUa_X509IdentityToken_Initialize,
-                                                                     OpcUa_X509IdentityToken_Clear,
-                                                                     NULL,
-                                                                     OpcUa_X509IdentityToken_Encode,
-                                                                     OpcUa_X509IdentityToken_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_KerberosIdentityToken
@@ -6773,22 +6016,6 @@ SOPC_ReturnStatus OpcUa_KerberosIdentityToken_Decode(void* pValue, SOPC_Buffer* 
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_KerberosIdentityToken_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_KerberosIdentityToken_EncodeableType = {
-    "KerberosIdentityToken",
-    OpcUaId_KerberosIdentityToken,
-    OpcUaId_KerberosIdentityToken_Encoding_DefaultBinary,
-    OpcUaId_KerberosIdentityToken_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_KerberosIdentityToken),
-    OpcUa_KerberosIdentityToken_Initialize,
-    OpcUa_KerberosIdentityToken_Clear,
-    NULL,
-    OpcUa_KerberosIdentityToken_Encode,
-    OpcUa_KerberosIdentityToken_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_IssuedIdentityToken
@@ -6885,22 +6112,6 @@ SOPC_ReturnStatus OpcUa_IssuedIdentityToken_Decode(void* pValue, SOPC_Buffer* bu
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_IssuedIdentityToken_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_IssuedIdentityToken_EncodeableType = {
-    "IssuedIdentityToken",
-    OpcUaId_IssuedIdentityToken,
-    OpcUaId_IssuedIdentityToken_Encoding_DefaultBinary,
-    OpcUaId_IssuedIdentityToken_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_IssuedIdentityToken),
-    OpcUa_IssuedIdentityToken_Initialize,
-    OpcUa_IssuedIdentityToken_Clear,
-    NULL,
-    OpcUa_IssuedIdentityToken_Encode,
-    OpcUa_IssuedIdentityToken_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ActivateSession
@@ -7037,22 +6248,6 @@ SOPC_ReturnStatus OpcUa_ActivateSessionRequest_Decode(void* pValue, SOPC_Buffer*
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_ActivateSessionRequest_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_ActivateSessionRequest_EncodeableType = {
-    "ActivateSessionRequest",
-    OpcUaId_ActivateSessionRequest,
-    OpcUaId_ActivateSessionRequest_Encoding_DefaultBinary,
-    OpcUaId_ActivateSessionRequest_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_ActivateSessionRequest),
-    OpcUa_ActivateSessionRequest_Initialize,
-    OpcUa_ActivateSessionRequest_Clear,
-    NULL,
-    OpcUa_ActivateSessionRequest_Encode,
-    OpcUa_ActivateSessionRequest_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ActivateSessionResponse
@@ -7167,22 +6362,6 @@ SOPC_ReturnStatus OpcUa_ActivateSessionResponse_Decode(void* pValue, SOPC_Buffer
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_ActivateSessionResponse_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_ActivateSessionResponse_EncodeableType = {
-    "ActivateSessionResponse",
-    OpcUaId_ActivateSessionResponse,
-    OpcUaId_ActivateSessionResponse_Encoding_DefaultBinary,
-    OpcUaId_ActivateSessionResponse_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_ActivateSessionResponse),
-    OpcUa_ActivateSessionResponse_Initialize,
-    OpcUa_ActivateSessionResponse_Clear,
-    NULL,
-    OpcUa_ActivateSessionResponse_Encode,
-    OpcUa_ActivateSessionResponse_Decode};
 #endif
 #endif
 
@@ -7261,22 +6440,6 @@ SOPC_ReturnStatus OpcUa_CloseSessionRequest_Decode(void* pValue, SOPC_Buffer* bu
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_CloseSessionRequest_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_CloseSessionRequest_EncodeableType = {
-    "CloseSessionRequest",
-    OpcUaId_CloseSessionRequest,
-    OpcUaId_CloseSessionRequest_Encoding_DefaultBinary,
-    OpcUaId_CloseSessionRequest_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_CloseSessionRequest),
-    OpcUa_CloseSessionRequest_Initialize,
-    OpcUa_CloseSessionRequest_Clear,
-    NULL,
-    OpcUa_CloseSessionRequest_Encode,
-    OpcUa_CloseSessionRequest_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_CloseSessionResponse
@@ -7343,22 +6506,6 @@ SOPC_ReturnStatus OpcUa_CloseSessionResponse_Decode(void* pValue, SOPC_Buffer* b
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_CloseSessionResponse_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_CloseSessionResponse_EncodeableType = {
-    "CloseSessionResponse",
-    OpcUaId_CloseSessionResponse,
-    OpcUaId_CloseSessionResponse_Encoding_DefaultBinary,
-    OpcUaId_CloseSessionResponse_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_CloseSessionResponse),
-    OpcUa_CloseSessionResponse_Initialize,
-    OpcUa_CloseSessionResponse_Clear,
-    NULL,
-    OpcUa_CloseSessionResponse_Encode,
-    OpcUa_CloseSessionResponse_Decode};
 #endif
 #endif
 
@@ -7437,21 +6584,6 @@ SOPC_ReturnStatus OpcUa_CancelRequest_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_CancelRequest_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_CancelRequest_EncodeableType = {"CancelRequest",
-                                                                 OpcUaId_CancelRequest,
-                                                                 OpcUaId_CancelRequest_Encoding_DefaultBinary,
-                                                                 OpcUaId_CancelRequest_Encoding_DefaultXml,
-                                                                 NULL,
-                                                                 sizeof(OpcUa_CancelRequest),
-                                                                 OpcUa_CancelRequest_Initialize,
-                                                                 OpcUa_CancelRequest_Clear,
-                                                                 NULL,
-                                                                 OpcUa_CancelRequest_Encode,
-                                                                 OpcUa_CancelRequest_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_CancelResponse
@@ -7530,21 +6662,6 @@ SOPC_ReturnStatus OpcUa_CancelResponse_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_CancelResponse_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_CancelResponse_EncodeableType = {"CancelResponse",
-                                                                  OpcUaId_CancelResponse,
-                                                                  OpcUaId_CancelResponse_Encoding_DefaultBinary,
-                                                                  OpcUaId_CancelResponse_Encoding_DefaultXml,
-                                                                  NULL,
-                                                                  sizeof(OpcUa_CancelResponse),
-                                                                  OpcUa_CancelResponse_Initialize,
-                                                                  OpcUa_CancelResponse_Clear,
-                                                                  NULL,
-                                                                  OpcUa_CancelResponse_Encode,
-                                                                  OpcUa_CancelResponse_Decode};
 #endif
 #endif
 
@@ -7662,21 +6779,6 @@ SOPC_ReturnStatus OpcUa_NodeAttributes_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_NodeAttributes_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_NodeAttributes_EncodeableType = {"NodeAttributes",
-                                                                  OpcUaId_NodeAttributes,
-                                                                  OpcUaId_NodeAttributes_Encoding_DefaultBinary,
-                                                                  OpcUaId_NodeAttributes_Encoding_DefaultXml,
-                                                                  NULL,
-                                                                  sizeof(OpcUa_NodeAttributes),
-                                                                  OpcUa_NodeAttributes_Initialize,
-                                                                  OpcUa_NodeAttributes_Clear,
-                                                                  NULL,
-                                                                  OpcUa_NodeAttributes_Encode,
-                                                                  OpcUa_NodeAttributes_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ObjectAttributes
@@ -7803,21 +6905,6 @@ SOPC_ReturnStatus OpcUa_ObjectAttributes_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_ObjectAttributes_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_ObjectAttributes_EncodeableType = {"ObjectAttributes",
-                                                                    OpcUaId_ObjectAttributes,
-                                                                    OpcUaId_ObjectAttributes_Encoding_DefaultBinary,
-                                                                    OpcUaId_ObjectAttributes_Encoding_DefaultXml,
-                                                                    NULL,
-                                                                    sizeof(OpcUa_ObjectAttributes),
-                                                                    OpcUa_ObjectAttributes_Initialize,
-                                                                    OpcUa_ObjectAttributes_Clear,
-                                                                    NULL,
-                                                                    OpcUa_ObjectAttributes_Encode,
-                                                                    OpcUa_ObjectAttributes_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_VariableAttributes
@@ -8021,21 +7108,6 @@ SOPC_ReturnStatus OpcUa_VariableAttributes_Decode(void* pValue, SOPC_Buffer* buf
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_VariableAttributes_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_VariableAttributes_EncodeableType = {"VariableAttributes",
-                                                                      OpcUaId_VariableAttributes,
-                                                                      OpcUaId_VariableAttributes_Encoding_DefaultBinary,
-                                                                      OpcUaId_VariableAttributes_Encoding_DefaultXml,
-                                                                      NULL,
-                                                                      sizeof(OpcUa_VariableAttributes),
-                                                                      OpcUa_VariableAttributes_Initialize,
-                                                                      OpcUa_VariableAttributes_Clear,
-                                                                      NULL,
-                                                                      OpcUa_VariableAttributes_Encode,
-                                                                      OpcUa_VariableAttributes_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_MethodAttributes
@@ -8172,21 +7244,6 @@ SOPC_ReturnStatus OpcUa_MethodAttributes_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_MethodAttributes_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_MethodAttributes_EncodeableType = {"MethodAttributes",
-                                                                    OpcUaId_MethodAttributes,
-                                                                    OpcUaId_MethodAttributes_Encoding_DefaultBinary,
-                                                                    OpcUaId_MethodAttributes_Encoding_DefaultXml,
-                                                                    NULL,
-                                                                    sizeof(OpcUa_MethodAttributes),
-                                                                    OpcUa_MethodAttributes_Initialize,
-                                                                    OpcUa_MethodAttributes_Clear,
-                                                                    NULL,
-                                                                    OpcUa_MethodAttributes_Encode,
-                                                                    OpcUa_MethodAttributes_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ObjectTypeAttributes
@@ -8313,22 +7370,6 @@ SOPC_ReturnStatus OpcUa_ObjectTypeAttributes_Decode(void* pValue, SOPC_Buffer* b
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_ObjectTypeAttributes_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_ObjectTypeAttributes_EncodeableType = {
-    "ObjectTypeAttributes",
-    OpcUaId_ObjectTypeAttributes,
-    OpcUaId_ObjectTypeAttributes_Encoding_DefaultBinary,
-    OpcUaId_ObjectTypeAttributes_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_ObjectTypeAttributes),
-    OpcUa_ObjectTypeAttributes_Initialize,
-    OpcUa_ObjectTypeAttributes_Clear,
-    NULL,
-    OpcUa_ObjectTypeAttributes_Encode,
-    OpcUa_ObjectTypeAttributes_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_VariableTypeAttributes
@@ -8502,22 +7543,6 @@ SOPC_ReturnStatus OpcUa_VariableTypeAttributes_Decode(void* pValue, SOPC_Buffer*
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_VariableTypeAttributes_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_VariableTypeAttributes_EncodeableType = {
-    "VariableTypeAttributes",
-    OpcUaId_VariableTypeAttributes,
-    OpcUaId_VariableTypeAttributes_Encoding_DefaultBinary,
-    OpcUaId_VariableTypeAttributes_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_VariableTypeAttributes),
-    OpcUa_VariableTypeAttributes_Initialize,
-    OpcUa_VariableTypeAttributes_Clear,
-    NULL,
-    OpcUa_VariableTypeAttributes_Encode,
-    OpcUa_VariableTypeAttributes_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ReferenceTypeAttributes
@@ -8664,22 +7689,6 @@ SOPC_ReturnStatus OpcUa_ReferenceTypeAttributes_Decode(void* pValue, SOPC_Buffer
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_ReferenceTypeAttributes_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_ReferenceTypeAttributes_EncodeableType = {
-    "ReferenceTypeAttributes",
-    OpcUaId_ReferenceTypeAttributes,
-    OpcUaId_ReferenceTypeAttributes_Encoding_DefaultBinary,
-    OpcUaId_ReferenceTypeAttributes_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_ReferenceTypeAttributes),
-    OpcUa_ReferenceTypeAttributes_Initialize,
-    OpcUa_ReferenceTypeAttributes_Clear,
-    NULL,
-    OpcUa_ReferenceTypeAttributes_Encode,
-    OpcUa_ReferenceTypeAttributes_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_DataTypeAttributes
@@ -8806,21 +7815,6 @@ SOPC_ReturnStatus OpcUa_DataTypeAttributes_Decode(void* pValue, SOPC_Buffer* buf
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_DataTypeAttributes_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_DataTypeAttributes_EncodeableType = {"DataTypeAttributes",
-                                                                      OpcUaId_DataTypeAttributes,
-                                                                      OpcUaId_DataTypeAttributes_Encoding_DefaultBinary,
-                                                                      OpcUaId_DataTypeAttributes_Encoding_DefaultXml,
-                                                                      NULL,
-                                                                      sizeof(OpcUa_DataTypeAttributes),
-                                                                      OpcUa_DataTypeAttributes_Initialize,
-                                                                      OpcUa_DataTypeAttributes_Clear,
-                                                                      NULL,
-                                                                      OpcUa_DataTypeAttributes_Encode,
-                                                                      OpcUa_DataTypeAttributes_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ViewAttributes
@@ -8957,21 +7951,6 @@ SOPC_ReturnStatus OpcUa_ViewAttributes_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_ViewAttributes_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_ViewAttributes_EncodeableType = {"ViewAttributes",
-                                                                  OpcUaId_ViewAttributes,
-                                                                  OpcUaId_ViewAttributes_Encoding_DefaultBinary,
-                                                                  OpcUaId_ViewAttributes_Encoding_DefaultXml,
-                                                                  NULL,
-                                                                  sizeof(OpcUa_ViewAttributes),
-                                                                  OpcUa_ViewAttributes_Initialize,
-                                                                  OpcUa_ViewAttributes_Clear,
-                                                                  NULL,
-                                                                  OpcUa_ViewAttributes_Encode,
-                                                                  OpcUa_ViewAttributes_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_AddNodesItem
@@ -9108,21 +8087,6 @@ SOPC_ReturnStatus OpcUa_AddNodesItem_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_AddNodesItem_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_AddNodesItem_EncodeableType = {"AddNodesItem",
-                                                                OpcUaId_AddNodesItem,
-                                                                OpcUaId_AddNodesItem_Encoding_DefaultBinary,
-                                                                OpcUaId_AddNodesItem_Encoding_DefaultXml,
-                                                                NULL,
-                                                                sizeof(OpcUa_AddNodesItem),
-                                                                OpcUa_AddNodesItem_Initialize,
-                                                                OpcUa_AddNodesItem_Clear,
-                                                                NULL,
-                                                                OpcUa_AddNodesItem_Encode,
-                                                                OpcUa_AddNodesItem_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_AddNodesResult
@@ -9209,21 +8173,6 @@ SOPC_ReturnStatus OpcUa_AddNodesResult_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_AddNodesResult_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_AddNodesResult_EncodeableType = {"AddNodesResult",
-                                                                  OpcUaId_AddNodesResult,
-                                                                  OpcUaId_AddNodesResult_Encoding_DefaultBinary,
-                                                                  OpcUaId_AddNodesResult_Encoding_DefaultXml,
-                                                                  NULL,
-                                                                  sizeof(OpcUa_AddNodesResult),
-                                                                  OpcUa_AddNodesResult_Initialize,
-                                                                  OpcUa_AddNodesResult_Clear,
-                                                                  NULL,
-                                                                  OpcUa_AddNodesResult_Encode,
-                                                                  OpcUa_AddNodesResult_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_AddNodes
@@ -9309,21 +8258,6 @@ SOPC_ReturnStatus OpcUa_AddNodesRequest_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_AddNodesRequest_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_AddNodesRequest_EncodeableType = {"AddNodesRequest",
-                                                                   OpcUaId_AddNodesRequest,
-                                                                   OpcUaId_AddNodesRequest_Encoding_DefaultBinary,
-                                                                   OpcUaId_AddNodesRequest_Encoding_DefaultXml,
-                                                                   NULL,
-                                                                   sizeof(OpcUa_AddNodesRequest),
-                                                                   OpcUa_AddNodesRequest_Initialize,
-                                                                   OpcUa_AddNodesRequest_Clear,
-                                                                   NULL,
-                                                                   OpcUa_AddNodesRequest_Encode,
-                                                                   OpcUa_AddNodesRequest_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_AddNodesResponse
@@ -9428,21 +8362,6 @@ SOPC_ReturnStatus OpcUa_AddNodesResponse_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_AddNodesResponse_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_AddNodesResponse_EncodeableType = {"AddNodesResponse",
-                                                                    OpcUaId_AddNodesResponse,
-                                                                    OpcUaId_AddNodesResponse_Encoding_DefaultBinary,
-                                                                    OpcUaId_AddNodesResponse_Encoding_DefaultXml,
-                                                                    NULL,
-                                                                    sizeof(OpcUa_AddNodesResponse),
-                                                                    OpcUa_AddNodesResponse_Initialize,
-                                                                    OpcUa_AddNodesResponse_Clear,
-                                                                    NULL,
-                                                                    OpcUa_AddNodesResponse_Encode,
-                                                                    OpcUa_AddNodesResponse_Decode};
 #endif
 #endif
 
@@ -9570,21 +8489,6 @@ SOPC_ReturnStatus OpcUa_AddReferencesItem_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_AddReferencesItem_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_AddReferencesItem_EncodeableType = {"AddReferencesItem",
-                                                                     OpcUaId_AddReferencesItem,
-                                                                     OpcUaId_AddReferencesItem_Encoding_DefaultBinary,
-                                                                     OpcUaId_AddReferencesItem_Encoding_DefaultXml,
-                                                                     NULL,
-                                                                     sizeof(OpcUa_AddReferencesItem),
-                                                                     OpcUa_AddReferencesItem_Initialize,
-                                                                     OpcUa_AddReferencesItem_Clear,
-                                                                     NULL,
-                                                                     OpcUa_AddReferencesItem_Encode,
-                                                                     OpcUa_AddReferencesItem_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_AddReferences
@@ -9672,22 +8576,6 @@ SOPC_ReturnStatus OpcUa_AddReferencesRequest_Decode(void* pValue, SOPC_Buffer* b
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_AddReferencesRequest_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_AddReferencesRequest_EncodeableType = {
-    "AddReferencesRequest",
-    OpcUaId_AddReferencesRequest,
-    OpcUaId_AddReferencesRequest_Encoding_DefaultBinary,
-    OpcUaId_AddReferencesRequest_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_AddReferencesRequest),
-    OpcUa_AddReferencesRequest_Initialize,
-    OpcUa_AddReferencesRequest_Clear,
-    NULL,
-    OpcUa_AddReferencesRequest_Encode,
-    OpcUa_AddReferencesRequest_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_AddReferencesResponse
@@ -9792,22 +8680,6 @@ SOPC_ReturnStatus OpcUa_AddReferencesResponse_Decode(void* pValue, SOPC_Buffer* 
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_AddReferencesResponse_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_AddReferencesResponse_EncodeableType = {
-    "AddReferencesResponse",
-    OpcUaId_AddReferencesResponse,
-    OpcUaId_AddReferencesResponse_Encoding_DefaultBinary,
-    OpcUaId_AddReferencesResponse_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_AddReferencesResponse),
-    OpcUa_AddReferencesResponse_Initialize,
-    OpcUa_AddReferencesResponse_Clear,
-    NULL,
-    OpcUa_AddReferencesResponse_Encode,
-    OpcUa_AddReferencesResponse_Decode};
 #endif
 #endif
 
@@ -9895,21 +8767,6 @@ SOPC_ReturnStatus OpcUa_DeleteNodesItem_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_DeleteNodesItem_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_DeleteNodesItem_EncodeableType = {"DeleteNodesItem",
-                                                                   OpcUaId_DeleteNodesItem,
-                                                                   OpcUaId_DeleteNodesItem_Encoding_DefaultBinary,
-                                                                   OpcUaId_DeleteNodesItem_Encoding_DefaultXml,
-                                                                   NULL,
-                                                                   sizeof(OpcUa_DeleteNodesItem),
-                                                                   OpcUa_DeleteNodesItem_Initialize,
-                                                                   OpcUa_DeleteNodesItem_Clear,
-                                                                   NULL,
-                                                                   OpcUa_DeleteNodesItem_Encode,
-                                                                   OpcUa_DeleteNodesItem_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_DeleteNodes
@@ -9996,21 +8853,6 @@ SOPC_ReturnStatus OpcUa_DeleteNodesRequest_Decode(void* pValue, SOPC_Buffer* buf
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_DeleteNodesRequest_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_DeleteNodesRequest_EncodeableType = {"DeleteNodesRequest",
-                                                                      OpcUaId_DeleteNodesRequest,
-                                                                      OpcUaId_DeleteNodesRequest_Encoding_DefaultBinary,
-                                                                      OpcUaId_DeleteNodesRequest_Encoding_DefaultXml,
-                                                                      NULL,
-                                                                      sizeof(OpcUa_DeleteNodesRequest),
-                                                                      OpcUa_DeleteNodesRequest_Initialize,
-                                                                      OpcUa_DeleteNodesRequest_Clear,
-                                                                      NULL,
-                                                                      OpcUa_DeleteNodesRequest_Encode,
-                                                                      OpcUa_DeleteNodesRequest_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_DeleteNodesResponse
@@ -10115,22 +8957,6 @@ SOPC_ReturnStatus OpcUa_DeleteNodesResponse_Decode(void* pValue, SOPC_Buffer* bu
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_DeleteNodesResponse_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_DeleteNodesResponse_EncodeableType = {
-    "DeleteNodesResponse",
-    OpcUaId_DeleteNodesResponse,
-    OpcUaId_DeleteNodesResponse_Encoding_DefaultBinary,
-    OpcUaId_DeleteNodesResponse_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_DeleteNodesResponse),
-    OpcUa_DeleteNodesResponse_Initialize,
-    OpcUa_DeleteNodesResponse_Clear,
-    NULL,
-    OpcUa_DeleteNodesResponse_Encode,
-    OpcUa_DeleteNodesResponse_Decode};
 #endif
 #endif
 
@@ -10248,22 +9074,6 @@ SOPC_ReturnStatus OpcUa_DeleteReferencesItem_Decode(void* pValue, SOPC_Buffer* b
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_DeleteReferencesItem_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_DeleteReferencesItem_EncodeableType = {
-    "DeleteReferencesItem",
-    OpcUaId_DeleteReferencesItem,
-    OpcUaId_DeleteReferencesItem_Encoding_DefaultBinary,
-    OpcUaId_DeleteReferencesItem_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_DeleteReferencesItem),
-    OpcUa_DeleteReferencesItem_Initialize,
-    OpcUa_DeleteReferencesItem_Clear,
-    NULL,
-    OpcUa_DeleteReferencesItem_Encode,
-    OpcUa_DeleteReferencesItem_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_DeleteReferences
@@ -10351,22 +9161,6 @@ SOPC_ReturnStatus OpcUa_DeleteReferencesRequest_Decode(void* pValue, SOPC_Buffer
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_DeleteReferencesRequest_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_DeleteReferencesRequest_EncodeableType = {
-    "DeleteReferencesRequest",
-    OpcUaId_DeleteReferencesRequest,
-    OpcUaId_DeleteReferencesRequest_Encoding_DefaultBinary,
-    OpcUaId_DeleteReferencesRequest_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_DeleteReferencesRequest),
-    OpcUa_DeleteReferencesRequest_Initialize,
-    OpcUa_DeleteReferencesRequest_Clear,
-    NULL,
-    OpcUa_DeleteReferencesRequest_Encode,
-    OpcUa_DeleteReferencesRequest_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_DeleteReferencesResponse
@@ -10471,22 +9265,6 @@ SOPC_ReturnStatus OpcUa_DeleteReferencesResponse_Decode(void* pValue, SOPC_Buffe
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_DeleteReferencesResponse_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_DeleteReferencesResponse_EncodeableType = {
-    "DeleteReferencesResponse",
-    OpcUaId_DeleteReferencesResponse,
-    OpcUaId_DeleteReferencesResponse_Encoding_DefaultBinary,
-    OpcUaId_DeleteReferencesResponse_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_DeleteReferencesResponse),
-    OpcUa_DeleteReferencesResponse_Initialize,
-    OpcUa_DeleteReferencesResponse_Clear,
-    NULL,
-    OpcUa_DeleteReferencesResponse_Encode,
-    OpcUa_DeleteReferencesResponse_Decode};
 #endif
 #endif
 
@@ -10584,21 +9362,6 @@ SOPC_ReturnStatus OpcUa_ViewDescription_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_ViewDescription_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_ViewDescription_EncodeableType = {"ViewDescription",
-                                                                   OpcUaId_ViewDescription,
-                                                                   OpcUaId_ViewDescription_Encoding_DefaultBinary,
-                                                                   OpcUaId_ViewDescription_Encoding_DefaultXml,
-                                                                   NULL,
-                                                                   sizeof(OpcUa_ViewDescription),
-                                                                   OpcUa_ViewDescription_Initialize,
-                                                                   OpcUa_ViewDescription_Clear,
-                                                                   NULL,
-                                                                   OpcUa_ViewDescription_Encode,
-                                                                   OpcUa_ViewDescription_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_BrowseDescription
@@ -10725,21 +9488,6 @@ SOPC_ReturnStatus OpcUa_BrowseDescription_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_BrowseDescription_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_BrowseDescription_EncodeableType = {"BrowseDescription",
-                                                                     OpcUaId_BrowseDescription,
-                                                                     OpcUaId_BrowseDescription_Encoding_DefaultBinary,
-                                                                     OpcUaId_BrowseDescription_Encoding_DefaultXml,
-                                                                     NULL,
-                                                                     sizeof(OpcUa_BrowseDescription),
-                                                                     OpcUa_BrowseDescription_Initialize,
-                                                                     OpcUa_BrowseDescription_Clear,
-                                                                     NULL,
-                                                                     OpcUa_BrowseDescription_Encode,
-                                                                     OpcUa_BrowseDescription_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ReferenceDescription
@@ -10876,22 +9624,6 @@ SOPC_ReturnStatus OpcUa_ReferenceDescription_Decode(void* pValue, SOPC_Buffer* b
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_ReferenceDescription_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_ReferenceDescription_EncodeableType = {
-    "ReferenceDescription",
-    OpcUaId_ReferenceDescription,
-    OpcUaId_ReferenceDescription_Encoding_DefaultBinary,
-    OpcUaId_ReferenceDescription_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_ReferenceDescription),
-    OpcUa_ReferenceDescription_Initialize,
-    OpcUa_ReferenceDescription_Clear,
-    NULL,
-    OpcUa_ReferenceDescription_Encode,
-    OpcUa_ReferenceDescription_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_BrowseResult
@@ -10997,21 +9729,6 @@ SOPC_ReturnStatus OpcUa_BrowseResult_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_BrowseResult_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_BrowseResult_EncodeableType = {"BrowseResult",
-                                                                OpcUaId_BrowseResult,
-                                                                OpcUaId_BrowseResult_Encoding_DefaultBinary,
-                                                                OpcUaId_BrowseResult_Encoding_DefaultXml,
-                                                                NULL,
-                                                                sizeof(OpcUa_BrowseResult),
-                                                                OpcUa_BrowseResult_Initialize,
-                                                                OpcUa_BrowseResult_Clear,
-                                                                NULL,
-                                                                OpcUa_BrowseResult_Encode,
-                                                                OpcUa_BrowseResult_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_Browse
@@ -11119,21 +9836,6 @@ SOPC_ReturnStatus OpcUa_BrowseRequest_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_BrowseRequest_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_BrowseRequest_EncodeableType = {"BrowseRequest",
-                                                                 OpcUaId_BrowseRequest,
-                                                                 OpcUaId_BrowseRequest_Encoding_DefaultBinary,
-                                                                 OpcUaId_BrowseRequest_Encoding_DefaultXml,
-                                                                 NULL,
-                                                                 sizeof(OpcUa_BrowseRequest),
-                                                                 OpcUa_BrowseRequest_Initialize,
-                                                                 OpcUa_BrowseRequest_Clear,
-                                                                 NULL,
-                                                                 OpcUa_BrowseRequest_Encode,
-                                                                 OpcUa_BrowseRequest_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_BrowseResponse
@@ -11238,21 +9940,6 @@ SOPC_ReturnStatus OpcUa_BrowseResponse_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_BrowseResponse_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_BrowseResponse_EncodeableType = {"BrowseResponse",
-                                                                  OpcUaId_BrowseResponse,
-                                                                  OpcUaId_BrowseResponse_Encoding_DefaultBinary,
-                                                                  OpcUaId_BrowseResponse_Encoding_DefaultXml,
-                                                                  NULL,
-                                                                  sizeof(OpcUa_BrowseResponse),
-                                                                  OpcUa_BrowseResponse_Initialize,
-                                                                  OpcUa_BrowseResponse_Clear,
-                                                                  NULL,
-                                                                  OpcUa_BrowseResponse_Encode,
-                                                                  OpcUa_BrowseResponse_Decode};
 #endif
 #endif
 
@@ -11349,21 +10036,6 @@ SOPC_ReturnStatus OpcUa_BrowseNextRequest_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_BrowseNextRequest_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_BrowseNextRequest_EncodeableType = {"BrowseNextRequest",
-                                                                     OpcUaId_BrowseNextRequest,
-                                                                     OpcUaId_BrowseNextRequest_Encoding_DefaultBinary,
-                                                                     OpcUaId_BrowseNextRequest_Encoding_DefaultXml,
-                                                                     NULL,
-                                                                     sizeof(OpcUa_BrowseNextRequest),
-                                                                     OpcUa_BrowseNextRequest_Initialize,
-                                                                     OpcUa_BrowseNextRequest_Clear,
-                                                                     NULL,
-                                                                     OpcUa_BrowseNextRequest_Encode,
-                                                                     OpcUa_BrowseNextRequest_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_BrowseNextResponse
@@ -11468,21 +10140,6 @@ SOPC_ReturnStatus OpcUa_BrowseNextResponse_Decode(void* pValue, SOPC_Buffer* buf
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_BrowseNextResponse_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_BrowseNextResponse_EncodeableType = {"BrowseNextResponse",
-                                                                      OpcUaId_BrowseNextResponse,
-                                                                      OpcUaId_BrowseNextResponse_Encoding_DefaultBinary,
-                                                                      OpcUaId_BrowseNextResponse_Encoding_DefaultXml,
-                                                                      NULL,
-                                                                      sizeof(OpcUa_BrowseNextResponse),
-                                                                      OpcUa_BrowseNextResponse_Initialize,
-                                                                      OpcUa_BrowseNextResponse_Clear,
-                                                                      NULL,
-                                                                      OpcUa_BrowseNextResponse_Encode,
-                                                                      OpcUa_BrowseNextResponse_Decode};
 #endif
 #endif
 
@@ -11590,22 +10247,6 @@ SOPC_ReturnStatus OpcUa_RelativePathElement_Decode(void* pValue, SOPC_Buffer* bu
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_RelativePathElement_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_RelativePathElement_EncodeableType = {
-    "RelativePathElement",
-    OpcUaId_RelativePathElement,
-    OpcUaId_RelativePathElement_Encoding_DefaultBinary,
-    OpcUaId_RelativePathElement_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_RelativePathElement),
-    OpcUa_RelativePathElement_Initialize,
-    OpcUa_RelativePathElement_Clear,
-    NULL,
-    OpcUa_RelativePathElement_Encode,
-    OpcUa_RelativePathElement_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_RelativePath
@@ -11690,21 +10331,6 @@ SOPC_ReturnStatus OpcUa_RelativePath_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_RelativePath_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_RelativePath_EncodeableType = {"RelativePath",
-                                                                OpcUaId_RelativePath,
-                                                                OpcUaId_RelativePath_Encoding_DefaultBinary,
-                                                                OpcUaId_RelativePath_Encoding_DefaultXml,
-                                                                NULL,
-                                                                sizeof(OpcUa_RelativePath),
-                                                                OpcUa_RelativePath_Initialize,
-                                                                OpcUa_RelativePath_Clear,
-                                                                NULL,
-                                                                OpcUa_RelativePath_Encode,
-                                                                OpcUa_RelativePath_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_BrowsePath
@@ -11791,21 +10417,6 @@ SOPC_ReturnStatus OpcUa_BrowsePath_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_BrowsePath_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_BrowsePath_EncodeableType = {"BrowsePath",
-                                                              OpcUaId_BrowsePath,
-                                                              OpcUaId_BrowsePath_Encoding_DefaultBinary,
-                                                              OpcUaId_BrowsePath_Encoding_DefaultXml,
-                                                              NULL,
-                                                              sizeof(OpcUa_BrowsePath),
-                                                              OpcUa_BrowsePath_Initialize,
-                                                              OpcUa_BrowsePath_Clear,
-                                                              NULL,
-                                                              OpcUa_BrowsePath_Encode,
-                                                              OpcUa_BrowsePath_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_BrowsePathTarget
@@ -11892,21 +10503,6 @@ SOPC_ReturnStatus OpcUa_BrowsePathTarget_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_BrowsePathTarget_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_BrowsePathTarget_EncodeableType = {"BrowsePathTarget",
-                                                                    OpcUaId_BrowsePathTarget,
-                                                                    OpcUaId_BrowsePathTarget_Encoding_DefaultBinary,
-                                                                    OpcUaId_BrowsePathTarget_Encoding_DefaultXml,
-                                                                    NULL,
-                                                                    sizeof(OpcUa_BrowsePathTarget),
-                                                                    OpcUa_BrowsePathTarget_Initialize,
-                                                                    OpcUa_BrowsePathTarget_Clear,
-                                                                    NULL,
-                                                                    OpcUa_BrowsePathTarget_Encode,
-                                                                    OpcUa_BrowsePathTarget_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_BrowsePathResult
@@ -12001,21 +10597,6 @@ SOPC_ReturnStatus OpcUa_BrowsePathResult_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_BrowsePathResult_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_BrowsePathResult_EncodeableType = {"BrowsePathResult",
-                                                                    OpcUaId_BrowsePathResult,
-                                                                    OpcUaId_BrowsePathResult_Encoding_DefaultBinary,
-                                                                    OpcUaId_BrowsePathResult_Encoding_DefaultXml,
-                                                                    NULL,
-                                                                    sizeof(OpcUa_BrowsePathResult),
-                                                                    OpcUa_BrowsePathResult_Initialize,
-                                                                    OpcUa_BrowsePathResult_Clear,
-                                                                    NULL,
-                                                                    OpcUa_BrowsePathResult_Encode,
-                                                                    OpcUa_BrowsePathResult_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_TranslateBrowsePathsToNodeIds
@@ -12101,22 +10682,6 @@ SOPC_ReturnStatus OpcUa_TranslateBrowsePathsToNodeIdsRequest_Decode(void* pValue
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_TranslateBrowsePathsToNodeIdsRequest_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_TranslateBrowsePathsToNodeIdsRequest_EncodeableType = {
-    "TranslateBrowsePathsToNodeIdsRequest",
-    OpcUaId_TranslateBrowsePathsToNodeIdsRequest,
-    OpcUaId_TranslateBrowsePathsToNodeIdsRequest_Encoding_DefaultBinary,
-    OpcUaId_TranslateBrowsePathsToNodeIdsRequest_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_TranslateBrowsePathsToNodeIdsRequest),
-    OpcUa_TranslateBrowsePathsToNodeIdsRequest_Initialize,
-    OpcUa_TranslateBrowsePathsToNodeIdsRequest_Clear,
-    NULL,
-    OpcUa_TranslateBrowsePathsToNodeIdsRequest_Encode,
-    OpcUa_TranslateBrowsePathsToNodeIdsRequest_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_TranslateBrowsePathsToNodeIdsResponse
@@ -12223,22 +10788,6 @@ SOPC_ReturnStatus OpcUa_TranslateBrowsePathsToNodeIdsResponse_Decode(void* pValu
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_TranslateBrowsePathsToNodeIdsResponse_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_TranslateBrowsePathsToNodeIdsResponse_EncodeableType = {
-    "TranslateBrowsePathsToNodeIdsResponse",
-    OpcUaId_TranslateBrowsePathsToNodeIdsResponse,
-    OpcUaId_TranslateBrowsePathsToNodeIdsResponse_Encoding_DefaultBinary,
-    OpcUaId_TranslateBrowsePathsToNodeIdsResponse_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_TranslateBrowsePathsToNodeIdsResponse),
-    OpcUa_TranslateBrowsePathsToNodeIdsResponse_Initialize,
-    OpcUa_TranslateBrowsePathsToNodeIdsResponse_Clear,
-    NULL,
-    OpcUa_TranslateBrowsePathsToNodeIdsResponse_Encode,
-    OpcUa_TranslateBrowsePathsToNodeIdsResponse_Decode};
 #endif
 #endif
 
@@ -12324,22 +10873,6 @@ SOPC_ReturnStatus OpcUa_RegisterNodesRequest_Decode(void* pValue, SOPC_Buffer* b
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_RegisterNodesRequest_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_RegisterNodesRequest_EncodeableType = {
-    "RegisterNodesRequest",
-    OpcUaId_RegisterNodesRequest,
-    OpcUaId_RegisterNodesRequest_Encoding_DefaultBinary,
-    OpcUaId_RegisterNodesRequest_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_RegisterNodesRequest),
-    OpcUa_RegisterNodesRequest_Initialize,
-    OpcUa_RegisterNodesRequest_Clear,
-    NULL,
-    OpcUa_RegisterNodesRequest_Encode,
-    OpcUa_RegisterNodesRequest_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_RegisterNodesResponse
@@ -12425,22 +10958,6 @@ SOPC_ReturnStatus OpcUa_RegisterNodesResponse_Decode(void* pValue, SOPC_Buffer* 
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_RegisterNodesResponse_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_RegisterNodesResponse_EncodeableType = {
-    "RegisterNodesResponse",
-    OpcUaId_RegisterNodesResponse,
-    OpcUaId_RegisterNodesResponse_Encoding_DefaultBinary,
-    OpcUaId_RegisterNodesResponse_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_RegisterNodesResponse),
-    OpcUa_RegisterNodesResponse_Initialize,
-    OpcUa_RegisterNodesResponse_Clear,
-    NULL,
-    OpcUa_RegisterNodesResponse_Encode,
-    OpcUa_RegisterNodesResponse_Decode};
 #endif
 #endif
 
@@ -12526,22 +11043,6 @@ SOPC_ReturnStatus OpcUa_UnregisterNodesRequest_Decode(void* pValue, SOPC_Buffer*
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_UnregisterNodesRequest_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_UnregisterNodesRequest_EncodeableType = {
-    "UnregisterNodesRequest",
-    OpcUaId_UnregisterNodesRequest,
-    OpcUaId_UnregisterNodesRequest_Encoding_DefaultBinary,
-    OpcUaId_UnregisterNodesRequest_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_UnregisterNodesRequest),
-    OpcUa_UnregisterNodesRequest_Initialize,
-    OpcUa_UnregisterNodesRequest_Clear,
-    NULL,
-    OpcUa_UnregisterNodesRequest_Encode,
-    OpcUa_UnregisterNodesRequest_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_UnregisterNodesResponse
@@ -12608,22 +11109,6 @@ SOPC_ReturnStatus OpcUa_UnregisterNodesResponse_Decode(void* pValue, SOPC_Buffer
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_UnregisterNodesResponse_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_UnregisterNodesResponse_EncodeableType = {
-    "UnregisterNodesResponse",
-    OpcUaId_UnregisterNodesResponse,
-    OpcUaId_UnregisterNodesResponse_Encoding_DefaultBinary,
-    OpcUaId_UnregisterNodesResponse_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_UnregisterNodesResponse),
-    OpcUa_UnregisterNodesResponse_Initialize,
-    OpcUa_UnregisterNodesResponse_Clear,
-    NULL,
-    OpcUa_UnregisterNodesResponse_Encode,
-    OpcUa_UnregisterNodesResponse_Decode};
 #endif
 #endif
 
@@ -12781,22 +11266,6 @@ SOPC_ReturnStatus OpcUa_EndpointConfiguration_Decode(void* pValue, SOPC_Buffer* 
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_EndpointConfiguration_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_EndpointConfiguration_EncodeableType = {
-    "EndpointConfiguration",
-    OpcUaId_EndpointConfiguration,
-    OpcUaId_EndpointConfiguration_Encoding_DefaultBinary,
-    OpcUaId_EndpointConfiguration_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_EndpointConfiguration),
-    OpcUa_EndpointConfiguration_Initialize,
-    OpcUa_EndpointConfiguration_Clear,
-    NULL,
-    OpcUa_EndpointConfiguration_Encode,
-    OpcUa_EndpointConfiguration_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_SupportedProfile
@@ -12930,21 +11399,6 @@ SOPC_ReturnStatus OpcUa_SupportedProfile_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_SupportedProfile_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_SupportedProfile_EncodeableType = {"SupportedProfile",
-                                                                    OpcUaId_SupportedProfile,
-                                                                    OpcUaId_SupportedProfile_Encoding_DefaultBinary,
-                                                                    OpcUaId_SupportedProfile_Encoding_DefaultXml,
-                                                                    NULL,
-                                                                    sizeof(OpcUa_SupportedProfile),
-                                                                    OpcUa_SupportedProfile_Initialize,
-                                                                    OpcUa_SupportedProfile_Clear,
-                                                                    NULL,
-                                                                    OpcUa_SupportedProfile_Encode,
-                                                                    OpcUa_SupportedProfile_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_SoftwareCertificate
@@ -13121,22 +11575,6 @@ SOPC_ReturnStatus OpcUa_SoftwareCertificate_Decode(void* pValue, SOPC_Buffer* bu
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_SoftwareCertificate_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_SoftwareCertificate_EncodeableType = {
-    "SoftwareCertificate",
-    OpcUaId_SoftwareCertificate,
-    OpcUaId_SoftwareCertificate_Encoding_DefaultBinary,
-    OpcUaId_SoftwareCertificate_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_SoftwareCertificate),
-    OpcUa_SoftwareCertificate_Initialize,
-    OpcUa_SoftwareCertificate_Clear,
-    NULL,
-    OpcUa_SoftwareCertificate_Encode,
-    OpcUa_SoftwareCertificate_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_QueryDataDescription
@@ -13233,22 +11671,6 @@ SOPC_ReturnStatus OpcUa_QueryDataDescription_Decode(void* pValue, SOPC_Buffer* b
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_QueryDataDescription_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_QueryDataDescription_EncodeableType = {
-    "QueryDataDescription",
-    OpcUaId_QueryDataDescription,
-    OpcUaId_QueryDataDescription_Encoding_DefaultBinary,
-    OpcUaId_QueryDataDescription_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_QueryDataDescription),
-    OpcUa_QueryDataDescription_Initialize,
-    OpcUa_QueryDataDescription_Clear,
-    NULL,
-    OpcUa_QueryDataDescription_Encode,
-    OpcUa_QueryDataDescription_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_NodeTypeDescription
@@ -13355,22 +11777,6 @@ SOPC_ReturnStatus OpcUa_NodeTypeDescription_Decode(void* pValue, SOPC_Buffer* bu
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_NodeTypeDescription_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_NodeTypeDescription_EncodeableType = {
-    "NodeTypeDescription",
-    OpcUaId_NodeTypeDescription,
-    OpcUaId_NodeTypeDescription_Encoding_DefaultBinary,
-    OpcUaId_NodeTypeDescription_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_NodeTypeDescription),
-    OpcUa_NodeTypeDescription_Initialize,
-    OpcUa_NodeTypeDescription_Clear,
-    NULL,
-    OpcUa_NodeTypeDescription_Encode,
-    OpcUa_NodeTypeDescription_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_QueryDataSet
@@ -13474,21 +11880,6 @@ SOPC_ReturnStatus OpcUa_QueryDataSet_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_QueryDataSet_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_QueryDataSet_EncodeableType = {"QueryDataSet",
-                                                                OpcUaId_QueryDataSet,
-                                                                OpcUaId_QueryDataSet_Encoding_DefaultBinary,
-                                                                OpcUaId_QueryDataSet_Encoding_DefaultXml,
-                                                                NULL,
-                                                                sizeof(OpcUa_QueryDataSet),
-                                                                OpcUa_QueryDataSet_Initialize,
-                                                                OpcUa_QueryDataSet_Clear,
-                                                                NULL,
-                                                                OpcUa_QueryDataSet_Encode,
-                                                                OpcUa_QueryDataSet_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_NodeReference
@@ -13602,21 +11993,6 @@ SOPC_ReturnStatus OpcUa_NodeReference_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_NodeReference_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_NodeReference_EncodeableType = {"NodeReference",
-                                                                 OpcUaId_NodeReference,
-                                                                 OpcUaId_NodeReference_Encoding_DefaultBinary,
-                                                                 OpcUaId_NodeReference_Encoding_DefaultXml,
-                                                                 NULL,
-                                                                 sizeof(OpcUa_NodeReference),
-                                                                 OpcUa_NodeReference_Initialize,
-                                                                 OpcUa_NodeReference_Clear,
-                                                                 NULL,
-                                                                 OpcUa_NodeReference_Encode,
-                                                                 OpcUa_NodeReference_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ContentFilterElement
@@ -13712,22 +12088,6 @@ SOPC_ReturnStatus OpcUa_ContentFilterElement_Decode(void* pValue, SOPC_Buffer* b
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_ContentFilterElement_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_ContentFilterElement_EncodeableType = {
-    "ContentFilterElement",
-    OpcUaId_ContentFilterElement,
-    OpcUaId_ContentFilterElement_Encoding_DefaultBinary,
-    OpcUaId_ContentFilterElement_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_ContentFilterElement),
-    OpcUa_ContentFilterElement_Initialize,
-    OpcUa_ContentFilterElement_Clear,
-    NULL,
-    OpcUa_ContentFilterElement_Encode,
-    OpcUa_ContentFilterElement_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ContentFilter
@@ -13812,21 +12172,6 @@ SOPC_ReturnStatus OpcUa_ContentFilter_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_ContentFilter_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_ContentFilter_EncodeableType = {"ContentFilter",
-                                                                 OpcUaId_ContentFilter,
-                                                                 OpcUaId_ContentFilter_Encoding_DefaultBinary,
-                                                                 OpcUaId_ContentFilter_Encoding_DefaultXml,
-                                                                 NULL,
-                                                                 sizeof(OpcUa_ContentFilter),
-                                                                 OpcUa_ContentFilter_Initialize,
-                                                                 OpcUa_ContentFilter_Clear,
-                                                                 NULL,
-                                                                 OpcUa_ContentFilter_Encode,
-                                                                 OpcUa_ContentFilter_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ElementOperand
@@ -13903,21 +12248,6 @@ SOPC_ReturnStatus OpcUa_ElementOperand_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_ElementOperand_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_ElementOperand_EncodeableType = {"ElementOperand",
-                                                                  OpcUaId_ElementOperand,
-                                                                  OpcUaId_ElementOperand_Encoding_DefaultBinary,
-                                                                  OpcUaId_ElementOperand_Encoding_DefaultXml,
-                                                                  NULL,
-                                                                  sizeof(OpcUa_ElementOperand),
-                                                                  OpcUa_ElementOperand_Initialize,
-                                                                  OpcUa_ElementOperand_Clear,
-                                                                  NULL,
-                                                                  OpcUa_ElementOperand_Encode,
-                                                                  OpcUa_ElementOperand_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_LiteralOperand
@@ -13994,21 +12324,6 @@ SOPC_ReturnStatus OpcUa_LiteralOperand_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_LiteralOperand_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_LiteralOperand_EncodeableType = {"LiteralOperand",
-                                                                  OpcUaId_LiteralOperand,
-                                                                  OpcUaId_LiteralOperand_Encoding_DefaultBinary,
-                                                                  OpcUaId_LiteralOperand_Encoding_DefaultXml,
-                                                                  NULL,
-                                                                  sizeof(OpcUa_LiteralOperand),
-                                                                  OpcUa_LiteralOperand_Initialize,
-                                                                  OpcUa_LiteralOperand_Clear,
-                                                                  NULL,
-                                                                  OpcUa_LiteralOperand_Encode,
-                                                                  OpcUa_LiteralOperand_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_AttributeOperand
@@ -14125,21 +12440,6 @@ SOPC_ReturnStatus OpcUa_AttributeOperand_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_AttributeOperand_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_AttributeOperand_EncodeableType = {"AttributeOperand",
-                                                                    OpcUaId_AttributeOperand,
-                                                                    OpcUaId_AttributeOperand_Encoding_DefaultBinary,
-                                                                    OpcUaId_AttributeOperand_Encoding_DefaultXml,
-                                                                    NULL,
-                                                                    sizeof(OpcUa_AttributeOperand),
-                                                                    OpcUa_AttributeOperand_Initialize,
-                                                                    OpcUa_AttributeOperand_Clear,
-                                                                    NULL,
-                                                                    OpcUa_AttributeOperand_Encode,
-                                                                    OpcUa_AttributeOperand_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_SimpleAttributeOperand
@@ -14254,22 +12554,6 @@ SOPC_ReturnStatus OpcUa_SimpleAttributeOperand_Decode(void* pValue, SOPC_Buffer*
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_SimpleAttributeOperand_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_SimpleAttributeOperand_EncodeableType = {
-    "SimpleAttributeOperand",
-    OpcUaId_SimpleAttributeOperand,
-    OpcUaId_SimpleAttributeOperand_Encoding_DefaultBinary,
-    OpcUaId_SimpleAttributeOperand_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_SimpleAttributeOperand),
-    OpcUa_SimpleAttributeOperand_Initialize,
-    OpcUa_SimpleAttributeOperand_Clear,
-    NULL,
-    OpcUa_SimpleAttributeOperand_Encode,
-    OpcUa_SimpleAttributeOperand_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ContentFilterElementResult
@@ -14383,22 +12667,6 @@ SOPC_ReturnStatus OpcUa_ContentFilterElementResult_Decode(void* pValue, SOPC_Buf
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_ContentFilterElementResult_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_ContentFilterElementResult_EncodeableType = {
-    "ContentFilterElementResult",
-    OpcUaId_ContentFilterElementResult,
-    OpcUaId_ContentFilterElementResult_Encoding_DefaultBinary,
-    OpcUaId_ContentFilterElementResult_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_ContentFilterElementResult),
-    OpcUa_ContentFilterElementResult_Initialize,
-    OpcUa_ContentFilterElementResult_Clear,
-    NULL,
-    OpcUa_ContentFilterElementResult_Encode,
-    OpcUa_ContentFilterElementResult_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ContentFilterResult
@@ -14504,22 +12772,6 @@ SOPC_ReturnStatus OpcUa_ContentFilterResult_Decode(void* pValue, SOPC_Buffer* bu
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_ContentFilterResult_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_ContentFilterResult_EncodeableType = {
-    "ContentFilterResult",
-    OpcUaId_ContentFilterResult,
-    OpcUaId_ContentFilterResult_Encoding_DefaultBinary,
-    OpcUaId_ContentFilterResult_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_ContentFilterResult),
-    OpcUa_ContentFilterResult_Initialize,
-    OpcUa_ContentFilterResult_Clear,
-    NULL,
-    OpcUa_ContentFilterResult_Encode,
-    OpcUa_ContentFilterResult_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ParsingResult
@@ -14633,21 +12885,6 @@ SOPC_ReturnStatus OpcUa_ParsingResult_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_ParsingResult_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_ParsingResult_EncodeableType = {"ParsingResult",
-                                                                 OpcUaId_ParsingResult,
-                                                                 OpcUaId_ParsingResult_Encoding_DefaultBinary,
-                                                                 OpcUaId_ParsingResult_Encoding_DefaultXml,
-                                                                 NULL,
-                                                                 sizeof(OpcUa_ParsingResult),
-                                                                 OpcUa_ParsingResult_Initialize,
-                                                                 OpcUa_ParsingResult_Clear,
-                                                                 NULL,
-                                                                 OpcUa_ParsingResult_Encode,
-                                                                 OpcUa_ParsingResult_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_QueryFirst
@@ -14774,21 +13011,6 @@ SOPC_ReturnStatus OpcUa_QueryFirstRequest_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_QueryFirstRequest_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_QueryFirstRequest_EncodeableType = {"QueryFirstRequest",
-                                                                     OpcUaId_QueryFirstRequest,
-                                                                     OpcUaId_QueryFirstRequest_Encoding_DefaultBinary,
-                                                                     OpcUaId_QueryFirstRequest_Encoding_DefaultXml,
-                                                                     NULL,
-                                                                     sizeof(OpcUa_QueryFirstRequest),
-                                                                     OpcUa_QueryFirstRequest_Initialize,
-                                                                     OpcUa_QueryFirstRequest_Clear,
-                                                                     NULL,
-                                                                     OpcUa_QueryFirstRequest_Encode,
-                                                                     OpcUa_QueryFirstRequest_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_QueryFirstResponse
@@ -14934,21 +13156,6 @@ SOPC_ReturnStatus OpcUa_QueryFirstResponse_Decode(void* pValue, SOPC_Buffer* buf
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_QueryFirstResponse_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_QueryFirstResponse_EncodeableType = {"QueryFirstResponse",
-                                                                      OpcUaId_QueryFirstResponse,
-                                                                      OpcUaId_QueryFirstResponse_Encoding_DefaultBinary,
-                                                                      OpcUaId_QueryFirstResponse_Encoding_DefaultXml,
-                                                                      NULL,
-                                                                      sizeof(OpcUa_QueryFirstResponse),
-                                                                      OpcUa_QueryFirstResponse_Initialize,
-                                                                      OpcUa_QueryFirstResponse_Clear,
-                                                                      NULL,
-                                                                      OpcUa_QueryFirstResponse_Encode,
-                                                                      OpcUa_QueryFirstResponse_Decode};
 #endif
 #endif
 
@@ -15037,21 +13244,6 @@ SOPC_ReturnStatus OpcUa_QueryNextRequest_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_QueryNextRequest_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_QueryNextRequest_EncodeableType = {"QueryNextRequest",
-                                                                    OpcUaId_QueryNextRequest,
-                                                                    OpcUaId_QueryNextRequest_Encoding_DefaultBinary,
-                                                                    OpcUaId_QueryNextRequest_Encoding_DefaultXml,
-                                                                    NULL,
-                                                                    sizeof(OpcUa_QueryNextRequest),
-                                                                    OpcUa_QueryNextRequest_Initialize,
-                                                                    OpcUa_QueryNextRequest_Clear,
-                                                                    NULL,
-                                                                    OpcUa_QueryNextRequest_Encode,
-                                                                    OpcUa_QueryNextRequest_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_QueryNextResponse
@@ -15149,21 +13341,6 @@ SOPC_ReturnStatus OpcUa_QueryNextResponse_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_QueryNextResponse_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_QueryNextResponse_EncodeableType = {"QueryNextResponse",
-                                                                     OpcUaId_QueryNextResponse,
-                                                                     OpcUaId_QueryNextResponse_Encoding_DefaultBinary,
-                                                                     OpcUaId_QueryNextResponse_Encoding_DefaultXml,
-                                                                     NULL,
-                                                                     sizeof(OpcUa_QueryNextResponse),
-                                                                     OpcUa_QueryNextResponse_Initialize,
-                                                                     OpcUa_QueryNextResponse_Clear,
-                                                                     NULL,
-                                                                     OpcUa_QueryNextResponse_Encode,
-                                                                     OpcUa_QueryNextResponse_Decode};
 #endif
 #endif
 
@@ -15271,21 +13448,6 @@ SOPC_ReturnStatus OpcUa_ReadValueId_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_ReadValueId_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_ReadValueId_EncodeableType = {"ReadValueId",
-                                                               OpcUaId_ReadValueId,
-                                                               OpcUaId_ReadValueId_Encoding_DefaultBinary,
-                                                               OpcUaId_ReadValueId_Encoding_DefaultXml,
-                                                               NULL,
-                                                               sizeof(OpcUa_ReadValueId),
-                                                               OpcUa_ReadValueId_Initialize,
-                                                               OpcUa_ReadValueId_Clear,
-                                                               NULL,
-                                                               OpcUa_ReadValueId_Encode,
-                                                               OpcUa_ReadValueId_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_Read
@@ -15390,21 +13552,6 @@ SOPC_ReturnStatus OpcUa_ReadRequest_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_ReadRequest_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_ReadRequest_EncodeableType = {"ReadRequest",
-                                                               OpcUaId_ReadRequest,
-                                                               OpcUaId_ReadRequest_Encoding_DefaultBinary,
-                                                               OpcUaId_ReadRequest_Encoding_DefaultXml,
-                                                               NULL,
-                                                               sizeof(OpcUa_ReadRequest),
-                                                               OpcUa_ReadRequest_Initialize,
-                                                               OpcUa_ReadRequest_Clear,
-                                                               NULL,
-                                                               OpcUa_ReadRequest_Encode,
-                                                               OpcUa_ReadRequest_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ReadResponse
@@ -15509,21 +13656,6 @@ SOPC_ReturnStatus OpcUa_ReadResponse_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_ReadResponse_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_ReadResponse_EncodeableType = {"ReadResponse",
-                                                                OpcUaId_ReadResponse,
-                                                                OpcUaId_ReadResponse_Encoding_DefaultBinary,
-                                                                OpcUaId_ReadResponse_Encoding_DefaultXml,
-                                                                NULL,
-                                                                sizeof(OpcUa_ReadResponse),
-                                                                OpcUa_ReadResponse_Initialize,
-                                                                OpcUa_ReadResponse_Clear,
-                                                                NULL,
-                                                                OpcUa_ReadResponse_Encode,
-                                                                OpcUa_ReadResponse_Decode};
 #endif
 #endif
 
@@ -15631,21 +13763,6 @@ SOPC_ReturnStatus OpcUa_HistoryReadValueId_Decode(void* pValue, SOPC_Buffer* buf
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_HistoryReadValueId_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_HistoryReadValueId_EncodeableType = {"HistoryReadValueId",
-                                                                      OpcUaId_HistoryReadValueId,
-                                                                      OpcUaId_HistoryReadValueId_Encoding_DefaultBinary,
-                                                                      OpcUaId_HistoryReadValueId_Encoding_DefaultXml,
-                                                                      NULL,
-                                                                      sizeof(OpcUa_HistoryReadValueId),
-                                                                      OpcUa_HistoryReadValueId_Initialize,
-                                                                      OpcUa_HistoryReadValueId_Clear,
-                                                                      NULL,
-                                                                      OpcUa_HistoryReadValueId_Encode,
-                                                                      OpcUa_HistoryReadValueId_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_HistoryReadResult
@@ -15742,21 +13859,6 @@ SOPC_ReturnStatus OpcUa_HistoryReadResult_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_HistoryReadResult_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_HistoryReadResult_EncodeableType = {"HistoryReadResult",
-                                                                     OpcUaId_HistoryReadResult,
-                                                                     OpcUaId_HistoryReadResult_Encoding_DefaultBinary,
-                                                                     OpcUaId_HistoryReadResult_Encoding_DefaultXml,
-                                                                     NULL,
-                                                                     sizeof(OpcUa_HistoryReadResult),
-                                                                     OpcUa_HistoryReadResult_Initialize,
-                                                                     OpcUa_HistoryReadResult_Clear,
-                                                                     NULL,
-                                                                     OpcUa_HistoryReadResult_Encode,
-                                                                     OpcUa_HistoryReadResult_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ReadEventDetails
@@ -15863,21 +13965,6 @@ SOPC_ReturnStatus OpcUa_ReadEventDetails_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_ReadEventDetails_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_ReadEventDetails_EncodeableType = {"ReadEventDetails",
-                                                                    OpcUaId_ReadEventDetails,
-                                                                    OpcUaId_ReadEventDetails_Encoding_DefaultBinary,
-                                                                    OpcUaId_ReadEventDetails_Encoding_DefaultXml,
-                                                                    NULL,
-                                                                    sizeof(OpcUa_ReadEventDetails),
-                                                                    OpcUa_ReadEventDetails_Initialize,
-                                                                    OpcUa_ReadEventDetails_Clear,
-                                                                    NULL,
-                                                                    OpcUa_ReadEventDetails_Encode,
-                                                                    OpcUa_ReadEventDetails_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ReadRawModifiedDetails
@@ -15994,22 +14081,6 @@ SOPC_ReturnStatus OpcUa_ReadRawModifiedDetails_Decode(void* pValue, SOPC_Buffer*
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_ReadRawModifiedDetails_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_ReadRawModifiedDetails_EncodeableType = {
-    "ReadRawModifiedDetails",
-    OpcUaId_ReadRawModifiedDetails,
-    OpcUaId_ReadRawModifiedDetails_Encoding_DefaultBinary,
-    OpcUaId_ReadRawModifiedDetails_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_ReadRawModifiedDetails),
-    OpcUa_ReadRawModifiedDetails_Initialize,
-    OpcUa_ReadRawModifiedDetails_Clear,
-    NULL,
-    OpcUa_ReadRawModifiedDetails_Encode,
-    OpcUa_ReadRawModifiedDetails_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ReadProcessedDetails
@@ -16133,22 +14204,6 @@ SOPC_ReturnStatus OpcUa_ReadProcessedDetails_Decode(void* pValue, SOPC_Buffer* b
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_ReadProcessedDetails_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_ReadProcessedDetails_EncodeableType = {
-    "ReadProcessedDetails",
-    OpcUaId_ReadProcessedDetails,
-    OpcUaId_ReadProcessedDetails_Encoding_DefaultBinary,
-    OpcUaId_ReadProcessedDetails_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_ReadProcessedDetails),
-    OpcUa_ReadProcessedDetails_Initialize,
-    OpcUa_ReadProcessedDetails_Clear,
-    NULL,
-    OpcUa_ReadProcessedDetails_Encode,
-    OpcUa_ReadProcessedDetails_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ReadAtTimeDetails
@@ -16242,21 +14297,6 @@ SOPC_ReturnStatus OpcUa_ReadAtTimeDetails_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_ReadAtTimeDetails_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_ReadAtTimeDetails_EncodeableType = {"ReadAtTimeDetails",
-                                                                     OpcUaId_ReadAtTimeDetails,
-                                                                     OpcUaId_ReadAtTimeDetails_Encoding_DefaultBinary,
-                                                                     OpcUaId_ReadAtTimeDetails_Encoding_DefaultXml,
-                                                                     NULL,
-                                                                     sizeof(OpcUa_ReadAtTimeDetails),
-                                                                     OpcUa_ReadAtTimeDetails_Initialize,
-                                                                     OpcUa_ReadAtTimeDetails_Clear,
-                                                                     NULL,
-                                                                     OpcUa_ReadAtTimeDetails_Encode,
-                                                                     OpcUa_ReadAtTimeDetails_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_HistoryData
@@ -16340,21 +14380,6 @@ SOPC_ReturnStatus OpcUa_HistoryData_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_HistoryData_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_HistoryData_EncodeableType = {"HistoryData",
-                                                               OpcUaId_HistoryData,
-                                                               OpcUaId_HistoryData_Encoding_DefaultBinary,
-                                                               OpcUaId_HistoryData_Encoding_DefaultXml,
-                                                               NULL,
-                                                               sizeof(OpcUa_HistoryData),
-                                                               OpcUa_HistoryData_Initialize,
-                                                               OpcUa_HistoryData_Clear,
-                                                               NULL,
-                                                               OpcUa_HistoryData_Encode,
-                                                               OpcUa_HistoryData_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ModificationInfo
@@ -16451,21 +14476,6 @@ SOPC_ReturnStatus OpcUa_ModificationInfo_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_ModificationInfo_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_ModificationInfo_EncodeableType = {"ModificationInfo",
-                                                                    OpcUaId_ModificationInfo,
-                                                                    OpcUaId_ModificationInfo_Encoding_DefaultBinary,
-                                                                    OpcUaId_ModificationInfo_Encoding_DefaultXml,
-                                                                    NULL,
-                                                                    sizeof(OpcUa_ModificationInfo),
-                                                                    OpcUa_ModificationInfo_Initialize,
-                                                                    OpcUa_ModificationInfo_Clear,
-                                                                    NULL,
-                                                                    OpcUa_ModificationInfo_Encode,
-                                                                    OpcUa_ModificationInfo_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_HistoryModifiedData
@@ -16569,22 +14579,6 @@ SOPC_ReturnStatus OpcUa_HistoryModifiedData_Decode(void* pValue, SOPC_Buffer* bu
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_HistoryModifiedData_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_HistoryModifiedData_EncodeableType = {
-    "HistoryModifiedData",
-    OpcUaId_HistoryModifiedData,
-    OpcUaId_HistoryModifiedData_Encoding_DefaultBinary,
-    OpcUaId_HistoryModifiedData_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_HistoryModifiedData),
-    OpcUa_HistoryModifiedData_Initialize,
-    OpcUa_HistoryModifiedData_Clear,
-    NULL,
-    OpcUa_HistoryModifiedData_Encode,
-    OpcUa_HistoryModifiedData_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_HistoryEvent
@@ -16669,21 +14663,6 @@ SOPC_ReturnStatus OpcUa_HistoryEvent_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_HistoryEvent_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_HistoryEvent_EncodeableType = {"HistoryEvent",
-                                                                OpcUaId_HistoryEvent,
-                                                                OpcUaId_HistoryEvent_Encoding_DefaultBinary,
-                                                                OpcUaId_HistoryEvent_Encoding_DefaultXml,
-                                                                NULL,
-                                                                sizeof(OpcUa_HistoryEvent),
-                                                                OpcUa_HistoryEvent_Initialize,
-                                                                OpcUa_HistoryEvent_Clear,
-                                                                NULL,
-                                                                OpcUa_HistoryEvent_Encode,
-                                                                OpcUa_HistoryEvent_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_HistoryRead
@@ -16800,21 +14779,6 @@ SOPC_ReturnStatus OpcUa_HistoryReadRequest_Decode(void* pValue, SOPC_Buffer* buf
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_HistoryReadRequest_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_HistoryReadRequest_EncodeableType = {"HistoryReadRequest",
-                                                                      OpcUaId_HistoryReadRequest,
-                                                                      OpcUaId_HistoryReadRequest_Encoding_DefaultBinary,
-                                                                      OpcUaId_HistoryReadRequest_Encoding_DefaultXml,
-                                                                      NULL,
-                                                                      sizeof(OpcUa_HistoryReadRequest),
-                                                                      OpcUa_HistoryReadRequest_Initialize,
-                                                                      OpcUa_HistoryReadRequest_Clear,
-                                                                      NULL,
-                                                                      OpcUa_HistoryReadRequest_Encode,
-                                                                      OpcUa_HistoryReadRequest_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_HistoryReadResponse
@@ -16920,22 +14884,6 @@ SOPC_ReturnStatus OpcUa_HistoryReadResponse_Decode(void* pValue, SOPC_Buffer* bu
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_HistoryReadResponse_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_HistoryReadResponse_EncodeableType = {
-    "HistoryReadResponse",
-    OpcUaId_HistoryReadResponse,
-    OpcUaId_HistoryReadResponse_Encoding_DefaultBinary,
-    OpcUaId_HistoryReadResponse_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_HistoryReadResponse),
-    OpcUa_HistoryReadResponse_Initialize,
-    OpcUa_HistoryReadResponse_Clear,
-    NULL,
-    OpcUa_HistoryReadResponse_Encode,
-    OpcUa_HistoryReadResponse_Decode};
 #endif
 #endif
 
@@ -17043,21 +14991,6 @@ SOPC_ReturnStatus OpcUa_WriteValue_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_WriteValue_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_WriteValue_EncodeableType = {"WriteValue",
-                                                              OpcUaId_WriteValue,
-                                                              OpcUaId_WriteValue_Encoding_DefaultBinary,
-                                                              OpcUaId_WriteValue_Encoding_DefaultXml,
-                                                              NULL,
-                                                              sizeof(OpcUa_WriteValue),
-                                                              OpcUa_WriteValue_Initialize,
-                                                              OpcUa_WriteValue_Clear,
-                                                              NULL,
-                                                              OpcUa_WriteValue_Encode,
-                                                              OpcUa_WriteValue_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_Write
@@ -17142,21 +15075,6 @@ SOPC_ReturnStatus OpcUa_WriteRequest_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_WriteRequest_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_WriteRequest_EncodeableType = {"WriteRequest",
-                                                                OpcUaId_WriteRequest,
-                                                                OpcUaId_WriteRequest_Encoding_DefaultBinary,
-                                                                OpcUaId_WriteRequest_Encoding_DefaultXml,
-                                                                NULL,
-                                                                sizeof(OpcUa_WriteRequest),
-                                                                OpcUa_WriteRequest_Initialize,
-                                                                OpcUa_WriteRequest_Clear,
-                                                                NULL,
-                                                                OpcUa_WriteRequest_Encode,
-                                                                OpcUa_WriteRequest_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_WriteResponse
@@ -17261,21 +15179,6 @@ SOPC_ReturnStatus OpcUa_WriteResponse_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_WriteResponse_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_WriteResponse_EncodeableType = {"WriteResponse",
-                                                                 OpcUaId_WriteResponse,
-                                                                 OpcUaId_WriteResponse_Encoding_DefaultBinary,
-                                                                 OpcUaId_WriteResponse_Encoding_DefaultXml,
-                                                                 NULL,
-                                                                 sizeof(OpcUa_WriteResponse),
-                                                                 OpcUa_WriteResponse_Initialize,
-                                                                 OpcUa_WriteResponse_Clear,
-                                                                 NULL,
-                                                                 OpcUa_WriteResponse_Encode,
-                                                                 OpcUa_WriteResponse_Decode};
 #endif
 #endif
 
@@ -17353,22 +15256,6 @@ SOPC_ReturnStatus OpcUa_HistoryUpdateDetails_Decode(void* pValue, SOPC_Buffer* b
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_HistoryUpdateDetails_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_HistoryUpdateDetails_EncodeableType = {
-    "HistoryUpdateDetails",
-    OpcUaId_HistoryUpdateDetails,
-    OpcUaId_HistoryUpdateDetails_Encoding_DefaultBinary,
-    OpcUaId_HistoryUpdateDetails_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_HistoryUpdateDetails),
-    OpcUa_HistoryUpdateDetails_Initialize,
-    OpcUa_HistoryUpdateDetails_Clear,
-    NULL,
-    OpcUa_HistoryUpdateDetails_Encode,
-    OpcUa_HistoryUpdateDetails_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_UpdateDataDetails
@@ -17472,21 +15359,6 @@ SOPC_ReturnStatus OpcUa_UpdateDataDetails_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_UpdateDataDetails_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_UpdateDataDetails_EncodeableType = {"UpdateDataDetails",
-                                                                     OpcUaId_UpdateDataDetails,
-                                                                     OpcUaId_UpdateDataDetails_Encoding_DefaultBinary,
-                                                                     OpcUaId_UpdateDataDetails_Encoding_DefaultXml,
-                                                                     NULL,
-                                                                     sizeof(OpcUa_UpdateDataDetails),
-                                                                     OpcUa_UpdateDataDetails_Initialize,
-                                                                     OpcUa_UpdateDataDetails_Clear,
-                                                                     NULL,
-                                                                     OpcUa_UpdateDataDetails_Encode,
-                                                                     OpcUa_UpdateDataDetails_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_UpdateStructureDataDetails
@@ -17590,22 +15462,6 @@ SOPC_ReturnStatus OpcUa_UpdateStructureDataDetails_Decode(void* pValue, SOPC_Buf
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_UpdateStructureDataDetails_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_UpdateStructureDataDetails_EncodeableType = {
-    "UpdateStructureDataDetails",
-    OpcUaId_UpdateStructureDataDetails,
-    OpcUaId_UpdateStructureDataDetails_Encoding_DefaultBinary,
-    OpcUaId_UpdateStructureDataDetails_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_UpdateStructureDataDetails),
-    OpcUa_UpdateStructureDataDetails_Initialize,
-    OpcUa_UpdateStructureDataDetails_Clear,
-    NULL,
-    OpcUa_UpdateStructureDataDetails_Encode,
-    OpcUa_UpdateStructureDataDetails_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_UpdateEventDetails
@@ -17721,21 +15577,6 @@ SOPC_ReturnStatus OpcUa_UpdateEventDetails_Decode(void* pValue, SOPC_Buffer* buf
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_UpdateEventDetails_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_UpdateEventDetails_EncodeableType = {"UpdateEventDetails",
-                                                                      OpcUaId_UpdateEventDetails,
-                                                                      OpcUaId_UpdateEventDetails_Encoding_DefaultBinary,
-                                                                      OpcUaId_UpdateEventDetails_Encoding_DefaultXml,
-                                                                      NULL,
-                                                                      sizeof(OpcUa_UpdateEventDetails),
-                                                                      OpcUa_UpdateEventDetails_Initialize,
-                                                                      OpcUa_UpdateEventDetails_Clear,
-                                                                      NULL,
-                                                                      OpcUa_UpdateEventDetails_Encode,
-                                                                      OpcUa_UpdateEventDetails_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_DeleteRawModifiedDetails
@@ -17842,22 +15683,6 @@ SOPC_ReturnStatus OpcUa_DeleteRawModifiedDetails_Decode(void* pValue, SOPC_Buffe
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_DeleteRawModifiedDetails_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_DeleteRawModifiedDetails_EncodeableType = {
-    "DeleteRawModifiedDetails",
-    OpcUaId_DeleteRawModifiedDetails,
-    OpcUaId_DeleteRawModifiedDetails_Encoding_DefaultBinary,
-    OpcUaId_DeleteRawModifiedDetails_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_DeleteRawModifiedDetails),
-    OpcUa_DeleteRawModifiedDetails_Initialize,
-    OpcUa_DeleteRawModifiedDetails_Clear,
-    NULL,
-    OpcUa_DeleteRawModifiedDetails_Encode,
-    OpcUa_DeleteRawModifiedDetails_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_DeleteAtTimeDetails
@@ -17951,22 +15776,6 @@ SOPC_ReturnStatus OpcUa_DeleteAtTimeDetails_Decode(void* pValue, SOPC_Buffer* bu
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_DeleteAtTimeDetails_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_DeleteAtTimeDetails_EncodeableType = {
-    "DeleteAtTimeDetails",
-    OpcUaId_DeleteAtTimeDetails,
-    OpcUaId_DeleteAtTimeDetails_Encoding_DefaultBinary,
-    OpcUaId_DeleteAtTimeDetails_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_DeleteAtTimeDetails),
-    OpcUa_DeleteAtTimeDetails_Initialize,
-    OpcUa_DeleteAtTimeDetails_Clear,
-    NULL,
-    OpcUa_DeleteAtTimeDetails_Encode,
-    OpcUa_DeleteAtTimeDetails_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_DeleteEventDetails
@@ -18060,21 +15869,6 @@ SOPC_ReturnStatus OpcUa_DeleteEventDetails_Decode(void* pValue, SOPC_Buffer* buf
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_DeleteEventDetails_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_DeleteEventDetails_EncodeableType = {"DeleteEventDetails",
-                                                                      OpcUaId_DeleteEventDetails,
-                                                                      OpcUaId_DeleteEventDetails_Encoding_DefaultBinary,
-                                                                      OpcUaId_DeleteEventDetails_Encoding_DefaultXml,
-                                                                      NULL,
-                                                                      sizeof(OpcUa_DeleteEventDetails),
-                                                                      OpcUa_DeleteEventDetails_Initialize,
-                                                                      OpcUa_DeleteEventDetails_Clear,
-                                                                      NULL,
-                                                                      OpcUa_DeleteEventDetails_Encode,
-                                                                      OpcUa_DeleteEventDetails_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_HistoryUpdateResult
@@ -18188,22 +15982,6 @@ SOPC_ReturnStatus OpcUa_HistoryUpdateResult_Decode(void* pValue, SOPC_Buffer* bu
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_HistoryUpdateResult_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_HistoryUpdateResult_EncodeableType = {
-    "HistoryUpdateResult",
-    OpcUaId_HistoryUpdateResult,
-    OpcUaId_HistoryUpdateResult_Encoding_DefaultBinary,
-    OpcUaId_HistoryUpdateResult_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_HistoryUpdateResult),
-    OpcUa_HistoryUpdateResult_Initialize,
-    OpcUa_HistoryUpdateResult_Clear,
-    NULL,
-    OpcUa_HistoryUpdateResult_Encode,
-    OpcUa_HistoryUpdateResult_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_HistoryUpdate
@@ -18290,22 +16068,6 @@ SOPC_ReturnStatus OpcUa_HistoryUpdateRequest_Decode(void* pValue, SOPC_Buffer* b
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_HistoryUpdateRequest_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_HistoryUpdateRequest_EncodeableType = {
-    "HistoryUpdateRequest",
-    OpcUaId_HistoryUpdateRequest,
-    OpcUaId_HistoryUpdateRequest_Encoding_DefaultBinary,
-    OpcUaId_HistoryUpdateRequest_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_HistoryUpdateRequest),
-    OpcUa_HistoryUpdateRequest_Initialize,
-    OpcUa_HistoryUpdateRequest_Clear,
-    NULL,
-    OpcUa_HistoryUpdateRequest_Encode,
-    OpcUa_HistoryUpdateRequest_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_HistoryUpdateResponse
@@ -18411,22 +16173,6 @@ SOPC_ReturnStatus OpcUa_HistoryUpdateResponse_Decode(void* pValue, SOPC_Buffer* 
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_HistoryUpdateResponse_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_HistoryUpdateResponse_EncodeableType = {
-    "HistoryUpdateResponse",
-    OpcUaId_HistoryUpdateResponse,
-    OpcUaId_HistoryUpdateResponse_Encoding_DefaultBinary,
-    OpcUaId_HistoryUpdateResponse_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_HistoryUpdateResponse),
-    OpcUa_HistoryUpdateResponse_Initialize,
-    OpcUa_HistoryUpdateResponse_Clear,
-    NULL,
-    OpcUa_HistoryUpdateResponse_Encode,
-    OpcUa_HistoryUpdateResponse_Decode};
 #endif
 #endif
 
@@ -18531,21 +16277,6 @@ SOPC_ReturnStatus OpcUa_CallMethodRequest_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_CallMethodRequest_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_CallMethodRequest_EncodeableType = {"CallMethodRequest",
-                                                                     OpcUaId_CallMethodRequest,
-                                                                     OpcUaId_CallMethodRequest_Encoding_DefaultBinary,
-                                                                     OpcUaId_CallMethodRequest_Encoding_DefaultXml,
-                                                                     NULL,
-                                                                     sizeof(OpcUa_CallMethodRequest),
-                                                                     OpcUa_CallMethodRequest_Initialize,
-                                                                     OpcUa_CallMethodRequest_Clear,
-                                                                     NULL,
-                                                                     OpcUa_CallMethodRequest_Encode,
-                                                                     OpcUa_CallMethodRequest_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_CallMethodResult
@@ -18676,21 +16407,6 @@ SOPC_ReturnStatus OpcUa_CallMethodResult_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_CallMethodResult_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_CallMethodResult_EncodeableType = {"CallMethodResult",
-                                                                    OpcUaId_CallMethodResult,
-                                                                    OpcUaId_CallMethodResult_Encoding_DefaultBinary,
-                                                                    OpcUaId_CallMethodResult_Encoding_DefaultXml,
-                                                                    NULL,
-                                                                    sizeof(OpcUa_CallMethodResult),
-                                                                    OpcUa_CallMethodResult_Initialize,
-                                                                    OpcUa_CallMethodResult_Clear,
-                                                                    NULL,
-                                                                    OpcUa_CallMethodResult_Encode,
-                                                                    OpcUa_CallMethodResult_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_Call
@@ -18778,21 +16494,6 @@ SOPC_ReturnStatus OpcUa_CallRequest_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_CallRequest_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_CallRequest_EncodeableType = {"CallRequest",
-                                                               OpcUaId_CallRequest,
-                                                               OpcUaId_CallRequest_Encoding_DefaultBinary,
-                                                               OpcUaId_CallRequest_Encoding_DefaultXml,
-                                                               NULL,
-                                                               sizeof(OpcUa_CallRequest),
-                                                               OpcUa_CallRequest_Initialize,
-                                                               OpcUa_CallRequest_Clear,
-                                                               NULL,
-                                                               OpcUa_CallRequest_Encode,
-                                                               OpcUa_CallRequest_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_CallResponse
@@ -18898,21 +16599,6 @@ SOPC_ReturnStatus OpcUa_CallResponse_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_CallResponse_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_CallResponse_EncodeableType = {"CallResponse",
-                                                                OpcUaId_CallResponse,
-                                                                OpcUaId_CallResponse_Encoding_DefaultBinary,
-                                                                OpcUaId_CallResponse_Encoding_DefaultXml,
-                                                                NULL,
-                                                                sizeof(OpcUa_CallResponse),
-                                                                OpcUa_CallResponse_Initialize,
-                                                                OpcUa_CallResponse_Clear,
-                                                                NULL,
-                                                                OpcUa_CallResponse_Encode,
-                                                                OpcUa_CallResponse_Decode};
 #endif
 #endif
 
@@ -19010,21 +16696,6 @@ SOPC_ReturnStatus OpcUa_DataChangeFilter_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_DataChangeFilter_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_DataChangeFilter_EncodeableType = {"DataChangeFilter",
-                                                                    OpcUaId_DataChangeFilter,
-                                                                    OpcUaId_DataChangeFilter_Encoding_DefaultBinary,
-                                                                    OpcUaId_DataChangeFilter_Encoding_DefaultXml,
-                                                                    NULL,
-                                                                    sizeof(OpcUa_DataChangeFilter),
-                                                                    OpcUa_DataChangeFilter_Initialize,
-                                                                    OpcUa_DataChangeFilter_Clear,
-                                                                    NULL,
-                                                                    OpcUa_DataChangeFilter_Encode,
-                                                                    OpcUa_DataChangeFilter_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_EventFilter
@@ -19121,21 +16792,6 @@ SOPC_ReturnStatus OpcUa_EventFilter_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_EventFilter_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_EventFilter_EncodeableType = {"EventFilter",
-                                                               OpcUaId_EventFilter,
-                                                               OpcUaId_EventFilter_Encoding_DefaultBinary,
-                                                               OpcUaId_EventFilter_Encoding_DefaultXml,
-                                                               NULL,
-                                                               sizeof(OpcUa_EventFilter),
-                                                               OpcUa_EventFilter_Initialize,
-                                                               OpcUa_EventFilter_Clear,
-                                                               NULL,
-                                                               OpcUa_EventFilter_Encode,
-                                                               OpcUa_EventFilter_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_AggregateConfiguration
@@ -19252,22 +16908,6 @@ SOPC_ReturnStatus OpcUa_AggregateConfiguration_Decode(void* pValue, SOPC_Buffer*
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_AggregateConfiguration_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_AggregateConfiguration_EncodeableType = {
-    "AggregateConfiguration",
-    OpcUaId_AggregateConfiguration,
-    OpcUaId_AggregateConfiguration_Encoding_DefaultBinary,
-    OpcUaId_AggregateConfiguration_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_AggregateConfiguration),
-    OpcUa_AggregateConfiguration_Initialize,
-    OpcUa_AggregateConfiguration_Clear,
-    NULL,
-    OpcUa_AggregateConfiguration_Encode,
-    OpcUa_AggregateConfiguration_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_AggregateFilter
@@ -19374,21 +17014,6 @@ SOPC_ReturnStatus OpcUa_AggregateFilter_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_AggregateFilter_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_AggregateFilter_EncodeableType = {"AggregateFilter",
-                                                                   OpcUaId_AggregateFilter,
-                                                                   OpcUaId_AggregateFilter_Encoding_DefaultBinary,
-                                                                   OpcUaId_AggregateFilter_Encoding_DefaultXml,
-                                                                   NULL,
-                                                                   sizeof(OpcUa_AggregateFilter),
-                                                                   OpcUa_AggregateFilter_Initialize,
-                                                                   OpcUa_AggregateFilter_Clear,
-                                                                   NULL,
-                                                                   OpcUa_AggregateFilter_Encode,
-                                                                   OpcUa_AggregateFilter_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_EventFilterResult
@@ -19502,21 +17127,6 @@ SOPC_ReturnStatus OpcUa_EventFilterResult_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_EventFilterResult_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_EventFilterResult_EncodeableType = {"EventFilterResult",
-                                                                     OpcUaId_EventFilterResult,
-                                                                     OpcUaId_EventFilterResult_Encoding_DefaultBinary,
-                                                                     OpcUaId_EventFilterResult_Encoding_DefaultXml,
-                                                                     NULL,
-                                                                     sizeof(OpcUa_EventFilterResult),
-                                                                     OpcUa_EventFilterResult_Initialize,
-                                                                     OpcUa_EventFilterResult_Clear,
-                                                                     NULL,
-                                                                     OpcUa_EventFilterResult_Encode,
-                                                                     OpcUa_EventFilterResult_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_AggregateFilterResult
@@ -19613,22 +17223,6 @@ SOPC_ReturnStatus OpcUa_AggregateFilterResult_Decode(void* pValue, SOPC_Buffer* 
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_AggregateFilterResult_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_AggregateFilterResult_EncodeableType = {
-    "AggregateFilterResult",
-    OpcUaId_AggregateFilterResult,
-    OpcUaId_AggregateFilterResult_Encoding_DefaultBinary,
-    OpcUaId_AggregateFilterResult_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_AggregateFilterResult),
-    OpcUa_AggregateFilterResult_Initialize,
-    OpcUa_AggregateFilterResult_Clear,
-    NULL,
-    OpcUa_AggregateFilterResult_Encode,
-    OpcUa_AggregateFilterResult_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_MonitoringParameters
@@ -19745,22 +17339,6 @@ SOPC_ReturnStatus OpcUa_MonitoringParameters_Decode(void* pValue, SOPC_Buffer* b
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_MonitoringParameters_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_MonitoringParameters_EncodeableType = {
-    "MonitoringParameters",
-    OpcUaId_MonitoringParameters,
-    OpcUaId_MonitoringParameters_Encoding_DefaultBinary,
-    OpcUaId_MonitoringParameters_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_MonitoringParameters),
-    OpcUa_MonitoringParameters_Initialize,
-    OpcUa_MonitoringParameters_Clear,
-    NULL,
-    OpcUa_MonitoringParameters_Encode,
-    OpcUa_MonitoringParameters_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_MonitoredItemCreateRequest
@@ -19857,22 +17435,6 @@ SOPC_ReturnStatus OpcUa_MonitoredItemCreateRequest_Decode(void* pValue, SOPC_Buf
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_MonitoredItemCreateRequest_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_MonitoredItemCreateRequest_EncodeableType = {
-    "MonitoredItemCreateRequest",
-    OpcUaId_MonitoredItemCreateRequest,
-    OpcUaId_MonitoredItemCreateRequest_Encoding_DefaultBinary,
-    OpcUaId_MonitoredItemCreateRequest_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_MonitoredItemCreateRequest),
-    OpcUa_MonitoredItemCreateRequest_Initialize,
-    OpcUa_MonitoredItemCreateRequest_Clear,
-    NULL,
-    OpcUa_MonitoredItemCreateRequest_Encode,
-    OpcUa_MonitoredItemCreateRequest_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_MonitoredItemCreateResult
@@ -19989,22 +17551,6 @@ SOPC_ReturnStatus OpcUa_MonitoredItemCreateResult_Decode(void* pValue, SOPC_Buff
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_MonitoredItemCreateResult_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_MonitoredItemCreateResult_EncodeableType = {
-    "MonitoredItemCreateResult",
-    OpcUaId_MonitoredItemCreateResult,
-    OpcUaId_MonitoredItemCreateResult_Encoding_DefaultBinary,
-    OpcUaId_MonitoredItemCreateResult_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_MonitoredItemCreateResult),
-    OpcUa_MonitoredItemCreateResult_Initialize,
-    OpcUa_MonitoredItemCreateResult_Clear,
-    NULL,
-    OpcUa_MonitoredItemCreateResult_Encode,
-    OpcUa_MonitoredItemCreateResult_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_CreateMonitoredItems
@@ -20112,22 +17658,6 @@ SOPC_ReturnStatus OpcUa_CreateMonitoredItemsRequest_Decode(void* pValue, SOPC_Bu
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_CreateMonitoredItemsRequest_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_CreateMonitoredItemsRequest_EncodeableType = {
-    "CreateMonitoredItemsRequest",
-    OpcUaId_CreateMonitoredItemsRequest,
-    OpcUaId_CreateMonitoredItemsRequest_Encoding_DefaultBinary,
-    OpcUaId_CreateMonitoredItemsRequest_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_CreateMonitoredItemsRequest),
-    OpcUa_CreateMonitoredItemsRequest_Initialize,
-    OpcUa_CreateMonitoredItemsRequest_Clear,
-    NULL,
-    OpcUa_CreateMonitoredItemsRequest_Encode,
-    OpcUa_CreateMonitoredItemsRequest_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_CreateMonitoredItemsResponse
@@ -20234,22 +17764,6 @@ SOPC_ReturnStatus OpcUa_CreateMonitoredItemsResponse_Decode(void* pValue, SOPC_B
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_CreateMonitoredItemsResponse_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_CreateMonitoredItemsResponse_EncodeableType = {
-    "CreateMonitoredItemsResponse",
-    OpcUaId_CreateMonitoredItemsResponse,
-    OpcUaId_CreateMonitoredItemsResponse_Encoding_DefaultBinary,
-    OpcUaId_CreateMonitoredItemsResponse_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_CreateMonitoredItemsResponse),
-    OpcUa_CreateMonitoredItemsResponse_Initialize,
-    OpcUa_CreateMonitoredItemsResponse_Clear,
-    NULL,
-    OpcUa_CreateMonitoredItemsResponse_Encode,
-    OpcUa_CreateMonitoredItemsResponse_Decode};
 #endif
 #endif
 
@@ -20337,22 +17851,6 @@ SOPC_ReturnStatus OpcUa_MonitoredItemModifyRequest_Decode(void* pValue, SOPC_Buf
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_MonitoredItemModifyRequest_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_MonitoredItemModifyRequest_EncodeableType = {
-    "MonitoredItemModifyRequest",
-    OpcUaId_MonitoredItemModifyRequest,
-    OpcUaId_MonitoredItemModifyRequest_Encoding_DefaultBinary,
-    OpcUaId_MonitoredItemModifyRequest_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_MonitoredItemModifyRequest),
-    OpcUa_MonitoredItemModifyRequest_Initialize,
-    OpcUa_MonitoredItemModifyRequest_Clear,
-    NULL,
-    OpcUa_MonitoredItemModifyRequest_Encode,
-    OpcUa_MonitoredItemModifyRequest_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_MonitoredItemModifyResult
@@ -20459,22 +17957,6 @@ SOPC_ReturnStatus OpcUa_MonitoredItemModifyResult_Decode(void* pValue, SOPC_Buff
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_MonitoredItemModifyResult_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_MonitoredItemModifyResult_EncodeableType = {
-    "MonitoredItemModifyResult",
-    OpcUaId_MonitoredItemModifyResult,
-    OpcUaId_MonitoredItemModifyResult_Encoding_DefaultBinary,
-    OpcUaId_MonitoredItemModifyResult_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_MonitoredItemModifyResult),
-    OpcUa_MonitoredItemModifyResult_Initialize,
-    OpcUa_MonitoredItemModifyResult_Clear,
-    NULL,
-    OpcUa_MonitoredItemModifyResult_Encode,
-    OpcUa_MonitoredItemModifyResult_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ModifyMonitoredItems
@@ -20582,22 +18064,6 @@ SOPC_ReturnStatus OpcUa_ModifyMonitoredItemsRequest_Decode(void* pValue, SOPC_Bu
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_ModifyMonitoredItemsRequest_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_ModifyMonitoredItemsRequest_EncodeableType = {
-    "ModifyMonitoredItemsRequest",
-    OpcUaId_ModifyMonitoredItemsRequest,
-    OpcUaId_ModifyMonitoredItemsRequest_Encoding_DefaultBinary,
-    OpcUaId_ModifyMonitoredItemsRequest_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_ModifyMonitoredItemsRequest),
-    OpcUa_ModifyMonitoredItemsRequest_Initialize,
-    OpcUa_ModifyMonitoredItemsRequest_Clear,
-    NULL,
-    OpcUa_ModifyMonitoredItemsRequest_Encode,
-    OpcUa_ModifyMonitoredItemsRequest_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ModifyMonitoredItemsResponse
@@ -20704,22 +18170,6 @@ SOPC_ReturnStatus OpcUa_ModifyMonitoredItemsResponse_Decode(void* pValue, SOPC_B
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_ModifyMonitoredItemsResponse_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_ModifyMonitoredItemsResponse_EncodeableType = {
-    "ModifyMonitoredItemsResponse",
-    OpcUaId_ModifyMonitoredItemsResponse,
-    OpcUaId_ModifyMonitoredItemsResponse_Encoding_DefaultBinary,
-    OpcUaId_ModifyMonitoredItemsResponse_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_ModifyMonitoredItemsResponse),
-    OpcUa_ModifyMonitoredItemsResponse_Initialize,
-    OpcUa_ModifyMonitoredItemsResponse_Clear,
-    NULL,
-    OpcUa_ModifyMonitoredItemsResponse_Encode,
-    OpcUa_ModifyMonitoredItemsResponse_Decode};
 #endif
 #endif
 
@@ -20825,22 +18275,6 @@ SOPC_ReturnStatus OpcUa_SetMonitoringModeRequest_Decode(void* pValue, SOPC_Buffe
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_SetMonitoringModeRequest_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_SetMonitoringModeRequest_EncodeableType = {
-    "SetMonitoringModeRequest",
-    OpcUaId_SetMonitoringModeRequest,
-    OpcUaId_SetMonitoringModeRequest_Encoding_DefaultBinary,
-    OpcUaId_SetMonitoringModeRequest_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_SetMonitoringModeRequest),
-    OpcUa_SetMonitoringModeRequest_Initialize,
-    OpcUa_SetMonitoringModeRequest_Clear,
-    NULL,
-    OpcUa_SetMonitoringModeRequest_Encode,
-    OpcUa_SetMonitoringModeRequest_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_SetMonitoringModeResponse
@@ -20945,22 +18379,6 @@ SOPC_ReturnStatus OpcUa_SetMonitoringModeResponse_Decode(void* pValue, SOPC_Buff
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_SetMonitoringModeResponse_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_SetMonitoringModeResponse_EncodeableType = {
-    "SetMonitoringModeResponse",
-    OpcUaId_SetMonitoringModeResponse,
-    OpcUaId_SetMonitoringModeResponse_Encoding_DefaultBinary,
-    OpcUaId_SetMonitoringModeResponse_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_SetMonitoringModeResponse),
-    OpcUa_SetMonitoringModeResponse_Initialize,
-    OpcUa_SetMonitoringModeResponse_Clear,
-    NULL,
-    OpcUa_SetMonitoringModeResponse_Encode,
-    OpcUa_SetMonitoringModeResponse_Decode};
 #endif
 #endif
 
@@ -21083,22 +18501,6 @@ SOPC_ReturnStatus OpcUa_SetTriggeringRequest_Decode(void* pValue, SOPC_Buffer* b
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_SetTriggeringRequest_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_SetTriggeringRequest_EncodeableType = {
-    "SetTriggeringRequest",
-    OpcUaId_SetTriggeringRequest,
-    OpcUaId_SetTriggeringRequest_Encoding_DefaultBinary,
-    OpcUaId_SetTriggeringRequest_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_SetTriggeringRequest),
-    OpcUa_SetTriggeringRequest_Initialize,
-    OpcUa_SetTriggeringRequest_Clear,
-    NULL,
-    OpcUa_SetTriggeringRequest_Encode,
-    OpcUa_SetTriggeringRequest_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_SetTriggeringResponse
@@ -21239,22 +18641,6 @@ SOPC_ReturnStatus OpcUa_SetTriggeringResponse_Decode(void* pValue, SOPC_Buffer* 
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_SetTriggeringResponse_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_SetTriggeringResponse_EncodeableType = {
-    "SetTriggeringResponse",
-    OpcUaId_SetTriggeringResponse,
-    OpcUaId_SetTriggeringResponse_Encoding_DefaultBinary,
-    OpcUaId_SetTriggeringResponse_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_SetTriggeringResponse),
-    OpcUa_SetTriggeringResponse_Initialize,
-    OpcUa_SetTriggeringResponse_Clear,
-    NULL,
-    OpcUa_SetTriggeringResponse_Encode,
-    OpcUa_SetTriggeringResponse_Decode};
 #endif
 #endif
 
@@ -21350,22 +18736,6 @@ SOPC_ReturnStatus OpcUa_DeleteMonitoredItemsRequest_Decode(void* pValue, SOPC_Bu
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_DeleteMonitoredItemsRequest_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_DeleteMonitoredItemsRequest_EncodeableType = {
-    "DeleteMonitoredItemsRequest",
-    OpcUaId_DeleteMonitoredItemsRequest,
-    OpcUaId_DeleteMonitoredItemsRequest_Encoding_DefaultBinary,
-    OpcUaId_DeleteMonitoredItemsRequest_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_DeleteMonitoredItemsRequest),
-    OpcUa_DeleteMonitoredItemsRequest_Initialize,
-    OpcUa_DeleteMonitoredItemsRequest_Clear,
-    NULL,
-    OpcUa_DeleteMonitoredItemsRequest_Encode,
-    OpcUa_DeleteMonitoredItemsRequest_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_DeleteMonitoredItemsResponse
@@ -21470,22 +18840,6 @@ SOPC_ReturnStatus OpcUa_DeleteMonitoredItemsResponse_Decode(void* pValue, SOPC_B
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_DeleteMonitoredItemsResponse_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_DeleteMonitoredItemsResponse_EncodeableType = {
-    "DeleteMonitoredItemsResponse",
-    OpcUaId_DeleteMonitoredItemsResponse,
-    OpcUaId_DeleteMonitoredItemsResponse_Encoding_DefaultBinary,
-    OpcUaId_DeleteMonitoredItemsResponse_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_DeleteMonitoredItemsResponse),
-    OpcUa_DeleteMonitoredItemsResponse_Initialize,
-    OpcUa_DeleteMonitoredItemsResponse_Clear,
-    NULL,
-    OpcUa_DeleteMonitoredItemsResponse_Encode,
-    OpcUa_DeleteMonitoredItemsResponse_Decode};
 #endif
 #endif
 
@@ -21614,22 +18968,6 @@ SOPC_ReturnStatus OpcUa_CreateSubscriptionRequest_Decode(void* pValue, SOPC_Buff
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_CreateSubscriptionRequest_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_CreateSubscriptionRequest_EncodeableType = {
-    "CreateSubscriptionRequest",
-    OpcUaId_CreateSubscriptionRequest,
-    OpcUaId_CreateSubscriptionRequest_Encoding_DefaultBinary,
-    OpcUaId_CreateSubscriptionRequest_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_CreateSubscriptionRequest),
-    OpcUa_CreateSubscriptionRequest_Initialize,
-    OpcUa_CreateSubscriptionRequest_Clear,
-    NULL,
-    OpcUa_CreateSubscriptionRequest_Encode,
-    OpcUa_CreateSubscriptionRequest_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_CreateSubscriptionResponse
@@ -21738,22 +19076,6 @@ SOPC_ReturnStatus OpcUa_CreateSubscriptionResponse_Decode(void* pValue, SOPC_Buf
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_CreateSubscriptionResponse_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_CreateSubscriptionResponse_EncodeableType = {
-    "CreateSubscriptionResponse",
-    OpcUaId_CreateSubscriptionResponse,
-    OpcUaId_CreateSubscriptionResponse_Encoding_DefaultBinary,
-    OpcUaId_CreateSubscriptionResponse_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_CreateSubscriptionResponse),
-    OpcUa_CreateSubscriptionResponse_Initialize,
-    OpcUa_CreateSubscriptionResponse_Clear,
-    NULL,
-    OpcUa_CreateSubscriptionResponse_Encode,
-    OpcUa_CreateSubscriptionResponse_Decode};
 #endif
 #endif
 
@@ -21882,22 +19204,6 @@ SOPC_ReturnStatus OpcUa_ModifySubscriptionRequest_Decode(void* pValue, SOPC_Buff
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_ModifySubscriptionRequest_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_ModifySubscriptionRequest_EncodeableType = {
-    "ModifySubscriptionRequest",
-    OpcUaId_ModifySubscriptionRequest,
-    OpcUaId_ModifySubscriptionRequest_Encoding_DefaultBinary,
-    OpcUaId_ModifySubscriptionRequest_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_ModifySubscriptionRequest),
-    OpcUa_ModifySubscriptionRequest_Initialize,
-    OpcUa_ModifySubscriptionRequest_Clear,
-    NULL,
-    OpcUa_ModifySubscriptionRequest_Encode,
-    OpcUa_ModifySubscriptionRequest_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ModifySubscriptionResponse
@@ -21996,22 +19302,6 @@ SOPC_ReturnStatus OpcUa_ModifySubscriptionResponse_Decode(void* pValue, SOPC_Buf
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_ModifySubscriptionResponse_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_ModifySubscriptionResponse_EncodeableType = {
-    "ModifySubscriptionResponse",
-    OpcUaId_ModifySubscriptionResponse,
-    OpcUaId_ModifySubscriptionResponse_Encoding_DefaultBinary,
-    OpcUaId_ModifySubscriptionResponse_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_ModifySubscriptionResponse),
-    OpcUa_ModifySubscriptionResponse_Initialize,
-    OpcUa_ModifySubscriptionResponse_Clear,
-    NULL,
-    OpcUa_ModifySubscriptionResponse_Encode,
-    OpcUa_ModifySubscriptionResponse_Decode};
 #endif
 #endif
 
@@ -22107,22 +19397,6 @@ SOPC_ReturnStatus OpcUa_SetPublishingModeRequest_Decode(void* pValue, SOPC_Buffe
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_SetPublishingModeRequest_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_SetPublishingModeRequest_EncodeableType = {
-    "SetPublishingModeRequest",
-    OpcUaId_SetPublishingModeRequest,
-    OpcUaId_SetPublishingModeRequest_Encoding_DefaultBinary,
-    OpcUaId_SetPublishingModeRequest_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_SetPublishingModeRequest),
-    OpcUa_SetPublishingModeRequest_Initialize,
-    OpcUa_SetPublishingModeRequest_Clear,
-    NULL,
-    OpcUa_SetPublishingModeRequest_Encode,
-    OpcUa_SetPublishingModeRequest_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_SetPublishingModeResponse
@@ -22227,22 +19501,6 @@ SOPC_ReturnStatus OpcUa_SetPublishingModeResponse_Decode(void* pValue, SOPC_Buff
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_SetPublishingModeResponse_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_SetPublishingModeResponse_EncodeableType = {
-    "SetPublishingModeResponse",
-    OpcUaId_SetPublishingModeResponse,
-    OpcUaId_SetPublishingModeResponse_Encoding_DefaultBinary,
-    OpcUaId_SetPublishingModeResponse_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_SetPublishingModeResponse),
-    OpcUa_SetPublishingModeResponse_Initialize,
-    OpcUa_SetPublishingModeResponse_Clear,
-    NULL,
-    OpcUa_SetPublishingModeResponse_Encode,
-    OpcUa_SetPublishingModeResponse_Decode};
 #endif
 #endif
 
@@ -22349,22 +19607,6 @@ SOPC_ReturnStatus OpcUa_NotificationMessage_Decode(void* pValue, SOPC_Buffer* bu
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_NotificationMessage_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_NotificationMessage_EncodeableType = {
-    "NotificationMessage",
-    OpcUaId_NotificationMessage,
-    OpcUaId_NotificationMessage_Encoding_DefaultBinary,
-    OpcUaId_NotificationMessage_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_NotificationMessage),
-    OpcUa_NotificationMessage_Initialize,
-    OpcUa_NotificationMessage_Clear,
-    NULL,
-    OpcUa_NotificationMessage_Encode,
-    OpcUa_NotificationMessage_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_DataChangeNotification
@@ -22470,22 +19712,6 @@ SOPC_ReturnStatus OpcUa_DataChangeNotification_Decode(void* pValue, SOPC_Buffer*
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_DataChangeNotification_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_DataChangeNotification_EncodeableType = {
-    "DataChangeNotification",
-    OpcUaId_DataChangeNotification,
-    OpcUaId_DataChangeNotification_Encoding_DefaultBinary,
-    OpcUaId_DataChangeNotification_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_DataChangeNotification),
-    OpcUa_DataChangeNotification_Initialize,
-    OpcUa_DataChangeNotification_Clear,
-    NULL,
-    OpcUa_DataChangeNotification_Encode,
-    OpcUa_DataChangeNotification_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_MonitoredItemNotification
@@ -22572,22 +19798,6 @@ SOPC_ReturnStatus OpcUa_MonitoredItemNotification_Decode(void* pValue, SOPC_Buff
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_MonitoredItemNotification_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_MonitoredItemNotification_EncodeableType = {
-    "MonitoredItemNotification",
-    OpcUaId_MonitoredItemNotification,
-    OpcUaId_MonitoredItemNotification_Encoding_DefaultBinary,
-    OpcUaId_MonitoredItemNotification_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_MonitoredItemNotification),
-    OpcUa_MonitoredItemNotification_Initialize,
-    OpcUa_MonitoredItemNotification_Clear,
-    NULL,
-    OpcUa_MonitoredItemNotification_Encode,
-    OpcUa_MonitoredItemNotification_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_EventNotificationList
@@ -22671,22 +19881,6 @@ SOPC_ReturnStatus OpcUa_EventNotificationList_Decode(void* pValue, SOPC_Buffer* 
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_EventNotificationList_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_EventNotificationList_EncodeableType = {
-    "EventNotificationList",
-    OpcUaId_EventNotificationList,
-    OpcUaId_EventNotificationList_Encoding_DefaultBinary,
-    OpcUaId_EventNotificationList_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_EventNotificationList),
-    OpcUa_EventNotificationList_Initialize,
-    OpcUa_EventNotificationList_Clear,
-    NULL,
-    OpcUa_EventNotificationList_Encode,
-    OpcUa_EventNotificationList_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_EventFieldList
@@ -22780,21 +19974,6 @@ SOPC_ReturnStatus OpcUa_EventFieldList_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_EventFieldList_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_EventFieldList_EncodeableType = {"EventFieldList",
-                                                                  OpcUaId_EventFieldList,
-                                                                  OpcUaId_EventFieldList_Encoding_DefaultBinary,
-                                                                  OpcUaId_EventFieldList_Encoding_DefaultXml,
-                                                                  NULL,
-                                                                  sizeof(OpcUa_EventFieldList),
-                                                                  OpcUa_EventFieldList_Initialize,
-                                                                  OpcUa_EventFieldList_Clear,
-                                                                  NULL,
-                                                                  OpcUa_EventFieldList_Encode,
-                                                                  OpcUa_EventFieldList_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_HistoryEventFieldList
@@ -22878,22 +20057,6 @@ SOPC_ReturnStatus OpcUa_HistoryEventFieldList_Decode(void* pValue, SOPC_Buffer* 
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_HistoryEventFieldList_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_HistoryEventFieldList_EncodeableType = {
-    "HistoryEventFieldList",
-    OpcUaId_HistoryEventFieldList,
-    OpcUaId_HistoryEventFieldList_Encoding_DefaultBinary,
-    OpcUaId_HistoryEventFieldList_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_HistoryEventFieldList),
-    OpcUa_HistoryEventFieldList_Initialize,
-    OpcUa_HistoryEventFieldList_Clear,
-    NULL,
-    OpcUa_HistoryEventFieldList_Encode,
-    OpcUa_HistoryEventFieldList_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_StatusChangeNotification
@@ -22980,22 +20143,6 @@ SOPC_ReturnStatus OpcUa_StatusChangeNotification_Decode(void* pValue, SOPC_Buffe
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_StatusChangeNotification_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_StatusChangeNotification_EncodeableType = {
-    "StatusChangeNotification",
-    OpcUaId_StatusChangeNotification,
-    OpcUaId_StatusChangeNotification_Encoding_DefaultBinary,
-    OpcUaId_StatusChangeNotification_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_StatusChangeNotification),
-    OpcUa_StatusChangeNotification_Initialize,
-    OpcUa_StatusChangeNotification_Clear,
-    NULL,
-    OpcUa_StatusChangeNotification_Encode,
-    OpcUa_StatusChangeNotification_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_SubscriptionAcknowledgement
@@ -23082,22 +20229,6 @@ SOPC_ReturnStatus OpcUa_SubscriptionAcknowledgement_Decode(void* pValue, SOPC_Bu
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_SubscriptionAcknowledgement_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_SubscriptionAcknowledgement_EncodeableType = {
-    "SubscriptionAcknowledgement",
-    OpcUaId_SubscriptionAcknowledgement,
-    OpcUaId_SubscriptionAcknowledgement_Encoding_DefaultBinary,
-    OpcUaId_SubscriptionAcknowledgement_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_SubscriptionAcknowledgement),
-    OpcUa_SubscriptionAcknowledgement_Initialize,
-    OpcUa_SubscriptionAcknowledgement_Clear,
-    NULL,
-    OpcUa_SubscriptionAcknowledgement_Encode,
-    OpcUa_SubscriptionAcknowledgement_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_Publish
@@ -23188,21 +20319,6 @@ SOPC_ReturnStatus OpcUa_PublishRequest_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_PublishRequest_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_PublishRequest_EncodeableType = {"PublishRequest",
-                                                                  OpcUaId_PublishRequest,
-                                                                  OpcUaId_PublishRequest_Encoding_DefaultBinary,
-                                                                  OpcUaId_PublishRequest_Encoding_DefaultXml,
-                                                                  NULL,
-                                                                  sizeof(OpcUa_PublishRequest),
-                                                                  OpcUa_PublishRequest_Initialize,
-                                                                  OpcUa_PublishRequest_Clear,
-                                                                  NULL,
-                                                                  OpcUa_PublishRequest_Encode,
-                                                                  OpcUa_PublishRequest_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_PublishResponse
@@ -23355,21 +20471,6 @@ SOPC_ReturnStatus OpcUa_PublishResponse_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_PublishResponse_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_PublishResponse_EncodeableType = {"PublishResponse",
-                                                                   OpcUaId_PublishResponse,
-                                                                   OpcUaId_PublishResponse_Encoding_DefaultBinary,
-                                                                   OpcUaId_PublishResponse_Encoding_DefaultXml,
-                                                                   NULL,
-                                                                   sizeof(OpcUa_PublishResponse),
-                                                                   OpcUa_PublishResponse_Initialize,
-                                                                   OpcUa_PublishResponse_Clear,
-                                                                   NULL,
-                                                                   OpcUa_PublishResponse_Encode,
-                                                                   OpcUa_PublishResponse_Decode};
 #endif
 #endif
 
@@ -23458,21 +20559,6 @@ SOPC_ReturnStatus OpcUa_RepublishRequest_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_RepublishRequest_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_RepublishRequest_EncodeableType = {"RepublishRequest",
-                                                                    OpcUaId_RepublishRequest,
-                                                                    OpcUaId_RepublishRequest_Encoding_DefaultBinary,
-                                                                    OpcUaId_RepublishRequest_Encoding_DefaultXml,
-                                                                    NULL,
-                                                                    sizeof(OpcUa_RepublishRequest),
-                                                                    OpcUa_RepublishRequest_Initialize,
-                                                                    OpcUa_RepublishRequest_Clear,
-                                                                    NULL,
-                                                                    OpcUa_RepublishRequest_Encode,
-                                                                    OpcUa_RepublishRequest_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_RepublishResponse
@@ -23551,21 +20637,6 @@ SOPC_ReturnStatus OpcUa_RepublishResponse_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_RepublishResponse_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_RepublishResponse_EncodeableType = {"RepublishResponse",
-                                                                     OpcUaId_RepublishResponse,
-                                                                     OpcUaId_RepublishResponse_Encoding_DefaultBinary,
-                                                                     OpcUaId_RepublishResponse_Encoding_DefaultXml,
-                                                                     NULL,
-                                                                     sizeof(OpcUa_RepublishResponse),
-                                                                     OpcUa_RepublishResponse_Initialize,
-                                                                     OpcUa_RepublishResponse_Clear,
-                                                                     NULL,
-                                                                     OpcUa_RepublishResponse_Encode,
-                                                                     OpcUa_RepublishResponse_Decode};
 #endif
 #endif
 
@@ -23661,21 +20732,6 @@ SOPC_ReturnStatus OpcUa_TransferResult_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_TransferResult_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_TransferResult_EncodeableType = {"TransferResult",
-                                                                  OpcUaId_TransferResult,
-                                                                  OpcUaId_TransferResult_Encoding_DefaultBinary,
-                                                                  OpcUaId_TransferResult_Encoding_DefaultXml,
-                                                                  NULL,
-                                                                  sizeof(OpcUa_TransferResult),
-                                                                  OpcUa_TransferResult_Initialize,
-                                                                  OpcUa_TransferResult_Clear,
-                                                                  NULL,
-                                                                  OpcUa_TransferResult_Encode,
-                                                                  OpcUa_TransferResult_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_TransferSubscriptions
@@ -23770,22 +20826,6 @@ SOPC_ReturnStatus OpcUa_TransferSubscriptionsRequest_Decode(void* pValue, SOPC_B
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_TransferSubscriptionsRequest_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_TransferSubscriptionsRequest_EncodeableType = {
-    "TransferSubscriptionsRequest",
-    OpcUaId_TransferSubscriptionsRequest,
-    OpcUaId_TransferSubscriptionsRequest_Encoding_DefaultBinary,
-    OpcUaId_TransferSubscriptionsRequest_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_TransferSubscriptionsRequest),
-    OpcUa_TransferSubscriptionsRequest_Initialize,
-    OpcUa_TransferSubscriptionsRequest_Clear,
-    NULL,
-    OpcUa_TransferSubscriptionsRequest_Encode,
-    OpcUa_TransferSubscriptionsRequest_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_TransferSubscriptionsResponse
@@ -23890,22 +20930,6 @@ SOPC_ReturnStatus OpcUa_TransferSubscriptionsResponse_Decode(void* pValue, SOPC_
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_TransferSubscriptionsResponse_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_TransferSubscriptionsResponse_EncodeableType = {
-    "TransferSubscriptionsResponse",
-    OpcUaId_TransferSubscriptionsResponse,
-    OpcUaId_TransferSubscriptionsResponse_Encoding_DefaultBinary,
-    OpcUaId_TransferSubscriptionsResponse_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_TransferSubscriptionsResponse),
-    OpcUa_TransferSubscriptionsResponse_Initialize,
-    OpcUa_TransferSubscriptionsResponse_Clear,
-    NULL,
-    OpcUa_TransferSubscriptionsResponse_Encode,
-    OpcUa_TransferSubscriptionsResponse_Decode};
 #endif
 #endif
 
@@ -23991,22 +21015,6 @@ SOPC_ReturnStatus OpcUa_DeleteSubscriptionsRequest_Decode(void* pValue, SOPC_Buf
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_DeleteSubscriptionsRequest_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_DeleteSubscriptionsRequest_EncodeableType = {
-    "DeleteSubscriptionsRequest",
-    OpcUaId_DeleteSubscriptionsRequest,
-    OpcUaId_DeleteSubscriptionsRequest_Encoding_DefaultBinary,
-    OpcUaId_DeleteSubscriptionsRequest_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_DeleteSubscriptionsRequest),
-    OpcUa_DeleteSubscriptionsRequest_Initialize,
-    OpcUa_DeleteSubscriptionsRequest_Clear,
-    NULL,
-    OpcUa_DeleteSubscriptionsRequest_Encode,
-    OpcUa_DeleteSubscriptionsRequest_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_DeleteSubscriptionsResponse
@@ -24111,22 +21119,6 @@ SOPC_ReturnStatus OpcUa_DeleteSubscriptionsResponse_Decode(void* pValue, SOPC_Bu
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_DeleteSubscriptionsResponse_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_DeleteSubscriptionsResponse_EncodeableType = {
-    "DeleteSubscriptionsResponse",
-    OpcUaId_DeleteSubscriptionsResponse,
-    OpcUaId_DeleteSubscriptionsResponse_Encoding_DefaultBinary,
-    OpcUaId_DeleteSubscriptionsResponse_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_DeleteSubscriptionsResponse),
-    OpcUa_DeleteSubscriptionsResponse_Initialize,
-    OpcUa_DeleteSubscriptionsResponse_Clear,
-    NULL,
-    OpcUa_DeleteSubscriptionsResponse_Encode,
-    OpcUa_DeleteSubscriptionsResponse_Decode};
 #endif
 #endif
 
@@ -24254,21 +21246,6 @@ SOPC_ReturnStatus OpcUa_BuildInfo_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_BuildInfo_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_BuildInfo_EncodeableType = {"BuildInfo",
-                                                             OpcUaId_BuildInfo,
-                                                             OpcUaId_BuildInfo_Encoding_DefaultBinary,
-                                                             OpcUaId_BuildInfo_Encoding_DefaultXml,
-                                                             NULL,
-                                                             sizeof(OpcUa_BuildInfo),
-                                                             OpcUa_BuildInfo_Initialize,
-                                                             OpcUa_BuildInfo_Clear,
-                                                             NULL,
-                                                             OpcUa_BuildInfo_Encode,
-                                                             OpcUa_BuildInfo_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_RedundantServerDataType
@@ -24365,22 +21342,6 @@ SOPC_ReturnStatus OpcUa_RedundantServerDataType_Decode(void* pValue, SOPC_Buffer
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_RedundantServerDataType_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_RedundantServerDataType_EncodeableType = {
-    "RedundantServerDataType",
-    OpcUaId_RedundantServerDataType,
-    OpcUaId_RedundantServerDataType_Encoding_DefaultBinary,
-    OpcUaId_RedundantServerDataType_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_RedundantServerDataType),
-    OpcUa_RedundantServerDataType_Initialize,
-    OpcUa_RedundantServerDataType_Clear,
-    NULL,
-    OpcUa_RedundantServerDataType_Encode,
-    OpcUa_RedundantServerDataType_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_EndpointUrlListDataType
@@ -24464,22 +21425,6 @@ SOPC_ReturnStatus OpcUa_EndpointUrlListDataType_Decode(void* pValue, SOPC_Buffer
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_EndpointUrlListDataType_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_EndpointUrlListDataType_EncodeableType = {
-    "EndpointUrlListDataType",
-    OpcUaId_EndpointUrlListDataType,
-    OpcUaId_EndpointUrlListDataType_Encoding_DefaultBinary,
-    OpcUaId_EndpointUrlListDataType_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_EndpointUrlListDataType),
-    OpcUa_EndpointUrlListDataType_Initialize,
-    OpcUa_EndpointUrlListDataType_Clear,
-    NULL,
-    OpcUa_EndpointUrlListDataType_Encode,
-    OpcUa_EndpointUrlListDataType_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_NetworkGroupDataType
@@ -24576,22 +21521,6 @@ SOPC_ReturnStatus OpcUa_NetworkGroupDataType_Decode(void* pValue, SOPC_Buffer* b
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_NetworkGroupDataType_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_NetworkGroupDataType_EncodeableType = {
-    "NetworkGroupDataType",
-    OpcUaId_NetworkGroupDataType,
-    OpcUaId_NetworkGroupDataType_Encoding_DefaultBinary,
-    OpcUaId_NetworkGroupDataType_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_NetworkGroupDataType),
-    OpcUa_NetworkGroupDataType_Initialize,
-    OpcUa_NetworkGroupDataType_Clear,
-    NULL,
-    OpcUa_NetworkGroupDataType_Encode,
-    OpcUa_NetworkGroupDataType_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_SamplingIntervalDiagnosticsDataType
@@ -24699,22 +21628,6 @@ SOPC_ReturnStatus OpcUa_SamplingIntervalDiagnosticsDataType_Decode(void* pValue,
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_SamplingIntervalDiagnosticsDataType_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_SamplingIntervalDiagnosticsDataType_EncodeableType = {
-    "SamplingIntervalDiagnosticsDataType",
-    OpcUaId_SamplingIntervalDiagnosticsDataType,
-    OpcUaId_SamplingIntervalDiagnosticsDataType_Encoding_DefaultBinary,
-    OpcUaId_SamplingIntervalDiagnosticsDataType_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_SamplingIntervalDiagnosticsDataType),
-    OpcUa_SamplingIntervalDiagnosticsDataType_Initialize,
-    OpcUa_SamplingIntervalDiagnosticsDataType_Clear,
-    NULL,
-    OpcUa_SamplingIntervalDiagnosticsDataType_Encode,
-    OpcUa_SamplingIntervalDiagnosticsDataType_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ServerDiagnosticsSummaryDataType
@@ -24901,22 +21814,6 @@ SOPC_ReturnStatus OpcUa_ServerDiagnosticsSummaryDataType_Decode(void* pValue, SO
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_ServerDiagnosticsSummaryDataType_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_ServerDiagnosticsSummaryDataType_EncodeableType = {
-    "ServerDiagnosticsSummaryDataType",
-    OpcUaId_ServerDiagnosticsSummaryDataType,
-    OpcUaId_ServerDiagnosticsSummaryDataType_Encoding_DefaultBinary,
-    OpcUaId_ServerDiagnosticsSummaryDataType_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_ServerDiagnosticsSummaryDataType),
-    OpcUa_ServerDiagnosticsSummaryDataType_Initialize,
-    OpcUa_ServerDiagnosticsSummaryDataType_Clear,
-    NULL,
-    OpcUa_ServerDiagnosticsSummaryDataType_Encode,
-    OpcUa_ServerDiagnosticsSummaryDataType_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ServerStatusDataType
@@ -25043,22 +21940,6 @@ SOPC_ReturnStatus OpcUa_ServerStatusDataType_Decode(void* pValue, SOPC_Buffer* b
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_ServerStatusDataType_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_ServerStatusDataType_EncodeableType = {
-    "ServerStatusDataType",
-    OpcUaId_ServerStatusDataType,
-    OpcUaId_ServerStatusDataType_Encoding_DefaultBinary,
-    OpcUaId_ServerStatusDataType_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_ServerStatusDataType),
-    OpcUa_ServerStatusDataType_Initialize,
-    OpcUa_ServerStatusDataType_Clear,
-    NULL,
-    OpcUa_ServerStatusDataType_Encode,
-    OpcUa_ServerStatusDataType_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_SessionDiagnosticsDataType
@@ -25562,22 +22443,6 @@ SOPC_ReturnStatus OpcUa_SessionDiagnosticsDataType_Decode(void* pValue, SOPC_Buf
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_SessionDiagnosticsDataType_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_SessionDiagnosticsDataType_EncodeableType = {
-    "SessionDiagnosticsDataType",
-    OpcUaId_SessionDiagnosticsDataType,
-    OpcUaId_SessionDiagnosticsDataType_Encoding_DefaultBinary,
-    OpcUaId_SessionDiagnosticsDataType_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_SessionDiagnosticsDataType),
-    OpcUa_SessionDiagnosticsDataType_Initialize,
-    OpcUa_SessionDiagnosticsDataType_Clear,
-    NULL,
-    OpcUa_SessionDiagnosticsDataType_Encode,
-    OpcUa_SessionDiagnosticsDataType_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_SessionSecurityDiagnosticsDataType
@@ -25741,22 +22606,6 @@ SOPC_ReturnStatus OpcUa_SessionSecurityDiagnosticsDataType_Decode(void* pValue, 
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_SessionSecurityDiagnosticsDataType_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_SessionSecurityDiagnosticsDataType_EncodeableType = {
-    "SessionSecurityDiagnosticsDataType",
-    OpcUaId_SessionSecurityDiagnosticsDataType,
-    OpcUaId_SessionSecurityDiagnosticsDataType_Encoding_DefaultBinary,
-    OpcUaId_SessionSecurityDiagnosticsDataType_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_SessionSecurityDiagnosticsDataType),
-    OpcUa_SessionSecurityDiagnosticsDataType_Initialize,
-    OpcUa_SessionSecurityDiagnosticsDataType_Clear,
-    NULL,
-    OpcUa_SessionSecurityDiagnosticsDataType_Encode,
-    OpcUa_SessionSecurityDiagnosticsDataType_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ServiceCounterDataType
@@ -25843,22 +22692,6 @@ SOPC_ReturnStatus OpcUa_ServiceCounterDataType_Decode(void* pValue, SOPC_Buffer*
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_ServiceCounterDataType_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_ServiceCounterDataType_EncodeableType = {
-    "ServiceCounterDataType",
-    OpcUaId_ServiceCounterDataType,
-    OpcUaId_ServiceCounterDataType_Encoding_DefaultBinary,
-    OpcUaId_ServiceCounterDataType_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_ServiceCounterDataType),
-    OpcUa_ServiceCounterDataType_Initialize,
-    OpcUa_ServiceCounterDataType_Clear,
-    NULL,
-    OpcUa_ServiceCounterDataType_Encode,
-    OpcUa_ServiceCounterDataType_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_StatusResult
@@ -25945,21 +22778,6 @@ SOPC_ReturnStatus OpcUa_StatusResult_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_StatusResult_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_StatusResult_EncodeableType = {"StatusResult",
-                                                                OpcUaId_StatusResult,
-                                                                OpcUaId_StatusResult_Encoding_DefaultBinary,
-                                                                OpcUaId_StatusResult_Encoding_DefaultXml,
-                                                                NULL,
-                                                                sizeof(OpcUa_StatusResult),
-                                                                OpcUa_StatusResult_Initialize,
-                                                                OpcUa_StatusResult_Clear,
-                                                                NULL,
-                                                                OpcUa_StatusResult_Encode,
-                                                                OpcUa_StatusResult_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_SubscriptionDiagnosticsDataType
@@ -26336,22 +23154,6 @@ SOPC_ReturnStatus OpcUa_SubscriptionDiagnosticsDataType_Decode(void* pValue, SOP
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_SubscriptionDiagnosticsDataType_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_SubscriptionDiagnosticsDataType_EncodeableType = {
-    "SubscriptionDiagnosticsDataType",
-    OpcUaId_SubscriptionDiagnosticsDataType,
-    OpcUaId_SubscriptionDiagnosticsDataType_Encoding_DefaultBinary,
-    OpcUaId_SubscriptionDiagnosticsDataType_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_SubscriptionDiagnosticsDataType),
-    OpcUa_SubscriptionDiagnosticsDataType_Initialize,
-    OpcUa_SubscriptionDiagnosticsDataType_Clear,
-    NULL,
-    OpcUa_SubscriptionDiagnosticsDataType_Encode,
-    OpcUa_SubscriptionDiagnosticsDataType_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ModelChangeStructureDataType
@@ -26448,22 +23250,6 @@ SOPC_ReturnStatus OpcUa_ModelChangeStructureDataType_Decode(void* pValue, SOPC_B
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_ModelChangeStructureDataType_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_ModelChangeStructureDataType_EncodeableType = {
-    "ModelChangeStructureDataType",
-    OpcUaId_ModelChangeStructureDataType,
-    OpcUaId_ModelChangeStructureDataType_Encoding_DefaultBinary,
-    OpcUaId_ModelChangeStructureDataType_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_ModelChangeStructureDataType),
-    OpcUa_ModelChangeStructureDataType_Initialize,
-    OpcUa_ModelChangeStructureDataType_Clear,
-    NULL,
-    OpcUa_ModelChangeStructureDataType_Encode,
-    OpcUa_ModelChangeStructureDataType_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_SemanticChangeStructureDataType
@@ -26550,22 +23336,6 @@ SOPC_ReturnStatus OpcUa_SemanticChangeStructureDataType_Decode(void* pValue, SOP
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_SemanticChangeStructureDataType_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_SemanticChangeStructureDataType_EncodeableType = {
-    "SemanticChangeStructureDataType",
-    OpcUaId_SemanticChangeStructureDataType,
-    OpcUaId_SemanticChangeStructureDataType_Encoding_DefaultBinary,
-    OpcUaId_SemanticChangeStructureDataType_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_SemanticChangeStructureDataType),
-    OpcUa_SemanticChangeStructureDataType_Initialize,
-    OpcUa_SemanticChangeStructureDataType_Clear,
-    NULL,
-    OpcUa_SemanticChangeStructureDataType_Encode,
-    OpcUa_SemanticChangeStructureDataType_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_Range
@@ -26652,21 +23422,6 @@ SOPC_ReturnStatus OpcUa_Range_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_Range_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_Range_EncodeableType = {"Range",
-                                                         OpcUaId_Range,
-                                                         OpcUaId_Range_Encoding_DefaultBinary,
-                                                         OpcUaId_Range_Encoding_DefaultXml,
-                                                         NULL,
-                                                         sizeof(OpcUa_Range),
-                                                         OpcUa_Range_Initialize,
-                                                         OpcUa_Range_Clear,
-                                                         NULL,
-                                                         OpcUa_Range_Encode,
-                                                         OpcUa_Range_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_EUInformation
@@ -26773,21 +23528,6 @@ SOPC_ReturnStatus OpcUa_EUInformation_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_EUInformation_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_EUInformation_EncodeableType = {"EUInformation",
-                                                                 OpcUaId_EUInformation,
-                                                                 OpcUaId_EUInformation_Encoding_DefaultBinary,
-                                                                 OpcUaId_EUInformation_Encoding_DefaultXml,
-                                                                 NULL,
-                                                                 sizeof(OpcUa_EUInformation),
-                                                                 OpcUa_EUInformation_Initialize,
-                                                                 OpcUa_EUInformation_Clear,
-                                                                 NULL,
-                                                                 OpcUa_EUInformation_Encode,
-                                                                 OpcUa_EUInformation_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ComplexNumberType
@@ -26874,21 +23614,6 @@ SOPC_ReturnStatus OpcUa_ComplexNumberType_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_ComplexNumberType_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_ComplexNumberType_EncodeableType = {"ComplexNumberType",
-                                                                     OpcUaId_ComplexNumberType,
-                                                                     OpcUaId_ComplexNumberType_Encoding_DefaultBinary,
-                                                                     OpcUaId_ComplexNumberType_Encoding_DefaultXml,
-                                                                     NULL,
-                                                                     sizeof(OpcUa_ComplexNumberType),
-                                                                     OpcUa_ComplexNumberType_Initialize,
-                                                                     OpcUa_ComplexNumberType_Clear,
-                                                                     NULL,
-                                                                     OpcUa_ComplexNumberType_Encode,
-                                                                     OpcUa_ComplexNumberType_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_DoubleComplexNumberType
@@ -26975,22 +23700,6 @@ SOPC_ReturnStatus OpcUa_DoubleComplexNumberType_Decode(void* pValue, SOPC_Buffer
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_DoubleComplexNumberType_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_DoubleComplexNumberType_EncodeableType = {
-    "DoubleComplexNumberType",
-    OpcUaId_DoubleComplexNumberType,
-    OpcUaId_DoubleComplexNumberType_Encoding_DefaultBinary,
-    OpcUaId_DoubleComplexNumberType_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_DoubleComplexNumberType),
-    OpcUa_DoubleComplexNumberType_Initialize,
-    OpcUa_DoubleComplexNumberType_Clear,
-    NULL,
-    OpcUa_DoubleComplexNumberType_Encode,
-    OpcUa_DoubleComplexNumberType_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_AxisInformation
@@ -27114,21 +23823,6 @@ SOPC_ReturnStatus OpcUa_AxisInformation_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_AxisInformation_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_AxisInformation_EncodeableType = {"AxisInformation",
-                                                                   OpcUaId_AxisInformation,
-                                                                   OpcUaId_AxisInformation_Encoding_DefaultBinary,
-                                                                   OpcUaId_AxisInformation_Encoding_DefaultXml,
-                                                                   NULL,
-                                                                   sizeof(OpcUa_AxisInformation),
-                                                                   OpcUa_AxisInformation_Initialize,
-                                                                   OpcUa_AxisInformation_Clear,
-                                                                   NULL,
-                                                                   OpcUa_AxisInformation_Encode,
-                                                                   OpcUa_AxisInformation_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_XVType
@@ -27215,21 +23909,6 @@ SOPC_ReturnStatus OpcUa_XVType_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_XVType_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_XVType_EncodeableType = {"XVType",
-                                                          OpcUaId_XVType,
-                                                          OpcUaId_XVType_Encoding_DefaultBinary,
-                                                          OpcUaId_XVType_Encoding_DefaultXml,
-                                                          NULL,
-                                                          sizeof(OpcUa_XVType),
-                                                          OpcUa_XVType_Initialize,
-                                                          OpcUa_XVType_Clear,
-                                                          NULL,
-                                                          OpcUa_XVType_Encode,
-                                                          OpcUa_XVType_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ProgramDiagnosticDataType
@@ -27412,22 +24091,6 @@ SOPC_ReturnStatus OpcUa_ProgramDiagnosticDataType_Decode(void* pValue, SOPC_Buff
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_ProgramDiagnosticDataType_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_ProgramDiagnosticDataType_EncodeableType = {
-    "ProgramDiagnosticDataType",
-    OpcUaId_ProgramDiagnosticDataType,
-    OpcUaId_ProgramDiagnosticDataType_Encoding_DefaultBinary,
-    OpcUaId_ProgramDiagnosticDataType_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_ProgramDiagnosticDataType),
-    OpcUa_ProgramDiagnosticDataType_Initialize,
-    OpcUa_ProgramDiagnosticDataType_Clear,
-    NULL,
-    OpcUa_ProgramDiagnosticDataType_Encode,
-    OpcUa_ProgramDiagnosticDataType_Decode};
 #endif
 
 #ifndef OPCUA_EXCLUDE_Annotation
@@ -27524,21 +24187,6 @@ SOPC_ReturnStatus OpcUa_Annotation_Decode(void* pValue, SOPC_Buffer* buf)
 
     return status;
 }
-
-/*============================================================================
- * OpcUa_Annotation_EncodeableType
- *===========================================================================*/
-struct SOPC_EncodeableType OpcUa_Annotation_EncodeableType = {"Annotation",
-                                                              OpcUaId_Annotation,
-                                                              OpcUaId_Annotation_Encoding_DefaultBinary,
-                                                              OpcUaId_Annotation_Encoding_DefaultXml,
-                                                              NULL,
-                                                              sizeof(OpcUa_Annotation),
-                                                              OpcUa_Annotation_Initialize,
-                                                              OpcUa_Annotation_Clear,
-                                                              NULL,
-                                                              OpcUa_Annotation_Encode,
-                                                              OpcUa_Annotation_Decode};
 #endif
 
 void SOPC_Initialize_EnumeratedType(int32_t* enumerationValue)
@@ -27561,581 +24209,6 @@ SOPC_ReturnStatus SOPC_Write_EnumeratedType(SOPC_Buffer* buffer, const int32_t* 
     return SOPC_Int32_Write(enumerationValue, buffer);
 }
 
-/*============================================================================
- * Table of known types.
- *===========================================================================*/
-static SOPC_EncodeableType* g_KnownEncodeableTypes[] = {
-#ifndef OPCUA_EXCLUDE_Node
-    &OpcUa_Node_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_InstanceNode
-    &OpcUa_InstanceNode_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_TypeNode
-    &OpcUa_TypeNode_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_ObjectNode
-    &OpcUa_ObjectNode_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_ObjectTypeNode
-    &OpcUa_ObjectTypeNode_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_VariableNode
-    &OpcUa_VariableNode_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_VariableTypeNode
-    &OpcUa_VariableTypeNode_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_ReferenceTypeNode
-    &OpcUa_ReferenceTypeNode_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_MethodNode
-    &OpcUa_MethodNode_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_ViewNode
-    &OpcUa_ViewNode_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_DataTypeNode
-    &OpcUa_DataTypeNode_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_ReferenceNode
-    &OpcUa_ReferenceNode_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_Argument
-    &OpcUa_Argument_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_EnumValueType
-    &OpcUa_EnumValueType_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_EnumField
-    &OpcUa_EnumField_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_OptionSet
-    &OpcUa_OptionSet_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_TimeZoneDataType
-    &OpcUa_TimeZoneDataType_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_ApplicationDescription
-    &OpcUa_ApplicationDescription_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_RequestHeader
-    &OpcUa_RequestHeader_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_ResponseHeader
-    &OpcUa_ResponseHeader_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_ServiceFault
-    &OpcUa_ServiceFault_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_FindServers
-    &OpcUa_FindServersRequest_EncodeableType,
-    &OpcUa_FindServersResponse_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_ServerOnNetwork
-    &OpcUa_ServerOnNetwork_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_FindServersOnNetwork
-    &OpcUa_FindServersOnNetworkRequest_EncodeableType,
-    &OpcUa_FindServersOnNetworkResponse_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_UserTokenPolicy
-    &OpcUa_UserTokenPolicy_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_EndpointDescription
-    &OpcUa_EndpointDescription_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_GetEndpoints
-    &OpcUa_GetEndpointsRequest_EncodeableType,
-    &OpcUa_GetEndpointsResponse_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_RegisteredServer
-    &OpcUa_RegisteredServer_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_RegisterServer
-    &OpcUa_RegisterServerRequest_EncodeableType,
-    &OpcUa_RegisterServerResponse_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_MdnsDiscoveryConfiguration
-    &OpcUa_MdnsDiscoveryConfiguration_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_RegisterServer2
-    &OpcUa_RegisterServer2Request_EncodeableType,
-    &OpcUa_RegisterServer2Response_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_ChannelSecurityToken
-    &OpcUa_ChannelSecurityToken_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_OpenSecureChannel
-    &OpcUa_OpenSecureChannelRequest_EncodeableType,
-    &OpcUa_OpenSecureChannelResponse_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_CloseSecureChannel
-    &OpcUa_CloseSecureChannelRequest_EncodeableType,
-    &OpcUa_CloseSecureChannelResponse_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_SignedSoftwareCertificate
-    &OpcUa_SignedSoftwareCertificate_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_SignatureData
-    &OpcUa_SignatureData_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_CreateSession
-    &OpcUa_CreateSessionRequest_EncodeableType,
-    &OpcUa_CreateSessionResponse_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_UserIdentityToken
-    &OpcUa_UserIdentityToken_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_AnonymousIdentityToken
-    &OpcUa_AnonymousIdentityToken_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_UserNameIdentityToken
-    &OpcUa_UserNameIdentityToken_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_X509IdentityToken
-    &OpcUa_X509IdentityToken_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_KerberosIdentityToken
-    &OpcUa_KerberosIdentityToken_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_IssuedIdentityToken
-    &OpcUa_IssuedIdentityToken_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_ActivateSession
-    &OpcUa_ActivateSessionRequest_EncodeableType,
-    &OpcUa_ActivateSessionResponse_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_CloseSession
-    &OpcUa_CloseSessionRequest_EncodeableType,
-    &OpcUa_CloseSessionResponse_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_Cancel
-    &OpcUa_CancelRequest_EncodeableType,
-    &OpcUa_CancelResponse_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_NodeAttributes
-    &OpcUa_NodeAttributes_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_ObjectAttributes
-    &OpcUa_ObjectAttributes_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_VariableAttributes
-    &OpcUa_VariableAttributes_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_MethodAttributes
-    &OpcUa_MethodAttributes_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_ObjectTypeAttributes
-    &OpcUa_ObjectTypeAttributes_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_VariableTypeAttributes
-    &OpcUa_VariableTypeAttributes_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_ReferenceTypeAttributes
-    &OpcUa_ReferenceTypeAttributes_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_DataTypeAttributes
-    &OpcUa_DataTypeAttributes_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_ViewAttributes
-    &OpcUa_ViewAttributes_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_AddNodesItem
-    &OpcUa_AddNodesItem_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_AddNodesResult
-    &OpcUa_AddNodesResult_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_AddNodes
-    &OpcUa_AddNodesRequest_EncodeableType,
-    &OpcUa_AddNodesResponse_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_AddReferencesItem
-    &OpcUa_AddReferencesItem_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_AddReferences
-    &OpcUa_AddReferencesRequest_EncodeableType,
-    &OpcUa_AddReferencesResponse_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_DeleteNodesItem
-    &OpcUa_DeleteNodesItem_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_DeleteNodes
-    &OpcUa_DeleteNodesRequest_EncodeableType,
-    &OpcUa_DeleteNodesResponse_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_DeleteReferencesItem
-    &OpcUa_DeleteReferencesItem_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_DeleteReferences
-    &OpcUa_DeleteReferencesRequest_EncodeableType,
-    &OpcUa_DeleteReferencesResponse_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_ViewDescription
-    &OpcUa_ViewDescription_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_BrowseDescription
-    &OpcUa_BrowseDescription_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_ReferenceDescription
-    &OpcUa_ReferenceDescription_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_BrowseResult
-    &OpcUa_BrowseResult_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_Browse
-    &OpcUa_BrowseRequest_EncodeableType,
-    &OpcUa_BrowseResponse_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_BrowseNext
-    &OpcUa_BrowseNextRequest_EncodeableType,
-    &OpcUa_BrowseNextResponse_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_RelativePathElement
-    &OpcUa_RelativePathElement_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_RelativePath
-    &OpcUa_RelativePath_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_BrowsePath
-    &OpcUa_BrowsePath_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_BrowsePathTarget
-    &OpcUa_BrowsePathTarget_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_BrowsePathResult
-    &OpcUa_BrowsePathResult_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_TranslateBrowsePathsToNodeIds
-    &OpcUa_TranslateBrowsePathsToNodeIdsRequest_EncodeableType,
-    &OpcUa_TranslateBrowsePathsToNodeIdsResponse_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_RegisterNodes
-    &OpcUa_RegisterNodesRequest_EncodeableType,
-    &OpcUa_RegisterNodesResponse_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_UnregisterNodes
-    &OpcUa_UnregisterNodesRequest_EncodeableType,
-    &OpcUa_UnregisterNodesResponse_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_EndpointConfiguration
-    &OpcUa_EndpointConfiguration_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_SupportedProfile
-    &OpcUa_SupportedProfile_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_SoftwareCertificate
-    &OpcUa_SoftwareCertificate_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_QueryDataDescription
-    &OpcUa_QueryDataDescription_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_NodeTypeDescription
-    &OpcUa_NodeTypeDescription_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_QueryDataSet
-    &OpcUa_QueryDataSet_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_NodeReference
-    &OpcUa_NodeReference_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_ContentFilterElement
-    &OpcUa_ContentFilterElement_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_ContentFilter
-    &OpcUa_ContentFilter_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_ElementOperand
-    &OpcUa_ElementOperand_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_LiteralOperand
-    &OpcUa_LiteralOperand_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_AttributeOperand
-    &OpcUa_AttributeOperand_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_SimpleAttributeOperand
-    &OpcUa_SimpleAttributeOperand_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_ContentFilterElementResult
-    &OpcUa_ContentFilterElementResult_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_ContentFilterResult
-    &OpcUa_ContentFilterResult_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_ParsingResult
-    &OpcUa_ParsingResult_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_QueryFirst
-    &OpcUa_QueryFirstRequest_EncodeableType,
-    &OpcUa_QueryFirstResponse_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_QueryNext
-    &OpcUa_QueryNextRequest_EncodeableType,
-    &OpcUa_QueryNextResponse_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_ReadValueId
-    &OpcUa_ReadValueId_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_Read
-    &OpcUa_ReadRequest_EncodeableType,
-    &OpcUa_ReadResponse_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_HistoryReadValueId
-    &OpcUa_HistoryReadValueId_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_HistoryReadResult
-    &OpcUa_HistoryReadResult_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_ReadEventDetails
-    &OpcUa_ReadEventDetails_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_ReadRawModifiedDetails
-    &OpcUa_ReadRawModifiedDetails_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_ReadProcessedDetails
-    &OpcUa_ReadProcessedDetails_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_ReadAtTimeDetails
-    &OpcUa_ReadAtTimeDetails_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_HistoryData
-    &OpcUa_HistoryData_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_ModificationInfo
-    &OpcUa_ModificationInfo_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_HistoryModifiedData
-    &OpcUa_HistoryModifiedData_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_HistoryEvent
-    &OpcUa_HistoryEvent_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_HistoryRead
-    &OpcUa_HistoryReadRequest_EncodeableType,
-    &OpcUa_HistoryReadResponse_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_WriteValue
-    &OpcUa_WriteValue_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_Write
-    &OpcUa_WriteRequest_EncodeableType,
-    &OpcUa_WriteResponse_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_HistoryUpdateDetails
-    &OpcUa_HistoryUpdateDetails_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_UpdateDataDetails
-    &OpcUa_UpdateDataDetails_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_UpdateStructureDataDetails
-    &OpcUa_UpdateStructureDataDetails_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_UpdateEventDetails
-    &OpcUa_UpdateEventDetails_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_DeleteRawModifiedDetails
-    &OpcUa_DeleteRawModifiedDetails_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_DeleteAtTimeDetails
-    &OpcUa_DeleteAtTimeDetails_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_DeleteEventDetails
-    &OpcUa_DeleteEventDetails_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_HistoryUpdateResult
-    &OpcUa_HistoryUpdateResult_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_HistoryUpdate
-    &OpcUa_HistoryUpdateRequest_EncodeableType,
-    &OpcUa_HistoryUpdateResponse_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_CallMethodRequest
-    &OpcUa_CallMethodRequest_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_CallMethodResult
-    &OpcUa_CallMethodResult_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_Call
-    &OpcUa_CallRequest_EncodeableType,
-    &OpcUa_CallResponse_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_DataChangeFilter
-    &OpcUa_DataChangeFilter_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_EventFilter
-    &OpcUa_EventFilter_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_AggregateConfiguration
-    &OpcUa_AggregateConfiguration_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_AggregateFilter
-    &OpcUa_AggregateFilter_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_EventFilterResult
-    &OpcUa_EventFilterResult_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_AggregateFilterResult
-    &OpcUa_AggregateFilterResult_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_MonitoringParameters
-    &OpcUa_MonitoringParameters_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_MonitoredItemCreateRequest
-    &OpcUa_MonitoredItemCreateRequest_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_MonitoredItemCreateResult
-    &OpcUa_MonitoredItemCreateResult_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_CreateMonitoredItems
-    &OpcUa_CreateMonitoredItemsRequest_EncodeableType,
-    &OpcUa_CreateMonitoredItemsResponse_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_MonitoredItemModifyRequest
-    &OpcUa_MonitoredItemModifyRequest_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_MonitoredItemModifyResult
-    &OpcUa_MonitoredItemModifyResult_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_ModifyMonitoredItems
-    &OpcUa_ModifyMonitoredItemsRequest_EncodeableType,
-    &OpcUa_ModifyMonitoredItemsResponse_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_SetMonitoringMode
-    &OpcUa_SetMonitoringModeRequest_EncodeableType,
-    &OpcUa_SetMonitoringModeResponse_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_SetTriggering
-    &OpcUa_SetTriggeringRequest_EncodeableType,
-    &OpcUa_SetTriggeringResponse_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_DeleteMonitoredItems
-    &OpcUa_DeleteMonitoredItemsRequest_EncodeableType,
-    &OpcUa_DeleteMonitoredItemsResponse_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_CreateSubscription
-    &OpcUa_CreateSubscriptionRequest_EncodeableType,
-    &OpcUa_CreateSubscriptionResponse_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_ModifySubscription
-    &OpcUa_ModifySubscriptionRequest_EncodeableType,
-    &OpcUa_ModifySubscriptionResponse_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_SetPublishingMode
-    &OpcUa_SetPublishingModeRequest_EncodeableType,
-    &OpcUa_SetPublishingModeResponse_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_NotificationMessage
-    &OpcUa_NotificationMessage_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_DataChangeNotification
-    &OpcUa_DataChangeNotification_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_MonitoredItemNotification
-    &OpcUa_MonitoredItemNotification_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_EventNotificationList
-    &OpcUa_EventNotificationList_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_EventFieldList
-    &OpcUa_EventFieldList_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_HistoryEventFieldList
-    &OpcUa_HistoryEventFieldList_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_StatusChangeNotification
-    &OpcUa_StatusChangeNotification_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_SubscriptionAcknowledgement
-    &OpcUa_SubscriptionAcknowledgement_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_Publish
-    &OpcUa_PublishRequest_EncodeableType,
-    &OpcUa_PublishResponse_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_Republish
-    &OpcUa_RepublishRequest_EncodeableType,
-    &OpcUa_RepublishResponse_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_TransferResult
-    &OpcUa_TransferResult_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_TransferSubscriptions
-    &OpcUa_TransferSubscriptionsRequest_EncodeableType,
-    &OpcUa_TransferSubscriptionsResponse_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_DeleteSubscriptions
-    &OpcUa_DeleteSubscriptionsRequest_EncodeableType,
-    &OpcUa_DeleteSubscriptionsResponse_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_BuildInfo
-    &OpcUa_BuildInfo_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_RedundantServerDataType
-    &OpcUa_RedundantServerDataType_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_EndpointUrlListDataType
-    &OpcUa_EndpointUrlListDataType_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_NetworkGroupDataType
-    &OpcUa_NetworkGroupDataType_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_SamplingIntervalDiagnosticsDataType
-    &OpcUa_SamplingIntervalDiagnosticsDataType_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_ServerDiagnosticsSummaryDataType
-    &OpcUa_ServerDiagnosticsSummaryDataType_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_ServerStatusDataType
-    &OpcUa_ServerStatusDataType_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_SessionDiagnosticsDataType
-    &OpcUa_SessionDiagnosticsDataType_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_SessionSecurityDiagnosticsDataType
-    &OpcUa_SessionSecurityDiagnosticsDataType_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_ServiceCounterDataType
-    &OpcUa_ServiceCounterDataType_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_StatusResult
-    &OpcUa_StatusResult_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_SubscriptionDiagnosticsDataType
-    &OpcUa_SubscriptionDiagnosticsDataType_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_ModelChangeStructureDataType
-    &OpcUa_ModelChangeStructureDataType_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_SemanticChangeStructureDataType
-    &OpcUa_SemanticChangeStructureDataType_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_Range
-    &OpcUa_Range_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_EUInformation
-    &OpcUa_EUInformation_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_ComplexNumberType
-    &OpcUa_ComplexNumberType_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_DoubleComplexNumberType
-    &OpcUa_DoubleComplexNumberType_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_AxisInformation
-    &OpcUa_AxisInformation_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_XVType
-    &OpcUa_XVType_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_ProgramDiagnosticDataType
-    &OpcUa_ProgramDiagnosticDataType_EncodeableType,
-#endif
-#ifndef OPCUA_EXCLUDE_Annotation
-    &OpcUa_Annotation_EncodeableType,
-#endif
-    NULL};
-
-SOPC_EncodeableType** SOPC_KnownEncodeableTypes = g_KnownEncodeableTypes;
 /* This is the last line of an autogenerated file. */
+
+#include "sopc_types.c.suppl"

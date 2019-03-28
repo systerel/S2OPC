@@ -28,7 +28,7 @@ import xml.etree.ElementTree as ET
 import sys
 
 H_FILE_PATH = 'csrc/opcua_types/sopc_types.h'
-C_FILE_PATH = 'csrc/opcua_types/sopc_types.c'
+C_FILE_PATH = 'csrc/opcua_types/sopc_types.c.suppl'
 
 
 def main():
@@ -36,6 +36,8 @@ def main():
     ns = parse_args()
     schema = BinarySchema(ns.bsd)
     gen_header_file(schema)
+    gen_implem_file(schema)
+
     untranslated = schema.untranslated_typenames()
     toignore = (set('ua:' + t for t in PREDEFINED_TYPES) |
                 set('ua:' + t for t in ORPHANED_TYPES))
@@ -73,6 +75,16 @@ def gen_header_file(schema):
         out.write(H_FILE_ENUM_FUN_DECLS)
         schema.gen_type_index_decl(out)
         out.write(H_FILE_END)
+
+
+def gen_implem_file(schema):
+    """
+    Generates the sopc_types.c file from the given schema.
+    """
+    with open(C_FILE_PATH, "w") as out:
+        out.write(C_FILE_START)
+        gen_implem_types(out, schema)
+        out.write(C_FILE_END)
 
 
 def gen_header_types(out, schema):
@@ -265,6 +277,11 @@ def gen_header_types(out, schema):
     schema.gen_header_type(out, 'ExceptionDeviationFormat')
 
 
+def gen_implem_types(out, schema):
+    schema.gen_encodeable_type_descs(out)
+    schema.gen_encodeable_type_table(out)
+
+
 class BinarySchema:
     """Represents a Binary Schema Description (BSD) file"""
 
@@ -368,12 +385,33 @@ class BinarySchema:
         are always compact, even when some type is excluded.  The purpose of
         these indexes is to access rapidly to the description of a type.
         """
-        def writer(barename):
+        def writer(typename, barename):
             out.write(TYPE_INDEX_DECL_ENCODEABLE_TYPE.format(name=barename))
 
         out.write(TYPE_INDEX_DECL_START)
         self.known_writer.gen_types(out, writer)
         out.write(TYPE_INDEX_DECL_END)
+
+    def gen_encodeable_type_descs(self, out):
+        """
+        Generates the descriptors of all encodeable types.
+        """
+        def writer(typename, barename):
+            ctype = self.bsd2c[typename]
+            out.write(ENCODEABLE_TYPE_DESC.format(name=barename, ctype=ctype))
+
+        self.known_writer.gen_types(out, writer)
+
+    def gen_encodeable_type_table(self, out):
+        """
+        Generates the table of all encodeable types.
+        """
+        def writer(typename, barename):
+            out.write(TYPE_TABLE_ENTRY.format(name=barename))
+
+        out.write(TYPE_TABLE_START)
+        self.known_writer.gen_types(out, writer)
+        out.write(TYPE_TABLE_END)
 
     def untranslated_typenames(self):
         """
@@ -520,15 +558,16 @@ class KnownEncodeableTypeWriter:
         """
         Generates declarations for all encodeable types.
 
-        The ``write`` parameter is a function that takes the barename of a type
-        and writes the piece of C code appropriate for that type.
+        The ``write`` parameter is a function that takes the full name and
+        barename of a type and writes the piece of C code appropriate for that
+        type.
         """
         for typename in self.encodeable_types:
             barename = typename.split(':')[1]
             blockname = self.block_start.get(barename, None)
             if blockname:
                 out.write(BLOCK_PROTECTION_START.format(name=blockname))
-            write(barename)
+            write(typename, barename)
             blockname = self.block_end.get(barename, None)
             if blockname:
                 out.write('\n' + BLOCK_PROTECTION_END.format(name=blockname))
@@ -742,6 +781,75 @@ ORPHANED_TYPES = [
 """
 Types that are present in the binary schema but not used by any other type and
 not translated to module ``sopc_types``.
+"""
+
+C_FILE_START = """
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+"""[1:]
+
+# TODO make records const
+ENCODEABLE_TYPE_DESC = """
+#ifndef OPCUA_EXCLUDE_{name}
+/*============================================================================
+ * Descriptor of the {name} encodeable type.
+ *===========================================================================*/
+SOPC_EncodeableType OpcUa_{name}_EncodeableType =
+{{
+    "{name}",
+    OpcUaId_{name},
+    OpcUaId_{name}_Encoding_DefaultBinary,
+    OpcUaId_{name}_Encoding_DefaultXml,
+    NULL,
+    sizeof({ctype}),
+    OpcUa_{name}_Initialize,
+    OpcUa_{name}_Clear,
+    NULL,
+    OpcUa_{name}_Encode,
+    OpcUa_{name}_Decode
+}};
+#endif
+"""
+
+# TODO make it const
+TYPE_TABLE_START = """
+/*============================================================================
+ * Table of known types.
+ *===========================================================================*/
+static SOPC_EncodeableType* g_KnownEncodeableTypes[\
+SOPC_TypeInternalIndex_SIZE + 1] = {
+"""[:-1]
+
+TYPE_TABLE_ENTRY = """
+#ifndef OPCUA_EXCLUDE_{name}
+    &OpcUa_{name}_EncodeableType,
+#endif"""
+
+TYPE_TABLE_END = """
+    NULL
+};
+"""
+
+C_FILE_END = """
+SOPC_EncodeableType** SOPC_KnownEncodeableTypes = g_KnownEncodeableTypes;
+
+/* This is the last line of an autogenerated file. */
 """
 
 if __name__ == '__main__':
