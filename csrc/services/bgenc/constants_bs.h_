@@ -21,7 +21,7 @@
 
  File Name            : constants_bs.h
 
- Date                 : 06/02/2019 08:23:38
+ Date                 : 29/03/2019 15:39:18
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -39,6 +39,7 @@
    SETS Clause: deferred sets
   -----------------------------*/
 #define constants_bs__t_Byte t_entier4
+#define constants_bs__t_ContinuationPoint_i t_entier4
 #define constants_bs__t_DataValue_i t_entier4
 #define constants_bs__t_ExpandedNodeId_i t_entier4
 #define constants_bs__t_IndexRange_i t_entier4
@@ -90,6 +91,7 @@
    Added by the Translator
   --------------------------*/
 #define constants_bs__t_Byte_max (-1)
+#define constants_bs__t_ContinuationPoint_i_max (-1)
 #define constants_bs__t_DataValue_i_max (-1)
 #define constants_bs__t_ExpandedNodeId_i_max (-1)
 #define constants_bs__t_IndexRange_i_max (-1)
@@ -142,6 +144,7 @@
   ------------------------------------------------*/
 #define constants_bs__c_ByteString_Type_NodeId 0
 #define constants_bs__c_Byte_Type_NodeId 0
+#define constants_bs__c_ContinuationPoint_indet 0
 #define constants_bs__c_DataValue_indet 0
 #define constants_bs__c_ExpandedNodeId_indet 0
 #define constants_bs__c_IndexRange_indet 0

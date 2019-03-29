@@ -25,6 +25,7 @@ REFINES
 IMPORTS
     io_dispatch_mgr,
     constants,
-    constants_statuscodes_bs
+    constants_statuscodes_bs,
+    browse_treatment
 
 END

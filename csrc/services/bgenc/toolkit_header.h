@@ -21,7 +21,7 @@
 
  File Name            : toolkit_header.h
 
- Date                 : 29/01/2019 12:58:13
+ Date                 : 05/04/2019 08:05:09
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -38,6 +38,7 @@
 /*-----------------
    IMPORTS Clause
   -----------------*/
+#include "browse_treatment.h"
 #include "constants.h"
 #include "constants_statuscodes_bs.h"
 #include "io_dispatch_mgr.h"

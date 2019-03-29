@@ -774,6 +774,15 @@ void util_status_code__B_to_C(constants_statuscodes_bs__t_StatusCode_i bstatus, 
     case constants_statuscodes_bs__e_sc_bad_type_mismatch:
         *status = OpcUa_BadTypeMismatch;
         break;
+    case constants_statuscodes_bs__e_sc_bad_reference_type_id_invalid:
+        *status = OpcUa_BadReferenceTypeIdInvalid;
+        break;
+    case constants_statuscodes_bs__e_sc_bad_continuation_point_invalid:
+        *status = OpcUa_BadContinuationPointInvalid;
+        break;
+    case constants_statuscodes_bs__e_sc_bad_no_continuation_points:
+        *status = OpcUa_BadNoContinuationPoints;
+        break;
     default:
         *status = OpcUa_BadInternalError;
     }
@@ -1004,6 +1013,15 @@ void util_status_code__C_to_B(SOPC_StatusCode status, constants_statuscodes_bs__
         break;
     case OpcUa_BadTypeMismatch:
         *bstatus = constants_statuscodes_bs__e_sc_bad_type_mismatch;
+        break;
+    case OpcUa_BadReferenceTypeIdInvalid:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_reference_type_id_invalid;
+        break;
+    case OpcUa_BadContinuationPointInvalid:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_continuation_point_invalid;
+        break;
+    case OpcUa_BadNoContinuationPoints:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_no_continuation_points;
         break;
     default:
         if ((status & SOPC_GoodStatusOppositeMask) == 0)

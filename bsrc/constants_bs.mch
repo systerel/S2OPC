@@ -69,7 +69,8 @@ SETS
     t_monitoredItemId_i;
     t_client_handle_i;
     t_timer_id_i;
-    t_IndexRange_i
+    t_IndexRange_i;
+    t_ContinuationPoint_i
 
 CONCRETE_CONSTANTS
     k_n_read_resp_max,
@@ -132,7 +133,8 @@ CONCRETE_CONSTANTS
     c_monitoredItemId_indet,
     c_WriteValuePointer_indet,
     c_timer_id_indet,
-    c_IndexRange_indet
+    c_IndexRange_indet,
+    c_ContinuationPoint_indet
 
 ABSTRACT_CONSTANTS
 
@@ -177,7 +179,8 @@ ABSTRACT_CONSTANTS
     t_monitoredItemId,
     t_WriteValuePointer,
     t_timer_id,
-    t_IndexRange
+    t_IndexRange,
+    t_ContinuationPoint
 
 PROPERTIES
     k_n_read_resp_max : NAT &
@@ -370,7 +373,11 @@ PROPERTIES
 
     t_IndexRange <: t_IndexRange_i &
     c_IndexRange_indet : t_IndexRange_i &
-    c_IndexRange_indet /: t_IndexRange_i
+    c_IndexRange_indet /: t_IndexRange_i &
+
+    t_ContinuationPoint <: t_ContinuationPoint_i &
+    c_ContinuationPoint_indet : t_ContinuationPoint_i &
+    c_ContinuationPoint_indet /: t_ContinuationPoint
 
 OPERATIONS
 

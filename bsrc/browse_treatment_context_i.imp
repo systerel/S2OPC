@@ -1,0 +1,120 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+IMPLEMENTATION
+   browse_treatment_context_i
+REFINES
+   browse_treatment_context
+
+SEES
+   constants
+
+CONCRETE_VARIABLES
+    in_startIndex_i,
+    in_session_i,
+    in_maxReferencesPerNode_i,
+    in_BrowseView_i,
+    in_BrowseValue_NodeId_i,
+    in_BrowseValue_BrowseDirection_i,
+    in_BrowseValue_ReferenceTypeId_i,
+    in_BrowseValue_IncludeSubtypes_i,
+    isBrowseValueContextDefined_i
+
+INVARIANT
+    in_startIndex_i : NAT &
+    in_startIndex = in_startIndex_i &
+
+    in_session_i : t_session_i &
+    in_session = in_session_i &
+
+    in_maxReferencesPerNode_i : NAT &
+    in_maxReferencesPerNode = in_maxReferencesPerNode_i &
+
+    in_BrowseView_i : t_NodeId_i &
+    in_BrowseView_i = in_BrowseView &
+
+    in_BrowseValue_NodeId_i : t_NodeId_i &
+    in_BrowseValue_NodeId_i = in_BrowseValue_NodeId &
+
+    in_BrowseValue_BrowseDirection_i : t_BrowseDirection_i &
+    in_BrowseValue_BrowseDirection = in_BrowseValue_BrowseDirection_i &
+
+    in_BrowseValue_ReferenceTypeId_i : t_NodeId_i &
+    in_BrowseValue_ReferenceTypeId_i = in_BrowseValue_ReferenceTypeId &
+
+    in_BrowseValue_IncludeSubtypes_i : BOOL &
+    in_BrowseValue_IncludeSubtypes_i = in_BrowseValue_IncludeSubtypes &
+
+    isBrowseValueContextDefined_i : BOOL &
+    isBrowseValueContextDefined_i = isBrowseValueContextDefined
+
+INITIALISATION
+
+    in_startIndex_i := 0;
+    in_session_i := c_session_indet;
+    in_maxReferencesPerNode_i := 0;
+    in_BrowseView_i := c_NodeId_indet;
+    in_BrowseValue_NodeId_i := c_NodeId_indet;
+    in_BrowseValue_BrowseDirection_i := e_bd_indet;
+    in_BrowseValue_ReferenceTypeId_i := c_NodeId_indet;
+    in_BrowseValue_IncludeSubtypes_i := FALSE;
+    isBrowseValueContextDefined_i := FALSE
+
+OPERATIONS
+   setall_browse_value_context (p_startIndex, p_session, p_maxTargetRef, p_browseView, p_nodeId, p_browseDirection, p_referenceType, p_includeSubtypes) =
+   BEGIN
+        in_startIndex_i := p_startIndex;
+        in_session_i := c_session_indet;
+        in_maxReferencesPerNode_i := p_maxTargetRef;
+        in_BrowseView_i := p_browseView;
+        in_BrowseValue_NodeId_i := p_nodeId;
+        in_BrowseValue_BrowseDirection_i := p_browseDirection;
+        in_BrowseValue_ReferenceTypeId_i := p_referenceType;
+        in_BrowseValue_IncludeSubtypes_i := p_includeSubtypes;
+        isBrowseValueContextDefined_i := TRUE
+   END
+   ;
+
+   p_startIndex , p_session , p_maxTargetRef , p_browseView , p_nodeId , p_browseDirection , p_referenceType , p_includeSubtypes <-- getall_browse_value_context =
+   BEGIN
+        p_startIndex := in_startIndex_i;
+        p_session := in_session_i;
+        p_maxTargetRef := in_maxReferencesPerNode_i;
+        p_browseView := in_BrowseView_i;
+        p_nodeId := in_BrowseValue_NodeId_i;
+        p_browseDirection := in_BrowseValue_BrowseDirection_i;
+        p_referenceType := in_BrowseValue_ReferenceTypeId_i;
+        p_includeSubtypes := in_BrowseValue_IncludeSubtypes_i
+   END
+   ;
+
+   clear_browse_value_context =
+   BEGIN
+       in_startIndex_i := 0;
+        in_session_i := c_session_indet;
+        in_maxReferencesPerNode_i := 0;
+        in_BrowseView_i := c_NodeId_indet;
+        in_BrowseValue_NodeId_i := c_NodeId_indet;
+        in_BrowseValue_BrowseDirection_i := e_bd_indet;
+        in_BrowseValue_ReferenceTypeId_i := c_NodeId_indet;
+        in_BrowseValue_IncludeSubtypes_i := FALSE;
+        isBrowseValueContextDefined_i := FALSE
+   END
+
+END

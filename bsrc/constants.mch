@@ -281,7 +281,9 @@ SETS
     /* User authorization operation type, see SOPC_UserAuthorization_Manager */
     t_operation_type_i = {c_operation_type_indet,
                           e_operation_type_read,
-                          e_operation_type_write}
+                          e_operation_type_write};
+
+    t_ContinuationPoint_i
 
 CONCRETE_CONSTANTS
     /*AddS,*/
@@ -355,6 +357,7 @@ CONCRETE_CONSTANTS
     c_ValueRank_Scalar,
     c_ValueRank_Any,
     c_ValueRank_ScalarOrOneDimension,
+    c_ContinuationPoint_indet,
 
     t_counter,
     t_ValueRank,
@@ -443,6 +446,7 @@ ABSTRACT_CONSTANTS
     t_operation_type,
     t_registerNodesReqIndex,
     t_unregisterNodesReqIndex,
+    t_ContinuationPoint,
 
     s_session_treatment_reqs,
     s_session_treatment_resps,
@@ -714,6 +718,10 @@ PROPERTIES
     t_IndexRange <: t_IndexRange_i &
     c_IndexRange_indet : t_IndexRange_i &
     c_IndexRange_indet /: t_IndexRange &
+
+    t_ContinuationPoint <: t_ContinuationPoint_i &
+    c_ContinuationPoint_indet : t_ContinuationPoint_i &
+    c_ContinuationPoint_indet /: t_ContinuationPoint &
 
     t_buffer_in_state = { e_buffer_in_msg_not_read,
         e_buffer_in_msg_type_read,
