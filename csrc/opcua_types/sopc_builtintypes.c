@@ -4939,3 +4939,187 @@ int32_t SOPC_Variant_Get_ValueRank(SOPC_Variant* var)
         return -3;
     }
 }
+
+const SOPC_BuiltInType_Handling SOPC_BuiltInType_HandlingTable[SOPC_BUILTINID_MAX + 1] = {
+    {
+        0,                   // size
+        NULL,                // initialize
+        SOPC_Null_ClearAux,  // clear
+        SOPC_Null_CopyAux,   // copy
+        SOPC_Null_CompareAux // compare
+    },
+    {
+        sizeof(SOPC_Boolean),       // size
+        SOPC_Boolean_InitializeAux, // initialize
+        SOPC_Boolean_ClearAux,      // clear
+        SOPC_Boolean_CopyAux,       // copy
+        SOPC_Boolean_CompareAux     // compare
+    },
+    {
+        sizeof(SOPC_SByte),       // size
+        SOPC_SByte_InitializeAux, // initialize
+        SOPC_SByte_ClearAux,      // clear
+        SOPC_SByte_CopyAux,       // copy
+        SOPC_SByte_CompareAux     // compare
+    },
+    {
+        sizeof(SOPC_Byte),       // size
+        SOPC_Byte_InitializeAux, // initialize
+        SOPC_Byte_ClearAux,      // clear
+        SOPC_Byte_CopyAux,       // copy
+        SOPC_Byte_CompareAux     // compare
+    },
+    {
+        sizeof(int16_t),          // size
+        SOPC_Int16_InitializeAux, // initialize
+        SOPC_Int16_ClearAux,      // clear
+        SOPC_Int16_CopyAux,       // copy
+        SOPC_Int16_CompareAux     // compare
+    },
+    {
+        sizeof(uint16_t),          // size
+        SOPC_UInt16_InitializeAux, // initialize
+        SOPC_UInt16_ClearAux,      // clear
+        SOPC_UInt16_CopyAux,       // copy
+        SOPC_UInt16_CompareAux     // compare
+    },
+    {
+        sizeof(int32_t),          // size
+        SOPC_Int32_InitializeAux, // initialize
+        SOPC_Int32_ClearAux,      // clear
+        SOPC_Int32_CopyAux,       // copy
+        SOPC_Int32_CompareAux     // compare
+    },
+    {
+        sizeof(uint32_t),          // size
+        SOPC_UInt32_InitializeAux, // initialize
+        SOPC_UInt32_ClearAux,      // clear
+        SOPC_UInt32_CopyAux,       // copy
+        SOPC_UInt32_CompareAux     // compare
+    },
+    {
+        sizeof(int64_t),          // size
+        SOPC_Int64_InitializeAux, // initialize
+        SOPC_Int64_ClearAux,      // clear
+        SOPC_Int64_CopyAux,       // copy
+        SOPC_Int64_CompareAux     // compare
+    },
+    {
+        sizeof(uint64_t),          // size
+        SOPC_UInt64_InitializeAux, // initialize
+        SOPC_UInt64_ClearAux,      // clear
+        SOPC_UInt64_CopyAux,       // copy
+        SOPC_UInt64_CompareAux     // compare
+    },
+    {
+        sizeof(float),            // size
+        SOPC_Float_InitializeAux, // initialize
+        SOPC_Float_ClearAux,      // clear
+        SOPC_Float_CopyAux,       // copy
+        SOPC_Float_CompareAux     // compare
+    },
+    {
+        sizeof(double),            // size
+        SOPC_Double_InitializeAux, // initialize
+        SOPC_Double_ClearAux,      // clear
+        SOPC_Double_CopyAux,       // copy
+        SOPC_Double_CompareAux     // compare
+    },
+    {
+        sizeof(SOPC_String),       // size
+        SOPC_String_InitializeAux, // initialize
+        SOPC_String_ClearAux,      // clear
+        SOPC_String_CopyAux,       // copy
+        SOPC_String_CompareAux     // compare
+    },
+    {
+        sizeof(SOPC_DateTime),       // size
+        SOPC_DateTime_InitializeAux, // initialize
+        SOPC_DateTime_ClearAux,      // clear
+        SOPC_DateTime_CopyAux,       // copy
+        SOPC_DateTime_CompareAux     // compare
+    },
+    {
+        sizeof(SOPC_Guid),       // size
+        SOPC_Guid_InitializeAux, // initialize
+        SOPC_Guid_ClearAux,      // clear
+        SOPC_Guid_CopyAux,       // copy
+        SOPC_Guid_CompareAux     // compare
+    },
+    {
+        sizeof(SOPC_ByteString),       // size
+        SOPC_ByteString_InitializeAux, // initialize
+        SOPC_ByteString_ClearAux,      // clear
+        SOPC_ByteString_CopyAux,       // copy
+        SOPC_ByteString_CompareAux     // compare
+    },
+    {
+        sizeof(SOPC_XmlElement),       // size
+        SOPC_XmlElement_InitializeAux, // initialize
+        SOPC_XmlElement_ClearAux,      // clear
+        SOPC_XmlElement_CopyAux,       // copy
+        SOPC_XmlElement_CompareAux     // compare
+    },
+    {
+        sizeof(SOPC_NodeId),       // size
+        SOPC_NodeId_InitializeAux, // initialize
+        SOPC_NodeId_ClearAux,      // clear
+        SOPC_NodeId_CopyAux,       // copy
+        SOPC_NodeId_CompareAux     // compare
+    },
+    {
+        sizeof(SOPC_ExpandedNodeId),       // size
+        SOPC_ExpandedNodeId_InitializeAux, // initialize
+        SOPC_ExpandedNodeId_ClearAux,      // clear
+        SOPC_ExpandedNodeId_CopyAux,       // copy
+        SOPC_ExpandedNodeId_CompareAux     // compare
+    },
+    {
+        sizeof(SOPC_StatusCode),       // size
+        SOPC_StatusCode_InitializeAux, // initialize
+        SOPC_StatusCode_ClearAux,      // clear
+        SOPC_StatusCode_CopyAux,       // copy
+        SOPC_StatusCode_CompareAux     // compare
+    },
+    {
+        sizeof(SOPC_QualifiedName),       // size
+        SOPC_QualifiedName_InitializeAux, // initialize
+        SOPC_QualifiedName_ClearAux,      // clear
+        SOPC_QualifiedName_CopyAux,       // copy
+        SOPC_QualifiedName_CompareAux     // compare
+    },
+    {
+        sizeof(SOPC_LocalizedText),       // size
+        SOPC_LocalizedText_InitializeAux, // initialize
+        SOPC_LocalizedText_ClearAux,      // clear
+        SOPC_LocalizedText_CopyAux,       // copy
+        SOPC_LocalizedText_CompareAux     // compare
+    },
+    {
+        sizeof(SOPC_ExtensionObject),       // size
+        SOPC_ExtensionObject_InitializeAux, // initialize
+        SOPC_ExtensionObject_ClearAux,      // clear
+        SOPC_ExtensionObject_CopyAux,       // copy
+        SOPC_ExtensionObject_CompareAux     // compare
+    },
+    {
+        sizeof(SOPC_DataValue),       // size
+        SOPC_DataValue_InitializeAux, // initialize
+        SOPC_DataValue_ClearAux,      // clear
+        SOPC_DataValue_CopyAux,       // copy
+        SOPC_DataValue_CompareAux     // compare
+    },
+    {
+        sizeof(SOPC_Variant),       // size
+        SOPC_Variant_InitializeAux, // initialize
+        SOPC_Variant_ClearAux,      // clear
+        SOPC_Variant_CopyAux,       // copy
+        SOPC_Variant_CompareAux     // compare
+    },
+    {
+        sizeof(SOPC_DiagnosticInfo),       // size
+        SOPC_DiagnosticInfo_InitializeAux, // initialize
+        SOPC_DiagnosticInfo_ClearAux,      // clear
+        SOPC_DiagnosticInfo_CopyAux,       // copy
+        SOPC_DiagnosticInfo_CompareAux     // compare
+    }};

@@ -3099,3 +3099,31 @@ SOPC_ReturnStatus SOPC_DecodeMsg_HeaderOrBody(SOPC_Buffer* buffer,
     }
     return status;
 }
+
+const SOPC_BuiltInType_Encoding SOPC_BuiltInType_EncodingTable[SOPC_BUILTINID_MAX + 1] = {
+    {NULL, NULL},
+    {SOPC_Boolean_WriteAux, SOPC_Boolean_ReadAux},
+    {SOPC_SByte_WriteAux, SOPC_SByte_ReadAux},
+    {SOPC_Byte_WriteAux, SOPC_Byte_ReadAux},
+    {SOPC_Int16_WriteAux, SOPC_Int16_ReadAux},
+    {SOPC_UInt16_WriteAux, SOPC_UInt16_ReadAux},
+    {SOPC_Int32_WriteAux, SOPC_Int32_ReadAux},
+    {SOPC_UInt32_WriteAux, SOPC_UInt32_ReadAux},
+    {SOPC_Int64_WriteAux, SOPC_Int64_ReadAux},
+    {SOPC_UInt64_WriteAux, SOPC_UInt64_ReadAux},
+    {SOPC_Float_WriteAux, SOPC_Float_ReadAux},
+    {SOPC_Double_WriteAux, SOPC_Double_ReadAux},
+    {SOPC_String_WriteAux, SOPC_String_ReadAux},
+    {SOPC_DateTime_WriteAux, SOPC_DateTime_ReadAux},
+    {SOPC_Guid_WriteAux, SOPC_Guid_ReadAux},
+    {SOPC_ByteString_WriteAux, SOPC_ByteString_ReadAux},
+    {SOPC_XmlElement_WriteAux, SOPC_XmlElement_ReadAux},
+    {SOPC_NodeId_WriteAux, SOPC_NodeId_ReadAux},
+    {SOPC_ExpandedNodeId_WriteAux, SOPC_ExpandedNodeId_ReadAux},
+    {SOPC_StatusCode_WriteAux, SOPC_StatusCode_ReadAux},
+    {SOPC_QualifiedName_WriteAux, SOPC_QualifiedName_ReadAux},
+    {SOPC_LocalizedText_WriteAux, SOPC_LocalizedText_ReadAux},
+    {SOPC_ExtensionObject_WriteAux, SOPC_ExtensionObject_ReadAux},
+    {SOPC_DataValue_WriteAux, SOPC_DataValue_ReadAux},
+    {SOPC_Variant_WriteAux, SOPC_Variant_ReadAux},
+    {SOPC_DiagnosticInfo_WriteAux, SOPC_DiagnosticInfo_ReadAux}};

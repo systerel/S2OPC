@@ -608,4 +608,26 @@ SOPC_ReturnStatus SOPC_Comp_Array(int32_t noOfElts,
                                   int32_t* comparison);
 void SOPC_Clear_Array(int32_t* noOfElts, void** eltsArray, size_t sizeOfElt, SOPC_EncodeableObject_PfnClear* clearFct);
 
+/**
+ *  \brief Built-in type handling. Provides all the generic service functions
+ *  associated with a built-in type (except encoders and decoders which are
+ *  declared in struct \c SOPC_BuiltInType_Encoders). Also define the
+ *  allocation size of objects of a built-in type.
+ */
+typedef struct SOPC_BuiltInType_Handling
+{
+    size_t size;
+    SOPC_EncodeableObject_PfnInitialize* initialize;
+    SOPC_EncodeableObject_PfnClear* clear;
+    SOPC_EncodeableObject_PfnCopy* copy;
+    SOPC_EncodeableObject_PfnComp* compare;
+} SOPC_BuiltInType_Handling;
+
+/**
+ *  \brief Table of all built-in type handlers. To be indexed with a \c
+ *  SOPC_BuiltinId.  Provides all the generic service functions associated with
+ *  each built-in type.
+ */
+extern const SOPC_BuiltInType_Handling SOPC_BuiltInType_HandlingTable[SOPC_BUILTINID_MAX + 1];
+
 #endif /* SOPC_SOPC_BUILTINTYPES_H_ */

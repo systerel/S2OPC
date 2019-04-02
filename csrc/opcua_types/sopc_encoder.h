@@ -296,4 +296,21 @@ SOPC_ReturnStatus SOPC_DecodeMsg_HeaderOrBody(SOPC_Buffer* buffer,
                                               SOPC_EncodeableType* msgEncType,
                                               void** encodeableObj);
 
+/**
+ *  \brief Generic built-in type encoding. Provides all the generic service
+ *  functions for encoding and decoding a built-in type.
+ */
+typedef struct SOPC_BuiltInType_Encoding
+{
+    SOPC_EncodeableObject_PfnEncode* encode;
+    SOPC_EncodeableObject_PfnDecode* decode;
+} SOPC_BuiltInType_Encoding;
+
+/**
+ *  \brief Table of all built-in type encoding. To be indexed with a \c
+ *  SOPC_BuiltinId.  Provides all the generic encoding and decoding functions
+ *  associated with each built-in type.
+ */
+extern const SOPC_BuiltInType_Encoding SOPC_BuiltInType_EncodingTable[SOPC_BUILTINID_MAX + 1];
+
 #endif /* SOPC_ENCODER_H_ */
