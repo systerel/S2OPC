@@ -3372,88 +3372,9 @@ void SOPC_Null_ClearAux(void* value)
 static SOPC_EncodeableObject_PfnClear* GetBuiltInTypeClearFunction(SOPC_BuiltinId builtInTypeId)
 {
     SOPC_EncodeableObject_PfnClear* clearFunction = NULL;
-    switch (builtInTypeId)
+    if (0 <= builtInTypeId && builtInTypeId <= SOPC_BUILTINID_MAX)
     {
-    case SOPC_Null_Id:
-        clearFunction = SOPC_Null_ClearAux;
-        break;
-    case SOPC_Boolean_Id:
-        clearFunction = SOPC_Boolean_ClearAux;
-        break;
-    case SOPC_SByte_Id:
-        clearFunction = SOPC_SByte_ClearAux;
-        break;
-    case SOPC_Byte_Id:
-        clearFunction = SOPC_Byte_ClearAux;
-        break;
-    case SOPC_Int16_Id:
-        clearFunction = SOPC_Int16_ClearAux;
-        break;
-    case SOPC_UInt16_Id:
-        clearFunction = SOPC_UInt16_ClearAux;
-        break;
-    case SOPC_Int32_Id:
-        clearFunction = SOPC_Int32_ClearAux;
-        break;
-    case SOPC_UInt32_Id:
-        clearFunction = SOPC_UInt32_ClearAux;
-        break;
-    case SOPC_Int64_Id:
-        clearFunction = SOPC_Int64_ClearAux;
-        break;
-    case SOPC_UInt64_Id:
-        clearFunction = SOPC_UInt64_ClearAux;
-        break;
-    case SOPC_Float_Id:
-        clearFunction = SOPC_Float_ClearAux;
-        break;
-    case SOPC_Double_Id:
-        clearFunction = SOPC_Double_ClearAux;
-        break;
-    case SOPC_String_Id:
-        clearFunction = SOPC_String_ClearAux;
-        break;
-    case SOPC_DateTime_Id:
-        clearFunction = SOPC_DateTime_ClearAux;
-        break;
-    case SOPC_Guid_Id:
-        clearFunction = SOPC_Guid_ClearAux;
-        break;
-    case SOPC_ByteString_Id:
-        clearFunction = SOPC_ByteString_ClearAux;
-        break;
-    case SOPC_XmlElement_Id:
-        clearFunction = SOPC_XmlElement_ClearAux;
-        break;
-    case SOPC_NodeId_Id:
-        clearFunction = SOPC_NodeId_ClearAux;
-        break;
-    case SOPC_ExpandedNodeId_Id:
-        clearFunction = SOPC_ExpandedNodeId_ClearAux;
-        break;
-    case SOPC_StatusCode_Id:
-        clearFunction = SOPC_StatusCode_ClearAux;
-        break;
-    case SOPC_QualifiedName_Id:
-        clearFunction = SOPC_QualifiedName_ClearAux;
-        break;
-    case SOPC_LocalizedText_Id:
-        clearFunction = SOPC_LocalizedText_ClearAux;
-        break;
-    case SOPC_ExtensionObject_Id:
-        clearFunction = SOPC_ExtensionObject_ClearAux;
-        break;
-    case SOPC_DataValue_Id:
-        clearFunction = SOPC_DataValue_ClearAux;
-        break;
-    case SOPC_Variant_Id:
-        clearFunction = SOPC_Variant_ClearAux;
-        break;
-    case SOPC_DiagnosticInfo_Id:
-        clearFunction = SOPC_DiagnosticInfo_ClearAux;
-        break;
-    default:
-        break;
+        clearFunction = SOPC_BuiltInType_HandlingTable[builtInTypeId].clear;
     }
     return clearFunction;
 }
@@ -3468,88 +3389,9 @@ SOPC_ReturnStatus SOPC_Null_CopyAux(void* dest, const void* src)
 static SOPC_EncodeableObject_PfnCopy* GetBuiltInTypeCopyFunction(SOPC_BuiltinId builtInTypeId)
 {
     SOPC_EncodeableObject_PfnCopy* copyFunction = NULL;
-    switch (builtInTypeId)
+    if (0 <= builtInTypeId && builtInTypeId <= SOPC_BUILTINID_MAX)
     {
-    case SOPC_Null_Id:
-        copyFunction = SOPC_Null_CopyAux;
-        break;
-    case SOPC_Boolean_Id:
-        copyFunction = SOPC_Boolean_CopyAux;
-        break;
-    case SOPC_SByte_Id:
-        copyFunction = SOPC_SByte_CopyAux;
-        break;
-    case SOPC_Byte_Id:
-        copyFunction = SOPC_Byte_CopyAux;
-        break;
-    case SOPC_Int16_Id:
-        copyFunction = SOPC_Int16_CopyAux;
-        break;
-    case SOPC_UInt16_Id:
-        copyFunction = SOPC_UInt16_CopyAux;
-        break;
-    case SOPC_Int32_Id:
-        copyFunction = SOPC_Int32_CopyAux;
-        break;
-    case SOPC_UInt32_Id:
-        copyFunction = SOPC_UInt32_CopyAux;
-        break;
-    case SOPC_Int64_Id:
-        copyFunction = SOPC_Int64_CopyAux;
-        break;
-    case SOPC_UInt64_Id:
-        copyFunction = SOPC_UInt64_CopyAux;
-        break;
-    case SOPC_Float_Id:
-        copyFunction = SOPC_Float_CopyAux;
-        break;
-    case SOPC_Double_Id:
-        copyFunction = SOPC_Double_CopyAux;
-        break;
-    case SOPC_String_Id:
-        copyFunction = SOPC_String_CopyAux;
-        break;
-    case SOPC_DateTime_Id:
-        copyFunction = SOPC_DateTime_CopyAux;
-        break;
-    case SOPC_Guid_Id:
-        copyFunction = SOPC_Guid_CopyAux;
-        break;
-    case SOPC_ByteString_Id:
-        copyFunction = SOPC_ByteString_CopyAux;
-        break;
-    case SOPC_XmlElement_Id:
-        copyFunction = SOPC_XmlElement_CopyAux;
-        break;
-    case SOPC_NodeId_Id:
-        copyFunction = SOPC_NodeId_CopyAux;
-        break;
-    case SOPC_ExpandedNodeId_Id:
-        copyFunction = SOPC_ExpandedNodeId_CopyAux;
-        break;
-    case SOPC_StatusCode_Id:
-        copyFunction = SOPC_StatusCode_CopyAux;
-        break;
-    case SOPC_QualifiedName_Id:
-        copyFunction = SOPC_QualifiedName_CopyAux;
-        break;
-    case SOPC_LocalizedText_Id:
-        copyFunction = SOPC_LocalizedText_CopyAux;
-        break;
-    case SOPC_ExtensionObject_Id:
-        copyFunction = SOPC_ExtensionObject_CopyAux;
-        break;
-    case SOPC_DataValue_Id:
-        copyFunction = SOPC_DataValue_CopyAux;
-        break;
-    case SOPC_Variant_Id:
-        copyFunction = SOPC_Variant_CopyAux;
-        break;
-    case SOPC_DiagnosticInfo_Id:
-        copyFunction = SOPC_DiagnosticInfo_CopyAux;
-        break;
-    default:
-        break;
+        copyFunction = SOPC_BuiltInType_HandlingTable[builtInTypeId].copy;
     }
     return copyFunction;
 }
@@ -3568,88 +3410,9 @@ SOPC_ReturnStatus SOPC_Null_CompareAux(const void* dest, const void* src, int32_
 static SOPC_EncodeableObject_PfnComp* GetBuiltInTypeCompFunction(SOPC_BuiltinId builtInTypeId)
 {
     SOPC_EncodeableObject_PfnComp* compFunction = NULL;
-    switch (builtInTypeId)
+    if (0 <= builtInTypeId && builtInTypeId <= SOPC_BUILTINID_MAX)
     {
-    case SOPC_Null_Id:
-        compFunction = SOPC_Null_CompareAux;
-        break;
-    case SOPC_Boolean_Id:
-        compFunction = SOPC_Boolean_CompareAux;
-        break;
-    case SOPC_SByte_Id:
-        compFunction = SOPC_SByte_CompareAux;
-        break;
-    case SOPC_Byte_Id:
-        compFunction = SOPC_Byte_CompareAux;
-        break;
-    case SOPC_Int16_Id:
-        compFunction = SOPC_Int16_CompareAux;
-        break;
-    case SOPC_UInt16_Id:
-        compFunction = SOPC_UInt16_CompareAux;
-        break;
-    case SOPC_Int32_Id:
-        compFunction = SOPC_Int32_CompareAux;
-        break;
-    case SOPC_UInt32_Id:
-        compFunction = SOPC_UInt32_CompareAux;
-        break;
-    case SOPC_Int64_Id:
-        compFunction = SOPC_Int64_CompareAux;
-        break;
-    case SOPC_UInt64_Id:
-        compFunction = SOPC_UInt64_CompareAux;
-        break;
-    case SOPC_Float_Id:
-        compFunction = SOPC_Float_CompareAux;
-        break;
-    case SOPC_Double_Id:
-        compFunction = SOPC_Double_CompareAux;
-        break;
-    case SOPC_String_Id:
-        compFunction = SOPC_String_CompareAux;
-        break;
-    case SOPC_DateTime_Id:
-        compFunction = SOPC_DateTime_CompareAux;
-        break;
-    case SOPC_Guid_Id:
-        compFunction = SOPC_Guid_CompareAux;
-        break;
-    case SOPC_ByteString_Id:
-        compFunction = SOPC_ByteString_CompareAux;
-        break;
-    case SOPC_XmlElement_Id:
-        compFunction = SOPC_XmlElement_CompareAux;
-        break;
-    case SOPC_NodeId_Id:
-        compFunction = SOPC_NodeId_CompareAux;
-        break;
-    case SOPC_ExpandedNodeId_Id:
-        compFunction = SOPC_ExpandedNodeId_CompareAux;
-        break;
-    case SOPC_StatusCode_Id:
-        compFunction = SOPC_StatusCode_CompareAux;
-        break;
-    case SOPC_QualifiedName_Id:
-        compFunction = SOPC_QualifiedName_CompareAux;
-        break;
-    case SOPC_LocalizedText_Id:
-        compFunction = SOPC_LocalizedText_CompareAux;
-        break;
-    case SOPC_ExtensionObject_Id:
-        compFunction = SOPC_ExtensionObject_CompareAux;
-        break;
-    case SOPC_DataValue_Id:
-        compFunction = SOPC_DataValue_CompareAux;
-        break;
-    case SOPC_Variant_Id:
-        compFunction = SOPC_Variant_CompareAux;
-        break;
-    case SOPC_DiagnosticInfo_Id:
-        compFunction = SOPC_DiagnosticInfo_CompareAux;
-        break;
-    default:
-        break;
+        compFunction = SOPC_BuiltInType_HandlingTable[builtInTypeId].compare;
     }
     return compFunction;
 }
@@ -4560,62 +4323,11 @@ static SOPC_ReturnStatus get_range_bytestring(SOPC_Variant* dst, const SOPC_Stri
     return get_range_string_helper(&dst->Value.Bstring, src, range);
 }
 
-static size_t size_of_builtin_type(SOPC_BuiltinId type_id)
+static size_t size_of_builtin_type(SOPC_BuiltinId builtInTypeId)
 {
-    switch (type_id)
+    if (0 <= builtInTypeId && builtInTypeId <= SOPC_BUILTINID_MAX)
     {
-    case SOPC_Null_Id:
-        return 0;
-    case SOPC_Boolean_Id:
-        return sizeof(SOPC_Boolean);
-    case SOPC_SByte_Id:
-        return sizeof(SOPC_SByte);
-    case SOPC_Byte_Id:
-        return sizeof(SOPC_Byte);
-    case SOPC_Int16_Id:
-        return sizeof(int16_t);
-    case SOPC_UInt16_Id:
-        return sizeof(uint16_t);
-    case SOPC_Int32_Id:
-        return sizeof(int32_t);
-    case SOPC_UInt32_Id:
-        return sizeof(uint32_t);
-    case SOPC_Int64_Id:
-        return sizeof(int64_t);
-    case SOPC_UInt64_Id:
-        return sizeof(uint64_t);
-    case SOPC_Float_Id:
-        return sizeof(float);
-    case SOPC_Double_Id:
-        return sizeof(double);
-    case SOPC_String_Id:
-        return sizeof(SOPC_String);
-    case SOPC_DateTime_Id:
-        return sizeof(SOPC_DateTime);
-    case SOPC_Guid_Id:
-        return sizeof(SOPC_Guid);
-    case SOPC_ByteString_Id:
-        return sizeof(SOPC_ByteString);
-    case SOPC_XmlElement_Id:
-        return sizeof(SOPC_XmlElement);
-    case SOPC_NodeId_Id:
-        return sizeof(SOPC_NodeId);
-    case SOPC_ExpandedNodeId_Id:
-        return sizeof(SOPC_ExpandedNodeId);
-    case SOPC_StatusCode_Id:
-        return sizeof(SOPC_StatusCode);
-    case SOPC_QualifiedName_Id:
-        return sizeof(SOPC_QualifiedName);
-    case SOPC_LocalizedText_Id:
-        return sizeof(SOPC_LocalizedText);
-    case SOPC_ExtensionObject_Id:
-        return sizeof(SOPC_ExtensionObject);
-    case SOPC_DataValue_Id:
-        return sizeof(SOPC_DataValue);
-    case SOPC_Variant_Id:
-        return sizeof(SOPC_Variant);
-    case SOPC_DiagnosticInfo_Id:
-        return sizeof(SOPC_DiagnosticInfo);
+        return SOPC_BuiltInType_HandlingTable[builtInTypeId].size;
     }
 
     assert(false);
