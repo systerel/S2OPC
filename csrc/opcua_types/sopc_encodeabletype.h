@@ -58,6 +58,34 @@ typedef SOPC_ReturnStatus(SOPC_EncodeableObject_PfnEncode)(const void* value, SO
  */
 typedef SOPC_ReturnStatus(SOPC_EncodeableObject_PfnDecode)(void* value, SOPC_Buffer* msgBuffer);
 
+/*
+ * \brief Description of an encodeable type field.
+ *
+ * This structure has been designed to be very compact and fit into 8 bytes.
+ * The \c isBuiltIn field indicates whether the field type is built-in or
+ * defined in the address space.  In the first case, the type index is a member
+ * of the \c SOPC_BuiltinId enumeration.  In the second case, it is a member of
+ * the \c SOPC_TypeInternalIndex enumeration.
+ *
+ * The \c isArrayLength field indicates whether this field contains the length
+ * of an array.  When true, the field must be of built-in type \c Int32, and the
+ * array is described by the next field.
+ *
+ * The \c isToEncode field indicates whether this field shall be encoded and
+ * decoded.  When false, the field is only initialized and cleared.
+ *
+ * Finally, the \c offset field gives the offset in bytes of the field in the
+ * object structure.
+ */
+typedef struct SOPC_EncodeableType_FieldDescriptor
+{
+    bool isBuiltIn : 1;
+    bool isArrayLength : 1;
+    bool isToEncode : 1;
+    uint32_t typeIndex : 29;
+    uint32_t offset;
+} SOPC_EncodeableType_FieldDescriptor;
+
 /**
  *  \brief Encodeable object type structure definition. It provides all the services
  *  functions associated with the encodeable object for encoding needs.
@@ -75,6 +103,8 @@ typedef struct SOPC_EncodeableType
     SOPC_EncodeableObject_PfnGetSize* GetSize;
     SOPC_EncodeableObject_PfnEncode* Encode;
     SOPC_EncodeableObject_PfnDecode* Decode;
+    int32_t NoOfFields;
+    const SOPC_EncodeableType_FieldDescriptor* Fields;
 } SOPC_EncodeableType;
 
 /**

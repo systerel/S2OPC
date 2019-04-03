@@ -822,7 +822,9 @@ SOPC_EncodeableType OpcUa_{name}_EncodeableType =
     OpcUa_{name}_Clear,
     NULL,
     OpcUa_{name}_Encode,
-    OpcUa_{name}_Decode
+    OpcUa_{name}_Decode,
+    0,
+    NULL
 }};
 #endif
 """
