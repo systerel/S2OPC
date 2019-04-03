@@ -21,7 +21,7 @@
 
  File Name            : toolkit_header_init.c
 
- Date                 : 07/02/2019 16:21:33
+ Date                 : 03/04/2019 09:37:51
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -90,6 +90,7 @@
 #include "service_read_it.h"
 #include "service_register_nodes.h"
 #include "service_response_cb_bs.h"
+#include "service_translate_browse_paths_bs.h"
 #include "service_unregister_nodes.h"
 #include "service_write_decode_bs.h"
 #include "session_core.h"
@@ -193,6 +194,7 @@ void INITIALISATION(void) {
    msg_unregister_nodes__INITIALISATION();
    unregister_nodes_it__INITIALISATION();
    service_unregister_nodes__INITIALISATION();
+   service_translate_browse_paths_bs__INITIALISATION();
    service_mgr__INITIALISATION();
    io_dispatch_mgr__INITIALISATION();
    toolkit_header__INITIALISATION();

@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 13/03/2019 17:57:18
+ Date                 : 03/04/2019 09:37:28
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -376,6 +376,11 @@ void service_mgr__treat_session_service_req(
          break;
       case constants__e_msg_view_unregister_nodes_req:
          service_unregister_nodes__treat_unregister_nodes_request(service_mgr__req_msg,
+            service_mgr__StatusCode_service);
+         break;
+      case constants__e_msg_view_translate_browse_paths_to_node_ids_req:
+         service_translate_browse_paths_bs__treat_translate_browse_path_request(service_mgr__req_msg,
+            service_mgr__resp_msg,
             service_mgr__StatusCode_service);
          break;
       default:

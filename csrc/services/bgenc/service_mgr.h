@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.h
 
- Date                 : 07/02/2019 16:21:08
+ Date                 : 03/04/2019 09:37:28
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -49,6 +49,7 @@
 #include "service_read.h"
 #include "service_register_nodes.h"
 #include "service_response_cb_bs.h"
+#include "service_translate_browse_paths_bs.h"
 #include "service_unregister_nodes.h"
 #include "service_write_decode_bs.h"
 #include "session_mgr.h"
