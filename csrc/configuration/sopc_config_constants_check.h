@@ -115,4 +115,9 @@
 #error "SIZE_MAX < UINT32_MAX whereas uint32_t are casted to size_t values"
 #endif
 
+/* Check that the message buffer is large enough to hold the minimal TCP UA chunk */
+#if SOPC_MAX_MESSAGE_LENGTH < SOPC_TCP_UA_MIN_BUFFER_SIZE
+#error "SOPC_MAX_MESSAGE_LENGTH is not large enough, must be >= SOPC_TCP_UA_MIN_BUFFER_SIZE"
+#endif
+
 #endif

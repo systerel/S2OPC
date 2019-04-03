@@ -30,7 +30,7 @@
 
 /* COMMON CONFIGURATION */
 
-/** @brief Maximum Message Length used (must be > SOPC_TCP_UA_MIN_BUFFER_SIZE) */
+/** @brief Maximum Message Length used (must be >= SOPC_TCP_UA_MIN_BUFFER_SIZE) */
 #ifndef SOPC_MAX_MESSAGE_LENGTH
 #define SOPC_MAX_MESSAGE_LENGTH UINT16_MAX
 #endif /* SOPC_MAX_MESSAGE_LENGTH */

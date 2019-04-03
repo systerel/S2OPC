@@ -72,7 +72,6 @@ bool SC_InitNewConnection(uint32_t* newConnectionIdx)
 
         // Initialize TCP message properties
         scConnection->tcpMsgProperties.protocolVersion = SOPC_PROTOCOL_VERSION;
-        assert(SOPC_MAX_MESSAGE_LENGTH > SOPC_TCP_UA_MIN_BUFFER_SIZE);
         scConnection->tcpMsgProperties.receiveBufferSize = SOPC_MAX_MESSAGE_LENGTH;
         scConnection->tcpMsgProperties.sendBufferSize = SOPC_MAX_MESSAGE_LENGTH;
         // TODO: reduce size since it includes only the body and not the headers/signature ?
@@ -724,7 +723,7 @@ static bool SC_ClientTransition_TcpNegotiate_To_ScInit(SOPC_SecureConnection* sc
             if (scConnection->tcpMsgProperties.sendBufferSize > tempValue)
             {
                 if (tempValue >= SOPC_TCP_UA_MIN_BUFFER_SIZE)
-                { // see mantis #3447 for >= instead of >
+                {
                     scConnection->tcpMsgProperties.sendBufferSize = tempValue;
                 }
                 else
@@ -751,7 +750,7 @@ static bool SC_ClientTransition_TcpNegotiate_To_ScInit(SOPC_SecureConnection* sc
             if (scConnection->tcpMsgProperties.receiveBufferSize > tempValue)
             {
                 if (tempValue >= SOPC_TCP_UA_MIN_BUFFER_SIZE)
-                { // see mantis #3447 for >= instead of >
+                {
                     scConnection->tcpMsgProperties.receiveBufferSize = tempValue;
                 }
                 else
@@ -1232,7 +1231,7 @@ static bool SC_ServerTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
             if (scConnection->tcpMsgProperties.sendBufferSize > tempValue)
             {
                 if (tempValue >= SOPC_TCP_UA_MIN_BUFFER_SIZE)
-                { // see mantis #3447 for >= instead of >
+                {
                     scConnection->tcpMsgProperties.sendBufferSize = tempValue;
                 }
                 else
@@ -1260,7 +1259,7 @@ static bool SC_ServerTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
             if (scConnection->tcpMsgProperties.receiveBufferSize > tempValue)
             {
                 if (tempValue >= SOPC_TCP_UA_MIN_BUFFER_SIZE)
-                { // see mantis #3447 for >= instead of >
+                {
                     scConnection->tcpMsgProperties.receiveBufferSize = tempValue;
                 }
                 else
