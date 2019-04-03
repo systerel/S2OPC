@@ -304,7 +304,7 @@ class PyS2OPC:
         pConId = ffi.new('SOPC_LibSub_DataId *')
         status = libsub.SOPC_LibSub_Connect(cfgId, pConId)
         if status != ReturnStatus.OK:
-            raise ConnectionError('Could not connect to the server with the given configuration.')
+            raise ConnectionError('Could not connect to the server with the given configuration with status {}.'.format(ReturnStatus.get_name_from_id(status)))
 
         connectionId = pConId[0]
         assert connectionId not in PyS2OPC._dConnections,\

@@ -59,22 +59,6 @@ class Request:
         return self._requestContext
 
 
-class ReturnStatus:
-    """
-    The operation return statuses. These are accessors to the SOPC_ReturnStatus C enum.
-    """
-    OK                 = libsub.SOPC_STATUS_OK
-    NOK                = libsub.SOPC_STATUS_NOK
-    INVALID_PARAMETERS = libsub.SOPC_STATUS_INVALID_PARAMETERS
-    INVALID_STATE      = libsub.SOPC_STATUS_INVALID_STATE
-    ENCODING_ERROR     = libsub.SOPC_STATUS_ENCODING_ERROR
-    WOULD_BLOCK        = libsub.SOPC_STATUS_WOULD_BLOCK
-    TIMEOUT            = libsub.SOPC_STATUS_TIMEOUT
-    OUT_OF_MEMORY      = libsub.SOPC_STATUS_OUT_OF_MEMORY
-    CLOSED             = libsub.SOPC_STATUS_CLOSED
-    NOT_SUPPORTED      = libsub.SOPC_STATUS_NOT_SUPPORTED
-
-
 class NamedMembers:
     """
     This class has the class function :func:`get_name_from_id` which takes an id of a member of the class
@@ -90,6 +74,22 @@ class NamedMembers:
         if cls._dCodeNames is None:
             cls._dCodeNames = {getattr(cls, name): name for name in dir(cls) if not name.startswith('get_') and not name.startswith('_')}
         return cls._dCodeNames[memberId]
+
+
+class ReturnStatus(NamedMembers):
+    """
+    The operation return statuses. These are accessors to the SOPC_ReturnStatus C enum.
+    """
+    OK                 = libsub.SOPC_STATUS_OK
+    NOK                = libsub.SOPC_STATUS_NOK
+    INVALID_PARAMETERS = libsub.SOPC_STATUS_INVALID_PARAMETERS
+    INVALID_STATE      = libsub.SOPC_STATUS_INVALID_STATE
+    ENCODING_ERROR     = libsub.SOPC_STATUS_ENCODING_ERROR
+    WOULD_BLOCK        = libsub.SOPC_STATUS_WOULD_BLOCK
+    TIMEOUT            = libsub.SOPC_STATUS_TIMEOUT
+    OUT_OF_MEMORY      = libsub.SOPC_STATUS_OUT_OF_MEMORY
+    CLOSED             = libsub.SOPC_STATUS_CLOSED
+    NOT_SUPPORTED      = libsub.SOPC_STATUS_NOT_SUPPORTED
 
 
 class StatusCode(NamedMembers):
