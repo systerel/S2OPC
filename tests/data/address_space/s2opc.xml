@@ -47,6 +47,22 @@
     <Description>Describes a value that can have any valid DataType.</Description>
     <References>
       <Reference ReferenceType="Organizes" IsForward="false">i=86</Reference>
+      <Reference ReferenceType="HasSubtype">i=26</Reference>
+      <Reference ReferenceType="HasSubtype">i=29</Reference>
+      <Reference ReferenceType="HasSubtype">i=1</Reference>
+      <Reference ReferenceType="HasSubtype">i=12</Reference>
+      <Reference ReferenceType="HasSubtype">i=13</Reference>
+      <Reference ReferenceType="HasSubtype">i=14</Reference>
+      <Reference ReferenceType="HasSubtype">i=15</Reference>
+      <Reference ReferenceType="HasSubtype">i=16</Reference>
+      <Reference ReferenceType="HasSubtype">i=17</Reference>
+      <Reference ReferenceType="HasSubtype">i=18</Reference>
+      <Reference ReferenceType="HasSubtype">i=19</Reference>
+      <Reference ReferenceType="HasSubtype">i=20</Reference>
+      <Reference ReferenceType="HasSubtype">i=21</Reference>
+      <Reference ReferenceType="HasSubtype">i=22</Reference>
+      <Reference ReferenceType="HasSubtype">i=23</Reference>
+      <Reference ReferenceType="HasSubtype">i=25</Reference>
     </References>
   </UADataType>
   <UADataType NodeId="i=26" BrowseName="Number" IsAbstract="true">
@@ -54,6 +70,10 @@
     <Description>Describes a value that can have any numeric DataType.</Description>
     <References>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=24</Reference>
+      <Reference ReferenceType="HasSubtype">i=27</Reference>
+      <Reference ReferenceType="HasSubtype">i=28</Reference>
+      <Reference ReferenceType="HasSubtype">i=10</Reference>
+      <Reference ReferenceType="HasSubtype">i=11</Reference>
     </References>
   </UADataType>
   <UADataType NodeId="i=27" BrowseName="Integer" IsAbstract="true">
@@ -61,6 +81,10 @@
     <Description>Describes a value that can have any integer DataType.</Description>
     <References>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=26</Reference>
+      <Reference ReferenceType="HasSubtype">i=2</Reference>      
+      <Reference ReferenceType="HasSubtype">i=4</Reference>    
+      <Reference ReferenceType="HasSubtype">i=6</Reference>     
+      <Reference ReferenceType="HasSubtype">i=8</Reference>
     </References>
   </UADataType>
   <UADataType NodeId="i=28" BrowseName="UInteger" IsAbstract="true">
@@ -68,6 +92,10 @@
     <Description>Describes a value that can have any unsigned integer DataType.</Description>
     <References>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=26</Reference>
+      <Reference ReferenceType="HasSubtype">i=3</Reference>
+      <Reference ReferenceType="HasSubtype">i=5</Reference>
+      <Reference ReferenceType="HasSubtype">i=7</Reference>
+      <Reference ReferenceType="HasSubtype">i=9</Reference>
     </References>
   </UADataType>
   <UADataType NodeId="i=29" BrowseName="Enumeration" IsAbstract="true">
@@ -159,6 +187,7 @@
     <Description>Describes a value that is a sequence of printable Unicode characters.</Description>
     <References>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=24</Reference>
+      <Reference ReferenceType="HasSubtype">i=295</Reference>
     </References>
   </UADataType>
   <UADataType NodeId="i=13" BrowseName="DateTime">
@@ -180,6 +209,7 @@
     <Description>Describes a value that is a sequence of bytes.</Description>
     <References>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=24</Reference>
+      <Reference ReferenceType="HasSubtype">i=30</Reference>
     </References>
   </UADataType>
   <UADataType NodeId="i=16" BrowseName="XmlElement">
@@ -255,13 +285,22 @@
     <UAReferenceType NodeId="i=31" BrowseName="References" IsAbstract="true" Symmetric="true">
     <DisplayName>References</DisplayName>
     <Description>The abstract base type for all references.</Description>
-    <References />
+    <References>
+      <Reference ReferenceType="HasSubtype">i=32</Reference>
+      <Reference ReferenceType="HasSubtype">i=33</Reference>
+    </References>
   </UAReferenceType>
   <UAReferenceType NodeId="i=32" BrowseName="NonHierarchicalReferences" IsAbstract="true">
     <DisplayName>NonHierarchicalReferences</DisplayName>
     <Description>The abstract base type for all non-hierarchical references.</Description>
     <References>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=31</Reference>
+      <Reference ReferenceType="HasSubtype">i=37</Reference>
+      <Reference ReferenceType="HasSubtype">i=38</Reference>
+      <Reference ReferenceType="HasSubtype">i=39</Reference>
+      <Reference ReferenceType="HasSubtype">i=40</Reference>
+      <Reference ReferenceType="HasSubtype">i=41</Reference>
+      <Reference ReferenceType="HasSubtype">i=3065</Reference>
     </References>
     <InverseName>NonHierarchicalReferences</InverseName>
   </UAReferenceType>
@@ -270,6 +309,9 @@
     <Description>The abstract base type for all hierarchical references.</Description>
     <References>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=31</Reference>
+      <Reference ReferenceType="HasSubtype">i=34</Reference>
+      <Reference ReferenceType="HasSubtype">i=35</Reference>
+      <Reference ReferenceType="HasSubtype">i=36</Reference>
     </References>
     <InverseName>HierarchicalReferences</InverseName>
   </UAReferenceType>
@@ -278,6 +320,8 @@
     <Description>The abstract base type for all non-looping hierarchical references.</Description>
     <References>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=33</Reference>
+      <Reference ReferenceType="HasSubtype">i=44</Reference>
+      <Reference ReferenceType="HasSubtype">i=45</Reference>
     </References>
     <InverseName>ChildOf</InverseName>
   </UAReferenceType>
@@ -294,6 +338,7 @@
     <Description>The type for non-looping hierarchical references that are used to organize event sources.</Description>
     <References>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=33</Reference>
+      <Reference ReferenceType="HasSubtype">i=48</Reference>      
     </References>
     <InverseName>EventSourceOf</InverseName>
   </UAReferenceType>
@@ -350,6 +395,9 @@
     <Description>The type for non-looping hierarchical references that are used to aggregate nodes into complex types.</Description>
     <References>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=34</Reference>
+      <Reference ReferenceType="HasSubtype">i=46</Reference>
+      <Reference ReferenceType="HasSubtype">i=47</Reference>
+      <Reference ReferenceType="HasSubtype">i=56</Reference>
     </References>
     <InverseName>AggregatedBy</InverseName>
   </UAReferenceType>
@@ -374,6 +422,7 @@
     <Description>The type for non-looping hierarchical reference from a node to its component.</Description>
     <References>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=44</Reference>
+      <Reference ReferenceType="HasSubtype">i=49</Reference>
     </References>
     <InverseName>ComponentOf</InverseName>
   </UAReferenceType>
@@ -557,33 +606,6 @@
     <References>
       <Reference ReferenceType="Organizes" IsForward="false">i=86</Reference>
       <Reference ReferenceType="Organizes">i=24</Reference>
-      <Reference ReferenceType="Organizes">i=26</Reference>
-      <Reference ReferenceType="Organizes">i=27</Reference>
-      <Reference ReferenceType="Organizes">i=28</Reference>
-      <Reference ReferenceType="Organizes">i=29</Reference>
-      <Reference ReferenceType="Organizes">i=1</Reference>
-      <Reference ReferenceType="Organizes">i=2</Reference>
-      <Reference ReferenceType="Organizes">i=3</Reference>
-      <Reference ReferenceType="Organizes">i=4</Reference>
-      <Reference ReferenceType="Organizes">i=5</Reference>
-      <Reference ReferenceType="Organizes">i=6</Reference>
-      <Reference ReferenceType="Organizes">i=7</Reference>
-      <Reference ReferenceType="Organizes">i=8</Reference>
-      <Reference ReferenceType="Organizes">i=9</Reference>
-      <Reference ReferenceType="Organizes">i=10</Reference>
-      <Reference ReferenceType="Organizes">i=11</Reference>
-      <Reference ReferenceType="Organizes">i=12</Reference>
-      <Reference ReferenceType="Organizes">i=13</Reference>
-      <Reference ReferenceType="Organizes">i=14</Reference>
-      <Reference ReferenceType="Organizes">i=15</Reference>
-      <Reference ReferenceType="Organizes">i=16</Reference>
-      <Reference ReferenceType="Organizes">i=17</Reference>
-      <Reference ReferenceType="Organizes">i=18</Reference>
-      <Reference ReferenceType="Organizes">i=19</Reference>
-      <Reference ReferenceType="Organizes">i=20</Reference>
-      <Reference ReferenceType="Organizes">i=21</Reference>
-      <Reference ReferenceType="Organizes">i=22</Reference>
-      <Reference ReferenceType="Organizes">i=23</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
     </References>
   </UAObject>
