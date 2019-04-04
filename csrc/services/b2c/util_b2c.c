@@ -708,6 +708,9 @@ void util_status_code__B_to_C(constants_statuscodes_bs__t_StatusCode_i bstatus, 
     case constants_statuscodes_bs__e_sc_bad_browse_direction_invalid:
         *status = OpcUa_BadBrowseDirectionInvalid;
         break;
+    case constants_statuscodes_bs__e_sc_bad_browse_name_invalid:
+        *status = OpcUa_BadBrowseNameInvalid;
+        break;
     case constants_statuscodes_bs__e_sc_bad_service_unsupported:
         *status = OpcUa_BadServiceUnsupported;
         break;
@@ -782,6 +785,15 @@ void util_status_code__B_to_C(constants_statuscodes_bs__t_StatusCode_i bstatus, 
         break;
     case constants_statuscodes_bs__e_sc_bad_no_continuation_points:
         *status = OpcUa_BadNoContinuationPoints;
+        break;
+    case constants_statuscodes_bs__e_sc_bad_query_too_complex:
+        *status = OpcUa_BadQueryTooComplex;
+        break;
+    case constants_statuscodes_bs__e_sc_bad_no_match:
+        *status = OpcUa_BadNoMatch;
+        break;
+    case constants_statuscodes_bs__e_sc_uncertain_reference_out_of_server:
+        *status = OpcUa_UncertainReferenceOutOfServer;
         break;
     default:
         *status = OpcUa_BadInternalError;
@@ -948,6 +960,9 @@ void util_status_code__C_to_B(SOPC_StatusCode status, constants_statuscodes_bs__
     case OpcUa_BadBrowseDirectionInvalid:
         *bstatus = constants_statuscodes_bs__e_sc_bad_browse_direction_invalid;
         break;
+    case OpcUa_BadBrowseNameInvalid:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_browse_name_invalid;
+        break;
     case OpcUa_BadServiceUnsupported:
         *bstatus = constants_statuscodes_bs__e_sc_bad_service_unsupported;
         break;
@@ -1023,6 +1038,16 @@ void util_status_code__C_to_B(SOPC_StatusCode status, constants_statuscodes_bs__
     case OpcUa_BadNoContinuationPoints:
         *bstatus = constants_statuscodes_bs__e_sc_bad_no_continuation_points;
         break;
+    case OpcUa_BadQueryTooComplex:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_query_too_complex;
+        break;
+    case OpcUa_BadNoMatch:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_no_match;
+        break;
+    case OpcUa_UncertainReferenceOutOfServer:
+        *bstatus = constants_statuscodes_bs__e_sc_uncertain_reference_out_of_server;
+        break;
+
     default:
         if ((status & SOPC_GoodStatusOppositeMask) == 0)
         {

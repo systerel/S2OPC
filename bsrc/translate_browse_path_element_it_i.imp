@@ -1,0 +1,81 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+IMPLEMENTATION
+    translate_browse_path_element_it_i
+
+REFINES
+    translate_browse_path_element_it
+
+SEES
+    constants,
+    msg_translate_browse_path_bs
+
+CONCRETE_VARIABLES
+
+    current_element_index,
+    nb_elements_to_iterate,
+    relativePath
+
+INVARIANT
+    current_element_index : NAT &
+    nb_elements_to_iterate : NAT &
+    relativePath : t_RelativePath_i &
+
+    current_element_index : 0..nb_elements_to_iterate
+
+
+    /*
+    &
+
+    elements_to_iterate = cast_t_RelativePathElt[1..current_element_index] &
+    elements_iterated = cast_t_RelativePathElt[current_element_index+1..nb_elements_to_iterate]
+
+    elements_to_iterate : seq(t_RelativePathElt)  &
+    elements_iterated   : seq(t_RelativePathElt)*/
+
+
+INITIALISATION
+
+    current_element_index := 0;
+    nb_elements_to_iterate := 0;
+    relativePath := c_RelativePath_indet
+
+OPERATIONS
+
+
+    p_continue <-- init_iter_relativePath(p_relativePath) =
+    BEGIN
+        nb_elements_to_iterate <-- read_RelativePath_Nb_RelativePathElt(p_relativePath);
+        current_element_index := 1;
+        relativePath := p_relativePath;
+        p_continue := bool (current_element_index <= nb_elements_to_iterate)
+    END
+    ;
+
+    p_continue, p_relativePathElt, p_index <-- continue_iter_relativePath =
+    BEGIN
+        p_index := current_element_index;
+        p_relativePathElt <-- read_RelativePath_RelativePathElt(relativePath, current_element_index);
+        current_element_index := current_element_index + 1;
+        p_continue := bool (current_element_index <= nb_elements_to_iterate)
+    END
+
+
+END

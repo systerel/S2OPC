@@ -25,9 +25,10 @@ REFINES
 
 IMPORTS
     service_browse_it,
-    browse_treatment,
     msg_browse_bs,
-    msg_browse_next_bs
+    msg_browse_next_bs,
+    translate_browse_path,
+    translate_browse_path_it
 
 SEES
     constants,
@@ -483,6 +484,32 @@ OPERATIONS
     service_set_view_UNINITIALISATION =
     BEGIN
         continuation_points_UNINITIALISATION
+    END
+    ;
+
+    StatusCode_service <-- treat_translate_browse_paths_request (p_req_msg, p_resp_msg) =
+    VAR
+        l_continue,
+        l_browsePath
+    IN
+        StatusCode_service <-- init_translate_browse_paths_request(p_req_msg);
+        IF StatusCode_service = e_sc_ok THEN
+            l_continue <-- init_iter_browsePaths;
+            WHILE l_continue = TRUE
+            DO
+                l_continue, l_browsePath <-- continue_iter_browsePath;
+                treat_one_translate_browse_path(l_browsePath)
+            INVARIANT
+                browsePaths_to_iterate <: t_BrowsePath &
+                browsePaths_iterated   <: t_BrowsePath &
+                browsePaths_to_iterate /\ browsePaths_iterated = {} &
+                l_continue = bool(browsePaths_to_iterate /= {})
+            VARIANT
+                card(browsePaths_iterated)
+            END
+        END
+        ;
+        write_translate_browse_paths_response(p_resp_msg)
     END
 
 END

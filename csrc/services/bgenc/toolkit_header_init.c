@@ -21,7 +21,7 @@
 
  File Name            : toolkit_header_init.c
 
- Date                 : 13/06/2019 14:23:48
+ Date                 : 14/06/2019 07:38:24
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -81,6 +81,7 @@
 #include "msg_subscription_publish_ack_bs.h"
 #include "msg_subscription_publish_bs.h"
 #include "msg_subscription_set_publishing_mode_bs.h"
+#include "msg_translate_browse_path_bs.h"
 #include "msg_unregister_nodes.h"
 #include "msg_unregister_nodes_bs.h"
 #include "node_id_pointer_bs.h"
@@ -118,6 +119,9 @@
 #include "subscription_create_monitored_item_it.h"
 #include "subscription_mgr.h"
 #include "toolkit_header.h"
+#include "translate_browse_path.h"
+#include "translate_browse_path_element_it.h"
+#include "translate_browse_path_it.h"
 #include "unregister_nodes_it.h"
 #include "user_authentication.h"
 #include "user_authentication_bs.h"
@@ -170,6 +174,10 @@ void INITIALISATION(void) {
    service_read__INITIALISATION();
    service_get_endpoints_bs__INITIALISATION();
    service_browse_it__INITIALISATION();
+   msg_browse_bs__INITIALISATION();
+   msg_browse_next_bs__INITIALISATION();
+   msg_translate_browse_path_bs__INITIALISATION();
+   translate_browse_path_element_it__INITIALISATION();
    browse_treatment_context_bs__INITIALISATION();
    node_id_pointer_bs__INITIALISATION();
    browse_treatment_context__INITIALISATION();
@@ -181,8 +189,8 @@ void INITIALISATION(void) {
    browse_treatment_target_it__INITIALISATION();
    browse_treatment_result_it__INITIALISATION();
    browse_treatment__INITIALISATION();
-   msg_browse_bs__INITIALISATION();
-   msg_browse_next_bs__INITIALISATION();
+   translate_browse_path__INITIALISATION();
+   translate_browse_path_it__INITIALISATION();
    service_set_view__INITIALISATION();
    subscription_core_1__INITIALISATION();
    monitored_item_queue_bs__INITIALISATION();

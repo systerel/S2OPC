@@ -87,5 +87,23 @@ OPERATIONS
     BEGIN
         skip
     END
+    ;
+
+
+    StatusCode_service <-- treat_translate_browse_paths_request (p_req_msg, p_resp_msg) =
+    PRE
+        p_req_msg : t_msg_i &
+        p_req_msg : t_msg &
+        p_req_msg = c_msg_in &
+        a_msg_in_type = e_msg_subscription_create_req &
+        p_resp_msg : t_msg_i &
+        p_resp_msg : t_msg &
+        p_resp_msg = c_msg_out
+    THEN
+        StatusCode_service
+        :(  StatusCode_service : t_StatusCode_i &
+            StatusCode_service : t_StatusCode
+        )
+    END
 
 END

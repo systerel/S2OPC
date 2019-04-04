@@ -128,22 +128,40 @@ DEFINITIONS
             out_BrowseResult_TypeDefinition    = {}                         &
             out_BrowseResultReferences         = c_BrowseResultReferences_indet &
             isBrowseResultComputed             = FALSE
-         )
+        );
+
+    d_variables_it ==
+    browseResult_to_iterate,
+    browseResult_iterated,
+    nb_browseResult_max_refs
+    ;
+
+    d_inv_it ==
+    (
+    nb_browseResult_max_refs : NAT &
+    browseResult_to_iterate <: NAT &
+    browseResult_iterated   <: NAT &
+    browseResult_to_iterate /\ browseResult_iterated = {} &
+    nb_browseResult_max_refs = card(browseResult_to_iterate \/ browseResult_iterated)
+    )
 
 ABSTRACT_VARIABLES
     d_variables_in,
     d_variables_persist,
-    d_variables_out
+    d_variables_out,
+    d_variables_it
 
 INVARIANT
     d_inv_in &
     d_inv_persist &
-    d_inv_out
+    d_inv_out &
+    d_inv_it
 
 INITIALISATION
     d_init_in ||
     d_init_persist ||
-    d_init_out
+    d_init_out ||
+    d_variables_it :( d_inv_it )
 
 OPERATIONS
 
@@ -369,5 +387,31 @@ OPERATIONS
         d_init_in ||
         d_init_out
     END
+    ;
 
+    p_continue <-- init_iter_browseResult(p_nb_browseResult_max_refs) =
+    PRE
+        p_nb_browseResult_max_refs : NAT
+    THEN
+        browseResult_iterated    := {}        ||
+        browseResult_to_iterate  := 1..p_nb_browseResult_max_refs ||
+        nb_browseResult_max_refs := p_nb_browseResult_max_refs ||
+        p_continue               := bool(p_nb_browseResult_max_refs > 0)
+    END
+    ;
+
+    p_continue, p_browseResultIdx <-- continue_iter_browseResult =
+    PRE
+        browseResult_to_iterate /= {}
+    THEN
+        ANY l_browseResult WHERE
+            l_browseResult : NAT &
+            l_browseResult : browseResult_to_iterate
+        THEN
+            browseResult_iterated   := browseResult_iterated   \/ {l_browseResult} ||
+            browseResult_to_iterate := browseResult_to_iterate -  {l_browseResult} ||
+            p_browseResultIdx        := l_browseResult                               ||
+            p_continue               := bool(browseResult_to_iterate /= {l_browseResult})
+        END
+    END
 END

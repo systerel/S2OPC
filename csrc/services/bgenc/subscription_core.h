@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.h
 
- Date                 : 06/02/2019 17:15:34
+ Date                 : 19/04/2019 16:19:42
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 

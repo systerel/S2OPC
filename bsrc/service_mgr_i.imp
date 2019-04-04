@@ -477,6 +477,8 @@ OPERATIONS
                 StatusCode_service <-- treat_browse_request(session, req_msg, resp_msg)
             OR e_msg_view_browse_next_req THEN
                 StatusCode_service <-- treat_browse_next_request(session, req_msg, resp_msg)
+            OR e_msg_view_translate_browse_paths_to_node_ids_req THEN
+                StatusCode_service <-- treat_translate_browse_paths_request(req_msg, resp_msg)
             OR e_msg_subscription_create_req THEN
                 StatusCode_service <-- treat_create_subscription_request (session, req_msg, resp_msg)
             OR e_msg_subscription_modify_req THEN

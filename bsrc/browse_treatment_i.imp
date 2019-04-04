@@ -37,7 +37,9 @@ PROMOTES
     getall_browse_result_reference_at,
     getall_and_move_browse_result,
     clear_browse_value_context,
-    clear_browse_result
+    clear_browse_result,
+    init_iter_browseResult,
+    continue_iter_browseResult
 
 SEES
    constants,

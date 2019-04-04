@@ -21,7 +21,7 @@
 
  File Name            : service_set_view.c
 
- Date                 : 13/06/2019 16:59:56
+ Date                 : 14/06/2019 07:37:56
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -70,7 +70,7 @@ void service_set_view__treat_browse_request_BrowseValue_1(
          &service_set_view__l_resultMask);
       if (service_set_view__l_dir != constants__e_bd_indet) {
          if (service_set_view__l_SrcNodeId != constants__c_NodeId_indet) {
-            browse_treatment__set_browse_value_context(service_set_view__p_session,
+            translate_browse_path__set_browse_value_context(service_set_view__p_session,
                service_set_view__p_nb_target_max,
                service_set_view__p_nid_view,
                service_set_view__l_SrcNodeId,
@@ -81,13 +81,13 @@ void service_set_view__treat_browse_request_BrowseValue_1(
                service_set_view__l_resultMask,
                &service_set_view__l_serviceStatusCode);
             if (service_set_view__l_serviceStatusCode == constants_statuscodes_bs__e_sc_ok) {
-               browse_treatment__compute_browse_result(&service_set_view__l_serviceStatusCode,
+               translate_browse_path__compute_browse_result(&service_set_view__l_serviceStatusCode,
                   &service_set_view__l_continuationPointId,
                   &service_set_view__l_nbTargets);
-               browse_treatment__clear_browse_value_context();
+               translate_browse_path__clear_browse_value_context();
                if ((service_set_view__l_serviceStatusCode == constants_statuscodes_bs__e_sc_ok) ||
                   (service_set_view__l_serviceStatusCode == constants_statuscodes_bs__e_sc_bad_no_continuation_points)) {
-                  browse_treatment__getall_and_move_browse_result(&service_set_view__l_nbTargets,
+                  translate_browse_path__getall_and_move_browse_result(&service_set_view__l_nbTargets,
                      &service_set_view__l_browseResult);
                   msg_browse_bs__set_ResponseBrowse_BrowseResult(service_set_view__p_resp_msg,
                      service_set_view__p_bvi,
@@ -183,17 +183,17 @@ void service_set_view__treat_browse_next_request_BrowseContinuationPoint_1(
       msg_browse_next_bs__getall_ContinuationPoint(service_set_view__p_req_msg,
          service_set_view__p_cpi,
          &service_set_view__l_continuationPointId);
-      browse_treatment__set_browse_value_context_from_continuation_point(service_set_view__p_session,
+      translate_browse_path__set_browse_value_context_from_continuation_point(service_set_view__p_session,
          service_set_view__l_continuationPointId,
          &service_set_view__l_statusCode);
       if (service_set_view__l_statusCode == constants_statuscodes_bs__e_sc_ok) {
-         browse_treatment__compute_browse_result(&service_set_view__l_statusCode,
+         translate_browse_path__compute_browse_result(&service_set_view__l_statusCode,
             &service_set_view__l_continuationPointId,
             &service_set_view__l_nbTargets);
-         browse_treatment__clear_browse_value_context();
+         translate_browse_path__clear_browse_value_context();
          if ((service_set_view__l_statusCode == constants_statuscodes_bs__e_sc_ok) ||
             (service_set_view__l_statusCode == constants_statuscodes_bs__e_sc_bad_no_continuation_points)) {
-            browse_treatment__getall_and_move_browse_result(&service_set_view__l_nbTargets,
+            translate_browse_path__getall_and_move_browse_result(&service_set_view__l_nbTargets,
                &service_set_view__l_browseResult);
             msg_browse_next_bs__set_ResponseBrowseNext_BrowseResult(service_set_view__p_resp_msg,
                service_set_view__p_cpi,
@@ -222,7 +222,7 @@ void service_set_view__treat_browse_next_request_ReleaseContinuationPoint_1(
       msg_browse_next_bs__getall_ContinuationPoint(service_set_view__p_req_msg,
          service_set_view__p_cpi,
          &service_set_view__l_continuationPointId);
-      browse_treatment__release_continuation_point(service_set_view__p_session,
+      translate_browse_path__release_continuation_point(service_set_view__p_session,
          service_set_view__l_continuationPointId,
          &service_set_view__l_bres);
       if (service_set_view__l_bres == true) {
@@ -338,14 +338,36 @@ void service_set_view__treat_browse_next_request(
 
 void service_set_view__service_set_view_set_session_closed(
    const constants__t_session_i service_set_view__p_session) {
-   browse_treatment__set_session_closed(service_set_view__p_session);
+   translate_browse_path__set_session_closed(service_set_view__p_session);
 }
 
 void service_set_view__service_set_view_service_node_management_used(void) {
-   browse_treatment__continuation_points_UNINITIALISATION();
+   translate_browse_path__continuation_points_UNINITIALISATION();
 }
 
 void service_set_view__service_set_view_UNINITIALISATION(void) {
-   browse_treatment__continuation_points_UNINITIALISATION();
+   translate_browse_path__continuation_points_UNINITIALISATION();
+}
+
+void service_set_view__treat_translate_browse_paths_request(
+   const constants__t_msg_i service_set_view__p_req_msg,
+   const constants__t_msg_i service_set_view__p_resp_msg,
+   constants_statuscodes_bs__t_StatusCode_i * const service_set_view__StatusCode_service) {
+   {
+      t_bool service_set_view__l_continue;
+      constants__t_BrowsePath_i service_set_view__l_browsePath;
+      
+      translate_browse_path__init_translate_browse_paths_request(service_set_view__p_req_msg,
+         service_set_view__StatusCode_service);
+      if (*service_set_view__StatusCode_service == constants_statuscodes_bs__e_sc_ok) {
+         translate_browse_path_it__init_iter_browsePaths(&service_set_view__l_continue);
+         while (service_set_view__l_continue == true) {
+            translate_browse_path_it__continue_iter_browsePath(&service_set_view__l_continue,
+               &service_set_view__l_browsePath);
+            translate_browse_path__treat_one_translate_browse_path(service_set_view__l_browsePath);
+         }
+      }
+      translate_browse_path__write_translate_browse_paths_response(service_set_view__p_resp_msg);
+   }
 }
 

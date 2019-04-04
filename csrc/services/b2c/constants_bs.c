@@ -24,6 +24,7 @@
 
 #include "constants_bs.h"
 #include "b2c.h"
+#include "sopc_macros.h"
 
 #include "sopc_builtintypes.h"
 #include "sopc_logger.h"
@@ -149,4 +150,58 @@ void constants_bs__is_t_endpoint_config_idx(
     *constants_bs__p_res = (constants_bs__p_endpoint_config_idx != constants_bs__c_endpoint_config_idx_indet &&
                             constants_bs__p_endpoint_config_idx > 0 &&
                             constants_bs__p_endpoint_config_idx <= constants_bs__t_endpoint_config_idx_i_max);
+}
+
+void constants_bs__get_cast_t_BrowsePath(const t_entier4 constants_bs__p_ind,
+                                         constants_bs__t_BrowsePath_i* const constants_bs__p_browsePath)
+{
+    *constants_bs__p_browsePath = (uint32_t) constants_bs__p_ind; // TODO: add precondition in B model
+}
+
+void constants_bs__is_QualifiedNames_Empty(const constants_bs__t_QualifiedName_i constants_bs__name,
+                                           t_bool* const constants_bs__p_bool)
+{
+    if (NULL == constants_bs__name)
+    {
+        *constants_bs__p_bool = true;
+    }
+    else
+    {
+        *constants_bs__p_bool = (0 >= constants_bs__name->Name.Length);
+    }
+}
+
+void constants_bs__is_QualifiedNames_Equal(const constants_bs__t_QualifiedName_i constants_bs__name1,
+                                           const constants_bs__t_QualifiedName_i constants_bs__name2,
+                                           t_bool* const constants_bs__p_bool)
+{
+    if (NULL == constants_bs__name1 || NULL == constants_bs__name2)
+    {
+        *constants_bs__p_bool = (constants_bs__name1 == constants_bs__name2);
+    }
+    else
+    {
+        int32_t comparison = 0;
+        SOPC_String_Compare(&constants_bs__name1->Name, &constants_bs__name2->Name, true, &comparison);
+        *constants_bs__p_bool = (0 == comparison);
+    }
+}
+
+void constants_bs__free_ExpandedNodeId(const constants_bs__t_ExpandedNodeId_i constants_bs__p_in)
+{
+    if (NULL != constants_bs__p_in)
+    {
+        SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+        SOPC_ExpandedNodeId_Clear(constants_bs__p_in);
+        free(constants_bs__p_in);
+        SOPC_GCC_DIAGNOSTIC_RESTORE
+    }
+}
+
+void constants_bs__get_copy_ExpandedNodeId(const constants_bs__t_ExpandedNodeId_i constants_bs__p_in,
+                                           constants_bs__t_ExpandedNodeId_i* const constants_bs__p_out)
+{
+    *constants_bs__p_out = calloc(1, sizeof(**constants_bs__p_out));
+    SOPC_ExpandedNodeId_Initialize(*constants_bs__p_out);
+    SOPC_ExpandedNodeId_Copy(*constants_bs__p_out, constants_bs__p_in);
 }

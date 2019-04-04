@@ -52,6 +52,7 @@ SETS
                       e_sc_bad_view_id_unknown,
                       e_sc_bad_attribute_id_invalid,
                       e_sc_bad_browse_direction_invalid,
+                      e_sc_bad_browse_name_invalid,
                       e_sc_bad_reference_type_id_invalid,
                       e_sc_bad_continuation_point_invalid,
                       e_sc_bad_no_continuation_points,
@@ -76,7 +77,10 @@ SETS
                       e_sc_bad_data_unavailable,
                       e_sc_bad_not_writable,
                       e_sc_bad_not_readable,
-                      e_sc_bad_type_mismatch}
+                      e_sc_bad_type_mismatch,
+                      e_sc_bad_query_too_complex,
+                      e_sc_bad_no_match,
+                      e_sc_uncertain_reference_out_of_server}
 
 ABSTRACT_CONSTANTS
     c_RawStatusCode_BadInvalidState,

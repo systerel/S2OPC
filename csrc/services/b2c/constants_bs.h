@@ -54,6 +54,7 @@
    SETS Clause: deferred sets
   -----------------------------*/
 typedef uint32_t constants_bs__t_BrowseNodeClassMask_i;
+typedef uint32_t constants_bs__t_BrowsePath_i;
 typedef uint32_t constants_bs__t_BrowseResultMask_i;
 typedef OpcUa_ReferenceDescription* constants_bs__t_BrowseResultReferences_i;
 typedef uint8_t constants_bs__t_Byte;
@@ -70,6 +71,8 @@ typedef SOPC_ByteString* constants_bs__t_Nonce_i;
 typedef SOPC_QualifiedName* constants_bs__t_QualifiedName_i;
 typedef SOPC_StatusCode constants_bs__t_RawStatusCode;
 typedef OpcUa_ReferenceNode* constants_bs__t_Reference_i;
+typedef OpcUa_RelativePath* constants_bs__t_RelativePath_i;
+typedef OpcUa_RelativePathElement* constants_bs__t_RelativePathElt_i;
 typedef OpcUa_SignatureData* constants_bs__t_SignatureData_i;
 typedef SOPC_Value_Timestamp constants_bs__t_Timestamp;
 typedef SOPC_Variant* constants_bs__t_Variant_i;
@@ -119,6 +122,7 @@ typedef SOPC_ExtensionObject* constants_bs__t_user_token_i;
    CONCRETE_CONSTANTS Clause: scalars and arrays
   ------------------------------------------------*/
 #define constants_bs__c_BrowseNodeClassMask_indet 0
+#define constants_bs__c_BrowseResultMask_all 63
 #define constants_bs__c_BrowseResultMask_indet 0
 #define constants_bs__c_BrowseResultReferences_indet NULL
 extern const constants_bs__t_NodeId_i constants_bs__c_ByteString_Type_NodeId;
@@ -135,11 +139,14 @@ extern const constants_bs__t_NodeId_i constants_bs__c_Byte_Type_NodeId;
 extern const constants_bs__t_NodeId_i constants_bs__c_Null_Type_NodeId;
 #define constants_bs__c_QualifiedName_indet 0
 #define constants_bs__c_Reference_indet 0
+#define constants_bs__c_RelativePathElt_indet 0
+#define constants_bs__c_RelativePath_indet 0
 #define constants_bs__c_SignatureData_indet 0
 #define constants_bs__c_Timestamp_null \
     (SOPC_Value_Timestamp) { 0, 0 }
 #define constants_bs__c_Variant_indet 0
 #define constants_bs__c_WriteValuePointer_indet 0
+#define constants_bs__c_browsePath_indet 0
 #define constants_bs__c_byte_buffer_indet 0
 #define constants_bs__c_channel_config_idx_indet 0
 #define constants_bs__c_channel_indet 0
@@ -179,8 +186,8 @@ extern const constants_bs__t_NodeId_i constants_bs__c_Null_Type_NodeId;
 #define constants_bs__k_n_monitoredItem_max SOPC_MAX_OPERATIONS_PER_MSG
 #define constants_bs__k_n_publishRequestPerSub_max SOPC_MAX_SUBSCRIPTION_PUBLISH_REQUESTS
 #define constants_bs__k_n_read_resp_max SOPC_MAX_OPERATIONS_PER_MSG
-#define constants_bs__k_n_republishNotifPerSub_max (2 * SOPC_MAX_SUBSCRIPTION_PUBLISH_REQUESTS)
 #define constants_bs__k_n_registerNodes_max SOPC_MAX_OPERATIONS_PER_MSG
+#define constants_bs__k_n_republishNotifPerSub_max (2 * SOPC_MAX_SUBSCRIPTION_PUBLISH_REQUESTS)
 #define constants_bs__k_n_unregisterNodes_max SOPC_MAX_OPERATIONS_PER_MSG
 
 /*------------------------
@@ -191,19 +198,30 @@ extern void constants_bs__INITIALISATION(void);
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+extern void constants_bs__free_ExpandedNodeId(const constants_bs__t_ExpandedNodeId_i constants_bs__p_in);
 extern void constants_bs__get_card_t_channel(t_entier4* const constants_bs__p_card_channel);
 extern void constants_bs__get_card_t_session(t_entier4* const constants_bs__p_card_session);
 extern void constants_bs__get_card_t_subscription(t_entier4* const constants_bs__p_card_subscription);
+extern void constants_bs__get_cast_t_BrowsePath(const t_entier4 constants_bs__p_ind,
+                                                constants_bs__t_BrowsePath_i* const constants_bs__p_browsePath);
+
 extern void constants_bs__get_cast_t_channel(const t_entier4 constants_bs__p_ind,
                                              constants_bs__t_channel_i* const constants_bs__p_channel);
 extern void constants_bs__get_cast_t_session(const t_entier4 constants_bs__p_ind,
                                              constants_bs__t_session_i* const constants_bs__p_session);
 extern void constants_bs__get_cast_t_subscription(const t_entier4 constants_bs__p_ind,
                                                   constants_bs__t_subscription_i* const constants_bs__p_subscription);
+extern void constants_bs__get_copy_ExpandedNodeId(const constants_bs__t_ExpandedNodeId_i constants_bs__p_in,
+                                                  constants_bs__t_ExpandedNodeId_i* const constants_bs__p_out);
 extern void constants_bs__getall_conv_ExpandedNodeId_NodeId(
     const constants_bs__t_ExpandedNodeId_i constants_bs__p_expnid,
     t_bool* const constants_bs__p_local_server,
     constants_bs__t_NodeId_i* const constants_bs__p_nid);
+extern void constants_bs__is_QualifiedNames_Empty(const constants_bs__t_QualifiedName_i constants_bs__name,
+                                                  t_bool* const constants_bs__p_bool);
+extern void constants_bs__is_QualifiedNames_Equal(const constants_bs__t_QualifiedName_i constants_bs__name1,
+                                                  const constants_bs__t_QualifiedName_i constants_bs__name2,
+                                                  t_bool* const constants_bs__p_bool);
 extern void constants_bs__is_t_access_level_currentRead(const constants_bs__t_access_level constants_bs__p_access_lvl,
                                                         t_bool* const constants_bs__bres);
 extern void constants_bs__is_t_access_level_currentWrite(const constants_bs__t_access_level constants_bs__p_access_lvl,

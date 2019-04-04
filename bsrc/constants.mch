@@ -101,6 +101,9 @@ SETS
     t_access_level; /* SOPC_Byte */
 
     t_session_i;
+    t_BrowsePath_i;
+    t_RelativePath_i;
+    t_RelativePathElt_i;
     t_session_token_i; /* (SOPC_NodeId*) */
     t_user_i; /* Server-side user */
     t_user_token_i; /* Raw OPC UA user token */
@@ -328,6 +331,9 @@ CONCRETE_CONSTANTS
     c_user_indet,
     c_user_token_indet,
     c_session_indet,
+    c_browsePath_indet,
+    c_RelativePath_indet,
+    c_RelativePathElt_indet,
     c_session_token_indet,
     c_Nonce_indet,
     c_SignatureData_indet,
@@ -363,6 +369,7 @@ CONCRETE_CONSTANTS
     c_ValueRank_ScalarOrOneDimension,
     c_ContinuationPoint_indet,
     c_ContinuationPointId_indet,
+    c_BrowseResultMask_all,
 
     t_counter,
     t_ValueRank,
@@ -406,6 +413,7 @@ ABSTRACT_CONSTANTS
     t_QualifiedName,
 
     cast_t_session,
+    cast_t_BrowsePath,
     cast_t_channel,
     cast_t_subscription,
     cast_t_ReadValue,
@@ -414,6 +422,9 @@ ABSTRACT_CONSTANTS
 
     t_endpoint_config_idx,
     t_session,
+    t_BrowsePath,
+    t_RelativePath,
+    t_RelativePathElt,
     t_session_token,
     t_user,
     t_user_token,
@@ -462,7 +473,9 @@ ABSTRACT_CONSTANTS
     s_service_reqs,
     s_service_resps,
 
-    Is_Dir_Forward_Compatible
+    Is_Dir_Forward_Compatible,
+
+    k_n_noRemainingPathIndex
 
 PROPERTIES
 
@@ -526,6 +539,8 @@ PROPERTIES
     k_n_IndexRange_max : NAT &
     k_n_registerNodes_max : NAT &
     k_n_unregisterNodes_max : NAT &
+    k_n_noRemainingPathIndex : NAT &
+    k_n_noRemainingPathIndex > k_n_genericOperationPerReq_max &
 
     t_Node <: t_Node_i &
     c_Node_indet : t_Node_i &
@@ -560,6 +575,7 @@ PROPERTIES
     c_BrowseNodeClassMask_indet : t_BrowseNodeClassMask_i &
 
     c_BrowseResultMask_indet : t_BrowseResultMask_i &
+    c_BrowseResultMask_all : t_BrowseResultMask_i &
 
     t_monitoredItemReqIndex <: NAT &
     t_monitoredItemNotifIndex <: NAT &
@@ -598,6 +614,20 @@ PROPERTIES
     c_session_indet /: t_session &
     cast_t_session : NAT +-> t_session_i &
     cast_t_session : perm(t_session) &
+
+    t_BrowsePath <: t_BrowsePath_i &
+    c_browsePath_indet : t_BrowsePath_i &
+    c_browsePath_indet /: t_BrowsePath &
+    cast_t_BrowsePath : NAT +-> t_BrowsePath_i &
+    cast_t_BrowsePath : perm(t_BrowsePath) &
+
+    t_RelativePath <: t_RelativePath_i &
+    c_RelativePath_indet : t_RelativePath_i &
+    c_RelativePath_indet /: t_RelativePath &
+
+    t_RelativePathElt <: t_RelativePathElt_i &
+    c_RelativePathElt_indet : t_RelativePathElt_i &
+    c_RelativePathElt_indet /: t_RelativePathElt &
 
     t_session_token <: t_session_token_i &
     c_session_token_indet : t_session_token_i &
@@ -732,7 +762,6 @@ PROPERTIES
 
     c_ContinuationPointId_indet : t_ContinuationPointId_i &
     t_ContinuationPointId = t_ContinuationPointId_i - {c_ContinuationPointId_indet} &
-
 
     t_buffer_in_state = { e_buffer_in_msg_not_read,
         e_buffer_in_msg_type_read,
@@ -905,6 +934,15 @@ OPERATIONS
     END
     ;
 
+    p_browsePath <-- get_cast_t_BrowsePath(p_ind) =
+    PRE
+        p_ind : NAT &
+        p_ind : dom(cast_t_BrowsePath)
+    THEN
+        p_browsePath := cast_t_BrowsePath(p_ind)
+    END
+    ;
+
     p_res <-- is_t_channel(p_channel) =
     PRE
         p_channel : t_channel_i
@@ -980,6 +1018,26 @@ OPERATIONS
     END
     ;
 
+    p_bool <-- is_QualifiedNames_Equal(name1, name2) =
+    PRE
+        name1: t_QualifiedName_i &
+        name1: t_QualifiedName &
+        name2: t_QualifiedName_i &
+        name2: t_QualifiedName
+    THEN
+        p_bool := bool(name1 = name2)
+    END
+    ;
+
+    p_bool <-- is_QualifiedNames_Empty(name) =
+    PRE
+        name: t_QualifiedName_i &
+        name: t_QualifiedName
+    THEN
+        p_bool := bool(name = c_QualifiedName_indet)
+    END
+    ;
+
     p_card_subscription <-- get_card_t_subscription =
     BEGIN
         p_card_subscription := card(t_subscription)
@@ -1024,6 +1082,28 @@ OPERATIONS
         p_access_lvl : t_access_level
     THEN
         bres := conv_AccessLevel_TimestampWrite(p_access_lvl)
+    END
+    ;
+
+    p_out <-- get_copy_ExpandedNodeId(p_in) =
+    PRE
+        p_in : t_ExpandedNodeId_i &
+        p_in : t_ExpandedNodeId
+    THEN
+        p_out
+        :(
+            p_out : t_ExpandedNodeId_i &
+            p_out : t_ExpandedNodeId
+        )
+    END
+    ;
+
+    free_ExpandedNodeId(p_in) =
+    PRE
+        p_in : t_ExpandedNodeId_i &
+        p_in : t_ExpandedNodeId
+    THEN
+        skip
     END
 
 END

@@ -1,0 +1,65 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+IMPLEMENTATION
+    translate_browse_path_it_i
+
+REFINES
+    translate_browse_path_it
+
+SEES
+    constants,
+    translate_browse_path
+
+CONCRETE_VARIABLES
+
+    current_browsePath_idx,
+    nb_browsePaths_to_iterate
+
+INVARIANT
+    current_browsePath_idx : NAT &
+    nb_browsePaths_to_iterate : NAT &
+
+    current_browsePath_idx : 0..nb_browsePaths_to_iterate &
+    browsePaths_to_iterate = cast_t_BrowsePath[1..current_browsePath_idx] &
+    browsePaths_iterated = cast_t_BrowsePath[current_browsePath_idx+1..nb_browsePaths_to_iterate]
+
+INITIALISATION
+    current_browsePath_idx := 0;
+    nb_browsePaths_to_iterate := 0
+
+OPERATIONS
+
+
+    p_continue <-- init_iter_browsePaths =
+    BEGIN
+        nb_browsePaths_to_iterate <-- read_nb_BrowsePaths;
+        current_browsePath_idx := nb_browsePaths_to_iterate;
+        p_continue := bool (0 < current_browsePath_idx)
+    END
+    ;
+
+    p_continue, p_browsePath <-- continue_iter_browsePath =
+    BEGIN
+        p_browsePath <-- get_cast_t_BrowsePath(current_browsePath_idx);
+        current_browsePath_idx := current_browsePath_idx - 1;
+        p_continue := bool (0 < current_browsePath_idx)
+    END
+
+END

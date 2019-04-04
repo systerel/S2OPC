@@ -21,7 +21,7 @@
 
  File Name            : constants_statuscodes_bs.h
 
- Date                 : 14/06/2019 14:02:32
+ Date                 : 14/06/2019 15:11:24
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -73,6 +73,7 @@ typedef enum {
    constants_statuscodes_bs__e_sc_bad_view_id_unknown,
    constants_statuscodes_bs__e_sc_bad_attribute_id_invalid,
    constants_statuscodes_bs__e_sc_bad_browse_direction_invalid,
+   constants_statuscodes_bs__e_sc_bad_browse_name_invalid,
    constants_statuscodes_bs__e_sc_bad_reference_type_id_invalid,
    constants_statuscodes_bs__e_sc_bad_continuation_point_invalid,
    constants_statuscodes_bs__e_sc_bad_no_continuation_points,
@@ -97,7 +98,10 @@ typedef enum {
    constants_statuscodes_bs__e_sc_bad_data_unavailable,
    constants_statuscodes_bs__e_sc_bad_not_writable,
    constants_statuscodes_bs__e_sc_bad_not_readable,
-   constants_statuscodes_bs__e_sc_bad_type_mismatch
+   constants_statuscodes_bs__e_sc_bad_type_mismatch,
+   constants_statuscodes_bs__e_sc_bad_query_too_complex,
+   constants_statuscodes_bs__e_sc_bad_no_match,
+   constants_statuscodes_bs__e_sc_uncertain_reference_out_of_server
 } constants_statuscodes_bs__t_StatusCode_i;
 
 /*------------------------

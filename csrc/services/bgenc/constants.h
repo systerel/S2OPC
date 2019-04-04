@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 14/06/2019 15:04:13
+ Date                 : 14/06/2019 15:11:06
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -44,6 +44,7 @@
    SETS Clause: deferred sets
   -----------------------------*/
 #define constants__t_BrowseNodeClassMask_i constants_bs__t_BrowseNodeClassMask_i
+#define constants__t_BrowsePath_i constants_bs__t_BrowsePath_i
 #define constants__t_BrowseResultMask_i constants_bs__t_BrowseResultMask_i
 #define constants__t_BrowseResultReferences_i constants_bs__t_BrowseResultReferences_i
 #define constants__t_Byte constants_bs__t_Byte
@@ -60,6 +61,8 @@
 #define constants__t_QualifiedName_i constants_bs__t_QualifiedName_i
 #define constants__t_RawStatusCode constants_bs__t_RawStatusCode
 #define constants__t_Reference_i constants_bs__t_Reference_i
+#define constants__t_RelativePathElt_i constants_bs__t_RelativePathElt_i
+#define constants__t_RelativePath_i constants_bs__t_RelativePath_i
 #define constants__t_SignatureData_i constants_bs__t_SignatureData_i
 #define constants__t_Timestamp constants_bs__t_Timestamp
 #define constants__t_Variant_i constants_bs__t_Variant_i
@@ -297,6 +300,7 @@ typedef enum {
    Added by the Translator
   --------------------------*/
 #define constants__t_BrowseNodeClassMask_i_max constants_bs__t_BrowseNodeClassMask_i_max
+#define constants__t_BrowsePath_i_max constants_bs__t_BrowsePath_i_max
 #define constants__t_BrowseResultMask_i_max constants_bs__t_BrowseResultMask_i_max
 #define constants__t_BrowseResultReferences_i_max constants_bs__t_BrowseResultReferences_i_max
 #define constants__t_Byte_max constants_bs__t_Byte_max
@@ -313,6 +317,8 @@ typedef enum {
 #define constants__t_QualifiedName_i_max constants_bs__t_QualifiedName_i_max
 #define constants__t_RawStatusCode_max constants_bs__t_RawStatusCode_max
 #define constants__t_Reference_i_max constants_bs__t_Reference_i_max
+#define constants__t_RelativePathElt_i_max constants_bs__t_RelativePathElt_i_max
+#define constants__t_RelativePath_i_max constants_bs__t_RelativePath_i_max
 #define constants__t_SignatureData_i_max constants_bs__t_SignatureData_i_max
 #define constants__t_Timestamp_max constants_bs__t_Timestamp_max
 #define constants__t_Variant_i_max constants_bs__t_Variant_i_max
@@ -355,6 +361,7 @@ typedef enum {
    CONCRETE_CONSTANTS Clause: scalars and arrays
   ------------------------------------------------*/
 #define constants__c_BrowseNodeClassMask_indet constants_bs__c_BrowseNodeClassMask_indet
+#define constants__c_BrowseResultMask_all constants_bs__c_BrowseResultMask_all
 #define constants__c_BrowseResultMask_indet constants_bs__c_BrowseResultMask_indet
 #define constants__c_BrowseResultReferences_indet constants_bs__c_BrowseResultReferences_indet
 #define constants__c_ByteString_Type_NodeId constants_bs__c_ByteString_Type_NodeId
@@ -371,10 +378,13 @@ typedef enum {
 #define constants__c_Null_Type_NodeId constants_bs__c_Null_Type_NodeId
 #define constants__c_QualifiedName_indet constants_bs__c_QualifiedName_indet
 #define constants__c_Reference_indet constants_bs__c_Reference_indet
+#define constants__c_RelativePathElt_indet constants_bs__c_RelativePathElt_indet
+#define constants__c_RelativePath_indet constants_bs__c_RelativePath_indet
 #define constants__c_SignatureData_indet constants_bs__c_SignatureData_indet
 #define constants__c_Timestamp_null constants_bs__c_Timestamp_null
 #define constants__c_Variant_indet constants_bs__c_Variant_indet
 #define constants__c_WriteValuePointer_indet constants_bs__c_WriteValuePointer_indet
+#define constants__c_browsePath_indet constants_bs__c_browsePath_indet
 #define constants__c_byte_buffer_indet constants_bs__c_byte_buffer_indet
 #define constants__c_channel_config_idx_indet constants_bs__c_channel_config_idx_indet
 #define constants__c_channel_indet constants_bs__c_channel_indet
@@ -434,13 +444,18 @@ extern void constants__INITIALISATION(void);
 /*-------------------------------
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
+#define constants__free_ExpandedNodeId constants_bs__free_ExpandedNodeId
 #define constants__get_card_t_channel constants_bs__get_card_t_channel
 #define constants__get_card_t_session constants_bs__get_card_t_session
 #define constants__get_card_t_subscription constants_bs__get_card_t_subscription
+#define constants__get_cast_t_BrowsePath constants_bs__get_cast_t_BrowsePath
 #define constants__get_cast_t_channel constants_bs__get_cast_t_channel
 #define constants__get_cast_t_session constants_bs__get_cast_t_session
 #define constants__get_cast_t_subscription constants_bs__get_cast_t_subscription
+#define constants__get_copy_ExpandedNodeId constants_bs__get_copy_ExpandedNodeId
 #define constants__getall_conv_ExpandedNodeId_NodeId constants_bs__getall_conv_ExpandedNodeId_NodeId
+#define constants__is_QualifiedNames_Empty constants_bs__is_QualifiedNames_Empty
+#define constants__is_QualifiedNames_Equal constants_bs__is_QualifiedNames_Equal
 #define constants__is_t_access_level_currentRead constants_bs__is_t_access_level_currentRead
 #define constants__is_t_access_level_currentWrite constants_bs__is_t_access_level_currentWrite
 #define constants__is_t_access_level_statusWrite constants_bs__is_t_access_level_statusWrite

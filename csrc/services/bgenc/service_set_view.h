@@ -21,7 +21,7 @@
 
  File Name            : service_set_view.h
 
- Date                 : 17/04/2019 08:59:48
+ Date                 : 29/04/2019 16:57:44
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -38,10 +38,11 @@
 /*-----------------
    IMPORTS Clause
   -----------------*/
-#include "browse_treatment.h"
 #include "msg_browse_bs.h"
 #include "msg_browse_next_bs.h"
 #include "service_browse_it.h"
+#include "translate_browse_path.h"
+#include "translate_browse_path_it.h"
 
 /*--------------
    SEES Clause
@@ -106,6 +107,10 @@ extern void service_set_view__treat_browse_next_request(
    constants_statuscodes_bs__t_StatusCode_i * const service_set_view__StatusCode_service);
 extern void service_set_view__treat_browse_request(
    const constants__t_session_i service_set_view__p_session,
+   const constants__t_msg_i service_set_view__p_req_msg,
+   const constants__t_msg_i service_set_view__p_resp_msg,
+   constants_statuscodes_bs__t_StatusCode_i * const service_set_view__StatusCode_service);
+extern void service_set_view__treat_translate_browse_paths_request(
    const constants__t_msg_i service_set_view__p_req_msg,
    const constants__t_msg_i service_set_view__p_resp_msg,
    constants_statuscodes_bs__t_StatusCode_i * const service_set_view__StatusCode_service);
