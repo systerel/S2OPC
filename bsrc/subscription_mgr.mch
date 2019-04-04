@@ -187,11 +187,11 @@ OPERATIONS
         p_req_msg : t_msg_i &
         p_req_msg : t_msg &
         p_req_msg = c_msg_in &
-        a_msg_in_type = e_msg_subscription_publish_req &
+        a_msg_in_type = e_msg_monitored_items_create_req &
         p_resp_msg : t_msg_i &
         p_resp_msg : t_msg &
         p_resp_msg = c_msg_out &
-        a_msg_out_type = e_msg_subscription_publish_resp
+        a_msg_out_type = e_msg_monitored_items_create_resp
     THEN
         StatusCode_service
         :(  StatusCode_service : t_StatusCode_i &
