@@ -867,6 +867,39 @@ C_FILE_START = """
 
 ENCODEABLE_TYPE_DESC_START = """
 #ifndef OPCUA_EXCLUDE_{name}
+/*============================================================================
+ * OpcUa_{name}_Initialize
+ *===========================================================================*/
+void OpcUa_{name}_Initialize(void* pValue)
+{{
+    SOPC_EncodeableObject_Initialize(&OpcUa_{name}_EncodeableType, pValue);
+}}
+
+/*============================================================================
+ * OpcUa_{name}_Clear
+ *===========================================================================*/
+void OpcUa_{name}_Clear(void* pValue)
+{{
+    SOPC_EncodeableObject_Clear(&OpcUa_{name}_EncodeableType, pValue);
+}}
+
+/*============================================================================
+ * OpcUa_{name}_Encode
+ *===========================================================================*/
+SOPC_ReturnStatus OpcUa_{name}_Encode(const void* pValue, SOPC_Buffer* buf)
+{{
+    return SOPC_EncodeableObject_Encode(\
+&OpcUa_{name}_EncodeableType, pValue, buf);
+}}
+
+/*============================================================================
+ * OpcUa_{name}_Decode
+ *===========================================================================*/
+SOPC_ReturnStatus OpcUa_{name}_Decode(void* pValue, SOPC_Buffer* buf)
+{{
+    return SOPC_EncodeableObject_Decode(\
+&OpcUa_{name}_EncodeableType, pValue, buf);
+}}
 """
 
 ENCODEABLE_TYPE_FIELD_DESC_START = """
@@ -874,7 +907,7 @@ ENCODEABLE_TYPE_FIELD_DESC_START = """
  * Field descriptors of the {name} encodeable type.
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor {name}_Fields[] = {{
-"""[1:]
+"""
 
 ENCODEABLE_TYPE_FIELD_DESC = """
     {{
