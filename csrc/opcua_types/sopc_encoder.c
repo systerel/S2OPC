@@ -2973,7 +2973,7 @@ SOPC_ReturnStatus SOPC_Read_Array(SOPC_Buffer* buf,
 
 SOPC_ReturnStatus SOPC_Write_Array(SOPC_Buffer* msgBuf,
                                    const int32_t* const noOfElts,
-                                   const void** eltsArray,
+                                   const void* const* eltsArray,
                                    size_t sizeOfElt,
                                    SOPC_EncodeableObject_PfnEncode* encodeFct)
 {
