@@ -337,6 +337,7 @@ class BinarySchema:
             fatal("Invalid root element in bsd file: %s" % root.tag)
         self.bsd2c = OrderedDict(self.BUILTIN_TYPES)
         self.enums = set()
+        self.fields = dict()
         self.known_writer = KnownEncodeableTypeWriter()
 
     def gen_header_pair(self, out, basename):
@@ -397,10 +398,57 @@ class BinarySchema:
         Generates the descriptors of all encodeable types.
         """
         def writer(typename, barename):
-            ctype = self.bsd2c[typename]
-            out.write(ENCODEABLE_TYPE_DESC.format(name=barename, ctype=ctype))
+            self.gen_encodeable_type_desc(out, typename, barename)
 
         self.known_writer.gen_types(out, writer)
+
+    def gen_encodeable_type_desc(self, out, typename, barename):
+        """
+        Generates the field descriptors of an encodeable type.
+        """
+        ctype = self.bsd2c[typename]
+        out.write(ENCODEABLE_TYPE_DESC_START.format(name=barename))
+        fields = self.fields[barename]
+        if fields:
+            out.write(ENCODEABLE_TYPE_FIELD_DESC_START.format(name=barename))
+        for field in fields:
+            is_built_in, type_index = self.get_type_index(field.type_name)
+            out.write(ENCODEABLE_TYPE_FIELD_DESC.format(
+                name=barename,
+                is_built_in=c_bool_value(is_built_in),
+                is_array_length=c_bool_value(field.is_array_length),
+                is_to_encode=c_bool_value(field.is_to_encode),
+                type_index=type_index,
+                field_name=field.name
+            ))
+        if fields:
+            out.write(ENCODEABLE_TYPE_FIELD_DESC_END.format())
+            nof_fields = ENCODEABLE_TYPE_NOF_FIELDS.format(name=barename)
+            field_desc = barename + '_Fields'
+        else:
+            nof_fields = '0'
+            field_desc = 'NULL'
+        out.write(ENCODEABLE_TYPE_DESC_END.format(
+            name=barename,
+            ctype=ctype,
+            nof_fields=nof_fields,
+            field_desc=field_desc))
+
+    def get_type_index(self, typename):
+        """
+        Returns a pair (is_built_in, type_index) for a field type.
+        """
+        barename = typename.split(':')[1]
+        is_built_in = typename in self.BUILTIN_TYPES
+        if is_built_in:
+            template = 'SOPC_{name}_Id'
+        elif self.is_enum(self.normalize_typename(typename)):
+            # Enumerated types are repainted to Int32
+            is_built_in = True
+            template = 'SOPC_Int32_Id'
+        else:
+            template = 'SOPC_TypeInternalIndex_{name}'
+        return is_built_in, template.format(name=barename)
 
     def gen_encodeable_type_table(self, out):
         """
@@ -431,15 +479,16 @@ class BinarySchema:
         fields = [Field(self, child) for child in children]
         for field in fields:
             self.gen_header_type(out, field.type_name)
+        fields = [field for field in fields if field.name != 'RequestHeader']
         self._check_array_fields(name, fields)
 
         out.write(STRUCT_DECL_START.format(name=name))
 
         for field in fields:
-            if field.name != 'RequestHeader':
-                self._gen_field_decl(out, field)
+            self._gen_field_decl(out, field)
 
         out.write(STRUCT_DECL_END.format(name=name))
+        self.fields[name] = fields
         return 'OpcUa_' + name
 
     def _gen_field_decl(self, out, field):
@@ -457,6 +506,7 @@ class BinarySchema:
         """
         Checks that array fields are always just after their length.
         Also check that the length is encoded as an Int32.
+        Then mark the length field with the is_array_length attribute.
         """
         for i, field in enumerate(fields):
             if not field.length_field:
@@ -471,6 +521,7 @@ class BinarySchema:
             if prev.type_name != 'opc:Int32':
                 fatal("invalid type %s for array length %s in struct %s"
                       % (prev.type_name, prev.name, name))
+            prev.is_array_length = True
 
     def _gen_enum_decl(self, out, node, name):
         """
@@ -540,6 +591,9 @@ class Field:
             fatal("Missing name for field node: %s", node)
         if not self.type_name:
             fatal("Missing type name for field node: %s", node)
+        # Will be updated later when checking arrays
+        self.is_array_length = False
+        self.is_to_encode = self.name != 'ResponseHeader'
 
 
 class KnownEncodeableTypeWriter:
@@ -571,6 +625,13 @@ class KnownEncodeableTypeWriter:
             blockname = self.block_end.get(barename, None)
             if blockname:
                 out.write('\n' + BLOCK_PROTECTION_END.format(name=blockname))
+
+
+def c_bool_value(value):
+    """
+    Returns the C representation of a Boolean value.
+    """
+    return 'true' if value else 'false'
 
 
 def fatal(msg):
@@ -804,9 +865,37 @@ C_FILE_START = """
  */
 """[1:]
 
-# TODO make records const
-ENCODEABLE_TYPE_DESC = """
+ENCODEABLE_TYPE_DESC_START = """
 #ifndef OPCUA_EXCLUDE_{name}
+"""
+
+ENCODEABLE_TYPE_FIELD_DESC_START = """
+/*============================================================================
+ * Field descriptors of the {name} encodeable type.
+ *===========================================================================*/
+static const SOPC_EncodeableType_FieldDescriptor {name}_Fields[] = {{
+"""[1:]
+
+ENCODEABLE_TYPE_FIELD_DESC = """
+    {{
+        {is_built_in},  // isBuiltIn
+        {is_array_length}, // isArrayLength
+        {is_to_encode}, // isToEncode
+        (uint32_t) {type_index}, // typeIndex
+        (uint32_t) offsetof(OpcUa_{name}, {field_name}) // offset
+    }},
+"""[1:]
+
+ENCODEABLE_TYPE_FIELD_DESC_END = """
+}};
+"""[1:]
+
+ENCODEABLE_TYPE_NOF_FIELDS = """
+sizeof {name}_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor)
+"""[1:-1]
+
+# TODO make encodeable type descriptor const
+ENCODEABLE_TYPE_DESC_END = """
 /*============================================================================
  * Descriptor of the {name} encodeable type.
  *===========================================================================*/
@@ -823,13 +912,13 @@ SOPC_EncodeableType OpcUa_{name}_EncodeableType =
     NULL,
     OpcUa_{name}_Encode,
     OpcUa_{name}_Decode,
-    0,
-    NULL
+    {nof_fields},
+    {field_desc}
 }};
 #endif
 """
 
-# TODO make it const
+# TODO make the whole array const
 TYPE_TABLE_START = """
 /*============================================================================
  * Table of known types.
