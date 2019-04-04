@@ -19,9 +19,11 @@
 
 #include "sopc_encodeabletype.h"
 
+#include <assert.h>
 #include <string.h>
 
 #include "sopc_builtintypes.h"
+#include "sopc_encoder.h"
 #include "sopc_helper_string.h"
 #include "sopc_types.h"
 
@@ -69,4 +71,247 @@ const char* SOPC_EncodeableType_GetName(SOPC_EncodeableType* encType)
         result = encType->TypeName;
     }
     return result;
+}
+
+static size_t getAllocationSize(const SOPC_EncodeableType_FieldDescriptor* desc)
+{
+    if (desc->isBuiltIn)
+    {
+        return SOPC_BuiltInType_HandlingTable[desc->typeIndex].size;
+    }
+    return SOPC_KnownEncodeableTypes[desc->typeIndex]->AllocationSize;
+}
+
+static SOPC_EncodeableObject_PfnInitialize* getPfnInitialize(const SOPC_EncodeableType_FieldDescriptor* desc)
+{
+    if (desc->isBuiltIn)
+    {
+        return SOPC_BuiltInType_HandlingTable[desc->typeIndex].initialize;
+    }
+    return SOPC_KnownEncodeableTypes[desc->typeIndex]->Initialize;
+}
+
+static SOPC_EncodeableObject_PfnClear* getPfnClear(const SOPC_EncodeableType_FieldDescriptor* desc)
+{
+    if (desc->isBuiltIn)
+    {
+        return SOPC_BuiltInType_HandlingTable[desc->typeIndex].clear;
+    }
+    return SOPC_KnownEncodeableTypes[desc->typeIndex]->Clear;
+}
+
+static SOPC_EncodeableObject_PfnEncode* getPfnEncode(const SOPC_EncodeableType_FieldDescriptor* desc)
+{
+    if (desc->isBuiltIn)
+    {
+        return SOPC_BuiltInType_EncodingTable[desc->typeIndex].encode;
+    }
+    return SOPC_KnownEncodeableTypes[desc->typeIndex]->Encode;
+}
+
+static SOPC_EncodeableObject_PfnDecode* getPfnDecode(const SOPC_EncodeableType_FieldDescriptor* desc)
+{
+    if (desc->isBuiltIn)
+    {
+        return SOPC_BuiltInType_EncodingTable[desc->typeIndex].decode;
+    }
+    return SOPC_KnownEncodeableTypes[desc->typeIndex]->Decode;
+}
+
+void SOPC_EncodeableObject_Initialize(SOPC_EncodeableType* type, void* pValue)
+{
+    assert(type != NULL);
+    assert(pValue != NULL);
+
+    // The first field of all non-builtin OPC UA type instances is its encodeable type
+    *((SOPC_EncodeableType**) pValue) = type;
+
+    for (int32_t i = 0; i < type->NoOfFields; ++i)
+    {
+        const SOPC_EncodeableType_FieldDescriptor* desc = &type->Fields[i];
+        void* pField = (char*) pValue + desc->offset;
+        SOPC_EncodeableObject_PfnInitialize* initFunction = NULL;
+
+        if (desc->isArrayLength)
+        {
+            int32_t* pLength = NULL;
+            const SOPC_EncodeableType_FieldDescriptor* arrayDesc = NULL;
+            void** pArray = NULL;
+            size_t size = 0;
+
+            assert(desc->isBuiltIn);
+            assert(desc->typeIndex == (uint32_t) SOPC_Int32_Id);
+            pLength = pField;
+
+            ++i;
+            assert(i < type->NoOfFields);
+            arrayDesc = &type->Fields[i];
+            pArray = (void**) ((char*) pValue + arrayDesc->offset);
+            size = getAllocationSize(arrayDesc);
+            initFunction = getPfnInitialize(arrayDesc);
+
+            SOPC_Initialize_Array(pLength, pArray, size, initFunction);
+        }
+        else
+        {
+            initFunction = getPfnInitialize(desc);
+            initFunction(pField);
+        }
+    }
+}
+
+void SOPC_EncodeableObject_Clear(SOPC_EncodeableType* type, void* pValue)
+{
+    assert(type != NULL);
+    assert(pValue != NULL);
+
+    for (int32_t i = 0; i < type->NoOfFields; ++i)
+    {
+        const SOPC_EncodeableType_FieldDescriptor* desc = &type->Fields[i];
+        void* pField = (char*) pValue + desc->offset;
+        SOPC_EncodeableObject_PfnClear* clearFunction = NULL;
+
+        if (desc->isArrayLength)
+        {
+            int32_t* pLength = NULL;
+            const SOPC_EncodeableType_FieldDescriptor* arrayDesc = NULL;
+            void** pArray = NULL;
+            size_t size = 0;
+
+            assert(desc->isBuiltIn);
+            assert(desc->typeIndex == (uint32_t) SOPC_Int32_Id);
+            pLength = pField;
+
+            ++i;
+            assert(i < type->NoOfFields);
+            arrayDesc = &type->Fields[i];
+            pArray = (void**) ((char*) pValue + arrayDesc->offset);
+            size = getAllocationSize(arrayDesc);
+            clearFunction = getPfnClear(arrayDesc);
+
+            SOPC_Clear_Array(pLength, pArray, size, clearFunction);
+        }
+        else
+        {
+            clearFunction = getPfnClear(desc);
+            clearFunction(pField);
+        }
+    }
+}
+
+SOPC_ReturnStatus SOPC_EncodeableObject_Encode(const SOPC_EncodeableType* type, const void* pValue, SOPC_Buffer* buf)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+
+    if (type != NULL && pValue != NULL && buf != NULL)
+    {
+        status = SOPC_STATUS_OK;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        // TODO assert(*((SOPC_EncodeableType* const*) pValue) == type);
+    }
+
+    for (int32_t i = 0; SOPC_STATUS_OK == status && i < type->NoOfFields; ++i)
+    {
+        const SOPC_EncodeableType_FieldDescriptor* desc = &type->Fields[i];
+        const void* pField = (const char*) pValue + desc->offset;
+
+        if (!desc->isToEncode)
+        {
+            // Skip this field
+        }
+        else if (desc->isArrayLength)
+        {
+            const int32_t* pLength = NULL;
+            const SOPC_EncodeableType_FieldDescriptor* arrayDesc = NULL;
+            const void* const* pArray = NULL;
+            size_t size = 0;
+            SOPC_EncodeableObject_PfnEncode* encodeFunction = NULL;
+
+            assert(desc->isBuiltIn);
+            assert(desc->typeIndex == (uint32_t) SOPC_Int32_Id);
+            pLength = pField;
+
+            ++i;
+            assert(i < type->NoOfFields);
+            arrayDesc = &type->Fields[i];
+            pArray = (const void* const*) ((const char*) pValue + arrayDesc->offset);
+            size = getAllocationSize(arrayDesc);
+            encodeFunction = getPfnEncode(arrayDesc);
+
+            status = SOPC_Write_Array(buf, pLength, pArray, size, encodeFunction);
+        }
+        else
+        {
+            SOPC_EncodeableObject_PfnEncode* encodeFunction = getPfnEncode(desc);
+            status = encodeFunction(pField, buf);
+        }
+    }
+
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_EncodeableObject_Decode(SOPC_EncodeableType* type, void* pValue, SOPC_Buffer* buf)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+
+    if (type != NULL && pValue != NULL && buf != NULL)
+    {
+        status = SOPC_STATUS_OK;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_EncodeableObject_Initialize(type, pValue);
+    }
+
+    for (int32_t i = 0; SOPC_STATUS_OK == status && i < type->NoOfFields; ++i)
+    {
+        const SOPC_EncodeableType_FieldDescriptor* desc = &type->Fields[i];
+        void* pField = (char*) pValue + desc->offset;
+        SOPC_EncodeableObject_PfnDecode* decodeFunction = NULL;
+
+        if (!desc->isToEncode)
+        {
+            // Skip this field
+        }
+        else if (desc->isArrayLength)
+        {
+            int32_t* pLength = NULL;
+            const SOPC_EncodeableType_FieldDescriptor* arrayDesc = NULL;
+            void** pArray = NULL;
+            size_t size = 0;
+            SOPC_EncodeableObject_PfnInitialize* initFunction = NULL;
+            SOPC_EncodeableObject_PfnClear* clearFunction = NULL;
+
+            assert(desc->isBuiltIn);
+            assert(desc->typeIndex == (uint32_t) SOPC_Int32_Id);
+            pLength = pField;
+
+            ++i;
+            assert(i < type->NoOfFields);
+            arrayDesc = &type->Fields[i];
+            pArray = (void**) ((char*) pValue + arrayDesc->offset);
+            size = getAllocationSize(arrayDesc);
+            decodeFunction = getPfnDecode(arrayDesc);
+            initFunction = getPfnInitialize(arrayDesc);
+            clearFunction = getPfnClear(arrayDesc);
+
+            status = SOPC_Read_Array(buf, pLength, pArray, size, decodeFunction, initFunction, clearFunction);
+        }
+        else
+        {
+            decodeFunction = getPfnDecode(desc);
+            status = decodeFunction(pField, buf);
+        }
+    }
+
+    if (status != SOPC_STATUS_OK && type != NULL && pValue != NULL)
+    {
+        SOPC_EncodeableObject_Clear(type, pValue);
+    }
+
+    return status;
 }

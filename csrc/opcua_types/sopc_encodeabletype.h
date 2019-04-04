@@ -117,4 +117,36 @@ SOPC_EncodeableType* SOPC_EncodeableType_GetEncodeableType(uint32_t typeId);
 
 const char* SOPC_EncodeableType_GetName(SOPC_EncodeableType* encType);
 
+/**
+ * \brief Initialize an encodeable object.
+ *
+ * The \c pValue parameter shall correspond to an object of the appropriate
+ * type.
+ */
+void SOPC_EncodeableObject_Initialize(SOPC_EncodeableType* type, void* pValue);
+
+/**
+ * \brief Clear an encodeable object.
+ *
+ * The \c pValue parameter shall correspond to an object of the appropriate
+ * type.
+ */
+void SOPC_EncodeableObject_Clear(SOPC_EncodeableType* type, void* pValue);
+
+/**
+ * \brief Encode an encodeable object.
+ *
+ * The \c pValue parameter shall correspond to an object of the appropriate
+ * type.
+ */
+SOPC_ReturnStatus SOPC_EncodeableObject_Encode(const SOPC_EncodeableType* type, const void* pValue, SOPC_Buffer* buf);
+
+/**
+ * \brief Decode an encodeable object.
+ *
+ * The \c pValue parameter shall correspond to an object of the appropriate
+ * type.
+ */
+SOPC_ReturnStatus SOPC_EncodeableObject_Decode(SOPC_EncodeableType* type, void* pValue, SOPC_Buffer* buf);
+
 #endif /* SOPC_ENCODEABLETYPE_H_ */
