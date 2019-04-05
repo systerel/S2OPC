@@ -19,32 +19,47 @@
 
 /******************************************************************************
 
- File Name            : toolkit_header.h
+ File Name            : browse_treatment_1.h
 
- Date                 : 05/04/2019 14:46:43
+ Date                 : 05/04/2019 14:46:17
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
 ******************************************************************************/
 
-#ifndef _toolkit_header_h
-#define _toolkit_header_h
+#ifndef _browse_treatment_1_h
+#define _browse_treatment_1_h
 
 /*--------------------------
    Added by the Translator
   --------------------------*/
 #include "b2c.h"
 
-/*-----------------
-   IMPORTS Clause
-  -----------------*/
+/*--------------
+   SEES Clause
+  --------------*/
+#include "address_space.h"
 #include "constants.h"
 #include "constants_statuscodes_bs.h"
-#include "io_dispatch_mgr.h"
 
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
-extern void toolkit_header__INITIALISATION(void);
+extern void browse_treatment_1__INITIALISATION(void);
+
+/*--------------------
+   OPERATIONS Clause
+  --------------------*/
+extern void browse_treatment_1__Is_RefTypes_Compatible(
+   const t_bool browse_treatment_1__p_is_ref_type1,
+   const constants__t_NodeId_i browse_treatment_1__p_ref_type1,
+   const t_bool browse_treatment_1__p_inc_subtypes,
+   const constants__t_NodeId_i browse_treatment_1__p_ref_type2,
+   t_bool * const browse_treatment_1__p_ref_types_compat);
+extern void browse_treatment_1__getall_SourceNode_NbRef(
+   const constants__t_NodeId_i browse_treatment_1__p_src_nodeid,
+   t_bool * const browse_treatment_1__p_isvalid,
+   t_entier4 * const browse_treatment_1__p_nb_ref,
+   constants__t_Node_i * const browse_treatment_1__p_src_node);
 
 #endif

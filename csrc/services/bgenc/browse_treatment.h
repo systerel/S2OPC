@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment.h
 
- Date                 : 05/04/2019 08:04:44
+ Date                 : 05/04/2019 14:46:17
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -38,7 +38,10 @@
 /*-----------------
    IMPORTS Clause
   -----------------*/
+#include "browse_treatment_1.h"
 #include "browse_treatment_context.h"
+#include "browse_treatment_continuation_points.h"
+#include "browse_treatment_result_bs.h"
 
 /*--------------
    SEES Clause
@@ -51,25 +54,41 @@
   ------------------------*/
 extern void browse_treatment__INITIALISATION(void);
 
+/*-------------------------------
+   PROMOTES and EXTENDS Clauses
+  -------------------------------*/
+#define browse_treatment__clear_browse_result browse_treatment_result_bs__clear_browse_result
+#define browse_treatment__getall_and_clear_browse_result browse_treatment_result_bs__getall_and_clear_browse_result
+#define browse_treatment__getall_browse_result_reference_at browse_treatment_result_bs__getall_browse_result_reference_at
+#define browse_treatment__set_session_closed browse_treatment_continuation_points__set_session_closed
+
+/*--------------------------
+   LOCAL_OPERATIONS Clause
+  --------------------------*/
+extern void browse_treatment__fill_browse_result(
+   const t_entier4 browse_treatment__p_startIndex,
+   const t_entier4 browse_treatment__p_max_nb_results,
+   const constants__t_NodeId_i browse_treatment__p_browseView,
+   const constants__t_Node_i browse_treatment__p_src_node,
+   const constants__t_BrowseDirection_i browse_treatment__p_browseDirection,
+   const t_bool browse_treatment__p_refType_defined,
+   const constants__t_NodeId_i browse_treatment__p_referenceType,
+   const t_bool browse_treatment__p_includeSubtypes,
+   constants_statuscodes_bs__t_StatusCode_i * const browse_treatment__p_serviceStatusCode,
+   t_bool * const browse_treatment__p_toContinue,
+   t_entier4 * const browse_treatment__p_nextIndex);
+extern void browse_treatment__min_max_nb_result_refs(
+   const t_entier4 browse_treatment__p_maxTargetRef,
+   const t_entier4 browse_treatment__p_nb_target,
+   t_entier4 * const browse_treatment__p_maxResultRefs);
+
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-extern void browse_treatment__clear_browse_results(void);
 extern void browse_treatment__compute_browse_result(
    constants_statuscodes_bs__t_StatusCode_i * const browse_treatment__p_serviceStatusCode,
    constants__t_ContinuationPoint_i * const browse_treatment__p_continuationPoint,
    t_entier4 * const browse_treatment__p_nbReferences);
-extern void browse_treatment__getall_and_clear_browse_results(
-   constants__t_BrowseResult_i * const browse_treatment__p_browseResult);
-extern void browse_treatment__getall_browse_result(
-   const t_entier4 browse_treatment__p_refIndex,
-   constants__t_NodeId_i * const browse_treatment__p_refTypeId,
-   t_bool * const browse_treatment__p_isForward,
-   constants__t_ExpandedNodeId_i * const browse_treatment__p_NodeId,
-   constants__t_QualifiedName_i * const browse_treatment__p_BrowseName,
-   constants__t_LocalizedText_i * const browse_treatment__p_DisplayName,
-   constants__t_NodeClass_i * const browse_treatment__p_NodeClass,
-   constants__t_ExpandedNodeId_i * const browse_treatment__p_TypeDefinition);
 extern void browse_treatment__set_browse_value_context(
    const constants__t_session_i browse_treatment__p_session,
    const t_entier4 browse_treatment__p_maxTargetRef,
@@ -82,7 +101,5 @@ extern void browse_treatment__set_browse_value_context_from_continuation_point(
    const constants__t_session_i browse_treatment__p_session,
    const constants__t_ContinuationPoint_i browse_treatment__p_continuationPoint,
    constants_statuscodes_bs__t_StatusCode_i * const browse_treatment__p_service_StatusCode);
-extern void browse_treatment__set_session_closed(
-   const constants__t_session_i browse_treatment__p_session);
 
 #endif

@@ -768,7 +768,7 @@ void address_space_bs__get_Node_RefIndexEnd(const constants__t_Node_i address_sp
     assert(NULL != address_space_bs__p_node);
     SOPC_AddressSpace_Item* item = address_space_bs__p_node;
     int32_t* n_refs = SOPC_AddressSpace_Item_Get_NoOfReferences(item);
-    *address_space_bs__p_ref_index = *n_refs - 1;
+    *address_space_bs__p_ref_index = *n_refs;
 }
 
 void address_space_bs__get_RefIndex_Reference(const constants__t_Node_i address_space_bs__p_node,
@@ -779,6 +779,13 @@ void address_space_bs__get_RefIndex_Reference(const constants__t_Node_i address_
     SOPC_AddressSpace_Item* item = address_space_bs__p_node;
     OpcUa_ReferenceNode** refs = SOPC_AddressSpace_Item_Get_References(item);
     int32_t* n_refs = SOPC_AddressSpace_Item_Get_NoOfReferences(item);
-    assert(address_space_bs__p_ref_index < *n_refs);
-    *address_space_bs__p_ref = &(*refs)[address_space_bs__p_ref_index];
+    assert(address_space_bs__p_ref_index <= *n_refs);
+    if (*nrefs < 0)
+    {
+        *address_space_bs__p_ref = 0;
+    }
+    else
+    {
+        *address_space_bs__p_ref = &(*refs)[address_space_bs__p_ref_index - 1];
+    }
 }

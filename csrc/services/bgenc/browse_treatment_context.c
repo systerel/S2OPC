@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment_context.c
 
- Date                 : 05/04/2019 08:04:44
+ Date                 : 05/04/2019 14:46:17
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -90,6 +90,7 @@ void browse_treatment_context__getall_browse_value_context(
    constants__t_NodeId_i * const browse_treatment_context__p_browseView,
    constants__t_NodeId_i * const browse_treatment_context__p_nodeId,
    constants__t_BrowseDirection_i * const browse_treatment_context__p_browseDirection,
+   t_bool * const browse_treatment_context__p_refType_defined,
    constants__t_NodeId_i * const browse_treatment_context__p_referenceType,
    t_bool * const browse_treatment_context__p_includeSubtypes) {
    *browse_treatment_context__p_startIndex = browse_treatment_context__in_startIndex_i;
@@ -98,6 +99,7 @@ void browse_treatment_context__getall_browse_value_context(
    *browse_treatment_context__p_browseView = browse_treatment_context__in_BrowseView_i;
    *browse_treatment_context__p_nodeId = browse_treatment_context__in_BrowseValue_NodeId_i;
    *browse_treatment_context__p_browseDirection = browse_treatment_context__in_BrowseValue_BrowseDirection_i;
+   *browse_treatment_context__p_refType_defined = (browse_treatment_context__in_BrowseValue_ReferenceTypeId_i != constants__c_NodeId_indet);
    *browse_treatment_context__p_referenceType = browse_treatment_context__in_BrowseValue_ReferenceTypeId_i;
    *browse_treatment_context__p_includeSubtypes = browse_treatment_context__in_BrowseValue_IncludeSubtypes_i;
 }

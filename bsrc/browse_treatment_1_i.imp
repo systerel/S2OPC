@@ -1,0 +1,63 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+IMPLEMENTATION
+    browse_treatment_1_i
+
+REFINES
+    browse_treatment_1
+
+SEES
+    constants,
+    constants_statuscodes_bs,
+    address_space
+
+OPERATIONS
+
+    p_isvalid, p_nb_ref, p_src_node <-- getall_SourceNode_NbRef(p_src_nodeid) =
+    BEGIN
+        p_isvalid, p_src_node <-- readall_AddressSpace_Node(p_src_nodeid);
+        IF  p_isvalid = TRUE THEN
+            p_nb_ref   <-- get_Node_RefIndexEnd  (p_src_node)
+        ELSE
+            p_nb_ref := 0
+        END
+    END
+    ;
+
+    p_ref_types_compat <-- Is_RefTypes_Compatible(p_is_ref_type1, p_ref_type1, p_inc_subtypes, p_ref_type2) =
+    VAR
+        l_node_ids_equal
+    IN
+        IF  p_is_ref_type1 = TRUE THEN
+            l_node_ids_equal <-- is_NodeId_equal(p_ref_type1, p_ref_type2);
+            IF  l_node_ids_equal = TRUE THEN
+                p_ref_types_compat := TRUE
+            ELSIF p_inc_subtypes = TRUE THEN
+                p_ref_types_compat <-- is_transitive_subtype(p_ref_type2, p_ref_type1)
+            ELSE
+                p_ref_types_compat := FALSE
+            END
+            /* TODO: if ref type invalid in address space, specific status code to return */
+        ELSE
+            p_ref_types_compat := TRUE
+        END
+    END
+
+END

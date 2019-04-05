@@ -749,6 +749,7 @@ OPERATIONS
         p_node : t_Node_i &
         p_node : t_Node
     THEN
+        /* Valid indexes > 0 */
         p_ref_index :(
             p_ref_index : NAT &
             p_ref_index = Node_RefIndexEnd(p_node)

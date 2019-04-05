@@ -77,6 +77,7 @@ INITIALISATION
     isBrowseValueContextDefined_i := FALSE
 
 OPERATIONS
+
    setall_browse_value_context (p_startIndex, p_session, p_maxTargetRef, p_browseView, p_nodeId, p_browseDirection, p_referenceType, p_includeSubtypes) =
    BEGIN
         in_startIndex_i := p_startIndex;
@@ -91,7 +92,8 @@ OPERATIONS
    END
    ;
 
-   p_startIndex , p_session , p_maxTargetRef , p_browseView , p_nodeId , p_browseDirection , p_referenceType , p_includeSubtypes <-- getall_browse_value_context =
+   p_startIndex, p_session, p_maxTargetRef, p_browseView, p_nodeId, p_browseDirection, p_refType_defined, p_referenceType, p_includeSubtypes
+      <-- getall_browse_value_context =
    BEGIN
         p_startIndex := in_startIndex_i;
         p_session := in_session_i;
@@ -99,6 +101,7 @@ OPERATIONS
         p_browseView := in_BrowseView_i;
         p_nodeId := in_BrowseValue_NodeId_i;
         p_browseDirection := in_BrowseValue_BrowseDirection_i;
+        p_refType_defined := bool(in_BrowseValue_ReferenceTypeId_i /= c_NodeId_indet);
         p_referenceType := in_BrowseValue_ReferenceTypeId_i;
         p_includeSubtypes := in_BrowseValue_IncludeSubtypes_i
    END

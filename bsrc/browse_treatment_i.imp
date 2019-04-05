@@ -20,63 +20,160 @@
 IMPLEMENTATION
    browse_treatment_i
 REFINES
-   browse_treatment
+    browse_treatment
+
 IMPORTS
-    browse_treatment_context
+    browse_treatment_context,
+    browse_treatment_continuation_points,
+    browse_treatment_result_bs,
+    browse_treatment_1
+
+PROMOTES
+    set_session_closed,
+    getall_browse_result_reference_at,
+    getall_and_clear_browse_result,
+    clear_browse_result
+
 SEES
-   constants ,
+   constants,
    constants_statuscodes_bs
+
+LOCAL_OPERATIONS
+
+    p_maxResultRefs <-- min_max_nb_result_refs (p_maxTargetRef, p_nb_target) =
+    PRE
+        p_maxTargetRef : NAT                      &
+        p_maxTargetRef <= k_n_BrowseTarget_max    &
+        p_nb_target : NAT
+    THEN
+        IF  0 < p_maxTargetRef
+        THEN
+            p_maxResultRefs := p_maxTargetRef
+        ELSE
+            p_maxResultRefs := p_nb_target
+        END
+    END
+    ;
+
+    p_serviceStatusCode, p_toContinue, p_nextIndex
+      <-- fill_browse_result(p_startIndex, p_max_nb_results, p_browseView, p_src_node, p_browseDirection, p_refType_defined, p_referenceType, p_includeSubtypes) =
+    PRE
+        p_startIndex    : NAT                       &
+        p_startIndex    : t_RefIndex                &
+        p_max_nb_results : NAT                      &
+        p_max_nb_results <= k_n_BrowseTarget_max    &
+        p_browseView : t_NodeId_i                   &
+        p_src_node : t_Node_i                       &
+        p_src_node : t_Node                         &
+        p_browseDirection : t_BrowseDirection_i     &
+        p_browseDirection : t_BrowseDirection       &
+        p_refType_defined : BOOL                    &
+        p_referenceType : t_NodeId_i                &
+        (p_refType_defined = TRUE =>
+            p_referenceType : t_NodeId)             &
+        p_includeSubtypes : BOOL
+    THEN
+        p_serviceStatusCode,
+        p_toContinue,
+        p_nextIndex
+        :(p_serviceStatusCode : {e_sc_ok, e_sc_bad_reference_type_id_invalid, e_sc_bad_view_id_unknown} &
+          p_toContinue : BOOL &
+          p_nextIndex : NAT &
+          p_nextIndex : t_RefIndex &
+          (p_serviceStatusCode /= e_sc_ok =>
+              p_toContinue = FALSE & p_nextIndex = 0) &
+          (p_serviceStatusCode = e_sc_ok & p_toContinue = TRUE =>
+              p_nextIndex = p_max_nb_results)
+        )
+    END
 
 OPERATIONS
 
+    /* LOCAL OPERATIONS */
+
+    p_maxResultRefs <-- min_max_nb_result_refs (p_maxTargetRef, p_nb_target) =
+    BEGIN
+        IF  0 < p_maxTargetRef
+        THEN
+            p_maxResultRefs := p_maxTargetRef
+        ELSE
+            p_maxResultRefs := p_nb_target
+        END
+    END
+    ;
+    p_serviceStatusCode, p_toContinue, p_nextIndex <-- fill_browse_result(p_startIndex, p_max_nb_results, p_browseView,
+                                                                          p_src_node, p_browseDirection, p_refType_defined,
+                                                                          p_referenceType, p_includeSubtypes) =
+    BEGIN
+        p_serviceStatusCode := c_StatusCode_indet;
+        p_toContinue := FALSE;
+        p_nextIndex := 0
+    END
+    ;
+
+    /* END OF LOCAL OPERATIONS */
+
    set_browse_value_context (p_session, p_maxTargetRef, p_browseView, p_nodeId, p_browseDirection, p_referenceType, p_includeSubtypes) =
    BEGIN
-       /* Only set context to start with index 0 of target references */
-       setall_browse_value_context(0, p_session, p_maxTargetRef, p_browseView, p_nodeId, p_browseDirection, p_referenceType, p_includeSubtypes)
+       /* Only set context to start with index 1 of target references */
+       setall_browse_value_context(1, p_session, p_maxTargetRef, p_browseView, p_nodeId, p_browseDirection, p_referenceType, p_includeSubtypes)
    END
    ;
 
-   p_service_StatusCode <-- set_browse_value_context_from_continuation_point (p_session , p_continuationPoint) =
+   p_service_StatusCode <-- set_browse_value_context_from_continuation_point (p_session, p_continuationPoint) =
    BEGIN
        p_service_StatusCode := e_sc_bad_continuation_point_invalid
    END
    ;
 
-   p_serviceStatusCode , p_continuationPoint , p_nbReferences <-- compute_browse_result =
-   BEGIN
-       p_serviceStatusCode := e_sc_bad_out_of_memory;
+   p_serviceStatusCode, p_continuationPoint, p_nbReferences <-- compute_browse_result =
+   VAR
+       l_startIndex,
+       l_session,
+       l_maxTargetRef,
+       l_browseView,
+       l_nodeId,
+       l_browseDirection,
+       l_refType_defined,
+       l_referenceType,
+       l_includeSubtypes,
+       l_is_src_node_valid,
+       l_nb_target,
+       l_src_node,
+       l_alloc_bres,
+       l_max_nb_results,
+       l_toContinue,
+       l_nextIndex,
+       l_cp_bres
+   IN
        p_continuationPoint := c_ContinuationPoint_indet;
-       p_nbReferences := 0
-   END
-   ;
-
-   set_session_closed (p_session) =
-   BEGIN
-       skip
-   END
-   ;
-
-   p_refTypeId , p_isForward , p_NodeId , p_BrowseName , p_DisplayName , p_NodeClass , p_TypeDefinition <-- getall_browse_result (p_refIndex) =
-   BEGIN
-       p_refTypeId := c_NodeId_indet;
-       p_isForward := TRUE;
-       p_NodeId := c_ExpandedNodeId_indet;
-       p_BrowseName := c_QualifiedName_indet;
-       p_DisplayName := c_LocalizedText_indet;
-       p_NodeClass := c_NodeClass_indet;
-       p_TypeDefinition := c_ExpandedNodeId_indet
-   END
-   ;
-
-   p_browseResult <-- getall_and_clear_browse_results =
-   BEGIN
-       p_browseResult := c_BrowseResult_indet
-   END
-   ;
-
-   clear_browse_results =
-   BEGIN
-       skip
-   END
+       p_nbReferences := 0;
+        /* Get input context */
+        l_startIndex, l_session, l_maxTargetRef, l_browseView, l_nodeId,
+          l_browseDirection, l_refType_defined, l_referenceType, l_includeSubtypes <-- getall_browse_value_context;
+        /* Retrieve source node in address space */
+        l_is_src_node_valid, l_nb_target, l_src_node <-- getall_SourceNode_NbRef(l_nodeId);
+        IF  l_is_src_node_valid = TRUE THEN
+            l_max_nb_results <-- min_max_nb_result_refs (l_maxTargetRef, l_nb_target);
+            /* Allocate a BrowseResult with maximum number of references (reached if none reference is filtered)*/
+            l_alloc_bres <-- alloc_browse_result(l_max_nb_results);
+            IF  l_alloc_bres = TRUE THEN
+                p_serviceStatusCode, l_toContinue, l_nextIndex
+                  <-- fill_browse_result (l_startIndex, l_max_nb_results, l_browseView, l_src_node,
+                                          l_browseDirection, l_refType_defined, l_referenceType, l_includeSubtypes);
+                IF l_toContinue = TRUE THEN
+                    l_cp_bres, p_continuationPoint <-- create_continuation_point (l_session, l_nextIndex, l_maxTargetRef, l_browseView,
+                                                                                  l_nodeId, l_browseDirection, l_referenceType, l_includeSubtypes);
+                    IF l_cp_bres = FALSE THEN
+                        p_serviceStatusCode := e_sc_bad_no_continuation_points
+                    END
+                END
+            ELSE
+                p_serviceStatusCode := e_sc_bad_out_of_memory
+            END
+        ELSE
+            p_serviceStatusCode := e_sc_bad_node_id_unknown
+        END
+    END
 
 END

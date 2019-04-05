@@ -51,7 +51,7 @@ DEFINITIONS
         out_BrowseResult_DisplayName,
         out_BrowseResult_NodeClass,
         out_BrowseResult_TypeDefinition,
-        out_BrowseResults,
+        out_BrowseResult,
         isBrowseResultComputed
     ;
 
@@ -75,14 +75,14 @@ DEFINITIONS
         out_BrowseResult_ContinuationPoint : t_ContinuationPoint_i      &
         out_BrowseResult_nb_References     : NAT                        &
         out_BrowseResult_nb_References     <= in_maxReferencesPerNode   &
-        out_BrowseResult_ReferenceTypeId   : NAT +-> t_NodeId_i         &
+        out_BrowseResult_ReferenceTypeId   : NAT +-> t_NodeId           &
         out_BrowseResult_isForward         : NAT +-> BOOL               &
-        out_BrowseResult_NodeId            : NAT +-> t_ExpandedNodeId_i &
+        out_BrowseResult_NodeId            : NAT +-> t_ExpandedNodeId   &
         out_BrowseResult_BrowseName        : NAT +-> t_QualifiedName_i  &
-        out_BrowseResult_DisplayName       : NAT +-> t_LocalizedText_i  &
+        out_BrowseResult_DisplayName       : NAT +-> t_LocalizedText    &
         out_BrowseResult_NodeClass         : NAT +-> t_NodeClass_i      &
         out_BrowseResult_TypeDefinition    : NAT +-> t_ExpandedNodeId_i &
-        out_BrowseResults                  : t_BrowseResult_i           &
+        out_BrowseResult                   : t_BrowseResult_i           &
         isBrowseResultComputed             : BOOL
     ;
     d_init_in ==
@@ -117,7 +117,7 @@ DEFINITIONS
             out_BrowseResult_DisplayName       = {}                         &
             out_BrowseResult_NodeClass         = {}                         &
             out_BrowseResult_TypeDefinition    = {}                         &
-            out_BrowseResults                  = c_BrowseResult_indet       &
+            out_BrowseResult                   = c_BrowseResult_indet       &
             isBrowseResultComputed             = FALSE
          )
 
@@ -205,11 +205,13 @@ OPERATIONS
         p_nbReferences,
         session_ContinuationPoint
         :(d_inv_out &
-          p_serviceStatusCode : {e_sc_ok, e_sc_bad_out_of_memory, e_sc_bad_node_id_unknown, e_sc_bad_reference_type_id_invalid, e_sc_bad_view_id_unknown} & /* Add other bad view statuses when treated */
+            p_serviceStatusCode : {e_sc_ok, e_sc_bad_out_of_memory, e_sc_bad_node_id_unknown,
+                                   e_sc_bad_reference_type_id_invalid, e_sc_bad_no_continuation_points,
+                                   e_sc_bad_view_id_unknown} & /* Add other bad view statuses when treated */
           p_nbReferences : NAT &
           p_continuationPoint : t_ContinuationPoint_i &
-          isBrowseResultComputed = bool(p_serviceStatusCode = e_sc_ok) &
-          (p_serviceStatusCode = e_sc_ok =>
+          isBrowseResultComputed = bool(p_serviceStatusCode = e_sc_ok or p_serviceStatusCode = e_sc_bad_no_continuation_points) &
+          (p_serviceStatusCode = e_sc_ok or p_serviceStatusCode = e_sc_bad_no_continuation_points =>
               out_BrowseResult_nb_References     : NAT                        &
               out_BrowseResult_nb_References     <= in_maxReferencesPerNode   &
               p_nbReferences = out_BrowseResult_nb_References &
@@ -220,7 +222,7 @@ OPERATIONS
               out_BrowseResult_DisplayName       : 1..p_nbReferences --> t_LocalizedText    &
               out_BrowseResult_NodeClass         : 1..p_nbReferences --> t_NodeClass_i      & /* TODO: restrict to t_NodeClass if Node in server */
               out_BrowseResult_TypeDefinition    : 1..p_nbReferences --> t_ExpandedNodeId_i & /* TODO: restrict to t_ExpandedNodeId if Node in server */
-              out_BrowseResults : t_BrowseResult & /* Results are defined */
+              out_BrowseResult : t_BrowseResult & /* Results are defined */
               /* ContinuationPoint defined constraints: */
               (out_BrowseResult_ContinuationPoint /= c_ContinuationPoint_indet =>
                   p_nbReferences = in_maxReferencesPerNode & /* Maximum reached if continuation point defined */
@@ -231,8 +233,7 @@ OPERATIONS
               p_continuationPoint = out_BrowseResult_ContinuationPoint
           ) &
           (p_serviceStatusCode /= e_sc_ok =>
-              p_continuationPoint = c_ContinuationPoint_indet &
-              p_nbReferences = 0)
+              p_continuationPoint = c_ContinuationPoint_indet)
         )
     END
     ;
@@ -248,7 +249,7 @@ OPERATIONS
     ;
 
     p_refTypeId, p_isForward, p_NodeId, p_BrowseName, p_DisplayName, p_NodeClass, p_TypeDefinition
-      <-- getall_browse_result(p_refIndex) =
+      <-- getall_browse_result_reference_at(p_refIndex) =
     PRE
         isBrowseResultComputed = TRUE &
         p_refIndex : NAT &
@@ -261,25 +262,29 @@ OPERATIONS
         p_refIndex : dom(out_BrowseResult_NodeClass) &
         p_refIndex : dom(out_BrowseResult_TypeDefinition)
     THEN
-        p_refTypeId := out_BrowseResult_ReferenceTypeId(p_refIndex) ||
+        p_refTypeId :(p_refTypeId : t_NodeId_i & p_refTypeId = out_BrowseResult_ReferenceTypeId(p_refIndex)) ||
         p_isForward := out_BrowseResult_isForward(p_refIndex) ||
-        p_NodeId := out_BrowseResult_NodeId(p_refIndex) ||
+        p_NodeId :(p_NodeId : t_ExpandedNodeId_i & p_NodeId = out_BrowseResult_NodeId(p_refIndex)) ||
         p_BrowseName := out_BrowseResult_BrowseName(p_refIndex) ||
-        p_DisplayName := out_BrowseResult_DisplayName(p_refIndex) ||
+        p_DisplayName :(p_DisplayName : t_LocalizedText_i & p_DisplayName = out_BrowseResult_DisplayName(p_refIndex)) ||
         p_NodeClass := out_BrowseResult_NodeClass(p_refIndex) ||
         p_TypeDefinition := out_BrowseResult_TypeDefinition(p_refIndex)
     END
     ;
 
-    p_browseResult <-- getall_and_clear_browse_results =
-    BEGIN
-        p_browseResult := out_BrowseResults || /* Transfer ownership of BrowseResults array to caller */
+    p_nb_references, p_browseResult <-- getall_and_clear_browse_result =
+    PRE
+        isBrowseResultComputed = TRUE
+    THEN
+        p_nb_references := out_BrowseResult_nb_References ||
+        p_browseResult := out_BrowseResult || /* Transfer ownership of BrowseResult to caller */
         d_init_in ||
         d_init_out
     END
     ;
 
-    clear_browse_results =
+
+    clear_browse_result =
     BEGIN
         d_init_in ||
         d_init_out

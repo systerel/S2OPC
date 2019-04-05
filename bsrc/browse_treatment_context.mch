@@ -44,10 +44,8 @@ DEFINITIONS
         in_maxReferencesPerNode         <= k_n_BrowseTarget_max  &
         in_BrowseView                    : t_NodeId_i            &
         in_BrowseValue_NodeId            : t_NodeId_i            &
-        in_BrowseValue_NodeId            : t_NodeId              &
         in_BrowseValue_BrowseDirection   : t_BrowseDirection_i   &
         in_BrowseValue_ReferenceTypeId   : t_NodeId_i            &
-        in_BrowseValue_ReferenceTypeId   : t_NodeId              &
         in_BrowseValue_IncludeSubtypes   : BOOL                  &
         isBrowseValueContextDefined      : BOOL
     ;
@@ -90,7 +88,6 @@ OPERATIONS
         p_browseDirection : t_BrowseDirection_i     &
         p_browseDirection : t_BrowseDirection       &
         p_referenceType : t_NodeId_i                &
-        p_referenceType : t_NodeId                  &
         p_includeSubtypes : BOOL
    THEN
         in_startIndex                   := p_startIndex      ||
@@ -105,7 +102,8 @@ OPERATIONS
    END
    ;
 
-   p_startIndex, p_session, p_maxTargetRef, p_browseView, p_nodeId, p_browseDirection, p_referenceType, p_includeSubtypes <-- getall_browse_value_context =
+   p_startIndex, p_session, p_maxTargetRef, p_browseView, p_nodeId, p_browseDirection, p_refType_defined, p_referenceType, p_includeSubtypes
+      <-- getall_browse_value_context =
    PRE
        isBrowseValueContextDefined = TRUE
    THEN
@@ -115,6 +113,7 @@ OPERATIONS
         p_browseView := in_BrowseView                        ||
         p_nodeId := in_BrowseValue_NodeId                    ||
         p_browseDirection := in_BrowseValue_BrowseDirection  ||
+        p_refType_defined := bool(in_BrowseValue_ReferenceTypeId : t_NodeId) ||
         p_referenceType := in_BrowseValue_ReferenceTypeId    ||
         p_includeSubtypes := in_BrowseValue_IncludeSubtypes
    END
