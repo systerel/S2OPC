@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment_1.h
 
- Date                 : 05/04/2019 14:46:17
+ Date                 : 08/04/2019 16:46:07
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -56,6 +56,12 @@ extern void browse_treatment_1__Is_RefTypes_Compatible(
    const t_bool browse_treatment_1__p_inc_subtypes,
    const constants__t_NodeId_i browse_treatment_1__p_ref_type2,
    t_bool * const browse_treatment_1__p_ref_types_compat);
+extern void browse_treatment_1__get_optional_fields_ReferenceDescription(
+   const constants__t_ExpandedNodeId_i browse_treatment_1__p_TargetNodeId,
+   constants__t_QualifiedName_i * const browse_treatment_1__p_BrowseName,
+   constants__t_LocalizedText_i * const browse_treatment_1__p_DisplayName,
+   constants__t_NodeClass_i * const browse_treatment_1__p_NodeClass,
+   constants__t_ExpandedNodeId_i * const browse_treatment_1__p_TypeDefinition);
 extern void browse_treatment_1__getall_SourceNode_NbRef(
    const constants__t_NodeId_i browse_treatment_1__p_src_nodeid,
    t_bool * const browse_treatment_1__p_isvalid,

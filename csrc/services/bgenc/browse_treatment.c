@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment.c
 
- Date                 : 05/04/2019 14:46:18
+ Date                 : 08/04/2019 16:46:08
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -53,6 +53,61 @@ void browse_treatment__min_max_nb_result_refs(
    }
 }
 
+void browse_treatment__fill_browse_result_ref(
+   const constants__t_Reference_i browse_treatment__p_ref,
+   const constants__t_BrowseDirection_i browse_treatment__p_browseDirection,
+   const t_bool browse_treatment__p_refType_defined,
+   const constants__t_NodeId_i browse_treatment__p_referenceType,
+   const t_bool browse_treatment__p_includeSubtypes,
+   t_bool * const browse_treatment__p_continue) {
+   {
+      constants__t_NodeId_i browse_treatment__l_RefType;
+      constants__t_ExpandedNodeId_i browse_treatment__l_TargetNode;
+      t_bool browse_treatment__l_IsForward;
+      t_bool browse_treatment__l_res;
+      t_entier4 browse_treatment__l_bri;
+      constants__t_QualifiedName_i browse_treatment__l_BrowseName;
+      constants__t_LocalizedText_i browse_treatment__l_DisplayName;
+      constants__t_NodeClass_i browse_treatment__l_NodeClass;
+      constants__t_ExpandedNodeId_i browse_treatment__l_TypeDefinition;
+      
+      *browse_treatment__p_continue = true;
+      address_space__get_Reference_ReferenceType(browse_treatment__p_ref,
+         &browse_treatment__l_RefType);
+      address_space__get_Reference_TargetNode(browse_treatment__p_ref,
+         &browse_treatment__l_TargetNode);
+      address_space__get_Reference_IsForward(browse_treatment__p_ref,
+         &browse_treatment__l_IsForward);
+      constants__get_Is_Dir_Forward_Compatible(browse_treatment__p_browseDirection,
+         browse_treatment__l_IsForward,
+         &browse_treatment__l_res);
+      if (browse_treatment__l_res == true) {
+         browse_treatment_1__Is_RefTypes_Compatible(browse_treatment__p_refType_defined,
+            browse_treatment__p_referenceType,
+            browse_treatment__p_includeSubtypes,
+            browse_treatment__l_RefType,
+            &browse_treatment__l_res);
+         if (browse_treatment__l_res == true) {
+            browse_treatment_result_it__continue_iter_browseResult(browse_treatment__p_continue,
+               &browse_treatment__l_bri);
+            browse_treatment_1__get_optional_fields_ReferenceDescription(browse_treatment__l_TargetNode,
+               &browse_treatment__l_BrowseName,
+               &browse_treatment__l_DisplayName,
+               &browse_treatment__l_NodeClass,
+               &browse_treatment__l_TypeDefinition);
+            browse_treatment_result_bs__setall_browse_result_reference_at(browse_treatment__l_bri,
+               browse_treatment__l_RefType,
+               browse_treatment__l_IsForward,
+               browse_treatment__l_TargetNode,
+               browse_treatment__l_BrowseName,
+               browse_treatment__l_DisplayName,
+               browse_treatment__l_NodeClass,
+               browse_treatment__l_TypeDefinition);
+         }
+      }
+   }
+}
+
 void browse_treatment__fill_browse_result(
    const t_entier4 browse_treatment__p_startIndex,
    const t_entier4 browse_treatment__p_max_nb_results,
@@ -65,9 +120,34 @@ void browse_treatment__fill_browse_result(
    constants_statuscodes_bs__t_StatusCode_i * const browse_treatment__p_serviceStatusCode,
    t_bool * const browse_treatment__p_toContinue,
    t_entier4 * const browse_treatment__p_nextIndex) {
-   *browse_treatment__p_serviceStatusCode = constants_statuscodes_bs__c_StatusCode_indet;
-   *browse_treatment__p_toContinue = false;
-   *browse_treatment__p_nextIndex = 0;
+   {
+      t_bool browse_treatment__l_continue_bri;
+      t_bool browse_treatment__l_continue_ref;
+      constants__t_Reference_i browse_treatment__l_ref;
+      
+      *browse_treatment__p_serviceStatusCode = constants_statuscodes_bs__e_sc_ok;
+      browse_treatment__l_ref = constants__c_Reference_indet;
+      browse_treatment_result_it__init_iter_browseResult(browse_treatment__p_max_nb_results,
+         &browse_treatment__l_continue_bri);
+      browse_treatment_target_it__init_iter_reference(browse_treatment__p_src_node,
+         browse_treatment__p_startIndex,
+         &browse_treatment__l_continue_ref);
+      *browse_treatment__p_nextIndex = browse_treatment__p_startIndex;
+      while ((browse_treatment__l_continue_ref == true) &&
+         (browse_treatment__l_continue_bri == true)) {
+         browse_treatment_target_it__continue_iter_reference(&browse_treatment__l_continue_ref,
+            &browse_treatment__l_ref,
+            browse_treatment__p_nextIndex);
+         browse_treatment__fill_browse_result_ref(browse_treatment__l_ref,
+            browse_treatment__p_browseDirection,
+            browse_treatment__p_refType_defined,
+            browse_treatment__p_referenceType,
+            browse_treatment__p_includeSubtypes,
+            &browse_treatment__l_continue_bri);
+      }
+      *browse_treatment__p_toContinue = ((browse_treatment__l_continue_ref == true) &&
+         (browse_treatment__l_continue_bri == false));
+   }
 }
 
 void browse_treatment__set_browse_value_context(

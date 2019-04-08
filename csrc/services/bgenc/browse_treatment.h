@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment.h
 
- Date                 : 08/04/2019 09:32:47
+ Date                 : 08/04/2019 16:46:08
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -48,6 +48,7 @@
 /*--------------
    SEES Clause
   --------------*/
+#include "address_space.h"
 #include "constants.h"
 #include "constants_statuscodes_bs.h"
 
@@ -79,6 +80,13 @@ extern void browse_treatment__fill_browse_result(
    constants_statuscodes_bs__t_StatusCode_i * const browse_treatment__p_serviceStatusCode,
    t_bool * const browse_treatment__p_toContinue,
    t_entier4 * const browse_treatment__p_nextIndex);
+extern void browse_treatment__fill_browse_result_ref(
+   const constants__t_Reference_i browse_treatment__p_ref,
+   const constants__t_BrowseDirection_i browse_treatment__p_browseDirection,
+   const t_bool browse_treatment__p_refType_defined,
+   const constants__t_NodeId_i browse_treatment__p_referenceType,
+   const t_bool browse_treatment__p_includeSubtypes,
+   t_bool * const browse_treatment__p_continue);
 extern void browse_treatment__min_max_nb_result_refs(
    const t_entier4 browse_treatment__p_maxTargetRef,
    const t_entier4 browse_treatment__p_nb_target,

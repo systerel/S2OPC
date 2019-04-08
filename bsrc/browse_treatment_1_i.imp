@@ -59,5 +59,35 @@ OPERATIONS
             p_ref_types_compat := TRUE
         END
     END
+    ;
+
+    p_BrowseName, p_DisplayName, p_NodeClass, p_TypeDefinition <-- get_optional_fields_ReferenceDescription(p_TargetNodeId) =
+    VAR
+        l_local_server,
+        l_NodeId,
+        l_isvalid,
+        l_node
+    IN
+        l_local_server, l_NodeId <-- getall_conv_ExpandedNodeId_NodeId(p_TargetNodeId);
+        IF  l_local_server = TRUE THEN
+            l_isvalid, l_node <-- readall_AddressSpace_Node(l_NodeId);
+            IF l_isvalid = TRUE THEN
+                p_BrowseName <-- get_BrowseName(l_node);
+                p_DisplayName <-- get_DisplayName(l_node);
+                p_NodeClass <-- get_NodeClass(l_node);
+                p_TypeDefinition <-- get_TypeDefinition(l_node)
+            ELSE
+                p_BrowseName := c_QualifiedName_indet;
+                p_DisplayName := c_LocalizedText_indet;
+                p_NodeClass := c_NodeClass_indet;
+                p_TypeDefinition := c_ExpandedNodeId_indet
+            END
+        ELSE
+            p_BrowseName := c_QualifiedName_indet;
+            p_DisplayName := c_LocalizedText_indet;
+            p_NodeClass := c_NodeClass_indet;
+            p_TypeDefinition := c_ExpandedNodeId_indet
+        END
+    END
 
 END

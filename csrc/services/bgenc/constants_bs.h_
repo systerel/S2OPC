@@ -21,7 +21,7 @@
 
  File Name            : constants_bs.h
 
- Date                 : 29/03/2019 15:39:18
+ Date                 : 08/04/2019 16:46:23
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -227,6 +227,7 @@ extern void constants_bs__get_cast_t_subscription(
    constants_bs__t_subscription_i * const constants_bs__p_subscription);
 extern void constants_bs__getall_conv_ExpandedNodeId_NodeId(
    const constants_bs__t_ExpandedNodeId_i constants_bs__p_expnid,
+   t_bool * const constants_bs__p_local_server,
    constants_bs__t_NodeId_i * const constants_bs__p_nid);
 extern void constants_bs__is_t_access_level_currentRead(
    const constants_bs__t_access_level constants_bs__p_access_lvl,

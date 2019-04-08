@@ -52,10 +52,18 @@ void constants_bs__get_Is_SubType(const constants_bs__t_NodeId_i constants_bs__p
 }
 
 void constants_bs__getall_conv_ExpandedNodeId_NodeId(const constants_bs__t_ExpandedNodeId_i constants_bs__p_expnid,
+                                                     t_bool* const constants_bs__p_local_server,
                                                      constants_bs__t_NodeId_i* const constants_bs__p_nid)
 {
-    /* Reminder: This is a borrow */
-    *constants_bs__p_nid = &constants_bs__p_expnid->NodeId;
+    *constants_bs__p_nid = constants_bs__c_ExpandedNodeId_indet;
+    // TODO: namespaceUri.Length > 0 does not really mean it is an external node but we do not manage it
+    *constants_bs__p_local_server =
+        constants_bs__p_expnid->ServerIndex == 0 && constants_bs__p_expnid->NamespaceUri.Length <= 0;
+    if (*constants_bs__p_local_server)
+    {
+        /* Reminder: This is a borrow */
+        *constants_bs__p_nid = &constants_bs__p_expnid->NodeId;
+    }
 }
 
 void constants_bs__is_t_access_level_currentRead(const constants_bs__t_access_level constants_bs__p_access_lvl,

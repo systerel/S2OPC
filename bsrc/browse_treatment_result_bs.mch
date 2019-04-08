@@ -115,6 +115,7 @@ OPERATIONS
 
     setall_browse_result_reference_at (p_refIndex, p_refTypeId, p_isForward, p_NodeId, p_BrowseName, p_DisplayName, p_NodeClass, p_TypeDefinition) =
     PRE
+        isBrowseResultAllocated = TRUE &
         p_refIndex : NAT &
         p_refIndex = out_BrowseResult_nb_References + 1 & /* Next unused index */
         p_refIndex <= max_nb_references &
@@ -143,6 +144,7 @@ OPERATIONS
     p_refTypeId, p_isForward, p_NodeId, p_BrowseName, p_DisplayName, p_NodeClass, p_TypeDefinition
       <-- getall_browse_result_reference_at (p_refIndex) =
     PRE
+        isBrowseResultAllocated = TRUE &
         p_refIndex : NAT &
         p_refIndex : 1 .. out_BrowseResult_nb_References &
         p_refIndex : dom ( out_BrowseResult_ReferenceTypeId ) &

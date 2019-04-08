@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment_result_it.c
 
- Date                 : 08/04/2019 09:32:48
+ Date                 : 08/04/2019 16:46:08
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -49,15 +49,15 @@ void browse_treatment_result_it__INITIALISATION(void) {
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-void browse_treatment_result_it__init_iter_browseResults(
-   const t_entier4 browse_treatment_result_it__p_nb_to_iterate,
+void browse_treatment_result_it__init_iter_browseResult(
+   const t_entier4 browse_treatment_result_it__p_nb_browseResult_max_refs,
    t_bool * const browse_treatment_result_it__p_continue) {
-   browse_treatment_result_it__max_browseResult_idx = browse_treatment_result_it__p_nb_to_iterate;
+   browse_treatment_result_it__max_browseResult_idx = browse_treatment_result_it__p_nb_browseResult_max_refs;
    browse_treatment_result_it__current_browseResult_idx = 0;
    *browse_treatment_result_it__p_continue = (0 < browse_treatment_result_it__p_nb_browseResult_max_refs);
 }
 
-void browse_treatment_result_it__continue_iter_browseResults(
+void browse_treatment_result_it__continue_iter_browseResult(
    t_bool * const browse_treatment_result_it__p_continue,
    t_entier4 * const browse_treatment_result_it__p_browseResultIdx) {
    browse_treatment_result_it__current_browseResult_idx = browse_treatment_result_it__current_browseResult_idx +

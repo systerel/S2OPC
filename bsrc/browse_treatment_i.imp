@@ -38,7 +38,8 @@ PROMOTES
 
 SEES
    constants,
-   constants_statuscodes_bs
+   constants_statuscodes_bs,
+   address_space
 
 LOCAL_OPERATIONS
 
@@ -73,7 +74,9 @@ LOCAL_OPERATIONS
         p_referenceType : t_NodeId_i                &
         (p_refType_defined = TRUE =>
             p_referenceType : t_NodeId)             &
-        p_includeSubtypes : BOOL
+        p_includeSubtypes : BOOL                    &
+        isBrowseResultAllocated = TRUE              &
+        max_nb_references = p_max_nb_results
     THEN
         p_serviceStatusCode,
         p_toContinue,
@@ -86,7 +89,75 @@ LOCAL_OPERATIONS
               p_toContinue = FALSE & p_nextIndex = 0) &
           (p_serviceStatusCode = e_sc_ok & p_toContinue = TRUE =>
               p_nextIndex = p_max_nb_results)
-        )
+       ) ||
+        /* Use of BrowseResult iterator */
+        browseResult_to_iterate,
+        browseResult_iterated,
+        nb_browseResult_max_refs :(
+            nb_browseResult_max_refs : NAT &
+            browseResult_to_iterate <: NAT &
+            browseResult_iterated   <: NAT) ||
+        /* Use of reference targets iterator */
+        starting_node,
+        references_to_iterate,
+        references_iterated,
+        next_reference_index :(
+        starting_node : t_Node_i &
+        references_to_iterate <: NAT &
+        references_iterated   <: NAT &
+        next_reference_index : NAT)
+    END
+    ;
+
+    p_continue <-- fill_browse_result_ref(p_ref, p_browseDirection, p_refType_defined, p_referenceType, p_includeSubtypes) =
+    PRE
+        p_ref             : t_Reference_i       &
+        p_ref             : t_Reference         &
+        p_browseDirection : t_BrowseDirection_i &
+        p_browseDirection : t_BrowseDirection   &
+        p_refType_defined : BOOL                &
+        p_referenceType   : t_NodeId_i          &
+        (p_refType_defined = TRUE =>
+            p_referenceType : t_NodeId)         &
+        p_includeSubtypes : BOOL                &
+
+        browseResult_to_iterate /= {}
+    THEN
+        IF Is_Dir_Forward_Compatible(p_browseDirection |-> Reference_IsForward(p_ref)) = TRUE &
+            (p_refType_defined = FALSE or
+             p_referenceType = Reference_ReferenceType(p_ref) or
+             Reference_ReferenceType(p_ref) |-> p_referenceType : Type_IsTransitiveSubtype)
+        THEN
+            /* Compatible reference, add it in a available reference index of the browse result */
+            ANY l_browseResultIdx WHERE
+                l_browseResultIdx : NAT &
+                l_browseResultIdx : browseResult_to_iterate
+            THEN
+                browseResult_iterated   := browseResult_iterated   \/ {l_browseResultIdx} ||
+                browseResult_to_iterate := browseResult_to_iterate -  {l_browseResultIdx} ||
+                p_continue              := bool(browseResult_to_iterate /= {l_browseResultIdx}) ||
+                out_BrowseResult_ReferenceTypeId (l_browseResultIdx) := Reference_ReferenceType(p_ref) ||
+                out_BrowseResult_isForward (l_browseResultIdx) := Reference_IsForward(p_ref) ||
+                out_BrowseResult_NodeId (l_browseResultIdx) := Reference_TargetNode(p_ref) ||
+                out_BrowseResult_nb_References := l_browseResultIdx ||
+                IF Reference_TargetNode(p_ref) : dom(conv_ExpandedNodeId_NodeId) &
+                    conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref)) : ran(a_NodeId)
+                THEN
+                    out_BrowseResult_BrowseName (l_browseResultIdx) := a_BrowseName(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref)))) ||
+                    out_BrowseResult_DisplayName (l_browseResultIdx) := a_DisplayName(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref)))) ||
+                    out_BrowseResult_NodeClass (l_browseResultIdx) := a_NodeClass(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref)))) ||
+                    out_BrowseResult_TypeDefinition (l_browseResultIdx) := Ref_HasTypeDefinition(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref))))
+                ELSE
+                    out_BrowseResult_BrowseName (l_browseResultIdx) := c_QualifiedName_indet ||
+                    out_BrowseResult_DisplayName (l_browseResultIdx) := c_LocalizedText_indet ||
+                    out_BrowseResult_NodeClass (l_browseResultIdx) := c_NodeClass_indet ||
+                    out_BrowseResult_TypeDefinition (l_browseResultIdx) := c_ExpandedNodeId_indet
+                END
+            END
+        ELSE
+            /* if reference filtered, nothing to do and there are still browse result reference index available for next call */
+            p_continue := TRUE
+        END
     END
 
 OPERATIONS
@@ -103,13 +174,116 @@ OPERATIONS
         END
     END
     ;
+
+    /* When the target node fulfills all the filtering conditions, then fill its data and iterate
+       on the browse result index.
+       p_ref             : reference to evaluate
+       p_browseDirection : direction(s) of references to filter
+       p_refType_defined : indicates whether the reference type should be filtered. The following 2
+                           parameters are meaningfull only when this one is true
+       p_referenceType   : reference type to filter
+       p_includeSubtypes : indicates whether subtypes should be filtered. Else only the given reference
+                           type is filtered
+       p_continue        : indicates whether the iteration should continue (it should stop if the
+                           maximum number of browse response index has just been filled)
+    */
+    p_continue <-- fill_browse_result_ref(p_ref, p_browseDirection, p_refType_defined, p_referenceType, p_includeSubtypes) =
+    VAR
+        l_RefType,
+        l_TargetNode,
+        l_IsForward,
+        l_res,
+        l_bri,
+        l_BrowseName,
+        l_DisplayName,
+        l_NodeClass,
+        l_TypeDefinition
+    IN
+        p_continue := TRUE;
+        l_RefType    <-- get_Reference_ReferenceType(p_ref);
+        l_TargetNode <-- get_Reference_TargetNode(p_ref);
+        l_IsForward  <-- get_Reference_IsForward(p_ref);
+        l_res        <-- get_Is_Dir_Forward_Compatible(p_browseDirection, l_IsForward);
+        IF  l_res = TRUE THEN
+            l_res <-- Is_RefTypes_Compatible(p_refType_defined, p_referenceType, p_includeSubtypes, l_RefType);
+            IF  l_res = TRUE THEN
+                p_continue, l_bri <-- continue_iter_browseResult;
+                l_BrowseName, l_DisplayName, l_NodeClass, l_TypeDefinition <-- get_optional_fields_ReferenceDescription(l_TargetNode);
+                setall_browse_result_reference_at (l_bri, l_RefType, l_IsForward, l_TargetNode,
+                                                   l_BrowseName, l_DisplayName, l_NodeClass, l_TypeDefinition)
+            END
+        END
+    END
+    ;
+
+    /* Fills the browse result on one given source node.
+       Iterates on each reference (starting from p_startIndex) of the source node:
+       p_startIndex     : reference index used to start iteration on source node references (to be able to continue)
+       p_max_nb_results : maximum number of results (number of references on the source node before filtering)
+       p_browseView     : browse view node Id (unused for filtering for now)
+       p_src_node       : source node from which refences should start
+       p_browseDirection: direction(s) of references to filter
+       p_refType_defined: indicates whether the reference type should be filtered. The following 2
+                          parameters are meaningfull only when this one is true
+       p_referenceType  : reference type to filter
+       p_includeSubtypes: indicates whether subtypes should be filtered. Else only the given reference
+                          type is filtered
+    */
     p_serviceStatusCode, p_toContinue, p_nextIndex <-- fill_browse_result(p_startIndex, p_max_nb_results, p_browseView,
                                                                           p_src_node, p_browseDirection, p_refType_defined,
                                                                           p_referenceType, p_includeSubtypes) =
-    BEGIN
-        p_serviceStatusCode := c_StatusCode_indet;
-        p_toContinue := FALSE;
-        p_nextIndex := 0
+    VAR
+        l_continue_bri,
+        l_continue_ref,
+        l_ref
+    IN
+        p_serviceStatusCode := e_sc_ok; /* TODO: check if the reference type is valid ?
+                                           Silently fail if we do not know the reference type during typecheck for now (no result will be found) */
+        l_ref := c_Reference_indet;
+        /* Initialization of the iteration on the browse result */
+        l_continue_bri <-- init_iter_browseResult(p_max_nb_results);
+        /* Loop on the references starting on the source node */
+        l_continue_ref <-- init_iter_reference(p_src_node, p_startIndex);
+        p_nextIndex := p_startIndex;
+        WHILE
+            l_continue_ref = TRUE &
+            l_continue_bri = TRUE
+        DO
+            l_continue_ref, l_ref, p_nextIndex <-- continue_iter_reference;
+            /* When the target node fulfills all the filtering conditions, then
+            fill its data and iterate on the browse result index */
+            l_continue_bri <-- fill_browse_result_ref(l_ref, p_browseDirection, p_refType_defined, p_referenceType, p_includeSubtypes)
+        INVARIANT
+            /* Iteration on references from source node */
+            references_to_iterate <: NAT &
+            references_iterated   <: NAT &
+            references_to_iterate /\ references_iterated = {} &
+            next_reference_index : NAT &
+            card(references_to_iterate) = Node_RefIndexEnd(p_src_node) - p_startIndex + 1 &
+
+            /* Iteration on browse result stored references */
+            browseResult_to_iterate <: NAT &
+            browseResult_iterated   <: NAT &
+            browseResult_to_iterate /\ browseResult_iterated = {} &
+            nb_browseResult_max_refs = card(browseResult_to_iterate \/ browseResult_iterated) &
+
+            /* Mandatory defined part of browse result for iterated indexes */
+            out_BrowseResult_ReferenceTypeId : browseResult_iterated --> t_NodeId &
+            out_BrowseResult_isForward : browseResult_iterated --> BOOL &
+            out_BrowseResult_NodeId : browseResult_iterated --> t_ExpandedNodeId &
+            /* Optional defined part of browse result for iterated indexes (external target node or degraded case if target node not found) */
+            out_BrowseResult_BrowseName : browseResult_iterated --> t_QualifiedName_i &
+            out_BrowseResult_DisplayName : browseResult_iterated --> t_LocalizedText_i &
+            out_BrowseResult_NodeClass : browseResult_iterated --> t_NodeClass_i &
+            out_BrowseResult_TypeDefinition : browseResult_iterated --> t_ExpandedNodeId_i &
+
+            out_BrowseResult_nb_References = card(browseResult_iterated)
+        VARIANT
+            card(references_to_iterate)
+        END;
+        /* There are references remaining but no more free indexes available in BrowseResult => continuatoin point needed */
+        p_toContinue := bool(l_continue_ref = TRUE & l_continue_bri = FALSE)
+
     END
     ;
 

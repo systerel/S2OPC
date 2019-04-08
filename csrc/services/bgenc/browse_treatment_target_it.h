@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment_target_it.h
 
- Date                 : 08/04/2019 09:32:49
+ Date                 : 08/04/2019 16:46:08
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -58,9 +58,11 @@ extern void browse_treatment_target_it__INITIALISATION(void);
   --------------------*/
 extern void browse_treatment_target_it__continue_iter_reference(
    t_bool * const browse_treatment_target_it__p_continue,
-   constants__t_Reference_i * const browse_treatment_target_it__p_ref);
+   constants__t_Reference_i * const browse_treatment_target_it__p_ref,
+   t_entier4 * const browse_treatment_target_it__p_nextRefIndex);
 extern void browse_treatment_target_it__init_iter_reference(
    const constants__t_Node_i browse_treatment_target_it__p_node,
+   const t_entier4 browse_treatment_target_it__p_startIndex,
    t_bool * const browse_treatment_target_it__p_continue);
 
 #endif

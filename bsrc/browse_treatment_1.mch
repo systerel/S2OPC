@@ -78,5 +78,37 @@ OPERATIONS
             p_ref_types_compat := TRUE
         END
     END
+    ;
+
+    p_BrowseName, p_DisplayName, p_NodeClass, p_TypeDefinition <-- get_optional_fields_ReferenceDescription(p_TargetNodeId) =
+    PRE
+        p_TargetNodeId : t_ExpandedNodeId_i &
+        p_TargetNodeId : t_ExpandedNodeId
+    THEN
+        p_BrowseName, p_DisplayName, p_NodeClass, p_TypeDefinition
+        :(
+          p_BrowseName : t_QualifiedName_i &
+          p_DisplayName : t_LocalizedText_i &
+          p_DisplayName : t_LocalizedText &
+          p_NodeClass : t_NodeClass_i &
+          p_TypeDefinition : t_ExpandedNodeId_i &
+          (p_TargetNodeId : dom(conv_ExpandedNodeId_NodeId) &
+           conv_ExpandedNodeId_NodeId(p_TargetNodeId) : ran(a_NodeId)
+              =>
+                p_BrowseName = a_BrowseName(a_NodeId~(conv_ExpandedNodeId_NodeId(p_TargetNodeId))) &
+                p_DisplayName = a_DisplayName(a_NodeId~(conv_ExpandedNodeId_NodeId(p_TargetNodeId))) &
+                p_NodeClass = a_NodeClass(a_NodeId~(conv_ExpandedNodeId_NodeId(p_TargetNodeId))) &
+                p_TypeDefinition = Ref_HasTypeDefinition(a_NodeId~(conv_ExpandedNodeId_NodeId(p_TargetNodeId)))
+          ) &
+          (not (p_TargetNodeId : dom(conv_ExpandedNodeId_NodeId) &
+                conv_ExpandedNodeId_NodeId(p_TargetNodeId) : ran(a_NodeId))
+              =>
+                p_BrowseName = c_QualifiedName_indet &
+                p_DisplayName = c_LocalizedText_indet &
+                p_NodeClass = c_NodeClass_indet &
+                p_TypeDefinition = c_ExpandedNodeId_indet
+          )
+        )
+    END
 
 END

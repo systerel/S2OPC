@@ -953,13 +953,18 @@ OPERATIONS
     END
     ;
 
-    p_nid <-- getall_conv_ExpandedNodeId_NodeId(p_expnid) =
+    p_local_server, p_nid <-- getall_conv_ExpandedNodeId_NodeId(p_expnid) =
     PRE
         p_expnid : t_ExpandedNodeId_i &
         p_expnid : t_ExpandedNodeId
     THEN
-        p_nid :(p_nid : t_NodeId_i &
-                p_nid = conv_ExpandedNodeId_NodeId(p_expnid))
+        p_local_server, p_nid :(p_local_server : BOOL &
+                                p_nid : t_NodeId_i &
+                                (p_local_server = TRUE =>
+                                    p_nid = conv_ExpandedNodeId_NodeId(p_expnid)) &
+                                (p_local_server = FALSE =>
+                                    p_nid = c_NodeId_indet)
+                               )
     END
     ;
 

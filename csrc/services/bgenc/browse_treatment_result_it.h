@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment_result_it.h
 
- Date                 : 08/04/2019 09:32:48
+ Date                 : 08/04/2019 16:46:08
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -54,11 +54,11 @@ extern void browse_treatment_result_it__INITIALISATION(void);
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-extern void browse_treatment_result_it__continue_iter_browseResults(
+extern void browse_treatment_result_it__continue_iter_browseResult(
    t_bool * const browse_treatment_result_it__p_continue,
    t_entier4 * const browse_treatment_result_it__p_browseResultIdx);
-extern void browse_treatment_result_it__init_iter_browseResults(
-   const t_entier4 browse_treatment_result_it__p_nb_to_iterate,
+extern void browse_treatment_result_it__init_iter_browseResult(
+   const t_entier4 browse_treatment_result_it__p_nb_browseResult_max_refs,
    t_bool * const browse_treatment_result_it__p_continue);
 
 #endif
