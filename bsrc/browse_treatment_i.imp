@@ -26,7 +26,9 @@ IMPORTS
     browse_treatment_context,
     browse_treatment_continuation_points,
     browse_treatment_result_bs,
-    browse_treatment_1
+    browse_treatment_1,
+    browse_treatment_target_it,
+    browse_treatment_result_it
 
 PROMOTES
     set_session_closed,

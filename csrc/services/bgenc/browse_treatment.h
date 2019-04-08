@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment.h
 
- Date                 : 05/04/2019 14:46:17
+ Date                 : 08/04/2019 09:32:47
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -42,6 +42,8 @@
 #include "browse_treatment_context.h"
 #include "browse_treatment_continuation_points.h"
 #include "browse_treatment_result_bs.h"
+#include "browse_treatment_result_it.h"
+#include "browse_treatment_target_it.h"
 
 /*--------------
    SEES Clause

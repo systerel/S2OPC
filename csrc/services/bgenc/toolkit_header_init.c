@@ -21,7 +21,7 @@
 
  File Name            : toolkit_header_init.c
 
- Date                 : 05/04/2019 14:46:44
+ Date                 : 08/04/2019 09:33:21
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -46,6 +46,8 @@
 #include "browse_treatment_context.h"
 #include "browse_treatment_continuation_points.h"
 #include "browse_treatment_result_bs.h"
+#include "browse_treatment_result_it.h"
+#include "browse_treatment_target_it.h"
 #include "channel_mgr.h"
 #include "channel_mgr_1.h"
 #include "channel_mgr_bs.h"
@@ -202,6 +204,8 @@ void INITIALISATION(void) {
    browse_treatment_continuation_points__INITIALISATION();
    browse_treatment_result_bs__INITIALISATION();
    browse_treatment_1__INITIALISATION();
+   browse_treatment_target_it__INITIALISATION();
+   browse_treatment_result_it__INITIALISATION();
    browse_treatment__INITIALISATION();
    service_mgr__INITIALISATION();
    io_dispatch_mgr__INITIALISATION();
