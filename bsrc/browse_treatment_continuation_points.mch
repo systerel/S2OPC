@@ -115,5 +115,13 @@ OPERATIONS
         s_ContinuationPoints := s_ContinuationPoints - {session_ContinuationPoint~(p_session)} ||
         session_ContinuationPoint := session_ContinuationPoint |>> {p_session}
     END
+    ;
+
+    /* TODO: to be called on UNINIT to free all continuations AND on NodeManagement service calls modifying the address space !!! */
+    UNINITIALISATION =
+    BEGIN
+        s_ContinuationPoints :: {} ||
+        session_ContinuationPoint :: {}
+    END
 
 END

@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment_continuation_points.h
 
- Date                 : 05/04/2019 14:46:17
+ Date                 : 08/04/2019 17:03:06
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -48,6 +48,7 @@ extern void browse_treatment_continuation_points__INITIALISATION(void);
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+extern void browse_treatment_continuation_points__UNINITIALISATION(void);
 extern void browse_treatment_continuation_points__create_continuation_point(
    const constants__t_session_i browse_treatment_continuation_points__p_session,
    const t_entier4 browse_treatment_continuation_points__p_nextIndex,

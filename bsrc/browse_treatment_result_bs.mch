@@ -126,7 +126,6 @@ OPERATIONS
         p_NodeId : t_ExpandedNodeId &
         p_BrowseName : t_QualifiedName_i &
         p_DisplayName : t_LocalizedText_i &
-        p_DisplayName : t_LocalizedText &
         p_NodeClass : t_NodeClass_i &
         p_TypeDefinition : t_ExpandedNodeId_i
     THEN
@@ -159,7 +158,7 @@ OPERATIONS
         p_isForward := out_BrowseResult_isForward ( p_refIndex ) ||
         p_NodeId : ( p_NodeId : t_ExpandedNodeId_i & p_NodeId = out_BrowseResult_NodeId ( p_refIndex ) ) ||
         p_BrowseName := out_BrowseResult_BrowseName ( p_refIndex ) ||
-        p_DisplayName : ( p_DisplayName : t_LocalizedText_i & p_DisplayName = out_BrowseResult_DisplayName ( p_refIndex ) ) ||
+        p_DisplayName := out_BrowseResult_DisplayName ( p_refIndex ) ||
         p_NodeClass := out_BrowseResult_NodeClass ( p_refIndex ) ||
         p_TypeDefinition := out_BrowseResult_TypeDefinition ( p_refIndex )
     END

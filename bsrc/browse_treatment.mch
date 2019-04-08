@@ -79,7 +79,8 @@ DEFINITIONS
         out_BrowseResult_isForward         : NAT +-> BOOL               &
         out_BrowseResult_NodeId            : NAT +-> t_ExpandedNodeId   &
         out_BrowseResult_BrowseName        : NAT +-> t_QualifiedName_i  &
-        out_BrowseResult_DisplayName       : NAT +-> t_LocalizedText    &
+        out_BrowseResult_DisplayName       : NAT +-> t_LocalizedText_i  & /* Spec (v1.04) part 4 table 167 indicates it as mandatory (should be t_LocalizedText)
+                                                                             but if node is not present we do not have it*/
         out_BrowseResult_NodeClass         : NAT +-> t_NodeClass_i      &
         out_BrowseResult_TypeDefinition    : NAT +-> t_ExpandedNodeId_i &
         out_BrowseResult                   : t_BrowseResult_i           &
@@ -219,7 +220,7 @@ OPERATIONS
               out_BrowseResult_isForward         : 1..p_nbReferences --> BOOL     &
               out_BrowseResult_NodeId            : 1..p_nbReferences --> t_ExpandedNodeId   &
               out_BrowseResult_BrowseName        : 1..p_nbReferences --> t_QualifiedName_i  & /* TODO: restrict to t_QualifiedName if Node in server */
-              out_BrowseResult_DisplayName       : 1..p_nbReferences --> t_LocalizedText    &
+              out_BrowseResult_DisplayName       : 1..p_nbReferences --> t_LocalizedText_i  &
               out_BrowseResult_NodeClass         : 1..p_nbReferences --> t_NodeClass_i      & /* TODO: restrict to t_NodeClass if Node in server */
               out_BrowseResult_TypeDefinition    : 1..p_nbReferences --> t_ExpandedNodeId_i & /* TODO: restrict to t_ExpandedNodeId if Node in server */
               out_BrowseResult : t_BrowseResult & /* Results are defined */
@@ -266,7 +267,7 @@ OPERATIONS
         p_isForward := out_BrowseResult_isForward(p_refIndex) ||
         p_NodeId :(p_NodeId : t_ExpandedNodeId_i & p_NodeId = out_BrowseResult_NodeId(p_refIndex)) ||
         p_BrowseName := out_BrowseResult_BrowseName(p_refIndex) ||
-        p_DisplayName :(p_DisplayName : t_LocalizedText_i & p_DisplayName = out_BrowseResult_DisplayName(p_refIndex)) ||
+        p_DisplayName := out_BrowseResult_DisplayName(p_refIndex) ||
         p_NodeClass := out_BrowseResult_NodeClass(p_refIndex) ||
         p_TypeDefinition := out_BrowseResult_TypeDefinition(p_refIndex)
     END
