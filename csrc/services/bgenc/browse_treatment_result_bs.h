@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment_result_bs.h
 
- Date                 : 05/04/2019 14:46:30
+ Date                 : 10/04/2019 09:26:14
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -55,7 +55,7 @@ extern void browse_treatment_result_bs__alloc_browse_result(
 extern void browse_treatment_result_bs__clear_browse_result(void);
 extern void browse_treatment_result_bs__getall_and_clear_browse_result(
    t_entier4 * const browse_treatment_result_bs__p_nb_references,
-   constants__t_BrowseResult_i * const browse_treatment_result_bs__p_browseResult);
+   constants__t_BrowseResultReferences_i * const browse_treatment_result_bs__p_browseResult);
 extern void browse_treatment_result_bs__getall_browse_result_reference_at(
    const t_entier4 browse_treatment_result_bs__p_refIndex,
    constants__t_NodeId_i * const browse_treatment_result_bs__p_refTypeId,
@@ -74,5 +74,7 @@ extern void browse_treatment_result_bs__setall_browse_result_reference_at(
    const constants__t_LocalizedText_i browse_treatment_result_bs__p_DisplayName,
    const constants__t_NodeClass_i browse_treatment_result_bs__p_NodeClass,
    const constants__t_ExpandedNodeId_i browse_treatment_result_bs__p_TypeDefinition);
+extern void browse_treatment_result_bs__unused_browse_view(
+   const constants__t_NodeId_i browse_treatment_result_bs__p_browseView);
 
 #endif

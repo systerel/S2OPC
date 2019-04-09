@@ -30,6 +30,9 @@ IMPORTS
     write_value_pointer_bs,
     data_value_pointer_bs
 
+PROMOTES
+    internal_server_inactive_session_prio_event
+
 LOCAL_OPERATIONS
 
     header_type <-- get_msg_header_type (msg_typ) =
@@ -811,17 +814,6 @@ OPERATIONS
                     send_channel_msg_buffer (l_channel, l_buffer_out, p_req_context)
                 END
             END
-        ELSE
-            bres := FALSE
-        END
-    END
-    ;
-
-    bres <-- internal_server_inactive_session_prio_event (p_session, p_newSessionState) =
-    BEGIN
-        IF p_session /= c_session_indet THEN
-            bres := TRUE;
-            server_subscription_session_inactive (p_session, p_newSessionState)
         ELSE
             bres := FALSE
         END

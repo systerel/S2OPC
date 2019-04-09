@@ -36,7 +36,7 @@ DEFINITIONS
         out_BrowseResult_DisplayName,
         out_BrowseResult_NodeClass,
         out_BrowseResult_TypeDefinition,
-        out_BrowseResult,
+        out_BrowseResultReferences,
         max_nb_references,
         isBrowseResultAllocated
     ;
@@ -51,7 +51,7 @@ DEFINITIONS
         out_BrowseResult_DisplayName       : NAT +-> t_LocalizedText_i  &
         out_BrowseResult_NodeClass         : NAT +-> t_NodeClass_i      &
         out_BrowseResult_TypeDefinition    : NAT +-> t_ExpandedNodeId_i &
-        out_BrowseResult                   : t_BrowseResult_i           &
+        out_BrowseResultReferences         : t_BrowseResultReferences_i &
         max_nb_references                  : NAT                        &
         isBrowseResultAllocated            : BOOL
     ;
@@ -67,7 +67,7 @@ DEFINITIONS
             out_BrowseResult_DisplayName       = {}                         &
             out_BrowseResult_NodeClass         = {}                         &
             out_BrowseResult_TypeDefinition    = {}                         &
-            out_BrowseResult                   = c_BrowseResult_indet       &
+            out_BrowseResultReferences         = c_BrowseResultReferences_indet &
             max_nb_references                  = 0                          &
             isBrowseResultAllocated            = FALSE
         )
@@ -107,7 +107,7 @@ OPERATIONS
                 out_BrowseResult_DisplayName       = {}                         &
                 out_BrowseResult_NodeClass         = {}                         &
                 out_BrowseResult_TypeDefinition    = {}                         &
-                out_BrowseResult                   : t_BrowseResult
+                out_BrowseResultReferences         : t_BrowseResultReferences
             )
         END
     END
@@ -168,7 +168,7 @@ OPERATIONS
     PRE
         isBrowseResultAllocated = TRUE
     THEN
-        p_browseResult := out_BrowseResult ||
+        p_browseResult := out_BrowseResultReferences ||
         p_nb_references := out_BrowseResult_nb_References
     END
     ;
@@ -176,6 +176,15 @@ OPERATIONS
     clear_browse_result =
     BEGIN
         d_init_out
+    END
+    ;
+
+    // Note: avoid unused parameter warning in browse_treatment_i
+    unused_browse_view (p_browseView) =
+    PRE
+        p_browseView : t_NodeId_i
+    THEN
+        skip
     END
 
 END

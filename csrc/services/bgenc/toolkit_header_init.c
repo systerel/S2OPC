@@ -21,7 +21,7 @@
 
  File Name            : toolkit_header_init.c
 
- Date                 : 08/04/2019 09:33:21
+ Date                 : 10/04/2019 09:26:28
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -45,6 +45,7 @@
 #include "browse_treatment_1.h"
 #include "browse_treatment_context.h"
 #include "browse_treatment_continuation_points.h"
+#include "browse_treatment_continuation_points_bs.h"
 #include "browse_treatment_result_bs.h"
 #include "browse_treatment_result_it.h"
 #include "browse_treatment_target_it.h"
@@ -64,7 +65,7 @@
 #include "monitored_item_pointer_bs.h"
 #include "monitored_item_queue_bs.h"
 #include "monitored_item_queue_it_bs.h"
-#include "msg_browse_response_bs.h"
+#include "msg_browse_bs.h"
 #include "msg_read_request.h"
 #include "msg_read_request_bs.h"
 #include "msg_read_response_bs.h"
@@ -85,10 +86,7 @@
 #include "register_nodes_it.h"
 #include "request_handle_bs.h"
 #include "response_write_bs.h"
-#include "service_browse.h"
-#include "service_browse_decode_bs.h"
-#include "service_browse_seq.h"
-#include "service_browse_seq_it.h"
+#include "service_browse_it.h"
 #include "service_find_servers_bs.h"
 #include "service_get_endpoints_bs.h"
 #include "service_mgr.h"
@@ -97,6 +95,7 @@
 #include "service_read_it.h"
 #include "service_register_nodes.h"
 #include "service_response_cb_bs.h"
+#include "service_set_view.h"
 #include "service_unregister_nodes.h"
 #include "service_write_decode_bs.h"
 #include "session_core.h"
@@ -166,11 +165,17 @@ void INITIALISATION(void) {
    service_read_it__INITIALISATION();
    service_read__INITIALISATION();
    service_get_endpoints_bs__INITIALISATION();
-   msg_browse_response_bs__INITIALISATION();
-   service_browse__INITIALISATION();
-   service_browse_seq_it__INITIALISATION();
-   service_browse_decode_bs__INITIALISATION();
-   service_browse_seq__INITIALISATION();
+   service_browse_it__INITIALISATION();
+   browse_treatment_context__INITIALISATION();
+   browse_treatment_continuation_points_bs__INITIALISATION();
+   browse_treatment_continuation_points__INITIALISATION();
+   browse_treatment_result_bs__INITIALISATION();
+   browse_treatment_1__INITIALISATION();
+   browse_treatment_target_it__INITIALISATION();
+   browse_treatment_result_it__INITIALISATION();
+   browse_treatment__INITIALISATION();
+   msg_browse_bs__INITIALISATION();
+   service_set_view__INITIALISATION();
    subscription_core_1__INITIALISATION();
    monitored_item_queue_bs__INITIALISATION();
    subscription_core_bs__INITIALISATION();
@@ -200,13 +205,6 @@ void INITIALISATION(void) {
    msg_unregister_nodes__INITIALISATION();
    unregister_nodes_it__INITIALISATION();
    service_unregister_nodes__INITIALISATION();
-   browse_treatment_context__INITIALISATION();
-   browse_treatment_continuation_points__INITIALISATION();
-   browse_treatment_result_bs__INITIALISATION();
-   browse_treatment_1__INITIALISATION();
-   browse_treatment_target_it__INITIALISATION();
-   browse_treatment_result_it__INITIALISATION();
-   browse_treatment__INITIALISATION();
    service_mgr__INITIALISATION();
    io_dispatch_mgr__INITIALISATION();
    toolkit_header__INITIALISATION();

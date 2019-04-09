@@ -18,10 +18,10 @@
  */
 
 IMPLEMENTATION
-    service_browse_seq_it_i
+    service_browse_it_i
 
 REFINES
-    service_browse_seq_it
+    service_browse_it
 
 SEES
     constants,
@@ -29,39 +29,21 @@ SEES
 
 CONCRETE_VARIABLES
     nb_bvi,
-    bvi_i,
-
-    nb_bri,
-    bri_i,
-
-    Node,
-    RefIndex,
-    RefIndexEnd
+    bvi_i
 
 INVARIANT
     nb_bvi : NAT &
     bvi_i  : NAT &
 
-    nb_bri : NAT &
-    bri_i  : NAT &
+    breqs_nb_reqs = nb_bvi &
+    (bvi_i > 0 & bvi_i <= nb_bvi =>
+      breqs_to_iterate = cast_t_BrowseValue[bvi_i..nb_bvi] &
+      breqs_iterated = cast_t_BrowseValue[1..bvi_i])
 
-    Node        : t_Node_i &
-    Node        : t_Node &
-    RefIndex    : NAT &
-    RefIndex    : t_RefIndex &
-    RefIndexEnd : NAT &
-    RefIndexEnd : t_RefIndex
 
 INITIALISATION
     nb_bvi := 0;
-    bvi_i  := 0;
-
-    nb_bri := 0;
-    bri_i  := 0;
-
-    Node        := c_Node_indet;
-    RefIndex    := 0;
-    RefIndexEnd := 0
+    bvi_i  := 0
 
 OPERATIONS
 
@@ -78,39 +60,6 @@ OPERATIONS
         p_bvi <-- get_cast_t_BrowseValue(bvi_i);
         bvi_i := bvi_i + 1;
         p_continue := bool(bvi_i <= nb_bvi)
-    END
-    ;
-
-    p_continue <-- init_iter_browse_result(p_nb_bri) =
-    BEGIN
-        nb_bri     := p_nb_bri;
-        bri_i      := 1;
-        p_continue := bool(1 <= p_nb_bri)
-    END
-    ;
-
-    p_continue, p_bri <-- continue_iter_browse_result =
-    BEGIN
-        p_bri <-- get_cast_t_BrowseResult(bri_i);
-        bri_i := bri_i + 1;
-        p_continue := bool(bri_i <= nb_bri)
-    END
-    ;
-
-    p_continue <-- init_iter_reference(p_node) =
-    BEGIN
-        Node        := p_node;
-        RefIndex    := 0;
-        RefIndexEnd <-- get_Node_RefIndexEnd(p_node);
-        p_continue := bool(RefIndexEnd >= RefIndex)
-    END
-    ;
-
-    p_continue, p_ref <-- continue_iter_reference =
-    BEGIN
-       p_ref <-- get_RefIndex_Reference(Node, RefIndex);
-       RefIndex := RefIndex + 1;
-       p_continue := bool(RefIndex <= RefIndexEnd)
     END
 
 END

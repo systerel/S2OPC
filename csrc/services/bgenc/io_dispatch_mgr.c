@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 29/01/2019 12:57:48
+ Date                 : 09/04/2019 12:10:32
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -931,20 +931,6 @@ void io_dispatch_mgr__internal_server_send_publish_response_prio_event(
       else {
          *io_dispatch_mgr__bres = false;
       }
-   }
-}
-
-void io_dispatch_mgr__internal_server_inactive_session_prio_event(
-   const constants__t_session_i io_dispatch_mgr__p_session,
-   const constants__t_sessionState io_dispatch_mgr__p_newSessionState,
-   t_bool * const io_dispatch_mgr__bres) {
-   if (io_dispatch_mgr__p_session != constants__c_session_indet) {
-      *io_dispatch_mgr__bres = true;
-      service_mgr__server_subscription_session_inactive(io_dispatch_mgr__p_session,
-         io_dispatch_mgr__p_newSessionState);
-   }
-   else {
-      *io_dispatch_mgr__bres = false;
    }
 }
 

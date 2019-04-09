@@ -1068,34 +1068,9 @@ bool util_channel__SecurityPolicy_C_to_B(const char* uri, constants__t_SecurityP
     return false;
 }
 
-bool util_BrowseDirection__B_to_C(constants__t_BrowseDirection_i bdir, OpcUa_BrowseDirection* cdir)
+void util_BrowseDirection__C_to_B(OpcUa_BrowseDirection cdir, constants__t_BrowseDirection_i* bdir)
 {
-    if (NULL == cdir)
-        return false;
-
-    switch (bdir)
-    {
-    case constants__e_bd_forward:
-        *cdir = OpcUa_BrowseDirection_Forward;
-        break;
-    case constants__e_bd_inverse:
-        *cdir = OpcUa_BrowseDirection_Inverse;
-        break;
-    case constants__e_bd_both:
-        *cdir = OpcUa_BrowseDirection_Both;
-        break;
-    case constants__e_bd_indet:
-    default:
-        return false;
-    }
-
-    return true;
-}
-
-bool util_BrowseDirection__C_to_B(OpcUa_BrowseDirection cdir, constants__t_BrowseDirection_i* bdir)
-{
-    if (NULL == bdir)
-        return false;
+    assert(NULL != bdir);
 
     switch (cdir)
     {
@@ -1109,10 +1084,8 @@ bool util_BrowseDirection__C_to_B(OpcUa_BrowseDirection cdir, constants__t_Brows
         *bdir = constants__e_bd_both;
         break;
     default:
-        return false;
+        *bdir = constants__e_bd_indet;
     }
-
-    return true;
 }
 
 bool util_NodeClass__B_to_C(constants__t_NodeClass_i bncl, OpcUa_NodeClass* cncl)
@@ -1349,4 +1322,16 @@ constants_statuscodes_bs__t_StatusCode_i util_read_value_string_indexed(SOPC_Var
     SOPC_NumericRange_Delete(range);
 
     return ret;
+}
+
+void util_NodeId_borrowReference_or_indet__C_to_B(constants__t_NodeId_i* bnodeId, SOPC_NodeId* nodeId)
+{
+    if (SOPC_NodeId_IsNull(nodeId))
+    {
+        *bnodeId = constants__c_NodeId_indet;
+    }
+    else
+    {
+        *bnodeId = nodeId;
+    }
 }

@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 22/05/2019 14:06:15
+ Date                 : 14/06/2019 14:02:14
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -43,7 +43,10 @@
 /*-----------------------------
    SETS Clause: deferred sets
   -----------------------------*/
+#define constants__t_BrowseNodeClassMask_i constants_bs__t_BrowseNodeClassMask_i
+#define constants__t_BrowseResultReferences_i constants_bs__t_BrowseResultReferences_i
 #define constants__t_Byte constants_bs__t_Byte
+#define constants__t_ContinuationPoint_i constants_bs__t_ContinuationPoint_i
 #define constants__t_DataValue_i constants_bs__t_DataValue_i
 #define constants__t_ExpandedNodeId_i constants_bs__t_ExpandedNodeId_i
 #define constants__t_IndexRange_i constants_bs__t_IndexRange_i
@@ -93,7 +96,6 @@
 #define constants__t_ReadValue_i t_entier4
 #define constants__t_WriteValue_i t_entier4
 #define constants__t_BrowseValue_i t_entier4
-#define constants__t_BrowseResult_i t_entier4
 
 /*-------------------------------
    SETS Clause: enumerated sets
@@ -292,7 +294,10 @@ typedef enum {
 /*--------------------------
    Added by the Translator
   --------------------------*/
+#define constants__t_BrowseNodeClassMask_i_max constants_bs__t_BrowseNodeClassMask_i_max
+#define constants__t_BrowseResultReferences_i_max constants_bs__t_BrowseResultReferences_i_max
 #define constants__t_Byte_max constants_bs__t_Byte_max
+#define constants__t_ContinuationPoint_i_max constants_bs__t_ContinuationPoint_i_max
 #define constants__t_DataValue_i_max constants_bs__t_DataValue_i_max
 #define constants__t_ExpandedNodeId_i_max constants_bs__t_ExpandedNodeId_i_max
 #define constants__t_IndexRange_i_max constants_bs__t_IndexRange_i_max
@@ -341,13 +346,14 @@ typedef enum {
 #define constants__t_ReadValue_i_max constants_bs__k_n_read_resp_max
 #define constants__t_WriteValue_i_max constants_bs__k_n_WriteResponse_max
 #define constants__t_BrowseValue_i_max constants_bs__k_n_BrowseResponse_max
-#define constants__t_BrowseResult_i_max constants_bs__k_n_BrowseTarget_max
 
 /*------------------------------------------------
    CONCRETE_CONSTANTS Clause: scalars and arrays
   ------------------------------------------------*/
+#define constants__c_BrowseResultReferences_indet constants_bs__c_BrowseResultReferences_indet
 #define constants__c_ByteString_Type_NodeId constants_bs__c_ByteString_Type_NodeId
 #define constants__c_Byte_Type_NodeId constants_bs__c_Byte_Type_NodeId
+#define constants__c_ContinuationPoint_indet constants_bs__c_ContinuationPoint_indet
 #define constants__c_DataValue_indet constants_bs__c_DataValue_indet
 #define constants__c_ExpandedNodeId_indet constants_bs__c_ExpandedNodeId_indet
 #define constants__c_IndexRange_indet constants_bs__c_IndexRange_indet
@@ -407,7 +413,6 @@ typedef enum {
 #define constants__c_ReadValue_indet (0)
 #define constants__c_WriteValue_indet (0)
 #define constants__c_BrowseValue_indet (0)
-#define constants__c_BrowseResult_indet (0)
 #define constants__c_ValueRank_OneDimension (1)
 #define constants__c_ValueRank_OneOrMoreDimensions (0)
 #define constants__c_ValueRank_Scalar (-1)
@@ -444,9 +449,6 @@ extern void constants__get_Is_Dir_Forward_Compatible(
    const constants__t_BrowseDirection_i constants__p_dir,
    const t_bool constants__p_IsForward,
    t_bool * const constants__p_dir_compat);
-extern void constants__get_cast_t_BrowseResult(
-   const t_entier4 constants__p_ind,
-   constants__t_BrowseResult_i * const constants__p_bri);
 extern void constants__get_cast_t_BrowseValue(
    const t_entier4 constants__p_ind,
    constants__t_BrowseValue_i * const constants__p_bvi);

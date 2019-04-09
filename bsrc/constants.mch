@@ -86,8 +86,8 @@ SETS
 
     /* A BrowseValue of a BrowseRequest. */
     t_BrowseValue_i;
-    t_BrowseResult_i;
-
+    t_BrowseResultReferences_i;
+    t_BrowseNodeClassMask_i;
 
     t_byte_buffer_i; /* (SOPC_Buffer*) */
     t_LocalizedText_i; /* (SOPC_LocalizedText*) */
@@ -314,7 +314,7 @@ CONCRETE_CONSTANTS
     c_WriteValue_indet,
     c_WriteValuePointer_indet,
     c_BrowseValue_indet,
-    c_BrowseResult_indet,
+    c_BrowseResultReferences_indet,
     c_byte_buffer_indet,
     c_LocalizedText_indet,
     c_QualifiedName_indet,
@@ -394,7 +394,7 @@ ABSTRACT_CONSTANTS
     t_WriteValue,
     t_WriteValuePointer,
     t_BrowseValue,
-    t_BrowseResult,
+    t_BrowseResultReferences,
     t_RefIndex,
     t_byte_buffer,
     t_LocalizedText,
@@ -406,7 +406,6 @@ ABSTRACT_CONSTANTS
     cast_t_ReadValue,
     cast_t_WriteValue,
     cast_t_BrowseValue,
-    cast_t_BrowseResult,
 
     t_endpoint_config_idx,
     t_session,
@@ -548,11 +547,9 @@ PROPERTIES
     cast_t_BrowseValue : NAT +-> t_BrowseValue_i &
     cast_t_BrowseValue : perm(t_BrowseValue) &
 
-    t_BrowseResult <: t_BrowseResult_i &
-    c_BrowseResult_indet : t_BrowseResult_i &
-    c_BrowseResult_indet /: t_BrowseResult &
-    cast_t_BrowseResult : NAT +-> t_BrowseResult_i &
-    cast_t_BrowseResult : perm(t_BrowseResult) &
+    t_BrowseResultReferences <: t_BrowseResultReferences_i &
+    c_BrowseResultReferences_indet : t_BrowseResultReferences_i &
+    c_BrowseResultReferences_indet /: t_BrowseResultReferences &
 
     t_monitoredItemReqIndex <: NAT &
     t_monitoredItemNotifIndex <: NAT &
@@ -941,15 +938,6 @@ OPERATIONS
         p_ind : dom(cast_t_BrowseValue)
     THEN
         p_bvi := cast_t_BrowseValue(p_ind)
-    END
-    ;
-
-    p_bri <-- get_cast_t_BrowseResult(p_ind) =
-    PRE
-        p_ind : NAT &
-        p_ind : dom(cast_t_BrowseResult)
-    THEN
-        p_bri := cast_t_BrowseResult(p_ind)
     END
     ;
 

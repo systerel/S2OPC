@@ -48,12 +48,10 @@ VALUES
     t_ReadValue_i = 0..k_n_read_resp_max;
     t_WriteValue_i = 0..k_n_WriteResponse_max;
     t_BrowseValue_i = 0..k_n_BrowseResponse_max;
-    t_BrowseResult_i = 0..k_n_BrowseTarget_max;
 
     c_ReadValue_indet = 0;
     c_WriteValue_indet = 0;
     c_BrowseValue_indet = 0;
-    c_BrowseResult_indet = 0;
 
     c_ValueRank_OneDimension = 1;
     c_ValueRank_OneOrMoreDimensions = 0;
@@ -82,12 +80,6 @@ OPERATIONS
     p_bvi <-- get_cast_t_BrowseValue(p_ind) =
     BEGIN
         p_bvi := p_ind
-    END
-    ;
-
-    p_bri <-- get_cast_t_BrowseResult(p_ind) =
-    BEGIN
-        p_bri := p_ind
     END
     ;
 

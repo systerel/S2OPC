@@ -52,7 +52,10 @@
 /*-----------------------------
    SETS Clause: deferred sets
   -----------------------------*/
+typedef uint32_t constants_bs__t_BrowseNodeClassMask_i;
+typedef OpcUa_ReferenceDescription* constants_bs__t_BrowseResultReferences_i;
 typedef uint8_t constants_bs__t_Byte;
+typedef void* constants_bs__t_ContinuationPoint_i; // TODO: to be implemented and typed
 typedef SOPC_DataValue* constants_bs__t_DataValue_i;
 typedef SOPC_ExpandedNodeId* constants_bs__t_ExpandedNodeId_i;
 typedef SOPC_String* constants_bs__t_IndexRange_i;
@@ -112,8 +115,10 @@ typedef SOPC_ExtensionObject* constants_bs__t_user_token_i;
 /*------------------------------------------------
    CONCRETE_CONSTANTS Clause: scalars and arrays
   ------------------------------------------------*/
+#define constants_bs__c_BrowseResultReferences_indet NULL
 extern const constants_bs__t_NodeId_i constants_bs__c_ByteString_Type_NodeId;
 extern const constants_bs__t_NodeId_i constants_bs__c_Byte_Type_NodeId;
+#define constants_bs__c_ContinuationPoint_indet NULL
 #define constants_bs__c_DataValue_indet NULL
 #define constants_bs__c_ExpandedNodeId_indet NULL
 #define constants_bs__c_IndexRange_indet 0

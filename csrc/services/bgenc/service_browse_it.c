@@ -19,9 +19,9 @@
 
 /******************************************************************************
 
- File Name            : constants.c
+ File Name            : service_browse_it.c
 
- Date                 : 10/04/2019 08:42:10
+ Date                 : 09/04/2019 12:10:34
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -30,49 +30,40 @@
 /*------------------------
    Exported Declarations
   ------------------------*/
-#include "constants.h"
+#include "service_browse_it.h"
+
+/*----------------------------
+   CONCRETE_VARIABLES Clause
+  ----------------------------*/
+t_entier4 service_browse_it__bvi_i;
+t_entier4 service_browse_it__nb_bvi;
 
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
-void constants__INITIALISATION(void) {
+void service_browse_it__INITIALISATION(void) {
+   service_browse_it__nb_bvi = 0;
+   service_browse_it__bvi_i = 0;
 }
 
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-void constants__read_cast_t_ReadValue(
-   const t_entier4 constants__ii,
-   constants__t_ReadValue_i * const constants__rvi) {
-   *constants__rvi = constants__ii;
+void service_browse_it__init_iter_browse_request(
+   const t_entier4 service_browse_it__p_nb_req,
+   t_bool * const service_browse_it__p_continue) {
+   service_browse_it__nb_bvi = service_browse_it__p_nb_req;
+   service_browse_it__bvi_i = 1;
+   *service_browse_it__p_continue = (1 <= service_browse_it__p_nb_req);
 }
 
-void constants__get_cast_t_WriteValue(
-   const t_entier4 constants__ii,
-   constants__t_WriteValue_i * const constants__wvi) {
-   *constants__wvi = constants__ii;
-}
-
-void constants__get_cast_t_BrowseValue(
-   const t_entier4 constants__p_ind,
-   constants__t_BrowseValue_i * const constants__p_bvi) {
-   *constants__p_bvi = constants__p_ind;
-}
-
-void constants__get_Is_Dir_Forward_Compatible(
-   const constants__t_BrowseDirection_i constants__p_dir,
-   const t_bool constants__p_IsForward,
-   t_bool * const constants__p_dir_compat) {
-   switch (constants__p_dir) {
-   case constants__e_bd_forward:
-      *constants__p_dir_compat = constants__p_IsForward;
-      break;
-   case constants__e_bd_inverse:
-      *constants__p_dir_compat = (constants__p_IsForward == false);
-      break;
-   default:
-      *constants__p_dir_compat = true;
-      break;
-   }
+void service_browse_it__continue_iter_browse_request(
+   t_bool * const service_browse_it__p_continue,
+   constants__t_BrowseValue_i * const service_browse_it__p_bvi) {
+   constants__get_cast_t_BrowseValue(service_browse_it__bvi_i,
+      service_browse_it__p_bvi);
+   service_browse_it__bvi_i = service_browse_it__bvi_i +
+      1;
+   *service_browse_it__p_continue = (service_browse_it__bvi_i <= service_browse_it__nb_bvi);
 }
 

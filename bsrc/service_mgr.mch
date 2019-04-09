@@ -728,6 +728,16 @@ OPERATIONS
     END
     ;
 
+    bres <-- internal_server_inactive_session_prio_event (p_session, p_newSessionState) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session &
+        p_newSessionState : t_sessionState
+    THEN
+        bres :: BOOL
+    END
+    ;
+
     /* Promotions */
 
     p_user <-- get_session_user_server (session) =
@@ -775,16 +785,6 @@ OPERATIONS
     PRE
         p_subscription : t_subscription_i &
         p_subscription : t_subscription
-    THEN
-        skip
-    END
-    ;
-
-    server_subscription_session_inactive (p_session, p_newSessionState) =
-    PRE
-        p_session : t_session_i &
-        p_session : t_session &
-        p_newSessionState : t_sessionState
     THEN
         skip
     END

@@ -18,7 +18,7 @@
  */
 
 MACHINE
-    service_browse_seq_it
+    service_browse_it
 
 SEES
     constants
@@ -37,7 +37,8 @@ DEFINITIONS
 
         breqs_to_iterate <: t_BrowseValue &
         breqs_iterated <: t_BrowseValue &
-        breqs_to_iterate /\ breqs_iterated = {}
+        breqs_to_iterate /\ breqs_iterated = {} &
+        breqs_nb_reqs = card(breqs_to_iterate \/ breqs_iterated)
     )
 
 ABSTRACT_VARIABLES
@@ -77,43 +78,6 @@ OPERATIONS
             p_bvi            := l_bvi ||
             p_continue       := bool(breqs_to_iterate /= {l_bvi})
         END
-    END
-    ;
-
-    p_continue <-- init_iter_browse_result(p_nb_bri) =
-    PRE
-        p_nb_bri : NAT
-    THEN
-        p_continue :: BOOL
-    END
-    ;
-
-    p_continue, p_bri <-- continue_iter_browse_result =
-    BEGIN
-       p_continue :: BOOL ||
-       p_bri
-       :(  p_bri : t_BrowseResult_i &
-           p_bri : t_BrowseResult
-        )
-    END
-    ;
-
-    p_continue <-- init_iter_reference(p_node) =
-    PRE
-        p_node : t_Node_i &
-        p_node : t_Node
-    THEN
-        p_continue :: BOOL
-    END
-    ;
-
-    p_continue, p_ref <-- continue_iter_reference =
-    BEGIN
-       p_continue :: BOOL ||
-       p_ref
-       :(  p_ref : t_Reference_i &
-           p_ref : t_Reference
-        )
     END
 
 END

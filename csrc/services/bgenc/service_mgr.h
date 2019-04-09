@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.h
 
- Date                 : 07/02/2019 16:21:08
+ Date                 : 09/04/2019 12:10:35
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -42,13 +42,13 @@
 #include "message_in_bs.h"
 #include "message_out_bs.h"
 #include "request_handle_bs.h"
-#include "service_browse_seq.h"
 #include "service_find_servers_bs.h"
 #include "service_get_endpoints_bs.h"
 #include "service_mgr_bs.h"
 #include "service_read.h"
 #include "service_register_nodes.h"
 #include "service_response_cb_bs.h"
+#include "service_set_view.h"
 #include "service_unregister_nodes.h"
 #include "service_write_decode_bs.h"
 #include "session_mgr.h"
@@ -96,7 +96,6 @@ extern void service_mgr__INITIALISATION(void);
 #define service_mgr__server_secure_channel_lost_session_sm session_mgr__server_secure_channel_lost_session_sm
 #define service_mgr__server_subscription_data_changed subscription_mgr__server_subscription_data_changed
 #define service_mgr__server_subscription_publish_timeout subscription_mgr__server_subscription_publish_timeout
-#define service_mgr__server_subscription_session_inactive subscription_mgr__server_subscription_session_inactive
 
 /*--------------------------
    LOCAL_OPERATIONS Clause
@@ -207,6 +206,10 @@ extern void service_mgr__client_snd_msg_failure(
    const constants__t_channel_i service_mgr__channel,
    const constants__t_client_request_handle_i service_mgr__request_handle,
    const constants_statuscodes_bs__t_StatusCode_i service_mgr__error_status);
+extern void service_mgr__internal_server_inactive_session_prio_event(
+   const constants__t_session_i service_mgr__p_session,
+   const constants__t_sessionState service_mgr__p_newSessionState,
+   t_bool * const service_mgr__bres);
 extern void service_mgr__server_receive_discovery_service_req(
    const constants__t_channel_i service_mgr__channel,
    const constants__t_msg_type_i service_mgr__req_typ,

@@ -49,11 +49,7 @@ constants_statuscodes_bs__t_StatusCode_i util_return_status__C_to_status_code_B(
 
 bool util_channel__SecurityPolicy_C_to_B(const char* uri, constants__t_SecurityPolicy* secpol);
 
-/* Returns true or false upon failure (e_bd_indet or invalid cdir) */
-bool util_BrowseDirection__B_to_C(constants__t_BrowseDirection_i bdir, OpcUa_BrowseDirection* cdir);
-
-/* Returns true or false upon failure (invalid bdir) */
-bool util_BrowseDirection__C_to_B(OpcUa_BrowseDirection cdir, constants__t_BrowseDirection_i* bdir);
+void util_BrowseDirection__C_to_B(OpcUa_BrowseDirection cdir, constants__t_BrowseDirection_i* bdir);
 
 /* Returns true or false upon failure (c_NodeClass_indet or invalid cncl) */
 bool util_NodeClass__B_to_C(constants__t_NodeClass_i bncl, OpcUa_NodeClass* cncl);
@@ -82,5 +78,7 @@ constants_statuscodes_bs__t_StatusCode_i util_read_value_indexed_helper(SOPC_Var
 constants_statuscodes_bs__t_StatusCode_i util_read_value_string_indexed(SOPC_Variant* dst,
                                                                         const SOPC_Variant* src,
                                                                         const SOPC_String* range_str);
+
+void util_NodeId_borrowReference_or_indet__C_to_B(constants__t_NodeId_i* bnodeId, SOPC_NodeId* nodeId);
 
 #endif /* UTIL_B2C_H */

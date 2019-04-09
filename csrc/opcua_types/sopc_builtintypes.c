@@ -1643,6 +1643,12 @@ bool SOPC_NodeId_Equal(const SOPC_NodeId* left, const SOPC_NodeId* right)
     return compare == 0;
 }
 
+bool SOPC_NodeId_IsNull(const SOPC_NodeId* nodeId)
+{
+    return (SOPC_IdentifierType_Numeric == nodeId->IdentifierType && 0 == nodeId->Data.Numeric &&
+            0 == nodeId->Namespace);
+}
+
 void SOPC_NodeId_Hash(const SOPC_NodeId* nodeId, uint64_t* hash)
 {
     uint64_t h;

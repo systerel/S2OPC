@@ -1,41 +1,53 @@
 /*
- * Licensed to Systerel under one or more contributor license
- * agreements. See the NOTICE file distributed with this work
- * for additional information regarding copyright ownership.
- * Systerel licenses this file to you under the Apache
- * License, Version 2.0 (the "License"); you may not use this
- * file except in compliance with the License. You may obtain
- * a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
+* Licensed to Systerel under one or more contributor license
+* agreements. See the NOTICE file distributed with this work
+* for additional information regarding copyright ownership.
+* Systerel licenses this file to you under the Apache
+* License, Version 2.0 (the "License"); you may not use this
+* file except in compliance with the License. You may obtain
+* a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing,
+* software distributed under the License is distributed on an
+* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied.  See the License for the
+* specific language governing permissions and limitations
+* under the License.
+*/
 
 IMPLEMENTATION
-   browse_treatment_continuation_points_i
+    browse_treatment_continuation_points_i
 REFINES
-   browse_treatment_continuation_points
+    browse_treatment_continuation_points
+IMPORTS
+    browse_treatment_continuation_points_bs
 SEES
-   constants
+    constants,
+    session_mgr
+
 OPERATIONS
 
     bres, p_ContinuationPoint <-- create_continuation_point (p_session, p_nextIndex, p_maxTargetRef, p_browseView,
         p_nodeId, p_browseDirection, p_referenceType, p_includeSubtypes) =
     BEGIN
-        /* TODO: call base machine for actual creation + implement session_ContinuationPoint array to store it */
-        bres := FALSE;
-        p_ContinuationPoint := c_ContinuationPoint_indet
+        p_ContinuationPoint := c_ContinuationPoint_indet;
+        bres <-- is_valid_session (p_session);
+        IF bres = TRUE THEN
+            /* TODO: call base machine for actual creation + implement session_ContinuationPoint array to store it */
+            bres, p_ContinuationPoint <-- create_continuation_point_bs (p_nextIndex, p_maxTargetRef, p_browseView, p_nodeId, p_browseDirection, p_referenceType, p_includeSubtypes);
+            bres := FALSE
+        END
     END
     ;
 
     bres, p_nextIndex, p_maxTargetRef, p_browseView, p_nodeId, p_browseDirection, p_referenceType, p_includeSubtypes <-- getall_and_clear_continuation_point (p_session, p_continuationPoint) =
     BEGIN
+        // TODO: remove, only avoid unused param
+        bres <-- is_valid_session (p_session);
+        unused_continuationPoint(p_continuationPoint);
+
         bres := FALSE;
         p_nextIndex := 0;
         p_maxTargetRef := 0;
@@ -48,12 +60,15 @@ OPERATIONS
     ;
 
     set_session_closed (p_session) =
-    BEGIN
-        skip
+    VAR
+        l_res
+    IN
+        // TODO: remove (only avoid unused param) + clear session continuation point
+        l_res <-- is_valid_session (p_session)
     END
     ;
 
-    UNINITIALISATION =
+    continuation_points_UNINITIALISATION =
     BEGIN
         skip
     END

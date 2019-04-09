@@ -33,6 +33,8 @@ SETS
     t_access_level;
 
     t_WriteValuePointer_i;
+    t_BrowseResultReferences_i;
+    t_BrowseNodeClassMask_i;
 
     t_channel_i;
     t_session_i;
@@ -132,6 +134,7 @@ CONCRETE_CONSTANTS
     c_monitoredItemPointer_indet,
     c_monitoredItemId_indet,
     c_WriteValuePointer_indet,
+    c_BrowseResultReferences_indet,
     c_timer_id_indet,
     c_IndexRange_indet,
     c_ContinuationPoint_indet
@@ -178,6 +181,7 @@ ABSTRACT_CONSTANTS
     t_monitoredItemPointer,
     t_monitoredItemId,
     t_WriteValuePointer,
+    t_BrowseResultReferences,
     t_timer_id,
     t_IndexRange,
     t_ContinuationPoint
@@ -366,6 +370,10 @@ PROPERTIES
     t_WriteValuePointer <: t_WriteValuePointer_i &
     c_WriteValuePointer_indet : t_WriteValuePointer_i &
     c_WriteValuePointer_indet /: t_WriteValuePointer &
+
+    t_BrowseResultReferences <: t_BrowseResultReferences_i &
+    c_BrowseResultReferences_indet : t_BrowseResultReferences_i &
+    c_BrowseResultReferences_indet /: t_BrowseResultReferences &
 
     t_timer_id <: t_timer_id_i &
     c_timer_id_indet : t_timer_id_i &

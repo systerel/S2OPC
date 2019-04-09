@@ -51,7 +51,7 @@ DEFINITIONS
         out_BrowseResult_DisplayName,
         out_BrowseResult_NodeClass,
         out_BrowseResult_TypeDefinition,
-        out_BrowseResult,
+        out_BrowseResultReferences,
         isBrowseResultComputed
     ;
 
@@ -83,7 +83,7 @@ DEFINITIONS
                                                                              but if node is not present we do not have it*/
         out_BrowseResult_NodeClass         : NAT +-> t_NodeClass_i      &
         out_BrowseResult_TypeDefinition    : NAT +-> t_ExpandedNodeId_i &
-        out_BrowseResult                   : t_BrowseResult_i           &
+        out_BrowseResultReferences         : t_BrowseResultReferences_i &
         isBrowseResultComputed             : BOOL
     ;
     d_init_in ==
@@ -118,7 +118,7 @@ DEFINITIONS
             out_BrowseResult_DisplayName       = {}                         &
             out_BrowseResult_NodeClass         = {}                         &
             out_BrowseResult_TypeDefinition    = {}                         &
-            out_BrowseResult                   = c_BrowseResult_indet       &
+            out_BrowseResultReferences         = c_BrowseResultReferences_indet &
             isBrowseResultComputed             = FALSE
          )
 
@@ -151,7 +151,6 @@ OPERATIONS
         p_browseDirection : t_BrowseDirection_i     &
         p_browseDirection : t_BrowseDirection       &
         p_referenceType : t_NodeId_i                &
-        p_referenceType : t_NodeId                  &
         p_includeSubtypes : BOOL
     THEN
         /* Reset output result on new context*/
@@ -223,7 +222,7 @@ OPERATIONS
               out_BrowseResult_DisplayName       : 1..p_nbReferences --> t_LocalizedText_i  &
               out_BrowseResult_NodeClass         : 1..p_nbReferences --> t_NodeClass_i      & /* TODO: restrict to t_NodeClass if Node in server */
               out_BrowseResult_TypeDefinition    : 1..p_nbReferences --> t_ExpandedNodeId_i & /* TODO: restrict to t_ExpandedNodeId if Node in server */
-              out_BrowseResult : t_BrowseResult & /* Results are defined */
+              out_BrowseResultReferences : t_BrowseResultReferences & /* Results are defined */
               /* ContinuationPoint defined constraints: */
               (out_BrowseResult_ContinuationPoint /= c_ContinuationPoint_indet =>
                   p_nbReferences = in_maxReferencesPerNode & /* Maximum reached if continuation point defined */
@@ -246,6 +245,12 @@ OPERATIONS
     THEN
         /* De-associate and de-activate the continuation point associated with session */
         session_ContinuationPoint := session_ContinuationPoint |>> {p_session}
+    END
+    ;
+
+    continuation_points_UNINITIALISATION =
+    BEGIN
+        session_ContinuationPoint :: {}
     END
     ;
 
@@ -278,7 +283,7 @@ OPERATIONS
         isBrowseResultComputed = TRUE
     THEN
         p_nb_references := out_BrowseResult_nb_References ||
-        p_browseResult := out_BrowseResult || /* Transfer ownership of BrowseResult to caller */
+        p_browseResult := out_BrowseResultReferences || /* Transfer ownership of BrowseResultReferences to caller */
         d_init_in ||
         d_init_out
     END

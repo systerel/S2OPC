@@ -462,6 +462,7 @@ void SOPC_NodeId_ClearAux(void* value);
 SOPC_ReturnStatus SOPC_NodeId_Compare(const SOPC_NodeId* left, const SOPC_NodeId* right, int32_t* comparison);
 SOPC_ReturnStatus SOPC_NodeId_CompareAux(const void* left, const void* right, int32_t* comparison);
 bool SOPC_NodeId_Equal(const SOPC_NodeId* left, const SOPC_NodeId* right);
+bool SOPC_NodeId_IsNull(const SOPC_NodeId* nodeId);
 
 void SOPC_NodeId_Hash(const SOPC_NodeId* nodeId, uint64_t* hash);
 

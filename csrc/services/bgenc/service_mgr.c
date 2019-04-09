@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 13/03/2019 17:57:18
+ Date                 : 09/04/2019 12:10:35
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -227,7 +227,6 @@ void service_mgr__treat_session_local_service_req(
    const constants__t_msg_i service_mgr__resp_msg,
    constants_statuscodes_bs__t_StatusCode_i * const service_mgr__StatusCode_service) {
    {
-      t_bool service_mgr__l_bret;
       constants__t_user_i service_mgr__l_user;
       
       switch (service_mgr__req_typ) {
@@ -249,20 +248,10 @@ void service_mgr__treat_session_local_service_req(
          address_space__dealloc_write_request_responses();
          break;
       case constants__e_msg_view_browse_req:
-         service_browse_seq__decode_browse_request(service_mgr__req_msg,
+         service_set_view__treat_browse_request(constants__c_session_indet,
+            service_mgr__req_msg,
+            service_mgr__resp_msg,
             service_mgr__StatusCode_service);
-         if (*service_mgr__StatusCode_service == constants_statuscodes_bs__e_sc_ok) {
-            service_browse_seq__treat_browse_request_BrowseValues(service_mgr__StatusCode_service);
-            if (*service_mgr__StatusCode_service == constants_statuscodes_bs__e_sc_ok) {
-               service_browse_seq__write_BrowseResponse_msg_out(service_mgr__resp_msg,
-                  &service_mgr__l_bret);
-               if (service_mgr__l_bret != true) {
-                  *service_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_bad_out_of_memory;
-               }
-            }
-         }
-         service_browse_seq__free_browse_request();
-         service_browse_seq__free_browse_result();
          break;
       default:
          *service_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_bad_service_unsupported;
@@ -282,7 +271,6 @@ void service_mgr__treat_session_service_req(
    constants_statuscodes_bs__t_StatusCode_i * const service_mgr__StatusCode_service,
    t_bool * const service_mgr__async_resp_msg) {
    {
-      t_bool service_mgr__l_bret;
       constants__t_user_i service_mgr__l_user;
       
       *service_mgr__async_resp_msg = false;
@@ -305,20 +293,10 @@ void service_mgr__treat_session_service_req(
          address_space__dealloc_write_request_responses();
          break;
       case constants__e_msg_view_browse_req:
-         service_browse_seq__decode_browse_request(service_mgr__req_msg,
+         service_set_view__treat_browse_request(service_mgr__session,
+            service_mgr__req_msg,
+            service_mgr__resp_msg,
             service_mgr__StatusCode_service);
-         if (*service_mgr__StatusCode_service == constants_statuscodes_bs__e_sc_ok) {
-            service_browse_seq__treat_browse_request_BrowseValues(service_mgr__StatusCode_service);
-            if (*service_mgr__StatusCode_service == constants_statuscodes_bs__e_sc_ok) {
-               service_browse_seq__write_BrowseResponse_msg_out(service_mgr__resp_msg,
-                  &service_mgr__l_bret);
-               if (service_mgr__l_bret != true) {
-                  *service_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_bad_out_of_memory;
-               }
-            }
-         }
-         service_browse_seq__free_browse_request();
-         service_browse_seq__free_browse_result();
          break;
       case constants__e_msg_subscription_create_req:
          subscription_mgr__treat_create_subscription_request(service_mgr__session,
@@ -1694,8 +1672,26 @@ void service_mgr__server_send_publish_response(
    }
 }
 
+void service_mgr__internal_server_inactive_session_prio_event(
+   const constants__t_session_i service_mgr__p_session,
+   const constants__t_sessionState service_mgr__p_newSessionState,
+   t_bool * const service_mgr__bres) {
+   if (service_mgr__p_session != constants__c_session_indet) {
+      *service_mgr__bres = true;
+      subscription_mgr__server_subscription_session_inactive(service_mgr__p_session,
+         service_mgr__p_newSessionState);
+      if (service_mgr__p_newSessionState == constants__e_session_closed) {
+         service_set_view__service_set_view_set_session_closed(service_mgr__p_session);
+      }
+   }
+   else {
+      *service_mgr__bres = false;
+   }
+}
+
 void service_mgr__service_mgr_UNINITIALISATION(void) {
    subscription_mgr__subscription_mgr_UNINITIALISATION();
+   service_set_view__service_set_view_UNINITIALISATION();
    service_mgr_bs__service_mgr_bs_UNINITIALISATION();
 }
 

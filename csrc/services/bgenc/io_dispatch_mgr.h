@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.h
 
- Date                 : 29/01/2019 12:57:48
+ Date                 : 09/04/2019 12:10:32
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -53,6 +53,11 @@
    INITIALISATION Clause
   ------------------------*/
 extern void io_dispatch_mgr__INITIALISATION(void);
+
+/*-------------------------------
+   PROMOTES and EXTENDS Clauses
+  -------------------------------*/
+#define io_dispatch_mgr__internal_server_inactive_session_prio_event service_mgr__internal_server_inactive_session_prio_event
 
 /*--------------------------
    LOCAL_OPERATIONS Clause
@@ -111,10 +116,6 @@ extern void io_dispatch_mgr__internal_server_data_changed(
    t_bool * const io_dispatch_mgr__bres);
 extern void io_dispatch_mgr__internal_server_evaluate_session_timeout(
    const constants__t_session_i io_dispatch_mgr__session);
-extern void io_dispatch_mgr__internal_server_inactive_session_prio_event(
-   const constants__t_session_i io_dispatch_mgr__p_session,
-   const constants__t_sessionState io_dispatch_mgr__p_newSessionState,
-   t_bool * const io_dispatch_mgr__bres);
 extern void io_dispatch_mgr__internal_server_send_publish_response_prio_event(
    const constants__t_session_i io_dispatch_mgr__p_session,
    const constants__t_server_request_handle_i io_dispatch_mgr__p_req_handle,

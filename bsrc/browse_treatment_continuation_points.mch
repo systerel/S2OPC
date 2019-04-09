@@ -40,7 +40,6 @@ OPERATIONS
                                                               p_nodeId, p_browseDirection, p_referenceType, p_includeSubtypes) =
     PRE
         p_session : t_session_i                     &
-        p_session : t_session                       &
         p_nextIndex    : NAT                        &
         p_nextIndex    : t_RefIndex                 &
         p_maxTargetRef : NAT                        &
@@ -55,8 +54,8 @@ OPERATIONS
         p_includeSubtypes : BOOL
     THEN
         /* No continuation point shall be define for given session to create one */
-        bres := bool(p_session /: dom(session_ContinuationPoint~)) ||
-        IF p_session /: dom(session_ContinuationPoint~)
+        bres := bool(p_session : t_session & p_session /: dom(session_ContinuationPoint~)) ||
+        IF p_session : t_session &  p_session /: dom(session_ContinuationPoint~)
         THEN
             ANY l_ContinuationPoint WHERE
                 l_ContinuationPoint : t_ContinuationPoint - s_ContinuationPoints
@@ -118,7 +117,7 @@ OPERATIONS
     ;
 
     /* TODO: to be called on UNINIT to free all continuations AND on NodeManagement service calls modifying the address space !!! */
-    UNINITIALISATION =
+    continuation_points_UNINITIALISATION =
     BEGIN
         s_ContinuationPoints :: {} ||
         session_ContinuationPoint :: {}

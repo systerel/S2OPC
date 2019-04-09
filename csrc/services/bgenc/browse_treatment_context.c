@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment_context.c
 
- Date                 : 05/04/2019 14:46:17
+ Date                 : 10/04/2019 09:25:58
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -73,7 +73,7 @@ void browse_treatment_context__setall_browse_value_context(
    const constants__t_NodeId_i browse_treatment_context__p_referenceType,
    const t_bool browse_treatment_context__p_includeSubtypes) {
    browse_treatment_context__in_startIndex_i = browse_treatment_context__p_startIndex;
-   browse_treatment_context__in_session_i = constants__c_session_indet;
+   browse_treatment_context__in_session_i = browse_treatment_context__p_session;
    browse_treatment_context__in_maxReferencesPerNode_i = browse_treatment_context__p_maxTargetRef;
    browse_treatment_context__in_BrowseView_i = browse_treatment_context__p_browseView;
    browse_treatment_context__in_BrowseValue_NodeId_i = browse_treatment_context__p_nodeId;

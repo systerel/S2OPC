@@ -81,7 +81,7 @@ OPERATIONS
    setall_browse_value_context (p_startIndex, p_session, p_maxTargetRef, p_browseView, p_nodeId, p_browseDirection, p_referenceType, p_includeSubtypes) =
    BEGIN
         in_startIndex_i := p_startIndex;
-        in_session_i := c_session_indet;
+        in_session_i := p_session;
         in_maxReferencesPerNode_i := p_maxTargetRef;
         in_BrowseView_i := p_browseView;
         in_BrowseValue_NodeId_i := p_nodeId;

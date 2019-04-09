@@ -21,7 +21,7 @@
 
  File Name            : constants_statuscodes_bs.h
 
- Date                 : 22/05/2019 14:06:27
+ Date                 : 14/06/2019 14:02:32
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -73,6 +73,9 @@ typedef enum {
    constants_statuscodes_bs__e_sc_bad_view_id_unknown,
    constants_statuscodes_bs__e_sc_bad_attribute_id_invalid,
    constants_statuscodes_bs__e_sc_bad_browse_direction_invalid,
+   constants_statuscodes_bs__e_sc_bad_reference_type_id_invalid,
+   constants_statuscodes_bs__e_sc_bad_continuation_point_invalid,
+   constants_statuscodes_bs__e_sc_bad_no_continuation_points,
    constants_statuscodes_bs__e_sc_bad_service_unsupported,
    constants_statuscodes_bs__e_sc_bad_write_not_supported,
    constants_statuscodes_bs__e_sc_bad_timeout,

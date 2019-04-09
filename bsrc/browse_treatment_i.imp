@@ -32,6 +32,7 @@ IMPORTS
 
 PROMOTES
     set_session_closed,
+    continuation_points_UNINITIALISATION,
     getall_browse_result_reference_at,
     getall_and_clear_browse_result,
     clear_browse_result
@@ -109,10 +110,11 @@ LOCAL_OPERATIONS
     END
     ;
 
-    p_continue <-- fill_browse_result_ref(p_ref, p_browseDirection, p_refType_defined, p_referenceType, p_includeSubtypes) =
+    p_continue <-- fill_browse_result_ref(p_ref, p_browseView, p_browseDirection, p_refType_defined, p_referenceType, p_includeSubtypes) =
     PRE
         p_ref             : t_Reference_i       &
         p_ref             : t_Reference         &
+        p_browseView      : t_NodeId_i          &
         p_browseDirection : t_BrowseDirection_i &
         p_browseDirection : t_BrowseDirection   &
         p_refType_defined : BOOL                &
@@ -187,7 +189,7 @@ OPERATIONS
        p_continue        : indicates whether the iteration should continue (it should stop if the
                            maximum number of browse response index has just been filled)
     */
-    p_continue <-- fill_browse_result_ref(p_ref, p_browseDirection, p_refType_defined, p_referenceType, p_includeSubtypes) =
+    p_continue <-- fill_browse_result_ref(p_ref, p_browseView, p_browseDirection, p_refType_defined, p_referenceType, p_includeSubtypes) =
     VAR
         l_RefType,
         l_TargetNode,
@@ -200,6 +202,7 @@ OPERATIONS
         l_TypeDefinition
     IN
         p_continue := TRUE;
+        unused_browse_view (p_browseView); // TODO: filtering using browse view
         l_RefType    <-- get_Reference_ReferenceType(p_ref);
         l_TargetNode <-- get_Reference_TargetNode(p_ref);
         l_IsForward  <-- get_Reference_IsForward(p_ref);
@@ -252,7 +255,7 @@ OPERATIONS
             l_continue_ref, l_ref, p_nextIndex <-- continue_iter_reference;
             /* When the target node fulfills all the filtering conditions, then
             fill its data and iterate on the browse result index */
-            l_continue_bri <-- fill_browse_result_ref(l_ref, p_browseDirection, p_refType_defined, p_referenceType, p_includeSubtypes)
+            l_continue_bri <-- fill_browse_result_ref(l_ref, p_browseView, p_browseDirection, p_refType_defined, p_referenceType, p_includeSubtypes)
         INVARIANT
             /* Iteration on references from source node */
             references_to_iterate <: NAT &
@@ -297,8 +300,29 @@ OPERATIONS
    ;
 
    p_service_StatusCode <-- set_browse_value_context_from_continuation_point (p_session, p_continuationPoint) =
-   BEGIN
-       p_service_StatusCode := e_sc_bad_continuation_point_invalid
+   VAR
+       l_res,
+       l_nextIndex,
+       l_maxTargetRef,
+       l_browseView,
+       l_nodeId,
+       l_browseDirection,
+       l_referenceType,
+       l_includeSubtypes
+   IN
+        p_service_StatusCode := e_sc_bad_continuation_point_invalid;
+        l_res,
+        l_nextIndex,
+        l_maxTargetRef,
+        l_browseView,
+        l_nodeId,
+        l_browseDirection,
+        l_referenceType,
+        l_includeSubtypes <-- getall_and_clear_continuation_point (p_session, p_continuationPoint);
+        IF l_res = TRUE THEN
+            setall_browse_value_context(l_nextIndex, p_session, l_maxTargetRef, l_browseView, l_nodeId, l_browseDirection, l_referenceType, l_includeSubtypes);
+            p_service_StatusCode := e_sc_ok
+        END
    END
    ;
 

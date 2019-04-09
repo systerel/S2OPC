@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment.c
 
- Date                 : 08/04/2019 16:46:08
+ Date                 : 10/04/2019 09:25:59
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -55,6 +55,7 @@ void browse_treatment__min_max_nb_result_refs(
 
 void browse_treatment__fill_browse_result_ref(
    const constants__t_Reference_i browse_treatment__p_ref,
+   const constants__t_NodeId_i browse_treatment__p_browseView,
    const constants__t_BrowseDirection_i browse_treatment__p_browseDirection,
    const t_bool browse_treatment__p_refType_defined,
    const constants__t_NodeId_i browse_treatment__p_referenceType,
@@ -72,6 +73,7 @@ void browse_treatment__fill_browse_result_ref(
       constants__t_ExpandedNodeId_i browse_treatment__l_TypeDefinition;
       
       *browse_treatment__p_continue = true;
+      browse_treatment_result_bs__unused_browse_view(browse_treatment__p_browseView);
       address_space__get_Reference_ReferenceType(browse_treatment__p_ref,
          &browse_treatment__l_RefType);
       address_space__get_Reference_TargetNode(browse_treatment__p_ref,
@@ -139,6 +141,7 @@ void browse_treatment__fill_browse_result(
             &browse_treatment__l_ref,
             browse_treatment__p_nextIndex);
          browse_treatment__fill_browse_result_ref(browse_treatment__l_ref,
+            browse_treatment__p_browseView,
             browse_treatment__p_browseDirection,
             browse_treatment__p_refType_defined,
             browse_treatment__p_referenceType,
@@ -172,7 +175,39 @@ void browse_treatment__set_browse_value_context_from_continuation_point(
    const constants__t_session_i browse_treatment__p_session,
    const constants__t_ContinuationPoint_i browse_treatment__p_continuationPoint,
    constants_statuscodes_bs__t_StatusCode_i * const browse_treatment__p_service_StatusCode) {
-   *browse_treatment__p_service_StatusCode = constants_statuscodes_bs__e_sc_bad_continuation_point_invalid;
+   {
+      t_bool browse_treatment__l_res;
+      t_entier4 browse_treatment__l_nextIndex;
+      t_entier4 browse_treatment__l_maxTargetRef;
+      constants__t_NodeId_i browse_treatment__l_browseView;
+      constants__t_NodeId_i browse_treatment__l_nodeId;
+      constants__t_BrowseDirection_i browse_treatment__l_browseDirection;
+      constants__t_NodeId_i browse_treatment__l_referenceType;
+      t_bool browse_treatment__l_includeSubtypes;
+      
+      *browse_treatment__p_service_StatusCode = constants_statuscodes_bs__e_sc_bad_continuation_point_invalid;
+      browse_treatment_continuation_points__getall_and_clear_continuation_point(browse_treatment__p_session,
+         browse_treatment__p_continuationPoint,
+         &browse_treatment__l_res,
+         &browse_treatment__l_nextIndex,
+         &browse_treatment__l_maxTargetRef,
+         &browse_treatment__l_browseView,
+         &browse_treatment__l_nodeId,
+         &browse_treatment__l_browseDirection,
+         &browse_treatment__l_referenceType,
+         &browse_treatment__l_includeSubtypes);
+      if (browse_treatment__l_res == true) {
+         browse_treatment_context__setall_browse_value_context(browse_treatment__l_nextIndex,
+            browse_treatment__p_session,
+            browse_treatment__l_maxTargetRef,
+            browse_treatment__l_browseView,
+            browse_treatment__l_nodeId,
+            browse_treatment__l_browseDirection,
+            browse_treatment__l_referenceType,
+            browse_treatment__l_includeSubtypes);
+         *browse_treatment__p_service_StatusCode = constants_statuscodes_bs__e_sc_ok;
+      }
+   }
 }
 
 void browse_treatment__compute_browse_result(

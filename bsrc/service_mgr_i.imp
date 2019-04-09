@@ -38,7 +38,7 @@ IMPORTS
     address_space,
     service_write_decode_bs,
     service_get_endpoints_bs,
-    service_browse_seq,
+    service_set_view,
     subscription_mgr,
     service_find_servers_bs,
     service_register_nodes,
@@ -80,7 +80,6 @@ PROMOTES
     /* subscription_mgr */
     is_valid_subscription,
     server_subscription_data_changed,
-    server_subscription_session_inactive,
     server_subscription_publish_timeout
 
 LOCAL_OPERATIONS
@@ -434,7 +433,6 @@ OPERATIONS
 
     StatusCode_service <-- treat_session_local_service_req (endpoint_config_idx, req_typ, req_msg, resp_msg) =
     VAR
-        l_bret,
         l_user
     IN
         CASE req_typ OF
@@ -449,20 +447,9 @@ OPERATIONS
                 write_WriteResponse_msg_out(resp_msg);
                 dealloc_write_request_responses
             OR e_msg_view_browse_req THEN
-                /* TODO: l_req_msg is the decoded struct */
-                StatusCode_service <-- decode_browse_request(req_msg);
-                IF StatusCode_service = e_sc_ok THEN
-                    StatusCode_service <-- treat_browse_request_BrowseValues;
-                    IF StatusCode_service = e_sc_ok THEN
-                        l_bret <-- write_BrowseResponse_msg_out(resp_msg);
-                        IF l_bret /= TRUE THEN
-                            StatusCode_service := e_sc_bad_out_of_memory
-                        END
-                    END
-                END;
-                free_browse_request;
-                free_browse_result
+                StatusCode_service <-- treat_browse_request(c_session_indet, req_msg, resp_msg)
             ELSE
+                /* NOTE: when implementing Node Management service set, service_set_view_service_node_management_used shall be called on success */
                 /* service is not supported */
                 StatusCode_service := e_sc_bad_service_unsupported
             END
@@ -472,7 +459,6 @@ OPERATIONS
 
     StatusCode_service, async_resp_msg <-- treat_session_service_req (session, req_typ, req_handle, req_ctx, req_header, req_msg, resp_msg) =
     VAR
-        l_bret,
         l_user
     IN
         async_resp_msg := FALSE;
@@ -488,18 +474,7 @@ OPERATIONS
                 write_WriteResponse_msg_out(resp_msg);
                 dealloc_write_request_responses
             OR e_msg_view_browse_req THEN
-                StatusCode_service <-- decode_browse_request(req_msg);
-                IF StatusCode_service = e_sc_ok THEN
-                    StatusCode_service <-- treat_browse_request_BrowseValues;
-                    IF StatusCode_service = e_sc_ok THEN
-                        l_bret <-- write_BrowseResponse_msg_out(resp_msg);
-                        IF l_bret /= TRUE THEN
-                            StatusCode_service := e_sc_bad_out_of_memory
-                        END
-                    END
-                END;
-                free_browse_request;
-                free_browse_result
+                StatusCode_service <-- treat_browse_request(session, req_msg, resp_msg)
             OR e_msg_subscription_create_req THEN
                 StatusCode_service <-- treat_create_subscription_request (session, req_msg, resp_msg)
             OR e_msg_subscription_modify_req THEN
@@ -521,6 +496,7 @@ OPERATIONS
             OR e_msg_view_unregister_nodes_req THEN
                 StatusCode_service <-- treat_unregister_nodes_request (req_msg)
             ELSE
+                /* NOTE: when implementing Node Management service set, service_set_view_service_node_management_used shall be called on success */
                 /* service is not supported */
                 StatusCode_service := e_sc_bad_service_unsupported
             END
@@ -1545,9 +1521,24 @@ OPERATIONS
     END
     ;
 
+    bres <-- internal_server_inactive_session_prio_event (p_session, p_newSessionState) =
+    BEGIN
+        IF p_session /= c_session_indet THEN
+            bres := TRUE;
+            server_subscription_session_inactive (p_session, p_newSessionState);
+            IF p_newSessionState = e_session_closed THEN
+                service_set_view_set_session_closed (p_session)
+            END
+        ELSE
+            bres := FALSE
+        END
+    END
+    ;
+
     service_mgr_UNINITIALISATION =
     BEGIN
         subscription_mgr_UNINITIALISATION;
+        service_set_view_UNINITIALISATION;
         service_mgr_bs_UNINITIALISATION
     END
 

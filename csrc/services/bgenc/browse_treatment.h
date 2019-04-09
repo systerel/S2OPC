@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment.h
 
- Date                 : 08/04/2019 16:46:08
+ Date                 : 10/04/2019 09:25:59
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -61,6 +61,7 @@ extern void browse_treatment__INITIALISATION(void);
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
 #define browse_treatment__clear_browse_result browse_treatment_result_bs__clear_browse_result
+#define browse_treatment__continuation_points_UNINITIALISATION browse_treatment_continuation_points__continuation_points_UNINITIALISATION
 #define browse_treatment__getall_and_clear_browse_result browse_treatment_result_bs__getall_and_clear_browse_result
 #define browse_treatment__getall_browse_result_reference_at browse_treatment_result_bs__getall_browse_result_reference_at
 #define browse_treatment__set_session_closed browse_treatment_continuation_points__set_session_closed
@@ -82,6 +83,7 @@ extern void browse_treatment__fill_browse_result(
    t_entier4 * const browse_treatment__p_nextIndex);
 extern void browse_treatment__fill_browse_result_ref(
    const constants__t_Reference_i browse_treatment__p_ref,
+   const constants__t_NodeId_i browse_treatment__p_browseView,
    const constants__t_BrowseDirection_i browse_treatment__p_browseDirection,
    const t_bool browse_treatment__p_refType_defined,
    const constants__t_NodeId_i browse_treatment__p_referenceType,
