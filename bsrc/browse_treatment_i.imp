@@ -35,6 +35,7 @@ PROMOTES
     continuation_points_UNINITIALISATION,
     getall_browse_result_reference_at,
     getall_and_clear_browse_result,
+    clear_browse_value_context,
     clear_browse_result
 
 SEES
@@ -60,7 +61,8 @@ LOCAL_OPERATIONS
     ;
 
     p_serviceStatusCode, p_toContinue, p_nextIndex
-      <-- fill_browse_result(p_startIndex, p_max_nb_results, p_browseView, p_src_node, p_browseDirection, p_refType_defined, p_referenceType, p_includeSubtypes) =
+      <-- fill_browse_result(p_startIndex, p_max_nb_results, p_browseView, p_src_node,
+                             p_browseDirection, p_refType_defined, p_referenceType, p_includeSubtypes) =
     PRE
         p_startIndex    : NAT                       &
         p_startIndex    : t_RefIndex                &
@@ -128,7 +130,16 @@ LOCAL_OPERATIONS
         IF Is_Dir_Forward_Compatible(p_browseDirection |-> Reference_IsForward(p_ref)) = TRUE &
             (p_refType_defined = FALSE or
              p_referenceType = Reference_ReferenceType(p_ref) or
-             Reference_ReferenceType(p_ref) |-> p_referenceType : Type_IsTransitiveSubtype)
+             Reference_ReferenceType(p_ref) |-> p_referenceType : Type_IsTransitiveSubtype) &
+             /* Node is unknown or Node is known and NodeClass is compatible with NodeClassMask */
+             (not (Reference_TargetNode(p_ref) : dom(conv_ExpandedNodeId_NodeId) &
+                   conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref)) : ran(a_NodeId))
+              or
+              (Reference_TargetNode(p_ref) : dom(conv_ExpandedNodeId_NodeId) &
+               conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref)) : ran(a_NodeId) &
+               a_NodeClass(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref)))) : in_BrowseValue_NodeClassesInMask
+              )
+             )
         THEN
             /* Compatible reference, add it in a available reference index of the browse result */
             ANY l_browseResultIdx WHERE
@@ -189,7 +200,8 @@ OPERATIONS
        p_continue        : indicates whether the iteration should continue (it should stop if the
                            maximum number of browse response index has just been filled)
     */
-    p_continue <-- fill_browse_result_ref(p_ref, p_browseView, p_browseDirection, p_refType_defined, p_referenceType, p_includeSubtypes) =
+    p_continue <-- fill_browse_result_ref(p_ref, p_browseView, p_browseDirection,
+                                          p_refType_defined, p_referenceType, p_includeSubtypes) =
     VAR
         l_RefType,
         l_TargetNode,
@@ -199,7 +211,8 @@ OPERATIONS
         l_BrowseName,
         l_DisplayName,
         l_NodeClass,
-        l_TypeDefinition
+        l_TypeDefinition,
+        l_NodeClassInMask
     IN
         p_continue := TRUE;
         unused_browse_view (p_browseView); // TODO: filtering using browse view
@@ -210,10 +223,13 @@ OPERATIONS
         IF  l_res = TRUE THEN
             l_res <-- Is_RefTypes_Compatible(p_refType_defined, p_referenceType, p_includeSubtypes, l_RefType);
             IF  l_res = TRUE THEN
-                p_continue, l_bri <-- continue_iter_browseResult;
                 l_BrowseName, l_DisplayName, l_NodeClass, l_TypeDefinition <-- get_optional_fields_ReferenceDescription(l_TargetNode);
-                setall_browse_result_reference_at (l_bri, l_RefType, l_IsForward, l_TargetNode,
-                                                   l_BrowseName, l_DisplayName, l_NodeClass, l_TypeDefinition)
+                l_NodeClassInMask <-- is_NodeClass_in_NodeClassMask (l_NodeClass);
+                IF l_NodeClassInMask = TRUE THEN
+                    p_continue, l_bri <-- continue_iter_browseResult;
+                    setall_browse_result_reference_at (l_bri, l_RefType, l_IsForward, l_TargetNode,
+                                                       l_BrowseName, l_DisplayName, l_NodeClass, l_TypeDefinition)
+                END
             END
         END
     END
@@ -255,7 +271,8 @@ OPERATIONS
             l_continue_ref, l_ref, p_nextIndex <-- continue_iter_reference;
             /* When the target node fulfills all the filtering conditions, then
             fill its data and iterate on the browse result index */
-            l_continue_bri <-- fill_browse_result_ref(l_ref, p_browseView, p_browseDirection, p_refType_defined, p_referenceType, p_includeSubtypes)
+            l_continue_bri <-- fill_browse_result_ref(l_ref, p_browseView, p_browseDirection, p_refType_defined,
+                                                      p_referenceType, p_includeSubtypes)
         INVARIANT
             /* Iteration on references from source node */
             references_to_iterate <: NAT &
@@ -292,10 +309,12 @@ OPERATIONS
 
     /* END OF LOCAL OPERATIONS */
 
-   set_browse_value_context (p_session, p_maxTargetRef, p_browseView, p_nodeId, p_browseDirection, p_referenceType, p_includeSubtypes) =
+   set_browse_value_context (p_session, p_maxTargetRef, p_browseView, p_nodeId,
+                             p_browseDirection, p_referenceType, p_includeSubtypes, p_nodeClassMask) =
    BEGIN
        /* Only set context to start with index 1 of target references */
-       setall_browse_value_context(1, p_session, p_maxTargetRef, p_browseView, p_nodeId, p_browseDirection, p_referenceType, p_includeSubtypes)
+       setall_browse_value_context(1, p_session, p_maxTargetRef, p_browseView, p_nodeId,
+                                   p_browseDirection, p_referenceType, p_includeSubtypes, p_nodeClassMask)
    END
    ;
 
@@ -308,7 +327,8 @@ OPERATIONS
        l_nodeId,
        l_browseDirection,
        l_referenceType,
-       l_includeSubtypes
+       l_includeSubtypes,
+       l_nodeClassMask
    IN
         p_service_StatusCode := e_sc_bad_continuation_point_invalid;
         l_res,
@@ -318,9 +338,11 @@ OPERATIONS
         l_nodeId,
         l_browseDirection,
         l_referenceType,
-        l_includeSubtypes <-- getall_and_clear_continuation_point (p_session, p_continuationPoint);
+        l_includeSubtypes,
+        l_nodeClassMask<-- getall_and_clear_continuation_point (p_session, p_continuationPoint);
         IF l_res = TRUE THEN
-            setall_browse_value_context(l_nextIndex, p_session, l_maxTargetRef, l_browseView, l_nodeId, l_browseDirection, l_referenceType, l_includeSubtypes);
+            setall_browse_value_context(l_nextIndex, p_session, l_maxTargetRef, l_browseView,
+                                        l_nodeId, l_browseDirection, l_referenceType, l_includeSubtypes, l_nodeClassMask);
             p_service_StatusCode := e_sc_ok
         END
    END
@@ -337,6 +359,7 @@ OPERATIONS
        l_refType_defined,
        l_referenceType,
        l_includeSubtypes,
+       l_nodeClassMask,
        l_is_src_node_valid,
        l_nb_target,
        l_src_node,
@@ -350,7 +373,7 @@ OPERATIONS
        p_nbReferences := 0;
         /* Get input context */
         l_startIndex, l_session, l_maxTargetRef, l_browseView, l_nodeId,
-          l_browseDirection, l_refType_defined, l_referenceType, l_includeSubtypes <-- getall_browse_value_context;
+          l_browseDirection, l_refType_defined, l_referenceType, l_includeSubtypes, l_nodeClassMask <-- getall_browse_value_context;
         /* Retrieve source node in address space */
         l_is_src_node_valid, l_nb_target, l_src_node <-- getall_SourceNode_NbRef(l_nodeId);
         IF  l_is_src_node_valid = TRUE THEN
@@ -363,7 +386,7 @@ OPERATIONS
                                           l_browseDirection, l_refType_defined, l_referenceType, l_includeSubtypes);
                 IF l_toContinue = TRUE THEN
                     l_cp_bres, p_continuationPoint <-- create_continuation_point (l_session, l_nextIndex, l_maxTargetRef, l_browseView,
-                                                                                  l_nodeId, l_browseDirection, l_referenceType, l_includeSubtypes);
+                                                                                  l_nodeId, l_browseDirection, l_referenceType, l_includeSubtypes, l_nodeClassMask);
                     IF l_cp_bres = FALSE THEN
                         p_serviceStatusCode := e_sc_bad_no_continuation_points
                     END

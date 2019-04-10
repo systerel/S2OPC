@@ -33,7 +33,7 @@ DEFINITIONS
         in_BrowseValue_BrowseDirection,
         in_BrowseValue_ReferenceTypeId,
         in_BrowseValue_IncludeSubtypes,
-        in_BrowseValue_ContinuationPoint,
+        in_BrowseValue_NodeClassMask,
         isBrowseValueContextDefined;
 
     d_variables_persist ==
@@ -64,7 +64,7 @@ DEFINITIONS
         in_BrowseValue_BrowseDirection   : t_BrowseDirection_i   &
         in_BrowseValue_ReferenceTypeId   : t_NodeId              &
         in_BrowseValue_IncludeSubtypes   : BOOL                  &
-        in_BrowseValue_ContinuationPoint : t_ContinuationPoint_i &
+        in_BrowseValue_NodeClassMask     : t_BrowseNodeClassMask_i &
         isBrowseValueContextDefined      : BOOL
     ;
     d_inv_persist ==
@@ -96,7 +96,7 @@ DEFINITIONS
             in_BrowseValue_BrowseDirection  = e_bd_indet                 &
             in_BrowseValue_ReferenceTypeId  = c_NodeId_indet             &
             in_BrowseValue_IncludeSubtypes  = FALSE                      &
-            in_BrowseValue_ContinuationPoint = c_ContinuationPoint_indet &
+            in_BrowseValue_NodeClassMask    = c_BrowseNodeClassMask_indet &
             isBrowseValueContextDefined     = FALSE
         )
     ;
@@ -139,7 +139,7 @@ INITIALISATION
 
 OPERATIONS
 
-    set_browse_value_context(p_session, p_maxTargetRef, p_browseView, p_nodeId, p_browseDirection, p_referenceType, p_includeSubtypes) =
+    set_browse_value_context(p_session, p_maxTargetRef, p_browseView, p_nodeId, p_browseDirection, p_referenceType, p_includeSubtypes, p_nodeClassMask) =
     PRE
         isBrowseValueContextDefined = FALSE         &
         p_session : t_session_i                     &
@@ -151,6 +151,7 @@ OPERATIONS
         p_browseDirection : t_BrowseDirection_i     &
         p_browseDirection : t_BrowseDirection       &
         p_referenceType : t_NodeId_i                &
+        p_nodeClassMask : t_BrowseNodeClassMask_i   &
         p_includeSubtypes : BOOL
     THEN
         /* Reset output result on new context*/
@@ -166,7 +167,8 @@ OPERATIONS
                 in_BrowseValue_BrowseDirection   = p_browseDirection &
                 in_BrowseValue_ReferenceTypeId   = p_referenceType   &
                 in_BrowseValue_IncludeSubtypes   = p_includeSubtypes &
-                in_BrowseValue_ContinuationPoint = c_ContinuationPoint_indet &
+                in_BrowseValue_NodeClassMask     = p_nodeClassMask   &
+
                 isBrowseValueContextDefined = TRUE
         )
     END
@@ -186,11 +188,14 @@ OPERATIONS
         p_service_StatusCode
         :(  p_service_StatusCode : {e_sc_ok, e_sc_bad_continuation_point_invalid} &
             d_inv_in &
-            isBrowseValueContextDefined = bool(p_service_StatusCode = e_sc_ok) &
-            (p_service_StatusCode = e_sc_ok =>
-                in_BrowseValue_ContinuationPoint = p_continuationPoint &
-                isBrowseValueContextDefined = TRUE)
+            isBrowseValueContextDefined = bool(p_service_StatusCode = e_sc_ok)
         )
+    END
+    ;
+
+    clear_browse_value_context =
+    BEGIN
+        d_init_in
     END
     ;
 

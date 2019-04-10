@@ -135,6 +135,7 @@ CONCRETE_CONSTANTS
     c_monitoredItemId_indet,
     c_WriteValuePointer_indet,
     c_BrowseResultReferences_indet,
+    c_BrowseNodeClassMask_indet,
     c_timer_id_indet,
     c_IndexRange_indet,
     c_ContinuationPoint_indet
@@ -374,6 +375,8 @@ PROPERTIES
     t_BrowseResultReferences <: t_BrowseResultReferences_i &
     c_BrowseResultReferences_indet : t_BrowseResultReferences_i &
     c_BrowseResultReferences_indet /: t_BrowseResultReferences &
+
+    c_BrowseNodeClassMask_indet : t_BrowseNodeClassMask_i &
 
     t_timer_id <: t_timer_id_i &
     c_timer_id_indet : t_timer_id_i &

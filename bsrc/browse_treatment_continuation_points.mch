@@ -37,7 +37,7 @@ INITIALISATION
 OPERATIONS
 
     bres, p_ContinuationPoint <-- create_continuation_point (p_session, p_nextIndex, p_maxTargetRef, p_browseView,
-                                                              p_nodeId, p_browseDirection, p_referenceType, p_includeSubtypes) =
+                                                              p_nodeId, p_browseDirection, p_referenceType, p_includeSubtypes, p_nodeClassMask) =
     PRE
         p_session : t_session_i                     &
         p_nextIndex    : NAT                        &
@@ -51,7 +51,8 @@ OPERATIONS
         p_browseDirection : t_BrowseDirection       &
         p_referenceType : t_NodeId_i                &
         p_referenceType : t_NodeId                  &
-        p_includeSubtypes : BOOL
+        p_includeSubtypes : BOOL                    &
+        p_nodeClassMask : t_BrowseNodeClassMask_i
     THEN
         /* No continuation point shall be define for given session to create one */
         bres := bool(p_session : t_session & p_session /: dom(session_ContinuationPoint~)) ||
@@ -71,7 +72,7 @@ OPERATIONS
     ;
 
     bres, p_nextIndex, p_maxTargetRef, p_browseView, p_nodeId,
-    p_browseDirection, p_referenceType, p_includeSubtypes
+    p_browseDirection, p_referenceType, p_includeSubtypes, p_nodeClassMask
       <-- getall_and_clear_continuation_point (p_session, p_continuationPoint) =
     PRE
         p_session : t_session_i &
@@ -79,7 +80,9 @@ OPERATIONS
         p_continuationPoint : t_ContinuationPoint_i &
         p_continuationPoint : t_ContinuationPoint
     THEN
-        bres, s_ContinuationPoints, session_ContinuationPoint, p_nextIndex, p_maxTargetRef, p_browseView, p_nodeId, p_browseDirection, p_referenceType, p_includeSubtypes
+        s_ContinuationPoints, session_ContinuationPoint,
+        bres, p_nextIndex, p_maxTargetRef, p_browseView, p_nodeId,
+        p_browseDirection, p_referenceType, p_includeSubtypes, p_nodeClassMask
         :(
             bres : BOOL &
             p_nextIndex    : NAT                        &
@@ -94,6 +97,7 @@ OPERATIONS
             p_referenceType : t_NodeId_i                &
             p_referenceType : t_NodeId                  &
             p_includeSubtypes : BOOL                    &
+            p_nodeClassMask : t_BrowseNodeClassMask_i   &
 
             bres = bool(session_ContinuationPoint(p_continuationPoint) = p_session) &
             /* Clear the continuation point once used to free session continuation point for BrowseNext treatment */

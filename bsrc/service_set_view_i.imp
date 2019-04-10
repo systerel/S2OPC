@@ -109,8 +109,9 @@ OPERATIONS
         l_SrcNodeId, l_dir, l_reftype, l_incsubtyp, l_nodeClassMask <-- getall_BrowseValue(p_req_msg, p_bvi);
         IF l_dir /= e_bd_indet THEN
             IF  l_SrcNodeId /= c_NodeId_indet THEN
-                set_browse_value_context(p_session, p_nb_target_max, p_nid_view, l_SrcNodeId, l_dir, l_reftype, l_incsubtyp);
+                set_browse_value_context(p_session, p_nb_target_max, p_nid_view, l_SrcNodeId, l_dir, l_reftype, l_incsubtyp, l_nodeClassMask);
                 l_serviceStatusCode, l_continuationPoint, l_nbTargets <-- compute_browse_result;
+                clear_browse_value_context;
                 set_ResponseBrowse_BrowseStatus(p_resp_msg, p_bvi, l_serviceStatusCode);
                 IF l_serviceStatusCode = e_sc_ok or l_serviceStatusCode = e_sc_bad_no_continuation_points THEN
                     /* Note: result is defined even if there is no continuation point to give the rest later */

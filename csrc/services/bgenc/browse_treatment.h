@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment.h
 
- Date                 : 10/04/2019 09:25:59
+ Date                 : 10/04/2019 12:55:44
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -61,6 +61,7 @@ extern void browse_treatment__INITIALISATION(void);
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
 #define browse_treatment__clear_browse_result browse_treatment_result_bs__clear_browse_result
+#define browse_treatment__clear_browse_value_context browse_treatment_context__clear_browse_value_context
 #define browse_treatment__continuation_points_UNINITIALISATION browse_treatment_continuation_points__continuation_points_UNINITIALISATION
 #define browse_treatment__getall_and_clear_browse_result browse_treatment_result_bs__getall_and_clear_browse_result
 #define browse_treatment__getall_browse_result_reference_at browse_treatment_result_bs__getall_browse_result_reference_at
@@ -108,7 +109,8 @@ extern void browse_treatment__set_browse_value_context(
    const constants__t_NodeId_i browse_treatment__p_nodeId,
    const constants__t_BrowseDirection_i browse_treatment__p_browseDirection,
    const constants__t_NodeId_i browse_treatment__p_referenceType,
-   const t_bool browse_treatment__p_includeSubtypes);
+   const t_bool browse_treatment__p_includeSubtypes,
+   const constants__t_BrowseNodeClassMask_i browse_treatment__p_nodeClassMask);
 extern void browse_treatment__set_browse_value_context_from_continuation_point(
    const constants__t_session_i browse_treatment__p_session,
    const constants__t_ContinuationPoint_i browse_treatment__p_continuationPoint,

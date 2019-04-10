@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment_context.h
 
- Date                 : 05/04/2019 14:46:17
+ Date                 : 10/04/2019 12:55:44
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -35,6 +35,11 @@
   --------------------------*/
 #include "b2c.h"
 
+/*-----------------
+   IMPORTS Clause
+  -----------------*/
+#include "browse_treatment_context_bs.h"
+
 /*--------------
    SEES Clause
   --------------*/
@@ -45,6 +50,7 @@
   ----------------------------*/
 extern constants__t_BrowseDirection_i browse_treatment_context__in_BrowseValue_BrowseDirection_i;
 extern t_bool browse_treatment_context__in_BrowseValue_IncludeSubtypes_i;
+extern constants__t_BrowseNodeClassMask_i browse_treatment_context__in_BrowseValue_NodeClassMask_i;
 extern constants__t_NodeId_i browse_treatment_context__in_BrowseValue_NodeId_i;
 extern constants__t_NodeId_i browse_treatment_context__in_BrowseValue_ReferenceTypeId_i;
 extern constants__t_NodeId_i browse_treatment_context__in_BrowseView_i;
@@ -71,7 +77,11 @@ extern void browse_treatment_context__getall_browse_value_context(
    constants__t_BrowseDirection_i * const browse_treatment_context__p_browseDirection,
    t_bool * const browse_treatment_context__p_refType_defined,
    constants__t_NodeId_i * const browse_treatment_context__p_referenceType,
-   t_bool * const browse_treatment_context__p_includeSubtypes);
+   t_bool * const browse_treatment_context__p_includeSubtypes,
+   constants__t_BrowseNodeClassMask_i * const browse_treatment_context__p_nodeClassMask);
+extern void browse_treatment_context__is_NodeClass_in_NodeClassMask(
+   const constants__t_NodeClass_i browse_treatment_context__p_nodeClass,
+   t_bool * const browse_treatment_context__bres);
 extern void browse_treatment_context__setall_browse_value_context(
    const t_entier4 browse_treatment_context__p_startIndex,
    const constants__t_session_i browse_treatment_context__p_session,
@@ -80,6 +90,7 @@ extern void browse_treatment_context__setall_browse_value_context(
    const constants__t_NodeId_i browse_treatment_context__p_nodeId,
    const constants__t_BrowseDirection_i browse_treatment_context__p_browseDirection,
    const constants__t_NodeId_i browse_treatment_context__p_referenceType,
-   const t_bool browse_treatment_context__p_includeSubtypes);
+   const t_bool browse_treatment_context__p_includeSubtypes,
+   const constants__t_BrowseNodeClassMask_i browse_treatment_context__p_nodeClassMask);
 
 #endif

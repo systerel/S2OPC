@@ -21,7 +21,8 @@ IMPLEMENTATION
    browse_treatment_context_i
 REFINES
    browse_treatment_context
-
+IMPORTS
+   browse_treatment_context_bs
 SEES
    constants
 
@@ -34,6 +35,7 @@ CONCRETE_VARIABLES
     in_BrowseValue_BrowseDirection_i,
     in_BrowseValue_ReferenceTypeId_i,
     in_BrowseValue_IncludeSubtypes_i,
+    in_BrowseValue_NodeClassMask_i,
     isBrowseValueContextDefined_i
 
 INVARIANT
@@ -61,6 +63,9 @@ INVARIANT
     in_BrowseValue_IncludeSubtypes_i : BOOL &
     in_BrowseValue_IncludeSubtypes_i = in_BrowseValue_IncludeSubtypes &
 
+    in_BrowseValue_NodeClassMask_i : t_BrowseNodeClassMask_i &
+    in_BrowseValue_NodeClassMask_i = in_BrowseValue_NodeClassMask &
+
     isBrowseValueContextDefined_i : BOOL &
     isBrowseValueContextDefined_i = isBrowseValueContextDefined
 
@@ -74,11 +79,14 @@ INITIALISATION
     in_BrowseValue_BrowseDirection_i := e_bd_indet;
     in_BrowseValue_ReferenceTypeId_i := c_NodeId_indet;
     in_BrowseValue_IncludeSubtypes_i := FALSE;
+    in_BrowseValue_NodeClassMask_i := c_BrowseNodeClassMask_indet;
     isBrowseValueContextDefined_i := FALSE
 
 OPERATIONS
 
-   setall_browse_value_context (p_startIndex, p_session, p_maxTargetRef, p_browseView, p_nodeId, p_browseDirection, p_referenceType, p_includeSubtypes) =
+   setall_browse_value_context (p_startIndex, p_session, p_maxTargetRef,
+                                p_browseView, p_nodeId, p_browseDirection,
+                                p_referenceType, p_includeSubtypes, p_nodeClassMask) =
    BEGIN
         in_startIndex_i := p_startIndex;
         in_session_i := p_session;
@@ -88,11 +96,13 @@ OPERATIONS
         in_BrowseValue_BrowseDirection_i := p_browseDirection;
         in_BrowseValue_ReferenceTypeId_i := p_referenceType;
         in_BrowseValue_IncludeSubtypes_i := p_includeSubtypes;
+        in_BrowseValue_NodeClassMask_i := p_nodeClassMask;
         isBrowseValueContextDefined_i := TRUE
    END
    ;
 
-   p_startIndex, p_session, p_maxTargetRef, p_browseView, p_nodeId, p_browseDirection, p_refType_defined, p_referenceType, p_includeSubtypes
+   p_startIndex, p_session, p_maxTargetRef, p_browseView, p_nodeId,
+   p_browseDirection, p_refType_defined, p_referenceType, p_includeSubtypes, p_nodeClassMask
       <-- getall_browse_value_context =
    BEGIN
         p_startIndex := in_startIndex_i;
@@ -103,13 +113,24 @@ OPERATIONS
         p_browseDirection := in_BrowseValue_BrowseDirection_i;
         p_refType_defined := bool(in_BrowseValue_ReferenceTypeId_i /= c_NodeId_indet);
         p_referenceType := in_BrowseValue_ReferenceTypeId_i;
-        p_includeSubtypes := in_BrowseValue_IncludeSubtypes_i
+        p_includeSubtypes := in_BrowseValue_IncludeSubtypes_i;
+        p_nodeClassMask := in_BrowseValue_NodeClassMask_i
+   END
+   ;
+
+   bres <-- is_NodeClass_in_NodeClassMask(p_nodeClass) =
+   BEGIN
+       IF p_nodeClass = c_NodeClass_indet THEN
+           bres := TRUE /* Since we do not know the class we shall not filter the node */
+       ELSE
+           bres <-- is_NodeClass_in_NodeClassMask_bs(p_nodeClass, in_BrowseValue_NodeClassMask_i)
+       END
    END
    ;
 
    clear_browse_value_context =
    BEGIN
-       in_startIndex_i := 0;
+        in_startIndex_i := 0;
         in_session_i := c_session_indet;
         in_maxReferencesPerNode_i := 0;
         in_BrowseView_i := c_NodeId_indet;
@@ -117,6 +138,7 @@ OPERATIONS
         in_BrowseValue_BrowseDirection_i := e_bd_indet;
         in_BrowseValue_ReferenceTypeId_i := c_NodeId_indet;
         in_BrowseValue_IncludeSubtypes_i := FALSE;
+        in_BrowseValue_NodeClassMask_i := c_BrowseNodeClassMask_indet;
         isBrowseValueContextDefined_i := FALSE
    END
 

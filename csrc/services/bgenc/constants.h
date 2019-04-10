@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 14/06/2019 14:02:14
+ Date                 : 14/06/2019 14:34:15
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -350,6 +350,7 @@ typedef enum {
 /*------------------------------------------------
    CONCRETE_CONSTANTS Clause: scalars and arrays
   ------------------------------------------------*/
+#define constants__c_BrowseNodeClassMask_indet constants_bs__c_BrowseNodeClassMask_indet
 #define constants__c_BrowseResultReferences_indet constants_bs__c_BrowseResultReferences_indet
 #define constants__c_ByteString_Type_NodeId constants_bs__c_ByteString_Type_NodeId
 #define constants__c_Byte_Type_NodeId constants_bs__c_Byte_Type_NodeId

@@ -315,6 +315,7 @@ CONCRETE_CONSTANTS
     c_WriteValuePointer_indet,
     c_BrowseValue_indet,
     c_BrowseResultReferences_indet,
+    c_BrowseNodeClassMask_indet,
     c_byte_buffer_indet,
     c_LocalizedText_indet,
     c_QualifiedName_indet,
@@ -550,6 +551,8 @@ PROPERTIES
     t_BrowseResultReferences <: t_BrowseResultReferences_i &
     c_BrowseResultReferences_indet : t_BrowseResultReferences_i &
     c_BrowseResultReferences_indet /: t_BrowseResultReferences &
+
+    c_BrowseNodeClassMask_indet : t_BrowseNodeClassMask_i &
 
     t_monitoredItemReqIndex <: NAT &
     t_monitoredItemNotifIndex <: NAT &

@@ -25,7 +25,7 @@ SEES
 
 OPERATIONS
     bres, p_ContinuationPoint <-- create_continuation_point_bs (p_nextIndex, p_maxTargetRef, p_browseView,
-                                                                p_nodeId, p_browseDirection, p_referenceType, p_includeSubtypes) =
+                                                                p_nodeId, p_browseDirection, p_referenceType, p_includeSubtypes, p_nodeClassMask) =
     PRE
         p_nextIndex    : NAT                        &
         p_nextIndex    : t_RefIndex                 &
@@ -38,7 +38,8 @@ OPERATIONS
         p_browseDirection : t_BrowseDirection       &
         p_referenceType : t_NodeId_i                &
         p_referenceType : t_NodeId                  &
-        p_includeSubtypes : BOOL
+        p_includeSubtypes : BOOL                    &
+        p_nodeClassMask : t_BrowseNodeClassMask_i
     THEN
         bres :: BOOL ||
         p_ContinuationPoint :: t_ContinuationPoint_i

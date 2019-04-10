@@ -30,19 +30,22 @@ SEES
 OPERATIONS
 
     bres, p_ContinuationPoint <-- create_continuation_point (p_session, p_nextIndex, p_maxTargetRef, p_browseView,
-        p_nodeId, p_browseDirection, p_referenceType, p_includeSubtypes) =
+                                                             p_nodeId, p_browseDirection, p_referenceType, p_includeSubtypes, p_nodeClassMask) =
     BEGIN
         p_ContinuationPoint := c_ContinuationPoint_indet;
         bres <-- is_valid_session (p_session);
         IF bres = TRUE THEN
             /* TODO: call base machine for actual creation + implement session_ContinuationPoint array to store it */
-            bres, p_ContinuationPoint <-- create_continuation_point_bs (p_nextIndex, p_maxTargetRef, p_browseView, p_nodeId, p_browseDirection, p_referenceType, p_includeSubtypes);
+            bres, p_ContinuationPoint <-- create_continuation_point_bs (p_nextIndex, p_maxTargetRef, p_browseView, p_nodeId,
+                                                                        p_browseDirection, p_referenceType, p_includeSubtypes, p_nodeClassMask);
             bres := FALSE
         END
     END
     ;
 
-    bres, p_nextIndex, p_maxTargetRef, p_browseView, p_nodeId, p_browseDirection, p_referenceType, p_includeSubtypes <-- getall_and_clear_continuation_point (p_session, p_continuationPoint) =
+    bres, p_nextIndex, p_maxTargetRef, p_browseView, p_nodeId,
+    p_browseDirection, p_referenceType, p_includeSubtypes, p_nodeClassMask
+      <-- getall_and_clear_continuation_point (p_session, p_continuationPoint) =
     BEGIN
         // TODO: remove, only avoid unused param
         bres <-- is_valid_session (p_session);
@@ -55,7 +58,8 @@ OPERATIONS
         p_nodeId := c_NodeId_indet;
         p_browseDirection := e_bd_indet;
         p_referenceType := c_NodeId_indet;
-        p_includeSubtypes := FALSE
+        p_includeSubtypes := FALSE;
+        p_nodeClassMask := c_BrowseNodeClassMask_indet
     END
     ;
 
