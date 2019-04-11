@@ -29,14 +29,16 @@ DEFINITIONS
     d_variables ==
 
         Type_IsTransitiveSubtype,
-        Type_IsIncludedValueRank
+        Type_IsIncludedValueRank,
+        Type_IsReferenceTypeIdValid
     ;
 
     d_inv ==
 
         /* Types */
         Type_IsTransitiveSubtype : t_NodeId <-> t_NodeId &
-        Type_IsIncludedValueRank : NAT1 \/ {-1} <-> INT
+        Type_IsIncludedValueRank : NAT1 \/ {-1} <-> INT &
+        Type_IsReferenceTypeIdValid <: t_NodeId
 
 ABSTRACT_VARIABLES
     d_variables
@@ -46,7 +48,6 @@ INITIALISATION
 
 OPERATIONS
 
-    /* TODO: imlplement using B model !!! Iterate references of node + recursive resolution (iterate with all nodes as max card) */
     bres <-- is_transitive_subtype(p_subtype, p_parent_type) =
     PRE
         p_subtype : t_NodeId_i &
@@ -55,6 +56,15 @@ OPERATIONS
         p_parent_type : t_NodeId
     THEN
         bres := bool(p_subtype |-> p_parent_type : Type_IsTransitiveSubtype)
+    END
+    ;
+
+    bres <-- is_valid_ReferenceTypeId(p_nodeId) =
+    PRE
+        p_nodeId : t_NodeId_i &
+        p_nodeId : t_NodeId
+    THEN
+        bres := bool(p_nodeId : Type_IsReferenceTypeIdValid)
     END
 
 END

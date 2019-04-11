@@ -28,14 +28,16 @@ DEFINITIONS
 
         /* Typing */
         Type_IsTransitiveSubtype,
-        Type_IsIncludedValueRank
+        Type_IsIncludedValueRank,
+        Type_IsReferenceTypeIdValid
     ;
 
     d_inv ==
     (
         /* Typing */
         Type_IsTransitiveSubtype : t_NodeId <-> t_NodeId &
-        Type_IsIncludedValueRank : t_ConcreteValueRank <-> t_ValueRank
+        Type_IsIncludedValueRank : t_ConcreteValueRank <-> t_ValueRank &
+        Type_IsReferenceTypeIdValid <: t_NodeId
     )
 
 ABSTRACT_VARIABLES
@@ -81,6 +83,15 @@ OPERATIONS
                            (p_expValueRank >= c_ValueRank_OneDimension & p_expValueRank = p_concValueRank)) &
                (bres = TRUE <=> ((p_concValueRank |-> p_expValueRank) : Type_IsIncludedValueRank))
               )
+    END
+    ;
+
+    bres <-- is_valid_ReferenceTypeId(p_nodeId) =
+    PRE
+        p_nodeId : t_NodeId_i &
+        p_nodeId : t_NodeId
+    THEN
+        bres := bool(p_nodeId : Type_IsReferenceTypeIdValid)
     END
 
 END

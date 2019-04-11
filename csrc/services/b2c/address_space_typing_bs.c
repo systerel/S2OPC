@@ -121,13 +121,12 @@ static const SOPC_NodeId* get_direct_parent(const SOPC_NodeId* childNodeId)
     const SOPC_NodeId* result = NULL;
 
     if (SOPC_IdentifierType_Numeric == childNodeId->IdentifierType && OPCUA_NAMESPACE_INDEX == childNodeId->Namespace &&
-        childNodeId->Data.Numeric <= SOPC_MAX_HAS_HASUBTYPE_BACKWARD_NODE_ID)
+        childNodeId->Data.Numeric <= SOPC_MAX_TYPE_INFO_NODE_ID)
     {
-        result = &SOPC_Embedded_HasSubTypeBackward[childNodeId->Data.Numeric];
-        if (SOPC_IdentifierType_Numeric == result->IdentifierType && 0 == result->Data.Numeric)
+        const SOPC_AddressSpaceTypeInfo* typeInfo = &SOPC_Embedded_HasSubTypeBackward[childNodeId->Data.Numeric];
+        if (typeInfo->hasSubtype)
         {
-            // Null NodeId case
-            result = NULL;
+            result = &typeInfo->subtypeNodeId;
         }
     }
     else if (SOPC_HAS_SUBTYPE_HYBRID_RESOLUTION)
@@ -191,4 +190,30 @@ void address_space_typing_bs__is_transitive_subtype(const constants__t_NodeId_i 
     *address_space_typing_bs__bres =
         recursive_is_transitive_subtype(RECURSION_LIMIT, address_space_typing_bs__p_subtype,
                                         address_space_typing_bs__p_subtype, address_space_typing_bs__p_parent_type);
+}
+
+void address_space_typing_bs__is_valid_ReferenceTypeId(const constants__t_NodeId_i address_space_typing_bs__p_nodeId,
+                                                       t_bool* const address_space_typing_bs__bres)
+{
+    const SOPC_NodeId* nodeId = address_space_typing_bs__p_nodeId;
+    *address_space_typing_bs__bres = false;
+    if (SOPC_IdentifierType_Numeric == nodeId->IdentifierType && OPCUA_NAMESPACE_INDEX == nodeId->Namespace &&
+        nodeId->Data.Numeric <= SOPC_MAX_TYPE_INFO_NODE_ID)
+    {
+        // NodeId is in statically extracted type nodes info
+        const SOPC_AddressSpaceTypeInfo* typeInfo = &SOPC_Embedded_HasSubTypeBackward[nodeId->Data.Numeric];
+        *address_space_typing_bs__bres = OpcUa_NodeClass_ReferenceType == typeInfo->nodeClass;
+    }
+    else if (SOPC_HAS_SUBTYPE_HYBRID_RESOLUTION)
+    {
+        // NodeId not in static array of type nodes info, start research in address space
+        bool node_found = false;
+        SOPC_AddressSpace_Item* node = SOPC_Dict_Get(address_space_bs__nodes, nodeId, &node_found);
+
+        if (node_found)
+        {
+            // Starting to check if direct parent is researched parent
+            *address_space_typing_bs__bres = OpcUa_NodeClass_ReferenceType == node->node_class;
+        }
+    }
 }

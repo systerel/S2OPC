@@ -50,6 +50,7 @@ DEFINITIONS
         a_Symmetric,
 
         Type_IsTransitiveSubtype,
+        Type_IsReferenceTypeIdValid,
 
         Ref_HasTypeDefinition,
 
@@ -116,6 +117,7 @@ DEFINITIONS
 
         /* Types */
         Type_IsTransitiveSubtype : t_NodeId <-> t_NodeId &
+        Type_IsReferenceTypeIdValid <: t_NodeId &
 
         /* References */
         Ref_HasTypeDefinition : t_Node +-> t_ExpandedNodeId &

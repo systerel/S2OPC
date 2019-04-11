@@ -43,6 +43,17 @@ UA_REFERENCES_TAG = UA_NODESET_NS + 'References'
 UA_REFERENCE_TAG = UA_NODESET_NS + 'Reference'
 UA_VALUE_TAG = UA_NODESET_NS + 'Value'
 
+NODE_TAG_TO_NODE_CLASS = {
+    UA_OBJECT_TAG : "OpcUa_NodeClass_Object",
+    UA_VARIABLE_TAG : "OpcUa_NodeClass_Variable",
+    UA_METHOD_TAG : "OpcUa_NodeClass_Method",
+    UA_OBJECT_TYPE_TAG : "OpcUa_NodeClass_ObjectType",
+    UA_VARIABLE_TYPE_TAG : "OpcUa_NodeClass_VariableType",
+    UA_REFERENCE_TYPE_TAG : "OpcUa_NodeClass_ReferenceType",
+    UA_DATA_TYPE_TAG : "OpcUa_NodeClass_DataType",
+    UA_VIEW_TAG : "OpcUa_NodeClass_View"
+}
+
 ID_TYPE_NUMERIC = 0
 ID_TYPE_STRING = 1
 ID_TYPE_GUID = 2
@@ -332,16 +343,22 @@ def parse_uanode_supertype(xml_node, source, aliases):
 
 TYPE_TAGS = [UA_VARIABLE_TYPE_TAG, UA_OBJECT_TYPE_TAG, UA_REFERENCE_TYPE_TAG, UA_DATA_TYPE_TAG]
 
-
 # Returns an array of Node objects
-def generate_subtypes_hierarchy(source, out, max_nodeId):
+def generate_type_node_info(source, out, max_nodeId):
     aliases = {}
     subtypes_backward = dict()
+    type_node_nodeclass = dict()
 
     out.write(c_header)
+    out.write("typedef struct SOPC_AddressSpaceTypeInfo\n")
+    out.write("{\n")
+    out.write("    "+"OpcUa_NodeClass nodeClass;\n")
+    out.write("    "+"bool hasSubtype;\n")
+    out.write("    "+"SOPC_NodeId subtypeNodeId;\n")
+    out.write("} SOPC_AddressSpaceTypeInfo;\n")
     out.write("// Generated from NodeSet2: integer nodeId --> SOPC_NodeId\n")
-    out.write("#define SOPC_MAX_HAS_HASUBTYPE_BACKWARD_NODE_ID "+str(max_nodeId)+"\n\n")
-    out.write('const SOPC_NodeId SOPC_Embedded_HasSubTypeBackward[SOPC_MAX_HAS_HASUBTYPE_BACKWARD_NODE_ID + 1] = {\n')
+    out.write("#define SOPC_MAX_TYPE_INFO_NODE_ID "+str(max_nodeId)+"\n\n")
+    out.write('const SOPC_AddressSpaceTypeInfo SOPC_Embedded_HasSubTypeBackward[SOPC_MAX_TYPE_INFO_NODE_ID + 1] = {\n')
 
     expect_element(source, UA_NODESET_TAG).clear()
 
@@ -356,11 +373,15 @@ def generate_subtypes_hierarchy(source, out, max_nodeId):
             # Ensures no reference defined from 'NULL' NodeId
             if 0 in subtypes_backward:
                 del subtypes_backward[0]
+            # Set NodeClass unspecified for 'NULL' NodeId
+            type_node_nodeclass[0] = "OpcUa_NodeClass_Unspecified"
+            
             while index <= max_nodeId:
+                node_class = type_node_nodeclass.get(index, "OpcUa_NodeClass_Unspecified")
                 if(index in subtypes_backward):
-                    out.write("    "+generate_nodeid(subtypes_backward[index])+",   // "+str(index)+"\n")
+                    out.write("    {"+node_class+", true, "+generate_nodeid(subtypes_backward[index])+"},   // "+str(index)+"\n")
                 else:
-                    out.write("    "+generate_nodeid(NodeId(0, ID_TYPE_NUMERIC, 0))+",   // "+str(index)+"\n")
+                    out.write("    {"+node_class+", false, "+generate_nodeid(NodeId(0, ID_TYPE_NUMERIC, 0))+"},   // "+str(index)+"\n")
                 index += 1
             out.write('};\n\n#endif\n')
             return
@@ -381,6 +402,9 @@ def generate_subtypes_hierarchy(source, out, max_nodeId):
                     #child = n.find(UA_DISPLAY_NAME_TAG)
                     #print(str(n.tag[len(UA_NODESET_NS):])+": "+child.text+": "+str(nodeid)+" references")
                     #print(" - Reference: "+str(ref.ty)+", "+str(ref.target)+", "+str(ref.is_forward))
+
+            if nodeid.ty == ID_TYPE_NUMERIC:
+                type_node_nodeclass[nodeid.data] = NODE_TAG_TO_NODE_CLASS.get(n.tag)
 
         elif n.tag == UA_ALIASES_TAG:
             parse_element(source, n.tag)
@@ -404,7 +428,7 @@ def main():
     print('Generating C model...')
     with open(args.xml_file, 'rb') as xml_fd, open(args.h_file, 'w', encoding='utf8') as out_fd:
         try:
-            generate_subtypes_hierarchy(iterparse(xml_fd, events=('start', 'end')), out_fd, args.max_nodeId)
+            generate_type_node_info(iterparse(xml_fd, events=('start', 'end')), out_fd, args.max_nodeId)
         except ParseError as e:
             sys.stderr.write('Woops, an error occurred: %s\n' % str(e))
             sys.exit(1)

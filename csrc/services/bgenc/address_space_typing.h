@@ -21,7 +21,7 @@
 
  File Name            : address_space_typing.h
 
- Date                 : 29/01/2019 09:56:36
+ Date                 : 11/04/2019 16:26:00
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -54,6 +54,7 @@ extern void address_space_typing__INITIALISATION(void);
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
 #define address_space_typing__is_transitive_subtype address_space_typing_bs__is_transitive_subtype
+#define address_space_typing__is_valid_ReferenceTypeId address_space_typing_bs__is_valid_ReferenceTypeId
 
 /*--------------------
    OPERATIONS Clause

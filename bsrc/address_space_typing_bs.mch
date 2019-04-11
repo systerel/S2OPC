@@ -27,12 +27,14 @@ DEFINITIONS
 
     d_variables ==
 
-        Type_IsTransitiveSubtype
+        Type_IsTransitiveSubtype,
+        Type_IsReferenceTypeIdValid
     ;
 
     d_inv ==
     (
-        Type_IsTransitiveSubtype : t_NodeId <-> t_NodeId
+        Type_IsTransitiveSubtype : t_NodeId <-> t_NodeId &
+        Type_IsReferenceTypeIdValid <: t_NodeId
     );
 
     d_init ==
@@ -57,6 +59,15 @@ OPERATIONS
         p_parent_type : t_NodeId
     THEN
         bres := bool(p_subtype |-> p_parent_type : Type_IsTransitiveSubtype)
+    END
+    ;
+
+    bres <-- is_valid_ReferenceTypeId(p_nodeId) =
+    PRE
+        p_nodeId : t_NodeId_i &
+        p_nodeId : t_NodeId
+    THEN
+        bres := bool(p_nodeId : Type_IsReferenceTypeIdValid)
     END
 
 END

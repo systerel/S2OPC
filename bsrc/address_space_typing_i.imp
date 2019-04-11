@@ -30,7 +30,8 @@ IMPORTS
     address_space_typing_bs
 
 PROMOTES
-    is_transitive_subtype
+    is_transitive_subtype,
+    is_valid_ReferenceTypeId
 
 OPERATIONS
 

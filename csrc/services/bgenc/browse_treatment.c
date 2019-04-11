@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment.c
 
- Date                 : 07/06/2019 16:33:57
+ Date                 : 11/06/2019 13:55:29
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -61,6 +61,19 @@ void browse_treatment__min_nb_result_refs(
       else {
          *browse_treatment__p_maxResultRefs = browse_treatment__l_maxTargetRef;
       }
+   }
+}
+
+void browse_treatment__local_is_valid_ReferenceTypeId(
+   const t_bool browse_treatment__p_refType_defined,
+   const constants__t_NodeId_i browse_treatment__p_referenceTypeId,
+   t_bool * const browse_treatment__bres) {
+   if (browse_treatment__p_refType_defined == true) {
+      address_space__is_valid_ReferenceTypeId(browse_treatment__p_referenceTypeId,
+         browse_treatment__bres);
+   }
+   else {
+      *browse_treatment__bres = true;
    }
 }
 
@@ -259,6 +272,7 @@ void browse_treatment__compute_browse_result(
       constants__t_NodeId_i browse_treatment__l_referenceType;
       t_bool browse_treatment__l_includeSubtypes;
       constants__t_BrowseNodeClassMask_i browse_treatment__l_nodeClassMask;
+      t_bool browse_treatment__l_is_ref_type_id_valid;
       t_bool browse_treatment__l_is_src_node_valid;
       t_entier4 browse_treatment__l_nb_target;
       constants__t_Node_i browse_treatment__l_src_node;
@@ -280,11 +294,15 @@ void browse_treatment__compute_browse_result(
          &browse_treatment__l_referenceType,
          &browse_treatment__l_includeSubtypes,
          &browse_treatment__l_nodeClassMask);
+      browse_treatment__local_is_valid_ReferenceTypeId(browse_treatment__l_refType_defined,
+         browse_treatment__l_referenceType,
+         &browse_treatment__l_is_ref_type_id_valid);
       browse_treatment_1__getall_SourceNode_NbRef(browse_treatment__l_nodeId,
          &browse_treatment__l_is_src_node_valid,
          &browse_treatment__l_nb_target,
          &browse_treatment__l_src_node);
-      if (browse_treatment__l_is_src_node_valid == true) {
+      if ((browse_treatment__l_is_ref_type_id_valid == true) &&
+         (browse_treatment__l_is_src_node_valid == true)) {
          browse_treatment__min_nb_result_refs(browse_treatment__l_maxTargetRef,
             browse_treatment__l_nb_target,
             &browse_treatment__l_max_nb_results);
@@ -327,7 +345,12 @@ void browse_treatment__compute_browse_result(
          }
       }
       else {
-         *browse_treatment__p_serviceStatusCode = constants_statuscodes_bs__e_sc_bad_node_id_unknown;
+         if (browse_treatment__l_is_ref_type_id_valid == false) {
+            *browse_treatment__p_serviceStatusCode = constants_statuscodes_bs__e_sc_bad_reference_type_id_invalid;
+         }
+         else {
+            *browse_treatment__p_serviceStatusCode = constants_statuscodes_bs__e_sc_bad_node_id_unknown;
+         }
       }
    }
 }

@@ -18,7 +18,7 @@
  */
 
 IMPLEMENTATION
-   browse_treatment_i
+    browse_treatment_i
 REFINES
     browse_treatment
 
@@ -63,6 +63,22 @@ LOCAL_OPERATIONS
     END
     ;
 
+    bres <-- local_is_valid_ReferenceTypeId(p_refType_defined, p_referenceTypeId) =
+    PRE
+        p_refType_defined : BOOL &
+        p_referenceTypeId : t_NodeId_i &
+        (p_refType_defined = TRUE =>
+            p_referenceTypeId : t_NodeId)
+    THEN
+        IF p_refType_defined = TRUE
+        THEN
+            bres := bool(p_referenceTypeId : Type_IsReferenceTypeIdValid)
+        ELSE
+            bres := TRUE
+        END
+    END
+    ;
+
     p_serviceStatusCode, p_toContinue, p_nextIndex
       <-- fill_browse_result(p_startIndex, p_max_nb_results, p_browseView, p_src_node,
                              p_browseDirection, p_refType_defined, p_referenceType, p_includeSubtypes) =
@@ -95,7 +111,7 @@ LOCAL_OPERATIONS
               p_toContinue = FALSE & p_nextIndex = 0) &
           (p_serviceStatusCode = e_sc_ok & p_toContinue = TRUE =>
               p_nextIndex : p_startIndex + p_max_nb_results .. Node_RefIndexEnd(p_src_node))
-       ) ||
+        ) ||
         /* Use of BrowseResult iterator */
         browseResult_to_iterate,
         browseResult_iterated,
@@ -208,6 +224,17 @@ OPERATIONS
     END
     ;
 
+    bres <-- local_is_valid_ReferenceTypeId(p_refType_defined, p_referenceTypeId) =
+    BEGIN
+        IF p_refType_defined = TRUE THEN
+            /* Check ReferenceTypeId validity*/
+            bres <-- is_valid_ReferenceTypeId(p_referenceTypeId)
+        ELSE
+            bres := TRUE
+        END
+    END
+    ;
+
     /* When the target node fulfills all the filtering conditions, then fill its data and iterate
        on the browse result index.
        p_ref             : reference to evaluate
@@ -282,8 +309,7 @@ OPERATIONS
         l_ref,
         l_alloc_failed
     IN
-        p_serviceStatusCode := e_sc_ok; /* TODO: check if the reference type is valid ?
-                                           Silently fail if we do not know the reference type during typecheck for now (no result will be found) */
+        p_serviceStatusCode := e_sc_ok;
         l_ref := c_Reference_indet;
         l_alloc_failed := FALSE;
         /* Initialization of the iteration on the browse result */
@@ -399,6 +425,7 @@ OPERATIONS
        l_referenceType,
        l_includeSubtypes,
        l_nodeClassMask,
+       l_is_ref_type_id_valid,
        l_is_src_node_valid,
        l_nb_target,
        l_src_node,
@@ -408,14 +435,15 @@ OPERATIONS
        l_nextIndex,
        l_cp_bres
    IN
-       p_continuationPoint := c_ContinuationPoint_indet;
-       p_nbReferences := 0;
+        p_continuationPoint := c_ContinuationPoint_indet;
+        p_nbReferences := 0;
         /* Get input context */
         l_startIndex, l_session, l_maxTargetRef, l_browseView, l_nodeId,
-          l_browseDirection, l_refType_defined, l_referenceType, l_includeSubtypes, l_nodeClassMask <-- getall_browse_value_context;
+        l_browseDirection, l_refType_defined, l_referenceType, l_includeSubtypes, l_nodeClassMask <-- getall_browse_value_context;
+        l_is_ref_type_id_valid <-- local_is_valid_ReferenceTypeId(l_refType_defined, l_referenceType);
         /* Retrieve source node in address space */
         l_is_src_node_valid, l_nb_target, l_src_node <-- getall_SourceNode_NbRef(l_nodeId);
-        IF  l_is_src_node_valid = TRUE THEN
+        IF  l_is_ref_type_id_valid = TRUE & l_is_src_node_valid = TRUE THEN
             /* Keep the minimum between the maximum of targets allowed in result and the maximum number of potential targets */
             l_max_nb_results <-- min_nb_result_refs (l_maxTargetRef, l_nb_target);
             /* Allocate a BrowseResult with maximum number of references (reached if none reference is filtered)*/
@@ -440,7 +468,11 @@ OPERATIONS
                 p_serviceStatusCode := e_sc_bad_out_of_memory
             END
         ELSE
-            p_serviceStatusCode := e_sc_bad_node_id_unknown
+            IF l_is_ref_type_id_valid = FALSE THEN
+                p_serviceStatusCode := e_sc_bad_reference_type_id_invalid
+            ELSE
+                p_serviceStatusCode := e_sc_bad_node_id_unknown
+            END
         END
     END
 

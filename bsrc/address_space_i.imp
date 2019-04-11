@@ -46,6 +46,7 @@ PROMOTES
     get_BrowseName,
     get_DisplayName,
     is_transitive_subtype,
+    is_valid_ReferenceTypeId,
     is_NodeId_equal,
     get_TypeDefinition,
     get_Reference_ReferenceType,
