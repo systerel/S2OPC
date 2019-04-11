@@ -45,17 +45,29 @@ SEES
 
 LOCAL_OPERATIONS
 
-    p_maxResultRefs <-- min_max_nb_result_refs (p_maxTargetRef, p_nb_target) =
+    p_maxResultRefs <-- min_nb_result_refs (p_maxTargetRef, p_nb_target) =
     PRE
         p_maxTargetRef : NAT                      &
         p_maxTargetRef <= k_n_BrowseTarget_max    &
         p_nb_target : NAT
     THEN
-        IF  0 < p_maxTargetRef
+        IF 0 = p_maxTargetRef
         THEN
-            p_maxResultRefs := p_maxTargetRef
+            /* No maximum of targets in results defined by clent: keep maximum number of potential targets or default max */
+            IF p_nb_target < k_n_BrowseTarget_max THEN
+                p_maxResultRefs := p_nb_target
+            ELSE
+                p_maxResultRefs := k_n_BrowseTarget_max
+            END
         ELSE
-            p_maxResultRefs := p_nb_target
+            /* Limited by maximum of targets in result */
+            IF  p_maxTargetRef < p_nb_target
+            THEN
+                p_maxResultRefs := p_maxTargetRef
+            ELSE
+                /* Keep the maximum number of potential targets (reduced by browse filters) */
+                p_maxResultRefs := p_nb_target
+            END
         END
     END
     ;
@@ -177,13 +189,25 @@ OPERATIONS
 
     /* LOCAL OPERATIONS */
 
-    p_maxResultRefs <-- min_max_nb_result_refs (p_maxTargetRef, p_nb_target) =
+    p_maxResultRefs <-- min_nb_result_refs (p_maxTargetRef, p_nb_target) =
     BEGIN
-        IF  0 < p_maxTargetRef
+        IF 0 = p_maxTargetRef
         THEN
-            p_maxResultRefs := p_maxTargetRef
+            /* No maximum of targets in results defined by clent: keep maximum number of potential targets or default max */
+            IF p_nb_target < k_n_BrowseTarget_max THEN
+                p_maxResultRefs := p_nb_target
+            ELSE
+                p_maxResultRefs := k_n_BrowseTarget_max
+            END
         ELSE
-            p_maxResultRefs := p_nb_target
+            /* Limited by maximum of targets in result */
+            IF  p_maxTargetRef < p_nb_target
+            THEN
+                p_maxResultRefs := p_maxTargetRef
+            ELSE
+                /* Keep the maximum number of potential targets (reduced by browse filters) */
+                p_maxResultRefs := p_nb_target
+            END
         END
     END
     ;
@@ -377,7 +401,8 @@ OPERATIONS
         /* Retrieve source node in address space */
         l_is_src_node_valid, l_nb_target, l_src_node <-- getall_SourceNode_NbRef(l_nodeId);
         IF  l_is_src_node_valid = TRUE THEN
-            l_max_nb_results <-- min_max_nb_result_refs (l_maxTargetRef, l_nb_target);
+            /* Keep the minimum between the maximum of targets allowed in result and the maximum number of potential targets */
+            l_max_nb_results <-- min_nb_result_refs (l_maxTargetRef, l_nb_target);
             /* Allocate a BrowseResult with maximum number of references (reached if none reference is filtered)*/
             l_alloc_bres <-- alloc_browse_result(l_max_nb_results);
             IF  l_alloc_bres = TRUE THEN

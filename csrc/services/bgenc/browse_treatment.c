@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment.c
 
- Date                 : 10/04/2019 12:55:44
+ Date                 : 11/04/2019 12:41:30
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -41,15 +41,25 @@ void browse_treatment__INITIALISATION(void) {
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-void browse_treatment__min_max_nb_result_refs(
+void browse_treatment__min_nb_result_refs(
    const t_entier4 browse_treatment__p_maxTargetRef,
    const t_entier4 browse_treatment__p_nb_target,
    t_entier4 * const browse_treatment__p_maxResultRefs) {
-   if (0 < browse_treatment__p_maxTargetRef) {
-      *browse_treatment__p_maxResultRefs = browse_treatment__p_maxTargetRef;
+   if (0 == browse_treatment__p_maxTargetRef) {
+      if (browse_treatment__p_nb_target < constants__k_n_BrowseTarget_max) {
+         *browse_treatment__p_maxResultRefs = browse_treatment__p_nb_target;
+      }
+      else {
+         *browse_treatment__p_maxResultRefs = constants__k_n_BrowseTarget_max;
+      }
    }
    else {
-      *browse_treatment__p_maxResultRefs = browse_treatment__p_nb_target;
+      if (browse_treatment__p_maxTargetRef < browse_treatment__p_nb_target) {
+         *browse_treatment__p_maxResultRefs = browse_treatment__p_maxTargetRef;
+      }
+      else {
+         *browse_treatment__p_maxResultRefs = browse_treatment__p_nb_target;
+      }
    }
 }
 
@@ -261,7 +271,7 @@ void browse_treatment__compute_browse_result(
          &browse_treatment__l_nb_target,
          &browse_treatment__l_src_node);
       if (browse_treatment__l_is_src_node_valid == true) {
-         browse_treatment__min_max_nb_result_refs(browse_treatment__l_maxTargetRef,
+         browse_treatment__min_nb_result_refs(browse_treatment__l_maxTargetRef,
             browse_treatment__l_nb_target,
             &browse_treatment__l_max_nb_results);
          browse_treatment_result_bs__alloc_browse_result(browse_treatment__l_max_nb_results,

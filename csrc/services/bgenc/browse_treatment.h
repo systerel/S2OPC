@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment.h
 
- Date                 : 10/04/2019 12:55:44
+ Date                 : 11/04/2019 12:41:30
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -90,7 +90,7 @@ extern void browse_treatment__fill_browse_result_ref(
    const constants__t_NodeId_i browse_treatment__p_referenceType,
    const t_bool browse_treatment__p_includeSubtypes,
    t_bool * const browse_treatment__p_continue);
-extern void browse_treatment__min_max_nb_result_refs(
+extern void browse_treatment__min_nb_result_refs(
    const t_entier4 browse_treatment__p_maxTargetRef,
    const t_entier4 browse_treatment__p_nb_target,
    t_entier4 * const browse_treatment__p_maxResultRefs);
