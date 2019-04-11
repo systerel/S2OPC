@@ -42,15 +42,6 @@ void constants_bs__INITIALISATION(void) {}
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-void constants_bs__get_Is_SubType(const constants_bs__t_NodeId_i constants_bs__p_type1,
-                                  const constants_bs__t_NodeId_i constants_bs__p_type2,
-                                  t_bool* const constants_bs__p_res)
-{
-    (void) constants_bs__p_type1;
-    (void) constants_bs__p_type2;
-    /* TODO: implement a functional subtype query */
-    *constants_bs__p_res = true;
-}
 
 void constants_bs__getall_conv_ExpandedNodeId_NodeId(const constants_bs__t_ExpandedNodeId_i constants_bs__p_expnid,
                                                      t_bool* const constants_bs__p_local_server,
