@@ -1075,7 +1075,7 @@
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
-      <uax:XmlElement>XmlElement:S2OPC</uax:XmlElement>
+      <uax:XmlElement>&lt;XmlElement:S2OPC/&gt;</uax:XmlElement>
     </Value>
   </UAVariable>
   <!-- END OF COMMON PART WITH READ/WRITE TEST -->
@@ -1369,11 +1369,11 @@
     </References>
     <Value>
       <uax:ListOfByteString>
-				<uax:ByteString>Qnl0ZVN0cmluZzpJTkdPUENT</uax:ByteString>
-				<uax:ByteString>Qnl0ZVN0cmluZzpJTkdPUENT</uax:ByteString>
-				<uax:ByteString>Qnl0ZVN0cmluZzpJTkdPUENT</uax:ByteString>
-				<uax:ByteString>Qnl0ZVN0cmluZzpJTkdPUENT</uax:ByteString>
-				<uax:ByteString>Qnl0ZVN0cmluZzpJTkdPUENT</uax:ByteString>
+				<uax:ByteString>VGhlIHF1aWNr</uax:ByteString>
+				<uax:ByteString>YnJvd24gZm94</uax:ByteString>
+				<uax:ByteString>anVtcHMgb3Zlcg==</uax:ByteString>
+				<uax:ByteString>dGhlIGxhenk=</uax:ByteString>
+				<uax:ByteString>ZG9n</uax:ByteString>
       </uax:ListOfByteString>
     </Value>
   </UAVariable>
@@ -1386,11 +1386,11 @@
     </References>
     <Value>
       <uax:ListOfXmlElement>
-				<uax:XmlElement>The_quick</uax:XmlElement>
-				<uax:XmlElement>brown_fox</uax:XmlElement>
-				<uax:XmlElement>jumps_over</uax:XmlElement>
-				<uax:XmlElement>the_lazy</uax:XmlElement>
-				<uax:XmlElement>dog</uax:XmlElement>
+				<uax:XmlElement>&lt;The_quick/&gt;</uax:XmlElement>
+				<uax:XmlElement>&lt;brown_fox/&gt;</uax:XmlElement>
+				<uax:XmlElement>&lt;jumps_over/&gt;</uax:XmlElement>
+				<uax:XmlElement>&lt;the_lazy/&gt;</uax:XmlElement>
+				<uax:XmlElement>&lt;dog/&gt;</uax:XmlElement>
       </uax:ListOfXmlElement>
     </Value>
   </UAVariable>

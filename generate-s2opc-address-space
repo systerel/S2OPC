@@ -428,7 +428,10 @@ def identity(x):
 
 # Bytestrings are encoded as base4
 def decode_bytestring(x):
-    return binascii.a2b_base64(x).decode('utf-8')
+    if x is None:
+        return None
+    else:
+        return binascii.a2b_base64(x).decode('utf-8')
 
 # Returns a VariableValue object
 def collect_variable_value(n):
