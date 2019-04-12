@@ -38,7 +38,7 @@ variantInfoList = [ ('Int64', ua.VariantType.Int64, -1000, random.randint(-92233
                     ('Double', ua.VariantType.Double, 2.0, random.uniform(0,2**1023) * random.choice([-1,1])),
                     ('String', ua.VariantType.String, "String:S2OPC", "String:{}".format(random_string)),
                     ('ByteString', ua.VariantType.ByteString, str.encode("ByteString:S2OPC"), "ByteString:{}".format(random_string).encode()),
-                    ('XmlElement', ua.VariantType.XmlElement, XmlElement("XmlElement:S2OPC"), XmlElement("XmlElement:{}".format(random_string))),
+                    ('XmlElement', ua.VariantType.XmlElement, XmlElement("<XmlElement:S2OPC/>"), XmlElement("XmlElement:{}".format(random_string))),
                     ('SByte', ua.VariantType.SByte, -127, random.randint(-128,127)),
                     ('Byte', ua.VariantType.Byte, 255, random.randint(0,255)),
                     ('Int16', ua.VariantType.Int16, -32767, random.randint(-32768, 32767)),
