@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment_continuation_points.c
 
- Date                 : 10/04/2019 12:55:44
+ Date                 : 12/04/2019 10:12:13
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -51,6 +51,7 @@ void browse_treatment_continuation_points__create_continuation_point(
    const constants__t_NodeId_i browse_treatment_continuation_points__p_referenceType,
    const t_bool browse_treatment_continuation_points__p_includeSubtypes,
    const constants__t_BrowseNodeClassMask_i browse_treatment_continuation_points__p_nodeClassMask,
+   const constants__t_BrowseResultMask_i browse_treatment_continuation_points__p_resultMask,
    t_bool * const browse_treatment_continuation_points__bres,
    constants__t_ContinuationPoint_i * const browse_treatment_continuation_points__p_ContinuationPoint) {
    *browse_treatment_continuation_points__p_ContinuationPoint = constants__c_ContinuationPoint_indet;
@@ -65,6 +66,7 @@ void browse_treatment_continuation_points__create_continuation_point(
          browse_treatment_continuation_points__p_referenceType,
          browse_treatment_continuation_points__p_includeSubtypes,
          browse_treatment_continuation_points__p_nodeClassMask,
+         browse_treatment_continuation_points__p_resultMask,
          browse_treatment_continuation_points__bres,
          browse_treatment_continuation_points__p_ContinuationPoint);
       *browse_treatment_continuation_points__bres = false;
@@ -82,7 +84,8 @@ void browse_treatment_continuation_points__getall_and_clear_continuation_point(
    constants__t_BrowseDirection_i * const browse_treatment_continuation_points__p_browseDirection,
    constants__t_NodeId_i * const browse_treatment_continuation_points__p_referenceType,
    t_bool * const browse_treatment_continuation_points__p_includeSubtypes,
-   constants__t_BrowseNodeClassMask_i * const browse_treatment_continuation_points__p_nodeClassMask) {
+   constants__t_BrowseNodeClassMask_i * const browse_treatment_continuation_points__p_nodeClassMask,
+   constants__t_BrowseResultMask_i * const browse_treatment_continuation_points__p_resultMask) {
    session_mgr__is_valid_session(browse_treatment_continuation_points__p_session,
       browse_treatment_continuation_points__bres);
    browse_treatment_continuation_points_bs__unused_continuationPoint(browse_treatment_continuation_points__p_continuationPoint);
@@ -95,6 +98,7 @@ void browse_treatment_continuation_points__getall_and_clear_continuation_point(
    *browse_treatment_continuation_points__p_referenceType = constants__c_NodeId_indet;
    *browse_treatment_continuation_points__p_includeSubtypes = false;
    *browse_treatment_continuation_points__p_nodeClassMask = constants__c_BrowseNodeClassMask_indet;
+   *browse_treatment_continuation_points__p_resultMask = constants__c_BrowseResultMask_indet;
 }
 
 void browse_treatment_continuation_points__set_session_closed(

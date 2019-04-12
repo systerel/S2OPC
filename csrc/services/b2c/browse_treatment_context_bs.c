@@ -19,14 +19,14 @@
 
 #include "browse_treatment_context_bs.h"
 
-#define NODECLASS_MASK_OBJECT 1
-#define NODECLASS_MASK_VARIABLE 2
-#define NODECLASS_MASK_METHOD 4
-#define NODECLASS_MASK_OBJECT_TYPE 8
-#define NODECLASS_MASK_VARIABLE_TYPE 16
-#define NODECLASS_MASK_REFERENCE_TYPE 32
-#define NODECLASS_MASK_DATA_TYPE 64
-#define NODECLASS_MASK_VIEW 128
+#define NODECLASS_MASK_OBJECT 1          // bit 0
+#define NODECLASS_MASK_VARIABLE 2        // bit 1
+#define NODECLASS_MASK_METHOD 4          // bit 2
+#define NODECLASS_MASK_OBJECT_TYPE 8     // bit 3
+#define NODECLASS_MASK_VARIABLE_TYPE 16  // bit 4
+#define NODECLASS_MASK_REFERENCE_TYPE 32 // bit 5
+#define NODECLASS_MASK_DATA_TYPE 64      // bit 6
+#define NODECLASS_MASK_VIEW 128          // bit 7
 
 /*------------------------
    INITIALISATION Clause

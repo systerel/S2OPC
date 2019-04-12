@@ -35,6 +35,7 @@ SETS
     t_WriteValuePointer_i;
     t_BrowseResultReferences_i;
     t_BrowseNodeClassMask_i;
+    t_BrowseResultMask_i;
 
     t_channel_i;
     t_session_i;
@@ -136,6 +137,7 @@ CONCRETE_CONSTANTS
     c_WriteValuePointer_indet,
     c_BrowseResultReferences_indet,
     c_BrowseNodeClassMask_indet,
+    c_BrowseResultMask_indet,
     c_timer_id_indet,
     c_IndexRange_indet,
     c_ContinuationPoint_indet
@@ -379,6 +381,8 @@ PROPERTIES
     c_BrowseResultReferences_indet /: t_BrowseResultReferences &
 
     c_BrowseNodeClassMask_indet : t_BrowseNodeClassMask_i &
+
+    c_BrowseResultMask_indet : t_BrowseResultMask_i &
 
     t_timer_id <: t_timer_id_i &
     c_timer_id_indet : t_timer_id_i &

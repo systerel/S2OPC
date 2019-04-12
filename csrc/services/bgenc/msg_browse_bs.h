@@ -21,7 +21,7 @@
 
  File Name            : msg_browse_bs.h
 
- Date                 : 10/04/2019 08:42:24
+ Date                 : 12/04/2019 10:12:30
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -67,7 +67,8 @@ extern void msg_browse_bs__getall_BrowseValue(
    constants__t_BrowseDirection_i * const msg_browse_bs__p_dir,
    constants__t_NodeId_i * const msg_browse_bs__p_reftype,
    t_bool * const msg_browse_bs__p_inc_subtype,
-   constants__t_BrowseNodeClassMask_i * const msg_browse_bs__p_class_mask);
+   constants__t_BrowseNodeClassMask_i * const msg_browse_bs__p_class_mask,
+   constants__t_BrowseResultMask_i * const msg_browse_bs__p_result_mask);
 extern void msg_browse_bs__set_ResponseBrowse_BrowseResult(
    const constants__t_msg_i msg_browse_bs__p_resp_msg,
    const constants__t_BrowseValue_i msg_browse_bs__p_bvi,

@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment_continuation_points.h
 
- Date                 : 10/04/2019 12:55:44
+ Date                 : 12/04/2019 10:12:13
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -65,6 +65,7 @@ extern void browse_treatment_continuation_points__create_continuation_point(
    const constants__t_NodeId_i browse_treatment_continuation_points__p_referenceType,
    const t_bool browse_treatment_continuation_points__p_includeSubtypes,
    const constants__t_BrowseNodeClassMask_i browse_treatment_continuation_points__p_nodeClassMask,
+   const constants__t_BrowseResultMask_i browse_treatment_continuation_points__p_resultMask,
    t_bool * const browse_treatment_continuation_points__bres,
    constants__t_ContinuationPoint_i * const browse_treatment_continuation_points__p_ContinuationPoint);
 extern void browse_treatment_continuation_points__getall_and_clear_continuation_point(
@@ -78,7 +79,8 @@ extern void browse_treatment_continuation_points__getall_and_clear_continuation_
    constants__t_BrowseDirection_i * const browse_treatment_continuation_points__p_browseDirection,
    constants__t_NodeId_i * const browse_treatment_continuation_points__p_referenceType,
    t_bool * const browse_treatment_continuation_points__p_includeSubtypes,
-   constants__t_BrowseNodeClassMask_i * const browse_treatment_continuation_points__p_nodeClassMask);
+   constants__t_BrowseNodeClassMask_i * const browse_treatment_continuation_points__p_nodeClassMask,
+   constants__t_BrowseResultMask_i * const browse_treatment_continuation_points__p_resultMask);
 extern void browse_treatment_continuation_points__set_session_closed(
    const constants__t_session_i browse_treatment_continuation_points__p_session);
 

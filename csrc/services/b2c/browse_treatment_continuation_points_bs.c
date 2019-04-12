@@ -33,6 +33,7 @@ void browse_treatment_continuation_points_bs__create_continuation_point_bs(
     const constants__t_NodeId_i browse_treatment_continuation_points_bs__p_referenceType,
     const t_bool browse_treatment_continuation_points_bs__p_includeSubtypes,
     const constants__t_BrowseNodeClassMask_i browse_treatment_continuation_points_bs__p_nodeClassMask,
+    const constants__t_BrowseResultMask_i browse_treatment_continuation_points_bs__p_resultMask,
     t_bool* const browse_treatment_continuation_points_bs__bres,
     constants__t_ContinuationPoint_i* const browse_treatment_continuation_points_bs__p_ContinuationPoint)
 {
@@ -44,6 +45,7 @@ void browse_treatment_continuation_points_bs__create_continuation_point_bs(
     (void) browse_treatment_continuation_points_bs__p_referenceType;
     (void) browse_treatment_continuation_points_bs__p_includeSubtypes;
     (void) browse_treatment_continuation_points_bs__p_nodeClassMask;
+    (void) browse_treatment_continuation_points_bs__p_resultMask;
     *browse_treatment_continuation_points_bs__bres = false;
     *browse_treatment_continuation_points_bs__p_ContinuationPoint = NULL;
 }

@@ -84,7 +84,8 @@ void msg_browse_bs__getall_BrowseValue(const constants__t_msg_i msg_browse_bs__p
                                        constants__t_BrowseDirection_i* const msg_browse_bs__p_dir,
                                        constants__t_NodeId_i* const msg_browse_bs__p_reftype,
                                        t_bool* const msg_browse_bs__p_inc_subtype,
-                                       constants__t_BrowseNodeClassMask_i* const msg_browse_bs__p_class_mask)
+                                       constants__t_BrowseNodeClassMask_i* const msg_browse_bs__p_class_mask,
+                                       constants__t_BrowseResultMask_i* const msg_browse_bs__p_result_mask)
 {
     OpcUa_BrowseRequest* req = msg_browse_bs__p_req_msg;
     // Note: msg_browse_bs__p_bvi : 1..N to be translated into C array index by adding (-1)
@@ -96,6 +97,7 @@ void msg_browse_bs__getall_BrowseValue(const constants__t_msg_i msg_browse_bs__p
     util_NodeId_borrowReference_or_indet__C_to_B(msg_browse_bs__p_reftype, &bdesc->ReferenceTypeId);
     *msg_browse_bs__p_inc_subtype = bdesc->IncludeSubtypes;
     *msg_browse_bs__p_class_mask = bdesc->NodeClassMask;
+    *msg_browse_bs__p_result_mask = bdesc->ResultMask;
 }
 
 void msg_browse_bs__set_ResponseBrowse_BrowseResult(

@@ -88,6 +88,7 @@ SETS
     t_BrowseValue_i;
     t_BrowseResultReferences_i;
     t_BrowseNodeClassMask_i;
+    t_BrowseResultMask_i;
 
     t_byte_buffer_i; /* (SOPC_Buffer*) */
     t_LocalizedText_i; /* (SOPC_LocalizedText*) */
@@ -316,6 +317,7 @@ CONCRETE_CONSTANTS
     c_BrowseValue_indet,
     c_BrowseResultReferences_indet,
     c_BrowseNodeClassMask_indet,
+    c_BrowseResultMask_indet,
     c_byte_buffer_indet,
     c_LocalizedText_indet,
     c_QualifiedName_indet,
@@ -553,6 +555,8 @@ PROPERTIES
     c_BrowseResultReferences_indet /: t_BrowseResultReferences &
 
     c_BrowseNodeClassMask_indet : t_BrowseNodeClassMask_i &
+
+    c_BrowseResultMask_indet : t_BrowseResultMask_i &
 
     t_monitoredItemReqIndex <: NAT &
     t_monitoredItemNotifIndex <: NAT &

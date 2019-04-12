@@ -21,7 +21,7 @@
 
  File Name            : service_set_view.c
 
- Date                 : 18/04/2019 13:46:40
+ Date                 : 18/04/2019 15:01:57
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -58,6 +58,7 @@ void service_set_view__treat_browse_request_BrowseValue_1(
       t_entier4 service_set_view__l_nbTargets;
       constants__t_BrowseResultReferences_i service_set_view__l_browseResult;
       constants__t_BrowseNodeClassMask_i service_set_view__l_nodeClassMask;
+      constants__t_BrowseResultMask_i service_set_view__l_resultMask;
       
       msg_browse_bs__getall_BrowseValue(service_set_view__p_req_msg,
          service_set_view__p_bvi,
@@ -65,7 +66,8 @@ void service_set_view__treat_browse_request_BrowseValue_1(
          &service_set_view__l_dir,
          &service_set_view__l_reftype,
          &service_set_view__l_incsubtyp,
-         &service_set_view__l_nodeClassMask);
+         &service_set_view__l_nodeClassMask,
+         &service_set_view__l_resultMask);
       if (service_set_view__l_dir != constants__e_bd_indet) {
          if (service_set_view__l_SrcNodeId != constants__c_NodeId_indet) {
             browse_treatment__set_browse_value_context(service_set_view__p_session,
@@ -75,7 +77,8 @@ void service_set_view__treat_browse_request_BrowseValue_1(
                service_set_view__l_dir,
                service_set_view__l_reftype,
                service_set_view__l_incsubtyp,
-               service_set_view__l_nodeClassMask);
+               service_set_view__l_nodeClassMask,
+               service_set_view__l_resultMask);
             browse_treatment__compute_browse_result(&service_set_view__l_serviceStatusCode,
                &service_set_view__l_continuationPoint,
                &service_set_view__l_nbTargets);

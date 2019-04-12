@@ -79,25 +79,84 @@ LOCAL_OPERATIONS
     END
     ;
 
+    out_RefType, out_IsForward, out_BrowseName, out_DisplayName, out_NodeClass, out_TypeDefinition
+      <-- apply_result_mask_filter
+        (p_resultMask, p_RefType, p_IsForward, p_BrowseName, p_DisplayName, p_NodeClass, p_TypeDefinition) =
+    PRE
+        p_resultMask : t_BrowseResultMask_i &
+        p_RefType : t_NodeId_i &
+        p_IsForward : BOOL &
+        p_BrowseName : t_QualifiedName_i &
+        p_DisplayName : t_LocalizedText_i &
+        p_NodeClass : t_NodeClass_i &
+        p_TypeDefinition : t_ExpandedNodeId_i
+    THEN
+        out_RefType,
+        out_IsForward,
+        out_BrowseName,
+        out_DisplayName,
+        out_NodeClass,
+        out_TypeDefinition
+        :(out_RefType : t_NodeId_i &
+          out_IsForward : BOOL &
+          out_BrowseName : t_QualifiedName_i &
+          out_DisplayName : t_LocalizedText_i &
+          out_NodeClass : t_NodeClass_i &
+          out_TypeDefinition : t_ExpandedNodeId_i &
+
+          (p_resultMask : mask_hasReferenceType =>
+                out_RefType = p_RefType) &
+          (p_resultMask /: mask_hasReferenceType =>
+                out_RefType = c_NodeId_indet) &
+
+          (p_resultMask : mask_hasIsForward =>
+                out_IsForward = p_IsForward) &
+          (p_resultMask /: mask_hasIsForward =>
+                out_IsForward = FALSE) &
+
+          (p_resultMask : mask_hasBrowseName =>
+                out_BrowseName = p_BrowseName) &
+          (p_resultMask /: mask_hasBrowseName =>
+                out_BrowseName = c_QualifiedName_indet) &
+
+          (p_resultMask : mask_hasDisplayName =>
+                out_DisplayName = p_DisplayName) &
+          (p_resultMask /: mask_hasDisplayName =>
+                out_DisplayName = c_LocalizedText_indet) &
+
+          (p_resultMask : mask_hasNodeClass =>
+                out_NodeClass = p_NodeClass) &
+          (p_resultMask /: mask_hasNodeClass =>
+                out_NodeClass = c_NodeClass_indet) &
+
+          (p_resultMask : mask_hasTypeDefinition =>
+                out_TypeDefinition = p_TypeDefinition) &
+          (p_resultMask /: mask_hasTypeDefinition =>
+                out_TypeDefinition = c_ExpandedNodeId_indet)
+        )
+    END
+    ;
+
     p_serviceStatusCode, p_toContinue, p_nextIndex
       <-- fill_browse_result(p_startIndex, p_max_nb_results, p_browseView, p_src_node,
-                             p_browseDirection, p_refType_defined, p_referenceType, p_includeSubtypes) =
+                             p_browseDirection, p_refType_defined, p_referenceType, p_includeSubtypes, p_resultMask) =
     PRE
-        p_startIndex    : NAT                       &
-        p_startIndex    : t_RefIndex                &
-        p_max_nb_results : NAT                      &
-        p_max_nb_results <= k_n_BrowseTarget_max    &
-        p_browseView : t_NodeId_i                   &
-        p_src_node : t_Node_i                       &
-        p_src_node : t_Node                         &
-        p_browseDirection : t_BrowseDirection_i     &
-        p_browseDirection : t_BrowseDirection       &
-        p_refType_defined : BOOL                    &
-        p_referenceType : t_NodeId_i                &
+        p_startIndex      : NAT                      &
+        p_startIndex      : t_RefIndex               &
+        p_max_nb_results  : NAT                      &
+        p_max_nb_results  <= k_n_BrowseTarget_max    &
+        p_browseView      : t_NodeId_i               &
+        p_src_node        : t_Node_i                 &
+        p_src_node        : t_Node                   &
+        p_browseDirection : t_BrowseDirection_i      &
+        p_browseDirection : t_BrowseDirection        &
+        p_refType_defined : BOOL                     &
+        p_referenceType   : t_NodeId_i               &
         (p_refType_defined = TRUE =>
-            p_referenceType : t_NodeId)             &
-        p_includeSubtypes : BOOL                    &
-        isBrowseResultAllocated = TRUE              &
+            p_referenceType : t_NodeId)              &
+        p_includeSubtypes : BOOL                     &
+        p_resultMask      : t_BrowseResultMask_i     &
+        isBrowseResultAllocated = TRUE               &
         max_nb_references = p_max_nb_results
     THEN
         p_serviceStatusCode,
@@ -131,8 +190,11 @@ LOCAL_OPERATIONS
     END
     ;
 
-    p_continue, p_alloc_failed <-- fill_browse_result_ref(p_ref, p_browseView, p_browseDirection, p_refType_defined, p_referenceType, p_includeSubtypes) =
+    p_continue, p_alloc_failed <-- fill_browse_result_ref(p_ref, p_browseView, p_browseDirection,
+                                                          p_refType_defined, p_referenceType,
+                                                          p_includeSubtypes, p_resultMask) =
     PRE
+        p_resultMask      : t_BrowseResultMask_i &
         p_ref             : t_Reference_i       &
         p_ref             : t_Reference         &
         p_browseView      : t_NodeId_i          &
@@ -161,31 +223,69 @@ LOCAL_OPERATIONS
              )
         THEN
             CHOICE
-                p_alloc_failed := FALSE ||
-                /* Compatible reference, add it in a available reference index of the browse result */
-                ANY l_browseResultIdx WHERE
-                    l_browseResultIdx : NAT &
-                    l_browseResultIdx : browseResult_to_iterate
-                THEN
-                    browseResult_iterated   := browseResult_iterated   \/ {l_browseResultIdx} ||
-                    browseResult_to_iterate := browseResult_to_iterate -  {l_browseResultIdx} ||
-                    p_continue              := bool(browseResult_to_iterate /= {l_browseResultIdx}) ||
-                    out_BrowseResult_ReferenceTypeId (l_browseResultIdx) := Reference_ReferenceType(p_ref) ||
-                    out_BrowseResult_isForward (l_browseResultIdx) := Reference_IsForward(p_ref) ||
+                LET l_browseResultIdx BE
+                    l_browseResultIdx = nextBrowseResult
+                IN                    
+                    p_alloc_failed := FALSE ||
+                    /* Compatible reference, add it in a available reference index of the browse result */
+                    browseResult_iterated   := 1 .. nextBrowseResult ||
+                    browseResult_to_iterate := nextBrowseResult + 1 .. nb_browseResult_max_refs ||
+                    nextBrowseResult        := nextBrowseResult + 1 ||
+                    p_continue              := bool(nextBrowseResult + 1 /= nb_browseResult_max_refs) ||
                     out_BrowseResult_NodeId (l_browseResultIdx) := Reference_TargetNode(p_ref) ||
                     out_BrowseResult_nb_References := l_browseResultIdx ||
                     IF Reference_TargetNode(p_ref) : dom(conv_ExpandedNodeId_NodeId) &
                         conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref)) : ran(a_NodeId)
                     THEN
-                        out_BrowseResult_BrowseName (l_browseResultIdx) := a_BrowseName(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref)))) ||
-                        out_BrowseResult_DisplayName (l_browseResultIdx) := a_DisplayName(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref)))) ||
-                        out_BrowseResult_NodeClass (l_browseResultIdx) := a_NodeClass(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref)))) ||
-                        out_BrowseResult_TypeDefinition (l_browseResultIdx) := Ref_HasTypeDefinition(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref))))
+                        IF p_resultMask : mask_hasBrowseName THEN
+                            out_BrowseResult_BrowseName (l_browseResultIdx) :=
+                              a_BrowseName(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref))))
+                        ELSE
+                            out_BrowseResult_BrowseName (l_browseResultIdx) := c_QualifiedName_indet
+                        END ||
+                        IF p_resultMask : mask_hasDisplayName THEN
+                            out_BrowseResult_DisplayName (l_browseResultIdx) :=
+                              a_DisplayName(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref))))
+                        ELSE
+                            out_BrowseResult_DisplayName (l_browseResultIdx) := c_LocalizedText_indet
+                        END ||
+                        IF p_resultMask : mask_hasNodeClass THEN
+                            out_BrowseResult_NodeClass (l_browseResultIdx) :=
+                              a_NodeClass(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref))))
+                        ELSE
+                            out_BrowseResult_NodeClass (l_browseResultIdx) := c_NodeClass_indet
+                        END ||
+                        IF p_resultMask : mask_hasTypeDefinition THEN
+                            out_BrowseResult_TypeDefinition (l_browseResultIdx) :=
+                              Ref_HasTypeDefinition(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref))))
+                        ELSE
+                            out_BrowseResult_TypeDefinition (l_browseResultIdx) := c_ExpandedNodeId_indet
+                        END ||
+                        IF p_resultMask : mask_hasReferenceType THEN
+                            out_BrowseResult_ReferenceTypeId (l_browseResultIdx) := Reference_ReferenceType(p_ref)
+                        ELSE
+                            out_BrowseResult_ReferenceTypeId (l_browseResultIdx) := c_NodeId_indet
+                        END ||
+                        IF p_resultMask : mask_hasIsForward THEN
+                            out_BrowseResult_isForward (l_browseResultIdx) := Reference_IsForward(p_ref)
+                        ELSE
+                            out_BrowseResult_isForward (l_browseResultIdx) := FALSE
+                        END
                     ELSE
                         out_BrowseResult_BrowseName (l_browseResultIdx) := c_QualifiedName_indet ||
                         out_BrowseResult_DisplayName (l_browseResultIdx) := c_LocalizedText_indet ||
                         out_BrowseResult_NodeClass (l_browseResultIdx) := c_NodeClass_indet ||
-                        out_BrowseResult_TypeDefinition (l_browseResultIdx) := c_ExpandedNodeId_indet
+                        out_BrowseResult_TypeDefinition (l_browseResultIdx) := c_ExpandedNodeId_indet ||
+                        IF p_resultMask : mask_hasReferenceType THEN
+                            out_BrowseResult_ReferenceTypeId (l_browseResultIdx) := Reference_ReferenceType(p_ref)
+                        ELSE
+                            out_BrowseResult_ReferenceTypeId (l_browseResultIdx) := c_NodeId_indet
+                        END ||
+                        IF p_resultMask : mask_hasIsForward THEN
+                            out_BrowseResult_isForward (l_browseResultIdx) := Reference_IsForward(p_ref)
+                        ELSE
+                            out_BrowseResult_isForward (l_browseResultIdx) := FALSE
+                        END
                     END
                 END
             OR
@@ -235,6 +335,51 @@ OPERATIONS
     END
     ;
 
+    out_RefType, out_IsForward, out_BrowseName, out_DisplayName, out_NodeClass, out_TypeDefinition
+      <-- apply_result_mask_filter
+        (p_resultMask, p_RefType, p_IsForward, p_BrowseName, p_DisplayName, p_NodeClass, p_TypeDefinition) =
+    VAR
+        is_in_mask
+    IN
+        is_in_mask <-- is_BrowseName_in_mask (p_resultMask);
+        IF is_in_mask = TRUE THEN
+            out_BrowseName := p_BrowseName
+        ELSE
+            out_BrowseName := c_QualifiedName_indet
+        END;
+        is_in_mask <-- is_DisplayName_in_mask (p_resultMask);
+        IF is_in_mask = TRUE THEN
+            out_DisplayName := p_DisplayName
+        ELSE
+            out_DisplayName := c_LocalizedText_indet
+        END;
+        is_in_mask <-- is_NodeClass_in_mask (p_resultMask);
+        IF is_in_mask = TRUE THEN
+            out_NodeClass := p_NodeClass
+        ELSE
+            out_NodeClass := c_NodeClass_indet
+        END;
+        is_in_mask <-- is_TypeDefinition_in_mask (p_resultMask);
+        IF is_in_mask = TRUE THEN
+            out_TypeDefinition := p_TypeDefinition
+        ELSE
+            out_TypeDefinition := c_ExpandedNodeId_indet
+        END;
+        is_in_mask <-- is_ReferenceType_in_mask (p_resultMask);
+        IF is_in_mask = TRUE THEN
+            out_RefType := p_RefType
+        ELSE
+            out_RefType := c_NodeId_indet
+        END;
+        is_in_mask <-- is_IsForward_in_mask (p_resultMask);
+        IF is_in_mask = TRUE THEN
+            out_IsForward := p_IsForward
+        ELSE
+            out_IsForward := FALSE
+        END
+    END
+    ;
+
     /* When the target node fulfills all the filtering conditions, then fill its data and iterate
        on the browse result index.
        p_ref             : reference to evaluate
@@ -244,12 +389,14 @@ OPERATIONS
        p_referenceType   : reference type to filter
        p_includeSubtypes : indicates whether subtypes should be filtered. Else only the given reference
                            type is filtered
+       p_resultMask      : the mask to apply on result (fields to fill in result)
        p_continue        : indicates whether the iteration should continue (it should stop if the
                            maximum number of browse response index has just been filled)
        p_alloc_failed    : indicates an out of memory issue when filling result reference
     */
     p_continue, p_alloc_failed <-- fill_browse_result_ref(p_ref, p_browseView, p_browseDirection,
-                                                          p_refType_defined, p_referenceType, p_includeSubtypes) =
+                                                          p_refType_defined, p_referenceType,
+                                                          p_includeSubtypes, p_resultMask) =
     VAR
         l_RefType,
         l_TargetNode,
@@ -260,7 +407,13 @@ OPERATIONS
         l_DisplayName,
         l_NodeClass,
         l_TypeDefinition,
-        l_NodeClassInMask
+        l_NodeClassInMask,
+        l_RefType2,
+        l_IsForward2,
+        l_BrowseName2,
+        l_DisplayName2,
+        l_NodeClass2,
+        l_TypeDefinition2
     IN
         p_alloc_failed := FALSE;
         p_continue := TRUE;
@@ -272,12 +425,16 @@ OPERATIONS
         IF  l_res = TRUE THEN
             l_res <-- Is_RefTypes_Compatible(p_refType_defined, p_referenceType, p_includeSubtypes, l_RefType);
             IF  l_res = TRUE THEN
-                l_BrowseName, l_DisplayName, l_NodeClass, l_TypeDefinition <-- get_optional_fields_ReferenceDescription(l_TargetNode);
+                l_BrowseName, l_DisplayName, l_NodeClass, l_TypeDefinition
+                  <-- get_optional_fields_ReferenceDescription(l_TargetNode);
                 l_NodeClassInMask <-- is_NodeClass_in_NodeClassMask (l_NodeClass);
                 IF l_NodeClassInMask = TRUE THEN
                     p_continue, l_bri <-- continue_iter_browseResult;
-                    p_alloc_failed <-- setall_browse_result_reference_at (l_bri, l_RefType, l_IsForward, l_TargetNode,
-                                                                          l_BrowseName, l_DisplayName, l_NodeClass, l_TypeDefinition)
+                    l_RefType2, l_IsForward2, l_BrowseName2, l_DisplayName2, l_NodeClass2, l_TypeDefinition2
+                      <-- apply_result_mask_filter
+                             (p_resultMask, l_RefType, l_IsForward, l_BrowseName, l_DisplayName, l_NodeClass, l_TypeDefinition);
+                    p_alloc_failed <-- setall_browse_result_reference_at (l_bri, l_RefType2, l_IsForward2, l_TargetNode,
+                                                                          l_BrowseName2, l_DisplayName2, l_NodeClass2, l_TypeDefinition2)
                 END
             END
         END;
@@ -299,10 +456,12 @@ OPERATIONS
        p_referenceType  : reference type to filter
        p_includeSubtypes: indicates whether subtypes should be filtered. Else only the given reference
                           type is filtered
+       p_resultMask     : the mask to apply on result (fields to fill in result)
     */
+
     p_serviceStatusCode, p_toContinue, p_nextIndex <-- fill_browse_result(p_startIndex, p_max_nb_results, p_browseView,
                                                                           p_src_node, p_browseDirection, p_refType_defined,
-                                                                          p_referenceType, p_includeSubtypes) =
+                                                                          p_referenceType, p_includeSubtypes, p_resultMask) =
     VAR
         l_continue_bri,
         l_continue_ref,
@@ -325,7 +484,7 @@ OPERATIONS
             /* When the target node fulfills all the filtering conditions, then
             fill its data and iterate on the browse result index */
             l_continue_bri, l_alloc_failed <-- fill_browse_result_ref(l_ref, p_browseView, p_browseDirection, p_refType_defined,
-                                                                      p_referenceType, p_includeSubtypes)
+                                                                      p_referenceType, p_includeSubtypes, p_resultMask)
         INVARIANT
             /* Iteration on references from source node */
             references_to_iterate <: NAT &
@@ -375,11 +534,11 @@ OPERATIONS
     /* END OF LOCAL OPERATIONS */
 
    set_browse_value_context (p_session, p_maxTargetRef, p_browseView, p_nodeId,
-                             p_browseDirection, p_referenceType, p_includeSubtypes, p_nodeClassMask) =
+                             p_browseDirection, p_referenceType, p_includeSubtypes, p_nodeClassMask, p_resultMask) =
    BEGIN
        /* Only set context to start with index 1 of target references */
        setall_browse_value_context(1, p_session, p_maxTargetRef, p_browseView, p_nodeId,
-                                   p_browseDirection, p_referenceType, p_includeSubtypes, p_nodeClassMask)
+                                   p_browseDirection, p_referenceType, p_includeSubtypes, p_nodeClassMask, p_resultMask)
    END
    ;
 
@@ -393,7 +552,8 @@ OPERATIONS
        l_browseDirection,
        l_referenceType,
        l_includeSubtypes,
-       l_nodeClassMask
+       l_nodeClassMask,
+       l_resultMask
    IN
         p_service_StatusCode := e_sc_bad_continuation_point_invalid;
         l_res,
@@ -404,10 +564,13 @@ OPERATIONS
         l_browseDirection,
         l_referenceType,
         l_includeSubtypes,
-        l_nodeClassMask<-- getall_and_clear_continuation_point (p_session, p_continuationPoint);
+        l_nodeClassMask,
+        l_resultMask
+          <-- getall_and_clear_continuation_point (p_session, p_continuationPoint);
         IF l_res = TRUE THEN
             setall_browse_value_context(l_nextIndex, p_session, l_maxTargetRef, l_browseView,
-                                        l_nodeId, l_browseDirection, l_referenceType, l_includeSubtypes, l_nodeClassMask);
+                                        l_nodeId, l_browseDirection, l_referenceType, l_includeSubtypes,
+                                        l_nodeClassMask, l_resultMask);
             p_service_StatusCode := e_sc_ok
         END
    END
@@ -425,6 +588,7 @@ OPERATIONS
        l_referenceType,
        l_includeSubtypes,
        l_nodeClassMask,
+       l_resultMask,
        l_is_ref_type_id_valid,
        l_is_src_node_valid,
        l_nb_target,
@@ -439,7 +603,8 @@ OPERATIONS
         p_nbReferences := 0;
         /* Get input context */
         l_startIndex, l_session, l_maxTargetRef, l_browseView, l_nodeId,
-        l_browseDirection, l_refType_defined, l_referenceType, l_includeSubtypes, l_nodeClassMask <-- getall_browse_value_context;
+        l_browseDirection, l_refType_defined, l_referenceType, l_includeSubtypes, l_nodeClassMask, l_resultMask
+          <-- getall_browse_value_context;
         l_is_ref_type_id_valid <-- local_is_valid_ReferenceTypeId(l_refType_defined, l_referenceType);
         /* Retrieve source node in address space */
         l_is_src_node_valid, l_nb_target, l_src_node <-- getall_SourceNode_NbRef(l_nodeId);
@@ -451,14 +616,15 @@ OPERATIONS
             IF  l_alloc_bres = TRUE THEN
                 p_serviceStatusCode, l_toContinue, l_nextIndex
                   <-- fill_browse_result (l_startIndex, l_max_nb_results, l_browseView, l_src_node,
-                                          l_browseDirection, l_refType_defined, l_referenceType, l_includeSubtypes);
+                                          l_browseDirection, l_refType_defined, l_referenceType,
+                                          l_includeSubtypes, l_resultMask);
                 IF p_serviceStatusCode = e_sc_ok THEN
                     p_nbReferences <-- get_browse_result_nb_references;
                     IF l_toContinue = TRUE THEN
                         l_cp_bres, p_continuationPoint
                           <-- create_continuation_point (l_session, l_nextIndex, l_maxTargetRef, l_browseView,
                                                          l_nodeId, l_browseDirection, l_referenceType,
-                                                         l_includeSubtypes, l_nodeClassMask);
+                                                         l_includeSubtypes, l_nodeClassMask, l_resultMask);
                         IF l_cp_bres = FALSE THEN
                             p_serviceStatusCode := e_sc_bad_no_continuation_points
                         END

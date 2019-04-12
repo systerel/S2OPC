@@ -36,7 +36,8 @@ DEFINITIONS
         RequestBrowse_BrowseValue_BrowseDirection,
         RequestBrowse_BrowseValue_ReferenceTypeId,
         RequestBrowse_BrowseValue_IncludedSubtypes,
-        RequestBrowse_BrowseValue_NodeClassMask
+        RequestBrowse_BrowseValue_NodeClassMask,
+        RequestBrowse_BrowseValue_ResultMask
     ;
     d_variables_resp ==
         ResponseBrowse,
@@ -54,7 +55,8 @@ DEFINITIONS
         RequestBrowse_BrowseValue_BrowseDirection   : t_BrowseValue +-> t_BrowseDirection_i &
         RequestBrowse_BrowseValue_ReferenceTypeId   : t_BrowseValue +-> t_NodeId_i          &
         RequestBrowse_BrowseValue_IncludedSubtypes <: t_BrowseValue                         &
-        RequestBrowse_BrowseValue_NodeClassMask     : t_BrowseValue +-> t_BrowseNodeClassMask_i
+        RequestBrowse_BrowseValue_NodeClassMask     : t_BrowseValue +-> t_BrowseNodeClassMask_i &
+        RequestBrowse_BrowseValue_ResultMask     : t_BrowseValue +-> t_BrowseResultMask_i
     ;
     d_inv_resp ==
         ResponseBrowse                     : t_msg_i &
@@ -74,7 +76,8 @@ DEFINITIONS
             RequestBrowse_BrowseValue_BrowseDirection  = {} &
             RequestBrowse_BrowseValue_ReferenceTypeId  = {} &
             RequestBrowse_BrowseValue_IncludedSubtypes = {} &
-            RequestBrowse_BrowseValue_NodeClassMask    = {}
+            RequestBrowse_BrowseValue_NodeClassMask    = {} &
+            RequestBrowse_BrowseValue_ResultMask    = {}
         )
     ;
     d_init_resp ==
@@ -125,6 +128,7 @@ OPERATIONS
             RequestBrowse_BrowseValue_ReferenceTypeId  : cast_t_BrowseValue[1..RequestBrowse_nb_BrowseValue] --> t_NodeId_i          &
             RequestBrowse_BrowseValue_IncludedSubtypes <: cast_t_BrowseValue[1..RequestBrowse_nb_BrowseValue]                        &
             RequestBrowse_BrowseValue_NodeClassMask    : cast_t_BrowseValue[1..RequestBrowse_nb_BrowseValue] --> t_BrowseNodeClassMask_i &
+            RequestBrowse_BrowseValue_ResultMask       : cast_t_BrowseValue[1..RequestBrowse_nb_BrowseValue] --> t_BrowseResultMask_i &
             p_nid_view = RequestBrowse_BrowseView &
             p_nb_BrowseTargetMax = RequestBrowse_nb_BrowseTargetMax &
             p_nb_browse_value = RequestBrowse_nb_BrowseValue
@@ -132,7 +136,7 @@ OPERATIONS
     END
     ;
 
-    p_NodeId, p_dir, p_reftype, p_inc_subtype, p_class_mask <-- getall_BrowseValue(p_req_msg, p_bvi) =
+    p_NodeId, p_dir, p_reftype, p_inc_subtype, p_class_mask, p_result_mask <-- getall_BrowseValue(p_req_msg, p_bvi) =
     PRE
         p_req_msg : t_msg_i &
         p_req_msg : t_msg &
@@ -146,6 +150,7 @@ OPERATIONS
         p_bvi : dom(RequestBrowse_BrowseValue_BrowseDirection) &
         p_bvi : dom(RequestBrowse_BrowseValue_ReferenceTypeId) &
         p_bvi : dom(RequestBrowse_BrowseValue_NodeClassMask) &
+        p_bvi : dom(RequestBrowse_BrowseValue_ResultMask) &
 
         RequestBrowse = p_req_msg &
         RequestBrowse_nb_BrowseValue > 0 &
@@ -155,13 +160,15 @@ OPERATIONS
         p_dir,
         p_reftype,
         p_inc_subtype,
-        p_class_mask
+        p_class_mask,
+        p_result_mask
         :(  p_NodeId      = RequestBrowse_BrowseValue_NodeId(p_bvi) &
             p_dir         = RequestBrowse_BrowseValue_BrowseDirection(p_bvi) &
             p_reftype     = RequestBrowse_BrowseValue_ReferenceTypeId(p_bvi) &
             p_reftype = RequestBrowse_BrowseValue_ReferenceTypeId(p_bvi) &
             p_inc_subtype = bool(p_bvi : RequestBrowse_BrowseValue_IncludedSubtypes) &
-            p_class_mask  = RequestBrowse_BrowseValue_NodeClassMask(p_bvi)
+            p_class_mask  = RequestBrowse_BrowseValue_NodeClassMask(p_bvi) &
+            p_result_mask  = RequestBrowse_BrowseValue_ResultMask(p_bvi)
         )
     END
     ;

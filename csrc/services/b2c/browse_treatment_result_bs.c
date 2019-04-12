@@ -24,6 +24,13 @@
 #include <assert.h>
 #include <stdlib.h>
 
+#define RESULT_MASK_REFERENCE_TYPE 1   // bit 0
+#define RESULT_MASK_IS_FORWARD 2       // bit 1
+#define RESULT_MASK_NODE_CLASS 4       // bit 2
+#define RESULT_MASK_BROWSE_NAME 8      // bit 3
+#define RESULT_MASK_DISPLAY_NAME 16    // bit 4
+#define RESULT_MASK_TYPE_DEFINITION 32 // bit 5
+
 static OpcUa_ReferenceDescription* references = NULL;
 static int32_t nbReferences = 0;
 static int32_t nbMaxReferences = 0;
@@ -149,6 +156,48 @@ void browse_treatment_result_bs__getall_browse_result_reference_at(
     }
 }
 
+void browse_treatment_result_bs__is_BrowseName_in_mask(
+    const constants__t_BrowseResultMask_i browse_treatment_result_bs__p_resultMask,
+    t_bool* const browse_treatment_result_bs__bres)
+{
+    *browse_treatment_result_bs__bres = 0 != (browse_treatment_result_bs__p_resultMask & RESULT_MASK_BROWSE_NAME);
+}
+
+void browse_treatment_result_bs__is_DisplayName_in_mask(
+    const constants__t_BrowseResultMask_i browse_treatment_result_bs__p_resultMask,
+    t_bool* const browse_treatment_result_bs__bres)
+{
+    *browse_treatment_result_bs__bres = 0 != (browse_treatment_result_bs__p_resultMask & RESULT_MASK_DISPLAY_NAME);
+}
+
+void browse_treatment_result_bs__is_IsForward_in_mask(
+    const constants__t_BrowseResultMask_i browse_treatment_result_bs__p_resultMask,
+    t_bool* const browse_treatment_result_bs__bres)
+{
+    *browse_treatment_result_bs__bres = 0 != (browse_treatment_result_bs__p_resultMask & RESULT_MASK_IS_FORWARD);
+}
+
+void browse_treatment_result_bs__is_NodeClass_in_mask(
+    const constants__t_BrowseResultMask_i browse_treatment_result_bs__p_resultMask,
+    t_bool* const browse_treatment_result_bs__bres)
+{
+    *browse_treatment_result_bs__bres = 0 != (browse_treatment_result_bs__p_resultMask & RESULT_MASK_NODE_CLASS);
+}
+
+void browse_treatment_result_bs__is_ReferenceType_in_mask(
+    const constants__t_BrowseResultMask_i browse_treatment_result_bs__p_resultMask,
+    t_bool* const browse_treatment_result_bs__bres)
+{
+    *browse_treatment_result_bs__bres = 0 != (browse_treatment_result_bs__p_resultMask & RESULT_MASK_REFERENCE_TYPE);
+}
+
+void browse_treatment_result_bs__is_TypeDefinition_in_mask(
+    const constants__t_BrowseResultMask_i browse_treatment_result_bs__p_resultMask,
+    t_bool* const browse_treatment_result_bs__bres)
+{
+    *browse_treatment_result_bs__bres = 0 != (browse_treatment_result_bs__p_resultMask & RESULT_MASK_TYPE_DEFINITION);
+}
+
 void browse_treatment_result_bs__setall_browse_result_reference_at(
     const t_entier4 browse_treatment_result_bs__p_refIndex,
     const constants__t_NodeId_i browse_treatment_result_bs__p_refTypeId,
@@ -171,14 +220,19 @@ void browse_treatment_result_bs__setall_browse_result_reference_at(
     OpcUa_ReferenceDescription* refDesc = &references[browse_treatment_result_bs__p_refIndex - 1];
     OpcUa_ReferenceDescription_Initialize(refDesc);
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    // Mandatory ReferenceTypeId: cannot be indet (ensured by following assertion)
-    status = SOPC_NodeId_Copy(&refDesc->ReferenceTypeId, browse_treatment_result_bs__p_refTypeId);
+
+    // ReferenceTypeId: mandatory (except if filtered by ResultMask)
+    if (constants__c_NodeId_indet != browse_treatment_result_bs__p_refTypeId)
+    {
+        status = SOPC_NodeId_Copy(&refDesc->ReferenceTypeId, browse_treatment_result_bs__p_refTypeId);
+    }
 
     if (SOPC_STATUS_OK == status)
     {
-        // Mandatory IsForward
+        // IsForward: mandatory (except if filtered by ResultMask => false value in this case)
         refDesc->IsForward = browse_treatment_result_bs__p_isForward;
-        // Mandatory TargetNodeId: cannot be indet (ensured by following assertion)
+        // TargetNodeId: cannot be indet (ensured by following assertion)
+        assert(constants_bs__c_ExpandedNodeId_indet != browse_treatment_result_bs__p_NodeId);
         status = SOPC_ExpandedNodeId_Copy(&refDesc->NodeId, browse_treatment_result_bs__p_NodeId);
     }
 

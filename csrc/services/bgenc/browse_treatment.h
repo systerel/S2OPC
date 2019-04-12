@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment.h
 
- Date                 : 11/06/2019 13:55:29
+ Date                 : 11/06/2019 15:04:28
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -70,6 +70,20 @@ extern void browse_treatment__INITIALISATION(void);
 /*--------------------------
    LOCAL_OPERATIONS Clause
   --------------------------*/
+extern void browse_treatment__apply_result_mask_filter(
+   const constants__t_BrowseResultMask_i browse_treatment__p_resultMask,
+   const constants__t_NodeId_i browse_treatment__p_RefType,
+   const t_bool browse_treatment__p_IsForward,
+   const constants__t_QualifiedName_i browse_treatment__p_BrowseName,
+   const constants__t_LocalizedText_i browse_treatment__p_DisplayName,
+   const constants__t_NodeClass_i browse_treatment__p_NodeClass,
+   const constants__t_ExpandedNodeId_i browse_treatment__p_TypeDefinition,
+   constants__t_NodeId_i * const browse_treatment__out_RefType,
+   t_bool * const browse_treatment__out_IsForward,
+   constants__t_QualifiedName_i * const browse_treatment__out_BrowseName,
+   constants__t_LocalizedText_i * const browse_treatment__out_DisplayName,
+   constants__t_NodeClass_i * const browse_treatment__out_NodeClass,
+   constants__t_ExpandedNodeId_i * const browse_treatment__out_TypeDefinition);
 extern void browse_treatment__fill_browse_result(
    const t_entier4 browse_treatment__p_startIndex,
    const t_entier4 browse_treatment__p_max_nb_results,
@@ -79,6 +93,7 @@ extern void browse_treatment__fill_browse_result(
    const t_bool browse_treatment__p_refType_defined,
    const constants__t_NodeId_i browse_treatment__p_referenceType,
    const t_bool browse_treatment__p_includeSubtypes,
+   const constants__t_BrowseResultMask_i browse_treatment__p_resultMask,
    constants_statuscodes_bs__t_StatusCode_i * const browse_treatment__p_serviceStatusCode,
    t_bool * const browse_treatment__p_toContinue,
    t_entier4 * const browse_treatment__p_nextIndex);
@@ -89,6 +104,7 @@ extern void browse_treatment__fill_browse_result_ref(
    const t_bool browse_treatment__p_refType_defined,
    const constants__t_NodeId_i browse_treatment__p_referenceType,
    const t_bool browse_treatment__p_includeSubtypes,
+   const constants__t_BrowseResultMask_i browse_treatment__p_resultMask,
    t_bool * const browse_treatment__p_continue,
    t_bool * const browse_treatment__p_alloc_failed);
 extern void browse_treatment__local_is_valid_ReferenceTypeId(
@@ -115,7 +131,8 @@ extern void browse_treatment__set_browse_value_context(
    const constants__t_BrowseDirection_i browse_treatment__p_browseDirection,
    const constants__t_NodeId_i browse_treatment__p_referenceType,
    const t_bool browse_treatment__p_includeSubtypes,
-   const constants__t_BrowseNodeClassMask_i browse_treatment__p_nodeClassMask);
+   const constants__t_BrowseNodeClassMask_i browse_treatment__p_nodeClassMask,
+   const constants__t_BrowseResultMask_i browse_treatment__p_resultMask);
 extern void browse_treatment__set_browse_value_context_from_continuation_point(
    const constants__t_session_i browse_treatment__p_session,
    const constants__t_ContinuationPoint_i browse_treatment__p_continuationPoint,

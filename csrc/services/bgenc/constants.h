@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 14/06/2019 14:34:15
+ Date                 : 14/06/2019 14:53:29
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -44,6 +44,7 @@
    SETS Clause: deferred sets
   -----------------------------*/
 #define constants__t_BrowseNodeClassMask_i constants_bs__t_BrowseNodeClassMask_i
+#define constants__t_BrowseResultMask_i constants_bs__t_BrowseResultMask_i
 #define constants__t_BrowseResultReferences_i constants_bs__t_BrowseResultReferences_i
 #define constants__t_Byte constants_bs__t_Byte
 #define constants__t_ContinuationPoint_i constants_bs__t_ContinuationPoint_i
@@ -295,6 +296,7 @@ typedef enum {
    Added by the Translator
   --------------------------*/
 #define constants__t_BrowseNodeClassMask_i_max constants_bs__t_BrowseNodeClassMask_i_max
+#define constants__t_BrowseResultMask_i_max constants_bs__t_BrowseResultMask_i_max
 #define constants__t_BrowseResultReferences_i_max constants_bs__t_BrowseResultReferences_i_max
 #define constants__t_Byte_max constants_bs__t_Byte_max
 #define constants__t_ContinuationPoint_i_max constants_bs__t_ContinuationPoint_i_max
@@ -351,6 +353,7 @@ typedef enum {
    CONCRETE_CONSTANTS Clause: scalars and arrays
   ------------------------------------------------*/
 #define constants__c_BrowseNodeClassMask_indet constants_bs__c_BrowseNodeClassMask_indet
+#define constants__c_BrowseResultMask_indet constants_bs__c_BrowseResultMask_indet
 #define constants__c_BrowseResultReferences_indet constants_bs__c_BrowseResultReferences_indet
 #define constants__c_ByteString_Type_NodeId constants_bs__c_ByteString_Type_NodeId
 #define constants__c_Byte_Type_NodeId constants_bs__c_Byte_Type_NodeId

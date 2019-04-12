@@ -41,6 +41,15 @@ DEFINITIONS
         isBrowseResultAllocated
     ;
 
+    d_variables_mask ==
+        mask_hasReferenceType,
+        mask_hasIsForward,
+        mask_hasNodeClass,
+        mask_hasBrowseName,
+        mask_hasDisplayName,
+        mask_hasTypeDefinition
+    ;
+
     d_inv_out ==
         out_BrowseResult_BrowseStatus      : t_StatusCode_i             &
         out_BrowseResult_nb_References     : NAT                        &
@@ -55,6 +64,16 @@ DEFINITIONS
         max_nb_references                  : NAT                        &
         isBrowseResultAllocated            : BOOL
     ;
+
+    d_inv_mask ==
+        mask_hasReferenceType <: t_BrowseResultMask_i &
+        mask_hasIsForward <: t_BrowseResultMask_i &
+        mask_hasNodeClass <: t_BrowseResultMask_i &
+        mask_hasBrowseName <: t_BrowseResultMask_i &
+        mask_hasDisplayName <: t_BrowseResultMask_i &
+        mask_hasTypeDefinition <: t_BrowseResultMask_i
+    ;
+
     d_init_out ==
         d_variables_out
         :(
@@ -71,15 +90,22 @@ DEFINITIONS
             max_nb_references                  = 0                          &
             isBrowseResultAllocated            = FALSE
         )
+    ;
+
+    d_init_mask ==
+        d_variables_mask :( d_inv_mask)
 
 ABSTRACT_VARIABLES
-    d_variables_out
+    d_variables_out,
+    d_variables_mask
 
 INVARIANT
-    d_inv_out
+    d_inv_out &
+    d_inv_mask
 
 INITIALISATION
-    d_init_out
+    d_init_out ||
+    d_init_mask
 
 OPERATIONS
 
@@ -113,14 +139,15 @@ OPERATIONS
     END
     ;
 
-    p_alloc_failed <-- setall_browse_result_reference_at (p_refIndex, p_refTypeId, p_isForward, p_NodeId, p_BrowseName, p_DisplayName, p_NodeClass, p_TypeDefinition) =
+    p_alloc_failed <-- setall_browse_result_reference_at (p_refIndex, p_refTypeId, p_isForward,
+                                                          p_NodeId, p_BrowseName, p_DisplayName,
+                                                          p_NodeClass, p_TypeDefinition) =
     PRE
         isBrowseResultAllocated = TRUE &
         p_refIndex : NAT1 &
         p_refIndex = out_BrowseResult_nb_References + 1 & /* Next unused index */
         p_refIndex <= max_nb_references &
         p_refTypeId : t_NodeId_i &
-        p_refTypeId : t_NodeId   &
         p_isForward : BOOL &
         p_NodeId : t_ExpandedNodeId_i &
         p_NodeId : t_ExpandedNodeId &
@@ -199,5 +226,52 @@ OPERATIONS
     THEN
         skip
     END
+    ;
 
+    bres <-- is_ReferenceType_in_mask (p_resultMask) =
+    PRE
+        p_resultMask : t_BrowseResultMask_i
+    THEN
+        bres := bool(p_resultMask : mask_hasReferenceType)
+    END
+    ;
+
+    bres <-- is_IsForward_in_mask (p_resultMask) =
+    PRE
+        p_resultMask : t_BrowseResultMask_i
+    THEN
+        bres := bool(p_resultMask : mask_hasIsForward)
+    END
+    ;
+
+    bres <-- is_NodeClass_in_mask (p_resultMask) =
+    PRE
+        p_resultMask : t_BrowseResultMask_i
+    THEN
+        bres := bool(p_resultMask : mask_hasNodeClass)
+    END
+    ;
+
+    bres <-- is_BrowseName_in_mask (p_resultMask) =
+    PRE
+        p_resultMask : t_BrowseResultMask_i
+    THEN
+        bres := bool(p_resultMask : mask_hasBrowseName)
+    END
+    ;
+
+    bres <-- is_DisplayName_in_mask (p_resultMask) =
+    PRE
+        p_resultMask : t_BrowseResultMask_i
+    THEN
+        bres := bool(p_resultMask : mask_hasDisplayName)
+    END
+    ;
+
+    bres <-- is_TypeDefinition_in_mask (p_resultMask) =
+    PRE
+        p_resultMask : t_BrowseResultMask_i
+    THEN
+        bres := bool(p_resultMask : mask_hasTypeDefinition)
+    END
 END
