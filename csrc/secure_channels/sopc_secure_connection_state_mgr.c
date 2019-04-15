@@ -978,6 +978,9 @@ static bool SC_ClientTransitionHelper_ReceiveOPN(SOPC_SecureConnection* scConnec
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     OpcUa_ResponseHeader* respHeader = NULL;
     OpcUa_OpenSecureChannelResponse* opnResp = NULL;
+    SOPC_SC_SecurityKeySets newSecuKeySets;
+
+    memset(&newSecuKeySets, 0, sizeof(newSecuKeySets));
 
     status = SOPC_DecodeMsg_HeaderOrBody(opnRespBuffer, &OpcUa_ResponseHeader_EncodeableType, (void**) &respHeader);
     if (SOPC_STATUS_OK == status)
@@ -1073,7 +1076,7 @@ static bool SC_ClientTransitionHelper_ReceiveOPN(SOPC_SecureConnection* scConnec
                 if (secretServerNonce != NULL)
                 {
                     result = SC_DeriveSymmetricKeySets(false, scConnection->cryptoProvider, scConnection->clientNonce,
-                                                       secretServerNonce, &scConnection->currentSecuKeySets);
+                                                       secretServerNonce, &newSecuKeySets);
                     SOPC_SecretBuffer_DeleteClear(secretServerNonce);
                 }
                 else
@@ -1089,29 +1092,26 @@ static bool SC_ClientTransitionHelper_ReceiveOPN(SOPC_SecureConnection* scConnec
 
     if (result != false)
     {
-        if (isOPNrenew == false)
+        if (isOPNrenew)
         {
-            // Define the current security token properties
-            scConnection->currentSecurityToken.secureChannelId = opnResp->SecurityToken.ChannelId;
-            scConnection->currentSecurityToken.tokenId = opnResp->SecurityToken.TokenId;
-            scConnection->currentSecurityToken.createdAt = opnResp->SecurityToken.CreatedAt;
-            scConnection->currentSecurityToken.revisedLifetime = opnResp->SecurityToken.RevisedLifetime;
-            scConnection->currentSecurityToken.lifetimeEndTimeRef = SOPC_TimeReference_AddMilliseconds(
-                SOPC_TimeReference_GetCurrent(), scConnection->currentSecurityToken.revisedLifetime);
-        }
-        else
-        {
-            // Set current security token properties as previous one
+            // Clear and update precedent key set
+            SOPC_KeySet_Delete(scConnection->precedentSecuKeySets.receiverKeySet);
+            SOPC_KeySet_Delete(scConnection->precedentSecuKeySets.senderKeySet);
+            scConnection->precedentSecuKeySets = scConnection->currentSecuKeySets;
+            // Set current security token properties as precedent one
             scConnection->precedentSecurityToken = scConnection->currentSecurityToken;
-
-            // Set new current security token
-            scConnection->currentSecurityToken.secureChannelId = opnResp->SecurityToken.ChannelId;
-            scConnection->currentSecurityToken.tokenId = opnResp->SecurityToken.TokenId;
-            scConnection->currentSecurityToken.createdAt = opnResp->SecurityToken.CreatedAt;
-            scConnection->currentSecurityToken.revisedLifetime = opnResp->SecurityToken.RevisedLifetime;
-            scConnection->currentSecurityToken.lifetimeEndTimeRef = SOPC_TimeReference_AddMilliseconds(
-                SOPC_TimeReference_GetCurrent(), scConnection->currentSecurityToken.revisedLifetime);
         }
+
+        // Define the current security key set
+        scConnection->currentSecuKeySets = newSecuKeySets;
+
+        // Define the current security token properties
+        scConnection->currentSecurityToken.secureChannelId = opnResp->SecurityToken.ChannelId;
+        scConnection->currentSecurityToken.tokenId = opnResp->SecurityToken.TokenId;
+        scConnection->currentSecurityToken.createdAt = opnResp->SecurityToken.CreatedAt;
+        scConnection->currentSecurityToken.revisedLifetime = opnResp->SecurityToken.RevisedLifetime;
+        scConnection->currentSecurityToken.lifetimeEndTimeRef = SOPC_TimeReference_AddMilliseconds(
+            SOPC_TimeReference_GetCurrent(), scConnection->currentSecurityToken.revisedLifetime);
 
         // Add timer to renew the secure channel security token before expiration
         // Part 4 1.03: "Clients should request a new SecurityToken after 75% of its lifetime elapsed"
