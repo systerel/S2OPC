@@ -516,7 +516,10 @@
   <UAObjectType NodeId="i=58" BrowseName="BaseObjectType">
     <DisplayName>BaseObjectType</DisplayName>
     <Description>The base type for all object nodes.</Description>
-    <References />
+    <References>
+      <Reference ReferenceType="HasSubtype">i=2013</Reference>
+      <Reference ReferenceType="HasSubtype">i=61</Reference>
+    </References>
   </UAObjectType>
   <UAObjectType NodeId="i=61" BrowseName="FolderType">
     <DisplayName>FolderType</DisplayName>
