@@ -21,7 +21,7 @@
 
  File Name            : msg_browse_bs.h
 
- Date                 : 12/04/2019 10:12:30
+ Date                 : 16/04/2019 10:23:42
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -81,6 +81,6 @@ extern void msg_browse_bs__set_ResponseBrowse_BrowseStatus(
 extern void msg_browse_bs__set_ResponseBrowse_ContinuationPoint(
    const constants__t_msg_i msg_browse_bs__p_resp_msg,
    const constants__t_BrowseValue_i msg_browse_bs__p_bvi,
-   const constants__t_ContinuationPoint_i msg_browse_bs__p_continuationPoint);
+   const constants__t_ContinuationPointId_i msg_browse_bs__p_continuationPointId);
 
 #endif

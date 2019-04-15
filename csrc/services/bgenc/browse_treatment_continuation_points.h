@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment_continuation_points.h
 
- Date                 : 12/04/2019 10:12:13
+ Date                 : 16/04/2019 10:23:22
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -46,10 +46,21 @@
 #include "constants.h"
 #include "session_mgr.h"
 
+/*----------------------------
+   CONCRETE_VARIABLES Clause
+  ----------------------------*/
+extern constants__t_ContinuationPoint_i browse_treatment_continuation_points__session_ContinuationPoint_i[constants__t_session_i_max+1];
+extern t_bool browse_treatment_continuation_points__session_hasContinuationPoint_i[constants__t_session_i_max+1];
+
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
 extern void browse_treatment_continuation_points__INITIALISATION(void);
+
+/*-------------------------------
+   PROMOTES and EXTENDS Clauses
+  -------------------------------*/
+#define browse_treatment_continuation_points__get_continuation_point_id browse_treatment_continuation_points_bs__get_continuation_point_id
 
 /*--------------------
    OPERATIONS Clause
@@ -67,10 +78,10 @@ extern void browse_treatment_continuation_points__create_continuation_point(
    const constants__t_BrowseNodeClassMask_i browse_treatment_continuation_points__p_nodeClassMask,
    const constants__t_BrowseResultMask_i browse_treatment_continuation_points__p_resultMask,
    t_bool * const browse_treatment_continuation_points__bres,
-   constants__t_ContinuationPoint_i * const browse_treatment_continuation_points__p_ContinuationPoint);
+   constants__t_ContinuationPointId_i * const browse_treatment_continuation_points__p_ContinuationPointId);
 extern void browse_treatment_continuation_points__getall_and_clear_continuation_point(
    const constants__t_session_i browse_treatment_continuation_points__p_session,
-   const constants__t_ContinuationPoint_i browse_treatment_continuation_points__p_continuationPoint,
+   const constants__t_ContinuationPointId_i browse_treatment_continuation_points__p_continuationPointId,
    t_bool * const browse_treatment_continuation_points__bres,
    t_entier4 * const browse_treatment_continuation_points__p_nextIndex,
    t_entier4 * const browse_treatment_continuation_points__p_maxTargetRef,

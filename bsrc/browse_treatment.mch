@@ -38,12 +38,14 @@ DEFINITIONS
         isBrowseValueContextDefined;
 
     d_variables_persist ==
+        s_ContinuationPoints,
+        id_ContinuationPoint,
         session_ContinuationPoint
     ;
 
     d_variables_out ==
         out_BrowseResult_BrowseStatus,
-        out_BrowseResult_ContinuationPoint,
+        out_BrowseResult_ContinuationPointId,
         out_BrowseResult_nb_References,
         out_BrowseResult_ReferenceTypeId,
         out_BrowseResult_isForward,
@@ -69,11 +71,13 @@ DEFINITIONS
         isBrowseValueContextDefined      : BOOL
     ;
     d_inv_persist ==
-        session_ContinuationPoint : t_ContinuationPoint >+> t_session // a continuation point could be associated to a session (=> 1 CP / session)
+        s_ContinuationPoints <: t_ContinuationPoint &
+        id_ContinuationPoint : s_ContinuationPoints >-> t_ContinuationPointId & // Each continuation has a unique Id
+        session_ContinuationPoint : s_ContinuationPoints >-> t_session // a continuation point is associated to a session (=> 1 CP / session)
     ;
     d_inv_out ==
         out_BrowseResult_BrowseStatus      : t_StatusCode_i             &
-        out_BrowseResult_ContinuationPoint : t_ContinuationPoint_i      &
+        out_BrowseResult_ContinuationPointId : t_ContinuationPointId_i  &
         out_BrowseResult_nb_References     : NAT                        &
         out_BrowseResult_nb_References     <= in_maxReferencesPerNode   &
         out_BrowseResult_ReferenceTypeId   : NAT +-> t_NodeId           &
@@ -105,13 +109,15 @@ DEFINITIONS
     d_init_persist ==
         d_variables_persist
         :(
+            s_ContinuationPoints = {} &
+            id_ContinuationPoint = {} &
             session_ContinuationPoint = {})
     ;
     d_init_out ==
         d_variables_out
         :(
             out_BrowseResult_BrowseStatus      = c_StatusCode_indet         &
-            out_BrowseResult_ContinuationPoint = c_ContinuationPoint_indet  &
+            out_BrowseResult_ContinuationPointId = c_ContinuationPointId_indet &
             out_BrowseResult_nb_References     = 0                          &
             out_BrowseResult_ReferenceTypeId   = {}                         &
             out_BrowseResult_isForward         = {}                         &
@@ -179,12 +185,12 @@ OPERATIONS
     END
     ;
 
-    p_service_StatusCode <-- set_browse_value_context_from_continuation_point(p_session, p_continuationPoint) =
+    p_service_StatusCode <-- set_browse_value_context_from_continuation_point(p_session, p_continuationPointId) =
     PRE
         isBrowseValueContextDefined = FALSE &
         p_session : t_session_i &
         p_session : t_session &
-        p_continuationPoint : t_ContinuationPoint_i
+        p_continuationPointId : t_ContinuationPointId_i
     THEN
         /* Reset output result on new context*/
         d_variables_out :(d_inv_out) ||
@@ -204,7 +210,7 @@ OPERATIONS
     END
     ;
 
-    p_serviceStatusCode, p_continuationPoint, p_nbReferences <-- compute_browse_result =
+    p_serviceStatusCode, p_continuationPointId, p_nbReferences <-- compute_browse_result =
     PRE
         isBrowseValueContextDefined = TRUE &
         isBrowseResultComputed = FALSE
@@ -215,15 +221,17 @@ OPERATIONS
         IN
         d_variables_out,
         p_serviceStatusCode,
-        p_continuationPoint,
+        p_continuationPointId,
         p_nbReferences,
+        s_ContinuationPoints,
+        id_ContinuationPoint,
         session_ContinuationPoint
         :(d_inv_out &
             p_serviceStatusCode : {e_sc_ok, e_sc_bad_out_of_memory, e_sc_bad_node_id_unknown,
                                    e_sc_bad_reference_type_id_invalid, e_sc_bad_no_continuation_points,
                                    e_sc_bad_view_id_unknown} & /* Add other bad view statuses when treated */
           p_nbReferences : NAT &
-          p_continuationPoint : t_ContinuationPoint_i &
+          p_continuationPointId : t_ContinuationPointId_i &
           isBrowseResultComputed = bool(p_serviceStatusCode = e_sc_ok or p_serviceStatusCode = e_sc_bad_no_continuation_points) &
           (p_serviceStatusCode = e_sc_ok or p_serviceStatusCode = e_sc_bad_no_continuation_points =>
               out_BrowseResult_nb_References     : NAT                        &
@@ -238,16 +246,19 @@ OPERATIONS
               out_BrowseResult_TypeDefinition    : 1..p_nbReferences --> t_ExpandedNodeId_i & /* TODO: restrict to t_ExpandedNodeId if Node in server */
               out_BrowseResultReferences : t_BrowseResultReferences & /* Results are defined */
               /* ContinuationPoint defined constraints: */
-              (out_BrowseResult_ContinuationPoint /= c_ContinuationPoint_indet =>
-                  p_nbReferences = l_maxTargetRef & /* Maximum reached if continuation point defined */
+              (out_BrowseResult_ContinuationPointId /= c_ContinuationPointId_indet =>
+                  p_nbReferences = in_maxReferencesPerNode & /* Maximum reached if continuation point defined */
                   in_session /: dom(session_ContinuationPoint$0~) & /* No continuation point already defined for current session */
-                  out_BrowseResult_ContinuationPoint : t_ContinuationPoint & /* Returned continuation point is associated with current session */
-                  session_ContinuationPoint = session_ContinuationPoint$0 <+ {out_BrowseResult_ContinuationPoint |-> in_session}
+                  out_BrowseResult_ContinuationPointId : t_ContinuationPointId & /* Returned continuation point is associated with current session */
+                  id_ContinuationPoint <: id_ContinuationPoint$0 &
+                  out_BrowseResult_ContinuationPointId : ran(id_ContinuationPoint) &
+                  s_ContinuationPoints = s_ContinuationPoints$0 \/ {id_ContinuationPoint~(out_BrowseResult_ContinuationPointId)} &
+                  session_ContinuationPoint = session_ContinuationPoint$0 <+ {id_ContinuationPoint~(out_BrowseResult_ContinuationPointId) |-> in_session}
               ) &
-              p_continuationPoint = out_BrowseResult_ContinuationPoint
+              p_continuationPointId = out_BrowseResult_ContinuationPointId
           ) &
           (p_serviceStatusCode /= e_sc_ok =>
-              p_continuationPoint = c_ContinuationPoint_indet)
+              p_continuationPointId = c_ContinuationPointId_indet)
           )
         END
     END

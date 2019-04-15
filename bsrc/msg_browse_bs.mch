@@ -61,7 +61,7 @@ DEFINITIONS
     d_inv_resp ==
         ResponseBrowse                     : t_msg_i &
         ResponseBrowse_BrowseStatus        : t_BrowseValue +-> t_StatusCode        &
-        ResponseBrowse_ContinuationPoint   : t_BrowseValue +-> t_ContinuationPoint_i &
+        ResponseBrowse_ContinuationPoint   : t_BrowseValue +-> t_ContinuationPointId_i &
         ResponseBrowse_ResultReferences    : t_BrowseValue +-> t_BrowseResultReferences &
         isBrowseResponseAllocated : BOOL
     ;
@@ -215,7 +215,7 @@ OPERATIONS
     END
     ;
 
-    set_ResponseBrowse_ContinuationPoint(p_resp_msg, p_bvi, p_continuationPoint) =
+    set_ResponseBrowse_ContinuationPoint(p_resp_msg, p_bvi, p_continuationPointId) =
     PRE
         isBrowseResponseAllocated = TRUE &
         p_resp_msg : t_msg_i &
@@ -224,11 +224,11 @@ OPERATIONS
         a_msg_out_type = e_msg_view_browse_resp &
         p_bvi : t_BrowseValue_i &
         p_bvi : t_BrowseValue   &
-        p_continuationPoint : t_ContinuationPoint_i   &
-        p_continuationPoint : t_ContinuationPoint &
+        p_continuationPointId : t_ContinuationPointId_i   &
+        p_continuationPointId : t_ContinuationPointId &
         ResponseBrowse = p_resp_msg
     THEN
-        ResponseBrowse_ContinuationPoint(p_bvi) := p_continuationPoint
+        ResponseBrowse_ContinuationPoint(p_bvi) := p_continuationPointId
     END
     ;
 

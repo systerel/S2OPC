@@ -93,7 +93,7 @@ void msg_browse_bs__getall_BrowseValue(const constants__t_msg_i msg_browse_bs__p
     assert(msg_browse_bs__p_bvi <= req->NoOfNodesToBrowse);
     OpcUa_BrowseDescription* bdesc = &req->NodesToBrowse[msg_browse_bs__p_bvi - 1];
     util_NodeId_borrowReference_or_indet__C_to_B(msg_browse_bs__p_NodeId, &bdesc->NodeId);
-    util_BrowseDirection__C_to_B(bdesc->BrowseDirection, msg_browse_bs__p_dir);
+    *msg_browse_bs__p_dir = util_BrowseDirection__C_to_B(bdesc->BrowseDirection);
     util_NodeId_borrowReference_or_indet__C_to_B(msg_browse_bs__p_reftype, &bdesc->ReferenceTypeId);
     *msg_browse_bs__p_inc_subtype = bdesc->IncludeSubtypes;
     *msg_browse_bs__p_class_mask = bdesc->NodeClassMask;
@@ -130,13 +130,15 @@ void msg_browse_bs__set_ResponseBrowse_BrowseStatus(const constants__t_msg_i msg
 void msg_browse_bs__set_ResponseBrowse_ContinuationPoint(
     const constants__t_msg_i msg_browse_bs__p_resp_msg,
     const constants__t_BrowseValue_i msg_browse_bs__p_bvi,
-    const constants__t_ContinuationPoint_i msg_browse_bs__p_continuationPoint)
+    const constants__t_ContinuationPointId_i msg_browse_bs__p_continuationPointId)
 {
+    assert(msg_browse_bs__p_continuationPointId != constants__c_ContinuationPointId_indet);
     OpcUa_BrowseResponse* resp = msg_browse_bs__p_resp_msg;
     // Note: msg_browse_bs__p_bvi : 1..N to be translated into C array index by adding (-1)
     assert(msg_browse_bs__p_bvi > 0);
     assert(msg_browse_bs__p_bvi <= resp->NoOfResults);
-    // TODO: continuation points not implemented
-    // OpcUa_BrowseResult* res = &resp->Results[msg_browse_bs__p_bvi - 1];
-    assert(msg_browse_bs__p_continuationPoint == NULL);
+    OpcUa_BrowseResult* res = &resp->Results[msg_browse_bs__p_bvi - 1];
+    SOPC_ReturnStatus status =
+        SOPC_ContinuationPointId_Encode(msg_browse_bs__p_continuationPointId, &res->ContinuationPoint);
+    assert(SOPC_STATUS_OK == status);
 }

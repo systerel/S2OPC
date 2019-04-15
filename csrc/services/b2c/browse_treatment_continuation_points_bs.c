@@ -19,7 +19,24 @@
 
 #include "browse_treatment_continuation_points_bs.h"
 
-void browse_treatment_continuation_points_bs__INITIALISATION(void) {}
+#include "util_b2c.h"
+
+static uint64_t continuationPointIdSeed = constants__c_ContinuationPointId_indet;
+
+void browse_treatment_continuation_points_bs__INITIALISATION(void)
+{
+    continuationPointIdSeed = SOPC_TimeReference_GetCurrent();
+}
+
+static uint64_t get_freshContinuationPointId(void)
+{
+    continuationPointIdSeed++;
+    if (continuationPointIdSeed == constants__c_ContinuationPointId_indet)
+    {
+        continuationPointIdSeed++;
+    }
+    return continuationPointIdSeed;
+}
 
 /*--------------------
    OPERATIONS Clause
@@ -37,20 +54,97 @@ void browse_treatment_continuation_points_bs__create_continuation_point_bs(
     t_bool* const browse_treatment_continuation_points_bs__bres,
     constants__t_ContinuationPoint_i* const browse_treatment_continuation_points_bs__p_ContinuationPoint)
 {
-    (void) browse_treatment_continuation_points_bs__p_nextIndex;
-    (void) browse_treatment_continuation_points_bs__p_maxTargetRef;
-    (void) browse_treatment_continuation_points_bs__p_browseView;
-    (void) browse_treatment_continuation_points_bs__p_nodeId;
-    (void) browse_treatment_continuation_points_bs__p_browseDirection;
-    (void) browse_treatment_continuation_points_bs__p_referenceType;
-    (void) browse_treatment_continuation_points_bs__p_includeSubtypes;
-    (void) browse_treatment_continuation_points_bs__p_nodeClassMask;
-    (void) browse_treatment_continuation_points_bs__p_resultMask;
     *browse_treatment_continuation_points_bs__bres = false;
-    *browse_treatment_continuation_points_bs__p_ContinuationPoint = NULL;
+    *browse_treatment_continuation_points_bs__p_ContinuationPoint = constants__c_ContinuationPoint_indet;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    bool allocSuccess = true;
+    SOPC_ContinuationPointData data;
+
+    if (allocSuccess && browse_treatment_continuation_points_bs__p_browseView != constants__c_NodeId_indet)
+    {
+        data.browseView = calloc(1, sizeof(SOPC_NodeId));
+        allocSuccess = NULL != data.browseView;
+        if (allocSuccess)
+        {
+            status = SOPC_NodeId_Copy(data.browseView, browse_treatment_continuation_points_bs__p_browseView);
+            allocSuccess = SOPC_STATUS_OK == status;
+        }
+    }
+
+    if (allocSuccess && browse_treatment_continuation_points_bs__p_nodeId != constants__c_NodeId_indet)
+    {
+        data.nodeId = calloc(1, sizeof(SOPC_NodeId));
+        allocSuccess = NULL != data.nodeId;
+        if (allocSuccess)
+        {
+            status = SOPC_NodeId_Copy(data.nodeId, browse_treatment_continuation_points_bs__p_nodeId);
+            allocSuccess = SOPC_STATUS_OK == status;
+        }
+    }
+
+    if (allocSuccess && browse_treatment_continuation_points_bs__p_referenceType != constants__c_NodeId_indet)
+    {
+        data.referenceTypeId = calloc(1, sizeof(SOPC_NodeId));
+        allocSuccess = NULL != data.referenceTypeId;
+        if (allocSuccess)
+        {
+            status = SOPC_NodeId_Copy(data.referenceTypeId, browse_treatment_continuation_points_bs__p_referenceType);
+            allocSuccess = SOPC_STATUS_OK == status;
+        }
+    }
+
+    if (allocSuccess)
+    {
+        data.continuationPointId = get_freshContinuationPointId();
+        data.nextRefIndexOnNode = browse_treatment_continuation_points_bs__p_nextIndex;
+        data.maxTargetReferencesToReturn = browse_treatment_continuation_points_bs__p_maxTargetRef;
+        data.browseDirection = util_BrowseDirection__B_to_C(browse_treatment_continuation_points_bs__p_browseDirection);
+        data.includeSubtypes = browse_treatment_continuation_points_bs__p_includeSubtypes;
+        data.nodeClassMask = browse_treatment_continuation_points_bs__p_nodeClassMask;
+        data.resultMask = browse_treatment_continuation_points_bs__p_resultMask;
+
+        *browse_treatment_continuation_points_bs__bres = true;
+        *browse_treatment_continuation_points_bs__p_ContinuationPoint = data;
+    }
+    else
+    {
+        free(data.browseView);
+        free(data.nodeId);
+        free(data.referenceTypeId);
+    }
 }
-void browse_treatment_continuation_points_bs__unused_continuationPoint(
-    const constants__t_ContinuationPoint_i browse_treatment_continuation_points_bs__p_continuationPoint)
+
+void browse_treatment_continuation_points_bs__get_continuation_point_id(
+    const constants__t_ContinuationPoint_i browse_treatment_continuation_points_bs__p_continuationPoint,
+    constants__t_ContinuationPointId_i* const browse_treatment_continuation_points_bs__p_continuationPointId)
 {
-    (void) browse_treatment_continuation_points_bs__p_continuationPoint;
+    assert(browse_treatment_continuation_points_bs__p_continuationPoint.continuationPointId != 0);
+    *browse_treatment_continuation_points_bs__p_continuationPointId =
+        browse_treatment_continuation_points_bs__p_continuationPoint.continuationPointId;
+}
+
+void browse_treatment_continuation_points_bs__getall_continuation_point(
+    const constants__t_ContinuationPoint_i browse_treatment_continuation_points_bs__p_ContinuationPoint,
+    t_entier4* const browse_treatment_continuation_points_bs__p_nextIndex,
+    t_entier4* const browse_treatment_continuation_points_bs__p_maxTargetRef,
+    constants__t_NodeId_i* const browse_treatment_continuation_points_bs__p_browseView,
+    constants__t_NodeId_i* const browse_treatment_continuation_points_bs__p_nodeId,
+    constants__t_BrowseDirection_i* const browse_treatment_continuation_points_bs__p_browseDirection,
+    constants__t_NodeId_i* const browse_treatment_continuation_points_bs__p_referenceType,
+    t_bool* const browse_treatment_continuation_points_bs__p_includeSubtypes,
+    constants__t_BrowseNodeClassMask_i* const browse_treatment_continuation_points_bs__p_nodeClassMask,
+    constants__t_BrowseResultMask_i* const browse_treatment_continuation_points_bs__p_resultMask)
+{
+    SOPC_ContinuationPointData data = browse_treatment_continuation_points_bs__p_ContinuationPoint;
+    assert(data.continuationPointId != 0);
+    // Note: continuation point not used anymore, we are moving the allocated values
+    *browse_treatment_continuation_points_bs__p_nextIndex = data.nextRefIndexOnNode;
+    *browse_treatment_continuation_points_bs__p_maxTargetRef = data.maxTargetReferencesToReturn;
+    *browse_treatment_continuation_points_bs__p_browseView = data.browseView;
+    *browse_treatment_continuation_points_bs__p_nodeId = data.nodeId;
+    *browse_treatment_continuation_points_bs__p_browseDirection = util_BrowseDirection__C_to_B(data.browseDirection);
+    *browse_treatment_continuation_points_bs__p_referenceType = data.referenceTypeId;
+    *browse_treatment_continuation_points_bs__p_includeSubtypes = data.includeSubtypes;
+    *browse_treatment_continuation_points_bs__p_nodeClassMask = data.nodeClassMask;
+    *browse_treatment_continuation_points_bs__p_resultMask = data.resultMask;
 }

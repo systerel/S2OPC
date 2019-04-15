@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment.h
 
- Date                 : 11/06/2019 15:04:28
+ Date                 : 11/06/2019 16:39:00
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -121,7 +121,7 @@ extern void browse_treatment__min_nb_result_refs(
   --------------------*/
 extern void browse_treatment__compute_browse_result(
    constants_statuscodes_bs__t_StatusCode_i * const browse_treatment__p_serviceStatusCode,
-   constants__t_ContinuationPoint_i * const browse_treatment__p_continuationPoint,
+   constants__t_ContinuationPointId_i * const browse_treatment__p_continuationPointId,
    t_entier4 * const browse_treatment__p_nbReferences);
 extern void browse_treatment__set_browse_value_context(
    const constants__t_session_i browse_treatment__p_session,
@@ -135,7 +135,7 @@ extern void browse_treatment__set_browse_value_context(
    const constants__t_BrowseResultMask_i browse_treatment__p_resultMask);
 extern void browse_treatment__set_browse_value_context_from_continuation_point(
    const constants__t_session_i browse_treatment__p_session,
-   const constants__t_ContinuationPoint_i browse_treatment__p_continuationPoint,
+   const constants__t_ContinuationPointId_i browse_treatment__p_continuationPointId,
    constants_statuscodes_bs__t_StatusCode_i * const browse_treatment__p_service_StatusCode);
 
 #endif

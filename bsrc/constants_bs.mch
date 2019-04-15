@@ -73,7 +73,8 @@ SETS
     t_client_handle_i;
     t_timer_id_i;
     t_IndexRange_i;
-    t_ContinuationPoint_i
+    t_ContinuationPoint_i;
+    t_ContinuationPointId_i
 
 CONCRETE_CONSTANTS
     k_n_read_resp_max,
@@ -140,7 +141,8 @@ CONCRETE_CONSTANTS
     c_BrowseResultMask_indet,
     c_timer_id_indet,
     c_IndexRange_indet,
-    c_ContinuationPoint_indet
+    c_ContinuationPoint_indet,
+    c_ContinuationPointId_indet
 
 ABSTRACT_CONSTANTS
 
@@ -188,6 +190,7 @@ ABSTRACT_CONSTANTS
     t_timer_id,
     t_IndexRange,
     t_ContinuationPoint,
+    t_ContinuationPointId,
 
     conv_ExpandedNodeId_NodeId
 
@@ -395,6 +398,9 @@ PROPERTIES
     t_ContinuationPoint <: t_ContinuationPoint_i &
     c_ContinuationPoint_indet : t_ContinuationPoint_i &
     c_ContinuationPoint_indet /: t_ContinuationPoint &
+
+    c_ContinuationPointId_indet : t_ContinuationPointId_i &
+    t_ContinuationPointId = t_ContinuationPointId_i - {c_ContinuationPointId_indet} &
 
     conv_ExpandedNodeId_NodeId : t_ExpandedNodeId +-> t_NodeId
 

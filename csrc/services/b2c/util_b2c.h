@@ -49,7 +49,9 @@ constants_statuscodes_bs__t_StatusCode_i util_return_status__C_to_status_code_B(
 
 bool util_channel__SecurityPolicy_C_to_B(const char* uri, constants__t_SecurityPolicy* secpol);
 
-void util_BrowseDirection__C_to_B(OpcUa_BrowseDirection cdir, constants__t_BrowseDirection_i* bdir);
+constants__t_BrowseDirection_i util_BrowseDirection__C_to_B(OpcUa_BrowseDirection cdir);
+
+OpcUa_BrowseDirection util_BrowseDirection__B_to_C(constants__t_BrowseDirection_i bdir);
 
 /* Returns true or false upon failure (c_NodeClass_indet or invalid cncl) */
 bool util_NodeClass__B_to_C(constants__t_NodeClass_i bncl, OpcUa_NodeClass* cncl);

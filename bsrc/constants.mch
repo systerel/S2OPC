@@ -284,7 +284,8 @@ SETS
                           e_operation_type_read,
                           e_operation_type_write};
 
-    t_ContinuationPoint_i
+    t_ContinuationPoint_i;
+    t_ContinuationPointId_i
 
 CONCRETE_CONSTANTS
     /*AddS,*/
@@ -361,6 +362,7 @@ CONCRETE_CONSTANTS
     c_ValueRank_Any,
     c_ValueRank_ScalarOrOneDimension,
     c_ContinuationPoint_indet,
+    c_ContinuationPointId_indet,
 
     t_counter,
     t_ValueRank,
@@ -449,6 +451,7 @@ ABSTRACT_CONSTANTS
     t_registerNodesReqIndex,
     t_unregisterNodesReqIndex,
     t_ContinuationPoint,
+    t_ContinuationPointId,
 
     s_session_treatment_reqs,
     s_session_treatment_resps,
@@ -726,6 +729,10 @@ PROPERTIES
     t_ContinuationPoint <: t_ContinuationPoint_i &
     c_ContinuationPoint_indet : t_ContinuationPoint_i &
     c_ContinuationPoint_indet /: t_ContinuationPoint &
+
+    c_ContinuationPointId_indet : t_ContinuationPointId_i &
+    t_ContinuationPointId = t_ContinuationPointId_i - {c_ContinuationPointId_indet} &
+
 
     t_buffer_in_state = { e_buffer_in_msg_not_read,
         e_buffer_in_msg_type_read,

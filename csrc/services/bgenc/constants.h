@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 14/06/2019 14:53:29
+ Date                 : 14/06/2019 15:04:13
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -47,6 +47,7 @@
 #define constants__t_BrowseResultMask_i constants_bs__t_BrowseResultMask_i
 #define constants__t_BrowseResultReferences_i constants_bs__t_BrowseResultReferences_i
 #define constants__t_Byte constants_bs__t_Byte
+#define constants__t_ContinuationPointId_i constants_bs__t_ContinuationPointId_i
 #define constants__t_ContinuationPoint_i constants_bs__t_ContinuationPoint_i
 #define constants__t_DataValue_i constants_bs__t_DataValue_i
 #define constants__t_ExpandedNodeId_i constants_bs__t_ExpandedNodeId_i
@@ -299,6 +300,7 @@ typedef enum {
 #define constants__t_BrowseResultMask_i_max constants_bs__t_BrowseResultMask_i_max
 #define constants__t_BrowseResultReferences_i_max constants_bs__t_BrowseResultReferences_i_max
 #define constants__t_Byte_max constants_bs__t_Byte_max
+#define constants__t_ContinuationPointId_i_max constants_bs__t_ContinuationPointId_i_max
 #define constants__t_ContinuationPoint_i_max constants_bs__t_ContinuationPoint_i_max
 #define constants__t_DataValue_i_max constants_bs__t_DataValue_i_max
 #define constants__t_ExpandedNodeId_i_max constants_bs__t_ExpandedNodeId_i_max
@@ -357,6 +359,7 @@ typedef enum {
 #define constants__c_BrowseResultReferences_indet constants_bs__c_BrowseResultReferences_indet
 #define constants__c_ByteString_Type_NodeId constants_bs__c_ByteString_Type_NodeId
 #define constants__c_Byte_Type_NodeId constants_bs__c_Byte_Type_NodeId
+#define constants__c_ContinuationPointId_indet constants_bs__c_ContinuationPointId_indet
 #define constants__c_ContinuationPoint_indet constants_bs__c_ContinuationPoint_indet
 #define constants__c_DataValue_indet constants_bs__c_DataValue_indet
 #define constants__c_ExpandedNodeId_indet constants_bs__c_ExpandedNodeId_indet

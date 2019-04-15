@@ -48,12 +48,41 @@ OPERATIONS
     END
     ;
 
-    unused_continuationPoint(p_continuationPoint) =
+    p_nextIndex, p_maxTargetRef, p_browseView, p_nodeId,
+    p_browseDirection, p_referenceType, p_includeSubtypes, p_nodeClassMask, p_resultMask
+      <-- getall_continuation_point (p_ContinuationPoint) =
+    PRE
+        p_ContinuationPoint : t_ContinuationPoint_i &
+        p_ContinuationPoint : t_ContinuationPoint
+    THEN
+        p_nextIndex, p_maxTargetRef, p_browseView, p_nodeId,
+        p_browseDirection, p_referenceType, p_includeSubtypes,
+        p_nodeClassMask, p_resultMask
+        :(
+            p_nextIndex    : NAT                        &
+            p_nextIndex    : t_RefIndex                 &
+            p_maxTargetRef : NAT                        &
+            p_maxTargetRef <= k_n_BrowseTarget_max      &
+            p_browseView : t_NodeId_i                   &
+            p_nodeId : t_NodeId_i                       &
+            p_browseDirection : t_BrowseDirection_i     &
+            p_browseDirection : t_BrowseDirection       &
+            p_referenceType : t_NodeId_i                &
+            p_includeSubtypes : BOOL                    &
+            p_nodeClassMask : t_BrowseNodeClassMask_i   &
+            p_resultMask    : t_BrowseResultMask_i
+         )
+    END
+    ;
+
+    p_continuationPointId <-- get_continuation_point_id(p_continuationPoint) =
     PRE
         p_continuationPoint : t_ContinuationPoint_i &
         p_continuationPoint : t_ContinuationPoint
     THEN
-        skip
+        p_continuationPointId
+        :(p_continuationPointId : t_ContinuationPointId_i &
+          p_continuationPointId : t_ContinuationPointId)
     END
 
 END

@@ -1068,23 +1068,35 @@ bool util_channel__SecurityPolicy_C_to_B(const char* uri, constants__t_SecurityP
     return false;
 }
 
-void util_BrowseDirection__C_to_B(OpcUa_BrowseDirection cdir, constants__t_BrowseDirection_i* bdir)
+constants__t_BrowseDirection_i util_BrowseDirection__C_to_B(OpcUa_BrowseDirection cdir)
 {
-    assert(NULL != bdir);
-
     switch (cdir)
     {
     case OpcUa_BrowseDirection_Forward:
-        *bdir = constants__e_bd_forward;
-        break;
+        return constants__e_bd_forward;
     case OpcUa_BrowseDirection_Inverse:
-        *bdir = constants__e_bd_inverse;
-        break;
+        return constants__e_bd_inverse;
     case OpcUa_BrowseDirection_Both:
-        *bdir = constants__e_bd_both;
-        break;
+        return constants__e_bd_both;
     default:
-        *bdir = constants__e_bd_indet;
+        return constants__e_bd_indet;
+    }
+}
+
+OpcUa_BrowseDirection util_BrowseDirection__B_to_C(constants__t_BrowseDirection_i bdir)
+{
+    switch (bdir)
+    {
+    case constants__e_bd_forward:
+        return OpcUa_BrowseDirection_Forward;
+    case constants__e_bd_inverse:
+        return OpcUa_BrowseDirection_Inverse;
+    case constants__e_bd_both:
+        return OpcUa_BrowseDirection_Both;
+    default:
+        assert(OpcUa_BrowseDirection_Both + 1 != OpcUa_BrowseDirection_Forward);
+        assert(OpcUa_BrowseDirection_Both + 1 != OpcUa_BrowseDirection_Inverse);
+        return OpcUa_BrowseDirection_Both + 1;
     }
 }
 

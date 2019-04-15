@@ -532,7 +532,7 @@ OPERATIONS
    END
    ;
 
-   p_service_StatusCode <-- set_browse_value_context_from_continuation_point (p_session, p_continuationPoint) =
+   p_service_StatusCode <-- set_browse_value_context_from_continuation_point (p_session, p_continuationPointId) =
    VAR
        l_res,
        l_nextIndex,
@@ -556,7 +556,7 @@ OPERATIONS
         l_includeSubtypes,
         l_nodeClassMask,
         l_resultMask
-          <-- getall_and_clear_continuation_point (p_session, p_continuationPoint);
+          <-- getall_and_clear_continuation_point (p_session, p_continuationPointId);
         IF l_res = TRUE THEN
             setall_browse_value_context(l_nextIndex, p_session, l_maxTargetRef, l_browseView,
                                         l_nodeId, l_browseDirection, l_referenceType, l_includeSubtypes,
@@ -566,7 +566,7 @@ OPERATIONS
    END
    ;
 
-   p_serviceStatusCode, p_continuationPoint, p_nbReferences <-- compute_browse_result =
+   p_serviceStatusCode, p_continuationPointId, p_nbReferences <-- compute_browse_result =
    VAR
        l_startIndex,
        l_session,
@@ -589,7 +589,7 @@ OPERATIONS
        l_nextIndex,
        l_cp_bres
    IN
-        p_continuationPoint := c_ContinuationPoint_indet;
+        p_continuationPointId := c_ContinuationPointId_indet;
         p_nbReferences := 0;
         /* Get input context */
         l_startIndex, l_session, l_maxTargetRef, l_browseView, l_nodeId,
@@ -611,10 +611,10 @@ OPERATIONS
                 IF p_serviceStatusCode = e_sc_ok THEN
                     p_nbReferences <-- get_browse_result_nb_references;
                     IF l_toContinue = TRUE THEN
-                        l_cp_bres, p_continuationPoint
-                          <-- create_continuation_point (l_session, l_nextIndex, l_maxTargetRef, l_browseView,
-                                                         l_nodeId, l_browseDirection, l_referenceType,
-                                                         l_includeSubtypes, l_nodeClassMask, l_resultMask);
+                        l_cp_bres, p_continuationPointId <-- create_continuation_point
+                                                           (l_session, l_nextIndex, l_maxTargetRef, l_browseView,
+                                                            l_nodeId, l_browseDirection, l_referenceType, l_includeSubtypes,
+                                                            l_nodeClassMask, l_resultMask);
                         IF l_cp_bres = FALSE THEN
                             p_serviceStatusCode := e_sc_bad_no_continuation_points
                         END

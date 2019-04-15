@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment_continuation_points_bs.h
 
- Date                 : 12/04/2019 10:12:26
+ Date                 : 15/04/2019 16:44:20
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -60,7 +60,19 @@ extern void browse_treatment_continuation_points_bs__create_continuation_point_b
    const constants__t_BrowseResultMask_i browse_treatment_continuation_points_bs__p_resultMask,
    t_bool * const browse_treatment_continuation_points_bs__bres,
    constants__t_ContinuationPoint_i * const browse_treatment_continuation_points_bs__p_ContinuationPoint);
-extern void browse_treatment_continuation_points_bs__unused_continuationPoint(
-   const constants__t_ContinuationPoint_i browse_treatment_continuation_points_bs__p_continuationPoint);
+extern void browse_treatment_continuation_points_bs__get_continuation_point_id(
+   const constants__t_ContinuationPoint_i browse_treatment_continuation_points_bs__p_continuationPoint,
+   constants__t_ContinuationPointId_i * const browse_treatment_continuation_points_bs__p_continuationPointId);
+extern void browse_treatment_continuation_points_bs__getall_continuation_point(
+   const constants__t_ContinuationPoint_i browse_treatment_continuation_points_bs__p_ContinuationPoint,
+   t_entier4 * const browse_treatment_continuation_points_bs__p_nextIndex,
+   t_entier4 * const browse_treatment_continuation_points_bs__p_maxTargetRef,
+   constants__t_NodeId_i * const browse_treatment_continuation_points_bs__p_browseView,
+   constants__t_NodeId_i * const browse_treatment_continuation_points_bs__p_nodeId,
+   constants__t_BrowseDirection_i * const browse_treatment_continuation_points_bs__p_browseDirection,
+   constants__t_NodeId_i * const browse_treatment_continuation_points_bs__p_referenceType,
+   t_bool * const browse_treatment_continuation_points_bs__p_includeSubtypes,
+   constants__t_BrowseNodeClassMask_i * const browse_treatment_continuation_points_bs__p_nodeClassMask,
+   constants__t_BrowseResultMask_i * const browse_treatment_continuation_points_bs__p_resultMask);
 
 #endif

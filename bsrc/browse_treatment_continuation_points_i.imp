@@ -23,36 +23,61 @@ REFINES
     browse_treatment_continuation_points
 IMPORTS
     browse_treatment_continuation_points_bs
+PROMOTES
+    get_continuation_point_id
 SEES
     constants,
     session_mgr
+CONCRETE_VARIABLES
+    session_hasContinuationPoint_i,
+    session_ContinuationPoint_i
+INVARIANT
+    session_hasContinuationPoint_i : t_session_i --> BOOL &
+    session_ContinuationPoint_i    : t_session_i --> t_ContinuationPoint_i &
 
+    s_ContinuationPoints = session_ContinuationPoint_i[dom(session_hasContinuationPoint_i |> {TRUE})] &
+    ran(session_ContinuationPoint) = dom(session_hasContinuationPoint_i |> {TRUE}) &
+    dom(session_ContinuationPoint) = session_ContinuationPoint_i[dom(session_hasContinuationPoint_i |> {TRUE})]
+
+INITIALISATION
+    session_hasContinuationPoint_i := t_session_i * {FALSE};
+    session_ContinuationPoint_i    := t_session_i * {c_ContinuationPoint_indet}
 OPERATIONS
 
-    bres, p_ContinuationPoint <-- create_continuation_point (p_session, p_nextIndex, p_maxTargetRef, p_browseView,
-                                                             p_nodeId, p_browseDirection, p_referenceType,
-                                                             p_includeSubtypes, p_nodeClassMask, p_resultMask) =
-    BEGIN
-        p_ContinuationPoint := c_ContinuationPoint_indet;
-        bres <-- is_valid_session (p_session);
+    bres, p_ContinuationPointId <-- create_continuation_point (p_session, p_nextIndex, p_maxTargetRef, p_browseView,
+                                                               p_nodeId, p_browseDirection, p_referenceType,
+                                                               p_includeSubtypes, p_nodeClassMask, p_resultMask) =
+    VAR
+        l_valid_session,
+        l_has_cp,
+        l_new_cp
+    IN
+        p_ContinuationPointId := c_ContinuationPointId_indet;
+        l_valid_session <-- is_valid_session (p_session);
+        l_has_cp := session_hasContinuationPoint_i(p_session);
+        bres := bool(l_valid_session = TRUE & l_has_cp = FALSE);
         IF bres = TRUE THEN
-            /* TODO: call base machine for actual creation + implement session_ContinuationPoint array to store it */
-            bres, p_ContinuationPoint <-- create_continuation_point_bs (p_nextIndex, p_maxTargetRef, p_browseView, p_nodeId,
-                                                                        p_browseDirection, p_referenceType, p_includeSubtypes,
-                                                                        p_nodeClassMask, p_resultMask);
-            bres := FALSE
+            bres, l_new_cp <-- create_continuation_point_bs (p_nextIndex, p_maxTargetRef, p_browseView, p_nodeId,
+                                                             p_browseDirection, p_referenceType, p_includeSubtypes,
+                                                             p_nodeClassMask, p_resultMask);
+            IF bres = TRUE THEN
+                session_hasContinuationPoint_i(p_session) := TRUE;
+                session_ContinuationPoint_i(p_session) := l_new_cp;
+                p_ContinuationPointId <-- get_continuation_point_id(l_new_cp)
+            END
         END
     END
     ;
 
     bres, p_nextIndex, p_maxTargetRef, p_browseView, p_nodeId,
     p_browseDirection, p_referenceType, p_includeSubtypes, p_nodeClassMask, p_resultMask
-      <-- getall_and_clear_continuation_point (p_session, p_continuationPoint) =
-    BEGIN
-        // TODO: remove, only avoid unused param
-        bres <-- is_valid_session (p_session);
-        unused_continuationPoint(p_continuationPoint);
-
+      <-- getall_and_clear_continuation_point (p_session, p_continuationPointId) =
+    VAR
+        l_valid_session,
+        l_session_has_cp,
+        l_session_cp,
+        l_session_cp_id
+    IN
         bres := FALSE;
         p_nextIndex := 0;
         p_maxTargetRef := 0;
@@ -62,22 +87,34 @@ OPERATIONS
         p_referenceType := c_NodeId_indet;
         p_includeSubtypes := FALSE;
         p_nodeClassMask := c_BrowseNodeClassMask_indet;
-        p_resultMask := c_BrowseResultMask_indet
+        p_resultMask := c_BrowseResultMask_indet;
+
+        l_valid_session <-- is_valid_session (p_session);
+        l_session_has_cp := session_hasContinuationPoint_i(p_session);
+        IF l_valid_session = TRUE & l_session_has_cp = TRUE THEN
+            l_session_cp := session_ContinuationPoint_i(p_session);
+            l_session_cp_id <-- get_continuation_point_id (l_session_cp);
+            IF l_session_cp_id = p_continuationPointId THEN
+                bres := TRUE;
+                p_nextIndex, p_maxTargetRef, p_browseView, p_nodeId,
+                p_browseDirection, p_referenceType, p_includeSubtypes, p_nodeClassMask, p_resultMask
+                  <-- getall_continuation_point (l_session_cp)
+            END
+        END
     END
     ;
 
     set_session_closed (p_session) =
-    VAR
-        l_res
-    IN
-        // TODO: remove (only avoid unused param) + clear session continuation point
-        l_res <-- is_valid_session (p_session)
+    BEGIN
+        session_hasContinuationPoint_i(p_session) := FALSE;
+        session_ContinuationPoint_i(p_session) := c_ContinuationPoint_indet
     END
     ;
 
     continuation_points_UNINITIALISATION =
     BEGIN
-        skip
+        session_hasContinuationPoint_i := t_session_i * {FALSE};
+        session_ContinuationPoint_i    := t_session_i * {c_ContinuationPoint_indet}
     END
 
 END

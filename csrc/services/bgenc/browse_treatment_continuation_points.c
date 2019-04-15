@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment_continuation_points.c
 
- Date                 : 12/04/2019 10:12:13
+ Date                 : 16/04/2019 10:23:22
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -32,10 +32,28 @@
   ------------------------*/
 #include "browse_treatment_continuation_points.h"
 
+/*----------------------------
+   CONCRETE_VARIABLES Clause
+  ----------------------------*/
+constants__t_ContinuationPoint_i browse_treatment_continuation_points__session_ContinuationPoint_i[constants__t_session_i_max+1];
+t_bool browse_treatment_continuation_points__session_hasContinuationPoint_i[constants__t_session_i_max+1];
+
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
 void browse_treatment_continuation_points__INITIALISATION(void) {
+   {
+      t_entier4 i;
+      for (i = constants__t_session_i_max; 0 <= i; i = i - 1) {
+         browse_treatment_continuation_points__session_hasContinuationPoint_i[i] = false;
+      }
+   }
+   {
+      t_entier4 i;
+      for (i = constants__t_session_i_max; 0 <= i; i = i - 1) {
+         browse_treatment_continuation_points__session_ContinuationPoint_i[i] = constants__c_ContinuationPoint_indet;
+      }
+   }
 }
 
 /*--------------------
@@ -53,29 +71,43 @@ void browse_treatment_continuation_points__create_continuation_point(
    const constants__t_BrowseNodeClassMask_i browse_treatment_continuation_points__p_nodeClassMask,
    const constants__t_BrowseResultMask_i browse_treatment_continuation_points__p_resultMask,
    t_bool * const browse_treatment_continuation_points__bres,
-   constants__t_ContinuationPoint_i * const browse_treatment_continuation_points__p_ContinuationPoint) {
-   *browse_treatment_continuation_points__p_ContinuationPoint = constants__c_ContinuationPoint_indet;
-   session_mgr__is_valid_session(browse_treatment_continuation_points__p_session,
-      browse_treatment_continuation_points__bres);
-   if (*browse_treatment_continuation_points__bres == true) {
-      browse_treatment_continuation_points_bs__create_continuation_point_bs(browse_treatment_continuation_points__p_nextIndex,
-         browse_treatment_continuation_points__p_maxTargetRef,
-         browse_treatment_continuation_points__p_browseView,
-         browse_treatment_continuation_points__p_nodeId,
-         browse_treatment_continuation_points__p_browseDirection,
-         browse_treatment_continuation_points__p_referenceType,
-         browse_treatment_continuation_points__p_includeSubtypes,
-         browse_treatment_continuation_points__p_nodeClassMask,
-         browse_treatment_continuation_points__p_resultMask,
-         browse_treatment_continuation_points__bres,
-         browse_treatment_continuation_points__p_ContinuationPoint);
-      *browse_treatment_continuation_points__bres = false;
+   constants__t_ContinuationPointId_i * const browse_treatment_continuation_points__p_ContinuationPointId) {
+   {
+      t_bool browse_treatment_continuation_points__l_valid_session;
+      t_bool browse_treatment_continuation_points__l_has_cp;
+      constants__t_ContinuationPoint_i browse_treatment_continuation_points__l_new_cp;
+      
+      *browse_treatment_continuation_points__p_ContinuationPointId = constants__c_ContinuationPointId_indet;
+      session_mgr__is_valid_session(browse_treatment_continuation_points__p_session,
+         &browse_treatment_continuation_points__l_valid_session);
+      browse_treatment_continuation_points__l_has_cp = browse_treatment_continuation_points__session_hasContinuationPoint_i[browse_treatment_continuation_points__p_session];
+      *browse_treatment_continuation_points__bres = ((browse_treatment_continuation_points__l_valid_session == true) &&
+         (browse_treatment_continuation_points__l_has_cp == false));
+      if (*browse_treatment_continuation_points__bres == true) {
+         browse_treatment_continuation_points_bs__create_continuation_point_bs(browse_treatment_continuation_points__p_nextIndex,
+            browse_treatment_continuation_points__p_maxTargetRef,
+            browse_treatment_continuation_points__p_browseView,
+            browse_treatment_continuation_points__p_nodeId,
+            browse_treatment_continuation_points__p_browseDirection,
+            browse_treatment_continuation_points__p_referenceType,
+            browse_treatment_continuation_points__p_includeSubtypes,
+            browse_treatment_continuation_points__p_nodeClassMask,
+            browse_treatment_continuation_points__p_resultMask,
+            browse_treatment_continuation_points__bres,
+            &browse_treatment_continuation_points__l_new_cp);
+         if (*browse_treatment_continuation_points__bres == true) {
+            browse_treatment_continuation_points__session_hasContinuationPoint_i[browse_treatment_continuation_points__p_session] = true;
+            browse_treatment_continuation_points__session_ContinuationPoint_i[browse_treatment_continuation_points__p_session] = browse_treatment_continuation_points__l_new_cp;
+            browse_treatment_continuation_points_bs__get_continuation_point_id(browse_treatment_continuation_points__l_new_cp,
+               browse_treatment_continuation_points__p_ContinuationPointId);
+         }
+      }
    }
 }
 
 void browse_treatment_continuation_points__getall_and_clear_continuation_point(
    const constants__t_session_i browse_treatment_continuation_points__p_session,
-   const constants__t_ContinuationPoint_i browse_treatment_continuation_points__p_continuationPoint,
+   const constants__t_ContinuationPointId_i browse_treatment_continuation_points__p_continuationPointId,
    t_bool * const browse_treatment_continuation_points__bres,
    t_entier4 * const browse_treatment_continuation_points__p_nextIndex,
    t_entier4 * const browse_treatment_continuation_points__p_maxTargetRef,
@@ -86,32 +118,65 @@ void browse_treatment_continuation_points__getall_and_clear_continuation_point(
    t_bool * const browse_treatment_continuation_points__p_includeSubtypes,
    constants__t_BrowseNodeClassMask_i * const browse_treatment_continuation_points__p_nodeClassMask,
    constants__t_BrowseResultMask_i * const browse_treatment_continuation_points__p_resultMask) {
-   session_mgr__is_valid_session(browse_treatment_continuation_points__p_session,
-      browse_treatment_continuation_points__bres);
-   browse_treatment_continuation_points_bs__unused_continuationPoint(browse_treatment_continuation_points__p_continuationPoint);
-   *browse_treatment_continuation_points__bres = false;
-   *browse_treatment_continuation_points__p_nextIndex = 0;
-   *browse_treatment_continuation_points__p_maxTargetRef = 0;
-   *browse_treatment_continuation_points__p_browseView = constants__c_NodeId_indet;
-   *browse_treatment_continuation_points__p_nodeId = constants__c_NodeId_indet;
-   *browse_treatment_continuation_points__p_browseDirection = constants__e_bd_indet;
-   *browse_treatment_continuation_points__p_referenceType = constants__c_NodeId_indet;
-   *browse_treatment_continuation_points__p_includeSubtypes = false;
-   *browse_treatment_continuation_points__p_nodeClassMask = constants__c_BrowseNodeClassMask_indet;
-   *browse_treatment_continuation_points__p_resultMask = constants__c_BrowseResultMask_indet;
+   {
+      t_bool browse_treatment_continuation_points__l_valid_session;
+      t_bool browse_treatment_continuation_points__l_session_has_cp;
+      constants__t_ContinuationPoint_i browse_treatment_continuation_points__l_session_cp;
+      constants__t_ContinuationPointId_i browse_treatment_continuation_points__l_session_cp_id;
+      
+      *browse_treatment_continuation_points__bres = false;
+      *browse_treatment_continuation_points__p_nextIndex = 0;
+      *browse_treatment_continuation_points__p_maxTargetRef = 0;
+      *browse_treatment_continuation_points__p_browseView = constants__c_NodeId_indet;
+      *browse_treatment_continuation_points__p_nodeId = constants__c_NodeId_indet;
+      *browse_treatment_continuation_points__p_browseDirection = constants__e_bd_indet;
+      *browse_treatment_continuation_points__p_referenceType = constants__c_NodeId_indet;
+      *browse_treatment_continuation_points__p_includeSubtypes = false;
+      *browse_treatment_continuation_points__p_nodeClassMask = constants__c_BrowseNodeClassMask_indet;
+      *browse_treatment_continuation_points__p_resultMask = constants__c_BrowseResultMask_indet;
+      session_mgr__is_valid_session(browse_treatment_continuation_points__p_session,
+         &browse_treatment_continuation_points__l_valid_session);
+      browse_treatment_continuation_points__l_session_has_cp = browse_treatment_continuation_points__session_hasContinuationPoint_i[browse_treatment_continuation_points__p_session];
+      if ((browse_treatment_continuation_points__l_valid_session == true) &&
+         (browse_treatment_continuation_points__l_session_has_cp == true)) {
+         browse_treatment_continuation_points__l_session_cp = browse_treatment_continuation_points__session_ContinuationPoint_i[browse_treatment_continuation_points__p_session];
+         browse_treatment_continuation_points_bs__get_continuation_point_id(browse_treatment_continuation_points__l_session_cp,
+            &browse_treatment_continuation_points__l_session_cp_id);
+         if (browse_treatment_continuation_points__l_session_cp_id == browse_treatment_continuation_points__p_continuationPointId) {
+            *browse_treatment_continuation_points__bres = true;
+            browse_treatment_continuation_points_bs__getall_continuation_point(browse_treatment_continuation_points__l_session_cp,
+               browse_treatment_continuation_points__p_nextIndex,
+               browse_treatment_continuation_points__p_maxTargetRef,
+               browse_treatment_continuation_points__p_browseView,
+               browse_treatment_continuation_points__p_nodeId,
+               browse_treatment_continuation_points__p_browseDirection,
+               browse_treatment_continuation_points__p_referenceType,
+               browse_treatment_continuation_points__p_includeSubtypes,
+               browse_treatment_continuation_points__p_nodeClassMask,
+               browse_treatment_continuation_points__p_resultMask);
+         }
+      }
+   }
 }
 
 void browse_treatment_continuation_points__set_session_closed(
    const constants__t_session_i browse_treatment_continuation_points__p_session) {
-   {
-      t_bool browse_treatment_continuation_points__l_res;
-      
-      session_mgr__is_valid_session(browse_treatment_continuation_points__p_session,
-         &browse_treatment_continuation_points__l_res);
-   }
+   browse_treatment_continuation_points__session_hasContinuationPoint_i[browse_treatment_continuation_points__p_session] = false;
+   browse_treatment_continuation_points__session_ContinuationPoint_i[browse_treatment_continuation_points__p_session] = constants__c_ContinuationPoint_indet;
 }
 
 void browse_treatment_continuation_points__continuation_points_UNINITIALISATION(void) {
-   ;
+   {
+      t_entier4 i;
+      for (i = constants__t_session_i_max; 0 <= i; i = i - 1) {
+         browse_treatment_continuation_points__session_hasContinuationPoint_i[i] = false;
+      }
+   }
+   {
+      t_entier4 i;
+      for (i = constants__t_session_i_max; 0 <= i; i = i - 1) {
+         browse_treatment_continuation_points__session_ContinuationPoint_i[i] = constants__c_ContinuationPoint_indet;
+      }
+   }
 }
 
