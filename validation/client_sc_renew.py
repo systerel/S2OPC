@@ -35,8 +35,23 @@ from common import sUri, create_client
 from tap_logger import TapLogger
 from opcua.crypto import security_policies
 
+def secure_channel_renew_nominal(client, logger):
+    # Define renew time to 1 second
+    client.secure_channel_timeout=1000
+    # Renew with 1 second
+    client.open_secure_channel(renew=True)
+    print('Open Secure Channel renewed')
+    # Check revised time
+    logger.add_test('OPN renew test - renewed with given timeout value', client.secure_channel_timeout == 1000)
+    # Read a node to be sure we are using the new security token
+    nid_index = 1001
+    nid = u"ns=1;i={}".format(nid_index)
+    node = client.get_node(nid)
+    value = node.get_value()
+    print(' Value for Node {}:'.format(nid), value)
+    print(' Error expected on next read:')
 
-def secure_channel_renew(client, logger):
+def secure_channel_renew_test_read_failure(client, logger):
     # Define renew time to 1 second
     client.secure_channel_timeout=1000
     # Renew with 1 second
@@ -80,7 +95,9 @@ if __name__=='__main__':
         print(headerString.format(re.split("#",sp.URI)[-1]))
         try:
             secure_channels_connect(client, sp)
-            secure_channel_renew(client, logger)
+            for i in range(0,1):
+                secure_channel_renew_nominal(client, logger)
+            secure_channel_renew_test_read_failure(client, logger)
         finally:
             try:
                 client.disconnect()
