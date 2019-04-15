@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment_result_bs.h
 
- Date                 : 10/04/2019 09:26:14
+ Date                 : 15/04/2019 16:06:39
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -53,6 +53,8 @@ extern void browse_treatment_result_bs__alloc_browse_result(
    const t_entier4 browse_treatment_result_bs__p_maxResultRefs,
    t_bool * const browse_treatment_result_bs__p_alloc_bres);
 extern void browse_treatment_result_bs__clear_browse_result(void);
+extern void browse_treatment_result_bs__get_browse_result_nb_references(
+   t_entier4 * const browse_treatment_result_bs__p_nb_references);
 extern void browse_treatment_result_bs__getall_and_clear_browse_result(
    t_entier4 * const browse_treatment_result_bs__p_nb_references,
    constants__t_BrowseResultReferences_i * const browse_treatment_result_bs__p_browseResult);

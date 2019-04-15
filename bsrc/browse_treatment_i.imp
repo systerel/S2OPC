@@ -409,6 +409,9 @@ OPERATIONS
                 p_serviceStatusCode, l_toContinue, l_nextIndex
                   <-- fill_browse_result (l_startIndex, l_max_nb_results, l_browseView, l_src_node,
                                           l_browseDirection, l_refType_defined, l_referenceType, l_includeSubtypes);
+                IF p_serviceStatusCode = e_sc_ok THEN
+                    p_nbReferences <-- get_browse_result_nb_references
+                END;
                 IF l_toContinue = TRUE THEN
                     l_cp_bres, p_continuationPoint <-- create_continuation_point (l_session, l_nextIndex, l_maxTargetRef, l_browseView,
                                                                                   l_nodeId, l_browseDirection, l_referenceType, l_includeSubtypes, l_nodeClassMask);

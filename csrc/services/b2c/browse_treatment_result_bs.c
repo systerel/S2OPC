@@ -67,6 +67,12 @@ void browse_treatment_result_bs__clear_browse_result(void)
     nbMaxReferences = 0;
 }
 
+void browse_treatment_result_bs__get_browse_result_nb_references(
+    t_entier4* const browse_treatment_result_bs__p_nb_references)
+{
+    *browse_treatment_result_bs__p_nb_references = nbReferences;
+}
+
 void browse_treatment_result_bs__getall_and_clear_browse_result(
     t_entier4* const browse_treatment_result_bs__p_nb_references,
     constants__t_BrowseResultReferences_i* const browse_treatment_result_bs__p_browseResult)

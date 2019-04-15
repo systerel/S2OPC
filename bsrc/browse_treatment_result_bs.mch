@@ -140,6 +140,14 @@ OPERATIONS
     END
     ;
 
+    p_nb_references <-- get_browse_result_nb_references =
+    PRE
+        isBrowseResultAllocated = TRUE
+    THEN
+        p_nb_references := out_BrowseResult_nb_References
+    END
+    ;
+
     p_refTypeId, p_isForward, p_NodeId, p_BrowseName, p_DisplayName, p_NodeClass, p_TypeDefinition
       <-- getall_browse_result_reference_at (p_refIndex) =
     PRE
