@@ -2221,6 +2221,8 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
     {
         scConnection->state = SECURE_CONNECTION_STATE_SC_CONNECTED;
         // copy current security token in precedent and new in current
+        SOPC_KeySet_Delete(scConnection->precedentSecuKeySets.receiverKeySet);
+        SOPC_KeySet_Delete(scConnection->precedentSecuKeySets.senderKeySet);
         scConnection->precedentSecurityToken = scConnection->currentSecurityToken;
         scConnection->precedentSecuKeySets = scConnection->currentSecuKeySets;
         scConnection->currentSecurityToken = newSecuToken;
