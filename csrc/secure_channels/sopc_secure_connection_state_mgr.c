@@ -2121,21 +2121,15 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
 
     // Write the OPN request message
     opnRespBuffer = SOPC_Buffer_Create(scConnection->tcpMsgProperties.sendBufferSize);
-    if (opnRespBuffer != NULL)
-    {
-        result = true;
-    }
-    // Note: do not let size of headers for chunks manager since it is not a fixed size
+    result = opnRespBuffer != NULL;
 
     // Generate security token parameters
-    if (result != false)
+    if (result)
     {
         newSecuToken.tokenId = SC_Server_GenerateFreshTokenId(scConnection);
-        if (newSecuToken.tokenId == 0)
-        {
-            result = false;
-        }
-        else
+        result = newSecuToken.tokenId != 0;
+
+        if (result)
         {
             newSecuToken.secureChannelId = scConnection->currentSecurityToken.secureChannelId;
             newSecuToken.revisedLifetime = requestedLifetime;
@@ -2147,7 +2141,7 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
 
     // Fill response header
 
-    if (result != false)
+    if (result)
     {
         // Fill the server nonce and generate key sets if applicable
         if (scConfig->msgSecurityMode != OpcUa_MessageSecurityMode_None)
@@ -2156,36 +2150,24 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
             assert(scConnection->clientNonce != NULL);
 
             status = SOPC_CryptoProvider_GenerateSecureChannelNonce(scConnection->cryptoProvider, &serverNonce);
+            result = SOPC_STATUS_OK == status;
 
-            if (SOPC_STATUS_OK == status)
+            if (result)
             {
                 result = SC_DeriveSymmetricKeySets(true, scConnection->cryptoProvider, scConnection->clientNonce,
                                                    serverNonce, &newSecuKeySets);
             }
-            else
-            {
-                result = false;
-            }
 
-            if (result != false)
+            if (result)
             {
-                if (SOPC_STATUS_OK == status)
-                {
-                    length = SOPC_SecretBuffer_GetLength(serverNonce);
-                    if (length <= INT32_MAX)
-                    {
-                        bytes = SOPC_SecretBuffer_Expose(serverNonce);
-                        status = SOPC_ByteString_CopyFromBytes(&opnResp.ServerNonce, bytes, (int32_t) length);
-                    }
-                    else
-                    {
-                        status = SOPC_STATUS_NOK;
-                    }
-                }
+                length = SOPC_SecretBuffer_GetLength(serverNonce);
+                result = length <= INT32_MAX;
 
-                if (status != SOPC_STATUS_OK)
+                if (result)
                 {
-                    result = false;
+                    bytes = SOPC_SecretBuffer_Expose(serverNonce);
+                    status = SOPC_ByteString_CopyFromBytes(&opnResp.ServerNonce, bytes, (int32_t) length);
+                    result = SOPC_STATUS_OK == status;
                 }
             }
 
@@ -2195,7 +2177,7 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
         }
     }
 
-    if (result != false)
+    if (result)
     {
         respHeader.Timestamp = SOPC_Time_GetCurrentTimeUTC();
         respHeader.RequestHandle = requestHandle;
@@ -2210,14 +2192,10 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
         status = SOPC_EncodeMsg_Type_Header_Body(opnRespBuffer, &OpcUa_OpenSecureChannelResponse_EncodeableType,
                                                  &OpcUa_ResponseHeader_EncodeableType, (void*) &respHeader,
                                                  (void*) &opnResp);
-
-        if (SOPC_STATUS_OK != status)
-        {
-            result = false;
-        }
+        result = SOPC_STATUS_OK == status;
     }
 
-    if (result != false)
+    if (result)
     {
         scConnection->state = SECURE_CONNECTION_STATE_SC_CONNECTED;
         // copy current security token in precedent and new in current
@@ -2233,19 +2211,10 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
     }
     else
     {
-        if (opnRespBuffer != NULL)
-        {
-            // Buffer will not be used anymore
-            SOPC_Buffer_Delete(opnRespBuffer);
-        }
-        if (newSecuKeySets.receiverKeySet != NULL)
-        {
-            SOPC_KeySet_Delete(newSecuKeySets.receiverKeySet);
-        }
-        if (newSecuKeySets.senderKeySet != NULL)
-        {
-            SOPC_KeySet_Delete(newSecuKeySets.senderKeySet);
-        }
+        // Buffer will not be used anymore
+        SOPC_Buffer_Delete(opnRespBuffer);
+        SOPC_KeySet_Delete(newSecuKeySets.receiverKeySet);
+        SOPC_KeySet_Delete(newSecuKeySets.senderKeySet);
     }
 
     OpcUa_ResponseHeader_Clear(&respHeader);
