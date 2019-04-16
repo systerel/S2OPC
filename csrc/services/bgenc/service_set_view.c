@@ -21,7 +21,7 @@
 
  File Name            : service_set_view.c
 
- Date                 : 18/04/2019 15:08:57
+ Date                 : 18/04/2019 15:14:14
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -88,15 +88,17 @@ void service_set_view__treat_browse_request_BrowseValue_1(
                service_set_view__l_serviceStatusCode);
             if ((service_set_view__l_serviceStatusCode == constants_statuscodes_bs__e_sc_ok) ||
                (service_set_view__l_serviceStatusCode == constants_statuscodes_bs__e_sc_bad_no_continuation_points)) {
-               msg_browse_bs__set_ResponseBrowse_ContinuationPoint(service_set_view__p_resp_msg,
-                  service_set_view__p_bvi,
-                  service_set_view__l_continuationPointId);
                browse_treatment__getall_and_move_browse_result(&service_set_view__l_nbTargets,
                   &service_set_view__l_browseResult);
                msg_browse_bs__set_ResponseBrowse_BrowseResult(service_set_view__p_resp_msg,
                   service_set_view__p_bvi,
                   service_set_view__l_nbTargets,
                   service_set_view__l_browseResult);
+               if (service_set_view__l_continuationPointId != constants__c_ContinuationPointId_indet) {
+                  msg_browse_bs__set_ResponseBrowse_ContinuationPoint(service_set_view__p_resp_msg,
+                     service_set_view__p_bvi,
+                     service_set_view__l_continuationPointId);
+               }
             }
          }
          else {
@@ -166,6 +168,130 @@ void service_set_view__treat_browse_request_BrowseValues(
    }
 }
 
+void service_set_view__treat_browse_next_request_BrowseContinuationPoint_1(
+   const constants__t_session_i service_set_view__p_session,
+   const constants__t_msg_i service_set_view__p_req_msg,
+   const constants__t_msg_i service_set_view__p_resp_msg,
+   const constants__t_BrowseValue_i service_set_view__p_cpi) {
+   {
+      constants__t_ContinuationPointId_i service_set_view__l_continuationPointId;
+      constants_statuscodes_bs__t_StatusCode_i service_set_view__l_statusCode;
+      t_entier4 service_set_view__l_nbTargets;
+      constants__t_BrowseResultReferences_i service_set_view__l_browseResult;
+      
+      msg_browse_next_bs__getall_ContinuationPoint(service_set_view__p_req_msg,
+         service_set_view__p_cpi,
+         &service_set_view__l_continuationPointId);
+      browse_treatment__set_browse_value_context_from_continuation_point(service_set_view__p_session,
+         service_set_view__l_continuationPointId,
+         &service_set_view__l_statusCode);
+      if (service_set_view__l_statusCode == constants_statuscodes_bs__e_sc_ok) {
+         browse_treatment__compute_browse_result(&service_set_view__l_statusCode,
+            &service_set_view__l_continuationPointId,
+            &service_set_view__l_nbTargets);
+         browse_treatment__clear_browse_value_context();
+         if ((service_set_view__l_statusCode == constants_statuscodes_bs__e_sc_ok) ||
+            (service_set_view__l_statusCode == constants_statuscodes_bs__e_sc_bad_no_continuation_points)) {
+            browse_treatment__getall_and_move_browse_result(&service_set_view__l_nbTargets,
+               &service_set_view__l_browseResult);
+            msg_browse_bs__set_ResponseBrowse_BrowseResult(service_set_view__p_resp_msg,
+               service_set_view__p_cpi,
+               service_set_view__l_nbTargets,
+               service_set_view__l_browseResult);
+            if (service_set_view__l_continuationPointId != constants__c_ContinuationPointId_indet) {
+               msg_browse_next_bs__set_ResponseBrowseNext_ContinuationPoint(service_set_view__p_resp_msg,
+                  service_set_view__p_cpi,
+                  service_set_view__l_continuationPointId);
+            }
+         }
+      }
+      msg_browse_next_bs__set_ResponseBrowseNext_BrowseStatus(service_set_view__p_resp_msg,
+         service_set_view__p_cpi,
+         service_set_view__l_statusCode);
+   }
+}
+
+void service_set_view__treat_browse_next_request_ReleaseContinuationPoint_1(
+   const constants__t_session_i service_set_view__p_session,
+   const constants__t_msg_i service_set_view__p_req_msg,
+   const constants__t_msg_i service_set_view__p_resp_msg,
+   const constants__t_BrowseValue_i service_set_view__p_cpi) {
+   {
+      constants__t_ContinuationPointId_i service_set_view__l_continuationPointId;
+      t_bool service_set_view__l_bres;
+      
+      msg_browse_next_bs__getall_ContinuationPoint(service_set_view__p_req_msg,
+         service_set_view__p_cpi,
+         &service_set_view__l_continuationPointId);
+      browse_treatment__release_continuation_point(service_set_view__p_session,
+         service_set_view__l_continuationPointId,
+         &service_set_view__l_bres);
+      if (service_set_view__l_bres == true) {
+         msg_browse_next_bs__set_ResponseBrowseNext_BrowseStatus(service_set_view__p_resp_msg,
+            service_set_view__p_cpi,
+            constants_statuscodes_bs__e_sc_ok);
+      }
+      else {
+         msg_browse_next_bs__set_ResponseBrowseNext_BrowseStatus(service_set_view__p_resp_msg,
+            service_set_view__p_cpi,
+            constants_statuscodes_bs__e_sc_bad_continuation_point_invalid);
+      }
+   }
+}
+
+void service_set_view__treat_browse_next_request_BrowseContinuationPoints(
+   const constants__t_session_i service_set_view__p_session,
+   const constants__t_msg_i service_set_view__p_req_msg,
+   const constants__t_msg_i service_set_view__p_resp_msg,
+   const t_bool service_set_view__p_releaseCP,
+   const t_entier4 service_set_view__p_nbCP,
+   constants_statuscodes_bs__t_StatusCode_i * const service_set_view__StatusCode_service) {
+   {
+      t_bool service_set_view__l_isallocated;
+      t_bool service_set_view__l_continue;
+      constants__t_BrowseValue_i service_set_view__l_cpi;
+      
+      if ((service_set_view__p_nbCP > 0) &&
+         (service_set_view__p_nbCP <= constants__k_n_BrowseResponse_max)) {
+         msg_browse_next_bs__alloc_browse_next_response(service_set_view__p_resp_msg,
+            service_set_view__p_nbCP,
+            &service_set_view__l_isallocated);
+         if (service_set_view__l_isallocated == true) {
+            *service_set_view__StatusCode_service = constants_statuscodes_bs__e_sc_ok;
+            service_browse_it__init_iter_browse_request(service_set_view__p_nbCP,
+               &service_set_view__l_continue);
+            while (service_set_view__l_continue == true) {
+               service_browse_it__continue_iter_browse_request(&service_set_view__l_continue,
+                  &service_set_view__l_cpi);
+               if (service_set_view__p_releaseCP == false) {
+                  service_set_view__treat_browse_next_request_BrowseContinuationPoint_1(service_set_view__p_session,
+                     service_set_view__p_req_msg,
+                     service_set_view__p_resp_msg,
+                     service_set_view__l_cpi);
+               }
+               else {
+                  service_set_view__treat_browse_next_request_ReleaseContinuationPoint_1(service_set_view__p_session,
+                     service_set_view__p_req_msg,
+                     service_set_view__p_resp_msg,
+                     service_set_view__l_cpi);
+               }
+            }
+         }
+         else {
+            *service_set_view__StatusCode_service = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+         }
+      }
+      else {
+         if (service_set_view__p_nbCP == 0) {
+            *service_set_view__StatusCode_service = constants_statuscodes_bs__e_sc_bad_nothing_to_do;
+         }
+         else {
+            *service_set_view__StatusCode_service = constants_statuscodes_bs__e_sc_bad_too_many_ops;
+         }
+      }
+   }
+}
+
 void service_set_view__treat_browse_request(
    const constants__t_session_i service_set_view__p_session,
    const constants__t_msg_i service_set_view__p_req_msg,
@@ -186,6 +312,27 @@ void service_set_view__treat_browse_request(
          service_set_view__l_nid_view,
          service_set_view__l_nb_BrowseTargetMax,
          service_set_view__l_nb_BrowseValues,
+         service_set_view__StatusCode_service);
+   }
+}
+
+void service_set_view__treat_browse_next_request(
+   const constants__t_session_i service_set_view__p_session,
+   const constants__t_msg_i service_set_view__p_req_msg,
+   const constants__t_msg_i service_set_view__p_resp_msg,
+   constants_statuscodes_bs__t_StatusCode_i * const service_set_view__StatusCode_service) {
+   {
+      t_bool service_set_view__l_releaseContinuationPoints;
+      t_entier4 service_set_view__l_nb_ContinuationPoints;
+      
+      msg_browse_next_bs__get_browse_next_request_params(service_set_view__p_req_msg,
+         &service_set_view__l_releaseContinuationPoints,
+         &service_set_view__l_nb_ContinuationPoints);
+      service_set_view__treat_browse_next_request_BrowseContinuationPoints(service_set_view__p_session,
+         service_set_view__p_req_msg,
+         service_set_view__p_resp_msg,
+         service_set_view__l_releaseContinuationPoints,
+         service_set_view__l_nb_ContinuationPoints,
          service_set_view__StatusCode_service);
    }
 }

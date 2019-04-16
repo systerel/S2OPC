@@ -31,6 +31,7 @@ IMPORTS
     browse_treatment_result_it
 
 PROMOTES
+    release_continuation_point,
     set_session_closed,
     continuation_points_UNINITIALISATION,
     getall_browse_result_reference_at,

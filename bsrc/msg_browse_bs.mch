@@ -182,9 +182,7 @@ OPERATIONS
         p_resp_msg = c_msg_out &
         a_msg_out_type = e_msg_view_browse_resp &
         p_nb_bvi : NAT1 &
-        p_nb_bvi <= k_n_BrowseTarget_max &
-        (RequestBrowse_nb_BrowseTargetMax > 0 =>
-            p_nb_bvi <= RequestBrowse_nb_BrowseTargetMax)
+        p_nb_bvi = RequestBrowse_nb_BrowseValue
     THEN
         p_isallocated :: BOOL ||
         d_variables_resp

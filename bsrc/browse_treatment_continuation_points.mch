@@ -118,6 +118,24 @@ OPERATIONS
     END
     ;
 
+    bres <-- release_continuation_point (p_session, p_continuationPointId) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session &
+        p_continuationPointId : t_ContinuationPointId_i
+    THEN
+        s_ContinuationPoints, id_ContinuationPoint, session_ContinuationPoint, bres
+        :(
+            bres = bool(id_ContinuationPoint(session_ContinuationPoint~(p_session)) = p_continuationPointId) &
+            /* Release the continuation point  */
+            (bres = TRUE =>
+                s_ContinuationPoints = s_ContinuationPoints$0 - {session_ContinuationPoint~(p_session)} &
+                id_ContinuationPoint = {session_ContinuationPoint~(p_session)} <<| id_ContinuationPoint$0 &
+                session_ContinuationPoint = {session_ContinuationPoint~(p_session)} <<| session_ContinuationPoint$0)
+        )
+    END
+    ;
+
     p_continuationPointId <-- get_continuation_point_id(p_continuationPoint) =
     PRE
         p_continuationPoint : t_ContinuationPoint_i &

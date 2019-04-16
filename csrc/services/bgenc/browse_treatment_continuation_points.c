@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment_continuation_points.c
 
- Date                 : 16/04/2019 10:23:22
+ Date                 : 17/04/2019 08:59:41
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -154,6 +154,36 @@ void browse_treatment_continuation_points__getall_and_clear_continuation_point(
                browse_treatment_continuation_points__p_includeSubtypes,
                browse_treatment_continuation_points__p_nodeClassMask,
                browse_treatment_continuation_points__p_resultMask);
+            browse_treatment_continuation_points__session_hasContinuationPoint_i[browse_treatment_continuation_points__p_session] = false;
+            browse_treatment_continuation_points__session_ContinuationPoint_i[browse_treatment_continuation_points__p_session] = constants__c_ContinuationPoint_indet;
+         }
+      }
+   }
+}
+
+void browse_treatment_continuation_points__release_continuation_point(
+   const constants__t_session_i browse_treatment_continuation_points__p_session,
+   const constants__t_ContinuationPointId_i browse_treatment_continuation_points__p_continuationPointId,
+   t_bool * const browse_treatment_continuation_points__bres) {
+   {
+      t_bool browse_treatment_continuation_points__l_valid_session;
+      t_bool browse_treatment_continuation_points__l_session_has_cp;
+      constants__t_ContinuationPoint_i browse_treatment_continuation_points__l_session_cp;
+      constants__t_ContinuationPointId_i browse_treatment_continuation_points__l_session_cp_id;
+      
+      *browse_treatment_continuation_points__bres = false;
+      session_mgr__is_valid_session(browse_treatment_continuation_points__p_session,
+         &browse_treatment_continuation_points__l_valid_session);
+      browse_treatment_continuation_points__l_session_has_cp = browse_treatment_continuation_points__session_hasContinuationPoint_i[browse_treatment_continuation_points__p_session];
+      if ((browse_treatment_continuation_points__l_valid_session == true) &&
+         (browse_treatment_continuation_points__l_session_has_cp == true)) {
+         browse_treatment_continuation_points__l_session_cp = browse_treatment_continuation_points__session_ContinuationPoint_i[browse_treatment_continuation_points__p_session];
+         browse_treatment_continuation_points_bs__get_continuation_point_id(browse_treatment_continuation_points__l_session_cp,
+            &browse_treatment_continuation_points__l_session_cp_id);
+         if (browse_treatment_continuation_points__l_session_cp_id == browse_treatment_continuation_points__p_continuationPointId) {
+            *browse_treatment_continuation_points__bres = true;
+            browse_treatment_continuation_points__session_hasContinuationPoint_i[browse_treatment_continuation_points__p_session] = false;
+            browse_treatment_continuation_points__session_ContinuationPoint_i[browse_treatment_continuation_points__p_session] = constants__c_ContinuationPoint_indet;
          }
       }
    }

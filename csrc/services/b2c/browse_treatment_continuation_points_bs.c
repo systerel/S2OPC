@@ -19,6 +19,8 @@
 
 #include "browse_treatment_continuation_points_bs.h"
 
+#include <string.h>
+
 #include "util_b2c.h"
 
 static uint64_t continuationPointIdSeed = constants__c_ContinuationPointId_indet;
@@ -59,6 +61,7 @@ void browse_treatment_continuation_points_bs__create_continuation_point_bs(
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     bool allocSuccess = true;
     SOPC_ContinuationPointData data;
+    memset(&data, 0, sizeof(data));
 
     if (allocSuccess && browse_treatment_continuation_points_bs__p_browseView != constants__c_NodeId_indet)
     {

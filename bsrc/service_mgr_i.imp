@@ -475,6 +475,8 @@ OPERATIONS
                 dealloc_write_request_responses
             OR e_msg_view_browse_req THEN
                 StatusCode_service <-- treat_browse_request(session, req_msg, resp_msg)
+            OR e_msg_view_browse_next_req THEN
+                StatusCode_service <-- treat_browse_next_request(session, req_msg, resp_msg)
             OR e_msg_subscription_create_req THEN
                 StatusCode_service <-- treat_create_subscription_request (session, req_msg, resp_msg)
             OR e_msg_subscription_modify_req THEN

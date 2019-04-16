@@ -21,7 +21,7 @@
 
  File Name            : service_set_view.h
 
- Date                 : 09/04/2019 12:10:36
+ Date                 : 17/04/2019 08:59:48
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -40,6 +40,7 @@
   -----------------*/
 #include "browse_treatment.h"
 #include "msg_browse_bs.h"
+#include "msg_browse_next_bs.h"
 #include "service_browse_it.h"
 
 /*--------------
@@ -58,6 +59,23 @@ extern void service_set_view__INITIALISATION(void);
 /*--------------------------
    LOCAL_OPERATIONS Clause
   --------------------------*/
+extern void service_set_view__treat_browse_next_request_BrowseContinuationPoint_1(
+   const constants__t_session_i service_set_view__p_session,
+   const constants__t_msg_i service_set_view__p_req_msg,
+   const constants__t_msg_i service_set_view__p_resp_msg,
+   const constants__t_BrowseValue_i service_set_view__p_cpi);
+extern void service_set_view__treat_browse_next_request_BrowseContinuationPoints(
+   const constants__t_session_i service_set_view__p_session,
+   const constants__t_msg_i service_set_view__p_req_msg,
+   const constants__t_msg_i service_set_view__p_resp_msg,
+   const t_bool service_set_view__p_releaseCP,
+   const t_entier4 service_set_view__p_nbCP,
+   constants_statuscodes_bs__t_StatusCode_i * const service_set_view__StatusCode_service);
+extern void service_set_view__treat_browse_next_request_ReleaseContinuationPoint_1(
+   const constants__t_session_i service_set_view__p_session,
+   const constants__t_msg_i service_set_view__p_req_msg,
+   const constants__t_msg_i service_set_view__p_resp_msg,
+   const constants__t_BrowseValue_i service_set_view__p_cpi);
 extern void service_set_view__treat_browse_request_BrowseValue_1(
    const constants__t_session_i service_set_view__p_session,
    const constants__t_msg_i service_set_view__p_req_msg,
@@ -81,6 +99,11 @@ extern void service_set_view__service_set_view_UNINITIALISATION(void);
 extern void service_set_view__service_set_view_service_node_management_used(void);
 extern void service_set_view__service_set_view_set_session_closed(
    const constants__t_session_i service_set_view__p_session);
+extern void service_set_view__treat_browse_next_request(
+   const constants__t_session_i service_set_view__p_session,
+   const constants__t_msg_i service_set_view__p_req_msg,
+   const constants__t_msg_i service_set_view__p_resp_msg,
+   constants_statuscodes_bs__t_StatusCode_i * const service_set_view__StatusCode_service);
 extern void service_set_view__treat_browse_request(
    const constants__t_session_i service_set_view__p_session,
    const constants__t_msg_i service_set_view__p_req_msg,

@@ -98,7 +98,35 @@ OPERATIONS
                 bres := TRUE;
                 p_nextIndex, p_maxTargetRef, p_browseView, p_nodeId,
                 p_browseDirection, p_referenceType, p_includeSubtypes, p_nodeClassMask, p_resultMask
-                  <-- getall_continuation_point (l_session_cp)
+                  <-- getall_continuation_point (l_session_cp);
+                /* Clear the continuation point */
+                session_hasContinuationPoint_i(p_session) := FALSE;
+                session_ContinuationPoint_i(p_session) := c_ContinuationPoint_indet
+                /* TODO: actually dealloc it */
+            END
+        END
+    END
+    ;
+
+    bres <-- release_continuation_point (p_session, p_continuationPointId) =
+    VAR
+        l_valid_session,
+        l_session_has_cp,
+        l_session_cp,
+        l_session_cp_id
+    IN
+        bres := FALSE;
+        l_valid_session <-- is_valid_session (p_session);
+        l_session_has_cp := session_hasContinuationPoint_i(p_session);
+        IF l_valid_session = TRUE & l_session_has_cp = TRUE THEN
+            l_session_cp := session_ContinuationPoint_i(p_session);
+            l_session_cp_id <-- get_continuation_point_id (l_session_cp);
+            IF l_session_cp_id = p_continuationPointId THEN
+                bres := TRUE;
+                /* Clear the continuation point */
+                session_hasContinuationPoint_i(p_session) := FALSE;
+                session_ContinuationPoint_i(p_session) := c_ContinuationPoint_indet
+                /* TODO: actually dealloc it */
             END
         END
     END

@@ -21,7 +21,7 @@
 
  File Name            : toolkit_header_init.c
 
- Date                 : 10/04/2019 12:56:11
+ Date                 : 16/04/2019 15:19:55
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -67,6 +67,7 @@
 #include "monitored_item_queue_bs.h"
 #include "monitored_item_queue_it_bs.h"
 #include "msg_browse_bs.h"
+#include "msg_browse_next_bs.h"
 #include "msg_read_request.h"
 #include "msg_read_request_bs.h"
 #include "msg_read_response_bs.h"
@@ -177,6 +178,7 @@ void INITIALISATION(void) {
    browse_treatment_result_it__INITIALISATION();
    browse_treatment__INITIALISATION();
    msg_browse_bs__INITIALISATION();
+   msg_browse_next_bs__INITIALISATION();
    service_set_view__INITIALISATION();
    subscription_core_1__INITIALISATION();
    monitored_item_queue_bs__INITIALISATION();

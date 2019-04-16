@@ -47,6 +47,25 @@ OPERATIONS
     END
     ;
 
+    StatusCode_service <-- treat_browse_next_request (p_session, p_req_msg, p_resp_msg) =
+    PRE
+        p_session : t_session_i &
+        p_req_msg : t_msg_i &
+        p_req_msg : t_msg &
+        p_req_msg = c_msg_in &
+        a_msg_in_type = e_msg_view_browse_next_req &
+        p_resp_msg : t_msg_i &
+        p_resp_msg : t_msg &
+        p_resp_msg = c_msg_out &
+        a_msg_out_type = e_msg_view_browse_next_resp
+    THEN
+        StatusCode_service
+        :(  StatusCode_service : t_StatusCode_i &
+            StatusCode_service : t_StatusCode
+        )
+    END
+    ;
+
     /* Remove associated continuation point */
     service_set_view_set_session_closed(p_session) =
     PRE

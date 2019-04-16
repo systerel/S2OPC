@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment_continuation_points.h
 
- Date                 : 16/04/2019 10:23:22
+ Date                 : 17/04/2019 08:59:41
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -92,6 +92,10 @@ extern void browse_treatment_continuation_points__getall_and_clear_continuation_
    t_bool * const browse_treatment_continuation_points__p_includeSubtypes,
    constants__t_BrowseNodeClassMask_i * const browse_treatment_continuation_points__p_nodeClassMask,
    constants__t_BrowseResultMask_i * const browse_treatment_continuation_points__p_resultMask);
+extern void browse_treatment_continuation_points__release_continuation_point(
+   const constants__t_session_i browse_treatment_continuation_points__p_session,
+   const constants__t_ContinuationPointId_i browse_treatment_continuation_points__p_continuationPointId,
+   t_bool * const browse_treatment_continuation_points__bres);
 extern void browse_treatment_continuation_points__set_session_closed(
    const constants__t_session_i browse_treatment_continuation_points__p_session);
 
