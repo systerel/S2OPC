@@ -80,7 +80,7 @@ OPERATIONS
 
     bres, p_nextIndex, p_maxTargetRef, p_browseView, p_nodeId,
     p_browseDirection, p_referenceType, p_includeSubtypes, p_nodeClassMask, p_resultMask
-      <-- getall_and_clear_continuation_point (p_session, p_continuationPointId) =
+      <-- getall_continuation_point (p_session, p_continuationPointId) =
     PRE
         p_session : t_session_i &
         p_session : t_session &
@@ -109,10 +109,7 @@ OPERATIONS
             /* Clear the continuation point once used to free session continuation point for BrowseNext treatment */
             (bres = TRUE =>
                 p_nodeId : t_NodeId &
-                p_referenceType : t_NodeId &
-                s_ContinuationPoints = s_ContinuationPoints$0 - {session_ContinuationPoint~(p_session)} &
-                id_ContinuationPoint = {session_ContinuationPoint~(p_session)} <<| id_ContinuationPoint$0 &
-                session_ContinuationPoint = {session_ContinuationPoint~(p_session)} <<| session_ContinuationPoint$0
+                p_referenceType : t_NodeId
             )
         )
     END
@@ -159,7 +156,6 @@ OPERATIONS
     END
     ;
 
-    /* TODO: to be called on UNINIT to free all continuations AND on NodeManagement service calls modifying the address space !!! */
     continuation_points_UNINITIALISATION =
     BEGIN
         s_ContinuationPoints :: {} ||

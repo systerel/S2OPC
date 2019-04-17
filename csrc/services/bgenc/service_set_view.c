@@ -21,7 +21,7 @@
 
  File Name            : service_set_view.c
 
- Date                 : 18/04/2019 15:14:14
+ Date                 : 13/06/2019 16:52:34
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -78,28 +78,29 @@ void service_set_view__treat_browse_request_BrowseValue_1(
                service_set_view__l_reftype,
                service_set_view__l_incsubtyp,
                service_set_view__l_nodeClassMask,
-               service_set_view__l_resultMask);
-            browse_treatment__compute_browse_result(&service_set_view__l_serviceStatusCode,
-               &service_set_view__l_continuationPointId,
-               &service_set_view__l_nbTargets);
-            browse_treatment__clear_browse_value_context();
-            msg_browse_bs__set_ResponseBrowse_BrowseStatus(service_set_view__p_resp_msg,
-               service_set_view__p_bvi,
-               service_set_view__l_serviceStatusCode);
-            if ((service_set_view__l_serviceStatusCode == constants_statuscodes_bs__e_sc_ok) ||
-               (service_set_view__l_serviceStatusCode == constants_statuscodes_bs__e_sc_bad_no_continuation_points)) {
-               browse_treatment__getall_and_move_browse_result(&service_set_view__l_nbTargets,
-                  &service_set_view__l_browseResult);
-               msg_browse_bs__set_ResponseBrowse_BrowseResult(service_set_view__p_resp_msg,
-                  service_set_view__p_bvi,
-                  service_set_view__l_nbTargets,
-                  service_set_view__l_browseResult);
-               if (service_set_view__l_continuationPointId != constants__c_ContinuationPointId_indet) {
+               service_set_view__l_resultMask,
+               &service_set_view__l_serviceStatusCode);
+            if (service_set_view__l_serviceStatusCode == constants_statuscodes_bs__e_sc_ok) {
+               browse_treatment__compute_browse_result(&service_set_view__l_serviceStatusCode,
+                  &service_set_view__l_continuationPointId,
+                  &service_set_view__l_nbTargets);
+               browse_treatment__clear_browse_value_context();
+               if ((service_set_view__l_serviceStatusCode == constants_statuscodes_bs__e_sc_ok) ||
+                  (service_set_view__l_serviceStatusCode == constants_statuscodes_bs__e_sc_bad_no_continuation_points)) {
+                  browse_treatment__getall_and_move_browse_result(&service_set_view__l_nbTargets,
+                     &service_set_view__l_browseResult);
+                  msg_browse_bs__set_ResponseBrowse_BrowseResult(service_set_view__p_resp_msg,
+                     service_set_view__p_bvi,
+                     service_set_view__l_nbTargets,
+                     service_set_view__l_browseResult);
                   msg_browse_bs__set_ResponseBrowse_ContinuationPoint(service_set_view__p_resp_msg,
                      service_set_view__p_bvi,
                      service_set_view__l_continuationPointId);
                }
             }
+            msg_browse_bs__set_ResponseBrowse_BrowseStatus(service_set_view__p_resp_msg,
+               service_set_view__p_bvi,
+               service_set_view__l_serviceStatusCode);
          }
          else {
             msg_browse_bs__set_ResponseBrowse_BrowseStatus(service_set_view__p_resp_msg,

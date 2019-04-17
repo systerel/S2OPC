@@ -21,7 +21,7 @@
 
  File Name            : toolkit_header_init.c
 
- Date                 : 16/04/2019 15:19:55
+ Date                 : 13/06/2019 14:23:48
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -47,6 +47,7 @@
 #include "browse_treatment_context_bs.h"
 #include "browse_treatment_continuation_points.h"
 #include "browse_treatment_continuation_points_bs.h"
+#include "browse_treatment_continuation_points_session_it.h"
 #include "browse_treatment_result_bs.h"
 #include "browse_treatment_result_it.h"
 #include "browse_treatment_target_it.h"
@@ -82,6 +83,7 @@
 #include "msg_subscription_set_publishing_mode_bs.h"
 #include "msg_unregister_nodes.h"
 #include "msg_unregister_nodes_bs.h"
+#include "node_id_pointer_bs.h"
 #include "notification_republish_queue_bs.h"
 #include "notification_republish_queue_it_bs.h"
 #include "publish_request_queue_bs.h"
@@ -169,8 +171,10 @@ void INITIALISATION(void) {
    service_get_endpoints_bs__INITIALISATION();
    service_browse_it__INITIALISATION();
    browse_treatment_context_bs__INITIALISATION();
+   node_id_pointer_bs__INITIALISATION();
    browse_treatment_context__INITIALISATION();
    browse_treatment_continuation_points_bs__INITIALISATION();
+   browse_treatment_continuation_points_session_it__INITIALISATION();
    browse_treatment_continuation_points__INITIALISATION();
    browse_treatment_result_bs__INITIALISATION();
    browse_treatment_1__INITIALISATION();

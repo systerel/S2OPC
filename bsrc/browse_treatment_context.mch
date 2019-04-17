@@ -21,7 +21,8 @@ MACHINE
     browse_treatment_context
 
 SEES
-    constants
+    constants,
+    constants_statuscodes_bs
 
 DEFINITIONS
 
@@ -82,10 +83,10 @@ INITIALISATION
 
 OPERATIONS
 
-    setall_browse_value_context (p_startIndex, p_session, p_maxTargetRef,
-                                 p_browseView, p_nodeId, p_browseDirection,
-                                 p_referenceType, p_includeSubtypes,
-                                 p_nodeClassMask, p_resultMask) =
+    p_service_StatusCode <-- setall_browse_value_context (p_startIndex, p_session, p_maxTargetRef,
+                                                          p_browseView, p_nodeId, p_browseDirection,
+                                                          p_referenceType, p_includeSubtypes,
+                                                          p_nodeClassMask, p_resultMask) =
    PRE
         isBrowseValueContextDefined = FALSE &
         p_startIndex    : NAT &
@@ -103,19 +104,29 @@ OPERATIONS
         p_resultMask    : t_BrowseResultMask_i   &
         p_includeSubtypes : BOOL
    THEN
-        in_startIndex                   := p_startIndex      ||
-        in_session                      := p_session         ||
-        in_maxReferencesPerNode         := p_maxTargetRef    ||
-        in_BrowseView                   := p_browseView      ||
-        in_BrowseValue_NodeId           := p_nodeId          ||
-        in_BrowseValue_BrowseDirection  := p_browseDirection ||
-        in_BrowseValue_ReferenceTypeId  := p_referenceType   ||
-        in_BrowseValue_IncludeSubtypes  := p_includeSubtypes ||
-        in_BrowseValue_NodeClassMask    := p_nodeClassMask   ||
-        in_BrowseValue_NodeClassesInMask :(in_BrowseValue_NodeClassesInMask <: t_NodeClass_i &
-                                           in_BrowseValue_NodeClassesInMask$0 <: in_BrowseValue_NodeClassesInMask) ||
-        in_BrowseValue_ResultMask       := p_resultMask   ||
-        isBrowseValueContextDefined     := TRUE
+        p_service_StatusCode,
+        d_variables_in
+        :(
+            p_service_StatusCode : {e_sc_ok, e_sc_bad_out_of_memory} &
+            d_inv_in &
+            (p_service_StatusCode = e_sc_ok =>
+                in_startIndex                    = p_startIndex      &
+                in_session                       = p_session         &
+                in_maxReferencesPerNode          = p_maxTargetRef    &
+                in_BrowseView                    = p_browseView      &
+                in_BrowseValue_NodeId            = p_nodeId          &
+                in_BrowseValue_BrowseDirection   = p_browseDirection &
+                in_BrowseValue_ReferenceTypeId   = p_referenceType   &
+                in_BrowseValue_IncludeSubtypes   = p_includeSubtypes &
+                in_BrowseValue_NodeClassMask     = p_nodeClassMask   &
+                in_BrowseValue_NodeClassesInMask <: t_NodeClass_i &
+                in_BrowseValue_NodeClassesInMask$0 <: in_BrowseValue_NodeClassesInMask &
+                in_BrowseValue_ResultMask        = p_resultMask   &
+
+                isBrowseValueContextDefined = TRUE) &
+            (p_service_StatusCode /= e_sc_ok =>
+                isBrowseValueContextDefined = FALSE)
+        )
    END
    ;
 

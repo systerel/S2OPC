@@ -524,12 +524,14 @@ OPERATIONS
 
     /* END OF LOCAL OPERATIONS */
 
-   set_browse_value_context (p_session, p_maxTargetRef, p_browseView, p_nodeId,
-                             p_browseDirection, p_referenceType, p_includeSubtypes, p_nodeClassMask, p_resultMask) =
+   p_service_StatusCode <-- set_browse_value_context (p_session, p_maxTargetRef, p_browseView, p_nodeId,
+                                                      p_browseDirection, p_referenceType, p_includeSubtypes,
+                                                      p_nodeClassMask, p_resultMask) =
    BEGIN
        /* Only set context to start with index 1 of target references */
-       setall_browse_value_context(1, p_session, p_maxTargetRef, p_browseView, p_nodeId,
-                                   p_browseDirection, p_referenceType, p_includeSubtypes, p_nodeClassMask, p_resultMask)
+       p_service_StatusCode <-- setall_browse_value_context(1, p_session, p_maxTargetRef, p_browseView, p_nodeId,
+                                                            p_browseDirection, p_referenceType, p_includeSubtypes,
+                                                            p_nodeClassMask, p_resultMask)
    END
    ;
 
@@ -557,12 +559,16 @@ OPERATIONS
         l_includeSubtypes,
         l_nodeClassMask,
         l_resultMask
-          <-- getall_and_clear_continuation_point (p_session, p_continuationPointId);
+          <-- getall_continuation_point (p_session, p_continuationPointId);
         IF l_res = TRUE THEN
-            setall_browse_value_context(l_nextIndex, p_session, l_maxTargetRef, l_browseView,
-                                        l_nodeId, l_browseDirection, l_referenceType, l_includeSubtypes,
-                                        l_nodeClassMask, l_resultMask);
-            p_service_StatusCode := e_sc_ok
+            p_service_StatusCode <-- setall_browse_value_context(l_nextIndex, p_session, l_maxTargetRef, l_browseView,
+                                                                 l_nodeId, l_browseDirection, l_referenceType, l_includeSubtypes,
+                                                                 l_nodeClassMask, l_resultMask);
+            IF p_service_StatusCode = e_sc_ok THEN
+                /* Result ignored since it is same algorithm determines l_res in getall_continuation_point.
+                   => mandatory TRUE result here */
+                l_res <-- release_continuation_point (p_session, p_continuationPointId)
+            END
         END
    END
    ;

@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment_context.c
 
- Date                 : 12/04/2019 10:12:12
+ Date                 : 13/06/2019 15:23:54
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -67,6 +67,23 @@ void browse_treatment_context__INITIALISATION(void) {
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+void browse_treatment_context__local_clear_browse_value_context(void) {
+   browse_treatment_context__in_startIndex_i = 0;
+   browse_treatment_context__in_session_i = constants__c_session_indet;
+   browse_treatment_context__in_maxReferencesPerNode_i = 0;
+   node_id_pointer_bs__free_node_id_pointer(browse_treatment_context__in_BrowseView_i);
+   browse_treatment_context__in_BrowseView_i = constants__c_NodeId_indet;
+   node_id_pointer_bs__free_node_id_pointer(browse_treatment_context__in_BrowseValue_NodeId_i);
+   browse_treatment_context__in_BrowseValue_NodeId_i = constants__c_NodeId_indet;
+   browse_treatment_context__in_BrowseValue_BrowseDirection_i = constants__e_bd_indet;
+   node_id_pointer_bs__free_node_id_pointer(browse_treatment_context__in_BrowseValue_ReferenceTypeId_i);
+   browse_treatment_context__in_BrowseValue_ReferenceTypeId_i = constants__c_NodeId_indet;
+   browse_treatment_context__in_BrowseValue_IncludeSubtypes_i = false;
+   browse_treatment_context__in_BrowseValue_NodeClassMask_i = constants__c_BrowseNodeClassMask_indet;
+   browse_treatment_context__in_BrowseValue_ResultMask_i = constants__c_BrowseResultMask_indet;
+   browse_treatment_context__isBrowseValueContextDefined_i = false;
+}
+
 void browse_treatment_context__setall_browse_value_context(
    const t_entier4 browse_treatment_context__p_startIndex,
    const constants__t_session_i browse_treatment_context__p_session,
@@ -77,18 +94,46 @@ void browse_treatment_context__setall_browse_value_context(
    const constants__t_NodeId_i browse_treatment_context__p_referenceType,
    const t_bool browse_treatment_context__p_includeSubtypes,
    const constants__t_BrowseNodeClassMask_i browse_treatment_context__p_nodeClassMask,
-   const constants__t_BrowseResultMask_i browse_treatment_context__p_resultMask) {
-   browse_treatment_context__in_startIndex_i = browse_treatment_context__p_startIndex;
-   browse_treatment_context__in_session_i = browse_treatment_context__p_session;
-   browse_treatment_context__in_maxReferencesPerNode_i = browse_treatment_context__p_maxTargetRef;
-   browse_treatment_context__in_BrowseView_i = browse_treatment_context__p_browseView;
-   browse_treatment_context__in_BrowseValue_NodeId_i = browse_treatment_context__p_nodeId;
-   browse_treatment_context__in_BrowseValue_BrowseDirection_i = browse_treatment_context__p_browseDirection;
-   browse_treatment_context__in_BrowseValue_ReferenceTypeId_i = browse_treatment_context__p_referenceType;
-   browse_treatment_context__in_BrowseValue_IncludeSubtypes_i = browse_treatment_context__p_includeSubtypes;
-   browse_treatment_context__in_BrowseValue_NodeClassMask_i = browse_treatment_context__p_nodeClassMask;
-   browse_treatment_context__in_BrowseValue_ResultMask_i = browse_treatment_context__p_resultMask;
-   browse_treatment_context__isBrowseValueContextDefined_i = true;
+   const constants__t_BrowseResultMask_i browse_treatment_context__p_resultMask,
+   constants_statuscodes_bs__t_StatusCode_i * const browse_treatment_context__p_service_StatusCode) {
+   {
+      t_bool browse_treatment_context__l_bresView;
+      constants__t_NodeId_i browse_treatment_context__l_browseView;
+      t_bool browse_treatment_context__l_bresSrc;
+      constants__t_NodeId_i browse_treatment_context__l_srcNodeId;
+      t_bool browse_treatment_context__l_bresRef;
+      constants__t_NodeId_i browse_treatment_context__l_refTypeId;
+      
+      node_id_pointer_bs__copy_node_id_pointer_content(browse_treatment_context__p_browseView,
+         &browse_treatment_context__l_bresView,
+         &browse_treatment_context__l_browseView);
+      node_id_pointer_bs__copy_node_id_pointer_content(browse_treatment_context__p_nodeId,
+         &browse_treatment_context__l_bresSrc,
+         &browse_treatment_context__l_srcNodeId);
+      node_id_pointer_bs__copy_node_id_pointer_content(browse_treatment_context__p_referenceType,
+         &browse_treatment_context__l_bresRef,
+         &browse_treatment_context__l_refTypeId);
+      if (((browse_treatment_context__l_bresView == true) &&
+         (browse_treatment_context__l_bresSrc == true)) &&
+         (browse_treatment_context__l_bresRef == true)) {
+         *browse_treatment_context__p_service_StatusCode = constants_statuscodes_bs__e_sc_ok;
+         browse_treatment_context__in_startIndex_i = browse_treatment_context__p_startIndex;
+         browse_treatment_context__in_session_i = browse_treatment_context__p_session;
+         browse_treatment_context__in_maxReferencesPerNode_i = browse_treatment_context__p_maxTargetRef;
+         browse_treatment_context__in_BrowseView_i = browse_treatment_context__l_browseView;
+         browse_treatment_context__in_BrowseValue_NodeId_i = browse_treatment_context__l_srcNodeId;
+         browse_treatment_context__in_BrowseValue_BrowseDirection_i = browse_treatment_context__p_browseDirection;
+         browse_treatment_context__in_BrowseValue_ReferenceTypeId_i = browse_treatment_context__l_refTypeId;
+         browse_treatment_context__in_BrowseValue_IncludeSubtypes_i = browse_treatment_context__p_includeSubtypes;
+         browse_treatment_context__in_BrowseValue_NodeClassMask_i = browse_treatment_context__p_nodeClassMask;
+         browse_treatment_context__in_BrowseValue_ResultMask_i = browse_treatment_context__p_resultMask;
+         browse_treatment_context__isBrowseValueContextDefined_i = true;
+      }
+      else {
+         *browse_treatment_context__p_service_StatusCode = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+         browse_treatment_context__local_clear_browse_value_context();
+      }
+   }
 }
 
 void browse_treatment_context__getall_browse_value_context(
@@ -130,16 +175,6 @@ void browse_treatment_context__is_NodeClass_in_NodeClassMask(
 }
 
 void browse_treatment_context__clear_browse_value_context(void) {
-   browse_treatment_context__in_startIndex_i = 0;
-   browse_treatment_context__in_session_i = constants__c_session_indet;
-   browse_treatment_context__in_maxReferencesPerNode_i = 0;
-   browse_treatment_context__in_BrowseView_i = constants__c_NodeId_indet;
-   browse_treatment_context__in_BrowseValue_NodeId_i = constants__c_NodeId_indet;
-   browse_treatment_context__in_BrowseValue_BrowseDirection_i = constants__e_bd_indet;
-   browse_treatment_context__in_BrowseValue_ReferenceTypeId_i = constants__c_NodeId_indet;
-   browse_treatment_context__in_BrowseValue_IncludeSubtypes_i = false;
-   browse_treatment_context__in_BrowseValue_NodeClassMask_i = constants__c_BrowseNodeClassMask_indet;
-   browse_treatment_context__in_BrowseValue_ResultMask_i = constants__c_BrowseResultMask_indet;
-   browse_treatment_context__isBrowseValueContextDefined_i = false;
+   browse_treatment_context__local_clear_browse_value_context();
 }
 

@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment_continuation_points_bs.h
 
- Date                 : 15/04/2019 16:44:20
+ Date                 : 13/06/2019 16:16:07
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -48,6 +48,8 @@ extern void browse_treatment_continuation_points_bs__INITIALISATION(void);
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+extern void browse_treatment_continuation_points_bs__clear_continuation_point(
+   const constants__t_ContinuationPoint_i browse_treatment_continuation_points_bs__p_continuationPoint);
 extern void browse_treatment_continuation_points_bs__create_continuation_point_bs(
    const t_entier4 browse_treatment_continuation_points_bs__p_nextIndex,
    const t_entier4 browse_treatment_continuation_points_bs__p_maxTargetRef,
@@ -63,7 +65,7 @@ extern void browse_treatment_continuation_points_bs__create_continuation_point_b
 extern void browse_treatment_continuation_points_bs__get_continuation_point_id(
    const constants__t_ContinuationPoint_i browse_treatment_continuation_points_bs__p_continuationPoint,
    constants__t_ContinuationPointId_i * const browse_treatment_continuation_points_bs__p_continuationPointId);
-extern void browse_treatment_continuation_points_bs__getall_continuation_point(
+extern void browse_treatment_continuation_points_bs__getall_continuation_point_bs(
    const constants__t_ContinuationPoint_i browse_treatment_continuation_points_bs__p_ContinuationPoint,
    t_entier4 * const browse_treatment_continuation_points_bs__p_nextIndex,
    t_entier4 * const browse_treatment_continuation_points_bs__p_maxTargetRef,

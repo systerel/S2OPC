@@ -23,6 +23,18 @@ MACHINE
 SEES
     constants
 
+ABSTRACT_VARIABLES
+    s_ContinuationPoints,
+    id_ContinuationPoint
+
+INVARIANT
+    s_ContinuationPoints <: t_ContinuationPoint &
+    id_ContinuationPoint : s_ContinuationPoints >-> t_ContinuationPointId
+
+INITIALISATION
+    s_ContinuationPoints :: {} ||
+    id_ContinuationPoint :: {}
+
 OPERATIONS
     bres, p_ContinuationPoint <-- create_continuation_point_bs (p_nextIndex, p_maxTargetRef, p_browseView,
                                                                 p_nodeId, p_browseDirection, p_referenceType, p_includeSubtypes,
@@ -43,17 +55,30 @@ OPERATIONS
         p_nodeClassMask : t_BrowseNodeClassMask_i   &
         p_resultMask : t_BrowseResultMask_i
     THEN
-        bres :: BOOL ||
-        p_ContinuationPoint :: t_ContinuationPoint_i
+        /* No continuation point shall be defined for given session to create a new one */
+        bres := bool(s_ContinuationPoints /= t_ContinuationPoint) ||
+        IF s_ContinuationPoints /= t_ContinuationPoint
+        THEN
+            ANY l_ContinuationPoint, l_continuationPointId WHERE
+                l_ContinuationPoint : t_ContinuationPoint - s_ContinuationPoints &
+                l_continuationPointId : t_ContinuationPointId - ran(id_ContinuationPoint)
+            THEN
+                p_ContinuationPoint :(p_ContinuationPoint : t_ContinuationPoint_i & p_ContinuationPoint = l_ContinuationPoint) ||
+                s_ContinuationPoints := s_ContinuationPoints \/ {l_ContinuationPoint} ||
+                id_ContinuationPoint(l_ContinuationPoint) := l_continuationPointId
+            END
+        ELSE
+            p_ContinuationPoint := c_ContinuationPoint_indet
+        END
     END
     ;
 
     p_nextIndex, p_maxTargetRef, p_browseView, p_nodeId,
     p_browseDirection, p_referenceType, p_includeSubtypes, p_nodeClassMask, p_resultMask
-      <-- getall_continuation_point (p_ContinuationPoint) =
+      <-- getall_continuation_point_bs (p_ContinuationPoint) =
     PRE
         p_ContinuationPoint : t_ContinuationPoint_i &
-        p_ContinuationPoint : t_ContinuationPoint
+        p_ContinuationPoint : s_ContinuationPoints
     THEN
         p_nextIndex, p_maxTargetRef, p_browseView, p_nodeId,
         p_browseDirection, p_referenceType, p_includeSubtypes,
@@ -78,11 +103,25 @@ OPERATIONS
     p_continuationPointId <-- get_continuation_point_id(p_continuationPoint) =
     PRE
         p_continuationPoint : t_ContinuationPoint_i &
-        p_continuationPoint : t_ContinuationPoint
+        p_continuationPoint : s_ContinuationPoints
     THEN
         p_continuationPointId
         :(p_continuationPointId : t_ContinuationPointId_i &
-          p_continuationPointId : t_ContinuationPointId)
+          p_continuationPointId = id_ContinuationPoint(p_continuationPoint))
+    END
+    ;
+
+    clear_continuation_point(p_continuationPoint) =
+    PRE
+        p_continuationPoint : t_ContinuationPoint_i
+    THEN
+        IF p_continuationPoint : s_ContinuationPoints THEN
+            s_ContinuationPoints, id_ContinuationPoint
+            :(
+                s_ContinuationPoints = s_ContinuationPoints$0 - {p_continuationPoint} &
+                id_ContinuationPoint = id_ContinuationPoint$0 - {p_continuationPoint |-> id_ContinuationPoint$0(p_continuationPoint)}
+            )
+        END
     END
 
 END

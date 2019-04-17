@@ -228,20 +228,20 @@ OPERATIONS
           <-- getall_BrowseValue(p_req_msg, p_bvi);
         IF l_dir /= e_bd_indet THEN
             IF  l_SrcNodeId /= c_NodeId_indet THEN
-                set_browse_value_context(p_session, p_nb_target_max, p_nid_view,
-                                         l_SrcNodeId, l_dir, l_reftype, l_incsubtyp, l_nodeClassMask, l_resultMask);
-                l_serviceStatusCode, l_continuationPointId, l_nbTargets <-- compute_browse_result;
-                clear_browse_value_context;
-                set_ResponseBrowse_BrowseStatus(p_resp_msg, p_bvi, l_serviceStatusCode);
-                IF l_serviceStatusCode = e_sc_ok or l_serviceStatusCode = e_sc_bad_no_continuation_points THEN
-                    l_nbTargets, l_browseResult <-- getall_and_move_browse_result;
-                    set_ResponseBrowse_BrowseResult(p_resp_msg, p_bvi, l_nbTargets, l_browseResult);
-
-                    IF l_continuationPointId /= c_ContinuationPointId_indet THEN
-                        /* If a continuation point is defined, add it to response */
+                l_serviceStatusCode <-- set_browse_value_context(p_session, p_nb_target_max, p_nid_view,
+                                                                 l_SrcNodeId, l_dir, l_reftype, l_incsubtyp,
+                                                                 l_nodeClassMask, l_resultMask);
+                IF l_serviceStatusCode = e_sc_ok THEN
+                    l_serviceStatusCode, l_continuationPointId, l_nbTargets <-- compute_browse_result;
+                    clear_browse_value_context;
+                    IF l_serviceStatusCode = e_sc_ok or l_serviceStatusCode = e_sc_bad_no_continuation_points THEN
+                        l_nbTargets, l_browseResult <-- getall_and_move_browse_result;
+                        set_ResponseBrowse_BrowseResult(p_resp_msg, p_bvi, l_nbTargets, l_browseResult);
+                        // Continuation is either indet or defined
                         set_ResponseBrowse_ContinuationPoint(p_resp_msg, p_bvi, l_continuationPointId)
                     END
-                END
+                END;
+                set_ResponseBrowse_BrowseStatus(p_resp_msg, p_bvi, l_serviceStatusCode)
             ELSE
                 set_ResponseBrowse_BrowseStatus(p_resp_msg, p_bvi, e_sc_bad_node_id_invalid)
             END

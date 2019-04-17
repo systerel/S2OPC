@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.h
 
- Date                 : 09/04/2019 12:10:32
+ Date                 : 13/06/2019 14:23:18
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -40,6 +40,7 @@
   -----------------*/
 #include "channel_mgr.h"
 #include "data_value_pointer_bs.h"
+#include "node_id_pointer_bs.h"
 #include "service_mgr.h"
 #include "write_value_pointer_bs.h"
 

@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment_context.h
 
- Date                 : 12/04/2019 10:12:12
+ Date                 : 13/06/2019 14:23:14
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -44,6 +44,8 @@
    SEES Clause
   --------------*/
 #include "constants.h"
+#include "constants_statuscodes_bs.h"
+#include "node_id_pointer_bs.h"
 
 /*----------------------------
    CONCRETE_VARIABLES Clause
@@ -64,6 +66,11 @@ extern t_bool browse_treatment_context__isBrowseValueContextDefined_i;
    INITIALISATION Clause
   ------------------------*/
 extern void browse_treatment_context__INITIALISATION(void);
+
+/*--------------------------
+   LOCAL_OPERATIONS Clause
+  --------------------------*/
+extern void browse_treatment_context__local_clear_browse_value_context(void);
 
 /*--------------------
    OPERATIONS Clause
@@ -94,6 +101,7 @@ extern void browse_treatment_context__setall_browse_value_context(
    const constants__t_NodeId_i browse_treatment_context__p_referenceType,
    const t_bool browse_treatment_context__p_includeSubtypes,
    const constants__t_BrowseNodeClassMask_i browse_treatment_context__p_nodeClassMask,
-   const constants__t_BrowseResultMask_i browse_treatment_context__p_resultMask);
+   const constants__t_BrowseResultMask_i browse_treatment_context__p_resultMask,
+   constants_statuscodes_bs__t_StatusCode_i * const browse_treatment_context__p_service_StatusCode);
 
 #endif

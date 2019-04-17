@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment.c
 
- Date                 : 11/06/2019 16:39:01
+ Date                 : 13/06/2019 16:15:50
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -294,7 +294,8 @@ void browse_treatment__set_browse_value_context(
    const constants__t_NodeId_i browse_treatment__p_referenceType,
    const t_bool browse_treatment__p_includeSubtypes,
    const constants__t_BrowseNodeClassMask_i browse_treatment__p_nodeClassMask,
-   const constants__t_BrowseResultMask_i browse_treatment__p_resultMask) {
+   const constants__t_BrowseResultMask_i browse_treatment__p_resultMask,
+   constants_statuscodes_bs__t_StatusCode_i * const browse_treatment__p_service_StatusCode) {
    browse_treatment_context__setall_browse_value_context(1,
       browse_treatment__p_session,
       browse_treatment__p_maxTargetRef,
@@ -304,7 +305,8 @@ void browse_treatment__set_browse_value_context(
       browse_treatment__p_referenceType,
       browse_treatment__p_includeSubtypes,
       browse_treatment__p_nodeClassMask,
-      browse_treatment__p_resultMask);
+      browse_treatment__p_resultMask,
+      browse_treatment__p_service_StatusCode);
 }
 
 void browse_treatment__set_browse_value_context_from_continuation_point(
@@ -324,7 +326,7 @@ void browse_treatment__set_browse_value_context_from_continuation_point(
       constants__t_BrowseResultMask_i browse_treatment__l_resultMask;
       
       *browse_treatment__p_service_StatusCode = constants_statuscodes_bs__e_sc_bad_continuation_point_invalid;
-      browse_treatment_continuation_points__getall_and_clear_continuation_point(browse_treatment__p_session,
+      browse_treatment_continuation_points__getall_continuation_point(browse_treatment__p_session,
          browse_treatment__p_continuationPointId,
          &browse_treatment__l_res,
          &browse_treatment__l_nextIndex,
@@ -346,8 +348,13 @@ void browse_treatment__set_browse_value_context_from_continuation_point(
             browse_treatment__l_referenceType,
             browse_treatment__l_includeSubtypes,
             browse_treatment__l_nodeClassMask,
-            browse_treatment__l_resultMask);
-         *browse_treatment__p_service_StatusCode = constants_statuscodes_bs__e_sc_ok;
+            browse_treatment__l_resultMask,
+            browse_treatment__p_service_StatusCode);
+         if (*browse_treatment__p_service_StatusCode == constants_statuscodes_bs__e_sc_ok) {
+            browse_treatment_continuation_points__release_continuation_point(browse_treatment__p_session,
+               browse_treatment__p_continuationPointId,
+               &browse_treatment__l_res);
+         }
       }
    }
 }
