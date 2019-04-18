@@ -16,8 +16,14 @@ test on one or more specific corpus items, to analyze a crash or to make
 coverage reports. The LibFuzzer binaries have a name ending with `.libfuzzer`,
 while the standalone ones have a name ending with `.standalone`.
 
-Compiling fuzzing tests against LibFuzzer requires CLang 6.0 or higher. Other
-fuzzing engines like AFL have not been investigated yet.
+Compiling fuzzing tests against libFuzzer requires CLang 6.0 or higher (libFuzzer is embedded in CLang starting from 6.0.0).
+Other fuzzing engines like AFL have not been investigated yet.
+
+Once a some corpus has been made with representative test cases,
+the goal is to use OSS-Fuzz, the continuous Fuzzing for Open Source Software.
+
+
+# libFuzzer (local or in docker check)
 
 ## Running fuzzing tests
 
@@ -29,12 +35,12 @@ fuzzing corpus actually covers). From the source directory, run:
 mkdir build.san build.cov
 
 cd build.san && \
-CC=clang cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DWITH_ASAN=1 -DWITH_UBSAN=1 .. && \
+CC=clang cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DWITH_ASAN=1 -DWITH_UBSAN=1 ../../.. && \
 make && \
 cd ..
 
 cd build.cov && \
-CC=clang cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DWITH_CLANG_SOURCE_COVERAGE=1 .. && \
+CC=clang cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DWITH_CLANG_SOURCE_COVERAGE=1 ../../.. && \
 make && \
 cd ..
 ```
@@ -88,3 +94,82 @@ The following links give valuable information about LibFuzzer etc:
 - https://llvm.org/docs/LibFuzzer.html
 - https://github.com/google/fuzzer-test-suite/blob/master/tutorial/libFuzzerTutorial.md
 - https://llvm.org/docs/CommandGuide/llvm-cov.html
+
+
+# OSS-Fuzz (distributed)
+
+Most of this section has been written from the online documentation of [OSS-Fuzz](https://github.com/google/oss-fuzz).
+Overview of the process to use OSS-Fuzz:
+
+- Prepare fuzz targets: the functions/scenarios that are tested, their compilation, and the test corpus.
+  This work is done in the S2OPC repository.
+- Configure OSS-Fuzz to fuzz our fuzz targets.
+  OSS-Fuzz builds a docker with a clone of our current sources, its compilers and their options, and its fuzz libraries,
+  then distributes the binaries, then runs it (on another docker), then informs us of the results, then repeat.
+  There is a `build.sh` script that runs in the docker to build our sources.
+  These files are in the OSS-Fuzz repository.
+  Don't forget copyright headers.
+  Wait before sending a pull request.
+- Test locally: we can build and run the same docker, so do it.
+  OSS-Fuzz has helpers for that too.
+- Push and wait for the fuzzers to run.
+- Fetch back the new corpus.
+
+
+## Configure S²OPC
+
+- Identify functions to be tested.
+  The fuzzer calls the function `int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size)`.
+  The fuzzer gives an input buffer and its size.
+  The `LLVMFuzzerTestOneInput` use it as a test input.
+  The fuzzer changes something in the input, and checks whether new parts of the code is covered by the input.
+  It keeps doing so, until something breaks.
+- The tested code should be fast (runs ~ 1000Hz).
+- Make a binary with a `LLVMFuzzerTestOneInput()` implementation for each of the tested features.
+  To be homogeneous, this binary should be built with a rule suffixed by `_fuzzer`.
+- Important: things are running in `/out/` in the docker,
+  and it is [read-only](https://github.com/google/oss-fuzz/blob/master/docs/fuzzer_environment.md#file-system).
+  But `/tmp/` is writable.
+- Important: only link statically, as the build docker that we create with OSS-Fuzz is not the docker that will run our targets.
+- Build a corpus: identify different base inputs that are valid inputs for the fuzzed functions.
+  These inputs are just files.
+  TODO: document how to fuzz locally using the test build docker images built in the next section.
+- Important: the corpus may not reside on the S²OPC repository,
+  but in the configuration phase of OSS-Fuzz, the `build.sh` script must be able to access them.
+  So it may reside in another git.
+
+
+## Configure OSS-Fuzz
+
+This is done in the OSS-Fuzz repository, in `projects/s2opc`.
+
+- Add a `project.yaml` to oss-fuzz repo
+  ([initial pull request](https://github.com/google/oss-fuzz/pull/2133),
+  [doc](https://github.com/google/oss-fuzz/blob/master/docs/new_project_guide.md#projectyaml)).
+
+    - Set who we are,
+    - Choose sanitizers.
+
+- Add a `Dockerfile`: clone our sources, install our build dependencies.
+  This docker is dedicated to build our sources.
+  Binaries will not run on this one.
+  Add copyright header.
+- Add a `build.sh`.
+  This one can clone and build our dependencies.
+  It calls everything required and put fuzz targets in `$OUT`.
+  This includes preparing the corpus as a `.zip`.
+  Add copyright header.
+- There should not be anything else here, as sources of the fuzz targets are in the S2OPC repository.
+- [Test it locally](https://github.com/google/oss-fuzz/blob/master/docs/new_project_guide.md#testing-locally) before pushing it.
+- Make a pull request (or repoen an existing one?) and push it to OSS-Fuzz.
+
+
+## Fetch the new corpus
+
+As the fuzzer explores new test case, it expands the input corpus.
+We can [get it](https://github.com/google/oss-fuzz/blob/master/docs/corpora.md).
+It can then be merged to reduce its size, and added to our own corpus.
+It requires a Google account that is mentioned in our `project.yaml`.
+
+
+[modeline]: # ( vim: set syntax=markdown spell spelllang=en: )
