@@ -53,7 +53,34 @@ LOCAL_OPERATIONS
         p_nb_target_max <= k_n_BrowseTarget_max &
         p_nb_browse_value : NAT
     THEN
-        StatusCode_service :: {e_sc_ok, e_sc_bad_out_of_memory, e_sc_bad_nothing_to_do, e_sc_bad_too_many_ops, e_sc_bad_view_id_unknown}
+        StatusCode_service,
+        ResponseBrowse_BrowseStatus,
+        ResponseBrowse_ContinuationPoint,
+        ResponseBrowse_ResultReferences,
+        isBrowseResponseAllocated
+        :(
+            ResponseBrowse_BrowseStatus        : t_BrowseValue +-> t_StatusCode        &
+            ResponseBrowse_ContinuationPoint   : t_BrowseValue +-> t_ContinuationPoint_i &
+            ResponseBrowse_ResultReferences    : t_BrowseValue +-> t_BrowseResultReferences &
+            isBrowseResponseAllocated : BOOL &
+
+            StatusCode_service : {e_sc_ok, e_sc_bad_out_of_memory, e_sc_bad_nothing_to_do, e_sc_bad_too_many_ops, e_sc_bad_view_id_unknown} &
+
+            (StatusCode_service = e_sc_ok =>
+                isBrowseResponseAllocated = TRUE &
+                ResponseBrowse_BrowseStatus : cast_t_BrowseValue[1..p_nb_browse_value] --> t_StatusCode &
+                !p_index.(p_index : cast_t_BrowseValue[1..p_nb_browse_value] & ResponseBrowse_BrowseStatus(p_index) = e_sc_ok =>
+                            p_index : dom(ResponseBrowse_ContinuationPoint) &
+                            p_index : dom(ResponseBrowse_ResultReferences)
+                ) &
+                !p_index.(p_index : cast_t_BrowseValue[1..p_nb_browse_value] & ResponseBrowse_BrowseStatus(p_index) /= e_sc_ok =>
+                    p_index /: dom(ResponseBrowse_ContinuationPoint) &
+                    p_index /: dom(ResponseBrowse_ResultReferences)
+                )
+
+            ) &
+            (StatusCode_service /= e_sc_ok => isBrowseResponseAllocated = FALSE)
+        )
     END
     ;
 
@@ -77,9 +104,30 @@ LOCAL_OPERATIONS
         p_nb_target_max <= k_n_BrowseTarget_max &
 
         p_bvi           : t_BrowseValue_i &
-        p_bvi           : t_BrowseValue
+        p_bvi           : t_BrowseValue &
+        p_bvi           : cast_t_BrowseValue[1..RequestBrowse_nb_BrowseValue]
     THEN
-        skip
+        /* Note: we do not have access to the browse_treatment variables,
+                 only operation result are forwarded by translate browse path machines */
+        ResponseBrowse_BrowseStatus,
+        ResponseBrowse_ContinuationPoint,
+        ResponseBrowse_ResultReferences
+        :(
+            {p_bvi} <<| ResponseBrowse_BrowseStatus = {p_bvi} <<| ResponseBrowse_BrowseStatus$0 &
+            {p_bvi} <<| ResponseBrowse_ResultReferences = {p_bvi} <<| ResponseBrowse_ResultReferences$0 &
+            {p_bvi} <<| ResponseBrowse_ContinuationPoint = {p_bvi} <<| ResponseBrowse_ContinuationPoint$0 &
+
+            ResponseBrowse_BrowseStatus(p_bvi) : t_StatusCode &
+            ((ResponseBrowse_BrowseStatus(p_bvi) = e_sc_ok or
+              ResponseBrowse_BrowseStatus(p_bvi) = e_sc_bad_no_continuation_points) =>
+                p_bvi : dom(ResponseBrowse_ResultReferences) & // Result is defined
+                p_bvi : dom(ResponseBrowse_ContinuationPoint) &// Continuation is either indet or defined
+              not (ResponseBrowse_BrowseStatus(p_bvi) = e_sc_ok or
+                   ResponseBrowse_BrowseStatus(p_bvi) = e_sc_bad_no_continuation_points) =>
+                p_bvi /: dom(ResponseBrowse_ResultReferences) &
+                p_bvi /: dom(ResponseBrowse_ContinuationPoint)
+            )
+        )
     END
 
 OPERATIONS
