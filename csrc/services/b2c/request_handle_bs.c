@@ -61,7 +61,10 @@ void request_handle_bs__client_validate_response_request_handle(
     const constants__t_msg_type_i request_handle_bs__resp_typ,
     t_bool* const request_handle_bs__ret)
 {
-    if ((client_requests_context[request_handle_bs__req_handle].response == request_handle_bs__resp_typ ||
+    bool isvalid = false;
+    request_handle_bs__is_valid_req_handle(request_handle_bs__req_handle, &isvalid);
+    if (isvalid &&
+        (client_requests_context[request_handle_bs__req_handle].response == request_handle_bs__resp_typ ||
          constants__e_msg_service_fault_resp == request_handle_bs__resp_typ) &&
         client_requests_channel[request_handle_bs__req_handle] == request_handle_bs__channel)
     {
@@ -148,7 +151,13 @@ void request_handle_bs__get_req_handle_app_context(
 void request_handle_bs__get_req_handle_channel(const constants__t_client_request_handle_i request_handle_bs__req_handle,
                                                constants__t_channel_i* const request_handle_bs__channel)
 {
-    *request_handle_bs__channel = client_requests_channel[request_handle_bs__req_handle];
+    *request_handle_bs__channel = constants__c_channel_indet;
+    bool isvalid = false;
+    request_handle_bs__is_valid_req_handle(request_handle_bs__req_handle, &isvalid);
+    if (isvalid)
+    {
+        *request_handle_bs__channel = client_requests_channel[request_handle_bs__req_handle];
+    }
 }
 
 void request_handle_bs__client_remove_req_handle(

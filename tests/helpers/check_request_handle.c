@@ -64,15 +64,18 @@ START_TEST(test_request_handle_bs)
                                                                    &is_valid);
         ck_assert_int_eq(true, is_valid);
 
+        /* Test an invalid channel with valid request handle */
         request_handle_bs__client_validate_response_request_handle(i + 1, i, constants__e_msg_session_create_resp,
                                                                    &is_valid);
         ck_assert_int_eq(false, is_valid);
 
+        /* Test an invalid request handle with valid channel */
         is_valid = true;
         request_handle_bs__client_validate_response_request_handle(i, i + 1, constants__e_msg_session_create_resp,
                                                                    &is_valid);
         ck_assert_int_eq(false, is_valid);
 
+        /* Test an valid request handle with valid channel but invalid response message type */
         is_valid = true;
         request_handle_bs__client_validate_response_request_handle(i, i, constants__e_msg_session_activate_resp,
                                                                    &is_valid);
