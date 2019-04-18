@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment.h
 
- Date                 : 11/04/2019 12:41:30
+ Date                 : 18/04/2019 13:46:32
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -63,7 +63,7 @@ extern void browse_treatment__INITIALISATION(void);
 #define browse_treatment__clear_browse_result browse_treatment_result_bs__clear_browse_result
 #define browse_treatment__clear_browse_value_context browse_treatment_context__clear_browse_value_context
 #define browse_treatment__continuation_points_UNINITIALISATION browse_treatment_continuation_points__continuation_points_UNINITIALISATION
-#define browse_treatment__getall_and_clear_browse_result browse_treatment_result_bs__getall_and_clear_browse_result
+#define browse_treatment__getall_and_move_browse_result browse_treatment_result_bs__getall_and_move_browse_result
 #define browse_treatment__getall_browse_result_reference_at browse_treatment_result_bs__getall_browse_result_reference_at
 #define browse_treatment__set_session_closed browse_treatment_continuation_points__set_session_closed
 

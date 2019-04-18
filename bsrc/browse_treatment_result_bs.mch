@@ -172,7 +172,7 @@ OPERATIONS
     END
     ;
 
-    p_nb_references, p_browseResult <-- getall_and_clear_browse_result =
+    p_nb_references, p_browseResult <-- getall_and_move_browse_result =
     PRE
         isBrowseResultAllocated = TRUE
     THEN

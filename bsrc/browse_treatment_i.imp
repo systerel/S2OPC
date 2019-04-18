@@ -34,7 +34,7 @@ PROMOTES
     set_session_closed,
     continuation_points_UNINITIALISATION,
     getall_browse_result_reference_at,
-    getall_and_clear_browse_result,
+    getall_and_move_browse_result,
     clear_browse_value_context,
     clear_browse_result
 

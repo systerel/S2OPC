@@ -63,6 +63,10 @@ void browse_treatment_result_bs__alloc_browse_result(const t_entier4 browse_trea
 
 void browse_treatment_result_bs__clear_browse_result(void)
 {
+    for (int32_t i = 0; i < nbReferences; i++)
+    {
+        OpcUa_ReferenceDescription_Clear(&references[i]);
+    }
     free(references);
     nbMaxReferences = 0;
 }
@@ -73,12 +77,14 @@ void browse_treatment_result_bs__get_browse_result_nb_references(
     *browse_treatment_result_bs__p_nb_references = nbReferences;
 }
 
-void browse_treatment_result_bs__getall_and_clear_browse_result(
+void browse_treatment_result_bs__getall_and_move_browse_result(
     t_entier4* const browse_treatment_result_bs__p_nb_references,
     constants__t_BrowseResultReferences_i* const browse_treatment_result_bs__p_browseResult)
 {
     *browse_treatment_result_bs__p_browseResult = references;
     *browse_treatment_result_bs__p_nb_references = nbReferences;
+    references = NULL;
+    nbReferences = 0;
     nbMaxReferences = 0;
 }
 

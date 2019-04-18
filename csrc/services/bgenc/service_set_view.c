@@ -21,7 +21,7 @@
 
  File Name            : service_set_view.c
 
- Date                 : 10/04/2019 17:16:12
+ Date                 : 18/04/2019 13:46:40
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -88,7 +88,7 @@ void service_set_view__treat_browse_request_BrowseValue_1(
                msg_browse_bs__set_ResponseBrowse_ContinuationPoint(service_set_view__p_resp_msg,
                   service_set_view__p_bvi,
                   service_set_view__l_continuationPoint);
-               browse_treatment__getall_and_clear_browse_result(&service_set_view__l_nbTargets,
+               browse_treatment__getall_and_move_browse_result(&service_set_view__l_nbTargets,
                   &service_set_view__l_browseResult);
                msg_browse_bs__set_ResponseBrowse_BrowseResult(service_set_view__p_resp_msg,
                   service_set_view__p_bvi,

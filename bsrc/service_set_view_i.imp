@@ -116,7 +116,7 @@ OPERATIONS
                 IF l_serviceStatusCode = e_sc_ok or l_serviceStatusCode = e_sc_bad_no_continuation_points THEN
                     /* Note: result is defined even if there is no continuation point to give the rest later */
                     set_ResponseBrowse_ContinuationPoint(p_resp_msg, p_bvi, l_continuationPoint);
-                    l_nbTargets, l_browseResult <-- getall_and_clear_browse_result;
+                    l_nbTargets, l_browseResult <-- getall_and_move_browse_result;
                     set_ResponseBrowse_BrowseResult(p_resp_msg, p_bvi, l_nbTargets, l_browseResult)
                 END
             ELSE
