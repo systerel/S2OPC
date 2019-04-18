@@ -21,7 +21,7 @@
 
  File Name            : service_set_view.c
 
- Date                 : 13/06/2019 16:52:34
+ Date                 : 13/06/2019 16:59:56
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -195,15 +195,13 @@ void service_set_view__treat_browse_next_request_BrowseContinuationPoint_1(
             (service_set_view__l_statusCode == constants_statuscodes_bs__e_sc_bad_no_continuation_points)) {
             browse_treatment__getall_and_move_browse_result(&service_set_view__l_nbTargets,
                &service_set_view__l_browseResult);
-            msg_browse_bs__set_ResponseBrowse_BrowseResult(service_set_view__p_resp_msg,
+            msg_browse_next_bs__set_ResponseBrowseNext_BrowseResult(service_set_view__p_resp_msg,
                service_set_view__p_cpi,
                service_set_view__l_nbTargets,
                service_set_view__l_browseResult);
-            if (service_set_view__l_continuationPointId != constants__c_ContinuationPointId_indet) {
-               msg_browse_next_bs__set_ResponseBrowseNext_ContinuationPoint(service_set_view__p_resp_msg,
-                  service_set_view__p_cpi,
-                  service_set_view__l_continuationPointId);
-            }
+            msg_browse_next_bs__set_ResponseBrowseNext_ContinuationPoint(service_set_view__p_resp_msg,
+               service_set_view__p_cpi,
+               service_set_view__l_continuationPointId);
          }
       }
       msg_browse_next_bs__set_ResponseBrowseNext_BrowseStatus(service_set_view__p_resp_msg,

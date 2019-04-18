@@ -305,13 +305,19 @@ OPERATIONS
         p_session : t_session
     THEN
         /* De-associate and de-activate the continuation point associated with session */
-        session_ContinuationPoint := session_ContinuationPoint |>> {p_session}
+        session_ContinuationPoint := session_ContinuationPoint |>> {p_session} ||
+        IF p_session : ran(session_ContinuationPoint) THEN
+            s_ContinuationPoints := s_ContinuationPoints - {session_ContinuationPoint~(p_session)} ||
+            id_ContinuationPoint := {session_ContinuationPoint~(p_session)} <<| id_ContinuationPoint
+        END
     END
     ;
 
     continuation_points_UNINITIALISATION =
     BEGIN
-        session_ContinuationPoint :: {}
+        s_ContinuationPoints :: {} ||
+        session_ContinuationPoint :: {} ||
+        id_ContinuationPoint :: {}
     END
     ;
 

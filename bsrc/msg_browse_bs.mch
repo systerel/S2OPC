@@ -223,7 +223,6 @@ OPERATIONS
         p_bvi : t_BrowseValue_i &
         p_bvi : t_BrowseValue   &
         p_continuationPointId : t_ContinuationPointId_i   &
-        p_continuationPointId : t_ContinuationPointId &
         ResponseBrowse = p_resp_msg
     THEN
         ResponseBrowse_ContinuationPoint(p_bvi) := p_continuationPointId

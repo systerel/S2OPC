@@ -132,6 +132,7 @@ LOCAL_OPERATIONS
 
     treat_browse_next_request_BrowseContinuationPoint_1(p_session, p_req_msg, p_resp_msg, p_cpi) =
     PRE
+        RequestBrowseNext_ReleaseContinuationPoints = FALSE &
         RequestBrowse_nb_BrowseValue > 0 &
         RequestBrowse_nb_BrowseValue <= k_n_BrowseResponse_max &
 
@@ -139,42 +140,66 @@ LOCAL_OPERATIONS
         p_req_msg : t_msg_i &
         p_req_msg : t_msg &
         p_req_msg = c_msg_in &
-        a_msg_in_type = e_msg_view_browse_req &
+        a_msg_in_type = e_msg_view_browse_next_req &
         p_resp_msg : t_msg_i &
         p_resp_msg : t_msg &
         p_resp_msg = c_msg_out &
-        a_msg_out_type = e_msg_view_browse_resp &
+        a_msg_out_type = e_msg_view_browse_next_resp &
 
         p_cpi       : t_BrowseValue_i &
         p_cpi       : t_BrowseValue &
         p_cpi       : cast_t_BrowseValue[1..RequestBrowseNext_nb_ContinuationPoints]
     THEN
-        /* TODO: modified variables ? */
-        skip
+        /* Note: we do not have access to the browse_treatment variables,
+                 only operation result are forwarded by translate browse path machines */
+        ResponseBrowseNext_BrowseStatus,
+        ResponseBrowseNext_ContinuationPoint,
+        ResponseBrowseNext_ResultReferences
+        :(
+            {p_cpi} <<| ResponseBrowseNext_BrowseStatus = {p_cpi} <<| ResponseBrowseNext_BrowseStatus$0 &
+            {p_cpi} <<| ResponseBrowseNext_ResultReferences = {p_cpi} <<| ResponseBrowseNext_ResultReferences$0 &
+            {p_cpi} <<| ResponseBrowseNext_ContinuationPoint = {p_cpi} <<| ResponseBrowseNext_ContinuationPoint$0 &
+
+            ResponseBrowseNext_BrowseStatus(p_cpi) : t_StatusCode &
+            (ResponseBrowseNext_BrowseStatus(p_cpi) = e_sc_ok =>
+                p_cpi : dom(ResponseBrowseNext_ResultReferences) & // Result is defined
+                p_cpi : dom(ResponseBrowseNext_ContinuationPoint) // Continuation is either indet or defined
+            ) &
+            (ResponseBrowseNext_BrowseStatus(p_cpi) /= e_sc_ok =>
+                p_cpi /: dom(ResponseBrowseNext_ResultReferences) &
+                p_cpi /: dom(ResponseBrowseNext_ContinuationPoint)
+            )
+        )
     END
     ;
 
     treat_browse_next_request_ReleaseContinuationPoint_1(p_session, p_req_msg, p_resp_msg, p_cpi) =
     PRE
-        RequestBrowse_nb_BrowseValue > 0 &
-        RequestBrowse_nb_BrowseValue <= k_n_BrowseResponse_max &
+        RequestBrowseNext_ReleaseContinuationPoints = TRUE &
+        RequestBrowseNext_nb_ContinuationPoints > 0 &
+        RequestBrowseNext_nb_ContinuationPoints <= k_n_BrowseResponse_max &
 
         p_session : t_session_i &
         p_req_msg : t_msg_i &
         p_req_msg : t_msg &
         p_req_msg = c_msg_in &
-        a_msg_in_type = e_msg_view_browse_req &
+        a_msg_in_type = e_msg_view_browse_next_req &
         p_resp_msg : t_msg_i &
         p_resp_msg : t_msg &
         p_resp_msg = c_msg_out &
-        a_msg_out_type = e_msg_view_browse_resp &
+        a_msg_out_type = e_msg_view_browse_next_resp &
 
         p_cpi       : t_BrowseValue_i &
         p_cpi       : t_BrowseValue &
         p_cpi       : cast_t_BrowseValue[1..RequestBrowseNext_nb_ContinuationPoints]
     THEN
-        /* TODO: modified variables ? */
-        skip
+        /* Note: we do not have access to the browse_treatment variables,
+                 only operation result are forwarded by translate browse path machines */
+        ResponseBrowseNext_BrowseStatus
+        :(
+            {p_cpi} <<| ResponseBrowseNext_BrowseStatus = {p_cpi} <<| ResponseBrowseNext_BrowseStatus$0 &
+            ResponseBrowseNext_BrowseStatus(p_cpi) : {e_sc_ok, e_sc_bad_continuation_point_invalid}
+        )
     END
     ;
 
@@ -195,8 +220,35 @@ LOCAL_OPERATIONS
         p_nbCP      : NAT &
         p_nbCP      = RequestBrowseNext_nb_ContinuationPoints
     THEN
-        /* TODO: modified variables */
-        StatusCode_service :: {e_sc_ok, e_sc_bad_out_of_memory, e_sc_bad_nothing_to_do, e_sc_bad_too_many_ops}
+        StatusCode_service,
+        ResponseBrowseNext_BrowseStatus,
+        ResponseBrowseNext_ContinuationPoint,
+        ResponseBrowseNext_ResultReferences,
+        isBrowseNextResponseAllocated
+        :(
+            ResponseBrowseNext_BrowseStatus        : t_BrowseValue +-> t_StatusCode        &
+            ResponseBrowseNext_ContinuationPoint   : t_BrowseValue +-> t_ContinuationPointId_i &
+            ResponseBrowseNext_ResultReferences    : t_BrowseValue +-> t_BrowseResultReferences &
+            isBrowseNextResponseAllocated : BOOL &
+
+            StatusCode_service : {e_sc_ok, e_sc_bad_out_of_memory, e_sc_bad_nothing_to_do, e_sc_bad_too_many_ops} &
+
+            (StatusCode_service = e_sc_ok =>
+                isBrowseNextResponseAllocated = TRUE &
+                ResponseBrowseNext_BrowseStatus : cast_t_BrowseValue[1..p_nbCP] --> t_StatusCode &
+                (p_releaseCP = FALSE =>
+                    !p_index.(p_index : cast_t_BrowseValue[1..p_nbCP] & ResponseBrowseNext_BrowseStatus(p_index) = e_sc_ok =>
+                                p_index : dom(ResponseBrowseNext_ContinuationPoint) &
+                                p_index : dom(ResponseBrowseNext_ResultReferences)
+                    ) &
+                    !p_index.(p_index : cast_t_BrowseValue[1..p_nbCP] & ResponseBrowseNext_BrowseStatus(p_index) /= e_sc_ok =>
+                                p_index /: dom(ResponseBrowseNext_ContinuationPoint) &
+                                p_index /: dom(ResponseBrowseNext_ResultReferences)
+                    )
+                )
+            ) &
+            (StatusCode_service /= e_sc_ok => isBrowseNextResponseAllocated = FALSE)
+        )
     END
 
 OPERATIONS
@@ -318,12 +370,9 @@ OPERATIONS
                 /* Since the precedent continuation point has been released, there is always a continuation point here */
                 IF l_statusCode = e_sc_ok or l_statusCode = e_sc_bad_no_continuation_points THEN
                     l_nbTargets, l_browseResult <-- getall_and_move_browse_result;
-                    set_ResponseBrowse_BrowseResult(p_resp_msg, p_cpi, l_nbTargets, l_browseResult);
-
-                    IF l_continuationPointId /= c_ContinuationPointId_indet THEN
-                        /* If a continuation point is defined, add it to response */
-                        set_ResponseBrowseNext_ContinuationPoint(p_resp_msg, p_cpi, l_continuationPointId)
-                    END
+                    set_ResponseBrowseNext_BrowseResult(p_resp_msg, p_cpi, l_nbTargets, l_browseResult);
+                    // Continuation is either indet or defined
+                    set_ResponseBrowseNext_ContinuationPoint(p_resp_msg, p_cpi, l_continuationPointId)
                 END
             END
         END
@@ -374,9 +423,8 @@ OPERATIONS
                     - Continuation point could be indet
                     - Result references count could be 0
                     */
-                    !p_index.(p_index : breqs_iterated &
-                        (ResponseBrowseNext_BrowseStatus(p_index) = e_sc_ok or
-                            ResponseBrowseNext_BrowseStatus(p_index) = e_sc_bad_no_continuation_points) =>
+                    !p_index.(p_index : breqs_iterated & p_releaseCP = FALSE &
+                        (ResponseBrowseNext_BrowseStatus(p_index) = e_sc_ok) =>
                         p_index : dom(ResponseBrowseNext_ContinuationPoint) &
                         p_index : dom(ResponseBrowseNext_ResultReferences)
                     )

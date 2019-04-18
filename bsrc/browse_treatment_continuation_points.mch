@@ -150,9 +150,11 @@ OPERATIONS
         p_session : t_session
     THEN
         /* De-associate and clear the continuation point associated with session */
-        s_ContinuationPoints := s_ContinuationPoints - {session_ContinuationPoint~(p_session)} ||
-        id_ContinuationPoint := {session_ContinuationPoint~(p_session)} <<| id_ContinuationPoint ||
-        session_ContinuationPoint := session_ContinuationPoint |>> {p_session}
+        session_ContinuationPoint := session_ContinuationPoint |>> {p_session} ||
+        IF p_session : ran(session_ContinuationPoint) THEN
+            s_ContinuationPoints := s_ContinuationPoints - {session_ContinuationPoint~(p_session)} ||
+            id_ContinuationPoint := {session_ContinuationPoint~(p_session)} <<| id_ContinuationPoint
+        END
     END
     ;
 

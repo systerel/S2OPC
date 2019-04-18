@@ -112,13 +112,15 @@ void msg_browse_next_bs__set_ResponseBrowseNext_ContinuationPoint(
     const constants__t_BrowseValue_i msg_browse_next_bs__p_bvi,
     const constants__t_ContinuationPointId_i msg_browse_next_bs__p_continuationPointId)
 {
-    assert(msg_browse_next_bs__p_continuationPointId != constants__c_ContinuationPointId_indet);
-    OpcUa_BrowseNextResponse* resp = msg_browse_next_bs__p_resp_msg;
-    // Note: msg_browse_next_bs__p_bvi : 1..N to be translated into C array index by adding (-1)
-    assert(msg_browse_next_bs__p_bvi > 0);
-    assert(msg_browse_next_bs__p_bvi <= resp->NoOfResults);
-    OpcUa_BrowseResult* res = &resp->Results[msg_browse_next_bs__p_bvi - 1];
-    SOPC_ReturnStatus status =
-        SOPC_ContinuationPointId_Encode(msg_browse_next_bs__p_continuationPointId, &res->ContinuationPoint);
-    assert(SOPC_STATUS_OK == status);
+    if (msg_browse_next_bs__p_continuationPointId != constants__c_ContinuationPointId_indet)
+    {
+        OpcUa_BrowseNextResponse* resp = msg_browse_next_bs__p_resp_msg;
+        // Note: msg_browse_next_bs__p_bvi : 1..N to be translated into C array index by adding (-1)
+        assert(msg_browse_next_bs__p_bvi > 0);
+        assert(msg_browse_next_bs__p_bvi <= resp->NoOfResults);
+        OpcUa_BrowseResult* res = &resp->Results[msg_browse_next_bs__p_bvi - 1];
+        SOPC_ReturnStatus status =
+            SOPC_ContinuationPointId_Encode(msg_browse_next_bs__p_continuationPointId, &res->ContinuationPoint);
+        assert(SOPC_STATUS_OK == status);
+    }
 }
