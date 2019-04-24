@@ -32,9 +32,7 @@
 
 int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
 {
-    assert(len <= UINT32_MAX);
-
-    if (len == 0)
+    if (len == 0 || len > UINT32_MAX)
     {
         return 0;
     }
@@ -82,7 +80,7 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
         }
     }
 
-    SC_CloseConnection(conn_idx, false);
+    SC_CloseConnection(conn_idx, true);
     SOPC_Buffer_Delete(chunkCtx->chunkInputBuffer);
     SOPC_Buffer_Delete(sopc_buffer);
 
