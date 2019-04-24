@@ -145,6 +145,13 @@ if(WARNINGS_AS_ERRORS)
 	endif()
 endif()
 
+option(WITH_OSS_FUZZ "Add the fuzzers target when building for OSS-Fuzz" OFF)
+if(WITH_OSS_FUZZ)
+  if(WITH_ASAN OR WITH_UBSAN OR WITH_TSAN OR WITH_COVERAGE OR WITH_COVERITY OR WITH_CLANG_SOURCE_COVERAGE OR WITH_CLANG_ANALYZER)
+    message(FATAL_ERROR "Advanced WITH_ options not available when building WITH_OSS_FUZZ")
+  endif()
+endif()
+
 # Re-enable asserts for Release and RelWithDebInfo builds
 string(REGEX REPLACE "[-/]DNDEBUG" "" CMAKE_C_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
 string(REGEX REPLACE "[-/]DNDEBUG" "" CMAKE_C_FLAGS_RELWITHDEBINFO ${CMAKE_C_FLAGS_RELWITHDEBINFO})
@@ -741,32 +748,52 @@ if (EXPAT_FOUND)
 endif()
 
 # Fuzzing
+set(FUZZING_PATH "tests/fuzzing")
+
+# Local Fuzzing
 function(s2opc_fuzzer name src_file)
 	set(standalone_target_name "${name}.standalone")
 	set(fuzz_target_name "${name}.libfuzzer")
 
-	add_executable(${standalone_target_name} "tests/fuzzing/${src_file}" "tests/fuzzing/standalone_fuzzer.c")
+	add_executable(${standalone_target_name} "${FUZZING_PATH}/${src_file}" "tests/fuzzing/standalone_fuzzer.c")
 	target_include_directories(${standalone_target_name} PRIVATE ${S2OPC_PUBLIC_INCLUDES} ${S2OPC_PRIVATE_INCLUDES})
 	target_link_libraries(${standalone_target_name} ${S2OPC_STATIC_LIB})
+	add_dependencies(fuzzers ${standalone_target_name})
 
-	add_executable(${fuzz_target_name} "tests/fuzzing/${src_file}")
+	add_executable(${fuzz_target_name} "${FUZZING_PATH}/${src_file}")
 	set_target_properties(${fuzz_target_name} PROPERTIES COMPILE_FLAGS "-fsanitize=fuzzer")
 	set_target_properties(${fuzz_target_name} PROPERTIES LINK_FLAGS "-fsanitize=fuzzer")
 	target_include_directories(${fuzz_target_name} PRIVATE ${S2OPC_PUBLIC_INCLUDES} ${S2OPC_PRIVATE_INCLUDES})
 	target_link_libraries(${fuzz_target_name} ${S2OPC_STATIC_LIB})
+	add_dependencies(fuzzers ${fuzz_target_name})
 endfunction()
 
-if ("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
+if (NOT WITH_OSS_FUZZ AND "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
 	if (${CMAKE_C_COMPILER_VERSION} VERSION_LESS "6.0.0")
 		# We need at least CLang 6 to get LibFuzzer
 		message(STATUS "Your version of Clang (${CMAKE_C_COMPILER_ID}) is not recent enough to have LibFuzzer")
 	else()
+		add_custom_target(fuzzers)
 		s2opc_fuzzer(server_request_fuzzer "fuzz_server_request.c")
 		s2opc_fuzzer(parse_tcp_uri_fuzzer "fuzz_parse_tcp_uri.c")
 	endif()
 endif()
 
 endif(ENABLE_TESTING)
+
+# OSS Fuzzing
+function(s2opc_oss_fuzzer target_name src_file)
+  add_executable(${target_name} "${FUZZING_PATH}/${src_file}")
+  target_include_directories(${target_name} PRIVATE ${S2OPC_PUBLIC_INCLUDES} ${S2OPC_PRIVATE_INCLUDES})
+  target_link_libraries(${target_name} ${S2OPC_STATIC_LIB} $ENV{LIB_FUZZING_ENGINE})
+  add_dependencies(fuzzers ${target_name})
+endfunction()
+
+if(WITH_OSS_FUZZ)
+  add_custom_target(fuzzers)
+  s2opc_oss_fuzzer(server_request_fuzzer "fuzz_server_request.c")
+  s2opc_oss_fuzzer(parse_tcp_uri_fuzzer "fuzz_parse_tcp_uri.c")
+endif()
 
 ###### Subscribing client library and binary ######
 
