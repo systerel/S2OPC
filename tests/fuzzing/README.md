@@ -19,7 +19,7 @@ while the standalone ones have a name ending with `.standalone`.
 Compiling fuzzing tests against libFuzzer requires CLang 6.0 or higher (libFuzzer is embedded in CLang starting from 6.0.0).
 Other fuzzing engines like AFL have not been investigated yet.
 
-Once a some corpus has been made with representative test cases,
+Once a corpus has been made with representative test cases,
 the goal is to use OSS-Fuzz, the continuous Fuzzing for Open Source Software.
 
 
@@ -99,7 +99,7 @@ The following links give valuable information about LibFuzzer etc:
 # OSS-Fuzz (distributed)
 
 Most of this section has been written from the online documentation of [OSS-Fuzz](https://github.com/google/oss-fuzz).
-Overview of the process to use OSS-Fuzz:
+**Overview** of the process to use OSS-Fuzz (detailed in the latter sections):
 
 - Prepare fuzz targets: the functions/scenarios that are tested, their compilation, and the test corpus.
   This work is done in the S2OPC repository.
@@ -118,22 +118,23 @@ Overview of the process to use OSS-Fuzz:
 
 ## Configure S²OPC
 
+This work is done in the S²OPC repository.
+
 - Identify functions to be tested.
   The fuzzer calls the function `int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size)`.
   The fuzzer gives an input buffer and its size.
   The `LLVMFuzzerTestOneInput` use it as a test input.
   The fuzzer changes something in the input, and checks whether new parts of the code is covered by the input.
   It keeps doing so, until something breaks.
-- The tested code should be fast (runs ~ 1000Hz).
+  (The tested code should be fast (runs ~ 1000Hz)).
 - Make a binary with a `LLVMFuzzerTestOneInput()` implementation for each of the tested features.
   To be homogeneous, this binary should be built with a rule suffixed by `_fuzzer`.
-- Important: things are running in `/out/` in the docker,
+- Important: only link statically, as the build docker that we create with OSS-Fuzz is not the docker that will run our targets.
+- Important: things are running in `/out/` in the runner docker,
   and it is [read-only](https://github.com/google/oss-fuzz/blob/master/docs/fuzzer_environment.md#file-system).
   But `/tmp/` is writable.
-- Important: only link statically, as the build docker that we create with OSS-Fuzz is not the docker that will run our targets.
 - Build a corpus: identify different base inputs that are valid inputs for the fuzzed functions.
   These inputs are just files.
-  TODO: document how to fuzz locally using the test build docker images built in the next section.
 - Important: the corpus may not reside on the S²OPC repository,
   but in the configuration phase of OSS-Fuzz, the `build.sh` script must be able to access them.
   So it may reside in another git.
@@ -141,6 +142,7 @@ Overview of the process to use OSS-Fuzz:
 
 ## Configure OSS-Fuzz
 
+This is a one time configuration, and adding new fuzzers should not change this configuration.
 This is done in the OSS-Fuzz repository, in `projects/s2opc`.
 
 - Add a `project.yaml` to oss-fuzz repo
@@ -160,8 +162,65 @@ This is done in the OSS-Fuzz repository, in `projects/s2opc`.
   This includes preparing the corpus as a `.zip`.
   Add copyright header.
 - There should not be anything else here, as sources of the fuzz targets are in the S2OPC repository.
-- [Test it locally](https://github.com/google/oss-fuzz/blob/master/docs/new_project_guide.md#testing-locally) before pushing it.
-- Make a pull request (or repoen an existing one?) and push it to OSS-Fuzz.
+- [Test it locally](https://github.com/google/oss-fuzz/blob/master/docs/new_project_guide.md#testing-locally)
+  (and see next session) before pushing it.
+- Fork and make a pull request and push it to OSS-Fuzz.
+
+
+## Testing/Running/Coverage locally
+
+The OSS' `infra/helper.py` script can do a lot of interesting things.
+First, it builds the required docker image and the fuzzers (see [the already mentioned guide](https://github.com/google/oss-fuzz/blob/master/docs/new_project_guide.md#testing-locally)).
+This is done with `build_image`, `build_fuzers` and `shell` commands of `infra/helper.py` which are clearly explained in the guide.
+However, two notes:
+
+- Warning, on my machine the commands `build_fuzzer` and `shell` don't have the same `CXXFLAGS`,
+  even when using the `--sanitizer` flag, hence there were link bugs.
+  Pay attention to `CXXFLAGS`, which must include the `-fsanitize=[...]` part.
+- Warning, on my machine, the commands `docker run --cap-add SYS_TRACE` and
+  `docker run --priviledged` do not both enable `ptrace`.
+  Only the latter.
+  Hence `infra/helper.py build_fuzzer`, which uses the `--cap-add` version, is not able to `./configure` libcheck.
+  Either replace the `--cap-add` argument in the script, or start the shell as follows:
+  ```bash
+  $ python infra/helper.py shell --sanitizer [...] s2opc
+  # export ENV_SANITIZER=SANITIZER_FLAGS_$SANITIZER; export CFLAGS="$CFLAGS ${!ENV_SANITIZER}";  export CXXFLAGS="$CXXFLAGS ${!ENV_SANITIZER}"
+  # compile
+  ```
+
+OSS-Fuzz requires us to pass the `check_build` on both `build_fuzzers --sanitize address` and `build_fuzzer--sanitize undefined`.
+However, the test may fail indicating "seems to have only partial coverage instrumentation".
+It may be because the tested code is too small.
+The information is displayed when running the fuzzer, e.g. with 82 counters instead of at least 100:
+```log
+INFO: Loaded 1 modules   (82 inline 8-bit counters): 82 [0x7c3f90, 0x7c3fe2),
+```
+
+Other interesting modes are the `run_fuzzer` and `coverage`.
+With supplementary options, it is possible to run locally the fuzzer and save it, or merge existing corpora.
+The `build/out/s2opc` folder is mapped to `/out` in the docker container, so it is possible to save the corpus
+(note, the zipped corpus is also used in this case):
+```bash
+mkdir build/out/s2opc/corpus_dir
+python infra/helper.py run_fuzzer s2opc parse_tcp_uri_fuzzer /out/corpus_dir
+```
+Or to merge corpora
+(note, the zipped corpus is also used in this case):
+```bash
+mkdir build/out/s2opc/new_corpus
+python infra/helper.py run_fuzzer s2opc parse_tcp_uri_fuzzer /out/new_corpus -merge=1 /out/old_corpus
+```
+
+Finally, the `coverage` is used to obtain an interactive coverage web server.
+To start it, the fuzzers must be built with `--sanitize coverage`,
+and the corpus must be made accessible to the docker container:
+```bash
+# Existing corpus available in build/out/s2opc/corpus_dir
+rm -r build/work/s2opc  # Dependencies must also be re-built
+python infra/helper.py build_fuzzers --sanitizer coverage s2opc
+python infra/helper.py coverage --fuzz-target parse_tcp_uri_fuzzer --corpus-dir build/out/s2opc/parse_tcp_uri s2opc
+```
+The latter starts a server on `localhost:8008` by default.
 
 
 ## Fetch the new corpus
