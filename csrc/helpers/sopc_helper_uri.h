@@ -28,4 +28,7 @@
 /** @brief: return true and output parameters if parsed with success. false otherwise */
 bool SOPC_Helper_URI_ParseTcpUaUri(const char* uri, size_t* hostnameLength, size_t* portIdx, size_t* portLength);
 
+/** \brief: Splits an URI and stores it in newly created buffers */
+bool SOPC_Helper_URI_SplitTcpUaUri(const char* uri, char** hostname, char** port);
+
 #endif /* SOPC_HELPER_URI_H_ */

@@ -132,7 +132,7 @@ bool SOPC_Helper_URI_ParseTcpUaUri(const char* uri, size_t* hostnameLength, size
     return result;
 }
 
-bool ParseURI(const char* uri, char** hostname, char** port)
+bool SOPC_Helper_URI_SplitTcpUaUri(const char* uri, char** hostname, char** port)
 {
     bool result = false;
     size_t hostnameLength = 0;

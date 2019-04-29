@@ -116,7 +116,7 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateClientSocket(const char* uri)
 
     if (uri != NULL)
     {
-        result = ParseURI(uri, &hostname, &port);
+        result = SOPC_Helper_URI_SplitTcpUaUri(uri, &hostname, &port);
         if (result != false)
         {
             freeSocket = SOPC_SocketsInternalContext_GetFreeSocket(false);
@@ -199,7 +199,7 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateServerSocket(const char* uri, uin
 
     if (uri != NULL)
     {
-        result = ParseURI(uri, &hostname, &port);
+        result = SOPC_Helper_URI_SplitTcpUaUri(uri, &hostname, &port);
         if (result != false)
         {
             freeSocket = SOPC_SocketsInternalContext_GetFreeSocket(true);
