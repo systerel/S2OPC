@@ -22,8 +22,6 @@
 #include "util_b2c.h"
 
 /* Globals */
-static bool msg_translate_browse_path_bs__NodeId_IsNull(const SOPC_NodeId* nodeId);
-
 static OpcUa_TranslateBrowsePathsToNodeIdsRequest* browsePaths_request;
 
 struct msg_translate_browse_path_bs__BrowsePathResult
@@ -99,7 +97,7 @@ void msg_translate_browse_path_bs__read_BrowsePath_StartingNode(
     uint32_t browsePath_index = msg_translate_browse_path_bs__get_BrowsePathIndex(
         msg_translate_browse_path_bs__browsePath, browsePaths_nbBrowsePaths);
     *msg_translate_browse_path_bs__nodeId = &(browsePaths_request->BrowsePaths[browsePath_index].StartingNode);
-    if (msg_translate_browse_path_bs__NodeId_IsNull(*msg_translate_browse_path_bs__nodeId))
+    if (SOPC_NodeId_IsNull(*msg_translate_browse_path_bs__nodeId))
     {
         *msg_translate_browse_path_bs__nodeId = constants__c_NodeId_indet;
     }
@@ -169,35 +167,6 @@ void msg_translate_browse_path_bs__read_RelativePathElt_IsInverse(
     }
 }
 
-static bool msg_translate_browse_path_bs__NodeId_IsNull(const SOPC_NodeId* nodeId)
-{
-    if (NULL == nodeId)
-    {
-        return true;
-    }
-
-    switch (nodeId->IdentifierType)
-    {
-    case SOPC_IdentifierType_Numeric:
-        return 0 == nodeId->Data.Numeric;
-
-    case SOPC_IdentifierType_ByteString:
-    case SOPC_IdentifierType_String:
-        return 0 >= nodeId->Data.String.Length;
-
-    case SOPC_IdentifierType_Guid:
-        if (NULL == nodeId->Data.Guid)
-            return true;
-        return (0 == nodeId->Data.Guid->Data1 && 0 == nodeId->Data.Guid->Data2 && 0 == nodeId->Data.Guid->Data3 &&
-                0 == nodeId->Data.Guid->Data4[0] && 0 == nodeId->Data.Guid->Data4[1] &&
-                0 == nodeId->Data.Guid->Data4[2] && 0 == nodeId->Data.Guid->Data4[3] &&
-                0 == nodeId->Data.Guid->Data4[4] && 0 == nodeId->Data.Guid->Data4[5] &&
-                0 == nodeId->Data.Guid->Data4[6] && 0 == nodeId->Data.Guid->Data4[7]);
-    default:
-        return true;
-    }
-}
-
 void msg_translate_browse_path_bs__read_RelativePathElt_ReferenceTypeId(
     const constants__t_RelativePathElt_i msg_translate_browse_path_bs__relativePathElt,
     constants__t_NodeId_i* const msg_translate_browse_path_bs__referenceTypeId)
@@ -205,7 +174,7 @@ void msg_translate_browse_path_bs__read_RelativePathElt_ReferenceTypeId(
     assert(NULL != msg_translate_browse_path_bs__relativePathElt);
     assert(NULL != msg_translate_browse_path_bs__referenceTypeId);
     *msg_translate_browse_path_bs__referenceTypeId = &(msg_translate_browse_path_bs__relativePathElt->ReferenceTypeId);
-    if (msg_translate_browse_path_bs__NodeId_IsNull(*msg_translate_browse_path_bs__referenceTypeId))
+    if (SOPC_NodeId_IsNull(*msg_translate_browse_path_bs__referenceTypeId))
     {
         *msg_translate_browse_path_bs__referenceTypeId = constants__c_NodeId_indet;
     }

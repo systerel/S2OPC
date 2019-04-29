@@ -1645,8 +1645,36 @@ bool SOPC_NodeId_Equal(const SOPC_NodeId* left, const SOPC_NodeId* right)
 
 bool SOPC_NodeId_IsNull(const SOPC_NodeId* nodeId)
 {
-    return (SOPC_IdentifierType_Numeric == nodeId->IdentifierType && 0 == nodeId->Data.Numeric &&
-            0 == nodeId->Namespace);
+    if (NULL == nodeId)
+    {
+        return true;
+    }
+
+    if (0 != nodeId->Namespace)
+    {
+        return false;
+    }
+
+    switch (nodeId->IdentifierType)
+    {
+    case SOPC_IdentifierType_Numeric:
+        return 0 == nodeId->Data.Numeric;
+
+    case SOPC_IdentifierType_ByteString:
+    case SOPC_IdentifierType_String:
+        return 0 >= nodeId->Data.String.Length;
+
+    case SOPC_IdentifierType_Guid:
+        if (NULL == nodeId->Data.Guid)
+            return true;
+        return (0 == nodeId->Data.Guid->Data1 && 0 == nodeId->Data.Guid->Data2 && 0 == nodeId->Data.Guid->Data3 &&
+                0 == nodeId->Data.Guid->Data4[0] && 0 == nodeId->Data.Guid->Data4[1] &&
+                0 == nodeId->Data.Guid->Data4[2] && 0 == nodeId->Data.Guid->Data4[3] &&
+                0 == nodeId->Data.Guid->Data4[4] && 0 == nodeId->Data.Guid->Data4[5] &&
+                0 == nodeId->Data.Guid->Data4[6] && 0 == nodeId->Data.Guid->Data4[7]);
+    default:
+        return false;
+    }
 }
 
 void SOPC_NodeId_Hash(const SOPC_NodeId* nodeId, uint64_t* hash)
