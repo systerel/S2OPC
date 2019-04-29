@@ -152,8 +152,15 @@ bool SOPC_Helper_URI_SplitTcpUaUri(const char* uri, char** hostname, char** port
 
     if (result)
     {
-        assert(portIdx != 0 && hostnameLength != 0 && portLength != 0);
-
+        /* It looks like that the function requires a port number but no hostname */
+        assert(portIdx != 0 && portLength != 0);
+        if (0 == hostnameLength)
+        {
+            result = false;
+        }
+    }
+    if (result)
+    {
         lHostname = calloc(1u + hostnameLength, sizeof(char));
         lPort = calloc(1u + portLength, sizeof(char));
 
