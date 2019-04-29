@@ -32,11 +32,12 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
 
     memcpy(buf_copy, buf, len);
 
-    size_t hostname_len;
-    size_t port_idx;
-    size_t port_len;
-    SOPC_Helper_URI_ParseTcpUaUri(buf_copy, &hostname_len, &port_idx, &port_len);
+    char* hostname = NULL;
+    char* port = NULL;
+    SOPC_Helper_URI_SplitTcpUaUri(buf_copy, &hostname, &port);
 
+    free(hostname);
+    free(port);
     free(buf_copy);
 
     return 0;
