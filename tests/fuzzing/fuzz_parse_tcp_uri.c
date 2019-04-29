@@ -23,10 +23,22 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "sopc_builtintypes.h"
 #include "sopc_helper_uri.h"
 
 int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
 {
+    /* Make an awkward reference to another translation unit, increasing the complexity of this function.
+     * TODO: rework this test to avoid this, maybe by enlarging its scope. */
+    static bool init = false;
+    static SOPC_String dummy;
+
+    if (!init)
+    {
+        SOPC_String_Initialize(&dummy);
+        init = true;
+    }
+
     char* buf_copy = (char*) calloc(1 + len, sizeof(char));
     assert(buf_copy != NULL);
 
