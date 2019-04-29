@@ -131,3 +131,57 @@ bool SOPC_Helper_URI_ParseTcpUaUri(const char* uri, size_t* hostnameLength, size
 
     return result;
 }
+
+bool ParseURI(const char* uri, char** hostname, char** port)
+{
+    bool result = false;
+    size_t hostnameLength = 0;
+    size_t portIdx = 0;
+    size_t portLength = 0;
+    char* lHostname = NULL;
+    char* lPort = NULL;
+
+    if (uri != NULL && hostname != NULL && port != NULL)
+    {
+        result = SOPC_Helper_URI_ParseTcpUaUri(uri, &hostnameLength, &portIdx, &portLength);
+    }
+
+    if (result != false)
+    {
+        if (portIdx != 0 && hostnameLength != 0 && portLength != 0)
+        {
+            lHostname = calloc(1u + hostnameLength, sizeof(char));
+            if (NULL == lHostname)
+                return false;
+            if (lHostname != memcpy(lHostname, &(uri[10]), hostnameLength))
+            {
+                free(lHostname);
+                return false;
+            }
+            lHostname[hostnameLength] = '\0';
+
+            lPort = calloc(1u + portLength, sizeof(char));
+            if (NULL == lPort)
+            {
+                free(lHostname);
+                return false;
+            }
+            if (lPort != memcpy(lPort, &(uri[portIdx]), portLength))
+            {
+                free(lHostname);
+                free(lPort);
+                return false;
+            }
+            lPort[portLength] = '\0';
+            *hostname = lHostname;
+            *port = lPort;
+        }
+        else
+        {
+            result = false;
+        }
+    }
+
+    return result;
+}
+
