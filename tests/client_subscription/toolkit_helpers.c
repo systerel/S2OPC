@@ -501,11 +501,20 @@ SOPC_ReturnStatus Helpers_NewValueFromDataValue(SOPC_DataValue* pVal, SOPC_LibSu
             break;
         case SOPC_ByteString_Id:
             plsVal->type = SOPC_LibSub_DataType_bytestring;
-            plsVal->value = SOPC_String_GetCString((SOPC_String*) &pVal->Value.Value.Bstring);
-            if (NULL == plsVal->value)
+            if (pVal->Value.Value.Bstring.Length > 0)
             {
-                status = SOPC_STATUS_OUT_OF_MEMORY;
+                plsVal->length = pVal->Value.Value.Bstring.Length;
+                plsVal->value = malloc(plsVal->length);
+                if (NULL != plsVal->value)
+                {
+                    memcpy(plsVal->value, pVal->Value.Value.Bstring.Data, plsVal->length);
+                }
+                else
+                {
+                    status = SOPC_STATUS_OUT_OF_MEMORY;
+                }
             }
+            /* else we leave value NULL and length = 0 */
             break;
         case SOPC_Null_Id:
         case SOPC_Float_Id:
