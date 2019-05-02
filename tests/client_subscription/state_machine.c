@@ -929,8 +929,10 @@ static void StaMac_ProcessEvent_stActivated(SOPC_StaMac_Machine* pSM,
                     {
                         pSM->cbkDataChanged(pSM->iCliId, pMonItNotif->ClientHandle, plsVal);
                         free(plsVal->value);
+                        plsVal->value = NULL;
                         SOPC_Variant_Delete(plsVal->raw_value);
                         free(plsVal);
+                        plsVal = NULL;
                     }
                 }
             }

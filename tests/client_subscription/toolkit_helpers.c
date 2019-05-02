@@ -493,17 +493,21 @@ SOPC_ReturnStatus Helpers_NewValueFromDataValue(SOPC_DataValue* pVal, SOPC_LibSu
             break;
         case SOPC_String_Id:
             plsVal->type = SOPC_LibSub_DataType_string;
-            plsVal->value = SOPC_String_GetCString(&pVal->Value.Value.String);
-            if (NULL == plsVal->value)
+            if (pVal->Value.Value.String.Length > 0)
             {
-                status = SOPC_STATUS_OUT_OF_MEMORY;
+                plsVal->value = SOPC_String_GetCString(&pVal->Value.Value.String);
+                if (NULL == plsVal->value)
+                {
+                    status = SOPC_STATUS_OUT_OF_MEMORY;
+                }
             }
+            /* else we leave value NULL */
             break;
         case SOPC_ByteString_Id:
             plsVal->type = SOPC_LibSub_DataType_bytestring;
             if (pVal->Value.Value.Bstring.Length > 0)
             {
-                plsVal->length = pVal->Value.Value.Bstring.Length;
+                plsVal->length = (size_t) pVal->Value.Value.Bstring.Length;
                 plsVal->value = malloc(plsVal->length);
                 if (NULL != plsVal->value)
                 {
@@ -566,11 +570,8 @@ SOPC_ReturnStatus Helpers_NewValueFromDataValue(SOPC_DataValue* pVal, SOPC_LibSu
     {
         if (NULL != plsVal)
         {
-            if (NULL != plsVal->value)
-            {
-                free(plsVal->value);
-                plsVal->value = NULL;
-            }
+            free(plsVal->value);
+            plsVal->value = NULL;
             SOPC_Variant_Delete(plsVal->raw_value);
             free(plsVal);
             plsVal = NULL;
