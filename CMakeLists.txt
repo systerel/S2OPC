@@ -837,8 +837,8 @@ endif(ENABLE_TESTING)
 
 # The library is built by python. It may use the shared library but it must not be built with ASan.
 # The problem with ASan is to embed a dynamic library compiled with ASan into Python, which is not compiled with ASan.
-# The compilation is not done with clang-analyszer either, as this would analyze CFFI-generated code.
-if(NOT CROSS_COMPILE AND NOT WITH_ASAN AND NOT WITH_TSAN AND NOT WITH_UBSAN AND NOT WITH_CLANG_ANALYZER AND NOT WITH_COVERAGE AND NOT WITH_COVERITY)
+# The compilation is not done with clang-analyzer either, as this would analyze CFFI-generated code.
+if(NOT CROSS_COMPILE AND NOT WITH_CLANG_ANALYZER AND NOT WITH_COVERAGE AND NOT WITH_COVERITY)
   set(PYS2OPC_PATH "${CMAKE_SOURCE_DIR}/tests/pys2opc")
   set(PYS2OPC_FILES "${PYS2OPC_PATH}/pys2opc/__init__.py"
                     "${PYS2OPC_PATH}/pys2opc/connection.py"
@@ -871,8 +871,14 @@ if(NOT CROSS_COMPILE AND NOT WITH_ASAN AND NOT WITH_TSAN AND NOT WITH_UBSAN AND 
                    "--server-cmd" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/toolkit_test_server${FILE_EXT} ${no_ext_name}"
                    "${PYTHON_EXECUTABLE}" "${name}"
                )
+      # ASan requires to be the first dynamically linked library to be loaded. This is done with LD_PRELOAD.
+      set(new_env "PYTHONPATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}${ENV_PATH_SEP}${PYS2OPC_PATH}"
+                  "LD_LIBRARY_PATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
+      if(WITH_ASAN OR WITH_UBSAN OR WITH_TSAN)
+        set(new_env ${new_env} "LD_PRELOAD=/usr/local/lib64/libasan.so")
+      endif()
       set_tests_properties(${test_name} PROPERTIES
-          ENVIRONMENT "PYTHONPATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}${ENV_PATH_SEP}${PYS2OPC_PATH};LD_LIBRARY_PATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
+          ENVIRONMENT "${new_env}")
   endfunction()
 
   pys2opc_validation_test("pys2opc_client.py")
