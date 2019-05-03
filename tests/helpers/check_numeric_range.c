@@ -30,7 +30,7 @@
 static void str_append(SOPC_Array* str, const char* text)
 {
     size_t len = strlen(text);
-    assert(SOPC_Array_Append_Values(str, text, len));
+    ck_assert(SOPC_Array_Append_Values(str, text, len));
 }
 
 static char* format_numeric_range(const SOPC_NumericRange* range)
@@ -64,7 +64,7 @@ static char* format_numeric_range(const SOPC_NumericRange* range)
     }
 
     char end = '\0';
-    assert(SOPC_Array_Append(str, end));
+    ck_assert(SOPC_Array_Append(str, end));
 
     return SOPC_Array_Into_Raw(str);
 }

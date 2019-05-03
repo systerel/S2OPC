@@ -79,7 +79,8 @@ SOPC_ReturnStatus SOPC_Encodeable_CreateExtension(SOPC_ExtensionObject* extObjec
         }
         else
         {
-            assert(SOPC_Encodeable_Delete(encTyp, encObject) == SOPC_STATUS_OK);
+            SOPC_ReturnStatus deleteStatus = SOPC_Encodeable_Delete(encTyp, encObject);
+            assert(SOPC_STATUS_OK == deleteStatus);
         }
     }
     return status;

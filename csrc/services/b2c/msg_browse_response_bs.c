@@ -191,9 +191,11 @@ void msg_browse_response_bs__set_ResponseBrowse_Res_NodeClass(
     assert(msg_browse_response_bs__p_bvi <= nBrowseResult);
     assert(NULL != ppResNodeClass[msg_browse_response_bs__p_bvi]);
     assert(msg_browse_response_bs__p_bri <= pnAllocReferenceDescription[msg_browse_response_bs__p_bvi]);
-    assert(true ==
-           util_NodeClass__B_to_C(msg_browse_response_bs__p_NodeClass,
-                                  &ppResNodeClass[msg_browse_response_bs__p_bvi][msg_browse_response_bs__p_bri]));
+
+    bool return_status =
+        util_NodeClass__B_to_C(msg_browse_response_bs__p_NodeClass,
+                               &ppResNodeClass[msg_browse_response_bs__p_bvi][msg_browse_response_bs__p_bri]);
+    assert(return_status);
 }
 
 void msg_browse_response_bs__reset_ResponseBrowse_Res_NodeClass(

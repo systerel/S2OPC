@@ -52,6 +52,7 @@ static void on_event(SOPC_EventHandler* handler, int32_t event, uint32_t id, voi
     bool found;
     SOPC_AsyncQueue* queue = SOPC_Dict_Get(queues, handler, &found);
     assert(found);
+    SOPC_ReturnStatus status;
 
     SOPC_Event* ev = calloc(1, sizeof(SOPC_Event));
     assert(ev != NULL);
@@ -61,7 +62,8 @@ static void on_event(SOPC_EventHandler* handler, int32_t event, uint32_t id, voi
     ev->params = params;
     ev->auxParam = auxParam;
 
-    assert(SOPC_AsyncQueue_BlockingEnqueue(queue, ev) == SOPC_STATUS_OK);
+    status = SOPC_AsyncQueue_BlockingEnqueue(queue, ev);
+    assert(SOPC_STATUS_OK == status);
 }
 
 static void queue_free(SOPC_AsyncQueue* queue)

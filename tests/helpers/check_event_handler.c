@@ -51,7 +51,7 @@ static void test_callback(SOPC_EventHandler* handler, int32_t event, uint32_t el
     ev->params = params;
     ev->auxParam = auxParam;
 
-    assert(SOPC_AsyncQueue_BlockingEnqueue(queue, ev) == SOPC_STATUS_OK);
+    ck_assert(SOPC_AsyncQueue_BlockingEnqueue(queue, ev) == SOPC_STATUS_OK);
 
     while (SOPC_Atomic_Int_Get(&block_queue) == 1)
     {
@@ -62,7 +62,7 @@ static void test_callback(SOPC_EventHandler* handler, int32_t event, uint32_t el
 static void expect_event(SOPC_EventHandler* handler, int32_t event, uint32_t eltId, void* params, uintptr_t auxParam)
 {
     struct Event* ev;
-    assert(SOPC_AsyncQueue_BlockingDequeue(queue, (void**) &ev) == SOPC_STATUS_OK);
+    ck_assert(SOPC_AsyncQueue_BlockingDequeue(queue, (void**) &ev) == SOPC_STATUS_OK);
 
     ck_assert_ptr_eq(handler, ev->handler);
     ck_assert_int_eq(event, ev->event);
@@ -125,7 +125,7 @@ END_TEST
 
 static void test_setup(void)
 {
-    assert(SOPC_AsyncQueue_Init(&queue, "") == SOPC_STATUS_OK);
+    ck_assert(SOPC_AsyncQueue_Init(&queue, "") == SOPC_STATUS_OK);
 }
 
 static void test_teardown(void)

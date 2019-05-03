@@ -136,7 +136,7 @@ static SOPC_ReturnStatus selectiveAuthorizationAllow(SOPC_UserAuthorization_Mana
     /* Allow read on all attributes, but on valid node id only */
     /* Restrict write to valid node id and value attribute */
     int cmpNid = -2;
-    assert(SOPC_STATUS_OK == SOPC_NodeId_Compare(nodeId, &authorizedNodeId, &cmpNid));
+    ck_assert(SOPC_STATUS_OK == SOPC_NodeId_Compare(nodeId, &authorizedNodeId, &cmpNid));
     switch (operationType)
     {
     case SOPC_USER_AUTHORIZATION_OPERATION_READ:
