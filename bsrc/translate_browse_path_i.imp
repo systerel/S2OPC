@@ -73,7 +73,11 @@ LOCAL_OPERATIONS
                 card ( { lnode, lind | lnode = a_NodeId~(source) &
                         lind : 1..Node_RefIndexEnd(a_NodeId~(source)) &
                         target = Reference_TargetNode(RefIndex_Reference(lnode |-> lind)) &
-                        RelativePathElt_ReferenceTypeId(relativePathElt) = Reference_ReferenceType(RefIndex_Reference(lnode |-> lind)) &
+                        ( RelativePathElt_ReferenceTypeId(relativePathElt) /= c_NodeId_indet
+                          =>
+                          /* TODO: use isReverse */
+                          RelativePathElt_ReferenceTypeId(relativePathElt) = Reference_ReferenceType(RefIndex_Reference(lnode |-> lind))
+                        ) &
                         RelativePathElt_IsInverse(relativePathElt) /= Reference_IsForward(RefIndex_Reference(lnode |-> lind))
                     } ) = 1
 
@@ -305,6 +309,10 @@ OPERATIONS
         /* Get RelativePathElt info for browse */
         l_referenceTypeId <-- read_RelativePathElt_ReferenceTypeId(relativePathElt);
         IF l_referenceTypeId  = c_NodeId_indet THEN
+        /* Part 4: Services - Release 1.04
+           Table 168 – RelativePath
+           If not specified then all References are included and the parameter includeSubtypes is ignored.
+         */
             l_includedSubtypes := FALSE
         ELSE
             l_includedSubtypes <-- read_RelativePathElt_IncludedSubtypes(relativePathElt)
