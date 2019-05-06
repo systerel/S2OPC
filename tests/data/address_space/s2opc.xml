@@ -730,6 +730,41 @@
       <Reference ReferenceType="HasComponent" IsForward="false">i=2268</Reference>
     </References>
   </UAObject>
+  <UAObjectType NodeId="i=400" BrowseName="VendorServerInfoType">
+    <DisplayName>VendorServerInfoType</DisplayName>
+    <References>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=58</Reference>
+    </References>
+  </UAObjectType>
+  <UAObject NodeId="i=401" BrowseName="VendorServerInfo" ParentNodeId="i=2253">
+    <DisplayName>VendorServerInfo</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=400</Reference>
+      <Reference ReferenceType="HasComponent" IsForward="false">i=2253</Reference>
+    </References>
+  </UAObject>
+
+  <UAObjectType NodeId="i=402" BrowseName="ServerRedundancyType">
+    <DisplayName>ServerRedundancyType</DisplayName>
+    <References>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=58</Reference>
+    </References>
+  </UAObjectType>
+  <UAObject NodeId="i=403" BrowseName="ServerRedundancy" ParentNodeId="i=2253">
+    <DisplayName>ServerRedundancy</DisplayName>
+    <References>
+      <Reference ReferenceType="HasProperty">i=404</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=402</Reference>
+      <Reference ReferenceType="HasComponent" IsForward="false">i=2253</Reference>
+    </References>
+  </UAObject>
+  <UAVariable NodeId="i=404" BrowseName="RedundancySupport" ParentNodeId="i=403" DataType="i=344" ValueRank="1">
+    <DisplayName>RedundancySupport</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasProperty" IsForward="false">i=403</Reference>
+    </References>
+  </UAVariable>
   <UAObject NodeId="i=2253" BrowseName="Server">
     <DisplayName>Server</DisplayName>
     <Description>Describes this OPC-UA Server</Description>
@@ -739,6 +774,8 @@
       <Reference ReferenceType="HasComponent">i=2256</Reference>
       <Reference ReferenceType="HasProperty">i=2267</Reference>
       <Reference ReferenceType="HasComponent">i=2268</Reference>
+      <Reference ReferenceType="HasComponent">i=401</Reference>
+      <Reference ReferenceType="HasComponent">i=403</Reference>
       <Reference ReferenceType="HasComponent">i=2274</Reference>
       <Reference ReferenceType="HasProperty">i=2994</Reference>
       <Reference ReferenceType="Organizes" IsForward="false">i=85</Reference>
@@ -769,6 +806,8 @@
       <Reference ReferenceType="HasComponent">i=2258</Reference>
       <Reference ReferenceType="HasComponent">i=2259</Reference>
       <Reference ReferenceType="HasComponent">i=2260</Reference>
+      <Reference ReferenceType="HasComponent">i=450</Reference>
+      <Reference ReferenceType="HasComponent">i=451</Reference>
       <Reference ReferenceType="HasComponent" IsForward="false">i=2253</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
@@ -778,6 +817,20 @@
     <References>
       <Reference ReferenceType="HasComponent" IsForward="false">i=2256</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+  </UAVariable>
+  <UAVariable BrowseName="SecondsTillShutdown" NodeId="i=450" DataType="UInt32">
+    <DisplayName>StartTime</DisplayName>
+    <References>
+      <Reference ReferenceType="HasComponent" IsForward="false">i=2256</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=7</Reference>
+    </References>
+  </UAVariable>
+  <UAVariable BrowseName="ShutdownReason" NodeId="i=451" DataType="LocalizedText">
+    <DisplayName>StartTime</DisplayName>
+    <References>
+      <Reference ReferenceType="HasComponent" IsForward="false">i=2256</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=21</Reference>
     </References>
   </UAVariable>
   <UAVariable BrowseName="CurrentTime" NodeId="i=2258" DataType="DateTime">
