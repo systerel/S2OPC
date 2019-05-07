@@ -73,12 +73,15 @@ build-linux64:
     variables:
       - $WITH_COVERAGE
       - $CROSS_COMPILE
+      - $WITH_PYS2OPC
 
 build-win64: &build_win64
   <<: *docker_job
   stage: build-others
   image: registry.gitlab.com/systerel/s2opc/mingw_build@sha256:2f795355fd5e4b9ce3da064f049d9bf1296a13aa1fea3092cc81937b00a2bc8e # digest of mingw_build:1.7
   script:
+    # Manually disable PyS2OPC for windows cross builds. When set in "variables:", the value is overwritten.
+    - 'export WITH_PYS2OPC=OFF'
     - *build_command_line
   variables: &build_win64_variables
     CMAKE_INSTALL_PREFIX: '../install_win64'
@@ -89,7 +92,7 @@ build-win64: &build_win64
   artifacts:
     name: 'bin-w64-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
     paths:
-      - '$BUILD_DIR/bin/'
+      - '$BUILD_DIR/bin'
       - 'install_win64/'
     expire_in: '1 month'
   only:
@@ -187,6 +190,26 @@ test-uactt:
       - 'acceptances_tests/*.log'
     when: always
     expire_in: '1 month'
+
+test-pys2opc:
+  <<: *test_linux
+  image: registry.gitlab.com/systerel/s2opc/test@sha256:2517f830aa2dbf50868021cf184981c5b75f91b1768e4fbfdab282cc0daa8231  # digest of test:2.3
+  dependencies:
+    - build-linux64
+  script:
+    - cd build
+    - ctest -T test -R pys2opc
+  artifacts:
+    name: 'test-pys2opc-results-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
+    paths:
+      - 'build/'
+    when: on_failure
+    expire_in: '1 month'
+  only:
+    variables:
+      - $WITH_PYS2OPC
+  except:
+    variables: []
 
 ###
 # Analysis jobs
