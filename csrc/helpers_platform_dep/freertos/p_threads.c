@@ -21,48 +21,6 @@
 #include "sopc_threads.h"
 #include "sopc_time.h"
 
-SOPC_ReturnStatus Mutex_Initialization(Mutex* mut)
-{
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-
-    return status;
-}
-
-SOPC_ReturnStatus Mutex_Clear(Mutex* mut)
-{
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-
-    return status;
-}
-
-SOPC_ReturnStatus Mutex_Lock(Mutex* mut)
-{
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-
-    return status;
-}
-
-SOPC_ReturnStatus Mutex_Unlock(Mutex* mut)
-{
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-
-    return status;
-}
-
-SOPC_ReturnStatus Mutex_UnlockAndWaitCond(Condition* cond, Mutex* mut)
-{
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-
-    return status;
-}
-
-SOPC_ReturnStatus Mutex_UnlockAndTimedWaitCond(Condition* cond, Mutex* mut, uint32_t milliSecs)
-{
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-
-    return status;
-}
-
 SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), void* startArgs)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;

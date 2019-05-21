@@ -1,12 +1,26 @@
 /*
- * p_synchronisation.h
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
  *
- *  Created on: 17 mai 2019
- *      Author: nottin
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
-#ifndef PORTAGE_HELPERS_PLATFORM_DEP_FREERTOS_P_SYNCHRONISATION_H_
-#define PORTAGE_HELPERS_PLATFORM_DEP_FREERTOS_P_SYNCHRONISATION_H_
+#ifndef P_SYNCHRONISATION_H
+#define P_SYNCHRONISATION_H
+
+/*****Private condition variable api*****/
 
 #define MAX_SIGNAL (128)
 #define SIGNAL_VALUE (0x80000000)
@@ -14,17 +28,17 @@
 typedef struct T_ELT_TASK_LIST
 {
     TaskHandle_t value;
-    unsigned int uwWaitedSig;
-    unsigned short nxId;
-    unsigned short prId;
+    uint32_t uwWaitedSig;
+    uint16_t nxId;
+    uint16_t prId;
 } tEltTaskList;
 
 typedef struct T_CONDITION_VARIABLE
 {
     QueueHandle_t handleLockCounter;
-    unsigned short first;
-    unsigned short nbWaiters;
-    unsigned short maxWaiters;
+    uint16_t first;
+    uint16_t nbWaiters;
+    uint16_t maxWaiters;
     tEltTaskList* taskList;
 } tConditionVariable;
 
@@ -47,4 +61,9 @@ eConditionVariableResult UnlockAndWaitForConditionVariable(tConditionVariable* p
                                                            uint32_t uwSignal,
                                                            uint32_t uwTimeOutMs);
 
-#endif /* PORTAGE_HELPERS_PLATFORM_DEP_FREERTOS_P_SYNCHRONISATION_H_ */
+/*****Public s2opc condition variable and mutex api*****/
+
+typedef void* Condition; // tConditionVariable*
+typedef void* Mutex;     // QueueHandle_t*
+
+#endif

@@ -1,30 +1,54 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 #include <limits.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <stdio.h>
+#include <stdio.h> /*stdlib*/
 #include <string.h>
 
-#include "FreeRTOS.h"
+#include "sopc_enums.h" /*s2opc*/
+
+#include "FreeRTOS.h" /*freeRtos*/
 #include "queue.h"
 #include "semphr.h"
 #include "task.h"
 #include "timers.h"
 
-#include "p_synchronisation.h"
+#include "p_synchronisation.h" /*synchro*/
 
-static eConditionVariableResult PushSignal(tConditionVariable* pv,
-                                           TaskHandle_t taskNotifiedValue,
-                                           unsigned int uwWaitedSignal)
+/*****Private condition variable api*****/
+
+/*Add a waiting task to the waiting tasks list*/
+static eConditionVariableResult PushSignal(tConditionVariable* pv,         // Condition variable workspace
+                                           TaskHandle_t taskNotifiedValue, // Handle of the waiting task
+                                           uint32_t uwWaitedSignal)        // Signal mask
 {
     eConditionVariableResult result = E_COND_VAR_RESULT_OK;
-    unsigned short int wCurrentSlotId = 0;
-    unsigned short int wNextSlotId = 0;
+    uint16_t wCurrentSlotId = 0;
+    uint16_t wNextSlotId = 0;
 
     if (pv != NULL)
     {
-        if (pv->nbWaiters < pv->maxWaiters)
+        if (pv->nbWaiters < pv->maxWaiters) // Continue only if at least one waiter free
         {
-            // Recherche du premier slot signal libre
+            // Search free slot position
             while (wCurrentSlotId < pv->maxWaiters)
             {
                 if (pv->taskList[wCurrentSlotId].value == 0)
@@ -37,11 +61,12 @@ static eConditionVariableResult PushSignal(tConditionVariable* pv,
                 }
             }
 
-            // Slot libre trouv. Normalement, un slot doit etre trouvé puisque nbWaiters < MAX_SIGNAL...
+            // If free slot found...
             if (wCurrentSlotId < pv->maxWaiters)
             {
-                // Si des elements existe avant, le precedent indexe le courant.
-                // Le courant indexe le precedent.
+                // Update previous slot id information in the current slot
+                // and previous slot next slot id with current slot id
+                // if the previous slot exist
                 if (wCurrentSlotId > 0)
                 {
                     pv->taskList[wCurrentSlotId - 1].nxId = wCurrentSlotId;
@@ -49,17 +74,16 @@ static eConditionVariableResult PushSignal(tConditionVariable* pv,
                 }
                 else
                 {
-                    // Si pas d'lement avant, le courant s'indexe lui meme
-                    pv->taskList[wCurrentSlotId].prId = pv->maxWaiters;
+                    pv->taskList[wCurrentSlotId].prId = pv->maxWaiters; // MAX_WAITERS = NO PREVIOUS
                     pv->first = wCurrentSlotId;
                 }
 
-                // Recherche premier slot occupé après le slot trouvé
+                // Search next slot if exist (not the max and current slot < total already registered slots)
                 if ((wCurrentSlotId < (pv->maxWaiters - 1)) && (wCurrentSlotId < pv->nbWaiters))
                 {
                     wNextSlotId = wCurrentSlotId + 1;
 
-                    // Recherche du prochain enregistrant un task handle
+                    // Search the not free slot
                     while (wNextSlotId < pv->maxWaiters)
                     {
                         if (pv->taskList[wNextSlotId].value != 0)
@@ -72,36 +96,37 @@ static eConditionVariableResult PushSignal(tConditionVariable* pv,
                         }
                     }
 
-                    // Si un task handle a été trouve. Normalement, c'est forcément le cas,
-                    // puisque wCurrentSlotId < pv->nbWaiters
+                    // If a task handle has been found. (normally, it's the case,
+                    // because wCurrentSlotId < pv->nbWaiters), update next slot
+                    // with current id and current slot with this
                     if (wNextSlotId < pv->maxWaiters)
                     {
-                        // Il index comme precedent le courant
+                        // Il indexe comme précédent le courant
                         // Le courant index le suivant
                         pv->taskList[wNextSlotId].prId = wCurrentSlotId;
                         pv->taskList[wCurrentSlotId].nxId = wNextSlotId;
                     }
                     else
                     {
-                        // Pas d'element indexant un task handle, self reference
+                        // No next, next info set to MAX WAITERS
                         pv->taskList[wCurrentSlotId].nxId = pv->maxWaiters;
                     }
                 }
                 else
                 {
-                    // Il n'existe pas de slot après, le courant s'indexe lui-meme
+                    // No next, next info set to MAX WAITERS
                     pv->taskList[wCurrentSlotId].nxId = pv->maxWaiters;
                 }
 
                 pv->taskList[wCurrentSlotId].value = taskNotifiedValue;
                 pv->taskList[wCurrentSlotId].uwWaitedSig = uwWaitedSignal > 0 ? uwWaitedSignal : SIGNAL_VALUE;
                 pv->nbWaiters = pv->nbWaiters < pv->maxWaiters ? pv->nbWaiters + 1 : pv->nbWaiters;
-            } // if(wCurrentSlotId  < MAX_SIGNAL) pas de slot libre
+            } // if(wCurrentSlotId  < MAX_SIGNAL) no free slot
             else
             {
                 result = E_COND_VAR_RESULT_ERROR_MAX_WAITERS;
             }
-        } // pv->nbWaiters = pv->nbWaiters < MAX_SIGNAL  pas de slot libre
+        } // pv->nbWaiters = pv->nbWaiters < MAX_SIGNAL => no free slot
         else
         {
             result = E_COND_VAR_RESULT_ERROR_MAX_WAITERS;
@@ -110,16 +135,21 @@ static eConditionVariableResult PushSignal(tConditionVariable* pv,
     return result;
 }
 
-static void PopSignal(tConditionVariable* pv, TaskHandle_t taskNotified)
+/*Delete a task to notify from waiting tasks list*/
+static void PopSignal(tConditionVariable* pv,    // Condition variable handle
+                      TaskHandle_t taskNotified, // Task to remove
+                      uint32_t uwWaitedSignal) // Signal filtered associated. Must be same as the one used by PushSignal
 {
-    unsigned short wCurrentSlotId = 0;
+    uint16_t wCurrentSlotId = 0;
+    uint32_t uwWaitedSig = uwWaitedSignal > 0 ? uwWaitedSignal : SIGNAL_VALUE;
 
     if ((pv->nbWaiters > 0) && (taskNotified > 0))
     {
-        // Recherche task
+        // Search a task with handle and signal requested
         while (wCurrentSlotId < pv->maxWaiters)
         {
-            if (pv->taskList[wCurrentSlotId].value == taskNotified)
+            if ((pv->taskList[wCurrentSlotId].value == taskNotified) &&
+                (pv->taskList[wCurrentSlotId].uwWaitedSig == uwWaitedSig))
             {
                 break;
             }
@@ -128,7 +158,7 @@ static void PopSignal(tConditionVariable* pv, TaskHandle_t taskNotified)
                 wCurrentSlotId = pv->taskList[wCurrentSlotId].nxId;
             }
         }
-        // Si task trouvee, 1 waiters de moins, liberer le slot et update slots occupé adjacents.
+        // If found, -1 waiters, update list.
         if (wCurrentSlotId < pv->maxWaiters)
         {
             pv->nbWaiters = pv->nbWaiters > 0 ? pv->nbWaiters - 1 : pv->nbWaiters;
@@ -154,31 +184,35 @@ static void PopSignal(tConditionVariable* pv, TaskHandle_t taskNotified)
     }
 }
 
+/*Destroy condition variable*/
 void DestroyConditionVariable(tConditionVariable** ppv)
 {
-    if (ppv != NULL)
+    if ((ppv != NULL) && ((*ppv) != NULL))
     {
+        // Destruction taskList
         if ((*ppv)->taskList != NULL)
         {
             vPortFree((*ppv)->taskList);
             (*ppv)->taskList = NULL;
         }
 
+        // Destruction section critique
         if ((*ppv)->handleLockCounter != NULL)
         {
             vQueueDelete((*ppv)->handleLockCounter);
             (*ppv)->handleLockCounter = NULL;
         }
 
-        vPortFree(ppv);
-        ppv = NULL;
+        // Destruction workspace
+        vPortFree(*ppv);
+        *ppv = NULL;
     }
 }
 
-/*Construction condition variable*/
-tConditionVariable* BuildConditionVariable(unsigned short int wMaxWaiters)
+/*Make condition variable*/
+tConditionVariable* BuildConditionVariable(unsigned short int wMaxWaiters) // max parallel waiting tasks
 {
-    unsigned short int iIter = 0;
+    uint16_t iIter = 0;
     tConditionVariable* pv = NULL;
 
     // Nombre de thread en attente maximum
@@ -216,11 +250,13 @@ success:
     return pv;
 }
 
-eConditionVariableResult SignalAllConditionVariable(tConditionVariable* pv, unsigned int signalValue)
+/*Broadcast signal to all waiting task on signal passed in parameters*/
+eConditionVariableResult SignalAllConditionVariable(tConditionVariable* pv, // Condition variable workspace
+                                                    uint32_t signalValue)   // Signal to broadcaset
 {
     eConditionVariableResult result = E_COND_VAR_RESULT_ERROR_NO_WAITERS;
-    unsigned short int wCurrentSlotId = 0;
-    unsigned int signal = signalValue > 0 ? signalValue : SIGNAL_VALUE;
+    uint16_t wCurrentSlotId = 0;
+    uint32_t signal = signalValue > 0 ? signalValue : SIGNAL_VALUE;
 
     if ((pv != NULL) && (pv->handleLockCounter != NULL))
     {
@@ -230,7 +266,7 @@ eConditionVariableResult SignalAllConditionVariable(tConditionVariable* pv, unsi
             wCurrentSlotId = pv->first;
             if (pv->nbWaiters > 0)
             {
-                // Tant que Nb de tache en attente ET operation de signalement < nombre de tache en attente
+                // Tant que Nb de tache en attente ET operation de signalement < nombre de taches en attente
                 while (wCurrentSlotId < pv->maxWaiters)
                 {
                     if ((pv->taskList[wCurrentSlotId].value > 0) &&
@@ -252,16 +288,17 @@ eConditionVariableResult SignalAllConditionVariable(tConditionVariable* pv, unsi
     return result;
 }
 
-eConditionVariableResult UnlockAndWaitForConditionVariable(tConditionVariable* pv,
-                                                           QueueHandle_t handleMutex,
-                                                           uint32_t uwSignal,
-                                                           uint32_t uwTimeOutMs)
+/*Unlock recursive mutex in parameters before wait a signal. On timeout, task is removed from task to notify.*/
+eConditionVariableResult UnlockAndWaitForConditionVariable(tConditionVariable* pv, // Condition variable workspace
+                                                           QueueHandle_t handleRecursiveMutex, // Recursive mutex
+                                                           uint32_t uwSignal,                  // Signal to wait
+                                                           uint32_t uwTimeOutMs)               // TimeOut
 {
     eConditionVariableResult result = E_COND_VAR_RESULT_OK;
     TickType_t xTimeToWait = 0;
     TaskHandle_t handleTask = 0;
-    TimeOut_t xTimeOut;
-    unsigned int notificationValue = 0;
+    TimeOut_t xTimeOut = {0, 0};
+    uint32_t notificationValue = 0;
 
     if ((pv != NULL) && (pv->handleLockCounter != NULL))
     {
@@ -291,9 +328,9 @@ eConditionVariableResult UnlockAndWaitForConditionVariable(tConditionVariable* p
         xSemaphoreGive(pv->handleLockCounter);
 
         // Libération du mutex passé en paramètre
-        if (handleMutex != NULL)
+        if (handleRecursiveMutex != NULL)
         {
-            xSemaphoreGive(handleMutex);
+            (void) xQueueGiveMutexRecursive(handleRecursiveMutex);
         }
 
         if (result == E_COND_VAR_RESULT_OK)
@@ -336,15 +373,15 @@ eConditionVariableResult UnlockAndWaitForConditionVariable(tConditionVariable* p
             // Critical section
             xQueueSemaphoreTake(pv->handleLockCounter, portMAX_DELAY);
             {
-                PopSignal(pv, handleTask);
+                PopSignal(pv, handleTask, uwSignal);
             }
             xSemaphoreGive(pv->handleLockCounter);
         }
 
         // Prise du mutex passé en paramètre
-        if (handleMutex != NULL)
+        if (handleRecursiveMutex != NULL)
         {
-            xSemaphoreTake(handleMutex, portMAX_DELAY);
+            (void) xQueueTakeMutexRecursive(handleRecursiveMutex, portMAX_DELAY);
         }
     }
     else
@@ -352,5 +389,261 @@ eConditionVariableResult UnlockAndWaitForConditionVariable(tConditionVariable* p
         result = E_COND_VAR_RESULT_ERROR_INCORRECT_PARAMETERS;
     }
 
+    return result;
+}
+
+/*****Public s2opc condition variable and mutex api*****/
+
+/*Initialize a condition variable*/
+SOPC_ReturnStatus Condition_Init(Condition* cond)
+{
+    SOPC_ReturnStatus result = SOPC_STATUS_OK;
+    tConditionVariable** pptr = (tConditionVariable**) cond;
+
+    if ((pptr != NULL) && ((*pptr) == NULL))
+    {
+        *pptr = BuildConditionVariable(MAX_SIGNAL);
+        if (*pptr == NULL)
+        {
+            *cond = NULL;
+            result = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        else
+        {
+            *cond = (Condition)(*pptr);
+            result = SOPC_STATUS_OK;
+        }
+    }
+    else
+    {
+        result = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    return result;
+}
+
+/*Destroy a condition variable.*/
+SOPC_ReturnStatus Condition_Clear(Condition* cond)
+{
+    SOPC_ReturnStatus result = SOPC_STATUS_OK;
+    tConditionVariable** pptr = (tConditionVariable**) cond;
+    if ((pptr != NULL) && ((*pptr) != NULL))
+    {
+        DestroyConditionVariable(pptr);
+        *cond = NULL;
+    }
+    else
+    {
+        result = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    return result;
+}
+
+SOPC_ReturnStatus Condition_SignalAll(Condition* cond)
+{
+    SOPC_ReturnStatus result = SOPC_STATUS_OK;
+    eConditionVariableResult presult = E_COND_VAR_RESULT_OK;
+    tConditionVariable** pptr = (tConditionVariable**) cond;
+    if ((pptr != NULL) && ((*pptr) != NULL))
+    {
+        presult = SignalAllConditionVariable(*pptr, SIGNAL_VALUE);
+        if (presult != E_COND_VAR_RESULT_OK)
+        {
+            result = SOPC_STATUS_NOK;
+        }
+        else
+        {
+            result = SOPC_STATUS_OK;
+        }
+    }
+    else
+    {
+        result = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    return result;
+}
+
+// Must be called between lock and unlock of Mutex used to wait on condition
+SOPC_ReturnStatus Mutex_UnlockAndWaitCond(Condition* cond, Mutex* mut)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    eConditionVariableResult result = E_COND_VAR_RESULT_OK;
+    tConditionVariable** pptr = (tConditionVariable**) cond;
+    QueueHandle_t handleRecursiveMutex = NULL;
+
+    if ((pptr != NULL) && ((*pptr) != NULL))
+    {
+        if (mut != NULL)
+        {
+            handleRecursiveMutex = *((QueueHandle_t*) mut);
+        }
+
+        result = UnlockAndWaitForConditionVariable(*pptr, handleRecursiveMutex, SIGNAL_VALUE, ULONG_MAX);
+        if (result == E_COND_VAR_RESULT_OK)
+        {
+            status = SOPC_STATUS_OK;
+        }
+        else
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+    else
+    {
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    return status;
+}
+
+// Must be called between lock and unlock of Mutex used to wait on condition
+SOPC_ReturnStatus Mutex_UnlockAndTimedWaitCond(Condition* cond, Mutex* mut, uint32_t milliSecs)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    eConditionVariableResult result = E_COND_VAR_RESULT_OK;
+    tConditionVariable** pptr = (tConditionVariable**) cond;
+    QueueHandle_t handleRecursiveMutex = NULL;
+
+    if ((pptr != NULL) && ((*pptr) != NULL))
+    {
+        if (mut != NULL)
+        {
+            handleRecursiveMutex = *((QueueHandle_t*) mut);
+        }
+
+        result = UnlockAndWaitForConditionVariable(*pptr, handleRecursiveMutex, SIGNAL_VALUE, milliSecs);
+        if (result == E_COND_VAR_RESULT_OK)
+        {
+            status = SOPC_STATUS_OK;
+        }
+        else if (result == E_COND_VAR_RESULT_TIMEOUT)
+        {
+            status = SOPC_STATUS_TIMEOUT;
+        }
+        else
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+    else
+    {
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    return status;
+}
+
+/*Create recursive mutex*/
+SOPC_ReturnStatus Mutex_Initialization(Mutex* mut)
+{
+    SOPC_ReturnStatus result = SOPC_STATUS_OK;
+    QueueHandle_t handleRecursiveMutex = NULL;
+
+    if (mut == NULL)
+    {
+        result = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    else
+    {
+        handleRecursiveMutex = xQueueCreateMutex(queueQUEUE_TYPE_RECURSIVE_MUTEX);
+        if (handleRecursiveMutex == NULL)
+        {
+            result = SOPC_STATUS_OUT_OF_MEMORY;
+            *mut = NULL;
+        }
+        else
+        {
+            result = SOPC_STATUS_OK;
+            *mut = (Mutex) handleRecursiveMutex;
+        }
+    }
+    return result;
+}
+
+/*Destroy recursive mutex*/
+SOPC_ReturnStatus Mutex_Clear(Mutex* mut)
+{
+    QueueHandle_t handleRecursiveMutex = NULL;
+    SOPC_ReturnStatus result = SOPC_STATUS_OK;
+
+    if (mut == NULL)
+    {
+        result = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    else
+    {
+        handleRecursiveMutex = *((QueueHandle_t*) (mut));
+        if (handleRecursiveMutex == NULL)
+        {
+            result = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+        else
+        {
+            vQueueDelete(handleRecursiveMutex);
+            result = SOPC_STATUS_OK;
+        }
+    }
+    return result;
+}
+
+// Lock recursive mutex
+SOPC_ReturnStatus Mutex_Lock(Mutex* mut)
+{
+    SOPC_ReturnStatus result = SOPC_STATUS_OK;
+    QueueHandle_t handleRecursiveMutex = NULL;
+    if (mut == NULL)
+    {
+        result = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    else
+    {
+        handleRecursiveMutex = *((QueueHandle_t*) (mut));
+        if (handleRecursiveMutex == NULL)
+        {
+            result = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+        else
+        {
+            if (xQueueTakeMutexRecursive(handleRecursiveMutex, portMAX_DELAY) == pdPASS)
+            {
+                result = SOPC_STATUS_OK;
+            }
+            else
+            {
+                result = SOPC_STATUS_NOK;
+            }
+        }
+    }
+    return result;
+}
+
+// Unlock recursive mutex
+SOPC_ReturnStatus Mutex_Unlock(Mutex* mut)
+{
+    QueueHandle_t handleRecursiveMutex = NULL;
+    SOPC_ReturnStatus result = SOPC_STATUS_OK;
+    if (mut == NULL)
+    {
+        result = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    else
+    {
+        handleRecursiveMutex = *((QueueHandle_t*) (mut));
+        if (handleRecursiveMutex == NULL)
+        {
+            result = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+        else
+        {
+            if (xQueueGiveMutexRecursive(handleRecursiveMutex) == pdPASS)
+            {
+                result = SOPC_STATUS_OK;
+            }
+            else
+            {
+                result = SOPC_STATUS_NOK;
+            }
+        }
+    }
     return result;
 }

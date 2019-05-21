@@ -25,10 +25,6 @@
 #include "fsl_debug_console.h"
 #include "task.h"
 
-typedef QueueHandle_t Mutex;
-
-typedef QueueHandle_t Condition;
-
 typedef void*(SOPCThreadStartFct)(void*);
 
 typedef struct Thread
