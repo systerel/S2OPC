@@ -56,6 +56,10 @@ void msg_subscription_create_monitored_item_bs__alloc_msg_create_monitored_items
                                          sizeof(OpcUa_MonitoredItemCreateResult));
             if (NULL != createResp->Results)
             {
+                for (int32_t i = 0; i < createResp->NoOfResults; i++)
+                {
+                    OpcUa_MonitoredItemCreateResult_Initialize(&createResp->Results[i]);
+                }
                 *msg_subscription_create_monitored_item_bs__bres = true;
             }
         }

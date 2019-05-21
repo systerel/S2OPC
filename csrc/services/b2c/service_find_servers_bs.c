@@ -65,6 +65,7 @@ void service_find_servers_bs__treat_find_servers_request(
     // Since we're the only server here, we will always return a single record
 
     response->Servers = calloc(1, sizeof(OpcUa_ApplicationDescription));
+    OpcUa_ApplicationDescription_Initialize(response->Servers);
 
     if (response->Servers == NULL)
     {
@@ -78,6 +79,7 @@ void service_find_servers_bs__treat_find_servers_request(
     OpcUa_ApplicationDescription* dst_desc = &response->Servers[0];
 
     dst_desc->DiscoveryUrls = calloc(1, sizeof(SOPC_String));
+    SOPC_String_Initialize(dst_desc->DiscoveryUrls);
 
     if (dst_desc->DiscoveryUrls == NULL)
     {

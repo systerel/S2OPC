@@ -298,12 +298,9 @@ SOPC_ReturnStatus Helpers_NewPublishRequest(bool bAck, uint32_t iSubId, uint32_t
         if (bAck)
         {
             pReq->NoOfSubscriptionAcknowledgements = 1;
-            pReq->SubscriptionAcknowledgements = malloc(sizeof(OpcUa_SubscriptionAcknowledgement));
-            if (NULL == pReq->SubscriptionAcknowledgements)
-            {
-                status = SOPC_STATUS_OUT_OF_MEMORY;
-            }
-            else
+            status = SOPC_Encodeable_Create(&OpcUa_SubscriptionAcknowledgement_EncodeableType,
+                                            (void**) &pReq->SubscriptionAcknowledgements);
+            if (SOPC_STATUS_OK == status)
             {
                 pReq->SubscriptionAcknowledgements->SubscriptionId = iSubId;
                 pReq->SubscriptionAcknowledgements->SequenceNumber = iSeqNum;
@@ -376,6 +373,7 @@ SOPC_ReturnStatus Helpers_NewCreateMonitoredItemsRequest(SOPC_NodeId** lpNid,
         pReq->ItemsToCreate = pitc;
         for (int i = 0; i < nElems; ++i)
         {
+            OpcUa_MonitoredItemCreateRequest_Initialize(&pitc[i]);
             pitc[i].ItemToMonitor.NodeId = *lpNid[i];
             pitc[i].ItemToMonitor.AttributeId = liAttrId[i];
             SOPC_String_Initialize(&pitc[i].ItemToMonitor.IndexRange);

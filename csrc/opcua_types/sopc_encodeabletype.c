@@ -25,6 +25,7 @@
 #include "sopc_builtintypes.h"
 #include "sopc_encoder.h"
 #include "sopc_helper_string.h"
+#include "sopc_logger.h"
 #include "sopc_types.h"
 
 const char* nullType = "NULL";
@@ -203,14 +204,14 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Encode(const SOPC_EncodeableType* type, 
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
 
-    if (type != NULL && pValue != NULL && buf != NULL)
+    if (type != NULL && pValue != NULL && buf != NULL && *((SOPC_EncodeableType* const*) pValue) == type)
     {
         status = SOPC_STATUS_OK;
     }
-
-    if (SOPC_STATUS_OK == status)
+    else if (type != NULL && pValue != NULL && *((SOPC_EncodeableType* const*) pValue) != type)
     {
-        // TODO assert(*((SOPC_EncodeableType* const*) pValue) == type);
+        SOPC_Logger_TraceWarning(
+            "Problem encoding type %s value. Value 'encodeableType' field incorrectly initialized.", type->TypeName);
     }
 
     for (int32_t i = 0; SOPC_STATUS_OK == status && i < type->NoOfFields; ++i)
