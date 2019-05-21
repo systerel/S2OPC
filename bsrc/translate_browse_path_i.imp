@@ -69,7 +69,9 @@ LOCAL_OPERATIONS
             ( statusCode_operation = e_sc_ok
                 =>
                 target : t_ExpandedNodeId &
+                /* TargetName in the relativePathElt is equals to Browse name of matches target node */
                 RelativePathElt_TargetName(relativePathElt) = a_BrowseName(a_NodeId~(conv_ExpandedNodeId_NodeId(target))) &
+                /* There is one, and only one, node which is related to source node by the reference of relativePathElt */
                 card ( { lnode, lind | lnode = a_NodeId~(source) &
                         lind : 1..Node_RefIndexEnd(a_NodeId~(source)) &
                         target = Reference_TargetNode(RefIndex_Reference(lnode |-> lind)) &
@@ -115,7 +117,7 @@ LOCAL_OPERATIONS
             (translate_statusCode = e_sc_bad_node_id_unknown  => browse_statusCode : { e_sc_bad_node_id_unknown }) &
             (translate_statusCode = e_sc_bad_no_match  => browse_statusCode : { e_sc_bad_reference_type_id_invalid }) &
             (translate_statusCode = e_sc_bad_query_too_complex  => browse_statusCode : { e_sc_bad_out_of_memory, e_sc_bad_no_continuation_points, e_sc_bad_view_id_unknown}) &
-            /* Case not specify in B model */
+            /* Case not specified in B model */
             (translate_statusCode = c_StatusCode_indet => browse_statusCode /: {e_sc_ok, e_sc_bad_out_of_memory, e_sc_bad_node_id_unknown,
                     e_sc_bad_reference_type_id_invalid, e_sc_bad_no_continuation_points,
                     e_sc_bad_view_id_unknown})
@@ -369,6 +371,7 @@ OPERATIONS
                             statusCode_operation := e_sc_ok
                         ELSE
                             // several nodeId found => not managed
+                            // it means Bad_TooManyMatches is never returned
                             l_target_found := c_ExpandedNodeId_indet;
                             statusCode_operation := e_sc_bad_query_too_complex;
                             l_continue := FALSE

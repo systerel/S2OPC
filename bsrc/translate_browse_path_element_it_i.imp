@@ -40,17 +40,6 @@ INVARIANT
 
     current_element_index : 0..nb_elements_to_iterate
 
-
-    /*
-    &
-
-    elements_to_iterate = cast_t_RelativePathElt[1..current_element_index] &
-    elements_iterated = cast_t_RelativePathElt[current_element_index+1..nb_elements_to_iterate]
-
-    elements_to_iterate : seq(t_RelativePathElt)  &
-    elements_iterated   : seq(t_RelativePathElt)*/
-
-
 INITIALISATION
 
     current_element_index := 0;

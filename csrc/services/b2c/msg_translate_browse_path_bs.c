@@ -24,7 +24,7 @@
 /* Globals */
 static OpcUa_TranslateBrowsePathsToNodeIdsRequest* browsePaths_request;
 
-struct msg_translate_browse_path_bs__BrowsePathResult
+static struct msg_translate_browse_path_bs__BrowsePathResult
 {
     int32_t NoOfResults;
     OpcUa_BrowsePathResult* Results;
@@ -130,8 +130,8 @@ void msg_translate_browse_path_bs__read_RelativePath_RelativePathElt(
     assert(NULL != msg_translate_browse_path_bs__relativePath);
     assert(NULL != msg_translate_browse_path_bs__relativePathElt);
     assert(0 < msg_translate_browse_path_bs__index);
+    assert(msg_translate_browse_path_bs__index <= msg_translate_browse_path_bs__relativePath->NoOfElements);
     const int32_t index = msg_translate_browse_path_bs__index - 1;
-    assert(index < msg_translate_browse_path_bs__relativePath->NoOfElements);
     *msg_translate_browse_path_bs__relativePathElt = &(msg_translate_browse_path_bs__relativePath->Elements[index]);
 }
 
@@ -276,6 +276,8 @@ void msg_translate_browse_path_bs__add_BrowsePath_Res_Target_Common(
 {
     assert(NULL != browsePaths_results.Results);
     assert(NULL != statusCode);
+    assert(NULL != node);
+
     uint32_t browsePath_index =
         msg_translate_browse_path_bs__get_BrowsePathIndex(browsePath, browsePaths_results.NoOfResults);
     OpcUa_BrowsePathResult* result = &browsePaths_results.Results[browsePath_index];
@@ -288,19 +290,16 @@ void msg_translate_browse_path_bs__add_BrowsePath_Res_Target_Common(
     OpcUa_BrowsePathTarget_Initialize(&result->Targets[result->NoOfTargets]);
     SOPC_ExpandedNodeId_Initialize(&result->Targets[result->NoOfTargets].TargetId);
 
-    if (NULL != node)
+    const SOPC_ReturnStatus alloc = SOPC_ExpandedNodeId_Copy(&result->Targets[result->NoOfTargets].TargetId, node);
+    if (SOPC_STATUS_OK != alloc)
     {
-        const SOPC_ReturnStatus alloc = SOPC_ExpandedNodeId_Copy(&result->Targets[result->NoOfTargets].TargetId, node);
-
-        if (SOPC_STATUS_OK != alloc)
-        {
-            *statusCode = constants_statuscodes_bs__e_sc_bad_out_of_memory;
-        }
+        *statusCode = constants_statuscodes_bs__e_sc_bad_out_of_memory;
     }
-
-    result->Targets[result->NoOfTargets].RemainingPathIndex = remainingIndex;
-    result->NoOfTargets++;
-    *statusCode = constants_statuscodes_bs__e_sc_ok;
+    else
+    {
+        result->Targets[result->NoOfTargets].RemainingPathIndex = remainingIndex;
+        result->NoOfTargets++;
+    }
 }
 
 void msg_translate_browse_path_bs__write_translate_browse_paths_response(

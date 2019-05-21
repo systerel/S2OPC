@@ -182,8 +182,9 @@ void constants_bs__is_QualifiedNames_Equal(const constants_bs__t_QualifiedName_i
     else
     {
         int32_t comparison = 0;
-        SOPC_String_Compare(&constants_bs__name1->Name, &constants_bs__name2->Name, true, &comparison);
-        *constants_bs__p_bool = (0 == comparison);
+        const SOPC_ReturnStatus retVal =
+            SOPC_String_Compare(&constants_bs__name1->Name, &constants_bs__name2->Name, true, &comparison);
+        *constants_bs__p_bool = (SOPC_STATUS_OK == retVal && 0 == comparison);
     }
 }
 

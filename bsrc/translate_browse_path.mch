@@ -135,28 +135,6 @@ DEFINITIONS
         isBrowseValueContextDefined = FALSE &
         isBrowseResultComputed      = FALSE
     )
-    ;
-
-    d_add_BrowsePath_Res_Target(target_index, remainingIndex) ==
-    StatusCode,
-    BrowsePath_Res_Target_Node,
-    BrowsePath_Res_Target_Index
-    :(
-        StatusCode : t_StatusCode_i &
-        StatusCode : t_StatusCode &
-
-        (StatusCode = e_sc_ok =>
-            {browsePath} <<| BrowsePath_Res_Target_Node = {browsePath} <<| BrowsePath_Res_Target_Node$0 &
-            BrowsePath_Res_Target_Node(browsePath) = BrowsePath_Res_Target_Node$0(browsePath) <+ {target_index |-> node} &
-            {browsePath} <<| BrowsePath_Res_Target_Index = {browsePath} <<| BrowsePath_Res_Target_Index$0 &
-            BrowsePath_Res_Target_Index(browsePath) = BrowsePath_Res_Target_Index$0(browsePath) <+ {target_index |-> remainingIndex}
-        ) &address_space,
-
-        (StatusCode /= e_sc_ok =>
-            BrowsePath_Res_Target_Node = BrowsePath_Res_Target_Node$0 &
-            BrowsePath_Res_Target_Index = BrowsePath_Res_Target_Index$0
-        )
-    )
 
 ABSTRACT_VARIABLES
     d_variables_in,
@@ -185,7 +163,6 @@ OPERATIONS
         d_variables_in,
         d_variables_out
         :(
-            StatusCode_service : t_StatusCode_i &
             StatusCode_service : {e_sc_ok, e_sc_bad_too_many_ops, e_sc_bad_nothing_to_do} &
             ( StatusCode_service = e_sc_ok
                 =>
@@ -240,18 +217,20 @@ OPERATIONS
             (BrowsePath_Res_StatusCode(browsePath) = e_sc_ok =>
                 ! (ind).(ind : dom(BrowsePath_Res_Target_Node(browsePath))
                     =>
-                    /* Target is local and its browse name equals to the last target name in the request */
+                    /* Target is local and its browse name is equal to the last target name in the request */
                     BrowsePath_Res_Target_Node(browsePath)(ind) : dom(conv_ExpandedNodeId_NodeId) &
                     a_BrowseName(a_NodeId~(conv_ExpandedNodeId_NodeId(BrowsePath_Res_Target_Node(browsePath)(ind)))) =
                     RelativePathElt_TargetName(last(RelativePath_RelativePathElt(BrowsePath_RelativePath(browsePath)))) &
                     BrowsePath_Res_Target_Index(browsePath)(ind) = k_n_noRemainingPathIndex)
             ) &
 
+            /* e_sc_uncertain_reference_out_of_server is returned if there is at least one match which is not local.
+               Other matches are locals. */
             (BrowsePath_Res_StatusCode(browsePath) = e_sc_uncertain_reference_out_of_server =>
                 ! (ind).(ind : dom(BrowsePath_Res_Target_Node(browsePath))
                     =>
                     (
-                        /* If target is local, its browse name equals to the last target name in the request */
+                        /* If target is local, its browse name is equal to the last target name in the request */
                         BrowsePath_Res_Target_Node(browsePath)(ind) : dom(conv_ExpandedNodeId_NodeId)
                         =>
                         a_BrowseName(a_NodeId~(conv_ExpandedNodeId_NodeId(BrowsePath_Res_Target_Node(browsePath)(ind)))) =

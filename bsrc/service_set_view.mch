@@ -95,7 +95,7 @@ OPERATIONS
         p_req_msg : t_msg_i &
         p_req_msg : t_msg &
         p_req_msg = c_msg_in &
-        a_msg_in_type = e_msg_subscription_create_req &
+        a_msg_in_type = e_msg_view_translate_browse_paths_to_node_ids_req &
         p_resp_msg : t_msg_i &
         p_resp_msg : t_msg &
         p_resp_msg = c_msg_out

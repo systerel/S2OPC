@@ -52,10 +52,8 @@ DEFINITIONS
            /* BrowsePath */
         BrowsePaths                    <: t_BrowsePath                        &
         BrowsePaths                    = cast_t_BrowsePath[1..card(BrowsePaths)] &
-        BrowsePath_StartingNode        : t_BrowsePath +-> t_NodeId            &
-        BrowsePath_RelativePath        : t_BrowsePath +-> t_RelativePath      &
-        dom(BrowsePath_StartingNode)   = BrowsePaths &
-        dom(BrowsePath_RelativePath)   = BrowsePaths &
+        BrowsePath_StartingNode        : BrowsePaths --> t_NodeId            &
+        BrowsePath_RelativePath        : BrowsePaths --> t_RelativePath      &
 
         /* RelativePath */
         RelativePath_RelativePathElt   :  t_RelativePath +-> seq(t_RelativePathElt) &
@@ -112,25 +110,30 @@ DEFINITIONS
     )
     ;
 
-    d_add_BrowsePath_Res_Target(target_index, remainingIndex) ==
-    StatusCode,
-    BrowsePath_Res_Target_Node,
-    BrowsePath_Res_Target_Index
-    :(
-        StatusCode : t_StatusCode_i &
-        StatusCode : { e_sc_ok, e_sc_bad_out_of_memory } &
+    d_add_BrowsePath_Res_Target(remainingIndex) ==
+        LET target_index BE
+            target_index = card(BrowsePath_Res_Target_Node(browsePath))
+        IN
 
-        (StatusCode = e_sc_ok =>
-            {browsePath} <<| BrowsePath_Res_Target_Node = {browsePath} <<| BrowsePath_Res_Target_Node$0 &
-            BrowsePath_Res_Target_Node(browsePath) = BrowsePath_Res_Target_Node$0(browsePath) <+ {target_index |-> node} &
-            {browsePath} <<| BrowsePath_Res_Target_Index = {browsePath} <<| BrowsePath_Res_Target_Index$0 &
-            BrowsePath_Res_Target_Index(browsePath) = BrowsePath_Res_Target_Index$0(browsePath) <+ {target_index |-> remainingIndex}
-        ) &
-        (StatusCode /= e_sc_ok =>
-            BrowsePath_Res_Target_Node = BrowsePath_Res_Target_Node$0 &
-            BrowsePath_Res_Target_Index = BrowsePath_Res_Target_Index$0
+        StatusCode,
+        BrowsePath_Res_Target_Node,
+        BrowsePath_Res_Target_Index
+        :(
+            StatusCode : t_StatusCode_i &
+            StatusCode : { e_sc_ok, e_sc_bad_out_of_memory } &
+
+            (StatusCode = e_sc_ok =>
+                {browsePath} <<| BrowsePath_Res_Target_Node = {browsePath} <<| BrowsePath_Res_Target_Node$0 &
+                BrowsePath_Res_Target_Node(browsePath) = BrowsePath_Res_Target_Node$0(browsePath) <+ {target_index |-> node} &
+                {browsePath} <<| BrowsePath_Res_Target_Index = {browsePath} <<| BrowsePath_Res_Target_Index$0 &
+                BrowsePath_Res_Target_Index(browsePath) = BrowsePath_Res_Target_Index$0(browsePath) <+ {target_index |-> remainingIndex}
+            ) &
+            (StatusCode /= e_sc_ok =>
+                BrowsePath_Res_Target_Node = BrowsePath_Res_Target_Node$0 &
+                BrowsePath_Res_Target_Index = BrowsePath_Res_Target_Index$0
+            )
         )
-    )
+    END
 
 ABSTRACT_VARIABLES
     d_variables_in,
@@ -340,11 +343,7 @@ OPERATIONS
         node: t_ExpandedNodeId       &
         card(BrowsePath_Res_Target_Node(browsePath)) < BrowsePath_Res_NbTargetMax(browsePath)
     THEN
-        LET target_index BE
-            target_index = card(BrowsePath_Res_Target_Node(browsePath))
-        IN
-          d_add_BrowsePath_Res_Target(target_index, k_n_noRemainingPathIndex)
-        END
+        d_add_BrowsePath_Res_Target(k_n_noRemainingPathIndex)
     END
     ;
 
@@ -357,11 +356,7 @@ OPERATIONS
         remainingIndex : NAT         &
         card(BrowsePath_Res_Target_Node(browsePath)) < BrowsePath_Res_NbTargetMax(browsePath)
     THEN
-        LET target_index BE
-            target_index = card(BrowsePath_Res_Target_Node(browsePath))
-        IN
-           d_add_BrowsePath_Res_Target(target_index, remainingIndex)
-        END
+        d_add_BrowsePath_Res_Target(remainingIndex)
     END
     ;
 
