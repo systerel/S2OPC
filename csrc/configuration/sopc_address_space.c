@@ -53,7 +53,7 @@ void SOPC_AddressSpace_Item_Initialize(SOPC_AddressSpace_Item* item, OpcUa_NodeC
         {
             item->value_status = OpcUa_BadDataUnavailable;
         }
-        /*Note: set an initial timestamp to could return non null timestamps */
+        /*Note: set an initial timestamp to return non null timestamps */
         item->value_source_ts.timestamp = SOPC_Time_GetCurrentTimeUTC();
         item->value_source_ts.picoSeconds = 0;
     }

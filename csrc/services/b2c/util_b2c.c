@@ -854,7 +854,8 @@ constants_statuscodes_bs__t_StatusCode_i util_return_status__C_to_status_code_B(
     case SOPC_STATUS_OUT_OF_MEMORY:
         return constants_statuscodes_bs__e_sc_bad_out_of_memory;
     default:
-        SOPC_Logger_TraceWarning("index_range_statuscode: internal error generated from return status code %d", status);
+        SOPC_Logger_TraceWarning(
+            "util_return_status__C_to_status_code_B: internal error generated from return status code %d", status);
         return constants_statuscodes_bs__e_sc_bad_internal_error;
     }
 }

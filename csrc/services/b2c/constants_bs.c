@@ -82,9 +82,6 @@ void constants_bs__is_t_access_level_timestampWrite(const constants_bs__t_access
     *constants_bs__bres = (constants_bs__p_access_lvl & SOPC_AccessLevelMask_TimestampWrite) != 0;
 }
 
-void constants_bs__is_t_channel(const constants_bs__t_channel_i constants_bs__p_channel,
-                                t_bool* const constants_bs__p_res);
-
 void constants_bs__get_card_t_channel(t_entier4* const constants_bs__p_card_channel)
 {
     *constants_bs__p_card_channel = constants_bs__t_channel_i_max;

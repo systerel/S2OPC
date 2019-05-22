@@ -485,9 +485,55 @@ static constants_statuscodes_bs__t_StatusCode_i set_value_indexed(SOPC_Variant* 
     return ret;
 }
 
+static SOPC_Variant* convertVariantType_ByteArrayByteString(SOPC_Variant* toConvert)
+{
+    SOPC_Variant* result = SOPC_Variant_Create();
+
+    if (NULL == result)
+    {
+        return NULL;
+    }
+
+    if (SOPC_Byte_Id == toConvert->BuiltInTypeId && SOPC_VariantArrayType_Array == toConvert->ArrayType)
+    {
+        // Byte[] => ByteString
+        result->ArrayType = SOPC_VariantArrayType_SingleValue;
+        result->BuiltInTypeId = SOPC_ByteString_Id;
+        result->DoNotClear = true; // We do not actually copy the content
+
+        if (toConvert->Value.Array.Length > 0)
+        {
+            result->Value.Bstring.Length = toConvert->Value.Array.Length;
+            result->Value.Bstring.Data = toConvert->Value.Array.Content.ByteArr;
+        } // Otherwise NULL ByteString since array of length <= 0
+    }
+    else if (SOPC_ByteString_Id == toConvert->BuiltInTypeId &&
+             SOPC_VariantArrayType_SingleValue == toConvert->ArrayType)
+    {
+        // ByteString => Byte[]
+        result->ArrayType = SOPC_VariantArrayType_Array;
+        result->BuiltInTypeId = SOPC_Byte_Id;
+        result->DoNotClear = true; // We do not actually copy the content
+
+        if (toConvert->Value.Bstring.Length > 0)
+        {
+            result->Value.Array.Length = toConvert->Value.Bstring.Length;
+            result->Value.Array.Content.ByteArr = toConvert->Value.Bstring.Data;
+        } // Otherwise empty Byte[] since ByteString of length <= 0
+    }
+    else
+    {
+        // It shall be a Byte[] or a ByteString
+        assert(false);
+    }
+
+    return result;
+}
+
 void address_space_bs__set_Value(const constants__t_user_i address_space_bs__p_user,
                                  const constants__t_Node_i address_space_bs__node,
                                  const constants__t_Variant_i address_space_bs__variant,
+                                 const t_bool address_space_bs__toConvert,
                                  const constants__t_IndexRange_i address_space_bs__index_range,
                                  constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__serviceStatusCode,
                                  constants__t_DataValue_i* const address_space_bs__prev_dataValue)
@@ -495,9 +541,18 @@ void address_space_bs__set_Value(const constants__t_user_i address_space_bs__p_u
     (void) (address_space_bs__p_user); /* Keep for B precondition: user is already authorized for this operation */
     SOPC_AddressSpace_Item* item = address_space_bs__node;
     SOPC_Variant* pvar = SOPC_AddressSpace_Item_Get_Value(item);
+    SOPC_Variant* convertedValue = NULL;
+    const SOPC_Variant* newValue = address_space_bs__variant;
+
     *address_space_bs__prev_dataValue = calloc(1, sizeof(SOPC_DataValue));
 
-    if (*address_space_bs__prev_dataValue == NULL)
+    if (address_space_bs__toConvert)
+    {
+        convertedValue = convertVariantType_ByteArrayByteString(address_space_bs__variant);
+        newValue = convertedValue;
+    }
+
+    if (NULL == *address_space_bs__prev_dataValue || NULL == newValue)
     {
         *address_space_bs__serviceStatusCode = constants_statuscodes_bs__e_sc_bad_out_of_memory;
         return;
@@ -526,6 +581,11 @@ void address_space_bs__set_Value(const constants__t_user_i address_space_bs__p_u
         SOPC_DataValue_Clear(*address_space_bs__prev_dataValue);
         free(*address_space_bs__prev_dataValue);
         *address_space_bs__prev_dataValue = NULL;
+    }
+
+    if (address_space_bs__toConvert)
+    {
+        SOPC_Variant_Delete(convertedValue);
     }
 }
 

@@ -728,7 +728,7 @@ def number_coalesce(n, default):
 
 def default_variable_status(ua_node):
     value_status = '0x00' # Good status
-    if ua_node.value is None and ua_node.nodeid.ns != None and ua_node.nodeid.ns != 0:
+    if ua_node.value is None and ua_node.nodeid.ns not in (None,0):
         # Keep OPC UA default namespace nodes with a Good status, necessary to pass UACTT
         # othewise keep Good status only if a value is defined
         value_status='OpcUa_BadDataUnavailable'

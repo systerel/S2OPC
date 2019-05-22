@@ -43,7 +43,7 @@
 #include "sopc_types.h"
 #include "sopc_user_app_itf.h"
 
-/* Access levels, taken from Part 3 §5.6.2 Table 8 */
+/* Access levels, taken from Part 3 v1.03 §5.6.2 Table 8 */
 #define SOPC_AccessLevelMask_CurrentRead (uint8_t) 1     // bit0
 #define SOPC_AccessLevelMask_CurrentWrite (uint8_t) 2    // bit1
 #define SOPC_AccessLevelMask_StatusWrite (uint8_t) 32    // bit5
@@ -103,52 +103,11 @@ typedef SOPC_ExtensionObject* constants_bs__t_user_token_i;
 /*--------------------------
    Added by the Translator
   --------------------------*/
-#define constants_bs__t_DataValue_i_max (-1)
-#define constants_bs__t_ExpandedNodeId_i_max (-1)
-#define constants_bs__t_IndexRange_i_max (-1)
-#define constants_bs__t_Int32_max (-1)
-#define constants_bs__t_LocalizedText_i_max (-1)
-#define constants_bs__t_NodeId_i_max (-1)
-#define constants_bs__t_Node_i_max (-1)
-#define constants_bs__t_Nonce_i_max (-1)
-#define constants_bs__t_QualifiedName_i_max (-1)
-#define constants_bs__t_RawStatusCode_max (-1)
-#define constants_bs__t_Reference_i_max (-1)
-#define constants_bs__t_SignatureData_i_max (-1)
-#define constants_bs__t_Timestamp_max (-1)
-#define constants_bs__t_Variant_i_max (-1)
-#define constants_bs__t_WriteValuePointer_i_max (-1)
-#define constants_bs__t_access_level_max (-1)
-#define constants_bs__t_application_context_i_max (-1)
-#define constants_bs__t_byte_buffer_i_max (-1)
 #define constants_bs__t_channel_config_idx_i_max (2 * SOPC_MAX_SECURE_CONNECTIONS)
 #define constants_bs__t_channel_i_max SOPC_MAX_SECURE_CONNECTIONS
-#define constants_bs__t_client_handle_i_max (-1)
-#define constants_bs__t_client_request_handle_i_max (-1)
-#define constants_bs__t_counter_i_max (-1)
 #define constants_bs__t_endpoint_config_idx_i_max SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS
-#define constants_bs__t_monitoredItemId_i_max (-1)
-#define constants_bs__t_monitoredItemPointer_i_max (-1)
-#define constants_bs__t_monitoredItemQueueIterator_i_max (-1)
-#define constants_bs__t_monitoredItemQueue_i_max (-1)
-#define constants_bs__t_msg_header_i_max (-1)
-#define constants_bs__t_msg_i_max (-1)
-#define constants_bs__t_notifRepublishQueueIterator_i_max (-1)
-#define constants_bs__t_notifRepublishQueue_i_max (-1)
-#define constants_bs__t_notif_msg_i_max (-1)
-#define constants_bs__t_notificationQueue_i_max (-1)
-#define constants_bs__t_opcua_duration_i_max (-1)
-#define constants_bs__t_publishReqQueue_i_max (-1)
-#define constants_bs__t_request_context_i_max (-1)
-#define constants_bs__t_server_request_handle_i_max (-1)
 #define constants_bs__t_session_i_max SOPC_MAX_SESSIONS
-#define constants_bs__t_session_token_i_max (-1)
-#define constants_bs__t_sub_seq_num_i_max (-1)
 #define constants_bs__t_subscription_i_max SOPC_MAX_SESSIONS // 1 sub / session
-#define constants_bs__t_timer_id_i_max (-1)
-#define constants_bs__t_timeref_i_max (-1)
-#define constants_bs__t_user_i_max (-1)
-#define constants_bs__t_user_token_i_max (-1)
 
 /*------------------------------------------------
    CONCRETE_CONSTANTS Clause: scalars and arrays

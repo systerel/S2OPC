@@ -171,16 +171,13 @@ static bool recursive_is_transitive_subtype(int recursionLimit,
     }
     else
     {
-        if (NULL != directParent)
+        if (SOPC_NodeId_Equal(directParent, expectedParentType))
         {
-            if (SOPC_NodeId_Equal(directParent, expectedParentType))
-            {
-                return true;
-            }
-            else
-            {
-                return recursive_is_transitive_subtype(recursionLimit, originSubtype, directParent, expectedParentType);
-            }
+            return true;
+        }
+        else
+        {
+            return recursive_is_transitive_subtype(recursionLimit, originSubtype, directParent, expectedParentType);
         }
     }
 

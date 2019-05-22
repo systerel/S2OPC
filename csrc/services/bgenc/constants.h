@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 06/02/2019 08:23:25
+ Date                 : 22/05/2019 14:06:15
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -408,6 +408,11 @@ typedef enum {
 #define constants__c_WriteValue_indet (0)
 #define constants__c_BrowseValue_indet (0)
 #define constants__c_BrowseResult_indet (0)
+#define constants__c_ValueRank_OneDimension (1)
+#define constants__c_ValueRank_OneOrMoreDimensions (0)
+#define constants__c_ValueRank_Scalar (-1)
+#define constants__c_ValueRank_Any (-2)
+#define constants__c_ValueRank_ScalarOrOneDimension (-3)
 
 /*------------------------
    INITIALISATION Clause

@@ -362,14 +362,14 @@ const SOPC_NodeId SOPC_Embedded_HasSubTypeBackward[SOPC_MAX_HAS_HASUBTYPE_BACKWA
     {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 22},  // 331
     {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 0},   // 332
     {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 0},   // 333
-    {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 29},  // 334
-    {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 22},  // 335
+    {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 0},   // 334
+    {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 0},   // 335
     {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 0},   // 336
     {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 0},   // 337
     {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 22},  // 338
     {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 0},   // 339
     {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 0},   // 340
-    {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 22},  // 341
+    {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 0},   // 341
     {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 0},   // 342
     {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 0},   // 343
     {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 22},  // 344
@@ -426,7 +426,7 @@ const SOPC_NodeId SOPC_Embedded_HasSubTypeBackward[SOPC_MAX_HAS_HASUBTYPE_BACKWA
     {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 0},   // 395
     {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 0},   // 396
     {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 0},   // 397
-    {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 29},  // 398
+    {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 0},   // 398
     {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 0},   // 399
     {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 0},   // 400
     {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 0},   // 401

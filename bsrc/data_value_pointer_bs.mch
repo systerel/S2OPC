@@ -24,41 +24,48 @@ SEES
     constants,
     constants_statuscodes_bs
 
-ABSTRACT_VARIABLES
-    DataValue_Variant,
-    DataValue_StatusCode,
-    DataValue_SourceTimestamp,
-    DataValue_ServerTimestamp,
+DEFINITIONS
 
-    DataValue_LocalDataType,
-    DataValue_ValueRank
+    d_variables ==
+        DataValue_Variant,
+        DataValue_StatusCode,
+        DataValue_SourceTimestamp,
+        DataValue_ServerTimestamp,
+
+        DataValue_LocalDataType,
+        DataValue_ValueRank
+    ;
+
+    d_inv ==
+    (
+        DataValue_Variant : t_DataValue --> t_Variant &
+        DataValue_StatusCode : t_DataValue --> t_RawStatusCode &
+        DataValue_SourceTimestamp : t_DataValue --> t_Timestamp &
+        DataValue_ServerTimestamp : t_DataValue --> t_Timestamp &
+
+        DataValue_LocalDataType : t_DataValue --> t_NodeId & /* ExpandedNodeId from different server returns Structure <=> NodeId(i=22)
+                                                                / Null value return NodeId(i=0) */
+        DataValue_ValueRank : t_DataValue --> t_ConcreteValueRank
+    );
+
+    d_init ==
+        d_inv
+
+ABSTRACT_VARIABLES
+    d_variables
 
 INVARIANT
-    DataValue_Variant : t_DataValue --> t_Variant &
-    DataValue_StatusCode : t_DataValue --> t_RawStatusCode &
-    DataValue_SourceTimestamp : t_DataValue --> t_Timestamp &
-    DataValue_ServerTimestamp : t_DataValue --> t_Timestamp &
-
-    DataValue_LocalDataType : t_DataValue --> t_NodeId & /* ExpandedNodeId from different server returns Structure <=> NodeId(i=22)
-                                                            / Null value return NodeId(i=0) */
-    DataValue_ValueRank : t_DataValue --> t_ConcreteValueRank
-
+    d_inv
 
 INITIALISATION
-    DataValue_Variant :: {} ||
-    DataValue_StatusCode :: {} ||
-    DataValue_SourceTimestamp :: {} ||
-    DataValue_ServerTimestamp :: {} ||
-
-    DataValue_LocalDataType :: {} ||
-    DataValue_ValueRank :: {}
+    d_variables :( d_init )
 
 OPERATIONS
 
     p_variant <-- get_conv_DataValue_Variant(p_dataValue) =
     PRE
         p_dataValue : t_DataValue_i &
-        p_dataValue : t_DataValue_i
+        p_dataValue : t_DataValue
     THEN
         p_variant :(p_variant : t_Variant_i & p_variant = DataValue_Variant(p_dataValue))
     END
@@ -67,7 +74,7 @@ OPERATIONS
     p_sc <-- get_conv_DataValue_Status(p_dataValue) =
     PRE
         p_dataValue : t_DataValue_i &
-        p_dataValue : t_DataValue_i
+        p_dataValue : t_DataValue
     THEN
         p_sc := DataValue_StatusCode(p_dataValue)
     END
@@ -76,7 +83,7 @@ OPERATIONS
     p_st <-- get_conv_DataValue_SourceTimestamp(p_dataValue) =
     PRE
         p_dataValue : t_DataValue_i &
-        p_dataValue : t_DataValue_i
+        p_dataValue : t_DataValue
     THEN
         p_st := DataValue_SourceTimestamp(p_dataValue)
     END
@@ -85,7 +92,7 @@ OPERATIONS
     p_dt <-- get_conv_DataValue_LocalDataType(p_dataValue) =
     PRE
         p_dataValue : t_DataValue_i &
-        p_dataValue : t_DataValue_i
+        p_dataValue : t_DataValue
     THEN
         p_dt :(p_dt : t_NodeId_i & p_dt = DataValue_LocalDataType(p_dataValue))
     END
@@ -94,7 +101,7 @@ OPERATIONS
     p_vr <-- get_conv_DataValue_ValueRank(p_dataValue) =
     PRE
         p_dataValue : t_DataValue_i &
-        p_dataValue : t_DataValue_i
+        p_dataValue : t_DataValue
     THEN
         p_vr := DataValue_ValueRank(p_dataValue)
     END

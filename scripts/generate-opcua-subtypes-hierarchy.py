@@ -266,8 +266,8 @@ def get_node_reference_HasSubtype_Backward(node, aliases):
         is_forward = (parse_boolean_value(n.get('IsForward', 'true')))
 
         # Note: ns=0;i=45 <=> HasSubtype reference
-        if((ref_type.ns == None or ref_type.ns == 0) and ref_type.data == 45 and is_forward == False): 
-            if ref == None:
+        if((ref_type.ns is None or ref_type.ns == 0) and ref_type.data == 45 and is_forward is False):
+            if ref is None:
                 ref = Reference(ref_type, NodeId.parse(n.text), is_forward)
             else:
                 assert(False)
@@ -369,7 +369,7 @@ def generate_subtypes_hierarchy(source, out, max_nodeId):
 
         if n.tag in TYPE_TAGS:
             nodeid, ref = parse_uanode_supertype(n, source, aliases)
-            if not ref is None:
+            if ref is not None:
                 if not nodeid.ty == ID_TYPE_NUMERIC:
                     print("Warning: unexpected non-numeric source nodeId: "+str(nodeid))
                 elif not ref.target.ty == ID_TYPE_NUMERIC:

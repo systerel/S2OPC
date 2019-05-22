@@ -350,6 +350,11 @@ CONCRETE_CONSTANTS
     c_no_application_context,
     c_timer_id_indet,
     c_IndexRange_indet,
+    c_ValueRank_OneDimension,
+    c_ValueRank_OneOrMoreDimensions,
+    c_ValueRank_Scalar,
+    c_ValueRank_Any,
+    c_ValueRank_ScalarOrOneDimension,
 
     t_counter,
     t_ValueRank,
@@ -615,8 +620,16 @@ PROPERTIES
     t_counter = NAT &
 
     t_ValueRank = INT &
+    c_ValueRank_OneDimension : t_ValueRank &
+    c_ValueRank_OneOrMoreDimensions : t_ValueRank &
+    c_ValueRank_Scalar : t_ValueRank &
+    c_ValueRank_Any : t_ValueRank &
+    c_ValueRank_ScalarOrOneDimension : t_ValueRank &
+
     t_ConcreteValueRank <: INT &
     t_ConcreteValueRank = NAT1 \/ {-1} &
+    c_ValueRank_OneDimension : t_ConcreteValueRank &
+    c_ValueRank_Scalar : t_ConcreteValueRank &
 
     t_notif_msg <: t_notif_msg_i &
     c_notif_msg_indet : t_notif_msg_i &

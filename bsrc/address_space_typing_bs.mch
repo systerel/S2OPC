@@ -49,7 +49,6 @@ INITIALISATION
 
 OPERATIONS
 
-    /* TODO: B implem todo ! */
     bres <-- is_transitive_subtype(p_subtype, p_parent_type) =
     PRE
         p_subtype : t_NodeId_i &

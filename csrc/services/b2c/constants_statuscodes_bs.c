@@ -36,13 +36,13 @@ void constants_statuscodes_bs__INITIALISATION(void) {}
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-void constants_statuscodes_bs__const_RawStatusCode_BadInvalidState(
+void constants_statuscodes_bs__get_const_RawStatusCode_BadInvalidState(
     constants__t_RawStatusCode* const constants_statuscodes_bs__p_raw_sc)
 {
     *constants_statuscodes_bs__p_raw_sc = OpcUa_BadInvalidState;
 }
 
-void constants_statuscodes_bs__const_RawStatusCode_Good(
+void constants_statuscodes_bs__get_const_RawStatusCode_Good(
     constants__t_RawStatusCode* const constants_statuscodes_bs__p_raw_sc)
 {
     *constants_statuscodes_bs__p_raw_sc = SOPC_GoodGenericStatus;

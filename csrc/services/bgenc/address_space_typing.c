@@ -21,7 +21,7 @@
 
  File Name            : address_space_typing.c
 
- Date                 : 29/01/2019 09:56:36
+ Date                 : 22/05/2019 14:06:14
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -45,18 +45,18 @@ void address_space_typing__is_included_ValueRank(
    const t_entier4 address_space_typing__p_concValueRank,
    const t_entier4 address_space_typing__p_expValueRank,
    t_bool * const address_space_typing__bres) {
-   if (address_space_typing__p_expValueRank == -3) {
-      *address_space_typing__bres = ((address_space_typing__p_concValueRank == -1) ||
-         (address_space_typing__p_concValueRank == 1));
+   if (address_space_typing__p_expValueRank == constants__c_ValueRank_ScalarOrOneDimension) {
+      *address_space_typing__bres = ((address_space_typing__p_concValueRank == constants__c_ValueRank_Scalar) ||
+         (address_space_typing__p_concValueRank == constants__c_ValueRank_OneDimension));
    }
-   else if (address_space_typing__p_expValueRank == -2) {
+   else if (address_space_typing__p_expValueRank == constants__c_ValueRank_Any) {
       *address_space_typing__bres = true;
    }
-   else if (address_space_typing__p_expValueRank == -1) {
-      *address_space_typing__bres = (address_space_typing__p_concValueRank == -1);
+   else if (address_space_typing__p_expValueRank == constants__c_ValueRank_Scalar) {
+      *address_space_typing__bres = (address_space_typing__p_concValueRank == constants__c_ValueRank_Scalar);
    }
-   else if (address_space_typing__p_expValueRank == 0) {
-      *address_space_typing__bres = (address_space_typing__p_concValueRank >= 1);
+   else if (address_space_typing__p_expValueRank == constants__c_ValueRank_OneOrMoreDimensions) {
+      *address_space_typing__bres = (address_space_typing__p_concValueRank >= constants__c_ValueRank_OneDimension);
    }
    else {
       *address_space_typing__bres = (address_space_typing__p_expValueRank == address_space_typing__p_concValueRank);

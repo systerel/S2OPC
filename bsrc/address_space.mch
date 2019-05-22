@@ -96,46 +96,31 @@ DEFINITIONS
         dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value) & /* All Variable have value but not all VariableType */
 
         /* + Value attribute meta-data */
-        a_Value_StatusCode : t_Node +-> t_RawStatusCode &
-        dom(a_Value_StatusCode) = dom(a_NodeClass|>{e_ncl_Variable}) &
+        a_Value_StatusCode : a_NodeClass~[{e_ncl_Variable}] --> t_RawStatusCode &
 
-        a_Value_SourceTimestamp : t_Node +-> t_Timestamp &
-        dom(a_Value_SourceTimestamp) = dom(a_NodeClass|>{e_ncl_Variable}) &
+        a_Value_SourceTimestamp : a_NodeClass~[{e_ncl_Variable}] --> t_Timestamp &
 
-        a_IsAbstract : t_Node +-> BOOL &
-        dom(a_IsAbstract) = dom(a_NodeClass|>{e_ncl_ObjectType, e_ncl_VariableType, e_ncl_ReferenceType, e_ncl_DataType}) &
+        a_IsAbstract : a_NodeClass~[{e_ncl_ObjectType, e_ncl_VariableType, e_ncl_ReferenceType, e_ncl_DataType}] --> BOOL &
 
-        a_EventNotifier : t_Node +-> t_Byte &
-        dom(a_EventNotifier) = dom(a_NodeClass|>{e_ncl_Object, e_ncl_View}) &
+        a_EventNotifier : a_NodeClass~[{e_ncl_Object, e_ncl_View}] --> t_Byte &
 
-        a_DataType : t_Node +-> t_NodeId &
-        dom(a_DataType) = dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
+        a_DataType : a_NodeClass~[{e_ncl_Variable, e_ncl_VariableType}] --> t_NodeId &
 
-        a_ValueRank : t_Node +-> t_ValueRank &
-        dom(a_ValueRank) = dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
+        a_ValueRank : a_NodeClass~[{e_ncl_Variable, e_ncl_VariableType}] --> t_ValueRank &
 
-        a_AccessLevel : t_Node +-> t_access_level &
-        dom(a_AccessLevel) = dom(a_NodeClass|>{e_ncl_Variable}) &
+        a_AccessLevel : a_NodeClass~[{e_ncl_Variable}] --> t_access_level &
 
-        /* Note: Dynamic value evaluation depending on authorization of user */
-        a_UserAccessLevel : t_Node +-> t_access_level &
-        dom(a_UserAccessLevel) = dom(a_NodeClass|>{e_ncl_Variable}) &
+        a_UserAccessLevel : a_NodeClass~[{e_ncl_Variable}] --> t_access_level &
 
-        a_Historizing : t_Node +-> BOOL &
-        dom(a_Historizing) = dom(a_NodeClass|>{e_ncl_Variable}) &
+        a_Historizing : a_NodeClass~[{e_ncl_Variable}] --> BOOL &
 
-        a_Executable : t_Node +-> BOOL &
-        dom(a_Executable) = dom(a_NodeClass|>{e_ncl_Method}) &
+        a_Executable : a_NodeClass~[{e_ncl_Method}] --> BOOL &
 
-        a_UserExecutable : t_Node +-> BOOL &
-        dom(a_UserExecutable) = dom(a_NodeClass|>{e_ncl_Method}) &
+        a_UserExecutable : a_NodeClass~[{e_ncl_Method}] --> BOOL &
 
-        a_ContainsNoLoops : t_Node +-> BOOL &
-        dom(a_ContainsNoLoops) = dom(a_NodeClass|>{e_ncl_View}) &
+        a_ContainsNoLoops : a_NodeClass~[{e_ncl_View}] --> BOOL &
 
-        a_Symmetric : t_Node +-> BOOL &
-        dom(a_Symmetric) = dom(a_NodeClass|>{e_ncl_ReferenceType}) &
-
+        a_Symmetric : a_NodeClass~[{e_ncl_ReferenceType}] --> BOOL &
 
         /* Types */
         Type_IsTransitiveSubtype : t_NodeId <-> t_NodeId &

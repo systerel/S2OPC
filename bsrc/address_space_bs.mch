@@ -73,9 +73,8 @@ DEFINITIONS
         a_DisplayName : t_Node --> t_LocalizedText &
 
         a_Value       : t_Node +-> t_Variant   &
-        dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value) &
-        dom(a_Value) <: dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
         dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value) & /* All Variable have value but not all VariableType */
+        dom(a_Value) <: dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
 
         /* + Value attribute meta-data */
         a_Value_StatusCode : t_Node +-> t_RawStatusCode &
@@ -525,7 +524,7 @@ OPERATIONS
     ;
 
     /* a_Value, setter */
-    serviceStatusCode, prev_dataValue <-- set_Value(p_user, node, variant, index_range) =
+    serviceStatusCode, prev_dataValue <-- set_Value(p_user, node, variant, toConvert, index_range) =
     PRE
         p_user : t_user_i   &
         p_user : t_user     &
@@ -535,6 +534,7 @@ OPERATIONS
         node : dom(a_Value_StatusCode) &
         variant : t_Variant_i &
         variant : t_Variant   &
+        toConvert : BOOL & /* Variant need conversion */
         index_range : t_IndexRange_i &
         e_operation_type_write |-> a_NodeId(node) |-> e_aid_Value |-> p_user : s_AuthorizedOperations
     THEN
@@ -566,7 +566,6 @@ OPERATIONS
     END
     ;
 
-    /* TODO: status code are limited to values in constants if we use the B type, use the data value to avoid loss of info */
     set_Value_StatusCode(p_user, p_node, p_sc) =
     PRE
         p_user : t_user_i   &

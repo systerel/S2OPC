@@ -69,18 +69,18 @@ OPERATIONS
         p_concValueRank : t_ConcreteValueRank &
         p_expValueRank : t_ValueRank
     THEN
-        bres
-        :(bres : BOOL &
-            (p_expValueRank = -3 =>
-                bres = bool(p_concValueRank = -1 or p_concValueRank = 1)) &
-            (p_expValueRank = -2 => bres = TRUE) &
-            (p_expValueRank = -1 =>
-                bres = bool(p_concValueRank = -1)) &
-            (p_expValueRank = 0 =>
-                bres = bool(p_concValueRank >= 1)) &
-            (p_expValueRank >= 1 =>
-                bres = bool(p_expValueRank = p_concValueRank))
-        )
+        bres :(bres : BOOL &
+               bres = bool((p_expValueRank = c_ValueRank_ScalarOrOneDimension & p_concValueRank : {c_ValueRank_Scalar,c_ValueRank_OneDimension})
+                           or
+                           (p_expValueRank = c_ValueRank_Any)
+                           or
+                           (p_expValueRank = c_ValueRank_Scalar & p_concValueRank = c_ValueRank_Scalar)
+                           or
+                           (p_expValueRank = c_ValueRank_OneOrMoreDimensions  & p_concValueRank >= c_ValueRank_OneDimension)
+                           or
+                           (p_expValueRank >= c_ValueRank_OneDimension & p_expValueRank = p_concValueRank)) &
+               (bres = TRUE <=> ((p_concValueRank |-> p_expValueRank) : Type_IsIncludedValueRank))
+              )
     END
 
 END

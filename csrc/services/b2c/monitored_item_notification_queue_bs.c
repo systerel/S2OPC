@@ -235,10 +235,10 @@ void monitored_item_notification_queue_bs__add_monitored_item_notification_to_qu
         switch (monitored_item_notification_queue_bs__p_timestampToReturn)
         {
         case constants__e_ttr_source:
-            srcTs = constants__c_Timestamp_null;
+            srvTs = constants__c_Timestamp_null;
             break;
         case constants__e_ttr_server:
-            srvTs = constants__c_Timestamp_null;
+            srcTs = constants__c_Timestamp_null;
             break;
         case constants__e_ttr_neither:
             srcTs = constants__c_Timestamp_null;

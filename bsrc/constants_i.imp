@@ -55,6 +55,12 @@ VALUES
     c_BrowseValue_indet = 0;
     c_BrowseResult_indet = 0;
 
+    c_ValueRank_OneDimension = 1;
+    c_ValueRank_OneOrMoreDimensions = 0;
+    c_ValueRank_Scalar = -1;
+    c_ValueRank_Any = -2;
+    c_ValueRank_ScalarOrOneDimension = -3;
+
     t_counter = NAT;
     t_ValueRank = INT;
     t_ConcreteValueRank = INT

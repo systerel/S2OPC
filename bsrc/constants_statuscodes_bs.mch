@@ -113,13 +113,13 @@ OPERATIONS
     END
     ;
 
-    p_raw_sc <-- const_RawStatusCode_Good =
+    p_raw_sc <-- get_const_RawStatusCode_Good =
     BEGIN
         p_raw_sc := conv_StatusCode_To_RawStatusCode(e_sc_ok)
     END
     ;
 
-    p_raw_sc <-- const_RawStatusCode_BadInvalidState =
+    p_raw_sc <-- get_const_RawStatusCode_BadInvalidState =
     BEGIN
         p_raw_sc := conv_StatusCode_To_RawStatusCode(e_sc_bad_invalid_state)
     END

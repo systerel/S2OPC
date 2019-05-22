@@ -21,7 +21,7 @@
 
  File Name            : constants_statuscodes_bs.h
 
- Date                 : 05/02/2019 17:21:39
+ Date                 : 22/05/2019 14:06:27
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -105,9 +105,9 @@ extern void constants_statuscodes_bs__INITIALISATION(void);
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-extern void constants_statuscodes_bs__const_RawStatusCode_BadInvalidState(
+extern void constants_statuscodes_bs__get_const_RawStatusCode_BadInvalidState(
    constants__t_RawStatusCode * const constants_statuscodes_bs__p_raw_sc);
-extern void constants_statuscodes_bs__const_RawStatusCode_Good(
+extern void constants_statuscodes_bs__get_const_RawStatusCode_Good(
    constants__t_RawStatusCode * const constants_statuscodes_bs__p_raw_sc);
 extern void constants_statuscodes_bs__getall_conv_RawStatusCode_To_StatusCode(
    const constants__t_RawStatusCode constants_statuscodes_bs__p_raw_sc,
