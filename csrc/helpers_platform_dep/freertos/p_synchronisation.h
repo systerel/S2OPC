@@ -24,7 +24,8 @@
 
 #define MAX_SIGNAL (128)
 #define CLEARING_SIGNAL (0x80000000)
-#define SIGNAL_VALUE (0x40000000)
+#define JOINTURE_SIGNAL (0x40000000)
+#define SIGNAL_VALUE (0x20000000)
 
 typedef struct T_CONDITION_VARIABLE tConditionVariable;
 

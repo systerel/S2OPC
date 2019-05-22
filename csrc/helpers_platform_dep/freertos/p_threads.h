@@ -20,18 +20,40 @@
 #ifndef SOPC_P_THREADS_H_
 #define SOPC_P_THREADS_H_
 
-#include "FreeRTOS.h"
-#include "Queue.h"
-#include "fsl_debug_console.h"
-#include "task.h"
+// typedef struct T_THREAD_WKS tThreadWks;
 
-typedef void*(SOPCThreadStartFct)(void*);
+typedef void* (*ptrTaskCallback)(void*);
 
-typedef struct Thread
+/*****Private thread api*****/
+
+typedef struct T_THREAD_ARGS
 {
-    TaskHandle_t thread;
-    SOPCThreadStartFct* startFct;
-    void* args;
-} Thread;
+    ptrTaskCallback cbExternalCallback;
+    void* ptrStartArgs;
+    tConditionVariable* pJointure;
+} tThreadArgs;
+
+typedef struct T_THREAD_WKS
+{
+    TaskHandle_t handleTask;
+    QueueHandle_t lockRecHandle;
+    tThreadArgs args;
+} tThreadWks;
+
+typedef enum E_THREAD_RESULT
+{
+    E_THREAD_RESULT_OK,
+    E_THREAD_RESULT_ERROR_NOK,
+    E_THREAD_RESULT_ERROR_NOT_INITIALIZED,
+    E_THREAD_RESULT_ERROR_ALREADY_INITIALIZED
+} eThreadResult;
+
+tThreadWks* P_THREAD_Create(ptrTaskCallback fct, void* args);
+eThreadResult P_THREAD_Init(tThreadWks* p, unsigned short wMaxJoin);
+eThreadResult P_THREAD_Join(tThreadWks* p);
+
+/*****Public s2opc thread api*****/
+
+typedef tThreadWks Thread;
 
 #endif /* SOPC_P_THREADS_H_ */
