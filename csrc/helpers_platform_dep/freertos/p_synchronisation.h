@@ -23,47 +23,40 @@
 /*****Private condition variable api*****/
 
 #define MAX_SIGNAL (128)
-#define SIGNAL_VALUE (0x80000000)
+#define CLEARING_SIGNAL (0x80000000)
+#define SIGNAL_VALUE (0x40000000)
 
-typedef struct T_ELT_TASK_LIST
-{
-    TaskHandle_t value;
-    uint32_t uwWaitedSig;
-    uint16_t nxId;
-    uint16_t prId;
-} tEltTaskList;
-
-typedef struct T_CONDITION_VARIABLE
-{
-    QueueHandle_t handleLockCounter;
-    uint16_t first;
-    uint16_t nbWaiters;
-    uint16_t maxWaiters;
-    tEltTaskList* taskList;
-} tConditionVariable;
+typedef struct T_CONDITION_VARIABLE tConditionVariable;
 
 typedef enum T_CONDITION_VARIABLE_RESULT
 {
     E_COND_VAR_RESULT_OK,
+    E_COND_VAR_RESULT_ERROR_OUT_OF_MEM,
     E_COND_VAR_RESULT_TIMEOUT,
     E_COND_VAR_RESULT_ERROR_INCORRECT_PARAMETERS,
     E_COND_VAR_RESULT_ERROR_MAX_WAITERS,
-    E_COND_VAR_RESULT_ERROR_NO_WAITERS
+    E_COND_VAR_RESULT_ERROR_NO_WAITERS,
+    E_COND_VAR_RESULT_ERROR_NOT_INITIALIZED,
+    E_COND_VAR_RESULT_ERROR_ALREADY_INITIALIZED
 } eConditionVariableResult;
 
 /*Construction condition variable*/
-tConditionVariable* BuildConditionVariable(unsigned short int wMaxWaiters);
-void DestroyConditionVariable(tConditionVariable** ppv);
 
-eConditionVariableResult SignalAllConditionVariable(tConditionVariable* pv, unsigned int signalValue);
-eConditionVariableResult UnlockAndWaitForConditionVariable(tConditionVariable* pv,
-                                                           QueueHandle_t handleMutex,
-                                                           uint32_t uwSignal,
-                                                           uint32_t uwTimeOutMs);
+tConditionVariable* P_SYNCHRO_CreateConditionVariable(void);
+void P_SYNCHRO_DestroyConditionVariable(tConditionVariable** pv);
+
+eConditionVariableResult P_SYNCHRO_InitConditionVariable(tConditionVariable* pv, unsigned short int wMaxWaiters);
+eConditionVariableResult P_SYNCHRO_ClearConditionVariable(tConditionVariable* pv);
+
+eConditionVariableResult P_SYNCHRO_SignalAllConditionVariable(tConditionVariable* pv, unsigned int signalValue);
+eConditionVariableResult P_SYNCHRO_UnlockAndWaitForConditionVariable(tConditionVariable* pv,
+                                                                     QueueHandle_t handleMutex,
+                                                                     unsigned int uwSignal,
+                                                                     unsigned int uwTimeOutMs);
 
 /*****Public s2opc condition variable and mutex api*****/
 
-typedef void* Condition; // tConditionVariable*
-typedef void* Mutex;     // QueueHandle_t*
+typedef tConditionVariable Condition; // tConditionVariable*
+typedef QueueHandle_t Mutex;          // QueueHandle_t*
 
 #endif
