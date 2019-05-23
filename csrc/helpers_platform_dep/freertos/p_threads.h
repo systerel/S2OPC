@@ -22,21 +22,44 @@
 
 // typedef struct T_THREAD_WKS tThreadWks;
 
-typedef void* (*ptrTaskCallback)(void*);
+typedef void (*ptrTaskCallback)(void*);
 
 /*****Private thread api*****/
+
+typedef struct T_TASK_LIST_ELT
+{
+    TaskHandle_t value;
+    unsigned short int nxId;
+    unsigned short int prId;
+} tTaskListElt;
+
+typedef struct T_TASK_LIST
+{
+    tTaskListElt* taskList;
+    unsigned short int first;
+    unsigned short int wMaxWaitingTasks;
+    unsigned short int wNbRegisteredTasks;
+} tTaskList;
+
+typedef enum E_TASK_LIST_ERROR
+{
+    E_TASK_LIST_ERROR_OK,
+    E_TASK_LIST_ERROR_MAX_ELTS,
+    E_TASK_LIST_ERROR_NOK
+} eTaskListError;
 
 typedef struct T_THREAD_ARGS
 {
     ptrTaskCallback cbExternalCallback;
     void* ptrStartArgs;
+    TaskHandle_t handleTask;
+    QueueHandle_t lockRecHandle;
     tConditionVariable* pJointure;
 } tThreadArgs;
 
 typedef struct T_THREAD_WKS
 {
-    TaskHandle_t handleTask;
-    QueueHandle_t lockRecHandle;
+    tTaskList taskList;
     tThreadArgs args;
 } tThreadWks;
 
@@ -45,6 +68,7 @@ typedef enum E_THREAD_RESULT
     E_THREAD_RESULT_OK,
     E_THREAD_RESULT_ERROR_NOK,
     E_THREAD_RESULT_ERROR_NOT_INITIALIZED,
+    E_THREAD_RESULT_ERROR_SELF_JOIN_THREAD,
     E_THREAD_RESULT_ERROR_ALREADY_INITIALIZED
 } eThreadResult;
 

@@ -166,30 +166,42 @@ static eConditionVariableResult RegisterWaitingTask(tConditionVariable* pv,     
     return result;
 }
 
+static unsigned short int GetRegisteredTaskIdSlot(tConditionVariable* pv, // Condition variable handle
+                                                  TaskHandle_t taskNotified,
+                                                  unsigned int uwWaitedSignal)
+{
+    unsigned int uwWaitedSig = uwWaitedSignal > 0 ? uwWaitedSignal : SIGNAL_VALUE;
+    unsigned short wCurrentSlotId = pv->wIndexFirstTask;
+    // Search a task with handle and signal requested
+    while (wCurrentSlotId < pv->wMaxWaitingTasks)
+    {
+        if ((pv->taskList[wCurrentSlotId].value == taskNotified) &&
+            (pv->taskList[wCurrentSlotId].uwWaitedSig == uwWaitedSig))
+        {
+            break;
+        }
+        else
+        {
+            wCurrentSlotId = pv->taskList[wCurrentSlotId].nxId;
+        }
+    }
+
+    return wCurrentSlotId;
+}
+
 /*Delete a task to notify from waiting tasks list - not thread safe*/
 static void RemoveWaitingTask(
     tConditionVariable* pv,      // Condition variable handle
     TaskHandle_t taskNotified,   // Task to remove
     unsigned int uwWaitedSignal) // Signal filtered associated. Must be same as the one used by RegisterWaitingTask
 {
-    unsigned short wCurrentSlotId = 0;
+    unsigned short wCurrentSlotId = pv->wIndexFirstTask;
     unsigned int uwWaitedSig = uwWaitedSignal > 0 ? uwWaitedSignal : SIGNAL_VALUE;
 
     if ((pv->wNbRegisteredTasks > 0) && (taskNotified > 0))
     {
         // Search a task with handle and signal requested
-        while (wCurrentSlotId < pv->wMaxWaitingTasks)
-        {
-            if ((pv->taskList[wCurrentSlotId].value == taskNotified) &&
-                (pv->taskList[wCurrentSlotId].uwWaitedSig == uwWaitedSig))
-            {
-                break;
-            }
-            else
-            {
-                wCurrentSlotId = pv->taskList[wCurrentSlotId].nxId;
-            }
-        }
+        wCurrentSlotId = GetRegisteredTaskIdSlot(pv, taskNotified, uwWaitedSig);
         // If found, -1 waiters, update list.
         if (wCurrentSlotId < pv->wMaxWaitingTasks)
         {
@@ -495,6 +507,7 @@ eConditionVariableResult P_SYNCHRO_UnlockAndWaitForConditionVariable(
                     // Arrivee notification, check si la notif est celle attendu.
                     if ((notificationValue & CLEARING_SIGNAL) == CLEARING_SIGNAL)
                     {
+                        // Cas clearing en cours
                         result = E_COND_VAR_RESULT_ERROR_NOT_INITIALIZED;
                         break;
                     }
