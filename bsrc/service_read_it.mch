@@ -50,7 +50,7 @@ INITIALISATION
     d_variables :( d_inv )
 
 OPERATIONS
-    continue <-- init_iter_write_request(nb_req) =
+    continue <-- init_iter_read_request(nb_req) =
     PRE
         nb_req : NAT &
         nb_req <= k_n_read_resp_max
@@ -62,7 +62,7 @@ OPERATIONS
     END
     ;
 
-    continue, rvi <-- continue_iter_write_request =
+    continue, rvi <-- continue_iter_read_request =
     PRE
         rreqs_to_iterate /= {}
     THEN

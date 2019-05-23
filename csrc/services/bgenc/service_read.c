@@ -21,7 +21,7 @@
 
  File Name            : service_read.c
 
- Date                 : 05/02/2019 12:57:19
+ Date                 : 23/05/2019 08:54:41
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -147,10 +147,10 @@ void service_read__fill_read_response(
       constants__t_IndexRange_i service_read__l_index_range;
       
       msg_read_request__get_nb_ReadValue(&service_read__l_nb_ReadValue);
-      service_read_it__init_iter_write_request(service_read__l_nb_ReadValue,
+      service_read_it__init_iter_read_request(service_read__l_nb_ReadValue,
          &service_read__l_continue);
       while (service_read__l_continue == true) {
-         service_read_it__continue_iter_write_request(&service_read__l_continue,
+         service_read_it__continue_iter_read_request(&service_read__l_continue,
             &service_read__l_rvi);
          msg_read_request__getall_ReadValue_NodeId_AttributeId(service_read__req_msg,
             service_read__l_rvi,

@@ -38,14 +38,14 @@ INITIALISATION
     rreqs_i := 0
 
 OPERATIONS
-    continue <-- init_iter_write_request(nb_req) =
+    continue <-- init_iter_read_request(nb_req) =
     BEGIN
         rreqs_i := nb_req;
         continue := bool(0 < nb_req)
     END
     ;
 
-    continue, rvi <-- continue_iter_write_request =
+    continue, rvi <-- continue_iter_read_request =
     BEGIN
         rvi <-- read_cast_t_ReadValue(rreqs_i);
         rreqs_i := rreqs_i - 1;

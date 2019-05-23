@@ -186,9 +186,9 @@ OPERATIONS
         l_index_range
     IN
         l_nb_ReadValue <-- get_nb_ReadValue;
-        l_continue <-- init_iter_write_request(l_nb_ReadValue);
+        l_continue <-- init_iter_read_request(l_nb_ReadValue);
         WHILE l_continue = TRUE DO
-            l_continue, l_rvi <-- continue_iter_write_request;
+            l_continue, l_rvi <-- continue_iter_read_request;
             l_sc, l_nid, l_aid, l_index_range <-- getall_ReadValue_NodeId_AttributeId(req_msg, l_rvi);
             fill_read_response_1(p_TimestampsToReturn, p_user, resp_msg, l_sc, l_nid, l_aid, l_index_range, l_rvi)
         INVARIANT

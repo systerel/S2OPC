@@ -21,7 +21,7 @@
 
  File Name            : service_read_it.c
 
- Date                 : 29/01/2019 09:56:43
+ Date                 : 23/05/2019 08:54:41
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -47,14 +47,14 @@ void service_read_it__INITIALISATION(void) {
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-void service_read_it__init_iter_write_request(
+void service_read_it__init_iter_read_request(
    const t_entier4 service_read_it__nb_req,
    t_bool * const service_read_it__continue) {
    service_read_it__rreqs_i = service_read_it__nb_req;
    *service_read_it__continue = (0 < service_read_it__nb_req);
 }
 
-void service_read_it__continue_iter_write_request(
+void service_read_it__continue_iter_read_request(
    t_bool * const service_read_it__continue,
    constants__t_ReadValue_i * const service_read_it__rvi) {
    constants__read_cast_t_ReadValue(service_read_it__rreqs_i,
