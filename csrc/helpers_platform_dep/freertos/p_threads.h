@@ -20,6 +20,7 @@
 #ifndef SOPC_P_THREADS_H_
 #define SOPC_P_THREADS_H_
 
+#define WAIT_JOINTURE_READY_WITH_BIN_SEM (1)
 // typedef struct T_THREAD_WKS tThreadWks;
 
 typedef void (*tPtrFct)(void*);

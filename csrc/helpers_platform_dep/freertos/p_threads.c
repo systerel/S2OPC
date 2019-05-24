@@ -42,7 +42,9 @@ static unsigned int bOverflowDetected = 0;
 static void cbInternalCallback(void* ptr)
 {
     tThreadArgs* ptrArgs = (tThreadArgs*) ptr;
+#ifndef WAIT_JOINTURE_READY_WITH_BIN_SEM
     unsigned int notificationValue = 0;
+#endif
 
     if (ptr != NULL)
     {
@@ -57,6 +59,7 @@ static void cbInternalCallback(void* ptr)
         }
 
         // Wait for at least one join call
+#ifndef WAIT_JOINTURE_READY_WITH_BIN_SEM
         while (1)
         {
             xTaskNotifyWait(0, JOINTURE_READY, &notificationValue, portMAX_DELAY);
@@ -75,6 +78,9 @@ static void cbInternalCallback(void* ptr)
                 break;
             }
         }
+#else
+        xSemaphoreTake(ptrArgs->signalReadyToWait, portMAX_DELAY);
+#endif
 
         if (ptrArgs->cbReadyToSignal != NULL)
         {
@@ -229,7 +235,11 @@ eThreadResult P_THREAD_Join(tThreadWks* p)
                         // Le thread en cours est ajouté au handle du thread à joindre
                         P_UTILS_LIST_AddElt(&p->taskList, xTaskGetCurrentTaskHandle(), 0);
                         // Indicate that a thread is ready to wait for join
+#ifndef WAIT_JOINTURE_READY_WITH_BIN_SEM
                         xTaskGenericNotify(p->args.handleTask, JOINTURE_READY, eSetBits, NULL);
+#else
+                        xSemaphoreGive(p->args.signalReadyToWait);
+#endif
 
                         // The recursive mutex is taken. So, push handle to stack to notify
                         resPSYNC = P_SYNCHRO_UnlockAndWaitForConditionVariable(p->args.pJointure, p->args.lockRecHandle,
