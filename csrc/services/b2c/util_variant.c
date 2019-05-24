@@ -24,6 +24,8 @@
 #include "sopc_mem_alloc.h"
 #include "util_variant.h"
 
+#include "sopc_missing_c99.h"
+
 SOPC_Variant* util_variant__new_Variant_from_NodeId(SOPC_NodeId* pnid)
 {
     SOPC_Variant* pvar = SOPC_Malloc(sizeof(SOPC_Variant));
