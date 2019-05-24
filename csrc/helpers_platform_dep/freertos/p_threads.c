@@ -111,6 +111,12 @@ void P_THREAD_Destroy(tThreadWks** ptr)
 
         P_UTILS_LIST_DeInit(&(*ptr)->taskList);
 
+        if ((*ptr)->args.signalReadyToWait != NULL)
+        {
+            vQueueDelete((*ptr)->args.signalReadyToWait);
+            (*ptr)->args.signalReadyToWait = NULL;
+        }
+
         if ((*ptr)->args.lockRecHandle != NULL)
         {
             vQueueDelete((*ptr)->args.lockRecHandle);
@@ -145,6 +151,9 @@ tThreadWks* P_THREAD_Create(tPtrFct fct, void* args, tPtrFct fctWatingForJoin, t
     if (ptrWks->args.pJointure == NULL)
         goto error;
 
+    // ptrWks->args.signalReadyToWait = xSemaphoreCreateBinary();
+    // if(ptrWks->args.signalReadyToWait == NULL) 	goto error;
+
     goto success;
 error:
     P_THREAD_Destroy(&ptrWks);
@@ -174,6 +183,7 @@ eThreadResult P_THREAD_Init(tThreadWks* p, unsigned short int wMaxRDV)
                         p->args.signalReadyToWait = xSemaphoreCreateBinary();
                         if (p->args.signalReadyToWait != NULL)
                         {
+                            xSemaphoreTake(p->args.signalReadyToWait, 0);
                             if (xTaskCreate(cbInternalCallback, "appThread", configMINIMAL_STACK_SIZE, &p->args,
                                             configMAX_PRIORITIES - 1, &p->args.handleTask) != pdPASS)
                             {
