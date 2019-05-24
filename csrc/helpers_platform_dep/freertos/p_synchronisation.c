@@ -31,6 +31,8 @@
 #include "task.h"
 #include "timers.h"
 
+#include "p_utils.h"
+
 #include "p_synchronisation.h" /*synchro*/
 
 /*****Private condition variable api*****/
@@ -41,213 +43,19 @@ typedef enum E_CONDITION_VARIABLE_STATUS
     E_CONDITION_VARIABLE_STATUS_INITIALIZED
 } eConditionVariableStatus;
 
-typedef struct T_ELT_TASK_LIST
-{
-    TaskHandle_t value;
-    unsigned int uwWaitedSig;
-    unsigned short nxId;
-    unsigned short prId;
-} tEltTaskList;
-
 typedef struct T_CONDITION_VARIABLE
 {
     QueueHandle_t handleLockCounter;
     eConditionVariableStatus wStatus;
-    unsigned short wIndexFirstTask;
-    unsigned short wNbRegisteredTasks;
-    unsigned short wMaxWaitingTasks;
-    tEltTaskList* taskList;
+    tUtilsList taskList;
 } tConditionVariable;
-
-/*Add a waiting task to the waiting tasks list*/
-static eConditionVariableResult RegisterWaitingTask(tConditionVariable* pv,         // Condition variable workspace
-                                                    TaskHandle_t taskNotifiedValue, // Handle of the waiting task
-                                                    unsigned int uwWaitedSignal)    // Signal mask
-{
-    eConditionVariableResult result = E_COND_VAR_RESULT_OK;
-    unsigned short wCurrentSlotId = 0;
-    unsigned short wNextSlotId = 0;
-    unsigned int wSignalToRegister = uwWaitedSignal > 0 ? uwWaitedSignal : SIGNAL_VALUE;
-    wSignalToRegister &= ~CLEARING_SIGNAL;
-
-    if (pv != NULL)
-    {
-        if (pv->wNbRegisteredTasks < pv->wMaxWaitingTasks) // Continue only if at least one waiter free
-        {
-            // Search free slot position
-            while (wCurrentSlotId < pv->wMaxWaitingTasks)
-            {
-                if (pv->taskList[wCurrentSlotId].value == 0)
-                {
-                    // Slot found
-                    break;
-                }
-                else
-                {
-                    // Slot not found
-                    wCurrentSlotId++;
-                }
-            }
-
-            // If free slot found...
-            if (wCurrentSlotId < pv->wMaxWaitingTasks)
-            {
-                // Update previous slot id information in the current slot
-                // and previous slot next slot id with current slot id
-                // if the previous slot exist
-                if (wCurrentSlotId > 0)
-                {
-                    pv->taskList[wCurrentSlotId - 1].nxId = wCurrentSlotId;
-                    pv->taskList[wCurrentSlotId].prId = wCurrentSlotId - 1;
-                }
-                else
-                {
-                    pv->taskList[wCurrentSlotId].prId = pv->wMaxWaitingTasks; // MAX_WAITERS = NO PREVIOUS
-                    pv->wIndexFirstTask = wCurrentSlotId;
-                }
-
-                // Search next slot if exist (not the max and current slot < total already registered slots)
-                if ((wCurrentSlotId < (pv->wMaxWaitingTasks - 1)) && (wCurrentSlotId < pv->wNbRegisteredTasks))
-                {
-                    wNextSlotId = wCurrentSlotId + 1;
-
-                    // Search the not free slot
-                    while (wNextSlotId < pv->wMaxWaitingTasks)
-                    {
-                        if (pv->taskList[wNextSlotId].value != 0)
-                        {
-                            // Slot found;
-                            break;
-                        }
-                        else
-                        {
-                            // Slot not found
-                            wNextSlotId++;
-                        }
-                    }
-
-                    // If a task handle has been found. (normally, it's the case,
-                    // because wCurrentSlotId < pv->nbWaiters), update next slot
-                    // with current id and current slot with this
-                    if (wNextSlotId < pv->wMaxWaitingTasks)
-                    {
-                        // Il indexe comme précédent le courant
-                        // Le courant index le suivant
-                        pv->taskList[wNextSlotId].prId = wCurrentSlotId;
-                        pv->taskList[wCurrentSlotId].nxId = wNextSlotId;
-                    }
-                    else
-                    {
-                        // No next, next info set to MAX WAITERS
-                        pv->taskList[wCurrentSlotId].nxId = pv->wMaxWaitingTasks;
-                    }
-                }
-                else
-                {
-                    // No next, next info set to MAX WAITERS
-                    pv->taskList[wCurrentSlotId].nxId = pv->wMaxWaitingTasks;
-                }
-
-                pv->taskList[wCurrentSlotId].value = taskNotifiedValue;
-                pv->taskList[wCurrentSlotId].uwWaitedSig = wSignalToRegister;
-                pv->wNbRegisteredTasks =
-                    pv->wNbRegisteredTasks < pv->wMaxWaitingTasks ? pv->wNbRegisteredTasks + 1 : pv->wNbRegisteredTasks;
-            } // if(wCurrentSlotId  < MAX_SIGNAL) no free slot
-            else
-            {
-                result = E_COND_VAR_RESULT_ERROR_MAX_WAITERS;
-            }
-        } // pv->nbWaiters = pv->nbWaiters < MAX_SIGNAL => no free slot
-        else
-        {
-            result = E_COND_VAR_RESULT_ERROR_MAX_WAITERS;
-        }
-    }
-    return result;
-}
-
-static unsigned short int GetRegisteredTaskIdSlot(tConditionVariable* pv, // Condition variable handle
-                                                  TaskHandle_t taskNotified,
-                                                  unsigned int uwWaitedSignal)
-{
-    unsigned int uwWaitedSig = uwWaitedSignal > 0 ? uwWaitedSignal : SIGNAL_VALUE;
-    unsigned short wCurrentSlotId = pv->wIndexFirstTask;
-    // Search a task with handle and signal requested
-    while (wCurrentSlotId < pv->wMaxWaitingTasks)
-    {
-        if ((pv->taskList[wCurrentSlotId].value == taskNotified) &&
-            (pv->taskList[wCurrentSlotId].uwWaitedSig == uwWaitedSig))
-        {
-            break;
-        }
-        else
-        {
-            wCurrentSlotId = pv->taskList[wCurrentSlotId].nxId;
-        }
-    }
-
-    return wCurrentSlotId;
-}
-
-/*Delete a task to notify from waiting tasks list - not thread safe*/
-static void RemoveWaitingTask(
-    tConditionVariable* pv,      // Condition variable handle
-    TaskHandle_t taskNotified,   // Task to remove
-    unsigned int uwWaitedSignal) // Signal filtered associated. Must be same as the one used by RegisterWaitingTask
-{
-    unsigned short wCurrentSlotId = pv->wIndexFirstTask;
-    unsigned int uwWaitedSig = uwWaitedSignal > 0 ? uwWaitedSignal : SIGNAL_VALUE;
-
-    if ((pv->wNbRegisteredTasks > 0) && (taskNotified > 0))
-    {
-        // Search a task with handle and signal requested
-        wCurrentSlotId = GetRegisteredTaskIdSlot(pv, taskNotified, uwWaitedSig);
-        // If found, -1 waiters, update list.
-        if (wCurrentSlotId < pv->wMaxWaitingTasks)
-        {
-            // Safe decrement
-            pv->wNbRegisteredTasks = pv->wNbRegisteredTasks > 0 ? pv->wNbRegisteredTasks - 1 : pv->wNbRegisteredTasks;
-
-            // First slot removed, so index first on next
-            if (wCurrentSlotId == pv->wIndexFirstTask)
-            {
-                pv->wIndexFirstTask = pv->taskList[wCurrentSlotId].nxId;
-            }
-            // Next of current not the last, so previous of next = previous of current
-            if (pv->taskList[wCurrentSlotId].nxId < pv->wMaxWaitingTasks)
-            {
-                pv->taskList[pv->taskList[wCurrentSlotId].nxId].prId = pv->taskList[wCurrentSlotId].prId;
-            }
-            // previous of current not the last, so next of previous = next of current
-            if (pv->taskList[wCurrentSlotId].prId < pv->wMaxWaitingTasks)
-            {
-                pv->taskList[pv->taskList[wCurrentSlotId].prId].nxId = pv->taskList[wCurrentSlotId].nxId;
-            }
-
-            // RAZ current
-            pv->taskList[wCurrentSlotId].value = 0;
-            pv->taskList[wCurrentSlotId].uwWaitedSig = 0;
-            pv->taskList[wCurrentSlotId].nxId = pv->wMaxWaitingTasks;
-            pv->taskList[wCurrentSlotId].prId = pv->wMaxWaitingTasks;
-        }
-    }
-}
 
 // Internal deinit condition variable, not thread safe.
 static void ClearConditionVariable(tConditionVariable* pv)
 {
     if (pv != NULL)
     {
-        // Destruction taskList
-        if (pv->taskList != NULL)
-        {
-            vPortFree(pv->taskList);
-            pv->taskList = NULL;
-        }
-
-        pv->wIndexFirstTask = 0;
-        pv->wMaxWaitingTasks = 0;
-        pv->wNbRegisteredTasks = 0;
+        P_UTILS_LIST_DeInit(&pv->taskList);
         pv->wStatus = E_CONDITION_VARIABLE_STATUS_NOT_INITIALIZED; // Indique que le workspace n'est plus initialisé
     }
 }
@@ -264,17 +72,18 @@ eConditionVariableResult P_SYNCHRO_ClearConditionVariable(tConditionVariable* pv
             if (pv->wStatus == E_CONDITION_VARIABLE_STATUS_INITIALIZED)
             {
                 // Indicate for each registered task that clearing signal is pending
-                wCurrentSlotId = pv->wIndexFirstTask; // Index first slot to parse
-                if (pv->wNbRegisteredTasks > 0)       // Indicate if waiters are waiting
+                wCurrentSlotId = pv->taskList.first;     // Index first slot to parse
+                if (pv->taskList.wNbRegisteredTasks > 0) // Indicate if waiters are waiting
                 {
-                    while (wCurrentSlotId < pv->wMaxWaitingTasks)
+                    while (wCurrentSlotId < pv->taskList.wMaxWaitingTasks)
                     {
-                        if ((pv->taskList[wCurrentSlotId].value > 0))
+                        if ((pv->taskList.list[wCurrentSlotId].value > 0))
                         {
-                            xTaskGenericNotify(pv->taskList[wCurrentSlotId].value, CLEARING_SIGNAL, eSetBits, NULL);
+                            xTaskGenericNotify(pv->taskList.list[wCurrentSlotId].value, CLEARING_SIGNAL, eSetBits,
+                                               NULL);
                         }
                         // Go to next slot
-                        wCurrentSlotId = pv->taskList[wCurrentSlotId].nxId;
+                        wCurrentSlotId = pv->taskList.list[wCurrentSlotId].nxId;
                     }
                 }
                 // Set condition variable to not initialized state
@@ -294,9 +103,7 @@ eConditionVariableResult P_SYNCHRO_ClearConditionVariable(tConditionVariable* pv
 eConditionVariableResult P_SYNCHRO_InitConditionVariable(tConditionVariable* pv,
                                                          unsigned short int wMaxWaiters) // max parallel waiting tasks
 {
-    unsigned short wIterTaskSlot = 0;
     eConditionVariableResult result = E_COND_VAR_RESULT_OK;
-
     // Nombre de thread en attente maximum
     if ((wMaxWaiters > MAX_SIGNAL) || (pv == NULL) || (pv->handleLockCounter == NULL))
         goto error_parameter;
@@ -307,22 +114,9 @@ eConditionVariableResult P_SYNCHRO_InitConditionVariable(tConditionVariable* pv,
         goto error_status;
 
     // Allocation liste de threads en attente signal
-    pv->wMaxWaitingTasks = wMaxWaiters;
-    pv->taskList = (tEltTaskList*) pvPortMalloc(sizeof(tEltTaskList) * pv->wMaxWaitingTasks);
-    if (pv->taskList == NULL)
+    P_UTILS_LIST_Init(&pv->taskList, wMaxWaiters);
+    if (pv->taskList.list == NULL)
         goto error_init;
-
-    // Index du premier élément. Si = maxWaiters, alors pas de thread.
-    pv->wIndexFirstTask = pv->wMaxWaitingTasks;
-
-    // Init "chainage"
-    for (wIterTaskSlot = 0; wIterTaskSlot < pv->wMaxWaitingTasks; wIterTaskSlot++)
-    {
-        pv->taskList[wIterTaskSlot].value = 0;
-        pv->taskList[wIterTaskSlot].uwWaitedSig = 0;
-        pv->taskList[wIterTaskSlot].nxId = pv->wMaxWaitingTasks;
-        pv->taskList[wIterTaskSlot].prId = pv->wMaxWaitingTasks;
-    }
 
     // Flag condition var initialisée
     pv->wStatus = E_CONDITION_VARIABLE_STATUS_INITIALIZED;
@@ -403,19 +197,19 @@ eConditionVariableResult P_SYNCHRO_SignalAllConditionVariable(tConditionVariable
         {
             if (pv->wStatus == E_CONDITION_VARIABLE_STATUS_INITIALIZED)
             {
-                wCurrentSlotId = pv->wIndexFirstTask;
-                if (pv->wNbRegisteredTasks > 0)
+                wCurrentSlotId = pv->taskList.first;
+                if (pv->taskList.wNbRegisteredTasks > 0)
                 {
                     // Tant que Nb de tache en attente ET operation de signalement < nombre de taches en attente
-                    while (wCurrentSlotId < pv->wMaxWaitingTasks)
+                    while (wCurrentSlotId < pv->taskList.wMaxWaitingTasks)
                     {
-                        if ((pv->taskList[wCurrentSlotId].value > 0) &&
-                            (pv->taskList[wCurrentSlotId].uwWaitedSig == signal))
+                        if ((pv->taskList.list[wCurrentSlotId].value > 0) &&
+                            (pv->taskList.list[wCurrentSlotId].infos == signal))
                         {
-                            xTaskGenericNotify(pv->taskList[wCurrentSlotId].value, signal, eSetBits, NULL);
+                            xTaskGenericNotify(pv->taskList.list[wCurrentSlotId].value, signal, eSetBits, NULL);
                             result = E_COND_VAR_RESULT_OK;
                         }
-                        wCurrentSlotId = pv->taskList[wCurrentSlotId].nxId;
+                        wCurrentSlotId = pv->taskList.list[wCurrentSlotId].nxId;
                     }
                 }
             }
@@ -463,10 +257,10 @@ eConditionVariableResult P_SYNCHRO_UnlockAndWaitForConditionVariable(
             if (pv->wStatus == E_CONDITION_VARIABLE_STATUS_INITIALIZED) // Check init state.
             {
                 // Récupération du handle de task et sauvegarde en pile
-                if (pv->wNbRegisteredTasks < pv->wMaxWaitingTasks)
+                if (pv->taskList.wNbRegisteredTasks < pv->taskList.wMaxWaitingTasks)
                 {
                     handleTask = xTaskGetCurrentTaskHandle();
-                    result = RegisterWaitingTask(pv, handleTask, uwSignal);
+                    result = P_UTILS_LIST_AddElt(&pv->taskList, handleTask, uwSignal);
                 }
                 else
                 {
@@ -504,6 +298,13 @@ eConditionVariableResult P_SYNCHRO_UnlockAndWaitForConditionVariable(
                 }
                 else
                 {
+                    // If other notification,
+
+                    if ((notificationValue & (~(uwSignal | CLEARING_SIGNAL))) != 0)
+                    {
+                        xTaskGenericNotify(xTaskGetCurrentTaskHandle(),
+                                           notificationValue & (~(uwSignal | CLEARING_SIGNAL)), eSetBits, NULL);
+                    }
                     // Arrivee notification, check si la notif est celle attendu.
                     if ((notificationValue & CLEARING_SIGNAL) == CLEARING_SIGNAL)
                     {
@@ -534,7 +335,7 @@ eConditionVariableResult P_SYNCHRO_UnlockAndWaitForConditionVariable(
             {
                 if (pv->wStatus == E_CONDITION_VARIABLE_STATUS_INITIALIZED) // Check init state
                 {
-                    RemoveWaitingTask(pv, handleTask, uwSignal);
+                    P_UTILS_LIST_RemoveElt(&pv->taskList, handleTask, uwSignal);
                 }
                 else
                 {

@@ -33,173 +33,16 @@
 
 #include "p_synchronisation.h" /*synchro*/
 #include "p_threads.h"         /*thread*/
+#include "p_utils.h"
+
+static unsigned int bOverflowDetected = 0;
 
 /*****Private thread api*****/
-
-static eTaskListError AddToTaskList(tTaskList* ptr, TaskHandle_t handleTask) // Signal mask
-{
-    eTaskListError result = E_TASK_LIST_ERROR_OK;
-    unsigned short wCurrentSlotId = 0;
-    unsigned short wNextSlotId = 0;
-
-    if ((ptr != NULL) && (handleTask != NULL) && (ptr->taskList != NULL))
-    {
-        if (ptr->wNbRegisteredTasks < ptr->wMaxWaitingTasks) // Continue only if at least one waiter free
-        {
-            // Search free slot position
-            while (wCurrentSlotId < ptr->wMaxWaitingTasks)
-            {
-                if (ptr->taskList[wCurrentSlotId].value == 0)
-                {
-                    // Slot found
-                    break;
-                }
-                else
-                {
-                    // Slot not found
-                    wCurrentSlotId++;
-                }
-            }
-
-            // If free slot found...
-            if (wCurrentSlotId < ptr->wMaxWaitingTasks)
-            {
-                // Update previous slot id information in the current slot
-                // and previous slot next slot id with current slot id
-                // if the previous slot exist
-                if (wCurrentSlotId > 0)
-                {
-                    ptr->taskList[wCurrentSlotId - 1].nxId = wCurrentSlotId;
-                    ptr->taskList[wCurrentSlotId].prId = wCurrentSlotId - 1;
-                }
-                else
-                {
-                    ptr->taskList[wCurrentSlotId].prId = ptr->wMaxWaitingTasks; // MAX_WAITERS = NO PREVIOUS
-                    ptr->first = wCurrentSlotId;
-                }
-
-                // Search next slot if exist (not the max and current slot < total already registered slots)
-                if ((wCurrentSlotId < (ptr->wMaxWaitingTasks - 1)) && (wCurrentSlotId < ptr->wNbRegisteredTasks))
-                {
-                    wNextSlotId = wCurrentSlotId + 1;
-
-                    // Search the not free slot
-                    while (wNextSlotId < ptr->wMaxWaitingTasks)
-                    {
-                        if (ptr->taskList[wNextSlotId].value != 0)
-                        {
-                            // Slot found;
-                            break;
-                        }
-                        else
-                        {
-                            // Slot not found
-                            wNextSlotId++;
-                        }
-                    }
-
-                    // If a task handle has been found. (normally, it's the case,
-                    // because wCurrentSlotId < pv->nbWaiters), update next slot
-                    // with current id and current slot with this
-                    if (wNextSlotId < ptr->wMaxWaitingTasks)
-                    {
-                        // Il indexe comme précédent le courant
-                        // Le courant index le suivant
-                        ptr->taskList[wNextSlotId].prId = wCurrentSlotId;
-                        ptr->taskList[wCurrentSlotId].nxId = wNextSlotId;
-                    }
-                    else
-                    {
-                        // No next, next info set to MAX WAITERS
-                        ptr->taskList[wCurrentSlotId].nxId = ptr->wMaxWaitingTasks;
-                    }
-                }
-                else
-                {
-                    // No next, next info set to MAX WAITERS
-                    ptr->taskList[wCurrentSlotId].nxId = ptr->wMaxWaitingTasks;
-                }
-
-                ptr->taskList[wCurrentSlotId].value = handleTask;
-                ptr->wNbRegisteredTasks = ptr->wNbRegisteredTasks < ptr->wMaxWaitingTasks ? ptr->wNbRegisteredTasks + 1
-                                                                                          : ptr->wNbRegisteredTasks;
-            } // if(wCurrentSlotId  < MAX_SIGNAL) no free slot
-            else
-            {
-                result = E_TASK_LIST_ERROR_MAX_ELTS;
-            }
-        } // pv->nbWaiters = pv->nbWaiters < MAX_SIGNAL => no free slot
-        else
-        {
-            result = E_TASK_LIST_ERROR_MAX_ELTS;
-        }
-    }
-    return result;
-}
-
-static unsigned short int CheckIfTaskPresent(tTaskList* ptr,            // Condition variable handle
-                                             TaskHandle_t taskNotified) // Task to remove
-{
-    unsigned short wCurrentSlotId = USHRT_MAX;
-    if ((ptr != NULL) && (ptr->taskList != NULL) && (taskNotified != NULL))
-    {
-        wCurrentSlotId = ptr->first;
-        while (wCurrentSlotId < ptr->wMaxWaitingTasks)
-        {
-            if (ptr->taskList[wCurrentSlotId].value == taskNotified)
-            {
-                break;
-            }
-            else
-            {
-                wCurrentSlotId = ptr->taskList[wCurrentSlotId].nxId;
-            }
-        }
-    }
-    return wCurrentSlotId;
-}
-
-/*Alloc task*/
-static eTaskListError InitTaskList(tTaskList* ptr, unsigned short int wMaxRDV)
-{
-    unsigned short iIter = 0;
-    if ((ptr != NULL) && (wMaxRDV <= MAX_SIGNAL))
-    {
-        ptr->taskList = (tTaskListElt*) pvPortMalloc(sizeof(tTaskListElt) * wMaxRDV);
-        if (ptr->taskList != NULL)
-        {
-            ptr->wMaxWaitingTasks = wMaxRDV;
-            ptr->first = ptr->wMaxWaitingTasks;
-            ptr->wNbRegisteredTasks = 0;
-            for (iIter = 0; iIter < ptr->wMaxWaitingTasks; iIter++)
-            {
-                ptr->taskList[iIter].nxId = ptr->wMaxWaitingTasks;
-                ptr->taskList[iIter].prId = ptr->wMaxWaitingTasks;
-            }
-            return E_TASK_LIST_ERROR_OK;
-        }
-    }
-    return E_TASK_LIST_ERROR_NOK;
-}
-
-static void DeInitTaskList(tTaskList* ptr)
-{
-    if (ptr != NULL)
-    {
-        if (ptr->taskList != NULL)
-        {
-            vPortFree(ptr->taskList);
-            ptr->taskList = NULL;
-            ptr->wMaxWaitingTasks = 0;
-            ptr->first = 0;
-            ptr->wNbRegisteredTasks = 0;
-        }
-    }
-}
 
 static void cbInternalCallback(void* ptr)
 {
     tThreadArgs* ptrArgs = (tThreadArgs*) ptr;
+    unsigned int notificationValue = 0;
 
     if (ptr != NULL)
     {
@@ -208,8 +51,35 @@ static void cbInternalCallback(void* ptr)
             ptrArgs->cbExternalCallback(ptrArgs->ptrStartArgs);
         }
 
+        if (ptrArgs->cbWaitingForJoin != NULL)
+        {
+            ptrArgs->cbWaitingForJoin(ptrArgs->ptrStartArgs);
+        }
+
         // Wait for at least one join call
-        // xTaskNotifyWait(0,JOINTURE_READY,NULL,portMAX_DELAY);
+        while (1)
+        {
+            xTaskNotifyWait(0, JOINTURE_READY, &notificationValue, portMAX_DELAY);
+
+            // If other notification
+
+            if ((notificationValue & (~(JOINTURE_READY))) != 0)
+            {
+                xTaskGenericNotify(xTaskGetCurrentTaskHandle(), notificationValue & (~(JOINTURE_READY)), eSetBits,
+                                   NULL);
+            }
+
+            // If expected notification
+            if ((notificationValue & ((JOINTURE_READY))) == JOINTURE_READY)
+            {
+                break;
+            }
+        }
+
+        if (ptrArgs->cbReadyToSignal != NULL)
+        {
+            ptrArgs->cbReadyToSignal(ptrArgs->ptrStartArgs);
+        }
 
         // At this level, wait for release mutex by condition variable called from join function
         xSemaphoreTakeRecursive(ptrArgs->lockRecHandle, portMAX_DELAY); //******Enter Critical section
@@ -233,12 +103,7 @@ void P_THREAD_Destroy(tThreadWks** ptr)
             P_SYNCHRO_DestroyConditionVariable(&((*ptr)->args.pJointure));
         }
 
-        if ((*ptr)->taskList.taskList != NULL)
-        {
-            vPortFree((*ptr)->taskList.taskList);
-            (*ptr)->taskList.taskList = NULL;
-            (void) memset(&(*ptr)->taskList, 0, sizeof(tTaskList));
-        }
+        P_UTILS_LIST_DeInit(&(*ptr)->taskList);
 
         if ((*ptr)->args.lockRecHandle != NULL)
         {
@@ -251,7 +116,7 @@ void P_THREAD_Destroy(tThreadWks** ptr)
     }
 }
 // Non thread safe
-tThreadWks* P_THREAD_Create(ptrTaskCallback fct, void* args)
+tThreadWks* P_THREAD_Create(tPtrFct fct, void* args, tPtrFct fctWatingForJoin, tPtrFct fctReadyToSignal)
 {
     tThreadWks* ptrWks = NULL;
 
@@ -266,6 +131,8 @@ tThreadWks* P_THREAD_Create(ptrTaskCallback fct, void* args)
         goto error;
 
     ptrWks->args.cbExternalCallback = fct;
+    ptrWks->args.cbReadyToSignal = fctReadyToSignal;
+    ptrWks->args.cbWaitingForJoin = fctWatingForJoin;
     ptrWks->args.ptrStartArgs = args;
     ptrWks->args.handleTask = 0;
     ptrWks->args.pJointure = P_SYNCHRO_CreateConditionVariable();
@@ -283,7 +150,7 @@ eThreadResult P_THREAD_Init(tThreadWks* p, unsigned short int wMaxRDV)
 {
     eThreadResult resPTHR = E_THREAD_RESULT_OK;
     eConditionVariableResult resPSYNC = E_COND_VAR_RESULT_OK;
-    eTaskListError resTList = E_TASK_LIST_ERROR_OK;
+    eUtilsListError resTList = E_UTILS_LIST_ERROR_OK;
 
     if ((p != NULL) && (p->args.lockRecHandle != NULL))
     {
@@ -292,22 +159,36 @@ eThreadResult P_THREAD_Init(tThreadWks* p, unsigned short int wMaxRDV)
             if (p->args.handleTask == NULL)
             {
                 // Creation task list a exclure
-                resTList = InitTaskList(&p->taskList, wMaxRDV);
-                if (resTList == E_TASK_LIST_ERROR_OK)
+                resTList = P_UTILS_LIST_Init(&p->taskList, wMaxRDV);
+                if (resTList == E_UTILS_LIST_ERROR_OK)
                 {
                     resPSYNC = P_SYNCHRO_InitConditionVariable(p->args.pJointure, wMaxRDV);
                     if (resPSYNC == E_COND_VAR_RESULT_OK)
                     {
-                        if (xTaskCreate(cbInternalCallback, "appThread", configMINIMAL_STACK_SIZE, &p->args,
-                                        configMAX_PRIORITIES - 1, &p->args.handleTask) != pdPASS)
+                        p->args.signalReadyToWait = xSemaphoreCreateBinary();
+                        if (p->args.signalReadyToWait != NULL)
                         {
-                            p->args.handleTask = NULL;
+                            if (xTaskCreate(cbInternalCallback, "appThread", configMINIMAL_STACK_SIZE, &p->args,
+                                            configMAX_PRIORITIES - 1, &p->args.handleTask) != pdPASS)
+                            {
+                                p->args.handleTask = NULL;
+                                vQueueDelete(p->args.signalReadyToWait);
+                                p->args.signalReadyToWait = NULL;
+                                P_UTILS_LIST_DeInit(&p->taskList);
+                                P_SYNCHRO_ClearConditionVariable(p->args.pJointure);
+                                resPTHR = E_THREAD_RESULT_ERROR_NOK;
+                            }
+                        }
+                        else
+                        {
+                            P_UTILS_LIST_DeInit(&p->taskList);
                             P_SYNCHRO_ClearConditionVariable(p->args.pJointure);
                             resPTHR = E_THREAD_RESULT_ERROR_NOK;
                         }
                     }
                     else
                     {
+                        P_UTILS_LIST_DeInit(&p->taskList);
                         resPTHR = E_THREAD_RESULT_ERROR_NOK;
                     }
                 }
@@ -338,23 +219,30 @@ eThreadResult P_THREAD_Join(tThreadWks* p)
         {
             if (p->args.handleTask != NULL)
             {
+                // La tache en cours n'est pas celle sur laquelle on fait le join
                 if (p->args.handleTask != xTaskGetCurrentTaskHandle())
                 {
-                    if (CheckIfTaskPresent(&p->taskList, xTaskGetCurrentTaskHandle()) < p->taskList.wMaxWaitingTasks)
+                    // La tache en cours n'est pas exclue par le thread à joindre
+                    if (P_UTILS_LIST_GetEltIndex(&p->taskList, xTaskGetCurrentTaskHandle(), 0) ==
+                        p->taskList.wMaxWaitingTasks)
                     {
-                        AddToTaskList(&p->taskList, xTaskGetCurrentTaskHandle());
+                        // Le thread en cours est ajouté au handle du thread à joindre
+                        P_UTILS_LIST_AddElt(&p->taskList, xTaskGetCurrentTaskHandle(), 0);
                         // Indicate that a thread is ready to wait for join
-                        // xTaskGenericNotify(p->args.handleTask,JOINTURE_READY,eSetBits,NULL);
+                        xTaskGenericNotify(p->args.handleTask, JOINTURE_READY, eSetBits, NULL);
 
                         // The recursive mutex is taken. So, push handle to stack to notify
                         resPSYNC = P_SYNCHRO_UnlockAndWaitForConditionVariable(p->args.pJointure, p->args.lockRecHandle,
                                                                                JOINTURE_SIGNAL, ULONG_MAX);
 
                         // After wait, clear condition variable. Unlock other join if necessary.
-                        (void) P_SYNCHRO_ClearConditionVariable(p->args.pJointure);
-
-                        DeInitTaskList(&p->taskList);
-
+                        P_SYNCHRO_ClearConditionVariable(p->args.pJointure);
+                        P_UTILS_LIST_DeInit(&p->taskList);
+                        if (p->args.signalReadyToWait != NULL)
+                        {
+                            vQueueDelete(p->args.signalReadyToWait);
+                            p->args.signalReadyToWait = NULL;
+                        }
                         p->args.handleTask = NULL;
 
                         switch (resPSYNC) // resPSYNC is not E_COND_VAR_RESULT_OK if a clear has been performed
@@ -386,6 +274,11 @@ eThreadResult P_THREAD_Join(tThreadWks* p)
     }
 
     return result;
+}
+
+void vApplicationStackOverflowHook(TaskHandle_t xTask, char* pcTaskName)
+{
+    bOverflowDetected = 0xAAAAAAAA;
 }
 
 /*****Public s2opc thread api*****/

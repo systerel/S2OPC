@@ -22,44 +22,25 @@
 
 // typedef struct T_THREAD_WKS tThreadWks;
 
-typedef void (*ptrTaskCallback)(void*);
+typedef void (*tPtrFct)(void*);
 
 /*****Private thread api*****/
 
-typedef struct T_TASK_LIST_ELT
-{
-    TaskHandle_t value;
-    unsigned short int nxId;
-    unsigned short int prId;
-} tTaskListElt;
-
-typedef struct T_TASK_LIST
-{
-    tTaskListElt* taskList;
-    unsigned short int first;
-    unsigned short int wMaxWaitingTasks;
-    unsigned short int wNbRegisteredTasks;
-} tTaskList;
-
-typedef enum E_TASK_LIST_ERROR
-{
-    E_TASK_LIST_ERROR_OK,
-    E_TASK_LIST_ERROR_MAX_ELTS,
-    E_TASK_LIST_ERROR_NOK
-} eTaskListError;
-
 typedef struct T_THREAD_ARGS
 {
-    ptrTaskCallback cbExternalCallback;
+    tPtrFct cbExternalCallback;
     void* ptrStartArgs;
+    tPtrFct cbWaitingForJoin;
+    tPtrFct cbReadyToSignal;
     TaskHandle_t handleTask;
     QueueHandle_t lockRecHandle;
+    QueueHandle_t signalReadyToWait;
     tConditionVariable* pJointure;
 } tThreadArgs;
 
 typedef struct T_THREAD_WKS
 {
-    tTaskList taskList;
+    tUtilsList taskList;
     tThreadArgs args;
 } tThreadWks;
 
@@ -72,7 +53,7 @@ typedef enum E_THREAD_RESULT
     E_THREAD_RESULT_ERROR_ALREADY_INITIALIZED
 } eThreadResult;
 
-tThreadWks* P_THREAD_Create(ptrTaskCallback fct, void* args);
+tThreadWks* P_THREAD_Create(tPtrFct fct, void* args, tPtrFct fctWatingForJoin, tPtrFct fctReadyToSignal);
 eThreadResult P_THREAD_Init(tThreadWks* p, unsigned short wMaxJoin);
 eThreadResult P_THREAD_Join(tThreadWks* p);
 

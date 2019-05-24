@@ -22,7 +22,6 @@
 
 /*****Private condition variable api*****/
 
-#define MAX_SIGNAL (128)
 #define CLEARING_SIGNAL (0x80000000)
 #define JOINTURE_SIGNAL (0x40000000)
 #define JOINTURE_READY (0x20000000)
