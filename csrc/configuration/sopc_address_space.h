@@ -61,7 +61,7 @@ typedef struct
 /* Maps NodeId to SOPC_AddressSpace_Item */
 typedef SOPC_Dict SOPC_AddressSpace;
 
-void SOPC_AddressSpace_Item_Initialize(SOPC_AddressSpace_Item* item, uint32_t element_type);
+void SOPC_AddressSpace_Item_Initialize(SOPC_AddressSpace_Item* item, OpcUa_NodeClass element_type);
 
 SOPC_NodeId* SOPC_AddressSpace_Item_Get_NodeId(SOPC_AddressSpace_Item* item);
 SOPC_QualifiedName* SOPC_AddressSpace_Item_Get_BrowseName(SOPC_AddressSpace_Item* item);
