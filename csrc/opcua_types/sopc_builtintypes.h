@@ -575,8 +575,9 @@ void SOPC_Variant_Clear(SOPC_Variant* variant);
 void SOPC_Variant_ClearAux(void* value);
 void SOPC_Variant_Delete(SOPC_Variant* variant);
 
-const SOPC_NodeId* SOPC_Variant_Get_DataType(SOPC_Variant* var);
-int32_t SOPC_Variant_Get_ValueRank(SOPC_Variant* var);
+const SOPC_NodeId* SOPC_Variant_Get_DataType(const SOPC_Variant* var);
+int32_t SOPC_Variant_Get_ValueRank(const SOPC_Variant* var);
+bool SOPC_ValueRank_IsAssignableInto(int32_t dest_ValueRank, int32_t src_valueRank);
 
 void SOPC_DataValue_Initialize(SOPC_DataValue* dataValue);
 void SOPC_DataValue_InitializeAux(void* value);

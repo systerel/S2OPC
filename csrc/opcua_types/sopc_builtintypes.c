@@ -4574,7 +4574,7 @@ SOPC_ReturnStatus SOPC_Variant_SetRange(SOPC_Variant* variant, const SOPC_Varian
     }
 }
 
-const SOPC_NodeId* SOPC_Variant_Get_DataType(SOPC_Variant* var)
+const SOPC_NodeId* SOPC_Variant_Get_DataType(const SOPC_Variant* var)
 {
     switch (var->BuiltInTypeId)
     {
@@ -4636,7 +4636,7 @@ const SOPC_NodeId* SOPC_Variant_Get_DataType(SOPC_Variant* var)
     }
 }
 
-int32_t SOPC_Variant_Get_ValueRank(SOPC_Variant* var)
+int32_t SOPC_Variant_Get_ValueRank(const SOPC_Variant* var)
 {
     switch (var->ArrayType)
     {
@@ -4835,3 +4835,32 @@ const SOPC_BuiltInType_Handling SOPC_BuiltInType_HandlingTable[SOPC_BUILTINID_MA
         SOPC_DiagnosticInfo_CopyAux,       // copy
         SOPC_DiagnosticInfo_CompareAux     // compare
     }};
+
+bool SOPC_ValueRank_IsAssignableInto(int32_t dest_ValueRank, int32_t src_valueRank)
+{
+    assert(dest_ValueRank > -4);
+    assert(src_valueRank > -4);
+    if (dest_ValueRank == src_valueRank)
+    {
+        // Covers compatible abstract value rank (but src always concrete when computed from variant value)
+        return true;
+    }
+
+    switch (dest_ValueRank)
+    {
+    case -3:
+        // ScalarOrOneDimension (−3): src can be scalar (-1) or one dimension array (1)
+        return (src_valueRank == -1 || src_valueRank == 1);
+    case -2:
+        // Any (−2): src can be have any value rank
+        return true;
+    case -1:
+        // Scalar (−1): src can be scalar (-1) only
+        return src_valueRank == -1;
+    case 0:
+        // OneOrMoreDimensions (0): src can have <n> dimensions (1..n)
+        return src_valueRank > 0;
+    default:
+        return false; // value rank equality already tested prior to switch/case, otherwise false
+    }
+}
