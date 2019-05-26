@@ -31,9 +31,8 @@
 #include "task.h"
 #include "timers.h"
 
-#include "p_utils.h"
-
 #include "p_synchronisation.h" /*synchro*/
+#include "p_utils.h"
 
 /*****Private condition variable api*****/
 
@@ -260,7 +259,7 @@ eConditionVariableResult P_SYNCHRO_UnlockAndWaitForConditionVariable(
                 if (pv->taskList.wNbRegisteredTasks < pv->taskList.wMaxWaitingTasks)
                 {
                     handleTask = xTaskGetCurrentTaskHandle();
-                    result = P_UTILS_LIST_AddElt(&pv->taskList, handleTask, uwSignal);
+                    result = P_UTILS_LIST_AddElt(&pv->taskList, handleTask, NULL, uwSignal);
                 }
                 else
                 {
@@ -292,14 +291,13 @@ eConditionVariableResult P_SYNCHRO_UnlockAndWaitForConditionVariable(
                 // Wait for specified signal bit 0 -> 30. Bit 31 = CLEARING_SIGNAL
                 if (xTaskNotifyWait(0, uwSignal | CLEARING_SIGNAL, &notificationValue, xTimeToWait) != pdPASS)
                 {
-                    result = E_COND_VAR_RESULT_TIMEOUT;
+                    result = E_COND_VAR_RESULT_ERROR_TIMEOUT;
                     // Pas de notification reçue pendant le délai imparti
                     break;
                 }
                 else
                 {
-                    // If other notification,
-
+                    // If others notifications, forward it to generate task event
                     if ((notificationValue & (~(uwSignal | CLEARING_SIGNAL))) != 0)
                     {
                         xTaskGenericNotify(xTaskGetCurrentTaskHandle(),
@@ -318,7 +316,7 @@ eConditionVariableResult P_SYNCHRO_UnlockAndWaitForConditionVariable(
                         if (xTaskCheckForTimeOut(&xTimeOut, &xTimeToWait) == pdTRUE)
                         {
                             // Sinon timeout
-                            result = E_COND_VAR_RESULT_TIMEOUT;
+                            result = E_COND_VAR_RESULT_ERROR_TIMEOUT;
                             break;
                         }
                     }
@@ -484,7 +482,7 @@ SOPC_ReturnStatus Mutex_UnlockAndWaitCond(Condition* cond, Mutex* mut)
         case E_COND_VAR_RESULT_OK:
             resSOPC = SOPC_STATUS_OK;
             break;
-        case E_COND_VAR_RESULT_TIMEOUT:
+        case E_COND_VAR_RESULT_ERROR_TIMEOUT:
             resSOPC = SOPC_STATUS_TIMEOUT;
             break;
         case E_COND_VAR_RESULT_ERROR_NOT_INITIALIZED:
@@ -523,7 +521,7 @@ SOPC_ReturnStatus Mutex_UnlockAndTimedWaitCond(Condition* cond, Mutex* mut, uint
         case E_COND_VAR_RESULT_OK:
             resSOPC = SOPC_STATUS_OK;
             break;
-        case E_COND_VAR_RESULT_TIMEOUT:
+        case E_COND_VAR_RESULT_ERROR_TIMEOUT:
             resSOPC = SOPC_STATUS_TIMEOUT;
             break;
         case E_COND_VAR_RESULT_ERROR_NOT_INITIALIZED:

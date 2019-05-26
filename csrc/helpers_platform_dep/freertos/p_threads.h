@@ -36,6 +36,7 @@ typedef struct T_THREAD_ARGS
     TaskHandle_t handleTask;
     QueueHandle_t lockRecHandle;
     QueueHandle_t signalReadyToWait;
+    QueueHandle_t signalReadyToStart;
     tConditionVariable* pJointure;
 } tThreadArgs;
 
@@ -49,6 +50,7 @@ typedef enum E_THREAD_RESULT
 {
     E_THREAD_RESULT_OK,
     E_THREAD_RESULT_ERROR_NOK,
+    E_THREAD_RESULT_ERROR_MAX_THREADS,
     E_THREAD_RESULT_ERROR_NOT_INITIALIZED,
     E_THREAD_RESULT_ERROR_SELF_JOIN_THREAD,
     E_THREAD_RESULT_ERROR_ALREADY_INITIALIZED

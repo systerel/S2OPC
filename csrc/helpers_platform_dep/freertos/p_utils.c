@@ -12,9 +12,9 @@
 
 #include "p_utils.h"
 
-eUtilsListError P_UTILS_LIST_AddElt(tUtilsList* ptr, TaskHandle_t handleTask, unsigned int infos)
+eUtilsListResult P_UTILS_LIST_AddElt(tUtilsList* ptr, TaskHandle_t handleTask, void* pContext, unsigned int infos)
 {
-    eUtilsListError result = E_UTILS_LIST_ERROR_OK;
+    eUtilsListResult result = E_UTILS_LIST_RESULT_OK;
     unsigned short wCurrentSlotId = 0;
     unsigned short wNextSlotId = 0;
 
@@ -98,17 +98,18 @@ eUtilsListError P_UTILS_LIST_AddElt(tUtilsList* ptr, TaskHandle_t handleTask, un
 
                 ptr->list[wCurrentSlotId].value = handleTask;
                 ptr->list[wCurrentSlotId].infos = infos;
+                ptr->list[wCurrentSlotId].pContext = pContext;
                 ptr->wNbRegisteredTasks = ptr->wNbRegisteredTasks < ptr->wMaxWaitingTasks ? ptr->wNbRegisteredTasks + 1
                                                                                           : ptr->wNbRegisteredTasks;
             } // if(wCurrentSlotId  < MAX_SIGNAL) no free slot
             else
             {
-                result = E_UTILS_LIST_ERROR_MAX_ELTS;
+                result = E_UTILS_LIST_RESULT_ERROR_MAX_ELTS;
             }
         } // pv->nbWaiters = pv->nbWaiters < MAX_SIGNAL => no free slot
         else
         {
-            result = E_UTILS_LIST_ERROR_MAX_ELTS;
+            result = E_UTILS_LIST_RESULT_ERROR_MAX_ELTS;
         }
     }
     return result;
@@ -167,6 +168,7 @@ unsigned short int P_UTILS_LIST_RemoveElt(tUtilsList* pv, TaskHandle_t taskNotif
             // RAZ current
             pv->list[wCurrentSlotId].value = 0;
             pv->list[wCurrentSlotId].infos = 0;
+            pv->list[wCurrentSlotId].pContext = NULL;
             pv->list[wCurrentSlotId].nxId = pv->wMaxWaitingTasks;
             pv->list[wCurrentSlotId].prId = pv->wMaxWaitingTasks;
         }
@@ -175,28 +177,36 @@ unsigned short int P_UTILS_LIST_RemoveElt(tUtilsList* pv, TaskHandle_t taskNotif
 }
 
 /*Alloc task*/
-eUtilsListError P_UTILS_LIST_Init(tUtilsList* ptr, unsigned short int wMaxRDV)
+eUtilsListResult P_UTILS_LIST_Init(tUtilsList* ptr, unsigned short int wMaxRDV)
 {
     unsigned short iIter = 0;
     if ((ptr != NULL) && (wMaxRDV <= MAX_SIGNAL))
     {
-        ptr->list = (tUtilsListElt*) pvPortMalloc(sizeof(tUtilsListElt) * wMaxRDV);
-        if (ptr->list != NULL)
+        if (ptr->list == NULL)
         {
-            ptr->wMaxWaitingTasks = wMaxRDV;
-            ptr->first = ptr->wMaxWaitingTasks;
-            ptr->wNbRegisteredTasks = 0;
-            for (iIter = 0; iIter < ptr->wMaxWaitingTasks; iIter++)
+            ptr->list = (tUtilsListElt*) pvPortMalloc(sizeof(tUtilsListElt) * wMaxRDV);
+            if (ptr->list != NULL)
             {
-                ptr->list[iIter].value = 0;
-                ptr->list[iIter].infos = 0;
-                ptr->list[iIter].nxId = ptr->wMaxWaitingTasks;
-                ptr->list[iIter].prId = ptr->wMaxWaitingTasks;
+                ptr->wMaxWaitingTasks = wMaxRDV;
+                ptr->first = ptr->wMaxWaitingTasks;
+                ptr->wNbRegisteredTasks = 0;
+                for (iIter = 0; iIter < ptr->wMaxWaitingTasks; iIter++)
+                {
+                    ptr->list[iIter].value = 0;
+                    ptr->list[iIter].infos = 0;
+                    ptr->list[iIter].pContext = NULL;
+                    ptr->list[iIter].nxId = ptr->wMaxWaitingTasks;
+                    ptr->list[iIter].prId = ptr->wMaxWaitingTasks;
+                }
+                return E_UTILS_LIST_RESULT_OK;
             }
-            return E_UTILS_LIST_ERROR_OK;
+        }
+        else
+        {
+            return E_UTILS_LIST_RESULT_ERROR_ALREADY_INIT;
         }
     }
-    return E_UTILS_LIST_ERROR_NOK;
+    return E_UTILS_LIST_RESULT_ERROR_NOK;
 }
 
 void P_UTILS_LIST_DeInit(tUtilsList* ptr)
@@ -207,9 +217,63 @@ void P_UTILS_LIST_DeInit(tUtilsList* ptr)
         {
             vPortFree(ptr->list);
             ptr->list = NULL;
-            ptr->wMaxWaitingTasks = 0;
-            ptr->first = 0;
-            ptr->wNbRegisteredTasks = 0;
         }
+        ptr->wMaxWaitingTasks = 0;
+        ptr->first = 0;
+        ptr->wNbRegisteredTasks = 0;
     }
+}
+
+eUtilsListResult P_UTILS_LIST_AddEltMT(tUtilsList* ptr, TaskHandle_t handleTask, void* pContext, unsigned int infos)
+{
+    eUtilsListResult result = E_UTILS_LIST_RESULT_ERROR_NOK;
+
+    if ((ptr != NULL) && (ptr->lockHandle != NULL))
+    {
+        xSemaphoreTakeRecursive(ptr->lockHandle, portMAX_DELAY);
+        result = P_UTILS_LIST_AddElt(ptr, handleTask, pContext, infos);
+        xSemaphoreGiveRecursive(ptr->lockHandle);
+    }
+    return result;
+}
+
+unsigned short int P_UTILS_LIST_GetEltIndexMT(tUtilsList* ptr, TaskHandle_t taskNotified, unsigned int infos)
+{
+    unsigned short wCurrentSlotId = USHRT_MAX;
+    if ((ptr != NULL) && (ptr->lockHandle != NULL))
+    {
+        xSemaphoreTakeRecursive(ptr->lockHandle, portMAX_DELAY);
+        wCurrentSlotId = P_UTILS_LIST_GetEltIndex(ptr, taskNotified, infos);
+        xSemaphoreGiveRecursive(ptr->lockHandle);
+    }
+    return wCurrentSlotId;
+}
+
+void* P_UTILS_LIST_GetContextFromHandleMT(tUtilsList* ptr, TaskHandle_t taskNotified, unsigned int infos)
+{
+    void* ptrContext = NULL;
+    unsigned short wCurrentSlotId = USHRT_MAX;
+    if ((ptr != NULL) && (ptr->lockHandle != NULL))
+    {
+        xSemaphoreTakeRecursive(ptr->lockHandle, portMAX_DELAY);
+        wCurrentSlotId = P_UTILS_LIST_GetEltIndex(ptr, taskNotified, infos);
+        if (wCurrentSlotId < ptr->wMaxWaitingTasks)
+        {
+            ptrContext = ptr->list[wCurrentSlotId].pContext;
+        }
+        xSemaphoreGiveRecursive(ptr->lockHandle);
+    }
+    return ptrContext;
+}
+
+unsigned short int P_UTILS_LIST_RemoveEltMT(tUtilsList* ptr, TaskHandle_t taskNotified, unsigned int infos)
+{
+    unsigned short wCurrentSlotId = USHRT_MAX;
+    if ((ptr != NULL) && (ptr->lockHandle != NULL))
+    {
+        xSemaphoreTakeRecursive(ptr->lockHandle, portMAX_DELAY);
+        wCurrentSlotId = P_UTILS_LIST_RemoveElt(ptr, taskNotified, infos);
+        xSemaphoreGiveRecursive(ptr->lockHandle);
+    }
+    return wCurrentSlotId;
 }
