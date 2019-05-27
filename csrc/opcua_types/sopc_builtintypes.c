@@ -3388,6 +3388,19 @@ SOPC_Variant* SOPC_Variant_Create()
     return variant;
 }
 
+bool SOPC_Variant_Initialize_Array(SOPC_Variant* var, SOPC_BuiltinId builtInId, int32_t length)
+{
+    SOPC_ReturnStatus status = AllocVariantArrayBuiltInType(builtInId, &var->Value.Array.Content, length);
+    if (SOPC_STATUS_OK != status)
+    {
+        return false;
+    }
+    var->ArrayType = SOPC_VariantArrayType_Array;
+    var->Value.Array.Length = length;
+    var->BuiltInTypeId = builtInId;
+    return true;
+}
+
 void SOPC_Variant_InitializeAux(void* value)
 {
     SOPC_Variant_Initialize((SOPC_Variant*) value);
@@ -4609,6 +4622,240 @@ SOPC_ReturnStatus SOPC_Variant_SetRange(SOPC_Variant* variant, const SOPC_Varian
         // Matrix will come later
         return SOPC_STATUS_NOT_SUPPORTED;
     }
+}
+
+const void* SOPC_Variant_Get_SingleValue(const SOPC_Variant* var, SOPC_BuiltinId builtInTypeId)
+{
+    assert(SOPC_VariantArrayType_SingleValue == var->ArrayType);
+    assert(builtInTypeId == var->BuiltInTypeId);
+
+    switch (builtInTypeId)
+    {
+    case SOPC_Null_Id:
+        return NULL;
+    case SOPC_Boolean_Id:
+        return &var->Value.Boolean;
+    case SOPC_SByte_Id:
+        return &var->Value.Sbyte;
+    case SOPC_Byte_Id:
+        return &var->Value.Byte;
+    case SOPC_Int16_Id:
+        return &var->Value.Int16;
+    case SOPC_UInt16_Id:
+        return &var->Value.Uint16;
+    case SOPC_Int32_Id:
+        return &var->Value.Int32;
+    case SOPC_UInt32_Id:
+        return &var->Value.Uint32;
+    case SOPC_Int64_Id:
+        return &var->Value.Int64;
+    case SOPC_UInt64_Id:
+        return &var->Value.Uint64;
+    case SOPC_Float_Id:
+        return &var->Value.Floatv;
+    case SOPC_Double_Id:
+        return &var->Value.Doublev;
+    case SOPC_String_Id:
+        return &var->Value.String;
+    case SOPC_DateTime_Id:
+        return &var->Value.Date;
+    case SOPC_Guid_Id:
+        return var->Value.Guid;
+    case SOPC_ByteString_Id:
+        return &var->Value.Bstring;
+    case SOPC_XmlElement_Id:
+        return &var->Value.XmlElt;
+    case SOPC_NodeId_Id:
+        return var->Value.NodeId;
+    case SOPC_ExpandedNodeId_Id:
+        return var->Value.ExpNodeId;
+    case SOPC_StatusCode_Id:
+        return &var->Value.Status;
+    case SOPC_QualifiedName_Id:
+        return var->Value.Qname;
+    case SOPC_LocalizedText_Id:
+        return var->Value.LocalizedText;
+    case SOPC_ExtensionObject_Id:
+        return var->Value.ExtObject;
+    case SOPC_DataValue_Id:
+        return var->Value.DataValue;
+    case SOPC_DiagnosticInfo_Id:
+        return var->Value.DiagInfo;
+    case SOPC_Variant_Id:
+        // Part 6 Table 14 (v1.03): "The value shall not be a Variant
+        //                           but it could be an array of Variants."
+        // Note: Variant is not encoded in S2OPC stack for this case
+        return NULL;
+    default:
+        assert(false);
+        return NULL;
+    }
+}
+
+const void* SOPC_Variant_Get_ArrayValue(const SOPC_Variant* var, SOPC_BuiltinId builtInTypeId, int32_t index)
+{
+    assert(SOPC_VariantArrayType_Array == var->ArrayType);
+    assert(builtInTypeId == var->BuiltInTypeId);
+    assert(var->Value.Array.Length > index);
+
+    switch (builtInTypeId)
+    {
+    case SOPC_Null_Id:
+        // mantis #0003682: errata for 1.03 but not confirmed NULL array forbidden
+        return NULL;
+    case SOPC_Boolean_Id:
+        return (void*) &var->Value.Array.Content.BooleanArr[index];
+    case SOPC_SByte_Id:
+        return (void*) &var->Value.Array.Content.SbyteArr[index];
+    case SOPC_Byte_Id:
+        return (void*) &var->Value.Array.Content.ByteArr[index];
+    case SOPC_Int16_Id:
+        return (void*) &var->Value.Array.Content.Int16Arr[index];
+    case SOPC_UInt16_Id:
+        return (void*) &var->Value.Array.Content.Uint16Arr[index];
+    case SOPC_Int32_Id:
+        return (void*) &var->Value.Array.Content.Int32Arr[index];
+    case SOPC_UInt32_Id:
+        return (void*) &var->Value.Array.Content.Uint32Arr[index];
+    case SOPC_Int64_Id:
+        return (void*) &var->Value.Array.Content.Int64Arr[index];
+    case SOPC_UInt64_Id:
+        return (void*) &var->Value.Array.Content.Uint64Arr[index];
+    case SOPC_Float_Id:
+        return (void*) &var->Value.Array.Content.FloatvArr[index];
+    case SOPC_Double_Id:
+        return (void*) &var->Value.Array.Content.DoublevArr[index];
+    case SOPC_String_Id:
+        return (void*) &var->Value.Array.Content.StringArr[index];
+    case SOPC_DateTime_Id:
+        return (void*) &var->Value.Array.Content.DateArr[index];
+    case SOPC_Guid_Id:
+        return (void*) &var->Value.Array.Content.GuidArr[index];
+    case SOPC_ByteString_Id:
+        return (void*) &var->Value.Array.Content.BstringArr[index];
+    case SOPC_XmlElement_Id:
+        return (void*) &var->Value.Array.Content.XmlEltArr[index];
+    case SOPC_NodeId_Id:
+        return (void*) &var->Value.Array.Content.NodeIdArr[index];
+    case SOPC_ExpandedNodeId_Id:
+        return (void*) &var->Value.Array.Content.ExpNodeIdArr[index];
+    case SOPC_StatusCode_Id:
+        return (void*) &var->Value.Array.Content.StatusArr[index];
+    case SOPC_QualifiedName_Id:
+        return (void*) &var->Value.Array.Content.QnameArr[index];
+    case SOPC_LocalizedText_Id:
+        return (void*) &var->Value.Array.Content.LocalizedTextArr[index];
+    case SOPC_ExtensionObject_Id:
+        return (void*) &var->Value.Array.Content.ExtObjectArr[index];
+    case SOPC_DataValue_Id:
+        return (void*) &var->Value.Array.Content.DataValueArr[index];
+    case SOPC_Variant_Id:
+        return (void*) &var->Value.Array.Content.VariantArr[index];
+    case SOPC_DiagnosticInfo_Id:
+        return (void*) &var->Value.Array.Content.DiagInfoArr[index];
+    default:
+        return NULL;
+    }
+}
+
+bool SOPC_Variant_CopyInto_ArrayValueAt(const SOPC_Variant* var,
+                                        SOPC_BuiltinId builtInTypeId,
+                                        int32_t index,
+                                        const void* value)
+{
+    assert(SOPC_VariantArrayType_Array == var->ArrayType);
+    assert(builtInTypeId == var->BuiltInTypeId && SOPC_Null_Id != builtInTypeId);
+    assert(var->Value.Array.Length > index);
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+
+    SOPC_EncodeableObject_PfnCopy* copyFct = SOPC_BuiltInType_HandlingTable[builtInTypeId].copy;
+    switch (builtInTypeId)
+    {
+    case SOPC_Boolean_Id:
+        status = copyFct(&var->Value.Array.Content.BooleanArr[index], value);
+        break;
+    case SOPC_SByte_Id:
+        status = copyFct(&var->Value.Array.Content.SbyteArr[index], value);
+        break;
+    case SOPC_Byte_Id:
+        status = copyFct(&var->Value.Array.Content.ByteArr[index], value);
+        break;
+    case SOPC_Int16_Id:
+        status = copyFct(&var->Value.Array.Content.Int16Arr[index], value);
+        break;
+    case SOPC_UInt16_Id:
+        status = copyFct(&var->Value.Array.Content.Uint16Arr[index], value);
+        break;
+    case SOPC_Int32_Id:
+        status = copyFct(&var->Value.Array.Content.Int32Arr[index], value);
+        break;
+    case SOPC_UInt32_Id:
+        status = copyFct(&var->Value.Array.Content.Uint32Arr[index], value);
+        break;
+    case SOPC_Int64_Id:
+        status = copyFct(&var->Value.Array.Content.Int64Arr[index], value);
+        break;
+    case SOPC_UInt64_Id:
+        status = copyFct(&var->Value.Array.Content.Uint64Arr[index], value);
+        break;
+    case SOPC_Float_Id:
+        status = copyFct(&var->Value.Array.Content.FloatvArr[index], value);
+        break;
+    case SOPC_Double_Id:
+        status = copyFct(&var->Value.Array.Content.DoublevArr[index], value);
+        break;
+    case SOPC_String_Id:
+        status = copyFct(&var->Value.Array.Content.StringArr[index], value);
+        break;
+    case SOPC_DateTime_Id:
+        status = copyFct(&var->Value.Array.Content.DateArr[index], value);
+        break;
+    case SOPC_Guid_Id:
+        status = copyFct(&var->Value.Array.Content.GuidArr[index], value);
+        break;
+    case SOPC_ByteString_Id:
+        status = copyFct(&var->Value.Array.Content.BstringArr[index], value);
+        break;
+    case SOPC_XmlElement_Id:
+        status = copyFct(&var->Value.Array.Content.XmlEltArr[index], value);
+        break;
+    case SOPC_NodeId_Id:
+        status = copyFct(&var->Value.Array.Content.NodeIdArr[index], value);
+        break;
+    case SOPC_ExpandedNodeId_Id:
+        status = copyFct(&var->Value.Array.Content.ExpNodeIdArr[index], value);
+        break;
+    case SOPC_StatusCode_Id:
+        status = copyFct(&var->Value.Array.Content.StatusArr[index], value);
+        break;
+    case SOPC_QualifiedName_Id:
+        status = copyFct(&var->Value.Array.Content.QnameArr[index], value);
+        break;
+    case SOPC_LocalizedText_Id:
+        status = copyFct(&var->Value.Array.Content.LocalizedTextArr[index], value);
+        break;
+    case SOPC_ExtensionObject_Id:
+        status = copyFct(&var->Value.Array.Content.ExtObjectArr[index], value);
+        break;
+    case SOPC_DataValue_Id:
+        status = copyFct(&var->Value.Array.Content.DataValueArr[index], value);
+        break;
+    case SOPC_Variant_Id:
+        status = copyFct(&var->Value.Array.Content.VariantArr[index], value);
+        break;
+    case SOPC_DiagnosticInfo_Id:
+        status = copyFct(&var->Value.Array.Content.DiagInfoArr[index], value);
+        break;
+    default:
+        assert(false);
+        break;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        return true;
+    }
+    return false;
 }
 
 const SOPC_NodeId* SOPC_Variant_Get_DataType(const SOPC_Variant* var)

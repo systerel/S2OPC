@@ -333,7 +333,7 @@ void address_space_bs__read_AddressSpace_ValueRank_value(
            address_space_bs__p_node->node_class == OpcUa_NodeClass_VariableType);
     *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
     *address_space_bs__variant =
-        util_variant__new_Variant_from_int32(SOPC_AddressSpace_Item_Get_ValueRank(address_space_bs__p_node));
+        util_variant__new_Variant_from_int32(*SOPC_AddressSpace_Item_Get_ValueRank(address_space_bs__p_node));
     if (*address_space_bs__variant == NULL)
     {
         *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
@@ -706,7 +706,7 @@ void address_space_bs__get_ValueRank(const constants__t_Node_i address_space_bs_
 {
     assert(NULL != address_space_bs__p_node);
     SOPC_AddressSpace_Item* item = address_space_bs__p_node;
-    *address_space_bs__p_value_rank = SOPC_AddressSpace_Item_Get_ValueRank(item);
+    *address_space_bs__p_value_rank = *SOPC_AddressSpace_Item_Get_ValueRank(item);
 }
 
 static bool is_type_definition(const OpcUa_ReferenceNode* ref)

@@ -798,7 +798,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">i=2253</Reference>
     </References>
   </UAVariable>
-  <UAObject NodeId="i=2256" BrowseName="ServerStatus" DataType="Structure">
+  <UAObject NodeId="i=2256" BrowseName="ServerStatus">
     <DisplayName>ServerStatus</DisplayName>
     <Description>Describes the status of this server</Description>
     <References>

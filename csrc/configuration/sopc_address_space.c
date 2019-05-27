@@ -56,6 +56,15 @@ void SOPC_AddressSpace_Item_Initialize(SOPC_AddressSpace_Item* item, OpcUa_NodeC
         /*Note: set an initial timestamp to return non null timestamps */
         item->value_source_ts.timestamp = SOPC_Time_GetCurrentTimeUTC();
         item->value_source_ts.picoSeconds = 0;
+        item->data.variable.ValueRank = -1;
+        item->data.variable.AccessLevel = 1;
+    }
+    else if (node_class == OpcUa_NodeClass_VariableType)
+    {
+        item->value_status = SOPC_GoodGenericStatus;
+        item->value_source_ts.timestamp = 0;
+        item->value_source_ts.picoSeconds = 0;
+        item->data.variable_type.ValueRank = -1;
     }
     else
     {
@@ -117,17 +126,17 @@ SOPC_NodeId* SOPC_AddressSpace_Item_Get_DataType(SOPC_AddressSpace_Item* item)
     }
 }
 
-int32_t SOPC_AddressSpace_Item_Get_ValueRank(SOPC_AddressSpace_Item* item)
+int32_t* SOPC_AddressSpace_Item_Get_ValueRank(SOPC_AddressSpace_Item* item)
 {
     switch (item->node_class)
     {
     case OpcUa_NodeClass_Variable:
-        return item->data.variable.ValueRank;
+        return &item->data.variable.ValueRank;
     case OpcUa_NodeClass_VariableType:
-        return item->data.variable_type.ValueRank;
+        return &item->data.variable_type.ValueRank;
     default:
         assert(false && "Current element has no value rank.");
-        return -3;
+        return NULL;
     }
 }
 

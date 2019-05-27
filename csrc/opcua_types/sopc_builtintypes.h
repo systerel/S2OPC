@@ -544,6 +544,8 @@ void SOPC_ExtensionObject_ClearAux(void* value);
 
 SOPC_Variant* SOPC_Variant_Create(void);
 void SOPC_Variant_Initialize(SOPC_Variant* variant);
+// Allocation of the requested array to given length
+bool SOPC_Variant_Initialize_Array(SOPC_Variant* var, SOPC_BuiltinId builtInId, int32_t length);
 void SOPC_Null_ClearAux(void* value);
 SOPC_ReturnStatus SOPC_Null_CompareAux(const void* dest, const void* src, int32_t* comparison);
 SOPC_ReturnStatus SOPC_Null_CopyAux(void* dest, const void* src);
@@ -576,6 +578,12 @@ void SOPC_Variant_Clear(SOPC_Variant* variant);
 void SOPC_Variant_ClearAux(void* value);
 void SOPC_Variant_Delete(SOPC_Variant* variant);
 
+const void* SOPC_Variant_Get_SingleValue(const SOPC_Variant* var, SOPC_BuiltinId builtInTypeId);
+const void* SOPC_Variant_Get_ArrayValue(const SOPC_Variant* var, SOPC_BuiltinId builtInTypeId, int32_t index);
+bool SOPC_Variant_CopyInto_ArrayValueAt(const SOPC_Variant* var,
+                                        SOPC_BuiltinId builtInTypeId,
+                                        int32_t index,
+                                        const void* value);
 const SOPC_NodeId* SOPC_Variant_Get_DataType(const SOPC_Variant* var);
 int32_t SOPC_Variant_Get_ValueRank(const SOPC_Variant* var);
 bool SOPC_ValueRank_IsAssignableInto(int32_t dest_ValueRank, int32_t src_valueRank);
