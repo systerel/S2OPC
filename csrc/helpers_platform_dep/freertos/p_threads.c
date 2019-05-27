@@ -243,7 +243,7 @@ eThreadResult P_THREAD_Init(tThreadWks* p, unsigned short int wMaxRDV)
                 resPTHR = E_THREAD_RESULT_ERROR_ALREADY_INITIALIZED;
             }
 
-            if (resPTHR != E_THREAD_RESULT_OK)
+            if ((resPTHR != E_THREAD_RESULT_OK) && (resPTHR != E_THREAD_RESULT_ERROR_ALREADY_INITIALIZED))
             {
                 if (p->args.handleTask != NULL)
                 {
@@ -266,7 +266,10 @@ eThreadResult P_THREAD_Init(tThreadWks* p, unsigned short int wMaxRDV)
             }
             else
             {
-                xSemaphoreGive(p->args.signalReadyToStart);
+                if (resPTHR == E_THREAD_RESULT_OK)
+                {
+                    xSemaphoreGive(p->args.signalReadyToStart);
+                }
             }
         }
         xSemaphoreGiveRecursive(p->args.lockRecHandle); //******Leave Critical section
@@ -280,11 +283,9 @@ eThreadResult P_THREAD_Join(tThreadWks* p)
     eThreadResult result = E_THREAD_RESULT_ERROR_NOK;
     eConditionVariableResult resPSYNC = E_COND_VAR_RESULT_ERROR_NOK;
     eUtilsListResult resTList = E_UTILS_LIST_RESULT_ERROR_NOK;
-
     tThreadWks* ptrCurrentThread = NULL;
 
-    // Récuperation du pointeur de contexte du thread courant.
-
+    // Get current workspace from current task handle
     if ((gTaskList.lockHandle != NULL) && (p != NULL) && (p->args.lockRecHandle != NULL))
     {
         ptrCurrentThread = P_UTILS_LIST_GetContextFromHandleMT(&gTaskList, xTaskGetCurrentTaskHandle(), 0);
@@ -303,6 +304,8 @@ eThreadResult P_THREAD_Join(tThreadWks* p)
                     if (P_UTILS_LIST_GetEltIndex(&p->taskList, xTaskGetCurrentTaskHandle(), 0) >=
                         p->taskList.wMaxWaitingTasks)
                     {
+                        // Ajout join indirect
+
                         // Le thread en cours ajoute à sa task list d'exclusion le handle de la task à joindre
                         resTList =
                             P_UTILS_LIST_AddElt(&ptrCurrentThread->taskList, xTaskGetCurrentTaskHandle(), NULL, 0);
