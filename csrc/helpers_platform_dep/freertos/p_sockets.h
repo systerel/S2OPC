@@ -20,10 +20,7 @@
 #ifndef SOPC_P_SOCKETS_H_
 #define SOPC_P_SOCKETS_H_
 
-#include "Socket.h"
-
-#define MAX_SEND_ATTEMPTS 20
-#define SLEEP_NEXT_SEND_ATTEMP 50 // milliseconds
+#include "socket.h"
 
 #define SOPC_INVALID_SOCKET (-1)
 

@@ -12,6 +12,54 @@
 
 #include "p_utils.h"
 
+/*Alloc task*/
+eUtilsListResult P_UTILS_LIST_Init(tUtilsList* ptr, unsigned short int wMaxRDV)
+{
+    unsigned short iIter = 0;
+    if ((ptr != NULL) && (wMaxRDV <= MAX_SIGNAL))
+    {
+        if (ptr->list == NULL)
+        {
+            ptr->list = (tUtilsListElt*) pvPortMalloc(sizeof(tUtilsListElt) * wMaxRDV);
+            if (ptr->list != NULL)
+            {
+                ptr->wMaxWaitingTasks = wMaxRDV;
+                ptr->first = USHRT_MAX;
+                ptr->wNbRegisteredTasks = 0;
+                for (iIter = 0; iIter < ptr->wMaxWaitingTasks; iIter++)
+                {
+                    ptr->list[iIter].value = 0;
+                    ptr->list[iIter].infos = 0;
+                    ptr->list[iIter].pContext = NULL;
+                    ptr->list[iIter].nxId = USHRT_MAX;
+                    ptr->list[iIter].prId = USHRT_MAX;
+                }
+                return E_UTILS_LIST_RESULT_OK;
+            }
+        }
+        else
+        {
+            return E_UTILS_LIST_RESULT_ERROR_ALREADY_INIT;
+        }
+    }
+    return E_UTILS_LIST_RESULT_ERROR_NOK;
+}
+
+void P_UTILS_LIST_DeInit(tUtilsList* ptr)
+{
+    if (ptr != NULL)
+    {
+        if (ptr->list != NULL)
+        {
+            vPortFree(ptr->list);
+            ptr->list = NULL;
+        }
+        ptr->wMaxWaitingTasks = 0;
+        ptr->first = USHRT_MAX;
+        ptr->wNbRegisteredTasks = 0;
+    }
+}
+
 eUtilsListResult P_UTILS_LIST_AddElt(tUtilsList* ptr, TaskHandle_t handleTask, void* pContext, unsigned int infos)
 {
     eUtilsListResult result = E_UTILS_LIST_RESULT_OK;
@@ -50,7 +98,7 @@ eUtilsListResult P_UTILS_LIST_AddElt(tUtilsList* ptr, TaskHandle_t handleTask, v
                 }
                 else
                 {
-                    ptr->list[wCurrentSlotId].prId = ptr->wMaxWaitingTasks; // MAX_WAITERS = NO PREVIOUS
+                    ptr->list[wCurrentSlotId].prId = USHRT_MAX; // MAX_WAITERS = NO PREVIOUS
                     ptr->first = wCurrentSlotId;
                 }
 
@@ -87,13 +135,13 @@ eUtilsListResult P_UTILS_LIST_AddElt(tUtilsList* ptr, TaskHandle_t handleTask, v
                     else
                     {
                         // No next, next info set to MAX WAITERS
-                        ptr->list[wCurrentSlotId].nxId = ptr->wMaxWaitingTasks;
+                        ptr->list[wCurrentSlotId].nxId = USHRT_MAX;
                     }
                 }
                 else
                 {
                     // No next, next info set to MAX WAITERS
-                    ptr->list[wCurrentSlotId].nxId = ptr->wMaxWaitingTasks;
+                    ptr->list[wCurrentSlotId].nxId = USHRT_MAX;
                 }
 
                 ptr->list[wCurrentSlotId].value = handleTask;
@@ -113,27 +161,6 @@ eUtilsListResult P_UTILS_LIST_AddElt(tUtilsList* ptr, TaskHandle_t handleTask, v
         }
     }
     return result;
-}
-
-unsigned short int P_UTILS_LIST_GetEltIndex(tUtilsList* ptr, TaskHandle_t taskNotified, unsigned int infos)
-{
-    unsigned short wCurrentSlotId = USHRT_MAX;
-    if ((ptr != NULL) && (ptr->list != NULL) && (taskNotified != NULL))
-    {
-        wCurrentSlotId = ptr->first;
-        while (wCurrentSlotId < ptr->wMaxWaitingTasks)
-        {
-            if ((ptr->list[wCurrentSlotId].value == taskNotified) && (ptr->list[wCurrentSlotId].infos == infos))
-            {
-                break;
-            }
-            else
-            {
-                wCurrentSlotId = ptr->list[wCurrentSlotId].nxId;
-            }
-        }
-    }
-    return wCurrentSlotId;
 }
 
 unsigned short int P_UTILS_LIST_RemoveElt(tUtilsList* pv, TaskHandle_t taskNotified, unsigned int infos)
@@ -169,59 +196,132 @@ unsigned short int P_UTILS_LIST_RemoveElt(tUtilsList* pv, TaskHandle_t taskNotif
             pv->list[wCurrentSlotId].value = 0;
             pv->list[wCurrentSlotId].infos = 0;
             pv->list[wCurrentSlotId].pContext = NULL;
-            pv->list[wCurrentSlotId].nxId = pv->wMaxWaitingTasks;
-            pv->list[wCurrentSlotId].prId = pv->wMaxWaitingTasks;
+            pv->list[wCurrentSlotId].nxId = USHRT_MAX;
+            pv->list[wCurrentSlotId].prId = USHRT_MAX;
         }
     }
     return wCurrentSlotId;
 }
 
-/*Alloc task*/
-eUtilsListResult P_UTILS_LIST_Init(tUtilsList* ptr, unsigned short int wMaxRDV)
+TaskHandle_t P_UTILS_LIST_ParseValueElt(tUtilsList* ptr, unsigned short int* pCurrentSlotId)
 {
-    unsigned short iIter = 0;
-    if ((ptr != NULL) && (wMaxRDV <= MAX_SIGNAL))
+    unsigned short wCurrentSlotId = USHRT_MAX;
+    TaskHandle_t taskHandle = 0;
+    if ((ptr != NULL) && (ptr->list != NULL) && (pCurrentSlotId != NULL))
     {
-        if (ptr->list == NULL)
+        wCurrentSlotId = *pCurrentSlotId;
+        if (wCurrentSlotId == USHRT_MAX)
         {
-            ptr->list = (tUtilsListElt*) pvPortMalloc(sizeof(tUtilsListElt) * wMaxRDV);
-            if (ptr->list != NULL)
-            {
-                ptr->wMaxWaitingTasks = wMaxRDV;
-                ptr->first = ptr->wMaxWaitingTasks;
-                ptr->wNbRegisteredTasks = 0;
-                for (iIter = 0; iIter < ptr->wMaxWaitingTasks; iIter++)
-                {
-                    ptr->list[iIter].value = 0;
-                    ptr->list[iIter].infos = 0;
-                    ptr->list[iIter].pContext = NULL;
-                    ptr->list[iIter].nxId = ptr->wMaxWaitingTasks;
-                    ptr->list[iIter].prId = ptr->wMaxWaitingTasks;
-                }
-                return E_UTILS_LIST_RESULT_OK;
-            }
+            wCurrentSlotId = ptr->first;
+        }
+
+        if (wCurrentSlotId < ptr->wMaxWaitingTasks)
+        {
+            taskHandle = ptr->list[wCurrentSlotId].value;
+            wCurrentSlotId = ptr->list[wCurrentSlotId].nxId;
         }
         else
         {
-            return E_UTILS_LIST_RESULT_ERROR_ALREADY_INIT;
+            taskHandle = 0;
+            wCurrentSlotId = USHRT_MAX;
         }
     }
-    return E_UTILS_LIST_RESULT_ERROR_NOK;
+
+    *pCurrentSlotId = wCurrentSlotId;
+    return taskHandle;
 }
 
-void P_UTILS_LIST_DeInit(tUtilsList* ptr)
+void* P_UTILS_LIST_ParseContextElt(tUtilsList* ptr, unsigned short int* pCurrentSlotId)
 {
-    if (ptr != NULL)
+    unsigned short wCurrentSlotId = USHRT_MAX;
+    void* pContext = 0;
+    if ((ptr != NULL) && (ptr->list != NULL) && (pCurrentSlotId != NULL))
     {
-        if (ptr->list != NULL)
+        wCurrentSlotId = *pCurrentSlotId;
+        if (wCurrentSlotId == USHRT_MAX)
         {
-            vPortFree(ptr->list);
-            ptr->list = NULL;
+            wCurrentSlotId = ptr->first;
         }
-        ptr->wMaxWaitingTasks = 0;
-        ptr->first = 0;
-        ptr->wNbRegisteredTasks = 0;
+
+        if (wCurrentSlotId < ptr->wMaxWaitingTasks)
+        {
+            pContext = ptr->list[wCurrentSlotId].pContext;
+            wCurrentSlotId = ptr->list[wCurrentSlotId].nxId;
+        }
+        else
+        {
+            wCurrentSlotId = USHRT_MAX;
+            pContext = 0;
+        }
     }
+
+    *pCurrentSlotId = wCurrentSlotId;
+    return pContext;
+}
+
+unsigned short int P_UTILS_LIST_GetEltIndex(tUtilsList* ptr, TaskHandle_t taskNotified, unsigned int infos)
+{
+    unsigned short wCurrentSlotId = USHRT_MAX;
+    if ((ptr != NULL) && (ptr->list != NULL) && (taskNotified != NULL))
+    {
+        wCurrentSlotId = ptr->first;
+        while (wCurrentSlotId < ptr->wMaxWaitingTasks)
+        {
+            if ((ptr->list[wCurrentSlotId].value == taskNotified) && (ptr->list[wCurrentSlotId].infos == infos))
+            {
+                break;
+            }
+            else
+            {
+                wCurrentSlotId = ptr->list[wCurrentSlotId].nxId;
+            }
+        }
+    }
+
+    if (wCurrentSlotId >= ptr->wMaxWaitingTasks)
+    {
+        wCurrentSlotId = USHRT_MAX;
+    }
+    return wCurrentSlotId;
+}
+
+eUtilsListResult P_UTILS_LIST_InitMT(tUtilsList* ptr, unsigned short int wMaxRDV)
+{
+    eUtilsListResult result = E_UTILS_LIST_RESULT_ERROR_NOK;
+
+    if ((ptr != NULL) && (ptr->lockHandle != NULL))
+    {
+        xSemaphoreTakeRecursive(ptr->lockHandle, portMAX_DELAY);
+        {
+            result = P_UTILS_LIST_Init(ptr, wMaxRDV);
+        }
+        xSemaphoreGiveRecursive(ptr->lockHandle);
+    }
+    return result;
+}
+
+void P_UTILS_LIST_DeInitMT(tUtilsList* ptr)
+{
+    if ((ptr != NULL) && (ptr->lockHandle != NULL))
+    {
+        xSemaphoreTakeRecursive(ptr->lockHandle, portMAX_DELAY);
+        {
+            P_UTILS_LIST_DeInit(ptr);
+        }
+        xSemaphoreGiveRecursive(ptr->lockHandle);
+    }
+}
+
+unsigned short int P_UTILS_LIST_RemoveEltMT(tUtilsList* ptr, TaskHandle_t taskNotified, unsigned int infos)
+{
+    unsigned short wCurrentSlotId = USHRT_MAX;
+    if ((ptr != NULL) && (ptr->lockHandle != NULL))
+    {
+        xSemaphoreTakeRecursive(ptr->lockHandle, portMAX_DELAY);
+        wCurrentSlotId = P_UTILS_LIST_RemoveElt(ptr, taskNotified, infos);
+        xSemaphoreGiveRecursive(ptr->lockHandle);
+    }
+    return wCurrentSlotId;
 }
 
 eUtilsListResult P_UTILS_LIST_AddEltMT(tUtilsList* ptr, TaskHandle_t handleTask, void* pContext, unsigned int infos)
@@ -235,6 +335,34 @@ eUtilsListResult P_UTILS_LIST_AddEltMT(tUtilsList* ptr, TaskHandle_t handleTask,
         xSemaphoreGiveRecursive(ptr->lockHandle);
     }
     return result;
+}
+
+TaskHandle_t P_UTILS_LIST_ParseValueEltMT(tUtilsList* ptr, unsigned short int* pCurrentSlotId)
+{
+    TaskHandle_t taskHandle = 0;
+    if ((ptr != NULL) && (ptr->lockHandle != NULL))
+    {
+        xSemaphoreTakeRecursive(ptr->lockHandle, portMAX_DELAY);
+        {
+            taskHandle = P_UTILS_LIST_ParseValueElt(ptr, pCurrentSlotId);
+        }
+        xSemaphoreGiveRecursive(ptr->lockHandle);
+    }
+    return taskHandle;
+}
+
+void* P_UTILS_LIST_ParseContextEltMT(tUtilsList* ptr, unsigned short int* pCurrentSlotId)
+{
+    void* pContext = NULL;
+    if ((ptr != NULL) && (ptr->lockHandle != NULL))
+    {
+        xSemaphoreTakeRecursive(ptr->lockHandle, portMAX_DELAY);
+        {
+            pContext = P_UTILS_LIST_ParseContextElt(ptr, pCurrentSlotId);
+        }
+        xSemaphoreGiveRecursive(ptr->lockHandle);
+    }
+    return pContext;
 }
 
 unsigned short int P_UTILS_LIST_GetEltIndexMT(tUtilsList* ptr, TaskHandle_t taskNotified, unsigned int infos)
@@ -264,16 +392,4 @@ void* P_UTILS_LIST_GetContextFromHandleMT(tUtilsList* ptr, TaskHandle_t taskNoti
         xSemaphoreGiveRecursive(ptr->lockHandle);
     }
     return ptrContext;
-}
-
-unsigned short int P_UTILS_LIST_RemoveEltMT(tUtilsList* ptr, TaskHandle_t taskNotified, unsigned int infos)
-{
-    unsigned short wCurrentSlotId = USHRT_MAX;
-    if ((ptr != NULL) && (ptr->lockHandle != NULL))
-    {
-        xSemaphoreTakeRecursive(ptr->lockHandle, portMAX_DELAY);
-        wCurrentSlotId = P_UTILS_LIST_RemoveElt(ptr, taskNotified, infos);
-        xSemaphoreGiveRecursive(ptr->lockHandle);
-    }
-    return wCurrentSlotId;
 }

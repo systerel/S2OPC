@@ -273,7 +273,7 @@ eConditionVariableResult P_SYNCHRO_UnlockAndWaitForConditionVariable(
         }
         xSemaphoreGive(pv->handleLockCounter);
 
-        // Libération du mutex passé en paramètre
+        // Give mutex from parameters
         if (handleRecursiveMutex != NULL)
         {
             (void) xQueueGiveMutexRecursive(handleRecursiveMutex);
@@ -281,9 +281,9 @@ eConditionVariableResult P_SYNCHRO_UnlockAndWaitForConditionVariable(
 
         if (result == E_COND_VAR_RESULT_OK)
         {
-            // Attente signalement ou Timeout
-            // Dans les 2 cas, on depile le handle
-            // (on indique à la tache qui signale un waiter de moins)
+            // Wait signal or timeout
+            // If signal or timeout, in both case, unstack signal
+            // (we signal to the waiting task that nb of waiting task is decremented)
 
             for (;;)
             {
@@ -297,7 +297,7 @@ eConditionVariableResult P_SYNCHRO_UnlockAndWaitForConditionVariable(
                 }
                 else
                 {
-                    // If others notifications, forward it to generate task event
+                    // If others notifications, forward it in order to generate a task event
                     if ((notificationValue & (~(uwSignal | CLEARING_SIGNAL))) != 0)
                     {
                         xTaskGenericNotify(xTaskGetCurrentTaskHandle(),

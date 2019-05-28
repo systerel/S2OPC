@@ -20,31 +20,15 @@
 #ifndef SOPC_P_THREADS_H_
 #define SOPC_P_THREADS_H_
 
-#define WAIT_JOINTURE_READY_WITH_BIN_SEM (1)
-// typedef struct T_THREAD_WKS tThreadWks;
+#include "p_synchronisation.h"
 
-typedef void (*tPtrFct)(void*);
+#define WAIT_JOINTURE_READY_WITH_BIN_SEM (1)
 
 /*****Private thread api*****/
 
-typedef struct T_THREAD_ARGS
-{
-    tPtrFct cbExternalCallback;
-    void* ptrStartArgs;
-    tPtrFct cbWaitingForJoin;
-    tPtrFct cbReadyToSignal;
-    TaskHandle_t handleTask;
-    QueueHandle_t lockRecHandle;
-    QueueHandle_t signalReadyToWait;
-    QueueHandle_t signalReadyToStart;
-    tConditionVariable* pJointure;
-} tThreadArgs;
+typedef struct T_THREAD_WKS tThreadWks;
 
-typedef struct T_THREAD_WKS
-{
-    tUtilsList taskList;
-    tThreadArgs args;
-} tThreadWks;
+typedef void (*tPtrFct)(void*);
 
 typedef enum E_THREAD_RESULT
 {
@@ -57,11 +41,12 @@ typedef enum E_THREAD_RESULT
 } eThreadResult;
 
 tThreadWks* P_THREAD_Create(tPtrFct fct, void* args, tPtrFct fctWatingForJoin, tPtrFct fctReadyToSignal);
+
 eThreadResult P_THREAD_Init(tThreadWks* p, unsigned short wMaxJoin);
 eThreadResult P_THREAD_Join(tThreadWks* p);
 
 /*****Public s2opc thread api*****/
 
-typedef tThreadWks Thread;
+typedef tThreadWks* Thread;
 
 #endif /* SOPC_P_THREADS_H_ */

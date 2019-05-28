@@ -33,6 +33,10 @@ unsigned short int P_UTILS_LIST_GetEltIndex(tUtilsList* ptr, TaskHandle_t taskNo
 
 eUtilsListResult P_UTILS_LIST_AddElt(tUtilsList* ptr, TaskHandle_t handleTask, void* pContext, unsigned int infos);
 
+TaskHandle_t P_UTILS_LIST_ParseValueElt(tUtilsList* ptr, unsigned short int* pCurrentSlotId);
+
+void* P_UTILS_LIST_ParseContextEltMT(tUtilsList* ptr, unsigned short int* pCurrentSlotId);
+
 unsigned short P_UTILS_LIST_RemoveElt(tUtilsList* pv, TaskHandle_t taskNotified, unsigned int infos);
 
 void P_UTILS_LIST_DeInit(tUtilsList* ptr);
@@ -43,6 +47,8 @@ unsigned short int P_UTILS_LIST_GetEltIndexMT(tUtilsList* ptr, TaskHandle_t task
 
 void* P_UTILS_LIST_GetContextFromHandleMT(tUtilsList* ptr, TaskHandle_t taskNotified, unsigned int infos);
 
+TaskHandle_t P_UTILS_LIST_ParseValueEltMT(tUtilsList* ptr, unsigned short int* pCurrentSlotId);
+
 eUtilsListResult P_UTILS_LIST_AddEltMT(tUtilsList* ptr, TaskHandle_t handleTask, void* pContext, unsigned int infos);
 
 unsigned short P_UTILS_LIST_RemoveEltMT(tUtilsList* pv, TaskHandle_t taskNotified, unsigned int infos);
@@ -50,5 +56,7 @@ unsigned short P_UTILS_LIST_RemoveEltMT(tUtilsList* pv, TaskHandle_t taskNotifie
 void P_UTILS_LIST_DeInitMT(tUtilsList* ptr);
 
 eUtilsListResult P_UTILS_LIST_InitMT(tUtilsList* ptr, unsigned short int wMaxRDV);
+
+void P_UTILS_LIST_DeInitMT(tUtilsList* ptr);
 
 #endif

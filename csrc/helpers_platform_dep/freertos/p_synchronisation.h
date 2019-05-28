@@ -20,6 +20,11 @@
 #ifndef P_SYNCHRONISATION_H
 #define P_SYNCHRONISATION_H
 
+#include "FreeRTOS.h"
+#include "p_utils.h"
+#include "queue.h"
+#include "task.h"
+
 /*****Private condition variable api*****/
 
 #define CLEARING_SIGNAL (0x80000000)
@@ -41,8 +46,6 @@ typedef enum T_CONDITION_VARIABLE_RESULT
     E_COND_VAR_RESULT_ERROR_NOT_INITIALIZED,
     E_COND_VAR_RESULT_ERROR_ALREADY_INITIALIZED
 } eConditionVariableResult;
-
-/*Construction condition variable*/
 
 tConditionVariable* P_SYNCHRO_CreateConditionVariable(void);
 void P_SYNCHRO_DestroyConditionVariable(tConditionVariable** pv);

@@ -35,32 +35,66 @@
 #include "p_threads.h"         /*thread*/
 #include "p_utils.h"
 
-#define MAX_THREADS 128
+#define MAX_THREADS 16
+
+/*****Private structure definition*****/
+
+typedef enum E_THREAD_STATUS
+{
+    E_THREAD_STATUS_NOT_INITIALIZED,
+    E_THREAD_STATUS_INITIALIZED
+} eThreadStatus;
+
+typedef struct T_THREAD_ARGS
+{
+    tPtrFct cbExternalCallback;
+    void* ptrStartArgs;
+} tThreadArgs;
+
+typedef struct T_THREAD_WKS
+{
+    eThreadStatus status;
+    tUtilsList taskList;
+    tPtrFct cbWaitingForJoin;
+    tPtrFct cbReadyToSignal;
+    TaskHandle_t handleTask;
+    QueueHandle_t lockRecHandle;
+    QueueHandle_t signalReadyToWait;
+    QueueHandle_t signalReadyToStart;
+    tConditionVariable* pJointure;
+    tThreadArgs args;
+} tThreadWks;
+
+/*****Private global definition*****/
 
 static tUtilsList gTaskList = {NULL, 0, 0, 0, NULL};
 static unsigned int bOverflowDetected = 0;
 
 /*****Private thread api*****/
 
+// Callback encapsulate user callback. Abstract start and stop synchronisation.
 static void cbInternalCallback(void* ptr)
 {
-    tThreadArgs* ptrArgs = (tThreadArgs*) ptr;
+    tThreadWks* ptrArgs = (tThreadWks*) ptr;
 #ifndef WAIT_JOINTURE_READY_WITH_BIN_SEM
     unsigned int notificationValue = 0;
 #endif
 
     if (ptr != NULL)
     {
-        xSemaphoreTake(ptrArgs->signalReadyToStart, portMAX_DELAY);
-
-        if (ptrArgs->cbExternalCallback != NULL)
+        if (ptrArgs->signalReadyToStart != NULL)
         {
-            ptrArgs->cbExternalCallback(ptrArgs->ptrStartArgs);
+            xSemaphoreTake(ptrArgs->signalReadyToStart, portMAX_DELAY);
+        }
+
+        if (ptrArgs->args.cbExternalCallback != NULL)
+        {
+            ptrArgs->args.cbExternalCallback(ptrArgs->args.ptrStartArgs);
         }
 
         if (ptrArgs->cbWaitingForJoin != NULL)
         {
-            ptrArgs->cbWaitingForJoin(ptrArgs->ptrStartArgs);
+            ptrArgs->cbWaitingForJoin(ptrArgs->args.ptrStartArgs);
         }
 
         // Wait for at least one join call
@@ -84,61 +118,73 @@ static void cbInternalCallback(void* ptr)
             }
         }
 #else
-        xSemaphoreTake(ptrArgs->signalReadyToWait, portMAX_DELAY);
+        if (ptrArgs->signalReadyToWait != NULL)
+        {
+            xSemaphoreTake(ptrArgs->signalReadyToWait, portMAX_DELAY);
+        }
 #endif
 
         if (ptrArgs->cbReadyToSignal != NULL)
         {
-            ptrArgs->cbReadyToSignal(ptrArgs->ptrStartArgs);
+            ptrArgs->cbReadyToSignal(ptrArgs->args.ptrStartArgs);
         }
 
         // At this level, wait for release mutex by condition variable called from join function
-        xSemaphoreTakeRecursive(ptrArgs->lockRecHandle, portMAX_DELAY); //******Enter Critical section
+        if (ptrArgs->lockRecHandle != NULL)
         {
-            // Signal terminaison thread
-            P_SYNCHRO_SignalAllConditionVariable(ptrArgs->pJointure, JOINTURE_SIGNAL);
+            xSemaphoreTakeRecursive(ptrArgs->lockRecHandle, portMAX_DELAY); //******Enter Critical section
+            {
+                // Signal terminaison thread
+                P_SYNCHRO_SignalAllConditionVariable(ptrArgs->pJointure, JOINTURE_SIGNAL);
+            }
+            xSemaphoreGiveRecursive(ptrArgs->lockRecHandle); //******Leave Critical section
         }
-        xSemaphoreGiveRecursive(ptrArgs->lockRecHandle); //******Leave Critical section
     }
 
     vTaskDelete(NULL);
 }
 
-// Non thread safe
+// Destruction handle
 void P_THREAD_Destroy(tThreadWks** ptr)
 {
     if ((ptr != NULL) && ((*ptr) != NULL))
     {
-        if ((*ptr)->args.pJointure != NULL)
+        if ((*ptr)->pJointure != NULL)
         {
-            P_SYNCHRO_DestroyConditionVariable(&((*ptr)->args.pJointure));
+            P_SYNCHRO_DestroyConditionVariable(&((*ptr)->pJointure));
         }
 
         P_UTILS_LIST_DeInit(&(*ptr)->taskList);
 
-        if ((*ptr)->args.signalReadyToWait != NULL)
+        if ((*ptr)->taskList.lockHandle != NULL)
         {
-            vQueueDelete((*ptr)->args.signalReadyToWait);
-            (*ptr)->args.signalReadyToWait = NULL;
+            vQueueDelete((*ptr)->taskList.lockHandle);
+            (*ptr)->taskList.lockHandle = NULL;
         }
 
-        if ((*ptr)->args.signalReadyToStart != NULL)
+        if ((*ptr)->signalReadyToWait != NULL)
         {
-            vQueueDelete((*ptr)->args.signalReadyToStart);
-            (*ptr)->args.signalReadyToStart = NULL;
+            vQueueDelete((*ptr)->signalReadyToWait);
+            (*ptr)->signalReadyToWait = NULL;
         }
 
-        if ((*ptr)->args.lockRecHandle != NULL)
+        if ((*ptr)->signalReadyToStart != NULL)
         {
-            vQueueDelete((*ptr)->args.lockRecHandle);
-            (*ptr)->args.lockRecHandle = NULL;
+            vQueueDelete((*ptr)->signalReadyToStart);
+            (*ptr)->signalReadyToStart = NULL;
+        }
+
+        if ((*ptr)->lockRecHandle != NULL)
+        {
+            vQueueDelete((*ptr)->lockRecHandle);
+            (*ptr)->lockRecHandle = NULL;
         }
 
         vPortFree(*ptr);
         *ptr = NULL;
     }
 }
-// Non thread safe
+// Creation workspace
 tThreadWks* P_THREAD_Create(tPtrFct fct, void* args, tPtrFct fctWatingForJoin, tPtrFct fctReadyToSignal)
 {
     tThreadWks* ptrWks = NULL;
@@ -157,20 +203,24 @@ tThreadWks* P_THREAD_Create(tPtrFct fct, void* args, tPtrFct fctWatingForJoin, t
         goto error;
     (void) memset(ptrWks, 0, sizeof(tThreadWks));
 
-    ptrWks->args.lockRecHandle = xQueueCreateMutex(queueQUEUE_TYPE_RECURSIVE_MUTEX);
-    if (ptrWks->args.lockRecHandle == NULL)
+    ptrWks->lockRecHandle = xQueueCreateMutex(queueQUEUE_TYPE_RECURSIVE_MUTEX);
+    if (ptrWks->lockRecHandle == NULL)
         goto error;
 
     ptrWks->args.cbExternalCallback = fct;
-    ptrWks->args.cbReadyToSignal = fctReadyToSignal;
-    ptrWks->args.cbWaitingForJoin = fctWatingForJoin;
+    ptrWks->cbReadyToSignal = fctReadyToSignal;
+    ptrWks->cbWaitingForJoin = fctWatingForJoin;
     ptrWks->args.ptrStartArgs = args;
-    ptrWks->args.handleTask = 0;
-    ptrWks->args.signalReadyToWait = NULL;
-    ptrWks->args.signalReadyToStart = NULL;
+    ptrWks->handleTask = NULL;
+    ptrWks->signalReadyToWait = NULL;
+    ptrWks->signalReadyToStart = NULL;
 
-    ptrWks->args.pJointure = P_SYNCHRO_CreateConditionVariable();
-    if (ptrWks->args.pJointure == NULL)
+    ptrWks->taskList.lockHandle = xQueueCreateMutex(queueQUEUE_TYPE_RECURSIVE_MUTEX);
+    if (ptrWks->taskList.lockHandle == NULL)
+        goto error;
+
+    ptrWks->pJointure = P_SYNCHRO_CreateConditionVariable();
+    if (ptrWks->pJointure == NULL)
         goto error;
 
     goto success;
@@ -180,39 +230,41 @@ success:
     return ptrWks;
 }
 
+// Initializes created thread then launches it.
 eThreadResult P_THREAD_Init(tThreadWks* p, unsigned short int wMaxRDV)
 {
     eThreadResult resPTHR = E_THREAD_RESULT_ERROR_NOK;
     eConditionVariableResult resPSYNC = E_COND_VAR_RESULT_ERROR_NOK;
     eUtilsListResult resTList = E_UTILS_LIST_RESULT_ERROR_NOK;
 
-    if ((gTaskList.lockHandle != NULL) && (p != NULL) && (p->args.lockRecHandle != NULL))
+    if ((gTaskList.lockHandle != NULL) && (p != NULL) && (p->lockRecHandle != NULL))
     {
-        xSemaphoreTakeRecursive(p->args.lockRecHandle, portMAX_DELAY); //******Critical section
+        xSemaphoreTakeRecursive(p->lockRecHandle, portMAX_DELAY); //******Critical section
         {
-            if (p->args.handleTask == NULL)
+            if (p->handleTask == NULL)
             {
                 // Creation task list a exclure
-                resTList = P_UTILS_LIST_Init(&p->taskList, wMaxRDV);
+                resTList = P_UTILS_LIST_InitMT(&p->taskList, wMaxRDV);
                 if (resTList == E_UTILS_LIST_RESULT_OK)
                 {
-                    resPSYNC = P_SYNCHRO_InitConditionVariable(p->args.pJointure, wMaxRDV);
+                    resPSYNC = P_SYNCHRO_InitConditionVariable(p->pJointure, wMaxRDV);
                     if (resPSYNC == E_COND_VAR_RESULT_OK)
                     {
-                        p->args.signalReadyToWait = xSemaphoreCreateBinary();
-                        p->args.signalReadyToStart = xSemaphoreCreateBinary();
-                        if ((p->args.signalReadyToWait != NULL) && (p->args.signalReadyToStart != NULL))
+                        p->signalReadyToWait = xSemaphoreCreateBinary();
+                        p->signalReadyToStart = xSemaphoreCreateBinary();
+                        if ((p->signalReadyToWait != NULL) && (p->signalReadyToStart != NULL))
                         {
-                            xSemaphoreTake(p->args.signalReadyToStart, 0);
-                            xSemaphoreTake(p->args.signalReadyToWait, 0);
-                            if (xTaskCreate(cbInternalCallback, "appThread", configMINIMAL_STACK_SIZE, &p->args,
-                                            configMAX_PRIORITIES - 1, &p->args.handleTask) != pdPASS)
+                            xSemaphoreTake(p->signalReadyToStart, 0);
+                            xSemaphoreTake(p->signalReadyToWait, 0);
+                            if (xTaskCreate(cbInternalCallback, "appThread", configMINIMAL_STACK_SIZE, p,
+                                            configMAX_PRIORITIES - 1, &p->handleTask) != pdPASS)
                             {
                                 resPTHR = E_THREAD_RESULT_ERROR_NOK;
                             }
                             else
                             {
-                                resTList = P_UTILS_LIST_AddEltMT(&gTaskList, p->args.handleTask, p, 0);
+                                p->status = E_THREAD_STATUS_INITIALIZED;
+                                resTList = P_UTILS_LIST_AddEltMT(&gTaskList, p->handleTask, p, 0);
                                 if (resTList != E_UTILS_LIST_RESULT_OK)
                                 {
                                     resPTHR = E_THREAD_RESULT_ERROR_MAX_THREADS;
@@ -245,114 +297,232 @@ eThreadResult P_THREAD_Init(tThreadWks* p, unsigned short int wMaxRDV)
 
             if ((resPTHR != E_THREAD_RESULT_OK) && (resPTHR != E_THREAD_RESULT_ERROR_ALREADY_INITIALIZED))
             {
-                if (p->args.handleTask != NULL)
+                if (p->handleTask != NULL)
                 {
-                    vTaskSuspend(p->args.handleTask);
-                    vTaskDelete(p->args.handleTask);
+                    vTaskSuspend(p->handleTask);
+                    vTaskDelete(p->handleTask);
                 }
-                p->args.handleTask = NULL;
-                if (p->args.signalReadyToWait != NULL)
+                p->handleTask = NULL;
+                if (p->signalReadyToWait != NULL)
                 {
-                    vQueueDelete(p->args.signalReadyToWait);
+                    vQueueDelete(p->signalReadyToWait);
                 }
-                if (p->args.signalReadyToStart != NULL)
+                if (p->signalReadyToStart != NULL)
                 {
-                    vQueueDelete(p->args.signalReadyToStart);
+                    vQueueDelete(p->signalReadyToStart);
                 }
-                p->args.signalReadyToWait = NULL;
-                p->args.signalReadyToStart = NULL;
-                P_UTILS_LIST_DeInit(&p->taskList);
-                P_SYNCHRO_ClearConditionVariable(p->args.pJointure);
+                p->signalReadyToWait = NULL;
+                p->signalReadyToStart = NULL;
+                P_UTILS_LIST_DeInitMT(&p->taskList);
+                P_SYNCHRO_ClearConditionVariable(p->pJointure);
             }
             else
             {
                 if (resPTHR == E_THREAD_RESULT_OK)
                 {
-                    xSemaphoreGive(p->args.signalReadyToStart);
+                    xSemaphoreGive(p->signalReadyToStart);
                 }
             }
         }
-        xSemaphoreGiveRecursive(p->args.lockRecHandle); //******Leave Critical section
+        xSemaphoreGiveRecursive(p->lockRecHandle); //******Leave Critical section
     }
 
     return resPTHR;
 }
 
+// Joins thread. Thread joined becomes not initilized. Can be safely destroyed if just after
+// P_THREAD_Join return, only if RESULT_OK
 eThreadResult P_THREAD_Join(tThreadWks* p)
 {
     eThreadResult result = E_THREAD_RESULT_ERROR_NOK;
     eConditionVariableResult resPSYNC = E_COND_VAR_RESULT_ERROR_NOK;
     eUtilsListResult resTList = E_UTILS_LIST_RESULT_ERROR_NOK;
     tThreadWks* ptrCurrentThread = NULL;
+    tThreadWks* pOthersThread = NULL;
+    unsigned short int wSlotId = USHRT_MAX;
+    unsigned short int wSlotIdRes = USHRT_MAX;
+    TaskHandle_t handle = NULL;
 
     // Get current workspace from current task handle
-    if ((gTaskList.lockHandle != NULL) && (p != NULL) && (p->args.lockRecHandle != NULL))
+    if ((gTaskList.lockHandle != NULL) && (p != NULL) && (p->lockRecHandle != NULL))
     {
         ptrCurrentThread = P_UTILS_LIST_GetContextFromHandleMT(&gTaskList, xTaskGetCurrentTaskHandle(), 0);
     }
 
-    if (ptrCurrentThread != NULL)
+    if ((ptrCurrentThread != NULL) && (ptrCurrentThread->lockRecHandle != NULL))
     {
-        xSemaphoreTakeRecursive(p->args.lockRecHandle, portMAX_DELAY); //******Critical section
+        xSemaphoreTakeRecursive(p->lockRecHandle, portMAX_DELAY); //******Critical section
         {
-            if (p->args.handleTask != NULL)
+            if (p->handleTask != NULL)
             {
-                // La tache en cours n'est pas celle sur laquelle on fait le join
-                if (p->args.handleTask != xTaskGetCurrentTaskHandle())
+                // Le thread en cours n'est pas celui que l'on cherche à joindre
+                if (p->handleTask != xTaskGetCurrentTaskHandle())
                 {
-                    // La tache en cours n'est pas exclue par le thread à joindre
-                    if (P_UTILS_LIST_GetEltIndex(&p->taskList, xTaskGetCurrentTaskHandle(), 0) >=
-                        p->taskList.wMaxWaitingTasks)
+                    // Le thread en cours n'est pas exclu par le thread à joindre
+                    wSlotId = P_UTILS_LIST_GetEltIndexMT(&p->taskList, xTaskGetCurrentTaskHandle(), 0);
+
+                    if (wSlotId >= USHRT_MAX)
                     {
-                        // Ajout join indirect
+                        // Le thread à joindre n'a pas déjà été joint pas le thread à joindre
+                        wSlotId = P_UTILS_LIST_GetEltIndexMT(&ptrCurrentThread->taskList, p->handleTask, 0);
 
-                        // Le thread en cours ajoute à sa task list d'exclusion le handle de la task à joindre
-                        resTList =
-                            P_UTILS_LIST_AddElt(&ptrCurrentThread->taskList, xTaskGetCurrentTaskHandle(), NULL, 0);
-
-                        if (resTList == E_UTILS_LIST_RESULT_OK)
+                        if (wSlotId >= USHRT_MAX)
                         {
-                            // Indicate that a thread is ready to wait for join
+                            // La tache à joindre enregistre le handle courant du thread joingnant
+                            resTList = P_UTILS_LIST_AddEltMT(&p->taskList, xTaskGetCurrentTaskHandle(), NULL, 0);
+
+                            //---
+                            if (resTList == E_UTILS_LIST_RESULT_OK)
+                            {
+                                // Parcours de l'ensemble des threads. Ceux qui référencent la tache à joindre
+                                // enregistrent en plus le thread courant
+                                wSlotId = USHRT_MAX;
+                                do
+                                {
+                                    pOthersThread = P_UTILS_LIST_ParseContextEltMT(&gTaskList, &wSlotId);
+                                    if ((pOthersThread != ptrCurrentThread) && (pOthersThread != NULL))
+                                    {
+                                        wSlotIdRes =
+                                            P_UTILS_LIST_GetEltIndexMT(&pOthersThread->taskList, p->handleTask, 0);
+                                        if (wSlotIdRes < USHRT_MAX)
+                                        {
+                                            resTList = P_UTILS_LIST_AddEltMT(&pOthersThread->taskList,
+                                                                             xTaskGetCurrentTaskHandle(), NULL, 0);
+                                        }
+                                    }
+                                } while ((wSlotId != USHRT_MAX) && (resTList == E_UTILS_LIST_RESULT_OK));
+
+                                if (resTList != E_UTILS_LIST_RESULT_OK)
+                                {
+                                    // Error, restauration
+                                    // Parcours de l'ensemble des threads. Ceux qui référencent la tache à joindre
+                                    // n'enregistrent plus le thread courant
+                                    wSlotId = USHRT_MAX;
+                                    do
+                                    {
+                                        pOthersThread = P_UTILS_LIST_ParseContextEltMT(&gTaskList, &wSlotId);
+                                        if ((pOthersThread != ptrCurrentThread) && (pOthersThread != NULL))
+                                        {
+                                            wSlotIdRes =
+                                                P_UTILS_LIST_GetEltIndexMT(&pOthersThread->taskList, p->handleTask, 0);
+                                            if (wSlotIdRes < USHRT_MAX)
+                                            {
+                                                P_UTILS_LIST_RemoveEltMT(&pOthersThread->taskList,
+                                                                         xTaskGetCurrentTaskHandle(), 0);
+                                            }
+                                        }
+                                    } while (wSlotId != USHRT_MAX);
+
+                                    result = E_THREAD_RESULT_ERROR_MAX_THREADS;
+                                }
+                                else
+                                {
+                                    // Le thread à joindre enregistre les handles des threads qui joignent le thread
+                                    // courant
+                                    wSlotId = USHRT_MAX;
+                                    do
+                                    {
+                                        handle = (TaskHandle_t) P_UTILS_LIST_ParseValueEltMT(
+                                            &ptrCurrentThread->taskList, &wSlotId);
+                                        if (handle != NULL)
+                                        {
+                                            resTList = P_UTILS_LIST_AddEltMT(&p->taskList, handle, NULL, 0);
+                                        }
+                                    } while ((wSlotId != USHRT_MAX) && (resTList == E_UTILS_LIST_RESULT_OK));
+
+                                    if (resTList != E_UTILS_LIST_RESULT_OK)
+                                    {
+                                        // Error, Le thread à joindre n'enregistre plus les handles des threads qui
+                                        // joignent le thread courant
+                                        wSlotId = USHRT_MAX;
+
+                                        do
+                                        {
+                                            handle = (TaskHandle_t) P_UTILS_LIST_ParseValueEltMT(
+                                                &ptrCurrentThread->taskList, &wSlotId);
+
+                                            if (handle != NULL)
+                                            {
+                                                P_UTILS_LIST_RemoveEltMT(&p->taskList, handle, 0);
+                                            }
+                                        } while (wSlotId != USHRT_MAX);
+
+                                        result = E_THREAD_RESULT_ERROR_MAX_THREADS;
+                                    }
+                                    else
+
+                                    {
+                                        // Indicate that a thread is ready to wait for join
 #ifndef WAIT_JOINTURE_READY_WITH_BIN_SEM
-                            xTaskGenericNotify(p->args.handleTask, JOINTURE_READY, eSetBits, NULL);
+                                        xTaskGenericNotify(p->args.handleTask, JOINTURE_READY, eSetBits, NULL);
 #else
-                            xSemaphoreGive(p->args.signalReadyToWait);
+                                        xSemaphoreGive(p->signalReadyToWait);
 #endif
-                            // The recursive mutex is taken. So, push handle to stack to notify
-                            resPSYNC = P_SYNCHRO_UnlockAndWaitForConditionVariable(
-                                p->args.pJointure, p->args.lockRecHandle, JOINTURE_SIGNAL, ULONG_MAX);
+                                        // The recursive mutex is taken. So, push handle to stack to notify
+                                        resPSYNC = P_SYNCHRO_UnlockAndWaitForConditionVariable(
+                                            p->pJointure, p->lockRecHandle, JOINTURE_SIGNAL, ULONG_MAX);
 
-                            // After wait, clear condition variable. Unlock other join if necessary.
-                            P_SYNCHRO_ClearConditionVariable(p->args.pJointure);
-                            P_UTILS_LIST_DeInit(&p->taskList);
-                            if (p->args.signalReadyToWait != NULL)
-                            {
-                                vQueueDelete(p->args.signalReadyToWait);
-                                p->args.signalReadyToWait = NULL;
+                                        if (resPSYNC == E_COND_VAR_RESULT_OK)
+                                        {
+                                            // Flag thread not initialized
+                                            p->status = E_THREAD_STATUS_NOT_INITIALIZED;
+
+                                            // After wait, clear condition variable. Unlock other join if necessary.
+                                            P_SYNCHRO_ClearConditionVariable(p->pJointure);
+                                            P_UTILS_LIST_DeInitMT(&p->taskList);
+                                            if (p->signalReadyToWait != NULL)
+                                            {
+                                                vQueueDelete(p->signalReadyToWait);
+                                                p->signalReadyToWait = NULL;
+                                            }
+                                            if (p->signalReadyToStart != NULL)
+                                            {
+                                                vQueueDelete(p->signalReadyToStart);
+                                                p->signalReadyToStart = NULL;
+                                            }
+
+                                            // Remove thread from global list
+                                            P_UTILS_LIST_RemoveEltMT(&gTaskList, p->handleTask, 0);
+
+                                            // Remove thread handle from local thread list exclusion
+                                            P_UTILS_LIST_RemoveEltMT(&ptrCurrentThread->taskList, p->handleTask, 0);
+
+                                            // Remove thread handle from other thread list exclusion
+                                            wSlotId = USHRT_MAX;
+                                            do
+                                            {
+                                                pOthersThread = P_UTILS_LIST_ParseContextEltMT(&gTaskList, &wSlotId);
+                                                if ((pOthersThread != ptrCurrentThread) && (pOthersThread != NULL))
+                                                {
+                                                    wSlotIdRes = P_UTILS_LIST_GetEltIndexMT(&pOthersThread->taskList,
+                                                                                            p->handleTask, 0);
+                                                    if (wSlotIdRes < USHRT_MAX)
+                                                    {
+                                                        P_UTILS_LIST_RemoveEltMT(&pOthersThread->taskList,
+                                                                                 p->handleTask, 0);
+                                                    }
+                                                }
+                                            } while (wSlotId != USHRT_MAX);
+
+                                            p->handleTask = NULL;
+
+                                            result = E_THREAD_RESULT_OK;
+                                        }
+                                        else
+                                        {
+                                            result = E_THREAD_RESULT_ERROR_NOK;
+                                        }
+                                    }
+                                }
                             }
-                            if (p->args.signalReadyToStart != NULL)
+                            else
                             {
-                                vQueueDelete(p->args.signalReadyToStart);
-                                p->args.signalReadyToStart = NULL;
-                            }
-
-                            // Remove thread from global list
-                            P_UTILS_LIST_RemoveEltMT(&gTaskList, p->args.handleTask, 0);
-                            p->args.handleTask = NULL;
-
-                            switch (resPSYNC) // resPSYNC is not E_COND_VAR_RESULT_OK if a clear has been performed
-                            {
-                            case E_COND_VAR_RESULT_OK:
-                                result = E_THREAD_RESULT_OK;
-                                break;
-                            default:
-                                result = E_THREAD_RESULT_ERROR_NOK;
-                                break;
+                                result = E_THREAD_RESULT_ERROR_MAX_THREADS;
                             }
                         }
                         else
                         {
-                            result = E_THREAD_RESULT_ERROR_MAX_THREADS;
+                            result = E_THREAD_RESULT_ERROR_SELF_JOIN_THREAD;
                         }
                     }
                     else
@@ -370,10 +540,16 @@ eThreadResult P_THREAD_Join(tThreadWks* p)
                 result = E_THREAD_RESULT_ERROR_NOT_INITIALIZED;
             }
         }
-        xSemaphoreGiveRecursive(p->args.lockRecHandle); //******Leave Critical section
+        xSemaphoreGiveRecursive(p->lockRecHandle); //******Leave Critical section
     }
 
     return result;
+}
+
+// Relative task delay
+void P_THREAD_Sleep(unsigned int milliseconds)
+{
+    vTaskDelay(pdMS_TO_TICKS(milliseconds));
 }
 
 void vApplicationStackOverflowHook(TaskHandle_t xTask, char* pcTaskName)
@@ -386,15 +562,86 @@ void vApplicationStackOverflowHook(TaskHandle_t xTask, char* pcTaskName)
 SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), void* startArgs)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    eThreadResult result = E_THREAD_RESULT_ERROR_NOK;
+    tThreadWks* ptr = NULL;
 
+    if (thread != NULL)
+    {
+        ptr = P_THREAD_Create((tPtrFct) startFct, startArgs, NULL, NULL);
+        if (ptr != NULL)
+        {
+            result = P_THREAD_Init(ptr, MAX_THREADS);
+            switch (result)
+            {
+            case E_THREAD_RESULT_OK:
+                status = SOPC_STATUS_OK;
+                break;
+            case E_THREAD_RESULT_ERROR_NOK:
+                status = SOPC_STATUS_NOK;
+                break;
+            case E_THREAD_RESULT_ERROR_MAX_THREADS:
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+                break;
+            case E_THREAD_RESULT_ERROR_NOT_INITIALIZED:
+                status = SOPC_STATUS_INVALID_STATE;
+                break;
+            case E_THREAD_RESULT_ERROR_SELF_JOIN_THREAD:
+                status = SOPC_STATUS_NOK;
+                break;
+            case E_THREAD_RESULT_ERROR_ALREADY_INITIALIZED:
+                status = SOPC_STATUS_INVALID_STATE;
+                break;
+            default:
+                status = SOPC_STATUS_NOK;
+                break;
+            }
+        }
+    }
+
+    *thread = ptr;
     return status;
 }
 
 SOPC_ReturnStatus SOPC_Thread_Join(Thread thread)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    tThreadWks* ptr = (tThreadWks*) thread;
+    eThreadResult result = E_THREAD_RESULT_ERROR_NOK;
+
+    if (ptr != NULL)
+    {
+        result = P_THREAD_Join(ptr);
+        switch (result)
+        {
+        case E_THREAD_RESULT_OK:
+            P_THREAD_Destroy(&ptr);
+            status = SOPC_STATUS_OK;
+            break;
+        case E_THREAD_RESULT_ERROR_NOK:
+            status = SOPC_STATUS_NOK;
+            break;
+        case E_THREAD_RESULT_ERROR_MAX_THREADS:
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+            break;
+        case E_THREAD_RESULT_ERROR_NOT_INITIALIZED:
+            status = SOPC_STATUS_INVALID_STATE;
+            break;
+        case E_THREAD_RESULT_ERROR_SELF_JOIN_THREAD:
+            status = SOPC_STATUS_NOK;
+            break;
+        case E_THREAD_RESULT_ERROR_ALREADY_INITIALIZED:
+            status = SOPC_STATUS_INVALID_STATE;
+            break;
+        default:
+            status = SOPC_STATUS_NOK;
+            break;
+        }
+    }
 
     return status;
 }
 
-void SOPC_Sleep(unsigned int milliseconds) {}
+void SOPC_Sleep(unsigned int milliseconds)
+{
+    P_THREAD_Sleep(milliseconds);
+}
