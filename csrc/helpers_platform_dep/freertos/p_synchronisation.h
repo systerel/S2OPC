@@ -32,6 +32,21 @@
 #define JOINTURE_READY (0x20000000)
 #define SIGNAL_VALUE (0x10000000)
 
+/* TODO: move this abstract type to p_synchronisation.c */
+typedef enum E_CONDITION_VARIABLE_STATUS
+{
+    E_CONDITION_VARIABLE_STATUS_NOT_INITIALIZED,
+    E_CONDITION_VARIABLE_STATUS_INITIALIZED
+} eConditionVariableStatus;
+
+/* TODO: move this abstract type to p_synchronisation.c */
+struct T_CONDITION_VARIABLE
+{
+    QueueHandle_t handleLockCounter;
+    eConditionVariableStatus wStatus;
+    tUtilsList taskList;
+};
+
 typedef struct T_CONDITION_VARIABLE tConditionVariable;
 
 typedef enum T_CONDITION_VARIABLE_RESULT

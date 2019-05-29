@@ -36,18 +36,7 @@
 
 /*****Private condition variable api*****/
 
-typedef enum E_CONDITION_VARIABLE_STATUS
-{
-    E_CONDITION_VARIABLE_STATUS_NOT_INITIALIZED,
-    E_CONDITION_VARIABLE_STATUS_INITIALIZED
-} eConditionVariableStatus;
-
-typedef struct T_CONDITION_VARIABLE
-{
-    QueueHandle_t handleLockCounter;
-    eConditionVariableStatus wStatus;
-    tUtilsList taskList;
-} tConditionVariable;
+// typedef tConditionVariable;
 
 // Internal deinit condition variable, not thread safe.
 static void ClearConditionVariable(tConditionVariable* pv)
