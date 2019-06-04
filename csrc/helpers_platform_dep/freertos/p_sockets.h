@@ -20,9 +20,12 @@
 #ifndef SOPC_P_SOCKETS_H_
 #define SOPC_P_SOCKETS_H_
 
-#include "socket.h"
+#include "lwip/errno.h"
+#include "lwip/netdb.h"
+#include "lwip/sockets.h"
 
 #define SOPC_INVALID_SOCKET (-1)
+#define SOMAXCONN (2)
 
 /**
  *  \brief Socket base type
@@ -37,6 +40,10 @@ typedef struct addrinfo SOPC_Socket_AddressInfo;
 /**
  *  \brief Set of sockets type
  */
-typedef fd_set SOPC_SocketSet;
+typedef struct
+{
+    int fdmax;  /**< max of the set */
+    fd_set set; /**< set */
+} SOPC_SocketSet;
 
 #endif /* SOPC_P_SOCKETS_H_ */

@@ -18,8 +18,14 @@
  */
 
 #include "sopc_raw_sockets.h"
-
 #include "sopc_threads.h"
+
+#include "lwip/errno.h"
+#include "lwip/netdb.h"
+#include "lwip/sockets.h"
+#include "lwipopts.h"
+
+#include "p_sockets.h"
 
 bool SOPC_Socket_Network_Initialize()
 {
@@ -34,27 +40,53 @@ bool SOPC_Socket_Network_Clear()
 
     return status;
 }
-#include <stdio.h>
+
 SOPC_ReturnStatus SOPC_Socket_AddrInfo_Get(char* hostname, char* port, SOPC_Socket_AddressInfo** addrs)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    SOPC_Socket_AddressInfo hints;
+    memset(&hints, 0, sizeof(SOPC_Socket_AddressInfo));
+    hints.ai_family = AF_UNSPEC; // AF_INET or AF_INET6  can be use to force IPV4 or IPV6
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = AI_PASSIVE;
 
+    if ((hostname != NULL || port != NULL) && addrs != NULL)
+    {
+        if (getaddrinfo(hostname, port, &hints, addrs) != 0)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+        else
+        {
+            status = SOPC_STATUS_OK;
+        }
+    }
     return status;
 }
 
 SOPC_Socket_AddressInfo* SOPC_Socket_AddrInfo_IterNext(SOPC_Socket_AddressInfo* addr)
 {
     SOPC_Socket_AddressInfo* res = NULL;
-
+    if (addr != NULL)
+    {
+        res = addr->ai_next;
+    }
     return res;
 }
 
 uint8_t SOPC_Socket_AddrInfo_IsIPV6(SOPC_Socket_AddressInfo* addr)
 {
-    return AF_INET6;
+    return addr->ai_family == PF_INET6;
 }
 
-void SOPC_Socket_AddrInfoDelete(SOPC_Socket_AddressInfo** addrs) {}
+void SOPC_Socket_AddrInfoDelete(SOPC_Socket_AddressInfo** addrs)
+{
+    if (addrs != NULL)
+    {
+        freeaddrinfo(*addrs);
+        *addrs = NULL;
+    }
+}
 
 void SOPC_Socket_Clear(Socket* sock)
 {
@@ -74,28 +106,101 @@ SOPC_ReturnStatus SOPC_Socket_CreateNew(SOPC_Socket_AddressInfo* addr,
                                         Socket* sock)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    const int trueInt = true;
+    int setOptStatus = -1;
+    if (addr != NULL && sock != NULL)
+    {
+        *sock = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
 
+        if (*sock != SOPC_INVALID_SOCKET)
+        {
+            status = Socket_Configure(*sock, setNonBlocking);
+        }
+        else
+        {
+            status = SOPC_STATUS_NOK;
+        }
+
+        if (SOPC_STATUS_OK == status)
+        {
+            setOptStatus = 0;
+        } // else -1 due to init
+
+        if (setOptStatus != -1 && setReuseAddr != false)
+        {
+            setOptStatus = setsockopt(*sock, SOL_SOCKET, SO_REUSEADDR, (const void*) &trueInt, sizeof(int));
+        }
+
+        // Enforce IPV6 sockets can be used for IPV4 connections (if socket is IPV6)
+        if (setOptStatus != -1 && addr->ai_family == AF_INET6)
+        {
+            const int falseInt = false;
+            setOptStatus = setsockopt(*sock, IPPROTO_IPV6, IPV6_V6ONLY, (const void*) &falseInt, sizeof(int));
+        }
+
+        if (setOptStatus < 0)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
     return status;
 }
 
 SOPC_ReturnStatus SOPC_Socket_Listen(Socket sock, SOPC_Socket_AddressInfo* addr)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-
+    int bindListenStatus = -1;
+    if (addr != NULL)
+    {
+        bindListenStatus = bind(sock, addr->ai_addr, addr->ai_addrlen);
+        if (bindListenStatus != -1)
+        {
+            bindListenStatus = listen(sock, SOMAXCONN);
+        }
+    }
+    if (bindListenStatus != -1)
+    {
+        status = SOPC_STATUS_OK;
+    }
     return status;
 }
 
 SOPC_ReturnStatus SOPC_Socket_Accept(Socket listeningSock, bool setNonBlocking, Socket* acceptedSock)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-
+    struct sockaddr remoteAddr;
+    socklen_t addrLen = 0;
+    if (listeningSock != -1 && acceptedSock != NULL)
+    {
+        *acceptedSock = accept(listeningSock, &remoteAddr, &addrLen);
+        if (*acceptedSock != SOPC_INVALID_SOCKET)
+        {
+            status = Socket_Configure(*acceptedSock, setNonBlocking);
+        }
+    }
     return status;
 }
 
 SOPC_ReturnStatus SOPC_Socket_Connect(Socket sock, SOPC_Socket_AddressInfo* addr)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-
+    int connectStatus = -1;
+    if (addr != NULL && sock != -1)
+    {
+        connectStatus = connect(sock, addr->ai_addr, addr->ai_addrlen);
+        if (connectStatus < 0)
+        {
+            if (errno == EINPROGRESS)
+            {
+                // Non blocking connection started
+                connectStatus = 0;
+            }
+        }
+        if (connectStatus == 0)
+        {
+            status = SOPC_STATUS_OK;
+        }
+    }
     return status;
 }
 
@@ -109,18 +214,58 @@ SOPC_ReturnStatus SOPC_Socket_ConnectToLocal(Socket from, Socket to)
 SOPC_ReturnStatus SOPC_Socket_CheckAckConnect(Socket sock)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-
+    int error = 0;
+    socklen_t len = sizeof(int);
+    if (sock != -1)
+    {
+        if (getsockopt(sock, SOL_SOCKET, SO_ERROR, &error, &len) < 0 || error != 0)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+        else
+        {
+            status = SOPC_STATUS_OK;
+        }
+    }
     return status;
 }
 
-void SOPC_SocketSet_Add(Socket sock, SOPC_SocketSet* sockSet) {}
+void SOPC_SocketSet_Add(Socket sock, SOPC_SocketSet* sockSet)
+{
+    if (sock != -1 && sockSet != NULL)
+    {
+        FD_SET(sock, &sockSet->set);
+        if (sock > sockSet->fdmax)
+        {
+            sockSet->fdmax = sock;
+        }
+    }
+}
 
 bool SOPC_SocketSet_IsPresent(Socket sock, SOPC_SocketSet* sockSet)
 {
+    if (sock != -1 && sockSet != NULL)
+    {
+        if (false == FD_ISSET(sock, &sockSet->set))
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
     return false;
 }
 
-void SOPC_SocketSet_Clear(SOPC_SocketSet* sockSet) {}
+void SOPC_SocketSet_Clear(SOPC_SocketSet* sockSet)
+{
+    if (sockSet != NULL)
+    {
+        FD_ZERO(&sockSet->set);
+        sockSet->fdmax = 0;
+    }
+}
 
 int32_t SOPC_Socket_WaitSocketEvents(SOPC_SocketSet* readSet,
                                      SOPC_SocketSet* writeSet,
@@ -128,22 +273,103 @@ int32_t SOPC_Socket_WaitSocketEvents(SOPC_SocketSet* readSet,
                                      uint32_t waitMs)
 {
     int32_t nbReady = 0;
+    struct timeval timeout;
+    struct timeval* val;
+    int fdmax = 0;
+    if (readSet->fdmax > writeSet->fdmax)
+    {
+        fdmax = readSet->fdmax;
+    }
+    else
+    {
+        fdmax = writeSet->fdmax;
+    }
+    if (exceptSet->fdmax > fdmax)
+    {
+        fdmax = exceptSet->fdmax;
+    }
 
+    if (waitMs == 0)
+    {
+        val = NULL;
+    }
+    else
+    {
+        timeout.tv_sec = (time_t)(waitMs / 1000);
+        timeout.tv_usec = (suseconds_t)(1000 * (waitMs % 1000));
+        val = &timeout;
+    }
+    nbReady = select(fdmax + 1, &readSet->set, &writeSet->set, &exceptSet->set, val);
     return (int32_t) nbReady;
 }
 
 SOPC_ReturnStatus SOPC_Socket_Write(Socket sock, const uint8_t* data, uint32_t count, uint32_t* sentBytes)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    ssize_t res = 0;
+    if (sock != SOPC_INVALID_SOCKET && data != NULL && count <= INT32_MAX && sentBytes != NULL)
+    {
+        status = SOPC_STATUS_NOK;
+        res = send(sock, data, count, 0);
 
+        if (res >= 0)
+        {
+            status = SOPC_STATUS_OK;
+            *sentBytes = (uint32_t) res;
+        }
+        else
+        {
+            *sentBytes = 0;
+            if (errno == EAGAIN || errno == EWOULDBLOCK)
+            {
+                status = SOPC_STATUS_WOULD_BLOCK;
+            }
+        }
+    }
     return status;
 }
 
 SOPC_ReturnStatus SOPC_Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize, uint32_t* readCount)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    ssize_t sReadCount = 0;
+    if (sock != SOPC_INVALID_SOCKET && data != NULL && dataSize > 0)
+    {
+        sReadCount = recv(sock, data, dataSize, 0);
 
+        if (sReadCount > 0)
+        {
+            *readCount = (uint32_t) sReadCount;
+            status = SOPC_STATUS_OK;
+        }
+        else if (sReadCount == 0)
+        {
+            *readCount = 0;
+            status = SOPC_STATUS_CLOSED;
+        }
+        else if (sReadCount == -1)
+        {
+            *readCount = 0;
+            if (errno == EAGAIN || errno == EWOULDBLOCK)
+            {
+                status = SOPC_STATUS_WOULD_BLOCK;
+            }
+        }
+        else
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
     return status;
 }
 
-void SOPC_Socket_Close(Socket* sock) {}
+void SOPC_Socket_Close(Socket* sock)
+{
+    if (sock != NULL && *sock != SOPC_INVALID_SOCKET)
+    {
+        if (close(*sock) != -1)
+        {
+            *sock = SOPC_INVALID_SOCKET;
+        }
+    }
+}

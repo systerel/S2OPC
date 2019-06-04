@@ -22,11 +22,10 @@
 
 #include "p_synchronisation.h"
 
-#define WAIT_JOINTURE_READY_WITH_BIN_SEM (1)
-
 /*****Private thread api*****/
 
 typedef struct T_THREAD_WKS tThreadWks;
+typedef tThreadWks* hThread;
 
 typedef void (*tPtrFct)(void*);
 
@@ -34,19 +33,28 @@ typedef enum E_THREAD_RESULT
 {
     E_THREAD_RESULT_OK,
     E_THREAD_RESULT_ERROR_NOK,
+    E_THREAD_RESULT_ERROR_OUT_OF_MEM,
     E_THREAD_RESULT_ERROR_MAX_THREADS,
     E_THREAD_RESULT_ERROR_NOT_INITIALIZED,
     E_THREAD_RESULT_ERROR_SELF_JOIN_THREAD,
     E_THREAD_RESULT_ERROR_ALREADY_INITIALIZED
 } eThreadResult;
 
-tThreadWks* P_THREAD_Create(tPtrFct fct, void* args, tPtrFct fctWatingForJoin, tPtrFct fctReadyToSignal);
+hThread* P_THREAD_Create(tPtrFct fct, void* args, tPtrFct fctWatingForJoin, tPtrFct fctReadyToSignal);
 
-eThreadResult P_THREAD_Init(tThreadWks* p, unsigned short wMaxJoin);
-eThreadResult P_THREAD_Join(tThreadWks* p);
+eThreadResult P_THREAD_Init(hThread* ptrWks,
+                            uint16_t wMaxRDV,
+                            tPtrFct fct,
+                            void* args,
+                            tPtrFct fctWatingForJoin,
+                            tPtrFct fctReadyToSignal);
 
-/*****Public s2opc thread api*****/
+eThreadResult P_THREAD_Join(hThread* p);
 
-typedef tThreadWks* Thread;
+void P_THREAD_Destroy(hThread** ptr);
+
+/* Public s2opc api */
+
+typedef hThread Thread;
 
 #endif /* SOPC_P_THREADS_H_ */

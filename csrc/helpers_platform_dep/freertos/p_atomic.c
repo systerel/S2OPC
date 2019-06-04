@@ -21,25 +21,27 @@
 
 int32_t SOPC_Atomic_Int_Get(int32_t* atomic)
 {
+    __sync_synchronize();
     return *atomic;
 }
 
 void SOPC_Atomic_Int_Set(int32_t* atomic, int32_t val)
 {
     *atomic = val;
+    __sync_synchronize();
 }
 
 int32_t SOPC_Atomic_Int_Add(int32_t* atomic, int32_t val)
 {
-    return (int32_t) 0;
+    return __sync_fetch_and_add(atomic, val);
 }
 
 void* SOPC_Atomic_Ptr_Get(void** atomic)
 {
-    return *atomic;
+    return (void*) __atomic_load_4(atomic, __ATOMIC_SEQ_CST);
 }
 
 void SOPC_Atomic_Ptr_Set(void** atomic, void* val)
 {
-    *atomic = val;
+    __atomic_store_4(atomic, (uintptr_t) val, __ATOMIC_SEQ_CST);
 }

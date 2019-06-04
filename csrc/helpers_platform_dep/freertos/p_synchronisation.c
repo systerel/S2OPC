@@ -17,196 +17,92 @@
  * under the License.
  */
 
+#include <inttypes.h>
 #include <limits.h>
 #include <stddef.h>
-#include <stdint.h>
-#include <stdio.h> /*stdlib*/
+#include <stdio.h> /* stdlib includes */
 #include <string.h>
 
-#include "sopc_enums.h" /*s2opc*/
+#include "sopc_enums.h" /* s2opc includes */
 
-#include "FreeRTOS.h" /*freeRtos*/
+#include "FreeRTOS.h" /* freeRtos includes */
 #include "queue.h"
 #include "semphr.h"
 #include "task.h"
 #include "timers.h"
 
-#include "p_synchronisation.h" /*synchro*/
-#include "p_utils.h"
+#include "p_synchronisation.h" /* synchronisation include */
+#include "p_utils.h"           /* private list include */
+
+/*****Private declarations***************/
+
+typedef enum T_CONDITION_VARIABLE_STATUS
+{
+    E_COND_VAR_STATUS_NOT_INITIALIZED, // Condition variable not initialized
+    E_COND_VAR_STATUS_INITIALIZED      // Condition variable initialized
+} eConditionVariableStatus;
+
+struct T_CONDITION_VARIABLE
+{
+    eConditionVariableStatus status; // Status condition variable
+    QueueHandle_t handleLockCounter; // Critical section token
+    tUtilsList taskList;             // List of task with signal expected, calling unlock and wait
+};
 
 /*****Private condition variable api*****/
 
-// typedef tConditionVariable;
-
-// Internal deinit condition variable, not thread safe.
-static void ClearConditionVariable(tConditionVariable* pv)
+// Clear condition variable: release all thread waiting on it
+eConditionVariableResult P_SYNCHRO_ClearConditionVariable(hCondVar* pv)
 {
+    eConditionVariableResult result = E_COND_VAR_RESULT_OK;
+    uint16_t wCurrentSlotId = USHRT_MAX;
+    TaskHandle_t handle = NULL;
+    uint32_t wClearSignal = 0;
+
     if (pv != NULL)
     {
-        P_UTILS_LIST_DeInit(&pv->taskList);
-        pv->wStatus = E_CONDITION_VARIABLE_STATUS_NOT_INITIALIZED; // Indique que le workspace n'est plus initialisé
-    }
-}
-
-/*Deinit condition variable*/
-eConditionVariableResult P_SYNCHRO_ClearConditionVariable(tConditionVariable* pv)
-{
-    eConditionVariableResult result = E_COND_VAR_RESULT_OK;
-    unsigned short int wCurrentSlotId = 0;
-    if ((pv != NULL) && (pv->handleLockCounter != NULL))
-    {
-        xSemaphoreTake(pv->handleLockCounter, portMAX_DELAY); // Section critique
+        if (((*pv) != NULL) && ((*pv)->status == E_COND_VAR_STATUS_INITIALIZED) // Workspace initialized
+            && ((*pv)->handleLockCounter != NULL))                              // Critical section token exist
         {
-            if (pv->wStatus == E_CONDITION_VARIABLE_STATUS_INITIALIZED)
+            xSemaphoreTake((*pv)->handleLockCounter, portMAX_DELAY); // Critical section
             {
+                (*pv)->status = E_COND_VAR_STATUS_NOT_INITIALIZED; // Mark as not initialized
+
                 // Indicate for each registered task that clearing signal is pending
-                wCurrentSlotId = pv->taskList.first;     // Index first slot to parse
-                if (pv->taskList.wNbRegisteredTasks > 0) // Indicate if waiters are waiting
+                wCurrentSlotId = USHRT_MAX;
+                do
                 {
-                    while (wCurrentSlotId < pv->taskList.wMaxWaitingTasks)
+                    handle = (TaskHandle_t) P_UTILS_LIST_ParseValueElt(&(*pv)->taskList, NULL, &wClearSignal, NULL,
+                                                                       &wCurrentSlotId);
+                    if (handle != NULL)
                     {
-                        if ((pv->taskList.list[wCurrentSlotId].value > 0))
-                        {
-                            xTaskGenericNotify(pv->taskList.list[wCurrentSlotId].value, CLEARING_SIGNAL, eSetBits,
-                                               NULL);
-                        }
-                        // Go to next slot
-                        wCurrentSlotId = pv->taskList.list[wCurrentSlotId].nxId;
+                        xTaskGenericNotify(handle, wClearSignal, eSetBits, NULL);
                     }
-                }
-                // Set condition variable to not initialized state
-                ClearConditionVariable(pv);
+                } while (wCurrentSlotId != USHRT_MAX);
+
+                // Task list destruction
+                P_UTILS_LIST_DeInit(&(*pv)->taskList);
             }
-            else
-            {
-                result = E_COND_VAR_RESULT_ERROR_NOT_INITIALIZED;
-            }
-        }
-        xSemaphoreGive(pv->handleLockCounter); // Fin de section critique avant return
-    }
-    return result;
-}
 
-/*Make condition variable*/
-eConditionVariableResult P_SYNCHRO_InitConditionVariable(tConditionVariable* pv,
-                                                         unsigned short int wMaxWaiters) // max parallel waiting tasks
-{
-    eConditionVariableResult result = E_COND_VAR_RESULT_OK;
-    // Nombre de thread en attente maximum
-    if ((wMaxWaiters > MAX_SIGNAL) || (pv == NULL) || (pv->handleLockCounter == NULL))
-        goto error_parameter;
-
-    xSemaphoreTake(pv->handleLockCounter, portMAX_DELAY); //********Section critique
-
-    if (pv->wStatus == E_CONDITION_VARIABLE_STATUS_INITIALIZED)
-        goto error_status;
-
-    // Allocation liste de threads en attente signal
-    P_UTILS_LIST_Init(&pv->taskList, wMaxWaiters);
-    if (pv->taskList.list == NULL)
-        goto error_init;
-
-    // Flag condition var initialisée
-    pv->wStatus = E_CONDITION_VARIABLE_STATUS_INITIALIZED;
-
-    goto success;
-
-error_parameter:
-    result = E_COND_VAR_RESULT_ERROR_INCORRECT_PARAMETERS;
-    return result;
-error_init:
-    ClearConditionVariable(pv);
-    result = E_COND_VAR_RESULT_ERROR_OUT_OF_MEM;
-    xSemaphoreGive(pv->handleLockCounter); //*******Fin de section critique avant return
-    return result;
-error_status:
-    result = E_COND_VAR_RESULT_ERROR_ALREADY_INITIALIZED;
-    xSemaphoreGive(pv->handleLockCounter); //*******Fin de section critique avant return
-    return result;
-success:
-    xSemaphoreGive(pv->handleLockCounter); //*******Fin de section critique avant return
-    result = E_COND_VAR_RESULT_OK;
-    return result;
-}
-
-// Destruction workspace. Not thread safe. P_SYNCHRO_ClearCondition variable doit être appelée avant celle-ci.
-void P_SYNCHRO_DestroyConditionVariable(tConditionVariable** pv)
-{
-    if ((pv != NULL) && (*pv != NULL))
-    {
-        // Destruction section critique
-        if ((*pv)->handleLockCounter != NULL)
-        {
-            vQueueDelete((*pv)->handleLockCounter);
+            vQueueDelete((*pv)->handleLockCounter); // End of critical section. Destroy it on clear
             (*pv)->handleLockCounter = NULL;
+#ifdef FOLLOW_ALLOC
+            decrementCpt();
+#endif
+            if ((*pv) != NULL) // Destroy workspace
+            {
+                (void) memset(*pv, 0, sizeof(tConditionVariable)); // Raz on leave memory
+                vPortFree(*pv);
+                *pv = NULL;
+#ifdef FOLLOW_ALLOC
+                decrementCpt();
+#endif
+            }
         }
-        vPortFree(*pv);
-        *pv = NULL;
-    }
-}
-
-// Creation workspace. Not thread safe. P_SYNCHRO_InitCondition variable doit être appelée just après celle-ci.
-tConditionVariable* P_SYNCHRO_CreateConditionVariable(void)
-{
-    tConditionVariable* pv = NULL;
-
-    // Allocation workspace
-    pv = (tConditionVariable*) pvPortMalloc(sizeof(tConditionVariable));
-    if (pv == NULL)
-        goto error;
-
-    // Raz memory
-    (void) memset(pv, 0, sizeof(tConditionVariable));
-
-    // Creation critical section
-    pv->handleLockCounter = xQueueCreateMutex(queueQUEUE_TYPE_MUTEX);
-    if (pv->handleLockCounter == NULL)
-        goto error;
-
-    goto success;
-
-error:
-    P_SYNCHRO_DestroyConditionVariable(&pv);
-success:
-    return pv;
-}
-
-/*Broadcast signal to all waiting task on signal passed in parameters*/
-eConditionVariableResult P_SYNCHRO_SignalAllConditionVariable(tConditionVariable* pv,   // Condition variable workspace
-                                                              unsigned int signalValue) // Signal to broadcaset
-{
-    eConditionVariableResult result = E_COND_VAR_RESULT_ERROR_NO_WAITERS;
-    unsigned short wCurrentSlotId = 0;
-    unsigned int signal = signalValue > 0 ? signalValue : SIGNAL_VALUE;
-
-    if ((pv != NULL) && (pv->handleLockCounter != NULL))
-    {
-        xQueueSemaphoreTake(pv->handleLockCounter, portMAX_DELAY); // Critical section
+        else
         {
-            if (pv->wStatus == E_CONDITION_VARIABLE_STATUS_INITIALIZED)
-            {
-                wCurrentSlotId = pv->taskList.first;
-                if (pv->taskList.wNbRegisteredTasks > 0)
-                {
-                    // Tant que Nb de tache en attente ET operation de signalement < nombre de taches en attente
-                    while (wCurrentSlotId < pv->taskList.wMaxWaitingTasks)
-                    {
-                        if ((pv->taskList.list[wCurrentSlotId].value > 0) &&
-                            (pv->taskList.list[wCurrentSlotId].infos == signal))
-                        {
-                            xTaskGenericNotify(pv->taskList.list[wCurrentSlotId].value, signal, eSetBits, NULL);
-                            result = E_COND_VAR_RESULT_OK;
-                        }
-                        wCurrentSlotId = pv->taskList.list[wCurrentSlotId].nxId;
-                    }
-                }
-            }
-            else
-            {
-                result = E_COND_VAR_RESULT_ERROR_NOT_INITIALIZED;
-            }
+            result = E_COND_VAR_RESULT_ERROR_NOT_INITIALIZED;
         }
-        xSemaphoreGive(pv->handleLockCounter); // End critical section
     }
     else
     {
@@ -215,20 +111,198 @@ eConditionVariableResult P_SYNCHRO_SignalAllConditionVariable(tConditionVariable
     return result;
 }
 
-/*Unlock recursive mutex in parameters before wait a signal. On timeout, task is removed from task to notify.*/
-eConditionVariableResult P_SYNCHRO_UnlockAndWaitForConditionVariable(
-    tConditionVariable* pv,             // Condition variable workspace
-    QueueHandle_t handleRecursiveMutex, // Recursive mutex
-    unsigned int uwSignal,              // Signal to wait
-    unsigned int uwTimeOutMs)           // TimeOut
+// Initialize condition variable
+eConditionVariableResult P_SYNCHRO_InitConditionVariable(hCondVar* pv,         // Condition variable handle
+                                                         uint16_t wMaxWaiters) // max parallel waiting tasks
 {
     eConditionVariableResult result = E_COND_VAR_RESULT_OK;
+    QueueHandle_t pMutex = NULL;
+    hCondVar condVar = NULL;
+
+    if ((wMaxWaiters > MAX_P_UTILS_LIST) || (pv == NULL))
+    {
+        result = E_COND_VAR_RESULT_ERROR_INCORRECT_PARAMETERS;
+    }
+    else
+    {
+        if ((*pv) == NULL) // Check if workspace already exists
+        {
+            condVar = (tConditionVariable*) pvPortMalloc(sizeof(tConditionVariable));
+            if ((condVar) != NULL)
+            {
+#ifdef FOLLOW_ALLOC
+                incrementCpt();
+#endif
+                // Raz allocated workspaace
+                (void) memset(condVar, 0, sizeof(tConditionVariable));
+
+                pMutex = xQueueCreateMutex(queueQUEUE_TYPE_MUTEX);
+                if (pMutex != NULL)
+                {
+#ifdef FOLLOW_ALLOC
+                    incrementCpt();
+#endif
+                    // Allocate list of waiters
+                    P_UTILS_LIST_Init(&(condVar)->taskList, wMaxWaiters);
+                    if ((condVar)->taskList.list == NULL)
+                    {
+                        vQueueDelete(pMutex);
+                        pMutex = NULL;
+
+                        // Raz leaved memory
+                        (void) memset(condVar, 0, sizeof(tConditionVariable));
+                        vPortFree(condVar);
+                        condVar = NULL;
+#ifdef FOLLOW_ALLOC
+                        decrementCpt();
+                        decrementCpt();
+#endif
+                        result = E_COND_VAR_RESULT_ERROR_OUT_OF_MEM;
+                    }
+                    else
+                    {
+                        (condVar)->handleLockCounter = pMutex;
+                        (condVar)->status = E_COND_VAR_STATUS_INITIALIZED;
+                        *pv = condVar;
+                        result = E_COND_VAR_RESULT_OK;
+                    }
+                }
+                else
+                {
+                    /* Raz leaved memory*/
+                    (void) memset(condVar, 0, sizeof(tConditionVariable));
+                    vPortFree(condVar);
+                    condVar = NULL;
+#ifdef FOLLOW_ALLOC
+                    decrementCpt();
+#endif
+                    result = E_COND_VAR_RESULT_ERROR_OUT_OF_MEM;
+                }
+            }
+            else
+            {
+                result = E_COND_VAR_RESULT_ERROR_OUT_OF_MEM;
+            }
+        }
+        else
+        {
+            result = E_COND_VAR_RESULT_ERROR_ALREADY_INITIALIZED;
+        }
+    }
+    return result;
+}
+
+// Destruction of condition variable if created via CreateConditionVariable.
+void P_SYNCHRO_DestroyConditionVariable(hCondVar** ppv)
+{
+    hCondVar* ptrHCondVar = NULL;
+
+    if (ppv != NULL)
+    {
+        ptrHCondVar = *ppv;
+        if (ptrHCondVar != NULL)
+        {
+            P_SYNCHRO_ClearConditionVariable(ptrHCondVar);
+            (void) memset(ptrHCondVar, 0, sizeof(hCondVar));
+            vPortFree(ptrHCondVar);
+            *ppv = NULL;
+        }
+#ifdef FOLLOW_ALLOC
+        decrementCpt();
+#endif
+    }
+}
+
+// Creation workspace.
+hCondVar* P_SYNCHRO_CreateConditionVariable(void)
+{
+    hCondVar* ptr = NULL;
+    ptr = (hCondVar*) pvPortMalloc(sizeof(hCondVar));
+    if (ptr != NULL)
+    {
+#ifdef FOLLOW_ALLOC
+        incrementCpt();
+#endif
+        // Raz handle
+        (void) memset(ptr, 0, sizeof(hCondVar));
+        if (P_SYNCHRO_InitConditionVariable(ptr, MAX_WAITERS) != E_COND_VAR_RESULT_OK)
+        {
+            P_SYNCHRO_ClearConditionVariable(ptr);
+            // Raz handle
+            (void) memset(ptr, 0, sizeof(hCondVar));
+            vPortFree(ptr);
+            ptr = NULL;
+#ifdef FOLLOW_ALLOC
+            decrementCpt();
+#endif
+        }
+    }
+    return ptr;
+}
+
+// Broadcast signal to all waiting task on signal passed in parameters
+eConditionVariableResult P_SYNCHRO_SignalAllConditionVariable(hCondVar* pv) // Signal to broadcaset
+{
+    eConditionVariableResult result = E_COND_VAR_RESULT_ERROR_NO_WAITERS;
+    uint16_t wCurrentSlotId = USHRT_MAX;
+    TaskHandle_t handle = NULL;
+    uint32_t signal = 0;
+
+    if (pv != NULL)
+    {
+        if (((*pv) != NULL) && ((*pv)->status == E_COND_VAR_STATUS_INITIALIZED) && ((*pv)->handleLockCounter != NULL))
+        {
+            xQueueSemaphoreTake((*pv)->handleLockCounter, portMAX_DELAY); // Critical section
+
+            wCurrentSlotId = USHRT_MAX;
+            do
+            {
+                handle =
+                    (TaskHandle_t) P_UTILS_LIST_ParseValueElt(&(*pv)->taskList, &signal, NULL, NULL, &wCurrentSlotId);
+                if (handle != NULL)
+                {
+                    xTaskGenericNotify(handle, signal, eSetBits, NULL);
+                    result = E_COND_VAR_RESULT_OK;
+                }
+            } while (wCurrentSlotId != USHRT_MAX);
+
+            if (((*pv) != NULL) && ((*pv)->status == E_COND_VAR_STATUS_INITIALIZED) &&
+                ((*pv)->handleLockCounter != NULL))
+            {
+                xSemaphoreGive((*pv)->handleLockCounter); // End critical section
+            }
+            else
+            {
+                result = E_COND_VAR_RESULT_ERROR_NOT_INITIALIZED;
+            }
+        }
+        else
+        {
+            result = E_COND_VAR_RESULT_ERROR_NOT_INITIALIZED;
+        }
+    }
+    else
+    {
+        result = E_COND_VAR_RESULT_ERROR_INCORRECT_PARAMETERS;
+    }
+    return result;
+}
+
+// Unlock recursive mutex in parameters before wait a signal.
+// On timeout, task is removed from task to notify.
+eConditionVariableResult P_SYNCHRO_UnlockAndWaitForConditionVariable(hCondVar* pv, // Condition variable workspace
+                                                                     QueueHandle_t* pMutex,  // Recursive mutex
+                                                                     uint32_t uwSignal,      // Signal to wait
+                                                                     uint32_t uwClearSignal, // Clear signal
+                                                                     uint32_t uwTimeOutMs)   // TimeOut
+{
+    eConditionVariableResult result = E_COND_VAR_RESULT_ERROR_INCORRECT_PARAMETERS;
     TickType_t xTimeToWait = 0;
     TaskHandle_t handleTask = 0;
     TimeOut_t xTimeOut = {0, 0};
-    unsigned int notificationValue = 0;
+    uint32_t notificationValue = 0;
 
-    if ((pv != NULL) && (pv->handleLockCounter != NULL))
+    if (pv != NULL)
     {
         if (uwTimeOutMs == ULONG_MAX)
         {
@@ -239,33 +313,41 @@ eConditionVariableResult P_SYNCHRO_UnlockAndWaitForConditionVariable(
             xTimeToWait = pdMS_TO_TICKS(uwTimeOutMs);
         }
 
-        // Critical section
-        xQueueSemaphoreTake(pv->handleLockCounter, portMAX_DELAY);
+        if (((*pv) != NULL) // Check workspace initialization
+            && ((*pv)->status == E_COND_VAR_STATUS_INITIALIZED) && ((*pv)->handleLockCounter != NULL))
         {
-            if (pv->wStatus == E_CONDITION_VARIABLE_STATUS_INITIALIZED) // Check init state.
+            // Critical section
+            xQueueSemaphoreTake((*pv)->handleLockCounter, portMAX_DELAY);
             {
-                // Récupération du handle de task et sauvegarde en pile
-                if (pv->taskList.wNbRegisteredTasks < pv->taskList.wMaxWaitingTasks)
+                // Handle of the calling task added to list
+                if ((*pv)->taskList.wNbRegisteredTasks < (*pv)->taskList.wMaxWaitingTasks)
                 {
                     handleTask = xTaskGetCurrentTaskHandle();
-                    result = P_UTILS_LIST_AddElt(&pv->taskList, handleTask, NULL, uwSignal);
+
+                    result = P_UTILS_LIST_AddElt(&(*pv)->taskList, handleTask, NULL, uwSignal, uwClearSignal);
                 }
                 else
                 {
                     result = E_COND_VAR_RESULT_ERROR_MAX_WAITERS;
                 }
-            }
-            else
-            {
-                result = E_COND_VAR_RESULT_ERROR_NOT_INITIALIZED;
+
+                if (((*pv) != NULL) // End critical section
+                    && ((*pv)->status == E_COND_VAR_STATUS_INITIALIZED) && ((*pv)->handleLockCounter != NULL))
+                {
+                    xSemaphoreGive((*pv)->handleLockCounter);
+                }
             }
         }
-        xSemaphoreGive(pv->handleLockCounter);
+        else
+        {
+            notificationValue = uwClearSignal;
+            result = E_COND_VAR_RESULT_ERROR_NOT_INITIALIZED;
+        }
 
         // Give mutex from parameters
-        if (handleRecursiveMutex != NULL)
+        if ((*pMutex) != NULL)
         {
-            (void) xQueueGiveMutexRecursive(handleRecursiveMutex);
+            (void) xQueueGiveMutexRecursive(*pMutex);
         }
 
         if (result == E_COND_VAR_RESULT_OK)
@@ -278,7 +360,7 @@ eConditionVariableResult P_SYNCHRO_UnlockAndWaitForConditionVariable(
             {
                 vTaskSetTimeOutState(&xTimeOut); // RAZ timeout
                 // Wait for specified signal bit 0 -> 30. Bit 31 = CLEARING_SIGNAL
-                if (xTaskNotifyWait(0, uwSignal | CLEARING_SIGNAL, &notificationValue, xTimeToWait) != pdPASS)
+                if (xTaskNotifyWait(0, uwSignal | uwClearSignal, &notificationValue, xTimeToWait) != pdPASS)
                 {
                     result = E_COND_VAR_RESULT_ERROR_TIMEOUT;
                     // Pas de notification reçue pendant le délai imparti
@@ -287,55 +369,62 @@ eConditionVariableResult P_SYNCHRO_UnlockAndWaitForConditionVariable(
                 else
                 {
                     // If others notifications, forward it in order to generate a task event
-                    if ((notificationValue & (~(uwSignal | CLEARING_SIGNAL))) != 0)
+                    if ((notificationValue & (~(uwSignal | uwClearSignal))) != 0)
                     {
                         xTaskGenericNotify(xTaskGetCurrentTaskHandle(),
-                                           notificationValue & (~(uwSignal | CLEARING_SIGNAL)), eSetBits, NULL);
+                                           notificationValue & (~(uwSignal | uwClearSignal)), eSetBits, NULL);
                     }
-                    // Arrivee notification, check si la notif est celle attendu.
-                    if ((notificationValue & CLEARING_SIGNAL) == CLEARING_SIGNAL)
+                    // Verify if notification arrived
+                    if ((notificationValue & uwClearSignal) == uwClearSignal)
                     {
-                        // Cas clearing en cours
+                        // Clearing on going
                         result = E_COND_VAR_RESULT_ERROR_NOT_INITIALIZED;
                         break;
                     }
                     else if ((notificationValue & uwSignal) != uwSignal)
                     {
-                        // Si ce n'est pas le cas, update du temps restant à attendre la notification attendue
+                        // Update timeout status
                         if (xTaskCheckForTimeOut(&xTimeOut, &xTimeToWait) == pdTRUE)
                         {
-                            // Sinon timeout
+                            // Timeout occurred
                             result = E_COND_VAR_RESULT_ERROR_TIMEOUT;
                             break;
                         }
                     }
                     else
                     {
-                        // Notif attendue reçue
+                        // Waiting notification
                         break;
                     }
                 }
             }
 
             // Critical section
-            xQueueSemaphoreTake(pv->handleLockCounter, portMAX_DELAY);
+
+            if (((notificationValue & uwClearSignal) != uwClearSignal) && ((*pv) != NULL) &&
+                ((*pv)->status == E_COND_VAR_STATUS_INITIALIZED) && ((*pv)->handleLockCounter != NULL))
             {
-                if (pv->wStatus == E_CONDITION_VARIABLE_STATUS_INITIALIZED) // Check init state
+                xQueueSemaphoreTake((*pv)->handleLockCounter, portMAX_DELAY); // Critical section
                 {
-                    P_UTILS_LIST_RemoveElt(&pv->taskList, handleTask, uwSignal);
-                }
-                else
-                {
-                    result = E_COND_VAR_RESULT_ERROR_NOT_INITIALIZED;
+                    P_UTILS_LIST_RemoveElt(&(*pv)->taskList, handleTask, uwSignal, uwClearSignal);
+
+                    if (((*pv) != NULL) // End critical section
+                        && ((*pv)->status == E_COND_VAR_STATUS_INITIALIZED) && ((*pv)->handleLockCounter != NULL))
+                    {
+                        xSemaphoreGive((*pv)->handleLockCounter);
+                    }
                 }
             }
-            xSemaphoreGive(pv->handleLockCounter);
+            else
+            {
+                result = E_COND_VAR_RESULT_ERROR_NOT_INITIALIZED;
+            }
         }
 
         // Prise du mutex passé en paramètre
-        if (handleRecursiveMutex != NULL)
+        if (*pMutex != NULL)
         {
-            (void) xQueueTakeMutexRecursive(handleRecursiveMutex, portMAX_DELAY);
+            (void) xQueueTakeMutexRecursive(*pMutex, portMAX_DELAY);
         }
     }
     else
@@ -351,7 +440,7 @@ eConditionVariableResult P_SYNCHRO_UnlockAndWaitForConditionVariable(
 /*Initialize a condition variable*/
 Condition* Condition_Create(void)
 {
-    tConditionVariable* ptr = NULL;
+    hCondVar* ptr = NULL;
     ptr = P_SYNCHRO_CreateConditionVariable();
     return (Condition*) ptr;
 }
@@ -359,19 +448,23 @@ Condition* Condition_Create(void)
 /*Initialize a condition variable*/
 void Condition_Delete(Condition* cond)
 {
-    tConditionVariable* ptr = (tConditionVariable*) cond;
-    P_SYNCHRO_DestroyConditionVariable(&ptr);
+    hCondVar* ptr = (hCondVar*) cond;
+    if (ptr != NULL)
+    {
+        P_SYNCHRO_DestroyConditionVariable(&ptr);
+        ptr = NULL;
+    }
 }
 
 SOPC_ReturnStatus Condition_Init(Condition* cond)
 {
     SOPC_ReturnStatus resSOPC = SOPC_STATUS_OK;
     eConditionVariableResult resPSYNCH = E_COND_VAR_RESULT_OK;
-    tConditionVariable* ptr = (tConditionVariable*) cond;
+    hCondVar* ptr = (hCondVar*) cond;
 
     if (ptr != NULL)
     {
-        resPSYNCH = P_SYNCHRO_InitConditionVariable(ptr, MAX_SIGNAL);
+        resPSYNCH = P_SYNCHRO_InitConditionVariable(ptr, MAX_P_UTILS_LIST);
         switch (resPSYNCH)
         {
         case E_COND_VAR_RESULT_OK:
@@ -398,7 +491,7 @@ SOPC_ReturnStatus Condition_Clear(Condition* cond)
 {
     SOPC_ReturnStatus resSOPC = SOPC_STATUS_OK;
     eConditionVariableResult resPSYNC = E_COND_VAR_RESULT_OK;
-    tConditionVariable* ptrCond = (tConditionVariable*) cond;
+    hCondVar* ptrCond = (hCondVar*) cond;
     if (ptrCond != NULL)
     {
         resPSYNC = P_SYNCHRO_ClearConditionVariable(ptrCond);
@@ -426,53 +519,14 @@ SOPC_ReturnStatus Condition_SignalAll(Condition* cond)
 {
     SOPC_ReturnStatus resSOPC = SOPC_STATUS_OK;
     eConditionVariableResult resPSYNC = E_COND_VAR_RESULT_OK;
-    tConditionVariable* ptrCond = (tConditionVariable*) cond;
+    hCondVar* ptrCond = (hCondVar*) cond;
     if (ptrCond != NULL)
     {
-        resPSYNC = P_SYNCHRO_SignalAllConditionVariable(ptrCond, SIGNAL_VALUE);
+        resPSYNC = P_SYNCHRO_SignalAllConditionVariable(ptrCond);
         switch (resPSYNC)
         {
         case E_COND_VAR_RESULT_OK:
             resSOPC = SOPC_STATUS_OK;
-            break;
-        case E_COND_VAR_RESULT_ERROR_NOT_INITIALIZED:
-            resSOPC = SOPC_STATUS_INVALID_STATE;
-            break;
-        default:
-            resSOPC = SOPC_STATUS_NOK;
-            break;
-        }
-    }
-    else
-    {
-        resSOPC = SOPC_STATUS_INVALID_PARAMETERS;
-    }
-    return resSOPC;
-}
-
-// Must be called between lock and unlock of Mutex used to wait on condition
-SOPC_ReturnStatus Mutex_UnlockAndWaitCond(Condition* cond, Mutex* mut)
-{
-    SOPC_ReturnStatus resSOPC = SOPC_STATUS_INVALID_PARAMETERS;
-    eConditionVariableResult resPSYNC = E_COND_VAR_RESULT_OK;
-    tConditionVariable* ptrCond = (tConditionVariable*) cond;
-    QueueHandle_t handleRecursiveMutex = NULL;
-
-    if (ptrCond != NULL)
-    {
-        if (mut != NULL)
-        {
-            handleRecursiveMutex = *((QueueHandle_t*) mut);
-        }
-
-        resPSYNC = P_SYNCHRO_UnlockAndWaitForConditionVariable(ptrCond, handleRecursiveMutex, SIGNAL_VALUE, ULONG_MAX);
-        switch (resPSYNC)
-        {
-        case E_COND_VAR_RESULT_OK:
-            resSOPC = SOPC_STATUS_OK;
-            break;
-        case E_COND_VAR_RESULT_ERROR_TIMEOUT:
-            resSOPC = SOPC_STATUS_TIMEOUT;
             break;
         case E_COND_VAR_RESULT_ERROR_NOT_INITIALIZED:
             resSOPC = SOPC_STATUS_INVALID_STATE;
@@ -494,17 +548,18 @@ SOPC_ReturnStatus Mutex_UnlockAndTimedWaitCond(Condition* cond, Mutex* mut, uint
 {
     SOPC_ReturnStatus resSOPC = SOPC_STATUS_INVALID_PARAMETERS;
     eConditionVariableResult resPSYNC = E_COND_VAR_RESULT_OK;
-    tConditionVariable* ptrCond = (tConditionVariable*) cond;
-    QueueHandle_t handleRecursiveMutex = NULL;
+    hCondVar* ptrCond = (hCondVar*) cond;
+    QueueHandle_t* pFreeRtosMutex = mut;
 
     if (ptrCond != NULL)
     {
         if (mut != NULL)
         {
-            handleRecursiveMutex = *((QueueHandle_t*) mut);
+            pFreeRtosMutex = ((QueueHandle_t*) mut);
         }
 
-        resPSYNC = P_SYNCHRO_UnlockAndWaitForConditionVariable(ptrCond, handleRecursiveMutex, SIGNAL_VALUE, milliSecs);
+        resPSYNC = P_SYNCHRO_UnlockAndWaitForConditionVariable(ptrCond, pFreeRtosMutex, APP_DEFAULT_SIGNAL,
+                                                               APP_CLEARING_SIGNAL, milliSecs);
         switch (resPSYNC)
         {
         case E_COND_VAR_RESULT_OK:
@@ -529,11 +584,21 @@ SOPC_ReturnStatus Mutex_UnlockAndTimedWaitCond(Condition* cond, Mutex* mut, uint
     return resSOPC;
 }
 
+// Must be called between lock and unlock of Mutex used to wait on condition
+SOPC_ReturnStatus Mutex_UnlockAndWaitCond(Condition* cond, Mutex* mut)
+{
+    SOPC_ReturnStatus resSOPC = SOPC_STATUS_INVALID_PARAMETERS;
+
+    resSOPC = Mutex_UnlockAndTimedWaitCond(cond, mut, ULONG_MAX);
+
+    return resSOPC;
+}
+
 /*Create recursive mutex*/
 SOPC_ReturnStatus Mutex_Initialization(Mutex* mut)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
-    QueueHandle_t handleRecursiveMutex = NULL;
+    QueueHandle_t freeRtosMutex = NULL;
 
     if (mut == NULL)
     {
@@ -541,8 +606,8 @@ SOPC_ReturnStatus Mutex_Initialization(Mutex* mut)
     }
     else
     {
-        handleRecursiveMutex = xQueueCreateMutex(queueQUEUE_TYPE_RECURSIVE_MUTEX);
-        if (handleRecursiveMutex == NULL)
+        freeRtosMutex = xQueueCreateMutex(queueQUEUE_TYPE_RECURSIVE_MUTEX);
+        if (freeRtosMutex == NULL)
         {
             result = SOPC_STATUS_OUT_OF_MEMORY;
             *mut = NULL;
@@ -550,7 +615,7 @@ SOPC_ReturnStatus Mutex_Initialization(Mutex* mut)
         else
         {
             result = SOPC_STATUS_OK;
-            *mut = (Mutex) handleRecursiveMutex;
+            *mut = (Mutex) freeRtosMutex;
         }
     }
     return result;
@@ -586,21 +651,21 @@ SOPC_ReturnStatus Mutex_Clear(Mutex* mut)
 SOPC_ReturnStatus Mutex_Lock(Mutex* mut)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
-    QueueHandle_t handleRecursiveMutex = NULL;
+    QueueHandle_t freeRtosMutex = NULL;
     if (mut == NULL)
     {
         result = SOPC_STATUS_INVALID_PARAMETERS;
     }
     else
     {
-        handleRecursiveMutex = *((QueueHandle_t*) (mut));
-        if (handleRecursiveMutex == NULL)
+        freeRtosMutex = *((QueueHandle_t*) (mut));
+        if (freeRtosMutex == NULL)
         {
             result = SOPC_STATUS_INVALID_PARAMETERS;
         }
         else
         {
-            if (xQueueTakeMutexRecursive(handleRecursiveMutex, portMAX_DELAY) == pdPASS)
+            if (xQueueTakeMutexRecursive(freeRtosMutex, portMAX_DELAY) == pdPASS)
             {
                 result = SOPC_STATUS_OK;
             }
@@ -616,7 +681,7 @@ SOPC_ReturnStatus Mutex_Lock(Mutex* mut)
 // Unlock recursive mutex
 SOPC_ReturnStatus Mutex_Unlock(Mutex* mut)
 {
-    QueueHandle_t handleRecursiveMutex = NULL;
+    QueueHandle_t freeRtosMutex = NULL;
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
     if (mut == NULL)
     {
@@ -624,14 +689,14 @@ SOPC_ReturnStatus Mutex_Unlock(Mutex* mut)
     }
     else
     {
-        handleRecursiveMutex = *((QueueHandle_t*) (mut));
-        if (handleRecursiveMutex == NULL)
+        freeRtosMutex = *((QueueHandle_t*) (mut));
+        if (freeRtosMutex == NULL)
         {
             result = SOPC_STATUS_INVALID_PARAMETERS;
         }
         else
         {
-            if (xQueueGiveMutexRecursive(handleRecursiveMutex) == pdPASS)
+            if (xQueueGiveMutexRecursive(freeRtosMutex) == pdPASS)
             {
                 result = SOPC_STATUS_OK;
             }
