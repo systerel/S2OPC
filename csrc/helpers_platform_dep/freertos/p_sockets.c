@@ -20,11 +20,6 @@
 #include "sopc_raw_sockets.h"
 #include "sopc_threads.h"
 
-#include "lwip/errno.h"
-#include "lwip/netdb.h"
-#include "lwip/sockets.h"
-#include "lwipopts.h"
-
 #include "p_sockets.h"
 
 bool SOPC_Socket_Network_Initialize()

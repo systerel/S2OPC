@@ -21,9 +21,10 @@
 #define P_SYNCHRONISATION_H
 
 #include "FreeRTOS.h"
-#include "p_utils.h"
 #include "queue.h"
 #include "task.h"
+
+#include "p_utils.h"
 
 /*****Private condition variable api*****/
 

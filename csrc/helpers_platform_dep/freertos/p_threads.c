@@ -17,19 +17,19 @@
  * under the License.
  */
 
-#include <limits.h>
+#include <limits.h> /* stdlib includes */
 #include <stddef.h>
 #include <stdint.h>
-#include <stdio.h> /* stdlib includes */
+#include <stdio.h>
 #include <string.h>
-
-#include "sopc_enums.h" /* s2opc includes */
 
 #include "FreeRTOS.h" /* freeRtos includes */
 #include "queue.h"
 #include "semphr.h"
 #include "task.h"
 #include "timers.h"
+
+#include "sopc_enums.h" /* s2opc includes */
 
 #include "p_synchronisation.h" /* synchronisation include */
 #include "p_threads.h"         /* private thread include */

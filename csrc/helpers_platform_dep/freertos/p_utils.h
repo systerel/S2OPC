@@ -1,6 +1,10 @@
 #ifndef P_UTILS_H
 #define P_UTILS_H
 
+#include "FreeRTOS.h"
+#include "queue.h"
+#include "task.h"
+
 #define MAX_P_UTILS_LIST (16)
 
 typedef struct T_TASK_LIST_ELT
