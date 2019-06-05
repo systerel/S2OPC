@@ -173,7 +173,12 @@ SOPC_ReturnStatus SOPC_Sockets_EnqueueInputEvent(SOPC_Sockets_InputEvent socketE
     ev->id = id;
     ev->params = params;
     ev->auxParam = auxParam;
-    return SOPC_AsyncQueue_BlockingEnqueue(socketsInputEventQueue, ev);
+    SOPC_ReturnStatus status = SOPC_AsyncQueue_BlockingEnqueue(socketsInputEventQueue, ev);
+    if (SOPC_STATUS_OK != status)
+    {
+        free(ev);
+    }
+    return status;
 }
 
 SOPC_ReturnStatus SOPC_Sockets_DequeueAndDispatchInputEvent()
