@@ -39,7 +39,10 @@ typedef struct T_TASK_LIST_ELT
 typedef struct T_TASK_LIST
 {
     tUtilsListElt* list;
-    uint16_t first;
+    uint16_t firstValid;
+    uint16_t firstFreeNextOQP;
+    uint16_t firstFreePreviousOQP;
+    uint16_t firstFree;
     uint16_t wMaxWaitingTasks;
     uint16_t wNbRegisteredTasks;
     QueueHandle_t lockHandle;
