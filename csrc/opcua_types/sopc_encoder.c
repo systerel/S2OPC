@@ -1325,7 +1325,7 @@ static SOPC_ReturnStatus SOPC_DiagnosticInfo_Write_Internal(const SOPC_Diagnosti
     }
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_Byte_Write(&encodingByte, buf);
+        status = SOPC_Byte_Write(&encodingByte, buf);
     }
     if (SOPC_STATUS_OK == status && (encodingByte & SOPC_DiagInfoEncoding_SymbolicId) != 0x00)
     {
