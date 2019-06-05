@@ -2480,18 +2480,19 @@ void SOPC_ExtensionObject_Initialize(SOPC_ExtensionObject* extObj)
 
 SOPC_ReturnStatus SOPC_ExtensionObject_Copy(SOPC_ExtensionObject* dest, const SOPC_ExtensionObject* src)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     SOPC_Buffer* encodedObject = NULL;
     SOPC_ExtObjectBodyEncoding encoding = SOPC_ExtObjBodyEncoding_None;
 
     if (NULL == dest || NULL == src)
     {
-        return SOPC_STATUS_INVALID_PARAMETERS;
+        return status;
     }
 
     switch (src->Encoding)
     {
     case SOPC_ExtObjBodyEncoding_None:
+        status = SOPC_STATUS_OK;
         break;
     case SOPC_ExtObjBodyEncoding_ByteString:
         status = SOPC_ByteString_Copy(&dest->Body.Bstring, &src->Body.Bstring);
@@ -2504,6 +2505,8 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Copy(SOPC_ExtensionObject* dest, const SO
     case SOPC_ExtObjBodyEncoding_Object:
         if (NULL != src->Body.Object.ObjType && NULL != src->Body.Object.Value)
         {
+            status = SOPC_STATUS_OK;
+
             /* We do not have the copy method for the object but we can encode it */
             encoding = SOPC_ExtObjBodyEncoding_ByteString;
             encodedObject = SOPC_Buffer_Create(SOPC_MAX_STRING_LENGTH); /* String content + length */
