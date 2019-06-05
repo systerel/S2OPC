@@ -24,8 +24,8 @@
 
 /*****Private thread api*****/
 
-typedef struct T_THREAD_WKS tThreadWks;
-typedef tThreadWks* hThread;
+typedef struct T_THREAD_WKS tThreadWks; // Thread workspace
+typedef tThreadWks* hThread;            // Handle workspace
 
 typedef void (*tPtrFct)(void*);
 
@@ -40,14 +40,17 @@ typedef enum E_THREAD_RESULT
     E_THREAD_RESULT_ERROR_ALREADY_INITIALIZED
 } eThreadResult;
 
-hThread* P_THREAD_Create(tPtrFct fct, void* args, tPtrFct fctWatingForJoin, tPtrFct fctReadyToSignal);
+hThread* P_THREAD_Create(tPtrFct fct,               // Callback
+                         void* args,                // Args to pass to thread callback
+                         tPtrFct fctWatingForJoin,  // Callback debug wait for join
+                         tPtrFct fctReadyToSignal); // Callback debug joined, called before signal thread well ended
 
-eThreadResult P_THREAD_Init(hThread* ptrWks,
-                            uint16_t wMaxRDV,
-                            tPtrFct fct,
-                            void* args,
-                            tPtrFct fctWatingForJoin,
-                            tPtrFct fctReadyToSignal);
+eThreadResult P_THREAD_Init(hThread* ptrWks,           // Handle workspace
+                            uint16_t wMaxRDV,          // Max parallel join
+                            tPtrFct fct,               // Callback
+                            void* args,                // Args to pass to thread callback
+                            tPtrFct fctWatingForJoin,  // Callback debug wait for join
+                            tPtrFct fctReadyToSignal); // Callback debug joined, called before signal thread well ended
 
 eThreadResult P_THREAD_Join(hThread* p);
 
