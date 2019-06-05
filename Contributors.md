@@ -5,6 +5,7 @@ the legal rights to contribute.
 
 # Main Contributor list
 * Aurelien GILLES <aurelien.gilles@systerel.fr>
+* Aurelien NOTTIN <aurelien.nottin@systerel.fr>
 * Frederic Badeau <frederic.badeau@systerel.fr>
 * Laurent Voisin <laurent.voisin@systerel.fr>
 * metayer <christophe.metayer@systerel.fr>
