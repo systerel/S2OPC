@@ -134,7 +134,7 @@ static void onAddressSpaceNotification(SOPC_EventHandler* handler,
         wv = (OpcUa_WriteValue*) params;
         if (wv != NULL)
         {
-            char* nodeId = (params != NULL) ? SOPC_NodeId_ToCString(&wv->NodeId) : NULL;
+            char* nodeId = SOPC_NodeId_ToCString(&wv->NodeId);
 
             if (nodeId != NULL)
             {
