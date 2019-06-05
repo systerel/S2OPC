@@ -142,9 +142,21 @@ for f in opcua_identifiers.h opcua_statuscodes.h sopc_types.h sopc_types.c; do
     mv $f $f"_"
 done
 popd > /dev/null
+pushd tests/freertos/test_helpers_platform_dep/ > /dev/null
+for f in FreeRTOSConfig.h lwipopts.h semihost_hardfault.c; do
+    mv $f $f"_"
+done
+popd > /dev/null
+
 find csrc tests -name "*.[hc]" -print0 | xargs -0 -n 1 $HELPER_SCRIPT $HEADER_C || { echo 'Expected header:' ; cat $HEADER_C ; err=1 ; }
+
 pushd csrc/opcua_types/ > /dev/null
 for f in opcua_identifiers.h opcua_statuscodes.h sopc_types.h sopc_types.c; do
+    mv $f"_" $f
+done
+popd > /dev/null
+pushd tests/freertos/test_helpers_platform_dep/ > /dev/null
+for f in FreeRTOSConfig.h lwipopts.h semihost_hardfault.c; do
     mv $f"_" $f
 done
 popd > /dev/null
