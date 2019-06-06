@@ -7,8 +7,6 @@ stages:
   - test
   - build-others
   - analyses
-  - build-temp-pubsub
-  - trigger-temp-pubsub
 
 .docker-job: &docker_job
   tags:
@@ -242,20 +240,3 @@ windows-appveyor:
   only:
     variables:
       - $WINDOWS_TEST
-
-###
-# Jobs used by the PubSub CI
-###
-
-build-linux64-pubsub:
-  <<: *build_linux
-  stage: build-temp-pubsub
-  except:
-    variables: [$NO_BUILD_TEMP_PUBSUB]
-
-trigger-pubsub:
-  stage: trigger-temp-pubsub
-  except:
-    variables: [$NO_BUILD_TEMP_PUBSUB]
-  trigger:
-    project: systerel/s2opc_pubsub
