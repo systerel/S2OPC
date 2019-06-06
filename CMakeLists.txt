@@ -314,19 +314,6 @@ if(MINGW)
     target_link_libraries(s2opc PRIVATE -static-libgcc)
 endif()
 
-# Ensure we always build a static version of s2opc for the tests
-if (${BUILD_SHARED_LIBS})
-	add_library(s2opc_static STATIC $<TARGET_OBJECTS:s2opc_obj>)
-	target_include_directories(s2opc_static PUBLIC ${S2OPC_PUBLIC_INCLUDES})
-	target_link_libraries(s2opc_static PUBLIC ${S2OPC_STATIC_DEP_LIBS})
-endif()
-
-if (${BUILD_SHARED_LIBS})
-	set(S2OPC_STATIC_LIB s2opc_static)
-else()
-	set(S2OPC_STATIC_LIB s2opc)
-endif()
-
 # Define installation targets
 ## retrieve public include files
 foreach(dir ${S2OPC_PUBLIC_INCLUDES})
@@ -421,7 +408,7 @@ s2opc_embed_address_space(TEST_ADDRESS_SPACE "${CMAKE_SOURCE_DIR}/tests/data/add
 file(GLOB_RECURSE INTERNAL_TESTS_SRCS "tests/helpers/*.c")
 add_executable(check_helpers ${INTERNAL_TESTS_SRCS})
 target_include_directories(check_helpers PRIVATE ${S2OPC_PRIVATE_INCLUDES} ${MBEDTLS_INCLUDE_DIRS} ${CHECK_INCLUDE_DIRS})
-target_link_libraries(check_helpers PRIVATE ${S2OPC_STATIC_LIB} ${CHECK_LIBRARIES})
+target_link_libraries(check_helpers PRIVATE s2opc ${CHECK_LIBRARIES})
 
 s2opc_unit_test(check_helpers)
 
@@ -441,7 +428,7 @@ add_executable(toolkit_test_server_local_service "tests/services/toolkit_test_se
                                                  "tests/services/test_results.c"
                                                  "tests/services/testlib_read_response.c"
                                                  ${TEST_ADDRESS_SPACE})
-target_link_libraries(toolkit_test_server_local_service PRIVATE ${S2OPC_STATIC_LIB} s2opc-loader-embedded)
+target_link_libraries(toolkit_test_server_local_service PRIVATE s2opc s2opc-loader-embedded)
 target_include_directories(toolkit_test_server_local_service PRIVATE ${S2OPC_PUBLIC_INCLUDES}
                                                                      ${S2OPC_PRIVATE_INCLUDES})
 s2opc_unit_test(toolkit_test_server_local_service GENERATE_TAP)
@@ -453,13 +440,13 @@ add_executable(toolkit_test_client "tests/services/toolkit_test_client.c"
                                    "tests/services/test_results.c"
                                    "tests/services/testlib_read_response.c"
                                    ${TEST_ADDRESS_SPACE})
-target_link_libraries(toolkit_test_client PRIVATE ${S2OPC_STATIC_LIB} s2opc-loader-embedded)
+target_link_libraries(toolkit_test_client PRIVATE s2opc s2opc-loader-embedded)
 target_include_directories(toolkit_test_client PRIVATE ${S2OPC_PUBLIC_INCLUDES}
                                                        ${S2OPC_PRIVATE_INCLUDES})
 
 
 add_executable(toolkit_test_client_service_faults "tests/services/toolkit_test_client_service_faults.c")
-target_link_libraries(toolkit_test_client_service_faults PRIVATE ${S2OPC_STATIC_LIB})
+target_link_libraries(toolkit_test_client_service_faults PRIVATE s2opc)
 target_include_directories(toolkit_test_client_service_faults PRIVATE ${S2OPC_PUBLIC_INCLUDES}
                                                                       ${S2OPC_PRIVATE_INCLUDES})
 
@@ -469,7 +456,7 @@ add_executable(toolkit_test_suite_client "tests/demo/test_suite_client.c"
                                          "tests/demo/state_machine.c"
                                          "tests/demo/wait_machines.c"
                                          "tests/demo/test_session.c")
-target_link_libraries(toolkit_test_suite_client PRIVATE ${S2OPC_STATIC_LIB} ${CHECK_LIBRARIES})
+target_link_libraries(toolkit_test_suite_client PRIVATE s2opc ${CHECK_LIBRARIES})
 target_include_directories(toolkit_test_suite_client PRIVATE ${S2OPC_PUBLIC_INCLUDES}
                                                              ${S2OPC_PRIVATE_INCLUDES}
                                                              ${CHECK_INCLUDE_DIRS})
@@ -479,7 +466,7 @@ add_executable(toolkit_test_server
     "tests/services/runtime_variables.c"
     "tests/services/toolkit_test_server.c"
     ${TEST_ADDRESS_SPACE})
-target_link_libraries(toolkit_test_server PRIVATE ${S2OPC_STATIC_LIB} s2opc-loader-embedded)
+target_link_libraries(toolkit_test_server PRIVATE s2opc s2opc-loader-embedded)
 target_include_directories(toolkit_test_server PRIVATE ${S2OPC_PUBLIC_INCLUDES}
                                                        ${S2OPC_PRIVATE_INCLUDES})
 
@@ -513,7 +500,7 @@ add_executable(s2opc_browse "tests/demo/s2opc_browse.c"
                               "tests/demo/state_machine.c"
                               "tests/demo/config.c"
                               )
-target_link_libraries(s2opc_browse PRIVATE ${S2OPC_STATIC_LIB} s2opc-loader-embedded)
+target_link_libraries(s2opc_browse PRIVATE s2opc s2opc-loader-embedded)
 target_include_directories(s2opc_browse PRIVATE ${S2OPC_PUBLIC_INCLUDES}
                                                   ${S2OPC_PRIVATE_INCLUDES})
 
@@ -521,7 +508,7 @@ add_executable(s2opc_read "tests/demo/s2opc_read.c"
                             "tests/demo/state_machine.c"
                             "tests/demo/config.c"
                             )
-target_link_libraries(s2opc_read PRIVATE ${S2OPC_STATIC_LIB} s2opc-loader-embedded)
+target_link_libraries(s2opc_read PRIVATE s2opc s2opc-loader-embedded)
 target_include_directories(s2opc_read PRIVATE ${S2OPC_PUBLIC_INCLUDES}
                                                 ${S2OPC_PRIVATE_INCLUDES})
 
@@ -529,7 +516,7 @@ add_executable(s2opc_write "tests/demo/s2opc_write.c"
                              "tests/demo/state_machine.c"
                              "tests/demo/config.c"
                              )
-target_link_libraries(s2opc_write PRIVATE ${S2OPC_STATIC_LIB} s2opc-loader-embedded)
+target_link_libraries(s2opc_write PRIVATE s2opc s2opc-loader-embedded)
 target_include_directories(s2opc_write PRIVATE ${S2OPC_PUBLIC_INCLUDES}
                                                  ${S2OPC_PRIVATE_INCLUDES})
 
@@ -537,7 +524,7 @@ add_executable(s2opc_discovery "tests/demo/s2opc_discovery.c"
                                  "tests/demo/state_machine.c"
                                  "tests/demo/config.c"
                                  )
-target_link_libraries(s2opc_discovery PRIVATE ${S2OPC_STATIC_LIB} s2opc-loader-embedded)
+target_link_libraries(s2opc_discovery PRIVATE s2opc s2opc-loader-embedded)
 target_include_directories(s2opc_discovery PRIVATE ${S2OPC_PUBLIC_INCLUDES}
                                                      ${S2OPC_PRIVATE_INCLUDES})
 
@@ -545,7 +532,7 @@ add_executable(s2opc_findserver "tests/demo/s2opc_findserver.c"
                                   "tests/demo/state_machine.c"
                                   "tests/demo/config.c"
                                    )
-target_link_libraries(s2opc_findserver PRIVATE ${S2OPC_STATIC_LIB})
+target_link_libraries(s2opc_findserver PRIVATE s2opc)
 target_include_directories(s2opc_findserver PRIVATE "${ADDSPACEGEN_INCLUDE_DIR}"
                                                        ${S2OPC_PUBLIC_INCLUDES}
                                                        ${S2OPC_PRIVATE_INCLUDES})
@@ -554,7 +541,7 @@ add_executable(s2opc_register "tests/demo/s2opc_register.c"
                                   "tests/demo/state_machine.c"
                                   "tests/demo/config.c"
                                    )
-target_link_libraries(s2opc_register PRIVATE ${S2OPC_STATIC_LIB})
+target_link_libraries(s2opc_register PRIVATE s2opc)
 target_include_directories(s2opc_register PRIVATE "${ADDSPACEGEN_INCLUDE_DIR}"
                                                        ${S2OPC_PUBLIC_INCLUDES}
                                                        ${S2OPC_PRIVATE_INCLUDES})
@@ -583,7 +570,7 @@ add_executable(check_sockets "tests/sockets/check_sockets.c")
 target_include_directories(check_sockets PRIVATE ${S2OPC_PUBLIC_INCLUDES}
                                                  ${S2OPC_PRIVATE_INCLUDES}
                                                  ${CHECK_INCLUDE_DIRS})
-target_link_libraries(check_sockets PRIVATE ${CHECK_LIBRARIES} ${S2OPC_STATIC_LIB})
+target_link_libraries(check_sockets PRIVATE ${CHECK_LIBRARIES} s2opc)
 s2opc_unit_test(check_sockets)
 
 # Secure channels (stubbed on services side) tests
@@ -745,7 +732,7 @@ s2opc_sc_level_test("SignAndEncrypt_B256Sha256_2048bit_server_vs_4096bit_client"
 
 # Benchmarks
 add_executable(bench_tool "tests/benchmarks/bench_tool.c")
-target_link_libraries(bench_tool PRIVATE ${S2OPC_STATIC_LIB})
+target_link_libraries(bench_tool PRIVATE s2opc)
 target_include_directories(bench_tool PRIVATE ${S2OPC_PUBLIC_INCLUDES} ${S2OPC_PRIVATE_INCLUDES})
 
 if (EXPAT_FOUND)
@@ -764,14 +751,14 @@ function(s2opc_fuzzer name src_file)
 
 	add_executable(${standalone_target_name} "${FUZZING_PATH}/${src_file}" "tests/fuzzing/standalone_fuzzer.c")
 	target_include_directories(${standalone_target_name} PRIVATE ${S2OPC_PUBLIC_INCLUDES} ${S2OPC_PRIVATE_INCLUDES})
-	target_link_libraries(${standalone_target_name} ${S2OPC_STATIC_LIB})
+	target_link_libraries(${standalone_target_name} s2opc)
 	add_dependencies(fuzzers ${standalone_target_name})
 
 	add_executable(${fuzz_target_name} "${FUZZING_PATH}/${src_file}")
 	set_target_properties(${fuzz_target_name} PROPERTIES COMPILE_FLAGS "-fsanitize=fuzzer")
 	set_target_properties(${fuzz_target_name} PROPERTIES LINK_FLAGS "-fsanitize=fuzzer")
 	target_include_directories(${fuzz_target_name} PRIVATE ${S2OPC_PUBLIC_INCLUDES} ${S2OPC_PRIVATE_INCLUDES})
-	target_link_libraries(${fuzz_target_name} ${S2OPC_STATIC_LIB})
+	target_link_libraries(${fuzz_target_name} s2opc)
 	add_dependencies(fuzzers ${fuzz_target_name})
 endfunction()
 
@@ -792,7 +779,7 @@ endif(ENABLE_TESTING)
 function(s2opc_oss_fuzzer target_name src_file)
   add_executable(${target_name} "${FUZZING_PATH}/${src_file}")
   target_include_directories(${target_name} PRIVATE ${S2OPC_PUBLIC_INCLUDES} ${S2OPC_PRIVATE_INCLUDES})
-  target_link_libraries(${target_name} ${S2OPC_STATIC_LIB} $ENV{LIB_FUZZING_ENGINE})
+  target_link_libraries(${target_name} s2opc $ENV{LIB_FUZZING_ENGINE})
   add_dependencies(fuzzers ${target_name})
 endfunction()
 
@@ -804,15 +791,13 @@ endif()
 
 ###### Subscribing client library and binary ######
 
-# Library, always static
 set(LIBSUBSCRIBE_PATH "tests/client_subscription")
 add_library(client_subscription "${LIBSUBSCRIBE_PATH}/libs2opc_client.c"
                                 "${LIBSUBSCRIBE_PATH}/toolkit_helpers.c"
                                 "${LIBSUBSCRIBE_PATH}/state_machine.c"
                                 "${LIBSUBSCRIBE_PATH}/pki_permissive.c"
                                 )
-# add_dependencies(client_subscription ${S2OPC_STATIC_LIB})
-target_link_libraries(client_subscription PRIVATE ${S2OPC_STATIC_LIB}) # ${S2OPC_DEP_LIBS})
+target_link_libraries(client_subscription PRIVATE s2opc)
 target_include_directories(client_subscription PRIVATE ${S2OPC_PUBLIC_INCLUDES}
                                                        ${S2OPC_PRIVATE_INCLUDES}
                                                        ${LIBSUBSCRIBE_PATH})
@@ -829,13 +814,13 @@ if(NOT WIN32)
 # Demo client
 add_executable(s2opc_subscription_client "${LIBSUBSCRIBE_PATH}/client.c"
                                          )
-target_link_libraries(s2opc_subscription_client PRIVATE client_subscription)
+target_link_libraries(s2opc_subscription_client PRIVATE client_subscription s2opc)
 endif(NOT WIN32)
 
 # Helpers unit tests
 add_executable(check_libsub "${LIBSUBSCRIBE_PATH}/check_libsub.c")
 target_include_directories(check_libsub PRIVATE ${S2OPC_PRIVATE_INCLUDES} ${MBEDTLS_INCLUDE_DIRS} ${CHECK_INCLUDE_DIRS})
-target_link_libraries(check_libsub PRIVATE client_subscription ${S2OPC_STATIC_LIB} ${CHECK_LIBRARIES})
+target_link_libraries(check_libsub PRIVATE client_subscription s2opc ${CHECK_LIBRARIES})
 s2opc_client_validation_test(check_libsub)
 
 endif(ENABLE_TESTING)
