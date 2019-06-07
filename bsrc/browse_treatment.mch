@@ -58,7 +58,6 @@ DEFINITIONS
     d_inv_in ==
         in_session                       : t_session_i           &
         in_maxReferencesPerNode          : NAT                   &
-        in_maxReferencesPerNode         <= k_n_BrowseTarget_max  &
         in_BrowseView                    : t_NodeId_i            &
         in_BrowseValue_NodeId            : t_NodeId              &
         in_BrowseValue_BrowseDirection   : t_BrowseDirection_i   &
@@ -144,7 +143,6 @@ OPERATIONS
         isBrowseValueContextDefined = FALSE         &
         p_session : t_session_i                     &
         p_maxTargetRef : NAT                        &
-        p_maxTargetRef <= k_n_BrowseTarget_max      &
         p_browseView : t_NodeId_i                   &
         p_nodeId : t_NodeId_i                       &
         p_nodeId : t_NodeId                         &
@@ -204,6 +202,10 @@ OPERATIONS
         isBrowseValueContextDefined = TRUE &
         isBrowseResultComputed = FALSE
     THEN
+        LET l_maxTargetRef BE
+            l_maxTargetRef = {TRUE|-> in_maxReferencesPerNode, FALSE|-> k_n_BrowseTarget_max}
+                              (bool(0 /= in_maxReferencesPerNode & k_n_BrowseTarget_max > in_maxReferencesPerNode))
+        IN
         d_variables_out,
         p_serviceStatusCode,
         p_continuationPoint,
@@ -230,7 +232,7 @@ OPERATIONS
               out_BrowseResultReferences : t_BrowseResultReferences & /* Results are defined */
               /* ContinuationPoint defined constraints: */
               (out_BrowseResult_ContinuationPoint /= c_ContinuationPoint_indet =>
-                  p_nbReferences = in_maxReferencesPerNode & /* Maximum reached if continuation point defined */
+                  p_nbReferences = l_maxTargetRef & /* Maximum reached if continuation point defined */
                   in_session /: dom(session_ContinuationPoint$0~) & /* No continuation point already defined for current session */
                   out_BrowseResult_ContinuationPoint : t_ContinuationPoint & /* Returned continuation point is associated with current session */
                   session_ContinuationPoint = session_ContinuationPoint$0 <+ {out_BrowseResult_ContinuationPoint |-> in_session}
@@ -239,7 +241,8 @@ OPERATIONS
           ) &
           (p_serviceStatusCode /= e_sc_ok =>
               p_continuationPoint = c_ContinuationPoint_indet)
-        )
+          )
+        END
     END
     ;
 

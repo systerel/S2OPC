@@ -43,7 +43,6 @@ DEFINITIONS
         in_startIndex                    : t_RefIndex            &
         in_session                       : t_session_i           &
         in_maxReferencesPerNode          : NAT                   &
-        in_maxReferencesPerNode         <= k_n_BrowseTarget_max  &
         in_BrowseView                    : t_NodeId_i            &
         in_BrowseValue_NodeId            : t_NodeId_i            &
         in_BrowseValue_BrowseDirection   : t_BrowseDirection_i   &

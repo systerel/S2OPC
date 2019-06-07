@@ -49,7 +49,6 @@ DEFINITIONS
         RequestBrowse                               : t_msg_i                               &
         RequestBrowse_nb_BrowseValue                : NAT                                   &
         RequestBrowse_nb_BrowseTargetMax            : NAT                                   &
-        RequestBrowse_nb_BrowseTargetMax           <= k_n_BrowseTarget_max                  &
         RequestBrowse_BrowseView                    : t_NodeId_i                            &
         RequestBrowse_BrowseValue_NodeId            : t_BrowseValue +-> t_NodeId_i          &
         RequestBrowse_BrowseValue_BrowseDirection   : t_BrowseValue +-> t_BrowseDirection_i &
@@ -175,7 +174,10 @@ OPERATIONS
         p_resp_msg : t_msg &
         p_resp_msg = c_msg_out &
         a_msg_out_type = e_msg_view_browse_resp &
-        p_nb_bvi : NAT1
+        p_nb_bvi : NAT1 &
+        p_nb_bvi <= k_n_BrowseTarget_max &
+        (RequestBrowse_nb_BrowseTargetMax > 0 =>
+            p_nb_bvi <= RequestBrowse_nb_BrowseTargetMax)
     THEN
         p_isallocated :: BOOL ||
         d_variables_resp
@@ -233,10 +235,9 @@ OPERATIONS
         p_bvi          : t_BrowseValue_i  &
         p_bvi          : t_BrowseValue    &
         p_nb_targets   : NAT &
+        p_nb_targets <= k_n_BrowseTarget_max &
         (RequestBrowse_nb_BrowseTargetMax > 0 =>
-          p_nb_targets <= RequestBrowse_nb_BrowseTargetMax) &
-        (RequestBrowse_nb_BrowseTargetMax = 0 =>
-         p_nb_targets <= k_n_BrowseTarget_max) &
+            p_nb_targets <= RequestBrowse_nb_BrowseTargetMax) &
         p_browseResultReferences : t_BrowseResultReferences_i &
         ResponseBrowse = p_resp_msg
     THEN

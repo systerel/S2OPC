@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment.c
 
- Date                 : 07/06/2019 15:09:47
+ Date                 : 07/06/2019 16:33:57
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -48,7 +48,8 @@ void browse_treatment__min_nb_result_refs(
    {
       t_entier4 browse_treatment__l_maxTargetRef;
       
-      if (0 == browse_treatment__p_maxTargetRef) {
+      if ((0 == browse_treatment__p_maxTargetRef) ||
+         (browse_treatment__p_maxTargetRef >= constants__k_n_BrowseTarget_max)) {
          browse_treatment__l_maxTargetRef = constants__k_n_BrowseTarget_max;
       }
       else {

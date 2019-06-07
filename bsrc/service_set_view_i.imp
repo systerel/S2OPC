@@ -50,7 +50,6 @@ LOCAL_OPERATIONS
 
         p_nid_view : t_NodeId_i &
         p_nb_target_max : NAT &
-        p_nb_target_max <= k_n_BrowseTarget_max &
         p_nb_browse_value : NAT
     THEN
         StatusCode_service,
@@ -101,7 +100,6 @@ LOCAL_OPERATIONS
 
         p_nid_view : t_NodeId_i &
         p_nb_target_max : NAT &
-        p_nb_target_max <= k_n_BrowseTarget_max &
 
         p_bvi           : t_BrowseValue_i &
         p_bvi           : t_BrowseValue &

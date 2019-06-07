@@ -48,11 +48,10 @@ LOCAL_OPERATIONS
     p_maxResultRefs <-- min_nb_result_refs (p_maxTargetRef, p_nb_target) =
     PRE
         p_maxTargetRef : NAT                      &
-        p_maxTargetRef <= k_n_BrowseTarget_max    &
         p_nb_target : NAT
     THEN
         LET l_maxTargetRef BE
-            l_maxTargetRef = {TRUE|->k_n_BrowseTarget_max, FALSE|->p_maxTargetRef}(bool(0 = p_maxTargetRef))
+            l_maxTargetRef = {TRUE|-> p_maxTargetRef, FALSE|-> k_n_BrowseTarget_max}(bool(0 /= p_maxTargetRef & k_n_BrowseTarget_max > p_maxTargetRef))
         IN
             /* No maximum of targets in results defined by client: keep maximum number of potential targets or default max */
             IF p_nb_target < l_maxTargetRef THEN
@@ -192,9 +191,9 @@ OPERATIONS
     VAR
         l_maxTargetRef
     IN
-        IF 0 = p_maxTargetRef
+        IF 0 = p_maxTargetRef or p_maxTargetRef >= k_n_BrowseTarget_max
         THEN
-            /* No maximum of targets in results defined by client: default max */
+            /* No maximum of targets in results defined by client or greater than server maximum: default max */
             l_maxTargetRef := k_n_BrowseTarget_max
         ELSE
             /* Limited by maximum of targets in result */
