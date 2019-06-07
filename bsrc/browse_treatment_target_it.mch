@@ -50,6 +50,7 @@ OPERATIONS
         p_node : t_Node_i &
         p_node : t_Node   &
         p_startIndex : NAT &
+        p_startIndex : t_RefIndex &
         p_startIndex > 0
     THEN
         starting_node := p_node ||
@@ -67,10 +68,12 @@ OPERATIONS
     THEN
         references_iterated   := references_iterated   \/ {next_reference_index} ||
         references_to_iterate := references_to_iterate -  {next_reference_index} ||
-        next_reference_index := next_reference_index + 1 ||
         p_continue := bool(references_to_iterate - {next_reference_index} /= {}) ||
         p_ref :(p_ref : t_Reference_i & p_ref = RefIndex_Reference(starting_node |-> next_reference_index)) ||
-        p_nextRefIndex := next_reference_index + 1
+        next_reference_index,
+        p_nextRefIndex :(next_reference_index : NAT & next_reference_index : t_RefIndex &
+                         next_reference_index = next_reference_index$0 + 1 &
+                         p_nextRefIndex = next_reference_index)
     END
 
 END

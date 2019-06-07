@@ -28,6 +28,7 @@ SEES
 
 DEFINITIONS
     d_variables_req ==
+        RequestBrowse,
         RequestBrowse_nb_BrowseValue,
         RequestBrowse_nb_BrowseTargetMax, /* requestedMaxReferencesPerNode */
         RequestBrowse_BrowseView,
@@ -38,12 +39,14 @@ DEFINITIONS
         RequestBrowse_BrowseValue_NodeClassMask
     ;
     d_variables_resp ==
+        ResponseBrowse,
         ResponseBrowse_BrowseStatus,
         ResponseBrowse_ContinuationPoint,
         ResponseBrowse_ResultReferences,
         isBrowseResponseAllocated
     ;
     d_inv_req ==
+        RequestBrowse                               : t_msg_i                               &
         RequestBrowse_nb_BrowseValue                : NAT                                   &
         RequestBrowse_nb_BrowseTargetMax            : NAT                                   &
         RequestBrowse_nb_BrowseTargetMax           <= k_n_BrowseTarget_max                  &
@@ -55,6 +58,7 @@ DEFINITIONS
         RequestBrowse_BrowseValue_NodeClassMask     : t_BrowseValue +-> t_BrowseNodeClassMask_i
     ;
     d_inv_resp ==
+        ResponseBrowse                     : t_msg_i &
         ResponseBrowse_BrowseStatus        : t_BrowseValue +-> t_StatusCode        &
         ResponseBrowse_ContinuationPoint   : t_BrowseValue +-> t_ContinuationPoint_i &
         ResponseBrowse_ResultReferences    : t_BrowseValue +-> t_BrowseResultReferences &
@@ -63,6 +67,7 @@ DEFINITIONS
     d_init_req ==
         d_variables_req
         :(
+            RequestBrowse = c_msg_indet                     &
             RequestBrowse_nb_BrowseValue               = 0  &
             RequestBrowse_nb_BrowseTargetMax           = 0  &
             RequestBrowse_BrowseView                   = c_NodeId_indet &
@@ -76,6 +81,7 @@ DEFINITIONS
     d_init_resp ==
         d_variables_resp
         :(
+            ResponseBrowse                     = c_msg_indet &
             ResponseBrowse_BrowseStatus        = {} &
             ResponseBrowse_ContinuationPoint   = {} &
             ResponseBrowse_ResultReferences    = {} &
@@ -113,6 +119,7 @@ OPERATIONS
             p_nb_BrowseTargetMax : NAT &
             p_nb_browse_value : NAT &
             d_inv_req &
+            RequestBrowse = p_req_msg &
             RequestBrowse_nb_BrowseTargetMax >= 0 & /* 0 means no limit */
             RequestBrowse_BrowseValue_NodeId           : cast_t_BrowseValue[1..RequestBrowse_nb_BrowseValue] --> t_NodeId_i          &
             RequestBrowse_BrowseValue_BrowseDirection  : cast_t_BrowseValue[1..RequestBrowse_nb_BrowseValue] --> t_BrowseDirection_i &
@@ -128,9 +135,6 @@ OPERATIONS
 
     p_NodeId, p_dir, p_reftype, p_inc_subtype, p_class_mask <-- getall_BrowseValue(p_req_msg, p_bvi) =
     PRE
-        RequestBrowse_nb_BrowseValue > 0 &
-        RequestBrowse_nb_BrowseValue <= k_n_BrowseResponse_max &
-
         p_req_msg : t_msg_i &
         p_req_msg : t_msg &
         p_req_msg = c_msg_in &
@@ -142,7 +146,11 @@ OPERATIONS
         p_bvi : dom(RequestBrowse_BrowseValue_NodeId) &
         p_bvi : dom(RequestBrowse_BrowseValue_BrowseDirection) &
         p_bvi : dom(RequestBrowse_BrowseValue_ReferenceTypeId) &
-        p_bvi : dom(RequestBrowse_BrowseValue_NodeClassMask)
+        p_bvi : dom(RequestBrowse_BrowseValue_NodeClassMask) &
+
+        RequestBrowse = p_req_msg &
+        RequestBrowse_nb_BrowseValue > 0 &
+        RequestBrowse_nb_BrowseValue <= k_n_BrowseResponse_max
     THEN
         p_NodeId,
         p_dir,
@@ -167,12 +175,13 @@ OPERATIONS
         p_resp_msg : t_msg &
         p_resp_msg = c_msg_out &
         a_msg_out_type = e_msg_view_browse_resp &
-        p_nb_bvi : NAT
+        p_nb_bvi : NAT1
     THEN
         p_isallocated :: BOOL ||
         d_variables_resp
         :(d_inv_resp &
           isBrowseResponseAllocated = p_isallocated &
+          ResponseBrowse = p_resp_msg &
           ResponseBrowse_BrowseStatus        = {} &
           ResponseBrowse_ContinuationPoint   = {} &
           ResponseBrowse_ResultReferences    = {}
@@ -190,7 +199,8 @@ OPERATIONS
         p_bvi  : t_BrowseValue_i &
         p_bvi  : t_BrowseValue   &
         p_sc : t_StatusCode_i &
-        p_sc : t_StatusCode
+        p_sc : t_StatusCode &
+        ResponseBrowse = p_resp_msg
     THEN
         ResponseBrowse_BrowseStatus(p_bvi) := p_sc
     END
@@ -206,7 +216,8 @@ OPERATIONS
         p_bvi : t_BrowseValue_i &
         p_bvi : t_BrowseValue   &
         p_continuationPoint : t_ContinuationPoint_i   &
-        p_continuationPoint : t_ContinuationPoint
+        p_continuationPoint : t_ContinuationPoint &
+        ResponseBrowse = p_resp_msg
     THEN
         ResponseBrowse_ContinuationPoint(p_bvi) := p_continuationPoint
     END
@@ -222,8 +233,12 @@ OPERATIONS
         p_bvi          : t_BrowseValue_i  &
         p_bvi          : t_BrowseValue    &
         p_nb_targets   : NAT &
-        p_nb_targets  <= RequestBrowse_nb_BrowseTargetMax &
-        p_browseResultReferences : t_BrowseResultReferences_i
+        (RequestBrowse_nb_BrowseTargetMax > 0 =>
+          p_nb_targets <= RequestBrowse_nb_BrowseTargetMax) &
+        (RequestBrowse_nb_BrowseTargetMax = 0 =>
+         p_nb_targets <= k_n_BrowseTarget_max) &
+        p_browseResultReferences : t_BrowseResultReferences_i &
+        ResponseBrowse = p_resp_msg
     THEN
         ResponseBrowse_ResultReferences (p_bvi) := p_browseResultReferences
     END

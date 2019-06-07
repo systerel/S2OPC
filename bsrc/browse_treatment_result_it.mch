@@ -33,8 +33,8 @@ DEFINITIONS
     d_inv ==
     (
     nb_browseResult_max_refs : NAT &
-    browseResult_to_iterate <: NAT &
-    browseResult_iterated   <: NAT &
+    browseResult_to_iterate <: NAT1 &
+    browseResult_iterated   <: NAT1 &
     browseResult_to_iterate /\ browseResult_iterated = {} &
     nb_browseResult_max_refs = card(browseResult_to_iterate \/ browseResult_iterated)
     )

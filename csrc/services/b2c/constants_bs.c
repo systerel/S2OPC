@@ -26,6 +26,7 @@
 #include "b2c.h"
 
 #include "sopc_builtintypes.h"
+#include "sopc_logger.h"
 #include "sopc_types.h"
 
 static SOPC_NodeId ByteString_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_ByteString};
@@ -56,13 +57,25 @@ void constants_bs__getall_conv_ExpandedNodeId_NodeId(const constants_bs__t_Expan
                                                      constants_bs__t_NodeId_i* const constants_bs__p_nid)
 {
     *constants_bs__p_nid = constants_bs__c_ExpandedNodeId_indet;
-    // TODO: namespaceUri.Length > 0 does not really mean it is an external node but we do not manage it
-    *constants_bs__p_local_server =
-        constants_bs__p_expnid->ServerIndex == 0 && constants_bs__p_expnid->NamespaceUri.Length <= 0;
-    if (*constants_bs__p_local_server)
+    *constants_bs__p_local_server = false;
+    if (constants_bs__p_expnid->ServerIndex == 0)
     {
-        /* Reminder: This is a borrow */
-        *constants_bs__p_nid = &constants_bs__p_expnid->NodeId;
+        // TODO: namespaceUri.Length > 0 does not really mean it is an external node but we do not manage it:
+        //       if server index indicates it is local node (index == 0) and URI is defined the URI
+        //       can be either valid in local server or invalid (another degraded case).
+        if (constants_bs__p_expnid->NamespaceUri.Length <= 0)
+        {
+            *constants_bs__p_local_server = true;
+            /* Reminder: This is a borrow */
+            *constants_bs__p_nid = &constants_bs__p_expnid->NodeId;
+        }
+        else
+        {
+            // Should be a local namespace URI but we do not manage it
+            SOPC_Logger_TraceWarning(
+                "Conversion of Namespace URI %s from ExpandedNodeId not managed => considered as external server node.",
+                SOPC_String_GetRawCString(&constants_bs__p_expnid->NamespaceUri));
+        }
     }
 }
 

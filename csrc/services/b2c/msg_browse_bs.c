@@ -39,6 +39,7 @@ void msg_browse_bs__alloc_browse_response(const constants__t_msg_i msg_browse_bs
     *msg_browse_bs__p_isallocated = false;
     OpcUa_BrowseResponse* resp = msg_browse_bs__p_resp_msg;
     assert((uint64_t) msg_browse_bs__p_nb_bvi < SIZE_MAX);
+    assert(msg_browse_bs__p_nb_bvi > 0);
     resp->Results = malloc(sizeof(*resp->Results) * (size_t) msg_browse_bs__p_nb_bvi);
     if (NULL != resp->Results)
     {
@@ -57,12 +58,13 @@ void msg_browse_bs__get_browse_request_params(const constants__t_msg_i msg_brows
                                               t_entier4* const msg_browse_bs__p_nb_browse_value)
 {
     OpcUa_BrowseRequest* req = msg_browse_bs__p_req_msg;
-    if (0 == req->View.Timestamp && 0 == req->View.ViewVersion && SOPC_NodeId_IsNull(&req->View.ViewId))
+    if (SOPC_NodeId_IsNull(&req->View.ViewId))
     {
         *msg_browse_bs__p_nid_view = constants__c_NodeId_indet;
     }
     else
     {
+        // Note: timestamp and version ignored
         *msg_browse_bs__p_nid_view = &req->View.ViewId;
     }
     if (req->RequestedMaxReferencesPerNode <= INT32_MAX)

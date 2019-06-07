@@ -51,22 +51,14 @@ LOCAL_OPERATIONS
         p_maxTargetRef <= k_n_BrowseTarget_max    &
         p_nb_target : NAT
     THEN
-        IF 0 = p_maxTargetRef
-        THEN
-            /* No maximum of targets in results defined by clent: keep maximum number of potential targets or default max */
-            IF p_nb_target < k_n_BrowseTarget_max THEN
+        LET l_maxTargetRef BE
+            l_maxTargetRef = {TRUE|->k_n_BrowseTarget_max, FALSE|->p_maxTargetRef}(bool(0 = p_maxTargetRef))
+        IN
+            /* No maximum of targets in results defined by client: keep maximum number of potential targets or default max */
+            IF p_nb_target < l_maxTargetRef THEN
                 p_maxResultRefs := p_nb_target
             ELSE
-                p_maxResultRefs := k_n_BrowseTarget_max
-            END
-        ELSE
-            /* Limited by maximum of targets in result */
-            IF  p_maxTargetRef < p_nb_target
-            THEN
-                p_maxResultRefs := p_maxTargetRef
-            ELSE
-                /* Keep the maximum number of potential targets (reduced by browse filters) */
-                p_maxResultRefs := p_nb_target
+                p_maxResultRefs := l_maxTargetRef
             END
         END
     END
@@ -96,7 +88,7 @@ LOCAL_OPERATIONS
         p_serviceStatusCode,
         p_toContinue,
         p_nextIndex
-        :(p_serviceStatusCode : {e_sc_ok, e_sc_bad_reference_type_id_invalid, e_sc_bad_view_id_unknown} &
+        :(p_serviceStatusCode : {e_sc_ok, e_sc_bad_out_of_memory, e_sc_bad_reference_type_id_invalid, e_sc_bad_view_id_unknown} &
           p_toContinue : BOOL &
           p_nextIndex : NAT &
           p_nextIndex : t_RefIndex &
@@ -124,7 +116,7 @@ LOCAL_OPERATIONS
     END
     ;
 
-    p_continue <-- fill_browse_result_ref(p_ref, p_browseView, p_browseDirection, p_refType_defined, p_referenceType, p_includeSubtypes) =
+    p_continue, p_alloc_failed <-- fill_browse_result_ref(p_ref, p_browseView, p_browseDirection, p_refType_defined, p_referenceType, p_includeSubtypes) =
     PRE
         p_ref             : t_Reference_i       &
         p_ref             : t_Reference         &
@@ -153,35 +145,42 @@ LOCAL_OPERATIONS
               )
              )
         THEN
-            /* Compatible reference, add it in a available reference index of the browse result */
-            ANY l_browseResultIdx WHERE
-                l_browseResultIdx : NAT &
-                l_browseResultIdx : browseResult_to_iterate
-            THEN
-                browseResult_iterated   := browseResult_iterated   \/ {l_browseResultIdx} ||
-                browseResult_to_iterate := browseResult_to_iterate -  {l_browseResultIdx} ||
-                p_continue              := bool(browseResult_to_iterate /= {l_browseResultIdx}) ||
-                out_BrowseResult_ReferenceTypeId (l_browseResultIdx) := Reference_ReferenceType(p_ref) ||
-                out_BrowseResult_isForward (l_browseResultIdx) := Reference_IsForward(p_ref) ||
-                out_BrowseResult_NodeId (l_browseResultIdx) := Reference_TargetNode(p_ref) ||
-                out_BrowseResult_nb_References := l_browseResultIdx ||
-                IF Reference_TargetNode(p_ref) : dom(conv_ExpandedNodeId_NodeId) &
-                    conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref)) : ran(a_NodeId)
+            CHOICE
+                p_alloc_failed := FALSE ||
+                /* Compatible reference, add it in a available reference index of the browse result */
+                ANY l_browseResultIdx WHERE
+                    l_browseResultIdx : NAT &
+                    l_browseResultIdx : browseResult_to_iterate
                 THEN
-                    out_BrowseResult_BrowseName (l_browseResultIdx) := a_BrowseName(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref)))) ||
-                    out_BrowseResult_DisplayName (l_browseResultIdx) := a_DisplayName(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref)))) ||
-                    out_BrowseResult_NodeClass (l_browseResultIdx) := a_NodeClass(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref)))) ||
-                    out_BrowseResult_TypeDefinition (l_browseResultIdx) := Ref_HasTypeDefinition(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref))))
-                ELSE
-                    out_BrowseResult_BrowseName (l_browseResultIdx) := c_QualifiedName_indet ||
-                    out_BrowseResult_DisplayName (l_browseResultIdx) := c_LocalizedText_indet ||
-                    out_BrowseResult_NodeClass (l_browseResultIdx) := c_NodeClass_indet ||
-                    out_BrowseResult_TypeDefinition (l_browseResultIdx) := c_ExpandedNodeId_indet
+                    browseResult_iterated   := browseResult_iterated   \/ {l_browseResultIdx} ||
+                    browseResult_to_iterate := browseResult_to_iterate -  {l_browseResultIdx} ||
+                    p_continue              := bool(browseResult_to_iterate /= {l_browseResultIdx}) ||
+                    out_BrowseResult_ReferenceTypeId (l_browseResultIdx) := Reference_ReferenceType(p_ref) ||
+                    out_BrowseResult_isForward (l_browseResultIdx) := Reference_IsForward(p_ref) ||
+                    out_BrowseResult_NodeId (l_browseResultIdx) := Reference_TargetNode(p_ref) ||
+                    out_BrowseResult_nb_References := l_browseResultIdx ||
+                    IF Reference_TargetNode(p_ref) : dom(conv_ExpandedNodeId_NodeId) &
+                        conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref)) : ran(a_NodeId)
+                    THEN
+                        out_BrowseResult_BrowseName (l_browseResultIdx) := a_BrowseName(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref)))) ||
+                        out_BrowseResult_DisplayName (l_browseResultIdx) := a_DisplayName(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref)))) ||
+                        out_BrowseResult_NodeClass (l_browseResultIdx) := a_NodeClass(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref)))) ||
+                        out_BrowseResult_TypeDefinition (l_browseResultIdx) := Ref_HasTypeDefinition(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref))))
+                    ELSE
+                        out_BrowseResult_BrowseName (l_browseResultIdx) := c_QualifiedName_indet ||
+                        out_BrowseResult_DisplayName (l_browseResultIdx) := c_LocalizedText_indet ||
+                        out_BrowseResult_NodeClass (l_browseResultIdx) := c_NodeClass_indet ||
+                        out_BrowseResult_TypeDefinition (l_browseResultIdx) := c_ExpandedNodeId_indet
+                    END
                 END
+            OR
+                p_alloc_failed := TRUE ||
+                p_continue := FALSE
             END
         ELSE
             /* if reference filtered, nothing to do and there are still browse result reference index available for next call */
-            p_continue := TRUE
+            p_continue := TRUE ||
+            p_alloc_failed := FALSE
         END
     END
 
@@ -190,24 +189,22 @@ OPERATIONS
     /* LOCAL OPERATIONS */
 
     p_maxResultRefs <-- min_nb_result_refs (p_maxTargetRef, p_nb_target) =
-    BEGIN
+    VAR
+        l_maxTargetRef
+    IN
         IF 0 = p_maxTargetRef
         THEN
-            /* No maximum of targets in results defined by clent: keep maximum number of potential targets or default max */
-            IF p_nb_target < k_n_BrowseTarget_max THEN
-                p_maxResultRefs := p_nb_target
-            ELSE
-                p_maxResultRefs := k_n_BrowseTarget_max
-            END
+            /* No maximum of targets in results defined by client: default max */
+            l_maxTargetRef := k_n_BrowseTarget_max
         ELSE
             /* Limited by maximum of targets in result */
-            IF  p_maxTargetRef < p_nb_target
-            THEN
-                p_maxResultRefs := p_maxTargetRef
-            ELSE
-                /* Keep the maximum number of potential targets (reduced by browse filters) */
-                p_maxResultRefs := p_nb_target
-            END
+            l_maxTargetRef := p_maxTargetRef
+        END;
+        IF p_nb_target < l_maxTargetRef THEN
+            /* Keep the maximum number of potential targets (reduced by browse filters) */
+            p_maxResultRefs := p_nb_target
+        ELSE
+            p_maxResultRefs := l_maxTargetRef
         END
     END
     ;
@@ -223,9 +220,10 @@ OPERATIONS
                            type is filtered
        p_continue        : indicates whether the iteration should continue (it should stop if the
                            maximum number of browse response index has just been filled)
+       p_alloc_failed    : indicates an out of memory issue when filling result reference
     */
-    p_continue <-- fill_browse_result_ref(p_ref, p_browseView, p_browseDirection,
-                                          p_refType_defined, p_referenceType, p_includeSubtypes) =
+    p_continue, p_alloc_failed <-- fill_browse_result_ref(p_ref, p_browseView, p_browseDirection,
+                                                          p_refType_defined, p_referenceType, p_includeSubtypes) =
     VAR
         l_RefType,
         l_TargetNode,
@@ -238,6 +236,7 @@ OPERATIONS
         l_TypeDefinition,
         l_NodeClassInMask
     IN
+        p_alloc_failed := FALSE;
         p_continue := TRUE;
         unused_browse_view (p_browseView); // TODO: filtering using browse view
         l_RefType    <-- get_Reference_ReferenceType(p_ref);
@@ -251,10 +250,13 @@ OPERATIONS
                 l_NodeClassInMask <-- is_NodeClass_in_NodeClassMask (l_NodeClass);
                 IF l_NodeClassInMask = TRUE THEN
                     p_continue, l_bri <-- continue_iter_browseResult;
-                    setall_browse_result_reference_at (l_bri, l_RefType, l_IsForward, l_TargetNode,
-                                                       l_BrowseName, l_DisplayName, l_NodeClass, l_TypeDefinition)
+                    p_alloc_failed <-- setall_browse_result_reference_at (l_bri, l_RefType, l_IsForward, l_TargetNode,
+                                                                          l_BrowseName, l_DisplayName, l_NodeClass, l_TypeDefinition)
                 END
             END
+        END;
+        IF p_alloc_failed = TRUE THEN
+            p_continue := FALSE
         END
     END
     ;
@@ -278,11 +280,13 @@ OPERATIONS
     VAR
         l_continue_bri,
         l_continue_ref,
-        l_ref
+        l_ref,
+        l_alloc_failed
     IN
         p_serviceStatusCode := e_sc_ok; /* TODO: check if the reference type is valid ?
                                            Silently fail if we do not know the reference type during typecheck for now (no result will be found) */
         l_ref := c_Reference_indet;
+        l_alloc_failed := FALSE;
         /* Initialization of the iteration on the browse result */
         l_continue_bri <-- init_iter_browseResult(p_max_nb_results);
         /* Loop on the references starting on the source node */
@@ -295,15 +299,15 @@ OPERATIONS
             l_continue_ref, l_ref, p_nextIndex <-- continue_iter_reference;
             /* When the target node fulfills all the filtering conditions, then
             fill its data and iterate on the browse result index */
-            l_continue_bri <-- fill_browse_result_ref(l_ref, p_browseView, p_browseDirection, p_refType_defined,
-                                                      p_referenceType, p_includeSubtypes)
+            l_continue_bri, l_alloc_failed <-- fill_browse_result_ref(l_ref, p_browseView, p_browseDirection, p_refType_defined,
+                                                                      p_referenceType, p_includeSubtypes)
         INVARIANT
             /* Iteration on references from source node */
             references_to_iterate <: NAT &
             references_iterated   <: NAT &
             references_to_iterate /\ references_iterated = {} &
             next_reference_index : NAT &
-            card(references_to_iterate) = Node_RefIndexEnd(p_src_node) - p_startIndex + 1 &
+            card(references_to_iterate) = Node_RefIndexEnd(p_src_node) - p_nextIndex + 1 &
 
             /* Iteration on browse result stored references */
             browseResult_to_iterate <: NAT &
@@ -325,9 +329,12 @@ OPERATIONS
         VARIANT
             card(references_to_iterate)
         END;
-        /* There are references remaining but no more free indexes available in BrowseResult => continuatoin point needed */
-        p_toContinue := bool(l_continue_ref = TRUE & l_continue_bri = FALSE)
-
+        /* There are references remaining but no more free indexes available in BrowseResult => continuation point needed */
+        p_toContinue := bool(l_continue_ref = TRUE & l_continue_bri = FALSE & l_alloc_failed = FALSE);
+        IF l_alloc_failed = TRUE
+        THEN
+            p_serviceStatusCode := e_sc_bad_out_of_memory
+        END
     END
     ;
 
@@ -410,13 +417,15 @@ OPERATIONS
                   <-- fill_browse_result (l_startIndex, l_max_nb_results, l_browseView, l_src_node,
                                           l_browseDirection, l_refType_defined, l_referenceType, l_includeSubtypes);
                 IF p_serviceStatusCode = e_sc_ok THEN
-                    p_nbReferences <-- get_browse_result_nb_references
-                END;
-                IF l_toContinue = TRUE THEN
-                    l_cp_bres, p_continuationPoint <-- create_continuation_point (l_session, l_nextIndex, l_maxTargetRef, l_browseView,
-                                                                                  l_nodeId, l_browseDirection, l_referenceType, l_includeSubtypes, l_nodeClassMask);
-                    IF l_cp_bres = FALSE THEN
-                        p_serviceStatusCode := e_sc_bad_no_continuation_points
+                    p_nbReferences <-- get_browse_result_nb_references;
+                    IF l_toContinue = TRUE THEN
+                        l_cp_bres, p_continuationPoint
+                          <-- create_continuation_point (l_session, l_nextIndex, l_maxTargetRef, l_browseView,
+                                                         l_nodeId, l_browseDirection, l_referenceType,
+                                                         l_includeSubtypes, l_nodeClassMask);
+                        IF l_cp_bres = FALSE THEN
+                            p_serviceStatusCode := e_sc_bad_no_continuation_points
+                        END
                     END
                 END
             ELSE

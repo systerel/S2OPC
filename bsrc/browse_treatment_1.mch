@@ -62,6 +62,7 @@ OPERATIONS
     PRE
         p_is_ref_type1 : BOOL       &
         p_ref_type1    : t_NodeId_i &
+        (p_is_ref_type1 = TRUE => p_ref_type1 : t_NodeId) &
         p_inc_subtypes : BOOL       &
         p_ref_type2    : t_NodeId_i &
         p_ref_type2    : t_NodeId

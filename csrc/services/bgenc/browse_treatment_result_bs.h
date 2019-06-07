@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment_result_bs.h
 
- Date                 : 18/04/2019 13:46:48
+ Date                 : 07/06/2019 13:37:37
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -75,7 +75,8 @@ extern void browse_treatment_result_bs__setall_browse_result_reference_at(
    const constants__t_QualifiedName_i browse_treatment_result_bs__p_BrowseName,
    const constants__t_LocalizedText_i browse_treatment_result_bs__p_DisplayName,
    const constants__t_NodeClass_i browse_treatment_result_bs__p_NodeClass,
-   const constants__t_ExpandedNodeId_i browse_treatment_result_bs__p_TypeDefinition);
+   const constants__t_ExpandedNodeId_i browse_treatment_result_bs__p_TypeDefinition,
+   t_bool * const browse_treatment_result_bs__p_alloc_failed);
 extern void browse_treatment_result_bs__unused_browse_view(
    const constants__t_NodeId_i browse_treatment_result_bs__p_browseView);
 

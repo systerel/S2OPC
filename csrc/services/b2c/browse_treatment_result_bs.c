@@ -157,7 +157,8 @@ void browse_treatment_result_bs__setall_browse_result_reference_at(
     const constants__t_QualifiedName_i browse_treatment_result_bs__p_BrowseName,
     const constants__t_LocalizedText_i browse_treatment_result_bs__p_DisplayName,
     const constants__t_NodeClass_i browse_treatment_result_bs__p_NodeClass,
-    const constants__t_ExpandedNodeId_i browse_treatment_result_bs__p_TypeDefinition)
+    const constants__t_ExpandedNodeId_i browse_treatment_result_bs__p_TypeDefinition,
+    t_bool* const browse_treatment_result_bs__p_alloc_failed)
 {
     assert(NULL != references);
     /* Notes:
@@ -168,40 +169,51 @@ void browse_treatment_result_bs__setall_browse_result_reference_at(
     assert(browse_treatment_result_bs__p_refIndex - 1 == nbReferences);
     assert(browse_treatment_result_bs__p_refIndex <= nbMaxReferences);
     OpcUa_ReferenceDescription* refDesc = &references[browse_treatment_result_bs__p_refIndex - 1];
+    OpcUa_ReferenceDescription_Initialize(refDesc);
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     // Mandatory ReferenceTypeId: cannot be indet (ensured by following assertion)
     status = SOPC_NodeId_Copy(&refDesc->ReferenceTypeId, browse_treatment_result_bs__p_refTypeId);
-    assert(SOPC_STATUS_OK == status);
-    // Mandatory IsForward
-    refDesc->IsForward = browse_treatment_result_bs__p_isForward;
-    // Mandatory TargetNodeId: cannot be indet (ensured by following assertion)
-    status = SOPC_ExpandedNodeId_Copy(&refDesc->NodeId, browse_treatment_result_bs__p_NodeId);
-    assert(SOPC_STATUS_OK == status);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        // Mandatory IsForward
+        refDesc->IsForward = browse_treatment_result_bs__p_isForward;
+        // Mandatory TargetNodeId: cannot be indet (ensured by following assertion)
+        status = SOPC_ExpandedNodeId_Copy(&refDesc->NodeId, browse_treatment_result_bs__p_NodeId);
+    }
+
     // Optional BrowseName
-    if (browse_treatment_result_bs__p_BrowseName != constants__c_QualifiedName_indet)
+    if (SOPC_STATUS_OK == status && browse_treatment_result_bs__p_BrowseName != constants__c_QualifiedName_indet)
     {
         status = SOPC_QualifiedName_Copy(&refDesc->BrowseName, browse_treatment_result_bs__p_BrowseName);
-        assert(SOPC_STATUS_OK == status);
     }
     // Optional DisplayName
-    if (browse_treatment_result_bs__p_DisplayName != constants__c_LocalizedText_indet)
+    if (SOPC_STATUS_OK == status && browse_treatment_result_bs__p_DisplayName != constants__c_LocalizedText_indet)
     {
         status = SOPC_LocalizedText_Copy(&refDesc->DisplayName, browse_treatment_result_bs__p_DisplayName);
-        assert(SOPC_STATUS_OK == status);
     }
     // Optional NodeClass
-    if (browse_treatment_result_bs__p_NodeClass != constants__c_NodeClass_indet)
+    if (SOPC_STATUS_OK == status && browse_treatment_result_bs__p_NodeClass != constants__c_NodeClass_indet)
     {
         bool res = util_NodeClass__B_to_C(browse_treatment_result_bs__p_NodeClass, &refDesc->NodeClass);
         assert(res);
     }
     // Optional TypeDefinition
-    if (browse_treatment_result_bs__p_TypeDefinition != constants__c_ExpandedNodeId_indet)
+    if (SOPC_STATUS_OK == status && browse_treatment_result_bs__p_TypeDefinition != constants__c_ExpandedNodeId_indet)
     {
         status = SOPC_ExpandedNodeId_Copy(&refDesc->TypeDefinition, browse_treatment_result_bs__p_TypeDefinition);
-        assert(SOPC_STATUS_OK == status);
     }
-    nbReferences = browse_treatment_result_bs__p_refIndex;
+
+    if (SOPC_STATUS_OK == status)
+    {
+        nbReferences = browse_treatment_result_bs__p_refIndex;
+        *browse_treatment_result_bs__p_alloc_failed = false;
+    }
+    else
+    {
+        *browse_treatment_result_bs__p_alloc_failed = true;
+        OpcUa_ReferenceDescription_Clear(refDesc);
+    }
 }
 
 void browse_treatment_result_bs__unused_browse_view(

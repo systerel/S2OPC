@@ -185,7 +185,9 @@ ABSTRACT_CONSTANTS
     t_BrowseResultReferences,
     t_timer_id,
     t_IndexRange,
-    t_ContinuationPoint
+    t_ContinuationPoint,
+
+    conv_ExpandedNodeId_NodeId
 
 PROPERTIES
     k_n_read_resp_max : NAT &
@@ -388,7 +390,9 @@ PROPERTIES
 
     t_ContinuationPoint <: t_ContinuationPoint_i &
     c_ContinuationPoint_indet : t_ContinuationPoint_i &
-    c_ContinuationPoint_indet /: t_ContinuationPoint
+    c_ContinuationPoint_indet /: t_ContinuationPoint &
+
+    conv_ExpandedNodeId_NodeId : t_ExpandedNodeId +-> t_NodeId
 
 OPERATIONS
 
@@ -454,7 +458,12 @@ OPERATIONS
         p_expnid : t_ExpandedNodeId
     THEN
         p_local_server, p_nid :(p_local_server : BOOL &
-                                p_nid : t_NodeId_i)
+                                p_nid : t_NodeId_i &
+                                (p_local_server = TRUE =>
+                                    p_nid = conv_ExpandedNodeId_NodeId(p_expnid)) &
+                                (p_local_server = FALSE =>
+                                    p_nid = c_NodeId_indet)
+                               )
     END
     ;
 

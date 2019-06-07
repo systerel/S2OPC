@@ -762,7 +762,8 @@ OPERATIONS
         p_node : t_Node_i &
         p_node : t_Node &
         p_ref_index : NAT &
-        p_ref_index : t_RefIndex
+        p_ref_index : t_RefIndex &
+        Node_RefIndexEnd(p_node) >= p_ref_index
     THEN
         p_ref :(p_ref : t_Reference_i &
                 p_ref = RefIndex_Reference(p_node |-> p_ref_index))

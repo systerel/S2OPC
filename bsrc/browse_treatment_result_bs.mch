@@ -113,7 +113,7 @@ OPERATIONS
     END
     ;
 
-    setall_browse_result_reference_at (p_refIndex, p_refTypeId, p_isForward, p_NodeId, p_BrowseName, p_DisplayName, p_NodeClass, p_TypeDefinition) =
+    p_alloc_failed <-- setall_browse_result_reference_at (p_refIndex, p_refTypeId, p_isForward, p_NodeId, p_BrowseName, p_DisplayName, p_NodeClass, p_TypeDefinition) =
     PRE
         isBrowseResultAllocated = TRUE &
         p_refIndex : NAT &
@@ -129,14 +129,19 @@ OPERATIONS
         p_NodeClass : t_NodeClass_i &
         p_TypeDefinition : t_ExpandedNodeId_i
     THEN
-        out_BrowseResult_ReferenceTypeId ( p_refIndex ) := p_refTypeId ||
-        out_BrowseResult_isForward ( p_refIndex ) := p_isForward ||
-        out_BrowseResult_NodeId ( p_refIndex ) := p_NodeId ||
-        out_BrowseResult_BrowseName ( p_refIndex ) := p_BrowseName ||
-        out_BrowseResult_DisplayName ( p_refIndex ) := p_DisplayName ||
-        out_BrowseResult_NodeClass ( p_refIndex ) := p_NodeClass ||
-        out_BrowseResult_TypeDefinition ( p_refIndex ) := p_TypeDefinition ||
-        out_BrowseResult_nb_References := p_refIndex
+        CHOICE
+            p_alloc_failed := TRUE ||
+            out_BrowseResult_ReferenceTypeId ( p_refIndex ) := p_refTypeId ||
+            out_BrowseResult_isForward ( p_refIndex ) := p_isForward ||
+            out_BrowseResult_NodeId ( p_refIndex ) := p_NodeId ||
+            out_BrowseResult_BrowseName ( p_refIndex ) := p_BrowseName ||
+            out_BrowseResult_DisplayName ( p_refIndex ) := p_DisplayName ||
+            out_BrowseResult_NodeClass ( p_refIndex ) := p_NodeClass ||
+            out_BrowseResult_TypeDefinition ( p_refIndex ) := p_TypeDefinition ||
+            out_BrowseResult_nb_References := p_refIndex
+        OR
+            p_alloc_failed := FALSE
+        END
     END
     ;
 
