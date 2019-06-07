@@ -16,3 +16,4 @@ the legal rights to contribute.
 * matclab <mathieu@clabaut.net>
 * Matthieu Archez <matthieu.archez@systerel.fr>
 * Simon Chollet <simon.chollet-stg@systerel.fr>
+* Kevin P <kevin.phouratsamay-stg@systerel.fr>
