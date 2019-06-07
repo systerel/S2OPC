@@ -113,8 +113,10 @@ START_TEST(test_sockets)
     uint32_t clientSocketIdx = 0;
 
     SOPC_Buffer* sendBuffer = SOPC_Buffer_Create(1000);
+    ck_assert_ptr_nonnull(sendBuffer);
     SOPC_Buffer* receivedBuffer = NULL;
     SOPC_Buffer* accBuffer = SOPC_Buffer_Create(1000);
+    ck_assert_ptr_nonnull(accBuffer);
     uint32_t idx = 0;
     uint8_t byte = 0;
     uint32_t receivedBytes = 0;
@@ -219,6 +221,7 @@ START_TEST(test_sockets)
 
     /* SERVER SIDE: send a msg buffer through connection */
     sendBuffer = SOPC_Buffer_Create(1000);
+    ck_assert_ptr_nonnull(sendBuffer);
     SOPC_Buffer_Reset(accBuffer);
 
     for (idx = 0; idx < 1000; idx++)
@@ -264,7 +267,12 @@ START_TEST(test_sockets)
     /* CLIENT SIDE: send a msg buffer through connection with a length greater than maximum message size
      * => the socket layer shall provide it in several buffers  */
     sendBuffer = SOPC_Buffer_Create(2 * SOPC_MAX_MESSAGE_LENGTH);
+    ck_assert_ptr_nonnull(sendBuffer);
+    // Use a copy of buffer to compare with result to avoid byte-to-byte comparison on long length buffer
+    SOPC_Buffer* sendBufferCopy = SOPC_Buffer_Create(2 * SOPC_MAX_MESSAGE_LENGTH);
+    ck_assert_ptr_nonnull(sendBufferCopy);
     accBuffer = SOPC_Buffer_Create(2 * SOPC_MAX_MESSAGE_LENGTH);
+    ck_assert_ptr_nonnull(accBuffer);
 
     for (idx = 0; idx < 2 * SOPC_MAX_MESSAGE_LENGTH; idx++)
     {
@@ -272,6 +280,8 @@ START_TEST(test_sockets)
         status = SOPC_Buffer_Write(sendBuffer, &byte, 1);
         ck_assert(SOPC_STATUS_OK == status);
     }
+    status = SOPC_Buffer_Copy(sendBufferCopy, sendBuffer);
+    ck_assert(SOPC_STATUS_OK == status);
     SOPC_Sockets_EnqueueEvent(SOCKET_WRITE, clientSocketIdx, (void*) sendBuffer, 0);
     sendBuffer = NULL; // deallocated by Socket event manager
 
@@ -300,13 +310,9 @@ START_TEST(test_sockets)
     ck_assert(SOPC_STATUS_OK == status);
 
     // Check acc buffer content
-    for (idx = 0; idx < 2 * SOPC_MAX_MESSAGE_LENGTH; idx++)
-    {
-        status = SOPC_Buffer_Read(&byte, accBuffer, 1);
-        ck_assert(SOPC_STATUS_OK == status);
-        ck_assert(byte == (idx % 256));
-    }
-
+    int compareResult = memcmp(sendBufferCopy->data, accBuffer->data, 2 * SOPC_MAX_MESSAGE_LENGTH);
+    ck_assert_int_eq(0, compareResult);
+    SOPC_Buffer_Delete(sendBufferCopy);
     SOPC_Buffer_Delete(accBuffer);
 
     /* CLIENT SIDE: receive a msg buffer through connection */
