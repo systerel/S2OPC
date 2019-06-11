@@ -24,6 +24,7 @@
 #include <stdio.h> /* stdlib includes */
 #include <stdlib.h>
 #include <string.h>
+#include <sys/time.h>
 #include <time.h>
 
 #include "sopc_builtintypes.h"
@@ -39,140 +40,104 @@
 
 /* Private time api */
 
-static SOPC_TimeReference gGlobalTimeReference = 0; // SOPC ticks
-static const char* INITIAL_TIME = __TIME__;         // Initial time set to build value
-static const char* INITIAL_DATE = __DATE__;
-static char gBuffer[16] = {0};
+#define SECOND_TO_100NS ((uint64_t) 10000000)
 
-#define ONE_DAY (86400)
-#define ONE_HOUR (3600)
-#define ONE_MINUTE (60)
+/* Number of ticks since FreeRTOS' EPOCH, which is 01/01/1970 00:00:00 UTC.
+ * There are configTICK_RATE_HZ per second.
+ */
+static uint64_t gGlobalTimeReference = 0;
 
 // Called if reference tick = 0
 static void P_TIME_vSetInitialDateToBuild(void)
 {
-    uint64_t wIter = 0;
-    uint64_t today_month = 1;
-    uint64_t today_year = 1970;
-    uint64_t today_day = 1;
-    uint64_t today_hour = 0;
-    uint64_t today_minutes = 0;
-    uint64_t today_seconds = 0;
-    uint64_t nb_years = 0;
-    uint64_t nb_leap_years = 0;
-    uint64_t A_ = 0;
-    uint64_t B_ = 0;
-    uint64_t C_ = 0;
-    uint64_t D_ = 0;
-    char* ptrMonth = NULL;
-    char* ptrDay = NULL;
-    char* ptrYear = NULL;
-    char* ptrH = NULL;
-    char* ptrM = NULL;
-    char* ptrS = NULL;
-
     // Get today date numerics values
+    struct tm today = {};
+    static char buffer[16] = {0};
 
-    sprintf(gBuffer, "%s", INITIAL_DATE);
-    ptrMonth = strtok(gBuffer, " ");
-    ptrDay = strtok(NULL, " ");
-    ptrYear = strtok(NULL, " ");
+    // Initial date set to build value, always "MMM DD YYYY",
+    // DD is left padded with a space if it is less than 10.
+    sprintf(buffer, "%s", __DATE__);
+    buffer[3] = '\0';
+    buffer[6] = '\0';
+    char* ptrMonth = buffer;
+    char* ptrDay = &buffer[4];
+    char* ptrYear = &buffer[7];
 
     if (strcmp(ptrMonth, "Jan") == 0)
-        today_month = 1;
-    if (strcmp(ptrMonth, "Feb") == 0)
-        today_month = 2;
-    if (strcmp(ptrMonth, "Mar") == 0)
-        today_month = 3;
-    if (strcmp(ptrMonth, "Apr") == 0)
-        today_month = 4;
-    if (strcmp(ptrMonth, "May") == 0)
-        today_month = 5;
-    if (strcmp(ptrMonth, "Jun") == 0)
-        today_month = 6;
-    if (strcmp(ptrMonth, "Jul") == 0)
-        today_month = 7;
-    if (strcmp(ptrMonth, "Aug") == 0)
-        today_month = 8;
-    if (strcmp(ptrMonth, "Sep") == 0)
-        today_month = 9;
-    if (strcmp(ptrMonth, "Oct") == 0)
-        today_month = 10;
-    if (strcmp(ptrMonth, "Nov") == 0)
-        today_month = 11;
-    if (strcmp(ptrMonth, "Dec") == 0)
-        today_month = 12;
-
-    today_year = atoi(ptrYear);
-    today_day = atoi(ptrDay);
-
-    sprintf(gBuffer, "%s", INITIAL_TIME);
-    ptrH = strtok(gBuffer, ":");
-    ptrM = strtok(NULL, ":");
-    ptrS = strtok(NULL, ":");
-
-    today_hour = (atoi(ptrH));
-    today_minutes = (atoi(ptrM));
-    today_seconds = (atoi(ptrS));
-
-    // Compute nb seconds for nb years since 1970 except current day.
-    // February = 28 j in this first compute.
-    nb_years = today_year - 1970;
-    A_ = (nb_years) *365 * ONE_DAY;
-
-    // Compute nb leap years
-    for (wIter = 1970; wIter < (1970 + nb_years); wIter++)
     {
-        if ((((wIter % 4) == 0) && ((wIter % 100) != 0)) || ((wIter % 400) == 0))
-        {
-            nb_leap_years += 1;
-        }
+        today.tm_mon = 0; /* Month starts from 0 in C99 */
+    }
+    else if (strcmp(ptrMonth, "Feb") == 0)
+    {
+        today.tm_mon = 1;
+    }
+    else if (strcmp(ptrMonth, "Mar") == 0)
+    {
+        today.tm_mon = 2;
+    }
+    else if (strcmp(ptrMonth, "Apr") == 0)
+    {
+        today.tm_mon = 3;
+    }
+    else if (strcmp(ptrMonth, "May") == 0)
+    {
+        today.tm_mon = 4;
+    }
+    else if (strcmp(ptrMonth, "Jun") == 0)
+    {
+        today.tm_mon = 5;
+    }
+    else if (strcmp(ptrMonth, "Jul") == 0)
+    {
+        today.tm_mon = 6;
+    }
+    else if (strcmp(ptrMonth, "Aug") == 0)
+    {
+        today.tm_mon = 7;
+    }
+    else if (strcmp(ptrMonth, "Sep") == 0)
+    {
+        today.tm_mon = 8;
+    }
+    else if (strcmp(ptrMonth, "Oct") == 0)
+    {
+        today.tm_mon = 9;
+    }
+    else if (strcmp(ptrMonth, "Nov") == 0)
+    {
+        today.tm_mon = 10;
+    }
+    else if (strcmp(ptrMonth, "Dec") == 0)
+    {
+        today.tm_mon = 11;
+    }
+    else
+    {
+        assert(false); /* Could not parse compilation date */
     }
 
-    D_ = nb_leap_years * ONE_DAY;
+    today.tm_year = atoi(ptrYear) - 1900; /* C99 specifies that tm_year begins in 1900 */
+    today.tm_mday = atoi(ptrDay);
 
-    // Compute nb s between today and 1 january of this year, except today.
-    for (wIter = 1; wIter <= (today_month - 1); wIter++)
-    {
-        switch (wIter)
-        {
-        case 1:
-        case 3:
-        case 5:
-        case 7:
-        case 8:
-        case 10:
-        case 12:
-            B_ += 31;
-            break;
+    // Initial time set to build value, always "HH:MM:SS",
+    sprintf(buffer, "%s", __TIME__);
+    char* ptrH = strtok(buffer, ":");
+    char* ptrM = strtok(NULL, ":");
+    char* ptrS = strtok(NULL, ":");
 
-        case 2:
-            if ((((today_year % 4) == 0) && ((today_year % 100) != 0)) || ((today_year % 400) == 0))
-            {
-                B_ += 29;
-            }
-            else
-            {
-                B_ += 28;
-            }
-            break;
+    today.tm_hour = (atoi(ptrH));
+    today.tm_min = (atoi(ptrM));
+    today.tm_sec = (atoi(ptrS));
 
-        case 4:
-        case 6:
-        case 9:
-        case 11:
-            B_ += 30;
-            break;
-        }
-    }
-
-    B_ = (B_ + (today_day - 1)) * ONE_DAY;
-
-    // Compute nb s since 00:00 of today
-    C_ = today_hour * ONE_HOUR + today_minutes * ONE_MINUTE + today_seconds;
+    // Newlib uses the same time_t precision and reference as Linux.
+    // Compute nb seconds since Unix EPOCH.
+    time_t now = mktime(&today);
 
     // Set nb ticks
-    gGlobalTimeReference = ((D_ + B_ + C_ + A_)) * ((uint64_t) configTICK_RATE_HZ);
+    if (0 <= now)
+    {
+        gGlobalTimeReference = ((uint64_t) now) * ((uint64_t) configTICK_RATE_HZ);
+    }
 }
 
 // Hook added in order to use 64 bit tick counter. Used by FreeRTOS
@@ -205,29 +170,53 @@ static uint64_t P_TIME_Get64BitTickCount(void)
 
 /* Public s2opc api */
 
-SOPC_DateTime SOPC_Time_GetCurrentTimeUTC()
+int64_t SOPC_Time_GetCurrentTimeUTC()
 {
-    int64_t dt = 0;
-    int64_t currentTimeInS = 0;
-    int64_t currentTimeIn100NS = 0;
-    uint64_t wTimeInTicks = 0;
-    // Get tick count
-    wTimeInTicks = P_TIME_Get64BitTickCount();
-    // Convert to 100NS and S. Warning on type used, intermediate operation on uint64_t
-    currentTimeInS = (int64_t)(((uint64_t) wTimeInTicks * (uint64_t) 1) / (uint64_t) configTICK_RATE_HZ);
+    uint64_t wTimeInTicks = P_TIME_Get64BitTickCount();
+    int64_t datetime = 0;
+    uint64_t currentTimeInS = 0;
+    uint64_t currentTimeFrac100NS = 0;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
-    currentTimeIn100NS = (int64_t)((((uint64_t) wTimeInTicks * (uint64_t) 10000000) / (uint64_t) configTICK_RATE_HZ) %
-                                   (uint64_t) 10000000);
+    // Convert to seconds and 100ns fractional part.
+    // Warning on type used, intermediate operation on uint64_t.
+    currentTimeInS = wTimeInTicks / (uint64_t) configTICK_RATE_HZ;
 
-    // Check for overflow
-    if ((SOPC_Time_FromTimeT(currentTimeInS, &dt) != SOPC_STATUS_OK) || (INT64_MAX - currentTimeIn100NS < dt))
+    currentTimeFrac100NS = ((wTimeInTicks * SECOND_TO_100NS) / (uint64_t) configTICK_RATE_HZ) % SECOND_TO_100NS;
+
+    // Check for overflow. Note that currentTimeFrac100NS cannot overflow.
+    // Problem: we don't know the limits of time_t, and they are not #defined.
+    time_t currentTimeT = 0;
+    int64_t limit = 0;
+    switch (sizeof(time_t))
+    {
+    case 4:
+        /* Assumes an int32_t */
+        limit = INT32_MAX;
+        break;
+    case 8:
+        /* Assumes an int64_t */
+        limit = INT64_MAX;
+        break;
+    default:
+        return INT64_MAX;
+    }
+
+    if (currentTimeInS > limit)
+    {
+        return INT64_MAX;
+    }
+
+    currentTimeT = (time_t) currentTimeInS;
+    status = SOPC_Time_FromTimeT(currentTimeT, &datetime);
+    if (SOPC_STATUS_OK != status)
     {
         // Time overflow...
         return INT64_MAX;
     }
 
-    dt += currentTimeIn100NS;
-    return dt;
+    datetime += currentTimeFrac100NS;
+    return datetime;
 }
 
 // Return current ms since last power on
@@ -237,7 +226,7 @@ SOPC_TimeReference SOPC_TimeReference_GetCurrent()
     uint64_t wTimeInTicks = 0;
 
     wTimeInTicks = P_TIME_Get64BitTickCount();
-    currentTimeInMs = ((uint64_t) wTimeInTicks * (uint64_t) 1000) / (uint64_t) configTICK_RATE_HZ;
+    currentTimeInMs = (wTimeInTicks * (uint64_t) 1000) / (uint64_t) configTICK_RATE_HZ;
 
     return currentTimeInMs;
 }
@@ -251,3 +240,15 @@ SOPC_ReturnStatus SOPC_Time_Breakdown_UTC(time_t t, struct tm* tm)
 {
     return (gmtime_r(&t, tm) == NULL) ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
 }
+
+/* TODO: assert that mktime works correctly on the targeted platform
+ * struct tm tmc = {.tm_year = 119,
+ *                  .tm_mon = 5, // in 0-11
+ *                  .tm_mday = 11,
+ *                  .tm_hour = 15,
+ *                  .tm_min = 50,
+ *                  .tm_sec = 42,
+ *                  .tm_isdst = 0};
+ * time_t nsec = mktime(&tmc);
+ * assert(1560268242 == nsec);
+ */
