@@ -27,7 +27,8 @@ DEFINITIONS
     d_variables ==
     browseResult_to_iterate,
     browseResult_iterated,
-    nb_browseResult_max_refs
+    nb_browseResult_max_refs,
+    nextBrowseResult
     ;
 
     d_inv ==
@@ -36,7 +37,8 @@ DEFINITIONS
     browseResult_to_iterate <: NAT1 &
     browseResult_iterated   <: NAT1 &
     browseResult_to_iterate /\ browseResult_iterated = {} &
-    nb_browseResult_max_refs = card(browseResult_to_iterate \/ browseResult_iterated)
+    nb_browseResult_max_refs = card(browseResult_to_iterate \/ browseResult_iterated) &
+    nextBrowseResult : NAT
     )
 
 ABSTRACT_VARIABLES
@@ -57,23 +59,21 @@ OPERATIONS
         browseResult_iterated    := {}        ||
         browseResult_to_iterate  := 1..p_nb_browseResult_max_refs ||
         nb_browseResult_max_refs := p_nb_browseResult_max_refs ||
+        nextBrowseResult         := 0 ||
         p_continue               := bool(p_nb_browseResult_max_refs > 0)
     END
     ;
 
     p_continue, p_browseResultIdx <-- continue_iter_browseResult =
     PRE
-        browseResult_to_iterate /= {}
+        nb_browseResult_max_refs > 0 &
+        nextBrowseResult <= nb_browseResult_max_refs
     THEN
-        ANY l_browseResult WHERE
-            l_browseResult : NAT &
-            l_browseResult : browseResult_to_iterate
-        THEN
-            browseResult_iterated   := browseResult_iterated   \/ {l_browseResult} ||
-            browseResult_to_iterate := browseResult_to_iterate -  {l_browseResult} ||
-            p_browseResultIdx        := l_browseResult                               ||
-            p_continue               := bool(browseResult_to_iterate /= {l_browseResult})
-        END
+        browseResult_iterated   := 1 .. nextBrowseResult ||
+        browseResult_to_iterate := nextBrowseResult + 1 .. nb_browseResult_max_refs ||
+        p_browseResultIdx       := nextBrowseResult ||
+        nextBrowseResult        := nextBrowseResult + 1 ||
+        p_continue              := bool(nextBrowseResult + 1 /= nb_browseResult_max_refs)
     END
 
 END

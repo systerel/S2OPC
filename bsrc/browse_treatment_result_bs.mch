@@ -116,7 +116,7 @@ OPERATIONS
     p_alloc_failed <-- setall_browse_result_reference_at (p_refIndex, p_refTypeId, p_isForward, p_NodeId, p_BrowseName, p_DisplayName, p_NodeClass, p_TypeDefinition) =
     PRE
         isBrowseResultAllocated = TRUE &
-        p_refIndex : NAT &
+        p_refIndex : NAT1 &
         p_refIndex = out_BrowseResult_nb_References + 1 & /* Next unused index */
         p_refIndex <= max_nb_references &
         p_refTypeId : t_NodeId_i &
