@@ -212,7 +212,7 @@ void address_space_typing_bs__is_valid_ReferenceTypeId(const constants__t_NodeId
 
         if (node_found)
         {
-            // Starting to check if direct parent is researched parent
+            // Check node has expected class
             *address_space_typing_bs__bres = OpcUa_NodeClass_ReferenceType == node->node_class;
         }
     }
