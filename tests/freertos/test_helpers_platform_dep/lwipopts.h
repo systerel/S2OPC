@@ -30,15 +30,20 @@
 /**
  * LWIP_NETCONN==1: Enable Netconn API (require to use api_lib.c)
  */
-#define LWIP_NETCONN 1
+#define LWIP_NETCONN 0
 /**
  * LWIP_SOCKET==1: Enable Socket API (require to use sockets.c)
  */
+#define LWIP_IGMP 1
 #define LWIP_SOCKET 1
 #define LWIP_DNS 1
 #define LWIP_IPV6 1
 #define LWIP_COMPAT_SOCKETS 2
 #define LWIP_TIMEVAL_PRIVATE 0
+#define LWIP_DHCP 0
+#define SO_REUSE 1
+#define LWIP_RAW 1
+//#define LWIP_MPU_COMPATIBLE 1
 
 /**
  * LWIP_SO_RCVTIMEO==1: Enable receive timeout for sockets/netconns and
@@ -167,6 +172,9 @@
 #define LWIP_ICMP 1
 #endif
 
+#if !defined LWIP_RAW
+#define LWIP_RAW 1
+#endif
 /* ---------- DHCP options ---------- */
 /* Define LWIP_DHCP to 1 if you want DHCP configuration of
    interfaces. DHCP is not implemented in lwIP 0.5.1, however, so

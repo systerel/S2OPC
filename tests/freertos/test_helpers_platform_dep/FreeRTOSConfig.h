@@ -43,7 +43,9 @@
 #define configCPU_CLOCK_HZ (SystemCoreClock)
 #define configTICK_RATE_HZ ((TickType_t) 1000)
 #define configMAX_PRIORITIES 5
-#define configMINIMAL_STACK_SIZE ((unsigned short) 4096)
+#define configMINIMAL_STACK_SIZE_S2OPC ((unsigned short) 4096)
+#define configMINIMAL_STACK_SIZE ((unsigned short) 64)
+#define configMINIMAL_STACK_SIZE_TIMER ((unsigned short) 128)
 #define configMAX_TASK_NAME_LEN 20
 #define configUSE_16_BIT_TICKS 0
 #define configIDLE_SHOULD_YIELD 1
@@ -55,38 +57,41 @@
 #define configQUEUE_REGISTRY_SIZE 8
 #define configUSE_QUEUE_SETS 0
 #define configUSE_TIME_SLICING 0
-#define configUSE_NEWLIB_REENTRANT 1
-#define configENABLE_BACKWARD_COMPATIBILITY 1
+#define configUSE_NEWLIB_REENTRANT 0
+#define configENABLE_BACKWARD_COMPATIBILITY 0
 #define configNUM_THREAD_LOCAL_STORAGE_POINTERS 5
 #define configUSE_APPLICATION_TASK_TAG 0
 
 /* Memory allocation related definitions. */
 #define configSUPPORT_STATIC_ALLOCATION 0
 #define configSUPPORT_DYNAMIC_ALLOCATION 1
-#define configTOTAL_HEAP_SIZE ((size_t)(262144))
+#define configTOTAL_HEAP_SIZE ((size_t)(262144 / 2))
 #define configAPPLICATION_ALLOCATED_HEAP 0
 
 /* Hook function related definitions. */
 #define configUSE_IDLE_HOOK 0
 #define configUSE_TICK_HOOK 1
 #define configCHECK_FOR_STACK_OVERFLOW 1
-#define configUSE_MALLOC_FAILED_HOOK 0
+#define configUSE_MALLOC_FAILED_HOOK 1
 #define configUSE_DAEMON_TASK_STARTUP_HOOK 0
 
 /* Run time and task stats gathering related definitions. */
-#define configGENERATE_RUN_TIME_STATS 0
+#define configGENERATE_RUN_TIME_STATS 1
 #define configUSE_TRACE_FACILITY 1
 #define configUSE_STATS_FORMATTING_FUNCTIONS 0
+#define configRECORD_STACK_HIGH_ADDRESS 1
 
 /* Co-routine related definitions. */
 #define configUSE_CO_ROUTINES 0
 #define configMAX_CO_ROUTINE_PRIORITIES 2
 
+#define configFRTOS_MEMORY_SCHEME 4
+#define configINCLUDE_FREERTOS_TASK_C_ADDITIONS_H 1
 /* Software timer related definitions. */
 #define configUSE_TIMERS 1
 #define configTIMER_TASK_PRIORITY (configMAX_PRIORITIES - 1)
 #define configTIMER_QUEUE_LENGTH 10
-#define configTIMER_TASK_STACK_DEPTH (configMINIMAL_STACK_SIZE * 2)
+#define configTIMER_TASK_STACK_DEPTH (configMINIMAL_STACK_SIZE_TIMER * 2)
 
 /* Define to trap errors during development. */
 #define configASSERT(x)           \
@@ -144,4 +149,10 @@ standard names. */
 #define xPortPendSVHandler PendSV_Handler
 #define xPortSysTickHandler SysTick_Handler
 
+#if (configGENERATE_RUN_TIME_STATS == 1)
+extern void RTOS_portCONFIGURE_TIMER_FOR_RUN_TIME_STATS(void);
+#define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS() RTOS_portCONFIGURE_TIMER_FOR_RUN_TIME_STATS()
+extern uint32_t RTOS_portGET_RUN_TIME_COUNTER_VALUE(void);
+#define portGET_RUN_TIME_COUNTER_VALUE() RTOS_portGET_RUN_TIME_COUNTER_VALUE()
+#endif
 #endif /* FREERTOS_CONFIG_H */

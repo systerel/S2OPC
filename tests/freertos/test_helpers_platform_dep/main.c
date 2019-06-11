@@ -18,66 +18,77 @@
  */
 
 #include <stdio.h>
-#include "FreeRTOS.h"
-#include "MIMXRT1064.h"
+
+#include "lwip/opt.h"
+#include "lwip/tcpip.h"
+
 #include "board.h"
 #include "clock_config.h"
-#include "fsl_debug_console.h"
+#include "ethernetif.h"
+#include "netif/ethernet.h"
 #include "peripherals.h"
 #include "pin_mux.h"
 
-/* FreeRTOS kernel includes. */
 #include "FreeRTOS.h"
+#include "MIMXRT1064.h"
 #include "queue.h"
 #include "task.h"
 #include "timers.h"
 
-/* Freescale includes. */
-#include "board.h"
 #include "fsl_debug_console.h"
 #include "fsl_device_registers.h"
+#include "fsl_gpio.h"
+#include "fsl_iomuxc.h"
+#include "fsl_qtmr.h"
 
-#include "clock_config.h"
-#include "pin_mux.h"
-
-#include "p_synchronisation.h"
 #include "sopc_mutexes.h"
+#include "sopc_threads.h"
 
 #include "FreeRTOSTest.h"
 
+//#include "p_ethernet_if.h"
+//#include "p_logsrv.h"
+
 Condition* handleCondition;
 tUtilsList list;
+// tLogSrvWks* pLogSrv;
 
 int main(void)
 {
-    /* Init board hardware. */
-    BOARD_InitBootPins();
-    BOARD_InitBootClocks();
-    BOARD_InitBootPeripherals();
-    /* Init FSL debug console. */
+    BOARD_ConfigMPU();
+    BOARD_InitPins();
+    BOARD_BootClockRUN();
     BOARD_InitDebugConsole();
+    BOARD_InitBootPeripherals();
 
-    /*memset(&list,0,sizeof(tUtilsList));
+    // P_ETHERNET_IF_Initialize();
 
-    P_UTILS_LIST_Init(&list,4);
+    // p = P_LOG_SRV_CreateAndStart(80,2);
+    // gpLogServ = P_LOG_SRV_CreateAndStart(80,4);
 
-    P_UTILS_LIST_AddElt(&list,1,0,0,0);
-    P_UTILS_LIST_AddElt(&list,2,0,0,0);
-    P_UTILS_LIST_AddElt(&list,3,0,0,0);
+    // memset(&list,0,sizeof(tUtilsList));
 
-    P_UTILS_LIST_RemoveElt(&list,1,0,0);
-    P_UTILS_LIST_RemoveElt(&list,2,0,0);
-    P_UTILS_LIST_RemoveElt(&list,3,0,0);
+    // P_UTILS_LIST_Init(&list,4);
 
-    P_UTILS_LIST_AddElt(&list,4,0,0,0);
+    //  P_UTILS_LIST_AddElt(&list,1,0,0,0);
+    // P_UTILS_LIST_AddElt(&list,2,0,0,0);
+    //  P_UTILS_LIST_AddElt(&list,3,0,0,0);
+    //
+    // P_UTILS_LIST_RemoveElt(&list,1,0,0);
+    //  P_UTILS_LIST_RemoveElt(&list,2,0,0);
+    //  P_UTILS_LIST_RemoveElt(&list,3,0,0);
 
-    P_UTILS_LIST_RemoveElt(&list,4,0,0);
+    //  P_UTILS_LIST_AddElt(&list,4,0,0,0);
 
-    P_UTILS_LIST_AddElt(&list,4,0,0,0);
+    //  P_UTILS_LIST_RemoveElt(&list,4,0,0);
 
-    P_UTILS_LIST_RemoveElt(&list,4,0,0);
+    //  P_UTILS_LIST_AddElt(&list,4,0,0,0);
 
-    P_UTILS_LIST_DeInit(&list);*/
+    //  P_UTILS_LIST_RemoveElt(&list,4,0,0);
+
+    // P_UTILS_LIST_DeInit(&list);
+
+    // pLogSrv = P_LOG_SRV_CreateAndStart(60,2);
 
     handleCondition = Condition_Create();
 

@@ -45,12 +45,27 @@ static Thread p1 = NULL;
 static Thread p2 = NULL;
 static Thread p3 = NULL;
 static Thread p4 = NULL;
+static Thread pX = NULL;
 
 static void* cbS2OPC_Thread_p4(void* ptr)
 {
     SOPC_ReturnStatus status;
     Condition* pv = (Condition*) ptr;
     unsigned short int cpt = 0;
+
+    Mutex_Lock(&m);
+    sprintf(sBuffer, "$$$$ %2X -  Sub task 4   signal all well started : current time = %lu\r\n",
+            xTaskGetCurrentTaskHandle(), xTaskGetTickCount());
+    PRINTF(sBuffer);
+    Mutex_Unlock(&m);
+
+    status = Condition_SignalAll(pv);
+
+    Mutex_Lock(&m);
+    sprintf(sBuffer, "$$$$ %2X -  Sub task 1  signal all well started status = %lu : current time = %lu\r\n",
+            xTaskGetCurrentTaskHandle(), status, xTaskGetTickCount());
+    PRINTF(sBuffer);
+    Mutex_Unlock(&m);
 
     for (cpt = 0; cpt < 10; cpt++)
     {
@@ -90,20 +105,13 @@ static void* cbS2OPC_Thread_p4(void* ptr)
         vTaskDelay(1000);
     }
 
-    status = Condition_SignalAll(pv);
-
-    Mutex_Lock(&m);
-    sprintf(sBuffer, "$$$$ %2X -  Sub task 4  signal all result = %lu : current time = %lu\r\n",
-            xTaskGetCurrentTaskHandle(), status, xTaskGetTickCount());
-    PRINTF(sBuffer);
-    Mutex_Unlock(&m);
-
     return NULL;
 }
 
 static void* cbS2OPC_Thread_p3(void* ptr)
 {
     SOPC_ReturnStatus status;
+    Condition* pv = (Condition*) ptr;
     unsigned short int cpt = 0;
 
     for (cpt = 0; cpt < 10; cpt++)
@@ -123,6 +131,10 @@ static void* cbS2OPC_Thread_p3(void* ptr)
     Mutex_Unlock(&m);
 
     status = SOPC_Thread_Join(p1);
+    if (status == 0)
+    {
+        p1 = NULL;
+    }
 
     Mutex_Lock(&m);
     sprintf(sBuffer, "$$$$ %2X -  Sub task 3  try to joins Sub task 1 result = %lu : current time = %lu\r\n",
@@ -150,11 +162,16 @@ static void* cbS2OPC_Thread_p3(void* ptr)
     return NULL;
 }
 
+static void* cbS2OPC_Thread_pX(void* ptr)
+{
+    return NULL;
+}
+
 static void* cbS2OPC_Thread_p2(void* ptr)
 {
     unsigned short int cpt = 0;
-
-    SOPC_ReturnStatus status = SOPC_Thread_Create(&p3, cbS2OPC_Thread_p3, NULL);
+    Condition* pv = (Condition*) ptr;
+    SOPC_ReturnStatus status = SOPC_Thread_Create(&p3, cbS2OPC_Thread_p3, ptr);
 
     Mutex_Lock(&m);
     sprintf(sBuffer, "$$$$ %2X -  Sub task2 creates Sub task 3 created result = %lu : current time = %lu\r\n",
@@ -200,6 +217,10 @@ static void* cbS2OPC_Thread_p1(void* ptr)
 
     for (;;)
     {
+        status = SOPC_Thread_Create(&pX, cbS2OPC_Thread_pX, pv);
+        status = SOPC_Thread_Join(pX);
+        pX = NULL;
+
         Mutex_Lock(&m);
         sprintf(sBuffer, "$$$$ %2X -  main loop task 1 working : current time = %lu\r\n", xTaskGetCurrentTaskHandle(),
                 xTaskGetTickCount());
@@ -208,7 +229,7 @@ static void* cbS2OPC_Thread_p1(void* ptr)
 
         SOPC_Sleep(1000);
 
-        status = SOPC_Thread_Create(&p2, cbS2OPC_Thread_p2, NULL);
+        status = SOPC_Thread_Create(&p2, cbS2OPC_Thread_p2, pv);
 
         Mutex_Lock(&m);
         sprintf(sBuffer, "$$$$ %2X -  Sub task 1 creates sub task 2 result = %lu : current time = %lu\r\n",
@@ -216,12 +237,25 @@ static void* cbS2OPC_Thread_p1(void* ptr)
         PRINTF(sBuffer);
         Mutex_Unlock(&m);
 
-        status = SOPC_Thread_Create(&p4, cbS2OPC_Thread_p4, pv);
+        Mutex_Lock(&m); // Test condition variable
+        {
+            status = SOPC_Thread_Create(&p4, cbS2OPC_Thread_p4, pv);
 
-        Mutex_Lock(&m);
-        sprintf(sBuffer, "$$$$ %2X -  Sub task 1 creates sub task 4 result = %lu : current time = %lu\r\n",
-                xTaskGetCurrentTaskHandle(), status, xTaskGetTickCount());
-        PRINTF(sBuffer);
+            sprintf(sBuffer, "$$$$ %2X -  Sub task 1 creates sub task 4 result = %lu : current time = %lu\r\n",
+                    xTaskGetCurrentTaskHandle(), status, xTaskGetTickCount());
+            PRINTF(sBuffer);
+
+            sprintf(sBuffer,
+                    "$$$$ %2X -  Sub task 1 go to wait signal from sub task 4 well started  : current time = %lu\r\n",
+                    xTaskGetCurrentTaskHandle(), xTaskGetTickCount());
+            PRINTF(sBuffer);
+
+            status = Mutex_UnlockAndWaitCond(pv, &m);
+
+            sprintf(sBuffer, "$$$$ %2X -  Sub task 1 wait signal from sub task 4 result = %lu : current time = %lu\r\n",
+                    xTaskGetCurrentTaskHandle(), status, xTaskGetTickCount());
+            PRINTF(sBuffer);
+        }
         Mutex_Unlock(&m);
 
         Mutex_Lock(&m);
@@ -238,16 +272,6 @@ static void* cbS2OPC_Thread_p1(void* ptr)
 
         Mutex_Lock(&m);
         sprintf(sBuffer, "$$$$ %2X -  Sub task 1 joins sub task 2 result = %lu : current time = %lu\r\n",
-                xTaskGetCurrentTaskHandle(), status, xTaskGetTickCount());
-        PRINTF(sBuffer);
-        Mutex_Unlock(&m);
-
-        Mutex_Lock(&m);
-        sprintf(sBuffer,
-                "$$$$ %2X -  Sub task 1 go to wait signal from sub task 4 result = %lu : current time = %lu\r\n",
-                xTaskGetCurrentTaskHandle(), status, xTaskGetTickCount());
-        status = Mutex_UnlockAndWaitCond(pv, &m);
-        sprintf(sBuffer, "$$$$ %2X -  Sub task 1 wait signal sub task 4 result = %lu : current time = %lu\r\n",
                 xTaskGetCurrentTaskHandle(), status, xTaskGetTickCount());
         PRINTF(sBuffer);
         Mutex_Unlock(&m);
