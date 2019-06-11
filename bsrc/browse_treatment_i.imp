@@ -225,7 +225,7 @@ LOCAL_OPERATIONS
             CHOICE
                 LET l_browseResultIdx BE
                     l_browseResultIdx = nextBrowseResult
-                IN                    
+                IN
                     p_alloc_failed := FALSE ||
                     /* Compatible reference, add it in a available reference index of the browse result */
                     browseResult_iterated   := 1 .. nextBrowseResult ||
@@ -260,32 +260,22 @@ LOCAL_OPERATIONS
                               Ref_HasTypeDefinition(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref))))
                         ELSE
                             out_BrowseResult_TypeDefinition (l_browseResultIdx) := c_ExpandedNodeId_indet
-                        END ||
-                        IF p_resultMask : mask_hasReferenceType THEN
-                            out_BrowseResult_ReferenceTypeId (l_browseResultIdx) := Reference_ReferenceType(p_ref)
-                        ELSE
-                            out_BrowseResult_ReferenceTypeId (l_browseResultIdx) := c_NodeId_indet
-                        END ||
-                        IF p_resultMask : mask_hasIsForward THEN
-                            out_BrowseResult_isForward (l_browseResultIdx) := Reference_IsForward(p_ref)
-                        ELSE
-                            out_BrowseResult_isForward (l_browseResultIdx) := FALSE
                         END
                     ELSE
                         out_BrowseResult_BrowseName (l_browseResultIdx) := c_QualifiedName_indet ||
                         out_BrowseResult_DisplayName (l_browseResultIdx) := c_LocalizedText_indet ||
                         out_BrowseResult_NodeClass (l_browseResultIdx) := c_NodeClass_indet ||
-                        out_BrowseResult_TypeDefinition (l_browseResultIdx) := c_ExpandedNodeId_indet ||
-                        IF p_resultMask : mask_hasReferenceType THEN
-                            out_BrowseResult_ReferenceTypeId (l_browseResultIdx) := Reference_ReferenceType(p_ref)
-                        ELSE
-                            out_BrowseResult_ReferenceTypeId (l_browseResultIdx) := c_NodeId_indet
-                        END ||
-                        IF p_resultMask : mask_hasIsForward THEN
-                            out_BrowseResult_isForward (l_browseResultIdx) := Reference_IsForward(p_ref)
-                        ELSE
-                            out_BrowseResult_isForward (l_browseResultIdx) := FALSE
-                        END
+                        out_BrowseResult_TypeDefinition (l_browseResultIdx) := c_ExpandedNodeId_indet
+                    END ||
+                    IF p_resultMask : mask_hasReferenceType THEN
+                        out_BrowseResult_ReferenceTypeId (l_browseResultIdx) := Reference_ReferenceType(p_ref)
+                    ELSE
+                        out_BrowseResult_ReferenceTypeId (l_browseResultIdx) := c_NodeId_indet
+                    END ||
+                    IF p_resultMask : mask_hasIsForward THEN
+                        out_BrowseResult_isForward (l_browseResultIdx) := Reference_IsForward(p_ref)
+                    ELSE
+                        out_BrowseResult_isForward (l_browseResultIdx) := FALSE
                     END
                 END
             OR
