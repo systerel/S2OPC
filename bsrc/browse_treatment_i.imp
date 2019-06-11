@@ -94,7 +94,7 @@ LOCAL_OPERATIONS
           (p_serviceStatusCode /= e_sc_ok =>
               p_toContinue = FALSE & p_nextIndex = 0) &
           (p_serviceStatusCode = e_sc_ok & p_toContinue = TRUE =>
-              p_nextIndex = p_max_nb_results)
+              p_nextIndex : p_startIndex + p_max_nb_results .. Node_RefIndexEnd(p_src_node))
        ) ||
         /* Use of BrowseResult iterator */
         browseResult_to_iterate,
@@ -306,13 +306,22 @@ OPERATIONS
             references_iterated   <: NAT &
             references_to_iterate /\ references_iterated = {} &
             next_reference_index : NAT &
-            card(references_to_iterate) = Node_RefIndexEnd(p_src_node) - p_nextIndex + 1 &
+            next_reference_index = p_nextIndex &
+            references_to_iterate = next_reference_index .. Node_RefIndexEnd(p_src_node) &
+            references_iterated = p_startIndex .. next_reference_index - 1 &
 
             /* Iteration on browse result stored references */
             browseResult_to_iterate <: NAT &
             browseResult_iterated   <: NAT &
             browseResult_to_iterate /\ browseResult_iterated = {} &
+            nb_browseResult_max_refs = p_max_nb_results &
             nb_browseResult_max_refs = card(browseResult_to_iterate \/ browseResult_iterated) &
+            /* Number of results is at least number of references iterated */
+            next_reference_index - p_startIndex >= card(browseResult_iterated) &
+            (l_continue_bri = FALSE & l_alloc_failed = FALSE =>
+                /* Number of results is maximum number of results in this case */
+                nb_browseResult_max_refs = card(browseResult_iterated)
+            ) &
 
             /* Mandatory defined part of browse result for iterated indexes */
             out_BrowseResult_ReferenceTypeId : browseResult_iterated --> t_NodeId &
