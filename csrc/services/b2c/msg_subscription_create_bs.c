@@ -86,7 +86,7 @@ void msg_subscription_create_bs__get_msg_create_subscription_req_params(
     t_bool* const msg_subscription_create_bs__publishEnabled)
 {
     OpcUa_CreateSubscriptionRequest* req = (OpcUa_CreateSubscriptionRequest*) msg_subscription_create_bs__p_req_msg;
-    *msg_subscription_create_bs__publishEnabled = req->PublishingEnabled;
+    *msg_subscription_create_bs__publishEnabled = util_SOPC_Boolean_to_B(req->PublishingEnabled);
 
     SOPC_InternalCommonCreateModifySubscription(
         req->RequestedPublishingInterval, req->RequestedLifetimeCount, req->RequestedMaxKeepAliveCount,

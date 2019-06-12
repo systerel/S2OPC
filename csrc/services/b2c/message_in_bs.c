@@ -245,6 +245,7 @@ void message_in_bs__read_activate_req_msg_identity_token(const constants__t_msg_
                                                          t_bool* const message_in_bs__p_valid_user_token,
                                                          constants__t_user_token_i* const message_in_bs__p_user_token)
 {
+    *message_in_bs__p_valid_user_token = false;
     OpcUa_ActivateSessionRequest* activateSessionReq = (OpcUa_ActivateSessionRequest*) message_in_bs__p_msg;
 
     if (activateSessionReq->UserIdentityToken.Length > 0)

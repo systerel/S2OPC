@@ -22,6 +22,7 @@
 #include "constants.h"
 #include "message_in_bs.h"
 #include "message_out_bs.h"
+#include "util_b2c.h"
 
 #include "opcua_statuscodes.h"
 
@@ -81,7 +82,7 @@ void msg_subscription_set_publishing_mode_bs__getall_msg_subscription_set_publis
     {
         *msg_subscription_set_publishing_mode_bs__p_nb_reqs = 0;
     }
-    *msg_subscription_set_publishing_mode_bs__p_pub_enabled = req->PublishingEnabled;
+    *msg_subscription_set_publishing_mode_bs__p_pub_enabled = util_SOPC_Boolean_to_B(req->PublishingEnabled);
 }
 
 void msg_subscription_set_publishing_mode_bs__setall_msg_subscription_set_publishing_mode_resp_at_index(
