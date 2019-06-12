@@ -256,7 +256,18 @@ void message_out_bs__encode_msg(const constants__t_msg_type_i message_out_bs__ms
     {
         *message_out_bs__buffer = (constants__t_byte_buffer_i) buffer;
 
-        SOPC_Logger_TraceDebug("Services: encoded output message type = '%s'", SOPC_EncodeableType_GetName(encType));
+        if (message_out_bs__msg_type == constants__e_msg_service_fault_resp)
+        {
+            SOPC_Logger_TraceDebug("Services: encoded output message type = '%s' with statusCode= '%X'",
+                                   SOPC_EncodeableType_GetName(encType),
+                                   ((OpcUa_ResponseHeader*) message_out_bs__msg_header)->ServiceResult);
+        }
+        else
+        {
+            // Note: no status in case of request and good status mandatory for not faulty response
+            SOPC_Logger_TraceDebug("Services: encoded output message type = '%s'",
+                                   SOPC_EncodeableType_GetName(encType));
+        }
     }
     else if (NULL != buffer)
     {
