@@ -28,6 +28,7 @@
 
 typedef struct T_TASK_LIST_ELT
 {
+    /** NULL value is reserved for empty list elements */
     TaskHandle_t value;
     void* pContext;
     uint32_t infosField1;
@@ -60,19 +61,26 @@ typedef enum E_UTILS_LIST_RESULT
 
 uint16_t P_UTILS_LIST_GetEltIndex(tUtilsList* ptr, TaskHandle_t taskNotified, uint32_t infos1, uint32_t infos2);
 
+/* \brief Adds an element to the list, if possible. \p handleTask can't be NULL. */
 eUtilsListResult P_UTILS_LIST_AddElt(tUtilsList* ptr,
                                      TaskHandle_t handleTask,
                                      void* pContext,
                                      uint32_t infos1,
                                      uint32_t infos2);
 
+/** \brief Enumerate and parse elements of the list.
+ *
+ * Continue the enumeration from \p pCurrentSlotId and updates it to the index of the next non empty element.
+ * \p pCurrentSlotId can be set to UINT16_MAX to initiate the enumerator.
+ * Returns NULL and sets \p pCurrentSlotId to USHRT_MAX when enumeration is finished.
+ */
 TaskHandle_t P_UTILS_LIST_ParseValueElt(tUtilsList* ptr,
                                         uint32_t* pOutValue,
                                         uint32_t* pOutValue2,
                                         void** ppOutContext,
                                         uint16_t* pCurrentSlotId);
 
-void* P_UTILS_LIST_ParseContextEltMT(tUtilsList* ptr, uint16_t* pCurrentSlotId);
+void* P_UTILS_LIST_ParseContextElt(tUtilsList* ptr, uint16_t* pCurrentSlotId);
 
 unsigned short P_UTILS_LIST_RemoveElt(tUtilsList* pv, TaskHandle_t taskNotified, uint32_t infos1, uint32_t infos2);
 
@@ -97,6 +105,8 @@ eUtilsListResult P_UTILS_LIST_AddEltMT(tUtilsList* ptr,
                                        void* pContext,
                                        uint32_t infos,
                                        uint32_t info2);
+
+void* P_UTILS_LIST_ParseContextEltMT(tUtilsList* ptr, uint16_t* pCurrentSlotId);
 
 unsigned short P_UTILS_LIST_RemoveEltMT(tUtilsList* pv, TaskHandle_t taskNotified, uint32_t infos1, uint32_t infos2);
 
