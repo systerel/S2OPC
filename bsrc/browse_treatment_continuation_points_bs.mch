@@ -56,8 +56,8 @@ OPERATIONS
         p_resultMask : t_BrowseResultMask_i
     THEN
         /* No continuation point shall be defined for given session to create a new one */
-        bres := bool(s_ContinuationPoints /= t_ContinuationPoint) ||
-        IF s_ContinuationPoints /= t_ContinuationPoint
+        bres := bool(s_ContinuationPoints /= t_ContinuationPoint & t_ContinuationPointId /= ran(id_ContinuationPoint)) ||
+        IF s_ContinuationPoints /= t_ContinuationPoint & t_ContinuationPointId /= ran(id_ContinuationPoint)
         THEN
             ANY l_ContinuationPoint, l_continuationPointId WHERE
                 l_ContinuationPoint : t_ContinuationPoint - s_ContinuationPoints &

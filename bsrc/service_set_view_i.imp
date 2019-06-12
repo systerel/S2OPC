@@ -148,7 +148,7 @@ LOCAL_OPERATIONS
 
         p_cpi       : t_BrowseValue_i &
         p_cpi       : t_BrowseValue &
-        p_cpi       : cast_t_BrowseValue[1..RequestBrowseNext_nb_ContinuationPoints]
+        p_cpi       : cast_t_BrowseValue[1..card(RequestBrowseNext_ContinuationPointId)]
     THEN
         /* Note: we do not have access to the browse_treatment variables,
                  only operation result are forwarded by translate browse path machines */
@@ -176,8 +176,6 @@ LOCAL_OPERATIONS
     treat_browse_next_request_ReleaseContinuationPoint_1(p_session, p_req_msg, p_resp_msg, p_cpi) =
     PRE
         RequestBrowseNext_ReleaseContinuationPoints = TRUE &
-        RequestBrowseNext_nb_ContinuationPoints > 0 &
-        RequestBrowseNext_nb_ContinuationPoints <= k_n_BrowseResponse_max &
 
         p_session : t_session_i &
         p_req_msg : t_msg_i &
@@ -191,7 +189,7 @@ LOCAL_OPERATIONS
 
         p_cpi       : t_BrowseValue_i &
         p_cpi       : t_BrowseValue &
-        p_cpi       : cast_t_BrowseValue[1..RequestBrowseNext_nb_ContinuationPoints]
+        p_cpi       : dom(RequestBrowseNext_ContinuationPointId)
     THEN
         /* Note: we do not have access to the browse_treatment variables,
                  only operation result are forwarded by translate browse path machines */
@@ -218,7 +216,7 @@ LOCAL_OPERATIONS
         p_releaseCP : BOOL &
         p_releaseCP = RequestBrowseNext_ReleaseContinuationPoints &
         p_nbCP      : NAT &
-        p_nbCP      = RequestBrowseNext_nb_ContinuationPoints
+        p_nbCP      = card(RequestBrowseNext_ContinuationPointId)
     THEN
         StatusCode_service,
         ResponseBrowseNext_BrowseStatus,
@@ -416,7 +414,8 @@ OPERATIONS
                     END
                 INVARIANT
                     breqs_to_iterate /\ breqs_iterated = {} &
-                    breqs_nb_reqs = card(breqs_to_iterate \/ breqs_iterated) &
+                    breqs_to_iterate \/ breqs_iterated = cast_t_BrowseValue[1..p_nbCP] &
+                    l_continue = bool(breqs_to_iterate /= {}) &
 
                     ResponseBrowseNext_BrowseStatus : breqs_iterated --> t_StatusCode &
                     /* Continuation points and result references are defined when status is OK or there is no available continuation points:

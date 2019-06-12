@@ -289,12 +289,16 @@ OPERATIONS
     THEN
         s_ContinuationPoints, id_ContinuationPoint, session_ContinuationPoint, bres
         :(
-            bres = bool(id_ContinuationPoint(session_ContinuationPoint~(p_session)) = p_continuationPointId) &
+            bres = bool(id_ContinuationPoint(session_ContinuationPoint$0~(p_session)) = p_continuationPointId) &
             /* Release the continuation point  */
             (bres = TRUE =>
-                s_ContinuationPoints = s_ContinuationPoints$0 - {session_ContinuationPoint~(p_session)} &
-                id_ContinuationPoint = {session_ContinuationPoint~(p_session)} <<| id_ContinuationPoint$0 &
-                session_ContinuationPoint = {session_ContinuationPoint~(p_session)} <<| session_ContinuationPoint$0)
+                s_ContinuationPoints = s_ContinuationPoints$0 - {session_ContinuationPoint$0~(p_session)} &
+                id_ContinuationPoint = {session_ContinuationPoint$0~(p_session)} <<| id_ContinuationPoint$0 &
+                session_ContinuationPoint = {session_ContinuationPoint$0~(p_session)} <<| session_ContinuationPoint$0) &
+            (bres = FALSE =>
+                s_ContinuationPoints = s_ContinuationPoints$0 &
+                id_ContinuationPoint = id_ContinuationPoint$0 &
+                session_ContinuationPoint = session_ContinuationPoint$0)
         )
     END
     ;
