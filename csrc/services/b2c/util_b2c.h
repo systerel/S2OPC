@@ -23,6 +23,7 @@
 #include <assert.h>
 #include <stdbool.h>
 
+#include "b2c.h"
 #include "constants.h"
 #include "constants_statuscodes_bs.h"
 
@@ -82,5 +83,9 @@ constants_statuscodes_bs__t_StatusCode_i util_read_value_string_indexed(SOPC_Var
                                                                         const SOPC_String* range_str);
 
 void util_NodeId_borrowReference_or_indet__C_to_B(constants__t_NodeId_i* bnodeId, SOPC_NodeId* nodeId);
+
+/* Normalizes the returned value to be either 'true' or 'false' since those are tested in code translated from B model
+ */
+t_bool util_SOPC_Boolean_to_B(const SOPC_Boolean b);
 
 #endif /* UTIL_B2C_H */

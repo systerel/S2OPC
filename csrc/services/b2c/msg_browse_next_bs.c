@@ -58,8 +58,16 @@ void msg_browse_next_bs__get_browse_next_request_params(const constants__t_msg_i
                                                         t_entier4* const msg_browse_next_bs__p_nb_ContinuationPoints)
 {
     OpcUa_BrowseNextRequest* req = msg_browse_next_bs__p_req_msg;
-    *msg_browse_next_bs__p_releaseContinuationPoints = req->ReleaseContinuationPoints;
-    *msg_browse_next_bs__p_nb_ContinuationPoints = req->NoOfContinuationPoints;
+    *msg_browse_next_bs__p_releaseContinuationPoints = util_SOPC_Boolean_to_B(req->ReleaseContinuationPoints);
+
+    if (req->NoOfContinuationPoints > 0)
+    {
+        *msg_browse_next_bs__p_nb_ContinuationPoints = req->NoOfContinuationPoints;
+    }
+    else
+    {
+        *msg_browse_next_bs__p_nb_ContinuationPoints = 0;
+    }
 }
 
 void msg_browse_next_bs__getall_ContinuationPoint(

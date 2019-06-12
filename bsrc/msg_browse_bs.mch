@@ -43,6 +43,7 @@ DEFINITIONS
         ResponseBrowse,
         ResponseBrowse_BrowseStatus,
         ResponseBrowse_ContinuationPoint,
+        /* The result array of complying references starting from browsed node for each browse request item */
         ResponseBrowse_ResultReferences,
         isBrowseResponseAllocated
     ;

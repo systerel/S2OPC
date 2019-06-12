@@ -28,22 +28,26 @@ SEES
 
 DEFINITIONS
     d_variables_req ==
+        RequestBrowseNext,
         RequestBrowseNext_ReleaseContinuationPoints,
-        RequestBrowseNext_nb_ContinuationPoints,
         RequestBrowseNext_ContinuationPointId
     ;
     d_variables_resp ==
+        ResponseBrowseNext,
         ResponseBrowseNext_BrowseStatus,
         ResponseBrowseNext_ContinuationPoint,
+        /* The result array of complying references starting from browsed node for each browse request item */
         ResponseBrowseNext_ResultReferences,
         isBrowseNextResponseAllocated
     ;
     d_inv_req ==
+        RequestBrowseNext                           : t_msg_i &
         RequestBrowseNext_ReleaseContinuationPoints : BOOL &
-        RequestBrowseNext_nb_ContinuationPoints     : NAT  &
-        RequestBrowseNext_ContinuationPointId       : t_BrowseValue +-> t_ContinuationPointId_i
+        RequestBrowseNext_ContinuationPointId       : t_BrowseValue +-> t_ContinuationPointId_i &
+        dom(RequestBrowseNext_ContinuationPointId) = cast_t_BrowseValue[1..card(RequestBrowseNext_ContinuationPointId)]
     ;
     d_inv_resp ==
+        ResponseBrowseNext                     : t_msg_i &
         ResponseBrowseNext_BrowseStatus        : t_BrowseValue +-> t_StatusCode        &
         ResponseBrowseNext_ContinuationPoint   : t_BrowseValue +-> t_ContinuationPointId_i &
         ResponseBrowseNext_ResultReferences    : t_BrowseValue +-> t_BrowseResultReferences &
@@ -53,7 +57,6 @@ DEFINITIONS
         d_variables_req
         :(
             RequestBrowseNext_ReleaseContinuationPoints = FALSE &
-            RequestBrowseNext_nb_ContinuationPoints = 0 &
             RequestBrowseNext_ContinuationPointId = {}
         )
     ;
@@ -94,27 +97,25 @@ OPERATIONS
             p_releaseContinuationPoints : BOOL &
             p_nb_ContinuationPoints : NAT &
             d_inv_req &
-            RequestBrowseNext_ContinuationPointId :
-              cast_t_BrowseValue[1..RequestBrowseNext_nb_ContinuationPoints] --> t_ContinuationPointId_i &
-            p_releaseContinuationPoints = RequestBrowseNext_ReleaseContinuationPoints &
-            p_nb_ContinuationPoints = RequestBrowseNext_nb_ContinuationPoints
+            RequestBrowseNext = p_req_msg &
+            p_nb_ContinuationPoints = card(RequestBrowseNext_ContinuationPointId) &
+            p_releaseContinuationPoints = RequestBrowseNext_ReleaseContinuationPoints
         )
     END
     ;
 
     p_ContinuationPointId <-- getall_ContinuationPoint(p_req_msg, p_cpi) =
     PRE
-        RequestBrowseNext_nb_ContinuationPoints > 0 &
-        RequestBrowseNext_nb_ContinuationPoints <= k_n_BrowseResponse_max &
-
         p_req_msg : t_msg_i &
         p_req_msg : t_msg &
         p_req_msg = c_msg_in &
         a_msg_in_type = e_msg_view_browse_next_req &
 
+        RequestBrowseNext = p_req_msg &
+
         p_cpi : t_BrowseValue_i &
         p_cpi : t_BrowseValue   &
-        p_cpi : cast_t_BrowseValue[1..RequestBrowseNext_nb_ContinuationPoints]
+        p_cpi : dom(RequestBrowseNext_ContinuationPointId)
     THEN
         p_ContinuationPointId := RequestBrowseNext_ContinuationPointId(p_cpi)
     END
@@ -129,12 +130,13 @@ OPERATIONS
         p_resp_msg = c_msg_out &
         a_msg_out_type = e_msg_view_browse_resp &
         p_nb_bvi : NAT &
-        p_nb_bvi = RequestBrowseNext_nb_ContinuationPoints
+        p_nb_bvi = card(RequestBrowseNext_ContinuationPointId)
     THEN
         p_isallocated :: BOOL ||
         d_variables_resp
         :(d_inv_resp &
           isBrowseNextResponseAllocated = p_isallocated &
+          ResponseBrowseNext = p_resp_msg &
           ResponseBrowseNext_BrowseStatus        = {} &
           ResponseBrowseNext_ContinuationPoint   = {} &
           ResponseBrowseNext_ResultReferences    = {}
@@ -149,8 +151,10 @@ OPERATIONS
         p_resp_msg : t_msg &
         p_resp_msg = c_msg_out &
         a_msg_out_type = e_msg_view_browse_resp &
+        ResponseBrowseNext = p_resp_msg &
         p_bvi  : t_BrowseValue_i &
         p_bvi  : t_BrowseValue   &
+        p_bvi : dom(RequestBrowseNext_ContinuationPointId) &
         p_sc : t_StatusCode_i &
         p_sc : t_StatusCode
     THEN
@@ -165,8 +169,10 @@ OPERATIONS
         p_resp_msg : t_msg &
         p_resp_msg = c_msg_out &
         a_msg_out_type = e_msg_view_browse_resp &
+        ResponseBrowseNext = p_resp_msg &
         p_bvi : t_BrowseValue_i &
         p_bvi : t_BrowseValue   &
+        p_bvi : dom(RequestBrowseNext_ContinuationPointId) &
         p_continuationPointId : t_ContinuationPointId_i   &
         p_continuationPointId : t_ContinuationPointId
     THEN
@@ -181,8 +187,10 @@ OPERATIONS
         p_resp_msg : t_msg &
         p_resp_msg = c_msg_out &
         a_msg_out_type = e_msg_view_browse_resp &
+        ResponseBrowseNext = p_resp_msg &
         p_bvi          : t_BrowseValue_i  &
         p_bvi          : t_BrowseValue    &
+        p_bvi : dom(RequestBrowseNext_ContinuationPointId) &
         p_nb_targets   : NAT &
         p_nb_targets  <= k_n_BrowseTarget_max &
         p_browseResultReferences : t_BrowseResultReferences_i

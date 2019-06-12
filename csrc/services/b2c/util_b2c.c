@@ -1347,3 +1347,12 @@ void util_NodeId_borrowReference_or_indet__C_to_B(constants__t_NodeId_i* bnodeId
         *bnodeId = nodeId;
     }
 }
+
+t_bool util_SOPC_Boolean_to_B(const SOPC_Boolean b)
+{
+    if (b)
+    {
+        return true;
+    }
+    return false;
+}
