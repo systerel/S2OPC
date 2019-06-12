@@ -35,7 +35,6 @@
 /*Alloc task*/
 eUtilsListResult P_UTILS_LIST_Init(tUtilsList* ptr, uint16_t wMaxRDV)
 {
-    uint16_t iIter = 0;
     if (NULL == ptr || MAX_P_UTILS_LIST >= wMaxRDV)
     {
         return E_UTILS_LIST_RESULT_ERROR_NOK;
@@ -56,9 +55,9 @@ eUtilsListResult P_UTILS_LIST_Init(tUtilsList* ptr, uint16_t wMaxRDV)
     incrementCpt();
 #endif
     ptr->wMaxWaitingTasks = wMaxRDV;
-    ptr->firstValid = USHRT_MAX;
-    ptr->firstFreeNextOQP = USHRT_MAX;
-    ptr->firstFreePreviousOQP = USHRT_MAX;
+    ptr->firstValid = UINT16_MAX;
+    ptr->firstFreeNextOQP = UINT16_MAX;
+    ptr->firstFreePreviousOQP = UINT16_MAX;
     ptr->firstFree = 0;
     ptr->wNbRegisteredTasks = 0;
     ptr->lockHandle = NULL;
@@ -80,9 +79,9 @@ void P_UTILS_LIST_DeInit(tUtilsList* ptr)
 #endif
         }
         ptr->wMaxWaitingTasks = 0;
-        ptr->firstValid = USHRT_MAX;
-        ptr->firstFreeNextOQP = USHRT_MAX;
-        ptr->firstFreePreviousOQP = USHRT_MAX;
+        ptr->firstValid = UINT16_MAX;
+        ptr->firstFreeNextOQP = UINT16_MAX;
+        ptr->firstFreePreviousOQP = UINT16_MAX;
         ptr->firstFree = 0;
         ptr->wNbRegisteredTasks = 0;
     }
@@ -108,9 +107,9 @@ eUtilsListResult P_UTILS_LIST_AddElt(tUtilsList* ptr,
     // Check if it's a valid slot
     if (ptr->wNbRegisteredTasks >= ptr->wMaxWaitingTasks || wCurrentSlotId >= ptr->wMaxWaitingTasks)
     {
-        ptr->firstFree = USHRT_MAX;
-        ptr->firstFreeNextOQP = USHRT_MAX;
-        ptr->firstFreePreviousOQP = USHRT_MAX;
+        ptr->firstFree = UINT16_MAX;
+        ptr->firstFreeNextOQP = UINT16_MAX;
+        ptr->firstFreePreviousOQP = UINT16_MAX;
         return E_UTILS_LIST_RESULT_ERROR_MAX_ELTS;
     }
 
@@ -139,11 +138,11 @@ eUtilsListResult P_UTILS_LIST_AddElt(tUtilsList* ptr,
     }
 
     // Update previous and next slot indexation
-    if (firstNextOQP < USHRT_MAX)
+    if (firstNextOQP < UINT16_MAX)
     {
         ptr->list[firstNextOQP].prId = wCurrentSlotId;
     }
-    if (firstPrevOQP < USHRT_MAX)
+    if (firstPrevOQP < UINT16_MAX)
     {
         ptr->list[firstPrevOQP].nxId = wCurrentSlotId;
     }
@@ -177,7 +176,7 @@ eUtilsListResult P_UTILS_LIST_AddElt(tUtilsList* ptr,
         if (bSlotFound)
         {
             ptr->firstFree = wCurrentSlotId;
-            ptr->firstFreePreviousOQP = wCurrentSlotId > 0 ? wCurrentSlotId - 1 : USHRT_MAX;
+            ptr->firstFreePreviousOQP = wCurrentSlotId > 0 ? wCurrentSlotId - 1 : UINT16_MAX;
             bSlotFound = false;
             // Then search for the new firstNextOQP
             wCurrentSlotId++;
@@ -200,15 +199,15 @@ eUtilsListResult P_UTILS_LIST_AddElt(tUtilsList* ptr,
             }
             else
             {
-                ptr->firstFreeNextOQP = USHRT_MAX;
+                ptr->firstFreeNextOQP = UINT16_MAX;
             }
         }
         else
         {
             // No free slot was found
-            ptr->firstFree = USHRT_MAX;
-            ptr->firstFreeNextOQP = USHRT_MAX;
-            ptr->firstFreePreviousOQP = USHRT_MAX;
+            ptr->firstFree = UINT16_MAX;
+            ptr->firstFreeNextOQP = UINT16_MAX;
+            ptr->firstFreePreviousOQP = UINT16_MAX;
         }
     }
 
@@ -217,7 +216,7 @@ eUtilsListResult P_UTILS_LIST_AddElt(tUtilsList* ptr,
 
 uint16_t P_UTILS_LIST_RemoveElt(tUtilsList* pv, TaskHandle_t taskNotified, uint32_t infos1, uint32_t infos2)
 {
-    uint16_t wCurrentSlotId = USHRT_MAX;
+    uint16_t wCurrentSlotId = UINT16_MAX;
     if ((pv != NULL) && (pv->list != NULL) && (taskNotified != NULL) && (pv->wNbRegisteredTasks > 0))
     {
         // Search a task with handle and signal requested
@@ -241,7 +240,7 @@ uint16_t P_UTILS_LIST_RemoveElt(tUtilsList* pv, TaskHandle_t taskNotified, uint3
             }
             else
             {
-                pv->firstFreeNextOQP = USHRT_MAX;
+                pv->firstFreeNextOQP = UINT16_MAX;
             }
             // previous of current not the last, so next of previous = next of current
             if (pv->list[wCurrentSlotId].prId < pv->wMaxWaitingTasks)
@@ -251,7 +250,7 @@ uint16_t P_UTILS_LIST_RemoveElt(tUtilsList* pv, TaskHandle_t taskNotified, uint3
             }
             else
             {
-                pv->firstFreePreviousOQP = USHRT_MAX;
+                pv->firstFreePreviousOQP = UINT16_MAX;
             }
 
             // RAZ current
@@ -259,8 +258,8 @@ uint16_t P_UTILS_LIST_RemoveElt(tUtilsList* pv, TaskHandle_t taskNotified, uint3
             pv->list[wCurrentSlotId].infosField1 = 0;
             pv->list[wCurrentSlotId].infosField2 = 0;
             pv->list[wCurrentSlotId].pContext = NULL;
-            pv->list[wCurrentSlotId].nxId = USHRT_MAX;
-            pv->list[wCurrentSlotId].prId = USHRT_MAX;
+            pv->list[wCurrentSlotId].nxId = UINT16_MAX;
+            pv->list[wCurrentSlotId].prId = UINT16_MAX;
             pv->firstFree = wCurrentSlotId;
         }
     }
@@ -273,12 +272,12 @@ TaskHandle_t P_UTILS_LIST_ParseValueElt(tUtilsList* ptr,
                                         void** ppOutContext,
                                         uint16_t* pCurrentSlotId)
 {
-    uint16_t wCurrentSlotId = USHRT_MAX;
+    uint16_t wCurrentSlotId = UINT16_MAX;
     TaskHandle_t taskHandle = 0;
     if ((ptr != NULL) && (ptr->list != NULL) && (pCurrentSlotId != NULL))
     {
         wCurrentSlotId = *pCurrentSlotId;
-        if (wCurrentSlotId == USHRT_MAX)
+        if (wCurrentSlotId == UINT16_MAX)
         {
             wCurrentSlotId = ptr->firstValid;
         }
@@ -303,7 +302,7 @@ TaskHandle_t P_UTILS_LIST_ParseValueElt(tUtilsList* ptr,
         else
         {
             taskHandle = 0;
-            wCurrentSlotId = USHRT_MAX;
+            wCurrentSlotId = UINT16_MAX;
         }
     }
 
@@ -313,12 +312,12 @@ TaskHandle_t P_UTILS_LIST_ParseValueElt(tUtilsList* ptr,
 
 void* P_UTILS_LIST_ParseContextElt(tUtilsList* ptr, uint16_t* pCurrentSlotId)
 {
-    uint16_t wCurrentSlotId = USHRT_MAX;
+    uint16_t wCurrentSlotId = UINT16_MAX;
     void* pContext = 0;
     if ((ptr != NULL) && (ptr->list != NULL) && (pCurrentSlotId != NULL))
     {
         wCurrentSlotId = *pCurrentSlotId;
-        if (wCurrentSlotId == USHRT_MAX)
+        if (wCurrentSlotId == UINT16_MAX)
         {
             wCurrentSlotId = ptr->firstValid;
         }
@@ -330,7 +329,7 @@ void* P_UTILS_LIST_ParseContextElt(tUtilsList* ptr, uint16_t* pCurrentSlotId)
         }
         else
         {
-            wCurrentSlotId = USHRT_MAX;
+            wCurrentSlotId = UINT16_MAX;
             pContext = 0;
         }
     }
@@ -341,7 +340,7 @@ void* P_UTILS_LIST_ParseContextElt(tUtilsList* ptr, uint16_t* pCurrentSlotId)
 
 uint16_t P_UTILS_LIST_GetEltIndex(tUtilsList* ptr, TaskHandle_t taskNotified, uint32_t infos1, uint32_t infos2)
 {
-    uint16_t wCurrentSlotId = USHRT_MAX;
+    uint16_t wCurrentSlotId = UINT16_MAX;
     if ((ptr != NULL) && (ptr->list != NULL) && (taskNotified != NULL))
     {
         wCurrentSlotId = ptr->firstValid;
@@ -361,7 +360,7 @@ uint16_t P_UTILS_LIST_GetEltIndex(tUtilsList* ptr, TaskHandle_t taskNotified, ui
 
     if (wCurrentSlotId >= ptr->wMaxWaitingTasks)
     {
-        wCurrentSlotId = USHRT_MAX;
+        wCurrentSlotId = UINT16_MAX;
     }
     return wCurrentSlotId;
 }
@@ -409,7 +408,7 @@ void P_UTILS_LIST_DeInitMT(tUtilsList* ptr)
 
 uint16_t P_UTILS_LIST_RemoveEltMT(tUtilsList* ptr, TaskHandle_t taskNotified, uint32_t infos1, uint32_t infos2)
 {
-    uint16_t wCurrentSlotId = USHRT_MAX;
+    uint16_t wCurrentSlotId = UINT16_MAX;
     if ((ptr != NULL) && (ptr->lockHandle != NULL))
     {
         xSemaphoreTakeRecursive(ptr->lockHandle, portMAX_DELAY);
@@ -470,7 +469,7 @@ void* P_UTILS_LIST_ParseContextEltMT(tUtilsList* ptr, uint16_t* pCurrentSlotId)
 
 uint16_t P_UTILS_LIST_GetEltIndexMT(tUtilsList* ptr, TaskHandle_t taskNotified, uint32_t infos1, uint32_t infos2)
 {
-    uint16_t wCurrentSlotId = USHRT_MAX;
+    uint16_t wCurrentSlotId = UINT16_MAX;
     if ((ptr != NULL) && (ptr->lockHandle != NULL))
     {
         xSemaphoreTakeRecursive(ptr->lockHandle, portMAX_DELAY);
@@ -483,7 +482,7 @@ uint16_t P_UTILS_LIST_GetEltIndexMT(tUtilsList* ptr, TaskHandle_t taskNotified, 
 void* P_UTILS_LIST_GetContextFromHandleMT(tUtilsList* ptr, TaskHandle_t taskNotified, uint32_t infos1, uint32_t infos2)
 {
     void* ptrContext = NULL;
-    uint16_t wCurrentSlotId = USHRT_MAX;
+    uint16_t wCurrentSlotId = UINT16_MAX;
     if ((ptr != NULL) && (ptr->lockHandle != NULL))
     {
         xSemaphoreTakeRecursive(ptr->lockHandle, portMAX_DELAY);

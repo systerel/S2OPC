@@ -348,8 +348,8 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
     eUtilsListResult resTList = E_UTILS_LIST_RESULT_ERROR_NOK;
     tThreadWks* ptrCurrentThread = NULL;
     tThreadWks* pOthersThread = NULL;
-    unsigned short int wSlotId = USHRT_MAX;
-    unsigned short int wSlotIdRes = USHRT_MAX;
+    uint16_t wSlotId = UINT16_MAX;
+    uint16_t wSlotIdRes = UINT16_MAX;
     TaskHandle_t handle = NULL;
 
     // Get current workspace from current task handle
@@ -389,7 +389,7 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
                                                      0,                           //
                                                      0);                          //
 
-                if (wSlotId < USHRT_MAX)
+                if (wSlotId < UINT16_MAX)
                 {
                     result = E_THREAD_RESULT_ERROR_SELF_JOIN_THREAD;
                 }
@@ -401,7 +401,7 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
                                                          0,                           //
                                                          0);                          //
 
-                    if (wSlotId < USHRT_MAX)
+                    if (wSlotId < UINT16_MAX)
                     {
                         result = E_THREAD_RESULT_ERROR_SELF_JOIN_THREAD;
                     }
@@ -421,7 +421,7 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
                         else
                         {
                             // Threads that reference the task to join record in addition the current thread
-                            wSlotId = USHRT_MAX;
+                            wSlotId = UINT16_MAX;
                             do
                             {
                                 pOthersThread = P_UTILS_LIST_ParseContextEltMT(&gTaskList, //
@@ -433,7 +433,7 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
                                                                             (*pHandle)->handleTask,   //
                                                                             0,                        //
                                                                             0);                       //
-                                    if (wSlotIdRes < USHRT_MAX)
+                                    if (wSlotIdRes < UINT16_MAX)
                                     {
                                         resTList = P_UTILS_LIST_AddEltMT(&pOthersThread->taskList,    //
                                                                          xTaskGetCurrentTaskHandle(), //
@@ -442,14 +442,14 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
                                                                          0);                          //
                                     }
                                 }
-                            } while ((wSlotId != USHRT_MAX) && (resTList == E_UTILS_LIST_RESULT_OK));
+                            } while ((wSlotId != UINT16_MAX) && (resTList == E_UTILS_LIST_RESULT_OK));
 
                             if (resTList != E_UTILS_LIST_RESULT_OK)
                             {
                                 // Restore if error occurred :
                                 // Threads that reference the task to join don't record in addition the current
                                 // thread
-                                wSlotId = USHRT_MAX;
+                                wSlotId = UINT16_MAX;
                                 do
                                 {
                                     pOthersThread = P_UTILS_LIST_ParseContextEltMT(&gTaskList, &wSlotId);
@@ -461,7 +461,7 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
                                                                                 0,                        //
                                                                                 0);                       //
 
-                                        if (wSlotIdRes < USHRT_MAX)
+                                        if (wSlotIdRes < UINT16_MAX)
                                         {
                                             P_UTILS_LIST_RemoveEltMT(&pOthersThread->taskList,    //
                                                                      xTaskGetCurrentTaskHandle(), //
@@ -469,7 +469,7 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
                                                                      0);                          //
                                         }
                                     }
-                                } while (wSlotId != USHRT_MAX);
+                                } while (wSlotId != UINT16_MAX);
 
                                 result = E_THREAD_RESULT_ERROR_MAX_THREADS;
                             }
@@ -477,7 +477,7 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
                             {
                                 // Forward of all thread handle recorded by the current thread to thread to join
                                 // exclusion list
-                                wSlotId = USHRT_MAX;
+                                wSlotId = UINT16_MAX;
                                 do
                                 {
                                     handle = (TaskHandle_t) P_UTILS_LIST_ParseValueEltMT(&ptrCurrentThread->taskList, //
@@ -494,12 +494,12 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
                                                                          0,                     //
                                                                          0);                    //
                                     }
-                                } while ((wSlotId != USHRT_MAX) && (resTList == E_UTILS_LIST_RESULT_OK));
+                                } while ((wSlotId != UINT16_MAX) && (resTList == E_UTILS_LIST_RESULT_OK));
 
                                 if (resTList != E_UTILS_LIST_RESULT_OK)
                                 {
                                     // Restore in case of error
-                                    wSlotId = USHRT_MAX;
+                                    wSlotId = UINT16_MAX;
                                     do
                                     {
                                         handle =
@@ -515,7 +515,7 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
                                                                      0,                     //
                                                                      0);                    //
                                         }
-                                    } while (wSlotId != USHRT_MAX);
+                                    } while (wSlotId != UINT16_MAX);
 
                                     result = E_THREAD_RESULT_ERROR_MAX_THREADS;
                                 }
@@ -568,7 +568,7 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
                                                                  0);                          //
 
                                         // Remove thread handle from other thread list exclusion
-                                        wSlotId = USHRT_MAX;
+                                        wSlotId = UINT16_MAX;
                                         do
                                         {
                                             pOthersThread = P_UTILS_LIST_ParseContextEltMT(&gTaskList, //
@@ -580,7 +580,7 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
                                                                                         (*pHandle)->handleTask,   //
                                                                                         0,                        //
                                                                                         0);                       //
-                                                if (wSlotIdRes < USHRT_MAX)
+                                                if (wSlotIdRes < UINT16_MAX)
                                                 {
                                                     P_UTILS_LIST_RemoveEltMT(&pOthersThread->taskList, //
                                                                              (*pHandle)->handleTask,   //
@@ -588,7 +588,7 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
                                                                              0);                       //
                                                 }
                                             }
-                                        } while (wSlotId != USHRT_MAX);
+                                        } while (wSlotId != UINT16_MAX);
 
                                         (*pHandle)->handleTask = NULL;
 

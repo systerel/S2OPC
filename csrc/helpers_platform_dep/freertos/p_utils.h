@@ -72,7 +72,7 @@ eUtilsListResult P_UTILS_LIST_AddElt(tUtilsList* ptr,
  *
  * Continue the enumeration from \p pCurrentSlotId and updates it to the index of the next non empty element.
  * \p pCurrentSlotId can be set to UINT16_MAX to initiate the enumerator.
- * Returns NULL and sets \p pCurrentSlotId to USHRT_MAX when enumeration is finished.
+ * Returns NULL and sets \p pCurrentSlotId to UINT16_MAX when enumeration is finished.
  */
 TaskHandle_t P_UTILS_LIST_ParseValueElt(tUtilsList* ptr,
                                         uint32_t* pOutValue,

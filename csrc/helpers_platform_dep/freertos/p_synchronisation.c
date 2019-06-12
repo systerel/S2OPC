@@ -55,7 +55,7 @@ struct T_CONDITION_VARIABLE
 eConditionVariableResult P_SYNCHRO_ClearConditionVariable(hCondVar* pv)
 {
     eConditionVariableResult result = E_COND_VAR_RESULT_OK;
-    uint16_t wCurrentSlotId = USHRT_MAX;
+    uint16_t wCurrentSlotId = UINT16_MAX;
     TaskHandle_t handle = NULL;
     uint32_t wClearSignal = 0;
 
@@ -70,7 +70,7 @@ eConditionVariableResult P_SYNCHRO_ClearConditionVariable(hCondVar* pv)
                 (*pv)->status = E_COND_VAR_STATUS_NOT_INITIALIZED; // Mark as not initialized
 
                 // Indicate for each registered task that clearing signal is pending
-                wCurrentSlotId = USHRT_MAX;
+                wCurrentSlotId = UINT16_MAX;
                 do
                 {
                     handle = (TaskHandle_t) P_UTILS_LIST_ParseValueElt(&(*pv)->taskList, NULL, &wClearSignal, NULL,
@@ -79,7 +79,7 @@ eConditionVariableResult P_SYNCHRO_ClearConditionVariable(hCondVar* pv)
                     {
                         xTaskGenericNotify(handle, wClearSignal, eSetBits, NULL);
                     }
-                } while (wCurrentSlotId != USHRT_MAX);
+                } while (wCurrentSlotId != UINT16_MAX);
 
                 // Task list destruction
                 P_UTILS_LIST_DeInit(&(*pv)->taskList);
@@ -245,7 +245,7 @@ hCondVar* P_SYNCHRO_CreateConditionVariable(void)
 eConditionVariableResult P_SYNCHRO_SignalAllConditionVariable(hCondVar* pv) // Signal to broadcaset
 {
     eConditionVariableResult result = E_COND_VAR_RESULT_ERROR_NO_WAITERS;
-    uint16_t wCurrentSlotId = USHRT_MAX;
+    uint16_t wCurrentSlotId = UINT16_MAX;
     TaskHandle_t handle = NULL;
     uint32_t signal = 0;
 
@@ -255,7 +255,7 @@ eConditionVariableResult P_SYNCHRO_SignalAllConditionVariable(hCondVar* pv) // S
         {
             xQueueSemaphoreTake((*pv)->handleLockCounter, portMAX_DELAY); // Critical section
             {
-                wCurrentSlotId = USHRT_MAX;
+                wCurrentSlotId = UINT16_MAX;
                 do
                 {
                     handle = (TaskHandle_t) P_UTILS_LIST_ParseValueElt(&(*pv)->taskList, //
@@ -268,7 +268,7 @@ eConditionVariableResult P_SYNCHRO_SignalAllConditionVariable(hCondVar* pv) // S
                         xTaskGenericNotify(handle, signal, eSetBits, NULL);
                         result = E_COND_VAR_RESULT_OK;
                     }
-                } while (wCurrentSlotId != USHRT_MAX);
+                } while (wCurrentSlotId != UINT16_MAX);
             }
             xSemaphoreGive((*pv)->handleLockCounter); // End critical section
         }
