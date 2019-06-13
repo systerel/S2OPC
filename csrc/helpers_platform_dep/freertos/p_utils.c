@@ -102,10 +102,7 @@ eUtilsListResult P_UTILS_LIST_AddElt(tUtilsList* ptr,
         return E_UTILS_LIST_RESULT_ERROR_NOK;
     }
 
-    wCurrentSlotId = ptr->firstFree;
-
-    // Check if it's a valid slot
-    if (ptr->wNbRegisteredTasks >= ptr->wMaxWaitingTasks || wCurrentSlotId >= ptr->wMaxWaitingTasks)
+    if (ptr->wNbRegisteredTasks >= ptr->wMaxWaitingTasks || ptr->firstFree >= ptr->wMaxWaitingTasks)
     {
         ptr->firstFree = UINT16_MAX;
         ptr->firstFreeNextOQP = UINT16_MAX;
@@ -113,16 +110,39 @@ eUtilsListResult P_UTILS_LIST_AddElt(tUtilsList* ptr,
         return E_UTILS_LIST_RESULT_ERROR_MAX_ELTS;
     }
 
-    ptr->list[wCurrentSlotId].prId = ptr->firstFreePreviousOQP;
-    ptr->list[wCurrentSlotId].nxId = ptr->firstFreeNextOQP;
+    // New element is the first free
+    wCurrentSlotId = ptr->firstFree;
+
     firstPrevOQP = ptr->firstFreePreviousOQP;
     firstNextOQP = ptr->firstFreeNextOQP;
 
+    // Update it
+    ptr->list[wCurrentSlotId].value = handleTask;
+    ptr->list[wCurrentSlotId].infosField1 = infos;
+    ptr->list[wCurrentSlotId].infosField2 = infos2;
+    ptr->list[wCurrentSlotId].pContext = pContext;
+    ptr->wNbRegisteredTasks =
+        ptr->wNbRegisteredTasks < ptr->wMaxWaitingTasks ? ptr->wNbRegisteredTasks + 1 : ptr->wNbRegisteredTasks;
+    ptr->list[wCurrentSlotId].prId = ptr->firstFreePreviousOQP;
+    ptr->list[wCurrentSlotId].nxId = ptr->firstFreeNextOQP;
+
+    // Update previous and next slot indexation
+    if (firstNextOQP < UINT16_MAX)
+    {
+        ptr->list[firstNextOQP].prId = wCurrentSlotId;
+    }
+    if (firstPrevOQP < UINT16_MAX)
+    {
+        ptr->list[firstPrevOQP].nxId = wCurrentSlotId;
+    }
+
+    // Update firstValid of the list
     if (firstPrevOQP >= ptr->wMaxWaitingTasks)
     {
         ptr->firstValid = wCurrentSlotId;
     }
 
+    // Find a new firstFree and update firstNext and firstPrev accordingly
     // Slot free before this slot, next not changed, this previous becomes the next free slot
     if ((wCurrentSlotId > 0) && ((firstPrevOQP >= ptr->wMaxWaitingTasks) || (firstPrevOQP < (wCurrentSlotId - 1))))
     {
@@ -136,66 +156,37 @@ eUtilsListResult P_UTILS_LIST_AddElt(tUtilsList* ptr,
         ptr->firstFree = wCurrentSlotId + 1;
         ptr->firstFreePreviousOQP = wCurrentSlotId;
     }
-
-    // Update previous and next slot indexation
-    if (firstNextOQP < UINT16_MAX)
-    {
-        ptr->list[firstNextOQP].prId = wCurrentSlotId;
-    }
-    if (firstPrevOQP < UINT16_MAX)
-    {
-        ptr->list[firstPrevOQP].nxId = wCurrentSlotId;
-    }
-
-    ptr->list[wCurrentSlotId].value = handleTask;
-    ptr->list[wCurrentSlotId].infosField1 = infos;
-    ptr->list[wCurrentSlotId].infosField2 = infos2;
-    ptr->list[wCurrentSlotId].pContext = pContext;
-    ptr->wNbRegisteredTasks =
-        ptr->wNbRegisteredTasks < ptr->wMaxWaitingTasks ? ptr->wNbRegisteredTasks + 1 : ptr->wNbRegisteredTasks;
-
     // If slot between 2 full slots, search for an empty slot in the whole list
-    if (ptr->firstFree == wCurrentSlotId)
+    else
     {
         bool bSlotFound = false;
-        wCurrentSlotId = 0;
-        while ((wCurrentSlotId < ptr->wMaxWaitingTasks) && (bSlotFound == 0))
+        uint16_t wSlotId = 0;
+        for (wSlotId = 0; wSlotId < ptr->wMaxWaitingTasks && (!bSlotFound); ++wSlotId)
         {
-            if (ptr->list[wCurrentSlotId].value == 0)
+            if (ptr->list[wSlotId].value == 0)
             {
                 // Slot found
                 bSlotFound = true;
-            }
-            else
-            {
-                // Slot not found
-                wCurrentSlotId++;
             }
         }
 
         if (bSlotFound)
         {
-            ptr->firstFree = wCurrentSlotId;
-            ptr->firstFreePreviousOQP = wCurrentSlotId > 0 ? wCurrentSlotId - 1 : UINT16_MAX;
+            ptr->firstFree = wSlotId;
+            ptr->firstFreePreviousOQP = wSlotId > 0 ? wSlotId - 1 : UINT16_MAX;
             bSlotFound = false;
             // Then search for the new firstNextOQP
-            wCurrentSlotId++;
-            while ((wCurrentSlotId < ptr->wMaxWaitingTasks) && (bSlotFound == 0))
+            for (++wSlotId; wSlotId < ptr->wMaxWaitingTasks && (!bSlotFound); ++wSlotId)
             {
-                if ((ptr->list[wCurrentSlotId].value) != 0)
+                if ((ptr->list[wSlotId].value) != 0)
                 {
                     // Slot found
                     bSlotFound = true;
                 }
-                else
-                {
-                    // Slot not found
-                    wCurrentSlotId++;
-                }
             }
             if (bSlotFound)
             {
-                ptr->firstFreeNextOQP = wCurrentSlotId;
+                ptr->firstFreeNextOQP = wSlotId;
             }
             else
             {
