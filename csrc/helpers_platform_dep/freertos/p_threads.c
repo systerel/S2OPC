@@ -121,7 +121,7 @@ void P_THREAD_Destroy(hThread** ptr)
     {
         P_THREAD_Join(*ptr);
         // Raz leaved memory
-        (void) memset(*ptr, 0, sizeof(hThread));
+        memset(*ptr, 0, sizeof(hThread));
         vPortFree(*ptr);
         *ptr = NULL;
         DEBUG_decrementCpt();
@@ -140,7 +140,7 @@ hThread* P_THREAD_Create(tPtrFct fct,              // Callback
     if (ptrWks != NULL)
     {
         DEBUG_incrementCpt();
-        (void) memset(ptrWks, 0, sizeof(hThread));
+        memset(ptrWks, 0, sizeof(hThread));
 
         // Initialization
         if (P_THREAD_Init(ptrWks, MAX_THREADS, fct, args, fctWatingForJoin, fctReadyToSignal) != E_THREAD_RESULT_OK)
@@ -191,7 +191,7 @@ eThreadResult P_THREAD_Init(hThread* ptrWks,            // Workspace
             }
             else
             {
-                (void) memset(handleWks, 0, sizeof(tThreadWks));
+                memset(handleWks, 0, sizeof(tThreadWks));
 
                 handleWks->args.cbExternalCallback = fct;
                 handleWks->cbReadyToSignal = fctReadyToSignal;
@@ -304,7 +304,7 @@ eThreadResult P_THREAD_Init(hThread* ptrWks,            // Workspace
                     P_SYNCHRO_ClearConditionVariable(&handleWks->signalThreadEnded);
 
                     // Raz leaved memory
-                    (void) memset(handleWks, 0, sizeof(tThreadWks));
+                    memset(handleWks, 0, sizeof(tThreadWks));
                 }
                 else
                 {
@@ -578,7 +578,7 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
                                         }
 
                                         /* Raz leaved memory */
-                                        (void) memset(*pHandle, 0, sizeof(tThreadWks));
+                                        memset(*pHandle, 0, sizeof(tThreadWks));
 
                                         vPortFree(*pHandle);
                                         *pHandle = NULL;

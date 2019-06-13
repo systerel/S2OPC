@@ -90,7 +90,7 @@ eConditionVariableResult P_SYNCHRO_ClearConditionVariable(hCondVar* pv)
             DEBUG_decrementCpt();
             if ((*pv) != NULL) // Destroy workspace
             {
-                (void) memset(*pv, 0, sizeof(tConditionVariable)); // Raz on leave memory
+                memset(*pv, 0, sizeof(tConditionVariable)); // Raz on leave memory
                 vPortFree(*pv);
                 *pv = NULL;
                 DEBUG_decrementCpt();
@@ -129,7 +129,7 @@ eConditionVariableResult P_SYNCHRO_InitConditionVariable(hCondVar* pv,         /
             {
                 DEBUG_incrementCpt();
                 // Raz allocated workspaace
-                (void) memset(condVar, 0, sizeof(tConditionVariable));
+                memset(condVar, 0, sizeof(tConditionVariable));
 
                 pMutex = xQueueCreateMutex(queueQUEUE_TYPE_MUTEX);
                 if (pMutex != NULL)
@@ -143,7 +143,7 @@ eConditionVariableResult P_SYNCHRO_InitConditionVariable(hCondVar* pv,         /
                         pMutex = NULL;
 
                         // Raz leaved memory
-                        (void) memset(condVar, 0, sizeof(tConditionVariable));
+                        memset(condVar, 0, sizeof(tConditionVariable));
                         vPortFree(condVar);
                         condVar = NULL;
                         DEBUG_decrementCpt();
@@ -161,7 +161,7 @@ eConditionVariableResult P_SYNCHRO_InitConditionVariable(hCondVar* pv,         /
                 else
                 {
                     /* Raz leaved memory*/
-                    (void) memset(condVar, 0, sizeof(tConditionVariable));
+                    memset(condVar, 0, sizeof(tConditionVariable));
                     vPortFree(condVar);
                     condVar = NULL;
                     DEBUG_decrementCpt();
@@ -192,7 +192,7 @@ void P_SYNCHRO_DestroyConditionVariable(hCondVar** ppv)
         if (ptrHCondVar != NULL)
         {
             P_SYNCHRO_ClearConditionVariable(ptrHCondVar);
-            (void) memset(ptrHCondVar, 0, sizeof(hCondVar));
+            memset(ptrHCondVar, 0, sizeof(hCondVar));
             vPortFree(ptrHCondVar);
             *ppv = NULL;
         }
@@ -209,12 +209,12 @@ hCondVar* P_SYNCHRO_CreateConditionVariable(void)
     {
         DEBUG_incrementCpt();
         // Raz handle
-        (void) memset(ptr, 0, sizeof(hCondVar));
+        memset(ptr, 0, sizeof(hCondVar));
         if (P_SYNCHRO_InitConditionVariable(ptr, MAX_WAITERS) != E_COND_VAR_RESULT_OK)
         {
             P_SYNCHRO_ClearConditionVariable(ptr);
             // Raz handle
-            (void) memset(ptr, 0, sizeof(hCondVar));
+            memset(ptr, 0, sizeof(hCondVar));
             vPortFree(ptr);
             ptr = NULL;
             DEBUG_decrementCpt();
@@ -397,7 +397,7 @@ eConditionVariableResult P_SYNCHRO_UnlockAndWaitForConditionVariable(hCondVar* p
         // Give mutex from parameters
         if ((*pMutex) != NULL)
         {
-            (void) xQueueGiveMutexRecursive(*pMutex);
+            xQueueGiveMutexRecursive(*pMutex);
         }
 
         if (result == E_COND_VAR_RESULT_OK)
@@ -435,7 +435,7 @@ eConditionVariableResult P_SYNCHRO_UnlockAndWaitForConditionVariable(hCondVar* p
         // Take mutex in parameter if exists
         if (*pMutex != NULL)
         {
-            (void) xQueueTakeMutexRecursive(*pMutex, portMAX_DELAY);
+            xQueueTakeMutexRecursive(*pMutex, portMAX_DELAY);
         }
     }
     else
