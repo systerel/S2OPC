@@ -161,161 +161,159 @@ eThreadResult P_THREAD_Init(hThread* ptrWks,            // Workspace
                             tPtrFct fctWaitingForJoin,  // Debug wait for join
                             tPtrFct fctReadyToSignal)   // Debug wait for
 {
-    eThreadResult resPTHR = E_THREAD_RESULT_ERROR_NOK;
+    eThreadResult resPTHR = E_THREAD_RESULT_OK;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     hThread handleWks = NULL;
 
+    if (NULL == ptrWks)
+    {
+        return E_THREAD_RESULT_ERROR_NOK;
+    }
+
     // Create global task list for first call.
-    if (gTaskList.lockHandle == NULL)
+    if (NULL == gTaskList.lockHandle)
     {
         P_UTILS_LIST_InitMT(&gTaskList, MAX_THREADS);
     }
-
-    if ((ptrWks == NULL) || (gTaskList.lockHandle == NULL))
+    if (NULL == gTaskList.lockHandle)
     {
-        resPTHR = E_THREAD_RESULT_ERROR_NOK;
+        return E_THREAD_RESULT_ERROR_NOK;
+    }
+
+    if (NULL != (*ptrWks))
+    {
+        return E_THREAD_RESULT_ERROR_ALREADY_INITIALIZED;
+    }
+
+    /* Create the tThreadWks structure and assign it to (*ptrWks) */
+    handleWks = pvPortMalloc(sizeof(tThreadWks));
+
+    if (NULL == handleWks)
+    {
+        return E_THREAD_RESULT_ERROR_OUT_OF_MEM;
+    }
+
+    memset(handleWks, 0, sizeof(tThreadWks));
+
+    handleWks->args.cbExternalCallback = fct;
+    handleWks->cbReadyToSignal = fctReadyToSignal;
+    handleWks->cbWaitingForJoin = fctWaitingForJoin;
+    handleWks->args.ptrStartArgs = args;
+    handleWks->handleTask = NULL;
+
+    handleWks->signalReadyToWait = xSemaphoreCreateBinary();
+    handleWks->signalReadyToStart = xSemaphoreCreateBinary();
+    handleWks->lockRecHandle = xQueueCreateMutex(queueQUEUE_TYPE_RECURSIVE_MUTEX);
+    if ((*ptrWks)->signalReadyToWait)
+    {
+        DEBUG_incrementCpt();
+    }
+    if ((*ptrWks)->signalReadyToStart)
+    {
+        DEBUG_incrementCpt();
+    }
+    if ((*ptrWks)->lockRecHandle)
+    {
+        DEBUG_incrementCpt();
+    }
+
+    if (NULL == handleWks->signalReadyToWait || NULL == handleWks->signalReadyToStart ||
+        NULL == handleWks->lockRecHandle == NULL)
+    {
+        resPTHR = E_THREAD_RESULT_ERROR_OUT_OF_MEM;
+    }
+
+    if (E_THREAD_RESULT_OK == resPTHR)
+    {
+        xSemaphoreTake(handleWks->signalReadyToStart, 0);
+        xSemaphoreTake(handleWks->signalReadyToWait, 0);
+
+        // List of task to exclude
+        status = P_UTILS_LIST_InitMT(&handleWks->taskList, wMaxRDV);
+        if (SOPC_STATUS_OK != status)
+        {
+            resPTHR = E_THREAD_RESULT_ERROR_OUT_OF_MEM;
+        }
+    }
+
+    if (E_THREAD_RESULT_OK == resPTHR)
+    {
+        P_SYNCHRO_InitConditionVariable(&handleWks->signalThreadEnded, wMaxRDV);
+
+        if (handleWks->signalThreadEnded == NULL)
+        {
+            resPTHR = E_THREAD_RESULT_ERROR_OUT_OF_MEM;
+        }
+    }
+    if (E_THREAD_RESULT_OK == resPTHR)
+    {
+        BaseType_t resTaskCreate = xTaskCreate(cbInternalCallback,       // Callback
+                                               "appThread",              // Friendly name
+                                               configMINIMAL_STACK_SIZE, // Stack size
+                                               handleWks,                // Workspace thread
+                                               configMAX_PRIORITIES - 1, // Priority
+                                               &handleWks->handleTask);  // Task handle
+        if (pdPASS != resTaskCreate)
+        {
+            resPTHR = E_THREAD_RESULT_ERROR_NOK;
+        }
+    }
+
+    if (E_THREAD_RESULT_OK == resPTHR)
+    {
+        DEBUG_incrementCpt();
+        status = P_UTILS_LIST_AddEltMT(&gTaskList,            // Thread list
+                                       handleWks->handleTask, // Handle task
+                                       handleWks,             // Workspace
+                                       0, 0);
+
+        if (SOPC_STATUS_OK != status)
+        {
+            resPTHR = E_THREAD_RESULT_ERROR_MAX_THREADS;
+        }
+    }
+
+    if (E_THREAD_RESULT_OK == resPTHR)
+    {
+        // Set output parameter
+        *ptrWks = handleWks;
+        // Start thread
+        xSemaphoreGive(handleWks->signalReadyToStart);
     }
     else
     {
-        if ((*ptrWks) != NULL)
+        /* Error: clean partially initialized components */
+        if (handleWks->handleTask != NULL)
         {
-            resPTHR = E_THREAD_RESULT_ERROR_ALREADY_INITIALIZED;
+            vTaskSuspend(handleWks->handleTask);
+            vTaskDelete(handleWks->handleTask);
+            handleWks->handleTask = NULL;
+            DEBUG_decrementCpt();
         }
-        else
+        if (handleWks->lockRecHandle != NULL)
         {
-            handleWks = (tThreadWks*) pvPortMalloc(sizeof(tThreadWks));
-
-            if (handleWks == NULL)
-            {
-                resPTHR = E_THREAD_RESULT_ERROR_OUT_OF_MEM;
-            }
-            else
-            {
-                memset(handleWks, 0, sizeof(tThreadWks));
-
-                handleWks->args.cbExternalCallback = fct;
-                handleWks->cbReadyToSignal = fctReadyToSignal;
-                handleWks->cbWaitingForJoin = fctWaitingForJoin;
-                handleWks->args.ptrStartArgs = args;
-                handleWks->handleTask = NULL;
-
-                handleWks->signalReadyToWait = xSemaphoreCreateBinary();
-                handleWks->signalReadyToStart = xSemaphoreCreateBinary();
-                handleWks->lockRecHandle = xQueueCreateMutex(queueQUEUE_TYPE_RECURSIVE_MUTEX);
-                if ((*ptrWks)->signalReadyToWait)
-                {
-                    DEBUG_incrementCpt();
-                }
-                if ((*ptrWks)->signalReadyToStart)
-                {
-                    DEBUG_incrementCpt();
-                }
-                if ((*ptrWks)->lockRecHandle)
-                {
-                    DEBUG_incrementCpt();
-                }
-
-                if ((handleWks->signalReadyToWait == NULL) || (handleWks->signalReadyToStart == NULL) ||
-                    (handleWks->lockRecHandle == NULL))
-                {
-                    resPTHR = E_THREAD_RESULT_ERROR_OUT_OF_MEM;
-                }
-                else
-                {
-                    xSemaphoreTake(handleWks->signalReadyToStart, 0);
-                    xSemaphoreTake(handleWks->signalReadyToWait, 0);
-
-                    // List of task to exclude
-                    status = P_UTILS_LIST_InitMT(&handleWks->taskList, wMaxRDV);
-                    if (SOPC_STATUS_OK != status)
-                    {
-                        resPTHR = E_THREAD_RESULT_ERROR_OUT_OF_MEM;
-                    }
-                    else
-                    {
-                        P_SYNCHRO_InitConditionVariable(&handleWks->signalThreadEnded, wMaxRDV);
-
-                        if (handleWks->signalThreadEnded == NULL)
-                        {
-                            resPTHR = E_THREAD_RESULT_ERROR_OUT_OF_MEM;
-                        }
-                        else
-                        {
-                            if (xTaskCreate(cbInternalCallback,                // Callback
-                                            "appThread",                       // Friendly name
-                                            configMINIMAL_STACK_SIZE,          // Stack size
-                                            handleWks,                         // Workspace thread
-                                            configMAX_PRIORITIES - 1,          // Priority
-                                            &handleWks->handleTask) != pdPASS) // Task handle
-                            {
-                                resPTHR = E_THREAD_RESULT_ERROR_NOK;
-                            }
-                            else
-                            {
-                                DEBUG_incrementCpt();
-                                status = P_UTILS_LIST_AddEltMT(&gTaskList,            // Thread list
-                                                               handleWks->handleTask, // Handle task
-                                                               handleWks,             // Workspace
-                                                               0, 0);
-
-                                if (SOPC_STATUS_OK != status)
-                                {
-                                    resPTHR = E_THREAD_RESULT_ERROR_MAX_THREADS;
-                                }
-                                else
-                                {
-                                    *ptrWks = handleWks;
-                                    resPTHR = E_THREAD_RESULT_OK;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (resPTHR != E_THREAD_RESULT_OK)
-                {
-                    if (handleWks->handleTask != NULL)
-                    {
-                        vTaskSuspend(handleWks->handleTask);
-                        vTaskDelete(handleWks->handleTask);
-                        handleWks->handleTask = NULL;
-                        DEBUG_decrementCpt();
-                    }
-                    if (handleWks->lockRecHandle != NULL)
-                    {
-                        vQueueDelete(handleWks->lockRecHandle);
-                        handleWks->lockRecHandle = NULL;
-                        DEBUG_decrementCpt();
-                    }
-                    if (handleWks->signalReadyToWait != NULL)
-                    {
-                        vQueueDelete(handleWks->signalReadyToWait);
-                        handleWks->signalReadyToWait = NULL;
-                        DEBUG_decrementCpt();
-                    }
-                    if (handleWks->signalReadyToStart != NULL)
-                    {
-                        vQueueDelete(handleWks->signalReadyToStart);
-                        handleWks->signalReadyToStart = NULL;
-                        DEBUG_decrementCpt();
-                    }
-
-                    P_UTILS_LIST_DeInitMT(&handleWks->taskList);
-                    P_SYNCHRO_ClearConditionVariable(&handleWks->signalThreadEnded);
-
-                    // Raz leaved memory
-                    memset(handleWks, 0, sizeof(tThreadWks));
-                }
-                else
-                {
-                    // Start thread
-                    if (resPTHR == E_THREAD_RESULT_OK)
-                    {
-                        xSemaphoreGive((*ptrWks)->signalReadyToStart);
-                    }
-                }
-            }
+            vQueueDelete(handleWks->lockRecHandle);
+            handleWks->lockRecHandle = NULL;
+            DEBUG_decrementCpt();
         }
+        if (handleWks->signalReadyToWait != NULL)
+        {
+            vQueueDelete(handleWks->signalReadyToWait);
+            handleWks->signalReadyToWait = NULL;
+            DEBUG_decrementCpt();
+        }
+        if (handleWks->signalReadyToStart != NULL)
+        {
+            vQueueDelete(handleWks->signalReadyToStart);
+            handleWks->signalReadyToStart = NULL;
+            DEBUG_decrementCpt();
+        }
+
+        P_UTILS_LIST_DeInitMT(&handleWks->taskList);
+        P_SYNCHRO_ClearConditionVariable(&handleWks->signalThreadEnded);
+
+        // Reset structure memory
+        memset(handleWks, 0, sizeof(tThreadWks));
     }
 
     return resPTHR;
