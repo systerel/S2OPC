@@ -61,7 +61,7 @@ typedef struct T_THREAD_WKS
 /*****Private global definition*****/
 
 static tUtilsList gTaskList = // Global task list
-    {NULL, 0, 0, 0, NULL};
+    {NULL, 0, 0, 0, 0, 0, 0, NULL};
 
 static unsigned int bOverflowDetected = 0;
 
