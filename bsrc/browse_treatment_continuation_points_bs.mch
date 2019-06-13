@@ -55,7 +55,7 @@ OPERATIONS
         p_nodeClassMask : t_BrowseNodeClassMask_i   &
         p_resultMask : t_BrowseResultMask_i
     THEN
-        /* No continuation point shall be defined for given session to create a new one */
+        /* Memory should allow to create a new continuation point */
         bres := bool(s_ContinuationPoints /= t_ContinuationPoint & t_ContinuationPointId /= ran(id_ContinuationPoint)) ||
         IF s_ContinuationPoints /= t_ContinuationPoint & t_ContinuationPointId /= ran(id_ContinuationPoint)
         THEN

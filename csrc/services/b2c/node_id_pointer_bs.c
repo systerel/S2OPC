@@ -36,15 +36,18 @@ void node_id_pointer_bs__copy_node_id_pointer_content(const constants__t_NodeId_
     if (constants__c_NodeId_indet != node_id_pointer_bs__p_node_id)
     {
         status = SOPC_STATUS_OUT_OF_MEMORY;
-        *node_id_pointer_bs__p_node_id_copy = calloc(1, sizeof(SOPC_NodeId));
-        if (NULL != *node_id_pointer_bs__p_node_id_copy)
+        SOPC_NodeId* nodeId = calloc(1, sizeof(SOPC_NodeId));
+        if (NULL != nodeId)
         {
-            SOPC_NodeId_Initialize(*node_id_pointer_bs__p_node_id_copy);
-            status = SOPC_NodeId_Copy(*node_id_pointer_bs__p_node_id_copy, node_id_pointer_bs__p_node_id);
-            if (SOPC_STATUS_OK != status)
+            SOPC_NodeId_Initialize(nodeId);
+            status = SOPC_NodeId_Copy(nodeId, node_id_pointer_bs__p_node_id);
+            if (SOPC_STATUS_OK == status)
             {
-                free(*node_id_pointer_bs__p_node_id_copy);
-                *node_id_pointer_bs__p_node_id_copy = NULL;
+                *node_id_pointer_bs__p_node_id_copy = nodeId;
+            }
+            else
+            {
+                free(nodeId);
             }
         }
     }

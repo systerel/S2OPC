@@ -129,7 +129,7 @@ extern const constants_bs__t_NodeId_i constants_bs__c_Byte_Type_NodeId;
 #define constants_bs__c_ExpandedNodeId_indet NULL
 #define constants_bs__c_IndexRange_indet 0
 #define constants_bs__c_LocalizedText_indet 0
-#define constants_bs__c_NodeId_indet 0
+#define constants_bs__c_NodeId_indet NULL
 #define constants_bs__c_Node_indet 0
 #define constants_bs__c_Nonce_indet 0
 extern const constants_bs__t_NodeId_i constants_bs__c_Null_Type_NodeId;

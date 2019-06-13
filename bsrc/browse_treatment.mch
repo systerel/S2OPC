@@ -208,6 +208,9 @@ OPERATIONS
             isBrowseValueContextDefined = bool(p_service_StatusCode = e_sc_ok) &
             /* If context is set then the continuation point is released */
             (p_service_StatusCode = e_sc_ok =>
+                p_continuationPointId : ran(id_ContinuationPoint$0) &
+                p_session : ran(session_ContinuationPoint$0) &
+                session_ContinuationPoint$0~(p_session) = id_ContinuationPoint$0~(p_continuationPointId) &
                 s_ContinuationPoints = s_ContinuationPoints$0 - {session_ContinuationPoint$0~(p_session)} &
                 id_ContinuationPoint = {session_ContinuationPoint$0~(p_session)} <<| id_ContinuationPoint$0 &
                 session_ContinuationPoint = {session_ContinuationPoint$0~(p_session)} <<| session_ContinuationPoint$0) &

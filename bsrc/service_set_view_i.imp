@@ -148,7 +148,7 @@ LOCAL_OPERATIONS
 
         p_cpi       : t_BrowseValue_i &
         p_cpi       : t_BrowseValue &
-        p_cpi       : cast_t_BrowseValue[1..card(RequestBrowseNext_ContinuationPointId)]
+        p_cpi       : dom(RequestBrowseNext_ContinuationPointId)
     THEN
         /* Note: we do not have access to the browse_treatment variables,
                  only operation result are forwarded by translate browse path machines */
