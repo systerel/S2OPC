@@ -114,8 +114,11 @@ void P_UTILS_LIST_DeInitMT(tUtilsList* ptr);
 extern uint32_t cptAlloc;
 extern uint32_t cptFree;
 extern QueueHandle_t cptMutex;
-void incrementCpt(void);
-void decrementCpt(void);
+void DEBUG_incrementCpt(void);
+void DEBUG_decrementCpt(void);
+#else
+#define DEBUG_incrementCpt()
+#define DEBUG_decrementCpt()
 #endif
 
 #endif

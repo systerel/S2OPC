@@ -87,17 +87,13 @@ eConditionVariableResult P_SYNCHRO_ClearConditionVariable(hCondVar* pv)
 
             vQueueDelete((*pv)->handleLockCounter); // End of critical section. Destroy it on clear
             (*pv)->handleLockCounter = NULL;
-#ifdef FOLLOW_ALLOC
-            decrementCpt();
-#endif
+            DEBUG_decrementCpt();
             if ((*pv) != NULL) // Destroy workspace
             {
                 (void) memset(*pv, 0, sizeof(tConditionVariable)); // Raz on leave memory
                 vPortFree(*pv);
                 *pv = NULL;
-#ifdef FOLLOW_ALLOC
-                decrementCpt();
-#endif
+                DEBUG_decrementCpt();
             }
         }
         else
@@ -131,18 +127,14 @@ eConditionVariableResult P_SYNCHRO_InitConditionVariable(hCondVar* pv,         /
             condVar = (tConditionVariable*) pvPortMalloc(sizeof(tConditionVariable));
             if (condVar != NULL)
             {
-#ifdef FOLLOW_ALLOC
-                incrementCpt();
-#endif
+                DEBUG_incrementCpt();
                 // Raz allocated workspaace
                 (void) memset(condVar, 0, sizeof(tConditionVariable));
 
                 pMutex = xQueueCreateMutex(queueQUEUE_TYPE_MUTEX);
                 if (pMutex != NULL)
                 {
-#ifdef FOLLOW_ALLOC
-                    incrementCpt();
-#endif
+                    DEBUG_incrementCpt();
                     // Allocate list of waiters
                     P_UTILS_LIST_Init(&condVar->taskList, wMaxWaiters);
                     if (condVar->taskList.list == NULL)
@@ -154,10 +146,8 @@ eConditionVariableResult P_SYNCHRO_InitConditionVariable(hCondVar* pv,         /
                         (void) memset(condVar, 0, sizeof(tConditionVariable));
                         vPortFree(condVar);
                         condVar = NULL;
-#ifdef FOLLOW_ALLOC
-                        decrementCpt();
-                        decrementCpt();
-#endif
+                        DEBUG_decrementCpt();
+                        DEBUG_decrementCpt();
                         result = E_COND_VAR_RESULT_ERROR_OUT_OF_MEM;
                     }
                     else
@@ -174,9 +164,7 @@ eConditionVariableResult P_SYNCHRO_InitConditionVariable(hCondVar* pv,         /
                     (void) memset(condVar, 0, sizeof(tConditionVariable));
                     vPortFree(condVar);
                     condVar = NULL;
-#ifdef FOLLOW_ALLOC
-                    decrementCpt();
-#endif
+                    DEBUG_decrementCpt();
                     result = E_COND_VAR_RESULT_ERROR_OUT_OF_MEM;
                 }
             }
@@ -208,9 +196,7 @@ void P_SYNCHRO_DestroyConditionVariable(hCondVar** ppv)
             vPortFree(ptrHCondVar);
             *ppv = NULL;
         }
-#ifdef FOLLOW_ALLOC
-        decrementCpt();
-#endif
+        DEBUG_decrementCpt();
     }
 }
 
@@ -221,9 +207,7 @@ hCondVar* P_SYNCHRO_CreateConditionVariable(void)
     ptr = (hCondVar*) pvPortMalloc(sizeof(hCondVar));
     if (ptr != NULL)
     {
-#ifdef FOLLOW_ALLOC
-        incrementCpt();
-#endif
+        DEBUG_incrementCpt();
         // Raz handle
         (void) memset(ptr, 0, sizeof(hCondVar));
         if (P_SYNCHRO_InitConditionVariable(ptr, MAX_WAITERS) != E_COND_VAR_RESULT_OK)
@@ -233,9 +217,7 @@ hCondVar* P_SYNCHRO_CreateConditionVariable(void)
             (void) memset(ptr, 0, sizeof(hCondVar));
             vPortFree(ptr);
             ptr = NULL;
-#ifdef FOLLOW_ALLOC
-            decrementCpt();
-#endif
+            DEBUG_decrementCpt();
         }
     }
     return ptr;

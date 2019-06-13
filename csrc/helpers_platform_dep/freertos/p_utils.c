@@ -51,9 +51,7 @@ SOPC_ReturnStatus P_UTILS_LIST_Init(tUtilsList* ptr, uint16_t wMaxRDV)
     }
 
     memset(ptr->list, 0, sizeof(tUtilsListElt) * wMaxRDV);
-#ifdef FOLLOW_ALLOC
-    incrementCpt();
-#endif
+    DEBUG_incrementCpt();
     ptr->wMaxWaitingTasks = wMaxRDV;
     ptr->firstValid = UINT16_MAX;
     ptr->firstFreeNextOQP = UINT16_MAX;
@@ -74,9 +72,7 @@ void P_UTILS_LIST_DeInit(tUtilsList* ptr)
             memset(ptr->list, 0, ptr->wMaxWaitingTasks * sizeof(tUtilsListElt));
             vPortFree(ptr->list);
             ptr->list = NULL;
-#ifdef FOLLOW_ALLOC
-            decrement();
-#endif
+            DEBUG_decrementCpt();
         }
         ptr->wMaxWaitingTasks = 0;
         ptr->firstValid = UINT16_MAX;
@@ -372,9 +368,7 @@ SOPC_ReturnStatus P_UTILS_LIST_InitMT(tUtilsList* ptr, uint16_t wMaxRDV)
             }
             else
             {
-#ifdef FOLLOW_ALLOC
-                incrementCpt();
-#endif
+                DEBUG_incrementCpt();
             }
         }
     }
@@ -391,9 +385,7 @@ void P_UTILS_LIST_DeInitMT(tUtilsList* ptr)
         }
         vQueueDelete(ptr->lockHandle);
         ptr->lockHandle = NULL;
-#ifdef FOLLOW_ALLOC
-        decrementCpt();
-#endif
+        DEBUG_decrementCpt();
     }
 }
 
@@ -492,7 +484,7 @@ uint32_t cptAlloc = 0;
 uint32_t cptFree = 0;
 QueueHandle_t cptMutex = NULL;
 
-void incrementCpt(void)
+void DEBUG_incrementCpt(void)
 {
     if (cptMutex == NULL)
     {
@@ -502,7 +494,7 @@ void incrementCpt(void)
     cptAlloc++;
     xSemaphoreGiveRecursive(cptMutex);
 }
-void decrementCpt(void)
+void DEBUG_decrementCpt(void)
 {
     if (cptMutex == NULL)
     {

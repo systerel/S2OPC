@@ -110,9 +110,7 @@ static void cbInternalCallback(void* ptr)
             xSemaphoreGiveRecursive(ptrArgs->lockRecHandle);
         }
     }
-#ifdef FOLLOW_ALLOC
-    decrementCpt();
-#endif
+    DEBUG_decrementCpt();
     vTaskDelete(NULL);
 }
 
@@ -126,9 +124,7 @@ void P_THREAD_Destroy(hThread** ptr)
         (void) memset(*ptr, 0, sizeof(hThread));
         vPortFree(*ptr);
         *ptr = NULL;
-#ifdef FOLLOW_ALLOC
-        decrementCpt();
-#endif
+        DEBUG_decrementCpt();
     }
 }
 // Creation workspace
@@ -143,9 +139,7 @@ hThread* P_THREAD_Create(tPtrFct fct,              // Callback
 
     if (ptrWks != NULL)
     {
-#ifdef FOLLOW_ALLOC
-        incrementCpt();
-#endif
+        DEBUG_incrementCpt();
         (void) memset(ptrWks, 0, sizeof(hThread));
 
         // Initialization
@@ -208,20 +202,18 @@ eThreadResult P_THREAD_Init(hThread* ptrWks,            // Workspace
                 handleWks->signalReadyToWait = xSemaphoreCreateBinary();
                 handleWks->signalReadyToStart = xSemaphoreCreateBinary();
                 handleWks->lockRecHandle = xQueueCreateMutex(queueQUEUE_TYPE_RECURSIVE_MUTEX);
-#ifdef FOLLOW_ALLOC
                 if ((*ptrWks)->signalReadyToWait)
                 {
-                    incrementCpt();
+                    DEBUG_incrementCpt();
                 }
                 if ((*ptrWks)->signalReadyToStart)
                 {
-                    incrementCpt();
+                    DEBUG_incrementCpt();
                 }
                 if ((*ptrWks)->lockRecHandle)
                 {
-                    incrementCpt();
+                    DEBUG_incrementCpt();
                 }
-#endif
 
                 if ((handleWks->signalReadyToWait == NULL) || (handleWks->signalReadyToStart == NULL) ||
                     (handleWks->lockRecHandle == NULL))
@@ -260,9 +252,7 @@ eThreadResult P_THREAD_Init(hThread* ptrWks,            // Workspace
                             }
                             else
                             {
-#ifdef FOLLOW_ALLOC
-                                incrementCpt();
-#endif
+                                DEBUG_incrementCpt();
                                 status = P_UTILS_LIST_AddEltMT(&gTaskList,            // Thread list
                                                                handleWks->handleTask, // Handle task
                                                                handleWks,             // Workspace
@@ -289,33 +279,25 @@ eThreadResult P_THREAD_Init(hThread* ptrWks,            // Workspace
                         vTaskSuspend(handleWks->handleTask);
                         vTaskDelete(handleWks->handleTask);
                         handleWks->handleTask = NULL;
-#ifdef FOLLOW_ALLOC
-                        decrementCpt();
-#endif
+                        DEBUG_decrementCpt();
                     }
                     if (handleWks->lockRecHandle != NULL)
                     {
                         vQueueDelete(handleWks->lockRecHandle);
                         handleWks->lockRecHandle = NULL;
-#ifdef FOLLOW_ALLOC
-                        decrementCpt();
-#endif
+                        DEBUG_decrementCpt();
                     }
                     if (handleWks->signalReadyToWait != NULL)
                     {
                         vQueueDelete(handleWks->signalReadyToWait);
                         handleWks->signalReadyToWait = NULL;
-#ifdef FOLLOW_ALLOC
-                        decrementCpt();
-#endif
+                        DEBUG_decrementCpt();
                     }
                     if (handleWks->signalReadyToStart != NULL)
                     {
                         vQueueDelete(handleWks->signalReadyToStart);
                         handleWks->signalReadyToStart = NULL;
-#ifdef FOLLOW_ALLOC
-                        decrementCpt();
-#endif
+                        DEBUG_decrementCpt();
                     }
 
                     P_UTILS_LIST_DeInitMT(&handleWks->taskList);
@@ -542,17 +524,13 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
                                         {
                                             vQueueDelete((*pHandle)->signalReadyToWait);
                                             (*pHandle)->signalReadyToWait = NULL;
-#ifdef FOLLOW_ALLOC
-                                            decrementCpt();
-#endif
+                                            DEBUG_decrementCpt();
                                         }
                                         if ((*pHandle)->signalReadyToStart != NULL)
                                         {
                                             vQueueDelete((*pHandle)->signalReadyToStart);
                                             (*pHandle)->signalReadyToStart = NULL;
-#ifdef FOLLOW_ALLOC
-                                            decrementCpt();
-#endif
+                                            DEBUG_decrementCpt();
                                         }
 
                                         // Remove thread from global list
@@ -596,9 +574,7 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
                                         {
                                             vQueueDelete((*pHandle)->lockRecHandle);
                                             (*pHandle)->lockRecHandle = NULL;
-#ifdef FOLLOW_ALLOC
-                                            decrementCpt();
-#endif
+                                            DEBUG_decrementCpt();
                                         }
 
                                         /* Raz leaved memory */
@@ -606,9 +582,7 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
 
                                         vPortFree(*pHandle);
                                         *pHandle = NULL;
-#ifdef FOLLOW_ALLOC
-                                        decrementCpt();
-#endif
+                                        DEBUG_decrementCpt();
                                         result = E_THREAD_RESULT_OK;
                                     }
                                     else
