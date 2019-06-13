@@ -364,7 +364,7 @@ eConditionVariableResult P_SYNCHRO_UnlockAndWaitForConditionVariable(hCondVar* p
                                                                      uint32_t uwTimeOutMs)   // TimeOut
 {
     eConditionVariableResult result = E_COND_VAR_RESULT_ERROR_INCORRECT_PARAMETERS;
-    eUtilsListResult resTList = E_UTILS_LIST_RESULT_ERROR_NOK;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     TickType_t xTimeToWait = 0;
     TaskHandle_t handleTask = 0;
     uint32_t notificationValue = 0;
@@ -389,13 +389,13 @@ eConditionVariableResult P_SYNCHRO_UnlockAndWaitForConditionVariable(hCondVar* p
             {
                 handleTask = xTaskGetCurrentTaskHandle();
 
-                resTList = P_UTILS_LIST_AddElt(&(*pv)->taskList, // Task waiting
-                                               handleTask,       // Current task
-                                               NULL,             // No context
-                                               uwSignal,         // Signal
-                                               uwClearSignal);   // Clear signal
+                status = P_UTILS_LIST_AddElt(&(*pv)->taskList, // Task waiting
+                                             handleTask,       // Current task
+                                             NULL,             // No context
+                                             uwSignal,         // Signal
+                                             uwClearSignal);   // Clear signal
 
-                if (resTList != E_UTILS_LIST_RESULT_OK)
+                if (SOPC_STATUS_OK != status)
                 {
                     result = E_COND_VAR_RESULT_ERROR_MAX_WAITERS;
                 }

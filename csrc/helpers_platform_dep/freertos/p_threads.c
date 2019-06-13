@@ -168,7 +168,7 @@ eThreadResult P_THREAD_Init(hThread* ptrWks,            // Workspace
                             tPtrFct fctReadyToSignal)   // Debug wait for
 {
     eThreadResult resPTHR = E_THREAD_RESULT_ERROR_NOK;
-    eUtilsListResult resTList = E_UTILS_LIST_RESULT_ERROR_NOK;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     hThread handleWks = NULL;
 
     // Create global task list for first call.
@@ -234,8 +234,8 @@ eThreadResult P_THREAD_Init(hThread* ptrWks,            // Workspace
                     xSemaphoreTake(handleWks->signalReadyToWait, 0);
 
                     // List of task to exclude
-                    resTList = P_UTILS_LIST_InitMT(&handleWks->taskList, wMaxRDV);
-                    if (resTList != E_UTILS_LIST_RESULT_OK)
+                    status = P_UTILS_LIST_InitMT(&handleWks->taskList, wMaxRDV);
+                    if (SOPC_STATUS_OK != status)
                     {
                         resPTHR = E_THREAD_RESULT_ERROR_OUT_OF_MEM;
                     }
@@ -263,12 +263,12 @@ eThreadResult P_THREAD_Init(hThread* ptrWks,            // Workspace
 #ifdef FOLLOW_ALLOC
                                 incrementCpt();
 #endif
-                                resTList = P_UTILS_LIST_AddEltMT(&gTaskList,            // Thread list
-                                                                 handleWks->handleTask, // Handle task
-                                                                 handleWks,             // Workspace
-                                                                 0, 0);
+                                status = P_UTILS_LIST_AddEltMT(&gTaskList,            // Thread list
+                                                               handleWks->handleTask, // Handle task
+                                                               handleWks,             // Workspace
+                                                               0, 0);
 
-                                if (resTList != E_UTILS_LIST_RESULT_OK)
+                                if (SOPC_STATUS_OK != status)
                                 {
                                     resPTHR = E_THREAD_RESULT_ERROR_MAX_THREADS;
                                 }
@@ -345,7 +345,7 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
 {
     eThreadResult result = E_THREAD_RESULT_ERROR_NOK;
     eConditionVariableResult resPSYNC = E_COND_VAR_RESULT_ERROR_NOK;
-    eUtilsListResult resTList = E_UTILS_LIST_RESULT_ERROR_NOK;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     tThreadWks* ptrCurrentThread = NULL;
     tThreadWks* pOthersThread = NULL;
     uint16_t wSlotId = UINT16_MAX;
@@ -408,13 +408,13 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
                     else
                     {
                         // THread to join add to its list current thread
-                        resTList = P_UTILS_LIST_AddEltMT(&(*pHandle)->taskList,       //
-                                                         xTaskGetCurrentTaskHandle(), //
-                                                         NULL,                        //
-                                                         0,                           //
-                                                         0);                          //
+                        status = P_UTILS_LIST_AddEltMT(&(*pHandle)->taskList,       //
+                                                       xTaskGetCurrentTaskHandle(), //
+                                                       NULL,                        //
+                                                       0,                           //
+                                                       0);                          //
 
-                        if (resTList != E_UTILS_LIST_RESULT_OK)
+                        if (SOPC_STATUS_OK != status)
                         {
                             result = E_THREAD_RESULT_ERROR_MAX_THREADS;
                         }
@@ -435,16 +435,16 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
                                                                             0);                       //
                                     if (wSlotIdRes < UINT16_MAX)
                                     {
-                                        resTList = P_UTILS_LIST_AddEltMT(&pOthersThread->taskList,    //
-                                                                         xTaskGetCurrentTaskHandle(), //
-                                                                         NULL,                        //
-                                                                         0,                           //
-                                                                         0);                          //
+                                        status = P_UTILS_LIST_AddEltMT(&pOthersThread->taskList,    //
+                                                                       xTaskGetCurrentTaskHandle(), //
+                                                                       NULL,                        //
+                                                                       0,                           //
+                                                                       0);                          //
                                     }
                                 }
-                            } while ((wSlotId != UINT16_MAX) && (resTList == E_UTILS_LIST_RESULT_OK));
+                            } while ((wSlotId != UINT16_MAX) && (SOPC_STATUS_OK == status));
 
-                            if (resTList != E_UTILS_LIST_RESULT_OK)
+                            if (SOPC_STATUS_OK != status)
                             {
                                 // Restore if error occurred :
                                 // Threads that reference the task to join don't record in addition the current
@@ -488,15 +488,15 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
 
                                     if (handle != NULL)
                                     {
-                                        resTList = P_UTILS_LIST_AddEltMT(&(*pHandle)->taskList, //
-                                                                         handle,                //
-                                                                         NULL,                  //
-                                                                         0,                     //
-                                                                         0);                    //
+                                        status = P_UTILS_LIST_AddEltMT(&(*pHandle)->taskList, //
+                                                                       handle,                //
+                                                                       NULL,                  //
+                                                                       0,                     //
+                                                                       0);                    //
                                     }
-                                } while ((wSlotId != UINT16_MAX) && (resTList == E_UTILS_LIST_RESULT_OK));
+                                } while ((wSlotId != UINT16_MAX) && (SOPC_STATUS_OK == status));
 
-                                if (resTList != E_UTILS_LIST_RESULT_OK)
+                                if (SOPC_STATUS_OK != status)
                                 {
                                     // Restore in case of error
                                     wSlotId = UINT16_MAX;

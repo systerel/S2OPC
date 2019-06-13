@@ -33,21 +33,21 @@
 #include "p_utils.h"
 
 /*Alloc task*/
-eUtilsListResult P_UTILS_LIST_Init(tUtilsList* ptr, uint16_t wMaxRDV)
+SOPC_ReturnStatus P_UTILS_LIST_Init(tUtilsList* ptr, uint16_t wMaxRDV)
 {
     if (NULL == ptr || MAX_P_UTILS_LIST >= wMaxRDV)
     {
-        return E_UTILS_LIST_RESULT_ERROR_NOK;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
     if (NULL != ptr->list)
     {
-        return E_UTILS_LIST_RESULT_ERROR_ALREADY_INIT;
+        return SOPC_STATUS_INVALID_STATE;
     }
 
     ptr->list = (tUtilsListElt*) pvPortMalloc(sizeof(tUtilsListElt) * wMaxRDV);
     if (NULL == ptr->list)
     {
-        return E_UTILS_LIST_RESULT_ERROR_NOK;
+        return SOPC_STATUS_OUT_OF_MEMORY;
     }
 
     memset(ptr->list, 0, sizeof(tUtilsListElt) * wMaxRDV);
@@ -62,7 +62,7 @@ eUtilsListResult P_UTILS_LIST_Init(tUtilsList* ptr, uint16_t wMaxRDV)
     ptr->wNbRegisteredTasks = 0;
     ptr->lockHandle = NULL;
 
-    return E_UTILS_LIST_RESULT_OK;
+    return SOPC_STATUS_OK;
 }
 
 void P_UTILS_LIST_DeInit(tUtilsList* ptr)
@@ -87,11 +87,11 @@ void P_UTILS_LIST_DeInit(tUtilsList* ptr)
     }
 }
 
-eUtilsListResult P_UTILS_LIST_AddElt(tUtilsList* ptr,
-                                     TaskHandle_t handleTask,
-                                     void* pContext,
-                                     uint32_t infos,
-                                     uint32_t infos2)
+SOPC_ReturnStatus P_UTILS_LIST_AddElt(tUtilsList* ptr,
+                                      TaskHandle_t handleTask,
+                                      void* pContext,
+                                      uint32_t infos,
+                                      uint32_t infos2)
 {
     uint16_t wCurrentSlotId = 0;
     uint16_t firstPrevOQP = 0;
@@ -99,7 +99,7 @@ eUtilsListResult P_UTILS_LIST_AddElt(tUtilsList* ptr,
 
     if (NULL == ptr || NULL == handleTask || NULL == ptr->list)
     {
-        return E_UTILS_LIST_RESULT_ERROR_NOK;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     if (ptr->wNbRegisteredTasks >= ptr->wMaxWaitingTasks || ptr->firstFree >= ptr->wMaxWaitingTasks)
@@ -107,7 +107,7 @@ eUtilsListResult P_UTILS_LIST_AddElt(tUtilsList* ptr,
         ptr->firstFree = UINT16_MAX;
         ptr->firstFreeNextOQP = UINT16_MAX;
         ptr->firstFreePreviousOQP = UINT16_MAX;
-        return E_UTILS_LIST_RESULT_ERROR_MAX_ELTS;
+        return SOPC_STATUS_NOK;
     }
 
     // New element is the first free
@@ -202,7 +202,7 @@ eUtilsListResult P_UTILS_LIST_AddElt(tUtilsList* ptr,
         }
     }
 
-    return E_UTILS_LIST_RESULT_OK;
+    return SOPC_STATUS_OK;
 }
 
 uint16_t P_UTILS_LIST_RemoveElt(tUtilsList* pv, TaskHandle_t taskNotified, uint32_t infos1, uint32_t infos2)
@@ -356,14 +356,14 @@ uint16_t P_UTILS_LIST_GetEltIndex(tUtilsList* ptr, TaskHandle_t taskNotified, ui
     return wCurrentSlotId;
 }
 
-eUtilsListResult P_UTILS_LIST_InitMT(tUtilsList* ptr, uint16_t wMaxRDV)
+SOPC_ReturnStatus P_UTILS_LIST_InitMT(tUtilsList* ptr, uint16_t wMaxRDV)
 {
-    eUtilsListResult result = E_UTILS_LIST_RESULT_ERROR_NOK;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     if ((ptr != NULL) && (ptr->lockHandle == NULL))
     {
-        result = P_UTILS_LIST_Init(ptr, wMaxRDV);
-        if (result == E_UTILS_LIST_RESULT_OK)
+        status = P_UTILS_LIST_Init(ptr, wMaxRDV);
+        if (SOPC_STATUS_OK == status)
         {
             ptr->lockHandle = xQueueCreateMutex(queueQUEUE_TYPE_RECURSIVE_MUTEX);
             if (ptr->lockHandle == NULL)
@@ -378,7 +378,7 @@ eUtilsListResult P_UTILS_LIST_InitMT(tUtilsList* ptr, uint16_t wMaxRDV)
             }
         }
     }
-    return result;
+    return status;
 }
 
 void P_UTILS_LIST_DeInitMT(tUtilsList* ptr)
@@ -409,21 +409,21 @@ uint16_t P_UTILS_LIST_RemoveEltMT(tUtilsList* ptr, TaskHandle_t taskNotified, ui
     return wCurrentSlotId;
 }
 
-eUtilsListResult P_UTILS_LIST_AddEltMT(tUtilsList* ptr,
-                                       TaskHandle_t handleTask,
-                                       void* pContext,
-                                       uint32_t infos1,
-                                       uint32_t infos2)
+SOPC_ReturnStatus P_UTILS_LIST_AddEltMT(tUtilsList* ptr,
+                                        TaskHandle_t handleTask,
+                                        void* pContext,
+                                        uint32_t infos1,
+                                        uint32_t infos2)
 {
-    eUtilsListResult result = E_UTILS_LIST_RESULT_ERROR_NOK;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     if ((ptr != NULL) && (ptr->lockHandle != NULL))
     {
         xSemaphoreTakeRecursive(ptr->lockHandle, portMAX_DELAY);
-        result = P_UTILS_LIST_AddElt(ptr, handleTask, pContext, infos1, infos2);
+        status = P_UTILS_LIST_AddElt(ptr, handleTask, pContext, infos1, infos2);
         xSemaphoreGiveRecursive(ptr->lockHandle);
     }
-    return result;
+    return status;
 }
 
 TaskHandle_t P_UTILS_LIST_ParseValueEltMT(tUtilsList* ptr,
