@@ -514,8 +514,14 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
                                     // if OK, destroy workspace
                                     if (resPSYNC == E_COND_VAR_RESULT_OK)
                                     {
+                                        // Unlink the condition variable and the mutex to avoid deadlock in multiple
+                                        // calls of Join
+                                        QueueHandle_t tempLock = (*pHandle)->lockRecHandle;
+                                        hCondVar tempCondVar = (*pHandle)->signalThreadEnded;
+                                        (*pHandle)->lockRecHandle = NULL;
+                                        (*pHandle)->signalThreadEnded = NULL;
                                         // After wait, clear condition variable. Unlock other join if necessary.
-                                        P_SYNCHRO_ClearConditionVariable(&(*pHandle)->signalThreadEnded);
+                                        P_SYNCHRO_ClearConditionVariable(&tempCondVar);
                                         P_UTILS_LIST_DeInitMT(&(*pHandle)->taskList);
 
                                         if ((*pHandle)->signalReadyToWait != NULL)
@@ -568,10 +574,10 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
 
                                         (*pHandle)->handleTask = NULL;
 
-                                        if ((*pHandle)->lockRecHandle != NULL)
+                                        if (tempLock != NULL)
                                         {
-                                            vQueueDelete((*pHandle)->lockRecHandle);
-                                            (*pHandle)->lockRecHandle = NULL;
+                                            vQueueDelete(tempLock);
+                                            tempLock = NULL;
                                             DEBUG_decrementCpt();
                                         }
 
