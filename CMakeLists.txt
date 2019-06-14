@@ -402,13 +402,19 @@ endfunction()
 
 enable_testing()
 
-s2opc_embed_address_space(TEST_ADDRESS_SPACE "${CMAKE_SOURCE_DIR}/tests/data/address_space/s2opc.xml")
+set(TEST_ADDRESS_SPACE_XML "${CMAKE_SOURCE_DIR}/tests/data/address_space/s2opc.xml")
+s2opc_embed_address_space(TEST_ADDRESS_SPACE ${TEST_ADDRESS_SPACE_XML})
 
 # Helpers unit tests
 file(GLOB_RECURSE INTERNAL_TESTS_SRCS "tests/helpers/*.c")
-add_executable(check_helpers ${INTERNAL_TESTS_SRCS})
+add_executable(check_helpers ${INTERNAL_TESTS_SRCS} ${TEST_ADDRESS_SPACE})
 target_include_directories(check_helpers PRIVATE ${S2OPC_PRIVATE_INCLUDES} ${MBEDTLS_INCLUDE_DIRS} ${CHECK_INCLUDE_DIRS})
-target_link_libraries(check_helpers PRIVATE s2opc ${CHECK_LIBRARIES})
+target_link_libraries(check_helpers PRIVATE s2opc ${CHECK_LIBRARIES} s2opc-loader-embedded)
+if (EXPAT_FOUND)
+	target_link_libraries(check_helpers PRIVATE s2opc-loader-uanodeset-expat)
+	set_target_properties(check_helpers PROPERTIES COMPILE_DEFINITIONS "WITH_EXPAT")
+endif()
+
 
 s2opc_unit_test(check_helpers)
 
@@ -419,7 +425,8 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tests/data/logger/logCircular.ref2 ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tests/data/logger/logTest.ref1 ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tests/data/logger/logTest.ref2 ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tests/data/logger/logTest.ref3 ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tests/data/logger/logTest.ref3 ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+    COMMAND ${CMAKE_COMMAND} -E copy ${TEST_ADDRESS_SPACE_XML} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 # Server test: local services
 add_executable(toolkit_test_server_local_service "tests/services/toolkit_test_server_local_service.c"

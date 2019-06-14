@@ -1,0 +1,255 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+/** \file
+ *
+ * \brief Entry point for threads tests. Tests use libcheck.
+ *
+ * If you want to debug the exe, you should define env var CK_FORK=no
+ * http://check.sourceforge.net/doc/check_html/check_4.html#No-Fork-Mode
+ */
+
+#include <check.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "check_helpers.h"
+
+#include "embedded/loader.h"
+#ifdef WITH_EXPAT
+#include "uanodeset_expat/loader.h"
+#endif
+
+#include "sopc_macros.h"
+
+#define XML_NAME "s2opc.xml"
+
+static const int64_t SOPC_SECOND_TO_100_NANOSECONDS = 10000000; // 10^7
+
+static void check_variable_and_type_common(SOPC_AddressSpace_Item* left, SOPC_AddressSpace_Item* right)
+{
+    /* Check value metadata (should be only valid for Variable/VariableType) */
+    ck_assert_uint_eq(left->value_status, right->value_status);
+
+    // Note: timestamps are dynamically set to current date in both case => not the exact same date
+    // Check delta < 1 second  between the 2 timestamps (=> do not check value_source_ts.picoSeconds)
+    if (left->value_source_ts.timestamp > right->value_source_ts.timestamp)
+    {
+        ck_assert_int_gt(SOPC_SECOND_TO_100_NANOSECONDS,
+                         left->value_source_ts.timestamp - right->value_source_ts.timestamp);
+    }
+    else
+    {
+        ck_assert_int_gt(SOPC_SECOND_TO_100_NANOSECONDS,
+                         right->value_source_ts.timestamp - left->value_source_ts.timestamp);
+    }
+
+    int32_t compare = -1;
+
+    SOPC_ReturnStatus status =
+        SOPC_Variant_Compare(SOPC_AddressSpace_Item_Get_Value(left), SOPC_AddressSpace_Item_Get_Value(right), &compare);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(0, compare);
+
+    status = SOPC_NodeId_Compare(SOPC_AddressSpace_Item_Get_DataType(left), SOPC_AddressSpace_Item_Get_DataType(right),
+                                 &compare);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(0, compare);
+
+    ck_assert_int_eq(*SOPC_AddressSpace_Item_Get_ValueRank(left), *SOPC_AddressSpace_Item_Get_ValueRank(right));
+
+    ck_assert_int_eq(SOPC_AddressSpace_Item_Get_NoOfArrayDimensions(left),
+                     SOPC_AddressSpace_Item_Get_NoOfArrayDimensions(right));
+
+    uint32_t* left_arr = SOPC_AddressSpace_Item_Get_ArrayDimensions(left);
+    uint32_t* right_arr = SOPC_AddressSpace_Item_Get_ArrayDimensions(right);
+    for (int32_t i = 0; i < SOPC_AddressSpace_Item_Get_NoOfArrayDimensions(left); i++)
+    {
+        ck_assert_uint_eq(left_arr[i], right_arr[i]);
+    }
+}
+
+static void addspace_for_each_equal(const void* key, const void* value, void* user_data)
+{
+    // Uncomment for debugging purpose:
+    /*
+    const SOPC_NodeId* id = key;
+    #include <stdio.h>
+    printf("Checking node: %s\n", SOPC_NodeId_ToCString(id));
+    */
+    bool found = false;
+    /* Note: we do not have read-only accessors for SOPC_AddressSpace_Item even if in this case we do not modify
+     * accessed values */
+    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+    SOPC_AddressSpace_Item* left = (SOPC_AddressSpace_Item*) value;
+    SOPC_GCC_DIAGNOSTIC_RESTORE
+
+    SOPC_AddressSpace* otherAddSpace = user_data;
+    SOPC_AddressSpace_Item* right = SOPC_Dict_Get(otherAddSpace, key, &found);
+    ck_assert(found);
+
+    /* Check item type */
+    ck_assert_int_eq(left->node_class, right->node_class);
+
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    int32_t compare = -1;
+
+    /* Check common attributes (NodeClass, NodeId, BrowseName, DisplayName, Description, *WriteMask) */
+    status = SOPC_NodeId_Compare(SOPC_AddressSpace_Item_Get_NodeId(left), SOPC_AddressSpace_Item_Get_NodeId(right),
+                                 &compare);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(0, compare);
+
+    ck_assert_int_eq(*SOPC_AddressSpace_Item_Get_NodeClass(left), *SOPC_AddressSpace_Item_Get_NodeClass(right));
+
+    status = SOPC_QualifiedName_Compare(SOPC_AddressSpace_Item_Get_BrowseName(left),
+                                        SOPC_AddressSpace_Item_Get_BrowseName(right), &compare);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(0, compare);
+
+    status = SOPC_LocalizedText_Compare(SOPC_AddressSpace_Item_Get_DisplayName(left),
+                                        SOPC_AddressSpace_Item_Get_DisplayName(right), &compare);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(0, compare);
+
+    status = SOPC_LocalizedText_Compare(SOPC_AddressSpace_Item_Get_Description(left),
+                                        SOPC_AddressSpace_Item_Get_Description(right), &compare);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(0, compare);
+
+    ck_assert_uint_eq(*SOPC_AddressSpace_Item_Get_WriteMask(left), *SOPC_AddressSpace_Item_Get_WriteMask(right));
+
+    ck_assert_uint_eq(*SOPC_AddressSpace_Item_Get_UserWriteMask(left),
+                      *SOPC_AddressSpace_Item_Get_UserWriteMask(right));
+
+    /* Check References */
+    ck_assert_int_eq(*SOPC_AddressSpace_Item_Get_NoOfReferences(left),
+                     *SOPC_AddressSpace_Item_Get_NoOfReferences(right));
+
+    OpcUa_ReferenceNode* left_refs = *SOPC_AddressSpace_Item_Get_References(left);
+    OpcUa_ReferenceNode* right_refs = *SOPC_AddressSpace_Item_Get_References(right);
+
+    for (int32_t i = 0; i < *SOPC_AddressSpace_Item_Get_NoOfReferences(left); i++)
+    {
+        ck_assert_uint_eq(left_refs[i].IsInverse, right_refs[i].IsInverse);
+
+        status = SOPC_NodeId_Compare(&left_refs[i].ReferenceTypeId, &right_refs[i].ReferenceTypeId, &compare);
+        ck_assert_int_eq(SOPC_STATUS_OK, status);
+        ck_assert_int_eq(0, compare);
+
+        status = SOPC_ExpandedNodeId_Compare(&left_refs[i].TargetId, &right_refs[i].TargetId, &compare);
+        ck_assert_int_eq(SOPC_STATUS_OK, status);
+        ck_assert_int_eq(0, compare);
+    }
+
+    /* Check specific attributes */
+    switch (left->node_class)
+    {
+    case OpcUa_NodeClass_Object:
+        ck_assert_uint_eq(left->data.object.EventNotifier, right->data.object.EventNotifier);
+        break;
+    case OpcUa_NodeClass_Variable:
+        check_variable_and_type_common(left, right);
+
+        ck_assert_uint_eq(SOPC_AddressSpace_Item_Get_AccessLevel(left), SOPC_AddressSpace_Item_Get_AccessLevel(right));
+
+        ck_assert_uint_eq(left->data.variable.UserAccessLevel, right->data.variable.UserAccessLevel);
+
+        ck_assert_double_eq(left->data.variable.MinimumSamplingInterval, right->data.variable.MinimumSamplingInterval);
+
+        ck_assert_uint_eq(left->data.variable.Historizing, right->data.variable.Historizing);
+        break;
+    case OpcUa_NodeClass_Method:
+        ck_assert_uint_eq(left->data.method.Executable, right->data.method.Executable);
+
+        ck_assert_uint_eq(left->data.method.UserExecutable, right->data.method.UserExecutable);
+        break;
+    case OpcUa_NodeClass_ObjectType:
+        ck_assert_uint_eq(left->data.object_type.IsAbstract, right->data.object_type.IsAbstract);
+        break;
+    case OpcUa_NodeClass_VariableType:
+        check_variable_and_type_common(left, right);
+
+        ck_assert_uint_eq(left->data.variable_type.IsAbstract, right->data.variable_type.IsAbstract);
+        break;
+    case OpcUa_NodeClass_ReferenceType:
+        ck_assert_uint_eq(left->data.reference_type.Symmetric, right->data.reference_type.Symmetric);
+
+        status = SOPC_LocalizedText_Compare(&left->data.reference_type.InverseName,
+                                            &right->data.reference_type.InverseName, &compare);
+        ck_assert_int_eq(SOPC_STATUS_OK, status);
+        ck_assert_int_eq(0, compare);
+
+        ck_assert_uint_eq(left->data.reference_type.IsAbstract, right->data.reference_type.IsAbstract);
+        break;
+    case OpcUa_NodeClass_DataType:
+        ck_assert_uint_eq(left->data.data_type.IsAbstract, right->data.data_type.IsAbstract);
+        break;
+    case OpcUa_NodeClass_View:
+        ck_assert_uint_eq(left->data.view.ContainsNoLoops, right->data.view.ContainsNoLoops);
+
+        ck_assert_uint_eq(left->data.view.EventNotifier, right->data.view.EventNotifier);
+        break;
+    default:
+        ck_assert(false);
+    }
+}
+
+START_TEST(test_same_address_space_results)
+{
+// Without EXPAT test cannot be done
+#ifndef WITH_EXPAT
+    ck_assert(false);
+#endif
+
+    /* Embedded address space (parsed prior to compilation) */
+    SOPC_AddressSpace* spaceEmbbeded = SOPC_Embedded_AddressSpace_Load();
+
+    /* Dynamic parsing of address space */
+    FILE* fd = fopen(XML_NAME, "r");
+
+    ck_assert_ptr_nonnull(fd);
+
+    SOPC_AddressSpace* spaceDynamic = SOPC_UANodeSet_Parse(fd);
+    ck_assert_ptr_nonnull(spaceDynamic);
+    fclose(fd);
+
+    /* Check all data present in embedded are present in dynamic */
+    SOPC_Dict_ForEach(spaceEmbbeded, addspace_for_each_equal, spaceDynamic);
+
+    /* Check all data present in dynamic are present in embedded */
+    SOPC_Dict_ForEach(spaceDynamic, addspace_for_each_equal, spaceEmbbeded);
+
+    SOPC_AddressSpace_Delete(spaceEmbbeded);
+    SOPC_AddressSpace_Delete(spaceDynamic);
+}
+END_TEST
+
+Suite* tests_make_suite_XML_parsers(void)
+{
+    Suite* s;
+    TCase* tc_logger;
+
+    s = suite_create("XML parsers tests");
+    tc_logger = tcase_create("XML parsers");
+    tcase_add_test(tc_logger, test_same_address_space_results);
+    suite_add_tcase(s, tc_logger);
+
+    return s;
+}
