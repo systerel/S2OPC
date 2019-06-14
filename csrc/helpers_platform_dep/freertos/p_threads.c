@@ -117,7 +117,7 @@ static void cbInternalCallback(void* ptr)
 // Destruction handle
 void P_THREAD_Destroy(hThread** ptr)
 {
-    if ((ptr != NULL) && ((*ptr) != NULL))
+    if (NULL != ptr && NULL != (*ptr))
     {
         P_THREAD_Join(*ptr);
         // Raz leaved memory
@@ -135,9 +135,9 @@ hThread* P_THREAD_Create(tPtrFct fct,              // Callback
 {
     hThread* ptrWks = NULL;
 
-    ptrWks = (hThread*) pvPortMalloc(sizeof(hThread));
+    ptrWks = pvPortMalloc(sizeof(hThread));
 
-    if (ptrWks != NULL)
+    if (NULL != ptrWks)
     {
         DEBUG_incrementCpt();
         memset(ptrWks, 0, sizeof(hThread));
@@ -637,11 +637,11 @@ SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), v
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
 
-    if (thread != NULL)
+    if (NULL != thread)
     {
         P_THREAD_Init(thread, MAX_THREADS, (tPtrFct) startFct, startArgs, NULL, NULL);
 
-        if (*thread != NULL)
+        if (NULL != *thread)
         {
             status = SOPC_STATUS_OK;
         }
