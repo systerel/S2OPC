@@ -26,11 +26,12 @@
 #include <string.h>
 
 #include <expat.h>
-#include <opcua_identifiers.h>
-#include <sopc_dict.h>
-#include <sopc_encoder.h>
-#include <sopc_hash.h>
-#include <sopc_macros.h>
+#include "opcua_identifiers.h"
+#include "opcua_statuscodes.h"
+#include "sopc_dict.h"
+#include "sopc_encoder.h"
+#include "sopc_hash.h"
+#include "sopc_macros.h"
 
 #ifdef UANODESET_LOADER_LOG
 #define LOG(str) fprintf(stderr, "UANODESET_LOADER: %s:%d: %s\n", __FILE__, __LINE__, (str))
@@ -483,6 +484,7 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
     assert(ctx->item.node_class == 0);
 
     SOPC_AddressSpace_Item_Initialize(&ctx->item, element_type);
+    // Note: value_status default value set on NodeId parsing
 
     for (size_t i = 0; attrs[i]; ++i)
     {
@@ -505,6 +507,11 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
                 LOG_XML_ERRORF("Invalid variable NodeId: %s", attr_val);
                 return false;
             }
+
+            // Set value_status default value:
+            // Keep OPC UA default namespace nodes with a Good status,
+            // necessary to pass UACTT othewise keep Good status only if a value is defined
+            ctx->item.value_status = id->Namespace == 0 ? SOPC_GoodGenericStatus : OpcUa_BadDataUnavailable;
 
             SOPC_NodeId* element_id = SOPC_AddressSpace_Item_Get_NodeId(&ctx->item);
             SOPC_ReturnStatus status = SOPC_NodeId_Copy(element_id, id);
@@ -1353,7 +1360,7 @@ static bool set_element_value_scalar(struct parse_context_t* ctx)
 
     if (ok)
     {
-        ctx->item.value_status = 0x00;
+        ctx->item.value_status = SOPC_GoodGenericStatus;
     }
 
     return ok;
@@ -1434,7 +1441,7 @@ static bool set_element_value_array(struct parse_context_t* ctx)
 
     SOPC_Array_Delete(ctx->list_items);
     ctx->list_items = NULL;
-    ctx->item.value_status = 0x00;
+    ctx->item.value_status = SOPC_GoodGenericStatus;
 
     return res;
 }
