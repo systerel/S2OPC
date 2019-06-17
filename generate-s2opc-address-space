@@ -524,7 +524,7 @@ def generate_string(data):
     assert data is None or isinstance(data, str), "Invalid string data: %r" % data
 
     if data is not None:
-        return '{%d, 1, (SOPC_Byte*) "%s"}' % (len(data), data.replace('"', '\\"'))
+        return '{sizeof("%s")-1, 1, (SOPC_Byte*) "%s"}' % (data.replace('"', '\\"'), data.replace('"', '\\"'))
 
     return '{0, 0, NULL}'
 
