@@ -137,34 +137,28 @@ OPERATIONS
                                                          p_nodeClassMask, p_resultMask) =
    VAR
        l_bresView,
-       l_browseView,
        l_bresSrc,
-       l_srcNodeId,
-       l_bresRef,
-       l_refTypeId
+       l_bresRef
    IN
-        l_bresView, l_browseView <-- copy_node_id_pointer_content (p_browseView);
-        l_bresSrc, l_srcNodeId <-- copy_node_id_pointer_content (p_nodeId);
-        l_bresRef, l_refTypeId <-- copy_node_id_pointer_content (p_referenceType);
+        l_bresView, in_BrowseView_i <-- copy_node_id_pointer_content (p_browseView);
+        l_bresSrc, in_BrowseValue_NodeId_i <-- copy_node_id_pointer_content (p_nodeId);
+        l_bresRef, in_BrowseValue_ReferenceTypeId_i <-- copy_node_id_pointer_content (p_referenceType);
+        in_startIndex_i := p_startIndex;
+        in_session_i := p_session;
+        in_maxReferencesPerNode_i := p_maxTargetRef;
+        in_BrowseValue_BrowseDirection_i := p_browseDirection;
+        in_BrowseValue_IncludeSubtypes_i := p_includeSubtypes;
+        in_BrowseValue_NodeClassMask_i := p_nodeClassMask;
+        in_BrowseValue_ResultMask_i := p_resultMask;
+        isBrowseValueContextDefined_i := TRUE;
         IF l_bresView = TRUE & l_bresSrc = TRUE & l_bresRef = TRUE
         THEN
-            p_service_StatusCode := e_sc_ok;
-            in_startIndex_i := p_startIndex;
-            in_session_i := p_session;
-            in_maxReferencesPerNode_i := p_maxTargetRef;
-            in_BrowseView_i := l_browseView;
-            in_BrowseValue_NodeId_i := l_srcNodeId;
-            in_BrowseValue_BrowseDirection_i := p_browseDirection;
-            in_BrowseValue_ReferenceTypeId_i := l_refTypeId;
-            in_BrowseValue_IncludeSubtypes_i := p_includeSubtypes;
-            in_BrowseValue_NodeClassMask_i := p_nodeClassMask;
-            in_BrowseValue_ResultMask_i := p_resultMask;
-            isBrowseValueContextDefined_i := TRUE
+            p_service_StatusCode := e_sc_ok
         ELSE
             p_service_StatusCode := e_sc_bad_out_of_memory;
             local_clear_browse_value_context
         END
-   END
+    END
    ;
 
    p_startIndex, p_session, p_maxTargetRef, p_browseView, p_nodeId,
