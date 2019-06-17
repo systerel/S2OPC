@@ -223,6 +223,48 @@ hCondVar* P_SYNCHRO_CreateConditionVariable(void)
     return ptr;
 }
 
+eConditionVariableResult P_SYNCHRO_SignalConditionVariable(hCondVar* pv) // Signal to one
+{
+    eConditionVariableResult result = E_COND_VAR_RESULT_ERROR_NO_WAITERS;
+    uint16_t wCurrentSlotId = USHRT_MAX;
+    TaskHandle_t handle = NULL;
+    uint32_t signal = 0;
+
+    if (pv != NULL)
+    {
+        if (((*pv) != NULL)                                     //
+            && ((*pv)->status == E_COND_VAR_STATUS_INITIALIZED) //
+            && ((*pv)->handleLockCounter != NULL))              //
+        {
+            xQueueSemaphoreTake((*pv)->handleLockCounter, portMAX_DELAY); // Critical section
+            {
+                wCurrentSlotId = USHRT_MAX;
+
+                handle = (TaskHandle_t) P_UTILS_LIST_ParseValueElt(&(*pv)->taskList, // List of task
+                                                                   &signal,          // Signal to send
+                                                                   NULL,             //
+                                                                   NULL,             //
+                                                                   &wCurrentSlotId); // Slot id
+                if (handle != NULL)
+                {
+                    xTaskGenericNotify(handle, signal, eSetBits, NULL);
+                    result = E_COND_VAR_RESULT_OK;
+                }
+            }
+            xSemaphoreGive((*pv)->handleLockCounter); // End critical section
+        }
+        else
+        {
+            result = E_COND_VAR_RESULT_ERROR_NOT_INITIALIZED;
+        }
+    }
+    else
+    {
+        result = E_COND_VAR_RESULT_ERROR_INCORRECT_PARAMETERS;
+    }
+    return result;
+}
+
 // Broadcast signal to all waiting task on signal passed in parameters
 eConditionVariableResult P_SYNCHRO_SignalAllConditionVariable(hCondVar* pv) // Signal to broadcaset
 {
@@ -240,11 +282,11 @@ eConditionVariableResult P_SYNCHRO_SignalAllConditionVariable(hCondVar* pv) // S
                 wCurrentSlotId = UINT16_MAX;
                 do
                 {
-                    handle = (TaskHandle_t) P_UTILS_LIST_ParseValueElt(&(*pv)->taskList, //
-                                                                       &signal,          //
+                    handle = (TaskHandle_t) P_UTILS_LIST_ParseValueElt(&(*pv)->taskList, // Task of list to notify
+                                                                       &signal,          // signal to send
                                                                        NULL,             //
                                                                        NULL,             //
-                                                                       &wCurrentSlotId);
+                                                                       &wCurrentSlotId); // Slot id
                     if (handle != NULL)
                     {
                         xTaskGenericNotify(handle, signal, eSetBits, NULL);

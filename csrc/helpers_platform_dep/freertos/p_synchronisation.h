@@ -60,6 +60,7 @@ eConditionVariableResult P_SYNCHRO_InitConditionVariable(hCondVar* pv, uint16_t 
 eConditionVariableResult P_SYNCHRO_ClearConditionVariable(hCondVar* pv);
 
 eConditionVariableResult P_SYNCHRO_SignalAllConditionVariable(hCondVar* pv);
+eConditionVariableResult P_SYNCHRO_SignalConditionVariable(hCondVar* pv);
 
 eConditionVariableResult P_SYNCHRO_UnlockAndWaitForConditionVariable(hCondVar* pv,
                                                                      QueueHandle_t* pMutex,

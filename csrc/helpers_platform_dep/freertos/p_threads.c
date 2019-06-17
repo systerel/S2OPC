@@ -105,7 +105,7 @@ static void cbInternalCallback(void* ptr)
             xSemaphoreTakeRecursive(ptrArgs->lockRecHandle, portMAX_DELAY);
 
             // Signal terminaison thread
-            P_SYNCHRO_SignalAllConditionVariable(&ptrArgs->signalThreadEnded);
+            P_SYNCHRO_SignalConditionVariable(&ptrArgs->signalThreadEnded);
 
             xSemaphoreGiveRecursive(ptrArgs->lockRecHandle);
         }
