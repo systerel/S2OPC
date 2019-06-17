@@ -30,7 +30,7 @@
 /**
  * LWIP_NETCONN==1: Enable Netconn API (require to use api_lib.c)
  */
-#define LWIP_NETCONN 0
+#define LWIP_NETCONN 1
 /**
  * LWIP_SOCKET==1: Enable Socket API (require to use sockets.c)
  */
@@ -43,7 +43,8 @@
 #define LWIP_DHCP 0
 #define SO_REUSE 1
 #define LWIP_RAW 1
-//#define LWIP_MPU_COMPATIBLE 1
+#define LWIP_MPU_COMPATIBLE 1
+#define MEM_LIBC_MALLOC 0
 
 /**
  * LWIP_SO_RCVTIMEO==1: Enable receive timeout for sockets/netconns and
@@ -159,7 +160,7 @@
 
 /* TCP receive window. */
 #ifndef TCP_WND
-#define TCP_WND (2 * TCP_MSS)
+#define TCP_WND (4 * TCP_MSS)
 #endif
 
 /* Enable backlog*/

@@ -474,13 +474,13 @@ void BOARD_InitEnet(void)
 {
     volatile uint32_t i = 0;
 
-    const clock_enet_pll_config_t configCLOCK_ENET = {
+    static const clock_enet_pll_config_t configCLOCK_ENET = {
         .enableClkOutput = true,
         .enableClkOutput25M = false,
         .loopDivider = 1,
     };
 
-    const gpio_pin_config_t configGPIO_ENET = {kGPIO_DigitalOutput, 0, kGPIO_NoIntmode};
+    static const gpio_pin_config_t configGPIO_ENET = {kGPIO_DigitalOutput, 0, kGPIO_NoIntmode};
 
     CLOCK_InitEnetPll(&configCLOCK_ENET);
 
