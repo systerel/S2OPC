@@ -60,10 +60,10 @@ typedef struct T_THREAD_WKS
 
 /*****Private global definition*****/
 
-static tUtilsList gTaskList = // Global task list
-    {NULL, 0, 0, 0, 0, 0, 0, NULL};
+static tUtilsList* pgTaskList = NULL;
 
 static unsigned int bOverflowDetected = 0;
+static unsigned int bMallocFailed = 0;
 
 /*****Private thread api*****/
 
@@ -128,10 +128,11 @@ void P_THREAD_Destroy(hThread** ptr)
     }
 }
 // Creation workspace
-hThread* P_THREAD_Create(tPtrFct fct,              // Callback
-                         void* args,               // Argument callback
-                         tPtrFct fctWatingForJoin, // Debug thread waiting join
-                         tPtrFct fctReadyToSignal) // Debug thread ended
+hThread*                                  // Handle workspace
+P_THREAD_Create(tPtrFct fct,              // Callback
+                void* args,               // Argument callback
+                tPtrFct fctWatingForJoin, // Debug thread waiting join
+                tPtrFct fctReadyToSignal) // Debug thread ended
 {
     hThread* ptrWks = NULL;
 
@@ -143,7 +144,12 @@ hThread* P_THREAD_Create(tPtrFct fct,              // Callback
         memset(ptrWks, 0, sizeof(hThread));
 
         // Initialization
-        if (P_THREAD_Init(ptrWks, MAX_THREADS, fct, args, fctWatingForJoin, fctReadyToSignal) != E_THREAD_RESULT_OK)
+        if (P_THREAD_Init(ptrWks,                                  //
+                          MAX_THREADS,                             //
+                          fct,                                     //
+                          args,                                    //
+                          fctWatingForJoin,                        //
+                          fctReadyToSignal) != E_THREAD_RESULT_OK) //
         {
             P_THREAD_Destroy(&ptrWks);
             ptrWks = NULL;
@@ -171,11 +177,24 @@ eThreadResult P_THREAD_Init(hThread* ptrWks,            // Workspace
     }
 
     // Create global task list for first call.
-    if (NULL == gTaskList.lockHandle)
+    /* TODO: outsource this initialization */
+    if (NULL == pgTaskList)
     {
-        P_UTILS_LIST_InitMT(&gTaskList, MAX_THREADS);
+        pgTaskList = pvPortMalloc(sizeof(tUtilsList));
+        if (NULL != pgTaskList)
+        {
+            DEBUG_incrementCpt();
+            memset(pgTaskList, 0, sizeof(tUtilsList));
+            resTList = P_UTILS_LIST_InitMT(pgTaskList, MAX_THREADS);
+            if (E_UTILS_LIST_RESULT_OK != resTList)
+            {
+                DEBUG_decrementCpt();
+                vPortFree(pgTaskList);
+                pgTaskList = NULL;
+            }
+        }
     }
-    if (NULL == gTaskList.lockHandle)
+    if (NULL == pgTaskList)
     {
         return E_THREAD_RESULT_ERROR_NOK;
     }
@@ -204,15 +223,15 @@ eThreadResult P_THREAD_Init(hThread* ptrWks,            // Workspace
     handleWks->signalReadyToWait = xSemaphoreCreateBinary();
     handleWks->signalReadyToStart = xSemaphoreCreateBinary();
     handleWks->lockRecHandle = xQueueCreateMutex(queueQUEUE_TYPE_RECURSIVE_MUTEX);
-    if ((*ptrWks)->signalReadyToWait)
+    if (handleWks->signalReadyToWait)
     {
         DEBUG_incrementCpt();
     }
-    if ((*ptrWks)->signalReadyToStart)
+    if (handleWks->signalReadyToStart)
     {
         DEBUG_incrementCpt();
     }
-    if ((*ptrWks)->lockRecHandle)
+    if (handleWks->lockRecHandle)
     {
         DEBUG_incrementCpt();
     }
@@ -225,6 +244,7 @@ eThreadResult P_THREAD_Init(hThread* ptrWks,            // Workspace
 
     if (E_THREAD_RESULT_OK == resPTHR)
     {
+        /* Semaphores (signals) are initialized "signaled", de-signal them */
         xSemaphoreTake(handleWks->signalReadyToStart, 0);
         xSemaphoreTake(handleWks->signalReadyToWait, 0);
 
@@ -337,7 +357,7 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
         return E_THREAD_RESULT_ERROR_NOK;
     }
 
-    if (NULL == gTaskList.lockHandle)
+    if (NULL == pgTaskList)
     {
         return E_THREAD_RESULT_ERROR_NOT_INITIALIZED;
     }
@@ -610,7 +630,10 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
         DEBUG_decrementCpt();
     }
 
-    // Critical section release if not deleted after unlock and wait
+    // Critical section release if not deleted after unlock and wait.
+    // *pHandle might have changed in another P_THREAD_Join.
+    /* TODO: check if this block is still needed */
+    pThread = *pHandle;
     if (NULL != pThread && NULL != pThread->lockRecHandle)
     {
         xSemaphoreGiveRecursive(pThread->lockRecHandle);
@@ -630,6 +653,10 @@ void vApplicationStackOverflowHook(TaskHandle_t xTask, char* pcTaskName)
     bOverflowDetected = 0xAAAAAAAA;
 }
 
+void vApplicationMallocFailedHook(void)
+{
+    bMallocFailed++;
+}
 /*****Public s2opc thread api*****/
 
 // Create and initialize a thread

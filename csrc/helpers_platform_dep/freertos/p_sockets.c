@@ -91,6 +91,38 @@ void SOPC_Socket_Clear(Socket* sock)
 static SOPC_ReturnStatus Socket_Configure(Socket sock, bool setNonBlocking)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    const int trueInt = true;
+    int setOptStatus = -1;
+
+    if (sock != SOPC_INVALID_SOCKET)
+    {
+        status = SOPC_STATUS_OK;
+
+        // Deactivate Nagle's algorithm since we always write a TCP UA binary message (and not just few bytes)
+        setOptStatus = setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (const void*) &trueInt, sizeof(int));
+
+        /*
+        if(setOptStatus != -1){
+            int rcvbufsize = UINT16_MAX;
+            setOptStatus = setsockopt(sock, SOL_SOCKET, SO_RCVBUF, &rcvbufsize, sizeof(int));
+        }
+
+        if(setOptStatus != -1){
+            int sndbufsize = UINT16_MAX;
+            setOptStatus = setsockopt(sock, SOL_SOCKET, SO_SNDBUF, &sndbufsize, sizeof(int));
+        }
+        */
+
+        if (setOptStatus != -1 && setNonBlocking != false)
+        {
+            setOptStatus = fcntl(sock, F_SETFL, O_NONBLOCK);
+        }
+
+        if (setOptStatus < 0)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
 
     return status;
 }
@@ -202,6 +234,17 @@ SOPC_ReturnStatus SOPC_Socket_Connect(Socket sock, SOPC_Socket_AddressInfo* addr
 SOPC_ReturnStatus SOPC_Socket_ConnectToLocal(Socket from, Socket to)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    SOPC_Socket_AddressInfo addr;
+    struct sockaddr saddr;
+    memset(&addr, 0, sizeof(SOPC_Socket_AddressInfo));
+    memset(&saddr, 0, sizeof(struct sockaddr));
+    addr.ai_addr = &saddr;
+    addr.ai_addrlen = sizeof(struct sockaddr);
+
+    if (0 == getsockname(to, addr.ai_addr, &addr.ai_addrlen))
+    {
+        status = SOPC_Socket_Connect(from, &addr);
+    }
 
     return status;
 }
