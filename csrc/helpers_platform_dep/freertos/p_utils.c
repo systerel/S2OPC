@@ -379,7 +379,7 @@ SOPC_ReturnStatus P_UTILS_LIST_InitMT(tUtilsList* ptr, uint16_t wMaxRDV)
         status = P_UTILS_LIST_Init(ptr, wMaxRDV);
         if (SOPC_STATUS_OK == status)
         {
-            ptr->lockHandle = xQueueCreateMutex(queueQUEUE_TYPE_RECURSIVE_MUTEX);
+            ptr->lockHandle = xQueueCreateMutex(queueQUEUE_TYPE_BINARY_SEMAPHORE);
             if (ptr->lockHandle == NULL)
             {
                 P_UTILS_LIST_DeInit(ptr);
@@ -397,7 +397,7 @@ void P_UTILS_LIST_DeInitMT(tUtilsList* ptr)
 {
     if ((ptr != NULL) && (ptr->lockHandle != NULL))
     {
-        xSemaphoreTakeRecursive(ptr->lockHandle, portMAX_DELAY);
+        xSemaphoreTake(ptr->lockHandle, portMAX_DELAY);
         {
             P_UTILS_LIST_DeInit(ptr);
         }
@@ -416,9 +416,9 @@ uint16_t P_UTILS_LIST_RemoveEltMT(tUtilsList* ptr,
     uint16_t wCurrentSlotId = UINT16_MAX;
     if ((ptr != NULL) && (ptr->lockHandle != NULL))
     {
-        xSemaphoreTakeRecursive(ptr->lockHandle, portMAX_DELAY);
+        xSemaphoreTake(ptr->lockHandle, portMAX_DELAY);
         wCurrentSlotId = P_UTILS_LIST_RemoveElt(ptr, taskNotified, infos1, infos2, pOutNextOQP);
-        xSemaphoreGiveRecursive(ptr->lockHandle);
+        xSemaphoreGive(ptr->lockHandle);
     }
     return wCurrentSlotId;
 }
@@ -445,9 +445,9 @@ SOPC_ReturnStatus P_UTILS_LIST_AddEltMT(tUtilsList* ptr,
 
     if ((ptr != NULL) && (ptr->lockHandle != NULL))
     {
-        xSemaphoreTakeRecursive(ptr->lockHandle, portMAX_DELAY);
+        xSemaphoreTake(ptr->lockHandle, portMAX_DELAY);
         status = P_UTILS_LIST_AddElt(ptr, handleTask, pContext, infos1, infos2);
-        xSemaphoreGiveRecursive(ptr->lockHandle);
+        xSemaphoreGive(ptr->lockHandle);
     }
     return status;
 }
@@ -461,11 +461,11 @@ TaskHandle_t P_UTILS_LIST_ParseValueEltMT(tUtilsList* ptr,
     TaskHandle_t taskHandle = 0;
     if ((ptr != NULL) && (ptr->lockHandle != NULL))
     {
-        xSemaphoreTakeRecursive(ptr->lockHandle, portMAX_DELAY);
+        xSemaphoreTake(ptr->lockHandle, portMAX_DELAY);
         {
             taskHandle = P_UTILS_LIST_ParseValueElt(ptr, pOutValue, pOutValue2, ppContext, pCurrentSlotId);
         }
-        xSemaphoreGiveRecursive(ptr->lockHandle);
+        xSemaphoreGive(ptr->lockHandle);
     }
     return taskHandle;
 }
@@ -475,11 +475,11 @@ void* P_UTILS_LIST_ParseContextEltMT(tUtilsList* ptr, uint16_t* pCurrentSlotId)
     void* pContext = NULL;
     if ((ptr != NULL) && (ptr->lockHandle != NULL))
     {
-        xSemaphoreTakeRecursive(ptr->lockHandle, portMAX_DELAY);
+        xSemaphoreTake(ptr->lockHandle, portMAX_DELAY);
         {
             pContext = P_UTILS_LIST_ParseContextElt(ptr, pCurrentSlotId);
         }
-        xSemaphoreGiveRecursive(ptr->lockHandle);
+        xSemaphoreGive(ptr->lockHandle);
     }
     return pContext;
 }
@@ -489,9 +489,9 @@ uint16_t P_UTILS_LIST_GetEltIndexMT(tUtilsList* ptr, TaskHandle_t taskNotified, 
     uint16_t wCurrentSlotId = UINT16_MAX;
     if ((ptr != NULL) && (ptr->lockHandle != NULL))
     {
-        xSemaphoreTakeRecursive(ptr->lockHandle, portMAX_DELAY);
+        xSemaphoreTake(ptr->lockHandle, portMAX_DELAY);
         wCurrentSlotId = P_UTILS_LIST_GetEltIndex(ptr, taskNotified, infos1, infos2);
-        xSemaphoreGiveRecursive(ptr->lockHandle);
+        xSemaphoreGive(ptr->lockHandle);
     }
     return wCurrentSlotId;
 }
@@ -502,13 +502,13 @@ void* P_UTILS_LIST_GetContextFromHandleMT(tUtilsList* ptr, TaskHandle_t taskNoti
     uint16_t wCurrentSlotId = UINT16_MAX;
     if ((ptr != NULL) && (ptr->lockHandle != NULL))
     {
-        xSemaphoreTakeRecursive(ptr->lockHandle, portMAX_DELAY);
+        xSemaphoreTake(ptr->lockHandle, portMAX_DELAY);
         wCurrentSlotId = P_UTILS_LIST_GetEltIndex(ptr, taskNotified, infos1, infos2);
         if (wCurrentSlotId < ptr->wMaxWaitingTasks)
         {
             ptrContext = ptr->list[wCurrentSlotId].pContext;
         }
-        xSemaphoreGiveRecursive(ptr->lockHandle);
+        xSemaphoreGive(ptr->lockHandle);
     }
     return ptrContext;
 }
@@ -522,20 +522,20 @@ void DEBUG_incrementCpt(void)
 {
     if (cptMutex == NULL)
     {
-        cptMutex = xQueueCreateMutex(queueQUEUE_TYPE_RECURSIVE_MUTEX);
+        cptMutex = xQueueCreateMutex(queueQUEUE_TYPE_BINARY_SEMAPHORE);
     }
-    xSemaphoreTakeRecursive(cptMutex, portMAX_DELAY);
+    xSemaphoreTake(cptMutex, portMAX_DELAY);
     cptAlloc++;
-    xSemaphoreGiveRecursive(cptMutex);
+    xSemaphoreGive(cptMutex);
 }
 void DEBUG_decrementCpt(void)
 {
     if (cptMutex == NULL)
     {
-        cptMutex = xQueueCreateMutex(queueQUEUE_TYPE_RECURSIVE_MUTEX);
+        cptMutex = xQueueCreateMutex(queueQUEUE_TYPE_BINARY_SEMAPHORE);
     }
-    xSemaphoreTakeRecursive(cptMutex, portMAX_DELAY);
+    xSemaphoreTake(cptMutex, portMAX_DELAY);
     cptFree++;
-    xSemaphoreGiveRecursive(cptMutex);
+    xSemaphoreGive(cptMutex);
 }
 #endif
