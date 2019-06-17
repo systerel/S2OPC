@@ -147,8 +147,8 @@ SOPC_ReturnStatus SOPC_strtouint32_t(const char* sz, uint32_t* n, int base, char
          *  so it will always be possible to store an uint32_t inside value */
         errno = 0;
         value = strtoul(sz, &pEnd, base);
-        if (NULL == pEnd || pEnd == sz || *pEnd != cEnd || value > UINT32_MAX ||
-            (ULONG_MAX == value && ERANGE == errno))
+        if (NULL == pEnd || pEnd == sz || *pEnd != cEnd || (ULONG_MAX == value && ERANGE == errno) ||
+            value > UINT32_MAX)
         {
             status = SOPC_STATUS_NOK;
         }
