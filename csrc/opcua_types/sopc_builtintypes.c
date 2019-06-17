@@ -1711,7 +1711,7 @@ void SOPC_NodeId_Hash(const SOPC_NodeId* nodeId, uint64_t* hash)
     *hash = h;
 }
 
-char* SOPC_NodeId_ToCString(SOPC_NodeId* nodeId)
+char* SOPC_NodeId_ToCString(const SOPC_NodeId* nodeId)
 {
     // format part 6 §5.3.1.10
     char* result = NULL;
@@ -3197,7 +3197,8 @@ static SOPC_ReturnStatus CompareVariantsNonArrayBuiltInType(SOPC_BuiltinId built
     switch (builtInTypeId)
     {
     case SOPC_Null_Id:
-        break; // SOPC_STATUS_NOK since no operation could be applied to a NULL variant
+        *comparison = 0;
+        break;
     case SOPC_Boolean_Id:
         status = compAuxFunction((const void*) &left->Boolean, (const void*) &right->Boolean, comparison);
         break;
