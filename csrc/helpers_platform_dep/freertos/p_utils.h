@@ -54,6 +54,7 @@ typedef struct T_TASK_LIST
 /* Non Thread safe private list api */
 
 uint16_t P_UTILS_LIST_GetEltIndex(tUtilsList* ptr, TaskHandle_t taskNotified, uint32_t infos1, uint32_t infos2);
+uint16_t P_UTILS_LIST_GetNbEltMT(tUtilsList* ptr);
 
 /* \brief Adds an element to the list, if possible. \p handleTask can't be NULL. */
 SOPC_ReturnStatus P_UTILS_LIST_AddElt(tUtilsList* ptr,
@@ -97,6 +98,8 @@ TaskHandle_t P_UTILS_LIST_ParseValueEltMT(tUtilsList* ptr,
                                           uint32_t* pOutValue2,
                                           void** ppOutContext,
                                           uint16_t* pCurrentSlotId);
+
+uint16_t P_UTILS_LIST_GetNbEltMT(tUtilsList* ptr);
 
 SOPC_ReturnStatus P_UTILS_LIST_AddEltMT(tUtilsList* ptr,
                                         TaskHandle_t handleTask,

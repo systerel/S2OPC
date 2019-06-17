@@ -83,6 +83,15 @@ void P_UTILS_LIST_DeInit(tUtilsList* ptr)
     }
 }
 
+uint16_t P_UTILS_LIST_GetNbElt(tUtilsList* ptr)
+{
+    if ((ptr != NULL) && (ptr->list != NULL))
+    {
+        return ptr->wNbRegisteredTasks;
+    }
+    return 0;
+}
+
 SOPC_ReturnStatus P_UTILS_LIST_AddElt(tUtilsList* ptr,
                                       TaskHandle_t handleTask,
                                       void* pContext,
@@ -412,6 +421,18 @@ uint16_t P_UTILS_LIST_RemoveEltMT(tUtilsList* ptr,
         xSemaphoreGiveRecursive(ptr->lockHandle);
     }
     return wCurrentSlotId;
+}
+
+uint16_t P_UTILS_LIST_GetNbEltMT(tUtilsList* ptr)
+{
+    uint16_t nbElts = 0;
+    if ((ptr != NULL) && (ptr->lockHandle != NULL))
+    {
+        xSemaphoreTake(ptr->lockHandle, portMAX_DELAY);
+        nbElts = P_UTILS_LIST_GetNbElt(ptr);
+        xSemaphoreGive(ptr->lockHandle);
+    }
+    return nbElts;
 }
 
 SOPC_ReturnStatus P_UTILS_LIST_AddEltMT(tUtilsList* ptr,
