@@ -479,7 +479,8 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
                         P_UTILS_LIST_RemoveEltMT(&pOthersThread->taskList,    //
                                                  xTaskGetCurrentTaskHandle(), //
                                                  0,                           //
-                                                 0);                          //
+                                                 0,                           //
+                                                 NULL);                       //
                     }
                 }
             } while (UINT16_MAX != wSlotId);
@@ -527,7 +528,8 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
                     P_UTILS_LIST_RemoveEltMT(&pThread->taskList, //
                                              handle,             //
                                              0,                  //
-                                             0);                 //
+                                             0,                  //
+                                             NULL);              //
                 }
             } while (UINT16_MAX != wSlotId);
 
@@ -581,13 +583,15 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
         P_UTILS_LIST_RemoveEltMT(&gTaskList,          //
                                  pThread->handleTask, //
                                  0,                   //
-                                 0);                  //
+                                 0,                   //
+                                 NULL);               //
 
         // Remove thread handle from local thread list exclusion
         P_UTILS_LIST_RemoveEltMT(&ptrCurrentThread->taskList, //
                                  pThread->handleTask,         //
                                  0,                           //
-                                 0);                          //
+                                 0,                           //
+                                 NULL);                       //
 
         // Remove thread handle from other thread list exclusion
         wSlotId = UINT16_MAX;
@@ -607,7 +611,8 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
                     P_UTILS_LIST_RemoveEltMT(&pOthersThread->taskList, //
                                              pThread->handleTask,      //
                                              0,                        //
-                                             0);                       //
+                                             0,                        //
+                                             NULL);                    //
                 }
             }
         } while (UINT16_MAX != wSlotId);

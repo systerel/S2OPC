@@ -76,7 +76,11 @@ TaskHandle_t P_UTILS_LIST_ParseValueElt(tUtilsList* ptr,
 
 void* P_UTILS_LIST_ParseContextElt(tUtilsList* ptr, uint16_t* pCurrentSlotId);
 
-unsigned short P_UTILS_LIST_RemoveElt(tUtilsList* pv, TaskHandle_t taskNotified, uint32_t infos1, uint32_t infos2);
+uint16_t P_UTILS_LIST_RemoveElt(tUtilsList* pv,
+                                TaskHandle_t taskNotified,
+                                uint32_t infos1,
+                                uint32_t infos2,
+                                uint16_t* pOutNextOQPSlot);
 
 void P_UTILS_LIST_DeInit(tUtilsList* ptr);
 
@@ -102,7 +106,11 @@ SOPC_ReturnStatus P_UTILS_LIST_AddEltMT(tUtilsList* ptr,
 
 void* P_UTILS_LIST_ParseContextEltMT(tUtilsList* ptr, uint16_t* pCurrentSlotId);
 
-unsigned short P_UTILS_LIST_RemoveEltMT(tUtilsList* pv, TaskHandle_t taskNotified, uint32_t infos1, uint32_t infos2);
+uint16_t P_UTILS_LIST_RemoveEltMT(tUtilsList* pv,
+                                  TaskHandle_t taskNotified,
+                                  uint32_t infos1,
+                                  uint32_t infos2,
+                                  uint16_t* pOutNextOQPSlot);
 
 void P_UTILS_LIST_DeInitMT(tUtilsList* ptr);
 

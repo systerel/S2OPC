@@ -201,7 +201,11 @@ SOPC_ReturnStatus P_UTILS_LIST_AddElt(tUtilsList* ptr,
     return SOPC_STATUS_OK;
 }
 
-uint16_t P_UTILS_LIST_RemoveElt(tUtilsList* pv, TaskHandle_t taskNotified, uint32_t infos1, uint32_t infos2)
+uint16_t P_UTILS_LIST_RemoveElt(tUtilsList* pv,
+                                TaskHandle_t taskNotified,
+                                uint32_t infos1,
+                                uint32_t infos2,
+                                uint16_t* pOutNextOQP)
 {
     uint16_t wCurrentSlotId = UINT16_MAX;
     if ((pv != NULL) && (pv->list != NULL) && (taskNotified != NULL) && (pv->wNbRegisteredTasks > 0))
@@ -238,6 +242,11 @@ uint16_t P_UTILS_LIST_RemoveElt(tUtilsList* pv, TaskHandle_t taskNotified, uint3
             else
             {
                 pv->firstFreePreviousOQP = UINT16_MAX;
+            }
+
+            if (pOutNextOQP != NULL)
+            {
+                *pOutNextOQP = pv->firstFreeNextOQP;
             }
 
             // RAZ current
@@ -389,13 +398,17 @@ void P_UTILS_LIST_DeInitMT(tUtilsList* ptr)
     }
 }
 
-uint16_t P_UTILS_LIST_RemoveEltMT(tUtilsList* ptr, TaskHandle_t taskNotified, uint32_t infos1, uint32_t infos2)
+uint16_t P_UTILS_LIST_RemoveEltMT(tUtilsList* ptr,
+                                  TaskHandle_t taskNotified,
+                                  uint32_t infos1,
+                                  uint32_t infos2,
+                                  uint16_t* pOutNextOQP)
 {
     uint16_t wCurrentSlotId = UINT16_MAX;
     if ((ptr != NULL) && (ptr->lockHandle != NULL))
     {
         xSemaphoreTakeRecursive(ptr->lockHandle, portMAX_DELAY);
-        wCurrentSlotId = P_UTILS_LIST_RemoveElt(ptr, taskNotified, infos1, infos2);
+        wCurrentSlotId = P_UTILS_LIST_RemoveElt(ptr, taskNotified, infos1, infos2, pOutNextOQP);
         xSemaphoreGiveRecursive(ptr->lockHandle);
     }
     return wCurrentSlotId;

@@ -73,8 +73,11 @@ eConditionVariableResult P_SYNCHRO_ClearConditionVariable(hCondVar* pv)
                 wCurrentSlotId = UINT16_MAX;
                 do
                 {
-                    handle = (TaskHandle_t) P_UTILS_LIST_ParseValueElt(&(*pv)->taskList, NULL, &wClearSignal, NULL,
-                                                                       &wCurrentSlotId);
+                    handle = (TaskHandle_t) P_UTILS_LIST_ParseValueElt(&(*pv)->taskList, //
+                                                                       NULL,             //
+                                                                       &wClearSignal,    //
+                                                                       NULL,             //
+                                                                       &wCurrentSlotId); //
                     if (handle != NULL)
                     {
                         xTaskGenericNotify(handle, wClearSignal, eSetBits, NULL);
@@ -462,7 +465,11 @@ eConditionVariableResult P_SYNCHRO_UnlockAndWaitForConditionVariable(hCondVar* p
             {
                 xQueueSemaphoreTake((*pv)->handleLockCounter, portMAX_DELAY); // Critical section
                 {
-                    P_UTILS_LIST_RemoveElt(&(*pv)->taskList, handleTask, uwSignal, uwClearSignal);
+                    P_UTILS_LIST_RemoveElt(&(*pv)->taskList, //
+                                           handleTask,       //
+                                           uwSignal,         //
+                                           uwClearSignal,    //
+                                           NULL);            //
                 }
                 xSemaphoreGive((*pv)->handleLockCounter);
 
