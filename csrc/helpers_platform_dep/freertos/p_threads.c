@@ -185,8 +185,8 @@ eThreadResult P_THREAD_Init(hThread* ptrWks,            // Workspace
         {
             DEBUG_incrementCpt();
             memset(pgTaskList, 0, sizeof(tUtilsList));
-            resTList = P_UTILS_LIST_InitMT(pgTaskList, MAX_THREADS);
-            if (E_UTILS_LIST_RESULT_OK != resTList)
+            status = P_UTILS_LIST_InitMT(pgTaskList, MAX_THREADS);
+            if (SOPC_STATUS_OK != status)
             {
                 DEBUG_decrementCpt();
                 vPortFree(pgTaskList);
@@ -282,7 +282,7 @@ eThreadResult P_THREAD_Init(hThread* ptrWks,            // Workspace
     if (E_THREAD_RESULT_OK == resPTHR)
     {
         DEBUG_incrementCpt();
-        status = P_UTILS_LIST_AddEltMT(&gTaskList,            // Thread list
+        status = P_UTILS_LIST_AddEltMT(pgTaskList,            // Thread list
                                        handleWks->handleTask, // Handle task
                                        handleWks,             // Workspace
                                        0, 0);
@@ -363,7 +363,7 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
     }
 
     // Get current workspace from current task handle
-    ptrCurrentThread = P_UTILS_LIST_GetContextFromHandleMT(&gTaskList,                  // Global thread list
+    ptrCurrentThread = P_UTILS_LIST_GetContextFromHandleMT(pgTaskList,                  // Global thread list
                                                            xTaskGetCurrentTaskHandle(), //
                                                            0,                           //
                                                            0);                          //
@@ -437,7 +437,7 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
         wSlotId = UINT16_MAX;
         do
         {
-            pOthersThread = P_UTILS_LIST_ParseContextEltMT(&gTaskList, //
+            pOthersThread = P_UTILS_LIST_ParseContextEltMT(pgTaskList, //
                                                            &wSlotId);  //
 
             if (pOthersThread != ptrCurrentThread && NULL != pOthersThread)
@@ -465,7 +465,7 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
             wSlotId = UINT16_MAX;
             do
             {
-                pOthersThread = P_UTILS_LIST_ParseContextEltMT(&gTaskList, &wSlotId);
+                pOthersThread = P_UTILS_LIST_ParseContextEltMT(pgTaskList, &wSlotId);
 
                 if (pOthersThread != ptrCurrentThread && NULL != pOthersThread)
                 {
@@ -580,7 +580,7 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
         }
 
         // Remove thread from global list
-        P_UTILS_LIST_RemoveEltMT(&gTaskList,          //
+        P_UTILS_LIST_RemoveEltMT(pgTaskList,          //
                                  pThread->handleTask, //
                                  0,                   //
                                  0,                   //
@@ -597,7 +597,7 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
         wSlotId = UINT16_MAX;
         do
         {
-            pOthersThread = P_UTILS_LIST_ParseContextEltMT(&gTaskList, //
+            pOthersThread = P_UTILS_LIST_ParseContextEltMT(pgTaskList, //
                                                            &wSlotId);  //
 
             if (pOthersThread != ptrCurrentThread && NULL != pOthersThread)
