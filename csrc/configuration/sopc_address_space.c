@@ -47,6 +47,9 @@ void SOPC_AddressSpace_Item_Initialize(SOPC_AddressSpace_Item* item, OpcUa_NodeC
     }
 
     item->node_class = node_class;
+    OpcUa_NodeClass* nodeClass = SOPC_AddressSpace_Item_Get_NodeClass(item);
+    *nodeClass = node_class;
+
     if (node_class == OpcUa_NodeClass_Variable)
     {
         if (SOPC_AddressSpace_Item_Get_NodeId(item)->Namespace != OPCUA_NAMESPACE_INDEX)
@@ -91,12 +94,15 @@ void SOPC_AddressSpace_Item_Initialize(SOPC_AddressSpace_Item* item, OpcUa_NodeC
         }                                                                     \
     }
 
+ELEMENT_ATTRIBUTE_GETTER(OpcUa_NodeClass, NodeClass)
 ELEMENT_ATTRIBUTE_GETTER(SOPC_NodeId, NodeId)
 ELEMENT_ATTRIBUTE_GETTER(SOPC_QualifiedName, BrowseName)
 ELEMENT_ATTRIBUTE_GETTER(SOPC_LocalizedText, DisplayName)
 ELEMENT_ATTRIBUTE_GETTER(SOPC_LocalizedText, Description)
 ELEMENT_ATTRIBUTE_GETTER(int32_t, NoOfReferences)
 ELEMENT_ATTRIBUTE_GETTER(OpcUa_ReferenceNode*, References)
+ELEMENT_ATTRIBUTE_GETTER(uint32_t, WriteMask)
+ELEMENT_ATTRIBUTE_GETTER(uint32_t, UserWriteMask)
 
 SOPC_Variant* SOPC_AddressSpace_Item_Get_Value(SOPC_AddressSpace_Item* item)
 {
@@ -136,6 +142,34 @@ int32_t* SOPC_AddressSpace_Item_Get_ValueRank(SOPC_AddressSpace_Item* item)
         return &item->data.variable_type.ValueRank;
     default:
         assert(false && "Current element has no value rank.");
+        return NULL;
+    }
+}
+
+int32_t SOPC_AddressSpace_Item_Get_NoOfArrayDimensions(SOPC_AddressSpace_Item* item)
+{
+    switch (item->node_class)
+    {
+    case OpcUa_NodeClass_Variable:
+        return item->data.variable.NoOfArrayDimensions;
+    case OpcUa_NodeClass_VariableType:
+        return item->data.variable_type.NoOfArrayDimensions;
+    default:
+        assert(false && "Current element has no NoOfDimensions.");
+        return -1;
+    }
+}
+
+uint32_t* SOPC_AddressSpace_Item_Get_ArrayDimensions(SOPC_AddressSpace_Item* item)
+{
+    switch (item->node_class)
+    {
+    case OpcUa_NodeClass_Variable:
+        return item->data.variable.ArrayDimensions;
+    case OpcUa_NodeClass_VariableType:
+        return item->data.variable_type.ArrayDimensions;
+    default:
+        assert(false && "Current element has no ArrayDimensions.");
         return NULL;
     }
 }
