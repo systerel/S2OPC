@@ -166,12 +166,16 @@ SOPC_ReturnStatus P_UTILS_LIST_AddElt(tUtilsList* ptr,
     {
         bool bSlotFound = false;
         uint16_t wSlotId = 0;
-        for (wSlotId = 0; wSlotId < ptr->wMaxWaitingTasks && (!bSlotFound); ++wSlotId)
+        while ((wSlotId < ptr->wMaxWaitingTasks) && (!bSlotFound))
         {
             if (ptr->list[wSlotId].value == 0)
             {
                 // Slot found
                 bSlotFound = true;
+            }
+            else
+            {
+                ++wSlotId;
             }
         }
 
@@ -180,13 +184,18 @@ SOPC_ReturnStatus P_UTILS_LIST_AddElt(tUtilsList* ptr,
             ptr->firstFree = wSlotId;
             ptr->firstFreePreviousOQP = wSlotId > 0 ? wSlotId - 1 : UINT16_MAX;
             bSlotFound = false;
+            ++wSlotId;
             // Then search for the new firstNextOQP
-            for (++wSlotId; wSlotId < ptr->wMaxWaitingTasks && (!bSlotFound); ++wSlotId)
+            while ((wSlotId < ptr->wMaxWaitingTasks) && (!bSlotFound))
             {
                 if ((ptr->list[wSlotId].value) != 0)
                 {
                     // Slot found
                     bSlotFound = true;
+                }
+                else
+                {
+                    ++wSlotId;
                 }
             }
             if (bSlotFound)
