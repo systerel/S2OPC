@@ -35,7 +35,7 @@
 /*Alloc task*/
 SOPC_ReturnStatus P_UTILS_LIST_Init(tUtilsList* ptr, uint16_t wMaxRDV)
 {
-    if (NULL == ptr || MAX_P_UTILS_LIST >= wMaxRDV)
+    if (NULL == ptr || MAX_P_UTILS_LIST < wMaxRDV)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
