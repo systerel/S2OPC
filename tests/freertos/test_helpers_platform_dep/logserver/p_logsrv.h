@@ -1,14 +1,25 @@
 /*
- * p_logsrv.h
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
  *
- *  Created on: 8 juin 2019
- *      Author: elsin
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 #ifndef FREERTOS_P_LOGSRV_H_
 #define FREERTOS_P_LOGSRV_H_
 
-#include <board.h>
 #include <inttypes.h> /* stdlib includes */
 #include <limits.h>
 #include <stddef.h>
@@ -41,43 +52,73 @@
 #include "lwip/tcpip.h"
 #include "lwip/sockets.h"
 
-#define P_LOG_SRV_TIMEOUT_SELECT 100
-#define P_LOG_CLT_TIMEOUT_SELECT 100
-#define P_LOG_CLT_TX_POP_WAIT   100
-#define P_LOG_CLT_RX_POP_WAIT   100
+#define P_LOG_SRV_ONLINE_PERIOD     (100)
+#define P_LOG_SRV_BINDING_WAIT      (100)
+#define P_LOG_CLT_MONITOR_PERIOD    (100)
+#define P_LOG_CLT_TX_PERIOD         (100)
+#define P_LOG_CLT_RX_PERIOD         (100)
 
-#define P_LOG_SRV_CALLBACK_STACK 512
-#define P_LOG_CLT_MON_CALLBACK_STACK 512
-#define P_LOG_CLT_TX_CALLBACK_STACK 512
-#define P_LOG_CLT_RX_CALLBACK_STACK 512
+#define P_LOG_SRV_CALLBACK_STACK        (512)
+#define P_LOG_CLT_MON_CALLBACK_STACK    (256)
+#define P_LOG_CLT_TX_CALLBACK_STACK     (256)
+#define P_LOG_CLT_RX_CALLBACK_STACK     (256)
+
+#define P_LOG_FIFO_DATA_SIZE         (256)
+#define P_LOG_FIFO_ELT_SIZE          (16)
 
 
-#define P_LOG_FIFO_RX_DATA_SIZE         (256)
-#define P_LOG_FIFO_RX_ELT_SIZE          (16)
 
-
-#define P_LOG_FIFO_TX_DATA_SIZE         (256)
-#define P_LOG_FIFO_TX_ELT_SIZE          (16)
-
-typedef enum E_LOG_SERVER_STATUS
+typedef enum E_LOG_SRV_RESULT
 {
-    E_LOG_SERVER_CLOSING,
-    E_LOG_SERVER_BINDING,
-    E_LOG_SERVER_ONLINE
-}eLogServerStatus;
+    E_LOG_SRV_RESULT_OK,
+    E_LOG_SRV_RESULT_NOK
+}eLogSrvResult;
 
-typedef enum E_LOG_CLIENT_STATUS
+typedef enum E_RESULT_ENCODER
 {
-    E_LOG_CLIENT_DISCONNECTED,
-    E_LOG_CLIENT_CONNECTED
-}eLogClientStatus;
+    E_ENCODER_RESULT_OK,
+    E_ENCODER_RESULT_ERROR_NOK //Disconnect client
+}eResultEncoder;
 
+typedef enum E_RESULT_DECODER
+{
+    E_DECODER_RESULT_OK,
+    E_DECODER_RESULT_ERROR_NOK //Disconnect client
+}eResultDecoder;
 
+typedef eResultDecoder (*ptrFct_AnalyzerCallback)(void*pAnalyzerContext,uint8_t*pBufferInOut, uint16_t *dataSize, uint16_t maxSizeBufferOut);
+typedef eResultDecoder (*ptrFct_AnalyzerTimeoutTickCallback)(void*pAnalyzerContext);
+typedef void (*ptrFct_AnalyzerContextCreation)(void**pAnalyzerContext);
+typedef void (*ptrFct_AnalyzerContextDestruction)(void**pAnalyzerContext);
 
-typedef struct T_CHANNEL tChannel;
-typedef struct T_LOG_CLIENT_WORKSPACE tLogClientWks;
+typedef void (*ptrFct_EncoderContextCreation)(void**ppEncoderContext);
+typedef void (*ptrFct_EncoderContextDestruction)(void**ppEncoderContext);
+typedef eResultEncoder (*ptrFct_EncoderCallback)(void*pEncoderContext, uint8_t *pBufferInOut,uint16_t* pNbBytesToEncode,uint16_t maxSizeBufferOut);
+typedef eResultEncoder (*ptrFct_EncoderTimeoutTickCallback)(void*pEncoderContext);
+
+typedef uint16_t (*ptrFct_EncoderTransmitHelloCallback)(uint8_t *pBufferInOut,uint16_t nbBytesToEncode,uint16_t maxSizeBufferOut);
+
 typedef struct T_LOG_SERVER_WORKSPACE tLogSrvWks;
 
-tLogSrvWks* P_LOG_SRV_CreateAndStart(uint16_t port, int16_t maxClient);
+tLogSrvWks* P_LOG_SRV_CreateAndStart(uint16_t port,
+                                     uint16_t portHello,
+                                     int16_t maxClient,
+                                     uint32_t timeoutS,
+                                     uint32_t periodeHelloS,
+                                     ptrFct_AnalyzerContextCreation cbAnalyzerContextCreationCallback,
+                                     ptrFct_AnalyzerContextDestruction cbAnalyzerContextDestructionCallback,
+                                     ptrFct_AnalyzerCallback cbAnalyzerCallback,
+                                     ptrFct_AnalyzerTimeoutTickCallback cbAnalyzerTimeOutCallback,
+
+                                     ptrFct_EncoderContextCreation cbSenderContextCreation,
+                                     ptrFct_EncoderContextDestruction cbSenderContextDestruction,
+                                     ptrFct_EncoderCallback cbSenderCallback,
+                                     ptrFct_EncoderTimeoutTickCallback cbSenderTimeoutCallback,
+
+                                     ptrFct_EncoderTransmitHelloCallback cbSenderHelloCallback);
+
+void P_LOG_SRV_StopAndDestroy(tLogSrvWks**p);
+
+eLogSrvResult P_LOG_SRV_SendToAllClient(tLogSrvWks*p, const uint8_t*pBuffer, uint16_t length);
 
 #endif /* FREERTOS_P_LOGSRV_H_ */
