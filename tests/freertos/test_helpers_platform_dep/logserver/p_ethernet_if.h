@@ -24,6 +24,7 @@
 #include "p_synchronisation.h" /* synchronisation include */
 #include "p_threads.h"
 #include "p_utils.h"           /* private list include */
+#include "p_channel.h"
 
 #include "lwip/opt.h"
 #include "lwipopts.h"
@@ -65,5 +66,6 @@ typedef enum E_ETHERNET_IF_RESULT
 
 eEthernetIfResult P_ETHERNET_IF_Initialize(void);
 eEthernetIfResult P_ETHERNET_IF_IsReady(void);
+eEthernetIfResult P_ETHERNET_IF_GetIp(ip_addr_t*pAdressInfo);
 
 #endif /* HELPERS_PLATFORM_DEP_FREERTOS_P_ETHERNET_IF_H_ */
