@@ -40,6 +40,8 @@
 #include "sopc_time.h"
 #include "sopc_types.h"
 
+#include "p_logsrv.h"
+
 static char sBuffer[256];
 static QueueHandle_t h;
 static Mutex m;
@@ -183,7 +185,6 @@ static void* cbS2OPC_Thread_pX(void* ptr)
 static void* cbS2OPC_Thread_p2(void* ptr)
 {
     unsigned short int cpt = 0;
-
     int fd;
     // static unsigned short int cptKillLogSrvTest = 0;
     uint32_t sizeofSOPCNodeID = sizeof(SOPC_NodeId);
@@ -229,10 +230,21 @@ static void* cbS2OPC_Thread_p2(void* ptr)
                 sizeofOpcUa_ReferenceNode);
         fprintf(fd, "%s", sBuffer);
         fclose(fd);
+
         PRINTF(sBuffer);
         Mutex_Unlock(&m);
+
         vTaskDelay(100);
     }
+
+    /*cptKillLogSrvTest++;
+    if(cptKillLogSrvTest > 3)
+    {
+        if(pLogSrv!=NULL)
+        {
+            P_LOG_SRV_StopAndDestroy(&pLogSrv);
+        }
+    }*/
 
     return NULL;
 }
