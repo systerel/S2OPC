@@ -52,10 +52,7 @@ void SOPC_AddressSpace_Item_Initialize(SOPC_AddressSpace_Item* item, OpcUa_NodeC
 
     if (node_class == OpcUa_NodeClass_Variable)
     {
-        if (SOPC_AddressSpace_Item_Get_NodeId(item)->Namespace != OPCUA_NAMESPACE_INDEX)
-        {
-            item->value_status = OpcUa_BadDataUnavailable;
-        }
+        item->value_status = SOPC_GoodGenericStatus;
         /*Note: set an initial timestamp to return non null timestamps */
         item->value_source_ts.timestamp = SOPC_Time_GetCurrentTimeUTC();
         item->value_source_ts.picoSeconds = 0;

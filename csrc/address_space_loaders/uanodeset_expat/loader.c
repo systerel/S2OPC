@@ -510,8 +510,8 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
 
             // Set value_status default value:
             // Keep OPC UA default namespace nodes with a Good status,
-            // necessary to pass UACTT othewise keep Good status only if a value is defined
-            ctx->item.value_status = id->Namespace == 0 ? SOPC_GoodGenericStatus : OpcUa_BadDataUnavailable;
+            // necessary to pass UACTT otherwise keep Good status only if a value is defined
+            ctx->item.value_status = id->Namespace == 0 ? SOPC_GoodGenericStatus : OpcUa_UncertainInitialValue;
 
             SOPC_NodeId* element_id = SOPC_AddressSpace_Item_Get_NodeId(&ctx->item);
             SOPC_ReturnStatus status = SOPC_NodeId_Copy(element_id, id);

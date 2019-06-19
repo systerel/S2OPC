@@ -678,7 +678,7 @@ def generate_reference(ref):
     )
 
 
-def generate_item(ua_node, ty, variant_field, value_status='OpcUa_BadDataUnavailable', **kwargs):
+def generate_item(ua_node, ty, variant_field, value_status='OpcUa_UncertainInitialValue', **kwargs):
     extra = ''
 
     for k, v in kwargs.items():
@@ -731,7 +731,7 @@ def default_variable_status(ua_node):
     if ua_node.value is None and ua_node.nodeid.ns not in (None,0):
         # Keep OPC UA default namespace nodes with a Good status, necessary to pass UACTT
         # othewise keep Good status only if a value is defined
-        value_status='OpcUa_BadDataUnavailable'
+        value_status='OpcUa_UncertainInitialValue'
     return value_status
 
 def generate_item_variable(ua_node):
