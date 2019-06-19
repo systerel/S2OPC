@@ -119,7 +119,7 @@ eConditionVariableResult P_SYNCHRO_InitConditionVariable(hCondVar* pv,         /
     QueueHandle_t pMutex = NULL;
     hCondVar condVar = NULL;
 
-    if ((wMaxWaiters > MAX_P_UTILS_LIST) || (pv == NULL))
+    if ((wMaxWaiters > MAX_WAITERS) || (pv == NULL))
     {
         result = E_COND_VAR_RESULT_ERROR_INCORRECT_PARAMETERS;
     }
