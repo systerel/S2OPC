@@ -46,8 +46,8 @@
 
 #include "FreeRTOSTest.h"
 
-//#include "p_ethernet_if.h"
-//#include "p_logsrv.h"
+#include "p_ethernet_if.h"
+#include "p_logsrv.h"
 
 #include "ksdk_mbedtls_config.h"
 
@@ -93,7 +93,7 @@ int main(void)
     BOARD_InitDebugConsole();
     BOARD_InitBootPeripherals();
 
-    // P_ETHERNET_IF_Initialize();
+    P_ETHERNET_IF_Initialize();
 
     P_TIME_SetInitialDateToBuildTime();
 
