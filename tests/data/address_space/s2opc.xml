@@ -915,6 +915,7 @@
     <References>
       <Reference ReferenceType="HasProperty">i=2294</Reference>
       <Reference ReferenceType="HasComponent" IsForward="false">i=2253</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=58</Reference>
     </References>
   </UAObject>
   <UAVariable BrowseName="Enabled" NodeId="i=2294" DataType="Boolean">
@@ -1097,7 +1098,7 @@
     <DisplayName>Int64_1dn</DisplayName>
     <Description>Int64_1d</Description>
     <References>
-      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
@@ -1108,7 +1109,7 @@
     <DisplayName>UInt32_1dn</DisplayName>
     <Description>UInt32_1d</Description>
     <References>
-      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
@@ -1119,7 +1120,7 @@
     <DisplayName>Double_1dn</DisplayName>
     <Description>Double_1d</Description>
     <References>
-      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
@@ -1130,7 +1131,7 @@
     <DisplayName>String_1dn</DisplayName>
     <Description>String_1d</Description>
     <References>
-      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
@@ -1141,7 +1142,7 @@
     <DisplayName>ByteString_1dn</DisplayName>
     <Description>ByteString_1d</Description>
     <References>
-      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
@@ -1152,7 +1153,7 @@
     <DisplayName>XmlElement_1dn</DisplayName>
     <Description>XmlElement_1d</Description>
     <References>
-      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
@@ -1164,7 +1165,7 @@
     <DisplayName>SByte_1dn</DisplayName>
     <Description>SByte_1d</Description>
     <References>
-      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
@@ -1175,7 +1176,7 @@
     <DisplayName>Byte_1dn</DisplayName>
     <Description>Byte_1d</Description>
     <References>
-      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
@@ -1186,7 +1187,7 @@
     <DisplayName>Int16_1dn</DisplayName>
     <Description>Int16_1d</Description>
     <References>
-      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
@@ -1197,7 +1198,7 @@
     <DisplayName>UInt16_1dn</DisplayName>
     <Description>UInt16_1d</Description>
     <References>
-      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
@@ -1208,7 +1209,7 @@
     <DisplayName>Int32_1dn</DisplayName>
     <Description>Int32_1d</Description>
     <References>
-      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
@@ -1219,7 +1220,7 @@
     <DisplayName>UInt64_1dn</DisplayName>
     <Description>UInt64_1d</Description>
     <References>
-      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
@@ -1230,7 +1231,7 @@
     <DisplayName>Float_1dn</DisplayName>
     <Description>Float_1d</Description>
     <References>
-      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
@@ -1241,7 +1242,7 @@
     <DisplayName>Boolean list DN</DisplayName>
     <Description>Boolean list Description</Description>
     <References>
-      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
@@ -1258,7 +1259,7 @@
     <DisplayName>Byte list DN</DisplayName>
     <Description>Byte list Description</Description>
     <References>
-      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
@@ -1275,7 +1276,7 @@
     <DisplayName>Int16 list DN</DisplayName>
     <Description>Int16 list Description</Description>
     <References>
-      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
@@ -1292,7 +1293,7 @@
     <DisplayName>Int32 list DN</DisplayName>
     <Description>Int32 list Description</Description>
     <References>
-      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
@@ -1309,7 +1310,7 @@
     <DisplayName>Int64 list DN</DisplayName>
     <Description>Int64 list Description</Description>
     <References>
-      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
@@ -1326,7 +1327,7 @@
     <DisplayName>SByte list DN</DisplayName>
     <Description>SByte list Description</Description>
     <References>
-      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
@@ -1343,7 +1344,7 @@
     <DisplayName>UInt16 list DN</DisplayName>
     <Description>UInt16 list Description</Description>
     <References>
-      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
@@ -1360,7 +1361,7 @@
     <DisplayName>UInt32 list DN</DisplayName>
     <Description>UInt32 list Description</Description>
     <References>
-      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
@@ -1377,7 +1378,7 @@
     <DisplayName>UInt64 list DN</DisplayName>
     <Description>UInt64 list Description</Description>
     <References>
-      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
@@ -1394,7 +1395,7 @@
     <DisplayName>Float list DN</DisplayName>
     <Description>Float list Description</Description>
     <References>
-      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
@@ -1411,7 +1412,7 @@
     <DisplayName>Double list DN</DisplayName>
     <Description>Double list Description</Description>
     <References>
-      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
@@ -1428,7 +1429,7 @@
     <DisplayName>String list DN</DisplayName>
     <Description>String list Description</Description>
     <References>
-      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
@@ -1445,7 +1446,7 @@
     <DisplayName>ByteString list DN</DisplayName>
     <Description>ByteString list Description</Description>
     <References>
-      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
@@ -1462,7 +1463,7 @@
     <DisplayName>XmlElement list DN</DisplayName>
     <Description>XmlElement list Description</Description>
     <References>
-      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
@@ -1479,7 +1480,7 @@
     <DisplayName>Boolean</DisplayName>
     <Description>Boolean Description</Description>
     <References>
-      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
@@ -1490,7 +1491,7 @@
     <DisplayName>Number</DisplayName>
     <Description>Number Description</Description>
     <References>
-      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
@@ -1501,7 +1502,7 @@
     <DisplayName>UInteger</DisplayName>
     <Description>UInteger Description</Description>
     <References>
-      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
@@ -1512,7 +1513,7 @@
     <DisplayName>Integer</DisplayName>
     <Description>Integer Description</Description>
     <References>
-      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
@@ -1524,7 +1525,7 @@
     <DisplayName>DateTime_1dn</DisplayName>
     <Description>DateTime_1d</Description>
     <References>
-      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
@@ -1535,7 +1536,7 @@
     <DisplayName>Guid_1dn</DisplayName>
     <Description>Guid_1d</Description>
     <References>
-      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
