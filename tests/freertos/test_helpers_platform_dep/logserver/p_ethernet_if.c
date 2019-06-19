@@ -76,6 +76,17 @@ eEthernetIfResult P_ETHERNET_IF_IsReady(void)
     return ETHERNET_IF_RESULT_NOK;
 }
 
+eEthernetIfResult P_ETHERNET_IF_GetIp(ip_addr_t*pAdressInfo)
+{
+    if(xSemaphoreTake(gEthernetReady,0)==pdPASS)
+    {
+        xSemaphoreGive(gEthernetReady);
+        (void)memcpy(pAdressInfo,&gnetif.ip_addr,sizeof(ip_addr_t));
+        return ETHERNET_IF_RESULT_OK;
+    }
+    return ETHERNET_IF_RESULT_NOK;
+}
+
 eEthernetIfResult P_ETHERNET_IF_Initialize(void)
 {
     eEthernetIfResult result = ETHERNET_IF_RESULT_OK;
