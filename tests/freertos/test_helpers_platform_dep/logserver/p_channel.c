@@ -55,6 +55,7 @@ void P_CHANNEL_DeInit(tChannel*p)
 
 //Initialize channel
 eChannelResult P_CHANNEL_Init(  tChannel*p,         //Channel workspace
+                                size_t totalDataSize,
                                 size_t maxEltSize,  //Max size per atomic element
                                 size_t nbElts)      //Max nb element.
 {
@@ -62,7 +63,7 @@ eChannelResult P_CHANNEL_Init(  tChannel*p,         //Channel workspace
     if(p!=NULL)
     {
         memset(p,0,sizeof(tChannel));
-        p->channelData = pvPortMalloc(maxEltSize * nbElts) ;
+        p->channelData = pvPortMalloc(totalDataSize ) ;
         p->channelRecord = pvPortMalloc(sizeof(uint16_t) * nbElts) ;
 
         p->isNotEmpty = xSemaphoreCreateBinary();
@@ -79,10 +80,10 @@ eChannelResult P_CHANNEL_Init(  tChannel*p,         //Channel workspace
             DEBUG_incrementCpt();
             DEBUG_incrementCpt();
 
-            (void)memset(p->channelData,0,maxEltSize * nbElts);
+            (void)memset(p->channelData,0,totalDataSize);
             (void)memset(p->channelRecord,0,nbElts * sizeof(uint16_t));
             p->maxSizeTotalElts = nbElts;
-            p->maxSizeTotalData = nbElts * maxEltSize;
+            p->maxSizeTotalData = totalDataSize;
             p->maxSizeDataPerElt = maxEltSize ;
             xSemaphoreTake(p->isNotEmpty,0);
             result = E_CHANNEL_RESULT_OK;
@@ -101,7 +102,7 @@ eChannelResult P_CHANNEL_Send(  tChannel*p,                 //Channel workspace
                                 eChannelWriteMode mode)     //Mode, overwrite or normal.
 {
     eChannelResult result = E_CHANNEL_RESULT_NOK;
-    uint16_t dataSize = 0;
+    uint16_t dataToDeleteSize = 0;
 
     //Check parameters
     if((p!=NULL)&&(size > 0)&&(pBuffer != NULL))
@@ -117,7 +118,7 @@ eChannelResult P_CHANNEL_Send(  tChannel*p,                 //Channel workspace
                         ||  ((size + p->currentNbDatas) > p->maxSizeTotalData )  )      //Not Enough space
                 {
                     //Data size of next elt to remove
-                    dataSize = p->channelRecord[p->iRd];
+                    dataToDeleteSize = p->channelRecord[p->iRd];
                     p->channelRecord[p->iRd] = 0;
                     p->iRd++;
                     if(p->iRd >= p->maxSizeTotalElts)
@@ -125,19 +126,19 @@ eChannelResult P_CHANNEL_Send(  tChannel*p,                 //Channel workspace
                         p->iRd = 0;
                     }
                     //If data size exist, remove data of this elt
-                    if(dataSize > 0)
+                    if(dataToDeleteSize > 0)
                     {
-                        if ((p->iRdData + size) < p->maxSizeTotalData)
+                        if ((p->iRdData + dataToDeleteSize) < p->maxSizeTotalData)
                         {
-                            memset (&p->channelData[p->iRdData], 0, size);
-                            p->iRdData =  p->iRdData + size;
+                            memset (&p->channelData[p->iRdData], 0, dataToDeleteSize);
+                            p->iRdData =  p->iRdData + dataToDeleteSize;
 
                         }
                         else
                         {
                             memset (&p->channelData[p->iRdData], 0, p->maxSizeTotalData - p->iRdData);
-                            memset (&p->channelData[0], 0, size - (p->maxSizeTotalData - p->iRdData));
-                            p->iRdData = size - (p->maxSizeTotalData - p->iRdData);
+                            memset (&p->channelData[0], 0, dataToDeleteSize - (p->maxSizeTotalData - p->iRdData));
+                            p->iRdData = dataToDeleteSize - (p->maxSizeTotalData - p->iRdData);
                         }
                     }
                 }
@@ -187,6 +188,7 @@ eChannelResult P_CHANNEL_Send(  tChannel*p,                 //Channel workspace
             }
             else
             {
+                p->overflowCpt++;
                 result = E_CHANNEL_RESULT_ERROR_FULL;
             }
         }

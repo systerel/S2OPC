@@ -71,6 +71,7 @@ typedef struct T_CHANNEL
     uint16_t maxSizeDataPerElt;     //Max size for each record
     uint16_t currentNbElts;         //Current nb records
     uint16_t currentNbDatas;        //Current cumulative data for current nb records
+    uint16_t overflowCpt;
     QueueHandle_t lock ;            //Critical section
     QueueHandle_t isNotEmpty;       //Signal not empty used by receive timeout
     uint8_t *channelData;           //Buffer of data
@@ -78,7 +79,7 @@ typedef struct T_CHANNEL
 }tChannel;
 
 void P_CHANNEL_DeInit(tChannel*p);
-eChannelResult P_CHANNEL_Init(tChannel*p, size_t maxEltSize, size_t nbElts);
+eChannelResult P_CHANNEL_Init(tChannel*p, size_t maxTotalDataSize, size_t maxEltSize, size_t nbElts);
 eChannelResult P_CHANNEL_Send(tChannel*p, const uint8_t * pBuffer, uint16_t size, eChannelWriteMode mode);
 eChannelResult P_CHANNEL_Flush(tChannel*p);
 eChannelResult P_CHANNEL_Receive(tChannel*p, uint16_t* pOutEltSize, uint8_t*pBuffer, TickType_t xTimeToWait, eChannelReadMode mode);
