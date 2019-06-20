@@ -137,29 +137,34 @@ under the License.
 # Do the finds
 err=0
 # Exclude some files
-pushd csrc/opcua_types/ > /dev/null
-for f in opcua_identifiers.h opcua_statuscodes.h sopc_types.h sopc_types.c; do
+read -d '' exclusions <<-EOF
+    csrc/opcua_types/opcua_identifiers.h
+    csrc/opcua_types/opcua_statuscodes.h
+    csrc/opcua_types/sopc_types.h
+    csrc/opcua_types/sopc_types.c
+    tests/freertos/test_helpers_platform_dep/FreeRTOSConfig.h
+    tests/freertos/test_helpers_platform_dep/lwipopts.h
+    tests/freertos/test_helpers_platform_dep/semihost_hardfault.c
+    tests/freertos/test_helpers_platform_dep/board_specific/fsl_phy.h
+    tests/freertos/test_helpers_platform_dep/board_specific/peripherals.h
+    tests/freertos/test_helpers_platform_dep/board_specific/pin_mux.c
+    tests/freertos/test_helpers_platform_dep/board_specific/pin_mux.h
+    tests/freertos/test_helpers_platform_dep/board_specific/peripherals.c
+    tests/freertos/test_helpers_platform_dep/board_specific/fsl_phy.c
+    tests/freertos/test_helpers_platform_dep/board_specific/src/board.h
+    tests/freertos/test_helpers_platform_dep/board_specific/src/clock_config.h
+    tests/freertos/test_helpers_platform_dep/board_specific/src/clock_config.c
+    tests/freertos/test_helpers_platform_dep/board_specific/src/board.c
+EOF
+for f in $exclusions; do
     mv $f $f"_"
 done
-popd > /dev/null
-pushd tests/freertos/test_helpers_platform_dep/ > /dev/null
-for f in FreeRTOSConfig.h lwipopts.h semihost_hardfault.c; do
-    mv $f $f"_"
-done
-popd > /dev/null
 
 find csrc tests -name "*.[hc]" -print0 | xargs -0 -n 1 $HELPER_SCRIPT $HEADER_C || { echo 'Expected header:' ; cat $HEADER_C ; err=1 ; }
 
-pushd csrc/opcua_types/ > /dev/null
-for f in opcua_identifiers.h opcua_statuscodes.h sopc_types.h sopc_types.c; do
+for f in $exclusions; do
     mv $f"_" $f
 done
-popd > /dev/null
-pushd tests/freertos/test_helpers_platform_dep/ > /dev/null
-for f in FreeRTOSConfig.h lwipopts.h semihost_hardfault.c; do
-    mv $f"_" $f
-done
-popd > /dev/null
 
 find bsrc -maxdepth 1 -name "*.[im]??" -print0 | xargs -0 -n 1 $HELPER_SCRIPT $HEADER_C || { echo 'Expected header:' ; cat $HEADER_C ; err=1 ; }
 find bsrc -maxdepth 1 -name "*.pmm" -print0 | xargs -0 -n 1 $HELPER_SCRIPT $HEADER_C || { echo 'Expected header:' ; cat $HEADER_C ; err=1 ; }
