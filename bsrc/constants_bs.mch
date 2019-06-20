@@ -84,6 +84,8 @@ CONCRETE_CONSTANTS
     k_n_WriteResponse_max,
     k_n_BrowseResponse_max,
     k_n_BrowseTarget_max,
+    k_n_BrowsePathResPerElt_max,
+    k_n_BrowsePathResPerPath_max,
     k_n_monitoredItem_max,
     k_n_monitoredItemNotif_max,
     k_n_publishRequestPerSub_max,
@@ -210,6 +212,8 @@ PROPERTIES
     k_n_WriteResponse_max : NAT &
     k_n_BrowseResponse_max : NAT &
     k_n_BrowseTarget_max : NAT &
+    k_n_BrowsePathResPerElt_max : NAT &
+    k_n_BrowsePathResPerPath_max : NAT &
     k_n_monitoredItem_max : NAT &
     k_n_monitoredItemNotif_max : NAT &
     k_n_publishRequestPerSub_max : NAT &
@@ -578,16 +582,17 @@ OPERATIONS
     END
     ;
 
-    p_out <-- get_copy_ExpandedNodeId(p_in) =
+    p_alloc, p_out <-- get_copy_ExpandedNodeId(p_in) =
     PRE
         p_in : t_ExpandedNodeId_i &
         p_in : t_ExpandedNodeId
     THEN
+        p_alloc,
         p_out
-        :(
-            p_out : t_ExpandedNodeId_i &
-            p_out : t_ExpandedNodeId
-        )
+        :(p_alloc : BOOL &
+          p_out : t_ExpandedNodeId_i &
+          (p_alloc = FALSE => p_out = c_ExpandedNodeId_indet) &
+          (p_alloc = TRUE => p_out = p_in))
     END
     ;
 

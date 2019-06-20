@@ -48,6 +48,7 @@ VALUES
     t_ReadValue_i = 0..k_n_read_resp_max;
     t_WriteValue_i = 0..k_n_WriteResponse_max;
     t_BrowseValue_i = 0..k_n_BrowseResponse_max;
+    t_BrowsePathResPerElt_i = 0..k_n_BrowsePathResPerElt_max;
 
     c_ReadValue_indet = 0;
     c_WriteValue_indet = 0;

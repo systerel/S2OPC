@@ -21,7 +21,7 @@
 
  File Name            : translate_browse_path.h
 
- Date                 : 29/04/2019 16:57:50
+ Date                 : 27/06/2019 10:56:18
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -40,7 +40,9 @@
   -----------------*/
 #include "browse_treatment.h"
 #include "msg_translate_browse_path_bs.h"
+#include "translate_browse_path_1.h"
 #include "translate_browse_path_element_it.h"
+#include "translate_browse_path_source_it.h"
 
 /*--------------
    SEES Clause
@@ -50,6 +52,7 @@
 #include "constants_statuscodes_bs.h"
 #include "message_in_bs.h"
 #include "message_out_bs.h"
+#include "node_id_pointer_bs.h"
 
 /*------------------------
    INITIALISATION Clause
@@ -75,20 +78,47 @@ extern void translate_browse_path__INITIALISATION(void);
 /*--------------------------
    LOCAL_OPERATIONS Clause
   --------------------------*/
+extern void translate_browse_path__checkAndAdd_BrowsePathRemaining(
+   const constants__t_ExpandedNodeId_i translate_browse_path__expandedNodeId,
+   const t_entier4 translate_browse_path__index,
+   constants_statuscodes_bs__t_StatusCode_i * const translate_browse_path__statusCode_operation);
+extern void translate_browse_path__checkAndAdd_BrowsePathResult(
+   const constants__t_ExpandedNodeId_i translate_browse_path__expandedNodeId,
+   constants_statuscodes_bs__t_StatusCode_i * const translate_browse_path__statusCode_operation);
 extern void translate_browse_path__check_startingNode(
    const constants__t_NodeId_i translate_browse_path__nodeid,
    constants_statuscodes_bs__t_StatusCode_i * const translate_browse_path__StatusCode);
+extern void translate_browse_path__compute_browse_result_from_source(
+   const constants__t_NodeId_i translate_browse_path__source,
+   const constants__t_BrowseDirection_i translate_browse_path__browseDirection,
+   const constants__t_NodeId_i translate_browse_path__referenceTypeId,
+   const t_bool translate_browse_path__includedSubtypes,
+   constants_statuscodes_bs__t_StatusCode_i * const translate_browse_path__statusCode_operation,
+   t_entier4 * const translate_browse_path__nbReferences);
+extern void translate_browse_path__copy_browsePathResult_to_msg(
+   const constants__t_BrowsePath_i translate_browse_path__browsePath,
+   const constants_statuscodes_bs__t_StatusCode_i translate_browse_path__in_statusCode_operation,
+   constants_statuscodes_bs__t_StatusCode_i * const translate_browse_path__out_statusCode_operation);
+extern void translate_browse_path__copy_browsePathResult_to_source(
+   constants_statuscodes_bs__t_StatusCode_i * const translate_browse_path__statusCode_operation);
+extern void translate_browse_path__free_BrowsePathRemaining(void);
+extern void translate_browse_path__free_BrowsePathResult(void);
+extern void translate_browse_path__free_BrowsePathSource(void);
 extern void translate_browse_path__get_browseDirection_from_isInverse(
    const t_bool translate_browse_path__isInverse,
    constants__t_BrowseDirection_i * const translate_browse_path__browseDirection);
 extern void translate_browse_path__get_translateStatus_from_browseStatus(
    const constants_statuscodes_bs__t_StatusCode_i translate_browse_path__browse_statusCode,
    constants_statuscodes_bs__t_StatusCode_i * const translate_browse_path__translate_statusCode);
+extern void translate_browse_path__treat_browse_result_one_source(
+   const t_entier4 translate_browse_path__index,
+   const constants__t_QualifiedName_i translate_browse_path__targetName,
+   const t_entier4 translate_browse_path__nbReferences,
+   constants_statuscodes_bs__t_StatusCode_i * const translate_browse_path__statusCode_operation);
 extern void translate_browse_path__treat_one_relative_path_element(
-   const constants__t_NodeId_i translate_browse_path__source,
    const constants__t_RelativePathElt_i translate_browse_path__relativePathElt,
-   constants_statuscodes_bs__t_StatusCode_i * const translate_browse_path__statusCode_operation,
-   constants__t_ExpandedNodeId_i * const translate_browse_path__target);
+   const t_entier4 translate_browse_path__index,
+   constants_statuscodes_bs__t_StatusCode_i * const translate_browse_path__statusCode_operation);
 
 /*--------------------
    OPERATIONS Clause

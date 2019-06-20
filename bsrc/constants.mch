@@ -296,6 +296,8 @@ CONCRETE_CONSTANTS
     k_n_WriteResponse_max,
     k_n_BrowseResponse_max,
     k_n_BrowseTarget_max,
+    k_n_BrowsePathResPerElt_max,  /* max intermediate result per path element */
+    k_n_BrowsePathResPerPath_max, /* max result per path in service response */
     k_n_monitoredItem_max,
     k_n_monitoredItemNotif_max,
     k_n_publishRequestPerSub_max,
@@ -334,6 +336,7 @@ CONCRETE_CONSTANTS
     c_browsePath_indet,
     c_RelativePath_indet,
     c_RelativePathElt_indet,
+    /*c_BrowsePathResPerElt_indet,*/
     c_session_token_indet,
     c_Nonce_indet,
     c_SignatureData_indet,
@@ -373,7 +376,8 @@ CONCRETE_CONSTANTS
 
     t_counter,
     t_ValueRank,
-    t_ConcreteValueRank
+    t_ConcreteValueRank,
+    t_BrowsePathResPerElt_i
 
 ABSTRACT_CONSTANTS
     conv_AccessLevel_Variant,
@@ -414,6 +418,7 @@ ABSTRACT_CONSTANTS
 
     cast_t_session,
     cast_t_BrowsePath,
+    /*cast_t_BrowsePathResPerElt,*/
     cast_t_channel,
     cast_t_subscription,
     cast_t_ReadValue,
@@ -425,6 +430,7 @@ ABSTRACT_CONSTANTS
     t_BrowsePath,
     t_RelativePath,
     t_RelativePathElt,
+    /*t_BrowsePathResPerElt,*/
     t_session_token,
     t_user,
     t_user_token,
@@ -529,6 +535,8 @@ PROPERTIES
     k_n_WriteResponse_max : NAT &
     k_n_BrowseResponse_max : NAT &
     k_n_BrowseTarget_max : NAT &
+    k_n_BrowsePathResPerElt_max : NAT &
+    k_n_BrowsePathResPerPath_max : NAT &
     k_n_monitoredItem_max : NAT &
     k_n_monitoredItemNotif_max : NAT &
     k_n_publishRequestPerSub_max : NAT &
@@ -628,6 +636,8 @@ PROPERTIES
     t_RelativePathElt <: t_RelativePathElt_i &
     c_RelativePathElt_indet : t_RelativePathElt_i &
     c_RelativePathElt_indet /: t_RelativePathElt &
+
+    t_BrowsePathResPerElt_i = 0..k_n_BrowsePathResPerElt_max &
 
     t_session_token <: t_session_token_i &
     c_session_token_indet : t_session_token_i &
@@ -1085,16 +1095,17 @@ OPERATIONS
     END
     ;
 
-    p_out <-- get_copy_ExpandedNodeId(p_in) =
+    p_alloc, p_out <-- get_copy_ExpandedNodeId(p_in) =
     PRE
         p_in : t_ExpandedNodeId_i &
         p_in : t_ExpandedNodeId
     THEN
+        p_alloc,
         p_out
-        :(
-            p_out : t_ExpandedNodeId_i &
-            p_out : t_ExpandedNodeId
-        )
+        :(p_alloc : BOOL &
+          p_out : t_ExpandedNodeId_i &
+          (p_alloc = FALSE => p_out = c_ExpandedNodeId_indet) &
+          (p_alloc = TRUE => p_out = p_in))
     END
     ;
 

@@ -189,6 +189,8 @@ extern const constants_bs__t_NodeId_i constants_bs__c_Null_Type_NodeId;
 #define constants_bs__k_n_registerNodes_max SOPC_MAX_OPERATIONS_PER_MSG
 #define constants_bs__k_n_republishNotifPerSub_max (2 * SOPC_MAX_SUBSCRIPTION_PUBLISH_REQUESTS)
 #define constants_bs__k_n_unregisterNodes_max SOPC_MAX_OPERATIONS_PER_MSG
+#define constants_bs__k_n_BrowsePathResPerElt_max SOPC_MAX_OPERATIONS_PER_MSG
+#define constants_bs__k_n_BrowsePathResPerPath_max SOPC_MAX_OPERATIONS_PER_MSG
 
 /*------------------------
    INITIALISATION Clause
@@ -212,6 +214,7 @@ extern void constants_bs__get_cast_t_session(const t_entier4 constants_bs__p_ind
 extern void constants_bs__get_cast_t_subscription(const t_entier4 constants_bs__p_ind,
                                                   constants_bs__t_subscription_i* const constants_bs__p_subscription);
 extern void constants_bs__get_copy_ExpandedNodeId(const constants_bs__t_ExpandedNodeId_i constants_bs__p_in,
+                                                  t_bool* const constants_bs__p_alloc,
                                                   constants_bs__t_ExpandedNodeId_i* const constants_bs__p_out);
 extern void constants_bs__getall_conv_ExpandedNodeId_NodeId(
     const constants_bs__t_ExpandedNodeId_i constants_bs__p_expnid,

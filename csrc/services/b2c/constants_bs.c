@@ -200,9 +200,15 @@ void constants_bs__free_ExpandedNodeId(const constants_bs__t_ExpandedNodeId_i co
 }
 
 void constants_bs__get_copy_ExpandedNodeId(const constants_bs__t_ExpandedNodeId_i constants_bs__p_in,
+                                           t_bool* const constants_bs__p_alloc,
                                            constants_bs__t_ExpandedNodeId_i* const constants_bs__p_out)
 {
+    *constants_bs__p_alloc = false;
     *constants_bs__p_out = SOPC_Calloc(1, sizeof(**constants_bs__p_out));
-    SOPC_ExpandedNodeId_Initialize(*constants_bs__p_out);
-    SOPC_ExpandedNodeId_Copy(*constants_bs__p_out, constants_bs__p_in);
+    if (NULL != *constants_bs__p_out)
+    {
+        *constants_bs__p_alloc = true;
+        SOPC_ExpandedNodeId_Initialize(*constants_bs__p_out);
+        SOPC_ExpandedNodeId_Copy(*constants_bs__p_out, constants_bs__p_in);
+    }
 }

@@ -1,0 +1,161 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+IMPLEMENTATION
+    translate_browse_path_1_i
+
+REFINES
+    translate_browse_path_1
+
+SEES
+    constants
+
+CONCRETE_VARIABLES
+    BrowsePathSource_tab,
+    BrowsePathSource_size,
+    BrowsePathResult_tab,
+    BrowsePathResult_size,
+    BrowsePathRemainingNodeId_tab,
+    BrowsePathRemainingIndex_tab,
+    BrowsePathRemainingNodeId_size
+
+INVARIANT
+    BrowsePathSource_tab  : t_BrowsePathResPerElt_i --> t_NodeId_i     &
+    BrowsePathSource_size : t_BrowsePathResPerElt_i &
+    BrowsePathSource      = 1..BrowsePathSource_size <| BrowsePathSource_tab &
+
+    BrowsePathResult_tab  : t_BrowsePathResPerElt_i --> t_ExpandedNodeId_i   &
+    BrowsePathResult_size : t_BrowsePathResPerElt_i &
+    BrowsePathResult      = 1..BrowsePathResult_size <| BrowsePathResult_tab &
+
+    BrowsePathRemainingNodeId_tab  : t_BrowsePathResPerElt_i --> t_ExpandedNodeId_i &
+    BrowsePathRemainingNodeId_size : t_BrowsePathResPerElt_i &
+    BrowsePathRemainingNodeId      = 1..BrowsePathRemainingNodeId_size <| BrowsePathRemainingNodeId_tab &
+
+    BrowsePathRemainingIndex_tab  : t_BrowsePathResPerElt_i --> NAT     &
+    BrowsePathRemainingIndex      = 1..BrowsePathRemainingNodeId_size <| BrowsePathRemainingIndex_tab |> {0}
+
+INITIALISATION
+
+    BrowsePathSource_tab  := t_BrowsePathResPerElt_i * {c_NodeId_indet};
+    BrowsePathSource_size := 0;
+    BrowsePathResult_tab := t_BrowsePathResPerElt_i * {c_ExpandedNodeId_indet};
+    BrowsePathResult_size := 0;
+    BrowsePathRemainingNodeId_size := 0;
+    BrowsePathRemainingNodeId_tab  := t_BrowsePathResPerElt_i * {c_ExpandedNodeId_indet};
+    BrowsePathRemainingIndex_tab   := t_BrowsePathResPerElt_i * {0}
+
+
+OPERATIONS
+
+    init_BrowsePathSource =
+    BEGIN
+        BrowsePathSource_tab  := t_BrowsePathResPerElt_i * {c_NodeId_indet};
+        BrowsePathSource_size := 0
+    END
+    ;
+
+    res <-- get_BrowsePathSourceSize =
+    BEGIN
+        res := BrowsePathSource_size
+    END
+    ;
+
+    nodeId <-- get_BrowsePathSource (index) =
+    BEGIN
+        nodeId := BrowsePathSource_tab (index)
+    END
+    ;
+
+    add_BrowsePathSource (nodeId) =
+    BEGIN
+        BrowsePathSource_size := BrowsePathSource_size + 1;
+        BrowsePathSource_tab(BrowsePathSource_size) := nodeId
+    END
+    ;
+
+    init_BrowsePathResult =
+    BEGIN
+         BrowsePathResult_tab := t_BrowsePathResPerElt_i * {c_ExpandedNodeId_indet};
+        BrowsePathResult_size := 0
+    END
+    ;
+
+    res <-- get_BrowsePathResultSize =
+    BEGIN
+        res := BrowsePathResult_size
+    END
+    ;
+
+    res <-- get_BrowsePathResult_IsFull =
+    BEGIN
+        res := bool(BrowsePathResult_size = k_n_BrowsePathResPerElt_max)
+    END
+    ;
+
+    nodeId <-- get_BrowsePathResult (index) =
+    BEGIN
+        nodeId := BrowsePathResult_tab (index)
+    END
+    ;
+
+    add_BrowsePathResult (nodeId) =
+    BEGIN
+        BrowsePathResult_size := BrowsePathResult_size + 1;
+        BrowsePathResult_tab(BrowsePathResult_size) := nodeId
+    END
+    ;
+
+    init_BrowsePathRemaining =
+    BEGIN
+        BrowsePathRemainingNodeId_size := 0;
+        BrowsePathRemainingNodeId_tab  := t_BrowsePathResPerElt_i * {c_ExpandedNodeId_indet};
+        BrowsePathRemainingIndex_tab   := t_BrowsePathResPerElt_i * {0}
+    END
+    ;
+
+    res <-- get_BrowsePathRemainingSize =
+    BEGIN
+        res := BrowsePathRemainingNodeId_size
+    END
+    ;
+
+    res <-- get_BrowsePathRemaining_IsFull =
+    BEGIN
+        res := bool(BrowsePathRemainingNodeId_size = k_n_BrowsePathResPerElt_max)
+    END
+    ;
+
+    nodeId, remainingIndex <-- get_BrowsePathRemaining (index) =
+    BEGIN
+        nodeId := BrowsePathRemainingNodeId_tab(index);
+        remainingIndex := BrowsePathRemainingIndex_tab(index)
+    END
+    ;
+
+    add_BrowsePathResultRemaining (nodeId, index) =
+    BEGIN
+        BrowsePathRemainingNodeId_size := BrowsePathRemainingNodeId_size + 1;
+        BrowsePathRemainingNodeId_tab(BrowsePathRemainingNodeId_size) := nodeId;
+        BrowsePathRemainingIndex_tab(BrowsePathRemainingNodeId_size) := index
+    END
+
+
+
+END

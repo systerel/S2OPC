@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 14/06/2019 15:11:06
+ Date                 : 25/06/2019 19:01:44
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -356,6 +356,7 @@ typedef enum {
 #define constants__t_ReadValue_i_max constants_bs__k_n_read_resp_max
 #define constants__t_WriteValue_i_max constants_bs__k_n_WriteResponse_max
 #define constants__t_BrowseValue_i_max constants_bs__k_n_BrowseResponse_max
+#define constants__t_BrowsePathResPerElt_i_max constants_bs__k_n_BrowsePathResPerElt_max
 
 /*------------------------------------------------
    CONCRETE_CONSTANTS Clause: scalars and arrays
@@ -415,6 +416,8 @@ typedef enum {
 #define constants__c_timeref_indet constants_bs__c_timeref_indet
 #define constants__c_user_indet constants_bs__c_user_indet
 #define constants__c_user_token_indet constants_bs__c_user_token_indet
+#define constants__k_n_BrowsePathResPerElt_max constants_bs__k_n_BrowsePathResPerElt_max
+#define constants__k_n_BrowsePathResPerPath_max constants_bs__k_n_BrowsePathResPerPath_max
 #define constants__k_n_BrowseResponse_max constants_bs__k_n_BrowseResponse_max
 #define constants__k_n_BrowseTarget_max constants_bs__k_n_BrowseTarget_max
 #define constants__k_n_IndexRange_max constants_bs__k_n_IndexRange_max

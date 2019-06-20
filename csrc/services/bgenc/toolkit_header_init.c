@@ -21,7 +21,7 @@
 
  File Name            : toolkit_header_init.c
 
- Date                 : 14/06/2019 07:38:24
+ Date                 : 26/06/2019 09:41:30
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -120,8 +120,10 @@
 #include "subscription_mgr.h"
 #include "toolkit_header.h"
 #include "translate_browse_path.h"
+#include "translate_browse_path_1.h"
 #include "translate_browse_path_element_it.h"
 #include "translate_browse_path_it.h"
+#include "translate_browse_path_source_it.h"
 #include "unregister_nodes_it.h"
 #include "user_authentication.h"
 #include "user_authentication_bs.h"
@@ -176,8 +178,10 @@ void INITIALISATION(void) {
    service_browse_it__INITIALISATION();
    msg_browse_bs__INITIALISATION();
    msg_browse_next_bs__INITIALISATION();
+   translate_browse_path_1__INITIALISATION();
    msg_translate_browse_path_bs__INITIALISATION();
    translate_browse_path_element_it__INITIALISATION();
+   translate_browse_path_source_it__INITIALISATION();
    browse_treatment_context_bs__INITIALISATION();
    node_id_pointer_bs__INITIALISATION();
    browse_treatment_context__INITIALISATION();
