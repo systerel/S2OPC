@@ -666,7 +666,7 @@ SOPC_ReturnStatus Mutex_Initialization(Mutex* mut)
     }
     else
     {
-        freeRtosMutex = xQueueCreateMutex(queueQUEUE_TYPE_RECURSIVE_MUTEX);
+        freeRtosMutex = xSemaphoreCreateRecursiveMutex();
         if (freeRtosMutex == NULL)
         {
             result = SOPC_STATUS_OUT_OF_MEMORY;
@@ -700,7 +700,7 @@ SOPC_ReturnStatus Mutex_Clear(Mutex* mut)
         }
         else
         {
-            vQueueDelete(handleRecursiveMutex);
+            vSemaphoreDelete(handleRecursiveMutex);
             result = SOPC_STATUS_OK;
         }
     }

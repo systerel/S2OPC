@@ -222,7 +222,7 @@ eThreadResult P_THREAD_Init(hThread* ptrWks,            // Workspace
 
     handleWks->signalReadyToWait = xSemaphoreCreateBinary();
     handleWks->signalReadyToStart = xSemaphoreCreateBinary();
-    handleWks->lockRecHandle = xQueueCreateMutex(queueQUEUE_TYPE_RECURSIVE_MUTEX);
+    handleWks->lockRecHandle = xSemaphoreCreateRecursiveMutex();
     if (handleWks->signalReadyToWait)
     {
         DEBUG_incrementCpt();
@@ -312,7 +312,7 @@ eThreadResult P_THREAD_Init(hThread* ptrWks,            // Workspace
         }
         if (handleWks->lockRecHandle != NULL)
         {
-            vQueueDelete(handleWks->lockRecHandle);
+            vSemaphoreDelete(handleWks->lockRecHandle);
             handleWks->lockRecHandle = NULL;
             DEBUG_decrementCpt();
         }
@@ -621,7 +621,7 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
 
         if (NULL != tempLock)
         {
-            vQueueDelete(tempLock);
+            vSemaphoreDelete(tempLock);
             tempLock = NULL;
             DEBUG_decrementCpt();
         }
