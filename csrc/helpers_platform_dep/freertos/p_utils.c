@@ -117,7 +117,6 @@ SOPC_ReturnStatus P_UTILS_LIST_AddElt(tUtilsList* ptr,
 
     // New element is the first free
     wCurrentSlotId = ptr->firstFree;
-
     firstPrevOQP = ptr->firstFreePreviousOQP;
     firstNextOQP = ptr->firstFreeNextOQP;
 
@@ -126,8 +125,7 @@ SOPC_ReturnStatus P_UTILS_LIST_AddElt(tUtilsList* ptr,
     ptr->list[wCurrentSlotId].infosField1 = infos;
     ptr->list[wCurrentSlotId].infosField2 = infos2;
     ptr->list[wCurrentSlotId].pContext = pContext;
-    ptr->wNbRegisteredTasks =
-        ptr->wNbRegisteredTasks < ptr->wMaxWaitingTasks ? ptr->wNbRegisteredTasks + 1 : ptr->wNbRegisteredTasks;
+    ++ptr->wNbRegisteredTasks;
     ptr->list[wCurrentSlotId].prId = ptr->firstFreePreviousOQP;
     ptr->list[wCurrentSlotId].nxId = ptr->firstFreeNextOQP;
 
