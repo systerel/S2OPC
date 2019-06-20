@@ -61,10 +61,11 @@
 #define P_LOG_SRV_CALLBACK_STACK        (512)
 #define P_LOG_CLT_MON_CALLBACK_STACK    (256)
 #define P_LOG_CLT_TX_CALLBACK_STACK     (256)
-#define P_LOG_CLT_RX_CALLBACK_STACK     (256)
+#define P_LOG_CLT_RX_CALLBACK_STACK     (128)
 
-#define P_LOG_FIFO_DATA_SIZE         (256)
-#define P_LOG_FIFO_ELT_SIZE          (16)
+#define P_LOG_FIFO_DATA_SIZE         (1024)
+#define P_LOG_FIFO_ELT_MAX_SIZE      (1024)
+#define P_LOG_FIFO_MAX_NB_ELT        (256)
 
 
 
@@ -87,14 +88,14 @@ typedef enum E_RESULT_DECODER
 }eResultDecoder;
 
 typedef eResultDecoder (*ptrFct_AnalyzerCallback)(void*pAnalyzerContext,uint8_t*pBufferInOut, uint16_t *dataSize, uint16_t maxSizeBufferOut);
-typedef eResultDecoder (*ptrFct_AnalyzerTimeoutTickCallback)(void*pAnalyzerContext);
+typedef eResultDecoder (*ptrFct_AnalyzerPeriodicCallback)(void*pAnalyzerContext, uint8_t*pBufferOut, uint16_t *dataSize, uint16_t maxSizeBufferOut);
 typedef void (*ptrFct_AnalyzerContextCreation)(void**pAnalyzerContext);
 typedef void (*ptrFct_AnalyzerContextDestruction)(void**pAnalyzerContext);
 
 typedef void (*ptrFct_EncoderContextCreation)(void**ppEncoderContext);
 typedef void (*ptrFct_EncoderContextDestruction)(void**ppEncoderContext);
 typedef eResultEncoder (*ptrFct_EncoderCallback)(void*pEncoderContext, uint8_t *pBufferInOut,uint16_t* pNbBytesToEncode,uint16_t maxSizeBufferOut);
-typedef eResultEncoder (*ptrFct_EncoderTimeoutTickCallback)(void*pEncoderContext);
+typedef eResultEncoder (*ptrFct_EncoderPeriodicCallback)(void*pEncoderContext);
 
 typedef uint16_t (*ptrFct_EncoderTransmitHelloCallback)(uint8_t *pBufferInOut,uint16_t nbBytesToEncode,uint16_t maxSizeBufferOut);
 
@@ -108,12 +109,12 @@ tLogSrvWks* P_LOG_SRV_CreateAndStart(uint16_t port,
                                      ptrFct_AnalyzerContextCreation cbAnalyzerContextCreationCallback,
                                      ptrFct_AnalyzerContextDestruction cbAnalyzerContextDestructionCallback,
                                      ptrFct_AnalyzerCallback cbAnalyzerCallback,
-                                     ptrFct_AnalyzerTimeoutTickCallback cbAnalyzerTimeOutCallback,
+                                     ptrFct_AnalyzerPeriodicCallback cbAnalyzerTimeOutCallback,
 
                                      ptrFct_EncoderContextCreation cbSenderContextCreation,
                                      ptrFct_EncoderContextDestruction cbSenderContextDestruction,
                                      ptrFct_EncoderCallback cbSenderCallback,
-                                     ptrFct_EncoderTimeoutTickCallback cbSenderTimeoutCallback,
+                                     ptrFct_EncoderPeriodicCallback cbSenderTimeoutCallback,
 
                                      ptrFct_EncoderTransmitHelloCallback cbSenderHelloCallback);
 
