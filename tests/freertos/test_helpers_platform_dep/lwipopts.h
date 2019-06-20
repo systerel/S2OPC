@@ -34,17 +34,27 @@
 /**
  * LWIP_SOCKET==1: Enable Socket API (require to use sockets.c)
  */
-#define LWIP_IGMP 1
 #define LWIP_SOCKET 1
+
+/*
+ * Add following lwip options
+ */
+#define LWIP_IGMP 1
 #define LWIP_DNS 1
 #define LWIP_IPV6 1
 #define LWIP_COMPAT_SOCKETS 2
 #define LWIP_TIMEVAL_PRIVATE 0
 #define LWIP_DHCP 0
-#define SO_REUSE 1
 #define LWIP_RAW 1
 #define LWIP_MPU_COMPATIBLE 1
-#define MEM_LIBC_MALLOC 0
+#define SO_REUSE 1
+/*
+ * Add following memory options
+ */
+
+#define MEM_LIBC_MALLOC (0)
+#define MEMP_NUM_NETBUF (8)
+#define MEMP_NUM_NETCONN (16)
 
 /**
  * LWIP_SO_RCVTIMEO==1: Enable receive timeout for sockets/netconns and
