@@ -67,12 +67,12 @@ typedef struct T_LOG_SERVER_WORKSPACE
     ptrFct_AnalyzerContextCreation cbClientAnalyzerContextCreationCallback;             //Context creation callback
     ptrFct_AnalyzerContextDestruction cbClientAnalyzerContextDestructionCallback;       //Context destruction callback. Return !=0 -> disconnect client
     ptrFct_AnalyzerCallback cbClientAnalyzerCallback;                                   //Input Frame decoder
-    ptrFct_AnalyzerTimeoutTickCallback cbClientAnalyzerTimeoutCallback;                 //Input frame periodic tick timeout. Return !=0 -> disconnect client
+    ptrFct_AnalyzerPeriodicCallback cbClientAnalyzerPeriodicCallback;                 //Input frame periodic tick timeout. Return !=0 -> disconnect client
 
     ptrFct_EncoderContextCreation cbClientEncoderContextCreation;                       //Output frame context creation
     ptrFct_EncoderContextDestruction cbClientEncoderContextDestruction;                 //Output frame encoder context destruction
     ptrFct_EncoderCallback cbClientEncoderCallback;                                     //Output frame encoder. Return !=0 -> disconnect client
-    ptrFct_EncoderTimeoutTickCallback cbClientEncoderTimeoutCallback;                   //Output frame encoder periodic timeout tick. Return != 0 => disconnect client
+    ptrFct_EncoderPeriodicCallback cbClientEncoderPeriodicCallback;                   //Output frame encoder periodic timeout tick. Return != 0 => disconnect client
 
     ptrFct_EncoderTransmitHelloCallback cbEncoderTransmitHelloCallback;                 //Hello callback.
 
@@ -127,12 +127,12 @@ typedef struct T_LOG_CLIENT_WORKSPACE
     ptrFct_AnalyzerContextCreation cbAnalyzerContextCreationCallback;
     ptrFct_AnalyzerContextDestruction cbAnalyzerContextDestructionCallback;
     ptrFct_AnalyzerCallback cbAnalyzerCallback;
-    ptrFct_AnalyzerTimeoutTickCallback cbAnalyzerTimeoutTickCallback;
+    ptrFct_AnalyzerPeriodicCallback cbAnalyzerPeriodicCallback;
 
     ptrFct_EncoderContextCreation cbEncoderContextCreation;
     ptrFct_EncoderContextDestruction cbEncoderContextDestruction;
     ptrFct_EncoderCallback cbEncoderCallback;
-    ptrFct_EncoderTimeoutTickCallback cbEncoderTimeoutTickCallback;
+    ptrFct_EncoderPeriodicCallback cbEncoderPeriodicCallback;
 
     void*ptrAnalyzerContext;    //Optional context for analyzer
     void*ptrEncoderContext;     //Optional context for encoder
@@ -155,12 +155,12 @@ static tLogClientWks* ClientCreateThenStart(            int32_t socket,         
                                                         ptrFct_AnalyzerContextCreation cbAnalyzerContextCreationCallback,           //analyzer context creation
                                                         ptrFct_AnalyzerContextDestruction cbAnalyzerContextDestructionCallback,     //analyzer context destruction
                                                         ptrFct_AnalyzerCallback cbAnalyzerCallback,                                 //analyzer
-                                                        ptrFct_AnalyzerTimeoutTickCallback cbAnalyzerTimeOutCallback,               //analyzer tick timeout
+                                                        ptrFct_AnalyzerPeriodicCallback cbAnalyzerTimeOutCallback,               //analyzer tick timeout
 
                                                         ptrFct_EncoderContextCreation cbClientSenderContextCreation,                //encoder context creation
                                                         ptrFct_EncoderContextDestruction cbClientSenderContextDestruction,          //encoder context destruction
                                                         ptrFct_EncoderCallback cbClientSenderCallback,                              //encoder
-                                                        ptrFct_EncoderTimeoutTickCallback cbClientSenderTimeoutCallback );          //tick timeout
+                                                        ptrFct_EncoderPeriodicCallback cbClientSenderTimeoutCallback );          //tick timeout
 
 static void ClientStopThenDestroy(tLogClientWks**p);
 
@@ -265,9 +265,9 @@ static void cbTaskSocketClientEncodeAndTx(void*pParameters)
                     //-------------------------Periodic zone--------------------------------
 
                     //If encoder tick timeout exist, if it returns an error, client is disconnected
-                    if(pClt->cbEncoderTimeoutTickCallback != NULL)
+                    if(pClt->cbEncoderPeriodicCallback != NULL)
                     {
-                        if(pClt->cbEncoderTimeoutTickCallback(pClt->ptrAnalyzerContext)!=E_ENCODER_RESULT_OK)
+                        if(pClt->cbEncoderPeriodicCallback(pClt->ptrAnalyzerContext)!=E_ENCODER_RESULT_OK)
                         {
                             pClt->status = E_LOG_CLIENT_DISCONNECTED;
                         }
@@ -356,7 +356,8 @@ static void cbTaskSocketClientDecodeAndDo(void*pParameters)
                                              xTicksToWait,
                                              E_CHANNEL_RD_MODE_NORMAL);
 
-            //If not a timeout, analyze bytes and send response if requested by nbBytes set by callback
+            //If not a timeout, analyze bytes and do action
+            //send response via channel out is possible, max frame size in parameters.
             //In case of ERROR returned by callback, client disconnected
             if(resChannel != E_CHANNEL_RESULT_ERROR_TMO)
             {
@@ -372,8 +373,6 @@ static void cbTaskSocketClientDecodeAndDo(void*pParameters)
                     }
                     else
                     {
-                        //If nbBytes returned by analyzer, so buffer analyzer contains a response.
-                        //Channel is reset in case of overflow
                         if((nbBytes > 0)&&(nbBytes <= sizeof(pClt->bufferANALYZER)))
                         {
                             if(P_CHANNEL_Send(  &pClt->channelOutput,
@@ -400,11 +399,34 @@ static void cbTaskSocketClientDecodeAndDo(void*pParameters)
 
                 pClt->bActiviteRx = 0;
                 //Timeout if nothing to analyze. If timeout tick callback return error, so client disconnected
-                if(pClt->cbAnalyzerTimeoutTickCallback != NULL)
+                if(pClt->cbAnalyzerPeriodicCallback != NULL)
                 {
-                    if(pClt->cbAnalyzerTimeoutTickCallback(pClt->ptrAnalyzerContext)!=E_DECODER_RESULT_OK)
+                    //Raz output buffer
+                    nbBytes = 0 ;
+                    memset(pClt->bufferANALYZER,0,sizeof(pClt->bufferANALYZER));
+
+                    //Periodic callback called
+                    if(pClt->cbAnalyzerPeriodicCallback(pClt->ptrAnalyzerContext,
+                                                           pClt->bufferANALYZER,
+                                                           &nbBytes,
+                                                           sizeof(pClt->bufferANALYZER))!=E_DECODER_RESULT_OK)
                     {
                         pClt->status = E_LOG_CLIENT_DISCONNECTED;
+                    }
+                    else
+                    {
+                       //If no error and output, send data to encoder
+                       if((nbBytes > 0)&&(nbBytes <= sizeof(pClt->bufferANALYZER)))
+                       {
+                           if(P_CHANNEL_Send(  &pClt->channelOutput,
+                                               pClt->bufferANALYZER,
+                                               nbBytes,
+                                               E_CHANNEL_WR_MODE_NORMAL)==E_CHANNEL_RESULT_ERROR_FULL)
+                           {
+                               P_CHANNEL_Flush(&pClt->channelOutput);
+                           }
+                       }
+                       nbBytes = 0 ;
                     }
                 }
 
@@ -463,16 +485,18 @@ static void cbTaskSocketClientRxAndMon(void*pParameters)
             //Reset join signal, task well created
             xSemaphoreTake(p->joinClientTaskTx,0);
 
-            //
+            //Loop monitoring client connexion and byte lwip reception
             while((p->status == E_LOG_CLIENT_CONNECTED) && (xSemaphoreTake(p->quitRequestTaskMonitor,0) == pdFAIL ))
             {
+                //Raz event
                 FD_ZERO(&rdfs);
                 FD_SET(p->socket,&rdfs);
+
+                //Update periodic timer
                 timeout.tv_sec = 0;
                 timeout.tv_usec =  1000 * ((xTimeToWait * 1000) / configTICK_RATE_HZ)  ;
 
                 //Monitoring socket
-
                 if( lwip_select(p->socket + 1, &rdfs, NULL, NULL, &timeout) == -1)    //Check deconnexion
                 {
                     p->status = E_LOG_CLIENT_DISCONNECTED;
@@ -487,31 +511,37 @@ static void cbTaskSocketClientRxAndMon(void*pParameters)
                                                      sizeof(p->bufferRX),
                                                      MSG_DONTWAIT);
 
+                        //Check deconnexion
                         if( nbBytesReceived <= 0)
                         {
                             p->status = E_LOG_CLIENT_DISCONNECTED;
                         }
                         else
                         {
+                            //Update rx activity
                             p->timeoutActivite = 0;
 
-                            if(P_CHANNEL_Send(&p->channelInput,p->bufferRX,nbBytesReceived,E_CHANNEL_WR_MODE_NORMAL) == E_CHANNEL_RESULT_ERROR_FULL)
+                            //Send to analyzer, flush if overflow
+                            if(P_CHANNEL_Send(  &p->channelInput,
+                                                p->bufferRX,
+                                                nbBytesReceived,
+                                                E_CHANNEL_WR_MODE_NORMAL) == E_CHANNEL_RESULT_ERROR_FULL)
                             {
                                 P_CHANNEL_Flush(&p->channelInput) ;
                             }
                         }
 
-                        xTaskCheckForTimeOut(&xTimeOut,&xTimeToWait); //Reajust Timeout
+                        xTaskCheckForTimeOut(&xTimeOut,&xTimeToWait);               //---Period reajust
                     }
                     else
                     {
-                        //Reset timeout
-                        vTaskSetTimeOutState(&xTimeOut);
+
+                        vTaskSetTimeOutState(&xTimeOut);                            //---Period restart
                         timeout.tv_sec = 0 ;
                         timeout.tv_usec = 1000 * P_LOG_CLT_MONITOR_PERIOD;
                         xTimeToWait = pdMS_TO_TICKS(P_LOG_CLT_MONITOR_PERIOD);
 
-                        //Periodic code
+                        //-------------------------Periodic zone--------------------------------
                         p->timeoutActivite++;
                         if ( p->timeoutActivite >= p->trigTimeoutActivite)
                         {
@@ -522,12 +552,13 @@ static void cbTaskSocketClientRxAndMon(void*pParameters)
                             }
                         }
 
-                        //Reajust timeout
-                        xTaskCheckForTimeOut(&xTimeOut,&xTimeToWait);
+
+                        xTaskCheckForTimeOut(&xTimeOut,&xTimeToWait);               //---Period reajust
                     }
                 }
             }
 
+            //Flush channel, status disconnected, send signal to created task and join it
             P_CHANNEL_Flush(&p->channelOutput);
             p->status = E_LOG_CLIENT_DISCONNECTED;
             xSemaphoreGive(p->quitRequestTaskTx);
@@ -538,6 +569,7 @@ static void cbTaskSocketClientRxAndMon(void*pParameters)
             p->status = E_LOG_CLIENT_DISCONNECTED;
         }
 
+        //Destroy socket
         if (p->socket != -1)
         {
             lwip_shutdown(p->socket,SHUT_RDWR);
@@ -546,43 +578,48 @@ static void cbTaskSocketClientRxAndMon(void*pParameters)
             p->socket = -1;
         }
 
+        //Send signal to server
         xSemaphoreGive(p->joinClientTaskMonitor);
     }
     DEBUG_decrementCpt();
     vTaskDelete(NULL);
 }
 
-
-
+//Client destruction. Call by server task.
 static void ClientStopThenDestroy(tLogClientWks**p)
 {
     if((p!=NULL)&&((*p)!=NULL))
     {
-
+        //Overwrite status
         (*p)->status = E_LOG_CLIENT_DISCONNECTED;
 
+        //Send quit request to server task
         if((*p)->quitRequestTaskMonitor != NULL)
         {
             xSemaphoreGive((*p)->quitRequestTaskMonitor);
         }
 
+        //Wait for server task termination
         if((*p)->joinClientTaskMonitor != NULL)
         {
             xSemaphoreTake((*p)->joinClientTaskMonitor,portMAX_DELAY);
         }
 
+        //Join signals destruction
         if((*p)->joinClientTaskMonitor != NULL)
         {
             vQueueDelete((*p)->joinClientTaskMonitor);
             (*p)->joinClientTaskMonitor = NULL;
             DEBUG_decrementCpt();
         }
+
         if((*p)->joinClientTaskRx != NULL)
         {
             vQueueDelete((*p)->joinClientTaskRx);
             (*p)->joinClientTaskRx = NULL;
             DEBUG_decrementCpt();
         }
+
         if((*p)->joinClientTaskTx != NULL)
         {
             vQueueDelete((*p)->joinClientTaskTx);
@@ -590,6 +627,7 @@ static void ClientStopThenDestroy(tLogClientWks**p)
             DEBUG_decrementCpt();
         }
 
+        //Quit signals destruction
         if((*p)->quitRequestTaskMonitor != NULL)
         {
             vQueueDelete((*p)->quitRequestTaskMonitor);
@@ -610,6 +648,7 @@ static void ClientStopThenDestroy(tLogClientWks**p)
             DEBUG_decrementCpt();
         }
 
+        //Socket destruction
         if((*p)->socket != -1)
         {
             lwip_shutdown((*p)->socket,SHUT_RDWR);
@@ -618,9 +657,11 @@ static void ClientStopThenDestroy(tLogClientWks**p)
             DEBUG_decrementCpt();
         }
 
+        //Channels destruction
         P_CHANNEL_DeInit(&(*p)->channelOutput);
         P_CHANNEL_DeInit(&(*p)->channelInput);
 
+        //Workspace destruction
         (void)memset(*p,0,sizeof(tLogClientWks));
         vPortFree(*p);
         *p = NULL;
@@ -629,38 +670,41 @@ static void ClientStopThenDestroy(tLogClientWks**p)
     }
 }
 
+//Client workspace creation
 static tLogClientWks* ClientCreateThenStart(            int32_t socket,
                                                         tLogSrvWks*pServ,
                                                         uint32_t timeoutS,
                                                         ptrFct_AnalyzerContextCreation cbAnalyzerContextCreationCallback,
                                                         ptrFct_AnalyzerContextDestruction cbAnalyzerContextDestructionCallback,
                                                         ptrFct_AnalyzerCallback cbAnalyzerCallback,
-                                                        ptrFct_AnalyzerTimeoutTickCallback cbAnalyzerTimeOutCallback,
+                                                        ptrFct_AnalyzerPeriodicCallback cbAnalyzerTimeOutCallback,
 
                                                         ptrFct_EncoderContextCreation cbSenderContextCreation,
                                                         ptrFct_EncoderContextDestruction cbSenderContextDestruction,
                                                         ptrFct_EncoderCallback cbSenderCallback,
-                                                        ptrFct_EncoderTimeoutTickCallback cbSenderTimeoutCallback)
+                                                        ptrFct_EncoderPeriodicCallback cbSenderTimeoutCallback)
 {
     tLogClientWks*pClt = NULL;
     eChannelResult resFifo = E_CHANNEL_RESULT_NOK;
-
 
     if( pServ == NULL)
     {
         return NULL;
     }
 
+    //Workspace creation
     pClt = pvPortMalloc(sizeof(tLogClientWks)) ;
     if (pClt == NULL)
     {
         return NULL;
     }
+    memset(pClt,0,sizeof(tLogClientWks));
 
     DEBUG_incrementCpt();
 
-    memset(pClt,0,sizeof(tLogClientWks));
+    //Backup socket value
     pClt->socket = socket ;
+    //Create signals
     pClt->joinClientTaskMonitor = xSemaphoreCreateBinary();
     pClt->joinClientTaskTx = xSemaphoreCreateBinary();
     pClt->joinClientTaskRx = xSemaphoreCreateBinary();
@@ -668,39 +712,48 @@ static tLogClientWks* ClientCreateThenStart(            int32_t socket,
     pClt->quitRequestTaskRx = xSemaphoreCreateBinary();
     pClt->quitRequestTaskTx = xSemaphoreCreateBinary();
 
+    //Set callbacks value
     pClt->cbAnalyzerCallback = cbAnalyzerCallback;
     pClt->cbAnalyzerContextCreationCallback = cbAnalyzerContextCreationCallback;
     pClt->cbAnalyzerContextDestructionCallback = cbAnalyzerContextDestructionCallback;
-    pClt->cbAnalyzerTimeoutTickCallback = cbAnalyzerTimeOutCallback;
+    pClt->cbAnalyzerPeriodicCallback = cbAnalyzerTimeOutCallback;
 
     pClt->cbEncoderCallback = cbSenderCallback;
     pClt->cbEncoderContextCreation = cbSenderContextCreation;
     pClt->cbEncoderContextDestruction = cbSenderContextDestruction;
-    pClt->cbEncoderTimeoutTickCallback = cbSenderTimeoutCallback;
+    pClt->cbEncoderPeriodicCallback = cbSenderTimeoutCallback;
 
+    //Contexts raz.
     pClt->ptrAnalyzerContext = NULL;
     pClt->ptrEncoderContext = NULL;
+
+    //Raz timeout value
     pClt->trigTimeoutActivite = (1000 * timeoutS) / P_LOG_CLT_MONITOR_PERIOD ;
     pClt->timeoutActivite = 0;
     pClt->bActiviteRx = 0;
     pClt->bActiviteTx = 0;
 
+    //Save server handle
     pClt->pServer = pServ;
+
+    //Set client status
     pClt->status = E_LOG_CLIENT_CONNECTED;
 
+    //Initialize channels input / output
     resFifo = P_CHANNEL_Init(    &pClt->channelInput,
                                  P_LOG_FIFO_DATA_SIZE,
-                                 P_LOG_FIFO_ELT_SIZE);
+                                 P_LOG_FIFO_ELT_MAX_SIZE,
+                                 P_LOG_FIFO_MAX_NB_ELT);
 
     if(resFifo == E_CHANNEL_RESULT_OK)
     {
         resFifo = P_CHANNEL_Init(    &pClt->channelOutput,
                                      P_LOG_FIFO_DATA_SIZE,
-                                     P_LOG_FIFO_ELT_SIZE);
+                                     P_LOG_FIFO_ELT_MAX_SIZE,
+                                     P_LOG_FIFO_MAX_NB_ELT);
     }
 
-    //Init fifo TX
-
+    //Check signals creation
     if(         (pClt->joinClientTaskMonitor == NULL)
             ||  (pClt->joinClientTaskTx == NULL)
             ||  (pClt->joinClientTaskRx == NULL)
@@ -720,6 +773,7 @@ static tLogClientWks* ClientCreateThenStart(            int32_t socket,
     DEBUG_incrementCpt();
     DEBUG_incrementCpt();
 
+    //Raz signals
     xSemaphoreTake(pClt->joinClientTaskMonitor,0);
     xSemaphoreTake(pClt->joinClientTaskTx,0);
     xSemaphoreTake(pClt->joinClientTaskRx,0);
@@ -727,10 +781,11 @@ static tLogClientWks* ClientCreateThenStart(            int32_t socket,
     xSemaphoreTake(pClt->quitRequestTaskRx,0);
     xSemaphoreTake(pClt->quitRequestTaskTx,0);
 
+    //Give join signal in case of creation of task failure
     xSemaphoreGive(pClt->joinClientTaskMonitor);
     if( xTaskCreate(    cbTaskSocketClientRxAndMon,
                         "logClt",
-                        P_LOG_SRV_CALLBACK_STACK,
+                        P_LOG_CLT_MON_CALLBACK_STACK,
                         pClt,
                         configMAX_PRIORITIES - 1,
                         &pClt->handleTaskMonitor ) != pdPASS)
@@ -740,6 +795,7 @@ static tLogClientWks* ClientCreateThenStart(            int32_t socket,
     }
     else
     {
+        //Task well launched, raz join signal
         DEBUG_incrementCpt();
         xSemaphoreTake(pClt->joinClientTaskMonitor,0);
     }
@@ -750,31 +806,36 @@ static tLogClientWks* ClientCreateThenStart(            int32_t socket,
 static void cbTaskSocketServerMonAndLog(void*pParameters)
 {
 
+    tLogSrvWks*p = (tLogSrvWks*)pParameters;        //Server workspace
+    tLogClientWks*pClt = NULL;                      //Temp client workspace
+
+    SOPC_ReturnStatus resList = SOPC_STATUS_OK ;
+
+    TimeOut_t xTimeOut = {0,0};     //Timeout use for periodic call of task
+    TickType_t xTimeToWait = 0;     //Timeout use for lwip select timeout adjust for periodic call of task
+    uint16_t nbBytesToSend  = 0;    //Nb Bytes to send
+    int16_t byteSent = 0;           //Nb byte sent by lwip api
+    uint16_t wIter = 0;             //Mute iterator
+
+    int32_t csock = -1;             //Temp new client socket
+    int32_t opt = 1;                //set opt
+    int32_t resLwip = 0;            //lwip api returns
+
     struct sockaddr_in sin = {0};
-    struct timeval lwipTimeOut ;
-    struct fd_set rdfs;
+    struct timeval lwipTimeOut = {0,0} ;
     socklen_t sinsize = sizeof(sin);
-    int32_t csock = -1;
-    int32_t opt = 1;
-    int32_t resLwip = 0;
-
-    uint16_t wIterList = 0;
-    SOPC_ReturnStatus resList ;
+    struct fd_set rdfs;
     ip_addr_t localeAddress;
-    TimeOut_t xTimeOut ;
-    TickType_t xTimeToWait ;
-    uint16_t nbBytesToSend  = 0;
-    int16_t byteSent = 0;
-    uint16_t iIter = 0;
 
-    tLogSrvWks*p = (tLogSrvWks*)pParameters;
-    tLogClientWks*pClt = NULL;
+    memset(&localeAddress,0,sizeof(ip_addr_t));
+    FD_ZERO(&rdfs);
 
     vTaskSetTimeOutState(&xTimeOut);
-    xTimeToWait = pdMS_TO_TICKS(P_LOG_SRV_ONLINE_PERIOD);
+    xTimeToWait = pdMS_TO_TICKS(P_LOG_SRV_ONLINE_PERIOD);   //Initialize period
 
     if(p!=NULL)
     {
+        //Server loop, quit if request or CLOSING status
         while(      (p->status != E_LOG_SERVER_CLOSING)
                 &&  (xSemaphoreTake(p->quitRequest,0) == pdFALSE) )
         {
@@ -784,9 +845,10 @@ static void cbTaskSocketServerMonAndLog(void*pParameters)
                 {
                     resLwip = -1 ;
 
+                    //Check if ethernet is ready
                     if(P_ETHERNET_IF_IsReady() == ETHERNET_IF_RESULT_OK)
                     {
-                        //TCP socket
+                        //Create tcp socket then bind
                         p->socketTCP = lwip_socket(AF_INET,SOCK_STREAM,0);
                         if(p->socketTCP >= 0)
                         {
@@ -802,16 +864,13 @@ static void cbTaskSocketServerMonAndLog(void*pParameters)
                                 lwip_bind(p->socketTCP,(struct sockaddr*)&sin,sizeof(struct sockaddr_in));
                                 if(resLwip == 0)
                                 {
-                                    resLwip = lwip_listen(p->socketTCP,p->maxClient + 1);
-                                    if(resLwip == 0)
-                                    {
-                                        csock = -1 ;
-                                    }
+                                    resLwip = lwip_listen(p->socketTCP,p->maxClient);
                                 }
                             }
                         }
                     }
 
+                    //If binding ok , go to online status, raz select period
                     if(resLwip == 0)
                     {
                         p->status = E_LOG_SERVER_ONLINE;
@@ -823,6 +882,7 @@ static void cbTaskSocketServerMonAndLog(void*pParameters)
                     }
                     else
                     {
+                        //Destroy socket in case of error
                         if (p->socketTCP >= 0)
                         {
                             lwip_shutdown(p->socketTCP,SHUT_RDWR);
@@ -830,6 +890,7 @@ static void cbTaskSocketServerMonAndLog(void*pParameters)
                             DEBUG_decrementCpt();
                             p->socketTCP = -1;
                         }
+                        //Wait for 100 ms before retry
                         p->status = E_LOG_SERVER_BINDING;
                         vTaskDelay(pdMS_TO_TICKS(P_LOG_SRV_BINDING_WAIT));
                     }
@@ -862,22 +923,28 @@ static void cbTaskSocketServerMonAndLog(void*pParameters)
                         csock = lwip_accept(p->socketTCP,(struct sockaddr*)&sin,&sinsize);
                         if(csock != -1)
                         {
-                            DEBUG_incrementCpt();
-                            //Create client workspace + thread...
+                            //Disable naggle algorithm
                             configASSERT(lwip_setsockopt(csock, IPPROTO_TCP, TCP_NODELAY, (const void*) &opt, sizeof(opt))==0);
+
+                            DEBUG_incrementCpt();
+
+                            //Check if free slot exist
                             if(P_UTILS_LIST_GetNbEltMT(&p->clientList) < p->maxClient)
                             {
+
+
+                                //Create client workspace + thread...
                                 pClt = ClientCreateThenStart(         csock,
                                                                       p,
                                                                       p->timeoutClientS,
                                                                       p->cbClientAnalyzerContextCreationCallback,
                                                                       p->cbClientAnalyzerContextDestructionCallback,
                                                                       p->cbClientAnalyzerCallback,
-                                                                      p->cbClientAnalyzerTimeoutCallback,
+                                                                      p->cbClientAnalyzerPeriodicCallback,
                                                                       p->cbClientEncoderContextCreation,
                                                                       p->cbClientEncoderContextDestruction,
                                                                       p->cbClientEncoderCallback,
-                                                                      p->cbClientEncoderTimeoutCallback);
+                                                                      p->cbClientEncoderPeriodicCallback);
                                 if(pClt != NULL)
                                 {
                                     resList = P_UTILS_LIST_AddEltMT(&p->clientList,pClt,NULL,0,0);
@@ -910,19 +977,19 @@ static void cbTaskSocketServerMonAndLog(void*pParameters)
                         xTimeToWait = pdMS_TO_TICKS(P_LOG_SRV_ONLINE_PERIOD);
 
                         //Check clients to destroy
-                        wIterList = USHRT_MAX;
+                        wIter = USHRT_MAX;
                         do
                         {
-                            pClt = P_UTILS_LIST_ParseValueEltMT(&p->clientList,NULL,NULL,NULL,&wIterList);
+                            pClt = P_UTILS_LIST_ParseValueEltMT(&p->clientList,NULL,NULL,NULL,&wIter);
                             if(pClt != NULL)
                             {
                                 if(pClt->status != E_LOG_CLIENT_CONNECTED)
                                 {
-                                    P_UTILS_LIST_RemoveEltMT(&p->clientList,pClt,0,0,&wIterList);
+                                    P_UTILS_LIST_RemoveEltMT(&p->clientList,pClt,0,0,&wIter);
                                     ClientStopThenDestroy(&pClt);
                                 }
                             }
-                        }while(wIterList != USHRT_MAX);
+                        }while(wIter != USHRT_MAX);
 
                         memset(p->bufferSRV_TX,0,sizeof(p->bufferSRV_TX));
                         //Broadcast channel
@@ -934,21 +1001,24 @@ static void cbTaskSocketServerMonAndLog(void*pParameters)
                         {
 
 
-                            wIterList = USHRT_MAX;
+                            wIter = USHRT_MAX;
                             do
                             {
-                                pClt = P_UTILS_LIST_ParseValueEltMT(&p->clientList,NULL,NULL,NULL,&wIterList);
+                                pClt = P_UTILS_LIST_ParseValueEltMT(&p->clientList,NULL,NULL,NULL,&wIter);
                                 if(pClt != NULL)
                                 {
                                     if(pClt->status == E_LOG_CLIENT_CONNECTED)
                                     {
-                                        if(P_CHANNEL_Send(&pClt->channelOutput,p->bufferSRV_TX,nbBytesToSend,E_CHANNEL_WR_MODE_NORMAL)==E_CHANNEL_RESULT_ERROR_FULL)
+                                        if(P_CHANNEL_Send(  &pClt->channelOutput,
+                                                            p->bufferSRV_TX,
+                                                            nbBytesToSend,
+                                                            E_CHANNEL_WR_MODE_NORMAL)==E_CHANNEL_RESULT_ERROR_FULL)
                                         {
                                             P_CHANNEL_Flush(&pClt->channelOutput);
                                         }
                                     }
                                 }
-                            }while(wIterList != USHRT_MAX);
+                            }while(wIter != USHRT_MAX);
 
                             memset(p->bufferSRV_TX,0,sizeof(p->bufferSRV_TX));
                         }
@@ -989,9 +1059,9 @@ static void cbTaskSocketServerMonAndLog(void*pParameters)
                                             if(nbBytesToSend <= sizeof(p->bufferSRV_TX))
                                             {
                                                 byteSent = 0;
-                                                for(iIter = 0 ; (iIter < nbBytesToSend) &&  (byteSent >= 0); iIter += (uint16_t)byteSent)
+                                                for(wIter = 0 ; (wIter < nbBytesToSend) &&  (wIter >= 0); wIter += (uint16_t)byteSent)
                                                 {
-                                                    byteSent = lwip_sendto(p->socketUDP,p->bufferSRV_TX + iIter, nbBytesToSend - iIter,0, (struct sockaddr *)&sin, sizeof(struct sockaddr_in));
+                                                    byteSent = lwip_sendto(p->socketUDP,p->bufferSRV_TX + wIter, nbBytesToSend - wIter,0, (struct sockaddr *)&sin, sizeof(struct sockaddr_in));
                                                 }
                                             }
 
@@ -1023,17 +1093,17 @@ static void cbTaskSocketServerMonAndLog(void*pParameters)
 
         //Status closing or quit request, quit all client then shutdown srv sockets.
 
-        wIterList = USHRT_MAX;
+        wIter = USHRT_MAX;
 
         do
         {
-            pClt = P_UTILS_LIST_ParseValueEltMT(&p->clientList,NULL,NULL,NULL,&wIterList);
+            pClt = P_UTILS_LIST_ParseValueEltMT(&p->clientList,NULL,NULL,NULL,&wIter);
             if(pClt != NULL)
             {
-                P_UTILS_LIST_RemoveEltMT(&p->clientList,pClt,0,0,&wIterList);
+                P_UTILS_LIST_RemoveEltMT(&p->clientList,pClt,0,0,&wIter);
                 ClientStopThenDestroy(&pClt);
             }
-        }while(wIterList != USHRT_MAX);
+        }while(wIter != USHRT_MAX);
 
         if (p->socketTCP >= 0)
         {
@@ -1058,6 +1128,7 @@ static void cbTaskSocketServerMonAndLog(void*pParameters)
     DEBUG_decrementCpt();
     vTaskDelete(NULL);
 }
+
 
 eLogSrvResult P_LOG_SRV_SendToAllClient(tLogSrvWks*p, const uint8_t*pBuffer, uint16_t length)
 {
@@ -1117,6 +1188,8 @@ void P_LOG_SRV_StopAndDestroy(tLogSrvWks**p)
     }
 }
 
+
+
 tLogSrvWks* P_LOG_SRV_CreateAndStart(uint16_t port,
                                      uint16_t portHello,
                                      int16_t maxClient,
@@ -1126,12 +1199,12 @@ tLogSrvWks* P_LOG_SRV_CreateAndStart(uint16_t port,
                                      ptrFct_AnalyzerContextCreation cbAnalyzerContextCreationCallback,
                                      ptrFct_AnalyzerContextDestruction cbAnalyzerContextDestructionCallback,
                                      ptrFct_AnalyzerCallback cbAnalyzerCallback,
-                                     ptrFct_AnalyzerTimeoutTickCallback cbAnalyzerTimeOutCallback,
+                                     ptrFct_AnalyzerPeriodicCallback cbAnalyzerTimeOutCallback,
 
                                      ptrFct_EncoderContextCreation cbSenderContextCreation,
                                      ptrFct_EncoderContextDestruction cbSenderContextDestruction,
                                      ptrFct_EncoderCallback cbSenderCallback,
-                                     ptrFct_EncoderTimeoutTickCallback cbSenderTimeoutCallback,
+                                     ptrFct_EncoderPeriodicCallback cbSenderTimeoutCallback,
 
                                      ptrFct_EncoderTransmitHelloCallback cbSenderHelloCallback)
 {
@@ -1159,12 +1232,12 @@ tLogSrvWks* P_LOG_SRV_CreateAndStart(uint16_t port,
     p->cbClientAnalyzerCallback = cbAnalyzerCallback;
     p->cbClientAnalyzerContextCreationCallback = cbAnalyzerContextCreationCallback;
     p->cbClientAnalyzerContextDestructionCallback = cbAnalyzerContextDestructionCallback;
-    p->cbClientAnalyzerTimeoutCallback = cbAnalyzerTimeOutCallback;
+    p->cbClientAnalyzerPeriodicCallback = cbAnalyzerTimeOutCallback;
 
     p->cbClientEncoderCallback = cbSenderCallback ;
     p->cbClientEncoderContextCreation = cbSenderContextCreation;
     p->cbClientEncoderContextDestruction = cbSenderContextDestruction;
-    p->cbClientEncoderTimeoutCallback = cbSenderTimeoutCallback;
+    p->cbClientEncoderPeriodicCallback = cbSenderTimeoutCallback;
 
     p->cbEncoderTransmitHelloCallback = cbSenderHelloCallback;
 
@@ -1172,7 +1245,8 @@ tLogSrvWks* P_LOG_SRV_CreateAndStart(uint16_t port,
 
     resFifo = P_CHANNEL_Init(   &p->broadCastChannel,
                                 P_LOG_FIFO_DATA_SIZE,
-                                P_LOG_FIFO_ELT_SIZE);
+                                P_LOG_FIFO_ELT_MAX_SIZE,
+                                P_LOG_FIFO_MAX_NB_ELT);
 
     if(resFifo != E_CHANNEL_RESULT_OK)
     {
