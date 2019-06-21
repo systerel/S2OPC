@@ -50,7 +50,7 @@ typedef struct T_LOG_SERVER_WORKSPACE
 
     //Broadcaster channem
     tChannel broadCastChannel;      //Broadcast channel, used to send a same message
-                                    //to all connected client. Use by log API
+    //to all connected client. Use by log API
 
 
     //Server tasks
@@ -67,12 +67,12 @@ typedef struct T_LOG_SERVER_WORKSPACE
     ptrFct_AnalyzerContextCreation cbClientAnalyzerContextCreationCallback;             //Context creation callback
     ptrFct_AnalyzerContextDestruction cbClientAnalyzerContextDestructionCallback;       //Context destruction callback. Return !=0 -> disconnect client
     ptrFct_AnalyzerCallback cbClientAnalyzerCallback;                                   //Input Frame decoder
-    ptrFct_AnalyzerPeriodicCallback cbClientAnalyzerPeriodicCallback;                 //Input frame periodic tick timeout. Return !=0 -> disconnect client
+    ptrFct_AnalyzerPeriodicCallback cbClientAnalyzerPeriodicCallback;                   //Input frame periodic tick timeout. Return !=0 -> disconnect client
 
     ptrFct_EncoderContextCreation cbClientEncoderContextCreation;                       //Output frame context creation
     ptrFct_EncoderContextDestruction cbClientEncoderContextDestruction;                 //Output frame encoder context destruction
     ptrFct_EncoderCallback cbClientEncoderCallback;                                     //Output frame encoder. Return !=0 -> disconnect client
-    ptrFct_EncoderPeriodicCallback cbClientEncoderPeriodicCallback;                   //Output frame encoder periodic timeout tick. Return != 0 => disconnect client
+    ptrFct_EncoderPeriodicCallback cbClientEncoderPeriodicCallback;                     //Output frame encoder periodic timeout tick. Return != 0 => disconnect client
 
     ptrFct_EncoderTransmitHelloCallback cbEncoderTransmitHelloCallback;                 //Hello callback.
 
@@ -120,10 +120,10 @@ typedef struct T_LOG_CLIENT_WORKSPACE
 
     tChannel channelInput;                              //Channel between monitor + rx and decoder + action
     tChannel channelOutput;                             //Channel between server and encoder + tx for broadcast
-                                                        //Safely shared with
+    //Safely shared with
 
     //See server workspace description
-    
+
     ptrFct_AnalyzerContextCreation cbAnalyzerContextCreationCallback;
     ptrFct_AnalyzerContextDestruction cbAnalyzerContextDestructionCallback;
     ptrFct_AnalyzerCallback cbAnalyzerCallback;
@@ -216,10 +216,15 @@ static void cbTaskSocketClientEncodeAndTx(void*pParameters)
                 memset(pClt->bufferTX,0,sizeof(pClt->bufferTX));
 
                 resChannel = P_CHANNEL_Receive(     &pClt->channelOutput,
-                                                    &nbBytes,
+                                                    NULL,
                                                     &pClt->bufferTX[0],
+                                                    &nbBytes,
+                                                    sizeof(pClt->bufferTX),
                                                     xTicksToWait,
                                                     E_CHANNEL_RD_MODE_NORMAL) ;
+
+
+
                 //In case of event (flush or rx)
                 if(resChannel != E_CHANNEL_RESULT_ERROR_TMO)
                 {
@@ -277,6 +282,7 @@ static void cbTaskSocketClientEncodeAndTx(void*pParameters)
 
                     xTaskCheckForTimeOut(&xTimeOut,&xTicksToWait) ;         //---Period reajust
                 }
+
             }//End of encoder loop
 
             //Set status to disconnected, flush channel on wich analyzer task is maybe waiting
@@ -324,11 +330,12 @@ static void cbTaskSocketClientDecodeAndDo(void*pParameters)
     tLogClientWks*pClt = (tLogClientWks*)pParameters;
 
     eChannelResult resChannel = E_CHANNEL_RESULT_NOK;
+    eChannelResult resChannelSent = E_CHANNEL_RESULT_OK;
     TickType_t xTicksToWait = 0 ;
     TimeOut_t xTimeOut = {0,0} ;
     uint16_t nbBytes = 0;
-
-
+    uint16_t wIterSent = 0;
+    uint16_t nbBytesSent = 0;
 
     if (pClt != NULL)
     {
@@ -338,7 +345,7 @@ static void cbTaskSocketClientDecodeAndDo(void*pParameters)
         //Analyzer context creation. If exist, can save context handle to ptrAnalyzerContext
         if(pClt->cbAnalyzerContextCreationCallback != NULL)
         {
-            pClt->cbAnalyzerContextCreationCallback(&pClt->ptrAnalyzerContext);
+            pClt->cbAnalyzerContextCreationCallback(&pClt->ptrAnalyzerContext,pClt);
         }
 
 
@@ -351,8 +358,10 @@ static void cbTaskSocketClientDecodeAndDo(void*pParameters)
             memset(pClt->bufferANALYZER,0,sizeof(pClt->bufferANALYZER));
             //Check if bytes received
             resChannel = P_CHANNEL_Receive(  &pClt->channelInput,
-                                             &nbBytes,
+                                             NULL,
                                              &pClt->bufferANALYZER[0],
+                                             &nbBytes,
+                                             sizeof(pClt->bufferANALYZER),
                                              xTicksToWait,
                                              E_CHANNEL_RD_MODE_NORMAL);
 
@@ -365,6 +374,7 @@ static void cbTaskSocketClientDecodeAndDo(void*pParameters)
                 if(pClt->cbAnalyzerCallback != NULL)
                 {
                     if(pClt->cbAnalyzerCallback(    pClt->ptrAnalyzerContext,
+                                                    pClt,
                                                     pClt->bufferANALYZER,
                                                     &nbBytes,
                                                     sizeof(pClt->bufferANALYZER))!=E_DECODER_RESULT_OK)
@@ -375,16 +385,24 @@ static void cbTaskSocketClientDecodeAndDo(void*pParameters)
                     {
                         if((nbBytes > 0)&&(nbBytes <= sizeof(pClt->bufferANALYZER)))
                         {
-                            if(P_CHANNEL_Send(  &pClt->channelOutput,
-                                                pClt->bufferANALYZER,
-                                                nbBytes,
-                                                E_CHANNEL_WR_MODE_NORMAL)==E_CHANNEL_RESULT_ERROR_FULL)
+                            resChannelSent = E_CHANNEL_RESULT_OK;
+                            for (wIterSent = 0; (wIterSent < nbBytes) && (resChannelSent == E_CHANNEL_RESULT_OK) ; wIterSent += nbBytesSent)
                             {
-                                P_CHANNEL_Flush(&pClt->channelOutput);
+                                resChannelSent = P_CHANNEL_Send(    &pClt->channelOutput,
+                                                                    &pClt->bufferANALYZER[wIterSent],
+                                                                    nbBytes - wIterSent,
+                                                                    &nbBytesSent,
+                                                                    E_CHANNEL_WR_MODE_NORMAL);
+
+                                if(resChannelSent == E_CHANNEL_RESULT_ERROR_FULL)
+                                {
+                                    P_CHANNEL_Flush(&pClt->channelOutput);
+
+                                }
                             }
                         }
                     }
-
+                    //Raz nb bytes to send, set by callback return
                     nbBytes = 0;
 
                 }
@@ -407,27 +425,37 @@ static void cbTaskSocketClientDecodeAndDo(void*pParameters)
 
                     //Periodic callback called
                     if(pClt->cbAnalyzerPeriodicCallback(pClt->ptrAnalyzerContext,
-                                                           pClt->bufferANALYZER,
-                                                           &nbBytes,
-                                                           sizeof(pClt->bufferANALYZER))!=E_DECODER_RESULT_OK)
+                                                        pClt,
+                                                        pClt->bufferANALYZER,
+                                                        &nbBytes,
+                                                        sizeof(pClt->bufferANALYZER))!=E_DECODER_RESULT_OK)
                     {
                         pClt->status = E_LOG_CLIENT_DISCONNECTED;
                     }
                     else
                     {
-                       //If no error and output, send data to encoder
-                       if((nbBytes > 0)&&(nbBytes <= sizeof(pClt->bufferANALYZER)))
-                       {
-                           if(P_CHANNEL_Send(  &pClt->channelOutput,
-                                               pClt->bufferANALYZER,
-                                               nbBytes,
-                                               E_CHANNEL_WR_MODE_NORMAL)==E_CHANNEL_RESULT_ERROR_FULL)
-                           {
-                               P_CHANNEL_Flush(&pClt->channelOutput);
-                           }
-                       }
-                       nbBytes = 0 ;
+                        //If no error and output, send data to encoder. Check limit before.
+                        if((nbBytes > 0)&&(nbBytes <= sizeof(pClt->bufferANALYZER)))
+                        {
+                            resChannelSent = E_CHANNEL_RESULT_OK;
+                            for (wIterSent = 0; (wIterSent < nbBytes) && (resChannelSent == E_CHANNEL_RESULT_OK) ; wIterSent += nbBytesSent)
+                            {
+                                resChannelSent = P_CHANNEL_Send(    &pClt->channelOutput,
+                                                                    &pClt->bufferANALYZER[wIterSent],
+                                                                    nbBytes - wIterSent,
+                                                                    &nbBytesSent,
+                                                                    E_CHANNEL_WR_MODE_NORMAL);
+
+                                if(resChannelSent == E_CHANNEL_RESULT_ERROR_FULL)
+                                {
+                                    P_CHANNEL_Flush(&pClt->channelOutput);
+
+                                }
+                            }
+                        }
                     }
+                    //Raz nb bytes to send, set by callback return.
+                    nbBytes = 0 ;
                 }
 
                 xTaskCheckForTimeOut(&xTimeOut,&xTicksToWait) ;         //---Period reajust
@@ -439,7 +467,7 @@ static void cbTaskSocketClientDecodeAndDo(void*pParameters)
         //Analyzer context destruction callback
         if(pClt->cbAnalyzerContextDestructionCallback != NULL)
         {
-            pClt->cbAnalyzerContextDestructionCallback(&pClt->ptrAnalyzerContext);
+            pClt->cbAnalyzerContextDestructionCallback(&pClt->ptrAnalyzerContext,pClt);
             pClt->ptrAnalyzerContext = NULL;
         }
 
@@ -459,6 +487,9 @@ static void cbTaskSocketClientRxAndMon(void*pParameters)
     TickType_t xTimeToWait = 0;
     TimeOut_t xTimeOut = {0,0};
     int32_t nbBytesReceived = 0;
+    eChannelResult resChannelSent = E_CHANNEL_RESULT_OK;
+    uint16_t nbBytesSent = 0;
+    uint16_t wIterSent = 0;
     struct timeval timeout ;
     fd_set rdfs;
 
@@ -522,12 +553,22 @@ static void cbTaskSocketClientRxAndMon(void*pParameters)
                             p->timeoutActivite = 0;
 
                             //Send to analyzer, flush if overflow
-                            if(P_CHANNEL_Send(  &p->channelInput,
-                                                p->bufferRX,
-                                                nbBytesReceived,
-                                                E_CHANNEL_WR_MODE_NORMAL) == E_CHANNEL_RESULT_ERROR_FULL)
+                            resChannelSent = E_CHANNEL_RESULT_OK ;
+                            for(    wIterSent = 0 ;
+                                    (wIterSent < nbBytesReceived) && (resChannelSent == E_CHANNEL_RESULT_OK) ;
+                                    wIterSent+=nbBytesSent)
                             {
-                                P_CHANNEL_Flush(&p->channelInput) ;
+
+                                resChannelSent = P_CHANNEL_Send(    &p->channelInput,
+                                                                    &p->bufferRX[wIterSent],
+                                                                    (uint16_t)nbBytesReceived - wIterSent,
+                                                                    &nbBytesSent,
+                                                                    E_CHANNEL_WR_MODE_NORMAL);
+
+                                if(resChannelSent == E_CHANNEL_RESULT_ERROR_FULL)
+                                {
+                                    P_CHANNEL_Flush(&p->channelInput) ;
+                                }
                             }
                         }
 
@@ -551,7 +592,6 @@ static void cbTaskSocketClientRxAndMon(void*pParameters)
                                 p->status = E_LOG_CLIENT_DISCONNECTED;
                             }
                         }
-
 
                         xTaskCheckForTimeOut(&xTimeOut,&xTimeToWait);               //---Period reajust
                     }
@@ -810,12 +850,16 @@ static void cbTaskSocketServerMonAndLog(void*pParameters)
     tLogClientWks*pClt = NULL;                      //Temp client workspace
 
     SOPC_ReturnStatus resList = SOPC_STATUS_OK ;
+    eChannelResult resChannel = E_CHANNEL_RESULT_OK;
+    eChannelResult resChannelSent = E_CHANNEL_RESULT_OK;
 
     TimeOut_t xTimeOut = {0,0};     //Timeout use for periodic call of task
     TickType_t xTimeToWait = 0;     //Timeout use for lwip select timeout adjust for periodic call of task
     uint16_t nbBytesToSend  = 0;    //Nb Bytes to send
+    uint16_t nbBytesSent = 0;
     int16_t byteSent = 0;           //Nb byte sent by lwip api
     uint16_t wIter = 0;             //Mute iterator
+    uint16_t wIterSent = 0;
 
     int32_t csock = -1;             //Temp new client socket
     int32_t opt = 1;                //set opt
@@ -913,6 +957,7 @@ static void cbTaskSocketServerMonAndLog(void*pParameters)
                         FD_SET(p->socketTCP,&rdfs);
                     }
 
+                    //----------------------------------------------Event part
                     if(FD_ISSET(p->socketTCP,&rdfs))
                     {
                         //Accept connexion
@@ -931,8 +976,6 @@ static void cbTaskSocketServerMonAndLog(void*pParameters)
                             //Check if free slot exist
                             if(P_UTILS_LIST_GetNbEltMT(&p->clientList) < p->maxClient)
                             {
-
-
                                 //Create client workspace + thread...
                                 pClt = ClientCreateThenStart(         csock,
                                                                       p,
@@ -966,7 +1009,7 @@ static void cbTaskSocketServerMonAndLog(void*pParameters)
                             memset(&sin,0,sinsize);
                         }
                         //Reajust timeout for periodic treatment
-                        xTaskCheckForTimeOut(&xTimeOut,&xTimeToWait);
+                        xTaskCheckForTimeOut(&xTimeOut,&xTimeToWait);               //---Period reajust
                     }
                     else
                     {
@@ -976,7 +1019,9 @@ static void cbTaskSocketServerMonAndLog(void*pParameters)
                         lwipTimeOut.tv_usec = 1000 * P_LOG_SRV_ONLINE_PERIOD;
                         xTimeToWait = pdMS_TO_TICKS(P_LOG_SRV_ONLINE_PERIOD);
 
-                        //Check clients to destroy
+                        //----------------------------------------------Periodic part
+
+                        //Check if clients are disconnected then destroy it if necessary
                         wIter = USHRT_MAX;
                         do
                         {
@@ -991,16 +1036,22 @@ static void cbTaskSocketServerMonAndLog(void*pParameters)
                             }
                         }while(wIter != USHRT_MAX);
 
+                        //Check if log message arrived
                         memset(p->bufferSRV_TX,0,sizeof(p->bufferSRV_TX));
-                        //Broadcast channel
-                        while(P_CHANNEL_Receive(     &p->broadCastChannel,
-                                                     &nbBytesToSend,
-                                                     &p->bufferSRV_TX[0],
-                                                     0,
-                                                     E_CHANNEL_RD_MODE_NORMAL) == E_CHANNEL_RESULT_OK)
+
+                        nbBytesToSend = 0;
+
+                        resChannel = P_CHANNEL_Receive(     &p->broadCastChannel,
+                                                            NULL,
+                                                            &p->bufferSRV_TX[0],
+                                                            &nbBytesToSend,
+                                                            sizeof(p->bufferSRV_TX),
+                                                            0,
+                                                            E_CHANNEL_RD_MODE_NORMAL) ;
+
+                        //Send message to all connected client. Quit loop if error.
+                        while((resChannel == E_CHANNEL_RESULT_OK) || (resChannel == E_CHANNEL_RESULT_MORE_DATA))
                         {
-
-
                             wIter = USHRT_MAX;
                             do
                             {
@@ -1009,10 +1060,17 @@ static void cbTaskSocketServerMonAndLog(void*pParameters)
                                 {
                                     if(pClt->status == E_LOG_CLIENT_CONNECTED)
                                     {
-                                        if(P_CHANNEL_Send(  &pClt->channelOutput,
-                                                            p->bufferSRV_TX,
-                                                            nbBytesToSend,
-                                                            E_CHANNEL_WR_MODE_NORMAL)==E_CHANNEL_RESULT_ERROR_FULL)
+                                        resChannelSent = E_CHANNEL_RESULT_OK;
+                                        for (wIterSent = 0; (wIterSent < nbBytesToSend) && (resChannelSent == E_CHANNEL_RESULT_OK) ; wIterSent+=nbBytesToSend)
+                                        {
+                                            resChannelSent = P_CHANNEL_Send(    &pClt->channelOutput,
+                                                                                &p->bufferSRV_TX[wIterSent],
+                                                                                nbBytesToSend - wIterSent,
+                                                                                &nbBytesSent,
+                                                                                E_CHANNEL_WR_MODE_NORMAL);
+                                        }
+
+                                        if(resChannelSent == E_CHANNEL_RESULT_ERROR_FULL)
                                         {
                                             P_CHANNEL_Flush(&pClt->channelOutput);
                                         }
@@ -1020,19 +1078,30 @@ static void cbTaskSocketServerMonAndLog(void*pParameters)
                                 }
                             }while(wIter != USHRT_MAX);
 
+
+                            //Receive next message
                             memset(p->bufferSRV_TX,0,sizeof(p->bufferSRV_TX));
+
+                            resChannel = P_CHANNEL_Receive(     &p->broadCastChannel,
+                                                                NULL,
+                                                                &p->bufferSRV_TX[0],
+                                                                &nbBytesToSend,
+                                                                sizeof(p->bufferSRV_TX),
+                                                                0,
+                                                                E_CHANNEL_RD_MODE_NORMAL) ;
+
                         }
 
-                        //Check if udp broadcast signaling log server ip
-
+                        //Check timeeout for announce ip and port of server to all client listing UDP port 4023
                         p->timerHello++;
                         if ( p->timerHello >= p->periodeHello)
                         {
                             p->timerHello = 0;
                             if( p->periodeHello > 0)
                             {
-                                if(P_ETHERNET_IF_GetIp(&localeAddress)==ETHERNET_IF_RESULT_OK)
+                                if(P_ETHERNET_IF_GetIp(&localeAddress)==ETHERNET_IF_RESULT_OK)  //Only if ethernet initialized
                                 {
+                                    //Create socket
                                     p->socketUDP = lwip_socket(AF_INET,SOCK_DGRAM,0);
                                     if(p->socketUDP >= 0)
                                     {
@@ -1059,14 +1128,20 @@ static void cbTaskSocketServerMonAndLog(void*pParameters)
                                             if(nbBytesToSend <= sizeof(p->bufferSRV_TX))
                                             {
                                                 byteSent = 0;
-                                                for(wIter = 0 ; (wIter < nbBytesToSend) &&  (wIter >= 0); wIter += (uint16_t)byteSent)
+                                                for(wIter = 0 ; (wIter < nbBytesToSend) &&  (byteSent >= 0); wIter += (uint16_t)byteSent)
                                                 {
-                                                    byteSent = lwip_sendto(p->socketUDP,p->bufferSRV_TX + wIter, nbBytesToSend - wIter,0, (struct sockaddr *)&sin, sizeof(struct sockaddr_in));
+                                                    byteSent = lwip_sendto(p->socketUDP,
+                                                                           p->bufferSRV_TX + wIter,
+                                                                           nbBytesToSend - wIter,
+                                                                           0,
+                                                                           (struct sockaddr *)&sin,
+                                                                           sizeof(struct sockaddr_in));
                                                 }
                                             }
 
                                         }
 
+                                        //Destroy socket
                                         lwip_close(p->socketUDP);
                                         DEBUG_decrementCpt();
                                         p->socketUDP = -1;
@@ -1075,8 +1150,7 @@ static void cbTaskSocketServerMonAndLog(void*pParameters)
                             }
                         }
 
-                        xTaskCheckForTimeOut(&xTimeOut,&xTimeToWait); //Reajust timeout for periodic treatment
-
+                        xTaskCheckForTimeOut(&xTimeOut,&xTimeToWait);                       //---Reajust timeout for periodic treatment
                     }
                 }
                 break;
@@ -1105,6 +1179,8 @@ static void cbTaskSocketServerMonAndLog(void*pParameters)
             }
         }while(wIter != USHRT_MAX);
 
+        //Destroy sockets
+
         if (p->socketTCP >= 0)
         {
             lwip_shutdown(p->socketTCP,SHUT_RDWR);
@@ -1121,23 +1197,41 @@ static void cbTaskSocketServerMonAndLog(void*pParameters)
             p->socketUDP = -1;
         }
 
+        //Signal server is terminated
         xSemaphoreGive(p->joinServerTask);
-
     }
 
     DEBUG_decrementCpt();
     vTaskDelete(NULL);
 }
 
-
+//Log function
 eLogSrvResult P_LOG_SRV_SendToAllClient(tLogSrvWks*p, const uint8_t*pBuffer, uint16_t length)
 {
     eLogSrvResult result = E_LOG_SRV_RESULT_NOK ;
+    eChannelResult resChannelSent = E_CHANNEL_RESULT_OK;
+    uint16_t wIterSent = 0;
+    uint16_t nbBytesSent = 0;
+
     if((p!=NULL)&&(p->status == E_LOG_SERVER_ONLINE))
     {
-        if( P_CHANNEL_Send(&p->broadCastChannel,pBuffer,length,E_CHANNEL_WR_MODE_OVERWRITE) == E_CHANNEL_RESULT_OK)
+        resChannelSent = E_CHANNEL_RESULT_OK;
+        for (wIterSent = 0; (wIterSent < length) && (resChannelSent == E_CHANNEL_RESULT_OK) ; wIterSent += nbBytesSent)
         {
-            result = E_LOG_SRV_RESULT_OK;
+            resChannelSent = P_CHANNEL_Send(    &p->broadCastChannel,
+                                                pBuffer + wIterSent,
+                                                length - wIterSent,
+                                                &nbBytesSent,
+                                                E_CHANNEL_WR_MODE_NORMAL);
+
+            if(resChannelSent == E_CHANNEL_RESULT_ERROR_FULL)
+            {
+                P_CHANNEL_Flush(&p->broadCastChannel);
+            }
+        }
+        if (resChannelSent == E_CHANNEL_RESULT_OK)
+        {
+            result =E_LOG_SRV_RESULT_OK;
         }
 
     }
@@ -1301,9 +1395,36 @@ tLogSrvWks* P_LOG_SRV_CreateAndStart(uint16_t port,
     return p;
 }
 
+eLogSrvResult P_LOG_CLIENT_SendResponse(tLogClientWks*pClt, const uint8_t*pBuffer, uint16_t length, uint16_t*pNbBytesSent)
+{
+    eLogSrvResult result = E_LOG_SRV_RESULT_NOK;
+    uint16_t nbBytesSent = 0;
+
+    if(pClt == NULL)
+    {
+        return result;
+    }
+
+    if(P_CHANNEL_Send(     &pClt->channelOutput,
+                           pBuffer,
+                           length,
+                           &nbBytesSent,
+                           E_CHANNEL_WR_MODE_NORMAL) == E_CHANNEL_RESULT_OK)
+    {
+        result = E_LOG_SRV_RESULT_OK;
+    }
+
+    if(pNbBytesSent != NULL)
+    {
+        *pNbBytesSent = nbBytesSent;
+    }
+
+    return result;
+}
+
 //Redirect low level read or write
 int __attribute__((weak)) _write(int handle, char *buffer, int size)
-{
+        {
     //buffer exist
     if (buffer == 0)
     {
@@ -1326,10 +1447,10 @@ int __attribute__((weak)) _write(int handle, char *buffer, int size)
     P_LOG_SRV_SendToAllClient(gLogServer,(uint8_t *)buffer, size);
 
     return size;
-}
+        }
 
 //Read is not implemented.
 int __attribute__((weak)) _read(int handle, char *buffer, int size)
-{
-   return -1;
-}
+        {
+    return -1;
+        }
