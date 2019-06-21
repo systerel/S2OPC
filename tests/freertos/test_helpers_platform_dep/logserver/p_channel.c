@@ -99,10 +99,12 @@ eChannelResult P_CHANNEL_Init(  tChannel*p,         //Channel workspace
 eChannelResult P_CHANNEL_Send(  tChannel*p,                 //Channel workspace
                                 const uint8_t * pBuffer,    //Data to send
                                 uint16_t size,              //Size of data to send
+                                uint16_t *pbNbWritedBytes,
                                 eChannelWriteMode mode)     //Mode, overwrite or normal.
 {
     eChannelResult result = E_CHANNEL_RESULT_NOK;
     uint16_t dataToDeleteSize = 0;
+    uint16_t dataToWriteSize = 0;
 
     //Check parameters
     if((p!=NULL)&&(size > 0)&&(pBuffer != NULL))
@@ -110,12 +112,15 @@ eChannelResult P_CHANNEL_Send(  tChannel*p,                 //Channel workspace
         //Critical section
         xSemaphoreTake(p->lock,portMAX_DELAY);
         {
+            //Define max size to read
+            dataToWriteSize = size > p->maxSizeDataPerElt ? p->maxSizeDataPerElt : size;
+
             //Mode overwrite and elt size ok, prepare enough memory space for new elt
-            if(( mode == E_CHANNEL_WR_MODE_OVERWRITE) && (size <= p->maxSizeDataPerElt))
+            if( mode == E_CHANNEL_WR_MODE_OVERWRITE)
             {
                 //Pop to free memory space to overwrite
                 while(      ((p->currentNbElts + 1) > p->maxSizeTotalElts)              //Not At least one elt
-                        ||  ((size + p->currentNbDatas) > p->maxSizeTotalData )  )      //Not Enough space
+                        ||  ((dataToWriteSize + p->currentNbDatas) > p->maxSizeTotalData )  )      //Not Enough space
                 {
                     //Data size of next elt to remove
                     dataToDeleteSize = p->channelRecord[p->iRd];
@@ -146,10 +151,10 @@ eChannelResult P_CHANNEL_Send(  tChannel*p,                 //Channel workspace
 
             //If enough memory space, write elt
             if(         ((p->currentNbElts + 1) <= p->maxSizeTotalElts)
-                    &&  ((size + p->currentNbDatas) <= p->maxSizeTotalData )
-                    &&  (size <= p->maxSizeDataPerElt))
+                    &&  ((dataToWriteSize + p->currentNbDatas) <= p->maxSizeTotalData )
+                    )
             {
-                p->channelRecord[p->iWr] = size ;
+                p->channelRecord[p->iWr] = dataToWriteSize ;
                 p->iWr++;
                 if(p->iWr >= p->maxSizeTotalElts)
                 {
@@ -157,26 +162,31 @@ eChannelResult P_CHANNEL_Send(  tChannel*p,                 //Channel workspace
                 }
                 p->currentNbElts++;
 
-                if (size > 0)
+                if (dataToWriteSize > 0)
                 {
                     //Data between upper bound of buffer and current data wr index
-                    if ((p->iWrData + size) < p->maxSizeTotalData)
+                    if ((p->iWrData + dataToWriteSize) < p->maxSizeTotalData)
                     {
-                        memcpy (&p->channelData[p->iWrData], pBuffer, size);
+                        memcpy (&p->channelData[p->iWrData], pBuffer, dataToWriteSize);
 
-                        p->iWrData = p->iWrData + size;
+                        p->iWrData = p->iWrData + dataToWriteSize;
                     }
                     else
                     {
                         //Data between wr index and upper bound of data buffer then restart at index 0.
                         memcpy (&p->channelData[p->iWrData], &pBuffer[0], p->maxSizeTotalData - p->iWrData);
-                        memcpy (&p->channelData[0], &pBuffer[p->maxSizeTotalData - p->iWrData], size - (p->maxSizeTotalData - p->iWrData));
+                        memcpy (&p->channelData[0], &pBuffer[p->maxSizeTotalData - p->iWrData], dataToWriteSize - (p->maxSizeTotalData - p->iWrData));
 
-                        p->iWrData = size - (p->maxSizeTotalData - p->iWrData);
+                        p->iWrData = dataToWriteSize - (p->maxSizeTotalData - p->iWrData);
                     }
 
                     //Update global nb data
-                    p->currentNbDatas = p->currentNbDatas + size;
+                    p->currentNbDatas = p->currentNbDatas + dataToWriteSize;
+                }
+
+                if( pbNbWritedBytes != NULL)
+                {
+                    *pbNbWritedBytes = dataToWriteSize;
                 }
 
                 //Signal channel not empty
@@ -225,20 +235,25 @@ eChannelResult P_CHANNEL_Flush(tChannel*p)
 }
 
 //Receive an element
-eChannelResult P_CHANNEL_Receive(   tChannel*p,                 //Channel workspace
-                                    uint16_t* pOutEltSize,      //Output element size
-                                    uint8_t*pBuffer,            //Buffer.  If null, only element size without pop is read
-                                    TickType_t xTimeToWait,     //Time to wait in ticks
-                                    eChannelReadMode mode)      //Mode RD or KEEP_ONLY. KEEP ONLY read without pop older elemt.
+//If pBuffer = NULL, pOutEltSize return max size required to pop atomically element
+//If pBuffer != NULL and maxBytesToRead is specified, maxBytesToRead will be returned, but element not pop.
+//It is pop only when all data has been read.
+//If flushing on going
+eChannelResult P_CHANNEL_Receive(   tChannel*p,                     //Channel workspace
+                                    uint16_t* pOutEltSize,          //Output element size
+                                    uint8_t*pBuffer,                //Buffer.  If null, only element size without pop is read
+                                    uint16_t* pNbReadBytes,         //Nb bytes read. If limited by maxBytesToRead
+                                    uint16_t maxBytesToRead,        // and total read bytes will be updated.
+                                    TickType_t xTimeToWait,         //Time to wait in ticks
+                                    eChannelReadMode mode)          //Mode RD or KEEP_ONLY. KEEP ONLY read without pop older elemt.
 {
     eChannelResult result = E_CHANNEL_RESULT_NOK;
-    uint16_t size = 0;
-
+    uint16_t dataSizeToRead = 0;
+    uint16_t dataSize = 0;
 
     //Check input parameters
-    if ((p != NULL) && (pOutEltSize != NULL))
+    if (p != NULL)
     {
-        *pOutEltSize = 0 ;
         //Wait for signal not empty
         if(xSemaphoreTake(p->isNotEmpty,xTimeToWait)==pdPASS)
         {
@@ -249,63 +264,77 @@ eChannelResult P_CHANNEL_Receive(   tChannel*p,                 //Channel worksp
                 if(p->currentNbElts > 0)
                 {
                     //Take elt size
-                    size = p->channelRecord[p->iRd] ;
-                    *pOutEltSize = size ;
+                    dataSize = p->channelRecord[p->iRd] ;
+
+                    //Define max size to read
+                    dataSizeToRead = dataSize > maxBytesToRead ? maxBytesToRead : dataSize;
+
 
                     //If buffer output exist, read elt data
                     if(pBuffer != NULL)
                     {
-                        //If mode normal (pop), raz elt size and update read index
-                        //and nb elmts
-                        if(mode == E_CHANNEL_RD_MODE_NORMAL)
-                        {
-                            p->channelRecord[p->iRd] = 0;
-                            p->iRd++;
-                            if(p->iRd >= p->maxSizeTotalElts)
-                            {
-                                p->iRd = 0;
-                            }
-                            p->currentNbElts--;
-                        }
-
                         //If elts have data, read data
-                        if(size > 0)
+                        if(dataSizeToRead > 0)
                         {
                             //Data between upper bound of buffer and current data read index
-                            if ((p->iRdData + size) < p->maxSizeTotalData)
+                            if (( p->iRdData + dataSizeToRead) < p->maxSizeTotalData)
                             {
                                 //Copy data to external buffer
-                                memcpy (pBuffer,&p->channelData[p->iRdData] , size);
-
-                                //If mode normal, update data index and raz buffer
-                                if( mode == E_CHANNEL_RD_MODE_NORMAL)
-                                {
-                                    memset (&p->channelData[p->iRdData], 0, size);
-                                    p->iRdData =  p->iRdData + size;
-                                }
+                                memcpy (pBuffer,&p->channelData[ p->iRdData] , dataSizeToRead);
                             }
                             else
                             {
                                 //Data between read index and upper bound of data buffer and restart at index 0.
-                                memcpy (&pBuffer[0], &p->channelData[p->iRdData], p->maxSizeTotalData - p->iRdData);
-                                memcpy (&pBuffer[p->maxSizeTotalData - p->iRdData], &p->channelData[0], size - (p->maxSizeTotalData - p->iRdData));
+                                memcpy (&pBuffer[0], &p->channelData[ p->iRdData], p->maxSizeTotalData -  p->iRdData);
+                                memcpy (&pBuffer[p->maxSizeTotalData -  p->iRdData], &p->channelData[0], dataSizeToRead - (p->maxSizeTotalData -  p->iRdData));
 
-                                //If mode normal, update data index and raz buffer
-                                if( mode == E_CHANNEL_RD_MODE_NORMAL)
-                                {
-                                    memset (&p->channelData[p->iRdData], 0, p->maxSizeTotalData - p->iRdData);
-                                    memset (&p->channelData[0], 0, size - (p->maxSizeTotalData - p->iRdData));
-
-                                    p->iRdData = size - (p->maxSizeTotalData - p->iRdData);
-                                }
-                            }
-
-                            //If mode normal, update global nb data
-                            if( mode == E_CHANNEL_RD_MODE_NORMAL)
-                            {
-                                p->currentNbDatas = p->currentNbDatas - size;
                             }
                         }
+
+                        //If mode normal (pop), raz elt size and update read index
+                        //and nb elmts, only of buffer <> NULL
+                        if(mode == E_CHANNEL_RD_MODE_NORMAL)
+                        {
+                            //Datas
+                            if(dataSizeToRead > 0)
+                            {
+                                if ((p->iRdData + dataSizeToRead) < p->maxSizeTotalData)
+                                {
+                                    memset (&p->channelData[p->iRdData], 0, dataSizeToRead);
+                                    p->iRdData =  p->iRdData + dataSizeToRead;
+                                }
+                                else
+                                {
+                                    memset (&p->channelData[p->iRdData], 0, p->maxSizeTotalData - p->iRdData);
+                                    memset (&p->channelData[0], 0, dataSizeToRead - (p->maxSizeTotalData - p->iRdData));
+
+                                    p->iRdData = dataSizeToRead - (p->maxSizeTotalData - p->iRdData);
+                                }
+
+                                p->currentNbDatas = p->currentNbDatas - dataSizeToRead;
+                            }
+                            //Record
+                            p->channelRecord[p->iRd] = dataSize - dataSizeToRead;
+
+                            if(p->channelRecord[p->iRd] == 0)
+                            {
+                                p->iRd++;
+                                if(p->iRd >= p->maxSizeTotalElts)
+                                {
+                                    p->iRd = 0;
+                                }
+                                p->currentNbElts--;
+                            }
+                        }
+                    }
+
+                    if(p->channelRecord[p->iRd] == 0)
+                    {
+                        result = E_CHANNEL_RESULT_OK;
+                    }
+                    else
+                    {
+                        result = E_CHANNEL_RESULT_MORE_DATA;
                     }
 
                     //If some elt present, signal not empty is set
@@ -313,7 +342,6 @@ eChannelResult P_CHANNEL_Receive(   tChannel*p,                 //Channel worksp
                     {
                         xSemaphoreGive(p->isNotEmpty);
                     }
-                    result = E_CHANNEL_RESULT_OK;
                 }
                 else
                 {
@@ -327,5 +355,16 @@ eChannelResult P_CHANNEL_Receive(   tChannel*p,                 //Channel worksp
             result = E_CHANNEL_RESULT_ERROR_TMO;
         }
     }
+
+    if(pOutEltSize != NULL)
+    {
+        *pOutEltSize = dataSize ;
+    }
+
+    if(pNbReadBytes != NULL)
+    {
+        *pNbReadBytes = dataSizeToRead;
+    }
+
     return result;
 }
