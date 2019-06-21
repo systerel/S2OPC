@@ -42,7 +42,8 @@ typedef enum E_CHANNEL_RESULT
     E_CHANNEL_RESULT_NOK,           //General error
     E_CHANNEL_RESULT_ERROR_FULL,    //Not enough space
     E_CHANNEL_RESULT_ERROR_EMPTY,    //Empty
-    E_CHANNEL_RESULT_ERROR_TMO
+    E_CHANNEL_RESULT_ERROR_TMO,
+    E_CHANNEL_RESULT_MORE_DATA
 }eChannelResult;
 
 //Channel receive mode
@@ -80,8 +81,18 @@ typedef struct T_CHANNEL
 
 void P_CHANNEL_DeInit(tChannel*p);
 eChannelResult P_CHANNEL_Init(tChannel*p, size_t maxTotalDataSize, size_t maxEltSize, size_t nbElts);
-eChannelResult P_CHANNEL_Send(tChannel*p, const uint8_t * pBuffer, uint16_t size, eChannelWriteMode mode);
+eChannelResult P_CHANNEL_Send(      tChannel*p,                 //Channel workspace
+                                    const uint8_t * pBuffer,    //Data to send
+                                    uint16_t size,              //Size of data to send
+                                    uint16_t *pbNbWritedBytes,
+                                    eChannelWriteMode mode)    ; //Mode, overwrite or normal.
 eChannelResult P_CHANNEL_Flush(tChannel*p);
-eChannelResult P_CHANNEL_Receive(tChannel*p, uint16_t* pOutEltSize, uint8_t*pBuffer, TickType_t xTimeToWait, eChannelReadMode mode);
+eChannelResult P_CHANNEL_Receive(   tChannel*p,                 //Channel workspace
+                                    uint16_t* pOutEltSize,      //Output element size
+                                    uint8_t*pBuffer,            //Buffer.  If null, only element size without pop is read
+                                    uint16_t* pNbReadBytes,
+                                    uint16_t maxBytesToRead,
+                                    TickType_t xTimeToWait,     //Time to wait in ticks
+                                    eChannelReadMode mode)   ;   //Mode RD or KEEP_ONLY. KEEP ONLY read without pop older elemt.
 
 #endif
