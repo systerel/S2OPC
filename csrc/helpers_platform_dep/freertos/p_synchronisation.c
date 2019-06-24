@@ -295,7 +295,7 @@ static inline eConditionVariableResult _P_SYNCHRO_WaitSignal(uint32_t* pNotifica
                                           xTimeToWait))             //
             {
                 result = E_COND_VAR_RESULT_ERROR_TIMEOUT;
-                // Pas de notification reçue pendant le délai imparti
+                // TimeOut
                 bQuit = 1;
             }
             else
@@ -327,7 +327,7 @@ static inline eConditionVariableResult _P_SYNCHRO_WaitSignal(uint32_t* pNotifica
                 }
                 else
                 {
-                    // Waiting notification
+                    // Waited signal received. Quit waiting loop with E_COND_VAR_RESULT_OK
                     bQuit = 1;
                 }
             }
