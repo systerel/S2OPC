@@ -145,7 +145,7 @@ tLogSrvWks* P_LOG_SRV_CreateAndStart(uint16_t port,
 
 void P_LOG_SRV_StopAndDestroy(tLogSrvWks**p);
 
-eLogSrvResult P_LOG_SRV_SendToAllClient(tLogSrvWks*p, const uint8_t*pBuffer, uint16_t length);
+eLogSrvResult P_LOG_SRV_SendToAllClient(tLogSrvWks*p, const uint8_t*pBuffer, uint16_t length, uint16_t *sentLength);
 eLogSrvResult P_LOG_CLIENT_SendResponse(tLogClientWks*pClt, const uint8_t*pBuffer, uint16_t length, uint16_t*pNbBytesSent);
 
 

@@ -1206,12 +1206,13 @@ static void cbTaskSocketServerMonAndLog(void*pParameters)
 }
 
 //Log function
-eLogSrvResult P_LOG_SRV_SendToAllClient(tLogSrvWks*p, const uint8_t*pBuffer, uint16_t length)
+eLogSrvResult P_LOG_SRV_SendToAllClient(tLogSrvWks*p, const uint8_t*pBuffer, uint16_t length, uint16_t *sentLength)
 {
     eLogSrvResult result = E_LOG_SRV_RESULT_NOK ;
     eChannelResult resChannelSent = E_CHANNEL_RESULT_OK;
     uint16_t wIterSent = 0;
     uint16_t nbBytesSent = 0;
+    uint16_t totalBytesSent = 0;
 
     if((p!=NULL)&&(p->status == E_LOG_SERVER_ONLINE))
     {
@@ -1228,13 +1229,21 @@ eLogSrvResult P_LOG_SRV_SendToAllClient(tLogSrvWks*p, const uint8_t*pBuffer, uin
             {
                 P_CHANNEL_Flush(&p->broadCastChannel);
             }
+            else
+            {
+                totalBytesSent+=nbBytesSent;
+            }
         }
         if (resChannelSent == E_CHANNEL_RESULT_OK)
         {
-            result =E_LOG_SRV_RESULT_OK;
+            result = E_LOG_SRV_RESULT_OK;
         }
-
     }
+    if(sentLength != NULL)
+    {
+        *sentLength = totalBytesSent;
+    }
+
     return result;
 }
 
@@ -1422,9 +1431,19 @@ eLogSrvResult P_LOG_CLIENT_SendResponse(tLogClientWks*pClt, const uint8_t*pBuffe
     return result;
 }
 
-//Redirect low level read or write
+int __attribute__((weak)) _open (const char* Path, int flags , int mode )
+{
+    return (int)stdout->_file;
+}
+
+int __attribute__((weak)) _close (int fd)
+{
+    return 0;
+}
+
 int __attribute__((weak)) _write(int handle, char *buffer, int size)
-        {
+{
+    uint16_t length;
     //buffer exist
     if (buffer == 0)
     {
@@ -1444,13 +1463,13 @@ int __attribute__((weak)) _write(int handle, char *buffer, int size)
     }
 
     /* Send data. */
-    P_LOG_SRV_SendToAllClient(gLogServer,(uint8_t *)buffer, size);
+    P_LOG_SRV_SendToAllClient(gLogServer,(uint8_t *)buffer, size,&length);
 
-    return size;
-        }
+    return (int)length;
+}
 
 //Read is not implemented.
 int __attribute__((weak)) _read(int handle, char *buffer, int size)
-        {
+{
     return -1;
-        }
+}
