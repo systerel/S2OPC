@@ -453,25 +453,6 @@ SOPC_ReturnStatus P_SYNCHRO_UnlockAndWaitForConditionVariable(
 
 /*****Public s2opc condition variable and mutex api*****/
 
-/*Initialize a condition variable*/
-Condition* Condition_Create(void)
-{
-    Condition* ptr = NULL;
-    ptr = P_SYNCHRO_CreateConditionVariable(MAX_WAITERS);
-    return (Condition*) ptr;
-}
-
-/*Initialize a condition variable*/
-void Condition_Delete(Condition* cond)
-{
-    Condition* ptr = (Condition*) cond;
-    if (ptr != NULL)
-    {
-        P_SYNCHRO_DestroyConditionVariable(&ptr);
-        ptr = NULL;
-    }
-}
-
 SOPC_ReturnStatus Condition_Init(Condition* cond)
 {
     SOPC_ReturnStatus resSOPC = SOPC_STATUS_OK;

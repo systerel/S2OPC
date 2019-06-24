@@ -36,8 +36,6 @@
 // Import Mutex type from platform dependent code
 #include "p_threads.h"
 
-Condition* Condition_Create(void);
-void Condition_Delete(Condition* cond);
 SOPC_ReturnStatus Condition_Init(Condition* cond);
 SOPC_ReturnStatus Condition_Clear(Condition* cond);
 
