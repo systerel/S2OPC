@@ -25,39 +25,27 @@
 /*****Private thread api*****/
 
 typedef struct T_THREAD_WKS tThreadWks; // Thread workspace
-typedef tThreadWks* hThread;            // Handle workspace
+typedef tThreadWks* Thread;             // Handle workspace
 
 typedef void (*tPtrFct)(void*);
 
-typedef enum E_THREAD_RESULT
-{
-    E_THREAD_RESULT_OK,
-    E_THREAD_RESULT_ERROR_NOK,
-    E_THREAD_RESULT_ERROR_OUT_OF_MEM,
-    E_THREAD_RESULT_ERROR_MAX_THREADS,
-    E_THREAD_RESULT_ERROR_NOT_INITIALIZED,
-    E_THREAD_RESULT_ERROR_SELF_JOIN_THREAD,
-    E_THREAD_RESULT_ERROR_ALREADY_INITIALIZED
-} eThreadResult;
+Thread* P_THREAD_Create(tPtrFct fct,               // Callback
+                        void* args,                // Args to pass to thread callback
+                        tPtrFct fctWatingForJoin,  // Callback debug wait for join
+                        tPtrFct fctReadyToSignal); // Callback debug joined, called before signal thread well ended
 
-hThread* P_THREAD_Create(tPtrFct fct,               // Callback
-                         void* args,                // Args to pass to thread callback
-                         tPtrFct fctWatingForJoin,  // Callback debug wait for join
-                         tPtrFct fctReadyToSignal); // Callback debug joined, called before signal thread well ended
+SOPC_ReturnStatus P_THREAD_Init(
+    Thread* ptrWks,            // Handle workspace
+    uint16_t wMaxRDV,          // Max parallel join
+    tPtrFct fct,               // Callback
+    void* args,                // Args to pass to thread callback
+    tPtrFct fctWatingForJoin,  // Callback debug wait for join
+    tPtrFct fctReadyToSignal); // Callback debug joined, called before signal thread well ended
 
-eThreadResult P_THREAD_Init(hThread* ptrWks,           // Handle workspace
-                            uint16_t wMaxRDV,          // Max parallel join
-                            tPtrFct fct,               // Callback
-                            void* args,                // Args to pass to thread callback
-                            tPtrFct fctWatingForJoin,  // Callback debug wait for join
-                            tPtrFct fctReadyToSignal); // Callback debug joined, called before signal thread well ended
+SOPC_ReturnStatus P_THREAD_Join(Thread* p);
 
-eThreadResult P_THREAD_Join(hThread* p);
+void P_THREAD_Destroy(Thread** ptr);
 
-void P_THREAD_Destroy(hThread** ptr);
-
-/* Public s2opc api */
-
-typedef hThread Thread;
+void P_THREAD_Sleep(uint32_t milliseconds);
 
 #endif /* SOPC_P_THREADS_H_ */

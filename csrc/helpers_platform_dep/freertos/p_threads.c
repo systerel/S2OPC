@@ -70,7 +70,7 @@ static unsigned int bMallocFailed = 0;
 // Callback encapsulate user callback. Abstract start and stop synchronisation.
 static void cbInternalCallback(void* ptr)
 {
-    hThread ptrArgs = (hThread) ptr;
+    Thread ptrArgs = (Thread) ptr;
 
     if (ptrArgs != NULL)
     {
@@ -115,41 +115,41 @@ static void cbInternalCallback(void* ptr)
 }
 
 // Destruction handle
-void P_THREAD_Destroy(hThread** ptr)
+void P_THREAD_Destroy(Thread** ptr)
 {
     if (NULL != ptr && NULL != (*ptr))
     {
         P_THREAD_Join(*ptr);
         // Raz leaved memory
-        memset(*ptr, 0, sizeof(hThread));
+        memset(*ptr, 0, sizeof(Thread));
         vPortFree(*ptr);
         *ptr = NULL;
         DEBUG_decrementCpt();
     }
 }
 // Creation workspace
-hThread*                                  // Handle workspace
+Thread*                                   // Handle workspace
 P_THREAD_Create(tPtrFct fct,              // Callback
                 void* args,               // Argument callback
                 tPtrFct fctWatingForJoin, // Debug thread waiting join
                 tPtrFct fctReadyToSignal) // Debug thread ended
 {
-    hThread* ptrWks = NULL;
+    Thread* ptrWks = NULL;
 
-    ptrWks = pvPortMalloc(sizeof(hThread));
+    ptrWks = pvPortMalloc(sizeof(Thread));
 
     if (NULL != ptrWks)
     {
         DEBUG_incrementCpt();
-        memset(ptrWks, 0, sizeof(hThread));
+        memset(ptrWks, 0, sizeof(Thread));
 
         // Initialization
-        if (P_THREAD_Init(ptrWks,                                  //
-                          MAX_THREADS,                             //
-                          fct,                                     //
-                          args,                                    //
-                          fctWatingForJoin,                        //
-                          fctReadyToSignal) != E_THREAD_RESULT_OK) //
+        if (P_THREAD_Init(ptrWks,                              //
+                          MAX_THREADS,                         //
+                          fct,                                 //
+                          args,                                //
+                          fctWatingForJoin,                    //
+                          fctReadyToSignal) != SOPC_STATUS_OK) //
         {
             P_THREAD_Destroy(&ptrWks);
             ptrWks = NULL;
@@ -160,20 +160,20 @@ P_THREAD_Create(tPtrFct fct,              // Callback
 }
 
 // Initializes created thread then launches it.
-eThreadResult P_THREAD_Init(hThread* ptrWks,            // Workspace
-                            unsigned short int wMaxRDV, // Max join
-                            tPtrFct fct,                // Callback
-                            void* args,                 // Args
-                            tPtrFct fctWaitingForJoin,  // Debug wait for join
-                            tPtrFct fctReadyToSignal)   // Debug wait for
+SOPC_ReturnStatus P_THREAD_Init(Thread* ptrWks,            // Workspace
+                                uint16_t wMaxRDV,          // Max join
+                                tPtrFct fct,               // Callback
+                                void* args,                // Args
+                                tPtrFct fctWaitingForJoin, // Debug wait for join
+                                tPtrFct fctReadyToSignal)  // Debug wait for
 {
-    eThreadResult resPTHR = E_THREAD_RESULT_OK;
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    hThread handleWks = NULL;
+    SOPC_ReturnStatus resPTHR = SOPC_STATUS_OK;
+    SOPC_ReturnStatus resList = SOPC_STATUS_NOK;
+    Thread handleWks = NULL;
 
     if (NULL == ptrWks)
     {
-        return E_THREAD_RESULT_ERROR_NOK;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     // Create global task list for first call.
@@ -185,8 +185,8 @@ eThreadResult P_THREAD_Init(hThread* ptrWks,            // Workspace
         {
             DEBUG_incrementCpt();
             memset(pgTaskList, 0, sizeof(tUtilsList));
-            status = P_UTILS_LIST_InitMT(pgTaskList, MAX_THREADS);
-            if (SOPC_STATUS_OK != status)
+            resList = P_UTILS_LIST_InitMT(pgTaskList, MAX_THREADS);
+            if (SOPC_STATUS_OK != resList)
             {
                 DEBUG_decrementCpt();
                 vPortFree(pgTaskList);
@@ -196,12 +196,12 @@ eThreadResult P_THREAD_Init(hThread* ptrWks,            // Workspace
     }
     if (NULL == pgTaskList)
     {
-        return E_THREAD_RESULT_ERROR_NOK;
+        return SOPC_STATUS_NOK;
     }
 
     if (NULL != (*ptrWks))
     {
-        return E_THREAD_RESULT_ERROR_ALREADY_INITIALIZED;
+        return SOPC_STATUS_INVALID_STATE;
     }
 
     /* Create the tThreadWks structure and assign it to (*ptrWks) */
@@ -209,7 +209,7 @@ eThreadResult P_THREAD_Init(hThread* ptrWks,            // Workspace
 
     if (NULL == handleWks)
     {
-        return E_THREAD_RESULT_ERROR_OUT_OF_MEM;
+        return SOPC_STATUS_OUT_OF_MEMORY;
     }
 
     memset(handleWks, 0, sizeof(tThreadWks));
@@ -239,33 +239,33 @@ eThreadResult P_THREAD_Init(hThread* ptrWks,            // Workspace
     if (NULL == handleWks->signalReadyToWait || NULL == handleWks->signalReadyToStart ||
         NULL == handleWks->lockRecHandle)
     {
-        resPTHR = E_THREAD_RESULT_ERROR_OUT_OF_MEM;
+        resPTHR = SOPC_STATUS_OUT_OF_MEMORY;
     }
 
-    if (E_THREAD_RESULT_OK == resPTHR)
+    if (SOPC_STATUS_OK == resPTHR)
     {
         /* Semaphores (signals) are initialized "signaled", de-signal them */
         xSemaphoreTake(handleWks->signalReadyToStart, 0);
         xSemaphoreTake(handleWks->signalReadyToWait, 0);
 
         // List of task to exclude
-        status = P_UTILS_LIST_InitMT(&handleWks->taskList, wMaxRDV);
-        if (SOPC_STATUS_OK != status)
+        resList = P_UTILS_LIST_InitMT(&handleWks->taskList, wMaxRDV);
+        if (SOPC_STATUS_OK != resList)
         {
-            resPTHR = E_THREAD_RESULT_ERROR_OUT_OF_MEM;
+            resPTHR = SOPC_STATUS_OUT_OF_MEMORY;
         }
     }
 
-    if (E_THREAD_RESULT_OK == resPTHR)
+    if (SOPC_STATUS_OK == resPTHR)
     {
         handleWks->pSignalThreadJoined = P_SYNCHRO_CreateConditionVariable(wMaxRDV);
 
         if (handleWks->pSignalThreadJoined == NULL)
         {
-            resPTHR = E_THREAD_RESULT_ERROR_OUT_OF_MEM;
+            resPTHR = SOPC_STATUS_OUT_OF_MEMORY;
         }
     }
-    if (E_THREAD_RESULT_OK == resPTHR)
+    if (SOPC_STATUS_OK == resPTHR)
     {
         BaseType_t resTaskCreate = xTaskCreate(cbInternalCallback,       // Callback
                                                "appThread",              // Friendly name
@@ -275,25 +275,25 @@ eThreadResult P_THREAD_Init(hThread* ptrWks,            // Workspace
                                                &handleWks->handleTask);  // Task handle
         if (pdPASS != resTaskCreate)
         {
-            resPTHR = E_THREAD_RESULT_ERROR_NOK;
+            resPTHR = SOPC_STATUS_NOK;
         }
     }
 
-    if (E_THREAD_RESULT_OK == resPTHR)
+    if (SOPC_STATUS_OK == resPTHR)
     {
         DEBUG_incrementCpt();
-        status = P_UTILS_LIST_AddEltMT(pgTaskList,            // Thread list
-                                       handleWks->handleTask, // Handle task
-                                       handleWks,             // Workspace
-                                       0, 0);
+        resList = P_UTILS_LIST_AddEltMT(pgTaskList,            // Thread list
+                                        handleWks->handleTask, // Handle task
+                                        handleWks,             // Workspace
+                                        0, 0);
 
-        if (SOPC_STATUS_OK != status)
+        if (SOPC_STATUS_OK != resList)
         {
-            resPTHR = E_THREAD_RESULT_ERROR_MAX_THREADS;
+            resPTHR = SOPC_STATUS_OUT_OF_MEMORY;
         }
     }
 
-    if (E_THREAD_RESULT_OK == resPTHR)
+    if (SOPC_STATUS_OK == resPTHR)
     {
         // Set output parameter
         *ptrWks = handleWks;
@@ -340,11 +340,11 @@ eThreadResult P_THREAD_Init(hThread* ptrWks,            // Workspace
 
 // Joins thread. Thread joined becomes not initilized.
 // Can be safely destroyed if just after return OK
-eThreadResult P_THREAD_Join(hThread* pHandle)
+SOPC_ReturnStatus P_THREAD_Join(Thread* pHandle)
 {
-    eThreadResult result = E_THREAD_RESULT_OK;
+    SOPC_ReturnStatus result = SOPC_STATUS_OK;
     SOPC_ReturnStatus resPSYNC = SOPC_STATUS_NOK;
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    SOPC_ReturnStatus resList = SOPC_STATUS_NOK;
     tThreadWks* ptrCurrentThread = NULL;
     tThreadWks* pOthersThread = NULL;
     uint16_t wSlotId = UINT16_MAX;
@@ -353,12 +353,12 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
 
     if (NULL == pHandle)
     {
-        return E_THREAD_RESULT_ERROR_NOK;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     if (NULL == pgTaskList)
     {
-        return E_THREAD_RESULT_ERROR_NOT_INITIALIZED;
+        return SOPC_STATUS_INVALID_STATE;
     }
 
     // Get current workspace from current task handle
@@ -369,13 +369,13 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
 
     if (NULL == ptrCurrentThread || NULL == ptrCurrentThread->lockRecHandle)
     {
-        return E_THREAD_RESULT_ERROR_NOK;
+        return SOPC_STATUS_NOK;
     }
 
     tThreadWks* pThread = *pHandle;
     if (NULL == pThread || NULL == pThread->lockRecHandle)
     {
-        return E_THREAD_RESULT_ERROR_NOT_INITIALIZED;
+        return SOPC_STATUS_INVALID_STATE;
     }
 
     // Critical section release or deleted after unlock and wait
@@ -384,10 +384,10 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
     // Don't join the current thread or an invalid thread
     if (xTaskGetCurrentTaskHandle() == pThread->handleTask || NULL == pThread->handleTask)
     {
-        result = E_THREAD_RESULT_ERROR_SELF_JOIN_THREAD;
+        result = SOPC_STATUS_INVALID_STATE;
     }
 
-    if (E_THREAD_RESULT_OK == result)
+    if (SOPC_STATUS_OK == result)
     {
         // Verify that current thread is not excluded from threads to join
         wSlotId = P_UTILS_LIST_GetEltIndexMT(&pThread->taskList,          // Local thread task list exception
@@ -397,11 +397,11 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
 
         if (wSlotId < UINT16_MAX)
         {
-            result = E_THREAD_RESULT_ERROR_SELF_JOIN_THREAD;
+            result = SOPC_STATUS_INVALID_STATE;
         }
     }
 
-    if (E_THREAD_RESULT_OK == result)
+    if (SOPC_STATUS_OK == result)
     {
         // Verify that thread to join has not been joined by current thread
         wSlotId = P_UTILS_LIST_GetEltIndexMT(&ptrCurrentThread->taskList, //
@@ -411,26 +411,26 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
 
         if (wSlotId < UINT16_MAX)
         {
-            result = E_THREAD_RESULT_ERROR_SELF_JOIN_THREAD;
+            result = SOPC_STATUS_INVALID_STATE;
         }
     }
 
-    if (E_THREAD_RESULT_OK == result)
+    if (SOPC_STATUS_OK == result)
     {
         // Add thread to join to the exclusion list of the current thread
-        status = P_UTILS_LIST_AddEltMT(&pThread->taskList,          //
-                                       xTaskGetCurrentTaskHandle(), //
-                                       NULL,                        //
-                                       0,                           //
-                                       0);                          //
+        resList = P_UTILS_LIST_AddEltMT(&pThread->taskList,          //
+                                        xTaskGetCurrentTaskHandle(), //
+                                        NULL,                        //
+                                        0,                           //
+                                        0);                          //
 
-        if (SOPC_STATUS_OK != status)
+        if (SOPC_STATUS_OK != resList)
         {
-            result = E_THREAD_RESULT_ERROR_MAX_THREADS;
+            result = SOPC_STATUS_OUT_OF_MEMORY;
         }
     }
 
-    if (E_THREAD_RESULT_OK == result)
+    if (SOPC_STATUS_OK == result)
     {
         // Append current task to join-exclusion list of the threads that reference the task to join
         wSlotId = UINT16_MAX;
@@ -447,16 +447,16 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
                                                         0);                       //
                 if (wSlotIdRes < UINT16_MAX)
                 {
-                    status = P_UTILS_LIST_AddEltMT(&pOthersThread->taskList,    //
-                                                   xTaskGetCurrentTaskHandle(), //
-                                                   NULL,                        //
-                                                   0,                           //
-                                                   0);                          //
+                    resList = P_UTILS_LIST_AddEltMT(&pOthersThread->taskList,    //
+                                                    xTaskGetCurrentTaskHandle(), //
+                                                    NULL,                        //
+                                                    0,                           //
+                                                    0);                          //
                 }
             }
-        } while (UINT16_MAX != wSlotId && SOPC_STATUS_OK == status);
+        } while (UINT16_MAX != wSlotId && SOPC_STATUS_OK == resList);
 
-        if (SOPC_STATUS_OK != status)
+        if (SOPC_STATUS_OK != resList)
         {
             // Restore if error occurred :
             // Threads that reference the task to join don't record in addition the current
@@ -484,11 +484,11 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
                 }
             } while (UINT16_MAX != wSlotId);
 
-            result = E_THREAD_RESULT_ERROR_MAX_THREADS;
+            result = SOPC_STATUS_OUT_OF_MEMORY;
         }
     }
 
-    if (E_THREAD_RESULT_OK == result)
+    if (SOPC_STATUS_OK == result)
     {
         // Forward of all thread handle recorded by the current thread to thread to join
         // exclusion list
@@ -503,15 +503,15 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
 
             if (NULL != handle)
             {
-                status = P_UTILS_LIST_AddEltMT(&pThread->taskList, //
-                                               handle,             //
-                                               NULL,               //
-                                               0,                  //
-                                               0);                 //
+                resList = P_UTILS_LIST_AddEltMT(&pThread->taskList, //
+                                                handle,             //
+                                                NULL,               //
+                                                0,                  //
+                                                0);                 //
             }
-        } while (UINT16_MAX != wSlotId && SOPC_STATUS_OK == status);
+        } while (UINT16_MAX != wSlotId && SOPC_STATUS_OK == resList);
 
-        if (SOPC_STATUS_OK != status)
+        if (SOPC_STATUS_OK != resList)
         {
             // Restore in case of error
             wSlotId = UINT16_MAX;
@@ -532,10 +532,10 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
                 }
             } while (UINT16_MAX != wSlotId);
 
-            result = E_THREAD_RESULT_ERROR_MAX_THREADS;
+            result = SOPC_STATUS_OUT_OF_MEMORY;
         }
     }
-    if (E_THREAD_RESULT_OK == result)
+    if (SOPC_STATUS_OK == result)
     {
         // Indicate that a thread is ready to wait for join
         xSemaphoreGive(pThread->signalReadyToWait);
@@ -549,11 +549,11 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
         // if OK, destroy workspace
         if (SOPC_STATUS_OK != resPSYNC)
         {
-            result = E_THREAD_RESULT_ERROR_NOK;
+            result = SOPC_STATUS_NOK;
         }
     }
 
-    if (E_THREAD_RESULT_OK == result)
+    if (SOPC_STATUS_OK == result)
     {
         // Unlink the condition variable and the mutex to avoid deadlock in multiple
         // calls of Join
@@ -647,7 +647,7 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
 }
 
 // Relative task delay
-void P_THREAD_Sleep(unsigned int milliseconds)
+void P_THREAD_Sleep(uint32_t milliseconds)
 {
     vTaskDelay(pdMS_TO_TICKS(milliseconds));
 }
@@ -689,36 +689,10 @@ SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), v
 SOPC_ReturnStatus SOPC_Thread_Join(Thread thread)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    hThread ptr = thread;
-    eThreadResult result = E_THREAD_RESULT_ERROR_NOK;
 
-    if (ptr != NULL)
+    if (thread != NULL)
     {
-        result = P_THREAD_Join(&ptr);
-        switch (result)
-        {
-        case E_THREAD_RESULT_OK:
-            status = SOPC_STATUS_OK;
-            break;
-        case E_THREAD_RESULT_ERROR_NOK:
-            status = SOPC_STATUS_NOK;
-            break;
-        case E_THREAD_RESULT_ERROR_MAX_THREADS:
-            status = SOPC_STATUS_OUT_OF_MEMORY;
-            break;
-        case E_THREAD_RESULT_ERROR_NOT_INITIALIZED:
-            status = SOPC_STATUS_INVALID_STATE;
-            break;
-        case E_THREAD_RESULT_ERROR_SELF_JOIN_THREAD:
-            status = SOPC_STATUS_NOK;
-            break;
-        case E_THREAD_RESULT_ERROR_ALREADY_INITIALIZED:
-            status = SOPC_STATUS_INVALID_STATE;
-            break;
-        default:
-            status = SOPC_STATUS_NOK;
-            break;
-        }
+        status = P_THREAD_Join(&thread);
     }
 
     return status;
