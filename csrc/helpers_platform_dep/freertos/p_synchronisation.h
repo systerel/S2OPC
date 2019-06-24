@@ -35,8 +35,18 @@
 #define APP_DEFAULT_SIGNAL (0x20000000)
 #define APP_CLEARING_SIGNAL (0x10000000)
 
-typedef struct T_CONDITION_VARIABLE tConditionVariable;
-typedef tConditionVariable* hCondVar;
+typedef enum T_CONDITION_VARIABLE_STATUS
+{
+    E_COND_VAR_STATUS_NOT_INITIALIZED, // Condition variable not initialized
+    E_COND_VAR_STATUS_INITIALIZED      // Condition variable initialized
+} eConditionVariableStatus;
+
+typedef struct T_CONDITION_VARIABLE
+{
+    eConditionVariableStatus status; // Status condition variable
+    QueueHandle_t handleLockCounter; // Critical section token
+    tUtilsList taskList;             // List of task with signal expected, calling unlock and wait
+} tConditionVariable;
 
 typedef enum T_CONDITION_VARIABLE_RESULT
 {
@@ -51,18 +61,18 @@ typedef enum T_CONDITION_VARIABLE_RESULT
     E_COND_VAR_RESULT_ERROR_ALREADY_INITIALIZED
 } eConditionVariableResult;
 
-hCondVar* P_SYNCHRO_CreateConditionVariable(void);
+tConditionVariable* P_SYNCHRO_CreateConditionVariable(uint16_t wMaxRDV);
 
-void P_SYNCHRO_DestroyConditionVariable(hCondVar** pv);
+void P_SYNCHRO_DestroyConditionVariable(tConditionVariable** ppv);
 
-eConditionVariableResult P_SYNCHRO_InitConditionVariable(hCondVar* pv, uint16_t wMaxWaiters);
+eConditionVariableResult P_SYNCHRO_InitConditionVariable(tConditionVariable* pv, uint16_t wMaxWaiters);
 
-eConditionVariableResult P_SYNCHRO_ClearConditionVariable(hCondVar* pv);
+eConditionVariableResult P_SYNCHRO_ClearConditionVariable(tConditionVariable* pv);
 
-eConditionVariableResult P_SYNCHRO_SignalAllConditionVariable(hCondVar* pv);
-eConditionVariableResult P_SYNCHRO_SignalConditionVariable(hCondVar* pv);
+eConditionVariableResult P_SYNCHRO_SignalAllConditionVariable(tConditionVariable* pv);
+eConditionVariableResult P_SYNCHRO_SignalConditionVariable(tConditionVariable* pv);
 
-eConditionVariableResult P_SYNCHRO_UnlockAndWaitForConditionVariable(hCondVar* pv,
+eConditionVariableResult P_SYNCHRO_UnlockAndWaitForConditionVariable(tConditionVariable* pv,
                                                                      QueueHandle_t* pMutex,
                                                                      uint32_t uwSignal,
                                                                      uint32_t uwClearSignal,
@@ -70,7 +80,7 @@ eConditionVariableResult P_SYNCHRO_UnlockAndWaitForConditionVariable(hCondVar* p
 
 /*****Public s2opc condition variable and mutex api*****/
 
-typedef hCondVar Condition;
+typedef tConditionVariable Condition;
 typedef QueueHandle_t Mutex;
 
 #endif

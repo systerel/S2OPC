@@ -47,14 +47,14 @@ typedef struct T_THREAD_ARGS
 
 typedef struct T_THREAD_WKS
 {
-    tUtilsList taskList;              // Task list joining this task
-    tPtrFct cbWaitingForJoin;         // Debug callback
-    tPtrFct cbReadyToSignal;          // Debug callback
-    TaskHandle_t handleTask;          // Handle freeRtos task
-    QueueHandle_t lockRecHandle;      // Critical section
-    QueueHandle_t signalReadyToWait;  // Task wait for at least one join call
-    QueueHandle_t signalReadyToStart; // Autorize user callback execution
-    hCondVar signalThreadEnded;       // Cond var used to signal task end
+    tUtilsList taskList;                     // Task list joining this task
+    tPtrFct cbWaitingForJoin;                // Debug callback
+    tPtrFct cbReadyToSignal;                 // Debug callback
+    TaskHandle_t handleTask;                 // Handle freeRtos task
+    QueueHandle_t lockRecHandle;             // Critical section
+    QueueHandle_t signalReadyToWait;         // Task wait for at least one join call
+    QueueHandle_t signalReadyToStart;        // Autorize user callback execution
+    tConditionVariable* pSignalThreadJoined; // Cond var used to signal task end
     tThreadArgs args;
 } tThreadWks;
 
@@ -105,7 +105,7 @@ static void cbInternalCallback(void* ptr)
             xSemaphoreTakeRecursive(ptrArgs->lockRecHandle, portMAX_DELAY);
 
             // Signal terminaison thread
-            P_SYNCHRO_SignalConditionVariable(&ptrArgs->signalThreadEnded);
+            P_SYNCHRO_SignalConditionVariable(ptrArgs->pSignalThreadJoined);
 
             xSemaphoreGiveRecursive(ptrArgs->lockRecHandle);
         }
@@ -258,9 +258,9 @@ eThreadResult P_THREAD_Init(hThread* ptrWks,            // Workspace
 
     if (E_THREAD_RESULT_OK == resPTHR)
     {
-        P_SYNCHRO_InitConditionVariable(&handleWks->signalThreadEnded, wMaxRDV);
+        handleWks->pSignalThreadJoined = P_SYNCHRO_CreateConditionVariable(wMaxRDV);
 
-        if (handleWks->signalThreadEnded == NULL)
+        if (handleWks->pSignalThreadJoined == NULL)
         {
             resPTHR = E_THREAD_RESULT_ERROR_OUT_OF_MEM;
         }
@@ -330,8 +330,7 @@ eThreadResult P_THREAD_Init(hThread* ptrWks,            // Workspace
         }
 
         P_UTILS_LIST_DeInitMT(&handleWks->taskList);
-        P_SYNCHRO_ClearConditionVariable(&handleWks->signalThreadEnded);
-
+        P_SYNCHRO_DestroyConditionVariable(&handleWks->pSignalThreadJoined);
         // Reset structure memory
         memset(handleWks, 0, sizeof(tThreadWks));
     }
@@ -542,11 +541,11 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
         xSemaphoreGive(pThread->signalReadyToWait);
 
         // The recursive mutex is taken. So, push handle to stack to notify
-        resPSYNC = P_SYNCHRO_UnlockAndWaitForConditionVariable(&pThread->signalThreadEnded, //
-                                                               &pThread->lockRecHandle,     //
-                                                               JOINTURE_SIGNAL,             //
-                                                               JOINTURE_CLEAR_SIGNAL,       //
-                                                               ULONG_MAX);                  //
+        resPSYNC = P_SYNCHRO_UnlockAndWaitForConditionVariable(pThread->pSignalThreadJoined, //
+                                                               &pThread->lockRecHandle,      //
+                                                               JOINTURE_SIGNAL,              //
+                                                               JOINTURE_CLEAR_SIGNAL,        //
+                                                               ULONG_MAX);                   //
         // if OK, destroy workspace
         if (E_COND_VAR_RESULT_OK != resPSYNC)
         {
@@ -559,11 +558,11 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
         // Unlink the condition variable and the mutex to avoid deadlock in multiple
         // calls of Join
         QueueHandle_t tempLock = pThread->lockRecHandle;
-        hCondVar tempCondVar = pThread->signalThreadEnded;
         pThread->lockRecHandle = NULL;
-        pThread->signalThreadEnded = NULL;
-        // After wait, clear condition variable. Unlock other join if necessary.
-        P_SYNCHRO_ClearConditionVariable(&tempCondVar);
+
+        // After wait, clear and destroy condition variable. Unlock other join if necessary.
+        P_SYNCHRO_ClearConditionVariable(pThread->pSignalThreadJoined);
+        P_SYNCHRO_DestroyConditionVariable(&pThread->pSignalThreadJoined);
         P_UTILS_LIST_DeInitMT(&pThread->taskList);
 
         if (NULL != pThread->signalReadyToWait)
