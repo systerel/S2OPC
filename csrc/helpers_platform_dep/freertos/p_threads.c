@@ -47,14 +47,14 @@ typedef struct T_THREAD_ARGS
 
 typedef struct T_THREAD_WKS
 {
-    tUtilsList taskList;                     // Task list joining this task
-    tPtrFct cbWaitingForJoin;                // Debug callback
-    tPtrFct cbReadyToSignal;                 // Debug callback
-    TaskHandle_t handleTask;                 // Handle freeRtos task
-    QueueHandle_t lockRecHandle;             // Critical section
-    QueueHandle_t signalReadyToWait;         // Task wait for at least one join call
-    QueueHandle_t signalReadyToStart;        // Autorize user callback execution
-    tConditionVariable* pSignalThreadJoined; // Cond var used to signal task end
+    tUtilsList taskList;              // Task list joining this task
+    tPtrFct cbWaitingForJoin;         // Debug callback
+    tPtrFct cbReadyToSignal;          // Debug callback
+    TaskHandle_t handleTask;          // Handle freeRtos task
+    QueueHandle_t lockRecHandle;      // Critical section
+    QueueHandle_t signalReadyToWait;  // Task wait for at least one join call
+    QueueHandle_t signalReadyToStart; // Autorize user callback execution
+    Condition* pSignalThreadJoined;   // Cond var used to signal task end
     tThreadArgs args;
 } tThreadWks;
 
@@ -343,7 +343,7 @@ eThreadResult P_THREAD_Init(hThread* ptrWks,            // Workspace
 eThreadResult P_THREAD_Join(hThread* pHandle)
 {
     eThreadResult result = E_THREAD_RESULT_OK;
-    eConditionVariableResult resPSYNC = E_COND_VAR_RESULT_ERROR_NOK;
+    SOPC_ReturnStatus resPSYNC = SOPC_STATUS_NOK;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     tThreadWks* ptrCurrentThread = NULL;
     tThreadWks* pOthersThread = NULL;
@@ -547,7 +547,7 @@ eThreadResult P_THREAD_Join(hThread* pHandle)
                                                                JOINTURE_CLEAR_SIGNAL,        //
                                                                ULONG_MAX);                   //
         // if OK, destroy workspace
-        if (E_COND_VAR_RESULT_OK != resPSYNC)
+        if (SOPC_STATUS_OK != resPSYNC)
         {
             result = E_THREAD_RESULT_ERROR_NOK;
         }

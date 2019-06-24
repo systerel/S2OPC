@@ -37,9 +37,9 @@
 /*****Private condition variable api*****/
 
 // Clear condition variable: release all thread waiting on it
-eConditionVariableResult P_SYNCHRO_ClearConditionVariable(tConditionVariable* pConditionVariable)
+SOPC_ReturnStatus P_SYNCHRO_ClearConditionVariable(Condition* pConditionVariable)
 {
-    eConditionVariableResult result = E_COND_VAR_RESULT_OK;
+    SOPC_ReturnStatus result = SOPC_STATUS_OK;
     uint16_t wCurrentSlotId = UINT16_MAX;
     TaskHandle_t handle = NULL;
     uint32_t wClearSignal = 0;
@@ -75,38 +75,37 @@ eConditionVariableResult P_SYNCHRO_ClearConditionVariable(tConditionVariable* pC
             vQueueDelete(pConditionVariable->handleLockCounter); // End of critical section. Destroy it on clear
             pConditionVariable->handleLockCounter = NULL;
             DEBUG_decrementCpt();
-            memset(pConditionVariable, 0, sizeof(tConditionVariable)); // Raz on leave memory
+            memset(pConditionVariable, 0, sizeof(Condition)); // Raz on leave memory
         }
         else
         {
-            result = E_COND_VAR_RESULT_ERROR_NOT_INITIALIZED;
+            result = SOPC_STATUS_INVALID_STATE;
         }
     }
     else
     {
-        result = E_COND_VAR_RESULT_ERROR_INCORRECT_PARAMETERS;
+        result = SOPC_STATUS_INVALID_PARAMETERS;
     }
     return result;
 }
 
 // Initialize condition variable
-eConditionVariableResult P_SYNCHRO_InitConditionVariable(
-    tConditionVariable* pConditionVariable, // Condition variable handle
-    uint16_t wMaxWaiters)                   // max parallel waiting tasks
+SOPC_ReturnStatus P_SYNCHRO_InitConditionVariable(Condition* pConditionVariable, // Condition variable handle
+                                                  uint16_t wMaxWaiters)          // max parallel waiting tasks
 {
-    eConditionVariableResult result = E_COND_VAR_RESULT_OK;
+    SOPC_ReturnStatus result = SOPC_STATUS_OK;
     QueueHandle_t pMutex = NULL;
 
     if ((MAX_WAITERS < wMaxWaiters) || (NULL == pConditionVariable))
     {
-        result = E_COND_VAR_RESULT_ERROR_INCORRECT_PARAMETERS;
+        result = SOPC_STATUS_INVALID_PARAMETERS;
     }
     else
     {
         if (E_COND_VAR_STATUS_NOT_INITIALIZED == pConditionVariable->status) // Check if workspace already exists
         {
             // Raz allocated workspaace
-            memset(pConditionVariable, 0, sizeof(tConditionVariable));
+            memset(pConditionVariable, 0, sizeof(Condition));
             pMutex = xQueueCreateMutex(queueQUEUE_TYPE_MUTEX);
             if (pMutex != NULL)
             {
@@ -119,39 +118,39 @@ eConditionVariableResult P_SYNCHRO_InitConditionVariable(
                     pMutex = NULL;
 
                     // Raz leaved memory
-                    memset(pConditionVariable, 0, sizeof(tConditionVariable));
+                    memset(pConditionVariable, 0, sizeof(Condition));
                     DEBUG_decrementCpt();
-                    result = E_COND_VAR_RESULT_ERROR_OUT_OF_MEM;
+                    result = SOPC_STATUS_OUT_OF_MEMORY;
                 }
                 else
                 {
                     pConditionVariable->handleLockCounter = pMutex;
                     pConditionVariable->status = E_COND_VAR_STATUS_INITIALIZED;
-                    result = E_COND_VAR_RESULT_OK;
+                    result = SOPC_STATUS_OK;
                 }
             }
             else
             {
                 /* Raz leaved memory*/
-                memset(pConditionVariable, 0, sizeof(tConditionVariable));
-                result = E_COND_VAR_RESULT_ERROR_OUT_OF_MEM;
+                memset(pConditionVariable, 0, sizeof(Condition));
+                result = SOPC_STATUS_OUT_OF_MEMORY;
             }
         }
         else
         {
-            result = E_COND_VAR_RESULT_ERROR_ALREADY_INITIALIZED;
+            result = SOPC_STATUS_INVALID_STATE;
         }
     }
     return result;
 }
 
 // Destruction of condition variable if created via CreateConditionVariable.
-void P_SYNCHRO_DestroyConditionVariable(tConditionVariable** ppConditionVariable)
+void P_SYNCHRO_DestroyConditionVariable(Condition** ppConditionVariable)
 {
     if ((ppConditionVariable != NULL) && ((*ppConditionVariable) != NULL))
     {
         P_SYNCHRO_ClearConditionVariable(*ppConditionVariable);
-        memset(*ppConditionVariable, 0, sizeof(tConditionVariable));
+        memset(*ppConditionVariable, 0, sizeof(Condition));
         vPortFree(*ppConditionVariable);
         *ppConditionVariable = NULL;
         DEBUG_decrementCpt();
@@ -159,20 +158,20 @@ void P_SYNCHRO_DestroyConditionVariable(tConditionVariable** ppConditionVariable
 }
 
 // Creation workspace.
-tConditionVariable* P_SYNCHRO_CreateConditionVariable(uint16_t wMaxRDV)
+Condition* P_SYNCHRO_CreateConditionVariable(uint16_t wMaxRDV)
 {
-    tConditionVariable* pConditionVariable = NULL;
-    pConditionVariable = (tConditionVariable*) pvPortMalloc(sizeof(tConditionVariable));
+    Condition* pConditionVariable = NULL;
+    pConditionVariable = (Condition*) pvPortMalloc(sizeof(Condition));
     if (pConditionVariable != NULL)
     {
         DEBUG_incrementCpt();
         // Raz handle
-        memset(pConditionVariable, 0, sizeof(tConditionVariable));
-        if (P_SYNCHRO_InitConditionVariable(pConditionVariable, wMaxRDV) != E_COND_VAR_RESULT_OK)
+        memset(pConditionVariable, 0, sizeof(Condition));
+        if (P_SYNCHRO_InitConditionVariable(pConditionVariable, wMaxRDV) != SOPC_STATUS_OK)
         {
             P_SYNCHRO_ClearConditionVariable(pConditionVariable);
             // Raz handle
-            memset(pConditionVariable, 0, sizeof(tConditionVariable));
+            memset(pConditionVariable, 0, sizeof(Condition));
             vPortFree(pConditionVariable);
             pConditionVariable = NULL;
             DEBUG_decrementCpt();
@@ -181,9 +180,9 @@ tConditionVariable* P_SYNCHRO_CreateConditionVariable(uint16_t wMaxRDV)
     return pConditionVariable;
 }
 
-eConditionVariableResult P_SYNCHRO_SignalConditionVariable(tConditionVariable* pConditionVariable) // Signal to one
+SOPC_ReturnStatus P_SYNCHRO_SignalConditionVariable(Condition* pConditionVariable) // Signal to one
 {
-    eConditionVariableResult result = E_COND_VAR_RESULT_ERROR_NO_WAITERS;
+    SOPC_ReturnStatus result = SOPC_STATUS_INVALID_STATE;
     uint16_t wCurrentSlotId = USHRT_MAX;
     TaskHandle_t handle = NULL;
     uint32_t signal = 0;
@@ -205,28 +204,27 @@ eConditionVariableResult P_SYNCHRO_SignalConditionVariable(tConditionVariable* p
                 if (handle != NULL)
                 {
                     xTaskGenericNotify(handle, signal, eSetBits, NULL);
-                    result = E_COND_VAR_RESULT_OK;
+                    result = SOPC_STATUS_OK;
                 }
             }
             xSemaphoreGive(pConditionVariable->handleLockCounter); // End critical section
         }
         else
         {
-            result = E_COND_VAR_RESULT_ERROR_NOT_INITIALIZED;
+            result = SOPC_STATUS_INVALID_STATE;
         }
     }
     else
     {
-        result = E_COND_VAR_RESULT_ERROR_INCORRECT_PARAMETERS;
+        result = SOPC_STATUS_INVALID_PARAMETERS;
     }
     return result;
 }
 
 // Broadcast signal to all waiting task on signal passed in parameters
-eConditionVariableResult P_SYNCHRO_SignalAllConditionVariable(
-    tConditionVariable* pConditionVariable) // Signal to broadcaset
+SOPC_ReturnStatus P_SYNCHRO_SignalAllConditionVariable(Condition* pConditionVariable) // Signal to broadcaset
 {
-    eConditionVariableResult result = E_COND_VAR_RESULT_ERROR_NO_WAITERS;
+    SOPC_ReturnStatus result = SOPC_STATUS_INVALID_STATE;
     uint16_t wCurrentSlotId = UINT16_MAX;
     TaskHandle_t handle = NULL;
     uint32_t signal = 0;
@@ -250,7 +248,7 @@ eConditionVariableResult P_SYNCHRO_SignalAllConditionVariable(
                     if (handle != NULL)
                     {
                         xTaskGenericNotify(handle, signal, eSetBits, NULL);
-                        result = E_COND_VAR_RESULT_OK;
+                        result = SOPC_STATUS_OK;
                     }
                 } while (wCurrentSlotId != UINT16_MAX);
             }
@@ -258,30 +256,30 @@ eConditionVariableResult P_SYNCHRO_SignalAllConditionVariable(
         }
         else
         {
-            result = E_COND_VAR_RESULT_ERROR_NOT_INITIALIZED;
+            result = SOPC_STATUS_INVALID_STATE;
         }
     }
     else
     {
-        result = E_COND_VAR_RESULT_ERROR_INCORRECT_PARAMETERS;
+        result = SOPC_STATUS_INVALID_PARAMETERS;
     }
     return result;
 }
 
 // Used by P_SYNCHRO_UnlockAndWaitForConditionVariable
-static inline eConditionVariableResult _P_SYNCHRO_WaitSignal(uint32_t* pNotificationValue, // Notif received
-                                                             uint32_t uwSignal,            // Signal waited
-                                                             uint32_t uwClearSignal,       // Clear signal
-                                                             TickType_t xTimeToWait)       // TimeOut
+static inline SOPC_ReturnStatus _P_SYNCHRO_WaitSignal(uint32_t* pNotificationValue, // Notif received
+                                                      uint32_t uwSignal,            // Signal waited
+                                                      uint32_t uwClearSignal,       // Clear signal
+                                                      TickType_t xTimeToWait)       // TimeOut
 {
-    eConditionVariableResult result = E_COND_VAR_RESULT_OK;
+    SOPC_ReturnStatus result = SOPC_STATUS_OK;
     uint32_t notificationValue = 0;
     uint8_t bQuit = 0;
     TimeOut_t xTimeOut = {0, 0};
 
     if (NULL == pNotificationValue)
     {
-        result = E_COND_VAR_RESULT_ERROR_NOK;
+        result = SOPC_STATUS_NOK;
     }
     else
     {
@@ -294,7 +292,7 @@ static inline eConditionVariableResult _P_SYNCHRO_WaitSignal(uint32_t* pNotifica
                                           &notificationValue,       //
                                           xTimeToWait))             //
             {
-                result = E_COND_VAR_RESULT_ERROR_TIMEOUT;
+                result = SOPC_STATUS_TIMEOUT;
                 // TimeOut
                 bQuit = 1;
             }
@@ -312,7 +310,7 @@ static inline eConditionVariableResult _P_SYNCHRO_WaitSignal(uint32_t* pNotifica
                 if (uwClearSignal == (notificationValue & uwClearSignal))
                 {
                     // Clearing on going
-                    result = E_COND_VAR_RESULT_ERROR_NOT_INITIALIZED;
+                    result = SOPC_STATUS_INVALID_STATE;
                     bQuit = 1;
                 }
                 else if (uwSignal != (notificationValue & uwSignal))
@@ -321,7 +319,7 @@ static inline eConditionVariableResult _P_SYNCHRO_WaitSignal(uint32_t* pNotifica
                     if (pdTRUE == xTaskCheckForTimeOut(&xTimeOut, &xTimeToWait))
                     {
                         // Timeout occurred
-                        result = E_COND_VAR_RESULT_ERROR_TIMEOUT;
+                        result = SOPC_STATUS_TIMEOUT;
                         bQuit = 1;
                     }
                 }
@@ -340,15 +338,16 @@ static inline eConditionVariableResult _P_SYNCHRO_WaitSignal(uint32_t* pNotifica
 }
 
 // Unlock recursive mutex in parameters before wait a signal.
+// Mutex in parameter is optional. In this case, simple wait signal.
 // On timeout, task is removed from task to notify.
-eConditionVariableResult P_SYNCHRO_UnlockAndWaitForConditionVariable(
-    tConditionVariable* pConditionVariable, // Condition variable workspace
-    QueueHandle_t* pMutex,                  // Recursive mutex
-    uint32_t uwSignal,                      // Signal to wait
-    uint32_t uwClearSignal,                 // Clear signal
-    uint32_t uwTimeOutMs)                   // TimeOut
+SOPC_ReturnStatus P_SYNCHRO_UnlockAndWaitForConditionVariable(
+    Condition* pConditionVariable, // Condition variable workspace
+    QueueHandle_t* pMutex,         // Recursive mutex
+    uint32_t uwSignal,             // Signal to wait
+    uint32_t uwClearSignal,        // Clear signal
+    uint32_t uwTimeOutMs)          // TimeOut
 {
-    eConditionVariableResult result = E_COND_VAR_RESULT_ERROR_INCORRECT_PARAMETERS;
+    SOPC_ReturnStatus result = SOPC_STATUS_INVALID_PARAMETERS;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     TickType_t xTimeToWait = 0;
     TaskHandle_t handleTask = 0;
@@ -382,11 +381,11 @@ eConditionVariableResult P_SYNCHRO_UnlockAndWaitForConditionVariable(
 
                 if (SOPC_STATUS_OK != status)
                 {
-                    result = E_COND_VAR_RESULT_ERROR_MAX_WAITERS;
+                    result = SOPC_STATUS_INVALID_STATE;
                 }
                 else
                 {
-                    result = E_COND_VAR_RESULT_OK;
+                    result = SOPC_STATUS_OK;
                 }
             }
             xSemaphoreGive(pConditionVariable->handleLockCounter);
@@ -394,7 +393,7 @@ eConditionVariableResult P_SYNCHRO_UnlockAndWaitForConditionVariable(
         else
         {
             notificationValue = uwClearSignal;
-            result = E_COND_VAR_RESULT_ERROR_NOT_INITIALIZED;
+            result = SOPC_STATUS_INVALID_STATE;
         }
 
         // Give mutex from parameters
@@ -403,7 +402,7 @@ eConditionVariableResult P_SYNCHRO_UnlockAndWaitForConditionVariable(
             xQueueGiveMutexRecursive(*pMutex);
         }
 
-        if (E_COND_VAR_RESULT_OK == result)
+        if (SOPC_STATUS_OK == result)
         {
             // Wait signal or timeout
             // If signal or timeout, in both case, unstack signal
@@ -430,11 +429,11 @@ eConditionVariableResult P_SYNCHRO_UnlockAndWaitForConditionVariable(
                 }
                 xSemaphoreGive(pConditionVariable->handleLockCounter);
 
-                result = E_COND_VAR_RESULT_OK;
+                result = SOPC_STATUS_OK;
             }
             else
             {
-                result = E_COND_VAR_RESULT_ERROR_NOT_INITIALIZED;
+                result = SOPC_STATUS_INVALID_STATE;
             }
         }
 
@@ -446,7 +445,7 @@ eConditionVariableResult P_SYNCHRO_UnlockAndWaitForConditionVariable(
     }
     else
     {
-        result = E_COND_VAR_RESULT_ERROR_INCORRECT_PARAMETERS;
+        result = SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     return result;
@@ -455,17 +454,17 @@ eConditionVariableResult P_SYNCHRO_UnlockAndWaitForConditionVariable(
 /*****Public s2opc condition variable and mutex api*****/
 
 /*Initialize a condition variable*/
-tConditionVariable* Condition_Create(void)
+Condition* Condition_Create(void)
 {
-    tConditionVariable* ptr = NULL;
+    Condition* ptr = NULL;
     ptr = P_SYNCHRO_CreateConditionVariable(MAX_WAITERS);
-    return (tConditionVariable*) ptr;
+    return (Condition*) ptr;
 }
 
 /*Initialize a condition variable*/
-void Condition_Delete(tConditionVariable* cond)
+void Condition_Delete(Condition* cond)
 {
-    tConditionVariable* ptr = (tConditionVariable*) cond;
+    Condition* ptr = (Condition*) cond;
     if (ptr != NULL)
     {
         P_SYNCHRO_DestroyConditionVariable(&ptr);
@@ -473,57 +472,30 @@ void Condition_Delete(tConditionVariable* cond)
     }
 }
 
-SOPC_ReturnStatus Condition_Init(tConditionVariable* cond)
+SOPC_ReturnStatus Condition_Init(Condition* cond)
 {
     SOPC_ReturnStatus resSOPC = SOPC_STATUS_OK;
-    eConditionVariableResult resPSYNCH = E_COND_VAR_RESULT_OK;
-    tConditionVariable* ptr = (tConditionVariable*) cond;
+    Condition* ptr = (Condition*) cond;
 
     if (ptr != NULL)
     {
-        resPSYNCH = P_SYNCHRO_InitConditionVariable(ptr, MAX_P_UTILS_LIST);
-        switch (resPSYNCH)
-        {
-        case E_COND_VAR_RESULT_OK:
-            resSOPC = SOPC_STATUS_OK;
-            break;
-        case E_COND_VAR_RESULT_ERROR_ALREADY_INITIALIZED:
-            resSOPC = SOPC_STATUS_INVALID_STATE;
-            break;
-        default:
-            resSOPC = SOPC_STATUS_NOK;
-            break;
-        }
+        resSOPC = P_SYNCHRO_InitConditionVariable(ptr, MAX_P_UTILS_LIST);
     }
     else
     {
         resSOPC = SOPC_STATUS_INVALID_PARAMETERS;
     }
-
     return resSOPC;
 }
 
 /*Destroy a condition variable.*/
-SOPC_ReturnStatus Condition_Clear(tConditionVariable* cond)
+SOPC_ReturnStatus Condition_Clear(Condition* cond)
 {
     SOPC_ReturnStatus resSOPC = SOPC_STATUS_OK;
-    eConditionVariableResult resPSYNC = E_COND_VAR_RESULT_OK;
-    tConditionVariable* ptrCond = (tConditionVariable*) cond;
+    Condition* ptrCond = (Condition*) cond;
     if (ptrCond != NULL)
     {
-        resPSYNC = P_SYNCHRO_ClearConditionVariable(ptrCond);
-        switch (resPSYNC)
-        {
-        case E_COND_VAR_RESULT_OK:
-            resSOPC = SOPC_STATUS_OK;
-            break;
-        case E_COND_VAR_RESULT_ERROR_NOT_INITIALIZED:
-            resSOPC = SOPC_STATUS_INVALID_STATE;
-            break;
-        default:
-            resSOPC = SOPC_STATUS_NOK;
-            break;
-        }
+        resSOPC = P_SYNCHRO_ClearConditionVariable(ptrCond);
     }
     else
     {
@@ -532,26 +504,13 @@ SOPC_ReturnStatus Condition_Clear(tConditionVariable* cond)
     return resSOPC;
 }
 
-SOPC_ReturnStatus Condition_SignalAll(tConditionVariable* cond)
+SOPC_ReturnStatus Condition_SignalAll(Condition* cond)
 {
     SOPC_ReturnStatus resSOPC = SOPC_STATUS_OK;
-    eConditionVariableResult resPSYNC = E_COND_VAR_RESULT_OK;
-    tConditionVariable* ptrCond = (tConditionVariable*) cond;
+    Condition* ptrCond = (Condition*) cond;
     if (ptrCond != NULL)
     {
-        resPSYNC = P_SYNCHRO_SignalAllConditionVariable(ptrCond);
-        switch (resPSYNC)
-        {
-        case E_COND_VAR_RESULT_OK:
-            resSOPC = SOPC_STATUS_OK;
-            break;
-        case E_COND_VAR_RESULT_ERROR_NOT_INITIALIZED:
-            resSOPC = SOPC_STATUS_INVALID_STATE;
-            break;
-        default:
-            resSOPC = SOPC_STATUS_NOK;
-            break;
-        }
+        resSOPC = P_SYNCHRO_SignalAllConditionVariable(ptrCond);
     }
     else
     {
@@ -561,11 +520,10 @@ SOPC_ReturnStatus Condition_SignalAll(tConditionVariable* cond)
 }
 
 // Must be called between lock and unlock of Mutex used to wait on condition
-SOPC_ReturnStatus Mutex_UnlockAndTimedWaitCond(tConditionVariable* cond, Mutex* mut, uint32_t milliSecs)
+SOPC_ReturnStatus Mutex_UnlockAndTimedWaitCond(Condition* cond, Mutex* mut, uint32_t milliSecs)
 {
     SOPC_ReturnStatus resSOPC = SOPC_STATUS_INVALID_PARAMETERS;
-    eConditionVariableResult resPSYNC = E_COND_VAR_RESULT_OK;
-    tConditionVariable* ptrCond = (tConditionVariable*) cond;
+    Condition* ptrCond = (Condition*) cond;
     QueueHandle_t* pFreeRtosMutex = mut;
 
     if (ptrCond != NULL)
@@ -575,26 +533,11 @@ SOPC_ReturnStatus Mutex_UnlockAndTimedWaitCond(tConditionVariable* cond, Mutex* 
             pFreeRtosMutex = ((QueueHandle_t*) mut);
         }
 
-        resPSYNC = P_SYNCHRO_UnlockAndWaitForConditionVariable(ptrCond,             //
-                                                               pFreeRtosMutex,      //
-                                                               APP_DEFAULT_SIGNAL,  //
-                                                               APP_CLEARING_SIGNAL, //
-                                                               milliSecs);          //
-        switch (resPSYNC)
-        {
-        case E_COND_VAR_RESULT_OK:
-            resSOPC = SOPC_STATUS_OK;
-            break;
-        case E_COND_VAR_RESULT_ERROR_TIMEOUT:
-            resSOPC = SOPC_STATUS_TIMEOUT;
-            break;
-        case E_COND_VAR_RESULT_ERROR_NOT_INITIALIZED:
-            resSOPC = SOPC_STATUS_INVALID_STATE;
-            break;
-        default:
-            resSOPC = SOPC_STATUS_NOK;
-            break;
-        }
+        resSOPC = P_SYNCHRO_UnlockAndWaitForConditionVariable(ptrCond,             //
+                                                              pFreeRtosMutex,      //
+                                                              APP_DEFAULT_SIGNAL,  //
+                                                              APP_CLEARING_SIGNAL, //
+                                                              milliSecs);          //
     }
     else
     {
@@ -605,7 +548,7 @@ SOPC_ReturnStatus Mutex_UnlockAndTimedWaitCond(tConditionVariable* cond, Mutex* 
 }
 
 // Must be called between lock and unlock of Mutex used to wait on condition
-SOPC_ReturnStatus Mutex_UnlockAndWaitCond(tConditionVariable* cond, Mutex* mut)
+SOPC_ReturnStatus Mutex_UnlockAndWaitCond(Condition* cond, Mutex* mut)
 {
     SOPC_ReturnStatus resSOPC = SOPC_STATUS_INVALID_PARAMETERS;
 

@@ -20,6 +20,8 @@
 #ifndef P_SYNCHRONISATION_H
 #define P_SYNCHRONISATION_H
 
+#include "sopc_enums.h"
+
 #include "FreeRTOS.h"
 #include "queue.h"
 #include "task.h"
@@ -41,46 +43,27 @@ typedef enum T_CONDITION_VARIABLE_STATUS
     E_COND_VAR_STATUS_INITIALIZED      // Condition variable initialized
 } eConditionVariableStatus;
 
-typedef struct T_CONDITION_VARIABLE
+typedef struct tConditionVariable
 {
     eConditionVariableStatus status; // Status condition variable
     QueueHandle_t handleLockCounter; // Critical section token
     tUtilsList taskList;             // List of task with signal expected, calling unlock and wait
-} tConditionVariable;
+} Condition;
 
-typedef enum T_CONDITION_VARIABLE_RESULT
-{
-    E_COND_VAR_RESULT_OK,
-    E_COND_VAR_RESULT_ERROR_NOK,
-    E_COND_VAR_RESULT_ERROR_OUT_OF_MEM,
-    E_COND_VAR_RESULT_ERROR_TIMEOUT,
-    E_COND_VAR_RESULT_ERROR_INCORRECT_PARAMETERS,
-    E_COND_VAR_RESULT_ERROR_MAX_WAITERS,
-    E_COND_VAR_RESULT_ERROR_NO_WAITERS,
-    E_COND_VAR_RESULT_ERROR_NOT_INITIALIZED,
-    E_COND_VAR_RESULT_ERROR_ALREADY_INITIALIZED
-} eConditionVariableResult;
-
-tConditionVariable* P_SYNCHRO_CreateConditionVariable(uint16_t wMaxRDV);
-
-void P_SYNCHRO_DestroyConditionVariable(tConditionVariable** ppv);
-
-eConditionVariableResult P_SYNCHRO_InitConditionVariable(tConditionVariable* pv, uint16_t wMaxWaiters);
-
-eConditionVariableResult P_SYNCHRO_ClearConditionVariable(tConditionVariable* pv);
-
-eConditionVariableResult P_SYNCHRO_SignalAllConditionVariable(tConditionVariable* pv);
-eConditionVariableResult P_SYNCHRO_SignalConditionVariable(tConditionVariable* pv);
-
-eConditionVariableResult P_SYNCHRO_UnlockAndWaitForConditionVariable(tConditionVariable* pv,
-                                                                     QueueHandle_t* pMutex,
-                                                                     uint32_t uwSignal,
-                                                                     uint32_t uwClearSignal,
-                                                                     uint32_t uwTimeOutMs);
+Condition* P_SYNCHRO_CreateConditionVariable(uint16_t wMaxRDV);
+void P_SYNCHRO_DestroyConditionVariable(Condition** ppv);
+SOPC_ReturnStatus P_SYNCHRO_InitConditionVariable(Condition* pv, uint16_t wMaxWaiters);
+SOPC_ReturnStatus P_SYNCHRO_ClearConditionVariable(Condition* pv);
+SOPC_ReturnStatus P_SYNCHRO_SignalAllConditionVariable(Condition* pv);
+SOPC_ReturnStatus P_SYNCHRO_SignalConditionVariable(Condition* pv);
+SOPC_ReturnStatus P_SYNCHRO_UnlockAndWaitForConditionVariable(Condition* pv,
+                                                              QueueHandle_t* pMutex,
+                                                              uint32_t uwSignal,
+                                                              uint32_t uwClearSignal,
+                                                              uint32_t uwTimeOutMs);
 
 /*****Public s2opc condition variable and mutex api*****/
 
-typedef tConditionVariable Condition;
 typedef QueueHandle_t Mutex;
 
 #endif
