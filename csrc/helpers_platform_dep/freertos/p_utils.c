@@ -224,6 +224,7 @@ uint16_t P_UTILS_LIST_RemoveElt(tUtilsList* pv,
                                 uint16_t* pOutNextOQP)
 {
     uint16_t wCurrentSlotId = UINT16_MAX;
+    uint16_t wNextOQP = UINT16_MAX;
     if ((pv != NULL) && (pv->list != NULL) && (taskNotified != NULL) && (pv->wNbRegisteredTasks > 0))
     {
         // Search a task with handle and signal requested
@@ -262,7 +263,7 @@ uint16_t P_UTILS_LIST_RemoveElt(tUtilsList* pv,
 
             if (pOutNextOQP != NULL)
             {
-                *pOutNextOQP = pv->firstFreeNextOQP;
+                wNextOQP = pv->firstFreeNextOQP;
             }
 
             // RAZ current
@@ -274,6 +275,11 @@ uint16_t P_UTILS_LIST_RemoveElt(tUtilsList* pv,
             pv->list[wCurrentSlotId].prId = UINT16_MAX;
             pv->firstFree = wCurrentSlotId;
         }
+    }
+
+    if (pOutNextOQP != NULL)
+    {
+        *pOutNextOQP = wNextOQP;
     }
     return wCurrentSlotId;
 }
