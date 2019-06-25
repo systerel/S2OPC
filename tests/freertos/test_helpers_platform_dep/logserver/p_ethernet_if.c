@@ -22,33 +22,27 @@
 static QueueHandle_t gEthernetReady = NULL;
 
 static struct netif gnetif;
-static ip4_addr_t localAdress = { .addr = 0};
-static ip4_addr_t localNetmsk = { .addr = 0};
-static ip4_addr_t localGatewy = { .addr = 0};
+static ip4_addr_t localAdress = {.addr = 0};
+static ip4_addr_t localNetmsk = {.addr = 0};
+static ip4_addr_t localGatewy = {.addr = 0};
 
 static ethernetif_config_t fsl_enet_config = {
-                                                .phyAddress = BOARD_ENET0_PHY_ADDRESS,
-                                                .clockName = kCLOCK_CoreSysClk,
-                                                .macAddress = PHY_MAC_ADDRESS,
-                                            };
+    .phyAddress = BOARD_ENET0_PHY_ADDRESS,
+    .clockName = kCLOCK_CoreSysClk,
+    .macAddress = PHY_MAC_ADDRESS,
+};
 
-static void CB_P_ETHERNET_IF_Initialize(void*arg)
+static void CB_P_ETHERNET_IF_Initialize(void* arg)
 {
-    (void)arg;
+    (void) arg;
 
-    tcpip_init(NULL,NULL);
+    tcpip_init(NULL, NULL);
 
-    IP4_ADDR(&localAdress,IP_ADDRESS_0,IP_ADDRESS_1,IP_ADDRESS_2,IP_ADDRESS_3);
-    IP4_ADDR(&localNetmsk,IP_MASK_0,IP_MASK_1,IP_MASK_2,IP_MASK_3);
-    IP4_ADDR(&localGatewy,IP_GW_0,IP_GW_1,IP_GW_2,IP_GW_3);
+    IP4_ADDR(&localAdress, IP_ADDRESS_0, IP_ADDRESS_1, IP_ADDRESS_2, IP_ADDRESS_3);
+    IP4_ADDR(&localNetmsk, IP_MASK_0, IP_MASK_1, IP_MASK_2, IP_MASK_3);
+    IP4_ADDR(&localGatewy, IP_GW_0, IP_GW_1, IP_GW_2, IP_GW_3);
 
-    netif_add(      &gnetif,
-                    &localAdress,
-                    &localNetmsk,
-                    &localGatewy,
-                    &fsl_enet_config,
-                    &ethernetif0_init,
-                    &tcpip_input);
+    netif_add(&gnetif, &localAdress, &localNetmsk, &localGatewy, &fsl_enet_config, &ethernetif0_init, &tcpip_input);
 
     netif_set_default(&gnetif);
 
@@ -61,14 +55,14 @@ static void CB_P_ETHERNET_IF_Initialize(void*arg)
         netif_set_down(&gnetif);
     }
 
-    xSemaphoreGive(gEthernetReady) ;
+    xSemaphoreGive(gEthernetReady);
 
     vTaskDelete(NULL);
 }
 
 eEthernetIfResult P_ETHERNET_IF_IsReady(void)
 {
-    if(xSemaphoreTake(gEthernetReady,0)==pdPASS)
+    if (xSemaphoreTake(gEthernetReady, 0) == pdPASS)
     {
         xSemaphoreGive(gEthernetReady);
         return ETHERNET_IF_RESULT_OK;
@@ -76,12 +70,12 @@ eEthernetIfResult P_ETHERNET_IF_IsReady(void)
     return ETHERNET_IF_RESULT_NOK;
 }
 
-eEthernetIfResult P_ETHERNET_IF_GetIp(ip_addr_t*pAdressInfo)
+eEthernetIfResult P_ETHERNET_IF_GetIp(ip_addr_t* pAdressInfo)
 {
-    if(xSemaphoreTake(gEthernetReady,0)==pdPASS)
+    if (xSemaphoreTake(gEthernetReady, 0) == pdPASS)
     {
         xSemaphoreGive(gEthernetReady);
-        (void)memcpy(pAdressInfo,&gnetif.ip_addr,sizeof(ip_addr_t));
+        (void) memcpy(pAdressInfo, &gnetif.ip_addr, sizeof(ip_addr_t));
         return ETHERNET_IF_RESULT_OK;
     }
     return ETHERNET_IF_RESULT_NOK;
@@ -92,9 +86,10 @@ eEthernetIfResult P_ETHERNET_IF_Initialize(void)
     eEthernetIfResult result = ETHERNET_IF_RESULT_OK;
 
     gEthernetReady = xSemaphoreCreateBinary();
-    xSemaphoreTake(gEthernetReady,0);
+    xSemaphoreTake(gEthernetReady, 0);
 
-    if(sys_thread_new("lwip_init", CB_P_ETHERNET_IF_Initialize, NULL, DEFAULT_THREAD_STACKSIZE, DEFAULT_THREAD_PRIO) == NULL)
+    if (sys_thread_new("lwip_init", CB_P_ETHERNET_IF_Initialize, NULL, DEFAULT_THREAD_STACKSIZE, DEFAULT_THREAD_PRIO) ==
+        NULL)
     {
         result = ETHERNET_IF_RESULT_NOK;
     }

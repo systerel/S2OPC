@@ -32,121 +32,120 @@
 #include "task.h"
 #include "timers.h"
 
+#include "p_ethernet_if.h"
 #include "p_synchronisation.h" /* synchronisation include */
 #include "p_threads.h"
-#include "p_utils.h"           /* private list include */
-#include "p_ethernet_if.h"
+#include "p_utils.h" /* private list include */
 
-#include "lwip/opt.h"
-#include "lwipopts.h"
+#include "ethernetif.h"
+#include "lwip/dhcp.h"
 #include "lwip/mem.h"
 #include "lwip/memp.h"
-#include "netif/etharp.h"
-#include "lwip/dhcp.h"
 #include "lwip/netif.h"
+#include "lwip/opt.h"
 #include "lwip/timeouts.h"
-#include "ethernetif.h"
+#include "lwipopts.h"
+#include "netif/etharp.h"
 
 #include "lwip/init.h"
 #include "lwip/netif.h"
-#include "lwip/tcpip.h"
 #include "lwip/sockets.h"
+#include "lwip/tcpip.h"
 
-#define P_LOG_SRV_ONLINE_PERIOD     (100)
-#define P_LOG_SRV_BINDING_WAIT      (100)
-#define P_LOG_CLT_MONITOR_PERIOD    (100)
-#define P_LOG_CLT_TX_PERIOD         (100)
-#define P_LOG_CLT_RX_PERIOD         (100)
+#define P_LOG_SRV_ONLINE_PERIOD (100)
+#define P_LOG_SRV_BINDING_WAIT (100)
+#define P_LOG_CLT_MONITOR_PERIOD (100)
+#define P_LOG_CLT_TX_PERIOD (100)
+#define P_LOG_CLT_RX_PERIOD (100)
 
-#define P_LOG_SRV_CALLBACK_STACK        (512)
-#define P_LOG_CLT_MON_CALLBACK_STACK    (256)
-#define P_LOG_CLT_TX_CALLBACK_STACK     (256)
-#define P_LOG_CLT_RX_CALLBACK_STACK     (128)
+#define P_LOG_SRV_CALLBACK_STACK (512)
+#define P_LOG_CLT_MON_CALLBACK_STACK (256)
+#define P_LOG_CLT_TX_CALLBACK_STACK (256)
+#define P_LOG_CLT_RX_CALLBACK_STACK (128)
 
-#define P_LOG_FIFO_DATA_SIZE         (1024)
-#define P_LOG_FIFO_ELT_MAX_SIZE      (1024)
-#define P_LOG_FIFO_MAX_NB_ELT        (256)
-
-
+#define P_LOG_FIFO_DATA_SIZE (1024)
+#define P_LOG_FIFO_ELT_MAX_SIZE (1024)
+#define P_LOG_FIFO_MAX_NB_ELT (256)
 
 typedef enum E_LOG_SRV_RESULT
 {
     E_LOG_SRV_RESULT_OK,
     E_LOG_SRV_RESULT_NOK
-}eLogSrvResult;
+} eLogSrvResult;
 
 typedef enum E_RESULT_ENCODER
 {
     E_ENCODER_RESULT_OK,
-    E_ENCODER_RESULT_ERROR_NOK //Disconnect client
-}eResultEncoder;
+    E_ENCODER_RESULT_ERROR_NOK // Disconnect client
+} eResultEncoder;
 
 typedef enum E_RESULT_DECODER
 {
     E_DECODER_RESULT_OK,
-    E_DECODER_RESULT_ERROR_NOK //Disconnect client
-}eResultDecoder;
+    E_DECODER_RESULT_ERROR_NOK // Disconnect client
+} eResultDecoder;
 
 typedef struct T_LOG_SERVER_WORKSPACE tLogSrvWks;
 typedef struct T_LOG_CLIENT_WORKSPACE tLogClientWks;
 
-typedef eResultDecoder (*ptrFct_AnalyzerCallback)(          void*pAnalyzerContext,
-                                                            tLogClientWks*pClt,
-                                                            uint8_t*pBufferInOut,
-                                                            uint16_t *dataSize,
-                                                            uint16_t maxSizeBufferOut);
+typedef eResultDecoder (*ptrFct_AnalyzerCallback)(void* pAnalyzerContext,     //
+                                                  tLogClientWks* pClt,        //
+                                                  uint8_t* pBufferInOut,      //
+                                                  uint16_t* dataSize,         //
+                                                  uint16_t maxSizeBufferOut); //
 
-typedef eResultDecoder (*ptrFct_AnalyzerPeriodicCallback)(  void*pAnalyzerContext,
-                                                            tLogClientWks*pClt,
-                                                            uint8_t*pBufferOut,
-                                                            uint16_t *dataSize,
-                                                            uint16_t maxSizeBufferOut);
+typedef eResultDecoder (*ptrFct_AnalyzerPeriodic)(void* pAnalyzerContext,     //
+                                                  tLogClientWks* pClt,        //
+                                                  uint8_t* pBufferOut,        //
+                                                  uint16_t* dataSize,         //
+                                                  uint16_t maxSizeBufferOut); //
 
-typedef void (*ptrFct_AnalyzerContextCreation)(             void**pAnalyzerContext,
-                                                            tLogClientWks*pClt);
+typedef void (*ptrFct_AnalyzerContextCreation)(void** pAnalyzerContext, //
+                                               tLogClientWks* pClt);    //
 
-typedef void (*ptrFct_AnalyzerContextDestruction)(          void**pAnalyzerContext,
-                                                            tLogClientWks*pClt);
+typedef void (*ptrFct_AnalyzerContextDestruction)(void** pAnalyzerContext, //
+                                                  tLogClientWks* pClt);    //
 
-typedef void (*ptrFct_EncoderContextCreation)(              void**ppEncoderContext);
+typedef void (*ptrFct_EncoderContextCreation)(void** ppEncoderContext);
 
-typedef void (*ptrFct_EncoderContextDestruction)(           void**ppEncoderContext);
+typedef void (*ptrFct_EncoderContextDestruction)(void** ppEncoderContext);
 
-typedef eResultEncoder (*ptrFct_EncoderCallback)(           void*pEncoderContext,
-                                                            uint8_t *pBufferInOut,
-                                                            uint16_t* pNbBytesToEncode,
-                                                            uint16_t maxSizeBufferOut);
+typedef eResultEncoder (*ptrFct_EncoderCallback)(void* pEncoderContext,      //
+                                                 uint8_t* pBufferInOut,      //
+                                                 uint16_t* pNbBytesToEncode, //
+                                                 uint16_t maxSizeBufferOut); //
 
-typedef eResultEncoder (*ptrFct_EncoderPeriodicCallback)(   void*pEncoderContext);
+typedef eResultEncoder (*ptrFct_EncoderPeriodicCallback)(void* pEncoderContext);
 
+typedef uint16_t (*ptrFct_EncoderTransmitHelloCallback)(uint8_t* pBufferInOut,      //
+                                                        uint16_t nbBytesToEncode,   //
+                                                        uint16_t maxSizeBufferOut); //
 
-typedef uint16_t (*ptrFct_EncoderTransmitHelloCallback)(    uint8_t *pBufferInOut,
-                                                            uint16_t nbBytesToEncode,
-                                                            uint16_t maxSizeBufferOut);
+tLogSrvWks* P_LOG_SRV_CreateAndStart(uint16_t port,                                                          //
+                                     uint16_t portHello,                                                     //
+                                     int16_t maxClient,                                                      //
+                                     uint32_t timeoutS,                                                      //
+                                     uint32_t periodeHelloS,                                                 //
+                                     ptrFct_AnalyzerContextCreation cbAnalyzerContextCreationCallback,       //
+                                     ptrFct_AnalyzerContextDestruction cbAnalyzerContextDestructionCallback, //
+                                     ptrFct_AnalyzerCallback cbAnalyzerCallback,                             //
+                                     ptrFct_AnalyzerPeriodic cbAnalyzerTimeOutCallback,                      //
+                                     ptrFct_EncoderContextCreation cbSenderContextCreation,                  //
+                                     ptrFct_EncoderContextDestruction cbSenderContextDestruction,            //
+                                     ptrFct_EncoderCallback cbSenderCallback,                                //
+                                     ptrFct_EncoderPeriodicCallback cbSenderTimeoutCallback,                 //
+                                     ptrFct_EncoderTransmitHelloCallback cbSenderHelloCallback);             //
 
+void P_LOG_SRV_StopAndDestroy(tLogSrvWks** p);
 
+eLogSrvResult P_LOG_SRV_SendToAllClient(tLogSrvWks* p,          //
+                                        const uint8_t* pBuffer, //
+                                        uint16_t length,        //
+                                        uint16_t* sentLength);  //
 
-tLogSrvWks* P_LOG_SRV_CreateAndStart(uint16_t port,
-                                     uint16_t portHello,
-                                     int16_t maxClient,
-                                     uint32_t timeoutS,
-                                     uint32_t periodeHelloS,
-                                     ptrFct_AnalyzerContextCreation cbAnalyzerContextCreationCallback,
-                                     ptrFct_AnalyzerContextDestruction cbAnalyzerContextDestructionCallback,
-                                     ptrFct_AnalyzerCallback cbAnalyzerCallback,
-                                     ptrFct_AnalyzerPeriodicCallback cbAnalyzerTimeOutCallback,
-
-                                     ptrFct_EncoderContextCreation cbSenderContextCreation,
-                                     ptrFct_EncoderContextDestruction cbSenderContextDestruction,
-                                     ptrFct_EncoderCallback cbSenderCallback,
-                                     ptrFct_EncoderPeriodicCallback cbSenderTimeoutCallback,
-
-                                     ptrFct_EncoderTransmitHelloCallback cbSenderHelloCallback);
-
-void P_LOG_SRV_StopAndDestroy(tLogSrvWks**p);
-
-eLogSrvResult P_LOG_SRV_SendToAllClient(tLogSrvWks*p, const uint8_t*pBuffer, uint16_t length, uint16_t *sentLength);
-eLogSrvResult P_LOG_CLIENT_SendResponse(tLogClientWks*pClt, const uint8_t*pBuffer, uint16_t length, uint16_t*pNbBytesSent);
-
+eLogSrvResult P_LOG_CLIENT_SendResponse(tLogClientWks* pClt,     //
+                                        const uint8_t* pBuffer,  //
+                                        uint16_t length,         //
+                                        uint16_t* pNbBytesSent); //
 
 #endif /* FREERTOS_P_LOGSRV_H_ */
