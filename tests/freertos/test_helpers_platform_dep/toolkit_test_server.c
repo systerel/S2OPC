@@ -38,6 +38,10 @@
 #include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config.h"
 
+#include "sopc_mutexes.h"
+#include "sopc_threads.h"
+#include "p_ethernet_if.h"
+
 #include "embedded/loader.h"
 #include "runtime_variables.h"
 
@@ -52,7 +56,7 @@
 static const char* app_namespace_uris[] = {(const char*) PRODUCT_URI, NULL};
 
 static int32_t endpointClosed = 0;
-static bool secuActive = true;
+static bool secuActive = false;
 
 volatile sig_atomic_t stopServer = 0;
 
@@ -267,8 +271,16 @@ static const SOPC_UserAuthentication_Functions authentication_uactt_functions = 
     .pFuncFree = (SOPC_UserAuthentication_Free_Func) free,
     .pFuncValidateUserIdentity = authentication_uactt};
 
-int main(int argc, char* argv[])
+void* cbToolkit_test_server(void*arg)
 {
+    int argc = 0 ;
+    char*argv[1] = {NULL};
+    Condition*pv = (Condition*)arg;
+
+    while(P_ETHERNET_IF_IsReady() != 0);
+
+    Mutex_UnlockAndWaitCond(pv, NULL);
+
     // Install signal handler to close the server gracefully when server needs to stop
     signal(SIGINT, Test_StopSignal);
     signal(SIGTERM, Test_StopSignal);
@@ -584,5 +596,5 @@ int main(int argc, char* argv[])
     SOPC_UserAuthorization_FreeManager(&authorizationManager);
     free(logDirPath);
 
-    return (status == SOPC_STATUS_OK) ? 0 : 1;
+    return (void*)((status == SOPC_STATUS_OK) ? 0 : 1);
 }

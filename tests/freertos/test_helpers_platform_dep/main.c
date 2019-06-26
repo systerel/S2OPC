@@ -72,7 +72,7 @@ uint16_t cbHelloCallback(uint8_t* pBufferInOut, uint16_t nbBytesToEncode, uint16
 
 void cbOneConnexion(void** pAnalyzerContext, tLogClientWks* pClt)
 {
-    Condition_SignalAll(handleSigConnexion);
+    Condition_SignalAll(&handleSigConnexion);
 }
 
 eResultDecoder cbEchoCallback(void* pAnalyzerContext,
@@ -127,12 +127,12 @@ int main(void)
     gLogServer = P_LOG_SRV_CreateAndStart(60, 4023, 8, 0, 5, cbOneConnexion, NULL, cbEchoCallback, NULL, NULL, NULL,
                                           NULL, NULL, cbHelloCallback);
 
-    handleCondition = Condition_Create();
-    handleSigConnexion = Condition_Create();
+    Condition_Init(&handleCondition);
+    Condition_Init(&handleSigConnexion);
 
     // FREE_RTOS_TEST_API_S2OPC_THREAD(handleCondition);
 
-    FREE_RTOS_TEST_S2OPC_SERVER(handleSigConnexion);
+    FREE_RTOS_TEST_S2OPC_SERVER(&handleSigConnexion);
 
     vTaskStartScheduler();
 
