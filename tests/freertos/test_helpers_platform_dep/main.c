@@ -49,9 +49,38 @@
 //#include "p_ethernet_if.h"
 //#include "p_logsrv.h"
 
-Condition* handleCondition;
+Condition* handleCondition = NULL;
+Condition* handleSigConnexion = NULL;
 tUtilsList list;
-// tLogSrvWks* pLogSrv;
+
+extern tLogSrvWks* gLogServer;
+
+uint16_t cbHelloCallback(uint8_t* pBufferInOut, uint16_t nbBytesToEncode, uint16_t maxSizeBufferOut)
+{
+    uint16_t size;
+
+    snprintf((void*) pBufferInOut + nbBytesToEncode, maxSizeBufferOut - (2 * nbBytesToEncode + 1), "%s",
+             "Hello, log server is listening on the following site : ");
+    size = strlen((void*) pBufferInOut + nbBytesToEncode);
+    memmove((void*) pBufferInOut + nbBytesToEncode + size, (void*) pBufferInOut, nbBytesToEncode);
+    memmove((void*) pBufferInOut, (void*) pBufferInOut + nbBytesToEncode, nbBytesToEncode + size);
+    return nbBytesToEncode + size;
+}
+
+void cbOneConnexion(void** pAnalyzerContext, tLogClientWks* pClt)
+{
+    Condition_SignalAll(handleSigConnexion);
+}
+
+eResultDecoder cbEchoCallback(void* pAnalyzerContext,
+                              tLogClientWks* pClt,
+                              uint8_t* pBufferInOut,
+                              uint16_t* dataSize,
+                              uint16_t maxSizeBufferOut)
+{
+    // Don't modify dataSize output, echo simulation
+    return 0;
+}
 
 int main(void)
 {
@@ -88,11 +117,17 @@ int main(void)
 
     // P_UTILS_LIST_DeInit(&list);
 
-    // pLogSrv = P_LOG_SRV_CreateAndStart(60,2);
+    // int fd = fopen("path","w");
+
+    gLogServer = P_LOG_SRV_CreateAndStart(60, 4023, 8, 0, 5, cbOneConnexion, NULL, cbEchoCallback, NULL, NULL, NULL,
+                                          NULL, NULL, cbHelloCallback);
 
     handleCondition = Condition_Create();
+    handleSigConnexion = Condition_Create();
 
-    FREE_RTOS_TEST_API_S2OPC_THREAD(handleCondition);
+    // FREE_RTOS_TEST_API_S2OPC_THREAD(handleCondition);
+
+    FREE_RTOS_TEST_S2OPC_SERVER(handleSigConnexion);
 
     vTaskStartScheduler();
 
