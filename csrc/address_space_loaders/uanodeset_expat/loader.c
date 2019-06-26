@@ -28,6 +28,7 @@
 #include <expat.h>
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
+#include "sopc_array.h"
 #include "sopc_dict.h"
 #include "sopc_encoder.h"
 #include "sopc_hash.h"
@@ -1355,7 +1356,7 @@ static bool set_element_value_scalar(struct parse_context_t* ctx)
 {
     assert(ctx->current_array_type == SOPC_VariantArrayType_SingleValue);
 
-    SOPC_Variant* var = SOPC_AddressSpace_Item_Get_Value(&ctx->item);
+    SOPC_Variant* var = SOPC_AddressSpace_Get_Value(ctx->space, &ctx->item);
     bool ok = set_variant_value(var, ctx->current_value_type, ctx_char_data_stripped(ctx));
     ctx_char_data_reset(ctx);
 
@@ -1436,7 +1437,7 @@ static bool set_element_value_array(struct parse_context_t* ctx)
     assert(ctx->current_array_type == SOPC_VariantArrayType_Array);
     assert(ctx->list_items != NULL);
 
-    SOPC_Variant* var = SOPC_AddressSpace_Item_Get_Value(&ctx->item);
+    SOPC_Variant* var = SOPC_AddressSpace_Get_Value(ctx->space, &ctx->item);
 
     bool res = SOPC_Array_Of_Variant_Into_Variant_Array(ctx->list_items, ctx->current_value_type, var);
 

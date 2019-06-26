@@ -74,7 +74,7 @@ void address_space_bs__readall_AddressSpace_Node(const constants__t_NodeId_i add
     if (NULL == pnid_req)
         return;
 
-    val = SOPC_Dict_Get(SOPC_AddressSpace_Get_Items(address_space_bs__nodes), pnid_req, &val_found);
+    val = SOPC_AddressSpace_Get_Item(address_space_bs__nodes, pnid_req, &val_found);
 
     if (val_found)
     {

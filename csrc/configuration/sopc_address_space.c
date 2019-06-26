@@ -23,6 +23,7 @@
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
 #include "sopc_address_space.h"
+#include "sopc_dict.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_time.h"
 #include "sopc_types.h"
@@ -36,6 +37,20 @@
     case OpcUa_NodeClass_##val:                         \
         OpcUa_##val##Node_Clear(&item->data.field);     \
         break;
+
+struct _SOPC_AddressSpace
+{
+    /* Maps NodeId to SOPC_AddressSpace_Item */
+    SOPC_Dict* items;
+    /* Set to true if the NodeId and SOPC_AddressSpace_Item are const */
+    bool readOnlyItems;
+    /* Defined only if readOnlyNodes is true:
+     * array of modifiable Variants,
+     * indexes are defined as UInt32 values in SOPC_AddressSpace_Item variants for all Variable nodes.
+     * Note: Variable of VariableType nodes are read-only values and hence not represented here. */
+    uint32_t nb_variables;
+    SOPC_Variant* variables;
+};
 
 void SOPC_AddressSpace_Item_Initialize(SOPC_AddressSpace_Item* item, OpcUa_NodeClass node_class)
 {
@@ -101,7 +116,8 @@ ELEMENT_ATTRIBUTE_GETTER(OpcUa_ReferenceNode*, References)
 ELEMENT_ATTRIBUTE_GETTER(uint32_t, WriteMask)
 ELEMENT_ATTRIBUTE_GETTER(uint32_t, UserWriteMask)
 
-SOPC_Variant* SOPC_AddressSpace_Item_Get_Value(SOPC_AddressSpace_Item* item)
+// Important note: only for internal use for non const address space
+static SOPC_Variant* SOPC_AddressSpace_Item_Get_Value(SOPC_AddressSpace_Item* item)
 {
     switch (item->node_class)
     {
@@ -296,7 +312,7 @@ static void free_description_item(void* data)
 
 SOPC_AddressSpace* SOPC_AddressSpace_Create(bool free_items)
 {
-    SOPC_AddressSpace* result = calloc(1, sizeof(SOPC_AddressSpace));
+    SOPC_AddressSpace* result = SOPC_Calloc(1, sizeof(SOPC_AddressSpace));
     if (NULL == result)
     {
         return NULL;
@@ -313,7 +329,7 @@ SOPC_AddressSpace* SOPC_AddressSpace_Create(bool free_items)
 
 SOPC_AddressSpace* SOPC_AddressSpace_CreateReadOnlyItems(uint32_t nb_variables, SOPC_Variant* variables)
 {
-    SOPC_AddressSpace* result = calloc(1, sizeof(SOPC_AddressSpace));
+    SOPC_AddressSpace* result = SOPC_Calloc(1, sizeof(SOPC_AddressSpace));
     if (NULL == result)
     {
         return NULL;
@@ -332,30 +348,24 @@ SOPC_AddressSpace* SOPC_AddressSpace_CreateReadOnlyItems(uint32_t nb_variables, 
     return result;
 }
 
+bool SOPC_AddressSpace_AreReadOnlyItems(const SOPC_AddressSpace* space)
+{
+    return space->readOnlyItems;
+}
+
 SOPC_ReturnStatus SOPC_AddressSpace_Append(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item)
 {
     SOPC_NodeId* id = SOPC_AddressSpace_Item_Get_NodeId(item);
 
-    if (!space->readOnlyItems)
+    if (OpcUa_NodeClass_Variable == item->node_class)
     {
-        if (OpcUa_NodeClass_Variable == item->node_class)
+        /*Note: set an initial timestamp to could return non null timestamps */
+        if ((item->value_source_ts.timestamp == 0 && item->value_source_ts.picoSeconds == 0))
         {
-            /*Note: set an initial timestamp to could return non null timestamps */
-            if ((item->value_source_ts.timestamp == 0 && item->value_source_ts.picoSeconds == 0))
+            if (item->value_source_ts.timestamp == 0 && item->value_source_ts.picoSeconds == 0)
             {
-                if (item->value_source_ts.timestamp == 0 && item->value_source_ts.picoSeconds == 0)
-                {
-                    item->value_source_ts.timestamp = SOPC_Time_GetCurrentTimeUTC();
-                }
+                item->value_source_ts.timestamp = SOPC_Time_GetCurrentTimeUTC();
             }
-        }
-    }
-    else
-    {
-        if (OpcUa_NodeClass_Variable == item->node_class)
-        {
-            assert(SOPC_VariantArrayType_SingleValue == item->data.variable.Value.ArrayType);
-            assert(SOPC_UInt32_Id == item->data.variable.Value.BuiltInTypeId);
         }
     }
 
@@ -375,7 +385,12 @@ void SOPC_AddressSpace_Delete(SOPC_AddressSpace* space)
     free(space);
 }
 
-SOPC_Dict* SOPC_AddressSpace_Get_Items(SOPC_AddressSpace* space)
+SOPC_AddressSpace_Item* SOPC_AddressSpace_Get_Item(const SOPC_AddressSpace* space, const SOPC_NodeId* key, bool* found)
 {
-    return space->items;
+    return SOPC_Dict_Get(space->items, key, found);
+}
+
+void SOPC_AddressSpace_ForEach(SOPC_AddressSpace* space, SOPC_AddressSpace_ForEach_Fct func, void* user_data)
+{
+    SOPC_Dict_ForEach(space->items, func, user_data);
 }

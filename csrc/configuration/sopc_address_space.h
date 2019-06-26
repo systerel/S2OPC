@@ -22,8 +22,6 @@
 
 #include <stdint.h>
 
-#include "sopc_array.h"
-#include "sopc_dict.h"
 #include "sopc_types.h"
 
 #define FOR_EACH_ELEMENT_TYPE(x, extra)                                                                               \
@@ -58,19 +56,29 @@ typedef struct
 } SOPC_AddressSpace_Item;
 
 /* Address space structure */
-typedef struct
-{
-    /* Maps NodeId to SOPC_AddressSpace_Item */
-    SOPC_Dict* items;
-    /* Set to true if the NodeId and SOPC_AddressSpace_Item are const */
-    bool readOnlyItems;
-    /* Defined only if readOnlyNodes is true:
-     * array of modifiable Variants,
-     * indexes are defined as UInt32 values in SOPC_AddressSpace_Item variants for all Variable nodes.
-     * Note: Variable of VariableType nodes are read-only values and hence not represented here. */
-    uint32_t nb_variables;
-    SOPC_Variant* variables;
-} SOPC_AddressSpace;
+typedef struct _SOPC_AddressSpace SOPC_AddressSpace;
+
+SOPC_AddressSpace* SOPC_AddressSpace_Create(bool free_items);
+SOPC_AddressSpace* SOPC_AddressSpace_CreateReadOnlyItems(uint32_t nb_variables, SOPC_Variant* variables);
+bool SOPC_AddressSpace_AreReadOnlyItems(const SOPC_AddressSpace* space);
+SOPC_ReturnStatus SOPC_AddressSpace_Append(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item);
+void SOPC_AddressSpace_Delete(SOPC_AddressSpace* space);
+
+SOPC_AddressSpace_Item* SOPC_AddressSpace_Get_Item(const SOPC_AddressSpace* space, const SOPC_NodeId* key, bool* found);
+
+/**
+ * \brief Type of callback functions for \ref SOPC_AddressSpace_ForEach. Both the key and
+ * value belong to the address space and shall not be modified. The value of
+ * \p user_data is set when calling \ref SOPC_AddressSpace_ForEach.
+ * Note: \p key actual type is const SOPC_NodeId* but shall remain void in declaration for generic data structure usage
+ * Note: \p value actual type is const SOPC_AddressSpace_Item* but shall remain void in declaration for generic data
+ * structure usage
+ */
+typedef void (*SOPC_AddressSpace_ForEach_Fct)(const void* key, const void* value, void* user_data);
+
+void SOPC_AddressSpace_ForEach(SOPC_AddressSpace* space, SOPC_AddressSpace_ForEach_Fct func, void* user_data);
+
+/* Address space item structure */
 
 void SOPC_AddressSpace_Item_Initialize(SOPC_AddressSpace_Item* item, OpcUa_NodeClass element_type);
 
@@ -85,8 +93,6 @@ uint32_t* SOPC_AddressSpace_Item_Get_UserWriteMask(SOPC_AddressSpace_Item* item)
 int32_t* SOPC_AddressSpace_Item_Get_NoOfReferences(SOPC_AddressSpace_Item* item);
 OpcUa_ReferenceNode** SOPC_AddressSpace_Item_Get_References(SOPC_AddressSpace_Item* item);
 /* Variable and VariableType common attributes */
-SOPC_Variant* SOPC_AddressSpace_Item_Get_Value(SOPC_AddressSpace_Item* item);
-/* Same with management of read-only items */
 SOPC_Variant* SOPC_AddressSpace_Get_Value(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item);
 
 SOPC_Byte SOPC_AddressSpace_Item_Get_AccessLevel(SOPC_AddressSpace_Item* item);
@@ -104,12 +110,5 @@ SOPC_Value_Timestamp SOPC_AddressSpace_Get_SourceTs(SOPC_AddressSpace* space, SO
 void SOPC_AddressSpace_Set_SourceTs(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item, SOPC_Value_Timestamp ts);
 
 void SOPC_AddressSpace_Item_Clear(SOPC_AddressSpace_Item* item);
-
-SOPC_AddressSpace* SOPC_AddressSpace_Create(bool free_items);
-SOPC_AddressSpace* SOPC_AddressSpace_CreateReadOnlyItems(uint32_t nb_variables, SOPC_Variant* variables);
-SOPC_ReturnStatus SOPC_AddressSpace_Append(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item);
-void SOPC_AddressSpace_Delete(SOPC_AddressSpace* space);
-
-SOPC_Dict* SOPC_AddressSpace_Get_Items(SOPC_AddressSpace* space);
 
 #endif /* SOPC_ADDRESS_SPACE_H_ */
