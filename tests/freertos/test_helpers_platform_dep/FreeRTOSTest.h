@@ -21,5 +21,6 @@
 #define FREE_RTOS_TEST_H
 
 void FREE_RTOS_TEST_API_S2OPC_THREAD(void* ptr);
+void FREE_RTOS_TEST_S2OPC_SERVER(void* ptr);
 
 #endif
