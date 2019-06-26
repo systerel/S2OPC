@@ -37,6 +37,8 @@
 #include "sopc_mutexes.h"
 #include "sopc_threads.h"
 #include "sopc_time.h"
+#include "sopc_builtintypes.h"
+#include "sopc_types.h"
 
 static char sBuffer[256];
 static QueueHandle_t h;
@@ -178,7 +180,12 @@ static void* cbS2OPC_Thread_pX(void* ptr)
 static void* cbS2OPC_Thread_p2(void* ptr)
 {
     unsigned short int cpt = 0;
-    Condition* pv = (Condition*) ptr;
+
+    int fd;
+    //static unsigned short int cptKillLogSrvTest = 0;
+    uint32_t sizeofSOPCNodeID = sizeof(SOPC_NodeId);
+    uint32_t sizeofOpcUa_ReferenceNode = sizeof(OpcUa_ReferenceNode);
+
     SOPC_ReturnStatus status = SOPC_Thread_Create(&p3, cbS2OPC_Thread_p3, ptr);
 
     Mutex_Lock(&m);
@@ -208,8 +215,16 @@ static void* cbS2OPC_Thread_p2(void* ptr)
     for (cpt = 0; cpt < 100; cpt++)
     {
         Mutex_Lock(&m);
-        sprintf(sBuffer, "$$$$ %2X -  Sub task 2 2nd working : current time = %lu\r\n", xTaskGetCurrentTaskHandle(),
-                xTaskGetTickCount());
+
+        sprintf(sBuffer, "$$$$ %2X -  Sub task 2 2nd working : current time = %lu\r\n",
+                (unsigned int)xTaskGetCurrentTaskHandle(),  (uint32_t)xTaskGetTickCount());
+        //P_LOG_SRV_Print(pLogSrv,sBuffer,strlen(sBuffer));
+       // printf(sBuffer,strlen(sBuffer));
+        fd = fopen("path","w");
+        fprintf(fd,"%s",sBuffer);
+        sprintf(sBuffer,"Sizeof SOPC_NodeId = %lu | Sizeof OpcUa_ReferenceNode = %lu\r\n",sizeofSOPCNodeID,sizeofOpcUa_ReferenceNode);
+        fprintf(fd,"%s",sBuffer);
+        fclose(fd);
         PRINTF(sBuffer);
         Mutex_Unlock(&m);
         vTaskDelay(100);
