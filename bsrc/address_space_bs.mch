@@ -530,6 +530,7 @@ OPERATIONS
         p_user : t_user     &
         node  : t_Node_i    &
         node  : t_Node      &
+        a_NodeClass(node) = e_ncl_Variable &
         node : dom(a_Value) &
         node : dom(a_Value_StatusCode) &
         variant : t_Variant_i &
