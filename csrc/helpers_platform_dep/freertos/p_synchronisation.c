@@ -397,7 +397,7 @@ SOPC_ReturnStatus P_SYNCHRO_UnlockAndWaitForConditionVariable(
         }
 
         // Give mutex from parameters
-        if ((NULL != pMutex)&& (NULL != (*pMutex)))
+        if ((NULL != pMutex) && (NULL != (*pMutex)))
         {
             xQueueGiveMutexRecursive(*pMutex);
         }
@@ -438,7 +438,7 @@ SOPC_ReturnStatus P_SYNCHRO_UnlockAndWaitForConditionVariable(
         }
 
         // Take mutex in parameter if exists
-        if ((NULL != pMutex)&& (NULL != (*pMutex)))
+        if ((NULL != pMutex) && (NULL != (*pMutex)))
         {
             xQueueTakeMutexRecursive(*pMutex, portMAX_DELAY);
         }
@@ -452,15 +452,32 @@ SOPC_ReturnStatus P_SYNCHRO_UnlockAndWaitForConditionVariable(
 }
 
 /*****Public s2opc condition variable and mutex api*****/
-
+/*
+Condition* Condition_Create(void)
+{
+    Condition* ptr = NULL;
+    ptr = P_SYNCHRO_CreateConditionVariable(MAX_WAITERS);
+    return (Condition*) ptr;
+}
+void Condition_Delete(Condition* cond)
+{
+    Condition* ptr = (Condition*) cond;
+    if (ptr != NULL)
+    {
+        P_SYNCHRO_DestroyConditionVariable(&ptr);
+        ptr = NULL;
+    }
+}
+*/
 SOPC_ReturnStatus Condition_Init(Condition* cond)
 {
     SOPC_ReturnStatus resSOPC = SOPC_STATUS_OK;
-    Condition* ptr = (Condition*) cond;
+    Condition* ptrCond = (Condition*) cond;
 
-    if (ptr != NULL)
+    if (ptrCond != NULL)
     {
-        resSOPC = P_SYNCHRO_InitConditionVariable(ptr, MAX_P_UTILS_LIST);
+        memset(ptrCond, 0, sizeof(Condition));
+        resSOPC = P_SYNCHRO_InitConditionVariable(ptrCond, MAX_WAITERS);
     }
     else
     {
@@ -477,6 +494,7 @@ SOPC_ReturnStatus Condition_Clear(Condition* cond)
     if (ptrCond != NULL)
     {
         resSOPC = P_SYNCHRO_ClearConditionVariable(ptrCond);
+        memset(ptrCond, 0, sizeof(Condition));
     }
     else
     {
