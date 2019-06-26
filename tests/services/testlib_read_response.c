@@ -45,7 +45,7 @@ static SOPC_Variant* get_attribute_variant(SOPC_AddressSpace_Item* item, uint32_
     case constants__e_aid_NodeClass:
         return util_variant__new_Variant_from_NodeClass(item->node_class);
     case constants__e_aid_Value:
-        return util_variant__new_Variant_from_Variant(SOPC_AddressSpace_Item_Get_Value(item));
+        return util_variant__new_Variant_from_Variant(SOPC_AddressSpace_Get_Value(address_space_bs__nodes, item));
     /* TODO: rest of mandatory attributes */
     default:
         return NULL;
@@ -92,7 +92,7 @@ bool test_read_request_response(OpcUa_ReadResponse* pReadResp, SOPC_StatusCode s
 
     {
         SOPC_AddressSpace_Item* item =
-            SOPC_Dict_Get(address_space_bs__nodes, &pReadReq->NodesToRead[i].NodeId, &bTestOk);
+            SOPC_AddressSpace_Get_Item(address_space_bs__nodes, &pReadReq->NodesToRead[i].NodeId, &bTestOk);
 
         /* Find desired attribute and wrap it in a new SOPC_Variant* */
         if (bTestOk)

@@ -509,10 +509,10 @@ int main(void)
         test_results_set_service_result(false);
 
         // Create WriteRequest to be sent (deallocated by toolkit)
-        pWriteReqSent = tlibw_new_WriteRequest();
+        pWriteReqSent = tlibw_new_WriteRequest(address_space);
 
         // Create same WriteRequest to check results on response reception
-        pWriteReqCopy = tlibw_new_WriteRequest();
+        pWriteReqCopy = tlibw_new_WriteRequest(address_space);
 
         test_results_set_WriteRequest(pWriteReqCopy);
 

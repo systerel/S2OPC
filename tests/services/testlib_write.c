@@ -45,7 +45,7 @@ const uint32_t N_GROUPS = 6; // Each group is a different type of variable
 const uint32_t N_VARS = 6;   // Test on variables with Node Id 1001 to 1001 + N_VARS only
 // Note: There is N_VARS/N_GROUPS variables of each type (variables shall be sorted by type in predefined order below)
 
-OpcUa_WriteRequest* tlibw_new_WriteRequest(void)
+OpcUa_WriteRequest* tlibw_new_WriteRequest(const SOPC_AddressSpace* address_space)
 {
     // Multiple of number of groups
     assert(N_VARS % N_GROUPS == 0);
@@ -170,17 +170,18 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(void)
         memcpy((void*) (buf.Data), "XML ", 4);
         memcpy((void*) (buf.Data + 4), (void*) &j, 4);
 
-        lwv[i + 5 * (N_VARS / N_GROUPS)] =
-            (OpcUa_WriteValue){.encodeableType = &OpcUa_WriteValue_EncodeableType,
-                               .NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                          .Data.Numeric = (uint32_t) i + 5 * (N_VARS / N_GROUPS) + 1000 + 1,
-                                          .Namespace = 1},
-                               .AttributeId = constants__e_aid_Value,
-                               .IndexRange = {.Length = 0},
-                               .Value = {.Value = {.BuiltInTypeId = SOPC_XmlElement_Id,
-                                                   .ArrayType = SOPC_VariantArrayType_SingleValue,
-                                                   .Value.XmlElt = buf},
-                                         .Status = OpcUa_BadDataUnavailable}};
+        lwv[i + 5 * (N_VARS / N_GROUPS)] = (OpcUa_WriteValue){
+            .encodeableType = &OpcUa_WriteValue_EncodeableType,
+            .NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
+                       .Data.Numeric = (uint32_t) i + 5 * (N_VARS / N_GROUPS) + 1000 + 1,
+                       .Namespace = 1},
+            .AttributeId = constants__e_aid_Value,
+            .IndexRange = {.Length = 0},
+            .Value = {.Value = {.BuiltInTypeId = SOPC_XmlElement_Id,
+                                .ArrayType = SOPC_VariantArrayType_SingleValue,
+                                .Value.XmlElt = buf},
+                      .Status = SOPC_AddressSpace_AreReadOnlyItems(address_space) ? SOPC_GoodGenericStatus
+                                                                                  : OpcUa_BadDataUnavailable}};
     }
 
     OpcUa_WriteRequest* pReq = DESIGNATE_NEW(OpcUa_WriteRequest, .encodeableType = &OpcUa_WriteRequest_EncodeableType,

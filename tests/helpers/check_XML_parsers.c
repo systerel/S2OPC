@@ -44,28 +44,45 @@
 
 static const int64_t SOPC_SECOND_TO_100_NANOSECONDS = 10000000; // 10^7
 
-static void check_variable_and_type_common(SOPC_AddressSpace_Item* left, SOPC_AddressSpace_Item* right)
+static void check_variable_and_type_common(SOPC_AddressSpace* leftSpace,
+                                           SOPC_AddressSpace_Item* left,
+                                           SOPC_AddressSpace* rightSpace,
+                                           SOPC_AddressSpace_Item* right)
 {
     /* Check value metadata (should be only valid for Variable/VariableType) */
-    ck_assert_uint_eq(left->value_status, right->value_status);
+    if (!SOPC_AddressSpace_AreReadOnlyItems(leftSpace) && !SOPC_AddressSpace_AreReadOnlyItems(rightSpace))
+    {
+        ck_assert_uint_eq(SOPC_AddressSpace_Get_StatusCode(leftSpace, left),
+                          SOPC_AddressSpace_Get_StatusCode(rightSpace, right));
 
-    // Note: timestamps are dynamically set to current date in both case => not the exact same date
-    // Check delta < 1 second  between the 2 timestamps (=> do not check value_source_ts.picoSeconds)
-    if (left->value_source_ts.timestamp > right->value_source_ts.timestamp)
-    {
-        ck_assert_int_gt(SOPC_SECOND_TO_100_NANOSECONDS,
-                         left->value_source_ts.timestamp - right->value_source_ts.timestamp);
+        // Note: timestamps are dynamically set to current date in both case => not the exact same date
+        // Check delta < 1 second  between the 2 timestamps (=> do not check picoSeconds)
+        SOPC_Value_Timestamp left_ts = SOPC_AddressSpace_Get_SourceTs(leftSpace, left);
+        SOPC_Value_Timestamp right_ts = SOPC_AddressSpace_Get_SourceTs(rightSpace, right);
+        if (left_ts.timestamp > right_ts.timestamp)
+        {
+            ck_assert_int_gt(SOPC_SECOND_TO_100_NANOSECONDS, left_ts.timestamp - right_ts.timestamp);
+        }
+        else
+        {
+            ck_assert_int_gt(SOPC_SECOND_TO_100_NANOSECONDS, right_ts.timestamp - left_ts.timestamp);
+        }
     }
-    else
+
+    if (SOPC_AddressSpace_AreReadOnlyItems(leftSpace))
     {
-        ck_assert_int_gt(SOPC_SECOND_TO_100_NANOSECONDS,
-                         right->value_source_ts.timestamp - left->value_source_ts.timestamp);
+        ck_assert_uint_eq(SOPC_GoodGenericStatus, SOPC_AddressSpace_Get_StatusCode(leftSpace, left));
+    }
+
+    if (SOPC_AddressSpace_AreReadOnlyItems(rightSpace))
+    {
+        ck_assert_uint_eq(SOPC_GoodGenericStatus, SOPC_AddressSpace_Get_StatusCode(rightSpace, right));
     }
 
     int32_t compare = -1;
 
-    SOPC_ReturnStatus status =
-        SOPC_Variant_Compare(SOPC_AddressSpace_Item_Get_Value(left), SOPC_AddressSpace_Item_Get_Value(right), &compare);
+    SOPC_ReturnStatus status = SOPC_Variant_Compare(SOPC_AddressSpace_Get_Value(leftSpace, left),
+                                                    SOPC_AddressSpace_Get_Value(rightSpace, right), &compare);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq(0, compare);
 
@@ -98,12 +115,15 @@ static void addspace_for_each_equal(const void* key, const void* value, void* us
     bool found = false;
     /* Note: we do not have read-only accessors for SOPC_AddressSpace_Item even if in this case we do not modify
      * accessed values */
+    SOPC_AddressSpace** addSpaces = user_data;
+
+    SOPC_AddressSpace* leftSpace = addSpaces[0];
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
     SOPC_AddressSpace_Item* left = (SOPC_AddressSpace_Item*) value;
     SOPC_GCC_DIAGNOSTIC_RESTORE
 
-    SOPC_AddressSpace* otherAddSpace = user_data;
-    SOPC_AddressSpace_Item* right = SOPC_Dict_Get(otherAddSpace, key, &found);
+    SOPC_AddressSpace* rightSpace = addSpaces[1];
+    SOPC_AddressSpace_Item* right = SOPC_AddressSpace_Get_Item(rightSpace, key, &found);
     ck_assert(found);
 
     /* Check item type */
@@ -167,7 +187,7 @@ static void addspace_for_each_equal(const void* key, const void* value, void* us
         ck_assert_uint_eq(left->data.object.EventNotifier, right->data.object.EventNotifier);
         break;
     case OpcUa_NodeClass_Variable:
-        check_variable_and_type_common(left, right);
+        check_variable_and_type_common(leftSpace, left, rightSpace, right);
 
         ck_assert_uint_eq(SOPC_AddressSpace_Item_Get_AccessLevel(left), SOPC_AddressSpace_Item_Get_AccessLevel(right));
 
@@ -186,7 +206,7 @@ static void addspace_for_each_equal(const void* key, const void* value, void* us
         ck_assert_uint_eq(left->data.object_type.IsAbstract, right->data.object_type.IsAbstract);
         break;
     case OpcUa_NodeClass_VariableType:
-        check_variable_and_type_common(left, right);
+        check_variable_and_type_common(leftSpace, left, rightSpace, right);
 
         ck_assert_uint_eq(left->data.variable_type.IsAbstract, right->data.variable_type.IsAbstract);
         break;
@@ -221,7 +241,7 @@ START_TEST(test_same_address_space_results)
 #ifdef WITH_EXPAT
 
     /* Embedded address space (parsed prior to compilation) */
-    SOPC_AddressSpace* spaceEmbbeded = SOPC_Embedded_AddressSpace_Load();
+    SOPC_AddressSpace* spaceEmbedded = SOPC_Embedded_AddressSpace_Load();
 
     /* Dynamic parsing of address space */
     FILE* fd = fopen(XML_NAME, "r");
@@ -233,12 +253,14 @@ START_TEST(test_same_address_space_results)
     fclose(fd);
 
     /* Check all data present in embedded are present in dynamic */
-    SOPC_Dict_ForEach(spaceEmbbeded, addspace_for_each_equal, spaceDynamic);
+    SOPC_AddressSpace* spaces[2] = {spaceEmbedded, spaceDynamic};
+    SOPC_AddressSpace_ForEach(spaceEmbedded, addspace_for_each_equal, spaces);
 
     /* Check all data present in dynamic are present in embedded */
-    SOPC_Dict_ForEach(spaceDynamic, addspace_for_each_equal, spaceEmbbeded);
+    SOPC_AddressSpace* spaces2[2] = {spaceDynamic, spaceEmbedded};
+    SOPC_AddressSpace_ForEach(spaceDynamic, addspace_for_each_equal, spaces2);
 
-    SOPC_AddressSpace_Delete(spaceEmbbeded);
+    SOPC_AddressSpace_Delete(spaceEmbedded);
     SOPC_AddressSpace_Delete(spaceDynamic);
 #else
     printf("Test test_same_address_space_results ignored since EXPAT is not available\n");

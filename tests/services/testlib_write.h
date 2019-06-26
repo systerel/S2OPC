@@ -28,8 +28,10 @@
  * Generates a new WriteRequest. Must be coherent with current Address Space (see gen_addspace.c).
  * It is also recommended to write values that are different that the default values from gen_addspace.
  * Do not try to write a value of a different type than the current type in the Address Space, it would work.
+ *
+ * Note: address_space is necessary to know if the status code is modifiable or not (const address space case)
  */
-OpcUa_WriteRequest* tlibw_new_WriteRequest(void);
+OpcUa_WriteRequest* tlibw_new_WriteRequest(const SOPC_AddressSpace* address_space);
 /** One does not simply free a request, it must also free its content (NodesToWrite) and the content of its content
  * (ByteString) */
 void tlibw_free_WriteRequest(OpcUa_WriteRequest** ppWriteReq);
