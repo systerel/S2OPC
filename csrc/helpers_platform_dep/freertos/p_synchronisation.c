@@ -397,7 +397,7 @@ SOPC_ReturnStatus P_SYNCHRO_UnlockAndWaitForConditionVariable(
         }
 
         // Give mutex from parameters
-        if (NULL != (*pMutex))
+        if ((NULL != pMutex)&& (NULL != (*pMutex)))
         {
             xQueueGiveMutexRecursive(*pMutex);
         }
@@ -438,7 +438,7 @@ SOPC_ReturnStatus P_SYNCHRO_UnlockAndWaitForConditionVariable(
         }
 
         // Take mutex in parameter if exists
-        if (NULL != *pMutex)
+        if ((NULL != pMutex)&& (NULL != (*pMutex)))
         {
             xQueueTakeMutexRecursive(*pMutex, portMAX_DELAY);
         }
