@@ -115,6 +115,29 @@ SOPC_Variant* SOPC_AddressSpace_Item_Get_Value(SOPC_AddressSpace_Item* item)
     }
 }
 
+SOPC_Variant* SOPC_AddressSpace_Get_Value(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item)
+{
+    switch (item->node_class)
+    {
+    case OpcUa_NodeClass_Variable:
+        if (space->readOnlyItems)
+        {
+            assert(SOPC_VariantArrayType_SingleValue == item->data.variable.Value.ArrayType);
+            assert(SOPC_UInt32_Id == item->data.variable.Value.BuiltInTypeId);
+            return &space->variables[item->data.variable.Value.Value.Uint32];
+        }
+        else
+        {
+            return &item->data.variable.Value;
+        }
+    case OpcUa_NodeClass_VariableType:
+        return &item->data.variable_type.Value;
+    default:
+        assert(false && "Current element has no value.");
+        return NULL;
+    }
+}
+
 SOPC_NodeId* SOPC_AddressSpace_Item_Get_DataType(SOPC_AddressSpace_Item* item)
 {
     switch (item->node_class)
@@ -201,6 +224,47 @@ SOPC_Boolean* SOPC_AddressSpace_Item_Get_IsAbstract(SOPC_AddressSpace_Item* item
     }
 }
 
+SOPC_StatusCode SOPC_AddressSpace_Get_StatusCode(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item)
+{
+    if (!space->readOnlyItems)
+    {
+        return item->value_status;
+    }
+    else
+    {
+        return SOPC_GoodGenericStatus;
+    }
+}
+
+void SOPC_AddressSpace_Set_StatusCode(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item, SOPC_StatusCode status)
+{
+    if (!space->readOnlyItems)
+    {
+        item->value_status = status;
+    }
+}
+
+SOPC_Value_Timestamp SOPC_AddressSpace_Get_SourceTs(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item)
+{
+    if (!space->readOnlyItems)
+    {
+        return item->value_source_ts;
+    }
+    else
+    {
+        SOPC_Value_Timestamp ts = {SOPC_Time_GetCurrentTimeUTC(), 0};
+        return ts;
+    }
+}
+
+void SOPC_AddressSpace_Set_SourceTs(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item, SOPC_Value_Timestamp ts)
+{
+    if (!space->readOnlyItems)
+    {
+        item->value_source_ts = ts;
+    }
+}
+
 void SOPC_AddressSpace_Item_Clear(SOPC_AddressSpace_Item* item)
 {
     assert(item->node_class > 0);
@@ -232,29 +296,86 @@ static void free_description_item(void* data)
 
 SOPC_AddressSpace* SOPC_AddressSpace_Create(bool free_items)
 {
-    return SOPC_NodeId_Dict_Create(false, free_items ? free_description_item : clear_description_item_value);
+    SOPC_AddressSpace* result = calloc(1, sizeof(SOPC_AddressSpace));
+    if (NULL == result)
+    {
+        return NULL;
+    }
+    result->readOnlyItems = false;
+    result->items = SOPC_NodeId_Dict_Create(false, free_items ? free_description_item : clear_description_item_value);
+    if (NULL == result->items)
+    {
+        free(result);
+        return NULL;
+    }
+    return result;
+}
+
+SOPC_AddressSpace* SOPC_AddressSpace_CreateReadOnlyItems(uint32_t nb_variables, SOPC_Variant* variables)
+{
+    SOPC_AddressSpace* result = calloc(1, sizeof(SOPC_AddressSpace));
+    if (NULL == result)
+    {
+        return NULL;
+    }
+    result->readOnlyItems = true;
+    result->items = SOPC_NodeId_Dict_Create(false, NULL);
+    if (NULL == result->items)
+    {
+        free(result);
+        return NULL;
+    }
+
+    result->nb_variables = nb_variables;
+    result->variables = variables;
+
+    return result;
 }
 
 SOPC_ReturnStatus SOPC_AddressSpace_Append(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item)
 {
     SOPC_NodeId* id = SOPC_AddressSpace_Item_Get_NodeId(item);
 
-    if (item->node_class == OpcUa_NodeClass_Variable)
+    if (!space->readOnlyItems)
     {
-        /*Note: set an initial timestamp to could return non null timestamps */
-        if ((item->value_source_ts.timestamp == 0 && item->value_source_ts.picoSeconds == 0))
+        if (OpcUa_NodeClass_Variable == item->node_class)
         {
-            if (item->value_source_ts.timestamp == 0 && item->value_source_ts.picoSeconds == 0)
+            /*Note: set an initial timestamp to could return non null timestamps */
+            if ((item->value_source_ts.timestamp == 0 && item->value_source_ts.picoSeconds == 0))
             {
-                item->value_source_ts.timestamp = SOPC_Time_GetCurrentTimeUTC();
+                if (item->value_source_ts.timestamp == 0 && item->value_source_ts.picoSeconds == 0)
+                {
+                    item->value_source_ts.timestamp = SOPC_Time_GetCurrentTimeUTC();
+                }
             }
         }
     }
+    else
+    {
+        if (OpcUa_NodeClass_Variable == item->node_class)
+        {
+            assert(SOPC_VariantArrayType_SingleValue == item->data.variable.Value.ArrayType);
+            assert(SOPC_UInt32_Id == item->data.variable.Value.BuiltInTypeId);
+        }
+    }
 
-    return SOPC_Dict_Insert(space, id, item) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+    return SOPC_Dict_Insert(space->items, id, item) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
 }
 
 void SOPC_AddressSpace_Delete(SOPC_AddressSpace* space)
 {
-    SOPC_Dict_Delete(space);
+    SOPC_Dict_Delete(space->items);
+    space->items = NULL;
+    for (uint32_t i = 0; i < space->nb_variables; i++)
+    {
+        SOPC_Variant_Clear(&space->variables[i]);
+    }
+    // Do not free variables array which was provided as input
+    space->variables = NULL;
+    free(space);
+}
+
+SOPC_Dict* SOPC_AddressSpace_Get_Items(SOPC_AddressSpace* space)
+{
+    return space->items;
 }

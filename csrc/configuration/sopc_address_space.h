@@ -58,8 +58,19 @@ typedef struct
 } SOPC_AddressSpace_Item;
 
 /* Address space structure */
-/* Maps NodeId to SOPC_AddressSpace_Item */
-typedef SOPC_Dict SOPC_AddressSpace;
+typedef struct
+{
+    /* Maps NodeId to SOPC_AddressSpace_Item */
+    SOPC_Dict* items;
+    /* Set to true if the NodeId and SOPC_AddressSpace_Item are const */
+    bool readOnlyItems;
+    /* Defined only if readOnlyNodes is true:
+     * array of modifiable Variants,
+     * indexes are defined as UInt32 values in SOPC_AddressSpace_Item variants for all Variable nodes.
+     * Note: Variable of VariableType nodes are read-only values and hence not represented here. */
+    uint32_t nb_variables;
+    SOPC_Variant* variables;
+} SOPC_AddressSpace;
 
 void SOPC_AddressSpace_Item_Initialize(SOPC_AddressSpace_Item* item, OpcUa_NodeClass element_type);
 
@@ -75,6 +86,9 @@ int32_t* SOPC_AddressSpace_Item_Get_NoOfReferences(SOPC_AddressSpace_Item* item)
 OpcUa_ReferenceNode** SOPC_AddressSpace_Item_Get_References(SOPC_AddressSpace_Item* item);
 /* Variable and VariableType common attributes */
 SOPC_Variant* SOPC_AddressSpace_Item_Get_Value(SOPC_AddressSpace_Item* item);
+/* Same with management of read-only items */
+SOPC_Variant* SOPC_AddressSpace_Get_Value(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item);
+
 SOPC_Byte SOPC_AddressSpace_Item_Get_AccessLevel(SOPC_AddressSpace_Item* item);
 SOPC_NodeId* SOPC_AddressSpace_Item_Get_DataType(SOPC_AddressSpace_Item* item);
 int32_t* SOPC_AddressSpace_Item_Get_ValueRank(SOPC_AddressSpace_Item* item);
@@ -83,10 +97,19 @@ uint32_t* SOPC_AddressSpace_Item_Get_ArrayDimensions(SOPC_AddressSpace_Item* ite
 /* Types common attribute */
 SOPC_Boolean* SOPC_AddressSpace_Item_Get_IsAbstract(SOPC_AddressSpace_Item* item);
 
+SOPC_StatusCode SOPC_AddressSpace_Get_StatusCode(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item);
+void SOPC_AddressSpace_Set_StatusCode(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item, SOPC_StatusCode status);
+
+SOPC_Value_Timestamp SOPC_AddressSpace_Get_SourceTs(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item);
+void SOPC_AddressSpace_Set_SourceTs(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item, SOPC_Value_Timestamp ts);
+
 void SOPC_AddressSpace_Item_Clear(SOPC_AddressSpace_Item* item);
 
 SOPC_AddressSpace* SOPC_AddressSpace_Create(bool free_items);
+SOPC_AddressSpace* SOPC_AddressSpace_CreateReadOnlyItems(uint32_t nb_variables, SOPC_Variant* variables);
 SOPC_ReturnStatus SOPC_AddressSpace_Append(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item);
 void SOPC_AddressSpace_Delete(SOPC_AddressSpace* space);
+
+SOPC_Dict* SOPC_AddressSpace_Get_Items(SOPC_AddressSpace* space);
 
 #endif /* SOPC_ADDRESS_SPACE_H_ */

@@ -127,6 +127,7 @@ c_header = '''
 #include "sopc_builtintypes.h"
 #include "sopc_enums.h"
 #include "sopc_types.h"
+#include "sopc_macros.h"
 
 '''.lstrip()
 
@@ -685,7 +686,7 @@ def generate_item(ua_node, ty, variant_field, value_status='OpcUa_UncertainIniti
         extra += ('\n            .%s = %s,' % (k, v))
 
     references = list(map(generate_reference, ua_node.references))
-    references_str = ('(OpcUa_ReferenceNode[]) {\n' +
+    references_str = ('(const OpcUa_ReferenceNode[]) {\n' +
                       ',\n'.join(references) +
                       '\n            }') if references else 'NULL'
 
@@ -780,10 +781,12 @@ GEN_ITEM_FUNCS = {
 # Returns an array of Node objects
 def generate_address_space(source, out):
     aliases = {}
+    variables = list()
     n_items = 0
 
     out.write(c_header)
-    out.write('SOPC_AddressSpace_Item SOPC_Embedded_AddressSpace_Items[] = {\n')
+    out.write('SOPC_GCC_DIAGNOSTIC_IGNORE_DISCARD_QUALIFIER\n')
+    out.write('const SOPC_AddressSpace_Item SOPC_Embedded_AddressSpace_Items[] = {\n')
 
     expect_element(source, UA_NODESET_TAG).clear()
 
@@ -795,14 +798,36 @@ def generate_address_space(source, out):
 
         if ev == 'end' and n.tag == UA_NODESET_TAG:
             out.write('};\n')
-            out.write('uint32_t SOPC_Embedded_AddressSpace_nItems = %d;\n' % n_items)
+            out.write('SOPC_GCC_DIAGNOSTIC_RESTORE\n')
+            out.write('const uint32_t SOPC_Embedded_AddressSpace_nItems = %d;\n' % n_items)
+            out.write('\n');
+            if len(variables) > 0:
+                out.write('// Index is provided by the corresponding Variable UInt32 Variant in SOPC_Embedded_AddressSpace_Items\n');
+                out.write('SOPC_Variant SOPC_Embedded_VariableVariant[%d] = {\n' % len(variables))
+                for i in range(0, len(variables)):
+                    out.write(variables[i])
+                    out.write(',\n')
+                out.write('};\n')
+                out.write('const uint32_t SOPC_Embedded_VariableVariant_nb = %d;\n' % len(variables))
             return
 
         check_element(n)
 
         gen_func = GEN_ITEM_FUNCS.get(n.tag, None)
 
-        if gen_func:
+        if n.tag == UA_VARIABLE_TAG:
+            ua_node = parse_uanode(n, source, aliases)
+            # Add specific case for Variables to store the non constant part into array of Variants
+            out.write(generate_item(ua_node, 'Variable', 'variable', '0x00',
+                                    # Set Variant index as Variant value in constant item
+                                    Value=generate_variant('SOPC_UInt32_Id', 'uint32_t', 'Uint32', len(variables), False, str),
+                                    DataType=generate_nodeid(ua_node.data_type),
+                                    ValueRank="(%d)" % ua_node.value_rank,
+                                    AccessLevel=str(number_coalesce(ua_node.accesslevel, 1))))
+            # Set Variant value in variable Variants array
+            variables.append(generate_value_variant(ua_node.value))
+            n_items += 1
+        elif gen_func:
             out.write(gen_func(parse_uanode(n, source, aliases)))
             n_items += 1
         elif n.tag == UA_ALIASES_TAG:

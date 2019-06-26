@@ -74,7 +74,7 @@ void address_space_bs__readall_AddressSpace_Node(const constants__t_NodeId_i add
     if (NULL == pnid_req)
         return;
 
-    val = SOPC_Dict_Get(address_space_bs__nodes, pnid_req, &val_found);
+    val = SOPC_Dict_Get(SOPC_AddressSpace_Get_Items(address_space_bs__nodes), pnid_req, &val_found);
 
     if (val_found)
     {
@@ -356,8 +356,8 @@ void address_space_bs__read_AddressSpace_Value_value(
     *address_space_bs__val_ts_src = constants_bs__c_Timestamp_null;
     *address_space_bs__val_ts_srv = constants_bs__c_Timestamp_null;
 
-    SOPC_Variant* value =
-        util_variant__new_Variant_from_Variant(SOPC_AddressSpace_Item_Get_Value(address_space_bs__p_node));
+    SOPC_Variant* value = util_variant__new_Variant_from_Variant(
+        SOPC_AddressSpace_Get_Value(address_space_bs__nodes, address_space_bs__p_node));
 
     if (value == NULL)
     {
@@ -398,8 +398,10 @@ void address_space_bs__read_AddressSpace_Value_value(
     {
         if (address_space_bs__p_node->node_class == OpcUa_NodeClass_Variable)
         {
-            *address_space_bs__val_sc = address_space_bs__p_node->value_status;
-            *address_space_bs__val_ts_src = address_space_bs__p_node->value_source_ts;
+            *address_space_bs__val_sc =
+                SOPC_AddressSpace_Get_StatusCode(address_space_bs__nodes, address_space_bs__p_node);
+            *address_space_bs__val_ts_src =
+                SOPC_AddressSpace_Get_SourceTs(address_space_bs__nodes, address_space_bs__p_node);
             address_space_bs__val_ts_srv->timestamp = SOPC_Time_GetCurrentTimeUTC();
             address_space_bs__val_ts_srv->picoSeconds = 0;
         }
@@ -540,7 +542,7 @@ void address_space_bs__set_Value(const constants__t_user_i address_space_bs__p_u
 {
     (void) (address_space_bs__p_user); /* Keep for B precondition: user is already authorized for this operation */
     SOPC_AddressSpace_Item* item = address_space_bs__node;
-    SOPC_Variant* pvar = SOPC_AddressSpace_Item_Get_Value(item);
+    SOPC_Variant* pvar = SOPC_AddressSpace_Get_Value(address_space_bs__nodes, item);
     SOPC_Variant* convertedValue = NULL;
     const SOPC_Variant* newValue = address_space_bs__variant;
 
@@ -572,9 +574,10 @@ void address_space_bs__set_Value(const constants__t_user_i address_space_bs__p_u
 
     if (*address_space_bs__serviceStatusCode == constants_statuscodes_bs__e_sc_ok)
     {
-        (*address_space_bs__prev_dataValue)->Status = item->value_status;
-        (*address_space_bs__prev_dataValue)->SourceTimestamp = item->value_source_ts.timestamp;
-        (*address_space_bs__prev_dataValue)->SourcePicoSeconds = item->value_source_ts.picoSeconds;
+        (*address_space_bs__prev_dataValue)->Status = SOPC_AddressSpace_Get_StatusCode(address_space_bs__nodes, item);
+        SOPC_Value_Timestamp ts = SOPC_AddressSpace_Get_SourceTs(address_space_bs__nodes, item);
+        (*address_space_bs__prev_dataValue)->SourceTimestamp = ts.timestamp;
+        (*address_space_bs__prev_dataValue)->SourcePicoSeconds = ts.picoSeconds;
     }
     else
     {
@@ -599,11 +602,14 @@ void address_space_bs__set_Value_SourceTimestamp(const constants__t_user_i addre
     if (address_space_bs__p_ts.timestamp == 0 && address_space_bs__p_ts.picoSeconds == 0)
     {
         // Update source timestamp with current date if no date provided
-        item->value_source_ts.timestamp = SOPC_Time_GetCurrentTimeUTC();
+        SOPC_Value_Timestamp ts;
+        ts.timestamp = SOPC_Time_GetCurrentTimeUTC();
+        ts.picoSeconds = 0;
+        SOPC_AddressSpace_Set_SourceTs(address_space_bs__nodes, item, ts);
     }
     else
     {
-        item->value_source_ts = address_space_bs__p_ts;
+        SOPC_AddressSpace_Set_SourceTs(address_space_bs__nodes, item, address_space_bs__p_ts);
     }
 }
 
@@ -614,7 +620,7 @@ void address_space_bs__set_Value_StatusCode(const constants__t_user_i address_sp
     (void) (address_space_bs__p_user); /* Keep for B precondition: user is already authorized for this operation */
     SOPC_AddressSpace_Item* item = address_space_bs__p_node;
     assert(item->node_class == OpcUa_NodeClass_Variable);
-    item->value_status = address_space_bs__p_sc;
+    SOPC_AddressSpace_Set_StatusCode(address_space_bs__nodes, item, address_space_bs__p_sc);
 }
 
 void address_space_bs__get_Value_StatusCode(const constants__t_user_i address_space_bs__p_user,
@@ -622,8 +628,7 @@ void address_space_bs__get_Value_StatusCode(const constants__t_user_i address_sp
                                             constants__t_RawStatusCode* const address_space_bs__sc)
 {
     (void) (address_space_bs__p_user); /* User is already authorized for this operation */
-    SOPC_AddressSpace_Item* item = address_space_bs__node;
-    *address_space_bs__sc = item->value_status;
+    *address_space_bs__sc = SOPC_AddressSpace_Get_StatusCode(address_space_bs__nodes, address_space_bs__node);
 }
 
 void address_space_bs__is_IndexRangeDefined(const constants__t_IndexRange_i address_space_bs__p_index_range,

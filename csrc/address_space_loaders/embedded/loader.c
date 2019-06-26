@@ -22,9 +22,13 @@
 extern SOPC_AddressSpace_Item SOPC_Embedded_AddressSpace_Items[];
 extern uint32_t SOPC_Embedded_AddressSpace_nItems;
 
+extern SOPC_Variant SOPC_Embedded_VariableVariant[];
+extern uint32_t SOPC_Embedded_VariableVariant_nb;
+
 SOPC_AddressSpace* SOPC_Embedded_AddressSpace_Load(void)
 {
-    SOPC_AddressSpace* space = SOPC_AddressSpace_Create(false);
+    SOPC_AddressSpace* space =
+        SOPC_AddressSpace_CreateReadOnlyItems(SOPC_Embedded_VariableVariant_nb, SOPC_Embedded_VariableVariant);
 
     if (space == NULL)
     {
