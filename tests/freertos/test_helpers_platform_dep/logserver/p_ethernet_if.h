@@ -26,7 +26,7 @@
 #include "p_threads.h"
 #include "p_utils.h" /* private list include */
 
-#include "ethernetif.h"
+
 #include "lwip/dhcp.h"
 #include "lwip/mem.h"
 #include "lwip/memp.h"
@@ -35,6 +35,8 @@
 #include "lwip/timeouts.h"
 #include "lwipopts.h"
 #include "netif/etharp.h"
+
+#include "ethernetif.h"
 
 #include "lwip/init.h"
 #include "lwip/netif.h"
