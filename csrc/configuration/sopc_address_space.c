@@ -327,7 +327,10 @@ SOPC_AddressSpace* SOPC_AddressSpace_Create(bool free_items)
     return result;
 }
 
-SOPC_AddressSpace* SOPC_AddressSpace_CreateReadOnlyItems(uint32_t nb_variables, SOPC_Variant* variables)
+SOPC_AddressSpace* SOPC_AddressSpace_CreateReadOnlyItems(uint32_t nb_items,
+                                                         SOPC_AddressSpace_Item* items,
+                                                         uint32_t nb_variables,
+                                                         SOPC_Variant* variables)
 {
     SOPC_AddressSpace* result = SOPC_Calloc(1, sizeof(SOPC_AddressSpace));
     if (NULL == result)
@@ -340,6 +343,16 @@ SOPC_AddressSpace* SOPC_AddressSpace_CreateReadOnlyItems(uint32_t nb_variables, 
     {
         free(result);
         return NULL;
+    }
+
+    for (uint32_t i = 0; i < nb_items; ++i)
+    {
+        if (SOPC_AddressSpace_Append(result, &items[i]) != SOPC_STATUS_OK)
+        {
+            SOPC_Dict_Delete(result->items);
+            SOPC_AddressSpace_Delete(result);
+            return NULL;
+        }
     }
 
     result->nb_variables = nb_variables;

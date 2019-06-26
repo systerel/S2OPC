@@ -28,23 +28,8 @@ extern uint32_t SOPC_Embedded_VariableVariant_nb;
 SOPC_AddressSpace* SOPC_Embedded_AddressSpace_Load(void)
 {
     SOPC_AddressSpace* space =
-        SOPC_AddressSpace_CreateReadOnlyItems(SOPC_Embedded_VariableVariant_nb, SOPC_Embedded_VariableVariant);
-
-    if (space == NULL)
-    {
-        return NULL;
-    }
-
-    for (uint32_t i = 0; i < SOPC_Embedded_AddressSpace_nItems; ++i)
-    {
-        SOPC_AddressSpace_Item* item = &SOPC_Embedded_AddressSpace_Items[i];
-
-        if (SOPC_AddressSpace_Append(space, item) != SOPC_STATUS_OK)
-        {
-            SOPC_AddressSpace_Delete(space);
-            return NULL;
-        }
-    }
+        SOPC_AddressSpace_CreateReadOnlyItems(SOPC_Embedded_AddressSpace_nItems, SOPC_Embedded_AddressSpace_Items,
+                                              SOPC_Embedded_VariableVariant_nb, SOPC_Embedded_VariableVariant);
 
     return space;
 }

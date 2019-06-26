@@ -59,7 +59,10 @@ typedef struct
 typedef struct _SOPC_AddressSpace SOPC_AddressSpace;
 
 SOPC_AddressSpace* SOPC_AddressSpace_Create(bool free_items);
-SOPC_AddressSpace* SOPC_AddressSpace_CreateReadOnlyItems(uint32_t nb_variables, SOPC_Variant* variables);
+SOPC_AddressSpace* SOPC_AddressSpace_CreateReadOnlyItems(uint32_t nb_items,
+                                                         SOPC_AddressSpace_Item* items,
+                                                         uint32_t nb_variables,
+                                                         SOPC_Variant* variables);
 bool SOPC_AddressSpace_AreReadOnlyItems(const SOPC_AddressSpace* space);
 SOPC_ReturnStatus SOPC_AddressSpace_Append(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item);
 void SOPC_AddressSpace_Delete(SOPC_AddressSpace* space);
