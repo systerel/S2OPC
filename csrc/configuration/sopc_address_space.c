@@ -41,13 +41,17 @@
 struct _SOPC_AddressSpace
 {
     /* Maps NodeId to SOPC_AddressSpace_Item */
-    SOPC_Dict* items;
+    SOPC_Dict* dict_items;
     /* Set to true if the NodeId and SOPC_AddressSpace_Item are const */
     bool readOnlyItems;
     /* Defined only if readOnlyNodes is true:
-     * array of modifiable Variants,
-     * indexes are defined as UInt32 values in SOPC_AddressSpace_Item variants for all Variable nodes.
-     * Note: Variable of VariableType nodes are read-only values and hence not represented here. */
+     * - dict_items unused
+     * - const_items used instead
+     * - array of modifiable Variants,
+     *   indexes are defined as UInt32 values in SOPC_AddressSpace_Item variants for all Variable nodes.
+     *   Note: Values of VariableType nodes are read-only and hence not represented here. */
+    uint32_t nb_items;
+    SOPC_AddressSpace_Item* const_items;
     uint32_t nb_variables;
     SOPC_Variant* variables;
 };
@@ -318,8 +322,9 @@ SOPC_AddressSpace* SOPC_AddressSpace_Create(bool free_items)
         return NULL;
     }
     result->readOnlyItems = false;
-    result->items = SOPC_NodeId_Dict_Create(false, free_items ? free_description_item : clear_description_item_value);
-    if (NULL == result->items)
+    result->dict_items =
+        SOPC_NodeId_Dict_Create(false, free_items ? free_description_item : clear_description_item_value);
+    if (NULL == result->dict_items)
     {
         free(result);
         return NULL;
@@ -338,23 +343,9 @@ SOPC_AddressSpace* SOPC_AddressSpace_CreateReadOnlyItems(uint32_t nb_items,
         return NULL;
     }
     result->readOnlyItems = true;
-    result->items = SOPC_NodeId_Dict_Create(false, NULL);
-    if (NULL == result->items)
-    {
-        free(result);
-        return NULL;
-    }
 
-    for (uint32_t i = 0; i < nb_items; ++i)
-    {
-        if (SOPC_AddressSpace_Append(result, &items[i]) != SOPC_STATUS_OK)
-        {
-            SOPC_Dict_Delete(result->items);
-            SOPC_AddressSpace_Delete(result);
-            return NULL;
-        }
-    }
-
+    result->nb_items = nb_items;
+    result->const_items = items;
     result->nb_variables = nb_variables;
     result->variables = variables;
 
@@ -368,6 +359,11 @@ bool SOPC_AddressSpace_AreReadOnlyItems(const SOPC_AddressSpace* space)
 
 SOPC_ReturnStatus SOPC_AddressSpace_Append(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item)
 {
+    if (space->readOnlyItems)
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+
     SOPC_NodeId* id = SOPC_AddressSpace_Item_Get_NodeId(item);
 
     if (OpcUa_NodeClass_Variable == item->node_class)
@@ -382,28 +378,59 @@ SOPC_ReturnStatus SOPC_AddressSpace_Append(SOPC_AddressSpace* space, SOPC_Addres
         }
     }
 
-    return SOPC_Dict_Insert(space->items, id, item) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+    return SOPC_Dict_Insert(space->dict_items, id, item) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
 }
 
 void SOPC_AddressSpace_Delete(SOPC_AddressSpace* space)
 {
-    SOPC_Dict_Delete(space->items);
-    space->items = NULL;
+    SOPC_Dict_Delete(space->dict_items);
+    space->dict_items = NULL;
     for (uint32_t i = 0; i < space->nb_variables; i++)
     {
         SOPC_Variant_Clear(&space->variables[i]);
     }
     // Do not free variables array which was provided as input
+    space->nb_items = 0;
+    space->const_items = NULL;
+    space->nb_variables = 0;
     space->variables = NULL;
     free(space);
 }
 
 SOPC_AddressSpace_Item* SOPC_AddressSpace_Get_Item(const SOPC_AddressSpace* space, const SOPC_NodeId* key, bool* found)
 {
-    return SOPC_Dict_Get(space->items, key, found);
+    if (!space->readOnlyItems)
+    {
+        return SOPC_Dict_Get(space->dict_items, key, found);
+    }
+    else
+    {
+        SOPC_AddressSpace_Item* result = NULL;
+        bool lfound = false;
+        for (uint32_t i = 0; i < space->nb_items && !lfound; i++)
+        {
+            lfound = SOPC_NodeId_Equal(key, SOPC_AddressSpace_Item_Get_NodeId(&space->const_items[i]));
+            if (lfound)
+            {
+                result = &space->const_items[i];
+            }
+        }
+        *found = lfound;
+        return result;
+    }
 }
 
 void SOPC_AddressSpace_ForEach(SOPC_AddressSpace* space, SOPC_AddressSpace_ForEach_Fct func, void* user_data)
 {
-    SOPC_Dict_ForEach(space->items, func, user_data);
+    if (!space->readOnlyItems)
+    {
+        SOPC_Dict_ForEach(space->dict_items, func, user_data);
+    }
+    else
+    {
+        for (uint32_t i = 0; i < space->nb_items; i++)
+        {
+            func(SOPC_AddressSpace_Item_Get_NodeId(&space->const_items[i]), &space->const_items[i], user_data);
+        }
+    }
 }
