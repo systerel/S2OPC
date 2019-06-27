@@ -485,7 +485,7 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
 {
     assert(ctx->item.node_class == 0);
 
-    SOPC_AddressSpace_Item_Initialize(&ctx->item, element_type);
+    SOPC_AddressSpace_Item_Initialize(ctx->space, &ctx->item, element_type);
     // Note: value_status default value set on NodeId parsing
 
     for (size_t i = 0; attrs[i]; ++i)
@@ -515,7 +515,7 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
             // necessary to pass UACTT otherwise keep Good status only if a value is defined
             ctx->item.value_status = id->Namespace == 0 ? SOPC_GoodGenericStatus : OpcUa_UncertainInitialValue;
 
-            SOPC_NodeId* element_id = SOPC_AddressSpace_Item_Get_NodeId(&ctx->item);
+            SOPC_NodeId* element_id = SOPC_AddressSpace_Get_NodeId(ctx->space, &ctx->item);
             SOPC_ReturnStatus status = SOPC_NodeId_Copy(element_id, id);
             SOPC_NodeId_Clear(id);
             SOPC_Free(id);
@@ -530,7 +530,7 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
         {
             const char* attr_val = attrs[++i];
 
-            SOPC_QualifiedName* element_browse_name = SOPC_AddressSpace_Item_Get_BrowseName(&ctx->item);
+            SOPC_QualifiedName* element_browse_name = SOPC_AddressSpace_Get_BrowseName(ctx->space, &ctx->item);
             SOPC_QualifiedName_Initialize(element_browse_name);
             SOPC_ReturnStatus status = SOPC_QualifiedName_ParseCString(element_browse_name, attr_val);
 
@@ -574,7 +574,7 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
                 return false;
             }
 
-            SOPC_NodeId* dataType = SOPC_AddressSpace_Item_Get_DataType(&ctx->item);
+            SOPC_NodeId* dataType = SOPC_AddressSpace_Get_DataType(ctx->space, &ctx->item);
             SOPC_ReturnStatus status = SOPC_NodeId_Copy(dataType, id);
             SOPC_NodeId_Clear(id);
             SOPC_Free(id);
@@ -611,7 +611,7 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
                 return false;
             }
 
-            int32_t* valueRank = SOPC_AddressSpace_Item_Get_ValueRank(&ctx->item);
+            int32_t* valueRank = SOPC_AddressSpace_Get_ValueRank(ctx->space, &ctx->item);
             *valueRank = parsedValueRank;
         }
         else if (strcmp("AccessLevel", attr) == 0)
@@ -992,9 +992,9 @@ static SOPC_LocalizedText* element_localized_text_for_state(struct parse_context
     switch (ctx->state)
     {
     case PARSE_NODE_DISPLAYNAME:
-        return SOPC_AddressSpace_Item_Get_DisplayName(&ctx->item);
+        return SOPC_AddressSpace_Get_DisplayName(ctx->space, &ctx->item);
     case PARSE_NODE_DESCRIPTION:
-        return SOPC_AddressSpace_Item_Get_Description(&ctx->item);
+        return SOPC_AddressSpace_Get_Description(ctx->space, &ctx->item);
     default:
         assert(false && "Unexpected state");
     }
@@ -1455,8 +1455,8 @@ static bool finalize_node(struct parse_context_t* ctx)
         size_t n_references = SOPC_Array_Size(ctx->references);
         assert(n_references <= INT32_MAX);
 
-        *SOPC_AddressSpace_Item_Get_NoOfReferences(&ctx->item) = (int32_t) n_references;
-        *SOPC_AddressSpace_Item_Get_References(&ctx->item) = SOPC_Array_Into_Raw(ctx->references);
+        *SOPC_AddressSpace_Get_NoOfReferences(ctx->space, &ctx->item) = (int32_t) n_references;
+        *SOPC_AddressSpace_Get_References(ctx->space, &ctx->item) = SOPC_Array_Into_Raw(ctx->references);
         ctx->references = NULL;
     }
 
@@ -1586,7 +1586,7 @@ static void end_element_handler(void* user_data, const XML_Char* name)
 
         if (!ok)
         {
-            SOPC_AddressSpace_Item_Clear(&ctx->item);
+            SOPC_AddressSpace_Item_Clear(ctx->space, &ctx->item);
             XML_StopParser(ctx->parser, false);
             return;
         }
@@ -1693,7 +1693,7 @@ SOPC_AddressSpace* SOPC_UANodeSet_Parse(FILE* fd)
     }
     else
     {
-        SOPC_AddressSpace_Item_Clear(&ctx.item);
+        SOPC_AddressSpace_Item_Clear(ctx.space, &ctx.item);
         SOPC_AddressSpace_Delete(space);
         return NULL;
     }

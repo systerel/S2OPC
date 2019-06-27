@@ -56,7 +56,9 @@ struct _SOPC_AddressSpace
     SOPC_Variant* variables;
 };
 
-void SOPC_AddressSpace_Item_Initialize(SOPC_AddressSpace_Item* item, OpcUa_NodeClass node_class)
+void SOPC_AddressSpace_Item_Initialize(SOPC_AddressSpace* space,
+                                       SOPC_AddressSpace_Item* item,
+                                       OpcUa_NodeClass node_class)
 {
     switch (node_class)
     {
@@ -66,7 +68,7 @@ void SOPC_AddressSpace_Item_Initialize(SOPC_AddressSpace_Item* item, OpcUa_NodeC
     }
 
     item->node_class = node_class;
-    OpcUa_NodeClass* nodeClass = SOPC_AddressSpace_Item_Get_NodeClass(item);
+    OpcUa_NodeClass* nodeClass = SOPC_AddressSpace_Get_NodeClass(space, item);
     *nodeClass = node_class;
 
     if (node_class == OpcUa_NodeClass_Variable)
@@ -97,17 +99,18 @@ void SOPC_AddressSpace_Item_Initialize(SOPC_AddressSpace_Item* item, OpcUa_NodeC
     case OpcUa_NodeClass_##val:                          \
         return &item->data.field.extra;
 
-#define ELEMENT_ATTRIBUTE_GETTER(ret_type, name)                              \
-    ret_type* SOPC_AddressSpace_Item_Get_##name(SOPC_AddressSpace_Item* item) \
-    {                                                                         \
-        assert(item->node_class > 0);                                         \
-        switch (item->node_class)                                             \
-        {                                                                     \
-            FOR_EACH_ELEMENT_TYPE(ELEMENT_ATTRIBUTE_GETTER_CASE, name)        \
-        default:                                                              \
-            assert(false && "Unknown element type");                          \
-            return NULL;                                                      \
-        }                                                                     \
+#define ELEMENT_ATTRIBUTE_GETTER(ret_type, name)                                                   \
+    ret_type* SOPC_AddressSpace_Get_##name(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item) \
+    {                                                                                              \
+        (void) space;                                                                              \
+        assert(item->node_class > 0);                                                              \
+        switch (item->node_class)                                                                  \
+        {                                                                                          \
+            FOR_EACH_ELEMENT_TYPE(ELEMENT_ATTRIBUTE_GETTER_CASE, name)                             \
+        default:                                                                                   \
+            assert(false && "Unknown element type");                                               \
+            return NULL;                                                                           \
+        }                                                                                          \
     }
 
 ELEMENT_ATTRIBUTE_GETTER(OpcUa_NodeClass, NodeClass)
@@ -158,8 +161,10 @@ SOPC_Variant* SOPC_AddressSpace_Get_Value(SOPC_AddressSpace* space, SOPC_Address
     }
 }
 
-SOPC_NodeId* SOPC_AddressSpace_Item_Get_DataType(SOPC_AddressSpace_Item* item)
+SOPC_NodeId* SOPC_AddressSpace_Get_DataType(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item)
 {
+    // Avoid unused parameter warning:
+    (void) space;
     switch (item->node_class)
     {
     case OpcUa_NodeClass_Variable:
@@ -172,8 +177,10 @@ SOPC_NodeId* SOPC_AddressSpace_Item_Get_DataType(SOPC_AddressSpace_Item* item)
     }
 }
 
-int32_t* SOPC_AddressSpace_Item_Get_ValueRank(SOPC_AddressSpace_Item* item)
+int32_t* SOPC_AddressSpace_Get_ValueRank(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item)
 {
+    // Avoid unused parameter warning:
+    (void) space;
     switch (item->node_class)
     {
     case OpcUa_NodeClass_Variable:
@@ -186,8 +193,10 @@ int32_t* SOPC_AddressSpace_Item_Get_ValueRank(SOPC_AddressSpace_Item* item)
     }
 }
 
-int32_t SOPC_AddressSpace_Item_Get_NoOfArrayDimensions(SOPC_AddressSpace_Item* item)
+int32_t SOPC_AddressSpace_Get_NoOfArrayDimensions(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item)
 {
+    // Avoid unused parameter warning:
+    (void) space;
     switch (item->node_class)
     {
     case OpcUa_NodeClass_Variable:
@@ -200,8 +209,10 @@ int32_t SOPC_AddressSpace_Item_Get_NoOfArrayDimensions(SOPC_AddressSpace_Item* i
     }
 }
 
-uint32_t* SOPC_AddressSpace_Item_Get_ArrayDimensions(SOPC_AddressSpace_Item* item)
+uint32_t* SOPC_AddressSpace_Get_ArrayDimensions(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item)
 {
+    // Avoid unused parameter warning:
+    (void) space;
     switch (item->node_class)
     {
     case OpcUa_NodeClass_Variable:
@@ -214,8 +225,10 @@ uint32_t* SOPC_AddressSpace_Item_Get_ArrayDimensions(SOPC_AddressSpace_Item* ite
     }
 }
 
-SOPC_Byte SOPC_AddressSpace_Item_Get_AccessLevel(SOPC_AddressSpace_Item* item)
+SOPC_Byte SOPC_AddressSpace_Get_AccessLevel(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item)
 {
+    // Avoid unused parameter warning:
+    (void) space;
     switch (item->node_class)
     {
     case OpcUa_NodeClass_Variable:
@@ -226,8 +239,10 @@ SOPC_Byte SOPC_AddressSpace_Item_Get_AccessLevel(SOPC_AddressSpace_Item* item)
     }
 }
 
-SOPC_Boolean* SOPC_AddressSpace_Item_Get_IsAbstract(SOPC_AddressSpace_Item* item)
+SOPC_Boolean* SOPC_AddressSpace_Get_IsAbstract(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item)
 {
+    // Avoid unused parameter warning:
+    (void) space;
     switch (item->node_class)
     {
     case OpcUa_NodeClass_VariableType:
@@ -285,7 +300,7 @@ void SOPC_AddressSpace_Set_SourceTs(SOPC_AddressSpace* space, SOPC_AddressSpace_
     }
 }
 
-void SOPC_AddressSpace_Item_Clear(SOPC_AddressSpace_Item* item)
+static void SOPC_AddressSpace_Item_Clear_Local(SOPC_AddressSpace_Item* item)
 {
     assert(item->node_class > 0);
 
@@ -295,6 +310,13 @@ void SOPC_AddressSpace_Item_Clear(SOPC_AddressSpace_Item* item)
     default:
         assert(false && "Unknown element type");
     }
+}
+
+void SOPC_AddressSpace_Item_Clear(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item)
+{
+    // Avoid unused parameter warning:
+    (void) space;
+    SOPC_AddressSpace_Item_Clear_Local(item);
 }
 
 static void clear_description_item_value(void* data)
@@ -310,7 +332,7 @@ static void clear_description_item_value(void* data)
 static void free_description_item(void* data)
 {
     SOPC_AddressSpace_Item* item = data;
-    SOPC_AddressSpace_Item_Clear(item);
+    SOPC_AddressSpace_Item_Clear_Local(item);
     SOPC_Free(item);
 }
 
@@ -364,7 +386,7 @@ SOPC_ReturnStatus SOPC_AddressSpace_Append(SOPC_AddressSpace* space, SOPC_Addres
         return SOPC_STATUS_INVALID_STATE;
     }
 
-    SOPC_NodeId* id = SOPC_AddressSpace_Item_Get_NodeId(item);
+    SOPC_NodeId* id = SOPC_AddressSpace_Get_NodeId(space, item);
 
     if (OpcUa_NodeClass_Variable == item->node_class)
     {
@@ -397,7 +419,7 @@ void SOPC_AddressSpace_Delete(SOPC_AddressSpace* space)
     free(space);
 }
 
-SOPC_AddressSpace_Item* SOPC_AddressSpace_Get_Item(const SOPC_AddressSpace* space, const SOPC_NodeId* key, bool* found)
+SOPC_AddressSpace_Item* SOPC_AddressSpace_Get_Item(SOPC_AddressSpace* space, const SOPC_NodeId* key, bool* found)
 {
     if (!space->readOnlyItems)
     {
@@ -409,7 +431,7 @@ SOPC_AddressSpace_Item* SOPC_AddressSpace_Get_Item(const SOPC_AddressSpace* spac
         bool lfound = false;
         for (uint32_t i = 0; i < space->nb_items && !lfound; i++)
         {
-            lfound = SOPC_NodeId_Equal(key, SOPC_AddressSpace_Item_Get_NodeId(&space->const_items[i]));
+            lfound = SOPC_NodeId_Equal(key, SOPC_AddressSpace_Get_NodeId(space, &space->const_items[i]));
             if (lfound)
             {
                 result = &space->const_items[i];
@@ -430,7 +452,7 @@ void SOPC_AddressSpace_ForEach(SOPC_AddressSpace* space, SOPC_AddressSpace_ForEa
     {
         for (uint32_t i = 0; i < space->nb_items; i++)
         {
-            func(SOPC_AddressSpace_Item_Get_NodeId(&space->const_items[i]), &space->const_items[i], user_data);
+            func(SOPC_AddressSpace_Get_NodeId(space, &space->const_items[i]), &space->const_items[i], user_data);
         }
     }
 }

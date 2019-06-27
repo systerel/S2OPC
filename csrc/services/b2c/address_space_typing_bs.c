@@ -94,8 +94,8 @@ static bool is_reversed_has_child(const OpcUa_ReferenceNode* ref)
 static const SOPC_NodeId* get_direct_parent_of_node(const constants__t_Node_i child)
 {
     SOPC_NodeId* directParent = NULL;
-    int32_t* n_refs = SOPC_AddressSpace_Item_Get_NoOfReferences(child);
-    OpcUa_ReferenceNode** refs = SOPC_AddressSpace_Item_Get_References(child);
+    int32_t* n_refs = SOPC_AddressSpace_Get_NoOfReferences(address_space_bs__nodes, child);
+    OpcUa_ReferenceNode** refs = SOPC_AddressSpace_Get_References(address_space_bs__nodes, child);
     for (int32_t i = 0; i < *n_refs; ++i)
     {
         OpcUa_ReferenceNode* ref = &(*refs)[i];

@@ -86,19 +86,20 @@ static void check_variable_and_type_common(SOPC_AddressSpace* leftSpace,
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq(0, compare);
 
-    status = SOPC_NodeId_Compare(SOPC_AddressSpace_Item_Get_DataType(left), SOPC_AddressSpace_Item_Get_DataType(right),
-                                 &compare);
+    status = SOPC_NodeId_Compare(SOPC_AddressSpace_Get_DataType(leftSpace, left),
+                                 SOPC_AddressSpace_Get_DataType(rightSpace, right), &compare);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq(0, compare);
 
-    ck_assert_int_eq(*SOPC_AddressSpace_Item_Get_ValueRank(left), *SOPC_AddressSpace_Item_Get_ValueRank(right));
+    ck_assert_int_eq(*SOPC_AddressSpace_Get_ValueRank(leftSpace, left),
+                     *SOPC_AddressSpace_Get_ValueRank(rightSpace, right));
 
-    ck_assert_int_eq(SOPC_AddressSpace_Item_Get_NoOfArrayDimensions(left),
-                     SOPC_AddressSpace_Item_Get_NoOfArrayDimensions(right));
+    ck_assert_int_eq(SOPC_AddressSpace_Get_NoOfArrayDimensions(leftSpace, left),
+                     SOPC_AddressSpace_Get_NoOfArrayDimensions(rightSpace, right));
 
-    uint32_t* left_arr = SOPC_AddressSpace_Item_Get_ArrayDimensions(left);
-    uint32_t* right_arr = SOPC_AddressSpace_Item_Get_ArrayDimensions(right);
-    for (int32_t i = 0; i < SOPC_AddressSpace_Item_Get_NoOfArrayDimensions(left); i++)
+    uint32_t* left_arr = SOPC_AddressSpace_Get_ArrayDimensions(leftSpace, left);
+    uint32_t* right_arr = SOPC_AddressSpace_Get_ArrayDimensions(rightSpace, right);
+    for (int32_t i = 0; i < SOPC_AddressSpace_Get_NoOfArrayDimensions(leftSpace, left); i++)
     {
         ck_assert_uint_eq(left_arr[i], right_arr[i]);
     }
@@ -133,41 +134,43 @@ static void addspace_for_each_equal(const void* key, const void* value, void* us
     int32_t compare = -1;
 
     /* Check common attributes (NodeClass, NodeId, BrowseName, DisplayName, Description, *WriteMask) */
-    status = SOPC_NodeId_Compare(SOPC_AddressSpace_Item_Get_NodeId(left), SOPC_AddressSpace_Item_Get_NodeId(right),
-                                 &compare);
+    status = SOPC_NodeId_Compare(SOPC_AddressSpace_Get_NodeId(leftSpace, left),
+                                 SOPC_AddressSpace_Get_NodeId(rightSpace, right), &compare);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq(0, compare);
 
-    ck_assert_int_eq(*SOPC_AddressSpace_Item_Get_NodeClass(left), *SOPC_AddressSpace_Item_Get_NodeClass(right));
+    ck_assert_int_eq(*SOPC_AddressSpace_Get_NodeClass(leftSpace, left),
+                     *SOPC_AddressSpace_Get_NodeClass(rightSpace, right));
 
-    status = SOPC_QualifiedName_Compare(SOPC_AddressSpace_Item_Get_BrowseName(left),
-                                        SOPC_AddressSpace_Item_Get_BrowseName(right), &compare);
+    status = SOPC_QualifiedName_Compare(SOPC_AddressSpace_Get_BrowseName(leftSpace, left),
+                                        SOPC_AddressSpace_Get_BrowseName(rightSpace, right), &compare);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq(0, compare);
 
-    status = SOPC_LocalizedText_Compare(SOPC_AddressSpace_Item_Get_DisplayName(left),
-                                        SOPC_AddressSpace_Item_Get_DisplayName(right), &compare);
+    status = SOPC_LocalizedText_Compare(SOPC_AddressSpace_Get_DisplayName(leftSpace, left),
+                                        SOPC_AddressSpace_Get_DisplayName(rightSpace, right), &compare);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq(0, compare);
 
-    status = SOPC_LocalizedText_Compare(SOPC_AddressSpace_Item_Get_Description(left),
-                                        SOPC_AddressSpace_Item_Get_Description(right), &compare);
+    status = SOPC_LocalizedText_Compare(SOPC_AddressSpace_Get_Description(leftSpace, left),
+                                        SOPC_AddressSpace_Get_Description(rightSpace, right), &compare);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq(0, compare);
 
-    ck_assert_uint_eq(*SOPC_AddressSpace_Item_Get_WriteMask(left), *SOPC_AddressSpace_Item_Get_WriteMask(right));
+    ck_assert_uint_eq(*SOPC_AddressSpace_Get_WriteMask(leftSpace, left),
+                      *SOPC_AddressSpace_Get_WriteMask(rightSpace, right));
 
-    ck_assert_uint_eq(*SOPC_AddressSpace_Item_Get_UserWriteMask(left),
-                      *SOPC_AddressSpace_Item_Get_UserWriteMask(right));
+    ck_assert_uint_eq(*SOPC_AddressSpace_Get_UserWriteMask(leftSpace, left),
+                      *SOPC_AddressSpace_Get_UserWriteMask(rightSpace, right));
 
     /* Check References */
-    ck_assert_int_eq(*SOPC_AddressSpace_Item_Get_NoOfReferences(left),
-                     *SOPC_AddressSpace_Item_Get_NoOfReferences(right));
+    ck_assert_int_eq(*SOPC_AddressSpace_Get_NoOfReferences(leftSpace, left),
+                     *SOPC_AddressSpace_Get_NoOfReferences(rightSpace, right));
 
-    OpcUa_ReferenceNode* left_refs = *SOPC_AddressSpace_Item_Get_References(left);
-    OpcUa_ReferenceNode* right_refs = *SOPC_AddressSpace_Item_Get_References(right);
+    OpcUa_ReferenceNode* left_refs = *SOPC_AddressSpace_Get_References(leftSpace, left);
+    OpcUa_ReferenceNode* right_refs = *SOPC_AddressSpace_Get_References(rightSpace, right);
 
-    for (int32_t i = 0; i < *SOPC_AddressSpace_Item_Get_NoOfReferences(left); i++)
+    for (int32_t i = 0; i < *SOPC_AddressSpace_Get_NoOfReferences(leftSpace, left); i++)
     {
         ck_assert_uint_eq(left_refs[i].IsInverse, right_refs[i].IsInverse);
 
@@ -189,7 +192,8 @@ static void addspace_for_each_equal(const void* key, const void* value, void* us
     case OpcUa_NodeClass_Variable:
         check_variable_and_type_common(leftSpace, left, rightSpace, right);
 
-        ck_assert_uint_eq(SOPC_AddressSpace_Item_Get_AccessLevel(left), SOPC_AddressSpace_Item_Get_AccessLevel(right));
+        ck_assert_uint_eq(SOPC_AddressSpace_Get_AccessLevel(leftSpace, left),
+                          SOPC_AddressSpace_Get_AccessLevel(rightSpace, right));
 
         ck_assert_uint_eq(left->data.variable.UserAccessLevel, right->data.variable.UserAccessLevel);
 
