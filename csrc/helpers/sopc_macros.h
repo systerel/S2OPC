@@ -26,12 +26,22 @@
 #ifndef SOPC_MACROS_H_
 #define SOPC_MACROS_H_
 
-#if defined(__GNUC__) && (__GNUC__ > 4) && !defined(__clang__)
-#define SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST _Pragma("GCC diagnostic ignored \"-Wcast-qual\"");
+#if defined(__GNUC__) && (__GNUC__ > 4)
+#define SOPC_GCC_DIAGNOSTIC_PUSH _Pragma("GCC diagnostic push")
+#define SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST _Pragma("GCC diagnostic ignored \"-Wcast-qual\"")
 #define SOPC_GCC_DIAGNOSTIC_RESTORE _Pragma("GCC diagnostic pop")
 #else
 #define SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
 #define SOPC_GCC_DIAGNOSTIC_RESTORE
+#endif
+
+#if defined(__GNUC__) && (__GNUC__ > 4) && !defined(__clang__)
+#define SOPC_GCC_DIAGNOSTIC_IGNORE_DISCARD_QUALIFIER _Pragma("GCC diagnostic ignored \"-Wdiscarded-qualifiers\"")
+#elif defined(__GNUC__) && (__GNUC__ > 4) && defined(__clang__)
+#define SOPC_GCC_DIAGNOSTIC_IGNORE_DISCARD_QUALIFIER \
+    _Pragma("GCC diagnostic ignored \"-Wincompatible-pointer-types-discards-qualifiers\"")
+#else
+#define SOPC_GCC_DIAGNOSTIC_IGNORE_DISCARD_QUALIFIER
 #endif
 
 #endif // SOPC_MACROS_H_
