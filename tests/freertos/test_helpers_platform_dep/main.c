@@ -49,8 +49,11 @@
 //#include "p_ethernet_if.h"
 //#include "p_logsrv.h"
 
-Condition* handleCondition = NULL;
-Condition* handleSigConnexion = NULL;
+#include "ksdk_mbedtls_config.h"
+
+Condition handleCondition;
+Condition handleSigConnexion;
+
 tUtilsList list;
 
 extern tLogSrvWks* gLogServer;
@@ -91,6 +94,8 @@ int main(void)
     BOARD_InitBootPeripherals();
 
     // P_ETHERNET_IF_Initialize();
+
+    mbedtls_threading_initialize();
 
     // p = P_LOG_SRV_CreateAndStart(80,2);
     // gpLogServ = P_LOG_SRV_CreateAndStart(80,4);
