@@ -70,6 +70,7 @@ else
     append_cmake_option WITH_COVERAGE
     append_cmake_option WITH_COVERITY
     append_cmake_option WITH_PYS2OPC
+    append_cmake_option WITH_CONST_ADDSPACE
     append_cmake_option WARNINGS_AS_ERRORS
     append_cmake_option CMAKE_BUILD_TYPE RelWithDebInfo
     append_cmake_option CMAKE_C_FLAGS

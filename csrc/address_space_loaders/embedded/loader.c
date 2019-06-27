@@ -19,17 +19,44 @@
 
 #include "loader.h"
 
+extern const bool sopc_embedded_is_const_addspace;
+
 extern SOPC_AddressSpace_Item SOPC_Embedded_AddressSpace_Items[];
-extern uint32_t SOPC_Embedded_AddressSpace_nItems;
+extern const uint32_t SOPC_Embedded_AddressSpace_nItems;
 
 extern SOPC_Variant SOPC_Embedded_VariableVariant[];
-extern uint32_t SOPC_Embedded_VariableVariant_nb;
+extern const uint32_t SOPC_Embedded_VariableVariant_nb;
 
 SOPC_AddressSpace* SOPC_Embedded_AddressSpace_Load(void)
 {
-    SOPC_AddressSpace* space =
-        SOPC_AddressSpace_CreateReadOnlyItems(SOPC_Embedded_AddressSpace_nItems, SOPC_Embedded_AddressSpace_Items,
-                                              SOPC_Embedded_VariableVariant_nb, SOPC_Embedded_VariableVariant);
+    SOPC_AddressSpace* space = NULL;
+
+    if (sopc_embedded_is_const_addspace)
+    {
+        space =
+            SOPC_AddressSpace_CreateReadOnlyItems(SOPC_Embedded_AddressSpace_nItems, SOPC_Embedded_AddressSpace_Items,
+                                                  SOPC_Embedded_VariableVariant_nb, SOPC_Embedded_VariableVariant);
+    }
+    else
+    {
+        space = SOPC_AddressSpace_Create(false);
+
+        if (space == NULL)
+        {
+            return NULL;
+        }
+
+        for (uint32_t i = 0; i < SOPC_Embedded_AddressSpace_nItems; ++i)
+        {
+            SOPC_AddressSpace_Item* item = &SOPC_Embedded_AddressSpace_Items[i];
+
+            if (SOPC_AddressSpace_Append(space, item) != SOPC_STATUS_OK)
+            {
+                SOPC_AddressSpace_Delete(space);
+                return NULL;
+            }
+        }
+    }
 
     return space;
 }

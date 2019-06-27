@@ -331,6 +331,10 @@ install(TARGETS s2opc
 
 # Address space loader backends
 
+if(${WITH_CONST_ADDSPACE})
+  set(const_addspace "--const_addspace")
+endif()
+
 add_library(s2opc-loader-embedded STATIC csrc/address_space_loaders/embedded/loader.c)
 target_link_libraries(s2opc-loader-embedded PRIVATE s2opc)
 target_include_directories(s2opc-loader-embedded PRIVATE ${S2OPC_PUBLIC_INCLUDES} PUBLIC "csrc/address_space_loaders")
@@ -346,7 +350,7 @@ function(s2opc_embed_address_space var_name uanodeset_path)
     add_custom_command(
         OUTPUT ${c_file_path}
         DEPENDS ${uanodeset_path}
-		COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/generate-s2opc-address-space ${uanodeset_path} ${c_file_path}
+		COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/generate-s2opc-address-space ${uanodeset_path} ${c_file_path} ${const_addspace}
         COMMENT "Generating address space ${var_name}"
         VERBATIM
     )
