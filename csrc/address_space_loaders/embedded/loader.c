@@ -21,8 +21,8 @@
 
 extern const bool sopc_embedded_is_const_addspace;
 
-extern SOPC_AddressSpace_Item SOPC_Embedded_AddressSpace_Items[];
-extern const uint32_t SOPC_Embedded_AddressSpace_nItems;
+extern SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[];
+extern const uint32_t SOPC_Embedded_AddressSpace_nNodes;
 
 extern SOPC_Variant SOPC_Embedded_VariableVariant[];
 extern const uint32_t SOPC_Embedded_VariableVariant_nb;
@@ -34,7 +34,7 @@ SOPC_AddressSpace* SOPC_Embedded_AddressSpace_Load(void)
     if (sopc_embedded_is_const_addspace)
     {
         space =
-            SOPC_AddressSpace_CreateReadOnlyItems(SOPC_Embedded_AddressSpace_nItems, SOPC_Embedded_AddressSpace_Items,
+            SOPC_AddressSpace_CreateReadOnlyNodes(SOPC_Embedded_AddressSpace_nNodes, SOPC_Embedded_AddressSpace_Nodes,
                                                   SOPC_Embedded_VariableVariant_nb, SOPC_Embedded_VariableVariant);
     }
     else
@@ -46,11 +46,11 @@ SOPC_AddressSpace* SOPC_Embedded_AddressSpace_Load(void)
             return NULL;
         }
 
-        for (uint32_t i = 0; i < SOPC_Embedded_AddressSpace_nItems; ++i)
+        for (uint32_t i = 0; i < SOPC_Embedded_AddressSpace_nNodes; ++i)
         {
-            SOPC_AddressSpace_Item* item = &SOPC_Embedded_AddressSpace_Items[i];
+            SOPC_AddressSpace_Node* node = &SOPC_Embedded_AddressSpace_Nodes[i];
 
-            if (SOPC_AddressSpace_Append(space, item) != SOPC_STATUS_OK)
+            if (SOPC_AddressSpace_Append(space, node) != SOPC_STATUS_OK)
             {
                 SOPC_AddressSpace_Delete(space);
                 return NULL;

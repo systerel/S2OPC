@@ -180,7 +180,7 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(const SOPC_AddressSpace* address_spac
             .Value = {.Value = {.BuiltInTypeId = SOPC_XmlElement_Id,
                                 .ArrayType = SOPC_VariantArrayType_SingleValue,
                                 .Value.XmlElt = buf},
-                      .Status = SOPC_AddressSpace_AreReadOnlyItems(address_space) ? SOPC_GoodGenericStatus
+                      .Status = SOPC_AddressSpace_AreReadOnlyNodes(address_space) ? SOPC_GoodGenericStatus
                                                                                   : OpcUa_BadDataUnavailable}};
     }
 

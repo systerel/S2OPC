@@ -136,7 +136,7 @@ static const SOPC_NodeId* get_direct_parent(const SOPC_NodeId* childNodeId)
         void* node;
         bool node_found = false;
 
-        node = SOPC_AddressSpace_Get_Item(address_space_bs__nodes, childNodeId, &node_found);
+        node = SOPC_AddressSpace_Get_Node(address_space_bs__nodes, childNodeId, &node_found);
 
         if (node_found)
         {
@@ -208,7 +208,7 @@ void address_space_typing_bs__is_valid_ReferenceTypeId(const constants__t_NodeId
     {
         // NodeId not in static array of type nodes info, start research in address space
         bool node_found = false;
-        SOPC_AddressSpace_Item* node = SOPC_AddressSpace_Get_Item(address_space_bs__nodes, nodeId, &node_found);
+        SOPC_AddressSpace_Node* node = SOPC_AddressSpace_Get_Node(address_space_bs__nodes, nodeId, &node_found);
 
         if (node_found)
         {

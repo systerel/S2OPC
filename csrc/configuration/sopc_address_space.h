@@ -30,7 +30,7 @@
             x(View, view, extra)
 
 #define ELEMENT_ATTRIBUTE_GETTER_DECL(ret_type, lowercase_name, camel_case_name) \
-    ret_type* current_element_##lowercase_name(SOPC_AddressSpace_Item* item);
+    ret_type* current_element_##lowercase_name(SOPC_AddressSpace_Node* node);
 
 typedef struct SOPC_Value_Timestamp
 {
@@ -53,28 +53,28 @@ typedef struct
         OpcUa_VariableTypeNode variable_type;
         OpcUa_ViewNode view;
     } data;
-} SOPC_AddressSpace_Item;
+} SOPC_AddressSpace_Node;
 
 /* Address space structure */
 typedef struct _SOPC_AddressSpace SOPC_AddressSpace;
 
-SOPC_AddressSpace* SOPC_AddressSpace_Create(bool free_items);
-SOPC_AddressSpace* SOPC_AddressSpace_CreateReadOnlyItems(uint32_t nb_items,
-                                                         SOPC_AddressSpace_Item* items,
+SOPC_AddressSpace* SOPC_AddressSpace_Create(bool free_nodes);
+SOPC_AddressSpace* SOPC_AddressSpace_CreateReadOnlyNodes(uint32_t nb_nodes,
+                                                         SOPC_AddressSpace_Node* nodes,
                                                          uint32_t nb_variables,
                                                          SOPC_Variant* variables);
-bool SOPC_AddressSpace_AreReadOnlyItems(const SOPC_AddressSpace* space);
-SOPC_ReturnStatus SOPC_AddressSpace_Append(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item);
+bool SOPC_AddressSpace_AreReadOnlyNodes(const SOPC_AddressSpace* space);
+SOPC_ReturnStatus SOPC_AddressSpace_Append(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);
 void SOPC_AddressSpace_Delete(SOPC_AddressSpace* space);
 
-SOPC_AddressSpace_Item* SOPC_AddressSpace_Get_Item(SOPC_AddressSpace* space, const SOPC_NodeId* key, bool* found);
+SOPC_AddressSpace_Node* SOPC_AddressSpace_Get_Node(SOPC_AddressSpace* space, const SOPC_NodeId* key, bool* found);
 
 /**
  * \brief Type of callback functions for \ref SOPC_AddressSpace_ForEach. Both the key and
  * value belong to the address space and shall not be modified. The value of
  * \p user_data is set when calling \ref SOPC_AddressSpace_ForEach.
  * Note: \p key actual type is const SOPC_NodeId* but shall remain void in declaration for generic data structure usage
- * Note: \p value actual type is const SOPC_AddressSpace_Item* but shall remain void in declaration for generic data
+ * Note: \p value actual type is const SOPC_AddressSpace_Node* but shall remain void in declaration for generic data
  * structure usage
  */
 typedef void (*SOPC_AddressSpace_ForEach_Fct)(const void* key, const void* value, void* user_data);
@@ -82,36 +82,36 @@ typedef void (*SOPC_AddressSpace_ForEach_Fct)(const void* key, const void* value
 void SOPC_AddressSpace_ForEach(SOPC_AddressSpace* space, SOPC_AddressSpace_ForEach_Fct func, void* user_data);
 
 /* Common attributes */
-OpcUa_NodeClass* SOPC_AddressSpace_Get_NodeClass(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item);
-SOPC_NodeId* SOPC_AddressSpace_Get_NodeId(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item);
-SOPC_QualifiedName* SOPC_AddressSpace_Get_BrowseName(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item);
-SOPC_LocalizedText* SOPC_AddressSpace_Get_DisplayName(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item);
-SOPC_LocalizedText* SOPC_AddressSpace_Get_Description(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item);
-uint32_t* SOPC_AddressSpace_Get_WriteMask(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item);
-uint32_t* SOPC_AddressSpace_Get_UserWriteMask(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item);
-int32_t* SOPC_AddressSpace_Get_NoOfReferences(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item);
-OpcUa_ReferenceNode** SOPC_AddressSpace_Get_References(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item);
+OpcUa_NodeClass* SOPC_AddressSpace_Get_NodeClass(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);
+SOPC_NodeId* SOPC_AddressSpace_Get_NodeId(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);
+SOPC_QualifiedName* SOPC_AddressSpace_Get_BrowseName(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);
+SOPC_LocalizedText* SOPC_AddressSpace_Get_DisplayName(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);
+SOPC_LocalizedText* SOPC_AddressSpace_Get_Description(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);
+uint32_t* SOPC_AddressSpace_Get_WriteMask(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);
+uint32_t* SOPC_AddressSpace_Get_UserWriteMask(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);
+int32_t* SOPC_AddressSpace_Get_NoOfReferences(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);
+OpcUa_ReferenceNode** SOPC_AddressSpace_Get_References(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);
 /* Variable and VariableType common attributes */
-SOPC_Variant* SOPC_AddressSpace_Get_Value(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item);
+SOPC_Variant* SOPC_AddressSpace_Get_Value(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);
 
-SOPC_Byte SOPC_AddressSpace_Get_AccessLevel(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item);
-SOPC_NodeId* SOPC_AddressSpace_Get_DataType(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item);
-int32_t* SOPC_AddressSpace_Get_ValueRank(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item);
-int32_t SOPC_AddressSpace_Get_NoOfArrayDimensions(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item);
-uint32_t* SOPC_AddressSpace_Get_ArrayDimensions(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item);
+SOPC_Byte SOPC_AddressSpace_Get_AccessLevel(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);
+SOPC_NodeId* SOPC_AddressSpace_Get_DataType(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);
+int32_t* SOPC_AddressSpace_Get_ValueRank(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);
+int32_t SOPC_AddressSpace_Get_NoOfArrayDimensions(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);
+uint32_t* SOPC_AddressSpace_Get_ArrayDimensions(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);
 /* Types common attribute */
-SOPC_Boolean* SOPC_AddressSpace_Get_IsAbstract(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item);
+SOPC_Boolean* SOPC_AddressSpace_Get_IsAbstract(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);
 
-SOPC_StatusCode SOPC_AddressSpace_Get_StatusCode(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item);
-void SOPC_AddressSpace_Set_StatusCode(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item, SOPC_StatusCode status);
+SOPC_StatusCode SOPC_AddressSpace_Get_StatusCode(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);
+void SOPC_AddressSpace_Set_StatusCode(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node, SOPC_StatusCode status);
 
-SOPC_Value_Timestamp SOPC_AddressSpace_Get_SourceTs(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item);
-void SOPC_AddressSpace_Set_SourceTs(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item, SOPC_Value_Timestamp ts);
+SOPC_Value_Timestamp SOPC_AddressSpace_Get_SourceTs(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);
+void SOPC_AddressSpace_Set_SourceTs(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node, SOPC_Value_Timestamp ts);
 
-/* Address space item structure */
-void SOPC_AddressSpace_Item_Initialize(SOPC_AddressSpace* space,
-                                       SOPC_AddressSpace_Item* item,
+/* Address space node structure */
+void SOPC_AddressSpace_Node_Initialize(SOPC_AddressSpace* space,
+                                       SOPC_AddressSpace_Node* node,
                                        OpcUa_NodeClass element_type);
-void SOPC_AddressSpace_Item_Clear(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item);
+void SOPC_AddressSpace_Node_Clear(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);
 
 #endif /* SOPC_ADDRESS_SPACE_H_ */

@@ -66,7 +66,7 @@ typedef SOPC_String* constants_bs__t_IndexRange_i;
 typedef int32_t constants_bs__t_Int32;
 typedef SOPC_LocalizedText* constants_bs__t_LocalizedText_i;
 typedef SOPC_NodeId* constants_bs__t_NodeId_i;
-typedef SOPC_AddressSpace_Item* constants_bs__t_Node_i;
+typedef SOPC_AddressSpace_Node* constants_bs__t_Node_i;
 typedef SOPC_ByteString* constants_bs__t_Nonce_i;
 typedef SOPC_QualifiedName* constants_bs__t_QualifiedName_i;
 typedef SOPC_StatusCode constants_bs__t_RawStatusCode;

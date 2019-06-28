@@ -36,16 +36,16 @@ extern SOPC_AddressSpace* address_space_bs__nodes;
 /**
  * You should free() the returned Variant* afterwards.
  */
-static SOPC_Variant* get_attribute_variant(SOPC_AddressSpace_Item* item, uint32_t attr_id)
+static SOPC_Variant* get_attribute_variant(SOPC_AddressSpace_Node* node, uint32_t attr_id)
 {
     switch (attr_id)
     {
     case constants__e_aid_NodeId:
-        return util_variant__new_Variant_from_NodeId(SOPC_AddressSpace_Get_NodeId(address_space_bs__nodes, item));
+        return util_variant__new_Variant_from_NodeId(SOPC_AddressSpace_Get_NodeId(address_space_bs__nodes, node));
     case constants__e_aid_NodeClass:
-        return util_variant__new_Variant_from_NodeClass(item->node_class);
+        return util_variant__new_Variant_from_NodeClass(node->node_class);
     case constants__e_aid_Value:
-        return util_variant__new_Variant_from_Variant(SOPC_AddressSpace_Get_Value(address_space_bs__nodes, item));
+        return util_variant__new_Variant_from_Variant(SOPC_AddressSpace_Get_Value(address_space_bs__nodes, node));
     /* TODO: rest of mandatory attributes */
     default:
         return NULL;
@@ -91,13 +91,13 @@ bool test_read_request_response(OpcUa_ReadResponse* pReadResp, SOPC_StatusCode s
     for (i = 0; bTestOk && i < pReadReq->NoOfNodesToRead; ++i)
 
     {
-        SOPC_AddressSpace_Item* item =
-            SOPC_AddressSpace_Get_Item(address_space_bs__nodes, &pReadReq->NodesToRead[i].NodeId, &bTestOk);
+        SOPC_AddressSpace_Node* node =
+            SOPC_AddressSpace_Get_Node(address_space_bs__nodes, &pReadReq->NodesToRead[i].NodeId, &bTestOk);
 
         /* Find desired attribute and wrap it in a new SOPC_Variant* */
         if (bTestOk)
         {
-            pvar = get_attribute_variant(item, pReadReq->NodesToRead[i].AttributeId);
+            pvar = get_attribute_variant(node, pReadReq->NodesToRead[i].AttributeId);
         }
         else
         {

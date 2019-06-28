@@ -30,34 +30,34 @@
 
 #define ELEMENT_ATTRIBUTE_INITIALIZE_CASE(val, field, extra) \
     case OpcUa_NodeClass_##val:                              \
-        OpcUa_##val##Node_Initialize(&item->data.field);     \
+        OpcUa_##val##Node_Initialize(&node->data.field);     \
         break;
 
 #define ELEMENT_ATTRIBUTE_CLEAR_CASE(val, field, extra) \
     case OpcUa_NodeClass_##val:                         \
-        OpcUa_##val##Node_Clear(&item->data.field);     \
+        OpcUa_##val##Node_Clear(&node->data.field);     \
         break;
 
 struct _SOPC_AddressSpace
 {
-    /* Maps NodeId to SOPC_AddressSpace_Item */
-    SOPC_Dict* dict_items;
-    /* Set to true if the NodeId and SOPC_AddressSpace_Item are const */
-    bool readOnlyItems;
+    /* Maps NodeId to SOPC_AddressSpace_Node */
+    SOPC_Dict* dict_nodes;
+    /* Set to true if the NodeId and SOPC_AddressSpace_Node are const */
+    bool readOnlyNodes;
     /* Defined only if readOnlyNodes is true:
-     * - dict_items unused
-     * - const_items used instead
+     * - dict_nodes unused
+     * - const_nodes used instead
      * - array of modifiable Variants,
-     *   indexes are defined as UInt32 values in SOPC_AddressSpace_Item variants for all Variable nodes.
+     *   indexes are defined as UInt32 values in SOPC_AddressSpace_Node variants for all Variable nodes.
      *   Note: Values of VariableType nodes are read-only and hence not represented here. */
-    uint32_t nb_items;
-    SOPC_AddressSpace_Item* const_items;
+    uint32_t nb_nodes;
+    SOPC_AddressSpace_Node* const_nodes;
     uint32_t nb_variables;
     SOPC_Variant* variables;
 };
 
-void SOPC_AddressSpace_Item_Initialize(SOPC_AddressSpace* space,
-                                       SOPC_AddressSpace_Item* item,
+void SOPC_AddressSpace_Node_Initialize(SOPC_AddressSpace* space,
+                                       SOPC_AddressSpace_Node* node,
                                        OpcUa_NodeClass node_class)
 {
     switch (node_class)
@@ -67,44 +67,44 @@ void SOPC_AddressSpace_Item_Initialize(SOPC_AddressSpace* space,
         assert(false && "Unknown element type");
     }
 
-    item->node_class = node_class;
-    OpcUa_NodeClass* nodeClass = SOPC_AddressSpace_Get_NodeClass(space, item);
+    node->node_class = node_class;
+    OpcUa_NodeClass* nodeClass = SOPC_AddressSpace_Get_NodeClass(space, node);
     *nodeClass = node_class;
 
     if (node_class == OpcUa_NodeClass_Variable)
     {
-        item->value_status = SOPC_GoodGenericStatus;
+        node->value_status = SOPC_GoodGenericStatus;
         /*Note: set an initial timestamp to return non null timestamps */
-        item->value_source_ts.timestamp = SOPC_Time_GetCurrentTimeUTC();
-        item->value_source_ts.picoSeconds = 0;
-        item->data.variable.ValueRank = -1;
-        item->data.variable.AccessLevel = 1;
+        node->value_source_ts.timestamp = SOPC_Time_GetCurrentTimeUTC();
+        node->value_source_ts.picoSeconds = 0;
+        node->data.variable.ValueRank = -1;
+        node->data.variable.AccessLevel = 1;
     }
     else if (node_class == OpcUa_NodeClass_VariableType)
     {
-        item->value_status = SOPC_GoodGenericStatus;
-        item->value_source_ts.timestamp = 0;
-        item->value_source_ts.picoSeconds = 0;
-        item->data.variable_type.ValueRank = -1;
+        node->value_status = SOPC_GoodGenericStatus;
+        node->value_source_ts.timestamp = 0;
+        node->value_source_ts.picoSeconds = 0;
+        node->data.variable_type.ValueRank = -1;
     }
     else
     {
-        item->value_status = SOPC_GoodGenericStatus;
-        item->value_source_ts.timestamp = 0;
-        item->value_source_ts.picoSeconds = 0;
+        node->value_status = SOPC_GoodGenericStatus;
+        node->value_source_ts.timestamp = 0;
+        node->value_source_ts.picoSeconds = 0;
     }
 }
 
 #define ELEMENT_ATTRIBUTE_GETTER_CASE(val, field, extra) \
     case OpcUa_NodeClass_##val:                          \
-        return &item->data.field.extra;
+        return &node->data.field.extra;
 
 #define ELEMENT_ATTRIBUTE_GETTER(ret_type, name)                                                   \
-    ret_type* SOPC_AddressSpace_Get_##name(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item) \
+    ret_type* SOPC_AddressSpace_Get_##name(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node) \
     {                                                                                              \
         (void) space;                                                                              \
-        assert(item->node_class > 0);                                                              \
-        switch (item->node_class)                                                                  \
+        assert(node->node_class > 0);                                                              \
+        switch (node->node_class)                                                                  \
         {                                                                                          \
             FOR_EACH_ELEMENT_TYPE(ELEMENT_ATTRIBUTE_GETTER_CASE, name)                             \
         default:                                                                                   \
@@ -124,146 +124,146 @@ ELEMENT_ATTRIBUTE_GETTER(uint32_t, WriteMask)
 ELEMENT_ATTRIBUTE_GETTER(uint32_t, UserWriteMask)
 
 // Important note: only for internal use for non const address space
-static SOPC_Variant* SOPC_AddressSpace_Item_Get_Value(SOPC_AddressSpace_Item* item)
+static SOPC_Variant* SOPC_AddressSpace_Node_Get_Value(SOPC_AddressSpace_Node* node)
 {
-    switch (item->node_class)
+    switch (node->node_class)
     {
     case OpcUa_NodeClass_Variable:
-        return &item->data.variable.Value;
+        return &node->data.variable.Value;
     case OpcUa_NodeClass_VariableType:
-        return &item->data.variable_type.Value;
+        return &node->data.variable_type.Value;
     default:
         assert(false && "Current element has no value.");
         return NULL;
     }
 }
 
-SOPC_Variant* SOPC_AddressSpace_Get_Value(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item)
+SOPC_Variant* SOPC_AddressSpace_Get_Value(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node)
 {
-    switch (item->node_class)
+    switch (node->node_class)
     {
     case OpcUa_NodeClass_Variable:
-        if (space->readOnlyItems)
+        if (space->readOnlyNodes)
         {
-            assert(SOPC_VariantArrayType_SingleValue == item->data.variable.Value.ArrayType);
-            assert(SOPC_UInt32_Id == item->data.variable.Value.BuiltInTypeId);
-            return &space->variables[item->data.variable.Value.Value.Uint32];
+            assert(SOPC_VariantArrayType_SingleValue == node->data.variable.Value.ArrayType);
+            assert(SOPC_UInt32_Id == node->data.variable.Value.BuiltInTypeId);
+            return &space->variables[node->data.variable.Value.Value.Uint32];
         }
         else
         {
-            return &item->data.variable.Value;
+            return &node->data.variable.Value;
         }
     case OpcUa_NodeClass_VariableType:
-        return &item->data.variable_type.Value;
+        return &node->data.variable_type.Value;
     default:
         assert(false && "Current element has no value.");
         return NULL;
     }
 }
 
-SOPC_NodeId* SOPC_AddressSpace_Get_DataType(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item)
+SOPC_NodeId* SOPC_AddressSpace_Get_DataType(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node)
 {
     // Avoid unused parameter warning:
     (void) space;
-    switch (item->node_class)
+    switch (node->node_class)
     {
     case OpcUa_NodeClass_Variable:
-        return &item->data.variable.DataType;
+        return &node->data.variable.DataType;
     case OpcUa_NodeClass_VariableType:
-        return &item->data.variable_type.DataType;
+        return &node->data.variable_type.DataType;
     default:
         assert(false && "Current element has no data type.");
         return NULL;
     }
 }
 
-int32_t* SOPC_AddressSpace_Get_ValueRank(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item)
+int32_t* SOPC_AddressSpace_Get_ValueRank(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node)
 {
     // Avoid unused parameter warning:
     (void) space;
-    switch (item->node_class)
+    switch (node->node_class)
     {
     case OpcUa_NodeClass_Variable:
-        return &item->data.variable.ValueRank;
+        return &node->data.variable.ValueRank;
     case OpcUa_NodeClass_VariableType:
-        return &item->data.variable_type.ValueRank;
+        return &node->data.variable_type.ValueRank;
     default:
         assert(false && "Current element has no value rank.");
         return NULL;
     }
 }
 
-int32_t SOPC_AddressSpace_Get_NoOfArrayDimensions(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item)
+int32_t SOPC_AddressSpace_Get_NoOfArrayDimensions(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node)
 {
     // Avoid unused parameter warning:
     (void) space;
-    switch (item->node_class)
+    switch (node->node_class)
     {
     case OpcUa_NodeClass_Variable:
-        return item->data.variable.NoOfArrayDimensions;
+        return node->data.variable.NoOfArrayDimensions;
     case OpcUa_NodeClass_VariableType:
-        return item->data.variable_type.NoOfArrayDimensions;
+        return node->data.variable_type.NoOfArrayDimensions;
     default:
         assert(false && "Current element has no NoOfDimensions.");
         return -1;
     }
 }
 
-uint32_t* SOPC_AddressSpace_Get_ArrayDimensions(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item)
+uint32_t* SOPC_AddressSpace_Get_ArrayDimensions(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node)
 {
     // Avoid unused parameter warning:
     (void) space;
-    switch (item->node_class)
+    switch (node->node_class)
     {
     case OpcUa_NodeClass_Variable:
-        return item->data.variable.ArrayDimensions;
+        return node->data.variable.ArrayDimensions;
     case OpcUa_NodeClass_VariableType:
-        return item->data.variable_type.ArrayDimensions;
+        return node->data.variable_type.ArrayDimensions;
     default:
         assert(false && "Current element has no ArrayDimensions.");
         return NULL;
     }
 }
 
-SOPC_Byte SOPC_AddressSpace_Get_AccessLevel(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item)
+SOPC_Byte SOPC_AddressSpace_Get_AccessLevel(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node)
 {
     // Avoid unused parameter warning:
     (void) space;
-    switch (item->node_class)
+    switch (node->node_class)
     {
     case OpcUa_NodeClass_Variable:
-        return item->data.variable.AccessLevel;
+        return node->data.variable.AccessLevel;
     default:
         assert(false && "Current element has no access level.");
         return 0;
     }
 }
 
-SOPC_Boolean* SOPC_AddressSpace_Get_IsAbstract(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item)
+SOPC_Boolean* SOPC_AddressSpace_Get_IsAbstract(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node)
 {
     // Avoid unused parameter warning:
     (void) space;
-    switch (item->node_class)
+    switch (node->node_class)
     {
     case OpcUa_NodeClass_VariableType:
-        return &item->data.variable_type.IsAbstract;
+        return &node->data.variable_type.IsAbstract;
     case OpcUa_NodeClass_ObjectType:
-        return &item->data.object_type.IsAbstract;
+        return &node->data.object_type.IsAbstract;
     case OpcUa_NodeClass_ReferenceType:
-        return &item->data.reference_type.IsAbstract;
+        return &node->data.reference_type.IsAbstract;
     case OpcUa_NodeClass_DataType:
-        return &item->data.data_type.IsAbstract;
+        return &node->data.data_type.IsAbstract;
     default:
         assert(false && "Current element has no IsAbstract attribute.");
         return NULL;
     }
 }
 
-SOPC_StatusCode SOPC_AddressSpace_Get_StatusCode(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item)
+SOPC_StatusCode SOPC_AddressSpace_Get_StatusCode(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node)
 {
-    if (!space->readOnlyItems)
+    if (!space->readOnlyNodes)
     {
-        return item->value_status;
+        return node->value_status;
     }
     else
     {
@@ -271,19 +271,19 @@ SOPC_StatusCode SOPC_AddressSpace_Get_StatusCode(SOPC_AddressSpace* space, SOPC_
     }
 }
 
-void SOPC_AddressSpace_Set_StatusCode(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item, SOPC_StatusCode status)
+void SOPC_AddressSpace_Set_StatusCode(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node, SOPC_StatusCode status)
 {
-    if (!space->readOnlyItems)
+    if (!space->readOnlyNodes)
     {
-        item->value_status = status;
+        node->value_status = status;
     }
 }
 
-SOPC_Value_Timestamp SOPC_AddressSpace_Get_SourceTs(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item)
+SOPC_Value_Timestamp SOPC_AddressSpace_Get_SourceTs(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node)
 {
-    if (!space->readOnlyItems)
+    if (!space->readOnlyNodes)
     {
-        return item->value_source_ts;
+        return node->value_source_ts;
     }
     else
     {
@@ -292,19 +292,19 @@ SOPC_Value_Timestamp SOPC_AddressSpace_Get_SourceTs(SOPC_AddressSpace* space, SO
     }
 }
 
-void SOPC_AddressSpace_Set_SourceTs(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item, SOPC_Value_Timestamp ts)
+void SOPC_AddressSpace_Set_SourceTs(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node, SOPC_Value_Timestamp ts)
 {
-    if (!space->readOnlyItems)
+    if (!space->readOnlyNodes)
     {
-        item->value_source_ts = ts;
+        node->value_source_ts = ts;
     }
 }
 
-static void SOPC_AddressSpace_Item_Clear_Local(SOPC_AddressSpace_Item* item)
+static void SOPC_AddressSpace_Node_Clear_Local(SOPC_AddressSpace_Node* node)
 {
-    assert(item->node_class > 0);
+    assert(node->node_class > 0);
 
-    switch (item->node_class)
+    switch (node->node_class)
     {
         FOR_EACH_ELEMENT_TYPE(ELEMENT_ATTRIBUTE_CLEAR_CASE, NULL)
     default:
@@ -312,41 +312,41 @@ static void SOPC_AddressSpace_Item_Clear_Local(SOPC_AddressSpace_Item* item)
     }
 }
 
-void SOPC_AddressSpace_Item_Clear(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item)
+void SOPC_AddressSpace_Node_Clear(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node)
 {
     // Avoid unused parameter warning:
     (void) space;
-    SOPC_AddressSpace_Item_Clear_Local(item);
+    SOPC_AddressSpace_Node_Clear_Local(node);
 }
 
-static void clear_description_item_value(void* data)
+static void clear_description_node_value(void* data)
 {
-    SOPC_AddressSpace_Item* item = data;
+    SOPC_AddressSpace_Node* node = data;
 
-    if (item->node_class == OpcUa_NodeClass_Variable || item->node_class == OpcUa_NodeClass_VariableType)
+    if (node->node_class == OpcUa_NodeClass_Variable || node->node_class == OpcUa_NodeClass_VariableType)
     {
-        SOPC_Variant_Clear(SOPC_AddressSpace_Item_Get_Value(item));
+        SOPC_Variant_Clear(SOPC_AddressSpace_Node_Get_Value(node));
     }
 }
 
-static void free_description_item(void* data)
+static void free_description_node(void* data)
 {
-    SOPC_AddressSpace_Item* item = data;
-    SOPC_AddressSpace_Item_Clear_Local(item);
-    SOPC_Free(item);
+    SOPC_AddressSpace_Node* node = data;
+    SOPC_AddressSpace_Node_Clear_Local(node);
+    SOPC_Free(node);
 }
 
-SOPC_AddressSpace* SOPC_AddressSpace_Create(bool free_items)
+SOPC_AddressSpace* SOPC_AddressSpace_Create(bool free_nodes)
 {
     SOPC_AddressSpace* result = SOPC_Calloc(1, sizeof(SOPC_AddressSpace));
     if (NULL == result)
     {
         return NULL;
     }
-    result->readOnlyItems = false;
-    result->dict_items =
-        SOPC_NodeId_Dict_Create(false, free_items ? free_description_item : clear_description_item_value);
-    if (NULL == result->dict_items)
+    result->readOnlyNodes = false;
+    result->dict_nodes =
+        SOPC_NodeId_Dict_Create(false, free_nodes ? free_description_node : clear_description_node_value);
+    if (NULL == result->dict_nodes)
     {
         free(result);
         return NULL;
@@ -354,8 +354,8 @@ SOPC_AddressSpace* SOPC_AddressSpace_Create(bool free_items)
     return result;
 }
 
-SOPC_AddressSpace* SOPC_AddressSpace_CreateReadOnlyItems(uint32_t nb_items,
-                                                         SOPC_AddressSpace_Item* items,
+SOPC_AddressSpace* SOPC_AddressSpace_CreateReadOnlyNodes(uint32_t nb_nodes,
+                                                         SOPC_AddressSpace_Node* nodes,
                                                          uint32_t nb_variables,
                                                          SOPC_Variant* variables)
 {
@@ -364,77 +364,77 @@ SOPC_AddressSpace* SOPC_AddressSpace_CreateReadOnlyItems(uint32_t nb_items,
     {
         return NULL;
     }
-    result->readOnlyItems = true;
+    result->readOnlyNodes = true;
 
-    result->nb_items = nb_items;
-    result->const_items = items;
+    result->nb_nodes = nb_nodes;
+    result->const_nodes = nodes;
     result->nb_variables = nb_variables;
     result->variables = variables;
 
     return result;
 }
 
-bool SOPC_AddressSpace_AreReadOnlyItems(const SOPC_AddressSpace* space)
+bool SOPC_AddressSpace_AreReadOnlyNodes(const SOPC_AddressSpace* space)
 {
-    return space->readOnlyItems;
+    return space->readOnlyNodes;
 }
 
-SOPC_ReturnStatus SOPC_AddressSpace_Append(SOPC_AddressSpace* space, SOPC_AddressSpace_Item* item)
+SOPC_ReturnStatus SOPC_AddressSpace_Append(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node)
 {
-    if (space->readOnlyItems)
+    if (space->readOnlyNodes)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
 
-    SOPC_NodeId* id = SOPC_AddressSpace_Get_NodeId(space, item);
+    SOPC_NodeId* id = SOPC_AddressSpace_Get_NodeId(space, node);
 
-    if (OpcUa_NodeClass_Variable == item->node_class)
+    if (OpcUa_NodeClass_Variable == node->node_class)
     {
         /*Note: set an initial timestamp to could return non null timestamps */
-        if ((item->value_source_ts.timestamp == 0 && item->value_source_ts.picoSeconds == 0))
+        if ((node->value_source_ts.timestamp == 0 && node->value_source_ts.picoSeconds == 0))
         {
-            if (item->value_source_ts.timestamp == 0 && item->value_source_ts.picoSeconds == 0)
+            if (node->value_source_ts.timestamp == 0 && node->value_source_ts.picoSeconds == 0)
             {
-                item->value_source_ts.timestamp = SOPC_Time_GetCurrentTimeUTC();
+                node->value_source_ts.timestamp = SOPC_Time_GetCurrentTimeUTC();
             }
         }
     }
 
-    return SOPC_Dict_Insert(space->dict_items, id, item) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+    return SOPC_Dict_Insert(space->dict_nodes, id, node) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
 }
 
 void SOPC_AddressSpace_Delete(SOPC_AddressSpace* space)
 {
-    SOPC_Dict_Delete(space->dict_items);
-    space->dict_items = NULL;
+    SOPC_Dict_Delete(space->dict_nodes);
+    space->dict_nodes = NULL;
     for (uint32_t i = 0; i < space->nb_variables; i++)
     {
         SOPC_Variant_Clear(&space->variables[i]);
     }
     // Do not free variables array which was provided as input
-    space->nb_items = 0;
-    space->const_items = NULL;
+    space->nb_nodes = 0;
+    space->const_nodes = NULL;
     space->nb_variables = 0;
     space->variables = NULL;
     free(space);
 }
 
-SOPC_AddressSpace_Item* SOPC_AddressSpace_Get_Item(SOPC_AddressSpace* space, const SOPC_NodeId* key, bool* found)
+SOPC_AddressSpace_Node* SOPC_AddressSpace_Get_Node(SOPC_AddressSpace* space, const SOPC_NodeId* key, bool* found)
 {
-    if (!space->readOnlyItems)
+    if (!space->readOnlyNodes)
     {
-        return SOPC_Dict_Get(space->dict_items, key, found);
+        return SOPC_Dict_Get(space->dict_nodes, key, found);
     }
     else
     {
-        SOPC_AddressSpace_Item* result = NULL;
+        SOPC_AddressSpace_Node* result = NULL;
         bool lfound = false;
-        for (uint32_t i = 0; i < space->nb_items && !lfound; i++)
+        for (uint32_t i = 0; i < space->nb_nodes && !lfound; i++)
         {
-            lfound = SOPC_NodeId_Equal(key, SOPC_AddressSpace_Get_NodeId(space, &space->const_items[i]));
+            lfound = SOPC_NodeId_Equal(key, SOPC_AddressSpace_Get_NodeId(space, &space->const_nodes[i]));
             if (lfound)
             {
-                result = &space->const_items[i];
+                result = &space->const_nodes[i];
             }
         }
         *found = lfound;
@@ -444,15 +444,15 @@ SOPC_AddressSpace_Item* SOPC_AddressSpace_Get_Item(SOPC_AddressSpace* space, con
 
 void SOPC_AddressSpace_ForEach(SOPC_AddressSpace* space, SOPC_AddressSpace_ForEach_Fct func, void* user_data)
 {
-    if (!space->readOnlyItems)
+    if (!space->readOnlyNodes)
     {
-        SOPC_Dict_ForEach(space->dict_items, func, user_data);
+        SOPC_Dict_ForEach(space->dict_nodes, func, user_data);
     }
     else
     {
-        for (uint32_t i = 0; i < space->nb_items; i++)
+        for (uint32_t i = 0; i < space->nb_nodes; i++)
         {
-            func(SOPC_AddressSpace_Get_NodeId(space, &space->const_items[i]), &space->const_items[i], user_data);
+            func(SOPC_AddressSpace_Get_NodeId(space, &space->const_nodes[i]), &space->const_nodes[i], user_data);
         }
     }
 }

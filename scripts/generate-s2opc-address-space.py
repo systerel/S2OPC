@@ -791,9 +791,9 @@ def generate_address_space(is_const_addspace, source, out):
     out.write("const bool sopc_embedded_is_const_addspace = %s;\n\n" % ("true" if is_const_addspace else "false"))
     if is_const_addspace:
         out.write('SOPC_GCC_DIAGNOSTIC_IGNORE_DISCARD_QUALIFIER\n')
-        out.write('const SOPC_AddressSpace_Item SOPC_Embedded_AddressSpace_Items[] = {\n')
+        out.write('const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {\n')
     else:
-        out.write('SOPC_AddressSpace_Item SOPC_Embedded_AddressSpace_Items[] = {\n')
+        out.write('SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {\n')
 
     expect_element(source, UA_NODESET_TAG).clear()
 
@@ -807,10 +807,10 @@ def generate_address_space(is_const_addspace, source, out):
             out.write('};\n')
             if is_const_addspace:
                 out.write('SOPC_GCC_DIAGNOSTIC_RESTORE\n')
-            out.write('const uint32_t SOPC_Embedded_AddressSpace_nItems = %d;\n' % n_items)
+            out.write('const uint32_t SOPC_Embedded_AddressSpace_nNodes = %d;\n' % n_items)
             out.write('\n');
             if len(variables) > 0:
-                out.write('// Index is provided by the corresponding Variable UInt32 Variant in SOPC_Embedded_AddressSpace_Items\n');
+                out.write('// Index is provided by the corresponding Variable UInt32 Variant in SOPC_Embedded_AddressSpace_Nodes\n');
                 out.write('SOPC_Variant SOPC_Embedded_VariableVariant[%d] = {\n' % len(variables))
                 for i in range(0, len(variables)):
                     out.write(variables[i])

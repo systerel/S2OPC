@@ -94,10 +94,10 @@ struct parse_context_t
     char* current_alias_alias;
     SOPC_BuiltinId current_value_type;
     SOPC_VariantArrayType current_array_type;
-    SOPC_AddressSpace_Item item;
+    SOPC_AddressSpace_Node node;
     // Temporary array to store the references.
     SOPC_Array* references;
-    SOPC_Array* list_items;
+    SOPC_Array* list_nodes;
 };
 
 #define NS_SEPARATOR "|"
@@ -483,9 +483,9 @@ static const char* tag_from_element_id(const uint32_t id)
 
 static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const XML_Char** attrs)
 {
-    assert(ctx->item.node_class == 0);
+    assert(ctx->node.node_class == 0);
 
-    SOPC_AddressSpace_Item_Initialize(ctx->space, &ctx->item, element_type);
+    SOPC_AddressSpace_Node_Initialize(ctx->space, &ctx->node, element_type);
     // Note: value_status default value set on NodeId parsing
 
     for (size_t i = 0; attrs[i]; ++i)
@@ -513,9 +513,9 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
             // Set value_status default value:
             // Keep OPC UA default namespace nodes with a Good status,
             // necessary to pass UACTT otherwise keep Good status only if a value is defined
-            ctx->item.value_status = id->Namespace == 0 ? SOPC_GoodGenericStatus : OpcUa_UncertainInitialValue;
+            ctx->node.value_status = id->Namespace == 0 ? SOPC_GoodGenericStatus : OpcUa_UncertainInitialValue;
 
-            SOPC_NodeId* element_id = SOPC_AddressSpace_Get_NodeId(ctx->space, &ctx->item);
+            SOPC_NodeId* element_id = SOPC_AddressSpace_Get_NodeId(ctx->space, &ctx->node);
             SOPC_ReturnStatus status = SOPC_NodeId_Copy(element_id, id);
             SOPC_NodeId_Clear(id);
             SOPC_Free(id);
@@ -530,7 +530,7 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
         {
             const char* attr_val = attrs[++i];
 
-            SOPC_QualifiedName* element_browse_name = SOPC_AddressSpace_Get_BrowseName(ctx->space, &ctx->item);
+            SOPC_QualifiedName* element_browse_name = SOPC_AddressSpace_Get_BrowseName(ctx->space, &ctx->node);
             SOPC_QualifiedName_Initialize(element_browse_name);
             SOPC_ReturnStatus status = SOPC_QualifiedName_ParseCString(element_browse_name, attr_val);
 
@@ -574,7 +574,7 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
                 return false;
             }
 
-            SOPC_NodeId* dataType = SOPC_AddressSpace_Get_DataType(ctx->space, &ctx->item);
+            SOPC_NodeId* dataType = SOPC_AddressSpace_Get_DataType(ctx->space, &ctx->node);
             SOPC_ReturnStatus status = SOPC_NodeId_Copy(dataType, id);
             SOPC_NodeId_Clear(id);
             SOPC_Free(id);
@@ -611,7 +611,7 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
                 return false;
             }
 
-            int32_t* valueRank = SOPC_AddressSpace_Get_ValueRank(ctx->space, &ctx->item);
+            int32_t* valueRank = SOPC_AddressSpace_Get_ValueRank(ctx->space, &ctx->node);
             *valueRank = parsedValueRank;
         }
         else if (strcmp("AccessLevel", attr) == 0)
@@ -626,7 +626,7 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
 
             const char* attr_val = attrs[++i];
 
-            if (!parse_unsigned_value(attr_val, strlen(attr_val), 8, &ctx->item.data.variable.AccessLevel))
+            if (!parse_unsigned_value(attr_val, strlen(attr_val), 8, &ctx->node.data.variable.AccessLevel))
             {
                 LOG_XML_ERRORF("Invalid AccessLevel on node value: '%s", attr_val);
                 return false;
@@ -713,11 +713,11 @@ static bool start_node_reference(struct parse_context_t* ctx, const XML_Char** a
 static bool start_node_value_array(struct parse_context_t* ctx)
 {
     assert(ctx->current_array_type == SOPC_VariantArrayType_Array);
-    assert(ctx->list_items == NULL);
+    assert(ctx->list_nodes == NULL);
 
-    ctx->list_items = SOPC_Array_Create(sizeof(SOPC_Variant), 0, (SOPC_Array_Free_Func) SOPC_Variant_ClearAux);
+    ctx->list_nodes = SOPC_Array_Create(sizeof(SOPC_Variant), 0, (SOPC_Array_Free_Func) SOPC_Variant_ClearAux);
 
-    if (ctx->list_items == NULL)
+    if (ctx->list_nodes == NULL)
     {
         LOG_MEMORY_ALLOCATION_FAILURE;
         return false;
@@ -735,7 +735,7 @@ static void skip_tag(struct parse_context_t* ctx, const char* name)
 
 static bool current_element_has_value(struct parse_context_t* ctx)
 {
-    switch (ctx->item.node_class)
+    switch (ctx->node.node_class)
     {
     case OpcUa_NodeClass_Variable:
     case OpcUa_NodeClass_VariableType:
@@ -992,9 +992,9 @@ static SOPC_LocalizedText* element_localized_text_for_state(struct parse_context
     switch (ctx->state)
     {
     case PARSE_NODE_DISPLAYNAME:
-        return SOPC_AddressSpace_Get_DisplayName(ctx->space, &ctx->item);
+        return SOPC_AddressSpace_Get_DisplayName(ctx->space, &ctx->node);
     case PARSE_NODE_DESCRIPTION:
-        return SOPC_AddressSpace_Get_Description(ctx->space, &ctx->item);
+        return SOPC_AddressSpace_Get_Description(ctx->space, &ctx->node);
     default:
         assert(false && "Unexpected state");
     }
@@ -1356,13 +1356,13 @@ static bool set_element_value_scalar(struct parse_context_t* ctx)
 {
     assert(ctx->current_array_type == SOPC_VariantArrayType_SingleValue);
 
-    SOPC_Variant* var = SOPC_AddressSpace_Get_Value(ctx->space, &ctx->item);
+    SOPC_Variant* var = SOPC_AddressSpace_Get_Value(ctx->space, &ctx->node);
     bool ok = set_variant_value(var, ctx->current_value_type, ctx_char_data_stripped(ctx));
     ctx_char_data_reset(ctx);
 
     if (ok)
     {
-        ctx->item.value_status = SOPC_GoodGenericStatus;
+        ctx->node.value_status = SOPC_GoodGenericStatus;
     }
 
     return ok;
@@ -1389,7 +1389,7 @@ static bool append_element_value(struct parse_context_t* ctx)
         return false;
     }
 
-    bool appended = SOPC_Array_Append(ctx->list_items, *var);
+    bool appended = SOPC_Array_Append(ctx->list_nodes, *var);
 
     if (!appended)
     {
@@ -1435,15 +1435,15 @@ static bool SOPC_Array_Of_Variant_Into_Variant_Array(SOPC_Array* var_arr, SOPC_B
 static bool set_element_value_array(struct parse_context_t* ctx)
 {
     assert(ctx->current_array_type == SOPC_VariantArrayType_Array);
-    assert(ctx->list_items != NULL);
+    assert(ctx->list_nodes != NULL);
 
-    SOPC_Variant* var = SOPC_AddressSpace_Get_Value(ctx->space, &ctx->item);
+    SOPC_Variant* var = SOPC_AddressSpace_Get_Value(ctx->space, &ctx->node);
 
-    bool res = SOPC_Array_Of_Variant_Into_Variant_Array(ctx->list_items, ctx->current_value_type, var);
+    bool res = SOPC_Array_Of_Variant_Into_Variant_Array(ctx->list_nodes, ctx->current_value_type, var);
 
-    SOPC_Array_Delete(ctx->list_items);
-    ctx->list_items = NULL;
-    ctx->item.value_status = SOPC_GoodGenericStatus;
+    SOPC_Array_Delete(ctx->list_nodes);
+    ctx->list_nodes = NULL;
+    ctx->node.value_status = SOPC_GoodGenericStatus;
 
     return res;
 }
@@ -1455,28 +1455,28 @@ static bool finalize_node(struct parse_context_t* ctx)
         size_t n_references = SOPC_Array_Size(ctx->references);
         assert(n_references <= INT32_MAX);
 
-        *SOPC_AddressSpace_Get_NoOfReferences(ctx->space, &ctx->item) = (int32_t) n_references;
-        *SOPC_AddressSpace_Get_References(ctx->space, &ctx->item) = SOPC_Array_Into_Raw(ctx->references);
+        *SOPC_AddressSpace_Get_NoOfReferences(ctx->space, &ctx->node) = (int32_t) n_references;
+        *SOPC_AddressSpace_Get_References(ctx->space, &ctx->node) = SOPC_Array_Into_Raw(ctx->references);
         ctx->references = NULL;
     }
 
-    SOPC_AddressSpace_Item* item = SOPC_Calloc(1, sizeof(SOPC_AddressSpace_Item));
+    SOPC_AddressSpace_Node* node = SOPC_Calloc(1, sizeof(SOPC_AddressSpace_Node));
 
-    if (item == NULL)
+    if (node == NULL)
     {
         LOG_MEMORY_ALLOCATION_FAILURE;
         return false;
     }
 
-    memcpy(item, &ctx->item, sizeof(SOPC_AddressSpace_Item));
+    memcpy(node, &ctx->node, sizeof(SOPC_AddressSpace_Node));
 
-    if (SOPC_AddressSpace_Append(ctx->space, item) == SOPC_STATUS_OK)
+    if (SOPC_AddressSpace_Append(ctx->space, node) == SOPC_STATUS_OK)
     {
         return true;
     }
     else
     {
-        SOPC_Free(item);
+        SOPC_Free(node);
         return false;
     }
 }
@@ -1586,12 +1586,12 @@ static void end_element_handler(void* user_data, const XML_Char* name)
 
         if (!ok)
         {
-            SOPC_AddressSpace_Item_Clear(ctx->space, &ctx->item);
+            SOPC_AddressSpace_Node_Clear(ctx->space, &ctx->node);
             XML_StopParser(ctx->parser, false);
             return;
         }
 
-        ctx->item.node_class = 0;
+        ctx->node.node_class = 0;
         ctx->state = PARSE_NODESET;
         break;
     }
@@ -1685,7 +1685,7 @@ SOPC_AddressSpace* SOPC_UANodeSet_Parse(FILE* fd)
     SOPC_Free(ctx.current_alias_alias);
     SOPC_Free(ctx.char_data_buffer);
     SOPC_Array_Delete(ctx.references);
-    SOPC_Array_Delete(ctx.list_items);
+    SOPC_Array_Delete(ctx.list_nodes);
 
     if (res == SOPC_STATUS_OK)
     {
@@ -1693,7 +1693,7 @@ SOPC_AddressSpace* SOPC_UANodeSet_Parse(FILE* fd)
     }
     else
     {
-        SOPC_AddressSpace_Item_Clear(ctx.space, &ctx.item);
+        SOPC_AddressSpace_Node_Clear(ctx.space, &ctx.node);
         SOPC_AddressSpace_Delete(space);
         return NULL;
     }

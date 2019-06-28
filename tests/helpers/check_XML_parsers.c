@@ -45,12 +45,12 @@
 static const int64_t SOPC_SECOND_TO_100_NANOSECONDS = 10000000; // 10^7
 
 static void check_variable_and_type_common(SOPC_AddressSpace* leftSpace,
-                                           SOPC_AddressSpace_Item* left,
+                                           SOPC_AddressSpace_Node* left,
                                            SOPC_AddressSpace* rightSpace,
-                                           SOPC_AddressSpace_Item* right)
+                                           SOPC_AddressSpace_Node* right)
 {
     /* Check value metadata (should be only valid for Variable/VariableType) */
-    if (!SOPC_AddressSpace_AreReadOnlyItems(leftSpace) && !SOPC_AddressSpace_AreReadOnlyItems(rightSpace))
+    if (!SOPC_AddressSpace_AreReadOnlyNodes(leftSpace) && !SOPC_AddressSpace_AreReadOnlyNodes(rightSpace))
     {
         ck_assert_uint_eq(SOPC_AddressSpace_Get_StatusCode(leftSpace, left),
                           SOPC_AddressSpace_Get_StatusCode(rightSpace, right));
@@ -69,12 +69,12 @@ static void check_variable_and_type_common(SOPC_AddressSpace* leftSpace,
         }
     }
 
-    if (SOPC_AddressSpace_AreReadOnlyItems(leftSpace))
+    if (SOPC_AddressSpace_AreReadOnlyNodes(leftSpace))
     {
         ck_assert_uint_eq(SOPC_GoodGenericStatus, SOPC_AddressSpace_Get_StatusCode(leftSpace, left));
     }
 
-    if (SOPC_AddressSpace_AreReadOnlyItems(rightSpace))
+    if (SOPC_AddressSpace_AreReadOnlyNodes(rightSpace))
     {
         ck_assert_uint_eq(SOPC_GoodGenericStatus, SOPC_AddressSpace_Get_StatusCode(rightSpace, right));
     }
@@ -114,17 +114,17 @@ static void addspace_for_each_equal(const void* key, const void* value, void* us
     printf("Checking node: %s\n", SOPC_NodeId_ToCString(id));
     */
     bool found = false;
-    /* Note: we do not have read-only accessors for SOPC_AddressSpace_Item even if in this case we do not modify
+    /* Note: we do not have read-only accessors for SOPC_AddressSpace_Node even if in this case we do not modify
      * accessed values */
     SOPC_AddressSpace** addSpaces = user_data;
 
     SOPC_AddressSpace* leftSpace = addSpaces[0];
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-    SOPC_AddressSpace_Item* left = (SOPC_AddressSpace_Item*) value;
+    SOPC_AddressSpace_Node* left = (SOPC_AddressSpace_Node*) value;
     SOPC_GCC_DIAGNOSTIC_RESTORE
 
     SOPC_AddressSpace* rightSpace = addSpaces[1];
-    SOPC_AddressSpace_Item* right = SOPC_AddressSpace_Get_Item(rightSpace, key, &found);
+    SOPC_AddressSpace_Node* right = SOPC_AddressSpace_Get_Node(rightSpace, key, &found);
     ck_assert(found);
 
     /* Check item type */
