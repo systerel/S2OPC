@@ -3285,7 +3285,7 @@ static bool SC_Chunks_TreatSendBuffer(
                 case SOPC_MSG_TYPE_SC_OPN:
                 case SOPC_MSG_TYPE_SC_MSG:
                     /* CLIENT SIDE: RECORD REQUEST SENT (response expected)*/
-                    msgCtx = calloc(1, sizeof(SOPC_SentRequestMsg_Context));
+                    msgCtx = SOPC_Calloc(1, sizeof(SOPC_SentRequestMsg_Context));
                     if (msgCtx != NULL)
                     {
                         msgCtx->scConnectionIdx = scConnectionIdx;

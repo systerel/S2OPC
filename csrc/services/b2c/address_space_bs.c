@@ -544,7 +544,7 @@ void address_space_bs__set_Value(const constants__t_user_i address_space_bs__p_u
     SOPC_Variant* convertedValue = NULL;
     const SOPC_Variant* newValue = address_space_bs__variant;
 
-    *address_space_bs__prev_dataValue = calloc(1, sizeof(SOPC_DataValue));
+    *address_space_bs__prev_dataValue = SOPC_Calloc(1, sizeof(SOPC_DataValue));
 
     if (address_space_bs__toConvert)
     {

@@ -1766,7 +1766,7 @@ char* SOPC_NodeId_ToCString(const SOPC_NodeId* nodeId)
         default:
             break;
         }
-        result = calloc(maxSize, sizeof(char));
+        result = SOPC_Calloc(maxSize, sizeof(char));
         if (result != NULL)
         {
             if (nodeId->Namespace != 0)
@@ -1849,7 +1849,7 @@ SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString, int32_t len)
     /* Copy the string in a safe place and sscanf it */
     if (NULL != cString && len > 0)
     {
-        sz = (char*) calloc((size_t) len + 1, sizeof(char));
+        sz = SOPC_Calloc((size_t) len + 1, sizeof(char));
     }
     if (NULL != sz)
     {
@@ -2780,127 +2780,127 @@ static SOPC_ReturnStatus AllocVariantArrayBuiltInType(SOPC_BuiltinId builtInType
             // mantis #0003682: errata for 1.03 but not confirmed NULL array forbidden
             break; // SOPC_STATUS_NOK since a NULL must not be an array
         case SOPC_Boolean_Id:
-            array->BooleanArr = calloc(size, sizeof(SOPC_Boolean));
+            array->BooleanArr = SOPC_Calloc(size, sizeof(SOPC_Boolean));
             if (NULL != array->BooleanArr)
                 return SOPC_STATUS_OK;
             break;
         case SOPC_SByte_Id:
-            array->SbyteArr = calloc(size, sizeof(SOPC_SByte));
+            array->SbyteArr = SOPC_Calloc(size, sizeof(SOPC_SByte));
             if (NULL != array->SbyteArr)
                 return SOPC_STATUS_OK;
             break;
         case SOPC_Byte_Id:
-            array->ByteArr = calloc(size, sizeof(SOPC_Byte));
+            array->ByteArr = SOPC_Calloc(size, sizeof(SOPC_Byte));
             if (NULL != array->ByteArr)
                 return SOPC_STATUS_OK;
             break;
         case SOPC_Int16_Id:
-            array->Int16Arr = calloc(size, sizeof(int16_t));
+            array->Int16Arr = SOPC_Calloc(size, sizeof(int16_t));
             if (NULL != array->Int16Arr)
                 return SOPC_STATUS_OK;
             break;
         case SOPC_UInt16_Id:
-            array->Uint16Arr = calloc(size, sizeof(uint16_t));
+            array->Uint16Arr = SOPC_Calloc(size, sizeof(uint16_t));
             if (NULL != array->Uint16Arr)
                 return SOPC_STATUS_OK;
             break;
         case SOPC_Int32_Id:
-            array->Int32Arr = calloc(size, sizeof(int32_t));
+            array->Int32Arr = SOPC_Calloc(size, sizeof(int32_t));
             if (NULL != array->Int32Arr)
                 return SOPC_STATUS_OK;
             break;
         case SOPC_UInt32_Id:
-            array->Uint32Arr = calloc(size, sizeof(uint32_t));
+            array->Uint32Arr = SOPC_Calloc(size, sizeof(uint32_t));
             if (NULL != array->Uint32Arr)
                 return SOPC_STATUS_OK;
             break;
         case SOPC_Int64_Id:
-            array->Int64Arr = calloc(size, sizeof(int64_t));
+            array->Int64Arr = SOPC_Calloc(size, sizeof(int64_t));
             if (NULL != array->Int64Arr)
                 return SOPC_STATUS_OK;
             break;
         case SOPC_UInt64_Id:
-            array->Uint64Arr = calloc(size, sizeof(uint64_t));
+            array->Uint64Arr = SOPC_Calloc(size, sizeof(uint64_t));
             if (NULL != array->Uint64Arr)
                 return SOPC_STATUS_OK;
             break;
         case SOPC_Float_Id:
-            array->FloatvArr = calloc(size, sizeof(float));
+            array->FloatvArr = SOPC_Calloc(size, sizeof(float));
             if (NULL != array->FloatvArr)
                 return SOPC_STATUS_OK;
             break;
         case SOPC_Double_Id:
-            array->DoublevArr = calloc(size, sizeof(double));
+            array->DoublevArr = SOPC_Calloc(size, sizeof(double));
             if (NULL != array->DoublevArr)
                 return SOPC_STATUS_OK;
             break;
         case SOPC_String_Id:
-            array->StringArr = calloc(size, sizeof(SOPC_String));
+            array->StringArr = SOPC_Calloc(size, sizeof(SOPC_String));
             if (NULL != array->StringArr)
                 return SOPC_STATUS_OK;
             break;
         case SOPC_DateTime_Id:
-            array->DateArr = calloc(size, sizeof(SOPC_DateTime));
+            array->DateArr = SOPC_Calloc(size, sizeof(SOPC_DateTime));
             if (NULL != array->DateArr)
                 return SOPC_STATUS_OK;
             break;
         case SOPC_Guid_Id:
-            array->GuidArr = calloc(size, sizeof(SOPC_Guid));
+            array->GuidArr = SOPC_Calloc(size, sizeof(SOPC_Guid));
             if (NULL != array->GuidArr)
                 return SOPC_STATUS_OK;
             break;
         case SOPC_ByteString_Id:
-            array->BstringArr = calloc(size, sizeof(SOPC_ByteString));
+            array->BstringArr = SOPC_Calloc(size, sizeof(SOPC_ByteString));
             if (NULL != array->BstringArr)
                 return SOPC_STATUS_OK;
             break;
         case SOPC_XmlElement_Id:
-            array->XmlEltArr = calloc(size, sizeof(SOPC_XmlElement));
+            array->XmlEltArr = SOPC_Calloc(size, sizeof(SOPC_XmlElement));
             if (NULL != array->XmlEltArr)
                 return SOPC_STATUS_OK;
             break;
         case SOPC_NodeId_Id:
-            array->NodeIdArr = calloc(size, sizeof(SOPC_NodeId));
+            array->NodeIdArr = SOPC_Calloc(size, sizeof(SOPC_NodeId));
             if (NULL != array->NodeIdArr)
                 return SOPC_STATUS_OK;
             break;
         case SOPC_ExpandedNodeId_Id:
-            array->ExpNodeIdArr = calloc(size, sizeof(SOPC_ExpandedNodeId));
+            array->ExpNodeIdArr = SOPC_Calloc(size, sizeof(SOPC_ExpandedNodeId));
             if (NULL != array->ExpNodeIdArr)
                 return SOPC_STATUS_OK;
             break;
         case SOPC_StatusCode_Id:
-            array->StatusArr = calloc(size, sizeof(SOPC_StatusCode));
+            array->StatusArr = SOPC_Calloc(size, sizeof(SOPC_StatusCode));
             if (NULL != array->StatusArr)
                 return SOPC_STATUS_OK;
             break;
         case SOPC_QualifiedName_Id:
-            array->QnameArr = calloc(size, sizeof(SOPC_QualifiedName));
+            array->QnameArr = SOPC_Calloc(size, sizeof(SOPC_QualifiedName));
             if (NULL != array->QnameArr)
                 return SOPC_STATUS_OK;
             break;
         case SOPC_LocalizedText_Id:
-            array->LocalizedTextArr = calloc(size, sizeof(SOPC_LocalizedText));
+            array->LocalizedTextArr = SOPC_Calloc(size, sizeof(SOPC_LocalizedText));
             if (NULL != array->LocalizedTextArr)
                 return SOPC_STATUS_OK;
             break;
         case SOPC_ExtensionObject_Id:
-            array->ExtObjectArr = calloc(size, sizeof(SOPC_ExtensionObject));
+            array->ExtObjectArr = SOPC_Calloc(size, sizeof(SOPC_ExtensionObject));
             if (NULL != array->ExtObjectArr)
                 return SOPC_STATUS_OK;
             break;
         case SOPC_DataValue_Id:
-            array->DataValueArr = calloc(size, sizeof(SOPC_DataValue));
+            array->DataValueArr = SOPC_Calloc(size, sizeof(SOPC_DataValue));
             if (NULL != array->DataValueArr)
                 return SOPC_STATUS_OK;
             break;
         case SOPC_Variant_Id:
-            array->VariantArr = calloc(size, sizeof(SOPC_Variant));
+            array->VariantArr = SOPC_Calloc(size, sizeof(SOPC_Variant));
             if (NULL != array->VariantArr)
                 return SOPC_STATUS_OK;
             break;
         case SOPC_DiagnosticInfo_Id:
-            array->DiagInfoArr = calloc(size, sizeof(SOPC_DiagnosticInfo));
+            array->DiagInfoArr = SOPC_Calloc(size, sizeof(SOPC_DiagnosticInfo));
             if (NULL != array->DiagInfoArr)
                 return SOPC_STATUS_OK;
             break;
@@ -3378,7 +3378,7 @@ static SOPC_ReturnStatus CompareVariantArrayBuiltInType(SOPC_BuiltinId builtInTy
 
 SOPC_Variant* SOPC_Variant_Create()
 {
-    SOPC_Variant* variant = calloc(1, sizeof(SOPC_Variant));
+    SOPC_Variant* variant = SOPC_Calloc(1, sizeof(SOPC_Variant));
 
     if (variant == NULL)
     {
@@ -4339,7 +4339,7 @@ static SOPC_ReturnStatus get_range_string_helper(SOPC_String* dst,
 
     uint32_t dst_len = end - start + 1;
 
-    dst->Data = calloc(1 + dst_len, sizeof(SOPC_Byte));
+    dst->Data = SOPC_Calloc(1 + dst_len, sizeof(SOPC_Byte));
 
     if (dst->Data == NULL)
     {

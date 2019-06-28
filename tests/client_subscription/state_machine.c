@@ -148,7 +148,7 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
                                      SOPC_LibSub_EventCbk cbkGenericEvent,
                                      SOPC_StaMac_Machine** ppSM)
 {
-    SOPC_StaMac_Machine* pSM = calloc(1, sizeof(SOPC_StaMac_Machine));
+    SOPC_StaMac_Machine* pSM = SOPC_Calloc(1, sizeof(SOPC_StaMac_Machine));
 
     if (NULL == pSM)
     {
@@ -423,7 +423,7 @@ SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
     }
 
     /* Create the NodeIds from the strings */
-    SOPC_NodeId** lpNid = calloc((size_t) nElems, sizeof(SOPC_NodeId*));
+    SOPC_NodeId** lpNid = SOPC_Calloc((size_t) nElems, sizeof(SOPC_NodeId*));
     if (NULL == lpNid)
     {
         return SOPC_STATUS_OUT_OF_MEMORY;

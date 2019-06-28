@@ -36,7 +36,7 @@ void node_id_pointer_bs__copy_node_id_pointer_content(const constants__t_NodeId_
     if (constants__c_NodeId_indet != node_id_pointer_bs__p_node_id)
     {
         status = SOPC_STATUS_OUT_OF_MEMORY;
-        SOPC_NodeId* nodeId = calloc(1, sizeof(SOPC_NodeId));
+        SOPC_NodeId* nodeId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
         if (NULL != nodeId)
         {
             SOPC_NodeId_Initialize(nodeId);

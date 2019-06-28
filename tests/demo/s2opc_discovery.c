@@ -212,7 +212,7 @@ static void PrintEndpoints(OpcUa_GetEndpointsResponse* pResp)
                     }
                     else
                     {
-                        pThmb = calloc(lenThmb + 1, sizeof(char));
+                        pThmb = SOPC_Calloc(lenThmb + 1, sizeof(char));
                         if (NULL == pThmb || SOPC_KeyManager_Certificate_GetThumbprint(
                                                  pProvider, pCert, (uint8_t*) pThmb, lenThmb) != SOPC_STATUS_OK)
                         {

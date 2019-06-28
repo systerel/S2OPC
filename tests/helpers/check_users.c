@@ -180,7 +180,7 @@ static inline void setup_authentication(void)
 {
     gAuthenticationManager = SOPC_UserAuthentication_CreateManager_AllowAll();
     ck_assert_ptr_nonnull(gAuthenticationManager);
-    gAuthenticationManagerSelective = calloc(1, sizeof(SOPC_UserAuthentication_Manager));
+    gAuthenticationManagerSelective = SOPC_Calloc(1, sizeof(SOPC_UserAuthentication_Manager));
     ck_assert_ptr_nonnull(gAuthenticationManagerSelective);
     gAuthenticationManagerSelective->pFunctions = &selectiveAuthenticationFunctions;
 }
@@ -197,7 +197,7 @@ static inline void setup_authorization(void)
 {
     gAuthorizationManager = SOPC_UserAuthorization_CreateManager_AllowAll();
     ck_assert_ptr_nonnull(gAuthorizationManager);
-    gAuthorizationManagerSelective = calloc(1, sizeof(SOPC_UserAuthorization_Manager));
+    gAuthorizationManagerSelective = SOPC_Calloc(1, sizeof(SOPC_UserAuthorization_Manager));
     ck_assert_ptr_nonnull(gAuthorizationManagerSelective);
     gAuthorizationManagerSelective->pFunctions = &selectiveAuthorizationFunctions;
 }

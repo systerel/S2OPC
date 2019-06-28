@@ -63,7 +63,7 @@ bool SOPC_User_IsAnonymous(const SOPC_User* user)
 
 SOPC_User* SOPC_User_CreateUsername(SOPC_String* username)
 {
-    SOPC_User* user = calloc(1, sizeof(SOPC_User));
+    SOPC_User* user = SOPC_Calloc(1, sizeof(SOPC_User));
     if (NULL == user)
     {
         return NULL;

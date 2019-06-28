@@ -46,7 +46,7 @@ SOPC_SLinkedList* SOPC_SLinkedList_Create(size_t sizeMax)
 
     if (sizeMax <= UINT32_MAX)
     {
-        result = calloc(1, sizeof(SOPC_SLinkedList));
+        result = SOPC_Calloc(1, sizeof(SOPC_SLinkedList));
         if (result != NULL)
         {
             result->maxLength = (uint32_t) sizeMax;

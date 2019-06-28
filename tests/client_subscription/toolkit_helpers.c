@@ -358,7 +358,7 @@ SOPC_ReturnStatus Helpers_NewCreateMonitoredItemsRequest(SOPC_NodeId** lpNid,
 
     if (SOPC_STATUS_OK == status)
     {
-        pitc = calloc((size_t) nElems, sizeof(OpcUa_MonitoredItemCreateRequest));
+        pitc = SOPC_Calloc((size_t) nElems, sizeof(OpcUa_MonitoredItemCreateRequest));
         if (NULL == pitc)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -405,7 +405,7 @@ SOPC_ReturnStatus Helpers_NewValueFromDataValue(SOPC_DataValue* pVal, SOPC_LibSu
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    plsVal = calloc(1, sizeof(SOPC_LibSub_Value));
+    plsVal = SOPC_Calloc(1, sizeof(SOPC_LibSub_Value));
     if (NULL == plsVal)
     {
         return SOPC_STATUS_OUT_OF_MEMORY;

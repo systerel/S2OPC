@@ -202,7 +202,7 @@ void constants_bs__free_ExpandedNodeId(const constants_bs__t_ExpandedNodeId_i co
 void constants_bs__get_copy_ExpandedNodeId(const constants_bs__t_ExpandedNodeId_i constants_bs__p_in,
                                            constants_bs__t_ExpandedNodeId_i* const constants_bs__p_out)
 {
-    *constants_bs__p_out = calloc(1, sizeof(**constants_bs__p_out));
+    *constants_bs__p_out = SOPC_Calloc(1, sizeof(**constants_bs__p_out));
     SOPC_ExpandedNodeId_Initialize(*constants_bs__p_out);
     SOPC_ExpandedNodeId_Copy(*constants_bs__p_out, constants_bs__p_in);
 }

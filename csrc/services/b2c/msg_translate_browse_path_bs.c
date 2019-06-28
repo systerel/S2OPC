@@ -193,7 +193,7 @@ void msg_translate_browse_path_bs__alloc_browse_path_result(
     constants_statuscodes_bs__t_StatusCode_i* const msg_translate_browse_path_bs__statusCode)
 {
     assert(browsePaths_nbBrowsePaths > 0);
-    browsePaths_results.Results = calloc((size_t) browsePaths_nbBrowsePaths, sizeof(OpcUa_BrowsePathResult));
+    browsePaths_results.Results = SOPC_Calloc((size_t) browsePaths_nbBrowsePaths, sizeof(OpcUa_BrowsePathResult));
     if (NULL == browsePaths_results.Results)
     {
         *msg_translate_browse_path_bs__statusCode = constants_statuscodes_bs__e_sc_bad_out_of_memory;
@@ -232,7 +232,7 @@ void msg_translate_browse_path_bs__alloc_BrowsePath_Res_Target(
     uint32_t browsePath_index = msg_translate_browse_path_bs__get_BrowsePathIndex(
         msg_translate_browse_path_bs__browsePath, browsePaths_results.NoOfResults);
 
-    browsePaths_results.Results[browsePath_index].Targets = calloc(allocSize, sizeof(OpcUa_BrowsePathTarget));
+    browsePaths_results.Results[browsePath_index].Targets = SOPC_Calloc(allocSize, sizeof(OpcUa_BrowsePathTarget));
     if (NULL == browsePaths_results.Results[browsePath_index].Targets)
     {
         *msg_translate_browse_path_bs__statusCode = constants_statuscodes_bs__e_sc_bad_out_of_memory;

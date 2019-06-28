@@ -118,7 +118,7 @@ static bool dict_resize(SOPC_Dict* d, size_t size)
     size_t sizemask = size - 1;
     assert((size & sizemask) == 0); // Ensure we have a power of two
 
-    SOPC_DictBucket* buckets = calloc(size, sizeof(SOPC_DictBucket));
+    SOPC_DictBucket* buckets = SOPC_Calloc(size, sizeof(SOPC_DictBucket));
 
     if (buckets == NULL)
     {
@@ -176,7 +176,7 @@ SOPC_Dict* SOPC_Dict_Create(void* empty_key,
                             SOPC_Dict_Free_Fct key_free,
                             SOPC_Dict_Free_Fct value_free)
 {
-    SOPC_Dict* d = calloc(1, sizeof(SOPC_Dict));
+    SOPC_Dict* d = SOPC_Calloc(1, sizeof(SOPC_Dict));
 
     if (d == NULL)
     {
@@ -186,7 +186,7 @@ SOPC_Dict* SOPC_Dict_Create(void* empty_key,
     d->size = DICT_INITIAL_SIZE;
     d->sizemask = d->size - 1;
 
-    d->buckets = calloc(d->size, sizeof(SOPC_DictBucket));
+    d->buckets = SOPC_Calloc(d->size, sizeof(SOPC_DictBucket));
 
     bool ok = d->buckets != NULL;
 

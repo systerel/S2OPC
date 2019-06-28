@@ -798,7 +798,7 @@ static SOPC_ReturnStatus check_signature_with_provider(SOPC_CryptoProvider* prov
     }
 
     uint32_t verify_len = payload->length + LENGTH_NONCE;
-    uint8_t* verify_payload = calloc(verify_len, sizeof(uint8_t));
+    uint8_t* verify_payload = SOPC_Calloc(verify_len, sizeof(uint8_t));
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     if (verify_payload != NULL)

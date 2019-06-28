@@ -42,7 +42,7 @@ static int32_t block_queue = 0;
 
 static void test_callback(SOPC_EventHandler* handler, int32_t event, uint32_t eltId, void* params, uintptr_t auxParam)
 {
-    struct Event* ev = calloc(1, sizeof(struct Event));
+    struct Event* ev = SOPC_Calloc(1, sizeof(struct Event));
     assert(ev != NULL);
 
     ev->handler = handler;

@@ -49,8 +49,7 @@ void msg_read_response_bs__alloc_read_response(const t_entier4 msg_read_response
     msg_read_resp->NoOfResults = msg_read_response_bs__p_nb_resps;
     if (msg_read_response_bs__p_nb_resps > 0)
     {
-        msg_read_resp->Results =
-            (SOPC_DataValue*) calloc((size_t) msg_read_response_bs__p_nb_resps, sizeof(SOPC_DataValue));
+        msg_read_resp->Results = SOPC_Calloc((size_t) msg_read_response_bs__p_nb_resps, sizeof(SOPC_DataValue));
     }
     else
     {

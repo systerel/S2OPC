@@ -142,10 +142,10 @@ START_TEST(test_dict_free)
     static const char key[] = "Hello";
     static const char value[] = "World";
 
-    char* k = calloc(1 + sizeof(key), sizeof(char));
+    char* k = SOPC_Calloc(1 + sizeof(key), sizeof(char));
     memcpy(k, key, sizeof(key));
 
-    char* v = calloc(1 + sizeof(value), sizeof(char));
+    char* v = SOPC_Calloc(1 + sizeof(value), sizeof(char));
     memcpy(v, value, sizeof(value));
 
     ck_assert(SOPC_Dict_Insert(d, k, v));

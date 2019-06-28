@@ -37,7 +37,7 @@ static bool notification_message_copy(OpcUa_NotificationMessage* dst, const OpcU
     assert(dst != NULL && src != NULL);
     assert(src->NoOfNotificationData == 1); // Restricted support for now
 
-    SOPC_ExtensionObject* notification_data = calloc(1, sizeof(SOPC_ExtensionObject));
+    SOPC_ExtensionObject* notification_data = SOPC_Calloc(1, sizeof(SOPC_ExtensionObject));
 
     if (notification_data == NULL)
     {

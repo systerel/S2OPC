@@ -34,7 +34,7 @@ SOPC_EventHandler* socketsEventHandler = NULL;
 void SOPC_Sockets_EnqueueEvent(SOPC_Sockets_InputEvent scEvent, uint32_t id, void* params, uintptr_t auxParam)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_Event* scParams = calloc(1, sizeof(SOPC_Event));
+    SOPC_Event* scParams = SOPC_Calloc(1, sizeof(SOPC_Event));
     assert(scParams != NULL && socketsInputEvents != NULL);
     scParams->event = (int32_t) scEvent;
     scParams->eltId = id;

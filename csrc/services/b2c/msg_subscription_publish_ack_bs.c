@@ -43,7 +43,7 @@ void msg_subscription_publish_ack_bs__allocate_subscription_ack_results(
 {
     OpcUa_PublishResponse* resp = (OpcUa_PublishResponse*) msg_subscription_publish_ack_bs__p_resp_msg;
     resp->NoOfResults = msg_subscription_publish_ack_bs__p_nb_acks;
-    resp->Results = calloc((size_t) msg_subscription_publish_ack_bs__p_nb_acks, sizeof(SOPC_StatusCode));
+    resp->Results = SOPC_Calloc((size_t) msg_subscription_publish_ack_bs__p_nb_acks, sizeof(SOPC_StatusCode));
     if (resp->Results != NULL)
     {
         *msg_subscription_publish_ack_bs__bres = true;
@@ -62,7 +62,8 @@ void msg_subscription_publish_ack_bs__allocate_subscription_available_seq_nums(
 {
     OpcUa_PublishResponse* resp = (OpcUa_PublishResponse*) msg_subscription_publish_ack_bs__p_resp_msg;
     resp->NoOfAvailableSequenceNumbers = msg_subscription_publish_ack_bs__p_nb_seq_num;
-    resp->AvailableSequenceNumbers = calloc((size_t) msg_subscription_publish_ack_bs__p_nb_seq_num, sizeof(uint32_t));
+    resp->AvailableSequenceNumbers =
+        SOPC_Calloc((size_t) msg_subscription_publish_ack_bs__p_nb_seq_num, sizeof(uint32_t));
     if (resp->AvailableSequenceNumbers != NULL)
     {
         *msg_subscription_publish_ack_bs__bres = true;

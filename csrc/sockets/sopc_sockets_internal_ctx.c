@@ -164,7 +164,7 @@ SOPC_ReturnStatus SOPC_Sockets_EnqueueInputEvent(SOPC_Sockets_InputEvent socketE
                                                  void* params,
                                                  uintptr_t auxParam)
 {
-    struct Event* ev = calloc(1, sizeof(struct Event));
+    struct Event* ev = SOPC_Calloc(1, sizeof(struct Event));
     if (NULL == ev)
     {
         return SOPC_STATUS_OUT_OF_MEMORY;

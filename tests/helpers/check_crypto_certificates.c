@@ -90,7 +90,7 @@ const size_t CA_CRT_LEN = sizeof(CA_CRT_DEFINE) / 2;
 SOPC_Certificate* SOPC_UnhexlifyCertificate(const char* hex_data)
 {
     size_t der_len = strlen(hex_data) / 2;
-    uint8_t* der_data = calloc(der_len, sizeof(uint8_t));
+    uint8_t* der_data = SOPC_Calloc(der_len, sizeof(uint8_t));
     ck_assert_ptr_nonnull(der_data);
 
     ck_assert(unhexlify(hex_data, der_data, der_len) == (int) der_len);

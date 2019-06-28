@@ -224,7 +224,7 @@ SOPC_ReturnStatus SOPC_NumericRange_Parse(const char* text, SOPC_NumericRange** 
     };
 
     SOPC_Array* dimensions = SOPC_Array_Create(sizeof(SOPC_Dimension), 1, NULL);
-    SOPC_NumericRange* range = calloc(1, sizeof(SOPC_NumericRange));
+    SOPC_NumericRange* range = SOPC_Calloc(1, sizeof(SOPC_NumericRange));
 
     if (dimensions == NULL || range == NULL)
     {

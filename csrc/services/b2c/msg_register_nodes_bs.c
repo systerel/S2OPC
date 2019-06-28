@@ -31,7 +31,7 @@ void msg_register_nodes_bs__alloc_msg_register_nodes_resp_results(
     assert(msg_register_nodes_bs__p_nb_results > 0);
 
     OpcUa_RegisterNodesResponse* response = msg_register_nodes_bs__p_resp_msg;
-    response->RegisteredNodeIds = calloc((size_t) msg_register_nodes_bs__p_nb_results, sizeof(SOPC_NodeId));
+    response->RegisteredNodeIds = SOPC_Calloc((size_t) msg_register_nodes_bs__p_nb_results, sizeof(SOPC_NodeId));
 
     if (response->RegisteredNodeIds != NULL)
     {

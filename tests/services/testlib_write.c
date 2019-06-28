@@ -258,7 +258,7 @@ bool tlibw_verify_response(OpcUa_WriteRequest* pWriteReq, OpcUa_WriteResponse* p
 
 OpcUa_ReadRequest* tlibw_new_ReadRequest_check(void)
 {
-    OpcUa_ReadValueId* lrv = (OpcUa_ReadValueId*) calloc(N_VARS, sizeof(OpcUa_ReadValueId));
+    OpcUa_ReadValueId* lrv = SOPC_Calloc(N_VARS, sizeof(OpcUa_ReadValueId));
     size_t i;
 
     if (NULL == lrv)

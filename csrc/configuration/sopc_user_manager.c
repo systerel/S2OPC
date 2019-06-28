@@ -141,7 +141,7 @@ static const SOPC_UserAuthorization_Functions AuthorizeAllowAllFunctions = {
 
 SOPC_UserAuthentication_Manager* SOPC_UserAuthentication_CreateManager_AllowAll(void)
 {
-    SOPC_UserAuthentication_Manager* authenticationManager = calloc(1, sizeof(SOPC_UserAuthentication_Manager));
+    SOPC_UserAuthentication_Manager* authenticationManager = SOPC_Calloc(1, sizeof(SOPC_UserAuthentication_Manager));
 
     if (NULL == authenticationManager)
     {
@@ -154,7 +154,7 @@ SOPC_UserAuthentication_Manager* SOPC_UserAuthentication_CreateManager_AllowAll(
 
 SOPC_UserAuthorization_Manager* SOPC_UserAuthorization_CreateManager_AllowAll(void)
 {
-    SOPC_UserAuthorization_Manager* authorizationManager = calloc(1, sizeof(SOPC_UserAuthorization_Manager));
+    SOPC_UserAuthorization_Manager* authorizationManager = SOPC_Calloc(1, sizeof(SOPC_UserAuthorization_Manager));
 
     if (NULL == authorizationManager)
     {
@@ -174,7 +174,7 @@ SOPC_UserWithAuthorization* SOPC_UserWithAuthorization_CreateFromIdentityToken(
     assert(&OpcUa_AnonymousIdentityToken_EncodeableType == pUserIdentity->Body.Object.ObjType ||
            &OpcUa_UserNameIdentityToken_EncodeableType == pUserIdentity->Body.Object.ObjType);
 
-    SOPC_UserWithAuthorization* userauthz = calloc(1, sizeof(SOPC_UserWithAuthorization));
+    SOPC_UserWithAuthorization* userauthz = SOPC_Calloc(1, sizeof(SOPC_UserWithAuthorization));
     if (NULL == userauthz)
     {
         return NULL;
@@ -204,7 +204,7 @@ SOPC_UserWithAuthorization* SOPC_UserWithAuthorization_CreateFromIdentityToken(
 
 SOPC_UserWithAuthorization* SOPC_UserWithAuthorization_CreateLocal(SOPC_UserAuthorization_Manager* authorizationManager)
 {
-    SOPC_UserWithAuthorization* userauthz = calloc(1, sizeof(SOPC_UserWithAuthorization));
+    SOPC_UserWithAuthorization* userauthz = SOPC_Calloc(1, sizeof(SOPC_UserWithAuthorization));
     if (NULL == userauthz)
     {
         return NULL;

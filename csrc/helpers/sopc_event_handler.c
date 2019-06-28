@@ -62,7 +62,7 @@ static SOPC_ReturnStatus post(SOPC_EventHandler* handler,
                               uintptr_t auxParam,
                               bool asNext)
 {
-    struct Event* ev = calloc(1, sizeof(struct Event));
+    struct Event* ev = SOPC_Calloc(1, sizeof(struct Event));
 
     if (ev == NULL)
     {
@@ -111,7 +111,7 @@ static void* looper_loop(void* user_data)
 
 SOPC_EventHandler* SOPC_EventHandler_Create(SOPC_Looper* looper, SOPC_EventHandler_Callback callback)
 {
-    SOPC_EventHandler* handler = calloc(1, sizeof(SOPC_EventHandler));
+    SOPC_EventHandler* handler = SOPC_Calloc(1, sizeof(SOPC_EventHandler));
 
     if (handler == NULL)
     {
@@ -150,7 +150,7 @@ SOPC_ReturnStatus SOPC_EventHandler_PostAsNext(SOPC_EventHandler* handler,
 
 SOPC_Looper* SOPC_Looper_Create(void)
 {
-    SOPC_Looper* looper = calloc(1, sizeof(SOPC_Looper));
+    SOPC_Looper* looper = SOPC_Calloc(1, sizeof(SOPC_Looper));
     SOPC_AsyncQueue* queue = NULL;
     SOPC_Array* handlers =
         SOPC_Array_Create(sizeof(SOPC_EventHandler*), 0, (SOPC_Array_Free_Func) event_handler_delete);

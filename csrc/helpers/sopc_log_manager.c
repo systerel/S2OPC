@@ -191,7 +191,7 @@ SOPC_Log_Instance* SOPC_Log_CreateInstance(const char* logDirPath,
         strlen(logDirPath) + strlen(SOPC_CSTRING_UNIQUE_LOG_PREFIX) + strlen(logFileName) + 2 <= UINT8_MAX &&
         maxBytes > RESERVED_BYTES_PRINT_FILE_CHANGE && maxFiles > 0)
     {
-        result = calloc(1, sizeof(SOPC_Log_Instance));
+        result = SOPC_Calloc(1, sizeof(SOPC_Log_Instance));
     }
     if (result != NULL)
     {
@@ -205,7 +205,7 @@ SOPC_Log_Instance* SOPC_Log_CreateInstance(const char* logDirPath,
                 (uint8_t)(strlen(logDirPath) + strlen(SOPC_CSTRING_UNIQUE_LOG_PREFIX) + strlen(logFileName) + 2);
             // Attempt to create first log file:
             // 5 for file number + 4 for file extension +1 for '\0' terminating character => 10
-            filePath = calloc(10u + file->fileNumberPos, sizeof(char));
+            filePath = SOPC_Calloc(10u + file->fileNumberPos, sizeof(char));
             if (filePath != NULL)
             {
                 res = sprintf(filePath, "%s%s_%s_00001.log", logDirPath, SOPC_CSTRING_UNIQUE_LOG_PREFIX, logFileName);
@@ -284,7 +284,7 @@ SOPC_Log_Instance* SOPC_Log_CreateInstanceAssociation(SOPC_Log_Instance* pLogIns
 
     if (NULL != pLogInst)
     {
-        result = calloc(1, sizeof(SOPC_Log_Instance));
+        result = SOPC_Calloc(1, sizeof(SOPC_Log_Instance));
 
         if (result != NULL)
         {
@@ -420,7 +420,7 @@ char* SOPC_Log_GetFilePathPrefix(SOPC_Log_Instance* pLogInst)
     char* filePathPrefix = NULL;
     if (NULL != pLogInst && NULL != pLogInst->file->filePath)
     {
-        filePathPrefix = calloc(1u + pLogInst->file->fileNumberPos, sizeof(char));
+        filePathPrefix = SOPC_Calloc(1u + pLogInst->file->fileNumberPos, sizeof(char));
         if (NULL != filePathPrefix)
         {
             memcpy(filePathPrefix, pLogInst->file->filePath, (size_t) pLogInst->file->fileNumberPos);

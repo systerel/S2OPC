@@ -161,8 +161,8 @@ bool SOPC_Helper_URI_SplitTcpUaUri(const char* uri, char** hostname, char** port
     }
     if (result)
     {
-        lHostname = calloc(1u + hostnameLength, sizeof(char));
-        lPort = calloc(1u + portLength, sizeof(char));
+        lHostname = SOPC_Calloc(1u + hostnameLength, sizeof(char));
+        lPort = SOPC_Calloc(1u + portLength, sizeof(char));
 
         if (NULL == lHostname || NULL == lPort)
         {

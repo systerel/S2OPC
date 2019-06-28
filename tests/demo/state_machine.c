@@ -424,7 +424,7 @@ SOPC_ReturnStatus StateMachine_StartRegisterServer(StateMachine_Machine* pSM)
     }
     else
     {
-        serverName = calloc(1, sizeof(SOPC_LocalizedText));
+        serverName = SOPC_Calloc(1, sizeof(SOPC_LocalizedText));
         discoveryURL = SOPC_String_Create();
         status = SOPC_Encodeable_Create(&OpcUa_RegisterServerRequest_EncodeableType, (void**) &pReq);
     }
@@ -491,7 +491,7 @@ SOPC_ReturnStatus StateMachine_SendRequest(StateMachine_Machine* pSM, void* requ
     SOPC_ReturnStatus mutStatus = Mutex_Lock(&pSM->mutex);
     assert(SOPC_STATUS_OK == mutStatus);
 
-    StateMachine_RequestContext* ctx = calloc(1, sizeof(StateMachine_RequestContext));
+    StateMachine_RequestContext* ctx = SOPC_Calloc(1, sizeof(StateMachine_RequestContext));
 
     if (NULL != pSM->pCtxSession || stActivated != pSM->state || ctx == NULL)
     {

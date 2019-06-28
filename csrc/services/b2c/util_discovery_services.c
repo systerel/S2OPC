@@ -81,11 +81,11 @@ static void SOPC_SetServerApplicationDescription(SOPC_Endpoint_Config* sopcEndpo
     if (sopcEndpointConfig->serverDescription.NoOfDiscoveryUrls > 0)
     {
         appDesc->DiscoveryUrls =
-            calloc((size_t) sopcEndpointConfig->serverDescription.NoOfDiscoveryUrls, sizeof(SOPC_String));
+            SOPC_Calloc((size_t) sopcEndpointConfig->serverDescription.NoOfDiscoveryUrls, sizeof(SOPC_String));
     }
     else
     {
-        appDesc->DiscoveryUrls = calloc(1, sizeof(SOPC_String));
+        appDesc->DiscoveryUrls = SOPC_Calloc(1, sizeof(SOPC_String));
     }
     if (appDesc->DiscoveryUrls != NULL)
     {
@@ -113,7 +113,7 @@ static void copyUserIdTokens(SOPC_SecurityPolicy* currentSecurityPolicy,
 {
     // Set userIdentityTokens
     newEndPointDescription->UserIdentityTokens =
-        calloc(currentSecurityPolicy->nbOfUserTokenPolicies, sizeof(OpcUa_UserTokenPolicy));
+        SOPC_Calloc(currentSecurityPolicy->nbOfUserTokenPolicies, sizeof(OpcUa_UserTokenPolicy));
     if (NULL != newEndPointDescription->UserIdentityTokens)
     {
         newEndPointDescription->NoOfUserIdentityTokens = (int32_t) currentSecurityPolicy->nbOfUserTokenPolicies;
@@ -209,7 +209,7 @@ constants_statuscodes_bs__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions
          * and securityLevel with all other parameters set to null. */
 
         // TODO: this code section can probably be optimized
-        currentConfig_EndpointDescription = calloc(3u * nbSecuConfigs, sizeof(OpcUa_EndpointDescription));
+        currentConfig_EndpointDescription = SOPC_Calloc(3u * nbSecuConfigs, sizeof(OpcUa_EndpointDescription));
         nbEndpointDescription = 0;
         OpcUa_EndpointDescription newEndPointDescription;
         OpcUa_EndpointDescription_Initialize(&newEndPointDescription);
@@ -335,7 +335,8 @@ constants_statuscodes_bs__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions
         OpcUa_EndpointDescription* final_OpcUa_EndpointDescription = NULL;
         if (nbEndpointDescription > 0)
         {
-            final_OpcUa_EndpointDescription = calloc((size_t) nbEndpointDescription, sizeof(OpcUa_EndpointDescription));
+            final_OpcUa_EndpointDescription =
+                SOPC_Calloc((size_t) nbEndpointDescription, sizeof(OpcUa_EndpointDescription));
             if (final_OpcUa_EndpointDescription != NULL)
             {
                 for (uint32_t i = 0; i < nbEndpointDescription; i++)

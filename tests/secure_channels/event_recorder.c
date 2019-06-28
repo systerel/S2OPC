@@ -54,7 +54,7 @@ static void on_event(SOPC_EventHandler* handler, int32_t event, uint32_t id, voi
     assert(found);
     SOPC_ReturnStatus status;
 
-    SOPC_Event* ev = calloc(1, sizeof(SOPC_Event));
+    SOPC_Event* ev = SOPC_Calloc(1, sizeof(SOPC_Event));
     assert(ev != NULL);
 
     ev->event = event;
@@ -89,7 +89,7 @@ SOPC_EventRecorder* SOPC_EventRecorder_Create(void)
     }
 
     SOPC_EventHandler* handler = SOPC_EventHandler_Create(looper, on_event);
-    SOPC_EventRecorder* recorder = calloc(1, sizeof(SOPC_EventRecorder));
+    SOPC_EventRecorder* recorder = SOPC_Calloc(1, sizeof(SOPC_EventRecorder));
     SOPC_AsyncQueue* queue;
     SOPC_AsyncQueue_Init(&queue, NULL);
 

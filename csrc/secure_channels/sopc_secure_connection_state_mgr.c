@@ -1629,7 +1629,7 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
             }
         }
 
-        SOPC_SecureChannel_Config* nconfig = calloc(1, sizeof(SOPC_SecureChannel_Config));
+        SOPC_SecureChannel_Config* nconfig = SOPC_Calloc(1, sizeof(SOPC_SecureChannel_Config));
         SOPC_Buffer* cert_buffer = NULL;
 
         if (nconfig == NULL || !get_certificate_der(scConnection->serverAsymmSecuInfo.clientCertificate, &cert_buffer))

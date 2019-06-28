@@ -2935,7 +2935,7 @@ SOPC_ReturnStatus SOPC_Read_Array(SOPC_Buffer* buf,
 
     if (*noOfElts > 0)
     {
-        *eltsArray = calloc((size_t) *noOfElts, sizeOfElt);
+        *eltsArray = SOPC_Calloc((size_t) *noOfElts, sizeOfElt);
 
         if (NULL == *eltsArray)
         {

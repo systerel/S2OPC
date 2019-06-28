@@ -61,7 +61,7 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Anonymous(uint32_t end
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    SOPC_ExtensionObject* user = calloc(1, sizeof(SOPC_ExtensionObject));
+    SOPC_ExtensionObject* user = SOPC_Calloc(1, sizeof(SOPC_ExtensionObject));
     OpcUa_AnonymousIdentityToken* token = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
@@ -102,7 +102,7 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(uint3
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    SOPC_ExtensionObject* user = calloc(1, sizeof(SOPC_ExtensionObject));
+    SOPC_ExtensionObject* user = SOPC_Calloc(1, sizeof(SOPC_ExtensionObject));
     OpcUa_UserNameIdentityToken* token = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 

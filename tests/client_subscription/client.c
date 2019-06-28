@@ -308,7 +308,7 @@ static bool parse_options(cmd_line_options_t* o, int argc, char* const* argv)
 
 #define STR_OPT_CASE(name, req, arg_req, val, field) \
     case val:                                        \
-        free(o->field);                              \
+        SOPC_Free(o->field);                              \
         o->field = calloc(strlen(optarg) + 1, 1);    \
         strcpy(o->field, optarg);                    \
         break;

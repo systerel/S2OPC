@@ -62,7 +62,7 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t* 
     // PEM keys.
     if (buffer[lenBuf - 1] != '\0')
     {
-        uint8_t* null_terminated_buffer = calloc(1 + lenBuf, sizeof(uint8_t));
+        uint8_t* null_terminated_buffer = SOPC_Calloc(1 + lenBuf, sizeof(uint8_t));
 
         if (null_terminated_buffer == NULL)
         {
@@ -527,7 +527,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetMaybeApplicationUri(const SOPC_
         return SOPC_STATUS_NOK;
     }
 
-    char* data_copy = calloc(str_len + 1U, sizeof(char));
+    char* data_copy = SOPC_Calloc(str_len + 1U, sizeof(char));
 
     if (NULL == data_copy)
     {

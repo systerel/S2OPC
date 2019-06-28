@@ -76,7 +76,7 @@ void browse_treatment_continuation_points_bs__create_continuation_point_bs(
 
     if (allocSuccess && browse_treatment_continuation_points_bs__p_browseView != constants__c_NodeId_indet)
     {
-        data.browseView = calloc(1, sizeof(SOPC_NodeId));
+        data.browseView = SOPC_Calloc(1, sizeof(SOPC_NodeId));
         allocSuccess = NULL != data.browseView;
         if (allocSuccess)
         {
@@ -87,7 +87,7 @@ void browse_treatment_continuation_points_bs__create_continuation_point_bs(
 
     if (allocSuccess && browse_treatment_continuation_points_bs__p_nodeId != constants__c_NodeId_indet)
     {
-        data.nodeId = calloc(1, sizeof(SOPC_NodeId));
+        data.nodeId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
         allocSuccess = NULL != data.nodeId;
         if (allocSuccess)
         {
@@ -98,7 +98,7 @@ void browse_treatment_continuation_points_bs__create_continuation_point_bs(
 
     if (allocSuccess && browse_treatment_continuation_points_bs__p_referenceType != constants__c_NodeId_indet)
     {
-        data.referenceTypeId = calloc(1, sizeof(SOPC_NodeId));
+        data.referenceTypeId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
         allocSuccess = NULL != data.referenceTypeId;
         if (allocSuccess)
         {

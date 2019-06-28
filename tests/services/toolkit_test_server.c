@@ -402,7 +402,7 @@ int main(int argc, char* argv[])
     SOPC_UserAuthorization_Manager* authorizationManager = NULL;
     if (SOPC_STATUS_OK == status)
     {
-        authenticationManager = calloc(1, sizeof(SOPC_UserAuthentication_Manager));
+        authenticationManager = SOPC_Calloc(1, sizeof(SOPC_UserAuthentication_Manager));
         authorizationManager = SOPC_UserAuthorization_CreateManager_AllowAll();
         if (NULL == authenticationManager || NULL == authorizationManager)
         {

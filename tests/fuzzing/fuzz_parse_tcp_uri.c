@@ -39,7 +39,7 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
         init = true;
     }
 
-    char* buf_copy = (char*) calloc(1 + len, sizeof(char));
+    char* buf_copy = SOPC_Calloc(1 + len, sizeof(char));
     assert(buf_copy != NULL);
 
     memcpy(buf_copy, buf, len);

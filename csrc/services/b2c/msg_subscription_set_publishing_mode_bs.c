@@ -43,7 +43,8 @@ void msg_subscription_set_publishing_mode_bs__allocate_msg_subscription_set_publ
         (OpcUa_SetPublishingModeResponse*) msg_subscription_set_publishing_mode_bs__p_resp_msg;
     if (msg_subscription_set_publishing_mode_bs__l_nb_subs > 0)
     {
-        resp->Results = calloc((size_t) msg_subscription_set_publishing_mode_bs__l_nb_subs, sizeof(SOPC_StatusCode));
+        resp->Results =
+            SOPC_Calloc((size_t) msg_subscription_set_publishing_mode_bs__l_nb_subs, sizeof(SOPC_StatusCode));
     }
     if (NULL != resp->Results)
     {

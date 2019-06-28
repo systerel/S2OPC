@@ -62,7 +62,7 @@ static char* get_time_string(bool local, bool compact)
         return NULL;
     }
 
-    char* buf = calloc(buf_size, sizeof(char));
+    char* buf = SOPC_Calloc(buf_size, sizeof(char));
 
     if (buf == NULL)
     {

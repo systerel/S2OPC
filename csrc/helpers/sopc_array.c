@@ -66,7 +66,7 @@ static bool array_grow(SOPC_Array* a, size_t min_size)
 
 SOPC_Array* SOPC_Array_Create(size_t element_size, size_t initial_capacity, SOPC_Array_Free_Func free_func)
 {
-    SOPC_Array* a = calloc(1, sizeof(SOPC_Array));
+    SOPC_Array* a = SOPC_Calloc(1, sizeof(SOPC_Array));
 
     if (a == NULL)
     {

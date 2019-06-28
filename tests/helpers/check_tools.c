@@ -2635,7 +2635,7 @@ START_TEST(test_ua_decoder_allocation_limit)
     v.BuiltInTypeId = SOPC_Boolean_Id;
     v.ArrayType = SOPC_VariantArrayType_Array;
     v.Value.Array.Length = 10;
-    v.Value.Array.Content.BooleanArr = calloc((size_t) v.Value.Array.Length, sizeof(SOPC_Boolean));
+    v.Value.Array.Content.BooleanArr = SOPC_Calloc((size_t) v.Value.Array.Length, sizeof(SOPC_Boolean));
     status = SOPC_Variant_Write(&v, buffer);
     ck_assert(SOPC_STATUS_OK == status);
     SOPC_Variant_Clear(&v);
@@ -2693,9 +2693,9 @@ START_TEST(test_ua_decoder_allocation_limit)
     v.Value.Matrix.ArrayDimensions[1] = 3;
     v.Value.Matrix.ArrayDimensions[2] = 1;
     v.Value.Matrix.Content.BooleanArr =
-        calloc((size_t) v.Value.Matrix.ArrayDimensions[0] * (size_t) v.Value.Matrix.ArrayDimensions[1] *
-                   (size_t) v.Value.Matrix.ArrayDimensions[2],
-               sizeof(SOPC_Boolean));
+        SOPC_Calloc((size_t) v.Value.Matrix.ArrayDimensions[0] * (size_t) v.Value.Matrix.ArrayDimensions[1] *
+                        (size_t) v.Value.Matrix.ArrayDimensions[2],
+                    sizeof(SOPC_Boolean));
     status = SOPC_Variant_Write(&v, buffer);
     ck_assert(SOPC_STATUS_OK == status);
     SOPC_Variant_Clear(&v);
@@ -2729,9 +2729,9 @@ START_TEST(test_ua_decoder_allocation_limit)
     v.Value.Matrix.ArrayDimensions[1] = 3;
     v.Value.Matrix.ArrayDimensions[2] = 1;
     v.Value.Matrix.Content.BooleanArr =
-        calloc((size_t) v.Value.Matrix.ArrayDimensions[0] * (size_t) v.Value.Matrix.ArrayDimensions[1] *
-                   (size_t) v.Value.Matrix.ArrayDimensions[2],
-               sizeof(SOPC_Boolean));
+        SOPC_Calloc((size_t) v.Value.Matrix.ArrayDimensions[0] * (size_t) v.Value.Matrix.ArrayDimensions[1] *
+                        (size_t) v.Value.Matrix.ArrayDimensions[2],
+                    sizeof(SOPC_Boolean));
     status = SOPC_Variant_Write(&v, buffer);
     ck_assert(SOPC_STATUS_OK == status);
     SOPC_Variant_Clear(&v);
@@ -3520,7 +3520,7 @@ static SOPC_Variant* create_string_array_variant(const char** strs, size_t n_str
         return variant;
     }
 
-    variant->Value.Array.Content.StringArr = calloc(n_strs, sizeof(SOPC_String));
+    variant->Value.Array.Content.StringArr = SOPC_Calloc(n_strs, sizeof(SOPC_String));
     ck_assert_ptr_nonnull(variant->Value.Array.Content.StringArr);
 
     for (size_t i = 0; i < n_strs; ++i)

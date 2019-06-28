@@ -323,7 +323,7 @@ static uint32_t SOPC_InternalEventTimer_Create(SOPC_EventHandler* eventHandler,
     // Create target time reference
     targetTime = SOPC_TimeReference_AddMilliseconds(SOPC_TimeReference_GetCurrent(), msDelay);
     // Allocate new timer
-    newTimer = calloc(1, sizeof(SOPC_EventTimer));
+    newTimer = SOPC_Calloc(1, sizeof(SOPC_EventTimer));
 
     if (newTimer == NULL)
     {

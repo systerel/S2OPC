@@ -92,10 +92,10 @@ static void* bench_read_requests(size_t request_size, size_t bench_offset, size_
 {
     assert(request_size <= INT32_MAX);
 
-    OpcUa_ReadRequest* req = calloc(1, sizeof(OpcUa_ReadRequest));
+    OpcUa_ReadRequest* req = SOPC_Calloc(1, sizeof(OpcUa_ReadRequest));
     assert(req != NULL);
 
-    OpcUa_ReadValueId* req_contents = calloc(request_size, sizeof(OpcUa_ReadValueId));
+    OpcUa_ReadValueId* req_contents = SOPC_Calloc(request_size, sizeof(OpcUa_ReadValueId));
     assert(req_contents != NULL);
 
     OpcUa_ReadRequest_Initialize(req);
@@ -130,10 +130,10 @@ static void* bench_write_requests(size_t request_size, size_t bench_offset, size
 {
     assert(request_size <= INT32_MAX);
 
-    OpcUa_WriteRequest* req = calloc(1, sizeof(OpcUa_WriteRequest));
+    OpcUa_WriteRequest* req = SOPC_Calloc(1, sizeof(OpcUa_WriteRequest));
     assert(req != NULL);
 
-    OpcUa_WriteValue* req_contents = calloc(request_size, sizeof(OpcUa_WriteValue));
+    OpcUa_WriteValue* req_contents = SOPC_Calloc(request_size, sizeof(OpcUa_WriteValue));
     assert(req_contents != NULL);
 
     OpcUa_WriteRequest_Initialize(req);

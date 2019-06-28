@@ -54,7 +54,7 @@ SOPC_SecretBuffer* SOPC_SecretBuffer_NewFromFile(const char* path)
         return NULL;
     }
 
-    SOPC_SecretBuffer* sec = calloc(1, sizeof(SOPC_SecretBuffer));
+    SOPC_SecretBuffer* sec = SOPC_Calloc(1, sizeof(SOPC_SecretBuffer));
 
     if (sec == NULL)
     {

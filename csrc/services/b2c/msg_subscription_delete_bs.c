@@ -45,7 +45,7 @@ void msg_subscription_delete_bs__allocate_msg_delete_subscriptions_resp_results_
         (OpcUa_DeleteSubscriptionsResponse*) msg_subscription_delete_bs__p_resp_msg;
     if (msg_subscription_delete_bs__l_nb_subs > 0)
     {
-        resp->Results = calloc((size_t) msg_subscription_delete_bs__l_nb_subs, sizeof(SOPC_StatusCode));
+        resp->Results = SOPC_Calloc((size_t) msg_subscription_delete_bs__l_nb_subs, sizeof(SOPC_StatusCode));
     }
     if (NULL != resp->Results)
     {

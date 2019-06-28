@@ -51,7 +51,7 @@ void browse_treatment_result_bs__alloc_browse_result(const t_entier4 browse_trea
     if (browse_treatment_result_bs__p_maxResultRefs > 0)
     {
         assert((uint64_t) browse_treatment_result_bs__p_maxResultRefs <= SIZE_MAX);
-        references = calloc((size_t) browse_treatment_result_bs__p_maxResultRefs, sizeof(*references));
+        references = SOPC_Calloc((size_t) browse_treatment_result_bs__p_maxResultRefs, sizeof(*references));
         if (NULL != references)
         {
             nbReferences = 0;

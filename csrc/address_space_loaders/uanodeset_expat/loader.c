@@ -216,7 +216,7 @@ static SOPC_ReturnStatus parse(XML_Parser parser, FILE* fd)
 static char* dup_c_string(const char* s)
 {
     size_t len = strlen(s);
-    char* res = calloc(1 + len, sizeof(char));
+    char* res = SOPC_Calloc(1 + len, sizeof(char));
 
     if (res == NULL)
     {
@@ -1179,7 +1179,7 @@ static bool set_variant_value_bstring(SOPC_Variant* var, const char* bstring_str
     bool return_code;
 
     /* By definition, ByteString base64 length is greater than its corresponding string length */
-    unsigned char* str = calloc(1, length);
+    unsigned char* str = SOPC_Calloc(1, length);
 
     return_code = base64decode(bstring_str, str, &length);
     assert(true == return_code);
@@ -1203,7 +1203,7 @@ static bool set_variant_value_bstring(SOPC_Variant* var, const char* bstring_str
 
 static bool set_variant_value_guid(SOPC_Variant* var, const char* guid_str)
 {
-    SOPC_Guid* guid = calloc(1, sizeof(SOPC_Guid));
+    SOPC_Guid* guid = SOPC_Calloc(1, sizeof(SOPC_Guid));
 
     if (guid == NULL)
     {
@@ -1227,7 +1227,7 @@ static bool set_variant_value_guid(SOPC_Variant* var, const char* guid_str)
 
 static bool set_variant_value_qname(SOPC_Variant* var, const char* qname_str)
 {
-    SOPC_QualifiedName* qname = calloc(1, sizeof(SOPC_QualifiedName));
+    SOPC_QualifiedName* qname = SOPC_Calloc(1, sizeof(SOPC_QualifiedName));
 
     if (qname == NULL)
     {
@@ -1256,7 +1256,7 @@ static bool set_variant_value_qname(SOPC_Variant* var, const char* qname_str)
 
 static bool set_variant_value_localized_text(SOPC_Variant* var, const char* text)
 {
-    SOPC_LocalizedText* lt = calloc(1, sizeof(SOPC_LocalizedText));
+    SOPC_LocalizedText* lt = SOPC_Calloc(1, sizeof(SOPC_LocalizedText));
 
     if (lt == NULL)
     {
@@ -1458,7 +1458,7 @@ static bool finalize_node(struct parse_context_t* ctx)
         ctx->references = NULL;
     }
 
-    SOPC_AddressSpace_Item* item = calloc(1, sizeof(SOPC_AddressSpace_Item));
+    SOPC_AddressSpace_Item* item = SOPC_Calloc(1, sizeof(SOPC_AddressSpace_Item));
 
     if (item == NULL)
     {
@@ -1650,7 +1650,7 @@ SOPC_AddressSpace* SOPC_UANodeSet_Parse(FILE* fd)
     static const size_t char_data_cap_initial = 4096;
     SOPC_Dict* aliases = SOPC_Dict_Create(NULL, str_hash, str_equal, free, free);
     XML_Parser parser = XML_ParserCreateNS(NULL, NS_SEPARATOR[0]);
-    char* char_data_buffer = calloc(char_data_cap_initial, sizeof(char));
+    char* char_data_buffer = SOPC_Calloc(char_data_cap_initial, sizeof(char));
     SOPC_AddressSpace* space = SOPC_AddressSpace_Create(true);
 
     if ((aliases == NULL) || (parser == NULL) || (char_data_buffer == NULL) || (space == NULL))

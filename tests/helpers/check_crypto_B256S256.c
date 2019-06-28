@@ -1022,7 +1022,7 @@ START_TEST(test_cert_copyder_B256S256)
 {
     uint8_t *buffer0 = NULL, *buffer1 = NULL;
     size_t der_len = strlen(SRV_CRT) / 2;
-    uint8_t* der_cert = calloc(der_len, sizeof(uint8_t));
+    uint8_t* der_cert = SOPC_Calloc(der_len, sizeof(uint8_t));
     uint32_t lenAlloc0 = 0, lenAlloc1 = 0;
 
     // Reference certificate. This is server_public/server_2k.der.

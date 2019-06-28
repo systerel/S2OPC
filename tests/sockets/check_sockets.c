@@ -52,7 +52,7 @@ static void onSocketEvent(SOPC_EventHandler* handler, int32_t event, uint32_t id
     /* avoid unused parameter compiler warning */
     (void) handler;
 
-    SOPC_Event* ev = calloc(1, sizeof(SOPC_Event));
+    SOPC_Event* ev = SOPC_Calloc(1, sizeof(SOPC_Event));
     ck_assert_ptr_nonnull(ev);
 
     ev->event = event;
