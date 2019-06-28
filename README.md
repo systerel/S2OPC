@@ -83,7 +83,7 @@ Server side (e.g.: tests/services/toolkit_test_server.c):
 
 ## Address space generation
 
-The `generate-s2opc-address-space` tool converts a UANodeSet XML file into a
+The `scripts/generate-s2opc-address-space.py` tool converts a UANodeSet XML file into a
 C file that can be compiled in the binary, and used with the embedded address
 space loader (see the `tests/data/address_space/parts/User_Address_Space.xml`
 file for example). Not all the features of the schema are supported at the

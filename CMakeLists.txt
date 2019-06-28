@@ -350,7 +350,7 @@ function(s2opc_embed_address_space var_name uanodeset_path)
     add_custom_command(
         OUTPUT ${c_file_path}
         DEPENDS ${uanodeset_path}
-		COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/generate-s2opc-address-space ${uanodeset_path} ${c_file_path} ${const_addspace}
+		COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/scripts/generate-s2opc-address-space.py ${uanodeset_path} ${c_file_path} ${const_addspace}
         COMMENT "Generating address space ${var_name}"
         VERBATIM
     )
