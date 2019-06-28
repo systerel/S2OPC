@@ -120,7 +120,7 @@ static void SC_Client_ClearPendingRequest(uint32_t id, void* val)
             // Other cases are SC level requests pending: nothing to do
             break;
         }
-        free(msgCtx);
+        SOPC_Free(msgCtx);
     }
 }
 
@@ -1460,7 +1460,7 @@ static bool get_certificate_der(SOPC_Certificate* cert, SOPC_Buffer** buffer)
 
     if (cert_buffer == NULL)
     {
-        free(cert_data);
+        SOPC_Free(cert_data);
         return false;
     }
 
@@ -1660,8 +1660,8 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
 
         if (result == false)
         {
-            free(nconfig);
-            free(cert_buffer);
+            SOPC_Free(nconfig);
+            SOPC_Free(cert_buffer);
             *errorStatus = OpcUa_BadTcpInternalError;
         }
     }
@@ -2707,7 +2707,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
                                      true,  // consider immediate close since server should have closed now
                                      false, // still request to close socket just in case server did not
                                      errorStatus, errorReason);
-            free(errorReason);
+            SOPC_Free(errorReason);
         }
         else
         {
@@ -2910,7 +2910,7 @@ void SOPC_SecureConnectionStateMgr_OnTimerEvent(SOPC_SecureChannels_TimerEvent e
             break;
         }
 
-        free(msgCtx);
+        SOPC_Free(msgCtx);
 
         break;
     }

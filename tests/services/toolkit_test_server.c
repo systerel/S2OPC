@@ -202,7 +202,7 @@ static char* Config_SetLogPath(int argc, char* argv[])
                 return logDirPath;
             }
         }
-        free(logDirPath);
+        SOPC_Free(logDirPath);
     }
     else
     {
@@ -264,7 +264,7 @@ static SOPC_ReturnStatus authentication_uactt(SOPC_UserAuthentication_Manager* a
 }
 
 static const SOPC_UserAuthentication_Functions authentication_uactt_functions = {
-    .pFuncFree = (SOPC_UserAuthentication_Free_Func) free,
+    .pFuncFree = (SOPC_UserAuthentication_Free_Func) SOPC_Free,
     .pFuncValidateUserIdentity = authentication_uactt};
 
 int main(int argc, char* argv[])
@@ -582,7 +582,7 @@ int main(int argc, char* argv[])
 
     SOPC_UserAuthentication_FreeManager(&authenticationManager);
     SOPC_UserAuthorization_FreeManager(&authorizationManager);
-    free(logDirPath);
+    SOPC_Free(logDirPath);
 
     return (status == SOPC_STATUS_OK) ? 0 : 1;
 }

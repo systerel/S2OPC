@@ -51,7 +51,7 @@ SOPC_CryptoProvider* SOPC_CryptoProvider_Create(const char* uri)
             SOPC_GCC_DIAGNOSTIC_RESTORE
             if (SOPC_STATUS_OK != SOPC_CryptoProvider_Init(pCryptoProvider))
             {
-                free(pCryptoProvider);
+                SOPC_Free(pCryptoProvider);
                 pCryptoProvider = NULL;
             }
         }
@@ -65,7 +65,7 @@ void SOPC_CryptoProvider_Free(SOPC_CryptoProvider* pCryptoProvider)
     if (NULL != pCryptoProvider)
     {
         SOPC_CryptoProvider_Deinit(pCryptoProvider);
-        free(pCryptoProvider);
+        SOPC_Free(pCryptoProvider);
     }
 }
 
@@ -682,7 +682,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_GenerateRandomBytes(const SOPC_CryptoProvi
         }
         else
         {
-            free(pExp);
+            SOPC_Free(pExp);
         }
     }
 
@@ -712,7 +712,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_GenerateSecureChannelNonce(const SOPC_Cryp
         }
 
         memset(pExp, 0, lenNonce);
-        free(pExp);
+        SOPC_Free(pExp);
     }
 
     return status;
@@ -808,7 +808,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_DeriveKeySets(const SOPC_CryptoProvider* p
 
     // Clears and delete
     memset(genData, 0, lenData);
-    free(genData);
+    SOPC_Free(genData);
 
     return status;
 }

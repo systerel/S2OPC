@@ -52,7 +52,7 @@ struct Event
 
 static void event_handler_delete(SOPC_EventHandler** handler)
 {
-    free(*handler);
+    SOPC_Free(*handler);
 }
 
 static SOPC_ReturnStatus post(SOPC_EventHandler* handler,
@@ -80,7 +80,7 @@ static SOPC_ReturnStatus post(SOPC_EventHandler* handler,
 
     if (status != SOPC_STATUS_OK)
     {
-        free(ev);
+        SOPC_Free(ev);
     }
 
     return status;
@@ -103,7 +103,7 @@ static void* looper_loop(void* user_data)
 
         struct Event* ev = item;
         ev->handler->callback(ev->handler, ev->code, ev->id, ev->params, ev->auxParam);
-        free(ev);
+        SOPC_Free(ev);
     }
 
     return NULL;
@@ -160,7 +160,7 @@ SOPC_Looper* SOPC_Looper_Create(void)
     {
         SOPC_AsyncQueue_Free(&queue);
         SOPC_Array_Delete(handlers);
-        free(looper);
+        SOPC_Free(looper);
         return NULL;
     }
 
@@ -185,5 +185,5 @@ void SOPC_Looper_Delete(SOPC_Looper* looper)
 
     SOPC_AsyncQueue_Free(&looper->queue);
     SOPC_Array_Delete(looper->handlers);
-    free(looper);
+    SOPC_Free(looper);
 }

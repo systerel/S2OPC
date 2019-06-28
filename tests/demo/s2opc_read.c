@@ -169,7 +169,7 @@ int main(int argc, char* argv[])
     /* Finish it */
     if (NULL != g_pNid)
     {
-        free(g_pNid);
+        SOPC_Free(g_pNid);
     }
     SOPC_Toolkit_Clear();
     StateMachine_Delete(&g_pSM);
@@ -258,11 +258,11 @@ static SOPC_ReturnStatus SendReadRequest(StateMachine_Machine* pSM)
         if (NULL != pReq)
         {
             OpcUa_ReadRequest_Clear(pReq);
-            free(pReq);
+            SOPC_Free(pReq);
         }
         if (NULL != lrv)
         {
-            free(lrv);
+            SOPC_Free(lrv);
         }
     }
 
@@ -285,7 +285,7 @@ static void PrintReadResponse(OpcUa_ReadResponse* pResp)
     {
         sNid = SOPC_NodeId_ToCString(g_pNid);
         printf("Read node \"%s\", attribute %i:\n", sNid, g_iAttr);
-        free(sNid);
+        SOPC_Free(sNid);
         sNid = NULL;
 
         pVal = &pResp->Results[i];

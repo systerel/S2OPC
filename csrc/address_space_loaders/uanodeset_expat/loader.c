@@ -516,7 +516,7 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
             SOPC_NodeId* element_id = SOPC_AddressSpace_Item_Get_NodeId(&ctx->item);
             SOPC_ReturnStatus status = SOPC_NodeId_Copy(element_id, id);
             SOPC_NodeId_Clear(id);
-            free(id);
+            SOPC_Free(id);
 
             if (status != SOPC_STATUS_OK)
             {
@@ -575,7 +575,7 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
             SOPC_NodeId* dataType = SOPC_AddressSpace_Item_Get_DataType(&ctx->item);
             SOPC_ReturnStatus status = SOPC_NodeId_Copy(dataType, id);
             SOPC_NodeId_Clear(id);
-            free(id);
+            SOPC_Free(id);
 
             if (status != SOPC_STATUS_OK)
             {
@@ -672,7 +672,7 @@ static bool start_node_reference(struct parse_context_t* ctx, const XML_Char** a
 
             SOPC_ReturnStatus status = SOPC_NodeId_Copy(&ref.ReferenceTypeId, nodeid);
             SOPC_NodeId_Clear(nodeid);
-            free(nodeid);
+            SOPC_Free(nodeid);
 
             if (status != SOPC_STATUS_OK)
             {
@@ -952,7 +952,7 @@ static bool finalize_alias(struct parse_context_t* ctx)
     if (target == NULL || !SOPC_Dict_Insert(ctx->aliases, ctx->current_alias_alias, target))
     {
         LOG_MEMORY_ALLOCATION_FAILURE;
-        free(target);
+        SOPC_Free(target);
         return false;
     }
 
@@ -980,7 +980,7 @@ static bool finalize_reference(struct parse_context_t* ctx)
 
     SOPC_ReturnStatus status = SOPC_NodeId_Copy(&ref->TargetId.NodeId, target_id);
     SOPC_NodeId_Clear(target_id);
-    free(target_id);
+    SOPC_Free(target_id);
 
     return status == SOPC_STATUS_OK;
 }
@@ -1185,7 +1185,7 @@ static bool set_variant_value_bstring(SOPC_Variant* var, const char* bstring_str
     assert(true == return_code);
 
     status = SOPC_String_CopyFromCString(&var->Value.Bstring, (char*) str);
-    free(str);
+    SOPC_Free(str);
 
     if (status == SOPC_STATUS_OK)
     {
@@ -1216,7 +1216,7 @@ static bool set_variant_value_guid(SOPC_Variant* var, const char* guid_str)
     {
         LOGF("Invalid GUID: '%s'", guid_str);
         SOPC_Guid_Clear(guid);
-        free(guid);
+        SOPC_Free(guid);
         return false;
     }
 
@@ -1232,7 +1232,7 @@ static bool set_variant_value_qname(SOPC_Variant* var, const char* qname_str)
     if (qname == NULL)
     {
         LOG_MEMORY_ALLOCATION_FAILURE;
-        free(qname);
+        SOPC_Free(qname);
         return false;
     }
 
@@ -1249,7 +1249,7 @@ static bool set_variant_value_qname(SOPC_Variant* var, const char* qname_str)
     {
         LOGF("Invalid qualified name: '%s'", qname_str);
         SOPC_QualifiedName_Clear(qname);
-        free(qname);
+        SOPC_Free(qname);
         return false;
     }
 }
@@ -1261,7 +1261,7 @@ static bool set_variant_value_localized_text(SOPC_Variant* var, const char* text
     if (lt == NULL)
     {
         LOG_MEMORY_ALLOCATION_FAILURE;
-        free(lt);
+        SOPC_Free(lt);
         return false;
     }
 
@@ -1271,7 +1271,7 @@ static bool set_variant_value_localized_text(SOPC_Variant* var, const char* text
     {
         LOG_MEMORY_ALLOCATION_FAILURE;
         SOPC_LocalizedText_Clear(lt);
-        free(lt);
+        SOPC_Free(lt);
         return false;
     }
     else
@@ -1396,7 +1396,7 @@ static bool append_element_value(struct parse_context_t* ctx)
         return false;
     }
     // The structure content was copied in array but structure itself shall be freed
-    free(var);
+    SOPC_Free(var);
 
     return true;
 }
@@ -1474,7 +1474,7 @@ static bool finalize_node(struct parse_context_t* ctx)
     }
     else
     {
-        free(item);
+        SOPC_Free(item);
         return false;
     }
 }
@@ -1498,7 +1498,7 @@ static void end_element_handler(void* user_data, const XML_Char* name)
     {
         bool ok = finalize_alias(ctx);
 
-        free(ctx->current_alias_alias);
+        SOPC_Free(ctx->current_alias_alias);
         ctx->current_alias_alias = NULL;
 
         if (!ok)
@@ -1648,7 +1648,7 @@ static bool str_equal(const void* a, const void* b)
 SOPC_AddressSpace* SOPC_UANodeSet_Parse(FILE* fd)
 {
     static const size_t char_data_cap_initial = 4096;
-    SOPC_Dict* aliases = SOPC_Dict_Create(NULL, str_hash, str_equal, free, free);
+    SOPC_Dict* aliases = SOPC_Dict_Create(NULL, str_hash, str_equal, SOPC_Free, SOPC_Free);
     XML_Parser parser = XML_ParserCreateNS(NULL, NS_SEPARATOR[0]);
     char* char_data_buffer = SOPC_Calloc(char_data_cap_initial, sizeof(char));
     SOPC_AddressSpace* space = SOPC_AddressSpace_Create(true);
@@ -1658,7 +1658,7 @@ SOPC_AddressSpace* SOPC_UANodeSet_Parse(FILE* fd)
         LOG_MEMORY_ALLOCATION_FAILURE;
         SOPC_Dict_Delete(aliases);
         XML_ParserFree(parser);
-        free(char_data_buffer);
+        SOPC_Free(char_data_buffer);
         SOPC_AddressSpace_Delete(space);
         return NULL;
     }
@@ -1680,8 +1680,8 @@ SOPC_AddressSpace* SOPC_UANodeSet_Parse(FILE* fd)
     SOPC_ReturnStatus res = parse(parser, fd);
     XML_ParserFree(parser);
     SOPC_Dict_Delete(aliases);
-    free(ctx.current_alias_alias);
-    free(ctx.char_data_buffer);
+    SOPC_Free(ctx.current_alias_alias);
+    SOPC_Free(ctx.char_data_buffer);
     SOPC_Array_Delete(ctx.references);
     SOPC_Array_Delete(ctx.list_items);
 

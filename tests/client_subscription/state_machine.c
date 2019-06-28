@@ -252,11 +252,11 @@ void SOPC_StaMac_Delete(SOPC_StaMac_Machine** ppSM)
         assert(SOPC_STATUS_OK == status);
         Mutex_Clear(&pSM->mutex);
         SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-        free((void*) pSM->szPolicyId);
-        free((void*) pSM->szUsername);
-        free((void*) pSM->szPassword);
+        SOPC_Free((void*) pSM->szPolicyId);
+        SOPC_Free((void*) pSM->szUsername);
+        SOPC_Free((void*) pSM->szPassword);
         SOPC_GCC_DIAGNOSTIC_RESTORE
-        free(pSM);
+        SOPC_Free(pSM);
         *ppSM = NULL;
     }
 }
@@ -388,7 +388,7 @@ SOPC_ReturnStatus SOPC_StaMac_SendRequest(SOPC_StaMac_Machine* pSM,
     if (SOPC_STATUS_OK != status)
     {
         pSM->state = stError;
-        free(pReqCtx);
+        SOPC_Free(pReqCtx);
     }
 
     mutStatus = Mutex_Unlock(&pSM->mutex);
@@ -492,10 +492,10 @@ SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
 
     for (int i = 0; NULL != lpNid && i < nElems; ++i)
     {
-        free(lpNid[i]);
+        SOPC_Free(lpNid[i]);
         lpNid[i] = NULL;
     }
-    free(lpNid);
+    SOPC_Free(lpNid);
     lpNid = NULL;
 
     mutStatus = Mutex_Unlock(&pSM->mutex);
@@ -793,7 +793,7 @@ static bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
                 {
                     Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_WARNING, "failed to pop the request from the pListReqCtx.");
                 }
-                free((void*) appCtx);
+                SOPC_Free((void*) appCtx);
                 appCtx = 0;
             }
         }
@@ -928,10 +928,10 @@ static void StaMac_ProcessEvent_stActivated(SOPC_StaMac_Machine* pSM,
                     if (SOPC_STATUS_OK == status)
                     {
                         pSM->cbkDataChanged(pSM->iCliId, pMonItNotif->ClientHandle, plsVal);
-                        free(plsVal->value);
+                        SOPC_Free(plsVal->value);
                         plsVal->value = NULL;
                         SOPC_Variant_Delete(plsVal->raw_value);
-                        free(plsVal);
+                        SOPC_Free(plsVal);
                         plsVal = NULL;
                     }
                 }

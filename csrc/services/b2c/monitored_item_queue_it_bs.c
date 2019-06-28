@@ -72,5 +72,5 @@ void monitored_item_queue_it_bs__init_iter_monitored_item(
 void monitored_item_queue_it_bs__clear_iter_monitored_item(
     const constants__t_monitoredItemQueueIterator_i monitored_item_queue_it_bs__p_iterator)
 {
-    free(monitored_item_queue_it_bs__p_iterator);
+    SOPC_Free(monitored_item_queue_it_bs__p_iterator);
 }

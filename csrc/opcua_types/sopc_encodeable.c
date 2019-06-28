@@ -51,7 +51,7 @@ SOPC_ReturnStatus SOPC_Encodeable_Delete(SOPC_EncodeableType* encTyp, void** enc
     if (encTyp != NULL && encTyp->Clear != NULL && encObject != NULL && *encObject != NULL)
     {
         encTyp->Clear(*encObject);
-        free(*encObject);
+        SOPC_Free(*encObject);
         *encObject = NULL;
         status = SOPC_STATUS_OK;
     }

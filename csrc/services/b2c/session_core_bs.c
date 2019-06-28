@@ -248,7 +248,7 @@ void session_core_bs__delete_session_token(const constants__t_session_i session_
 {
     SOPC_NodeId_Clear(&sessionDataArray[session_core_bs__p_session].sessionToken);
     SOPC_ExtensionObject_Clear(sessionDataArray[session_core_bs__p_session].user_client);
-    free(sessionDataArray[session_core_bs__p_session].user_client);
+    SOPC_Free(sessionDataArray[session_core_bs__p_session].user_client);
     sessionDataArray[session_core_bs__p_session].user_client = NULL;
 }
 
@@ -522,7 +522,7 @@ void session_core_bs__server_create_session_req_do_crypto(
     /* Clean */
     if (NULL != pToSign)
     {
-        free(pToSign);
+        SOPC_Free(pToSign);
         pToSign = NULL;
     }
     if (NULL != pProvider)
@@ -674,7 +674,7 @@ void session_core_bs__client_activate_session_req_do_crypto(
     /* Clean */
     if (NULL != pToSign)
     {
-        free(pToSign);
+        SOPC_Free(pToSign);
         pToSign = NULL;
     }
     if (NULL != pProvider)
@@ -808,7 +808,7 @@ static SOPC_ReturnStatus check_signature_with_provider(SOPC_CryptoProvider* prov
 
         status = SOPC_CryptoProvider_AsymmetricVerify(provider, verify_payload, verify_len, publicKey, signature->Data,
                                                       (uint32_t) signature->Length);
-        free(verify_payload);
+        SOPC_Free(verify_payload);
     }
     else
     {
@@ -944,7 +944,7 @@ void session_core_bs__server_activate_session_check_crypto(
         *session_core_bs__valid = true;
 
         // renew the server Nonce
-        free(pNonce->Data);
+        SOPC_Free(pNonce->Data);
         pNonce->Data = NULL;
         status = SOPC_CryptoProvider_GenerateRandomBytes(provider, (uint32_t) pNonce->Length, &pNonce->Data);
         assert(SOPC_STATUS_OK == status);

@@ -240,7 +240,7 @@ int main(int argc, char* argv[])
                 printf("<Stub_Server: Unexpected client connection parameters values\n");
                 status = SOPC_STATUS_NOK;
             }
-            free(serviceEvent);
+            SOPC_Free(serviceEvent);
             serviceEvent = NULL;
         }
         else
@@ -305,7 +305,7 @@ int main(int argc, char* argv[])
             printf("<Stub_Server: Unexpected event received '%d'\n", serviceEvent->event);
             status = SOPC_STATUS_NOK;
         }
-        free(serviceEvent);
+        SOPC_Free(serviceEvent);
         serviceEvent = NULL;
 
         // Wait for client disconnection
@@ -329,7 +329,7 @@ int main(int argc, char* argv[])
             printf("<Stub_Server: Unexpected event received '%d'\n", serviceEvent->event);
             status = SOPC_STATUS_NOK;
         }
-        free(serviceEvent);
+        SOPC_Free(serviceEvent);
         serviceEvent = NULL;
 
         // Close the endpoint connection listener
@@ -355,7 +355,7 @@ int main(int argc, char* argv[])
             status = SOPC_STATUS_NOK;
         }
 
-        free(serviceEvent);
+        SOPC_Free(serviceEvent);
         serviceEvent = NULL;
     }
 

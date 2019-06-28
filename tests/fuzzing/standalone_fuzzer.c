@@ -88,7 +88,7 @@ static bool fuzz_file(FILE* fd)
     }
 
     LLVMFuzzerTestOneInput(buf, (size_t) len);
-    free(buf);
+    SOPC_Free(buf);
 
     fprintf(stderr, "Done (%ld bytes)\n", len);
 

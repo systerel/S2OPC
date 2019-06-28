@@ -227,7 +227,7 @@ static void free_description_item(void* data)
 {
     SOPC_AddressSpace_Item* item = data;
     SOPC_AddressSpace_Item_Clear(item);
-    free(item);
+    SOPC_Free(item);
 }
 
 SOPC_AddressSpace* SOPC_AddressSpace_Create(bool free_items)

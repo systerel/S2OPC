@@ -117,12 +117,12 @@ bool test_read_request_response(OpcUa_ReadResponse* pReadResp, SOPC_StatusCode s
             else
                 printf("-- nok\n");
         }
-        free(pvar); /* It's ok to free a NULL */
+        SOPC_Free(pvar);
     }
 
     /* Free the Request */
-    free(pReadReq->NodesToRead);
-    free(pReadReq);
+    SOPC_Free(pReadReq->NodesToRead);
+    SOPC_Free(pReadReq);
 
     if (bTestOk)
         printf("OK\n");

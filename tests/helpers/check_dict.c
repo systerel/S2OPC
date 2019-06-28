@@ -137,7 +137,7 @@ END_TEST
 
 START_TEST(test_dict_free)
 {
-    SOPC_Dict* d = SOPC_Dict_Create(NULL, str_hash, str_equal, free, free);
+    SOPC_Dict* d = SOPC_Dict_Create(NULL, str_hash, str_equal, SOPC_Free, SOPC_Free);
 
     static const char key[] = "Hello";
     static const char value[] = "World";

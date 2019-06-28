@@ -56,8 +56,8 @@ static void SOPC_InternalPublishRequestQueueElement_Free(uint32_t id, void* val)
     (void) id;
     SOPC_InternalPublishRequestQueueElement* elt = (SOPC_InternalPublishRequestQueueElement*) val;
     OpcUa_PublishResponse_Clear(elt->resp_msg);
-    free(elt->resp_msg);
-    free(elt);
+    SOPC_Free(elt->resp_msg);
+    SOPC_Free(elt);
 }
 
 void publish_request_queue_bs__clear_and_deallocate_publish_queue(
@@ -100,7 +100,7 @@ void publish_request_queue_bs__append_publish_request_to_queue(
         }
         else
         {
-            free(elt);
+            SOPC_Free(elt);
         }
     }
 }
@@ -118,7 +118,7 @@ void publish_request_queue_bs__discard_oldest_publish_request(
     *publish_request_queue_bs__old_req_handle = elt->req_handle;
     *publish_request_queue_bs__old_req_ctx = elt->req_ctx;
     *publish_request_queue_bs__old_resp_msg = elt->resp_msg;
-    free(elt);
+    SOPC_Free(elt);
 }
 
 void publish_request_queue_bs__get_nb_publish_requests(
@@ -143,7 +143,7 @@ void publish_request_queue_bs__continue_pop_head_iter_publish_request(
     *publish_request_queue_bs__p_req_handle = elt->req_handle;
     *publish_request_queue_bs__p_req_ctx = elt->req_ctx;
     *publish_request_queue_bs__p_resp_msg = elt->resp_msg;
-    free(elt);
+    SOPC_Free(elt);
     *publish_request_queue_bs__p_continue = SOPC_SLinkedList_GetLength(publish_request_queue_bs__p_queue) > 0;
 }
 
@@ -175,7 +175,7 @@ void publish_request_queue_bs__pop_valid_publish_request_queue(
     *publish_request_queue_bs__p_req_handle = elt->req_handle;
     *publish_request_queue_bs__p_req_ctx = elt->req_ctx;
     *publish_request_queue_bs__p_resp_msg = elt->resp_msg;
-    free(elt);
+    SOPC_Free(elt);
 }
 
 void publish_request_queue_bs__prepend_publish_request_to_queue(
@@ -204,7 +204,7 @@ void publish_request_queue_bs__prepend_publish_request_to_queue(
         }
         else
         {
-            free(elt);
+            SOPC_Free(elt);
         }
     }
 }

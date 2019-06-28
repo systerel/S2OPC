@@ -160,7 +160,7 @@ static void onSecureChannelEvent(SOPC_EventHandler* handler,
             constants_statuscodes_bs__t_StatusCode_i statusCode;
             util_status_code__C_to_B((SOPC_StatusCode) auxParam, &statusCode);
             io_dispatch_mgr__snd_msg_failure(id, (constants__t_request_context_i) * (uint32_t*) params, statusCode);
-            free(params);
+            SOPC_Free(params);
         } // else: without request Id, it cannot be treated
         break;
     case SC_REQUEST_TIMEOUT:
@@ -275,7 +275,7 @@ static void onServiceEvent(SOPC_EventHandler* handler, int32_t scEvent, uint32_t
         io_dispatch_mgr__internal_server_send_publish_response_prio_event(
             (constants__t_session_i) id, msg_data->requestHandle, msg_data->requestId, msg_data->msgToSend,
             (constants_statuscodes_bs__t_StatusCode_i) auxParam, &bres);
-        free(msg_data);
+        SOPC_Free(msg_data);
 
         if (bres == false)
         {

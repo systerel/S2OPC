@@ -300,7 +300,7 @@ int main(int argc, char* argv[])
             printf(">>Stub_Client: Unexpected event received '%d'\n", serviceEvent->event);
             status = SOPC_STATUS_CLOSED;
         }
-        free(serviceEvent);
+        SOPC_Free(serviceEvent);
         serviceEvent = NULL;
     }
     if (SOPC_STATUS_OK != status)
@@ -384,7 +384,7 @@ int main(int argc, char* argv[])
             printf(">>Stub_Client: Unexpected event received '%d'\n", serviceEvent->event);
             status = SOPC_STATUS_NOK;
         }
-        free(serviceEvent);
+        SOPC_Free(serviceEvent);
         serviceEvent = NULL;
     }
     if (SOPC_STATUS_OK != status)
@@ -409,7 +409,7 @@ int main(int argc, char* argv[])
             printf(">>Stub_Client: Unexpected event received '%d'\n", serviceEvent->event);
             status = SOPC_STATUS_CLOSED;
         }
-        free(serviceEvent);
+        SOPC_Free(serviceEvent);
         serviceEvent = NULL;
         if (SOPC_STATUS_OK != status)
         {

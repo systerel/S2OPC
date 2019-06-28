@@ -47,7 +47,7 @@ void node_id_pointer_bs__copy_node_id_pointer_content(const constants__t_NodeId_
             }
             else
             {
-                free(nodeId);
+                SOPC_Free(nodeId);
             }
         }
     }
@@ -57,5 +57,5 @@ void node_id_pointer_bs__copy_node_id_pointer_content(const constants__t_NodeId_
 void node_id_pointer_bs__free_node_id_pointer(const constants__t_NodeId_i node_id_pointer_bs__p_node_id)
 {
     SOPC_NodeId_Clear(node_id_pointer_bs__p_node_id);
-    free(node_id_pointer_bs__p_node_id);
+    SOPC_Free(node_id_pointer_bs__p_node_id);
 }

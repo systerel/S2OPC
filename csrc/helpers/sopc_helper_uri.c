@@ -193,8 +193,8 @@ bool SOPC_Helper_URI_SplitTcpUaUri(const char* uri, char** hostname, char** port
     }
     else
     {
-        free(lHostname);
-        free(lPort);
+        SOPC_Free(lHostname);
+        SOPC_Free(lPort);
     }
 
     return result;

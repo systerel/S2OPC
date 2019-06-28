@@ -49,7 +49,7 @@ START_TEST(test_crypto_get_app_uri)
     SOPC_Certificate* crt_uri = SOPC_UnhexlifyCertificate(SRV_CRT);
     ck_assert(SOPC_STATUS_OK == SOPC_KeyManager_Certificate_GetMaybeApplicationUri(crt_uri, &appUri, &len));
     ck_assert(strcmp(appUri, "urn:S2OPC:localhost") == 0);
-    free(appUri);
+    SOPC_Free(appUri);
     SOPC_KeyManager_Certificate_Free(crt_uri);
 
     SOPC_Certificate* crt_no_uri = SOPC_UnhexlifyCertificate(CA_CRT);

@@ -194,7 +194,7 @@ void constants_bs__free_ExpandedNodeId(const constants_bs__t_ExpandedNodeId_i co
     {
         SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
         SOPC_ExpandedNodeId_Clear(constants_bs__p_in);
-        free(constants_bs__p_in);
+        SOPC_Free(constants_bs__p_in);
         SOPC_GCC_DIAGNOSTIC_RESTORE
     }
 }

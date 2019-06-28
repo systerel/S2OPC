@@ -579,7 +579,7 @@ void address_space_bs__set_Value(const constants__t_user_i address_space_bs__p_u
     else
     {
         SOPC_DataValue_Clear(*address_space_bs__prev_dataValue);
-        free(*address_space_bs__prev_dataValue);
+        SOPC_Free(*address_space_bs__prev_dataValue);
         *address_space_bs__prev_dataValue = NULL;
     }
 
@@ -656,7 +656,7 @@ void address_space_bs__read_AddressSpace_free_variant(const constants__t_Variant
 void address_space_bs__write_AddressSpace_free_dataValue(const constants__t_DataValue_i address_space_bs__data)
 {
     SOPC_DataValue_Clear(address_space_bs__data);
-    free(address_space_bs__data);
+    SOPC_Free(address_space_bs__data);
 }
 
 void address_space_bs__get_AccessLevel(const constants__t_Node_i address_space_bs__p_node,

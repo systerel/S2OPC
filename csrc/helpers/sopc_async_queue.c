@@ -71,7 +71,7 @@ SOPC_ReturnStatus SOPC_AsyncQueue_Init(SOPC_AsyncQueue** queue, const char* queu
             }
             if (SOPC_STATUS_OK != status)
             {
-                free(*queue);
+                SOPC_Free(*queue);
                 *queue = NULL;
             }
         }
@@ -182,7 +182,7 @@ void SOPC_AsyncQueue_Free(SOPC_AsyncQueue** queue)
             Mutex_Clear(&(*queue)->queueMutex);
             Condition_Clear(&(*queue)->queueCond);
         }
-        free(*queue);
+        SOPC_Free(*queue);
         *queue = NULL;
     }
 }

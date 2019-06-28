@@ -97,7 +97,7 @@ static void PKIProviderStack_Free(SOPC_PKIProvider* pPKI)
     }
 
     SOPC_KeyManager_Certificate_Free(pPKI->pUserCertAuthList);
-    free(pPKI);
+    SOPC_Free(pPKI);
 }
 
 SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_SerializedCertificate* pCertAuth,
@@ -119,7 +119,7 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_SerializedCertificate* pCert
     if (NULL == pki || status != SOPC_STATUS_OK)
     {
         SOPC_KeyManager_Certificate_Free(caCert);
-        free(pki);
+        SOPC_Free(pki);
         return SOPC_STATUS_NOK;
     }
 

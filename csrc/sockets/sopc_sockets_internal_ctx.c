@@ -176,7 +176,7 @@ SOPC_ReturnStatus SOPC_Sockets_EnqueueInputEvent(SOPC_Sockets_InputEvent socketE
     SOPC_ReturnStatus status = SOPC_AsyncQueue_BlockingEnqueue(socketsInputEventQueue, ev);
     if (SOPC_STATUS_OK != status)
     {
-        free(ev);
+        SOPC_Free(ev);
     }
     return status;
 }
@@ -188,7 +188,7 @@ SOPC_ReturnStatus SOPC_Sockets_DequeueAndDispatchInputEvent()
     if (SOPC_STATUS_OK == status)
     {
         SOPC_SocketsEventMgr_Dispatcher(ev->event, ev->id, ev->params, ev->auxParam);
-        free(ev);
+        SOPC_Free(ev);
     }
     return status;
 }

@@ -70,7 +70,7 @@ static void expect_event(SOPC_EventHandler* handler, int32_t event, uint32_t elt
     ck_assert_ptr_eq(params, ev->params);
     ck_assert_uint_eq(auxParam, ev->auxParam);
 
-    free(ev);
+    SOPC_Free(ev);
 }
 
 START_TEST(test_event_handler_empty_looper)

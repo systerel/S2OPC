@@ -85,7 +85,7 @@ SOPC_SecretBuffer* SOPC_SecretBuffer_New(uint32_t len)
             sec->buf = SOPC_Malloc((size_t) len);
             if (NULL == sec->buf)
             {
-                free(sec);
+                SOPC_Free(sec);
                 sec = NULL;
             }
         }
@@ -101,9 +101,9 @@ void SOPC_SecretBuffer_DeleteClear(SOPC_SecretBuffer* sec)
         if (sec->buf)
         {
             memset(sec->buf, 0, sec->len);
-            free(sec->buf);
+            SOPC_Free(sec->buf);
         }
-        free(sec);
+        SOPC_Free(sec);
     }
 }
 

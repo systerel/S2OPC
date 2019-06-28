@@ -34,7 +34,7 @@ void notification_republish_queue_it_bs__clear_notif_republish_iterator(
     const constants__t_notifRepublishQueueIterator_i notification_republish_queue_it_bs__p_iterator)
 {
     (void) notification_republish_queue_it_bs__p_queue;
-    free(notification_republish_queue_it_bs__p_iterator);
+    SOPC_Free(notification_republish_queue_it_bs__p_iterator);
 }
 
 void notification_republish_queue_it_bs__continue_iter_notif_republish(

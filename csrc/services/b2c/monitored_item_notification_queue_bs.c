@@ -63,8 +63,8 @@ static void SOPC_InternalNotificationQueueElement_Free(uint32_t id, void* val)
     (void) id;
     SOPC_InternalNotificationElement* notifElt = (SOPC_InternalNotificationElement*) val;
     OpcUa_WriteValue_Clear(notifElt->value);
-    free(notifElt->value);
-    free(notifElt);
+    SOPC_Free(notifElt->value);
+    SOPC_Free(notifElt);
 }
 
 void monitored_item_notification_queue_bs__clear_and_deallocate_monitored_item_notification_queue(
@@ -140,8 +140,8 @@ void monitored_item_notification_queue_bs__add_first_monitored_item_notification
 
     if (NULL == pNewWriteValue || NULL == notifElt)
     {
-        free(notifElt);
-        free(pNewWriteValue);
+        SOPC_Free(notifElt);
+        SOPC_Free(pNewWriteValue);
         return;
     }
     OpcUa_WriteValue_Initialize(pNewWriteValue);
@@ -172,9 +172,9 @@ void monitored_item_notification_queue_bs__add_first_monitored_item_notification
     }
     else
     {
-        free(notifElt);
+        SOPC_Free(notifElt);
         OpcUa_WriteValue_Clear(pNewWriteValue);
-        free(pNewWriteValue);
+        SOPC_Free(pNewWriteValue);
     }
 }
 
@@ -198,8 +198,8 @@ void monitored_item_notification_queue_bs__add_monitored_item_notification_to_qu
 
     if (NULL == notifElt || NULL == pNewWriteValue)
     {
-        free(notifElt);
-        free(pNewWriteValue);
+        SOPC_Free(notifElt);
+        SOPC_Free(pNewWriteValue);
         return;
     }
 
@@ -263,9 +263,9 @@ void monitored_item_notification_queue_bs__add_monitored_item_notification_to_qu
     }
     else
     {
-        free(notifElt);
+        SOPC_Free(notifElt);
         OpcUa_WriteValue_Clear(pNewWriteValue);
-        free(pNewWriteValue);
+        SOPC_Free(pNewWriteValue);
     }
 }
 
@@ -283,7 +283,7 @@ void monitored_item_notification_queue_bs__continue_pop_iter_monitor_item_notifi
 
     *monitored_item_notification_queue_bs__p_monitoredItem = notifElt->monitoredItemPointer;
     *monitored_item_notification_queue_bs__p_writeValuePointer = notifElt->value;
-    free(notifElt);
+    SOPC_Free(notifElt);
     *monitored_item_notification_queue_bs__p_continue =
         SOPC_SLinkedList_GetLength(monitored_item_notification_queue_bs__p_queue) > 0;
 }
@@ -291,7 +291,7 @@ void monitored_item_notification_queue_bs__continue_pop_iter_monitor_item_notifi
 void monitored_item_notification_queue_bs__free_first_monitored_item_notification_value(
     const constants__t_Variant_i monitored_item_notification_queue_bs__p_VariantValuePointer)
 {
-    free(monitored_item_notification_queue_bs__p_VariantValuePointer);
+    SOPC_Free(monitored_item_notification_queue_bs__p_VariantValuePointer);
 }
 
 void monitored_item_notification_queue_bs__init_iter_monitored_item_notification(

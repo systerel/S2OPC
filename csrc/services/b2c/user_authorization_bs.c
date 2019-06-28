@@ -74,6 +74,6 @@ void user_authorization_bs__get_user_authorization(
         SOPC_Logger_TraceWarning(
             "SOPC_UserAuthorization_IsAuthorizedOperation did not authorize %s operation on value \"%s\"\n", operation,
             s_node_id);
-        free(s_node_id);
+        SOPC_Free(s_node_id);
     }
 }

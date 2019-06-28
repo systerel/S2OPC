@@ -74,7 +74,7 @@ void msg_subscription_publish_bs__alloc_notification_message_items(
 
             if (SOPC_STATUS_OK != status)
             {
-                free(notifMsg->NotificationData);
+                SOPC_Free(notifMsg->NotificationData);
                 notifMsg->NotificationData = NULL;
             }
         }
@@ -188,5 +188,5 @@ void msg_subscription_publish_bs__setall_notification_msg_monitored_item_notif(
                         &msg_subscription_publish_bs__p_wv_pointer->Value);
 
     OpcUa_WriteValue_Clear(msg_subscription_publish_bs__p_wv_pointer);
-    free(msg_subscription_publish_bs__p_wv_pointer);
+    SOPC_Free(msg_subscription_publish_bs__p_wv_pointer);
 }

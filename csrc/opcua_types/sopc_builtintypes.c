@@ -1024,7 +1024,7 @@ void SOPC_String_Clear(SOPC_String* string)
         {
             if (string->Data != NULL)
             {
-                free(string->Data);
+                SOPC_Free(string->Data);
             }
         }
         SOPC_String_Initialize(string);
@@ -1036,7 +1036,7 @@ void SOPC_String_Delete(SOPC_String* string)
     if (NULL != string)
     {
         SOPC_String_Clear(string);
-        free(string);
+        SOPC_Free(string);
     }
 }
 
@@ -1535,7 +1535,7 @@ void SOPC_NodeId_Clear(SOPC_NodeId* nodeId)
             SOPC_Guid_Clear(nodeId->Data.Guid);
             if (nodeId->Data.Guid != NULL)
             {
-                free(nodeId->Data.Guid);
+                SOPC_Free(nodeId->Data.Guid);
             }
             nodeId->Data.Guid = NULL;
             break;
@@ -1826,7 +1826,7 @@ char* SOPC_NodeId_ToCString(const SOPC_NodeId* nodeId)
             }
             else
             {
-                free(result);
+                SOPC_Free(result);
                 result = NULL;
             }
         }
@@ -1943,7 +1943,7 @@ SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString, int32_t len)
             /* May be failed, but pGuid is allocated */
             if (SOPC_STATUS_OK != status)
             {
-                free(pGuid);
+                SOPC_Free(pGuid);
                 pGuid = NULL;
                 status = SOPC_STATUS_NOK;
             }
@@ -1959,16 +1959,16 @@ SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString, int32_t len)
         /* Something could have failed but the NodeId is already allocated */
         if (SOPC_STATUS_OK != status)
         {
-            free(pNid);
+            SOPC_Free(pNid);
             pNid = NULL;
         }
     }
     else
     {
-        free(pGuid);
+        SOPC_Free(pGuid);
     }
 
-    free(sz);
+    SOPC_Free(sz);
 
     return pNid;
 }
@@ -1995,7 +1995,7 @@ static void nodeid_free(void* id)
     if (id != NULL)
     {
         SOPC_NodeId_Clear(id);
-        free(id);
+        SOPC_Free(id);
     }
 }
 
@@ -2299,7 +2299,7 @@ void SOPC_DiagnosticInfo_Clear(SOPC_DiagnosticInfo* diagInfo)
         if (diagInfo->InnerDiagnosticInfo != NULL)
         {
             SOPC_DiagnosticInfo_Clear(diagInfo->InnerDiagnosticInfo);
-            free(diagInfo->InnerDiagnosticInfo);
+            SOPC_Free(diagInfo->InnerDiagnosticInfo);
         }
         diagInfo->SymbolicId = -1;
         diagInfo->NamespaceUri = -1;
@@ -2667,7 +2667,7 @@ void SOPC_ExtensionObject_Clear(SOPC_ExtensionObject* extObj)
             break;
         case SOPC_ExtObjBodyEncoding_Object:
             extObj->Body.Object.ObjType->Clear(extObj->Body.Object.Value);
-            free(extObj->Body.Object.Value);
+            SOPC_Free(extObj->Body.Object.Value);
             extObj->Body.Object.Value = NULL;
             break;
         }
@@ -3613,56 +3613,56 @@ static void FreeVariantNonArrayBuiltInType(SOPC_BuiltinId builtInTypeId, SOPC_Va
     case SOPC_Guid_Id:
         if (NULL != val->Guid)
         {
-            free(val->Guid);
+            SOPC_Free(val->Guid);
         }
         val->Guid = NULL;
         break;
     case SOPC_NodeId_Id:
         if (NULL != val->NodeId)
         {
-            free(val->NodeId);
+            SOPC_Free(val->NodeId);
         }
         val->NodeId = NULL;
         break;
     case SOPC_ExpandedNodeId_Id:
         if (NULL != val->ExpNodeId)
         {
-            free(val->ExpNodeId);
+            SOPC_Free(val->ExpNodeId);
         }
         val->ExpNodeId = NULL;
         break;
     case SOPC_QualifiedName_Id:
         if (NULL != val->Qname)
         {
-            free(val->Qname);
+            SOPC_Free(val->Qname);
         }
         val->Qname = NULL;
         break;
     case SOPC_LocalizedText_Id:
         if (NULL != val->LocalizedText)
         {
-            free(val->LocalizedText);
+            SOPC_Free(val->LocalizedText);
         }
         val->LocalizedText = NULL;
         break;
     case SOPC_ExtensionObject_Id:
         if (NULL != val->ExtObject)
         {
-            free(val->ExtObject);
+            SOPC_Free(val->ExtObject);
         }
         val->ExtObject = NULL;
         break;
     case SOPC_DataValue_Id:
         if (NULL != val->DataValue)
         {
-            free(val->DataValue);
+            SOPC_Free(val->DataValue);
         }
         val->DataValue = NULL;
         break;
     case SOPC_DiagnosticInfo_Id:
         if (NULL != val->DiagInfo)
         {
-            free(val->DiagInfo);
+            SOPC_Free(val->DiagInfo);
         }
         val->DiagInfo = NULL;
         break;
@@ -3758,13 +3758,13 @@ SOPC_ReturnStatus SOPC_Variant_Copy(SOPC_Variant* dest, const SOPC_Variant* src)
                                 ClearToVariantArrayBuiltInType(src->BuiltInTypeId, &dest->Value.Matrix.Content,
                                                                (int32_t*) &matrixLength,
                                                                GetBuiltInTypeClearFunction(src->BuiltInTypeId));
-                                free(dest->Value.Matrix.ArrayDimensions);
+                                SOPC_Free(dest->Value.Matrix.ArrayDimensions);
                                 dest->Value.Matrix.ArrayDimensions = NULL;
                             }
                         }
                         else
                         {
-                            free(dest->Value.Matrix.ArrayDimensions);
+                            SOPC_Free(dest->Value.Matrix.ArrayDimensions);
                             dest->Value.Matrix.ArrayDimensions = NULL;
                         }
                     }
@@ -4019,7 +4019,7 @@ void SOPC_Variant_Clear(SOPC_Variant* variant)
                 }
                 if (false == error)
                 {
-                    free(variant->Value.Matrix.ArrayDimensions);
+                    SOPC_Free(variant->Value.Matrix.ArrayDimensions);
                     variant->Value.Matrix.ArrayDimensions = NULL;
                     ClearToVariantArrayBuiltInType(variant->BuiltInTypeId, &variant->Value.Matrix.Content,
                                                    (int32_t*) &matrixLength, clearFunction);
@@ -4044,7 +4044,7 @@ void SOPC_Variant_Delete(SOPC_Variant* variant)
     }
 
     SOPC_Variant_Clear(variant);
-    free(variant);
+    SOPC_Free(variant);
 }
 
 void SOPC_DataValue_InitializeAux(void* value)
@@ -4251,7 +4251,7 @@ void SOPC_Clear_Array(int32_t* noOfElts, void** eltsArray, size_t sizeOfElt, SOP
                 clearFct(&(byteArray[pos]));
             }
 
-            free(*eltsArray);
+            SOPC_Free(*eltsArray);
         }
         *noOfElts = 0;
         *eltsArray = NULL;

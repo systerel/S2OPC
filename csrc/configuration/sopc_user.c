@@ -75,7 +75,7 @@ SOPC_User* SOPC_User_CreateUsername(SOPC_String* username)
     if (SOPC_STATUS_OK != status)
     {
         SOPC_String_Clear(&user->data.username);
-        free(user);
+        SOPC_Free(user);
         user = NULL;
     }
 
@@ -125,7 +125,7 @@ void SOPC_User_Free(SOPC_User** ppUser)
     {
         assert(SOPC_User_IsUsername(user));
         SOPC_String_Clear(&user->data.username);
-        free(user);
+        SOPC_Free(user);
     }
     *ppUser = NULL;
 }

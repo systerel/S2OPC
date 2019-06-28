@@ -253,7 +253,7 @@ static bool set_server_server_array_value(OpcUa_WriteValue* wv, const char* serv
     if (SOPC_String_CopyFromCString(uri_copy, server_uri) != SOPC_STATUS_OK)
     {
         SOPC_String_Clear(uri_copy);
-        free(uri_copy);
+        SOPC_Free(uri_copy);
         return false;
     }
 
@@ -341,7 +341,7 @@ bool set_runtime_variables(uint32_t endpoint_config_idx, RuntimeVariables vars)
     if (!ok)
     {
         SOPC_Array_Delete(write_values);
-        free(request);
+        SOPC_Free(request);
         return false;
     }
 

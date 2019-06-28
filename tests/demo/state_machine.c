@@ -41,8 +41,8 @@ StateMachine_Machine* StateMachine_Create(void)
 
     if (pSM == NULL || pCtxSess == NULL || Mutex_Initialization(&pSM->mutex) != SOPC_STATUS_OK)
     {
-        free(pSM);
-        free(pCtxSess);
+        SOPC_Free(pSM);
+        SOPC_Free(pCtxSess);
         return NULL;
     }
 
@@ -276,11 +276,11 @@ SOPC_ReturnStatus StateMachine_StartDiscovery(StateMachine_Machine* pSM)
         pSM->state = stError;
         if (NULL != pReq)
         {
-            free(pReq);
+            SOPC_Free(pReq);
         }
         if (NULL != pSM->pCtxRequest)
         {
-            free(pSM->pCtxRequest);
+            SOPC_Free(pSM->pCtxRequest);
             pSM->pCtxRequest = NULL;
         }
     }
@@ -348,11 +348,11 @@ SOPC_ReturnStatus StateMachine_StartFindServers(StateMachine_Machine* pSM)
         pSM->state = stError;
         if (NULL != pReq)
         {
-            free(pReq);
+            SOPC_Free(pReq);
         }
         if (NULL != pSM->pCtxRequest)
         {
-            free(pSM->pCtxRequest);
+            SOPC_Free(pSM->pCtxRequest);
             pSM->pCtxRequest = NULL;
         }
     }
@@ -389,7 +389,7 @@ static SOPC_ReturnStatus fillRegisterServerRequest(OpcUa_RegisteredServer* pServ
     {
         /* clear ressources */
         SOPC_LocalizedText_Clear(serverName);
-        free(serverName);
+        SOPC_Free(serverName);
         SOPC_String_Delete(discoveryURL);
         status = SOPC_STATUS_NOK;
     }
@@ -431,7 +431,7 @@ SOPC_ReturnStatus StateMachine_StartRegisterServer(StateMachine_Machine* pSM)
 
     if ((NULL == serverName) || (NULL == discoveryURL) || (SOPC_STATUS_OK != status))
     {
-        free(serverName);
+        SOPC_Free(serverName);
         SOPC_String_Delete(discoveryURL);
         status = SOPC_STATUS_NOK;
     }
@@ -469,10 +469,10 @@ SOPC_ReturnStatus StateMachine_StartRegisterServer(StateMachine_Machine* pSM)
     {
         /* Free all remaining resources */
         pSM->state = stError;
-        free(pSM->pCtxRequest);
+        SOPC_Free(pSM->pCtxRequest);
         pSM->pCtxRequest = NULL;
         OpcUa_RegisterServerRequest_Clear(pReq);
-        free(pReq);
+        SOPC_Free(pReq);
     }
 
     status = Mutex_Unlock(&pSM->mutex);
@@ -496,8 +496,8 @@ SOPC_ReturnStatus StateMachine_SendRequest(StateMachine_Machine* pSM, void* requ
     if (NULL != pSM->pCtxSession || stActivated != pSM->state || ctx == NULL)
     {
         pSM->state = stError;
-        free(ctx);
-        free(pSM->pCtxRequest);
+        SOPC_Free(ctx);
+        SOPC_Free(pSM->pCtxRequest);
         pSM->pCtxRequest = NULL;
         return SOPC_STATUS_NOK;
     }
@@ -594,15 +594,15 @@ void StateMachine_Delete(StateMachine_Machine** ppSM)
 
     SOPC_ReturnStatus status = Mutex_Lock(&pSM->mutex);
     assert(SOPC_STATUS_OK == status);
-    free(pSM->pCtxSession);
+    SOPC_Free(pSM->pCtxSession);
     pSM->pCtxSession = NULL;
-    free(pSM->pCtxRequest);
+    SOPC_Free(pSM->pCtxRequest);
     pSM->pCtxRequest = NULL;
     Config_DeleteSCConfig(&(pSM->pscConfig));
     status = Mutex_Unlock(&pSM->mutex);
     assert(SOPC_STATUS_OK == status);
     Mutex_Clear(&pSM->mutex);
-    free(pSM);
+    SOPC_Free(pSM);
     *ppSM = NULL;
 }
 
@@ -757,7 +757,7 @@ bool StateMachine_EventDispatcher(StateMachine_Machine* pSM,
             {
                 *pAppCtx = pSM->pCtxRequest->appCtx;
             }
-            free(pSM->pCtxRequest);
+            SOPC_Free(pSM->pCtxRequest);
             pSM->pCtxRequest = NULL;
         }
     }

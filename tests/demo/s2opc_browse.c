@@ -131,7 +131,7 @@ int main(int argc, char* argv[])
     /* Finish it */
     if (NULL != g_pNid)
     {
-        free(g_pNid);
+        SOPC_Free(g_pNid);
     }
     SOPC_Toolkit_Clear();
     StateMachine_Delete(&g_pSM);
@@ -222,11 +222,11 @@ static SOPC_ReturnStatus SendBrowseRequest(StateMachine_Machine* pSM)
         if (NULL != pReq)
         {
             OpcUa_BrowseRequest_Clear(pReq);
-            free(pReq);
+            SOPC_Free(pReq);
         }
         if (NULL != pDesc)
         {
-            free(pDesc);
+            SOPC_Free(pDesc);
         }
     }
 
@@ -276,7 +276,7 @@ static void PrintBrowseResponse(OpcUa_BrowseResponse* pResp)
                 }
                 sNidB = SOPC_NodeId_ToCString(&pRefe->NodeId.NodeId);
                 printf("%s \"%s\"\n", sNidB, SOPC_String_GetRawCString(&pRefe->BrowseName.Name));
-                free(sNidB);
+                SOPC_Free(sNidB);
             }
 
             if (pBwse->ContinuationPoint.Length <= 0)
@@ -290,5 +290,5 @@ static void PrintBrowseResponse(OpcUa_BrowseResponse* pResp)
         }
     }
 
-    free(sNidA);
+    SOPC_Free(sNidA);
 }

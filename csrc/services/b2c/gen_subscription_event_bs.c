@@ -91,17 +91,17 @@ void gen_subscription_event_bs__gen_data_changed_event(
         {
             // Delete the WriteValues allocated
             OpcUa_WriteValue_Clear(oldValue);
-            free(oldValue);
+            SOPC_Free(oldValue);
             OpcUa_WriteValue_Clear(newValue);
-            free(newValue);
+            SOPC_Free(newValue);
         }
     }
     else
     {
         OpcUa_WriteValue_Clear(oldValue);
-        free(oldValue);
+        SOPC_Free(oldValue);
         OpcUa_WriteValue_Clear(newValue);
-        free(newValue);
+        SOPC_Free(newValue);
 
         SOPC_Logger_TraceError(
             "gen_subscription_event_bs__gen_data_changed_event: failed to generate a data changed event (out of "

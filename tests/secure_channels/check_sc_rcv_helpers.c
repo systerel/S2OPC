@@ -61,7 +61,7 @@ SOPC_Event* Check_Service_Event_Received(SOPC_SecureChannels_OutputEvent event, 
     }
     else
     {
-        free(serviceEvent);
+        SOPC_Free(serviceEvent);
         return NULL;
     }
 }
@@ -83,12 +83,12 @@ SOPC_ReturnStatus Check_Client_Closed_SC(uint32_t scIdx,
 
     if (event == NULL || event->params == NULL)
     {
-        free(event);
+        SOPC_Free(event);
         return SOPC_STATUS_NOK;
     }
 
     buffer = (SOPC_Buffer*) event->params;
-    free(event);
+    SOPC_Free(event);
     event = NULL;
 
     uint32_t buffer_len = buffer->length;
@@ -115,7 +115,7 @@ SOPC_ReturnStatus Check_Client_Closed_SC(uint32_t scIdx,
         return SOPC_STATUS_NOK;
     }
 
-    free(event);
+    SOPC_Free(event);
     event = NULL;
 
     printf("               - pending request indicated as in timeout to Services\n");
@@ -126,7 +126,7 @@ SOPC_ReturnStatus Check_Client_Closed_SC(uint32_t scIdx,
         return SOPC_STATUS_NOK;
     }
 
-    free(event);
+    SOPC_Free(event);
     event = NULL;
 
     printf("               - SC indicated as disconnected to Services\n");
@@ -137,7 +137,7 @@ SOPC_ReturnStatus Check_Client_Closed_SC(uint32_t scIdx,
         return SOPC_STATUS_NOK;
     }
 
-    free(event);
+    SOPC_Free(event);
 
     return SOPC_STATUS_OK;
 }

@@ -74,7 +74,7 @@ SOPC_Event* Check_Socket_Event_Received(SOPC_Sockets_InputEvent event, uint32_t 
     }
     else
     {
-        free(socketEvent);
+        SOPC_Free(socketEvent);
         return NULL;
     }
 }
@@ -143,7 +143,7 @@ SOPC_ReturnStatus Check_Expected_Sent_Message(uint32_t socketIdx,
     }
 
     SOPC_Buffer_Delete(buffer);
-    free(socketEvent);
+    SOPC_Free(socketEvent);
     return status;
 }
 

@@ -48,9 +48,9 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
     char* port = NULL;
     SOPC_Helper_URI_SplitTcpUaUri(buf_copy, &hostname, &port);
 
-    free(hostname);
-    free(port);
-    free(buf_copy);
+    SOPC_Free(hostname);
+    SOPC_Free(port);
+    SOPC_Free(buf_copy);
 
     return 0;
 }

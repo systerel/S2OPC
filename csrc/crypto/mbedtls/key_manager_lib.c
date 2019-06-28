@@ -66,14 +66,14 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t* 
 
         if (null_terminated_buffer == NULL)
         {
-            free(key);
+            SOPC_Free(key);
             return SOPC_STATUS_OUT_OF_MEMORY;
         }
 
         memcpy(null_terminated_buffer, buffer, lenBuf);
         res = is_public ? mbedtls_pk_parse_public_key(&key->pk, null_terminated_buffer, 1 + lenBuf)
                         : mbedtls_pk_parse_key(&key->pk, null_terminated_buffer, 1 + lenBuf, NULL, 0);
-        free(null_terminated_buffer);
+        SOPC_Free(null_terminated_buffer);
     }
 
     if (res != 0)
@@ -84,7 +84,7 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t* 
 
     if (res != 0)
     {
-        free(key);
+        SOPC_Free(key);
         return SOPC_STATUS_NOK;
     }
 
@@ -122,7 +122,7 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromFile(const char* szPat
 
     if (mbedtls_pk_parse_keyfile(&key->pk, szPath, password) != 0)
     {
-        free(key);
+        SOPC_Free(key);
         return SOPC_STATUS_NOK;
     }
 
@@ -158,7 +158,7 @@ void SOPC_KeyManager_AsymmetricKey_Free(SOPC_AsymmetricKey* pKey)
     {
         mbedtls_pk_free(&pKey->pk);
     }
-    free(pKey);
+    SOPC_Free(pKey);
 }
 
 /**
@@ -196,7 +196,7 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_ToDER(const SOPC_AsymmetricKey* 
         status = SOPC_STATUS_OK;
     }
 
-    free(buffer);
+    SOPC_Free(buffer);
 
     return status;
 }
@@ -292,7 +292,7 @@ void SOPC_KeyManager_Certificate_Free(SOPC_Certificate* pCert)
     mbedtls_x509_crt_free(&pCert->crt);
     pCert->crt_der = NULL;
     pCert->len_der = 0;
-    free(pCert);
+    SOPC_Free(pCert);
 }
 
 SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetThumbprint(const SOPC_CryptoProvider* pProvider,
@@ -339,7 +339,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetThumbprint(const SOPC_CryptoPro
             status = SOPC_STATUS_NOK;
     }
 
-    free(pDER);
+    SOPC_Free(pDER);
 
     return status;
 }

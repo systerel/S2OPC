@@ -133,7 +133,7 @@ static void SOPC_Log_TracePrefixNoLock(SOPC_Log_Instance* pLogInst,
             fclose(pLogInst->file->pFile);
             pLogInst->file->pFile = NULL;
         }
-        free(timestamp);
+        SOPC_Free(timestamp);
     }
 }
 
@@ -216,9 +216,9 @@ SOPC_Log_Instance* SOPC_Log_CreateInstance(const char* logDirPath,
             {
                 if (filePath != NULL)
                 {
-                    free(filePath);
+                    SOPC_Free(filePath);
                 }
-                free(file);
+                SOPC_Free(file);
                 file = NULL;
             }
             else
@@ -238,7 +238,7 @@ SOPC_Log_Instance* SOPC_Log_CreateInstance(const char* logDirPath,
         }
         else
         {
-            free(result);
+            SOPC_Free(result);
             result = NULL;
         }
     }
@@ -296,7 +296,7 @@ SOPC_Log_Instance* SOPC_Log_CreateInstanceAssociation(SOPC_Log_Instance* pLogIns
             }
             else
             {
-                free(result);
+                SOPC_Free(result);
                 result = NULL;
             }
             Mutex_Unlock(&pLogInst->file->fileMutex);
@@ -537,15 +537,15 @@ void SOPC_Log_ClearInstance(SOPC_Log_Instance** ppLogInst)
             pLogInst->file->pFile = NULL;
             Mutex_Unlock(&pLogInst->file->fileMutex);
             Mutex_Clear(&pLogInst->file->fileMutex);
-            free(pLogInst->file->filePath);
-            free(pLogInst->file);
+            SOPC_Free(pLogInst->file->filePath);
+            SOPC_Free(pLogInst->file);
         }
         else
         {
             pLogInst->file->nbRefs--;
             Mutex_Unlock(&pLogInst->file->fileMutex);
         }
-        free(pLogInst);
+        SOPC_Free(pLogInst);
         *ppLogInst = NULL;
     }
 }
@@ -554,7 +554,7 @@ void SOPC_Log_Clear(void)
 {
     if (uniquePrefixSet != false)
     {
-        free(SOPC_CSTRING_UNIQUE_LOG_PREFIX);
+        SOPC_Free(SOPC_CSTRING_UNIQUE_LOG_PREFIX);
         uniquePrefixSet = false;
     }
 }

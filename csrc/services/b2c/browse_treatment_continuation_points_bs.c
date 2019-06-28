@@ -47,11 +47,11 @@ void browse_treatment_continuation_points_bs__clear_continuation_point(
     const constants__t_ContinuationPoint_i browse_treatment_continuation_points_bs__p_continuationPoint)
 {
     SOPC_NodeId_Clear(browse_treatment_continuation_points_bs__p_continuationPoint.browseView);
-    free(browse_treatment_continuation_points_bs__p_continuationPoint.browseView);
+    SOPC_Free(browse_treatment_continuation_points_bs__p_continuationPoint.browseView);
     SOPC_NodeId_Clear(browse_treatment_continuation_points_bs__p_continuationPoint.nodeId);
-    free(browse_treatment_continuation_points_bs__p_continuationPoint.nodeId);
+    SOPC_Free(browse_treatment_continuation_points_bs__p_continuationPoint.nodeId);
     SOPC_NodeId_Clear(browse_treatment_continuation_points_bs__p_continuationPoint.referenceTypeId);
-    free(browse_treatment_continuation_points_bs__p_continuationPoint.referenceTypeId);
+    SOPC_Free(browse_treatment_continuation_points_bs__p_continuationPoint.referenceTypeId);
 }
 
 void browse_treatment_continuation_points_bs__create_continuation_point_bs(
@@ -122,9 +122,9 @@ void browse_treatment_continuation_points_bs__create_continuation_point_bs(
     }
     else
     {
-        free(data.browseView);
-        free(data.nodeId);
-        free(data.referenceTypeId);
+        SOPC_Free(data.browseView);
+        SOPC_Free(data.nodeId);
+        SOPC_Free(data.referenceTypeId);
     }
 }
 

@@ -141,7 +141,7 @@ static void onAddressSpaceNotification(SOPC_EventHandler* handler,
                 SOPC_Logger_TraceDebug("App: AS_WRITE_EVENT on NodeId: %s, AttributeId: %" PRIu32
                                        ", Write status: %" PRIX32,
                                        nodeId, wv->AttributeId, (SOPC_StatusCode) auxParam);
-                free(nodeId);
+                SOPC_Free(nodeId);
             }
             else
             {
@@ -157,7 +157,7 @@ static void onAddressSpaceNotification(SOPC_EventHandler* handler,
         if (NULL != params)
         {
             OpcUa_WriteValue_Clear((OpcUa_WriteValue*) params);
-            free(params);
+            SOPC_Free(params);
         }
         break;
     }

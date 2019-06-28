@@ -229,7 +229,7 @@ SOPC_ReturnStatus SOPC_NumericRange_Parse(const char* text, SOPC_NumericRange** 
     if (dimensions == NULL || range == NULL)
     {
         SOPC_Array_Delete(dimensions);
-        free(range);
+        SOPC_Free(range);
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
 
@@ -245,7 +245,7 @@ SOPC_ReturnStatus SOPC_NumericRange_Parse(const char* text, SOPC_NumericRange** 
     if (status != SOPC_STATUS_OK)
     {
         SOPC_Array_Delete(dimensions);
-        free(range);
+        SOPC_Free(range);
         return status;
     }
 
@@ -262,6 +262,6 @@ void SOPC_NumericRange_Delete(SOPC_NumericRange* range)
         return;
     }
 
-    free(range->dimensions);
-    free(range);
+    SOPC_Free(range->dimensions);
+    SOPC_Free(range);
 }

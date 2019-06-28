@@ -182,8 +182,8 @@ START_TEST(test_crypto_generate_nbytes_None)
     // You have a slight chance to fail here (1/(2**512))
     ck_assert_msg(memcmp(pExpBuffer0, pExpBuffer1, 64) != 0,
                   "Randomly generated two times the same 64 bytes, which should happen once in pow(2, 512) tries.");
-    free(pExpBuffer0);
-    free(pExpBuffer1);
+    SOPC_Free(pExpBuffer0);
+    SOPC_Free(pExpBuffer1);
 
     // Test invalid inputs
     ck_assert(SOPC_CryptoProvider_GenerateRandomBytes(NULL, 64, &pExpBuffer0) == SOPC_STATUS_INVALID_PARAMETERS);
@@ -453,7 +453,7 @@ static inline void setup_asym_keys(void)
 
 static inline void teardown_asym_keys(void)
 {
-    free(key_pub);
+    SOPC_Free(key_pub);
     key_pub = NULL;
     SOPC_KeyManager_Certificate_Free(crt_pub);
     crt_pub = NULL;
@@ -720,8 +720,8 @@ START_TEST(test_cert_copyder_None)
     ck_assert(buffer0 != buffer1);
 
     // Clear
-    free(buffer0);
-    free(buffer1);
+    SOPC_Free(buffer0);
+    SOPC_Free(buffer1);
 }
 END_TEST
 

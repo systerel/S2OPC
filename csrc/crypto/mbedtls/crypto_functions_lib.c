@@ -165,7 +165,7 @@ SOPC_ReturnStatus CryptoProvider_SymmVerify_HMAC_SHA256(const SOPC_CryptoProvide
     if (SOPC_STATUS_OK == status)
         status = memcmp(pSignature, pCalcSig, lenSig) != 0 ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
 
-    free(pCalcSig);
+    SOPC_Free(pCalcSig);
 
     return status;
 }
@@ -247,7 +247,7 @@ SOPC_ReturnStatus CryptoProvider_DeriveData_PRF_SHA256(const SOPC_CryptoProvider
 
     // Clear and release A
     memset(bufA, 0, lenBufA);
-    free(bufA);
+    SOPC_Free(bufA);
 
     return status;
 }
@@ -507,7 +507,7 @@ SOPC_ReturnStatus CryptoProvider_AsymSign_RSASSA_PKCS1_v15_w_SHA256(const SOPC_C
     }
 
     if (NULL != hash)
-        free(hash);
+        SOPC_Free(hash);
     return status;
 }
 
@@ -539,7 +539,7 @@ SOPC_ReturnStatus CryptoProvider_AsymVerify_RSASSA_PKCS1_v15_w_SHA256(const SOPC
     }
 
     if (NULL != hash)
-        free(hash);
+        SOPC_Free(hash);
     return status;
 }
 
@@ -636,7 +636,7 @@ SOPC_ReturnStatus CryptoProvider_SymmVerify_HMAC_SHA1(const SOPC_CryptoProvider*
     if (SOPC_STATUS_OK == status)
         status = memcmp(pSignature, pCalcSig, lenSig) != 0 ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
 
-    free(pCalcSig);
+    SOPC_Free(pCalcSig);
 
     return status;
 }
@@ -683,7 +683,7 @@ SOPC_ReturnStatus CryptoProvider_DeriveData_PRF_SHA1(const SOPC_CryptoProvider* 
 
     // Clear and release A
     memset(bufA, 0, lenBufA);
-    free(bufA);
+    SOPC_Free(bufA);
 
     return status;
 }
@@ -715,7 +715,7 @@ SOPC_ReturnStatus CryptoProvider_AsymSign_RSASSA_PKCS1_v15_w_SHA1(const SOPC_Cry
     }
 
     if (NULL != hash)
-        free(hash);
+        SOPC_Free(hash);
     return status;
 }
 
@@ -747,7 +747,7 @@ SOPC_ReturnStatus CryptoProvider_AsymVerify_RSASSA_PKCS1_v15_w_SHA1(const SOPC_C
     }
 
     if (NULL != hash)
-        free(hash);
+        SOPC_Free(hash);
     return status;
 }
 

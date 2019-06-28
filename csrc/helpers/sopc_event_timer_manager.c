@@ -155,7 +155,7 @@ static void SOPC_InternalEventTimer_RestartPeriodicTimer_WithoutLock(SOPC_EventT
             SOPC_Logger_TraceError("EventTimerManager: failed to restart the periodic timer on insertion id=%" PRIu32
                                    " with event=%" PRIi32 " and associated id=%" PRIu32,
                                    timer->id, timer->event.event, timer->event.eltId);
-            free(timer);
+            SOPC_Free(timer);
         }
     }
     else
@@ -163,7 +163,7 @@ static void SOPC_InternalEventTimer_RestartPeriodicTimer_WithoutLock(SOPC_EventT
         SOPC_Logger_TraceError("EventTimerManager: failed to restart the disabled periodic timer id=%" PRIu32
                                " with event=%" PRIi32 " and associated id=%" PRIu32,
                                timer->id, timer->event.event, timer->event.eltId);
-        free(timer);
+        SOPC_Free(timer);
     }
 }
 
@@ -175,7 +175,7 @@ static void SOPC_Internal_EventTimer_Cancel_WithoutLock(uint32_t timerId)
         timer = SOPC_SLinkedList_RemoveFromId(timers, timerId);
         if (timer != NULL)
         {
-            free(timer);
+            SOPC_Free(timer);
         }
         usedTimerIds[timerId] = false;
     }
@@ -349,12 +349,12 @@ static uint32_t SOPC_InternalEventTimer_Create(SOPC_EventHandler* eventHandler,
         if (insertResult == NULL)
         {
             result = 0;
-            free(newTimer);
+            SOPC_Free(newTimer);
         }
     } // else 0 is invalid value => no timer available
     else
     {
-        free(newTimer);
+        SOPC_Free(newTimer);
     }
     Mutex_Unlock(&timersMutex);
 

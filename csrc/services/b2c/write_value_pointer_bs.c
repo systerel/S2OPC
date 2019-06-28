@@ -72,7 +72,7 @@ void write_value_pointer_bs__copy_write_value_pointer_content(
         else
         {
             OpcUa_WriteValue_Clear(&writeValueCopy);
-            free(writeValueCopy);
+            SOPC_Free(writeValueCopy);
         }
     }
 }
@@ -97,5 +97,5 @@ void write_value_pointer_bs__free_write_value_pointer(
     const constants__t_WriteValuePointer_i write_value_pointer_bs__p_write_value)
 {
     OpcUa_WriteValue_Clear(write_value_pointer_bs__p_write_value);
-    free(write_value_pointer_bs__p_write_value);
+    SOPC_Free(write_value_pointer_bs__p_write_value);
 }

@@ -104,7 +104,7 @@ START_TEST(test_logger_levels)
     SOPC_Log_ClearInstance(&otherLog);
 
     // Check testLog log file content is the expected content
-    free(filePath);
+    SOPC_Free(filePath);
     filePath = SOPC_Malloc((strlen(filePathPrefix) + 10) * sizeof(char)); // 9 + '\0'
     ck_assert(filePath != NULL);
     ires = sprintf(filePath, "%s00001.log", filePathPrefix);
@@ -142,8 +142,8 @@ START_TEST(test_logger_levels)
     fclose(refLogFile);
     fclose(genLogFile);
 
-    free(filePathPrefix);
-    free(filePath);
+    SOPC_Free(filePathPrefix);
+    SOPC_Free(filePath);
 }
 END_TEST
 
@@ -271,8 +271,8 @@ START_TEST(test_logger_categories_and_files)
         fclose(genLogFile);
     }
 
-    free(filePathPrefix);
-    free(filePath);
+    SOPC_Free(filePathPrefix);
+    SOPC_Free(filePath);
 }
 END_TEST
 
@@ -338,7 +338,7 @@ START_TEST(test_logger_circular)
     SOPC_Log_ClearInstance(&circularLog);
 
     // Check testLog log file content is the expected content
-    free(filePath);
+    SOPC_Free(filePath);
     filePath = SOPC_Malloc((strlen(filePathPrefix) + 10) * sizeof(char)); // 9 + '\0'
     ck_assert(filePath != NULL);
     ires = sprintf(filePath, "%s00001.log", filePathPrefix);
@@ -390,8 +390,8 @@ START_TEST(test_logger_circular)
         fclose(genLogFile);
     }
 
-    free(filePathPrefix);
-    free(filePath);
+    SOPC_Free(filePathPrefix);
+    SOPC_Free(filePath);
 }
 END_TEST
 

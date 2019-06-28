@@ -77,7 +77,7 @@ void response_write_bs__alloc_write_request_responses_malloc(const t_entier4 res
 
 void response_write_bs__reset_ResponseWrite(void)
 {
-    free(arr_StatusCode);
+    SOPC_Free(arr_StatusCode);
     arr_StatusCode = NULL;
     nb_req = 0;
 }

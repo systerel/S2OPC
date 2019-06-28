@@ -111,7 +111,7 @@ void message_in_bs__forget_resp_msg_in(const constants__t_msg_header_i message_i
     (void) message_in_bs__msg;
     // In this case the message header shall have been copied into msg, we should free the header structure since then
     // Message structure dealloaction is now responsibility of the user application
-    free(message_in_bs__msg_header);
+    SOPC_Free(message_in_bs__msg_header);
 }
 
 void message_in_bs__decode_msg_header(const t_bool message_in_bs__is_request,

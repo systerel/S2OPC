@@ -160,7 +160,7 @@ static bool dict_resize(SOPC_Dict* d, size_t size)
 
     if (ok)
     {
-        free(dict_backup.buckets);
+        SOPC_Free(dict_backup.buckets);
     }
     else
     {
@@ -230,10 +230,10 @@ void SOPC_Dict_Delete(SOPC_Dict* d)
                 }
             }
 
-            free(d->buckets);
+            SOPC_Free(d->buckets);
         }
 
-        free(d);
+        SOPC_Free(d);
     }
 }
 

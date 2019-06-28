@@ -73,7 +73,7 @@ static char* get_time_string(bool local, bool compact)
 
     if (res == 0)
     {
-        free(buf);
+        SOPC_Free(buf);
         return NULL;
     }
 

@@ -78,7 +78,7 @@ SOPC_Array* SOPC_Array_Create(size_t element_size, size_t initial_capacity, SOPC
 
     if (!array_grow(a, initial_capacity))
     {
-        free(a);
+        SOPC_Free(a);
         return NULL;
     }
 
@@ -121,8 +121,8 @@ void SOPC_Array_Delete(SOPC_Array* array)
         }
     }
 
-    free(array->data);
-    free(array);
+    SOPC_Free(array->data);
+    SOPC_Free(array);
 }
 
 bool SOPC_Array_Append_Values(SOPC_Array* array, const void* data, size_t n_elements)
@@ -184,7 +184,7 @@ void* SOPC_Array_Into_Raw(SOPC_Array* array)
         data = SOPC_Realloc(data, array->cap * array->element_size, array->sz * array->element_size);
     }
 
-    free(array);
+    SOPC_Free(array);
 
     return data;
 }

@@ -183,7 +183,7 @@ static void SOPC_ToolkitServer_ClearScConfig_WithoutLock(uint32_t serverScConfig
         SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
         SOPC_KeyManager_SerializedCertificate_Delete((SOPC_SerializedCertificate*) scConfig->crt_cli);
         SOPC_GCC_DIAGNOSTIC_RESTORE
-        free(scConfig);
+        SOPC_Free(scConfig);
         tConfig.serverScConfigs[serverScConfigIdxWithoutOffset] = NULL;
     }
 }

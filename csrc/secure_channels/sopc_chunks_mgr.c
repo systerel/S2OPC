@@ -1075,7 +1075,7 @@ static bool SC_Chunks_CheckSequenceHeaderRequestId(SOPC_SecureConnection* scConn
                 }
                 else
                 {
-                    free(recordedMsgCtx);
+                    SOPC_Free(recordedMsgCtx);
                 }
             }
             else
@@ -2364,7 +2364,7 @@ static bool SOPC_Chunks_EncodePadding(SOPC_SecureConnection* scConnection,
                 {
                     result = false;
                 }
-                free(paddingBytes);
+                SOPC_Free(paddingBytes);
             }
             else
             {

@@ -49,7 +49,7 @@ static bool notification_message_copy(OpcUa_NotificationMessage* dst, const OpcU
     if (SOPC_ExtensionObject_Copy(notification_data, src->NotificationData) != SOPC_STATUS_OK)
     {
         SOPC_ExtensionObject_Clear(notification_data);
-        free(notification_data);
+        SOPC_Free(notification_data);
         return false;
     }
 
@@ -75,7 +75,7 @@ void notification_republish_queue_bs__add_republish_notif_to_queue(
     {
         SOPC_Logger_TraceError(
             "notification_republish_queue_bs__add_republish_notif_to_queue: Error while copying notification message");
-        free(notifMsgCpy);
+        SOPC_Free(notifMsgCpy);
         return;
     }
     void* res = SOPC_SLinkedList_Append(notification_republish_queue_bs__p_queue,
@@ -83,7 +83,7 @@ void notification_republish_queue_bs__add_republish_notif_to_queue(
     if (res != notifMsgCpy)
     {
         OpcUa_NotificationMessage_Clear((void*) notifMsgCpy);
-        free(notifMsgCpy);
+        SOPC_Free(notifMsgCpy);
     }
     else
     {
@@ -107,7 +107,7 @@ static void SOPC_InternalDeallocNotifMsg(uint32_t id, void* val)
 {
     (void) id;
     OpcUa_NotificationMessage_Clear(val);
-    free(val);
+    SOPC_Free(val);
 }
 
 void notification_republish_queue_bs__clear_and_deallocate_republish_queue(
@@ -166,7 +166,7 @@ void notification_republish_queue_bs__remove_republish_notif_from_queue(
     if (notifMsg != NULL)
     {
         OpcUa_NotificationMessage_Clear(notifMsg);
-        free(notifMsg);
+        SOPC_Free(notifMsg);
         *notification_republish_queue_bs__bres = true;
     }
 }

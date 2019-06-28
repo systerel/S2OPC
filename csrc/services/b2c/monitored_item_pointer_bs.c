@@ -34,8 +34,8 @@ static void SOPC_InternalMonitoredItem_Free(void* data)
     {
         SOPC_NumericRange_Delete(mi->indexRange);
         SOPC_NodeId_Clear(mi->nid);
-        free(mi->nid);
-        free(mi);
+        SOPC_Free(mi->nid);
+        SOPC_Free(mi);
     }
 }
 
@@ -117,8 +117,8 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
 
     if (NULL == monitItem || NULL == nid)
     {
-        free(monitItem);
-        free(nid);
+        SOPC_Free(monitItem);
+        SOPC_Free(nid);
         return;
     }
 
@@ -183,8 +183,8 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
     else
     {
         SOPC_NumericRange_Delete(range);
-        free(monitItem);
-        free(nid);
+        SOPC_Free(monitItem);
+        SOPC_Free(nid);
     }
 }
 

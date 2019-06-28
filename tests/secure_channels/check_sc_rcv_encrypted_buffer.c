@@ -231,7 +231,7 @@ static void establishSC(void)
         printf("SC_Rcv_Buffer: Unexpected SOCKET_CREATE_CLIENT params\n");
         ck_assert(false);
     }
-    free(socketEvent);
+    SOPC_Free(socketEvent);
     socketEvent = NULL;
 
     // Simulate event from socket
@@ -360,7 +360,7 @@ static void establishSC(void)
     serviceEvent = Check_Service_Event_Received(SC_CONNECTED, scConfigIdx, scConfigIdx);
 
     ck_assert(NULL != serviceEvent);
-    free(serviceEvent);
+    SOPC_Free(serviceEvent);
     serviceEvent = NULL;
 
     /* Check the PKI validate function was called during OPN treatment */
@@ -393,7 +393,7 @@ static void establishSC(void)
     ck_assert(SOPC_STATUS_OK == status);
 
     SOPC_Buffer_Delete(buffer);
-    free(socketEvent);
+    SOPC_Free(socketEvent);
     socketEvent = NULL;
 
     ck_assert(SOPC_STATUS_OK == status);

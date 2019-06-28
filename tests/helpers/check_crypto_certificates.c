@@ -97,7 +97,7 @@ SOPC_Certificate* SOPC_UnhexlifyCertificate(const char* hex_data)
     SOPC_Certificate* crt = NULL;
     ck_assert(der_len <= SIZE_MAX);
     ck_assert_uint_eq(SOPC_STATUS_OK, SOPC_KeyManager_Certificate_CreateFromDER(der_data, (uint32_t) der_len, &crt));
-    free(der_data);
+    SOPC_Free(der_data);
 
     return crt;
 }

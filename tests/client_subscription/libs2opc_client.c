@@ -163,18 +163,18 @@ void SOPC_LibSub_Clear(void)
         if (NULL != pCfg)
         {
             SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-            free((void*) pCfg->server_url);
-            free((void*) pCfg->security_policy);
-            free((void*) pCfg->path_cert_auth);
-            free((void*) pCfg->path_cert_srv);
-            free((void*) pCfg->path_cert_cli);
-            free((void*) pCfg->path_key_cli);
-            free((void*) pCfg->path_crl);
-            free((void*) pCfg->policyId);
-            free((void*) pCfg->username);
-            free((void*) pCfg->password);
+            SOPC_Free((void*) pCfg->server_url);
+            SOPC_Free((void*) pCfg->security_policy);
+            SOPC_Free((void*) pCfg->path_cert_auth);
+            SOPC_Free((void*) pCfg->path_cert_srv);
+            SOPC_Free((void*) pCfg->path_cert_cli);
+            SOPC_Free((void*) pCfg->path_key_cli);
+            SOPC_Free((void*) pCfg->path_crl);
+            SOPC_Free((void*) pCfg->policyId);
+            SOPC_Free((void*) pCfg->username);
+            SOPC_Free((void*) pCfg->password);
             SOPC_GCC_DIAGNOSTIC_RESTORE
-            free(pCfg);
+            SOPC_Free(pCfg);
         }
     }
     SOPC_SLinkedList_Delete(pListConfig);
@@ -387,18 +387,18 @@ SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCf
     else if (NULL != pCfgCpy)
     {
         SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-        free((void*) pCfgCpy->server_url);
-        free((void*) pCfgCpy->security_policy);
-        free((void*) pCfgCpy->path_cert_auth);
-        free((void*) pCfgCpy->path_cert_srv);
-        free((void*) pCfgCpy->path_cert_cli);
-        free((void*) pCfgCpy->path_key_cli);
-        free((void*) pCfgCpy->path_crl);
-        free((void*) pCfgCpy->policyId);
-        free((void*) pCfgCpy->username);
-        free((void*) pCfgCpy->password);
+        SOPC_Free((void*) pCfgCpy->server_url);
+        SOPC_Free((void*) pCfgCpy->security_policy);
+        SOPC_Free((void*) pCfgCpy->path_cert_auth);
+        SOPC_Free((void*) pCfgCpy->path_cert_srv);
+        SOPC_Free((void*) pCfgCpy->path_cert_cli);
+        SOPC_Free((void*) pCfgCpy->path_key_cli);
+        SOPC_Free((void*) pCfgCpy->path_crl);
+        SOPC_Free((void*) pCfgCpy->policyId);
+        SOPC_Free((void*) pCfgCpy->username);
+        SOPC_Free((void*) pCfgCpy->password);
         SOPC_GCC_DIAGNOSTIC_RESTORE
-        free(pCfgCpy);
+        SOPC_Free(pCfgCpy);
     }
 
     mutStatus = Mutex_Unlock(&mutex);

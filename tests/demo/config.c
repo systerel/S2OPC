@@ -101,7 +101,7 @@ void Config_DeleteSCConfig(SOPC_SecureChannel_Config** ppscConfig)
         nCfgCreated -= 1;
     }
 
-    free(*ppscConfig);
+    SOPC_Free(*ppscConfig);
     *ppscConfig = NULL;
 
     /* Garbage collect, if needed */

@@ -151,7 +151,7 @@ void subscription_core_bs__get_nodeToMonitoredItemQueue(
         if (NULL == monitoredItemQueue || NULL == nid)
         {
             SOPC_SLinkedList_Delete(monitoredItemQueue);
-            free(nid);
+            SOPC_Free(nid);
             return;
         }
 
@@ -172,7 +172,7 @@ void subscription_core_bs__get_nodeToMonitoredItemQueue(
         {
             SOPC_SLinkedList_Delete(monitoredItemQueue);
             monitoredItemQueue = NULL;
-            free(nid);
+            SOPC_Free(nid);
         }
     }
     *subscription_core_bs__p_monitoredItemQueue = monitoredItemQueue;

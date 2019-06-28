@@ -205,14 +205,14 @@ void tlibw_free_WriteRequest(OpcUa_WriteRequest** ppWriteReq)
     /* Free the ByteStrings */
     for (i = 0; i < N_VARS / N_GROUPS; ++i)
     {
-        free(pReq->NodesToWrite[i + 3 * (N_VARS / N_GROUPS)].Value.Value.Value.String.Data);
-        free(pReq->NodesToWrite[i + 4 * (N_VARS / N_GROUPS)].Value.Value.Value.Bstring.Data);
-        free(pReq->NodesToWrite[i + 5 * (N_VARS / N_GROUPS)].Value.Value.Value.XmlElt.Data);
+        SOPC_Free(pReq->NodesToWrite[i + 3 * (N_VARS / N_GROUPS)].Value.Value.Value.String.Data);
+        SOPC_Free(pReq->NodesToWrite[i + 4 * (N_VARS / N_GROUPS)].Value.Value.Value.Bstring.Data);
+        SOPC_Free(pReq->NodesToWrite[i + 5 * (N_VARS / N_GROUPS)].Value.Value.Value.XmlElt.Data);
     }
     /* Free the lwv */
-    free(pReq->NodesToWrite);
+    SOPC_Free(pReq->NodesToWrite);
     /* Free the request */
-    free(pReq);
+    SOPC_Free(pReq);
     /* Reset the pointer */
     *ppWriteReq = NULL;
 }

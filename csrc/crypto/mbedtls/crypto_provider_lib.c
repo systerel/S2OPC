@@ -67,7 +67,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_Deinit(SOPC_CryptoProvider* pCryptoProvide
     {
         mbedtls_ctr_drbg_free(&pCtx->ctxDrbg);
         mbedtls_entropy_free(&pCtx->ctxEnt);
-        free(pCtx);
+        SOPC_Free(pCtx);
     }
 
     return SOPC_STATUS_OK;

@@ -132,11 +132,11 @@ static SOPC_ReturnStatus AuthorizeAllowAll(SOPC_UserAuthorization_Manager* autho
 }
 
 static const SOPC_UserAuthentication_Functions AlwaysAuthenticateFunctions = {
-    .pFuncFree = (SOPC_UserAuthentication_Free_Func) free,
+    .pFuncFree = (SOPC_UserAuthentication_Free_Func) SOPC_Free,
     .pFuncValidateUserIdentity = AuthenticateAllowAll};
 
 static const SOPC_UserAuthorization_Functions AuthorizeAllowAllFunctions = {
-    .pFuncFree = (SOPC_UserAuthorization_Free_Func) free,
+    .pFuncFree = (SOPC_UserAuthorization_Free_Func) SOPC_Free,
     .pFuncAuthorizeOperation = AuthorizeAllowAll};
 
 SOPC_UserAuthentication_Manager* SOPC_UserAuthentication_CreateManager_AllowAll(void)
@@ -195,7 +195,7 @@ SOPC_UserWithAuthorization* SOPC_UserWithAuthorization_CreateFromIdentityToken(
 
     if (NULL == userauthz->user)
     {
-        free(userauthz);
+        SOPC_Free(userauthz);
         userauthz = NULL;
     }
 
@@ -217,7 +217,7 @@ SOPC_UserWithAuthorization* SOPC_UserWithAuthorization_CreateLocal(SOPC_UserAuth
 
     if (NULL == userauthz->user)
     {
-        free(userauthz);
+        SOPC_Free(userauthz);
         userauthz = NULL;
     }
 
@@ -245,6 +245,6 @@ void SOPC_UserWithAuthorization_Free(SOPC_UserWithAuthorization** ppUserWithAuto
 
     SOPC_UserWithAuthorization* userauthz = *ppUserWithAutorization;
     SOPC_User_Free(&userauthz->user);
-    free(userauthz);
+    SOPC_Free(userauthz);
     *ppUserWithAutorization = NULL;
 }

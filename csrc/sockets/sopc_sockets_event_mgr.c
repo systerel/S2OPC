@@ -173,12 +173,12 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateClientSocket(const char* uri)
 
         if (port != NULL)
         {
-            free(port);
+            SOPC_Free(port);
         }
 
         if (hostname != NULL)
         {
-            free(hostname);
+            SOPC_Free(hostname);
         }
     }
 
@@ -213,7 +213,7 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateServerSocket(const char* uri, uin
         {
             if (listenAllItfs != false)
             {
-                free(hostname);
+                SOPC_Free(hostname);
                 hostname = NULL;
             }
 
@@ -277,11 +277,11 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateServerSocket(const char* uri, uin
 
         if (port != NULL)
         {
-            free(port);
+            SOPC_Free(port);
         }
         if (hostname != NULL)
         {
-            free(hostname);
+            SOPC_Free(hostname);
         }
 
         if (result != false)

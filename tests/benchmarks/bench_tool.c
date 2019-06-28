@@ -120,7 +120,7 @@ static void* bench_read_requests(size_t request_size, size_t bench_offset, size_
         assert(status == SOPC_STATUS_OK);
 
         SOPC_NodeId_Clear(id);
-        free(id);
+        SOPC_Free(id);
     }
 
     return req;
@@ -156,7 +156,7 @@ static void* bench_write_requests(size_t request_size, size_t bench_offset, size
         assert(status == SOPC_STATUS_OK);
 
         SOPC_NodeId_Clear(id);
-        free(id);
+        SOPC_Free(id);
 
         r->AttributeId = 13; // Value
         r->Value.Value.BuiltInTypeId = SOPC_Boolean_Id;

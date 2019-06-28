@@ -96,7 +96,7 @@ SOPC_EventRecorder* SOPC_EventRecorder_Create(void)
     if (handler == NULL || recorder == NULL || queue == NULL || !SOPC_Dict_Insert(queues, handler, queue))
     {
         SOPC_Looper_Delete(looper);
-        free(recorder);
+        SOPC_Free(recorder);
         queue_free(queue);
         return NULL;
     }
@@ -117,5 +117,5 @@ void SOPC_EventRecorder_Delete(SOPC_EventRecorder* recorder)
 
     SOPC_Looper_Delete(recorder->looper);
     queue_free(recorder->events);
-    free(recorder);
+    SOPC_Free(recorder);
 }

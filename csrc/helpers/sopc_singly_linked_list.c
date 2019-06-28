@@ -230,7 +230,7 @@ void* SOPC_SLinkedList_PopHead(SOPC_SLinkedList* list)
     list->length = list->length - 1;
     result = list->first->value;
     nextElt = list->first->next;
-    free(list->first);
+    SOPC_Free(list->first);
     list->first = nextElt;
     // If no element remaining, last element to be updated too
     if (NULL == list->first)
@@ -274,7 +274,7 @@ static void* SOPC_SLinkedList_RemoveFromElt(SOPC_SLinkedList* list,
             list->length = list->length - 1;
             result = list->first->value;
             nextElt = list->first->next;
-            free(list->first);
+            SOPC_Free(list->first);
             list->first = nextElt;
             // If no element remaining, last element to be updated too
             if (NULL == list->first)
@@ -300,7 +300,7 @@ static void* SOPC_SLinkedList_RemoveFromElt(SOPC_SLinkedList* list,
                 {
                     list->last = elt;
                 }
-                free(elt->next);
+                SOPC_Free(elt->next);
                 elt->next = nextElt;
             }
         }
@@ -378,7 +378,7 @@ void SOPC_SLinkedList_Clear(SOPC_SLinkedList* list)
         while (elt != NULL)
         {
             nextElt = elt->next;
-            free(elt);
+            SOPC_Free(elt);
             elt = nextElt;
         }
         list->first = NULL;
@@ -392,14 +392,14 @@ void SOPC_SLinkedList_Delete(SOPC_SLinkedList* list)
     if (list != NULL)
     {
         SOPC_SLinkedList_Clear(list);
-        free(list);
+        SOPC_Free(list);
     }
 }
 
 void SOPC_SLinkedList_EltGenericFree(uint32_t id, void* val)
 {
     (void) (id);
-    free(val);
+    SOPC_Free(val);
 }
 
 SOPC_SLinkedListIterator SOPC_SLinkedList_GetIterator(SOPC_SLinkedList* list)

@@ -131,7 +131,7 @@ START_TEST(test_array_into_raw)
     char* data = SOPC_Array_Into_Raw(a);
 
     ck_assert_str_eq("abc", data);
-    free(data);
+    SOPC_Free(data);
 
     a = SOPC_Array_Create(sizeof(char), 4, NULL);
     ck_assert_ptr_nonnull(a);

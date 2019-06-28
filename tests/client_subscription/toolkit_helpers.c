@@ -198,8 +198,8 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
             }
             else
             {
-                free((void*) pscConfig->url);
-                free((void*) pscConfig->reqSecuPolicyUri);
+                SOPC_Free((void*) pscConfig->url);
+                SOPC_Free((void*) pscConfig->reqSecuPolicyUri);
                 status = SOPC_STATUS_OUT_OF_MEMORY;
             }
             SOPC_GCC_DIAGNOSTIC_RESTORE
@@ -217,7 +217,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
         SOPC_KeyManager_SerializedCertificate_Delete(pCrtSrv);
         SOPC_KeyManager_SerializedCertificate_Delete(pCrtCli);
         SOPC_KeyManager_SerializedAsymmetricKey_Delete(pKeyCli);
-        free(pscConfig);
+        SOPC_Free(pscConfig);
     }
 
     return status;
@@ -237,11 +237,11 @@ void Helpers_SecureChannel_Config_Free(SOPC_SecureChannel_Config** ppscConfig)
     SOPC_KeyManager_SerializedAsymmetricKey_Delete((SOPC_SerializedAsymmetricKey*) pscConfig->key_priv_cli);
     SOPC_KeyManager_SerializedCertificate_Delete((SOPC_SerializedCertificate*) pscConfig->crt_srv);
     SOPC_PKIProvider_Free((SOPC_PKIProvider**) (&pscConfig->pki));
-    free((void*) pscConfig->url);
-    free((void*) pscConfig->reqSecuPolicyUri);
+    SOPC_Free((void*) pscConfig->url);
+    SOPC_Free((void*) pscConfig->reqSecuPolicyUri);
     SOPC_GCC_DIAGNOSTIC_RESTORE
 
-    free(pscConfig);
+    SOPC_Free(pscConfig);
 
     *ppscConfig = NULL;
 }
@@ -321,7 +321,7 @@ SOPC_ReturnStatus Helpers_NewPublishRequest(bool bAck, uint32_t iSubId, uint32_t
     {
         if (NULL != pReq->SubscriptionAcknowledgements)
         {
-            free(pReq->SubscriptionAcknowledgements);
+            SOPC_Free(pReq->SubscriptionAcknowledgements);
         }
         SOPC_Encodeable_Delete(&OpcUa_PublishRequest_EncodeableType, (void**) &pReq);
     }
@@ -568,10 +568,10 @@ SOPC_ReturnStatus Helpers_NewValueFromDataValue(SOPC_DataValue* pVal, SOPC_LibSu
     {
         if (NULL != plsVal)
         {
-            free(plsVal->value);
+            SOPC_Free(plsVal->value);
             plsVal->value = NULL;
             SOPC_Variant_Delete(plsVal->raw_value);
-            free(plsVal);
+            SOPC_Free(plsVal);
             plsVal = NULL;
         }
     }

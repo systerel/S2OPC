@@ -121,7 +121,7 @@ void service_mgr_bs__client_channel_connected_event_discovery(
                         SOPC_Services_EnqueueEvent(APP_TO_SE_SEND_DISCOVERY_REQUEST, service_mgr_bs__channel_config_idx,
                                                    elt->msgToSend, elt->msgAppContext);
                     }
-                    free(elt);
+                    SOPC_Free(elt);
                 }
                 SOPC_SLinkedList_Clear(sLinkedList);
             }
@@ -145,7 +145,7 @@ static void SOPC_ServiceMgrBs_DicoveryReqSendingFailure(uint32_t id, void* val)
         }
         SOPC_App_EnqueueComEvent(SE_SND_REQUEST_FAILED, SOPC_STATUS_CLOSED, NULL, elt->msgAppContext);
         message_out_bs__dealloc_msg_out(elt->msgToSend);
-        free(elt);
+        SOPC_Free(elt);
     }
 }
 
@@ -170,7 +170,7 @@ static void SOPC_ServiceMgrBs_DeallocateMsgs(uint32_t id, void* val)
     if (NULL != elt)
     {
         message_out_bs__dealloc_msg_out(elt->msgToSend);
-        free(elt);
+        SOPC_Free(elt);
     }
 }
 

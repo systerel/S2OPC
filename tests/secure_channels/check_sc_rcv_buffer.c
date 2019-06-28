@@ -135,7 +135,7 @@ static void establishSC(void)
         status = SOPC_STATUS_NOK;
         printf("SC_Rcv_Buffer: Unexpected SOCKET_CREATE_CLIENT params\n");
     }
-    free(socketEvent);
+    SOPC_Free(socketEvent);
     socketEvent = NULL;
 
     // Simulate event from socket
@@ -193,7 +193,7 @@ static void establishSC(void)
     serviceEvent = Check_Service_Event_Received(SC_CONNECTED, scConfigIdx, scConfigIdx);
 
     ck_assert(NULL != serviceEvent);
-    free(serviceEvent);
+    SOPC_Free(serviceEvent);
     serviceEvent = NULL;
 
     printf("SC_Rcv_Buffer: request to send an empty MSG and retrieve requestId associated\n");
@@ -226,7 +226,7 @@ static void establishSC(void)
     ck_assert(2 == requestId); // Expected as valid request Id in unit test
 
     SOPC_Buffer_Delete(buffer);
-    free(socketEvent);
+    SOPC_Free(socketEvent);
     socketEvent = NULL;
 
     ck_assert(SOPC_STATUS_OK == status);
@@ -535,7 +535,7 @@ START_TEST(test_valid_sc_request_id)
     ck_assert(res == 0);
 
     SOPC_Buffer_Delete(serviceEvent->params);
-    free(serviceEvent);
+    SOPC_Free(serviceEvent);
 }
 END_TEST
 

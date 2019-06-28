@@ -119,7 +119,7 @@ SOPC_Variant* util_variant__new_Variant_from_Variant(SOPC_Variant* pvara)
     {
         if (pvar != NULL)
         {
-            free(pvar);
+            SOPC_Free(pvar);
         }
         pvar = NULL;
     }
@@ -304,7 +304,7 @@ void util_variant__print_SOPC_Variant(SOPC_Variant* pvar)
     case SOPC_NodeId_Id:
         s = SOPC_NodeId_ToCString(pvar->Value.NodeId);
         printf("NodeId\n  Value: %s\n", s);
-        free(s);
+        SOPC_Free(s);
         s = NULL;
         break;
     case SOPC_StatusCode_Id:

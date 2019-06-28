@@ -124,7 +124,7 @@ START_TEST(test_numeric_range_parser)
             ck_assert_ptr_nonnull(result);
             char* str = format_numeric_range(result);
             ck_assert_str_eq(test_data[i].input, str);
-            free(str);
+            SOPC_Free(str);
         }
         else
         {

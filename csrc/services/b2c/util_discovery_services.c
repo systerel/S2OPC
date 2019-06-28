@@ -354,7 +354,7 @@ constants_statuscodes_bs__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions
 
         if (currentConfig_EndpointDescription != NULL)
         {
-            free(currentConfig_EndpointDescription);
+            SOPC_Free(currentConfig_EndpointDescription);
         }
     }
 

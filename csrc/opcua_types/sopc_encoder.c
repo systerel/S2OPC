@@ -715,7 +715,7 @@ SOPC_ReturnStatus SOPC_ByteString_Read(SOPC_ByteString* str, SOPC_Buffer* buf)
                         if (status != SOPC_STATUS_OK)
                         {
                             status = SOPC_STATUS_ENCODING_ERROR;
-                            free(str->Data);
+                            SOPC_Free(str->Data);
                             str->Data = NULL;
                             str->Length = -1;
                         }
@@ -808,7 +808,7 @@ SOPC_ReturnStatus SOPC_String_Read(SOPC_String* str, SOPC_Buffer* buf)
                         if (status != SOPC_STATUS_OK)
                         {
                             status = SOPC_STATUS_ENCODING_ERROR;
-                            free(str->Data);
+                            SOPC_Free(str->Data);
                             str->Data = NULL;
                             str->Length = -1;
                         }
@@ -1146,7 +1146,7 @@ static SOPC_ReturnStatus Internal_NodeId_Read(SOPC_Buffer* buf, SOPC_NodeId* nod
                     status = SOPC_Guid_Read(nodeId->Data.Guid, buf);
                     if (status != SOPC_STATUS_OK)
                     {
-                        free(nodeId->Data.Guid);
+                        SOPC_Free(nodeId->Data.Guid);
                         nodeId->Data.Guid = NULL;
                     }
                 }
@@ -1424,7 +1424,7 @@ static SOPC_ReturnStatus SOPC_DiagnosticInfo_Read_Internal(SOPC_DiagnosticInfo* 
             if (NULL == diagInfo->InnerDiagnosticInfo)
             {
                 status = SOPC_STATUS_OUT_OF_MEMORY;
-                free(diagInfo->InnerDiagnosticInfo);
+                SOPC_Free(diagInfo->InnerDiagnosticInfo);
                 diagInfo->InnerDiagnosticInfo = NULL;
             }
             else
@@ -1433,7 +1433,7 @@ static SOPC_ReturnStatus SOPC_DiagnosticInfo_Read_Internal(SOPC_DiagnosticInfo* 
                 status = SOPC_DiagnosticInfo_Read_Internal(diagInfo->InnerDiagnosticInfo, buf, nestedLevel);
                 if (SOPC_STATUS_OK != status)
                 {
-                    free(diagInfo->InnerDiagnosticInfo);
+                    SOPC_Free(diagInfo->InnerDiagnosticInfo);
                     diagInfo->InnerDiagnosticInfo = NULL;
                 }
             }
@@ -1733,7 +1733,7 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_B
                     status = extObj->Body.Object.ObjType->Decode(extObj->Body.Object.Value, buf);
                     if (SOPC_STATUS_OK != status)
                     {
-                        free(extObj->Body.Object.Value);
+                        SOPC_Free(extObj->Body.Object.Value);
                         extObj->Body.Object.Value = NULL;
                     }
                 }
@@ -1841,7 +1841,7 @@ static SOPC_ReturnStatus SOPC_Read_Array_WithNestedLevel(SOPC_Buffer* buf,
                 pos = clearIdx * sizeOfElt;
                 clearFct(&(byteArray[pos]));
             }
-            free(*eltsArray);
+            SOPC_Free(*eltsArray);
             *eltsArray = NULL;
             *noOfElts = 0;
         }
@@ -2286,7 +2286,7 @@ static SOPC_ReturnStatus ReadVariantNonArrayBuiltInType(SOPC_Buffer* buf,
             status = SOPC_Guid_Read(val->Guid, buf);
             if (status != SOPC_STATUS_OK)
             {
-                free(val->Guid);
+                SOPC_Free(val->Guid);
                 val->Guid = NULL;
             }
         }
@@ -2309,7 +2309,7 @@ static SOPC_ReturnStatus ReadVariantNonArrayBuiltInType(SOPC_Buffer* buf,
             status = SOPC_NodeId_Read(val->NodeId, buf);
             if (status != SOPC_STATUS_OK)
             {
-                free(val->NodeId);
+                SOPC_Free(val->NodeId);
                 val->NodeId = NULL;
             }
         }
@@ -2326,7 +2326,7 @@ static SOPC_ReturnStatus ReadVariantNonArrayBuiltInType(SOPC_Buffer* buf,
             status = SOPC_ExpandedNodeId_Read(val->ExpNodeId, buf);
             if (status != SOPC_STATUS_OK)
             {
-                free(val->ExpNodeId);
+                SOPC_Free(val->ExpNodeId);
                 val->ExpNodeId = NULL;
             }
         }
@@ -2346,7 +2346,7 @@ static SOPC_ReturnStatus ReadVariantNonArrayBuiltInType(SOPC_Buffer* buf,
             status = SOPC_QualifiedName_Read(val->Qname, buf);
             if (status != SOPC_STATUS_OK)
             {
-                free(val->Qname);
+                SOPC_Free(val->Qname);
                 val->Qname = NULL;
             }
         }
@@ -2363,7 +2363,7 @@ static SOPC_ReturnStatus ReadVariantNonArrayBuiltInType(SOPC_Buffer* buf,
             status = SOPC_LocalizedText_Read(val->LocalizedText, buf);
             if (status != SOPC_STATUS_OK)
             {
-                free(val->LocalizedText);
+                SOPC_Free(val->LocalizedText);
                 val->LocalizedText = NULL;
             }
         }
@@ -2380,7 +2380,7 @@ static SOPC_ReturnStatus ReadVariantNonArrayBuiltInType(SOPC_Buffer* buf,
             status = SOPC_ExtensionObject_Read(val->ExtObject, buf);
             if (status != SOPC_STATUS_OK)
             {
-                free(val->ExtObject);
+                SOPC_Free(val->ExtObject);
                 val->ExtObject = NULL;
             }
         }
@@ -2397,7 +2397,7 @@ static SOPC_ReturnStatus ReadVariantNonArrayBuiltInType(SOPC_Buffer* buf,
             status = SOPC_DataValue_ReadAux_Nested((void*) val->DataValue, buf, nestedVariantLevel);
             if (status != SOPC_STATUS_OK)
             {
-                free(val->DataValue);
+                SOPC_Free(val->DataValue);
                 val->DataValue = NULL;
             }
         }
@@ -2420,7 +2420,7 @@ static SOPC_ReturnStatus ReadVariantNonArrayBuiltInType(SOPC_Buffer* buf,
             if (status != SOPC_STATUS_OK)
             {
                 SOPC_DiagnosticInfo_Clear(val->DiagInfo);
-                free(val->DiagInfo);
+                SOPC_Free(val->DiagInfo);
                 val->DiagInfo = NULL;
             }
         }
@@ -2678,7 +2678,7 @@ static SOPC_ReturnStatus SOPC_Variant_Read_Internal(SOPC_Variant* variant,
                     }
                     if (SOPC_STATUS_OK != status)
                     {
-                        free(variant->Value.Matrix.ArrayDimensions);
+                        SOPC_Free(variant->Value.Matrix.ArrayDimensions);
                         variant->Value.Matrix.ArrayDimensions = NULL;
                     }
                 }
@@ -2696,7 +2696,7 @@ static SOPC_ReturnStatus SOPC_Variant_Read_Internal(SOPC_Variant* variant,
 
             if (SOPC_STATUS_OK != status && variant->Value.Matrix.Content.BooleanArr != NULL)
             {
-                free((void*) variant->Value.Matrix.Content.BooleanArr);
+                SOPC_Free((void*) variant->Value.Matrix.Content.BooleanArr);
                 variant->Value.Matrix.Content.BooleanArr = NULL;
             }
 
@@ -2962,7 +2962,7 @@ SOPC_ReturnStatus SOPC_Read_Array(SOPC_Buffer* buf,
                 size_t pos = clearIdx * sizeOfElt;
                 clearFct(&(byteArray[pos]));
             }
-            free(*eltsArray);
+            SOPC_Free(*eltsArray);
             *eltsArray = NULL;
             *noOfElts = 0;
         }

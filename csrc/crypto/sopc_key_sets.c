@@ -34,6 +34,6 @@ void SOPC_KeySet_Delete(SOPC_SC_SecurityKeySet* keySet)
         SOPC_SecretBuffer_DeleteClear(keySet->encryptKey);
         SOPC_SecretBuffer_DeleteClear(keySet->initVector);
         SOPC_SecretBuffer_DeleteClear(keySet->signKey);
-        free(keySet);
+        SOPC_Free(keySet);
     }
 }

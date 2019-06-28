@@ -229,7 +229,7 @@ static void PrintEndpoints(OpcUa_GetEndpointsResponse* pResp)
                                 }
                             }
                             printf("\n");
-                            free(pThmb);
+                            SOPC_Free(pThmb);
                             pThmb = NULL;
                         }
                     }

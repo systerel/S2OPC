@@ -148,7 +148,7 @@ START_TEST(test_sockets)
     SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_SERVER, endpointDescConfigId, (void*) uri, (uint32_t) true);
     SOPC_GCC_DIAGNOSTIC_RESTORE
 
-    free(expect_event(SOCKET_LISTENER_OPENED, endpointDescConfigId));
+    SOPC_Free(expect_event(SOCKET_LISTENER_OPENED, endpointDescConfigId));
 
     /* CLIENT SIDE: connection establishment */
     // Create client connection
@@ -168,8 +168,8 @@ START_TEST(test_sockets)
                       clientSecureChannelConnectionId, &ev2);
         serverSocketIdx = (uint32_t) ev1->auxParam;
         clientSocketIdx = (uint32_t) ev2->auxParam;
-        free(ev1);
-        free(ev2);
+        SOPC_Free(ev1);
+        SOPC_Free(ev2);
     }
 
     /* SERVER SIDE: finish accepting connection (secure channel level) */
@@ -196,7 +196,7 @@ START_TEST(test_sockets)
     {
         SOPC_Event* ev = expect_event(SOCKET_RCV_BYTES, serverSecureChannelConnectionId);
         receivedBuffer = (SOPC_Buffer*) ev->params;
-        free(ev);
+        SOPC_Free(ev);
 
         ck_assert(receivedBuffer->length <= 1000);
         receivedBytes = receivedBuffer->length;
@@ -240,7 +240,7 @@ START_TEST(test_sockets)
     {
         SOPC_Event* ev = expect_event(SOCKET_RCV_BYTES, clientSecureChannelConnectionId);
         receivedBuffer = (SOPC_Buffer*) ev->params;
-        free(ev);
+        SOPC_Free(ev);
 
         ck_assert(receivedBuffer->length <= 1000);
         receivedBytes = receivedBuffer->length;
@@ -293,7 +293,7 @@ START_TEST(test_sockets)
     {
         SOPC_Event* ev = expect_event(SOCKET_RCV_BYTES, serverSecureChannelConnectionId);
         receivedBuffer = (SOPC_Buffer*) ev->params;
-        free(ev);
+        SOPC_Free(ev);
 
         ck_assert(receivedBuffer->length <= 2 * SOPC_MAX_MESSAGE_LENGTH);
         receivedBytes = receivedBuffer->length;
@@ -322,7 +322,7 @@ START_TEST(test_sockets)
     {
         SOPC_Event* ev = expect_event(SOCKET_FAILURE, serverSecureChannelConnectionId);
         ck_assert_uint_eq(serverSocketIdx, ev->auxParam);
-        free(ev);
+        SOPC_Free(ev);
     }
 
     SOPC_Sockets_Clear();

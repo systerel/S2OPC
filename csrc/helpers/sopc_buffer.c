@@ -85,7 +85,7 @@ void SOPC_Buffer_Clear(SOPC_Buffer* buffer)
     {
         if (buffer->data != NULL)
         {
-            free(buffer->data);
+            SOPC_Free(buffer->data);
             buffer->data = NULL;
         }
     }
@@ -96,7 +96,7 @@ void SOPC_Buffer_Delete(SOPC_Buffer* buffer)
     if (buffer != NULL)
     {
         SOPC_Buffer_Clear(buffer);
-        free(buffer);
+        SOPC_Free(buffer);
     }
 }
 

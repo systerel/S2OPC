@@ -107,7 +107,7 @@ static SOPC_ReturnStatus selectiveAuthenticationValidate(SOPC_UserAuthentication
 }
 
 static const SOPC_UserAuthentication_Functions selectiveAuthenticationFunctions = {
-    .pFuncFree = (SOPC_UserAuthentication_Free_Func) free,
+    .pFuncFree = (SOPC_UserAuthentication_Free_Func) SOPC_Free,
     .pFuncValidateUserIdentity = selectiveAuthenticationValidate};
 
 static SOPC_ReturnStatus selectiveAuthorizationAllow(SOPC_UserAuthorization_Manager* authz,
@@ -156,7 +156,7 @@ static SOPC_ReturnStatus selectiveAuthorizationAllow(SOPC_UserAuthorization_Mana
 }
 
 static const SOPC_UserAuthorization_Functions selectiveAuthorizationFunctions = {
-    .pFuncFree = (SOPC_UserAuthorization_Free_Func) free,
+    .pFuncFree = (SOPC_UserAuthorization_Free_Func) SOPC_Free,
     .pFuncAuthorizeOperation = selectiveAuthorizationAllow};
 
 /* Fixture setup and teardown functions */

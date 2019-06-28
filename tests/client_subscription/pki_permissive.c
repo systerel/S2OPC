@@ -34,7 +34,7 @@ static SOPC_ReturnStatus PKIPermissive_ValidateAnything(const SOPC_PKIProvider* 
 
 static void PKIPermissive_Free(SOPC_PKIProvider* pPKI)
 {
-    free(pPKI);
+    SOPC_Free(pPKI);
 }
 
 SOPC_ReturnStatus SOPC_PKIPermissive_Create(SOPC_PKIProvider** ppPKI)

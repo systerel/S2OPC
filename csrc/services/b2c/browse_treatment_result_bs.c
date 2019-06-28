@@ -74,7 +74,7 @@ void browse_treatment_result_bs__clear_browse_result(void)
     {
         OpcUa_ReferenceDescription_Clear(&references[i]);
     }
-    free(references);
+    SOPC_Free(references);
     nbMaxReferences = 0;
 }
 
