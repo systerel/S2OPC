@@ -51,7 +51,7 @@ static bool array_grow(SOPC_Array* a, size_t min_size)
         cap *= 2;
     }
 
-    void* data = realloc(a->data, cap * a->element_size);
+    void* data = SOPC_Realloc(a->data, a->cap * a->element_size, cap * a->element_size);
 
     if (data == NULL)
     {
@@ -181,7 +181,7 @@ void* SOPC_Array_Into_Raw(SOPC_Array* array)
 
     if (array->sz < array->cap)
     {
-        data = realloc(data, array->sz * array->element_size);
+        data = SOPC_Realloc(data, array->cap * array->element_size, array->sz * array->element_size);
     }
 
     free(array);

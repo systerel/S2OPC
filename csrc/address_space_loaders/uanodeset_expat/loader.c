@@ -142,7 +142,7 @@ static bool ctx_char_data_append(struct parse_context_t* ctx, const char* data, 
             cap = 2 * cap;
         }
 
-        char* dataBuff = realloc(ctx->char_data_buffer, cap * sizeof(char));
+        char* dataBuff = SOPC_Realloc(ctx->char_data_buffer, ctx->char_data_cap * sizeof(char), cap * sizeof(char));
 
         if (dataBuff == NULL)
         {
