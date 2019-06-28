@@ -28,7 +28,7 @@ import time
 from _pys2opc import ffi, lib as libsub
 
 
-allocator_no_gc = ffi.new_allocator(alloc=libsub.malloc, free=None, should_clear_after_alloc=True)
+allocator_no_gc = ffi.new_allocator(alloc=libsub.SOPC_Malloc, free=None, should_clear_after_alloc=True)
 
 
 class Request:
@@ -830,7 +830,7 @@ class Variant:
         else:
             raise ValueError('Invalid SOPC_Variant.ArrayType')
 
-    allocator = ffi.new_allocator(alloc=libsub.malloc, free=libsub.SOPC_Variant_Delete, should_clear_after_alloc=True)
+    allocator = ffi.new_allocator(alloc=libsub.SOPC_Malloc, free=libsub.SOPC_Variant_Delete, should_clear_after_alloc=True)
 
     def to_sopc_variant(self, *, copy_type_from_variant=None, sopc_variant_type=None, no_gc=False):
         """
@@ -1099,7 +1099,7 @@ class DataValue:
             val = Variant(val)
         return DataValue(time.time(), 0, ReturnStatus.OK, val)
 
-    allocator = ffi.new_allocator(alloc=libsub.malloc, free=libsub.SOPC_DataValue_Delete, should_clear_after_alloc=True)
+    allocator = ffi.new_allocator(alloc=libsub.SOPC_Malloc, free=libsub.SOPC_DataValue_Delete, should_clear_after_alloc=True)
 
     def to_sopc_datavalue(self, *, copy_type_from_variant=None, sopc_variant_type=None, no_gc=False):
         """

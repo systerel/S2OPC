@@ -478,6 +478,10 @@ void Helpers_Log(const SOPC_Toolkit_Log_Level log_level, const char* format, ...
  */
 void Helpers_LoggerStdout(const SOPC_Toolkit_Log_Level log_level, const SOPC_LibSub_CstString text);
 
+void* SOPC_Malloc(size_t size);
+void SOPC_Free(void* ptr);
+void* SOPC_Calloc(size_t nmemb, size_t size);
+void* SOPC_Realloc(void* ptr, size_t old_size, size_t new_size);
 
 typedef struct
 {
