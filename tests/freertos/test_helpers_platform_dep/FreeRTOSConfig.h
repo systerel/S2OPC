@@ -43,8 +43,7 @@
 #define configCPU_CLOCK_HZ (SystemCoreClock)
 #define configTICK_RATE_HZ ((TickType_t) 1000)
 #define configMAX_PRIORITIES 1
-#define configMINIMAL_STACK_SIZE_S2OPC ((unsigned short) 4096)
-#define configMINIMAL_STACK_SIZE ((unsigned short) 2048)
+#define configMINIMAL_STACK_SIZE ((unsigned short) 4096)
 #define configMINIMAL_STACK_SIZE_TIMER ((unsigned short) 2048)
 #define configMAX_TASK_NAME_LEN 40
 #define configUSE_16_BIT_TICKS 0
@@ -57,7 +56,7 @@
 #define configQUEUE_REGISTRY_SIZE 8
 #define configUSE_QUEUE_SETS 0
 #define configUSE_TIME_SLICING 1
-#define configUSE_NEWLIB_REENTRANT 0
+#define configUSE_NEWLIB_REENTRANT 1
 #define configENABLE_BACKWARD_COMPATIBILITY 0
 #define configNUM_THREAD_LOCAL_STORAGE_POINTERS 5
 #define configUSE_APPLICATION_TASK_TAG 0
@@ -65,7 +64,7 @@
 /* Memory allocation related definitions. */
 #define configSUPPORT_STATIC_ALLOCATION 0
 #define configSUPPORT_DYNAMIC_ALLOCATION 1
-#define configTOTAL_HEAP_SIZE ((size_t)(262144))
+#define configTOTAL_HEAP_SIZE ((size_t)(524288))
 #define configAPPLICATION_ALLOCATED_HEAP 0
 
 /* Hook function related definitions. */
