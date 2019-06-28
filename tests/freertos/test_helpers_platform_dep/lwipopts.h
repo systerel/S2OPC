@@ -48,6 +48,7 @@
 #define LWIP_RAW 1
 #define LWIP_MPU_COMPATIBLE 1
 #define SO_REUSE 1
+#define LWIP_NETIF_LOOPBACK 1
 /*
  * Add following memory options
  */
