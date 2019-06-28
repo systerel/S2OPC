@@ -179,8 +179,8 @@ static SOPC_ReturnStatus SendBrowseRequest(StateMachine_Machine* pSM)
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    pReq = malloc(sizeof(OpcUa_BrowseRequest));
-    pDesc = malloc(1 * sizeof(OpcUa_BrowseDescription));
+    pReq = SOPC_Malloc(sizeof(OpcUa_BrowseRequest));
+    pDesc = SOPC_Malloc(1 * sizeof(OpcUa_BrowseDescription));
     if (NULL == pReq || NULL == pDesc)
     {
         status = SOPC_STATUS_NOK;

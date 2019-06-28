@@ -41,7 +41,7 @@ void msg_browse_next_bs__alloc_browse_next_response(const constants__t_msg_i msg
     *msg_browse_next_bs__p_isallocated = false;
     OpcUa_BrowseNextResponse* resp = msg_browse_next_bs__p_resp_msg;
     assert((uint64_t) msg_browse_next_bs__p_nb_bvi < SIZE_MAX);
-    resp->Results = malloc(sizeof(*resp->Results) * (size_t) msg_browse_next_bs__p_nb_bvi);
+    resp->Results = SOPC_Malloc(sizeof(*resp->Results) * (size_t) msg_browse_next_bs__p_nb_bvi);
     if (NULL != resp->Results)
     {
         for (int32_t i = 0; i < msg_browse_next_bs__p_nb_bvi; i++)

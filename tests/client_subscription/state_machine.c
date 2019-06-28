@@ -181,7 +181,7 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
         pSM->iTimeoutMs = iTimeoutMs;
         if (NULL != szPolicyId)
         {
-            pSM->szPolicyId = malloc(strlen(szPolicyId) + 1);
+            pSM->szPolicyId = SOPC_Malloc(strlen(szPolicyId) + 1);
             if (NULL == pSM->szPolicyId)
             {
                 status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -189,7 +189,7 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
         }
         if (NULL != szUsername)
         {
-            pSM->szUsername = malloc(strlen(szUsername) + 1);
+            pSM->szUsername = SOPC_Malloc(strlen(szUsername) + 1);
             if (NULL == pSM->szUsername)
             {
                 status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -197,7 +197,7 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
         }
         if (NULL != szPassword)
         {
-            pSM->szPassword = malloc(strlen(szPassword) + 1);
+            pSM->szPassword = SOPC_Malloc(strlen(szPassword) + 1);
             if (NULL == pSM->szPassword)
             {
                 status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -357,7 +357,7 @@ SOPC_ReturnStatus SOPC_StaMac_SendRequest(SOPC_StaMac_Machine* pSM,
 
     assert(SOPC_REQUEST_SCOPE_STATE_MACHINE == requestScope || SOPC_REQUEST_SCOPE_APPLICATION == requestScope);
 
-    pReqCtx = malloc(sizeof(SOPC_StaMac_ReqCtx));
+    pReqCtx = SOPC_Malloc(sizeof(SOPC_StaMac_ReqCtx));
     if (NULL == pReqCtx)
     {
         return SOPC_STATUS_OUT_OF_MEMORY;

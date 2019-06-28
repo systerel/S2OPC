@@ -36,8 +36,8 @@ static uint32_t nReqSent = 0;   /* Number of other requests sent through the wra
 
 StateMachine_Machine* StateMachine_Create(void)
 {
-    StateMachine_Machine* pSM = malloc(sizeof(StateMachine_Machine));
-    StateMachine_RequestContext* pCtxSess = malloc(sizeof(StateMachine_RequestContext));
+    StateMachine_Machine* pSM = SOPC_Malloc(sizeof(StateMachine_Machine));
+    StateMachine_RequestContext* pCtxSess = SOPC_Malloc(sizeof(StateMachine_RequestContext));
 
     if (pSM == NULL || pCtxSess == NULL || Mutex_Initialization(&pSM->mutex) != SOPC_STATUS_OK)
     {
@@ -257,7 +257,7 @@ SOPC_ReturnStatus StateMachine_StartDiscovery(StateMachine_Machine* pSM)
     {
         /* Overflow will not cause a problem, as it shall not be possible to have UINTPTR_MAX pending discoveries */
         ++nDiscovery;
-        pSM->pCtxRequest = malloc(sizeof(StateMachine_RequestContext));
+        pSM->pCtxRequest = SOPC_Malloc(sizeof(StateMachine_RequestContext));
         if (NULL == pSM->pCtxRequest)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -329,7 +329,7 @@ SOPC_ReturnStatus StateMachine_StartFindServers(StateMachine_Machine* pSM)
 
         /* Overflow will not cause a problem, as it shall not be possible to have UINTPTR_MAX pending discoveries */
         ++nDiscovery;
-        pSM->pCtxRequest = malloc(sizeof(StateMachine_RequestContext));
+        pSM->pCtxRequest = SOPC_Malloc(sizeof(StateMachine_RequestContext));
         if (NULL == pSM->pCtxRequest)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -451,7 +451,7 @@ SOPC_ReturnStatus StateMachine_StartRegisterServer(StateMachine_Machine* pSM)
 
         /* Overflow will not cause a problem, as it shall not be possible to have UINTPTR_MAX pending discoveries */
         ++nDiscovery;
-        pSM->pCtxRequest = malloc(sizeof(StateMachine_RequestContext));
+        pSM->pCtxRequest = SOPC_Malloc(sizeof(StateMachine_RequestContext));
         if (NULL == pSM->pCtxRequest)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;

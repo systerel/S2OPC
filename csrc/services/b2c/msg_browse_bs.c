@@ -40,7 +40,7 @@ void msg_browse_bs__alloc_browse_response(const constants__t_msg_i msg_browse_bs
     OpcUa_BrowseResponse* resp = msg_browse_bs__p_resp_msg;
     assert((uint64_t) msg_browse_bs__p_nb_bvi < SIZE_MAX);
     assert(msg_browse_bs__p_nb_bvi > 0);
-    resp->Results = malloc(sizeof(*resp->Results) * (size_t) msg_browse_bs__p_nb_bvi);
+    resp->Results = SOPC_Malloc(sizeof(*resp->Results) * (size_t) msg_browse_bs__p_nb_bvi);
     if (NULL != resp->Results)
     {
         for (int32_t i = 0; i < msg_browse_bs__p_nb_bvi; i++)

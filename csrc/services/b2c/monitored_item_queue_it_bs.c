@@ -56,7 +56,7 @@ void monitored_item_queue_it_bs__init_iter_monitored_item(
     t_bool* const monitored_item_queue_it_bs__continue,
     constants__t_monitoredItemQueueIterator_i* const monitored_item_queue_it_bs__iterator)
 {
-    SOPC_SLinkedListIterator* it = malloc(sizeof(SOPC_SLinkedListIterator));
+    SOPC_SLinkedListIterator* it = SOPC_Malloc(sizeof(SOPC_SLinkedListIterator));
     *monitored_item_queue_it_bs__iterator = it;
     *monitored_item_queue_it_bs__continue = false;
     if (it != NULL && SOPC_SLinkedList_GetLength(monitored_item_queue_it_bs__p_queue) > 0)

@@ -39,7 +39,7 @@ SOPC_ReturnStatus SOPC_AsyncQueue_Init(SOPC_AsyncQueue** queue, const char* queu
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (NULL != queue)
     {
-        *queue = malloc(sizeof(SOPC_AsyncQueue));
+        *queue = SOPC_Malloc(sizeof(SOPC_AsyncQueue));
         if (*queue != NULL)
         {
             status = SOPC_STATUS_OK;

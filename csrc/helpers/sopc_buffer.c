@@ -28,7 +28,7 @@ SOPC_Buffer* SOPC_Buffer_Create(uint32_t size)
     SOPC_Buffer* buf = NULL;
     if (size > 0)
     {
-        buf = (SOPC_Buffer*) malloc(sizeof(SOPC_Buffer));
+        buf = SOPC_Malloc(sizeof(SOPC_Buffer));
         if (buf != NULL)
         {
             SOPC_ReturnStatus status = SOPC_Buffer_Init(buf, size);

@@ -46,7 +46,7 @@ SOPC_ReturnStatus SOPC_PKIPermissive_Create(SOPC_PKIProvider** ppPKI)
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    pki = (SOPC_PKIProvider*) malloc(sizeof(SOPC_PKIProvider));
+    pki = SOPC_Malloc(sizeof(SOPC_PKIProvider));
 
     if (NULL == pki)
     {

@@ -2355,7 +2355,7 @@ static bool SOPC_Chunks_EncodePadding(SOPC_SecureConnection* scConnection,
             uint8_t paddingSizeField = 0;
             paddingSizeField = (uint8_t)(0xFF & *realPaddingLength);
             // The value of each byte of the padding is equal to paddingSize:
-            SOPC_Byte* paddingBytes = malloc(sizeof(SOPC_Byte) * (*realPaddingLength));
+            SOPC_Byte* paddingBytes = SOPC_Malloc(sizeof(SOPC_Byte) * (*realPaddingLength));
             if (paddingBytes != NULL)
             {
                 memset(paddingBytes, paddingSizeField, *realPaddingLength);
@@ -3472,7 +3472,7 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InternalEvent event,
                 if (false == socketWillClose)
                 {
                     // Treat as prio events
-                    requestIdForSendFailure = malloc(sizeof(uint32_t));
+                    requestIdForSendFailure = SOPC_Malloc(sizeof(uint32_t));
                     if (requestIdForSendFailure != NULL)
                     {
                         *requestIdForSendFailure = (uint32_t) auxParam;

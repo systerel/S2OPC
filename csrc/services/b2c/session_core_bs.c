@@ -426,7 +426,7 @@ void session_core_bs__server_create_session_req_do_crypto(
                     SIZE_MAX / sizeof(uint8_t))
             {
                 lenToSign = (uint32_t) pReq->ClientCertificate.Length + (uint32_t) pReq->ClientNonce.Length;
-                pToSign = malloc(sizeof(uint8_t) * (size_t) lenToSign);
+                pToSign = SOPC_Malloc(sizeof(uint8_t) * (size_t) lenToSign);
             }
             else
             {
@@ -461,7 +461,7 @@ void session_core_bs__server_create_session_req_do_crypto(
             if (pSign->Signature.Length > 0 && (uint64_t) pSign->Signature.Length * sizeof(SOPC_Byte) <= SIZE_MAX)
             {
                 /* TODO: This should be freed with session */
-                pSign->Signature.Data = malloc(sizeof(SOPC_Byte) * (size_t) pSign->Signature.Length);
+                pSign->Signature.Data = SOPC_Malloc(sizeof(SOPC_Byte) * (size_t) pSign->Signature.Length);
             }
             else
             {
@@ -603,7 +603,7 @@ void session_core_bs__client_activate_session_req_do_crypto(
             (uint64_t) serverCert->length + (uint64_t) serverNonce->Length <= SIZE_MAX / sizeof(uint8_t))
         {
             lenToSign = (uint32_t) serverCert->length + (uint32_t) serverNonce->Length;
-            pToSign = malloc(sizeof(uint8_t) * (size_t) lenToSign);
+            pToSign = SOPC_Malloc(sizeof(uint8_t) * (size_t) lenToSign);
         }
 
         if (SOPC_STATUS_OK == status && NULL == pToSign)
@@ -630,9 +630,9 @@ void session_core_bs__client_activate_session_req_do_crypto(
         {
             if (pSign->Signature.Length > 0 && (uint64_t) pSign->Signature.Length * sizeof(SOPC_Byte) <= SIZE_MAX)
             {
-                pSign->Signature.Data =
-                    malloc(sizeof(SOPC_Byte) *
-                           (size_t) pSign->Signature.Length); /* TODO: This should not be stored in unique session ? */
+                pSign->Signature.Data = SOPC_Malloc(
+                    sizeof(SOPC_Byte) *
+                    (size_t) pSign->Signature.Length); /* TODO: This should not be stored in unique session ? */
             }
             else
             {

@@ -40,7 +40,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_Init(SOPC_CryptoProvider* pCryptoProvider)
     if (NULL == pCryptoProvider)
         return SOPC_STATUS_INVALID_PARAMETERS;
 
-    pctx = (SOPC_CryptolibContext*) malloc(sizeof(SOPC_CryptolibContext));
+    pctx = SOPC_Malloc(sizeof(SOPC_CryptolibContext));
     if (NULL == pctx)
         return SOPC_STATUS_NOK;
     memset(pctx, 0, sizeof(SOPC_CryptolibContext));

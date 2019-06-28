@@ -31,7 +31,7 @@ SOPC_ReturnStatus SOPC_Encodeable_Create(SOPC_EncodeableType* encTyp, void** enc
     if (encTyp != NULL && encTyp->Initialize != NULL && encTyp->AllocationSize > 0 && encObject != NULL &&
         NULL == *encObject)
     {
-        *encObject = malloc(encTyp->AllocationSize);
+        *encObject = SOPC_Malloc(encTyp->AllocationSize);
         if (*encObject != NULL)
         {
             encTyp->Initialize(*encObject);

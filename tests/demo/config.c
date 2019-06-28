@@ -65,7 +65,7 @@ SOPC_SecureChannel_Config* Config_NewSCConfig(const char* reqSecuPolicyUri, OpcU
     /* Create the configuration */
     if (SOPC_STATUS_OK == status)
     {
-        pscConfig = malloc(sizeof(SOPC_SecureChannel_Config));
+        pscConfig = SOPC_Malloc(sizeof(SOPC_SecureChannel_Config));
 
         if (NULL != pscConfig)
         {

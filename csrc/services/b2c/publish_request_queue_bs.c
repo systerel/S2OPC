@@ -84,7 +84,7 @@ void publish_request_queue_bs__append_publish_request_to_queue(
     t_bool* const publish_request_queue_bs__bres)
 {
     *publish_request_queue_bs__bres = false;
-    SOPC_InternalPublishRequestQueueElement* elt = malloc(sizeof(SOPC_InternalPublishRequestQueueElement));
+    SOPC_InternalPublishRequestQueueElement* elt = SOPC_Malloc(sizeof(SOPC_InternalPublishRequestQueueElement));
     if (NULL != elt)
     {
         elt->req_ctx = publish_request_queue_bs__p_req_ctx;
@@ -188,7 +188,7 @@ void publish_request_queue_bs__prepend_publish_request_to_queue(
     t_bool* const publish_request_queue_bs__bres)
 {
     *publish_request_queue_bs__bres = false;
-    SOPC_InternalPublishRequestQueueElement* elt = malloc(sizeof(SOPC_InternalPublishRequestQueueElement));
+    SOPC_InternalPublishRequestQueueElement* elt = SOPC_Malloc(sizeof(SOPC_InternalPublishRequestQueueElement));
     if (NULL != elt)
     {
         elt->req_ctx = publish_request_queue_bs__p_req_ctx;

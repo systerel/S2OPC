@@ -23,7 +23,7 @@
 
 void* SOPC_Malloc(size_t size)
 {
-    return SOPC_Malloc(size);
+    return malloc(size);
 }
 
 void SOPC_Free(void* ptr)

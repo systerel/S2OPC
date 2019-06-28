@@ -70,7 +70,7 @@ void notification_republish_queue_bs__add_republish_notif_to_queue(
 {
     assert(notification_republish_queue_bs__p_notif_msg->NoOfNotificationData == 1);
     *notification_republish_queue_bs__bres = false;
-    OpcUa_NotificationMessage* notifMsgCpy = malloc(sizeof(OpcUa_NotificationMessage));
+    OpcUa_NotificationMessage* notifMsgCpy = SOPC_Malloc(sizeof(OpcUa_NotificationMessage));
     if (notifMsgCpy == NULL || !notification_message_copy(notifMsgCpy, notification_republish_queue_bs__p_notif_msg))
     {
         SOPC_Logger_TraceError(

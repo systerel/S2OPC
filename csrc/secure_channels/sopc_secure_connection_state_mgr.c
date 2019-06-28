@@ -3025,7 +3025,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                 errorStatus = OpcUa_BadSecureChannelClosed;
             }
             // Error case:
-            requestIdForSndFailure = malloc(sizeof(uint32_t));
+            requestIdForSndFailure = SOPC_Malloc(sizeof(uint32_t));
             if (requestIdForSndFailure != NULL)
             {
                 *requestIdForSndFailure = (uint32_t) auxParam;

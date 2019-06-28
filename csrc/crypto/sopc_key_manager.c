@@ -58,7 +58,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CopyDER(const SOPC_Certificate* pC
     if (lenToAllocate == 0)
         return SOPC_STATUS_NOK;
 
-    (*ppDest) = (uint8_t*) malloc(lenToAllocate);
+    (*ppDest) = SOPC_Malloc(lenToAllocate);
     if (NULL == *ppDest)
         return SOPC_STATUS_NOK;
 

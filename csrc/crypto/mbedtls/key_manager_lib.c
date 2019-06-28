@@ -50,7 +50,7 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t* 
     if (NULL == buffer || 0 == lenBuf || NULL == ppKey)
         return SOPC_STATUS_INVALID_PARAMETERS;
 
-    key = malloc(sizeof(SOPC_AsymmetricKey));
+    key = SOPC_Malloc(sizeof(SOPC_AsymmetricKey));
     if (NULL == key)
         return SOPC_STATUS_NOK;
     key->isBorrowedFromCert = false;
@@ -114,7 +114,7 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromFile(const char* szPat
     if (NULL != password && (0 == lenPassword || '\0' != password[lenPassword]))
         return SOPC_STATUS_INVALID_PARAMETERS;
 
-    key = malloc(sizeof(SOPC_AsymmetricKey));
+    key = SOPC_Malloc(sizeof(SOPC_AsymmetricKey));
     if (NULL == key)
         return SOPC_STATUS_NOK;
     key->isBorrowedFromCert = false;
@@ -136,7 +136,7 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(const SOPC
 {
     if (NULL == pCert || NULL == pKey)
         return SOPC_STATUS_INVALID_PARAMETERS;
-    *pKey = malloc(sizeof(SOPC_AsymmetricKey));
+    *pKey = SOPC_Malloc(sizeof(SOPC_AsymmetricKey));
     if (NULL == *pKey)
         return SOPC_STATUS_NOK;
     (*pKey)->isBorrowedFromCert = true;
@@ -181,7 +181,7 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_ToDER(const SOPC_AsymmetricKey* 
     if (NULL == pKey || NULL == pDest || 0 == lenDest || NULL == pLenWritten)
         return SOPC_STATUS_INVALID_PARAMETERS;
 
-    buffer = malloc(lenDest);
+    buffer = SOPC_Malloc(lenDest);
     if (NULL == buffer)
         return SOPC_STATUS_NOK;
     // Asymmetric key should be const in mbedtls
@@ -216,7 +216,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateFromDER(const uint8_t* buffe
         return SOPC_STATUS_INVALID_PARAMETERS;
 
     // Mem alloc
-    certif = malloc(sizeof(SOPC_Certificate));
+    certif = SOPC_Malloc(sizeof(SOPC_Certificate));
     if (NULL == certif)
         return SOPC_STATUS_NOK;
 
@@ -257,7 +257,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateFromFile(const char* szPath,
         return SOPC_STATUS_INVALID_PARAMETERS;
 
     // Mem alloc
-    certif = malloc(sizeof(SOPC_Certificate));
+    certif = SOPC_Malloc(sizeof(SOPC_Certificate));
     if (NULL == certif)
         return SOPC_STATUS_NOK;
 

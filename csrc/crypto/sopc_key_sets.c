@@ -23,7 +23,7 @@
 
 SOPC_SC_SecurityKeySet* SOPC_KeySet_Create()
 {
-    SOPC_SC_SecurityKeySet* keySet = malloc(sizeof(SOPC_SC_SecurityKeySet));
+    SOPC_SC_SecurityKeySet* keySet = SOPC_Malloc(sizeof(SOPC_SC_SecurityKeySet));
     return keySet;
 }
 

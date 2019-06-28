@@ -173,7 +173,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
     /* Create the configuration */
     if (SOPC_STATUS_OK == status)
     {
-        pscConfig = malloc(sizeof(SOPC_SecureChannel_Config));
+        pscConfig = SOPC_Malloc(sizeof(SOPC_SecureChannel_Config));
 
         if (NULL != pscConfig)
         {
@@ -186,8 +186,8 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
             pscConfig->msgSecurityMode = msgSecurityMode;
 
             /* These input strings are verified non NULL */
-            pscConfig->url = malloc(strlen(szServerUrl) + 1);
-            pscConfig->reqSecuPolicyUri = malloc(strlen(szSecuPolicy) + 1);
+            pscConfig->url = SOPC_Malloc(strlen(szServerUrl) + 1);
+            pscConfig->reqSecuPolicyUri = SOPC_Malloc(strlen(szSecuPolicy) + 1);
             SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
             if (NULL != pscConfig->url && NULL != pscConfig->reqSecuPolicyUri)
             {
@@ -431,7 +431,7 @@ SOPC_ReturnStatus Helpers_NewValueFromDataValue(SOPC_DataValue* pVal, SOPC_LibSu
         case SOPC_UInt32_Id:
         case SOPC_Int64_Id:
             plsVal->type = SOPC_LibSub_DataType_integer;
-            plsVal->value = malloc(sizeof(int64_t));
+            plsVal->value = SOPC_Malloc(sizeof(int64_t));
             if (NULL == plsVal->value)
             {
                 status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -474,7 +474,7 @@ SOPC_ReturnStatus Helpers_NewValueFromDataValue(SOPC_DataValue* pVal, SOPC_LibSu
             if (INT64_MAX >= pVal->Value.Value.Uint64)
             {
                 plsVal->type = SOPC_LibSub_DataType_integer;
-                plsVal->value = malloc(sizeof(int64_t));
+                plsVal->value = SOPC_Malloc(sizeof(int64_t));
                 if (NULL == plsVal->value)
                 {
                     status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -506,7 +506,7 @@ SOPC_ReturnStatus Helpers_NewValueFromDataValue(SOPC_DataValue* pVal, SOPC_LibSu
             if (pVal->Value.Value.Bstring.Length > 0)
             {
                 plsVal->length = (size_t) pVal->Value.Value.Bstring.Length;
-                plsVal->value = malloc(plsVal->length);
+                plsVal->value = SOPC_Malloc(plsVal->length);
                 if (NULL != plsVal->value)
                 {
                     memcpy(plsVal->value, pVal->Value.Value.Bstring.Data, plsVal->length);

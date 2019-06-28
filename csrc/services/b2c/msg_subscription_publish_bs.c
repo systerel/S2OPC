@@ -63,7 +63,7 @@ void msg_subscription_publish_bs__alloc_notification_message_items(
         notifMsg->NoOfNotificationData = 1; // Only 1 DataChangeNotification supported (not event & no status change)
 
         // Create the extension object
-        notifMsg->NotificationData = malloc(sizeof(SOPC_ExtensionObject));
+        notifMsg->NotificationData = SOPC_Malloc(sizeof(SOPC_ExtensionObject));
 
         if (NULL != notifMsg->NotificationData)
         {
@@ -85,8 +85,8 @@ void msg_subscription_publish_bs__alloc_notification_message_items(
             if (dataChangeNotif->NoOfMonitoredItems > 0)
             {
                 dataChangeNotif->MonitoredItems =
-                    malloc((size_t) msg_subscription_publish_bs__p_nb_monitored_item_notifications *
-                           sizeof(OpcUa_MonitoredItemNotification));
+                    SOPC_Malloc((size_t) msg_subscription_publish_bs__p_nb_monitored_item_notifications *
+                                sizeof(OpcUa_MonitoredItemNotification));
                 if (NULL != dataChangeNotif->MonitoredItems)
                 {
                     for (int32_t i = 0; i < msg_subscription_publish_bs__p_nb_monitored_item_notifications; i++)
@@ -120,7 +120,7 @@ void msg_subscription_publish_bs__generate_internal_send_publish_response_event(
     const constants__t_request_context_i msg_subscription_publish_bs__p_req_context,
     const constants_statuscodes_bs__t_StatusCode_i msg_subscription_publish_bs__p_statusCode)
 {
-    SOPC_Internal_AsyncSendMsgData* eventData = malloc(sizeof(SOPC_Internal_AsyncSendMsgData));
+    SOPC_Internal_AsyncSendMsgData* eventData = SOPC_Malloc(sizeof(SOPC_Internal_AsyncSendMsgData));
     if (NULL != eventData)
     {
         eventData->msgToSend = msg_subscription_publish_bs__p_publish_resp_msg;

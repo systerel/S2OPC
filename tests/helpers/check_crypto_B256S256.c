@@ -981,7 +981,7 @@ static uint8_t* der_ca = NULL;
 
 static inline void setup_pki_stack(void)
 {
-    der_ca = malloc(CA_CRT_LEN);
+    der_ca = SOPC_Malloc(CA_CRT_LEN);
     ck_assert_ptr_nonnull(der_ca);
 
     setup_certificate();

@@ -26,7 +26,7 @@
 
 SOPC_Variant* util_variant__new_Variant_from_NodeId(SOPC_NodeId* pnid)
 {
-    SOPC_Variant* pvar = malloc(sizeof(SOPC_Variant));
+    SOPC_Variant* pvar = SOPC_Malloc(sizeof(SOPC_Variant));
 
     if (NULL == pvar)
         return NULL;
@@ -42,7 +42,7 @@ SOPC_Variant* util_variant__new_Variant_from_NodeId(SOPC_NodeId* pnid)
 
 SOPC_Variant* util_variant__new_Variant_from_NodeClass(OpcUa_NodeClass ncl)
 {
-    SOPC_Variant* pvar = malloc(sizeof(SOPC_Variant));
+    SOPC_Variant* pvar = SOPC_Malloc(sizeof(SOPC_Variant));
 
     if (NULL == pvar)
         return NULL;
@@ -57,7 +57,7 @@ SOPC_Variant* util_variant__new_Variant_from_NodeClass(OpcUa_NodeClass ncl)
 
 SOPC_Variant* util_variant__new_Variant_from_QualifiedName(SOPC_QualifiedName* qn)
 {
-    SOPC_Variant* pvar = malloc(sizeof(SOPC_Variant));
+    SOPC_Variant* pvar = SOPC_Malloc(sizeof(SOPC_Variant));
 
     if (NULL == pvar)
         return NULL;
@@ -73,7 +73,7 @@ SOPC_Variant* util_variant__new_Variant_from_QualifiedName(SOPC_QualifiedName* q
 
 SOPC_Variant* util_variant__new_Variant_from_LocalizedText(SOPC_LocalizedText* lt)
 {
-    SOPC_Variant* pvar = malloc(sizeof(SOPC_Variant));
+    SOPC_Variant* pvar = SOPC_Malloc(sizeof(SOPC_Variant));
 
     if (NULL == pvar)
         return NULL;
@@ -89,7 +89,7 @@ SOPC_Variant* util_variant__new_Variant_from_LocalizedText(SOPC_LocalizedText* l
 
 SOPC_Variant* util_variant__new_Variant_from_Indet(void)
 {
-    SOPC_Variant* pvar = malloc(sizeof(SOPC_Variant));
+    SOPC_Variant* pvar = SOPC_Malloc(sizeof(SOPC_Variant));
 
     if (NULL == pvar)
         return NULL;
@@ -108,7 +108,7 @@ SOPC_Variant* util_variant__new_Variant_from_Variant(SOPC_Variant* pvara)
     if (NULL == pvara)
         return util_variant__new_Variant_from_Indet();
 
-    pvar = malloc(sizeof(SOPC_Variant));
+    pvar = SOPC_Malloc(sizeof(SOPC_Variant));
 
     if (NULL == pvar)
         return NULL;
@@ -129,7 +129,7 @@ SOPC_Variant* util_variant__new_Variant_from_Variant(SOPC_Variant* pvara)
 
 SOPC_Variant* util_variant__new_Variant_from_Bool(bool b)
 {
-    SOPC_Variant* pvar = malloc(sizeof(SOPC_Variant));
+    SOPC_Variant* pvar = SOPC_Malloc(sizeof(SOPC_Variant));
 
     if (NULL != pvar)
     {
@@ -144,7 +144,7 @@ SOPC_Variant* util_variant__new_Variant_from_Bool(bool b)
 
 SOPC_Variant* util_variant__new_Variant_from_Byte(uint8_t i)
 {
-    SOPC_Variant* pvar = malloc(sizeof(SOPC_Variant));
+    SOPC_Variant* pvar = SOPC_Malloc(sizeof(SOPC_Variant));
 
     if (NULL != pvar)
     {
@@ -159,7 +159,7 @@ SOPC_Variant* util_variant__new_Variant_from_Byte(uint8_t i)
 
 SOPC_Variant* util_variant__new_Variant_from_uint32(uint32_t i)
 {
-    SOPC_Variant* pvar = malloc(sizeof(SOPC_Variant));
+    SOPC_Variant* pvar = SOPC_Malloc(sizeof(SOPC_Variant));
 
     if (NULL == pvar)
         return NULL;
@@ -174,7 +174,7 @@ SOPC_Variant* util_variant__new_Variant_from_uint32(uint32_t i)
 
 SOPC_Variant* util_variant__new_Variant_from_int64(int64_t i)
 {
-    SOPC_Variant* pvar = malloc(sizeof(SOPC_Variant));
+    SOPC_Variant* pvar = SOPC_Malloc(sizeof(SOPC_Variant));
 
     if (NULL == pvar)
         return NULL;
@@ -189,7 +189,7 @@ SOPC_Variant* util_variant__new_Variant_from_int64(int64_t i)
 
 SOPC_Variant* util_variant__new_Variant_from_int32(int32_t i)
 {
-    SOPC_Variant* pvar = malloc(sizeof(SOPC_Variant));
+    SOPC_Variant* pvar = SOPC_Malloc(sizeof(SOPC_Variant));
 
     if (NULL == pvar)
         return NULL;
@@ -204,7 +204,7 @@ SOPC_Variant* util_variant__new_Variant_from_int32(int32_t i)
 
 SOPC_Variant* util_variant__new_Variant_from_double(double f)
 {
-    SOPC_Variant* pvar = malloc(sizeof(SOPC_Variant));
+    SOPC_Variant* pvar = SOPC_Malloc(sizeof(SOPC_Variant));
 
     if (NULL == pvar)
         return NULL;
@@ -219,7 +219,7 @@ SOPC_Variant* util_variant__new_Variant_from_double(double f)
 
 SOPC_Variant* util_variant__new_Variant_from_ByteString(SOPC_ByteString buf)
 {
-    SOPC_Variant* pvar = malloc(sizeof(SOPC_Variant));
+    SOPC_Variant* pvar = SOPC_Malloc(sizeof(SOPC_Variant));
 
     if (NULL == pvar)
         return NULL;

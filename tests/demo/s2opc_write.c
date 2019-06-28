@@ -245,8 +245,8 @@ static SOPC_ReturnStatus SendWriteRequest(StateMachine_Machine* pSM)
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    pReq = malloc(sizeof(OpcUa_WriteRequest));
-    lwv = malloc(1 * sizeof(OpcUa_WriteValue));
+    pReq = SOPC_Malloc(sizeof(OpcUa_WriteRequest));
+    lwv = SOPC_Malloc(1 * sizeof(OpcUa_WriteValue));
     if (NULL == pReq || NULL == lwv)
     {
         status = SOPC_STATUS_NOK;

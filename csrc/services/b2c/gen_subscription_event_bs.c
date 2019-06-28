@@ -42,9 +42,9 @@ void gen_subscription_event_bs__gen_data_changed_event(
     const constants__t_Timestamp gen_subscription_event_bs__p_new_val_ts_srv)
 {
     SOPC_ReturnStatus retStatus = SOPC_STATUS_OK;
-    OpcUa_WriteValue* newValue = malloc(sizeof(OpcUa_WriteValue));
+    OpcUa_WriteValue* newValue = SOPC_Malloc(sizeof(OpcUa_WriteValue));
     OpcUa_WriteValue_Initialize(newValue);
-    OpcUa_WriteValue* oldValue = malloc(sizeof(OpcUa_WriteValue));
+    OpcUa_WriteValue* oldValue = SOPC_Malloc(sizeof(OpcUa_WriteValue));
     OpcUa_WriteValue_Initialize(oldValue);
 
     if (NULL != oldValue && NULL != newValue)

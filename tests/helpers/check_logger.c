@@ -105,7 +105,7 @@ START_TEST(test_logger_levels)
 
     // Check testLog log file content is the expected content
     free(filePath);
-    filePath = malloc((strlen(filePathPrefix) + 10) * sizeof(char)); // 9 + '\0'
+    filePath = SOPC_Malloc((strlen(filePathPrefix) + 10) * sizeof(char)); // 9 + '\0'
     ck_assert(filePath != NULL);
     ires = sprintf(filePath, "%s00001.log", filePathPrefix);
     ck_assert(ires > 0);
@@ -220,7 +220,7 @@ START_TEST(test_logger_categories_and_files)
     SOPC_Log_ClearInstance(&testLog3);
 
     // Check testLog log file content is the expected content
-    filePath = malloc((strlen(filePathPrefix) + 10) * sizeof(char)); // 9 + '\0'
+    filePath = SOPC_Malloc((strlen(filePathPrefix) + 10) * sizeof(char)); // 9 + '\0'
     ck_assert(filePath != NULL);
     ires = sprintf(filePath, "%s00001.log", filePathPrefix);
     ck_assert(ires > 0);
@@ -339,7 +339,7 @@ START_TEST(test_logger_circular)
 
     // Check testLog log file content is the expected content
     free(filePath);
-    filePath = malloc((strlen(filePathPrefix) + 10) * sizeof(char)); // 9 + '\0'
+    filePath = SOPC_Malloc((strlen(filePathPrefix) + 10) * sizeof(char)); // 9 + '\0'
     ck_assert(filePath != NULL);
     ires = sprintf(filePath, "%s00001.log", filePathPrefix);
     ck_assert(ires > 0);

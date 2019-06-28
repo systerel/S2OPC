@@ -758,7 +758,7 @@ SOPC_ReturnStatus SOPC_ByteString_InitializeFixedSize(SOPC_ByteString* bstring, 
         SOPC_ByteString_Initialize(bstring);
         if ((uint64_t) size * sizeof(SOPC_Byte) <= SIZE_MAX && size <= INT32_MAX)
         {
-            bstring->Data = (SOPC_Byte*) malloc(sizeof(SOPC_Byte) * (size_t) size);
+            bstring->Data = SOPC_Malloc(sizeof(SOPC_Byte) * (size_t) size);
             bstring->Length = (int32_t) size;
         }
         else
@@ -785,7 +785,7 @@ SOPC_ReturnStatus SOPC_ByteString_CopyFromBytes(SOPC_ByteString* dest, const SOP
         dest->Length = length;
         if (length > 0 && (uint64_t) length * sizeof(SOPC_Byte) <= SIZE_MAX)
         {
-            dest->Data = malloc(sizeof(SOPC_Byte) * (size_t) length);
+            dest->Data = SOPC_Malloc(sizeof(SOPC_Byte) * (size_t) length);
         }
         else
         {
@@ -810,7 +810,7 @@ SOPC_ReturnStatus SOPC_ByteString_Copy(SOPC_ByteString* dest, const SOPC_ByteStr
         {
             if ((uint64_t) dest->Length * sizeof(SOPC_Byte) <= SIZE_MAX)
             {
-                dest->Data = malloc(sizeof(SOPC_Byte) * (size_t) dest->Length);
+                dest->Data = SOPC_Malloc(sizeof(SOPC_Byte) * (size_t) dest->Length);
                 if (dest->Data != NULL)
                 {
                     status = SOPC_STATUS_OK;
@@ -925,7 +925,7 @@ void SOPC_String_Initialize(SOPC_String* string)
 SOPC_String* SOPC_String_Create()
 {
     SOPC_String* string = NULL;
-    string = (SOPC_String*) malloc(sizeof(SOPC_String));
+    string = SOPC_Malloc(sizeof(SOPC_String));
     if (NULL != string)
     {
         SOPC_String_Initialize(string);
@@ -978,7 +978,7 @@ SOPC_ReturnStatus SOPC_String_Copy(SOPC_String* dest, const SOPC_String* src)
             {
                 status = SOPC_STATUS_OK;
 
-                dest->Data = (SOPC_Byte*) malloc(sizeof(SOPC_Byte) * (size_t) dest->Length + 1);
+                dest->Data = SOPC_Malloc(sizeof(SOPC_Byte) * (size_t) dest->Length + 1);
                 if (dest->Data != NULL)
                 {
                     // No need of secure copy, both have same size here
@@ -1055,7 +1055,7 @@ SOPC_ReturnStatus SOPC_String_CopyFromCString(SOPC_String* string, const char* c
             // length without null terminator
             string->Length = (int32_t) stringLength;
             // keep terminator for compatibility with char* strings
-            string->Data = (SOPC_Byte*) malloc(sizeof(SOPC_Byte) * (stringLength + 1));
+            string->Data = SOPC_Malloc(sizeof(SOPC_Byte) * (stringLength + 1));
             if (string->Data != NULL)
             {
                 // Keep null terminator for compatibility with c strings !
@@ -1110,7 +1110,7 @@ char* SOPC_String_GetCString(const SOPC_String* string)
     int32_t idx = 0;
     if (string != NULL && string->Length > 0)
     {
-        cString = (char*) malloc(sizeof(char) * ((size_t) string->Length + 1));
+        cString = SOPC_Malloc(sizeof(char) * ((size_t) string->Length + 1));
         if (cString != NULL)
         {
             if (CHAR_BIT == 8)
@@ -1485,7 +1485,7 @@ SOPC_ReturnStatus SOPC_NodeId_Copy(SOPC_NodeId* dest, const SOPC_NodeId* src)
             status = SOPC_String_Copy(&dest->Data.String, &src->Data.String);
             break;
         case SOPC_IdentifierType_Guid:
-            dest->Data.Guid = malloc(sizeof(SOPC_Guid));
+            dest->Data.Guid = SOPC_Malloc(sizeof(SOPC_Guid));
             if (dest->Data.Guid != NULL)
             {
                 status = SOPC_Guid_Copy(dest->Data.Guid, src->Data.Guid);
@@ -1899,7 +1899,7 @@ SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString, int32_t len)
             case 'g':
                 type = SOPC_IdentifierType_Guid;
                 p += 2;
-                pGuid = (SOPC_Guid*) malloc(sizeof(SOPC_Guid));
+                pGuid = SOPC_Malloc(sizeof(SOPC_Guid));
                 if (NULL == pGuid)
                 {
                     status = SOPC_STATUS_NOK;
@@ -1919,7 +1919,7 @@ SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString, int32_t len)
     /* Now that it is valid and we now where to find the string/guid/bstring, create the NodeId */
     if (SOPC_STATUS_OK == status)
     {
-        pNid = (SOPC_NodeId*) malloc(sizeof(SOPC_NodeId));
+        pNid = SOPC_Malloc(sizeof(SOPC_NodeId));
         SOPC_NodeId_Initialize(pNid);
     }
 
@@ -3492,7 +3492,7 @@ static SOPC_ReturnStatus AllocVariantNonArrayBuiltInType(SOPC_BuiltinId builtInT
     case SOPC_StatusCode_Id:
         break;
     case SOPC_Guid_Id:
-        val->Guid = malloc(sizeof(SOPC_Guid));
+        val->Guid = SOPC_Malloc(sizeof(SOPC_Guid));
         if (NULL != val->Guid)
         {
             memset(val->Guid, 0, sizeof(SOPC_Guid));
@@ -3503,7 +3503,7 @@ static SOPC_ReturnStatus AllocVariantNonArrayBuiltInType(SOPC_BuiltinId builtInT
         }
         break;
     case SOPC_NodeId_Id:
-        val->NodeId = malloc(sizeof(SOPC_NodeId));
+        val->NodeId = SOPC_Malloc(sizeof(SOPC_NodeId));
         if (NULL != val->NodeId)
         {
             memset(val->NodeId, 0, sizeof(SOPC_NodeId));
@@ -3514,7 +3514,7 @@ static SOPC_ReturnStatus AllocVariantNonArrayBuiltInType(SOPC_BuiltinId builtInT
         }
         break;
     case SOPC_ExpandedNodeId_Id:
-        val->ExpNodeId = malloc(sizeof(SOPC_ExpandedNodeId));
+        val->ExpNodeId = SOPC_Malloc(sizeof(SOPC_ExpandedNodeId));
         if (NULL != val->ExpNodeId)
         {
             memset(val->ExpNodeId, 0, sizeof(SOPC_ExpandedNodeId));
@@ -3525,7 +3525,7 @@ static SOPC_ReturnStatus AllocVariantNonArrayBuiltInType(SOPC_BuiltinId builtInT
         }
         break;
     case SOPC_QualifiedName_Id:
-        val->Qname = malloc(sizeof(SOPC_QualifiedName));
+        val->Qname = SOPC_Malloc(sizeof(SOPC_QualifiedName));
         if (NULL != val->Qname)
         {
             memset(val->Qname, 0, sizeof(SOPC_QualifiedName));
@@ -3536,7 +3536,7 @@ static SOPC_ReturnStatus AllocVariantNonArrayBuiltInType(SOPC_BuiltinId builtInT
         }
         break;
     case SOPC_LocalizedText_Id:
-        val->LocalizedText = malloc(sizeof(SOPC_LocalizedText));
+        val->LocalizedText = SOPC_Malloc(sizeof(SOPC_LocalizedText));
         if (NULL != val->LocalizedText)
         {
             memset(val->LocalizedText, 0, sizeof(SOPC_LocalizedText));
@@ -3547,7 +3547,7 @@ static SOPC_ReturnStatus AllocVariantNonArrayBuiltInType(SOPC_BuiltinId builtInT
         }
         break;
     case SOPC_ExtensionObject_Id:
-        val->ExtObject = malloc(sizeof(SOPC_ExtensionObject));
+        val->ExtObject = SOPC_Malloc(sizeof(SOPC_ExtensionObject));
         if (NULL != val->ExtObject)
         {
             memset(val->ExtObject, 0, sizeof(SOPC_ExtensionObject));
@@ -3558,7 +3558,7 @@ static SOPC_ReturnStatus AllocVariantNonArrayBuiltInType(SOPC_BuiltinId builtInT
         }
         break;
     case SOPC_DataValue_Id:
-        val->DataValue = malloc(sizeof(SOPC_DataValue));
+        val->DataValue = SOPC_Malloc(sizeof(SOPC_DataValue));
         if (NULL != val->DataValue)
         {
             memset(val->DataValue, 0, sizeof(SOPC_DataValue));
@@ -3569,7 +3569,7 @@ static SOPC_ReturnStatus AllocVariantNonArrayBuiltInType(SOPC_BuiltinId builtInT
         }
         break;
     case SOPC_DiagnosticInfo_Id:
-        val->DiagInfo = malloc(sizeof(SOPC_DiagnosticInfo));
+        val->DiagInfo = SOPC_Malloc(sizeof(SOPC_DiagnosticInfo));
         if (NULL != val->DiagInfo)
         {
             memset(val->DiagInfo, 0, sizeof(SOPC_DiagnosticInfo));
@@ -3740,7 +3740,7 @@ SOPC_ReturnStatus SOPC_Variant_Copy(SOPC_Variant* dest, const SOPC_Variant* src)
                     (uint64_t) src->Value.Matrix.Dimensions * sizeof(int32_t) <= SIZE_MAX)
                 {
                     dest->Value.Matrix.ArrayDimensions =
-                        malloc((size_t) src->Value.Matrix.Dimensions * sizeof(int32_t));
+                        SOPC_Malloc((size_t) src->Value.Matrix.Dimensions * sizeof(int32_t));
                     if (NULL != dest->Value.Matrix.ArrayDimensions)
                     {
                         dest->Value.Matrix.Dimensions = src->Value.Matrix.Dimensions;

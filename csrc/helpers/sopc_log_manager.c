@@ -195,7 +195,7 @@ SOPC_Log_Instance* SOPC_Log_CreateInstance(const char* logDirPath,
     }
     if (result != NULL)
     {
-        file = malloc(sizeof(SOPC_Log_File));
+        file = SOPC_Malloc(sizeof(SOPC_Log_File));
         // Define file path and try to open it
         if (file != NULL)
         {

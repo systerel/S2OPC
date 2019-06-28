@@ -40,7 +40,7 @@
 #include "util_b2c.h"
 
 /* http://stackoverflow.com/questions/7265583/combine-designated-initializers-and-malloc-in-c99 */
-#define DESIGNATE_NEW(T, ...) memcpy(malloc(sizeof(T)), &(T const){__VA_ARGS__}, sizeof(T))
+#define DESIGNATE_NEW(T, ...) memcpy(SOPC_Malloc(sizeof(T)), &(T const){__VA_ARGS__}, sizeof(T))
 
 const uint32_t N_GROUPS = 6; // Each group is a different type of variable
 const uint32_t N_VARS = 6;   // Test on variables with Node Id 1001 to 1001 + N_VARS only
@@ -52,7 +52,7 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(void)
     assert(N_VARS % N_GROUPS == 0);
     assert(N_VARS <= INT32_MAX);
 
-    OpcUa_WriteValue* lwv = (OpcUa_WriteValue*) malloc(N_VARS * sizeof(OpcUa_WriteValue));
+    OpcUa_WriteValue* lwv = SOPC_Malloc(N_VARS * sizeof(OpcUa_WriteValue));
     size_t i;
     SOPC_ByteString buf;
     SOPC_ByteString_Initialize(&buf);
@@ -116,7 +116,7 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(void)
     for (i = 0; i < N_VARS / N_GROUPS; ++i)
     {
         buf.Length = 8;
-        buf.Data = (SOPC_Byte*) malloc(8);
+        buf.Data = SOPC_Malloc(8);
         if (NULL == buf.Data)
             exit(1);
         j = (uint32_t) i;
@@ -140,7 +140,7 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(void)
     for (i = 0; i < N_VARS / N_GROUPS; ++i)
     {
         buf.Length = 8;
-        buf.Data = (SOPC_Byte*) malloc(8);
+        buf.Data = SOPC_Malloc(8);
         if (NULL == buf.Data)
             exit(1);
         j = (uint32_t) i;
@@ -164,7 +164,7 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(void)
     for (i = 0; i < N_VARS / N_GROUPS; ++i)
     {
         buf.Length = 8;
-        buf.Data = (SOPC_Byte*) malloc(8);
+        buf.Data = SOPC_Malloc(8);
         if (NULL == buf.Data)
             exit(1);
         j = (uint32_t) i;

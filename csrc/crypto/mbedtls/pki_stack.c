@@ -113,7 +113,7 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_SerializedCertificate* pCert
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    pki = (SOPC_PKIProvider*) malloc(sizeof(SOPC_PKIProvider));
+    pki = SOPC_Malloc(sizeof(SOPC_PKIProvider));
     status = SOPC_KeyManager_SerializedCertificate_Deserialize(pCertAuth, &caCert);
 
     if (NULL == pki || status != SOPC_STATUS_OK)

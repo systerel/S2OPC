@@ -266,9 +266,9 @@ SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCf
             pCfgCpy->generic_response_callback = pCfg->generic_response_callback;
 
             /* These 3 strings are verified non NULL */
-            pCfgCpy->server_url = malloc(strlen(pCfg->server_url) + 1);
-            pCfgCpy->security_policy = malloc(strlen(pCfg->security_policy) + 1);
-            pCfgCpy->policyId = malloc(strlen(pCfg->policyId) + 1);
+            pCfgCpy->server_url = SOPC_Malloc(strlen(pCfg->server_url) + 1);
+            pCfgCpy->security_policy = SOPC_Malloc(strlen(pCfg->security_policy) + 1);
+            pCfgCpy->policyId = SOPC_Malloc(strlen(pCfg->policyId) + 1);
             if (NULL == pCfgCpy->server_url || NULL == pCfgCpy->security_policy || NULL == pCfgCpy->policyId)
             {
                 status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -276,7 +276,7 @@ SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCf
 
             if (NULL != pCfg->path_cert_auth)
             {
-                pCfgCpy->path_cert_auth = malloc(strlen(pCfg->path_cert_auth) + 1);
+                pCfgCpy->path_cert_auth = SOPC_Malloc(strlen(pCfg->path_cert_auth) + 1);
                 if (NULL == pCfgCpy->path_cert_auth)
                 {
                     status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -284,7 +284,7 @@ SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCf
             }
             if (NULL != pCfg->path_cert_srv)
             {
-                pCfgCpy->path_cert_srv = malloc(strlen(pCfg->path_cert_srv) + 1);
+                pCfgCpy->path_cert_srv = SOPC_Malloc(strlen(pCfg->path_cert_srv) + 1);
                 if (NULL == pCfgCpy->path_cert_srv)
                 {
                     status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -292,7 +292,7 @@ SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCf
             }
             if (NULL != pCfg->path_cert_cli)
             {
-                pCfgCpy->path_cert_cli = malloc(strlen(pCfg->path_cert_cli) + 1);
+                pCfgCpy->path_cert_cli = SOPC_Malloc(strlen(pCfg->path_cert_cli) + 1);
                 if (NULL == pCfgCpy->path_cert_cli)
                 {
                     status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -300,7 +300,7 @@ SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCf
             }
             if (NULL != pCfg->path_key_cli)
             {
-                pCfgCpy->path_key_cli = malloc(strlen(pCfg->path_key_cli) + 1);
+                pCfgCpy->path_key_cli = SOPC_Malloc(strlen(pCfg->path_key_cli) + 1);
                 if (NULL == pCfgCpy->path_key_cli)
                 {
                     status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -308,7 +308,7 @@ SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCf
             }
             if (NULL != pCfg->path_crl)
             {
-                pCfgCpy->path_crl = malloc(strlen(pCfg->path_crl) + 1);
+                pCfgCpy->path_crl = SOPC_Malloc(strlen(pCfg->path_crl) + 1);
                 if (NULL == pCfgCpy->path_crl)
                 {
                     status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -316,7 +316,7 @@ SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCf
             }
             if (NULL != pCfg->username)
             {
-                pCfgCpy->username = malloc(strlen(pCfg->username) + 1);
+                pCfgCpy->username = SOPC_Malloc(strlen(pCfg->username) + 1);
                 if (NULL == pCfgCpy->username)
                 {
                     status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -324,7 +324,7 @@ SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCf
             }
             if (NULL != pCfg->password)
             {
-                pCfgCpy->password = malloc(strlen(pCfg->password) + 1);
+                pCfgCpy->password = SOPC_Malloc(strlen(pCfg->password) + 1);
                 if (NULL == pCfgCpy->password)
                 {
                     status = SOPC_STATUS_OUT_OF_MEMORY;

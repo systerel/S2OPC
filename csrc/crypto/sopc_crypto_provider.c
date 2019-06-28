@@ -42,7 +42,7 @@ SOPC_CryptoProvider* SOPC_CryptoProvider_Create(const char* uri)
     pProfile = SOPC_CryptoProfile_Get(uri);
     if (NULL != pProfile)
     {
-        pCryptoProvider = (SOPC_CryptoProvider*) malloc(sizeof(SOPC_CryptoProvider));
+        pCryptoProvider = SOPC_Malloc(sizeof(SOPC_CryptoProvider));
         if (NULL != pCryptoProvider)
         {
             // The crypto provider profile shall be const after this init
@@ -666,7 +666,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_GenerateRandomBytes(const SOPC_CryptoProvi
         /* Empties pointer in case an error occurs after that point. */
         *ppBuffer = NULL;
 
-        pExp = (SOPC_ExposedBuffer*) malloc(nBytes);
+        pExp = SOPC_Malloc(nBytes);
         if (NULL == pExp)
         {
             status = SOPC_STATUS_NOK;
@@ -794,7 +794,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_DeriveKeySets(const SOPC_CryptoProvider* p
 
     // Allocate buffer for PRF generated data
     lenData = lenKeySign + lenKeyEncr + lenIV;
-    genData = malloc(lenData);
+    genData = SOPC_Malloc(lenData);
     if (NULL == genData)
         return SOPC_STATUS_NOK;
 

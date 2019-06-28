@@ -155,7 +155,7 @@ SOPC_ReturnStatus CryptoProvider_SymmVerify_HMAC_SHA256(const SOPC_CryptoProvide
     if (SOPC_CryptoProvider_SymmetricGetLength_Signature(pProvider, &lenSig) != SOPC_STATUS_OK)
         return SOPC_STATUS_NOK;
 
-    pCalcSig = malloc(lenSig);
+    pCalcSig = SOPC_Malloc(lenSig);
     if (NULL == pCalcSig)
         return SOPC_STATUS_NOK;
 
@@ -233,7 +233,7 @@ SOPC_ReturnStatus CryptoProvider_DeriveData_PRF_SHA256(const SOPC_CryptoProvider
     if (lenHash == 0 || lenBufA <= lenSeed) // Test uint overflow
         return SOPC_STATUS_NOK;
 
-    bufA = malloc(lenBufA);
+    bufA = SOPC_Malloc(lenBufA);
     if (NULL == bufA)
         return SOPC_STATUS_NOK;
 
@@ -468,7 +468,7 @@ static inline SOPC_ReturnStatus NewMsgDigestBuffer(const uint8_t* pInput,
         return SOPC_STATUS_NOK;
 
     lenHash = mbedtls_md_get_size(pmd_info_hash);
-    hash = malloc(lenHash);
+    hash = SOPC_Malloc(lenHash);
     if (NULL == hash)
         return SOPC_STATUS_NOK;
     *ppHash = hash;
@@ -626,7 +626,7 @@ SOPC_ReturnStatus CryptoProvider_SymmVerify_HMAC_SHA1(const SOPC_CryptoProvider*
     if (SOPC_CryptoProvider_SymmetricGetLength_Signature(pProvider, &lenSig) != SOPC_STATUS_OK)
         return SOPC_STATUS_NOK;
 
-    pCalcSig = malloc(lenSig);
+    pCalcSig = SOPC_Malloc(lenSig);
     if (NULL == pCalcSig)
         return SOPC_STATUS_NOK;
 
@@ -669,7 +669,7 @@ SOPC_ReturnStatus CryptoProvider_DeriveData_PRF_SHA1(const SOPC_CryptoProvider* 
     if (lenHash == 0 || lenBufA <= lenSeed) // Test uint overflow
         return SOPC_STATUS_NOK;
 
-    bufA = malloc(lenBufA);
+    bufA = SOPC_Malloc(lenBufA);
     if (NULL == bufA)
         return SOPC_STATUS_NOK;
 

@@ -42,7 +42,7 @@ void write_value_pointer_bs__copy_write_value_pointer_content(
 {
     SOPC_ReturnStatus retStatus = SOPC_STATUS_OK;
     OpcUa_WriteValue* wv = write_value_pointer_bs__p_write_value;
-    OpcUa_WriteValue* writeValueCopy = malloc(sizeof(OpcUa_WriteValue));
+    OpcUa_WriteValue* writeValueCopy = SOPC_Malloc(sizeof(OpcUa_WriteValue));
     OpcUa_WriteValue_Initialize((void*) writeValueCopy);
 
     *write_value_pointer_bs__bres = false;

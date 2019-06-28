@@ -135,8 +135,8 @@ void monitored_item_notification_queue_bs__add_first_monitored_item_notification
     }
 
     SOPC_ReturnStatus retStatus = SOPC_STATUS_OK;
-    SOPC_InternalNotificationElement* notifElt = malloc(sizeof(SOPC_InternalNotificationElement));
-    OpcUa_WriteValue* pNewWriteValue = malloc(sizeof(OpcUa_WriteValue));
+    SOPC_InternalNotificationElement* notifElt = SOPC_Malloc(sizeof(SOPC_InternalNotificationElement));
+    OpcUa_WriteValue* pNewWriteValue = SOPC_Malloc(sizeof(OpcUa_WriteValue));
 
     if (NULL == pNewWriteValue || NULL == notifElt)
     {
@@ -193,8 +193,8 @@ void monitored_item_notification_queue_bs__add_monitored_item_notification_to_qu
     }
 
     SOPC_ReturnStatus retStatus = SOPC_STATUS_NOK;
-    SOPC_InternalNotificationElement* notifElt = malloc(sizeof(SOPC_InternalNotificationElement));
-    OpcUa_WriteValue* pNewWriteValue = malloc(sizeof(OpcUa_WriteValue));
+    SOPC_InternalNotificationElement* notifElt = SOPC_Malloc(sizeof(SOPC_InternalNotificationElement));
+    OpcUa_WriteValue* pNewWriteValue = SOPC_Malloc(sizeof(OpcUa_WriteValue));
 
     if (NULL == notifElt || NULL == pNewWriteValue)
     {

@@ -177,7 +177,7 @@ void msg_subscription_publish_ack_bs__setall_msg_republish_response(
     OpcUa_RepublishResponse* resp = (OpcUa_RepublishResponse*) msg_subscription_publish_ack_bs__p_resp_msg;
     resp->NotificationMessage = *msg_subscription_publish_ack_bs__p_notifMsg; /* Shallow copy */
     resp->NotificationMessage.NotificationData =
-        malloc(1 * sizeof(SOPC_ExtensionObject)); /* Deep copy for notification data */
+        SOPC_Malloc(1 * sizeof(SOPC_ExtensionObject)); /* Deep copy for notification data */
     if (resp->NotificationMessage.NotificationData == NULL)
     {
         return;

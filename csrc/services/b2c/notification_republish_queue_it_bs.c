@@ -73,7 +73,7 @@ void notification_republish_queue_it_bs__init_iter_notif_republish(
     constants__t_notifRepublishQueueIterator_i* const notification_republish_queue_it_bs__iterator)
 {
     *notification_republish_queue_it_bs__continue = false;
-    *notification_republish_queue_it_bs__iterator = malloc(sizeof(SOPC_SLinkedListIterator));
+    *notification_republish_queue_it_bs__iterator = SOPC_Malloc(sizeof(SOPC_SLinkedListIterator));
 
     if (*notification_republish_queue_it_bs__iterator == NULL)
     {

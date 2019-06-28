@@ -113,7 +113,7 @@ START_TEST(test_buffer_create)
 
     // Test initialization
     //// Test nominal case
-    buf = malloc(sizeof(SOPC_Buffer));
+    buf = SOPC_Malloc(sizeof(SOPC_Buffer));
     status = SOPC_Buffer_Init(buf, 100);
     ck_assert(status == 0);
     ck_assert(buf->data != NULL);
@@ -166,7 +166,7 @@ START_TEST(test_buffer_read_write)
     buf = NULL;
 
     //// Test degraded cases
-    buf = malloc(sizeof(SOPC_Buffer));
+    buf = SOPC_Malloc(sizeof(SOPC_Buffer));
     memset(buf, 0, sizeof(SOPC_Buffer));
     ////// Non allocated buffer data
     status = SOPC_Buffer_Write(buf, data, 3);
@@ -219,7 +219,7 @@ START_TEST(test_buffer_read_write)
     buf = NULL;
 
     //// Test degraded cases
-    buf = malloc(sizeof(SOPC_Buffer));
+    buf = SOPC_Malloc(sizeof(SOPC_Buffer));
     memset(buf, 0, sizeof(SOPC_Buffer));
     ////// Non allocated buffer data
     status = SOPC_Buffer_Read(readData, buf, 3);
@@ -341,7 +341,7 @@ START_TEST(test_buffer_copy)
     buf = NULL;
 
     /////// Non allocated buffer data
-    buf = malloc(sizeof(SOPC_Buffer));
+    buf = SOPC_Malloc(sizeof(SOPC_Buffer));
     memset(buf, 0, sizeof(SOPC_Buffer));
     ////// Non allocated buffer data
     status = SOPC_Buffer_Copy(buf2, buf);
@@ -356,7 +356,7 @@ START_TEST(test_buffer_copy)
     buf2 = NULL;
 
     /////// Non allocated buffer data
-    buf2 = malloc(sizeof(SOPC_Buffer));
+    buf2 = SOPC_Malloc(sizeof(SOPC_Buffer));
     memset(buf2, 0, sizeof(SOPC_Buffer));
     ////// Non allocated buffer data
     status = SOPC_Buffer_Copy(buf2, buf);
@@ -440,7 +440,7 @@ START_TEST(test_buffer_reset)
     buf = NULL;
 
     /////// Non allocated buffer data
-    buf = malloc(sizeof(SOPC_Buffer));
+    buf = SOPC_Malloc(sizeof(SOPC_Buffer));
     memset(buf, 0, sizeof(SOPC_Buffer));
     ////// Non allocated buffer data
     status = SOPC_Buffer_ResetAfterPosition(buf, 2);
@@ -505,7 +505,7 @@ START_TEST(test_buffer_set_properties)
     buf = NULL;
 
     /////// Non allocated buffer data
-    buf = malloc(sizeof(SOPC_Buffer));
+    buf = SOPC_Malloc(sizeof(SOPC_Buffer));
     memset(buf, 0, sizeof(SOPC_Buffer));
     ////// Non allocated buffer data
     status = SOPC_Buffer_SetPosition(buf, 0);
@@ -716,15 +716,15 @@ START_TEST(test_linked_list)
     //// Check apply to free elements
     void* p = NULL;
     SOPC_SLinkedList_Clear(list);
-    p = malloc(sizeof(int));
+    p = SOPC_Malloc(sizeof(int));
     ck_assert(NULL != p);
     *(int*) p = 2;
     ck_assert(SOPC_SLinkedList_Prepend(list, 0, p) != NULL);
-    p = malloc(sizeof(double));
+    p = SOPC_Malloc(sizeof(double));
     ck_assert(NULL != p);
     *(double*) p = 2.;
     ck_assert(SOPC_SLinkedList_Prepend(list, 1, p) != NULL);
-    p = malloc(sizeof(char) * 5);
+    p = SOPC_Malloc(sizeof(char) * 5);
     ck_assert(NULL != p);
     memcpy(p, "toto", 5);
     ck_assert(SOPC_SLinkedList_Prepend(list, 2, p) != NULL);
@@ -2201,7 +2201,7 @@ START_TEST(test_ua_encoder_other_types)
 
     /////// Non empty bytestring
     SOPC_Buffer_Reset(buffer);
-    xmlElt.Data = malloc(sizeof(SOPC_Byte) * 3);
+    xmlElt.Data = SOPC_Malloc(sizeof(SOPC_Byte) * 3);
     ck_assert(xmlElt.Data != NULL);
     ck_assert(memcpy(xmlElt.Data, balA, 3) == xmlElt.Data);
     xmlElt.Length = 3;
@@ -2687,7 +2687,7 @@ START_TEST(test_ua_decoder_allocation_limit)
     v.BuiltInTypeId = SOPC_Boolean_Id;
     v.ArrayType = SOPC_VariantArrayType_Matrix;
     v.Value.Matrix.Dimensions = 3;
-    v.Value.Matrix.ArrayDimensions = malloc(sizeof(int32_t) * (size_t) v.Value.Matrix.Dimensions);
+    v.Value.Matrix.ArrayDimensions = SOPC_Malloc(sizeof(int32_t) * (size_t) v.Value.Matrix.Dimensions);
     ck_assert(v.Value.Matrix.ArrayDimensions != NULL);
     v.Value.Matrix.ArrayDimensions[0] = 3;
     v.Value.Matrix.ArrayDimensions[1] = 3;
@@ -2723,7 +2723,7 @@ START_TEST(test_ua_decoder_allocation_limit)
     v.BuiltInTypeId = SOPC_Boolean_Id;
     v.ArrayType = SOPC_VariantArrayType_Matrix;
     v.Value.Matrix.Dimensions = 3;
-    v.Value.Matrix.ArrayDimensions = malloc(sizeof(int32_t) * (size_t) v.Value.Matrix.Dimensions);
+    v.Value.Matrix.ArrayDimensions = SOPC_Malloc(sizeof(int32_t) * (size_t) v.Value.Matrix.Dimensions);
     ck_assert(v.Value.Matrix.ArrayDimensions != NULL);
     v.Value.Matrix.ArrayDimensions[0] = 3;
     v.Value.Matrix.ArrayDimensions[1] = 3;
@@ -2761,7 +2761,7 @@ START_TEST(test_ua_decoder_allocation_limit)
     v.BuiltInTypeId = SOPC_Variant_Id;
     v.ArrayType = SOPC_VariantArrayType_Array;
     v.Value.Array.Length = 1;
-    v.Value.Array.Content.VariantArr = malloc(sizeof(SOPC_Variant));
+    v.Value.Array.Content.VariantArr = SOPC_Malloc(sizeof(SOPC_Variant));
     SOPC_Variant_Initialize(&v.Value.Array.Content.VariantArr[0]);
     v.Value.Array.Content.VariantArr[0].BuiltInTypeId = SOPC_Boolean_Id;
     v.Value.Array.Content.VariantArr[0].ArrayType = SOPC_VariantArrayType_SingleValue;
@@ -2797,7 +2797,7 @@ START_TEST(test_ua_decoder_allocation_limit)
         pvar->BuiltInTypeId = SOPC_Variant_Id;
         pvar->ArrayType = SOPC_VariantArrayType_Array;
         pvar->Value.Array.Length = 1;
-        pvar->Value.Array.Content.VariantArr = malloc(sizeof(SOPC_Variant));
+        pvar->Value.Array.Content.VariantArr = SOPC_Malloc(sizeof(SOPC_Variant));
         ck_assert(pvar->Value.Array.Content.VariantArr != NULL);
         SOPC_Variant_Initialize(&pvar->Value.Array.Content.VariantArr[0]);
         pvar = pvar->Value.Array.Content.VariantArr;
@@ -2851,7 +2851,7 @@ START_TEST(test_ua_decoder_allocation_limit)
     {
         pvar->BuiltInTypeId = SOPC_DataValue_Id;
         pvar->ArrayType = SOPC_VariantArrayType_SingleValue;
-        pvar->Value.DataValue = malloc(sizeof(SOPC_DataValue));
+        pvar->Value.DataValue = SOPC_Malloc(sizeof(SOPC_DataValue));
         ck_assert(pvar->Value.DataValue != NULL);
         SOPC_DataValue_Initialize(pvar->Value.DataValue);
         SOPC_Variant_Initialize(&pvar->Value.DataValue->Value);
@@ -2885,7 +2885,7 @@ START_TEST(test_ua_decoder_allocation_limit)
     {
         pvar->BuiltInTypeId = SOPC_DataValue_Id;
         pvar->ArrayType = SOPC_VariantArrayType_SingleValue;
-        pvar->Value.DataValue = malloc(sizeof(SOPC_DataValue));
+        pvar->Value.DataValue = SOPC_Malloc(sizeof(SOPC_DataValue));
         ck_assert(pvar->Value.DataValue != NULL);
         SOPC_DataValue_Initialize(pvar->Value.DataValue);
         SOPC_Variant_Initialize(&pvar->Value.DataValue->Value);
@@ -2943,7 +2943,7 @@ START_TEST(test_ua_decoder_allocation_limit)
     {
         pvar->BuiltInTypeId = SOPC_DataValue_Id;
         pvar->ArrayType = SOPC_VariantArrayType_SingleValue;
-        pvar->Value.DataValue = malloc(sizeof(SOPC_DataValue));
+        pvar->Value.DataValue = SOPC_Malloc(sizeof(SOPC_DataValue));
         ck_assert(pvar->Value.DataValue != NULL);
         SOPC_DataValue_Initialize(pvar->Value.DataValue);
         SOPC_Variant_Initialize(&pvar->Value.DataValue->Value);
@@ -3004,7 +3004,7 @@ START_TEST(test_ua_decoder_allocation_limit)
     pDiag = &diag;
     for (idx = 1; idx <= SOPC_MAX_DIAG_INFO_NESTED_LEVEL; idx++)
     {
-        pDiag->InnerDiagnosticInfo = malloc(sizeof(SOPC_DiagnosticInfo));
+        pDiag->InnerDiagnosticInfo = SOPC_Malloc(sizeof(SOPC_DiagnosticInfo));
         ck_assert(pDiag->InnerDiagnosticInfo != NULL);
         SOPC_DiagnosticInfo_Initialize(pDiag->InnerDiagnosticInfo);
         pDiag = pDiag->InnerDiagnosticInfo;

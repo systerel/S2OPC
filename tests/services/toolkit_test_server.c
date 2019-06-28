@@ -191,7 +191,7 @@ static char* Config_SetLogPath(int argc, char* argv[])
                                 7; // "./" + exec_name + _ + test_name + _logs/ + '\0'
         if (logDirPathSize < 200)
         {
-            logDirPath = malloc(logDirPathSize * sizeof(char));
+            logDirPath = SOPC_Malloc(logDirPathSize * sizeof(char));
         }
         if (NULL != logDirPath && (int) (logDirPathSize - 1) == snprintf(logDirPath, logDirPathSize, "./%s_%s_logs/",
                                                                          "toolkit_test_server", argv[1]))

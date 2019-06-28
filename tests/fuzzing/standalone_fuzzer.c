@@ -74,7 +74,7 @@ static bool fuzz_file(FILE* fd)
         return false;
     }
 
-    unsigned char* buf = (unsigned char*) malloc((size_t) len);
+    unsigned char* buf = SOPC_Malloc((size_t) len);
 
     if (buf == NULL)
     {

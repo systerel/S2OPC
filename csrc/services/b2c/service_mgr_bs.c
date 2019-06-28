@@ -79,7 +79,7 @@ void service_mgr_bs__client_async_discovery_request_without_channel(
         }
         if (NULL != sLinkedList)
         {
-            elt = malloc(sizeof(SOPC_DiscoveryRequest_ToSend));
+            elt = SOPC_Malloc(sizeof(SOPC_DiscoveryRequest_ToSend));
         }
         if (NULL != sLinkedList && NULL != elt)
         {

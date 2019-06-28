@@ -58,7 +58,7 @@ void response_write_bs__alloc_write_request_responses_malloc(const t_entier4 res
     if (response_write_bs__nb_req >= 0 &&
         (uint64_t)(response_write_bs__nb_req + 1) <= (uint64_t) SIZE_MAX / sizeof(SOPC_StatusCode))
     {
-        arr_StatusCode = (SOPC_StatusCode*) malloc(sizeof(SOPC_StatusCode) * (size_t)(response_write_bs__nb_req + 1));
+        arr_StatusCode = SOPC_Malloc(sizeof(SOPC_StatusCode) * (size_t)(response_write_bs__nb_req + 1));
     }
     else
     {
@@ -96,7 +96,7 @@ void response_write_bs__write_WriteResponse_msg_out(const constants__t_msg_i res
 
     if (nb_req > 0 && (uint64_t) SIZE_MAX / sizeof(SOPC_StatusCode) >= (uint64_t) nb_req)
     {
-        lsc = (SOPC_StatusCode*) malloc(sizeof(SOPC_StatusCode) * (size_t) nb_req);
+        lsc = SOPC_Malloc(sizeof(SOPC_StatusCode) * (size_t) nb_req);
     }
 
     if (NULL == lsc)

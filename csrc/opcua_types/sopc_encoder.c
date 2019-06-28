@@ -708,7 +708,7 @@ SOPC_ReturnStatus SOPC_ByteString_Read(SOPC_ByteString* str, SOPC_Buffer* buf)
                 if (length <= SOPC_MAX_STRING_LENGTH && (uint64_t) length * sizeof(SOPC_Byte) <= SIZE_MAX)
                 {
                     str->Length = length;
-                    str->Data = malloc(sizeof(SOPC_Byte) * (size_t) length);
+                    str->Data = SOPC_Malloc(sizeof(SOPC_Byte) * (size_t) length);
                     if (str->Data != NULL)
                     {
                         status = SOPC_Buffer_Read(str->Data, buf, (uint32_t) length);
@@ -801,7 +801,7 @@ SOPC_ReturnStatus SOPC_String_Read(SOPC_String* str, SOPC_Buffer* buf)
                 {
                     str->Length = length;
                     // +1 to add '\0' character for CString compatibility
-                    str->Data = malloc(sizeof(SOPC_Byte) * (size_t)(length + 1));
+                    str->Data = SOPC_Malloc(sizeof(SOPC_Byte) * (size_t)(length + 1));
                     if (str->Data != NULL)
                     {
                         status = SOPC_Buffer_Read(str->Data, buf, (uint32_t) length);
@@ -1135,7 +1135,7 @@ static SOPC_ReturnStatus Internal_NodeId_Read(SOPC_Buffer* buf, SOPC_NodeId* nod
             status = SOPC_UInt16_Read(&nodeId->Namespace, buf);
             if (SOPC_STATUS_OK == status)
             {
-                nodeId->Data.Guid = malloc(sizeof(SOPC_Guid));
+                nodeId->Data.Guid = SOPC_Malloc(sizeof(SOPC_Guid));
                 if (NULL == nodeId->Data.Guid)
                 {
                     status = SOPC_STATUS_NOK;
@@ -1420,7 +1420,7 @@ static SOPC_ReturnStatus SOPC_DiagnosticInfo_Read_Internal(SOPC_DiagnosticInfo* 
         }
         else
         {
-            diagInfo->InnerDiagnosticInfo = malloc(sizeof(SOPC_DiagnosticInfo));
+            diagInfo->InnerDiagnosticInfo = SOPC_Malloc(sizeof(SOPC_DiagnosticInfo));
             if (NULL == diagInfo->InnerDiagnosticInfo)
             {
                 status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -1726,7 +1726,7 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_B
             {
                 /* Allocation size value comes from types defined in Toolkit and is considered as not excessive
                  * value */
-                extObj->Body.Object.Value = malloc(extObj->Body.Object.ObjType->AllocationSize);
+                extObj->Body.Object.Value = SOPC_Malloc(extObj->Body.Object.ObjType->AllocationSize);
                 if (extObj->Body.Object.Value != NULL)
                 {
                     extObj->Body.Object.ObjType->Initialize(extObj->Body.Object.Value);
@@ -1809,7 +1809,7 @@ static SOPC_ReturnStatus SOPC_Read_Array_WithNestedLevel(SOPC_Buffer* buf,
 
     if (SOPC_STATUS_OK == status && *noOfElts > 0)
     {
-        *eltsArray = malloc(sizeOfElt * (size_t) *noOfElts);
+        *eltsArray = SOPC_Malloc(sizeOfElt * (size_t) *noOfElts);
         if (NULL == *eltsArray)
         {
             status = SOPC_STATUS_NOK;
@@ -2279,7 +2279,7 @@ static SOPC_ReturnStatus ReadVariantNonArrayBuiltInType(SOPC_Buffer* buf,
         status = SOPC_DateTime_Read(&val->Date, buf);
         break;
     case SOPC_Guid_Id:
-        val->Guid = malloc(sizeof(SOPC_Guid));
+        val->Guid = SOPC_Malloc(sizeof(SOPC_Guid));
         if (val->Guid != NULL)
         {
             SOPC_Guid_Initialize(val->Guid);
@@ -2302,7 +2302,7 @@ static SOPC_ReturnStatus ReadVariantNonArrayBuiltInType(SOPC_Buffer* buf,
         status = SOPC_XmlElement_Read(&val->XmlElt, buf);
         break;
     case SOPC_NodeId_Id:
-        val->NodeId = malloc(sizeof(SOPC_NodeId));
+        val->NodeId = SOPC_Malloc(sizeof(SOPC_NodeId));
         if (val->NodeId != NULL)
         {
             SOPC_NodeId_Initialize(val->NodeId);
@@ -2319,7 +2319,7 @@ static SOPC_ReturnStatus ReadVariantNonArrayBuiltInType(SOPC_Buffer* buf,
         }
         break;
     case SOPC_ExpandedNodeId_Id:
-        val->ExpNodeId = malloc(sizeof(SOPC_ExpandedNodeId));
+        val->ExpNodeId = SOPC_Malloc(sizeof(SOPC_ExpandedNodeId));
         if (val->ExpNodeId != NULL)
         {
             SOPC_ExpandedNodeId_Initialize(val->ExpNodeId);
@@ -2339,7 +2339,7 @@ static SOPC_ReturnStatus ReadVariantNonArrayBuiltInType(SOPC_Buffer* buf,
         status = SOPC_StatusCode_Read(&val->Status, buf);
         break;
     case SOPC_QualifiedName_Id:
-        val->Qname = malloc(sizeof(SOPC_QualifiedName));
+        val->Qname = SOPC_Malloc(sizeof(SOPC_QualifiedName));
         if (val->Qname != NULL)
         {
             SOPC_QualifiedName_Initialize(val->Qname);
@@ -2356,7 +2356,7 @@ static SOPC_ReturnStatus ReadVariantNonArrayBuiltInType(SOPC_Buffer* buf,
         }
         break;
     case SOPC_LocalizedText_Id:
-        val->LocalizedText = malloc(sizeof(SOPC_LocalizedText));
+        val->LocalizedText = SOPC_Malloc(sizeof(SOPC_LocalizedText));
         if (val->LocalizedText != NULL)
         {
             SOPC_LocalizedText_Initialize(val->LocalizedText);
@@ -2373,7 +2373,7 @@ static SOPC_ReturnStatus ReadVariantNonArrayBuiltInType(SOPC_Buffer* buf,
         }
         break;
     case SOPC_ExtensionObject_Id:
-        val->ExtObject = malloc(sizeof(SOPC_ExtensionObject));
+        val->ExtObject = SOPC_Malloc(sizeof(SOPC_ExtensionObject));
         if (val->ExtObject != NULL)
         {
             SOPC_ExtensionObject_Initialize(val->ExtObject);
@@ -2390,7 +2390,7 @@ static SOPC_ReturnStatus ReadVariantNonArrayBuiltInType(SOPC_Buffer* buf,
         }
         break;
     case SOPC_DataValue_Id:
-        val->DataValue = malloc(sizeof(SOPC_DataValue));
+        val->DataValue = SOPC_Malloc(sizeof(SOPC_DataValue));
         if (val->DataValue != NULL)
         {
             SOPC_DataValue_Initialize(val->DataValue);
@@ -2412,7 +2412,7 @@ static SOPC_ReturnStatus ReadVariantNonArrayBuiltInType(SOPC_Buffer* buf,
         status = SOPC_STATUS_ENCODING_ERROR;
         break;
     case SOPC_DiagnosticInfo_Id:
-        val->DiagInfo = malloc(sizeof(SOPC_DiagnosticInfo));
+        val->DiagInfo = SOPC_Malloc(sizeof(SOPC_DiagnosticInfo));
         if (val->DiagInfo != NULL)
         {
             SOPC_DiagnosticInfo_Initialize(val->DiagInfo);
@@ -2651,7 +2651,7 @@ static SOPC_ReturnStatus SOPC_Variant_Read_Internal(SOPC_Variant* variant,
             {
                 // array
                 variant->Value.Matrix.ArrayDimensions =
-                    malloc(sizeof(int32_t) * (size_t) variant->Value.Matrix.Dimensions);
+                    SOPC_Malloc(sizeof(int32_t) * (size_t) variant->Value.Matrix.Dimensions);
                 if (variant->Value.Matrix.Dimensions == 0)
                 {
                     matrixLength = 0;
@@ -3087,7 +3087,7 @@ SOPC_ReturnStatus SOPC_DecodeMsg_HeaderOrBody(SOPC_Buffer* buffer,
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (buffer != NULL && encodeableObj != NULL && msgEncType != NULL)
     {
-        *encodeableObj = malloc(msgEncType->AllocationSize);
+        *encodeableObj = SOPC_Malloc(msgEncType->AllocationSize);
         if (*encodeableObj != NULL)
         {
             status = msgEncType->Decode(*encodeableObj, buffer);

@@ -217,8 +217,8 @@ static SOPC_ReturnStatus SendReadRequest(StateMachine_Machine* pSM)
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    pReq = malloc(sizeof(OpcUa_ReadRequest));
-    lrv = malloc(1 * sizeof(OpcUa_ReadValueId));
+    pReq = SOPC_Malloc(sizeof(OpcUa_ReadRequest));
+    lrv = SOPC_Malloc(1 * sizeof(OpcUa_ReadValueId));
     if (NULL == pReq || NULL == lrv)
     {
         status = SOPC_STATUS_NOK;

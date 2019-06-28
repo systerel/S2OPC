@@ -65,7 +65,7 @@ void* SOPC_SLinkedList_Prepend(SOPC_SLinkedList* list, uint32_t id, void* value)
 
     if (list->length < list->maxLength || list->maxLength == 0)
     {
-        elt = malloc(sizeof(SOPC_SLinkedList_Elt));
+        elt = SOPC_Malloc(sizeof(SOPC_SLinkedList_Elt));
     }
 
     if (elt == NULL)
@@ -98,7 +98,7 @@ void* SOPC_SLinkedList_Append(SOPC_SLinkedList* list, uint32_t id, void* value)
     {
         if (list->length < list->maxLength || list->maxLength == 0)
         {
-            elt = malloc(sizeof(SOPC_SLinkedList_Elt));
+            elt = SOPC_Malloc(sizeof(SOPC_SLinkedList_Elt));
         }
     }
 
@@ -141,7 +141,7 @@ void* SOPC_SLinkedList_SortedInsert(SOPC_SLinkedList* list,
 
     if (list->length < list->maxLength || list->maxLength == 0)
     {
-        newElt = malloc(sizeof(SOPC_SLinkedList_Elt));
+        newElt = SOPC_Malloc(sizeof(SOPC_SLinkedList_Elt));
     }
 
     if (newElt == NULL)

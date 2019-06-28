@@ -145,7 +145,7 @@ void subscription_core_bs__get_nodeToMonitoredItemQueue(
     {
         // Insert a new allocated queue for the new nodeId
 
-        SOPC_NodeId* nid = malloc(sizeof(SOPC_NodeId));
+        SOPC_NodeId* nid = SOPC_Malloc(sizeof(SOPC_NodeId));
         monitoredItemQueue = SOPC_SLinkedList_Create(0);
 
         if (NULL == monitoredItemQueue || NULL == nid)
