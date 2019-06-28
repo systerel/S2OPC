@@ -17,26 +17,7 @@
  * under the License.
  */
 
-#include <assert.h>
-#include <limits.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <stdio.h> /* stdlib includes */
-#include <stdlib.h>
-#include <string.h>
-#include <sys/time.h>
-#include <time.h>
-
-#include "sopc_builtintypes.h"
-#include "sopc_enums.h" /* s2opc includes */
-#include "sopc_time.h"
-
-#include "FreeRTOS.h"       /* freeRtos includes */
-#include "FreeRTOSConfig.h" /* freeRtos includes */
-#include "queue.h"
-#include "semphr.h"
-#include "task.h"
-#include "timers.h"
+#include "p_time.h"
 
 /* Private time api */
 
@@ -48,11 +29,11 @@
 static uint64_t gGlobalTimeReference = 0;
 
 // Called if reference tick = 0
-static void P_TIME_vSetInitialDateToBuild(void)
+void P_TIME_SetInitialDateToBuildTime(void)
 {
     // Get today date numerics values
     struct tm today = {};
-    static char buffer[16] = {0};
+    static char buffer[32] = {0};
 
     // Initial date set to build value, always "MMM DD YYYY",
     // DD is left padded with a space if it is less than 10.
@@ -131,6 +112,7 @@ static void P_TIME_vSetInitialDateToBuild(void)
 
     // Newlib uses the same time_t precision and reference as Linux.
     // Compute nb seconds since Unix EPOCH.
+    // Warn, mktime use libc malloc
     time_t now = mktime(&today);
 
     // Set nb ticks
@@ -144,14 +126,8 @@ static void P_TIME_vSetInitialDateToBuild(void)
 // Called from ISR
 void vApplicationTickHook(void)
 {
-    if (gGlobalTimeReference == 0)
-    {
-        P_TIME_vSetInitialDateToBuild();
-    }
-    else
-    {
-        gGlobalTimeReference += 1;
-    }
+    gGlobalTimeReference += 1;
+
     return;
 }
 
