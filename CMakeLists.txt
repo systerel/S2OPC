@@ -188,7 +188,7 @@ endif()
 if(CMAKE_HOST_UNIX)
   add_custom_command(OUTPUT csrc/configuration/sopc_toolkit_build_info.h
                      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/csrc/configuration/sopc_toolkit_build_info.h_ ${CMAKE_SOURCE_DIR}/csrc/configuration/sopc_toolkit_build_info.h
-                     COMMAND ./gen_build_info_file.sh ${CMAKE_SOURCE_DIR}
+                     COMMAND ${CMAKE_SOURCE_DIR}/scripts/gen_build_info_file.sh ${CMAKE_SOURCE_DIR}
                      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 else()
   add_custom_command(OUTPUT csrc/configuration/sopc_toolkit_build_info.h
