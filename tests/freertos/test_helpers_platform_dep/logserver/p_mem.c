@@ -96,10 +96,18 @@ void* SOPC_Calloc(size_t n, size_t s)
 {
     uint8_t* p = NULL;
     size_t size = n * s;
-    p = pvPortMalloc(size);
-    if (p != NULL)
+
+    if(size > 0)
     {
-        memset(p, 0, size);
+        p = pvPortMalloc(size);
+        if (p != NULL)
+        {
+            memset(p, 0, size);
+        }
+    }
+    else
+    {
+        p = NULL;
     }
     return p;
 }
@@ -124,7 +132,7 @@ void* __attribute__((weak)) malloc(size_t size)
 void* __attribute__((weak)) _malloc_r(void* reent, size_t size)
 {
     void* ptr = NULL;
-    ptr = SOPC_Realloc(NULL, size);
+    ptr = SOPC_Malloc(size);
     return ptr;
 }
 
