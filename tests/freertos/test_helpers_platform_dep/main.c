@@ -51,10 +51,10 @@
 
 #include "ksdk_mbedtls_config.h"
 
+#include "p_time.h"
+
 Condition handleCondition;
 Condition handleSigConnexion;
-
-tUtilsList list;
 
 extern tLogSrvWks* gLogServer;
 
@@ -95,42 +95,29 @@ int main(void)
 
     // P_ETHERNET_IF_Initialize();
 
+    P_TIME_SetInitialDateToBuildTime();
+
     mbedtls_threading_initialize();
 
-    // p = P_LOG_SRV_CreateAndStart(80,2);
-    // gpLogServ = P_LOG_SRV_CreateAndStart(80,4);
-
-    // memset(&list,0,sizeof(tUtilsList));
-
-    // P_UTILS_LIST_Init(&list,4);
-
-    //  P_UTILS_LIST_AddElt(&list,1,0,0,0);
-    // P_UTILS_LIST_AddElt(&list,2,0,0,0);
-    //  P_UTILS_LIST_AddElt(&list,3,0,0,0);
-    //
-    // P_UTILS_LIST_RemoveElt(&list,1,0,0);
-    //  P_UTILS_LIST_RemoveElt(&list,2,0,0);
-    //  P_UTILS_LIST_RemoveElt(&list,3,0,0);
-
-    //  P_UTILS_LIST_AddElt(&list,4,0,0,0);
-
-    //  P_UTILS_LIST_RemoveElt(&list,4,0,0);
-
-    //  P_UTILS_LIST_AddElt(&list,4,0,0,0);
-
-    //  P_UTILS_LIST_RemoveElt(&list,4,0,0);
-
-    // P_UTILS_LIST_DeInit(&list);
-
-    // int fd = fopen("path","w");
-
-    gLogServer = P_LOG_SRV_CreateAndStart(60, 4023, 8, 0, 5, cbOneConnexion, NULL, cbEchoCallback, NULL, NULL, NULL,
-                                          NULL, NULL, cbHelloCallback);
+    gLogServer = P_LOG_SRV_CreateAndStart(60,               //
+                                          4023,             //
+                                          2,                //
+                                          0,                //
+                                          5,                //
+                                          cbOneConnexion,   //
+                                          NULL,             //
+                                          cbEchoCallback,   //
+                                          NULL,             //
+                                          NULL,             //
+                                          NULL,             //
+                                          NULL,             //
+                                          NULL,             //
+                                          cbHelloCallback); //
 
     Condition_Init(&handleCondition);
     Condition_Init(&handleSigConnexion);
 
-    // FREE_RTOS_TEST_API_S2OPC_THREAD(handleCondition);
+    // FREE_RTOS_TEST_API_S2OPC_THREAD(&handleCondition);
 
     FREE_RTOS_TEST_S2OPC_SERVER(&handleSigConnexion);
 
