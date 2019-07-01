@@ -151,7 +151,7 @@ void* __attribute__((weak)) calloc(size_t n, size_t s)
 void* __attribute__((weak)) calloc_r(void* reeant, size_t n, size_t s)
 {
     void* ptr = NULL;
-    ptr = SOPC_Calloc(NULL, n * s);
+    ptr = SOPC_Calloc(n, s);
     return ptr;
 }
 
