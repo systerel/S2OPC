@@ -193,7 +193,7 @@ test-uactt:
 
 test-pys2opc:
   <<: *test_linux
-  image: registry.gitlab.com/systerel/s2opc/test@sha256:2517f830aa2dbf50868021cf184981c5b75f91b1768e4fbfdab282cc0daa8231  # digest of test:2.3
+  image: registry.gitlab.com/systerel/s2opc/test@sha256:8e4368f19364d4027eaf0731ebddd2ea0a351949af1ad8d9e07d698b422f1330  # digest of test:2.4
   dependencies:
     - build-linux64
   script:
@@ -218,7 +218,7 @@ test-pys2opc:
 coverage-analysis:
   <<: *docker_job
   stage: analyses
-  image: registry.gitlab.com/systerel/s2opc/test@sha256:2517f830aa2dbf50868021cf184981c5b75f91b1768e4fbfdab282cc0daa8231  # digest of test:2.3
+  image: registry.gitlab.com/systerel/s2opc/test@sha256:8e4368f19364d4027eaf0731ebddd2ea0a351949af1ad8d9e07d698b422f1330  # digest of test:2.4
   script:
     - ./.gen_coverage.sh
   artifacts:
