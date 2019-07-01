@@ -21,6 +21,12 @@
 
 // Block info structure is used by heap_4.c. If another memory model is used, this code is not compatible
 // This bloc is defined as private structure by heap_4.c
+//
+// --wrap option shall be used to wrap default newlib implementation of malloc functions :
+// Add to your linker those option :
+// --wrap=_malloc_r --wrap=_calloc_r --wrap=_free_r --wrap=_realloc_r
+// --wrap=malloc --wrap=calloc --wrap=realloc --wrap=free
+
 struct T_BLOCK_INFO
 {
     struct T_BLOCK_INFO* pNextFreeBlock;
@@ -33,11 +39,13 @@ static size_t heap4StackInfo =
 // This constant define the bit of allocated status used by FreeRTOS in the blockSize field of block info
 static size_t xBlockAllocatedBit = ((size_t) 1) << ((sizeof(size_t) * 8) - 1);
 
+// Malloc function thread safe function
 void* SOPC_Malloc(size_t size)
 {
     return pvPortMalloc(size);
 }
 
+// Realloc function thread safe function
 void* SOPC_Realloc(void* aptr, size_t nbytes)
 {
     configASSERT(configFRTOS_MEMORY_SCHEME == 4);
@@ -73,6 +81,8 @@ void* SOPC_Realloc(void* aptr, size_t nbytes)
     else
     {
         memcpy(n_ptr, aptr, (pBlockInfo->blockSize & ~xBlockAllocatedBit));
+        memset(n_ptr + (pBlockInfo->blockSize & ~xBlockAllocatedBit), 0,
+               nbytes - (pBlockInfo->blockSize & ~xBlockAllocatedBit));
     }
 
     taskEXIT_CRITICAL();
@@ -81,6 +91,7 @@ void* SOPC_Realloc(void* aptr, size_t nbytes)
     return n_ptr;
 }
 
+// Calloc function thread safe function
 void* SOPC_Calloc(size_t n, size_t s)
 {
     uint8_t* p = NULL;
@@ -93,6 +104,7 @@ void* SOPC_Calloc(size_t n, size_t s)
     return p;
 }
 
+// Free function thread safe function
 void SOPC_Free(void* aptr)
 {
     if (aptr != NULL)
@@ -101,64 +113,75 @@ void SOPC_Free(void* aptr)
     }
 }
 
-#ifdef P_MEM_LIB_C_WRAPPER
-void* __wrap_malloc(size_t size)
-{
-    void* ptr = NULL;
-    vTaskSuspendAll();
-    ptr = __real_malloc(size);
-    xTaskResumeAll();
-    return ptr;
-}
-
-void __wrap_free(void* aptr)
-{
-    vTaskSuspendAll();
-    __real_free(aptr);
-    xTaskResumeAll();
-}
-
-void* __wrap_calloc(size_t n, size_t s)
-{
-    void* ptr = NULL;
-    vTaskSuspendAll();
-    ptr = __real_calloc(n, s);
-    xTaskResumeAll();
-    return ptr;
-}
-
-void* __wrap_realloc(void* aptr, size_t nbytes)
-{
-    void* ptr = NULL;
-    vTaskSuspendAll();
-    ptr = __real_realloc(aptr, nbytes);
-    xTaskResumeAll();
-    return ptr;
-}
-#else
-void* __wrap_malloc(size_t size)
+// Malloc wrapping function
+void* __attribute__((weak)) malloc(size_t size)
 {
     void* ptr = NULL;
     ptr = SOPC_Malloc(size);
     return ptr;
 }
 
-void __wrap_free(void* aptr)
-{
-    SOPC_Free(aptr);
-}
-
-void* __wrap_calloc(size_t n, size_t s)
+void* __attribute__((weak)) malloc_r(void* reent, size_t size)
 {
     void* ptr = NULL;
-    ptr = SOPC_Calloc(n, s);
+    ptr = SOPC_Realloc(NULL, size);
     return ptr;
 }
 
-void* __wrap_realloc(void* aptr, size_t nbytes)
+void* __attribute__((weak)) realloc(void* aptr, size_t nbytes)
 {
     void* ptr = NULL;
     ptr = SOPC_Realloc(aptr, nbytes);
     return ptr;
 }
-#endif
+
+void* __attribute__((weak)) realloc_r(void* reent, void* arg, size_t size)
+{
+    void* ptr = NULL;
+    ptr = SOPC_Realloc(arg, size);
+    return ptr;
+}
+
+void* __attribute__((weak)) calloc(size_t n, size_t s)
+{
+    void* ptr = NULL;
+    ptr = SOPC_Calloc(n, s);
+    return ptr;
+}
+void* __attribute__((weak)) calloc_r(void* reeant, size_t n, size_t s)
+{
+    void* ptr = NULL;
+    ptr = SOPC_Calloc(NULL, n * s);
+    return ptr;
+}
+
+void __attribute__((weak)) free(void* aptr)
+{
+    SOPC_Free(aptr);
+}
+
+void __attribute__((weak)) free_r(void* reent, void* ptr)
+{
+    SOPC_Free(ptr);
+}
+
+// New lib lock functions redefinition for thread safe buffer
+void __attribute__((weak)) __malloc_lock()
+{
+    vTaskSuspendAll();
+};
+
+void __attribute__((weak)) __malloc_unlock()
+{
+    xTaskResumeAll();
+};
+
+void __attribute__((weak)) __env_lock()
+{
+    vTaskSuspendAll();
+};
+
+void __attribute__((weak)) __env_unlock()
+{
+    xTaskResumeAll();
+};
