@@ -52,20 +52,20 @@
 #include "lwip/sockets.h"
 #include "lwip/tcpip.h"
 
-#define P_LOG_SRV_ONLINE_PERIOD (100)
-#define P_LOG_SRV_BINDING_WAIT (100)
-#define P_LOG_CLT_MONITOR_PERIOD (100)
-#define P_LOG_CLT_TX_PERIOD (100)
-#define P_LOG_CLT_RX_PERIOD (100)
+#define P_LOG_SRV_ONLINE_PERIOD (10)
+#define P_LOG_SRV_BINDING_WAIT (10)
+#define P_LOG_CLT_MONITOR_PERIOD (10)
+#define P_LOG_CLT_TX_PERIOD (10)
+#define P_LOG_CLT_RX_PERIOD (10)
 
 #define P_LOG_SRV_CALLBACK_STACK (512)
 #define P_LOG_CLT_MON_CALLBACK_STACK (512)
 #define P_LOG_CLT_TX_CALLBACK_STACK (512)
 #define P_LOG_CLT_RX_CALLBACK_STACK (512)
 
-#define P_LOG_FIFO_DATA_SIZE (2048)
+#define P_LOG_FIFO_DATA_SIZE (4096)
 #define P_LOG_FIFO_ELT_MAX_SIZE (1024)
-#define P_LOG_FIFO_MAX_NB_ELT (256)
+#define P_LOG_FIFO_MAX_NB_ELT (512)
 
 typedef enum E_LOG_SRV_RESULT
 {
