@@ -4236,11 +4236,6 @@ static int mutex_unlock(mbedtls_threading_mutex_t* pMutex)
     return (int) Mutex_Unlock(pMutex);
 }
 
-void mbedtls_threading_initialize(void)
-{
-    mbedtls_threading_set_alt(mutex_init, mutex_free, mutex_lock, mutex_unlock);
-}
-
 /*---------Mutex-------- --------------------------------------------------*/
 
 void mbedtls_threading_set_alt(void (*mutex_init)(mbedtls_threading_mutex_t*),
@@ -4248,6 +4243,10 @@ void mbedtls_threading_set_alt(void (*mutex_init)(mbedtls_threading_mutex_t*),
                                int (*mutex_lock)(mbedtls_threading_mutex_t*),
                                int (*mutex_unlock)(mbedtls_threading_mutex_t*));
 
+void mbedtls_threading_initialize(void)
+{
+    mbedtls_threading_set_alt(mutex_init, mutex_free, mutex_lock, mutex_unlock);
+}
 /*---------HEAP_4 calloc --------------------------------------------------*/
 
 void* pvPortCalloc(size_t num, size_t size)
