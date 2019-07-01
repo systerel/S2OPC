@@ -121,7 +121,7 @@ void* __attribute__((weak)) malloc(size_t size)
     return ptr;
 }
 
-void* __attribute__((weak)) malloc_r(void* reent, size_t size)
+void* __attribute__((weak)) _malloc_r(void* reent, size_t size)
 {
     void* ptr = NULL;
     ptr = SOPC_Realloc(NULL, size);
@@ -135,7 +135,7 @@ void* __attribute__((weak)) realloc(void* aptr, size_t nbytes)
     return ptr;
 }
 
-void* __attribute__((weak)) realloc_r(void* reent, void* arg, size_t size)
+void* __attribute__((weak)) _realloc_r(void* reent, void* arg, size_t size)
 {
     void* ptr = NULL;
     ptr = SOPC_Realloc(arg, size);
@@ -148,7 +148,7 @@ void* __attribute__((weak)) calloc(size_t n, size_t s)
     ptr = SOPC_Calloc(n, s);
     return ptr;
 }
-void* __attribute__((weak)) calloc_r(void* reeant, size_t n, size_t s)
+void* __attribute__((weak)) _calloc_r(void* reeant, size_t n, size_t s)
 {
     void* ptr = NULL;
     ptr = SOPC_Calloc(n, s);
@@ -160,7 +160,7 @@ void __attribute__((weak)) free(void* aptr)
     SOPC_Free(aptr);
 }
 
-void __attribute__((weak)) free_r(void* reent, void* ptr)
+void __attribute__((weak)) _free_r(void* reent, void* ptr)
 {
     SOPC_Free(ptr);
 }
