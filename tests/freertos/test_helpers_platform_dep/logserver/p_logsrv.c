@@ -1443,6 +1443,8 @@ int __attribute__((weak)) _write(int handle, char* buffer, int size)
         return -1;
     }
 
+    // PRINTF(buffer);
+
     // Log server exist
     if (gLogServer == NULL)
     {
