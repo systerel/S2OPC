@@ -1448,13 +1448,15 @@ int __attribute__((weak)) _write(int handle, char* buffer, int size)
     // Log server exist
     if (gLogServer == NULL)
     {
-        return -1;
+        length = PRINTF(buffer, size);
+    }
+    else
+    {
+        /* Send data. */
+        P_LOG_SRV_SendToAllClient(gLogServer, (uint8_t*) buffer, size, &length);
     }
 
-    /* Send data. */
-    P_LOG_SRV_SendToAllClient(gLogServer, (uint8_t*) buffer, size, &length);
-
-    return (int) length;
+    return length;
 }
 
 // Read is not implemented.
