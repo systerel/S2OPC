@@ -38,12 +38,15 @@
 #include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config.h"
 
+#include "p_ethernet_if.h"
+#include "p_logsrv.h"
 #include "sopc_mutexes.h"
 #include "sopc_threads.h"
-#include "p_ethernet_if.h"
 
 #include "embedded/loader.h"
 #include "runtime_variables.h"
+
+extern tLogSrvWks* gLogServer;
 
 #ifdef WITH_EXPAT
 #include "uanodeset_expat/loader.h"
@@ -271,15 +274,19 @@ static const SOPC_UserAuthentication_Functions authentication_uactt_functions = 
     .pFuncFree = (SOPC_UserAuthentication_Free_Func) free,
     .pFuncValidateUserIdentity = authentication_uactt};
 
-void* cbToolkit_test_server(void*arg)
+void* cbToolkit_test_server(void* arg)
 {
-    int argc = 0 ;
-    char*argv[1] = {NULL};
-    Condition*pv = (Condition*)arg;
+    int argc = 0;
+    char* argv[1] = {NULL};
+    Condition* pv = (Condition*) arg;
 
-    while(P_ETHERNET_IF_IsReady() != 0);
+    while (P_ETHERNET_IF_IsReady() != 0)
+        ;
 
-    Mutex_UnlockAndWaitCond(pv, NULL);
+    if (gLogServer != NULL)
+    {
+        Mutex_UnlockAndWaitCond(pv, NULL);
+    }
 
     // Install signal handler to close the server gracefully when server needs to stop
     signal(SIGINT, Test_StopSignal);
@@ -596,5 +603,5 @@ void* cbToolkit_test_server(void*arg)
     SOPC_UserAuthorization_FreeManager(&authorizationManager);
     free(logDirPath);
 
-    return (void*)((status == SOPC_STATUS_OK) ? 0 : 1);
+    return (void*) ((status == SOPC_STATUS_OK) ? 0 : 1);
 }
