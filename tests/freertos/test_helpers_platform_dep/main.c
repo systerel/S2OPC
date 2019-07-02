@@ -121,6 +121,8 @@ int main(void)
 
     FREE_RTOS_TEST_S2OPC_SERVER(&handleSigConnexion);
 
+    //FREE_RTOS_TEST_S2OPC_TIME(&handleSigConnexion);
+
     vTaskStartScheduler();
 
     for (;;)

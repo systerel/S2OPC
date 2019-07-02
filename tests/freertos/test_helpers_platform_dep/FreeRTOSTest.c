@@ -371,3 +371,84 @@ void FREE_RTOS_TEST_S2OPC_SERVER(void* ptr)
     PRINTF(sBuffer);
     Mutex_Unlock(&m);
 }
+
+/*================================CHECK_TIME======================================*/
+
+static const int64_t UNIX_EPOCH_01012017_SECS = 1483228800;
+static const int64_t UNIX_EPOCH_01012020_SECS = 1577836800;
+/*
+ * It represents the number of seconds between the OPC-UA (Windows) which starts on 1601/01/01 (supposedly 00:00:00
+ * UTC), and Linux times starts on epoch, 1970/01/01 00:00:00 UTC.
+ * */
+static const int64_t SOPC_SECONDS_BETWEEN_EPOCHS = 11644473600;
+static const int64_t SOPC_SECONDS_TO_100_NANOSECONDS = 10000000; // 10^7
+
+
+static void* cbS2OPC_Thread_TestTime(void* ptr)
+{
+    int64_t tdate = SOPC_Time_GetCurrentTimeUTC();
+    int64_t tdate2;
+    uint64_t elapsedMs = 0;
+    int8_t compareResult = 0;
+    SOPC_TimeReference tref = 0;
+    SOPC_TimeReference tref2 = 0;
+
+    int64_t vDate = SOPC_Time_GetCurrentTimeUTC();
+
+    configASSERT(vDate != 0);
+    configASSERT(vDate > (UNIX_EPOCH_01012017_SECS + SOPC_SECONDS_BETWEEN_EPOCHS) * SOPC_SECONDS_TO_100_NANOSECONDS);
+    configASSERT(vDate < (UNIX_EPOCH_01012020_SECS + SOPC_SECONDS_BETWEEN_EPOCHS) * SOPC_SECONDS_TO_100_NANOSECONDS);
+
+    tref = SOPC_TimeReference_GetCurrent();
+    /* Test SOPC_TimeReference_Compare */
+    // tref == tref
+    compareResult = SOPC_TimeReference_Compare(tref, tref);
+    configASSERT(compareResult == 0);
+
+    // (tref2 > tref)
+    SOPC_Sleep(20); // Sleep 20 ms to ensure time is different (windows implementation less precise)
+    tref2 = SOPC_TimeReference_GetCurrent();
+
+    compareResult = SOPC_TimeReference_Compare(tref2, tref);
+    configASSERT(compareResult == 1);
+
+    compareResult = SOPC_TimeReference_Compare(tref, tref2);
+    configASSERT(compareResult == -1);
+
+    /* Test SOPC_TimeReference_AddMilliseconds */
+
+    // Nominal case (compute elpase time)
+    tref = SOPC_TimeReference_GetCurrent();
+    tref2 = SOPC_TimeReference_AddMilliseconds(tref, 1000);
+
+    // Wait 1000 ms elapsed (target time reference <= current time reference)
+    while (SOPC_TimeReference_Compare(tref2, tref) > 0)
+    {
+        SOPC_Sleep(50);
+        tref = SOPC_TimeReference_GetCurrent();
+    }
+    tdate2 = SOPC_Time_GetCurrentTimeUTC();
+
+    configASSERT(tdate >= 0 && tdate2 >= 0 && tdate2 >= tdate);
+    elapsedMs = ((uint64_t) tdate2 - (uint64_t) tdate) / 10000; // 100 nanoseconds to milliseconds
+
+    // Check computed elapsed time value (on non monotonic clock) is 1000ms +/- 100ms
+    configASSERT(1000 - 100 < elapsedMs && elapsedMs < 1000 + 100);
+
+    return NULL;
+}
+
+void FREE_RTOS_TEST_S2OPC_TIME(void* ptr)
+{
+    SOPC_ReturnStatus status;
+    Condition* pv = (Condition*) ptr;
+    Mutex_Initialization(&m);
+
+    status = SOPC_Thread_Create(&pX, cbS2OPC_Thread_TestTime, pv);
+
+    Mutex_Lock(&m);
+    sprintf(sBuffer, "$$$$ %2X -  Toolkit test thread init launching result = %d : current time = %lu\r\n",
+            (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
+    PRINTF(sBuffer);
+    Mutex_Unlock(&m);
+}
