@@ -17,11 +17,10 @@
  * under the License.
  */
 
-#include "sopc_async_queue.h"
-
 #include <stdbool.h>
-#include <stdlib.h>
 
+#include "sopc_async_queue.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
 #include "sopc_singly_linked_list.h"
 

@@ -24,12 +24,12 @@
 #include <limits.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include "sopc_hash.h"
 #include "sopc_helper_string.h"
 #include "sopc_macros.h"
+#include "sopc_mem_alloc.h"
 
 #include "opcua_identifiers.h"
 #include "sopc_toolkit_config_constants.h"

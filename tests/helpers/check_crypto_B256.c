@@ -26,7 +26,6 @@
 
 #include <check.h>
 #include <stdio.h>
-#include <stdlib.h> // malloc, free
 
 #include "check_crypto_certificates.h"
 #include "check_helpers.h"
@@ -36,6 +35,7 @@
 #include "sopc_crypto_profiles.h"
 #include "sopc_crypto_provider.h"
 #include "sopc_key_manager.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
 #include "sopc_secret_buffer.h"
 

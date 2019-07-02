@@ -17,13 +17,12 @@
  * under the License.
  */
 
-#include "sopc_secret_buffer.h"
-
 #include <stddef.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include "sopc_buffer.h"
+#include "sopc_mem_alloc.h"
+#include "sopc_secret_buffer.h"
 
 struct SOPC_SecretBuffer
 {

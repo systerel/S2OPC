@@ -27,11 +27,11 @@
 
 #include <check.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #include "check_helpers.h"
 
 #include "sopc_log_manager.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_time.h"
 
 #define MAX_LINE_LENGTH 100

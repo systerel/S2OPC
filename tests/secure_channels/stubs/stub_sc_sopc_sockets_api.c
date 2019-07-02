@@ -21,12 +21,12 @@
 
 #include <assert.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include "event_helpers.h"
 #include "hexlify.h"
 #include "sopc_buffer.h"
+#include "sopc_mem_alloc.h"
 
 SOPC_AsyncQueue* socketsInputEvents = NULL;
 SOPC_EventHandler* socketsEventHandler = NULL;

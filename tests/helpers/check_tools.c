@@ -28,7 +28,6 @@
 #include <assert.h>
 #include <check.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #include "check_helpers.h"
 #include "hexlify.h"
@@ -44,6 +43,7 @@
 #include "sopc_helper_endianness_cfg.h"
 #include "sopc_helper_string.h"
 #include "sopc_helper_uri.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_singly_linked_list.h"
 #include "sopc_threads.h"
 #include "sopc_time.h"

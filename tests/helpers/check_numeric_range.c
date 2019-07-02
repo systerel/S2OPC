@@ -21,10 +21,10 @@
 #include <check.h>
 #include <inttypes.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #include "check_helpers.h"
 #include "sopc_array.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_numeric_range.h"
 
 static void str_append(SOPC_Array* str, const char* text)

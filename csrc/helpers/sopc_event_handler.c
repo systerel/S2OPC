@@ -17,13 +17,12 @@
  * under the License.
  */
 
-#include "sopc_event_handler.h"
-
 #include <assert.h>
-#include <stdlib.h>
 
 #include "sopc_array.h"
 #include "sopc_async_queue.h"
+#include "sopc_event_handler.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_threads.h"
 
 static void* POISON_PILL = (void*) 0x01;

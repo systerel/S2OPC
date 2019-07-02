@@ -35,6 +35,7 @@
 #include "sopc_event_timer_manager.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_protocol_constants.h"
 #include "sopc_secure_channels_api.h"
 #include "sopc_secure_channels_api_internal.h"

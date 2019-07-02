@@ -18,6 +18,7 @@
  */
 
 #include "notification_republish_queue_it_bs.h"
+#include "sopc_mem_alloc.h"
 
 #include <assert.h>
 

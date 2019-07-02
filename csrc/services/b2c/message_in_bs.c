@@ -22,7 +22,6 @@
   ------------------------*/
 #include <assert.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include "util_b2c.h"
@@ -36,6 +35,7 @@
 #include "sopc_encoder.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
+#include "sopc_mem_alloc.h"
 
 /*------------------------
    INITIALISATION Clause

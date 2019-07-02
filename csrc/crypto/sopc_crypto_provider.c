@@ -17,7 +17,6 @@
  * under the License.
  */
 
-#include <stdlib.h>
 #include <string.h>
 
 #include "sopc_crypto_provider.h"
@@ -26,6 +25,7 @@
 #include "sopc_crypto_profiles.h"
 #include "sopc_key_manager.h"
 #include "sopc_macros.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_pki.h"
 #include "sopc_secret_buffer.h"
 

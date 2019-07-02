@@ -17,13 +17,12 @@
  * under the License.
  */
 
-#include "sopc_encodeable.h"
-
 #include <assert.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include "opcua_identifiers.h"
+#include "sopc_encodeable.h"
+#include "sopc_mem_alloc.h"
 
 SOPC_ReturnStatus SOPC_Encodeable_Create(SOPC_EncodeableType* encTyp, void** encObject)
 {

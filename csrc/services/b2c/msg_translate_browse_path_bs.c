@@ -17,8 +17,10 @@
  * under the License.
  */
 
-#include "msg_translate_browse_path_bs.h"
 #include <assert.h>
+
+#include "msg_translate_browse_path_bs.h"
+#include "sopc_mem_alloc.h"
 #include "util_b2c.h"
 
 /* Globals */

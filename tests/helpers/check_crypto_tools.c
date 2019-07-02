@@ -20,12 +20,12 @@
 #include "check_helpers.h"
 
 #include <check.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include "check_crypto_certificates.h"
 #include "hexlify.h"
 #include "sopc_key_manager.h"
+#include "sopc_mem_alloc.h"
 
 START_TEST(test_crypto_check_app_uri)
 {

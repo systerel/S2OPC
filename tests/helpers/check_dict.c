@@ -18,13 +18,13 @@
  */
 
 #include <check.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include "check_helpers.h"
 
 #include "sopc_dict.h"
 #include "sopc_hash.h"
+#include "sopc_mem_alloc.h"
 
 static uint64_t str_hash(const void* str)
 {

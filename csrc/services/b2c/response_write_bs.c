@@ -22,16 +22,15 @@
  * Implements the structures behind the address space.
  */
 
-#include <stdlib.h>
 #include <string.h>
 
 #include "b2c.h"
 #include "response_write_bs.h"
-#include "util_b2c.h"
-
+#include "sopc_mem_alloc.h"
 #include "sopc_services_api.h"
 #include "sopc_toolkit_config_internal.h"
 #include "sopc_types.h"
+#include "util_b2c.h"
 
 /* Globals */
 static SOPC_StatusCode* arr_StatusCode; /* Indexed from 1, first element is never used. */

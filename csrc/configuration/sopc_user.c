@@ -18,8 +18,8 @@
  */
 
 #include <assert.h>
-#include <stdlib.h>
 
+#include "sopc_mem_alloc.h"
 #include "sopc_user.h"
 
 typedef enum

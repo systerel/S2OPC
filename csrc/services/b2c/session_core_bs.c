@@ -24,7 +24,6 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include "opcua_identifiers.h"
@@ -37,6 +36,7 @@
 #include "sopc_internal_app_dispatcher.h"
 #include "sopc_key_manager.h"
 #include "sopc_logger.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_secret_buffer.h"
 #include "sopc_services_api_internal.h"
 #include "sopc_time.h"

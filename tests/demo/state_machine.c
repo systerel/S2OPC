@@ -20,9 +20,9 @@
 #include <assert.h>
 #include <inttypes.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #include "sopc_encodeable.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config.h"
 #include "sopc_types.h"

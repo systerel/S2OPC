@@ -21,9 +21,9 @@
 
 #include <check.h>
 #include <inttypes.h>
-#include <stdlib.h>
 
 #include "sopc_array.h"
+#include "sopc_mem_alloc.h"
 
 START_TEST(test_array_create)
 {

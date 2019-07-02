@@ -17,11 +17,12 @@
  * under the License.
  */
 
-#include "sopc_buffer.h"
 #include <assert.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
+
+#include "sopc_buffer.h"
+#include "sopc_mem_alloc.h"
 
 SOPC_Buffer* SOPC_Buffer_Create(uint32_t size)
 {

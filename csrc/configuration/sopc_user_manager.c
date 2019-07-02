@@ -19,10 +19,10 @@
 
 #include <assert.h>
 #include <stdbool.h>
-#include <stdlib.h>
 
 #include "sopc_builtintypes.h"
 #include "sopc_macros.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_types.h"
 #include "sopc_user_manager_internal.h"
 

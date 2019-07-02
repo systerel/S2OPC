@@ -18,6 +18,7 @@
  */
 
 #include "msg_subscription_delete_bs.h"
+#include "sopc_mem_alloc.h"
 
 /*--------------
    SEES Clause

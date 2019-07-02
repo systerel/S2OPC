@@ -21,8 +21,9 @@
 #include <errno.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
+
+#include "sopc_mem_alloc.h"
 
 extern int LLVMFuzzerTestOneInput(const unsigned char* data, size_t size);
 

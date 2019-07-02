@@ -20,15 +20,14 @@
 #include <assert.h>
 #include <inttypes.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-
-#include "sopc_sockets_event_mgr.h"
 
 #include "sopc_buffer.h"
 #include "sopc_helper_uri.h"
 #include "sopc_logger.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_sockets_api.h"
+#include "sopc_sockets_event_mgr.h"
 #include "sopc_sockets_internal_ctx.h"
 
 #include "p_sockets.h"

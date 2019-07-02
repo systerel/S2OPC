@@ -21,6 +21,7 @@
 
 #include <string.h>
 
+#include "sopc_mem_alloc.h"
 #include "util_b2c.h"
 
 static uint64_t continuationPointIdSeed = constants__c_ContinuationPointId_indet;

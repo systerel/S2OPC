@@ -20,11 +20,11 @@
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include "sopc_builtintypes.h"
 #include "sopc_helper_uri.h"
+#include "sopc_mem_alloc.h"
 
 int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
 {

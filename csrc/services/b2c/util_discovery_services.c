@@ -18,10 +18,10 @@
  */
 
 #include <assert.h>
-#include <stdlib.h>
 
 #include "constants.h"
 #include "sopc_crypto_profiles.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_toolkit_config_internal.h"
 #include "util_discovery_services.h"
 

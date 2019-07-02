@@ -29,15 +29,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "address_space_impl.h"
-#include "testlib_write.h"
-#include "util_variant.h"
-
 #include "address_space.h"
 #include "address_space_bs.h"
+#include "address_space_impl.h"
 #include "io_dispatch_mgr.h"
-
+#include "sopc_mem_alloc.h"
+#include "testlib_write.h"
 #include "util_b2c.h"
+#include "util_variant.h"
 
 /* http://stackoverflow.com/questions/7265583/combine-designated-initializers-and-malloc-in-c99 */
 #define DESIGNATE_NEW(T, ...) memcpy(SOPC_Malloc(sizeof(T)), &(T const){__VA_ARGS__}, sizeof(T))

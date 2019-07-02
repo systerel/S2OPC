@@ -17,11 +17,10 @@
  * under the License.
  */
 
-#include <stdlib.h>
-
 #include "pki_permissive.h"
 
 #include "sopc_macros.h"
+#include "sopc_mem_alloc.h"
 
 static SOPC_ReturnStatus PKIPermissive_ValidateAnything(const SOPC_PKIProvider* pPKI,
                                                         const SOPC_Certificate* pToValidate)

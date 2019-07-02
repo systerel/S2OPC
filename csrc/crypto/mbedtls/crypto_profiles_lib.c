@@ -26,8 +26,8 @@
 
 #include <stddef.h>
 
-#include "../sopc_crypto_profiles.h"
 #include "crypto_functions_lib.h"
+#include "sopc_crypto_profiles.h"
 
 /* Security policy "Basic256Sha256", as of 09/09/2016:
  * SymmetricSignatureAlgorithm – Hmac_Sha256        OK

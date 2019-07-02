@@ -28,6 +28,7 @@
 #include <string.h>
 
 #include <sopc_crypto_profiles.h>
+#include <sopc_mem_alloc.h>
 #include <sopc_mutexes.h>
 #include <sopc_pki_stack.h>
 #include <sopc_time.h>

@@ -18,6 +18,7 @@
  */
 
 #include "node_id_pointer_bs.h"
+#include "sopc_mem_alloc.h"
 
 /*------------------------
    INITIALISATION Clause

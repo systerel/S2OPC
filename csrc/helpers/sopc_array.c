@@ -18,10 +18,11 @@
  */
 
 #include "sopc_array.h"
+#include "sopc_mem_alloc.h"
 
 #include <assert.h>
 #include <stdint.h>
-#include <stdlib.h>
+#include <stdlib.h> /* qsort */
 #include <string.h>
 
 #define ARRAY_ELT(a, idx) ((void*) (a->data + idx * a->element_size))

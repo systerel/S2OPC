@@ -25,7 +25,6 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #include "address_space_bs.h"
 #include "b2c.h"
@@ -35,6 +34,7 @@
 #include "sopc_builtintypes.h"
 #include "sopc_dict.h"
 #include "sopc_logger.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_numeric_range.h"
 #include "sopc_user_manager.h"
 #include "util_b2c.h"

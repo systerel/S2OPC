@@ -19,12 +19,12 @@
 
 #include <assert.h>
 #include <inttypes.h>
-#include <stdlib.h>
 
 #include "sopc_encodeable.h"
 #include "sopc_encodeabletype.h"
 #include "sopc_internal_app_dispatcher.h"
 #include "sopc_logger.h"
+#include "sopc_mem_alloc.h"
 
 SOPC_ComEvent_Fct* appEventCallback = NULL;
 SOPC_AddressSpaceNotif_Fct* appAddressSpaceNotificationCallback = NULL;

@@ -21,11 +21,11 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #include "sopc_enums.h"
 #include "sopc_internal_app_dispatcher.h"
 #include "sopc_logger.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
 #include "sopc_secure_channels_api.h"
 #include "sopc_services_api.h"

@@ -30,12 +30,13 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <stdlib.h>
+#include <stdlib.h> /* EXIT_* */
 
 #include "check_sc_rcv_helpers.h"
 #include "hexlify.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_encoder.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
 #include "sopc_secure_channels_api.h"
 #include "sopc_time.h"

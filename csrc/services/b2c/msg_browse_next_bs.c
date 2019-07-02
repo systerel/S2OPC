@@ -22,8 +22,8 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <stdlib.h>
 
+#include "sopc_mem_alloc.h"
 #include "util_b2c.h"
 
 /*------------------------

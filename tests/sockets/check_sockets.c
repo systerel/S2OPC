@@ -28,15 +28,15 @@
 #include <check.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <stdlib.h>
-
-#include "sopc_buffer.h"
-#include "sopc_macros.h"
+#include <stdlib.h> /* EXIT_* */
 
 #include "sopc_async_queue.h"
+#include "sopc_buffer.h"
 #include "sopc_event_timer_manager.h"
 #include "sopc_filesystem.h"
 #include "sopc_logger.h"
+#include "sopc_macros.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_sockets_api.h"
 #include "sopc_toolkit_config_constants.h"
 

@@ -17,12 +17,12 @@
  * under the License.
  */
 
-#include "msg_browse_bs.h"
-
-#include "util_b2c.h"
-
 #include <assert.h>
-#include <stdlib.h>
+#include <stddef.h>
+
+#include "msg_browse_bs.h"
+#include "sopc_mem_alloc.h"
+#include "util_b2c.h"
 
 /*------------------------
    INITIALISATION Clause

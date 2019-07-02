@@ -22,6 +22,7 @@
 #include <assert.h>
 
 #include "sopc_logger.h"
+#include "sopc_mem_alloc.h"
 
 /*------------------------
    INITIALISATION Clause

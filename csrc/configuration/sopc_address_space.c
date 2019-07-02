@@ -18,12 +18,12 @@
  */
 
 #include <assert.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
 #include "sopc_address_space.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_time.h"
 #include "sopc_types.h"
 

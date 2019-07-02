@@ -32,6 +32,7 @@
 #include "sopc_encoder.h"
 #include "sopc_hash.h"
 #include "sopc_macros.h"
+#include "sopc_mem_alloc.h"
 
 #ifdef UANODESET_LOADER_LOG
 #define LOG(str) fprintf(stderr, "UANODESET_LOADER: %s:%d: %s\n", __FILE__, __LINE__, (str))

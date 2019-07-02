@@ -23,11 +23,11 @@
 #include <errno.h>
 #include <limits.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include "sopc_array.h"
 #include "sopc_helper_string.h"
+#include "sopc_mem_alloc.h"
 
 typedef enum
 {

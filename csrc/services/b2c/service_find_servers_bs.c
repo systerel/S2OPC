@@ -29,6 +29,7 @@
 
 #include "b2c.h"
 #include "opcua_statuscodes.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_toolkit_config_internal.h"
 #include "sopc_types.h"
 #include "sopc_user_app_itf.h"

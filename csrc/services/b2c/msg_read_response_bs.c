@@ -22,15 +22,14 @@
  * Implements the base machine that "sends" the ReadResponse.
  */
 
-#include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
 #include "msg_read_response_bs.h"
-#include "util_b2c.h"
-
+#include "sopc_mem_alloc.h"
 #include "sopc_time.h"
 #include "sopc_types.h"
+#include "util_b2c.h"
 
 /*------------------------
    INITIALISATION Clause

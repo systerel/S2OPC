@@ -18,6 +18,7 @@
  */
 
 #include "msg_register_nodes_bs.h"
+#include "sopc_mem_alloc.h"
 
 #include <assert.h>
 

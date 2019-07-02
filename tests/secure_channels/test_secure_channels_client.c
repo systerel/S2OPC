@@ -21,25 +21,24 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include "event_helpers.h"
 #include "event_recorder.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_encoder.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
 #include "sopc_protocol_constants.h"
 #include "sopc_secure_channels_api.h"
 #include "sopc_services_api.h"
+#include "sopc_time.h"
 #include "sopc_toolkit_config.h"
 #include "sopc_toolkit_config_constants.h"
 #include "sopc_types.h"
 
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
-
-#include "sopc_time.h"
 
 /*
  * Expected arguments (based on arguments order, last arguments can be unused (default value used)):

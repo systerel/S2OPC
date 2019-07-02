@@ -26,14 +26,13 @@
  * Most of the functions are lib-dependent. This file defines the others.
  */
 
-#include <stdlib.h>
 #include <string.h>
 
 #include "key_manager_lib.h"
-#include "sopc_key_manager.h"
-
 #include "sopc_crypto_decl.h"
 #include "sopc_crypto_profiles.h"
+#include "sopc_key_manager.h"
+#include "sopc_mem_alloc.h"
 
 /* ------------------------------------------------------------------------------------------------
  * AsymetricKey API

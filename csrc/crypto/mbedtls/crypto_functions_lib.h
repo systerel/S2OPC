@@ -27,9 +27,9 @@
 #ifndef SOPC_CRYPTO_FUNCTIONS_LIB_H_
 #define SOPC_CRYPTO_FUNCTIONS_LIB_H_
 
-#include "../sopc_crypto_decl.h"
-#include "../sopc_key_manager.h"
-#include "../sopc_secret_buffer.h"
+#include "sopc_crypto_decl.h"
+#include "sopc_key_manager.h"
+#include "sopc_secret_buffer.h"
 
 /* ------------------------------------------------------------------------------------------------
  * Basic256Sha256

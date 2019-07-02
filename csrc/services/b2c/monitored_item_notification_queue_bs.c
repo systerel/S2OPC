@@ -17,9 +17,10 @@
  * under the License.
  */
 
-#include "monitored_item_notification_queue_bs.h"
-
 #include <assert.h>
+
+#include "monitored_item_notification_queue_bs.h"
+#include "sopc_mem_alloc.h"
 
 /*--------------
    SEES Clause

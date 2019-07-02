@@ -22,8 +22,9 @@
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <stdlib.h>
 #include <string.h>
+
+#include "sopc_mem_alloc.h"
 
 struct SOPC_SLinkedList_Elt
 {

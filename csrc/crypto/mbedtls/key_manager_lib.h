@@ -26,7 +26,8 @@
 #define SOPC_KEY_MANAGER_LIB_H_
 
 #include <stdbool.h>
-#include "../sopc_crypto_decl.h"
+
+#include "sopc_crypto_decl.h"
 #include "sopc_enums.h"
 
 #include "mbedtls/pk.h"

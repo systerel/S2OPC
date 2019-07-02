@@ -20,12 +20,13 @@
 /*--------------
    SEES Clause
   --------------*/
-#include "write_value_pointer_bs.h"
 
-#include "stdbool.h"
+#include <stdbool.h>
 
+#include "sopc_mem_alloc.h"
 #include "sopc_types.h"
 #include "util_b2c.h"
+#include "write_value_pointer_bs.h"
 
 /*------------------------
    INITIALISATION Clause

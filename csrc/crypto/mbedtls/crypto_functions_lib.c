@@ -27,12 +27,13 @@
  *              nor sanitize their arguments.
  */
 
-#include <stdlib.h>
 #include <string.h>
 
-#include "../sopc_crypto_profiles.h"
-#include "../sopc_crypto_provider.h"
-#include "../sopc_secret_buffer.h"
+#include "sopc_crypto_profiles.h"
+#include "sopc_crypto_provider.h"
+#include "sopc_mem_alloc.h"
+#include "sopc_secret_buffer.h"
+
 #include "crypto_functions_lib.h"
 #include "crypto_provider_lib.h"
 #include "key_manager_lib.h"

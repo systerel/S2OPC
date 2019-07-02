@@ -25,12 +25,12 @@
 
 #include <assert.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include "sopc_crypto_profiles.h"
 #include "sopc_encodeable.h"
 #include "sopc_macros.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
 
 #include "pki_permissive.h"

@@ -22,12 +22,12 @@
  */
 #include <assert.h>
 #include <inttypes.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include "constants.h"
 
 #include "address_space_impl.h"
+#include "sopc_mem_alloc.h"
 #include "testlib_read_response.h"
 #include "util_variant.h"
 

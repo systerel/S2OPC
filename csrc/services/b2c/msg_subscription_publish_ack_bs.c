@@ -17,13 +17,12 @@
  * under the License.
  */
 
-#include "msg_subscription_publish_ack_bs.h"
-
-#include "util_b2c.h"
-
 #include <assert.h>
 
+#include "msg_subscription_publish_ack_bs.h"
 #include "sopc_logger.h"
+#include "sopc_mem_alloc.h"
+#include "util_b2c.h"
 
 static const uint64_t SOPC_MILLISECOND_TO_100_NANOSECONDS = 10000; // 10^4
 static const uint64_t SOPC_YEAR_TO_MILLISECONDS = 31536000000;     // 365 * 24 * 60 * 60 * 1000

@@ -18,9 +18,9 @@
  */
 
 #include "sopc_dict.h"
+#include "sopc_mem_alloc.h"
 
 #include <assert.h>
-#include <stdlib.h>
 
 #define HASH_I(hash, i) (hash + (i / 2) + (i * i / 2))
 

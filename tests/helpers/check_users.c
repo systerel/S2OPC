@@ -18,10 +18,10 @@
  */
 
 #include <assert.h>
-#include <stdlib.h>
 
 #include "check_helpers.h"
 #include "opcua_identifiers.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_types.h"
 #include "sopc_user_manager.h"
 

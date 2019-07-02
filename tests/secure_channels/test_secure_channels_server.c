@@ -21,19 +21,19 @@
 #include <inttypes.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-
-#include "opcua_statuscodes.h"
-#include "sopc_crypto_profiles.h"
-#include "sopc_key_manager.h"
-#include "sopc_pki_stack.h"
-#include "sopc_protocol_constants.h"
 
 #include "event_helpers.h"
 #include "event_recorder.h"
+
+#include "opcua_statuscodes.h"
 #include "sopc_async_queue.h"
+#include "sopc_crypto_profiles.h"
 #include "sopc_encoder.h"
+#include "sopc_key_manager.h"
+#include "sopc_mem_alloc.h"
+#include "sopc_pki_stack.h"
+#include "sopc_protocol_constants.h"
 #include "sopc_secure_channels_api.h"
 #include "sopc_services_api.h"
 #include "sopc_time.h"

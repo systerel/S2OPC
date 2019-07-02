@@ -22,7 +22,6 @@
 #include <assert.h>
 #include <inttypes.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #include <check.h>
 
@@ -31,6 +30,7 @@
 #include "sopc_buffer.h"
 #include "sopc_helper_endianness_cfg.h"
 #include "sopc_ieee_check.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_secure_channels_api.h"
 #include "sopc_time.h"
 #include "stub_sc_sopc_sockets_api.h"

@@ -19,15 +19,14 @@
 
 #include <assert.h>
 #include <stddef.h>
-#include <stdlib.h>
 #include <string.h>
-
-#include "sopc_sockets_internal_ctx.h"
 
 #include "sopc_async_queue.h"
 #include "sopc_buffer.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_raw_sockets.h"
 #include "sopc_sockets_event_mgr.h"
+#include "sopc_sockets_internal_ctx.h"
 
 SOPC_Socket socketsArray[SOPC_MAX_SOCKETS];
 Mutex socketsMutex;

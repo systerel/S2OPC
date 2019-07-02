@@ -25,6 +25,7 @@
 
 #include "sopc_dict.h"
 #include "sopc_logger.h"
+#include "sopc_mem_alloc.h"
 #include "util_b2c.h"
 
 static void SOPC_InternalMonitoredItem_Free(void* data)

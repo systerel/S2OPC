@@ -24,6 +24,7 @@
 #include "util_b2c.h"
 
 #include "sopc_logger.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_user_manager.h"
 
 /*------------------------

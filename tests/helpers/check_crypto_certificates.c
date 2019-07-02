@@ -19,11 +19,10 @@
 
 #include "check_crypto_certificates.h"
 
-#include <stdlib.h>
-
 #include <check.h>
 
 #include "hexlify.h"
+#include "sopc_mem_alloc.h"
 
 // server_2k_cert.der
 const char* SRV_CRT =

@@ -18,6 +18,7 @@
  */
 
 #include "subscription_core_bs.h"
+#include "sopc_mem_alloc.h"
 
 /*--------------
    SEES Clause

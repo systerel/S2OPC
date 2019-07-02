@@ -21,12 +21,12 @@
 
 #include <inttypes.h>
 
-#include "util_b2c.h"
-
 #include "sopc_logger.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_services_api_internal.h"
 #include "sopc_time.h"
 #include "sopc_types.h"
+#include "util_b2c.h"
 
 /*--------------
    SEES Clause

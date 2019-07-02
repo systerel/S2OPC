@@ -17,13 +17,13 @@
  * under the License.
  */
 
-#include <stdlib.h>
 #include <string.h>
 
 #include "sopc_toolkit_async_api.h"
 
 #include "sopc_encodeable.h"
 #include "sopc_logger.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_services_api.h"
 #include "sopc_types.h"
 

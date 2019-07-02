@@ -28,15 +28,14 @@
 
 /*#include "header.h"*/
 #include "address_space.h"
+#include "address_space_bs.h"
+#include "address_space_impl.h"
 #include "constants.h"
+#include "constants_bs.h"
 #include "io_dispatch_mgr.h"
 #include "msg_read_request.h"
-
-#include "address_space_bs.h"
-#include "constants_bs.h"
 #include "msg_read_request_bs.h"
-
-#include "address_space_impl.h"
+#include "sopc_mem_alloc.h"
 #include "testlib_read_response.h"
 
 /* http://stackoverflow.com/questions/7265583/combine-designated-initializers-and-malloc-in-c99 */

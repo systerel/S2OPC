@@ -17,12 +17,11 @@
  * under the License.
  */
 
-#include "browse_treatment_result_bs.h"
-
-#include "util_b2c.h"
-
 #include <assert.h>
-#include <stdlib.h>
+
+#include "browse_treatment_result_bs.h"
+#include "sopc_mem_alloc.h"
+#include "util_b2c.h"
 
 #define RESULT_MASK_REFERENCE_TYPE 1   // bit 0
 #define RESULT_MASK_IS_FORWARD 2       // bit 1

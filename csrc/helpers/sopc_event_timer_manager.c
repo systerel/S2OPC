@@ -17,14 +17,14 @@
  * under the License.
  */
 
-#include "sopc_event_timer_manager.h"
-
 #include <assert.h>
 #include <inttypes.h>
 #include <string.h>
 
 #include "sopc_atomic.h"
+#include "sopc_event_timer_manager.h"
 #include "sopc_logger.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
 #include "sopc_singly_linked_list.h"
 #include "sopc_threads.h"

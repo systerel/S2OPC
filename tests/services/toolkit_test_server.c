@@ -22,19 +22,18 @@
 #include <inttypes.h>
 #include <signal.h>
 #include <stdio.h>
-#include <stdlib.h>
+#include <stdlib.h> /* getenv, exit */
 #include <string.h>
-
-#include "sopc_atomic.h"
-#include "sopc_crypto_profiles.h"
-#include "sopc_crypto_provider.h"
-#include "sopc_pki_stack.h"
 
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
+#include "sopc_atomic.h"
+#include "sopc_crypto_profiles.h"
+#include "sopc_crypto_provider.h"
 #include "sopc_encodeable.h"
+#include "sopc_mem_alloc.h"
+#include "sopc_pki_stack.h"
 #include "sopc_time.h"
-
 #include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config.h"
 

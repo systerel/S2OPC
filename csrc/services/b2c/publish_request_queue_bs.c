@@ -18,8 +18,8 @@
  */
 
 #include "publish_request_queue_bs.h"
-
 #include "publish_request_queue_impl.h"
+#include "sopc_mem_alloc.h"
 
 /*--------------
    SEES Clause

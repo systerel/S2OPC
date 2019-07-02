@@ -26,12 +26,12 @@
 #include <assert.h>
 #include <inttypes.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include "sopc_atomic.h"
 #include "sopc_encodeable.h"
 #include "sopc_macros.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
 #include "sopc_singly_linked_list.h"
 #include "sopc_toolkit_async_api.h"

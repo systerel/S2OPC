@@ -24,10 +24,10 @@
 
 #include "constants_bs.h"
 #include "b2c.h"
-#include "sopc_macros.h"
-
 #include "sopc_builtintypes.h"
 #include "sopc_logger.h"
+#include "sopc_macros.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_types.h"
 
 static SOPC_NodeId ByteString_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_ByteString};

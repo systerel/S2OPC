@@ -25,15 +25,15 @@
  * The stack provides only a minimal, always safe validating PKI.
  */
 
-#include <stdlib.h>
-
+#include "sopc_crypto_provider.h"
+#include "sopc_key_manager.h"
 #include "sopc_macros.h"
+#include "sopc_mem_alloc.h"
+#include "sopc_pki.h"
+#include "sopc_pki_stack.h"
 
-#include "../sopc_crypto_provider.h"
-#include "../sopc_key_manager.h"
-#include "../sopc_pki.h"
-#include "../sopc_pki_stack.h"
 #include "key_manager_lib.h"
+
 #include "mbedtls/x509.h"
 
 /**

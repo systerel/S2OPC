@@ -24,8 +24,8 @@
 
 #include <assert.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 /* Note: due to request handle generation on client side, request handle is unique regardless the session */

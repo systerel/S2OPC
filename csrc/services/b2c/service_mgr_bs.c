@@ -21,8 +21,8 @@
    Exported Declarations
   ------------------------*/
 #include <assert.h>
+#include <stddef.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include "constants.h"
@@ -31,6 +31,7 @@
 #include "util_b2c.h"
 
 #include "sopc_internal_app_dispatcher.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_services_api.h"
 #include "sopc_singly_linked_list.h"
 #include "sopc_toolkit_config_internal.h"

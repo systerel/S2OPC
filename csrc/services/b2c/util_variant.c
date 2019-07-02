@@ -19,9 +19,9 @@
 
 #include <inttypes.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
+#include "sopc_mem_alloc.h"
 #include "util_variant.h"
 
 SOPC_Variant* util_variant__new_Variant_from_NodeId(SOPC_NodeId* pnid)

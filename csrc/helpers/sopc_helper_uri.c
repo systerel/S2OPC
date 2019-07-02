@@ -17,13 +17,13 @@
  * under the License.
  */
 
-#include "sopc_helper_uri.h"
-
 #include <assert.h>
 #include <stdint.h>
 #include <string.h>
 
 #include "sopc_helper_string.h"
+#include "sopc_helper_uri.h"
+#include "sopc_mem_alloc.h"
 
 #define TCPUA_PREFIX ((const char*) "opc.tcp://")
 

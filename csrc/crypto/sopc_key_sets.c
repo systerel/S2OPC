@@ -17,9 +17,10 @@
  * under the License.
  */
 
-#include "sopc_key_sets.h"
 #include <stddef.h>
-#include <stdlib.h>
+
+#include "sopc_key_sets.h"
+#include "sopc_mem_alloc.h"
 
 SOPC_SC_SecurityKeySet* SOPC_KeySet_Create()
 {

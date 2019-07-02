@@ -20,9 +20,9 @@
 #include "event_recorder.h"
 
 #include <assert.h>
-#include <stdlib.h>
 
 #include "sopc_dict.h"
+#include "sopc_mem_alloc.h"
 
 static SOPC_Dict* queues = NULL;
 
