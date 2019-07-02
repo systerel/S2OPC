@@ -32,12 +32,12 @@
 
 /** @brief Maximum Message Length used (must be >= SOPC_TCP_UA_MIN_BUFFER_SIZE) */
 #ifndef SOPC_MAX_MESSAGE_LENGTH
-#define SOPC_MAX_MESSAGE_LENGTH UINT16_MAX
+#define SOPC_MAX_MESSAGE_LENGTH 8192
 #endif /* SOPC_MAX_MESSAGE_LENGTH */
 
 /** @brief Maximum ByteString/String/XmlElement length in bytes used */
 #ifndef SOPC_MAX_STRING_LENGTH
-#define SOPC_MAX_STRING_LENGTH UINT16_MAX
+#define SOPC_MAX_STRING_LENGTH 8192
 #endif /* SOPC_MAX_MESSAGE_LENGTH */
 
 /** @brief Maximum array length that could be stored in a variant */
