@@ -283,7 +283,7 @@ void* cbToolkit_test_server(void* arg)
     while (P_ETHERNET_IF_IsReady() != 0)
         ;
 
-    if (gLogServer != NULL)
+    if ((gLogServer != NULL) && (pv != NULL))
     {
         Mutex_UnlockAndWaitCond(pv, NULL);
     }
