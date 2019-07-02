@@ -34,10 +34,14 @@ struct T_BLOCK_INFO
 };
 
 // This constant is the size of a block info with alignement constraints
-static size_t heap4StackInfo =
+static const size_t heap4StackInfo =
     (sizeof(struct T_BLOCK_INFO) + ((size_t)(portBYTE_ALIGNMENT - 1))) & ~((size_t) portBYTE_ALIGNMENT_MASK);
 // This constant define the bit of allocated status used by FreeRTOS in the blockSize field of block info
-static size_t xBlockAllocatedBit = ((size_t) 1) << ((sizeof(size_t) * 8) - 1);
+static const size_t xBlockAllocatedBit = ((size_t) 1) << ((sizeof(size_t) * 8) - 1);
+
+// This counters are used to trace malloc and free
+static uint32_t gFreeRTOSTotalMalloc = 0;
+static uint32_t gFreeRTOSTotalFree = 0;
 
 // Malloc function thread safe function
 void* SOPC_Malloc(size_t size)
@@ -97,7 +101,7 @@ void* SOPC_Calloc(size_t n, size_t s)
     uint8_t* p = NULL;
     size_t size = n * s;
 
-    if(size > 0)
+    if (size > 0)
     {
         p = pvPortMalloc(size);
         if (p != NULL)
@@ -193,3 +197,20 @@ void __attribute__((weak)) __env_unlock()
 {
     xTaskResumeAll();
 };
+
+// FreeRTOS trace function, defines macro traceMALLOC and traceFREE defined by FreeRTOS_Config.h
+void freeRTOS_TRACE_MALLOC(void* pvAddress, uint32_t uiSize)
+{
+    if ((gFreeRTOSTotalMalloc + 1) < UINT32_MAX)
+    {
+        gFreeRTOSTotalMalloc++;
+    }
+}
+
+void freeRTOS_TRACE_FREE(void* pvAddress, uint32_t uiSize)
+{
+    if ((gFreeRTOSTotalFree + 1) < UINT32_MAX)
+    {
+        gFreeRTOSTotalFree++;
+    }
+}
