@@ -154,4 +154,10 @@ extern void RTOS_portCONFIGURE_TIMER_FOR_RUN_TIME_STATS(void);
 extern uint32_t RTOS_portGET_RUN_TIME_COUNTER_VALUE(void);
 #define portGET_RUN_TIME_COUNTER_VALUE() RTOS_portGET_RUN_TIME_COUNTER_VALUE()
 #endif
+
+extern void freeRTOS_TRACE_MALLOC(void* pvAddress, uint32_t uiSize);
+#define traceMALLOC(pvAddress, uiSize) freeRTOS_TRACE_MALLOC(pvAddress, uiSize)
+extern void freeRTOS_TRACE_FREE(void* pvAddress, uint32_t uiSize);
+#define traceFREE(pvAddress, uiSize) freeRTOS_TRACE_FREE(pvAddress, uiSize)
+
 #endif /* FREERTOS_CONFIG_H */
