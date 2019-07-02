@@ -32,14 +32,14 @@
 
 /** @brief Maximum chunk buffer size used (must be >= SOPC_TCP_UA_MIN_BUFFER_SIZE) */
 #ifndef SOPC_TCP_UA_MAX_BUFFER_SIZE
-#define SOPC_TCP_UA_MAX_BUFFER_SIZE UINT16_MAX
+#define SOPC_TCP_UA_MAX_BUFFER_SIZE 8192
 #endif /* SOPC_TCP_UA_MAX_BUFFER_SIZE */
 
 /** @brief Maximum number of chunks accepted for 1 message, 0 means no limit.
  *  Note: if 0 is chosen SOPC_MAX_MESSAGE_LENGTH definition shall be changed not to use it and shall not be 0.
  */
 #ifndef SOPC_MAX_NB_CHUNKS
-#define SOPC_MAX_NB_CHUNKS 5
+#define SOPC_MAX_NB_CHUNKS 1
 #endif /* SOPC_MAX_NB_CHUNKS */
 
 /** @brief Maximum message length used (must be >= SOPC_TCP_UA_MAX_BUFFER_SIZE), 0 means no limit.
@@ -51,8 +51,8 @@
 
 /** @brief Maximum ByteString/String/XmlElement length in bytes used */
 #ifndef SOPC_MAX_STRING_LENGTH
-#define SOPC_MAX_STRING_LENGTH UINT16_MAX
-#endif /* SOPC_MAX_STRING_LENGTH */
+#define SOPC_MAX_STRING_LENGTH 8192
+#endif /* SOPC_MAX_MESSAGE_LENGTH */
 
 /** @brief Maximum array length that could be stored in a variant */
 #ifndef SOPC_MAX_ARRAY_LENGTH
