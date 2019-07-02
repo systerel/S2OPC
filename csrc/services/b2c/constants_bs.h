@@ -25,8 +25,8 @@
 #ifndef CONSTANTS_BS_H_
 #define CONSTANTS_BS_H_
 
+#include <stddef.h>
 #include <stdint.h>
-#include <stdlib.h>
 
 /*--------------------------
    Added by the Translator

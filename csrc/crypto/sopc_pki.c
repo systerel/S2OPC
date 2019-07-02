@@ -17,8 +17,6 @@
  * under the License.
  */
 
-#include <stdlib.h>
-
 #include "sopc_pki.h"
 
 void SOPC_PKIProvider_Free(SOPC_PKIProvider** ppPKI)

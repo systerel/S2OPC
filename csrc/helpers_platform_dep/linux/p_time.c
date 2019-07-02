@@ -19,7 +19,6 @@
 
 #include <assert.h>
 #include <stdint.h>
-#include <stdlib.h>
 #include <time.h>
 
 #include "sopc_time.h"

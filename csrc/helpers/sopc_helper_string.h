@@ -21,7 +21,7 @@
 #define SOPC_HELPER_STRING_H_
 
 #include <inttypes.h>
-#include <stdlib.h>
+#include <stddef.h>
 
 #include "sopc_enums.h"
 

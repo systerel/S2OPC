@@ -21,7 +21,6 @@
 
 #include <check.h>
 #include <inttypes.h>
-#include <stdlib.h>
 
 #include "request_handle_bs.h"
 

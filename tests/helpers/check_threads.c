@@ -28,7 +28,6 @@
 #include <inttypes.h>
 
 #include <check.h>
-#include <stdlib.h>
 
 #include "check_helpers.h"
 #include "opcua_statuscodes.h"

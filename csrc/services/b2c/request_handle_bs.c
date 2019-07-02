@@ -21,9 +21,9 @@
    Exported Declarations
   ------------------------*/
 #include "request_handle_bs.h"
+#include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include "sopc_event_timer_manager.h"

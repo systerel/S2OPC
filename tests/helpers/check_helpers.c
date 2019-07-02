@@ -27,7 +27,7 @@
  */
 
 #include <check.h>
-#include <stdlib.h>
+#include <stdlib.h> /* EXIT_* */
 
 #include "check_helpers.h"
 

@@ -27,8 +27,8 @@
 #define SOPC_SINGLY_LINKED_LIST_H_
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
-#include <stdlib.h>
 
 /**
  *  \brief Singly linked list structure

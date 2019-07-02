@@ -18,7 +18,7 @@
  */
 
 #include <check.h>
-#include <stdlib.h>
+#include <stdlib.h> /* EXIT_* */
 
 #include "test_suite_client.h"
 

@@ -26,7 +26,6 @@
  */
 
 #include <check.h>
-#include <stdlib.h>
 
 #include "check_helpers.h"
 

@@ -27,7 +27,7 @@
 
 #include <check.h>
 #include <stdint.h>
-#include <stdlib.h>
+#include <stdlib.h> /* EXIT_* */
 
 #include "sopc_atomic.h"
 #include "sopc_builtintypes.h"

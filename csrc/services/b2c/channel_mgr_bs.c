@@ -23,7 +23,6 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #include "sopc_secure_channels_api.h"
 

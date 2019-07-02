@@ -21,7 +21,6 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #include "sopc_crypto_profiles.h"
 #include "sopc_pki_stack.h"

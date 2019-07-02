@@ -22,6 +22,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
+#include <stdlib.h> /* strtoul */
 
 int SOPC_strncmp_ignore_case(const char* s1, const char* s2, size_t size)
 {

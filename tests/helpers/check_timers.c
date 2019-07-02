@@ -28,7 +28,6 @@
 #include "check_helpers.h"
 
 #include <check.h>
-#include <stdlib.h>
 
 #include "sopc_atomic.h"
 #include "sopc_builtintypes.h"

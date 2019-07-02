@@ -17,13 +17,9 @@
  * under the License.
  */
 
-#include <assert.h>
-#include <stddef.h>
-#include <stdlib.h>
-
+#include "sopc_types.h"
 #include "opcua_identifiers.h"
 #include "sopc_encoder.h"
-#include "sopc_types.h"
 
 #ifndef OPCUA_EXCLUDE_ReferenceNode
 /*============================================================================

@@ -864,10 +864,6 @@ C_FILE_START = """
  * under the License.
  */
 
-#include <assert.h>
-#include <stddef.h>
-#include <stdlib.h>
-
 #include "opcua_identifiers.h"
 #include "sopc_types.h"
 #include "sopc_encoder.h"
