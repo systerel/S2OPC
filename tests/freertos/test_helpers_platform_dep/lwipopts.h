@@ -46,7 +46,7 @@
 #define LWIP_TIMEVAL_PRIVATE 0
 #define LWIP_DHCP 0
 #define LWIP_RAW 1
-#define LWIP_MPU_COMPATIBLE 1
+#define LWIP_MPU_COMPATIBLE 0
 #define SO_REUSE 1
 #define LWIP_NETIF_LOOPBACK 1
 /*
