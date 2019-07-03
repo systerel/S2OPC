@@ -28,7 +28,7 @@
 #include "sopc_enums.h"
 #include "sopc_types.h"
 
-SOPC_AddressSpace_Item
+__attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
     SOPC_Embedded_AddressSpace_Items[] =
         {
             {OpcUa_NodeClass_DataType,
