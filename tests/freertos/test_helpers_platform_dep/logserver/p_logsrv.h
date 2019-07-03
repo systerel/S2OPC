@@ -17,8 +17,8 @@
  * under the License.
  */
 
-#ifndef FREERTOS_P_LOGSRV_H_
-#define FREERTOS_P_LOGSRV_H_
+#ifndef P_LOGSRV_H
+#define P_LOGSRV_H
 
 #include <inttypes.h> /* stdlib includes */
 #include <limits.h>
@@ -58,13 +58,13 @@
 #define P_LOG_CLT_TX_PERIOD (10)
 #define P_LOG_CLT_RX_PERIOD (10)
 
-#define P_LOG_SRV_CALLBACK_STACK (512)
-#define P_LOG_CLT_MON_CALLBACK_STACK (512)
-#define P_LOG_CLT_TX_CALLBACK_STACK (512)
-#define P_LOG_CLT_RX_CALLBACK_STACK (512)
+#define P_LOG_SRV_CALLBACK_STACK (384)
+#define P_LOG_CLT_MON_CALLBACK_STACK (384)
+#define P_LOG_CLT_TX_CALLBACK_STACK (384)
+#define P_LOG_CLT_RX_CALLBACK_STACK (384)
 
 #define P_LOG_FIFO_DATA_SIZE (4096)
-#define P_LOG_FIFO_ELT_MAX_SIZE (1024)
+#define P_LOG_FIFO_ELT_MAX_SIZE (2048)
 #define P_LOG_FIFO_MAX_NB_ELT (512)
 
 typedef enum E_LOG_SRV_RESULT
@@ -88,44 +88,55 @@ typedef enum E_RESULT_DECODER
 typedef struct T_LOG_SERVER_WORKSPACE tLogSrvWks;
 typedef struct T_LOG_CLIENT_WORKSPACE tLogClientWks;
 
-typedef eResultDecoder (*ptrFct_AnalyzerCallback)(void* pAnalyzerContext,     //
-                                                  tLogClientWks* pClt,        //
-                                                  uint8_t* pBufferInOut,      //
-                                                  uint16_t* dataSize,         //
-                                                  uint16_t maxSizeBufferOut); //
+//***Analyzer callbacks***
+// Analyzer callback.
+typedef eResultDecoder (*ptrFct_AnalyzerCallback)(
+    void* pAnalyzerContext,     // Context analyzer.
+    tLogClientWks* pClt,        // Client workspace, can be used to send response by callback
+    uint8_t* pBufferInOut,      // Last buffer received
+    uint16_t* dataSize,         // Data size of significant data in buffer then out buffer
+    uint16_t maxSizeBufferOut); // Max size  of buffer.
 
-typedef eResultDecoder (*ptrFct_AnalyzerPeriodic)(void* pAnalyzerContext,     //
-                                                  tLogClientWks* pClt,        //
-                                                  uint8_t* pBufferOut,        //
-                                                  uint16_t* dataSize,         //
-                                                  uint16_t maxSizeBufferOut); //
+// Analyzer periodic callback. Called each P_LOG_CLT_RX_PERIOD defined in this .H
+typedef eResultDecoder (*ptrFct_AnalyzerPeriodic)(
+    void* pAnalyzerContext,     // Context analyzer
+    tLogClientWks* pClt,        // Client workspace, can be used to send response by callback
+    uint8_t* pBufferOut,        // Buffer to send
+    uint16_t* dataSize,         // data size to send
+    uint16_t maxSizeBufferOut); // max size of buffer.
 
-typedef void (*ptrFct_AnalyzerContextCreation)(void** pAnalyzerContext, //
-                                               tLogClientWks* pClt);    //
+// Analyzer context creation callback
+typedef void (*ptrFct_AnalyzerContextCreation)(void** pAnalyzerContext, // Context analyzer to free
+                                               tLogClientWks* pClt); // Client workspace, can be used to send response
 
-typedef void (*ptrFct_AnalyzerContextDestruction)(void** pAnalyzerContext, //
-                                                  tLogClientWks* pClt);    //
+// Analyzer context destruction callback
+typedef void (*ptrFct_AnalyzerContextDestruction)(
+    void** pAnalyzerContext, // Context analyzer to destroy
+    tLogClientWks* pClt);    // Client workspace, can be used to send response
 
+//***Encoder callbacks***
 typedef void (*ptrFct_EncoderContextCreation)(void** ppEncoderContext);
 
 typedef void (*ptrFct_EncoderContextDestruction)(void** ppEncoderContext);
 
-typedef eResultEncoder (*ptrFct_EncoderCallback)(void* pEncoderContext,      //
-                                                 uint8_t* pBufferInOut,      //
-                                                 uint16_t* pNbBytesToEncode, //
-                                                 uint16_t maxSizeBufferOut); //
+typedef eResultEncoder (*ptrFct_EncoderCallback)(void* pEncoderContext,      // Encoder context
+                                                 uint8_t* pBufferInOut,      // Buffer in out
+                                                 uint16_t* pNbBytesToEncode, // Signicant bytes in / out
+                                                 uint16_t maxSizeBufferOut); // Max size of buffer
 
 typedef eResultEncoder (*ptrFct_EncoderPeriodicCallback)(void* pEncoderContext);
 
-typedef uint16_t (*ptrFct_EncoderTransmitHelloCallback)(uint8_t* pBufferInOut,      //
-                                                        uint16_t nbBytesToEncode,   //
-                                                        uint16_t maxSizeBufferOut); //
+// Callback used to modify default hello string sent on UDP broadcast. Return nb bytes of new size of buffer in out
+typedef uint16_t (*ptrFct_EncoderTransmitHelloCallback)(
+    uint8_t* pBufferInOut,      // Receive "192.168.1.102:4063" by default
+    uint16_t nbBytesToEncode,   // Strlen of inOut
+    uint16_t maxSizeBufferOut); // Max size of buffer.
 
-tLogSrvWks* P_LOG_SRV_CreateAndStart(uint16_t port,                                                          //
-                                     uint16_t portHello,                                                     //
-                                     int16_t maxClient,                                                      //
-                                     uint32_t timeoutS,                                                      //
-                                     uint32_t periodeHelloS,                                                 //
+tLogSrvWks* P_LOG_SRV_CreateAndStart(uint16_t port,          // Listen port
+                                     uint16_t portHello,     // UDP Hello port destination
+                                     int16_t maxClient,      // Max client
+                                     uint32_t timeoutS,      // Timeout. If 0, no timeout.
+                                     uint32_t periodeHelloS, // Period of hello message
                                      ptrFct_AnalyzerContextCreation cbAnalyzerContextCreationCallback,       //
                                      ptrFct_AnalyzerContextDestruction cbAnalyzerContextDestructionCallback, //
                                      ptrFct_AnalyzerCallback cbAnalyzerCallback,                             //
@@ -138,14 +149,17 @@ tLogSrvWks* P_LOG_SRV_CreateAndStart(uint16_t port,                             
 
 void P_LOG_SRV_StopAndDestroy(tLogSrvWks** p);
 
-eLogSrvResult P_LOG_SRV_SendToAllClient(tLogSrvWks* p,          //
-                                        const uint8_t* pBuffer, //
-                                        uint16_t length,        //
-                                        uint16_t* sentLength);  //
+eLogSrvResult P_LOG_SRV_SendToAllClient(tLogSrvWks* p,          // Server handle
+                                        const uint8_t* pBuffer, // Buffer to send
+                                        uint16_t length,        // Length
+                                        uint16_t* sentLength);  // Sent lenght
 
-eLogSrvResult P_LOG_CLIENT_SendResponse(tLogClientWks* pClt,     //
-                                        const uint8_t* pBuffer,  //
-                                        uint16_t length,         //
-                                        uint16_t* pNbBytesSent); //
+eLogSrvResult P_LOG_CLIENT_SendResponse(tLogClientWks* pClt,     // Client handle
+                                        const uint8_t* pBuffer,  // Buffer to send
+                                        uint16_t length,         // Length
+                                        uint16_t* pNbBytesSent); // Sent length
 
-#endif /* FREERTOS_P_LOGSRV_H_ */
+// Global used by printf redirections
+extern tLogSrvWks* gLogServer;
+
+#endif /* P_LOGSRV_H */
