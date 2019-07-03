@@ -18,6 +18,7 @@
  */
 
 typedef uint32_t SOPC_StatusCode;
+typedef uint8_t bool;
 
 typedef enum SOPC_ReturnStatus
 {
@@ -54,6 +55,36 @@ const char* SOPC_SecurityPolicy_Basic256_URI;
 const char* SOPC_SecurityPolicy_Basic256Sha256_URI;
 
 void SOPC_Sleep(unsigned int milliseconds);
+
+/**
+ * \brief Configure the toolkit log generation properties (SOPC_LibSub_Initialize required,
+ *        !SOPC_LibSub_Configured required)
+ *
+ * \param logDirPath       Absolute or relative path of the directory to be used for logs
+ *                        (full path shall exists or createDirectory flag shall be set,
+ *                         path shall terminate with directory separator).
+ *                         Default value is execution directory (same * as "" value provided).
+ *
+ * \param createDirectory  Flag indicating if the directory (last item of path regarding directory separator) shall be
+ *                         created
+ *
+ * \warning The value of the pointer \p logDirPath is used afterwards by the Toolkit. The string is not copied. Hence,
+ *          it must not be modified nor freed by the caller before SOPC_LibSub_Clear.
+ */
+SOPC_ReturnStatus SOPC_ToolkitConfig_SetCircularLogPath(const char* logDirPath, bool createDirectory);
+
+/**
+ * \brief Configure the toolkit log generation properties (SOPC_LibSub_Initialize required,
+ *        !SOPC_LibSub_Configured required)
+ *
+ *
+ * \param maxBytes      A maximum amount of bytes (> 100) by log file before opening a new file incrementing the integer
+ *                      suffix. It is a best effort value (amount verified after each print). Default value is 1048576.
+ *
+ * \param maxFiles      A maximum number of files (> 0) to be used, when reached the older log file is overwritten
+ *                      (starting with *_00001.log). Default value is 50.
+ */
+SOPC_ReturnStatus SOPC_ToolkitConfig_SetCircularLogProperties(uint32_t maxBytes, uint16_t maxFiles);
 
 /* C String type */
 typedef char* SOPC_LibSub_String;
@@ -258,7 +289,7 @@ typedef struct
  @field username
    Zero-terminated username, NULL for anonymous access, see policyId
  @field password
-   Zero-terminated password, ignored when username is NULL
+   Zero-terminated password, ignored when username is NULL. Password is kept in memory for future reconnections.
  @field publish_period_ms
    The requested publish period for the created subscription (in milliseconds)
  @field n_max_keepalive
@@ -371,20 +402,31 @@ SOPC_ReturnStatus SOPC_LibSub_Configured(void);
  @param pCliId [out, not null]
     The connection id of the newly created client, set when return is SOPC_STATUS_OK.
  @return
-    The operation status */
+    The operation status and SOPC_STATUS_TIMEOUT when connection hanged for more than
+    connection_cfg->timeout_ms milliseconds */
 SOPC_ReturnStatus SOPC_LibSub_Connect(const SOPC_LibSub_ConfigurationId cfgId, SOPC_LibSub_ConnectionId* pCliId);
 
 /*
  @description
-    Add a variable to an existing subscription
+    Add variables to the subscription of the connection.
+    This call is synchroneous: it waits for the server response, or the Toolkit times out.
+    The connection timeout is also used for this function.
  @param cliId
     The connection id.
- @param szNodeId
-    A zero-terminated string describing the NodeId to add.
- @param pDataId [out, not null]
-    The unique variable data identifier. Will be used in call to data_change_callback.
+ @param lszNodeId
+    An array of zero-terminated strings describing the NodeIds to add.
+    It should be at least \p nElements long.
+ @param lattrId
+    An array of attributes id. The subscription is created for the attribute lAttrId[i]
+    for the node id lszNodeId[i].
+    It should be at least \p nElements long.
+ @param lDataId [out, not null]
+    A pre-allocated array to the output unique variable data identifiers.
+    It should be at least \p nElements long.
+    The values will be used in call to data_change_callback.
  @return
-    The operation status */
+    The operation status. lDataId is only valid when the return status is SOPC_STATUS_OK.
+    SOPC_STATUS_TIMEOUT is returned when the timeout expires before receiving a response. */
 SOPC_ReturnStatus SOPC_LibSub_AddToSubscription(const SOPC_LibSub_ConnectionId cliId,
                                                 const SOPC_LibSub_CstString* lszNodeId,
                                                 const SOPC_LibSub_AttributeId* lattrId,
@@ -413,7 +455,10 @@ SOPC_ReturnStatus SOPC_LibSub_AsyncSendRequestOnSession(SOPC_LibSub_ConnectionId
  @param c_id
     The connection id to disconnect
  @return
-    The operation status */
+    The operation status. Erroneous case are:
+    - unitialized or unconfigured toolkit (SOPC_STATUS_INVALID_STATE),
+    - inexisting connection (SOPC_STATUS_INVALID_PARAMETERS),
+    - already closed connection (SOPC_STATUS_NOK). */
 SOPC_ReturnStatus SOPC_LibSub_Disconnect(const SOPC_LibSub_ConnectionId cliId);
 
 /*--------------------------------
@@ -433,7 +478,6 @@ void Helpers_Log(const SOPC_Toolkit_Log_Level log_level, const char* format, ...
  */
 void Helpers_LoggerStdout(const SOPC_Toolkit_Log_Level log_level, const SOPC_LibSub_CstString text);
 
-typedef uint8_t bool;
 
 typedef struct
 {
@@ -1036,8 +1080,6 @@ void SOPC_Clear_Array(int32_t* noOfElts, void** eltsArray, size_t sizeOfElt, SOP
  * end of builtintypes.h
  *******************************************************************/
 SOPC_DateTime SOPC_Time_GetCurrentTimeUTC(void);
-SOPC_ReturnStatus SOPC_ToolkitConfig_SetCircularLogPath(const char* logDirPath, bool createDirectory);
-SOPC_ReturnStatus SOPC_ToolkitConfig_SetCircularLogProperties(uint32_t maxBytes, uint16_t maxFiles);
 
 extern struct SOPC_EncodeableType OpcUa_ResponseHeader_EncodeableType;
 typedef struct _OpcUa_ResponseHeader
