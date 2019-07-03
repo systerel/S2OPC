@@ -41,7 +41,7 @@ typedef enum E_CHANNEL_RESULT
     E_CHANNEL_RESULT_NOK,         // General error
     E_CHANNEL_RESULT_ERROR_FULL,  // Not enough space
     E_CHANNEL_RESULT_ERROR_EMPTY, // Empty
-    E_CHANNEL_RESULT_ERROR_TMO,
+    E_CHANNEL_RESULT_ERROR_TMO,   // Timeout
     E_CHANNEL_RESULT_MORE_DATA
 } eChannelResult;
 
@@ -71,11 +71,11 @@ typedef struct T_CHANNEL
     uint16_t maxSizeDataPerElt; // Max size for each record
     uint16_t currentNbElts;     // Current nb records
     uint16_t currentNbDatas;    // Current cumulative data for current nb records
-    uint16_t overflowCpt;
-    QueueHandle_t lock;       // Critical section
-    QueueHandle_t isNotEmpty; // Signal not empty used by receive timeout
-    uint8_t* channelData;     // Buffer of data
-    uint16_t* channelRecord;  // Buffer of record (of size for each elt).
+    uint16_t overflowCpt;       // Overflow counter
+    QueueHandle_t lock;         // Critical section
+    QueueHandle_t isNotEmpty;   // Signal not empty used by receive timeout
+    uint8_t* channelData;       // Buffer of data
+    uint16_t* channelRecord;    // Buffer of record (of size for each elt).
 } tChannel;
 
 void P_CHANNEL_DeInit(tChannel* p);

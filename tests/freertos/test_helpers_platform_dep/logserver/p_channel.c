@@ -22,32 +22,36 @@
 // Deinitialize channel
 void P_CHANNEL_DeInit(tChannel* p)
 {
-    if (p != NULL)
+    if (NULL != p)
     {
-        if (p->isNotEmpty != NULL)
+        if (NULL != p->isNotEmpty)
         {
             vQueueDelete(p->isNotEmpty);
             p->isNotEmpty = NULL;
             DEBUG_decrementCpt();
         }
-        if (p->lock != NULL)
+
+        if (NULL != p->lock)
         {
             vQueueDelete(p->lock);
             p->lock = NULL;
             DEBUG_decrementCpt();
         }
-        if (p->channelData != NULL)
+
+        if (NULL != p->channelData)
         {
             memset(p->channelData, 0, p->maxSizeTotalData);
             vPortFree(p->channelData);
             DEBUG_decrementCpt();
         }
-        if (p->channelRecord != NULL)
+
+        if (NULL != p->channelRecord)
         {
             memset(p->channelRecord, 0, p->maxSizeTotalElts);
             vPortFree(p->channelRecord);
             DEBUG_decrementCpt();
         }
+
         memset(p, 0, sizeof(tChannel));
     }
 }
@@ -59,7 +63,7 @@ eChannelResult P_CHANNEL_Init(tChannel* p,          // Channel workspace
                               size_t nbElts)        // Max nb element.
 {
     eChannelResult result = E_CHANNEL_RESULT_NOK;
-    if (p != NULL)
+    if (NULL != p)
     {
         memset(p, 0, sizeof(tChannel));
         p->channelData = pvPortMalloc(totalDataSize);
@@ -68,7 +72,7 @@ eChannelResult P_CHANNEL_Init(tChannel* p,          // Channel workspace
         p->isNotEmpty = xSemaphoreCreateBinary();
         p->lock = xSemaphoreCreateMutex();
 
-        if ((p->isNotEmpty == NULL) || (p->lock == NULL) || (p->channelData == NULL) || (p->channelRecord == NULL))
+        if ((NULL == p->isNotEmpty) || (NULL == p->lock) || (NULL == p->channelData) || (NULL == p->channelRecord))
         {
             P_CHANNEL_DeInit(p);
         }
@@ -115,7 +119,7 @@ eChannelResult P_CHANNEL_Send(tChannel* p,               // Channel workspace
             dataToWriteSize = size > p->maxSizeDataPerElt ? p->maxSizeDataPerElt : size;
 
             // Mode overwrite and elt size ok, prepare enough memory space for new elt
-            if (mode == E_CHANNEL_WR_MODE_OVERWRITE)
+            if (E_CHANNEL_WR_MODE_OVERWRITE == mode)
             {
                 // Pop to free memory space to overwrite
                 while (((p->currentNbElts + 1) > p->maxSizeTotalElts)                    // Not At least one elt
@@ -219,7 +223,7 @@ eChannelResult P_CHANNEL_Send(tChannel* p,               // Channel workspace
 eChannelResult P_CHANNEL_Flush(tChannel* p)
 {
     eChannelResult result = E_CHANNEL_RESULT_NOK;
-    if (p != NULL)
+    if (NULL != p)
     {
         xSemaphoreTake(p->lock, portMAX_DELAY);
         {
@@ -259,7 +263,7 @@ eChannelResult P_CHANNEL_Receive(tChannel* p,             // Channel workspace
     uint16_t dataSize = 0;
 
     // Check input parameters
-    if (p != NULL)
+    if (NULL != p)
     {
         // Wait for signal not empty
         if (xSemaphoreTake(p->isNotEmpty, xTimeToWait) == pdPASS)
