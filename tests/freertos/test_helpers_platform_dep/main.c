@@ -53,10 +53,10 @@
 
 #include "p_time.h"
 
-Condition handleCondition;
-Condition handleSigConnexion;
+// Global variables
 
-extern tLogSrvWks* gLogServer;
+Condition gHandleConditionVariable;
+Condition gHandleSignalConnexionSrvLog;
 
 uint16_t cbHelloCallback(uint8_t* pBufferInOut, uint16_t nbBytesToEncode, uint16_t maxSizeBufferOut)
 {
@@ -72,7 +72,7 @@ uint16_t cbHelloCallback(uint8_t* pBufferInOut, uint16_t nbBytesToEncode, uint16
 
 void cbOneConnexion(void** pAnalyzerContext, tLogClientWks* pClt)
 {
-    Condition_SignalAll(&handleSigConnexion);
+    Condition_SignalAll(&gHandleSignalConnexionSrvLog);
 }
 
 eResultDecoder cbEchoCallback(void* pAnalyzerContext,
@@ -114,14 +114,14 @@ int main(void)
                                           NULL,             //
                                           cbHelloCallback); //
 
-    Condition_Init(&handleCondition);
-    Condition_Init(&handleSigConnexion);
+    Condition_Init(&gHandleConditionVariable);
+    Condition_Init(&gHandleSignalConnexionSrvLog);
 
-    // FREE_RTOS_TEST_API_S2OPC_THREAD(&handleCondition);
+    // FREE_RTOS_TEST_API_S2OPC_THREAD(&gHandleConditionVariable);
 
-    FREE_RTOS_TEST_S2OPC_SERVER(&handleSigConnexion);
+    FREE_RTOS_TEST_S2OPC_SERVER(&gHandleSignalConnexionSrvLog);
 
-    //FREE_RTOS_TEST_S2OPC_TIME(&handleSigConnexion);
+    // FREE_RTOS_TEST_S2OPC_TIME(&gHandleSignalConnexionSrvLog);
 
     vTaskStartScheduler();
 
