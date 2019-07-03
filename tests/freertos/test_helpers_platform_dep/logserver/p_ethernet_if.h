@@ -1,12 +1,24 @@
 /*
- * p_ethernet_if.h
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
  *
- *  Created on: 6 juin 2019
- *      Author: nottin
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
-#ifndef HELPERS_PLATFORM_DEP_FREERTOS_P_ETHERNET_IF_H_
-#define HELPERS_PLATFORM_DEP_FREERTOS_P_ETHERNET_IF_H_
+#ifndef P_ETHERNET_IF_H
+#define P_ETHERNET_IF_H
 
 #include <board.h>
 #include <inttypes.h> /* stdlib includes */
@@ -25,7 +37,6 @@
 #include "p_synchronisation.h" /* synchronisation include */
 #include "p_threads.h"
 #include "p_utils.h" /* private list include */
-
 
 #include "lwip/dhcp.h"
 #include "lwip/mem.h"
@@ -73,4 +84,4 @@ eEthernetIfResult P_ETHERNET_IF_Initialize(void);
 eEthernetIfResult P_ETHERNET_IF_IsReady(void);
 eEthernetIfResult P_ETHERNET_IF_GetIp(ip_addr_t* pAdressInfo);
 
-#endif /* HELPERS_PLATFORM_DEP_FREERTOS_P_ETHERNET_IF_H_ */
+#endif /* P_ETHERNET_IF_H */

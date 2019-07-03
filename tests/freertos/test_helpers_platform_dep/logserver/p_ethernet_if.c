@@ -88,8 +88,8 @@ eEthernetIfResult P_ETHERNET_IF_Initialize(void)
     gEthernetReady = xSemaphoreCreateBinary();
     xSemaphoreTake(gEthernetReady, 0);
 
-    if (sys_thread_new("lwip_init", CB_P_ETHERNET_IF_Initialize, NULL, DEFAULT_THREAD_STACKSIZE, DEFAULT_THREAD_PRIO) ==
-        NULL)
+    if (NULL ==
+        sys_thread_new("lwip_init", CB_P_ETHERNET_IF_Initialize, NULL, DEFAULT_THREAD_STACKSIZE, DEFAULT_THREAD_PRIO))
     {
         result = ETHERNET_IF_RESULT_NOK;
     }
