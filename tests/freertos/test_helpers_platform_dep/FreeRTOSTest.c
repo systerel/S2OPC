@@ -28,7 +28,6 @@
 /* FreeRTOS kernel includes. */
 #include "FreeRTOS.h"
 #include "fsl_debug_console.h"
-#include "limits.h"
 #include "queue.h"
 #include "semphr.h"
 #include "task.h"
@@ -50,7 +49,6 @@ static Thread p3 = NULL;
 static Thread p4 = NULL;
 static Thread pX = NULL;
 
-extern tLogSrvWks* gLogServer;
 extern void* cbToolkit_test_server(void* arg);
 
 static void* cbS2OPC_Thread_p4(void* ptr)
@@ -157,21 +155,6 @@ static void* cbS2OPC_Thread_p3(void* ptr)
         Mutex_Unlock(&m);
         vTaskDelay(100);
     }
-    //    Mutex_Lock (&m);
-    //    sprintf (sBuffer, "$$$$ %2X -  Sub task 3 try joins ==> Sub task 4  : current time = %lu\r\n",
-    //    xTaskGetCurrentTaskHandle (), xTaskGetTickCount ()); PRINTF (sBuffer); Mutex_Unlock (&m);
-    //
-    //    status = SOPC_Thread_Join (p4);
-    //    if (status == 0)
-    //    {
-    //        p4 = NULL;
-    //    }
-    //    Mutex_Lock (&m);
-    //    sprintf (sBuffer, "$$$$ %2X -  Sub task 3  try to joins Sub task 4 result = %lu : current time = %lu\r\n",
-    //    xTaskGetCurrentTaskHandle (), status,
-    //             xTaskGetTickCount ());
-    //    PRINTF (sBuffer);
-    //    Mutex_Unlock (&m);
 
     return NULL;
 }
@@ -184,7 +167,7 @@ static void* cbS2OPC_Thread_pX(void* ptr)
 static void* cbS2OPC_Thread_p2(void* ptr)
 {
     unsigned short int cpt = 0;
-    int fd;
+    FILE* fd = NULL;
     // static unsigned short int cptKillLogSrvTest = 0;
     uint32_t sizeofSOPCNodeID = sizeof(SOPC_NodeId);
     uint32_t sizeofOpcUa_ReferenceNode = sizeof(OpcUa_ReferenceNode);
@@ -393,7 +376,6 @@ static const int64_t UNIX_EPOCH_01012020_SECS = 1577836800;
  * */
 static const int64_t SOPC_SECONDS_BETWEEN_EPOCHS = 11644473600;
 static const int64_t SOPC_SECONDS_TO_100_NANOSECONDS = 10000000; // 10^7
-
 
 static void* cbS2OPC_Thread_TestTime(void* ptr)
 {
