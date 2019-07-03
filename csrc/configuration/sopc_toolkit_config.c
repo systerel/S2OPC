@@ -75,7 +75,7 @@ tConfig = {.initDone = false,
            .serverScLastConfigIdx = 0,
            .epConfigIdxMax = 0,
            .logDirPath = "",
-           .logMaxBytes = 1048576, // 1 MB
+           .logMaxBytes = 8192, // 1 MB
            .logMaxFiles = 50,
            .logLevel = SOPC_LOG_LEVEL_ERROR};
 
