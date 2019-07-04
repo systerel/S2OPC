@@ -279,14 +279,14 @@ void* cbToolkit_test_server(void* arg)
     int argc = 0;
     char* argv[1] = {NULL};
     Condition* pv = (Condition*) arg;
+    (void) pv;
+
+    SOPC_LogSrv_Start();
 
     while (P_ETHERNET_IF_IsReady() != 0)
         ;
 
-    if ((gLogServer != NULL) && (pv != NULL))
-    {
-        Mutex_UnlockAndWaitCond(pv, NULL);
-    }
+    SOPC_LogSrv_WaitClient(UINT32_MAX);
 
     // Install signal handler to close the server gracefully when server needs to stop
     signal(SIGINT, Test_StopSignal);
