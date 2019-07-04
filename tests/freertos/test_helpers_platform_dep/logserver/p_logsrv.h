@@ -26,6 +26,10 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "sopc_enums.h"
+#include "sopc_mutexes.h"
+#include "sopc_threads.h"
+
 #include "FreeRTOS.h" /* freeRtos includes */
 #include "queue.h"
 #include "semphr.h"
@@ -52,18 +56,21 @@
 #include "lwip/sockets.h"
 #include "lwip/tcpip.h"
 
+// Periodic config
 #define P_LOG_SRV_ONLINE_PERIOD (10)
 #define P_LOG_SRV_BINDING_WAIT (10)
 #define P_LOG_CLT_MONITOR_PERIOD (10)
 #define P_LOG_CLT_TX_PERIOD (10)
 #define P_LOG_CLT_RX_PERIOD (10)
 
+// Stack config
 #define P_LOG_SRV_CALLBACK_STACK (384)
 #define P_LOG_CLT_MON_CALLBACK_STACK (384)
 #define P_LOG_CLT_TX_CALLBACK_STACK (384)
 #define P_LOG_CLT_RX_CALLBACK_STACK (384)
 
-#define P_LOG_FIFO_DATA_SIZE (4096)
+// Atomic fifo config
+#define P_LOG_FIFO_DATA_SIZE (8192)
 #define P_LOG_FIFO_ELT_MAX_SIZE (2048)
 #define P_LOG_FIFO_MAX_NB_ELT (512)
 
@@ -159,7 +166,17 @@ eLogSrvResult P_LOG_CLIENT_SendResponse(tLogClientWks* pClt,     // Client handl
                                         uint16_t length,         // Length
                                         uint16_t* pNbBytesSent); // Sent length
 
-// Global used by printf redirections
-extern tLogSrvWks* gLogServer;
+// Public API
+
+// Wait a client connexion.
+SOPC_ReturnStatus SOPC_LogSrv_WaitClient(uint32_t timeoutMs);
+
+// Stop log server
+SOPC_ReturnStatus SOPC_LogSrv_Stop(void);
+
+// Start log server
+SOPC_ReturnStatus SOPC_LogSrv_Start(
+    uint16_t portSrvTCP,  // Server listen port
+    uint16_t portCltUDP); // Destination UDP port where server announce its @IP and listen port
 
 #endif /* P_LOGSRV_H */

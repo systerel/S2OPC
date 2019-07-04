@@ -850,7 +850,7 @@ static void cbTaskSocketServerMonAndLog(void* pParameters)
     vTaskSetTimeOutState(&xTimeOut);
     xTimeToWait = pdMS_TO_TICKS(P_LOG_SRV_ONLINE_PERIOD); // Initialize period
 
-    if (p != NULL)
+    if (NULL != p)
     {
         // Server loop, quit if request or CLOSING status
         while ((E_LOG_SERVER_CLOSING != p->status) && (pdFALSE == xSemaphoreTake(p->quitRequest, 0)))
@@ -1418,15 +1418,183 @@ eLogSrvResult P_LOG_CLIENT_SendResponse(tLogClientWks* pClt,
     return result;
 }
 
-// Wrapper of newlib
-tLogSrvWks* gLogServer = NULL;
+//***********S2OPC api wrapper*************
+
+static tLogSrvWks* gLogServer = NULL;
+static Mutex gLockLogServer = NULL;
+static Condition gSignalOneConnexion;
+
+// Callback used by logserv to customize hello message
+static uint16_t cbHelloCallback(uint8_t* pBufferInOut, uint16_t nbBytesToEncode, uint16_t maxSizeBufferOut)
+{
+    uint16_t size;
+
+    snprintf((void*) pBufferInOut + nbBytesToEncode, maxSizeBufferOut - (2 * nbBytesToEncode + 1), "%s",
+             "Hello, S2OPC log server is listening on ");
+    size = strlen((void*) pBufferInOut + nbBytesToEncode);
+    memmove((void*) pBufferInOut + nbBytesToEncode + size, (void*) pBufferInOut, nbBytesToEncode);
+    memmove((void*) pBufferInOut, (void*) pBufferInOut + nbBytesToEncode, nbBytesToEncode + size);
+    return nbBytesToEncode + size;
+}
+
+// Callback used to unlock SOPC_LogSrv_WaitClient function
+static void cbOneConnexion(void** pAnalyzerContext, tLogClientWks* pClt)
+{
+    Condition_SignalAll(&gSignalOneConnexion);
+}
+
+// Callback used by analyzer, so *dataSize not changed, buffer in copy to buffer out to client
+static eResultDecoder cbEchoCallback(void* pAnalyzerContext,
+                                     tLogClientWks* pClt,
+                                     uint8_t* pBufferInOut,
+                                     uint16_t* dataSize,
+                                     uint16_t maxSizeBufferOut)
+{
+    // Don't modify dataSize output, echo simulation
+    return 0;
+}
+
+// Wait a client connexion.
+SOPC_ReturnStatus SOPC_LogSrv_WaitClient(uint32_t timeoutMs)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    if (NULL == gLockLogServer)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    Mutex_Lock(&gLockLogServer);
+
+    if (gLogServer == NULL)
+    {
+        Mutex_Unlock(&gLockLogServer);
+        return SOPC_STATUS_NOK;
+    }
+
+    status = Mutex_UnlockAndTimedWaitCond(&gSignalOneConnexion, &gLockLogServer, timeoutMs);
+
+    Mutex_Unlock(&gLockLogServer);
+
+    return status;
+}
+
+// Stop log server
+SOPC_ReturnStatus SOPC_LogSrv_Stop(void)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    if (NULL == gLockLogServer)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    Mutex_Lock(&gLockLogServer);
+
+    if (NULL == gLogServer)
+    {
+        Mutex_Unlock(&gLockLogServer);
+        return SOPC_STATUS_NOK;
+    }
+
+    P_LOG_SRV_StopAndDestroy(&gLogServer);
+
+    Mutex_Unlock(&gLockLogServer);
+
+    return status;
+}
+
+// Start log server
+SOPC_ReturnStatus SOPC_LogSrv_Start(
+    uint16_t portSrvTCP, // Server listen port
+    uint16_t portCltUDP) // Destination UDP port where server announce its @IP and listen port
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    if (gLockLogServer == NULL)
+    {
+        status = Mutex_Initialization(&gLockLogServer);
+    }
+
+    if (SOPC_STATUS_OK != status)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    Mutex_Lock(&gLockLogServer);
+
+    status = Condition_Init(&gSignalOneConnexion);
+
+    if (SOPC_STATUS_OK != status)
+    {
+        Mutex_Unlock(&gLockLogServer);
+        return status;
+    }
+
+    if (gLogServer == NULL)
+    {
+        gLogServer = P_LOG_SRV_CreateAndStart(portSrvTCP,       //
+                                              portCltUDP,       //
+                                              2,                // Max log client
+                                              0,                // Disconnect log client after 0s
+                                              5,                // Hello message each 5seconds
+                                              cbOneConnexion,   //
+                                              NULL,             //
+                                              cbEchoCallback,   // Test echo to verify lwip
+                                              NULL,             //
+                                              NULL,             //
+                                              NULL,             //
+                                              NULL,             //
+                                              NULL,             //
+                                              cbHelloCallback); // Customize message hello
+
+        if (gLogServer == NULL)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
+    Mutex_Unlock(&gLockLogServer);
+
+    return status;
+}
+
+//*********Wrappers for newlib**************
 
 int __attribute__((weak)) _open(const char* Path, int flags, int mode)
 {
     return (int) stdout->_file;
 }
 
+int __attribute__((weak)) _open_r(struct _reent* reent, const char* Path, int flags, int mode)
+{
+    return _open(Path, flags, mode);
+}
+
 int __attribute__((weak)) _close(int fd)
+{
+    return 0;
+}
+
+int __attribute__((weak)) _close_r(struct _reent* reent, int fd)
+{
+    return _close(fd);
+}
+
+FILE* __attribute__((weak)) fopen(const char* file, const char* mode)
+{
+    return (FILE*) stdout;
+}
+
+FILE* __attribute__((weak)) _fopen_r(struct _reent* reent, const char* file, const char* mode)
+{
+    return fopen(file, mode);
+}
+
+int __attribute__((weak)) fclose(FILE* ptrFile)
+{
+    return 0;
+}
+
+int __attribute__((weak)) _fclose_r(struct _reent* reent, FILE* ptrFile)
 {
     return 0;
 }
@@ -1460,8 +1628,18 @@ int __attribute__((weak)) _write(int handle, const char* buffer, size_t size)
     return length;
 }
 
+int __attribute__((weak)) _write_r(struct _reent* reent, int handle, const void* buffer, size_t size)
+{
+    return _write(handle, buffer, size);
+}
+
 // Read is not implemented.
 int __attribute__((weak)) _read(int handle, char* buffer, int size)
 {
     return -1;
+}
+
+int __attribute__((weak)) _read_r(struct _reent* reent, int handle, void* buffer, size_t size)
+{
+    return _read(handle, buffer, size);
 }
