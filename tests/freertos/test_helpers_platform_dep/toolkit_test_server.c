@@ -281,10 +281,9 @@ void* cbToolkit_test_server(void* arg)
     Condition* pv = (Condition*) arg;
     (void) pv;
 
-    SOPC_LogSrv_Start();
+    SOPC_LogSrv_Start(60, 4063);
 
-    while (P_ETHERNET_IF_IsReady() != 0)
-        ;
+    P_ETHERNET_IF_IsReady(UINT32_MAX);
 
     SOPC_LogSrv_WaitClient(UINT32_MAX);
 
