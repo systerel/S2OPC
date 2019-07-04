@@ -34,6 +34,8 @@
 
 #include "p_utils.h"
 
+// ************Private API**************
+
 // Channel result
 typedef enum E_CHANNEL_RESULT
 {
@@ -101,5 +103,7 @@ eChannelResult P_CHANNEL_Receive(
     uint16_t maxBytesToRead, // Max bytes to read
     TickType_t xTimeToWait,  // Time to wait in ticks
     eChannelReadMode mode);  // Mode RD or KEEP_ONLY. KEEP ONLY read without pop older elemt.
+
+// ************Public API**************
 
 #endif
