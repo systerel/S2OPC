@@ -20,6 +20,13 @@
 #ifndef P_SYNCHRONISATION_H
 #define P_SYNCHRONISATION_H
 
+#include <limits.h> /* stdlib includes */
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+
 #include "sopc_enums.h"
 
 #include "FreeRTOS.h"
@@ -55,7 +62,8 @@ void P_SYNCHRO_DestroyConditionVariable(Condition** ppv);
 SOPC_ReturnStatus P_SYNCHRO_InitConditionVariable(Condition* pv, uint16_t wMaxWaiters);
 SOPC_ReturnStatus P_SYNCHRO_ClearConditionVariable(Condition* pv);
 SOPC_ReturnStatus P_SYNCHRO_SignalAllConditionVariable(Condition* pv);
-SOPC_ReturnStatus P_SYNCHRO_SignalConditionVariable(Condition* pv);
+SOPC_ReturnStatus P_SYNCHRO_SignalConditionVariable(Condition* pConditionVariable, // Signal to broadcaset
+                                                    bool bSignalAll);              // Signal one (false) or all (true)
 SOPC_ReturnStatus P_SYNCHRO_UnlockAndWaitForConditionVariable(Condition* pv,
                                                               QueueHandle_t* pMutex,
                                                               uint32_t uwSignal,

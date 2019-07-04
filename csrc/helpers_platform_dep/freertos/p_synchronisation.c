@@ -180,49 +180,9 @@ Condition* P_SYNCHRO_CreateConditionVariable(uint16_t wMaxRDV)
     return pConditionVariable;
 }
 
-SOPC_ReturnStatus P_SYNCHRO_SignalConditionVariable(Condition* pConditionVariable) // Signal to one
-{
-    SOPC_ReturnStatus result = SOPC_STATUS_INVALID_STATE;
-    uint16_t wCurrentSlotId = USHRT_MAX;
-    TaskHandle_t handle = NULL;
-    uint32_t signal = 0;
-
-    if (pConditionVariable != NULL)
-    {
-        if ((E_COND_VAR_STATUS_INITIALIZED == pConditionVariable->status) //
-            && (NULL != pConditionVariable->handleLockCounter))           //
-        {
-            xQueueSemaphoreTake(pConditionVariable->handleLockCounter, portMAX_DELAY); // Critical section
-            {
-                wCurrentSlotId = USHRT_MAX;
-
-                handle = (TaskHandle_t) P_UTILS_LIST_ParseValueElt(&pConditionVariable->taskList, // List of task
-                                                                   &signal,                       // Signal to send
-                                                                   NULL,                          //
-                                                                   NULL,                          //
-                                                                   &wCurrentSlotId);              // Slot id
-                if (handle != NULL)
-                {
-                    xTaskGenericNotify(handle, signal, eSetBits, NULL);
-                    result = SOPC_STATUS_OK;
-                }
-            }
-            xSemaphoreGive(pConditionVariable->handleLockCounter); // End critical section
-        }
-        else
-        {
-            result = SOPC_STATUS_INVALID_STATE;
-        }
-    }
-    else
-    {
-        result = SOPC_STATUS_INVALID_PARAMETERS;
-    }
-    return result;
-}
-
 // Broadcast signal to all waiting task on signal passed in parameters
-SOPC_ReturnStatus P_SYNCHRO_SignalAllConditionVariable(Condition* pConditionVariable) // Signal to broadcaset
+SOPC_ReturnStatus P_SYNCHRO_SignalConditionVariable(Condition* pConditionVariable, // Signal to broadcaset
+                                                    bool bSignalAll)               // Signal one (false) or all (true)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_INVALID_STATE;
     uint16_t wCurrentSlotId = UINT16_MAX;
@@ -245,12 +205,13 @@ SOPC_ReturnStatus P_SYNCHRO_SignalAllConditionVariable(Condition* pConditionVari
                         NULL,                          //
                         NULL,                          //
                         &wCurrentSlotId);              // Slot id
+
                     if (handle != NULL)
                     {
                         xTaskGenericNotify(handle, signal, eSetBits, NULL);
                         result = SOPC_STATUS_OK;
                     }
-                } while (wCurrentSlotId != UINT16_MAX);
+                } while ((wCurrentSlotId != UINT16_MAX) && (true == bSignalAll));
             }
             xSemaphoreGive(pConditionVariable->handleLockCounter); // End critical section
         }
@@ -471,17 +432,11 @@ void Condition_Delete(Condition* cond)
 */
 SOPC_ReturnStatus Condition_Init(Condition* cond)
 {
-    SOPC_ReturnStatus resSOPC = SOPC_STATUS_OK;
-    Condition* ptrCond = (Condition*) cond;
-
-    if (ptrCond != NULL)
+    SOPC_ReturnStatus resSOPC = SOPC_STATUS_INVALID_PARAMETERS;
+    if (NULL != cond)
     {
-        memset(ptrCond, 0, sizeof(Condition));
-        resSOPC = P_SYNCHRO_InitConditionVariable(ptrCond, MAX_WAITERS);
-    }
-    else
-    {
-        resSOPC = SOPC_STATUS_INVALID_PARAMETERS;
+        memset(cond, 0, sizeof(Condition));
+        resSOPC = P_SYNCHRO_InitConditionVariable(cond, MAX_WAITERS);
     }
     return resSOPC;
 }
@@ -489,58 +444,38 @@ SOPC_ReturnStatus Condition_Init(Condition* cond)
 /*Destroy a condition variable.*/
 SOPC_ReturnStatus Condition_Clear(Condition* cond)
 {
-    SOPC_ReturnStatus resSOPC = SOPC_STATUS_OK;
-    Condition* ptrCond = (Condition*) cond;
-    if (ptrCond != NULL)
+    SOPC_ReturnStatus resSOPC = SOPC_STATUS_INVALID_PARAMETERS;
+    if (NULL != cond)
     {
-        resSOPC = P_SYNCHRO_ClearConditionVariable(ptrCond);
-        memset(ptrCond, 0, sizeof(Condition));
-    }
-    else
-    {
-        resSOPC = SOPC_STATUS_INVALID_PARAMETERS;
+        resSOPC = P_SYNCHRO_ClearConditionVariable(cond);
+        memset(cond, 0, sizeof(Condition));
     }
     return resSOPC;
 }
 
 SOPC_ReturnStatus Condition_SignalAll(Condition* cond)
 {
-    SOPC_ReturnStatus resSOPC = SOPC_STATUS_OK;
-    Condition* ptrCond = (Condition*) cond;
-    if (ptrCond != NULL)
-    {
-        resSOPC = P_SYNCHRO_SignalAllConditionVariable(ptrCond);
-    }
-    else
-    {
-        resSOPC = SOPC_STATUS_INVALID_PARAMETERS;
-    }
-    return resSOPC;
+    return P_SYNCHRO_SignalConditionVariable(cond, true);
 }
 
 // Must be called between lock and unlock of Mutex used to wait on condition
 SOPC_ReturnStatus Mutex_UnlockAndTimedWaitCond(Condition* cond, Mutex* mut, uint32_t milliSecs)
 {
     SOPC_ReturnStatus resSOPC = SOPC_STATUS_INVALID_PARAMETERS;
-    Condition* ptrCond = (Condition*) cond;
     QueueHandle_t* pFreeRtosMutex = mut;
 
-    if (ptrCond != NULL)
+    if (NULL != cond)
     {
-        if (mut != NULL)
+        if (NULL != mut)
         {
             pFreeRtosMutex = ((QueueHandle_t*) mut);
         }
 
-        resSOPC = P_SYNCHRO_UnlockAndWaitForConditionVariable(ptrCond,             //
+        resSOPC = P_SYNCHRO_UnlockAndWaitForConditionVariable(cond,                //
                                                               pFreeRtosMutex,      //
                                                               APP_DEFAULT_SIGNAL,  //
                                                               APP_CLEARING_SIGNAL, //
                                                               milliSecs);          //
-    }
-    else
-    {
-        resSOPC = SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     return resSOPC;
@@ -549,11 +484,7 @@ SOPC_ReturnStatus Mutex_UnlockAndTimedWaitCond(Condition* cond, Mutex* mut, uint
 // Must be called between lock and unlock of Mutex used to wait on condition
 SOPC_ReturnStatus Mutex_UnlockAndWaitCond(Condition* cond, Mutex* mut)
 {
-    SOPC_ReturnStatus resSOPC = SOPC_STATUS_INVALID_PARAMETERS;
-
-    resSOPC = Mutex_UnlockAndTimedWaitCond(cond, mut, UINT32_MAX);
-
-    return resSOPC;
+    return Mutex_UnlockAndTimedWaitCond(cond, mut, UINT32_MAX);
 }
 
 /*Create recursive mutex*/
