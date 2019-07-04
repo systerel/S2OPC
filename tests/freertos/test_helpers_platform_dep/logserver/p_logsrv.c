@@ -862,7 +862,7 @@ static void cbTaskSocketServerMonAndLog(void* pParameters)
                 resLwip = -1;
 
                 // Check if ethernet is ready
-                if (ETHERNET_IF_RESULT_OK == P_ETHERNET_IF_IsReady())
+                if (ETHERNET_IF_RESULT_OK == P_ETHERNET_IF_IsReady(0))
                 {
                     // Create tcp socket then bind
                     p->socketTCP = lwip_socket(AF_INET, SOCK_STREAM, 0);
