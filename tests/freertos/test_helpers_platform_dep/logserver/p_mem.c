@@ -42,6 +42,8 @@ static const size_t xBlockAllocatedBit = ((size_t) 1) << ((sizeof(size_t) * 8) -
 // This counters are used to trace malloc and free
 static uint32_t gFreeRTOSTotalMalloc = 0;
 static uint32_t gFreeRTOSTotalFree = 0;
+static uint32_t bOverflowDetected = 0;
+static uint32_t bMallocFailed = 0;
 
 // Malloc function thread safe function
 void* SOPC_Malloc(size_t size)
@@ -213,4 +215,14 @@ void freeRTOS_TRACE_FREE(void* pvAddress, uint32_t uiSize)
     {
         gFreeRTOSTotalFree++;
     }
+}
+
+void vApplicationStackOverflowHook(TaskHandle_t xTask, char* pcTaskName)
+{
+    bOverflowDetected = 0xAAAAAAAA;
+}
+
+void vApplicationMallocFailedHook(void)
+{
+    bMallocFailed++;
 }
