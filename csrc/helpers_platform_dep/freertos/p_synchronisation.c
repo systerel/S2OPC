@@ -189,54 +189,50 @@ SOPC_ReturnStatus P_SYNCHRO_SignalConditionVariable(Condition* pConditionVariabl
     TaskHandle_t handle = NULL;
     uint32_t signal = 0;
 
-    if (NULL != pConditionVariable)
+    if (NULL == pConditionVariable)
     {
-        if ((E_COND_VAR_STATUS_INITIALIZED == pConditionVariable->status) &&
-            (NULL != pConditionVariable->handleLockCounter))
-        {
-            xQueueSemaphoreTake(pConditionVariable->handleLockCounter, portMAX_DELAY); // Critical section
-            {
-                wCurrentSlotId = UINT16_MAX;
-                do
-                {
-                    handle = (TaskHandle_t) P_UTILS_LIST_ParseValueElt(
-                        &pConditionVariable->taskList, // Task of list to notify
-                        &signal,                       // signal to send
-                        NULL,                          //
-                        NULL,                          //
-                        &wCurrentSlotId);              // Slot id
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    if ((E_COND_VAR_STATUS_INITIALIZED != pConditionVariable->status) ||
+        (NULL == pConditionVariable->handleLockCounter))
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
 
-                    if (handle != NULL)
-                    {
-                        xTaskGenericNotify(handle, signal, eSetBits, NULL);
-                        result = SOPC_STATUS_OK;
-                    }
-                } while ((wCurrentSlotId != UINT16_MAX) && (true == bSignalAll));
-            }
-            xSemaphoreGive(pConditionVariable->handleLockCounter); // End critical section
-        }
-        else
-        {
-            result = SOPC_STATUS_INVALID_STATE;
-        }
-    }
-    else
+    xQueueSemaphoreTake(pConditionVariable->handleLockCounter, portMAX_DELAY); // Critical section
     {
-        result = SOPC_STATUS_INVALID_PARAMETERS;
+        wCurrentSlotId = UINT16_MAX;
+        do
+        {
+            handle = (TaskHandle_t) P_UTILS_LIST_ParseValueElt(&pConditionVariable->taskList, // Task of list to notify
+                                                               &signal,                       // signal to send
+                                                               NULL,                          //
+                                                               NULL,                          //
+                                                               &wCurrentSlotId);              // Slot id
+
+            if (handle != NULL)
+            {
+                xTaskGenericNotify(handle, signal, eSetBits, NULL);
+                result = SOPC_STATUS_OK;
+            }
+        } while ((UINT16_MAX != wCurrentSlotId) && (true == bSignalAll));
     }
+    xSemaphoreGive(pConditionVariable->handleLockCounter); // End critical section
+
     return result;
 }
 
 // Used by P_SYNCHRO_UnlockAndWaitForConditionVariable
-static inline SOPC_ReturnStatus _P_SYNCHRO_WaitSignal(uint32_t* pNotificationValue, // Notif received
-                                                      uint32_t uwSignal,            // Signal waited
-                                                      uint32_t uwClearSignal,       // Clear signal
-                                                      TickType_t xTimeToWait)       // TimeOut
+static inline SOPC_ReturnStatus P_SYNCHRO_WaitSignal(uint32_t* pNotificationValue, // Notif received
+                                                     uint32_t uwSignal,            // Signal waited
+                                                     uint32_t uwClearSignal,       // Clear signal
+                                                     TickType_t xTimeToWait)       // TimeOut
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
     uint32_t notificationValue = 0;
-    uint8_t bQuit = 0;
+    bool bQuit = false;
     TimeOut_t xTimeOut = {0, 0};
+    BaseType_t resRtos = pdPASS;
 
     if (NULL == pNotificationValue)
     {
@@ -244,18 +240,20 @@ static inline SOPC_ReturnStatus _P_SYNCHRO_WaitSignal(uint32_t* pNotificationVal
     }
     else
     {
-        while (0 == bQuit)
+        while (false == bQuit)
         {
             vTaskSetTimeOutState(&xTimeOut); // RAZ timeout
             // Wait for specified signal bit 0 -> 30. Bit 31 = CLEARING_SIGNAL
-            if (pdPASS != xTaskNotifyWait(0,                        //
-                                          uwSignal | uwClearSignal, //
-                                          &notificationValue,       //
-                                          xTimeToWait))             //
+            resRtos = xTaskNotifyWait(0,                        //
+                                      uwSignal | uwClearSignal, //
+                                      &notificationValue,       //
+                                      xTimeToWait);             //
+
+            if (pdPASS != resRtos)
             {
                 result = SOPC_STATUS_TIMEOUT;
                 // TimeOut
-                bQuit = 1;
+                bQuit = true;
             }
             else
             {
@@ -272,22 +270,24 @@ static inline SOPC_ReturnStatus _P_SYNCHRO_WaitSignal(uint32_t* pNotificationVal
                 {
                     // Clearing on going
                     result = SOPC_STATUS_INVALID_STATE;
-                    bQuit = 1;
+                    bQuit = true;
                 }
                 else if (uwSignal != (notificationValue & uwSignal))
                 {
                     // Update timeout status
-                    if (pdTRUE == xTaskCheckForTimeOut(&xTimeOut, &xTimeToWait))
+                    resRtos = xTaskCheckForTimeOut(&xTimeOut, &xTimeToWait);
+
+                    if (pdTRUE == resRtos)
                     {
                         // Timeout occurred
                         result = SOPC_STATUS_TIMEOUT;
-                        bQuit = 1;
+                        bQuit = true;
                     }
                 }
                 else
                 {
                     // Waited signal received. Quit waiting loop with E_COND_VAR_RESULT_OK
-                    bQuit = 1;
+                    bQuit = true;
                 }
             }
         }
@@ -314,99 +314,94 @@ SOPC_ReturnStatus P_SYNCHRO_UnlockAndWaitForConditionVariable(
     TaskHandle_t handleTask = 0;
     uint32_t notificationValue = 0;
 
-    if (pConditionVariable != NULL)
+    if (NULL == pConditionVariable)
     {
-        if (uwTimeOutMs >= (portMAX_DELAY / (configTICK_RATE_HZ * ((uint32_t) 1000))))
-        {
-            xTimeToWait = portMAX_DELAY;
-        }
-        else
-        {
-            xTimeToWait = pdMS_TO_TICKS(uwTimeOutMs);
-        }
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-        if (                                                              // Check workspace exists
-            (E_COND_VAR_STATUS_INITIALIZED == pConditionVariable->status) // Check workspace initialization
-            && (NULL != pConditionVariable->handleLockCounter))           // Check sem existence
-        {
-            // Critical section
-            xQueueSemaphoreTake(pConditionVariable->handleLockCounter, portMAX_DELAY);
-            {
-                handleTask = xTaskGetCurrentTaskHandle();
-
-                status = P_UTILS_LIST_AddElt(&pConditionVariable->taskList, // Task waiting
-                                             handleTask,                    // Current task
-                                             NULL,                          // No context
-                                             uwSignal,                      // Signal
-                                             uwClearSignal);                // Clear signal
-
-                if (SOPC_STATUS_OK != status)
-                {
-                    result = SOPC_STATUS_INVALID_STATE;
-                }
-                else
-                {
-                    result = SOPC_STATUS_OK;
-                }
-            }
-            xSemaphoreGive(pConditionVariable->handleLockCounter);
-        }
-        else
-        {
-            notificationValue = uwClearSignal;
-            result = SOPC_STATUS_INVALID_STATE;
-        }
-
-        // Give mutex from parameters
-        if ((NULL != pMutex) && (NULL != (*pMutex)))
-        {
-            xQueueGiveMutexRecursive(*pMutex);
-        }
-
-        if (SOPC_STATUS_OK == result)
-        {
-            // Wait signal or timeout
-            // If signal or timeout, in both case, unstack signal
-            // (we signal to the waiting task that nb of waiting task is decremented)
-
-            result = _P_SYNCHRO_WaitSignal(&notificationValue, // Notif
-                                           uwSignal,           // Signal waited
-                                           uwClearSignal,      // Clear signal
-                                           xTimeToWait);       // Tick timeout
-
-            // Critical section
-
-            if ((uwClearSignal != (notificationValue & uwClearSignal))           // Not a clear signal
-                && (E_COND_VAR_STATUS_INITIALIZED == pConditionVariable->status) // Workspace initilized
-                && (NULL != pConditionVariable->handleLockCounter))              // Lock exists
-            {
-                xQueueSemaphoreTake(pConditionVariable->handleLockCounter, portMAX_DELAY); // Critical section
-                {
-                    P_UTILS_LIST_RemoveElt(&pConditionVariable->taskList, //
-                                           handleTask,                    //
-                                           uwSignal,                      //
-                                           uwClearSignal,                 //
-                                           NULL);                         //
-                }
-                xSemaphoreGive(pConditionVariable->handleLockCounter);
-
-                result = SOPC_STATUS_OK;
-            }
-            else
-            {
-                result = SOPC_STATUS_INVALID_STATE;
-            }
-        }
-
-        // Take mutex in parameter if exists
-        if ((NULL != pMutex) && (NULL != (*pMutex)))
-        {
-            xQueueTakeMutexRecursive(*pMutex, portMAX_DELAY);
-        }
+    if (uwTimeOutMs >= (portMAX_DELAY / (configTICK_RATE_HZ * ((uint32_t) 1000))))
+    {
+        xTimeToWait = portMAX_DELAY;
     }
     else
     {
-        result = SOPC_STATUS_INVALID_PARAMETERS;
+        xTimeToWait = pdMS_TO_TICKS(uwTimeOutMs);
+    }
+
+    if (                                                              // Check workspace exists
+        (E_COND_VAR_STATUS_INITIALIZED != pConditionVariable->status) // Check workspace initialization
+        || (NULL == pConditionVariable->handleLockCounter))           // Check sem existence
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+    // Critical section
+    xQueueSemaphoreTake(pConditionVariable->handleLockCounter, portMAX_DELAY);
+    {
+        handleTask = xTaskGetCurrentTaskHandle();
+
+        status = P_UTILS_LIST_AddElt(&pConditionVariable->taskList, // Task waiting
+                                     handleTask,                    // Current task
+                                     NULL,                          // No context
+                                     uwSignal,                      // Signal
+                                     uwClearSignal);                // Clear signal
+
+        if (SOPC_STATUS_OK != status)
+        {
+            result = SOPC_STATUS_INVALID_STATE;
+        }
+        else
+        {
+            result = SOPC_STATUS_OK;
+        }
+    }
+    xSemaphoreGive(pConditionVariable->handleLockCounter);
+
+    if (SOPC_STATUS_OK != result)
+    {
+        return result;
+    }
+
+    // Give mutex from parameters
+    if ((NULL != pMutex) && (NULL != (*pMutex)))
+    {
+        xQueueGiveMutexRecursive(*pMutex);
+    }
+    // Wait signal or timeout
+    // If signal or timeout, in both case, unstack signal
+    // (we signal to the waiting task that nb of waiting task is decremented)
+
+    result = P_SYNCHRO_WaitSignal(&notificationValue, // Notif
+                                  uwSignal,           // Signal waited
+                                  uwClearSignal,      // Clear signal
+                                  xTimeToWait);       // Tick timeout
+
+    // Critical section
+
+    if ((uwClearSignal != (notificationValue & uwClearSignal))           // Not a clear signal
+        && (E_COND_VAR_STATUS_INITIALIZED == pConditionVariable->status) // Workspace initilized
+        && (NULL != pConditionVariable->handleLockCounter))              // Lock exists
+    {
+        xQueueSemaphoreTake(pConditionVariable->handleLockCounter, portMAX_DELAY); // Critical section
+        {
+            P_UTILS_LIST_RemoveElt(&pConditionVariable->taskList, //
+                                   handleTask,                    //
+                                   uwSignal,                      //
+                                   uwClearSignal,                 //
+                                   NULL);                         //
+        }
+        xSemaphoreGive(pConditionVariable->handleLockCounter);
+
+        result = SOPC_STATUS_OK;
+    }
+    else
+    {
+        result = SOPC_STATUS_INVALID_STATE;
+    }
+
+    // Take mutex in parameter if exists
+    if ((NULL != pMutex) && (NULL != (*pMutex)))
+    {
+        xQueueTakeMutexRecursive(*pMutex, portMAX_DELAY);
     }
 
     return result;
