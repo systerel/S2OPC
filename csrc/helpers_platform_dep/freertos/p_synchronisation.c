@@ -589,22 +589,14 @@ SOPC_ReturnStatus Mutex_Clear(Mutex* mut)
     QueueHandle_t handleRecursiveMutex = NULL;
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
-    if (mut == NULL)
+    if ((NULL == mut) || (NULL == (*mut)))
     {
         result = SOPC_STATUS_INVALID_PARAMETERS;
     }
     else
     {
         handleRecursiveMutex = *((QueueHandle_t*) (mut));
-        if (handleRecursiveMutex == NULL)
-        {
-            result = SOPC_STATUS_INVALID_PARAMETERS;
-        }
-        else
-        {
-            vSemaphoreDelete(handleRecursiveMutex);
-            result = SOPC_STATUS_OK;
-        }
+        vSemaphoreDelete(handleRecursiveMutex);
     }
     return result;
 }
@@ -613,28 +605,24 @@ SOPC_ReturnStatus Mutex_Clear(Mutex* mut)
 SOPC_ReturnStatus Mutex_Lock(Mutex* mut)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
+    BaseType_t resRtos = pdPASS;
     QueueHandle_t freeRtosMutex = NULL;
-    if (mut == NULL)
+    if ((NULL == mut) || (NULL == (*mut)))
     {
         result = SOPC_STATUS_INVALID_PARAMETERS;
     }
     else
     {
         freeRtosMutex = *((QueueHandle_t*) (mut));
-        if (freeRtosMutex == NULL)
+
+        resRtos = xQueueTakeMutexRecursive(freeRtosMutex, portMAX_DELAY);
+        if (pdPASS == resRtos)
         {
-            result = SOPC_STATUS_INVALID_PARAMETERS;
+            result = SOPC_STATUS_OK;
         }
         else
         {
-            if (xQueueTakeMutexRecursive(freeRtosMutex, portMAX_DELAY) == pdPASS)
-            {
-                result = SOPC_STATUS_OK;
-            }
-            else
-            {
-                result = SOPC_STATUS_NOK;
-            }
+            result = SOPC_STATUS_NOK;
         }
     }
     return result;
@@ -644,28 +632,23 @@ SOPC_ReturnStatus Mutex_Lock(Mutex* mut)
 SOPC_ReturnStatus Mutex_Unlock(Mutex* mut)
 {
     QueueHandle_t freeRtosMutex = NULL;
+    BaseType_t resRtos = pdPASS;
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
-    if (mut == NULL)
+    if ((NULL == mut) || ((*mut) == NULL))
     {
         result = SOPC_STATUS_INVALID_PARAMETERS;
     }
     else
     {
         freeRtosMutex = *((QueueHandle_t*) (mut));
-        if (freeRtosMutex == NULL)
+        resRtos = xQueueGiveMutexRecursive(freeRtosMutex);
+        if (pdPASS == resRtos)
         {
-            result = SOPC_STATUS_INVALID_PARAMETERS;
+            result = SOPC_STATUS_OK;
         }
         else
         {
-            if (xQueueGiveMutexRecursive(freeRtosMutex) == pdPASS)
-            {
-                result = SOPC_STATUS_OK;
-            }
-            else
-            {
-                result = SOPC_STATUS_NOK;
-            }
+            result = SOPC_STATUS_NOK;
         }
     }
     return result;
