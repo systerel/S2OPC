@@ -19,6 +19,8 @@
 
 #include "p_channel.h"
 
+// ************Private API**************
+
 // Deinitialize channel
 void P_CHANNEL_DeInit(tChannel* p)
 {
@@ -388,3 +390,5 @@ eChannelResult P_CHANNEL_Receive(tChannel* p,             // Channel workspace
 
     return result;
 }
+
+// ************Public API**************
