@@ -339,31 +339,31 @@ SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCf
                 strcpy((char*) pCfgCpy->security_policy, pCfg->security_policy);
                 strcpy((char*) pCfgCpy->policyId, pCfg->policyId);
 
-                if (NULL != pCfgCpy->path_cert_auth)
+                if (NULL != pCfg->path_cert_auth)
                 {
                     strcpy((char*) pCfgCpy->path_cert_auth, pCfg->path_cert_auth);
                 }
-                if (NULL != pCfgCpy->path_cert_srv)
+                if (NULL != pCfg->path_cert_srv)
                 {
                     strcpy((char*) pCfgCpy->path_cert_srv, pCfg->path_cert_srv);
                 }
-                if (NULL != pCfgCpy->path_cert_cli)
+                if (NULL != pCfg->path_cert_cli)
                 {
                     strcpy((char*) pCfgCpy->path_cert_cli, pCfg->path_cert_cli);
                 }
-                if (NULL != pCfgCpy->path_key_cli)
+                if (NULL != pCfg->path_key_cli)
                 {
                     strcpy((char*) pCfgCpy->path_key_cli, pCfg->path_key_cli);
                 }
-                if (NULL != pCfgCpy->path_crl)
+                if (NULL != pCfg->path_crl)
                 {
                     strcpy((char*) pCfgCpy->path_crl, pCfg->path_crl);
                 }
-                if (NULL != pCfgCpy->username)
+                if (NULL != pCfg->username)
                 {
                     strcpy((char*) pCfgCpy->username, pCfg->username);
                 }
-                if (NULL != pCfgCpy->password)
+                if (NULL != pCfg->password)
                 {
                     strcpy((char*) pCfgCpy->password, pCfg->password);
                 }
