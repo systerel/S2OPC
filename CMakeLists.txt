@@ -344,23 +344,22 @@ install(TARGETS s2opc-loader-embedded
         ARCHIVE DESTINATION lib
         PUBLIC_HEADER DESTINATION "include/embedded")
 
-function(s2opc_embed_address_space var_name uanodeset_path)
+function(s2opc_embed_address_space c_file_name xml_uanodeset_path)
     set(c_file_path "address_space_${var_name}.c")
 
     add_custom_command(
-        OUTPUT ${c_file_path}
-        DEPENDS ${uanodeset_path}
-		COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/scripts/generate-s2opc-address-space.py ${uanodeset_path} ${c_file_path} ${const_addspace}
-        COMMENT "Generating address space ${var_name}"
+        OUTPUT ${c_file_name}
+        DEPENDS ${xml_uanodeset_path}
+		COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/scripts/generate-s2opc-address-space.py ${xml_uanodeset_path} ${c_file_name} ${const_addspace}
+        COMMENT "Generating address space ${c_file_name}"
         VERBATIM
     )
 
-    set_source_files_properties(${c_file_path} PROPERTIES GENERATED TRUE)
+    set_source_files_properties(${c_file_name} PROPERTIES GENERATED TRUE)
     if(NOT "${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
-        set_source_files_properties(${c_file_path} PROPERTIES COMPILE_FLAGS -Wno-missing-field-initializers)
+        set_source_files_properties(${c_file_name} PROPERTIES COMPILE_FLAGS -Wno-missing-field-initializers)
     endif()
 
-    set(${var_name} ${c_file_path} PARENT_SCOPE)
 endfunction()
 
 find_package(EXPAT)
@@ -407,11 +406,12 @@ endfunction()
 enable_testing()
 
 set(TEST_ADDRESS_SPACE_XML "${CMAKE_SOURCE_DIR}/tests/data/address_space/s2opc.xml")
-s2opc_embed_address_space(TEST_ADDRESS_SPACE ${TEST_ADDRESS_SPACE_XML})
+set(TEST_ADDRESS_SPACE_C "test_address_space.c")
+s2opc_embed_address_space(${TEST_ADDRESS_SPACE_C} ${TEST_ADDRESS_SPACE_XML})
 
 # Helpers unit tests
 file(GLOB_RECURSE INTERNAL_TESTS_SRCS "tests/helpers/*.c")
-add_executable(check_helpers ${INTERNAL_TESTS_SRCS} ${TEST_ADDRESS_SPACE})
+add_executable(check_helpers ${INTERNAL_TESTS_SRCS} ${TEST_ADDRESS_SPACE_C})
 target_include_directories(check_helpers PRIVATE ${S2OPC_PRIVATE_INCLUDES} ${MBEDTLS_INCLUDE_DIRS} ${CHECK_INCLUDE_DIRS})
 target_link_libraries(check_helpers PRIVATE s2opc ${CHECK_LIBRARIES} s2opc-loader-embedded)
 if (EXPAT_FOUND)
@@ -438,7 +438,7 @@ add_executable(toolkit_test_server_local_service "tests/services/toolkit_test_se
                                                  "tests/services/testlib_write.c"
                                                  "tests/services/test_results.c"
                                                  "tests/services/testlib_read_response.c"
-                                                 ${TEST_ADDRESS_SPACE})
+                                                 ${TEST_ADDRESS_SPACE_C})
 target_link_libraries(toolkit_test_server_local_service PRIVATE s2opc s2opc-loader-embedded)
 target_include_directories(toolkit_test_server_local_service PRIVATE ${S2OPC_PUBLIC_INCLUDES}
                                                                      ${S2OPC_PRIVATE_INCLUDES})
@@ -450,7 +450,7 @@ add_executable(toolkit_test_client "tests/services/toolkit_test_client.c"
                                    "tests/services/testlib_write.c"
                                    "tests/services/test_results.c"
                                    "tests/services/testlib_read_response.c"
-                                   ${TEST_ADDRESS_SPACE})
+                                   ${TEST_ADDRESS_SPACE_C})
 target_link_libraries(toolkit_test_client PRIVATE s2opc s2opc-loader-embedded)
 target_include_directories(toolkit_test_client PRIVATE ${S2OPC_PUBLIC_INCLUDES}
                                                        ${S2OPC_PRIVATE_INCLUDES})
@@ -476,7 +476,7 @@ target_include_directories(toolkit_test_suite_client PRIVATE ${S2OPC_PUBLIC_INCL
 add_executable(toolkit_test_server
     "tests/services/runtime_variables.c"
     "tests/services/toolkit_test_server.c"
-    ${TEST_ADDRESS_SPACE})
+    ${TEST_ADDRESS_SPACE_C})
 target_link_libraries(toolkit_test_server PRIVATE s2opc s2opc-loader-embedded)
 target_include_directories(toolkit_test_server PRIVATE ${S2OPC_PUBLIC_INCLUDES}
                                                        ${S2OPC_PRIVATE_INCLUDES})
