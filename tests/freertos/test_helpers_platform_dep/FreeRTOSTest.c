@@ -236,6 +236,8 @@ static void* cbS2OPC_Thread_p1(void* ptr)
     SOPC_ReturnStatus status;
     Condition* pv = ptr;
 
+    SOPC_LogSrv_Start(60, 4023);
+
     for (;;)
     {
         status = SOPC_Thread_Create(&pX, cbS2OPC_Thread_pX, pv);
