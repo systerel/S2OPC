@@ -62,9 +62,6 @@ typedef struct T_THREAD_WKS
 
 static tUtilsList* pgTaskList = NULL;
 
-static unsigned int bOverflowDetected = 0;
-static unsigned int bMallocFailed = 0;
-
 /*****Private thread api*****/
 
 // Callback encapsulate user callback. Abstract start and stop synchronisation.
@@ -652,15 +649,6 @@ void P_THREAD_Sleep(uint32_t milliseconds)
     vTaskDelay(pdMS_TO_TICKS(milliseconds));
 }
 
-void vApplicationStackOverflowHook(TaskHandle_t xTask, char* pcTaskName)
-{
-    bOverflowDetected = 0xAAAAAAAA;
-}
-
-void vApplicationMallocFailedHook(void)
-{
-    bMallocFailed++;
-}
 /*****Public s2opc thread api*****/
 
 // Create and initialize a thread
