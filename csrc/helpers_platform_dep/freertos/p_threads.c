@@ -654,23 +654,7 @@ void P_THREAD_Sleep(uint32_t milliseconds)
 // Create and initialize a thread
 SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), void* startArgs)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-
-    if (NULL != thread)
-    {
-        P_THREAD_Init(thread, MAX_THREADS, (tPtrFct) startFct, startArgs, NULL, NULL);
-
-        if (NULL != *thread)
-        {
-            status = SOPC_STATUS_OK;
-        }
-        else
-        {
-            status = SOPC_STATUS_NOK;
-        }
-    }
-
-    return status;
+    return P_THREAD_Init(thread, MAX_THREADS, (tPtrFct) startFct, startArgs, NULL, NULL);
 }
 
 // Join then destroy a thread
