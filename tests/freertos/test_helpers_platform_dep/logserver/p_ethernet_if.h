@@ -54,6 +54,8 @@
 #include "lwip/sockets.h"
 #include "lwip/tcpip.h"
 
+// ************Private API**************
+
 #define IP_ADDRESS_0 192
 #define IP_ADDRESS_1 168
 #define IP_ADDRESS_2 1
@@ -81,7 +83,9 @@ typedef enum E_ETHERNET_IF_RESULT
 } eEthernetIfResult;
 
 eEthernetIfResult P_ETHERNET_IF_Initialize(void);
-eEthernetIfResult P_ETHERNET_IF_IsReady(void);
+eEthernetIfResult P_ETHERNET_IF_IsReady(uint32_t timeoutMS);
 eEthernetIfResult P_ETHERNET_IF_GetIp(ip_addr_t* pAdressInfo);
+
+// ************Public API**************
 
 #endif /* P_ETHERNET_IF_H */

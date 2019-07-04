@@ -56,6 +56,8 @@
 #include "lwip/sockets.h"
 #include "lwip/tcpip.h"
 
+// ************Private API**************
+
 // Periodic config
 #define P_LOG_SRV_ONLINE_PERIOD (10)
 #define P_LOG_SRV_BINDING_WAIT (10)
@@ -166,7 +168,7 @@ eLogSrvResult P_LOG_CLIENT_SendResponse(tLogClientWks* pClt,     // Client handl
                                         uint16_t length,         // Length
                                         uint16_t* pNbBytesSent); // Sent length
 
-// Public API
+// ************Public API**************
 
 // Wait a client connexion.
 SOPC_ReturnStatus SOPC_LogSrv_WaitClient(uint32_t timeoutMs);

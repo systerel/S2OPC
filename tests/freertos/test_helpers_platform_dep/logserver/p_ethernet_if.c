@@ -60,9 +60,18 @@ static void CB_P_ETHERNET_IF_Initialize(void* arg)
     vTaskDelete(NULL);
 }
 
-eEthernetIfResult P_ETHERNET_IF_IsReady(void)
+eEthernetIfResult P_ETHERNET_IF_IsReady(uint32_t uwTimeOutMs)
 {
-    if (xSemaphoreTake(gEthernetReady, 0) == pdPASS)
+    TickType_t xTimeToWait = 0;
+    if (uwTimeOutMs >= (portMAX_DELAY / (configTICK_RATE_HZ * ((uint32_t) 1000))))
+    {
+        xTimeToWait = portMAX_DELAY;
+    }
+    else
+    {
+        xTimeToWait = pdMS_TO_TICKS(uwTimeOutMs);
+    }
+    if (xSemaphoreTake(gEthernetReady, xTimeToWait) == pdPASS)
     {
         xSemaphoreGive(gEthernetReady);
         return ETHERNET_IF_RESULT_OK;
