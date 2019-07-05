@@ -274,12 +274,14 @@ SOPC_StatusCode SOPC_AddressSpace_Get_StatusCode(SOPC_AddressSpace* space, SOPC_
     }
 }
 
-void SOPC_AddressSpace_Set_StatusCode(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node, SOPC_StatusCode status)
+bool SOPC_AddressSpace_Set_StatusCode(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node, SOPC_StatusCode status)
 {
     if (!space->readOnlyNodes)
     {
         node->value_status = status;
+        return true;
     }
+    return false;
 }
 
 SOPC_Value_Timestamp SOPC_AddressSpace_Get_SourceTs(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node)
@@ -295,12 +297,14 @@ SOPC_Value_Timestamp SOPC_AddressSpace_Get_SourceTs(SOPC_AddressSpace* space, SO
     }
 }
 
-void SOPC_AddressSpace_Set_SourceTs(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node, SOPC_Value_Timestamp ts)
+bool SOPC_AddressSpace_Set_SourceTs(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node, SOPC_Value_Timestamp ts)
 {
     if (!space->readOnlyNodes)
     {
         node->value_source_ts = ts;
+        return true;
     }
+    return false;
 }
 
 static void SOPC_AddressSpace_Node_Clear_Local(SOPC_AddressSpace_Node* node)
