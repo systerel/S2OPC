@@ -1495,6 +1495,8 @@ SOPC_ReturnStatus SOPC_LogSrv_Stop(void)
         return SOPC_STATUS_NOK;
     }
 
+    Condition_Clear(&gSignalOneConnexion);
+
     P_LOG_SRV_StopAndDestroy(&gLogServer);
 
     Mutex_Unlock(&gLockLogServer);
@@ -1521,8 +1523,6 @@ SOPC_ReturnStatus SOPC_LogSrv_Start(
 
     Mutex_Lock(&gLockLogServer);
 
-    status = Condition_Init(&gSignalOneConnexion);
-
     if (SOPC_STATUS_OK != status)
     {
         Mutex_Unlock(&gLockLogServer);
@@ -1531,6 +1531,8 @@ SOPC_ReturnStatus SOPC_LogSrv_Start(
 
     if (gLogServer == NULL)
     {
+        status = Condition_Init(&gSignalOneConnexion);
+
         gLogServer = P_LOG_SRV_CreateAndStart(portSrvTCP,       //
                                               portCltUDP,       //
                                               2,                // Max log client
