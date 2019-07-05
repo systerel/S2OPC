@@ -132,6 +132,8 @@ c_header = '''
 
 '''.lstrip()
 
+ACCESSLEVEL_MASK_STATUSWRITE = 0b00100000
+ACCESSLEVEL_MASK_TIMESTAMPWRITE = 0b01000000
 
 class ParseError(Exception):
     """
@@ -735,7 +737,7 @@ def default_variable_status(ua_node):
         # Keep OPC UA default namespace nodes with a Good status, necessary to pass UACTT
         # othewise keep Good status only if a value is defined
         value_status='OpcUa_UncertainInitialValue'
-    return value_status
+    return value_status  
 
 def generate_item_variable(is_const_addspace, ua_node):
     value_status = default_variable_status(ua_node)
@@ -779,6 +781,16 @@ GEN_ITEM_FUNCS = {
     UA_METHOD_TAG: generate_item_method,
 }
 
+def no_metadata_write_in_accesslevel(ua_node, access_level):
+    if (ACCESSLEVEL_MASK_TIMESTAMPWRITE | ACCESSLEVEL_MASK_STATUSWRITE) & access_level == 0:
+        # no metadata write allowed => OK
+        return access_level
+    else:
+        # metadata write allowed => warning + forbids it since metadata is read only
+        new_access_level = ~(ACCESSLEVEL_MASK_TIMESTAMPWRITE | ACCESSLEVEL_MASK_STATUSWRITE) & access_level
+        print('WARNING: AccessLevel %d of NodeId %s changed to %d'
+              % (access_level, str(ua_node.nodeid), new_access_level))
+        return new_access_level
 
 # Returns an array of Node objects
 def generate_address_space(is_const_addspace, source, out):
@@ -830,12 +842,13 @@ def generate_address_space(is_const_addspace, source, out):
         if is_const_addspace and n.tag == UA_VARIABLE_TAG:
             ua_node = parse_uanode(n, source, aliases)
             # Add specific case for Variables to store the non constant part into array of Variants
+            access_level= no_metadata_write_in_accesslevel(ua_node, number_coalesce(ua_node.accesslevel, 1))
             out.write(generate_item(is_const_addspace, ua_node, 'Variable', 'variable', '0x00',
                                     # Set Variant index as Variant value in constant item
                                     Value=generate_variant('SOPC_UInt32_Id', 'uint32_t', 'Uint32', len(variables), False, str),
                                     DataType=generate_nodeid(ua_node.data_type),
                                     ValueRank="(%d)" % ua_node.value_rank,
-                                    AccessLevel=str(number_coalesce(ua_node.accesslevel, 1))))
+                                    AccessLevel=str(access_level)))
             # Set Variant value in variable Variants array
             variables.append(generate_value_variant(ua_node.value))
             n_items += 1
