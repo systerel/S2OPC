@@ -351,7 +351,7 @@ SOPC_AddressSpace* SOPC_AddressSpace_Create(bool free_nodes)
         SOPC_NodeId_Dict_Create(false, free_nodes ? free_description_node : clear_description_node_value);
     if (NULL == result->dict_nodes)
     {
-        free(result);
+        SOPC_Free(result);
         return NULL;
     }
     return result;
@@ -419,7 +419,7 @@ void SOPC_AddressSpace_Delete(SOPC_AddressSpace* space)
     space->const_nodes = NULL;
     space->nb_variables = 0;
     space->variables = NULL;
-    free(space);
+    SOPC_Free(space);
 }
 
 SOPC_AddressSpace_Node* SOPC_AddressSpace_Get_Node(SOPC_AddressSpace* space, const SOPC_NodeId* key, bool* found)
