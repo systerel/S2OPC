@@ -179,6 +179,28 @@ void __attribute__((weak)) _free_r(void* reent, void* ptr)
     SOPC_Free(ptr);
 }
 
+// New lib Cleanup stdout reentrant structure. Called by freeRTOS.
+// This structure is redefine, because NewLib consider that reent structure is allocated
+// from the stack, and not from the heap.
+void __attribute__((weak)) _reclaim_reent(struct _reent* reent)
+{
+    if (reent != NULL)
+    {
+        if (reent->__sf[1]._bf._base != NULL)
+        {
+            vPortFree(reent->__sf[1]._bf._base);
+        }
+        if (reent->__sf[1]._ub._base != NULL)
+        {
+            vPortFree(reent->__sf[1]._ub._base);
+        }
+        if (reent->__sf[1]._lb._base != NULL)
+        {
+            vPortFree(reent->__sf[1]._lb._base);
+        }
+    }
+}
+
 // New lib lock functions redefinition for thread safe buffer
 void __attribute__((weak)) __malloc_lock()
 {
