@@ -145,6 +145,9 @@ SOPC_Variant* SOPC_AddressSpace_Get_Value(SOPC_AddressSpace* space, SOPC_Address
     case OpcUa_NodeClass_Variable:
         if (space->readOnlyNodes)
         {
+            /* When the address space is constant, the only variable part is the variant array space->variables defined
+             * outside of the node. In this case the node variable variant content data.variable.Value.Value shall be
+             * the index in this array and therefore shall be a single value UInt32 */
             assert(SOPC_VariantArrayType_SingleValue == node->data.variable.Value.ArrayType);
             assert(SOPC_UInt32_Id == node->data.variable.Value.BuiltInTypeId);
             return &space->variables[node->data.variable.Value.Value.Uint32];
