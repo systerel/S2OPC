@@ -535,7 +535,7 @@ void DEBUG_incrementCpt(void)
 {
     if (cptMutex == NULL)
     {
-        cptMutex = xQueueCreateMutex(queueQUEUE_TYPE_BINARY_SEMAPHORE);
+        cptMutex = xQueueCreateMutex(queueQUEUE_TYPE_MUTEX);
     }
     xSemaphoreTake(cptMutex, portMAX_DELAY);
     cptAlloc++;
@@ -545,7 +545,7 @@ void DEBUG_decrementCpt(void)
 {
     if (cptMutex == NULL)
     {
-        cptMutex = xQueueCreateMutex(queueQUEUE_TYPE_BINARY_SEMAPHORE);
+        cptMutex = xQueueCreateMutex(queueQUEUE_TYPE_MUTEX);
     }
     xSemaphoreTake(cptMutex, portMAX_DELAY);
     cptFree++;
