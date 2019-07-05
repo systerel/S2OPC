@@ -27,15 +27,37 @@ extern const uint32_t SOPC_Embedded_AddressSpace_nNodes;
 extern SOPC_Variant SOPC_Embedded_VariableVariant[];
 extern const uint32_t SOPC_Embedded_VariableVariant_nb;
 
+#define SOPC_AccessLevelMask_StatusWrite (uint8_t) 32    // bit5
+#define SOPC_AccessLevelMask_TimestampWrite (uint8_t) 64 // bit6
+
+static bool checkAccessLevelsForbidsStatusAndTs(void)
+{
+    bool result = true;
+    for (uint32_t i = 0; i < SOPC_Embedded_AddressSpace_nNodes; i++)
+    {
+        SOPC_AddressSpace_Node* node = &SOPC_Embedded_AddressSpace_Nodes[i];
+        if (OpcUa_NodeClass_Variable == node->node_class)
+        {
+            // Check AccessLevel does not allow to write Status or SourceTimestamp
+            result = result && ((SOPC_AccessLevelMask_StatusWrite | SOPC_AccessLevelMask_TimestampWrite) &
+                                node->data.variable.AccessLevel) == 0;
+        }
+    }
+    return result;
+}
+
 SOPC_AddressSpace* SOPC_Embedded_AddressSpace_Load(void)
 {
     SOPC_AddressSpace* space = NULL;
 
     if (sopc_embedded_is_const_addspace)
     {
-        space =
-            SOPC_AddressSpace_CreateReadOnlyNodes(SOPC_Embedded_AddressSpace_nNodes, SOPC_Embedded_AddressSpace_Nodes,
-                                                  SOPC_Embedded_VariableVariant_nb, SOPC_Embedded_VariableVariant);
+        if (checkAccessLevelsForbidsStatusAndTs())
+        {
+            space = SOPC_AddressSpace_CreateReadOnlyNodes(
+                SOPC_Embedded_AddressSpace_nNodes, SOPC_Embedded_AddressSpace_Nodes, SOPC_Embedded_VariableVariant_nb,
+                SOPC_Embedded_VariableVariant);
+        }
     }
     else
     {
