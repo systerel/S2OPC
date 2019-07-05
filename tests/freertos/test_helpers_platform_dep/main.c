@@ -73,13 +73,11 @@ int main(void)
 
     Condition_Init(&gHandleConditionVariable);
 
+    FREE_RTOS_TEST_API_S2OPC_THREAD(&gHandleConditionVariable);
 
+    // FREE_RTOS_TEST_S2OPC_SERVER(&gHandleConditionVariable);
 
-    // FREE_RTOS_TEST_API_S2OPC_THREAD(&gHandleConditionVariable);
-
-    FREE_RTOS_TEST_S2OPC_SERVER(&gHandleConditionVariable);
-
-    // FREE_RTOS_TEST_S2OPC_TIME(&gHandleSignalConnexionSrvLog);
+    // FREE_RTOS_TEST_S2OPC_TIME(&gHandleConditionVariable);
 
     vTaskStartScheduler();
 
