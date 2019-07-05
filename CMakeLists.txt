@@ -329,6 +329,8 @@ install(TARGETS s2opc
         PUBLIC_HEADER DESTINATION include
 )
 
+install(FILES ${CMAKE_SOURCE_DIR}/scripts/generate-s2opc-address-space.py DESTINATION bin)
+
 # Address space loader backends
 
 if(${WITH_CONST_ADDSPACE})
