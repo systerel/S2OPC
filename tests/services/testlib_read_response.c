@@ -34,7 +34,7 @@
 extern SOPC_AddressSpace* address_space_bs__nodes;
 
 /**
- * You should free() the returned Variant* afterwards.
+ * You should free the returned Variant* afterwards.
  */
 static SOPC_Variant* get_attribute_variant(SOPC_AddressSpace_Node* node, uint32_t attr_id)
 {

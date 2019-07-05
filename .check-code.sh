@@ -64,6 +64,24 @@ echo "Checking specific functions or headers not used in code" | tee -a $LOGPATH
 find $CSRC -name "*.c" -or -name "*.h" | xargs grep -wiEc $CHECK_ABSENCE | grep -Ec ":[^0]+" | xargs test 0 -eq
 if [[ $? != 0 ]]; then
     echo "ERROR: checking absence of functions or headers: $CHECK_ABSENCE" | tee -a $LOGPATH
+    find $CSRC -name "*.c" -or -name "*.h" | xargs grep -wiEc $CHECK_ABSENCE | tee -a $LOGPATH
+    EXITCODE=1
+fi
+
+CHECK_STD_MEM_ALLOC_ABSENCE="(\bfree\b\(|\bmalloc\b\(|\bcalloc\b\()"
+EXLUDE_STD_MEM_IMPLEM="*\/p_mem_alloc.c"
+EXCLUDED_TESTS="*\/client_subscription\/*"
+
+find $CSRC -not -path $EXLUDE_STD_MEM_IMPLEM -name "*.c" | xargs grep -E $CHECK_STD_MEM_ALLOC_ABSENCE | grep -Ec ":[^0]+" | xargs test 0 -eq
+if [[ $? != 0 ]]; then
+    echo "ERROR: checking absence of std library use for memory allocation in tookit" | tee -a $LOGPATH
+    find $CSRC -not -path $EXLUDE_STD_MEM_IMPLEM -name "*.c" | xargs grep -E $CHECK_STD_MEM_ALLOC_ABSENCE | tee -a $LOGPATH
+    EXITCODE=1
+fi
+find $TST -not -path $EXCLUDED_TESTS -name "*.c" | xargs grep -E $CHECK_STD_MEM_ALLOC_ABSENCE | grep -Ec ":[^0]+" | xargs test 0 -eq
+if [[ $? != 0 ]]; then
+    echo "ERROR: checking absence of std library use for memory allocation in tests" | tee -a $LOGPATH
+    find $TST -not -path $EXCLUDED_TESTS -name "*.c" | xargs grep -E $CHECK_STD_MEM_ALLOC_ABSENCE | tee -a $LOGPATH
     EXITCODE=1
 fi
 
