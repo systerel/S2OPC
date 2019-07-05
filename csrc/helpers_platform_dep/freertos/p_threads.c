@@ -209,6 +209,8 @@ SOPC_ReturnStatus P_THREAD_Init(Thread* ptrWks,            // Workspace
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
 
+    DEBUG_incrementCpt();
+
     memset(handleWks, 0, sizeof(tThreadWks));
 
     handleWks->args.cbExternalCallback = fct;
