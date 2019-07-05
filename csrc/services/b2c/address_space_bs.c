@@ -599,17 +599,28 @@ void address_space_bs__set_Value_SourceTimestamp(const constants__t_user_i addre
     (void) (address_space_bs__p_user); /* Keep for B precondition: user is already authorized for this operation */
     SOPC_AddressSpace_Node* node = address_space_bs__p_node;
     assert(node->node_class == OpcUa_NodeClass_Variable);
+    bool result = true;
     if (address_space_bs__p_ts.timestamp == 0 && address_space_bs__p_ts.picoSeconds == 0)
     {
         // Update source timestamp with current date if no date provided
         SOPC_Value_Timestamp ts;
         ts.timestamp = SOPC_Time_GetCurrentTimeUTC();
         ts.picoSeconds = 0;
-        SOPC_AddressSpace_Set_SourceTs(address_space_bs__nodes, node, ts);
+        result = SOPC_AddressSpace_Set_SourceTs(address_space_bs__nodes, node, ts);
     }
     else
     {
-        SOPC_AddressSpace_Set_SourceTs(address_space_bs__nodes, node, address_space_bs__p_ts);
+        result = SOPC_AddressSpace_Set_SourceTs(address_space_bs__nodes, node, address_space_bs__p_ts);
+    }
+
+    if (!result)
+    {
+        char* nodeId = SOPC_NodeId_ToCString(SOPC_AddressSpace_Get_NodeId(address_space_bs__nodes, node));
+        SOPC_Logger_TraceWarning(
+            "SourceTimestamp write on NodeId=%s failed due to constant metadata in address space. "
+            "It should be forbidden by AccessLevel.",
+            nodeId);
+        SOPC_Free(nodeId);
     }
 }
 
@@ -620,7 +631,17 @@ void address_space_bs__set_Value_StatusCode(const constants__t_user_i address_sp
     (void) (address_space_bs__p_user); /* Keep for B precondition: user is already authorized for this operation */
     SOPC_AddressSpace_Node* node = address_space_bs__p_node;
     assert(node->node_class == OpcUa_NodeClass_Variable);
-    SOPC_AddressSpace_Set_StatusCode(address_space_bs__nodes, node, address_space_bs__p_sc);
+    bool result = SOPC_AddressSpace_Set_StatusCode(address_space_bs__nodes, node, address_space_bs__p_sc);
+
+    if (!result)
+    {
+        char* nodeId = SOPC_NodeId_ToCString(SOPC_AddressSpace_Get_NodeId(address_space_bs__nodes, node));
+        SOPC_Logger_TraceWarning(
+            "StatusCode write on NodeId=%s failed due to constant metadata in address space."
+            "It should be forbidden by AccessLevel.",
+            nodeId);
+        SOPC_Free(nodeId);
+    }
 }
 
 void address_space_bs__get_Value_StatusCode(const constants__t_user_i address_space_bs__p_user,
