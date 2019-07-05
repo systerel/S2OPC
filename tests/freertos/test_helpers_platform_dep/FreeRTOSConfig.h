@@ -43,7 +43,7 @@
 #define configCPU_CLOCK_HZ (SystemCoreClock)
 #define configTICK_RATE_HZ ((TickType_t) 1000)
 #define configMAX_PRIORITIES 1
-#define configMINIMAL_STACK_SIZE ((unsigned short) 1024)
+#define configMINIMAL_STACK_SIZE ((unsigned short) 2048)
 #define configMINIMAL_STACK_SIZE_TIMER ((unsigned short) 256)
 #define configMAX_TASK_NAME_LEN 40
 #define configUSE_16_BIT_TICKS 0
