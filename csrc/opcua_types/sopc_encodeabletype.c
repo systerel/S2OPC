@@ -26,6 +26,7 @@
 #include "sopc_encoder.h"
 #include "sopc_helper_string.h"
 #include "sopc_logger.h"
+#include "sopc_macros.h"
 #include "sopc_types.h"
 
 const char* nullType = "NULL";
@@ -119,6 +120,31 @@ static SOPC_EncodeableObject_PfnDecode* getPfnDecode(const SOPC_EncodeableType_F
     return SOPC_KnownEncodeableTypes[desc->typeIndex]->Decode;
 }
 
+static void** retrieveArrayAddressPtr(void* pValue, const SOPC_EncodeableType_FieldDescriptor* arrayDesc)
+{
+    /* Avoid "warning: cast increases required alignment of target type [-Wcast-align]"
+     * There is no issue in this case since arrayDesc->offset has been computed using 'offsetof' operator and
+     * actually contains a void* address (address of the allocated array).
+     * Therefore casting this address into a (void**) is valid and cannot lead to lose information on the
+     * address due to alignment normalization (e.g.: when casting a char* to a int*, char* might not be aligned on
+     * multiple of 4 bytes and then its address can be normalized to comply to this alignment after the cast
+     * operation | see EXP36-C SEI CERT rule).*/
+    SOPC_GCC_DIAGNOSTIC_PUSH
+    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_ALIGN
+    return (void**) ((char*) pValue + arrayDesc->offset);
+    SOPC_GCC_DIAGNOSTIC_RESTORE
+}
+
+static const void* const* retrieveConstArrayAddressPtr(const void* pValue,
+                                                       const SOPC_EncodeableType_FieldDescriptor* arrayDesc)
+{
+    /* See retrieveArrayAddressPtr comment */
+    SOPC_GCC_DIAGNOSTIC_PUSH
+    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_ALIGN
+    return (const void* const*) ((const char*) pValue + arrayDesc->offset);
+    SOPC_GCC_DIAGNOSTIC_RESTORE
+}
+
 void SOPC_EncodeableObject_Initialize(SOPC_EncodeableType* type, void* pValue)
 {
     assert(type != NULL);
@@ -147,7 +173,7 @@ void SOPC_EncodeableObject_Initialize(SOPC_EncodeableType* type, void* pValue)
             ++i;
             assert(i < type->NoOfFields);
             arrayDesc = &type->Fields[i];
-            pArray = (void**) ((char*) pValue + arrayDesc->offset);
+            pArray = retrieveArrayAddressPtr(pValue, arrayDesc);
             size = getAllocationSize(arrayDesc);
             initFunction = getPfnInitialize(arrayDesc);
 
@@ -186,7 +212,7 @@ void SOPC_EncodeableObject_Clear(SOPC_EncodeableType* type, void* pValue)
             ++i;
             assert(i < type->NoOfFields);
             arrayDesc = &type->Fields[i];
-            pArray = (void**) ((char*) pValue + arrayDesc->offset);
+            pArray = retrieveArrayAddressPtr(pValue, arrayDesc);
             size = getAllocationSize(arrayDesc);
             clearFunction = getPfnClear(arrayDesc);
 
@@ -238,7 +264,7 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Encode(const SOPC_EncodeableType* type, 
             ++i;
             assert(i < type->NoOfFields);
             arrayDesc = &type->Fields[i];
-            pArray = (const void* const*) ((const char*) pValue + arrayDesc->offset);
+            pArray = retrieveConstArrayAddressPtr(pValue, arrayDesc);
             size = getAllocationSize(arrayDesc);
             encodeFunction = getPfnEncode(arrayDesc);
 
@@ -294,7 +320,7 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Decode(SOPC_EncodeableType* type, void* 
             ++i;
             assert(i < type->NoOfFields);
             arrayDesc = &type->Fields[i];
-            pArray = (void**) ((char*) pValue + arrayDesc->offset);
+            pArray = retrieveArrayAddressPtr(pValue, arrayDesc);
             size = getAllocationSize(arrayDesc);
             decodeFunction = getPfnDecode(arrayDesc);
             initFunction = getPfnInitialize(arrayDesc);
