@@ -396,6 +396,7 @@ int main(int argc, char* argv[])
     SOPC_String_AttachFromCstring(&epConfig.serverDescription.ProductUri, PRODUCT_URI);
     epConfig.serverDescription.ApplicationType = OpcUa_ApplicationType_Server;
     SOPC_String_AttachFromCstring(&epConfig.serverDescription.ApplicationName.Text, "S2OPC toolkit server example");
+    SOPC_String_AttachFromCstring(&epConfig.serverDescription.ApplicationName.Locale, "en-US");
 
     SOPC_UserAuthentication_Manager* authenticationManager = NULL;
     SOPC_UserAuthorization_Manager* authorizationManager = NULL;
