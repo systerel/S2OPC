@@ -667,6 +667,7 @@
     </References>
     <Value>
       <uax:ListOfString>
+        <uax:String>en</uax:String>
         <uax:String>en-US</uax:String>
       </uax:ListOfString>
     </Value>
