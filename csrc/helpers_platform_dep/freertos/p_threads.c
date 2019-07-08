@@ -171,9 +171,7 @@ SOPC_ReturnStatus P_THREAD_Init(Thread* ptrWks,            // Workspace
     SOPC_ReturnStatus resList = SOPC_STATUS_NOK;
     Thread handleWks = NULL;
 
-    assert(NULL != taskName);
-
-    if (NULL == ptrWks)
+    if (NULL == ptrWks || NULL == fct)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
