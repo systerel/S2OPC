@@ -435,7 +435,7 @@ def decode_bytestring(x):
     if x is None:
         return None
     else:
-        return binascii.a2b_base64(x).decode('utf-8')
+        return binascii.a2b_base64(x.encode('utf-8')).decode('utf-8')
 
 # Returns a VariableValue object
 def collect_variable_value(n):
