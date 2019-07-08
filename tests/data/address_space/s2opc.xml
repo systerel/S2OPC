@@ -561,6 +561,7 @@
       <Reference ReferenceType="Organizes">ns=1;i=1000</Reference>
       <Reference ReferenceType="Organizes">i=2253</Reference>
       <Reference ReferenceType="Organizes">ns=1;i=15361</Reference>
+      <Reference ReferenceType="Organizes">ns=1;s=TestReferencesFolder</Reference>
       <Reference ReferenceType="Organizes" IsForward="false">i=84</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
     </References>
@@ -1521,7 +1522,6 @@
       <uax:Int64>0</uax:Int64>
     </Value>
   </UAVariable>
-
   <!--UAVariable AccessLevel="99" BrowseName="0:DateTime" DataType="DateTime" NodeId="ns=1;i=1014" ParentNodeId="ns=1;i=1000">
     <DisplayName>DateTime_1dn</DisplayName>
     <Description>DateTime_1d</Description>
@@ -2111,4 +2111,209 @@
       <uax:Boolean>false</uax:Boolean>
     </Value>
   </UAVariable>
+  <!-- Nodes for UACTT tests on references and paths -->
+  <UAObject BrowseName="1:TestReferencesFolder" NodeId="ns=1;s=TestReferencesFolder" ParentNodeId="i=85">
+    <DisplayName>TestReferencesFolder</DisplayName>
+    <Description>Folder containing nodes with references necessary for UACTT tests</Description>
+    <References>
+      <Reference ReferenceType="Organizes" IsForward="false">i=85</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+
+      <Reference ReferenceType="Organizes">ns=1;s=Level1Folder1</Reference>
+      <Reference ReferenceType="Organizes">ns=1;s=Level1Folder2</Reference>
+      <Reference ReferenceType="Organizes">ns=1;s=Level1Folder3</Reference>
+    </References>
+  </UAObject>
+  <!-- Level 1 -->
+  <UAObject BrowseName="1:Level1Folder1" NodeId="ns=1;s=Level1Folder1" ParentNodeId="ns=1;s=TestReferencesFolder">
+    <DisplayName>Level1Folder1</DisplayName>
+    <Description>Level1Folder1 containing nodes with references necessary for UACTT tests</Description>
+    <References>
+      <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=TestReferencesFolder</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+
+      <Reference ReferenceType="Organizes">ns=1;s=Level2Folder1</Reference>
+      <Reference ReferenceType="Organizes">ns=1;s=Level2Folder2</Reference>
+      <Reference ReferenceType="Organizes">ns=1;s=Level2Folder3</Reference>
+    </References>
+  </UAObject>
+  <UAObject BrowseName="1:Level1Folder2" NodeId="ns=1;s=Level1Folder2" ParentNodeId="ns=1;s=TestReferencesFolder">
+    <DisplayName>Level1Folder2</DisplayName>
+    <Description>Level1Folder2 containing nodes with references necessary for UACTT tests</Description>
+    <References>
+      <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=TestReferencesFolder</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+
+      <Reference ReferenceType="Organizes">ns=1;s=Level2Folder1</Reference>
+      <Reference ReferenceType="Organizes">ns=1;s=Level2Folder2</Reference>
+      <Reference ReferenceType="Organizes">ns=1;s=Level2Folder3</Reference>
+    </References>
+  </UAObject>
+  <UAObject BrowseName="1:Level1Folder3" NodeId="ns=1;s=Level1Folder3" ParentNodeId="ns=1;s=TestReferencesFolder">
+    <DisplayName>Level1Folder3</DisplayName>
+    <Description>Level1Folder3 containing nodes with references necessary for UACTT tests</Description>
+    <References>
+      <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=TestReferencesFolder</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+
+      <Reference ReferenceType="Organizes">ns=1;s=Level2Folder1</Reference>
+      <Reference ReferenceType="Organizes">ns=1;s=Level2Folder2</Reference>
+      <Reference ReferenceType="Organizes">ns=1;s=Level2Folder3</Reference>
+    </References>
+  </UAObject>
+  <!-- Level 2 -->
+  <UAObject BrowseName="1:Level2Folder1" NodeId="ns=1;s=Level2Folder1">
+    <DisplayName>Level2Folder1</DisplayName>
+    <Description>Level2Folder1 containing nodes with references necessary for UACTT tests</Description>
+    <References>
+      <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level1Folder1</Reference>
+      <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level1Folder2</Reference>
+      <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level1Folder3</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+
+      <Reference ReferenceType="Organizes">ns=1;s=Level3Folder1</Reference>
+      <Reference ReferenceType="Organizes">ns=1;s=Level3Folder2</Reference>
+      <Reference ReferenceType="Organizes">ns=1;s=Level3Folder3</Reference>
+    </References>
+  </UAObject>
+  <UAObject BrowseName="1:Level2Folder2" NodeId="ns=1;s=Level2Folder2" ParentNodeId="ns=1;s=TestReferencesFolder">
+    <DisplayName>Level2Folder2</DisplayName>
+    <Description>Level2Folder2 containing nodes with references necessary for UACTT tests</Description>
+    <References>
+      <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level1Folder1</Reference>
+      <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level1Folder2</Reference>
+      <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level1Folder3</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+
+      <Reference ReferenceType="Organizes">ns=1;s=Level3Folder1</Reference>
+      <Reference ReferenceType="Organizes">ns=1;s=Level3Folder2</Reference>
+      <Reference ReferenceType="Organizes">ns=1;s=Level3Folder3</Reference>
+    </References>
+  </UAObject>
+  <UAObject BrowseName="1:Level2Folder3" NodeId="ns=1;s=Level2Folder3" ParentNodeId="ns=1;s=TestReferencesFolder">
+    <DisplayName>Level2Folder3</DisplayName>
+    <Description>Level2Folder3 containing nodes with references necessary for UACTT tests</Description>
+    <References>
+      <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level1Folder1</Reference>
+      <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level1Folder2</Reference>
+      <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level1Folder3</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+
+      <Reference ReferenceType="Organizes">ns=1;s=Level3Folder1</Reference>
+      <Reference ReferenceType="Organizes">ns=1;s=Level3Folder2</Reference>
+      <Reference ReferenceType="Organizes">ns=1;s=Level3Folder3</Reference>
+    </References>
+  </UAObject>
+  <!-- Level 3 -->
+  <UAObject BrowseName="1:Level3Folder1" NodeId="ns=1;s=Level3Folder1">
+    <DisplayName>Level3Folder1</DisplayName>
+    <Description>Level3Folder1 containing nodes with references necessary for UACTT tests</Description>
+    <References>
+      <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level2Folder1</Reference>
+      <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level2Folder2</Reference>
+      <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level2Folder3</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+
+      <Reference ReferenceType="Organizes">ns=1;s=Level4Folder1</Reference>
+    </References>
+  </UAObject>
+  <UAObject BrowseName="1:Level3Folder2" NodeId="ns=1;s=Level3Folder2" ParentNodeId="ns=1;s=TestReferencesFolder">
+    <DisplayName>Level3Folder2</DisplayName>
+    <Description>Level3Folder2 containing nodes with references necessary for UACTT tests</Description>
+    <References>
+      <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level2Folder1</Reference>
+      <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level2Folder2</Reference>
+      <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level2Folder3</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+
+    </References>
+  </UAObject>
+  <UAObject BrowseName="1:Level3Folder3" NodeId="ns=1;s=Level3Folder3" ParentNodeId="ns=1;s=TestReferencesFolder">
+    <DisplayName>Level3Folder3</DisplayName>
+    <Description>Level3Folder3 containing nodes with references necessary for UACTT tests</Description>
+    <References>
+      <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level2Folder1</Reference>
+      <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level2Folder2</Reference>
+      <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level2Folder3</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+
+    </References>
+  </UAObject>
+  <!-- Level 4 -->
+  <UAObject BrowseName="1:Level4Folder1" NodeId="ns=1;s=Level4Folder1">
+    <DisplayName>Level4Folder1</DisplayName>
+    <Description>Level4Folder1 containing nodes with references necessary for UACTT tests</Description>
+    <References>
+      <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level3Folder1</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+
+      <Reference ReferenceType="Organizes">ns=1;s=Level5Folder1</Reference>
+    </References>
+  </UAObject>
+  <!-- Level 5 -->
+  <UAObject BrowseName="1:Level5Folder1" NodeId="ns=1;s=Level5Folder1">
+    <DisplayName>Level5Folder1</DisplayName>
+    <Description>Level5Folder1 containing nodes with references necessary for UACTT tests</Description>
+    <References>
+      <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level4Folder1</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+
+      <Reference ReferenceType="Organizes">ns=1;s=Level6Folder1</Reference>
+    </References>
+  </UAObject>
+  <!-- Level 6 -->
+  <UAObject BrowseName="1:Level6Folder1" NodeId="ns=1;s=Level6Folder1">
+    <DisplayName>Level6Folder1</DisplayName>
+    <Description>Level6Folder1 containing nodes with references necessary for UACTT tests</Description>
+    <References>
+      <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level5Folder1</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+
+      <Reference ReferenceType="Organizes">ns=1;s=Level7Folder1</Reference>
+    </References>
+  </UAObject>
+  <!-- Level 7 -->
+  <UAObject BrowseName="1:Level7Folder1" NodeId="ns=1;s=Level7Folder1">
+    <DisplayName>Level7Folder1</DisplayName>
+    <Description>Level7Folder1 containing nodes with references necessary for UACTT tests</Description>
+    <References>
+      <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level6Folder1</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+
+      <Reference ReferenceType="Organizes">ns=1;s=Level8Folder1</Reference>
+    </References>
+  </UAObject>
+  <!-- Level 8 -->
+  <UAObject BrowseName="1:Level8Folder1" NodeId="ns=1;s=Level8Folder1">
+    <DisplayName>Level8Folder1</DisplayName>
+    <Description>Level8Folder1 containing nodes with references necessary for UACTT tests</Description>
+    <References>
+      <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level7Folder1</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+
+      <Reference ReferenceType="Organizes">ns=1;s=Level9Folder1</Reference>
+    </References>
+  </UAObject>
+  <!-- Level 9 -->
+  <UAObject BrowseName="1:Level9Folder1" NodeId="ns=1;s=Level9Folder1">
+    <DisplayName>Level9Folder1</DisplayName>
+    <Description>Level9Folder1 containing nodes with references necessary for UACTT tests</Description>
+    <References>
+      <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level8Folder1</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+
+      <Reference ReferenceType="Organizes">ns=1;s=Level10Folder1</Reference>
+    </References>
+  </UAObject>
+  <!-- Level 10 -->
+  <UAObject BrowseName="1:Level10Folder1" NodeId="ns=1;s=Level10Folder1">
+    <DisplayName>Level10Folder1</DisplayName>
+    <Description>Level10Folder1 containing nodes with references necessary for UACTT tests</Description>
+    <References>
+      <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level9Folder1</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+
+    </References>
+  </UAObject>
+
 </UANodeSet>
