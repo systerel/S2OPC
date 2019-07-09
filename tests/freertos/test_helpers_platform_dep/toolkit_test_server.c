@@ -281,11 +281,11 @@ void* cbToolkit_test_server(void* arg)
     Condition* pv = (Condition*) arg;
     (void) pv;
 
-    SOPC_LogSrv_Start(60, 4063);
+    SOPC_LogSrv_Start(60, 4023);
 
     P_ETHERNET_IF_IsReady(UINT32_MAX);
 
-    SOPC_LogSrv_WaitClient(UINT32_MAX);
+    // SOPC_LogSrv_WaitClient(UINT32_MAX);
 
     // Install signal handler to close the server gracefully when server needs to stop
     signal(SIGINT, Test_StopSignal);
