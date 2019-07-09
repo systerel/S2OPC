@@ -149,24 +149,27 @@ static bool SOPC_Log_Start(SOPC_Log_Instance* pLogInst)
         {
             pLogInst->started = true;
             SOPC_Log_TracePrefixNoLock(pLogInst, SOPC_LOG_LEVEL_INFO, true, true);
-            res = fprintf(pLogInst->file->pFile, "LOG START\n");
-            if (res > 0)
+            if (NULL != pLogInst->file->pFile)
             {
-                if ((uint64_t) res <= UINT32_MAX - pLogInst->file->nbBytes)
+                res = fprintf(pLogInst->file->pFile, "LOG START\n");
+                if (res > 0)
                 {
-                    pLogInst->file->nbBytes += (uint32_t) res;
+                    if ((uint64_t) res <= UINT32_MAX - pLogInst->file->nbBytes)
+                    {
+                        pLogInst->file->nbBytes += (uint32_t) res;
+                    }
+                    else
+                    {
+                        pLogInst->file->nbBytes = UINT32_MAX;
+                    }
+                    result = true;
                 }
                 else
                 {
-                    pLogInst->file->nbBytes = UINT32_MAX;
+                    printf("Log error: impossible to write in log %s\n", pLogInst->file->filePath);
+                    fclose(pLogInst->file->pFile);
+                    pLogInst->file->pFile = NULL;
                 }
-                result = true;
-            }
-            else
-            {
-                printf("Log error: impossible to write in log %s\n", pLogInst->file->filePath);
-                fclose(pLogInst->file->pFile);
-                pLogInst->file->pFile = NULL;
             }
         }
         Mutex_Unlock(&pLogInst->file->fileMutex);
