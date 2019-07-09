@@ -38,7 +38,7 @@ DEFINITIONS
     browsePathSourceIdx_iterated   <: NAT1 &
     browsePathSourceIdx_to_iterate /\ browsePathSourceIdx_iterated = {} &
     nb_browsePathSourceIdx_max_refs = card(browsePathSourceIdx_to_iterate \/ browsePathSourceIdx_iterated) &
-    nextBrowsePathSourceIdx : NAT
+    nextBrowsePathSourceIdx : NAT1
     )
 
 ABSTRACT_VARIABLES
@@ -59,7 +59,7 @@ OPERATIONS
         browsePathSourceIdx_iterated    := {}        ||
         browsePathSourceIdx_to_iterate  := 1..p_nb_browsePathSourceIdx_max_refs ||
         nb_browsePathSourceIdx_max_refs := p_nb_browsePathSourceIdx_max_refs ||
-        nextBrowsePathSourceIdx         := 0 ||
+        nextBrowsePathSourceIdx         := 1 ||
         p_continue               := bool(p_nb_browsePathSourceIdx_max_refs > 0)
     END
     ;

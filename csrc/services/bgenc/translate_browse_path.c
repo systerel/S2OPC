@@ -21,7 +21,7 @@
 
  File Name            : translate_browse_path.c
 
- Date                 : 27/06/2019 10:56:18
+ Date                 : 09/07/2019 19:01:16
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -112,12 +112,12 @@ void translate_browse_path__treat_one_translate_browse_path(
                translate_browse_path__l_index,
                &translate_browse_path__l_statusCode_operation);
             translate_browse_path__free_BrowsePathSource();
-            if ((translate_browse_path__l_continue == true) &&
-               (translate_browse_path__l_statusCode_operation == constants_statuscodes_bs__e_sc_ok)) {
+            translate_browse_path__l_continue = ((translate_browse_path__l_continue == true) &&
+               ((translate_browse_path__l_statusCode_operation == constants_statuscodes_bs__e_sc_ok) ||
+               (translate_browse_path__l_statusCode_operation == constants_statuscodes_bs__e_sc_uncertain_reference_out_of_server)));
+            if (translate_browse_path__l_continue == true) {
                translate_browse_path__copy_browsePathResult_to_source(&translate_browse_path__l_statusCode_operation);
             }
-            translate_browse_path__l_continue = ((translate_browse_path__l_continue == true) &&
-               (translate_browse_path__l_statusCode_operation == constants_statuscodes_bs__e_sc_ok));
          }
          if ((translate_browse_path__l_statusCode_operation == constants_statuscodes_bs__e_sc_ok) ||
             (translate_browse_path__l_statusCode_operation == constants_statuscodes_bs__e_sc_uncertain_reference_out_of_server)) {

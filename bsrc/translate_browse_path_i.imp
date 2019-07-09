@@ -164,9 +164,16 @@ LOCAL_OPERATIONS
     BEGIN
         statusCode_operation
         :(
-            statusCode_operation: {e_sc_ok, e_sc_bad_out_of_memory}
+            statusCode_operation: {e_sc_ok, e_sc_bad_out_of_memory} &
+            (
+                statusCode_operation = e_sc_ok
+                =>
+                BrowsePathSource =
+                %(idx).(idx : 1..size(BrowsePathResult) &
+                    BrowsePathResult(idx) : dom(conv_ExpandedNodeId_NodeId)
+                    | conv_ExpandedNodeId_NodeId(BrowsePathResult(idx)))
+            )
         )
-
     END
     ;
 
@@ -194,11 +201,32 @@ LOCAL_OPERATIONS
         expandedNodeId : t_ExpandedNodeId_i &
         expandedNodeId : t_ExpandedNodeId
     THEN
-        statusCode_operation:: {e_sc_ok, e_sc_bad_out_of_memory}
-       END
-       ;
+        statusCode_operation,
+        BrowsePathResult
+        :(
+            statusCode_operation : {e_sc_ok, e_sc_bad_query_too_complex, e_sc_bad_out_of_memory} &
+            (
+                statusCode_operation = e_sc_ok
+                =>
+                BrowsePathResult = BrowsePathResult$0 <- expandedNodeId &
+                size(BrowsePathResult) <= k_n_BrowsePathResPerElt_max
+            ) &
+            (
+                statusCode_operation /= e_sc_ok
+                =>
+                BrowsePathResult = BrowsePathResult$0
+            ) &
+            (
+                statusCode_operation = e_sc_bad_query_too_complex
+                =>
+                size(BrowsePathResult) = k_n_BrowsePathResPerElt_max
+            )
+        )
 
-       statusCode_operation <-- checkAndAdd_BrowsePathRemaining(expandedNodeId, index) =
+    END
+    ;
+
+    statusCode_operation <-- checkAndAdd_BrowsePathRemaining(expandedNodeId, index) =
     PRE
         expandedNodeId : t_ExpandedNodeId_i &
         expandedNodeId : t_ExpandedNodeId   &
@@ -236,9 +264,10 @@ LOCAL_OPERATIONS
         browsePath : t_BrowsePath_i  &
         browsePath : BrowsePaths     &
         in_statusCode_operation : t_StatusCode_i &
-        in_statusCode_operation : {e_sc_uncertain_reference_out_of_server, e_sc_bad_query_too_complex, e_sc_bad_out_of_memory}
+        in_statusCode_operation : {e_sc_ok, e_sc_uncertain_reference_out_of_server}
     THEN
-        out_statusCode_operation :: {e_sc_uncertain_reference_out_of_server, e_sc_bad_query_too_complex, e_sc_bad_out_of_memory}
+        out_statusCode_operation :: {e_sc_uncertain_reference_out_of_server, e_sc_bad_query_too_complex,
+            e_sc_bad_out_of_memory, e_sc_bad_too_many_matches}
     END
     ;
 
@@ -266,7 +295,7 @@ LOCAL_OPERATIONS
 
     statusCode_operation <-- treat_browse_result_one_source(index, targetName, nbReferences) =
     PRE
-        index : NAT &
+        index : NAT1 &
         nbReferences : NAT &
         nbReferences : dom(out_BrowseResult_NodeId) &
         targetName : t_QualifiedName_i &
@@ -287,7 +316,7 @@ LOCAL_OPERATIONS
             size(BrowsePathRemainingNodeId)  = size(BrowsePathRemainingIndex) &
 
             statusCode_operation : t_StatusCode_i &
-            statusCode_operation : {e_sc_ok, e_sc_bad_node_id_unknown,
+            statusCode_operation : {e_sc_ok, e_sc_uncertain_reference_out_of_server, e_sc_bad_node_id_unknown,
                 e_sc_bad_query_too_complex, e_sc_bad_no_match} &
 
             dom(BrowsePathResult$0) <| BrowsePathResult = BrowsePathResult$0 &
@@ -298,7 +327,7 @@ LOCAL_OPERATIONS
                 =>
 
                 /* all target in BrowsePathResult has browse name equal to TargetName and
-                there is taken from a browse result */
+                is equal to a browse result */
                 !(bpri).( bpri : size(BrowsePathResult$0)+1 .. size(BrowsePathResult) =>
                     #(bri).(bri : 1..nbReferences &
                         out_BrowseResult_NodeId(bri) = BrowsePathResult(bpri) &
@@ -312,6 +341,11 @@ LOCAL_OPERATIONS
                     #(bri).(bri : 1..nbReferences &
                         out_BrowseResult_NodeId(bri) = BrowsePathRemainingNodeId(bpri) &
                         out_BrowseResult_BrowseName(bri) = targetName))
+            ) &
+            ( statusCode_operation = e_sc_ok
+                =>
+                BrowsePathRemainingNodeId = BrowsePathRemainingNodeId$0 &
+                BrowsePathRemainingIndex = BrowsePathRemainingIndex$0
             )
         )
     END
@@ -379,13 +413,14 @@ OPERATIONS
 
                 free_BrowsePathSource;
                 // que fait on si un node est a l'exterieur mais pas les autres ?
-                IF l_continue = TRUE & l_statusCode_operation = e_sc_ok
+                l_continue := bool(l_continue = TRUE &
+                                   (l_statusCode_operation = e_sc_ok or
+                                    l_statusCode_operation = e_sc_uncertain_reference_out_of_server));
+                IF l_continue = TRUE
                 THEN
                     l_statusCode_operation <-- copy_browsePathResult_to_source
                 END
-                ;
 
-                l_continue := bool(l_continue = TRUE & l_statusCode_operation = e_sc_ok)
             INVARIANT
                 elements_to_iterate : seq(t_RelativePathElt)  &
                 elements_iterated   : seq(t_RelativePathElt)  &
@@ -501,14 +536,20 @@ OPERATIONS
             DO
                 l_continue_source, l_index <-- continue_iter_browsePathSourceIdx;
                 l_source <-- get_BrowsePathSource(l_index);
-                l_translate_statusCode, l_nbReferences <-- compute_browse_result_from_source(l_source, l_browseDirection, l_referenceTypeId, l_includedSubtypes);
-
-                /* Check browse result status */
-                IF l_translate_statusCode /= e_sc_ok THEN
-                    statusCode_operation := l_translate_statusCode
-                ELSE
-                    statusCode_operation <-- treat_browse_result_one_source(index, l_targetName, l_nbReferences);
-                    clear_browse_result
+                l_translate_statusCode,
+                l_nbReferences
+                <-- compute_browse_result_from_source(l_source,
+                                                      l_browseDirection,
+                                                      l_referenceTypeId,
+                                                      l_includedSubtypes);
+                ASSERT l_translate_statusCode /= c_StatusCode_indet THEN
+                    /* Check browse result status */
+                    IF l_translate_statusCode /= e_sc_ok THEN
+                        statusCode_operation := l_translate_statusCode
+                    ELSE
+                        statusCode_operation <-- treat_browse_result_one_source(index, l_targetName, l_nbReferences);
+                        clear_browse_result
+                    END
                 END
             INVARIANT
 
@@ -598,13 +639,15 @@ OPERATIONS
             l_continue, l_index <-- continue_iter_browsePathSourceIdx;
             l_expandedNodeId <-- get_BrowsePathResult(l_index);
             l_local_server, l_nodeId <-- getall_conv_ExpandedNodeId_NodeId(l_expandedNodeId);
-            l_alloc, l_source_copy <-- copy_node_id_pointer_content (l_nodeId);
-            IF l_alloc = TRUE THEN
-                   add_BrowsePathSource(l_source_copy)
-            ELSE
-                free_BrowsePathSource;
-                statusCode_operation := e_sc_bad_out_of_memory;
-                l_continue := FALSE
+            ASSERT l_local_server = TRUE THEN
+                l_alloc, l_source_copy <-- copy_node_id_pointer_content (l_nodeId);
+                IF l_alloc = TRUE THEN
+                    add_BrowsePathSource(l_source_copy)
+                ELSE
+                    free_BrowsePathSource;
+                    statusCode_operation := e_sc_bad_out_of_memory;
+                    l_continue := FALSE
+                END
             END
         INVARIANT
 
@@ -867,7 +910,7 @@ OPERATIONS
                 l_translate_statusCode <-- checkAndAdd_BrowsePathResult(l_res_ExpandedNodeId);
                 /* keep old status if operation is OK but get an out of server previoulsy */
                 IF (l_translate_statusCode = e_sc_ok & statusCode_operation = e_sc_uncertain_reference_out_of_server) THEN
-                    skip /* TODO Bug traducteur */
+                    skip
                 ELSE
                     statusCode_operation := l_translate_statusCode
                 END

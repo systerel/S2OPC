@@ -177,6 +177,15 @@
 #define SOPC_MAX_LIFETIME_PUBLISH_INTERVALS 300 // >= 3 KeepAlive
 #endif
 
+/* TRANSLATE BROWSE PATH MANAGEMENT */
+
+/** @brief Maximum number of matches to return for a given relative path
+ * Note: 3 arrays of this size are allocated in B model.
+ */
+#ifndef SOPC_MAX_TRANSLATE_BROWSE_PATH_MATCHES
+#define SOPC_MAX_TRANSLATE_BROWSE_PATH_MATCHES 10
+#endif
+
 /* ADDRESS SPACE MANAGEMENT */
 
 /** @brief By default resolution of HasSubtype references used in services uses only the static and limited extraction

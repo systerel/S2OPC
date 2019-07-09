@@ -21,7 +21,7 @@
 
  File Name            : translate_browse_path_source_it.c
 
- Date                 : 20/06/2019 17:56:21
+ Date                 : 10/07/2019 11:38:51
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -35,15 +35,15 @@
 /*----------------------------
    CONCRETE_VARIABLES Clause
   ----------------------------*/
-t_entier4 translate_browse_path_source_it__current_browsePathSource_idx;
-t_entier4 translate_browse_path_source_it__max_browsePathSource_idx;
+t_entier4 translate_browse_path_source_it__currentBrowsePathSourceIdx_i;
+t_entier4 translate_browse_path_source_it__nb_browsePathSourceIdx_max_refs_i;
 
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
 void translate_browse_path_source_it__INITIALISATION(void) {
-   translate_browse_path_source_it__current_browsePathSource_idx = 0;
-   translate_browse_path_source_it__max_browsePathSource_idx = 0;
+   translate_browse_path_source_it__currentBrowsePathSourceIdx_i = 0;
+   translate_browse_path_source_it__nb_browsePathSourceIdx_max_refs_i = 0;
 }
 
 /*--------------------
@@ -52,17 +52,17 @@ void translate_browse_path_source_it__INITIALISATION(void) {
 void translate_browse_path_source_it__init_iter_browsePathSourceIdx(
    const t_entier4 translate_browse_path_source_it__p_nb_browsePathSourceIdx_max_refs,
    t_bool * const translate_browse_path_source_it__p_continue) {
-   translate_browse_path_source_it__max_browsePathSource_idx = translate_browse_path_source_it__p_nb_browsePathSourceIdx_max_refs;
-   translate_browse_path_source_it__current_browsePathSource_idx = 0;
+   translate_browse_path_source_it__nb_browsePathSourceIdx_max_refs_i = translate_browse_path_source_it__p_nb_browsePathSourceIdx_max_refs;
+   translate_browse_path_source_it__currentBrowsePathSourceIdx_i = 0;
    *translate_browse_path_source_it__p_continue = (0 < translate_browse_path_source_it__p_nb_browsePathSourceIdx_max_refs);
 }
 
 void translate_browse_path_source_it__continue_iter_browsePathSourceIdx(
    t_bool * const translate_browse_path_source_it__p_continue,
    t_entier4 * const translate_browse_path_source_it__p_browsePathSourceIdx) {
-   translate_browse_path_source_it__current_browsePathSource_idx = translate_browse_path_source_it__current_browsePathSource_idx +
+   translate_browse_path_source_it__currentBrowsePathSourceIdx_i = translate_browse_path_source_it__currentBrowsePathSourceIdx_i +
       1;
-   *translate_browse_path_source_it__p_browsePathSourceIdx = translate_browse_path_source_it__current_browsePathSource_idx;
-   *translate_browse_path_source_it__p_continue = (translate_browse_path_source_it__current_browsePathSource_idx < translate_browse_path_source_it__max_browsePathSource_idx);
+   *translate_browse_path_source_it__p_browsePathSourceIdx = translate_browse_path_source_it__currentBrowsePathSourceIdx_i;
+   *translate_browse_path_source_it__p_continue = (translate_browse_path_source_it__currentBrowsePathSourceIdx_i < translate_browse_path_source_it__nb_browsePathSourceIdx_max_refs_i);
 }
 

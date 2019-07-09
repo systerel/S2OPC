@@ -21,7 +21,7 @@
 
  File Name            : translate_browse_path_1.h
 
- Date                 : 21/06/2019 11:24:49
+ Date                 : 09/07/2019 19:01:05
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -43,13 +43,13 @@
 /*----------------------------
    CONCRETE_VARIABLES Clause
   ----------------------------*/
-extern t_entier4 translate_browse_path_1__BrowsePathRemainingIndex_tab[constants__t_BrowsePathResPerElt_i_max+1];
-extern t_entier4 translate_browse_path_1__BrowsePathRemainingNodeId_size;
-extern constants__t_ExpandedNodeId_i translate_browse_path_1__BrowsePathRemainingNodeId_tab[constants__t_BrowsePathResPerElt_i_max+1];
-extern t_entier4 translate_browse_path_1__BrowsePathResult_size;
-extern constants__t_ExpandedNodeId_i translate_browse_path_1__BrowsePathResult_tab[constants__t_BrowsePathResPerElt_i_max+1];
-extern t_entier4 translate_browse_path_1__BrowsePathSource_size;
-extern constants__t_NodeId_i translate_browse_path_1__BrowsePathSource_tab[constants__t_BrowsePathResPerElt_i_max+1];
+extern t_entier4 translate_browse_path_1__BrowsePathRemainingIndex_tab_i[constants__t_BrowsePathResPerElt_i_max+1];
+extern t_entier4 translate_browse_path_1__BrowsePathRemainingNodeId_size_i;
+extern constants__t_ExpandedNodeId_i translate_browse_path_1__BrowsePathRemainingNodeId_tab_i[constants__t_BrowsePathResPerElt_i_max+1];
+extern t_entier4 translate_browse_path_1__BrowsePathResult_size_i;
+extern constants__t_ExpandedNodeId_i translate_browse_path_1__BrowsePathResult_tab_i[constants__t_BrowsePathResPerElt_i_max+1];
+extern t_entier4 translate_browse_path_1__BrowsePathSource_size_i;
+extern constants__t_NodeId_i translate_browse_path_1__BrowsePathSource_tab_i[constants__t_BrowsePathResPerElt_i_max+1];
 
 /*------------------------
    INITIALISATION Clause

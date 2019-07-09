@@ -27,133 +27,133 @@ SEES
     constants
 
 CONCRETE_VARIABLES
-    BrowsePathSource_tab,
-    BrowsePathSource_size,
-    BrowsePathResult_tab,
-    BrowsePathResult_size,
-    BrowsePathRemainingNodeId_tab,
-    BrowsePathRemainingIndex_tab,
-    BrowsePathRemainingNodeId_size
+    BrowsePathSource_tab_i,
+    BrowsePathSource_size_i,
+    BrowsePathResult_tab_i,
+    BrowsePathResult_size_i,
+    BrowsePathRemainingNodeId_tab_i,
+    BrowsePathRemainingIndex_tab_i,
+    BrowsePathRemainingNodeId_size_i
 
 INVARIANT
-    BrowsePathSource_tab  : t_BrowsePathResPerElt_i --> t_NodeId_i     &
-    BrowsePathSource_size : t_BrowsePathResPerElt_i &
-    BrowsePathSource      = 1..BrowsePathSource_size <| BrowsePathSource_tab &
+    BrowsePathSource_tab_i  : t_BrowsePathResPerElt_i --> t_NodeId_i     &
+    BrowsePathSource_size_i : t_BrowsePathResPerElt_i &
+    BrowsePathSource      = 1..BrowsePathSource_size_i <| BrowsePathSource_tab_i &
 
-    BrowsePathResult_tab  : t_BrowsePathResPerElt_i --> t_ExpandedNodeId_i   &
-    BrowsePathResult_size : t_BrowsePathResPerElt_i &
-    BrowsePathResult      = 1..BrowsePathResult_size <| BrowsePathResult_tab &
+    BrowsePathResult_tab_i  : t_BrowsePathResPerElt_i --> t_ExpandedNodeId_i   &
+    BrowsePathResult_size_i : t_BrowsePathResPerElt_i &
+    BrowsePathResult      = 1..BrowsePathResult_size_i <| BrowsePathResult_tab_i &
 
-    BrowsePathRemainingNodeId_tab  : t_BrowsePathResPerElt_i --> t_ExpandedNodeId_i &
-    BrowsePathRemainingNodeId_size : t_BrowsePathResPerElt_i &
-    BrowsePathRemainingNodeId      = 1..BrowsePathRemainingNodeId_size <| BrowsePathRemainingNodeId_tab &
+    BrowsePathRemainingNodeId_tab_i  : t_BrowsePathResPerElt_i --> t_ExpandedNodeId_i &
+    BrowsePathRemainingNodeId_size_i : t_BrowsePathResPerElt_i &
+    BrowsePathRemainingNodeId      = 1..BrowsePathRemainingNodeId_size_i <| BrowsePathRemainingNodeId_tab_i &
 
-    BrowsePathRemainingIndex_tab  : t_BrowsePathResPerElt_i --> NAT     &
-    BrowsePathRemainingIndex      = 1..BrowsePathRemainingNodeId_size <| BrowsePathRemainingIndex_tab |> {0}
+    BrowsePathRemainingIndex_tab_i  : t_BrowsePathResPerElt_i --> NAT     &
+    BrowsePathRemainingIndex      = 1..BrowsePathRemainingNodeId_size_i <| BrowsePathRemainingIndex_tab_i |> {0}
 
 INITIALISATION
 
-    BrowsePathSource_tab  := t_BrowsePathResPerElt_i * {c_NodeId_indet};
-    BrowsePathSource_size := 0;
-    BrowsePathResult_tab := t_BrowsePathResPerElt_i * {c_ExpandedNodeId_indet};
-    BrowsePathResult_size := 0;
-    BrowsePathRemainingNodeId_size := 0;
-    BrowsePathRemainingNodeId_tab  := t_BrowsePathResPerElt_i * {c_ExpandedNodeId_indet};
-    BrowsePathRemainingIndex_tab   := t_BrowsePathResPerElt_i * {0}
+    BrowsePathSource_tab_i  := t_BrowsePathResPerElt_i * {c_NodeId_indet};
+    BrowsePathSource_size_i := 0;
+    BrowsePathResult_tab_i := t_BrowsePathResPerElt_i * {c_ExpandedNodeId_indet};
+    BrowsePathResult_size_i := 0;
+    BrowsePathRemainingNodeId_size_i := 0;
+    BrowsePathRemainingNodeId_tab_i  := t_BrowsePathResPerElt_i * {c_ExpandedNodeId_indet};
+    BrowsePathRemainingIndex_tab_i   := t_BrowsePathResPerElt_i * {0}
 
 
 OPERATIONS
 
     init_BrowsePathSource =
     BEGIN
-        BrowsePathSource_tab  := t_BrowsePathResPerElt_i * {c_NodeId_indet};
-        BrowsePathSource_size := 0
+        BrowsePathSource_tab_i  := t_BrowsePathResPerElt_i * {c_NodeId_indet};
+        BrowsePathSource_size_i := 0
     END
     ;
 
     res <-- get_BrowsePathSourceSize =
     BEGIN
-        res := BrowsePathSource_size
+        res := BrowsePathSource_size_i
     END
     ;
 
     nodeId <-- get_BrowsePathSource (index) =
     BEGIN
-        nodeId := BrowsePathSource_tab (index)
+        nodeId := BrowsePathSource_tab_i (index)
     END
     ;
 
     add_BrowsePathSource (nodeId) =
     BEGIN
-        BrowsePathSource_size := BrowsePathSource_size + 1;
-        BrowsePathSource_tab(BrowsePathSource_size) := nodeId
+        BrowsePathSource_size_i := BrowsePathSource_size_i + 1;
+        BrowsePathSource_tab_i(BrowsePathSource_size_i) := nodeId
     END
     ;
 
     init_BrowsePathResult =
     BEGIN
-         BrowsePathResult_tab := t_BrowsePathResPerElt_i * {c_ExpandedNodeId_indet};
-        BrowsePathResult_size := 0
+         BrowsePathResult_tab_i := t_BrowsePathResPerElt_i * {c_ExpandedNodeId_indet};
+        BrowsePathResult_size_i := 0
     END
     ;
 
     res <-- get_BrowsePathResultSize =
     BEGIN
-        res := BrowsePathResult_size
+        res := BrowsePathResult_size_i
     END
     ;
 
     res <-- get_BrowsePathResult_IsFull =
     BEGIN
-        res := bool(BrowsePathResult_size = k_n_BrowsePathResPerElt_max)
+        res := bool(BrowsePathResult_size_i = k_n_BrowsePathResPerElt_max)
     END
     ;
 
     nodeId <-- get_BrowsePathResult (index) =
     BEGIN
-        nodeId := BrowsePathResult_tab (index)
+        nodeId := BrowsePathResult_tab_i (index)
     END
     ;
 
     add_BrowsePathResult (nodeId) =
     BEGIN
-        BrowsePathResult_size := BrowsePathResult_size + 1;
-        BrowsePathResult_tab(BrowsePathResult_size) := nodeId
+        BrowsePathResult_size_i := BrowsePathResult_size_i + 1;
+        BrowsePathResult_tab_i(BrowsePathResult_size_i) := nodeId
     END
     ;
 
     init_BrowsePathRemaining =
     BEGIN
-        BrowsePathRemainingNodeId_size := 0;
-        BrowsePathRemainingNodeId_tab  := t_BrowsePathResPerElt_i * {c_ExpandedNodeId_indet};
-        BrowsePathRemainingIndex_tab   := t_BrowsePathResPerElt_i * {0}
+        BrowsePathRemainingNodeId_size_i := 0;
+        BrowsePathRemainingNodeId_tab_i  := t_BrowsePathResPerElt_i * {c_ExpandedNodeId_indet};
+        BrowsePathRemainingIndex_tab_i   := t_BrowsePathResPerElt_i * {0}
     END
     ;
 
     res <-- get_BrowsePathRemainingSize =
     BEGIN
-        res := BrowsePathRemainingNodeId_size
+        res := BrowsePathRemainingNodeId_size_i
     END
     ;
 
     res <-- get_BrowsePathRemaining_IsFull =
     BEGIN
-        res := bool(BrowsePathRemainingNodeId_size = k_n_BrowsePathResPerElt_max)
+        res := bool(BrowsePathRemainingNodeId_size_i = k_n_BrowsePathResPerElt_max)
     END
     ;
 
     nodeId, remainingIndex <-- get_BrowsePathRemaining (index) =
     BEGIN
-        nodeId := BrowsePathRemainingNodeId_tab(index);
-        remainingIndex := BrowsePathRemainingIndex_tab(index)
+        nodeId := BrowsePathRemainingNodeId_tab_i(index);
+        remainingIndex := BrowsePathRemainingIndex_tab_i(index)
     END
     ;
 
     add_BrowsePathResultRemaining (nodeId, index) =
     BEGIN
-        BrowsePathRemainingNodeId_size := BrowsePathRemainingNodeId_size + 1;
-        BrowsePathRemainingNodeId_tab(BrowsePathRemainingNodeId_size) := nodeId;
-        BrowsePathRemainingIndex_tab(BrowsePathRemainingNodeId_size) := index
+        BrowsePathRemainingNodeId_size_i := BrowsePathRemainingNodeId_size_i + 1;
+        BrowsePathRemainingNodeId_tab_i(BrowsePathRemainingNodeId_size_i) := nodeId;
+        BrowsePathRemainingIndex_tab_i(BrowsePathRemainingNodeId_size_i) := index
     END
 
 

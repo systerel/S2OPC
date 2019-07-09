@@ -189,8 +189,8 @@ extern const constants_bs__t_NodeId_i constants_bs__c_Null_Type_NodeId;
 #define constants_bs__k_n_registerNodes_max SOPC_MAX_OPERATIONS_PER_MSG
 #define constants_bs__k_n_republishNotifPerSub_max (2 * SOPC_MAX_SUBSCRIPTION_PUBLISH_REQUESTS)
 #define constants_bs__k_n_unregisterNodes_max SOPC_MAX_OPERATIONS_PER_MSG
-#define constants_bs__k_n_BrowsePathResPerElt_max SOPC_MAX_OPERATIONS_PER_MSG
-#define constants_bs__k_n_BrowsePathResPerPath_max SOPC_MAX_OPERATIONS_PER_MSG
+#define constants_bs__k_n_BrowsePathResPerElt_max SOPC_MAX_TRANSLATE_BROWSE_PATH_MATCHES
+#define constants_bs__k_n_BrowsePathResPerPath_max SOPC_MAX_TRANSLATE_BROWSE_PATH_MATCHES
 
 /*------------------------
    INITIALISATION Clause

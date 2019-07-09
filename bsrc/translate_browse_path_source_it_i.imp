@@ -28,44 +28,45 @@ SEES
 
 CONCRETE_VARIABLES
 
-    current_browsePathSource_idx,
-    max_browsePathSource_idx
+    currentBrowsePathSourceIdx_i,
+    nb_browsePathSourceIdx_max_refs_i
 
 INVARIANT
-    current_browsePathSource_idx : NAT &
-    max_browsePathSource_idx : NAT &
+    currentBrowsePathSourceIdx_i : NAT &
+    nb_browsePathSourceIdx_max_refs_i : NAT &
 
-    nb_browsePathSourceIdx_max_refs = max_browsePathSource_idx &
-    current_browsePathSource_idx : 0..max_browsePathSource_idx &
+    nb_browsePathSourceIdx_max_refs = nb_browsePathSourceIdx_max_refs_i &
+    currentBrowsePathSourceIdx_i : 0..nb_browsePathSourceIdx_max_refs_i &
+    nextBrowsePathSourceIdx = currentBrowsePathSourceIdx_i + 1 &
 
-    (current_browsePathSource_idx = 0 =>
-        browsePathSourceIdx_to_iterate = 1..max_browsePathSource_idx &
-        browsePathSourceIdx_iterated = {}
-    ) &
-    (current_browsePathSource_idx /= 0 =>
-        browsePathSourceIdx_to_iterate = current_browsePathSource_idx..max_browsePathSource_idx &
-        browsePathSourceIdx_iterated = 1..current_browsePathSource_idx)
+    (nb_browsePathSourceIdx_max_refs_i = 0 =>
+        browsePathSourceIdx_to_iterate = {} &
+        browsePathSourceIdx_iterated = {}) &
+
+    (nb_browsePathSourceIdx_max_refs_i /= 0 =>
+        browsePathSourceIdx_to_iterate = currentBrowsePathSourceIdx_i..nb_browsePathSourceIdx_max_refs_i &
+        browsePathSourceIdx_iterated = 1..currentBrowsePathSourceIdx_i)
 
 INITIALISATION
-    current_browsePathSource_idx := 0;
-    max_browsePathSource_idx := 0
+    currentBrowsePathSourceIdx_i := 0;
+    nb_browsePathSourceIdx_max_refs_i := 0
 
 OPERATIONS
 
 
     p_continue <-- init_iter_browsePathSourceIdx(p_nb_browsePathSourceIdx_max_refs) =
     BEGIN
-        max_browsePathSource_idx := p_nb_browsePathSourceIdx_max_refs;
-        current_browsePathSource_idx := 0;
+        nb_browsePathSourceIdx_max_refs_i := p_nb_browsePathSourceIdx_max_refs;
+        currentBrowsePathSourceIdx_i := 0;
         p_continue := bool (0 < p_nb_browsePathSourceIdx_max_refs)
     END
     ;
 
     p_continue, p_browsePathSourceIdx <-- continue_iter_browsePathSourceIdx =
     BEGIN
-        current_browsePathSource_idx := current_browsePathSource_idx + 1;
-        p_browsePathSourceIdx := current_browsePathSource_idx;
-        p_continue := bool (current_browsePathSource_idx < max_browsePathSource_idx)
+        currentBrowsePathSourceIdx_i := currentBrowsePathSourceIdx_i + 1;
+        p_browsePathSourceIdx := currentBrowsePathSourceIdx_i;
+        p_continue := bool (currentBrowsePathSourceIdx_i < nb_browsePathSourceIdx_max_refs_i)
     END
 
 END

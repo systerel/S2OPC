@@ -21,7 +21,7 @@
 
  File Name            : translate_browse_path_source_it.h
 
- Date                 : 20/06/2019 17:56:21
+ Date                 : 10/07/2019 11:38:51
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -43,8 +43,8 @@
 /*----------------------------
    CONCRETE_VARIABLES Clause
   ----------------------------*/
-extern t_entier4 translate_browse_path_source_it__current_browsePathSource_idx;
-extern t_entier4 translate_browse_path_source_it__max_browsePathSource_idx;
+extern t_entier4 translate_browse_path_source_it__currentBrowsePathSourceIdx_i;
+extern t_entier4 translate_browse_path_source_it__nb_browsePathSourceIdx_max_refs_i;
 
 /*------------------------
    INITIALISATION Clause

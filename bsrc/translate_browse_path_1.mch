@@ -42,7 +42,13 @@ DEFINITIONS
 
     size(BrowsePathRemainingNodeId) <= k_n_BrowsePathResPerElt_max  &
     size(BrowsePathRemainingIndex)  <= k_n_BrowsePathResPerElt_max  &
-    size(BrowsePathRemainingNodeId)  = size(BrowsePathRemainingIndex)
+    size(BrowsePathRemainingNodeId)  = size(BrowsePathRemainingIndex) &
+
+    !(node).(
+        node : ran(BrowsePathResult)
+        =>
+        node /= c_ExpandedNodeId_indet &
+        node : dom(conv_ExpandedNodeId_NodeId))
 
 ABSTRACT_VARIABLES
     d_variables
@@ -126,6 +132,7 @@ OPERATIONS
     PRE
         nodeId : t_ExpandedNodeId_i &
         nodeId : t_ExpandedNodeId &
+        nodeId : dom(conv_ExpandedNodeId_NodeId) &
         size(BrowsePathResult) < k_n_BrowsePathResPerElt_max
     THEN
         BrowsePathResult
@@ -137,7 +144,7 @@ OPERATIONS
 
     init_BrowsePathRemaining =
     BEGIN
-           BrowsePathRemainingNodeId := {} ||
+        BrowsePathRemainingNodeId := {} ||
         BrowsePathRemainingIndex  := {}
     END
     ;

@@ -336,7 +336,6 @@ CONCRETE_CONSTANTS
     c_browsePath_indet,
     c_RelativePath_indet,
     c_RelativePathElt_indet,
-    /*c_BrowsePathResPerElt_indet,*/
     c_session_token_indet,
     c_Nonce_indet,
     c_SignatureData_indet,
@@ -418,7 +417,6 @@ ABSTRACT_CONSTANTS
 
     cast_t_session,
     cast_t_BrowsePath,
-    /*cast_t_BrowsePathResPerElt,*/
     cast_t_channel,
     cast_t_subscription,
     cast_t_ReadValue,
@@ -430,7 +428,6 @@ ABSTRACT_CONSTANTS
     t_BrowsePath,
     t_RelativePath,
     t_RelativePathElt,
-    /*t_BrowsePathResPerElt,*/
     t_session_token,
     t_user,
     t_user_token,
