@@ -459,20 +459,15 @@ SOPC_ReturnStatus Mutex_UnlockAndTimedWaitCond(Condition* cond, Mutex* mut, uint
     SOPC_ReturnStatus resSOPC = SOPC_STATUS_INVALID_PARAMETERS;
     QueueHandle_t* pFreeRtosMutex = mut;
 
-    if (NULL != cond)
+    if (NULL != cond && NULL != mut && NULL != (*mut))
     {
-        if (NULL != mut)
-        {
-            pFreeRtosMutex = ((QueueHandle_t*) mut);
-        }
-
+        pFreeRtosMutex = ((QueueHandle_t*) mut);
         resSOPC = P_SYNCHRO_UnlockAndWaitForConditionVariable(cond,                //
                                                               pFreeRtosMutex,      //
                                                               APP_DEFAULT_SIGNAL,  //
                                                               APP_CLEARING_SIGNAL, //
                                                               milliSecs);          //
     }
-
     return resSOPC;
 }
 
@@ -512,7 +507,7 @@ SOPC_ReturnStatus Mutex_Initialization(Mutex* mut)
 /*Destroy recursive mutex*/
 SOPC_ReturnStatus Mutex_Clear(Mutex* mut)
 {
-    QueueHandle_t handleRecursiveMutex = NULL;
+    QueueHandle_t freeRtosMutex = NULL;
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
     if ((NULL == mut) || (NULL == (*mut)))
@@ -521,8 +516,9 @@ SOPC_ReturnStatus Mutex_Clear(Mutex* mut)
     }
     else
     {
-        handleRecursiveMutex = *((QueueHandle_t*) (mut));
-        vSemaphoreDelete(handleRecursiveMutex);
+        freeRtosMutex = (QueueHandle_t)(*mut);
+        vSemaphoreDelete(freeRtosMutex);
+        *mut = NULL;
     }
     return result;
 }
