@@ -415,7 +415,7 @@ static SOPC_ReturnStatus on_ready_read(SOPC_Socket* socket, uint32_t socket_id)
         return SOPC_STATUS_OK;
     }
 
-    SOPC_Buffer* buffer = SOPC_Buffer_Create(SOPC_MAX_MESSAGE_LENGTH);
+    SOPC_Buffer* buffer = SOPC_Buffer_Create(SOPC_MSG_SIZE_TO_CHUNK_MANAGER);
 
     if (buffer == NULL)
     {
@@ -423,7 +423,7 @@ static SOPC_ReturnStatus on_ready_read(SOPC_Socket* socket, uint32_t socket_id)
     }
 
     uint32_t readBytes;
-    SOPC_ReturnStatus status = SOPC_Socket_Read(socket->sock, buffer->data, SOPC_MAX_MESSAGE_LENGTH, &readBytes);
+    SOPC_ReturnStatus status = SOPC_Socket_Read(socket->sock, buffer->data, SOPC_MSG_SIZE_TO_CHUNK_MANAGER, &readBytes);
 
     if (status != SOPC_STATUS_OK)
     {

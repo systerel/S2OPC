@@ -75,6 +75,11 @@
 #define SOPC_MAX_SOCKETS_CONNECTIONS 50
 #endif /* SOPC_MAX_SOCKETS_CONNECTIONS */
 
+/** @brief Message size allocated to send messages from sockets to chunk manager */
+#ifndef SOPC_MSG_SIZE_TO_CHUNK_MANAGER
+#define SOPC_MSG_SIZE_TO_CHUNK_MANAGER 1024
+#endif /* SOPC_MSG_SIZE_TO_CHUNK_MANAGER */
+
 /* SECURE CHANNEL CONFIGURATION */
 
 /** @brief Maximum number of endpoint description configured (same as number of connection listeners) */
