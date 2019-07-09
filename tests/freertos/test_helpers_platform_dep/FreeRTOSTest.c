@@ -33,6 +33,7 @@
 #include "task.h"
 #include "timers.h"
 
+#include "sopc_atomic.h"
 #include "sopc_builtintypes.h"
 #include "sopc_mutexes.h"
 #include "sopc_threads.h"
@@ -478,6 +479,461 @@ void FREE_RTOS_TEST_S2OPC_TIME(void* ptr)
 
     Mutex_Lock(&m);
     sprintf(sBuffer, "$$$$ %2X -  Toolkit test thread init launching result = %d : current time = %lu\r\n",
+            (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
+    PRINTF(sBuffer);
+    Mutex_Unlock(&m);
+}
+
+/*================================CHECK_THREAD======================================*/
+
+static bool wait_value(int32_t* atomic, int32_t val)
+{
+    for (int i = 0; i < 100; ++i)
+    {
+        int32_t x = SOPC_Atomic_Int_Get(atomic);
+
+        if (x == val)
+        {
+            return true;
+        }
+
+        SOPC_Sleep(10);
+    }
+
+    return false;
+}
+
+static Mutex gmutex;
+static Condition gcond;
+
+typedef struct CondRes
+{
+    uint32_t protectedCondition;
+    uint32_t waitingThreadStarted;
+    uint32_t successCondition;
+    uint32_t timeoutCondition;
+} CondRes;
+
+static void* test_thread_exec_fct(void* args)
+{
+    SOPC_Atomic_Int_Add((int32_t*) args, 1);
+    return NULL;
+}
+
+static void* test_thread_mutex_fct(void* args)
+{
+    SOPC_Atomic_Int_Add((int32_t*) args, 1);
+    Mutex_Lock(&gmutex);
+    SOPC_Atomic_Int_Add((int32_t*) args, 1);
+    Mutex_Unlock(&gmutex);
+    return NULL;
+}
+
+static void* test_thread_mutex_recursive_fct(void* args)
+{
+    SOPC_Atomic_Int_Add((int32_t*) args, 1);
+    Mutex_Lock(&gmutex);
+    Mutex_Lock(&gmutex);
+    SOPC_Atomic_Int_Add((int32_t*) args, 1);
+    Mutex_Unlock(&gmutex);
+    Mutex_Unlock(&gmutex);
+    return NULL;
+}
+
+static void* cbS2OPC_Thread_Test_Thread(void* ptr)
+{
+    Thread thread;
+    int32_t cpt = 0;
+    // Nominal behavior
+    thread = NULL;
+    SOPC_ReturnStatus status = SOPC_Thread_Create(&thread, test_thread_exec_fct, &cpt);
+    configASSERT(status == SOPC_STATUS_OK);
+
+    configASSERT(wait_value(&cpt, 1));
+
+    status = SOPC_Thread_Join(thread);
+    configASSERT(status == SOPC_STATUS_OK);
+    thread = NULL;
+
+    // Degraded behavior
+    status = SOPC_Thread_Create(NULL, test_thread_exec_fct, &cpt);
+    configASSERT(status == SOPC_STATUS_INVALID_PARAMETERS);
+    status = SOPC_Thread_Create(&thread, NULL, &cpt);
+    configASSERT(status == SOPC_STATUS_INVALID_PARAMETERS);
+    status = SOPC_Thread_Join(thread);
+    configASSERT(status != SOPC_STATUS_OK); // Todo: expected NOK, returned INVALID_STATE
+    return NULL;
+}
+
+static void* cbS2OPC_Thread_Test_Thread_Mutex(void* ptr)
+{
+    Thread thread = NULL; // Todo: current implem: handle must be set to NULL before called by create
+    int32_t cpt = 0;
+    // Nominal behavior
+    configASSERT(SOPC_STATUS_OK == Mutex_Initialization(&gmutex));
+    configASSERT(SOPC_STATUS_OK == Mutex_Lock(&gmutex));
+    configASSERT(SOPC_STATUS_OK == SOPC_Thread_Create(&thread, test_thread_mutex_fct, &cpt));
+
+    // Wait until the thread reaches the "lock mutex" statement
+    configASSERT(wait_value(&cpt, 1));
+
+    // Wait a bit, this is not really deterministic anyway as the thread could
+    // have been put to sleep by the OS...
+    SOPC_Sleep(10);
+    configASSERT(1 == SOPC_Atomic_Int_Get(&cpt));
+
+    // Unlock the mutex and check that the thread can go forward.
+    configASSERT(SOPC_STATUS_OK == Mutex_Unlock(&gmutex));
+    configASSERT(wait_value(&cpt, 2));
+
+    configASSERT(SOPC_STATUS_OK == SOPC_Thread_Join(thread));
+    configASSERT(SOPC_STATUS_OK == Mutex_Clear(&gmutex));
+
+    // Degraded behavior
+    SOPC_ReturnStatus status = Mutex_Lock(NULL);
+    configASSERT(status == SOPC_STATUS_INVALID_PARAMETERS);
+    status = Mutex_Unlock(NULL);
+    configASSERT(status == SOPC_STATUS_INVALID_PARAMETERS);
+    status = Mutex_Clear(NULL);
+    configASSERT(status == SOPC_STATUS_INVALID_PARAMETERS);
+    return NULL;
+}
+
+static void* cbS2OPC_Thread_Test_Mutex_Recursive(void* ptr)
+{
+    Thread thread = NULL; // Todo: current implem: handle must be set to NULL before called by create
+    int32_t cpt = 0;
+    configASSERT(SOPC_STATUS_OK == Mutex_Initialization(&gmutex));
+    configASSERT(SOPC_STATUS_OK == Mutex_Lock(&gmutex));
+    configASSERT(SOPC_STATUS_OK == SOPC_Thread_Create(&thread, test_thread_mutex_recursive_fct, &cpt));
+
+    // Wait until the thread reaches the "lock mutex" statement
+    configASSERT(wait_value(&cpt, 1));
+
+    // Wait a bit, this is not really deterministic anyway as the thread could
+    // have been put to sleep by the OS...
+    SOPC_Sleep(10);
+    configASSERT(1 == SOPC_Atomic_Int_Get(&cpt));
+
+    // Unlock the mutex and check that the thread can go forward.
+    configASSERT(SOPC_STATUS_OK == Mutex_Unlock(&gmutex));
+    configASSERT(wait_value(&cpt, 2));
+
+    configASSERT(SOPC_STATUS_OK == SOPC_Thread_Join(thread));
+    configASSERT(SOPC_STATUS_OK == Mutex_Clear(&gmutex));
+    return NULL;
+}
+
+static void* test_thread_condvar_fct(void* args)
+{
+    CondRes* condRes = (CondRes*) args;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    status = Mutex_Lock(&gmutex);
+    configASSERT(SOPC_STATUS_OK == status);
+    condRes->waitingThreadStarted = 1;
+    while (condRes->protectedCondition == 0)
+    {
+        status = Mutex_UnlockAndWaitCond(&gcond, &gmutex);
+        configASSERT(SOPC_STATUS_OK == status);
+        if (condRes->protectedCondition == 1)
+        {
+            // Set success
+            condRes->successCondition = 1;
+        }
+    }
+    status = Mutex_Unlock(&gmutex);
+    return NULL;
+}
+
+static void* test_thread_condvar_timed_fct(void* args)
+{
+    CondRes* condRes = (CondRes*) args;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    status = Mutex_Lock(&gmutex);
+    condRes->waitingThreadStarted = 1;
+    status = SOPC_STATUS_NOK;
+    while (condRes->protectedCondition == 0 && SOPC_STATUS_TIMEOUT != status)
+    {
+        status = Mutex_UnlockAndTimedWaitCond(&gcond, &gmutex, 1000);
+    }
+    if (SOPC_STATUS_OK == status && condRes->protectedCondition == 1)
+    {
+        // Set success on condition
+        condRes->successCondition = 1;
+    }
+    else if (SOPC_STATUS_TIMEOUT == status && condRes->protectedCondition == 0)
+    {
+        condRes->timeoutCondition = 1;
+    }
+    status = Mutex_Unlock(&gmutex);
+    return NULL;
+}
+
+static void* cbS2OPC_Thread_Test_CondVar(void* ptr)
+{
+    Thread thread = NULL; // Todo: current implem: handle must be set to NULL before called by create
+    CondRes condRes;
+    condRes.protectedCondition = 0;   // FALSE
+    condRes.waitingThreadStarted = 0; // FALSE
+    condRes.successCondition = 0;     // FALSE
+    condRes.timeoutCondition = 0;     // FALSE
+
+    // Nominal behavior (non timed waiting on condition)
+    SOPC_ReturnStatus status = Mutex_Initialization(&gmutex);
+    configASSERT(status == SOPC_STATUS_OK);
+    status = Condition_Init(&gcond);
+    configASSERT(status == SOPC_STATUS_OK);
+    status = SOPC_Thread_Create(&thread, test_thread_condvar_fct, &condRes);
+    configASSERT(status == SOPC_STATUS_OK);
+    SOPC_Sleep(10);
+    status = Mutex_Lock(&gmutex);
+    configASSERT(status == SOPC_STATUS_OK);
+    // Check thread is waiting and mutex is released since we locked it !
+    configASSERT(condRes.waitingThreadStarted == 1);
+    // Trigger the condition now
+    condRes.protectedCondition = 1;
+    status = Mutex_Unlock(&gmutex);
+    configASSERT(status == SOPC_STATUS_OK);
+    // Signal condition has changed
+    status = Condition_SignalAll(&gcond);
+    // Wait thread termination
+    status = SOPC_Thread_Join(thread);
+    configASSERT(status == SOPC_STATUS_OK);
+    thread = NULL;
+    // Check condition status after thread termination
+    status = Mutex_Lock(&gmutex);
+    configASSERT(condRes.successCondition == 1);
+    status = Mutex_Unlock(&gmutex);
+
+    // Clear mutex and Condtion
+    status = Mutex_Clear(&gmutex);
+    configASSERT(status == SOPC_STATUS_OK);
+    status = Condition_Clear(&gcond);
+    configASSERT(status == SOPC_STATUS_OK);
+
+    // Nominal behavior (timed waiting on condition)
+    condRes.protectedCondition = 0;   // FALSE
+    condRes.waitingThreadStarted = 0; // FALSE
+    condRes.successCondition = 0;     // FALSE
+    condRes.timeoutCondition = 0;     // FALSE
+    status = Mutex_Initialization(&gmutex);
+    configASSERT(status == SOPC_STATUS_OK);
+    status = Condition_Init(&gcond);
+    configASSERT(status == SOPC_STATUS_OK);
+    status = SOPC_Thread_Create(&thread, test_thread_condvar_timed_fct, &condRes);
+    configASSERT(status == SOPC_STATUS_OK);
+    SOPC_Sleep(10);
+    status = Mutex_Lock(&gmutex);
+    configASSERT(status == SOPC_STATUS_OK);
+    // Check thread is waiting and mutex is released since we locked it !
+    configASSERT(condRes.waitingThreadStarted == 1);
+    // Trigger the condition now
+    condRes.protectedCondition = 1;
+    status = Mutex_Unlock(&gmutex);
+    configASSERT(status == SOPC_STATUS_OK);
+    // Signal condition has changed
+    status = Condition_SignalAll(&gcond);
+    // Wait for thread termination
+    status = SOPC_Thread_Join(thread);
+    thread = NULL;
+    configASSERT(status == SOPC_STATUS_OK);
+
+    status = Mutex_Lock(&gmutex);
+    configASSERT(condRes.successCondition == 1);
+    status = Mutex_Unlock(&gmutex);
+
+    // Clear mutex and Condtion
+    status = Mutex_Clear(&gmutex);
+    configASSERT(status == SOPC_STATUS_OK);
+    status = Condition_Clear(&gcond);
+    configASSERT(status == SOPC_STATUS_OK);
+
+    // Degraded behavior (timed waiting on condition)
+    condRes.protectedCondition = 0;   // FALSE
+    condRes.waitingThreadStarted = 0; // FALSE
+    condRes.successCondition = 0;     // FALSE
+    condRes.timeoutCondition = 0;     // FALSE
+    status = Mutex_Initialization(&gmutex);
+    configASSERT(status == SOPC_STATUS_OK);
+    status = Condition_Init(&gcond);
+    configASSERT(status == SOPC_STATUS_OK);
+    status = SOPC_Thread_Create(&thread, test_thread_condvar_timed_fct, &condRes);
+    configASSERT(status == SOPC_STATUS_OK);
+    SOPC_Sleep(10);
+    status = Mutex_Lock(&gmutex);
+    configASSERT(status == SOPC_STATUS_OK);
+    // Check thread is waiting and mutex is released since we locked it !
+    configASSERT(condRes.waitingThreadStarted == 1);
+    // DO NOT CHANGE CONDITION
+    status = Mutex_Unlock(&gmutex);
+    configASSERT(status == SOPC_STATUS_OK);
+    // DO NOT SIGNAL CONDITION CHANGE
+
+    // Wait thread termination
+    status = SOPC_Thread_Join(thread);
+    configASSERT(status == SOPC_STATUS_OK);
+    thread = NULL;
+    // Check timeout on condition occured
+    status = Mutex_Lock(&gmutex);
+    configASSERT(condRes.timeoutCondition == 1);
+    status = Mutex_Unlock(&gmutex);
+
+    // Clear mutex and Condtion
+    status = Mutex_Clear(&gmutex);
+    configASSERT(status == SOPC_STATUS_OK);
+    status = Condition_Clear(&gcond);
+    configASSERT(status == SOPC_STATUS_OK);
+
+    // Degraded behavior (invalid parameter)
+    status = Condition_Init(NULL);
+    configASSERT(status == SOPC_STATUS_INVALID_PARAMETERS);
+    status = Condition_Clear(NULL);
+    configASSERT(status == SOPC_STATUS_INVALID_PARAMETERS);
+    status = Condition_SignalAll(NULL);
+    configASSERT(status == SOPC_STATUS_INVALID_PARAMETERS);
+    // status = Condition_Init(&gcond); // Todo: Initialized to test gCond valid and other parameters invalid else valid
+    // parameters with gCond not initialized returns INVALID STATE
+
+    status = Mutex_UnlockAndWaitCond(NULL, &gmutex);
+    configASSERT(status == SOPC_STATUS_INVALID_PARAMETERS);
+    status = Mutex_UnlockAndWaitCond(&gcond, NULL);
+    configASSERT(status == SOPC_STATUS_INVALID_PARAMETERS);
+    status = Mutex_UnlockAndWaitCond(NULL, NULL);
+    configASSERT(status == SOPC_STATUS_INVALID_PARAMETERS);
+
+    status = Mutex_UnlockAndTimedWaitCond(NULL, &gmutex, 100);
+    configASSERT(status == SOPC_STATUS_INVALID_PARAMETERS);
+    status = Mutex_UnlockAndTimedWaitCond(&gcond, &gmutex, 0);
+    configASSERT(status == SOPC_STATUS_INVALID_PARAMETERS);
+    status = Mutex_UnlockAndTimedWaitCond(NULL, &gmutex, 0);
+    configASSERT(status == SOPC_STATUS_INVALID_PARAMETERS);
+
+    status = Mutex_UnlockAndTimedWaitCond(&gcond, NULL, 100);
+    configASSERT(status == SOPC_STATUS_INVALID_PARAMETERS);
+    status = Mutex_UnlockAndTimedWaitCond(&gcond, &gmutex, 0);
+    configASSERT(status == SOPC_STATUS_INVALID_PARAMETERS);
+    status = Mutex_UnlockAndTimedWaitCond(&gcond, NULL, 0);
+
+    status = Mutex_UnlockAndTimedWaitCond(NULL, NULL, 100);
+    configASSERT(status == SOPC_STATUS_INVALID_PARAMETERS);
+    status = Mutex_UnlockAndTimedWaitCond(&gcond, NULL, 100);
+    configASSERT(status == SOPC_STATUS_INVALID_PARAMETERS);
+    status = Mutex_UnlockAndTimedWaitCond(NULL, &gmutex, 100);
+    configASSERT(status == SOPC_STATUS_INVALID_PARAMETERS);
+
+    status = Mutex_UnlockAndTimedWaitCond(NULL, NULL, 0);
+    configASSERT(status == SOPC_STATUS_INVALID_PARAMETERS);
+
+    // status = Condition_Clear(&gcond);
+    // configASSERT(status == SOPC_STATUS_OK);
+
+    return NULL;
+}
+
+static void* cbS2OPC_Thread_CheckThread(void* ptr)
+{
+    SOPC_ReturnStatus status;
+    Condition* pv = (Condition*) ptr;
+
+    SOPC_LogSrv_Start(60, 4023);
+    SOPC_LogSrv_WaitClient(UINT32_MAX);
+
+    pX = NULL;
+    status = SOPC_Thread_Create(&pX, cbS2OPC_Thread_Test_Thread, pv);
+
+    Mutex_Lock(&m);
+    sprintf(sBuffer, "$$$$ %2X - Test thread launching result = %d : current time = %lu\r\n",
+            (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
+    printf(sBuffer);
+    Mutex_Unlock(&m);
+
+    configASSERT(status == SOPC_STATUS_OK);
+    status = SOPC_Thread_Join(pX);
+    pX = NULL;
+
+    Mutex_Lock(&m);
+    sprintf(sBuffer, "$$$$ %2X - Test thread joined result = %d : current time = %lu\r\n",
+            (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
+    printf(sBuffer);
+    Mutex_Unlock(&m);
+
+    configASSERT(status == SOPC_STATUS_OK);
+
+    pX = NULL;
+    status = SOPC_Thread_Create(&pX, cbS2OPC_Thread_Test_Thread_Mutex, pv);
+
+    Mutex_Lock(&m);
+    sprintf(sBuffer, "$$$$ %2X - Test thread mutex launching result = %d : current time = %lu\r\n",
+            (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
+    printf(sBuffer);
+    Mutex_Unlock(&m);
+
+    configASSERT(status == SOPC_STATUS_OK);
+    status = SOPC_Thread_Join(pX);
+    pX = NULL;
+
+    Mutex_Lock(&m);
+    sprintf(sBuffer, "$$$$ %2X - Test thread mutex joined result = %d : current time = %lu\r\n",
+            (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
+    printf(sBuffer);
+    Mutex_Unlock(&m);
+
+    configASSERT(status == SOPC_STATUS_OK);
+
+    pX = NULL;
+    status = SOPC_Thread_Create(&pX, cbS2OPC_Thread_Test_Mutex_Recursive, pv);
+
+    Mutex_Lock(&m);
+    sprintf(sBuffer, "$$$$ %2X - Test thread mutex recursive launching result = %d : current time = %lu\r\n",
+            (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
+    printf(sBuffer);
+    Mutex_Unlock(&m);
+
+    configASSERT(status == SOPC_STATUS_OK);
+    status = SOPC_Thread_Join(pX);
+    pX = NULL;
+
+    Mutex_Lock(&m);
+    sprintf(sBuffer, "$$$$ %2X - Test thread mutex recursive joined result = %d : current time = %lu\r\n",
+            (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
+    printf(sBuffer);
+    Mutex_Unlock(&m);
+
+    configASSERT(status == SOPC_STATUS_OK);
+
+    pX = NULL;
+    status = SOPC_Thread_Create(&pX, cbS2OPC_Thread_Test_CondVar, pv);
+
+    Mutex_Lock(&m);
+    sprintf(sBuffer, "$$$$ %2X - Test thread cond var launching result = %d : current time = %lu\r\n",
+            (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
+    printf(sBuffer);
+    Mutex_Unlock(&m);
+
+    configASSERT(status == SOPC_STATUS_OK);
+    status = SOPC_Thread_Join(pX);
+    pX = NULL;
+
+    Mutex_Lock(&m);
+    sprintf(sBuffer, "$$$$ %2X - Test thread cond var joined result = %d : current time = %lu\r\n",
+            (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
+    printf(sBuffer);
+    Mutex_Unlock(&m);
+
+    configASSERT(status == SOPC_STATUS_OK);
+    return NULL;
+}
+
+void FREE_RTOS_TEST_S2OPC_CHECK_THREAD(void* ptr)
+{
+    SOPC_ReturnStatus status;
+    Condition* pv = (Condition*) ptr;
+    Mutex_Initialization(&m);
+
+    status = SOPC_Thread_Create(&pX, cbS2OPC_Thread_CheckThread, pv);
+
+    Mutex_Lock(&m);
+    sprintf(sBuffer, "$$$$ %2X -  Toolkit check thread launching result = %d : current time = %lu\r\n",
             (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
     PRINTF(sBuffer);
     Mutex_Unlock(&m);

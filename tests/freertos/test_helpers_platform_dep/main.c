@@ -59,25 +59,47 @@ Condition gHandleConditionVariable;
 
 int main(void)
 {
+    // Configuration of MPU. I and D cache are disabled.
     BOARD_ConfigMPU();
+    // Initialization of GPIO
     BOARD_InitPins();
+    // Initialization  of clocks
     BOARD_BootClockRUN();
+    // Initialization of SDK debug console
     BOARD_InitDebugConsole();
+
+    // Initialization of MCU ENET driver
+    // Initialization of MCU Timer 3 used by FreeRTOS
+    // to generate 10KHz signal and measure cpu load per thread
+
     BOARD_InitBootPeripherals();
 
+    // Network interface initialization (IP @...)
+    // P_ETHERNET_IF_IsReady shall be called
+    // to verify if interface is ready, else
+    // lwip socket api crash.
     P_ETHERNET_IF_Initialize();
 
+    // Init tick to UTC time (build date)
     P_TIME_SetInitialDateToBuildTime();
 
+    // Attach S2OPC Mutexes mechanism to mbedtls.
     mbedtls_threading_initialize();
 
+    // used by FreeRTOS thread validation.
     Condition_Init(&gHandleConditionVariable);
 
-    FREE_RTOS_TEST_API_S2OPC_THREAD(&gHandleConditionVariable);
+    // FreeRTOS thread validation. This test shall be running ad vitam ethernam.
+    // FREE_RTOS_TEST_API_S2OPC_THREAD(&gHandleConditionVariable);
 
+    // Toolkit server application
     // FREE_RTOS_TEST_S2OPC_SERVER(&gHandleConditionVariable);
 
+    // Unit test copy from tests sources. CHECK_TIME
     // FREE_RTOS_TEST_S2OPC_TIME(&gHandleConditionVariable);
+
+    // Unit test copy from tests sources. CHECK_THREAD and MUTEX and COND VAR
+    FREE_RTOS_TEST_S2OPC_CHECK_THREAD(&gHandleConditionVariable);
 
     vTaskStartScheduler();
 
