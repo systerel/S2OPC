@@ -391,7 +391,7 @@ SOPC_ReturnStatus P_SYNCHRO_UnlockAndWaitForConditionVariable(
         }
         xSemaphoreGive(pConditionVariable->handleLockCounter);
 
-        result = SOPC_STATUS_OK;
+        // Result updated by P_SYNCHRO_WaitSignal. Can be SOPC_OK or TIMEOUT !!!
     }
     else
     {
