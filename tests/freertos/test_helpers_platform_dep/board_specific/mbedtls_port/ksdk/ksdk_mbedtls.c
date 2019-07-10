@@ -10,7 +10,7 @@
 #if !defined(MBEDTLS_CONFIG_FILE)
 #include "mbedtls/config.h"
 #else
-#include<mbedtls_port/ksdk/ksdk_mbedtls_config.h>
+#include <mbedtls_port/ksdk/ksdk_mbedtls_config.h>
 #endif
 
 #include "fsl_common.h"
@@ -4247,13 +4247,5 @@ void mbedtls_threading_initialize(void)
 {
     mbedtls_threading_set_alt(mutex_init, mutex_free, mutex_lock, mutex_unlock);
 }
-/*---------HEAP_4 calloc --------------------------------------------------*/
 
-void* pvPortCalloc(size_t num, size_t size)
-{
-    size_t totalSize = num * size;
-    unsigned char* p = (unsigned char*) pvPortMalloc(totalSize);
-    memset(p, 0, totalSize);
-    return p;
-}
 #endif /* USE_RTOS && defined(FSL_RTOS_FREE_RTOS) && defined(MBEDTLS_FREESCALE_FREERTOS_CALLOC_ALT) */
