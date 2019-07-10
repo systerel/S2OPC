@@ -105,24 +105,10 @@ void* pvPortRealloc(void* aptr, size_t nbytes)
 }
 
 // Malloc wrapping function
-void* __attribute__((weak)) malloc(size_t size)
-{
-    void* ptr = NULL;
-    ptr = pvPortMalloc(size);
-    return ptr;
-}
-
 void* __attribute__((weak)) _malloc_r(void* reent, size_t size)
 {
     void* ptr = NULL;
     ptr = pvPortMalloc(size);
-    return ptr;
-}
-
-void* __attribute__((weak)) realloc(void* aptr, size_t nbytes)
-{
-    void* ptr = NULL;
-    ptr = pvPortRealloc(aptr, nbytes);
     return ptr;
 }
 
@@ -133,22 +119,11 @@ void* __attribute__((weak)) _realloc_r(void* reent, void* arg, size_t size)
     return ptr;
 }
 
-void* __attribute__((weak)) calloc(size_t n, size_t s)
-{
-    void* ptr = NULL;
-    ptr = pvPortCalloc(n, s);
-    return ptr;
-}
 void* __attribute__((weak)) _calloc_r(void* reeant, size_t n, size_t s)
 {
     void* ptr = NULL;
     ptr = pvPortCalloc(n, s);
     return ptr;
-}
-
-void __attribute__((weak)) free(void* aptr)
-{
-    vPortFree(aptr);
 }
 
 void __attribute__((weak)) _free_r(void* reent, void* ptr)
