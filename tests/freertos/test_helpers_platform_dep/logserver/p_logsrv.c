@@ -1617,7 +1617,7 @@ int __attribute__((weak)) _write(int handle, const char* buffer, size_t size)
         return -1;
     }
     // Log server exist
-    if (NULL == gLogServer)
+    if (NULL == gLogServer || E_LOG_SERVER_ONLINE != gLogServer->status)
     {
         length = PRINTF(buffer, size);
     }
