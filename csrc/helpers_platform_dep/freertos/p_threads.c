@@ -30,6 +30,7 @@
 #include "timers.h"
 
 #include "sopc_enums.h" /* s2opc includes */
+#include "sopc_mem_alloc.h"
 
 #include "p_synchronisation.h" /* synchronisation include */
 #include "p_threads.h"         /* private thread include */
@@ -119,7 +120,7 @@ void P_THREAD_Destroy(Thread** ptr)
         P_THREAD_Join(*ptr);
         // Raz leaved memory
         memset(*ptr, 0, sizeof(Thread));
-        vPortFree(*ptr);
+        SOPC_Free(*ptr);
         *ptr = NULL;
         DEBUG_decrementCpt();
     }
@@ -134,7 +135,7 @@ P_THREAD_Create(tPtrFct fct,              // Callback
 {
     Thread* ptrWks = NULL;
 
-    ptrWks = pvPortMalloc(sizeof(Thread));
+    ptrWks = SOPC_Malloc(sizeof(Thread));
 
     if (NULL != ptrWks)
     {
@@ -180,7 +181,7 @@ SOPC_ReturnStatus P_THREAD_Init(Thread* ptrWks,            // Workspace
     /* TODO: outsource this initialization */
     if (NULL == pgTaskList)
     {
-        pgTaskList = pvPortMalloc(sizeof(tUtilsList));
+        pgTaskList = SOPC_Malloc(sizeof(tUtilsList));
         if (NULL != pgTaskList)
         {
             DEBUG_incrementCpt();
@@ -189,7 +190,7 @@ SOPC_ReturnStatus P_THREAD_Init(Thread* ptrWks,            // Workspace
             if (SOPC_STATUS_OK != resList)
             {
                 DEBUG_decrementCpt();
-                vPortFree(pgTaskList);
+                SOPC_Free(pgTaskList);
                 pgTaskList = NULL;
             }
         }
@@ -205,7 +206,7 @@ SOPC_ReturnStatus P_THREAD_Init(Thread* ptrWks,            // Workspace
     }
 
     /* Create the tThreadWks structure and assign it to (*ptrWks) */
-    handleWks = pvPortMalloc(sizeof(tThreadWks));
+    handleWks = SOPC_Malloc(sizeof(tThreadWks));
 
     if (NULL == handleWks)
     {
@@ -630,7 +631,7 @@ SOPC_ReturnStatus P_THREAD_Join(Thread* pHandle)
         /* Raz leaved memory */
         memset(pThread, 0, sizeof(tThreadWks));
 
-        vPortFree(pThread);
+        SOPC_Free(pThread);
         *pHandle = NULL;
         pThread = NULL;
         DEBUG_decrementCpt();
