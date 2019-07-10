@@ -298,18 +298,15 @@ int main(int argc, char* argv[])
     if (SOPC_STATUS_OK == status)
     {
         /*
-         * 1st Security policy is None with anonymous and username (non encrypted) authentication allowed
-         * (for tests only, otherwise users on unsecure channel shall be forbidden)
+         * 1st Security policy is Basic256Sha256 with anonymous and username (non encrypted) authentication allowed
          */
         SOPC_String_Initialize(&epConfig.secuConfigurations[0].securityPolicy);
-        status =
-            SOPC_String_AttachFromCstring(&epConfig.secuConfigurations[0].securityPolicy, SOPC_SecurityPolicy_None_URI);
-        epConfig.secuConfigurations[0].securityModes = SOPC_SECURITY_MODE_NONE_MASK;
+        status = SOPC_String_AttachFromCstring(&epConfig.secuConfigurations[0].securityPolicy,
+                                               SOPC_SecurityPolicy_Basic256Sha256_URI);
+        epConfig.secuConfigurations[0].securityModes = SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK;
         epConfig.secuConfigurations[0].nbOfUserTokenPolicies = 2;
-        epConfig.secuConfigurations[0].userTokenPolicies[0] =
-            c_userTokenPolicy_Anonymous; /* Necessary for tests only */
-        epConfig.secuConfigurations[0].userTokenPolicies[1] =
-            c_userTokenPolicy_UserName_NoneSecurityPolicy; /* Necessary for UACTT tests only */
+        epConfig.secuConfigurations[0].userTokenPolicies[0] = c_userTokenPolicy_Anonymous;
+        epConfig.secuConfigurations[0].userTokenPolicies[1] = c_userTokenPolicy_UserName_NoneSecurityPolicy;
 
         /*
          * 2nd Security policy is Basic256 with anonymous and username (non encrypted) authentication allowed
@@ -325,18 +322,24 @@ int main(int argc, char* argv[])
             epConfig.secuConfigurations[1].userTokenPolicies[0] = c_userTokenPolicy_Anonymous;
             epConfig.secuConfigurations[1].userTokenPolicies[1] = c_userTokenPolicy_UserName_NoneSecurityPolicy;
         }
+
         /*
-         * 3rd Security policy is Basic256Sha256 with anonymous and username (non encrypted) authentication allowed
+         * 3rd Security policy is None with anonymous and username (non encrypted) authentication allowed
+         * (for tests only, otherwise users on unsecure channel shall be forbidden)
          */
         if (SOPC_STATUS_OK == status)
         {
             SOPC_String_Initialize(&epConfig.secuConfigurations[2].securityPolicy);
             status = SOPC_String_AttachFromCstring(&epConfig.secuConfigurations[2].securityPolicy,
-                                                   SOPC_SecurityPolicy_Basic256Sha256_URI);
-            epConfig.secuConfigurations[2].securityModes = SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK;
-            epConfig.secuConfigurations[2].nbOfUserTokenPolicies = 2;
-            epConfig.secuConfigurations[2].userTokenPolicies[0] = c_userTokenPolicy_Anonymous;
-            epConfig.secuConfigurations[2].userTokenPolicies[1] = c_userTokenPolicy_UserName_NoneSecurityPolicy;
+                                                   SOPC_SecurityPolicy_None_URI);
+            epConfig.secuConfigurations[2].securityModes = SOPC_SECURITY_MODE_NONE_MASK;
+            epConfig.secuConfigurations[2].nbOfUserTokenPolicies =
+                2; /* Necessary for tests only: it shall be 0 when
+                      security is None to avoid any possible session without security */
+            epConfig.secuConfigurations[2].userTokenPolicies[0] =
+                c_userTokenPolicy_Anonymous; /* Necessary for tests only */
+            epConfig.secuConfigurations[2].userTokenPolicies[1] =
+                c_userTokenPolicy_UserName_NoneSecurityPolicy; /* Necessary for UACTT tests only */
         }
     }
 
