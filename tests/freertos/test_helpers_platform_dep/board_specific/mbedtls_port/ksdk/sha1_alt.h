@@ -25,7 +25,8 @@
 #define MBEDTLS_SHA1_ALT_H
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 #if defined(MBEDTLS_FREESCALE_LTC_SHA1)
