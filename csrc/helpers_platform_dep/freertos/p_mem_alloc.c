@@ -27,6 +27,11 @@
 
 void* SOPC_Malloc(size_t size)
 {
+    // Minimum size = 4 to avoid NULL pointer
+    if (0 == size)
+    {
+        size = 4;
+    }
     return pvPortMalloc(size);
 }
 
