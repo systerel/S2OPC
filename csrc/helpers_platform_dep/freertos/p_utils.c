@@ -24,6 +24,8 @@
 #include <stdio.h> /*stdlib*/
 #include <string.h>
 
+#include "sopc_mem_alloc.h" /*s2opc*/
+
 #include "FreeRTOS.h" /*freeRtos*/
 #include "queue.h"
 #include "semphr.h"
@@ -44,7 +46,7 @@ SOPC_ReturnStatus P_UTILS_LIST_Init(tUtilsList* ptr, uint16_t wMaxRDV)
         return SOPC_STATUS_INVALID_STATE;
     }
 
-    ptr->list = (tUtilsListElt*) pvPortMalloc(sizeof(tUtilsListElt) * wMaxRDV);
+    ptr->list = (tUtilsListElt*) SOPC_Calloc(wMaxRDV, sizeof(tUtilsListElt));
     if (NULL == ptr->list)
     {
         return SOPC_STATUS_OUT_OF_MEMORY;
@@ -70,7 +72,7 @@ void P_UTILS_LIST_DeInit(tUtilsList* ptr)
         if (ptr->list != NULL)
         {
             memset(ptr->list, 0, ptr->wMaxWaitingTasks * sizeof(tUtilsListElt));
-            vPortFree(ptr->list);
+            SOPC_Free(ptr->list);
             ptr->list = NULL;
             DEBUG_decrementCpt();
         }
