@@ -45,14 +45,17 @@ static uint32_t gFreeRTOSTotalFree = 0;
 static uint32_t bOverflowDetected = 0;
 static uint32_t bMallocFailed = 0;
 
-// Malloc function thread safe function
-void* SOPC_Malloc(size_t size)
+/*---------HEAP_4 calloc and realloc--------------------------------------------------*/
+
+void* pvPortCalloc(size_t num, size_t size)
 {
-    return pvPortMalloc(size);
+    size_t totalSize = num * size;
+    unsigned char* p = (unsigned char*) pvPortMalloc(totalSize);
+    memset(p, 0, totalSize);
+    return p;
 }
 
-// Realloc function thread safe function
-void* SOPC_Realloc(void* aptr, size_t nbytes)
+void* pvPortRealloc(void* aptr, size_t nbytes)
 {
     configASSERT(configFRTOS_MEMORY_SCHEME == 4);
     struct T_BLOCK_INFO* pBlockInfo = NULL;
@@ -97,86 +100,56 @@ void* SOPC_Realloc(void* aptr, size_t nbytes)
     return n_ptr;
 }
 
-// Calloc function thread safe function
-void* SOPC_Calloc(size_t n, size_t s)
-{
-    uint8_t* p = NULL;
-    size_t size = n * s;
-
-    if (size > 0)
-    {
-        p = pvPortMalloc(size);
-        if (p != NULL)
-        {
-            memset(p, 0, size);
-        }
-    }
-    else
-    {
-        p = NULL;
-    }
-    return p;
-}
-
-// Free function thread safe function
-void SOPC_Free(void* aptr)
-{
-    if (aptr != NULL)
-    {
-        vPortFree(aptr);
-    }
-}
-
 // Malloc wrapping function
 void* __attribute__((weak)) malloc(size_t size)
 {
     void* ptr = NULL;
-    ptr = SOPC_Malloc(size);
+    ptr = pvPortMalloc(size);
     return ptr;
 }
 
 void* __attribute__((weak)) _malloc_r(void* reent, size_t size)
 {
     void* ptr = NULL;
-    ptr = SOPC_Malloc(size);
+    ptr = pvPortMalloc(size);
     return ptr;
 }
 
 void* __attribute__((weak)) realloc(void* aptr, size_t nbytes)
 {
     void* ptr = NULL;
-    ptr = SOPC_Realloc(aptr, nbytes);
+    ptr = pvPortRealloc(aptr, nbytes);
     return ptr;
 }
 
 void* __attribute__((weak)) _realloc_r(void* reent, void* arg, size_t size)
 {
     void* ptr = NULL;
-    ptr = SOPC_Realloc(arg, size);
+    ptr = pvPortRealloc(arg, size);
     return ptr;
 }
 
 void* __attribute__((weak)) calloc(size_t n, size_t s)
 {
     void* ptr = NULL;
-    ptr = SOPC_Calloc(n, s);
+    ptr = pvPortCalloc(n, s);
     return ptr;
 }
 void* __attribute__((weak)) _calloc_r(void* reeant, size_t n, size_t s)
 {
     void* ptr = NULL;
-    ptr = SOPC_Calloc(n, s);
+    ptr = pvPortCalloc(n, s);
     return ptr;
 }
 
 void __attribute__((weak)) free(void* aptr)
 {
-    SOPC_Free(aptr);
+    vPortFree(aptr);
 }
 
 void __attribute__((weak)) _free_r(void* reent, void* ptr)
 {
-    SOPC_Free(ptr);
+    vPortFree(ptr);
 }
 
 // New lib Cleanup stdout reentrant structure. Called by freeRTOS.
