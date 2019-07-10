@@ -30,6 +30,7 @@
 #include "timers.h"
 
 #include "sopc_enums.h" /* s2opc includes */
+#include "sopc_mem_alloc.h"
 
 #include "p_synchronisation.h" /* synchronisation include */
 #include "p_utils.h"           /* private list include */
@@ -151,7 +152,7 @@ void P_SYNCHRO_DestroyConditionVariable(Condition** ppConditionVariable)
     {
         P_SYNCHRO_ClearConditionVariable(*ppConditionVariable);
         memset(*ppConditionVariable, 0, sizeof(Condition));
-        vPortFree(*ppConditionVariable);
+        SOPC_Free(*ppConditionVariable);
         *ppConditionVariable = NULL;
         DEBUG_decrementCpt();
     }
@@ -161,7 +162,7 @@ void P_SYNCHRO_DestroyConditionVariable(Condition** ppConditionVariable)
 Condition* P_SYNCHRO_CreateConditionVariable(uint16_t wMaxRDV)
 {
     Condition* pConditionVariable = NULL;
-    pConditionVariable = (Condition*) pvPortMalloc(sizeof(Condition));
+    pConditionVariable = (Condition*) SOPC_Malloc(sizeof(Condition));
     if (pConditionVariable != NULL)
     {
         DEBUG_incrementCpt();
@@ -172,7 +173,7 @@ Condition* P_SYNCHRO_CreateConditionVariable(uint16_t wMaxRDV)
             P_SYNCHRO_ClearConditionVariable(pConditionVariable);
             // Raz handle
             memset(pConditionVariable, 0, sizeof(Condition));
-            vPortFree(pConditionVariable);
+            SOPC_Free(pConditionVariable);
             pConditionVariable = NULL;
             DEBUG_decrementCpt();
         }
