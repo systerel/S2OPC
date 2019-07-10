@@ -49,6 +49,10 @@ static uint32_t bMallocFailed = 0;
 
 void* pvPortCalloc(size_t num, size_t size)
 {
+    if (size > (SIZE_MAX / num))
+    {
+        return NULL;
+    }
     size_t totalSize = num * size;
     unsigned char* p = (unsigned char*) pvPortMalloc(totalSize);
     memset(p, 0, totalSize);
