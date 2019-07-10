@@ -155,6 +155,15 @@ read -d '' exclusions <<-EOF
     tests/freertos/test_helpers_platform_dep/board_specific/src/clock_config.h
     tests/freertos/test_helpers_platform_dep/board_specific/src/clock_config.c
     tests/freertos/test_helpers_platform_dep/board_specific/src/board.c
+    tests/freertos/test_helpers_platform_dep/board_specific/mbedtls_port/ksdk/ksdk_mbedtls.c
+    tests/freertos/test_helpers_platform_dep/board_specific/mbedtls_port/ksdk/sha1_alt.h
+    tests/freertos/test_helpers_platform_dep/board_specific/mbedtls_port/ksdk/ksdk_mbedtls.h
+    tests/freertos/test_helpers_platform_dep/board_specific/mbedtls_port/ksdk/threading_alt.h
+    tests/freertos/test_helpers_platform_dep/board_specific/mbedtls_port/ksdk/sha256_alt.h
+    tests/freertos/test_helpers_platform_dep/board_specific/mbedtls_port/ksdk/des_alt.c
+    tests/freertos/test_helpers_platform_dep/board_specific/mbedtls_port/ksdk/des_alt.h
+    tests/freertos/test_helpers_platform_dep/board_specific/mbedtls_port/ksdk/ksdk_mbedtls_config.h
+    tests/freertos/test_helpers_platform_dep/board_specific/MIMXRT1064_features.h    
 EOF
 for f in $exclusions; do
     mv $f $f"_"
