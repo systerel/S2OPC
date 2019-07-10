@@ -159,7 +159,7 @@
 #define FSL_FEATURE_FLEXCAN_HAS_DOZE_MODE_SUPPORT (1)
 /* @brief Insatnce has doze mode support (register bit field MCR[DOZE]). */
 #define FSL_FEATURE_FLEXCAN_INSTANCE_HAS_DOZE_MODE_SUPPORTn(x) \
-  ((x) == CAN1 ? (0) : ((x) == CAN2 ? (0) : ((x) == CAN3 ? (1) : (-1))))
+    ((x) == CAN1 ? (0) : ((x) == CAN2 ? (0) : ((x) == CAN3 ? (1) : (-1))))
 /* @brief Has a glitch filter on the receive pin (register bit field
  * MCR[WAKSRC]). */
 #define FSL_FEATURE_FLEXCAN_HAS_GLITCH_FILTER (1)
@@ -168,19 +168,19 @@
 #define FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER (1)
 /* @brief Instance has extended bit timing register (register CBT). */
 #define FSL_FEATURE_FLEXCAN_INSTANCE_HAS_EXTENDED_TIMING_REGISTERn(x) \
-  ((x) == CAN1 ? (0) : ((x) == CAN2 ? (0) : ((x) == CAN3 ? (1) : (-1))))
+    ((x) == CAN1 ? (0) : ((x) == CAN2 ? (0) : ((x) == CAN3 ? (1) : (-1))))
 /* @brief Has a receive FIFO DMA feature (register bit field MCR[DMA]). */
 #define FSL_FEATURE_FLEXCAN_HAS_RX_FIFO_DMA (1)
 /* @brief Instance has a receive FIFO DMA feature (register bit field MCR[DMA]).
  */
 #define FSL_FEATURE_FLEXCAN_INSTANCE_HAS_RX_FIFO_DMAn(x) \
-  ((x) == CAN1 ? (0) : ((x) == CAN2 ? (0) : ((x) == CAN3 ? (1) : (-1))))
+    ((x) == CAN1 ? (0) : ((x) == CAN2 ? (0) : ((x) == CAN3 ? (1) : (-1))))
 /* @brief Remove CAN Engine Clock Source Selection from unsupported part. */
 #define FSL_FEATURE_FLEXCAN_SUPPORT_ENGINE_CLK_SEL_REMOVE (1)
 /* @brief Instance remove CAN Engine Clock Source Selection from unsupported
  * part. */
 #define FSL_FEATURE_FLEXCAN_INSTANCE_SUPPORT_ENGINE_CLK_SEL_REMOVEn(x) \
-  ((x) == CAN1 ? (1) : ((x) == CAN2 ? (1) : ((x) == CAN3 ? (0) : (-1))))
+    ((x) == CAN1 ? (1) : ((x) == CAN2 ? (1) : ((x) == CAN3 ? (0) : (-1))))
 /* @brief Is affected by errata with ID 5641 (Module does not transmit a message
  * that is enabled to be transmitted at a specific moment during the arbitration
  * process). */
@@ -189,7 +189,7 @@
 #define FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE (1)
 /* @brief CAN instance support Flexible Data rate (CAN FD) protocol. */
 #define FSL_FEATURE_FLEXCAN_INSTANCE_HAS_FLEXIBLE_DATA_RATEn(x) \
-  ((x) == CAN1 ? (0) : ((x) == CAN2 ? (0) : ((x) == CAN3 ? (1) : (-1))))
+    ((x) == CAN1 ? (0) : ((x) == CAN2 ? (0) : ((x) == CAN3 ? (1) : (-1))))
 /* @brief Has extra MB interrupt or common one. */
 #define FSL_FEATURE_FLEXCAN_HAS_EXTRA_MB_INT (1)
 
