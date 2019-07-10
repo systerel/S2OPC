@@ -26,10 +26,14 @@
 
 #include "sopc_builtintypes.h"
 #include "sopc_enums.h"
+#include "sopc_macros.h"
 #include "sopc_types.h"
 
-__attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
-    SOPC_Embedded_AddressSpace_Items[] =
+const bool sopc_embedded_is_const_addspace = true;
+
+SOPC_GCC_DIAGNOSTIC_IGNORE_DISCARD_QUALIFIER
+const SOPC_AddressSpace_Node
+    SOPC_Embedded_AddressSpace_Nodes[] =
         {
             {OpcUa_NodeClass_DataType,
              OpcUa_UncertainInitialValue,
@@ -46,7 +50,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "Describes a value that can have any valid DataType."}},
                       .NoOfReferences = 17,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
@@ -165,7 +169,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "Describes a value that can have any numeric DataType."}},
                       .NoOfReferences = 5,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -212,7 +216,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "Describes a value that can have any integer DataType."}},
                       .NoOfReferences = 5,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -259,7 +263,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "Describes a value that can have any unsigned integer DataType."}},
                       .NoOfReferences = 5,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -306,7 +310,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "Describes a value that is an enumerated DataType."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -329,7 +333,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "Describes a value that is either TRUE or FALSE."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -352,7 +356,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "Describes a value that is an integer between -128 and 127."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -375,7 +379,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "Describes a value that is an integer between 0 and 255."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -399,7 +403,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                             (SOPC_Byte*) "Describes a value that is an integer between ?32,768 and 32,767."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -422,7 +426,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "Describes a value that is an integer between 0 and 65535."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -449,7 +453,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                          "2,147,483,647."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -473,7 +477,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                             (SOPC_Byte*) "Describes a value that is an integer between 0 and 4,294,967,295."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -500,7 +504,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                                     "?9,223,372,036,854,775,808 and 9,223,372,036,854,775,807."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -527,7 +531,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                          "18,446,744,073,709,551,615."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -555,7 +559,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                          "number."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -583,7 +587,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                          "number."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -607,7 +611,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                             (SOPC_Byte*) "Describes a value that is a sequence of printable Unicode characters."}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -636,7 +640,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "Describes a value that is a Gregorian calender date and time."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -659,7 +663,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "Describes a value that is a 128-bit globally unique identifier."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -682,7 +686,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "Describes a value that is a sequence of bytes."}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -711,7 +715,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "Describes a value that is an XML element."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -739,7 +743,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                          "space."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -762,7 +766,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "Describes a value that is an absolute identifier for a node."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -789,7 +793,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                                     "operation by a Server."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -812,7 +816,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "Describes a value that is a name qualified by a namespace."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -839,7 +843,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                          "identifier."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -866,7 +870,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                                     "described with a data encoding."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -893,7 +897,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                                     "status code and timestamps."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -920,7 +924,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                                     "associated with a StatusCode."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -944,7 +948,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                             (SOPC_Byte*) "Describes a value that is an image encoded as a string of bytes."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -967,7 +971,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "The abstract base type for all references."}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -999,7 +1003,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "The abstract base type for all non-hierarchical references."}},
                       .NoOfReferences = 7,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -1060,7 +1064,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "The abstract base type for all hierarchical references."}},
                       .NoOfReferences = 4,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -1102,7 +1106,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                             (SOPC_Byte*) "The abstract base type for all non-looping hierarchical references."}},
                       .NoOfReferences = 3,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -1138,7 +1142,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                             (SOPC_Byte*) "The type for hierarchical references that are used to organize nodes."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -1165,7 +1169,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                                     "organize event sources."}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -1198,7 +1202,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                          "nodes."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -1224,7 +1228,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                          "nodes."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -1251,7 +1255,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                                     "type description nodes."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -1276,7 +1280,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                             (SOPC_Byte*) "The type for references from a instance node its type defintion node."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -1302,7 +1306,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                          "node."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -1331,7 +1335,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                          "by node."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -1358,7 +1362,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                                     "aggregate nodes into complex types."}},
                       .NoOfReferences = 4,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -1404,7 +1408,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                          "types."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -1430,7 +1434,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                          "property."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -1456,7 +1460,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                          "component."}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -1489,7 +1493,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                                     "indicate how events propagate from node to node."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -1517,7 +1521,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                                     "its component when the order of references matters."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -1540,7 +1544,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "The type for a reference to the state before a transition."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -1563,7 +1567,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "The type for a reference to the state after a transition."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -1587,7 +1591,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                             (SOPC_Byte*) "The type for a reference to a method that can cause a transition to occur."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -1615,7 +1619,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                          "occurs."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -1639,7 +1643,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "The type for a reference to a substate for a state."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -1668,7 +1672,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                          "variable."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -1692,7 +1696,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                             (SOPC_Byte*) "The type for variable that represents a property of another node."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -1718,7 +1722,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "An identifier for a user locale."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -1741,7 +1745,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "Describes a 128-bit decimal value."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -1764,7 +1768,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "The base type for all object nodes."}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -1793,7 +1797,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "The type for objects that organize other nodes."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -1817,7 +1821,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "The abstract base type for all variable nodes."}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -1850,7 +1854,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "The type for variable that represents a process value."}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -1882,7 +1886,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "The root of the server address space."}},
                       .NoOfReferences = 4,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
@@ -1926,7 +1930,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                          "space."}},
                       .NoOfReferences = 5,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
@@ -1974,7 +1978,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                             (SOPC_Byte*) "The browse entry point when looking for types in the server address space."}},
                       .NoOfReferences = 6,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
@@ -2028,7 +2032,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                             (SOPC_Byte*) "The browse entry point when looking for views in the server address space."}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
@@ -2062,7 +2066,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                          "space."}},
                       .NoOfReferences = 3,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
@@ -2102,7 +2106,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                          "space."}},
                       .NoOfReferences = 3,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
@@ -2141,7 +2145,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                          "space."}},
                       .NoOfReferences = 3,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
@@ -2180,7 +2184,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                                     "server address space."}},
                       .NoOfReferences = 3,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
@@ -2217,7 +2221,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "Describes the capabilities supported by the server."}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -2241,7 +2245,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "Describes capabilities supported by the server."}},
                       .NoOfReferences = 11,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 46},
@@ -2325,7 +2329,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "A list of profiles supported by the server."}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
@@ -2338,17 +2342,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   true,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2268}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true,
-                                SOPC_String_Id,
-                                SOPC_VariantArrayType_Array,
-                                {.Array = {1,
-                                           {.StringArr = (SOPC_String[]){{sizeof("http://opcfoundation.org/UA-Profile/"
-                                                                                 "Server/NanoEmbeddedDevice") -
-                                                                              1,
-                                                                          1,
-                                                                          (SOPC_Byte*) "http://opcfoundation.org/"
-                                                                                       "UA-Profile/Server/"
-                                                                                       "NanoEmbeddedDevice"}}}}}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 0}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 12},
                       .ValueRank = (1),
                       .AccessLevel = 1,
@@ -2368,7 +2362,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "A list of locales supported by the server."}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
@@ -2381,12 +2375,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   true,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2268}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true,
-                                SOPC_String_Id,
-                                SOPC_VariantArrayType_Array,
-                                {.Array = {1,
-                                           {.StringArr =
-                                                (SOPC_String[]){{sizeof("en-US") - 1, 1, (SOPC_Byte*) "en-US"}}}}}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 1}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 295},
                       .ValueRank = (1),
                       .AccessLevel = 1,
@@ -2408,7 +2397,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "The minimum sampling interval supported by the server."}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
@@ -2421,7 +2410,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   true,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2268}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 2}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 290},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -2448,7 +2437,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                          "session."}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
@@ -2461,7 +2450,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   true,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2268}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_UInt16_Id, SOPC_VariantArrayType_SingleValue, {.Uint16 = 1}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 3}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 5},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -2487,7 +2476,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                          "session."}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
@@ -2500,7 +2489,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   true,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2268}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 4}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 5},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -2529,7 +2518,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                          "session."}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
@@ -2542,7 +2531,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   true,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2268}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 5}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 5},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -2563,7 +2552,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "The software certificates owned by the server."}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
@@ -2576,7 +2565,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   true,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2268}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 6}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 344},
                       .ValueRank = (1),
                       .AccessLevel = 1,
@@ -2596,7 +2585,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "A folder for the modelling rules supported by the server."}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
@@ -2626,7 +2615,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "A folder for the real time aggregates supported by the server."}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
@@ -2654,7 +2643,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -2676,7 +2665,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
@@ -2704,7 +2693,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 1,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -2726,7 +2715,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 3,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 46},
@@ -2760,7 +2749,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
@@ -2773,7 +2762,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   true,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 403}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 7}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 344},
                       .ValueRank = (1),
                       .AccessLevel = 1,
@@ -2793,7 +2782,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "Describes this OPC-UA Server"}},
                       .NoOfReferences = 11,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 46},
@@ -2876,7 +2865,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "List of servers accessible from this server."}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
@@ -2889,7 +2878,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   true,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2253}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 8}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 12},
                       .ValueRank = (1),
                       .AccessLevel = 1,
@@ -2909,7 +2898,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "List of namespace on this server."}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
@@ -2922,7 +2911,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   true,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2253}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 9}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 12},
                       .ValueRank = (1),
                       .AccessLevel = 1,
@@ -2942,7 +2931,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "Describes the status of this server"}},
                       .NoOfReferences = 8,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -3005,7 +2994,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -3018,7 +3007,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 10}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 13},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -3036,7 +3025,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -3049,7 +3038,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 7}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 11}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 7},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -3067,7 +3056,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -3080,7 +3069,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 21}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 12}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 21},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -3098,7 +3087,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -3111,7 +3100,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 13}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 13},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -3129,7 +3118,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -3142,7 +3131,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 14}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 6},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -3160,7 +3149,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 8,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -3209,7 +3198,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 3051}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 15}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 338},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -3227,7 +3216,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -3240,7 +3229,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 16}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 12},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -3258,7 +3247,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -3271,7 +3260,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 17}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 12},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -3290,7 +3279,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -3303,7 +3292,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 18}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 12},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -3321,7 +3310,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -3334,7 +3323,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 19}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 12},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -3352,7 +3341,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -3365,7 +3354,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 20}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 12},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -3383,7 +3372,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -3396,7 +3385,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 21}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 13},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -3414,7 +3403,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 46},
@@ -3427,7 +3416,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 22}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 3},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -3448,7 +3437,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "Diagnostic summary of this server"}},
                       .NoOfReferences = 3,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 46},
@@ -3481,7 +3470,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 46},
@@ -3494,7 +3483,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 23}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -3512,7 +3501,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 46},
@@ -3525,7 +3514,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 24}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -3543,7 +3532,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
@@ -3570,7 +3559,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 7,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -3630,7 +3619,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
@@ -3643,7 +3632,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   true,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 3051}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 25}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 12},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -3662,7 +3651,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
@@ -3675,7 +3664,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   true,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 3051}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 26}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 12},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -3693,7 +3682,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
@@ -3706,7 +3695,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   true,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 3051}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 27}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 12},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -3724,7 +3713,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
@@ -3737,7 +3726,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   true,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 3051}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 28}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 12},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -3755,7 +3744,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
@@ -3768,7 +3757,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   true,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 3051}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 29}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 12},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -3786,7 +3775,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
@@ -3799,7 +3788,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   true,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 3051}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 30}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 294},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -4120,7 +4109,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "VariablesFolderDescObj1d2"}},
                       .NoOfReferences = 33,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
@@ -4333,7 +4322,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {sizeof("Int64_1d") - 1, 1, (SOPC_Byte*) "Int64_1d"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -4346,10 +4335,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Int64_Id, SOPC_VariantArrayType_SingleValue, {.Int64 = -1000L}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 31}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 8},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -4364,7 +4353,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {sizeof("UInt32_1d") - 1, 1, (SOPC_Byte*) "UInt32_1d"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -4377,10 +4366,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 1000}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 32}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 7},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -4395,7 +4384,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {sizeof("Double_1d") - 1, 1, (SOPC_Byte*) "Double_1d"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -4408,10 +4397,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Double_Id, SOPC_VariantArrayType_SingleValue, {.Doublev = 2.0}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 33}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 11},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -4426,7 +4415,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {sizeof("String_1d") - 1, 1, (SOPC_Byte*) "String_1d"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -4439,13 +4428,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true,
-                                SOPC_String_Id,
-                                SOPC_VariantArrayType_SingleValue,
-                                {.String = {sizeof("String:S2OPC") - 1, 1, (SOPC_Byte*) "String:S2OPC"}}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 34}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 12},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -4460,7 +4446,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {sizeof("ByteString_1d") - 1, 1, (SOPC_Byte*) "ByteString_1d"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -4473,13 +4459,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true,
-                                SOPC_ByteString_Id,
-                                SOPC_VariantArrayType_SingleValue,
-                                {.Bstring = {sizeof("ByteString:S2OPC") - 1, 1, (SOPC_Byte*) "ByteString:S2OPC"}}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 35}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 15},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -4494,7 +4477,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {sizeof("XmlElement_1d") - 1, 1, (SOPC_Byte*) "XmlElement_1d"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -4507,13 +4490,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true,
-                                SOPC_XmlElement_Id,
-                                SOPC_VariantArrayType_SingleValue,
-                                {.XmlElt = {sizeof("<XmlElement:S2OPC/>") - 1, 1, (SOPC_Byte*) "<XmlElement:S2OPC/>"}}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 36}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 16},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -4528,7 +4508,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {sizeof("SByte_1d") - 1, 1, (SOPC_Byte*) "SByte_1d"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -4541,10 +4521,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_SByte_Id, SOPC_VariantArrayType_SingleValue, {.Sbyte = -127}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 37}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -4559,7 +4539,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {sizeof("Byte_1d") - 1, 1, (SOPC_Byte*) "Byte_1d"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -4572,10 +4552,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Byte_Id, SOPC_VariantArrayType_SingleValue, {.Byte = 255}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 38}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 3},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -4590,7 +4570,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {sizeof("Int16_1d") - 1, 1, (SOPC_Byte*) "Int16_1d"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -4603,10 +4583,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Int16_Id, SOPC_VariantArrayType_SingleValue, {.Int16 = -32767}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 39}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 4},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -4621,7 +4601,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {sizeof("UInt16_1d") - 1, 1, (SOPC_Byte*) "UInt16_1d"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -4634,10 +4614,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_UInt16_Id, SOPC_VariantArrayType_SingleValue, {.Uint16 = 65535}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 40}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 5},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -4652,7 +4632,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {sizeof("Int32_1d") - 1, 1, (SOPC_Byte*) "Int32_1d"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -4665,10 +4645,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Int32_Id, SOPC_VariantArrayType_SingleValue, {.Int32 = -2147483647}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 41}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 6},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -4683,7 +4663,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {sizeof("UInt64_1d") - 1, 1, (SOPC_Byte*) "UInt64_1d"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -4696,11 +4676,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value =
-                          {true, SOPC_UInt64_Id, SOPC_VariantArrayType_SingleValue, {.Uint64 = 1844674407370955UL}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 42}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 9},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -4715,7 +4694,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {sizeof("Float_1d") - 1, 1, (SOPC_Byte*) "Float_1d"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -4728,10 +4707,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Float_Id, SOPC_VariantArrayType_SingleValue, {.Floatv = 109517.875}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 43}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 10},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -4748,7 +4727,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "Boolean list Description"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -4761,13 +4740,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true,
-                                SOPC_Boolean_Id,
-                                SOPC_VariantArrayType_Array,
-                                {.Array = {5, {.BooleanArr = (SOPC_Boolean[]){true, false, true, false, true}}}}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 44}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
                       .ValueRank = (1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -4783,7 +4759,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                       {sizeof("Byte list Description") - 1, 1, (SOPC_Byte*) "Byte list Description"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -4796,13 +4772,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true,
-                                SOPC_Byte_Id,
-                                SOPC_VariantArrayType_Array,
-                                {.Array = {5, {.ByteArr = (SOPC_Byte[]){0, 1, 2, 3, 255}}}}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 45}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 3},
                       .ValueRank = (1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -4818,7 +4791,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                       {sizeof("Int16 list Description") - 1, 1, (SOPC_Byte*) "Int16 list Description"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -4831,13 +4804,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true,
-                                SOPC_Int16_Id,
-                                SOPC_VariantArrayType_Array,
-                                {.Array = {5, {.Int16Arr = (int16_t[]){-32768, -1, 0, 1, 32767}}}}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 46}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 4},
                       .ValueRank = (1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -4853,7 +4823,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                       {sizeof("Int32 list Description") - 1, 1, (SOPC_Byte*) "Int32 list Description"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -4866,13 +4836,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true,
-                                SOPC_Int32_Id,
-                                SOPC_VariantArrayType_Array,
-                                {.Array = {5, {.Int32Arr = (int32_t[]){-2147483647, -1, 0, 1, 2147483647}}}}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 47}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 6},
                       .ValueRank = (1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -4888,7 +4855,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                       {sizeof("Int64 list Description") - 1, 1, (SOPC_Byte*) "Int64 list Description"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -4901,15 +4868,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true,
-                                SOPC_Int64_Id,
-                                SOPC_VariantArrayType_Array,
-                                {.Array = {5,
-                                           {.Int64Arr = (int64_t[]){-9223372036854775807L, -1L,
-                                                                    0L, 1L, 9223372036854775807L}}}}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 48}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 8},
                       .ValueRank = (1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -4925,7 +4887,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                       {sizeof("SByte list Description") - 1, 1, (SOPC_Byte*) "SByte list Description"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -4938,13 +4900,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true,
-                                SOPC_SByte_Id,
-                                SOPC_VariantArrayType_Array,
-                                {.Array = {5, {.SbyteArr = (SOPC_SByte[]){-128, -1, 0, 1, 127}}}}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 49}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2},
                       .ValueRank = (1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -4961,7 +4920,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "UInt16 list Description"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -4974,13 +4933,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true,
-                                SOPC_UInt16_Id,
-                                SOPC_VariantArrayType_Array,
-                                {.Array = {5, {.Uint16Arr = (uint16_t[]){0, 1, 2, 3, 65535}}}}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 50}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 5},
                       .ValueRank = (1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -4997,7 +4953,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "UInt32 list Description"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -5010,13 +4966,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true,
-                                SOPC_UInt32_Id,
-                                SOPC_VariantArrayType_Array,
-                                {.Array = {5, {.Uint32Arr = (uint32_t[]){0, 1, 2, 3, 4294967295}}}}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 51}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 7},
                       .ValueRank = (1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -5033,7 +4986,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "UInt64 list Description"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -5046,14 +4999,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true,
-                                SOPC_UInt64_Id,
-                                SOPC_VariantArrayType_Array,
-                                {.Array = {5,
-                                           {.Uint64Arr = (uint64_t[]){0UL, 1UL, 2UL, 3UL, 18446744073709551615UL}}}}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 52}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 9},
                       .ValueRank = (1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -5069,7 +5018,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                       {sizeof("Float list Description") - 1, 1, (SOPC_Byte*) "Float list Description"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -5082,13 +5031,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true,
-                                SOPC_Float_Id,
-                                SOPC_VariantArrayType_Array,
-                                {.Array = {5, {.FloatvArr = (float[]){0.0, 1.0, 2.0, 3.0, 3.4028234663852886e+38}}}}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 53}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 10},
                       .ValueRank = (1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -5105,7 +5051,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "Double list Description"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -5118,14 +5064,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true,
-                                SOPC_Double_Id,
-                                SOPC_VariantArrayType_Array,
-                                {.Array = {5,
-                                           {.DoublevArr = (double[]){0.0, 1.0, 2.0, 3.0, 1.7976931348623157e+308}}}}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 54}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 11},
                       .ValueRank = (1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -5142,7 +5084,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "String list Description"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -5155,23 +5097,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true,
-                                SOPC_String_Id,
-                                SOPC_VariantArrayType_Array,
-                                {.Array = {5,
-                                           {.StringArr = (SOPC_String[]){{sizeof("The quick") - 1, 1,
-                                                                          (SOPC_Byte*) "The quick"},
-                                                                         {sizeof("brown fox") - 1, 1,
-                                                                          (SOPC_Byte*) "brown fox"},
-                                                                         {sizeof("jumps over") - 1, 1,
-                                                                          (SOPC_Byte*) "jumps over"},
-                                                                         {sizeof("the lazy") - 1, 1,
-                                                                          (SOPC_Byte*) "the lazy"},
-                                                                         {sizeof("dog") - 1, 1,
-                                                                          (SOPC_Byte*) "dog"}}}}}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 55}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 12},
                       .ValueRank = (1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -5189,7 +5118,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "ByteString list Description"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -5202,21 +5131,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value =
-                          {true,
-                           SOPC_ByteString_Id,
-                           SOPC_VariantArrayType_Array,
-                           {.Array = {5,
-                                      {.BstringArr =
-                                           (SOPC_ByteString[]){
-                                               {sizeof("The quick") - 1, 1, (SOPC_Byte*) "The quick"},
-                                               {sizeof("brown fox") - 1, 1, (SOPC_Byte*) "brown fox"},
-                                               {sizeof("jumps over") - 1, 1, (SOPC_Byte*) "jumps over"},
-                                               {sizeof("the lazy") - 1, 1, (SOPC_Byte*) "the lazy"},
-                                               {sizeof("dog") - 1, 1, (SOPC_Byte*) "dog"}}}}}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 56}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 15},
                       .ValueRank = (1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -5234,7 +5152,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "XmlElement list Description"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -5247,21 +5165,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value =
-                          {true,
-                           SOPC_XmlElement_Id,
-                           SOPC_VariantArrayType_Array,
-                           {.Array = {5,
-                                      {.XmlEltArr =
-                                           (SOPC_XmlElement[]){
-                                               {sizeof("<The_quick/>") - 1, 1, (SOPC_Byte*) "<The_quick/>"},
-                                               {sizeof("<brown_fox/>") - 1, 1, (SOPC_Byte*) "<brown_fox/>"},
-                                               {sizeof("<jumps_over/>") - 1, 1, (SOPC_Byte*) "<jumps_over/>"},
-                                               {sizeof("<the_lazy/>") - 1, 1, (SOPC_Byte*) "<the_lazy/>"},
-                                               {sizeof("<dog/>") - 1, 1, (SOPC_Byte*) "<dog/>"}}}}}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 57}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 16},
                       .ValueRank = (1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -5277,7 +5184,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                       {sizeof("Boolean Description") - 1, 1, (SOPC_Byte*) "Boolean Description"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -5290,10 +5197,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = true}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 58}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -5309,7 +5216,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                       {sizeof("Number Description") - 1, 1, (SOPC_Byte*) "Number Description"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -5322,10 +5229,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_UInt64_Id, SOPC_VariantArrayType_SingleValue, {.Uint64 = 0UL}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 59}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 26},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -5341,7 +5248,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                       {sizeof("UInteger Description") - 1, 1, (SOPC_Byte*) "UInteger Description"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -5354,10 +5261,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_UInt64_Id, SOPC_VariantArrayType_SingleValue, {.Uint64 = 0UL}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 60}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 28},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -5373,7 +5280,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                       {sizeof("Integer Description") - 1, 1, (SOPC_Byte*) "Integer Description"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -5386,10 +5293,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Int64_Id, SOPC_VariantArrayType_SingleValue, {.Int64 = 0L}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 61}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 27},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Object,
              OpcUa_UncertainInitialValue,
@@ -5404,7 +5311,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
                       .NoOfReferences = 4,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
@@ -5457,7 +5364,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
                       .NoOfReferences = 5,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
@@ -5516,7 +5423,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
                       .NoOfReferences = 3,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
@@ -5555,7 +5462,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
                       .NoOfReferences = 6,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
@@ -5624,7 +5531,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
                       .NoOfReferences = 7,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
@@ -5708,7 +5615,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
                       .NoOfReferences = 8,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
@@ -5803,7 +5710,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "Permissive Signal Status, ~é€bla"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -5820,10 +5727,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 62}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -5842,7 +5749,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "Signal Approach Locking"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -5859,10 +5766,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 63}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -5881,7 +5788,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "Exit blocking is in effect for the signal"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -5898,10 +5805,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 64}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -5920,7 +5827,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "Exit Block Removal Request"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -5937,10 +5844,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 65}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -5959,7 +5866,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "Exit blocking is rejected for the signal"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -5976,10 +5883,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 66}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -5998,7 +5905,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "Exit block removal is rejected for the signal"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -6015,10 +5922,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 67}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Object,
              OpcUa_UncertainInitialValue,
@@ -6035,7 +5942,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
                       .NoOfReferences = 7,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
@@ -6118,7 +6025,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -6135,13 +6042,13 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 68}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
-             OpcUa_UncertainInitialValue,
+             0x00,
              {0, 0},
              {.variable =
                   {
@@ -6155,7 +6062,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -6172,13 +6079,13 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 69}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
-             OpcUa_UncertainInitialValue,
+             0x00,
              {0, 0},
              {.variable =
                   {
@@ -6192,7 +6099,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -6209,10 +6116,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 70}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -6229,7 +6136,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {sizeof("Signal request") - 1, 1, (SOPC_Byte*) "Signal request"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -6246,10 +6153,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 71}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -6266,7 +6173,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {sizeof("Signal cancel") - 1, 1, (SOPC_Byte*) "Signal cancel"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -6283,10 +6190,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 72}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -6305,7 +6212,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "Exit Block Application Request"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -6322,10 +6229,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 73}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -6344,7 +6251,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "Exit Block Removal Request"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -6361,10 +6268,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 74}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -6383,7 +6290,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "Exit Block Removal - Acknowledge"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -6400,10 +6307,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 75}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Object,
              OpcUa_UncertainInitialValue,
@@ -6420,7 +6327,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
                       .NoOfReferences = 7,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
@@ -6504,7 +6411,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
                       .NoOfReferences = 4,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
@@ -6559,7 +6466,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "Permissive Signal Status"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -6576,10 +6483,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 76}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -6598,7 +6505,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "Signal Approach Locking"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -6615,10 +6522,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 77}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Object,
              OpcUa_UncertainInitialValue,
@@ -6635,7 +6542,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
                       .NoOfReferences = 4,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
@@ -6688,7 +6595,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -6705,13 +6612,13 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 78}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
-             OpcUa_UncertainInitialValue,
+             0x00,
              {0, 0},
              {.variable =
                   {
@@ -6725,7 +6632,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -6742,13 +6649,13 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 79}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
-             OpcUa_UncertainInitialValue,
+             0x00,
              {0, 0},
              {.variable =
                   {
@@ -6762,7 +6669,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -6779,10 +6686,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 80}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -6799,7 +6706,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {sizeof("Signal cancel") - 1, 1, (SOPC_Byte*) "Signal cancel"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -6816,10 +6723,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 81}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -6836,7 +6743,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {sizeof("Signal request") - 1, 1, (SOPC_Byte*) "Signal request"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -6853,10 +6760,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 82}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Object,
              OpcUa_UncertainInitialValue,
@@ -6873,7 +6780,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
                       .NoOfReferences = 3,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
@@ -6916,7 +6823,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
                       .NoOfReferences = 3,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
@@ -6961,7 +6868,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "Permissive Signal Status"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -6978,10 +6885,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 83}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Object,
              OpcUa_UncertainInitialValue,
@@ -6998,7 +6905,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
                       .NoOfReferences = 7,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
@@ -7081,7 +6988,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
                       .NoOfReferences = 5,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
@@ -7145,7 +7052,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                       {sizeof("Switch Detected Normal") - 1, 1, (SOPC_Byte*) "Switch Detected Normal"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -7162,10 +7069,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 84}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -7184,7 +7091,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "Switch Detected Reverse"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -7201,10 +7108,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 85}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -7222,7 +7129,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                       {sizeof("Switch Locally Locked") - 1, 1, (SOPC_Byte*) "Switch Locally Locked"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -7239,10 +7146,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 86}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Object,
              OpcUa_UncertainInitialValue,
@@ -7259,7 +7166,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
                       .NoOfReferences = 4,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
@@ -7312,7 +7219,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -7329,13 +7236,13 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 87}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
-             OpcUa_UncertainInitialValue,
+             0x00,
              {0, 0},
              {.variable =
                   {
@@ -7349,7 +7256,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -7366,13 +7273,13 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 88}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
-             OpcUa_UncertainInitialValue,
+             0x00,
              {0, 0},
              {.variable =
                   {
@@ -7386,7 +7293,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -7403,10 +7310,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 89}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -7425,7 +7332,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "Switch Calling in Normal Direction"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -7442,10 +7349,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 90}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Variable,
              0x00,
@@ -7464,7 +7371,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "Switch Calling in Reverse Direction"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -7481,10 +7388,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 91}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
                       .ValueRank = (-1),
-                      .AccessLevel = 98,
+                      .AccessLevel = 2,
                   }}},
             {OpcUa_NodeClass_Object,
              OpcUa_UncertainInitialValue,
@@ -7501,7 +7408,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
                       .NoOfReferences = 3,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
@@ -7544,7 +7451,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
                       .NoOfReferences = 3,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
@@ -7589,7 +7496,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "Secondary Detection Status"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -7606,7 +7513,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = true}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 92}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -7626,7 +7533,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
                       .NoOfReferences = 3,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
@@ -7669,7 +7576,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
                       .NoOfReferences = 3,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
@@ -7714,7 +7621,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "Secondary Detection Status"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -7731,10 +7638,10 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = true}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 93}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
             {OpcUa_NodeClass_Object,
              OpcUa_UncertainInitialValue,
@@ -7751,7 +7658,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
@@ -7786,7 +7693,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
                       .NoOfReferences = 3,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
@@ -7829,7 +7736,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                       .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
                       .NoOfReferences = 3,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
@@ -7874,7 +7781,7 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                        (SOPC_Byte*) "Secondary Detection Status"}},
                       .NoOfReferences = 2,
                       .References =
-                          (OpcUa_ReferenceNode[]){
+                          (const OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -7891,11 +7798,181 @@ __attribute__((section(".ramfunc.$SRAM_OC_256"))) SOPC_AddressSpace_Item
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 94}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
                       .ValueRank = (-1),
-                      .AccessLevel = 99,
+                      .AccessLevel = 3,
                   }}},
 };
+SOPC_GCC_DIAGNOSTIC_RESTORE
+const uint32_t SOPC_Embedded_AddressSpace_nNodes = 220;
 
-uint32_t SOPC_Embedded_AddressSpace_nItems = 220;
+// Index is provided by the corresponding Variable UInt32 Variant in SOPC_Embedded_AddressSpace_Nodes
+SOPC_Variant SOPC_Embedded_VariableVariant[95] = {
+    {true,
+     SOPC_String_Id,
+     SOPC_VariantArrayType_Array,
+     {.Array = {1,
+                {.StringArr =
+                     (SOPC_String[]){
+                         {sizeof("http://opcfoundation.org/UA-Profile/Server/NanoEmbeddedDevice") - 1, 1,
+                          (SOPC_Byte*) "http://opcfoundation.org/UA-Profile/Server/NanoEmbeddedDevice"}}}}}},
+    {true,
+     SOPC_String_Id,
+     SOPC_VariantArrayType_Array,
+     {.Array = {1, {.StringArr = (SOPC_String[]){{sizeof("en-US") - 1, 1, (SOPC_Byte*) "en-US"}}}}}},
+    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+    {true, SOPC_UInt16_Id, SOPC_VariantArrayType_SingleValue, {.Uint16 = 1}},
+    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+    {true, SOPC_Int64_Id, SOPC_VariantArrayType_SingleValue, {.Int64 = -1000L}},
+    {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 1000}},
+    {true, SOPC_Double_Id, SOPC_VariantArrayType_SingleValue, {.Doublev = 2.0}},
+    {true,
+     SOPC_String_Id,
+     SOPC_VariantArrayType_SingleValue,
+     {.String = {sizeof("String:S2OPC") - 1, 1, (SOPC_Byte*) "String:S2OPC"}}},
+    {true,
+     SOPC_ByteString_Id,
+     SOPC_VariantArrayType_SingleValue,
+     {.Bstring = {sizeof("ByteString:S2OPC") - 1, 1, (SOPC_Byte*) "ByteString:S2OPC"}}},
+    {true,
+     SOPC_XmlElement_Id,
+     SOPC_VariantArrayType_SingleValue,
+     {.XmlElt = {sizeof("<XmlElement:S2OPC/>") - 1, 1, (SOPC_Byte*) "<XmlElement:S2OPC/>"}}},
+    {true, SOPC_SByte_Id, SOPC_VariantArrayType_SingleValue, {.Sbyte = -127}},
+    {true, SOPC_Byte_Id, SOPC_VariantArrayType_SingleValue, {.Byte = 255}},
+    {true, SOPC_Int16_Id, SOPC_VariantArrayType_SingleValue, {.Int16 = -32767}},
+    {true, SOPC_UInt16_Id, SOPC_VariantArrayType_SingleValue, {.Uint16 = 65535}},
+    {true, SOPC_Int32_Id, SOPC_VariantArrayType_SingleValue, {.Int32 = -2147483647}},
+    {true, SOPC_UInt64_Id, SOPC_VariantArrayType_SingleValue, {.Uint64 = 1844674407370955UL}},
+    {true, SOPC_Float_Id, SOPC_VariantArrayType_SingleValue, {.Floatv = 109517.875}},
+    {true,
+     SOPC_Boolean_Id,
+     SOPC_VariantArrayType_Array,
+     {.Array = {5, {.BooleanArr = (SOPC_Boolean[]){true, false, true, false, true}}}}},
+    {true, SOPC_Byte_Id, SOPC_VariantArrayType_Array, {.Array = {5, {.ByteArr = (SOPC_Byte[]){0, 1, 2, 3, 255}}}}},
+    {true,
+     SOPC_Int16_Id,
+     SOPC_VariantArrayType_Array,
+     {.Array = {5, {.Int16Arr = (int16_t[]){-32768, -1, 0, 1, 32767}}}}},
+    {true,
+     SOPC_Int32_Id,
+     SOPC_VariantArrayType_Array,
+     {.Array = {5, {.Int32Arr = (int32_t[]){-2147483647, -1, 0, 1, 2147483647}}}}},
+    {true,
+     SOPC_Int64_Id,
+     SOPC_VariantArrayType_Array,
+     {.Array = {5, {.Int64Arr = (int64_t[]){-9223372036854775807L, -1L, 0L, 1L, 9223372036854775807L}}}}},
+    {true,
+     SOPC_SByte_Id,
+     SOPC_VariantArrayType_Array,
+     {.Array = {5, {.SbyteArr = (SOPC_SByte[]){-128, -1, 0, 1, 127}}}}},
+    {true, SOPC_UInt16_Id, SOPC_VariantArrayType_Array, {.Array = {5, {.Uint16Arr = (uint16_t[]){0, 1, 2, 3, 65535}}}}},
+    {true,
+     SOPC_UInt32_Id,
+     SOPC_VariantArrayType_Array,
+     {.Array = {5, {.Uint32Arr = (uint32_t[]){0, 1, 2, 3, 4294967295}}}}},
+    {true,
+     SOPC_UInt64_Id,
+     SOPC_VariantArrayType_Array,
+     {.Array = {5, {.Uint64Arr = (uint64_t[]){0UL, 1UL, 2UL, 3UL, 18446744073709551615UL}}}}},
+    {true,
+     SOPC_Float_Id,
+     SOPC_VariantArrayType_Array,
+     {.Array = {5, {.FloatvArr = (float[]){0.0, 1.0, 2.0, 3.0, 3.4028234663852886e+38}}}}},
+    {true,
+     SOPC_Double_Id,
+     SOPC_VariantArrayType_Array,
+     {.Array = {5, {.DoublevArr = (double[]){0.0, 1.0, 2.0, 3.0, 1.7976931348623157e+308}}}}},
+    {true,
+     SOPC_String_Id,
+     SOPC_VariantArrayType_Array,
+     {.Array = {5,
+                {.StringArr = (SOPC_String[]){{sizeof("The quick") - 1, 1, (SOPC_Byte*) "The quick"},
+                                              {sizeof("brown fox") - 1, 1, (SOPC_Byte*) "brown fox"},
+                                              {sizeof("jumps over") - 1, 1, (SOPC_Byte*) "jumps over"},
+                                              {sizeof("the lazy") - 1, 1, (SOPC_Byte*) "the lazy"},
+                                              {sizeof("dog") - 1, 1, (SOPC_Byte*) "dog"}}}}}},
+    {true,
+     SOPC_ByteString_Id,
+     SOPC_VariantArrayType_Array,
+     {.Array = {5,
+                {.BstringArr = (SOPC_ByteString[]){{sizeof("The quick") - 1, 1, (SOPC_Byte*) "The quick"},
+                                                   {sizeof("brown fox") - 1, 1, (SOPC_Byte*) "brown fox"},
+                                                   {sizeof("jumps over") - 1, 1, (SOPC_Byte*) "jumps over"},
+                                                   {sizeof("the lazy") - 1, 1, (SOPC_Byte*) "the lazy"},
+                                                   {sizeof("dog") - 1, 1, (SOPC_Byte*) "dog"}}}}}},
+    {true,
+     SOPC_XmlElement_Id,
+     SOPC_VariantArrayType_Array,
+     {.Array = {5,
+                {.XmlEltArr = (SOPC_XmlElement[]){{sizeof("<The_quick/>") - 1, 1, (SOPC_Byte*) "<The_quick/>"},
+                                                  {sizeof("<brown_fox/>") - 1, 1, (SOPC_Byte*) "<brown_fox/>"},
+                                                  {sizeof("<jumps_over/>") - 1, 1, (SOPC_Byte*) "<jumps_over/>"},
+                                                  {sizeof("<the_lazy/>") - 1, 1, (SOPC_Byte*) "<the_lazy/>"},
+                                                  {sizeof("<dog/>") - 1, 1, (SOPC_Byte*) "<dog/>"}}}}}},
+    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = true}},
+    {true, SOPC_UInt64_Id, SOPC_VariantArrayType_SingleValue, {.Uint64 = 0UL}},
+    {true, SOPC_UInt64_Id, SOPC_VariantArrayType_SingleValue, {.Uint64 = 0UL}},
+    {true, SOPC_Int64_Id, SOPC_VariantArrayType_SingleValue, {.Int64 = 0L}},
+    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
+    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = true}},
+    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = true}},
+    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
+};
+const uint32_t SOPC_Embedded_VariableVariant_nb = 95;
