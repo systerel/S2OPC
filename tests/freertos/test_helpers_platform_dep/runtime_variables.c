@@ -165,7 +165,7 @@ static bool set_write_value_datetime(OpcUa_WriteValue* wv, uint32_t id, SOPC_Dat
 static bool set_write_value_build_info(OpcUa_WriteValue* wv, const OpcUa_BuildInfo* build_info)
 {
     /* create extension object */
-    SOPC_ExtensionObject* extObject = calloc(1, sizeof(SOPC_ExtensionObject));
+    SOPC_ExtensionObject* extObject = SOPC_Calloc(1, sizeof(SOPC_ExtensionObject));
     OpcUa_BuildInfo* build_info_in_extObject = NULL;
     SOPC_ReturnStatus status;
 
@@ -241,7 +241,7 @@ static bool set_server_server_array_value(OpcUa_WriteValue* wv, const char* serv
     wv->Value.Value.ArrayType = SOPC_VariantArrayType_Array;
     wv->Value.Value.BuiltInTypeId = SOPC_String_Id;
 
-    SOPC_String* uri_copy = calloc(1, sizeof(SOPC_String));
+    SOPC_String* uri_copy = SOPC_Calloc(1, sizeof(SOPC_String));
 
     if (uri_copy == NULL)
     {
@@ -253,7 +253,7 @@ static bool set_server_server_array_value(OpcUa_WriteValue* wv, const char* serv
     if (SOPC_String_CopyFromCString(uri_copy, server_uri) != SOPC_STATUS_OK)
     {
         SOPC_String_Clear(uri_copy);
-        free(uri_copy);
+        SOPC_Free(uri_copy);
         return false;
     }
 
@@ -281,7 +281,7 @@ static bool set_server_namespace_array_value(OpcUa_WriteValue* wv, const char** 
 
     assert(n_app_namespace_uris <= INT32_MAX);
 
-    SOPC_String* uris = calloc(n_app_namespace_uris, sizeof(SOPC_String));
+    SOPC_String* uris = SOPC_Calloc(n_app_namespace_uris, sizeof(SOPC_String));
 
     if (uris == NULL)
     {
@@ -333,7 +333,7 @@ static bool set_server_variables(SOPC_Array* write_values, RuntimeVariables vars
 
 bool set_runtime_variables(uint32_t endpoint_config_idx, RuntimeVariables vars)
 {
-    OpcUa_WriteRequest* request = calloc(1, sizeof(OpcUa_WriteRequest));
+    OpcUa_WriteRequest* request = SOPC_Calloc(1, sizeof(OpcUa_WriteRequest));
     SOPC_Array* write_values = SOPC_Array_Create(sizeof(OpcUa_WriteValue), 0, OpcUa_WriteValue_Clear);
 
     bool ok = (write_values != NULL && request != NULL && set_server_variables(write_values, vars));
@@ -341,7 +341,7 @@ bool set_runtime_variables(uint32_t endpoint_config_idx, RuntimeVariables vars)
     if (!ok)
     {
         SOPC_Array_Delete(write_values);
-        free(request);
+        SOPC_Free(request);
         return false;
     }
 
