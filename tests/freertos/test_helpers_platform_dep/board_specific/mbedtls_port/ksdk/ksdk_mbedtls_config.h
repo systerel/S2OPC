@@ -68,10 +68,10 @@
 #define MBEDTLS_FREESCALE_MMCAU_MD5    /* Enable use of MMCAU MD5.*/
 #define MBEDTLS_FREESCALE_MMCAU_SHA1   /* Enable use of MMCAU SHA1.*/
 #define MBEDTLS_FREESCALE_MMCAU_SHA256 /* Enable use of MMCAU SHA256.*/
-#define MBEDTLS_FREESCALE_MMCAU_DES /* Enable use of MMCAU DES, when LTC is \ \
-                                       \ \ disabled.*/
-#define MBEDTLS_FREESCALE_MMCAU_AES /* Enable use of MMCAU AES, when LTC is \ \
-                                       \ \ disabled.*/
+#define MBEDTLS_FREESCALE_MMCAU_DES    /* Enable use of MMCAU DES, when LTC is \ \
+                                          \ \ disabled.*/
+#define MBEDTLS_FREESCALE_MMCAU_AES    /* Enable use of MMCAU AES, when LTC is \ \
+                                          \ \ disabled.*/
 #endif
 
 /* Enable CAU3 use in library if there is CAU3 on chip. */
@@ -91,8 +91,7 @@
 #endif
 
 /* Enable CAAM use in library if there is CAAM on chip. */
-#if defined(FSL_FEATURE_SOC_CAAM_COUNT) && (FSL_FEATURE_SOC_CAAM_COUNT > 0) && \
-    defined(CRYPTO_USE_DRIVER_CAAM)
+#if defined(FSL_FEATURE_SOC_CAAM_COUNT) && (FSL_FEATURE_SOC_CAAM_COUNT > 0) && defined(CRYPTO_USE_DRIVER_CAAM)
 #include "fsl_caam.h"
 
 #define CAAM_INSTANCE CAAM
@@ -119,9 +118,7 @@
 
 #endif
 
-#if defined(MBEDTLS_FREESCALE_LTC_PKHA) ||  \
-    defined(MBEDTLS_FREESCALE_CAU3_PKHA) || \
-    defined(MBEDTLS_FREESCALE_CAAM_PKHA)
+#if defined(MBEDTLS_FREESCALE_LTC_PKHA) || defined(MBEDTLS_FREESCALE_CAU3_PKHA) || defined(MBEDTLS_FREESCALE_CAAM_PKHA)
 /*
  * This FREESCALE_PKHA_LONG_OPERANDS_ENABLE macro can be defined.
  * In such a case both software and hardware algorithm for TFM is linked in.
@@ -182,16 +179,13 @@
 #endif
 
 /* Define ALT MMCAU & LTC functions. Do not change it. */
-#if defined(MBEDTLS_FREESCALE_MMCAU_DES) || \
-    defined(MBEDTLS_FREESCALE_LTC_DES) ||   \
+#if defined(MBEDTLS_FREESCALE_MMCAU_DES) || defined(MBEDTLS_FREESCALE_LTC_DES) || \
     defined(MBEDTLS_FREESCALE_CAAM_DES) || defined(MBEDTLS_FREESCALE_CAU3_DES)
 #define MBEDTLS_DES_ALT
 #define MBEDTLS_DES3_SETKEY_ENC_ALT
 #define MBEDTLS_DES3_SETKEY_DEC_ALT
 #define MBEDTLS_DES3_CRYPT_ECB_ALT
-#if defined(MBEDTLS_FREESCALE_LTC_DES) ||   \
-    defined(MBEDTLS_FREESCALE_MMCAU_DES) || \
-    defined(MBEDTLS_FREESCALE_CAAM_DES)
+#if defined(MBEDTLS_FREESCALE_LTC_DES) || defined(MBEDTLS_FREESCALE_MMCAU_DES) || defined(MBEDTLS_FREESCALE_CAAM_DES)
 #define MBEDTLS_DES_SETKEY_ENC_ALT
 #define MBEDTLS_DES_SETKEY_DEC_ALT
 #define MBEDTLS_DES_CRYPT_ECB_ALT
@@ -212,8 +206,7 @@
 #define MBEDTLS_AES_CRYPT_CBC_ALT
 #define MBEDTLS_AES_ALT_NO_256
 #endif
-#if defined(MBEDTLS_FREESCALE_LTC_AES) ||   \
-    defined(MBEDTLS_FREESCALE_MMCAU_AES) || \
+#if defined(MBEDTLS_FREESCALE_LTC_AES) || defined(MBEDTLS_FREESCALE_MMCAU_AES) || \
     defined(MBEDTLS_FREESCALE_LPC_AES) || defined(MBEDTLS_FREESCALE_CAAM_AES)
 #define MBEDTLS_AES_SETKEY_ENC_ALT
 #define MBEDTLS_AES_SETKEY_DEC_ALT
@@ -225,14 +218,11 @@
 #define MBEDTLS_AES_CRYPT_CTR_ALT
 #define MBEDTLS_CCM_CRYPT_ALT
 #endif
-#if defined(MBEDTLS_FREESCALE_LTC_AES_GCM) || \
-    defined(MBEDTLS_FREESCALE_LPC_AES_GCM) || \
+#if defined(MBEDTLS_FREESCALE_LTC_AES_GCM) || defined(MBEDTLS_FREESCALE_LPC_AES_GCM) || \
     defined(MBEDTLS_FREESCALE_CAAM_AES_GCM)
 #define MBEDTLS_GCM_CRYPT_ALT
 #endif
-#if defined(MBEDTLS_FREESCALE_LTC_PKHA) ||  \
-    defined(MBEDTLS_FREESCALE_CAU3_PKHA) || \
-    defined(MBEDTLS_FREESCALE_CAAM_PKHA)
+#if defined(MBEDTLS_FREESCALE_LTC_PKHA) || defined(MBEDTLS_FREESCALE_CAU3_PKHA) || defined(MBEDTLS_FREESCALE_CAAM_PKHA)
 #define MBEDTLS_MPI_ADD_ABS_ALT
 #define MBEDTLS_MPI_SUB_ABS_ALT
 #define MBEDTLS_MPI_MUL_MPI_ALT
@@ -250,17 +240,13 @@
 #if defined(MBEDTLS_FREESCALE_CASPER_PKHA)
 #define MBEDTLS_RSA_PUBLIC_ALT
 #endif
-#if defined(MBEDTLS_FREESCALE_LTC_SHA1) ||  \
-    defined(MBEDTLS_FREESCALE_LPC_SHA1) ||  \
-    defined(MBEDTLS_FREESCALE_CAAM_SHA1) || \
-    defined(MBEDTLS_FREESCALE_CAU3_SHA1) || \
+#if defined(MBEDTLS_FREESCALE_LTC_SHA1) || defined(MBEDTLS_FREESCALE_LPC_SHA1) ||   \
+    defined(MBEDTLS_FREESCALE_CAAM_SHA1) || defined(MBEDTLS_FREESCALE_CAU3_SHA1) || \
     defined(MBEDTLS_FREESCALE_DCP_SHA1)
 #define MBEDTLS_SHA1_ALT
 #endif
-#if defined(MBEDTLS_FREESCALE_LTC_SHA256) ||  \
-    defined(MBEDTLS_FREESCALE_LPC_SHA256) ||  \
-    defined(MBEDTLS_FREESCALE_CAAM_SHA256) || \
-    defined(MBEDTLS_FREESCALE_CAU3_SHA256) || \
+#if defined(MBEDTLS_FREESCALE_LTC_SHA256) || defined(MBEDTLS_FREESCALE_LPC_SHA256) ||   \
+    defined(MBEDTLS_FREESCALE_CAAM_SHA256) || defined(MBEDTLS_FREESCALE_CAU3_SHA256) || \
     defined(MBEDTLS_FREESCALE_DCP_SHA256)
 #define MBEDTLS_SHA256_ALT
 /*
@@ -273,8 +259,7 @@
  * To use SHA-224 on LPC, do not define MBEDTLS_SHA256_ALT and both SHA-224 and
  * SHA-256 will use original mbed TLS software implementation.
  */
-#if defined(MBEDTLS_FREESCALE_LPC_SHA256) || \
-    defined(MBEDTLS_FREESCALE_DCP_SHA256)
+#if defined(MBEDTLS_FREESCALE_LPC_SHA256) || defined(MBEDTLS_FREESCALE_DCP_SHA256)
 #define MBEDTLS_SHA256_ALT_NO_224
 #endif
 #endif
@@ -325,7 +310,7 @@
 #if USE_RTOS && defined(FSL_RTOS_FREE_RTOS)
 #include "FreeRTOS.h"
 
-void *pvPortCalloc(size_t num, size_t size); /*Calloc for HEAP4.*/
+void* pvPortCalloc(size_t num, size_t size); /*Calloc for HEAP4.*/
 
 #define MBEDTLS_PLATFORM_MEMORY
 #define MBEDTLS_PLATFORM_STD_CALLOC pvPortCalloc
@@ -341,9 +326,9 @@ void *pvPortCalloc(size_t num, size_t size); /*Calloc for HEAP4.*/
 #define MBEDTLS_SSL_MAX_CONTENT_LEN (1024 * 10) /* Reduce SSL frame buffer. */
 #define MBEDTLS_MPI_WINDOW_SIZE 1
 #define MBEDTLS_ECP_WINDOW_SIZE 2
-#define MBEDTLS_MPI_MAX_SIZE                            \
-  512 /* Maximum number of bytes for usable MPIs. \ \ \ \
-       */
+#define MBEDTLS_MPI_MAX_SIZE                                                       \
+    512                          /* Maximum number of bytes for usable MPIs. \ \ \ \
+                                  */
 #define MBEDTLS_ECP_MAX_BITS 384 /* Maximum bit size of groups */
 
 /**************************** KSDK end ****************************************/
@@ -3135,8 +3120,7 @@ void mbedtls_threading_initialize(void);
 // macro to use, can be undefined. MBEDTLS_HAVE_TIME must be enabled */ #define
 // MBEDTLS_PLATFORM_FPRINTF_MACRO      fprintf /**< Default fprintf macro to
 // use, can be undefined */
-#define MBEDTLS_PLATFORM_PRINTF_MACRO \
-  PRINTF /**< Default printf macro to use, can be undefined */
+#define MBEDTLS_PLATFORM_PRINTF_MACRO PRINTF /**< Default printf macro to use, can be undefined */
 /* Note: your snprintf must correclty zero-terminate the buffer! */
 //#define MBEDTLS_PLATFORM_SNPRINTF_MACRO    snprintf /**< Default snprintf
 // macro to use, can be undefined */ #define MBEDTLS_PLATFORM_NV_SEED_READ_MACRO
