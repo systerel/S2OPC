@@ -198,7 +198,7 @@ static char* Config_SetLogPath(int argc, char* argv[])
                                 7; // "./" + exec_name + _ + test_name + _logs/ + '\0'
         if (logDirPathSize < 200)
         {
-            logDirPath = malloc(logDirPathSize * sizeof(char));
+            logDirPath = SOPC_Malloc(logDirPathSize * sizeof(char));
         }
         if (NULL != logDirPath && (int) (logDirPathSize - 1) == snprintf(logDirPath, logDirPathSize, "./%s_%s_logs/",
                                                                          "toolkit_test_server", argv[1]))
@@ -209,7 +209,7 @@ static char* Config_SetLogPath(int argc, char* argv[])
                 return logDirPath;
             }
         }
-        free(logDirPath);
+        SOPC_Free(logDirPath);
     }
     else
     {
@@ -271,7 +271,7 @@ static SOPC_ReturnStatus authentication_uactt(SOPC_UserAuthentication_Manager* a
 }
 
 static const SOPC_UserAuthentication_Functions authentication_uactt_functions = {
-    .pFuncFree = (SOPC_UserAuthentication_Free_Func) free,
+    .pFuncFree = (SOPC_UserAuthentication_Free_Func) SOPC_Free,
     .pFuncValidateUserIdentity = authentication_uactt};
 
 void* cbToolkit_test_server(void* arg)
@@ -420,7 +420,7 @@ void* cbToolkit_test_server(void* arg)
     SOPC_UserAuthorization_Manager* authorizationManager = NULL;
     if (SOPC_STATUS_OK == status)
     {
-        authenticationManager = calloc(1, sizeof(SOPC_UserAuthentication_Manager));
+        authenticationManager = SOPC_Calloc(1, sizeof(SOPC_UserAuthentication_Manager));
         authorizationManager = SOPC_UserAuthorization_CreateManager_AllowAll();
         if (NULL == authenticationManager || NULL == authorizationManager)
         {
@@ -600,7 +600,7 @@ void* cbToolkit_test_server(void* arg)
 
     SOPC_UserAuthentication_FreeManager(&authenticationManager);
     SOPC_UserAuthorization_FreeManager(&authorizationManager);
-    free(logDirPath);
+    SOPC_Free(logDirPath);
 
     return (void*) ((status == SOPC_STATUS_OK) ? 0 : 1);
 }
