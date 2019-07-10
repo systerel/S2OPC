@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment_result_it.h
 
- Date                 : 19/04/2019 16:19:32
+ Date                 : 10/07/2019 11:35:35
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -43,8 +43,8 @@
 /*----------------------------
    CONCRETE_VARIABLES Clause
   ----------------------------*/
-extern t_entier4 browse_treatment_result_it__current_browseResult_idx;
-extern t_entier4 browse_treatment_result_it__max_browseResult_idx;
+extern t_entier4 browse_treatment_result_it__currentBrowseResultIdx_i;
+extern t_entier4 browse_treatment_result_it__nb_browseResult_max_refs_i;
 
 /*------------------------
    INITIALISATION Clause

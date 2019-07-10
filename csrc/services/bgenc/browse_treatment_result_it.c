@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment_result_it.c
 
- Date                 : 19/04/2019 16:19:32
+ Date                 : 10/07/2019 11:35:35
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -35,15 +35,15 @@
 /*----------------------------
    CONCRETE_VARIABLES Clause
   ----------------------------*/
-t_entier4 browse_treatment_result_it__current_browseResult_idx;
-t_entier4 browse_treatment_result_it__max_browseResult_idx;
+t_entier4 browse_treatment_result_it__currentBrowseResultIdx_i;
+t_entier4 browse_treatment_result_it__nb_browseResult_max_refs_i;
 
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
 void browse_treatment_result_it__INITIALISATION(void) {
-   browse_treatment_result_it__current_browseResult_idx = 0;
-   browse_treatment_result_it__max_browseResult_idx = 0;
+   browse_treatment_result_it__currentBrowseResultIdx_i = 0;
+   browse_treatment_result_it__nb_browseResult_max_refs_i = 0;
 }
 
 /*--------------------
@@ -52,17 +52,17 @@ void browse_treatment_result_it__INITIALISATION(void) {
 void browse_treatment_result_it__init_iter_browseResult(
    const t_entier4 browse_treatment_result_it__p_nb_browseResult_max_refs,
    t_bool * const browse_treatment_result_it__p_continue) {
-   browse_treatment_result_it__max_browseResult_idx = browse_treatment_result_it__p_nb_browseResult_max_refs;
-   browse_treatment_result_it__current_browseResult_idx = 0;
+   browse_treatment_result_it__nb_browseResult_max_refs_i = browse_treatment_result_it__p_nb_browseResult_max_refs;
+   browse_treatment_result_it__currentBrowseResultIdx_i = 0;
    *browse_treatment_result_it__p_continue = (0 < browse_treatment_result_it__p_nb_browseResult_max_refs);
 }
 
 void browse_treatment_result_it__continue_iter_browseResult(
    t_bool * const browse_treatment_result_it__p_continue,
    t_entier4 * const browse_treatment_result_it__p_browseResultIdx) {
-   browse_treatment_result_it__current_browseResult_idx = browse_treatment_result_it__current_browseResult_idx +
+   browse_treatment_result_it__currentBrowseResultIdx_i = browse_treatment_result_it__currentBrowseResultIdx_i +
       1;
-   *browse_treatment_result_it__p_browseResultIdx = browse_treatment_result_it__current_browseResult_idx;
-   *browse_treatment_result_it__p_continue = (browse_treatment_result_it__current_browseResult_idx < browse_treatment_result_it__max_browseResult_idx);
+   *browse_treatment_result_it__p_browseResultIdx = browse_treatment_result_it__currentBrowseResultIdx_i;
+   *browse_treatment_result_it__p_continue = (browse_treatment_result_it__currentBrowseResultIdx_i < browse_treatment_result_it__nb_browseResult_max_refs_i);
 }
 

@@ -59,7 +59,7 @@ OPERATIONS
         browseResult_iterated    := {}        ||
         browseResult_to_iterate  := 1..p_nb_browseResult_max_refs ||
         nb_browseResult_max_refs := p_nb_browseResult_max_refs ||
-        nextBrowseResult         := 0 ||
+        nextBrowseResult         := 1 ||
         p_continue               := bool(p_nb_browseResult_max_refs > 0)
     END
     ;
