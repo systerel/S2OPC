@@ -68,7 +68,7 @@ if [[ $? != 0 ]]; then
     EXITCODE=1
 fi
 
-CHECK_STD_MEM_ALLOC_ABSENCE="(\bfree\b\(|\bmalloc\b\(|\bcalloc\b\()"
+CHECK_STD_MEM_ALLOC_ABSENCE="(\bfree\b\(|\bmalloc\b\(|\bcalloc\b\(|\brealloc\b\()"
 EXLUDE_STD_MEM_IMPLEM="*\/p_mem_alloc.c"
 EXCLUDED_TESTS="*\/client_subscription\/*"
 
