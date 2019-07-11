@@ -23,7 +23,7 @@ import string
 from opcua import ua, Client
 from opcua.ua import XmlElement
 
-sUri = 'opc.tcp://localhost:4841'
+sUri = 'opc.tcp://192.168.1.102:4841'
 
 securityPolicyNoneURI = "http://opcfoundation.org/UA/SecurityPolicy#None"
 securityPolicyBasic256URI = "http://opcfoundation.org/UA/SecurityPolicy#Basic256"
