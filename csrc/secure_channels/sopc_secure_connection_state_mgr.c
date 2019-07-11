@@ -155,7 +155,7 @@ bool SC_CloseConnection(uint32_t connectionIdx, bool socketFailure)
                 SOPC_KeyManager_Certificate_Free(scConnection->serverAsymmSecuInfo.clientCertificate);
                 scConnection->serverAsymmSecuInfo.clientCertificate = NULL;
             }
-            // scConnection->serverAsymmSecuInfo.securityPolicyUri => do not free (pointer to config data)
+            // scConnection->serverAsymmSecuInfo.securityPolicyUri: do not free (pointer to config data)
             scConnection->serverAsymmSecuInfo.securityPolicyUri = NULL;
 
             if (scConnection->cryptoProvider != NULL)
