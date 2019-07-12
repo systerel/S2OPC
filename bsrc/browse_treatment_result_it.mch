@@ -38,7 +38,7 @@ DEFINITIONS
     browseResult_iterated   <: NAT1 &
     browseResult_to_iterate /\ browseResult_iterated = {} &
     nb_browseResult_max_refs = card(browseResult_to_iterate \/ browseResult_iterated) &
-    nextBrowseResult : NAT
+    nextBrowseResult : NAT1
     )
 
 ABSTRACT_VARIABLES

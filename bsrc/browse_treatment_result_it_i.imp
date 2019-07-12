@@ -44,7 +44,7 @@ INVARIANT
         browseResult_iterated = {}
     ) &
     (nb_browseResult_max_refs_i /= 0 =>
-        browseResult_to_iterate = currentBrowseResultIdx_i..nb_browseResult_max_refs_i &
+        browseResult_to_iterate = currentBrowseResultIdx_i+1..nb_browseResult_max_refs_i &
         browseResult_iterated = 1..currentBrowseResultIdx_i)
 
 INITIALISATION

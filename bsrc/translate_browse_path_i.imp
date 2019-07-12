@@ -266,8 +266,20 @@ LOCAL_OPERATIONS
         in_statusCode_operation : t_StatusCode_i &
         in_statusCode_operation : {e_sc_ok, e_sc_uncertain_reference_out_of_server}
     THEN
-        out_statusCode_operation :: {e_sc_uncertain_reference_out_of_server, e_sc_bad_query_too_complex,
-            e_sc_bad_out_of_memory, e_sc_bad_too_many_matches}
+        out_statusCode_operation,
+        BrowsePath_Res_Target_Node,
+        BrowsePath_Res_Target_Index
+        :(
+            out_statusCode_operation : {e_sc_ok, e_sc_uncertain_reference_out_of_server, e_sc_bad_query_too_complex,
+                e_sc_bad_out_of_memory, e_sc_bad_too_many_matches} &
+            (out_statusCode_operation : { e_sc_ok, e_sc_uncertain_reference_out_of_server }
+                =>
+                BrowsePath_Res_Target_Node(browsePath) = BrowsePathResult^BrowsePathRemainingNodeId &
+                1..size(BrowsePathResult) <| BrowsePath_Res_Target_Index(browsePath) = %(xx).(xx : 1..size(BrowsePathResult) | k_n_noRemainingPathIndex ) &
+                (size(BrowsePathResult) + 1 .. size(BrowsePath_Res_Target_Index(browsePath))) <| BrowsePath_Res_Target_Index(browsePath) = BrowsePathRemainingIndex &
+                size(BrowsePath_Res_Target_Node(browsePath)) = size(BrowsePath_Res_Target_Index(browsePath))
+            )
+        )
     END
     ;
 
@@ -399,20 +411,25 @@ OPERATIONS
         ELSE
             l_continue, l_source_copy <-- copy_node_id_pointer_content (l_source);
             l_index := 0;
-               IF l_continue = TRUE THEN
+            IF l_continue = TRUE THEN
                 add_BrowsePathSource(l_source_copy) /* copy the source in source sequence */
-             ELSE
+            ELSE
                 l_statusCode_operation := e_sc_bad_out_of_memory
-             END
-             ;
-            WHILE l_continue = TRUE /* For each element of the path */
+            END
+            ;
+
+            /* Iterate on element list of the path
+               - BrowsePathResult is reset at each step to keep only intermediate target
+               - BrowsePathRemainingNodeId/Index are cumulative
+               - Final target are last step BrowsePathResult + BrowsePathRemainingNodeId
+            */
+            WHILE l_continue = TRUE
             DO
                 free_BrowsePathResult;
                 l_continue, l_relativePathElt, l_index <-- continue_iter_relativePath;
                 l_statusCode_operation <-- treat_one_relative_path_element(l_relativePathElt, l_index);
 
                 free_BrowsePathSource;
-                // que fait on si un node est a l'exterieur mais pas les autres ?
                 l_continue := bool(l_continue = TRUE &
                                    (l_statusCode_operation = e_sc_ok or
                                     l_statusCode_operation = e_sc_uncertain_reference_out_of_server));
@@ -454,17 +471,25 @@ OPERATIONS
                     size(BrowsePathRemainingIndex) = 0
 
                 ) &
-
                 !(l_target).(
                     l_target : ran(BrowsePathResult)
                     =>
                     l_target /= c_ExpandedNodeId_indet &
                     l_target : dom(conv_ExpandedNodeId_NodeId)) &
 
-                BrowsePathSource =
-                %(idx).(idx : 1..size(BrowsePathResult) &
-                    BrowsePathResult(idx) : dom(conv_ExpandedNodeId_NodeId)
-                    | conv_ExpandedNodeId_NodeId(BrowsePathResult(idx)))
+                (   l_index = 0 &
+                    l_continue = TRUE
+                    =>
+                    BrowsePathSource = { 1 |-> BrowsePath_StartingNode(browsePath)}
+                ) &
+                (   l_index > 0 &
+                    l_continue = TRUE
+                    =>
+                    BrowsePathSource =
+                    %(idx).(idx : 1..size(BrowsePathResult) &
+                        BrowsePathResult(idx) : dom(conv_ExpandedNodeId_NodeId)
+                        | conv_ExpandedNodeId_NodeId(BrowsePathResult(idx)))
+                )
 
             VARIANT
                 card(elements_to_iterate)
@@ -788,12 +813,12 @@ OPERATIONS
         l_size_result <-- get_BrowsePathResultSize;
         l_size_remaining <-- get_BrowsePathRemainingSize;
         l_size := l_size_result + l_size_remaining;
-
         IF l_size <= k_n_BrowsePathResPerPath_max THEN
             l_statusCode_alloc <-- alloc_BrowsePath_Res_Target(browsePath, l_size);
             IF l_statusCode_alloc = e_sc_ok THEN
                 /* Move result from BrowsePathResult */
                 l_continue <-- init_iter_browsePathSourceIdx(l_size_result);
+                l_index := 0;
                 WHILE l_continue = TRUE
                 DO
                     l_continue, l_index <-- continue_iter_browsePathSourceIdx;
@@ -814,12 +839,15 @@ OPERATIONS
                     l_continue = bool(l_statusCode_alloc = e_sc_ok or (l_index + 1 < l_size_result)) &
                     (l_statusCode_alloc = e_sc_ok
                         =>
-                        BrowsePath_Res_Target_Node(browsePath) = 1..l_size_result <| BrowsePathResult)
+                        1..l_index <| BrowsePath_Res_Target_Node(browsePath) = 1..l_index <| BrowsePathResult &
+                        1..l_index <| BrowsePath_Res_Target_Index(browsePath) = %(xx).(xx : 1..l_index | k_n_noRemainingPathIndex ))
                 VARIANT
                     l_size_result - l_index
                 END
                 ;
+
                 l_continue <-- init_iter_browsePathSourceIdx(l_size_remaining);
+                l_index := 0;
                 WHILE l_continue = TRUE
                 DO
                     l_continue, l_index <-- continue_iter_browsePathSourceIdx;
@@ -840,7 +868,11 @@ OPERATIONS
                     l_continue = bool(l_statusCode_alloc = e_sc_ok or (l_index + 1 < l_size_result)) &
                     (l_statusCode_alloc = e_sc_ok
                         =>
-                        BrowsePath_Res_Target_Node(browsePath) = 1..l_size_result <| BrowsePathResult)
+                        1..l_size_result <| BrowsePath_Res_Target_Node(browsePath) = BrowsePathResult &
+                        1..l_size_result <| BrowsePath_Res_Target_Index(browsePath) = %(xx).(xx : 1..l_size_result | k_n_noRemainingPathIndex ) &
+                        (l_size_result + 1) .. (l_size_result + l_index) <| BrowsePath_Res_Target_Node(browsePath) = 1..l_index <| BrowsePathRemainingNodeId &
+                        (l_size_result + 1) .. (l_size_result + l_index) <| BrowsePath_Res_Target_Index(browsePath) = 1..l_index <| BrowsePathRemainingIndex)
+
                 VARIANT
                     l_size_remaining - l_index
                 END
