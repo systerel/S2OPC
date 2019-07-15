@@ -528,12 +528,12 @@ OPERATIONS
 
    p_service_StatusCode <-- set_browse_value_context (p_session, p_maxTargetRef, p_browseView, p_nodeId,
                                                       p_browseDirection, p_referenceType, p_includeSubtypes,
-                                                      p_nodeClassMask, p_resultMask) =
+                                                      p_nodeClassMask, p_resultMask, p_autoReleaseCP) =
    BEGIN
        /* Only set context to start with index 1 of target references */
        p_service_StatusCode <-- setall_browse_value_context(1, p_session, p_maxTargetRef, p_browseView, p_nodeId,
                                                             p_browseDirection, p_referenceType, p_includeSubtypes,
-                                                            p_nodeClassMask, p_resultMask)
+                                                            p_nodeClassMask, p_resultMask, p_autoReleaseCP)
    END
    ;
 
@@ -548,9 +548,11 @@ OPERATIONS
        l_referenceType,
        l_includeSubtypes,
        l_nodeClassMask,
-       l_resultMask
+       l_resultMask,
+       l_autoReleaseCP
    IN
         p_service_StatusCode := e_sc_bad_continuation_point_invalid;
+        l_autoReleaseCP := FALSE; /* No need to do auto release here since we manually release it before treatment */
         l_res,
         l_nextIndex,
         l_maxTargetRef,
@@ -565,7 +567,7 @@ OPERATIONS
         IF l_res = TRUE THEN
             p_service_StatusCode <-- setall_browse_value_context(l_nextIndex, p_session, l_maxTargetRef, l_browseView,
                                                                  l_nodeId, l_browseDirection, l_referenceType, l_includeSubtypes,
-                                                                 l_nodeClassMask, l_resultMask);
+                                                                 l_nodeClassMask, l_resultMask, l_autoReleaseCP);
             IF p_service_StatusCode = e_sc_ok THEN
                 /* Result ignored since it is same algorithm determines l_res in getall_continuation_point.
                    => mandatory TRUE result here */
@@ -588,6 +590,7 @@ OPERATIONS
        l_includeSubtypes,
        l_nodeClassMask,
        l_resultMask,
+       l_autoReleaseCP,
        l_is_ref_type_id_valid,
        l_is_src_node_valid,
        l_nb_target,
@@ -596,13 +599,16 @@ OPERATIONS
        l_max_nb_results,
        l_toContinue,
        l_nextIndex,
+       l_has_continuation_point,
+       l_prev_cp_id,
        l_cp_bres
    IN
         p_continuationPointId := c_ContinuationPointId_indet;
         p_nbReferences := 0;
         /* Get input context */
         l_startIndex, l_session, l_maxTargetRef, l_browseView, l_nodeId,
-        l_browseDirection, l_refType_defined, l_referenceType, l_includeSubtypes, l_nodeClassMask, l_resultMask
+        l_browseDirection, l_refType_defined, l_referenceType, l_includeSubtypes,
+        l_nodeClassMask, l_resultMask, l_autoReleaseCP
           <-- getall_browse_value_context;
         l_is_ref_type_id_valid <-- local_is_valid_ReferenceTypeId(l_refType_defined, l_referenceType);
         /* Retrieve source node in address space */
@@ -620,6 +626,13 @@ OPERATIONS
                 IF p_serviceStatusCode = e_sc_ok THEN
                     p_nbReferences <-- get_browse_result_nb_references;
                     IF l_toContinue = TRUE THEN
+                        l_has_continuation_point, l_prev_cp_id <-- has_continuation_point (l_session);
+                        /* If flag is set to release previous CP and the session already has a CP we have to release it */
+                        IF l_autoReleaseCP = TRUE & l_has_continuation_point = TRUE
+                        THEN
+                            l_cp_bres <-- release_continuation_point (l_session, l_prev_cp_id)
+                        END
+                        ;
                         l_cp_bres, p_continuationPointId <-- create_continuation_point
                                                            (l_session, l_nextIndex, l_maxTargetRef, l_browseView,
                                                             l_nodeId, l_browseDirection, l_referenceType, l_includeSubtypes,

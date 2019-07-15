@@ -21,7 +21,7 @@
 
  File Name            : translate_browse_path.c
 
- Date                 : 16/07/2019 15:20:03
+ Date                 : 19/07/2019 09:16:36
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -512,6 +512,7 @@ void translate_browse_path__compute_browse_result_from_source(
          translate_browse_path__includedSubtypes,
          constants__c_BrowseNodeClassMask_indet,
          constants__c_BrowseResultMask_all,
+         false,
          translate_browse_path__statusCode_operation);
       if (*translate_browse_path__statusCode_operation == constants_statuscodes_bs__e_sc_ok) {
          browse_treatment__compute_browse_result(&translate_browse_path__l_browse_statusCode,

@@ -287,7 +287,8 @@ OPERATIONS
 
     p_service_StatusCode <-- set_browse_value_context(p_session, p_maxTargetRef, p_browseView,
                                                       p_nodeId, p_browseDirection, p_referenceType,
-                                                      p_includeSubtypes, p_nodeClassMask, p_resultMask) =
+                                                      p_includeSubtypes, p_nodeClassMask, p_resultMask,
+                                                      p_autoReleaseCP) =
     PRE
         isBrowseValueContextDefined = FALSE         &
         p_session : t_session_i                     &
@@ -299,7 +300,8 @@ OPERATIONS
         p_browseDirection : t_BrowseDirection       &
         p_referenceType : t_NodeId_i                &
         p_nodeClassMask : t_BrowseNodeClassMask_i   &
-        p_resultMask    : t_BrowseResultMask_i   &
+        p_resultMask    : t_BrowseResultMask_i      &
+        p_autoReleaseCP : BOOL                      &
         p_includeSubtypes : BOOL
     THEN
         BrowseContext_MaxNbTargets,
@@ -356,6 +358,7 @@ OPERATIONS
           p_nbReferences <= k_n_BrowseTarget_max &
           p_nbReferences = BrowseContext_MaxNbTargets &
           p_continuationPointId : t_ContinuationPointId_i &
+          (p_serviceStatusCode /= e_sc_ok => p_continuationPointId = c_ContinuationPointId_indet) &
           isBrowseResultComputed = bool(p_serviceStatusCode = e_sc_ok or p_serviceStatusCode = e_sc_bad_no_continuation_points)
         )
     END

@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment_context.c
 
- Date                 : 17/06/2019 08:31:46
+ Date                 : 15/07/2019 16:33:59
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -42,6 +42,7 @@ constants__t_NodeId_i browse_treatment_context__in_BrowseValue_NodeId_i;
 constants__t_NodeId_i browse_treatment_context__in_BrowseValue_ReferenceTypeId_i;
 constants__t_BrowseResultMask_i browse_treatment_context__in_BrowseValue_ResultMask_i;
 constants__t_NodeId_i browse_treatment_context__in_BrowseView_i;
+t_bool browse_treatment_context__in_ReleasePrevContinuationPoint_i;
 t_entier4 browse_treatment_context__in_maxReferencesPerNode_i;
 constants__t_session_i browse_treatment_context__in_session_i;
 t_entier4 browse_treatment_context__in_startIndex_i;
@@ -61,6 +62,7 @@ void browse_treatment_context__INITIALISATION(void) {
    browse_treatment_context__in_BrowseValue_IncludeSubtypes_i = false;
    browse_treatment_context__in_BrowseValue_NodeClassMask_i = constants__c_BrowseNodeClassMask_indet;
    browse_treatment_context__in_BrowseValue_ResultMask_i = constants__c_BrowseResultMask_indet;
+   browse_treatment_context__in_ReleasePrevContinuationPoint_i = false;
    browse_treatment_context__isBrowseValueContextDefined_i = false;
 }
 
@@ -81,6 +83,7 @@ void browse_treatment_context__local_clear_browse_value_context(void) {
    browse_treatment_context__in_BrowseValue_IncludeSubtypes_i = false;
    browse_treatment_context__in_BrowseValue_NodeClassMask_i = constants__c_BrowseNodeClassMask_indet;
    browse_treatment_context__in_BrowseValue_ResultMask_i = constants__c_BrowseResultMask_indet;
+   browse_treatment_context__in_ReleasePrevContinuationPoint_i = false;
    browse_treatment_context__isBrowseValueContextDefined_i = false;
 }
 
@@ -95,6 +98,7 @@ void browse_treatment_context__setall_browse_value_context(
    const t_bool browse_treatment_context__p_includeSubtypes,
    const constants__t_BrowseNodeClassMask_i browse_treatment_context__p_nodeClassMask,
    const constants__t_BrowseResultMask_i browse_treatment_context__p_resultMask,
+   const t_bool browse_treatment_context__p_autoReleaseCP,
    constants_statuscodes_bs__t_StatusCode_i * const browse_treatment_context__p_service_StatusCode) {
    {
       t_bool browse_treatment_context__l_bresView;
@@ -117,6 +121,7 @@ void browse_treatment_context__setall_browse_value_context(
       browse_treatment_context__in_BrowseValue_IncludeSubtypes_i = browse_treatment_context__p_includeSubtypes;
       browse_treatment_context__in_BrowseValue_NodeClassMask_i = browse_treatment_context__p_nodeClassMask;
       browse_treatment_context__in_BrowseValue_ResultMask_i = browse_treatment_context__p_resultMask;
+      browse_treatment_context__in_ReleasePrevContinuationPoint_i = browse_treatment_context__p_autoReleaseCP;
       browse_treatment_context__isBrowseValueContextDefined_i = true;
       if (((browse_treatment_context__l_bresView == true) &&
          (browse_treatment_context__l_bresSrc == true)) &&
@@ -141,7 +146,8 @@ void browse_treatment_context__getall_browse_value_context(
    constants__t_NodeId_i * const browse_treatment_context__p_referenceType,
    t_bool * const browse_treatment_context__p_includeSubtypes,
    constants__t_BrowseNodeClassMask_i * const browse_treatment_context__p_nodeClassMask,
-   constants__t_BrowseResultMask_i * const browse_treatment_context__p_resultMask) {
+   constants__t_BrowseResultMask_i * const browse_treatment_context__p_resultMask,
+   t_bool * const browse_treatment_context__p_autoReleaseCP) {
    *browse_treatment_context__p_startIndex = browse_treatment_context__in_startIndex_i;
    *browse_treatment_context__p_session = browse_treatment_context__in_session_i;
    *browse_treatment_context__p_maxTargetRef = browse_treatment_context__in_maxReferencesPerNode_i;
@@ -153,6 +159,7 @@ void browse_treatment_context__getall_browse_value_context(
    *browse_treatment_context__p_includeSubtypes = browse_treatment_context__in_BrowseValue_IncludeSubtypes_i;
    *browse_treatment_context__p_nodeClassMask = browse_treatment_context__in_BrowseValue_NodeClassMask_i;
    *browse_treatment_context__p_resultMask = browse_treatment_context__in_BrowseValue_ResultMask_i;
+   *browse_treatment_context__p_autoReleaseCP = browse_treatment_context__in_ReleasePrevContinuationPoint_i;
 }
 
 void browse_treatment_context__is_NodeClass_in_NodeClassMask(

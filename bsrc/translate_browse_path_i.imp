@@ -895,7 +895,7 @@ OPERATIONS
         nbReferences := 0;
         statusCode_operation <-- set_browse_value_context(c_session_indet, 0, c_NodeId_indet, source,
             browseDirection, referenceTypeId, includedSubtypes,
-            c_BrowseNodeClassMask_indet, c_BrowseResultMask_all);
+            c_BrowseNodeClassMask_indet, c_BrowseResultMask_all, FALSE);
         IF statusCode_operation = e_sc_ok THEN
             l_browse_statusCode,
             l_continuationPoint,

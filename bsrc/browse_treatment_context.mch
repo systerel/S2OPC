@@ -38,6 +38,7 @@ DEFINITIONS
         in_BrowseValue_NodeClassMask,
         in_BrowseValue_NodeClassesInMask,
         in_BrowseValue_ResultMask,
+        in_ReleasePrevContinuationPoint,
         isBrowseValueContextDefined;
 
     d_inv_in ==
@@ -53,6 +54,7 @@ DEFINITIONS
         in_BrowseValue_NodeClassMask     : t_BrowseNodeClassMask_i &
         in_BrowseValue_NodeClassesInMask <: t_NodeClass_i         &
         in_BrowseValue_ResultMask        : t_BrowseResultMask_i &
+        in_ReleasePrevContinuationPoint  : BOOL & /* Automatic release of previous continuation flag */
         isBrowseValueContextDefined      : BOOL
     ;
     d_init_in ==
@@ -69,6 +71,7 @@ DEFINITIONS
             in_BrowseValue_NodeClassMask    = c_BrowseNodeClassMask_indet &
             in_BrowseValue_NodeClassesInMask = {c_NodeClass_indet}       &
             in_BrowseValue_ResultMask       = c_BrowseResultMask_indet &
+            in_ReleasePrevContinuationPoint = FALSE &
             isBrowseValueContextDefined     = FALSE
         )
 
@@ -86,7 +89,7 @@ OPERATIONS
     p_service_StatusCode <-- setall_browse_value_context (p_startIndex, p_session, p_maxTargetRef,
                                                           p_browseView, p_nodeId, p_browseDirection,
                                                           p_referenceType, p_includeSubtypes,
-                                                          p_nodeClassMask, p_resultMask) =
+                                                          p_nodeClassMask, p_resultMask, p_autoReleaseCP) =
    PRE
         isBrowseValueContextDefined = FALSE &
         p_startIndex    : NAT &
@@ -102,6 +105,7 @@ OPERATIONS
         p_referenceType : t_NodeId_i                &
         p_nodeClassMask : t_BrowseNodeClassMask_i   &
         p_resultMask    : t_BrowseResultMask_i   &
+        p_autoReleaseCP : BOOL &
         p_includeSubtypes : BOOL
    THEN
         p_service_StatusCode,
@@ -122,6 +126,7 @@ OPERATIONS
                 in_BrowseValue_NodeClassesInMask <: t_NodeClass_i &
                 in_BrowseValue_NodeClassesInMask$0 <: in_BrowseValue_NodeClassesInMask &
                 in_BrowseValue_ResultMask        = p_resultMask   &
+                in_ReleasePrevContinuationPoint  = p_autoReleaseCP &
 
                 isBrowseValueContextDefined = TRUE) &
             (p_service_StatusCode /= e_sc_ok =>
@@ -132,7 +137,7 @@ OPERATIONS
 
    p_startIndex, p_session, p_maxTargetRef, p_browseView,
    p_nodeId, p_browseDirection, p_refType_defined, p_referenceType,
-   p_includeSubtypes, p_nodeClassMask, p_resultMask
+   p_includeSubtypes, p_nodeClassMask, p_resultMask, p_autoReleaseCP
       <-- getall_browse_value_context =
    PRE
        isBrowseValueContextDefined = TRUE
@@ -147,7 +152,8 @@ OPERATIONS
         p_referenceType := in_BrowseValue_ReferenceTypeId    ||
         p_includeSubtypes := in_BrowseValue_IncludeSubtypes ||
         p_nodeClassMask := in_BrowseValue_NodeClassMask ||
-        p_resultMask := in_BrowseValue_ResultMask
+        p_resultMask := in_BrowseValue_ResultMask ||
+        p_autoReleaseCP := in_ReleasePrevContinuationPoint
    END
    ;
 

@@ -70,9 +70,13 @@ LOCAL_OPERATIONS
             (StatusCode_service = e_sc_ok =>
                 isBrowseResponseAllocated = TRUE &
                 ResponseBrowse_BrowseStatus : cast_t_BrowseValue[1..p_nb_browse_value] --> t_StatusCode &
-                !p_index.(p_index : cast_t_BrowseValue[1..p_nb_browse_value] & ResponseBrowse_BrowseStatus(p_index) = e_sc_ok =>
+                !p_index.(p_index : cast_t_BrowseValue[1..p_nb_browse_value] &
+                          (ResponseBrowse_BrowseStatus(p_index) = e_sc_ok or
+                           ResponseBrowse_BrowseStatus(p_index) = e_sc_bad_no_continuation_points) =>
                             p_index : dom(ResponseBrowse_ContinuationPoint) &
-                            p_index : dom(ResponseBrowse_ResultReferences)
+                            p_index : dom(ResponseBrowse_ResultReferences) &
+                          (ResponseBrowse_BrowseStatus(p_index) = e_sc_bad_no_continuation_points =>
+                            ResponseBrowse_ContinuationPoint(p_index) = c_ContinuationPointId_indet)
                 ) &
                 !p_index.(p_index : cast_t_BrowseValue[1..p_nb_browse_value] & ResponseBrowse_BrowseStatus(p_index) /= e_sc_ok =>
                     p_index /: dom(ResponseBrowse_ContinuationPoint) &
@@ -85,7 +89,7 @@ LOCAL_OPERATIONS
     END
     ;
 
-    treat_browse_request_BrowseValue_1(p_session, p_req_msg, p_resp_msg, p_nid_view, p_nb_target_max, p_bvi) =
+    treat_browse_request_BrowseValue_1(p_session, p_req_msg, p_resp_msg, p_nid_view, p_nb_target_max, p_bvi, p_autoReleaseCP) =
     PRE
         RequestBrowse_nb_BrowseValue > 0 &
         RequestBrowse_nb_BrowseValue <= k_n_BrowseResponse_max &
@@ -105,7 +109,9 @@ LOCAL_OPERATIONS
 
         p_bvi           : t_BrowseValue_i &
         p_bvi           : t_BrowseValue &
-        p_bvi           : cast_t_BrowseValue[1..RequestBrowse_nb_BrowseValue]
+        p_bvi           : cast_t_BrowseValue[1..RequestBrowse_nb_BrowseValue] &
+
+        p_autoReleaseCP : BOOL
     THEN
         /* Note: we do not have access to the browse_treatment variables,
                  only operation result are forwarded by translate browse path machines */
@@ -121,7 +127,9 @@ LOCAL_OPERATIONS
             ((ResponseBrowse_BrowseStatus(p_bvi) = e_sc_ok or
               ResponseBrowse_BrowseStatus(p_bvi) = e_sc_bad_no_continuation_points) =>
                 p_bvi : dom(ResponseBrowse_ResultReferences) & // Result is defined
-                p_bvi : dom(ResponseBrowse_ContinuationPoint) &// Continuation is either indet or defined
+                p_bvi : dom(ResponseBrowse_ContinuationPoint) & // Continuation is either indet or defined
+              (ResponseBrowse_BrowseStatus(p_bvi) = e_sc_bad_no_continuation_points =>
+                 ResponseBrowse_ContinuationPoint(p_bvi) = c_ContinuationPointId_indet) &
               not (ResponseBrowse_BrowseStatus(p_bvi) = e_sc_ok or
                    ResponseBrowse_BrowseStatus(p_bvi) = e_sc_bad_no_continuation_points) =>
                 p_bvi /: dom(ResponseBrowse_ResultReferences) &
@@ -261,8 +269,9 @@ OPERATIONS
        p_nid_view      : the browse request view node id
        p_nb_target_max : limit number of target nodes in the browse response requested by the client (0 means no limit)
        p_bvi           : browse value index of the starting node
+       p_autoReleaseCP : release the previous continuation point if a new one is required
     */
-    treat_browse_request_BrowseValue_1(p_session, p_req_msg, p_resp_msg, p_nid_view, p_nb_target_max, p_bvi) =
+    treat_browse_request_BrowseValue_1(p_session, p_req_msg, p_resp_msg, p_nid_view, p_nb_target_max, p_bvi, p_autoReleaseCP) =
     VAR
         l_SrcNodeId,
         l_dir,
@@ -281,7 +290,7 @@ OPERATIONS
             IF  l_SrcNodeId /= c_NodeId_indet THEN
                 l_serviceStatusCode <-- set_browse_value_context(p_session, p_nb_target_max, p_nid_view,
                                                                  l_SrcNodeId, l_dir, l_reftype, l_incsubtyp,
-                                                                 l_nodeClassMask, l_resultMask);
+                                                                 l_nodeClassMask, l_resultMask, p_autoReleaseCP);
                 IF l_serviceStatusCode = e_sc_ok THEN
                     l_serviceStatusCode, l_continuationPointId, l_nbTargets <-- compute_browse_result;
                     clear_browse_value_context;
@@ -307,6 +316,7 @@ OPERATIONS
     VAR
         l_continue,
         l_bvi,
+        l_first_iteration,
         l_isallocated
     IN
         /* When view is not c_NodeId_indet, we fail, because we don't support Views at all. */
@@ -316,9 +326,11 @@ OPERATIONS
                 IF l_isallocated = TRUE THEN
                     StatusCode_service := e_sc_ok;
                     l_continue <-- init_iter_browse_request(p_nb_browse_value);
+                    l_first_iteration := TRUE;
                     WHILE l_continue = TRUE DO
                         l_continue, l_bvi <-- continue_iter_browse_request;
-                        treat_browse_request_BrowseValue_1(p_session,  p_req_msg, p_resp_msg, p_nid_view, p_nb_target_max, l_bvi)
+                        treat_browse_request_BrowseValue_1(p_session,  p_req_msg, p_resp_msg, p_nid_view, p_nb_target_max, l_bvi, l_first_iteration);
+                        l_first_iteration := FALSE
                     INVARIANT
                         breqs_to_iterate /\ breqs_iterated = {} &
                         breqs_nb_reqs = card(breqs_to_iterate \/ breqs_iterated) &
@@ -331,8 +343,10 @@ OPERATIONS
                         !p_index.(p_index : breqs_iterated &
                                    (ResponseBrowse_BrowseStatus(p_index) = e_sc_ok or
                                     ResponseBrowse_BrowseStatus(p_index) = e_sc_bad_no_continuation_points) =>
-                                 p_index : dom(ResponseBrowse_ContinuationPoint) &
-                                 p_index : dom(ResponseBrowse_ResultReferences)
+                                     p_index : dom(ResponseBrowse_ContinuationPoint) &
+                                     p_index : dom(ResponseBrowse_ResultReferences) &
+                                    (ResponseBrowse_BrowseStatus(p_index) = e_sc_bad_no_continuation_points =>
+                                      ResponseBrowse_ContinuationPoint(p_index) = c_ContinuationPointId_indet)
                          )
                     VARIANT
                         card(breqs_to_iterate)

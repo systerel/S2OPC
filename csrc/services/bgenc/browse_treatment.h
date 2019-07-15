@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment.h
 
- Date                 : 14/06/2019 07:37:48
+ Date                 : 15/07/2019 16:34:01
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -136,6 +136,7 @@ extern void browse_treatment__set_browse_value_context(
    const t_bool browse_treatment__p_includeSubtypes,
    const constants__t_BrowseNodeClassMask_i browse_treatment__p_nodeClassMask,
    const constants__t_BrowseResultMask_i browse_treatment__p_resultMask,
+   const t_bool browse_treatment__p_autoReleaseCP,
    constants_statuscodes_bs__t_StatusCode_i * const browse_treatment__p_service_StatusCode);
 extern void browse_treatment__set_browse_value_context_from_continuation_point(
    const constants__t_session_i browse_treatment__p_session,

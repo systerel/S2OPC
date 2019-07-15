@@ -21,7 +21,7 @@
 
  File Name            : service_set_view.c
 
- Date                 : 14/06/2019 07:37:56
+ Date                 : 15/07/2019 16:34:08
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -47,7 +47,8 @@ void service_set_view__treat_browse_request_BrowseValue_1(
    const constants__t_msg_i service_set_view__p_resp_msg,
    const constants__t_NodeId_i service_set_view__p_nid_view,
    const t_entier4 service_set_view__p_nb_target_max,
-   const constants__t_BrowseValue_i service_set_view__p_bvi) {
+   const constants__t_BrowseValue_i service_set_view__p_bvi,
+   const t_bool service_set_view__p_autoReleaseCP) {
    {
       constants__t_NodeId_i service_set_view__l_SrcNodeId;
       constants__t_BrowseDirection_i service_set_view__l_dir;
@@ -79,6 +80,7 @@ void service_set_view__treat_browse_request_BrowseValue_1(
                service_set_view__l_incsubtyp,
                service_set_view__l_nodeClassMask,
                service_set_view__l_resultMask,
+               service_set_view__p_autoReleaseCP,
                &service_set_view__l_serviceStatusCode);
             if (service_set_view__l_serviceStatusCode == constants_statuscodes_bs__e_sc_ok) {
                translate_browse_path__compute_browse_result(&service_set_view__l_serviceStatusCode,
@@ -127,6 +129,7 @@ void service_set_view__treat_browse_request_BrowseValues(
    {
       t_bool service_set_view__l_continue;
       constants__t_BrowseValue_i service_set_view__l_bvi;
+      t_bool service_set_view__l_first_iteration;
       t_bool service_set_view__l_isallocated;
       
       if (service_set_view__p_nid_view == constants__c_NodeId_indet) {
@@ -139,6 +142,7 @@ void service_set_view__treat_browse_request_BrowseValues(
                *service_set_view__StatusCode_service = constants_statuscodes_bs__e_sc_ok;
                service_browse_it__init_iter_browse_request(service_set_view__p_nb_browse_value,
                   &service_set_view__l_continue);
+               service_set_view__l_first_iteration = true;
                while (service_set_view__l_continue == true) {
                   service_browse_it__continue_iter_browse_request(&service_set_view__l_continue,
                      &service_set_view__l_bvi);
@@ -147,7 +151,9 @@ void service_set_view__treat_browse_request_BrowseValues(
                      service_set_view__p_resp_msg,
                      service_set_view__p_nid_view,
                      service_set_view__p_nb_target_max,
-                     service_set_view__l_bvi);
+                     service_set_view__l_bvi,
+                     service_set_view__l_first_iteration);
+                  service_set_view__l_first_iteration = false;
                }
             }
             else {

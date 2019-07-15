@@ -40,6 +40,7 @@ CONCRETE_VARIABLES
     in_BrowseValue_IncludeSubtypes_i,
     in_BrowseValue_NodeClassMask_i,
     in_BrowseValue_ResultMask_i,
+    in_ReleasePrevContinuationPoint_i,
     isBrowseValueContextDefined_i
 
 INVARIANT
@@ -73,6 +74,9 @@ INVARIANT
     in_BrowseValue_ResultMask_i : t_BrowseResultMask_i &
     in_BrowseValue_ResultMask_i = in_BrowseValue_ResultMask &
 
+    in_ReleasePrevContinuationPoint_i : BOOL &
+    in_ReleasePrevContinuationPoint_i = in_ReleasePrevContinuationPoint &
+
     isBrowseValueContextDefined_i : BOOL &
     isBrowseValueContextDefined_i = isBrowseValueContextDefined
 
@@ -88,6 +92,7 @@ INITIALISATION
     in_BrowseValue_IncludeSubtypes_i := FALSE;
     in_BrowseValue_NodeClassMask_i := c_BrowseNodeClassMask_indet;
     in_BrowseValue_ResultMask_i := c_BrowseResultMask_indet;
+    in_ReleasePrevContinuationPoint_i := FALSE;
     isBrowseValueContextDefined_i := FALSE
 LOCAL_OPERATIONS
 
@@ -103,6 +108,7 @@ LOCAL_OPERATIONS
         in_BrowseValue_IncludeSubtypes_i := FALSE ||
         in_BrowseValue_NodeClassMask_i := c_BrowseNodeClassMask_indet ||
         in_BrowseValue_ResultMask_i := c_BrowseResultMask_indet ||
+        in_ReleasePrevContinuationPoint_i := FALSE ||
         isBrowseValueContextDefined_i := FALSE
     END
 
@@ -125,6 +131,7 @@ OPERATIONS
         in_BrowseValue_IncludeSubtypes_i := FALSE;
         in_BrowseValue_NodeClassMask_i := c_BrowseNodeClassMask_indet;
         in_BrowseValue_ResultMask_i := c_BrowseResultMask_indet;
+        in_ReleasePrevContinuationPoint_i := FALSE;
         isBrowseValueContextDefined_i := FALSE
    END
    ;
@@ -134,7 +141,7 @@ OPERATIONS
    p_service_StatusCode <-- setall_browse_value_context (p_startIndex, p_session, p_maxTargetRef,
                                                          p_browseView, p_nodeId, p_browseDirection,
                                                          p_referenceType, p_includeSubtypes,
-                                                         p_nodeClassMask, p_resultMask) =
+                                                         p_nodeClassMask, p_resultMask, p_autoReleaseCP) =
    VAR
        l_bresView,
        l_bresSrc,
@@ -150,6 +157,7 @@ OPERATIONS
         in_BrowseValue_IncludeSubtypes_i := p_includeSubtypes;
         in_BrowseValue_NodeClassMask_i := p_nodeClassMask;
         in_BrowseValue_ResultMask_i := p_resultMask;
+        in_ReleasePrevContinuationPoint_i := p_autoReleaseCP;
         isBrowseValueContextDefined_i := TRUE;
         IF l_bresView = TRUE & l_bresSrc = TRUE & l_bresRef = TRUE
         THEN
@@ -163,7 +171,7 @@ OPERATIONS
 
    p_startIndex, p_session, p_maxTargetRef, p_browseView, p_nodeId,
    p_browseDirection, p_refType_defined, p_referenceType, p_includeSubtypes,
-   p_nodeClassMask, p_resultMask
+   p_nodeClassMask, p_resultMask, p_autoReleaseCP
       <-- getall_browse_value_context =
    BEGIN
         p_startIndex := in_startIndex_i;
@@ -176,7 +184,8 @@ OPERATIONS
         p_referenceType := in_BrowseValue_ReferenceTypeId_i;
         p_includeSubtypes := in_BrowseValue_IncludeSubtypes_i;
         p_nodeClassMask := in_BrowseValue_NodeClassMask_i;
-        p_resultMask := in_BrowseValue_ResultMask_i
+        p_resultMask := in_BrowseValue_ResultMask_i;
+        p_autoReleaseCP := in_ReleasePrevContinuationPoint_i
    END
    ;
 

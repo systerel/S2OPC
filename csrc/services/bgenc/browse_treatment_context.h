@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment_context.h
 
- Date                 : 14/06/2019 07:37:46
+ Date                 : 15/07/2019 16:33:59
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -57,6 +57,7 @@ extern constants__t_NodeId_i browse_treatment_context__in_BrowseValue_NodeId_i;
 extern constants__t_NodeId_i browse_treatment_context__in_BrowseValue_ReferenceTypeId_i;
 extern constants__t_BrowseResultMask_i browse_treatment_context__in_BrowseValue_ResultMask_i;
 extern constants__t_NodeId_i browse_treatment_context__in_BrowseView_i;
+extern t_bool browse_treatment_context__in_ReleasePrevContinuationPoint_i;
 extern t_entier4 browse_treatment_context__in_maxReferencesPerNode_i;
 extern constants__t_session_i browse_treatment_context__in_session_i;
 extern t_entier4 browse_treatment_context__in_startIndex_i;
@@ -87,7 +88,8 @@ extern void browse_treatment_context__getall_browse_value_context(
    constants__t_NodeId_i * const browse_treatment_context__p_referenceType,
    t_bool * const browse_treatment_context__p_includeSubtypes,
    constants__t_BrowseNodeClassMask_i * const browse_treatment_context__p_nodeClassMask,
-   constants__t_BrowseResultMask_i * const browse_treatment_context__p_resultMask);
+   constants__t_BrowseResultMask_i * const browse_treatment_context__p_resultMask,
+   t_bool * const browse_treatment_context__p_autoReleaseCP);
 extern void browse_treatment_context__is_NodeClass_in_NodeClassMask(
    const constants__t_NodeClass_i browse_treatment_context__p_nodeClass,
    t_bool * const browse_treatment_context__bres);
@@ -102,6 +104,7 @@ extern void browse_treatment_context__setall_browse_value_context(
    const t_bool browse_treatment_context__p_includeSubtypes,
    const constants__t_BrowseNodeClassMask_i browse_treatment_context__p_nodeClassMask,
    const constants__t_BrowseResultMask_i browse_treatment_context__p_resultMask,
+   const t_bool browse_treatment_context__p_autoReleaseCP,
    constants_statuscodes_bs__t_StatusCode_i * const browse_treatment_context__p_service_StatusCode);
 
 #endif

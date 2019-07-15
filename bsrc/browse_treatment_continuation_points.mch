@@ -39,6 +39,22 @@ INITIALISATION
 
 OPERATIONS
 
+    bres, p_ContinuationPointId <-- has_continuation_point(p_session) =
+    PRE
+        p_session : t_session_i
+    THEN
+        bres, p_ContinuationPointId
+        :(bres : BOOL &
+          p_ContinuationPointId : t_ContinuationPointId_i &
+          bres = bool(p_session : t_session & p_session : dom(session_ContinuationPoint~)) &
+          (bres = TRUE =>
+              p_ContinuationPointId = id_ContinuationPoint(session_ContinuationPoint~(p_session))) &
+          (bres = FALSE =>
+              p_ContinuationPointId = c_ContinuationPointId_indet)
+         )
+    END
+    ;
+
     bres, p_ContinuationPointId <-- create_continuation_point (p_session, p_nextIndex, p_maxTargetRef, p_browseView,
                                                                p_nodeId, p_browseDirection, p_referenceType,
                                                                p_includeSubtypes, p_nodeClassMask, p_resultMask) =

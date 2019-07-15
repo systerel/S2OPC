@@ -35,6 +35,7 @@ DEFINITIONS
         in_BrowseValue_IncludeSubtypes,
         in_BrowseValue_NodeClassMask,
         in_BrowseValue_ResultMask,
+        in_ReleasePrevContinuationPoint,
         isBrowseValueContextDefined;
 
     d_variables_persist ==
@@ -67,7 +68,8 @@ DEFINITIONS
         in_BrowseValue_ReferenceTypeId   : t_NodeId              &
         in_BrowseValue_IncludeSubtypes   : BOOL                  &
         in_BrowseValue_NodeClassMask     : t_BrowseNodeClassMask_i &
-        in_BrowseValue_ResultMask        : t_BrowseResultMask_i &
+        in_BrowseValue_ResultMask        : t_BrowseResultMask_i  &
+        in_ReleasePrevContinuationPoint  : BOOL                  &
         isBrowseValueContextDefined      : BOOL
     ;
     d_inv_persist ==
@@ -102,7 +104,8 @@ DEFINITIONS
             in_BrowseValue_ReferenceTypeId  = c_NodeId_indet             &
             in_BrowseValue_IncludeSubtypes  = FALSE                      &
             in_BrowseValue_NodeClassMask    = c_BrowseNodeClassMask_indet &
-            in_BrowseValue_ResultMask       = c_BrowseResultMask_indet &
+            in_BrowseValue_ResultMask       = c_BrowseResultMask_indet   &
+            in_ReleasePrevContinuationPoint = FALSE                      &
             isBrowseValueContextDefined     = FALSE
         )
     ;
@@ -167,7 +170,8 @@ OPERATIONS
 
     p_service_StatusCode <-- set_browse_value_context(p_session, p_maxTargetRef, p_browseView,
                                                       p_nodeId, p_browseDirection, p_referenceType,
-                                                      p_includeSubtypes, p_nodeClassMask, p_resultMask) =
+                                                      p_includeSubtypes, p_nodeClassMask, p_resultMask,
+                                                      p_autoReleaseCP) =
     PRE
         isBrowseValueContextDefined = FALSE         &
         p_session : t_session_i                     &
@@ -179,7 +183,8 @@ OPERATIONS
         p_browseDirection : t_BrowseDirection       &
         p_referenceType : t_NodeId_i                &
         p_nodeClassMask : t_BrowseNodeClassMask_i   &
-        p_resultMask    : t_BrowseResultMask_i   &
+        p_resultMask    : t_BrowseResultMask_i      &
+        p_autoReleaseCP : BOOL                      &
         p_includeSubtypes : BOOL
     THEN
         /* Reset output result on new context*/
@@ -199,7 +204,8 @@ OPERATIONS
                  in_BrowseValue_ReferenceTypeId   = p_referenceType   &
                  in_BrowseValue_IncludeSubtypes   = p_includeSubtypes &
                  in_BrowseValue_NodeClassMask     = p_nodeClassMask   &
-                 in_BrowseValue_ResultMask        = p_resultMask   &
+                 in_BrowseValue_ResultMask        = p_resultMask      &
+                 in_ReleasePrevContinuationPoint  = p_autoReleaseCP   &
 
                  isBrowseValueContextDefined = TRUE) &
                 (p_service_StatusCode /= e_sc_ok =>
@@ -284,12 +290,25 @@ OPERATIONS
               /* ContinuationPoint defined constraints: */
               (out_BrowseResult_ContinuationPointId /= c_ContinuationPointId_indet =>
                   p_nbReferences = in_maxReferencesPerNode & /* Maximum reached if continuation point defined */
-                  in_session /: dom(session_ContinuationPoint$0~) & /* No continuation point already defined for current session */
-                  out_BrowseResult_ContinuationPointId : t_ContinuationPointId & /* Returned continuation point is associated with current session */
-                  id_ContinuationPoint <: id_ContinuationPoint$0 &
-                  out_BrowseResult_ContinuationPointId : ran(id_ContinuationPoint) & /* Continuation point added to valid continuation points */
-                  s_ContinuationPoints = s_ContinuationPoints$0 \/ {id_ContinuationPoint~(out_BrowseResult_ContinuationPointId)} &
-                  session_ContinuationPoint = session_ContinuationPoint$0 <+ {id_ContinuationPoint~(out_BrowseResult_ContinuationPointId) |-> in_session}
+                  /* No continuation point already defined for current session or automatic release of previous continuation point set */
+                  (in_session /: dom(session_ContinuationPoint$0~) or in_ReleasePrevContinuationPoint = TRUE) &
+
+                  /* No continuation point already defined, only add a new one */
+                  (in_session /: dom(session_ContinuationPoint$0~) =>
+                      out_BrowseResult_ContinuationPointId : t_ContinuationPointId & /* Returned continuation point is associated with current session */
+                      id_ContinuationPoint$0 <: id_ContinuationPoint &
+                      out_BrowseResult_ContinuationPointId : ran(id_ContinuationPoint) & /* Continuation point added to valid continuation points */
+                      s_ContinuationPoints = s_ContinuationPoints$0 \/ {id_ContinuationPoint~(out_BrowseResult_ContinuationPointId)} &
+                      session_ContinuationPoint = session_ContinuationPoint$0 <+ {id_ContinuationPoint~(out_BrowseResult_ContinuationPointId) |-> in_session}) &
+                  /* OR Continuation point already defined, remove previous one and replace by the new one */
+                  (in_session : dom(session_ContinuationPoint$0~) =>
+                      out_BrowseResult_ContinuationPointId : t_ContinuationPointId & /* Returned continuation point is associated with current session */
+                      {session_ContinuationPoint$0~(in_session)} <<| id_ContinuationPoint$0 <: id_ContinuationPoint &
+                      out_BrowseResult_ContinuationPointId : ran(id_ContinuationPoint) & /* Continuation point added to valid continuation points */
+                      s_ContinuationPoints = s_ContinuationPoints$0
+                                              - {session_ContinuationPoint$0~(in_session)}
+                                              \/ {id_ContinuationPoint~(out_BrowseResult_ContinuationPointId)} &
+                      session_ContinuationPoint = session_ContinuationPoint$0 |>> {in_session} <+ {id_ContinuationPoint~(out_BrowseResult_ContinuationPointId) |-> in_session})
               ) &
               p_continuationPointId = out_BrowseResult_ContinuationPointId
           ) &

@@ -45,6 +45,24 @@ INITIALISATION
     session_ContinuationPoint_i    := t_session_i * {c_ContinuationPoint_indet}
 OPERATIONS
 
+    bres, p_ContinuationPointId <-- has_continuation_point(p_session) =
+    VAR
+        l_valid_session,
+        l_has_cp
+    IN
+        l_valid_session <-- is_valid_session (p_session);
+        l_has_cp := session_hasContinuationPoint_i(p_session);
+        IF l_valid_session = TRUE & l_has_cp = TRUE
+        THEN
+            bres := TRUE;
+            p_ContinuationPointId <-- get_continuation_point_id (session_ContinuationPoint_i(p_session))
+        ELSE
+            bres := FALSE;
+            p_ContinuationPointId := c_ContinuationPointId_indet
+        END
+    END
+    ;
+
     bres, p_ContinuationPointId <-- create_continuation_point (p_session, p_nextIndex, p_maxTargetRef, p_browseView,
                                                                p_nodeId, p_browseDirection, p_referenceType,
                                                                p_includeSubtypes, p_nodeClassMask, p_resultMask) =

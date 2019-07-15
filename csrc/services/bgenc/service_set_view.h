@@ -21,7 +21,7 @@
 
  File Name            : service_set_view.h
 
- Date                 : 29/04/2019 16:57:44
+ Date                 : 15/07/2019 16:34:08
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -83,7 +83,8 @@ extern void service_set_view__treat_browse_request_BrowseValue_1(
    const constants__t_msg_i service_set_view__p_resp_msg,
    const constants__t_NodeId_i service_set_view__p_nid_view,
    const t_entier4 service_set_view__p_nb_target_max,
-   const constants__t_BrowseValue_i service_set_view__p_bvi);
+   const constants__t_BrowseValue_i service_set_view__p_bvi,
+   const t_bool service_set_view__p_autoReleaseCP);
 extern void service_set_view__treat_browse_request_BrowseValues(
    const constants__t_session_i service_set_view__p_session,
    const constants__t_msg_i service_set_view__p_req_msg,

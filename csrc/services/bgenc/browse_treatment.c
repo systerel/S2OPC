@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment.c
 
- Date                 : 14/06/2019 07:37:48
+ Date                 : 15/07/2019 16:34:01
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -295,6 +295,7 @@ void browse_treatment__set_browse_value_context(
    const t_bool browse_treatment__p_includeSubtypes,
    const constants__t_BrowseNodeClassMask_i browse_treatment__p_nodeClassMask,
    const constants__t_BrowseResultMask_i browse_treatment__p_resultMask,
+   const t_bool browse_treatment__p_autoReleaseCP,
    constants_statuscodes_bs__t_StatusCode_i * const browse_treatment__p_service_StatusCode) {
    browse_treatment_context__setall_browse_value_context(1,
       browse_treatment__p_session,
@@ -306,6 +307,7 @@ void browse_treatment__set_browse_value_context(
       browse_treatment__p_includeSubtypes,
       browse_treatment__p_nodeClassMask,
       browse_treatment__p_resultMask,
+      browse_treatment__p_autoReleaseCP,
       browse_treatment__p_service_StatusCode);
 }
 
@@ -324,8 +326,10 @@ void browse_treatment__set_browse_value_context_from_continuation_point(
       t_bool browse_treatment__l_includeSubtypes;
       constants__t_BrowseNodeClassMask_i browse_treatment__l_nodeClassMask;
       constants__t_BrowseResultMask_i browse_treatment__l_resultMask;
+      t_bool browse_treatment__l_autoReleaseCP;
       
       *browse_treatment__p_service_StatusCode = constants_statuscodes_bs__e_sc_bad_continuation_point_invalid;
+      browse_treatment__l_autoReleaseCP = false;
       browse_treatment_continuation_points__getall_continuation_point(browse_treatment__p_session,
          browse_treatment__p_continuationPointId,
          &browse_treatment__l_res,
@@ -349,6 +353,7 @@ void browse_treatment__set_browse_value_context_from_continuation_point(
             browse_treatment__l_includeSubtypes,
             browse_treatment__l_nodeClassMask,
             browse_treatment__l_resultMask,
+            browse_treatment__l_autoReleaseCP,
             browse_treatment__p_service_StatusCode);
          if (*browse_treatment__p_service_StatusCode == constants_statuscodes_bs__e_sc_ok) {
             browse_treatment_continuation_points__release_continuation_point(browse_treatment__p_session,
@@ -375,6 +380,7 @@ void browse_treatment__compute_browse_result(
       t_bool browse_treatment__l_includeSubtypes;
       constants__t_BrowseNodeClassMask_i browse_treatment__l_nodeClassMask;
       constants__t_BrowseResultMask_i browse_treatment__l_resultMask;
+      t_bool browse_treatment__l_autoReleaseCP;
       t_bool browse_treatment__l_is_ref_type_id_valid;
       t_bool browse_treatment__l_is_src_node_valid;
       t_entier4 browse_treatment__l_nb_target;
@@ -383,6 +389,8 @@ void browse_treatment__compute_browse_result(
       t_entier4 browse_treatment__l_max_nb_results;
       t_bool browse_treatment__l_toContinue;
       t_entier4 browse_treatment__l_nextIndex;
+      t_bool browse_treatment__l_has_continuation_point;
+      constants__t_ContinuationPointId_i browse_treatment__l_prev_cp_id;
       t_bool browse_treatment__l_cp_bres;
       
       *browse_treatment__p_continuationPointId = constants__c_ContinuationPointId_indet;
@@ -397,7 +405,8 @@ void browse_treatment__compute_browse_result(
          &browse_treatment__l_referenceType,
          &browse_treatment__l_includeSubtypes,
          &browse_treatment__l_nodeClassMask,
-         &browse_treatment__l_resultMask);
+         &browse_treatment__l_resultMask,
+         &browse_treatment__l_autoReleaseCP);
       browse_treatment__local_is_valid_ReferenceTypeId(browse_treatment__l_refType_defined,
          browse_treatment__l_referenceType,
          &browse_treatment__l_is_ref_type_id_valid);
@@ -428,6 +437,15 @@ void browse_treatment__compute_browse_result(
             if (*browse_treatment__p_serviceStatusCode == constants_statuscodes_bs__e_sc_ok) {
                browse_treatment_result_bs__get_browse_result_nb_references(browse_treatment__p_nbReferences);
                if (browse_treatment__l_toContinue == true) {
+                  browse_treatment_continuation_points__has_continuation_point(browse_treatment__l_session,
+                     &browse_treatment__l_has_continuation_point,
+                     &browse_treatment__l_prev_cp_id);
+                  if ((browse_treatment__l_autoReleaseCP == true) &&
+                     (browse_treatment__l_has_continuation_point == true)) {
+                     browse_treatment_continuation_points__release_continuation_point(browse_treatment__l_session,
+                        browse_treatment__l_prev_cp_id,
+                        &browse_treatment__l_cp_bres);
+                  }
                   browse_treatment_continuation_points__create_continuation_point(browse_treatment__l_session,
                      browse_treatment__l_nextIndex,
                      browse_treatment__l_maxTargetRef,
