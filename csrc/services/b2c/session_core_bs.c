@@ -786,6 +786,18 @@ static SOPC_ReturnStatus check_signature_with_provider(SOPC_CryptoProvider* prov
                                                        const SOPC_ByteString* nonce,
                                                        const SOPC_String* signature)
 {
+    assert(NULL != provider);
+    assert(NULL != requestedSecurityPolicy);
+    assert(NULL != requestedSecurityPolicy->Data);
+    assert(requestedSecurityPolicy->Length > 0);
+    assert(NULL != payload);
+    assert(NULL != nonce);
+    assert(NULL != nonce->Data);
+    assert(LENGTH_NONCE == nonce->Length);
+    assert(NULL != signature);
+    assert(NULL != signature->Data);
+    assert(signature->Length > 0);
+
     /* Verify signature algorithm URI */
     const char* algorithm = SOPC_CryptoProvider_AsymmetricGetUri_SignAlgorithm(provider);
 
@@ -861,6 +873,18 @@ void session_core_bs__client_create_session_check_crypto(
 
     pSession = &sessionDataArray[session_core_bs__p_session];
 
+    /* Check server signature algorithm is not empty */
+    if (NULL == pSignCandid->Algorithm.Data || pSignCandid->Algorithm.Length <= 0)
+    {
+        return;
+    }
+
+    /* Check server signature is not empty */
+    if (NULL == pSignCandid->Signature.Data || pSignCandid->Signature.Length <= 0)
+    {
+        return;
+    }
+
     /* Retrieve the security policy and mode */
     pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig(session_core_bs__p_channel_config_idx);
 
@@ -916,6 +940,17 @@ void session_core_bs__server_activate_session_check_crypto(
     }
 
     pSession = &sessionDataArray[session_core_bs__session];
+
+    /* Check client signature algorithm is not empty */
+    if (NULL == pSignCandid->Algorithm.Data || pSignCandid->Algorithm.Length <= 0)
+    {
+        return;
+    }
+    /* Check client signature is not empty */
+    if (NULL == pSignCandid->Signature.Data || pSignCandid->Signature.Length <= 0)
+    {
+        return;
+    }
 
     /* Retrieve the security policy and mode */
     pSCCfg = SOPC_ToolkitServer_GetSecureChannelConfig(session_core_bs__channel_config_idx);
