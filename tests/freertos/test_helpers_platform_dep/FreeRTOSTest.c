@@ -205,7 +205,7 @@ static void* cbS2OPC_Thread_p2(void* ptr)
                 (unsigned int) xTaskGetCurrentTaskHandle(), (uint32_t) xTaskGetTickCount());
 
         // Test to check reentrant newlib functions issue (memory leaks)
-        // fd = fopen("path", "w");
+        fd = fopen("path", "w");
         fprintf(
             stdout,
             "%s "
@@ -252,7 +252,7 @@ static void* cbS2OPC_Thread_p2(void* ptr)
             sBuffer);
 
         fflush(stdout); // Test with flush request, if faild, ZZZZ missing for the last logging
-        // fclose(fd);
+        fclose(fd);
 
         PRINTF(sBuffer);
         Mutex_Unlock(&m);
