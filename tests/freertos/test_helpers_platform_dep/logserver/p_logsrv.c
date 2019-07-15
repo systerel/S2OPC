@@ -264,7 +264,7 @@ static void cbTaskSocketClientEncodeAndTx(void* pParameters)
                     // If encoder tick timeout exist, if it returns an error, client is disconnected
                     if (pClt->cbEncoderPeriodic != NULL)
                     {
-                        if (pClt->cbEncoderPeriodic(pClt->ptrAnalyzerContext) != E_ENCODER_RESULT_OK)
+                        if (pClt->cbEncoderPeriodic(pClt->ptrEncoderContext) != E_ENCODER_RESULT_OK)
                         {
                             pClt->status = E_LOG_CLIENT_DISCONNECTED;
                         }
@@ -1550,6 +1550,30 @@ static eResultDecoder cbEchoCallback(void* pAnalyzerContext,
     return 0;
 }
 
+// Callback used by logserv to customize sent buffer
+static eResultEncoder cbEncoderCallback(void* pEncoderContext,      // Encoder context
+                                        uint8_t* pBufferInOut,      // Buffer in out
+                                        uint16_t* pNbBytesToEncode, // Signicant bytes in / out
+                                        uint16_t maxSizeBufferOut)
+{
+    uint16_t lengthLogMemStatus = 0;
+    uint16_t lengthLog = *pNbBytesToEncode;
+
+    memmove((void*) pBufferInOut + maxSizeBufferOut / 2, (void*) pBufferInOut, lengthLog);
+
+    snprintf((void*) pBufferInOut, maxSizeBufferOut / 2, "HF=%u / HL=%u - ", xPortGetFreeHeapSize(),
+             xPortGetMinimumEverFreeHeapSize());
+
+    pBufferInOut[maxSizeBufferOut / 2 - 1] = 0;
+
+    lengthLogMemStatus = strlen((void*) pBufferInOut);
+    memmove((void*) pBufferInOut + lengthLogMemStatus, (void*) pBufferInOut + maxSizeBufferOut / 2, lengthLog);
+
+    *pNbBytesToEncode = lengthLog + lengthLogMemStatus;
+
+    return E_ENCODER_RESULT_OK;
+}
+
 // Wait a client connexion.
 SOPC_ReturnStatus SOPC_LogSrv_WaitClient(uint32_t timeoutMs)
 {
@@ -1629,20 +1653,20 @@ SOPC_ReturnStatus SOPC_LogSrv_Start(
     {
         status = Condition_Init(&gSignalOneConnexion);
 
-        gLogServer = P_LOG_SRV_CreateAndStart(portSrvTCP,       //
-                                              portCltUDP,       //
-                                              1,                // Max log client
-                                              0,                // Disconnect log client after 0s
-                                              5,                // Hello message each 5seconds
-                                              cbOneConnexion,   //
-                                              NULL,             //
-                                              cbEchoCallback,   // Test echo to verify lwip
-                                              NULL,             //
-                                              NULL,             //
-                                              NULL,             //
-                                              NULL,             //
-                                              NULL,             //
-                                              cbHelloCallback); // Customize message hello
+        gLogServer = P_LOG_SRV_CreateAndStart(portSrvTCP,        //
+                                              portCltUDP,        //
+                                              1,                 // Max log client
+                                              0,                 // Disconnect log client after 0s
+                                              5,                 // Hello message each 5seconds
+                                              cbOneConnexion,    //
+                                              NULL,              //
+                                              cbEchoCallback,    // Test echo to verify lwip
+                                              NULL,              //
+                                              NULL,              //
+                                              NULL,              //
+                                              cbEncoderCallback, //
+                                              NULL,              //
+                                              cbHelloCallback);  // Customize message hello
 
         if (gLogServer == NULL)
         {
