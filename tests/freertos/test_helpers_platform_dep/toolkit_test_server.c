@@ -60,7 +60,7 @@ extern tLogSrvWks* gLogServer;
 static const char* app_namespace_uris[] = {(const char*) PRODUCT_URI, NULL};
 
 static int32_t endpointClosed = 0;
-static bool secuActive = false;
+static bool secuActive = true;
 
 volatile sig_atomic_t stopServer = 0;
 
@@ -427,7 +427,7 @@ static const unsigned char server_2k_cert[] = {
     0xbc, 0x6b, 0x5c, 0xf5, 0x17, 0x94, 0x35, 0x3a, 0xfa, 0x7e, 0x7e, 0x52, 0xda, 0x6f, 0xf8, 0x44, 0x5b, 0xc6, 0x0e,
     0x7a, 0x69, 0x59, 0xb8, 0xcf, 0xfc, 0x13, 0x1d, 0x8a, 0xf4, 0x74, 0x84, 0x60, 0x9b, 0xcb, 0xce, 0xe3, 0xfc, 0xde,
     0x73, 0xc8, 0x76, 0xfb, 0x1b, 0x4b, 0x98, 0x06, 0xa7, 0x1d, 0x75, 0x12, 0x4a, 0xb5, 0x08, 0x26, 0x73, 0xa4, 0x9f,
-    0x85, 0xae, 0x62, 0x9a, 0xbc, 0x8f, 0xb3, 0x39, 0xf6, 0x85, 0x00, 0x9a, 0x38, 0x69, 0x35, 0};
+    0x85, 0xae, 0x62, 0x9a, 0xbc, 0x8f, 0xb3, 0x39, 0xf6, 0x85, 0x00, 0x9a, 0x38, 0x69, 0x35, 0x17};
 
 static const unsigned char server_2k_key[] = {
     0x2d, 0x2d, 0x2d, 0x2d, 0x2d, 0x42, 0x45, 0x47, 0x49, 0x4e, 0x20, 0x50, 0x52, 0x49, 0x56, 0x41, 0x54, 0x45, 0x20,
@@ -611,29 +611,28 @@ void* cbToolkit_test_server(void* arg)
 
     if (secuActive != false)
     {
-        status = SOPC_KeyManager_SerializedCertificate_CreateFromFile("./server_public/server_2k_cert.der",
-                                                                      &serverCertificate);
+        // status = SOPC_KeyManager_SerializedCertificate_CreateFromFile("./server_public/server_2k_cert.der",
+        //                                                              &serverCertificate);
 
-        // status = SOPC_KeyManager_Certificate_CreateFromDER(server_2k_cert, sizeof(server_2k_cert),
-        // &serverCertificate);
+        status = SOPC_KeyManager_SerializedCertificate_CreateFromDER(server_2k_cert, sizeof(server_2k_cert),
+                                                                     &serverCertificate);
 
         epConfig.serverCertificate = serverCertificate;
 
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile("./server_private/server_2k_key.pem",
+            // status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile("./server_private/server_2k_key.pem",
+            //                                                                &serverKey);
+            status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromData(server_2k_key, sizeof(server_2k_key),
                                                                             &serverKey);
-            // status =
-            //    SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(server_2k_key, sizeof(server_2k_key), false,
-            //    &serverKey);
 
             epConfig.serverKey = serverKey;
         }
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_KeyManager_SerializedCertificate_CreateFromFile("./trusted/cacert.der", &authCertificate);
+            // status = SOPC_KeyManager_SerializedCertificate_CreateFromFile("./trusted/cacert.der", &authCertificate);
 
-            // status = SOPC_KeyManager_Certificate_CreateFromDER(cacert, sizeof(cacert), &authCertificate);
+            status = SOPC_KeyManager_SerializedCertificate_CreateFromDER(cacert, sizeof(cacert), &authCertificate);
         }
 
         if (SOPC_STATUS_OK == status)
