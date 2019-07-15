@@ -57,6 +57,6 @@ browseSubTree = ('ns=1;s=Objects.15361.SIGNALs.BALA_RDLS_G019',
                 )
 
 def create_client(uri=sUri):
-    client = Client(uri)
+    client = Client(uri,timeout=120)
     client.application_uri = "urn:S2OPC:localhost"
     return client
