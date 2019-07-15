@@ -666,6 +666,9 @@ void util_status_code__B_to_C(constants_statuscodes_bs__t_StatusCode_i bstatus, 
     case constants_statuscodes_bs__e_sc_bad_identity_token_rejected:
         *status = OpcUa_BadIdentityTokenRejected;
         break;
+    case constants_statuscodes_bs__e_sc_bad_application_signature_invalid:
+        *status = OpcUa_BadApplicationSignatureInvalid;
+        break;
     case constants_statuscodes_bs__e_sc_bad_encoding_error:
         *status = OpcUa_BadEncodingError;
         break;
@@ -917,6 +920,9 @@ void util_status_code__C_to_B(SOPC_StatusCode status, constants_statuscodes_bs__
         break;
     case OpcUa_BadIdentityTokenRejected:
         *bstatus = constants_statuscodes_bs__e_sc_bad_identity_token_rejected;
+        break;
+    case OpcUa_BadApplicationSignatureInvalid:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_application_signature_invalid;
         break;
     case OpcUa_BadEncodingError:
         *bstatus = constants_statuscodes_bs__e_sc_bad_encoding_error;

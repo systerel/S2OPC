@@ -340,7 +340,7 @@ OPERATIONS
                 ret := e_sc_ok
                 // modify credential if user was already associated, sends response
             OR
-                ret := e_sc_bad_invalid_argument
+                ret :: {e_sc_bad_invalid_state, e_sc_bad_application_signature_invalid}
                 // sends response with error
             END
         ELSIF a_state(session) : {e_session_scOrphaned, e_session_userActivated} &
@@ -353,12 +353,12 @@ OPERATIONS
                 a_state(session) := e_session_userActivated ||
                 ret := e_sc_ok
             OR
-                ret := e_sc_bad_invalid_argument
+                ret := e_sc_bad_application_signature_invalid
                 // sends response with error
             END
         ELSE
             ret :: {e_sc_bad_invalid_argument,
-                e_sc_bad_invalid_state}
+                    e_sc_bad_invalid_state}
         END
     END
     ;

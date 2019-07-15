@@ -21,7 +21,7 @@
 
  File Name            : session_core.c
 
- Date                 : 19/04/2019 16:19:40
+ Date                 : 15/07/2019 12:56:02
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -395,7 +395,7 @@ void session_core__server_activate_session_req_and_resp_sm(
                session_core__l_ret = constants_statuscodes_bs__e_sc_ok;
             }
             else {
-               session_core__l_ret = constants_statuscodes_bs__e_sc_bad_unexpected_error;
+               session_core__l_ret = constants_statuscodes_bs__e_sc_bad_application_signature_invalid;
             }
          }
          else {
@@ -421,7 +421,7 @@ void session_core__server_activate_session_req_and_resp_sm(
                session_core__l_ret = constants_statuscodes_bs__e_sc_ok;
             }
             else {
-               session_core__l_ret = constants_statuscodes_bs__e_sc_bad_unexpected_error;
+               session_core__l_ret = constants_statuscodes_bs__e_sc_bad_application_signature_invalid;
             }
          }
          else if ((session_core__l_channel != session_core__channel) &&
@@ -437,7 +437,7 @@ void session_core__server_activate_session_req_and_resp_sm(
                session_core__l_ret = constants_statuscodes_bs__e_sc_ok;
             }
             else {
-               session_core__l_ret = constants_statuscodes_bs__e_sc_bad_unexpected_error;
+               session_core__l_ret = constants_statuscodes_bs__e_sc_bad_application_signature_invalid;
             }
          }
          else {
@@ -463,7 +463,7 @@ void session_core__server_activate_session_req_and_resp_sm(
                session_core__l_ret = constants_statuscodes_bs__e_sc_ok;
             }
             else {
-               session_core__l_ret = constants_statuscodes_bs__e_sc_bad_unexpected_error;
+               session_core__l_ret = constants_statuscodes_bs__e_sc_bad_application_signature_invalid;
             }
          }
          else {

@@ -526,8 +526,8 @@ OPERATIONS
                 IF l_valid = TRUE THEN
                     l_ret := e_sc_ok
                 ELSE
-                    /* TODO: return detailed error from transition */
-                    l_ret := e_sc_bad_unexpected_error
+                    /* Note: it also might be an unexpected internal error */
+                    l_ret := e_sc_bad_application_signature_invalid
                 END
             ELSE
                 l_ret := e_sc_bad_invalid_argument
@@ -549,8 +549,8 @@ OPERATIONS
                 IF l_valid = TRUE THEN
                     l_ret := e_sc_ok
                 ELSE
-                    /* TODO: return detailed error from transition */
-                    l_ret := e_sc_bad_unexpected_error
+                    /* Note: it also might be an unexpected internal error */
+                    l_ret := e_sc_bad_application_signature_invalid
                 END
             ELSIF l_channel /= channel &
                 l_is_same_user = TRUE
@@ -564,8 +564,8 @@ OPERATIONS
                 IF l_valid = TRUE THEN
                     l_ret := e_sc_ok
                 ELSE
-                    /* TODO: return detailed error from transition */
-                    l_ret := e_sc_bad_unexpected_error
+                    /* Note: it also might be an unexpected internal error */
+                    l_ret := e_sc_bad_application_signature_invalid
                 END
             ELSE
                 l_ret := e_sc_bad_invalid_state
@@ -587,8 +587,8 @@ OPERATIONS
                 IF l_valid = TRUE THEN
                     l_ret := e_sc_ok
                 ELSE
-                    /* TODO: return detailed error from transition */
-                    l_ret := e_sc_bad_unexpected_error
+                    /* Note: it also might be an unexpected internal error */
+                    l_ret := e_sc_bad_application_signature_invalid
                 END
             ELSE
                 l_ret := e_sc_bad_invalid_state
