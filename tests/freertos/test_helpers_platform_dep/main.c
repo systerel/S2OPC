@@ -43,6 +43,7 @@
 
 #include "sopc_mutexes.h"
 #include "sopc_threads.h"
+#include "sopc_udp_sockets.h"
 
 #include "FreeRTOSTest.h"
 
@@ -93,13 +94,15 @@ int main(void)
     // FREE_RTOS_TEST_API_S2OPC_THREAD(&gHandleConditionVariable);
 
     // Toolkit server application
-    FREE_RTOS_TEST_S2OPC_SERVER(&gHandleConditionVariable);
+    // FREE_RTOS_TEST_S2OPC_SERVER(&gHandleConditionVariable);
 
     // Unit test copy from tests sources. CHECK_TIME
     // FREE_RTOS_TEST_S2OPC_TIME(&gHandleConditionVariable);
 
     // Unit test copy from tests sources. CHECK_THREAD and MUTEX and COND VAR
     // FREE_RTOS_TEST_S2OPC_CHECK_THREAD(&gHandleConditionVariable);
+
+    FREE_RTOS_TEST_S2OPC_UDP_SOCKET_API(&gHandleConditionVariable);
 
     vTaskStartScheduler();
 
