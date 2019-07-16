@@ -24,5 +24,6 @@ void FREE_RTOS_TEST_API_S2OPC_THREAD(void* ptr);
 void FREE_RTOS_TEST_S2OPC_SERVER(void* ptr);
 void FREE_RTOS_TEST_S2OPC_TIME(void* ptr);
 void FREE_RTOS_TEST_S2OPC_CHECK_THREAD(void* ptr);
+void FREE_RTOS_TEST_S2OPC_UDP_SOCKET_API(void* ptr);
 
 #endif

@@ -39,6 +39,7 @@
 #include "sopc_threads.h"
 #include "sopc_time.h"
 #include "sopc_types.h"
+#include "sopc_udp_sockets.h"
 
 #include "p_logsrv.h"
 
@@ -936,6 +937,73 @@ void FREE_RTOS_TEST_S2OPC_CHECK_THREAD(void* ptr)
 
     Mutex_Lock(&m);
     sprintf(sBuffer, "$$$$ %2X -  Toolkit check thread launching result = %d : current time = %lu\r\n",
+            (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
+    PRINTF(sBuffer);
+    Mutex_Unlock(&m);
+}
+
+static void* cbS2OPC_Thread_UDP_Socket_API(void* ptr)
+{
+    SOPC_ReturnStatus status;
+    // Condition* pv = (Condition*) ptr;
+
+    SOPC_Buffer* pBuffer;
+    SOPC_Socket_AddressInfo* adresse = NULL;
+    Socket sock = -1;
+    pBuffer = SOPC_Buffer_Create(256);
+    SOPC_Buffer_Write(pBuffer, (const uint8_t*) "Hello world !!!\r\n", (uint32_t) strlen("Hello world !!!\r\n"));
+    SOPC_Buffer_SetPosition(pBuffer, 0);
+    SOPC_LogSrv_Start(60, 4023);
+
+    P_ETHERNET_IF_IsReady(UINT32_MAX);
+
+    while (1)
+    {
+        {
+            adresse = SOPC_UDP_SocketAddress_Create(false, "224.1.2.3", "4000");
+            status = SOPC_UDP_Socket_CreateToSend(adresse, &sock);
+            status = SOPC_UDP_Socket_Set_MulticastTTL(sock, 255);
+            status = SOPC_UDP_Socket_SendTo(sock, adresse, pBuffer);
+            SOPC_UDP_Socket_Close(&sock);
+            SOPC_UDP_SocketAddress_Delete(&adresse);
+
+            adresse = SOPC_UDP_SocketAddress_Create(false, "224.1.2.3", "5000");
+            status = SOPC_UDP_Socket_CreateToReceive(adresse, true, &sock);
+            status = SOPC_UDP_Socket_AddMembership(sock, adresse, NULL);
+            status = SOPC_UDP_Socket_ReceiveFrom(sock, pBuffer);
+
+            if (pBuffer->length > 0)
+            {
+                pBuffer->data[pBuffer->length < (pBuffer->max_size - 2) ? pBuffer->length : pBuffer->length - 1] = '\r';
+                pBuffer->data[pBuffer->length < (pBuffer->max_size - 2) ? pBuffer->length + 1 : pBuffer->length - 1] =
+                    '\n';
+                pBuffer->data[pBuffer->length < (pBuffer->max_size - 2) ? pBuffer->length + 2 : pBuffer->length - 1] =
+                    0;
+
+                printf((void*) pBuffer->data);
+                fflush(stdout);
+            }
+
+            SOPC_UDP_Socket_Close(&sock);
+            SOPC_UDP_SocketAddress_Delete(&adresse);
+
+            // SOPC_Sleep(5000);
+        }
+    }
+
+    return NULL;
+}
+
+void FREE_RTOS_TEST_S2OPC_UDP_SOCKET_API(void* ptr)
+{
+    SOPC_ReturnStatus status;
+    Condition* pv = (Condition*) ptr;
+    Mutex_Initialization(&m);
+
+    status = SOPC_Thread_Create(&pX, cbS2OPC_Thread_UDP_Socket_API, pv);
+
+    Mutex_Lock(&m);
+    sprintf(sBuffer, "$$$$ %2X -  Toolkit test udp socket api init launching result = %d : current time = %lu\r\n",
             (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
     PRINTF(sBuffer);
     Mutex_Unlock(&m);
