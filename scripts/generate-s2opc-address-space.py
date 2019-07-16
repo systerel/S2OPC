@@ -613,7 +613,7 @@ def generate_value_variant(val):
     elif val.ty == VALUE_TYPE_UINT64:
         return generate_variant('SOPC_UInt64_Id', 'uint64_t', 'Uint64', val.val, val.is_array, lambda x: str(x) + 'UL')
     elif val.ty == VALUE_TYPE_FLOAT:
-        return generate_variant('SOPC_Float_Id', 'float', 'Floatv', val.val, val.is_array, str)
+        return generate_variant('SOPC_Float_Id', 'float', 'Floatv', val.val, val.is_array, lambda x : str(x) + 'f')
     elif val.ty == VALUE_TYPE_DOUBLE:
         return generate_variant('SOPC_Double_Id', 'double', 'Doublev', val.val, val.is_array, str)
     elif val.ty == VALUE_TYPE_STRING:
