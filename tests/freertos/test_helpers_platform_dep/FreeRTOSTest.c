@@ -43,6 +43,10 @@
 
 #include "p_logsrv.h"
 
+#include "config.h"
+#include "pubsub.h"
+#include "server.h"
+
 static char sBuffer[256];
 static Mutex m;
 static Thread p1 = NULL;
@@ -944,7 +948,6 @@ void FREE_RTOS_TEST_S2OPC_CHECK_THREAD(void* ptr)
 
 static void* cbS2OPC_Thread_UDP_Socket_API(void* ptr)
 {
-    SOPC_ReturnStatus status;
     // Condition* pv = (Condition*) ptr;
 
     SOPC_Buffer* pBuffer;
@@ -961,16 +964,16 @@ static void* cbS2OPC_Thread_UDP_Socket_API(void* ptr)
     {
         {
             adresse = SOPC_UDP_SocketAddress_Create(false, "224.1.2.3", "4000");
-            status = SOPC_UDP_Socket_CreateToSend(adresse, &sock);
-            status = SOPC_UDP_Socket_Set_MulticastTTL(sock, 255);
-            status = SOPC_UDP_Socket_SendTo(sock, adresse, pBuffer);
+            SOPC_UDP_Socket_CreateToSend(adresse, &sock);
+            SOPC_UDP_Socket_Set_MulticastTTL(sock, 255);
+            SOPC_UDP_Socket_SendTo(sock, adresse, pBuffer);
             SOPC_UDP_Socket_Close(&sock);
             SOPC_UDP_SocketAddress_Delete(&adresse);
 
             adresse = SOPC_UDP_SocketAddress_Create(false, "224.1.2.3", "5000");
-            status = SOPC_UDP_Socket_CreateToReceive(adresse, true, &sock);
-            status = SOPC_UDP_Socket_AddMembership(sock, adresse, NULL);
-            status = SOPC_UDP_Socket_ReceiveFrom(sock, pBuffer);
+            SOPC_UDP_Socket_CreateToReceive(adresse, true, &sock);
+            SOPC_UDP_Socket_AddMembership(sock, adresse, NULL);
+            SOPC_UDP_Socket_ReceiveFrom(sock, pBuffer);
 
             if (pBuffer->length > 0)
             {
@@ -1004,6 +1007,119 @@ void FREE_RTOS_TEST_S2OPC_UDP_SOCKET_API(void* ptr)
 
     Mutex_Lock(&m);
     sprintf(sBuffer, "$$$$ %2X -  Toolkit test udp socket api init launching result = %d : current time = %lu\r\n",
+            (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
+    PRINTF(sBuffer);
+    Mutex_Unlock(&m);
+}
+
+static void* cbS2OPC_Thread_PubSub(void* ptr)
+{
+    SOPC_LogSrv_Start(60, 4023);
+    SOPC_LogSrv_WaitClient(UINT32_MAX);
+
+    P_ETHERNET_IF_IsReady(UINT32_MAX);
+
+    ENDPOINT_URL = DEFAULT_ENDPOINT_URL;
+
+    /* Initialize S2OPC Server */
+    SOPC_ReturnStatus status = Server_Initialize();
+    if (SOPC_STATUS_OK != status)
+    {
+        printf("# Error: Could not initialize the server.\n");
+    }
+
+    /* Configure the Server */
+    SOPC_Endpoint_Config* pEpConfig = NULL;
+    if (SOPC_STATUS_OK == status)
+    {
+        pEpConfig = Server_CreateEndpointConfig();
+        if (NULL == pEpConfig)
+        {
+            printf("# Error: Could not create the endpoint configuration.\n");
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = Server_LoadAddressSpace();
+    }
+
+    /* Configuration of the PubSub module is done upon PubSub start through the local service */
+
+    /* Start the Server */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = Server_ConfigureStartServer(pEpConfig);
+    }
+
+    /* Write in PubSub nodes, which starts the PubSub */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = Server_WritePubSubNodes();
+    }
+
+    /* Wait for a signal */
+    while (SOPC_STATUS_OK == status && Server_IsRunning())
+    {
+        SOPC_Sleep(SLEEP_TIMEOUT);
+        if (Server_PubSubStop_Requested())
+        {
+            PubSub_Stop();
+            printf("# Info: PubSub stopped through Start/Stop Command.\n");
+        }
+        if (Server_PubSubStart_Requested())
+        {
+            status = PubSub_Configure();
+            if (SOPC_STATUS_OK == status)
+            {
+                printf("# Info: PubSub configured through Start/Stop Command.\n");
+            }
+            else
+            {
+                printf("# Warning: Start/Stop Command failed to configure the PubSub module.\n");
+            }
+
+            if (SOPC_STATUS_OK == status)
+            {
+                status = PubSub_Start() ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+                if (SOPC_STATUS_NOK == status)
+                {
+                    PubSub_Stop(); // Ensure Pub & Sub are stopped in this case
+                }
+            }
+            if (SOPC_STATUS_OK == status)
+            {
+                printf("# Info: PubSub started through Start/Stop Command.\n");
+            }
+            else
+            {
+                printf("# Warning: Start/Stop Command failed to start the PubSub module.\n");
+            }
+        }
+        if (SOPC_STATUS_OK != status)
+        {
+            printf("# Warning: waiting for a new configure + start command !\n");
+            status = SOPC_STATUS_OK;
+        }
+    }
+
+    /* Clean and quit */
+    PubSub_StopAndClear();
+    Server_StopAndClear(&pEpConfig);
+    printf("# Info: Server closed.\n");
+    return NULL;
+}
+
+void FREE_RTOS_TEST_S2OPC_PUBSUB(void* ptr)
+{
+    SOPC_ReturnStatus status;
+    Mutex_Initialization(&m);
+
+    status = SOPC_Thread_Create(&pX, cbS2OPC_Thread_PubSub, NULL);
+
+    Mutex_Lock(&m);
+    sprintf(sBuffer, "$$$$ %2X -  Toolkit test pubsub init launching result = %d : current time = %lu\r\n",
             (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
     PRINTF(sBuffer);
     Mutex_Unlock(&m);

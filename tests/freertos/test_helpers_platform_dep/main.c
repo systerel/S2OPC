@@ -102,7 +102,9 @@ int main(void)
     // Unit test copy from tests sources. CHECK_THREAD and MUTEX and COND VAR
     // FREE_RTOS_TEST_S2OPC_CHECK_THREAD(&gHandleConditionVariable);
 
-    FREE_RTOS_TEST_S2OPC_UDP_SOCKET_API(&gHandleConditionVariable);
+    // FREE_RTOS_TEST_S2OPC_UDP_SOCKET_API(&gHandleConditionVariable);
+
+    FREE_RTOS_TEST_S2OPC_PUBSUB(NULL);
 
     vTaskStartScheduler();
 
