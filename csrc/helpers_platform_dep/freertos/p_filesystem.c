@@ -23,10 +23,10 @@
 
 SOPC_FileSystem_CreationResult SOPC_FileSystem_mkdir(const char* directoryPath)
 {
-    return SOPC_FileSystem_Creation_Error_PathPermisionDenied;
+    return SOPC_FileSystem_Creation_OK;
 }
 
 SOPC_FileSystem_RemoveResult SOPC_FileSystem_rmdir(const char* directoryPath)
 {
-    return SOPC_FileSystem_Remove_Error_UnknownIssue;
+    return SOPC_FileSystem_Creation_OK;
 }
