@@ -29,10 +29,9 @@
 #include "sopc_macros.h"
 #include "sopc_types.h"
 
-const bool sopc_embedded_is_const_addspace = true;
+const bool sopc_embedded_is_const_addspace = false;
 
-SOPC_GCC_DIAGNOSTIC_IGNORE_DISCARD_QUALIFIER
-const SOPC_AddressSpace_Node
+SOPC_AddressSpace_Node
     SOPC_Embedded_AddressSpace_Nodes[] =
         {
             {OpcUa_NodeClass_DataType,
@@ -48,111 +47,13 @@ const SOPC_AddressSpace_Node
                       .Description = {{0, 0, NULL},
                                       {sizeof("Describes a value that can have any valid DataType.") - 1, 1,
                                        (SOPC_Byte*) "Describes a value that can have any valid DataType."}},
-                      .NoOfReferences = 17,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 86}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 26}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 29}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 12}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 13}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 14}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 15}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 16}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 17}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 18}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 19}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 20}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 21}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 22}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 23}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 25}, {0, 0, NULL}, 0},
-                              }},
+                      .NoOfReferences = 1,
+                      .References = (OpcUa_ReferenceNode[]){{
+                          &OpcUa_ReferenceNode_EncodeableType,
+                          {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
+                          true,
+                          {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 86}, {0, 0, NULL}, 0},
+                      }},
                   }}},
             {OpcUa_NodeClass_DataType,
              OpcUa_UncertainInitialValue,
@@ -167,39 +68,13 @@ const SOPC_AddressSpace_Node
                       .Description = {{0, 0, NULL},
                                       {sizeof("Describes a value that can have any numeric DataType.") - 1, 1,
                                        (SOPC_Byte*) "Describes a value that can have any numeric DataType."}},
-                      .NoOfReferences = 5,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 24}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 27}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 28}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 10}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 11}, {0, 0, NULL}, 0},
-                              }},
+                      .NoOfReferences = 1,
+                      .References = (OpcUa_ReferenceNode[]){{
+                          &OpcUa_ReferenceNode_EncodeableType,
+                          {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
+                          true,
+                          {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 24}, {0, 0, NULL}, 0},
+                      }},
                   }}},
             {OpcUa_NodeClass_DataType,
              OpcUa_UncertainInitialValue,
@@ -214,38 +89,14 @@ const SOPC_AddressSpace_Node
                       .Description = {{0, 0, NULL},
                                       {sizeof("Describes a value that can have any integer DataType.") - 1, 1,
                                        (SOPC_Byte*) "Describes a value that can have any integer DataType."}},
-                      .NoOfReferences = 5,
+                      .NoOfReferences = 1,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
                                   true,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 26}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 4}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 6}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 8}, {0, 0, NULL}, 0},
                               }},
                   }}},
             {OpcUa_NodeClass_DataType,
@@ -261,38 +112,14 @@ const SOPC_AddressSpace_Node
                       .Description = {{0, 0, NULL},
                                       {sizeof("Describes a value that can have any unsigned integer DataType.") - 1, 1,
                                        (SOPC_Byte*) "Describes a value that can have any unsigned integer DataType."}},
-                      .NoOfReferences = 5,
+                      .NoOfReferences = 1,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
                                   true,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 26}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 3}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 5}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 7}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 9}, {0, 0, NULL}, 0},
                               }},
                   }}},
             {OpcUa_NodeClass_DataType,
@@ -310,7 +137,7 @@ const SOPC_AddressSpace_Node
                                        (SOPC_Byte*) "Describes a value that is an enumerated DataType."}},
                       .NoOfReferences = 1,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -333,7 +160,7 @@ const SOPC_AddressSpace_Node
                                        (SOPC_Byte*) "Describes a value that is either TRUE or FALSE."}},
                       .NoOfReferences = 1,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -356,7 +183,7 @@ const SOPC_AddressSpace_Node
                                        (SOPC_Byte*) "Describes a value that is an integer between -128 and 127."}},
                       .NoOfReferences = 1,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -379,7 +206,7 @@ const SOPC_AddressSpace_Node
                                        (SOPC_Byte*) "Describes a value that is an integer between 0 and 255."}},
                       .NoOfReferences = 1,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -403,7 +230,7 @@ const SOPC_AddressSpace_Node
                             (SOPC_Byte*) "Describes a value that is an integer between ?32,768 and 32,767."}},
                       .NoOfReferences = 1,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -426,7 +253,7 @@ const SOPC_AddressSpace_Node
                                        (SOPC_Byte*) "Describes a value that is an integer between 0 and 65535."}},
                       .NoOfReferences = 1,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -453,7 +280,7 @@ const SOPC_AddressSpace_Node
                                          "2,147,483,647."}},
                       .NoOfReferences = 1,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -477,7 +304,7 @@ const SOPC_AddressSpace_Node
                             (SOPC_Byte*) "Describes a value that is an integer between 0 and 4,294,967,295."}},
                       .NoOfReferences = 1,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -504,7 +331,7 @@ const SOPC_AddressSpace_Node
                                                     "?9,223,372,036,854,775,808 and 9,223,372,036,854,775,807."}},
                       .NoOfReferences = 1,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -531,7 +358,7 @@ const SOPC_AddressSpace_Node
                                          "18,446,744,073,709,551,615."}},
                       .NoOfReferences = 1,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -559,7 +386,7 @@ const SOPC_AddressSpace_Node
                                          "number."}},
                       .NoOfReferences = 1,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -587,7 +414,7 @@ const SOPC_AddressSpace_Node
                                          "number."}},
                       .NoOfReferences = 1,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -609,20 +436,14 @@ const SOPC_AddressSpace_Node
                           {{0, 0, NULL},
                            {sizeof("Describes a value that is a sequence of printable Unicode characters.") - 1, 1,
                             (SOPC_Byte*) "Describes a value that is a sequence of printable Unicode characters."}},
-                      .NoOfReferences = 2,
+                      .NoOfReferences = 1,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
                                   true,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 24}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 295}, {0, 0, NULL}, 0},
                               }},
                   }}},
             {OpcUa_NodeClass_DataType,
@@ -640,7 +461,7 @@ const SOPC_AddressSpace_Node
                                        (SOPC_Byte*) "Describes a value that is a Gregorian calender date and time."}},
                       .NoOfReferences = 1,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -663,7 +484,7 @@ const SOPC_AddressSpace_Node
                                        (SOPC_Byte*) "Describes a value that is a 128-bit globally unique identifier."}},
                       .NoOfReferences = 1,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -684,20 +505,14 @@ const SOPC_AddressSpace_Node
                       .Description = {{0, 0, NULL},
                                       {sizeof("Describes a value that is a sequence of bytes.") - 1, 1,
                                        (SOPC_Byte*) "Describes a value that is a sequence of bytes."}},
-                      .NoOfReferences = 2,
+                      .NoOfReferences = 1,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
                                   true,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 24}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 30}, {0, 0, NULL}, 0},
                               }},
                   }}},
             {OpcUa_NodeClass_DataType,
@@ -715,7 +530,7 @@ const SOPC_AddressSpace_Node
                                        (SOPC_Byte*) "Describes a value that is an XML element."}},
                       .NoOfReferences = 1,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -743,7 +558,7 @@ const SOPC_AddressSpace_Node
                                          "space."}},
                       .NoOfReferences = 1,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -766,7 +581,7 @@ const SOPC_AddressSpace_Node
                                        (SOPC_Byte*) "Describes a value that is an absolute identifier for a node."}},
                       .NoOfReferences = 1,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -793,7 +608,7 @@ const SOPC_AddressSpace_Node
                                                     "operation by a Server."}},
                       .NoOfReferences = 1,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -816,7 +631,7 @@ const SOPC_AddressSpace_Node
                                        (SOPC_Byte*) "Describes a value that is a name qualified by a namespace."}},
                       .NoOfReferences = 1,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -843,7 +658,7 @@ const SOPC_AddressSpace_Node
                                          "identifier."}},
                       .NoOfReferences = 1,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -870,7 +685,7 @@ const SOPC_AddressSpace_Node
                                                     "described with a data encoding."}},
                       .NoOfReferences = 1,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -897,7 +712,7 @@ const SOPC_AddressSpace_Node
                                                     "status code and timestamps."}},
                       .NoOfReferences = 1,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -924,7 +739,7 @@ const SOPC_AddressSpace_Node
                                                     "associated with a StatusCode."}},
                       .NoOfReferences = 1,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -948,7 +763,7 @@ const SOPC_AddressSpace_Node
                             (SOPC_Byte*) "Describes a value that is an image encoded as a string of bytes."}},
                       .NoOfReferences = 1,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -969,21 +784,8 @@ const SOPC_AddressSpace_Node
                       .Description = {{0, 0, NULL},
                                       {sizeof("The abstract base type for all references.") - 1, 1,
                                        (SOPC_Byte*) "The abstract base type for all references."}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 32}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 33}, {0, 0, NULL}, 0},
-                              }},
+                      .NoOfReferences = 0,
+                      .References = NULL,
                   }}},
             {OpcUa_NodeClass_ReferenceType,
              OpcUa_UncertainInitialValue,
@@ -1001,239 +803,14 @@ const SOPC_AddressSpace_Node
                       .Description = {{0, 0, NULL},
                                       {sizeof("The abstract base type for all non-hierarchical references.") - 1, 1,
                                        (SOPC_Byte*) "The abstract base type for all non-hierarchical references."}},
-                      .NoOfReferences = 7,
+                      .NoOfReferences = 1,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
                                   true,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 31}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 37}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 38}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 39}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 41}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 3065}, {0, 0, NULL}, 0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_ReferenceType,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.reference_type =
-                  {
-                      .encodeableType = &OpcUa_ReferenceTypeNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 33},
-                      .NodeClass = OpcUa_NodeClass_ReferenceType,
-                      .BrowseName = {0,
-                                     {sizeof("HierarchicalReferences") - 1, 1, (SOPC_Byte*) "HierarchicalReferences"}},
-                      .DisplayName = {{0, 0, NULL},
-                                      {sizeof("HierarchicalReferences") - 1, 1, (SOPC_Byte*) "HierarchicalReferences"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("The abstract base type for all hierarchical references.") - 1, 1,
-                                       (SOPC_Byte*) "The abstract base type for all hierarchical references."}},
-                      .NoOfReferences = 4,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 31}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 34}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 36}, {0, 0, NULL}, 0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_ReferenceType,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.reference_type =
-                  {
-                      .encodeableType = &OpcUa_ReferenceTypeNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 34},
-                      .NodeClass = OpcUa_NodeClass_ReferenceType,
-                      .BrowseName = {0, {sizeof("HasChild") - 1, 1, (SOPC_Byte*) "HasChild"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("HasChild") - 1, 1, (SOPC_Byte*) "HasChild"}},
-                      .Description =
-                          {{0, 0, NULL},
-                           {sizeof("The abstract base type for all non-looping hierarchical references.") - 1, 1,
-                            (SOPC_Byte*) "The abstract base type for all non-looping hierarchical references."}},
-                      .NoOfReferences = 3,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 33}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 44}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45}, {0, 0, NULL}, 0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_ReferenceType,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.reference_type =
-                  {
-                      .encodeableType = &OpcUa_ReferenceTypeNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                      .NodeClass = OpcUa_NodeClass_ReferenceType,
-                      .BrowseName = {0, {sizeof("Organizes") - 1, 1, (SOPC_Byte*) "Organizes"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("Organizes") - 1, 1, (SOPC_Byte*) "Organizes"}},
-                      .Description =
-                          {{0, 0, NULL},
-                           {sizeof("The type for hierarchical references that are used to organize nodes.") - 1, 1,
-                            (SOPC_Byte*) "The type for hierarchical references that are used to organize nodes."}},
-                      .NoOfReferences = 1,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 33}, {0, 0, NULL}, 0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_ReferenceType,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.reference_type =
-                  {
-                      .encodeableType = &OpcUa_ReferenceTypeNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 36},
-                      .NodeClass = OpcUa_NodeClass_ReferenceType,
-                      .BrowseName = {0, {sizeof("HasEventSource") - 1, 1, (SOPC_Byte*) "HasEventSource"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("HasEventSource") - 1, 1, (SOPC_Byte*) "HasEventSource"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("The type for non-looping hierarchical references that are used to "
-                                              "organize event sources.") -
-                                           1,
-                                       1,
-                                       (SOPC_Byte*) "The type for non-looping hierarchical references that are used to "
-                                                    "organize event sources."}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 33}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 48}, {0, 0, NULL}, 0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_ReferenceType,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.reference_type =
-                  {
-                      .encodeableType = &OpcUa_ReferenceTypeNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 37},
-                      .NodeClass = OpcUa_NodeClass_ReferenceType,
-                      .BrowseName = {0, {sizeof("HasModellingRule") - 1, 1, (SOPC_Byte*) "HasModellingRule"}},
-                      .DisplayName = {{0, 0, NULL},
-                                      {sizeof("HasModellingRule") - 1, 1, (SOPC_Byte*) "HasModellingRule"}},
-                      .Description =
-                          {{0, 0, NULL},
-                           {sizeof("The type for references from instance declarations to modelling rule nodes.") - 1,
-                            1,
-                            (SOPC_Byte*) "The type for references from instance declarations to modelling rule "
-                                         "nodes."}},
-                      .NoOfReferences = 1,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 32}, {0, 0, NULL}, 0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_ReferenceType,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.reference_type =
-                  {
-                      .encodeableType = &OpcUa_ReferenceTypeNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 38},
-                      .NodeClass = OpcUa_NodeClass_ReferenceType,
-                      .BrowseName = {0, {sizeof("HasEncoding") - 1, 1, (SOPC_Byte*) "HasEncoding"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("HasEncoding") - 1, 1, (SOPC_Byte*) "HasEncoding"}},
-                      .Description =
-                          {{0, 0, NULL},
-                           {sizeof("The type for references from data type nodes to to data type encoding nodes.") - 1,
-                            1,
-                            (SOPC_Byte*) "The type for references from data type nodes to to data type encoding "
-                                         "nodes."}},
-                      .NoOfReferences = 1,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 32}, {0, 0, NULL}, 0},
                               }},
                   }}},
             {OpcUa_NodeClass_ReferenceType,
@@ -1255,7 +832,7 @@ const SOPC_AddressSpace_Node
                                                     "type description nodes."}},
                       .NoOfReferences = 1,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -1276,408 +853,16 @@ const SOPC_AddressSpace_Node
                                       {sizeof("HasTypeDefinition") - 1, 1, (SOPC_Byte*) "HasTypeDefinition"}},
                       .Description =
                           {{0, 0, NULL},
-                           {sizeof("The type for references from a instance node its type defintion node.") - 1, 1,
-                            (SOPC_Byte*) "The type for references from a instance node its type defintion node."}},
+                           {sizeof("The type for references from a instance node its type definition node.") - 1, 1,
+                            (SOPC_Byte*) "The type for references from a instance node its type definition node."}},
                       .NoOfReferences = 1,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
                                   true,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 32}, {0, 0, NULL}, 0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_ReferenceType,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.reference_type =
-                  {
-                      .encodeableType = &OpcUa_ReferenceTypeNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 41},
-                      .NodeClass = OpcUa_NodeClass_ReferenceType,
-                      .BrowseName = {0, {sizeof("GeneratesEvent") - 1, 1, (SOPC_Byte*) "GeneratesEvent"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("GeneratesEvent") - 1, 1, (SOPC_Byte*) "GeneratesEvent"}},
-                      .Description =
-                          {{0, 0, NULL},
-                           {sizeof("The type for references from a node to an event type that is raised by node.") - 1,
-                            1,
-                            (SOPC_Byte*) "The type for references from a node to an event type that is raised by "
-                                         "node."}},
-                      .NoOfReferences = 1,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 32}, {0, 0, NULL}, 0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_ReferenceType,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.reference_type =
-                  {
-                      .encodeableType = &OpcUa_ReferenceTypeNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 3065},
-                      .NodeClass = OpcUa_NodeClass_ReferenceType,
-                      .BrowseName = {0, {sizeof("AlwaysGeneratesEvent") - 1, 1, (SOPC_Byte*) "AlwaysGeneratesEvent"}},
-                      .DisplayName = {{0, 0, NULL},
-                                      {sizeof("AlwaysGeneratesEvent") - 1, 1, (SOPC_Byte*) "AlwaysGeneratesEvent"}},
-                      .Description =
-                          {{0, 0, NULL},
-                           {sizeof(
-                                "The type for references from a node to an event type that is always raised by node.") -
-                                1,
-                            1,
-                            (SOPC_Byte*) "The type for references from a node to an event type that is always raised "
-                                         "by node."}},
-                      .NoOfReferences = 1,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 32}, {0, 0, NULL}, 0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_ReferenceType,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.reference_type =
-                  {
-                      .encodeableType = &OpcUa_ReferenceTypeNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 44},
-                      .NodeClass = OpcUa_NodeClass_ReferenceType,
-                      .BrowseName = {0, {sizeof("Aggregates") - 1, 1, (SOPC_Byte*) "Aggregates"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("Aggregates") - 1, 1, (SOPC_Byte*) "Aggregates"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("The type for non-looping hierarchical references that are used to "
-                                              "aggregate nodes into complex types.") -
-                                           1,
-                                       1,
-                                       (SOPC_Byte*) "The type for non-looping hierarchical references that are used to "
-                                                    "aggregate nodes into complex types."}},
-                      .NoOfReferences = 4,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 34}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 46}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 56}, {0, 0, NULL}, 0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_ReferenceType,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.reference_type =
-                  {
-                      .encodeableType = &OpcUa_ReferenceTypeNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                      .NodeClass = OpcUa_NodeClass_ReferenceType,
-                      .BrowseName = {0, {sizeof("HasSubtype") - 1, 1, (SOPC_Byte*) "HasSubtype"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("HasSubtype") - 1, 1, (SOPC_Byte*) "HasSubtype"}},
-                      .Description =
-                          {{0, 0, NULL},
-                           {sizeof(
-                                "The type for non-looping hierarchical references that are used to define sub types.") -
-                                1,
-                            1,
-                            (SOPC_Byte*) "The type for non-looping hierarchical references that are used to define sub "
-                                         "types."}},
-                      .NoOfReferences = 1,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 34}, {0, 0, NULL}, 0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_ReferenceType,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.reference_type =
-                  {
-                      .encodeableType = &OpcUa_ReferenceTypeNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 46},
-                      .NodeClass = OpcUa_NodeClass_ReferenceType,
-                      .BrowseName = {0, {sizeof("HasProperty") - 1, 1, (SOPC_Byte*) "HasProperty"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("HasProperty") - 1, 1, (SOPC_Byte*) "HasProperty"}},
-                      .Description =
-                          {{0, 0, NULL},
-                           {sizeof("The type for non-looping hierarchical reference from a node to its property.") - 1,
-                            1,
-                            (SOPC_Byte*) "The type for non-looping hierarchical reference from a node to its "
-                                         "property."}},
-                      .NoOfReferences = 1,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 44}, {0, 0, NULL}, 0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_ReferenceType,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.reference_type =
-                  {
-                      .encodeableType = &OpcUa_ReferenceTypeNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                      .NodeClass = OpcUa_NodeClass_ReferenceType,
-                      .BrowseName = {0, {sizeof("HasComponent") - 1, 1, (SOPC_Byte*) "HasComponent"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("HasComponent") - 1, 1, (SOPC_Byte*) "HasComponent"}},
-                      .Description =
-                          {{0, 0, NULL},
-                           {sizeof("The type for non-looping hierarchical reference from a node to its component.") - 1,
-                            1,
-                            (SOPC_Byte*) "The type for non-looping hierarchical reference from a node to its "
-                                         "component."}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 44}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 49}, {0, 0, NULL}, 0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_ReferenceType,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.reference_type =
-                  {
-                      .encodeableType = &OpcUa_ReferenceTypeNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 48},
-                      .NodeClass = OpcUa_NodeClass_ReferenceType,
-                      .BrowseName = {0, {sizeof("HasNotifier") - 1, 1, (SOPC_Byte*) "HasNotifier"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("HasNotifier") - 1, 1, (SOPC_Byte*) "HasNotifier"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("The type for non-looping hierarchical references that are used to "
-                                              "indicate how events propagate from node to node.") -
-                                           1,
-                                       1,
-                                       (SOPC_Byte*) "The type for non-looping hierarchical references that are used to "
-                                                    "indicate how events propagate from node to node."}},
-                      .NoOfReferences = 1,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 36}, {0, 0, NULL}, 0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_ReferenceType,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.reference_type =
-                  {
-                      .encodeableType = &OpcUa_ReferenceTypeNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 49},
-                      .NodeClass = OpcUa_NodeClass_ReferenceType,
-                      .BrowseName = {0, {sizeof("HasOrderedComponent") - 1, 1, (SOPC_Byte*) "HasOrderedComponent"}},
-                      .DisplayName = {{0, 0, NULL},
-                                      {sizeof("HasOrderedComponent") - 1, 1, (SOPC_Byte*) "HasOrderedComponent"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("The type for non-looping hierarchical reference from a node to its "
-                                              "component when the order of references matters.") -
-                                           1,
-                                       1,
-                                       (SOPC_Byte*) "The type for non-looping hierarchical reference from a node to "
-                                                    "its component when the order of references matters."}},
-                      .NoOfReferences = 1,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47}, {0, 0, NULL}, 0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_ReferenceType,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.reference_type =
-                  {
-                      .encodeableType = &OpcUa_ReferenceTypeNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 51},
-                      .NodeClass = OpcUa_NodeClass_ReferenceType,
-                      .BrowseName = {0, {sizeof("FromState") - 1, 1, (SOPC_Byte*) "FromState"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("FromState") - 1, 1, (SOPC_Byte*) "FromState"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("The type for a reference to the state before a transition.") - 1, 1,
-                                       (SOPC_Byte*) "The type for a reference to the state before a transition."}},
-                      .NoOfReferences = 1,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 32}, {0, 0, NULL}, 0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_ReferenceType,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.reference_type =
-                  {
-                      .encodeableType = &OpcUa_ReferenceTypeNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 52},
-                      .NodeClass = OpcUa_NodeClass_ReferenceType,
-                      .BrowseName = {0, {sizeof("ToState") - 1, 1, (SOPC_Byte*) "ToState"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("ToState") - 1, 1, (SOPC_Byte*) "ToState"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("The type for a reference to the state after a transition.") - 1, 1,
-                                       (SOPC_Byte*) "The type for a reference to the state after a transition."}},
-                      .NoOfReferences = 1,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 32}, {0, 0, NULL}, 0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_ReferenceType,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.reference_type =
-                  {
-                      .encodeableType = &OpcUa_ReferenceTypeNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 53},
-                      .NodeClass = OpcUa_NodeClass_ReferenceType,
-                      .BrowseName = {0, {sizeof("HasCause") - 1, 1, (SOPC_Byte*) "HasCause"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("HasCause") - 1, 1, (SOPC_Byte*) "HasCause"}},
-                      .Description =
-                          {{0, 0, NULL},
-                           {sizeof("The type for a reference to a method that can cause a transition to occur.") - 1, 1,
-                            (SOPC_Byte*) "The type for a reference to a method that can cause a transition to occur."}},
-                      .NoOfReferences = 1,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 32}, {0, 0, NULL}, 0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_ReferenceType,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.reference_type =
-                  {
-                      .encodeableType = &OpcUa_ReferenceTypeNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 54},
-                      .NodeClass = OpcUa_NodeClass_ReferenceType,
-                      .BrowseName = {0, {sizeof("HasEffect") - 1, 1, (SOPC_Byte*) "HasEffect"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("HasEffect") - 1, 1, (SOPC_Byte*) "HasEffect"}},
-                      .Description =
-                          {{0, 0, NULL},
-                           {sizeof(
-                                "The type for a reference to an event that may be raised when a transition occurs.") -
-                                1,
-                            1,
-                            (SOPC_Byte*) "The type for a reference to an event that may be raised when a transition "
-                                         "occurs."}},
-                      .NoOfReferences = 1,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 32}, {0, 0, NULL}, 0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_ReferenceType,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.reference_type =
-                  {
-                      .encodeableType = &OpcUa_ReferenceTypeNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 117},
-                      .NodeClass = OpcUa_NodeClass_ReferenceType,
-                      .BrowseName = {0, {sizeof("HasSubStateMachine") - 1, 1, (SOPC_Byte*) "HasSubStateMachine"}},
-                      .DisplayName = {{0, 0, NULL},
-                                      {sizeof("HasSubStateMachine") - 1, 1, (SOPC_Byte*) "HasSubStateMachine"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("The type for a reference to a substate for a state.") - 1, 1,
-                                       (SOPC_Byte*) "The type for a reference to a substate for a state."}},
-                      .NoOfReferences = 1,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 32}, {0, 0, NULL}, 0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_ReferenceType,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.reference_type =
-                  {
-                      .encodeableType = &OpcUa_ReferenceTypeNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 56},
-                      .NodeClass = OpcUa_NodeClass_ReferenceType,
-                      .BrowseName =
-                          {0, {sizeof("HasHistoricalConfiguration") - 1, 1, (SOPC_Byte*) "HasHistoricalConfiguration"}},
-                      .DisplayName = {{0, 0, NULL},
-                                      {sizeof("HasHistoricalConfiguration") - 1, 1,
-                                       (SOPC_Byte*) "HasHistoricalConfiguration"}},
-                      .Description =
-                          {{0, 0, NULL},
-                           {sizeof("The type for a reference to the historical configuration for a data variable.") - 1,
-                            1,
-                            (SOPC_Byte*) "The type for a reference to the historical configuration for a data "
-                                         "variable."}},
-                      .NoOfReferences = 1,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 44}, {0, 0, NULL}, 0},
                               }},
                   }}},
             {OpcUa_NodeClass_VariableType,
@@ -1696,7 +881,7 @@ const SOPC_AddressSpace_Node
                             (SOPC_Byte*) "The type for variable that represents a property of another node."}},
                       .NoOfReferences = 1,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -1722,7 +907,7 @@ const SOPC_AddressSpace_Node
                                        (SOPC_Byte*) "An identifier for a user locale."}},
                       .NoOfReferences = 1,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -1745,7 +930,7 @@ const SOPC_AddressSpace_Node
                                        (SOPC_Byte*) "Describes a 128-bit decimal value."}},
                       .NoOfReferences = 1,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -1766,21 +951,8 @@ const SOPC_AddressSpace_Node
                       .Description = {{0, 0, NULL},
                                       {sizeof("The base type for all object nodes.") - 1, 1,
                                        (SOPC_Byte*) "The base type for all object nodes."}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2013}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 61}, {0, 0, NULL}, 0},
-                              }},
+                      .NoOfReferences = 0,
+                      .References = NULL,
                   }}},
             {OpcUa_NodeClass_ObjectType,
              OpcUa_UncertainInitialValue,
@@ -1797,7 +969,7 @@ const SOPC_AddressSpace_Node
                                        (SOPC_Byte*) "The type for objects that organize other nodes."}},
                       .NoOfReferences = 1,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -1821,7 +993,7 @@ const SOPC_AddressSpace_Node
                                        (SOPC_Byte*) "The abstract base type for all variable nodes."}},
                       .NoOfReferences = 2,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -1854,7 +1026,7 @@ const SOPC_AddressSpace_Node
                                        (SOPC_Byte*) "The type for variable that represents a process value."}},
                       .NoOfReferences = 2,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -1886,7 +1058,7 @@ const SOPC_AddressSpace_Node
                                        (SOPC_Byte*) "The root of the server address space."}},
                       .NoOfReferences = 4,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
@@ -1928,14 +1100,26 @@ const SOPC_AddressSpace_Node
                             1,
                             (SOPC_Byte*) "The browse entry point when looking for objects in the server address "
                                          "space."}},
-                      .NoOfReferences = 5,
+                      .NoOfReferences = 8,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
                                   false,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1000}, {0, 0, NULL}, 0},
+                                  {{SOPC_IdentifierType_String, 1,
+                                    .Data.String = {sizeof("PubVars") - 1, 1, (SOPC_Byte*) "PubVars"}},
+                                   {0, 0, NULL},
+                                   0},
+                              },
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
+                                  false,
+                                  {{SOPC_IdentifierType_String, 1,
+                                    .Data.String = {sizeof("SubVars") - 1, 1, (SOPC_Byte*) "SubVars"}},
+                                   {0, 0, NULL},
+                                   0},
                               },
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -1945,9 +1129,31 @@ const SOPC_AddressSpace_Node
                               },
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
                                   false,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 15361}, {0, 0, NULL}, 0},
+                                  {{SOPC_IdentifierType_String, 1,
+                                    .Data.String = {sizeof("PubSubStatus") - 1, 1, (SOPC_Byte*) "PubSubStatus"}},
+                                   {0, 0, NULL},
+                                   0},
+                              },
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
+                                  false,
+                                  {{SOPC_IdentifierType_String, 1,
+                                    .Data.String = {sizeof("PubSubConfiguration") - 1, 1,
+                                                    (SOPC_Byte*) "PubSubConfiguration"}},
+                                   {0, 0, NULL},
+                                   0},
+                              },
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
+                                  false,
+                                  {{SOPC_IdentifierType_String, 1,
+                                    .Data.String = {sizeof("PubSubStartStop") - 1, 1, (SOPC_Byte*) "PubSubStartStop"}},
+                                   {0, 0, NULL},
+                                   0},
                               },
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -1978,7 +1184,7 @@ const SOPC_AddressSpace_Node
                             (SOPC_Byte*) "The browse entry point when looking for types in the server address space."}},
                       .NoOfReferences = 6,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
@@ -2032,7 +1238,7 @@ const SOPC_AddressSpace_Node
                             (SOPC_Byte*) "The browse entry point when looking for views in the server address space."}},
                       .NoOfReferences = 2,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
@@ -2066,7 +1272,7 @@ const SOPC_AddressSpace_Node
                                          "space."}},
                       .NoOfReferences = 3,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
@@ -2106,7 +1312,7 @@ const SOPC_AddressSpace_Node
                                          "space."}},
                       .NoOfReferences = 3,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
@@ -2143,9 +1349,9 @@ const SOPC_AddressSpace_Node
                             1,
                             (SOPC_Byte*) "The browse entry point when looking for data types in the server address "
                                          "space."}},
-                      .NoOfReferences = 3,
+                      .NoOfReferences = 30,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
@@ -2157,6 +1363,168 @@ const SOPC_AddressSpace_Node
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 24}, {0, 0, NULL}, 0},
+                              },
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
+                                  false,
+                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 26}, {0, 0, NULL}, 0},
+                              },
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
+                                  false,
+                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 27}, {0, 0, NULL}, 0},
+                              },
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
+                                  false,
+                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 28}, {0, 0, NULL}, 0},
+                              },
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
+                                  false,
+                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 29}, {0, 0, NULL}, 0},
+                              },
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
+                                  false,
+                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1}, {0, 0, NULL}, 0},
+                              },
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
+                                  false,
+                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2}, {0, 0, NULL}, 0},
+                              },
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
+                                  false,
+                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 3}, {0, 0, NULL}, 0},
+                              },
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
+                                  false,
+                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 4}, {0, 0, NULL}, 0},
+                              },
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
+                                  false,
+                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 5}, {0, 0, NULL}, 0},
+                              },
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
+                                  false,
+                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 6}, {0, 0, NULL}, 0},
+                              },
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
+                                  false,
+                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 7}, {0, 0, NULL}, 0},
+                              },
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
+                                  false,
+                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 8}, {0, 0, NULL}, 0},
+                              },
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
+                                  false,
+                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 9}, {0, 0, NULL}, 0},
+                              },
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
+                                  false,
+                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 10}, {0, 0, NULL}, 0},
+                              },
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
+                                  false,
+                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 11}, {0, 0, NULL}, 0},
+                              },
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
+                                  false,
+                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 12}, {0, 0, NULL}, 0},
+                              },
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
+                                  false,
+                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 13}, {0, 0, NULL}, 0},
+                              },
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
+                                  false,
+                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 14}, {0, 0, NULL}, 0},
+                              },
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
+                                  false,
+                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 15}, {0, 0, NULL}, 0},
+                              },
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
+                                  false,
+                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 16}, {0, 0, NULL}, 0},
+                              },
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
+                                  false,
+                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 17}, {0, 0, NULL}, 0},
+                              },
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
+                                  false,
+                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 18}, {0, 0, NULL}, 0},
+                              },
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
+                                  false,
+                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 19}, {0, 0, NULL}, 0},
+                              },
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
+                                  false,
+                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 20}, {0, 0, NULL}, 0},
+                              },
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
+                                  false,
+                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 21}, {0, 0, NULL}, 0},
+                              },
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
+                                  false,
+                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 22}, {0, 0, NULL}, 0},
+                              },
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
+                                  false,
+                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 23}, {0, 0, NULL}, 0},
                               },
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -2184,7 +1552,7 @@ const SOPC_AddressSpace_Node
                                                     "server address space."}},
                       .NoOfReferences = 3,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
@@ -2221,7 +1589,7 @@ const SOPC_AddressSpace_Node
                                        (SOPC_Byte*) "Describes the capabilities supported by the server."}},
                       .NoOfReferences = 1,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
@@ -2243,62 +1611,14 @@ const SOPC_AddressSpace_Node
                       .Description = {{0, 0, NULL},
                                       {sizeof("Describes capabilities supported by the server.") - 1, 1,
                                        (SOPC_Byte*) "Describes capabilities supported by the server."}},
-                      .NoOfReferences = 11,
+                      .NoOfReferences = 3,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 46},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2269}, {0, 0, NULL}, 0},
-                              },
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 46},
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2271}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 46},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2272}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 46},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2735}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 46},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2736}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 46},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2737}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 46},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 3704}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2996}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2997}, {0, 0, NULL}, 0},
                               },
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -2319,40 +1639,6 @@ const SOPC_AddressSpace_Node
              {.variable =
                   {
                       .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2269},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {0, {sizeof("ServerProfileArray") - 1, 1, (SOPC_Byte*) "ServerProfileArray"}},
-                      .DisplayName = {{0, 0, NULL},
-                                      {sizeof("ServerProfileArray") - 1, 1, (SOPC_Byte*) "ServerProfileArray"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("A list of profiles supported by the server.") - 1, 1,
-                                       (SOPC_Byte*) "A list of profiles supported by the server."}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 68}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 46},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2268}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 0}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 12},
-                      .ValueRank = (1),
-                      .AccessLevel = 1,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
                       .NodeId = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2271},
                       .NodeClass = OpcUa_NodeClass_Variable,
                       .BrowseName = {0, {sizeof("LocaleIdArray") - 1, 1, (SOPC_Byte*) "LocaleIdArray"}},
@@ -2362,7 +1648,7 @@ const SOPC_AddressSpace_Node
                                        (SOPC_Byte*) "A list of locales supported by the server."}},
                       .NoOfReferences = 2,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
@@ -2375,395 +1661,8 @@ const SOPC_AddressSpace_Node
                                   true,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2268}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 1}},
+                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 295},
-                      .ValueRank = (1),
-                      .AccessLevel = 1,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2272},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {0,
-                                     {sizeof("MinSupportedSampleRate") - 1, 1, (SOPC_Byte*) "MinSupportedSampleRate"}},
-                      .DisplayName = {{0, 0, NULL},
-                                      {sizeof("MinSupportedSampleRate") - 1, 1, (SOPC_Byte*) "MinSupportedSampleRate"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("The minimum sampling interval supported by the server.") - 1, 1,
-                                       (SOPC_Byte*) "The minimum sampling interval supported by the server."}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 68}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 46},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2268}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 2}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 290},
-                      .ValueRank = (-1),
-                      .AccessLevel = 1,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2735},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {0,
-                                     {sizeof("MaxBrowseContinuationPoints") - 1, 1,
-                                      (SOPC_Byte*) "MaxBrowseContinuationPoints"}},
-                      .DisplayName = {{0, 0, NULL},
-                                      {sizeof("MaxBrowseContinuationPoints") - 1, 1,
-                                       (SOPC_Byte*) "MaxBrowseContinuationPoints"}},
-                      .Description =
-                          {{0, 0, NULL},
-                           {sizeof("The maximum number of continuation points for Browse operations per session.") - 1,
-                            1,
-                            (SOPC_Byte*) "The maximum number of continuation points for Browse operations per "
-                                         "session."}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 68}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 46},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2268}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 3}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 5},
-                      .ValueRank = (-1),
-                      .AccessLevel = 1,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2736},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName =
-                          {0, {sizeof("MaxQueryContinuationPoints") - 1, 1, (SOPC_Byte*) "MaxQueryContinuationPoints"}},
-                      .DisplayName = {{0, 0, NULL},
-                                      {sizeof("MaxQueryContinuationPoints") - 1, 1,
-                                       (SOPC_Byte*) "MaxQueryContinuationPoints"}},
-                      .Description =
-                          {{0, 0, NULL},
-                           {sizeof("The maximum number of continuation points for Query operations per session.") - 1,
-                            1,
-                            (SOPC_Byte*) "The maximum number of continuation points for Query operations per "
-                                         "session."}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 68}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 46},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2268}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 4}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 5},
-                      .ValueRank = (-1),
-                      .AccessLevel = 1,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2737},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {0,
-                                     {sizeof("MaxHistoryContinuationPoints") - 1, 1,
-                                      (SOPC_Byte*) "MaxHistoryContinuationPoints"}},
-                      .DisplayName = {{0, 0, NULL},
-                                      {sizeof("MaxHistoryContinuationPoints") - 1, 1,
-                                       (SOPC_Byte*) "MaxHistoryContinuationPoints"}},
-                      .Description =
-                          {{0, 0, NULL},
-                           {sizeof(
-                                "The maximum number of continuation points for ReadHistory operations per session.") -
-                                1,
-                            1,
-                            (SOPC_Byte*) "The maximum number of continuation points for ReadHistory operations per "
-                                         "session."}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 68}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 46},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2268}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 5}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 5},
-                      .ValueRank = (-1),
-                      .AccessLevel = 1,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 3704},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {0, {sizeof("SoftwareCertificates") - 1, 1, (SOPC_Byte*) "SoftwareCertificates"}},
-                      .DisplayName = {{0, 0, NULL},
-                                      {sizeof("SoftwareCertificates") - 1, 1, (SOPC_Byte*) "SoftwareCertificates"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("The software certificates owned by the server.") - 1, 1,
-                                       (SOPC_Byte*) "The software certificates owned by the server."}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 68}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 46},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2268}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 6}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 344},
-                      .ValueRank = (1),
-                      .AccessLevel = 1,
-                  }}},
-            {OpcUa_NodeClass_Object,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.object =
-                  {
-                      .encodeableType = &OpcUa_ObjectNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2996},
-                      .NodeClass = OpcUa_NodeClass_Object,
-                      .BrowseName = {0, {sizeof("ModellingRules") - 1, 1, (SOPC_Byte*) "ModellingRules"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("ModellingRules") - 1, 1, (SOPC_Byte*) "ModellingRules"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("A folder for the modelling rules supported by the server.") - 1, 1,
-                                       (SOPC_Byte*) "A folder for the modelling rules supported by the server."}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 61}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2268}, {0, 0, NULL}, 0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_Object,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.object =
-                  {
-                      .encodeableType = &OpcUa_ObjectNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2997},
-                      .NodeClass = OpcUa_NodeClass_Object,
-                      .BrowseName = {0, {sizeof("AggregateFunctions") - 1, 1, (SOPC_Byte*) "AggregateFunctions"}},
-                      .DisplayName = {{0, 0, NULL},
-                                      {sizeof("AggregateFunctions") - 1, 1, (SOPC_Byte*) "AggregateFunctions"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("A folder for the real time aggregates supported by the server.") - 1, 1,
-                                       (SOPC_Byte*) "A folder for the real time aggregates supported by the server."}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 61}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2268}, {0, 0, NULL}, 0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_ObjectType,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.object_type =
-                  {
-                      .encodeableType = &OpcUa_ObjectTypeNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 400},
-                      .NodeClass = OpcUa_NodeClass_ObjectType,
-                      .BrowseName = {0, {sizeof("VendorServerInfoType") - 1, 1, (SOPC_Byte*) "VendorServerInfoType"}},
-                      .DisplayName = {{0, 0, NULL},
-                                      {sizeof("VendorServerInfoType") - 1, 1, (SOPC_Byte*) "VendorServerInfoType"}},
-                      .Description = {{0, 0, NULL}, {0, 0, NULL}},
-                      .NoOfReferences = 1,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 58}, {0, 0, NULL}, 0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_Object,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.object =
-                  {
-                      .encodeableType = &OpcUa_ObjectNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 401},
-                      .NodeClass = OpcUa_NodeClass_Object,
-                      .BrowseName = {0, {sizeof("VendorServerInfo") - 1, 1, (SOPC_Byte*) "VendorServerInfo"}},
-                      .DisplayName = {{0, 0, NULL},
-                                      {sizeof("VendorServerInfo") - 1, 1, (SOPC_Byte*) "VendorServerInfo"}},
-                      .Description = {{0, 0, NULL}, {0, 0, NULL}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 400}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2253}, {0, 0, NULL}, 0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_ObjectType,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.object_type =
-                  {
-                      .encodeableType = &OpcUa_ObjectTypeNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 402},
-                      .NodeClass = OpcUa_NodeClass_ObjectType,
-                      .BrowseName = {0, {sizeof("ServerRedundancyType") - 1, 1, (SOPC_Byte*) "ServerRedundancyType"}},
-                      .DisplayName = {{0, 0, NULL},
-                                      {sizeof("ServerRedundancyType") - 1, 1, (SOPC_Byte*) "ServerRedundancyType"}},
-                      .Description = {{0, 0, NULL}, {0, 0, NULL}},
-                      .NoOfReferences = 1,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 45},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 58}, {0, 0, NULL}, 0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_Object,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.object =
-                  {
-                      .encodeableType = &OpcUa_ObjectNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 403},
-                      .NodeClass = OpcUa_NodeClass_Object,
-                      .BrowseName = {0, {sizeof("ServerRedundancy") - 1, 1, (SOPC_Byte*) "ServerRedundancy"}},
-                      .DisplayName = {{0, 0, NULL},
-                                      {sizeof("ServerRedundancy") - 1, 1, (SOPC_Byte*) "ServerRedundancy"}},
-                      .Description = {{0, 0, NULL}, {0, 0, NULL}},
-                      .NoOfReferences = 3,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 46},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 404}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 402}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2253}, {0, 0, NULL}, 0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 404},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {0, {sizeof("RedundancySupport") - 1, 1, (SOPC_Byte*) "RedundancySupport"}},
-                      .DisplayName = {{0, 0, NULL},
-                                      {sizeof("RedundancySupport") - 1, 1, (SOPC_Byte*) "RedundancySupport"}},
-                      .Description = {{0, 0, NULL}, {0, 0, NULL}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 68}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 46},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 403}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 7}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 344},
                       .ValueRank = (1),
                       .AccessLevel = 1,
                   }}},
@@ -2780,9 +1679,9 @@ const SOPC_AddressSpace_Node
                       .Description = {{0, 0, NULL},
                                       {sizeof("Describes this OPC-UA Server") - 1, 1,
                                        (SOPC_Byte*) "Describes this OPC-UA Server"}},
-                      .NoOfReferences = 11,
+                      .NoOfReferences = 9,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 46},
@@ -2817,18 +1716,6 @@ const SOPC_AddressSpace_Node
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
                                   false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 401}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 403}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2274}, {0, 0, NULL}, 0},
                               },
                               {
@@ -2847,7 +1734,7 @@ const SOPC_AddressSpace_Node
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
                                   false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 58}, {0, 0, NULL}, 0},
+                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 61}, {0, 0, NULL}, 0},
                               }},
                   }}},
             {OpcUa_NodeClass_Variable,
@@ -2865,7 +1752,7 @@ const SOPC_AddressSpace_Node
                                        (SOPC_Byte*) "List of servers accessible from this server."}},
                       .NoOfReferences = 2,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
@@ -2878,7 +1765,7 @@ const SOPC_AddressSpace_Node
                                   true,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2253}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 8}},
+                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 12},
                       .ValueRank = (1),
                       .AccessLevel = 1,
@@ -2898,7 +1785,7 @@ const SOPC_AddressSpace_Node
                                        (SOPC_Byte*) "List of namespace on this server."}},
                       .NoOfReferences = 2,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
@@ -2911,7 +1798,7 @@ const SOPC_AddressSpace_Node
                                   true,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2253}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 9}},
+                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 12},
                       .ValueRank = (1),
                       .AccessLevel = 1,
@@ -2929,9 +1816,9 @@ const SOPC_AddressSpace_Node
                       .Description = {{0, 0, NULL},
                                       {sizeof("Describes the status of this server") - 1, 1,
                                        (SOPC_Byte*) "Describes the status of this server"}},
-                      .NoOfReferences = 8,
+                      .NoOfReferences = 6,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -2959,18 +1846,6 @@ const SOPC_AddressSpace_Node
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 450}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 451}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
                                   true,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2253}, {0, 0, NULL}, 0},
                               },
@@ -2978,7 +1853,7 @@ const SOPC_AddressSpace_Node
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
                                   false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
+                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 61}, {0, 0, NULL}, 0},
                               }},
                   }}},
             {OpcUa_NodeClass_Variable,
@@ -2994,7 +1869,7 @@ const SOPC_AddressSpace_Node
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -3007,70 +1882,8 @@ const SOPC_AddressSpace_Node
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 10}},
+                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 13},
-                      .ValueRank = (-1),
-                      .AccessLevel = 1,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 450},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {0, {sizeof("SecondsTillShutdown") - 1, 1, (SOPC_Byte*) "SecondsTillShutdown"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("StartTime") - 1, 1, (SOPC_Byte*) "StartTime"}},
-                      .Description = {{0, 0, NULL}, {0, 0, NULL}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2256}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 7}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 11}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 7},
-                      .ValueRank = (-1),
-                      .AccessLevel = 1,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 451},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {0, {sizeof("ShutdownReason") - 1, 1, (SOPC_Byte*) "ShutdownReason"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("StartTime") - 1, 1, (SOPC_Byte*) "StartTime"}},
-                      .Description = {{0, 0, NULL}, {0, 0, NULL}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2256}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 21}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 12}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 21},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
                   }}},
@@ -3087,7 +1900,7 @@ const SOPC_AddressSpace_Node
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -3100,7 +1913,7 @@ const SOPC_AddressSpace_Node
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 13}},
+                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 13},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -3118,7 +1931,7 @@ const SOPC_AddressSpace_Node
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -3131,7 +1944,7 @@ const SOPC_AddressSpace_Node
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 14}},
+                      .Value = {true, SOPC_Int32_Id, SOPC_VariantArrayType_SingleValue, {.Int32 = 0}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 6},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -3149,7 +1962,7 @@ const SOPC_AddressSpace_Node
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 8,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -3198,7 +2011,7 @@ const SOPC_AddressSpace_Node
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 3051}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 15}},
+                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 338},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -3216,7 +2029,7 @@ const SOPC_AddressSpace_Node
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -3229,7 +2042,7 @@ const SOPC_AddressSpace_Node
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 16}},
+                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 12},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -3247,7 +2060,7 @@ const SOPC_AddressSpace_Node
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -3260,7 +2073,7 @@ const SOPC_AddressSpace_Node
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 17}},
+                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 12},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -3279,7 +2092,7 @@ const SOPC_AddressSpace_Node
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -3292,7 +2105,7 @@ const SOPC_AddressSpace_Node
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 18}},
+                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 12},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -3310,7 +2123,7 @@ const SOPC_AddressSpace_Node
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -3323,7 +2136,7 @@ const SOPC_AddressSpace_Node
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 19}},
+                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 12},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -3341,7 +2154,7 @@ const SOPC_AddressSpace_Node
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -3354,7 +2167,7 @@ const SOPC_AddressSpace_Node
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 20}},
+                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 12},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -3372,7 +2185,7 @@ const SOPC_AddressSpace_Node
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -3385,7 +2198,7 @@ const SOPC_AddressSpace_Node
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 21}},
+                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 13},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -3403,7 +2216,7 @@ const SOPC_AddressSpace_Node
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 46},
@@ -3416,7 +2229,7 @@ const SOPC_AddressSpace_Node
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 22}},
+                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 3},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -3435,9 +2248,9 @@ const SOPC_AddressSpace_Node
                       .Description = {{0, 0, NULL},
                                       {sizeof("Diagnostic summary of this server") - 1, 1,
                                        (SOPC_Byte*) "Diagnostic summary of this server"}},
-                      .NoOfReferences = 3,
+                      .NoOfReferences = 2,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 46},
@@ -3449,12 +2262,6 @@ const SOPC_AddressSpace_Node
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
                                   true,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2253}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 58}, {0, 0, NULL}, 0},
                               }},
                   }}},
             {OpcUa_NodeClass_Variable,
@@ -3470,7 +2277,7 @@ const SOPC_AddressSpace_Node
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 46},
@@ -3483,7 +2290,7 @@ const SOPC_AddressSpace_Node
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 23}},
+                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -3501,7 +2308,7 @@ const SOPC_AddressSpace_Node
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 46},
@@ -3514,37 +2321,10 @@ const SOPC_AddressSpace_Node
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 24}},
+                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
-                  }}},
-            {OpcUa_NodeClass_Object,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.object =
-                  {
-                      .encodeableType = &OpcUa_ObjectNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 3048},
-                      .NodeClass = OpcUa_NodeClass_Object,
-                      .BrowseName = {0, {sizeof("EventTypes") - 1, 1, (SOPC_Byte*) "EventTypes"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("EventTypes") - 1, 1, (SOPC_Byte*) "EventTypes"}},
-                      .Description = {{0, 0, NULL}, {0, 0, NULL}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 86}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 61}, {0, 0, NULL}, 0},
-                              }},
                   }}},
             {OpcUa_NodeClass_VariableType,
              0x00,
@@ -3559,7 +2339,7 @@ const SOPC_AddressSpace_Node
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 7,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
@@ -3619,7 +2399,7 @@ const SOPC_AddressSpace_Node
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
@@ -3632,7 +2412,7 @@ const SOPC_AddressSpace_Node
                                   true,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 3051}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 25}},
+                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 12},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -3651,7 +2431,7 @@ const SOPC_AddressSpace_Node
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
@@ -3664,7 +2444,7 @@ const SOPC_AddressSpace_Node
                                   true,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 3051}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 26}},
+                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 12},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -3682,7 +2462,7 @@ const SOPC_AddressSpace_Node
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
@@ -3695,7 +2475,7 @@ const SOPC_AddressSpace_Node
                                   true,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 3051}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 27}},
+                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 12},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -3713,7 +2493,7 @@ const SOPC_AddressSpace_Node
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
@@ -3726,7 +2506,7 @@ const SOPC_AddressSpace_Node
                                   true,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 3051}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 28}},
+                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 12},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -3744,7 +2524,7 @@ const SOPC_AddressSpace_Node
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
@@ -3757,7 +2537,7 @@ const SOPC_AddressSpace_Node
                                   true,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 3051}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 29}},
+                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 12},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -3775,7 +2555,7 @@ const SOPC_AddressSpace_Node
                       .Description = {{0, 0, NULL}, {0, 0, NULL}},
                       .NoOfReferences = 2,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
@@ -3788,7 +2568,7 @@ const SOPC_AddressSpace_Node
                                   true,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 3051}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 30}},
+                      .Value = {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 294},
                       .ValueRank = (-1),
                       .AccessLevel = 1,
@@ -4093,23 +2873,135 @@ const SOPC_AddressSpace_Node
                       .NoOfReferences = 0,
                       .References = NULL,
                   }}},
+            {OpcUa_NodeClass_Variable,
+             0x00,
+             {0, 0},
+             {.variable =
+                  {
+                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
+                      .NodeId = {SOPC_IdentifierType_String, 1,
+                                 .Data.String = {sizeof("PubSubStatus") - 1, 1, (SOPC_Byte*) "PubSubStatus"}},
+                      .NodeClass = OpcUa_NodeClass_Variable,
+                      .BrowseName = {0, {sizeof("PubSub Status") - 1, 1, (SOPC_Byte*) "PubSub Status"}},
+                      .DisplayName = {{0, 0, NULL}, {sizeof("PubSub Status") - 1, 1, (SOPC_Byte*) "PubSub Status"}},
+                      .Description = {{0, 0, NULL},
+                                      {sizeof("The status of the PubSub module") - 1, 1,
+                                       (SOPC_Byte*) "The status of the PubSub module"}},
+                      .NoOfReferences = 2,
+                      .References =
+                          (OpcUa_ReferenceNode[]){
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
+                                  true,
+                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 85}, {0, 0, NULL}, 0},
+                              },
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
+                                  false,
+                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
+                              }},
+                      .Value = {true, SOPC_Byte_Id, SOPC_VariantArrayType_SingleValue, {.Byte = 3}},
+                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 3},
+                      .ValueRank = (-1),
+                      .AccessLevel = 3,
+                  }}},
+            {OpcUa_NodeClass_Variable,
+             0x00,
+             {0, 0},
+             {.variable =
+                  {
+                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
+                      .NodeId = {SOPC_IdentifierType_String, 1,
+                                 .Data.String = {sizeof("PubSubConfiguration") - 1, 1,
+                                                 (SOPC_Byte*) "PubSubConfiguration"}},
+                      .NodeClass = OpcUa_NodeClass_Variable,
+                      .BrowseName = {0, {sizeof("PubSub Configuration") - 1, 1, (SOPC_Byte*) "PubSub Configuration"}},
+                      .DisplayName = {{0, 0, NULL},
+                                      {sizeof("PubSub Configuration") - 1, 1, (SOPC_Byte*) "PubSub Configuration"}},
+                      .Description = {{0, 0, NULL},
+                                      {sizeof("Path(s) to the configuration files used when PubSub is started") - 1, 1,
+                                       (SOPC_Byte*) "Path(s) to the configuration files used when PubSub is started"}},
+                      .NoOfReferences = 2,
+                      .References =
+                          (OpcUa_ReferenceNode[]){
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
+                                  true,
+                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 85}, {0, 0, NULL}, 0},
+                              },
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
+                                  false,
+                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
+                              }},
+                      .Value = {true,
+                                SOPC_String_Id,
+                                SOPC_VariantArrayType_SingleValue,
+                                {.String = {sizeof("PLACEHOLDER") - 1, 1, (SOPC_Byte*) "PLACEHOLDER"}}},
+                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 12},
+                      .ValueRank = (-1),
+                      .AccessLevel = 3,
+                  }}},
+            {OpcUa_NodeClass_Variable,
+             0x00,
+             {0, 0},
+             {.variable =
+                  {
+                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
+                      .NodeId = {SOPC_IdentifierType_String, 1,
+                                 .Data.String = {sizeof("PubSubStartStop") - 1, 1, (SOPC_Byte*) "PubSubStartStop"}},
+                      .NodeClass = OpcUa_NodeClass_Variable,
+                      .BrowseName =
+                          {0, {sizeof("PubSub Start/Stop Command") - 1, 1, (SOPC_Byte*) "PubSub Start/Stop Command"}},
+                      .DisplayName = {{0, 0, NULL},
+                                      {sizeof("PubSub Start/Stop Command") - 1, 1,
+                                       (SOPC_Byte*) "PubSub Start/Stop Command"}},
+                      .Description =
+                          {{0, 0, NULL},
+                           {sizeof("Write 1 to start (or restart) the PubSub Module, write 0 to stop the module") - 1,
+                            1,
+                            (SOPC_Byte*) "Write 1 to start (or restart) the PubSub Module, write 0 to stop the "
+                                         "module"}},
+                      .NoOfReferences = 2,
+                      .References =
+                          (OpcUa_ReferenceNode[]){
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
+                                  true,
+                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 85}, {0, 0, NULL}, 0},
+                              },
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
+                                  false,
+                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
+                              }},
+                      .Value = {true, SOPC_Byte_Id, SOPC_VariantArrayType_SingleValue, {.Byte = 2}},
+                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 3},
+                      .ValueRank = (-1),
+                      .AccessLevel = 3,
+                  }}},
             {OpcUa_NodeClass_Object,
              OpcUa_UncertainInitialValue,
              {0, 0},
              {.object =
                   {
                       .encodeableType = &OpcUa_ObjectNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1000},
+                      .NodeId = {SOPC_IdentifierType_String, 1,
+                                 .Data.String = {sizeof("PubVars") - 1, 1, (SOPC_Byte*) "PubVars"}},
                       .NodeClass = OpcUa_NodeClass_Object,
-                      .BrowseName = {1, {sizeof("VariablesFolderBn") - 1, 1, (SOPC_Byte*) "VariablesFolderBn"}},
-                      .DisplayName = {{0, 0, NULL},
-                                      {sizeof("VariablesFolderDn") - 1, 1, (SOPC_Byte*) "VariablesFolderDn"}},
+                      .BrowseName = {1, {sizeof("PublisherVars") - 1, 1, (SOPC_Byte*) "PublisherVars"}},
+                      .DisplayName = {{0, 0, NULL}, {sizeof("PublisherVars") - 1, 1, (SOPC_Byte*) "PublisherVars"}},
                       .Description = {{0, 0, NULL},
-                                      {sizeof("VariablesFolderDescObj1d2") - 1, 1,
-                                       (SOPC_Byte*) "VariablesFolderDescObj1d2"}},
-                      .NoOfReferences = 33,
+                                      {sizeof("PublisherVarsDesc") - 1, 1, (SOPC_Byte*) "PublisherVarsDesc"}},
+                      .NoOfReferences = 8,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
@@ -4126,187 +3018,55 @@ const SOPC_AddressSpace_Node
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
                                   false,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1001}, {0, 0, NULL}, 0},
+                                  {{SOPC_IdentifierType_String, 1,
+                                    .Data.String = {sizeof("PubBool") - 1, 1, (SOPC_Byte*) "PubBool"}},
+                                   {0, 0, NULL},
+                                   0},
                               },
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
                                   false,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1002}, {0, 0, NULL}, 0},
+                                  {{SOPC_IdentifierType_String, 1,
+                                    .Data.String = {sizeof("PubString") - 1, 1, (SOPC_Byte*) "PubString"}},
+                                   {0, 0, NULL},
+                                   0},
                               },
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
                                   false,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1003}, {0, 0, NULL}, 0},
+                                  {{SOPC_IdentifierType_String, 1,
+                                    .Data.String = {sizeof("PubInt") - 1, 1, (SOPC_Byte*) "PubInt"}},
+                                   {0, 0, NULL},
+                                   0},
                               },
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
                                   false,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1004}, {0, 0, NULL}, 0},
+                                  {{SOPC_IdentifierType_String, 1,
+                                    .Data.String = {sizeof("PubUInt") - 1, 1, (SOPC_Byte*) "PubUInt"}},
+                                   {0, 0, NULL},
+                                   0},
                               },
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
                                   false,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1005}, {0, 0, NULL}, 0},
+                                  {{SOPC_IdentifierType_String, 1,
+                                    .Data.String = {sizeof("PubUInt16") - 1, 1, (SOPC_Byte*) "PubUInt16"}},
+                                   {0, 0, NULL},
+                                   0},
                               },
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
                                   false,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1006}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1007}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1008}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1009}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1010}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1011}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1012}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1013}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1015}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1016}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1017}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1018}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1019}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1020}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1021}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1022}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1023}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1024}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1025}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1026}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1027}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1028}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1029}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1030}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1031}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1032}, {0, 0, NULL}, 0},
+                                  {{SOPC_IdentifierType_String, 1,
+                                    .Data.String = {sizeof("PubUInt32") - 1, 1, (SOPC_Byte*) "PubUInt32"}},
+                                   {0, 0, NULL},
+                                   0},
                               }},
                   }}},
             {OpcUa_NodeClass_Variable,
@@ -4315,19 +3075,23 @@ const SOPC_AddressSpace_Node
              {.variable =
                   {
                       .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1001},
+                      .NodeId = {SOPC_IdentifierType_String, 1,
+                                 .Data.String = {sizeof("PubBool") - 1, 1, (SOPC_Byte*) "PubBool"}},
                       .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("Int64") - 1, 1, (SOPC_Byte*) "Int64"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("Int64_1dn") - 1, 1, (SOPC_Byte*) "Int64_1dn"}},
-                      .Description = {{0, 0, NULL}, {sizeof("Int64_1d") - 1, 1, (SOPC_Byte*) "Int64_1d"}},
+                      .BrowseName = {1, {sizeof("varBool") - 1, 1, (SOPC_Byte*) "varBool"}},
+                      .DisplayName = {{0, 0, NULL}, {sizeof("pubVarBool") - 1, 1, (SOPC_Byte*) "pubVarBool"}},
+                      .Description = {{0, 0, NULL}, {sizeof("pubVarBoolDesc") - 1, 1, (SOPC_Byte*) "pubVarBoolDesc"}},
                       .NoOfReferences = 2,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
                                   true,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1000}, {0, 0, NULL}, 0},
+                                  {{SOPC_IdentifierType_String, 1,
+                                    .Data.String = {sizeof("PubVars") - 1, 1, (SOPC_Byte*) "PubVars"}},
+                                   {0, 0, NULL},
+                                   0},
                               },
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -4335,869 +3099,7 @@ const SOPC_AddressSpace_Node
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 31}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 8},
-                      .ValueRank = (-1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1002},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("UInt32") - 1, 1, (SOPC_Byte*) "UInt32"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("UInt32_1dn") - 1, 1, (SOPC_Byte*) "UInt32_1dn"}},
-                      .Description = {{0, 0, NULL}, {sizeof("UInt32_1d") - 1, 1, (SOPC_Byte*) "UInt32_1d"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1000}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 32}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 7},
-                      .ValueRank = (-1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1003},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("Double") - 1, 1, (SOPC_Byte*) "Double"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("Double_1dn") - 1, 1, (SOPC_Byte*) "Double_1dn"}},
-                      .Description = {{0, 0, NULL}, {sizeof("Double_1d") - 1, 1, (SOPC_Byte*) "Double_1d"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1000}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 33}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 11},
-                      .ValueRank = (-1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1004},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("String") - 1, 1, (SOPC_Byte*) "String"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("String_1dn") - 1, 1, (SOPC_Byte*) "String_1dn"}},
-                      .Description = {{0, 0, NULL}, {sizeof("String_1d") - 1, 1, (SOPC_Byte*) "String_1d"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1000}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 34}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 12},
-                      .ValueRank = (-1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1005},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("ByteString") - 1, 1, (SOPC_Byte*) "ByteString"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("ByteString_1dn") - 1, 1, (SOPC_Byte*) "ByteString_1dn"}},
-                      .Description = {{0, 0, NULL}, {sizeof("ByteString_1d") - 1, 1, (SOPC_Byte*) "ByteString_1d"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1000}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 35}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 15},
-                      .ValueRank = (-1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1006},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("XmlElement") - 1, 1, (SOPC_Byte*) "XmlElement"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("XmlElement_1dn") - 1, 1, (SOPC_Byte*) "XmlElement_1dn"}},
-                      .Description = {{0, 0, NULL}, {sizeof("XmlElement_1d") - 1, 1, (SOPC_Byte*) "XmlElement_1d"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1000}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 36}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 16},
-                      .ValueRank = (-1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1007},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("SByte") - 1, 1, (SOPC_Byte*) "SByte"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("SByte_1dn") - 1, 1, (SOPC_Byte*) "SByte_1dn"}},
-                      .Description = {{0, 0, NULL}, {sizeof("SByte_1d") - 1, 1, (SOPC_Byte*) "SByte_1d"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1000}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 37}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2},
-                      .ValueRank = (-1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1008},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("Byte") - 1, 1, (SOPC_Byte*) "Byte"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("Byte_1dn") - 1, 1, (SOPC_Byte*) "Byte_1dn"}},
-                      .Description = {{0, 0, NULL}, {sizeof("Byte_1d") - 1, 1, (SOPC_Byte*) "Byte_1d"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1000}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 38}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 3},
-                      .ValueRank = (-1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1009},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("Int16") - 1, 1, (SOPC_Byte*) "Int16"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("Int16_1dn") - 1, 1, (SOPC_Byte*) "Int16_1dn"}},
-                      .Description = {{0, 0, NULL}, {sizeof("Int16_1d") - 1, 1, (SOPC_Byte*) "Int16_1d"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1000}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 39}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 4},
-                      .ValueRank = (-1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1010},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("UInt16") - 1, 1, (SOPC_Byte*) "UInt16"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("UInt16_1dn") - 1, 1, (SOPC_Byte*) "UInt16_1dn"}},
-                      .Description = {{0, 0, NULL}, {sizeof("UInt16_1d") - 1, 1, (SOPC_Byte*) "UInt16_1d"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1000}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 40}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 5},
-                      .ValueRank = (-1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1011},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("Int32") - 1, 1, (SOPC_Byte*) "Int32"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("Int32_1dn") - 1, 1, (SOPC_Byte*) "Int32_1dn"}},
-                      .Description = {{0, 0, NULL}, {sizeof("Int32_1d") - 1, 1, (SOPC_Byte*) "Int32_1d"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1000}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 41}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 6},
-                      .ValueRank = (-1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1012},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("UInt64") - 1, 1, (SOPC_Byte*) "UInt64"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("UInt64_1dn") - 1, 1, (SOPC_Byte*) "UInt64_1dn"}},
-                      .Description = {{0, 0, NULL}, {sizeof("UInt64_1d") - 1, 1, (SOPC_Byte*) "UInt64_1d"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1000}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 42}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 9},
-                      .ValueRank = (-1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1013},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("Float") - 1, 1, (SOPC_Byte*) "Float"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("Float_1dn") - 1, 1, (SOPC_Byte*) "Float_1dn"}},
-                      .Description = {{0, 0, NULL}, {sizeof("Float_1d") - 1, 1, (SOPC_Byte*) "Float_1d"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1000}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 43}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 10},
-                      .ValueRank = (-1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1015},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("BooleanList") - 1, 1, (SOPC_Byte*) "BooleanList"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("Boolean list DN") - 1, 1, (SOPC_Byte*) "Boolean list DN"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("Boolean list Description") - 1, 1,
-                                       (SOPC_Byte*) "Boolean list Description"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1000}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 44}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
-                      .ValueRank = (1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1016},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("ByteList") - 1, 1, (SOPC_Byte*) "ByteList"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("Byte list DN") - 1, 1, (SOPC_Byte*) "Byte list DN"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("Byte list Description") - 1, 1, (SOPC_Byte*) "Byte list Description"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1000}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 45}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 3},
-                      .ValueRank = (1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1017},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("Int16List") - 1, 1, (SOPC_Byte*) "Int16List"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("Int16 list DN") - 1, 1, (SOPC_Byte*) "Int16 list DN"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("Int16 list Description") - 1, 1, (SOPC_Byte*) "Int16 list Description"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1000}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 46}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 4},
-                      .ValueRank = (1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1018},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("Int32List") - 1, 1, (SOPC_Byte*) "Int32List"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("Int32 list DN") - 1, 1, (SOPC_Byte*) "Int32 list DN"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("Int32 list Description") - 1, 1, (SOPC_Byte*) "Int32 list Description"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1000}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 47}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 6},
-                      .ValueRank = (1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1019},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("Int64List") - 1, 1, (SOPC_Byte*) "Int64List"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("Int64 list DN") - 1, 1, (SOPC_Byte*) "Int64 list DN"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("Int64 list Description") - 1, 1, (SOPC_Byte*) "Int64 list Description"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1000}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 48}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 8},
-                      .ValueRank = (1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1020},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("SByteList") - 1, 1, (SOPC_Byte*) "SByteList"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("SByte list DN") - 1, 1, (SOPC_Byte*) "SByte list DN"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("SByte list Description") - 1, 1, (SOPC_Byte*) "SByte list Description"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1000}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 49}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2},
-                      .ValueRank = (1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1021},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("UInt16List") - 1, 1, (SOPC_Byte*) "UInt16List"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("UInt16 list DN") - 1, 1, (SOPC_Byte*) "UInt16 list DN"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("UInt16 list Description") - 1, 1,
-                                       (SOPC_Byte*) "UInt16 list Description"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1000}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 50}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 5},
-                      .ValueRank = (1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1022},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("UInt32List") - 1, 1, (SOPC_Byte*) "UInt32List"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("UInt32 list DN") - 1, 1, (SOPC_Byte*) "UInt32 list DN"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("UInt32 list Description") - 1, 1,
-                                       (SOPC_Byte*) "UInt32 list Description"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1000}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 51}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 7},
-                      .ValueRank = (1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1023},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("UInt64List") - 1, 1, (SOPC_Byte*) "UInt64List"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("UInt64 list DN") - 1, 1, (SOPC_Byte*) "UInt64 list DN"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("UInt64 list Description") - 1, 1,
-                                       (SOPC_Byte*) "UInt64 list Description"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1000}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 52}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 9},
-                      .ValueRank = (1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1024},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("FloatList") - 1, 1, (SOPC_Byte*) "FloatList"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("Float list DN") - 1, 1, (SOPC_Byte*) "Float list DN"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("Float list Description") - 1, 1, (SOPC_Byte*) "Float list Description"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1000}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 53}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 10},
-                      .ValueRank = (1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1025},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("DoubleList") - 1, 1, (SOPC_Byte*) "DoubleList"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("Double list DN") - 1, 1, (SOPC_Byte*) "Double list DN"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("Double list Description") - 1, 1,
-                                       (SOPC_Byte*) "Double list Description"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1000}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 54}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 11},
-                      .ValueRank = (1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1026},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("StringList") - 1, 1, (SOPC_Byte*) "StringList"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("String list DN") - 1, 1, (SOPC_Byte*) "String list DN"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("String list Description") - 1, 1,
-                                       (SOPC_Byte*) "String list Description"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1000}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 55}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 12},
-                      .ValueRank = (1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1027},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("ByteStringList") - 1, 1, (SOPC_Byte*) "ByteStringList"}},
-                      .DisplayName = {{0, 0, NULL},
-                                      {sizeof("ByteString list DN") - 1, 1, (SOPC_Byte*) "ByteString list DN"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("ByteString list Description") - 1, 1,
-                                       (SOPC_Byte*) "ByteString list Description"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1000}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 56}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 15},
-                      .ValueRank = (1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1028},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("XmlElementList") - 1, 1, (SOPC_Byte*) "XmlElementList"}},
-                      .DisplayName = {{0, 0, NULL},
-                                      {sizeof("XmlElement list DN") - 1, 1, (SOPC_Byte*) "XmlElement list DN"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("XmlElement list Description") - 1, 1,
-                                       (SOPC_Byte*) "XmlElement list Description"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1000}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 57}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 16},
-                      .ValueRank = (1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1029},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("Boolean") - 1, 1, (SOPC_Byte*) "Boolean"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("Boolean") - 1, 1, (SOPC_Byte*) "Boolean"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("Boolean Description") - 1, 1, (SOPC_Byte*) "Boolean Description"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1000}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 58}},
+                      .Value = {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = true}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
                       .ValueRank = (-1),
                       .AccessLevel = 3,
@@ -5208,20 +3110,24 @@ const SOPC_AddressSpace_Node
              {.variable =
                   {
                       .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1030},
+                      .NodeId = {SOPC_IdentifierType_String, 1,
+                                 .Data.String = {sizeof("PubString") - 1, 1, (SOPC_Byte*) "PubString"}},
                       .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("Number") - 1, 1, (SOPC_Byte*) "Number"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("Number") - 1, 1, (SOPC_Byte*) "Number"}},
+                      .BrowseName = {1, {sizeof("varString") - 1, 1, (SOPC_Byte*) "varString"}},
+                      .DisplayName = {{0, 0, NULL}, {sizeof("pubVarString") - 1, 1, (SOPC_Byte*) "pubVarString"}},
                       .Description = {{0, 0, NULL},
-                                      {sizeof("Number Description") - 1, 1, (SOPC_Byte*) "Number Description"}},
+                                      {sizeof("pubVarStringDesc") - 1, 1, (SOPC_Byte*) "pubVarStringDesc"}},
                       .NoOfReferences = 2,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
                                   true,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1000}, {0, 0, NULL}, 0},
+                                  {{SOPC_IdentifierType_String, 1,
+                                    .Data.String = {sizeof("PubVars") - 1, 1, (SOPC_Byte*) "PubVars"}},
+                                   {0, 0, NULL},
+                                   0},
                               },
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -5229,8 +3135,11 @@ const SOPC_AddressSpace_Node
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 59}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 26},
+                      .Value = {true,
+                                SOPC_String_Id,
+                                SOPC_VariantArrayType_SingleValue,
+                                {.String = {sizeof("This is a text !") - 1, 1, (SOPC_Byte*) "This is a text !"}}},
+                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 12},
                       .ValueRank = (-1),
                       .AccessLevel = 3,
                   }}},
@@ -5240,20 +3149,23 @@ const SOPC_AddressSpace_Node
              {.variable =
                   {
                       .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1031},
+                      .NodeId = {SOPC_IdentifierType_String, 1,
+                                 .Data.String = {sizeof("PubInt") - 1, 1, (SOPC_Byte*) "PubInt"}},
                       .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("UInteger") - 1, 1, (SOPC_Byte*) "UInteger"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("UInteger") - 1, 1, (SOPC_Byte*) "UInteger"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("UInteger Description") - 1, 1, (SOPC_Byte*) "UInteger Description"}},
+                      .BrowseName = {1, {sizeof("varInt") - 1, 1, (SOPC_Byte*) "varInt"}},
+                      .DisplayName = {{0, 0, NULL}, {sizeof("pubVarInt") - 1, 1, (SOPC_Byte*) "pubVarInt"}},
+                      .Description = {{0, 0, NULL}, {sizeof("pubVarIntDesc") - 1, 1, (SOPC_Byte*) "pubVarIntDesc"}},
                       .NoOfReferences = 2,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
                                   true,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1000}, {0, 0, NULL}, 0},
+                                  {{SOPC_IdentifierType_String, 1,
+                                    .Data.String = {sizeof("PubVars") - 1, 1, (SOPC_Byte*) "PubVars"}},
+                                   {0, 0, NULL},
+                                   0},
                               },
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -5261,8 +3173,8 @@ const SOPC_AddressSpace_Node
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 60}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 28},
+                      .Value = {true, SOPC_Int64_Id, SOPC_VariantArrayType_SingleValue, {.Int64 = -32767L}},
+                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 8},
                       .ValueRank = (-1),
                       .AccessLevel = 3,
                   }}},
@@ -5272,20 +3184,23 @@ const SOPC_AddressSpace_Node
              {.variable =
                   {
                       .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1032},
+                      .NodeId = {SOPC_IdentifierType_String, 1,
+                                 .Data.String = {sizeof("PubUInt") - 1, 1, (SOPC_Byte*) "PubUInt"}},
                       .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("Integer") - 1, 1, (SOPC_Byte*) "Integer"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("Integer") - 1, 1, (SOPC_Byte*) "Integer"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("Integer Description") - 1, 1, (SOPC_Byte*) "Integer Description"}},
+                      .BrowseName = {1, {sizeof("varUInt") - 1, 1, (SOPC_Byte*) "varUInt"}},
+                      .DisplayName = {{0, 0, NULL}, {sizeof("pubVarUInt") - 1, 1, (SOPC_Byte*) "pubVarUInt"}},
+                      .Description = {{0, 0, NULL}, {sizeof("pubVarUIntDesc") - 1, 1, (SOPC_Byte*) "pubVarUIntDesc"}},
                       .NoOfReferences = 2,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
                                   true,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1000}, {0, 0, NULL}, 0},
+                                  {{SOPC_IdentifierType_String, 1,
+                                    .Data.String = {sizeof("PubVars") - 1, 1, (SOPC_Byte*) "PubVars"}},
+                                   {0, 0, NULL},
+                                   0},
                               },
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -5293,8 +3208,78 @@ const SOPC_AddressSpace_Node
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 61}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 27},
+                      .Value = {true, SOPC_UInt64_Id, SOPC_VariantArrayType_SingleValue, {.Uint64 = 8589934592UL}},
+                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 9},
+                      .ValueRank = (-1),
+                      .AccessLevel = 3,
+                  }}},
+            {OpcUa_NodeClass_Variable,
+             0x00,
+             {0, 0},
+             {.variable =
+                  {
+                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
+                      .NodeId = {SOPC_IdentifierType_String, 1,
+                                 .Data.String = {sizeof("PubUInt16") - 1, 1, (SOPC_Byte*) "PubUInt16"}},
+                      .NodeClass = OpcUa_NodeClass_Variable,
+                      .BrowseName = {1, {sizeof("varUInt16") - 1, 1, (SOPC_Byte*) "varUInt16"}},
+                      .DisplayName = {{0, 0, NULL}, {sizeof("pubVarUInt16") - 1, 1, (SOPC_Byte*) "pubVarUInt16"}},
+                      .Description = {{0, 0, NULL}, {sizeof("pubVarUIntDesc") - 1, 1, (SOPC_Byte*) "pubVarUIntDesc"}},
+                      .NoOfReferences = 2,
+                      .References =
+                          (OpcUa_ReferenceNode[]){
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
+                                  true,
+                                  {{SOPC_IdentifierType_String, 1,
+                                    .Data.String = {sizeof("PubVars") - 1, 1, (SOPC_Byte*) "PubVars"}},
+                                   {0, 0, NULL},
+                                   0},
+                              },
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
+                                  false,
+                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
+                              }},
+                      .Value = {true, SOPC_UInt16_Id, SOPC_VariantArrayType_SingleValue, {.Uint16 = 65535}},
+                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 5},
+                      .ValueRank = (-1),
+                      .AccessLevel = 3,
+                  }}},
+            {OpcUa_NodeClass_Variable,
+             0x00,
+             {0, 0},
+             {.variable =
+                  {
+                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
+                      .NodeId = {SOPC_IdentifierType_String, 1,
+                                 .Data.String = {sizeof("PubUInt32") - 1, 1, (SOPC_Byte*) "PubUInt32"}},
+                      .NodeClass = OpcUa_NodeClass_Variable,
+                      .BrowseName = {1, {sizeof("varUInt32") - 1, 1, (SOPC_Byte*) "varUInt32"}},
+                      .DisplayName = {{0, 0, NULL}, {sizeof("pubVarUInt32") - 1, 1, (SOPC_Byte*) "pubVarUInt32"}},
+                      .Description = {{0, 0, NULL}, {sizeof("pubVarUIntDesc") - 1, 1, (SOPC_Byte*) "pubVarUIntDesc"}},
+                      .NoOfReferences = 2,
+                      .References =
+                          (OpcUa_ReferenceNode[]){
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
+                                  true,
+                                  {{SOPC_IdentifierType_String, 1,
+                                    .Data.String = {sizeof("PubVars") - 1, 1, (SOPC_Byte*) "PubVars"}},
+                                   {0, 0, NULL},
+                                   0},
+                              },
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
+                                  false,
+                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
+                              }},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 4294967295}},
+                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 7},
                       .ValueRank = (-1),
                       .AccessLevel = 3,
                   }}},
@@ -5304,327 +3289,21 @@ const SOPC_AddressSpace_Node
              {.object =
                   {
                       .encodeableType = &OpcUa_ObjectNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 15361},
-                      .NodeClass = OpcUa_NodeClass_Object,
-                      .BrowseName = {1, {sizeof("15361") - 1, 1, (SOPC_Byte*) "15361"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("15361") - 1, 1, (SOPC_Byte*) "15361"}},
-                      .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
-                      .NoOfReferences = 4,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 61}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SWITCHs") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SWITCHs"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.TRACKs") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.TRACKs"}},
-                                   {0, 0, NULL},
-                                   0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_Object,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.object =
-                  {
-                      .encodeableType = &OpcUa_ObjectNode_EncodeableType,
                       .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SIGNALs") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SIGNALs"}},
+                                 .Data.String = {sizeof("SubVars") - 1, 1, (SOPC_Byte*) "SubVars"}},
                       .NodeClass = OpcUa_NodeClass_Object,
-                      .BrowseName = {1, {sizeof("SIGNALs") - 1, 1, (SOPC_Byte*) "SIGNALs"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("SIGNALs") - 1, 1, (SOPC_Byte*) "SIGNALs"}},
-                      .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
-                      .NoOfReferences = 5,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 15361}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 61}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G025") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G025"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G026") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G026"}},
-                                   {0, 0, NULL},
-                                   0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_Object,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.object =
-                  {
-                      .encodeableType = &OpcUa_ObjectNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SWITCHs") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SWITCHs"}},
-                      .NodeClass = OpcUa_NodeClass_Object,
-                      .BrowseName = {1, {sizeof("SWITCHs") - 1, 1, (SOPC_Byte*) "SWITCHs"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("SWITCHs") - 1, 1, (SOPC_Byte*) "SWITCHs"}},
-                      .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
-                      .NoOfReferences = 3,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 15361}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 61}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SWITCHs.BALA_RDLS_W1") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SWITCHs.BALA_RDLS_W1"}},
-                                   {0, 0, NULL},
-                                   0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_Object,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.object =
-                  {
-                      .encodeableType = &OpcUa_ObjectNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.TRACKs") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.TRACKs"}},
-                      .NodeClass = OpcUa_NodeClass_Object,
-                      .BrowseName = {1, {sizeof("TRACKs") - 1, 1, (SOPC_Byte*) "TRACKs"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("TRACKs") - 1, 1, (SOPC_Byte*) "TRACKs"}},
-                      .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
-                      .NoOfReferences = 6,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  true,
-                                  {{SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 15361}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 61}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.TRACKs.BALA_RDLS_026TK") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.TRACKs.BALA_RDLS_026TK"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.TRACKs.BALA_RDLS_OSTK") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.TRACKs.BALA_RDLS_OSTK"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.TRACKs.BALA_RDLS_P500") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.TRACKs.BALA_RDLS_P500"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK"}},
-                                   {0, 0, NULL},
-                                   0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_Object,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.object =
-                  {
-                      .encodeableType = &OpcUa_ObjectNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019"}},
-                      .NodeClass = OpcUa_NodeClass_Object,
-                      .BrowseName = {1, {sizeof("BALA_RDLS_G019") - 1, 1, (SOPC_Byte*) "BALA_RDLS_G019"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("BALA_RDLS_G019") - 1, 1, (SOPC_Byte*) "BALA_RDLS_G019"}},
-                      .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
-                      .NoOfReferences = 7,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 61}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.RM") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.RM"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.RC") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.RC"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.SendCommand") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.SendCommand"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-K") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-K"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String =
-                                        {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-CC") - 1, 1,
-                                         (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-CC"}},
-                                   {0, 0, NULL},
-                                   0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_Object,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.object =
-                  {
-                      .encodeableType = &OpcUa_ObjectNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.RM") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.RM"}},
-                      .NodeClass = OpcUa_NodeClass_Object,
-                      .BrowseName = {1, {sizeof("RM") - 1, 1, (SOPC_Byte*) "RM"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("RM") - 1, 1, (SOPC_Byte*) "RM"}},
-                      .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
+                      .BrowseName = {1, {sizeof("SubscriberVars") - 1, 1, (SOPC_Byte*) "SubscriberVars"}},
+                      .DisplayName = {{0, 0, NULL}, {sizeof("SubscriberVars") - 1, 1, (SOPC_Byte*) "SubscriberVars"}},
+                      .Description = {{0, 0, NULL},
+                                      {sizeof("SubscriberVarsDesc") - 1, 1, (SOPC_Byte*) "SubscriberVarsDesc"}},
                       .NoOfReferences = 8,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
                                   true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019"}},
-                                   {0, 0, NULL},
-                                   0},
+                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 85}, {0, 0, NULL}, 0},
                               },
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -5637,8 +3316,7 @@ const SOPC_AddressSpace_Node
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
                                   false,
                                   {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.RM.GK") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.RM.GK"}},
+                                    .Data.String = {sizeof("SubBool") - 1, 1, (SOPC_Byte*) "SubBool"}},
                                    {0, 0, NULL},
                                    0},
                               },
@@ -5647,8 +3325,7 @@ const SOPC_AddressSpace_Node
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
                                   false,
                                   {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.RM.ASK") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.RM.ASK"}},
+                                    .Data.String = {sizeof("SubString") - 1, 1, (SOPC_Byte*) "SubString"}},
                                    {0, 0, NULL},
                                    0},
                               },
@@ -5657,8 +3334,7 @@ const SOPC_AddressSpace_Node
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
                                   false,
                                   {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBKK") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBKK"}},
+                                    .Data.String = {sizeof("SubInt") - 1, 1, (SOPC_Byte*) "SubInt"}},
                                    {0, 0, NULL},
                                    0},
                               },
@@ -5667,8 +3343,7 @@ const SOPC_AddressSpace_Node
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
                                   false,
                                   {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ"}},
+                                    .Data.String = {sizeof("SubUInt") - 1, 1, (SOPC_Byte*) "SubUInt"}},
                                    {0, 0, NULL},
                                    0},
                               },
@@ -5677,8 +3352,7 @@ const SOPC_AddressSpace_Node
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
                                   false,
                                   {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZ-AK") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZ-AK"}},
+                                    .Data.String = {sizeof("SubUInt16") - 1, 1, (SOPC_Byte*) "SubUInt16"}},
                                    {0, 0, NULL},
                                    0},
                               },
@@ -5687,8 +3361,7 @@ const SOPC_AddressSpace_Node
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
                                   false,
                                   {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ-AK") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ-AK"}},
+                                    .Data.String = {sizeof("SubUInt32") - 1, 1, (SOPC_Byte*) "SubUInt32"}},
                                    {0, 0, NULL},
                                    0},
                               }},
@@ -5700,24 +3373,56 @@ const SOPC_AddressSpace_Node
                   {
                       .encodeableType = &OpcUa_VariableNode_EncodeableType,
                       .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.RM.GK") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.RM.GK"}},
+                                 .Data.String = {sizeof("SubBool") - 1, 1, (SOPC_Byte*) "SubBool"}},
                       .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("GK") - 1, 1, (SOPC_Byte*) "GK"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("GK") - 1, 1, (SOPC_Byte*) "GK"}},
+                      .BrowseName = {1, {sizeof("varBool") - 1, 1, (SOPC_Byte*) "varBool"}},
+                      .DisplayName = {{0, 0, NULL}, {sizeof("subVarBool") - 1, 1, (SOPC_Byte*) "subVarBool"}},
+                      .Description = {{0, 0, NULL}, {sizeof("subVarBoolDesc") - 1, 1, (SOPC_Byte*) "subVarBoolDesc"}},
+                      .NoOfReferences = 2,
+                      .References =
+                          (OpcUa_ReferenceNode[]){
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
+                                  true,
+                                  {{SOPC_IdentifierType_String, 1,
+                                    .Data.String = {sizeof("SubVars") - 1, 1, (SOPC_Byte*) "SubVars"}},
+                                   {0, 0, NULL},
+                                   0},
+                              },
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
+                                  false,
+                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
+                              }},
+                      .Value = {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = true}},
+                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
+                      .ValueRank = (-1),
+                      .AccessLevel = 3,
+                  }}},
+            {OpcUa_NodeClass_Variable,
+             0x00,
+             {0, 0},
+             {.variable =
+                  {
+                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
+                      .NodeId = {SOPC_IdentifierType_String, 1,
+                                 .Data.String = {sizeof("SubString") - 1, 1, (SOPC_Byte*) "SubString"}},
+                      .NodeClass = OpcUa_NodeClass_Variable,
+                      .BrowseName = {1, {sizeof("varString") - 1, 1, (SOPC_Byte*) "varString"}},
+                      .DisplayName = {{0, 0, NULL}, {sizeof("subVarString") - 1, 1, (SOPC_Byte*) "subVarString"}},
                       .Description = {{0, 0, NULL},
-                                      {sizeof("Permissive Signal Status, ~é€bla") - 1, 1,
-                                       (SOPC_Byte*) "Permissive Signal Status, ~é€bla"}},
+                                      {sizeof("subVarStringDesc") - 1, 1, (SOPC_Byte*) "subVarStringDesc"}},
                       .NoOfReferences = 2,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
                                   true,
                                   {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.RM") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.RM"}},
+                                    .Data.String = {sizeof("SubVars") - 1, 1, (SOPC_Byte*) "SubVars"}},
                                    {0, 0, NULL},
                                    0},
                               },
@@ -5727,8 +3432,11 @@ const SOPC_AddressSpace_Node
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 62}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
+                      .Value = {true,
+                                SOPC_String_Id,
+                                SOPC_VariantArrayType_SingleValue,
+                                {.String = {sizeof("This is a text !") - 1, 1, (SOPC_Byte*) "This is a text !"}}},
+                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 12},
                       .ValueRank = (-1),
                       .AccessLevel = 3,
                   }}},
@@ -5739,24 +3447,91 @@ const SOPC_AddressSpace_Node
                   {
                       .encodeableType = &OpcUa_VariableNode_EncodeableType,
                       .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.RM.ASK") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.RM.ASK"}},
+                                 .Data.String = {sizeof("SubInt") - 1, 1, (SOPC_Byte*) "SubInt"}},
                       .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("ASK") - 1, 1, (SOPC_Byte*) "ASK"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("ASK") - 1, 1, (SOPC_Byte*) "ASK"}},
+                      .BrowseName = {1, {sizeof("varInt") - 1, 1, (SOPC_Byte*) "varInt"}},
+                      .DisplayName = {{0, 0, NULL}, {sizeof("subVarInt") - 1, 1, (SOPC_Byte*) "subVarInt"}},
+                      .Description = {{0, 0, NULL}, {sizeof("subVarIntDesc") - 1, 1, (SOPC_Byte*) "subVarIntDesc"}},
+                      .NoOfReferences = 2,
+                      .References =
+                          (OpcUa_ReferenceNode[]){
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
+                                  true,
+                                  {{SOPC_IdentifierType_String, 1,
+                                    .Data.String = {sizeof("SubVars") - 1, 1, (SOPC_Byte*) "SubVars"}},
+                                   {0, 0, NULL},
+                                   0},
+                              },
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
+                                  false,
+                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
+                              }},
+                      .Value = {true, SOPC_Int16_Id, SOPC_VariantArrayType_SingleValue, {.Int16 = -1}},
+                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 8},
+                      .ValueRank = (-1),
+                      .AccessLevel = 3,
+                  }}},
+            {OpcUa_NodeClass_Variable,
+             0x00,
+             {0, 0},
+             {.variable =
+                  {
+                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
+                      .NodeId = {SOPC_IdentifierType_String, 1,
+                                 .Data.String = {sizeof("SubUInt") - 1, 1, (SOPC_Byte*) "SubUInt"}},
+                      .NodeClass = OpcUa_NodeClass_Variable,
+                      .BrowseName = {1, {sizeof("varUInt") - 1, 1, (SOPC_Byte*) "varUInt"}},
+                      .DisplayName = {{0, 0, NULL}, {sizeof("subVarUInt") - 1, 1, (SOPC_Byte*) "subVarUInt"}},
+                      .Description = {{0, 0, NULL}, {sizeof("subVarUIntDesc") - 1, 1, (SOPC_Byte*) "subVarUIntDesc"}},
+                      .NoOfReferences = 2,
+                      .References =
+                          (OpcUa_ReferenceNode[]){
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
+                                  true,
+                                  {{SOPC_IdentifierType_String, 1,
+                                    .Data.String = {sizeof("SubVars") - 1, 1, (SOPC_Byte*) "SubVars"}},
+                                   {0, 0, NULL},
+                                   0},
+                              },
+                              {
+                                  &OpcUa_ReferenceNode_EncodeableType,
+                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
+                                  false,
+                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
+                              }},
+                      .Value = {true, SOPC_UInt64_Id, SOPC_VariantArrayType_SingleValue, {.Uint64 = 1UL}},
+                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 9},
+                      .ValueRank = (-1),
+                      .AccessLevel = 3,
+                  }}},
+            {OpcUa_NodeClass_Variable,
+             0x00,
+             {0, 0},
+             {.variable =
+                  {
+                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
+                      .NodeId = {SOPC_IdentifierType_String, 1,
+                                 .Data.String = {sizeof("SubUInt16") - 1, 1, (SOPC_Byte*) "SubUInt16"}},
+                      .NodeClass = OpcUa_NodeClass_Variable,
+                      .BrowseName = {1, {sizeof("varUInt16") - 1, 1, (SOPC_Byte*) "varUInt16"}},
+                      .DisplayName = {{0, 0, NULL}, {sizeof("subVarUInt16") - 1, 1, (SOPC_Byte*) "subVarUInt16"}},
                       .Description = {{0, 0, NULL},
-                                      {sizeof("Signal Approach Locking") - 1, 1,
-                                       (SOPC_Byte*) "Signal Approach Locking"}},
+                                      {sizeof("subVarUInt16Desc") - 1, 1, (SOPC_Byte*) "subVarUInt16Desc"}},
                       .NoOfReferences = 2,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
                                   true,
                                   {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.RM") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.RM"}},
+                                    .Data.String = {sizeof("SubVars") - 1, 1, (SOPC_Byte*) "SubVars"}},
                                    {0, 0, NULL},
                                    0},
                               },
@@ -5766,8 +3541,8 @@ const SOPC_AddressSpace_Node
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 63}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
+                      .Value = {true, SOPC_UInt16_Id, SOPC_VariantArrayType_SingleValue, {.Uint16 = 1}},
+                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 5},
                       .ValueRank = (-1),
                       .AccessLevel = 3,
                   }}},
@@ -5778,24 +3553,21 @@ const SOPC_AddressSpace_Node
                   {
                       .encodeableType = &OpcUa_VariableNode_EncodeableType,
                       .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBKK") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBKK"}},
+                                 .Data.String = {sizeof("SubUInt32") - 1, 1, (SOPC_Byte*) "SubUInt32"}},
                       .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("XBKK") - 1, 1, (SOPC_Byte*) "XBKK"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("XBKK") - 1, 1, (SOPC_Byte*) "XBKK"}},
+                      .BrowseName = {1, {sizeof("varUInt32") - 1, 1, (SOPC_Byte*) "varUInt32"}},
+                      .DisplayName = {{0, 0, NULL}, {sizeof("subVarUInt32") - 1, 1, (SOPC_Byte*) "subVarUInt32"}},
                       .Description = {{0, 0, NULL},
-                                      {sizeof("Exit blocking is in effect for the signal") - 1, 1,
-                                       (SOPC_Byte*) "Exit blocking is in effect for the signal"}},
+                                      {sizeof("subVarUInt32Desc") - 1, 1, (SOPC_Byte*) "subVarUInt32Desc"}},
                       .NoOfReferences = 2,
                       .References =
-                          (const OpcUa_ReferenceNode[]){
+                          (OpcUa_ReferenceNode[]){
                               {
                                   &OpcUa_ReferenceNode_EncodeableType,
                                   {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
                                   true,
                                   {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.RM") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.RM"}},
+                                    .Data.String = {sizeof("SubVars") - 1, 1, (SOPC_Byte*) "SubVars"}},
                                    {0, 0, NULL},
                                    0},
                               },
@@ -5805,2174 +3577,14 @@ const SOPC_AddressSpace_Node
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 64}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
-                      .ValueRank = (-1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ"}},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("XBZCRQ") - 1, 1, (SOPC_Byte*) "XBZCRQ"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("XBZCRQ") - 1, 1, (SOPC_Byte*) "XBZCRQ"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("Exit Block Removal Request") - 1, 1,
-                                       (SOPC_Byte*) "Exit Block Removal Request"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.RM") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.RM"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 65}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
-                      .ValueRank = (-1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZ-AK") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZ-AK"}},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("XBZ-AK") - 1, 1, (SOPC_Byte*) "XBZ-AK"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("XBZ-AK") - 1, 1, (SOPC_Byte*) "XBZ-AK"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("Exit blocking is rejected for the signal") - 1, 1,
-                                       (SOPC_Byte*) "Exit blocking is rejected for the signal"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.RM") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.RM"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 66}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
-                      .ValueRank = (-1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ-AK") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ-AK"}},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("XBZCRQ-AK") - 1, 1, (SOPC_Byte*) "XBZCRQ-AK"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("XBZCRQ-AK") - 1, 1, (SOPC_Byte*) "XBZCRQ-AK"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("Exit block removal is rejected for the signal") - 1, 1,
-                                       (SOPC_Byte*) "Exit block removal is rejected for the signal"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.RM") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.RM"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 67}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
-                      .ValueRank = (-1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Object,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.object =
-                  {
-                      .encodeableType = &OpcUa_ObjectNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.RC") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.RC"}},
-                      .NodeClass = OpcUa_NodeClass_Object,
-                      .BrowseName = {1, {sizeof("RC") - 1, 1, (SOPC_Byte*) "RC"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("RC") - 1, 1, (SOPC_Byte*) "RC"}},
-                      .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
-                      .NoOfReferences = 7,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 61}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.RC.GZ") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.RC.GZ"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.RC.SZ") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.RC.SZ"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZ-CC") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZ-CC"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZCRQ-CC") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZCRQ-CC"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZC-CC") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZC-CC"}},
-                                   {0, 0, NULL},
-                                   0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.SendCommand") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.SendCommand"}},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("SendCommand") - 1, 1, (SOPC_Byte*) "SendCommand"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("SendCommand") - 1, 1, (SOPC_Byte*) "SendCommand"}},
-                      .Description = {{0, 0, NULL}, {0, 0, NULL}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 68}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
-                      .ValueRank = (-1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-K") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-K"}},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("OffBlocking-K") - 1, 1, (SOPC_Byte*) "OffBlocking-K"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("OffBlocking-K") - 1, 1, (SOPC_Byte*) "OffBlocking-K"}},
-                      .Description = {{0, 0, NULL}, {0, 0, NULL}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 69}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
-                      .ValueRank = (-1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-CC") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-CC"}},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("OffBlocking-CC") - 1, 1, (SOPC_Byte*) "OffBlocking-CC"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("OffBlocking-CC") - 1, 1, (SOPC_Byte*) "OffBlocking-CC"}},
-                      .Description = {{0, 0, NULL}, {0, 0, NULL}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 70}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
-                      .ValueRank = (-1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.RC.GZ") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.RC.GZ"}},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("GZ") - 1, 1, (SOPC_Byte*) "GZ"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("GZ") - 1, 1, (SOPC_Byte*) "GZ"}},
-                      .Description = {{0, 0, NULL}, {sizeof("Signal request") - 1, 1, (SOPC_Byte*) "Signal request"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.RC") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.RC"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 71}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
-                      .ValueRank = (-1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.RC.SZ") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.RC.SZ"}},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("SZ") - 1, 1, (SOPC_Byte*) "SZ"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("SZ") - 1, 1, (SOPC_Byte*) "SZ"}},
-                      .Description = {{0, 0, NULL}, {sizeof("Signal cancel") - 1, 1, (SOPC_Byte*) "Signal cancel"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.RC") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.RC"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 72}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
-                      .ValueRank = (-1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZ-CC") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZ-CC"}},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("XBZ-CC") - 1, 1, (SOPC_Byte*) "XBZ-CC"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("XBZ-CC") - 1, 1, (SOPC_Byte*) "XBZ-CC"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("Exit Block Application Request") - 1, 1,
-                                       (SOPC_Byte*) "Exit Block Application Request"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.RC") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.RC"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 73}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
-                      .ValueRank = (-1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZCRQ-CC") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZCRQ-CC"}},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("XBZCRQ-CC") - 1, 1, (SOPC_Byte*) "XBZCRQ-CC"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("XBZCRQ-CC") - 1, 1, (SOPC_Byte*) "XBZCRQ-CC"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("Exit Block Removal Request") - 1, 1,
-                                       (SOPC_Byte*) "Exit Block Removal Request"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.RC") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.RC"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 74}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
-                      .ValueRank = (-1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZC-CC") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZC-CC"}},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("XBZC-CC") - 1, 1, (SOPC_Byte*) "XBZC-CC"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("XBZC-CC") - 1, 1, (SOPC_Byte*) "XBZC-CC"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("Exit Block Removal - Acknowledge") - 1, 1,
-                                       (SOPC_Byte*) "Exit Block Removal - Acknowledge"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G019.RC") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G019.RC"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 75}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
-                      .ValueRank = (-1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Object,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.object =
-                  {
-                      .encodeableType = &OpcUa_ObjectNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G025") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G025"}},
-                      .NodeClass = OpcUa_NodeClass_Object,
-                      .BrowseName = {1, {sizeof("BALA_RDLS_G025") - 1, 1, (SOPC_Byte*) "BALA_RDLS_G025"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("BALA_RDLS_G025") - 1, 1, (SOPC_Byte*) "BALA_RDLS_G025"}},
-                      .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
-                      .NoOfReferences = 7,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 61}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G025.RM") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G025.RM"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G025.RC") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G025.RC"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G025.SendCommand") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G025.SendCommand"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-K") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-K"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String =
-                                        {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-CC") - 1, 1,
-                                         (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-CC"}},
-                                   {0, 0, NULL},
-                                   0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_Object,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.object =
-                  {
-                      .encodeableType = &OpcUa_ObjectNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G025.RM") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G025.RM"}},
-                      .NodeClass = OpcUa_NodeClass_Object,
-                      .BrowseName = {1, {sizeof("RM") - 1, 1, (SOPC_Byte*) "RM"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("RM") - 1, 1, (SOPC_Byte*) "RM"}},
-                      .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
-                      .NoOfReferences = 4,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G025") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G025"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 61}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G025.RM.GK") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G025.RM.GK"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G025.RM.ASK") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G025.RM.ASK"}},
-                                   {0, 0, NULL},
-                                   0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G025.RM.GK") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G025.RM.GK"}},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("GK") - 1, 1, (SOPC_Byte*) "GK"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("GK") - 1, 1, (SOPC_Byte*) "GK"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("Permissive Signal Status") - 1, 1,
-                                       (SOPC_Byte*) "Permissive Signal Status"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G025.RM") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G025.RM"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 76}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
-                      .ValueRank = (-1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G025.RM.ASK") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G025.RM.ASK"}},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("ASK") - 1, 1, (SOPC_Byte*) "ASK"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("ASK") - 1, 1, (SOPC_Byte*) "ASK"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("Signal Approach Locking") - 1, 1,
-                                       (SOPC_Byte*) "Signal Approach Locking"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G025.RM") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G025.RM"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 77}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
-                      .ValueRank = (-1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Object,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.object =
-                  {
-                      .encodeableType = &OpcUa_ObjectNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G025.RC") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G025.RC"}},
-                      .NodeClass = OpcUa_NodeClass_Object,
-                      .BrowseName = {1, {sizeof("RC") - 1, 1, (SOPC_Byte*) "RC"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("RC") - 1, 1, (SOPC_Byte*) "RC"}},
-                      .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
-                      .NoOfReferences = 4,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G025") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G025"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 61}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G025.RC.SZ") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G025.RC.SZ"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G025.RC.GZ") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G025.RC.GZ"}},
-                                   {0, 0, NULL},
-                                   0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G025.SendCommand") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G025.SendCommand"}},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("SendCommand") - 1, 1, (SOPC_Byte*) "SendCommand"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("SendCommand") - 1, 1, (SOPC_Byte*) "SendCommand"}},
-                      .Description = {{0, 0, NULL}, {0, 0, NULL}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G025") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G025"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 78}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
-                      .ValueRank = (-1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-K") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-K"}},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("OffBlocking-K") - 1, 1, (SOPC_Byte*) "OffBlocking-K"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("OffBlocking-K") - 1, 1, (SOPC_Byte*) "OffBlocking-K"}},
-                      .Description = {{0, 0, NULL}, {0, 0, NULL}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G025") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G025"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 79}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
-                      .ValueRank = (-1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-CC") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-CC"}},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("OffBlocking-CC") - 1, 1, (SOPC_Byte*) "OffBlocking-CC"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("OffBlocking-CC") - 1, 1, (SOPC_Byte*) "OffBlocking-CC"}},
-                      .Description = {{0, 0, NULL}, {0, 0, NULL}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G025") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G025"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 80}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
-                      .ValueRank = (-1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G025.RC.SZ") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G025.RC.SZ"}},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("SZ") - 1, 1, (SOPC_Byte*) "SZ"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("SZ") - 1, 1, (SOPC_Byte*) "SZ"}},
-                      .Description = {{0, 0, NULL}, {sizeof("Signal cancel") - 1, 1, (SOPC_Byte*) "Signal cancel"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G025.RC") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G025.RC"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 81}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
-                      .ValueRank = (-1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G025.RC.GZ") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G025.RC.GZ"}},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("GZ") - 1, 1, (SOPC_Byte*) "GZ"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("GZ") - 1, 1, (SOPC_Byte*) "GZ"}},
-                      .Description = {{0, 0, NULL}, {sizeof("Signal request") - 1, 1, (SOPC_Byte*) "Signal request"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G025.RC") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G025.RC"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 82}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
-                      .ValueRank = (-1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Object,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.object =
-                  {
-                      .encodeableType = &OpcUa_ObjectNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G026") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G026"}},
-                      .NodeClass = OpcUa_NodeClass_Object,
-                      .BrowseName = {1, {sizeof("BALA_RDLS_G026") - 1, 1, (SOPC_Byte*) "BALA_RDLS_G026"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("BALA_RDLS_G026") - 1, 1, (SOPC_Byte*) "BALA_RDLS_G026"}},
-                      .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
-                      .NoOfReferences = 3,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 61}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G026.RM") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G026.RM"}},
-                                   {0, 0, NULL},
-                                   0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_Object,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.object =
-                  {
-                      .encodeableType = &OpcUa_ObjectNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G026.RM") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G026.RM"}},
-                      .NodeClass = OpcUa_NodeClass_Object,
-                      .BrowseName = {1, {sizeof("RM") - 1, 1, (SOPC_Byte*) "RM"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("RM") - 1, 1, (SOPC_Byte*) "RM"}},
-                      .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
-                      .NoOfReferences = 3,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G026") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G026"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 61}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G026.RM.GK") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G026.RM.GK"}},
-                                   {0, 0, NULL},
-                                   0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G026.RM.GK") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G026.RM.GK"}},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("GK") - 1, 1, (SOPC_Byte*) "GK"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("GK") - 1, 1, (SOPC_Byte*) "GK"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("Permissive Signal Status") - 1, 1,
-                                       (SOPC_Byte*) "Permissive Signal Status"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SIGNALs.BALA_RDLS_G026.RM") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SIGNALs.BALA_RDLS_G026.RM"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 83}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
-                      .ValueRank = (-1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Object,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.object =
-                  {
-                      .encodeableType = &OpcUa_ObjectNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SWITCHs.BALA_RDLS_W1") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SWITCHs.BALA_RDLS_W1"}},
-                      .NodeClass = OpcUa_NodeClass_Object,
-                      .BrowseName = {1, {sizeof("BALA_RDLS_W1") - 1, 1, (SOPC_Byte*) "BALA_RDLS_W1"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("BALA_RDLS_W1") - 1, 1, (SOPC_Byte*) "BALA_RDLS_W1"}},
-                      .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
-                      .NoOfReferences = 7,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SWITCHs") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SWITCHs"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 61}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SWITCHs.BALA_RDLS_W1.RM") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SWITCHs.BALA_RDLS_W1.RM"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SWITCHs.BALA_RDLS_W1.RC") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SWITCHs.BALA_RDLS_W1.RC"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SWITCHs.BALA_RDLS_W1.SendCommand") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SWITCHs.BALA_RDLS_W1.SendCommand"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-K") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-K"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-CC") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-CC"}},
-                                   {0, 0, NULL},
-                                   0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_Object,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.object =
-                  {
-                      .encodeableType = &OpcUa_ObjectNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SWITCHs.BALA_RDLS_W1.RM") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SWITCHs.BALA_RDLS_W1.RM"}},
-                      .NodeClass = OpcUa_NodeClass_Object,
-                      .BrowseName = {1, {sizeof("RM") - 1, 1, (SOPC_Byte*) "RM"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("RM") - 1, 1, (SOPC_Byte*) "RM"}},
-                      .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
-                      .NoOfReferences = 5,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SWITCHs.BALA_RDLS_W1") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SWITCHs.BALA_RDLS_W1"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 61}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SWITCHs.BALA_RDLS_W1.RM.NWK") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SWITCHs.BALA_RDLS_W1.RM.NWK"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SWITCHs.BALA_RDLS_W1.RM.RWK") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SWITCHs.BALA_RDLS_W1.RM.RWK"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SWITCHs.BALA_RDLS_W1.RM.LK") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SWITCHs.BALA_RDLS_W1.RM.LK"}},
-                                   {0, 0, NULL},
-                                   0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SWITCHs.BALA_RDLS_W1.RM.NWK") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SWITCHs.BALA_RDLS_W1.RM.NWK"}},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("NWK") - 1, 1, (SOPC_Byte*) "NWK"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("NWK") - 1, 1, (SOPC_Byte*) "NWK"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("Switch Detected Normal") - 1, 1, (SOPC_Byte*) "Switch Detected Normal"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SWITCHs.BALA_RDLS_W1.RM") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SWITCHs.BALA_RDLS_W1.RM"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 84}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
-                      .ValueRank = (-1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SWITCHs.BALA_RDLS_W1.RM.RWK") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SWITCHs.BALA_RDLS_W1.RM.RWK"}},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("RWK") - 1, 1, (SOPC_Byte*) "RWK"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("RWK") - 1, 1, (SOPC_Byte*) "RWK"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("Switch Detected Reverse") - 1, 1,
-                                       (SOPC_Byte*) "Switch Detected Reverse"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SWITCHs.BALA_RDLS_W1.RM") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SWITCHs.BALA_RDLS_W1.RM"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 85}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
-                      .ValueRank = (-1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SWITCHs.BALA_RDLS_W1.RM.LK") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SWITCHs.BALA_RDLS_W1.RM.LK"}},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("LK") - 1, 1, (SOPC_Byte*) "LK"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("LK") - 1, 1, (SOPC_Byte*) "LK"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("Switch Locally Locked") - 1, 1, (SOPC_Byte*) "Switch Locally Locked"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SWITCHs.BALA_RDLS_W1.RM") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SWITCHs.BALA_RDLS_W1.RM"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 86}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
-                      .ValueRank = (-1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Object,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.object =
-                  {
-                      .encodeableType = &OpcUa_ObjectNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SWITCHs.BALA_RDLS_W1.RC") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SWITCHs.BALA_RDLS_W1.RC"}},
-                      .NodeClass = OpcUa_NodeClass_Object,
-                      .BrowseName = {1, {sizeof("RC") - 1, 1, (SOPC_Byte*) "RC"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("RC") - 1, 1, (SOPC_Byte*) "RC"}},
-                      .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
-                      .NoOfReferences = 4,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SWITCHs.BALA_RDLS_W1") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SWITCHs.BALA_RDLS_W1"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 61}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SWITCHs.BALA_RDLS_W1.RC.NWZ") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SWITCHs.BALA_RDLS_W1.RC.NWZ"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SWITCHs.BALA_RDLS_W1.RC.RWZ") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SWITCHs.BALA_RDLS_W1.RC.RWZ"}},
-                                   {0, 0, NULL},
-                                   0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SWITCHs.BALA_RDLS_W1.SendCommand") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SWITCHs.BALA_RDLS_W1.SendCommand"}},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("SendCommand") - 1, 1, (SOPC_Byte*) "SendCommand"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("SendCommand") - 1, 1, (SOPC_Byte*) "SendCommand"}},
-                      .Description = {{0, 0, NULL}, {0, 0, NULL}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SWITCHs.BALA_RDLS_W1") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SWITCHs.BALA_RDLS_W1"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 87}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
-                      .ValueRank = (-1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-K") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-K"}},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("OffBlocking-K") - 1, 1, (SOPC_Byte*) "OffBlocking-K"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("OffBlocking-K") - 1, 1, (SOPC_Byte*) "OffBlocking-K"}},
-                      .Description = {{0, 0, NULL}, {0, 0, NULL}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SWITCHs.BALA_RDLS_W1") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SWITCHs.BALA_RDLS_W1"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 88}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
-                      .ValueRank = (-1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-CC") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-CC"}},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("OffBlocking-CC") - 1, 1, (SOPC_Byte*) "OffBlocking-CC"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("OffBlocking-CC") - 1, 1, (SOPC_Byte*) "OffBlocking-CC"}},
-                      .Description = {{0, 0, NULL}, {0, 0, NULL}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SWITCHs.BALA_RDLS_W1") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SWITCHs.BALA_RDLS_W1"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 89}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
-                      .ValueRank = (-1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SWITCHs.BALA_RDLS_W1.RC.NWZ") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SWITCHs.BALA_RDLS_W1.RC.NWZ"}},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("NWZ") - 1, 1, (SOPC_Byte*) "NWZ"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("NWZ") - 1, 1, (SOPC_Byte*) "NWZ"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("Switch Calling in Normal Direction") - 1, 1,
-                                       (SOPC_Byte*) "Switch Calling in Normal Direction"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SWITCHs.BALA_RDLS_W1.RC") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SWITCHs.BALA_RDLS_W1.RC"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 90}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
-                      .ValueRank = (-1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.SWITCHs.BALA_RDLS_W1.RC.RWZ") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.SWITCHs.BALA_RDLS_W1.RC.RWZ"}},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("RWZ") - 1, 1, (SOPC_Byte*) "RWZ"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("RWZ") - 1, 1, (SOPC_Byte*) "RWZ"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("Switch Calling in Reverse Direction") - 1, 1,
-                                       (SOPC_Byte*) "Switch Calling in Reverse Direction"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.SWITCHs.BALA_RDLS_W1.RC") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.SWITCHs.BALA_RDLS_W1.RC"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 91}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
-                      .ValueRank = (-1),
-                      .AccessLevel = 2,
-                  }}},
-            {OpcUa_NodeClass_Object,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.object =
-                  {
-                      .encodeableType = &OpcUa_ObjectNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.TRACKs.BALA_RDLS_026TK") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.TRACKs.BALA_RDLS_026TK"}},
-                      .NodeClass = OpcUa_NodeClass_Object,
-                      .BrowseName = {1, {sizeof("BALA_RDLS_026TK") - 1, 1, (SOPC_Byte*) "BALA_RDLS_026TK"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("BALA_RDLS_026TK") - 1, 1, (SOPC_Byte*) "BALA_RDLS_026TK"}},
-                      .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
-                      .NoOfReferences = 3,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.TRACKs") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.TRACKs"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 61}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.TRACKs.BALA_RDLS_026TK.RM") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.TRACKs.BALA_RDLS_026TK.RM"}},
-                                   {0, 0, NULL},
-                                   0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_Object,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.object =
-                  {
-                      .encodeableType = &OpcUa_ObjectNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.TRACKs.BALA_RDLS_026TK.RM") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.TRACKs.BALA_RDLS_026TK.RM"}},
-                      .NodeClass = OpcUa_NodeClass_Object,
-                      .BrowseName = {1, {sizeof("RM") - 1, 1, (SOPC_Byte*) "RM"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("RM") - 1, 1, (SOPC_Byte*) "RM"}},
-                      .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
-                      .NoOfReferences = 3,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.TRACKs.BALA_RDLS_026TK") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.TRACKs.BALA_RDLS_026TK"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 61}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.TRACKs.BALA_RDLS_026TK.RM.TK") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.TRACKs.BALA_RDLS_026TK.RM.TK"}},
-                                   {0, 0, NULL},
-                                   0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.TRACKs.BALA_RDLS_026TK.RM.TK") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.TRACKs.BALA_RDLS_026TK.RM.TK"}},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("TK") - 1, 1, (SOPC_Byte*) "TK"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("TK") - 1, 1, (SOPC_Byte*) "TK"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("Secondary Detection Status") - 1, 1,
-                                       (SOPC_Byte*) "Secondary Detection Status"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.TRACKs.BALA_RDLS_026TK.RM") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.TRACKs.BALA_RDLS_026TK.RM"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 92}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
-                      .ValueRank = (-1),
-                      .AccessLevel = 1,
-                  }}},
-            {OpcUa_NodeClass_Object,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.object =
-                  {
-                      .encodeableType = &OpcUa_ObjectNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.TRACKs.BALA_RDLS_OSTK") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.TRACKs.BALA_RDLS_OSTK"}},
-                      .NodeClass = OpcUa_NodeClass_Object,
-                      .BrowseName = {1, {sizeof("BALA_RDLS_OSTK") - 1, 1, (SOPC_Byte*) "BALA_RDLS_OSTK"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("BALA_RDLS_OSTK") - 1, 1, (SOPC_Byte*) "BALA_RDLS_OSTK"}},
-                      .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
-                      .NoOfReferences = 3,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.TRACKs") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.TRACKs"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 61}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.TRACKs.BALA_RDLS_OSTK.RM") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.TRACKs.BALA_RDLS_OSTK.RM"}},
-                                   {0, 0, NULL},
-                                   0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_Object,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.object =
-                  {
-                      .encodeableType = &OpcUa_ObjectNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.TRACKs.BALA_RDLS_OSTK.RM") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.TRACKs.BALA_RDLS_OSTK.RM"}},
-                      .NodeClass = OpcUa_NodeClass_Object,
-                      .BrowseName = {1, {sizeof("RM") - 1, 1, (SOPC_Byte*) "RM"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("RM") - 1, 1, (SOPC_Byte*) "RM"}},
-                      .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
-                      .NoOfReferences = 3,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.TRACKs.BALA_RDLS_OSTK") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.TRACKs.BALA_RDLS_OSTK"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 61}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.TRACKs.BALA_RDLS_OSTK.RM.TK") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.TRACKs.BALA_RDLS_OSTK.RM.TK"}},
-                                   {0, 0, NULL},
-                                   0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.TRACKs.BALA_RDLS_OSTK.RM.TK") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.TRACKs.BALA_RDLS_OSTK.RM.TK"}},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("TK") - 1, 1, (SOPC_Byte*) "TK"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("TK") - 1, 1, (SOPC_Byte*) "TK"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("Secondary Detection Status") - 1, 1,
-                                       (SOPC_Byte*) "Secondary Detection Status"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.TRACKs.BALA_RDLS_OSTK.RM") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.TRACKs.BALA_RDLS_OSTK.RM"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 93}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
-                      .ValueRank = (-1),
-                      .AccessLevel = 3,
-                  }}},
-            {OpcUa_NodeClass_Object,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.object =
-                  {
-                      .encodeableType = &OpcUa_ObjectNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.TRACKs.BALA_RDLS_P500") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.TRACKs.BALA_RDLS_P500"}},
-                      .NodeClass = OpcUa_NodeClass_Object,
-                      .BrowseName = {1, {sizeof("BALA_RDLS_P500") - 1, 1, (SOPC_Byte*) "BALA_RDLS_P500"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("BALA_RDLS_P500") - 1, 1, (SOPC_Byte*) "BALA_RDLS_P500"}},
-                      .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.TRACKs") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.TRACKs"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 61}, {0, 0, NULL}, 0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_Object,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.object =
-                  {
-                      .encodeableType = &OpcUa_ObjectNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK"}},
-                      .NodeClass = OpcUa_NodeClass_Object,
-                      .BrowseName = {1,
-                                     {sizeof("BALA_RDLS_WBK_RDLN_EBK") - 1, 1, (SOPC_Byte*) "BALA_RDLS_WBK_RDLN_EBK"}},
-                      .DisplayName = {{0, 0, NULL},
-                                      {sizeof("BALA_RDLS_WBK_RDLN_EBK") - 1, 1, (SOPC_Byte*) "BALA_RDLS_WBK_RDLN_EBK"}},
-                      .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
-                      .NoOfReferences = 3,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.TRACKs") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.TRACKs"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 61}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM"}},
-                                   {0, 0, NULL},
-                                   0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_Object,
-             OpcUa_UncertainInitialValue,
-             {0, 0},
-             {.object =
-                  {
-                      .encodeableType = &OpcUa_ObjectNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM"}},
-                      .NodeClass = OpcUa_NodeClass_Object,
-                      .BrowseName = {1, {sizeof("RM") - 1, 1, (SOPC_Byte*) "RM"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("RM") - 1, 1, (SOPC_Byte*) "RM"}},
-                      .Description = {{0, 0, NULL}, {sizeof("NoName") - 1, 1, (SOPC_Byte*) "NoName"}},
-                      .NoOfReferences = 3,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 35},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 61}, {0, 0, NULL}, 0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  false,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM.TK") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM.TK"}},
-                                   {0, 0, NULL},
-                                   0},
-                              }},
-                  }}},
-            {OpcUa_NodeClass_Variable,
-             0x00,
-             {0, 0},
-             {.variable =
-                  {
-                      .encodeableType = &OpcUa_VariableNode_EncodeableType,
-                      .NodeId = {SOPC_IdentifierType_String, 1,
-                                 .Data.String = {sizeof("Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM.TK") - 1, 1,
-                                                 (SOPC_Byte*) "Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM.TK"}},
-                      .NodeClass = OpcUa_NodeClass_Variable,
-                      .BrowseName = {1, {sizeof("TK") - 1, 1, (SOPC_Byte*) "TK"}},
-                      .DisplayName = {{0, 0, NULL}, {sizeof("TK") - 1, 1, (SOPC_Byte*) "TK"}},
-                      .Description = {{0, 0, NULL},
-                                      {sizeof("Secondary Detection Status") - 1, 1,
-                                       (SOPC_Byte*) "Secondary Detection Status"}},
-                      .NoOfReferences = 2,
-                      .References =
-                          (const OpcUa_ReferenceNode[]){
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 47},
-                                  true,
-                                  {{SOPC_IdentifierType_String, 1,
-                                    .Data.String = {sizeof("Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM") - 1, 1,
-                                                    (SOPC_Byte*) "Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM"}},
-                                   {0, 0, NULL},
-                                   0},
-                              },
-                              {
-                                  &OpcUa_ReferenceNode_EncodeableType,
-                                  {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 40},
-                                  false,
-                                  {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
-                              }},
-                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 94}},
-                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 1},
+                      .Value = {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 1}},
+                      .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 7},
                       .ValueRank = (-1),
                       .AccessLevel = 3,
                   }}},
 };
-SOPC_GCC_DIAGNOSTIC_RESTORE
-const uint32_t SOPC_Embedded_AddressSpace_nNodes = 220;
+const uint32_t SOPC_Embedded_AddressSpace_nNodes = 114;
 
-// Index is provided by the corresponding Variable UInt32 Variant in SOPC_Embedded_AddressSpace_Nodes
-SOPC_Variant SOPC_Embedded_VariableVariant[95] = {
-    {true,
-     SOPC_String_Id,
-     SOPC_VariantArrayType_Array,
-     {.Array = {1,
-                {.StringArr =
-                     (SOPC_String[]){
-                         {sizeof("http://opcfoundation.org/UA-Profile/Server/NanoEmbeddedDevice") - 1, 1,
-                          (SOPC_Byte*) "http://opcfoundation.org/UA-Profile/Server/NanoEmbeddedDevice"}}}}}},
-    {true,
-     SOPC_String_Id,
-     SOPC_VariantArrayType_Array,
-     {.Array = {1, {.StringArr = (SOPC_String[]){{sizeof("en-US") - 1, 1, (SOPC_Byte*) "en-US"}}}}}},
-    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
-    {true, SOPC_UInt16_Id, SOPC_VariantArrayType_SingleValue, {.Uint16 = 1}},
-    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
-    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
-    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
-    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
-    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
-    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
-    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
-    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
-    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
-    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
-    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
-    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
-    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
-    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
-    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
-    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
-    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
-    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
-    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
-    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
-    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
-    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
-    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
-    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
-    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
-    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
-    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
-    {true, SOPC_Int64_Id, SOPC_VariantArrayType_SingleValue, {.Int64 = -1000L}},
-    {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 1000}},
-    {true, SOPC_Double_Id, SOPC_VariantArrayType_SingleValue, {.Doublev = 2.0}},
-    {true,
-     SOPC_String_Id,
-     SOPC_VariantArrayType_SingleValue,
-     {.String = {sizeof("String:S2OPC") - 1, 1, (SOPC_Byte*) "String:S2OPC"}}},
-    {true,
-     SOPC_ByteString_Id,
-     SOPC_VariantArrayType_SingleValue,
-     {.Bstring = {sizeof("ByteString:S2OPC") - 1, 1, (SOPC_Byte*) "ByteString:S2OPC"}}},
-    {true,
-     SOPC_XmlElement_Id,
-     SOPC_VariantArrayType_SingleValue,
-     {.XmlElt = {sizeof("<XmlElement:S2OPC/>") - 1, 1, (SOPC_Byte*) "<XmlElement:S2OPC/>"}}},
-    {true, SOPC_SByte_Id, SOPC_VariantArrayType_SingleValue, {.Sbyte = -127}},
-    {true, SOPC_Byte_Id, SOPC_VariantArrayType_SingleValue, {.Byte = 255}},
-    {true, SOPC_Int16_Id, SOPC_VariantArrayType_SingleValue, {.Int16 = -32767}},
-    {true, SOPC_UInt16_Id, SOPC_VariantArrayType_SingleValue, {.Uint16 = 65535}},
-    {true, SOPC_Int32_Id, SOPC_VariantArrayType_SingleValue, {.Int32 = -2147483647}},
-    {true, SOPC_UInt64_Id, SOPC_VariantArrayType_SingleValue, {.Uint64 = 1844674407370955UL}},
-    {true, SOPC_Float_Id, SOPC_VariantArrayType_SingleValue, {.Floatv = 109517.875}},
-    {true,
-     SOPC_Boolean_Id,
-     SOPC_VariantArrayType_Array,
-     {.Array = {5, {.BooleanArr = (SOPC_Boolean[]){true, false, true, false, true}}}}},
-    {true, SOPC_Byte_Id, SOPC_VariantArrayType_Array, {.Array = {5, {.ByteArr = (SOPC_Byte[]){0, 1, 2, 3, 255}}}}},
-    {true,
-     SOPC_Int16_Id,
-     SOPC_VariantArrayType_Array,
-     {.Array = {5, {.Int16Arr = (int16_t[]){-32768, -1, 0, 1, 32767}}}}},
-    {true,
-     SOPC_Int32_Id,
-     SOPC_VariantArrayType_Array,
-     {.Array = {5, {.Int32Arr = (int32_t[]){-2147483647, -1, 0, 1, 2147483647}}}}},
-    {true,
-     SOPC_Int64_Id,
-     SOPC_VariantArrayType_Array,
-     {.Array = {5, {.Int64Arr = (int64_t[]){-9223372036854775807L, -1L, 0L, 1L, 9223372036854775807L}}}}},
-    {true,
-     SOPC_SByte_Id,
-     SOPC_VariantArrayType_Array,
-     {.Array = {5, {.SbyteArr = (SOPC_SByte[]){-128, -1, 0, 1, 127}}}}},
-    {true, SOPC_UInt16_Id, SOPC_VariantArrayType_Array, {.Array = {5, {.Uint16Arr = (uint16_t[]){0, 1, 2, 3, 65535}}}}},
-    {true,
-     SOPC_UInt32_Id,
-     SOPC_VariantArrayType_Array,
-     {.Array = {5, {.Uint32Arr = (uint32_t[]){0, 1, 2, 3, 4294967295}}}}},
-    {true,
-     SOPC_UInt64_Id,
-     SOPC_VariantArrayType_Array,
-     {.Array = {5, {.Uint64Arr = (uint64_t[]){0UL, 1UL, 2UL, 3UL, 18446744073709551615UL}}}}},
-    {true,
-     SOPC_Float_Id,
-     SOPC_VariantArrayType_Array,
-     {.Array = {5, {.FloatvArr = (float[]){0.0, 1.0, 2.0, 3.0, 3.4028234663852886e+38}}}}},
-    {true,
-     SOPC_Double_Id,
-     SOPC_VariantArrayType_Array,
-     {.Array = {5, {.DoublevArr = (double[]){0.0, 1.0, 2.0, 3.0, 1.7976931348623157e+308}}}}},
-    {true,
-     SOPC_String_Id,
-     SOPC_VariantArrayType_Array,
-     {.Array = {5,
-                {.StringArr = (SOPC_String[]){{sizeof("The quick") - 1, 1, (SOPC_Byte*) "The quick"},
-                                              {sizeof("brown fox") - 1, 1, (SOPC_Byte*) "brown fox"},
-                                              {sizeof("jumps over") - 1, 1, (SOPC_Byte*) "jumps over"},
-                                              {sizeof("the lazy") - 1, 1, (SOPC_Byte*) "the lazy"},
-                                              {sizeof("dog") - 1, 1, (SOPC_Byte*) "dog"}}}}}},
-    {true,
-     SOPC_ByteString_Id,
-     SOPC_VariantArrayType_Array,
-     {.Array = {5,
-                {.BstringArr = (SOPC_ByteString[]){{sizeof("The quick") - 1, 1, (SOPC_Byte*) "The quick"},
-                                                   {sizeof("brown fox") - 1, 1, (SOPC_Byte*) "brown fox"},
-                                                   {sizeof("jumps over") - 1, 1, (SOPC_Byte*) "jumps over"},
-                                                   {sizeof("the lazy") - 1, 1, (SOPC_Byte*) "the lazy"},
-                                                   {sizeof("dog") - 1, 1, (SOPC_Byte*) "dog"}}}}}},
-    {true,
-     SOPC_XmlElement_Id,
-     SOPC_VariantArrayType_Array,
-     {.Array = {5,
-                {.XmlEltArr = (SOPC_XmlElement[]){{sizeof("<The_quick/>") - 1, 1, (SOPC_Byte*) "<The_quick/>"},
-                                                  {sizeof("<brown_fox/>") - 1, 1, (SOPC_Byte*) "<brown_fox/>"},
-                                                  {sizeof("<jumps_over/>") - 1, 1, (SOPC_Byte*) "<jumps_over/>"},
-                                                  {sizeof("<the_lazy/>") - 1, 1, (SOPC_Byte*) "<the_lazy/>"},
-                                                  {sizeof("<dog/>") - 1, 1, (SOPC_Byte*) "<dog/>"}}}}}},
-    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = true}},
-    {true, SOPC_UInt64_Id, SOPC_VariantArrayType_SingleValue, {.Uint64 = 0UL}},
-    {true, SOPC_UInt64_Id, SOPC_VariantArrayType_SingleValue, {.Uint64 = 0UL}},
-    {true, SOPC_Int64_Id, SOPC_VariantArrayType_SingleValue, {.Int64 = 0L}},
-    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
-    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
-    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
-    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
-    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
-    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
-    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
-    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
-    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
-    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
-    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
-    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
-    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
-    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
-    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
-    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
-    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
-    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
-    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
-    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
-    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
-    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
-    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
-    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
-    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
-    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
-    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
-    {true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}},
-    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
-    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
-    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = true}},
-    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = true}},
-    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}},
-};
-const uint32_t SOPC_Embedded_VariableVariant_nb = 95;
+// Unused variable but it is still necessary to link the loader of embedded address space
+SOPC_Variant* SOPC_Embedded_VariableVariant = NULL;
+const uint32_t SOPC_Embedded_VariableVariant_nb = 0;
