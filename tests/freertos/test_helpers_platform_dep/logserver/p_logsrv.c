@@ -1598,6 +1598,30 @@ SOPC_ReturnStatus SOPC_LogSrv_WaitClient(uint32_t timeoutMs)
     return status;
 }
 
+// Wait a client connexion.
+SOPC_ReturnStatus SOPC_LogSrv_Print(const uint8_t* buffer, uint16_t length)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    if (NULL == gLockLogServer)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    Mutex_Lock(&gLockLogServer);
+
+    if (gLogServer == NULL)
+    {
+        Mutex_Unlock(&gLockLogServer);
+        return SOPC_STATUS_NOK;
+    }
+
+    P_LOG_SRV_SendToAllClient(gLogServer, (uint8_t*) buffer, length, NULL);
+
+    Mutex_Unlock(&gLockLogServer);
+
+    return status;
+}
+
 // Stop log server
 SOPC_ReturnStatus SOPC_LogSrv_Stop(void)
 {
