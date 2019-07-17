@@ -74,13 +74,13 @@
 #define P_LOG_CLT_RX_CALLBACK_STACK (128)
 
 // Atomic fifo config
-#define P_LOG_FIFO_DATA_SIZE_SRV_TX (8192)
-#define P_LOG_FIFO_ELT_MAX_SIZE_SRV_TX (2048)
-#define P_LOG_FIFO_MAX_NB_ELT_SRV_TX (128)
+#define P_LOG_FIFO_DATA_SIZE_SRV_TX (16384)  // Max cumulative size
+#define P_LOG_FIFO_ELT_MAX_SIZE_SRV_TX (256) // Atomic max size
+#define P_LOG_FIFO_MAX_NB_ELT_SRV_TX (1024)  // Max elt
 
-#define P_LOG_FIFO_DATA_SIZE_CLT_TX (4096)
+#define P_LOG_FIFO_DATA_SIZE_CLT_TX (16384)
 #define P_LOG_FIFO_ELT_MAX_SIZE_CLT_TX (256)
-#define P_LOG_FIFO_MAX_NB_ELT_CLT_TX (128)
+#define P_LOG_FIFO_MAX_NB_ELT_CLT_TX (1024)
 
 #define P_LOG_FIFO_DATA_SIZE_CLT_RX (1024)
 #define P_LOG_FIFO_ELT_MAX_SIZE_CLT_RX (128)
@@ -196,5 +196,7 @@ SOPC_ReturnStatus SOPC_LogSrv_Stop(void);
 SOPC_ReturnStatus SOPC_LogSrv_Start(
     uint16_t portSrvTCP,  // Server listen port
     uint16_t portCltUDP); // Destination UDP port where server announce its @IP and listen port
+
+SOPC_ReturnStatus SOPC_LogSrv_Print(const uint8_t* buffer, uint16_t length);
 
 #endif /* P_LOGSRV_H */
