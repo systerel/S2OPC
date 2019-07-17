@@ -29,9 +29,4 @@
 #include "FreeRTOS.h" /* freeRtos includes */
 #include "task.h"
 
-void* SOPC_Malloc(size_t size);
-void* SOPC_Realloc(void* aptr, size_t nbytes);
-void* SOPC_Calloc(size_t n, size_t s);
-void SOPC_Free(void* aptr);
-
 #endif /* FREERTOS_P_MEM_H_ */
