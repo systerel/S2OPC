@@ -340,6 +340,15 @@ eChannelResult P_CHANNEL_Receive(tChannel* p,             // Channel workspace
 
                             if (p->channelRecord[p->iRd] == 0)
                             {
+                                result = E_CHANNEL_RESULT_OK;
+                            }
+                            else
+                            {
+                                result = E_CHANNEL_RESULT_MORE_DATA;
+                            }
+
+                            if (p->channelRecord[p->iRd] == 0)
+                            {
                                 p->iRd++;
                                 if (p->iRd >= p->maxSizeTotalElts)
                                 {
@@ -348,11 +357,6 @@ eChannelResult P_CHANNEL_Receive(tChannel* p,             // Channel workspace
                                 p->currentNbElts--;
                             }
                         }
-                    }
-
-                    if (p->channelRecord[p->iRd] == 0)
-                    {
-                        result = E_CHANNEL_RESULT_OK;
                     }
                     else
                     {
