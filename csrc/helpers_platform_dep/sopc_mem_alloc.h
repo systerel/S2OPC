@@ -29,6 +29,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define DEBUG_MEMORY_LEAKS
 #ifndef DEBUG_MEMORY_LEAKS
 
 void* SOPC_Malloc(size_t size);
@@ -48,51 +49,49 @@ void* SOPC_Calloc_(size_t nmemb, size_t size);
 void* SOPC_Realloc_(void* ptr, size_t old_size, size_t new_size);
 
 #undef SOPC_FreeD
-#define SOPC_FreeD(ptr)                                                                             \
-    ({                                                                                              \
-        char ptr2[256] = {0};                                                                       \
-                                                                                                    \
-        snprintf(ptr2, 255, "FREE from thread=%08X:file=%s:line=%u:function=%s\r\n",                \
-                 (unsigned int) xTaskGetCurrentTaskHandle(), __FILENAME__, __LINE__, __FUNCTION__); \
-                                                                                                    \
-        SOPC_LogSrv_Print((uint8_t*) ptr2, strlen(ptr2));                                           \
-                                                                                                    \
-        SOPC_Free_(ptr);                                                                            \
+#define SOPC_FreeD(ptr)                                                                                      \
+    ({                                                                                                       \
+        char ptr2[256] = {0};                                                                                \
+                                                                                                             \
+        snprintf(ptr2, 255, "FREE\t;\t;%08X\t;%s\t;%u\t;%s\r\n", (unsigned int) xTaskGetCurrentTaskHandle(), \
+                 __FILENAME__, __LINE__, __FUNCTION__);                                                      \
+                                                                                                             \
+        SOPC_LogSrv_Print((uint8_t*) ptr2, strlen(ptr2));                                                    \
+                                                                                                             \
+        SOPC_Free_(ptr);                                                                                     \
     })
 
 #undef SOPC_ReallocD
-#define SOPC_ReallocD(ptr, old_size, new_size)                                                                  \
-    ({                                                                                                          \
-        void* _ptr;                                                                                             \
-        char ptr2[256] = {0};                                                                                   \
-                                                                                                                \
-        snprintf(ptr2, 255, "REALLOC of %u bytes from thread=%08X:file=%s:line=%u:function=%s\r\n",             \
-                 (unsigned int) (new_size), (unsigned int) xTaskGetCurrentTaskHandle(), __FILENAME__, __LINE__, \
-                 __FUNCTION__);                                                                                 \
-                                                                                                                \
-        SOPC_LogSrv_Print((uint8_t*) ptr2, strlen(ptr2));                                                       \
-        _ptr = SOPC_Realloc_(ptr, old_size, new_size);                                                          \
-        _ptr;                                                                                                   \
+#define SOPC_ReallocD(ptr, old_size, new_size)                                                      \
+    ({                                                                                              \
+        void* _ptr;                                                                                 \
+        char ptr2[256] = {0};                                                                       \
+                                                                                                    \
+        snprintf(ptr2, 255, "REALLOC\t;%u\t;%08X\t;%s\t;%u\t;%s\r\n", (unsigned int) (new_size),    \
+                 (unsigned int) xTaskGetCurrentTaskHandle(), __FILENAME__, __LINE__, __FUNCTION__); \
+                                                                                                    \
+        SOPC_LogSrv_Print((uint8_t*) ptr2, strlen(ptr2));                                           \
+        _ptr = SOPC_Realloc_(ptr, old_size, new_size);                                              \
+        _ptr;                                                                                       \
     })
 
 #undef SOPC_CallocD
-#define SOPC_CallocD(nmemb, size)                                                                                   \
-    ({                                                                                                              \
-        void* _ptr;                                                                                                 \
-        /*fprintf(stdout, "CALLOC of %u bytes from thread=%08X:file=%s:line=%u:function=%s\r\n",  */                \
-        /* (unsigned int) (nmemb * size), (unsigned int) xTaskGetCurrentTaskHandle(), __FILENAME__, __LINE__,*/     \
-        /* __FUNCTION__);     */                                                                                    \
-                                                                                                                    \
-        char ptr2[256] = {0};                                                                                       \
-                                                                                                                    \
-        snprintf(ptr2, 255, "CALLOC of %u bytes from thread=%08X:file=%s:line=%u:function=%s\r\n",                  \
-                 (unsigned int) (nmemb * size), (unsigned int) xTaskGetCurrentTaskHandle(), __FILENAME__, __LINE__, \
-                 __FUNCTION__);                                                                                     \
-                                                                                                                    \
-        SOPC_LogSrv_Print((uint8_t*) ptr2, strlen(ptr2));                                                           \
-                                                                                                                    \
-        _ptr = SOPC_Calloc_(nmemb, size);                                                                           \
-        _ptr;                                                                                                       \
+#define SOPC_CallocD(nmemb, size)                                                                               \
+    ({                                                                                                          \
+        void* _ptr;                                                                                             \
+        /*fprintf(stdout, "CALLOC of %u bytes from thread=%08X:file=%s:line=%u:function=%s\r\n",  */            \
+        /* (unsigned int) (nmemb * size), (unsigned int) xTaskGetCurrentTaskHandle(), __FILENAME__, __LINE__,*/ \
+        /* __FUNCTION__);     */                                                                                \
+                                                                                                                \
+        char ptr2[256] = {0};                                                                                   \
+                                                                                                                \
+        snprintf(ptr2, 255, "CALLOC\t;%u\t;%08X\t;%s\t;%u\t;%s\r\n", (unsigned int) (nmemb * size),             \
+                 (unsigned int) xTaskGetCurrentTaskHandle(), __FILENAME__, __LINE__, __FUNCTION__);             \
+                                                                                                                \
+        SOPC_LogSrv_Print((uint8_t*) ptr2, strlen(ptr2));                                                       \
+                                                                                                                \
+        _ptr = SOPC_Calloc_(nmemb, size);                                                                       \
+        _ptr;                                                                                                   \
     })
 
 #undef SOPC_MallocD
@@ -105,9 +104,8 @@ void* SOPC_Realloc_(void* ptr, size_t old_size, size_t new_size);
                                                                                                                   \
         char ptr2[256] = {0};                                                                                     \
                                                                                                                   \
-        snprintf(ptr2, 255, "MALLOC of %u bytes from thread=%08X:file=%s:line=%u:function=%s\r\n",                \
-                 (unsigned int) (size), (unsigned int) xTaskGetCurrentTaskHandle(), __FILENAME__, __LINE__,       \
-                 __FUNCTION__);                                                                                   \
+        snprintf(ptr2, 255, "MALLOC\t;%u\t;%08X\t;%s\t;%u\t;%s\r\n", (unsigned int) (size),                       \
+                 (unsigned int) xTaskGetCurrentTaskHandle(), __FILENAME__, __LINE__, __FUNCTION__);               \
                                                                                                                   \
         SOPC_LogSrv_Print((uint8_t*) ptr2, strlen(ptr2));                                                         \
                                                                                                                   \
