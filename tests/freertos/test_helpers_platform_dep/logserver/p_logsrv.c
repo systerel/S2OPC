@@ -193,12 +193,13 @@ static void cbTaskSocketClientEncodeAndTx(void* pParameters)
         // Task of analyzer (decoder) is created. Give join signal in case of error.
         xSemaphoreGive(pClt->joinClientTaskRx);
 
-        if (xTaskCreate(cbTaskSocketClientDecodeAndDo,  //
-                        "logCltRx",                     //
-                        P_LOG_CLT_RX_CALLBACK_STACK,    //
-                        pClt,                           //
-                        configMAX_PRIORITIES - 1,       //
-                        &pClt->handleTaskRx) == pdPASS) //
+        if (xTaskCreate(cbTaskSocketClientDecodeAndDo, //
+                        "logCltRx",                    //
+                        P_LOG_CLT_RX_CALLBACK_STACK,   //
+                        pClt,                          //
+                        configPRIORITY_LOGSRV > (configMAX_PRIORITIES - 1) ? configMAX_PRIORITIES - 1
+                                                                           : configPRIORITY_LOGSRV, //
+                        &pClt->handleTaskRx) == pdPASS)                                             //
         {
             DEBUG_incrementCpt();
 
@@ -497,8 +498,9 @@ static void cbTaskSocketClientRxAndMon(void* pParameters)
                         "logCltTx",                    //
                         P_LOG_CLT_TX_CALLBACK_STACK,   //
                         p,                             //
-                        configMAX_PRIORITIES - 1,      //
-                        &p->handleTaskTx) == pdPASS)   //
+                        configPRIORITY_LOGSRV > (configMAX_PRIORITIES - 1) ? configMAX_PRIORITIES - 1
+                                                                           : configPRIORITY_LOGSRV, //
+                        &p->handleTaskTx) == pdPASS)                                                //
         {
             DEBUG_incrementCpt();
             // Reset join signal, task well created
@@ -805,12 +807,13 @@ static tLogClientWks* ClientCreateThenStart(int32_t socket,
 
     // Give join signal in case of creation of task failure
     xSemaphoreGive(pClt->joinClientTaskMonitor);
-    if (xTaskCreate(cbTaskSocketClientRxAndMon,          //
-                    "logClt",                            //
-                    P_LOG_CLT_MON_CALLBACK_STACK,        //
-                    pClt,                                //
-                    configMAX_PRIORITIES - 1,            //
-                    &pClt->handleTaskMonitor) != pdPASS) //
+    if (xTaskCreate(
+            cbTaskSocketClientRxAndMon,                                                                            //
+            "logClt",                                                                                              //
+            P_LOG_CLT_MON_CALLBACK_STACK,                                                                          //
+            pClt,                                                                                                  //
+            configPRIORITY_LOGSRV > (configMAX_PRIORITIES - 1) ? configMAX_PRIORITIES - 1 : configPRIORITY_LOGSRV, //
+            &pClt->handleTaskMonitor) != pdPASS)                                                                   //
     {
         ClientStopThenDestroy(&pClt);
         return NULL;
@@ -983,12 +986,13 @@ static void cbTaskSocketServerMonitor(void* pParameters)
         // Give signal join in the case of task creation failure
         xSemaphoreGive(p->joinTxTask);
 
-        if (xTaskCreate(cbTaskSocketServerTx,               //
-                        "logSrvTx",                         //
-                        P_LOG_SRV_CALLBACK_TX_STACK,        //
-                        p,                                  //
-                        configMAX_PRIORITIES - 1,           //
-                        &p->handleBroadcastTask) == pdPASS) //
+        if (xTaskCreate(cbTaskSocketServerTx,        //
+                        "logSrvTx",                  //
+                        P_LOG_SRV_CALLBACK_TX_STACK, //
+                        p,                           //
+                        configPRIORITY_LOGSRV > (configMAX_PRIORITIES - 1) ? configMAX_PRIORITIES - 1
+                                                                           : configPRIORITY_LOGSRV, //
+                        &p->handleBroadcastTask) == pdPASS)                                         //
         {
             DEBUG_incrementCpt();
             // Reset join signal, task well created
@@ -1463,12 +1467,13 @@ tLogSrvWks* P_LOG_SRV_CreateAndStart(uint16_t port,
 
     // Give join for delete
     xSemaphoreGive(p->joinServerTask);
-    if (xTaskCreate(cbTaskSocketServerMonitor, //
-                    "logSrv",                  //
-                    P_LOG_SRV_CALLBACK_STACK,  //
-                    p,                         //
-                    configMAX_PRIORITIES - 1,  //
-                    &p->handleTask) != pdPASS) //
+    if (xTaskCreate(
+            cbTaskSocketServerMonitor,                                                                               //
+            "logSrv",                                                                                                //
+            P_LOG_SRV_CALLBACK_STACK,                                                                                //
+            p,                                                                                                       //
+            (configPRIORITY_LOGSRV > (configMAX_PRIORITIES - 1)) ? configMAX_PRIORITIES - 1 : configPRIORITY_LOGSRV, //
+            &p->handleTask) != pdPASS)                                                                               //
     {
         P_LOG_SRV_StopAndDestroy(&p);
         return p;
