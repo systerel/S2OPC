@@ -98,6 +98,12 @@ typedef enum
 #define SOPC_SecurityPolicy_Basic256_URI "http://opcfoundation.org/UA/SecurityPolicy#Basic256"
 #define SOPC_SecurityPolicy_Basic256Sha256_URI "http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"
 
+typedef enum
+{
+    SOPC_USER_POLICY_ID_ANONYMOUS = 0,
+    SOPC_USER_POLICY_ID_USERNAME = 1
+} SOPC_UserPolicyId;
+
 void SOPC_Sleep(unsigned int milliseconds);
 
 /**
@@ -299,6 +305,11 @@ typedef struct
 {
     SOPC_LibSub_LogCbk host_log_callback;
     SOPC_LibSub_DisconnectCbk disconnect_callback;
+    struct
+    {
+        SOPC_Toolkit_Log_Level level;
+        const char* log_path;
+    } toolkit_logger;
 } SOPC_LibSub_StaticCfg;
 
 /*
@@ -522,5 +533,26 @@ void Helpers_Log(const SOPC_Toolkit_Log_Level log_level, const char* format, ...
  * \brief Helper logger, prints a log message to stdout, with the following format "# log_level: text\n".
  */
 void Helpers_LoggerStdout(const SOPC_Toolkit_Log_Level log_level, const SOPC_LibSub_CstString text);
+
+/* ************************************************************************
+            SIMPLIFIED CLIENT INTERFACE (COMMAND LINE LIKE)
+   ************************************************************************
+*/
+
+int32_t SOPC_ClientHelper_Initialize(const char* log_path, int32_t log_level);
+void SOPC_ClientHelper_Finalize(void);
+int32_t SOPC_ClientHelper_Connect(const char* endpointUrl,
+                                  const char* security_policy,
+                                  int32_t security_mode,
+                                  const char* path_cert_auth,
+                                  const char* path_cert_srv,
+                                  const char* path_cert_cli,
+                                  const char* path_key_cli,
+                                  const char* policyId,
+                                  const char* username,
+                                  const char* password,
+                                  SOPC_LibSub_DataChangeCbk callback);
+int32_t SOPC_ClientHelper_Subscribe(int32_t connectionId, char** nodeIds, size_t nbNodeIds);
+int32_t SOPC_ClientHelper_Disconnect(int32_t connectionId);
 
 #endif /* LIBS2OPC_CLIENT_H_ */

@@ -99,162 +99,6 @@ static bool parse_options(cmd_line_options_t* o, int argc, char* const* argv);
 static void free_options(cmd_line_options_t* o);
 static void print_usage(const char* exe);
 
-/* Callbacks */
-static void log_callback(const SOPC_Toolkit_Log_Level log_level, SOPC_LibSub_CstString text);
-static void disconnect_callback(const SOPC_LibSub_ConnectionId c_id);
-static void datachange_callback(const SOPC_LibSub_ConnectionId c_id,
-                                const SOPC_LibSub_DataId d_id,
-                                const SOPC_LibSub_Value* value);
-
-/* Main subscribing client */
-int main(int argc, char* const argv[])
-{
-    cmd_line_options_t options;
-    if (!parse_options(&options, argc, argv))
-    {
-        free_options(&options);
-        return 1;
-    }
-
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_LibSub_StaticCfg cfg_cli = {.host_log_callback = log_callback, .disconnect_callback = disconnect_callback};
-    SOPC_LibSub_ConnectionCfg cfg_con = {.server_url = options.endpoint_url,
-                                         .security_policy = SECURITY_POLICY,
-                                         .security_mode = SECURITY_MODE,
-                                         .disable_certificate_verification = options.disable_certificate_verification,
-                                         .path_cert_auth = NULL,
-                                         .path_cert_srv = NULL,
-                                         .path_cert_cli = NULL,
-                                         .path_key_cli = NULL,
-                                         .path_crl = NULL,
-                                         .policyId = options.policyId,
-                                         .username = options.username,
-                                         .password = options.password,
-                                         .publish_period_ms = options.publish_period,
-                                         .n_max_keepalive = options.n_max_keepalive,
-                                         .n_max_lifetime = MAX_LIFETIME_COUNT,
-                                         .data_change_callback = datachange_callback,
-                                         .timeout_ms = TIMEOUT_MS,
-                                         .sc_lifetime = SC_LIFETIME_MS,
-                                         .token_target = options.token_target,
-                                         .generic_response_callback = NULL};
-    SOPC_LibSub_ConfigurationId cfg_id = 0;
-    SOPC_LibSub_ConnectionId con_id = 0;
-
-    if (cfg_con.security_mode != OpcUa_MessageSecurityMode_None)
-    {
-        cfg_con.path_cert_srv = PATH_SERVER_PUBL;
-        cfg_con.path_cert_cli = PATH_CLIENT_PUBL;
-        cfg_con.path_key_cli = PATH_CLIENT_PRIV;
-    }
-    if (!cfg_con.disable_certificate_verification)
-    {
-        cfg_con.path_cert_auth = PATH_CACERT_PUBL;
-    }
-
-    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, SOPC_LibSub_GetVersion());
-    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Connecting to \"%s\"", cfg_con.server_url);
-
-    if (SOPC_STATUS_OK != SOPC_LibSub_Initialize(&cfg_cli))
-    {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not initialize library.");
-        free_options(&options);
-        return 2;
-    }
-
-    status = SOPC_ToolkitConfig_SetCircularLogPath("./client_subscription_logs/", true);
-    if (SOPC_STATUS_OK != status)
-    {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not configure SDK logger.");
-    }
-
-    status = SOPC_LibSub_ConfigureConnection(&cfg_con, &cfg_id);
-    if (SOPC_STATUS_OK != status)
-    {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not configure connection.");
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_LibSub_Configured();
-        if (SOPC_STATUS_OK != status)
-        {
-            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not configure the toolkit.");
-        }
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_LibSub_Connect(cfg_id, &con_id);
-        if (SOPC_STATUS_OK != status)
-        {
-            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not connect with given configuration id.");
-        }
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Connected.");
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        SOPC_LibSub_AttributeId* lAttrIds = calloc((size_t)(options.node_ids_size), sizeof(SOPC_LibSub_AttributeId));
-        assert(NULL != lAttrIds);
-        for (int i = 0; i < options.node_ids_size; ++i)
-        {
-            lAttrIds[i] = SOPC_LibSub_AttributeId_Value;
-        }
-        SOPC_LibSub_DataId* lDataId = calloc((size_t)(options.node_ids_size), sizeof(SOPC_LibSub_DataId));
-        assert(NULL != lDataId);
-        status = SOPC_LibSub_AddToSubscription(con_id, (const char* const*) options.node_ids, lAttrIds,
-                                               options.node_ids_size, lDataId);
-        if (SOPC_STATUS_OK != status)
-        {
-            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not create monitored items.");
-        }
-        else
-        {
-            for (int i = 0; i < options.node_ids_size; ++i)
-            {
-                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Created MonIt for \"%s\" with data_id %" PRIu32 ".",
-                            options.node_ids[i], lDataId[i]);
-            }
-        }
-        free(lAttrIds);
-        free(lDataId);
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        SOPC_Sleep(1000 * 1000);
-    }
-
-    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Closing the connections.");
-    status = SOPC_LibSub_Disconnect(con_id);
-    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Closing the Toolkit.");
-    SOPC_LibSub_Clear();
-    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Toolkit closed.");
-
-    free_options(&options);
-
-    if (SOPC_STATUS_OK != status)
-    {
-        return 3;
-    }
-    return 0;
-}
-
-static void log_callback(const SOPC_Toolkit_Log_Level log_level, SOPC_LibSub_CstString text)
-{
-    Helpers_LoggerStdout(log_level, text);
-}
-
-static void disconnect_callback(const SOPC_LibSub_ConnectionId c_id)
-{
-    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Client %" PRIu32 " disconnected.", c_id);
-}
-
 static void datachange_callback(const SOPC_LibSub_ConnectionId c_id,
                                 const SOPC_LibSub_DataId d_id,
                                 const SOPC_LibSub_Value* value)
@@ -281,7 +125,55 @@ static void datachange_callback(const SOPC_LibSub_ConnectionId c_id,
         snprintf(sz + n, sizeof(sz) / sizeof(sz[0]) - n, "%s", (SOPC_LibSub_CstString) value->value);
     }
 
-    log_callback(SOPC_TOOLKIT_LOG_LEVEL_INFO, sz);
+    Helpers_LoggerStdout(SOPC_TOOLKIT_LOG_LEVEL_INFO, sz);
+}
+
+/* Main subscribing client */
+int main(int argc, char* const argv[])
+{
+    int res = 0;
+
+    cmd_line_options_t options;
+    if (!parse_options(&options, argc, argv))
+    {
+        free_options(&options);
+        return 1;
+    }
+
+    SOPC_ClientHelper_Initialize("./client_subscription_logs", SOPC_TOOLKIT_LOG_LEVEL_DEBUG);
+
+    int32_t connectionId = SOPC_ClientHelper_Connect(
+        options.endpoint_url, SECURITY_POLICY, SECURITY_MODE, PATH_CACERT_PUBL, PATH_SERVER_PUBL, PATH_CLIENT_PUBL,
+        PATH_CLIENT_PRIV, options.policyId, options.username, options.password, datachange_callback);
+
+    if (connectionId <= 0)
+    {
+        res = connectionId != 0 ? connectionId : -1;
+    }
+
+    if (res == 0)
+    {
+        assert(options.node_ids_size > 0);
+        assert((uint32_t) options.node_ids_size <= SIZE_MAX);
+        res = SOPC_ClientHelper_Subscribe(connectionId, options.node_ids, (size_t) options.node_ids_size);
+    }
+
+    if (res == 0)
+    {
+        SOPC_Sleep(1000 * 1000);
+    }
+
+    if (connectionId > 0)
+    {
+        int32_t discoRes = SOPC_ClientHelper_Disconnect(connectionId);
+        res = res != 0 ? res : discoRes;
+    }
+
+    SOPC_ClientHelper_Finalize();
+
+    free_options(&options);
+
+    return res;
 }
 
 #define FOREACH_OPT(x)                                                                                            \

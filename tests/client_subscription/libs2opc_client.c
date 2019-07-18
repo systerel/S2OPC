@@ -111,6 +111,20 @@ SOPC_ReturnStatus SOPC_LibSub_Initialize(const SOPC_LibSub_StaticCfg* pCfg)
         status = SOPC_Toolkit_Initialize(ToolkitEventCallback);
     }
 
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ToolkitConfig_SetLogLevel(pCfg->toolkit_logger.level);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ToolkitConfig_SetCircularLogPath(pCfg->toolkit_logger.log_path, true);
+        if (SOPC_STATUS_OK != status)
+        {
+            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not configure SDK logger.");
+        }
+    }
+
     if (SOPC_STATUS_OK != status)
     {
         /* Clean partial mallocs */
@@ -419,11 +433,6 @@ SOPC_ReturnStatus SOPC_LibSub_Configured(void)
     else
     {
         status = SOPC_Toolkit_Configured();
-        if (SOPC_STATUS_OK == status)
-        {
-            /* TODO: make this value configurable through SOPC_LibSub_StaticCfg */
-            status = SOPC_ToolkitConfig_SetLogLevel(SOPC_TOOLKIT_LOG_LEVEL_DEBUG);
-        }
         if (SOPC_STATUS_OK == status)
         {
             SOPC_Atomic_Int_Set(&libConfigured, 1);
