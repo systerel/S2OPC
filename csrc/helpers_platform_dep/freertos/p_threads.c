@@ -37,6 +37,7 @@
 #include "p_utils.h"           /* private list include */
 
 #define MAX_THREADS MAX_WAITERS
+#define configPRIORITY_S2OPC 1
 
 /* Private structure definition */
 
@@ -270,12 +271,15 @@ SOPC_ReturnStatus P_THREAD_Init(Thread* ptrWks,            // Workspace
     }
     if (SOPC_STATUS_OK == resPTHR)
     {
-        BaseType_t resTaskCreate = xTaskCreate(cbInternalCallback,       // Callback
-                                               taskName,                 // Friendly name
-                                               configMINIMAL_STACK_SIZE, // Stack size
-                                               handleWks,                // Workspace thread
-                                               configMAX_PRIORITIES - 1, // Priority
-                                               &handleWks->handleTask);  // Task handle
+        BaseType_t resTaskCreate =
+            xTaskCreate(cbInternalCallback,       // Callback
+                        "appThread",              // Friendly name
+                        configMINIMAL_STACK_SIZE, // Stack size
+                        handleWks,                // Workspace thread
+                        (configPRIORITY_S2OPC > (configMAX_PRIORITIES - 1)) ? configMAX_PRIORITIES - 1
+                                                                            : configPRIORITY_S2OPC, // Priority
+                        &handleWks->handleTask);                                                    // Task handle
+
         if (pdPASS != resTaskCreate)
         {
             resPTHR = SOPC_STATUS_NOK;
