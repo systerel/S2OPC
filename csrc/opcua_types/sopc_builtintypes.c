@@ -2769,7 +2769,11 @@ static SOPC_ReturnStatus AllocVariantArrayBuiltInType(SOPC_BuiltinId builtInType
                                                       SOPC_VariantArrayValue* array,
                                                       int32_t length)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    if (NULL == array)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
     size_t size = 0;
     if (length > 0)
     {
@@ -2908,7 +2912,11 @@ static SOPC_ReturnStatus AllocVariantArrayBuiltInType(SOPC_BuiltinId builtInType
             break;
         }
     }
-    return status;
+    else
+    {
+        return SOPC_STATUS_OK;
+    }
+    return SOPC_STATUS_OUT_OF_MEMORY;
 }
 
 static void ClearToVariantArrayBuiltInType(SOPC_BuiltinId builtInTypeId,
@@ -4192,13 +4200,17 @@ SOPC_ReturnStatus SOPC_Op_Array(int32_t noOfElts,
     size_t pos = 0;
     SOPC_Byte* byteArrayLeft = eltsArrayLeft;
     SOPC_Byte* byteArrayRight = eltsArrayRight;
-    if (noOfElts >= 0 && byteArrayLeft != NULL && byteArrayRight != NULL)
+    if (noOfElts > 0 && byteArrayLeft != NULL && byteArrayRight != NULL)
     {
         for (idx = 0; idx < (size_t) noOfElts && SOPC_STATUS_OK == status; idx++)
         {
             pos = idx * sizeOfElt;
             status = opFct(&(byteArrayLeft[pos]), &(byteArrayRight[pos]));
         }
+    }
+    else if (0 == noOfElts && NULL == byteArrayLeft && NULL == byteArrayRight)
+    {
+        status = SOPC_STATUS_OK;
     }
     else
     {
