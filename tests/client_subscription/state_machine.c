@@ -927,7 +927,10 @@ static void StaMac_ProcessEvent_stActivated(SOPC_StaMac_Machine* pSM,
                     status = Helpers_NewValueFromDataValue(&pMonItNotif->Value, &plsVal);
                     if (SOPC_STATUS_OK == status)
                     {
-                        pSM->cbkDataChanged(pSM->iCliId, pMonItNotif->ClientHandle, plsVal);
+                        if (NULL != pSM->cbkDataChanged)
+                        {
+                            pSM->cbkDataChanged(pSM->iCliId, pMonItNotif->ClientHandle, plsVal);
+                        }
                         SOPC_Free(plsVal->value);
                         plsVal->value = NULL;
                         SOPC_Variant_Delete(plsVal->raw_value);
