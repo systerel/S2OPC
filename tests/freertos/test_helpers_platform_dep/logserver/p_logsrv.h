@@ -58,6 +58,8 @@
 
 // ************Private API**************
 
+#define configPRIORITY_LOGSRV 8
+
 // Periodic config
 #define P_LOG_SRV_ONLINE_PERIOD (100)
 #define P_LOG_SRV_BINDING_WAIT (100)
@@ -78,7 +80,7 @@
 #define P_LOG_FIFO_ELT_MAX_SIZE_SRV_TX (256) // Atomic max size
 #define P_LOG_FIFO_MAX_NB_ELT_SRV_TX (1024)  // Max elt
 
-#define P_LOG_FIFO_DATA_SIZE_CLT_TX (16384)
+#define P_LOG_FIFO_DATA_SIZE_CLT_TX (18432)
 #define P_LOG_FIFO_ELT_MAX_SIZE_CLT_TX (256)
 #define P_LOG_FIFO_MAX_NB_ELT_CLT_TX (1024)
 
