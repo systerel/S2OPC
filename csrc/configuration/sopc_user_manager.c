@@ -131,14 +131,12 @@ static SOPC_ReturnStatus AuthorizeAllowAll(SOPC_UserAuthorization_Manager* autho
     return SOPC_STATUS_OK;
 }
 
-#include "FreeRTOS.h"
-
 static const SOPC_UserAuthentication_Functions AlwaysAuthenticateFunctions = {
-    .pFuncFree = (SOPC_UserAuthentication_Free_Func) vPortFree,
+    .pFuncFree = (SOPC_UserAuthentication_Free_Func) SOPC_Free,
     .pFuncValidateUserIdentity = AuthenticateAllowAll};
 
 static const SOPC_UserAuthorization_Functions AuthorizeAllowAllFunctions = {
-    .pFuncFree = (SOPC_UserAuthorization_Free_Func) vPortFree,
+    .pFuncFree = (SOPC_UserAuthorization_Free_Func) SOPC_Free,
     .pFuncAuthorizeOperation = AuthorizeAllowAll};
 
 SOPC_UserAuthentication_Manager* SOPC_UserAuthentication_CreateManager_AllowAll(void)

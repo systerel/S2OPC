@@ -19,18 +19,13 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <string.h>
 
 #include "FreeRTOS.h"
 
 #include "sopc_mem_alloc.h"
 
-#ifndef DEBUG_MEMORY_LEAKS
 void* SOPC_Malloc(size_t size)
-#else
-void* SOPC_Malloc_(size_t size)
-#endif
 {
     // Minimum size = 4 to avoid NULL pointer
     if (0 == size)
@@ -40,31 +35,19 @@ void* SOPC_Malloc_(size_t size)
     return pvPortMalloc(size);
 }
 
-#ifndef DEBUG_MEMORY_LEAKS
 void SOPC_Free(void* ptr)
-#else
-void SOPC_Free_(void* ptr)
-#endif
 {
     vPortFree(ptr);
 }
 
-#ifndef DEBUG_MEMORY_LEAKS
 void* SOPC_Calloc(size_t nmemb, size_t size)
-#else
-void* SOPC_Calloc_(size_t nmemb, size_t size)
-#endif
 {
     if (nmemb > SIZE_MAX / size)
     {
         return NULL;
     }
 
-#ifndef DEBUG_MEMORY_LEAKS
     void* p = SOPC_Malloc(nmemb * size);
-#else
-    void* p = SOPC_Malloc_(nmemb * size);
-#endif
     if (NULL == p)
     {
         return NULL;
@@ -73,11 +56,7 @@ void* SOPC_Calloc_(size_t nmemb, size_t size)
     return memset(p, 0, nmemb * size);
 }
 
-#ifndef DEBUG_MEMORY_LEAKS
 void* SOPC_Realloc(void* ptr, size_t old_size, size_t new_size)
-#else
-void* SOPC_Realloc_(void* ptr, size_t old_size, size_t new_size)
-#endif
 {
     /* Do not realloc/copy if size is reduced.
      * This keeps the larger buffer reserved but avoids the copy. */
@@ -87,11 +66,7 @@ void* SOPC_Realloc_(void* ptr, size_t old_size, size_t new_size)
     }
 
     /* realloc(NULL) shall behave as malloc */
-#ifndef DEBUG_MEMORY_LEAKS
     void* new = SOPC_Malloc(new_size);
-#else
-    void* new = SOPC_Malloc_(new_size);
-#endif
     if (NULL == new)
     {
         return NULL;
