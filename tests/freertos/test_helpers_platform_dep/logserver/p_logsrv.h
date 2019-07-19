@@ -76,12 +76,12 @@
 #define P_LOG_CLT_RX_CALLBACK_STACK (128)
 
 // Atomic fifo config
-#define P_LOG_FIFO_DATA_SIZE_SRV_TX (32764)   // Max cumulative size
-#define P_LOG_FIFO_ELT_MAX_SIZE_SRV_TX (1024) // Atomic max size
+#define P_LOG_FIFO_DATA_SIZE_SRV_TX (8196)    // Max cumulative size
+#define P_LOG_FIFO_ELT_MAX_SIZE_SRV_TX (2048) // Atomic max size
 #define P_LOG_FIFO_MAX_NB_ELT_SRV_TX (1024)   // Max elt
 
-#define P_LOG_FIFO_DATA_SIZE_CLT_TX (32764)
-#define P_LOG_FIFO_ELT_MAX_SIZE_CLT_TX (1024)
+#define P_LOG_FIFO_DATA_SIZE_CLT_TX (8196)
+#define P_LOG_FIFO_ELT_MAX_SIZE_CLT_TX (256)
 #define P_LOG_FIFO_MAX_NB_ELT_CLT_TX (1024)
 
 #define P_LOG_FIFO_DATA_SIZE_CLT_RX (1024)
