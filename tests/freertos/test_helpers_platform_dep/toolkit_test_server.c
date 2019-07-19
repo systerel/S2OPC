@@ -272,7 +272,7 @@ static SOPC_ReturnStatus authentication_uactt(SOPC_UserAuthentication_Manager* a
 }
 
 static const SOPC_UserAuthentication_Functions authentication_uactt_functions = {
-    .pFuncFree = (SOPC_UserAuthentication_Free_Func) vPortFree,
+    .pFuncFree = (SOPC_UserAuthentication_Free_Func) SOPC_Free,
     .pFuncValidateUserIdentity = authentication_uactt};
 
 static const unsigned char cacert[] = {
