@@ -128,9 +128,9 @@ SOPC_ReturnStatus SOPC_KeyManager_SerializedCertificate_CreateFromDER(const uint
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
 
-    SOPC_Buffer_Write(buf, der, len);
+    SOPC_ReturnStatus status = SOPC_Buffer_Write(buf, der, len);
     *cert = buf;
-    return SOPC_STATUS_OK;
+    return status;
 }
 
 SOPC_ReturnStatus SOPC_KeyManager_SerializedCertificate_CreateFromFile(const char* path,
