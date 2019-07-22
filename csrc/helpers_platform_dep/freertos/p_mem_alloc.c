@@ -75,6 +75,7 @@ void* SOPC_Realloc(void* ptr, size_t old_size, size_t new_size)
     if (NULL != ptr)
     {
         memcpy(new, ptr, old_size);
+        SOPC_Free(ptr);
     }
 
     return new;
