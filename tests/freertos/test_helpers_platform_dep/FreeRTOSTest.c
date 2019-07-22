@@ -54,6 +54,13 @@ static Thread p2 = NULL;
 static Thread p3 = NULL;
 static Thread p4 = NULL;
 static Thread pX = NULL;
+typedef struct message
+{
+    Mutex mut;
+    Condition cond;
+} tMessage;
+
+static tChannel channel;
 
 extern void* cbToolkit_test_server(void* arg);
 
@@ -1014,8 +1021,8 @@ void FREE_RTOS_TEST_S2OPC_UDP_SOCKET_API(void* ptr)
 
 static void* cbS2OPC_Thread_PubSub(void* ptr)
 {
-    SOPC_LogSrv_Start(60, 4023);
-    SOPC_LogSrv_WaitClient(UINT32_MAX);
+    // SOPC_LogSrv_Start(60, 4023);
+    // SOPC_LogSrv_WaitClient(UINT32_MAX);
 
     P_ETHERNET_IF_IsReady(UINT32_MAX);
 
@@ -1120,6 +1127,139 @@ void FREE_RTOS_TEST_S2OPC_PUBSUB(void* ptr)
 
     Mutex_Lock(&m);
     sprintf(sBuffer, "$$$$ %2X -  Toolkit test pubsub init launching result = %d : current time = %lu\r\n",
+            (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
+    PRINTF(sBuffer);
+    Mutex_Unlock(&m);
+}
+
+static void* cbS2OPC_Thread_prod(void* ptr)
+{
+    SOPC_ReturnStatus status;
+    eChannelResult resChannel;
+
+    tMessage* ctx;
+    uint32_t cptLoop = 0;
+    char lclBuffer[256];
+    SOPC_LogSrv_Start(60, 4023);
+    SOPC_LogSrv_WaitClient(UINT32_MAX); // Todo: Test to verify server start stop memory leaks.
+    // SOPC_LogSrv_Stop();
+    // SOPC_LogSrv_Start(60, 4023);
+    for (;;)
+    {
+        cptLoop += 1;
+        if ((cptLoop % 1024) == 0)
+        {
+            sprintf(lclBuffer, "$$$$ %2X -  PROD - toujours en vie cptLoop = %lu : current time = %lu\r\n",
+                    (unsigned int) xTaskGetCurrentTaskHandle(), cptLoop, (uint32_t) xTaskGetTickCount());
+            printf(lclBuffer);
+        }
+        ctx = pvPortMalloc(sizeof(tMessage));
+        status = Mutex_Initialization(&ctx->mut);
+        configASSERT(status == SOPC_STATUS_OK);
+        status = Condition_Init(&ctx->cond);
+        configASSERT(status == SOPC_STATUS_OK);
+
+        status = Mutex_Lock(&ctx->mut);
+        configASSERT(status == SOPC_STATUS_OK);
+#if 1
+
+        sprintf(lclBuffer, "$$$$ %2X -  PROD - Envoi requete %2X : current time = %lu\r\n",
+                (unsigned int) xTaskGetCurrentTaskHandle(), (unsigned int) ctx, (uint32_t) xTaskGetTickCount());
+        printf(lclBuffer);
+
+#endif
+
+        resChannel = P_CHANNEL_Send(&channel, (uint8_t*) &ctx, sizeof(ctx), NULL, 0);
+        configASSERT(resChannel == E_CHANNEL_RESULT_OK);
+
+        status = Mutex_UnlockAndWaitCond(&ctx->cond, &ctx->mut);
+        configASSERT(status == SOPC_STATUS_OK);
+
+#if 1
+
+        sprintf(lclBuffer, "$$$$ %2X -  PROD - Reponse arrivee : current time = %lu\r\n",
+                (unsigned int) xTaskGetCurrentTaskHandle(), (uint32_t) xTaskGetTickCount());
+        printf(lclBuffer);
+
+#endif
+
+        SOPC_Sleep(1);
+
+        status = Condition_SignalAll(&ctx->cond);
+        configASSERT(status == SOPC_STATUS_OK);
+        status = Mutex_Unlock(&ctx->mut);
+        configASSERT(status == SOPC_STATUS_OK);
+    }
+    return NULL;
+}
+
+static void* cbS2OPC_Thread_cons(void* ptr)
+{
+    SOPC_ReturnStatus status;
+    tMessage* ctx;
+    char lclBuffer[256];
+    // SOPC_LogSrv_Start(60, 4023);
+    // SOPC_LogSrv_WaitClient(UINT32_MAX); // Todo: Test to verify server start stop memory leaks.
+    // SOPC_LogSrv_Stop();
+    // SOPC_LogSrv_Start(60, 4023);
+    for (;;)
+    {
+        SOPC_Sleep(1);
+
+        P_CHANNEL_Receive(&channel, NULL, (uint8_t*) &ctx, NULL, sizeof(ctx), portMAX_DELAY, 0);
+#if 1
+
+        sprintf(lclBuffer, "$$$$ %2X -  CONS - Reception contexte %2X : current time = %lu\r\n",
+                (unsigned int) xTaskGetCurrentTaskHandle(), (unsigned int) ctx, (uint32_t) xTaskGetTickCount());
+        printf(lclBuffer);
+
+#endif
+
+        status = Mutex_Lock(&ctx->mut);
+        configASSERT(status == SOPC_STATUS_OK);
+        // Sinal à prod reponse arrivee
+        status = Condition_SignalAll(&ctx->cond);
+        configASSERT(status == SOPC_STATUS_OK);
+        status = Mutex_UnlockAndWaitCond(&ctx->cond, &ctx->mut);
+        configASSERT(status == SOPC_STATUS_OK);
+#if 1
+
+        sprintf(lclBuffer, "$$$$ %2X -  CONS - Autorisation destruction contexte %2X : current time = %lu\r\n",
+                (unsigned int) xTaskGetCurrentTaskHandle(), (unsigned int) ctx, (uint32_t) xTaskGetTickCount());
+        printf(lclBuffer);
+
+#endif
+        status = Mutex_Unlock(&ctx->mut);
+        configASSERT(status == SOPC_STATUS_OK);
+        status = Mutex_Clear(&ctx->mut);
+        configASSERT(status == SOPC_STATUS_OK);
+        status = Condition_Clear(&ctx->cond);
+        configASSERT(status == SOPC_STATUS_OK);
+        vPortFree(ctx);
+        ctx = NULL;
+    }
+    return NULL;
+}
+
+void FREE_RTOS_TEST_S2OPC_USECASE_PUBSUB_SYNCHRO(void* ptr)
+{
+    SOPC_ReturnStatus status;
+    Mutex_Initialization(&m);
+
+    P_CHANNEL_Init(&channel, 16 * sizeof(tMessage), sizeof(tMessage), 16);
+
+    status = SOPC_Thread_Create(&p1, cbS2OPC_Thread_prod, NULL);
+
+    Mutex_Lock(&m);
+    sprintf(sBuffer, "$$$$ %2X -  cbS2OPC_Thread_prod init launching result = %d : current time = %lu\r\n",
+            (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
+    PRINTF(sBuffer);
+    Mutex_Unlock(&m);
+
+    status = SOPC_Thread_Create(&p2, cbS2OPC_Thread_cons, NULL);
+
+    Mutex_Lock(&m);
+    sprintf(sBuffer, "$$$$ %2X -  cbS2OPC_Thread_cons init launching result = %d : current time = %lu\r\n",
             (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
     PRINTF(sBuffer);
     Mutex_Unlock(&m);
