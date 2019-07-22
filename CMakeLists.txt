@@ -159,6 +159,8 @@ if(WITH_PYS2OPC AND (WITH_COVERAGE OR WITH_COVERITY OR WITH_CLANG_SOURCE_COVERAG
   message(WARNING "PyS²OPC relies on CFFI code generation, which may bend code analysis results.")
 endif()
 
+option(WITH_STATIC_SECURITY_DATA "Use static security data for test" OFF)
+
 # Re-enable asserts for Release and RelWithDebInfo builds
 string(REGEX REPLACE "[-/]DNDEBUG" "" CMAKE_C_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
 string(REGEX REPLACE "[-/]DNDEBUG" "" CMAKE_C_FLAGS_RELWITHDEBINFO ${CMAKE_C_FLAGS_RELWITHDEBINFO})
@@ -347,7 +349,6 @@ install(TARGETS s2opc-loader-embedded
         PUBLIC_HEADER DESTINATION "include/embedded")
 
 function(s2opc_embed_address_space c_file_name xml_uanodeset_path)
-    set(c_file_path "address_space_${var_name}.c")
 
     add_custom_command(
         OUTPUT ${c_file_name}
@@ -486,6 +487,10 @@ target_include_directories(toolkit_test_server PRIVATE ${S2OPC_PUBLIC_INCLUDES}
 if (EXPAT_FOUND)
 	target_link_libraries(toolkit_test_server PRIVATE s2opc-loader-uanodeset-expat)
 	set_target_properties(toolkit_test_server PROPERTIES COMPILE_DEFINITIONS "WITH_EXPAT")
+endif()
+
+if (WITH_STATIC_SECURITY_DATA)
+    set_target_properties(toolkit_test_server PROPERTIES COMPILE_DEFINITIONS "WITH_STATIC_SECURITY_DATA")
 endif()
 
 add_test(NAME "validation::client_server_test"

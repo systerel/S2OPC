@@ -44,6 +44,10 @@
 #include "uanodeset_expat/loader.h"
 #endif
 
+#ifdef WITH_STATIC_SECURITY_DATA
+#include "static_security_data.h"
+#endif
+
 #define ENDPOINT_URL "opc.tcp://localhost:4841"
 #define APPLICATION_URI "urn:S2OPC:localhost"
 #define PRODUCT_URI "urn:S2OPC:localhost"
@@ -348,19 +352,36 @@ int main(int argc, char* argv[])
 
     if (secuActive != false)
     {
+#ifdef WITH_STATIC_SECURITY_DATA
+        status = SOPC_KeyManager_SerializedCertificate_CreateFromDER(server_2k_cert, sizeof(server_2k_cert),
+                                                                     &serverCertificate);
+#else
+
         status = SOPC_KeyManager_SerializedCertificate_CreateFromFile("./server_public/server_2k_cert.der",
                                                                       &serverCertificate);
+#endif
+
         epConfig.serverCertificate = serverCertificate;
 
         if (SOPC_STATUS_OK == status)
         {
+#ifdef WITH_STATIC_SECURITY_DATA
+            status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromData(server_2k_key, sizeof(server_2k_key),
+                                                                            &serverKey);
+#else
             status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile("./server_private/server_2k_key.pem",
                                                                             &serverKey);
+#endif
+
             epConfig.serverKey = serverKey;
         }
         if (SOPC_STATUS_OK == status)
         {
+#ifdef WITH_STATIC_SECURITY_DATA
+            status = SOPC_KeyManager_SerializedCertificate_CreateFromDER(cacert, sizeof(cacert), &authCertificate);
+#else
             status = SOPC_KeyManager_SerializedCertificate_CreateFromFile("./trusted/cacert.der", &authCertificate);
+#endif
         }
 
         if (SOPC_STATUS_OK == status)
