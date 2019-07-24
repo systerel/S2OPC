@@ -228,7 +228,8 @@ SOPC_ReturnStatus P_SYNCHRO_SignalConditionVariable(Condition* pConditionVariabl
                                        signal,                        //
                                        clearsignal,                   //
                                        &wCurrentSlotId);              //
-                xTaskGenericNotify(handle, signal, eSetBits, NULL);
+
+                configASSERT(pdPASS == xTaskGenericNotify(handle, signal, eSetBits, NULL));
                 result = SOPC_STATUS_OK;
             }
         } while ((UINT16_MAX != wCurrentSlotId) && (true == bSignalAll));
@@ -392,12 +393,38 @@ SOPC_ReturnStatus P_SYNCHRO_UnlockAndWaitForConditionVariable(
     }
     // Wait signal or timeout
     // If signal or timeout, in both case, unstack signal
-    // (we signal to the waiting task that nb of waiting task is decremented)
 
     result = P_SYNCHRO_WaitSignal(&notificationValue, // Notif
                                   uwSignal,           // Signal waited
                                   uwClearSignal,      // Clear signal
                                   xTimeToWait);       // Tick timeout
+
+    // Remove from task list in case of SOPC_STATUS_TIMEOUT
+
+    if ((uwClearSignal != (notificationValue & uwClearSignal))           // Not a clear signal
+        && (E_COND_VAR_STATUS_INITIALIZED == pConditionVariable->status) // Workspace initilized
+        && (NULL != pConditionVariable->handleLockCounter))              // Lock exists
+    {
+        // If timeout occured, remove the task from the list.
+        if (SOPC_STATUS_TIMEOUT == result)
+        {
+            xQueueSemaphoreTake(pConditionVariable->handleLockCounter, portMAX_DELAY); // Critical section
+            {
+                P_UTILS_LIST_RemoveElt(&pConditionVariable->taskList, //
+                                       handleTask,                    //
+                                       uwSignal,                      //
+                                       uwClearSignal,                 //
+                                       NULL);                         //
+            }
+            xSemaphoreGive(pConditionVariable->handleLockCounter);
+        }
+
+        // Result updated by P_SYNCHRO_WaitSignal. Can be SOPC_OK or TIMEOUT !!!
+    }
+    else
+    {
+        result = SOPC_STATUS_INVALID_STATE;
+    }
 
     // Take mutex in parameter if exists
     if ((NULL != pMutex) && (NULL != (*pMutex)))
