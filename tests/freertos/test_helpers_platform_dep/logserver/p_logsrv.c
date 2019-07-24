@@ -1073,156 +1073,167 @@ static void cbTaskSocketServerMonitor(void* pParameters)
                                           NULL,             //
                                           NULL,             //
                                           &lwipTimeOut);    //
+                    // In case of select error, socket is dead. Go to binding state
                     if (resLwip < 0)
                     {
-                        FD_ZERO(&rdfs);
-                        FD_SET(p->socketTCP, &rdfs);
-                    }
-
-                    //----------------------------------------------Event part
-                    if (FD_ISSET(p->socketTCP, &rdfs))
-                    {
-                        // Accept connexion
-                        pClt = NULL;
-                        csock = -1;
-                        memset(&sin, 0, sinsize);
-
-                        if (resLwip > 0)
+                        if (p->socketTCP >= 0)
                         {
-                            csock = lwip_accept(p->socketTCP, (struct sockaddr*) &sin, &sinsize);
-                            if (csock != -1)
-                            {
-                                // Disable naggle algorithm
-                                configASSERT(lwip_setsockopt(csock,              //
-                                                             IPPROTO_TCP,        //
-                                                             TCP_NODELAY,        //
-                                                             (const void*) &opt, //
-                                                             sizeof(opt)) == 0); //
-
-                                DEBUG_incrementCpt();
-
-                                // Check if free slot exist
-                                if (P_UTILS_LIST_GetNbEltMT(&p->clientList) < p->maxClient)
-                                {
-                                    // Create client workspace + thread...
-                                    pClt = ClientCreateThenStart(csock,                                 //
-                                                                 p,                                     //
-                                                                 p->timeoutClientS,                     //
-                                                                 p->cbClientAnalyzerContextCreation,    //
-                                                                 p->cbClientAnalyzerContextDestruction, //
-                                                                 p->cbClientAnalyzer,                   //
-                                                                 p->cbClientAnalyzerPeriodic,           //
-                                                                 p->cbClientEncoderContextCreation,     //
-                                                                 p->cbClientEncoderContextDestruction,  //
-                                                                 p->cbClientEncoder,                    //
-                                                                 p->cbClientEncoderPeriodic);           //
-                                    if (pClt != NULL)
-                                    {
-                                        resList = P_UTILS_LIST_AddEltMT(&p->clientList, pClt, NULL, 0, 0);
-                                        if (resList != SOPC_STATUS_OK)
-                                        {
-                                            ClientStopThenDestroy(&pClt);
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    lwip_shutdown(csock, SHUT_RDWR);
-                                    lwip_close(csock);
-                                    DEBUG_decrementCpt();
-                                }
-
-                                pClt = NULL;
-                                csock = -1;
-                                memset(&sin, 0, sinsize);
-                            }
+                            lwip_shutdown(p->socketTCP, SHUT_RDWR);
+                            lwip_close(p->socketTCP);
+                            DEBUG_decrementCpt();
+                            p->socketTCP = -1;
                         }
-                        // Reajust timeout for periodic treatment
-                        xTaskCheckForTimeOut(&xTimeOut, &xTimeToWait); //---Period reajust
+                        p->status = E_LOG_SERVER_BINDING;
                     }
                     else
                     {
-                        // Periodic treatment or timeout
-                        vTaskSetTimeOutState(&xTimeOut);
-                        lwipTimeOut.tv_sec = 0;
-                        lwipTimeOut.tv_usec = 1000 * P_LOG_SRV_ONLINE_PERIOD;
-                        xTimeToWait = pdMS_TO_TICKS(P_LOG_SRV_ONLINE_PERIOD);
-
-                        //----------------------------------------------Periodic part
-
-                        // Check timeeout for announce ip and port of server to all client listing UDP port 4023
-                        p->timerHello++;
-                        if (p->timerHello >= p->periodeHello)
+                        //----------------------------------------------Event part
+                        if (FD_ISSET(p->socketTCP, &rdfs))
                         {
-                            p->timerHello = 0;
-                            if (p->periodeHello > 0)
+                            // Accept connexion
+                            pClt = NULL;
+                            csock = -1;
+                            memset(&sin, 0, sinsize);
+
+                            if (resLwip > 0)
                             {
-                                if (P_ETHERNET_IF_GetIp(&localeAddress) ==
-                                    ETHERNET_IF_RESULT_OK) // Only if ethernet initialized
+                                csock = lwip_accept(p->socketTCP, (struct sockaddr*) &sin, &sinsize);
+                                if (csock != -1)
                                 {
-                                    // Create socket
-                                    p->socketUDP = lwip_socket(AF_INET, SOCK_DGRAM, 0);
-                                    if (p->socketUDP >= 0)
+                                    // Disable naggle algorithm
+                                    configASSERT(lwip_setsockopt(csock,              //
+                                                                 IPPROTO_TCP,        //
+                                                                 TCP_NODELAY,        //
+                                                                 (const void*) &opt, //
+                                                                 sizeof(opt)) == 0); //
+
+                                    DEBUG_incrementCpt();
+
+                                    // Check if free slot exist
+                                    if (P_UTILS_LIST_GetNbEltMT(&p->clientList) < p->maxClient)
                                     {
-                                        DEBUG_incrementCpt();
-                                        if (localeAddress.type == 0)
+                                        // Create client workspace + thread...
+                                        pClt = ClientCreateThenStart(csock,                                 //
+                                                                     p,                                     //
+                                                                     p->timeoutClientS,                     //
+                                                                     p->cbClientAnalyzerContextCreation,    //
+                                                                     p->cbClientAnalyzerContextDestruction, //
+                                                                     p->cbClientAnalyzer,                   //
+                                                                     p->cbClientAnalyzerPeriodic,           //
+                                                                     p->cbClientEncoderContextCreation,     //
+                                                                     p->cbClientEncoderContextDestruction,  //
+                                                                     p->cbClientEncoder,                    //
+                                                                     p->cbClientEncoderPeriodic);           //
+                                        if (pClt != NULL)
                                         {
-                                            memset(&sin, 0, sizeof(struct sockaddr_in));
-                                            memset(p->bufferSRV_BROADCAST_UDP, 0, sizeof(p->bufferSRV_BROADCAST_UDP));
-                                            sin.sin_addr.s_addr = htonl(INADDR_BROADCAST);
-                                            sin.sin_family = AF_INET;
-                                            sin.sin_port = htons(p->portHello);
-                                            ipaddr_ntoa_r(&localeAddress,
-                                                          (void*) p->bufferSRV_BROADCAST_UDP +
-                                                              sizeof(p->bufferSRV_BROADCAST_UDP) / 2,
-                                                          sizeof(p->bufferSRV_BROADCAST_UDP) / 2);
-
-                                            snprintf(
-                                                (void*) p->bufferSRV_BROADCAST_UDP,
-                                                sizeof(p->bufferSRV_BROADCAST_UDP) / 2, "%s:%d\r\n",
-                                                p->bufferSRV_BROADCAST_UDP + sizeof(p->bufferSRV_BROADCAST_UDP) / 2,
-                                                p->port);
-
-                                            p->bufferSRV_BROADCAST_UDP[sizeof(p->bufferSRV_BROADCAST_UDP) - 1] = 0;
-
-                                            if (p->cbEncoderTransmitHello != NULL)
+                                            resList = P_UTILS_LIST_AddEltMT(&p->clientList, pClt, NULL, 0, 0);
+                                            if (resList != SOPC_STATUS_OK)
                                             {
-                                                nbBytesToSend = p->cbEncoderTransmitHello(
-                                                    p->bufferSRV_BROADCAST_UDP,
-                                                    strlen((void*) p->bufferSRV_BROADCAST_UDP),
-                                                    sizeof(p->bufferSRV_BROADCAST_UDP));
-                                            }
-                                            else
-                                            {
-                                                nbBytesToSend = strlen((void*) p->bufferSRV_BROADCAST_UDP);
-                                            }
-
-                                            if (nbBytesToSend <= sizeof(p->bufferSRV_BROADCAST_UDP))
-                                            {
-                                                byteSent = 0;
-                                                for (wIter = 0; (wIter < nbBytesToSend) && (byteSent >= 0);
-                                                     wIter += (uint16_t) byteSent)
-                                                {
-                                                    byteSent = lwip_sendto(p->socketUDP,                       //
-                                                                           p->bufferSRV_BROADCAST_UDP + wIter, //
-                                                                           nbBytesToSend - wIter,              //
-                                                                           0,                                  //
-                                                                           (struct sockaddr*) &sin,            //
-                                                                           sizeof(struct sockaddr_in));        //
-                                                }
+                                                ClientStopThenDestroy(&pClt);
                                             }
                                         }
-
-                                        // Destroy socket
-                                        lwip_close(p->socketUDP);
+                                    }
+                                    else
+                                    {
+                                        lwip_shutdown(csock, SHUT_RDWR);
+                                        lwip_close(csock);
                                         DEBUG_decrementCpt();
-                                        p->socketUDP = -1;
+                                    }
+
+                                    pClt = NULL;
+                                    csock = -1;
+                                    memset(&sin, 0, sinsize);
+                                }
+                            }
+
+                            // Reajust timeout for periodic treatment
+                            xTaskCheckForTimeOut(&xTimeOut, &xTimeToWait); //---Period reajust
+                        }
+                        else
+                        {
+                            // Periodic treatment or timeout
+                            vTaskSetTimeOutState(&xTimeOut);
+                            lwipTimeOut.tv_sec = 0;
+                            lwipTimeOut.tv_usec = 1000 * P_LOG_SRV_ONLINE_PERIOD;
+                            xTimeToWait = pdMS_TO_TICKS(P_LOG_SRV_ONLINE_PERIOD);
+
+                            //----------------------------------------------Periodic part
+
+                            // Check timeeout for announce ip and port of server to all client listing UDP port 4023
+                            p->timerHello++;
+                            if (p->timerHello >= p->periodeHello)
+                            {
+                                p->timerHello = 0;
+                                if (p->periodeHello > 0)
+                                {
+                                    if (P_ETHERNET_IF_GetIp(&localeAddress) ==
+                                        ETHERNET_IF_RESULT_OK) // Only if ethernet initialized
+                                    {
+                                        // Create socket
+                                        p->socketUDP = lwip_socket(AF_INET, SOCK_DGRAM, 0);
+                                        if (p->socketUDP >= 0)
+                                        {
+                                            DEBUG_incrementCpt();
+                                            if (localeAddress.type == 0)
+                                            {
+                                                memset(&sin, 0, sizeof(struct sockaddr_in));
+                                                memset(p->bufferSRV_BROADCAST_UDP, 0,
+                                                       sizeof(p->bufferSRV_BROADCAST_UDP));
+                                                sin.sin_addr.s_addr = htonl(INADDR_BROADCAST);
+                                                sin.sin_family = AF_INET;
+                                                sin.sin_port = htons(p->portHello);
+                                                ipaddr_ntoa_r(&localeAddress,
+                                                              (void*) p->bufferSRV_BROADCAST_UDP +
+                                                                  sizeof(p->bufferSRV_BROADCAST_UDP) / 2,
+                                                              sizeof(p->bufferSRV_BROADCAST_UDP) / 2);
+
+                                                snprintf(
+                                                    (void*) p->bufferSRV_BROADCAST_UDP,
+                                                    sizeof(p->bufferSRV_BROADCAST_UDP) / 2, "%s:%d\r\n",
+                                                    p->bufferSRV_BROADCAST_UDP + sizeof(p->bufferSRV_BROADCAST_UDP) / 2,
+                                                    p->port);
+
+                                                p->bufferSRV_BROADCAST_UDP[sizeof(p->bufferSRV_BROADCAST_UDP) - 1] = 0;
+
+                                                if (p->cbEncoderTransmitHello != NULL)
+                                                {
+                                                    nbBytesToSend = p->cbEncoderTransmitHello(
+                                                        p->bufferSRV_BROADCAST_UDP,
+                                                        strlen((void*) p->bufferSRV_BROADCAST_UDP),
+                                                        sizeof(p->bufferSRV_BROADCAST_UDP));
+                                                }
+                                                else
+                                                {
+                                                    nbBytesToSend = strlen((void*) p->bufferSRV_BROADCAST_UDP);
+                                                }
+
+                                                if (nbBytesToSend <= sizeof(p->bufferSRV_BROADCAST_UDP))
+                                                {
+                                                    byteSent = 0;
+                                                    for (wIter = 0; (wIter < nbBytesToSend) && (byteSent >= 0);
+                                                         wIter += (uint16_t) byteSent)
+                                                    {
+                                                        byteSent = lwip_sendto(p->socketUDP,                       //
+                                                                               p->bufferSRV_BROADCAST_UDP + wIter, //
+                                                                               nbBytesToSend - wIter,              //
+                                                                               0,                                  //
+                                                                               (struct sockaddr*) &sin,            //
+                                                                               sizeof(struct sockaddr_in));        //
+                                                    }
+                                                }
+                                            }
+
+                                            // Destroy socket
+                                            lwip_close(p->socketUDP);
+                                            DEBUG_decrementCpt();
+                                            p->socketUDP = -1;
+                                        }
                                     }
                                 }
                             }
-                        }
 
-                        xTaskCheckForTimeOut(&xTimeOut, &xTimeToWait); //---Reajust timeout for periodic treatment
+                            xTaskCheckForTimeOut(&xTimeOut, &xTimeToWait); //---Reajust timeout for periodic treatment
+                        }
                     }
                 }
                 break;
