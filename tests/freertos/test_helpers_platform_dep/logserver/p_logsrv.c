@@ -1087,52 +1087,55 @@ static void cbTaskSocketServerMonitor(void* pParameters)
                         csock = -1;
                         memset(&sin, 0, sinsize);
 
-                        csock = lwip_accept(p->socketTCP, (struct sockaddr*) &sin, &sinsize);
-                        if (csock != -1)
+                        if (resLwip > 0)
                         {
-                            // Disable naggle algorithm
-                            configASSERT(lwip_setsockopt(csock,              //
-                                                         IPPROTO_TCP,        //
-                                                         TCP_NODELAY,        //
-                                                         (const void*) &opt, //
-                                                         sizeof(opt)) == 0); //
-
-                            DEBUG_incrementCpt();
-
-                            // Check if free slot exist
-                            if (P_UTILS_LIST_GetNbEltMT(&p->clientList) < p->maxClient)
+                            csock = lwip_accept(p->socketTCP, (struct sockaddr*) &sin, &sinsize);
+                            if (csock != -1)
                             {
-                                // Create client workspace + thread...
-                                pClt = ClientCreateThenStart(csock,                                 //
-                                                             p,                                     //
-                                                             p->timeoutClientS,                     //
-                                                             p->cbClientAnalyzerContextCreation,    //
-                                                             p->cbClientAnalyzerContextDestruction, //
-                                                             p->cbClientAnalyzer,                   //
-                                                             p->cbClientAnalyzerPeriodic,           //
-                                                             p->cbClientEncoderContextCreation,     //
-                                                             p->cbClientEncoderContextDestruction,  //
-                                                             p->cbClientEncoder,                    //
-                                                             p->cbClientEncoderPeriodic);           //
-                                if (pClt != NULL)
+                                // Disable naggle algorithm
+                                configASSERT(lwip_setsockopt(csock,              //
+                                                             IPPROTO_TCP,        //
+                                                             TCP_NODELAY,        //
+                                                             (const void*) &opt, //
+                                                             sizeof(opt)) == 0); //
+
+                                DEBUG_incrementCpt();
+
+                                // Check if free slot exist
+                                if (P_UTILS_LIST_GetNbEltMT(&p->clientList) < p->maxClient)
                                 {
-                                    resList = P_UTILS_LIST_AddEltMT(&p->clientList, pClt, NULL, 0, 0);
-                                    if (resList != SOPC_STATUS_OK)
+                                    // Create client workspace + thread...
+                                    pClt = ClientCreateThenStart(csock,                                 //
+                                                                 p,                                     //
+                                                                 p->timeoutClientS,                     //
+                                                                 p->cbClientAnalyzerContextCreation,    //
+                                                                 p->cbClientAnalyzerContextDestruction, //
+                                                                 p->cbClientAnalyzer,                   //
+                                                                 p->cbClientAnalyzerPeriodic,           //
+                                                                 p->cbClientEncoderContextCreation,     //
+                                                                 p->cbClientEncoderContextDestruction,  //
+                                                                 p->cbClientEncoder,                    //
+                                                                 p->cbClientEncoderPeriodic);           //
+                                    if (pClt != NULL)
                                     {
-                                        ClientStopThenDestroy(&pClt);
+                                        resList = P_UTILS_LIST_AddEltMT(&p->clientList, pClt, NULL, 0, 0);
+                                        if (resList != SOPC_STATUS_OK)
+                                        {
+                                            ClientStopThenDestroy(&pClt);
+                                        }
                                     }
                                 }
-                            }
-                            else
-                            {
-                                lwip_shutdown(csock, SHUT_RDWR);
-                                lwip_close(csock);
-                                DEBUG_decrementCpt();
-                            }
+                                else
+                                {
+                                    lwip_shutdown(csock, SHUT_RDWR);
+                                    lwip_close(csock);
+                                    DEBUG_decrementCpt();
+                                }
 
-                            pClt = NULL;
-                            csock = -1;
-                            memset(&sin, 0, sinsize);
+                                pClt = NULL;
+                                csock = -1;
+                                memset(&sin, 0, sinsize);
+                            }
                         }
                         // Reajust timeout for periodic treatment
                         xTaskCheckForTimeOut(&xTimeOut, &xTimeToWait); //---Period reajust
@@ -1684,9 +1687,9 @@ SOPC_ReturnStatus SOPC_LogSrv_Start(
 
         gLogServer = P_LOG_SRV_CreateAndStart(portSrvTCP,        //
                                               portCltUDP,        //
-                                              1,                 // Max log client
+                                              2,                 // Max log client
                                               0,                 // Disconnect log client after 0s
-                                              5,                 // Hello message each 5seconds
+                                              0,                 // Hello message each 5seconds
                                               cbOneConnexion,    //
                                               NULL,              //
                                               cbEchoCallback,    // Test echo to verify lwip
@@ -1772,10 +1775,21 @@ int __attribute__((weak)) _write(int handle, const char* buffer, size_t size)
     }
     else
     {
-        /* Send data. */
-        P_LOG_SRV_SendToAllClient(gLogServer, (uint8_t*) buffer, size, &length);
-    }
+        eChannelResult resChannelSent;
+        resChannelSent = P_CHANNEL_Send(&gLogServer->logChannel,   //
+                                        (const uint8_t*) buffer,   //
+                                        size,                      //
+                                        &length,                   //
+                                        E_CHANNEL_WR_MODE_NORMAL); //
 
+        if (E_CHANNEL_RESULT_ERROR_FULL == resChannelSent)
+        {
+            P_CHANNEL_Flush(&gLogServer->logChannel);
+        }
+
+        /* Send data. */
+        // P_LOG_SRV_SendToAllClient(gLogServer, (uint8_t*) buffer, size, &length);
+    }
     return length;
 }
 
