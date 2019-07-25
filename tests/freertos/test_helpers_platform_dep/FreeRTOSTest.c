@@ -955,8 +955,6 @@ void FREE_RTOS_TEST_S2OPC_CHECK_THREAD(void* ptr)
 
 static void* cbS2OPC_Thread_UDP_Socket_API(void* ptr)
 {
-    // Condition* pv = (Condition*) ptr;
-
     SOPC_Buffer* pBuffer;
     SOPC_Socket_AddressInfo* adresse = NULL;
     Socket sock = -1;
@@ -996,8 +994,67 @@ static void* cbS2OPC_Thread_UDP_Socket_API(void* ptr)
 
             SOPC_UDP_Socket_Close(&sock);
             SOPC_UDP_SocketAddress_Delete(&adresse);
+        }
+    }
 
-            // SOPC_Sleep(5000);
+    return NULL;
+}
+
+static void* cbS2OPC_Thread_UDP_Socket_API_LB(void* ptr)
+{
+    SOPC_Buffer* pBuffer;
+    SOPC_Socket_AddressInfo* adresseR;
+    adresseR = NULL;
+    Socket sockR = -1;
+    pBuffer = SOPC_Buffer_Create(256);
+    SOPC_Buffer_Write(pBuffer, (const uint8_t*) "Hello world !!!\r\n", (uint32_t) strlen("Hello world !!!\r\n"));
+    SOPC_Buffer_SetPosition(pBuffer, 0);
+    SOPC_LogSrv_Start(60, 4023);
+
+    P_ETHERNET_IF_IsReady(UINT32_MAX);
+
+    adresseR = SOPC_UDP_SocketAddress_Create(false, "232.1.2.101", "4840");
+    configASSERT(SOPC_UDP_Socket_CreateToReceive(adresseR, true, &sockR) == SOPC_STATUS_OK);
+    configASSERT(SOPC_UDP_Socket_AddMembership(sockR, adresseR, NULL) == SOPC_STATUS_OK);
+    SOPC_SocketSet rdset;
+    SOPC_SocketSet wrset;
+    SOPC_SocketSet exset;
+    SOPC_SocketSet_Clear(&rdset);
+    SOPC_SocketSet_Clear(&wrset);
+    SOPC_SocketSet_Clear(&exset);
+    SOPC_SocketSet_Add(sockR, &rdset);
+    SOPC_SocketSet_Add(sockR, &wrset);
+    SOPC_SocketSet_Add(sockR, &exset);
+
+    while (1)
+    {
+        {
+            SOPC_SocketSet_Clear(&rdset);
+            SOPC_SocketSet_Clear(&wrset);
+            SOPC_SocketSet_Clear(&exset);
+            SOPC_SocketSet_Add(sockR, &rdset);
+            SOPC_SocketSet_Add(sockR, &wrset);
+            SOPC_SocketSet_Add(sockR, &exset);
+
+            if (SOPC_Socket_WaitSocketEvents(&rdset, &rdset, &exset, 1000) > 0)
+            {
+                configASSERT(SOPC_UDP_Socket_ReceiveFrom(sockR, pBuffer) == SOPC_STATUS_OK);
+
+                if (pBuffer->length > 0)
+                {
+                    pBuffer->data[pBuffer->length < (pBuffer->max_size - 2) ? pBuffer->length : pBuffer->length - 1] =
+                        '\r';
+                    pBuffer
+                        ->data[pBuffer->length < (pBuffer->max_size - 2) ? pBuffer->length + 1 : pBuffer->length - 1] =
+                        '\n';
+                    pBuffer
+                        ->data[pBuffer->length < (pBuffer->max_size - 2) ? pBuffer->length + 2 : pBuffer->length - 1] =
+                        0;
+
+                    printf((void*) pBuffer->data);
+                    fflush(stdout);
+                }
+            }
         }
     }
 
@@ -1019,9 +1076,24 @@ void FREE_RTOS_TEST_S2OPC_UDP_SOCKET_API(void* ptr)
     Mutex_Unlock(&m);
 }
 
+void FREE_RTOS_TEST_S2OPC_UDP_SOCKET_API_LB(void* ptr)
+{
+    SOPC_ReturnStatus status;
+    Condition* pv = (Condition*) ptr;
+    Mutex_Initialization(&m);
+
+    status = SOPC_Thread_Create(&pX, cbS2OPC_Thread_UDP_Socket_API_LB, pv);
+
+    Mutex_Lock(&m);
+    sprintf(sBuffer, "$$$$ %2X -  Toolkit test udp socket api init launching result = %d : current time = %lu\r\n",
+            (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
+    PRINTF(sBuffer);
+    Mutex_Unlock(&m);
+}
+
 static void* cbS2OPC_Thread_PubSub(void* ptr)
 {
-    // SOPC_LogSrv_Start(60, 4023);
+    SOPC_LogSrv_Start(60, 4023);
     // SOPC_LogSrv_WaitClient(UINT32_MAX);
 
     P_ETHERNET_IF_IsReady(UINT32_MAX);
@@ -1198,10 +1270,6 @@ static void* cbS2OPC_Thread_cons(void* ptr)
     SOPC_ReturnStatus status;
     tMessage* ctx;
     char lclBuffer[256];
-    // SOPC_LogSrv_Start(60, 4023);
-    // SOPC_LogSrv_WaitClient(UINT32_MAX); // Todo: Test to verify server start stop memory leaks.
-    // SOPC_LogSrv_Stop();
-    // SOPC_LogSrv_Start(60, 4023);
     for (;;)
     {
         SOPC_Sleep(1);
