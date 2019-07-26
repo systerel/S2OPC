@@ -35,6 +35,65 @@
 
 /*
   @description
+    Callback type for data change event (related to a subscription)
+  @param connectionId
+    The connection id on which the datachange happened
+  @param nodeId
+    The node id of changed node
+  @param value
+    The new value of the Attribute 'Value'. Its content is freed by the LibSub after this function has been called,
+    hence the callback must copy it if it should be used outside the callback. */
+typedef void (*SOPC_ClientHelper_DataChangeCbk)(const int32_t connectionId,
+                                          const char* nodeId,
+                                          const SOPC_DataValue* value);
+
+/*
+ @description
+   Connection configuration to a remote OPC server
+ @field security_policy
+   The chosen OPC-UA security policy for the connection, one of the SOPC_SecurityPolicy_*_URI string.
+   zero-terminated string
+ @field security_mode
+   The chosen OPC-UA security mode for the connection.
+   The list of accepted values is:
+   - 1: no security mode,
+   - 2: only signature,
+   - 3: signature and encryption.
+ @field path_cert_auth
+   Zero-terminated path to the root certificate authority in the DER format
+ @field path_cert_srv
+   Zero-terminated path to the server certificate in the DER format, signed by the root certificate authority
+ @field path_cert_cli
+   Zero-terminated path to the client certificate in the DER format, signed by the root certificate authority
+ @field path_key_cli
+   Zero-terminated path to the client private key which is paired to the public key signed server certificate,
+   in the DER format
+ @field policyId
+   Zero-terminated policy id. To know which policy id to use, please read a
+   GetEndpointsResponse or a CreateSessionResponse. When username is NULL, the
+   AnonymousIdentityToken is used and the policy id must correspond to an
+   anonymous UserIdentityPolicy. Otherwise, the UserNameIdentityToken is used
+   and the policy id must correspond to an username UserIdentityPolicy.
+ @field username
+   Zero-terminated username, NULL for anonymous access, see policyId
+ @field password
+   Zero-terminated password, ignored when username is NULL. Password is kept in memory for future reconnections.
+*/
+typedef struct
+{
+  const char* security_policy;
+  int32_t security_mode;
+  const char* path_cert_auth;
+  const char* path_cert_srv;
+  const char* path_cert_cli;
+  const char* path_key_cli;
+  const char* policyId;
+  const char* username;
+  const char* password;
+} SOPC_ClientHelper_Security;
+
+/*
+  @description
     Structure defining a node and value to write.
     Value should be single value or one-dimensional array: value.value.ArrayType should be SingleValue or Array.
   @field nodeId
@@ -100,8 +159,6 @@ typedef struct {
   boolean includeSubtypes;
 } SOPC_ClientHelper_BrowseRequest;
 
-
-
 /*
   @description
     Structure defining a node, an attribute and a value.
@@ -110,7 +167,7 @@ typedef struct {
   @field isForward
     If True, the server follow a forward reference. Otherwise, it follow an inverse.
   @field nodeId
-    ExpandedNodeId of the target node following the Reference defined by the returned ReferenceTypeId.
+    ExpandedNodeId (see OPC Unified Architecture, Part 4) of the target node following the Reference defined by the returned ReferenceTypeId.
   @field browseName
     BrowseName of the target node. zero-terminated string or NULL.
   @field DisplayName
@@ -162,7 +219,6 @@ int32_t SOPC_ClientHelper_Initialize(const char* log_path, int32_t log_level);
     As this function should be called only once, it is not threadsafe. */
 void SOPC_ClientHelper_Finalize(void);
 
-
 /*
  @description
     Creates a new connection to a remote OPC server.
@@ -172,49 +228,14 @@ void SOPC_ClientHelper_Finalize(void);
     All parameters are copied and can be freed by the caller.
  @param endpointUrl
    Zero-terminated path to server URL
- @param security_policy
-   The chosen OPC-UA security policy for the connection, one of the SOPC_SecurityPolicy_*_URI string.
-   zero-terminated string
- @param security_mode
-   The chosen OPC-UA security mode for the connection.
-   The list of accepted values is:
-   - 1: no security mode,
-   - 2: only signature,
-   - 3: signature and encryption.
- @param path_cert_auth
-   Zero-terminated path to the root certificate authority in the DER format
- @param path_cert_srv
-   Zero-terminated path to the server certificate in the DER format, signed by the root certificate authority
- @param path_cert_cli
-   Zero-terminated path to the client certificate in the DER format, signed by the root certificate authority
- @param path_key_cli
-   Zero-terminated path to the client private key which is paired to the public key signed server certificate,
-   in the DER format
- @param policyId
-   Zero-terminated policy id. To know which policy id to use, please read a
-   GetEndpointsResponse or a CreateSessionResponse. When username is NULL, the
-   AnonymousIdentityToken is used and the policy id must correspond to an
-   anonymous UserIdentityPolicy. Otherwise, the UserNameIdentityToken is used
-   and the policy id must correspond to an username UserIdentityPolicy.
- @param username
-   Zero-terminated username, NULL for anonymous access, see policyId
- @param password
-   Zero-terminated password, ignored when username is NULL. Password is kept in memory for future reconnections.
  @return
     If this operation succeeded, return a connection id > 0.
-    If invalid arguement detected, return -<n> with <n> argument number (starting from 1).
+    If invalid endpointUrl detected, return -1.
+    If invalid security detected, return -<10+n> with <n> field number (starting from 1).
     If connection failed, return '-100'.
  */
 int32_t SOPC_ClientHelper_Connect(const char* endpointUrl,
-                                  const char* security_policy,
-                                  int32_t security_mode,
-                                  const char* path_cert_auth,
-                                  const char* path_cert_srv,
-                                  const char* path_cert_cli,
-                                  const char* path_key_cli,
-                                  const char* policyId,
-                                  const char* username,
-                                  const char* password);
+                                  SOPC_ClientHelper_Security security);
 
 /*
  @description
@@ -231,6 +252,7 @@ int32_t SOPC_ClientHelper_Connect(const char* endpointUrl,
  @param nodeIds
     An array of zero-terminated strings describing the NodeIds to add.
     It should be not NULL and be at least \p nbNodeIds long.
+    See OPC Unified Architecture, Part 3 for NodeId description.
  @param nbNodeIds
     Number of elements to subscribes. It should be between 1 and INT32_MAX
  @param callback
@@ -239,9 +261,10 @@ int32_t SOPC_ClientHelper_Connect(const char* endpointUrl,
    '0' if operation succeed 
    '-1' if connectionId not valid
    '-2' if nodeIds or nbNodeIds not valid
+   '-3' if the data change callback associated to connectionId is NULL
    '-100' if operation failed
 */
-int32_t SOPC_ClientHelper_Subscribe(int32_t connectionId, char** nodeIds, size_t nbNodeIds, SOPC_LibSub_DataChangeCbk callback);
+int32_t SOPC_ClientHelper_Subscribe(int32_t connectionId, char** nodeIds, size_t nbNodeIds, SOPC_ClientHelper_DataChangeCbk callback);
 
 /*
  @description
