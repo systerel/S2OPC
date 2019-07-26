@@ -91,16 +91,97 @@ static SOPC_ReturnStatus SOPC_AsyncQueue_BlockingEnqueueFirstOrLast(SOPC_AsyncQu
         {
             if (false == firstOut)
             {
+                {
+#if 0
+                    struct SOPC_SLinkedList_
+                    {
+                        SOPC_SLinkedList_Elt* first;
+                        SOPC_SLinkedList_Elt* last;
+                        uint32_t length;
+                        uint32_t maxLength;
+                    };
+
+                    struct Event_
+                    {
+                        void* handler;
+                        int32_t code;
+                        uint32_t id;
+                        void* params;
+                        uintptr_t auxParam;
+                    };
+
+                    {
+                        char* sBuffer[50] = {0};
+                        QueueHandle_t value = xTaskGetCurrentTaskHandle();
+                        snprintf((void*) sBuffer, sizeof(sBuffer) - 1, "|%lu|APPEND|%lu|%s|%2X|%lu|%lu|q%s\r\n",
+                                 xTaskGetTickCount(), ((struct Event_*) element)->code, pcTaskGetName(value),
+                                 (unsigned int) queue, ((struct SOPC_SLinkedList_*) queue->queueList)->length,
+                                 queue->waitingThreads, queue->debugQueueName);
+                        SOPC_LogSrv_Print(sBuffer, strlen(sBuffer));
+                    }
+#endif
+                }
                 enqueuedElt = SOPC_SLinkedList_Append(queue->queueList, 0, element);
             }
             else
             {
+                {
+#if 0
+                    struct SOPC_SLinkedList_
+                    {
+                        SOPC_SLinkedList_Elt* first;
+                        SOPC_SLinkedList_Elt* last;
+                        uint32_t length;
+                        uint32_t maxLength;
+                    };
+
+                    struct Event_
+                    {
+                        void* handler;
+                        int32_t code;
+                        uint32_t id;
+                        void* params;
+                        uintptr_t auxParam;
+                    };
+
+                    {
+                        char* sBuffer[50] = {0};
+                        QueueHandle_t value = xTaskGetCurrentTaskHandle();
+                        snprintf((void*) sBuffer, sizeof(sBuffer) - 1, "|%lu|PREPEND|%lu|%s|%2X|%lu|%lu|q%s\r\n",
+                                 xTaskGetTickCount(), ((struct Event_*) element)->code, pcTaskGetName(value),
+                                 (unsigned int) queue, ((struct SOPC_SLinkedList_*) queue->queueList)->length,
+                                 queue->waitingThreads, queue->debugQueueName);
+                        SOPC_LogSrv_Print(sBuffer, strlen(sBuffer));
+                    }
+#endif
+                }
                 enqueuedElt = SOPC_SLinkedList_Prepend(queue->queueList, 0, element);
             }
             if (element == enqueuedElt)
             {
                 if (queue->waitingThreads > 0)
                 {
+                    {
+#if 0
+                        struct SOPC_SLinkedList_
+                        {
+                            SOPC_SLinkedList_Elt* first;
+                            SOPC_SLinkedList_Elt* last;
+                            uint32_t length;
+                            uint32_t maxLength;
+                        };
+
+                        {
+                            char* sBuffer[50] = {0};
+                            QueueHandle_t value = xTaskGetCurrentTaskHandle();
+                            snprintf((void*) sBuffer, sizeof(sBuffer) - 1, "|%lu|SIGALL||%s|%2X|%lu|%lu|q%s\r\n",
+                                     xTaskGetTickCount(), pcTaskGetName(value), (unsigned int) queue,
+                                     ((struct SOPC_SLinkedList_*) queue->queueList)->length, queue->waitingThreads,
+                                     queue->debugQueueName);
+                            SOPC_LogSrv_Print(sBuffer, strlen(sBuffer));
+                        }
+#endif
+                    }
                     Condition_SignalAll(&queue->queueCond);
                 }
             }
@@ -147,12 +228,73 @@ static SOPC_ReturnStatus SOPC_AsyncQueue_Dequeue(SOPC_AsyncQueue* queue, bool is
                     Mutex_UnlockAndWaitCond(&queue->queueCond, &queue->queueMutex);
                     *element = SOPC_SLinkedList_PopHead(queue->queueList);
                 }
+
                 status = SOPC_STATUS_OK;
                 queue->waitingThreads--;
+
+                {
+#if 0
+                    struct SOPC_SLinkedList_
+                    {
+                        SOPC_SLinkedList_Elt* first;
+                        SOPC_SLinkedList_Elt* last;
+                        uint32_t length;
+                        uint32_t maxLength;
+                    };
+
+                    struct Event_
+                    {
+                        void* handler;
+                        int32_t code;
+                        uint32_t id;
+                        void* params;
+                        uintptr_t auxParam;
+                    };
+
+                    {
+                        char* sBuffer[50] = {0};
+                        QueueHandle_t value = xTaskGetCurrentTaskHandle();
+                        snprintf((void*) sBuffer, sizeof(sBuffer) - 1, "|%lu|POPHEAD LOOPER|%lu|q%s|%2X|%lu|%lu|%s\r\n",
+                                 xTaskGetTickCount(), (*((struct Event_**) element))->code, queue->debugQueueName,
+                                 (unsigned int) queue, ((struct SOPC_SLinkedList_*) queue->queueList)->length,
+                                 queue->waitingThreads, pcTaskGetName(value));
+                        SOPC_LogSrv_Print(sBuffer, strlen(sBuffer));
+                    }
+#endif
+                }
             }
         }
         else
         {
+            {
+#if 0
+                struct SOPC_SLinkedList_
+                {
+                    SOPC_SLinkedList_Elt* first;
+                    SOPC_SLinkedList_Elt* last;
+                    uint32_t length;
+                    uint32_t maxLength;
+                };
+                struct Event_
+                {
+                    void* handler;
+                    int32_t code;
+                    uint32_t id;
+                    void* params;
+                    uintptr_t auxParam;
+                };
+
+                {
+                    char* sBuffer[50] = {0};
+                    QueueHandle_t value = xTaskGetCurrentTaskHandle();
+                    snprintf((void*) sBuffer, sizeof(sBuffer) - 1, "|%lu|POPHEAD|%lu|q%s|%2X|%lu|%lu|%s\r\n",
+                             xTaskGetTickCount(), (*((struct Event_**) element))->code, queue->debugQueueName,
+                             (unsigned int) queue, ((struct SOPC_SLinkedList_*) queue->queueList)->length,
+                             queue->waitingThreads, pcTaskGetName(value));
+                    SOPC_LogSrv_Print(sBuffer, strlen(sBuffer));
+                }
+#endif
+            }
             status = SOPC_STATUS_OK;
         }
         Mutex_Unlock(&queue->queueMutex);
