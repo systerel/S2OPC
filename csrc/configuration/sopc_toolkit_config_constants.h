@@ -115,7 +115,7 @@
  * (elapsed time between socket connection and OPN response message)
  * */
 #ifndef SOPC_SC_CONNECTION_TIMEOUT_MS
-#define SOPC_SC_CONNECTION_TIMEOUT_MS 60000
+#define SOPC_SC_CONNECTION_TIMEOUT_MS (5 * 60000)
 #endif
 
 /* SESSION CONFIGURATION */
