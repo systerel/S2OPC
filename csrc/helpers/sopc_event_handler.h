@@ -121,7 +121,7 @@ SOPC_ReturnStatus SOPC_EventHandler_PostAsNext(SOPC_EventHandler* handler,
  *
  * \return The created looper, or \c NULL in case or error.
  */
-SOPC_Looper* SOPC_Looper_Create(void);
+SOPC_Looper* SOPC_Looper_Create(const char* taskName);
 
 /**
  * \brief Stops a looper and releases all resources allocated to it.

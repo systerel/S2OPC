@@ -127,9 +127,10 @@ void P_THREAD_Destroy(Thread** ptr)
     }
 }
 // Creation workspace
-Thread*                                   // Handle workspace
-P_THREAD_Create(tPtrFct fct,              // Callback
-                void* args,               // Argument callback
+Thread*                      // Handle workspace
+P_THREAD_Create(tPtrFct fct, // Callback
+                void* args,  // Argument callback
+                const char* taskName,
                 tPtrFct fctWatingForJoin, // Debug thread waiting join
                 tPtrFct fctReadyToSignal) // Debug thread ended
 {
@@ -147,6 +148,7 @@ P_THREAD_Create(tPtrFct fct,              // Callback
                           MAX_THREADS,                         //
                           fct,                                 //
                           args,                                //
+                          taskName,                            //
                           fctWatingForJoin,                    //
                           fctReadyToSignal) != SOPC_STATUS_OK) //
         {
@@ -163,6 +165,7 @@ SOPC_ReturnStatus P_THREAD_Init(Thread* ptrWks,            // Workspace
                                 uint16_t wMaxRDV,          // Max join
                                 tPtrFct fct,               // Callback
                                 void* args,                // Args
+                                const char* taskName,      //
                                 tPtrFct fctWaitingForJoin, // Debug wait for join
                                 tPtrFct fctReadyToSignal)  // Debug wait for
 {
@@ -269,10 +272,10 @@ SOPC_ReturnStatus P_THREAD_Init(Thread* ptrWks,            // Workspace
     if (SOPC_STATUS_OK == resPTHR)
     {
         BaseType_t resTaskCreate =
-            xTaskCreate(cbInternalCallback,       // Callback
-                        "appThread",              // Friendly name
-                        configMINIMAL_STACK_SIZE, // Stack size
-                        handleWks,                // Workspace thread
+            xTaskCreate(cbInternalCallback,                        // Callback
+                        taskName == NULL ? "appThread" : taskName, // Friendly name
+                        configMINIMAL_STACK_SIZE,                  // Stack size
+                        handleWks,                                 // Workspace thread
                         (configPRIORITY_S2OPC > (configMAX_PRIORITIES - 1)) ? configMAX_PRIORITIES - 1
                                                                             : configPRIORITY_S2OPC, // Priority
                         &handleWks->handleTask);                                                    // Task handle
@@ -658,9 +661,9 @@ void P_THREAD_Sleep(uint32_t milliseconds)
 /*****Public s2opc thread api*****/
 
 // Create and initialize a thread
-SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), void* startArgs)
+SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), void* startArgs, const char* taskName)
 {
-    return P_THREAD_Init(thread, MAX_THREADS, (tPtrFct) startFct, startArgs, NULL, NULL);
+    return P_THREAD_Init(thread, MAX_THREADS, (tPtrFct) startFct, startArgs, taskName, NULL, NULL);
 }
 
 // Join then destroy a thread
