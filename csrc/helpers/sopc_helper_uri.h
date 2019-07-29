@@ -19,16 +19,30 @@
 
 #ifndef SOPC_HELPER_URI_H_
 #define SOPC_HELPER_URI_H_
-
-#include <stdbool.h>
-#include <stddef.h>
-
 #define TCP_UA_MAX_URL_LENGTH 4096
 
-/** @brief: return true and output parameters if parsed with success. false otherwise */
-bool SOPC_Helper_URI_ParseTcpUaUri(const char* uri, size_t* hostnameLength, size_t* portIdx, size_t* portLength);
+#include <stdbool.h>
 
-/** \brief: Splits an URI and stores it in newly created buffers */
-bool SOPC_Helper_URI_SplitTcpUaUri(const char* uri, char** hostname, char** port);
+typedef enum SOPC_UriType
+{
+    SOPC_URI_Undetermined,
+    SOPC_URI_TcpUa,
+    SOPC_URI_UdpUa,
+    SOPC_URI_EthUa,
+    SOPC_URI_MqttUa
+} SOPC_UriType;
+
+/* Return true if find exist in sep array, return false otherwise */
+static bool URI_match(char find, const char* sep);
+
+/* Extract respectively Port, Hostname and prefix from given URI */
+static bool getUriPortId(const char** ppCursor, char** ppPort);
+static bool getUriHostname(const char** ppCursor, char** ppHostname);
+static bool getUriPrefix(const char** ppCursor, char** ppPrefix);
+
+/*  */
+static bool getUriTypeFromEnum(char** prefix, SOPC_UriType* type);
+
+bool SOPC_Helper_URI_SplitUri(const char* uri, SOPC_UriType* type, char** hostname, char** port);
 
 #endif /* SOPC_HELPER_URI_H_ */

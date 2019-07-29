@@ -17,185 +17,252 @@
  * under the License.
  */
 
-#include <assert.h>
-#include <stdint.h>
+#include <stddef.h>
 #include <string.h>
 
 #include "sopc_helper_string.h"
 #include "sopc_helper_uri.h"
 #include "sopc_mem_alloc.h"
 
-#define TCPUA_PREFIX ((const char*) "opc.tcp://")
+#define URI_Prefix_Sep "://"
+#define URI_HostName_Sep ":"
+#define URI_Port_Sep "/"
 
-bool SOPC_Helper_URI_ParseTcpUaUri(const char* uri, size_t* hostnameLength, size_t* portIdx, size_t* portLength)
+#define URI_Default_Bracket_nb 0
+
+#define TCPUA_PREFIX ((const char*) "opc.tcp")
+#define UDPUA_PREFIX ((const char*) "opc.udp")
+#define ETHUA_PREFIX ((const char*) "opc.eth")
+#define MQTTUA_PREFIX ((const char*) "MqttUa")
+
+static bool URI_match(char find, const char* sep)
 {
-    bool result = false;
-    size_t idx = 0;
-    bool isPort = false;
-    bool endOfPort = false;
-    bool hasPort = false;
-    bool hasName = false;
-    bool invalid = false;
-    bool startIPv6 = false;
-    if (uri != NULL && hostnameLength != NULL && portLength != NULL)
+    bool res = false;
+    size_t i = 0;
+
+    while (sep[i] && !res)
     {
-        *hostnameLength = 0;
-        *portIdx = 0;
-        *portLength = 0;
-        const size_t PREFIX_LENGTH = strlen(TCPUA_PREFIX);
-        if (strlen(uri) + 4 > TCP_UA_MAX_URL_LENGTH)
+        if (sep[i] == find)
         {
-            // Encoded value shall be less than 4096 bytes
+            res = true;
         }
-        else if (strlen(uri) > PREFIX_LENGTH && SOPC_strncmp_ignore_case(uri, TCPUA_PREFIX, PREFIX_LENGTH) == 0)
-        {
-            // search for a ':' defining port for given IP
-            // search for a '/' defining endpoint name for given IP => at least 1 char after it (len - 1)
-            for (idx = PREFIX_LENGTH; idx < strlen(uri) - 1; idx++)
-            {
-                if (false != isPort && false == endOfPort)
-                {
-                    if (uri[idx] >= '0' && uri[idx] <= '9')
-                    {
-                        if (false == hasPort)
-                        {
-                            // port definition
-                            hasPort = true;
-                            *portIdx = idx;
-                        }
-                    }
-                    else if (uri[idx] == '/' && false == invalid)
-                    {
-                        // Name of the endpoint after port, invalid otherwise
-                        if (false == hasPort)
-                        {
-                            invalid = true;
-                        }
-                        else
-                        {
-                            *portLength = idx - *portIdx;
-                            hasName = true;
-                            endOfPort = true; // End of port definition
-                        }
-                    }
-                    else
-                    {
-                        if (false == hasPort || false == hasName)
-                        {
-                            // unexpected character: we do not expect a endpoint name
-                            invalid = true;
-                        }
-                    }
-                }
-                else
-                {
-                    if (false == endOfPort)
-                    {
-                        // Treatment before the port parsing
-                        if (uri[idx] == ':' && false == startIPv6)
-                        {
-                            *hostnameLength = idx - PREFIX_LENGTH;
-                            isPort = true;
-                        }
-                        else if (uri[idx] == '[')
-                        {
-                            startIPv6 = true;
-                        }
-                        else if (uri[idx] == ']')
-                        {
-                            if (false == startIPv6)
-                            {
-                                invalid = true;
-                            }
-                            else
-                            {
-                                startIPv6 = false;
-                            }
-                        }
-                    }
-                    else if (hasPort)
-                    {
-                        // Treatment after the port parsing
-                        // TODO: check absence of forbidden characters
-                    }
-                }
-            }
-
-            if (hasPort != false && false == invalid)
-            {
-                result = true;
-                if (*portLength == 0)
-                {
-                    // No endpoint name after port provided
-                    *portLength = idx - *portIdx + 1;
-                }
-            }
-        }
+        ++i;
     }
-
-    return result;
+    return (res);
 }
 
-bool SOPC_Helper_URI_SplitTcpUaUri(const char* uri, char** hostname, char** port)
+static bool getUriPortId(const char** ppCursor, char** ppPort)
+{
+    const char* start = *ppCursor;
+    const char* pCursor = *ppCursor;
+    bool res = true;
+    bool match = false;
+    char* resStr = NULL;
+    size_t len = 0;
+
+    while (!match)
+    {
+        match = URI_match(*pCursor, URI_Port_Sep);
+        if (!*pCursor)
+        {
+            match = true;
+        }
+        if (!match)
+        {
+            ++len;
+            ++pCursor;
+        }
+    }
+    if (0 == len)
+    {
+        res = false;
+    }
+    if (res)
+    {
+        resStr = calloc(len + 1, sizeof(char));
+        if (resStr == NULL)
+        {
+            res = false;
+        }
+    }
+    if (res)
+    {
+        resStr = strncpy(resStr, start, len);
+        *ppPort = resStr;
+        *ppCursor = pCursor;
+    }
+    return (res);
+}
+
+static bool getUriHostname(const char** ppCursor, char** ppHostname)
+{
+    const char* start = *ppCursor;
+    const char* pCursor = *ppCursor;
+    bool res = true;
+    bool match = false;
+    char* resStr = NULL;
+    size_t NbBracketOpen = URI_Default_Bracket_nb;
+    size_t len = 0;
+
+    while (!match && res)
+    {
+        if (NbBracketOpen <= 0)
+        {
+            match = URI_match(*pCursor, URI_HostName_Sep);
+        }
+        if (!match)
+        {
+            if (*pCursor == '[')
+            {
+                ++NbBracketOpen;
+            }
+            if (0 < NbBracketOpen && ']' == *pCursor)
+            {
+                --NbBracketOpen;
+            }
+            ++len;
+            ++pCursor;
+        }
+        if (!*pCursor)
+        {
+            res = false;
+        }
+    }
+    if (NbBracketOpen > 0 || 0 == len)
+    {
+        res = false;
+    }
+    if (res)
+    {
+        resStr = calloc(len + 1, sizeof(char));
+        if (resStr == NULL)
+        {
+            res = false;
+        }
+    }
+    if (res)
+    {
+        resStr = strncpy(resStr, start, len);
+        *ppHostname = resStr;
+        while (match)
+        {
+            match = URI_match(*(++pCursor), URI_HostName_Sep);
+        }
+        *ppCursor = pCursor;
+    }
+    return (res);
+}
+
+static bool getUriPrefix(const char** ppCursor, char** ppPrefix)
+{
+    const char* start = *ppCursor;
+    const char* pCursor = *ppCursor;
+    bool res = true;
+    bool match = false;
+    char* resStr = NULL;
+    size_t len = 0;
+
+    while (!match && res)
+    {
+        match = URI_match(*pCursor, URI_Prefix_Sep);
+        if (!match)
+        {
+            ++len;
+            ++pCursor;
+        }
+        else if (!*pCursor)
+        {
+            res = false;
+        }
+    }
+    if (0 == len)
+    {
+        res = false;
+    }
+    if (res)
+    {
+        resStr = calloc(len + 1, sizeof(char));
+        if (resStr == NULL)
+        {
+            res = false;
+        }
+    }
+    if (res)
+    {
+        resStr = strncpy(resStr, start, len);
+        *ppPrefix = resStr;
+        while (match)
+        {
+            match = URI_match(*(++pCursor), URI_Prefix_Sep);
+        }
+        *ppCursor = pCursor;
+    }
+    return (res);
+}
+
+static bool getUriTypeFromEnum(char** prefix, SOPC_UriType* type)
+{
+    int i = 0;
+
+    if (strncmp(*prefix, TCPUA_PREFIX, strlen(*prefix)) == 0)
+    {
+        *type = SOPC_URI_TcpUa;
+        return (true);
+    }
+    else if (strncmp(*prefix, UDPUA_PREFIX, strlen(*prefix)) == 0)
+    {
+        *type = SOPC_URI_UdpUa;
+        return (true);
+    }
+    else if (strncmp(*prefix, ETHUA_PREFIX, strlen(*prefix)) == 0)
+    {
+        *type = SOPC_URI_EthUa;
+        return (true);
+    }
+    else if (strncmp(*prefix, MQTTUA_PREFIX, strlen(*prefix)) == 0)
+    {
+        *type = SOPC_URI_MqttUa;
+        return (true);
+    }
+    return (false);
+}
+
+bool SOPC_Helper_URI_SplitUri(const char* uri, SOPC_UriType* type, char** hostname, char** port)
 {
     if (NULL == uri || NULL == hostname || NULL == port)
     {
-        return false;
+        return (false);
     }
-
-    size_t hostnameLength = 0;
-    size_t portIdx = 0;
-    size_t portLength = 0;
-    char* lHostname = NULL;
-    char* lPort = NULL;
-    bool result = SOPC_Helper_URI_ParseTcpUaUri(uri, &hostnameLength, &portIdx, &portLength);
-
-    if (result)
+    if (strlen(uri) + 4 > TCP_UA_MAX_URL_LENGTH) // Encoded value shall be less than 4096 byte
     {
-        /* It looks like that the function requires a port number but no hostname */
-        assert(portIdx != 0 && portLength != 0);
-        if (0 == hostnameLength)
-        {
-            result = false;
-        }
+        return (false);
     }
-    if (result)
-    {
-        lHostname = SOPC_Calloc(1u + hostnameLength, sizeof(char));
-        lPort = SOPC_Calloc(1u + portLength, sizeof(char));
 
-        if (NULL == lHostname || NULL == lPort)
-        {
-            result = false;
-        }
-    }
+    const char* pCursor = uri;
+    char* prefix = NULL;
+    bool result = true;
 
     if (result)
     {
-        const size_t PREFIX_LENGTH = strlen(TCPUA_PREFIX);
-        if (lHostname != memcpy(lHostname, &(uri[PREFIX_LENGTH]), hostnameLength))
-        {
-            result = false;
-        }
+        result = getUriPrefix(&pCursor, &prefix);
     }
     if (result)
     {
-        if (lPort != memcpy(lPort, &(uri[portIdx]), portLength))
-        {
-            result = false;
-        }
+        result = getUriHostname(&pCursor, hostname);
     }
-
     if (result)
     {
-        *hostname = lHostname;
-        *port = lPort;
+        result = getUriPortId(&pCursor, port);
     }
-    else
+    if (result)
     {
-        SOPC_Free(lHostname);
-        SOPC_Free(lPort);
+        result = getUriTypeFromEnum(&prefix, type);
     }
-
-    return result;
+    free(prefix);
+    if (!result)
+    {
+        free(*hostname);
+        free(*port);
+    }
+    return (result);
 }
