@@ -126,7 +126,7 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateClientSocket(const char* uri)
             }
         }
 
-        if (result != false)
+        if (result)
         {
             status = SOPC_Socket_AddrInfo_Get(hostname, port, &res);
             if (SOPC_STATUS_OK != status)
@@ -135,7 +135,7 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateClientSocket(const char* uri)
             }
         }
 
-        if (result != false)
+        if (result)
         {
             // Try to connect on IP addresses provided (IPV4 and IPV6)
             for (p = res; p != NULL && false == connectResult; p = SOPC_Socket_AddrInfo_IterNext(p))
@@ -145,7 +145,7 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateClientSocket(const char* uri)
             result = connectResult;
         }
 
-        if (result != false)
+        if (result)
         {
             if (p != NULL)
             {
