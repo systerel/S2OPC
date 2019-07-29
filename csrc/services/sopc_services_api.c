@@ -476,7 +476,7 @@ void SOPC_Services_Initialize(SOPC_SetListenerFunc setSecureChannelsListener)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
-    servicesLooper = SOPC_Looper_Create();
+    servicesLooper = SOPC_Looper_Create("Services");
     assert(servicesLooper != NULL);
 
     servicesEventHandler = SOPC_EventHandler_Create(servicesLooper, onServiceEvent);

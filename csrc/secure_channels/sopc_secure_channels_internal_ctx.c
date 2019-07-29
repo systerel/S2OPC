@@ -41,7 +41,7 @@ void SOPC_SecureChannelsInternalContext_Initialize(SOPC_SetListenerFunc setSocke
     memset(secureConnectionsArray, 0, sizeof(SOPC_SecureConnection) * (SOPC_MAX_SECURE_CONNECTIONS + 1));
     lastSecureConnectionArrayIdx = 0;
 
-    secureChannelsLooper = SOPC_Looper_Create();
+    secureChannelsLooper = SOPC_Looper_Create("SecureChannel");
     assert(secureChannelsLooper != NULL);
 
     secureChannelsInputEventHandler = SOPC_EventHandler_Create(secureChannelsLooper, SOPC_SecureChannels_OnInputEvent);

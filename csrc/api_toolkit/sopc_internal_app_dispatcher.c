@@ -169,7 +169,7 @@ static void onAddressSpaceNotification(SOPC_EventHandler* handler,
 
 void SOPC_App_Initialize(void)
 {
-    appLooper = SOPC_Looper_Create();
+    appLooper = SOPC_Looper_Create("Application");
     assert(appLooper != NULL);
 
     appComEventHandler = SOPC_EventHandler_Create(appLooper, onComEvent);
