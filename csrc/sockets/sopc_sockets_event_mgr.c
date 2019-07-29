@@ -112,11 +112,12 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateClientSocket(const char* uri)
     char* hostname = NULL;
     char* port = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    SOPC_UriType type = SOPC_URI_Undetermined;
 
     if (uri != NULL)
     {
-        result = SOPC_Helper_URI_SplitTcpUaUri(uri, &hostname, &port);
-        if (result != false)
+        result = SOPC_Helper_URI_SplitUri(uri, &type, &hostname, &port);
+        if (result)
         {
             freeSocket = SOPC_SocketsInternalContext_GetFreeSocket(false);
             if (NULL == freeSocket)
@@ -195,10 +196,15 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateServerSocket(const char* uri, uin
     char* hostname = NULL;
     char* port = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    SOPC_UriType type = SOPC_URI_Undetermined;
 
     if (uri != NULL)
     {
-        result = SOPC_Helper_URI_SplitTcpUaUri(uri, &hostname, &port);
+        result = SOPC_Helper_URI_SplitUri(uri, &type, &hostname, &port);
+        if (type != TcpUa)
+        {
+            result = false;
+        }
         if (result != false)
         {
             freeSocket = SOPC_SocketsInternalContext_GetFreeSocket(true);

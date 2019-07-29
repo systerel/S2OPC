@@ -23,13 +23,15 @@
 
 #include <stdbool.h>
 
+#include "sopc_enums.h"
+
 typedef enum SOPC_UriType
 {
-    SOPC_URI_Undetermined,
-    SOPC_URI_TcpUa,
-    SOPC_URI_UdpUa,
-    SOPC_URI_EthUa,
-    SOPC_URI_MqttUa
+    SOPC_URI_UNDETERMINED = 0,
+    SOPC_URI_TCPUA,
+    SOPC_URI_UDPUA,
+    SOPC_URI_ETHUA,
+    SOPC_URI_MQTTUA
 } SOPC_UriType;
 
 /* Return true if find exist in sep array, return false otherwise */

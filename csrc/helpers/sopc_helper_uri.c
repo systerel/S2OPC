@@ -24,11 +24,12 @@
 #include "sopc_helper_uri.h"
 #include "sopc_mem_alloc.h"
 
-#define URI_Prefix_Sep "://"
-#define URI_HostName_Sep ":"
-#define URI_Port_Sep "/"
+#define URI_PREFIX_SEP "://"
+#define URI_HOSTNAME_SEP ":"
+#define URI_PORT_SEP "/"
 
-#define URI_Default_Bracket_nb 0
+#define URI_OPEN_BRACKET '['
+#define URI_CLOSE_BRACKET ']'
 
 #define TCPUA_PREFIX ((const char*) "opc.tcp")
 #define UDPUA_PREFIX ((const char*) "opc.udp")
