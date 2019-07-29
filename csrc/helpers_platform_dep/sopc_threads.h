@@ -40,7 +40,7 @@
  *  \return            SOPC_STATUS_OK if operation succeeded, SOPC_STATUS_INVALID_PARAMETERS
  *      or SOPC_STATUS_NOK otherwise.
  */
-SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), void* startArgs, const char* name);
+SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), void* startArgs, const char* taskName);
 
 /**
  *  \brief Function to wait for a thread to terminate
