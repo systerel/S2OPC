@@ -154,7 +154,7 @@ SOPC_Looper* SOPC_Looper_Create(const char* taskName)
     SOPC_Array* handlers =
         SOPC_Array_Create(sizeof(SOPC_EventHandler*), 0, (SOPC_Array_Free_Func) event_handler_delete);
 
-    if (looper == NULL || handlers == NULL || SOPC_AsyncQueue_Init(&queue, "") != SOPC_STATUS_OK ||
+    if (looper == NULL || handlers == NULL || SOPC_AsyncQueue_Init(&queue, taskName) != SOPC_STATUS_OK ||
         SOPC_Thread_Create(&looper->thread, looper_loop, queue, taskName) != SOPC_STATUS_OK)
     {
         SOPC_AsyncQueue_Free(&queue);
