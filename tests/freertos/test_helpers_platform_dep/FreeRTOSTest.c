@@ -179,7 +179,7 @@ static void* cbS2OPC_Thread_p2(void* ptr)
 {
     unsigned short int cpt = 0;
     Condition* pv = (Condition*) ptr;
-    SOPC_ReturnStatus status = SOPC_Thread_Create(&p3, cbS2OPC_Thread_p3, ptr);
+    SOPC_ReturnStatus status = SOPC_Thread_Create(&p3, cbS2OPC_Thread_p3, ptr, "Thread_p2");
 
     Mutex_Lock(&m);
     sprintf(sBuffer, "$$$$ %2X -  Sub task2 creates Sub task 3 created result = %lu : current time = %lu\r\n",
@@ -225,7 +225,7 @@ static void* cbS2OPC_Thread_p1(void* ptr)
 
     for (;;)
     {
-        status = SOPC_Thread_Create(&pX, cbS2OPC_Thread_pX, pv);
+        status = SOPC_Thread_Create(&pX, cbS2OPC_Thread_pX, pv, "Thread_p1");
         status = SOPC_Thread_Join(pX);
         pX = NULL;
 
@@ -318,7 +318,7 @@ void FREE_RTOS_TEST_API_S2OPC_THREAD(void* ptr)
     Condition* pv = (Condition*) ptr;
     Mutex_Initialization(&m);
 
-    status = SOPC_Thread_Create(&p1, cbS2OPC_Thread_p1, pv);
+    status = SOPC_Thread_Create(&p1, cbS2OPC_Thread_p1, pv, "Sub task 1");
 
     Mutex_Lock(&m);
     sprintf(sBuffer, "$$$$ %2X -  Sub task 1 created result = %lu : current time = %lu\r\n",

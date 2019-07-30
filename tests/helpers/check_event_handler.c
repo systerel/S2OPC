@@ -75,7 +75,7 @@ static void expect_event(SOPC_EventHandler* handler, int32_t event, uint32_t elt
 
 START_TEST(test_event_handler_empty_looper)
 {
-    SOPC_Looper* looper = SOPC_Looper_Create();
+    SOPC_Looper* looper = SOPC_Looper_Create("test_events");
     ck_assert_ptr_nonnull(looper);
     SOPC_Looper_Delete(looper);
 }
@@ -83,7 +83,7 @@ END_TEST
 
 START_TEST(test_event_handler_post)
 {
-    SOPC_Looper* looper = SOPC_Looper_Create();
+    SOPC_Looper* looper = SOPC_Looper_Create("test_events");
     ck_assert_ptr_nonnull(looper);
 
     SOPC_EventHandler* h1 = SOPC_EventHandler_Create(looper, test_callback);
@@ -103,7 +103,7 @@ END_TEST
 
 START_TEST(test_event_handler_post_as_next)
 {
-    SOPC_Looper* looper = SOPC_Looper_Create();
+    SOPC_Looper* looper = SOPC_Looper_Create("test events");
     ck_assert_ptr_nonnull(looper);
 
     SOPC_EventHandler* h1 = SOPC_EventHandler_Create(looper, test_callback);

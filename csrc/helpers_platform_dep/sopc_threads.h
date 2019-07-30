@@ -29,7 +29,25 @@
 // Import Mutex type from platform dependent code
 #include "p_threads.h"
 
-SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), void* startArgs);
+/**
+ *  \brief Function to create a thread
+ *
+ *  \param thread      Return parameter for the created thread
+ *  \param startFct    Function called at thread start
+ *  \param startArgs   Arguments of the start function
+ *  \param name        Name of the created thread
+ *
+ *  \return            SOPC_STATUS_OK if operation succeeded, SOPC_STATUS_INVALID_PARAMETERS
+ *      or SOPC_STATUS_NOK otherwise.
+ */
+SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), void* startArgs, const char* name);
+
+/**
+ *  \brief Function to wait for a thread to terminate
+ *
+ *  \param thread   Thread to wait for
+ *
+ */
 SOPC_ReturnStatus SOPC_Thread_Join(Thread thread);
 
 #endif /* SOPC_THREADS_H_ */

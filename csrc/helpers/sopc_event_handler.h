@@ -117,11 +117,14 @@ SOPC_ReturnStatus SOPC_EventHandler_PostAsNext(SOPC_EventHandler* handler,
                                                uintptr_t auxParam);
 
 /**
+ *
  * \brief Creates a new looper and attaches it to a new thread.
+ *
+ *  \param threadName name of the thread
  *
  * \return The created looper, or \c NULL in case or error.
  */
-SOPC_Looper* SOPC_Looper_Create(void);
+SOPC_Looper* SOPC_Looper_Create(const char* threadName);
 
 /**
  * \brief Stops a looper and releases all resources allocated to it.

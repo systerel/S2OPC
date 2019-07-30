@@ -81,7 +81,7 @@ SOPC_EventRecorder* SOPC_EventRecorder_Create(void)
         return NULL;
     }
 
-    SOPC_Looper* looper = SOPC_Looper_Create();
+    SOPC_Looper* looper = SOPC_Looper_Create("Test_SC_Threads");
 
     if (looper == NULL)
     {

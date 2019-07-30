@@ -133,7 +133,7 @@ START_TEST(test_sockets)
 
     ck_assert_int_eq(SOPC_STATUS_OK, SOPC_AsyncQueue_Init(&socketEvents, ""));
 
-    SOPC_Looper* looper = SOPC_Looper_Create();
+    SOPC_Looper* looper = SOPC_Looper_Create("test_sockets");
     ck_assert_ptr_nonnull(looper);
 
     SOPC_EventHandler* event_handler = SOPC_EventHandler_Create(looper, onSocketEvent);

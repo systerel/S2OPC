@@ -184,7 +184,7 @@ file(GLOB PLATFORM_SRCS "csrc/helpers_platform_dep/*.c" "csrc/helpers_platform_d
 # Set specialized compilation flags for platform dependent source files
 if(UNIX)
   # add POSIX support
-  set_source_files_properties(${PLATFORM_SRCS} PROPERTIES COMPILE_FLAGS "-D_XOPEN_SOURCE=600")
+  set_source_files_properties(${PLATFORM_SRCS} PROPERTIES COMPILE_FLAGS "-D_GNU_SOURCE")
 endif()
 
 if(CMAKE_HOST_UNIX)

@@ -79,7 +79,7 @@ START_TEST(test_thread_exec)
     Thread thread;
     int32_t cpt = 0;
     // Nominal behavior
-    SOPC_ReturnStatus status = SOPC_Thread_Create(&thread, test_thread_exec_fct, &cpt);
+    SOPC_ReturnStatus status = SOPC_Thread_Create(&thread, test_thread_exec_fct, &cpt, "test_exec");
     ck_assert(status == SOPC_STATUS_OK);
 
     ck_assert(wait_value(&cpt, 1));
@@ -88,9 +88,9 @@ START_TEST(test_thread_exec)
     ck_assert(status == SOPC_STATUS_OK);
 
     // Degraded behavior
-    status = SOPC_Thread_Create(NULL, test_thread_exec_fct, &cpt);
+    status = SOPC_Thread_Create(NULL, test_thread_exec_fct, &cpt, "test_exec");
     ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
-    status = SOPC_Thread_Create(&thread, NULL, &cpt);
+    status = SOPC_Thread_Create(&thread, NULL, &cpt, "test_exec");
     ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
     status = SOPC_Thread_Join(thread);
     ck_assert(status == SOPC_STATUS_NOK);
@@ -104,7 +104,7 @@ START_TEST(test_thread_mutex)
     // Nominal behavior
     ck_assert_int_eq(SOPC_STATUS_OK, Mutex_Initialization(&gmutex));
     ck_assert_int_eq(SOPC_STATUS_OK, Mutex_Lock(&gmutex));
-    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Thread_Create(&thread, test_thread_mutex_fct, &cpt));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Thread_Create(&thread, test_thread_mutex_fct, &cpt, "test_mutex"));
 
     // Wait until the thread reaches the "lock mutex" statement
     ck_assert(wait_value(&cpt, 1));
@@ -137,7 +137,8 @@ START_TEST(test_thread_mutex_recursive)
     int32_t cpt = 0;
     ck_assert_int_eq(SOPC_STATUS_OK, Mutex_Initialization(&gmutex));
     ck_assert_int_eq(SOPC_STATUS_OK, Mutex_Lock(&gmutex));
-    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Thread_Create(&thread, test_thread_mutex_recursive_fct, &cpt));
+    ck_assert_int_eq(SOPC_STATUS_OK,
+                     SOPC_Thread_Create(&thread, test_thread_mutex_recursive_fct, &cpt, "mutex_recursive"));
 
     // Wait until the thread reaches the "lock mutex" statement
     ck_assert(wait_value(&cpt, 1));
@@ -215,7 +216,7 @@ START_TEST(test_thread_condvar)
     ck_assert(status == SOPC_STATUS_OK);
     status = Condition_Init(&gcond);
     ck_assert(status == SOPC_STATUS_OK);
-    status = SOPC_Thread_Create(&thread, test_thread_condvar_fct, &condRes);
+    status = SOPC_Thread_Create(&thread, test_thread_condvar_fct, &condRes, "Condvar_fct");
     ck_assert(status == SOPC_STATUS_OK);
     SOPC_Sleep(10);
     status = Mutex_Lock(&gmutex);
@@ -251,7 +252,7 @@ START_TEST(test_thread_condvar)
     ck_assert(status == SOPC_STATUS_OK);
     status = Condition_Init(&gcond);
     ck_assert(status == SOPC_STATUS_OK);
-    status = SOPC_Thread_Create(&thread, test_thread_condvar_timed_fct, &condRes);
+    status = SOPC_Thread_Create(&thread, test_thread_condvar_timed_fct, &condRes, "Condvar_fct");
     ck_assert(status == SOPC_STATUS_OK);
     SOPC_Sleep(10);
     status = Mutex_Lock(&gmutex);
@@ -287,7 +288,7 @@ START_TEST(test_thread_condvar)
     ck_assert(status == SOPC_STATUS_OK);
     status = Condition_Init(&gcond);
     ck_assert(status == SOPC_STATUS_OK);
-    status = SOPC_Thread_Create(&thread, test_thread_condvar_timed_fct, &condRes);
+    status = SOPC_Thread_Create(&thread, test_thread_condvar_timed_fct, &condRes, "Condvar_fct");
     ck_assert(status == SOPC_STATUS_OK);
     SOPC_Sleep(10);
     status = Mutex_Lock(&gmutex);

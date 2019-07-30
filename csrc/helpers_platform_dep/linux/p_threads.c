@@ -19,6 +19,7 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <stdio.h>
 #include <unistd.h>
 
 #include "sopc_mutexes.h"
@@ -235,18 +236,27 @@ SOPC_ReturnStatus Mutex_UnlockAndTimedWaitCond(Condition* cond, Mutex* mut, uint
     return status;
 }
 
-SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), void* startArgs)
+SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), void* startArgs, const char* name)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (thread != NULL && startFct != NULL)
     {
-        if (pthread_create(thread, NULL, startFct, startArgs) == 0)
+        int creationRetCode = pthread_create(thread, NULL, startFct, startArgs);
+        int setNameRetCode = pthread_setname_np(*thread, name);
+
+        if (0 == creationRetCode)
         {
             status = SOPC_STATUS_OK;
         }
         else
         {
             status = SOPC_STATUS_NOK;
+        }
+
+        /* pthread_setname_np calls can fail. It is not a sufficent reason to stop processing. */
+        if (0 != setNameRetCode)
+        {
+            printf("Error during set name to thread: %s", name);
         }
     }
     return status;

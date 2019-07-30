@@ -297,7 +297,8 @@ static bool SOPC_SocketsNetworkEventMgr_LoopThreadStart(void)
 
     receptionThread.stopFlag = 0;
 
-    if (SOPC_Thread_Create(&receptionThread.thread, SOPC_SocketsNetworkEventMgr_ThreadLoop, NULL) != SOPC_STATUS_OK)
+    if (SOPC_Thread_Create(&receptionThread.thread, SOPC_SocketsNetworkEventMgr_ThreadLoop, NULL, "Sockets") !=
+        SOPC_STATUS_OK)
     {
         return false;
     }

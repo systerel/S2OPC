@@ -17,9 +17,15 @@
  * under the License.
  */
 
+#include <assert.h>
+#include <stdlib.h>
+
+#include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
 #include "sopc_threads.h"
 #include "sopc_time.h"
+
+typedef HRESULT(WINAPI* pSetThreadDescription)(HANDLE, PCWSTR);
 
 SOPC_ReturnStatus Condition_Init(Condition* cond)
 {
@@ -147,32 +153,78 @@ static DWORD WINAPI SOPC_Thread_StartFct(LPVOID args)
     return 0;
 }
 
-SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), void* startArgs)
+SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), void* startArgs, const char* name)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     DWORD threadId = 0;
-    if (thread != NULL && startFct != NULL)
+
+    if (NULL == thread)
     {
-        thread->args = startArgs;
-        thread->startFct = startFct;
-        thread->thread = CreateThread(NULL, // default security attributes
-                                      0,    // use default stack size
-                                      SOPC_Thread_StartFct, thread,
-                                      0, // use default creation flags
-                                      &threadId);
-        if (NULL == thread->thread)
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    if (NULL == startFct)
+    {
+        thread->thread = NULL;
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    thread->args = startArgs;
+    thread->startFct = startFct;
+    thread->thread = CreateThread(NULL, // default security attributes
+                                  0,    // use default stack size
+                                  SOPC_Thread_StartFct, thread,
+                                  0, // use default creation flags
+                                  &threadId);
+    if (NULL == thread->thread)
+    {
+        status = SOPC_STATUS_NOK;
+    }
+    else
+    {
+/* API is available starting from Windows 10 */
+/* We need to check if the API is available  both at compile and execution time */
+#if _WIN32_WINNT >= 0x0A00
+        HMODULE kernel32 = LoadLibraryW(L"kernel32");
+        assert(kernel32 != NULL);
+        pSetThreadDescription funcAddress = (pSetThreadDescription) GetProcAddress(kernel32, "SetThreadDescription");
+
+        if (NULL != funcAddress)
         {
-            status = SOPC_STATUS_NOK;
+            size_t returnValue;
+            size_t targetSize = (strlen(name) + 1) * sizeof(wchar_t);
+            wchar_t* wcstr = SOPC_Malloc(targetSize);
+            errno_t ret = mbstowcs_s(&returnValue, wcstr, targetSize, name, strlen(name));
+
+            if (0 == ret)
+            {
+                HRESULT result = funcAddress(thread->thread, wcstr);
+                if (S_OK == result)
+                {
+                    status = SOPC_STATUS_OK;
+                }
+                else
+                {
+                    SOPC_Free(wcstr);
+                    status = SOPC_STATUS_NOK;
+                }
+            }
+            else
+            {
+                SOPC_Free(wcstr);
+                status = SOPC_STATUS_NOK;
+            }
         }
         else
         {
             status = SOPC_STATUS_OK;
         }
+#else
+        (void) name;
+        status = SOPC_STATUS_OK;
+#endif
     }
-    else if (thread != NULL)
-    {
-        thread->thread = NULL;
-    }
+
     return status;
 }
 

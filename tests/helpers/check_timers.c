@@ -77,7 +77,7 @@ START_TEST(test_timers)
     uint32_t timerId = 0;
     uint64_t elapsedMs = 0;
     SOPC_Event event;
-    SOPC_Looper* looper = SOPC_Looper_Create();
+    SOPC_Looper* looper = SOPC_Looper_Create("timers");
     ck_assert_ptr_nonnull(looper);
 
     SOPC_EventHandler* eventHandler = SOPC_EventHandler_Create(looper, timeout_event);
@@ -145,7 +145,7 @@ START_TEST(test_timers_with_cancellation)
     uint8_t i = 0;
     uint64_t elapsedMs = 0;
     SOPC_Event event;
-    SOPC_Looper* looper = SOPC_Looper_Create();
+    SOPC_Looper* looper = SOPC_Looper_Create("timers");
     ck_assert_ptr_nonnull(looper);
 
     SOPC_EventHandler* eventHandler = SOPC_EventHandler_Create(looper, canceled_timeout_event);

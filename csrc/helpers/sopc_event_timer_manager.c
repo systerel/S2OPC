@@ -283,7 +283,7 @@ void SOPC_EventTimer_Initialize()
     SOPC_Atomic_Int_Set(&initialized, 1);
     SOPC_Atomic_Int_Set(&stop, 0);
 
-    if (SOPC_Thread_Create(&cyclicEvalThread, SOPC_Internal_ThreadLoop, NULL) != SOPC_STATUS_OK)
+    if (SOPC_Thread_Create(&cyclicEvalThread, SOPC_Internal_ThreadLoop, NULL, "Timers") != SOPC_STATUS_OK)
     {
         assert(false);
     }
