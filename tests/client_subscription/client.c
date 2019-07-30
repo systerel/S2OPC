@@ -31,8 +31,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
-#include "libs2opc_client.h"
+#include "libs2opc_client_cmds.h"
 
 /* Secure Channel configuration */
 #define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"
@@ -99,30 +100,38 @@ static bool parse_options(cmd_line_options_t* o, int argc, char* const* argv);
 static void free_options(cmd_line_options_t* o);
 static void print_usage(const char* exe);
 
-static void datachange_callback(const SOPC_LibSub_ConnectionId c_id,
-                                const SOPC_LibSub_DataId d_id,
-                                const SOPC_LibSub_Value* value)
+static void datachange_callback(const int32_t c_id,
+                                const char* node_id,
+                                const SOPC_DataValue* value)
 {
     char sz[1024];
     size_t n;
 
+    //TODO use format constant for node_id if it exists
     n = (size_t) snprintf(sz, sizeof(sz) / sizeof(sz[0]),
-                          "Client %" PRIu32 " data change:\n  value id %" PRIu32 "\n  new value ", c_id, d_id);
-    if (NULL == value || NULL == value->value)
+                          "Client %" PRIu32 " data change:\n  value id %s\n  new value ", c_id, node_id);
+
+
+    if (NULL == value)
     {
         snprintf(sz + n, sizeof(sz) / sizeof(sz[0]) - n, "NULL");
     }
-    else if (SOPC_LibSub_DataType_bool == value->type)
-    {
-        snprintf(sz + n, sizeof(sz) / sizeof(sz[0]) - n, *(bool*) value->value ? "true" : "false");
-    }
-    else if (SOPC_LibSub_DataType_integer == value->type)
-    {
-        snprintf(sz + n, sizeof(sz) / sizeof(sz[0]) - n, "%" PRIi64, *(int64_t*) value->value);
-    }
-    else
-    {
-        snprintf(sz + n, sizeof(sz) / sizeof(sz[0]) - n, "%s", (SOPC_LibSub_CstString) value->value);
+    else {
+        // TODO is there a generic function to print/format a variant ?
+        //SOPC_Variant variant = value->Value;
+        //TODO print value
+        //if (SOPC_Boolean_Id == variant.BuiltInTypeId)
+        //{
+        //    snprintf(sz + n, sizeof(sz) / sizeof(sz[0]) - n, (bool) variant.Value ? "true" : "false");
+        //}
+        //else if (SOPC_Int64_Id == variant.BuiltInTypeId)
+        //{
+        //    snprintf(sz + n, sizeof(sz) / sizeof(sz[0]) - n, "%" PRIi64, (int64_t) variant.Value);
+        //}
+        //else
+        //{
+        //    snprintf(sz + n, sizeof(sz) / sizeof(sz[0]) - n, "%s", (SOPC_LibSub_CstString) variant.Value);
+        //}
     }
 
     Helpers_LoggerStdout(SOPC_TOOLKIT_LOG_LEVEL_INFO, sz);
@@ -142,9 +151,20 @@ int main(int argc, char* const argv[])
 
     SOPC_ClientHelper_Initialize("./client_subscription_logs", SOPC_TOOLKIT_LOG_LEVEL_DEBUG);
 
+    SOPC_ClientHelper_Security security = {
+        .security_policy = SECURITY_POLICY,
+        .security_mode = SECURITY_MODE,
+        .path_cert_auth = PATH_CACERT_PUBL,
+        .path_cert_srv = PATH_SERVER_PUBL,
+        .path_cert_cli = PATH_CLIENT_PUBL,
+        .path_key_cli = PATH_CLIENT_PRIV,
+        .policyId = options.policyId,
+        .username = options.username,
+        .password = options.password,
+    };
+
     int32_t connectionId = SOPC_ClientHelper_Connect(
-        options.endpoint_url, SECURITY_POLICY, SECURITY_MODE, PATH_CACERT_PUBL, PATH_SERVER_PUBL, PATH_CLIENT_PUBL,
-        PATH_CLIENT_PRIV, options.policyId, options.username, options.password, datachange_callback);
+        options.endpoint_url, security);
 
     if (connectionId <= 0)
     {
@@ -155,12 +175,16 @@ int main(int argc, char* const argv[])
     {
         assert(options.node_ids_size > 0);
         assert((uint32_t) options.node_ids_size <= SIZE_MAX);
-        res = SOPC_ClientHelper_Subscribe(connectionId, options.node_ids, (size_t) options.node_ids_size);
+        //TODO use SOPC_ClientHelper_CreateSubscription and SOPC_ClientHelper_AddMonitoredItems
+        res = SOPC_ClientHelper_CreateSubscription(connectionId, datachange_callback);
+        //res = SOPC_ClientHelper_Subscribe(connectionId, options.node_ids, (size_t) options.node_ids_size);
     }
 
     if (res == 0)
     {
-        SOPC_Sleep(1000 * 1000);
+        // TODO decide if using SOPC_Sleep is necessary
+        //SOPC_Sleep(1000 * 1000);
+        sleep(1000 * 1000);
     }
 
     if (connectionId > 0)
