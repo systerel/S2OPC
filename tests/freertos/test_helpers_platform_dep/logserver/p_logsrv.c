@@ -1698,9 +1698,9 @@ SOPC_ReturnStatus SOPC_LogSrv_Start(
 
         gLogServer = P_LOG_SRV_CreateAndStart(portSrvTCP,        //
                                               portCltUDP,        //
-                                              2,                 // Max log client
+                                              1,                 // Max log client
                                               0,                 // Disconnect log client after 0s
-                                              0,                 // Hello message each 5seconds
+                                              10,                // Hello message each 5seconds
                                               cbOneConnexion,    //
                                               NULL,              //
                                               cbEchoCallback,    // Test echo to verify lwip
