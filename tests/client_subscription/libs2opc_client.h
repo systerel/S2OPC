@@ -534,25 +534,4 @@ void Helpers_Log(const SOPC_Toolkit_Log_Level log_level, const char* format, ...
  */
 void Helpers_LoggerStdout(const SOPC_Toolkit_Log_Level log_level, const SOPC_LibSub_CstString text);
 
-/* ************************************************************************
-            SIMPLIFIED CLIENT INTERFACE (COMMAND LINE LIKE)
-   ************************************************************************
-*/
-
-int32_t SOPC_ClientHelper_Initialize(const char* log_path, int32_t log_level);
-void SOPC_ClientHelper_Finalize(void);
-int32_t SOPC_ClientHelper_Connect(const char* endpointUrl,
-                                  const char* security_policy,
-                                  int32_t security_mode,
-                                  const char* path_cert_auth,
-                                  const char* path_cert_srv,
-                                  const char* path_cert_cli,
-                                  const char* path_key_cli,
-                                  const char* policyId,
-                                  const char* username,
-                                  const char* password,
-                                  SOPC_LibSub_DataChangeCbk callback);
-int32_t SOPC_ClientHelper_Subscribe(int32_t connectionId, char** nodeIds, size_t nbNodeIds);
-int32_t SOPC_ClientHelper_Disconnect(int32_t connectionId);
-
 #endif /* LIBS2OPC_CLIENT_H_ */

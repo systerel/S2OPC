@@ -17,11 +17,17 @@
  * under the License.
  */
 
-/** \file
- *
- * \brief A client executable using the client_subscription library.
- *
- */
+#include "libs2opc_client_cmds.h"
+
+#include "sopc_builtintypes.h"
+#include "sopc_mutexes.h"
+#include "sopc_toolkit_config.h"
+#include "sopc_types.h"
+
+#define SKIP_S2OPC_DEFINITIONS
+#include "libs2opc_client.h"
+#include "sopc_mem_alloc.h"
+#include "sopc_types.h"
 
 #include <assert.h>
 #include <getopt.h>
@@ -32,7 +38,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "libs2opc_client.h"
+/* TODO add documentation */
+#define SYNCHRONOUS_READ_TIMEOUT 10000
 
 /* Secure Channel configuration */
 #define ENDPOINT_URL "opc.tcp://localhost:4841"
@@ -79,6 +86,7 @@ enum
     OPT_DISABLE_SECU,
     OPT_KEEPALIVE,
 } cmd_line_option_values_t;
+
 typedef struct
 {
     char* endpoint_url;
@@ -95,6 +103,28 @@ typedef struct
     char* n_max_keepalive_str;
     uint32_t n_max_keepalive;
 } cmd_line_options_t;
+
+typedef struct
+{
+    Mutex mutex; /* protect this context */
+    Condition condition;
+
+    SOPC_DataValue* values;
+    int32_t nbElements;
+    SOPC_StatusCode status;
+    bool finish;
+} ReadContext;
+
+static SOPC_ReturnStatus SOPC_ReadContext_Initialization(ReadContext* ctx)
+{
+    SOPC_ReturnStatus status = Mutex_Initialization(&ctx->mutex);
+    ctx->values = NULL;
+    ctx->nbElements = 0;
+    ctx->status = SOPC_STATUS_NOK;
+    ctx->finish = false;
+    return status;
+}
+
 
 /* Callbacks */
 static void log_callback(const SOPC_Toolkit_Log_Level log_level, SOPC_LibSub_CstString text);
@@ -169,17 +199,21 @@ void SOPC_ClientHelper_Finalize(void)
 // Return connection Id > 0 if succeeded, -<n> with <n> argument number (starting from 1) if invalid arguement detected
 // or '-100' if connection failed
 int32_t SOPC_ClientHelper_Connect(const char* endpointUrl,
-                                  const char* security_policy,
-                                  int32_t security_mode,
-                                  const char* path_cert_auth,
-                                  const char* path_cert_srv,
-                                  const char* path_cert_cli,
-                                  const char* path_key_cli,
-                                  const char* policyId,
-                                  const char* username,
-                                  const char* password,
-                                  SOPC_LibSub_DataChangeCbk callback)
+                                  SOPC_ClientHelper_Security security)
 {
+    /* TODO use structure instead of redefining */
+    const char* security_policy = security.security_policy;
+    int32_t security_mode = security.security_mode;
+    const char* path_cert_auth = security.path_cert_auth;
+    const char* path_cert_srv = security.path_cert_srv;
+    const char* path_cert_cli = security.path_cert_cli;
+    const char* path_key_cli = security.path_key_cli;
+    const char* policyId = security.policyId;
+    const char* username = security.username;
+    const char* password = security.password;
+
+    SOPC_LibSub_DataChangeCbk callback = NULL;
+
     OpcUa_MessageSecurityMode secuMode = OpcUa_MessageSecurityMode_Invalid;
     bool disable_verification = false;
     const char* cert_auth = path_cert_auth;
@@ -314,60 +348,203 @@ int32_t SOPC_ClientHelper_Connect(const char* endpointUrl,
     return (int32_t) con_id;
 }
 
-// Returns 0 if succeeded
-int32_t SOPC_ClientHelper_Subscribe(int32_t connectionId, char** nodeIds, size_t nbNodeIds)
+// TODO Add Mutex protection. See SOPC_Mutex
+void SOPC_ClientHelper_GenericCallback(SOPC_LibSub_ConnectionId c_id,
+                                       SOPC_LibSub_ApplicativeEvent event,
+                                       SOPC_StatusCode status,
+                                       const void* response,
+                                       uintptr_t responseContext)
+{
+    // unused
+    (void) c_id;
+
+    if (SOPC_LibSub_ApplicativeEvent_Response != event)
+    {
+        return;
+    }
+
+    const SOPC_EncodeableType* pEncType = *(SOPC_EncodeableType* const*) response;
+
+    if (pEncType == &OpcUa_ReadResponse_EncodeableType)
+    {
+        ReadContext* ctx = (ReadContext*) responseContext;
+        const OpcUa_ReadResponse* readResp = *(OpcUa_ReadResponse* const*) response;
+
+        ctx->status = Mutex_Lock(&ctx->mutex);
+        assert(SOPC_STATUS_OK == ctx->status);
+
+        ctx->status = status;
+        if (ctx->nbElements != readResp->NoOfResults)
+        {
+            // TODO log error
+            ctx->status = SOPC_STATUS_NOK;
+        }
+        for (int32_t i = 0; i < readResp->NoOfResults && ctx->status; i++)
+        {
+            ctx->status = SOPC_DataValue_Copy(&ctx->values[i], &readResp->Results[i]);
+        }
+        if (ctx->status == SOPC_STATUS_NOK)
+        {
+            for (int32_t i = 0; i < readResp->NoOfResults; i++)
+            {
+                SOPC_DataValue_Clear(&ctx->values[i]);
+            }
+            ctx->nbElements = 0;
+        }
+        ctx->finish = true;
+
+        /* Signal that the response is available */
+        status = Condition_SignalAll(&ctx->condition);
+        assert(SOPC_STATUS_OK == status);
+    }
+}
+
+int32_t SOPC_ClientHelper_Read(int32_t connectionId,
+                               SOPC_ClientHelper_ReadValue* readValues,
+                               size_t nbElements,
+                               SOPC_DataValue* values)
 {
     if (connectionId <= 0)
     {
         return -1;
     }
-    else if (NULL == nodeIds || nbNodeIds <= 0 || nbNodeIds > INT32_MAX)
+    if (NULL == readValues || nbElements < 1 || nbElements > INT32_MAX)
     {
         return -2;
     }
-    else
-    {
-        /*
-        for (size_t i = 0; i < nbNodeIds; i++)
-        {
-            if (NULL == nodeIds[i])
-            {
-                return -3 - (int32_t) i;
-            }
-        }*/
-    }
 
-    SOPC_LibSub_AttributeId* lAttrIds = calloc(nbNodeIds, sizeof(SOPC_LibSub_AttributeId));
-    assert(NULL != lAttrIds);
-    for (size_t i = 0; i < nbNodeIds; ++i)
+    OpcUa_ReadRequest request;
+    OpcUa_ReadValueId* nodesToRead;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    ReadContext ctx;
+
+    OpcUa_ReadRequest_Initialize(&request);
+    request.MaxAge = 0; /* Not manage by S2OPC */
+    request.TimestampsToReturn = OpcUa_TimestampsToReturn_Both;
+    request.NoOfNodesToRead = (int32_t) nbElements; // check is done before
+
+    /* Set NodesToRead. This is deallocated by toolkit
+       when call SOPC_LibSub_AsyncSendRequestOnSession */
+    nodesToRead = SOPC_Calloc(nbElements, sizeof(OpcUa_ReadValueId));
+    for (size_t i = 0; i < nbElements && SOPC_STATUS_OK == status; i++)
     {
-        lAttrIds[i] = SOPC_LibSub_AttributeId_Value;
-    }
-    SOPC_LibSub_DataId* lDataId = calloc(nbNodeIds, sizeof(SOPC_LibSub_DataId));
-    assert(NULL != lDataId);
-    SOPC_ReturnStatus status = SOPC_LibSub_AddToSubscription(
-        (SOPC_LibSub_ConnectionId) connectionId, (const char* const*) nodeIds, lAttrIds, (int32_t) nbNodeIds, lDataId);
-    if (SOPC_STATUS_OK != status)
-    {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not create monitored items.");
-    }
-    else
-    {
-        for (size_t i = 0; i < nbNodeIds; ++i)
+        OpcUa_ReadValueId_Initialize(&nodesToRead[i]);
+        nodesToRead[i].AttributeId = readValues[i].attributeId;
+        status = SOPC_String_CopyFromCString(&nodesToRead[i].IndexRange, readValues[i].indexRange);
+        if (SOPC_STATUS_OK == status)
         {
-            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Created MonIt for \"%s\" with data_id %" PRIu32 ".", nodeIds[i],
-                        lDataId[i]);
+            // create an instance of NodeId
+            SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(readValues[i].nodeId, 1);
+            status = SOPC_NodeId_Copy(&nodesToRead[i].NodeId, nodeId);
+            SOPC_NodeId_Clear(nodeId);
         }
     }
-    free(lAttrIds);
-    free(lDataId);
+    request.NodesToRead = nodesToRead;
 
-    if (SOPC_STATUS_OK != status)
+    if (SOPC_STATUS_OK == status)
     {
-        return 3;
+        /* Prepare the synchronous context */
+        /* TODO: assert that the SOPC_STATUS_OK != statusMutex always avoid deadlocks in production code */
+        SOPC_ReturnStatus statusMutex = SOPC_ReadContext_Initialization(&ctx);
+        assert(SOPC_STATUS_OK == statusMutex);
+        Condition_Init(&ctx.condition);
+        assert(SOPC_STATUS_OK == statusMutex);
+        statusMutex = Mutex_Lock(&ctx.mutex);
+        assert(SOPC_STATUS_OK == statusMutex);
+
+        /* Set context */
+        ctx.values = values;
+        ctx.nbElements = request.NoOfNodesToRead;
+        ctx.status = SOPC_STATUS_NOK;
+        ctx.finish = false;
+        status =
+            SOPC_LibSub_AsyncSendRequestOnSession((SOPC_LibSub_ConnectionId) connectionId, &request, (uintptr_t) &ctx);
+
+        /* Wait for the response */
+        while (SOPC_STATUS_OK == status && ctx.finish)
+        {
+            statusMutex = Mutex_UnlockAndTimedWaitCond(&ctx.condition, &ctx.mutex, SYNCHRONOUS_READ_TIMEOUT);
+            assert(SOPC_STATUS_TIMEOUT != statusMutex); /* TODO return error */
+            assert(SOPC_STATUS_OK == statusMutex);
+        }
+        status = ctx.status;
+
+        /* Free the context */
+        statusMutex = Mutex_Unlock(&ctx.mutex);
+        assert(SOPC_STATUS_OK == statusMutex);
+        statusMutex = Condition_Clear(&ctx.condition);
+        assert(SOPC_STATUS_OK == statusMutex);
+        statusMutex = Mutex_Clear(&ctx.mutex);
+        assert(SOPC_STATUS_OK == statusMutex);
     }
 
-    return 0;
+    if (SOPC_STATUS_OK == status)
+    {
+        return 0;
+    }
+    else
+    {
+        return -100;
+    }
+}
+
+int32_t SOPC_ClientHelper_CreateSubscription(int32_t connectionId, SOPC_ClientHelper_DataChangeCbk callback)
+{
+    if (connectionId <= 0)
+    {
+        return -1;
+    }
+    else if (NULL == callback)
+    {
+        return -2;
+    }
+    //else if (NULL == nodeIds || nbNodeIds <= 0 || nbNodeIds > INT32_MAX)
+    //{
+    //    return -2;
+    //}
+    //else
+    //{
+    //    /*
+    //    for (size_t i = 0; i < nbNodeIds; i++)
+    //    {
+    //        if (NULL == nodeIds[i])
+    //        {
+    //            return -3 - (int32_t) i;
+    //        }
+    //    }*/
+    //}
+
+    //SOPC_LibSub_AttributeId* lAttrIds = calloc(nbNodeIds, sizeof(SOPC_LibSub_AttributeId));
+    //assert(NULL != lAttrIds);
+    //for (size_t i = 0; i < nbNodeIds; ++i)
+    //{
+    //    lAttrIds[i] = SOPC_LibSub_AttributeId_Value;
+    //}
+    //SOPC_LibSub_DataId* lDataId = calloc(nbNodeIds, sizeof(SOPC_LibSub_DataId));
+    //assert(NULL != lDataId);
+    //SOPC_ReturnStatus status = SOPC_LibSub_AddToSubscription(
+    //    (SOPC_LibSub_ConnectionId) connectionId, (const char* const*) nodeIds, lAttrIds, (int32_t) nbNodeIds, lDataId);
+    //if (SOPC_STATUS_OK != status)
+    //{
+    //    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not create monitored items.");
+    //}
+    //else
+    //{
+    //    for (size_t i = 0; i < nbNodeIds; ++i)
+    //    {
+    //        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Created MonIt for \"%s\" with data_id %" PRIu32 ".", nodeIds[i],
+    //                    lDataId[i]);
+    //    }
+    //}
+    //free(lAttrIds);
+    //free(lDataId);
+
+    //if (SOPC_STATUS_OK != status)
+    //{
+    //    return 3;
+    //}
+
+    return -100;
 }
 
 int32_t SOPC_ClientHelper_Disconnect(int32_t connectionId)

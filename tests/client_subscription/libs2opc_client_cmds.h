@@ -21,17 +21,23 @@
  *
  * \brief Interface of a library supporting the subscription management, read/write operation and browse.
  *
- * The functions of this interface are synchronous and mutually excluded: functions wait for server's response and 2 functions cannot be called simultaneously.
+ * The functions of this interface are synchronous and mutually excluded: functions wait for server's response and 2
+ * functions cannot be called simultaneously.
  */
 
 #ifndef LIBS2OPC_CLIENT_CMDS_H_
 #define LIBS2OPC_CLIENT_CMDS_H_
 
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdlib.h>
+
+#include "sopc_builtintypes.h"
+
 /* Security policies, taken from "sopc_crypto_profiles.h" */
 #define SOPC_SecurityPolicy_None_URI "http://opcfoundation.org/UA/SecurityPolicy#None"
 #define SOPC_SecurityPolicy_Basic256_URI "http://opcfoundation.org/UA/SecurityPolicy#Basic256"
 #define SOPC_SecurityPolicy_Basic256Sha256_URI "http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"
-
 
 /*
   @description
@@ -44,8 +50,8 @@
     The new value of the Attribute 'Value'. Its content is freed by the LibSub after this function has been called,
     hence the callback must copy it if it should be used outside the callback. */
 typedef void (*SOPC_ClientHelper_DataChangeCbk)(const int32_t connectionId,
-                                          const char* nodeId,
-                                          const SOPC_DataValue* value);
+                                                const char* nodeId,
+                                                const SOPC_DataValue* value);
 
 /*
  @description
@@ -81,15 +87,15 @@ typedef void (*SOPC_ClientHelper_DataChangeCbk)(const int32_t connectionId,
 */
 typedef struct
 {
-  const char* security_policy;
-  int32_t security_mode;
-  const char* path_cert_auth;
-  const char* path_cert_srv;
-  const char* path_cert_cli;
-  const char* path_key_cli;
-  const char* policyId;
-  const char* username;
-  const char* password;
+    const char* security_policy;
+    int32_t security_mode;
+    const char* path_cert_auth;
+    const char* path_cert_srv;
+    const char* path_cert_cli;
+    const char* path_key_cli;
+    const char* policyId;
+    const char* username;
+    const char* password;
 } SOPC_ClientHelper_Security;
 
 /*
@@ -108,9 +114,9 @@ typedef struct
 */
 typedef struct
 {
-  char* nodeId;
-  char* indexRange;
-  SOPC_DataValue value;
+    char* nodeId;
+    char* indexRange;
+    SOPC_DataValue value;
 } SOPC_ClientHelper_WriteValue;
 
 /*
@@ -131,9 +137,9 @@ typedef struct
 */
 typedef struct
 {
-  char* nodeId;
-  uint32_t attributeId;
-  char* indexRange;
+    char* nodeId;
+    uint32_t attributeId;
+    char* indexRange;
 } SOPC_ClientHelper_ReadValue;
 
 /*
@@ -152,11 +158,12 @@ typedef struct
   @field includeSubTypes
     Indicates whether subtypes of the ReferenceType should be included.
 */
-typedef struct {
-  char* nodeId;
-  int32_t direction;
-  char* referenceTypeId;
-  boolean includeSubtypes;
+typedef struct
+{
+    char* nodeId;
+    int32_t direction;
+    char* referenceTypeId;
+    bool includeSubtypes;
 } SOPC_ClientHelper_BrowseRequest;
 
 /*
@@ -167,7 +174,8 @@ typedef struct {
   @field isForward
     If True, the server follow a forward reference. Otherwise, it follow an inverse.
   @field nodeId
-    ExpandedNodeId (see OPC Unified Architecture, Part 4) of the target node following the Reference defined by the returned ReferenceTypeId.
+    ExpandedNodeId (see OPC Unified Architecture, Part 4) of the target node following the Reference defined by the
+  returned ReferenceTypeId.
   @field browseName
     BrowseName of the target node. zero-terminated string or NULL.
   @field DisplayName
@@ -177,13 +185,14 @@ typedef struct {
   @field type
     Type definition of target node. Used only if NodeClass is Object or Variable. Otherwise, it is NULL.
 */
-typedef struct {
-  char* referenceTypeId;
-  boolean isForward;
-  char* nodeId;
-  char*  browseName;
-  char*  displayName;
-  int32_t nodeClass;
+typedef struct
+{
+    char* referenceTypeId;
+    bool isForward;
+    char* nodeId;
+    char* browseName;
+    char* displayName;
+    int32_t nodeClass;
 } SOPC_ClientHelper_BrowseResult;
 
 /*
@@ -206,7 +215,7 @@ typedef struct {
     This list is decreasing. It means ERROR level is the maximum value and DEBUG level is the minimum value.
     If level is not an accepted value, DEBUG is used by default.
  @return
-   '0' if operation succeed 
+   '0' if operation succeed
    '-1' if path is not valid
    '-2' if toolkit not initialized
  */
@@ -234,19 +243,39 @@ void SOPC_ClientHelper_Finalize(void);
     If invalid security detected, return -<10+n> with <n> field number (starting from 1).
     If connection failed, return '-100'.
  */
-int32_t SOPC_ClientHelper_Connect(const char* endpointUrl,
-                                  SOPC_ClientHelper_Security security);
+int32_t SOPC_ClientHelper_Connect(const char* endpointUrl, SOPC_ClientHelper_Security security);
 
 /*
  @description
-    Create a subscription associated to the given connection and adds monitored items.
+    Create a subscription associated to the given connection
     The given callback will be called on data changes.
 
     Only attributes "Value" are monitored.
-    The function waits until the subscription is effectively created and monitored items associated,
-    or the Toolkit times out.
+    The function waits until the subscription is effectively created or the Toolkit times out.
     Returns 0 if succeeded, otherwise an error code < 0.
-    This function can be called only once time for a valid connection id or user should call SOPC_ClientHelper_unsubscribe() before.
+    This function can be called only once time for a valid connection id or user should call
+ SOPC_ClientHelper_unsubscribe() before.
+ @param connectionId
+    The connection id. It should be > 0
+ @param callback
+   The callback for data change notification. Should not be null.
+ @return
+   '0' if operation succeed
+   '-1' if connectionId not valid
+   '-2' if the data change callback associated to connectionId is NULL
+   '-100' if operation failed
+*/
+int32_t SOPC_ClientHelper_CreateSubscription(int32_t connectionId, SOPC_ClientHelper_DataChangeCbk callback);
+
+/*
+ @description
+    Adds monitored items to the subscription associated to the given connection.
+    SOPC_ClientHelper_CreateSubscription() should have been called previously.
+
+    Only attributes "Value" are monitored.
+    The function waits until the monitored items are effectively created or the Toolkit times out.
+    Returns 0 if succeeded, otherwise an error code < 0.
+
  @param connectionId
     The connection id. It should be > 0
  @param nodeIds
@@ -255,26 +284,26 @@ int32_t SOPC_ClientHelper_Connect(const char* endpointUrl,
     See OPC Unified Architecture, Part 3 for NodeId description.
  @param nbNodeIds
     Number of elements to subscribes. It should be between 1 and INT32_MAX
- @param callback
-   The callback for data change notification. Should not be null.
  @return
-   '0' if operation succeed 
+   '0' if operation succeed
    '-1' if connectionId not valid
    '-2' if nodeIds or nbNodeIds not valid
-   '-3' if the data change callback associated to connectionId is NULL
    '-100' if operation failed
 */
-int32_t SOPC_ClientHelper_Subscribe(int32_t connectionId, char** nodeIds, size_t nbNodeIds, SOPC_ClientHelper_DataChangeCbk callback);
+int32_t SOPC_ClientHelper_AddMonitoredItems(int32_t connectionId,
+                                            char** nodeIds,
+                                            size_t nbNodeIds);
 
 /*
  @description
     Delete subscription associated to the given connection.
-    If this function succeed, no more data changes notification is received about this connection until SOPC_ClientHelper_Subscribe() is call.
+    If this function succeed, no more data changes notification is received about this connection until
+ SOPC_ClientHelper_CreateSubscription() and SOPC_ClientHelper_AddMonitorItems() are called.
 
  @param connectionId
     The connection id. It should be > 0
  @return
-   '0' if operation succeed 
+   '0' if operation succeed
    '-1' if connectionId not valid
    '-100' if operation failed
 */
@@ -287,7 +316,7 @@ int32_t SOPC_ClientHelper_Unsubscribe(int32_t connectionId);
  @param c_id
     The connection id to disconnect
  @return
-   '0' if operation succeed 
+   '0' if operation succeed
    '-1' if connectionId not valid
    '-2' if toolkit unitialized
    '-2' if already closed connection
@@ -311,13 +340,12 @@ int32_t SOPC_ClientHelper_Disconnect(int32_t connectionId);
  @param nbElements
     Number of elements to write. It should be between 1 and INT32_MAX
  @return
-   '0' if operation succeed 
+   '0' if operation succeed
    '-1' if connectionId not valid
    '-2' if writeValues or nbElements not valid
    '-100' if operation failed
 */
 int32_t SOPC_ClientHelper_Write(int32_t connectionId, SOPC_ClientHelper_WriteValue* writeValues, size_t nbElements);
-
 
 /*
  @description
@@ -326,7 +354,7 @@ int32_t SOPC_ClientHelper_Write(int32_t connectionId, SOPC_ClientHelper_WriteVal
 
     Restrictions:
     - The service parameter 'maxAge' is not managed.
-    - If DataEncodig should apply, Binary encoding is used. 
+    - If DataEncodig should apply, Binary encoding is used.
  @param connectionId
     The connection id. It should be > 0
  @param readValues
@@ -341,7 +369,7 @@ int32_t SOPC_ClientHelper_Write(int32_t connectionId, SOPC_ClientHelper_WriteVal
     When return, the order of this list matches the order of \p readValues.
     The ownership of the data moved to caller which should freed the content of this array.
  @return
-   '0' if operation succeed 
+   '0' if operation succeed
    '-1' if connectionId not valid
    '-2' if readValues, values or nbElements not valid
    '-100' if operation failed
@@ -361,6 +389,7 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
     - requestedMaxReferencesPerNode is set to 0
     - nodeClassMask is set to 0 (object)
     - resultMask specifies all fields are returned
+    - browse cannot be called several times simultanously
 
  @param connectionId
     The connection id. It should be > 0
@@ -377,7 +406,7 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
     The ownership of the data moved to caller which should freed the content of this array.
 
  @return
-   '0' if operation succeed 
+   '0' if operation succeed
    '-1' if connectionId not valid
    '-2' if browseRequest, browseResult or nbElements not valid
    '-3' too many call to BrowseNext without finishing the request
@@ -388,5 +417,19 @@ int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
                                  size_t nbElements,
                                  SOPC_ClientHelper_BrowseResult* browseResults);
 
+/* TODO
+This part below is only to compile during dev.
+Includes should be remove and and genericCallback should be only in C implementation ( static )
+*/
+
+#include "sopc_toolkit_config.h"
+#define SKIP_S2OPC_DEFINITIONS
+#include "libs2opc_client.h"
+/* TODO to make static in C file */
+void SOPC_ClientHelper_GenericCallback(SOPC_LibSub_ConnectionId c_id,
+                                       SOPC_LibSub_ApplicativeEvent event,
+                                       SOPC_StatusCode status,
+                                       const void* response,
+                                       uintptr_t responseContext);
 
 #endif /* LIBS2OPC_CLIENT_CMDS_H_ */
