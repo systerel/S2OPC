@@ -75,8 +75,8 @@
 #define configUSE_DAEMON_TASK_STARTUP_HOOK 0
 
 /* Run time and task stats gathering related definitions. */
-#define configGENERATE_RUN_TIME_STATS 1
-#define configUSE_TRACE_FACILITY 1
+#define configGENERATE_RUN_TIME_STATS 0
+#define configUSE_TRACE_FACILITY 0
 #define configUSE_STATS_FORMATTING_FUNCTIONS 0
 #define configRECORD_STACK_HIGH_ADDRESS 1
 
@@ -154,10 +154,14 @@ extern void RTOS_portCONFIGURE_TIMER_FOR_RUN_TIME_STATS(void);
 extern uint32_t RTOS_portGET_RUN_TIME_COUNTER_VALUE(void);
 #define portGET_RUN_TIME_COUNTER_VALUE() RTOS_portGET_RUN_TIME_COUNTER_VALUE()
 #endif
-
+/*
 extern void freeRTOS_TRACE_MALLOC(void* pvAddress, uint32_t uiSize);
 #define traceMALLOC(pvAddress, uiSize) freeRTOS_TRACE_MALLOC(pvAddress, uiSize)
 extern void freeRTOS_TRACE_FREE(void* pvAddress, uint32_t uiSize);
 #define traceFREE(pvAddress, uiSize) freeRTOS_TRACE_FREE(pvAddress, uiSize)
+*/
+#if (configUSE_TRACE_FACILITY == 1)
+#include "trcRecorder.h"
+#endif
 
 #endif /* FREERTOS_CONFIG_H */
