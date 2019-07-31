@@ -362,6 +362,7 @@ SOPC_ReturnStatus SOPC_Socket_Write(Socket sock, const uint8_t* data, uint32_t c
         }
         else
         {
+            errno = 0;
             *sentBytes = 0;
             getsockopt(sock, SOL_SOCKET, SO_ERROR, &optErr, &optErrSize);
             if (EAGAIN == optErr || EWOULDBLOCK == optErr)
