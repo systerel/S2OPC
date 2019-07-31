@@ -108,6 +108,10 @@ int main(void)
 
     // FREE_RTOS_TEST_S2OPC_USECASE_PUBSUB_SYNCHRO(NULL);
 
+#if (configUSE_TRACE_FACILITY == 1)
+    vTraceEnable(TRC_INIT);
+#endif
+
     vTaskStartScheduler();
 
     for (;;)
