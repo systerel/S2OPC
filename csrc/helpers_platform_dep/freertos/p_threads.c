@@ -37,7 +37,7 @@
 #include "p_utils.h"           /* private list include */
 
 #define MAX_THREADS MAX_WAITERS
-#define configPRIORITY_S2OPC 1
+#define configPRIORITY_S2OPC 0
 
 /* Private structure definition */
 
