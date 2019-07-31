@@ -290,9 +290,7 @@ int32_t SOPC_ClientHelper_CreateSubscription(int32_t connectionId, SOPC_ClientHe
    '-2' if nodeIds or nbNodeIds not valid
    '-100' if operation failed
 */
-int32_t SOPC_ClientHelper_AddMonitoredItems(int32_t connectionId,
-                                            char** nodeIds,
-                                            size_t nbNodeIds);
+int32_t SOPC_ClientHelper_AddMonitoredItems(int32_t connectionId, char** nodeIds, size_t nbNodeIds);
 
 /*
  @description
