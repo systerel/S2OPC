@@ -370,6 +370,15 @@ SOPC_ReturnStatus P_SYNCHRO_UnlockAndWaitForConditionVariable(
                         &notificationValue,       //
                         0);                       //
 
+        // If others notifications, forward it in order to generate a task event
+        if (0 != (notificationValue & (~(uwSignal | uwClearSignal))))
+        {
+            xTaskGenericNotify(xTaskGetCurrentTaskHandle(),                       //
+                               notificationValue & (~(uwSignal | uwClearSignal)), //
+                               eSetBits,                                          //
+                               NULL);                                             //
+        }
+
         if (SOPC_STATUS_OK != status)
         {
             result = SOPC_STATUS_INVALID_STATE;
