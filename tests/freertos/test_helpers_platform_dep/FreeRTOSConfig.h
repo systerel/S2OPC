@@ -85,7 +85,7 @@
 #define configMAX_CO_ROUTINE_PRIORITIES 2
 
 #define configFRTOS_MEMORY_SCHEME 4
-#define configINCLUDE_FREERTOS_TASK_C_ADDITIONS_H 1
+#define configINCLUDE_FREERTOS_TASK_C_ADDITIONS_H 0
 /* Software timer related definitions. */
 #define configUSE_TIMERS 1
 #define configTIMER_TASK_PRIORITY (configMAX_PRIORITIES - 1)
