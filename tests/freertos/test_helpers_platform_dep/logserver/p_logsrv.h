@@ -58,7 +58,7 @@
 
 // ************Private API**************
 
-#define configPRIORITY_LOGSRV 8
+#define configPRIORITY_LOGSRV 0
 
 // Periodic config
 #define P_LOG_SRV_ONLINE_PERIOD (1000)
