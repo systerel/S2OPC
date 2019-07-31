@@ -547,6 +547,22 @@ int32_t SOPC_ClientHelper_CreateSubscription(int32_t connectionId, SOPC_ClientHe
     return -100;
 }
 
+int32_t SOPC_ClientHelper_AddMonitoredItems(int32_t connectionId, char** nodeIds, size_t nbNodeIds)
+{
+    // TODO implement this function
+    (void) connectionId;
+    (void) nodeIds;
+    (void) nbNodeIds;
+    return -100;
+}
+
+int32_t SOPC_ClientHelper_Unsubscribe(int32_t connectionId)
+{
+    // TODO implement this function
+    (void) connectionId;
+    return -100;
+}
+
 int32_t SOPC_ClientHelper_Disconnect(int32_t connectionId)
 {
     if (connectionId <= 0)
@@ -572,4 +588,25 @@ static void log_callback(const SOPC_Toolkit_Log_Level log_level, SOPC_LibSub_Cst
 static void disconnect_callback(const SOPC_LibSub_ConnectionId c_id)
 {
     Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Client %" PRIu32 " disconnected.", c_id);
+}
+
+int32_t SOPC_ClientHelper_Write(int32_t connectionId, SOPC_ClientHelper_WriteValue* writeValues, size_t nbElements)
+{
+    // TODO
+    (void) connectionId;
+    (void) writeValues;
+    (void) nbElements;
+    return -100;
+}
+int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
+                                 SOPC_ClientHelper_BrowseRequest* browseRequests,
+                                 size_t nbElements,
+                                 SOPC_ClientHelper_BrowseResult* browseResults)
+{
+    // TODO
+    (void) connectionId;
+    (void) browseRequests;
+    (void) nbElements;
+    (void) browseResults;
+    return -100;
 }
