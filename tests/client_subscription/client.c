@@ -118,12 +118,16 @@ static void datachange_callback(const int32_t c_id,
     }
     else {
         // TODO is there a generic function to print/format a variant ?
-        //SOPC_Variant variant = value->Value;
+        SOPC_Variant variant = value->Value;
         //TODO print value
-        //if (SOPC_Boolean_Id == variant.BuiltInTypeId)
-        //{
-        //    snprintf(sz + n, sizeof(sz) / sizeof(sz[0]) - n, (bool) variant.Value ? "true" : "false");
-        //}
+        if (SOPC_Boolean_Id == variant.BuiltInTypeId)
+        {
+            snprintf(sz + n, sizeof(sz) / sizeof(sz[0]) - n, (bool) variant.Value.Boolean ? "true" : "false");
+        }
+        else if (SOPC_UInt64_Id == variant.BuiltInTypeId)
+        {
+            snprintf(sz + n, sizeof(sz) / sizeof(sz[0]) - n, "%" PRIu64, (int64_t) variant.Value.Uint64);
+        }
         //else if (SOPC_Int64_Id == variant.BuiltInTypeId)
         //{
         //    snprintf(sz + n, sizeof(sz) / sizeof(sz[0]) - n, "%" PRIi64, (int64_t) variant.Value);
@@ -173,11 +177,14 @@ int main(int argc, char* const argv[])
 
     if (res == 0)
     {
+        res = SOPC_ClientHelper_CreateSubscription(connectionId, datachange_callback);
+    }
+
+    if (res == 0)
+    {
         assert(options.node_ids_size > 0);
         assert((uint32_t) options.node_ids_size <= SIZE_MAX);
-        //TODO use SOPC_ClientHelper_CreateSubscription and SOPC_ClientHelper_AddMonitoredItems
-        res = SOPC_ClientHelper_CreateSubscription(connectionId, datachange_callback);
-        //res = SOPC_ClientHelper_Subscribe(connectionId, options.node_ids, (size_t) options.node_ids_size);
+        res = SOPC_ClientHelper_AddMonitoredItems(connectionId, options.node_ids, (size_t) options.node_ids_size);
     }
 
     if (res == 0)

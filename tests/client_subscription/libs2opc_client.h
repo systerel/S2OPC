@@ -517,6 +517,7 @@ SOPC_ReturnStatus SOPC_LibSub_AsyncSendRequestOnSession(SOPC_LibSub_ConnectionId
     - already closed connection (SOPC_STATUS_NOK). */
 SOPC_ReturnStatus SOPC_LibSub_Disconnect(const SOPC_LibSub_ConnectionId cliId);
 
+
 /*--------------------------------
     TBC??
     - delete_subscription
