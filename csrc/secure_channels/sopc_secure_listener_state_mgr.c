@@ -64,7 +64,7 @@ static bool SOPC_SecureListenerStateMgr_CloseListener(uint32_t endpointConfigIdx
             // Close all active secure connections established on the listener
             for (idx = 0; idx < SOPC_MAX_SOCKETS_CONNECTIONS; idx++)
             {
-                if (scListener->isUsedConnectionIdxArray[idx] != false)
+                if (scListener->isUsedConnectionIdxArray[idx])
                 {
                     SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_EP_SC_CLOSE, scListener->connectionIdxArray[idx],
                                                                    NULL, endpointConfigIdx);
@@ -72,7 +72,7 @@ static bool SOPC_SecureListenerStateMgr_CloseListener(uint32_t endpointConfigIdx
                     scListener->connectionIdxArray[idx] = 0;
                 }
             }
-            if (socketFailure == false)
+            if (!socketFailure)
             {
                 // Close the socket listener in case it is not a socket failure (already done)
                 SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE_SERVER, scListener->socketIndex, NULL,
@@ -107,16 +107,16 @@ static bool SOPC_SecureListenerStateMgr_AddConnection(SOPC_SecureListener* scLis
     do
     {
         lastIdx = idx;
-        if (false == scListener->isUsedConnectionIdxArray[idx])
+        if (!scListener->isUsedConnectionIdxArray[idx])
         {
             scListener->connectionIdxArray[idx] = newConnectionIndex;
             scListener->isUsedConnectionIdxArray[idx] = true;
             result = true;
         }
         idx = (idx + 1) % SOPC_MAX_SOCKETS_CONNECTIONS;
-    } while (idx != scListener->lastConnectionIdxArrayIdx && false == result);
+    } while (idx != scListener->lastConnectionIdxArrayIdx && !result);
 
-    if (result != false)
+    if (result)
     {
         scListener->lastConnectionIdxArrayIdx = lastIdx;
     }
@@ -131,15 +131,14 @@ static void SOPC_SecureListenerStateMgr_RemoveConnection(SOPC_SecureListener* sc
     bool result = false;
     do
     {
-        if (scListener->isUsedConnectionIdxArray[idx] != false &&
-            scListener->connectionIdxArray[idx] == connectionIndex)
+        if (scListener->isUsedConnectionIdxArray[idx] && scListener->connectionIdxArray[idx] == connectionIndex)
         {
             scListener->isUsedConnectionIdxArray[idx] = false;
             scListener->connectionIdxArray[idx] = 0;
             result = true;
         }
         idx++;
-    } while (idx < SOPC_MAX_SOCKETS_CONNECTIONS && false == result);
+    } while (idx < SOPC_MAX_SOCKETS_CONNECTIONS && !result);
 }
 
 void SOPC_SecureListenerStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalEvent event,
@@ -297,7 +296,7 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
         {
             result = SOPC_SecureListenerStateMgr_OpeningListener(eltId);
         }
-        if (false == result)
+        if (!result)
         {
             // Nothing to do: it means EP is already open or in opening step
         }
@@ -318,7 +317,7 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
         if (epConfig != NULL)
         {
             result = SOPC_SecureListenerStateMgr_CloseListener(eltId, false);
-            if (result == false)
+            if (!result)
             {
                 status = SOPC_STATUS_INVALID_PARAMETERS;
             }
