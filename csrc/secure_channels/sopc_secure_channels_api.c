@@ -60,6 +60,7 @@ void SOPC_SecureChannels_OnInternalEvent(SOPC_EventHandler* handler,
     case INT_SC_RCV_OPN:
     case INT_SC_RCV_CLO:
     case INT_SC_RCV_MSG_CHUNKS:
+    case INT_SC_RCV_MSG_CHUNK_ABORT:
     case INT_SC_RCV_FAILURE:
     case INT_SC_SND_FAILURE:
     case INT_SC_CLOSE:

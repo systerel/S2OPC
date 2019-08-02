@@ -42,11 +42,12 @@ typedef enum
                     // params = (SOPC_Buffer*) buffer positioned to message payload,
     INT_SC_RCV_ERR, /* -------------------------< */
 
-    INT_SC_RCV_OPN,        /* >------------------------- */
-                           // id = secure channel connection index,
-                           // params = (SOPC_Buffer*) buffer positioned to message payload,
-    INT_SC_RCV_CLO,        // auxParam = (uint32_t) request Id context if request
-    INT_SC_RCV_MSG_CHUNKS, /* -------------------------< */
+    INT_SC_RCV_OPN, /* >------------------------- */
+                    // id = secure channel connection index,
+                    // params = (SOPC_Buffer*) buffer positioned to message payload,
+    INT_SC_RCV_CLO, // auxParam = (uint32_t) request Id context if request
+    INT_SC_RCV_MSG_CHUNKS,
+    INT_SC_RCV_MSG_CHUNK_ABORT, /* -------------------------< */
 
     INT_SC_RCV_FAILURE, /* id = secure channel connection index,
                            auxParam = error status */

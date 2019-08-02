@@ -55,11 +55,11 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
 
     while (SOPC_Buffer_Remaining(sopc_buffer) > 0)
     {
-        if (NULL == chunkCtx->chunkInputBuffer)
+        if (NULL == chunkCtx->currentChunkInputBuffer)
         {
             // No incomplete message data: create a new buffer
-            chunkCtx->chunkInputBuffer = SOPC_Buffer_Create(sc->tcpMsgProperties.receiveBufferSize);
-            assert(chunkCtx->chunkInputBuffer != NULL);
+            chunkCtx->currentChunkInputBuffer = SOPC_Buffer_Create(sc->tcpMsgProperties.receiveBufferSize);
+            assert(chunkCtx->currentChunkInputBuffer != NULL);
         }
 
         if (!SC_Chunks_DecodeReceivedBuffer(&sc->chunksCtx, sopc_buffer, &errorStatus))
@@ -70,8 +70,8 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
         // Decode OPC UA Secure Conversation MessageChunk specific headers if necessary (not HEL/ACK/ERR)
         if (SC_Chunks_TreatTcpPayload(sc, &request_id, &errorStatus))
         {
-            SOPC_Buffer_Delete(chunkCtx->chunkInputBuffer);
-            chunkCtx->chunkInputBuffer = NULL;
+            SOPC_Buffer_Delete(chunkCtx->currentChunkInputBuffer);
+            chunkCtx->currentChunkInputBuffer = NULL;
         }
         else
         {
@@ -80,7 +80,7 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
     }
 
     SC_CloseConnection(conn_idx, true);
-    SOPC_Buffer_Delete(chunkCtx->chunkInputBuffer);
+    SOPC_Buffer_Delete(chunkCtx->currentChunkInputBuffer);
     SOPC_Buffer_Delete(sopc_buffer);
 
     return 0;

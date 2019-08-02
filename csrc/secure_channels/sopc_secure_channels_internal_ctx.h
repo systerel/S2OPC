@@ -90,10 +90,12 @@ typedef enum
 // Chunk manager context
 typedef struct SOPC_SecureConnection_ChunkMgrCtx
 {
-    SOPC_Buffer* chunkInputBuffer;
+    SOPC_Buffer* currentChunkInputBuffer; // The current chunk bytes accumulation
     uint32_t currentMsgSize;
     SOPC_Msg_Type currentMsgType;
     SOPC_Msg_IsFinal currentMsgIsFinal;
+    SOPC_SLinkedList* intermediateChunksInputBuffers;
+    SOPC_Buffer* currentMessageInputBuffer; // The message (from one or several chunks) received
 } SOPC_SecureConnection_ChunkMgrCtx;
 
 // Set on HEL/ACK exchange (see OPC UA specification Part 6 table 36/37)
@@ -224,6 +226,22 @@ SOPC_SecureConnection* SC_GetConnection(uint32_t connectionIdx);
 
 const SOPC_Certificate* SC_OwnCertificate(SOPC_SecureConnection* conn);
 const SOPC_Certificate* SC_PeerCertificate(SOPC_SecureConnection* conn);
+
+/** @brief Retrieve the number of intermediate chunks already received */
+uint32_t SOPC_ScInternalContext_GetNbIntermediateInputChunks(SOPC_SecureConnection_ChunkMgrCtx* chunkCtx);
+/** @brief Add an intermediate chunk received into message chunks */
+bool SOPC_ScInternalContext_AddIntermediateInputChunk(SOPC_SecureConnection_TcpProperties* tcpProperties,
+                                                      SOPC_SecureConnection_ChunkMgrCtx* chunkCtx,
+                                                      SOPC_Buffer* intermediateChunk);
+/** @brief Clear the list of intermediate chunks received
+ *  (should be called directly only in case of abort chunk received) */
+void SOPC_ScInternalContext_ClearIntermediateInputChunks(SOPC_SecureConnection_ChunkMgrCtx* chunkCtx);
+
+/** @brief Clear the current chunk context but not the intermediate chunks context */
+void SOPC_ScInternalContext_ClearCurrentInputChunkContext(SOPC_SecureConnection_ChunkMgrCtx* chunkCtx);
+
+/** @brief Clear the current chunk and intermediate chunks context */
+void SOPC_ScInternalContext_ClearInputChunksContext(SOPC_SecureConnection_ChunkMgrCtx* chunkCtx);
 
 void SOPC_SecureChannels_OnInternalEvent(SOPC_EventHandler* handler,
                                          int32_t event,

@@ -136,11 +136,7 @@ bool SC_CloseConnection(uint32_t connectionIdx, bool socketFailure)
         if (scConnection->state != SECURE_CONNECTION_STATE_SC_CLOSED)
         {
             result = true;
-            // Clear chunk manager context
-            if (scConnection->chunksCtx.chunkInputBuffer != NULL)
-            {
-                SOPC_Buffer_Delete(scConnection->chunksCtx.chunkInputBuffer);
-            }
+            SOPC_ScInternalContext_ClearInputChunksContext(&scConnection->chunksCtx);
 
             // Clear TCP sequence properties
             assert(scConnection->tcpSeqProperties.sentRequestIds != NULL);
@@ -2453,6 +2449,12 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
                                                    void* params,
                                                    uintptr_t auxParam)
 {
+    uint32_t* requestIdForSndFailure = NULL;
+    SOPC_SecureConnection* scConnection = NULL;
+    SOPC_Buffer* buffer = NULL;
+    SOPC_StatusCode errorStatus;
+    char* errorReason = NULL;
+
     switch (event)
     {
     /* SC listener manager -> SC connection manager */
@@ -2488,9 +2490,9 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
     {
         SOPC_Logger_TraceDebug("ScStateMgr: INT_SC_RCV_HEL scIdx=%" PRIu32, eltId);
 
-        SOPC_Buffer* buffer = params;
-        SOPC_SecureConnection* scConnection = SC_GetConnection(eltId);
-        SOPC_StatusCode errorStatus = SOPC_GoodGenericStatus;
+        buffer = params;
+        scConnection = SC_GetConnection(eltId);
+        errorStatus = SOPC_GoodGenericStatus;
 
         if (scConnection == NULL)
         {
@@ -2516,8 +2518,8 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
     {
         SOPC_Logger_TraceDebug("ScStateMgr: INT_SC_RCV_ACK scIdx=%" PRIu32, eltId);
 
-        SOPC_Buffer* buffer = params;
-        SOPC_SecureConnection* scConnection = SC_GetConnection(eltId);
+        buffer = params;
+        scConnection = SC_GetConnection(eltId);
 
         if (scConnection == NULL)
         {
@@ -2543,7 +2545,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
     {
         SOPC_Logger_TraceDebug("ScStateMgr: INT_SC_RCV_OPN scIdx=%" PRIu32 " reqId=%" PRIuPTR, eltId, auxParam);
 
-        SOPC_SecureConnection* scConnection = SC_GetConnection(eltId);
+        scConnection = SC_GetConnection(eltId);
 
         if (scConnection == NULL)
         {
@@ -2569,7 +2571,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
     {
         SOPC_Logger_TraceDebug("ScStateMgr: INT_SC_RCV_CLO scIdx=%" PRIu32 " reqId=%" PRIuPTR, eltId, auxParam);
 
-        SOPC_SecureConnection* scConnection = SC_GetConnection(eltId);
+        scConnection = SC_GetConnection(eltId);
 
         if (scConnection != NULL)
         {
@@ -2610,9 +2612,12 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
     }
     case INT_SC_RCV_MSG_CHUNKS:
     {
+        /* eltId = secure channel connection index,
+           params = (SOPC_Buffer*) buffer,
+           auxParam = requestId */
         SOPC_Logger_TraceDebug("ScStateMgr: INT_SC_RCV_MSG_CHUNKS scIdx=%" PRIu32 " reqId=%" PRIuPTR, eltId, auxParam);
 
-        SOPC_SecureConnection* scConnection = SC_GetConnection(eltId);
+        scConnection = SC_GetConnection(eltId);
 
         if (scConnection != NULL)
         {
@@ -2645,12 +2650,63 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
         }
         break;
     }
+    case INT_SC_RCV_MSG_CHUNK_ABORT:
+        SOPC_Logger_TraceDebug("ScStateMgr: INT_SC_RCV_MSG_CHUNK_ABORT scIdx=%" PRIu32, eltId);
+
+        /* eltId = secure channel connection index,
+           params = (SOPC_Buffer*) buffer,
+           auxParam = requestId */
+        scConnection = SC_GetConnection(eltId);
+        errorStatus = SOPC_GoodGenericStatus;
+
+        if (params != NULL)
+        {
+            // Note: Abort chunk message has same message content than ERR message
+            //       (except it was contained in a secure message with security layer)
+            errorReason = SC_ClientTransition_ReceivedErrorMsg((SOPC_Buffer*) params, &errorStatus);
+
+            SOPC_Buffer_Delete((SOPC_Buffer*) params);
+        }
+
+        // Part 6 (1.03) §6.7.3: "The receiver shall ignore the Message but shall not close the SecureChannel"
+        if (errorReason != NULL)
+        {
+            if (scConnection->isServerConnection)
+            {
+                // Log a warning, client request is aborted
+                SOPC_Logger_TraceWarning("ScStateMgr: abort chunk message received with status=%" PRIX32
+                                         " and reason=%s (scIdx=%" PRIu32 ")",
+                                         errorStatus, errorReason, eltId);
+            }
+            else
+            {
+                requestIdForSndFailure = SOPC_Malloc(sizeof(uint32_t));
+                if (requestIdForSndFailure != NULL)
+                {
+                    *requestIdForSndFailure = (uint32_t) auxParam;
+                    // Part 6 (1.03) §6.7.3:
+                    // "The client shall report the error back to the Application as StatusCode for the request"
+                    SOPC_EventHandler_Post(secureChannelsEventHandler, SC_SND_FAILURE,
+                                           eltId,                  // secure connection id
+                                           requestIdForSndFailure, // request Id
+                                           errorStatus);           // error status
+                }
+                else // without request Id, nothing can be treated for the failure
+                {
+                    SOPC_Logger_TraceError("ScStateMgr: abort chunk message received with status=%" PRIX32
+                                           " and reason=%s (scIdx=%" PRIu32 ").",
+                                           errorStatus, errorReason, eltId);
+                }
+            }
+            SOPC_Free(errorReason);
+        }
+        break;
     case INT_SC_RCV_FAILURE:
     {
         SOPC_Logger_TraceDebug("ScStateMgr: INT_SC_RCV_FAILURE scIdx=%" PRIu32 " statusCode=%" PRIXPTR, eltId,
                                auxParam);
 
-        SOPC_SecureConnection* scConnection = SC_GetConnection(eltId);
+        scConnection = SC_GetConnection(eltId);
 
         if (scConnection != NULL)
         {
@@ -2673,7 +2729,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
                                    auxParam); // error status
         }
         // else: without request Id, nothing can be treated for the failure
-        SOPC_SecureConnection* scConnection = SC_GetConnection(eltId);
+        scConnection = SC_GetConnection(eltId);
 
         if (scConnection != NULL)
         {
@@ -2688,9 +2744,9 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
 
         /* id = secure channel connection index,
            auxParam = params = (SOPC_Buffer*) buffer */
-        SOPC_SecureConnection* scConnection = SC_GetConnection(eltId);
-        SOPC_StatusCode errorStatus = SOPC_GoodGenericStatus;
-        char* errorReason = NULL;
+        scConnection = SC_GetConnection(eltId);
+        errorStatus = SOPC_GoodGenericStatus;
+        errorReason = NULL;
 
         if (params != NULL)
         {
@@ -2729,7 +2785,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
 
         /* id = secure channel connection index,
            auxParam = endpoint description configuration index */
-        SOPC_SecureConnection* scConnection = SC_GetConnection(eltId);
+        scConnection = SC_GetConnection(eltId);
 
         if (scConnection != NULL)
         {
@@ -2744,7 +2800,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
                                params == NULL ? "NULL" : (char*) params, auxParam);
 
         /* id = secure channel connection index */
-        SOPC_SecureConnection* scConnection = SC_GetConnection(eltId);
+        scConnection = SC_GetConnection(eltId);
 
         if (scConnection != NULL)
         {

@@ -48,6 +48,44 @@ static const uint8_t SOPC_MSG[3] = {'M', 'S', 'G'};
 static const uint8_t SOPC_OPN[3] = {'O', 'P', 'N'};
 static const uint8_t SOPC_CLO[3] = {'C', 'L', 'O'};
 
+/**
+ * \brief Fills a target buffer from a source buffer up to a given length.
+ *
+ * Note that this function may copy LESS than \c n bytes to dst, if \c src is
+ * less than \c n bytes long. This is NOT considered as an error, the caller
+ * should call this function again when there is more data in \c src.
+ *
+ * In other words, \c dst has been successfully filled if and only if this
+ * function returns \c TRUE and \c remaining is set to 0.
+ *
+ * \param dst        The buffer to fill.
+ * \param src        The source buffer.
+ * \param n          The number of bytes to accumulate in \c dst.
+ * \param remaining  Out parameter, the number of bytes remaining to fill.
+ *
+ * \return \c TRUE in case of success, \c FALSE in case reading from \c src
+ *         fails.
+ */
+static bool fill_buffer(SOPC_Buffer* dst, SOPC_Buffer* src, uint32_t n, uint32_t* remaining)
+{
+    if (SOPC_Buffer_Remaining(dst) >= n)
+    {
+        *remaining = 0;
+        return true;
+    }
+
+    uint32_t missing = n - SOPC_Buffer_Remaining(dst);
+    int64_t read = SOPC_Buffer_ReadFrom(dst, src, missing);
+
+    if (read < 0)
+    {
+        return false;
+    }
+
+    *remaining = n - SOPC_Buffer_Remaining(dst);
+    return true;
+}
+
 static uint32_t SC_Client_StartRequestTimeout(uint32_t connectionIdx, uint32_t requestId)
 {
     SOPC_Event event;
@@ -61,8 +99,9 @@ static uint32_t SC_Client_StartRequestTimeout(uint32_t connectionIdx, uint32_t r
 static bool SC_Chunks_DecodeTcpMsgHeader(SOPC_SecureConnection_ChunkMgrCtx* chunkCtx, SOPC_StatusCode* errorStatus)
 {
     assert(chunkCtx != NULL);
-    assert(chunkCtx->chunkInputBuffer != NULL);
-    assert(chunkCtx->chunkInputBuffer->length - chunkCtx->chunkInputBuffer->position >= SOPC_TCP_UA_HEADER_LENGTH);
+    assert(chunkCtx->currentChunkInputBuffer != NULL);
+    assert(chunkCtx->currentChunkInputBuffer->length - chunkCtx->currentChunkInputBuffer->position >=
+           SOPC_TCP_UA_HEADER_LENGTH);
     assert(chunkCtx->currentMsgType == SOPC_MSG_TYPE_INVALID);
     assert(chunkCtx->currentMsgIsFinal == SOPC_MSG_ISFINAL_INVALID);
     assert(chunkCtx->currentMsgSize == 0);
@@ -74,7 +113,7 @@ static bool SC_Chunks_DecodeTcpMsgHeader(SOPC_SecureConnection_ChunkMgrCtx* chun
     uint8_t isFinal;
 
     // READ message type
-    status = SOPC_Buffer_Read(msgType, chunkCtx->chunkInputBuffer, 3);
+    status = SOPC_Buffer_Read(msgType, chunkCtx->currentChunkInputBuffer, 3);
     if (SOPC_STATUS_OK == status)
     {
         result = true;
@@ -115,7 +154,7 @@ static bool SC_Chunks_DecodeTcpMsgHeader(SOPC_SecureConnection_ChunkMgrCtx* chun
     // READ IsFinal message chunk
     if (result)
     {
-        status = SOPC_Buffer_Read(&isFinal, chunkCtx->chunkInputBuffer, 1);
+        status = SOPC_Buffer_Read(&isFinal, chunkCtx->currentChunkInputBuffer, 1);
         if (SOPC_STATUS_OK == status)
         {
             switch (isFinal)
@@ -147,40 +186,25 @@ static bool SC_Chunks_DecodeTcpMsgHeader(SOPC_SecureConnection_ChunkMgrCtx* chun
                     *errorStatus = OpcUa_BadTcpMessageTypeInvalid;
                     result = false;
                 }
-            }
-            else
-            {
-                /* Limitation of the current version: does not support multi-chunk messages and shall not receive some
-                 * since it was indicated on connection configuration
-                 */
-                if (chunkCtx->currentMsgIsFinal != SOPC_MSG_ISFINAL_FINAL)
-                {
-                    SOPC_Logger_TraceError(
-                        "ChunksMgr: decoding TCP UA header: unexpected isFinal='%c' value for given msg type 'MSG', "
-                        "multi-chunk was indicated as not active on connection",
-                        (char) isFinal);
-                    *errorStatus = OpcUa_BadTcpMessageTypeInvalid;
-                    result = false;
-                }
-            }
+            } // else we could receive 'C', 'A' or 'F'
         }
     }
 
     // READ message size
     if (result)
     {
-        status = SOPC_UInt32_Read(&chunkCtx->currentMsgSize, chunkCtx->chunkInputBuffer);
+        status = SOPC_UInt32_Read(&chunkCtx->currentMsgSize, chunkCtx->currentChunkInputBuffer);
         if (SOPC_STATUS_OK != status || chunkCtx->currentMsgSize <= SOPC_TCP_UA_HEADER_LENGTH)
         {
             // Message size cannot be less or equal to the TCP UA header length
             *errorStatus = OpcUa_BadEncodingError;
             result = false;
         }
-        else if (chunkCtx->currentMsgSize > chunkCtx->chunkInputBuffer->max_size)
+        else if (chunkCtx->currentMsgSize > chunkCtx->currentChunkInputBuffer->max_size)
         {
             SOPC_Logger_TraceError(
                 "ChunksMgr: decoding TCP UA header: message size=%u indicated greater than receiveBufferSize=%u",
-                chunkCtx->currentMsgSize, chunkCtx->chunkInputBuffer->max_size);
+                chunkCtx->currentMsgSize, chunkCtx->currentChunkInputBuffer->max_size);
             *errorStatus = OpcUa_BadTcpMessageTooLarge;
             result = false;
         }
@@ -189,7 +213,8 @@ static bool SC_Chunks_DecodeTcpMsgHeader(SOPC_SecureConnection_ChunkMgrCtx* chun
     return result;
 }
 
-static SOPC_SecureChannels_InternalEvent SC_Chunks_MsgTypeToRcvEvent(SOPC_Msg_Type msgType)
+static SOPC_SecureChannels_InternalEvent SC_Chunks_MsgTypeToRcvEvent(SOPC_Msg_Type msgType,
+                                                                     SOPC_Msg_IsFinal currentMsgIsFinal)
 {
     switch (msgType)
     {
@@ -209,7 +234,14 @@ static SOPC_SecureChannels_InternalEvent SC_Chunks_MsgTypeToRcvEvent(SOPC_Msg_Ty
         return INT_SC_RCV_CLO;
         break;
     case SOPC_MSG_TYPE_SC_MSG:
-        return INT_SC_RCV_MSG_CHUNKS;
+        if (SOPC_MSG_ISFINAL_ABORT == currentMsgIsFinal)
+        {
+            return INT_SC_RCV_MSG_CHUNK_ABORT;
+        }
+        else
+        {
+            return INT_SC_RCV_MSG_CHUNKS;
+        }
         break;
     default:
         assert(false);
@@ -251,7 +283,7 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
 {
     assert(scConnection != NULL);
     assert(scConnection->cryptoProvider != NULL);
-    assert(scConnection->chunksCtx.chunkInputBuffer != NULL);
+    assert(scConnection->chunksCtx.currentChunkInputBuffer != NULL);
     assert(senderCertificatePresence != NULL);
     assert(receiverCertificatePresence != NULL);
     assert(clientSenderCertificate != NULL);
@@ -331,7 +363,7 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
     // Sender Certificate:
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ByteString_Read(&senderCertificate, scConnection->chunksCtx.chunkInputBuffer);
+        status = SOPC_ByteString_Read(&senderCertificate, scConnection->chunksCtx.currentChunkInputBuffer);
 
         if (SOPC_STATUS_OK != status)
         {
@@ -440,7 +472,7 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
     // Receiver Certificate Thumbprint:
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ByteString_Read(&receiverCertThumb, scConnection->chunksCtx.chunkInputBuffer);
+        status = SOPC_ByteString_Read(&receiverCertThumb, scConnection->chunksCtx.currentChunkInputBuffer);
 
         if (SOPC_STATUS_OK == status)
         {
@@ -576,7 +608,7 @@ static bool SC_Chunks_CheckAsymmetricSecurityHeader(SOPC_SecureConnection* scCon
                                                     SOPC_StatusCode* errorStatus)
 {
     assert(scConnection != NULL);
-    assert(scConnection->chunksCtx.chunkInputBuffer != NULL);
+    assert(scConnection->chunksCtx.currentChunkInputBuffer != NULL);
 
     SOPC_SecureConnection_ChunkMgrCtx* chunkCtx = &scConnection->chunksCtx;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -644,7 +676,7 @@ static bool SC_Chunks_CheckAsymmetricSecurityHeader(SOPC_SecureConnection* scCon
     if (result)
     {
         // Decode security policy
-        status = SOPC_String_Read(&securityPolicy, chunkCtx->chunkInputBuffer);
+        status = SOPC_String_Read(&securityPolicy, chunkCtx->currentChunkInputBuffer);
         if (SOPC_STATUS_OK != status)
         {
             result = false;
@@ -855,7 +887,7 @@ static bool SC_Chunks_CheckSymmetricSecurityHeader(SOPC_SecureConnection* scConn
                                                    SOPC_StatusCode* errorStatus)
 {
     assert(scConnection != NULL);
-    assert(scConnection->chunksCtx.chunkInputBuffer != NULL);
+    assert(scConnection->chunksCtx.currentChunkInputBuffer != NULL);
 
     SOPC_SecureConnection_ChunkMgrCtx* chunkCtx = &scConnection->chunksCtx;
     uint32_t tokenId = 0;
@@ -863,7 +895,7 @@ static bool SC_Chunks_CheckSymmetricSecurityHeader(SOPC_SecureConnection* scConn
     bool isTokenValid = false;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
-    status = SOPC_UInt32_Read(&tokenId, chunkCtx->chunkInputBuffer);
+    status = SOPC_UInt32_Read(&tokenId, chunkCtx->currentChunkInputBuffer);
 
     if (SOPC_STATUS_OK == status)
     {
@@ -1016,14 +1048,14 @@ static bool SC_Chunks_CheckSequenceHeaderSN(SOPC_SecureConnection* scConnection,
                                             SOPC_StatusCode* errorStatus)
 {
     assert(scConnection != NULL);
-    assert(scConnection->chunksCtx.chunkInputBuffer != NULL);
+    assert(scConnection->chunksCtx.currentChunkInputBuffer != NULL);
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     bool result = true;
     SOPC_SecureConnection_ChunkMgrCtx* chunkCtx = &scConnection->chunksCtx;
     uint32_t seqNumber = 0;
 
-    status = SOPC_UInt32_Read(&seqNumber, chunkCtx->chunkInputBuffer);
+    status = SOPC_UInt32_Read(&seqNumber, chunkCtx->currentChunkInputBuffer);
 
     if (SOPC_STATUS_OK == status)
     {
@@ -1045,7 +1077,7 @@ static bool SC_Chunks_CheckSequenceHeaderRequestId(SOPC_SecureConnection* scConn
                                                    SOPC_StatusCode* errorStatus)
 {
     assert(scConnection != NULL);
-    assert(scConnection->chunksCtx.chunkInputBuffer != NULL);
+    assert(scConnection->chunksCtx.currentChunkInputBuffer != NULL);
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     bool result = true;
@@ -1054,7 +1086,7 @@ static bool SC_Chunks_CheckSequenceHeaderRequestId(SOPC_SecureConnection* scConn
     SOPC_SentRequestMsg_Context* recordedMsgCtx = NULL;
 
     // Retrieve request id
-    status = SOPC_UInt32_Read(requestId, chunkCtx->chunkInputBuffer);
+    status = SOPC_UInt32_Read(requestId, chunkCtx->currentChunkInputBuffer);
     if (SOPC_STATUS_OK == status)
     {
         if (isClient)
@@ -1096,7 +1128,7 @@ static bool SC_Chunks_CheckSequenceHeaderRequestId(SOPC_SecureConnection* scConn
 static bool SC_Chunks_DecryptMsg(SOPC_SecureConnection* scConnection, bool isSymmetric, bool isPrecCryptoData)
 {
     assert(scConnection != NULL);
-    SOPC_Buffer* encryptedBuffer = scConnection->chunksCtx.chunkInputBuffer;
+    SOPC_Buffer* encryptedBuffer = scConnection->chunksCtx.currentChunkInputBuffer;
     assert(encryptedBuffer != NULL);
     // Current position is SN position
     uint32_t sequenceNumberPosition = encryptedBuffer->position;
@@ -1219,8 +1251,8 @@ static bool SC_Chunks_DecryptMsg(SOPC_SecureConnection* scConnection, bool isSym
     if (!result)
     {
         // Clear all buffers
-        SOPC_Buffer_Delete(scConnection->chunksCtx.chunkInputBuffer);
-        scConnection->chunksCtx.chunkInputBuffer = NULL;
+        SOPC_Buffer_Delete(scConnection->chunksCtx.currentChunkInputBuffer);
+        scConnection->chunksCtx.currentChunkInputBuffer = NULL;
 
         if (plainBuffer != NULL)
         {
@@ -1229,9 +1261,9 @@ static bool SC_Chunks_DecryptMsg(SOPC_SecureConnection* scConnection, bool isSym
     }
     else
     {
-        SOPC_Buffer_Delete(scConnection->chunksCtx.chunkInputBuffer);
+        SOPC_Buffer_Delete(scConnection->chunksCtx.currentChunkInputBuffer);
         // Replace input buffer with the plain buffer (position == SN position)
-        scConnection->chunksCtx.chunkInputBuffer = plainBuffer;
+        scConnection->chunksCtx.currentChunkInputBuffer = plainBuffer;
     }
 
     return result;
@@ -1240,7 +1272,7 @@ static bool SC_Chunks_DecryptMsg(SOPC_SecureConnection* scConnection, bool isSym
 static bool SC_Chunks_VerifyMsgSignature(SOPC_SecureConnection* scConnection, bool isSymmetric, bool isPrecCryptoData)
 {
     assert(scConnection != NULL);
-    SOPC_Buffer* buffer = scConnection->chunksCtx.chunkInputBuffer;
+    SOPC_Buffer* buffer = scConnection->chunksCtx.currentChunkInputBuffer;
     assert(buffer != NULL);
 
     bool result = false;
@@ -1332,14 +1364,132 @@ static bool SC_Chunks_VerifyMsgSignature(SOPC_SecureConnection* scConnection, bo
     return result;
 }
 
+static bool SC_Chunks_TreatMsgMultiChunks(SOPC_SecureConnection* scConnection, SOPC_StatusCode* errorStatus)
+{
+    SOPC_SecureConnection_ChunkMgrCtx* chunkCtx = &scConnection->chunksCtx;
+    SOPC_SecureConnection_TcpProperties* tcpProperties = &scConnection->tcpMsgProperties;
+    assert(SOPC_MSG_TYPE_SC_MSG == chunkCtx->currentMsgType);
+
+    bool checkBodyMessageSize = false;
+    bool addIntermediateChunk = false;
+    bool mergeFinalChunk = false;
+    bool clearIntermediateChunks = false;
+
+    switch (chunkCtx->currentMsgIsFinal)
+    {
+    case SOPC_MSG_ISFINAL_INTERMEDIATE:
+        // Note: number of intermediate chunks already checked by SC_Chunks_CheckMultiChunkContext
+        checkBodyMessageSize = true;
+        addIntermediateChunk = true;
+        break;
+    case SOPC_MSG_ISFINAL_FINAL:
+        checkBodyMessageSize = true;
+        mergeFinalChunk = true;
+        break;
+    case SOPC_MSG_ISFINAL_ABORT:
+        clearIntermediateChunks = true;
+        mergeFinalChunk = true; // Abort is a final chunk but intermediate chunks shall be cleared before merge !
+        break;
+    default:
+        assert(false);
+    }
+
+    uint32_t totalSize = 0;
+    if (checkBodyMessageSize)
+    {
+        // Check message size (total of chunks size)
+
+        if (SOPC_ScInternalContext_GetNbIntermediateInputChunks(chunkCtx) > 0)
+        {
+            SOPC_SLinkedListIterator it = SOPC_SLinkedList_GetIterator(chunkCtx->intermediateChunksInputBuffers);
+            while (SOPC_SLinkedList_HasNext(&it))
+            {
+                totalSize += SOPC_Buffer_Remaining((SOPC_Buffer*) SOPC_SLinkedList_Next(&it));
+            }
+        }
+        totalSize += SOPC_Buffer_Remaining(chunkCtx->currentChunkInputBuffer);
+        if (totalSize > tcpProperties->receiveMaxMessageSize)
+        {
+            *errorStatus = OpcUa_BadTcpMessageTooLarge;
+            return false;
+        }
+    }
+
+    if (addIntermediateChunk)
+    {
+        // Add an intermediate chunk and wait for next chunk
+
+        if (!SOPC_ScInternalContext_AddIntermediateInputChunk(tcpProperties, chunkCtx,
+                                                              chunkCtx->currentChunkInputBuffer))
+        {
+            *errorStatus = OpcUa_BadOutOfMemory;
+            return false;
+        }
+        // No current chunk or message context kept
+        SOPC_ScInternalContext_ClearCurrentInputChunkContext(chunkCtx);
+    }
+
+    if (clearIntermediateChunks)
+    {
+        // Clear intermediate chunks in case of final abort chunk (containing associated error in current chunk)
+        SOPC_ScInternalContext_ClearIntermediateInputChunks(chunkCtx);
+    }
+
+    if (mergeFinalChunk)
+    {
+        SOPC_Buffer* mergedBuffer = NULL;
+        if (SOPC_ScInternalContext_GetNbIntermediateInputChunks(chunkCtx) > 0)
+        {
+            // Merge several unencrypted chunks into one buffer containing complete message.
+
+            assert(totalSize > 0); // Ensure size was computed
+            uint32_t remaining = 0;
+            bool result = false;
+            mergedBuffer = SOPC_Buffer_Create(totalSize);
+            if (NULL == mergedBuffer)
+            {
+                *errorStatus = OpcUa_BadOutOfMemory;
+                return false;
+            }
+
+            SOPC_Buffer* bufferToMerge = SOPC_SLinkedList_PopHead(chunkCtx->intermediateChunksInputBuffers);
+            while (NULL != bufferToMerge)
+            {
+                result = fill_buffer(mergedBuffer, bufferToMerge, totalSize, &remaining);
+                assert(result);
+                assert(0 == SOPC_Buffer_Remaining(bufferToMerge));
+                SOPC_Buffer_Delete(bufferToMerge);
+                bufferToMerge = SOPC_SLinkedList_PopHead(chunkCtx->intermediateChunksInputBuffers);
+            }
+            result = fill_buffer(mergedBuffer, chunkCtx->currentChunkInputBuffer, totalSize, &remaining);
+            assert(result);
+            assert(0 == remaining);
+            assert(0 == SOPC_Buffer_Remaining(chunkCtx->currentChunkInputBuffer));
+            SOPC_Buffer_Delete(chunkCtx->currentChunkInputBuffer);
+            chunkCtx->currentChunkInputBuffer = NULL;
+        }
+        else
+        {
+            // No merge to do if only one final chunk received.
+
+            mergedBuffer = chunkCtx->currentChunkInputBuffer;
+            chunkCtx->currentChunkInputBuffer = NULL;
+        }
+
+        // Set merged buffer as the current message buffer
+        chunkCtx->currentMessageInputBuffer = mergedBuffer;
+    }
+
+    assert(NULL == chunkCtx->currentChunkInputBuffer);
+    return true;
+}
+
 bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection, uint32_t* requestId, SOPC_StatusCode* errorStatus)
 {
     assert(requestId != NULL);
 
     bool result = true;
     SOPC_SecureConnection_ChunkMgrCtx* chunkCtx = &scConnection->chunksCtx;
-    // Note: we do not treat multiple chunks => guaranteed by HEL/ACK exchanged (chunk config)
-    assert(chunkCtx->currentMsgIsFinal == SOPC_MSG_ISFINAL_FINAL);
 
     bool asymmSecuHeader = false;
     bool symmSecuHeader = false;
@@ -1449,7 +1599,7 @@ bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection, uint32_t* re
     if (result && hasSecureChannelId)
     {
         // Decode secure channel id
-        result = (SOPC_UInt32_Read(&secureChannelId, chunkCtx->chunkInputBuffer) == SOPC_STATUS_OK);
+        result = (SOPC_UInt32_Read(&secureChannelId, chunkCtx->currentChunkInputBuffer) == SOPC_STATUS_OK);
     }
 
     if (result && hasSecureChannelId)
@@ -1648,45 +1798,22 @@ bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection, uint32_t* re
         }
     }
 
+    // Once security header, encryption and signature is treated we have to deal with multi-chunks aspect
+    if (result)
+    {
+        if (SOPC_MSG_TYPE_SC_MSG == chunkCtx->currentMsgType)
+        {
+            result = SC_Chunks_TreatMsgMultiChunks(scConnection, errorStatus);
+        }
+        else
+        {
+            // Single chunk, move it as complete message buffer
+            chunkCtx->currentMessageInputBuffer = chunkCtx->currentChunkInputBuffer;
+            chunkCtx->currentChunkInputBuffer = NULL;
+        }
+    }
+
     return result;
-}
-
-/**
- * \brief Fills a target buffer from a source buffer up to a given length.
- *
- * Note that this function may copy LESS than \c n bytes to dst, if \c src is
- * less than \c n bytes long. This is NOT considered as an error, the caller
- * should call this function again when there is more data in \c src.
- *
- * In other words, \c dst has been successfully filled if and only if this
- * function returns \c TRUE and \c remaining is set to 0.
- *
- * \param dst        The buffer to fill.
- * \param src        The source buffer.
- * \param n          The number of bytes to accumulate in \c dst.
- * \param remaining  Out parameter, the number of bytes remaining to fill.
- *
- * \return \c TRUE in case of success, \c FALSE in case reading from \c src
- *         fails.
- */
-static bool fill_buffer(SOPC_Buffer* dst, SOPC_Buffer* src, uint32_t n, uint32_t* remaining)
-{
-    if (SOPC_Buffer_Remaining(dst) >= n)
-    {
-        *remaining = 0;
-        return true;
-    }
-
-    uint32_t missing = n - SOPC_Buffer_Remaining(dst);
-    int64_t read = SOPC_Buffer_ReadFrom(dst, src, missing);
-
-    if (read < 0)
-    {
-        return false;
-    }
-
-    *remaining = n - SOPC_Buffer_Remaining(dst);
-    return true;
 }
 
 // Returns true if a message was decoded (false if there was not enough data).
@@ -1705,7 +1832,7 @@ bool SC_Chunks_DecodeReceivedBuffer(SOPC_SecureConnection_ChunkMgrCtx* ctx,
     // Header decoding
     if (ctx->currentMsgSize == 0)
     {
-        if (!fill_buffer(ctx->chunkInputBuffer, receivedBuffer, SOPC_TCP_UA_HEADER_LENGTH, &remaining))
+        if (!fill_buffer(ctx->currentChunkInputBuffer, receivedBuffer, SOPC_TCP_UA_HEADER_LENGTH, &remaining))
         {
             *error = OpcUa_BadTcpInternalError;
             return false;
@@ -1722,7 +1849,7 @@ bool SC_Chunks_DecodeReceivedBuffer(SOPC_SecureConnection_ChunkMgrCtx* ctx,
     assert(ctx->currentMsgType != SOPC_MSG_TYPE_INVALID);
     assert(ctx->currentMsgIsFinal != SOPC_MSG_ISFINAL_INVALID);
 
-    if (!fill_buffer(ctx->chunkInputBuffer, receivedBuffer, ctx->currentMsgSize - SOPC_TCP_UA_HEADER_LENGTH,
+    if (!fill_buffer(ctx->currentChunkInputBuffer, receivedBuffer, ctx->currentMsgSize - SOPC_TCP_UA_HEADER_LENGTH,
                      &remaining))
     {
         *error = OpcUa_BadTcpInternalError;
@@ -1730,6 +1857,28 @@ bool SC_Chunks_DecodeReceivedBuffer(SOPC_SecureConnection_ChunkMgrCtx* ctx,
     }
 
     return (remaining == 0);
+}
+
+static bool SC_Chunks_CheckMultiChunkContext(SOPC_SecureConnection_ChunkMgrCtx* ctx,
+                                             SOPC_SecureConnection_TcpProperties* tcpProperties,
+                                             SOPC_StatusCode* error)
+{
+    /* Check if number of chunks received is compatible with configured number of chunks accepted.
+     * Valid cases are:
+     * - Chunk is final ('F' or 'A')
+     * - Chunk is intermediate and no limit number of chunks is defined
+     * - Chunk is intermediate and number of chunks already received (previously + current) is strictly less than the
+     *   maximum number of chunks.
+     *   Note: a final chunk is still expected and will increase by 1 the final number of chunks.
+     */
+    if (SOPC_MSG_ISFINAL_INTERMEDIATE == ctx->currentMsgIsFinal && tcpProperties->receiveMaxChunkCount != 0 &&
+        SOPC_ScInternalContext_GetNbIntermediateInputChunks(ctx) + 1 >= tcpProperties->receiveMaxChunkCount)
+    {
+        // Too many intermediate chunks received
+        *error = OpcUa_BadTcpMessageTooLarge;
+        return false;
+    }
+    return true;
 }
 
 static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
@@ -1747,18 +1896,18 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
     // Continue until an error occurred OR received buffer is empty (could contain 1 or several messages)
     while (SOPC_Buffer_Remaining(receivedBuffer) > 0)
     {
-        if (NULL == chunkCtx->chunkInputBuffer)
+        if (NULL == chunkCtx->currentChunkInputBuffer)
         {
             // No incomplete message data: create a new buffer
-            chunkCtx->chunkInputBuffer = SOPC_Buffer_Create(scConnection->tcpMsgProperties.receiveBufferSize);
-            if (NULL == chunkCtx->chunkInputBuffer)
+            chunkCtx->currentChunkInputBuffer = SOPC_Buffer_Create(scConnection->tcpMsgProperties.receiveBufferSize);
+            if (NULL == chunkCtx->currentChunkInputBuffer)
             {
                 errorStatus = OpcUa_BadOutOfMemory;
                 break;
             }
         }
 
-        if (!SC_Chunks_DecodeReceivedBuffer(&scConnection->chunksCtx, receivedBuffer, &errorStatus))
+        if (!SC_Chunks_DecodeReceivedBuffer(chunkCtx, receivedBuffer, &errorStatus))
         {
             if (errorStatus != SOPC_GoodGenericStatus)
             {
@@ -1770,31 +1919,34 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
             break;
         }
 
-        SOPC_Logger_TraceDebug("ChunksMgr: received TCP UA message type SOPC_Msg_Type=%d (epCfgIdx=%" PRIu32
-                               ", scCfgIdx=%" PRIu32 ")",
-                               scConnection->chunksCtx.currentMsgType, scConnection->serverEndpointConfigIdx,
-                               scConnection->endpointConnectionConfigIdx);
+        SOPC_Logger_TraceDebug(
+            "ChunksMgr: received TCP UA message type SOPC_Msg_Type=%d (epCfgIdx=%" PRIu32 ", scCfgIdx=%" PRIu32 ")",
+            chunkCtx->currentMsgType, scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
 
         // Decode OPC UA Secure Conversation MessageChunk specific headers if necessary (not HEL/ACK/ERR)
-        if (SC_Chunks_TreatTcpPayload(scConnection, &requestId, &errorStatus))
+        if (SC_Chunks_CheckMultiChunkContext(chunkCtx, &scConnection->tcpMsgProperties, &errorStatus) &&
+            SC_Chunks_TreatTcpPayload(scConnection, &requestId, &errorStatus))
         {
-            // Transmit OPC UA message to secure connection state manager
-            SOPC_SecureChannels_InternalEvent scEvent = SC_Chunks_MsgTypeToRcvEvent(chunkCtx->currentMsgType);
-            if (scEvent == INT_SC_RCV_ERR || scEvent == INT_SC_RCV_CLO)
+            // Current chunk shall have been moved into intermediate chunk buffers or into complete message buffer
+            assert(NULL == chunkCtx->currentChunkInputBuffer);
+            if (NULL != chunkCtx->currentMessageInputBuffer)
             {
-                // Treat as prio events
-                SOPC_SecureChannels_EnqueueInternalEventAsNext(scEvent, scConnectionIdx,
-                                                               (void*) chunkCtx->chunkInputBuffer, requestId);
+                // Transmit OPC UA message to secure connection state manager
+                SOPC_SecureChannels_InternalEvent scEvent =
+                    SC_Chunks_MsgTypeToRcvEvent(chunkCtx->currentMsgType, chunkCtx->currentMsgIsFinal);
+                if (scEvent == INT_SC_RCV_ERR || scEvent == INT_SC_RCV_CLO)
+                {
+                    // Treat as prio events
+                    SOPC_SecureChannels_EnqueueInternalEventAsNext(
+                        scEvent, scConnectionIdx, (void*) chunkCtx->currentMessageInputBuffer, requestId);
+                }
+                else
+                {
+                    SOPC_SecureChannels_EnqueueInternalEvent(scEvent, scConnectionIdx,
+                                                             (void*) chunkCtx->currentMessageInputBuffer, requestId);
+                }
+                SOPC_ScInternalContext_ClearInputChunksContext(chunkCtx);
             }
-            else
-            {
-                SOPC_SecureChannels_EnqueueInternalEvent(scEvent, scConnectionIdx, (void*) chunkCtx->chunkInputBuffer,
-                                                         requestId);
-            }
-            chunkCtx->chunkInputBuffer = NULL;
-            // reset chunk context (buffer not deallocated since provided to secure connection state
-            // manager)
-            memset(&scConnection->chunksCtx, 0, sizeof(SOPC_SecureConnection_ChunkMgrCtx));
         }
     }
 
@@ -1806,9 +1958,8 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
 
         // Treat as prio events
         SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_RCV_FAILURE, scConnectionIdx, NULL, errorStatus);
-        SOPC_Buffer_Delete(chunkCtx->chunkInputBuffer);
-        // reset chunk context
-        memset(&scConnection->chunksCtx, 0, sizeof(SOPC_SecureConnection_ChunkMgrCtx));
+        SOPC_Buffer_Delete(chunkCtx->currentChunkInputBuffer);
+        SOPC_ScInternalContext_ClearInputChunksContext(chunkCtx);
     }
 
     SOPC_Buffer_Delete(receivedBuffer);
