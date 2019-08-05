@@ -548,7 +548,7 @@ START_TEST(test_invalid_msg_typ)
     ck_assert(SOPC_STATUS_OK == status);
 }
 END_TEST
-
+/*
 START_TEST(test_unexpected_multi_chunks_final_value)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -579,7 +579,7 @@ START_TEST(test_unexpected_abort_chunk_final_value)
     ck_assert(SOPC_STATUS_OK == status);
 }
 END_TEST
-
+*/
 START_TEST(test_invalid_final_value)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -718,8 +718,8 @@ static Suite* tests_make_suite_invalid_encrypted_buffers(void)
     tcase_add_test(tc_invalid_buf, test_unexpected_opn_req_msg_replay);
     tcase_add_test(tc_invalid_buf, test_unexpected_opn_resp_msg_replay);
     tcase_add_test(tc_invalid_buf, test_invalid_msg_typ);
-    tcase_add_test(tc_invalid_buf, test_unexpected_multi_chunks_final_value);
-    tcase_add_test(tc_invalid_buf, test_unexpected_abort_chunk_final_value);
+    // tcase_add_test(tc_invalid_buf, test_unexpected_multi_chunks_final_value);
+    // tcase_add_test(tc_invalid_buf, test_unexpected_abort_chunk_final_value);
     tcase_add_test(tc_invalid_buf, test_invalid_final_value);
     tcase_add_test(tc_invalid_buf, test_too_large_msg_size);
     tcase_add_test(tc_invalid_buf, test_invalid_sc_id);
