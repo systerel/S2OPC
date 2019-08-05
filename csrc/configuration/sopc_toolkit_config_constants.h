@@ -38,30 +38,35 @@
 /** @brief Maximum ByteString/String/XmlElement length in bytes used */
 #ifndef SOPC_MAX_STRING_LENGTH
 #define SOPC_MAX_STRING_LENGTH UINT16_MAX
-#endif /* SOPC_MAX_MESSAGE_LENGTH */
+#endif /* SOPC_MAX_STRING_LENGTH */
 
 /** @brief Maximum array length that could be stored in a variant */
 #ifndef SOPC_MAX_ARRAY_LENGTH
 #define SOPC_MAX_ARRAY_LENGTH 1000000
-#endif /* SOPC_MAX_MESSAGE_LENGTH */
+#endif /* SOPC_MAX_ARRAY_LENGTH */
 
 /** @brief Maximum levels of nested diagnostic information structure
  *  Note: OPC UA specification v1.03 part 6 §5.2.2.12 indicates
  *  "Decoders shall support at least 100 nesting levels ..."*/
 #ifndef SOPC_MAX_DIAG_INFO_NESTED_LEVEL
 #define SOPC_MAX_DIAG_INFO_NESTED_LEVEL 100
-#endif /* SOPC_MAX_MESSAGE_LENGTH */
+#endif /* SOPC_MAX_DIAG_INFO_NESTED_LEVEL */
 
 /** @brief Maximum levels of nested variant
  * (e.g.: variant containing array of variants / data value) */
 #ifndef SOPC_MAX_VARIANT_NESTED_LEVEL
 #define SOPC_MAX_VARIANT_NESTED_LEVEL 10
-#endif /* SOPC_MAX_MESSAGE_LENGTH */
+#endif /* SOPC_MAX_VARIANT_NESTED_LEVEL */
 
 /* @brief Maximum number of operations in a request accepted by server (Read, Write, etc.) */
 #ifndef SOPC_MAX_OPERATIONS_PER_MSG
 #define SOPC_MAX_OPERATIONS_PER_MSG 5000
 #endif /* SOPC_MAX_OPERATIONS_PER_MSG */
+
+/* @brief Maximum number of elements in Async Queue */
+#ifndef SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE
+#define SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE 200
+#endif /* SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE */
 
 /* TCP SOCKETS CONFIGURATION */
 

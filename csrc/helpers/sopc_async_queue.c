@@ -20,9 +20,11 @@
 #include <stdbool.h>
 
 #include "sopc_async_queue.h"
+#include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
 #include "sopc_singly_linked_list.h"
+#include "sopc_toolkit_config_constants.h"
 
 struct SOPC_AsyncQueue
 {
@@ -44,7 +46,7 @@ SOPC_ReturnStatus SOPC_AsyncQueue_Init(SOPC_AsyncQueue** queue, const char* queu
             status = SOPC_STATUS_OK;
             (*queue)->debugQueueName = queueName;
             (*queue)->waitingThreads = 0;
-            (*queue)->queueList = SOPC_SLinkedList_Create(0);
+            (*queue)->queueList = SOPC_SLinkedList_Create(SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE);
             if (NULL == (*queue)->queueList)
             {
                 status = SOPC_STATUS_NOK;
@@ -84,33 +86,38 @@ static SOPC_ReturnStatus SOPC_AsyncQueue_BlockingEnqueueFirstOrLast(SOPC_AsyncQu
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     void* enqueuedElt = NULL;
-    if (NULL != queue && NULL != element)
+
+    if (NULL == queue || NULL == element)
     {
-        status = Mutex_Lock(&queue->queueMutex);
-        if (SOPC_STATUS_OK == status)
-        {
-            if (false == firstOut)
-            {
-                enqueuedElt = SOPC_SLinkedList_Append(queue->queueList, 0, element);
-            }
-            else
-            {
-                enqueuedElt = SOPC_SLinkedList_Prepend(queue->queueList, 0, element);
-            }
-            if (element == enqueuedElt)
-            {
-                if (queue->waitingThreads > 0)
-                {
-                    Condition_SignalAll(&queue->queueCond);
-                }
-            }
-            else
-            {
-                status = SOPC_STATUS_NOK;
-            }
-            Mutex_Unlock(&queue->queueMutex);
-        }
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
+
+    status = Mutex_Lock(&queue->queueMutex);
+    if (SOPC_STATUS_OK == status)
+    {
+        if (false == firstOut)
+        {
+            enqueuedElt = SOPC_SLinkedList_Append(queue->queueList, 0, element);
+        }
+        else
+        {
+            enqueuedElt = SOPC_SLinkedList_Prepend(queue->queueList, 0, element);
+        }
+        if (element == enqueuedElt)
+        {
+            if (queue->waitingThreads > 0)
+            {
+                Condition_SignalAll(&queue->queueCond);
+            }
+        }
+        else
+        {
+            SOPC_Logger_TraceError("Unable to Enqueue on queue %s", queue->debugQueueName);
+            status = SOPC_STATUS_NOK;
+        }
+        Mutex_Unlock(&queue->queueMutex);
+    }
+
     return status;
 }
 
