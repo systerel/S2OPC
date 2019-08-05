@@ -73,13 +73,13 @@ bool SC_InitNewConnection(uint32_t* newConnectionIdx)
 
         // Initialize TCP message properties
         scConnection->tcpMsgProperties.protocolVersion = SOPC_PROTOCOL_VERSION;
-        scConnection->tcpMsgProperties.receiveBufferSize = SOPC_MAX_MESSAGE_LENGTH;
-        scConnection->tcpMsgProperties.sendBufferSize = SOPC_MAX_MESSAGE_LENGTH;
+        scConnection->tcpMsgProperties.receiveBufferSize = SOPC_TCP_UA_MAX_BUFFER_SIZE;
+        scConnection->tcpMsgProperties.sendBufferSize = SOPC_TCP_UA_MAX_BUFFER_SIZE;
         // TODO: reduce size since it includes only the body and not the headers/signature ?
         scConnection->tcpMsgProperties.receiveMaxMessageSize = SOPC_MAX_MESSAGE_LENGTH;
         scConnection->tcpMsgProperties.sendMaxMessageSize = SOPC_MAX_MESSAGE_LENGTH;
         // Note: we do not manage multiple chunks in this version of the toolkit
-        scConnection->tcpMsgProperties.receiveMaxChunkCount = 1;
+        scConnection->tcpMsgProperties.receiveMaxChunkCount = SOPC_MAX_NB_CHUNKS;
         scConnection->tcpMsgProperties.sendMaxChunkCount = 1;
 
         // Initialize TCP sequence properties

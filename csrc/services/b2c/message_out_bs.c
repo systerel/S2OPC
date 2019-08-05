@@ -204,6 +204,7 @@ void message_out_bs__encode_msg(const constants__t_msg_type_i message_out_bs__ms
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_EncodeableType* encType = *(SOPC_EncodeableType**) message_out_bs__msg;
     SOPC_EncodeableType* headerType = *(SOPC_EncodeableType**) message_out_bs__msg_header;
+    // TODO: automatically growing buffer or lazy encoder to avoid creation of buffer of this size
     SOPC_Buffer* buffer = SOPC_Buffer_Create(SOPC_MAX_MESSAGE_LENGTH);
     if (NULL != buffer)
     {

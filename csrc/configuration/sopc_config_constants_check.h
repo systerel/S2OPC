@@ -116,8 +116,13 @@
 #endif
 
 /* Check that the message buffer is large enough to hold the minimal TCP UA chunk */
-#if SOPC_MAX_MESSAGE_LENGTH < SOPC_TCP_UA_MIN_BUFFER_SIZE
-#error "SOPC_MAX_MESSAGE_LENGTH is not large enough, must be >= SOPC_TCP_UA_MIN_BUFFER_SIZE"
+#if SOPC_TCP_UA_MAX_BUFFER_SIZE < SOPC_TCP_UA_MIN_BUFFER_SIZE
+#error "SOPC_TCP_UA_MAX_BUFFER_SIZE is not large enough, must be >= SOPC_TCP_UA_MIN_BUFFER_SIZE"
+#endif
+
+/* Check that the message buffer is large enough to hold the minimal TCP UA chunk */
+#if SOPC_MAX_MESSAGE_LENGTH < SOPC_TCP_UA_MAX_BUFFER_SIZE
+#error "SOPC_MAX_MESSAGE_LENGTH is not large enough, must be >= SOPC_TCP_UA_MAX_BUFFER_SIZE"
 #endif
 
 #endif
