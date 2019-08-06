@@ -148,7 +148,7 @@ static void establishSC(void)
     // Check expected HEL message requested to be sent on socket
     status = Check_Expected_Sent_Message(scConfigIdx,
                                          // Expected HEL message
-                                         "48454c464300000000000000ffff0000ffff0000ffff000001000000230000006f70632e74637"
+                                         "48454c464300000000000000ffff0000ffff0000fbff040005000000230000006f70632e74637"
                                          "03a2f2f6c6f63616c686f73743a383838382f6d79456e64506f696e74",
                                          false, 0, 0);
     ck_assert(SOPC_STATUS_OK == status);
@@ -158,7 +158,7 @@ static void establishSC(void)
     // Simulate ACK message received on socket
     status = Simulate_Received_Message(scConfigIdx,
                                        // Expected ACK message received
-                                       "41434b461c00000000000000ffff0000ffff0000ffff000001000000");
+                                       "41434b461c00000000000000ffff0000ffff0000fbff040005000000");
 
     ck_assert(SOPC_STATUS_OK == status);
     printf("SC_Rcv_Buffer Init: Checking correct OPN message requested to be sent\n");
