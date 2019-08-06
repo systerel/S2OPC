@@ -49,11 +49,13 @@ typedef enum
     INT_SC_RCV_MSG_CHUNKS,
     INT_SC_RCV_MSG_CHUNK_ABORT, /* -------------------------< */
 
-    INT_SC_RCV_FAILURE, /* id = secure channel connection index,
-                           auxParam = error status */
-    INT_SC_SND_FAILURE, /* id = secure channel connection index,
-                           params = (uint32_t *) requestId,
-                           auxParam = (SOPC_StatusCode) error status in case of client */
+    INT_SC_RCV_FAILURE,       /* id = secure channel connection index,
+                                 auxParam = error status */
+    INT_SC_SND_FATAL_FAILURE, /* >------------------------- */
+                              // id = secure channel connection index,
+                              // params = (uint32_t *) requestId,
+                              // auxParam = (SOPC_StatusCode) error status in case of client */
+    INT_SC_SND_ABORT_FAILURE, /* -------------------------< */
     /* SC connection manager -> OPC UA chunks message manager */
     INT_SC_SND_HEL, /* >------------------------- */
     INT_SC_SND_ACK, // id = secure channel connection index,

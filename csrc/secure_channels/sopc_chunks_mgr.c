@@ -48,6 +48,14 @@ static const uint8_t SOPC_MSG[3] = {'M', 'S', 'G'};
 static const uint8_t SOPC_OPN[3] = {'O', 'P', 'N'};
 static const uint8_t SOPC_CLO[3] = {'C', 'L', 'O'};
 
+#define SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH                                \
+    (SOPC_UA_SECURE_MESSAGE_HEADER_LENGTH + SOPC_UA_SYMMETRIC_SECURITY_HEADER_LENGTH + \
+     SOPC_UA_SECURE_MESSAGE_SEQUENCE_LENGTH)
+
+#define SOPC_UA_ABORT_FINAL_CHUNK 'A'
+#define SOPC_UA_INTERMEDIATE_CHUNK 'C'
+#define SOPC_UA_FINAL_CHUNK 'F'
+
 /**
  * \brief Fills a target buffer from a source buffer up to a given length.
  *
@@ -171,13 +179,13 @@ static bool SC_Chunks_DecodeTcpMsgHeader(SOPC_SecureConnection_ChunkMgrCtx* chun
         {
             switch (isFinal)
             {
-            case 'C':
+            case SOPC_UA_INTERMEDIATE_CHUNK:
                 chunkCtx->currentMsgIsFinal = SOPC_MSG_ISFINAL_INTERMEDIATE;
                 break;
-            case 'F':
+            case SOPC_UA_FINAL_CHUNK:
                 chunkCtx->currentMsgIsFinal = SOPC_MSG_ISFINAL_FINAL;
                 break;
-            case 'A':
+            case SOPC_UA_ABORT_FINAL_CHUNK:
                 chunkCtx->currentMsgIsFinal = SOPC_MSG_ISFINAL_ABORT;
                 break;
             default:
@@ -1971,7 +1979,7 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
 static bool SC_Chunks_EncodeTcpMsgHeader(uint32_t scConnectionIdx,
                                          SOPC_SecureConnection* scConnection,
                                          SOPC_Msg_Type sendMsgType,
-                                         bool isFinalChunk,
+                                         uint8_t isFinalChar,
                                          SOPC_Buffer* buffer,
                                          SOPC_StatusCode* errorStatus)
 {
@@ -1979,7 +1987,6 @@ static bool SC_Chunks_EncodeTcpMsgHeader(uint32_t scConnectionIdx,
     assert(buffer != NULL);
     bool result = false;
     const uint8_t* msgTypeBytes = NULL;
-    uint8_t isFinalChunkByte = 'F';
     uint32_t messageSize = 0; // Could be temporary depending on message type / secu parameters
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
@@ -1987,23 +1994,23 @@ static bool SC_Chunks_EncodeTcpMsgHeader(uint32_t scConnectionIdx,
     {
     case SOPC_MSG_TYPE_HEL:
         msgTypeBytes = SOPC_HEL;
-        result = isFinalChunk;
+        result = SOPC_UA_FINAL_CHUNK == isFinalChar;
         break;
     case SOPC_MSG_TYPE_ACK:
         msgTypeBytes = SOPC_ACK;
-        result = isFinalChunk;
+        result = SOPC_UA_FINAL_CHUNK == isFinalChar;
         break;
     case SOPC_MSG_TYPE_ERR:
         msgTypeBytes = SOPC_ERR;
-        result = isFinalChunk;
+        result = SOPC_UA_FINAL_CHUNK == isFinalChar;
         break;
     case SOPC_MSG_TYPE_SC_OPN:
         msgTypeBytes = SOPC_OPN;
-        result = isFinalChunk;
+        result = SOPC_UA_FINAL_CHUNK == isFinalChar;
         break;
     case SOPC_MSG_TYPE_SC_CLO:
         msgTypeBytes = SOPC_CLO;
-        result = isFinalChunk;
+        result = SOPC_UA_FINAL_CHUNK == isFinalChar;
         break;
     case SOPC_MSG_TYPE_SC_MSG:
         msgTypeBytes = SOPC_MSG;
@@ -2023,12 +2030,7 @@ static bool SC_Chunks_EncodeTcpMsgHeader(uint32_t scConnectionIdx,
     }
     if (result)
     {
-        if (!isFinalChunk)
-        {
-            // Set intermediate chunk value
-            isFinalChunkByte = 'C';
-        }
-        status = SOPC_Buffer_Write(buffer, &isFinalChunkByte, 1);
+        status = SOPC_Buffer_Write(buffer, &isFinalChar, 1);
         if (SOPC_STATUS_OK != status)
         {
             result = false;
@@ -2683,17 +2685,7 @@ static bool SC_Chunks_CheckMaxSenderCertificateSize(uint32_t scConnectionIdx,
 
     if (!result)
     {
-        if (!scConnection->isServerConnection)
-        {
-            // Client side
-            *errorStatus = OpcUa_BadRequestTooLarge;
-        }
-        else
-        {
-            // Server side
-            *errorStatus = OpcUa_BadResponseTooLarge;
-        }
-
+        *errorStatus = scConnection->isServerConnection ? OpcUa_BadResponseTooLarge : OpcUa_BadRequestTooLarge;
         SOPC_Logger_TraceError(
             "ChunksMgr: treat send buffer: asymmetric max sender certificate size check failed "
             "(scIdx=%" PRIu32 ", scCfgIdx=%" PRIu32 ")",
@@ -3052,8 +3044,7 @@ static bool SC_Chunks_TreatSendBufferTCPonly(uint32_t scConnectionIdx,
     assert(SOPC_STATUS_OK == status);
 
     /* ENCODE OPC UA TCP HEADER PHASE */
-    bool result = SC_Chunks_EncodeTcpMsgHeader(scConnectionIdx, scConnection, sendMsgType,
-                                               true, // isFinal
+    bool result = SC_Chunks_EncodeTcpMsgHeader(scConnectionIdx, scConnection, sendMsgType, SOPC_UA_FINAL_CHUNK,
                                                inputBuffer, errorStatus);
 
     if (result)
@@ -3323,19 +3314,13 @@ static bool SC_Chunks_TreatSendBufferOPN(
     bool toEncrypt = SC_Chunks_IsMsgEncrypted(scConfig->msgSecurityMode, true);
     bool toSign = SC_Chunks_IsMsgSigned(scConfig->msgSecurityMode);
 
-    // Set the position at the beginning of the buffer (to be read or to encode header for which space was
-    // left)
-    status = SOPC_Buffer_SetPosition(inputBuffer, 0);
-    assert(SOPC_STATUS_OK == status);
-
     // In specific case of OPN the input buffer contains only message body
     // (without bytes reserved for headers since it is not static size)
     assert(scConnection->tcpMsgProperties.sendBufferSize > 0);
     nonEncryptedBuffer = SOPC_Buffer_Create(scConnection->tcpMsgProperties.sendBufferSize);
 
     /* ENCODE OPC UA TCP HEADER PHASE */
-    result = SC_Chunks_EncodeTcpMsgHeader(scConnectionIdx, scConnection, sendMsgType,
-                                          true, // isFinal
+    result = SC_Chunks_EncodeTcpMsgHeader(scConnectionIdx, scConnection, sendMsgType, SOPC_UA_FINAL_CHUNK,
                                           nonEncryptedBuffer, errorStatus);
 
     /* ENCODE OPC UA SECURE CONVERSATION MESSAGE PHASE*/
@@ -3381,17 +3366,7 @@ static bool SC_Chunks_TreatSendBufferOPN(
             if (inputBuffer->length > scConnection->asymmSecuMaxBodySize)
             {
                 result = false;
-                if (!scConnection->isServerConnection)
-                {
-                    // Client side
-                    *errorStatus = OpcUa_BadRequestTooLarge;
-                }
-                else
-                {
-                    // Server side
-                    *errorStatus = OpcUa_BadResponseTooLarge;
-                }
-
+                *errorStatus = scConnection->isServerConnection ? OpcUa_BadResponseTooLarge : OpcUa_BadRequestTooLarge;
                 SOPC_Logger_TraceError("ChunksMgr: treat send buffer: asymmetric max body size check failed : %" PRIu32
                                        " > max = %" PRIu32 " (scIdx=%" PRIu32 ", scCfgIdx=%" PRIu32 ")",
                                        inputBuffer->length, scConnection->asymmSecuMaxBodySize, scConnectionIdx,
@@ -3531,20 +3506,22 @@ static bool SC_Chunks_TreatSendBufferMSGCLO(
     SOPC_SecureConnection* scConnection,
     uint32_t requestIdOrHandle, // requestId when sender is server / requestHandle when client
     SOPC_Msg_Type sendMsgType,
-    SOPC_Buffer* nonEncryptedBuffer,
+    uint8_t isFinalChar,
+    SOPC_Buffer** inputChunkBuffer,
     SOPC_Buffer** outputBuffer,
     SOPC_StatusCode* errorStatus)
 {
     assert(scConnection != NULL);
-    assert(nonEncryptedBuffer != NULL);
+    assert(inputChunkBuffer != NULL);
+    assert(*inputChunkBuffer != NULL);
     assert(outputBuffer != NULL);
     assert(errorStatus != NULL);
+    SOPC_Buffer* nonEncryptedBuffer = *inputChunkBuffer;
     SOPC_SecureChannel_Config* scConfig = NULL;
     bool result = false;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     uint32_t requestId = 0;
     uint32_t bodySize = 0;
-    uint32_t sequenceNumberPosition = 0; // Position from which encryption start
     uint32_t tokenId = 0;
     uint32_t signatureSize = 0;
     bool hasPadding = false;
@@ -3568,9 +3545,8 @@ static bool SC_Chunks_TreatSendBufferMSGCLO(
     assert(SOPC_STATUS_OK == status);
 
     /* ENCODE OPC UA TCP HEADER PHASE */
-    result = SC_Chunks_EncodeTcpMsgHeader(scConnectionIdx, scConnection, sendMsgType,
-                                          true, // isFinal
-                                          nonEncryptedBuffer, errorStatus);
+    result = SC_Chunks_EncodeTcpMsgHeader(scConnectionIdx, scConnection, sendMsgType, isFinalChar, nonEncryptedBuffer,
+                                          errorStatus);
 
     /* ENCODE OPC UA SECURE CONVERSATION MESSAGE PHASE*/
     if (result)
@@ -3581,28 +3557,15 @@ static bool SC_Chunks_TreatSendBufferMSGCLO(
 
     if (result)
     {
-        // SYMMETRIC SECURITY CASE
-        sequenceNumberPosition = SOPC_UA_SECURE_MESSAGE_HEADER_LENGTH + SOPC_UA_SYMMETRIC_SECURITY_HEADER_LENGTH;
-
         /* CHECK MAX BODY SIZE */
         assert(scConnection->symmSecuMaxBodySize != 0);
         // Note: buffer already contains the message body (buffer length == end of body)
-        bodySize = nonEncryptedBuffer->length - // symm headers
-                   (SOPC_UA_SECURE_MESSAGE_HEADER_LENGTH + SOPC_UA_SYMMETRIC_SECURITY_HEADER_LENGTH +
-                    SOPC_UA_SECURE_MESSAGE_SEQUENCE_LENGTH);
+        bodySize = nonEncryptedBuffer->length - SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH;
         if (bodySize > scConnection->symmSecuMaxBodySize)
         {
             // Note: we do not manage several chunks for now (expected place to manage it)
             result = false;
-            if (!scConnection->isServerConnection)
-            {
-                *errorStatus = OpcUa_BadRequestTooLarge;
-            }
-            else
-            {
-                *errorStatus = OpcUa_BadResponseTooLarge;
-            }
-
+            *errorStatus = scConnection->isServerConnection ? OpcUa_BadResponseTooLarge : OpcUa_BadRequestTooLarge;
             SOPC_Logger_TraceError("ChunksMgr: treat send buffer: symmetric max body size check failed : %" PRIu32
                                    " > max = %" PRIu32 " (scIdx=%" PRIu32 ", scCfgIdx=%" PRIu32 ")",
                                    bodySize, scConnection->symmSecuMaxBodySize, scConnectionIdx,
@@ -3652,7 +3615,8 @@ static bool SC_Chunks_TreatSendBufferMSGCLO(
         // GET SIGNATURE SIZE + ((when toEncrypt = true only)  ENCODE PADDING + GET PADDING LENGTH)
         result = SOPC_Chunks_GetSignatureSize_EncodePadding(
             scConnectionIdx, scConnection, scConfig, nonEncryptedBuffer, true, toEncrypt, toSign,
-            sequenceNumberPosition, &signatureSize, &hasPadding, &realPaddingLength, &hasExtraPadding, errorStatus);
+            SOPC_UA_SYMMETRIC_SEQUENCE_HEADER_POSITION, &signatureSize, &hasPadding, &realPaddingLength,
+            &hasExtraPadding, errorStatus);
     }
 
     if (result)
@@ -3666,13 +3630,15 @@ static bool SC_Chunks_TreatSendBufferMSGCLO(
     {
         /* ENCODE (ENCRYPTED) MESSAGE SIZE */
         result = SC_Chunks_EncodeMessageSize(scConfig, scConnection, nonEncryptedBuffer, true, toEncrypt,
-                                             sequenceNumberPosition, signatureSize, &encryptedDataLength, errorStatus);
+                                             SOPC_UA_SYMMETRIC_SEQUENCE_HEADER_POSITION, signatureSize,
+                                             &encryptedDataLength, errorStatus);
     }
 
     if (result)
     {
         /* ENCODE SEQUENCE NUMBER */
-        result = SC_Chunks_EncodeSequenceNumber(scConnection, nonEncryptedBuffer, sequenceNumberPosition, errorStatus);
+        result = SC_Chunks_EncodeSequenceNumber(scConnection, nonEncryptedBuffer,
+                                                SOPC_UA_SYMMETRIC_SEQUENCE_HEADER_POSITION, errorStatus);
     }
 
     if (result)
@@ -3711,13 +3677,17 @@ static bool SC_Chunks_TreatSendBufferMSGCLO(
         /* ENCRYPT MESSAGE */
         if (toEncrypt)
         {
-            result = SC_Chunks_Encrypt(scConnection, nonEncryptedBuffer, true, sequenceNumberPosition,
-                                       encryptedDataLength, outputBuffer, errorStatus);
+            result =
+                SC_Chunks_Encrypt(scConnection, nonEncryptedBuffer, true, SOPC_UA_SYMMETRIC_SEQUENCE_HEADER_POSITION,
+                                  encryptedDataLength, outputBuffer, errorStatus);
+            // Note: do not deallocate inputChunkBuffer for reuse
         }
         else
         {
             // No encryption output buffer is non encrypted buffer
             *outputBuffer = nonEncryptedBuffer;
+            // Input chunk buffer shall not be reused
+            *inputChunkBuffer = NULL;
         }
     }
 
@@ -3776,6 +3746,338 @@ void SOPC_ChunksMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event, uint32_t eltId
     }
 }
 
+/**
+ * \brief Compute the number of chunks to send given the message size and TCP UA settings.
+ *
+ * In other words, \c dst has been successfully filled if and only if this
+ * function returns \c TRUE and \c remaining is set to 0.
+ *
+ * \param scConnection  The connection properties (TCP UA settings, server or client)
+ * \param msgType       The message type (multi-chunk only allowed for MSG type)
+ * \param msgBodyLength Length of the unencrypted message body to send
+ * \param nbChunks      Output parameter valid when \c TRUE returned, the number of chunks to use
+ * \param errorStatus   Output parameter valid when \c FALSE returned, the error status to use
+ *
+ * \return \c TRUE in case is possible to send the message with the returned number of chunks,
+ *         \c FALSE when it is impossible to send the message
+ */
+static bool SC_Chunks_ComputeNbChunksToSend(SOPC_SecureConnection* scConnection,
+                                            SOPC_Msg_Type msgType,
+                                            uint32_t msgBodyLength,
+                                            uint32_t* nbChunks,
+                                            SOPC_StatusCode* errorStatus)
+{
+    assert(NULL != nbChunks);
+    assert(NULL != errorStatus);
+    bool result = false;
+    SOPC_SecureConnection_TcpProperties* tcpProperties = &scConnection->tcpMsgProperties;
+    if (0 == tcpProperties->sendMaxMessageSize || msgBodyLength <= tcpProperties->sendMaxMessageSize)
+    {
+        if (msgBodyLength <= tcpProperties->sendBufferSize)
+        {
+            *nbChunks = 1;
+            result = true;
+        }
+        else if (SOPC_MSG_TYPE_SC_MSG == msgType)
+        {
+            uint32_t requestedNbChunks = msgBodyLength / scConnection->symmSecuMaxBodySize;
+            if (msgBodyLength % scConnection->symmSecuMaxBodySize)
+            {
+                // Previous computed value is truncated, an additional chunk is necessary
+                requestedNbChunks++;
+            }
+
+            if (0 == tcpProperties->sendMaxChunkCount || requestedNbChunks <= tcpProperties->sendMaxChunkCount)
+            {
+                *nbChunks = requestedNbChunks;
+                result = true;
+            }
+
+        } // else: only MSG type is allowed to use multi-chunks
+    }
+
+    if (!result)
+    {
+        *errorStatus = scConnection->isServerConnection ? OpcUa_BadResponseTooLarge : OpcUa_BadRequestTooLarge;
+    }
+
+    return result;
+}
+
+static bool SC_Chunks_NextOutputChunkBuffer(SOPC_SecureConnection* scConnection,
+                                            SOPC_Buffer* msgBuffer,
+                                            SOPC_Buffer** nextChunkBuffer,
+                                            SOPC_StatusCode* errorStatus,
+                                            char** errorReason)
+{
+    // Note: msgBuffer position is set to first byte of body to be sent
+    uint32_t remainingBytes = SOPC_Buffer_Remaining(msgBuffer);
+    uint32_t nextChunkBodySize =
+        remainingBytes < scConnection->symmSecuMaxBodySize ? remainingBytes : scConnection->symmSecuMaxBodySize;
+    if (NULL == *nextChunkBuffer)
+    {
+        // Note: allocate of max buffer size since we need to encode headers in addition to body
+        //       (symmSecuMaxBodySize is computed based on this size)
+        *nextChunkBuffer = SOPC_Buffer_Create(scConnection->tcpMsgProperties.sendBufferSize);
+    }
+    else
+    {
+        assert(SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH + nextChunkBodySize <= (*nextChunkBuffer)->max_size);
+        SOPC_Buffer_Reset(*nextChunkBuffer);
+    }
+    bool result = *nextChunkBuffer != NULL;
+    if (result)
+    {
+        // Set buffer position and length after the message headers to only manage message body part
+        SOPC_ReturnStatus status =
+            SOPC_Buffer_SetDataLength(*nextChunkBuffer, SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
+        assert(SOPC_STATUS_OK == status);
+        status = SOPC_Buffer_SetPosition(*nextChunkBuffer, SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
+        assert(SOPC_STATUS_OK == status);
+
+        // Copy message body bytes to be sent in the next chunk
+        uint32_t remaining = 0;
+        result = fill_buffer(*nextChunkBuffer, msgBuffer, nextChunkBodySize, &remaining);
+        assert(result);
+        assert(0 == remaining);
+
+        if (result)
+        {
+            // Restore position prior to message headers to be encoded first
+            status = SOPC_Buffer_SetPosition(*nextChunkBuffer, 0);
+            assert(SOPC_STATUS_OK == status);
+        }
+        else
+        {
+            *errorStatus = OpcUa_BadTcpInternalError;
+            *errorReason = "Internal error when copying next chunk buffer";
+        }
+    }
+    else
+    {
+        *errorStatus = OpcUa_BadOutOfMemory;
+        *errorReason = "Internal error when allocating next chunk buffer";
+    }
+    return result;
+}
+
+static bool SC_Chunks_EncodeAbortMsg(SOPC_Buffer* inputMsgBuffer, SOPC_StatusCode errorStatus, char* reason)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    SOPC_String tempString;
+    SOPC_String_Initialize(&tempString);
+
+    SOPC_Buffer_Reset(inputMsgBuffer);
+
+    // Let size of the headers for the chunk manager
+    status = SOPC_Buffer_SetDataLength(inputMsgBuffer, SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_Buffer_SetPosition(inputMsgBuffer, SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_UInt32_Write(&errorStatus, inputMsgBuffer);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_String_AttachFromCstring(&tempString, reason);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_String_Write(&tempString, inputMsgBuffer);
+    }
+
+    SOPC_String_Clear(&tempString);
+
+    return SOPC_STATUS_OK == status;
+}
+
+static uint8_t SC_Chunks_IsNextChunkIntermediateOrFinal(uint32_t nb_chunks_required, uint32_t nb_chunks_sent)
+{
+    if (nb_chunks_required > nb_chunks_sent + 1)
+    {
+        return SOPC_UA_INTERMEDIATE_CHUNK;
+    }
+    else
+    {
+        return SOPC_UA_FINAL_CHUNK;
+    }
+}
+
+static bool SC_Chunks_TreatSendMessageBuffer(
+    uint32_t scConnectionIdx,
+    SOPC_SecureConnection* scConnection,
+    uint32_t requestIdOrHandle, // requestId when sender is server / requestHandle when client
+    SOPC_Msg_Type sendMsgType,
+    bool isTcpUaOnly,
+    bool isOPN,
+    SOPC_Buffer* inputMsgBuffer,
+    bool* failedWithAbortMessage,
+    SOPC_StatusCode* errorStatus)
+{
+    bool result = false;
+    uint32_t nb_chunks = 0;
+    uint32_t nb_chunks_sent = 0;
+    SOPC_Buffer* inputChunkBuffer = NULL;
+    SOPC_Buffer* outputChunkBuffer = NULL;
+
+    *failedWithAbortMessage = false;
+
+    // Set the position at the beginning of the message buffer where starts message headers
+    // (corresponding empty bytes were left for headers)
+    SOPC_StatusCode status = SOPC_Buffer_SetPosition(inputMsgBuffer, 0);
+    assert(SOPC_STATUS_OK == status);
+
+    if (isTcpUaOnly)
+    {
+        // HEL / ACK / ERR case
+        assert(SOPC_MSG_TYPE_HEL == sendMsgType || SOPC_MSG_TYPE_ACK == sendMsgType ||
+               SOPC_MSG_TYPE_ERR == sendMsgType);
+        result = SC_Chunks_TreatSendBufferTCPonly(scConnectionIdx, scConnection, sendMsgType, inputMsgBuffer,
+                                                  &outputChunkBuffer, errorStatus);
+
+        if (result)
+        {
+            // Require write of output buffer on socket
+            SOPC_Sockets_EnqueueEvent(SOCKET_WRITE, scConnection->socketIndex, (void*) outputChunkBuffer, 0);
+        }
+    }
+    else if (isOPN)
+    {
+        // OPN case (asymmetric case)
+        assert(SOPC_MSG_TYPE_SC_OPN == sendMsgType);
+        result = SC_Chunks_TreatSendBufferOPN(scConnectionIdx, scConnection, requestIdOrHandle, sendMsgType,
+                                              inputMsgBuffer, &outputChunkBuffer, errorStatus);
+
+        if (result)
+        {
+            // Require write of output buffer on socket
+            SOPC_Sockets_EnqueueEvent(SOCKET_WRITE, scConnection->socketIndex, (void*) outputChunkBuffer, 0);
+        }
+    }
+    else
+    {
+        assert(SOPC_MSG_TYPE_SC_MSG == sendMsgType || SOPC_MSG_TYPE_SC_CLO == sendMsgType);
+        // MSG (/CLO) case (symmetric case)
+
+        /* Part 6 (1.03): §6.7.3 MessageChunks and error handling:
+         * If an error occurs creating a MessageChunk then the sender shall [...]
+         * tells the receiver that an error occurred and that it should discard
+         * the previous chunks. The sender indicates that the MessageChunk contains an error
+         * by setting the IsFinal flag to ‘A’ (for Abort).
+         * [...] the receiver shall ignore the Message but shall not close the SecureChannel.
+         *
+         * Note: since it is possible to fail building first chunk it seems reasonable to send a final chunk 'A' even
+         * when no intermediate chunks were sent before. It allows to indicate failure to peer but to keep the SC opened
+         * as indicated.
+         */
+        *failedWithAbortMessage = true;
+        char* errorReason = "Not enough bytes available in chunk(s) to send the message.";
+
+        // Move forward to message body only in order to compute the number of chunks only based on body size
+        status = SOPC_Buffer_SetPosition(inputMsgBuffer, SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
+        assert(SOPC_STATUS_OK == status);
+
+        result = SC_Chunks_ComputeNbChunksToSend(scConnection, sendMsgType, SOPC_Buffer_Remaining(inputMsgBuffer),
+                                                 &nb_chunks, errorStatus);
+
+        if (result)
+        {
+            assert(nb_chunks > 0);
+            if (nb_chunks == 1)
+            {
+                // We use the buffer directly, restore position prior to message headers and use it directly as final
+                // chunk
+                status = SOPC_Buffer_SetPosition(inputMsgBuffer, 0);
+                assert(SOPC_STATUS_OK == status);
+                inputChunkBuffer = inputMsgBuffer;
+                // Deallocation of input buffer transfered to chunks buffer
+                inputMsgBuffer = NULL;
+            }
+            else
+            {
+                assert(!isOPN);
+                result = SC_Chunks_NextOutputChunkBuffer(scConnection, inputMsgBuffer, &inputChunkBuffer, errorStatus,
+                                                         &errorReason);
+            }
+        }
+
+        while (result && nb_chunks_sent < nb_chunks)
+        {
+            result =
+                SC_Chunks_TreatSendBufferMSGCLO(scConnectionIdx, scConnection, requestIdOrHandle, sendMsgType,
+                                                SC_Chunks_IsNextChunkIntermediateOrFinal(nb_chunks, nb_chunks_sent),
+                                                &inputChunkBuffer, &outputChunkBuffer, errorStatus);
+
+            if (result)
+            {
+                // Require write of output buffer on socket
+                SOPC_Sockets_EnqueueEvent(SOCKET_WRITE, scConnection->socketIndex, (void*) outputChunkBuffer, 0);
+            }
+            else
+            {
+                // Deallocate output buffer since not transmitted to socket layer
+                SOPC_Buffer_Delete(outputChunkBuffer);
+                // Input chunk buffer is always deallocated after the loop
+                // (if it was not forwarded as the output buffer)
+                outputChunkBuffer = NULL;
+            }
+
+            nb_chunks_sent++;
+
+            if (result && nb_chunks_sent < nb_chunks)
+            {
+                assert(outputChunkBuffer != inputMsgBuffer); // otherwise only one chunk to send
+                result = SC_Chunks_NextOutputChunkBuffer(scConnection, inputMsgBuffer, &inputChunkBuffer, errorStatus,
+                                                         &errorReason);
+            }
+        }
+
+        // Deallocate chunk since it will not be used it anymore
+        SOPC_Buffer_Delete(inputChunkBuffer);
+        inputChunkBuffer = NULL;
+
+        // In case of failure we send an abort chunk
+        if (!result)
+        {
+            // Note: Reuse inputMsgBuffer for abort message
+            result = SC_Chunks_EncodeAbortMsg(inputMsgBuffer, *errorStatus, errorReason);
+
+            if (result)
+            {
+                result = SC_Chunks_TreatSendBufferMSGCLO(scConnectionIdx, scConnection, requestIdOrHandle, sendMsgType,
+                                                         SOPC_UA_ABORT_FINAL_CHUNK, &inputMsgBuffer, &outputChunkBuffer,
+                                                         errorStatus);
+            }
+
+            if (result)
+            {
+                // Require write of output buffer on socket
+                SOPC_Sockets_EnqueueEvent(SOCKET_WRITE, scConnection->socketIndex, (void*) outputChunkBuffer, 0);
+            }
+            else
+            {
+                // Abort message sending failed, keep error as a fatal failure to send a msg on SC
+                *failedWithAbortMessage = false;
+                // Deallocate output buffer since not transmitted to socket layer
+                SOPC_Buffer_Delete(outputChunkBuffer);
+                outputChunkBuffer = NULL;
+                // InputMsgBuffer deallocated before return of function if it was not forwarded as the outputChunkBuffer
+            }
+        }
+    }
+
+    if (inputMsgBuffer != outputChunkBuffer)
+    {
+        // If buffer not reused for sending on socket: delete it (function caller shall consider it NULL)
+        SOPC_Buffer_Delete(inputMsgBuffer);
+    } // else: buffer reused for sending on socket (function caller shall consider it NULL)
+
+    return result;
+}
+
 void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InternalEvent event,
                                uint32_t eltId,
                                void* params,
@@ -3783,9 +4085,7 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InternalEvent event,
 {
     SOPC_Msg_Type sendMsgType = SOPC_MSG_TYPE_INVALID;
     SOPC_Buffer* buffer = (SOPC_Buffer*) params;
-    SOPC_Buffer* outputBuffer = NULL;
     SOPC_StatusCode errorStatus = SOPC_GoodGenericStatus; // Good
-    bool isSendCase = false;
     bool isSendTcpOnly = false;
     bool isOPN = false;
     bool result = false;
@@ -3793,6 +4093,7 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InternalEvent event,
     bool socketWillClose = false;
     SOPC_SecureConnection* scConnection = SC_GetConnection(eltId);
     uint32_t* requestIdForSendFailure = NULL;
+    bool failedWithAbortMessage = false;
 
     if (scConnection != NULL && scConnection->state != SECURE_CONNECTION_STATE_SC_CLOSED)
     {
@@ -3805,14 +4106,12 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InternalEvent event,
         case INT_SC_SND_HEL:
             SOPC_Logger_TraceDebug("ScChunksMgr: INT_SC_SND_HEL scIdx=%" PRIu32, eltId);
 
-            isSendCase = true;
             isSendTcpOnly = true;
             sendMsgType = SOPC_MSG_TYPE_HEL;
             break;
         case INT_SC_SND_ACK:
             SOPC_Logger_TraceDebug("ScChunksMgr: INT_SC_SND_ACK scIdx=%" PRIu32, eltId);
 
-            isSendCase = true;
             isSendTcpOnly = true;
             sendMsgType = SOPC_MSG_TYPE_ACK;
             break;
@@ -3820,14 +4119,12 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InternalEvent event,
             SOPC_Logger_TraceDebug("ScChunksMgr: INT_SC_SND_ERR scIdx=%" PRIu32, eltId);
 
             socketWillClose = true;
-            isSendCase = true;
             isSendTcpOnly = true;
             sendMsgType = SOPC_MSG_TYPE_ERR;
             break;
         case INT_SC_SND_OPN:
             SOPC_Logger_TraceDebug("ScChunksMgr: INT_SC_SND_OPN scIdx=%" PRIu32, eltId);
 
-            isSendCase = true;
             isOPN = true;
             sendMsgType = SOPC_MSG_TYPE_SC_OPN;
             // Note: only message to be provided without size of header reserved (variable size for asymmetric secu
@@ -3837,14 +4134,12 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InternalEvent event,
             SOPC_Logger_TraceDebug("ScChunksMgr: INT_SC_SND_CLO scIdx=%" PRIu32, eltId);
 
             socketWillClose = true;
-            isSendCase = true;
             sendMsgType = SOPC_MSG_TYPE_SC_CLO;
             break;
         case INT_SC_SND_MSG_CHUNKS:
             SOPC_Logger_TraceDebug("ScChunksMgr: INT_SC_SND_MSG_CHUNKS scIdx=%" PRIu32 " reqId/Handle=%" PRIuPTR, eltId,
                                    auxParam);
 
-            isSendCase = true;
             sendMsgType = SOPC_MSG_TYPE_SC_MSG;
             break;
         default:
@@ -3852,75 +4147,48 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InternalEvent event,
             assert(false);
         }
 
-        if (isSendCase)
+        if (NULL == buffer || auxParam > UINT32_MAX)
         {
-            if (NULL != buffer && auxParam <= UINT32_MAX)
+            result = false;
+            errorStatus = OpcUa_BadInvalidArgument;
+        }
+
+        // TODO: manage SND_FAILURE in this case to send an Abort message ?
+        result = SC_Chunks_TreatSendMessageBuffer(eltId, scConnection, (uint32_t) auxParam, sendMsgType, isSendTcpOnly,
+                                                  isOPN, buffer, &failedWithAbortMessage, &errorStatus);
+        buffer = NULL; // Consumed by previous call
+
+        if (!result)
+        {
+            if (!socketWillClose)
             {
-                if (isSendTcpOnly)
+                requestIdForSendFailure = SOPC_Malloc(sizeof(uint32_t));
+                if (requestIdForSendFailure != NULL)
                 {
-                    // HEL / ACK / ERR case
-                    result = SC_Chunks_TreatSendBufferTCPonly(eltId, scConnection, sendMsgType, buffer, &outputBuffer,
-                                                              &errorStatus);
+                    *requestIdForSendFailure = (uint32_t) auxParam;
                 }
-                else if (isOPN)
+
+                if (failedWithAbortMessage)
                 {
-                    // OPN case (asymmetric case)
-                    result = SC_Chunks_TreatSendBufferOPN(eltId, scConnection, (uint32_t) auxParam, sendMsgType, buffer,
-                                                          &outputBuffer, &errorStatus);
+                    SOPC_SecureChannels_EnqueueInternalEvent(INT_SC_SND_ABORT_FAILURE, eltId, requestIdForSendFailure,
+                                                             errorStatus);
                 }
                 else
-                {
-                    // MSG (/CLO) case (symmetric case)
-                    result = SC_Chunks_TreatSendBufferMSGCLO(eltId, scConnection, (uint32_t) auxParam, sendMsgType,
-                                                             buffer, &outputBuffer, &errorStatus);
-                }
-            }
-            else
-            {
-                SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_RCV_FAILURE, eltId, NULL,
-                                                               OpcUa_BadInvalidArgument);
-            }
-
-            if (!result)
-            {
-                if (!socketWillClose)
                 {
                     // Treat as prio events
-                    requestIdForSendFailure = SOPC_Malloc(sizeof(uint32_t));
-                    if (requestIdForSendFailure != NULL)
-                    {
-                        *requestIdForSendFailure = (uint32_t) auxParam;
-                    }
-                    SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_SND_FAILURE, eltId, requestIdForSendFailure,
-                                                                   errorStatus);
-                }
-                else
-                {
-                    SOPC_Logger_TraceError(
-                        "ScChunksMgr: Failed sending message type SOPC_Msg_Type=%d before socket closed "
-                        "scIdx=%" PRIu32,
-                        sendMsgType, eltId);
+                    SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_SND_FATAL_FAILURE, eltId,
+                                                                   requestIdForSendFailure, errorStatus);
                 }
             }
             else
             {
-                // Require write of output buffer on socket
-                SOPC_Sockets_EnqueueEvent(SOCKET_WRITE, scConnection->socketIndex, (void*) outputBuffer, 0);
-
-                if (buffer != outputBuffer)
-                {
-                    // If buffer not reused for sending on socket: delete it
-                    SOPC_Buffer_Delete(buffer);
-                    buffer = NULL;
-                }
-                else
-                {
-                    // If buffer reused for sending on socket: set pointer to NULL to avoid final deallocation
-                    buffer = NULL;
-                }
+                SOPC_Logger_TraceError(
+                    "ScChunksMgr: Failed sending message type SOPC_Msg_Type=%d before socket closed "
+                    "scIdx=%" PRIu32,
+                    sendMsgType, eltId);
             }
         }
-    } // else SC not connected: ignore event
+    }
 
     if (NULL != buffer)
     {

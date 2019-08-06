@@ -57,4 +57,8 @@
 /* Length of an UA secure message chunk sequence header */
 #define SOPC_UA_SECURE_MESSAGE_SEQUENCE_LENGTH 8
 
+/* Position of sequence header in a symmetric secure message */
+#define SOPC_UA_SYMMETRIC_SEQUENCE_HEADER_POSITION \
+    (SOPC_UA_SECURE_MESSAGE_HEADER_LENGTH + SOPC_UA_SYMMETRIC_SECURITY_HEADER_LENGTH)
+
 #endif // SOPC_PROTOCOL_CONSTANTS_H_

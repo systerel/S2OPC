@@ -35,13 +35,16 @@
 #define SOPC_TCP_UA_MAX_BUFFER_SIZE UINT16_MAX
 #endif /* SOPC_TCP_UA_MAX_BUFFER_SIZE */
 
-/** @brief Maximum number of chunks accepted for 1 message, 0 means no limit
- *  Note: if 0 is chosen SOPC_MAX_MESSAGE_LENGTH definition shall be change to not use it  */
+/** @brief Maximum number of chunks accepted for 1 message, 0 means no limit.
+ *  Note: if 0 is chosen SOPC_MAX_MESSAGE_LENGTH definition shall be change to not use it and shall not be 0.
+ */
 #ifndef SOPC_MAX_NB_CHUNKS
 #define SOPC_MAX_NB_CHUNKS 5
 #endif /* SOPC_MAX_NB_CHUNKS */
 
-/** @brief Maximum message length used (must be >= SOPC_TCP_UA_MAX_BUFFER_SIZE) */
+/** @brief Maximum message length used (must be >= SOPC_TCP_UA_MAX_BUFFER_SIZE), 0 means no limit.
+ *  Note: if 0 is chosen SOPC_MAX_NB_CHUNK shall not be 0.
+ * */
 #ifndef SOPC_MAX_MESSAGE_LENGTH
 #define SOPC_MAX_MESSAGE_LENGTH SOPC_TCP_UA_MAX_BUFFER_SIZE* SOPC_MAX_NB_CHUNKS
 #endif /* SOPC_MAX_MESSAGE_LENGTH */

@@ -80,7 +80,7 @@ bool SC_InitNewConnection(uint32_t* newConnectionIdx)
         scConnection->tcpMsgProperties.sendMaxMessageSize = SOPC_MAX_MESSAGE_LENGTH;
         // Note: we do not manage multiple chunks in this version of the toolkit
         scConnection->tcpMsgProperties.receiveMaxChunkCount = SOPC_MAX_NB_CHUNKS;
-        scConnection->tcpMsgProperties.sendMaxChunkCount = 1;
+        scConnection->tcpMsgProperties.sendMaxChunkCount = SOPC_MAX_NB_CHUNKS;
 
         // Initialize TCP sequence properties
         scConnection->tcpSeqProperties.sentRequestIds = SOPC_SLinkedList_Create(0);
@@ -2715,9 +2715,10 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
         } // else: nothing to do (=> socket should already be required to close)
         break;
     }
-    case INT_SC_SND_FAILURE:
+    case INT_SC_SND_FATAL_FAILURE:
     {
-        SOPC_Logger_TraceDebug("ScStateMgr: INT_SC_SND_FAILURE scIdx=%" PRIu32 " reqId/Handle=%" PRIu32
+        // An error occurred and SC connection shall be closed
+        SOPC_Logger_TraceDebug("ScStateMgr: INT_SC_SND_FATAL_FAILURE scIdx=%" PRIu32 " reqId/Handle=%" PRIu32
                                " statusCode=%" PRIXPTR,
                                eltId, params == NULL ? 0 : *(uint32_t*) params, auxParam);
 
@@ -2736,6 +2737,22 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
             SC_CloseSecureConnection(scConnection, eltId, false, false, (SOPC_StatusCode) auxParam,
                                      "Failure when encoding a message to send on the secure connection");
         } // else: nothing to do (=> socket should already be required to close)
+        break;
+    }
+    case INT_SC_SND_ABORT_FAILURE:
+    {
+        // An abort final chunk has been sent and SC connection shall not be closed
+        SOPC_Logger_TraceDebug("ScStateMgr: INT_SC_SND_FATAL_FAILURE scIdx=%" PRIu32 " reqId/Handle=%" PRIu32
+                               " statusCode=%" PRIXPTR,
+                               eltId, params == NULL ? 0 : *(uint32_t*) params, auxParam);
+
+        if (params != NULL)
+        {
+            SOPC_EventHandler_Post(secureChannelsEventHandler, SC_SND_FAILURE,
+                                   eltId,     // secure connection id
+                                   params,    // request Id
+                                   auxParam); // error status
+        }
         break;
     }
     case INT_SC_RCV_ERR:

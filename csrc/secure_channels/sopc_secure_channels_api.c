@@ -62,7 +62,8 @@ void SOPC_SecureChannels_OnInternalEvent(SOPC_EventHandler* handler,
     case INT_SC_RCV_MSG_CHUNKS:
     case INT_SC_RCV_MSG_CHUNK_ABORT:
     case INT_SC_RCV_FAILURE:
-    case INT_SC_SND_FAILURE:
+    case INT_SC_SND_FATAL_FAILURE:
+    case INT_SC_SND_ABORT_FAILURE:
     case INT_SC_CLOSE:
         SOPC_SecureConnectionStateMgr_OnInternalEvent(internalEvent, eltId, params, auxParam);
         break;
