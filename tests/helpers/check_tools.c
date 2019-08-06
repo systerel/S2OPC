@@ -919,42 +919,62 @@ START_TEST(test_base_tools)
 }
 END_TEST
 
+static void uri_free(SOPC_UriType* type, char** hostname, char** port)
+{
+    SOPC_Free(*hostname);
+    SOPC_Free(*port);
+    if (*type != SOPC_URI_UNDETERMINED)
+    {
+        *type = SOPC_URI_UNDETERMINED;
+    }
+    *port = NULL;
+    *hostname = NULL;
+}
+
 START_TEST(test_helper_uri)
 {
-    size_t hostLength = 0;
-    size_t portIdx = 0;
-    size_t portLength = 0;
+    SOPC_UriType type = SOPC_URI_UNDETERMINED;
+    char* hostname = NULL;
+    char* port = NULL;
 
     // Not a TCP UA address
-    ck_assert(false == SOPC_Helper_URI_ParseTcpUaUri("http://localhost:9999/test", &hostLength, &portIdx, &portLength));
+    ck_assert(SOPC_STATUS_OK != SOPC_Helper_URI_SplitUri("http://localhost:9999/test", &type, &hostname, &port));
+    uri_free(&type, &hostname, &port);
 
-    ck_assert(false !=
-              SOPC_Helper_URI_ParseTcpUaUri("opc.tcp://localhost:9999/test", &hostLength, &portIdx, &portLength));
-    ck_assert(9 == hostLength);
-    ck_assert(10 + hostLength + 1 == portIdx);
-    ck_assert(4 == portLength);
+    ck_assert(SOPC_STATUS_OK == SOPC_Helper_URI_SplitUri("opc.tcp://localhost:9999/test", &type, &hostname, &port));
+    ck_assert(SOPC_URI_TCPUA == type);
+    ck_assert(strncmp(hostname, "localhost", strlen("localhost") + 1) == 0);
+    ck_assert(strncmp(port, "9999", strlen("9999") + 1) == 0);
+    uri_free(&type, &hostname, &port);
 
-    ck_assert(false != SOPC_Helper_URI_ParseTcpUaUri("opc.tcp://localhost:9999/test/moreThingsInPath/plus", &hostLength,
-                                                     &portIdx, &portLength));
-    ck_assert(9 == hostLength);
-    ck_assert(10 + hostLength + 1 == portIdx);
-    ck_assert(4 == portLength);
+    ck_assert(SOPC_STATUS_OK ==
+              SOPC_Helper_URI_SplitUri("opc.tcp://localhost:9999/test/moreThingsInPath/plus", &type, &hostname, &port));
+    ck_assert(SOPC_URI_TCPUA == type);
+    ck_assert(strncmp(hostname, "localhost", strlen("localhost") + 1) == 0);
+    ck_assert(strncmp(port, "9999", strlen("9999") + 1) == 0);
+    uri_free(&type, &hostname, &port);
 
     // No port defined
-    ck_assert(false == SOPC_Helper_URI_ParseTcpUaUri("opc.tcp://localhost:/test", &hostLength, &portIdx, &portLength));
-    ck_assert(false == SOPC_Helper_URI_ParseTcpUaUri("opc.tcp://localhost/test", &hostLength, &portIdx, &portLength));
+    ck_assert(SOPC_STATUS_OK != SOPC_Helper_URI_SplitUri("opc.tcp://localhost:/test", &type, &hostname, &port));
+    ck_assert_ptr_null(port);
+    uri_free(&type, &hostname, &port);
 
-    ck_assert(false !=
-              SOPC_Helper_URI_ParseTcpUaUri("opc.tcp://192.168.4.1:9/test", &hostLength, &portIdx, &portLength));
-    ck_assert(11 == hostLength);
-    ck_assert(10 + hostLength + 1 == portIdx);
-    ck_assert(1 == portLength);
+    ck_assert(SOPC_STATUS_OK != SOPC_Helper_URI_SplitUri("opc.tcp://localhost/test", &type, &hostname, &port));
+    ck_assert_ptr_null(port);
+    uri_free(&type, &hostname, &port);
 
-    ck_assert(false != SOPC_Helper_URI_ParseTcpUaUri("opc.tcp://[fe80::250:b6ff:fe17:9f3a]:99999/test", &hostLength,
-                                                     &portIdx, &portLength));
-    ck_assert(26 == hostLength);
-    ck_assert(10 + hostLength + 1 == portIdx);
-    ck_assert(5 == portLength);
+    ck_assert(SOPC_STATUS_OK == SOPC_Helper_URI_SplitUri("opc.tcp://192.168.4.1:9/test", &type, &hostname, &port));
+    ck_assert(SOPC_URI_TCPUA == type);
+    ck_assert(strncmp(hostname, "192.168.4.1", strlen("192.168.4.1") + 1) == 0);
+    ck_assert(strncmp(port, "9", strlen("9") + 1) == 0);
+    uri_free(&type, &hostname, &port);
+
+    ck_assert(SOPC_STATUS_OK ==
+              SOPC_Helper_URI_SplitUri("opc.tcp://[fe80::250:b6ff:fe17:9f3a]:99999/test", &type, &hostname, &port));
+    ck_assert(SOPC_URI_TCPUA == type);
+    ck_assert(strncmp(hostname, "[fe80::250:b6ff:fe17:9f3a]", strlen("[fe80::250:b6ff:fe17:9f3a]") + 1) == 0);
+    ck_assert(strncmp(port, "99999", strlen("99999") + 1) == 0);
+    uri_free(&type, &hostname, &port);
 }
 END_TEST
 
