@@ -69,12 +69,17 @@ int main(int argc, char* argv[])
     {
         assert(strlen(argv[1]) <= 100);
 
-        size_t tmp, tmp2, tmp3;
-        bool res = SOPC_Helper_URI_ParseTcpUaUri(argv[1], &tmp, &tmp2, &tmp3);
-        if (!res)
+        SOPC_UriType tmp = SOPC_URI_UNDETERMINED;
+        char *tmp2, *tmp3 = NULL;
+        status = SOPC_Helper_URI_SplitUri(argv[1], &tmp, &tmp2, &tmp3);
+        if (SOPC_STATUS_OK == status)
+        {
+            SOPC_Free(tmp2);
+            SOPC_Free(tmp3);
+        }
+        else
         {
             printf("# Error: invalid OPC UA server address\n");
-            status = SOPC_STATUS_NOK;
         }
         ENDPOINT_URL = argv[1];
     }
