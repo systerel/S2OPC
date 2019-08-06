@@ -166,31 +166,29 @@ static SOPC_ReturnStatus getUriPrefixOrPort(const char** ppCursor, char** ppFind
     return (res);
 }
 
-static bool getUriTypeFromEnum(char** prefix, SOPC_UriType* type)
+static SOPC_ReturnStatus getUriTypeFromEnum(char** prefix, SOPC_UriType* type)
 {
-    int i = 0;
-
-    if (strncmp(*prefix, TCPUA_PREFIX, strlen(*prefix)) == 0)
+    if (strncmp(*prefix, TCPUA_PREFIX, (strlen(*prefix) + 1)) == 0)
     {
-        *type = SOPC_URI_TcpUa;
-        return (true);
+        *type = SOPC_URI_TCPUA;
+        return (SOPC_STATUS_OK);
     }
-    else if (strncmp(*prefix, UDPUA_PREFIX, strlen(*prefix)) == 0)
+    else if (strncmp(*prefix, UDPUA_PREFIX, (strlen(*prefix) + 1)) == 0)
     {
-        *type = SOPC_URI_UdpUa;
-        return (true);
+        *type = SOPC_URI_UDPUA;
+        return (SOPC_STATUS_OK);
     }
-    else if (strncmp(*prefix, ETHUA_PREFIX, strlen(*prefix)) == 0)
+    else if (strncmp(*prefix, ETHUA_PREFIX, (strlen(*prefix) + 1)) == 0)
     {
-        *type = SOPC_URI_EthUa;
-        return (true);
+        *type = SOPC_URI_ETHUA;
+        return (SOPC_STATUS_OK);
     }
-    else if (strncmp(*prefix, MQTTUA_PREFIX, strlen(*prefix)) == 0)
+    else if (strncmp(*prefix, MQTTUA_PREFIX, (strlen(*prefix) + 1)) == 0)
     {
-        *type = SOPC_URI_MqttUa;
-        return (true);
+        *type = SOPC_URI_MQTTUA;
+        return (SOPC_STATUS_OK);
     }
-    return (false);
+    return (SOPC_STATUS_INVALID_PARAMETERS);
 }
 
 bool SOPC_Helper_URI_SplitUri(const char* uri, SOPC_UriType* type, char** hostname, char** port)
