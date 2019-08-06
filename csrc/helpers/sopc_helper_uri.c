@@ -36,21 +36,7 @@
 #define ETHUA_PREFIX ((const char*) "opc.eth")
 #define MQTTUA_PREFIX ((const char*) "MqttUa")
 
-static bool URI_match(char find, const char* sep)
-{
-    bool res = false;
-    size_t i = 0;
 
-    while (sep[i] && !res)
-    {
-        if (sep[i] == find)
-        {
-            res = true;
-        }
-        ++i;
-    }
-    return (res);
-}
 
 static bool getUriPortId(const char** ppCursor, char** ppPort)
 {
