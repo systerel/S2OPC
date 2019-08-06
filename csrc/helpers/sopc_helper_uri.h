@@ -34,17 +34,9 @@ typedef enum SOPC_UriType
     SOPC_URI_MQTTUA
 } SOPC_UriType;
 
-/* Return true if find exist in sep array, return false otherwise */
-static bool URI_match(char find, const char* sep);
-
-/* Extract respectively Port, Hostname and prefix from given URI */
-static bool getUriPortId(const char** ppCursor, char** ppPort);
-static bool getUriHostname(const char** ppCursor, char** ppHostname);
-static bool getUriPrefix(const char** ppCursor, char** ppPrefix);
-
-/*  */
-static bool getUriTypeFromEnum(char** prefix, SOPC_UriType* type);
-
-bool SOPC_Helper_URI_SplitUri(const char* uri, SOPC_UriType* type, char** hostname, char** port);
+/* set given type, hostname and prefix from given URI and return true. Return false in case of failure */
+/* return false if at least one parameter is NULL */
+/* in case of failure parameters are not modified */
+SOPC_ReturnStatus SOPC_Helper_URI_SplitUri(const char* uri, SOPC_UriType* type, char** hostname, char** port);
 
 #endif /* SOPC_HELPER_URI_H_ */
