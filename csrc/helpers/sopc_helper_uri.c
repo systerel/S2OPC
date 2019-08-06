@@ -36,7 +36,25 @@
 #define ETHUA_PREFIX ((const char*) "opc.eth")
 #define MQTTUA_PREFIX ((const char*) "MqttUa")
 
+/**
+ * Match prefix with SOPC existing prefix set the type with a SOPC_UriType and return true otherwise return false
+ */
+static SOPC_ReturnStatus getUriTypeFromEnum(char** prefix, SOPC_UriType* type);
 
+/**
+ * Extract Hostname from given URI
+ * must take a &pCursor which strictly start at the begining of the sequence and a &pHostname which must be pointing to
+ * NULL.
+ * in case of failure parameters are not modified
+ */
+static SOPC_ReturnStatus getUriHostname(const char** ppCursor, char** ppHostname);
+/**
+ * Extract prefix or port from given URI depending on sep_match
+ * Must take a &pCursor which strictly start at the beginning of the sequence and a &ppFind which must be pointing to
+ * NULL.
+ * In case of failure parameters are not modified
+ */
+static SOPC_ReturnStatus getUriPrefixOrPort(const char** ppCursor, char** ppFind, const char* sep_match);
 
 static bool getUriPortId(const char** ppCursor, char** ppPort)
 {
