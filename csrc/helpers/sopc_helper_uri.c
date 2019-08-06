@@ -19,6 +19,7 @@
 
 #include <stddef.h>
 #include <string.h>
+#include <sys/types.h>
 
 #include "sopc_helper_string.h"
 #include "sopc_helper_uri.h"
@@ -56,7 +57,6 @@ static SOPC_ReturnStatus getUriHostname(const char** ppCursor, char** ppHostname
  */
 static SOPC_ReturnStatus getUriPrefixOrPort(const char** ppCursor, char** ppFind, const char* sep_match);
 
-static bool getUriPortId(const char** ppCursor, char** ppPort)
 static SOPC_ReturnStatus getUriHostname(const char** ppCursor, char** ppHostname)
 {
     if (NULL == *ppCursor && NULL == ppHostname)
@@ -119,48 +119,48 @@ static SOPC_ReturnStatus getUriHostname(const char** ppCursor, char** ppHostname
     return (res);
 }
 
-static bool getUriPrefix(const char** ppCursor, char** ppPrefix)
+static SOPC_ReturnStatus getUriPrefixOrPort(const char** ppCursor, char** ppFind, const char* sep_match)
 {
+    if (NULL == *ppCursor && NULL == ppFind)
+    {
+        return (SOPC_STATUS_INVALID_PARAMETERS);
+    }
+
     const char* start = *ppCursor;
     const char* pCursor = *ppCursor;
-    bool res = true;
-    bool match = false;
+    SOPC_ReturnStatus res = SOPC_STATUS_OK;
     char* resStr = NULL;
     size_t len = 0;
 
-    while (!match && res)
+    pCursor = strstr(start, sep_match);
+    if (NULL == pCursor)
     {
-        match = URI_match(*pCursor, URI_Prefix_Sep);
-        if (!match)
+        res = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    if (SOPC_STATUS_OK == res)
+    {
+        if (pCursor > start)
         {
-            ++len;
-            ++pCursor;
+            len = (size_t)(pCursor - start);
         }
-        else if (!*pCursor)
+        else
         {
-            res = false;
+            res = SOPC_STATUS_INVALID_PARAMETERS;
         }
     }
-    if (0 == len)
+    if (SOPC_STATUS_OK == res)
     {
-        res = false;
-    }
-    if (res)
-    {
-        resStr = calloc(len + 1, sizeof(char));
+        resStr = SOPC_Calloc(len + 1, sizeof(char));
         if (resStr == NULL)
         {
-            res = false;
+            res = SOPC_STATUS_OUT_OF_MEMORY;
         }
     }
-    if (res)
+    if (SOPC_STATUS_OK == res)
     {
         resStr = strncpy(resStr, start, len);
-        *ppPrefix = resStr;
-        while (match)
-        {
-            match = URI_match(*(++pCursor), URI_Prefix_Sep);
-        }
+        pCursor += strlen(sep_match);
+        *ppFind = resStr;
         *ppCursor = pCursor;
     }
     return (res);
