@@ -57,71 +57,34 @@ static SOPC_ReturnStatus getUriHostname(const char** ppCursor, char** ppHostname
 static SOPC_ReturnStatus getUriPrefixOrPort(const char** ppCursor, char** ppFind, const char* sep_match);
 
 static bool getUriPortId(const char** ppCursor, char** ppPort)
+static SOPC_ReturnStatus getUriHostname(const char** ppCursor, char** ppHostname)
 {
+    if (NULL == *ppCursor && NULL == ppHostname)
+    {
+        return (SOPC_STATUS_INVALID_PARAMETERS);
+    }
+
     const char* start = *ppCursor;
     const char* pCursor = *ppCursor;
-    bool res = true;
+    SOPC_ReturnStatus res = SOPC_STATUS_OK;
     bool match = false;
     char* resStr = NULL;
     size_t len = 0;
+    size_t NbBracketOpen = 0;
 
-    while (!match)
+    while (!match && res == SOPC_STATUS_OK)
     {
-        match = URI_match(*pCursor, URI_Port_Sep);
-        if (!*pCursor)
+        if (0 == NbBracketOpen)
         {
-            match = true;
+            match = strchr(URI_HOSTNAME_SEP, *pCursor) != NULL;
         }
         if (!match)
         {
-            ++len;
-            ++pCursor;
-        }
-    }
-    if (0 == len)
-    {
-        res = false;
-    }
-    if (res)
-    {
-        resStr = calloc(len + 1, sizeof(char));
-        if (resStr == NULL)
-        {
-            res = false;
-        }
-    }
-    if (res)
-    {
-        resStr = strncpy(resStr, start, len);
-        *ppPort = resStr;
-        *ppCursor = pCursor;
-    }
-    return (res);
-}
-
-static bool getUriHostname(const char** ppCursor, char** ppHostname)
-{
-    const char* start = *ppCursor;
-    const char* pCursor = *ppCursor;
-    bool res = true;
-    bool match = false;
-    char* resStr = NULL;
-    size_t NbBracketOpen = URI_Default_Bracket_nb;
-    size_t len = 0;
-
-    while (!match && res)
-    {
-        if (NbBracketOpen <= 0)
-        {
-            match = URI_match(*pCursor, URI_HostName_Sep);
-        }
-        if (!match)
-        {
-            if (*pCursor == '[')
+            if (*pCursor == URI_OPEN_BRACKET)
             {
                 ++NbBracketOpen;
             }
-            if (0 < NbBracketOpen && ']' == *pCursor)
+            if (NbBracketOpen > 0 && URI_CLOSE_BRACKET == *pCursor)
             {
                 --NbBracketOpen;
             }
@@ -130,29 +93,27 @@ static bool getUriHostname(const char** ppCursor, char** ppHostname)
         }
         if (!*pCursor)
         {
-            res = false;
+            res = SOPC_STATUS_INVALID_PARAMETERS;
         }
     }
     if (NbBracketOpen > 0 || 0 == len)
     {
-        res = false;
+        res = SOPC_STATUS_INVALID_PARAMETERS;
     }
-    if (res)
+    if (SOPC_STATUS_OK == res)
     {
-        resStr = calloc(len + 1, sizeof(char));
+        resStr = SOPC_Calloc(len + 1, sizeof(char));
         if (resStr == NULL)
         {
-            res = false;
+            res = SOPC_STATUS_OUT_OF_MEMORY;
         }
     }
-    if (res)
+    if (SOPC_STATUS_OK == res)
     {
         resStr = strncpy(resStr, start, len);
         *ppHostname = resStr;
-        while (match)
-        {
-            match = URI_match(*(++pCursor), URI_HostName_Sep);
-        }
+        pCursor = strstr(pCursor, URI_HOSTNAME_SEP);
+        pCursor += strlen(URI_HOSTNAME_SEP);
         *ppCursor = pCursor;
     }
     return (res);
