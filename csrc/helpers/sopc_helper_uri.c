@@ -191,42 +191,46 @@ static SOPC_ReturnStatus getUriTypeFromEnum(char** prefix, SOPC_UriType* type)
     return (SOPC_STATUS_INVALID_PARAMETERS);
 }
 
-bool SOPC_Helper_URI_SplitUri(const char* uri, SOPC_UriType* type, char** hostname, char** port)
+SOPC_ReturnStatus SOPC_Helper_URI_SplitUri(const char* uri, SOPC_UriType* type, char** hostname, char** port)
 {
-    if (NULL == uri || NULL == hostname || NULL == port)
+    if (NULL == uri || NULL == hostname || NULL == port || NULL != *port || NULL != *hostname)
     {
-        return (false);
+        return (SOPC_STATUS_INVALID_PARAMETERS);
     }
     if (strlen(uri) + 4 > TCP_UA_MAX_URL_LENGTH) // Encoded value shall be less than 4096 byte
     {
-        return (false);
+        return (SOPC_STATUS_INVALID_PARAMETERS);
     }
 
+    /* *pCursor is a tmp copy to the uri. its purpose is to run through the URI
+     * Its pos must be at the beginning of each sequence and must be strictly after the last separator found */
     const char* pCursor = uri;
     char* prefix = NULL;
-    bool result = true;
+    SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
-    if (result)
+    if (SOPC_STATUS_OK == result)
     {
-        result = getUriPrefix(&pCursor, &prefix);
+        result = getUriPrefixOrPort(&pCursor, &prefix, URI_PREFIX_SEP);
     }
-    if (result)
+    if (SOPC_STATUS_OK == result)
     {
         result = getUriHostname(&pCursor, hostname);
     }
-    if (result)
+    if (SOPC_STATUS_OK == result)
     {
-        result = getUriPortId(&pCursor, port);
+        result = getUriPrefixOrPort(&pCursor, port, URI_PORT_SEP);
     }
-    if (result)
+    if (SOPC_STATUS_OK == result)
     {
         result = getUriTypeFromEnum(&prefix, type);
     }
-    free(prefix);
-    if (!result)
+    SOPC_Free(prefix);
+    if (SOPC_STATUS_OK != result)
     {
-        free(*hostname);
-        free(*port);
+        SOPC_Free(*hostname);
+        SOPC_Free(*port);
+        *hostname = NULL;
+        *port = NULL;
     }
     return (result);
 }
