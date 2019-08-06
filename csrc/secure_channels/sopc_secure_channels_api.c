@@ -148,12 +148,13 @@ void SOPC_SecureChannels_OnInputEvent(SOPC_EventHandler* handler,
     }
 }
 
-void SOPC_SecureChannels_EnqueueEvent(SOPC_SecureChannels_InputEvent scEvent,
-                                      uint32_t id,
-                                      void* params,
-                                      uintptr_t auxParam)
+SOPC_ReturnStatus SOPC_SecureChannels_EnqueueEvent(SOPC_SecureChannels_InputEvent scEvent,
+                                                   uint32_t id,
+                                                   void* params,
+                                                   uintptr_t auxParam)
 {
     assert(secureChannelsInputEventHandler != NULL);
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     switch (scEvent)
     {
@@ -163,11 +164,12 @@ void SOPC_SecureChannels_EnqueueEvent(SOPC_SecureChannels_InputEvent scEvent,
     case SC_CONNECT:
     case SC_DISCONNECT:
     case SC_SERVICE_SND_MSG:
-        SOPC_EventHandler_Post(secureChannelsInputEventHandler, (int32_t) scEvent, id, params, auxParam);
+        status = SOPC_EventHandler_Post(secureChannelsInputEventHandler, (int32_t) scEvent, id, params, auxParam);
         break;
     default:
         assert(false);
     }
+    return status;
 }
 
 void SOPC_SecureChannels_EnqueueInternalEvent(SOPC_SecureChannels_InternalEvent event,

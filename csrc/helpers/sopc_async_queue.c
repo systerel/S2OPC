@@ -136,7 +136,6 @@ static SOPC_ReturnStatus SOPC_AsyncQueue_Dequeue(SOPC_AsyncQueue* queue, bool is
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (NULL != queue && NULL != element)
     {
-        status = SOPC_STATUS_NOK;
         Mutex_Lock(&queue->queueMutex);
         *element = SOPC_SLinkedList_PopHead(queue->queueList);
         if (NULL == *element)

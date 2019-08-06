@@ -94,7 +94,8 @@ static SOPC_ReturnStatus SOPC_InternalAddCommonFinishAddNotifElt(
     {
         retStatus = SOPC_NodeId_Copy(&notifElt->value->NodeId, monitored_item_notification_queue_bs__p_nid);
     }
-    else
+
+    if (SOPC_STATUS_OK != retStatus)
     {
         return retStatus;
     }

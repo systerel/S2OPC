@@ -452,6 +452,7 @@ static void SOPC_Log_CheckFileChangeNoLock(SOPC_Log_Instance* pLogInst)
             // Display that next file will be opened
             SOPC_Log_TracePrefixNoLock(pLogInst, SOPC_LOG_LEVEL_INFO, false, true);
             res = fprintf(pLogInst->file->pFile, "LOG CONTINUE IN NEXT FILE: %s\n", pLogInst->file->filePath);
+            assert(res > 0);
             fclose(pLogInst->file->pFile);
             pLogInst->file->pFile = fopen(pLogInst->file->filePath, "w");
             pLogInst->file->nbBytes = 0;

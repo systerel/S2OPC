@@ -1780,6 +1780,7 @@ char* SOPC_NodeId_ToCString(const SOPC_NodeId* nodeId)
                 case SOPC_IdentifierType_Numeric:
                     // with <id> = 10 digits max: "i=<id>\0"
                     res = sprintf(&result[res], "i=%" PRIu32, nodeId->Data.Numeric);
+                    assert(res > 0);
                     break;
                 case SOPC_IdentifierType_String:
                     // "s=<string>\0"
@@ -1791,6 +1792,7 @@ char* SOPC_NodeId_ToCString(const SOPC_NodeId* nodeId)
                     {
                         res = sprintf(&result[res], "s=");
                     }
+                    assert(res > 0);
                     break;
                 case SOPC_IdentifierType_Guid:
                     // ex: "g=09087e75-8e5e-499b-954f-f2a9603db28a\0"
@@ -1807,6 +1809,7 @@ char* SOPC_NodeId_ToCString(const SOPC_NodeId* nodeId)
                     {
                         res = sprintf(&result[res], "g=");
                     }
+                    assert(res > 0);
                     break;
                 case SOPC_IdentifierType_ByteString:
                     // "b=<bstring>\0"
@@ -1818,6 +1821,7 @@ char* SOPC_NodeId_ToCString(const SOPC_NodeId* nodeId)
                     else
                     {
                         res = sprintf(&result[res], "b=");
+                        assert(res > 0);
                     }
                     break;
                 default:

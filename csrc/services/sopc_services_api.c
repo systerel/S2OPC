@@ -308,13 +308,14 @@ static void onServiceEvent(SOPC_EventHandler* handler, int32_t scEvent, uint32_t
         if (NULL == epConfig)
         {
             status = SOPC_App_EnqueueComEvent(SE_CLOSED_ENDPOINT, id, NULL, SOPC_STATUS_INVALID_PARAMETERS);
+            assert(SOPC_STATUS_OK == status);
         }
         else
         {
-            SOPC_SecureChannels_EnqueueEvent(EP_OPEN,
-                                             id, // Server endpoint config idx
-                                             NULL, 0);
-            status = SOPC_STATUS_OK;
+            status = SOPC_SecureChannels_EnqueueEvent(EP_OPEN,
+                                                      id, // Server endpoint config idx
+                                                      NULL, 0);
+            assert(SOPC_STATUS_OK == status);
         }
         break;
     case APP_TO_SE_CLOSE_ENDPOINT:
@@ -326,11 +327,12 @@ static void onServiceEvent(SOPC_EventHandler* handler, int32_t scEvent, uint32_t
         if (NULL == epConfig)
         {
             status = SOPC_App_EnqueueComEvent(SE_CLOSED_ENDPOINT, id, NULL, SOPC_STATUS_INVALID_PARAMETERS);
+            assert(SOPC_STATUS_OK == status);
         }
         else
         {
-            SOPC_SecureChannels_EnqueueEvent(EP_CLOSE, id, NULL, 0);
-            status = SOPC_STATUS_OK;
+            status = SOPC_SecureChannels_EnqueueEvent(EP_CLOSE, id, NULL, 0);
+            assert(SOPC_STATUS_OK == status);
         }
         break;
 
@@ -361,7 +363,8 @@ static void onServiceEvent(SOPC_EventHandler* handler, int32_t scEvent, uint32_t
             {
                 msg = NULL;
             }
-            SOPC_App_EnqueueComEvent(SE_LOCAL_SERVICE_RESPONSE, id, msg, auxParam);
+            status = SOPC_App_EnqueueComEvent(SE_LOCAL_SERVICE_RESPONSE, id, msg, auxParam);
+            assert(SOPC_STATUS_OK == status);
             SOPC_Logger_TraceWarning("ServicesMgr: APP_TO_SE_LOCAL_SERVICE_REQUEST failed epCfgIdx=%" PRIu32
                                      " msgType=%s ctx=%" PRIuPTR,
                                      id, SOPC_EncodeableType_GetName(encType), auxParam);
@@ -405,9 +408,9 @@ static void onServiceEvent(SOPC_EventHandler* handler, int32_t scEvent, uint32_t
         io_dispatch_mgr__client_send_service_request(id, params, auxParam, &sCode);
         if (sCode != constants_statuscodes_bs__e_sc_ok)
         {
-            SOPC_App_EnqueueComEvent(SE_SND_REQUEST_FAILED, util_status_code__B_to_return_status_C(sCode), encType,
-                                     auxParam);
-            status = SOPC_STATUS_NOK;
+            status = SOPC_App_EnqueueComEvent(SE_SND_REQUEST_FAILED, util_status_code__B_to_return_status_C(sCode),
+                                              encType, auxParam);
+            assert(SOPC_STATUS_OK == status);
 
             SOPC_Logger_TraceWarning("ServicesMgr: APP_TO_SE_SEND_SESSION_REQUEST failed session=%" PRIu32
                                      " msgType=%s ctx=%" PRIuPTR,
@@ -442,9 +445,9 @@ static void onServiceEvent(SOPC_EventHandler* handler, int32_t scEvent, uint32_t
         io_dispatch_mgr__client_send_discovery_request(id, params, auxParam, &sCode);
         if (sCode != constants_statuscodes_bs__e_sc_ok)
         {
-            SOPC_App_EnqueueComEvent(SE_SND_REQUEST_FAILED, util_status_code__B_to_return_status_C(sCode), encType,
-                                     auxParam);
-            status = SOPC_STATUS_NOK;
+            status = SOPC_App_EnqueueComEvent(SE_SND_REQUEST_FAILED, util_status_code__B_to_return_status_C(sCode),
+                                              encType, auxParam);
+            assert(SOPC_STATUS_OK == status);
 
             SOPC_Logger_TraceWarning("ServicesMgr: APP_TO_SE_SEND_SESSION_REQUEST failed session=%" PRIu32
                                      " msgType=%s ctx=%" PRIuPTR,
