@@ -107,45 +107,50 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateClientSocket(const char* uri)
     SOPC_Socket* resultSocket = NULL;
     SOPC_Socket_AddressInfo *res = NULL, *p = NULL;
     SOPC_Socket* freeSocket = NULL;
-    bool result = false;
     bool connectResult = false;
     char* hostname = NULL;
     char* port = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    SOPC_UriType type = SOPC_URI_Undetermined;
+    SOPC_UriType type = SOPC_URI_UNDETERMINED;
 
     if (uri != NULL)
     {
-        result = SOPC_Helper_URI_SplitUri(uri, &type, &hostname, &port);
-        if (result)
+        status = SOPC_Helper_URI_SplitUri(uri, &type, &hostname, &port);
+        if (SOPC_STATUS_OK == status)
+        {
+            if (type != SOPC_URI_TCPUA)
+            {
+                status = SOPC_STATUS_NOK;
+            }
+        }
+        if (SOPC_STATUS_OK == status)
         {
             freeSocket = SOPC_SocketsInternalContext_GetFreeSocket(false);
             if (NULL == freeSocket)
             {
-                result = false;
+                status = SOPC_STATUS_NOK;
             }
         }
 
-        if (result)
+        if (SOPC_STATUS_OK == status)
         {
             status = SOPC_Socket_AddrInfo_Get(hostname, port, &res);
-            if (SOPC_STATUS_OK != status)
-            {
-                result = false;
-            }
         }
 
-        if (result)
+        if (SOPC_STATUS_OK == status)
         {
             // Try to connect on IP addresses provided (IPV4 and IPV6)
             for (p = res; p != NULL && false == connectResult; p = SOPC_Socket_AddrInfo_IterNext(p))
             {
                 connectResult = SOPC_SocketsEventMgr_ConnectClient(freeSocket, p);
             }
-            result = connectResult;
+            if (!connectResult)
+            {
+                status = SOPC_STATUS_NOK;
+            }
         }
 
-        if (result)
+        if (SOPC_STATUS_OK == status)
         {
             if (p != NULL)
             {
@@ -157,7 +162,7 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateClientSocket(const char* uri)
             resultSocket = freeSocket;
         }
 
-        if (false == result || // connection already failed => do not keep addresses for next attempts
+        if (SOPC_STATUS_OK != status || // connection already failed => do not keep addresses for next attempts
             (res != NULL &&
              NULL == freeSocket->connectAddrs) || // async connecting but NO next attempts remaining (if current fails)
             (NULL == p))                          // result is true but res is no more used
@@ -165,7 +170,7 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateClientSocket(const char* uri)
             SOPC_Socket_AddrInfoDelete(&res);
         }
 
-        if (false == result && freeSocket != NULL)
+        if (SOPC_STATUS_OK != status && freeSocket != NULL)
         {
             // Set as closed to be removed from used socket
             SOPC_SocketsInternalContext_CloseSocket(freeSocket->socketIdx);
@@ -188,7 +193,6 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateClientSocket(const char* uri)
 static SOPC_Socket* SOPC_SocketsEventMgr_CreateServerSocket(const char* uri, uint8_t listenAllItfs)
 {
     SOPC_Socket* resultSocket = NULL;
-    bool result = false;
     SOPC_Socket_AddressInfo *res = NULL, *p = NULL;
     bool attemptWithIPV6 = true;
     SOPC_Socket* freeSocket = NULL;
@@ -196,25 +200,28 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateServerSocket(const char* uri, uin
     char* hostname = NULL;
     char* port = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    SOPC_UriType type = SOPC_URI_Undetermined;
+    SOPC_UriType type = SOPC_URI_UNDETERMINED;
 
     if (uri != NULL)
     {
-        result = SOPC_Helper_URI_SplitUri(uri, &type, &hostname, &port);
-        if (type != TcpUa)
+        status = SOPC_Helper_URI_SplitUri(uri, &type, &hostname, &port);
+        if (SOPC_STATUS_OK == status)
         {
-            result = false;
+            if (type != SOPC_URI_TCPUA)
+            {
+                status = SOPC_STATUS_NOK;
+            }
         }
-        if (result != false)
+        if (SOPC_STATUS_OK == status)
         {
             freeSocket = SOPC_SocketsInternalContext_GetFreeSocket(true);
             if (NULL == freeSocket)
             {
-                result = false;
+                status = SOPC_STATUS_NOK;
             }
         }
 
-        if (result != false)
+        if (SOPC_STATUS_OK == status)
         {
             if (listenAllItfs != false)
             {
@@ -223,13 +230,9 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateServerSocket(const char* uri, uin
             }
 
             status = SOPC_Socket_AddrInfo_Get(hostname, port, &res);
-            if (SOPC_STATUS_OK != status)
-            {
-                result = false;
-            }
         }
 
-        if (result != false)
+        if (SOPC_STATUS_OK == status)
         {
             // Try to connect on IP addresses provided (IPV4 and IPV6)
             p = res;
@@ -253,23 +256,10 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateServerSocket(const char* uri, uin
                                                        &freeSocket->sock);
                         if (SOPC_STATUS_OK == status)
                         {
-                            result = true;
-                        }
-                        else
-                        {
-                            result = false;
-                        }
-
-                        if (result != false)
-                        {
                             status = SOPC_Socket_Listen(freeSocket->sock, p);
-                            if (SOPC_STATUS_OK != status)
-                            {
-                                result = false;
-                            }
                         }
 
-                        if (result != false)
+                        if (SOPC_STATUS_OK == status)
                         {
                             freeSocket->state = SOCKET_STATE_LISTENING;
                             listenResult = true;
@@ -289,7 +279,7 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateServerSocket(const char* uri, uin
             SOPC_Free(hostname);
         }
 
-        if (result != false)
+        if (SOPC_STATUS_OK == status)
         {
             resultSocket = freeSocket;
         }
