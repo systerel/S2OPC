@@ -59,7 +59,7 @@ static SOPC_ReturnStatus getUriPrefixOrPort(const char** ppCursor, char** ppFind
 
 static SOPC_ReturnStatus getUriHostname(const char** ppCursor, char** ppHostname)
 {
-    if (NULL == *ppCursor && NULL == ppHostname)
+    if (NULL == *ppCursor || NULL == ppHostname)
     {
         return (SOPC_STATUS_INVALID_PARAMETERS);
     }
@@ -121,7 +121,7 @@ static SOPC_ReturnStatus getUriHostname(const char** ppCursor, char** ppHostname
 
 static SOPC_ReturnStatus getUriPrefixOrPort(const char** ppCursor, char** ppFind, const char* sep_match)
 {
-    if (NULL == *ppCursor && NULL == ppFind)
+    if (NULL == *ppCursor || NULL == ppFind || NULL == sep_match)
     {
         return (SOPC_STATUS_INVALID_PARAMETERS);
     }
