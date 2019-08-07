@@ -53,13 +53,17 @@ static SOPC_ReturnStatus getUriHostname(const char** ppCursor, char** ppHostname
  * Extract prefix or port from given URI depending on sep_match
  * Must take a &pCursor which strictly start at the beginning of the sequence and a &ppFind which must be pointing to
  * NULL.
+ * uriSwitch specify if we are looking for a port or a prefix
  * In case of failure parameters are not modified
  */
-static SOPC_ReturnStatus getUriPrefixOrPort(const char** ppCursor, char** ppFind, const char* sep_match);
+static SOPC_ReturnStatus getUriPrefixOrPort(const char** ppCursor,
+                                            char** ppFind,
+                                            const char* sep_match,
+                                            SOPC_UriSwitch uriSwitch);
 
 static SOPC_ReturnStatus getUriHostname(const char** ppCursor, char** ppHostname)
 {
-    if (NULL == *ppCursor || NULL == ppHostname)
+    if (NULL == ppCursor || NULL == *ppCursor || NULL == ppHostname)
     {
         return (SOPC_STATUS_INVALID_PARAMETERS);
     }
@@ -118,9 +122,12 @@ static SOPC_ReturnStatus getUriHostname(const char** ppCursor, char** ppHostname
     return (res);
 }
 
-static SOPC_ReturnStatus getUriPrefixOrPort(const char** ppCursor, char** ppFind, const char* sep_match)
+static SOPC_ReturnStatus getUriPrefixOrPort(const char** ppCursor,
+                                            char** ppFind,
+                                            const char* sep_match,
+                                            SOPC_UriSwitch uriSwitch)
 {
-    if (NULL == *ppCursor || NULL == ppFind || NULL == sep_match)
+    if (NULL == ppCursor || NULL == *ppCursor || NULL == ppFind || NULL == sep_match)
     {
         return (SOPC_STATUS_INVALID_PARAMETERS);
     }
@@ -132,10 +139,21 @@ static SOPC_ReturnStatus getUriPrefixOrPort(const char** ppCursor, char** ppFind
     size_t len = 0;
 
     pCursor = strstr(start, sep_match);
-    if (NULL == pCursor)
+    if (SOPC_URI_PREFIX == uriSwitch)
     {
-        res = SOPC_STATUS_INVALID_PARAMETERS;
+        if (NULL == pCursor)
+        {
+            res = SOPC_STATUS_INVALID_PARAMETERS;
+        }
     }
+    else if (SOPC_URI_PORT == uriSwitch)
+    {
+        if (NULL == pCursor)
+        {
+            pCursor = start + strlen(start);
+        }
+    }
+
     if (SOPC_STATUS_OK == res)
     {
         if (pCursor > start)
@@ -147,6 +165,7 @@ static SOPC_ReturnStatus getUriPrefixOrPort(const char** ppCursor, char** ppFind
             res = SOPC_STATUS_INVALID_PARAMETERS;
         }
     }
+
     if (SOPC_STATUS_OK == res)
     {
         resStr = SOPC_Calloc(len + 1, sizeof(char));
@@ -155,6 +174,7 @@ static SOPC_ReturnStatus getUriPrefixOrPort(const char** ppCursor, char** ppFind
             res = SOPC_STATUS_OUT_OF_MEMORY;
         }
     }
+
     if (SOPC_STATUS_OK == res)
     {
         resStr = strncpy(resStr, start, len);
@@ -209,7 +229,7 @@ SOPC_ReturnStatus SOPC_Helper_URI_SplitUri(const char* uri, SOPC_UriType* type, 
 
     if (SOPC_STATUS_OK == result)
     {
-        result = getUriPrefixOrPort(&pCursor, &prefix, URI_PREFIX_SEP);
+        result = getUriPrefixOrPort(&pCursor, &prefix, URI_PREFIX_SEP, SOPC_URI_PREFIX);
     }
     if (SOPC_STATUS_OK == result)
     {
@@ -217,7 +237,7 @@ SOPC_ReturnStatus SOPC_Helper_URI_SplitUri(const char* uri, SOPC_UriType* type, 
     }
     if (SOPC_STATUS_OK == result)
     {
-        result = getUriPrefixOrPort(&pCursor, port, URI_PORT_SEP);
+        result = getUriPrefixOrPort(&pCursor, port, URI_PORT_SEP, SOPC_URI_PORT);
     }
     if (SOPC_STATUS_OK == result)
     {

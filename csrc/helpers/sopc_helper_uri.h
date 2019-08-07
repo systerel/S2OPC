@@ -25,6 +25,12 @@
 
 #include "sopc_enums.h"
 
+typedef enum SOPC_UriSwitch
+{
+    SOPC_URI_PREFIX = 0,
+    SOPC_URI_PORT,
+} SOPC_UriSwitch;
+
 typedef enum SOPC_UriType
 {
     SOPC_URI_UNDETERMINED = 0,
