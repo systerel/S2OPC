@@ -91,7 +91,7 @@ static SOPC_ReturnStatus getUriHostname(const char** ppCursor, char** ppHostname
             ++len;
             ++pCursor;
         }
-        if (!*pCursor)
+        if ('\0' != *pCursor)
         {
             res = SOPC_STATUS_INVALID_PARAMETERS;
         }
