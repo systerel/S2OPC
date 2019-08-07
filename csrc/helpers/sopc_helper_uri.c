@@ -103,7 +103,7 @@ static SOPC_ReturnStatus getUriHostname(const char** ppCursor, char** ppHostname
     if (SOPC_STATUS_OK == res)
     {
         resStr = SOPC_Calloc(len + 1, sizeof(char));
-        if (resStr == NULL)
+        if (NULL == resStr)
         {
             res = SOPC_STATUS_OUT_OF_MEMORY;
         }
@@ -151,7 +151,7 @@ static SOPC_ReturnStatus getUriPrefixOrPort(const char** ppCursor, char** ppFind
     if (SOPC_STATUS_OK == res)
     {
         resStr = SOPC_Calloc(len + 1, sizeof(char));
-        if (resStr == NULL)
+        if (NULL == resStr)
         {
             res = SOPC_STATUS_OUT_OF_MEMORY;
         }
