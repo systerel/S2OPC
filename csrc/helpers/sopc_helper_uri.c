@@ -112,7 +112,6 @@ static SOPC_ReturnStatus getUriHostname(const char** ppCursor, char** ppHostname
     {
         resStr = strncpy(resStr, start, len);
         *ppHostname = resStr;
-        pCursor = strstr(pCursor, URI_HOSTNAME_SEP);
         pCursor += strlen(URI_HOSTNAME_SEP);
         *ppCursor = pCursor;
     }
