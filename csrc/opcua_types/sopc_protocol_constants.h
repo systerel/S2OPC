@@ -46,7 +46,7 @@
 #define SOPC_TCP_UA_ERR_MIN_MSG_LENGTH 16
 
 /* Position of MessageSize header field in a UA message chunk*/
-#define SOPC_UA_HEADER_LENGTH_POSITION 4
+#define SOPC_UA_HEADER_MESSAGE_SIZE_POSITION 4
 /* Position of IsFinal header field in a UA message chunk*/
 #define SOPC_UA_HEADER_ISFINAL_POSITION 3
 

@@ -2297,10 +2297,14 @@ static uint32_t SC_Chunks_ComputeMaxBodySize(uint32_t nonEncryptedHeadersSize,
     //  otherwise the plain size could be greater than the  buffer size regarding computation
     assert(cipherBlockSize >= plainBlockSize);
 
-    // Use formulae of spec 1.03 part 6 §6.7.2 even if controversial (see mantis ticket #2897)
-    result =
-        plainBlockSize * ((chunkSize - nonEncryptedHeadersSize - signatureSize - paddingSizeFields) / cipherBlockSize) -
-        SOPC_UA_SECURE_MESSAGE_SEQUENCE_LENGTH;
+    /*
+     * Use formulae of spec 1.03.6 errata (see mantis ticket #2897):
+     * MaxBodySize = PlainTextBlockSize * Floor((MessageChunkSize - HeaderSize) / CipherTextBlockSize)
+     *                - SequenceHeaderSize - SignatureSize - PaddingByteSize;
+     *
+     */
+    result = plainBlockSize * ((chunkSize - nonEncryptedHeadersSize) / cipherBlockSize) -
+             SOPC_UA_SECURE_MESSAGE_SEQUENCE_LENGTH - signatureSize - paddingSizeFields;
 
     // Maximum body size (+headers+signature+padding size fields) cannot be greater than maximum buffer size
     assert(chunkSize >= (nonEncryptedHeadersSize + SOPC_UA_SECURE_MESSAGE_SEQUENCE_LENGTH + result + signatureSize +
@@ -2477,7 +2481,12 @@ static uint16_t SC_Chunks_GetPaddingSize(
     {
         paddingSizeFields++;
     }
-    lresult = plainBlockSize - ((bytesToEncrypt + signatureSize + paddingSizeFields) % plainBlockSize);
+    uint32_t missingBytesForBlockMultiple = (bytesToEncrypt + signatureSize + paddingSizeFields) % plainBlockSize;
+    if (0 != missingBytesForBlockMultiple)
+    {
+        lresult = plainBlockSize - missingBytesForBlockMultiple;
+    } // else no padding necessary
+
     if (lresult <= UINT16_MAX)
     {
         result = (uint16_t) lresult;
@@ -3349,11 +3358,11 @@ static bool SC_Chunks_TreatSendBufferOPN(
         if (scConnection->asymmSecuMaxBodySize == 0 && scConnection->symmSecuMaxBodySize == 0)
         {
             scConnection->asymmSecuMaxBodySize = SC_Chunks_GetSendingMaxBodySize(
-                scConnection, scConfig, nonEncryptedBuffer->max_size, sequenceNumberPosition, false);
+                scConnection, scConfig, scConnection->tcpMsgProperties.sendBufferSize, sequenceNumberPosition, false);
             scConnection->symmSecuMaxBodySize = SC_Chunks_GetSendingMaxBodySize(
-                scConnection, scConfig, nonEncryptedBuffer->max_size,
+                scConnection, scConfig, scConnection->tcpMsgProperties.sendBufferSize,
                 // sequenceNumber position for symmetric case:
-                (SOPC_UA_HEADER_LENGTH_POSITION + SOPC_UA_SYMMETRIC_SECURITY_HEADER_LENGTH), true);
+                (SOPC_UA_SECURE_MESSAGE_HEADER_LENGTH + SOPC_UA_SYMMETRIC_SECURITY_HEADER_LENGTH), true);
         }
         if (scConnection->asymmSecuMaxBodySize == 0 || scConnection->symmSecuMaxBodySize == 0)
         {
@@ -3425,7 +3434,7 @@ static bool SC_Chunks_TreatSendBufferOPN(
     if (result)
     {
         // Set position to message size field
-        status = SOPC_Buffer_SetPosition(nonEncryptedBuffer, SOPC_UA_HEADER_LENGTH_POSITION);
+        status = SOPC_Buffer_SetPosition(nonEncryptedBuffer, SOPC_UA_HEADER_MESSAGE_SIZE_POSITION);
         assert(SOPC_STATUS_OK == status);
     }
 
@@ -3622,7 +3631,7 @@ static bool SC_Chunks_TreatSendBufferMSGCLO(
     if (result)
     {
         // Set position to message size field
-        status = SOPC_Buffer_SetPosition(nonEncryptedBuffer, SOPC_UA_HEADER_LENGTH_POSITION);
+        status = SOPC_Buffer_SetPosition(nonEncryptedBuffer, SOPC_UA_HEADER_MESSAGE_SIZE_POSITION);
         assert(SOPC_STATUS_OK == status);
     }
 
