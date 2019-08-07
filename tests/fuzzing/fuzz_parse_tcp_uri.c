@@ -46,7 +46,8 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
 
     char* hostname = NULL;
     char* port = NULL;
-    SOPC_Helper_URI_SplitTcpUaUri(buf_copy, &hostname, &port);
+    SOPC_UriType type = SOPC_URI_UNDETERMINED;
+    SOPC_Helper_URI_SplitUri(buf_copy, &hostname, &port);
 
     SOPC_Free(hostname);
     SOPC_Free(port);
