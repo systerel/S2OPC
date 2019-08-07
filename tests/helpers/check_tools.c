@@ -947,6 +947,12 @@ START_TEST(test_helper_uri)
     ck_assert(strncmp(port, "9999", strlen("9999") + 1) == 0);
     uri_free(&type, &hostname, &port);
 
+    ck_assert(SOPC_STATUS_OK == SOPC_Helper_URI_SplitUri("opc.tcp://localhost:9999", &type, &hostname, &port));
+    ck_assert(SOPC_URI_TCPUA == type);
+    ck_assert(strncmp(hostname, "localhost", strlen("localhost") + 1) == 0);
+    ck_assert(strncmp(port, "9999", strlen("9999") + 1) == 0);
+    uri_free(&type, &hostname, &port);
+
     ck_assert(SOPC_STATUS_OK ==
               SOPC_Helper_URI_SplitUri("opc.tcp://localhost:9999/test/moreThingsInPath/plus", &type, &hostname, &port));
     ck_assert(SOPC_URI_TCPUA == type);
