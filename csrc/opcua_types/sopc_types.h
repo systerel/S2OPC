@@ -45,7 +45,8 @@ typedef enum _OpcUa_IdType
     OpcUa_IdType_Numeric = 0,
     OpcUa_IdType_String = 1,
     OpcUa_IdType_Guid = 2,
-    OpcUa_IdType_Opaque = 3
+    OpcUa_IdType_Opaque = 3,
+    OpcUa_IdType_SizeOf = INT32_MAX
 } OpcUa_IdType;
 
 #endif
@@ -64,7 +65,8 @@ typedef enum _OpcUa_NodeClass
     OpcUa_NodeClass_VariableType = 16,
     OpcUa_NodeClass_ReferenceType = 32,
     OpcUa_NodeClass_DataType = 64,
-    OpcUa_NodeClass_View = 128
+    OpcUa_NodeClass_View = 128,
+    OpcUa_NodeClass_SizeOf = INT32_MAX
 } OpcUa_NodeClass;
 
 #endif
@@ -630,7 +632,8 @@ typedef enum _OpcUa_ApplicationType
     OpcUa_ApplicationType_Server = 0,
     OpcUa_ApplicationType_Client = 1,
     OpcUa_ApplicationType_ClientAndServer = 2,
-    OpcUa_ApplicationType_DiscoveryServer = 3
+    OpcUa_ApplicationType_DiscoveryServer = 3,
+    OpcUa_ApplicationType_SizeOf = INT32_MAX
 } OpcUa_ApplicationType;
 
 #endif
@@ -908,7 +911,8 @@ typedef enum _OpcUa_MessageSecurityMode
     OpcUa_MessageSecurityMode_Invalid = 0,
     OpcUa_MessageSecurityMode_None = 1,
     OpcUa_MessageSecurityMode_Sign = 2,
-    OpcUa_MessageSecurityMode_SignAndEncrypt = 3
+    OpcUa_MessageSecurityMode_SignAndEncrypt = 3,
+    OpcUa_MessageSecurityMode_SizeOf = INT32_MAX
 } OpcUa_MessageSecurityMode;
 
 #endif
@@ -923,7 +927,8 @@ typedef enum _OpcUa_UserTokenType
     OpcUa_UserTokenType_UserName = 1,
     OpcUa_UserTokenType_Certificate = 2,
     OpcUa_UserTokenType_IssuedToken = 3,
-    OpcUa_UserTokenType_Kerberos = 4
+    OpcUa_UserTokenType_Kerberos = 4,
+    OpcUa_UserTokenType_SizeOf = INT32_MAX
 } OpcUa_UserTokenType;
 
 #endif
@@ -1226,7 +1231,8 @@ SOPC_ReturnStatus OpcUa_RegisterServer2Response_Decode(void* pValue, SOPC_Buffer
 typedef enum _OpcUa_SecurityTokenRequestType
 {
     OpcUa_SecurityTokenRequestType_Issue = 0,
-    OpcUa_SecurityTokenRequestType_Renew = 1
+    OpcUa_SecurityTokenRequestType_Renew = 1,
+    OpcUa_SecurityTokenRequestType_SizeOf = INT32_MAX
 } OpcUa_SecurityTokenRequestType;
 
 #endif
@@ -1853,7 +1859,8 @@ typedef enum _OpcUa_NodeAttributesMask
     OpcUa_NodeAttributesMask_VariableType = 3958902,
     OpcUa_NodeAttributesMask_Method = 1466724,
     OpcUa_NodeAttributesMask_ReferenceType = 1371236,
-    OpcUa_NodeAttributesMask_View = 1335532
+    OpcUa_NodeAttributesMask_View = 1335532,
+    OpcUa_NodeAttributesMask_SizeOf = INT32_MAX
 } OpcUa_NodeAttributesMask;
 
 #endif
@@ -2542,7 +2549,8 @@ typedef enum _OpcUa_AttributeWriteMask
     OpcUa_AttributeWriteMask_UserWriteMask = 262144,
     OpcUa_AttributeWriteMask_ValueRank = 524288,
     OpcUa_AttributeWriteMask_WriteMask = 1048576,
-    OpcUa_AttributeWriteMask_ValueForVariableType = 2097152
+    OpcUa_AttributeWriteMask_ValueForVariableType = 2097152,
+    OpcUa_AttributeWriteMask_SizeOf = INT32_MAX
 } OpcUa_AttributeWriteMask;
 
 #endif
@@ -2555,7 +2563,8 @@ typedef enum _OpcUa_BrowseDirection
 {
     OpcUa_BrowseDirection_Forward = 0,
     OpcUa_BrowseDirection_Inverse = 1,
-    OpcUa_BrowseDirection_Both = 2
+    OpcUa_BrowseDirection_Both = 2,
+    OpcUa_BrowseDirection_SizeOf = INT32_MAX
 } OpcUa_BrowseDirection;
 
 #endif
@@ -2632,7 +2641,8 @@ typedef enum _OpcUa_BrowseResultMask
     OpcUa_BrowseResultMask_TypeDefinition = 32,
     OpcUa_BrowseResultMask_All = 63,
     OpcUa_BrowseResultMask_ReferenceTypeInfo = 3,
-    OpcUa_BrowseResultMask_TargetInfo = 60
+    OpcUa_BrowseResultMask_TargetInfo = 60,
+    OpcUa_BrowseResultMask_SizeOf = INT32_MAX
 } OpcUa_BrowseResultMask;
 
 #endif
@@ -3153,7 +3163,8 @@ typedef enum _OpcUa_ComplianceLevel
     OpcUa_ComplianceLevel_Untested = 0,
     OpcUa_ComplianceLevel_Partial = 1,
     OpcUa_ComplianceLevel_SelfTested = 2,
-    OpcUa_ComplianceLevel_Certified = 3
+    OpcUa_ComplianceLevel_Certified = 3,
+    OpcUa_ComplianceLevel_SizeOf = INT32_MAX
 } OpcUa_ComplianceLevel;
 
 #endif
@@ -3302,7 +3313,8 @@ typedef enum _OpcUa_FilterOperator
     OpcUa_FilterOperator_OfType = 14,
     OpcUa_FilterOperator_RelatedTo = 15,
     OpcUa_FilterOperator_BitwiseAnd = 16,
-    OpcUa_FilterOperator_BitwiseOr = 17
+    OpcUa_FilterOperator_BitwiseOr = 17,
+    OpcUa_FilterOperator_SizeOf = INT32_MAX
 } OpcUa_FilterOperator;
 
 #endif
@@ -3741,7 +3753,8 @@ typedef enum _OpcUa_TimestampsToReturn
     OpcUa_TimestampsToReturn_Source = 0,
     OpcUa_TimestampsToReturn_Server = 1,
     OpcUa_TimestampsToReturn_Both = 2,
-    OpcUa_TimestampsToReturn_Neither = 3
+    OpcUa_TimestampsToReturn_Neither = 3,
+    OpcUa_TimestampsToReturn_SizeOf = INT32_MAX
 } OpcUa_TimestampsToReturn;
 
 #endif
@@ -4093,7 +4106,8 @@ typedef enum _OpcUa_HistoryUpdateType
     OpcUa_HistoryUpdateType_Insert = 1,
     OpcUa_HistoryUpdateType_Replace = 2,
     OpcUa_HistoryUpdateType_Update = 3,
-    OpcUa_HistoryUpdateType_Delete = 4
+    OpcUa_HistoryUpdateType_Delete = 4,
+    OpcUa_HistoryUpdateType_SizeOf = INT32_MAX
 } OpcUa_HistoryUpdateType;
 
 #endif
@@ -4384,7 +4398,8 @@ typedef enum _OpcUa_PerformUpdateType
     OpcUa_PerformUpdateType_Insert = 1,
     OpcUa_PerformUpdateType_Replace = 2,
     OpcUa_PerformUpdateType_Update = 3,
-    OpcUa_PerformUpdateType_Remove = 4
+    OpcUa_PerformUpdateType_Remove = 4,
+    OpcUa_PerformUpdateType_SizeOf = INT32_MAX
 } OpcUa_PerformUpdateType;
 
 #endif
@@ -4766,7 +4781,8 @@ typedef enum _OpcUa_MonitoringMode
 {
     OpcUa_MonitoringMode_Disabled = 0,
     OpcUa_MonitoringMode_Sampling = 1,
-    OpcUa_MonitoringMode_Reporting = 2
+    OpcUa_MonitoringMode_Reporting = 2,
+    OpcUa_MonitoringMode_SizeOf = INT32_MAX
 } OpcUa_MonitoringMode;
 
 #endif
@@ -4779,7 +4795,8 @@ typedef enum _OpcUa_DataChangeTrigger
 {
     OpcUa_DataChangeTrigger_Status = 0,
     OpcUa_DataChangeTrigger_StatusValue = 1,
-    OpcUa_DataChangeTrigger_StatusValueTimestamp = 2
+    OpcUa_DataChangeTrigger_StatusValueTimestamp = 2,
+    OpcUa_DataChangeTrigger_SizeOf = INT32_MAX
 } OpcUa_DataChangeTrigger;
 
 #endif
@@ -4792,7 +4809,8 @@ typedef enum _OpcUa_DeadbandType
 {
     OpcUa_DeadbandType_None = 0,
     OpcUa_DeadbandType_Absolute = 1,
-    OpcUa_DeadbandType_Percent = 2
+    OpcUa_DeadbandType_Percent = 2,
+    OpcUa_DeadbandType_SizeOf = INT32_MAX
 } OpcUa_DeadbandType;
 
 #endif
@@ -5979,7 +5997,8 @@ typedef enum _OpcUa_EnumeratedTestType
 {
     OpcUa_EnumeratedTestType_Red = 1,
     OpcUa_EnumeratedTestType_Yellow = 4,
-    OpcUa_EnumeratedTestType_Green = 5
+    OpcUa_EnumeratedTestType_Green = 5,
+    OpcUa_EnumeratedTestType_SizeOf = INT32_MAX
 } OpcUa_EnumeratedTestType;
 
 #endif
@@ -6025,7 +6044,8 @@ typedef enum _OpcUa_RedundancySupport
     OpcUa_RedundancySupport_Warm = 2,
     OpcUa_RedundancySupport_Hot = 3,
     OpcUa_RedundancySupport_Transparent = 4,
-    OpcUa_RedundancySupport_HotAndMirrored = 5
+    OpcUa_RedundancySupport_HotAndMirrored = 5,
+    OpcUa_RedundancySupport_SizeOf = INT32_MAX
 } OpcUa_RedundancySupport;
 
 #endif
@@ -6043,7 +6063,8 @@ typedef enum _OpcUa_ServerState
     OpcUa_ServerState_Shutdown = 4,
     OpcUa_ServerState_Test = 5,
     OpcUa_ServerState_CommunicationFault = 6,
-    OpcUa_ServerState_Unknown = 7
+    OpcUa_ServerState_Unknown = 7,
+    OpcUa_ServerState_SizeOf = INT32_MAX
 } OpcUa_ServerState;
 
 #endif
@@ -6441,7 +6462,8 @@ typedef enum _OpcUa_ModelChangeStructureVerbMask
     OpcUa_ModelChangeStructureVerbMask_NodeDeleted = 2,
     OpcUa_ModelChangeStructureVerbMask_ReferenceAdded = 4,
     OpcUa_ModelChangeStructureVerbMask_ReferenceDeleted = 8,
-    OpcUa_ModelChangeStructureVerbMask_DataTypeChanged = 16
+    OpcUa_ModelChangeStructureVerbMask_DataTypeChanged = 16,
+    OpcUa_ModelChangeStructureVerbMask_SizeOf = INT32_MAX
 } OpcUa_ModelChangeStructureVerbMask;
 
 #endif
@@ -6561,7 +6583,8 @@ typedef enum _OpcUa_AxisScaleEnumeration
 {
     OpcUa_AxisScaleEnumeration_Linear = 0,
     OpcUa_AxisScaleEnumeration_Log = 1,
-    OpcUa_AxisScaleEnumeration_Ln = 2
+    OpcUa_AxisScaleEnumeration_Ln = 2,
+    OpcUa_AxisScaleEnumeration_SizeOf = INT32_MAX
 } OpcUa_AxisScaleEnumeration;
 
 #endif
@@ -6747,7 +6770,8 @@ typedef enum _OpcUa_ExceptionDeviationFormat
     OpcUa_ExceptionDeviationFormat_PercentOfValue = 1,
     OpcUa_ExceptionDeviationFormat_PercentOfRange = 2,
     OpcUa_ExceptionDeviationFormat_PercentOfEURange = 3,
-    OpcUa_ExceptionDeviationFormat_Unknown = 4
+    OpcUa_ExceptionDeviationFormat_Unknown = 4,
+    OpcUa_ExceptionDeviationFormat_SizeOf = INT32_MAX
 } OpcUa_ExceptionDeviationFormat;
 
 #endif
