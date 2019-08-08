@@ -132,23 +132,9 @@ static SOPC_ReturnStatus SOPC_ReadContext_Initialization(ReadContext* ctx)
     return status;
 }
 
-typedef struct
-{
-    SOPC_ClientHelper_DataChangeCbk user_callback;
-    SOPC_SLinkedList* data_id_to_node_id_list;
-} UserConnectionData;
-
-
 /* Callbacks */
 static void log_callback(const SOPC_Toolkit_Log_Level log_level, SOPC_LibSub_CstString text);
 static void disconnect_callback(const SOPC_LibSub_ConnectionId c_id);
-static void data_changed_wrapper_callback(const SOPC_LibSub_ConnectionId c_id,
-                                          const SOPC_LibSub_DataId data_id,
-                                          const SOPC_LibSub_Value* value);
-
-/* Static variables */
-
-static SOPC_SLinkedList* c_id_to_c_data_list = NULL;
 
 /* Functions */
 
@@ -207,14 +193,6 @@ int32_t SOPC_ClientHelper_Initialize(const char* log_path, int32_t log_level)
     }
 
 
-    c_id_to_c_data_list = SOPC_SLinkedList_Create(MAX_SIMULTANEOUS_CONNECTIONS);
-
-    if (NULL == c_id_to_c_data_list)
-    {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not create connection linked list.");
-        return 2;
-    }
-
     return 0;
 }
 
@@ -242,8 +220,6 @@ int32_t SOPC_ClientHelper_Connect(const char* endpointUrl,
     const char* policyId = security.policyId;
     const char* username = security.username;
     const char* password = security.password;
-
-    SOPC_LibSub_DataChangeCbk callback = data_changed_wrapper_callback;
 
     OpcUa_MessageSecurityMode secuMode = OpcUa_MessageSecurityMode_Invalid;
     bool disable_verification = false;
@@ -318,7 +294,7 @@ int32_t SOPC_ClientHelper_Connect(const char* endpointUrl,
                                          .publish_period_ms = PUBLISH_PERIOD_MS,
                                          .n_max_keepalive = MAX_KEEP_ALIVE_COUNT,
                                          .n_max_lifetime = MAX_LIFETIME_COUNT,
-                                         .data_change_callback = callback,
+                                         .data_change_callback = NULL,
                                          .timeout_ms = TIMEOUT_MS,
                                          .sc_lifetime = SC_LIFETIME_MS,
                                          .token_target = PUBLISH_N_TOKEN,
@@ -372,35 +348,6 @@ int32_t SOPC_ClientHelper_Connect(const char* endpointUrl,
     else
     {
         return -100;
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        UserConnectionData* user_connection_data = (UserConnectionData*) SOPC_Malloc(sizeof(UserConnectionData));
-        if (NULL == user_connection_data)
-        {
-            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not allocate memory for connection data");
-            return -100;
-        }
-
-        user_connection_data->user_callback = NULL;
-        user_connection_data->data_id_to_node_id_list= NULL;
-
-        if (NULL == c_id_to_c_data_list)
-        {
-            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not append new connection to non allocated connection list");
-            SOPC_Free((void*) user_connection_data);
-            return -100;
-        }
-
-        void* appended_value = SOPC_SLinkedList_Append(c_id_to_c_data_list, con_id, (void*) user_connection_data);
-
-        if (NULL == appended_value)
-        {
-            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not append new connection to current connection list");
-            SOPC_Free((void*) user_connection_data);
-            return -100;
-        }
     }
 
     assert(con_id > 0);
@@ -551,7 +498,7 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
 int32_t SOPC_ClientHelper_CreateSubscription(int32_t connectionId, SOPC_ClientHelper_DataChangeCbk callback)
 {
     int32_t res = 0;
-    UserConnectionData* user_connection_data = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     if (connectionId <= 0)
     {
@@ -562,28 +509,9 @@ int32_t SOPC_ClientHelper_CreateSubscription(int32_t connectionId, SOPC_ClientHe
         return -2;
     }
 
-    if (NULL == c_id_to_c_data_list)
+    status = SOPC_ClientCommon_CreateSubscription((SOPC_LibSub_ConnectionId) connectionId, callback);
+    if (SOPC_STATUS_OK != status)
     {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "User connection data list non allocated.");
-        return -100;
-    }
-
-    user_connection_data = (UserConnectionData*) SOPC_SLinkedList_FindFromId(c_id_to_c_data_list, (uint32_t) connectionId);
-
-    if (NULL == user_connection_data)
-    {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Connection not found in user connection data list.");
-        return -100;
-    }
-
-    // TODO change user callback
-    user_connection_data->user_callback = callback;
-
-    // TODO initialize data_id_to_node_id_list
-    user_connection_data->data_id_to_node_id_list = SOPC_SLinkedList_Create(MAX_SUBSCRIBED_ITEMS);
-    if (NULL == user_connection_data->data_id_to_node_id_list)
-    {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not create user data id to node id list.");
         return -100;
     }
 
@@ -592,9 +520,6 @@ int32_t SOPC_ClientHelper_CreateSubscription(int32_t connectionId, SOPC_ClientHe
 
 int32_t SOPC_ClientHelper_AddMonitoredItems(int32_t connectionId, char** nodeIds, size_t nbNodeIds)
 {
-    UserConnectionData* user_connection_data = NULL;
-    void* appended = NULL;
-    void* to_append = NULL;
     // TODO implement this function
     if (connectionId <= 0)
     {
@@ -614,26 +539,6 @@ int32_t SOPC_ClientHelper_AddMonitoredItems(int32_t connectionId, char** nodeIds
                 return -3 - (int32_t) i;
             }
         }*/
-    }
-
-    if (NULL == c_id_to_c_data_list)
-    {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "User Connection data list non allocated.");
-        return -100;
-    }
-
-    user_connection_data = SOPC_SLinkedList_FindFromId(c_id_to_c_data_list, (uint32_t) connectionId);
-
-    if (NULL == user_connection_data)
-    {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "User Connection data not found in User Connection Data list.");
-        return -100;
-    }
-
-    if (NULL == user_connection_data->data_id_to_node_id_list)
-    {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Data id to node id list not initialized");
-        return -100;
     }
 
     SOPC_LibSub_AttributeId* lAttrIds = calloc(nbNodeIds, sizeof(SOPC_LibSub_AttributeId));
@@ -657,16 +562,6 @@ int32_t SOPC_ClientHelper_AddMonitoredItems(int32_t connectionId, char** nodeIds
         {
             Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Created MonIt for \"%s\" with data_id %" PRIu32 ".", nodeIds[i],
                         lDataId[i]);
-
-            to_append = SOPC_Malloc(sizeof(char) * strlen(nodeIds[i]));
-            strcpy(to_append, nodeIds[i]);
-            appended = SOPC_SLinkedList_Append(user_connection_data->data_id_to_node_id_list, lDataId[i], to_append);
-            //TODO what happens if we fail the append, do we have to clear the list of added elements ?
-            if (NULL == appended)
-            {
-                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not append monitored items to data id to node id list.");
-                status = SOPC_STATUS_OUT_OF_MEMORY;
-            }
         }
     }
     free(lAttrIds);
@@ -707,77 +602,6 @@ int32_t SOPC_ClientHelper_Disconnect(int32_t connectionId)
 static void log_callback(const SOPC_Toolkit_Log_Level log_level, SOPC_LibSub_CstString text)
 {
     Helpers_LoggerStdout(log_level, text);
-}
-
-static void data_changed_wrapper_callback(const SOPC_LibSub_ConnectionId c_id,
-                                          const SOPC_LibSub_DataId data_id,
-                                          const SOPC_LibSub_Value* value)
-{
-    UserConnectionData* user_connection_data = NULL;
-    char*  node_id = NULL;
-
-    (void) data_id;
-    (void) value;
-
-    if (0 >= c_id)
-    {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Invalid connection id");
-        return;
-    }
-    // TODO check for data id and value ?
-    if (NULL == c_id_to_c_data_list)
-    {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "User Connection Data list not allocated.");
-        return;
-    }
-
-    user_connection_data = SOPC_SLinkedList_FindFromId(c_id_to_c_data_list, (uint32_t) c_id);
-
-    if (NULL == user_connection_data)
-    {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "User Connection Data not found in User connection data list.");
-        return;
-    }
-
-    if (NULL == user_connection_data->data_id_to_node_id_list)
-    {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Connection Data id to node id list non allocated.");
-        return;
-    }
-
-    node_id = SOPC_SLinkedList_FindFromId(user_connection_data->data_id_to_node_id_list, (uint32_t) data_id);
-
-    if (NULL == node_id)
-    {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "node id not found in data id to node id list.");
-        return;
-    }
-
-    SOPC_DataValue* data_value = SOPC_Malloc(sizeof(SOPC_DataValue));
-
-    if (NULL == data_value)
-    {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "could not allocate space for data value");
-        return;
-    }
-
-    if (NULL == value->raw_value)
-    {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Invalid raw value");
-        return;
-    }
-
-    data_value->Value = *((SOPC_Variant*) value->raw_value);
-    data_value->Status = value->quality;
-    data_value->SourceTimestamp = 0; // TODO
-    data_value->ServerTimestamp = 0; // TODO
-    data_value->SourcePicoSeconds = 0;
-    data_value->ServerPicoSeconds = 0;
-
-    //TODO verify c_id < INT32_MAX
-    user_connection_data->user_callback((int32_t) c_id, node_id, data_value);
-
-    SOPC_Free(data_value);
 }
 
 static void disconnect_callback(const SOPC_LibSub_ConnectionId c_id)
