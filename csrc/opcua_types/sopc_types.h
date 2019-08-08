@@ -7517,7 +7517,8 @@ typedef enum SOPC_TypeInternalIndex
 #ifndef OPCUA_EXCLUDE_Annotation
     SOPC_TypeInternalIndex_Annotation,
 #endif
-    SOPC_TypeInternalIndex_SIZE
+    SOPC_TypeInternalIndex_SIZE,
+    SOPC_TypeInternalIndex_SizeOf = UINT32_MAX
 } SOPC_TypeInternalIndex;
 
 /*============================================================================
