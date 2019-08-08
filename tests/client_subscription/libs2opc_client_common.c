@@ -478,7 +478,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConfigurationId cf
         ++nCreatedClient;
         *pCliId = nCreatedClient;
         status = SOPC_StaMac_Create(cfgId, *pCliId, pCfg->policyId, pCfg->username, pCfg->password,
-                                    pCfg->data_change_callback, (double) pCfg->publish_period_ms, pCfg->n_max_keepalive,
+                                    (double) pCfg->publish_period_ms, pCfg->n_max_keepalive,
                                     pCfg->n_max_lifetime, pCfg->token_target, pCfg->timeout_ms,
                                     pCfg->generic_response_callback, &pSM);
     }
@@ -691,12 +691,39 @@ SOPC_ReturnStatus SOPC_ClientCommon_CreateSubscription(const SOPC_LibSub_Connect
 {
     //TODO implement this function
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_StaMac_Machine* pSM = NULL;
 
-    (void) cliId;
-    if (NULL == cbkLibSub && NULL == cbkWrapper)
+    if (SOPC_Atomic_Int_Get(&libInitialized) == 0 || SOPC_Atomic_Int_Get(&libConfigured) == 0)
     {
-        //status = SOPC_STATUS_INVALID_PARAMETERS;
+        return SOPC_STATUS_INVALID_STATE;
     }
+
+    SOPC_ReturnStatus mutStatus = Mutex_Lock(&mutex);
+    assert(SOPC_STATUS_OK == mutStatus);
+
+    /* Retrieve the machine to disconnect */
+    pSM = SOPC_SLinkedList_FindFromId(pListClient, cliId);
+    if (NULL == pSM)
+    {
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        if ((NULL == cbkLibSub && NULL == cbkWrapper) || (NULL != cbkLibSub && NULL != cbkWrapper))
+        {
+            status = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_StaMac_ConfigureDataChangeCallback(pSM, cbkLibSub, cbkWrapper);
+    }
+
+    /* Release the lock so that the event handler can work properly while waiting */
+    mutStatus = Mutex_Unlock(&mutex);
+    assert(SOPC_STATUS_OK == mutStatus);
 
     return status;
 }
