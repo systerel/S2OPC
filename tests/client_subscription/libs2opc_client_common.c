@@ -478,7 +478,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConfigurationId cf
         ++nCreatedClient;
         *pCliId = nCreatedClient;
         status = SOPC_StaMac_Create(cfgId, *pCliId, pCfg->policyId, pCfg->username, pCfg->password,
-                                    (double) pCfg->publish_period_ms, pCfg->n_max_keepalive,
+                                    pCfg->data_change_callback, (double) pCfg->publish_period_ms, pCfg->n_max_keepalive,
                                     pCfg->n_max_lifetime, pCfg->token_target, pCfg->timeout_ms,
                                     pCfg->generic_response_callback, &pSM);
     }
@@ -686,7 +686,6 @@ SOPC_ReturnStatus SOPC_ClientCommon_Disconnect(const SOPC_LibSub_ConnectionId cl
 
 
 SOPC_ReturnStatus SOPC_ClientCommon_CreateSubscription(const SOPC_LibSub_ConnectionId cliId,
-                                                       SOPC_LibSub_DataChangeCbk cbkLibSub,
                                                        SOPC_ClientHelper_DataChangeCbk cbkWrapper)
 {
     //TODO implement this function
@@ -710,15 +709,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_CreateSubscription(const SOPC_LibSub_Connect
 
     if (SOPC_STATUS_OK == status)
     {
-        if ((NULL == cbkLibSub && NULL == cbkWrapper) || (NULL != cbkLibSub && NULL != cbkWrapper))
-        {
-            status = SOPC_STATUS_INVALID_PARAMETERS;
-        }
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_StaMac_ConfigureDataChangeCallback(pSM, cbkLibSub, cbkWrapper);
+        status = SOPC_StaMac_ConfigureDataChangeCallback(pSM, cbkWrapper);
     }
 
     /* Release the lock so that the event handler can work properly while waiting */

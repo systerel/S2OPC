@@ -104,17 +104,15 @@ SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConnectionId cfgId
 /*
  * @description
  *    Create a subscription.
+ *    TODO
  * @param cliId
  *    The connection id.
- * @param cbkLibSub
- *    The data change callback type with libSub style
  * @param cbkWrapper
  *    The data change callback with wrapper style
  * @return
  *    The operation status.
  */
 SOPC_ReturnStatus SOPC_ClientCommon_CreateSubscription(const SOPC_LibSub_ConnectionId cliId,
-                                                       SOPC_LibSub_DataChangeCbk cbkLibSub,
                                                        SOPC_ClientHelper_DataChangeCbk cbkWrapper);
 
 /*

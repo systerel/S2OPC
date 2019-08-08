@@ -77,7 +77,7 @@ SOPC_ReturnStatus SOPC_LibSub_Connect(const SOPC_LibSub_ConfigurationId cfgId, S
     if (SOPC_STATUS_OK == status)
     {
         //TODO specify callback
-        status = SOPC_ClientCommon_CreateSubscription(*pCliId, NULL, NULL);
+        status = SOPC_ClientCommon_CreateSubscription(*pCliId, NULL);
     }
     return status;
 }

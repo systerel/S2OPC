@@ -140,6 +140,7 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
                                      const char* szPolicyId,
                                      const char* szUsername,
                                      const char* szPassword,
+                                     SOPC_LibSub_DataChangeCbk cbkLibSubDataChanged,
                                      double fPublishInterval,
                                      uint32_t iCntMaxKeepAlive,
                                      uint32_t iCntLifetime,
@@ -161,7 +162,7 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
         pSM->state = stInit;
         pSM->iscConfig = iscConfig;
         pSM->iCliId = iCliId;
-        pSM->cbkLibSubDataChanged = NULL;
+        pSM->cbkLibSubDataChanged = cbkLibSubDataChanged;
         pSM->cbkClientHelperDataChanged = NULL;
         pSM->iSessionCtx = 0;
         pSM->iSessionID = 0;
@@ -239,42 +240,23 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
 }
 
 SOPC_ReturnStatus SOPC_StaMac_ConfigureDataChangeCallback(SOPC_StaMac_Machine *pSM,
-                                                          SOPC_LibSub_DataChangeCbk cbkLibSub,
                                                           SOPC_ClientHelper_DataChangeCbk cbkClientHelper)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    if (NULL == pSM)
+    if (NULL == pSM || NULL == cbkClientHelper)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
     if (SOPC_STATUS_OK == status)
     {
-        if (NULL == cbkLibSub && NULL != cbkClientHelper)
+        if (NULL != pSM->cbkLibSubDataChanged)
         {
-            if (pSM->cbkLibSubDataChanged == NULL)
-            {
-                pSM->cbkClientHelperDataChanged = cbkClientHelper;
-            }
-            else
-            {
-                status = SOPC_STATUS_INVALID_STATE;
-            }
+            status = SOPC_STATUS_INVALID_STATE;
         }
-        else if (NULL != cbkLibSub && NULL == cbkClientHelper)
-        {
-            if (pSM->cbkClientHelperDataChanged == NULL)
-            {
-                pSM->cbkLibSubDataChanged = cbkLibSub;
-            }
-            else
-            {
-                status = SOPC_STATUS_INVALID_STATE;
-            }
-        }
-        else
-        {
-            status = SOPC_STATUS_INVALID_PARAMETERS;
-        }
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        pSM->cbkClientHelperDataChanged = cbkClientHelper;
     }
     return status;
 }
