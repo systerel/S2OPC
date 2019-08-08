@@ -701,6 +701,14 @@ SOPC_ReturnStatus SOPC_ClientCommon_CreateSubscription(const SOPC_LibSub_Connect
     return status;
 }
 
+SOPC_ReturnStatus SOPC_ClientCommon_DeleteSubscription(const SOPC_LibSub_ConnectionId cliId)
+{
+    //TODO implement this function
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    (void) cliId;
+    return status;
+}
+
 /* ========================
  * Internal implementations
  * ========================
