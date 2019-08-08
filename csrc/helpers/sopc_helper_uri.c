@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include <assert.h>
 #include <stddef.h>
 #include <string.h>
 #include <sys/types.h>
@@ -44,16 +45,17 @@ static SOPC_ReturnStatus getUriTypeFromEnum(char** prefix, SOPC_UriType* type);
 
 /**
  * Extract Hostname from given URI
- * must take a &pCursor which strictly start at the begining of the sequence and a &pHostname which must be pointing to
+ * Must take a *pCursor which strictly start at the beginning of the sequence and a hostname with *hostname pointing to
  * NULL.
- * in case of failure parameters are not modified
+ * In case of failure parameters are not modified
  */
 static SOPC_ReturnStatus getUriHostname(const char** ppCursor, char** ppHostname);
+
 /**
  * Extract prefix or port from given URI depending on sep_match
- * Must take a &pCursor which strictly start at the beginning of the sequence and a &ppFind which must be pointing to
- * NULL.
- * uriSwitch specify if we are looking for a port or a prefix
+ * Must take a *pCursor which strictly start at the beginning of the sequence and a port or prefix with *port or *prefix
+ * pointing to NULL.
+ * uriSwitch specify if we are looking for a port or a prefix.
  * In case of failure parameters are not modified
  */
 static SOPC_ReturnStatus getUriPrefixOrPort(const char** ppCursor,
@@ -63,7 +65,7 @@ static SOPC_ReturnStatus getUriPrefixOrPort(const char** ppCursor,
 
 static SOPC_ReturnStatus getUriHostname(const char** ppCursor, char** ppHostname)
 {
-    if (NULL == ppCursor || NULL == *ppCursor || NULL == ppHostname)
+    if (NULL == ppCursor || NULL == *ppCursor || NULL == ppHostname || NULL != *ppHostname)
     {
         return (SOPC_STATUS_INVALID_PARAMETERS);
     }
@@ -127,7 +129,7 @@ static SOPC_ReturnStatus getUriPrefixOrPort(const char** ppCursor,
                                             const char* sep_match,
                                             SOPC_UriSwitch uriSwitch)
 {
-    if (NULL == ppCursor || NULL == *ppCursor || NULL == ppFind || NULL == sep_match)
+    if (NULL == ppCursor || NULL == *ppCursor || NULL == ppFind || NULL != *ppFind || NULL == sep_match)
     {
         return (SOPC_STATUS_INVALID_PARAMETERS);
     }
