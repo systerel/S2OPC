@@ -17,17 +17,13 @@
  * under the License.
  */
 
-#ifndef FREE_RTOS_TEST_H
-#define FREE_RTOS_TEST_H
+#ifndef WRAP_READ_H_
+#define WRAP_READ_H_
 
-void FREE_RTOS_TEST_API_S2OPC_THREAD(void* ptr);
-void FREE_RTOS_TEST_S2OPC_SERVER(void* ptr);
-void FREE_RTOS_TEST_S2OPC_CLIENT(void* ptr);
-void FREE_RTOS_TEST_S2OPC_TIME(void* ptr);
-void FREE_RTOS_TEST_S2OPC_CHECK_THREAD(void* ptr);
-void FREE_RTOS_TEST_S2OPC_UDP_SOCKET_API(void* ptr);
-void FREE_RTOS_TEST_S2OPC_UDP_SOCKET_API_LB(void* ptr);
-void FREE_RTOS_TEST_S2OPC_PUBSUB(void* ptr);
-void FREE_RTOS_TEST_S2OPC_USECASE_PUBSUB_SYNCHRO(void* ptr);
+#include <stdbool.h>
+#include "sopc_types.h"
 
-#endif
+/* The lib */
+OpcUa_ReadRequest* read_new_read_request(void);
+
+#endif /* WRAP_READ_H_ */

@@ -17,17 +17,16 @@
  * under the License.
  */
 
-#ifndef FREE_RTOS_TEST_H
-#define FREE_RTOS_TEST_H
+#ifndef TEST_RESULTS_H_
+#define TEST_RESULTS_H_
 
-void FREE_RTOS_TEST_API_S2OPC_THREAD(void* ptr);
-void FREE_RTOS_TEST_S2OPC_SERVER(void* ptr);
-void FREE_RTOS_TEST_S2OPC_CLIENT(void* ptr);
-void FREE_RTOS_TEST_S2OPC_TIME(void* ptr);
-void FREE_RTOS_TEST_S2OPC_CHECK_THREAD(void* ptr);
-void FREE_RTOS_TEST_S2OPC_UDP_SOCKET_API(void* ptr);
-void FREE_RTOS_TEST_S2OPC_UDP_SOCKET_API_LB(void* ptr);
-void FREE_RTOS_TEST_S2OPC_PUBSUB(void* ptr);
-void FREE_RTOS_TEST_S2OPC_USECASE_PUBSUB_SYNCHRO(void* ptr);
+#include "b2c.h"
+#include "sopc_types.h"
+
+void test_results_set_service_result(t_bool res);
+void test_results_set_WriteRequest(OpcUa_WriteRequest* pWriteReq);
+
+t_bool test_results_get_service_result(void);
+OpcUa_WriteRequest* test_results_get_WriteRequest(void);
 
 #endif
