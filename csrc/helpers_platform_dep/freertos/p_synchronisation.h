@@ -47,7 +47,8 @@
 typedef enum T_CONDITION_VARIABLE_STATUS
 {
     E_COND_VAR_STATUS_NOT_INITIALIZED, // Condition variable not initialized
-    E_COND_VAR_STATUS_INITIALIZED      // Condition variable initialized
+    E_COND_VAR_STATUS_INITIALIZED,     // Condition variable initialized
+    E_COND_VAR_STATUS_SIZEOF = UINT32_MAX
 } eConditionVariableStatus;
 
 typedef struct tConditionVariable
