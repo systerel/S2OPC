@@ -14,6 +14,7 @@ the legal rights to contribute.
 * Vincent Lacroix <vincent.lacroix@systerel.fr>
 
 # Contributor list
+* Anthony Reyre <anthony.reyre-stg@systerel.fr>
 * Adrien Bustany <adrien.bustany@systerel.fr>
 * matclab <mathieu@clabaut.net>
 * Matthieu Archez <matthieu.archez@systerel.fr>
