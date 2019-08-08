@@ -17,17 +17,29 @@
  * under the License.
  */
 
-#ifndef FREE_RTOS_TEST_H
-#define FREE_RTOS_TEST_H
+#include "test_results.h"
 
-void FREE_RTOS_TEST_API_S2OPC_THREAD(void* ptr);
-void FREE_RTOS_TEST_S2OPC_SERVER(void* ptr);
-void FREE_RTOS_TEST_S2OPC_CLIENT(void* ptr);
-void FREE_RTOS_TEST_S2OPC_TIME(void* ptr);
-void FREE_RTOS_TEST_S2OPC_CHECK_THREAD(void* ptr);
-void FREE_RTOS_TEST_S2OPC_UDP_SOCKET_API(void* ptr);
-void FREE_RTOS_TEST_S2OPC_UDP_SOCKET_API_LB(void* ptr);
-void FREE_RTOS_TEST_S2OPC_PUBSUB(void* ptr);
-void FREE_RTOS_TEST_S2OPC_USECASE_PUBSUB_SYNCHRO(void* ptr);
+#include "sopc_atomic.h"
 
-#endif
+static int32_t valid_service_result = 0;
+static OpcUa_WriteRequest* current_pWriteRequest = NULL;
+
+void test_results_set_service_result(t_bool res)
+{
+    SOPC_Atomic_Int_Set(&valid_service_result, res ? 1 : 0);
+}
+
+void test_results_set_WriteRequest(OpcUa_WriteRequest* pWriteReq)
+{
+    SOPC_Atomic_Ptr_Set((void**) &current_pWriteRequest, pWriteReq);
+}
+
+t_bool test_results_get_service_result(void)
+{
+    return SOPC_Atomic_Int_Get(&valid_service_result) == 1;
+}
+
+OpcUa_WriteRequest* test_results_get_WriteRequest(void)
+{
+    return (OpcUa_WriteRequest*) SOPC_Atomic_Ptr_Get((void**) &current_pWriteRequest);
+}

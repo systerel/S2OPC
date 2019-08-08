@@ -63,6 +63,7 @@ typedef struct message
 static tChannel channel;
 
 extern void* cbToolkit_test_server(void* arg);
+extern void* cbToolkit_test_client(void* arg);
 
 static void* cbS2OPC_Thread_p4(void* ptr)
 {
@@ -410,6 +411,21 @@ void FREE_RTOS_TEST_S2OPC_SERVER(void* ptr)
     Mutex_Initialization(&m);
 
     status = SOPC_Thread_Create(&pX, cbToolkit_test_server, pv, NULL);
+
+    Mutex_Lock(&m);
+    sprintf(sBuffer, "$$$$ %2X -  Toolkit test thread init launching result = %d : current time = %lu\r\n",
+            (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
+    PRINTF(sBuffer);
+    Mutex_Unlock(&m);
+}
+
+void FREE_RTOS_TEST_S2OPC_CLIENT(void* ptr)
+{
+    SOPC_ReturnStatus status;
+    Condition* pv = (Condition*) ptr;
+    Mutex_Initialization(&m);
+
+    status = SOPC_Thread_Create(&pX, cbToolkit_test_client, pv, NULL);
 
     Mutex_Lock(&m);
     sprintf(sBuffer, "$$$$ %2X -  Toolkit test thread init launching result = %d : current time = %lu\r\n",

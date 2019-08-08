@@ -96,6 +96,9 @@ int main(void)
     // Toolkit server application
     // FREE_RTOS_TEST_S2OPC_SERVER(&gHandleConditionVariable);
 
+    // Toolkit client application
+    // FREE_RTOS_TEST_S2OPC_CLIENT(&gHandleConditionVariable);
+
     // Unit test copy from tests sources. CHECK_TIME
     // FREE_RTOS_TEST_S2OPC_TIME(&gHandleConditionVariable);
 
