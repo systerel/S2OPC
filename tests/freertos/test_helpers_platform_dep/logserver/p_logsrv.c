@@ -24,7 +24,8 @@ typedef enum E_LOG_SERVER_STATUS
 {
     E_LOG_SERVER_CLOSING,
     E_LOG_SERVER_BINDING,
-    E_LOG_SERVER_ONLINE
+    E_LOG_SERVER_ONLINE,
+    E_LOG_SERVER_SIZEOF = UINT32_MAX
 } eLogServerStatus;
 
 // Log server workspace
@@ -41,6 +42,8 @@ typedef struct T_LOG_SERVER_WORKSPACE
     uint16_t maxClient; // Max clients
     uint16_t port;      // Server port
     uint16_t portHello; // UDP port destination for hello message
+
+    uint8_t rfu[2];
 
     uint32_t timeoutClientS; // Timeout in S for client connexion keep alive
     uint32_t periodeHello;   // Periode of hello message
@@ -87,7 +90,8 @@ typedef struct T_LOG_SERVER_WORKSPACE
 typedef enum E_LOG_CLIENT_STATUS
 {
     E_LOG_CLIENT_DISCONNECTED,
-    E_LOG_CLIENT_CONNECTED
+    E_LOG_CLIENT_CONNECTED,
+    E_LOG_CLIENT_SIZEOF = UINT32_MAX
 } eLogClientStatus;
 
 // Server Client workspace
@@ -101,6 +105,8 @@ typedef struct T_LOG_CLIENT_WORKSPACE
 
     uint8_t bActiviteTx; // Flag activity for debug
     uint8_t bActiviteRx;
+
+    uint8_t rfu[2];
 
     uint8_t bufferTX[ENCODER_RX_BUFFER_SIZE];           // Buffer TX
     uint8_t bufferRX_LWIP[LWIP_RX_BUFFER_SIZE];         // Buffer RX from monitoring
