@@ -301,48 +301,57 @@ int main(int argc, char* argv[])
 
     if (SOPC_STATUS_OK == status)
     {
-        /*
-         * 1st Security policy is Basic256Sha256 with anonymous and username (non encrypted) authentication allowed
-         */
-        SOPC_String_Initialize(&epConfig.secuConfigurations[0].securityPolicy);
-        status = SOPC_String_AttachFromCstring(&epConfig.secuConfigurations[0].securityPolicy,
-                                               SOPC_SecurityPolicy_Basic256Sha256_URI);
-        epConfig.secuConfigurations[0].securityModes = SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK;
-        epConfig.secuConfigurations[0].nbOfUserTokenPolicies = 2;
-        epConfig.secuConfigurations[0].userTokenPolicies[0] = c_userTokenPolicy_Anonymous;
-        epConfig.secuConfigurations[0].userTokenPolicies[1] = c_userTokenPolicy_UserName_NoneSecurityPolicy;
-
-        /*
-         * 2nd Security policy is Basic256 with anonymous and username (non encrypted) authentication allowed
-         */
-        if (SOPC_STATUS_OK == status)
+        if (secuActive)
         {
-            SOPC_String_Initialize(&epConfig.secuConfigurations[1].securityPolicy);
-            status = SOPC_String_AttachFromCstring(&epConfig.secuConfigurations[1].securityPolicy,
-                                                   SOPC_SecurityPolicy_Basic256_URI);
-            epConfig.secuConfigurations[1].securityModes =
-                SOPC_SECURITY_MODE_SIGN_MASK | SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK;
-            epConfig.secuConfigurations[1].nbOfUserTokenPolicies = 2;
-            epConfig.secuConfigurations[1].userTokenPolicies[0] = c_userTokenPolicy_Anonymous;
-            epConfig.secuConfigurations[1].userTokenPolicies[1] = c_userTokenPolicy_UserName_NoneSecurityPolicy;
+            /*
+             * 1st Security policy is Basic256Sha256 with anonymous and username (non encrypted) authentication allowed
+             */
+            SOPC_String_Initialize(&epConfig.secuConfigurations[0].securityPolicy);
+            status = SOPC_String_AttachFromCstring(&epConfig.secuConfigurations[0].securityPolicy,
+                                                   SOPC_SecurityPolicy_Basic256Sha256_URI);
+            epConfig.secuConfigurations[0].securityModes = SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK;
+            epConfig.secuConfigurations[0].nbOfUserTokenPolicies = 2;
+            epConfig.secuConfigurations[0].userTokenPolicies[0] = c_userTokenPolicy_Anonymous;
+            epConfig.secuConfigurations[0].userTokenPolicies[1] = c_userTokenPolicy_UserName_NoneSecurityPolicy;
+
+            /*
+             * 2nd Security policy is Basic256 with anonymous and username (non encrypted) authentication allowed
+             */
+            if (SOPC_STATUS_OK == status)
+            {
+                SOPC_String_Initialize(&epConfig.secuConfigurations[1].securityPolicy);
+                status = SOPC_String_AttachFromCstring(&epConfig.secuConfigurations[1].securityPolicy,
+                                                       SOPC_SecurityPolicy_Basic256_URI);
+                epConfig.secuConfigurations[1].securityModes =
+                    SOPC_SECURITY_MODE_SIGN_MASK | SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK;
+                epConfig.secuConfigurations[1].nbOfUserTokenPolicies = 2;
+                epConfig.secuConfigurations[1].userTokenPolicies[0] = c_userTokenPolicy_Anonymous;
+                epConfig.secuConfigurations[1].userTokenPolicies[1] = c_userTokenPolicy_UserName_NoneSecurityPolicy;
+            }
         }
 
         /*
          * 3rd Security policy is None with anonymous and username (non encrypted) authentication allowed
          * (for tests only, otherwise users on unsecure channel shall be forbidden)
          */
+        uint8_t NoneSecuConfigIdx = 2;
+        if (!secuActive)
+        {
+            // Keep only None secu and set it as first secu config in this case
+            NoneSecuConfigIdx = 0;
+        }
         if (SOPC_STATUS_OK == status)
         {
-            SOPC_String_Initialize(&epConfig.secuConfigurations[2].securityPolicy);
-            status = SOPC_String_AttachFromCstring(&epConfig.secuConfigurations[2].securityPolicy,
+            SOPC_String_Initialize(&epConfig.secuConfigurations[NoneSecuConfigIdx].securityPolicy);
+            status = SOPC_String_AttachFromCstring(&epConfig.secuConfigurations[NoneSecuConfigIdx].securityPolicy,
                                                    SOPC_SecurityPolicy_None_URI);
-            epConfig.secuConfigurations[2].securityModes = SOPC_SECURITY_MODE_NONE_MASK;
-            epConfig.secuConfigurations[2].nbOfUserTokenPolicies =
+            epConfig.secuConfigurations[NoneSecuConfigIdx].securityModes = SOPC_SECURITY_MODE_NONE_MASK;
+            epConfig.secuConfigurations[NoneSecuConfigIdx].nbOfUserTokenPolicies =
                 2; /* Necessary for tests only: it shall be 0 when
                       security is None to avoid any possible session without security */
-            epConfig.secuConfigurations[2].userTokenPolicies[0] =
+            epConfig.secuConfigurations[NoneSecuConfigIdx].userTokenPolicies[0] =
                 c_userTokenPolicy_Anonymous; /* Necessary for tests only */
-            epConfig.secuConfigurations[2].userTokenPolicies[1] =
+            epConfig.secuConfigurations[NoneSecuConfigIdx].userTokenPolicies[1] =
                 c_userTokenPolicy_UserName_NoneSecurityPolicy; /* Necessary for UACTT tests only */
         }
     }
@@ -350,7 +359,7 @@ int main(int argc, char* argv[])
     // Init unique endpoint structure
     epConfig.endpointURL = ENDPOINT_URL;
 
-    if (secuActive != false)
+    if (secuActive)
     {
 #ifdef WITH_STATIC_SECURITY_DATA
         status = SOPC_KeyManager_SerializedCertificate_CreateFromDER(server_2k_cert, sizeof(server_2k_cert),
