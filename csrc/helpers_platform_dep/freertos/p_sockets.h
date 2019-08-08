@@ -44,6 +44,7 @@ typedef struct
 {
     int fdmax;  /**< max of the set */
     fd_set set; /**< set */
+    uint8_t rfu[2];
 } SOPC_SocketSet;
 
 #endif /* SOPC_P_SOCKETS_H_ */
