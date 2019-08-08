@@ -54,6 +54,7 @@
 #include "sopc_user_app_itf.h"
 #define SKIP_S2OPC_DEFINITIONS
 #include "libs2opc_client.h"
+#include "libs2opc_client_cmds.h"
 
 /* Machine states */
 typedef enum
@@ -90,7 +91,6 @@ typedef struct SOPC_StaMac_Machine SOPC_StaMac_Machine;
  * \param szPolicyId        Zero-terminated user identity policy id, see SOPC_LibSub_ConnectionCfg
  * \param szUsername        Zero-terminated username, see SOPC_LibSub_ConnectionCfg
  * \param szPassword        Zero-terminated password, see SOPC_LibSub_ConnectionCfg
- * \param cbkDataChanged    The callback to trigger when a PublishResponse is received
  * \param fPublishInterval  Subscription publish interval, in milliseconds
  * \param iCntMaxKeepAlive  The number of times an empty PublishResponse is not sent
  * \param iCntLifetime      The number of times a PublishResponse cannot be sent before killing the subscription
@@ -106,7 +106,6 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
                                      const char* szPolicyId,
                                      const char* szUsername,
                                      const char* szPassword,
-                                     SOPC_LibSub_DataChangeCbk cbkDataChanged,
                                      double fPublishInterval,
                                      uint32_t iCntMaxKeepAlive,
                                      uint32_t iCntLifetime,
@@ -114,6 +113,13 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
                                      int64_t iTimeoutMs,
                                      SOPC_LibSub_EventCbk cbkGenericEvent,
                                      SOPC_StaMac_Machine** ppSM);
+
+/*
+ * TODO
+ */
+SOPC_ReturnStatus SOPC_StaMac_ConfigureDataChangeCallback(SOPC_StaMac_Machine *pSM,
+                                                          SOPC_LibSub_DataChangeCbk cbkLibSub,
+                                                          SOPC_ClientHelper_DataChangeCbk);
 
 /**
  * \brief Deletes and deallocate the machine.
