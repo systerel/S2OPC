@@ -153,6 +153,10 @@ static SOPC_ReturnStatus getUriPrefixOrPort(const char** ppCursor,
             pCursor = start + strlen(start);
         }
     }
+    else
+    {
+        assert(false && "Unknown uriSwitch");
+    }
 
     if (SOPC_STATUS_OK == res)
     {
