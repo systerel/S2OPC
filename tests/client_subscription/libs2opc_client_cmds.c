@@ -26,7 +26,7 @@
 #include "sopc_singly_linked_list.h"
 
 #define SKIP_S2OPC_DEFINITIONS
-#include "libs2opc_client.h"
+#include "libs2opc_client_common.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_types.h"
 
@@ -188,9 +188,7 @@ int32_t SOPC_ClientHelper_Initialize(const char* log_path, int32_t log_level)
                                      .disconnect_callback = disconnect_callback,
                                      .toolkit_logger = {.level = level, .log_path = log_path}};
 
-    SOPC_ReturnStatus status = SOPC_LibSub_Initialize(&cfg_cli);
-
-    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, SOPC_LibSub_GetVersion());
+    SOPC_ReturnStatus status = SOPC_ClientCommon_Initialize(&cfg_cli);
 
     if (!log_level_set)
     {
@@ -223,7 +221,7 @@ int32_t SOPC_ClientHelper_Initialize(const char* log_path, int32_t log_level)
 void SOPC_ClientHelper_Finalize(void)
 {
     Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Closing the Toolkit.");
-    SOPC_LibSub_Clear();
+    SOPC_ClientCommon_Clear();
     Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Toolkit closed.");
 }
 
@@ -343,7 +341,7 @@ int32_t SOPC_ClientHelper_Connect(const char* endpointUrl,
 
     Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Connecting to \"%s\"", cfg_con.server_url);
 
-    status = SOPC_LibSub_ConfigureConnection(&cfg_con, &cfg_id);
+    status = SOPC_ClientCommon_ConfigureConnection(&cfg_con, &cfg_id);
     if (SOPC_STATUS_OK != status)
     {
         Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not configure connection.");
@@ -351,7 +349,7 @@ int32_t SOPC_ClientHelper_Connect(const char* endpointUrl,
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_LibSub_Configured();
+        status = SOPC_ClientCommon_Configured();
         if (SOPC_STATUS_OK != status)
         {
             Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not configure the toolkit.");
@@ -360,7 +358,7 @@ int32_t SOPC_ClientHelper_Connect(const char* endpointUrl,
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_LibSub_Connect(cfg_id, &con_id);
+        status = SOPC_ClientCommon_Connect(cfg_id, &con_id);
         if (SOPC_STATUS_OK != status)
         {
             Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not connect with given configuration id.");
@@ -520,7 +518,7 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
         ctx.status = SOPC_STATUS_NOK;
         ctx.finish = false;
         status =
-            SOPC_LibSub_AsyncSendRequestOnSession((SOPC_LibSub_ConnectionId) connectionId, &request, (uintptr_t) &ctx);
+            SOPC_ClientCommon_AsyncSendRequestOnSession((SOPC_LibSub_ConnectionId) connectionId, &request, (uintptr_t) &ctx);
 
         /* Wait for the response */
         while (SOPC_STATUS_OK == status && ctx.finish)
@@ -646,7 +644,7 @@ int32_t SOPC_ClientHelper_AddMonitoredItems(int32_t connectionId, char** nodeIds
     }
     SOPC_LibSub_DataId* lDataId = calloc(nbNodeIds, sizeof(SOPC_LibSub_DataId));
     assert(NULL != lDataId);
-    SOPC_ReturnStatus status = SOPC_LibSub_AddToSubscription(
+    SOPC_ReturnStatus status = SOPC_ClientCommon_AddToSubscription(
         (SOPC_LibSub_ConnectionId) connectionId, (const char* const*) nodeIds, lAttrIds, (int32_t) nbNodeIds, lDataId);
     if (SOPC_STATUS_OK != status)
     {
@@ -697,7 +695,7 @@ int32_t SOPC_ClientHelper_Disconnect(int32_t connectionId)
     }
 
     Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Closing the connection %" PRIi32, connectionId);
-    SOPC_ReturnStatus status = SOPC_LibSub_Disconnect((SOPC_LibSub_ConnectionId) connectionId);
+    SOPC_ReturnStatus status = SOPC_ClientCommon_Disconnect((SOPC_LibSub_ConnectionId) connectionId);
 
     if (SOPC_STATUS_OK != status)
     {
