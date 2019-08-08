@@ -535,6 +535,9 @@ class BinarySchema:
                                       value=child.attrib['Value'])
                 for child in node.findall('./opc:EnumeratedValue', self.OPC_NS)
         ]
+        # append an element that will size the enum as an int32
+        elem_decls.append(ENUM_DECL_ELEM.format(name=name, elem="SizeOf", value="INT32_MAX"))
+
         out.write(",\n".join(elem_decls) + '\n')
 
         out.write(ENUM_DECL_END.format(name=name))
