@@ -82,6 +82,7 @@ struct SOPC_StaMac_Machine
     const char* szUsername;                                     /* See SOPC_LibSub_ConnectionCfg */
     const char* szPassword;                                     /* See SOPC_LibSub_ConnectionCfg */
     int64_t iTimeoutMs;                                         /* See SOPC_LibSub_ConnectionCfg.timeout_ms */
+    SOPC_SLinkedList* dataIdToNodeIdList;                       /* A list of data ids to node ids */
 };
 
 /* Global variables */
@@ -181,6 +182,7 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
         pSM->szUsername = NULL;
         pSM->szPassword = NULL;
         pSM->iTimeoutMs = iTimeoutMs;
+        pSM->dataIdToNodeIdList = SOPC_SLinkedList_Create(0);
         if (NULL != szPolicyId)
         {
             pSM->szPolicyId = SOPC_Malloc(strlen(szPolicyId) + 1);
@@ -221,7 +223,7 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
         SOPC_GCC_DIAGNOSTIC_RESTORE
     }
 
-    if (SOPC_STATUS_OK == status && (NULL == pSM->pListReqCtx || NULL == pSM->pListMonIt))
+    if (SOPC_STATUS_OK == status && (NULL == pSM->pListReqCtx || NULL == pSM->pListMonIt || NULL == pSM->dataIdToNodeIdList))
     {
         status = SOPC_STATUS_OUT_OF_MEMORY;
     }
@@ -279,6 +281,9 @@ void SOPC_StaMac_Delete(SOPC_StaMac_Machine** ppSM)
         SOPC_Free((void*) pSM->szPolicyId);
         SOPC_Free((void*) pSM->szUsername);
         SOPC_Free((void*) pSM->szPassword);
+        SOPC_SLinkedList_Delete(pSM->dataIdToNodeIdList);
+        pSM->dataIdToNodeIdList = NULL;
+
         SOPC_GCC_DIAGNOSTIC_RESTORE
         SOPC_Free(pSM);
         *ppSM = NULL;
@@ -488,6 +493,23 @@ SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
         {
             SOPC_Atomic_Int_Add(&nSentReqs, 1);
             lCliHndl[i] = (uint32_t) nSentReqs;
+            void* nodeId = SOPC_Calloc(1, sizeof(char)*strlen(lszNodeId[i]));
+            if (NULL == nodeId)
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+            else if (0 >= nSentReqs)
+            {
+
+                    status = SOPC_STATUS_NOK;
+                    SOPC_Free(nodeId);
+            }
+            else
+            {
+                strcpy(nodeId, lszNodeId[i]);
+                SOPC_SLinkedList_Append(pSM->dataIdToNodeIdList, (uint32_t) nSentReqs, nodeId);
+            }
+
         }
 
         status = Helpers_NewCreateMonitoredItemsRequest(lpNid, liAttrId, nElems, pSM->iSubscriptionID,
@@ -958,8 +980,11 @@ static void StaMac_ProcessEvent_stActivated(SOPC_StaMac_Machine* pSM,
                         else if (NULL != pSM->cbkClientHelperDataChanged
                                  && INT32_MAX >= pSM->iCliId)
                         {
-                            //TODO
-                            pSM->cbkClientHelperDataChanged((int32_t) pSM->iCliId, NULL, NULL);
+                            void* nodeId = SOPC_SLinkedList_FindFromId(pSM->dataIdToNodeIdList, pMonItNotif->ClientHandle);
+                            if (NULL != nodeId)
+                            {
+                                pSM->cbkClientHelperDataChanged((int32_t) pSM->iCliId, (char*) nodeId, &pMonItNotif->Value);
+                            }
                         }
                         SOPC_Free(plsVal->value);
                         plsVal->value = NULL;
