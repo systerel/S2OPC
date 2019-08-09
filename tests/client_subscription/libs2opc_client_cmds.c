@@ -578,9 +578,21 @@ int32_t SOPC_ClientHelper_AddMonitoredItems(int32_t connectionId, char** nodeIds
 
 int32_t SOPC_ClientHelper_Unsubscribe(int32_t connectionId)
 {
-    // TODO implement this function
-    (void) connectionId;
-    return -100;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    if (0 >= connectionId)
+    {
+        return -1;
+    }
+
+    status = SOPC_ClientCommon_DeleteSubscription((SOPC_LibSub_ConnectionId) connectionId);
+
+    if (SOPC_STATUS_OK != status)
+    {
+        return -100;
+    }
+
+    return 0;
 }
 
 int32_t SOPC_ClientHelper_Disconnect(int32_t connectionId)

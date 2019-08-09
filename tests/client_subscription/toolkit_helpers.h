@@ -72,6 +72,16 @@ SOPC_ReturnStatus Helpers_NewCreateSubscriptionRequest(double fPublishIntervalMs
                                                        uint32_t iCntMaxKeepAlive,
                                                        uint32_t iCntLifetime,
                                                        void** ppRequest);
+/**
+ * @brief Creates a new DeleteSubscriptionRequest
+ *
+ * @param subscriptionId
+ *    subscription id
+ * @param ppRequest
+ *    pointer to the request to be filled
+ */
+SOPC_ReturnStatus Helpers_NewDeleteSubscriptionRequest(uint32_t subscriptionId,
+                                                       void** ppRequest);
 
 /**
  * \brief Creates a new PublishRequest.

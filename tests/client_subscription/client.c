@@ -191,8 +191,11 @@ int main(int argc, char* const argv[])
     {
         // TODO decide if using SOPC_Sleep is necessary
         //SOPC_Sleep(1000 * 1000);
-        sleep(1000 * 1000);
+        sleep(10);
+        SOPC_ClientHelper_Unsubscribe(connectionId);
+        //sleep(1000 * 1000);
     }
+
 
     if (connectionId > 0)
     {

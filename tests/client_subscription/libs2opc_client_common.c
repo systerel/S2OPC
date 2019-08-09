@@ -689,7 +689,6 @@ SOPC_ReturnStatus SOPC_ClientCommon_Disconnect(const SOPC_LibSub_ConnectionId cl
 SOPC_ReturnStatus SOPC_ClientCommon_CreateSubscription(const SOPC_LibSub_ConnectionId cliId,
                                                        SOPC_ClientHelper_DataChangeCbk cbkWrapper)
 {
-    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "SOPC_ClientCommon_CreateSubscription");
     //TODO implement this function
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_StaMac_Machine* pSM = NULL;
@@ -716,7 +715,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_CreateSubscription(const SOPC_LibSub_Connect
 
     if (SOPC_STATUS_OK == status)
     {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Create Subscription.");
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_DEBUG, "Create Subscription.");
         status = SOPC_StaMac_CreateSubscription(pSM);
     }
 
@@ -748,16 +747,67 @@ SOPC_ReturnStatus SOPC_ClientCommon_CreateSubscription(const SOPC_LibSub_Connect
             SOPC_StaMac_SetError(pSM);
         }
     }
-    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "EndofCreateSubscription.");
 
     return status;
 }
 
 SOPC_ReturnStatus SOPC_ClientCommon_DeleteSubscription(const SOPC_LibSub_ConnectionId cliId)
 {
-    //TODO implement this function
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    (void) cliId;
+    SOPC_StaMac_Machine* pSM = NULL;
+
+    if (SOPC_Atomic_Int_Get(&libInitialized) == 0 || SOPC_Atomic_Int_Get(&libConfigured) == 0)
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+
+    SOPC_ReturnStatus mutStatus = Mutex_Lock(&mutex);
+    assert(SOPC_STATUS_OK == mutStatus);
+
+    /* Retrieve the machine to disconnect */
+    pSM = SOPC_SLinkedList_FindFromId(pListClient, cliId);
+    if (NULL == pSM)
+    {
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        if (SOPC_StaMac_HasSubscription(pSM))
+        {
+            status = SOPC_StaMac_DeleteSubscription(pSM);
+        }
+    }
+
+    int64_t timeout_ms = SOPC_StaMac_GetTimeout(pSM);
+
+    /* Release the lock so that the event handler can work properly while waiting */
+    mutStatus = Mutex_Unlock(&mutex);
+    assert(SOPC_STATUS_OK == mutStatus);
+
+    /* Wait for the subscription to be deleted */
+    if (SOPC_STATUS_OK == status)
+    {
+        int count = 0;
+        while (!SOPC_StaMac_IsError(pSM) && SOPC_StaMac_HasSubscription(pSM) &&
+               count * CONNECTION_TIMEOUT_MS_STEP < timeout_ms)
+        {
+            SOPC_Sleep(CONNECTION_TIMEOUT_MS_STEP);
+            ++count;
+        }
+        /* When the request timeoutHint is lower than pCfg->timeout_ms, the machine will go in error,
+         *  and NOK is returned. */
+        if (SOPC_StaMac_IsError(pSM))
+        {
+            status = SOPC_STATUS_NOK;
+        }
+        else if (count * CONNECTION_TIMEOUT_MS_STEP >= timeout_ms)
+        {
+            status = SOPC_STATUS_TIMEOUT;
+            SOPC_StaMac_SetError(pSM);
+        }
+    }
+
     return status;
 }
 
