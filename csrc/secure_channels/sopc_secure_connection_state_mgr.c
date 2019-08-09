@@ -1384,7 +1384,7 @@ static bool SC_ServerTransition_TcpNegotiate_To_ScInit(SOPC_SecureConnection* sc
 
     // Reuse the contents of the received message buffer
 
-    SOPC_Buffer* ackMsgBuffer = SOPC_Buffer_Create(helloMsgBuffer->max_size);
+    SOPC_Buffer* ackMsgBuffer = SOPC_Buffer_Create(helloMsgBuffer->maximum_size);
 
     if (ackMsgBuffer == NULL || SOPC_Buffer_SetPosition(helloMsgBuffer, 0) != SOPC_STATUS_OK ||
         SOPC_Buffer_CopyWithLength(ackMsgBuffer, helloMsgBuffer, SOPC_TCP_UA_HEADER_LENGTH) != SOPC_STATUS_OK)

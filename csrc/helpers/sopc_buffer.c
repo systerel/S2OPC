@@ -24,6 +24,29 @@
 #include "sopc_buffer.h"
 #include "sopc_mem_alloc.h"
 
+static SOPC_ReturnStatus SOPC_Buffer_Init(SOPC_Buffer* buffer, uint32_t initial_size, uint32_t maximum_size)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    if (buffer != NULL && initial_size > 0 && initial_size <= maximum_size)
+    {
+        status = SOPC_STATUS_OK;
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        buffer->position = 0;
+        buffer->length = 0;
+        buffer->initial_size = initial_size;
+        buffer->current_size = initial_size;
+        buffer->maximum_size = maximum_size;
+        buffer->data = SOPC_Calloc((size_t) buffer->current_size, sizeof(uint8_t));
+        if (buffer->data == NULL)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+    return status;
+}
+
 SOPC_Buffer* SOPC_Buffer_Create(uint32_t size)
 {
     SOPC_Buffer* buf = NULL;
@@ -32,7 +55,7 @@ SOPC_Buffer* SOPC_Buffer_Create(uint32_t size)
         buf = SOPC_Malloc(sizeof(SOPC_Buffer));
         if (buf != NULL)
         {
-            SOPC_ReturnStatus status = SOPC_Buffer_Init(buf, size);
+            SOPC_ReturnStatus status = SOPC_Buffer_Init(buf, size, size);
             if (status != SOPC_STATUS_OK)
             {
                 SOPC_Buffer_Delete(buf);
@@ -43,25 +66,23 @@ SOPC_Buffer* SOPC_Buffer_Create(uint32_t size)
     return buf;
 }
 
-SOPC_ReturnStatus SOPC_Buffer_Init(SOPC_Buffer* buffer, uint32_t size)
+SOPC_Buffer* SOPC_Buffer_CreateResizable(uint32_t initial_size, uint32_t maximum_size)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (buffer != NULL && size > 0)
+    SOPC_Buffer* buf = NULL;
+    if (initial_size > 0)
     {
-        status = SOPC_STATUS_OK;
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        buffer->position = 0;
-        buffer->length = 0;
-        buffer->max_size = size;
-        buffer->data = SOPC_Calloc((size_t) size, sizeof(uint8_t));
-        if (buffer->data == NULL)
+        buf = SOPC_Calloc(1, sizeof(SOPC_Buffer));
+        if (buf != NULL)
         {
-            status = SOPC_STATUS_OUT_OF_MEMORY;
+            SOPC_ReturnStatus status = SOPC_Buffer_Init(buf, initial_size, maximum_size);
+            if (status != SOPC_STATUS_OK)
+            {
+                SOPC_Buffer_Delete(buf);
+                buf = NULL;
+            }
         }
     }
-    return status;
+    return buf;
 }
 
 SOPC_Buffer* SOPC_Buffer_Attach(uint8_t* data, uint32_t size)
@@ -75,7 +96,9 @@ SOPC_Buffer* SOPC_Buffer_Attach(uint8_t* data, uint32_t size)
 
     b->data = data;
     b->length = size;
-    b->max_size = size;
+    b->initial_size = size;
+    b->current_size = size;
+    b->maximum_size = size;
 
     return b;
 }
@@ -107,7 +130,7 @@ void SOPC_Buffer_Reset(SOPC_Buffer* buffer)
     {
         buffer->position = 0;
         buffer->length = 0;
-        memset(buffer->data, 0, buffer->max_size);
+        memset(buffer->data, 0, buffer->current_size);
     }
 }
 
@@ -119,7 +142,7 @@ SOPC_ReturnStatus SOPC_Buffer_ResetAfterPosition(SOPC_Buffer* buffer, uint32_t p
         status = SOPC_STATUS_OK;
         buffer->position = position;
         buffer->length = position;
-        memset(&(buffer->data[buffer->position]), 0, buffer->max_size - buffer->position);
+        memset(&(buffer->data[buffer->position]), 0, buffer->current_size - buffer->position);
     }
     return status;
 }
@@ -139,7 +162,7 @@ SOPC_ReturnStatus SOPC_Buffer_SetDataLength(SOPC_Buffer* buffer, uint32_t length
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     uint8_t* data = NULL;
-    if (buffer != NULL && buffer->data != NULL && buffer->max_size >= length && buffer->position <= length)
+    if (buffer != NULL && buffer->data != NULL && buffer->current_size >= length && buffer->position <= length)
     {
         status = SOPC_STATUS_OK;
         if (buffer->length > length)
@@ -153,6 +176,51 @@ SOPC_ReturnStatus SOPC_Buffer_SetDataLength(SOPC_Buffer* buffer, uint32_t length
     return status;
 }
 
+static bool SOPC_Buffer_CheckSizeAndResize(SOPC_Buffer* buffer, uint32_t nbBytes, bool exactResize)
+{
+    if (nbBytes <= buffer->current_size)
+    {
+        // Enough bytes available in current buffer allocated bytes
+        return true;
+    }
+    else if (nbBytes <= buffer->maximum_size)
+    {
+        uint8_t* newData = NULL;
+        uint32_t newSize = 0;
+        // Enough bytes available if buffer is resized
+        if (exactResize)
+        {
+            newSize = nbBytes;
+        }
+        else
+        {
+            uint32_t requiredSteps = nbBytes / buffer->initial_size;
+            if (nbBytes % buffer->initial_size != 0)
+            {
+                requiredSteps++;
+            }
+            if (requiredSteps > buffer->maximum_size / buffer->initial_size)
+            {
+                newSize = buffer->maximum_size;
+            }
+            else
+            {
+                newSize = requiredSteps * buffer->initial_size;
+            }
+        }
+        // Resize exactly to the number of bytes needed to be available
+        newData = SOPC_Realloc(buffer->data, (size_t) buffer->current_size, (size_t) newSize);
+        if (NULL != newData)
+        {
+            buffer->data = newData;
+            buffer->current_size = newSize;
+
+            return true;
+        }
+    }
+    return false;
+}
+
 SOPC_ReturnStatus SOPC_Buffer_Write(SOPC_Buffer* buffer, const uint8_t* data_src, uint32_t count)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
@@ -162,11 +230,7 @@ SOPC_ReturnStatus SOPC_Buffer_Write(SOPC_Buffer* buffer, const uint8_t* data_src
     }
     else
     {
-        if (buffer->position + count > buffer->max_size)
-        {
-            status = SOPC_STATUS_INVALID_PARAMETERS;
-        }
-        else
+        if (SOPC_Buffer_CheckSizeAndResize(buffer, buffer->position + count, false))
         {
             if (memcpy(&(buffer->data[buffer->position]), data_src, count) == &(buffer->data[buffer->position]))
             {
@@ -182,6 +246,10 @@ SOPC_ReturnStatus SOPC_Buffer_Write(SOPC_Buffer* buffer, const uint8_t* data_src
             {
                 status = SOPC_STATUS_INVALID_STATE;
             }
+        }
+        else
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
         }
     }
     return status;
@@ -209,20 +277,27 @@ SOPC_ReturnStatus SOPC_Buffer_CopyWithLength(SOPC_Buffer* dest, SOPC_Buffer* src
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (dest != NULL && src != NULL && dest->data != NULL && src->data != NULL && src->length >= limitedLength &&
-        src->position <= limitedLength && limitedLength <= dest->max_size)
+        src->position <= limitedLength)
     {
         assert(src->position <= src->length);
 
-        memcpy(dest->data, src->data, limitedLength);
-        status = SOPC_Buffer_SetPosition(dest, 0);
+        if (SOPC_Buffer_CheckSizeAndResize(dest, limitedLength, true))
+        {
+            memcpy(dest->data, src->data, limitedLength);
+            status = SOPC_Buffer_SetPosition(dest, 0);
 
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_Buffer_SetDataLength(dest, limitedLength);
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_Buffer_SetDataLength(dest, limitedLength);
+            }
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_Buffer_SetPosition(dest, src->position);
+            }
         }
-        if (SOPC_STATUS_OK == status)
+        else
         {
-            status = SOPC_Buffer_SetPosition(dest, src->position);
+            status = SOPC_STATUS_OUT_OF_MEMORY;
         }
     }
     return status;
@@ -247,7 +322,7 @@ uint32_t SOPC_Buffer_Remaining(SOPC_Buffer* buffer)
 
 int64_t SOPC_Buffer_ReadFrom(SOPC_Buffer* buffer, SOPC_Buffer* src, uint32_t n)
 {
-    if ((buffer->max_size - buffer->length) < n)
+    if ((buffer->current_size - buffer->length) < n)
     {
         return -1;
     }
@@ -340,7 +415,7 @@ SOPC_ReturnStatus SOPC_Buffer_ReadFile(const char* path, SOPC_Buffer** buf)
         return SOPC_STATUS_NOK;
     }
 
-    buffer->length = buffer->max_size;
+    buffer->length = buffer->current_size;
     *buf = buffer;
     return SOPC_STATUS_OK;
 }

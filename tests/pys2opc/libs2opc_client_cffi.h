@@ -485,10 +485,12 @@ void* SOPC_Realloc(void* ptr, size_t old_size, size_t new_size);
 
 typedef struct
 {
-    uint32_t max_size; /**< maximum size (allocated bytes) */
-    uint32_t position; /**< read/write position */
-    uint32_t length;   /**< data length */
-    uint8_t* data;     /**< data bytes */
+    uint32_t initial_size; /**< initial size (also used as size increment step) */
+    uint32_t current_size; /**< current size */
+    uint32_t maximum_size; /**< maximum size */
+    uint32_t position;     /**< read/write position */
+    uint32_t length;       /**< data length */
+    uint8_t* data;         /**< data bytes */
 } SOPC_Buffer;
 
 typedef void(SOPC_EncodeableObject_PfnInitialize)(void* value);

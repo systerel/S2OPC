@@ -33,7 +33,9 @@ SOPC_ReturnStatus SOPC_ContinuationPointId_Encode(uint64_t continuationPointId, 
     {
         // Mapping the bytestring onto the buffer
         tmpBuf.data = bs->Data;
-        tmpBuf.max_size = sizeof(continuationPointId);
+        tmpBuf.maximum_size = sizeof(continuationPointId);
+        tmpBuf.initial_size = tmpBuf.maximum_size;
+        tmpBuf.current_size = tmpBuf.maximum_size;
         tmpBuf.length = 0;
         tmpBuf.position = 0;
 
@@ -59,7 +61,9 @@ SOPC_ReturnStatus SOPC_ContinuationPointId_Decode(const SOPC_ByteString* bs, uin
 
     // Mapping the bytestring onto the buffer
     tmpBuf.data = bs->Data;
-    tmpBuf.max_size = sizeof(*continuationPointId);
+    tmpBuf.maximum_size = sizeof(*continuationPointId);
+    tmpBuf.initial_size = tmpBuf.maximum_size;
+    tmpBuf.current_size = tmpBuf.maximum_size;
     tmpBuf.length = sizeof(*continuationPointId);
     tmpBuf.position = 0;
 

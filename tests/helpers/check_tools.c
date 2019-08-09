@@ -94,8 +94,6 @@ END_TEST
 
 START_TEST(test_buffer_create)
 {
-    SOPC_ReturnStatus status = 0;
-
     // Test creation
     //// Test nominal case
     SOPC_Buffer* buf = SOPC_Buffer_Create(10);
@@ -103,7 +101,21 @@ START_TEST(test_buffer_create)
     ck_assert(buf->data != NULL);
     ck_assert(buf->position == 0);
     ck_assert(buf->length == 0);
-    ck_assert(buf->max_size == 10);
+    ck_assert(buf->initial_size == 10);
+    ck_assert(buf->current_size == 10);
+    ck_assert(buf->maximum_size == 10);
+    SOPC_Buffer_Delete(buf);
+    buf = NULL;
+
+    //// Test nominal case
+    buf = SOPC_Buffer_CreateResizable(10, 100);
+    ck_assert(buf != NULL);
+    ck_assert(buf->data != NULL);
+    ck_assert(buf->position == 0);
+    ck_assert(buf->length == 0);
+    ck_assert(buf->initial_size == 10);
+    ck_assert(buf->current_size == 10);
+    ck_assert(buf->maximum_size == 100);
     SOPC_Buffer_Delete(buf);
     buf = NULL;
 
@@ -111,28 +123,10 @@ START_TEST(test_buffer_create)
     buf = SOPC_Buffer_Create(0);
     ck_assert(buf == NULL);
 
-    // Test initialization
-    //// Test nominal case
-    buf = SOPC_Malloc(sizeof(SOPC_Buffer));
-    status = SOPC_Buffer_Init(buf, 100);
-    ck_assert(status == 0);
-    ck_assert(buf->data != NULL);
-    ck_assert(buf->position == 0);
-    ck_assert(buf->length == 0);
-    ck_assert(buf->max_size == 100);
-    SOPC_Buffer_Delete(buf);
-    buf = NULL;
-
-    //// Test degraded case: NULL buffer
-    buf = NULL;
-    status = SOPC_Buffer_Init(buf, 100);
-    ck_assert(status != 0);
+    buf = SOPC_Buffer_CreateResizable(0, 10);
     ck_assert(buf == NULL);
 
-    //// Test degraded case: invalid size
-    buf = NULL;
-    status = SOPC_Buffer_Init(buf, 0);
-    ck_assert(status != 0);
+    buf = SOPC_Buffer_CreateResizable(100, 10);
     ck_assert(buf == NULL);
 }
 END_TEST
@@ -280,8 +274,12 @@ START_TEST(test_buffer_copy)
     ck_assert(buf2->data[1] == 0x01);
     ck_assert(buf2->data[2] == 0x02);
     ck_assert(buf2->data[3] == 0x03);
-    ck_assert(buf->max_size == 10);
-    ck_assert(buf2->max_size == 5);
+    ck_assert(buf->initial_size == 10);
+    ck_assert(buf->current_size == 10);
+    ck_assert(buf->maximum_size == 10);
+    ck_assert(buf2->initial_size == 5);
+    ck_assert(buf2->current_size == 5);
+    ck_assert(buf2->maximum_size == 5);
 
     buf->data[0] = 0x01;
     buf->data[3] = 0x0F;
@@ -547,6 +545,168 @@ START_TEST(test_buffer_append)
     SOPC_Buffer_Delete(bufB);
     bufA = NULL;
     bufB = NULL;
+}
+END_TEST
+
+START_TEST(test_buffer_resizable)
+{
+    uint8_t data[20] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09,
+                        0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12, 0x13};
+    SOPC_ReturnStatus status = 0;
+    SOPC_Buffer* buf = NULL;
+
+    // Test write with resizable buffer
+    //// Test nominal cases
+    buf = SOPC_Buffer_CreateResizable(5, 15);
+    status = SOPC_Buffer_Write(buf, data, 9);
+    ck_assert_int_eq(status, 0);
+    ck_assert_int_eq(buf->initial_size, 5);
+    ck_assert_int_eq(buf->current_size, 5 * 2);
+    ck_assert_int_eq(buf->maximum_size, 15);
+    ck_assert_int_eq(buf->length, 9);
+    ck_assert_int_eq(buf->position, 9);
+    ck_assert_int_eq(buf->data[0], 0x00);
+    ck_assert_int_eq(buf->data[1], 0x01);
+    ck_assert_int_eq(buf->data[2], 0x02);
+    ck_assert_int_eq(buf->data[3], 0x03);
+    ck_assert_int_eq(buf->data[4], 0x04);
+    ck_assert_int_eq(buf->data[5], 0x05);
+    ck_assert_int_eq(buf->data[6], 0x06);
+    ck_assert_int_eq(buf->data[7], 0x07);
+    ck_assert_int_eq(buf->data[8], 0x08);
+    status = SOPC_Buffer_Write(buf, &data[9], 2);
+    ck_assert_int_eq(status, 0);
+    ck_assert_int_eq(buf->initial_size, 5);
+    ck_assert_int_eq(buf->current_size, 5 * 3);
+    ck_assert_int_eq(buf->length, 11);
+    ck_assert_int_eq(buf->position, 11);
+    ck_assert_int_eq(buf->data[0], 0x00);
+    ck_assert_int_eq(buf->data[1], 0x01);
+    ck_assert_int_eq(buf->data[2], 0x02);
+    ck_assert_int_eq(buf->data[3], 0x03);
+    ck_assert_int_eq(buf->data[4], 0x04);
+    ck_assert_int_eq(buf->data[5], 0x05);
+    ck_assert_int_eq(buf->data[6], 0x06);
+    ck_assert_int_eq(buf->data[7], 0x07);
+    ck_assert_int_eq(buf->data[8], 0x08);
+    ck_assert_int_eq(buf->data[9], 0x09);
+    ck_assert_int_eq(buf->data[10], 0x0a);
+
+    status = SOPC_Buffer_Write(buf, &data[11], 4);
+    ck_assert_int_eq(status, 0);
+    ck_assert_int_eq(buf->initial_size, 5);
+    ck_assert_int_eq(buf->current_size, 5 * 3);
+    ck_assert_int_eq(buf->length, 15);
+    ck_assert_int_eq(buf->position, 15);
+    ck_assert_int_eq(buf->data[0], 0x00);
+    ck_assert_int_eq(buf->data[1], 0x01);
+    ck_assert_int_eq(buf->data[2], 0x02);
+    ck_assert_int_eq(buf->data[3], 0x03);
+    ck_assert_int_eq(buf->data[4], 0x04);
+    ck_assert_int_eq(buf->data[5], 0x05);
+    ck_assert_int_eq(buf->data[6], 0x06);
+    ck_assert_int_eq(buf->data[7], 0x07);
+    ck_assert_int_eq(buf->data[8], 0x08);
+    ck_assert_int_eq(buf->data[9], 0x09);
+    ck_assert_int_eq(buf->data[10], 0x0a);
+    ck_assert_int_eq(buf->data[11], 0x0b);
+    ck_assert_int_eq(buf->data[12], 0x0c);
+    ck_assert_int_eq(buf->data[13], 0x0d);
+    ck_assert_int_eq(buf->data[14], 0x0e);
+
+    //// Test degraded cases
+    status = SOPC_Buffer_Write(buf, &data[15], 5);
+    ck_assert_int_ne(status, 0);
+    ck_assert_int_eq(buf->initial_size, 5);
+    ck_assert_int_eq(buf->current_size, 5 * 3);
+    ck_assert_int_eq(buf->length, 15);
+    ck_assert_int_eq(buf->position, 15);
+    ck_assert_int_eq(buf->data[0], 0x00);
+    ck_assert_int_eq(buf->data[1], 0x01);
+    ck_assert_int_eq(buf->data[2], 0x02);
+    ck_assert_int_eq(buf->data[3], 0x03);
+    ck_assert_int_eq(buf->data[4], 0x04);
+    ck_assert_int_eq(buf->data[5], 0x05);
+    ck_assert_int_eq(buf->data[6], 0x06);
+    ck_assert_int_eq(buf->data[7], 0x07);
+    ck_assert_int_eq(buf->data[8], 0x08);
+    ck_assert_int_eq(buf->data[9], 0x09);
+    ck_assert_int_eq(buf->data[10], 0x0a);
+    ck_assert_int_eq(buf->data[11], 0x0b);
+    ck_assert_int_eq(buf->data[12], 0x0c);
+    ck_assert_int_eq(buf->data[13], 0x0d);
+    ck_assert_int_eq(buf->data[14], 0x0e);
+
+    SOPC_Buffer_Delete(buf);
+    buf = NULL;
+
+    // Test copy
+    //// Test nominal cases
+    buf = SOPC_Buffer_Create(10);
+    SOPC_Buffer* buf2 = SOPC_Buffer_CreateResizable(1, 5);
+    status = SOPC_Buffer_Write(buf, data, 4);
+    status = SOPC_Buffer_Copy(buf2, buf);
+    ck_assert_int_eq(status, SOPC_STATUS_OK);
+    ck_assert_int_eq(buf2->length, 4);
+    ck_assert_int_eq(buf2->position, 4);
+    ck_assert_int_eq(buf2->data[0], 0x00);
+    ck_assert_int_eq(buf2->data[1], 0x01);
+    ck_assert_int_eq(buf2->data[2], 0x02);
+    ck_assert_int_eq(buf2->data[3], 0x03);
+    ck_assert_int_eq(buf->initial_size, 10);
+    ck_assert_int_eq(buf->current_size, 10);
+    ck_assert_int_eq(buf->maximum_size, 10);
+    ck_assert_int_eq(buf2->initial_size, 1);
+    ck_assert_int_eq(buf2->current_size, 4);
+    ck_assert_int_eq(buf2->maximum_size, 5);
+
+    buf->data[0] = 0x01;
+    buf->data[3] = 0x0F;
+    status = SOPC_Buffer_SetPosition(buf, 1);
+    status = SOPC_Buffer_CopyWithLength(buf2, buf, 3);
+    ck_assert_int_eq(status, SOPC_STATUS_OK);
+    ck_assert_int_eq(buf2->length, 3);
+    ck_assert_int_eq(buf2->position, 1);
+    ck_assert_int_eq(buf2->data[0], 0x01);
+    ck_assert_int_eq(buf2->data[1], 0x01);
+    ck_assert_int_eq(buf2->data[2], 0x02);
+    ck_assert_int_eq(buf2->data[3], 0x00);
+    ck_assert_int_eq(buf2->initial_size, 1);
+    ck_assert_int_eq(buf2->current_size, 4);
+    ck_assert_int_eq(buf2->maximum_size, 5);
+
+    //// Test degraded cases
+
+    /////// Destination buffer size insufficient
+    SOPC_Buffer_Reset(buf);
+    status = SOPC_Buffer_Write(buf, data, 4);
+    status = SOPC_Buffer_Write(buf, data, 4);
+    status = SOPC_Buffer_Copy(buf2, buf);
+    ck_assert_int_eq(status, SOPC_STATUS_OUT_OF_MEMORY);
+    ck_assert_int_eq(buf2->length, 3);
+    ck_assert_int_eq(buf2->position, 1);
+    ck_assert_int_eq(buf2->data[0], 0x01);
+    ck_assert_int_eq(buf2->data[1], 0x01);
+    ck_assert_int_eq(buf2->data[2], 0x02);
+    ck_assert_int_eq(buf2->initial_size, 1);
+    ck_assert_int_eq(buf2->current_size, 4);
+    ck_assert_int_eq(buf2->maximum_size, 5);
+
+    status = SOPC_Buffer_SetPosition(buf, 1);
+    ck_assert_int_eq(status, 0);
+    status = SOPC_Buffer_CopyWithLength(buf2, buf, 6);
+    ck_assert_int_eq(status, SOPC_STATUS_OUT_OF_MEMORY);
+    ck_assert_int_eq(buf2->length, 3);
+    ck_assert_int_eq(buf2->position, 1);
+    ck_assert_int_eq(buf2->data[0], 0x01);
+    ck_assert_int_eq(buf2->data[1], 0x01);
+    ck_assert_int_eq(buf2->data[2], 0x02);
+
+    SOPC_Buffer_Delete(buf2);
+    buf2 = NULL;
+
+    SOPC_Buffer_Delete(buf);
+    buf = NULL;
 }
 END_TEST
 
@@ -3632,6 +3792,7 @@ Suite* tests_make_suite_tools(void)
     tcase_add_test(tc_buffer, test_buffer_reset);
     tcase_add_test(tc_buffer, test_buffer_set_properties);
     tcase_add_test(tc_buffer, test_buffer_append);
+    tcase_add_test(tc_buffer, test_buffer_resizable);
     suite_add_tcase(s, tc_buffer);
     tc_linkedlist = tcase_create("Linked List");
     tcase_add_test(tc_linkedlist, test_linked_list);

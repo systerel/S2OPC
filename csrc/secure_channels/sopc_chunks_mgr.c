@@ -220,11 +220,11 @@ static bool SC_Chunks_DecodeTcpMsgHeader(SOPC_SecureConnection_ChunkMgrCtx* chun
             *errorStatus = OpcUa_BadEncodingError;
             result = false;
         }
-        else if (chunkCtx->currentMsgSize > chunkCtx->currentChunkInputBuffer->max_size)
+        else if (chunkCtx->currentMsgSize > chunkCtx->currentChunkInputBuffer->maximum_size)
         {
             SOPC_Logger_TraceError(
                 "ChunksMgr: decoding TCP UA header: message size=%u indicated greater than receiveBufferSize=%u",
-                chunkCtx->currentMsgSize, chunkCtx->currentChunkInputBuffer->max_size);
+                chunkCtx->currentMsgSize, chunkCtx->currentChunkInputBuffer->maximum_size);
             *errorStatus = OpcUa_BadTcpMessageTooLarge;
             result = false;
         }
@@ -2977,7 +2977,7 @@ static bool SC_Chunks_EncryptMsg(SOPC_SecureConnection* scConnection,
         else
         {
             result = true;
-            if (encryptedBuffer->max_size < sequenceNumberPosition + encryptedDataLength)
+            if (encryptedBuffer->maximum_size < sequenceNumberPosition + encryptedDataLength)
             {
                 result = false;
             }
@@ -3042,7 +3042,7 @@ static bool SC_Chunks_EncryptMsg(SOPC_SecureConnection* scConnection,
             SOPC_Byte* encryptedData = NULL;
 
             // Check size of encrypted data array
-            if (encryptedBuffer->max_size < sequenceNumberPosition + encryptedDataLength)
+            if (encryptedBuffer->maximum_size < sequenceNumberPosition + encryptedDataLength)
             {
                 result = false;
                 *errorStatus = OpcUa_BadTcpInternalError;
@@ -3486,8 +3486,8 @@ static bool SC_Chunks_TreatSendBufferOPN(
         // ASYMMETRIC SECURITY SPECIFIC CASE: check MaxSenderCertificate side (padding necessary)
         // TODO: since we already encoded everything except signature, is it really necessary ?
         result = SC_Chunks_CheckMaxSenderCertificateSize(
-            scConnectionIdx, scConnection, senderCertificateSize, nonEncryptedBuffer->max_size, securityPolicyLength,
-            hasPadding, realPaddingLength, hasExtraPadding, signatureSize, errorStatus);
+            scConnectionIdx, scConnection, senderCertificateSize, nonEncryptedBuffer->maximum_size,
+            securityPolicyLength, hasPadding, realPaddingLength, hasExtraPadding, signatureSize, errorStatus);
     }
 
     if (result)
@@ -3890,7 +3890,7 @@ static bool SC_Chunks_NextOutputChunkBuffer(SOPC_SecureConnection* scConnection,
     }
     else
     {
-        assert(SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH + nextChunkBodySize <= (*nextChunkBuffer)->max_size);
+        assert(SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH + nextChunkBodySize <= (*nextChunkBuffer)->maximum_size);
         SOPC_Buffer_Reset(*nextChunkBuffer);
     }
     bool result = *nextChunkBuffer != NULL;

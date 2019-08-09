@@ -56,7 +56,7 @@ typedef enum
     EP_CLOSED,             /* id = endpoint description config index,
                                  auxParams = SOPC_ReturnStatus */
     SC_CONNECTED,          /* id = secure channel connection index,
-                                 auxParams = (uint32_t) secure channel configuration index */
+                              auxParams = (uint32_t) secure channel configuration index */
     SC_CONNECTION_TIMEOUT, /* id = endpoint connection config index */
     SC_DISCONNECTED,       /* id = secure channel connection index */
     SC_SERVICE_RCV_MSG,    /* id = secure channel connection index,

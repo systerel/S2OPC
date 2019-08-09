@@ -36,28 +36,30 @@
  */
 typedef struct
 {
-    uint32_t max_size; /**< maximum size (allocated bytes) */
-    uint32_t position; /**< read/write position */
-    uint32_t length;   /**< data length */
-    uint8_t* data;     /**< data bytes */
+    uint32_t initial_size; /**< initial size (also used as size increment step) */
+    uint32_t current_size; /**< current size */
+    uint32_t maximum_size; /**< maximum size */
+    uint32_t position;     /**< read/write position */
+    uint32_t length;       /**< data length */
+    uint8_t* data;         /**< data bytes */
 } SOPC_Buffer;
 
 /**
- *  \brief          Allocate a buffer and its data bytes of the given size and returns it
+ *  \brief          Allocate a buffer and its data bytes of the given definitive size and returns it
  *
- *  \param size     The size of the data bytes allocated
+ *  \param size     The size of the data bytes allocated (static size).
  *  \return         Pointer on the allocated buffer or NULL if allocation failed
  */
 SOPC_Buffer* SOPC_Buffer_Create(uint32_t size);
 
 /**
- *  \brief          Initialize a buffer by allocating data bytes
+ *  \brief              Allocate a resizable buffer and its initial and maximum data bytes
  *
- *  \param buffer   Pointer to a non allocated buffer (not NULL)
- *  \param size     The size of the buffer
- *  \return         0 if succeeded, non zero otherwise
+ *  \param initial_size The size of the data bytes allocated initially (also used as increment step)
+ *  \param maximum_size The size of the maximum data bytes finally allocated
+ *  \return             Pointer on the allocated buffer or NULL if allocation failed
  */
-SOPC_ReturnStatus SOPC_Buffer_Init(SOPC_Buffer* buffer, uint32_t size);
+SOPC_Buffer* SOPC_Buffer_CreateResizable(uint32_t initial_size, uint32_t maximum_size);
 
 /**
  * \brief Wraps a raw memory area into an SOPC_Buffer.
@@ -167,7 +169,8 @@ SOPC_ReturnStatus SOPC_Buffer_Copy(SOPC_Buffer* dest, SOPC_Buffer* src);
 
 /**
  *  \brief                  Copy the data bytes and properties for the given length from the source buffer to the
- * destination buffer
+ *                          destination buffer.
+ *
  *
  *  \param dest             Pointer to the destination buffer of the copy operation (dest->maxsize >= limitedLength)
  *  \param src              Pointer to the source buffer of the copy operation (src->length >= limitedLength,
