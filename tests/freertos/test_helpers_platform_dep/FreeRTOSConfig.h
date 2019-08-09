@@ -38,11 +38,16 @@
  * See http://www.freertos.org/a00110.html.
  *----------------------------------------------------------*/
 
+#define configUSE_TRACE_FACILITY 0 /*Enable TraceAnalyzer*/
 #define configUSE_PREEMPTION 1
 #define configUSE_TICKLESS_IDLE 0
 #define configCPU_CLOCK_HZ (SystemCoreClock)
 #define configTICK_RATE_HZ ((TickType_t) 1000)
+#if (configUSE_TRACE_FACILITY == 1)
+#define configMAX_PRIORITIES 10
+#else
 #define configMAX_PRIORITIES 1
+#endif
 #define configMINIMAL_STACK_SIZE ((unsigned short) 2048)
 #define configMINIMAL_STACK_SIZE_TIMER ((unsigned short) 256)
 #define configMAX_TASK_NAME_LEN 40
@@ -75,17 +80,20 @@
 #define configUSE_DAEMON_TASK_STARTUP_HOOK 0
 
 /* Run time and task stats gathering related definitions. */
-#define configGENERATE_RUN_TIME_STATS 0
-#define configUSE_TRACE_FACILITY 0
-#define configUSE_STATS_FORMATTING_FUNCTIONS 0
+#if configUSE_TRACE_FACILITY == 1
+#define configGENERATE_RUN_TIME_STATS 1
+#define configUSE_STATS_FORMATTING_FUNCTIONS 1
 #define configRECORD_STACK_HIGH_ADDRESS 1
+#else
+#define configGENERATE_RUN_TIME_STATS 0
+#define configUSE_STATS_FORMATTING_FUNCTIONS 0
+#define configRECORD_STACK_HIGH_ADDRESS 0
+#endif
 
 /* Co-routine related definitions. */
 #define configUSE_CO_ROUTINES 0
 #define configMAX_CO_ROUTINE_PRIORITIES 2
-
 #define configFRTOS_MEMORY_SCHEME 4
-#define configINCLUDE_FREERTOS_TASK_C_ADDITIONS_H 0
 /* Software timer related definitions. */
 #define configUSE_TIMERS 1
 #define configTIMER_TASK_PRIORITY (configMAX_PRIORITIES - 1)
