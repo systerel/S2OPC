@@ -66,6 +66,7 @@ typedef enum
     stCreatingSubscr,
     stCreatingMonIt,
     stCreatingPubReq,
+    stDeletingSubscr,
     stClosing
 } SOPC_StaMac_State;
 
@@ -167,6 +168,11 @@ SOPC_ReturnStatus SOPC_StaMac_SendRequest(SOPC_StaMac_Machine* pSM,
  * TODO
  */
 SOPC_ReturnStatus SOPC_StaMac_CreateSubscription(SOPC_StaMac_Machine* pSM);
+
+/**
+ * TODO
+ */
+SOPC_ReturnStatus SOPC_StaMac_DeleteSubscription(SOPC_StaMac_Machine* pSM);
 
 /**
  * \brief Creates a MonitoredItem asynchronously.

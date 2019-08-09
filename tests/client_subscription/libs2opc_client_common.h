@@ -114,6 +114,13 @@ SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConnectionId cfgId
  */
 SOPC_ReturnStatus SOPC_ClientCommon_CreateSubscription(const SOPC_LibSub_ConnectionId cliId,
                                                        SOPC_ClientHelper_DataChangeCbk cbkWrapper);
+/**
+ * @description
+ *    deletes a subscription
+ * @param cliId
+ *    connection id
+ */
+SOPC_ReturnStatus SOPC_ClientCommon_DeleteSubscription(const SOPC_LibSub_ConnectionId cliId);
 
 /*
  @description

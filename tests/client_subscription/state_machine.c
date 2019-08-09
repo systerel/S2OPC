@@ -123,6 +123,11 @@ static void StaMac_ProcessEvent_stCreatingMonIt(SOPC_StaMac_Machine* pSM,
                                                 uint32_t arg,
                                                 void* pParam,
                                                 uintptr_t appCtx);
+static void StaMac_ProcessEvent_stDeletingSubscr(SOPC_StaMac_Machine* pSM,
+                                                 SOPC_App_Com_Event event,
+                                                 uint32_t arg,
+                                                 void* pParam,
+                                                 uintptr_t appCtx);
 static void StaMac_ProcessEvent_stError(SOPC_StaMac_Machine* pSM,
                                         SOPC_App_Com_Event event,
                                         uint32_t arg,
@@ -459,6 +464,39 @@ SOPC_ReturnStatus SOPC_StaMac_CreateSubscription(SOPC_StaMac_Machine* pSM)
     return status;
 }
 
+SOPC_ReturnStatus SOPC_StaMac_DeleteSubscription(SOPC_StaMac_Machine* pSM)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    void* pRequest = NULL;
+
+    if (SOPC_StaMac_HasSubscription(pSM) && stActivated == pSM->state)
+    {
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Deleting subscription.");
+
+		if (SOPC_STATUS_OK == status)
+		{
+			status = Helpers_NewDeleteSubscriptionRequest(pSM->iSubscriptionID, &pRequest);
+		}
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_StaMac_SendRequest(pSM, pRequest, 0, SOPC_REQUEST_SCOPE_STATE_MACHINE);
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            pSM->state = stDeletingSubscr;
+        }
+        else
+        {
+            pSM->state = stError;
+        }
+    }
+    else
+    {
+        status = SOPC_STATUS_INVALID_STATE;
+    }
+    return status;
+}
+
 SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
                                                   char const* const* lszNodeId,
                                                   const uint32_t* liAttrId,
@@ -616,6 +654,7 @@ bool SOPC_StaMac_IsConnected(SOPC_StaMac_Machine* pSM)
     case stCreatingSubscr:
     case stCreatingMonIt:
     case stCreatingPubReq:
+    case stDeletingSubscr:
     case stClosing:
         bConnected = true;
         break;
@@ -757,6 +796,9 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                 break;
             case stCreatingPubReq:
                 /* TODO: remove this non existing state */
+                break;
+            case stDeletingSubscr:
+                StaMac_ProcessEvent_stDeletingSubscr(pSM, event, arg, pParam, intAppCtx);
                 break;
             /* Invalid states */
             case stInit:
@@ -1082,6 +1124,50 @@ static void StaMac_ProcessEvent_stCreatingSubscr(SOPC_StaMac_Machine* pSM,
     default:
         pSM->state = stError;
         Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "In state stCreatingSubscr, unexpected event %i.", event);
+        break;
+    }
+}
+
+static void StaMac_ProcessEvent_stDeletingSubscr(SOPC_StaMac_Machine* pSM,
+                                                 SOPC_App_Com_Event event,
+                                                 uint32_t arg,
+                                                 void* pParam,
+                                                 uintptr_t appCtx)
+{
+    (void) (arg);
+    (void) (appCtx);
+
+    switch (event)
+    {
+    case SE_RCV_SESSION_RESPONSE:
+        assert(pSM->iSubscriptionID != 0);
+        //TODO check that we receive a deleteSubscriptionResponse ?
+        //TODO check OpcUa_DeleteSubscriptionsResponse content
+        if (1 != ((OpcUa_DeleteSubscriptionsResponse*) pParam)->NoOfResults)
+        {
+            /* we should have deteled only one subscription */
+            pSM->state = stError;
+        }
+        else if (0 != ((OpcUa_DeleteSubscriptionsResponse*) pParam)->Results[0])
+        {
+            /* delete subscription went wrong */
+            pSM->state = stError;
+        }
+        //TODO clear any remaining information about previous subscription
+        pSM->iSubscriptionID = 0;
+        SOPC_SLinkedList_Clear(pSM->pListMonIt);
+        SOPC_SLinkedList_Clear(pSM->dataIdToNodeIdList);
+
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Subscription deleted.");
+        pSM->state = stActivated;
+        break;
+    case SE_SND_REQUEST_FAILED:
+        pSM->state = stError;
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Send delete subscription request failed.");
+        break;
+    default:
+        pSM->state = stError;
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "In state stDeletingSubscr, unexpected event %i.", event);
         break;
     }
 }
