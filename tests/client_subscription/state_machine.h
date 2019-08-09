@@ -163,6 +163,11 @@ SOPC_ReturnStatus SOPC_StaMac_SendRequest(SOPC_StaMac_Machine* pSM,
                                           uintptr_t appCtx,
                                           SOPC_StaMac_RequestScope requestScope);
 
+/*
+ * TODO
+ */
+SOPC_ReturnStatus SOPC_StaMac_CreateSubscription(SOPC_StaMac_Machine* pSM);
+
 /**
  * \brief Creates a MonitoredItem asynchronously.
  *

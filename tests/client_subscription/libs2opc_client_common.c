@@ -502,11 +502,12 @@ SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConfigurationId cf
     mutStatus = Mutex_Unlock(&mutex);
     assert(SOPC_STATUS_OK == mutStatus);
 
-    /* Wait for the subscription to be created */
+    /* Wait for the connection to be created */
     if (SOPC_STATUS_OK == status)
     {
         int count = 0;
-        while (!SOPC_StaMac_IsError(pSM) && !SOPC_StaMac_HasSubscription(pSM) &&
+        while (!SOPC_StaMac_IsError(pSM) &&
+               !SOPC_StaMac_IsConnected(pSM) &&
                count * CONNECTION_TIMEOUT_MS_STEP < pCfg->timeout_ms)
         {
             SOPC_Sleep(CONNECTION_TIMEOUT_MS_STEP);
@@ -688,6 +689,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_Disconnect(const SOPC_LibSub_ConnectionId cl
 SOPC_ReturnStatus SOPC_ClientCommon_CreateSubscription(const SOPC_LibSub_ConnectionId cliId,
                                                        SOPC_ClientHelper_DataChangeCbk cbkWrapper)
 {
+    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "SOPC_ClientCommon_CreateSubscription");
     //TODO implement this function
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_StaMac_Machine* pSM = NULL;
@@ -712,9 +714,41 @@ SOPC_ReturnStatus SOPC_ClientCommon_CreateSubscription(const SOPC_LibSub_Connect
         status = SOPC_StaMac_ConfigureDataChangeCallback(pSM, cbkWrapper);
     }
 
+    if (SOPC_STATUS_OK == status)
+    {
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Create Subscription.");
+        status = SOPC_StaMac_CreateSubscription(pSM);
+    }
+
+    int64_t timeout_ms = SOPC_StaMac_GetTimeout(pSM);
+
     /* Release the lock so that the event handler can work properly while waiting */
     mutStatus = Mutex_Unlock(&mutex);
     assert(SOPC_STATUS_OK == mutStatus);
+
+    /* Wait for the monitored item to be created */
+    if (SOPC_STATUS_OK == status)
+    {
+        int count = 0;
+        while (!SOPC_StaMac_IsError(pSM) && !SOPC_StaMac_HasSubscription(pSM) &&
+               count * CONNECTION_TIMEOUT_MS_STEP < timeout_ms)
+        {
+            SOPC_Sleep(CONNECTION_TIMEOUT_MS_STEP);
+            ++count;
+        }
+        /* When the request timeoutHint is lower than pCfg->timeout_ms, the machine will go in error,
+         *  and NOK is returned. */
+        if (SOPC_StaMac_IsError(pSM))
+        {
+            status = SOPC_STATUS_NOK;
+        }
+        else if (count * CONNECTION_TIMEOUT_MS_STEP >= timeout_ms)
+        {
+            status = SOPC_STATUS_TIMEOUT;
+            SOPC_StaMac_SetError(pSM);
+        }
+    }
+    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "EndofCreateSubscription.");
 
     return status;
 }

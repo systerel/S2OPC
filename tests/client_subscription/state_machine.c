@@ -426,6 +426,39 @@ SOPC_ReturnStatus SOPC_StaMac_SendRequest(SOPC_StaMac_Machine* pSM,
     return status;
 }
 
+SOPC_ReturnStatus SOPC_StaMac_CreateSubscription(SOPC_StaMac_Machine* pSM)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    void* pRequest = NULL;
+
+    if (0 == pSM->iSubscriptionID && stActivated == pSM->state)
+    {
+        /* Creates the subscription */
+        /* The request is freed by the Toolkit */
+        /* TODO: make all value configurable */
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Creating subscription.");
+        status = Helpers_NewCreateSubscriptionRequest(pSM->fPublishInterval, pSM->iCntMaxKeepAlive,
+                pSM->iCntLifetime, &pRequest);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_StaMac_SendRequest(pSM, pRequest, 0, SOPC_REQUEST_SCOPE_STATE_MACHINE);
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            pSM->state = stCreatingSubscr;
+        }
+        else
+        {
+            pSM->state = stError;
+        }
+    }
+    else
+    {
+        status = SOPC_STATUS_INVALID_STATE;
+    }
+    return status;
+}
+
 SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
                                                   char const* const* lszNodeId,
                                                   const uint32_t* liAttrId,
@@ -1152,30 +1185,8 @@ static void StaMac_PostProcessActions(SOPC_StaMac_Machine* pSM, SOPC_StaMac_Stat
     {
     /* Mostly when stActivated is reached */
     case stActivated:
-        /* First, create the subscription */
-        if (0 == pSM->iSubscriptionID)
-        {
-            /* Creates the subscription */
-            /* The request is freed by the Toolkit */
-            /* TODO: make all value configurable */
-            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Creating subscription.");
-            status = Helpers_NewCreateSubscriptionRequest(pSM->fPublishInterval, pSM->iCntMaxKeepAlive,
-                                                          pSM->iCntLifetime, &pRequest);
-            if (SOPC_STATUS_OK == status)
-            {
-                status = SOPC_StaMac_SendRequest(pSM, pRequest, 0, SOPC_REQUEST_SCOPE_STATE_MACHINE);
-            }
-            if (SOPC_STATUS_OK == status)
-            {
-                pSM->state = stCreatingSubscr;
-            }
-            else
-            {
-                pSM->state = stError;
-            }
-        }
-        /* Then add tokens, but wait for at least a monitored item */
-        else if (pSM->nTokenUsable < pSM->nTokenTarget)
+        /* add tokens, but wait for at least a monitored item */
+        if (0 != pSM->iSubscriptionID && pSM->nTokenUsable < pSM->nTokenTarget)
         {
             while (SOPC_STATUS_OK == status && pSM->nTokenUsable < pSM->nTokenTarget)
             {

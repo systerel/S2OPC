@@ -497,6 +497,7 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
 
 int32_t SOPC_ClientHelper_CreateSubscription(int32_t connectionId, SOPC_ClientHelper_DataChangeCbk callback)
 {
+    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_DEBUG, "SOPC_ClientHelper_CreateSubscription");
     int32_t res = 0;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
