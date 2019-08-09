@@ -58,6 +58,11 @@
 
 Condition gHandleConditionVariable;
 
+#if (configUSE_BOGOMIPS == 1)
+extern float external_bogomips(void);
+float gPerformanceValue = 0.0;
+#endif
+
 int main(void)
 {
     // Configuration of MPU. I and D cache are disabled.
@@ -72,11 +77,14 @@ int main(void)
     // Initialization of MCU ENET driver
     // Initialization of MCU Timer 3 used by FreeRTOS
     // to generate 10KHz signal and measure cpu load per thread
-
     BOARD_InitBootPeripherals();
 
+#if (configUSE_BOGOMIPS == 1)
+    gPerformanceValue = external_bogomips();
+#endif
+
     // Network interface initialization (IP @...)
-    // P_ETHERNET_IF_IsReady shall be called
+    //P_ETHERNET_IF_IsReady shall be called
     // to verify if interface is ready, else
     // lwip socket api crash.
     P_ETHERNET_IF_Initialize();
@@ -111,7 +119,7 @@ int main(void)
 
     // FREE_RTOS_TEST_S2OPC_USECASE_PUBSUB_SYNCHRO(NULL);
 
-#if (configUSE_TRACE_FACILITY == 1)
+#if (configUSE_TRACE_ANALYZER == 1)
     vTraceEnable(TRC_INIT);
 #endif
 

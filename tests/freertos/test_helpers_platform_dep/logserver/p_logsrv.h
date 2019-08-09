@@ -73,7 +73,7 @@
 #define P_LOG_SRV_CALLBACK_TX_STACK (128)
 #define P_LOG_CLT_MON_CALLBACK_STACK (384)
 #define P_LOG_CLT_TX_CALLBACK_STACK (384)
-#define P_LOG_CLT_RX_CALLBACK_STACK (128)
+#define P_LOG_CLT_RX_CALLBACK_STACK (384)
 
 // Atomic fifo config
 #define P_LOG_FIFO_DATA_SIZE_SRV_TX (8196)    // Max cumulative size

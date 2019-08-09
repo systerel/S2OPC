@@ -38,12 +38,12 @@
  * See http://www.freertos.org/a00110.html.
  *----------------------------------------------------------*/
 
-#define configUSE_TRACE_FACILITY 0 /*Enable TraceAnalyzer*/
+#define configUSE_TRACE_ANALYZER 0
 #define configUSE_PREEMPTION 1
 #define configUSE_TICKLESS_IDLE 0
 #define configCPU_CLOCK_HZ (SystemCoreClock)
 #define configTICK_RATE_HZ ((TickType_t) 1000)
-#if (configUSE_TRACE_FACILITY == 1)
+#if (configUSE_TRACE_ANALYZER == 1)
 #define configMAX_PRIORITIES 10
 #else
 #define configMAX_PRIORITIES 1
@@ -80,14 +80,20 @@
 #define configUSE_DAEMON_TASK_STARTUP_HOOK 0
 
 /* Run time and task stats gathering related definitions. */
-#if configUSE_TRACE_FACILITY == 1
+#if configUSE_TRACE_ANALYZER == 1 /*Enable TraceAnalyzer*/
+#define configUSE_TRACE_FACILITY 1
 #define configGENERATE_RUN_TIME_STATS 1
 #define configUSE_STATS_FORMATTING_FUNCTIONS 1
 #define configRECORD_STACK_HIGH_ADDRESS 1
+#define configINCLUDE_FREERTOS_TASK_C_ADDITIONS_H 1
+#define configUSE_BOGOMIPS 0
 #else
-#define configGENERATE_RUN_TIME_STATS 0
-#define configUSE_STATS_FORMATTING_FUNCTIONS 0
-#define configRECORD_STACK_HIGH_ADDRESS 0
+#define configUSE_TRACE_FACILITY 1
+#define configGENERATE_RUN_TIME_STATS 1
+#define configUSE_STATS_FORMATTING_FUNCTIONS 1
+#define configRECORD_STACK_HIGH_ADDRESS 1
+#define configINCLUDE_FREERTOS_TASK_C_ADDITIONS_H 1
+#define configUSE_BOGOMIPS 1
 #endif
 
 /* Co-routine related definitions. */
@@ -168,7 +174,7 @@ extern void freeRTOS_TRACE_MALLOC(void* pvAddress, uint32_t uiSize);
 extern void freeRTOS_TRACE_FREE(void* pvAddress, uint32_t uiSize);
 #define traceFREE(pvAddress, uiSize) freeRTOS_TRACE_FREE(pvAddress, uiSize)
 */
-#if (configUSE_TRACE_FACILITY == 1)
+#if (configUSE_TRACE_ANALYZER == 1)
 #include "trcRecorder.h"
 #endif
 

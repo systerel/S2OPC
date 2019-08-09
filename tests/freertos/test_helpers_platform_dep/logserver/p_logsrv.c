@@ -1562,6 +1562,13 @@ static uint16_t cbHelloCallback(uint8_t* pBufferInOut, uint16_t nbBytesToEncode,
 static void cbOneConnexion(void** pAnalyzerContext, tLogClientWks* pClt)
 {
     Condition_SignalAll(&gSignalOneConnexion);
+
+#if (configUSE_BOGOMIPS == 1)
+    char sBuffer[50] = {0};
+    extern float gPerformanceValue;
+    snprintf(sBuffer, sizeof(sBuffer), "\r\n *** BogoMips=%f *** \r\n", gPerformanceValue);
+    P_LOG_CLIENT_SendResponse(pClt, (const uint8_t*) sBuffer, strlen(sBuffer), NULL);
+#endif
 }
 
 // Callback used by analyzer, so *dataSize not changed, buffer in copy to buffer out to client
