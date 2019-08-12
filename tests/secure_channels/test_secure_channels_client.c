@@ -331,13 +331,9 @@ int main(int argc, char* argv[])
 
         SOPC_Buffer* buffer = SOPC_Buffer_Create(SOPC_MAX_MESSAGE_LENGTH);
         assert(NULL != buffer);
-        status = SOPC_Buffer_SetDataLength(buffer, SOPC_UA_SECURE_MESSAGE_HEADER_LENGTH +
-                                                       SOPC_UA_SYMMETRIC_SECURITY_HEADER_LENGTH +
-                                                       SOPC_UA_SECURE_MESSAGE_SEQUENCE_LENGTH);
+        status = SOPC_Buffer_SetDataLength(buffer, SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
         assert(SOPC_STATUS_OK == status);
-        status = SOPC_Buffer_SetPosition(buffer, SOPC_UA_SECURE_MESSAGE_HEADER_LENGTH +
-                                                     SOPC_UA_SYMMETRIC_SECURITY_HEADER_LENGTH +
-                                                     SOPC_UA_SECURE_MESSAGE_SEQUENCE_LENGTH);
+        status = SOPC_Buffer_SetPosition(buffer, SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
         assert(SOPC_STATUS_OK == status);
         status =
             SOPC_EncodeMsg_Type_Header_Body(buffer, &OpcUa_GetEndpointsRequest_EncodeableType,

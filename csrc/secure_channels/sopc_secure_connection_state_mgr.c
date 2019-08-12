@@ -346,14 +346,10 @@ static void SC_Client_SendCloseSecureChannelRequestAndClose(SOPC_SecureConnectio
     if (msgBuffer != NULL)
     {
         // Let size of the headers for the chunk manager
-        status = SOPC_Buffer_SetDataLength(msgBuffer, SOPC_UA_SECURE_MESSAGE_HEADER_LENGTH +
-                                                          SOPC_UA_SYMMETRIC_SECURITY_HEADER_LENGTH +
-                                                          SOPC_UA_SECURE_MESSAGE_SEQUENCE_LENGTH);
+        status = SOPC_Buffer_SetDataLength(msgBuffer, SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_Buffer_SetPosition(msgBuffer, SOPC_UA_SECURE_MESSAGE_HEADER_LENGTH +
-                                                            SOPC_UA_SYMMETRIC_SECURITY_HEADER_LENGTH +
-                                                            SOPC_UA_SECURE_MESSAGE_SEQUENCE_LENGTH);
+            status = SOPC_Buffer_SetPosition(msgBuffer, SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
         }
 
         // Fill header
