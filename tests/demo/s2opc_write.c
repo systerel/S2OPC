@@ -70,7 +70,8 @@ int main(int argc, char* argv[])
         assert(strlen(argv[1]) <= 100);
 
         SOPC_UriType tmp = SOPC_URI_UNDETERMINED;
-        char *tmp2, *tmp3 = NULL;
+        char* tmp2 = NULL;
+        char* tmp3 = NULL;
         status = SOPC_Helper_URI_SplitUri(argv[1], &tmp, &tmp2, &tmp3);
         if (SOPC_STATUS_OK == status)
         {
