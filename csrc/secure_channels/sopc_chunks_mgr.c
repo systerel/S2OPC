@@ -48,10 +48,6 @@ static const uint8_t SOPC_MSG[3] = {'M', 'S', 'G'};
 static const uint8_t SOPC_OPN[3] = {'O', 'P', 'N'};
 static const uint8_t SOPC_CLO[3] = {'C', 'L', 'O'};
 
-#define SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH                                \
-    (SOPC_UA_SECURE_MESSAGE_HEADER_LENGTH + SOPC_UA_SYMMETRIC_SECURITY_HEADER_LENGTH + \
-     SOPC_UA_SECURE_MESSAGE_SEQUENCE_LENGTH)
-
 #define SOPC_UA_ABORT_FINAL_CHUNK 'A'
 #define SOPC_UA_INTERMEDIATE_CHUNK 'C'
 #define SOPC_UA_FINAL_CHUNK 'F'

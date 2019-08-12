@@ -204,17 +204,15 @@ void message_out_bs__encode_msg(const constants__t_msg_type_i message_out_bs__ms
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_EncodeableType* encType = *(SOPC_EncodeableType**) message_out_bs__msg;
     SOPC_EncodeableType* headerType = *(SOPC_EncodeableType**) message_out_bs__msg_header;
-    // TODO: automatically growing buffer or lazy encoder to avoid creation of buffer of this size
-    SOPC_Buffer* buffer = SOPC_Buffer_Create(SOPC_MAX_MESSAGE_LENGTH);
+    SOPC_Buffer* buffer = SOPC_Buffer_CreateResizable(
+        SOPC_TCP_UA_MIN_BUFFER_SIZE, SOPC_MAX_MESSAGE_LENGTH + SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
     if (NULL != buffer)
     {
         status = SOPC_STATUS_OK;
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_Buffer_SetDataLength(buffer, SOPC_UA_SECURE_MESSAGE_HEADER_LENGTH +
-                                                       SOPC_UA_SYMMETRIC_SECURITY_HEADER_LENGTH +
-                                                       SOPC_UA_SECURE_MESSAGE_SEQUENCE_LENGTH);
+        status = SOPC_Buffer_SetDataLength(buffer, SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -224,9 +222,7 @@ void message_out_bs__encode_msg(const constants__t_msg_type_i message_out_bs__ms
             encType = &OpcUa_ServiceFault_EncodeableType;
         }
 
-        status = SOPC_Buffer_SetPosition(buffer, SOPC_UA_SECURE_MESSAGE_HEADER_LENGTH +
-                                                     SOPC_UA_SYMMETRIC_SECURITY_HEADER_LENGTH +
-                                                     SOPC_UA_SECURE_MESSAGE_SEQUENCE_LENGTH);
+        status = SOPC_Buffer_SetPosition(buffer, SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
     }
     if (SOPC_STATUS_OK == status)
     {
