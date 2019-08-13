@@ -147,6 +147,7 @@ typedef struct SOPC_SecureConnection
     SOPC_SecureConnection_TcpSequenceProperties tcpSeqProperties;
     uint32_t asymmSecuMaxBodySize;
     uint32_t symmSecuMaxBodySize;
+    bool hasExtraPaddingSize;
 
     // (Client side specific)
     uint32_t clientSecureChannelId; // Temporary recorded information from the OPN response TCP message

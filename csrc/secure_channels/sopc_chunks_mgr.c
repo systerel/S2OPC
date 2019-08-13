@@ -1289,7 +1289,10 @@ static bool SC_Chunks_DecryptMsg(SOPC_SecureConnection* scConnection, bool isSym
     return result;
 }
 
-static bool SC_Chunks_VerifyMsgSignature(SOPC_SecureConnection* scConnection, bool isSymmetric, bool isPrecCryptoData)
+static bool SC_Chunks_VerifyMsgSignature(SOPC_SecureConnection* scConnection,
+                                         bool isSymmetric,
+                                         bool isPrecCryptoData,
+                                         uint32_t* sigPosition)
 {
     assert(scConnection != NULL);
     SOPC_Buffer* buffer = scConnection->chunksCtx.currentChunkInputBuffer;
@@ -1369,10 +1372,37 @@ static bool SC_Chunks_VerifyMsgSignature(SOPC_SecureConnection* scConnection, bo
 
     if (SOPC_STATUS_OK == status)
     {
+        *sigPosition = signaturePosition;
         result = true;
     }
 
     return result;
+}
+
+static bool SOPC_Remove_Padding(SOPC_SecureConnection* scConnection)
+{
+    uint32_t nbPaddingBytes = 0;
+    SOPC_Buffer* buffer = scConnection->chunksCtx.currentChunkInputBuffer;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    if (scConnection->hasExtraPaddingSize)
+    {
+        // Last byte is the extraPaddingSize byte
+        // (most significant byte of 2 bytes integer used to specify the padding size)
+        nbPaddingBytes = (uint32_t) buffer->data[buffer->length - 1] << 8;
+        // Remove the ExtraPaddinSize byte
+        status = SOPC_Buffer_SetDataLength(buffer, buffer->length - 1);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        nbPaddingBytes += buffer->data[buffer->length - 1];
+        nbPaddingBytes++; // +1 for the PaddingSize byte which is not included
+
+        // Remove all byte related to padding
+        status = SOPC_Buffer_SetDataLength(buffer, buffer->length - nbPaddingBytes);
+    }
+
+    return SOPC_STATUS_OK == status;
 }
 
 static bool SC_Chunks_TreatMsgMultiChunks(SOPC_SecureConnection* scConnection, SOPC_StatusCode* errorStatus)
@@ -1515,6 +1545,8 @@ bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection, uint32_t* re
     bool isPrecCryptoData = false;
 
     SOPC_SecureChannel_Config* scConfig = NULL;
+
+    uint32_t signaturePosition = 0;
 
     // Note: for non secure message we already check those messages are expected
     //       regarding the connection type (client/server)
@@ -1774,8 +1806,15 @@ bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection, uint32_t* re
         // Check decrypted message signature
         result = SC_Chunks_VerifyMsgSignature(scConnection,
                                               false == isOPN, // isSymmetric
-                                              isPrecCryptoData);
-        if (!result)
+                                              isPrecCryptoData, &signaturePosition);
+        if (result)
+        {
+            // Set signature bytes as unreadable in the buffer (signature uses last bytes)
+            SOPC_ReturnStatus status =
+                SOPC_Buffer_SetDataLength(scConnection->chunksCtx.currentChunkInputBuffer, signaturePosition);
+            assert(SOPC_STATUS_OK == status);
+        }
+        else
         {
             *errorStatus = OpcUa_BadSecurityChecksFailed;
 
@@ -1805,6 +1844,18 @@ bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection, uint32_t* re
         else
         {
             SOPC_Logger_TraceError("ChunksMgr: SN verification failed (epCfgIdx=%" PRIu32 ", scCfgIdx=%" PRIu32 ")",
+                                   scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
+        }
+    }
+
+    if (result && toDecrypt)
+    {
+        // Set the padding bytes as unreadable bytes in the buffer
+        result = SOPC_Remove_Padding(scConnection);
+        if (!result)
+        {
+            *errorStatus = OpcUa_BadDecodingError;
+            SOPC_Logger_TraceError("ChunksMgr: padding removal failed (epCfgIdx=%" PRIu32 ", scCfgIdx=%" PRIu32 ")",
                                    scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
         }
     }
@@ -1931,8 +1982,10 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
         }
 
         SOPC_Logger_TraceDebug(
-            "ChunksMgr: received TCP UA message type SOPC_Msg_Type=%d (epCfgIdx=%" PRIu32 ", scCfgIdx=%" PRIu32 ")",
-            chunkCtx->currentMsgType, scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
+            "ChunksMgr: received TCP UA message type SOPC_Msg_Type=%d SOPC_Msg_IsFinal=%d (epCfgIdx=%" PRIu32
+            ", scCfgIdx=%" PRIu32 ")",
+            chunkCtx->currentMsgType, chunkCtx->currentMsgIsFinal, scConnection->serverEndpointConfigIdx,
+            scConnection->endpointConnectionConfigIdx);
 
         // Decode OPC UA Secure Conversation MessageChunk specific headers if necessary (not HEL/ACK/ERR)
         if (SC_Chunks_CheckMultiChunkContext(chunkCtx, &scConnection->tcpMsgProperties, &errorStatus) &&
@@ -2267,10 +2320,12 @@ static uint32_t SC_Chunks_ComputeMaxBodySize(uint32_t nonEncryptedHeadersSize,
                                              uint32_t cipherBlockSize,
                                              uint32_t plainBlockSize,
                                              bool toSign,
-                                             uint32_t signatureSize)
+                                             uint32_t signatureSize,
+                                             bool* hasExtraPaddingSize)
 {
     uint32_t result = 0;
     uint32_t paddingSizeFields = 0;
+    *hasExtraPaddingSize = false;
     if (!toEncrypt)
     {
         // No encryption => consider same size blocks and no padding size fields
@@ -2284,6 +2339,7 @@ static uint32_t SC_Chunks_ComputeMaxBodySize(uint32_t nonEncryptedHeadersSize,
         paddingSizeFields = 1;
         if (SC_Chunks_Is_ExtraPaddingSizePresent(plainBlockSize))
         {
+            *hasExtraPaddingSize = true;
             paddingSizeFields += 1;
         }
     }
@@ -2442,7 +2498,8 @@ static uint32_t SC_Chunks_GetSendingMaxBodySize(SOPC_SecureConnection* scConnect
                                                 SOPC_SecureChannel_Config* scConfig,
                                                 uint32_t chunkSize,
                                                 uint32_t nonEncryptedHeadersSize,
-                                                bool isSymmetric)
+                                                bool isSymmetric,
+                                                bool* hasExtraPaddingSize)
 {
     assert(scConnection != NULL);
     assert(scConfig != NULL);
@@ -2462,7 +2519,7 @@ static uint32_t SC_Chunks_GetSendingMaxBodySize(SOPC_SecureConnection* scConnect
     if (result)
     {
         maxBodySize = SC_Chunks_ComputeMaxBodySize(nonEncryptedHeadersSize, chunkSize, toEncrypt, cipherBlockSize,
-                                                   plainBlockSize, toSign, signatureSize);
+                                                   plainBlockSize, toSign, signatureSize, hasExtraPaddingSize);
     }
 
     return maxBodySize;
@@ -3357,12 +3414,14 @@ static bool SC_Chunks_TreatSendBufferOPN(
 
         if (scConnection->asymmSecuMaxBodySize == 0 && scConnection->symmSecuMaxBodySize == 0)
         {
-            scConnection->asymmSecuMaxBodySize = SC_Chunks_GetSendingMaxBodySize(
-                scConnection, scConfig, scConnection->tcpMsgProperties.sendBufferSize, sequenceNumberPosition, false);
+            scConnection->asymmSecuMaxBodySize =
+                SC_Chunks_GetSendingMaxBodySize(scConnection, scConfig, scConnection->tcpMsgProperties.sendBufferSize,
+                                                sequenceNumberPosition, false, &scConnection->hasExtraPaddingSize);
             scConnection->symmSecuMaxBodySize = SC_Chunks_GetSendingMaxBodySize(
                 scConnection, scConfig, scConnection->tcpMsgProperties.sendBufferSize,
                 // sequenceNumber position for symmetric case:
-                (SOPC_UA_SECURE_MESSAGE_HEADER_LENGTH + SOPC_UA_SYMMETRIC_SECURITY_HEADER_LENGTH), true);
+                (SOPC_UA_SECURE_MESSAGE_HEADER_LENGTH + SOPC_UA_SYMMETRIC_SECURITY_HEADER_LENGTH), true,
+                &scConnection->hasExtraPaddingSize);
         }
         if (scConnection->asymmSecuMaxBodySize == 0 || scConnection->symmSecuMaxBodySize == 0)
         {
