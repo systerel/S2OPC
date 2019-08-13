@@ -163,6 +163,11 @@ void SOPC_EncodeDecode_Float(float* floatv);
  */
 void SOPC_EncodeDecode_Double(double* doublev);
 
+/**
+ * Note: SOPC_*_Write operations return SOPC_STATUS_WOULD_BLOCK if not enough bytes available in buffer to write the
+ * value
+ */
+
 SOPC_ReturnStatus SOPC_Byte_Write(const SOPC_Byte* value, SOPC_Buffer* buf);
 SOPC_ReturnStatus SOPC_Byte_WriteAux(const void* value, SOPC_Buffer* buf);
 SOPC_ReturnStatus SOPC_Byte_Read(SOPC_Byte* value, SOPC_Buffer* buf);

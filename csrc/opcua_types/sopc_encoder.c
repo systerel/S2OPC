@@ -138,7 +138,7 @@ SOPC_ReturnStatus SOPC_Byte_Write(const SOPC_Byte* value, SOPC_Buffer* buf)
         status = SOPC_Buffer_Write(buf, value, 1);
         if (SOPC_STATUS_OK != status)
         {
-            status = SOPC_STATUS_ENCODING_ERROR;
+            status = SOPC_STATUS_OUT_OF_MEMORY == status ? SOPC_STATUS_WOULD_BLOCK : SOPC_STATUS_ENCODING_ERROR;
         }
     }
     return status;
@@ -241,7 +241,7 @@ SOPC_ReturnStatus SOPC_SByte_Write(const SOPC_SByte* value, SOPC_Buffer* buf)
 
         if (status != SOPC_STATUS_OK)
         {
-            status = SOPC_STATUS_ENCODING_ERROR;
+            status = SOPC_STATUS_OUT_OF_MEMORY == status ? SOPC_STATUS_WOULD_BLOCK : SOPC_STATUS_ENCODING_ERROR;
         }
     }
     return status;
@@ -287,7 +287,7 @@ SOPC_ReturnStatus SOPC_Int16_Write(const int16_t* value, SOPC_Buffer* buf)
 
         if (status != SOPC_STATUS_OK)
         {
-            status = SOPC_STATUS_ENCODING_ERROR;
+            status = SOPC_STATUS_OUT_OF_MEMORY == status ? SOPC_STATUS_WOULD_BLOCK : SOPC_STATUS_ENCODING_ERROR;
         }
     }
     return status;
@@ -338,7 +338,7 @@ SOPC_ReturnStatus SOPC_UInt16_Write(const uint16_t* value, SOPC_Buffer* buf)
 
         if (status != SOPC_STATUS_OK)
         {
-            status = SOPC_STATUS_ENCODING_ERROR;
+            status = SOPC_STATUS_OUT_OF_MEMORY == status ? SOPC_STATUS_WOULD_BLOCK : SOPC_STATUS_ENCODING_ERROR;
         }
     }
     return status;
@@ -387,7 +387,7 @@ SOPC_ReturnStatus SOPC_Int32_Write(const int32_t* value, SOPC_Buffer* buf)
 
         if (status != SOPC_STATUS_OK)
         {
-            status = SOPC_STATUS_ENCODING_ERROR;
+            status = SOPC_STATUS_OUT_OF_MEMORY == status ? SOPC_STATUS_WOULD_BLOCK : SOPC_STATUS_ENCODING_ERROR;
         }
     }
     return status;
@@ -432,7 +432,7 @@ SOPC_ReturnStatus SOPC_UInt32_Write(const uint32_t* value, SOPC_Buffer* buf)
 
         if (status != SOPC_STATUS_OK)
         {
-            status = SOPC_STATUS_ENCODING_ERROR;
+            status = SOPC_STATUS_OUT_OF_MEMORY == status ? SOPC_STATUS_WOULD_BLOCK : SOPC_STATUS_ENCODING_ERROR;
         }
     }
     return status;
@@ -477,7 +477,7 @@ SOPC_ReturnStatus SOPC_Int64_Write(const int64_t* value, SOPC_Buffer* buf)
 
         if (status != SOPC_STATUS_OK)
         {
-            status = SOPC_STATUS_ENCODING_ERROR;
+            status = SOPC_STATUS_OUT_OF_MEMORY == status ? SOPC_STATUS_WOULD_BLOCK : SOPC_STATUS_ENCODING_ERROR;
         }
     }
     return status;
@@ -522,7 +522,7 @@ SOPC_ReturnStatus SOPC_UInt64_Write(const uint64_t* value, SOPC_Buffer* buf)
 
         if (status != SOPC_STATUS_OK)
         {
-            status = SOPC_STATUS_ENCODING_ERROR;
+            status = SOPC_STATUS_OUT_OF_MEMORY == status ? SOPC_STATUS_WOULD_BLOCK : SOPC_STATUS_ENCODING_ERROR;
         }
     }
     return status;
@@ -567,7 +567,7 @@ SOPC_ReturnStatus SOPC_Float_Write(const float* value, SOPC_Buffer* buf)
 
         if (status != SOPC_STATUS_OK)
         {
-            status = SOPC_STATUS_ENCODING_ERROR;
+            status = SOPC_STATUS_OUT_OF_MEMORY == status ? SOPC_STATUS_WOULD_BLOCK : SOPC_STATUS_ENCODING_ERROR;
         }
     }
     return status;
@@ -612,7 +612,7 @@ SOPC_ReturnStatus SOPC_Double_Write(const double* value, SOPC_Buffer* buf)
 
         if (status != SOPC_STATUS_OK)
         {
-            status = SOPC_STATUS_ENCODING_ERROR;
+            status = SOPC_STATUS_OUT_OF_MEMORY == status ? SOPC_STATUS_WOULD_BLOCK : SOPC_STATUS_ENCODING_ERROR;
         }
     }
     return status;
@@ -671,12 +671,12 @@ SOPC_ReturnStatus SOPC_ByteString_Write(const SOPC_ByteString* str, SOPC_Buffer*
 
             if (status != SOPC_STATUS_OK)
             {
-                status = SOPC_STATUS_ENCODING_ERROR;
+                status = SOPC_STATUS_OUT_OF_MEMORY == status ? SOPC_STATUS_WOULD_BLOCK : SOPC_STATUS_ENCODING_ERROR;
             }
         }
         else if (SOPC_STATUS_OK != status)
         {
-            status = SOPC_STATUS_ENCODING_ERROR;
+            status = SOPC_STATUS_OUT_OF_MEMORY == status ? SOPC_STATUS_WOULD_BLOCK : SOPC_STATUS_ENCODING_ERROR;
         }
     }
     return status;
@@ -767,7 +767,7 @@ SOPC_ReturnStatus SOPC_String_Write(const SOPC_String* str, SOPC_Buffer* buf)
 
             if (status != SOPC_STATUS_OK)
             {
-                status = SOPC_STATUS_ENCODING_ERROR;
+                status = SOPC_STATUS_OUT_OF_MEMORY == status ? SOPC_STATUS_WOULD_BLOCK : SOPC_STATUS_ENCODING_ERROR;
             }
         }
     }
@@ -912,7 +912,7 @@ SOPC_ReturnStatus SOPC_Guid_Write(const SOPC_Guid* guid, SOPC_Buffer* buf)
         }
         if (status != SOPC_STATUS_OK)
         {
-            status = SOPC_STATUS_ENCODING_ERROR;
+            status = SOPC_STATUS_OUT_OF_MEMORY == status ? SOPC_STATUS_WOULD_BLOCK : SOPC_STATUS_ENCODING_ERROR;
         }
     }
     return status;

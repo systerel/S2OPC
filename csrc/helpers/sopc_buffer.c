@@ -258,16 +258,23 @@ SOPC_ReturnStatus SOPC_Buffer_Write(SOPC_Buffer* buffer, const uint8_t* data_src
 SOPC_ReturnStatus SOPC_Buffer_Read(uint8_t* data_dest, SOPC_Buffer* buffer, uint32_t count)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (buffer != NULL && buffer->data != NULL && buffer->position + count <= buffer->length)
+    if (buffer != NULL && buffer->data != NULL)
     {
-        if (memcpy(data_dest, &(buffer->data[buffer->position]), count) == data_dest)
+        if (buffer->position + count <= buffer->length)
         {
-            buffer->position = buffer->position + count;
-            status = SOPC_STATUS_OK;
+            if (memcpy(data_dest, &(buffer->data[buffer->position]), count) == data_dest)
+            {
+                buffer->position = buffer->position + count;
+                status = SOPC_STATUS_OK;
+            }
+            else
+            {
+                status = SOPC_STATUS_INVALID_STATE;
+            }
         }
         else
         {
-            status = SOPC_STATUS_INVALID_STATE;
+            status = SOPC_STATUS_OUT_OF_MEMORY;
         }
     }
     return status;
