@@ -147,6 +147,7 @@ int main(void)
 #endif
 
 #if (configUSE_ANALYZER == 1)
+
     gAnalyzerSrv = P_LOG_SRV_CreateAndStart(61, 4023, 1, 0, 0,                                                    //
                                             cbAnalyzerCreation, cbAnalyzerDestruction, cbAnalyzerExecution, NULL, //
                                             NULL, NULL, NULL, NULL,                                               //
