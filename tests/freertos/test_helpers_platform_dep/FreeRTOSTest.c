@@ -41,7 +41,11 @@
 #include "sopc_types.h"
 #include "sopc_udp_sockets.h"
 
-#include "p_logsrv.h"
+#include "p_sopc_log_srv.h"
+
+#include "p_channel.h"
+
+#include "p_ethernet_if.h"
 
 #include "config.h"
 #include "pubsub.h"
