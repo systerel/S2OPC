@@ -114,6 +114,15 @@ typedef enum E_RESULT_DECODER
     E_DECODER_RESULT_ERROR_NOK // Disconnect client
 } eResultDecoder;
 
+// Log server status
+typedef enum E_LOG_SERVER_STATUS
+{
+    E_LOG_SERVER_CLOSING,
+    E_LOG_SERVER_BINDING,
+    E_LOG_SERVER_ONLINE,
+    E_LOG_SERVER_SIZEOF = UINT32_MAX
+} eLogServerStatus;
+
 typedef struct T_LOG_SERVER_WORKSPACE tLogSrvWks;
 typedef struct T_LOG_CLIENT_WORKSPACE tLogClientWks;
 
@@ -161,6 +170,8 @@ typedef uint16_t (*ptrFct_EncoderTransmitHelloCallback)(
     uint16_t nbBytesToEncode,   // Strlen of inOut
     uint16_t maxSizeBufferOut); // Max size of buffer.
 
+/***Public API declaration***/
+
 tLogSrvWks* P_LOG_SRV_CreateAndStart(uint16_t port,          // Listen port
                                      uint16_t portHello,     // UDP Hello port destination
                                      int16_t maxClient,      // Max client
@@ -183,24 +194,17 @@ eLogSrvResult P_LOG_SRV_SendToAllClient(tLogSrvWks* p,          // Server handle
                                         uint16_t length,        // Length
                                         uint16_t* sentLength);  // Sent lenght
 
+eLogSrvResult P_LOG_SRV_SendToAllClientFullBuffer(tLogSrvWks* p,
+                                                  const uint8_t* pBuffer,
+                                                  uint16_t length,
+                                                  uint16_t* sentLength,
+                                                  bool bFlushOnFull);
+
+eLogServerStatus P_LOG_SRV_GetStatus(tLogSrvWks* p);
+
 eLogSrvResult P_LOG_CLIENT_SendResponse(tLogClientWks* pClt,     // Client handle
                                         const uint8_t* pBuffer,  // Buffer to send
                                         uint16_t length,         // Length
                                         uint16_t* pNbBytesSent); // Sent length
-
-// ************Public API**************
-
-// Wait a client connexion.
-SOPC_ReturnStatus SOPC_LogSrv_WaitClient(uint32_t timeoutMs);
-
-// Stop log server
-SOPC_ReturnStatus SOPC_LogSrv_Stop(void);
-
-// Start log server
-SOPC_ReturnStatus SOPC_LogSrv_Start(
-    uint16_t portSrvTCP,  // Server listen port
-    uint16_t portCltUDP); // Destination UDP port where server announce its @IP and listen port
-
-SOPC_ReturnStatus SOPC_LogSrv_Print(const uint8_t* buffer, uint16_t length);
 
 #endif /* P_LOGSRV_H */

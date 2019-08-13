@@ -19,14 +19,7 @@
 
 #include "p_logsrv.h"
 
-// Log server status
-typedef enum E_LOG_SERVER_STATUS
-{
-    E_LOG_SERVER_CLOSING,
-    E_LOG_SERVER_BINDING,
-    E_LOG_SERVER_ONLINE,
-    E_LOG_SERVER_SIZEOF = UINT32_MAX
-} eLogServerStatus;
+// *** Workspaces definitions ***
 
 // Log server workspace
 typedef struct T_LOG_SERVER_WORKSPACE
@@ -147,14 +140,14 @@ typedef struct T_LOG_CLIENT_WORKSPACE
 
 } tLogClientWks;
 
-// Static Callbacks declarations
+// *** Private Callbacks of thread declarations ***
 
 static void cbTaskSocketClientEncodeAndTx(void* pParameters); // Callback encode + tx
 static void cbTaskSocketClientDecodeAndDo(void* pParameters); // Callback decode + action / response
 static void cbTaskSocketClientRxAndMon(void* pParameters);    // Callback monitore + rx
 static void cbTaskSocketServerMonitor(void* pParameters);     // Server connexion callback + announce + "broadcast"
 
-// Static client workspace creation and destruction
+// *** Private client workspace creation and destruction function declaration***
 
 static tLogClientWks* ClientCreateThenStart(
     int32_t socket,    // socket
@@ -173,7 +166,7 @@ static tLogClientWks* ClientCreateThenStart(
 
 static void ClientStopThenDestroy(tLogClientWks** p);
 
-// Callbacks definitions
+// *** Callbacks definitions***
 
 // Callback of encoding and sending frame
 static void cbTaskSocketClientEncodeAndTx(void* pParameters)
@@ -834,8 +827,8 @@ static tLogClientWks* ClientCreateThenStart(int32_t socket,
     return pClt;
 }
 
-// Callback of client socket monitoring and reception of data,
-// which are sent to analyzer task.
+// Callback of server wich send broadcast to all connected client,
+// and remove old connexion of disconnected client
 static void cbTaskSocketServerTx(void* pParameters)
 {
     tLogSrvWks* p = (tLogSrvWks*) pParameters; // Server workspace
@@ -957,6 +950,7 @@ static void cbTaskSocketServerTx(void* pParameters)
     vTaskDelete(NULL);
 }
 
+// Server main task, listen new connections
 static void cbTaskSocketServerMonitor(void* pParameters)
 {
     tLogSrvWks* p = (tLogSrvWks*) pParameters; // Server workspace
@@ -1282,8 +1276,14 @@ static void cbTaskSocketServerMonitor(void* pParameters)
     vTaskDelete(NULL);
 }
 
+// ***Public API definition***
+
 // Log function
-eLogSrvResult P_LOG_SRV_SendToAllClient(tLogSrvWks* p, const uint8_t* pBuffer, uint16_t length, uint16_t* sentLength)
+eLogSrvResult P_LOG_SRV_SendToAllClientFullBuffer(tLogSrvWks* p,
+                                                  const uint8_t* pBuffer,
+                                                  uint16_t length,
+                                                  uint16_t* sentLength,
+                                                  bool bFlushOnFull)
 {
     eLogSrvResult result = E_LOG_SRV_RESULT_NOK;
     eChannelResult resChannelSent = E_CHANNEL_RESULT_OK;
@@ -1304,7 +1304,10 @@ eLogSrvResult P_LOG_SRV_SendToAllClient(tLogSrvWks* p, const uint8_t* pBuffer, u
 
             if (E_CHANNEL_RESULT_ERROR_FULL == resChannelSent)
             {
-                P_CHANNEL_Flush(&p->logChannel);
+                if (bFlushOnFull == true)
+                {
+                    P_CHANNEL_Flush(&p->logChannel);
+                }
             }
             else
             {
@@ -1322,6 +1325,52 @@ eLogSrvResult P_LOG_SRV_SendToAllClient(tLogSrvWks* p, const uint8_t* pBuffer, u
     }
 
     return result;
+}
+
+// Log function
+eLogSrvResult P_LOG_SRV_SendToAllClient(tLogSrvWks* p, const uint8_t* pBuffer, uint16_t length, uint16_t* sentLength)
+{
+    eLogSrvResult result = E_LOG_SRV_RESULT_NOK;
+    eChannelResult resChannelSent = E_CHANNEL_RESULT_OK;
+    uint16_t nbBytesSent = 0;
+
+    if ((NULL != p) && (E_LOG_SERVER_ONLINE == p->status))
+    {
+        resChannelSent = P_CHANNEL_Send(&p->logChannel,            //
+                                        pBuffer,                   //
+                                        length,                    //
+                                        &nbBytesSent,              //
+                                        E_CHANNEL_WR_MODE_NORMAL); //
+
+        if (E_CHANNEL_RESULT_ERROR_FULL == resChannelSent)
+        {
+            P_CHANNEL_Flush(&p->logChannel);
+            result = E_LOG_SRV_RESULT_NOK;
+        }
+
+        if (E_CHANNEL_RESULT_OK == resChannelSent)
+        {
+            result = E_LOG_SRV_RESULT_OK;
+        }
+
+        if (NULL != sentLength)
+        {
+            *sentLength = nbBytesSent;
+        }
+    }
+
+    return result;
+}
+
+// Get current status
+eLogServerStatus P_LOG_SRV_GetStatus(tLogSrvWks* p)
+{
+    if (NULL != p)
+    {
+        return p->status;
+    }
+
+    return E_LOG_SERVER_CLOSING;
 }
 
 // Server destruction
@@ -1537,298 +1586,4 @@ eLogSrvResult P_LOG_CLIENT_SendResponse(tLogClientWks* pClt,
     }
 
     return result;
-}
-
-//***********S2OPC api wrapper*************
-
-static tLogSrvWks* gLogServer = NULL;
-static Mutex gLockLogServer = NULL;
-static Condition gSignalOneConnexion;
-
-// Callback used by logserv to customize hello message
-static uint16_t cbHelloCallback(uint8_t* pBufferInOut, uint16_t nbBytesToEncode, uint16_t maxSizeBufferOut)
-{
-    uint16_t size;
-
-    snprintf((void*) pBufferInOut + nbBytesToEncode, maxSizeBufferOut - (2 * nbBytesToEncode + 1), "%s",
-             "Hello, S2OPC log server is listening on ");
-    size = strlen((void*) pBufferInOut + nbBytesToEncode);
-    memmove((void*) pBufferInOut + nbBytesToEncode + size, (void*) pBufferInOut, nbBytesToEncode);
-    memmove((void*) pBufferInOut, (void*) pBufferInOut + nbBytesToEncode, nbBytesToEncode + size);
-    return nbBytesToEncode + size;
-}
-
-// Callback used to unlock SOPC_LogSrv_WaitClient function
-static void cbOneConnexion(void** pAnalyzerContext, tLogClientWks* pClt)
-{
-    Condition_SignalAll(&gSignalOneConnexion);
-
-#if (configUSE_BOGOMIPS == 1)
-    char sBuffer[50] = {0};
-    extern float gPerformanceValue;
-    snprintf(sBuffer, sizeof(sBuffer), "\r\n *** BogoMips=%f *** \r\n", gPerformanceValue);
-    P_LOG_CLIENT_SendResponse(pClt, (const uint8_t*) sBuffer, strlen(sBuffer), NULL);
-#endif
-}
-
-// Callback used by analyzer, so *dataSize not changed, buffer in copy to buffer out to client
-static eResultDecoder cbEchoCallback(void* pAnalyzerContext,
-                                     tLogClientWks* pClt,
-                                     uint8_t* pBufferInOut,
-                                     uint16_t* dataSize,
-                                     uint16_t maxSizeBufferOut)
-{
-    // Don't modify dataSize output, echo simulation
-    return 0;
-}
-
-// Callback used by logserv to customize sent buffer
-static eResultEncoder cbEncoderCallback(void* pEncoderContext,      // Encoder context
-                                        uint8_t* pBufferInOut,      // Buffer in out
-                                        uint16_t* pNbBytesToEncode, // Signicant bytes in / out
-                                        uint16_t maxSizeBufferOut)
-{
-    uint16_t lengthLogMemStatus = 0;
-    uint16_t lengthLog = *pNbBytesToEncode;
-
-    memmove((void*) pBufferInOut + maxSizeBufferOut / 2, (void*) pBufferInOut, lengthLog);
-
-    snprintf((void*) pBufferInOut, maxSizeBufferOut / 2, "HF=%u / HL=%u - ", xPortGetFreeHeapSize(),
-             xPortGetMinimumEverFreeHeapSize());
-
-    pBufferInOut[maxSizeBufferOut / 2 - 1] = 0;
-
-    lengthLogMemStatus = strlen((void*) pBufferInOut);
-    memmove((void*) pBufferInOut + lengthLogMemStatus, (void*) pBufferInOut + maxSizeBufferOut / 2, lengthLog);
-
-    *pNbBytesToEncode = lengthLog + lengthLogMemStatus;
-
-    return E_ENCODER_RESULT_OK;
-}
-
-// Wait a client connexion.
-SOPC_ReturnStatus SOPC_LogSrv_WaitClient(uint32_t timeoutMs)
-{
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    if (NULL == gLockLogServer)
-    {
-        return SOPC_STATUS_NOK;
-    }
-
-    Mutex_Lock(&gLockLogServer);
-
-    if (gLogServer == NULL)
-    {
-        Mutex_Unlock(&gLockLogServer);
-        return SOPC_STATUS_NOK;
-    }
-
-    status = Mutex_UnlockAndTimedWaitCond(&gSignalOneConnexion, &gLockLogServer, timeoutMs);
-
-    Mutex_Unlock(&gLockLogServer);
-
-    return status;
-}
-
-// Wait a client connexion.
-SOPC_ReturnStatus SOPC_LogSrv_Print(const uint8_t* buffer, uint16_t length)
-{
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    if (NULL == gLockLogServer)
-    {
-        return SOPC_STATUS_NOK;
-    }
-
-    Mutex_Lock(&gLockLogServer);
-
-    if (gLogServer == NULL)
-    {
-        Mutex_Unlock(&gLockLogServer);
-        return SOPC_STATUS_NOK;
-    }
-
-    P_LOG_SRV_SendToAllClient(gLogServer, (uint8_t*) buffer, length, NULL);
-
-    Mutex_Unlock(&gLockLogServer);
-
-    return status;
-}
-
-// Stop log server
-SOPC_ReturnStatus SOPC_LogSrv_Stop(void)
-{
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    if (NULL == gLockLogServer)
-    {
-        return SOPC_STATUS_NOK;
-    }
-
-    Mutex_Lock(&gLockLogServer);
-
-    if (NULL == gLogServer)
-    {
-        Mutex_Unlock(&gLockLogServer);
-        return SOPC_STATUS_NOK;
-    }
-
-    Condition_Clear(&gSignalOneConnexion);
-
-    P_LOG_SRV_StopAndDestroy(&gLogServer);
-
-    Mutex_Unlock(&gLockLogServer);
-
-    return status;
-}
-
-// Start log server
-SOPC_ReturnStatus SOPC_LogSrv_Start(
-    uint16_t portSrvTCP, // Server listen port
-    uint16_t portCltUDP) // Destination UDP port where server announce its @IP and listen port
-{
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-
-    if (gLockLogServer == NULL)
-    {
-        status = Mutex_Initialization(&gLockLogServer);
-    }
-
-    if (SOPC_STATUS_OK != status)
-    {
-        return SOPC_STATUS_NOK;
-    }
-
-    Mutex_Lock(&gLockLogServer);
-
-    if (SOPC_STATUS_OK != status)
-    {
-        Mutex_Unlock(&gLockLogServer);
-        return status;
-    }
-
-    if (gLogServer == NULL)
-    {
-        status = Condition_Init(&gSignalOneConnexion);
-
-        gLogServer = P_LOG_SRV_CreateAndStart(portSrvTCP,        //
-                                              portCltUDP,        //
-                                              1,                 // Max log client
-                                              0,                 // Disconnect log client after 0s
-                                              10,                // Hello message each 5seconds
-                                              cbOneConnexion,    //
-                                              NULL,              //
-                                              cbEchoCallback,    // Test echo to verify lwip
-                                              NULL,              //
-                                              NULL,              //
-                                              NULL,              //
-                                              cbEncoderCallback, //
-                                              NULL,              //
-                                              cbHelloCallback);  // Customize message hello
-
-        if (gLogServer == NULL)
-        {
-            status = SOPC_STATUS_NOK;
-        }
-    }
-
-    Mutex_Unlock(&gLockLogServer);
-
-    return status;
-}
-
-//*********Wrappers for newlib**************
-
-int __attribute__((weak)) _open(const char* Path, int flags, int mode)
-{
-    return (int) stdout->_file;
-}
-
-int __attribute__((weak)) _open_r(struct _reent* reent, const char* Path, int flags, int mode)
-{
-    return _open(Path, flags, mode);
-}
-
-int __attribute__((weak)) _close(int fd)
-{
-    return 0;
-}
-
-int __attribute__((weak)) _close_r(struct _reent* reent, int fd)
-{
-    return _close(fd);
-}
-
-FILE* __attribute__((weak)) fopen(const char* file, const char* mode)
-{
-    return (FILE*) stdout;
-}
-
-FILE* __attribute__((weak)) _fopen_r(struct _reent* reent, const char* file, const char* mode)
-{
-    return fopen(file, mode);
-}
-
-int __attribute__((weak)) fclose(FILE* ptrFile)
-{
-    return 0;
-}
-
-int __attribute__((weak)) _fclose_r(struct _reent* reent, FILE* ptrFile)
-{
-    return 0;
-}
-
-int __attribute__((weak)) _write(int handle, const char* buffer, size_t size)
-{
-    uint16_t length;
-
-    // buffer exist
-    if (buffer == 0)
-    {
-        return -1;
-    }
-
-    // Stdout or stdin only are redirected
-    if ((handle != 1) && (handle != 2))
-    {
-        return -1;
-    }
-    // Log server exist
-    if (NULL == gLogServer || E_LOG_SERVER_ONLINE != gLogServer->status)
-    {
-        length = PRINTF(buffer, size);
-    }
-    else
-    {
-        eChannelResult resChannelSent;
-        resChannelSent = P_CHANNEL_Send(&gLogServer->logChannel,   //
-                                        (const uint8_t*) buffer,   //
-                                        size,                      //
-                                        &length,                   //
-                                        E_CHANNEL_WR_MODE_NORMAL); //
-
-        if (E_CHANNEL_RESULT_ERROR_FULL == resChannelSent)
-        {
-            P_CHANNEL_Flush(&gLogServer->logChannel);
-        }
-
-        /* Send data. */
-        // P_LOG_SRV_SendToAllClient(gLogServer, (uint8_t*) buffer, size, &length);
-    }
-    return length;
-}
-
-int __attribute__((weak)) _write_r(struct _reent* reent, int handle, const void* buffer, size_t size)
-{
-    return _write(handle, buffer, size);
-}
-
-// Read is not implemented.
-int __attribute__((weak)) _read(int handle, char* buffer, int size)
-{
-    return -1;
-}
-
-int __attribute__((weak)) _read_r(struct _reent* reent, int handle, void* buffer, size_t size)
-{
-    return _read(handle, buffer, size);
 }
