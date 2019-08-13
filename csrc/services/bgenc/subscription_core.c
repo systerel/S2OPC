@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.c
 
- Date                 : 19/04/2019 16:19:42
+ Date                 : 13/08/2019 14:23:00
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -542,9 +542,6 @@ void subscription_core__receive_publish_request(
                subscription_core__l_seq_num,
                subscription_core__l_notifMsg,
                &subscription_core__l_bres);
-            if (subscription_core__l_bres == false) {
-               ;
-            }
             *subscription_core__StatusCode_service = constants_statuscodes_bs__e_sc_ok;
          }
          else {
@@ -600,9 +597,6 @@ void subscription_core__receive_publish_request(
                subscription_core__l_seq_num,
                subscription_core__l_notifMsg,
                &subscription_core__l_bres);
-            if (subscription_core__l_bres == false) {
-               ;
-            }
             *subscription_core__StatusCode_service = constants_statuscodes_bs__e_sc_ok;
          }
          else {
@@ -926,9 +920,6 @@ void subscription_core__server_subscription_core_publish_timeout(
                subscription_core__l_seq_num,
                subscription_core__l_notifMsg,
                &subscription_core__l_bres);
-            if (subscription_core__l_bres == false) {
-               ;
-            }
             *subscription_core__p_msg_sc = constants_statuscodes_bs__e_sc_ok;
          }
          else {
@@ -1033,9 +1024,6 @@ void subscription_core__server_subscription_core_publish_timeout(
                subscription_core__l_seq_num,
                subscription_core__l_notifMsg,
                &subscription_core__l_bres);
-            if (subscription_core__l_bres == false) {
-               ;
-            }
             *subscription_core__p_msg_sc = constants_statuscodes_bs__e_sc_ok;
          }
          else {
@@ -1169,9 +1157,6 @@ void subscription_core__server_subscription_core_publish_timeout_return_moreNoti
             subscription_core__l_seq_num,
             subscription_core__l_notifMsg,
             &subscription_core__l_bres);
-         if (subscription_core__l_bres == false) {
-            ;
-         }
          *subscription_core__p_msg_sc = constants_statuscodes_bs__e_sc_ok;
       }
       else {

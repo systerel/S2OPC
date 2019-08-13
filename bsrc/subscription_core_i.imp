@@ -103,12 +103,7 @@ DEFINITIONS
         END
         ;
         l_bres <-- add_republish_notif_to_queue (p_repubQueue, l_seq_num, l_notifMsg);
-
-        IF l_bres = FALSE
-        THEN
-            skip /* TODO: log an error ? otherwise we already dequeue notification */
-        END
-        ;
+        // Note: if it failed we will still try to send the the publish response. It has been logged as error.
         p_msg_sc := e_sc_ok
     ELSE
         p_moreNotifs := TRUE;
