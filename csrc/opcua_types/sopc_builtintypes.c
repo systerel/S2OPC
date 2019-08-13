@@ -32,6 +32,7 @@
 #include "sopc_mem_alloc.h"
 
 #include "opcua_identifiers.h"
+#include "sopc_protocol_constants.h"
 #include "sopc_toolkit_config_constants.h"
 
 const SOPC_NodeId SOPC_Null_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 0};
@@ -2547,7 +2548,7 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Copy(SOPC_ExtensionObject* dest, const SO
 
             /* We do not have the copy method for the object but we can encode it */
             encoding = SOPC_ExtObjBodyEncoding_ByteString;
-            encodedObject = SOPC_Buffer_Create(SOPC_MAX_STRING_LENGTH); /* String content + length */
+            encodedObject = SOPC_Buffer_CreateResizable(SOPC_TCP_UA_MAX_BUFFER_SIZE, SOPC_MAX_MESSAGE_LENGTH);
             if (NULL == encodedObject)
             {
                 status = SOPC_STATUS_OUT_OF_MEMORY;
