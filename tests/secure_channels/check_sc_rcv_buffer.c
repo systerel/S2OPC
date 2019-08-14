@@ -415,7 +415,7 @@ START_TEST(test_too_large_msg_size)
 
     printf("SC_Rcv_Buffer: Simulate too large message size indicated (without associated content)\n");
 
-    // Simulate MSG / F / size SOPC_MAX_MESSAGE_LENGTH + 1 / SC id = 833084066 received on socket
+    // Simulate MSG / F / size SOPC_TCP_UA_MAX_BUFFER_SIZE + 1 / SC id = 833084066 received on socket
     SOPC_Buffer* buffer = SOPC_Buffer_Create(1000);
     ck_assert(buffer != NULL);
     byte = 'M';
@@ -430,7 +430,7 @@ START_TEST(test_too_large_msg_size)
     byte = 'F';
     status = SOPC_Byte_Write(&byte, buffer);
     ck_assert(SOPC_STATUS_OK == status);
-    ui32 = SOPC_MAX_MESSAGE_LENGTH + 1;
+    ui32 = SOPC_TCP_UA_MAX_BUFFER_SIZE + 1;
     status = SOPC_UInt32_Write(&ui32, buffer);
     ck_assert(SOPC_STATUS_OK == status);
     ui32 = 833084066;
