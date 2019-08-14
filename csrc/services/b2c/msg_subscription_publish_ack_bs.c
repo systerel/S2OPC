@@ -24,8 +24,7 @@
 #include "sopc_mem_alloc.h"
 #include "util_b2c.h"
 
-static const uint64_t SOPC_MILLISECOND_TO_100_NANOSECONDS = 10000; // 10^4
-static const uint64_t SOPC_YEAR_TO_MILLISECONDS = 31536000000;     // 365 * 24 * 60 * 60 * 1000
+static const uint64_t SOPC_YEAR_TO_MILLISECONDS = 31536000000; // 365 * 24 * 60 * 60 * 1000
 
 /*------------------------
    INITIALISATION Clause
@@ -88,30 +87,8 @@ void msg_subscription_publish_ack_bs__get_msg_header_expiration_time(
     }
     else
     {
-        int64_t dtDelta = SOPC_Time_GetCurrentTimeUTC() - pubReqHeader->Timestamp;
-
-        if (dtDelta > 0)
-        {
-            if (pubReqHeader->TimeoutHint >= (uint64_t) dtDelta / SOPC_MILLISECOND_TO_100_NANOSECONDS)
-            {
-                millisecondsToTarget =
-                    pubReqHeader->TimeoutHint - (uint64_t) dtDelta / SOPC_MILLISECOND_TO_100_NANOSECONDS;
-            }
-            else
-            {
-                // Already expired
-                millisecondsToTarget = 0;
-                SOPC_Logger_TraceError(
-                    "msg_subscription_publish_ack_bs__get_msg_header_expiration_time: received an already expired "
-                    "publish "
-                    "request");
-            }
-        }
-        else
-        {
-            // Keep only timeoutHint from current time
-            millisecondsToTarget = pubReqHeader->TimeoutHint;
-        }
+        // Keep only timeoutHint from current time
+        millisecondsToTarget = pubReqHeader->TimeoutHint;
     }
     *msg_subscription_publish_bs__req_expiration_time =
         SOPC_TimeReference_AddMilliseconds(*msg_subscription_publish_bs__req_expiration_time, millisecondsToTarget);
