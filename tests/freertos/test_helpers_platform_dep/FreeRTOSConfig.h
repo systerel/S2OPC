@@ -39,6 +39,7 @@
  *----------------------------------------------------------*/
 
 #define configUSE_TRACE_ANALYZER 0
+#define configUSE_ANALYZER 0
 #define configUSE_PREEMPTION 1
 #define configUSE_TICKLESS_IDLE 0
 #define configCPU_CLOCK_HZ (SystemCoreClock)
