@@ -20,6 +20,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <inttypes.h>
+
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -40,14 +41,12 @@
 #include "sopc_toolkit_config.h "
 
 #include "p_ethernet_if.h"
-#include "p_logsrv.h"
+#include "p_sopc_log_srv.h"
 #include "sopc_mutexes.h"
 #include "sopc_threads.h"
 
 #include "embedded/loader.h"
 #include "runtime_variables.h"
-
-extern tLogSrvWks* gLogServer;
 
 #ifdef WITH_EXPAT
 #include "uanodeset_expat/loader.h"

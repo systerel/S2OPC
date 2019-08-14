@@ -47,11 +47,9 @@
 
 #include "FreeRTOSTest.h"
 
-#include "p_ethernet_if.h"
-#include "p_logsrv.h"
-
 #include "ksdk_mbedtls_config.h"
-
+#include "p_ethernet_if.h"
+#include "p_generic_socket_srv.h"
 #include "p_time.h"
 
 // Global variables
@@ -61,6 +59,31 @@ Condition gHandleConditionVariable;
 #if (configUSE_BOGOMIPS == 1)
 extern float external_bogomips(void);
 float gPerformanceValue = 0.0;
+#endif
+
+#if (configUSE_ANALYZER == 1)
+#include "p_analyzer.h"
+tLogSrvWks* gAnalyzerSrv;
+static void cbAnalyzerCreation(void** pAnalyzerContext, tLogClientWks* pClt)
+{
+    *pAnalyzerContext = CreateAnalyzer(8, 5000 / P_LOG_CLT_RX_PERIOD);
+}
+static void cbAnalyzerDestruction(void** pAnalyzerContext, tLogClientWks* pClt)
+{
+    DestroyAnalyzer((tAnalyzerWks**) pAnalyzerContext);
+}
+static eResultDecoder cbAnalyzerExecution(void* pAnalyzerContext,
+                                          tLogClientWks* pClt,
+                                          uint8_t* pBufferInOut,
+                                          uint16_t* dataSize,
+                                          uint16_t maxSizeBufferOut)
+{
+    // Don't modify dataSize output, echo simulation
+
+    ExecuteAnalyzer(pAnalyzerContext, pBufferInOut, *dataSize);
+    *dataSize = 0;
+    return E_DECODER_RESULT_OK;
+}
 #endif
 
 int main(void)
@@ -84,7 +107,7 @@ int main(void)
 #endif
 
     // Network interface initialization (IP @...)
-    //P_ETHERNET_IF_IsReady shall be called
+    // P_ETHERNET_IF_IsReady shall be called
     // to verify if interface is ready, else
     // lwip socket api crash.
     P_ETHERNET_IF_Initialize();
@@ -123,6 +146,12 @@ int main(void)
     vTraceEnable(TRC_INIT);
 #endif
 
+#if (configUSE_ANALYZER == 1)
+    gAnalyzerSrv = P_LOG_SRV_CreateAndStart(61, 4023, 1, 0, 0,                                                    //
+                                            cbAnalyzerCreation, cbAnalyzerDestruction, cbAnalyzerExecution, NULL, //
+                                            NULL, NULL, NULL, NULL,                                               //
+                                            NULL);                                                                //
+#endif
     vTaskStartScheduler();
 
     for (;;)

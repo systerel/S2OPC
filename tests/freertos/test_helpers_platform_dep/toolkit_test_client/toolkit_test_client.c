@@ -43,7 +43,7 @@
 #include "embedded/loader.h"
 
 #include "p_ethernet_if.h"
-#include "p_logsrv.h"
+#include "p_sopc_log_srv.h"
 
 #define ENDPOINT_URL "opc.tcp://192.168.1.102:4841"
 
