@@ -17,7 +17,7 @@
  * under the License.
  */
 
-#include "p_logsrv.h"
+#include "p_generic_socket_srv.h"
 
 // *** Workspaces definitions ***
 
