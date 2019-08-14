@@ -179,6 +179,25 @@ void subscription_core_bs__get_nodeToMonitoredItemQueue(
     *subscription_core_bs__p_monitoredItemQueue = monitoredItemQueue;
 }
 
+static uint64_t getPublishCycle(double publishInterval)
+{
+    uint64_t msCycle = 0;
+    if (publishInterval < 0)
+    {
+        msCycle = 0;
+    }
+    else if ((uint64_t) publishInterval < UINT64_MAX)
+    {
+        msCycle = (uint64_t) publishInterval;
+    }
+    else
+    {
+        msCycle = UINT64_MAX;
+    }
+
+    return msCycle;
+}
+
 void subscription_core_bs__create_periodic_publish_timer(
     const constants__t_subscription_i subscription_core_bs__p_subscription,
     const constants__t_opcua_duration_i subscription_core_bs__p_publishInterval,
@@ -187,26 +206,13 @@ void subscription_core_bs__create_periodic_publish_timer(
 {
     *subscription_core_bs__bres = false;
 
-    uint64_t msCycle = 0;
+    uint64_t msCycle = getPublishCycle(subscription_core_bs__p_publishInterval);
     SOPC_Event event;
 
     event.eltId = (uint32_t) subscription_core_bs__p_subscription;
     event.event = TIMER_SE_PUBLISH_CYCLE_TIMEOUT;
     event.params = (uintptr_t) NULL;
     event.auxParam = 0;
-
-    if (subscription_core_bs__p_publishInterval > UINT64_MAX)
-    {
-        msCycle = UINT64_MAX;
-    }
-    else if (subscription_core_bs__p_publishInterval < 0)
-    {
-        msCycle = 0;
-    }
-    else
-    {
-        msCycle = (uint64_t) subscription_core_bs__p_publishInterval;
-    }
 
     *subscription_core_bs__timerId = SOPC_EventTimer_CreatePeriodic(SOPC_Services_GetEventHandler(), event, msCycle);
 
@@ -220,19 +226,7 @@ void subscription_core_bs__modify_publish_timer_period(
     const constants__t_timer_id_i subscription_core_bs__p_timerId,
     const constants__t_opcua_duration_i subscription_core_bs__p_revPublishInterval)
 {
-    uint64_t msCycle = 0;
-    if (subscription_core_bs__p_revPublishInterval > UINT64_MAX)
-    {
-        msCycle = UINT64_MAX;
-    }
-    else if (subscription_core_bs__p_revPublishInterval < 0)
-    {
-        msCycle = 0;
-    }
-    else
-    {
-        msCycle = (uint64_t) subscription_core_bs__p_revPublishInterval;
-    }
+    uint64_t msCycle = getPublishCycle(subscription_core_bs__p_revPublishInterval);
 
     bool res = SOPC_EventTimer_ModifyPeriodic(subscription_core_bs__p_timerId, msCycle);
     if (!res)
