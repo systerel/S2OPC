@@ -286,6 +286,7 @@ void SOPC_StaMac_Delete(SOPC_StaMac_Machine** ppSM)
         SOPC_Free((void*) pSM->szPolicyId);
         SOPC_Free((void*) pSM->szUsername);
         SOPC_Free((void*) pSM->szPassword);
+        SOPC_SLinkedList_Apply(pSM->dataIdToNodeIdList, SOPC_SLinkedList_EltGenericFree);
         SOPC_SLinkedList_Delete(pSM->dataIdToNodeIdList);
         pSM->dataIdToNodeIdList = NULL;
 
@@ -564,7 +565,7 @@ SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
         {
             SOPC_Atomic_Int_Add(&nSentReqs, 1);
             lCliHndl[i] = (uint32_t) nSentReqs;
-            void* nodeId = SOPC_Calloc(1, sizeof(char)*strlen(lszNodeId[i]));
+            void* nodeId = SOPC_Calloc(1, sizeof(char)* (strlen(lszNodeId[i]) + 1));
             if (NULL == nodeId)
             {
                 status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -1156,6 +1157,7 @@ static void StaMac_ProcessEvent_stDeletingSubscr(SOPC_StaMac_Machine* pSM,
         //TODO clear any remaining information about previous subscription
         pSM->iSubscriptionID = 0;
         SOPC_SLinkedList_Clear(pSM->pListMonIt);
+        SOPC_SLinkedList_Apply(pSM->dataIdToNodeIdList, SOPC_SLinkedList_EltGenericFree);
         SOPC_SLinkedList_Clear(pSM->dataIdToNodeIdList);
 
         Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Subscription deleted.");
