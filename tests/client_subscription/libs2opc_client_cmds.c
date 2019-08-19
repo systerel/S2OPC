@@ -298,7 +298,7 @@ int32_t SOPC_ClientHelper_Connect(const char* endpointUrl,
                                          .timeout_ms = TIMEOUT_MS,
                                          .sc_lifetime = SC_LIFETIME_MS,
                                          .token_target = PUBLISH_N_TOKEN,
-                                         .generic_response_callback = NULL};
+                                         .generic_response_callback = SOPC_ClientHelper_GenericCallback};
     SOPC_LibSub_ConfigurationId cfg_id = 0;
     SOPC_LibSub_ConnectionId con_id = 0;
 
@@ -375,7 +375,7 @@ void SOPC_ClientHelper_GenericCallback(SOPC_LibSub_ConnectionId c_id,
     if (pEncType == &OpcUa_ReadResponse_EncodeableType)
     {
         ReadContext* ctx = (ReadContext*) responseContext;
-        const OpcUa_ReadResponse* readResp = *(OpcUa_ReadResponse* const*) response;
+        const OpcUa_ReadResponse* readResp = (const OpcUa_ReadResponse*) response;
 
         ctx->status = Mutex_Lock(&ctx->mutex);
         assert(SOPC_STATUS_OK == ctx->status);
@@ -386,20 +386,26 @@ void SOPC_ClientHelper_GenericCallback(SOPC_LibSub_ConnectionId c_id,
             // TODO log error
             ctx->status = SOPC_STATUS_NOK;
         }
-        for (int32_t i = 0; i < readResp->NoOfResults && ctx->status; i++)
+        if (SOPC_STATUS_OK == ctx->status)
         {
-            ctx->status = SOPC_DataValue_Copy(&ctx->values[i], &readResp->Results[i]);
-        }
-        if (ctx->status == SOPC_STATUS_NOK)
-        {
-            for (int32_t i = 0; i < readResp->NoOfResults; i++)
+            //TODO solve readResp NoOfResults problem!
+            for (int32_t i = 0; i < readResp->NoOfResults && SOPC_STATUS_OK == ctx->status; i++)
             {
-                SOPC_DataValue_Clear(&ctx->values[i]);
+                ctx->status = SOPC_DataValue_Copy(&ctx->values[i], &readResp->Results[i]);
             }
-            ctx->nbElements = 0;
+            if (ctx->status == SOPC_STATUS_NOK)
+            {
+                for (int32_t i = 0; i < readResp->NoOfResults; i++)
+                {
+                    SOPC_DataValue_Clear(&ctx->values[i]);
+                }
+                ctx->nbElements = 0;
+            }
         }
         ctx->finish = true;
 
+        ctx->status = Mutex_Unlock(&ctx->mutex);
+        assert(SOPC_STATUS_OK == ctx->status);
         /* Signal that the response is available */
         status = Condition_SignalAll(&ctx->condition);
         assert(SOPC_STATUS_OK == status);
@@ -420,15 +426,15 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
         return -2;
     }
 
-    OpcUa_ReadRequest request;
+    OpcUa_ReadRequest* request = (OpcUa_ReadRequest*) SOPC_Malloc(sizeof(OpcUa_ReadRequest));
     OpcUa_ReadValueId* nodesToRead;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    ReadContext ctx;
+    ReadContext* ctx = (ReadContext*) SOPC_Malloc(sizeof(ReadContext));
 
-    OpcUa_ReadRequest_Initialize(&request);
-    request.MaxAge = 0; /* Not manage by S2OPC */
-    request.TimestampsToReturn = OpcUa_TimestampsToReturn_Both;
-    request.NoOfNodesToRead = (int32_t) nbElements; // check is done before
+    OpcUa_ReadRequest_Initialize(request);
+    request->MaxAge = 0; /* Not manage by S2OPC */
+    request->TimestampsToReturn = OpcUa_TimestampsToReturn_Both;
+    request->NoOfNodesToRead = (int32_t) nbElements; // check is done before
 
     /* Set NodesToRead. This is deallocated by toolkit
        when call SOPC_LibSub_AsyncSendRequestOnSession */
@@ -437,52 +443,67 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
     {
         OpcUa_ReadValueId_Initialize(&nodesToRead[i]);
         nodesToRead[i].AttributeId = readValues[i].attributeId;
-        status = SOPC_String_CopyFromCString(&nodesToRead[i].IndexRange, readValues[i].indexRange);
+        if (NULL == readValues[i].indexRange)
+        {
+            nodesToRead[i].IndexRange.Length = 0;
+            nodesToRead[i].IndexRange.DoNotClear = true;
+            nodesToRead[i].IndexRange.Data = NULL;
+        }
+        else
+        {
+            status = SOPC_String_CopyFromCString(&nodesToRead[i].IndexRange, readValues[i].indexRange);
+        }
         if (SOPC_STATUS_OK == status)
         {
             // create an instance of NodeId
-            SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(readValues[i].nodeId, 1);
+            SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(readValues[i].nodeId, (int) strlen(readValues[i].nodeId));
+            if (NULL == nodeId)
+            {
+                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "nodeId NULL");
+            }
             status = SOPC_NodeId_Copy(&nodesToRead[i].NodeId, nodeId);
             SOPC_NodeId_Clear(nodeId);
+            SOPC_Free(nodeId);
         }
     }
-    request.NodesToRead = nodesToRead;
+    request->NodesToRead = nodesToRead;
 
     if (SOPC_STATUS_OK == status)
     {
         /* Prepare the synchronous context */
         /* TODO: assert that the SOPC_STATUS_OK != statusMutex always avoid deadlocks in production code */
-        SOPC_ReturnStatus statusMutex = SOPC_ReadContext_Initialization(&ctx);
+        SOPC_ReturnStatus statusMutex = SOPC_ReadContext_Initialization(ctx);
         assert(SOPC_STATUS_OK == statusMutex);
-        Condition_Init(&ctx.condition);
+        Condition_Init(&ctx->condition);
         assert(SOPC_STATUS_OK == statusMutex);
-        statusMutex = Mutex_Lock(&ctx.mutex);
+        statusMutex = Mutex_Lock(&ctx->mutex);
         assert(SOPC_STATUS_OK == statusMutex);
 
         /* Set context */
-        ctx.values = values;
-        ctx.nbElements = request.NoOfNodesToRead;
-        ctx.status = SOPC_STATUS_NOK;
-        ctx.finish = false;
+        ctx->values = values;
+        ctx->nbElements = request->NoOfNodesToRead;
+        ctx->status = SOPC_STATUS_NOK;
+        ctx->finish = false;
         status =
-            SOPC_ClientCommon_AsyncSendRequestOnSession((SOPC_LibSub_ConnectionId) connectionId, &request, (uintptr_t) &ctx);
+            SOPC_ClientCommon_AsyncSendRequestOnSession((SOPC_LibSub_ConnectionId) connectionId, request, (uintptr_t) ctx);
 
         /* Wait for the response */
-        while (SOPC_STATUS_OK == status && ctx.finish)
+        while (SOPC_STATUS_OK == status && !ctx->finish)
         {
-            statusMutex = Mutex_UnlockAndTimedWaitCond(&ctx.condition, &ctx.mutex, SYNCHRONOUS_READ_TIMEOUT);
+            statusMutex = Mutex_UnlockAndTimedWaitCond(&ctx->condition, &ctx->mutex, SYNCHRONOUS_READ_TIMEOUT);
             assert(SOPC_STATUS_TIMEOUT != statusMutex); /* TODO return error */
             assert(SOPC_STATUS_OK == statusMutex);
         }
-        status = ctx.status;
+        status = ctx->status;
 
         /* Free the context */
-        statusMutex = Mutex_Unlock(&ctx.mutex);
+        statusMutex = Mutex_Unlock(&ctx->mutex);
         assert(SOPC_STATUS_OK == statusMutex);
-        statusMutex = Condition_Clear(&ctx.condition);
+        statusMutex = Condition_Clear(&ctx->condition);
         assert(SOPC_STATUS_OK == statusMutex);
-        statusMutex = Mutex_Clear(&ctx.mutex);
+        statusMutex = Mutex_Clear(&ctx->mutex);
         assert(SOPC_STATUS_OK == statusMutex);
+        SOPC_Free(ctx);
     }
 
     if (SOPC_STATUS_OK == status)

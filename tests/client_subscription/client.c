@@ -189,6 +189,53 @@ int main(int argc, char* const argv[])
 
     if (res == 0)
     {
+        sleep(3);
+        SOPC_ClientHelper_ReadValue* readValues = (SOPC_ClientHelper_ReadValue*) malloc(sizeof(SOPC_ClientHelper_ReadValue) * (size_t) options.node_ids_size);
+        //TODO check alloc
+        for (int i = 0; i < options.node_ids_size; i++)
+        {
+            readValues[i].nodeId = malloc(sizeof(char) * (strlen(options.node_ids[i]) + 1));
+            strcpy(readValues[i].nodeId, options.node_ids[i]);
+            readValues[i].attributeId = 13; // value
+            readValues[i].indexRange = NULL;
+        }
+
+        SOPC_DataValue* readDataValues = (SOPC_DataValue*) malloc(sizeof(SOPC_DataValue) * (size_t) options.node_ids_size);
+        //TODO check alloc
+
+        //TODO call this function correctly
+        res = SOPC_ClientHelper_Read(connectionId, readValues, (size_t) options.node_ids_size, readDataValues);
+        //TODO print results
+        for (int i = 0; i < options.node_ids_size; i++)
+        {
+            SOPC_DataValue* value = &readDataValues[i];
+            if (NULL == value)
+            {
+                printf("NULL\n");
+            }
+            else {
+                // TODO is there a generic function to print/format a variant ?
+                SOPC_Variant variant = value->Value;
+                if (SOPC_Boolean_Id == variant.BuiltInTypeId)
+                {
+                    printf("%s\n", (bool) variant.Value.Boolean ? "true" : "false");
+                }
+                else if (SOPC_UInt64_Id == variant.BuiltInTypeId)
+                {
+                    printf("%ld\n",(int64_t) variant.Value.Uint64);
+                }
+            }
+        }
+        for (int i = 0; i < options.node_ids_size; i++)
+        {
+            free(readValues[i].nodeId);
+        }
+        free(readValues);
+        free(readDataValues);
+    }
+
+    if (res == 0)
+    {
         // TODO decide if using SOPC_Sleep is necessary
         //SOPC_Sleep(1000 * 1000);
         sleep(10);
