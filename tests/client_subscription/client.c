@@ -189,12 +189,13 @@ int main(int argc, char* const argv[])
 
     if (res == 0)
     {
+        //Read values
         sleep(3);
         SOPC_ClientHelper_ReadValue* readValues = (SOPC_ClientHelper_ReadValue*) malloc(sizeof(SOPC_ClientHelper_ReadValue) * (size_t) options.node_ids_size);
-        //TODO check alloc
         for (int i = 0; i < options.node_ids_size; i++)
         {
             readValues[i].nodeId = malloc(sizeof(char) * (strlen(options.node_ids[i]) + 1));
+            assert(NULL != readValues[i].nodeId);
             strcpy(readValues[i].nodeId, options.node_ids[i]);
             readValues[i].attributeId = 13; // value
             readValues[i].indexRange = NULL;
@@ -232,6 +233,47 @@ int main(int argc, char* const argv[])
         }
         free(readValues);
         free(readDataValues);
+    }
+
+    if (0 == res)
+    {
+        //Write values
+        sleep(3);
+        SOPC_ClientHelper_WriteValue* writeValues = (SOPC_ClientHelper_WriteValue*)
+            malloc(sizeof(SOPC_ClientHelper_WriteValue) * (size_t) options.node_ids_size);
+        assert(writeValues != NULL);
+        SOPC_StatusCode* writeResults = (SOPC_StatusCode*) malloc(sizeof(SOPC_StatusCode) * (size_t) options.node_ids_size);
+        assert(writeResults != NULL);
+        for (int i = 0; i < options.node_ids_size; i++)
+        {
+            writeValues[i].nodeId = malloc(sizeof(char) * (strlen(options.node_ids[i]) + 1));
+            assert(NULL != writeValues[i].nodeId);
+            strcpy(writeValues[i].nodeId, options.node_ids[i]);
+            writeValues[i].indexRange = NULL;
+            writeValues[i].value = malloc(sizeof(SOPC_DataValue));
+            assert(writeValues[i].value != NULL);
+            SOPC_DataValue_Initialize(writeValues[i].value); // TODO determine value according to type ?
+            writeValues[i].value->Value.DoNotClear = false;
+            writeValues[i].value->Value.BuiltInTypeId = SOPC_UInt64_Id;
+            writeValues[i].value->Value.ArrayType = SOPC_VariantArrayType_SingleValue;
+            writeValues[i].value->Value.Value.Uint64 = 31;
+        }
+        res = SOPC_ClientHelper_Write(connectionId, writeValues, (size_t) options.node_ids_size, writeResults);
+        for (int i = 0; i < options.node_ids_size; i++)
+        {
+            if (SOPC_STATUS_OK == writeResults[i] && 0 == res)
+            {
+                printf("Write OK\n");
+            }
+            else
+            {
+                printf("Write Failed\n");
+            }
+            free(writeValues[i].nodeId);
+            free(writeValues[i].value);
+        }
+        free(writeValues);
+        free(writeResults);
     }
 
     if (res == 0)
