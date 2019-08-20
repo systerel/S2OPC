@@ -116,7 +116,7 @@ typedef struct
 {
     char* nodeId;
     char* indexRange;
-    SOPC_DataValue value;
+    SOPC_DataValue* value;
 } SOPC_ClientHelper_WriteValue;
 
 /*
@@ -337,13 +337,19 @@ int32_t SOPC_ClientHelper_Disconnect(int32_t connectionId);
     It should be not NULL and be at least \p nbElements long.
  @param nbElements
     Number of elements to write. It should be between 1 and INT32_MAX
+ @param writeResults
+    A pre-allocated array of StatusCode, filled with result for each write value
+    It should not be NULL and be at least \p nbElements long.
  @return
    '0' if operation succeed
    '-1' if connectionId not valid
    '-2' if writeValues or nbElements not valid
    '-100' if operation failed
 */
-int32_t SOPC_ClientHelper_Write(int32_t connectionId, SOPC_ClientHelper_WriteValue* writeValues, size_t nbElements);
+int32_t SOPC_ClientHelper_Write(int32_t connectionId,
+                                SOPC_ClientHelper_WriteValue* writeValues,
+                                size_t nbElements,
+                                SOPC_StatusCode* writeResults);
 
 /*
  @description

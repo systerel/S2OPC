@@ -132,6 +132,27 @@ static SOPC_ReturnStatus SOPC_ReadContext_Initialization(ReadContext* ctx)
     return status;
 }
 
+typedef struct
+{
+    Mutex mutex; /* protect this context */
+    Condition condition;
+
+    SOPC_StatusCode* writeResults;
+    int32_t nbElements;
+    SOPC_StatusCode status;
+    bool finish;
+} WriteContext;
+
+static SOPC_ReturnStatus SOPC_WriteContext_Initialization(WriteContext* ctx)
+{
+    SOPC_ReturnStatus status = Mutex_Initialization(&ctx->mutex);
+    ctx->writeResults = NULL;
+    ctx->nbElements = 0;
+    ctx->status = SOPC_STATUS_NOK;
+    ctx->finish = false;
+    return status;
+}
+
 /* Callbacks */
 static void log_callback(const SOPC_Toolkit_Log_Level log_level, SOPC_LibSub_CstString text);
 static void disconnect_callback(const SOPC_LibSub_ConnectionId c_id);
@@ -388,7 +409,6 @@ void SOPC_ClientHelper_GenericCallback(SOPC_LibSub_ConnectionId c_id,
         }
         if (SOPC_STATUS_OK == ctx->status)
         {
-            //TODO solve readResp NoOfResults problem!
             for (int32_t i = 0; i < readResp->NoOfResults && SOPC_STATUS_OK == ctx->status; i++)
             {
                 ctx->status = SOPC_DataValue_Copy(&ctx->values[i], &readResp->Results[i]);
@@ -400,6 +420,40 @@ void SOPC_ClientHelper_GenericCallback(SOPC_LibSub_ConnectionId c_id,
                     SOPC_DataValue_Clear(&ctx->values[i]);
                 }
                 ctx->nbElements = 0;
+            }
+        }
+        ctx->finish = true;
+
+        ctx->status = Mutex_Unlock(&ctx->mutex);
+        assert(SOPC_STATUS_OK == ctx->status);
+        /* Signal that the response is available */
+        status = Condition_SignalAll(&ctx->condition);
+        assert(SOPC_STATUS_OK == status);
+    }
+    else if (pEncType == &OpcUa_WriteResponse_EncodeableType)
+    {
+        WriteContext* ctx = (WriteContext*) responseContext;
+        const OpcUa_WriteResponse* writeResp = (const OpcUa_WriteResponse*) response;
+
+        ctx->status = Mutex_Lock(&ctx->mutex);
+        assert(SOPC_STATUS_OK == ctx->status);
+
+        ctx->status = status;
+        if (ctx->nbElements != writeResp->NoOfResults)
+        {
+            // TODO log error
+            ctx->status = SOPC_STATUS_NOK;
+        }
+        if (NULL == ctx->writeResults)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+        if (SOPC_STATUS_OK == ctx->status)
+        {
+            for (int32_t i = 0; i < writeResp->NoOfResults; i++)
+            {
+                ctx->writeResults[i] = writeResp->Results[i];
+                ctx->status = writeResp->Results[i];
             }
         }
         ctx->finish = true;
@@ -643,13 +697,117 @@ static void disconnect_callback(const SOPC_LibSub_ConnectionId c_id)
     Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Client %" PRIu32 " disconnected.", c_id);
 }
 
-int32_t SOPC_ClientHelper_Write(int32_t connectionId, SOPC_ClientHelper_WriteValue* writeValues, size_t nbElements)
+int32_t SOPC_ClientHelper_Write(int32_t connectionId,
+                                SOPC_ClientHelper_WriteValue* writeValues,
+                                size_t nbElements,
+                                SOPC_StatusCode* writeResults)
 {
-    // TODO
-    (void) connectionId;
-    (void) writeValues;
-    (void) nbElements;
-    return -100;
+    if (connectionId <= 0)
+    {
+        return -1;
+    }
+    if (NULL == writeValues || nbElements < 1 || nbElements > INT32_MAX)
+    {
+        return -2;
+    }
+    if (NULL == writeResults)
+    {
+        return -3;
+    }
+
+    OpcUa_WriteRequest* request = (OpcUa_WriteRequest*) SOPC_Malloc(sizeof(OpcUa_WriteRequest));
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    WriteContext* ctx = (WriteContext*) SOPC_Malloc(sizeof(WriteContext));
+
+    OpcUa_WriteRequest_Initialize(request);
+    request->NoOfNodesToWrite = (int32_t) nbElements;
+
+    OpcUa_WriteValue* nodesToWrite;
+    nodesToWrite = SOPC_Calloc(nbElements, sizeof(OpcUa_WriteValue));
+    for (size_t i = 0; i < nbElements && SOPC_STATUS_OK == status; i++)
+    {
+        OpcUa_WriteValue_Initialize(&nodesToWrite[i]);
+        nodesToWrite[i].AttributeId = 13; // TODO find corresponding constant for value attribute
+        SOPC_DataValue_Copy(&nodesToWrite[i].Value, writeValues[i].value);
+        if (NULL == writeValues[i].indexRange)
+        {
+            nodesToWrite[i].IndexRange.Length = 0;
+            nodesToWrite[i].IndexRange.DoNotClear = true;
+            nodesToWrite[i].IndexRange.Data = NULL;
+        }
+        else
+        {
+            status = SOPC_String_CopyFromCString(&nodesToWrite[i].IndexRange, writeValues[i].indexRange);
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            // create an instance of NodeId
+            SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(writeValues[i].nodeId, (int) strlen(writeValues[i].nodeId));
+            if (NULL == nodeId)
+            {
+                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "nodeId NULL");
+            }
+            status = SOPC_NodeId_Copy(&nodesToWrite[i].NodeId, nodeId);
+            SOPC_NodeId_Clear(nodeId);
+            SOPC_Free(nodeId);
+        }
+    }
+    request->NodesToWrite = nodesToWrite;
+
+    if (SOPC_STATUS_OK == status)
+    {
+        /* Prepare the synchronous context */
+        /* TODO: assert that the SOPC_STATUS_OK != statusMutex always avoid deadlocks in production code */
+        SOPC_ReturnStatus statusMutex = SOPC_WriteContext_Initialization(ctx);
+        assert(SOPC_STATUS_OK == statusMutex);
+        Condition_Init(&ctx->condition);
+        assert(SOPC_STATUS_OK == statusMutex);
+        statusMutex = Mutex_Lock(&ctx->mutex);
+        assert(SOPC_STATUS_OK == statusMutex);
+
+        /* Set context */
+        ctx->nbElements = request->NoOfNodesToWrite;
+        ctx->writeResults = (SOPC_StatusCode*) SOPC_Malloc(sizeof(SOPC_StatusCode) * (size_t) request->NoOfNodesToWrite);
+        assert(ctx->writeResults != NULL);
+        ctx->status = SOPC_STATUS_NOK;
+        ctx->finish = false;
+        status =
+            SOPC_ClientCommon_AsyncSendRequestOnSession((SOPC_LibSub_ConnectionId) connectionId, request, (uintptr_t) ctx);
+
+        /* Wait for the response */
+        while (SOPC_STATUS_OK == status && !ctx->finish)
+        {
+            statusMutex = Mutex_UnlockAndTimedWaitCond(&ctx->condition, &ctx->mutex, SYNCHRONOUS_READ_TIMEOUT);
+            assert(SOPC_STATUS_TIMEOUT != statusMutex); /* TODO return error */
+            assert(SOPC_STATUS_OK == statusMutex);
+        }
+        status = ctx->status;
+
+        /* fill write results */
+        for (int i=0; i < ctx->nbElements; i++)
+        {
+            writeResults[i] = ctx->writeResults[i];
+        }
+
+        /* Free the context */
+        statusMutex = Mutex_Unlock(&ctx->mutex);
+        assert(SOPC_STATUS_OK == statusMutex);
+        statusMutex = Condition_Clear(&ctx->condition);
+        assert(SOPC_STATUS_OK == statusMutex);
+        statusMutex = Mutex_Clear(&ctx->mutex);
+        assert(SOPC_STATUS_OK == statusMutex);
+        SOPC_Free(ctx->writeResults);
+        SOPC_Free(ctx);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        return 0;
+    }
+    else
+    {
+        return -100;
+    }
 }
 int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
                                  SOPC_ClientHelper_BrowseRequest* browseRequests,
@@ -661,5 +819,12 @@ int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
     (void) browseRequests;
     (void) nbElements;
     (void) browseResults;
+
+    //TODO send a browse request, wait a browseResponse
+    // if the browse response contains continuation points,
+    // send a browseNextRequest, wait a browseNextResponse
+    // repeat until there are no continuationPoints (or max number of request is reached?)
+    // return browseResults removing continuation points
+    // TODO add browseResponse and BrowseNextResponse to SOPC_ClientHelper_GenericCallback
     return -100;
 }
