@@ -489,65 +489,75 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
     OpcUa_ReadRequest* request = (OpcUa_ReadRequest*) SOPC_Malloc(sizeof(OpcUa_ReadRequest));
     if (NULL == request)
     {
-        return -101;
+        status = SOPC_STATUS_OUT_OF_MEMORY;
     }
 
     ReadContext* ctx = (ReadContext*) SOPC_Malloc(sizeof(ReadContext));
 
     if (NULL == ctx)
     {
-        SOPC_Free(request);
-        return -101;
+        status = SOPC_STATUS_OUT_OF_MEMORY;
     }
 
-    OpcUa_ReadRequest_Initialize(request);
-    request->MaxAge = 0; /* Not manage by S2OPC */
-    request->TimestampsToReturn = OpcUa_TimestampsToReturn_Both;
-    request->NoOfNodesToRead = (int32_t) nbElements; // check is done before
+    if (SOPC_STATUS_OK == status)
+    {
+        OpcUa_ReadRequest_Initialize(request);
+        request->MaxAge = 0; /* Not manage by S2OPC */
+        request->TimestampsToReturn = OpcUa_TimestampsToReturn_Both;
+        request->NoOfNodesToRead = (int32_t) nbElements; // check is done before
+    }
 
     /* Set NodesToRead. This is deallocated by toolkit
        when call SOPC_LibSub_AsyncSendRequestOnSession */
     OpcUa_ReadValueId* nodesToRead = SOPC_Calloc(nbElements, sizeof(OpcUa_ReadValueId));
     if (NULL == nodesToRead)
     {
-        SOPC_Free(request);
-        SOPC_Free(ctx);
-        return -101;
+        status = SOPC_STATUS_OUT_OF_MEMORY;
     }
-    for (size_t i = 0; i < nbElements && SOPC_STATUS_OK == status; i++)
-    {
-        OpcUa_ReadValueId_Initialize(&nodesToRead[i]);
-        nodesToRead[i].AttributeId = readValues[i].attributeId;
-        if (NULL == readValues[i].indexRange)
-        {
-            nodesToRead[i].IndexRange.Length = 0;
-            nodesToRead[i].IndexRange.DoNotClear = true;
-            nodesToRead[i].IndexRange.Data = NULL;
-        }
-        else
-        {
-            status = SOPC_String_CopyFromCString(&nodesToRead[i].IndexRange, readValues[i].indexRange);
-        }
-        if (SOPC_STATUS_OK == status)
-        {
-            // create an instance of NodeId
-            SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(readValues[i].nodeId, (int) strlen(readValues[i].nodeId));
-            if (NULL == nodeId)
-            {
-                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "nodeId NULL");
-            }
-            status = SOPC_NodeId_Copy(&nodesToRead[i].NodeId, nodeId);
-            SOPC_NodeId_Clear(nodeId);
-            SOPC_Free(nodeId);
-        }
-    }
-    request->NodesToRead = nodesToRead;
 
     if (SOPC_STATUS_OK == status)
     {
+        size_t i = 0;
+        for (i = 0; i < nbElements && SOPC_STATUS_OK == status; i++)
+        {
+            OpcUa_ReadValueId_Initialize(&nodesToRead[i]);
+            nodesToRead[i].AttributeId = readValues[i].attributeId;
+            if (NULL == readValues[i].indexRange)
+            {
+                nodesToRead[i].IndexRange.Length = 0;
+                nodesToRead[i].IndexRange.DoNotClear = true;
+                nodesToRead[i].IndexRange.Data = NULL;
+            }
+            else
+            {
+                status = SOPC_String_CopyFromCString(&nodesToRead[i].IndexRange, readValues[i].indexRange);
+            }
+            if (SOPC_STATUS_OK == status)
+            {
+                // create an instance of NodeId
+                SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(readValues[i].nodeId, (int) strlen(readValues[i].nodeId));
+                if (NULL == nodeId)
+                {
+                    status = SOPC_STATUS_OUT_OF_MEMORY;
+                }
+                if (SOPC_STATUS_OK == status)
+                {
+                    status = SOPC_NodeId_Copy(&nodesToRead[i].NodeId, nodeId);
+                    SOPC_NodeId_Clear(nodeId);
+                    SOPC_Free(nodeId);
+                }
+            }
+        }
+    }
+
+    SOPC_ReturnStatus statusMutex = SOPC_STATUS_OK;
+    if (SOPC_STATUS_OK == status)
+    {
+        request->NodesToRead = nodesToRead;
+
         /* Prepare the synchronous context */
         /* TODO: assert that the SOPC_STATUS_OK != statusMutex always avoid deadlocks in production code */
-        SOPC_ReturnStatus statusMutex = SOPC_ReadContext_Initialization(ctx);
+        statusMutex = SOPC_ReadContext_Initialization(ctx);
         assert(SOPC_STATUS_OK == statusMutex);
         Condition_Init(&ctx->condition);
         assert(SOPC_STATUS_OK == statusMutex);
@@ -570,12 +580,11 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
             {
                 SOPC_Free(values[j]);
             }
-
-            SOPC_Free(request);
-            SOPC_Free(ctx);
-            SOPC_Free(nodesToRead);
-            return -101;
         }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
         /* Set context */
         ctx->values = values;
         ctx->nbElements = request->NoOfNodesToRead;
@@ -587,6 +596,8 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
         /* Wait for the response */
         while (SOPC_STATUS_OK == status && !ctx->finish)
         {
+            //TODO see if status condition is relevant in while condition
+            // since it is not modification during the loop
             statusMutex = Mutex_UnlockAndTimedWaitCond(&ctx->condition, &ctx->mutex, SYNCHRONOUS_READ_TIMEOUT);
             assert(SOPC_STATUS_TIMEOUT != statusMutex); /* TODO return error */
             assert(SOPC_STATUS_OK == statusMutex);
@@ -600,8 +611,14 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
         assert(SOPC_STATUS_OK == statusMutex);
         statusMutex = Mutex_Clear(&ctx->mutex);
         assert(SOPC_STATUS_OK == statusMutex);
-        SOPC_Free(ctx);
     }
+
+    if (SOPC_STATUS_OUT_OF_MEMORY == status)
+    {
+        SOPC_Free(request);
+        SOPC_Free(nodesToRead);
+    }
+    SOPC_Free(ctx);
 
     if (SOPC_STATUS_OK == status)
     {
@@ -698,15 +715,8 @@ int32_t SOPC_ClientHelper_AddMonitoredItems(int32_t connectionId, char** nodeIds
         }
     }
 
-    if (NULL != lAttrIds)
-    {
-        SOPC_Free(lAttrIds);
-    }
-
-    if (NULL != lDataId)
-    {
-        SOPC_Free(lDataId);
-    }
+    SOPC_Free(lAttrIds);
+    SOPC_Free(lDataId);
 
     if (SOPC_STATUS_OK != status)
     {
@@ -767,6 +777,7 @@ int32_t SOPC_ClientHelper_Write(int32_t connectionId,
                                 size_t nbElements,
                                 SOPC_StatusCode* writeResults)
 {
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (connectionId <= 0)
     {
         return -1;
@@ -781,61 +792,88 @@ int32_t SOPC_ClientHelper_Write(int32_t connectionId,
     }
 
     OpcUa_WriteRequest* request = (OpcUa_WriteRequest*) SOPC_Malloc(sizeof(OpcUa_WriteRequest));
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    WriteContext* ctx = (WriteContext*) SOPC_Malloc(sizeof(WriteContext));
-
-    OpcUa_WriteRequest_Initialize(request);
-    request->NoOfNodesToWrite = (int32_t) nbElements;
-
-    OpcUa_WriteValue* nodesToWrite;
-    nodesToWrite = SOPC_Calloc(nbElements, sizeof(OpcUa_WriteValue));
-    for (size_t i = 0; i < nbElements && SOPC_STATUS_OK == status; i++)
+    if (NULL == request)
     {
-        OpcUa_WriteValue_Initialize(&nodesToWrite[i]);
-        nodesToWrite[i].AttributeId = 13; // TODO find corresponding constant for value attribute
-        SOPC_DataValue_Copy(&nodesToWrite[i].Value, writeValues[i].value);
-        if (NULL == writeValues[i].indexRange)
-        {
-            nodesToWrite[i].IndexRange.Length = 0;
-            nodesToWrite[i].IndexRange.DoNotClear = true;
-            nodesToWrite[i].IndexRange.Data = NULL;
-        }
-        else
-        {
-            status = SOPC_String_CopyFromCString(&nodesToWrite[i].IndexRange, writeValues[i].indexRange);
-        }
-        if (SOPC_STATUS_OK == status)
-        {
-            // create an instance of NodeId
-            SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(writeValues[i].nodeId, (int) strlen(writeValues[i].nodeId));
-            if (NULL == nodeId)
-            {
-                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "nodeId NULL");
-            }
-            status = SOPC_NodeId_Copy(&nodesToWrite[i].NodeId, nodeId);
-            SOPC_NodeId_Clear(nodeId);
-            SOPC_Free(nodeId);
-        }
+        status = SOPC_STATUS_OUT_OF_MEMORY;
     }
-    request->NodesToWrite = nodesToWrite;
+    WriteContext* ctx = (WriteContext*) SOPC_Malloc(sizeof(WriteContext));
+    if (NULL == ctx)
+    {
+        status = SOPC_STATUS_OUT_OF_MEMORY;
+    }
 
     if (SOPC_STATUS_OK == status)
     {
+        OpcUa_WriteRequest_Initialize(request);
+        request->NoOfNodesToWrite = (int32_t) nbElements;
+    }
+
+    OpcUa_WriteValue* nodesToWrite = SOPC_Calloc(nbElements, sizeof(OpcUa_WriteValue));
+    if (NULL == nodesToWrite)
+    {
+        status = SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        for (size_t i = 0; i < nbElements && SOPC_STATUS_OK == status; i++)
+        {
+            OpcUa_WriteValue_Initialize(&nodesToWrite[i]);
+            nodesToWrite[i].AttributeId = 13; // TODO find corresponding constant for value attribute
+            SOPC_DataValue_Copy(&nodesToWrite[i].Value, writeValues[i].value);
+            if (NULL == writeValues[i].indexRange)
+            {
+                nodesToWrite[i].IndexRange.Length = 0;
+                nodesToWrite[i].IndexRange.DoNotClear = true;
+                nodesToWrite[i].IndexRange.Data = NULL;
+            }
+            else
+            {
+                status = SOPC_String_CopyFromCString(&nodesToWrite[i].IndexRange, writeValues[i].indexRange);
+            }
+            if (SOPC_STATUS_OK == status)
+            {
+                // create an instance of NodeId
+                SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(writeValues[i].nodeId, (int) strlen(writeValues[i].nodeId));
+                if (NULL == nodeId)
+                {
+                    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "nodeId NULL");
+                }
+                status = SOPC_NodeId_Copy(&nodesToWrite[i].NodeId, nodeId);
+                SOPC_NodeId_Clear(nodeId);
+                SOPC_Free(nodeId);
+            }
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_WriteContext_Initialization(ctx);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        /* Set context */
+        ctx->nbElements = request->NoOfNodesToWrite;
+        ctx->writeResults = (SOPC_StatusCode*) SOPC_Malloc(sizeof(SOPC_StatusCode) * (size_t) request->NoOfNodesToWrite);
+        if (NULL == ctx->writeResults)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        ctx->status = SOPC_STATUS_NOK;
+        ctx->finish = false;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        request->NodesToWrite = nodesToWrite;
         /* Prepare the synchronous context */
         /* TODO: assert that the SOPC_STATUS_OK != statusMutex always avoid deadlocks in production code */
-        SOPC_ReturnStatus statusMutex = SOPC_WriteContext_Initialization(ctx);
-        assert(SOPC_STATUS_OK == statusMutex);
-        Condition_Init(&ctx->condition);
+        SOPC_ReturnStatus statusMutex = Condition_Init(&ctx->condition);
         assert(SOPC_STATUS_OK == statusMutex);
         statusMutex = Mutex_Lock(&ctx->mutex);
         assert(SOPC_STATUS_OK == statusMutex);
 
-        /* Set context */
-        ctx->nbElements = request->NoOfNodesToWrite;
-        ctx->writeResults = (SOPC_StatusCode*) SOPC_Malloc(sizeof(SOPC_StatusCode) * (size_t) request->NoOfNodesToWrite);
-        assert(ctx->writeResults != NULL);
-        ctx->status = SOPC_STATUS_NOK;
-        ctx->finish = false;
         status =
             SOPC_ClientCommon_AsyncSendRequestOnSession((SOPC_LibSub_ConnectionId) connectionId, request, (uintptr_t) ctx);
 
@@ -862,8 +900,14 @@ int32_t SOPC_ClientHelper_Write(int32_t connectionId,
         statusMutex = Mutex_Clear(&ctx->mutex);
         assert(SOPC_STATUS_OK == statusMutex);
         SOPC_Free(ctx->writeResults);
-        SOPC_Free(ctx);
     }
+
+    if (SOPC_STATUS_OUT_OF_MEMORY == status)
+    {
+        SOPC_Free(request);
+        SOPC_Free(nodesToWrite);
+    }
+    SOPC_Free(ctx);
 
     if (SOPC_STATUS_OK == status)
     {
