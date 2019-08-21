@@ -77,7 +77,8 @@ static char* get_time_string(bool local, bool compact)
         return NULL;
     }
 
-    sprintf(buf + 19, compact ? "_%03" PRIu32 : ".%03" PRIu32, milliseconds);
+    int res2 = sprintf(buf + 19, compact ? "_%03" PRIu32 : ".%03" PRIu32, milliseconds);
+    assert(res2 > 0);
 
     return buf;
 }
