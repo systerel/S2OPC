@@ -39,6 +39,7 @@ from attribute_write_values import attribute_write_values_tests, attribute_write
 from safety_secure_channels import secure_channels_connect
 from discovery_get_endpoints import discovery_get_endpoints_tests
 from view_basic import browse_tests
+from translate_browse_path import translate_browse_paths_to_node_ids_tests
 from common import sUri, create_client
 from tap_logger import TapLogger
 from opcua.crypto import security_policies
@@ -77,6 +78,10 @@ if __name__=='__main__':
             # browse tests
             print(headerString.format("Browse"))
             browse_tests(client, logger)
+
+            # translate browse path tests
+            print(headerString.format("TranslateBrowsePathToNodeIds"))
+            translate_browse_paths_to_node_ids_tests(client, logger)
 
         finally:
             client.disconnect()
