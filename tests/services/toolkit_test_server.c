@@ -51,8 +51,9 @@
 #define ENDPOINT_URL "opc.tcp://localhost:4841"
 #define APPLICATION_URI "urn:S2OPC:localhost"
 #define PRODUCT_URI "urn:S2OPC:localhost"
+#define PRODUCT_URI_2 "urn:S2OPC:localhost_2"
 
-static const char* app_namespace_uris[] = {(const char*) PRODUCT_URI, NULL};
+static const char* app_namespace_uris[] = {(const char*) PRODUCT_URI, PRODUCT_URI_2, NULL};
 
 static int32_t endpointClosed = 0;
 static bool secuActive = true;

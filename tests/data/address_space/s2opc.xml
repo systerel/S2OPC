@@ -1553,9 +1553,43 @@
     <Description Locale="en">NoName</Description>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+      <Reference ReferenceType="Organizes">ns=1;s=Objects.15361.BLOCKs</Reference>
+      <!-- Degraded case for TranslateBrowsePath test: different namespace but same name path -->
+      <Reference ReferenceType="Organizes">ns=2;s=Objects.15362.BLOCKs</Reference>
+      <!-- Degraded case for TranslateBrowsePath test: same path than 'ns=1;s=Objects.15361.BLOCKs' -->
+      <Reference ReferenceType="Organizes">ns=1;s=Objects.7681.BLOCKs</Reference>
       <Reference ReferenceType="Organizes">ns=1;s=Objects.15361.SIGNALs</Reference>
       <Reference ReferenceType="Organizes">ns=1;s=Objects.15361.SWITCHs</Reference>
       <Reference ReferenceType="Organizes">ns=1;s=Objects.15361.TRACKs</Reference>
+    </References>
+  </UAObject>
+  <UAObject BrowseName="1:BLOCKs" NodeId="ns=1;s=Objects.15361.BLOCKs" ParentNodeId="ns=1;i=15361">
+    <DisplayName>BLOCKs</DisplayName>
+    <Description>BLOCKS</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="Organizes">ns=1;i=15361</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+      <Reference ReferenceType="Organizes">ns=1;s=Objects.15361.BLOCKs.B_1</Reference>
+    </References>
+  </UAObject>
+  <!-- Define a second BLOCKs node with same browse name with different namespace -->
+  <UAObject BrowseName="2:BLOCKs" NodeId="ns=2;s=Objects.15362.BLOCKs" ParentNodeId="ns=1;i=15361">
+    <DisplayName>BLOCKs (15362)</DisplayName>
+    <Description>BLOCKS (15362): same as BLOCKs but different namespace / qualified name</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="Organizes">ns=1;i=15361</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+      <Reference ReferenceType="Organizes">ns=2;s=Objects.15362.BLOCKs.B_1</Reference>
+    </References>
+  </UAObject>
+  <!-- Define a third BLOCKs node with same browse name but different nodeId-->
+  <UAObject BrowseName="1:BLOCKs" NodeId="ns=1;s=Objects.7681.BLOCKs" ParentNodeId="ns=1;i=15361">
+    <DisplayName>BLOCKs (7681)</DisplayName>
+    <Description>BLOCKS (7681): same as BLOCKs regarding qualified name but different node/subnodes</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="Organizes">ns=1;i=15361</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+      <Reference ReferenceType="Organizes">ns=1;s=Objects.7681.BLOCKs.B_1</Reference>
     </References>
   </UAObject>
   <UAObject BrowseName="1:SIGNALs" NodeId="ns=1;s=Objects.15361.SIGNALs" ParentNodeId="ns=1;i=15361">
@@ -1590,6 +1624,84 @@
       <Reference ReferenceType="Organizes">ns=1;s=Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK</Reference>
     </References>
   </UAObject>
+  <UAObject BrowseName="1:B_1" NodeId="ns=1;s=Objects.15361.BLOCKs.B_1" ParentNodeId="ns=1;s=Objects.15361.BLOCKs">
+    <DisplayName>B_1</DisplayName>
+    <Description>B_1</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="Organizes">ns=1;s=Objects.15361.BLOCKs</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+      <Reference ReferenceType="Organizes">ns=1;s=Objects.15361.BLOCKs.B_1.RM</Reference>
+    </References>
+  </UAObject>
+  <UAObject BrowseName="1:RM" NodeId="ns=1;s=Objects.15361.BLOCKs.B_1.RM" ParentNodeId="ns=1;s=Objects.15361.BLOCKs.B_1">
+    <DisplayName>RM</DisplayName>
+    <Description>B_1.RM</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="Organizes">ns=1;s=Objects.15361.BLOCKs.B_1</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Objects.15361.BLOCKs.B_1.RM.LeftSubRoute</Reference>
+    </References>
+  </UAObject>
+  <UAVariable AccessLevel="99" BrowseName="1:LeftSubRoute" DataType="Boolean" NodeId="ns=1;s=Objects.15361.BLOCKs.B_1.RM.LeftSubRoute" ParentNodeId="ns=1;s=Objects.15361.BLOCKs.B_1.RM">
+    <DisplayName>LeftSubRoute</DisplayName>
+    <Description>B_1.RM.LeftSubRoute</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=Objects.15361.BLOCKs.B_1.RM</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:Boolean>false</uax:Boolean>
+    </Value>
+  </UAVariable>
+  <UAObject BrowseName="2:B_1" NodeId="ns=2;s=Objects.15362.BLOCKs.B_1" ParentNodeId="ns=2;s=Objects.15362.BLOCKs">
+    <DisplayName>B_1</DisplayName>
+    <Description>B_1</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="Organizes">ns=2;s=Objects.15362.BLOCKs</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+      <Reference ReferenceType="Organizes">ns=2;s=Objects.15362.BLOCKs.B_1.RM</Reference>
+    </References>
+  </UAObject>
+  <UAObject BrowseName="2:RM" NodeId="ns=2;s=Objects.15362.BLOCKs.B_1.RM" ParentNodeId="ns=2;s=Objects.15362.BLOCKs.B_1">
+    <DisplayName>RM</DisplayName>
+    <Description>B_1.RM</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="Organizes">ns=2;s=Objects.15362.BLOCKs.B_1</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+      <Reference ReferenceType="HasComponent">ns=2;s=Objects.15362.BLOCKs.B_1.RM.LeftSubRoute</Reference>
+    </References>
+  </UAObject>
+  <UAVariable AccessLevel="99" BrowseName="2:LeftSubRoute" DataType="Boolean" NodeId="ns=2;s=Objects.15362.BLOCKs.B_1.RM.LeftSubRoute" ParentNodeId="ns=2;s=Objects.15362.BLOCKs.B_1.RM">
+    <DisplayName>LeftSubRoute</DisplayName>
+    <Description>B_1.RM.LeftSubRoute</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=2;s=Objects.15362.BLOCKs.B_1.RM</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:Boolean>false</uax:Boolean>
+    </Value>
+  </UAVariable>
+  <UAObject BrowseName="1:B_1" NodeId="ns=1;s=Objects.7681.BLOCKs.B_1" ParentNodeId="ns=1;s=Objects.7681.BLOCKs">
+    <DisplayName>B_1 (7681)</DisplayName>
+    <Description>B_1 (7681)</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="Organizes">ns=1;s=Objects.7681.BLOCKs</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Objects.7681.BLOCKs.B_1.TSRApplied</Reference>
+    </References>
+  </UAObject>
+  <UAVariable AccessLevel="99" BrowseName="1:TSRApplied" DataType="String" NodeId="ns=1;s=Objects.7681.BLOCKs.B_1.TSRApplied" ParentNodeId="ns=1;s=Objects.7681.BLOCKs.B_1">
+    <DisplayName>TSRApplied</DisplayName>
+    <Description>B_1.TSRApplied</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=Objects.7681.BLOCKs.B_1</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:String>TSRApplied value...</uax:String>
+    </Value>
+  </UAVariable>
   <UAObject BrowseName="1:BALA_RDLS_G019" NodeId="ns=1;s=Objects.15361.SIGNALs.BALA_RDLS_G019" ParentNodeId="ns=1;s=Objects.15361.SIGNALs">
     <DisplayName>BALA_RDLS_G019</DisplayName>
     <Description>NoName</Description>
