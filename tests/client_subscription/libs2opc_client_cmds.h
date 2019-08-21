@@ -368,20 +368,23 @@ int32_t SOPC_ClientHelper_Write(int32_t connectionId,
  @param nbElements
     Number of elements to write. It should be between 1 and INT32_MAX
  @param values [out, not null]
-    A pre-allocated array to the output list of Attribute values.
+    A pre-allocated array to the output list of pointers of Attribute values.
     It should be at least \p nElements long.
     When return, the order of this list matches the order of \p readValues.
-    The ownership of the data moved to caller which should freed the content of this array.
+    The ownership of the data moved to caller which should freed the content of this array,
+    i.e. user should free all attribute values
  @return
    '0' if operation succeed
    '-1' if connectionId not valid
    '-2' if readValues, values or nbElements not valid
+   '-3' if values is not valid
    '-100' if operation failed
+   '-101' if memory allocation failed
 */
 int32_t SOPC_ClientHelper_Read(int32_t connectionId,
                                SOPC_ClientHelper_ReadValue* readValues,
                                size_t nbElements,
-                               SOPC_DataValue* values);
+                               SOPC_DataValue** values);
 
 /*
  @description

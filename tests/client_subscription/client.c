@@ -201,15 +201,14 @@ int main(int argc, char* const argv[])
             readValues[i].indexRange = NULL;
         }
 
-        SOPC_DataValue* readDataValues = (SOPC_DataValue*) malloc(sizeof(SOPC_DataValue) * (size_t) options.node_ids_size);
-        //TODO check alloc
+        SOPC_DataValue** readDataValues = malloc((size_t) options.node_ids_size * sizeof(SOPC_DataValue*));
+        assert(NULL != readDataValues);
 
-        //TODO call this function correctly
         res = SOPC_ClientHelper_Read(connectionId, readValues, (size_t) options.node_ids_size, readDataValues);
-        //TODO print results
+
         for (int i = 0; i < options.node_ids_size; i++)
         {
-            SOPC_DataValue* value = &readDataValues[i];
+            SOPC_DataValue* value = readDataValues[i];
             if (NULL == value)
             {
                 printf("NULL\n");
@@ -230,6 +229,7 @@ int main(int argc, char* const argv[])
         for (int i = 0; i < options.node_ids_size; i++)
         {
             free(readValues[i].nodeId);
+            free(readDataValues[i]);
         }
         free(readValues);
         free(readDataValues);
@@ -278,11 +278,8 @@ int main(int argc, char* const argv[])
 
     if (res == 0)
     {
-        // TODO decide if using SOPC_Sleep is necessary
-        //SOPC_Sleep(1000 * 1000);
         sleep(10);
         SOPC_ClientHelper_Unsubscribe(connectionId);
-        //sleep(1000 * 1000);
     }
 
 
