@@ -596,7 +596,7 @@ int32_t SOPC_ClientHelper_CreateSubscription(int32_t connectionId, SOPC_ClientHe
 
 int32_t SOPC_ClientHelper_AddMonitoredItems(int32_t connectionId, char** nodeIds, size_t nbNodeIds)
 {
-    // TODO implement this function
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (connectionId <= 0)
     {
         return -1;
@@ -617,16 +617,30 @@ int32_t SOPC_ClientHelper_AddMonitoredItems(int32_t connectionId, char** nodeIds
         }*/
     }
 
-    SOPC_LibSub_AttributeId* lAttrIds = calloc(nbNodeIds, sizeof(SOPC_LibSub_AttributeId));
-    assert(NULL != lAttrIds);
-    for (size_t i = 0; i < nbNodeIds; ++i)
+    SOPC_LibSub_AttributeId* lAttrIds = SOPC_Calloc(nbNodeIds, sizeof(SOPC_LibSub_AttributeId));
+    if (NULL == lAttrIds)
     {
-        lAttrIds[i] = SOPC_LibSub_AttributeId_Value;
+        status = SOPC_STATUS_OUT_OF_MEMORY;
     }
-    SOPC_LibSub_DataId* lDataId = calloc(nbNodeIds, sizeof(SOPC_LibSub_DataId));
-    assert(NULL != lDataId);
-    SOPC_ReturnStatus status = SOPC_ClientCommon_AddToSubscription(
-        (SOPC_LibSub_ConnectionId) connectionId, (const char* const*) nodeIds, lAttrIds, (int32_t) nbNodeIds, lDataId);
+    else
+    {
+        for (size_t i = 0; i < nbNodeIds; ++i)
+        {
+            lAttrIds[i] = SOPC_LibSub_AttributeId_Value;
+        }
+    }
+
+    SOPC_LibSub_DataId* lDataId = SOPC_Calloc(nbNodeIds, sizeof(SOPC_LibSub_DataId));
+    if (NULL == lDataId)
+    {
+        status = SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ClientCommon_AddToSubscription(
+                (SOPC_LibSub_ConnectionId) connectionId, (const char* const*) nodeIds, lAttrIds, (int32_t) nbNodeIds, lDataId);
+    }
     if (SOPC_STATUS_OK != status)
     {
         Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not create monitored items.");
@@ -640,8 +654,16 @@ int32_t SOPC_ClientHelper_AddMonitoredItems(int32_t connectionId, char** nodeIds
                         lDataId[i]);
         }
     }
-    free(lAttrIds);
-    free(lDataId);
+
+    if (NULL != lAttrIds)
+    {
+        SOPC_Free(lAttrIds);
+    }
+
+    if (NULL != lDataId)
+    {
+        SOPC_Free(lDataId);
+    }
 
     if (SOPC_STATUS_OK != status)
     {
