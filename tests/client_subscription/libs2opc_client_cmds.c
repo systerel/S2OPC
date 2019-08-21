@@ -116,7 +116,7 @@ typedef struct
     Mutex mutex; /* protect this context */
     Condition condition;
 
-    SOPC_DataValue* values;
+    SOPC_DataValue** values;
     int32_t nbElements;
     SOPC_StatusCode status;
     bool finish;
@@ -411,13 +411,13 @@ void SOPC_ClientHelper_GenericCallback(SOPC_LibSub_ConnectionId c_id,
         {
             for (int32_t i = 0; i < readResp->NoOfResults && SOPC_STATUS_OK == ctx->status; i++)
             {
-                ctx->status = SOPC_DataValue_Copy(&ctx->values[i], &readResp->Results[i]);
+                ctx->status = SOPC_DataValue_Copy(ctx->values[i], &readResp->Results[i]);
             }
             if (ctx->status == SOPC_STATUS_NOK)
             {
                 for (int32_t i = 0; i < readResp->NoOfResults; i++)
                 {
-                    SOPC_DataValue_Clear(&ctx->values[i]);
+                    SOPC_DataValue_Clear(ctx->values[i]);
                 }
                 ctx->nbElements = 0;
             }
@@ -469,8 +469,10 @@ void SOPC_ClientHelper_GenericCallback(SOPC_LibSub_ConnectionId c_id,
 int32_t SOPC_ClientHelper_Read(int32_t connectionId,
                                SOPC_ClientHelper_ReadValue* readValues,
                                size_t nbElements,
-                               SOPC_DataValue* values)
+                               SOPC_DataValue** values)
 {
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
     if (connectionId <= 0)
     {
         return -1;
@@ -479,11 +481,24 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
     {
         return -2;
     }
+    if (NULL == values)
+    {
+        return -3;
+    }
 
     OpcUa_ReadRequest* request = (OpcUa_ReadRequest*) SOPC_Malloc(sizeof(OpcUa_ReadRequest));
-    OpcUa_ReadValueId* nodesToRead;
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    if (NULL == request)
+    {
+        return -101;
+    }
+
     ReadContext* ctx = (ReadContext*) SOPC_Malloc(sizeof(ReadContext));
+
+    if (NULL == ctx)
+    {
+        SOPC_Free(request);
+        return -101;
+    }
 
     OpcUa_ReadRequest_Initialize(request);
     request->MaxAge = 0; /* Not manage by S2OPC */
@@ -492,7 +507,13 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
 
     /* Set NodesToRead. This is deallocated by toolkit
        when call SOPC_LibSub_AsyncSendRequestOnSession */
-    nodesToRead = SOPC_Calloc(nbElements, sizeof(OpcUa_ReadValueId));
+    OpcUa_ReadValueId* nodesToRead = SOPC_Calloc(nbElements, sizeof(OpcUa_ReadValueId));
+    if (NULL == nodesToRead)
+    {
+        SOPC_Free(request);
+        SOPC_Free(ctx);
+        return -101;
+    }
     for (size_t i = 0; i < nbElements && SOPC_STATUS_OK == status; i++)
     {
         OpcUa_ReadValueId_Initialize(&nodesToRead[i]);
@@ -533,6 +554,28 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
         statusMutex = Mutex_Lock(&ctx->mutex);
         assert(SOPC_STATUS_OK == statusMutex);
 
+        /* alloc values */
+        int i = 0;
+        for (i = 0; i < (int) nbElements && SOPC_STATUS_OK == status; i++)
+        {
+            values[i] = SOPC_Malloc(sizeof(SOPC_DataValue));
+            if (NULL == values[i])
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+        }
+        if (SOPC_STATUS_OK != status)
+        {
+            for (int j = 0;j < i + 1; j++)
+            {
+                SOPC_Free(values[j]);
+            }
+
+            SOPC_Free(request);
+            SOPC_Free(ctx);
+            SOPC_Free(nodesToRead);
+            return -101;
+        }
         /* Set context */
         ctx->values = values;
         ctx->nbElements = request->NoOfNodesToRead;
