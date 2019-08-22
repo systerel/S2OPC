@@ -187,11 +187,64 @@ int main(int argc, char* const argv[])
         res = SOPC_ClientHelper_AddMonitoredItems(connectionId, options.node_ids, (size_t) options.node_ids_size);
     }
 
+
+    if (0 == res)
+    {
+        //Browse server
+        size_t nbBrowse = 4;
+        SOPC_ClientHelper_BrowseRequest* browseRequests = (SOPC_ClientHelper_BrowseRequest*)
+            malloc(sizeof(SOPC_ClientHelper_BrowseRequest) * nbBrowse);
+        assert(NULL != browseRequests);
+        SOPC_ClientHelper_BrowseResult* browseResults = (SOPC_ClientHelper_BrowseResult*)
+            malloc(sizeof(SOPC_ClientHelper_BrowseResult) * nbBrowse);
+        assert(NULL != browseResults);
+
+        browseRequests[3].nodeId = "ns=0;i=85"; // Root/Objects/
+        browseRequests[3].direction= 0; // forward
+        browseRequests[3].referenceTypeId = ""; // all reference types (NULL?)
+        browseRequests[3].includeSubtypes = true;
+
+        browseRequests[1].nodeId = "ns=0;i=84"; // Root/
+        browseRequests[1].direction= 0; // forward
+        browseRequests[1].referenceTypeId = ""; // all reference types (NULL?)
+        browseRequests[1].includeSubtypes = true;
+
+        browseRequests[2].nodeId = "ns=0;i=20001"; // Root/Objects/scalar
+        browseRequests[2].direction= 0; // forward
+        browseRequests[2].referenceTypeId = ""; // all reference types (NULL?)
+        browseRequests[2].includeSubtypes = true;
+
+        browseRequests[0].nodeId = "ns=0;i=20008"; // Root/Objects/scalar/wo
+        browseRequests[0].direction= 0; // forward
+        browseRequests[0].referenceTypeId = ""; // all reference types (NULL?)
+        browseRequests[0].includeSubtypes = true;
+
+        res = SOPC_ClientHelper_Browse(connectionId, browseRequests, nbBrowse, browseResults);
+
+        for (size_t j = 0; j < nbBrowse; j++)
+        {
+            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "======================== %d ==============================", j);
+            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "status: %d, nbOfResults: %d",
+                                                     browseResults[j].statusCode,
+                                                     browseResults[j].nbOfReferences);
+            for (int32_t i = 0; i < browseResults[j].nbOfReferences; i++)
+            {
+                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "nodeId: %s", browseResults[j].references[i].nodeId);
+                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "displayName: %s", browseResults[j].references[i].displayName);
+            }
+            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "==========================================================", j);
+        }
+
+        free(browseRequests);
+        free(browseResults);
+    }
+
     if (res == 0)
     {
         //Read values
         sleep(3);
         SOPC_ClientHelper_ReadValue* readValues = (SOPC_ClientHelper_ReadValue*) malloc(sizeof(SOPC_ClientHelper_ReadValue) * (size_t) options.node_ids_size);
+        assert(NULL != readValues);
         for (int i = 0; i < options.node_ids_size; i++)
         {
             readValues[i].nodeId = malloc(sizeof(char) * (strlen(options.node_ids[i]) + 1));
