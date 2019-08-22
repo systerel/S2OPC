@@ -153,7 +153,7 @@ int main(int argc, char* const argv[])
         return 1;
     }
 
-    SOPC_ClientHelper_Initialize("./client_subscription_logs", SOPC_TOOLKIT_LOG_LEVEL_DEBUG);
+    SOPC_ClientHelper_Initialize("./client_subscription_logs/", SOPC_TOOLKIT_LOG_LEVEL_DEBUG);
 
     SOPC_ClientHelper_Security security = {
         .security_policy = SECURITY_POLICY,

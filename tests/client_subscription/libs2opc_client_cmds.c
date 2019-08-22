@@ -188,7 +188,7 @@ int32_t SOPC_ClientHelper_Initialize(const char* log_path, int32_t log_level)
     if (log_path == NULL)
     {
         log_path_set = false;
-        log_path = "./logs";
+        log_path = "./logs/";
     }
 
     SOPC_LibSub_StaticCfg cfg_cli = {.host_log_callback = log_callback,
@@ -204,7 +204,7 @@ int32_t SOPC_ClientHelper_Initialize(const char* log_path, int32_t log_level)
 
     if (!log_path_set)
     {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_WARNING, "No log path provided, set to './logs' by default.");
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_WARNING, "No log path provided, set to './logs/' by default.");
     }
 
     if (SOPC_STATUS_OK != status)
