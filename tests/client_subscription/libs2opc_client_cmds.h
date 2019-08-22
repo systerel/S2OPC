@@ -193,6 +193,23 @@ typedef struct
     char* browseName;
     char* displayName;
     int32_t nodeClass;
+} SOPC_ClientHelper_BrowseResultReference;
+
+/*
+ * @description
+ *   structure containing the result of a browse request
+ * @field statusCode
+ *   status code of the browse operation
+ * @field NbOfReferences
+ *   number of references
+ * @field references
+ *   references return by the browse request
+ */
+typedef struct
+{
+    SOPC_ReturnStatus statusCode;
+    int32_t nbOfReferences;
+    SOPC_ClientHelper_BrowseResultReference* references;
 } SOPC_ClientHelper_BrowseResult;
 
 /*
