@@ -572,7 +572,11 @@ OPERATIONS
                     IF l_translate_statusCode /= e_sc_ok THEN
                         statusCode_operation := l_translate_statusCode
                     ELSE
-                        statusCode_operation <-- treat_browse_result_one_source(index, l_targetName, l_nbReferences);
+                        l_translate_statusCode <-- treat_browse_result_one_source(index, l_targetName, l_nbReferences);
+                        IF statusCode_operation /= e_sc_ok THEN
+                            statusCode_operation := l_translate_statusCode
+                        END /* ELSE keep e_sc_ok status code for operation since it succeeded for at least one source */
+                        ;
                         clear_browse_result
                     END
                 END
