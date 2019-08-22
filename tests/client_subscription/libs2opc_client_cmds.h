@@ -201,8 +201,9 @@ typedef struct
     before any other service can be used.
  @param log_path
     Absolute or relative path of the directory to be used for logs. It will contain all created log files.
+    Shall be terminated by a directory separator.
     If given directory does not exist, it will be created by S2OP_ClientHelper
-    If log_path is NULL, './logs' is used by default.
+    If log_path is NULL, './logs/' is used by default.
     Value shall be NULL or zero-terminated string.
     The content of this String is copied the object pointed by /p log_path can be freed by the caller
  @param log_level
