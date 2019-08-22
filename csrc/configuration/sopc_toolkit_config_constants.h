@@ -94,9 +94,9 @@
 #define SOPC_MAX_SOCKETS_CONNECTIONS 50
 #endif /* SOPC_MAX_SOCKETS_CONNECTIONS */
 
-/** @brief Message size allocated to send messages from sockets to chunk manager */
-#ifndef SOPC_MSG_SIZE_TO_CHUNK_MANAGER
-#define SOPC_MSG_SIZE_TO_CHUNK_MANAGER 1024
+/** @brief Minimum byte buffer size allocated to read data from socket and send it to chunk manager */
+#ifndef SOPC_MIN_BYTE_BUFFER_SIZE_READ_SOCKET
+#define SOPC_MIN_BYTE_BUFFER_SIZE_READ_SOCKET 1024
 #endif /* SOPC_MSG_SIZE_TO_CHUNK_MANAGER */
 
 /* SECURE CHANNEL CONFIGURATION */

@@ -409,6 +409,34 @@ SOPC_ReturnStatus SOPC_Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize
     return status;
 }
 
+SOPC_ReturnStatus SOPC_Socket_BytesToRead(Socket sock, uint32_t* bytesToRead)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    u_long nbBytes = 0;
+    if (sock != SOPC_INVALID_SOCKET && bytesToRead != NULL)
+    {
+        int res = ioctlsocket(sock, FIONREAD, &nbBytes);
+        if (res == 0)
+        {
+            if (nbBytes < UINT32_MAX)
+            {
+                *bytesToRead = (uint32_t) nbBytes;
+            }
+            else
+            {
+                *bytesToRead = UINT32_MAX;
+            }
+
+            status = SOPC_STATUS_OK;
+        }
+        else
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+    return status;
+}
+
 void SOPC_Socket_Close(Socket* sock)
 {
     if (sock != NULL && *sock != SOPC_INVALID_SOCKET)

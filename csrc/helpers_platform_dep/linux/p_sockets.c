@@ -28,6 +28,7 @@
 #include <netinet/tcp.h>
 #include <stdint.h>
 #include <string.h>
+#include <sys/ioctl.h>
 #include <unistd.h>
 
 #include "sopc_threads.h"
@@ -419,6 +420,34 @@ SOPC_ReturnStatus SOPC_Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize
             {
                 status = SOPC_STATUS_WOULD_BLOCK;
             }
+        }
+        else
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_Socket_BytesToRead(Socket sock, uint32_t* bytesToRead)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    int nbBytes = 0;
+    if (sock != SOPC_INVALID_SOCKET && bytesToRead != NULL)
+    {
+        int res = ioctl(sock, FIONREAD, &nbBytes);
+        if (res == 0 && nbBytes >= 0)
+        {
+            if ((uint64_t) nbBytes < UINT32_MAX)
+            {
+                *bytesToRead = (uint32_t) nbBytes;
+            }
+            else
+            {
+                *bytesToRead = UINT32_MAX;
+            }
+
+            status = SOPC_STATUS_OK;
         }
         else
         {

@@ -407,19 +407,45 @@ static SOPC_ReturnStatus on_ready_read(SOPC_Socket* socket, uint32_t socket_id)
 {
     if (socket->state != SOCKET_STATE_CONNECTED)
     {
-        // ignore event since socket could have been closed since event was triggered
+        // ignore event since socket have been closed and event have been triggered
         return SOPC_STATUS_OK;
     }
 
-    SOPC_Buffer* buffer = SOPC_Buffer_Create(SOPC_MSG_SIZE_TO_CHUNK_MANAGER);
+    SOPC_Buffer* buffer = NULL;
 
-    if (buffer == NULL)
+    uint32_t readBytes = 0;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    status = SOPC_Socket_BytesToRead(socket->sock, &readBytes);
+
+    if (SOPC_STATUS_OK != status)
     {
-        return SOPC_STATUS_OUT_OF_MEMORY;
+        // No information, use the minimum size of buffer
+        readBytes = SOPC_MIN_BYTE_BUFFER_SIZE_READ_SOCKET;
+        status = SOPC_STATUS_OK;
     }
 
-    uint32_t readBytes;
-    SOPC_ReturnStatus status = SOPC_Socket_Read(socket->sock, buffer->data, SOPC_MSG_SIZE_TO_CHUNK_MANAGER, &readBytes);
+    if (SOPC_STATUS_OK == status)
+    {
+        if (0 == readBytes)
+        {
+            // Nothing to read, still allocate minimum size and make an attempt to at least check the socket closed case
+            readBytes = SOPC_MIN_BYTE_BUFFER_SIZE_READ_SOCKET;
+        }
+        else if (readBytes > SOPC_TCP_UA_MAX_BUFFER_SIZE)
+        {
+            // Too many bytes to read for a chunk maximum size, allocate the maximum chunk size
+            readBytes = SOPC_TCP_UA_MAX_BUFFER_SIZE;
+        }
+
+        buffer = SOPC_Buffer_Create(readBytes);
+        status = NULL == buffer ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_Socket_Read(socket->sock, buffer->data, readBytes, &readBytes);
+    }
 
     if (status != SOPC_STATUS_OK)
     {
@@ -431,6 +457,7 @@ static SOPC_ReturnStatus on_ready_read(SOPC_Socket* socket, uint32_t socket_id)
     assert(status == SOPC_STATUS_OK);
 
     SOPC_Sockets_Emit(SOCKET_RCV_BYTES, socket->connectionId, (void*) buffer, socket_id);
+
     return SOPC_STATUS_OK;
 }
 

@@ -401,6 +401,12 @@ SOPC_ReturnStatus SOPC_Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize
     return status;
 }
 
+SOPC_ReturnStatus SOPC_Socket_BytesToRead(Socket sock, uint32_t* bytesToRead)
+{
+    // TODO: to be implemented
+    return SOPC_STATUS_NOK;
+}
+
 void SOPC_Socket_Close(Socket* sock)
 {
     if (sock != NULL && *sock != SOPC_INVALID_SOCKET)

@@ -236,6 +236,18 @@ SOPC_ReturnStatus SOPC_Socket_Write(Socket sock, const uint8_t* data, uint32_t c
 SOPC_ReturnStatus SOPC_Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize, uint32_t* readCount);
 
 /**
+ *  \brief Retrieve number of bytes available to read on the socket
+ *
+ *  \param sock         The socket on which data might be available to read
+ *  \param byteToRead   (out) Pointer to the number of bytes available to read on the socket.
+ *                      To be considered only if returned status is SOPC_STATUS_OK
+ *
+ *  \return             SOPC_STATUS_OK if operation succeeded,
+ *                      SOPC_STATUS_INVALID_PARAMETRS if parameters are not valid, SOPC_STATUS_NOK otherwise.
+ */
+SOPC_ReturnStatus SOPC_Socket_BytesToRead(Socket sock, uint32_t* bytesToRead);
+
+/**
  *  \brief Close the socket connection and/or clear the socket
  *
  *  \param sock     The socket to disconnect and/or clear
