@@ -409,12 +409,18 @@ endfunction()
 enable_testing()
 
 set(TEST_ADDRESS_SPACE_XML "${CMAKE_SOURCE_DIR}/tests/data/address_space/s2opc.xml")
-set(TEST_ADDRESS_SPACE_C "test_address_space.c")
-s2opc_embed_address_space(${TEST_ADDRESS_SPACE_C} ${TEST_ADDRESS_SPACE_XML})
+set(TEST_CHECK_HELPERS_ADDRESS_SPACE_C "check_helpers_address_space.c")
+set(TEST_DEMO_SERVER_ADDRESS_SPACE_C "demo_server_address_space.c")
+set(TEST_LOCAL_DEMO_SERVER_ADDRESS_SPACE_C "local_demo_server_test_address_space.c")
+set(TEST_DEMO_CLIENT_ADDRESS_SPACE_C "demo_client_address_space.c")
+s2opc_embed_address_space(${TEST_CHECK_HELPERS_ADDRESS_SPACE_C} ${TEST_ADDRESS_SPACE_XML})
+s2opc_embed_address_space(${TEST_DEMO_SERVER_ADDRESS_SPACE_C} ${TEST_ADDRESS_SPACE_XML})
+s2opc_embed_address_space(${TEST_LOCAL_DEMO_SERVER_ADDRESS_SPACE_C} ${TEST_ADDRESS_SPACE_XML})
+s2opc_embed_address_space(${TEST_DEMO_CLIENT_ADDRESS_SPACE_C} ${TEST_ADDRESS_SPACE_XML})
 
 # Helpers unit tests
 file(GLOB_RECURSE INTERNAL_TESTS_SRCS "tests/helpers/*.c")
-add_executable(check_helpers ${INTERNAL_TESTS_SRCS} ${TEST_ADDRESS_SPACE_C})
+add_executable(check_helpers ${INTERNAL_TESTS_SRCS} ${TEST_CHECK_HELPERS_ADDRESS_SPACE_C})
 target_include_directories(check_helpers PRIVATE ${S2OPC_PRIVATE_INCLUDES} ${MBEDTLS_INCLUDE_DIRS} ${CHECK_INCLUDE_DIRS})
 target_link_libraries(check_helpers PRIVATE s2opc ${CHECK_LIBRARIES} s2opc-loader-embedded)
 if (EXPAT_FOUND)
@@ -441,7 +447,7 @@ add_executable(toolkit_test_server_local_service "tests/services/toolkit_test_se
                                                  "tests/services/testlib_write.c"
                                                  "tests/services/test_results.c"
                                                  "tests/services/testlib_read_response.c"
-                                                 ${TEST_ADDRESS_SPACE_C})
+                                                 ${TEST_LOCAL_DEMO_SERVER_ADDRESS_SPACE_C})
 target_link_libraries(toolkit_test_server_local_service PRIVATE s2opc s2opc-loader-embedded)
 target_include_directories(toolkit_test_server_local_service PRIVATE ${S2OPC_PUBLIC_INCLUDES}
                                                                      ${S2OPC_PRIVATE_INCLUDES})
@@ -453,7 +459,7 @@ add_executable(toolkit_test_client "tests/services/toolkit_test_client.c"
                                    "tests/services/testlib_write.c"
                                    "tests/services/test_results.c"
                                    "tests/services/testlib_read_response.c"
-                                   ${TEST_ADDRESS_SPACE_C})
+                                   ${TEST_DEMO_CLIENT_ADDRESS_SPACE_C})
 target_link_libraries(toolkit_test_client PRIVATE s2opc s2opc-loader-embedded)
 target_include_directories(toolkit_test_client PRIVATE ${S2OPC_PUBLIC_INCLUDES}
                                                        ${S2OPC_PRIVATE_INCLUDES})
@@ -479,7 +485,7 @@ target_include_directories(toolkit_test_suite_client PRIVATE ${S2OPC_PUBLIC_INCL
 add_executable(toolkit_test_server
     "tests/services/runtime_variables.c"
     "tests/services/toolkit_test_server.c"
-    ${TEST_ADDRESS_SPACE_C})
+    ${TEST_DEMO_SERVER_ADDRESS_SPACE_C})
 target_link_libraries(toolkit_test_server PRIVATE s2opc s2opc-loader-embedded)
 target_include_directories(toolkit_test_server PRIVATE ${S2OPC_PUBLIC_INCLUDES}
                                                        ${S2OPC_PRIVATE_INCLUDES})
