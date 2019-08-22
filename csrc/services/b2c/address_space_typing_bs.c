@@ -61,24 +61,6 @@ static void log_error_for_unknown_node(const SOPC_NodeId* nodeId, const char* no
     }
 }
 
-static void log_debug_for_unknown_node(const SOPC_NodeId* nodeId, const char* node_adjective, const char* info)
-{
-    if (nodeId->IdentifierType == SOPC_IdentifierType_Numeric)
-    {
-        SOPC_Logger_TraceDebug("address_space_typing_bs__is_transitive_child: %s, %s node: ns=%" PRIu16 ";i=%" PRIu32,
-                               info, node_adjective, nodeId->Namespace, nodeId->Data.Numeric);
-    }
-    else if (nodeId->IdentifierType == SOPC_IdentifierType_String)
-    {
-        SOPC_Logger_TraceDebug("address_space_typing_bs__is_transitive_child: %s, %s node: ns=%" PRIu16 ";s=%s", info,
-                               node_adjective, nodeId->Namespace, SOPC_String_GetRawCString(&nodeId->Data.String));
-    }
-    else
-    {
-        SOPC_Logger_TraceDebug("address_space_typing_bs__is_transitive_child: %s node: %s", node_adjective, info);
-    }
-}
-
 static bool is_reversed_has_child(const OpcUa_ReferenceNode* ref)
 {
     if (false == ref->IsInverse)
@@ -162,13 +144,7 @@ static bool recursive_is_transitive_subtype(int recursionLimit,
 
     // Starting to check if direct parent is researched parent
     const SOPC_NodeId* directParent = get_direct_parent(currentTypeOrSubtype);
-    if (NULL == directParent)
-    {
-        log_debug_for_unknown_node(originSubtype, "child type", "while searching for transitive parent");
-        log_debug_for_unknown_node(expectedParentType, "target type", "never reached in resolution");
-        log_debug_for_unknown_node(currentTypeOrSubtype, "transitive parent type", "has no more parent");
-    }
-    else
+    if (NULL != directParent)
     {
         if (SOPC_NodeId_Equal(directParent, expectedParentType))
         {
@@ -178,7 +154,7 @@ static bool recursive_is_transitive_subtype(int recursionLimit,
         {
             return recursive_is_transitive_subtype(recursionLimit, originSubtype, directParent, expectedParentType);
         }
-    }
+    } // else: transitive research failed
 
     return false;
 }
