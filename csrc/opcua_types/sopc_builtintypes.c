@@ -32,8 +32,48 @@
 #include "sopc_mem_alloc.h"
 
 #include "opcua_identifiers.h"
+#include "opcua_statuscodes.h"
 #include "sopc_protocol_constants.h"
 #include "sopc_toolkit_config_constants.h"
+
+// Converts if necessary the given status code to one of the tcp error code of spec part 6 (1.03) table 55
+SOPC_StatusCode SOPC_StatusCode_ToTcpErrorCode(SOPC_StatusCode status)
+{
+    switch (status)
+    {
+    case OpcUa_BadTcpServerTooBusy:
+    case OpcUa_BadTcpMessageTypeInvalid:
+    case OpcUa_BadTcpSecureChannelUnknown:
+    case OpcUa_BadTcpMessageTooLarge:
+    case OpcUa_BadTimeout:
+    case OpcUa_BadTcpNotEnoughResources:
+    case OpcUa_BadTcpInternalError:
+    case OpcUa_BadTcpEndpointUrlInvalid:
+    case OpcUa_BadSecurityChecksFailed:
+    case OpcUa_BadRequestInterrupted:
+    case OpcUa_BadRequestTimeout:
+    case OpcUa_BadSecureChannelClosed:
+    case OpcUa_BadSecureChannelTokenUnknown:
+    case OpcUa_BadCertificateUntrusted:
+    case OpcUa_BadCertificateTimeInvalid:
+    case OpcUa_BadCertificateIssuerTimeInvalid:
+    case OpcUa_BadCertificateUseNotAllowed:
+    case OpcUa_BadCertificateIssuerUseNotAllowed:
+    case OpcUa_BadCertificateRevocationUnknown:
+    case OpcUa_BadCertificateIssuerRevocationUnknown:
+    case OpcUa_BadCertificateRevoked:
+    case OpcUa_BadCertificateIssuerRevoked:
+        // case OpcUa_BadCertificateUnknown: => not defined
+        return status;
+    case OpcUa_BadOutOfMemory:
+        return OpcUa_BadTcpNotEnoughResources;
+    case OpcUa_BadRequestTooLarge:
+    case OpcUa_BadResponseTooLarge:
+        return OpcUa_BadTcpMessageTooLarge;
+    default:
+        return OpcUa_BadTcpInternalError;
+    }
+}
 
 const SOPC_NodeId SOPC_Null_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 0};
 const SOPC_NodeId SOPC_Boolean_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_Boolean};

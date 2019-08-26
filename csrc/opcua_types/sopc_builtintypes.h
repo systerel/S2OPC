@@ -53,6 +53,11 @@ typedef uint32_t SOPC_StatusCode;
 typedef SOPC_ReturnStatus(SOPC_EncodeableObject_PfnCopy)(void* dest, const void* src);
 typedef SOPC_ReturnStatus(SOPC_EncodeableObject_PfnComp)(const void* left, const void* right, int32_t* comp);
 
+/**
+ * \brief Restricts and converts the status code to the only status code authorized for TCP error code
+ */
+SOPC_StatusCode SOPC_StatusCode_ToTcpErrorCode(SOPC_StatusCode status);
+
 typedef enum SOPC_BuiltinId
 {
     SOPC_Null_Id = 0,

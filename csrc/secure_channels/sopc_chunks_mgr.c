@@ -3942,7 +3942,9 @@ static bool SC_Chunks_EncodeAbortMsg(SOPC_Buffer* inputMsgBuffer, SOPC_StatusCod
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_UInt32_Write(&errorStatus, inputMsgBuffer);
+        // This shall be one of the values listed in OPC UA TCP error codes table
+        SOPC_StatusCode normalizedStatus = SOPC_StatusCode_ToTcpErrorCode(errorStatus);
+        status = SOPC_UInt32_Write(&normalizedStatus, inputMsgBuffer);
     }
     if (SOPC_STATUS_OK == status)
     {

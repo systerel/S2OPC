@@ -292,7 +292,9 @@ static bool SC_Server_SendErrorMsgAndClose(uint32_t scConnectionIdx, SOPC_Status
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_UInt32_Write(&errorStatus, buffer);
+        // This shall be one of the values listed in OPC UA TCP error codes table
+        SOPC_StatusCode normalizedStatus = SOPC_StatusCode_ToTcpErrorCode(errorStatus);
+        status = SOPC_UInt32_Write(&normalizedStatus, buffer);
     }
     if (SOPC_STATUS_OK == status)
     {
