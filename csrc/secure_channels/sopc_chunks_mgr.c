@@ -899,7 +899,7 @@ static bool SC_Chunks_IsSecuTokenValid(bool isServerConnection, SOPC_SecureConne
 }
 
 static bool SC_Chunks_CheckSymmetricSecurityHeader(SOPC_SecureConnection* scConnection,
-                                                   bool* isPrecCryptoData,
+                                                   bool* isPrevCryptoData,
                                                    SOPC_StatusCode* errorStatus)
 {
     assert(scConnection != NULL);
@@ -929,7 +929,7 @@ static bool SC_Chunks_CheckSymmetricSecurityHeader(SOPC_SecureConnection* scConn
              */
             if (scConnection->currentSecurityToken.tokenId == tokenId)
             {
-                *isPrecCryptoData = false;
+                *isPrevCryptoData = false;
 
                 // Check token expiration
                 isTokenValid =
@@ -942,7 +942,7 @@ static bool SC_Chunks_CheckSymmetricSecurityHeader(SOPC_SecureConnection* scConn
                      scConnection->precedentSecurityToken.tokenId != 0)
             {
                 // Still valid with old security token => OK
-                *isPrecCryptoData = true;
+                *isPrevCryptoData = true;
 
                 // Check token expiration
                 isTokenValid =
@@ -980,7 +980,7 @@ static bool SC_Chunks_CheckSymmetricSecurityHeader(SOPC_SecureConnection* scConn
                     // anymore
                     scConnection->serverNewSecuTokenActive = true;
                 }
-                *isPrecCryptoData = false;
+                *isPrevCryptoData = false;
 
                 // Check token expiration
                 isTokenValid =
@@ -993,7 +993,7 @@ static bool SC_Chunks_CheckSymmetricSecurityHeader(SOPC_SecureConnection* scConn
                      scConnection->precedentSecurityToken.tokenId != 0)
             {
                 // Still valid with old security token => OK
-                *isPrecCryptoData = true;
+                *isPrevCryptoData = true;
 
                 // Check token expiration
                 isTokenValid =
@@ -1141,7 +1141,7 @@ static bool SC_Chunks_CheckSequenceHeaderRequestId(SOPC_SecureConnection* scConn
     return result;
 }
 
-static bool SC_Chunks_DecryptMsg(SOPC_SecureConnection* scConnection, bool isSymmetric, bool isPrecCryptoData)
+static bool SC_Chunks_DecryptMsg(SOPC_SecureConnection* scConnection, bool isSymmetric, bool isPrevCryptoData)
 {
     assert(scConnection != NULL);
     SOPC_Buffer* encryptedBuffer = scConnection->chunksCtx.currentChunkInputBuffer;
@@ -1209,7 +1209,7 @@ static bool SC_Chunks_DecryptMsg(SOPC_SecureConnection* scConnection, bool isSym
     else
     {
         SOPC_SC_SecurityKeySet* receiverKeySet = NULL;
-        if (!isPrecCryptoData)
+        if (!isPrevCryptoData)
         {
             receiverKeySet = scConnection->currentSecuKeySets.receiverKeySet;
         }
@@ -1287,7 +1287,7 @@ static bool SC_Chunks_DecryptMsg(SOPC_SecureConnection* scConnection, bool isSym
 
 static bool SC_Chunks_VerifyMsgSignature(SOPC_SecureConnection* scConnection,
                                          bool isSymmetric,
-                                         bool isPrecCryptoData,
+                                         bool isPrevCryptoData,
                                          uint32_t* sigPosition)
 {
     assert(scConnection != NULL);
@@ -1346,7 +1346,7 @@ static bool SC_Chunks_VerifyMsgSignature(SOPC_SecureConnection* scConnection,
     else
     {
         SOPC_SC_SecurityKeySet* receiverKeySet = NULL;
-        if (!isPrecCryptoData)
+        if (!isPrevCryptoData)
         {
             receiverKeySet = scConnection->currentSecuKeySets.receiverKeySet;
         }
@@ -1538,7 +1538,7 @@ bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection, uint32_t* re
 
     bool toDecrypt = false;
     bool toCheckSignature = false;
-    bool isPrecCryptoData = false;
+    bool isPrevCryptoData = false;
 
     SOPC_SecureChannel_Config* scConfig = NULL;
 
@@ -1734,7 +1734,7 @@ bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection, uint32_t* re
         {
             toDecrypt = isSecurityActive;
             toCheckSignature = isSecurityActive;
-            isPrecCryptoData = false; // asymmetric => unused parameter in decrypt / check sign
+            isPrevCryptoData = false; // asymmetric => unused parameter in decrypt / check sign
         }
         else
         {
@@ -1766,7 +1766,7 @@ bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection, uint32_t* re
         }
         else
         {
-            result = SC_Chunks_CheckSymmetricSecurityHeader(scConnection, &isPrecCryptoData, errorStatus);
+            result = SC_Chunks_CheckSymmetricSecurityHeader(scConnection, &isPrevCryptoData, errorStatus);
             if (result)
             {
                 toDecrypt = SC_Chunks_IsMsgEncrypted(scConfig->msgSecurityMode, isOPN);
@@ -1787,7 +1787,7 @@ bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection, uint32_t* re
         // Decrypt the message
         result = SC_Chunks_DecryptMsg(scConnection,
                                       false == isOPN, // isSymmetric
-                                      isPrecCryptoData);
+                                      isPrevCryptoData);
         if (!result)
         {
             *errorStatus = OpcUa_BadSecurityChecksFailed;
@@ -1802,7 +1802,7 @@ bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection, uint32_t* re
         // Check decrypted message signature
         result = SC_Chunks_VerifyMsgSignature(scConnection,
                                               false == isOPN, // isSymmetric
-                                              isPrecCryptoData, &signaturePosition);
+                                              isPrevCryptoData, &signaturePosition);
         if (result)
         {
             // Set signature bytes as unreadable in the buffer (signature uses last bytes)
@@ -3644,7 +3644,7 @@ static bool SC_Chunks_TreatSendBufferMSGCLO(
         if (scConnection->isServerConnection && !scConnection->serverNewSecuTokenActive)
         {
             // Server side only (SC renew): new token is not active yet, use the precedent token
-            // TODO: timeout on precedent token validity to be implemented
+            // Note: no timeout on precedent token validity implemented, but it is checked on each client request
             assert(scConnection->precedentSecurityToken.tokenId != 0);
             assert(scConnection->precedentSecurityToken.secureChannelId != 0);
             tokenId = scConnection->precedentSecurityToken.tokenId;
