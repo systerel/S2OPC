@@ -1155,6 +1155,36 @@ static bool SC_Chunks_CheckSequenceHeaderRequestId(SOPC_SecureConnection* scConn
     return result;
 }
 
+static bool SC_Chunks_GetSecurityKeySets(SOPC_SecureConnection* scConnection,
+                                         bool isPrevCryptoData,
+                                         SOPC_SC_SecurityKeySet** senderKeySet,
+                                         SOPC_SC_SecurityKeySet** receiverKeySet)
+{
+    assert(NULL != senderKeySet);
+    assert(NULL != receiverKeySet);
+
+    if (isPrevCryptoData)
+    {
+        *senderKeySet = scConnection->precedentSecuKeySets.senderKeySet;
+        *receiverKeySet = scConnection->precedentSecuKeySets.receiverKeySet;
+    }
+    else
+    {
+        *senderKeySet = scConnection->currentSecuKeySets.senderKeySet;
+        *receiverKeySet = scConnection->currentSecuKeySets.receiverKeySet;
+    }
+
+    if (NULL == *senderKeySet || NULL == *receiverKeySet)
+    {
+        SOPC_Logger_TraceError(
+            "ChunksMgr: sign or encrypt message (symm): security key sets missing (scConfigIdx=%" PRIu32 ")",
+            scConnection->endpointConnectionConfigIdx);
+        return false;
+    }
+
+    return true;
+}
+
 static bool SC_Chunks_DecryptMsg(SOPC_SecureConnection* scConnection, bool isSymmetric, bool isPrevCryptoData)
 {
     assert(scConnection != NULL);
@@ -1222,18 +1252,23 @@ static bool SC_Chunks_DecryptMsg(SOPC_SecureConnection* scConnection, bool isSym
     }
     else
     {
+        SOPC_SC_SecurityKeySet* senderKeySet = NULL;
         SOPC_SC_SecurityKeySet* receiverKeySet = NULL;
-        if (!isPrevCryptoData)
+
+        if (SC_Chunks_GetSecurityKeySets(scConnection, isPrevCryptoData, &senderKeySet, &receiverKeySet))
         {
-            receiverKeySet = scConnection->currentSecuKeySets.receiverKeySet;
+            status = SOPC_STATUS_OK;
         }
         else
         {
-            receiverKeySet = scConnection->precedentSecuKeySets.receiverKeySet;
+            status = SOPC_STATUS_INVALID_STATE;
         }
 
-        status = SOPC_CryptoProvider_SymmetricGetLength_Decryption(scConnection->cryptoProvider, lengthToDecrypt,
-                                                                   &decryptedTextLength);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_CryptoProvider_SymmetricGetLength_Decryption(scConnection->cryptoProvider, lengthToDecrypt,
+                                                                       &decryptedTextLength);
+        }
 
         if (SOPC_STATUS_OK == status)
         {
@@ -1359,17 +1394,22 @@ static bool SC_Chunks_VerifyMsgSignature(SOPC_SecureConnection* scConnection,
     }
     else
     {
+        SOPC_SC_SecurityKeySet* senderKeySet = NULL;
         SOPC_SC_SecurityKeySet* receiverKeySet = NULL;
-        if (!isPrevCryptoData)
+
+        if (SC_Chunks_GetSecurityKeySets(scConnection, isPrevCryptoData, &senderKeySet, &receiverKeySet))
         {
-            receiverKeySet = scConnection->currentSecuKeySets.receiverKeySet;
+            status = SOPC_STATUS_OK;
         }
         else
         {
-            receiverKeySet = scConnection->precedentSecuKeySets.receiverKeySet;
+            status = SOPC_STATUS_INVALID_STATE;
         }
 
-        status = SOPC_CryptoProvider_SymmetricGetLength_Signature(scConnection->cryptoProvider, &signatureSize);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_CryptoProvider_SymmetricGetLength_Signature(scConnection->cryptoProvider, &signatureSize);
+        }
 
         if (status == SOPC_STATUS_OK)
         {
@@ -2840,6 +2880,7 @@ static bool SC_Chunks_GetEncryptedDataLength(SOPC_SecureConnection* scConnection
 static bool SC_Chunks_EncodeSignatureNoError(SOPC_SecureConnection* scConnection,
                                              SOPC_Buffer* buffer,
                                              bool symmetricAlgo,
+                                             bool isPrevCryptoData,
                                              uint32_t signatureSize)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
@@ -2878,8 +2919,10 @@ static bool SC_Chunks_EncodeSignatureNoError(SOPC_SecureConnection* scConnection
     }
     else
     {
-        if (NULL == scConnection->currentSecuKeySets.senderKeySet ||
-            NULL == scConnection->currentSecuKeySets.receiverKeySet)
+        SOPC_SC_SecurityKeySet* senderKeySet = NULL;
+        SOPC_SC_SecurityKeySet* receiverKeySet = NULL;
+
+        if (!SC_Chunks_GetSecurityKeySets(scConnection, isPrevCryptoData, &senderKeySet, &receiverKeySet))
         {
             return false;
         }
@@ -2890,8 +2933,8 @@ static bool SC_Chunks_EncodeSignatureNoError(SOPC_SecureConnection* scConnection
             if (signedData.Length > 0)
             {
                 status = SOPC_CryptoProvider_SymmetricSign(scConnection->cryptoProvider, buffer->data, buffer->length,
-                                                           scConnection->currentSecuKeySets.senderKeySet->signKey,
-                                                           signedData.Data, (uint32_t) signedData.Length);
+                                                           senderKeySet->signKey, signedData.Data,
+                                                           (uint32_t) signedData.Length);
             }
             else
             {
@@ -2913,10 +2956,12 @@ static bool SC_Chunks_EncodeSignature(uint32_t scConnectionIdx,
                                       SOPC_SecureConnection* scConnection,
                                       SOPC_Buffer* buffer,
                                       bool symmetricAlgo,
+                                      bool isPrevCryptoData,
                                       uint32_t signatureSize,
                                       SOPC_StatusCode* errorStatus)
 {
-    bool result = SC_Chunks_EncodeSignatureNoError(scConnection, buffer, symmetricAlgo, signatureSize);
+    bool result =
+        SC_Chunks_EncodeSignatureNoError(scConnection, buffer, symmetricAlgo, isPrevCryptoData, signatureSize);
     if (!result)
     {
         *errorStatus = OpcUa_BadEncodingError;
@@ -2931,6 +2976,7 @@ static bool SC_Chunks_EncodeSignature(uint32_t scConnectionIdx,
 static bool SC_Chunks_EncryptMsg(SOPC_SecureConnection* scConnection,
                                  SOPC_Buffer* nonEncryptedBuffer,
                                  bool symmetricAlgo,
+                                 bool isPrevCryptoData,
                                  uint32_t sequenceNumberPosition,
                                  uint32_t encryptedDataLength,
                                  SOPC_Buffer* encryptedBuffer,
@@ -3037,15 +3083,13 @@ static bool SC_Chunks_EncryptMsg(SOPC_SecureConnection* scConnection,
     {
         /* SYMMETRIC CASE */
 
-        if (NULL == scConnection->currentSecuKeySets.senderKeySet ||
-            NULL == scConnection->currentSecuKeySets.receiverKeySet)
+        SOPC_SC_SecurityKeySet* senderKeySet = NULL;
+        SOPC_SC_SecurityKeySet* receiverKeySet = NULL;
+
+        if (!SC_Chunks_GetSecurityKeySets(scConnection, isPrevCryptoData, &senderKeySet, &receiverKeySet))
         {
             result = false;
             *errorStatus = OpcUa_BadTcpInternalError;
-
-            SOPC_Logger_TraceError("ChunksMgr: encrypt message (symm): security key sets missing (scConfigIdx=%" PRIu32
-                                   ")",
-                                   scConnection->endpointConnectionConfigIdx);
         }
         else
         {
@@ -3081,10 +3125,8 @@ static bool SC_Chunks_EncryptMsg(SOPC_SecureConnection* scConnection,
             if (result)
             {
                 status = SOPC_CryptoProvider_SymmetricEncrypt(
-                    scConnection->cryptoProvider, dataToEncrypt, dataToEncryptLength,
-                    scConnection->currentSecuKeySets.senderKeySet->encryptKey,
-                    scConnection->currentSecuKeySets.senderKeySet->initVector, &encryptedData[sequenceNumberPosition],
-                    encryptedDataLength);
+                    scConnection->cryptoProvider, dataToEncrypt, dataToEncryptLength, senderKeySet->encryptKey,
+                    senderKeySet->initVector, &encryptedData[sequenceNumberPosition], encryptedDataLength);
                 if (SOPC_STATUS_OK != status)
                 {
                     result = false;
@@ -3262,6 +3304,7 @@ static bool SC_Chunks_EncodeRequestId(SOPC_SecureConnection* scConnection,
 static bool SC_Chunks_Encrypt(SOPC_SecureConnection* scConnection,
                               SOPC_Buffer* nonEncryptedBuffer,
                               bool symmetricAlgo,
+                              bool isPrevCryptoData,
                               uint32_t sequenceNumberPosition,
                               uint32_t encryptedDataLength,
                               SOPC_Buffer** outputBuffer,
@@ -3274,16 +3317,11 @@ static bool SC_Chunks_Encrypt(SOPC_SecureConnection* scConnection,
     {
         encryptedBuffer = SOPC_Buffer_Create(sequenceNumberPosition + encryptedDataLength);
     }
-    else
-    {
-        // TODO: return status message too large ? => is there any guarantee due to plain buffer
-        // size ?
-    }
 
     if (encryptedBuffer != NULL)
     {
-        result = SC_Chunks_EncryptMsg(scConnection, nonEncryptedBuffer, symmetricAlgo, sequenceNumberPosition,
-                                      encryptedDataLength, encryptedBuffer, errorStatus);
+        result = SC_Chunks_EncryptMsg(scConnection, nonEncryptedBuffer, symmetricAlgo, isPrevCryptoData,
+                                      sequenceNumberPosition, encryptedDataLength, encryptedBuffer, errorStatus);
 
         if (!result)
         {
@@ -3538,8 +3576,8 @@ static bool SC_Chunks_TreatSendBufferOPN(
     /* SIGN MESSAGE */
     if (result && toSign)
     {
-        result = SC_Chunks_EncodeSignature(scConnectionIdx, scConnection, nonEncryptedBuffer, false, signatureSize,
-                                           errorStatus);
+        result = SC_Chunks_EncodeSignature(scConnectionIdx, scConnection, nonEncryptedBuffer, false, false,
+                                           signatureSize, errorStatus);
     }
 
     if (result)
@@ -3547,7 +3585,7 @@ static bool SC_Chunks_TreatSendBufferOPN(
         /* ENCRYPT MESSAGE */
         if (toEncrypt)
         {
-            result = SC_Chunks_Encrypt(scConnection, nonEncryptedBuffer, false, sequenceNumberPosition,
+            result = SC_Chunks_Encrypt(scConnection, nonEncryptedBuffer, false, false, sequenceNumberPosition,
                                        encryptedDataLength, outputBuffer, errorStatus);
 
             // It is only an internal buffer, it shall be freed
@@ -3602,6 +3640,7 @@ static bool SC_Chunks_TreatSendBufferMSGCLO(
     uint32_t requestId = 0;
     uint32_t bodySize = 0;
     uint32_t tokenId = 0;
+    bool isPrevCryptoData = false;
     uint32_t signatureSize = 0;
     bool hasPadding = false;
     uint16_t realPaddingLength = 0; // padding + extra total size
@@ -3663,11 +3702,13 @@ static bool SC_Chunks_TreatSendBufferMSGCLO(
             assert(scConnection->precedentSecurityToken.tokenId != 0);
             assert(scConnection->precedentSecurityToken.secureChannelId != 0);
             tokenId = scConnection->precedentSecurityToken.tokenId;
+            isPrevCryptoData = true;
         }
         else
         {
             // Use current token
             tokenId = scConnection->currentSecurityToken.tokenId;
+            isPrevCryptoData = false;
         }
         //  encode tokenId
         status = SOPC_UInt32_Write(&tokenId, nonEncryptedBuffer);
@@ -3738,8 +3779,8 @@ static bool SC_Chunks_TreatSendBufferMSGCLO(
     if (result && toSign)
     {
         /* SIGN MESSAGE */
-        result = SC_Chunks_EncodeSignature(scConnectionIdx, scConnection, nonEncryptedBuffer, true, signatureSize,
-                                           errorStatus);
+        result = SC_Chunks_EncodeSignature(scConnectionIdx, scConnection, nonEncryptedBuffer, true, isPrevCryptoData,
+                                           signatureSize, errorStatus);
 
         if (!result)
         {
@@ -3756,9 +3797,9 @@ static bool SC_Chunks_TreatSendBufferMSGCLO(
         /* ENCRYPT MESSAGE */
         if (toEncrypt)
         {
-            result =
-                SC_Chunks_Encrypt(scConnection, nonEncryptedBuffer, true, SOPC_UA_SYMMETRIC_SEQUENCE_HEADER_POSITION,
-                                  encryptedDataLength, outputBuffer, errorStatus);
+            result = SC_Chunks_Encrypt(scConnection, nonEncryptedBuffer, true, isPrevCryptoData,
+                                       SOPC_UA_SYMMETRIC_SEQUENCE_HEADER_POSITION, encryptedDataLength, outputBuffer,
+                                       errorStatus);
             // Note: do not deallocate inputChunkBuffer for reuse
         }
         else
