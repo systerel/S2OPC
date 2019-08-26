@@ -138,7 +138,7 @@ static void datachange_callback(const int32_t c_id,
         //}
     }
 
-    Helpers_LoggerStdout(SOPC_TOOLKIT_LOG_LEVEL_INFO, sz);
+    printf("%s",sz);
 }
 
 /* Main subscribing client */
@@ -223,21 +223,19 @@ int main(int argc, char* const argv[])
 
         for (size_t j = 0; j < nbBrowse; j++)
         {
-            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "======================== %d ==============================", j);
-            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "status: %d, nbOfResults: %d",
-                                                     browseResults[j].statusCode,
-                                                     browseResults[j].nbOfReferences);
+            printf("======================== %d ==============================\n", (int) j);
+            printf("status: %d, nbOfResults: %d\n", browseResults[j].statusCode, browseResults[j].nbOfReferences);
             for (int32_t i = 0; i < browseResults[j].nbOfReferences; i++)
             {
-                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "nodeId: %s", browseResults[j].references[i].nodeId);
-                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "displayName: %s", browseResults[j].references[i].displayName);
+                printf("nodeId: %s\n", browseResults[j].references[i].nodeId);
+                printf("displayName: %s\n", browseResults[j].references[i].displayName);
 
                 free(browseResults[j].references[i].nodeId);
                 free(browseResults[j].references[i].displayName);
                 free(browseResults[j].references[i].browseName);
                 free(browseResults[j].references[i].referenceTypeId);
             }
-            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "==========================================================", j);
+            printf("==========================================================\n");
             free(browseResults[j].references);
         }
 
@@ -408,7 +406,7 @@ static bool parse_options(cmd_line_options_t* o, int argc, char* const* argv)
 #define CHECK_REQUIRED_STR_OPT(name, req, arg_req, val, field)                    \
     if (req && o->field == NULL)                                                  \
     {                                                                             \
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Missing option: --" name "."); \
+        printf("Missing option: --" name ".\n"); \
         print_usage(argv[0]);                                                     \
         return false;                                                             \
     }
@@ -425,7 +423,7 @@ static bool parse_options(cmd_line_options_t* o, int argc, char* const* argv)
                                                                                              \
         if (*endptr != '\0')                                                                 \
         {                                                                                    \
-            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Invalid name: %s.\n", o->name##_str); \
+            printf("Invalid name: %s.\n", o->name##_str); \
             return false;                                                                    \
         }                                                                                    \
     }                                                                                        \
@@ -453,14 +451,14 @@ static bool parse_options(cmd_line_options_t* o, int argc, char* const* argv)
     o->node_ids_size = argc - optind;
     if (o->node_ids_size < 1)
     {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "No node to subscribe to were specified.");
+        printf("No node to subscribe to were specified.\n");
         print_usage(argv[0]);
         return false;
     }
     o->node_ids = malloc(sizeof(char*) * (size_t)(o->node_ids_size));
     if (NULL == o->node_ids)
     {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Out of memory.");
+        printf("Out of memory.\n");
         return false;
     }
     for (int i = 0; i < o->node_ids_size; ++i)

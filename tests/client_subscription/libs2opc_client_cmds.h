@@ -33,6 +33,7 @@
 #include <stdlib.h>
 
 #include "sopc_builtintypes.h"
+#include "sopc_user_app_itf.h"
 
 /* Security policies, taken from "sopc_crypto_profiles.h" */
 #define SOPC_SecurityPolicy_None_URI "http://opcfoundation.org/UA/SecurityPolicy#None"
@@ -441,20 +442,5 @@ int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
                                  SOPC_ClientHelper_BrowseRequest* browseRequests,
                                  size_t nbElements,
                                  SOPC_ClientHelper_BrowseResult* browseResults);
-
-/* TODO
-This part below is only to compile during dev.
-Includes should be remove and and genericCallback should be only in C implementation ( static )
-*/
-
-#include "sopc_toolkit_config.h"
-#define SKIP_S2OPC_DEFINITIONS
-#include "libs2opc_client.h"
-/* TODO to make static in C file */
-void SOPC_ClientHelper_GenericCallback(SOPC_LibSub_ConnectionId c_id,
-                                       SOPC_LibSub_ApplicativeEvent event,
-                                       SOPC_StatusCode status,
-                                       const void* response,
-                                       uintptr_t responseContext);
 
 #endif /* LIBS2OPC_CLIENT_CMDS_H_ */
