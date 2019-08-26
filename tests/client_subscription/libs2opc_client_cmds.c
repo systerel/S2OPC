@@ -187,6 +187,18 @@ static void disconnect_callback(const SOPC_LibSub_ConnectionId c_id);
 
 /* static functions */
 
+static void GenericCallbackHelper_Read(SOPC_StatusCode status,
+                                       const void* response,
+                                       uintptr_t responseContext);
+static void GenericCallbackHelper_Write(SOPC_StatusCode status,
+                                        const void* response,
+                                        uintptr_t responseContext);
+static void GenericCallbackHelper_Browse(SOPC_StatusCode status,
+                                         const void* response,
+                                         uintptr_t responseContext);
+static void GenericCallbackHelper_BrowseNext(SOPC_StatusCode status,
+                                             const void* response,
+                                             uintptr_t responseContext);
 static bool ContainsContinuationPoints(SOPC_ByteString** continuationPointsArray, size_t nbElements);
 static SOPC_ReturnStatus BrowseNext(int32_t connectionId,
                                     SOPC_StatusCode* statusCodes,
@@ -413,26 +425,10 @@ int32_t SOPC_ClientHelper_Connect(const char* endpointUrl,
     return (int32_t) con_id;
 }
 
-// TODO Add Mutex protection. See SOPC_Mutex
-// TODO use static function for each response processing
-void SOPC_ClientHelper_GenericCallback(SOPC_LibSub_ConnectionId c_id,
-                                       SOPC_LibSub_ApplicativeEvent event,
-                                       SOPC_StatusCode status,
+static void GenericCallbackHelper_Read(SOPC_StatusCode status,
                                        const void* response,
                                        uintptr_t responseContext)
 {
-    // unused
-    (void) c_id;
-
-    if (SOPC_LibSub_ApplicativeEvent_Response != event)
-    {
-        return;
-    }
-
-    const SOPC_EncodeableType* pEncType = *(SOPC_EncodeableType* const*) response;
-
-    if (pEncType == &OpcUa_ReadResponse_EncodeableType)
-    {
         ReadContext* ctx = (ReadContext*) responseContext;
         const OpcUa_ReadResponse* readResp = (const OpcUa_ReadResponse*) response;
 
@@ -467,9 +463,12 @@ void SOPC_ClientHelper_GenericCallback(SOPC_LibSub_ConnectionId c_id,
         /* Signal that the response is available */
         status = Condition_SignalAll(&ctx->condition);
         assert(SOPC_STATUS_OK == status);
-    }
-    else if (pEncType == &OpcUa_WriteResponse_EncodeableType)
-    {
+}
+
+static void GenericCallbackHelper_Write(SOPC_StatusCode status,
+                                        const void* response,
+                                        uintptr_t responseContext)
+{
         WriteContext* ctx = (WriteContext*) responseContext;
         const OpcUa_WriteResponse* writeResp = (const OpcUa_WriteResponse*) response;
 
@@ -500,9 +499,12 @@ void SOPC_ClientHelper_GenericCallback(SOPC_LibSub_ConnectionId c_id,
         /* Signal that the response is available */
         status = Condition_SignalAll(&ctx->condition);
         assert(SOPC_STATUS_OK == status);
-    }
-    else if (pEncType == &OpcUa_BrowseResponse_EncodeableType)
-    {
+}
+
+static void GenericCallbackHelper_Browse(SOPC_StatusCode status,
+                                         const void* response,
+                                         uintptr_t responseContext)
+{
         BrowseContext* ctx = (BrowseContext*) responseContext;
         const OpcUa_BrowseResponse* browseResp = (const OpcUa_BrowseResponse*) response;
 
@@ -545,9 +547,12 @@ void SOPC_ClientHelper_GenericCallback(SOPC_LibSub_ConnectionId c_id,
         /* Signal that the response is available */
         status = Condition_SignalAll(&ctx->condition);
         assert(SOPC_STATUS_OK == status);
-    }
-    else if (pEncType == &OpcUa_BrowseNextResponse_EncodeableType)
-    {
+}
+
+static void GenericCallbackHelper_BrowseNext(SOPC_StatusCode status,
+                                         const void* response,
+                                         uintptr_t responseContext)
+{
         BrowseContext* ctx = (BrowseContext*) responseContext;
         const OpcUa_BrowseNextResponse* browseNextResp = (const OpcUa_BrowseNextResponse*) response;
 
@@ -609,6 +614,41 @@ void SOPC_ClientHelper_GenericCallback(SOPC_LibSub_ConnectionId c_id,
         /* Signal that the response is available */
         status = Condition_SignalAll(&ctx->condition);
         assert(SOPC_STATUS_OK == status);
+}
+
+// TODO Add Mutex protection. See SOPC_Mutex
+// TODO use static function for each response processing
+void SOPC_ClientHelper_GenericCallback(SOPC_LibSub_ConnectionId c_id,
+                                       SOPC_LibSub_ApplicativeEvent event,
+                                       SOPC_StatusCode status,
+                                       const void* response,
+                                       uintptr_t responseContext)
+{
+    // unused
+    (void) c_id;
+
+    if (SOPC_LibSub_ApplicativeEvent_Response != event)
+    {
+        return;
+    }
+
+    const SOPC_EncodeableType* pEncType = *(SOPC_EncodeableType* const*) response;
+
+    if (pEncType == &OpcUa_ReadResponse_EncodeableType)
+    {
+        GenericCallbackHelper_Read(status, response, responseContext);
+    }
+    else if (pEncType == &OpcUa_WriteResponse_EncodeableType)
+    {
+        GenericCallbackHelper_Write(status, response, responseContext);
+    }
+    else if (pEncType == &OpcUa_BrowseResponse_EncodeableType)
+    {
+        GenericCallbackHelper_Browse(status, response, responseContext);
+    }
+    else if (pEncType == &OpcUa_BrowseNextResponse_EncodeableType)
+    {
+        GenericCallbackHelper_BrowseNext(status, response, responseContext);
     }
 }
 
@@ -696,20 +736,8 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
         }
     }
 
-    SOPC_ReturnStatus statusMutex = SOPC_STATUS_OK;
     if (SOPC_STATUS_OK == status)
     {
-        request->NodesToRead = nodesToRead;
-
-        /* Prepare the synchronous context */
-        statusMutex = SOPC_ReadContext_Initialization(ctx);
-        assert(SOPC_STATUS_OK == statusMutex);
-        Condition_Init(&ctx->condition);
-        assert(SOPC_STATUS_OK == statusMutex);
-        statusMutex = Mutex_Lock(&ctx->mutex);
-        assert(SOPC_STATUS_OK == statusMutex);
-
-        // TODO move alloc elsewhere
         /* alloc values */
         int i = 0;
         for (i = 0; i < (int) nbElements && SOPC_STATUS_OK == status; i++)
@@ -729,14 +757,27 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
         }
     }
 
+    /* set context */
     if (SOPC_STATUS_OK == status)
     {
-        //TODO will not unlock mutex if status != ok
-        /* Set context */
+        status = SOPC_ReadContext_Initialization(ctx);
         ctx->values = values;
         ctx->nbElements = request->NoOfNodesToRead;
         ctx->status = SOPC_STATUS_NOK;
         ctx->finish = false;
+    }
+
+    /* send request */
+    SOPC_ReturnStatus statusMutex = SOPC_STATUS_OK;
+    if (SOPC_STATUS_OK == status)
+    {
+        request->NodesToRead = nodesToRead;
+        /* Prepare the synchronous context */
+        Condition_Init(&ctx->condition);
+        assert(SOPC_STATUS_OK == statusMutex);
+        statusMutex = Mutex_Lock(&ctx->mutex);
+        assert(SOPC_STATUS_OK == statusMutex);
+
         status =
             SOPC_ClientCommon_AsyncSendRequestOnSession((SOPC_LibSub_ConnectionId) connectionId, request, (uintptr_t) ctx);
 
