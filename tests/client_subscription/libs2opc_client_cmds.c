@@ -27,6 +27,7 @@
 
 #define SKIP_S2OPC_DEFINITIONS
 #include "libs2opc_client_common.h"
+#include "libs2opc_client.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_types.h"
 
@@ -39,16 +40,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* TODO add documentation */
-#define SYNCHRONOUS_READ_TIMEOUT 10000
+/* Timeout for requests */
+#define SYNCHRONOUS_REQUEST_TIMEOUT 10000
 /* Max number of simultaneous connections */
-// TODO define a realist number
-#define MAX_SIMULTANEOUS_CONNECTIONS 20
+#define MAX_SIMULTANEOUS_CONNECTIONS 200
 /* Max number of subscribed items per connection */
-// TODO define a realist number
 #define MAX_SUBSCRIBED_ITEMS 200
 /* Max BrowseNext requests iteration number */
-//TODO choose correct value
 #define MAX_BROWSENEXT_REQUESTS 200
 
 /* Secure Channel configuration */
@@ -184,7 +182,11 @@ static SOPC_ReturnStatus SOPC_BrowseContext_Initialization(BrowseContext* ctx)
 /* Callbacks */
 static void log_callback(const SOPC_Toolkit_Log_Level log_level, SOPC_LibSub_CstString text);
 static void disconnect_callback(const SOPC_LibSub_ConnectionId c_id);
-
+static void SOPC_ClientHelper_GenericCallback(SOPC_LibSub_ConnectionId c_id,
+                                              SOPC_LibSub_ApplicativeEvent event,
+                                              SOPC_StatusCode status,
+                                              const void* response,
+                                              uintptr_t responseContext);
 /* static functions */
 
 static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_con,
@@ -819,7 +821,7 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
         /* Wait for the response */
         while (SOPC_STATUS_OK == status && !ctx->finish)
         {
-            statusMutex = Mutex_UnlockAndTimedWaitCond(&ctx->condition, &ctx->mutex, SYNCHRONOUS_READ_TIMEOUT);
+            statusMutex = Mutex_UnlockAndTimedWaitCond(&ctx->condition, &ctx->mutex, SYNCHRONOUS_REQUEST_TIMEOUT);
             assert(SOPC_STATUS_TIMEOUT != statusMutex); /* TODO return error */
             assert(SOPC_STATUS_OK == statusMutex);
         }
@@ -1108,7 +1110,7 @@ int32_t SOPC_ClientHelper_Write(int32_t connectionId,
         /* Wait for the response */
         while (SOPC_STATUS_OK == status && !ctx->finish)
         {
-            statusMutex = Mutex_UnlockAndTimedWaitCond(&ctx->condition, &ctx->mutex, SYNCHRONOUS_READ_TIMEOUT);
+            statusMutex = Mutex_UnlockAndTimedWaitCond(&ctx->condition, &ctx->mutex, SYNCHRONOUS_REQUEST_TIMEOUT);
             assert(SOPC_STATUS_TIMEOUT != statusMutex);
             assert(SOPC_STATUS_OK == statusMutex);
         }
@@ -1344,7 +1346,7 @@ int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
         /* Wait for the response */
         while (SOPC_STATUS_OK == status && !ctx->finish)
         {
-            statusMutex = Mutex_UnlockAndTimedWaitCond(&ctx->condition, &ctx->mutex, SYNCHRONOUS_READ_TIMEOUT);
+            statusMutex = Mutex_UnlockAndTimedWaitCond(&ctx->condition, &ctx->mutex, SYNCHRONOUS_REQUEST_TIMEOUT);
             assert(SOPC_STATUS_TIMEOUT != statusMutex);
             assert(SOPC_STATUS_OK == statusMutex);
         }
@@ -1486,7 +1488,7 @@ static SOPC_ReturnStatus BrowseNext(int32_t connectionId,
         /* Wait for the response */
         while (SOPC_STATUS_OK == status && !ctx->finish)
         {
-            statusMutex = Mutex_UnlockAndTimedWaitCond(&ctx->condition, &ctx->mutex, SYNCHRONOUS_READ_TIMEOUT);
+            statusMutex = Mutex_UnlockAndTimedWaitCond(&ctx->condition, &ctx->mutex, SYNCHRONOUS_REQUEST_TIMEOUT);
             assert(SOPC_STATUS_TIMEOUT != statusMutex);
             assert(SOPC_STATUS_OK == statusMutex);
         }
