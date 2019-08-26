@@ -190,6 +190,15 @@ static void disconnect_callback(const SOPC_LibSub_ConnectionId c_id);
 static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_con,
                                                  const char* endpointUrl,
                                                  SOPC_ClientHelper_Security security);
+static SOPC_ReturnStatus ReadHelper_Initialize(SOPC_ReturnStatus status,
+                                               size_t nbElements,
+                                               OpcUa_ReadValueId *nodesToRead,
+                                               SOPC_ClientHelper_ReadValue *readValues,
+                                               SOPC_DataValue **values);
+static SOPC_ReturnStatus WriteHelper_InitialiazeValues(size_t nbElements,
+                                                       SOPC_ReturnStatus status,
+                                                       OpcUa_WriteValue *nodesToWrite,
+                                                       SOPC_ClientHelper_WriteValue *writeValues);
 static void GenericCallbackHelper_Read(SOPC_StatusCode status,
                                        const void* response,
                                        uintptr_t responseContext);
@@ -626,8 +635,6 @@ static void GenericCallbackHelper_BrowseNext(SOPC_StatusCode status,
         assert(SOPC_STATUS_OK == status);
 }
 
-// TODO Add Mutex protection. See SOPC_Mutex
-// TODO use static function for each response processing
 void SOPC_ClientHelper_GenericCallback(SOPC_LibSub_ConnectionId c_id,
                                        SOPC_LibSub_ApplicativeEvent event,
                                        SOPC_StatusCode status,
@@ -660,6 +667,69 @@ void SOPC_ClientHelper_GenericCallback(SOPC_LibSub_ConnectionId c_id,
     {
         GenericCallbackHelper_BrowseNext(status, response, responseContext);
     }
+}
+
+static SOPC_ReturnStatus ReadHelper_Initialize(SOPC_ReturnStatus status, size_t nbElements,
+        OpcUa_ReadValueId *nodesToRead, SOPC_ClientHelper_ReadValue *readValues,
+        SOPC_DataValue **values)
+{
+    if (SOPC_STATUS_OK == status)
+    {
+        size_t i = 0;
+        for (i = 0; i < nbElements && SOPC_STATUS_OK == status; i++)
+        {
+            OpcUa_ReadValueId_Initialize(&nodesToRead[i]);
+            nodesToRead[i].AttributeId = readValues[i].attributeId;
+            if (NULL == readValues[i].indexRange)
+            {
+                nodesToRead[i].IndexRange.Length = 0;
+                nodesToRead[i].IndexRange.DoNotClear = true;
+                nodesToRead[i].IndexRange.Data = NULL;
+            }
+            else
+            {
+                status = SOPC_String_CopyFromCString(&nodesToRead[i].IndexRange,
+                        readValues[i].indexRange);
+            }
+            if (SOPC_STATUS_OK == status)
+            {
+                // create an instance of NodeId
+                SOPC_NodeId *nodeId = SOPC_NodeId_FromCString(readValues[i].nodeId,
+                        (int) strlen(readValues[i].nodeId));
+                if (NULL == nodeId)
+                {
+                    status = SOPC_STATUS_OUT_OF_MEMORY;
+                }
+                if (SOPC_STATUS_OK == status)
+                {
+                    status = SOPC_NodeId_Copy(&nodesToRead[i].NodeId, nodeId);
+                    SOPC_NodeId_Clear(nodeId);
+                    SOPC_Free(nodeId);
+                }
+            }
+        }
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        /* alloc values */
+        int i = 0;
+        for (i = 0; i < (int) nbElements && SOPC_STATUS_OK == status; i++)
+        {
+            values[i] = SOPC_Malloc(sizeof(SOPC_DataValue));
+            if (NULL == values[i])
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+        }
+        if (SOPC_STATUS_OK != status)
+        {
+            for (int j = 0; j < i + 1; j++)
+            {
+                SOPC_Free(values[j]);
+            }
+        }
+    }
+    return status;
 }
 
 int32_t SOPC_ClientHelper_Read(int32_t connectionId,
@@ -711,62 +781,7 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
         status = SOPC_STATUS_OUT_OF_MEMORY;
     }
 
-    if (SOPC_STATUS_OK == status)
-    {
-        size_t i = 0;
-        for (i = 0; i < nbElements && SOPC_STATUS_OK == status; i++)
-        {
-            OpcUa_ReadValueId_Initialize(&nodesToRead[i]);
-            nodesToRead[i].AttributeId = readValues[i].attributeId;
-            if (NULL == readValues[i].indexRange)
-            {
-                nodesToRead[i].IndexRange.Length = 0;
-                nodesToRead[i].IndexRange.DoNotClear = true;
-                nodesToRead[i].IndexRange.Data = NULL;
-            }
-            else
-            {
-                status = SOPC_String_CopyFromCString(&nodesToRead[i].IndexRange, readValues[i].indexRange);
-            }
-            if (SOPC_STATUS_OK == status)
-            {
-                // create an instance of NodeId
-                SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(readValues[i].nodeId, (int) strlen(readValues[i].nodeId));
-                if (NULL == nodeId)
-                {
-                    status = SOPC_STATUS_OUT_OF_MEMORY;
-                }
-                if (SOPC_STATUS_OK == status)
-                {
-                    status = SOPC_NodeId_Copy(&nodesToRead[i].NodeId, nodeId);
-                    SOPC_NodeId_Clear(nodeId);
-                    SOPC_Free(nodeId);
-                }
-            }
-        }
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        /* alloc values */
-        int i = 0;
-        for (i = 0; i < (int) nbElements && SOPC_STATUS_OK == status; i++)
-        {
-            values[i] = SOPC_Malloc(sizeof(SOPC_DataValue));
-            if (NULL == values[i])
-            {
-                status = SOPC_STATUS_OUT_OF_MEMORY;
-            }
-        }
-        if (SOPC_STATUS_OK != status)
-        {
-            for (int j = 0;j < i + 1; j++)
-            {
-                SOPC_Free(values[j]);
-            }
-        }
-    }
-
+	status = ReadHelper_Initialize(status, nbElements, nodesToRead, readValues, values);
     /* set context */
     if (SOPC_STATUS_OK == status)
     {
@@ -968,6 +983,42 @@ static void disconnect_callback(const SOPC_LibSub_ConnectionId c_id)
     Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Client %" PRIu32 " disconnected.", c_id);
 }
 
+static SOPC_ReturnStatus WriteHelper_InitialiazeValues(size_t nbElements, SOPC_ReturnStatus status,
+        OpcUa_WriteValue *nodesToWrite, SOPC_ClientHelper_WriteValue *writeValues)
+{
+    for (size_t i = 0; i < nbElements && SOPC_STATUS_OK == status; i++)
+    {
+        OpcUa_WriteValue_Initialize(&nodesToWrite[i]);
+        nodesToWrite[i].AttributeId = 13; // TODO find corresponding constant for value attribute
+        SOPC_DataValue_Copy(&nodesToWrite[i].Value, writeValues[i].value);
+        if (NULL == writeValues[i].indexRange)
+        {
+            nodesToWrite[i].IndexRange.Length = 0;
+            nodesToWrite[i].IndexRange.DoNotClear = true;
+            nodesToWrite[i].IndexRange.Data = NULL;
+        }
+        else
+        {
+            status = SOPC_String_CopyFromCString(&nodesToWrite[i].IndexRange,
+                    writeValues[i].indexRange);
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            // create an instance of NodeId
+            SOPC_NodeId *nodeId = SOPC_NodeId_FromCString(writeValues[i].nodeId,
+                    (int) strlen(writeValues[i].nodeId));
+            if (NULL == nodeId)
+            {
+                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "nodeId NULL");
+            }
+            status = SOPC_NodeId_Copy(&nodesToWrite[i].NodeId, nodeId);
+            SOPC_NodeId_Clear(nodeId);
+            SOPC_Free(nodeId);
+        }
+    }
+    return status;
+}
+
 int32_t SOPC_ClientHelper_Write(int32_t connectionId,
                                 SOPC_ClientHelper_WriteValue* writeValues,
                                 size_t nbElements,
@@ -1012,34 +1063,7 @@ int32_t SOPC_ClientHelper_Write(int32_t connectionId,
 
     if (SOPC_STATUS_OK == status)
     {
-        for (size_t i = 0; i < nbElements && SOPC_STATUS_OK == status; i++)
-        {
-            OpcUa_WriteValue_Initialize(&nodesToWrite[i]);
-            nodesToWrite[i].AttributeId = 13; // TODO find corresponding constant for value attribute
-            SOPC_DataValue_Copy(&nodesToWrite[i].Value, writeValues[i].value);
-            if (NULL == writeValues[i].indexRange)
-            {
-                nodesToWrite[i].IndexRange.Length = 0;
-                nodesToWrite[i].IndexRange.DoNotClear = true;
-                nodesToWrite[i].IndexRange.Data = NULL;
-            }
-            else
-            {
-                status = SOPC_String_CopyFromCString(&nodesToWrite[i].IndexRange, writeValues[i].indexRange);
-            }
-            if (SOPC_STATUS_OK == status)
-            {
-                // create an instance of NodeId
-                SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(writeValues[i].nodeId, (int) strlen(writeValues[i].nodeId));
-                if (NULL == nodeId)
-                {
-                    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "nodeId NULL");
-                }
-                status = SOPC_NodeId_Copy(&nodesToWrite[i].NodeId, nodeId);
-                SOPC_NodeId_Clear(nodeId);
-                SOPC_Free(nodeId);
-            }
-        }
+        status = WriteHelper_InitialiazeValues(nbElements, status, nodesToWrite, writeValues);
     }
 
     if (SOPC_STATUS_OK == status)
@@ -1069,8 +1093,7 @@ int32_t SOPC_ClientHelper_Write(int32_t connectionId,
         statusMutex = Mutex_Lock(&ctx->mutex);
         assert(SOPC_STATUS_OK == statusMutex);
 
-        status =
-            SOPC_ClientCommon_AsyncSendRequestOnSession((SOPC_LibSub_ConnectionId) connectionId, request, (uintptr_t) ctx);
+        status = SOPC_ClientCommon_AsyncSendRequestOnSession((SOPC_LibSub_ConnectionId) connectionId, request, (uintptr_t) ctx);
 
         /* Wait for the response */
         while (SOPC_STATUS_OK == status && !ctx->finish)
