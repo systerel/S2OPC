@@ -3978,8 +3978,9 @@ static bool SC_Chunks_TreatSendMessageBuffer(
     bool isTcpUaOnly,
     bool isOPN,
     SOPC_Buffer* inputMsgBuffer,
-    bool* failedWithAbortMessage,
-    SOPC_StatusCode* errorStatus)
+    bool* failedWithAbortMessage, /* input / output parameter: only an input when true == *failedWithAbortMessage
+                                                               <=> abort chunk message requested by service layer */
+    SOPC_StatusCode* errorStatus) // input / output parameter: only an input when true == *failedWithAbortMessage
 {
     bool result = false;
     uint32_t nb_chunks = 0;
@@ -3987,7 +3988,7 @@ static bool SC_Chunks_TreatSendMessageBuffer(
     SOPC_Buffer* inputChunkBuffer = NULL;
     SOPC_Buffer* outputChunkBuffer = NULL;
 
-    *failedWithAbortMessage = false;
+    assert(NULL != failedWithAbortMessage);
 
     // Set the position at the beginning of the message buffer where starts message headers
     // (corresponding empty bytes were left for headers)
@@ -3996,6 +3997,7 @@ static bool SC_Chunks_TreatSendMessageBuffer(
 
     if (isTcpUaOnly)
     {
+        assert(!*failedWithAbortMessage);
         // HEL / ACK / ERR case
         assert(SOPC_MSG_TYPE_HEL == sendMsgType || SOPC_MSG_TYPE_ACK == sendMsgType ||
                SOPC_MSG_TYPE_ERR == sendMsgType);
@@ -4010,6 +4012,7 @@ static bool SC_Chunks_TreatSendMessageBuffer(
     }
     else if (isOPN)
     {
+        assert(!*failedWithAbortMessage);
         // OPN case (asymmetric case)
         assert(SOPC_MSG_TYPE_SC_OPN == sendMsgType);
         result = SC_Chunks_TreatSendBufferOPN(scConnectionIdx, scConnection, requestIdOrHandle, sendMsgType,
@@ -4026,84 +4029,96 @@ static bool SC_Chunks_TreatSendMessageBuffer(
         assert(SOPC_MSG_TYPE_SC_MSG == sendMsgType || SOPC_MSG_TYPE_SC_CLO == sendMsgType);
         // MSG (/CLO) case (symmetric case)
 
-        /* Part 6 (1.03): §6.7.3 MessageChunks and error handling:
-         * If an error occurs creating a MessageChunk then the sender shall [...]
-         * tells the receiver that an error occurred and that it should discard
-         * the previous chunks. The sender indicates that the MessageChunk contains an error
-         * by setting the IsFinal flag to ‘A’ (for Abort).
-         * [...] the receiver shall ignore the Message but shall not close the SecureChannel.
-         *
-         * Note: since it is possible to fail building first chunk it seems reasonable to send a final chunk 'A' even
-         * when no intermediate chunks were sent before. It allows to indicate failure to peer but to keep the SC opened
-         * as indicated.
-         */
-        *failedWithAbortMessage = true;
-        char* errorReason = "Not enough bytes available in chunk(s) to send the message.";
-
-        // Move forward to message body only in order to compute the number of chunks only based on body size
-        status = SOPC_Buffer_SetPosition(inputMsgBuffer, SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
-        assert(SOPC_STATUS_OK == status);
-
-        result = SC_Chunks_ComputeNbChunksToSend(scConnection, sendMsgType, SOPC_Buffer_Remaining(inputMsgBuffer),
-                                                 &nb_chunks, errorStatus);
+        // If true == *failedWithAbortMessage it indicates we just want to send an abort message
+        result = false == *failedWithAbortMessage;
+        char* errorReason = NULL;
 
         if (result)
         {
-            assert(nb_chunks > 0);
-            if (nb_chunks == 1)
-            {
-                // We use the buffer directly, restore position prior to message headers and use it directly as final
-                // chunk
-                status = SOPC_Buffer_SetPosition(inputMsgBuffer, 0);
-                assert(SOPC_STATUS_OK == status);
-                inputChunkBuffer = inputMsgBuffer;
-                // Deallocation of input buffer transfered to chunks buffer
-                inputMsgBuffer = NULL;
-            }
-            else
-            {
-                assert(!isOPN);
-                result = SC_Chunks_NextOutputChunkBuffer(scConnection, inputMsgBuffer, &inputChunkBuffer, errorStatus,
-                                                         &errorReason);
-            }
-        }
+            /* Part 6 (1.03): §6.7.3 MessageChunks and error handling:
+             * If an error occurs creating a MessageChunk then the sender shall [...]
+             * tells the receiver that an error occurred and that it should discard
+             * the previous chunks. The sender indicates that the MessageChunk contains an error
+             * by setting the IsFinal flag to ‘A’ (for Abort).
+             * [...] the receiver shall ignore the Message but shall not close the SecureChannel.
+             *
+             * Note: since it is possible to fail building first chunk it seems reasonable to send a final chunk 'A'
+             * even when no intermediate chunks were sent before. It allows to indicate failure to peer but to keep the
+             * SC opened as indicated.
+             */
+            *failedWithAbortMessage = true;
+            errorReason = "Not enough bytes available in chunk(s) to send the message.";
 
-        while (result && nb_chunks_sent < nb_chunks)
-        {
-            result =
-                SC_Chunks_TreatSendBufferMSGCLO(scConnectionIdx, scConnection, requestIdOrHandle, sendMsgType,
-                                                SC_Chunks_IsNextChunkIntermediateOrFinal(nb_chunks, nb_chunks_sent),
-                                                &inputChunkBuffer, &outputChunkBuffer, errorStatus);
+            // Move forward to message body only in order to compute the number of chunks only based on body size
+            status = SOPC_Buffer_SetPosition(inputMsgBuffer, SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
+            assert(SOPC_STATUS_OK == status);
+
+            result = SC_Chunks_ComputeNbChunksToSend(scConnection, sendMsgType, SOPC_Buffer_Remaining(inputMsgBuffer),
+                                                     &nb_chunks, errorStatus);
 
             if (result)
             {
-                // Require write of output buffer on socket
-                SOPC_Sockets_EnqueueEvent(SOCKET_WRITE, scConnection->socketIndex, (void*) outputChunkBuffer, 0);
-            }
-            else
-            {
-                // Deallocate output buffer since not transmitted to socket layer
-                SOPC_Buffer_Delete(outputChunkBuffer);
-                // Input chunk buffer is always deallocated after the loop
-                // (if it was not forwarded as the output buffer)
-                outputChunkBuffer = NULL;
+                assert(nb_chunks > 0);
+                if (nb_chunks == 1)
+                {
+                    // We use the buffer directly, restore position prior to message headers and use it directly as
+                    // final chunk
+                    status = SOPC_Buffer_SetPosition(inputMsgBuffer, 0);
+                    assert(SOPC_STATUS_OK == status);
+                    inputChunkBuffer = inputMsgBuffer;
+                    // Deallocation of input buffer transfered to chunks buffer
+                    inputMsgBuffer = NULL;
+                }
+                else
+                {
+                    assert(!isOPN);
+                    result = SC_Chunks_NextOutputChunkBuffer(scConnection, inputMsgBuffer, &inputChunkBuffer,
+                                                             errorStatus, &errorReason);
+                }
             }
 
-            nb_chunks_sent++;
-
-            if (result && nb_chunks_sent < nb_chunks)
+            while (result && nb_chunks_sent < nb_chunks)
             {
-                assert(outputChunkBuffer != inputMsgBuffer); // otherwise only one chunk to send
-                result = SC_Chunks_NextOutputChunkBuffer(scConnection, inputMsgBuffer, &inputChunkBuffer, errorStatus,
-                                                         &errorReason);
+                result =
+                    SC_Chunks_TreatSendBufferMSGCLO(scConnectionIdx, scConnection, requestIdOrHandle, sendMsgType,
+                                                    SC_Chunks_IsNextChunkIntermediateOrFinal(nb_chunks, nb_chunks_sent),
+                                                    &inputChunkBuffer, &outputChunkBuffer, errorStatus);
+
+                if (result)
+                {
+                    // Require write of output buffer on socket
+                    SOPC_Sockets_EnqueueEvent(SOCKET_WRITE, scConnection->socketIndex, (void*) outputChunkBuffer, 0);
+                }
+                else
+                {
+                    // Deallocate output buffer since not transmitted to socket layer
+                    SOPC_Buffer_Delete(outputChunkBuffer);
+                    // Input chunk buffer is always deallocated after the loop
+                    // (if it was not forwarded as the output buffer)
+                    outputChunkBuffer = NULL;
+                }
+
+                nb_chunks_sent++;
+
+                if (result && nb_chunks_sent < nb_chunks)
+                {
+                    assert(outputChunkBuffer != inputMsgBuffer); // otherwise only one chunk to send
+                    result = SC_Chunks_NextOutputChunkBuffer(scConnection, inputMsgBuffer, &inputChunkBuffer,
+                                                             errorStatus, &errorReason);
+                }
             }
+
+            // Deallocate chunk since it will not be used it anymore
+            SOPC_Buffer_Delete(inputChunkBuffer);
+            inputChunkBuffer = NULL;
+        }
+        else
+        {
+            assert(SOPC_MSG_TYPE_SC_MSG == sendMsgType); // It shall not be a CLO message
+            errorReason = "Service message encoding failed.";
         }
 
-        // Deallocate chunk since it will not be used it anymore
-        SOPC_Buffer_Delete(inputChunkBuffer);
-        inputChunkBuffer = NULL;
-
-        // In case of failure we send an abort chunk
+        // In case of failure (or requested abort chunk) we send an abort chunk
         if (!result)
         {
             // Note: Reuse inputMsgBuffer for abort message
@@ -4111,6 +4126,9 @@ static bool SC_Chunks_TreatSendMessageBuffer(
 
             if (result)
             {
+                SOPC_Logger_TraceWarning("ScChunksMgr: encoded an abort chunk for: scIdx=%" PRIu32
+                                         " reqId/Handle=%" PRIu32 " sc=%X reason='%s'",
+                                         scConnectionIdx, requestIdOrHandle, *errorStatus, errorReason);
                 result = SC_Chunks_TreatSendBufferMSGCLO(scConnectionIdx, scConnection, requestIdOrHandle, sendMsgType,
                                                          SOPC_UA_ABORT_FINAL_CHUNK, &inputMsgBuffer, &outputChunkBuffer,
                                                          errorStatus);
@@ -4152,7 +4170,7 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InternalEvent event,
     SOPC_StatusCode errorStatus = SOPC_GoodGenericStatus; // Good
     bool isSendTcpOnly = false;
     bool isOPN = false;
-    bool result = false;
+    bool result = true;
     // True if socket will be closed after sending this message (ERR, CLO)
     bool socketWillClose = false;
     SOPC_SecureConnection* scConnection = SC_GetConnection(eltId);
@@ -4206,6 +4224,18 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InternalEvent event,
 
             sendMsgType = SOPC_MSG_TYPE_SC_MSG;
             break;
+        case INT_SC_SND_ABORT_CHUNK:
+            SOPC_Logger_TraceDebug("ScChunksMgr: INT_SC_SND_ABORT_CHUNK scIdx=%" PRIu32 " sc=%X reqId/Handle=%" PRIuPTR,
+                                   eltId, (SOPC_StatusCode)(uintptr_t) params, auxParam);
+            sendMsgType = SOPC_MSG_TYPE_SC_MSG;
+            // Force failure with abort message
+            failedWithAbortMessage = true;
+            // Set the error status to use
+            errorStatus = (SOPC_StatusCode)(uintptr_t) params;
+            // Create a dedicated empty buffer
+            buffer = SOPC_Buffer_CreateResizable(
+                SOPC_TCP_UA_MIN_BUFFER_SIZE, SOPC_MAX_MESSAGE_LENGTH + SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
+            break;
         default:
             // Already filtered by secure channels API module
             assert(false);
@@ -4217,10 +4247,13 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InternalEvent event,
             errorStatus = OpcUa_BadInvalidArgument;
         }
 
-        // TODO: manage SND_FAILURE in this case to send an Abort message ?
-        result = SC_Chunks_TreatSendMessageBuffer(eltId, scConnection, (uint32_t) auxParam, sendMsgType, isSendTcpOnly,
-                                                  isOPN, buffer, &failedWithAbortMessage, &errorStatus);
-        buffer = NULL; // Consumed by previous call
+        if (result)
+        {
+            result =
+                SC_Chunks_TreatSendMessageBuffer(eltId, scConnection, (uint32_t) auxParam, sendMsgType, isSendTcpOnly,
+                                                 isOPN, buffer, &failedWithAbortMessage, &errorStatus);
+            buffer = NULL; // Consumed by previous call
+        }
 
         if (!result)
         {
@@ -4234,7 +4267,7 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InternalEvent event,
 
                 if (failedWithAbortMessage)
                 {
-                    SOPC_SecureChannels_EnqueueInternalEvent(INT_SC_SND_ABORT_FAILURE, eltId, requestIdForSendFailure,
+                    SOPC_SecureChannels_EnqueueInternalEvent(INT_SC_SENT_ABORT_FAILURE, eltId, requestIdForSendFailure,
                                                              errorStatus);
                 }
                 else

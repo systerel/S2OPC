@@ -267,7 +267,7 @@ OPERATIONS
 
     /* END OF LOCAL OPERATIONS */
 
-    receive_msg_buffer (channel, buffer, request_context) =
+    valid_msg <-- receive_msg_buffer (channel, buffer, request_context) =
     VAR
         l_connected_channel,
         l_is_client,
@@ -279,8 +279,13 @@ OPERATIONS
         l_buffer_out,
         l_valid_buffer_out,
         l_valid_req_context,
-        l_valid_resp
+        l_valid_req,
+        l_async_resp,
+        l_valid_resp,
+        l_sc
     IN
+        l_async_resp := FALSE;
+        valid_msg := FALSE;
         l_connected_channel <-- is_connected_channel (channel);
         l_msg_type <-- decode_msg_type (buffer);
         l_valid_msg_type <-- is_valid_msg_in_type (l_msg_type);
@@ -293,6 +298,7 @@ OPERATIONS
             /* TODO: check that channel is secured if service class /= discovery class */
             CASE l_msg_header_type OF
                 EITHER e_msg_request_type THEN
+                    l_valid_req := FALSE;
                     l_valid_req_context <-- is_valid_request_context (request_context);
                     IF l_is_client = FALSE &
                         l_valid_req_context = TRUE
@@ -300,27 +306,35 @@ OPERATIONS
                         /* Server receiving a request: OK */
                         CASE l_msg_service_class OF
                             EITHER e_msg_session_treatment_class THEN
-                                l_buffer_out <-- server_receive_session_treatment_req (channel, l_msg_type, buffer)
+                                l_valid_req, l_sc, l_buffer_out <-- server_receive_session_treatment_req (channel, l_msg_type, buffer)
                             OR e_msg_session_service_class THEN
-                                l_buffer_out <-- server_receive_session_service_req (channel, l_msg_type, request_context, buffer)
+                                l_valid_req, l_async_resp, l_sc, l_buffer_out <-- server_receive_session_service_req (channel, l_msg_type, request_context, buffer)
                             OR e_msg_discovery_service_class THEN
-                                l_buffer_out <-- server_receive_discovery_service_req (channel, l_msg_type, buffer)
+                                l_valid_req, l_sc, l_buffer_out <-- server_receive_discovery_service_req (channel, l_msg_type, buffer)
                             ELSE /* INCLUDES e_msg_service_fault_class => unexpected response type */
                                 /* indet class */
-                                l_buffer_out := c_byte_buffer_indet
+                                l_valid_req := FALSE;
+                                l_buffer_out := c_byte_buffer_indet;
+                                l_sc := c_StatusCode_indet
                             END
                         END;
                         /* Send the response message on secure channel if available */
                         l_valid_buffer_out <-- is_valid_buffer_out (l_buffer_out);
-                        IF l_valid_buffer_out = TRUE
+                        IF l_valid_req = TRUE & l_valid_buffer_out = TRUE
                         THEN
                             send_channel_msg_buffer (channel, l_buffer_out, request_context)
+                        ELSIF l_valid_req = TRUE & l_async_resp = FALSE
+                        THEN
+                            /* Unexpected invalid buffer, it should lead to an Abort chunk */
+                            send_channel_abort_chunk(channel, l_sc, request_context)
                         END
                     ELSE
                         /* Server receiving a response: close secure channel since it is not expected from client */
                         close_secure_channel (channel)
-                    END
+                    END;
+                    valid_msg := l_valid_req
                 OR e_msg_response_type THEN
+                    l_valid_resp := FALSE;
                     IF l_is_client = TRUE
                     THEN
                         IF l_msg_service_class = e_msg_service_fault_class
@@ -350,8 +364,10 @@ OPERATIONS
                     ELSE
                         /* Client receiving a request: close secure channel since it is not expected from server */
                         close_secure_channel (channel)
-                    END
+                    END;
+                    valid_msg := l_valid_resp                    
                 ELSE
+                    valid_msg := FALSE;
                     /* Unknown message type: close the secure channel since it is not expected */
                     close_secure_channel (channel)
                 END
@@ -793,7 +809,7 @@ OPERATIONS
         l_msg_typ,
         l_valid_req_context,
         l_buffer_out,
-        l_valid_buffer_out,
+        l_sc,
         l_channel,
         l_connected_channel
     IN
@@ -803,17 +819,17 @@ OPERATIONS
         IF l_valid_session = TRUE & l_valid_msg = TRUE & l_msg_typ = e_msg_subscription_publish_resp &
             l_valid_req_context = TRUE & p_statusCode /= c_StatusCode_indet
         THEN
-            bres, l_buffer_out, l_channel
+            bres, l_sc, l_buffer_out, l_channel
               <-- server_send_publish_response (p_session, p_req_handle, p_statusCode, l_msg_typ, p_publish_resp_msg);
-            IF bres = TRUE
+            l_connected_channel <-- is_connected_channel (l_channel);
+            IF bres = TRUE & l_connected_channel = TRUE
             THEN
-                l_connected_channel <-- is_connected_channel (l_channel);
-                l_valid_buffer_out <-- is_valid_buffer_out (l_buffer_out);
-                IF l_connected_channel = TRUE &
-                    l_valid_buffer_out = TRUE
-                THEN
-                    send_channel_msg_buffer (l_channel, l_buffer_out, p_req_context)
-                END
+                send_channel_msg_buffer (l_channel, l_buffer_out, p_req_context)
+            ELSIF l_connected_channel = TRUE
+            THEN
+                /* Unexpected invalid buffer, it should lead to an Abort chunk */
+                send_channel_abort_chunk(l_channel, l_sc, p_req_context)
+                // Note: keep bres = FALSE, it will generate a log error
             END
         ELSE
             bres := FALSE

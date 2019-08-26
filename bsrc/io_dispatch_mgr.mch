@@ -56,7 +56,7 @@ INITIALISATION
 
 OPERATIONS
 
-    receive_msg_buffer (channel, buffer, request_context) =
+    valid_msg <-- receive_msg_buffer (channel, buffer, request_context) =
     PRE
         channel  : t_channel_i &
         channel  : t_channel &
@@ -76,8 +76,9 @@ OPERATIONS
         /* End of receive execution lead to a buffer in invalid state (error) or a buffer fully read */
         a_buffer_in_state  :: {c_buffer_in_state_indet, e_buffer_in_msg_read, e_buffer_in_msg_type_read, a_buffer_in_state} ||
         a_buffer_out_state :: {c_buffer_out_state_indet, e_buffer_out_msg_written, a_buffer_out_state} ||
-        a_msg_in_type      :: t_msg_type_i
+        a_msg_in_type      :: t_msg_type_i ||
         /* c_msg_in instance could be provided to app but should be not referenced anymore in c_msg_in */
+        valid_msg :: BOOL
     END
     ;
 

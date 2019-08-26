@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.h
 
- Date                 : 14/06/2019 07:37:51
+ Date                 : 26/08/2019 13:30:40
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -130,7 +130,8 @@ extern void io_dispatch_mgr__internal_server_subscription_publish_timeout(
 extern void io_dispatch_mgr__receive_msg_buffer(
    const constants__t_channel_i io_dispatch_mgr__channel,
    const constants__t_byte_buffer_i io_dispatch_mgr__buffer,
-   const constants__t_request_context_i io_dispatch_mgr__request_context);
+   const constants__t_request_context_i io_dispatch_mgr__request_context,
+   t_bool * const io_dispatch_mgr__valid_msg);
 extern void io_dispatch_mgr__secure_channel_lost(
    const constants__t_channel_i io_dispatch_mgr__channel);
 extern void io_dispatch_mgr__server_channel_connected_event(

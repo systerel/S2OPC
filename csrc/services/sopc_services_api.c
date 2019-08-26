@@ -78,6 +78,7 @@ static void onSecureChannelEvent(SOPC_EventHandler* handler,
 {
     (void) handler;
     SOPC_SecureChannels_OutputEvent scEvent = (SOPC_SecureChannels_OutputEvent) event;
+    bool bres = false;
 
     switch (scEvent)
     {
@@ -95,7 +96,6 @@ static void onSecureChannelEvent(SOPC_EventHandler* handler,
         assert(channel_config_idx <= constants__t_channel_config_idx_i_max);
         assert(auxParam <= constants__t_channel_i_max);
 
-        bool bres = false;
         io_dispatch_mgr__server_channel_connected_event(id, channel_config_idx, (uint32_t) auxParam, &bres);
         if (bres == false)
         {
@@ -148,7 +148,13 @@ static void onSecureChannelEvent(SOPC_EventHandler* handler,
         // auxParam == context (request id)
         assert(NULL != params);
         io_dispatch_mgr__receive_msg_buffer(id, (constants__t_byte_buffer_i) params,
-                                            (constants__t_request_context_i) auxParam);
+                                            (constants__t_request_context_i) auxParam, &bres);
+        if (!bres)
+        {
+            SOPC_Logger_TraceError("ServicesMgr: SC_SC_SERVICE_RCV_MSG scIdx=%" PRIu32 " reqId=%" PRIuPTR
+                                   " received message considered invalid",
+                                   id, auxParam);
+        }
         // params is freed by services manager
         break;
     case SC_SND_FAILURE:

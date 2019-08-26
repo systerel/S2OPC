@@ -21,7 +21,7 @@
 
  File Name            : channel_mgr.h
 
- Date                 : 19/04/2019 16:19:33
+ Date                 : 26/08/2019 13:30:39
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -46,6 +46,7 @@
    SEES Clause
   --------------*/
 #include "constants.h"
+#include "constants_statuscodes_bs.h"
 
 /*----------------------------
    CONCRETE_VARIABLES Clause
@@ -69,6 +70,7 @@ extern void channel_mgr__INITIALISATION(void);
 #define channel_mgr__is_disconnecting_channel channel_mgr_1__is_disconnecting_channel
 #define channel_mgr__is_valid_channel_config_idx channel_mgr_bs__is_valid_channel_config_idx
 #define channel_mgr__is_valid_endpoint_config_idx channel_mgr_bs__is_valid_endpoint_config_idx
+#define channel_mgr__send_channel_abort_chunk channel_mgr_bs__send_channel_abort_chunk
 #define channel_mgr__send_channel_msg_buffer channel_mgr_bs__send_channel_msg_buffer
 #define channel_mgr__server_get_endpoint_config channel_mgr_1__server_get_endpoint_config
 

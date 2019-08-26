@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.h
 
- Date                 : 19/04/2019 16:19:37
+ Date                 : 26/08/2019 13:30:43
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -214,6 +214,8 @@ extern void service_mgr__server_receive_discovery_service_req(
    const constants__t_channel_i service_mgr__channel,
    const constants__t_msg_type_i service_mgr__req_typ,
    const constants__t_byte_buffer_i service_mgr__msg_buffer,
+   t_bool * const service_mgr__valid_req,
+   constants_statuscodes_bs__t_StatusCode_i * const service_mgr__sc,
    constants__t_byte_buffer_i * const service_mgr__buffer_out);
 extern void service_mgr__server_receive_local_service_req(
    const constants__t_endpoint_config_idx_i service_mgr__endpoint_config_idx,
@@ -227,11 +229,16 @@ extern void service_mgr__server_receive_session_service_req(
    const constants__t_msg_type_i service_mgr__req_typ,
    const constants__t_request_context_i service_mgr__req_context,
    const constants__t_byte_buffer_i service_mgr__msg_buffer,
+   t_bool * const service_mgr__valid_req,
+   t_bool * const service_mgr__async_resp,
+   constants_statuscodes_bs__t_StatusCode_i * const service_mgr__sc,
    constants__t_byte_buffer_i * const service_mgr__buffer_out);
 extern void service_mgr__server_receive_session_treatment_req(
    const constants__t_channel_i service_mgr__channel,
    const constants__t_msg_type_i service_mgr__req_typ,
    const constants__t_byte_buffer_i service_mgr__msg_buffer,
+   t_bool * const service_mgr__valid_req,
+   constants_statuscodes_bs__t_StatusCode_i * const service_mgr__sc,
    constants__t_byte_buffer_i * const service_mgr__buffer_out);
 extern void service_mgr__server_send_publish_response(
    const constants__t_session_i service_mgr__session,
@@ -240,6 +247,7 @@ extern void service_mgr__server_send_publish_response(
    const constants__t_msg_type_i service_mgr__resp_typ,
    const constants__t_msg_i service_mgr__publish_resp_msg,
    t_bool * const service_mgr__bres,
+   constants_statuscodes_bs__t_StatusCode_i * const service_mgr__sc,
    constants__t_byte_buffer_i * const service_mgr__buffer_out,
    constants__t_channel_i * const service_mgr__channel);
 extern void service_mgr__service_mgr_UNINITIALISATION(void);

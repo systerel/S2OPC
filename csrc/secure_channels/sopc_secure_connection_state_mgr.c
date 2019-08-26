@@ -2735,7 +2735,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
         } // else: nothing to do (=> socket should already be required to close)
         break;
     }
-    case INT_SC_SND_ABORT_FAILURE:
+    case INT_SC_SENT_ABORT_FAILURE:
     {
         // An abort final chunk has been sent and SC connection shall not be closed
         SOPC_Logger_TraceDebug("ScStateMgr: INT_SC_SND_FATAL_FAILURE scIdx=%" PRIu32 " reqId/Handle=%" PRIu32
@@ -3110,6 +3110,20 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         {
             SOPC_SecureChannels_EnqueueInternalEvent(INT_SC_SND_MSG_CHUNKS, eltId, params, auxParam);
         }
+        break;
+    case SC_SERVICE_SND_MSG_ABORT:
+        SOPC_Logger_TraceDebug("ScStateMgr: SC_SERVICE_SND_MSG_ABORT scIdx=%" PRIu32 " sc=%X reqId/Handle=%" PRIuPTR,
+                               eltId, (SOPC_StatusCode)(uintptr_t) params, auxParam);
+
+        /* id = secure channel connection index,
+           params = (SOPC_StatusCode) encoding failure status code (response too large, etc)
+           auxParam = (uint32_t) request Id context of response (server) */
+        scConnection = SC_GetConnection(eltId);
+        if (NULL != scConnection && (scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED ||
+                                     scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW))
+        {
+            SOPC_SecureChannels_EnqueueInternalEvent(INT_SC_SND_ABORT_CHUNK, eltId, params, auxParam);
+        } // else: this event is only used by server and send failure on abort message should be ignored
         break;
     default:
         // Already filtered by secure channels API module

@@ -24,7 +24,8 @@ REFINES
     channel_mgr
 
 SEES
-    constants
+    constants,
+    constants_statuscodes_bs
 
 DEFINITIONS
     d_variables ==

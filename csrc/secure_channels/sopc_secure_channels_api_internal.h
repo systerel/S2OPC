@@ -49,24 +49,28 @@ typedef enum
     INT_SC_RCV_MSG_CHUNKS,
     INT_SC_RCV_MSG_CHUNK_ABORT, /* -------------------------< */
 
-    INT_SC_RCV_FAILURE,       /* id = secure channel connection index,
-                                 auxParam = error status */
-    INT_SC_SND_FATAL_FAILURE, /* >------------------------- */
-                              // id = secure channel connection index,
-                              // params = (uint32_t *) requestId,
-                              // auxParam = (SOPC_StatusCode) error status in case of client */
-    INT_SC_SND_ABORT_FAILURE, /* -------------------------< */
+    INT_SC_RCV_FAILURE,        /* id = secure channel connection index,
+                                  auxParam = error status */
+    INT_SC_SND_FATAL_FAILURE,  /* >------------------------- */
+                               // id = secure channel connection index,
+                               // params = (uint32_t *) requestId,
+                               // auxParam = (SOPC_StatusCode) error status in case of client */
+    INT_SC_SENT_ABORT_FAILURE, /* -------------------------< */
     /* SC connection manager -> OPC UA chunks message manager */
     INT_SC_SND_HEL, /* >------------------------- */
     INT_SC_SND_ACK, // id = secure channel connection index,
                     // params = (SOPC_Buffer*) buffer positioned to message payload
                     /* -------------------------< */
     INT_SC_SND_ERR,
-    INT_SC_SND_OPN,        /* >------------------------- */
-                           // id = secure channel connection index,
-                           // params = (SOPC_Buffer*) buffer positioned to message payload,
-    INT_SC_SND_CLO,        // auxParam = (uint32_t) request Id context if response / request Handle if request when MSG
-    INT_SC_SND_MSG_CHUNKS, /* -------------------------< */
+    INT_SC_SND_OPN,         /* >------------------------- */
+                            // id = secure channel connection index,
+                            // params = (SOPC_Buffer*) buffer positioned to message payload,
+    INT_SC_SND_CLO,         // auxParam = (uint32_t) request Id context if response / request Handle if request when MSG
+    INT_SC_SND_MSG_CHUNKS,  /* -------------------------< */
+    INT_SC_SND_ABORT_CHUNK, /* id = secure channel connection index,
+                               params = (SOPC_StatusCode) encoding failure status code (response too large, etc)
+                               auxParam = (uint32_t) request Id context of response (server)
+                            */
 
     /* SC connection manager -> SC connection manager */
     INT_SC_CLOSE // id = secure channel connection index,

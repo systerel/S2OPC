@@ -119,6 +119,17 @@ void channel_mgr_bs__last_connected_channel_lost()
     SOPC_EventHandler_Post(SOPC_Services_GetEventHandler(), SE_TO_SE_SC_ALL_DISCONNECTED, 0, NULL, 0);
 }
 
+void channel_mgr_bs__send_channel_abort_chunk(
+    const constants__t_channel_i channel_mgr_bs__channel,
+    const constants_statuscodes_bs__t_StatusCode_i channel_mgr_bs__status_code,
+    const constants__t_request_context_i channel_mgr_bs__request_context)
+{
+    SOPC_StatusCode status = SOPC_BadStatusMask;
+    util_status_code__B_to_C(channel_mgr_bs__status_code, &status);
+    SOPC_SecureChannels_EnqueueEvent(SC_SERVICE_SND_MSG_ABORT, channel_mgr_bs__channel, (void*) (uintptr_t) status,
+                                     channel_mgr_bs__request_context);
+}
+
 void channel_mgr_bs__send_channel_msg_buffer(const constants__t_channel_i channel_mgr_bs__channel,
                                              const constants__t_byte_buffer_i channel_mgr_bs__buffer,
                                              const constants__t_request_context_i channel_mgr_bs__request_context)

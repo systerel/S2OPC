@@ -173,9 +173,11 @@ OPERATIONS
     END
     ;
 
-    buffer <-- encode_msg (msg_type, msg_header, msg) =
+    sc, buffer <-- encode_msg (header_type, msg_type, msg_header, msg) =
     PRE
         a_buffer_out_state = c_buffer_out_state_indet &
+        header_type : t_msg_header_type_i &
+        header_type : t_msg_header_type &
         msg_type : t_msg_type_i &
         msg_type = a_msg_out_type &
         a_msg_out_type : t_msg_type &
@@ -187,10 +189,12 @@ OPERATIONS
         c_msg_out : t_msg
     THEN
         CHOICE
-            buffer :(buffer : t_byte_buffer_i & buffer = c_byte_buffer_indet)
+            buffer :(buffer : t_byte_buffer_i & buffer = c_byte_buffer_indet) ||
+            sc :(sc : t_StatusCode_i & sc :{e_sc_bad_request_too_large, e_sc_bad_response_too_large, e_sc_bad_out_of_memory})
         OR
             buffer :(buffer : t_byte_buffer_i & buffer : t_byte_buffer) ||
-            a_buffer_out_state := e_buffer_out_msg_written
+            a_buffer_out_state := e_buffer_out_msg_written ||
+            sc := e_sc_ok
         END
     END
     ;

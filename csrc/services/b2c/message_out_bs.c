@@ -158,7 +158,7 @@ void message_out_bs__bless_msg_out(const constants__t_msg_i message_out_bs__msg)
 
 void message_out_bs__dealloc_msg_header_out(const constants__t_msg_header_i message_out_bs__msg_header)
 {
-    // Generated header, parameter not really a const. TODO: Check if message should not be a / in a global variable
+    // Generated header, parameter not really a const.
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
     if ((*(SOPC_EncodeableType**) message_out_bs__msg_header) == &OpcUa_ResponseHeader_EncodeableType)
     {
@@ -182,22 +182,23 @@ void message_out_bs__dealloc_msg_out(const constants__t_msg_i message_out_bs__ms
     if (message_out_bs__msg != constants__c_msg_indet)
     {
         encType = *(SOPC_EncodeableType**) message_out_bs__msg;
-        // TODO: status returned ?
-        // TODO: const parameter modified !
 
         // To could keep generated prototype
-        // Generated header, parameter not really a const. TODO: Check if message should not be a / in a global variable
+        // Generated header, parameter not really a const.
         SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
         SOPC_Encodeable_Delete(encType, (void**) &message_out_bs__msg);
         SOPC_GCC_DIAGNOSTIC_RESTORE
     }
 }
 
-void message_out_bs__encode_msg(const constants__t_msg_type_i message_out_bs__msg_type,
+void message_out_bs__encode_msg(const constants__t_msg_header_type_i message_out_bs__header_type,
+                                const constants__t_msg_type_i message_out_bs__msg_type,
                                 const constants__t_msg_header_i message_out_bs__msg_header,
                                 const constants__t_msg_i message_out_bs__msg,
+                                constants_statuscodes_bs__t_StatusCode_i* const message_out_bs__sc,
                                 constants__t_byte_buffer_i* const message_out_bs__buffer)
 {
+    *message_out_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
     *message_out_bs__buffer = constants__c_byte_buffer_indet;
     OpcUa_RequestHeader* reqHeader = NULL;
     OpcUa_ResponseHeader* respHeader = NULL;
@@ -251,6 +252,7 @@ void message_out_bs__encode_msg(const constants__t_msg_type_i message_out_bs__ms
     }
     if (SOPC_STATUS_OK == status)
     {
+        *message_out_bs__sc = constants_statuscodes_bs__e_sc_ok;
         *message_out_bs__buffer = (constants__t_byte_buffer_i) buffer;
 
         if (message_out_bs__msg_type == constants__e_msg_service_fault_resp)
@@ -266,10 +268,29 @@ void message_out_bs__encode_msg(const constants__t_msg_type_i message_out_bs__ms
                                    SOPC_EncodeableType_GetName(encType));
         }
     }
-    else if (NULL != buffer)
+    else
     {
+        if (SOPC_STATUS_WOULD_BLOCK == status)
+        {
+            switch (message_out_bs__header_type)
+            {
+            case constants__e_msg_request_type:
+                *message_out_bs__sc = constants_statuscodes_bs__e_sc_bad_request_too_large;
+                break;
+            case constants__e_msg_response_type:
+                *message_out_bs__sc = constants_statuscodes_bs__e_sc_bad_response_too_large;
+                break;
+            default:
+                assert(false);
+            }
+        }
+        else
+        {
+            *message_out_bs__sc = constants_statuscodes_bs__e_sc_bad_encoding_error;
+        }
         // if buffer is not used, it must be freed
         SOPC_Buffer_Delete(buffer);
+        buffer = NULL;
     }
 }
 

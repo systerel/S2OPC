@@ -558,14 +558,11 @@ OPERATIONS
                 THEN
                     set_req_handle_channel (l_req_handle, channel);
                     client_write_msg_out_header_req_handle (l_msg_header, l_req_handle);
-                    l_buffer <-- encode_msg (e_msg_session_close_req, l_msg_header, req_msg);
+                    ret, l_buffer <-- encode_msg (e_msg_request_type, e_msg_session_close_req, l_msg_header, req_msg);
                     l_valid_buffer <-- is_valid_buffer_out (l_buffer);
                     IF l_valid_buffer = FALSE
                     THEN
-                        l_req_handle := c_client_request_handle_indet;
-                        ret := e_sc_bad_encoding_error
-                    ELSE
-                        ret := e_sc_ok
+                        l_req_handle := c_client_request_handle_indet
                     END
                 ELSE
                     l_req_handle := c_client_request_handle_indet;
@@ -610,7 +607,7 @@ OPERATIONS
     END
     ;
 
-    buffer_out <-- server_receive_session_treatment_req (channel, req_typ, msg_buffer) =
+    valid_req, sc, buffer_out <-- server_receive_session_treatment_req (channel, req_typ, msg_buffer) =
     VAR
         l_req_msg_header,
         l_valid_req_header,
@@ -628,6 +625,8 @@ OPERATIONS
         l_buffer_out,
         l_valid_buffer
     IN
+        l_valid_req := FALSE;
+        sc := c_StatusCode_indet;
         l_buffer_out := c_byte_buffer_indet;
         l_req_msg_header <-- decode_msg_header (TRUE, msg_buffer);
         l_valid_req_header <-- is_valid_msg_in_header (l_req_msg_header);
@@ -655,7 +654,7 @@ OPERATIONS
                     END;
                     write_msg_resp_header_service_status (l_resp_msg_header, l_ret);
                     server_write_msg_out_header_req_handle (l_resp_msg_header, l_request_handle);
-                    l_buffer_out <-- encode_msg (l_resp_msg_typ, l_resp_msg_header, l_resp_msg);
+                    sc, l_buffer_out <-- encode_msg (e_msg_response_type, l_resp_msg_typ, l_resp_msg_header, l_resp_msg);
                     l_valid_buffer <-- is_valid_buffer_out (l_buffer_out);
                     IF l_valid_buffer = FALSE
                     THEN
@@ -666,6 +665,9 @@ OPERATIONS
                     /* response message structures not necessary anymore */
                     dealloc_msg_header_out (l_resp_msg_header);
                     dealloc_msg_out (l_resp_msg)
+                ELSE
+                    /* In other cases than out of memory, request shall have been discarded previously */
+                    sc := e_sc_bad_out_of_memory
                 END;
                 /* request message not necessary anymore */
                 dealloc_msg_in (l_req_msg)
@@ -677,7 +679,8 @@ OPERATIONS
         END;
         /* In any case buffer will not be used anymore after this operation */
         dealloc_msg_in_buffer (msg_buffer);
-        buffer_out := l_buffer_out
+        buffer_out := l_buffer_out;
+        valid_req := bool(l_valid_req_header = TRUE & l_valid_req = TRUE)
     END
     ;
 
@@ -723,20 +726,19 @@ OPERATIONS
     END
     ;
 
-    buffer_out <-- server_receive_session_service_req (channel, req_typ, req_context, msg_buffer) =
+    valid_req, async_resp, sc, buffer_out <-- server_receive_session_service_req (channel, req_typ, req_context, msg_buffer) =
     VAR
         l_req_msg_header,
         l_valid_req_header,
         l_request_handle,
         l_session_token,
-        l_is_valid_req,
+        l_is_valid_req_on_session,
         l_session,
         l_req_msg,
         l_valid_req,
         l_resp_msg_allocated,
         l_resp_msg_typ,
         l_resp_msg,
-        l_async_resp,
         l_valid_msg,
         l_resp_msg_header,
         l_valid_resp_header,
@@ -746,10 +748,13 @@ OPERATIONS
         l_buffer_out,
         l_session_channel
     IN
+        sc := c_StatusCode_indet;
+        l_is_valid_req_on_session := FALSE;
+        l_valid_req := FALSE;
         l_resp_msg_typ := c_msg_type_indet;
         l_resp_msg_header := c_msg_header_indet;
         l_resp_msg := c_msg_indet;
-        l_async_resp := FALSE;
+        async_resp := FALSE;
         l_valid_msg := FALSE;
         l_valid_resp_header := FALSE;
         l_resp_msg_allocated := FALSE;
@@ -762,8 +767,8 @@ OPERATIONS
             l_request_handle <-- server_read_msg_header_req_handle (l_req_msg_header);
             /* Check valid session token used */
             l_session_token <-- read_msg_req_header_session_token (l_req_msg_header);
-            l_is_valid_req, l_session, l_ret <-- server_validate_session_service_req (channel, l_session_token);
-            IF l_is_valid_req = TRUE
+            l_is_valid_req_on_session, l_session, l_ret <-- server_validate_session_service_req (channel, l_session_token);
+            IF l_is_valid_req_on_session = TRUE
             THEN
                 /* Decode message */
                 l_req_msg <-- decode_msg (req_typ, msg_buffer);
@@ -780,7 +785,7 @@ OPERATIONS
                     THEN
                         l_resp_msg_allocated := TRUE;
                         // Call local operation to dispatch the service request on right service
-                            l_ret, l_async_resp
+                            l_ret, async_resp
                               <-- treat_session_service_req (l_session,
                                                              req_typ,
                                                              l_request_handle,
@@ -806,6 +811,9 @@ OPERATIONS
                 ELSE
                     l_ret := e_sc_bad_decoding_error
                 END /* DECODE REQ CHECK */
+            ELSE // l_is_valid_req_on_session = FALSE:
+                // Note: consider message valid if we do not evaluate it due to session invalid token but we will send a service fault anyway
+                l_valid_req := TRUE
             END; /* VALID SESSION REQ CHECK */
             IF l_resp_msg_allocated = FALSE THEN
                 /* Allocate error response message if not allocated (degraded case) */
@@ -816,7 +824,7 @@ OPERATIONS
             /* Encode the message (nominal and degraded cases) */
             IF l_valid_msg = TRUE &
                l_valid_resp_header = TRUE &
-               l_async_resp = FALSE
+               async_resp = FALSE
             THEN
                 IF l_ret /= e_sc_ok
                 THEN
@@ -826,20 +834,20 @@ OPERATIONS
                 server_write_msg_out_header_req_handle (l_resp_msg_header, l_request_handle);
                 write_msg_resp_header_service_status (l_resp_msg_header, l_ret);
                 /* Response message encoded */
-                l_buffer_out <-- encode_msg (l_resp_msg_typ, l_resp_msg_header, l_resp_msg);
+                sc, l_buffer_out <-- encode_msg (e_msg_response_type, l_resp_msg_typ, l_resp_msg_header, l_resp_msg);
                 /* response message structures not necessary anymore */
                 dealloc_msg_header_out (l_resp_msg_header);
                 dealloc_msg_out (l_resp_msg)
             ELSIF l_valid_msg = TRUE &
                     l_valid_resp_header = TRUE &
-                    l_async_resp = TRUE
+                    async_resp = TRUE
             THEN
                 /* response header is deallocated but
                    response message is not deallocated since it will be sent later */
                 forget_resp_msg_out(l_resp_msg_header, l_resp_msg)
             ELSE
-                /* ELSE: = nothing to do => alloc_resp_msg implies l_valid_msg = FALSE & l_valid_resp_header = FALSE */
-                skip
+                /* Failed to allocate the response */
+                sc := e_sc_bad_out_of_memory
             END
         END; /* DECODE REQ HEADER CHECK */
         IF l_valid_req_header = TRUE
@@ -848,7 +856,8 @@ OPERATIONS
         END;
         /* In any case buffer will not be used anymore after this operation */
         dealloc_msg_in_buffer (msg_buffer);
-        buffer_out := l_buffer_out
+        buffer_out := l_buffer_out;
+        valid_req := bool(l_valid_req_header = TRUE & l_valid_req = TRUE)
     END
     ;
 
@@ -903,7 +912,7 @@ OPERATIONS
     END
     ;
 
-    buffer_out <-- server_receive_discovery_service_req (channel, req_typ, msg_buffer) =
+    valid_req, sc, buffer_out <-- server_receive_discovery_service_req (channel, req_typ, msg_buffer) =
     VAR
         l_req_msg_header,
         l_valid_req_header,
@@ -919,6 +928,8 @@ OPERATIONS
         l_ret,
         l_buffer_out
     IN
+        sc := c_StatusCode_indet;
+        l_valid_req := FALSE;
         l_buffer_out := c_byte_buffer_indet;
         l_req_msg_header <-- decode_msg_header (TRUE, msg_buffer);
         l_valid_req_header <-- is_valid_msg_in_header (l_req_msg_header);
@@ -950,11 +961,14 @@ OPERATIONS
                     server_write_msg_out_header_req_handle (l_resp_msg_header, l_request_handle);
 
                     /* Response message encoded */
-                    l_buffer_out <-- encode_msg (l_resp_msg_typ, l_resp_msg_header, l_resp_msg);
+                    sc, l_buffer_out <-- encode_msg (e_msg_response_type, l_resp_msg_typ, l_resp_msg_header, l_resp_msg);
 
                     /* response message structures not necessary anymore */
                     dealloc_msg_header_out (l_resp_msg_header);
                     dealloc_msg_out (l_resp_msg)
+                ELSE
+                    /* In other cases than out of memory, request shall have been discarded previously */
+                    sc := e_sc_bad_out_of_memory
                 END;
                 /* request message not necessary anymore */
                 dealloc_msg_in (l_req_msg)
@@ -966,7 +980,8 @@ OPERATIONS
         END;
         /* In any case buffer will not be used anymore after this operation */
         dealloc_msg_in_buffer (msg_buffer);
-        buffer_out := l_buffer_out
+        buffer_out := l_buffer_out;
+        valid_req := bool(l_valid_req_header = TRUE & l_valid_req = TRUE)
     END
     ;
 
@@ -1075,6 +1090,7 @@ OPERATIONS
         l_valid_req_handle,
         l_valid_msg,
         l_buffer,
+        l_sc,
         l_valid_buffer,
         l_bret
     IN
@@ -1098,13 +1114,13 @@ OPERATIONS
                 IF l_bret = TRUE
                 THEN
                     client_write_msg_out_header_req_handle (l_msg_header, l_req_handle);
-                    l_buffer <-- encode_msg (e_msg_session_create_req, l_msg_header, l_req_msg);
+                    l_sc, l_buffer <-- encode_msg (e_msg_request_type, e_msg_session_create_req, l_msg_header, l_req_msg);
                     l_valid_buffer <-- is_valid_buffer_out (l_buffer);
                     IF l_valid_buffer = FALSE
                     THEN
                         /* Close session if impossible to create session */
                         client_remove_req_handle (l_req_handle);
-                        client_close_session (session, e_sc_bad_encoding_error)
+                        client_close_session (session, l_sc)
                     END
                 ELSE
                     client_remove_req_handle (l_req_handle);
@@ -1132,6 +1148,7 @@ OPERATIONS
         l_ret,
         l_session_token,
         l_buffer,
+        l_sc,
         l_valid_buffer
     IN
         l_buffer := c_byte_buffer_indet;
@@ -1155,13 +1172,13 @@ OPERATIONS
                 THEN
                     client_write_msg_out_header_req_handle(l_msg_header, l_req_handle);
                     write_msg_out_header_session_token(l_msg_header, l_session_token);
-                    l_buffer <-- encode_msg (e_msg_session_activate_req, l_msg_header, l_req_msg);
+                    l_sc, l_buffer <-- encode_msg (e_msg_request_type, e_msg_session_activate_req, l_msg_header, l_req_msg);
                     l_valid_buffer <-- is_valid_buffer_out (l_buffer);
                     IF l_valid_buffer = FALSE
                     THEN
                         /* If reactivation encoding failed, close the session */
                         client_remove_req_handle (l_req_handle);
-                        client_close_session (session, e_sc_bad_encoding_error)
+                        client_close_session (session, l_sc)
                     END
                 END
             END;
@@ -1211,14 +1228,13 @@ OPERATIONS
                     set_req_handle_channel (l_req_handle, l_channel);
                     client_write_msg_out_header_req_handle(l_msg_header, l_req_handle);
                     write_msg_out_header_session_token(l_msg_header, l_session_token);
-                    l_buffer <-- encode_msg (e_msg_session_activate_req, l_msg_header, l_req_msg);
+                    l_ret , l_buffer <-- encode_msg (e_msg_request_type, e_msg_session_activate_req, l_msg_header, l_req_msg);
                     l_valid_buffer <-- is_valid_buffer_out (l_buffer);
                     IF l_valid_buffer = FALSE
                     THEN
                         client_remove_req_handle (l_req_handle);
-                        l_ret := e_sc_bad_encoding_error;
                         l_channel := c_channel_indet;
-                        client_close_session (session, e_sc_bad_encoding_error)
+                        client_close_session (session, l_ret)
                     END
                 ELSE
                     client_close_session (session, e_sc_bad_internal_error)
@@ -1276,14 +1292,13 @@ OPERATIONS
                     set_req_handle_channel (l_req_handle, l_channel);
                     client_write_msg_out_header_req_handle(l_msg_header, l_req_handle);
                     write_msg_out_header_session_token(l_msg_header, l_session_token);
-                    l_buffer <-- encode_msg (e_msg_session_close_req, l_msg_header, l_req_msg);
+                    ret, l_buffer <-- encode_msg (e_msg_request_type, e_msg_session_close_req, l_msg_header, l_req_msg);
                     l_valid_buffer <-- is_valid_buffer_out (l_buffer);
                     IF l_valid_buffer = FALSE
                     THEN
                         l_channel := c_channel_indet;
-                        ret := e_sc_bad_encoding_error;
                         client_remove_req_handle (l_req_handle);
-                        client_close_session (session, e_sc_bad_encoding_error)
+                        client_close_session (session, ret)
                     END
                 END
             ELSE
@@ -1370,11 +1385,10 @@ OPERATIONS
                             set_req_handle_channel (l_req_handle, l_channel);
                             client_write_msg_out_header_req_handle (l_msg_header, l_req_handle);
                             write_msg_out_header_session_token (l_msg_header, l_session_token);
-                            l_buffer <-- encode_msg (e_msg_session_close_req, l_msg_header, req_msg);
+                            ret, l_buffer <-- encode_msg (e_msg_request_type, e_msg_session_close_req, l_msg_header, req_msg);
                             l_valid_buffer <-- is_valid_buffer_out (l_buffer);
                             IF l_valid_buffer = FALSE
                             THEN
-                                ret := e_sc_bad_encoding_error;
                                 l_channel := c_channel_indet
                             END
                         END
@@ -1398,10 +1412,8 @@ OPERATIONS
                     THEN
                         /* Use discovery operation since header shall not contain session information (see part 4) */
                         ret, l_buffer, l_req_handle <-- local_client_discovery_service_request (l_channel, req_msg, app_context);
-                        l_valid_buffer <-- is_valid_buffer_out (l_buffer);
-                        IF l_valid_buffer = FALSE
+                        IF ret /= e_sc_ok
                         THEN
-                            ret := e_sc_bad_encoding_error;
                             l_channel := c_channel_indet
                         END
                     ELSE
@@ -1485,22 +1497,22 @@ OPERATIONS
     END
     ;
 
-    bres, buffer_out, channel <-- server_send_publish_response (session, req_handle, statusCode, resp_typ, publish_resp_msg) =
+    bres, sc, buffer_out, channel <-- server_send_publish_response (session, req_handle, statusCode, resp_typ, publish_resp_msg) =
     VAR
         l_is_valid_resp,
         l_is_valid_header,
         l_ret,
-        l_channel,
         l_resp_msg_header,
         l_buffer_out,
         l_valid_buffer
     IN
+        sc := e_sc_bad_session_id_invalid;
         bres := FALSE;
         buffer_out := c_byte_buffer_indet;
         channel := c_channel_indet;
         /* Set provided message as output message to be encoded and deallocated*/
         bless_msg_out (publish_resp_msg);
-        l_is_valid_resp, l_ret, l_channel <-- server_validate_session_service_resp (session);
+        l_is_valid_resp, l_ret, channel <-- server_validate_session_service_resp (session);
         IF l_is_valid_resp = TRUE
         THEN
             l_resp_msg_header <-- alloc_msg_header (FALSE);
@@ -1510,15 +1522,16 @@ OPERATIONS
                 server_write_msg_out_header_req_handle (l_resp_msg_header, req_handle);
                 write_msg_resp_header_service_status (l_resp_msg_header, statusCode);
                 /* Response message encoded */
-                l_buffer_out <-- encode_msg (resp_typ, l_resp_msg_header, publish_resp_msg);
+                sc, l_buffer_out <-- encode_msg (e_msg_response_type, resp_typ, l_resp_msg_header, publish_resp_msg);
                 dealloc_msg_header_out (l_resp_msg_header);
                 l_valid_buffer <-- is_valid_buffer_out (l_buffer_out);
                 IF l_valid_buffer = TRUE
                 THEN
                     buffer_out := l_buffer_out;
-                    channel := l_channel;
                     bres := TRUE
                 END
+            ELSE
+                sc := e_sc_bad_out_of_memory
             END
         END;
         dealloc_msg_out (publish_resp_msg)

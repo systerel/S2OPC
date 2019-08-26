@@ -77,7 +77,7 @@ OPERATIONS
     END
     ;
 
-    buffer_out <-- server_receive_session_treatment_req (channel, req_typ, msg_buffer) =
+    valid_req, sc, buffer_out <-- server_receive_session_treatment_req (channel, req_typ, msg_buffer) =
     PRE
         channel : t_channel_i &
         channel : s_channel_connected &
@@ -99,10 +99,14 @@ OPERATIONS
         a_buffer_in_state :: {c_buffer_in_state_indet, e_buffer_in_msg_read} ||
         CHOICE
             a_buffer_out_state := c_buffer_out_state_indet ||
-            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet)
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet) ||
+            sc, valid_req :(sc : t_StatusCode_i & valid_req : BOOL &
+                            (valid_req = TRUE => sc :{e_sc_bad_request_too_large, e_sc_bad_response_too_large, e_sc_bad_out_of_memory}))
         OR
             a_buffer_out_state := e_buffer_out_msg_written ||
-            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer)
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer) ||
+            sc := e_sc_ok ||
+            valid_req := TRUE
         END
     END
     ;
@@ -129,7 +133,7 @@ OPERATIONS
     END
     ;
 
-    buffer_out <-- server_receive_session_service_req (channel, req_typ, req_context, msg_buffer) =
+    valid_req, async_resp, sc, buffer_out <-- server_receive_session_service_req (channel, req_typ, req_context, msg_buffer) =
     PRE
         channel : t_channel_i &
         channel : s_channel_connected &
@@ -153,10 +157,15 @@ OPERATIONS
         c_msg_in_header   :: t_msg_header_i ||
         CHOICE
             a_buffer_out_state := c_buffer_out_state_indet ||
-            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet)
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet) ||
+            sc, valid_req, async_resp :(sc : t_StatusCode_i & valid_req : BOOL & async_resp : BOOL &
+                            (valid_req = TRUE & async_resp = FALSE => sc :{e_sc_bad_request_too_large, e_sc_bad_response_too_large, e_sc_bad_out_of_memory}))
         OR
             a_buffer_out_state := e_buffer_out_msg_written ||
-            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer)
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer) ||
+            sc := e_sc_ok ||
+            valid_req := TRUE ||
+            async_resp := FALSE
         END
     END
     ;
@@ -183,7 +192,7 @@ OPERATIONS
     END
     ;
 
-    buffer_out <-- server_receive_discovery_service_req (channel, req_typ, msg_buffer) =
+    valid_req, sc, buffer_out <-- server_receive_discovery_service_req (channel, req_typ, msg_buffer) =
     PRE
         channel : t_channel_i &
         channel : s_channel_connected &
@@ -205,10 +214,14 @@ OPERATIONS
         a_buffer_in_state :: {c_buffer_in_state_indet, e_buffer_in_msg_read} ||
         CHOICE
             a_buffer_out_state := c_buffer_out_state_indet ||
-            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet)
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet) ||
+            sc, valid_req :(sc : t_StatusCode_i & valid_req : BOOL &
+                            (valid_req = TRUE => sc :{e_sc_bad_request_too_large, e_sc_bad_response_too_large, e_sc_bad_out_of_memory}))
         OR
             a_buffer_out_state := e_buffer_out_msg_written ||
-            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer)
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer) ||
+            sc := e_sc_ok ||
+            valid_req := TRUE
         END
     END
     ;
@@ -453,7 +466,7 @@ OPERATIONS
     END
     ;
 
-    bres, buffer_out, channel <-- server_send_publish_response (session, req_handle, statusCode, resp_typ, publish_resp_msg) =
+    bres, sc, buffer_out, channel <-- server_send_publish_response (session, req_handle, statusCode, resp_typ, publish_resp_msg) =
     PRE
         session : t_session_i &
         session : t_session &
@@ -472,11 +485,14 @@ OPERATIONS
         CHOICE
             bres := TRUE ||
             buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer) ||
-            channel :(channel : t_channel_i & channel : t_channel)
+            a_buffer_out_state := e_buffer_out_msg_written ||
+            channel :(channel : t_channel_i & channel : t_channel) ||
+            sc := e_sc_ok
         OR
             bres := FALSE ||
             buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet) ||
-            channel :(channel : t_channel_i & channel = c_channel_indet)
+            channel :(channel : t_channel_i) ||
+            sc :(sc : t_StatusCode_i & sc :{e_sc_bad_session_id_invalid, e_sc_bad_request_too_large, e_sc_bad_response_too_large, e_sc_bad_out_of_memory})
         END
     END
     ;

@@ -675,6 +675,12 @@ void util_status_code__B_to_C(constants_statuscodes_bs__t_StatusCode_i bstatus, 
     case constants_statuscodes_bs__e_sc_bad_decoding_error:
         *status = OpcUa_BadDecodingError;
         break;
+    case constants_statuscodes_bs__e_sc_bad_request_too_large:
+        *status = OpcUa_BadRequestTooLarge;
+        break;
+    case constants_statuscodes_bs__e_sc_bad_response_too_large:
+        *status = OpcUa_BadResponseTooLarge;
+        break;
     case constants_statuscodes_bs__e_sc_bad_invalid_argument:
         *status = OpcUa_BadInvalidArgument;
         break;
@@ -853,6 +859,12 @@ SOPC_ReturnStatus util_status_code__B_to_return_status_C(constants_statuscodes_b
     case constants_statuscodes_bs__e_sc_bad_decoding_error:
         result = SOPC_STATUS_ENCODING_ERROR;
         break;
+    case constants_statuscodes_bs__e_sc_bad_request_too_large:
+        result = SOPC_STATUS_ENCODING_ERROR;
+        break;
+    case constants_statuscodes_bs__e_sc_bad_response_too_large:
+        result = SOPC_STATUS_ENCODING_ERROR;
+        break;
     case constants_statuscodes_bs__e_sc_bad_invalid_argument:
         result = SOPC_STATUS_INVALID_PARAMETERS;
         break;
@@ -929,6 +941,12 @@ void util_status_code__C_to_B(SOPC_StatusCode status, constants_statuscodes_bs__
         break;
     case OpcUa_BadDecodingError:
         *bstatus = constants_statuscodes_bs__e_sc_bad_decoding_error;
+        break;
+    case OpcUa_BadRequestTooLarge:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_request_too_large;
+        break;
+    case OpcUa_BadResponseTooLarge:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_response_too_large;
         break;
     case OpcUa_BadInvalidArgument:
         *bstatus = constants_statuscodes_bs__e_sc_bad_invalid_argument;

@@ -41,6 +41,8 @@ SETS
                       e_sc_bad_application_signature_invalid,
                       e_sc_bad_encoding_error,
                       e_sc_bad_decoding_error,
+                      e_sc_bad_request_too_large,
+                      e_sc_bad_response_too_large,
                       e_sc_bad_invalid_argument,
                       e_sc_bad_unexpected_error,
                       e_sc_bad_out_of_memory,

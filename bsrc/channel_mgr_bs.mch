@@ -21,6 +21,7 @@ MACHINE
     channel_mgr_bs
 SEES
     constants,
+    constants_statuscodes_bs,
     channel_mgr_1
 
 ABSTRACT_VARIABLES
@@ -61,6 +62,19 @@ OPERATIONS
         /* ISSUE: not possible to see message_out_bs with AtelierB => TC failure / m -tc OK */
         request_context : t_request_context_i
     THEN
+        skip
+    END
+    ;
+    
+    send_channel_abort_chunk (channel, status_code, request_context) =
+    PRE
+        channel         : t_channel_i &
+        channel         : s_channel_connected &
+        status_code     : t_StatusCode_i &
+        status_code     : t_StatusCode &
+        request_context : t_request_context_i
+    THEN
+        /* No return status code, it is an asynchronous action */
         skip
     END
     ;
