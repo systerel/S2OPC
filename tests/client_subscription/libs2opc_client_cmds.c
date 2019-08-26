@@ -199,6 +199,16 @@ static SOPC_ReturnStatus WriteHelper_InitialiazeValues(size_t nbElements,
                                                        SOPC_ReturnStatus status,
                                                        OpcUa_WriteValue *nodesToWrite,
                                                        SOPC_ClientHelper_WriteValue *writeValues);
+static SOPC_ReturnStatus BrowseHelper_InitializeContinuationPoints(size_t nbElements,
+                                                                   SOPC_ReturnStatus status,
+                                                                   SOPC_ByteString **continuationPointsArray);
+static SOPC_ReturnStatus BrowseHelper_InitializeNodesToBrowse(size_t nbElements,
+                                                              SOPC_ReturnStatus status,
+                                                              OpcUa_BrowseDescription *nodesToBrowse,
+                                                              SOPC_ClientHelper_BrowseRequest *browseRequests);
+static SOPC_ReturnStatus BrowseHelper_InitializeBrowseResults(size_t nbElements,
+                                                              SOPC_ReturnStatus status,
+                                                              SOPC_Array **browseResultsListArray);
 static void GenericCallbackHelper_Read(SOPC_StatusCode status,
                                        const void* response,
                                        uintptr_t responseContext);
@@ -1136,6 +1146,94 @@ int32_t SOPC_ClientHelper_Write(int32_t connectionId,
         return -100;
     }
 }
+
+static SOPC_ReturnStatus BrowseHelper_InitializeContinuationPoints(size_t nbElements,
+        SOPC_ReturnStatus status, SOPC_ByteString **continuationPointsArray)
+{
+    size_t i = 0;
+    for (; i < nbElements && SOPC_STATUS_OK == status; i++)
+    {
+        continuationPointsArray[i] = SOPC_ByteString_Create();
+        if (NULL == continuationPointsArray)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+    if (SOPC_STATUS_OK != status)
+    {
+        for (size_t j = 0; j < i; j++)
+        {
+            SOPC_ByteString_Delete(continuationPointsArray[j]);
+            continuationPointsArray[j] = NULL;
+        }
+    }
+    return status;
+}
+
+static SOPC_ReturnStatus BrowseHelper_InitializeNodesToBrowse(size_t nbElements, SOPC_ReturnStatus status,
+        OpcUa_BrowseDescription *nodesToBrowse, SOPC_ClientHelper_BrowseRequest *browseRequests)
+{
+    for (size_t i = 0; i < nbElements && SOPC_STATUS_OK == status; i++)
+    {
+        OpcUa_BrowseDescription_Initialize(&nodesToBrowse[i]);
+        // create an instance of NodeId
+        SOPC_NodeId *nodeId = SOPC_NodeId_FromCString(browseRequests[i].nodeId,
+                (int) strlen(browseRequests[i].nodeId));
+        if (NULL == nodeId)
+        {
+            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "nodeId NULL");
+        }
+        status = SOPC_NodeId_Copy(&nodesToBrowse[i].NodeId, nodeId);
+        SOPC_NodeId_Clear(nodeId);
+        SOPC_Free(nodeId);
+        if (SOPC_STATUS_OK == status)
+        {
+            // create an instance of NodeId
+            SOPC_NodeId *refNodeId = SOPC_NodeId_FromCString(browseRequests[i].referenceTypeId,
+                    (int) strlen(browseRequests[i].referenceTypeId));
+            if (NULL == refNodeId)
+            {
+                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "refNodeId NULL");
+            }
+            status = SOPC_NodeId_Copy(&nodesToBrowse[i].ReferenceTypeId, refNodeId);
+            SOPC_NodeId_Clear(refNodeId);
+            SOPC_Free(refNodeId);
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            nodesToBrowse[i].BrowseDirection = browseRequests[i].direction;
+            nodesToBrowse[i].IncludeSubtypes = browseRequests[i].includeSubtypes;
+            nodesToBrowse[i].NodeClassMask = 0; //all //TODO correct ?
+            nodesToBrowse[i].ResultMask = 0x3f; //all //TODO correct ?
+        }
+    }
+    return status;
+}
+
+static SOPC_ReturnStatus BrowseHelper_InitializeBrowseResults(size_t nbElements, SOPC_ReturnStatus status,
+        SOPC_Array **browseResultsListArray)
+{
+    size_t i = 0;
+    for (; i < nbElements && SOPC_STATUS_OK == status; i++)
+    {
+        browseResultsListArray[i] = SOPC_Array_Create(
+                sizeof(SOPC_ClientHelper_BrowseResultReference), 10, SOPC_Free);
+        if (NULL == browseResultsListArray)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+    if (SOPC_STATUS_OK != status)
+    {
+        for (size_t j = 0; j < i; j++)
+        {
+            SOPC_Array_Delete(browseResultsListArray[j]);
+            browseResultsListArray[j] = NULL;
+        }
+    }
+    return status;
+}
+
 int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
                                  SOPC_ClientHelper_BrowseRequest* browseRequests,
                                  size_t nbElements,
@@ -1191,23 +1289,7 @@ int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
 
     if (SOPC_STATUS_OK == status)
     {
-        size_t i = 0;
-        for (; i < nbElements && SOPC_STATUS_OK == status; i++)
-        {
-            browseResultsListArray[i] = SOPC_Array_Create(sizeof(SOPC_ClientHelper_BrowseResultReference), 10, SOPC_Free);
-            if (NULL == browseResultsListArray)
-            {
-                status = SOPC_STATUS_OUT_OF_MEMORY;
-            }
-        }
-        if (SOPC_STATUS_OK != status)
-        {
-            for (size_t j = 0; j < i; j++)
-            {
-                SOPC_Array_Delete(browseResultsListArray[j]);
-                browseResultsListArray[j] = NULL;
-            }
-        }
+        status = BrowseHelper_InitializeBrowseResults(nbElements, status, browseResultsListArray);
     }
 
     /* create array of continuationPoints */
@@ -1220,62 +1302,14 @@ int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
 
     if (SOPC_STATUS_OK == status)
     {
-        size_t i = 0;
-        for (; i < nbElements && SOPC_STATUS_OK == status; i++)
-        {
-            continuationPointsArray[i] = SOPC_ByteString_Create();
-            if (NULL == continuationPointsArray)
-            {
-                status = SOPC_STATUS_OUT_OF_MEMORY;
-            }
-        }
-        if (SOPC_STATUS_OK != status)
-        {
-            for (size_t j = 0; j < i; j++)
-            {
-                SOPC_ByteString_Delete(continuationPointsArray[j]);
-                continuationPointsArray[j] = NULL;
-            }
-        }
+        status = BrowseHelper_InitializeContinuationPoints(nbElements, status,
+                continuationPointsArray);
     }
 
     if (SOPC_STATUS_OK == status)
     {
-        for (size_t i = 0; i < nbElements && SOPC_STATUS_OK == status; i++)
-        {
-            OpcUa_BrowseDescription_Initialize(&nodesToBrowse[i]);
-            // create an instance of NodeId
-            SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(browseRequests[i].nodeId, (int) strlen(browseRequests[i].nodeId));
-            if (NULL == nodeId)
-            {
-                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "nodeId NULL");
-            }
-            status = SOPC_NodeId_Copy(&nodesToBrowse[i].NodeId, nodeId);
-            SOPC_NodeId_Clear(nodeId);
-            SOPC_Free(nodeId);
-
-            if (SOPC_STATUS_OK == status)
-            {
-                // create an instance of NodeId
-                SOPC_NodeId* refNodeId = SOPC_NodeId_FromCString(browseRequests[i].referenceTypeId,
-                                                              (int) strlen(browseRequests[i].referenceTypeId));
-                if (NULL == refNodeId)
-                {
-                    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "refNodeId NULL");
-                }
-                status = SOPC_NodeId_Copy(&nodesToBrowse[i].ReferenceTypeId, refNodeId);
-                SOPC_NodeId_Clear(refNodeId);
-                SOPC_Free(refNodeId);
-            }
-
-            if (SOPC_STATUS_OK == status)
-            {
-                nodesToBrowse[i].BrowseDirection = browseRequests[i].direction;
-                nodesToBrowse[i].IncludeSubtypes = browseRequests[i].includeSubtypes;
-                nodesToBrowse[i].NodeClassMask = 0; //all //TODO correct ?
-                nodesToBrowse[i].ResultMask = 0x3f; //all //TODO correct ?
-            }
-        }
+        status = BrowseHelper_InitializeNodesToBrowse(nbElements, status, nodesToBrowse,
+                browseRequests);
     }
 
     if (SOPC_STATUS_OK == status)
@@ -1305,8 +1339,7 @@ int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
         statusMutex = Mutex_Lock(&ctx->mutex);
         assert(SOPC_STATUS_OK == statusMutex);
 
-        status =
-            SOPC_ClientCommon_AsyncSendRequestOnSession((SOPC_LibSub_ConnectionId) connectionId, request, (uintptr_t) ctx);
+        status = SOPC_ClientCommon_AsyncSendRequestOnSession((SOPC_LibSub_ConnectionId) connectionId, request, (uintptr_t) ctx);
 
         /* Wait for the response */
         while (SOPC_STATUS_OK == status && !ctx->finish)
@@ -1330,16 +1363,9 @@ int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
     bool containsContinuationPoint = ContainsContinuationPoints(continuationPointsArray, nbElements);
     if (SOPC_STATUS_OK == status && containsContinuationPoint)
     {
-
-        for (int i = 0; i < MAX_BROWSENEXT_REQUESTS
-                        && containsContinuationPoint
-                        && SOPC_STATUS_OK == status; i++)
+        for (int i = 0; i < MAX_BROWSENEXT_REQUESTS && containsContinuationPoint && SOPC_STATUS_OK == status; i++)
         {
-            status = BrowseNext(connectionId,
-                                statusCodes,
-                                browseResultsListArray,
-                                nbElements,
-                                continuationPointsArray);
+            status = BrowseNext(connectionId, statusCodes, browseResultsListArray, nbElements, continuationPointsArray);
             containsContinuationPoint = ContainsContinuationPoints(continuationPointsArray, nbElements);
         }
     }
