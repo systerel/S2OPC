@@ -187,6 +187,9 @@ static void disconnect_callback(const SOPC_LibSub_ConnectionId c_id);
 
 /* static functions */
 
+static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_con,
+                                                 const char* endpointUrl,
+                                                 SOPC_ClientHelper_Security security);
 static void GenericCallbackHelper_Read(SOPC_StatusCode status,
                                        const void* response,
                                        uintptr_t responseContext);
@@ -273,63 +276,44 @@ void SOPC_ClientHelper_Finalize(void)
     Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Toolkit closed.");
 }
 
-
-
-// Return connection Id > 0 if succeeded, -<n> with <n> argument number (starting from 1) if invalid arguement detected
-// or '-100' if connection failed
-int32_t SOPC_ClientHelper_Connect(const char* endpointUrl,
-                                  SOPC_ClientHelper_Security security)
+static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_con,
+                                                 const char* endpointUrl,
+                                                 SOPC_ClientHelper_Security security)
 {
-    /* TODO use structure instead of redefining */
-    const char* security_policy = security.security_policy;
-    int32_t security_mode = security.security_mode;
-    const char* path_cert_auth = security.path_cert_auth;
-    const char* path_cert_srv = security.path_cert_srv;
-    const char* path_cert_cli = security.path_cert_cli;
-    const char* path_key_cli = security.path_key_cli;
-    const char* policyId = security.policyId;
-    const char* username = security.username;
-    const char* password = security.password;
-
     OpcUa_MessageSecurityMode secuMode = OpcUa_MessageSecurityMode_Invalid;
     bool disable_verification = false;
-    const char* cert_auth = path_cert_auth;
-    const char* cert_srv = path_cert_srv;
-    const char* cert_cli = path_cert_cli;
-    const char* key_cli = path_key_cli;
+    const char* cert_auth = security.path_cert_auth;
+    const char* cert_srv = security.path_cert_srv;
+    const char* cert_cli = security.path_cert_cli;
+    const char* key_cli = security.path_key_cli;
 
-    if (NULL == endpointUrl)
+    if (NULL == cfg_con)
     {
         return -1;
     }
 
-    if (NULL == security_policy)
+    switch (security.security_mode)
     {
-        return -2;
-    }
-
-    switch (security_mode)
-    {
-    case OpcUa_MessageSecurityMode_None:
-        if (strncmp(security_policy, SOPC_SecurityPolicy_None_URI, strlen(SOPC_SecurityPolicy_None_URI) + 1) != 0)
-        {
-            return -2;
-        }
-        disable_verification = true;
-        secuMode = OpcUa_MessageSecurityMode_None;
-        cert_auth = NULL;
-        cert_srv = NULL;
-        cert_cli = NULL;
-        key_cli = NULL;
-        break;
-    case OpcUa_MessageSecurityMode_Sign:
-        secuMode = OpcUa_MessageSecurityMode_Sign;
-        break;
-    case OpcUa_MessageSecurityMode_SignAndEncrypt:
-        secuMode = OpcUa_MessageSecurityMode_SignAndEncrypt;
-        break;
-    default:
-        return -3;
+        case OpcUa_MessageSecurityMode_None:
+            if (strncmp(security.security_policy, SOPC_SecurityPolicy_None_URI, strlen(SOPC_SecurityPolicy_None_URI) + 1) != 0)
+            {
+                return -2;
+            }
+            disable_verification = true;
+            secuMode = OpcUa_MessageSecurityMode_None;
+            cert_auth = NULL;
+            cert_srv = NULL;
+            cert_cli = NULL;
+            key_cli = NULL;
+            break;
+        case OpcUa_MessageSecurityMode_Sign:
+            secuMode = OpcUa_MessageSecurityMode_Sign;
+            break;
+        case OpcUa_MessageSecurityMode_SignAndEncrypt:
+            secuMode = OpcUa_MessageSecurityMode_SignAndEncrypt;
+            break;
+        default:
+            return -3;
     }
 
     if (!disable_verification && NULL == cert_auth)
@@ -349,41 +333,67 @@ int32_t SOPC_ClientHelper_Connect(const char* endpointUrl,
         return -7;
     }
 
-    SOPC_LibSub_ConnectionCfg cfg_con = {.server_url = endpointUrl,
-                                         .security_policy = security_policy,
-                                         .security_mode = secuMode,
-                                         .disable_certificate_verification = disable_verification,
-                                         .path_cert_auth = cert_auth,
-                                         .path_cert_srv = cert_srv,
-                                         .path_cert_cli = cert_cli,
-                                         .path_key_cli = key_cli,
-                                         .path_crl = NULL,
-                                         .policyId = policyId,
-                                         .username = username,
-                                         .password = password,
-                                         .publish_period_ms = PUBLISH_PERIOD_MS,
-                                         .n_max_keepalive = MAX_KEEP_ALIVE_COUNT,
-                                         .n_max_lifetime = MAX_LIFETIME_COUNT,
-                                         .data_change_callback = NULL,
-                                         .timeout_ms = TIMEOUT_MS,
-                                         .sc_lifetime = SC_LIFETIME_MS,
-                                         .token_target = PUBLISH_N_TOKEN,
-                                         .generic_response_callback = SOPC_ClientHelper_GenericCallback};
+    cfg_con->server_url = endpointUrl;
+    cfg_con->security_policy = security.security_policy;
+    cfg_con->security_mode = secuMode;
+    cfg_con->disable_certificate_verification = disable_verification;
+    cfg_con->path_cert_auth = cert_auth;
+    cfg_con->path_cert_srv = cert_srv;
+    cfg_con->path_cert_cli = cert_cli;
+    cfg_con->path_key_cli = key_cli;
+    cfg_con->path_crl = NULL;
+    cfg_con->policyId = security.policyId;
+    cfg_con->username = security.username;
+    cfg_con->password = security.password;
+    cfg_con->publish_period_ms = PUBLISH_PERIOD_MS;
+    cfg_con->n_max_keepalive = MAX_KEEP_ALIVE_COUNT;
+    cfg_con->n_max_lifetime = MAX_LIFETIME_COUNT;
+    cfg_con->data_change_callback = NULL;
+    cfg_con->timeout_ms = TIMEOUT_MS;
+    cfg_con->sc_lifetime = SC_LIFETIME_MS;
+    cfg_con->token_target = PUBLISH_N_TOKEN;
+    cfg_con->generic_response_callback = SOPC_ClientHelper_GenericCallback;
+
+    if (cfg_con->security_mode != OpcUa_MessageSecurityMode_None)
+    {
+        cfg_con->path_cert_srv = PATH_SERVER_PUBL;
+        cfg_con->path_cert_cli = PATH_CLIENT_PUBL;
+        cfg_con->path_key_cli = PATH_CLIENT_PRIV;
+    }
+    if (!cfg_con->disable_certificate_verification)
+    {
+        cfg_con->path_cert_auth = PATH_CACERT_PUBL;
+    }
+
+    return 0;
+}
+
+// Return connection Id > 0 if succeeded, -<n> with <n> argument number (starting from 1) if invalid argument detected
+// or '-100' if connection failed
+int32_t SOPC_ClientHelper_Connect(const char* endpointUrl,
+                                  SOPC_ClientHelper_Security security)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    if (NULL == endpointUrl)
+    {
+        return -1;
+    }
+
+    if (NULL == security.security_policy)
+    {
+        return -2;
+    }
+
+    SOPC_LibSub_ConnectionCfg cfg_con;
+    int32_t res = ConnectHelper_CreateConfiguration(&cfg_con, endpointUrl, security);
+
+    if (0 != res)
+    {
+        return res;
+    }
+
     SOPC_LibSub_ConfigurationId cfg_id = 0;
     SOPC_LibSub_ConnectionId con_id = 0;
-
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-
-    if (cfg_con.security_mode != OpcUa_MessageSecurityMode_None)
-    {
-        cfg_con.path_cert_srv = PATH_SERVER_PUBL;
-        cfg_con.path_cert_cli = PATH_CLIENT_PUBL;
-        cfg_con.path_key_cli = PATH_CLIENT_PRIV;
-    }
-    if (!cfg_con.disable_certificate_verification)
-    {
-        cfg_con.path_cert_auth = PATH_CACERT_PUBL;
-    }
 
     Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Connecting to \"%s\"", cfg_con.server_url);
 
