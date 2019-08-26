@@ -520,7 +520,6 @@ void SOPC_ClientHelper_GenericCallback(SOPC_LibSub_ConnectionId c_id,
             for (int32_t i = 0; i < browseResp->NoOfResults; i++)
             {
                 ctx->statusCodes[i] = browseResp->Results[i].StatusCode;
-                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "NoOfReferences: %d", browseResp->Results[i].NoOfReferences);
                 SOPC_ByteString_Copy(ctx->continuationPoints[i],
                                      &browseResp->Results[i].ContinuationPoint);
                 for (int32_t j = 0; j < browseResp->Results[i].NoOfReferences; j++)
@@ -578,7 +577,6 @@ void SOPC_ClientHelper_GenericCallback(SOPC_LibSub_ConnectionId c_id,
                         index++;
                     }
                 }
-                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "BrowseNextResponse - index: %d", index);
 
                 ctx->statusCodes[index] = browseNextResp->Results[i].StatusCode;
 
@@ -704,7 +702,6 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
         request->NodesToRead = nodesToRead;
 
         /* Prepare the synchronous context */
-        /* TODO: assert that the SOPC_STATUS_OK != statusMutex always avoid deadlocks in production code */
         statusMutex = SOPC_ReadContext_Initialization(ctx);
         assert(SOPC_STATUS_OK == statusMutex);
         Condition_Init(&ctx->condition);
@@ -712,6 +709,7 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
         statusMutex = Mutex_Lock(&ctx->mutex);
         assert(SOPC_STATUS_OK == statusMutex);
 
+        // TODO move alloc elsewhere
         /* alloc values */
         int i = 0;
         for (i = 0; i < (int) nbElements && SOPC_STATUS_OK == status; i++)
@@ -745,8 +743,6 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
         /* Wait for the response */
         while (SOPC_STATUS_OK == status && !ctx->finish)
         {
-            //TODO see if status condition is relevant in while condition
-            // since it is not modification during the loop
             statusMutex = Mutex_UnlockAndTimedWaitCond(&ctx->condition, &ctx->mutex, SYNCHRONOUS_READ_TIMEOUT);
             assert(SOPC_STATUS_TIMEOUT != statusMutex); /* TODO return error */
             assert(SOPC_STATUS_OK == statusMutex);
@@ -1017,7 +1013,6 @@ int32_t SOPC_ClientHelper_Write(int32_t connectionId,
     {
         request->NodesToWrite = nodesToWrite;
         /* Prepare the synchronous context */
-        /* TODO: assert that the SOPC_STATUS_OK != statusMutex always avoid deadlocks in production code */
         SOPC_ReturnStatus statusMutex = Condition_Init(&ctx->condition);
         assert(SOPC_STATUS_OK == statusMutex);
         statusMutex = Mutex_Lock(&ctx->mutex);
@@ -1030,7 +1025,7 @@ int32_t SOPC_ClientHelper_Write(int32_t connectionId,
         while (SOPC_STATUS_OK == status && !ctx->finish)
         {
             statusMutex = Mutex_UnlockAndTimedWaitCond(&ctx->condition, &ctx->mutex, SYNCHRONOUS_READ_TIMEOUT);
-            assert(SOPC_STATUS_TIMEOUT != statusMutex); /* TODO return error */
+            assert(SOPC_STATUS_TIMEOUT != statusMutex);
             assert(SOPC_STATUS_OK == statusMutex);
         }
         status = ctx->status;
@@ -1072,8 +1067,6 @@ int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
                                  size_t nbElements,
                                  SOPC_ClientHelper_BrowseResult* browseResults)
 {
-    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "SOPC_ClientHelper_Browse");
-
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (connectionId <= 0)
     {
@@ -1127,7 +1120,6 @@ int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
         size_t i = 0;
         for (; i < nbElements && SOPC_STATUS_OK == status; i++)
         {
-            //TODO give a better free function
             browseResultsListArray[i] = SOPC_Array_Create(sizeof(SOPC_ClientHelper_BrowseResultReference), 10, SOPC_Free);
             if (NULL == browseResultsListArray)
             {
@@ -1218,9 +1210,9 @@ int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
         OpcUa_ViewDescription_Initialize(&request->View);
         request->NodesToBrowse = nodesToBrowse;
         request->NoOfNodesToBrowse = (int32_t) nbElements;
-        //request->RequestedMaxReferencesPerNode = 0; //unlimited
-        request->RequestedMaxReferencesPerNode = 1; // TODO used to have continutation point for testing
+        request->RequestedMaxReferencesPerNode = 0; //unlimited
     }
+
     /* Create context */
     if (SOPC_STATUS_OK == status)
     {
@@ -1234,7 +1226,6 @@ int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
     if (SOPC_STATUS_OK == status)
     {
         /* Prepare the synchronous context */
-        /* TODO: assert that the SOPC_STATUS_OK != statusMutex always avoid deadlocks in production code */
         SOPC_ReturnStatus statusMutex = Condition_Init(&ctx->condition);
         assert(SOPC_STATUS_OK == statusMutex);
         statusMutex = Mutex_Lock(&ctx->mutex);
@@ -1247,13 +1238,10 @@ int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
         while (SOPC_STATUS_OK == status && !ctx->finish)
         {
             statusMutex = Mutex_UnlockAndTimedWaitCond(&ctx->condition, &ctx->mutex, SYNCHRONOUS_READ_TIMEOUT);
-            assert(SOPC_STATUS_TIMEOUT != statusMutex); /* TODO return error */
+            assert(SOPC_STATUS_TIMEOUT != statusMutex);
             assert(SOPC_STATUS_OK == statusMutex);
         }
         status = ctx->status;
-
-        /* fill browse results */
-        //TODO
 
         /* Free the context */
         statusMutex = Mutex_Unlock(&ctx->mutex);
@@ -1298,7 +1286,13 @@ int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
     }
     SOPC_Free(statusCodes);
     SOPC_Free(browseResultsListArray);
+
+    for (size_t i = 0; i < nbElements; i++)
+    {
+        SOPC_ByteString_Delete(continuationPointsArray[i]);
+    }
     SOPC_Free(continuationPointsArray);
+
     SOPC_Free(ctx);
 
     if (SOPC_STATUS_OK == status)
@@ -1317,10 +1311,6 @@ static SOPC_ReturnStatus BrowseNext(int32_t connectionId,
                                     size_t nbElements,
                                     SOPC_ByteString** continuationPoints)
 {
-    //TODO see if a parameter to release continuation points is needed
-    //if we follow continuation points until the end, do we need to releaseContinuationPoints ?
-    //or create another function ?
-    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "BrowseNext");
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     if (0 > connectionId || NULL == statusCodes
@@ -1345,24 +1335,28 @@ static SOPC_ReturnStatus BrowseNext(int32_t connectionId,
 
     // TODO alloc correct size
     SOPC_ByteString* nextContinuationPoints = SOPC_Calloc(nbElements, sizeof(SOPC_ByteString));
-    //TODO check alloc
-    int32_t count = 0;
-    for (int32_t i = 0; i < (int32_t) nbElements; i++)
+
+    if (NULL == nextContinuationPoints)
     {
-        if (NULL != continuationPoints[i] && 0 < continuationPoints[i]->Length)
-        {
-            SOPC_ByteString_Copy(&nextContinuationPoints[count], continuationPoints[i]);
-            count++;
-        }
+        status = SOPC_STATUS_OUT_OF_MEMORY;
     }
 
-    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "BrowseNext - count: %d", count);
-
+    int32_t count = 0;
+    if (SOPC_STATUS_OK == status)
+    {
+        for (int32_t i = 0; i < (int32_t) nbElements; i++)
+        {
+            if (NULL != continuationPoints[i] && 0 < continuationPoints[i]->Length)
+            {
+                SOPC_ByteString_Copy(&nextContinuationPoints[count], continuationPoints[i]);
+                count++;
+            }
+        }
+    }
 
     /* craft request */
     if (SOPC_STATUS_OK == status)
     {
-        //TODO setup request parameters
         OpcUa_BrowseNextRequest_Initialize(request);
         request->ReleaseContinuationPoints = false;
         request->NoOfContinuationPoints = count;
@@ -1381,7 +1375,6 @@ static SOPC_ReturnStatus BrowseNext(int32_t connectionId,
     if (SOPC_STATUS_OK == status)
     {
         /* Prepare the synchronous context */
-        /* TODO: assert that the SOPC_STATUS_OK != statusMutex always avoid deadlocks in production code */
         SOPC_ReturnStatus statusMutex = Condition_Init(&ctx->condition);
         assert(SOPC_STATUS_OK == statusMutex);
         statusMutex = Mutex_Lock(&ctx->mutex);
@@ -1394,7 +1387,7 @@ static SOPC_ReturnStatus BrowseNext(int32_t connectionId,
         while (SOPC_STATUS_OK == status && !ctx->finish)
         {
             statusMutex = Mutex_UnlockAndTimedWaitCond(&ctx->condition, &ctx->mutex, SYNCHRONOUS_READ_TIMEOUT);
-            assert(SOPC_STATUS_TIMEOUT != statusMutex); /* TODO return error */
+            assert(SOPC_STATUS_TIMEOUT != statusMutex);
             assert(SOPC_STATUS_OK == statusMutex);
         }
         status = ctx->status;
@@ -1407,8 +1400,9 @@ static SOPC_ReturnStatus BrowseNext(int32_t connectionId,
         statusMutex = Mutex_Clear(&ctx->mutex);
         assert(SOPC_STATUS_OK == statusMutex);
     }
-    /* process request result */
+
     /* free memory */
+    SOPC_Free(ctx);
 
     return status;
 }
