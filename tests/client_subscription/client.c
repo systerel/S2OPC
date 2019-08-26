@@ -231,8 +231,14 @@ int main(int argc, char* const argv[])
             {
                 Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "nodeId: %s", browseResults[j].references[i].nodeId);
                 Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "displayName: %s", browseResults[j].references[i].displayName);
+
+                free(browseResults[j].references[i].nodeId);
+                free(browseResults[j].references[i].displayName);
+                free(browseResults[j].references[i].browseName);
+                free(browseResults[j].references[i].referenceTypeId);
             }
             Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "==========================================================", j);
+            free(browseResults[j].references);
         }
 
         free(browseRequests);
@@ -305,7 +311,7 @@ int main(int argc, char* const argv[])
             writeValues[i].indexRange = NULL;
             writeValues[i].value = malloc(sizeof(SOPC_DataValue));
             assert(writeValues[i].value != NULL);
-            SOPC_DataValue_Initialize(writeValues[i].value); // TODO determine value according to type ?
+            SOPC_DataValue_Initialize(writeValues[i].value);
             writeValues[i].value->Value.DoNotClear = false;
             writeValues[i].value->Value.BuiltInTypeId = SOPC_UInt64_Id;
             writeValues[i].value->Value.ArrayType = SOPC_VariantArrayType_SingleValue;
