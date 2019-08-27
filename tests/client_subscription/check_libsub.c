@@ -129,7 +129,10 @@ static void generic_event_callback(SOPC_LibSub_ConnectionId c_id,
 START_TEST(test_subscription)
 {
     SOPC_LibSub_StaticCfg cfg_cli = {.host_log_callback = Helpers_LoggerStdout,
-                                     .disconnect_callback = disconnect_callback};
+                                     .disconnect_callback = disconnect_callback,
+                                     .toolkit_logger = {.level = SOPC_TOOLKIT_LOG_LEVEL_DEBUG,
+                                                        .log_path = "./check_libsub_subscription_logs/"}
+                                    };
     SOPC_LibSub_ConnectionCfg cfg_con = {.server_url = "opc.tcp://localhost:4841",
                                          .security_policy = SOPC_SecurityPolicy_None_URI,
                                          .security_mode = OpcUa_MessageSecurityMode_None,
@@ -174,7 +177,6 @@ START_TEST(test_subscription)
                                     .NodesToRead = lrv};
 
     ck_assert(SOPC_LibSub_Initialize(&cfg_cli) == SOPC_STATUS_OK);
-    ck_assert(SOPC_ToolkitConfig_SetCircularLogPath("./check_libsub_subscription_logs/", true) == SOPC_STATUS_OK);
 
     ck_assert(SOPC_LibSub_ConfigureConnection(&cfg_con, &cfg_id) == SOPC_STATUS_OK);
     ck_assert(SOPC_LibSub_Configured() == SOPC_STATUS_OK);
@@ -239,7 +241,10 @@ static void disconnect_callback_multi(const SOPC_LibSub_ConnectionId c_id)
 START_TEST(test_half_broken_subscriptions)
 {
     SOPC_LibSub_StaticCfg cfg_cli = {.host_log_callback = Helpers_LoggerStdout,
-                                     .disconnect_callback = disconnect_callback_multi};
+                                     .disconnect_callback = disconnect_callback_multi,
+                                     .toolkit_logger = {.level = SOPC_TOOLKIT_LOG_LEVEL_DEBUG,
+                                                        .log_path = "./check_libsub_subscription_logs/"}
+                                    };
     SOPC_LibSub_ConnectionCfg cfg_con[N_CONNECTIONS] = {
         {.server_url = "opc.tcp://localhost:4841",
          .security_policy = SOPC_SecurityPolicy_None_URI,
@@ -300,7 +305,6 @@ START_TEST(test_half_broken_subscriptions)
          .token_target = 3}};
 
     ck_assert(SOPC_LibSub_Initialize(&cfg_cli) == SOPC_STATUS_OK);
-    ck_assert(SOPC_ToolkitConfig_SetCircularLogPath("./check_libsub_broken_sub_logs/", true) == SOPC_STATUS_OK);
     for (int i = 0; i < N_CONNECTIONS; ++i)
     {
         ck_assert(SOPC_LibSub_ConfigureConnection(&cfg_con[i], &cfg_ids[i]) == SOPC_STATUS_OK);
