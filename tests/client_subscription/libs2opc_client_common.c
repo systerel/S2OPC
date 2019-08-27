@@ -113,7 +113,15 @@ SOPC_ReturnStatus SOPC_ClientCommon_Initialize(const SOPC_LibSub_StaticCfg* pCfg
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ToolkitConfig_SetCircularLogPath(pCfg->toolkit_logger.log_path, true);
+        if (NULL == pCfg->toolkit_logger.log_path)
+        {
+            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Log Path is set to null.");
+            status = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+        else
+        {
+            status = SOPC_ToolkitConfig_SetCircularLogPath(pCfg->toolkit_logger.log_path, true);
+        }
         if (SOPC_STATUS_OK != status)
         {
             Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not configure SDK logger.");
