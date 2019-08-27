@@ -1088,6 +1088,7 @@ static bool SC_Chunks_CheckSequenceHeaderSN(SOPC_SecureConnection* scConnection,
 
 static bool SC_Chunks_CheckSequenceHeaderRequestId(SOPC_SecureConnection* scConnection,
                                                    bool isClient,
+                                                   SOPC_Msg_IsFinal receivedMsgIsFinal,
                                                    SOPC_Msg_Type receivedMsgType,
                                                    uint32_t* requestId,
                                                    SOPC_StatusCode* errorStatus)
@@ -1111,17 +1112,28 @@ static bool SC_Chunks_CheckSequenceHeaderRequestId(SOPC_SecureConnection* scConn
             recordedMsgCtx = SOPC_SLinkedList_RemoveFromId(scConnection->tcpSeqProperties.sentRequestIds, *requestId);
             if (recordedMsgCtx != NULL)
             {
-                SOPC_EventTimer_Cancel(recordedMsgCtx->timerId); // Deactivate timer for this request
                 if (recordedMsgCtx->msgType != receivedMsgType)
                 {
+                    SOPC_EventTimer_Cancel(recordedMsgCtx->timerId); // Deactivate timer for this request
+
                     // Re-enqueue the request id in order application receive the request timeout on SC closure
                     SOPC_SLinkedList_Append(scConnection->tcpSeqProperties.sentRequestIds, *requestId,
                                             (void*) recordedMsgCtx);
                     result = false;
                     *errorStatus = OpcUa_BadSecurityChecksFailed;
                 }
+                else if (SOPC_MSG_ISFINAL_INTERMEDIATE == receivedMsgIsFinal)
+                {
+                    // We receive a part of the response message:
+                    // do not deactivate timer and re-enqueue the request id as expected id
+                    // (Note: prepend since other chunks for this message shall be the next ones)
+                    void* prependedCtx = SOPC_SLinkedList_Prepend(scConnection->tcpSeqProperties.sentRequestIds,
+                                                                  *requestId, (void*) recordedMsgCtx);
+                    result = prependedCtx == recordedMsgCtx;
+                }
                 else
                 {
+                    // We received the complete response message
                     SOPC_Free(recordedMsgCtx);
                 }
             }
@@ -1828,7 +1840,8 @@ bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection, uint32_t* re
         {
             result = SC_Chunks_CheckSequenceHeaderRequestId(scConnection,
                                                             false == scConnection->isServerConnection, // isClient
-                                                            chunkCtx->currentMsgType, requestId, errorStatus);
+                                                            chunkCtx->currentMsgIsFinal, chunkCtx->currentMsgType,
+                                                            requestId, errorStatus);
             if (!result)
             {
                 SOPC_Logger_TraceError(

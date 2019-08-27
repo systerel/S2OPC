@@ -247,8 +247,11 @@ static uint32_t SC_Client_StartOPNrenewTimer(uint32_t connectionIdx, uint32_t ti
     return SOPC_EventTimer_Create(secureChannelsTimerEventHandler, event, timeoutMs);
 }
 
-static char* SC_ClientTransition_ReceivedErrorMsg(SOPC_Buffer* errBuffer, SOPC_StatusCode* errorStatus)
+static SOPC_ReturnStatus SC_ClientTransition_ReceivedErrorMsg(SOPC_Buffer* errBuffer,
+                                                              SOPC_StatusCode* errorStatus,
+                                                              char** errorReason)
 {
+    assert(errorReason != NULL);
     assert(errBuffer != NULL);
     assert(errorStatus != NULL);
     char* result = NULL;
@@ -266,9 +269,22 @@ static char* SC_ClientTransition_ReceivedErrorMsg(SOPC_Buffer* errBuffer, SOPC_S
     if (SOPC_STATUS_OK == status)
     {
         result = SOPC_String_GetCString(&reason);
+        if (NULL == result)
+        {
+            result = SOPC_Calloc(1, sizeof(char)); // empty NUL ended string
+            if (NULL == result)
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+        }
     }
     SOPC_String_Clear(&reason);
-    return result;
+
+    if (SOPC_STATUS_OK == status)
+    {
+        *errorReason = result;
+    }
+    return status;
 }
 
 static bool SC_Server_SendErrorMsgAndClose(uint32_t scConnectionIdx, SOPC_StatusCode errorStatus, char* reason)
@@ -2449,6 +2465,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
     SOPC_Buffer* buffer = NULL;
     SOPC_StatusCode errorStatus;
     char* errorReason = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     switch (event)
     {
@@ -2658,14 +2675,16 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
         {
             // Note: Abort chunk message has same message content than ERR message
             //       (except it was contained in a secure message with security layer)
-            errorReason = SC_ClientTransition_ReceivedErrorMsg((SOPC_Buffer*) params, &errorStatus);
+            status = SC_ClientTransition_ReceivedErrorMsg((SOPC_Buffer*) params, &errorStatus, &errorReason);
 
             SOPC_Buffer_Delete((SOPC_Buffer*) params);
         }
 
-        // Part 6 (1.03) §6.7.3: "The receiver shall ignore the Message but shall not close the SecureChannel"
-        if (errorReason != NULL)
+        if (SOPC_STATUS_OK == status)
         {
+            assert(errorReason != NULL);
+
+            // Part 6 (1.03) §6.7.3: "The receiver shall ignore the Message but shall not close the SecureChannel"
             if (scConnection->isServerConnection)
             {
                 // Log a warning, client request is aborted
@@ -2694,6 +2713,15 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
                 }
             }
             SOPC_Free(errorReason);
+        }
+        else
+        {
+            // Uncertain errorStatus value printed here:
+            SOPC_Logger_TraceError("ScStateMgr: Abort message received: error decoding status (%" PRIX32
+                                   ") / reason (scIdx=%" PRIu32 ")",
+                                   errorStatus, eltId);
+            SC_CloseSecureConnection(scConnection, eltId, false, false, OpcUa_BadDecodingError,
+                                     "Invalid abort message received");
         }
         break;
     case INT_SC_RCV_FAILURE:
@@ -2762,11 +2790,12 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
 
         if (params != NULL)
         {
-            errorReason = SC_ClientTransition_ReceivedErrorMsg((SOPC_Buffer*) params, &errorStatus);
+            status = SC_ClientTransition_ReceivedErrorMsg((SOPC_Buffer*) params, &errorStatus, &errorReason);
         }
 
-        if (errorReason != NULL)
+        if (SOPC_STATUS_OK == status)
         {
+            assert(errorReason != NULL);
             SOPC_Logger_TraceError("ScStateMgr: ERR message received with status=%" PRIX32
                                    " and reason=%s (scIdx=%" PRIu32 ")",
                                    errorStatus, errorReason, eltId);

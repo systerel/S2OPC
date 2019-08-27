@@ -62,7 +62,9 @@ typedef enum
     SC_CONNECTED,          /* id = secure channel connection index,
                               auxParams = (uint32_t) secure channel configuration index */
     SC_CONNECTION_TIMEOUT, /* id = endpoint connection config index */
-    SC_DISCONNECTED,       /* id = secure channel connection index */
+    SC_DISCONNECTED,       /* id = secure channel connection index
+                              auxParam = SOPC_StatusCode
+                            */
     SC_SERVICE_RCV_MSG,    /* id = secure channel connection index,
                                  params = (SOPC_Buffer*) OPC UA message payload buffer,
                                  auxParam = (uint32_t) request Id context (server side only, 0 if client) */
