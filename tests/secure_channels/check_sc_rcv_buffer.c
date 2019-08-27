@@ -31,6 +31,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h> /* EXIT_* */
+#include <string.h>
 
 #include "check_sc_rcv_helpers.h"
 #include "hexlify.h"
@@ -38,6 +39,7 @@
 #include "sopc_encoder.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
+#include "sopc_protocol_constants.h"
 #include "sopc_secure_channels_api.h"
 #include "sopc_time.h"
 #include "sopc_toolkit_config.h"
@@ -67,6 +69,9 @@ static void clearToolkit(void)
     SOPC_Toolkit_Clear();
     Check_SC_Clear();
 }
+
+static uint32_t maxSendingBufferSize = 0;
+static uint32_t maxSendingMsgSize = 0;
 
 static void establishSC(void)
 {
@@ -155,7 +160,9 @@ static void establishSC(void)
 
     printf("SC_Rcv_Buffer Init: Simulate correct ACK message received\n");
 
-    // Simulate ACK message received on socket
+    maxSendingBufferSize = 65535;
+    maxSendingMsgSize = 67174395;
+    // Simulate ACK message received on socket: [ACK|F|28|0|65535|65535|67174395|05]
     status = Simulate_Received_Message(scConfigIdx,
                                        // Expected ACK message received
                                        "41434b461c00000000000000ffff0000ffff0000fbff040005000000");
@@ -198,10 +205,10 @@ static void establishSC(void)
     serviceEvent = NULL;
 
     printf("SC_Rcv_Buffer: request to send an empty MSG and retrieve requestId associated\n");
-    buffer = SOPC_Buffer_Create(24); // Let 24 bytes reserved for the header
+    buffer = SOPC_Buffer_Create(SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
     ck_assert(buffer != NULL);
 
-    status = SOPC_Buffer_SetDataLength(buffer, 24);
+    status = SOPC_Buffer_SetDataLength(buffer, SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
     ck_assert(SOPC_STATUS_OK == status);
 
     SOPC_SecureChannels_EnqueueEvent(SC_SERVICE_SND_MSG, scConfigIdx, (void*) buffer, pendingRequestHandle);
@@ -360,38 +367,305 @@ START_TEST(test_invalid_msg_typ)
     ck_assert(SOPC_STATUS_OK == status);
 }
 END_TEST
-/*
-START_TEST(test_unexpected_multi_chunks_final_value)
+
+#define INTERMEDIATE_CHUNK_DATA "abcdefab"
+
+static void simulate_N_chunks(const char isFinal, uint8_t initialSN, uint8_t nbChunks)
 {
+    assert(nbChunks < 16 - initialSN);       // Ensure SN <= 15
+    assert('C' == isFinal || nbChunks == 1); // Only intermediate chunk sent several times
+    void* element = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    /* Simulate MSG / C / size 28 / SC id = 0xa2daa731 / tokenId = 0x3fc1046a / SN = 2 / requestId = 2 */
+    char msg[] = "4d5347431c000000a2daa7313fc1046a0200000002000000" INTERMEDIATE_CHUNK_DATA;
+    // Set isFinal char if different than 'C'
+    switch (isFinal)
+    {
+    case 'C':
+        break; // no change
+    case 'F':
+        // 0x"46" instead of 0x"43"
+        msg[7] = '6';
+        break;
+    case 'A':
+        ck_assert(false); // specific case treated elsewhere
+        break;
+    default:
+        ck_assert(false);
+    }
+    for (uint8_t i = 0; i < nbChunks && SOPC_STATUS_OK == status; i++)
+    {
+        // Check nothing receive in serviceEvents queue: waiting for final chunk
+        // or maximum number of chunks or maximum message size
+        status = SOPC_AsyncQueue_NonBlockingDequeue(servicesEvents->events, &element);
+        ck_assert_int_eq(SOPC_STATUS_WOULD_BLOCK, status);
+
+        // Set SN = initialSN + i
+        char SNcharValue = (char) (48 /* encoded value of char '0' */ + initialSN + i);
+        msg[33] = SNcharValue;
+        status = Simulate_Received_Message(scConfigIdx, msg);
+        ck_assert_int_eq(SOPC_STATUS_OK, status);
+    }
+}
+
+START_TEST(test_expected_receive_multi_chunks)
+{
+    SOPC_Event* serviceEvent = NULL;
+    SOPC_Buffer* buffer = NULL;
+
+    printf("SC_Rcv_Buffer: Simulate expected intermediate chunks message received\n");
+
+    // 3 intermediate chunks starting from SN=2
+    const uint8_t nb_intermediate_chunks = 3;
+    simulate_N_chunks('C', 2, nb_intermediate_chunks);
+
+    simulate_N_chunks('F', (uint8_t)(2 + nb_intermediate_chunks), 1);
+
+    serviceEvent = Check_Service_Event_Received(SC_SERVICE_RCV_MSG, scConfigIdx, 0);
+    ck_assert(NULL != serviceEvent);
+    ck_assert(NULL != serviceEvent->params);
+    buffer = (SOPC_Buffer*) serviceEvent->params;
+    uint8_t data_length = (uint8_t) strlen(INTERMEDIATE_CHUNK_DATA);
+    ck_assert_int_eq(data_length * (nb_intermediate_chunks + 1),
+                     buffer->length * 2); // Length * 2 => 2 characters for 1 byte
+
+    SOPC_ReturnStatus status = check_expected_message_helper(
+        INTERMEDIATE_CHUNK_DATA INTERMEDIATE_CHUNK_DATA INTERMEDIATE_CHUNK_DATA INTERMEDIATE_CHUNK_DATA, buffer, false,
+        0, 0);
+    ck_assert_int_eq(status, SOPC_STATUS_OK);
+
+    SOPC_Buffer_Delete(buffer);
+    SOPC_Free(serviceEvent);
+}
+END_TEST
+
+START_TEST(test_unexpected_receive_too_many_intermediate_chunks)
+{
+    printf("SC_Rcv_Buffer: Simulate too many intermediate chunks message received\n");
+
+    // SOPC_MAX_NB_CHUNKS intermediate chunks starting from SN=2
+    const uint8_t nb_intermediate_chunks = SOPC_MAX_NB_CHUNKS;
+    simulate_N_chunks('C', 2, nb_intermediate_chunks);
+
+    // Since MAX_NB_CHUNKS intermediate chunks were received no more chunks can be received and message is incomplete
+    // SC will be closed
+
+    SOPC_ReturnStatus status = Check_Client_Closed_SC_Helper(OpcUa_BadTcpMessageTooLarge);
+    ck_assert(SOPC_STATUS_OK == status);
+}
+END_TEST
+
+START_TEST(test_receive_intermediary_and_abort_chunk)
+{
+    SOPC_Event* serviceEvent = NULL;
+
+    printf("SC_Rcv_Buffer: Simulate intermediary and abort chunk message received as response\n");
+
+    // 3 intermediate chunks starting from SN=2
+    const uint8_t nb_intermediate_chunks = 3;
+    simulate_N_chunks('C', 2, nb_intermediate_chunks);
+
+    /* Simulate MSG / A / size 32 / SC id = 0xa2daa731 / tokenId = 0x3fc1046a / SN = 5 / requestId = 2 */
+    Simulate_Received_Message(scConfigIdx,
+                              "4d53474120000000a2daa7313fc1046a0500000002000000"
+                              "00008080"
+                              "00000000"); // error code OpcUa_BadTcpMessageTooLarge + empty reason
+
+    serviceEvent = Check_Service_Event_Received(SC_SND_FAILURE, scConfigIdx, OpcUa_BadTcpMessageTooLarge);
+    ck_assert_uint_eq(pendingRequestHandle, (uintptr_t) serviceEvent->params);
+    ck_assert(NULL != serviceEvent);
+
+    SOPC_Free(serviceEvent);
+}
+END_TEST
+
+START_TEST(test_receive_only_abort_chunk)
+{
+    SOPC_Event* serviceEvent = NULL;
 
     // Only since we are not managing multi chunk messages
-    printf("SC_Rcv_Buffer: Simulate unexpected intermediate chunk message received\n");
+    printf("SC_Rcv_Buffer: Simulate only an abort chunk message received as response\n");
 
-    // Simulate MSG / C / size 28 / SC id = 833084066 <=> 0xa2daa731 received on socket
-    status = Simulate_Received_Message(scConfigIdx, "4d5347431c000000a2daa7310123456789abcdef0123456789abcdef");
-    ck_assert(SOPC_STATUS_OK == status);
+    /* Simulate MSG / A / size 32 / SC id = 0xa2daa731 / tokenId = 0x3fc1046a / SN = 2 / requestId = 2 */
+    Simulate_Received_Message(scConfigIdx,
+                              "4d53474120000000a2daa7313fc1046a0200000002000000"
+                              "00008080"
+                              "00000000"); // error code OpcUa_BadTcpMessageTooLarge + empty reason
 
-    status = Check_Client_Closed_SC_Helper(OpcUa_BadTcpMessageTypeInvalid);
-    ck_assert(SOPC_STATUS_OK == status);
+    serviceEvent = Check_Service_Event_Received(SC_SND_FAILURE, scConfigIdx, OpcUa_BadTcpMessageTooLarge);
+    ck_assert_uint_eq(pendingRequestHandle, (uintptr_t) serviceEvent->params);
+    ck_assert(NULL != serviceEvent);
+
+    SOPC_Free(serviceEvent);
 }
 END_TEST
 
-START_TEST(test_unexpected_abort_chunk_final_value)
+START_TEST(test_expected_send_multi_chunks)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_Event* socketEvent = NULL;
+    SOPC_Buffer* buffer = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    int res = 0;
+    char hexOutput[(SOPC_MAX_MESSAGE_LENGTH + 1) * 2];
 
-    printf("SC_Rcv_Buffer: Simulate unexpected abort chunk message received\n");
+    printf("SC_Rcv_Buffer: Simulate multi-chunks message sent\n");
 
-    // Simulate MSG / A / size 28 / SC id = 833084066 <=> 0xa2daa731 received on socket
-    status = Simulate_Received_Message(scConfigIdx, "4d5347411c000000a2daa7310123456789abcdef0123456789abcdef");
+    buffer = SOPC_Buffer_Create(maxSendingBufferSize + 1);
+    ck_assert(buffer != NULL);
+
+    status = SOPC_Buffer_SetDataLength(buffer, maxSendingBufferSize + 1);
     ck_assert(SOPC_STATUS_OK == status);
 
-    status = Check_Client_Closed_SC_Helper(OpcUa_BadTcpMessageTypeInvalid);
-    ck_assert(SOPC_STATUS_OK == status);
+    SOPC_SecureChannels_EnqueueEvent(SC_SERVICE_SND_MSG, scConfigIdx, (void*) buffer, pendingRequestHandle);
+
+    // Check first message is a partial chunk of maxSendingBufferSize length
+    socketEvent = Check_Socket_Event_Received(SOCKET_WRITE, scConfigIdx, 0);
+    ck_assert(socketEvent != NULL && socketEvent->params != NULL);
+
+    buffer = (SOPC_Buffer*) socketEvent->params;
+    res = hexlify(buffer->data, hexOutput, buffer->length);
+
+    ck_assert((uint32_t) res == buffer->length);
+
+    // Check expected length is maximum sending buffer size
+    ck_assert_uint_eq(buffer->length, maxSendingBufferSize);
+    // Check typ = MSG final = C
+    res = memcmp(hexOutput, "4d534743", 8);
+    ck_assert(res == 0);
+    SOPC_Buffer_Delete(buffer);
+    SOPC_Free(socketEvent);
+    socketEvent = NULL;
+
+    // Check second message is a final chunk of headers + 1 bytes length
+    socketEvent = Check_Socket_Event_Received(SOCKET_WRITE, scConfigIdx, 0);
+    ck_assert(socketEvent != NULL && socketEvent->params != NULL);
+
+    buffer = (SOPC_Buffer*) socketEvent->params;
+    res = hexlify(buffer->data, hexOutput, buffer->length);
+
+    ck_assert((uint32_t) res == buffer->length);
+
+    // Check expected length is maximum sending buffer size
+    ck_assert_uint_eq(buffer->length, 1 + SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
+    // Check typ = MSG final = F
+    res = memcmp(hexOutput, "4d534746", 8);
+    ck_assert(res == 0);
+
+    SOPC_Buffer_Delete(buffer);
+    SOPC_Free(socketEvent);
+    socketEvent = NULL;
 }
 END_TEST
-*/
+
+START_TEST(test_expected_send_abort_chunk)
+{
+    // In this test we send a message too large to be sent, an abort message shall be sent instead
+    // and error returned to services layer
+
+    SOPC_Event* socketEvent = NULL;
+    SOPC_Event* serviceEvent = NULL;
+    SOPC_Buffer* buffer = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    int res = 0;
+    char hexOutput[(SOPC_MAX_MESSAGE_LENGTH + 1) * 2];
+
+    printf("SC_Rcv_Buffer: Simulate abort chunk message sent\n");
+
+    buffer = SOPC_Buffer_Create(maxSendingMsgSize - SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH +
+                                1); // It is maximum message body size, remove bytes of header
+    ck_assert(buffer != NULL);
+
+    status = SOPC_Buffer_SetDataLength(buffer, maxSendingMsgSize - SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH + 1);
+    ck_assert(SOPC_STATUS_OK == status);
+
+    const uint32_t newPendingRequestHandle = 10;
+    SOPC_SecureChannels_EnqueueEvent(SC_SERVICE_SND_MSG, scConfigIdx, (void*) buffer, newPendingRequestHandle);
+
+    // Check first message is a partial chunk of maxSendingBufferSize length
+    socketEvent = Check_Socket_Event_Received(SOCKET_WRITE, scConfigIdx, 0);
+    ck_assert(socketEvent != NULL && socketEvent->params != NULL);
+
+    buffer = (SOPC_Buffer*) socketEvent->params;
+    res = hexlify(buffer->data, hexOutput, buffer->length);
+
+    ck_assert((uint32_t) res == buffer->length);
+
+    // Check typ = MSG final = A
+    res = memcmp(hexOutput, "4d534741", 8);
+    ck_assert(res == 0);
+
+    // retrieve error status in MSG
+    status = SOPC_Buffer_SetPosition(buffer, SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
+    ck_assert(SOPC_STATUS_OK == status);
+
+    SOPC_StatusCode errorStatus;
+    status = SOPC_UInt32_Read(&errorStatus, buffer);
+    ck_assert(SOPC_STATUS_OK == status);
+    ck_assert_uint_eq(errorStatus, OpcUa_BadTcpMessageTooLarge);
+
+    SOPC_Buffer_Delete(buffer);
+    SOPC_Free(socketEvent);
+    socketEvent = NULL;
+
+    serviceEvent = Check_Service_Event_Received(SC_SND_FAILURE, scConfigIdx, OpcUa_BadRequestTooLarge);
+    ck_assert_uint_eq(newPendingRequestHandle, (uintptr_t) serviceEvent->params);
+    ck_assert(NULL != serviceEvent);
+    SOPC_Free(serviceEvent);
+    serviceEvent = NULL;
+}
+END_TEST
+
+START_TEST(test_expected_forced_send_abort_chunk)
+{
+    // In this test the service layer explicitly requests to send an abort message because encoding failed earlier
+    SOPC_Event* socketEvent = NULL;
+    SOPC_Event* serviceEvent = NULL;
+    SOPC_Buffer* buffer = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    int res = 0;
+    char hexOutput[(SOPC_MAX_MESSAGE_LENGTH + 1) * 2];
+
+    printf("SC_Rcv_Buffer: Simulate abort chunk message sent\n");
+
+    const uint32_t newPendingRequestHandle = 10;
+    // Note: should be used only as server but it is functional
+    SOPC_SecureChannels_EnqueueEvent(SC_SERVICE_SND_MSG_ABORT, scConfigIdx,
+                                     (void*) (uintptr_t) OpcUa_BadRequestTooLarge, newPendingRequestHandle);
+
+    // Check first message is a partial chunk of maxSendingBufferSize length
+    socketEvent = Check_Socket_Event_Received(SOCKET_WRITE, scConfigIdx, 0);
+    ck_assert(socketEvent != NULL && socketEvent->params != NULL);
+
+    buffer = (SOPC_Buffer*) socketEvent->params;
+    res = hexlify(buffer->data, hexOutput, buffer->length);
+
+    ck_assert((uint32_t) res == buffer->length);
+
+    // Check typ = MSG final = A
+    res = memcmp(hexOutput, "4d534741", 8);
+    ck_assert(res == 0);
+
+    // retrieve error status in MSG
+    status = SOPC_Buffer_SetPosition(buffer, SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
+    ck_assert(SOPC_STATUS_OK == status);
+
+    SOPC_StatusCode errorStatus;
+    status = SOPC_UInt32_Read(&errorStatus, buffer);
+    ck_assert(SOPC_STATUS_OK == status);
+    ck_assert_uint_eq(errorStatus, OpcUa_BadTcpMessageTooLarge);
+
+    SOPC_Buffer_Delete(buffer);
+    SOPC_Free(socketEvent);
+    socketEvent = NULL;
+
+    serviceEvent = Check_Service_Event_Received(SC_SND_FAILURE, scConfigIdx, OpcUa_BadRequestTooLarge);
+    ck_assert_uint_eq(newPendingRequestHandle, (uintptr_t) serviceEvent->params);
+    ck_assert(NULL != serviceEvent);
+    SOPC_Free(serviceEvent);
+    serviceEvent = NULL;
+}
+END_TEST
+
 START_TEST(test_invalid_final_value)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -497,7 +771,8 @@ START_TEST(test_invalid_sc_request_id)
 
     printf("SC_Rcv_Buffer: Simulate incorrect MSG message response received with an invalid REQUEST ID\n");
 
-    // Simulate MSG / F / size 28 / SC id = 833084066 / tokenId = 1778696511 / SN = 2 / RequestId !=2 received on socket
+    // Simulate MSG / F / size 28 / SC id = 833084066 / tokenId = 1778696511 / SN = 2 / RequestId !=2 received on
+    // socket
     status = Simulate_Received_Message(scConfigIdx, "4d5347461c000000a2daa7313fc1046a020000000000000089abcdef");
     ck_assert(SOPC_STATUS_OK == status);
 
@@ -516,7 +791,8 @@ START_TEST(test_valid_sc_request_id)
 
     printf("SC_Rcv_Buffer: Simulate correct MSG message response received with an valid REQUEST ID\n");
 
-    // Simulate MSG / F / size 28 / SC id = 833084066 / tokenId = 1778696511 / SN = 2 / requestId = 2 received on socket
+    // Simulate MSG / F / size 28 / SC id = 833084066 / tokenId = 1778696511 / SN = 2 / requestId = 2 received on
+    // socket
     status = Simulate_Received_Message(scConfigIdx, "4d5347461c000000a2daa7313fc1046a020000000200000089abcdef");
     ck_assert(SOPC_STATUS_OK == status);
 
@@ -543,9 +819,9 @@ END_TEST
 static Suite* tests_make_suite_invalid_buffers(void)
 {
     Suite* s;
-    TCase* tc_invalid_buf;
+    TCase *tc_invalid_buf, *tc_multichunks;
 
-    s = suite_create("SC layer: receive invalid buffers");
+    s = suite_create("SC layer: receive invalid buffers / manage multi chunk");
     tc_invalid_buf = tcase_create("Invalid buffers received");
     tcase_add_checked_fixture(tc_invalid_buf, establishSC, clearToolkit);
     tcase_add_test(tc_invalid_buf, test_unexpected_hel_msg);
@@ -555,8 +831,6 @@ static Suite* tests_make_suite_invalid_buffers(void)
     tcase_add_test(tc_invalid_buf, test_unexpected_opn_resp_msg_replay);
     tcase_add_test(tc_invalid_buf, test_unexpected_opn_resp_msg);
     tcase_add_test(tc_invalid_buf, test_invalid_msg_typ);
-    /*tcase_add_test(tc_invalid_buf, test_unexpected_multi_chunks_final_value);
-    tcase_add_test(tc_invalid_buf, test_unexpected_abort_chunk_final_value);*/
     tcase_add_test(tc_invalid_buf, test_invalid_final_value);
     tcase_add_test(tc_invalid_buf, test_too_large_msg_size);
     tcase_add_test(tc_invalid_buf, test_invalid_sc_id);
@@ -564,8 +838,18 @@ static Suite* tests_make_suite_invalid_buffers(void)
     tcase_add_test(tc_invalid_buf, test_invalid_sc_sequence_number);
     tcase_add_test(tc_invalid_buf, test_invalid_sc_request_id);
     tcase_add_test(tc_invalid_buf, test_valid_sc_request_id);
-
     suite_add_tcase(s, tc_invalid_buf);
+
+    tc_multichunks = tcase_create("Multichunk management");
+    tcase_add_checked_fixture(tc_multichunks, establishSC, clearToolkit);
+    tcase_add_test(tc_multichunks, test_expected_receive_multi_chunks);
+    tcase_add_test(tc_multichunks, test_unexpected_receive_too_many_intermediate_chunks);
+    tcase_add_test(tc_multichunks, test_receive_intermediary_and_abort_chunk);
+    tcase_add_test(tc_multichunks, test_receive_only_abort_chunk);
+    tcase_add_test(tc_multichunks, test_expected_send_multi_chunks);
+    tcase_add_test(tc_multichunks, test_expected_send_abort_chunk);
+    tcase_add_test(tc_multichunks, test_expected_forced_send_abort_chunk);
+    suite_add_tcase(s, tc_multichunks);
 
     return s;
 }

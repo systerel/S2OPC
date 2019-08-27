@@ -23,6 +23,7 @@
 #include <stdbool.h>
 
 #include "sopc_async_queue.h"
+#include "sopc_buffer.h"
 #include "sopc_sockets_api.h"
 
 // Async queue simulating the services dispatcher and containing SOPC_StubSC_ServicesEventParams elements
@@ -36,5 +37,11 @@ SOPC_ReturnStatus Check_Expected_Sent_Message(uint32_t socketIdx,
                                               uint16_t start,
                                               uint16_t length);
 SOPC_ReturnStatus Simulate_Received_Message(uint32_t scIdx, char* hexInputMsg);
+
+SOPC_ReturnStatus check_expected_message_helper(const char* hexExpMsg,
+                                                const SOPC_Buffer* buffer,
+                                                bool ignoreBytes,
+                                                uint16_t start,
+                                                uint16_t length);
 
 #endif /* STUBS_SC_SOPC_SOCKETS_API_H_ */

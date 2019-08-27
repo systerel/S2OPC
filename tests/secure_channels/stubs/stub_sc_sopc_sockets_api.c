@@ -25,7 +25,6 @@
 
 #include "event_helpers.h"
 #include "hexlify.h"
-#include "sopc_buffer.h"
 #include "sopc_mem_alloc.h"
 
 SOPC_AsyncQueue* socketsInputEvents = NULL;
@@ -79,11 +78,11 @@ SOPC_Event* Check_Socket_Event_Received(SOPC_Sockets_InputEvent event, uint32_t 
     }
 }
 
-static SOPC_ReturnStatus check_expected_sent_message_helper(const char* hexExpMsg,
-                                                            const SOPC_Buffer* buffer,
-                                                            bool ignoreBytes,
-                                                            uint16_t start,
-                                                            uint16_t length)
+SOPC_ReturnStatus check_expected_message_helper(const char* hexExpMsg,
+                                                const SOPC_Buffer* buffer,
+                                                bool ignoreBytes,
+                                                uint16_t start,
+                                                uint16_t length)
 {
     char hexOutput[5000];
     int res = 0;
@@ -139,7 +138,7 @@ SOPC_ReturnStatus Check_Expected_Sent_Message(uint32_t socketIdx,
     }
     else
     {
-        status = check_expected_sent_message_helper(hexExpMsg, buffer, ignoreBytes, start, length);
+        status = check_expected_message_helper(hexExpMsg, buffer, ignoreBytes, start, length);
     }
 
     SOPC_Buffer_Delete(buffer);
