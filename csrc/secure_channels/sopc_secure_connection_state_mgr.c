@@ -260,7 +260,8 @@ static char* SC_ClientTransition_ReceivedErrorMsg(SOPC_Buffer* errBuffer, SOPC_S
     status = SOPC_UInt32_Read(errorStatus, errBuffer);
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_String_Read(&reason, errBuffer);
+        // Part 6: "This string shall not be more than 4096 bytes"
+        status = SOPC_String_ReadWithLimitedLength(&reason, 4096, errBuffer);
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -1312,41 +1313,37 @@ static bool SC_ServerTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
     // EndpointURL
     if (result)
     {
-        status = SOPC_String_Read(&url, helloMsgBuffer);
+        status = SOPC_String_ReadWithLimitedLength(&url, SOPC_TCP_UA_MAX_URL_LENGTH, helloMsgBuffer);
         // Note: this parameter is normally used to forward to an endpoint sharing the same port
         //       but not in the same process.
         //       This is not supported by S2OPC secure channels layer, as consequence expected URL is only the one
         //       configured.
         if (SOPC_STATUS_OK == status)
         {
-            if (url.Length > SOPC_TCP_UA_MAX_URL_LENGTH)
+            int32_t compareValue;
+            status = SOPC_String_AttachFromCstring(&epUrl, epConfig->endpointURL);
+            if (SOPC_STATUS_OK == status)
             {
-                result = false;
-                *errorStatus = OpcUa_BadTcpEndpointUrlInvalid;
-            }
-            else
-            {
-                int32_t compareValue;
-                status = SOPC_String_AttachFromCstring(&epUrl, epConfig->endpointURL);
+                status = SOPC_String_Compare(&epUrl, &url, true, &compareValue);
                 if (SOPC_STATUS_OK == status)
                 {
-                    status = SOPC_String_Compare(&epUrl, &url, true, &compareValue);
-                    if (SOPC_STATUS_OK == status)
+                    if (compareValue != 0)
                     {
-                        if (compareValue != 0)
-                        {
-                            SOPC_Logger_TraceWarning(
-                                "Endpoint URL is not identical to requested URL : %s instead of %s",
-                                epConfig->endpointURL, (char*) url.Data);
-                        }
+                        SOPC_Logger_TraceWarning("Endpoint URL is not identical to requested URL : %s instead of %s",
+                                                 epConfig->endpointURL, (char*) url.Data);
                     }
                 }
-                if (SOPC_STATUS_OK != status)
-                {
-                    result = false;
-                    *errorStatus = OpcUa_BadTcpInternalError;
-                }
             }
+            if (SOPC_STATUS_OK != status)
+            {
+                result = false;
+                *errorStatus = OpcUa_BadTcpInternalError;
+            }
+        }
+        else if (SOPC_STATUS_WOULD_BLOCK)
+        {
+            result = false;
+            *errorStatus = OpcUa_BadTcpEndpointUrlInvalid;
         }
         else
         {

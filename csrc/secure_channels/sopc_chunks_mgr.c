@@ -691,8 +691,8 @@ static bool SC_Chunks_CheckAsymmetricSecurityHeader(SOPC_SecureConnection* scCon
 
     if (result)
     {
-        // Decode security policy
-        status = SOPC_String_Read(&securityPolicy, chunkCtx->currentChunkInputBuffer);
+        // Decode security policy (Part6: "this value shall not exceed 255 bytes")
+        status = SOPC_String_ReadWithLimitedLength(&securityPolicy, 255, chunkCtx->currentChunkInputBuffer);
         if (SOPC_STATUS_OK != status)
         {
             result = false;
@@ -4130,7 +4130,8 @@ static bool SC_Chunks_TreatSendMessageBuffer(
             {
                 SOPC_Logger_TraceWarning("ScChunksMgr: encoded an abort chunk for: scIdx=%" PRIu32
                                          " reqId/Handle=%" PRIu32 " sc=%X reason='%s'",
-                                         scConnectionIdx, requestIdOrHandle, *errorStatus, errorReason);
+                                         scConnectionIdx, requestIdOrHandle,
+                                         SOPC_StatusCode_ToTcpErrorCode(*errorStatus), errorReason);
                 result = SC_Chunks_TreatSendBufferMSGCLO(scConnectionIdx, scConnection, requestIdOrHandle, sendMsgType,
                                                          SOPC_UA_ABORT_FINAL_CHUNK, &inputMsgBuffer, &outputChunkBuffer,
                                                          errorStatus);

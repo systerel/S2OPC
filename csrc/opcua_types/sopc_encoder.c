@@ -779,7 +779,7 @@ SOPC_ReturnStatus SOPC_String_ReadAux(void* value, SOPC_Buffer* buf)
     return SOPC_String_Read((SOPC_String*) value, buf);
 }
 
-SOPC_ReturnStatus SOPC_String_Read(SOPC_String* str, SOPC_Buffer* buf)
+SOPC_ReturnStatus SOPC_String_ReadWithLimitedLength(SOPC_String* str, int32_t maxLength, SOPC_Buffer* buf)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     int32_t length;
@@ -796,29 +796,37 @@ SOPC_ReturnStatus SOPC_String_Read(SOPC_String* str, SOPC_Buffer* buf)
             {
                 if (length <= SOPC_MAX_STRING_LENGTH && (uint64_t) length + 1 <= SIZE_MAX)
                 {
-                    str->Length = length;
-                    // +1 to add '\0' character for CString compatibility
-                    str->Data = SOPC_Malloc(sizeof(SOPC_Byte) * (size_t)(length + 1));
-                    if (str->Data != NULL)
+                    if (0 == maxLength || length <= maxLength)
                     {
-                        status = SOPC_Buffer_Read(str->Data, buf, (uint32_t) length);
-                        if (status != SOPC_STATUS_OK)
+                        str->Length = length;
+                        // +1 to add '\0' character for CString compatibility
+                        str->Data = SOPC_Malloc(sizeof(SOPC_Byte) * (size_t)(length + 1));
+                        if (str->Data != NULL)
                         {
-                            status = SOPC_STATUS_ENCODING_ERROR;
-                            SOPC_Free(str->Data);
-                            str->Data = NULL;
-                            str->Length = -1;
+                            status = SOPC_Buffer_Read(str->Data, buf, (uint32_t) length);
+                            if (status != SOPC_STATUS_OK)
+                            {
+                                status = SOPC_STATUS_ENCODING_ERROR;
+                                SOPC_Free(str->Data);
+                                str->Data = NULL;
+                                str->Length = -1;
+                            }
+                            else
+                            {
+                                // Add '\0' character for CString compatibility
+                                str->Data[str->Length] = '\0';
+                            }
                         }
                         else
                         {
-                            // Add '\0' character for CString compatibility
-                            str->Data[str->Length] = '\0';
+                            str->Length = -1;
+                            status = SOPC_STATUS_OUT_OF_MEMORY;
                         }
                     }
                     else
                     {
                         str->Length = -1;
-                        status = SOPC_STATUS_OUT_OF_MEMORY;
+                        status = SOPC_STATUS_WOULD_BLOCK;
                     }
                 }
                 else
@@ -833,6 +841,11 @@ SOPC_ReturnStatus SOPC_String_Read(SOPC_String* str, SOPC_Buffer* buf)
         }
     }
     return status;
+}
+
+SOPC_ReturnStatus SOPC_String_Read(SOPC_String* str, SOPC_Buffer* buf)
+{
+    return SOPC_String_ReadWithLimitedLength(str, 0, buf);
 }
 
 SOPC_ReturnStatus SOPC_XmlElement_WriteAux(const void* value, SOPC_Buffer* buf)

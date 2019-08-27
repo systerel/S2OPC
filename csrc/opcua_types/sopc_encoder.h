@@ -224,6 +224,8 @@ SOPC_ReturnStatus SOPC_ByteString_ReadAux(void* value, SOPC_Buffer* buf);
 SOPC_ReturnStatus SOPC_String_Write(const SOPC_String* str, SOPC_Buffer* buf);
 SOPC_ReturnStatus SOPC_String_WriteAux(const void* value, SOPC_Buffer* buf);
 SOPC_ReturnStatus SOPC_String_Read(SOPC_String* str, SOPC_Buffer* buf);
+// Read with a limited length, returns SOPC_WOULD_BLOCK if length is more than restricted
+SOPC_ReturnStatus SOPC_String_ReadWithLimitedLength(SOPC_String* str, int32_t maxLength, SOPC_Buffer* buf);
 SOPC_ReturnStatus SOPC_String_ReadAux(void* value, SOPC_Buffer* buf);
 SOPC_ReturnStatus SOPC_XmlElement_Write(const SOPC_XmlElement* xml, SOPC_Buffer* buf);
 SOPC_ReturnStatus SOPC_XmlElement_WriteAux(const void* value, SOPC_Buffer* buf);
