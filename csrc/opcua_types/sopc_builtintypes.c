@@ -2605,9 +2605,9 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Copy(SOPC_ExtensionObject* dest, const SO
                 // Do a copy to keep only used data in buffer
                 status = SOPC_ByteString_CopyFromBytes(&dest->Body.Bstring, encodedObject->data,
                                                        (int32_t) encodedObject->length);
-                SOPC_Buffer_Delete(encodedObject);
-                encodedObject = NULL;
             }
+            SOPC_Buffer_Delete(encodedObject);
+            encodedObject = NULL;
         }
     }
     if (SOPC_STATUS_OK == status)
