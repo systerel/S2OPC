@@ -250,18 +250,20 @@ SOPC_ReturnStatus SOPC_StaMac_ConfigureDataChangeCallback(SOPC_StaMac_Machine *p
                                                           SOPC_ClientHelper_DataChangeCbk cbkClientHelper)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    if (NULL == pSM || NULL == cbkClientHelper)
+    if (NULL == pSM)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
     if (SOPC_STATUS_OK == status)
     {
-        if (NULL != pSM->cbkLibSubDataChanged)
+        if ((NULL != pSM->cbkLibSubDataChanged && NULL != cbkClientHelper)
+            || (NULL == pSM->cbkLibSubDataChanged && NULL == cbkClientHelper))
         {
+            /* One and only one callback type should be set */
             status = SOPC_STATUS_INVALID_STATE;
         }
     }
-    if (SOPC_STATUS_OK == status)
+    if (SOPC_STATUS_OK == status && NULL != cbkClientHelper)
     {
         pSM->cbkClientHelperDataChanged = cbkClientHelper;
     }
