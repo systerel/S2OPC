@@ -113,6 +113,11 @@ SOPC_ReturnStatus SOPC_ClientCommon_Initialize(const SOPC_LibSub_StaticCfg* pCfg
 
     if (SOPC_STATUS_OK == status)
     {
+        status = SOPC_ToolkitConfig_SetCircularLogProperties(pCfg->toolkit_logger.maxBytes, pCfg->toolkit_logger.maxFiles);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
         if (NULL == pCfg->toolkit_logger.log_path)
         {
             Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Log Path is set to null.");
@@ -697,7 +702,6 @@ SOPC_ReturnStatus SOPC_ClientCommon_Disconnect(const SOPC_LibSub_ConnectionId cl
 SOPC_ReturnStatus SOPC_ClientCommon_CreateSubscription(const SOPC_LibSub_ConnectionId cliId,
                                                        SOPC_ClientHelper_DataChangeCbk cbkWrapper)
 {
-    //TODO implement this function
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_StaMac_Machine* pSM = NULL;
 
