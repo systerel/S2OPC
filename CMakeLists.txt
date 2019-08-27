@@ -925,6 +925,11 @@ target_include_directories(check_libsub PRIVATE ${S2OPC_PRIVATE_INCLUDES} ${MBED
 target_link_libraries(check_libsub PRIVATE client_subscription s2opc ${CHECK_LIBRARIES})
 s2opc_client_validation_test(check_libsub)
 
+add_executable(check_wrapper "${LIBSUBSCRIBE_PATH}/check_wrapper.c")
+target_include_directories(check_wrapper PRIVATE ${S2OPC_PRIVATE_INCLUDES} ${MBEDTLS_INCLUDE_DIRS} ${CHECK_INCLUDE_DIRS})
+target_link_libraries(check_wrapper PRIVATE client_subscription s2opc ${CHECK_LIBRARIES})
+s2opc_client_validation_test(check_wrapper)
+
 endif(ENABLE_TESTING)
 
 ###### PyS2OPC ######
