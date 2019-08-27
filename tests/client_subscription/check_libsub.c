@@ -131,7 +131,9 @@ START_TEST(test_subscription)
     SOPC_LibSub_StaticCfg cfg_cli = {.host_log_callback = Helpers_LoggerStdout,
                                      .disconnect_callback = disconnect_callback,
                                      .toolkit_logger = {.level = SOPC_TOOLKIT_LOG_LEVEL_DEBUG,
-                                                        .log_path = "./check_libsub_subscription_logs/"}
+                                                        .log_path = "./check_libsub_subscription_logs/",
+                                                        .maxBytes = 1048576,
+                                                        .maxFiles = 50}
                                     };
     SOPC_LibSub_ConnectionCfg cfg_con = {.server_url = "opc.tcp://localhost:4841",
                                          .security_policy = SOPC_SecurityPolicy_None_URI,
@@ -243,7 +245,9 @@ START_TEST(test_half_broken_subscriptions)
     SOPC_LibSub_StaticCfg cfg_cli = {.host_log_callback = Helpers_LoggerStdout,
                                      .disconnect_callback = disconnect_callback_multi,
                                      .toolkit_logger = {.level = SOPC_TOOLKIT_LOG_LEVEL_DEBUG,
-                                                        .log_path = "./check_libsub_subscription_logs/"}
+                                                        .log_path = "./check_libsub_subscription_logs/",
+                                                        .maxBytes = 1048576,
+                                                        .maxFiles = 50}
                                     };
     SOPC_LibSub_ConnectionCfg cfg_con[N_CONNECTIONS] = {
         {.server_url = "opc.tcp://localhost:4841",
