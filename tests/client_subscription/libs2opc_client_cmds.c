@@ -266,7 +266,7 @@ int32_t SOPC_ClientHelper_Initialize(const char* log_path, int32_t log_level)
 
     SOPC_LibSub_StaticCfg cfg_cli = {.host_log_callback = log_callback,
                                      .disconnect_callback = disconnect_callback,
-                                     .toolkit_logger = {.level = level, .log_path = log_path}};
+                                     .toolkit_logger = {.level = level, .log_path = log_path, .maxBytes = 1048576, .maxFiles = 50}};
 
     SOPC_ReturnStatus status = SOPC_ClientCommon_Initialize(&cfg_cli);
 
@@ -318,7 +318,7 @@ static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_
         case OpcUa_MessageSecurityMode_None:
             if (strncmp(security.security_policy, SOPC_SecurityPolicy_None_URI, strlen(SOPC_SecurityPolicy_None_URI) + 1) != 0)
             {
-                return -2;
+                return -11;
             }
             disable_verification = true;
             secuMode = OpcUa_MessageSecurityMode_None;
@@ -334,24 +334,28 @@ static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_
             secuMode = OpcUa_MessageSecurityMode_SignAndEncrypt;
             break;
         default:
-            return -3;
+            return -12;
     }
 
     if (!disable_verification && NULL == cert_auth)
     {
-        return -4;
+        return -13;
     }
     if (!disable_verification && NULL == cert_srv)
     {
-        return -5;
+        return -14;
     }
     if (!disable_verification && NULL == cert_cli)
     {
-        return -6;
+        return -15;
     }
     if (!disable_verification && NULL == key_cli)
     {
-        return -7;
+        return -16;
+    }
+    if (NULL == security.policyId)
+    {
+        return -17;
     }
 
     cfg_con->server_url = endpointUrl;
@@ -402,7 +406,7 @@ int32_t SOPC_ClientHelper_Connect(const char* endpointUrl,
 
     if (NULL == security.security_policy)
     {
-        return -2;
+        return -11;
     }
 
     SOPC_LibSub_ConnectionCfg cfg_con;
