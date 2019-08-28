@@ -68,14 +68,14 @@ START_TEST(test_wrapper_initialize_finalize)
 {
     //TODO complete tests with invalid arguments and errors
     /* simple initialization */
-    ck_assert(0 == SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0));
     /* double finalize shall not fail*/
     SOPC_ClientHelper_Finalize();
     SOPC_ClientHelper_Finalize();
 
     /* double initialization shall fail */
-    ck_assert(0 == SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0));
-    ck_assert(2 == SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0));
+    ck_assert_int_eq(-2, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0));
 }
 END_TEST
 
@@ -121,7 +121,7 @@ START_TEST(test_wrapper_connect)
     SOPC_ClientHelper_Finalize();
 
     /* connect without wrapper being initialized */
-    ck_assert(-100 == SOPC_ClientHelper_Connect(valid_url, valid_security_none));
+    ck_assert_int_eq(-100, SOPC_ClientHelper_Connect(valid_url, valid_security_none));
 }
 END_TEST
 
@@ -181,7 +181,10 @@ END_TEST
 START_TEST(test_wrapper_disconnect)
 {
     //TODO complete tests
-    ck_assert(0 == SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0));
+    /* disconnect before wrapper has been initialized */
+    ck_assert_int_eq(-2, SOPC_ClientHelper_Disconnect(1));
+
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0));
 
     const char* valid_url = "opc.tcp://localhost:4841";
     SOPC_ClientHelper_Security valid_security = {
@@ -197,21 +200,24 @@ START_TEST(test_wrapper_disconnect)
 
     /* connection to a valid endpoint */
     int32_t valid_con_id = SOPC_ClientHelper_Connect(valid_url, valid_security);
-    ck_assert(valid_con_id > 0);
+    ck_assert_int_gt(valid_con_id, 0);
 
     /* disconnect a valid endpoint */
-    ck_assert(0 == SOPC_ClientHelper_Disconnect(valid_con_id));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Disconnect(valid_con_id));
 
     /* disconnect a non valid connection */
-    ck_assert(-1 == SOPC_ClientHelper_Disconnect(-1));
+    ck_assert_int_eq(-1, SOPC_ClientHelper_Disconnect(-1));
+
+    /* disconnect an already closed connection */
+    ck_assert_int_eq(-3, SOPC_ClientHelper_Disconnect(valid_con_id));
 
     /* disconnect a non existing connection */
-    ck_assert(4 == SOPC_ClientHelper_Disconnect(31));
+    ck_assert_int_eq(-3, SOPC_ClientHelper_Disconnect(31));
 
     SOPC_ClientHelper_Finalize();
 
-    /* disconnect without wrapper being initialized */
-    ck_assert(4 == SOPC_ClientHelper_Disconnect(1));
+    /* disconnect after wrapper has been closed */
+    ck_assert_int_eq(-2, SOPC_ClientHelper_Disconnect(1));
 }
 END_TEST
 

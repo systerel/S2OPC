@@ -283,7 +283,7 @@ int32_t SOPC_ClientHelper_Initialize(const char* log_path, int32_t log_level)
     if (SOPC_STATUS_OK != status)
     {
         Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not initialize library.");
-        return 2;
+        return -2;
     }
 
 
@@ -982,10 +982,22 @@ int32_t SOPC_ClientHelper_Disconnect(int32_t connectionId)
     Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Closing the connection %" PRIi32, connectionId);
     SOPC_ReturnStatus status = SOPC_ClientCommon_Disconnect((SOPC_LibSub_ConnectionId) connectionId);
 
-    if (SOPC_STATUS_OK != status)
+    if (SOPC_STATUS_INVALID_STATE == status)
     {
-        return 4;
+        /* toolkit not initialized */
+        return -2;
     }
+    else if (SOPC_STATUS_INVALID_PARAMETERS == status)
+    {
+        /* connection already closed or not existing */
+        return -3;
+    }
+    else if (SOPC_STATUS_OK != status)
+    {
+        /* operation failed */
+        return -100;
+    }
+
     return 0;
 }
 
