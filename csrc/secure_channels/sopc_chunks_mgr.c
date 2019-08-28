@@ -1090,7 +1090,7 @@ static bool SC_Chunks_CheckSequenceHeaderRequestId(SOPC_SecureConnection* scConn
                                                    bool isClient,
                                                    SOPC_Msg_IsFinal receivedMsgIsFinal,
                                                    SOPC_Msg_Type receivedMsgType,
-                                                   uint32_t* requestId,
+                                                   uint32_t* requestId, // for server or requestHandle for client
                                                    SOPC_StatusCode* errorStatus)
 {
     assert(scConnection != NULL);
@@ -1133,6 +1133,8 @@ static bool SC_Chunks_CheckSequenceHeaderRequestId(SOPC_SecureConnection* scConn
                 }
                 else
                 {
+                    // Set the requestHandle (only used in case of abort message)
+                    *requestId = recordedMsgCtx->requestHandle;
                     // We received the complete response message
                     SOPC_Free(recordedMsgCtx);
                 }

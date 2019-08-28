@@ -2697,7 +2697,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
                 // "The client shall report the error back to the Application as StatusCode for the request"
                 SOPC_EventHandler_Post(secureChannelsEventHandler, SC_SND_FAILURE,
                                        eltId,            // secure connection id
-                                       (void*) auxParam, // request Id
+                                       (void*) auxParam, // requestHandle
                                        errorStatus);     // error status
             }
             SOPC_Free(errorReason);
