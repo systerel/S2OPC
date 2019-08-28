@@ -894,14 +894,13 @@ int32_t SOPC_ClientHelper_AddMonitoredItems(int32_t connectionId, char** nodeIds
     }
     else
     {
-        /*
         for (size_t i = 0; i < nbNodeIds; i++)
         {
             if (NULL == nodeIds[i])
             {
                 return -3 - (int32_t) i;
             }
-        }*/
+        }
     }
 
     SOPC_LibSub_AttributeId* lAttrIds = SOPC_Calloc(nbNodeIds, sizeof(SOPC_LibSub_AttributeId));
@@ -928,12 +927,8 @@ int32_t SOPC_ClientHelper_AddMonitoredItems(int32_t connectionId, char** nodeIds
         status = SOPC_ClientCommon_AddToSubscription(
                 (SOPC_LibSub_ConnectionId) connectionId, (const char* const*) nodeIds, lAttrIds, (int32_t) nbNodeIds, lDataId);
     }
-    if (SOPC_STATUS_OK != status)
-    {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not create monitored items.");
-        return -100;
-    }
-    else
+
+    if (SOPC_STATUS_OK == status)
     {
         for (size_t i = 0; i < nbNodeIds; ++i)
         {
@@ -947,7 +942,8 @@ int32_t SOPC_ClientHelper_AddMonitoredItems(int32_t connectionId, char** nodeIds
 
     if (SOPC_STATUS_OK != status)
     {
-        return 3;
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not create monitored items.");
+        return -100;
     }
 
     return 0;

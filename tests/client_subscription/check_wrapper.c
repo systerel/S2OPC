@@ -29,6 +29,9 @@
 #include <stdint.h>
 #include <stdlib.h> /* EXIT_* */
 
+#include "assert.h"
+#include "string.h"
+#include "sopc_mutexes.h"
 #include "libs2opc_client_cmds.h"
 
 static const char* valid_url = "opc.tcp://localhost:4841";
@@ -76,6 +79,29 @@ static void datachange_callback_none(const int32_t c_id,
     (void) c_id;
     (void) node_id;
     (void) value;
+}
+
+static Mutex check_counter_mutex;
+static Condition check_counter_condition;
+static int32_t check_counter_connection_id = 0;
+static int32_t check_counter_node_id_comparison_result = 1;
+static SOPC_DataValue check_counter_data_value;
+
+static void datachange_callback_check_counter(const int32_t c_id,
+                                              const char* node_id,
+                                              const SOPC_DataValue* value)
+{
+    assert(SOPC_STATUS_OK == Mutex_Lock(&check_counter_mutex));
+
+    check_counter_connection_id = c_id;
+
+    const char* correct_node_id = "ns=0;s=Counter";
+    check_counter_node_id_comparison_result = strncmp(correct_node_id, node_id, strlen(correct_node_id));
+
+    SOPC_DataValue_Copy(&check_counter_data_value, value);
+
+    assert(SOPC_STATUS_OK == Mutex_Unlock(&check_counter_mutex));
+    assert(SOPC_STATUS_OK == Condition_SignalAll(&check_counter_condition));
 }
 
 START_TEST(test_wrapper_initialize_finalize)
@@ -276,6 +302,136 @@ START_TEST(test_wrapper_create_subscription_after_disconnect)
 }
 END_TEST
 
+START_TEST(test_wrapper_add_monitored_items)
+{
+    /* create an array of valid node ids */
+    char* nodeIds1[1] = { "ns=0;s=Counter" }; // value increments itself
+    char* nodeIds2[1] = { "ns=0;i=1013" };
+    char* nodeIds3[3] = { "ns=0;i=1009", "ns=0;i=1011", "ns=0;i=1001" };
+    char* invalidNodeIds[1] = { NULL };
+    char* invalidNodeIds2[2] = { "ns=0;s=Counter", NULL };
+
+    /* add monitored items before toolkit being initialized */
+    ck_assert_int_eq(-100, SOPC_ClientHelper_AddMonitoredItems(1, nodeIds1, 1));
+
+    /* initialize wrapper */
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0));
+
+    /* add monitored items before being connected */
+    ck_assert_int_eq(-100, SOPC_ClientHelper_AddMonitoredItems(1, nodeIds1, 1));
+
+    /* create a connection */
+    int32_t valid_con_id = SOPC_ClientHelper_Connect(valid_url, valid_security_none);
+    ck_assert_int_gt(valid_con_id, 0);
+
+    /* add monitored items before subscription being created */
+    ck_assert_int_eq(-100, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds1, 1));
+
+    /* create a subscription */
+    ck_assert_int_eq(0, SOPC_ClientHelper_CreateSubscription(valid_con_id, datachange_callback_none));
+
+    /* invalid argument: connection id*/
+    ck_assert_int_eq(-1, SOPC_ClientHelper_AddMonitoredItems(-1, nodeIds1, 1));
+    /* invalid argument: nodeIds */
+    ck_assert_int_eq(-2, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, NULL, 1));
+    /* invalid argument: nodeIds content */
+    ck_assert_int_eq(-3, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, invalidNodeIds, 1));
+    ck_assert_int_eq(-4, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, invalidNodeIds2, 2));
+    /* invalid argument: nbNodeIds */
+    ck_assert_int_eq(-2, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds1, 0));
+
+    /* add one monitored item */
+    ck_assert_int_eq(0, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds1, 1));
+    /* add one more monitored item */
+    ck_assert_int_eq(0, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds2, 1));
+    /* add multiple monitored items */
+    ck_assert_int_eq(0, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds3, 3));
+
+    /* delete subscription */
+    ck_assert_int_eq(0, SOPC_ClientHelper_Unsubscribe(valid_con_id));
+
+    /* add monitored items after subscription being deleted */
+    ck_assert_int_eq(-100, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds1, 1));
+
+    /* disconnect */
+    ck_assert_int_eq(0, SOPC_ClientHelper_Disconnect(valid_con_id));
+
+    /* add monitored items after being disconnected */
+    ck_assert_int_eq(-100, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds1, 1));
+
+    /* close wrapper */
+    SOPC_ClientHelper_Finalize();
+
+    /* add monitored items after toolkit being closed */
+    ck_assert_int_eq(-100, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds1, 1));
+}
+END_TEST
+
+START_TEST(test_wrapper_add_monitored_items_callback_called)
+{
+    char* nodeIds[1] = { "ns=0;s=Counter" };
+
+    /* initialize wrapper */
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0));
+
+    /* create a connection */
+    int32_t valid_con_id = SOPC_ClientHelper_Connect(valid_url, valid_security_none);
+    ck_assert_int_gt(valid_con_id, 0);
+
+    /* create a subscription */
+    ck_assert_int_eq(0, SOPC_ClientHelper_CreateSubscription(valid_con_id, datachange_callback_check_counter));
+
+    /* initialize mutex and condition */
+    ck_assert_int_eq(SOPC_STATUS_OK, Mutex_Initialization(&check_counter_mutex));
+    ck_assert_int_eq(SOPC_STATUS_OK, Condition_Init(&check_counter_condition));
+
+    ck_assert_int_eq(SOPC_STATUS_OK, Mutex_Lock(&check_counter_mutex));
+
+    /* add one monitored item */
+    ck_assert_int_eq(0, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds, 1));
+
+    /* verify that callback is called correctly */
+    /* use a mutex and a condition to wait until datachange has been received (use a 1.2 sec timeout)*/
+    ck_assert_int_eq(SOPC_STATUS_OK, Mutex_UnlockAndTimedWaitCond(&check_counter_condition, &check_counter_mutex, 1200));
+
+    /* check connection id */
+    ck_assert_int_eq(valid_con_id, check_counter_connection_id);
+    /* check node id */
+    ck_assert_int_eq(0, check_counter_node_id_comparison_result);
+    /* check datavalue */
+    ck_assert_int_eq(SOPC_UInt64_Id, check_counter_data_value.Value.BuiltInTypeId);
+    uint64_t first_value = check_counter_data_value.Value.Value.Uint64;
+
+    /* reset global values */
+    check_counter_connection_id = 0;
+    check_counter_node_id_comparison_result = 1;
+    check_counter_data_value.Value.BuiltInTypeId = SOPC_Int16_Id;
+
+    /* verify that callback is called correctly once again*/
+    ck_assert_int_eq(SOPC_STATUS_OK, Mutex_UnlockAndTimedWaitCond(&check_counter_condition, &check_counter_mutex, 1200));
+    /* verify datachange callback arguments again */
+    /* check connection id */
+    ck_assert_int_eq(valid_con_id, check_counter_connection_id);
+    /* check node id */
+    ck_assert_int_eq(0, check_counter_node_id_comparison_result);
+    /* check datavalue */
+    ck_assert_int_eq(SOPC_UInt64_Id, check_counter_data_value.Value.BuiltInTypeId);
+    ck_assert_uint_ne(first_value, check_counter_data_value.Value.Value.Uint64);
+
+    ck_assert_int_eq(SOPC_STATUS_OK, Mutex_Unlock(&check_counter_mutex));
+
+    /* disconnect */
+    ck_assert_int_eq(0, SOPC_ClientHelper_Disconnect(valid_con_id));
+
+    /* close wrapper */
+    SOPC_ClientHelper_Finalize();
+
+    /* clear mutex and condition */
+    ck_assert_int_eq(SOPC_STATUS_OK, Mutex_Clear(&check_counter_mutex));
+    ck_assert_int_eq(SOPC_STATUS_OK, Condition_Clear(&check_counter_condition));
+}
+END_TEST
+
 START_TEST(test_wrapper_browse)
 {
     //ck_assert(SOPC_STATUS_INVALID_STATE == SOPC_STATUS_OK);
@@ -296,6 +452,8 @@ static Suite* tests_make_suite_wrapper(void)
     tcase_add_test(tc_wrapper, test_wrapper_disconnect);
     tcase_add_test(tc_wrapper, test_wrapper_create_subscription);
     tcase_add_test(tc_wrapper, test_wrapper_create_subscription_after_disconnect);
+    tcase_add_test(tc_wrapper, test_wrapper_add_monitored_items);
+    tcase_add_test(tc_wrapper, test_wrapper_add_monitored_items_callback_called);
     tcase_add_test(tc_wrapper, test_wrapper_browse);
     tcase_set_timeout(tc_wrapper, 0);
     suite_add_tcase(s, tc_wrapper);
