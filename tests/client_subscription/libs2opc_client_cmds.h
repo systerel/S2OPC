@@ -316,7 +316,7 @@ int32_t SOPC_ClientHelper_AddMonitoredItems(int32_t connectionId, char** nodeIds
  @description
     Delete subscription associated to the given connection.
     If this function succeed, no more data changes notification is received about this connection until
- SOPC_ClientHelper_CreateSubscription() and SOPC_ClientHelper_AddMonitorItems() are called.
+    SOPC_ClientHelper_CreateSubscription() and SOPC_ClientHelper_AddMonitorItems() are called.
 
  @param connectionId
     The connection id. It should be > 0

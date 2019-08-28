@@ -271,6 +271,11 @@ START_TEST(test_wrapper_create_subscription)
     /* call the subscription creation a second time */
     ck_assert_int_eq(-100, SOPC_ClientHelper_CreateSubscription(valid_con_id, datachange_callback_none));
 
+    /* delete subscription */
+    ck_assert_int_eq(0, SOPC_ClientHelper_Unsubscribe(valid_con_id));
+    /* create a subscription a second time */
+    ck_assert_int_eq(0, SOPC_ClientHelper_CreateSubscription(valid_con_id, datachange_callback_none));
+
     /* disconnect */
     ck_assert_int_eq(0, SOPC_ClientHelper_Disconnect(valid_con_id));
 
@@ -432,6 +437,55 @@ START_TEST(test_wrapper_add_monitored_items_callback_called)
 }
 END_TEST
 
+START_TEST(test_wrapper_unsubscribe)
+{
+    /* delete subscription before toolkit is initialized */
+    ck_assert_int_eq(-100, SOPC_ClientHelper_Unsubscribe(1));
+
+    /* initialize wrapper */
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0));
+
+    /* delete subscription before connection */
+    ck_assert_int_eq(-100, SOPC_ClientHelper_Unsubscribe(1));
+
+    /* create a connection */
+    int32_t valid_con_id = SOPC_ClientHelper_Connect(valid_url, valid_security_none);
+    ck_assert_int_gt(valid_con_id, 0);
+
+    /* delete subscription before subscription is created */
+    ck_assert_int_eq(-100, SOPC_ClientHelper_Unsubscribe(valid_con_id));
+
+    /* create a subscription */
+    ck_assert_int_eq(0, SOPC_ClientHelper_CreateSubscription(valid_con_id, datachange_callback_none));
+
+    /* invalid argument: connection id */
+    ck_assert_int_eq(-1, SOPC_ClientHelper_Unsubscribe(-1));
+
+    /* delete subscription */
+    ck_assert_int_eq(0, SOPC_ClientHelper_Unsubscribe(valid_con_id));
+    /* delete subscription once again */
+    ck_assert_int_eq(-100, SOPC_ClientHelper_Unsubscribe(valid_con_id));
+
+    /* delete subscription non existing connection id */
+    ck_assert_int_eq(-100, SOPC_ClientHelper_Unsubscribe(valid_con_id + 1));
+
+    /* create a subscription again */
+    ck_assert_int_eq(0, SOPC_ClientHelper_CreateSubscription(valid_con_id, datachange_callback_none));
+
+    /* disconnect */
+    ck_assert_int_eq(0, SOPC_ClientHelper_Disconnect(valid_con_id));
+
+    /* delete subscription after disconnection */
+    ck_assert_int_eq(-100, SOPC_ClientHelper_Unsubscribe(valid_con_id));
+
+    /* close wrapper */
+    SOPC_ClientHelper_Finalize();
+
+    /* delete subscription after toolkit is closed*/
+    ck_assert_int_eq(-100, SOPC_ClientHelper_Unsubscribe(valid_con_id));
+}
+END_TEST
+
 START_TEST(test_wrapper_browse)
 {
     //ck_assert(SOPC_STATUS_INVALID_STATE == SOPC_STATUS_OK);
@@ -454,6 +508,7 @@ static Suite* tests_make_suite_wrapper(void)
     tcase_add_test(tc_wrapper, test_wrapper_create_subscription_after_disconnect);
     tcase_add_test(tc_wrapper, test_wrapper_add_monitored_items);
     tcase_add_test(tc_wrapper, test_wrapper_add_monitored_items_callback_called);
+    tcase_add_test(tc_wrapper, test_wrapper_unsubscribe);
     tcase_add_test(tc_wrapper, test_wrapper_browse);
     tcase_set_timeout(tc_wrapper, 0);
     suite_add_tcase(s, tc_wrapper);
