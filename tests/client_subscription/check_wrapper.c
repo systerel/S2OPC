@@ -31,6 +31,11 @@
 
 #include "libs2opc_client_cmds.h"
 
+static const char* valid_url = "opc.tcp://localhost:4841";
+static const char* invalid_url = "opc.tcp://localhost:5841";
+
+
+
 static SOPC_ClientHelper_Security valid_security_none = {
                                          .security_policy = SOPC_SecurityPolicy_None_URI,
                                          .security_mode = OpcUa_MessageSecurityMode_None,
@@ -64,6 +69,15 @@ static SOPC_ClientHelper_Security valid_security_signAndEncrypt_b256 = {
                                          .username = "TODO",
                                          .password = "TODO"};
 
+static void datachange_callback_none(const int32_t c_id,
+                                     const char* node_id,
+                                     const SOPC_DataValue* value)
+{
+    (void) c_id;
+    (void) node_id;
+    (void) value;
+}
+
 START_TEST(test_wrapper_initialize_finalize)
 {
     //TODO complete tests with invalid arguments and errors
@@ -82,9 +96,6 @@ END_TEST
 START_TEST(test_wrapper_connect)
 {
     ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0));
-
-    const char* valid_url = "opc.tcp://localhost:4841";
-    const char* invalid_url = "opc.tcp://localhost:5841";
 
     //TODO check different security_mode/security_policy combination
     //TODO check invalid client/srv cert (not signed by CA)
@@ -128,8 +139,6 @@ END_TEST
 START_TEST(test_wrapper_connect_invalid_arguments)
 {
     ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0));
-
-    const char* valid_url = "opc.tcp://localhost:4841";
 
     /* invalid arguments */
     ck_assert_int_eq(-1, SOPC_ClientHelper_Connect(NULL, valid_security_none));
@@ -186,20 +195,8 @@ START_TEST(test_wrapper_disconnect)
 
     ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0));
 
-    const char* valid_url = "opc.tcp://localhost:4841";
-    SOPC_ClientHelper_Security valid_security = {
-                                         .security_policy = SOPC_SecurityPolicy_None_URI,
-                                         .security_mode = OpcUa_MessageSecurityMode_None,
-                                         .path_cert_auth = "./trusted/cacert.der",
-                                         .path_cert_srv = NULL,
-                                         .path_cert_cli = NULL,
-                                         .path_key_cli = NULL,
-                                         .policyId = "anonymous",
-                                         .username = NULL,
-                                         .password = NULL};
-
     /* connection to a valid endpoint */
-    int32_t valid_con_id = SOPC_ClientHelper_Connect(valid_url, valid_security);
+    int32_t valid_con_id = SOPC_ClientHelper_Connect(valid_url, valid_security_none);
     ck_assert_int_gt(valid_con_id, 0);
 
     /* disconnect a valid endpoint */
@@ -221,6 +218,64 @@ START_TEST(test_wrapper_disconnect)
 }
 END_TEST
 
+START_TEST(test_wrapper_create_subscription)
+{
+    /* create subscription before wrapper has been initialized */
+    ck_assert_int_eq(-100, SOPC_ClientHelper_CreateSubscription(1, datachange_callback_none));
+
+    /* initialize wrapper */
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0));
+
+    /* create a connection */
+    int32_t valid_con_id = SOPC_ClientHelper_Connect(valid_url, valid_security_none);
+    ck_assert_int_gt(valid_con_id, 0);
+
+    /* create connection using invalid connection id */
+    ck_assert_int_eq(-1, SOPC_ClientHelper_CreateSubscription(-1, datachange_callback_none));
+
+    /* create a connection using an invalid callback */
+    ck_assert_int_eq(-2, SOPC_ClientHelper_CreateSubscription(valid_con_id, NULL));
+
+    /* create a connection using a non existing connection */
+    ck_assert_int_eq(-100, SOPC_ClientHelper_CreateSubscription(valid_con_id + 1, datachange_callback_none));
+
+    /* create a valid subscription */
+    ck_assert_int_eq(0, SOPC_ClientHelper_CreateSubscription(valid_con_id, datachange_callback_none));
+
+    /* call the subscription creation a second time */
+    ck_assert_int_eq(-100, SOPC_ClientHelper_CreateSubscription(valid_con_id, datachange_callback_none));
+
+    /* disconnect */
+    ck_assert_int_eq(0, SOPC_ClientHelper_Disconnect(valid_con_id));
+
+    /* close wrapper */
+    SOPC_ClientHelper_Finalize();
+
+    /* create a subscription after wrapper has been closed */
+    ck_assert_int_eq(-100, SOPC_ClientHelper_CreateSubscription(valid_con_id, datachange_callback_none));
+}
+END_TEST
+
+START_TEST(test_wrapper_create_subscription_after_disconnect)
+{
+    /* initialize wrapper */
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0));
+
+    /* create a connection */
+    int32_t valid_con_id = SOPC_ClientHelper_Connect(valid_url, valid_security_none);
+    ck_assert_int_gt(valid_con_id, 0);
+
+    /* disconnect */
+    ck_assert_int_eq(0, SOPC_ClientHelper_Disconnect(valid_con_id));
+
+    /* create a subscription after being disconnected */
+    ck_assert_int_eq(-100, SOPC_ClientHelper_CreateSubscription(valid_con_id, datachange_callback_none));
+
+    /* close wrapper */
+    SOPC_ClientHelper_Finalize();
+}
+END_TEST
+
 START_TEST(test_wrapper_browse)
 {
     //ck_assert(SOPC_STATUS_INVALID_STATE == SOPC_STATUS_OK);
@@ -239,6 +294,8 @@ static Suite* tests_make_suite_wrapper(void)
     tcase_add_test(tc_wrapper, test_wrapper_connect);
     tcase_add_test(tc_wrapper, test_wrapper_connect_invalid_arguments);
     tcase_add_test(tc_wrapper, test_wrapper_disconnect);
+    tcase_add_test(tc_wrapper, test_wrapper_create_subscription);
+    tcase_add_test(tc_wrapper, test_wrapper_create_subscription_after_disconnect);
     tcase_add_test(tc_wrapper, test_wrapper_browse);
     tcase_set_timeout(tc_wrapper, 0);
     suite_add_tcase(s, tc_wrapper);
