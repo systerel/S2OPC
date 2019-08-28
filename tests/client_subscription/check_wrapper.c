@@ -32,6 +32,7 @@
 #include "assert.h"
 #include "string.h"
 #include "sopc_mutexes.h"
+#include "sopc_mem_alloc.h"
 #include "libs2opc_client_cmds.h"
 
 static const char* valid_url = "opc.tcp://localhost:4841";
@@ -486,6 +487,146 @@ START_TEST(test_wrapper_unsubscribe)
 }
 END_TEST
 
+START_TEST(test_wrapper_read)
+{
+    /* read before toolkit is initialized */
+    {
+        SOPC_ClientHelper_ReadValue readValue[1] = {{ .nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL }};
+        SOPC_DataValue* readResults[1];
+        ck_assert_int_eq(-100, SOPC_ClientHelper_Read(1, readValue, 1, readResults));
+    }
+
+    /* initialize wrapper */
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0));
+
+    /* read before connection is created */
+    {
+        SOPC_ClientHelper_ReadValue readValue[1] = {{ .nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL }};
+        SOPC_DataValue* readResults[1];
+        ck_assert_int_eq(-100, SOPC_ClientHelper_Read(1, readValue, 1, readResults));
+    }
+
+    /* create a connection */
+    int32_t valid_con_id = SOPC_ClientHelper_Connect(valid_url, valid_security_none);
+    ck_assert_int_gt(valid_con_id, 0);
+
+    /* invalid arguments */
+    {
+        SOPC_ClientHelper_ReadValue readValue[1] = {{ .nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL }};
+        SOPC_ClientHelper_ReadValue readValue2[2] = {{ .nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL },
+                                                     { .nodeId = NULL, .attributeId = 13, .indexRange = NULL}};
+        SOPC_DataValue* readResults[1];
+        SOPC_DataValue* readResults2[1];
+
+        /* invalid connection id */
+        ck_assert_int_eq(-1, SOPC_ClientHelper_Read(-1, readValue, 1, readResults));
+        ck_assert_int_eq(-100, SOPC_ClientHelper_Read(valid_con_id + 1, readValue, 1, readResults));
+        /* invalid readValue */
+        ck_assert_int_eq(-2, SOPC_ClientHelper_Read(valid_con_id, NULL, 1, readResults));
+        /* invalid nbElements */
+        ck_assert_int_eq(-2, SOPC_ClientHelper_Read(valid_con_id, readValue, 0, readResults));
+        /* invalid values */
+        ck_assert_int_eq(-3, SOPC_ClientHelper_Read(valid_con_id, readValue, 1, NULL));
+        /* invalid readValue content (nodeId) */
+        readValue[0].nodeId = NULL;
+        ck_assert_int_eq(-4, SOPC_ClientHelper_Read(valid_con_id, readValue, 1, readResults));
+        ck_assert_int_eq(-5, SOPC_ClientHelper_Read(valid_con_id, readValue2, 2, readResults2));
+    }
+    /* read one node */
+    {
+        SOPC_ClientHelper_ReadValue readValue1[1] = {{ .nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL }};
+        SOPC_DataValue* readResults1[1];
+        ck_assert_int_eq(0, SOPC_ClientHelper_Read(valid_con_id, readValue1, 1, readResults1));
+        /* check datavalue */
+        ck_assert_ptr_ne(NULL, readResults1[0]);
+        ck_assert_int_eq(SOPC_STATUS_OK, readResults1[0]->Status);
+        ck_assert_int_eq(SOPC_UInt64_Id, readResults1[0]->Value.BuiltInTypeId);
+        ck_assert_uint_ne(0, readResults1[0]->Value.Value.Uint64);
+        /* free datavalue */
+        SOPC_Free(readResults1[0]);
+    }
+    /* read multiple nodes */
+    {
+        SOPC_ClientHelper_ReadValue readValue2[2] = {{ .nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL },
+                                                     { .nodeId = "ns=0;i=1001", .attributeId = 13, .indexRange = NULL }};
+        SOPC_DataValue* readResults2[2];
+        ck_assert_int_eq(0, SOPC_ClientHelper_Read(valid_con_id, readValue2, 2, readResults2));
+        /* check first datavalue */
+        ck_assert_ptr_ne(NULL, readResults2[0]);
+        ck_assert_int_eq(SOPC_STATUS_OK, readResults2[0]->Status);
+        ck_assert_int_eq(SOPC_UInt64_Id, readResults2[0]->Value.BuiltInTypeId);
+        ck_assert_uint_ne(0, readResults2[0]->Value.Value.Uint64);
+        /* free first datavalue */
+        SOPC_Free(readResults2[0]);
+
+        /* check second datavalue */
+        ck_assert_ptr_ne(NULL, readResults2[1]);
+        ck_assert_int_eq(SOPC_STATUS_OK, readResults2[1]->Status);
+        ck_assert_int_eq(SOPC_Int64_Id, readResults2[1]->Value.BuiltInTypeId);
+        ck_assert_int_ne(0, readResults2[1]->Value.Value.Int64);
+        /* free second datavalue */
+        SOPC_Free(readResults2[1]);
+    }
+    /* read invalid node */
+    {
+        SOPC_ClientHelper_ReadValue readValue3[1] = {{ .nodeId = "ns=0;s=CounterThatShouldNotExist",
+                                                       .attributeId = 13,
+                                                        .indexRange = NULL }};
+        SOPC_DataValue* readResults3[1];
+        ck_assert_int_eq(0, SOPC_ClientHelper_Read(valid_con_id, readValue3, 1, readResults3));
+        /* check datavalue */
+        ck_assert_ptr_ne(NULL, readResults3[0]);
+        ck_assert_int_ne(SOPC_STATUS_OK, readResults3[0]->Status);
+        /* free datavalue */
+        SOPC_Free(readResults3[0]);
+    }
+    /* read mix of invalid nodes and valid nodes */
+    {
+        SOPC_ClientHelper_ReadValue readValue4[2] = {{ .nodeId = "ns=0;s=CounterThatShouldNotExist",
+                                                       .attributeId = 13,
+                                                       .indexRange = NULL },
+                                                     { .nodeId = "ns=0;i=1001",
+                                                        .attributeId = 13,
+                                                        .indexRange = NULL }};
+        SOPC_DataValue* readResults4[2];
+        ck_assert_int_eq(0, SOPC_ClientHelper_Read(valid_con_id, readValue4, 2, readResults4));
+        /* check first datavalue */
+        ck_assert_ptr_ne(NULL, readResults4[0]);
+        ck_assert_int_ne(SOPC_STATUS_OK, readResults4[0]->Status);
+        /* free first datavalue */
+        SOPC_Free(readResults4[0]);
+
+        /* check second datavalue */
+        ck_assert_ptr_ne(NULL, readResults4[1]);
+        ck_assert_int_eq(SOPC_STATUS_OK, readResults4[1]->Status);
+        ck_assert_int_eq(SOPC_Int64_Id, readResults4[1]->Value.BuiltInTypeId);
+        ck_assert_int_ne(0, readResults4[1]->Value.Value.Int64);
+        /* free second datavalue */
+        SOPC_Free(readResults4[1]);
+    }
+
+    /* disconnect */
+    ck_assert_int_eq(0, SOPC_ClientHelper_Disconnect(valid_con_id));
+
+    /* read after connection is closed */
+    {
+        SOPC_ClientHelper_ReadValue readValue5[1] = {{ .nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL }};
+        SOPC_DataValue* readResults5[1];
+        ck_assert_int_eq(-100, SOPC_ClientHelper_Read(valid_con_id, readValue5, 1, readResults5));
+    }
+
+    /* close wrapper */
+    SOPC_ClientHelper_Finalize();
+
+    /* read after toolkit is closed */
+    {
+        SOPC_ClientHelper_ReadValue readValue6[1] = {{ .nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL }};
+        SOPC_DataValue* readResults6[1];
+        ck_assert_int_eq(-100, SOPC_ClientHelper_Read(valid_con_id, readValue6, 1, readResults6));
+    }
+}
+END_TEST
+
 START_TEST(test_wrapper_browse)
 {
     //ck_assert(SOPC_STATUS_INVALID_STATE == SOPC_STATUS_OK);
@@ -509,6 +650,7 @@ static Suite* tests_make_suite_wrapper(void)
     tcase_add_test(tc_wrapper, test_wrapper_add_monitored_items);
     tcase_add_test(tc_wrapper, test_wrapper_add_monitored_items_callback_called);
     tcase_add_test(tc_wrapper, test_wrapper_unsubscribe);
+    tcase_add_test(tc_wrapper, test_wrapper_read);
     tcase_add_test(tc_wrapper, test_wrapper_browse);
     tcase_set_timeout(tc_wrapper, 0);
     suite_add_tcase(s, tc_wrapper);

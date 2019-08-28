@@ -759,13 +759,21 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
     {
         return -1;
     }
-    if (NULL == readValues || nbElements < 1 || nbElements > INT32_MAX)
+    else if (NULL == readValues || nbElements < 1 || nbElements > INT32_MAX)
     {
         return -2;
     }
-    if (NULL == values)
+    else if (NULL == values)
     {
         return -3;
+    }
+
+    for (size_t i = 0; i < nbElements; i++)
+    {
+        if (NULL == readValues[i].nodeId)
+        {
+            return (int32_t) -(4 + i);
+        }
     }
 
     OpcUa_ReadRequest* request = (OpcUa_ReadRequest*) SOPC_Malloc(sizeof(OpcUa_ReadRequest));

@@ -378,7 +378,7 @@ int32_t SOPC_ClientHelper_Write(int32_t connectionId,
 
     Restrictions:
     - The service parameter 'maxAge' is not managed.
-    - If DataEncodig should apply, Binary encoding is used.
+    - If DataEncoding should apply, Binary encoding is used.
  @param connectionId
     The connection id. It should be > 0
  @param readValues
@@ -398,8 +398,8 @@ int32_t SOPC_ClientHelper_Write(int32_t connectionId,
    '-1' if connectionId not valid
    '-2' if readValues, values or nbElements not valid
    '-3' if values is not valid
+   '-<4+index>' if readValues[index].nodeId is invalid
    '-100' if operation failed
-   '-101' if memory allocation failed
 */
 int32_t SOPC_ClientHelper_Read(int32_t connectionId,
                                SOPC_ClientHelper_ReadValue* readValues,
