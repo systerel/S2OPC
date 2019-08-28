@@ -83,16 +83,15 @@ static void onSecureChannelEvent(SOPC_EventHandler* handler,
     switch (scEvent)
     {
     case EP_CONNECTED:
-        SOPC_Logger_TraceDebug("ServicesMgr: SC_EP_SC_CONNECTED epCfgIdx=%" PRIu32 " scCfgIdx=%" PRIu32
+        SOPC_Logger_TraceDebug("ServicesMgr: SC_EP_SC_CONNECTED epCfgIdx=%" PRIu32 " scCfgIdx=%" PRIuPTR
                                " scIdx=%" PRIuPTR,
-                               id, params == NULL ? 0 : *(uint32_t*) params, auxParam);
+                               id, (uintptr_t) params, auxParam);
 
         // id ==  endpoint configuration index
         // params = channel configuration index POINTER
         // auxParam == connection Id
         assert(id <= INT32_MAX);
-        assert(params != NULL);
-        uint32_t channel_config_idx = *((uint32_t*) params);
+        uint32_t channel_config_idx = (uint32_t)(uintptr_t) params;
         assert(channel_config_idx <= constants__t_channel_config_idx_i_max);
         assert(auxParam <= constants__t_channel_i_max);
 
@@ -158,16 +157,13 @@ static void onSecureChannelEvent(SOPC_EventHandler* handler,
         // params is freed by services manager
         break;
     case SC_SND_FAILURE:
-        SOPC_Logger_TraceDebug("ServicesMgr: SC_SND_FAILURE scIdx=%" PRIu32 " reqId=%" PRIu32 " statusCode=%" PRIXPTR,
-                               id, params == NULL ? 0 : *(uint32_t*) params, auxParam);
+        SOPC_Logger_TraceDebug("ServicesMgr: SC_SND_FAILURE scIdx=%" PRIu32 " reqId=%" PRIuPTR " statusCode=%" PRIXPTR,
+                               id, (uintptr_t) params, auxParam);
 
-        if (NULL != params)
-        {
-            constants_statuscodes_bs__t_StatusCode_i statusCode;
-            util_status_code__C_to_B((SOPC_StatusCode) auxParam, &statusCode);
-            io_dispatch_mgr__snd_msg_failure(id, (constants__t_request_context_i) * (uint32_t*) params, statusCode);
-            SOPC_Free(params);
-        } // else: without request Id, it cannot be treated
+        constants_statuscodes_bs__t_StatusCode_i statusCode;
+        util_status_code__C_to_B((SOPC_StatusCode) auxParam, &statusCode);
+        io_dispatch_mgr__snd_msg_failure(id, (constants__t_request_context_i)(uintptr_t) params, statusCode);
+        SOPC_Free(params);
         break;
     case SC_REQUEST_TIMEOUT:
         SOPC_Logger_TraceDebug("ServicesMgr: SC_REQUEST_TIMEOUT scIdx=%" PRIu32 " reqHandle=%" PRIuPTR, id, auxParam);

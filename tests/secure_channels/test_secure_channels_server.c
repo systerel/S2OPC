@@ -224,14 +224,14 @@ int main(int argc, char* argv[])
         if (serviceEvent->event == EP_CONNECTED)
         {
             if (serviceEvent->eltId == epConfigIdx && serviceEvent->params != NULL &&
-                (*(uint32_t*) serviceEvent->params) != 0 && // SC config index
+                (uintptr_t) serviceEvent->params != 0 && // SC config index
                 serviceEvent->auxParam != 0)
             { // SC connection index
 
                 /* avoid unused parameter compiler warning */
                 (void) scConfigIdx;
 
-                scConfigIdx = *(uint32_t*) serviceEvent->params;
+                scConfigIdx = (uint32_t)(uintptr_t) serviceEvent->params;
                 scConnectionId = (uint32_t) serviceEvent->auxParam;
                 printf("<Stub_Server: Connection established from a client\n");
             }

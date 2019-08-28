@@ -2425,7 +2425,7 @@ static void onServerSideOpen(SOPC_SecureConnection* scConnection, uint32_t scIdx
         SOPC_EventTimer_Cancel(scConnection->connectionTimeoutTimerId);
 
         SOPC_EventHandler_Post(secureChannelsEventHandler, EP_CONNECTED, scConnection->serverEndpointConfigIdx,
-                               (void*) &scConnection->endpointConnectionConfigIdx, scIdx);
+                               (void*) (uintptr_t) scConnection->endpointConnectionConfigIdx, scIdx);
 
         return;
     }
@@ -2460,7 +2460,6 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
                                                    void* params,
                                                    uintptr_t auxParam)
 {
-    uint32_t* requestIdForSndFailure = NULL;
     SOPC_SecureConnection* scConnection = NULL;
     SOPC_Buffer* buffer = NULL;
     SOPC_StatusCode errorStatus;
@@ -2694,23 +2693,12 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
             }
             else
             {
-                requestIdForSndFailure = SOPC_Malloc(sizeof(uint32_t));
-                if (requestIdForSndFailure != NULL)
-                {
-                    *requestIdForSndFailure = (uint32_t) auxParam;
-                    // Part 6 (1.03) §6.7.3:
-                    // "The client shall report the error back to the Application as StatusCode for the request"
-                    SOPC_EventHandler_Post(secureChannelsEventHandler, SC_SND_FAILURE,
-                                           eltId,                  // secure connection id
-                                           requestIdForSndFailure, // request Id
-                                           errorStatus);           // error status
-                }
-                else // without request Id, nothing can be treated for the failure
-                {
-                    SOPC_Logger_TraceError("ScStateMgr: abort chunk message received with status=%" PRIX32
-                                           " and reason=%s (scIdx=%" PRIu32 ").",
-                                           errorStatus, errorReason, eltId);
-                }
+                // Part 6 (1.03) §6.7.3:
+                // "The client shall report the error back to the Application as StatusCode for the request"
+                SOPC_EventHandler_Post(secureChannelsEventHandler, SC_SND_FAILURE,
+                                       eltId,            // secure connection id
+                                       (void*) auxParam, // request Id
+                                       errorStatus);     // error status
             }
             SOPC_Free(errorReason);
         }
@@ -2741,17 +2729,15 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
     case INT_SC_SND_FATAL_FAILURE:
     {
         // An error occurred and SC connection shall be closed
-        SOPC_Logger_TraceDebug("ScStateMgr: INT_SC_SND_FATAL_FAILURE scIdx=%" PRIu32 " reqId/Handle=%" PRIu32
+        SOPC_Logger_TraceDebug("ScStateMgr: INT_SC_SND_FATAL_FAILURE scIdx=%" PRIu32 " reqId/Handle=%" PRIuPTR
                                " statusCode=%" PRIXPTR,
-                               eltId, params == NULL ? 0 : *(uint32_t*) params, auxParam);
+                               eltId, (uintptr_t) params, auxParam);
 
-        if (params != NULL)
-        {
-            SOPC_EventHandler_Post(secureChannelsEventHandler, SC_SND_FAILURE,
-                                   eltId,     // secure connection id
-                                   params,    // request Id
-                                   auxParam); // error status
-        }
+        SOPC_EventHandler_Post(secureChannelsEventHandler, SC_SND_FAILURE,
+                               eltId,     // secure connection id
+                               params,    // request Id
+                               auxParam); // error status
+
         // else: without request Id, nothing can be treated for the failure
         scConnection = SC_GetConnection(eltId);
 
@@ -2765,17 +2751,14 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
     case INT_SC_SENT_ABORT_FAILURE:
     {
         // An abort final chunk has been sent and SC connection shall not be closed
-        SOPC_Logger_TraceDebug("ScStateMgr: INT_SC_SND_FATAL_FAILURE scIdx=%" PRIu32 " reqId/Handle=%" PRIu32
+        SOPC_Logger_TraceDebug("ScStateMgr: INT_SC_SENT_ABORT_FAILURE scIdx=%" PRIu32 " reqId/Handle=%" PRIuPTR
                                " statusCode=%" PRIXPTR,
-                               eltId, params == NULL ? 0 : *(uint32_t*) params, auxParam);
+                               eltId, (uintptr_t) params, auxParam);
 
-        if (params != NULL)
-        {
-            SOPC_EventHandler_Post(secureChannelsEventHandler, SC_SND_FAILURE,
-                                   eltId,     // secure connection id
-                                   params,    // request Id
-                                   auxParam); // error status
-        }
+        SOPC_EventHandler_Post(secureChannelsEventHandler, SC_SND_FAILURE,
+                               eltId,     // secure connection id
+                               params,    // request Id
+                               auxParam); // error status
         break;
     }
     case INT_SC_RCV_ERR:
@@ -3024,7 +3007,6 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
     uint32_t idx = 0;
     SOPC_SecureChannel_Config* scConfig = NULL;
     SOPC_SecureConnection* scConnection = NULL;
-    uint32_t* requestIdForSndFailure = NULL;
     SOPC_StatusCode errorStatus = SOPC_GoodGenericStatus; // Good
     switch (event)
     {
@@ -3120,17 +3102,10 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
             {
                 errorStatus = OpcUa_BadSecureChannelClosed;
             }
-            // Error case:
-            requestIdForSndFailure = SOPC_Malloc(sizeof(uint32_t));
-            if (requestIdForSndFailure != NULL)
-            {
-                *requestIdForSndFailure = (uint32_t) auxParam;
-                SOPC_EventHandler_Post(secureChannelsEventHandler, SC_SND_FAILURE,
-                                       eltId,                  // secure connection id
-                                       requestIdForSndFailure, // request Id
-                                       errorStatus);           // error status
-            }
-            // else: without request Id, nothing can be treated for the failure
+            SOPC_EventHandler_Post(secureChannelsEventHandler, SC_SND_FAILURE,
+                                   eltId,            // secure connection id
+                                   (void*) auxParam, // request Id
+                                   errorStatus);     // error status
 
             SOPC_Buffer_Delete((SOPC_Buffer*) params);
         }

@@ -4190,7 +4190,6 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InternalEvent event,
     // True if socket will be closed after sending this message (ERR, CLO)
     bool socketWillClose = false;
     SOPC_SecureConnection* scConnection = SC_GetConnection(eltId);
-    uint32_t* requestIdForSendFailure = NULL;
     bool failedWithAbortMessage = false;
 
     if (scConnection != NULL && scConnection->state != SECURE_CONNECTION_STATE_SC_CLOSED)
@@ -4275,22 +4274,16 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InternalEvent event,
         {
             if (!socketWillClose)
             {
-                requestIdForSendFailure = SOPC_Malloc(sizeof(uint32_t));
-                if (requestIdForSendFailure != NULL)
-                {
-                    *requestIdForSendFailure = (uint32_t) auxParam;
-                }
-
                 if (failedWithAbortMessage)
                 {
-                    SOPC_SecureChannels_EnqueueInternalEvent(INT_SC_SENT_ABORT_FAILURE, eltId, requestIdForSendFailure,
-                                                             errorStatus);
+                    SOPC_SecureChannels_EnqueueInternalEvent(INT_SC_SENT_ABORT_FAILURE, eltId,
+                                                             (void*) (uintptr_t) auxParam, errorStatus);
                 }
                 else
                 {
                     // Treat as prio events
                     SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_SND_FATAL_FAILURE, eltId,
-                                                                   requestIdForSendFailure, errorStatus);
+                                                                   (void*) (uintptr_t) auxParam, errorStatus);
                 }
             }
             else

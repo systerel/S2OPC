@@ -53,7 +53,7 @@ typedef enum
                                   auxParam = error status */
     INT_SC_SND_FATAL_FAILURE,  /* >------------------------- */
                                // id = secure channel connection index,
-                               // params = (uint32_t *) requestId,
+                               // params = (uint32_t) requestId,
                                // auxParam = (SOPC_StatusCode) error status in case of client */
     INT_SC_SENT_ABORT_FAILURE, /* -------------------------< */
     /* SC connection manager -> OPC UA chunks message manager */
