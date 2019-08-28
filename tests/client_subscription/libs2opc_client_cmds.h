@@ -335,8 +335,8 @@ int32_t SOPC_ClientHelper_Unsubscribe(int32_t connectionId);
  @return
    '0' if operation succeed
    '-1' if connectionId not valid
-   '-2' if toolkit unitialized
-   '-2' if already closed connection
+   '-2' if toolkit uninitialized
+   '-3' if already closed connection
    '-100' if operation failed
 */
 int32_t SOPC_ClientHelper_Disconnect(int32_t connectionId);
