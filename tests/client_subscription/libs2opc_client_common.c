@@ -731,8 +731,6 @@ SOPC_ReturnStatus SOPC_ClientCommon_CreateSubscription(const SOPC_LibSub_Connect
         status = SOPC_StaMac_CreateSubscription(pSM);
     }
 
-    int64_t timeout_ms = SOPC_StaMac_GetTimeout(pSM);
-
     /* Release the lock so that the event handler can work properly while waiting */
     mutStatus = Mutex_Unlock(&mutex);
     assert(SOPC_STATUS_OK == mutStatus);
@@ -740,6 +738,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_CreateSubscription(const SOPC_LibSub_Connect
     /* Wait for the monitored item to be created */
     if (SOPC_STATUS_OK == status)
     {
+        int64_t timeout_ms = SOPC_StaMac_GetTimeout(pSM);
         int count = 0;
         while (!SOPC_StaMac_IsError(pSM) && !SOPC_StaMac_HasSubscription(pSM) &&
                count * CONNECTION_TIMEOUT_MS_STEP < timeout_ms)
