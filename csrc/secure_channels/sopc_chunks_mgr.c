@@ -3771,7 +3771,7 @@ static bool SC_Chunks_TreatSendBufferMSGCLO(
     }
 
     /* RECORD REQUEST CONTEXT (CLIENT ONLY) */
-    if (result && !scConnection->isServerConnection)
+    if (result && !scConnection->isServerConnection && isFinalChar == 'F')
     {
         result = SC_Chunks_CreateClientSentRequestContext(scConnectionIdx, scConnection, requestIdOrHandle, sendMsgType,
                                                           requestId, errorStatus);
@@ -3852,7 +3852,7 @@ static bool SC_Chunks_ComputeNbChunksToSend(SOPC_SecureConnection* scConnection,
     SOPC_SecureConnection_TcpProperties* tcpProperties = &scConnection->tcpMsgProperties;
     if (0 == tcpProperties->sendMaxMessageSize || msgBodyLength <= tcpProperties->sendMaxMessageSize)
     {
-        if (msgBodyLength <= tcpProperties->sendBufferSize)
+        if (msgBodyLength <= scConnection->symmSecuMaxBodySize)
         {
             *nbChunks = 1;
             result = true;
@@ -4156,6 +4156,8 @@ static bool SC_Chunks_TreatSendMessageBuffer(
             {
                 // Require write of output buffer on socket
                 SOPC_Sockets_EnqueueEvent(SOCKET_WRITE, scConnection->socketIndex, (void*) outputChunkBuffer, 0);
+                // Final result is complete message cannot be sent even if abort message was
+                result = false;
             }
             else
             {
