@@ -239,7 +239,7 @@ SOPC_ReturnStatus SOPC_Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize
  *  \brief Retrieve number of bytes available to read on the socket
  *
  *  \param sock         The socket on which data might be available to read
- *  \param byteToRead   (out) Pointer to the number of bytes available to read on the socket.
+ *  \param bytesToRead  (out) Pointer to the number of bytes available to read on the socket.
  *                      To be considered only if returned status is SOPC_STATUS_OK
  *
  *  \return             SOPC_STATUS_OK if operation succeeded,
