@@ -505,11 +505,11 @@ SOPC_ReturnStatus Helpers_NewValueFromDataValue(SOPC_DataValue* pVal, SOPC_LibSu
             plsVal->type = SOPC_LibSub_DataType_bytestring;
             if (pVal->Value.Value.Bstring.Length > 0)
             {
-                plsVal->length = (size_t) pVal->Value.Value.Bstring.Length;
-                plsVal->value = SOPC_Malloc(plsVal->length);
+                plsVal->length = pVal->Value.Value.Bstring.Length;
+                plsVal->value = SOPC_Malloc((size_t) plsVal->length);
                 if (NULL != plsVal->value)
                 {
-                    memcpy(plsVal->value, pVal->Value.Value.Bstring.Data, plsVal->length);
+                    memcpy(plsVal->value, pVal->Value.Value.Bstring.Data, (size_t) plsVal->length);
                 }
                 else
                 {

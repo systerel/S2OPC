@@ -180,7 +180,7 @@ typedef struct
     SOPC_LibSub_DataType type;
     SOPC_StatusCode quality;
     void* value;
-    size_t length;
+    int32_t length;
     SOPC_LibSub_Timestamp source_timestamp;
     SOPC_LibSub_Timestamp server_timestamp;
     void* raw_value;
