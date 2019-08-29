@@ -413,11 +413,11 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
     If Browse Request returns ContinuationPoint, a BrowseNext Request is sent until no ContinuationPoint is returned.
 
     Restrictions:
-    - View are not managed
+    - Views are not managed
     - requestedMaxReferencesPerNode is set to 0
     - nodeClassMask is set to 0 (object)
     - resultMask specifies all fields are returned
-    - browse cannot be called several times simultanously
+    - browse cannot be called several times simultaneously
 
  @param connectionId
     The connection id. It should be > 0
@@ -431,13 +431,14 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
     A pre-allocated array to the output list of BrowseResult.
     It should be at least \p nElements long.
     When return, the order of this list matches the order of \p readValues.
-    The ownership of the data moved to caller which should freed the content of this array.
+    The ownership of the data moved to caller which should free the content of this array.
 
  @return
    '0' if operation succeed
    '-1' if connectionId not valid
-   '-2' if browseRequest, browseResult or nbElements not valid
-   '-3' too many call to BrowseNext without finishing the request
+   '-2' if browseRequest or nbElements not valid
+   '-3' if browseResults  not valid
+   '-4' too many calls to BrowseNext without finishing the request
    '-100' if operation failed
 */
 int32_t SOPC_ClientHelper_Browse(int32_t connectionId,

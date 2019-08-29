@@ -18,6 +18,7 @@
  */
 
 #include "libs2opc_client_cmds.h"
+#include "libs2opc_client_cmds_internal_api.h"
 
 #include "sopc_builtintypes.h"
 #include "sopc_mutexes.h"
@@ -32,7 +33,6 @@
 #include "sopc_types.h"
 
 #include <assert.h>
-#include <getopt.h>
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -47,14 +47,9 @@
 /* Max number of subscribed items per connection */
 #define MAX_SUBSCRIBED_ITEMS 200
 /* Max BrowseNext requests iteration number */
-#define MAX_BROWSENEXT_REQUESTS 200
-
-/* Secure Channel configuration */
-#define ENDPOINT_URL "opc.tcp://localhost:4841"
-/* Security Policy is None or Basic256 or Basic256Sha256 */
-#define SECURITY_POLICY SOPC_SecurityPolicy_None_URI
-/* Security Mode is None or Sign or SignAndEncrypt */
-#define SECURITY_MODE OpcUa_MessageSecurityMode_None
+uint32_t CfgMaxBrowseNextRequests = 50;
+/* Max references per node (BrowseRequest) */
+uint32_t CfgMaxReferencesPerNode = 0;
 
 /* Connection global timeout */
 #define TIMEOUT_MS 10000
@@ -66,7 +61,7 @@
 #define MAX_KEEP_ALIVE_COUNT 3
 /* Lifetime Count of subscriptions */
 #define MAX_LIFETIME_COUNT 10
-/* Number of targetted publish token */
+/* Number of targeted publish token */
 #define PUBLISH_N_TOKEN 3
 
 /* Path to the certificate authority */
@@ -77,23 +72,6 @@
 #define PATH_CLIENT_PUBL "./client_public/client_2k_cert.der"
 /* Path to the client private key */
 #define PATH_CLIENT_PRIV "./client_private/client_2k_key.pem"
-
-/* Default policy Id */
-#define POLICY_ID "anonymous"
-
-/* Command line helpers and arguments */
-enum
-{
-    OPT_HELP,
-    OPT_ENDPOINT,
-    OPT_POLICYID,
-    OPT_USERNAME,
-    OPT_PASSWORD,
-    OPT_PUBLISH_PERIOD,
-    OPT_TOKEN_TARGET,
-    OPT_DISABLE_SECU,
-    OPT_KEEPALIVE,
-} cmd_line_option_values_t;
 
 typedef struct
 {
@@ -1340,7 +1318,7 @@ int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
         OpcUa_ViewDescription_Initialize(&request->View);
         request->NodesToBrowse = nodesToBrowse;
         request->NoOfNodesToBrowse = (int32_t) nbElements;
-        request->RequestedMaxReferencesPerNode = 0; //unlimited
+        request->RequestedMaxReferencesPerNode = CfgMaxReferencesPerNode;
     }
 
     /* Create context */
@@ -1383,21 +1361,31 @@ int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
 
     /* Send Browse Next Request until there are no continuation or limit is reached */
     bool containsContinuationPoint = ContainsContinuationPoints(continuationPointsArray, nbElements);
+    bool maxRequestNumberReached = false;
     if (SOPC_STATUS_OK == status && containsContinuationPoint)
     {
-        for (int i = 0; i < MAX_BROWSENEXT_REQUESTS && containsContinuationPoint && SOPC_STATUS_OK == status; i++)
+        uint32_t i = 0;
+        for (; i < CfgMaxBrowseNextRequests && containsContinuationPoint && SOPC_STATUS_OK == status; i++)
         {
             status = BrowseNext(connectionId, statusCodes, browseResultsListArray, nbElements, continuationPointsArray);
             containsContinuationPoint = ContainsContinuationPoints(continuationPointsArray, nbElements);
         }
+        if (i >= CfgMaxBrowseNextRequests && ContainsContinuationPoints(continuationPointsArray, nbElements))
+        {
+            status = SOPC_STATUS_NOK;
+            maxRequestNumberReached = true;
+        }
     }
 
     /* process browseResultsListArray */
-    for (size_t i = 0; i < nbElements; i++)
+    if (SOPC_STATUS_OK == status)
     {
-        browseResults[i].statusCode = statusCodes[i];
-        browseResults[i].nbOfReferences = (int32_t) SOPC_Array_Size(browseResultsListArray[i]);
-        browseResults[i].references = SOPC_Array_Into_Raw(browseResultsListArray[i]);
+        for (size_t i = 0; i < nbElements; i++)
+        {
+            browseResults[i].statusCode = statusCodes[i];
+            browseResults[i].nbOfReferences = (int32_t) SOPC_Array_Size(browseResultsListArray[i]);
+            browseResults[i].references = SOPC_Array_Into_Raw(browseResultsListArray[i]);
+        }
     }
 
     /* Free memory */
@@ -1417,6 +1405,10 @@ int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
 
     SOPC_Free(ctx);
 
+    if (true == maxRequestNumberReached)
+    {
+        return -4;
+    }
     if (SOPC_STATUS_OK == status)
     {
         return 0;
