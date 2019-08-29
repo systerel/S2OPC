@@ -364,6 +364,7 @@ int32_t SOPC_ClientHelper_Disconnect(int32_t connectionId);
    '0' if operation succeed
    '-1' if connectionId not valid
    '-2' if writeValues or nbElements not valid
+   '-3' if writeResults is not valid
    '-100' if operation failed
 */
 int32_t SOPC_ClientHelper_Write(int32_t connectionId,

@@ -627,6 +627,190 @@ START_TEST(test_wrapper_read)
 }
 END_TEST
 
+START_TEST(test_wrapper_write)
+{
+    /* write a node before toolkit is initialized */
+    {
+        SOPC_DataValue value;
+        SOPC_ClientHelper_WriteValue writeValues[1] = {
+                {
+                .nodeId = "ns=0;i=1001",
+                .indexRange = NULL,
+                .value = &value
+                }
+        };
+        SOPC_StatusCode writeResults[1] = { SOPC_STATUS_NOK };
+
+        SOPC_DataValue_Initialize(writeValues[0].value);
+        writeValues[0].value->Value.DoNotClear = false;
+        writeValues[0].value->Value.BuiltInTypeId = SOPC_Int64_Id;
+        writeValues[0].value->Value.ArrayType = SOPC_VariantArrayType_SingleValue;
+        writeValues[0].value->Value.Value.Int64 = -500;
+
+        ck_assert_int_eq(-100, SOPC_ClientHelper_Write(1, writeValues, 1, writeResults));
+    }
+
+    /* initialize wrapper */
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0));
+
+    /* write a node before connection */
+    {
+        SOPC_DataValue value;
+        SOPC_ClientHelper_WriteValue writeValues[1] = {
+                {
+                .nodeId = "ns=0;i=1001",
+                .indexRange = NULL,
+                .value = &value
+                }
+        };
+        SOPC_StatusCode writeResults[1] = { SOPC_STATUS_NOK };
+
+        SOPC_DataValue_Initialize(writeValues[0].value);
+        writeValues[0].value->Value.DoNotClear = false;
+        writeValues[0].value->Value.BuiltInTypeId = SOPC_Int64_Id;
+        writeValues[0].value->Value.ArrayType = SOPC_VariantArrayType_SingleValue;
+        writeValues[0].value->Value.Value.Int64 = -500;
+
+        ck_assert_int_eq(-100, SOPC_ClientHelper_Write(1, writeValues, 1, writeResults));
+    }
+
+    /* create a connection */
+    int32_t valid_con_id = SOPC_ClientHelper_Connect(valid_url, valid_security_none);
+    ck_assert_int_gt(valid_con_id, 0);
+
+    /* invalid arguments */
+    {
+        SOPC_DataValue value;
+        SOPC_ClientHelper_WriteValue writeValues[1] = {
+                {
+                .nodeId = "ns=0;i=1001",
+                .indexRange = NULL,
+                .value = &value
+                }
+        };
+        SOPC_StatusCode writeResults[1] = { SOPC_STATUS_NOK };
+
+        SOPC_DataValue_Initialize(writeValues[0].value);
+        writeValues[0].value->Value.DoNotClear = false;
+        writeValues[0].value->Value.BuiltInTypeId = SOPC_Int64_Id;
+        writeValues[0].value->Value.ArrayType = SOPC_VariantArrayType_SingleValue;
+        writeValues[0].value->Value.Value.Int64 = -500;
+
+        /* invalid connection id */
+        ck_assert_int_eq(-1, SOPC_ClientHelper_Write(-1, writeValues, 1, writeResults));
+        /* invalid write values */
+        ck_assert_int_eq(-2, SOPC_ClientHelper_Write(valid_con_id, NULL, 1, writeResults));
+        /* invalid nbElements */
+        ck_assert_int_eq(-2, SOPC_ClientHelper_Write(valid_con_id, writeValues, 0, writeResults));
+        /* invalid writeResults */
+        ck_assert_int_eq(-3, SOPC_ClientHelper_Write(valid_con_id, writeValues, 1, NULL));
+    }
+
+    /* write a node */
+    {
+        SOPC_DataValue value;
+        SOPC_ClientHelper_WriteValue writeValues[1] = {
+                {
+                .nodeId = "ns=0;i=1001",
+                .indexRange = NULL,
+                .value = &value
+                }
+        };
+        SOPC_StatusCode writeResults[1] = { SOPC_STATUS_NOK };
+
+        SOPC_DataValue_Initialize(writeValues[0].value);
+        writeValues[0].value->Value.DoNotClear = false;
+        writeValues[0].value->Value.BuiltInTypeId = SOPC_Int64_Id;
+        writeValues[0].value->Value.ArrayType = SOPC_VariantArrayType_SingleValue;
+        writeValues[0].value->Value.Value.Int64 = -500;
+
+        ck_assert_int_eq(0, SOPC_ClientHelper_Write(valid_con_id, writeValues, 1, writeResults));
+        ck_assert_int_eq(SOPC_STATUS_OK, writeResults[0]);
+    }
+    /* write multiple nodes */
+    {
+        SOPC_DataValue value[2];
+        SOPC_ClientHelper_WriteValue writeValues[2] = {
+                {
+                .nodeId = "ns=0;i=1001",
+                .indexRange = NULL,
+                .value = &value[0]
+                },
+                {
+                .nodeId = "ns=0;i=1009",
+                .indexRange = NULL,
+                .value = &value[1]
+                },
+        };
+        SOPC_StatusCode writeResults[2] = { SOPC_STATUS_NOK };
+
+        SOPC_DataValue_Initialize(writeValues[0].value);
+        writeValues[0].value->Value.DoNotClear = false;
+        writeValues[0].value->Value.BuiltInTypeId = SOPC_Int64_Id;
+        writeValues[0].value->Value.ArrayType = SOPC_VariantArrayType_SingleValue;
+        writeValues[0].value->Value.Value.Int64 = -200;
+
+        SOPC_DataValue_Initialize(writeValues[1].value);
+        writeValues[1].value->Value.DoNotClear = false;
+        writeValues[1].value->Value.BuiltInTypeId = SOPC_Int16_Id;
+        writeValues[1].value->Value.ArrayType = SOPC_VariantArrayType_SingleValue;
+        writeValues[1].value->Value.Value.Int64 = -20;
+
+        ck_assert_int_eq(0, SOPC_ClientHelper_Write(valid_con_id, writeValues, 2, writeResults));
+        ck_assert_int_eq(SOPC_STATUS_OK, writeResults[0]);
+        ck_assert_int_eq(SOPC_STATUS_OK, writeResults[1]);
+    }
+
+    /* disconnect */
+    ck_assert_int_eq(0, SOPC_ClientHelper_Disconnect(valid_con_id));
+
+    /* write a node after disconnection */
+    {
+        SOPC_DataValue value;
+        SOPC_ClientHelper_WriteValue writeValues[1] = {
+                {
+                .nodeId = "ns=0;i=1001",
+                .indexRange = NULL,
+                .value = &value
+                }
+        };
+        SOPC_StatusCode writeResults[1] = { SOPC_STATUS_NOK };
+
+        SOPC_DataValue_Initialize(writeValues[0].value);
+        writeValues[0].value->Value.DoNotClear = false;
+        writeValues[0].value->Value.BuiltInTypeId = SOPC_Int64_Id;
+        writeValues[0].value->Value.ArrayType = SOPC_VariantArrayType_SingleValue;
+        writeValues[0].value->Value.Value.Int64 = -500;
+
+        ck_assert_int_eq(-100, SOPC_ClientHelper_Write(valid_con_id, writeValues, 1, writeResults));
+    }
+
+    /* close wrapper */
+    SOPC_ClientHelper_Finalize();
+
+    /* write a node after toolkit is closed */
+    {
+        SOPC_DataValue value;
+        SOPC_ClientHelper_WriteValue writeValues[1] = {
+                {
+                .nodeId = "ns=0;i=1001",
+                .indexRange = NULL,
+                .value = &value
+                }
+        };
+        SOPC_StatusCode writeResults[1] = { SOPC_STATUS_NOK };
+
+        SOPC_DataValue_Initialize(writeValues[0].value);
+        writeValues[0].value->Value.DoNotClear = false;
+        writeValues[0].value->Value.BuiltInTypeId = SOPC_Int64_Id;
+        writeValues[0].value->Value.ArrayType = SOPC_VariantArrayType_SingleValue;
+        writeValues[0].value->Value.Value.Int64 = -500;
+
+        ck_assert_int_eq(-100, SOPC_ClientHelper_Write(valid_con_id, writeValues, 1, writeResults));
+    }
+}
+END_TEST
+
 START_TEST(test_wrapper_browse)
 {
     //ck_assert(SOPC_STATUS_INVALID_STATE == SOPC_STATUS_OK);
@@ -651,6 +835,7 @@ static Suite* tests_make_suite_wrapper(void)
     tcase_add_test(tc_wrapper, test_wrapper_add_monitored_items_callback_called);
     tcase_add_test(tc_wrapper, test_wrapper_unsubscribe);
     tcase_add_test(tc_wrapper, test_wrapper_read);
+    tcase_add_test(tc_wrapper, test_wrapper_write);
     tcase_add_test(tc_wrapper, test_wrapper_browse);
     tcase_set_timeout(tc_wrapper, 0);
     suite_add_tcase(s, tc_wrapper);
