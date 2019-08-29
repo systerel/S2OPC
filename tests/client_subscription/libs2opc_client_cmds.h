@@ -235,7 +235,6 @@ typedef struct
     If level is not an accepted value, DEBUG is used by default.
  @return
    '0' if operation succeed
-   '-1' if path is not valid
    '-2' if toolkit not initialized
  */
 int32_t SOPC_ClientHelper_Initialize(const char* log_path, int32_t log_level);
