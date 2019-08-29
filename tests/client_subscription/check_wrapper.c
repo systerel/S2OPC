@@ -109,7 +109,6 @@ static void datachange_callback_check_counter(const int32_t c_id,
 
 START_TEST(test_wrapper_initialize_finalize)
 {
-    //TODO complete tests with invalid arguments and errors
     /* simple initialization */
     ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0));
     /* double finalize shall not fail*/
@@ -125,9 +124,6 @@ END_TEST
 START_TEST(test_wrapper_connect)
 {
     ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0));
-
-    //TODO check different security_mode/security_policy combination
-    //TODO check invalid client/srv cert (not signed by CA)
 
     /* connection to a valid endpoint */
     int32_t valid_con_id = SOPC_ClientHelper_Connect(valid_url, valid_security_none);
@@ -218,7 +214,6 @@ END_TEST
 
 START_TEST(test_wrapper_disconnect)
 {
-    //TODO complete tests
     /* disconnect before wrapper has been initialized */
     ck_assert_int_eq(-2, SOPC_ClientHelper_Disconnect(1));
 
