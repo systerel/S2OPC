@@ -33,7 +33,9 @@
 #include "string.h"
 #include "sopc_mutexes.h"
 #include "sopc_mem_alloc.h"
+
 #include "libs2opc_client_cmds.h"
+#include "libs2opc_client_cmds_internal_api.h"
 
 static const char* valid_url = "opc.tcp://localhost:4841";
 static const char* invalid_url = "opc.tcp://localhost:5841";
@@ -813,7 +815,192 @@ END_TEST
 
 START_TEST(test_wrapper_browse)
 {
-    //ck_assert(SOPC_STATUS_INVALID_STATE == SOPC_STATUS_OK);
+    /* browse before initialization */
+    {
+        //Root/ - Hierarchical references
+        SOPC_ClientHelper_BrowseRequest browseRequest[1] = {
+                { .nodeId = "ns=0;i=84", .direction = 0, .referenceTypeId = "ns=0;i=33", .includeSubtypes = true }
+        };
+        SOPC_ClientHelper_BrowseResult browseResult[1];
+
+        ck_assert_int_eq(-100, SOPC_ClientHelper_Browse(1, browseRequest, 1, browseResult));
+    }
+
+    /* initialize wrapper */
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0));
+
+    /* browse before connection */
+    {
+        //Root/ - Hierarchical references
+        SOPC_ClientHelper_BrowseRequest browseRequest[1] = {
+                { .nodeId = "ns=0;i=84", .direction = 0, .referenceTypeId = "ns=0;i=33", .includeSubtypes = true }
+        };
+        SOPC_ClientHelper_BrowseResult browseResult[1];
+
+        ck_assert_int_eq(-100, SOPC_ClientHelper_Browse(1, browseRequest, 1, browseResult));
+    }
+
+    /* create a connection */
+    int32_t valid_con_id = SOPC_ClientHelper_Connect(valid_url, valid_security_none);
+    ck_assert_int_gt(valid_con_id, 0);
+
+    /* invalid arguments */
+    {
+        //Root/ - Hierarchical references
+        SOPC_ClientHelper_BrowseRequest browseRequest[1] = {
+                { .nodeId = "ns=0;i=84", .direction = 0, .referenceTypeId = "ns=0;i=33", .includeSubtypes = true }
+        };
+        SOPC_ClientHelper_BrowseResult browseResult[1];
+
+        /* invalid connection id */
+        ck_assert_int_eq(-1, SOPC_ClientHelper_Browse(-1, browseRequest, 1, browseResult));
+        /* invalid browseRequests */
+        ck_assert_int_eq(-2, SOPC_ClientHelper_Browse(valid_con_id, NULL, 1, browseResult));
+        /*  invalid nbElements */
+        ck_assert_int_eq(-2, SOPC_ClientHelper_Browse(valid_con_id, browseRequest, 0, browseResult));
+        /*  invalid browseResults */
+        ck_assert_int_eq(-3, SOPC_ClientHelper_Browse(valid_con_id, browseRequest, 1, NULL));
+    }
+    /* browse */
+    {
+        //Root/ - Hierarchical references
+        SOPC_ClientHelper_BrowseRequest browseRequest[1] = {
+                { .nodeId = "ns=0;i=84", .direction = 0, .referenceTypeId = "ns=0;i=33", .includeSubtypes = true }
+        };
+        SOPC_ClientHelper_BrowseResult browseResult[1];
+
+        ck_assert_int_eq(0, SOPC_ClientHelper_Browse(valid_con_id, browseRequest, 1, browseResult));
+        ck_assert_int_eq(SOPC_STATUS_OK, browseResult[0].statusCode);
+        ck_assert_int_eq(3, browseResult[0].nbOfReferences);
+
+        ck_assert_ptr_ne(NULL, &browseResult[0].references[0]);
+        ck_assert_ptr_ne(NULL, browseResult[0].references[0].referenceTypeId);
+        ck_assert(true == browseResult[0].references[0].isForward);
+        ck_assert_ptr_ne(NULL, browseResult[0].references[0].nodeId);
+        ck_assert_ptr_ne(NULL, browseResult[0].references[0].browseName);
+        ck_assert_ptr_ne(NULL, browseResult[0].references[0].displayName);
+        ck_assert_int_eq(1, browseResult[0].references[0].nodeClass);
+        /* free */
+        SOPC_Free(browseResult[0].references[0].referenceTypeId);
+        SOPC_Free(browseResult[0].references[0].nodeId);
+        SOPC_Free(browseResult[0].references[0].browseName);
+        SOPC_Free(browseResult[0].references[0].displayName);
+
+        ck_assert_ptr_ne(NULL, &browseResult[0].references[1]);
+        ck_assert_ptr_ne(NULL, browseResult[0].references[1].referenceTypeId);
+        ck_assert(true == browseResult[0].references[1].isForward);
+        ck_assert_ptr_ne(NULL, browseResult[0].references[1].nodeId);
+        ck_assert_ptr_ne(NULL, browseResult[0].references[1].browseName);
+        ck_assert_ptr_ne(NULL, browseResult[0].references[1].displayName);
+        ck_assert_int_eq(1, browseResult[0].references[1].nodeClass);
+        /* free */
+        SOPC_Free(browseResult[0].references[1].referenceTypeId);
+        SOPC_Free(browseResult[0].references[1].nodeId);
+        SOPC_Free(browseResult[0].references[1].browseName);
+        SOPC_Free(browseResult[0].references[1].displayName);
+
+        ck_assert_ptr_ne(NULL, &browseResult[0].references[2]);
+        ck_assert_ptr_ne(NULL, browseResult[0].references[2].referenceTypeId);
+        ck_assert(true == browseResult[0].references[2].isForward);
+        ck_assert_ptr_ne(NULL, browseResult[0].references[2].nodeId);
+        ck_assert_ptr_ne(NULL, browseResult[0].references[2].browseName);
+        ck_assert_ptr_ne(NULL, browseResult[0].references[2].displayName);
+        ck_assert_int_eq(1, browseResult[0].references[2].nodeClass);
+        /* free */
+        SOPC_Free(browseResult[0].references[2].referenceTypeId);
+        SOPC_Free(browseResult[0].references[2].nodeId);
+        SOPC_Free(browseResult[0].references[2].browseName);
+        SOPC_Free(browseResult[0].references[2].displayName);
+
+        SOPC_Free(browseResult[0].references);
+    }
+    /* browse too many browse requests */
+    {
+        //TODO
+        //SOPC_ClientHelper_BrowseRequest browseRequest[1] = {
+        //        { .nodeId = "ns=0;i=7617", .direction = 0, .referenceTypeId = "ns=0;i=33", .includeSubtypes = true }
+        //};
+        //SOPC_ClientHelper_BrowseResult browseResult[1];
+        //CfgMaxReferencesPerNode = 1;
+        //CfgMaxBrowseNextRequests = 10;
+
+        //ck_assert_int_eq(-4, SOPC_ClientHelper_Browse(valid_con_id, browseRequest, 1, browseResult));
+    }
+    /* browse multiple nodes */
+    {
+        //Root/ and Root/Objects - Hierarchical references
+        SOPC_ClientHelper_BrowseRequest browseRequest[2] = {
+                { .nodeId = "ns=0;i=84", .direction = 0, .referenceTypeId = "ns=0;i=33", .includeSubtypes = true },
+                { .nodeId = "ns=0;i=85", .direction = 0, .referenceTypeId = "ns=0;i=33", .includeSubtypes = true }
+        };
+        SOPC_ClientHelper_BrowseResult browseResult[2];
+
+        ck_assert_int_eq(0, SOPC_ClientHelper_Browse(valid_con_id, browseRequest, 2, browseResult));
+        ck_assert_int_eq(SOPC_STATUS_OK, browseResult[0].statusCode);
+        ck_assert_int_eq(3, browseResult[0].nbOfReferences);
+        ck_assert_int_eq(16, browseResult[1].nbOfReferences);
+
+        /* free */
+        for (int32_t i = 0; i < browseResult[0].nbOfReferences; i++)
+        {
+            ck_assert_ptr_ne(NULL, &browseResult[0].references[i]);
+            ck_assert_ptr_ne(NULL, browseResult[0].references[i].referenceTypeId);
+            ck_assert(true == browseResult[0].references[i].isForward);
+            ck_assert_ptr_ne(NULL, browseResult[0].references[i].nodeId);
+            ck_assert_ptr_ne(NULL, browseResult[0].references[i].browseName);
+            ck_assert_ptr_ne(NULL, browseResult[0].references[i].displayName);
+
+            SOPC_Free(browseResult[0].references[i].referenceTypeId);
+            SOPC_Free(browseResult[0].references[i].nodeId);
+            SOPC_Free(browseResult[0].references[i].browseName);
+            SOPC_Free(browseResult[0].references[i].displayName);
+        }
+        SOPC_Free(browseResult[0].references);
+
+        for (int32_t i = 0; i < browseResult[1].nbOfReferences; i++)
+        {
+            ck_assert_ptr_ne(NULL, &browseResult[1].references[i]);
+            ck_assert_ptr_ne(NULL, browseResult[1].references[i].referenceTypeId);
+            ck_assert(true == browseResult[1].references[i].isForward);
+            ck_assert_ptr_ne(NULL, browseResult[1].references[i].nodeId);
+            ck_assert_ptr_ne(NULL, browseResult[1].references[i].browseName);
+            ck_assert_ptr_ne(NULL, browseResult[1].references[i].displayName);
+
+            SOPC_Free(browseResult[1].references[i].referenceTypeId);
+            SOPC_Free(browseResult[1].references[i].nodeId);
+            SOPC_Free(browseResult[1].references[i].browseName);
+            SOPC_Free(browseResult[1].references[i].displayName);
+        }
+        SOPC_Free(browseResult[1].references);
+    }
+
+    /* disconnect */
+    ck_assert_int_eq(0, SOPC_ClientHelper_Disconnect(valid_con_id));
+
+    /* browse after disconnection */
+    {
+        //Root/ - Hierarchical references
+        SOPC_ClientHelper_BrowseRequest browseRequest[1] = {
+                { .nodeId = "ns=0;i=84", .direction = 0, .referenceTypeId = "ns=0;i=33", .includeSubtypes = true }
+        };
+        SOPC_ClientHelper_BrowseResult browseResult[1];
+
+        ck_assert_int_eq(-100, SOPC_ClientHelper_Browse(valid_con_id, browseRequest, 1, browseResult));
+    }
+
+    /* close wrapper */
+    SOPC_ClientHelper_Finalize();
+
+    /* browse after toolkit is closed */
+    {
+        //Root/ - Hierarchical references
+        SOPC_ClientHelper_BrowseRequest browseRequest[1] = {
+                { .nodeId = "ns=0;i=84", .direction = 0, .referenceTypeId = "ns=0;i=33", .includeSubtypes = true }
+        };
+        SOPC_ClientHelper_BrowseResult browseResult[1];
+
+        ck_assert_int_eq(-100, SOPC_ClientHelper_Browse(valid_con_id, browseRequest, 1, browseResult));
+    }
 }
 END_TEST
 
