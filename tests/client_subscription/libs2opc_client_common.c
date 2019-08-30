@@ -219,7 +219,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_ConfigureConnection(const SOPC_LibSub_Connec
     uint32_t cfgId = 0;
     SOPC_LibSub_ConnectionCfg* pCfgCpy = NULL;
 
-    if (SOPC_Atomic_Int_Get(&libInitialized) == 0 || SOPC_Atomic_Int_Get(&libConfigured) != 0)
+    if (SOPC_Atomic_Int_Get(&libInitialized) == 0)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -434,11 +434,11 @@ SOPC_ReturnStatus SOPC_ClientCommon_Configured(void)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
-    if (SOPC_Atomic_Int_Get(&libInitialized) == 0 || SOPC_Atomic_Int_Get(&libConfigured) != 0)
+    if (SOPC_Atomic_Int_Get(&libInitialized) == 0)
     {
         status = SOPC_STATUS_INVALID_STATE;
     }
-    else
+    else if (SOPC_Atomic_Int_Get(&libConfigured) != 1)
     {
         status = SOPC_Toolkit_Configured();
         if (SOPC_STATUS_OK == status)
