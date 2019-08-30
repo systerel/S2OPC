@@ -969,7 +969,7 @@ int32_t SOPC_ClientHelper_Disconnect(int32_t connectionId)
         /* toolkit not initialized */
         return -2;
     }
-    else if (SOPC_STATUS_INVALID_PARAMETERS == status)
+    else if (SOPC_STATUS_INVALID_PARAMETERS == status || SOPC_STATUS_NOK == status)
     {
         /* connection already closed or not existing */
         return -3;
