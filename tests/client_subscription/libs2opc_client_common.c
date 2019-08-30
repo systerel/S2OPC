@@ -675,9 +675,16 @@ SOPC_ReturnStatus SOPC_ClientCommon_Disconnect(const SOPC_LibSub_ConnectionId cl
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    if (SOPC_STATUS_OK == status && SOPC_StaMac_IsConnected(pSM))
+    if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_StaMac_StopSession(pSM);
+        if (SOPC_StaMac_IsConnected(pSM))
+        {
+            status = SOPC_StaMac_StopSession(pSM);
+        }
+        else
+        {
+            status = SOPC_STATUS_NOK;
+        }
     }
 
     /* Release the lock so that the event handler can work properly while waiting */
