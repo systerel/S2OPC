@@ -37,10 +37,13 @@ INGOPCS initial consortium:
 
 Client side (e.g.: tests/services/toolkit_test_client.c):
 
-- Secure Channel configuration on Toolkit initialization
+- Secure Channel configuration
 - Activate a session with an anonymous use or user identified by username/password
 - Send a service on session request (read, write, browse, subscribe, etc.)
 - Send a discovery service request (getEndpoints, findServer, registerServer, etc.)
+- Automated client library LibSub (simplified interface, automated subscription):
+  see tests/client_subscription/libs2opc_client.h (e.g. tests/client_subscription/client.c)
+- Python wrapper PyS2OPC for a client: see tests/pys2opc/README.md
 
 Server side (e.g.: tests/services/toolkit_test_server.c):
 
@@ -51,14 +54,13 @@ Server side (e.g.: tests/services/toolkit_test_server.c):
 - Supported services:
   - Read service
   - Write service
-  - Browse service (simplified: no continuation point)
+  - Browse service
+  - BrowseNext service
+  - TranslateBrowsePathToNodeIds service
   - GetEndpoints service
   - FindServers service
   - RegisterNodes service
   - Subscription services (simplified: no monitoredItems deletion, no subscription transfer)
-
-### Limitations:
-- Multi-chunk not supported by client and server (negotiated during connection)
 
 ### Cryptography services use constraints
 - Only one authority certificate can be provided by channel (/endpoint)
@@ -73,24 +75,27 @@ Server side (e.g.: tests/services/toolkit_test_server.c):
 - Security modes available: None, Sign and SignAndEncrypt
 - Server instantiation: several endpoint descriptions, 1 address space, multiple secure channel instances and session instances
 - Server discovery services: getEndpoints, findServers
-- Server services: read, write, simplified browse (no filtering, no continuation point), subscription (no monitoredItems deletion, no subscription transfer), registerNodes
+- Server services: read, write, browse, browseNext (1 continuation point per session), translateBrowsePath,
+                   subscription (no monitoredItems deletion, no subscription transfer), registerNodes
 - Server local services: read, write, browse and discovery services
-- Server address space modification notification: write notification events are reported through application API
+- Server address space modification:
+  - mechanisms implemented for remote modification: variables modification with typechecking (data type and value rank), access level and user access level control
+  - notification: write notification events are reported through application API
 - Client instantiation: multiple secure channel instances and session instances
 - Client services requests: any discovery service or service on session request. Requests are only forwarded to server (no functional behavior)
-- Address space with following attributes: NodeId, NodeClass, BrowseName, Value (with single value Variants),
-  References, Access Level (R/W default value only)
+- Address space with all mandatory attributes: AccessLevel, BrowseName, ContainsNoLoop, DataType, DisplayName, EvenNotifier, Executable, Historizing,
+  IsAbstract, NodeClass, NodeId, Symmetric, UserAccessLevel, UserExecutable, Value (with single value and array Variants), ValueRank (and References)
 
 ## Address space generation
 
 The `scripts/generate-s2opc-address-space.py` tool converts a UANodeSet XML file into a
 C file that can be compiled in the binary, and used with the embedded address
-space loader (see the `tests/data/address_space/parts/User_Address_Space.xml`
+space loader (see the `tests/data/address_space/parts/s2opc.xml`
 file for example). Not all the features of the schema are supported at the
 moment.
 
 S2OPC server can also dynamically load a UANodeSet XML at startup.
-To do so, set `TEST_SERVER_XML_ADDRESS_SPACE` to the location of the address space and launch the server.
+To do so, set `TEST_SERVER_XML_ADDRESS_SPACE` to the location of the address space and launch the sample server.
 
 ## S2OPC Development
 
@@ -100,7 +105,7 @@ To do so, set `TEST_SERVER_XML_ADDRESS_SPACE` to the location of the address spa
 - static analysis using [Coverity](https://scan.coverity.com/),
 - check for memory leaks using [Valgrind](http://valgrind.org/),
 - use of GCC sanitizers to detect undefined behaviours, race conditions, memory leaks and errors,
-- compilation using four compilers (GCC, CLang, mingGw and MSVC) with conservative compilation flags,
+- compilation using several compilers (GCC, CLang, mingGw, MSVC, ...) with conservative compilation flags,
 - all development and testing environment are bundled into [Docker](https://www.docker.com/) images
 - continuous integration with a test bench containing:
     - modular tests using libcheck
@@ -114,18 +119,19 @@ See the [demo](https://gitlab.com/systerel/S2OPC/wikis/demo) page from the Wiki.
 
 ## Getting started
 
-For a sample server (respectively sample client), you can look at test/services/toolkit_test_server.c (respectively test/services/toolkit_test_client.c).
+For a sample server (respectively sample client), you can look at test/services/toolkit_test_server.c
+ (respectively test/services/toolkit_test_client.c and tests/client_subscription/client.c).
 
 ## S2OPC Linux compilation
 
-Tested under Ubuntu 14.04 and Debian 7.
+Tested under Ubuntu 16.04 and Debian 9.
 Prerequisites:
-- gcc (tested with GCC version 8.1)
-- CMake (tested with CMake version >= 3.5)
-- make (tested with GNU Make version >= 4.2)
-- Python3 (tested with Python version >= 3.6.3)
-- [mbedtls](https://tls.mbed.org/)(tested with mbedtls version 2.12.0)
-- [check](https://libcheck.github.io/check/)(tested with libcheck version 0.12)
+- Make (tested with GNU Make version 4.2.1)
+- CMake (tested with CMake version 3.9.4)
+- GCC (tested with GCC version 8.1.0)
+- [Mbedtls](https://tls.mbed.org/)(tested with mbedtls version 2.16.0)
+- [Check](https://libcheck.github.io/check/)(tested with libcheck version 0.12)
+- Python3 (tested with version 3.6.3)
 
 To build the Toolkit library and tests with default configuration on current 
 stable release:
@@ -198,11 +204,16 @@ Run all tests:
 - Tests results are provided in build/bin/*.tap files and shall indicate "ok" status for each test
 
 Run a particular test (build/bin/ directory):
+- Toolkit benchmark utility: execute ./bench_tool to see help
 - Toolkit helpers unit tests: execute ./check_helpers
+- Toolkit client library (LibSub) test: execute ./check_libsub
 - Toolkit sockets management layer test: execute ./check_sockets
-- Toolkit secure channel (+sockets) management layer: ./test_secure_channels_server and ./test_secure_channels_client in parallel
+- Toolkit secure channel (+sockets) management layer: ./check_sc_rcv_buffer, ./check_sc_rcv_encrypted_buffer, ./test_secure_channels_server and ./test_secure_channels_client in parallel
+- Toolkit client library based command line samples: to see help execute: ./s2opc_browse, ./s2opc_discovery, ./s2opc_findserver, ./s2opc_read, ./s2opc_register, ./s2opc_subscription_client, ./s2opc_write
+- Toolkit address space parser test: execute ./s2opc_parse_uanodeset to see help
 - Toolkit client/server session and read/write service example:
   execute ./toolkit_test_server and then ./toolkit_test_client in parallel
+  (or toolkit_test_client_service_faults for service fault specialized test)
 - Toolkit server and read / write / browse service validation:
   execute ./toolkit_test_server in build/bin/ directory and python3 client.py in validation/ directory
   (depends on FreeOpcUa python client available on github)
@@ -210,10 +221,13 @@ Run a particular test (build/bin/ directory):
   execute ./toolkit_test_server in build/bin/ directory and python3
   client_sc_renew.py in validation/ directory (depends on FreeOpcUa
   python client available on github)
+- Toolkit server local services validation: execute ./toolkit_test_server_local_service
 
 Run OPC UA Compliance Test Tool (UACTT: tool available for OPC foundation corporate members only):
-- Run toolkit server example with long timeout parameter in build/bin/ directory: ./toolkit_test_server
+- Run toolkit server in build/bin/ directory: ./toolkit_test_server
 - Run the UACTT tests using the UACTT project configuration file acceptances_tests/Acceptation_S2OPC/Acceptation_S2OPC.ctt.xml
+
+Note: ./toolkit_test_server shall be killed when test is finished
 
 ## Licenses
 
