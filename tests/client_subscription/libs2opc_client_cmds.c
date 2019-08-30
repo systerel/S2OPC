@@ -548,7 +548,7 @@ static void GenericCallbackHelper_Browse(SOPC_StatusCode status,
                     resultReference.browseName = SOPC_String_GetCString(&reference->BrowseName.Name);
                     resultReference.displayName = SOPC_String_GetCString(&reference->DisplayName.Text);
                     resultReference.isForward = reference->IsForward;
-                    resultReference.nodeClass = reference->NodeClass;
+                    resultReference.nodeClass = (int32_t) reference->NodeClass;
                     SOPC_Array_Append(ctx->browseResults[i], resultReference);
                 }
             }
@@ -613,7 +613,7 @@ static void GenericCallbackHelper_BrowseNext(SOPC_StatusCode status,
                     resultReference.browseName = SOPC_String_GetCString(&reference->BrowseName.Name);
                     resultReference.displayName = SOPC_String_GetCString(&reference->DisplayName.Text);
                     resultReference.isForward = reference->IsForward;
-                    resultReference.nodeClass = reference->NodeClass;
+                    resultReference.nodeClass = (int32_t) reference->NodeClass;
                     SOPC_Array_Append(ctx->browseResults[index], resultReference);
                 }
 
@@ -1201,7 +1201,7 @@ static SOPC_ReturnStatus BrowseHelper_InitializeNodesToBrowse(size_t nbElements,
         }
         if (SOPC_STATUS_OK == status)
         {
-            nodesToBrowse[i].BrowseDirection = browseRequests[i].direction;
+            nodesToBrowse[i].BrowseDirection = (OpcUa_BrowseDirection) browseRequests[i].direction;
             nodesToBrowse[i].IncludeSubtypes = browseRequests[i].includeSubtypes;
             nodesToBrowse[i].NodeClassMask = 0; //all //TODO correct ?
             nodesToBrowse[i].ResultMask = 0x3f; //all //TODO correct ?
