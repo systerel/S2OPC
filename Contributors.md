@@ -12,6 +12,7 @@ the legal rights to contribute.
 * monfort <vincent.monfort@systerel.fr>
 * Pierre-Antoine <brameret@systerel.fr>
 * Vincent Lacroix <vincent.lacroix@systerel.fr>
+* Paul Luperini <paul.luperini@systerel.fr>
 
 # Contributor list
 * Anthony Reyre <anthony.reyre-stg@systerel.fr>
