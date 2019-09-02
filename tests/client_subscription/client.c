@@ -183,7 +183,6 @@ int main(int argc, char* const argv[])
     if (res == 0)
     {
         assert(options.node_ids_size > 0);
-        assert((uint32_t) options.node_ids_size <= SIZE_MAX);
         res = SOPC_ClientHelper_AddMonitoredItems(connectionId, options.node_ids, (size_t) options.node_ids_size);
     }
 
@@ -193,10 +192,10 @@ int main(int argc, char* const argv[])
         //Browse server
         size_t nbBrowse = 4;
         SOPC_ClientHelper_BrowseRequest* browseRequests = (SOPC_ClientHelper_BrowseRequest*)
-            malloc(sizeof(SOPC_ClientHelper_BrowseRequest) * nbBrowse);
+            calloc(nbBrowse, sizeof(SOPC_ClientHelper_BrowseRequest));
         assert(NULL != browseRequests);
         SOPC_ClientHelper_BrowseResult* browseResults = (SOPC_ClientHelper_BrowseResult*)
-            malloc(sizeof(SOPC_ClientHelper_BrowseResult) * nbBrowse);
+            calloc(nbBrowse, sizeof(SOPC_ClientHelper_BrowseResult));
         assert(NULL != browseResults);
 
         browseRequests[3].nodeId = "ns=0;i=85"; // Root/Objects/

@@ -103,11 +103,15 @@ typedef struct
 
 static SOPC_ReturnStatus SOPC_ReadContext_Initialization(ReadContext* ctx)
 {
-    SOPC_ReturnStatus status = Mutex_Initialization(&ctx->mutex);
-    ctx->values = NULL;
-    ctx->nbElements = 0;
-    ctx->status = SOPC_STATUS_NOK;
-    ctx->finish = false;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    if (NULL != ctx)
+    {
+        status = Mutex_Initialization(&ctx->mutex);
+        ctx->values = NULL;
+        ctx->nbElements = 0;
+        ctx->status = SOPC_STATUS_NOK;
+        ctx->finish = false;
+    }
     return status;
 }
 
@@ -494,15 +498,18 @@ static void GenericCallbackHelper_Write(SOPC_StatusCode status,
             // TODO log error
             ctx->status = SOPC_STATUS_NOK;
         }
-        if (NULL == ctx->writeResults)
-        {
-            status = SOPC_STATUS_NOK;
-        }
         if (SOPC_STATUS_OK == ctx->status)
         {
             for (int32_t i = 0; i < writeResp->NoOfResults; i++)
             {
-                ctx->writeResults[i] = writeResp->Results[i];
+                if (NULL != ctx->writeResults)
+                {
+                    ctx->writeResults[i] = writeResp->Results[i];
+                }
+                else
+                {
+                    status = SOPC_STATUS_NOK;
+                }
             }
         }
         ctx->finish = true;
@@ -788,10 +795,17 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_ReadContext_Initialization(ctx);
-        ctx->values = values;
-        ctx->nbElements = request->NoOfNodesToRead;
-        ctx->status = SOPC_STATUS_NOK;
-        ctx->finish = false;
+        if (NULL != ctx && NULL != request)
+        {
+            ctx->values = values;
+            ctx->nbElements = request->NoOfNodesToRead;
+            ctx->status = SOPC_STATUS_NOK;
+            ctx->finish = false;
+        }
+        else
+        {
+            status = SOPC_STATUS_NOK;
+        }
     }
 
     /* send request */
@@ -1397,9 +1411,12 @@ int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
     SOPC_Free(statusCodes);
     SOPC_Free(browseResultsListArray);
 
-    for (size_t i = 0; i < nbElements; i++)
+    if (NULL != continuationPointsArray)
     {
-        SOPC_ByteString_Delete(continuationPointsArray[i]);
+        for (size_t i = 0; i < nbElements; i++)
+        {
+            SOPC_ByteString_Delete(continuationPointsArray[i]);
+        }
     }
     SOPC_Free(continuationPointsArray);
 
