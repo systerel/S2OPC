@@ -30,9 +30,9 @@
 #include <stdlib.h> /* EXIT_* */
 
 #include "assert.h"
-#include "string.h"
-#include "sopc_mutexes.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_mutexes.h"
+#include "string.h"
 
 #include "libs2opc_client_cmds.h"
 #include "libs2opc_client_cmds_internal_api.h"
@@ -40,44 +40,38 @@
 static const char* valid_url = "opc.tcp://localhost:4841";
 static const char* invalid_url = "opc.tcp://localhost:5841";
 
+static SOPC_ClientHelper_Security valid_security_none = {.security_policy = SOPC_SecurityPolicy_None_URI,
+                                                         .security_mode = OpcUa_MessageSecurityMode_None,
+                                                         .path_cert_auth = "./trusted/cacert.der",
+                                                         .path_cert_srv = NULL,
+                                                         .path_cert_cli = NULL,
+                                                         .path_key_cli = NULL,
+                                                         .policyId = "anonymous",
+                                                         .username = NULL,
+                                                         .password = NULL};
 
-
-static SOPC_ClientHelper_Security valid_security_none = {
-                                         .security_policy = SOPC_SecurityPolicy_None_URI,
-                                         .security_mode = OpcUa_MessageSecurityMode_None,
-                                         .path_cert_auth = "./trusted/cacert.der",
-                                         .path_cert_srv = NULL,
-                                         .path_cert_cli = NULL,
-                                         .path_key_cli = NULL,
-                                         .policyId = "anonymous",
-                                         .username = NULL,
-                                         .password = NULL};
-
-static SOPC_ClientHelper_Security valid_security_sign_b256 = {
-                                         .security_policy = SOPC_SecurityPolicy_Basic256_URI,
-                                         .security_mode = OpcUa_MessageSecurityMode_Sign,
-                                         .path_cert_auth = "./trusted/cacert.der",
-                                         .path_cert_srv = "TODO",
-                                         .path_cert_cli = "TODO",
-                                         .path_key_cli = "TODO",
-                                         .policyId = "TODO",
-                                         .username = "TODO",
-                                         .password = "TODO"};
+static SOPC_ClientHelper_Security valid_security_sign_b256 = {.security_policy = SOPC_SecurityPolicy_Basic256_URI,
+                                                              .security_mode = OpcUa_MessageSecurityMode_Sign,
+                                                              .path_cert_auth = "./trusted/cacert.der",
+                                                              .path_cert_srv = "TODO",
+                                                              .path_cert_cli = "TODO",
+                                                              .path_key_cli = "TODO",
+                                                              .policyId = "TODO",
+                                                              .username = "TODO",
+                                                              .password = "TODO"};
 
 static SOPC_ClientHelper_Security valid_security_signAndEncrypt_b256 = {
-                                         .security_policy = SOPC_SecurityPolicy_Basic256_URI,
-                                         .security_mode = OpcUa_MessageSecurityMode_SignAndEncrypt,
-                                         .path_cert_auth = "./trusted/cacert.der",
-                                         .path_cert_srv = "TODO",
-                                         .path_cert_cli = "TODO",
-                                         .path_key_cli = "TODO",
-                                         .policyId = "TODO",
-                                         .username = "TODO",
-                                         .password = "TODO"};
+    .security_policy = SOPC_SecurityPolicy_Basic256_URI,
+    .security_mode = OpcUa_MessageSecurityMode_SignAndEncrypt,
+    .path_cert_auth = "./trusted/cacert.der",
+    .path_cert_srv = "TODO",
+    .path_cert_cli = "TODO",
+    .path_key_cli = "TODO",
+    .policyId = "TODO",
+    .username = "TODO",
+    .password = "TODO"};
 
-static void datachange_callback_none(const int32_t c_id,
-                                     const char* node_id,
-                                     const SOPC_DataValue* value)
+static void datachange_callback_none(const int32_t c_id, const char* node_id, const SOPC_DataValue* value)
 {
     (void) c_id;
     (void) node_id;
@@ -90,9 +84,7 @@ static int32_t check_counter_connection_id = 0;
 static int32_t check_counter_node_id_comparison_result = 1;
 static SOPC_DataValue check_counter_data_value;
 
-static void datachange_callback_check_counter(const int32_t c_id,
-                                              const char* node_id,
-                                              const SOPC_DataValue* value)
+static void datachange_callback_check_counter(const int32_t c_id, const char* node_id, const SOPC_DataValue* value)
 {
     assert(SOPC_STATUS_OK == Mutex_Lock(&check_counter_mutex));
 
@@ -308,11 +300,11 @@ END_TEST
 START_TEST(test_wrapper_add_monitored_items)
 {
     /* create an array of valid node ids */
-    char* nodeIds1[1] = { "ns=0;s=Counter" }; // value increments itself
-    char* nodeIds2[1] = { "ns=0;i=1013" };
-    char* nodeIds3[3] = { "ns=0;i=1009", "ns=0;i=1011", "ns=0;i=1001" };
-    char* invalidNodeIds[1] = { NULL };
-    char* invalidNodeIds2[2] = { "ns=0;s=Counter", NULL };
+    char* nodeIds1[1] = {"ns=0;s=Counter"}; // value increments itself
+    char* nodeIds2[1] = {"ns=0;i=1013"};
+    char* nodeIds3[3] = {"ns=0;i=1009", "ns=0;i=1011", "ns=0;i=1001"};
+    char* invalidNodeIds[1] = {NULL};
+    char* invalidNodeIds2[2] = {"ns=0;s=Counter", NULL};
 
     /* add monitored items before toolkit being initialized */
     ck_assert_int_eq(-100, SOPC_ClientHelper_AddMonitoredItems(1, nodeIds1, 1));
@@ -372,7 +364,7 @@ END_TEST
 
 START_TEST(test_wrapper_add_monitored_items_callback_called)
 {
-    char* nodeIds[1] = { "ns=0;s=Counter" };
+    char* nodeIds[1] = {"ns=0;s=Counter"};
 
     /* initialize wrapper */
     ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0));
@@ -395,7 +387,8 @@ START_TEST(test_wrapper_add_monitored_items_callback_called)
 
     /* verify that callback is called correctly */
     /* use a mutex and a condition to wait until datachange has been received (use a 1.2 sec timeout)*/
-    ck_assert_int_eq(SOPC_STATUS_OK, Mutex_UnlockAndTimedWaitCond(&check_counter_condition, &check_counter_mutex, 1200));
+    ck_assert_int_eq(SOPC_STATUS_OK,
+                     Mutex_UnlockAndTimedWaitCond(&check_counter_condition, &check_counter_mutex, 1200));
 
     /* check connection id */
     ck_assert_int_eq(valid_con_id, check_counter_connection_id);
@@ -411,7 +404,8 @@ START_TEST(test_wrapper_add_monitored_items_callback_called)
     check_counter_data_value.Value.BuiltInTypeId = SOPC_Int16_Id;
 
     /* verify that callback is called correctly once again*/
-    ck_assert_int_eq(SOPC_STATUS_OK, Mutex_UnlockAndTimedWaitCond(&check_counter_condition, &check_counter_mutex, 1200));
+    ck_assert_int_eq(SOPC_STATUS_OK,
+                     Mutex_UnlockAndTimedWaitCond(&check_counter_condition, &check_counter_mutex, 1200));
     /* verify datachange callback arguments again */
     /* check connection id */
     ck_assert_int_eq(valid_con_id, check_counter_connection_id);
@@ -488,7 +482,8 @@ START_TEST(test_wrapper_read)
 {
     /* read before toolkit is initialized */
     {
-        SOPC_ClientHelper_ReadValue readValue[1] = {{ .nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL }};
+        SOPC_ClientHelper_ReadValue readValue[1] = {
+            {.nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL}};
         SOPC_DataValue* readResults[1];
         ck_assert_int_eq(-100, SOPC_ClientHelper_Read(1, readValue, 1, readResults));
     }
@@ -498,7 +493,8 @@ START_TEST(test_wrapper_read)
 
     /* read before connection is created */
     {
-        SOPC_ClientHelper_ReadValue readValue[1] = {{ .nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL }};
+        SOPC_ClientHelper_ReadValue readValue[1] = {
+            {.nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL}};
         SOPC_DataValue* readResults[1];
         ck_assert_int_eq(-100, SOPC_ClientHelper_Read(1, readValue, 1, readResults));
     }
@@ -509,9 +505,11 @@ START_TEST(test_wrapper_read)
 
     /* invalid arguments */
     {
-        SOPC_ClientHelper_ReadValue readValue[1] = {{ .nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL }};
-        SOPC_ClientHelper_ReadValue readValue2[2] = {{ .nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL },
-                                                     { .nodeId = NULL, .attributeId = 13, .indexRange = NULL}};
+        SOPC_ClientHelper_ReadValue readValue[1] = {
+            {.nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL}};
+        SOPC_ClientHelper_ReadValue readValue2[2] = {
+            {.nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL},
+            {.nodeId = NULL, .attributeId = 13, .indexRange = NULL}};
         SOPC_DataValue* readResults[1];
         SOPC_DataValue* readResults2[1];
 
@@ -531,7 +529,8 @@ START_TEST(test_wrapper_read)
     }
     /* read one node */
     {
-        SOPC_ClientHelper_ReadValue readValue1[1] = {{ .nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL }};
+        SOPC_ClientHelper_ReadValue readValue1[1] = {
+            {.nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL}};
         SOPC_DataValue* readResults1[1];
         ck_assert_int_eq(0, SOPC_ClientHelper_Read(valid_con_id, readValue1, 1, readResults1));
         /* check datavalue */
@@ -544,8 +543,9 @@ START_TEST(test_wrapper_read)
     }
     /* read multiple nodes */
     {
-        SOPC_ClientHelper_ReadValue readValue2[2] = {{ .nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL },
-                                                     { .nodeId = "ns=0;i=1001", .attributeId = 13, .indexRange = NULL }};
+        SOPC_ClientHelper_ReadValue readValue2[2] = {
+            {.nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL},
+            {.nodeId = "ns=0;i=1001", .attributeId = 13, .indexRange = NULL}};
         SOPC_DataValue* readResults2[2];
         ck_assert_int_eq(0, SOPC_ClientHelper_Read(valid_con_id, readValue2, 2, readResults2));
         /* check first datavalue */
@@ -566,9 +566,8 @@ START_TEST(test_wrapper_read)
     }
     /* read invalid node */
     {
-        SOPC_ClientHelper_ReadValue readValue3[1] = {{ .nodeId = "ns=0;s=CounterThatShouldNotExist",
-                                                       .attributeId = 13,
-                                                        .indexRange = NULL }};
+        SOPC_ClientHelper_ReadValue readValue3[1] = {
+            {.nodeId = "ns=0;s=CounterThatShouldNotExist", .attributeId = 13, .indexRange = NULL}};
         SOPC_DataValue* readResults3[1];
         ck_assert_int_eq(0, SOPC_ClientHelper_Read(valid_con_id, readValue3, 1, readResults3));
         /* check datavalue */
@@ -579,12 +578,9 @@ START_TEST(test_wrapper_read)
     }
     /* read mix of invalid nodes and valid nodes */
     {
-        SOPC_ClientHelper_ReadValue readValue4[2] = {{ .nodeId = "ns=0;s=CounterThatShouldNotExist",
-                                                       .attributeId = 13,
-                                                       .indexRange = NULL },
-                                                     { .nodeId = "ns=0;i=1001",
-                                                        .attributeId = 13,
-                                                        .indexRange = NULL }};
+        SOPC_ClientHelper_ReadValue readValue4[2] = {
+            {.nodeId = "ns=0;s=CounterThatShouldNotExist", .attributeId = 13, .indexRange = NULL},
+            {.nodeId = "ns=0;i=1001", .attributeId = 13, .indexRange = NULL}};
         SOPC_DataValue* readResults4[2];
         ck_assert_int_eq(0, SOPC_ClientHelper_Read(valid_con_id, readValue4, 2, readResults4));
         /* check first datavalue */
@@ -607,7 +603,8 @@ START_TEST(test_wrapper_read)
 
     /* read after connection is closed */
     {
-        SOPC_ClientHelper_ReadValue readValue5[1] = {{ .nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL }};
+        SOPC_ClientHelper_ReadValue readValue5[1] = {
+            {.nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL}};
         SOPC_DataValue* readResults5[1];
         ck_assert_int_eq(-100, SOPC_ClientHelper_Read(valid_con_id, readValue5, 1, readResults5));
     }
@@ -617,7 +614,8 @@ START_TEST(test_wrapper_read)
 
     /* read after toolkit is closed */
     {
-        SOPC_ClientHelper_ReadValue readValue6[1] = {{ .nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL }};
+        SOPC_ClientHelper_ReadValue readValue6[1] = {
+            {.nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL}};
         SOPC_DataValue* readResults6[1];
         ck_assert_int_eq(-100, SOPC_ClientHelper_Read(valid_con_id, readValue6, 1, readResults6));
     }
@@ -629,14 +627,8 @@ START_TEST(test_wrapper_write)
     /* write a node before toolkit is initialized */
     {
         SOPC_DataValue value;
-        SOPC_ClientHelper_WriteValue writeValues[1] = {
-                {
-                .nodeId = "ns=0;i=1001",
-                .indexRange = NULL,
-                .value = &value
-                }
-        };
-        SOPC_StatusCode writeResults[1] = { SOPC_STATUS_NOK };
+        SOPC_ClientHelper_WriteValue writeValues[1] = {{.nodeId = "ns=0;i=1001", .indexRange = NULL, .value = &value}};
+        SOPC_StatusCode writeResults[1] = {SOPC_STATUS_NOK};
 
         SOPC_DataValue_Initialize(writeValues[0].value);
         writeValues[0].value->Value.DoNotClear = false;
@@ -653,14 +645,8 @@ START_TEST(test_wrapper_write)
     /* write a node before connection */
     {
         SOPC_DataValue value;
-        SOPC_ClientHelper_WriteValue writeValues[1] = {
-                {
-                .nodeId = "ns=0;i=1001",
-                .indexRange = NULL,
-                .value = &value
-                }
-        };
-        SOPC_StatusCode writeResults[1] = { SOPC_STATUS_NOK };
+        SOPC_ClientHelper_WriteValue writeValues[1] = {{.nodeId = "ns=0;i=1001", .indexRange = NULL, .value = &value}};
+        SOPC_StatusCode writeResults[1] = {SOPC_STATUS_NOK};
 
         SOPC_DataValue_Initialize(writeValues[0].value);
         writeValues[0].value->Value.DoNotClear = false;
@@ -678,14 +664,8 @@ START_TEST(test_wrapper_write)
     /* invalid arguments */
     {
         SOPC_DataValue value;
-        SOPC_ClientHelper_WriteValue writeValues[1] = {
-                {
-                .nodeId = "ns=0;i=1001",
-                .indexRange = NULL,
-                .value = &value
-                }
-        };
-        SOPC_StatusCode writeResults[1] = { SOPC_STATUS_NOK };
+        SOPC_ClientHelper_WriteValue writeValues[1] = {{.nodeId = "ns=0;i=1001", .indexRange = NULL, .value = &value}};
+        SOPC_StatusCode writeResults[1] = {SOPC_STATUS_NOK};
 
         SOPC_DataValue_Initialize(writeValues[0].value);
         writeValues[0].value->Value.DoNotClear = false;
@@ -706,14 +686,8 @@ START_TEST(test_wrapper_write)
     /* write a node */
     {
         SOPC_DataValue value;
-        SOPC_ClientHelper_WriteValue writeValues[1] = {
-                {
-                .nodeId = "ns=0;i=1001",
-                .indexRange = NULL,
-                .value = &value
-                }
-        };
-        SOPC_StatusCode writeResults[1] = { SOPC_STATUS_NOK };
+        SOPC_ClientHelper_WriteValue writeValues[1] = {{.nodeId = "ns=0;i=1001", .indexRange = NULL, .value = &value}};
+        SOPC_StatusCode writeResults[1] = {SOPC_STATUS_NOK};
 
         SOPC_DataValue_Initialize(writeValues[0].value);
         writeValues[0].value->Value.DoNotClear = false;
@@ -728,18 +702,10 @@ START_TEST(test_wrapper_write)
     {
         SOPC_DataValue value[2];
         SOPC_ClientHelper_WriteValue writeValues[2] = {
-                {
-                .nodeId = "ns=0;i=1001",
-                .indexRange = NULL,
-                .value = &value[0]
-                },
-                {
-                .nodeId = "ns=0;i=1009",
-                .indexRange = NULL,
-                .value = &value[1]
-                },
+            {.nodeId = "ns=0;i=1001", .indexRange = NULL, .value = &value[0]},
+            {.nodeId = "ns=0;i=1009", .indexRange = NULL, .value = &value[1]},
         };
-        SOPC_StatusCode writeResults[2] = { SOPC_STATUS_NOK };
+        SOPC_StatusCode writeResults[2] = {SOPC_STATUS_NOK};
 
         SOPC_DataValue_Initialize(writeValues[0].value);
         writeValues[0].value->Value.DoNotClear = false;
@@ -764,14 +730,8 @@ START_TEST(test_wrapper_write)
     /* write a node after disconnection */
     {
         SOPC_DataValue value;
-        SOPC_ClientHelper_WriteValue writeValues[1] = {
-                {
-                .nodeId = "ns=0;i=1001",
-                .indexRange = NULL,
-                .value = &value
-                }
-        };
-        SOPC_StatusCode writeResults[1] = { SOPC_STATUS_NOK };
+        SOPC_ClientHelper_WriteValue writeValues[1] = {{.nodeId = "ns=0;i=1001", .indexRange = NULL, .value = &value}};
+        SOPC_StatusCode writeResults[1] = {SOPC_STATUS_NOK};
 
         SOPC_DataValue_Initialize(writeValues[0].value);
         writeValues[0].value->Value.DoNotClear = false;
@@ -788,14 +748,8 @@ START_TEST(test_wrapper_write)
     /* write a node after toolkit is closed */
     {
         SOPC_DataValue value;
-        SOPC_ClientHelper_WriteValue writeValues[1] = {
-                {
-                .nodeId = "ns=0;i=1001",
-                .indexRange = NULL,
-                .value = &value
-                }
-        };
-        SOPC_StatusCode writeResults[1] = { SOPC_STATUS_NOK };
+        SOPC_ClientHelper_WriteValue writeValues[1] = {{.nodeId = "ns=0;i=1001", .indexRange = NULL, .value = &value}};
+        SOPC_StatusCode writeResults[1] = {SOPC_STATUS_NOK};
 
         SOPC_DataValue_Initialize(writeValues[0].value);
         writeValues[0].value->Value.DoNotClear = false;
@@ -812,10 +766,9 @@ START_TEST(test_wrapper_browse)
 {
     /* browse before initialization */
     {
-        //Root/ - Hierarchical references
+        // Root/ - Hierarchical references
         SOPC_ClientHelper_BrowseRequest browseRequest[1] = {
-                { .nodeId = "ns=0;i=84", .direction = 0, .referenceTypeId = "ns=0;i=33", .includeSubtypes = true }
-        };
+            {.nodeId = "ns=0;i=84", .direction = 0, .referenceTypeId = "ns=0;i=33", .includeSubtypes = true}};
         SOPC_ClientHelper_BrowseResult browseResult[1];
 
         ck_assert_int_eq(-100, SOPC_ClientHelper_Browse(1, browseRequest, 1, browseResult));
@@ -826,10 +779,9 @@ START_TEST(test_wrapper_browse)
 
     /* browse before connection */
     {
-        //Root/ - Hierarchical references
+        // Root/ - Hierarchical references
         SOPC_ClientHelper_BrowseRequest browseRequest[1] = {
-                { .nodeId = "ns=0;i=84", .direction = 0, .referenceTypeId = "ns=0;i=33", .includeSubtypes = true }
-        };
+            {.nodeId = "ns=0;i=84", .direction = 0, .referenceTypeId = "ns=0;i=33", .includeSubtypes = true}};
         SOPC_ClientHelper_BrowseResult browseResult[1];
 
         ck_assert_int_eq(-100, SOPC_ClientHelper_Browse(1, browseRequest, 1, browseResult));
@@ -841,10 +793,9 @@ START_TEST(test_wrapper_browse)
 
     /* invalid arguments */
     {
-        //Root/ - Hierarchical references
+        // Root/ - Hierarchical references
         SOPC_ClientHelper_BrowseRequest browseRequest[1] = {
-                { .nodeId = "ns=0;i=84", .direction = 0, .referenceTypeId = "ns=0;i=33", .includeSubtypes = true }
-        };
+            {.nodeId = "ns=0;i=84", .direction = 0, .referenceTypeId = "ns=0;i=33", .includeSubtypes = true}};
         SOPC_ClientHelper_BrowseResult browseResult[1];
 
         /* invalid connection id */
@@ -858,10 +809,9 @@ START_TEST(test_wrapper_browse)
     }
     /* browse */
     {
-        //Root/ - Hierarchical references
+        // Root/ - Hierarchical references
         SOPC_ClientHelper_BrowseRequest browseRequest[1] = {
-                { .nodeId = "ns=0;i=84", .direction = 0, .referenceTypeId = "ns=0;i=33", .includeSubtypes = true }
-        };
+            {.nodeId = "ns=0;i=84", .direction = 0, .referenceTypeId = "ns=0;i=33", .includeSubtypes = true}};
         SOPC_ClientHelper_BrowseResult browseResult[1];
 
         ck_assert_int_eq(0, SOPC_ClientHelper_Browse(valid_con_id, browseRequest, 1, browseResult));
@@ -911,23 +861,21 @@ START_TEST(test_wrapper_browse)
     }
     /* browse too many browse requests */
     {
-        //TODO
-        //SOPC_ClientHelper_BrowseRequest browseRequest[1] = {
+        // TODO
+        // SOPC_ClientHelper_BrowseRequest browseRequest[1] = {
         //        { .nodeId = "ns=0;i=7617", .direction = 0, .referenceTypeId = "ns=0;i=33", .includeSubtypes = true }
         //};
-        //SOPC_ClientHelper_BrowseResult browseResult[1];
-        //CfgMaxReferencesPerNode = 1;
-        //CfgMaxBrowseNextRequests = 10;
+        // SOPC_ClientHelper_BrowseResult browseResult[1];
+        // CfgMaxReferencesPerNode = 1;
+        // CfgMaxBrowseNextRequests = 10;
 
-        //ck_assert_int_eq(-4, SOPC_ClientHelper_Browse(valid_con_id, browseRequest, 1, browseResult));
-    }
-    /* browse multiple nodes */
+        // ck_assert_int_eq(-4, SOPC_ClientHelper_Browse(valid_con_id, browseRequest, 1, browseResult));
+    } /* browse multiple nodes */
     {
-        //Root/ and Root/Objects - Hierarchical references
+        // Root/ and Root/Objects - Hierarchical references
         SOPC_ClientHelper_BrowseRequest browseRequest[2] = {
-                { .nodeId = "ns=0;i=84", .direction = 0, .referenceTypeId = "ns=0;i=33", .includeSubtypes = true },
-                { .nodeId = "ns=0;i=85", .direction = 0, .referenceTypeId = "ns=0;i=33", .includeSubtypes = true }
-        };
+            {.nodeId = "ns=0;i=84", .direction = 0, .referenceTypeId = "ns=0;i=33", .includeSubtypes = true},
+            {.nodeId = "ns=0;i=85", .direction = 0, .referenceTypeId = "ns=0;i=33", .includeSubtypes = true}};
         SOPC_ClientHelper_BrowseResult browseResult[2];
 
         ck_assert_int_eq(0, SOPC_ClientHelper_Browse(valid_con_id, browseRequest, 2, browseResult));
@@ -974,10 +922,9 @@ START_TEST(test_wrapper_browse)
 
     /* browse after disconnection */
     {
-        //Root/ - Hierarchical references
+        // Root/ - Hierarchical references
         SOPC_ClientHelper_BrowseRequest browseRequest[1] = {
-                { .nodeId = "ns=0;i=84", .direction = 0, .referenceTypeId = "ns=0;i=33", .includeSubtypes = true }
-        };
+            {.nodeId = "ns=0;i=84", .direction = 0, .referenceTypeId = "ns=0;i=33", .includeSubtypes = true}};
         SOPC_ClientHelper_BrowseResult browseResult[1];
 
         ck_assert_int_eq(-100, SOPC_ClientHelper_Browse(valid_con_id, browseRequest, 1, browseResult));
@@ -988,10 +935,9 @@ START_TEST(test_wrapper_browse)
 
     /* browse after toolkit is closed */
     {
-        //Root/ - Hierarchical references
+        // Root/ - Hierarchical references
         SOPC_ClientHelper_BrowseRequest browseRequest[1] = {
-                { .nodeId = "ns=0;i=84", .direction = 0, .referenceTypeId = "ns=0;i=33", .includeSubtypes = true }
-        };
+            {.nodeId = "ns=0;i=84", .direction = 0, .referenceTypeId = "ns=0;i=33", .includeSubtypes = true}};
         SOPC_ClientHelper_BrowseResult browseResult[1];
 
         ck_assert_int_eq(-100, SOPC_ClientHelper_Browse(valid_con_id, browseRequest, 1, browseResult));
@@ -1002,7 +948,7 @@ END_TEST
 static Suite* tests_make_suite_wrapper(void)
 {
     Suite* s = NULL;
-    TCase *tc_wrapper;
+    TCase* tc_wrapper;
 
     s = suite_create("Client subscription library");
 

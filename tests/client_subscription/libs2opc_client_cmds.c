@@ -20,15 +20,15 @@
 #include "libs2opc_client_cmds.h"
 #include "libs2opc_client_cmds_internal_api.h"
 
+#include "sopc_array.h"
 #include "sopc_builtintypes.h"
 #include "sopc_mutexes.h"
 #include "sopc_toolkit_config.h"
 #include "sopc_types.h"
-#include "sopc_array.h"
 
 #define SKIP_S2OPC_DEFINITIONS
-#include "libs2opc_client_common.h"
 #include "libs2opc_client.h"
+#include "libs2opc_client_common.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_types.h"
 
@@ -176,35 +176,27 @@ static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_
                                                  SOPC_ClientHelper_Security security);
 static SOPC_ReturnStatus ReadHelper_Initialize(SOPC_ReturnStatus status,
                                                size_t nbElements,
-                                               OpcUa_ReadValueId *nodesToRead,
-                                               SOPC_ClientHelper_ReadValue *readValues,
-                                               SOPC_DataValue **values);
+                                               OpcUa_ReadValueId* nodesToRead,
+                                               SOPC_ClientHelper_ReadValue* readValues,
+                                               SOPC_DataValue** values);
 static SOPC_ReturnStatus WriteHelper_InitialiazeValues(size_t nbElements,
                                                        SOPC_ReturnStatus status,
-                                                       OpcUa_WriteValue *nodesToWrite,
-                                                       SOPC_ClientHelper_WriteValue *writeValues);
+                                                       OpcUa_WriteValue* nodesToWrite,
+                                                       SOPC_ClientHelper_WriteValue* writeValues);
 static SOPC_ReturnStatus BrowseHelper_InitializeContinuationPoints(size_t nbElements,
                                                                    SOPC_ReturnStatus status,
-                                                                   SOPC_ByteString **continuationPointsArray);
+                                                                   SOPC_ByteString** continuationPointsArray);
 static SOPC_ReturnStatus BrowseHelper_InitializeNodesToBrowse(size_t nbElements,
                                                               SOPC_ReturnStatus status,
-                                                              OpcUa_BrowseDescription *nodesToBrowse,
-                                                              SOPC_ClientHelper_BrowseRequest *browseRequests);
+                                                              OpcUa_BrowseDescription* nodesToBrowse,
+                                                              SOPC_ClientHelper_BrowseRequest* browseRequests);
 static SOPC_ReturnStatus BrowseHelper_InitializeBrowseResults(size_t nbElements,
                                                               SOPC_ReturnStatus status,
-                                                              SOPC_Array **browseResultsListArray);
-static void GenericCallbackHelper_Read(SOPC_StatusCode status,
-                                       const void* response,
-                                       uintptr_t responseContext);
-static void GenericCallbackHelper_Write(SOPC_StatusCode status,
-                                        const void* response,
-                                        uintptr_t responseContext);
-static void GenericCallbackHelper_Browse(SOPC_StatusCode status,
-                                         const void* response,
-                                         uintptr_t responseContext);
-static void GenericCallbackHelper_BrowseNext(SOPC_StatusCode status,
-                                             const void* response,
-                                             uintptr_t responseContext);
+                                                              SOPC_Array** browseResultsListArray);
+static void GenericCallbackHelper_Read(SOPC_StatusCode status, const void* response, uintptr_t responseContext);
+static void GenericCallbackHelper_Write(SOPC_StatusCode status, const void* response, uintptr_t responseContext);
+static void GenericCallbackHelper_Browse(SOPC_StatusCode status, const void* response, uintptr_t responseContext);
+static void GenericCallbackHelper_BrowseNext(SOPC_StatusCode status, const void* response, uintptr_t responseContext);
 static bool ContainsContinuationPoints(SOPC_ByteString** continuationPointsArray, size_t nbElements);
 static SOPC_ReturnStatus BrowseNext(int32_t connectionId,
                                     SOPC_StatusCode* statusCodes,
@@ -246,9 +238,10 @@ int32_t SOPC_ClientHelper_Initialize(const char* log_path, int32_t log_level)
         log_path = "./logs/";
     }
 
-    SOPC_LibSub_StaticCfg cfg_cli = {.host_log_callback = log_callback,
-                                     .disconnect_callback = disconnect_callback,
-                                     .toolkit_logger = {.level = level, .log_path = log_path, .maxBytes = 1048576, .maxFiles = 50}};
+    SOPC_LibSub_StaticCfg cfg_cli = {
+        .host_log_callback = log_callback,
+        .disconnect_callback = disconnect_callback,
+        .toolkit_logger = {.level = level, .log_path = log_path, .maxBytes = 1048576, .maxFiles = 50}};
 
     SOPC_ReturnStatus status = SOPC_ClientCommon_Initialize(&cfg_cli);
 
@@ -267,7 +260,6 @@ int32_t SOPC_ClientHelper_Initialize(const char* log_path, int32_t log_level)
         Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not initialize library.");
         return -2;
     }
-
 
     return 0;
 }
@@ -297,26 +289,27 @@ static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_
 
     switch (security.security_mode)
     {
-        case OpcUa_MessageSecurityMode_None:
-            if (strncmp(security.security_policy, SOPC_SecurityPolicy_None_URI, strlen(SOPC_SecurityPolicy_None_URI) + 1) != 0)
-            {
-                return -11;
-            }
-            disable_verification = true;
-            secuMode = OpcUa_MessageSecurityMode_None;
-            cert_auth = NULL;
-            cert_srv = NULL;
-            cert_cli = NULL;
-            key_cli = NULL;
-            break;
-        case OpcUa_MessageSecurityMode_Sign:
-            secuMode = OpcUa_MessageSecurityMode_Sign;
-            break;
-        case OpcUa_MessageSecurityMode_SignAndEncrypt:
-            secuMode = OpcUa_MessageSecurityMode_SignAndEncrypt;
-            break;
-        default:
-            return -12;
+    case OpcUa_MessageSecurityMode_None:
+        if (strncmp(security.security_policy, SOPC_SecurityPolicy_None_URI, strlen(SOPC_SecurityPolicy_None_URI) + 1) !=
+            0)
+        {
+            return -11;
+        }
+        disable_verification = true;
+        secuMode = OpcUa_MessageSecurityMode_None;
+        cert_auth = NULL;
+        cert_srv = NULL;
+        cert_cli = NULL;
+        key_cli = NULL;
+        break;
+    case OpcUa_MessageSecurityMode_Sign:
+        secuMode = OpcUa_MessageSecurityMode_Sign;
+        break;
+    case OpcUa_MessageSecurityMode_SignAndEncrypt:
+        secuMode = OpcUa_MessageSecurityMode_SignAndEncrypt;
+        break;
+    default:
+        return -12;
     }
 
     if (!disable_verification && NULL == cert_auth)
@@ -377,8 +370,7 @@ static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_
 
 // Return connection Id > 0 if succeeded, -<n> with <n> argument number (starting from 1) if invalid argument detected
 // or '-100' if connection failed
-int32_t SOPC_ClientHelper_Connect(const char* endpointUrl,
-                                  SOPC_ClientHelper_Security security)
+int32_t SOPC_ClientHelper_Connect(const char* endpointUrl, SOPC_ClientHelper_Security security)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (NULL == endpointUrl)
@@ -442,198 +434,188 @@ int32_t SOPC_ClientHelper_Connect(const char* endpointUrl,
     return (int32_t) con_id;
 }
 
-static void GenericCallbackHelper_Read(SOPC_StatusCode status,
-                                       const void* response,
-                                       uintptr_t responseContext)
+static void GenericCallbackHelper_Read(SOPC_StatusCode status, const void* response, uintptr_t responseContext)
 {
-        ReadContext* ctx = (ReadContext*) responseContext;
-        const OpcUa_ReadResponse* readResp = (const OpcUa_ReadResponse*) response;
+    ReadContext* ctx = (ReadContext*) responseContext;
+    const OpcUa_ReadResponse* readResp = (const OpcUa_ReadResponse*) response;
 
-        ctx->status = Mutex_Lock(&ctx->mutex);
-        assert(SOPC_STATUS_OK == ctx->status);
+    ctx->status = Mutex_Lock(&ctx->mutex);
+    assert(SOPC_STATUS_OK == ctx->status);
 
-        ctx->status = status;
-        if (ctx->nbElements != readResp->NoOfResults)
+    ctx->status = status;
+    if (ctx->nbElements != readResp->NoOfResults)
+    {
+        // TODO log error
+        ctx->status = SOPC_STATUS_NOK;
+    }
+    if (SOPC_STATUS_OK == ctx->status)
+    {
+        for (int32_t i = 0; i < readResp->NoOfResults && SOPC_STATUS_OK == ctx->status; i++)
         {
-            // TODO log error
-            ctx->status = SOPC_STATUS_NOK;
+            ctx->status = SOPC_DataValue_Copy(ctx->values[i], &readResp->Results[i]);
         }
-        if (SOPC_STATUS_OK == ctx->status)
+        if (ctx->status == SOPC_STATUS_NOK)
         {
-            for (int32_t i = 0; i < readResp->NoOfResults && SOPC_STATUS_OK == ctx->status; i++)
+            for (int32_t i = 0; i < readResp->NoOfResults; i++)
             {
-                ctx->status = SOPC_DataValue_Copy(ctx->values[i], &readResp->Results[i]);
+                SOPC_DataValue_Clear(ctx->values[i]);
             }
-            if (ctx->status == SOPC_STATUS_NOK)
-            {
-                for (int32_t i = 0; i < readResp->NoOfResults; i++)
-                {
-                    SOPC_DataValue_Clear(ctx->values[i]);
-                }
-                ctx->nbElements = 0;
-            }
+            ctx->nbElements = 0;
         }
-        ctx->finish = true;
+    }
+    ctx->finish = true;
 
-        ctx->status = Mutex_Unlock(&ctx->mutex);
-        assert(SOPC_STATUS_OK == ctx->status);
-        /* Signal that the response is available */
-        status = Condition_SignalAll(&ctx->condition);
-        assert(SOPC_STATUS_OK == status);
+    ctx->status = Mutex_Unlock(&ctx->mutex);
+    assert(SOPC_STATUS_OK == ctx->status);
+    /* Signal that the response is available */
+    status = Condition_SignalAll(&ctx->condition);
+    assert(SOPC_STATUS_OK == status);
 }
 
-static void GenericCallbackHelper_Write(SOPC_StatusCode status,
-                                        const void* response,
-                                        uintptr_t responseContext)
+static void GenericCallbackHelper_Write(SOPC_StatusCode status, const void* response, uintptr_t responseContext)
 {
-        WriteContext* ctx = (WriteContext*) responseContext;
-        const OpcUa_WriteResponse* writeResp = (const OpcUa_WriteResponse*) response;
+    WriteContext* ctx = (WriteContext*) responseContext;
+    const OpcUa_WriteResponse* writeResp = (const OpcUa_WriteResponse*) response;
 
-        ctx->status = Mutex_Lock(&ctx->mutex);
-        assert(SOPC_STATUS_OK == ctx->status);
+    ctx->status = Mutex_Lock(&ctx->mutex);
+    assert(SOPC_STATUS_OK == ctx->status);
 
-        ctx->status = status;
-        if (ctx->nbElements != writeResp->NoOfResults)
+    ctx->status = status;
+    if (ctx->nbElements != writeResp->NoOfResults)
+    {
+        // TODO log error
+        ctx->status = SOPC_STATUS_NOK;
+    }
+    if (SOPC_STATUS_OK == ctx->status)
+    {
+        for (int32_t i = 0; i < writeResp->NoOfResults; i++)
         {
-            // TODO log error
-            ctx->status = SOPC_STATUS_NOK;
-        }
-        if (SOPC_STATUS_OK == ctx->status)
-        {
-            for (int32_t i = 0; i < writeResp->NoOfResults; i++)
+            if (NULL != ctx->writeResults)
             {
-                if (NULL != ctx->writeResults)
+                ctx->writeResults[i] = writeResp->Results[i];
+            }
+            else
+            {
+                status = SOPC_STATUS_NOK;
+            }
+        }
+    }
+    ctx->finish = true;
+
+    ctx->status = Mutex_Unlock(&ctx->mutex);
+    assert(SOPC_STATUS_OK == ctx->status);
+    /* Signal that the response is available */
+    status = Condition_SignalAll(&ctx->condition);
+    assert(SOPC_STATUS_OK == status);
+}
+
+static void GenericCallbackHelper_Browse(SOPC_StatusCode status, const void* response, uintptr_t responseContext)
+{
+    BrowseContext* ctx = (BrowseContext*) responseContext;
+    const OpcUa_BrowseResponse* browseResp = (const OpcUa_BrowseResponse*) response;
+
+    ctx->status = Mutex_Lock(&ctx->mutex);
+    assert(SOPC_STATUS_OK == ctx->status);
+
+    ctx->status = status;
+    if (ctx->nbElements != browseResp->NoOfResults)
+    {
+        // TODO log error
+        ctx->status = SOPC_STATUS_NOK;
+    }
+    if (SOPC_STATUS_OK == ctx->status)
+    {
+        for (int32_t i = 0; i < browseResp->NoOfResults; i++)
+        {
+            ctx->statusCodes[i] = browseResp->Results[i].StatusCode;
+            SOPC_ByteString_Copy(ctx->continuationPoints[i], &browseResp->Results[i].ContinuationPoint);
+            for (int32_t j = 0; j < browseResp->Results[i].NoOfReferences; j++)
+            {
+                SOPC_ClientHelper_BrowseResultReference resultReference;
+                OpcUa_ReferenceDescription* reference = &browseResp->Results[i].References[j];
+
+                // TODO check mallocs ?
+                resultReference.referenceTypeId = SOPC_NodeId_ToCString(&reference->ReferenceTypeId);
+                resultReference.nodeId = SOPC_NodeId_ToCString(&reference->NodeId.NodeId);
+                resultReference.browseName = SOPC_String_GetCString(&reference->BrowseName.Name);
+                resultReference.displayName = SOPC_String_GetCString(&reference->DisplayName.Text);
+                resultReference.isForward = reference->IsForward;
+                resultReference.nodeClass = (int32_t) reference->NodeClass;
+                SOPC_Array_Append(ctx->browseResults[i], resultReference);
+            }
+        }
+    }
+    ctx->finish = true;
+
+    ctx->status = Mutex_Unlock(&ctx->mutex);
+    assert(SOPC_STATUS_OK == ctx->status);
+    /* Signal that the response is available */
+    status = Condition_SignalAll(&ctx->condition);
+    assert(SOPC_STATUS_OK == status);
+}
+
+static void GenericCallbackHelper_BrowseNext(SOPC_StatusCode status, const void* response, uintptr_t responseContext)
+{
+    BrowseContext* ctx = (BrowseContext*) responseContext;
+    const OpcUa_BrowseNextResponse* browseNextResp = (const OpcUa_BrowseNextResponse*) response;
+
+    ctx->status = Mutex_Lock(&ctx->mutex);
+    assert(SOPC_STATUS_OK == ctx->status);
+
+    ctx->status = status;
+    if (ctx->nbElements < browseNextResp->NoOfResults)
+    {
+        // TODO log error
+        ctx->status = SOPC_STATUS_NOK;
+    }
+    if (SOPC_STATUS_OK == ctx->status)
+    {
+        int32_t index = 0;
+        for (int32_t i = 0; i < browseNextResp->NoOfResults && index < ctx->nbElements; i++)
+        {
+            bool found = false;
+            while (index < ctx->nbElements && !found)
+            {
+                if (0 < ctx->continuationPoints[index]->Length)
                 {
-                    ctx->writeResults[i] = writeResp->Results[i];
+                    found = true;
                 }
                 else
                 {
-                    status = SOPC_STATUS_NOK;
+                    index++;
                 }
             }
-        }
-        ctx->finish = true;
 
-        ctx->status = Mutex_Unlock(&ctx->mutex);
-        assert(SOPC_STATUS_OK == ctx->status);
-        /* Signal that the response is available */
-        status = Condition_SignalAll(&ctx->condition);
-        assert(SOPC_STATUS_OK == status);
-}
+            ctx->statusCodes[index] = browseNextResp->Results[i].StatusCode;
 
-static void GenericCallbackHelper_Browse(SOPC_StatusCode status,
-                                         const void* response,
-                                         uintptr_t responseContext)
-{
-        BrowseContext* ctx = (BrowseContext*) responseContext;
-        const OpcUa_BrowseResponse* browseResp = (const OpcUa_BrowseResponse*) response;
-
-        ctx->status = Mutex_Lock(&ctx->mutex);
-        assert(SOPC_STATUS_OK == ctx->status);
-
-        ctx->status = status;
-        if (ctx->nbElements != browseResp->NoOfResults)
-        {
-            // TODO log error
-            ctx->status = SOPC_STATUS_NOK;
-        }
-        if (SOPC_STATUS_OK == ctx->status)
-        {
-            for (int32_t i = 0; i < browseResp->NoOfResults; i++)
+            SOPC_ByteString_Delete(ctx->continuationPoints[index]);
+            ctx->continuationPoints[index] = SOPC_ByteString_Create();
+            SOPC_ByteString_Copy(ctx->continuationPoints[index], &browseNextResp->Results[i].ContinuationPoint);
+            for (int32_t j = 0; j < browseNextResp->Results[i].NoOfReferences; j++)
             {
-                ctx->statusCodes[i] = browseResp->Results[i].StatusCode;
-                SOPC_ByteString_Copy(ctx->continuationPoints[i],
-                                     &browseResp->Results[i].ContinuationPoint);
-                for (int32_t j = 0; j < browseResp->Results[i].NoOfReferences; j++)
-                {
-                    SOPC_ClientHelper_BrowseResultReference resultReference;
-                    OpcUa_ReferenceDescription* reference = &browseResp->Results[i].References[j];
+                SOPC_ClientHelper_BrowseResultReference resultReference;
+                OpcUa_ReferenceDescription* reference = &browseNextResp->Results[i].References[j];
 
-                    //TODO check mallocs ?
-                    resultReference.referenceTypeId = SOPC_NodeId_ToCString(&reference->ReferenceTypeId);
-                    resultReference.nodeId = SOPC_NodeId_ToCString(&reference->NodeId.NodeId);
-                    resultReference.browseName = SOPC_String_GetCString(&reference->BrowseName.Name);
-                    resultReference.displayName = SOPC_String_GetCString(&reference->DisplayName.Text);
-                    resultReference.isForward = reference->IsForward;
-                    resultReference.nodeClass = (int32_t) reference->NodeClass;
-                    SOPC_Array_Append(ctx->browseResults[i], resultReference);
-                }
+                // TODO check mallocs ?
+                resultReference.referenceTypeId = SOPC_NodeId_ToCString(&reference->ReferenceTypeId);
+                resultReference.nodeId = SOPC_NodeId_ToCString(&reference->NodeId.NodeId);
+                resultReference.browseName = SOPC_String_GetCString(&reference->BrowseName.Name);
+                resultReference.displayName = SOPC_String_GetCString(&reference->DisplayName.Text);
+                resultReference.isForward = reference->IsForward;
+                resultReference.nodeClass = (int32_t) reference->NodeClass;
+                SOPC_Array_Append(ctx->browseResults[index], resultReference);
             }
+
+            index += 1;
         }
-        ctx->finish = true;
+    }
+    ctx->finish = true;
 
-        ctx->status = Mutex_Unlock(&ctx->mutex);
-        assert(SOPC_STATUS_OK == ctx->status);
-        /* Signal that the response is available */
-        status = Condition_SignalAll(&ctx->condition);
-        assert(SOPC_STATUS_OK == status);
-}
-
-static void GenericCallbackHelper_BrowseNext(SOPC_StatusCode status,
-                                         const void* response,
-                                         uintptr_t responseContext)
-{
-        BrowseContext* ctx = (BrowseContext*) responseContext;
-        const OpcUa_BrowseNextResponse* browseNextResp = (const OpcUa_BrowseNextResponse*) response;
-
-        ctx->status = Mutex_Lock(&ctx->mutex);
-        assert(SOPC_STATUS_OK == ctx->status);
-
-        ctx->status = status;
-        if (ctx->nbElements < browseNextResp->NoOfResults)
-        {
-            // TODO log error
-            ctx->status = SOPC_STATUS_NOK;
-        }
-        if (SOPC_STATUS_OK == ctx->status)
-        {
-            int32_t index = 0;
-            for (int32_t i = 0; i < browseNextResp->NoOfResults && index < ctx->nbElements; i++)
-            {
-                bool found = false;
-                while (index < ctx->nbElements && !found)
-                {
-                    if (0 < ctx->continuationPoints[index]->Length)
-                    {
-                        found = true;
-                    }
-                    else
-                    {
-                        index++;
-                    }
-                }
-
-                ctx->statusCodes[index] = browseNextResp->Results[i].StatusCode;
-
-                SOPC_ByteString_Delete(ctx->continuationPoints[index]);
-                ctx->continuationPoints[index] = SOPC_ByteString_Create();
-                SOPC_ByteString_Copy(ctx->continuationPoints[index],
-                                   &browseNextResp->Results[i].ContinuationPoint);
-                for (int32_t j = 0; j < browseNextResp->Results[i].NoOfReferences; j++)
-                {
-                    SOPC_ClientHelper_BrowseResultReference resultReference;
-                    OpcUa_ReferenceDescription* reference = &browseNextResp->Results[i].References[j];
-
-                    //TODO check mallocs ?
-                    resultReference.referenceTypeId = SOPC_NodeId_ToCString(&reference->ReferenceTypeId);
-                    resultReference.nodeId = SOPC_NodeId_ToCString(&reference->NodeId.NodeId);
-                    resultReference.browseName = SOPC_String_GetCString(&reference->BrowseName.Name);
-                    resultReference.displayName = SOPC_String_GetCString(&reference->DisplayName.Text);
-                    resultReference.isForward = reference->IsForward;
-                    resultReference.nodeClass = (int32_t) reference->NodeClass;
-                    SOPC_Array_Append(ctx->browseResults[index], resultReference);
-                }
-
-                index += 1;
-            }
-        }
-        ctx->finish = true;
-
-        ctx->status = Mutex_Unlock(&ctx->mutex);
-        assert(SOPC_STATUS_OK == ctx->status);
-        /* Signal that the response is available */
-        status = Condition_SignalAll(&ctx->condition);
-        assert(SOPC_STATUS_OK == status);
+    ctx->status = Mutex_Unlock(&ctx->mutex);
+    assert(SOPC_STATUS_OK == ctx->status);
+    /* Signal that the response is available */
+    status = Condition_SignalAll(&ctx->condition);
+    assert(SOPC_STATUS_OK == status);
 }
 
 void SOPC_ClientHelper_GenericCallback(SOPC_LibSub_ConnectionId c_id,
@@ -670,9 +652,11 @@ void SOPC_ClientHelper_GenericCallback(SOPC_LibSub_ConnectionId c_id,
     }
 }
 
-static SOPC_ReturnStatus ReadHelper_Initialize(SOPC_ReturnStatus status, size_t nbElements,
-        OpcUa_ReadValueId *nodesToRead, SOPC_ClientHelper_ReadValue *readValues,
-        SOPC_DataValue **values)
+static SOPC_ReturnStatus ReadHelper_Initialize(SOPC_ReturnStatus status,
+                                               size_t nbElements,
+                                               OpcUa_ReadValueId* nodesToRead,
+                                               SOPC_ClientHelper_ReadValue* readValues,
+                                               SOPC_DataValue** values)
 {
     if (SOPC_STATUS_OK == status)
     {
@@ -689,14 +673,12 @@ static SOPC_ReturnStatus ReadHelper_Initialize(SOPC_ReturnStatus status, size_t 
             }
             else
             {
-                status = SOPC_String_CopyFromCString(&nodesToRead[i].IndexRange,
-                        readValues[i].indexRange);
+                status = SOPC_String_CopyFromCString(&nodesToRead[i].IndexRange, readValues[i].indexRange);
             }
             if (SOPC_STATUS_OK == status)
             {
                 // create an instance of NodeId
-                SOPC_NodeId *nodeId = SOPC_NodeId_FromCString(readValues[i].nodeId,
-                        (int) strlen(readValues[i].nodeId));
+                SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(readValues[i].nodeId, (int) strlen(readValues[i].nodeId));
                 if (NULL == nodeId)
                 {
                     status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -757,7 +739,7 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
     {
         if (NULL == readValues[i].nodeId)
         {
-            return (int32_t) -(4 + i);
+            return (int32_t) - (4 + i);
         }
     }
 
@@ -790,7 +772,7 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
         status = SOPC_STATUS_OUT_OF_MEMORY;
     }
 
-	status = ReadHelper_Initialize(status, nbElements, nodesToRead, readValues, values);
+    status = ReadHelper_Initialize(status, nbElements, nodesToRead, readValues, values);
     /* set context */
     if (SOPC_STATUS_OK == status)
     {
@@ -819,8 +801,8 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
         statusMutex = Mutex_Lock(&ctx->mutex);
         assert(SOPC_STATUS_OK == statusMutex);
 
-        status =
-            SOPC_ClientCommon_AsyncSendRequestOnSession((SOPC_LibSub_ConnectionId) connectionId, request, (uintptr_t) ctx);
+        status = SOPC_ClientCommon_AsyncSendRequestOnSession((SOPC_LibSub_ConnectionId) connectionId, request,
+                                                             (uintptr_t) ctx);
 
         /* Wait for the response */
         while (SOPC_STATUS_OK == status && !ctx->finish)
@@ -924,8 +906,9 @@ int32_t SOPC_ClientHelper_AddMonitoredItems(int32_t connectionId, char** nodeIds
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ClientCommon_AddToSubscription(
-                (SOPC_LibSub_ConnectionId) connectionId, (const char* const*) nodeIds, lAttrIds, (int32_t) nbNodeIds, lDataId);
+        status =
+            SOPC_ClientCommon_AddToSubscription((SOPC_LibSub_ConnectionId) connectionId, (const char* const*) nodeIds,
+                                                lAttrIds, (int32_t) nbNodeIds, lDataId);
     }
 
     if (SOPC_STATUS_OK == status)
@@ -1007,8 +990,10 @@ static void disconnect_callback(const SOPC_LibSub_ConnectionId c_id)
     Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Client %" PRIu32 " disconnected.", c_id);
 }
 
-static SOPC_ReturnStatus WriteHelper_InitialiazeValues(size_t nbElements, SOPC_ReturnStatus status,
-        OpcUa_WriteValue *nodesToWrite, SOPC_ClientHelper_WriteValue *writeValues)
+static SOPC_ReturnStatus WriteHelper_InitialiazeValues(size_t nbElements,
+                                                       SOPC_ReturnStatus status,
+                                                       OpcUa_WriteValue* nodesToWrite,
+                                                       SOPC_ClientHelper_WriteValue* writeValues)
 {
     for (size_t i = 0; i < nbElements && SOPC_STATUS_OK == status; i++)
     {
@@ -1023,14 +1008,12 @@ static SOPC_ReturnStatus WriteHelper_InitialiazeValues(size_t nbElements, SOPC_R
         }
         else
         {
-            status = SOPC_String_CopyFromCString(&nodesToWrite[i].IndexRange,
-                    writeValues[i].indexRange);
+            status = SOPC_String_CopyFromCString(&nodesToWrite[i].IndexRange, writeValues[i].indexRange);
         }
         if (SOPC_STATUS_OK == status)
         {
             // create an instance of NodeId
-            SOPC_NodeId *nodeId = SOPC_NodeId_FromCString(writeValues[i].nodeId,
-                    (int) strlen(writeValues[i].nodeId));
+            SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(writeValues[i].nodeId, (int) strlen(writeValues[i].nodeId));
             if (NULL == nodeId)
             {
                 Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "nodeId NULL");
@@ -1099,7 +1082,8 @@ int32_t SOPC_ClientHelper_Write(int32_t connectionId,
     {
         /* Set context */
         ctx->nbElements = request->NoOfNodesToWrite;
-        ctx->writeResults = (SOPC_StatusCode*) SOPC_Malloc(sizeof(SOPC_StatusCode) * (size_t) request->NoOfNodesToWrite);
+        ctx->writeResults =
+            (SOPC_StatusCode*) SOPC_Malloc(sizeof(SOPC_StatusCode) * (size_t) request->NoOfNodesToWrite);
         if (NULL == ctx->writeResults)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -1117,7 +1101,8 @@ int32_t SOPC_ClientHelper_Write(int32_t connectionId,
         statusMutex = Mutex_Lock(&ctx->mutex);
         assert(SOPC_STATUS_OK == statusMutex);
 
-        status = SOPC_ClientCommon_AsyncSendRequestOnSession((SOPC_LibSub_ConnectionId) connectionId, request, (uintptr_t) ctx);
+        status = SOPC_ClientCommon_AsyncSendRequestOnSession((SOPC_LibSub_ConnectionId) connectionId, request,
+                                                             (uintptr_t) ctx);
 
         /* Wait for the response */
         while (SOPC_STATUS_OK == status && !ctx->finish)
@@ -1129,7 +1114,7 @@ int32_t SOPC_ClientHelper_Write(int32_t connectionId,
         status = ctx->status;
 
         /* fill write results */
-        for (int i=0; i < ctx->nbElements; i++)
+        for (int i = 0; i < ctx->nbElements; i++)
         {
             writeResults[i] = ctx->writeResults[i];
         }
@@ -1162,7 +1147,8 @@ int32_t SOPC_ClientHelper_Write(int32_t connectionId,
 }
 
 static SOPC_ReturnStatus BrowseHelper_InitializeContinuationPoints(size_t nbElements,
-        SOPC_ReturnStatus status, SOPC_ByteString **continuationPointsArray)
+                                                                   SOPC_ReturnStatus status,
+                                                                   SOPC_ByteString** continuationPointsArray)
 {
     size_t i = 0;
     for (; i < nbElements && SOPC_STATUS_OK == status; i++)
@@ -1184,15 +1170,16 @@ static SOPC_ReturnStatus BrowseHelper_InitializeContinuationPoints(size_t nbElem
     return status;
 }
 
-static SOPC_ReturnStatus BrowseHelper_InitializeNodesToBrowse(size_t nbElements, SOPC_ReturnStatus status,
-        OpcUa_BrowseDescription *nodesToBrowse, SOPC_ClientHelper_BrowseRequest *browseRequests)
+static SOPC_ReturnStatus BrowseHelper_InitializeNodesToBrowse(size_t nbElements,
+                                                              SOPC_ReturnStatus status,
+                                                              OpcUa_BrowseDescription* nodesToBrowse,
+                                                              SOPC_ClientHelper_BrowseRequest* browseRequests)
 {
     for (size_t i = 0; i < nbElements && SOPC_STATUS_OK == status; i++)
     {
         OpcUa_BrowseDescription_Initialize(&nodesToBrowse[i]);
         // create an instance of NodeId
-        SOPC_NodeId *nodeId = SOPC_NodeId_FromCString(browseRequests[i].nodeId,
-                (int) strlen(browseRequests[i].nodeId));
+        SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(browseRequests[i].nodeId, (int) strlen(browseRequests[i].nodeId));
         if (NULL == nodeId)
         {
             Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "nodeId NULL");
@@ -1203,8 +1190,8 @@ static SOPC_ReturnStatus BrowseHelper_InitializeNodesToBrowse(size_t nbElements,
         if (SOPC_STATUS_OK == status)
         {
             // create an instance of NodeId
-            SOPC_NodeId *refNodeId = SOPC_NodeId_FromCString(browseRequests[i].referenceTypeId,
-                    (int) strlen(browseRequests[i].referenceTypeId));
+            SOPC_NodeId* refNodeId = SOPC_NodeId_FromCString(browseRequests[i].referenceTypeId,
+                                                             (int) strlen(browseRequests[i].referenceTypeId));
             if (NULL == refNodeId)
             {
                 Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "refNodeId NULL");
@@ -1217,21 +1204,21 @@ static SOPC_ReturnStatus BrowseHelper_InitializeNodesToBrowse(size_t nbElements,
         {
             nodesToBrowse[i].BrowseDirection = (OpcUa_BrowseDirection) browseRequests[i].direction;
             nodesToBrowse[i].IncludeSubtypes = browseRequests[i].includeSubtypes;
-            nodesToBrowse[i].NodeClassMask = 0; //all //TODO correct ?
-            nodesToBrowse[i].ResultMask = 0x3f; //all //TODO correct ?
+            nodesToBrowse[i].NodeClassMask = 0; // all //TODO correct ?
+            nodesToBrowse[i].ResultMask = 0x3f; // all //TODO correct ?
         }
     }
     return status;
 }
 
-static SOPC_ReturnStatus BrowseHelper_InitializeBrowseResults(size_t nbElements, SOPC_ReturnStatus status,
-        SOPC_Array **browseResultsListArray)
+static SOPC_ReturnStatus BrowseHelper_InitializeBrowseResults(size_t nbElements,
+                                                              SOPC_ReturnStatus status,
+                                                              SOPC_Array** browseResultsListArray)
 {
     size_t i = 0;
     for (; i < nbElements && SOPC_STATUS_OK == status; i++)
     {
-        browseResultsListArray[i] = SOPC_Array_Create(
-                sizeof(SOPC_ClientHelper_BrowseResultReference), 10, SOPC_Free);
+        browseResultsListArray[i] = SOPC_Array_Create(sizeof(SOPC_ClientHelper_BrowseResultReference), 10, SOPC_Free);
         if (NULL == browseResultsListArray)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -1266,8 +1253,7 @@ int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
     {
         return -3;
     }
-    OpcUa_BrowseRequest* request = (OpcUa_BrowseRequest*)
-        SOPC_Calloc(1, sizeof(OpcUa_BrowseRequest));
+    OpcUa_BrowseRequest* request = (OpcUa_BrowseRequest*) SOPC_Calloc(1, sizeof(OpcUa_BrowseRequest));
     if (NULL == request)
     {
         status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -1287,8 +1273,7 @@ int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
     }
 
     /* Create array of singly linked lists, containing browse results */
-    SOPC_Array** browseResultsListArray = (SOPC_Array**)
-        SOPC_Calloc(nbElements, sizeof(SOPC_Array*));
+    SOPC_Array** browseResultsListArray = (SOPC_Array**) SOPC_Calloc(nbElements, sizeof(SOPC_Array*));
     if (NULL == browseResultsListArray)
     {
         status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -1307,8 +1292,7 @@ int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
     }
 
     /* create array of continuationPoints */
-    SOPC_ByteString** continuationPointsArray = (SOPC_ByteString**)
-        SOPC_Calloc(nbElements, sizeof(SOPC_ByteString*));
+    SOPC_ByteString** continuationPointsArray = (SOPC_ByteString**) SOPC_Calloc(nbElements, sizeof(SOPC_ByteString*));
     if (NULL == continuationPointsArray)
     {
         status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -1316,14 +1300,12 @@ int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
 
     if (SOPC_STATUS_OK == status)
     {
-        status = BrowseHelper_InitializeContinuationPoints(nbElements, status,
-                continuationPointsArray);
+        status = BrowseHelper_InitializeContinuationPoints(nbElements, status, continuationPointsArray);
     }
 
     if (SOPC_STATUS_OK == status)
     {
-        status = BrowseHelper_InitializeNodesToBrowse(nbElements, status, nodesToBrowse,
-                browseRequests);
+        status = BrowseHelper_InitializeNodesToBrowse(nbElements, status, nodesToBrowse, browseRequests);
     }
 
     if (SOPC_STATUS_OK == status)
@@ -1353,7 +1335,8 @@ int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
         statusMutex = Mutex_Lock(&ctx->mutex);
         assert(SOPC_STATUS_OK == statusMutex);
 
-        status = SOPC_ClientCommon_AsyncSendRequestOnSession((SOPC_LibSub_ConnectionId) connectionId, request, (uintptr_t) ctx);
+        status = SOPC_ClientCommon_AsyncSendRequestOnSession((SOPC_LibSub_ConnectionId) connectionId, request,
+                                                             (uintptr_t) ctx);
 
         /* Wait for the response */
         while (SOPC_STATUS_OK == status && !ctx->finish)
@@ -1444,15 +1427,14 @@ static SOPC_ReturnStatus BrowseNext(int32_t connectionId,
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
-    if (0 > connectionId || NULL == statusCodes
-        || NULL == browseResultsListArray || 1 > nbElements || NULL == continuationPoints)
+    if (0 > connectionId || NULL == statusCodes || NULL == browseResultsListArray || 1 > nbElements ||
+        NULL == continuationPoints)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     /* allocate memory */
-    OpcUa_BrowseNextRequest* request = (OpcUa_BrowseNextRequest*)
-        SOPC_Calloc(1, sizeof(OpcUa_BrowseNextRequest));
+    OpcUa_BrowseNextRequest* request = (OpcUa_BrowseNextRequest*) SOPC_Calloc(1, sizeof(OpcUa_BrowseNextRequest));
     if (NULL == request)
     {
         status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -1511,8 +1493,8 @@ static SOPC_ReturnStatus BrowseNext(int32_t connectionId,
         statusMutex = Mutex_Lock(&ctx->mutex);
         assert(SOPC_STATUS_OK == statusMutex);
 
-        status =
-            SOPC_ClientCommon_AsyncSendRequestOnSession((SOPC_LibSub_ConnectionId) connectionId, request, (uintptr_t) ctx);
+        status = SOPC_ClientCommon_AsyncSendRequestOnSession((SOPC_LibSub_ConnectionId) connectionId, request,
+                                                             (uintptr_t) ctx);
 
         /* Wait for the response */
         while (SOPC_STATUS_OK == status && !ctx->finish)

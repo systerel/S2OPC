@@ -121,7 +121,7 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
 /*
  * TODO
  */
-SOPC_ReturnStatus SOPC_StaMac_ConfigureDataChangeCallback(SOPC_StaMac_Machine *pSM,
+SOPC_ReturnStatus SOPC_StaMac_ConfigureDataChangeCallback(SOPC_StaMac_Machine* pSM,
                                                           SOPC_ClientHelper_DataChangeCbk cbkClientHelper);
 
 /**

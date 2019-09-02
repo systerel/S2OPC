@@ -262,8 +262,7 @@ SOPC_ReturnStatus Helpers_NewCreateSubscriptionRequest(double fPublishIntervalMs
     return status;
 }
 
-SOPC_ReturnStatus Helpers_NewDeleteSubscriptionRequest(uint32_t subscriptionId,
-                                                       void** ppRequest)
+SOPC_ReturnStatus Helpers_NewDeleteSubscriptionRequest(uint32_t subscriptionId, void** ppRequest)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     OpcUa_DeleteSubscriptionsRequest* pReq = NULL;
@@ -280,11 +279,11 @@ SOPC_ReturnStatus Helpers_NewDeleteSubscriptionRequest(uint32_t subscriptionId,
 
     if (SOPC_STATUS_OK == status)
     {
-		uint32_t* pSubscriptionId = (uint32_t*) SOPC_Malloc(sizeof(uint32_t));
-		if (NULL == pSubscriptionId)
-		{
-			status = SOPC_STATUS_OUT_OF_MEMORY;
-		}
+        uint32_t* pSubscriptionId = (uint32_t*) SOPC_Malloc(sizeof(uint32_t));
+        if (NULL == pSubscriptionId)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
         else
         {
             *pSubscriptionId = subscriptionId;

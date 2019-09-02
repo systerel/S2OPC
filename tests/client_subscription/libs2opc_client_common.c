@@ -113,7 +113,8 @@ SOPC_ReturnStatus SOPC_ClientCommon_Initialize(const SOPC_LibSub_StaticCfg* pCfg
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ToolkitConfig_SetCircularLogProperties(pCfg->toolkit_logger.maxBytes, pCfg->toolkit_logger.maxFiles);
+        status =
+            SOPC_ToolkitConfig_SetCircularLogProperties(pCfg->toolkit_logger.maxBytes, pCfg->toolkit_logger.maxFiles);
     }
 
     if (SOPC_STATUS_OK == status)
@@ -519,8 +520,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConfigurationId cf
     if (SOPC_STATUS_OK == status)
     {
         int count = 0;
-        while (!SOPC_StaMac_IsError(pSM) &&
-               !SOPC_StaMac_IsConnected(pSM) &&
+        while (!SOPC_StaMac_IsError(pSM) && !SOPC_StaMac_IsConnected(pSM) &&
                count * CONNECTION_TIMEOUT_MS_STEP < pCfg->timeout_ms)
         {
             SOPC_Sleep(CONNECTION_TIMEOUT_MS_STEP);
@@ -704,7 +704,6 @@ SOPC_ReturnStatus SOPC_ClientCommon_Disconnect(const SOPC_LibSub_ConnectionId cl
 
     return status;
 }
-
 
 SOPC_ReturnStatus SOPC_ClientCommon_CreateSubscription(const SOPC_LibSub_ConnectionId cliId,
                                                        SOPC_ClientHelper_DataChangeCbk cbkWrapper)

@@ -22,7 +22,6 @@
  * \brief Internal interface of a client library, used for testing purpose
  */
 
-
 #ifndef LIBS2OPC_CLIENT_CMDS_INTERNAL_API_H_
 #define LIBS2OPC_CLIENT_CMDS_INTERNAL_API_H_
 
