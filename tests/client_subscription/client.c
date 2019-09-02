@@ -100,26 +100,24 @@ static bool parse_options(cmd_line_options_t* o, int argc, char* const* argv);
 static void free_options(cmd_line_options_t* o);
 static void print_usage(const char* exe);
 
-static void datachange_callback(const int32_t c_id,
-                                const char* node_id,
-                                const SOPC_DataValue* value)
+static void datachange_callback(const int32_t c_id, const char* node_id, const SOPC_DataValue* value)
 {
     char sz[1024];
     size_t n;
 
-    //TODO use format constant for node_id if it exists
+    // TODO use format constant for node_id if it exists
     n = (size_t) snprintf(sz, sizeof(sz) / sizeof(sz[0]),
                           "Client %" PRIu32 " data change:\n  value id %s\n  new value ", c_id, node_id);
-
 
     if (NULL == value)
     {
         snprintf(sz + n, sizeof(sz) / sizeof(sz[0]) - n, "NULL");
     }
-    else {
+    else
+    {
         // TODO is there a generic function to print/format a variant ?
         SOPC_Variant variant = value->Value;
-        //TODO print value
+        // TODO print value
         if (SOPC_Boolean_Id == variant.BuiltInTypeId)
         {
             snprintf(sz + n, sizeof(sz) / sizeof(sz[0]) - n, (bool) variant.Value.Boolean ? "true" : "false");
@@ -128,17 +126,17 @@ static void datachange_callback(const int32_t c_id,
         {
             snprintf(sz + n, sizeof(sz) / sizeof(sz[0]) - n, "%" PRIu64, (int64_t) variant.Value.Uint64);
         }
-        //else if (SOPC_Int64_Id == variant.BuiltInTypeId)
+        // else if (SOPC_Int64_Id == variant.BuiltInTypeId)
         //{
         //    snprintf(sz + n, sizeof(sz) / sizeof(sz[0]) - n, "%" PRIi64, (int64_t) variant.Value);
         //}
-        //else
+        // else
         //{
         //    snprintf(sz + n, sizeof(sz) / sizeof(sz[0]) - n, "%s", (SOPC_LibSub_CstString) variant.Value);
         //}
     }
 
-    printf("%s",sz);
+    printf("%s", sz);
 }
 
 /* Main subscribing client */
@@ -167,8 +165,7 @@ int main(int argc, char* const argv[])
         .password = options.password,
     };
 
-    int32_t connectionId = SOPC_ClientHelper_Connect(
-        options.endpoint_url, security);
+    int32_t connectionId = SOPC_ClientHelper_Connect(options.endpoint_url, security);
 
     if (connectionId <= 0)
     {
@@ -186,36 +183,35 @@ int main(int argc, char* const argv[])
         res = SOPC_ClientHelper_AddMonitoredItems(connectionId, options.node_ids, (size_t) options.node_ids_size);
     }
 
-
     if (0 == res)
     {
-        //Browse server
+        // Browse server
         size_t nbBrowse = 4;
-        SOPC_ClientHelper_BrowseRequest* browseRequests = (SOPC_ClientHelper_BrowseRequest*)
-            calloc(nbBrowse, sizeof(SOPC_ClientHelper_BrowseRequest));
+        SOPC_ClientHelper_BrowseRequest* browseRequests =
+            (SOPC_ClientHelper_BrowseRequest*) calloc(nbBrowse, sizeof(SOPC_ClientHelper_BrowseRequest));
         assert(NULL != browseRequests);
-        SOPC_ClientHelper_BrowseResult* browseResults = (SOPC_ClientHelper_BrowseResult*)
-            calloc(nbBrowse, sizeof(SOPC_ClientHelper_BrowseResult));
+        SOPC_ClientHelper_BrowseResult* browseResults =
+            (SOPC_ClientHelper_BrowseResult*) calloc(nbBrowse, sizeof(SOPC_ClientHelper_BrowseResult));
         assert(NULL != browseResults);
 
         browseRequests[3].nodeId = "ns=0;i=85"; // Root/Objects/
-        browseRequests[3].direction= 0; // forward
+        browseRequests[3].direction = 0;        // forward
         browseRequests[3].referenceTypeId = ""; // all reference types (NULL?)
         browseRequests[3].includeSubtypes = true;
 
         browseRequests[1].nodeId = "ns=0;i=84"; // Root/
-        browseRequests[1].direction= 0; // forward
+        browseRequests[1].direction = 0;        // forward
         browseRequests[1].referenceTypeId = ""; // all reference types (NULL?)
         browseRequests[1].includeSubtypes = true;
 
         browseRequests[2].nodeId = "ns=0;i=20001"; // Root/Objects/scalar
-        browseRequests[2].direction= 0; // forward
-        browseRequests[2].referenceTypeId = ""; // all reference types (NULL?)
+        browseRequests[2].direction = 0;           // forward
+        browseRequests[2].referenceTypeId = "";    // all reference types (NULL?)
         browseRequests[2].includeSubtypes = true;
 
         browseRequests[0].nodeId = "ns=0;i=20008"; // Root/Objects/scalar/wo
-        browseRequests[0].direction= 0; // forward
-        browseRequests[0].referenceTypeId = ""; // all reference types (NULL?)
+        browseRequests[0].direction = 0;           // forward
+        browseRequests[0].referenceTypeId = "";    // all reference types (NULL?)
         browseRequests[0].includeSubtypes = true;
 
         res = SOPC_ClientHelper_Browse(connectionId, browseRequests, nbBrowse, browseResults);
@@ -244,9 +240,10 @@ int main(int argc, char* const argv[])
 
     if (res == 0)
     {
-        //Read values
+        // Read values
         sleep(3);
-        SOPC_ClientHelper_ReadValue* readValues = (SOPC_ClientHelper_ReadValue*) malloc(sizeof(SOPC_ClientHelper_ReadValue) * (size_t) options.node_ids_size);
+        SOPC_ClientHelper_ReadValue* readValues =
+            (SOPC_ClientHelper_ReadValue*) malloc(sizeof(SOPC_ClientHelper_ReadValue) * (size_t) options.node_ids_size);
         assert(NULL != readValues);
         for (int i = 0; i < options.node_ids_size; i++)
         {
@@ -269,7 +266,8 @@ int main(int argc, char* const argv[])
             {
                 printf("NULL\n");
             }
-            else {
+            else
+            {
                 // TODO is there a generic function to print/format a variant ?
                 SOPC_Variant variant = value->Value;
                 if (SOPC_Boolean_Id == variant.BuiltInTypeId)
@@ -278,7 +276,7 @@ int main(int argc, char* const argv[])
                 }
                 else if (SOPC_UInt64_Id == variant.BuiltInTypeId)
                 {
-                    printf("%ld\n",(int64_t) variant.Value.Uint64);
+                    printf("%ld\n", (int64_t) variant.Value.Uint64);
                 }
             }
         }
@@ -293,12 +291,13 @@ int main(int argc, char* const argv[])
 
     if (0 == res)
     {
-        //Write values
+        // Write values
         sleep(3);
-        SOPC_ClientHelper_WriteValue* writeValues = (SOPC_ClientHelper_WriteValue*)
-            malloc(sizeof(SOPC_ClientHelper_WriteValue) * (size_t) options.node_ids_size);
+        SOPC_ClientHelper_WriteValue* writeValues = (SOPC_ClientHelper_WriteValue*) malloc(
+            sizeof(SOPC_ClientHelper_WriteValue) * (size_t) options.node_ids_size);
         assert(writeValues != NULL);
-        SOPC_StatusCode* writeResults = (SOPC_StatusCode*) malloc(sizeof(SOPC_StatusCode) * (size_t) options.node_ids_size);
+        SOPC_StatusCode* writeResults =
+            (SOPC_StatusCode*) malloc(sizeof(SOPC_StatusCode) * (size_t) options.node_ids_size);
         assert(writeResults != NULL);
         for (int i = 0; i < options.node_ids_size; i++)
         {
@@ -337,7 +336,6 @@ int main(int argc, char* const argv[])
         sleep(10);
         SOPC_ClientHelper_Unsubscribe(connectionId);
     }
-
 
     if (connectionId > 0)
     {
@@ -402,33 +400,33 @@ static bool parse_options(cmd_line_options_t* o, int argc, char* const* argv)
     }
 #undef STR_OPT_CASE
 
-#define CHECK_REQUIRED_STR_OPT(name, req, arg_req, val, field)                    \
-    if (req && o->field == NULL)                                                  \
-    {                                                                             \
-        printf("Missing option: --" name ".\n"); \
-        print_usage(argv[0]);                                                     \
-        return false;                                                             \
+#define CHECK_REQUIRED_STR_OPT(name, req, arg_req, val, field) \
+    if (req && o->field == NULL)                               \
+    {                                                          \
+        printf("Missing option: --" name ".\n");               \
+        print_usage(argv[0]);                                  \
+        return false;                                          \
     }
 
     FOREACH_OPT(CHECK_REQUIRED_STR_OPT)
 
 #undef CHECK_REQUIRED_STR_OPT
 
-#define CONVERT_STR_OPT(name, type, default_val)                                             \
-    if (o->name##_str != NULL)                                                               \
-    {                                                                                        \
-        char* endptr;                                                                        \
-        o->name = (type) strtoul(o->name##_str, &endptr, 10);                                \
-                                                                                             \
-        if (*endptr != '\0')                                                                 \
-        {                                                                                    \
-            printf("Invalid name: %s.\n", o->name##_str); \
-            return false;                                                                    \
-        }                                                                                    \
-    }                                                                                        \
-    else                                                                                     \
-    {                                                                                        \
-        o->name = default_val;                                                               \
+#define CONVERT_STR_OPT(name, type, default_val)              \
+    if (o->name##_str != NULL)                                \
+    {                                                         \
+        char* endptr;                                         \
+        o->name = (type) strtoul(o->name##_str, &endptr, 10); \
+                                                              \
+        if (*endptr != '\0')                                  \
+        {                                                     \
+            printf("Invalid name: %s.\n", o->name##_str);     \
+            return false;                                     \
+        }                                                     \
+    }                                                         \
+    else                                                      \
+    {                                                         \
+        o->name = default_val;                                \
     }
 
     if (NULL == o->endpoint_url)

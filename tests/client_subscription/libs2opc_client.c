@@ -30,8 +30,8 @@
 
 #include "sopc_builtintypes.h"
 #include "sopc_types.h"
-#include "toolkit_helpers.h"
 #include "sopc_version.h"
+#include "toolkit_helpers.h"
 #define SKIP_S2OPC_DEFINITIONS
 #include "libs2opc_client.h"
 
@@ -76,7 +76,7 @@ SOPC_ReturnStatus SOPC_LibSub_Connect(const SOPC_LibSub_ConfigurationId cfgId, S
     SOPC_ReturnStatus status = SOPC_ClientCommon_Connect(cfgId, pCliId);
     if (SOPC_STATUS_OK == status)
     {
-        //TODO specify callback
+        // TODO specify callback
         status = SOPC_ClientCommon_CreateSubscription(*pCliId, NULL);
     }
     return status;
@@ -88,11 +88,7 @@ SOPC_ReturnStatus SOPC_LibSub_AddToSubscription(const SOPC_LibSub_ConnectionId c
                                                 int32_t nElements,
                                                 SOPC_LibSub_DataId* lDataId)
 {
-    SOPC_ReturnStatus status = SOPC_ClientCommon_AddToSubscription(cliId,
-                                                                   lszNodeId,
-                                                                   lattrId,
-                                                                   nElements,
-                                                                   lDataId);
+    SOPC_ReturnStatus status = SOPC_ClientCommon_AddToSubscription(cliId, lszNodeId, lattrId, nElements, lDataId);
     return status;
 }
 

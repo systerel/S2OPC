@@ -80,8 +80,7 @@ SOPC_ReturnStatus Helpers_NewCreateSubscriptionRequest(double fPublishIntervalMs
  * @param ppRequest
  *    pointer to the request to be filled
  */
-SOPC_ReturnStatus Helpers_NewDeleteSubscriptionRequest(uint32_t subscriptionId,
-                                                       void** ppRequest);
+SOPC_ReturnStatus Helpers_NewDeleteSubscriptionRequest(uint32_t subscriptionId, void** ppRequest);
 
 /**
  * \brief Creates a new PublishRequest.

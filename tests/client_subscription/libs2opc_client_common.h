@@ -47,7 +47,7 @@
     and the object pointed by /p pCfg can be freed by the caller.
  @return
     The operation status */
-//TODO inline all struct parameters ?
+// TODO inline all struct parameters ?
 SOPC_ReturnStatus SOPC_ClientCommon_Initialize(const SOPC_LibSub_StaticCfg* pCfg);
 
 /*
@@ -68,7 +68,7 @@ void SOPC_ClientCommon_Clear(void);
     The configuration connection id. Set when the value returned is "SOPC_STATUS_OK".
  @return
     The operation status */
-//TODO inline all struct parameters ?
+// TODO inline all struct parameters ?
 SOPC_ReturnStatus SOPC_ClientCommon_ConfigureConnection(const SOPC_LibSub_ConnectionCfg* pCfg,
                                                         SOPC_LibSub_ConfigurationId* pCfgId);
 
@@ -98,8 +98,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_Configured(void);
  @return
     The operation status and SOPC_STATUS_TIMEOUT when connection hanged for more than
     connection_cfg->timeout_ms milliseconds */
-SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConnectionId cfgId,
-                                            SOPC_LibSub_ConnectionId* pCliId);
+SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConnectionId cfgId, SOPC_LibSub_ConnectionId* pCliId);
 
 /*
  * @description

@@ -61,28 +61,28 @@ struct SOPC_StaMac_Machine
     uint32_t iCliId;                                            /* LibSub connection ID, used by the callback */
     SOPC_LibSub_DataChangeCbk cbkLibSubDataChanged;             /* Callback when subscribed data changed */
     SOPC_ClientHelper_DataChangeCbk cbkClientHelperDataChanged; /* Callback when subscribed data changed */
-    SOPC_LibSub_EventCbk cbkGenericEvent;                       /* Callback when received event that is out of the LibSub scope */
-    uintptr_t iSessionCtx;                                      /* Toolkit Session Context, used to identify session events */
-    uint32_t iSessionID;                                        /* S2OPC Session ID */
-    SOPC_SLinkedList* pListReqCtx;                              /* List of yet-to-be-answered requests,
-                                                                 * id is unique request identifier, value is a SOPC_StaMac_ReqCtx */
-    double fPublishInterval;                                    /* The publish interval, in ms */
-    uint32_t iCntMaxKeepAlive;                                  /* Number of skipped response before sending an empty KeepAlive */
-    uint32_t iCntLifetime;                                      /* Number of deprived publish cycles before subscription deletion */
-    uint32_t iSubscriptionID;                                   /* OPC UA subscription ID, non 0 when subscription is created */
-    SOPC_SLinkedList* pListMonIt;                               /* List of monitored items, where the appCtx is the list value,
-                                                                 * and the id is the uint32_t OPC UA monitored item ID */
-    uint32_t nTokenTarget;                                      /* Target number of available tokens */
-    uint32_t nTokenUsable;                                      /* Tokens available to the server
-                                                                 * (PublishRequest_sent - PublishResponse_sent) */
-    bool bAckSubscr;                                            /* Indicates whether an acknowledgement should be sent
-                                                                 * in the next PublishRequest */
-    uint32_t iAckSeqNum;                                        /* The sequence number to acknowledge after a PublishResponse */
-    const char* szPolicyId;                                     /* See SOPC_LibSub_ConnectionCfg */
-    const char* szUsername;                                     /* See SOPC_LibSub_ConnectionCfg */
-    const char* szPassword;                                     /* See SOPC_LibSub_ConnectionCfg */
-    int64_t iTimeoutMs;                                         /* See SOPC_LibSub_ConnectionCfg.timeout_ms */
-    SOPC_SLinkedList* dataIdToNodeIdList;                       /* A list of data ids to node ids */
+    SOPC_LibSub_EventCbk cbkGenericEvent; /* Callback when received event that is out of the LibSub scope */
+    uintptr_t iSessionCtx;                /* Toolkit Session Context, used to identify session events */
+    uint32_t iSessionID;                  /* S2OPC Session ID */
+    SOPC_SLinkedList* pListReqCtx;        /* List of yet-to-be-answered requests,
+                                           * id is unique request identifier, value is a SOPC_StaMac_ReqCtx */
+    double fPublishInterval;              /* The publish interval, in ms */
+    uint32_t iCntMaxKeepAlive;            /* Number of skipped response before sending an empty KeepAlive */
+    uint32_t iCntLifetime;                /* Number of deprived publish cycles before subscription deletion */
+    uint32_t iSubscriptionID;             /* OPC UA subscription ID, non 0 when subscription is created */
+    SOPC_SLinkedList* pListMonIt;         /* List of monitored items, where the appCtx is the list value,
+                                           * and the id is the uint32_t OPC UA monitored item ID */
+    uint32_t nTokenTarget;                /* Target number of available tokens */
+    uint32_t nTokenUsable;                /* Tokens available to the server
+                                           * (PublishRequest_sent - PublishResponse_sent) */
+    bool bAckSubscr;                      /* Indicates whether an acknowledgement should be sent
+                                           * in the next PublishRequest */
+    uint32_t iAckSeqNum;                  /* The sequence number to acknowledge after a PublishResponse */
+    const char* szPolicyId;               /* See SOPC_LibSub_ConnectionCfg */
+    const char* szUsername;               /* See SOPC_LibSub_ConnectionCfg */
+    const char* szPassword;               /* See SOPC_LibSub_ConnectionCfg */
+    int64_t iTimeoutMs;                   /* See SOPC_LibSub_ConnectionCfg.timeout_ms */
+    SOPC_SLinkedList* dataIdToNodeIdList; /* A list of data ids to node ids */
 };
 
 /* Global variables */
@@ -228,7 +228,8 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
         SOPC_GCC_DIAGNOSTIC_RESTORE
     }
 
-    if (SOPC_STATUS_OK == status && (NULL == pSM->pListReqCtx || NULL == pSM->pListMonIt || NULL == pSM->dataIdToNodeIdList))
+    if (SOPC_STATUS_OK == status &&
+        (NULL == pSM->pListReqCtx || NULL == pSM->pListMonIt || NULL == pSM->dataIdToNodeIdList))
     {
         status = SOPC_STATUS_OUT_OF_MEMORY;
     }
@@ -246,7 +247,7 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
     return status;
 }
 
-SOPC_ReturnStatus SOPC_StaMac_ConfigureDataChangeCallback(SOPC_StaMac_Machine *pSM,
+SOPC_ReturnStatus SOPC_StaMac_ConfigureDataChangeCallback(SOPC_StaMac_Machine* pSM,
                                                           SOPC_ClientHelper_DataChangeCbk cbkClientHelper)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -256,8 +257,8 @@ SOPC_ReturnStatus SOPC_StaMac_ConfigureDataChangeCallback(SOPC_StaMac_Machine *p
     }
     if (SOPC_STATUS_OK == status)
     {
-        if ((NULL != pSM->cbkLibSubDataChanged && NULL != cbkClientHelper)
-            || (NULL == pSM->cbkLibSubDataChanged && NULL == cbkClientHelper))
+        if ((NULL != pSM->cbkLibSubDataChanged && NULL != cbkClientHelper) ||
+            (NULL == pSM->cbkLibSubDataChanged && NULL == cbkClientHelper))
         {
             /* One and only one callback type should be set */
             status = SOPC_STATUS_INVALID_STATE;
@@ -445,8 +446,8 @@ SOPC_ReturnStatus SOPC_StaMac_CreateSubscription(SOPC_StaMac_Machine* pSM)
         /* The request is freed by the Toolkit */
         /* TODO: make all value configurable */
         Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Creating subscription.");
-        status = Helpers_NewCreateSubscriptionRequest(pSM->fPublishInterval, pSM->iCntMaxKeepAlive,
-                pSM->iCntLifetime, &pRequest);
+        status = Helpers_NewCreateSubscriptionRequest(pSM->fPublishInterval, pSM->iCntMaxKeepAlive, pSM->iCntLifetime,
+                                                      &pRequest);
         if (SOPC_STATUS_OK == status)
         {
             status = SOPC_StaMac_SendRequest(pSM, pRequest, 0, SOPC_REQUEST_SCOPE_STATE_MACHINE);
@@ -476,10 +477,10 @@ SOPC_ReturnStatus SOPC_StaMac_DeleteSubscription(SOPC_StaMac_Machine* pSM)
     {
         Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Deleting subscription.");
 
-		if (SOPC_STATUS_OK == status)
-		{
-			status = Helpers_NewDeleteSubscriptionRequest(pSM->iSubscriptionID, &pRequest);
-		}
+        if (SOPC_STATUS_OK == status)
+        {
+            status = Helpers_NewDeleteSubscriptionRequest(pSM->iSubscriptionID, &pRequest);
+        }
         if (SOPC_STATUS_OK == status)
         {
             status = SOPC_StaMac_SendRequest(pSM, pRequest, 0, SOPC_REQUEST_SCOPE_STATE_MACHINE);
@@ -567,23 +568,21 @@ SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
         {
             SOPC_Atomic_Int_Add(&nSentReqs, 1);
             lCliHndl[i] = (uint32_t) nSentReqs;
-            void* nodeId = SOPC_Calloc(1, sizeof(char)* (strlen(lszNodeId[i]) + 1));
+            void* nodeId = SOPC_Calloc(1, sizeof(char) * (strlen(lszNodeId[i]) + 1));
             if (NULL == nodeId)
             {
                 status = SOPC_STATUS_OUT_OF_MEMORY;
             }
             else if (0 >= nSentReqs)
             {
-
-                    status = SOPC_STATUS_NOK;
-                    SOPC_Free(nodeId);
+                status = SOPC_STATUS_NOK;
+                SOPC_Free(nodeId);
             }
             else
             {
                 strcpy(nodeId, lszNodeId[i]);
                 SOPC_SLinkedList_Append(pSM->dataIdToNodeIdList, (uint32_t) nSentReqs, nodeId);
             }
-
         }
 
         status = Helpers_NewCreateMonitoredItemsRequest(lpNid, liAttrId, nElems, pSM->iSubscriptionID,
@@ -1055,13 +1054,14 @@ static void StaMac_ProcessEvent_stActivated(SOPC_StaMac_Machine* pSM,
                         {
                             pSM->cbkLibSubDataChanged(pSM->iCliId, pMonItNotif->ClientHandle, plsVal);
                         }
-                        else if (NULL != pSM->cbkClientHelperDataChanged
-                                 && INT32_MAX >= pSM->iCliId)
+                        else if (NULL != pSM->cbkClientHelperDataChanged && INT32_MAX >= pSM->iCliId)
                         {
-                            void* nodeId = SOPC_SLinkedList_FindFromId(pSM->dataIdToNodeIdList, pMonItNotif->ClientHandle);
+                            void* nodeId =
+                                SOPC_SLinkedList_FindFromId(pSM->dataIdToNodeIdList, pMonItNotif->ClientHandle);
                             if (NULL != nodeId)
                             {
-                                pSM->cbkClientHelperDataChanged((int32_t) pSM->iCliId, (char*) nodeId, &pMonItNotif->Value);
+                                pSM->cbkClientHelperDataChanged((int32_t) pSM->iCliId, (char*) nodeId,
+                                                                &pMonItNotif->Value);
                             }
                         }
                         SOPC_Free(plsVal->value);
@@ -1136,8 +1136,8 @@ static void StaMac_ProcessEvent_stDeletingSubscr(SOPC_StaMac_Machine* pSM,
     {
     case SE_RCV_SESSION_RESPONSE:
         assert(pSM->iSubscriptionID != 0);
-        //TODO check that we receive a deleteSubscriptionResponse ?
-        //TODO check OpcUa_DeleteSubscriptionsResponse content
+        // TODO check that we receive a deleteSubscriptionResponse ?
+        // TODO check OpcUa_DeleteSubscriptionsResponse content
         if (1 != ((OpcUa_DeleteSubscriptionsResponse*) pParam)->NoOfResults)
         {
             /* we should have deteled only one subscription */
@@ -1148,7 +1148,7 @@ static void StaMac_ProcessEvent_stDeletingSubscr(SOPC_StaMac_Machine* pSM,
             /* delete subscription went wrong */
             pSM->state = stError;
         }
-        //TODO clear any remaining information about previous subscription
+        // TODO clear any remaining information about previous subscription
         pSM->iSubscriptionID = 0;
         SOPC_SLinkedList_Clear(pSM->pListMonIt);
         SOPC_SLinkedList_Apply(pSM->dataIdToNodeIdList, SOPC_SLinkedList_EltGenericFree);
