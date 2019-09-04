@@ -34,7 +34,7 @@
 #define SOPC_TCP_UA_MIN_BUFFER_SIZE \
     8192 /* now defined only for OPC UA Secure Conversation (minimum chunk size): see mantis #3447 */
 
-#define SOPC_TCP_UA_MAX_URL_LENGTH 4096 /* see Part 6 Table 35 */
+#define SOPC_TCP_UA_MAX_URL_AND_REASON_LENGTH 4096 /* see Part 6 Table 31, 35 and 37 */
 
 /* Length of a TCP UA message Header */
 #define SOPC_TCP_UA_HEADER_LENGTH 8

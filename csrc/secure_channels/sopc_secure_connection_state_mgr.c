@@ -262,8 +262,7 @@ static SOPC_ReturnStatus SC_ClientTransition_ReceivedErrorMsg(SOPC_Buffer* errBu
     status = SOPC_UInt32_Read(errorStatus, errBuffer);
     if (SOPC_STATUS_OK == status)
     {
-        // Part 6: "This string shall not be more than 4096 bytes"
-        status = SOPC_String_ReadWithLimitedLength(&reason, 4096, errBuffer);
+        status = SOPC_String_ReadWithLimitedLength(&reason, SOPC_TCP_UA_MAX_URL_AND_REASON_LENGTH, errBuffer);
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -293,7 +292,7 @@ static bool SC_Server_SendErrorMsgAndClose(uint32_t scConnectionIdx, SOPC_Status
     SOPC_String tempString;
     SOPC_String_Initialize(&tempString);
 
-    SOPC_Buffer* buffer = SOPC_Buffer_Create(SOPC_TCP_UA_ERR_MIN_MSG_LENGTH + SOPC_TCP_UA_MAX_URL_LENGTH);
+    SOPC_Buffer* buffer = SOPC_Buffer_Create(SOPC_TCP_UA_ERR_MIN_MSG_LENGTH + SOPC_TCP_UA_MAX_URL_AND_REASON_LENGTH);
 
     if (buffer != NULL)
     {
@@ -621,7 +620,7 @@ static bool SC_ClientTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
 
     // Create OPC UA TCP Hello message
     // Max size of buffer is message minimum size + URL bytes length
-    msgBuffer = SOPC_Buffer_Create(SOPC_TCP_UA_HEL_MIN_MSG_LENGTH + SOPC_TCP_UA_MAX_URL_LENGTH);
+    msgBuffer = SOPC_Buffer_Create(SOPC_TCP_UA_HEL_MIN_MSG_LENGTH + SOPC_TCP_UA_MAX_URL_AND_REASON_LENGTH);
 
     if (msgBuffer != NULL && scConfig != NULL)
     {
@@ -1329,7 +1328,7 @@ static bool SC_ServerTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
     // EndpointURL
     if (result)
     {
-        status = SOPC_String_ReadWithLimitedLength(&url, SOPC_TCP_UA_MAX_URL_LENGTH, helloMsgBuffer);
+        status = SOPC_String_ReadWithLimitedLength(&url, SOPC_TCP_UA_MAX_URL_AND_REASON_LENGTH, helloMsgBuffer);
         // Note: this parameter is normally used to forward to an endpoint sharing the same port
         //       but not in the same process.
         //       This is not supported by S2OPC secure channels layer, as consequence expected URL is only the one

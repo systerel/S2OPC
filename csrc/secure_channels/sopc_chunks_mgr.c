@@ -4295,9 +4295,10 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InternalEvent event,
             failedWithAbortMessage = true;
             // Set the error status to use
             errorStatus = (SOPC_StatusCode)(uintptr_t) params;
-            // Create a dedicated empty buffer
-            buffer = SOPC_Buffer_CreateResizable(
-                SOPC_TCP_UA_MIN_BUFFER_SIZE, SOPC_MAX_MESSAGE_LENGTH + SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
+            // Create a dedicated empty buffer: we need headers + error (int32) + reason string length (int32) + reason
+            // string (4096 max)
+            buffer = SOPC_Buffer_Create(SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH + 4 + 4 +
+                                        SOPC_TCP_UA_MAX_URL_AND_REASON_LENGTH);
             break;
         default:
             // Already filtered by secure channels API module
