@@ -36,7 +36,7 @@
 #endif /* SOPC_TCP_UA_MAX_BUFFER_SIZE */
 
 /** @brief Maximum number of chunks accepted for 1 message, 0 means no limit.
- *  Note: if 0 is chosen SOPC_MAX_MESSAGE_LENGTH definition shall be change to not use it and shall not be 0.
+ *  Note: if 0 is chosen SOPC_MAX_MESSAGE_LENGTH definition shall be changed not to use it and shall not be 0.
  */
 #ifndef SOPC_MAX_NB_CHUNKS
 #define SOPC_MAX_NB_CHUNKS 5
@@ -97,7 +97,7 @@
 /** @brief Minimum byte buffer size allocated to read data from socket and send it to chunk manager */
 #ifndef SOPC_MIN_BYTE_BUFFER_SIZE_READ_SOCKET
 #define SOPC_MIN_BYTE_BUFFER_SIZE_READ_SOCKET 1024
-#endif /* SOPC_MSG_SIZE_TO_CHUNK_MANAGER */
+#endif /* SOPC_MIN_BYTE_BUFFER_SIZE_READ_SOCKET */
 
 /* SECURE CHANNEL CONFIGURATION */
 

@@ -243,7 +243,7 @@ SOPC_ReturnStatus SOPC_Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize
  *                      To be considered only if returned status is SOPC_STATUS_OK
  *
  *  \return             SOPC_STATUS_OK if operation succeeded,
- *                      SOPC_STATUS_INVALID_PARAMETRS if parameters are not valid, SOPC_STATUS_NOK otherwise.
+ *                      SOPC_STATUS_INVALID_PARAMETERS if parameters are not valid, SOPC_STATUS_NOK otherwise.
  */
 SOPC_ReturnStatus SOPC_Socket_BytesToRead(Socket sock, uint32_t* bytesToRead);
 

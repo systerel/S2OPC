@@ -26,25 +26,24 @@
 
 static SOPC_ReturnStatus SOPC_Buffer_Init(SOPC_Buffer* buffer, uint32_t initial_size, uint32_t maximum_size)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (buffer != NULL && initial_size > 0 && initial_size <= maximum_size)
+    if (buffer == NULL || initial_size <= 0 || initial_size > maximum_size)
     {
-        status = SOPC_STATUS_OK;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    if (SOPC_STATUS_OK == status)
+
+    buffer->data = SOPC_Calloc((size_t) initial_size, sizeof(uint8_t));
+    if (NULL == buffer->data)
     {
-        buffer->position = 0;
-        buffer->length = 0;
-        buffer->initial_size = initial_size;
-        buffer->current_size = initial_size;
-        buffer->maximum_size = maximum_size;
-        buffer->data = SOPC_Calloc((size_t) buffer->current_size, sizeof(uint8_t));
-        if (buffer->data == NULL)
-        {
-            status = SOPC_STATUS_OUT_OF_MEMORY;
-        }
+        return SOPC_STATUS_OUT_OF_MEMORY;
     }
-    return status;
+
+    buffer->position = 0;
+    buffer->length = 0;
+    buffer->initial_size = initial_size;
+    buffer->current_size = initial_size;
+    buffer->maximum_size = maximum_size;
+
+    return SOPC_STATUS_OK;
 }
 
 SOPC_Buffer* SOPC_Buffer_Create(uint32_t size)
@@ -176,39 +175,54 @@ SOPC_ReturnStatus SOPC_Buffer_SetDataLength(SOPC_Buffer* buffer, uint32_t length
     return status;
 }
 
-static bool SOPC_Buffer_CheckSizeAndResize(SOPC_Buffer* buffer, uint32_t nbBytes, bool exactResize)
+/**
+ * \brief Check the size of buffer can contains \p totalNbBytes.
+ *        If it does not and the buffer is resizable:
+ *        - (if \p exactResize == false) Compute new size to be the first multiple of initial_size
+ *          that contains \p totalNbBytes or maximum_size if greater than maximum_size
+ *        - Resize the buffer to the new size
+ *
+ *  \return true if buffer is large enough to contains \p totalNbBytes (with or without resize operation),
+ *          false otherwise
+ */
+static bool SOPC_Buffer_CheckSizeAndResize(SOPC_Buffer* buffer, uint32_t totalNbBytes, bool exactResize)
 {
-    if (nbBytes <= buffer->current_size)
+    assert(buffer != NULL);
+    if (totalNbBytes <= buffer->current_size)
     {
         // Enough bytes available in current buffer allocated bytes
         return true;
     }
-    else if (nbBytes <= buffer->maximum_size)
+    else if (totalNbBytes <= buffer->maximum_size)
     {
+        // Enough bytes available if buffer is resized
         uint8_t* newData = NULL;
         uint32_t newSize = 0;
-        // Enough bytes available if buffer is resized
         if (exactResize)
         {
-            newSize = nbBytes;
+            // Use the exact number of bytes necessary
+            newSize = totalNbBytes;
         }
         else
         {
-            uint32_t requiredSteps = nbBytes / buffer->initial_size;
-            if (nbBytes % buffer->initial_size != 0)
+            // Search the first multiple of initial_size which contains totalNbBytes
+            uint32_t requiredSteps = totalNbBytes / buffer->initial_size;
+            if (totalNbBytes % buffer->initial_size != 0)
             {
                 requiredSteps++;
             }
             if (requiredSteps > buffer->maximum_size / buffer->initial_size)
             {
+                // The first multiple found is greater than maximum_size => use maximum_size
                 newSize = buffer->maximum_size;
             }
             else
             {
+                // Resize to the multiple of initial_size which contains totalNbBytes
                 newSize = requiredSteps * buffer->initial_size;
             }
         }
-        // Resize exactly to the number of bytes needed to be available
+        // Resize buffer with computed size
         newData = SOPC_Realloc(buffer->data, (size_t) buffer->current_size, (size_t) newSize);
         if (NULL != newData)
         {
@@ -329,7 +343,7 @@ uint32_t SOPC_Buffer_Remaining(SOPC_Buffer* buffer)
 
 int64_t SOPC_Buffer_ReadFrom(SOPC_Buffer* buffer, SOPC_Buffer* src, uint32_t n)
 {
-    if ((buffer->current_size - buffer->length) < n)
+    if (NULL == buffer || NULL == src || (buffer->current_size - buffer->length) < n)
     {
         return -1;
     }

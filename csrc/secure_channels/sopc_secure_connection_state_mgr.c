@@ -75,10 +75,8 @@ bool SC_InitNewConnection(uint32_t* newConnectionIdx)
         scConnection->tcpMsgProperties.protocolVersion = SOPC_PROTOCOL_VERSION;
         scConnection->tcpMsgProperties.receiveBufferSize = SOPC_TCP_UA_MAX_BUFFER_SIZE;
         scConnection->tcpMsgProperties.sendBufferSize = SOPC_TCP_UA_MAX_BUFFER_SIZE;
-        // TODO: reduce size since it includes only the body and not the headers/signature ?
         scConnection->tcpMsgProperties.receiveMaxMessageSize = SOPC_MAX_MESSAGE_LENGTH;
         scConnection->tcpMsgProperties.sendMaxMessageSize = SOPC_MAX_MESSAGE_LENGTH;
-        // Note: we do not manage multiple chunks in this version of the toolkit
         scConnection->tcpMsgProperties.receiveMaxChunkCount = SOPC_MAX_NB_CHUNKS;
         scConnection->tcpMsgProperties.sendMaxChunkCount = SOPC_MAX_NB_CHUNKS;
 
@@ -271,7 +269,7 @@ static SOPC_ReturnStatus SC_ClientTransition_ReceivedErrorMsg(SOPC_Buffer* errBu
         result = SOPC_String_GetCString(&reason);
         if (NULL == result)
         {
-            result = SOPC_Calloc(1, sizeof(char)); // empty NUL ended string
+            result = SOPC_Calloc(1, sizeof(char)); // empty NULL ended string
             if (NULL == result)
             {
                 status = SOPC_STATUS_OUT_OF_MEMORY;
