@@ -47,7 +47,7 @@ static bool init_queues(void)
     return queues != NULL;
 }
 
-static void on_event(SOPC_EventHandler* handler, int32_t event, uint32_t id, void* params, uintptr_t auxParam)
+static void on_event(SOPC_EventHandler* handler, int32_t event, uint32_t id, uintptr_t params, uintptr_t auxParam)
 {
     bool found;
     SOPC_AsyncQueue* queue = SOPC_Dict_Get(queues, handler, &found);

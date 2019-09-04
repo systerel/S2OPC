@@ -192,7 +192,7 @@ void subscription_core_bs__create_periodic_publish_timer(
 
     event.eltId = (uint32_t) subscription_core_bs__p_subscription;
     event.event = TIMER_SE_PUBLISH_CYCLE_TIMEOUT;
-    event.params = NULL;
+    event.params = (uintptr_t) NULL;
     event.auxParam = 0;
 
     if (subscription_core_bs__p_publishInterval > UINT64_MAX)

@@ -27,7 +27,7 @@
 #include "sopc_sockets_internal_ctx.h"
 #include "sopc_sockets_network_event_mgr.h"
 
-void SOPC_Sockets_EnqueueEvent(SOPC_Sockets_InputEvent socketEvent, uint32_t id, void* params, uintptr_t auxParam)
+void SOPC_Sockets_EnqueueEvent(SOPC_Sockets_InputEvent socketEvent, uint32_t id, uintptr_t params, uintptr_t auxParam)
 {
     if (SOPC_STATUS_OK == SOPC_Sockets_EnqueueInputEvent(socketEvent, id, params, auxParam))
     {

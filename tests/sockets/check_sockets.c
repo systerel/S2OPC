@@ -47,7 +47,7 @@ const uint32_t clientSecureChannelConnectionId = 200;
 
 static SOPC_AsyncQueue* socketEvents = NULL;
 
-static void onSocketEvent(SOPC_EventHandler* handler, int32_t event, uint32_t id, void* params, uintptr_t auxParam)
+static void onSocketEvent(SOPC_EventHandler* handler, int32_t event, uint32_t id, uintptr_t params, uintptr_t auxParam)
 {
     /* avoid unused parameter compiler warning */
     (void) handler;
@@ -145,7 +145,7 @@ START_TEST(test_sockets)
 
     // const URI is not modified but generic API cannot guarantee it
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-    SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_SERVER, endpointDescConfigId, (void*) uri, (uint32_t) true);
+    SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_SERVER, endpointDescConfigId, (uintptr_t) uri, (uint32_t) true);
     SOPC_GCC_DIAGNOSTIC_RESTORE
 
     SOPC_Free(expect_event(SOCKET_LISTENER_OPENED, endpointDescConfigId));
@@ -154,7 +154,7 @@ START_TEST(test_sockets)
     // Create client connection
     // const URI is not modified but generic API cannot guarantee it
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-    SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_CLIENT, clientSecureChannelConnectionId, (void*) uri, 0);
+    SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_CLIENT, clientSecureChannelConnectionId, (uintptr_t) uri, 0);
     SOPC_GCC_DIAGNOSTIC_RESTORE
 
     /* SERVER SIDE: accepted connection (socket level only)
@@ -175,7 +175,8 @@ START_TEST(test_sockets)
     /* SERVER SIDE: finish accepting connection (secure channel level) */
     // Note: a new secure channel (with associated connection index) has been created and
     //       must be recorded by the socket as the connection Id
-    SOPC_Sockets_EnqueueEvent(SOCKET_ACCEPTED_CONNECTION, serverSocketIdx, NULL, serverSecureChannelConnectionId);
+    SOPC_Sockets_EnqueueEvent(SOCKET_ACCEPTED_CONNECTION, serverSocketIdx, (uintptr_t) NULL,
+                              serverSecureChannelConnectionId);
 
     /* CLIENT SIDE: send a msg buffer through connection */
     for (idx = 0; idx < 1000; idx++)
@@ -183,7 +184,7 @@ START_TEST(test_sockets)
         byte = (uint8_t)(idx % 256);
         SOPC_Buffer_Write(sendBuffer, &byte, 1);
     }
-    SOPC_Sockets_EnqueueEvent(SOCKET_WRITE, clientSocketIdx, (void*) sendBuffer, 0);
+    SOPC_Sockets_EnqueueEvent(SOCKET_WRITE, clientSocketIdx, (uintptr_t) sendBuffer, 0);
     sendBuffer = NULL; // deallocated by Socket event manager
 
     /* SERVER SIDE: receive a msg buffer through connection */
@@ -229,7 +230,7 @@ START_TEST(test_sockets)
         byte = (uint8_t)(idx % 256);
         SOPC_Buffer_Write(sendBuffer, &byte, 1);
     }
-    SOPC_Sockets_EnqueueEvent(SOCKET_WRITE, serverSocketIdx, (void*) sendBuffer, 0);
+    SOPC_Sockets_EnqueueEvent(SOCKET_WRITE, serverSocketIdx, (uintptr_t) sendBuffer, 0);
     sendBuffer = NULL; // deallocated by Socket event manager
 
     /* CLIENT SIDE: receive a msg buffer through connection */
@@ -282,7 +283,7 @@ START_TEST(test_sockets)
     }
     status = SOPC_Buffer_Copy(sendBufferCopy, sendBuffer);
     ck_assert(SOPC_STATUS_OK == status);
-    SOPC_Sockets_EnqueueEvent(SOCKET_WRITE, clientSocketIdx, (void*) sendBuffer, 0);
+    SOPC_Sockets_EnqueueEvent(SOCKET_WRITE, clientSocketIdx, (uintptr_t) sendBuffer, 0);
     sendBuffer = NULL; // deallocated by Socket event manager
 
     /* SERVER SIDE: receive a msg buffer through connection */
@@ -317,7 +318,7 @@ START_TEST(test_sockets)
     SOPC_Buffer_Delete(accBuffer);
 
     /* CLIENT SIDE: receive a msg buffer through connection */
-    SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, clientSocketIdx, NULL, clientSecureChannelConnectionId);
+    SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, clientSocketIdx, (uintptr_t) NULL, clientSecureChannelConnectionId);
 
     /* SERVER SIDE: accepted connection (socket level only) */
     {

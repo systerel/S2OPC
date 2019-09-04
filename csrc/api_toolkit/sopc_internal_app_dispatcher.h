@@ -29,10 +29,10 @@ extern SOPC_AddressSpaceNotif_Fct* appAddressSpaceNotificationCallback;
 void SOPC_App_Initialize(void);
 void SOPC_App_Clear(void);
 
-SOPC_ReturnStatus SOPC_App_EnqueueComEvent(SOPC_App_Com_Event event, uint32_t id, void* params, uintptr_t auxParam);
+SOPC_ReturnStatus SOPC_App_EnqueueComEvent(SOPC_App_Com_Event event, uint32_t id, uintptr_t params, uintptr_t auxParam);
 SOPC_ReturnStatus SOPC_App_EnqueueAddressSpaceNotification(SOPC_App_AddSpace_Event event,
                                                            uint32_t id,
-                                                           void* params,
+                                                           uintptr_t params,
                                                            uintptr_t auxParam);
 
 #endif // SOPC_INTERNAL_APP_DISPATCHER_H

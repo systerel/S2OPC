@@ -28,22 +28,22 @@
 
 void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalEvent event,
                                                    uint32_t eltId,
-                                                   void* params,
+                                                   uintptr_t params,
                                                    uintptr_t auxParam);
 
 void SOPC_SecureConnectionStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
                                                  uint32_t eltId,
-                                                 void* params,
+                                                 uintptr_t params,
                                                  uintptr_t auxParam);
 
 void SOPC_SecureConnectionStateMgr_OnTimerEvent(SOPC_SecureChannels_TimerEvent event,
                                                 uint32_t eltId,
-                                                void* params,
+                                                uintptr_t params,
                                                 uintptr_t auxParam);
 
 void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event,
                                               uint32_t eltId,
-                                              void* params,
+                                              uintptr_t params,
                                               uintptr_t auxParam);
 
 #endif /* SOPC_SECURE_CONNECTION_STATE_MGR_H_ */

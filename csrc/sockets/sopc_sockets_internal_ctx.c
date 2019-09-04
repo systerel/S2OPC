@@ -38,7 +38,7 @@ struct Event
 {
     SOPC_Sockets_InputEvent event;
     uint32_t id;
-    void* params;
+    uintptr_t params;
     uintptr_t auxParam;
 };
 
@@ -151,7 +151,7 @@ void SOPC_SocketsInternalContext_CloseSocket(uint32_t socketIdx)
     }
 }
 
-void SOPC_Sockets_Emit(SOPC_Sockets_OutputEvent event, uint32_t eltId, void* params, uintptr_t auxParam)
+void SOPC_Sockets_Emit(SOPC_Sockets_OutputEvent event, uint32_t eltId, uintptr_t params, uintptr_t auxParam)
 {
     assert(socketsEventHandler != NULL);
     SOPC_ReturnStatus status = SOPC_EventHandler_Post(socketsEventHandler, (int32_t) event, eltId, params, auxParam);
@@ -160,7 +160,7 @@ void SOPC_Sockets_Emit(SOPC_Sockets_OutputEvent event, uint32_t eltId, void* par
 
 SOPC_ReturnStatus SOPC_Sockets_EnqueueInputEvent(SOPC_Sockets_InputEvent socketEvent,
                                                  uint32_t id,
-                                                 void* params,
+                                                 uintptr_t params,
                                                  uintptr_t auxParam)
 {
     struct Event* ev = SOPC_Calloc(1, sizeof(struct Event));

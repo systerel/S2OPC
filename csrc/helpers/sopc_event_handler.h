@@ -49,7 +49,7 @@ typedef struct
 {
     int32_t event;
     uint32_t eltId;
-    void* params;
+    uintptr_t params;
     uintptr_t auxParam;
 } SOPC_Event;
 
@@ -67,7 +67,7 @@ typedef void (*SOPC_SetListenerFunc)(SOPC_EventHandler* handler);
 typedef void (*SOPC_EventHandler_Callback)(SOPC_EventHandler* handler,
                                            int32_t event,
                                            uint32_t eltId,
-                                           void* params,
+                                           uintptr_t params,
                                            uintptr_t auxParam);
 
 /**
@@ -96,7 +96,7 @@ SOPC_EventHandler* SOPC_EventHandler_Create(SOPC_Looper* looper, SOPC_EventHandl
 SOPC_ReturnStatus SOPC_EventHandler_Post(SOPC_EventHandler* handler,
                                          int32_t event,
                                          uint32_t eltId,
-                                         void* params,
+                                         uintptr_t params,
                                          uintptr_t auxParam);
 
 /**
@@ -113,7 +113,7 @@ SOPC_ReturnStatus SOPC_EventHandler_Post(SOPC_EventHandler* handler,
 SOPC_ReturnStatus SOPC_EventHandler_PostAsNext(SOPC_EventHandler* handler,
                                                int32_t event,
                                                uint32_t eltId,
-                                               void* params,
+                                               uintptr_t params,
                                                uintptr_t auxParam);
 
 /**

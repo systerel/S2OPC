@@ -284,7 +284,7 @@ int main(int argc, char* argv[])
         status = SOPC_Toolkit_Configured();
         assert(status == SOPC_STATUS_OK);
 
-        SOPC_SecureChannels_EnqueueEvent(SC_CONNECT, scConfigIdx, NULL, 0);
+        SOPC_SecureChannels_EnqueueEvent(SC_CONNECT, scConfigIdx, (uintptr_t) NULL, 0);
         printf(">>Stub_Client: Establishing connection to server...\n");
 
         WaitEvent(servicesEvents->events, (void**) &serviceEvent);
@@ -340,7 +340,7 @@ int main(int argc, char* argv[])
                                             &OpcUa_RequestHeader_EncodeableType, (void*) &rHeader, (void*) &cRequest);
         assert(SOPC_STATUS_OK == status);
 
-        SOPC_SecureChannels_EnqueueEvent(SC_SERVICE_SND_MSG, scConnectionId, (void*) buffer, 0);
+        SOPC_SecureChannels_EnqueueEvent(SC_SERVICE_SND_MSG, scConnectionId, (uintptr_t) buffer, 0);
 
         printf(">>Stub_Client: Calling GetEndpoint service...\n");
 
@@ -348,12 +348,13 @@ int main(int argc, char* argv[])
 
         if (serviceEvent->event == SC_SERVICE_RCV_MSG)
         {
-            if (serviceEvent->eltId == scConnectionId && serviceEvent->params != NULL && serviceEvent->auxParam == 0)
+            if (serviceEvent->eltId == scConnectionId && (void*) serviceEvent->params != NULL &&
+                serviceEvent->auxParam == 0)
             {
                 SOPC_EncodeableType* encType = NULL;
                 SOPC_MsgBodyType_Read((SOPC_Buffer*) serviceEvent->params, &encType);
                 SOPC_Buffer_Delete((SOPC_Buffer*) serviceEvent->params);
-                serviceEvent->params = NULL;
+                serviceEvent->params = (uintptr_t) NULL;
 
                 if (encType == &OpcUa_ServiceFault_EncodeableType)
                 {
@@ -390,7 +391,7 @@ int main(int argc, char* argv[])
     // CLOSE THE SECURE CHANNEL
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_SecureChannels_EnqueueEvent(SC_DISCONNECT, scConnectionId, NULL, 0);
+        SOPC_SecureChannels_EnqueueEvent(SC_DISCONNECT, scConnectionId, (uintptr_t) NULL, 0);
         printf(">>Stub_Client: Closing secure connection\n");
 
         WaitEvent(servicesEvents->events, (void**) &serviceEvent);

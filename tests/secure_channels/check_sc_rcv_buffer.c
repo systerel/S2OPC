@@ -126,7 +126,7 @@ static void establishSC(void)
     ck_assert(SOPC_STATUS_OK == SOPC_Toolkit_Configured());
 
     printf("SC_Rcv_Buffer Init: request connection to SC layer\n");
-    SOPC_SecureChannels_EnqueueEvent(SC_CONNECT, scConfigIdx, NULL, 0);
+    SOPC_SecureChannels_EnqueueEvent(SC_CONNECT, scConfigIdx, (uintptr_t) NULL, 0);
 
     // Retrieve socket event
     printf("SC_Rcv_Buffer Init: Checking correct socket creation event received\n");
@@ -145,7 +145,7 @@ static void establishSC(void)
     socketEvent = NULL;
 
     // Simulate event from socket
-    SOPC_EventHandler_Post(socketsEventHandler, SOCKET_CONNECTION, scConfigIdx, NULL, scConfigIdx);
+    SOPC_EventHandler_Post(socketsEventHandler, SOCKET_CONNECTION, scConfigIdx, (uintptr_t) NULL, scConfigIdx);
     printf("SC_Rcv_Buffer Init: Simulating socket connection\n");
 
     printf("SC_Rcv_Buffer Init: Checking correct HEL message requested to be sent\n");
@@ -200,7 +200,7 @@ static void establishSC(void)
     printf("SC_Rcv_Buffer Init: Checking correct connection established event received by services\n");
     serviceEvent = Check_Service_Event_Received(SC_CONNECTED, scConfigIdx, scConfigIdx);
 
-    ck_assert(NULL != serviceEvent);
+    ck_assert_ptr_nonnull(serviceEvent);
     SOPC_Free(serviceEvent);
     serviceEvent = NULL;
 
@@ -211,10 +211,11 @@ static void establishSC(void)
     status = SOPC_Buffer_SetDataLength(buffer, SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
     ck_assert(SOPC_STATUS_OK == status);
 
-    SOPC_SecureChannels_EnqueueEvent(SC_SERVICE_SND_MSG, scConfigIdx, (void*) buffer, pendingRequestHandle);
+    SOPC_SecureChannels_EnqueueEvent(SC_SERVICE_SND_MSG, scConfigIdx, (uintptr_t) buffer, pendingRequestHandle);
 
     socketEvent = Check_Socket_Event_Received(SOCKET_WRITE, scConfigIdx, 0);
-    ck_assert(socketEvent != NULL && socketEvent->params != NULL);
+    ck_assert_ptr_nonnull(socketEvent);
+    ck_assert_ptr_nonnull((void*) socketEvent->params);
 
     buffer = (SOPC_Buffer*) socketEvent->params;
     res = hexlify(buffer->data, hexOutput, buffer->length);
@@ -422,8 +423,8 @@ START_TEST(test_expected_receive_multi_chunks)
     simulate_N_chunks('F', (uint8_t)(2 + nb_intermediate_chunks), 1);
 
     serviceEvent = Check_Service_Event_Received(SC_SERVICE_RCV_MSG, scConfigIdx, 0);
-    ck_assert(NULL != serviceEvent);
-    ck_assert(NULL != serviceEvent->params);
+    ck_assert_ptr_nonnull(serviceEvent);
+    ck_assert_ptr_nonnull((void*) serviceEvent->params);
     buffer = (SOPC_Buffer*) serviceEvent->params;
     uint8_t data_length = (uint8_t) strlen(INTERMEDIATE_CHUNK_DATA);
     ck_assert_int_eq(data_length * (nb_intermediate_chunks + 1),
@@ -473,7 +474,7 @@ START_TEST(test_receive_intermediary_and_abort_chunk)
 
     serviceEvent = Check_Service_Event_Received(SC_SND_FAILURE, scConfigIdx, OpcUa_BadTcpMessageTooLarge);
     ck_assert_uint_eq(pendingRequestHandle, (uintptr_t) serviceEvent->params);
-    ck_assert(NULL != serviceEvent);
+    ck_assert_ptr_nonnull(serviceEvent);
 
     SOPC_Free(serviceEvent);
 }
@@ -494,7 +495,7 @@ START_TEST(test_receive_only_abort_chunk)
 
     serviceEvent = Check_Service_Event_Received(SC_SND_FAILURE, scConfigIdx, OpcUa_BadTcpMessageTooLarge);
     ck_assert_uint_eq(pendingRequestHandle, (uintptr_t) serviceEvent->params);
-    ck_assert(NULL != serviceEvent);
+    ck_assert_ptr_nonnull(serviceEvent);
 
     SOPC_Free(serviceEvent);
 }
@@ -516,11 +517,12 @@ START_TEST(test_expected_send_multi_chunks)
     status = SOPC_Buffer_SetDataLength(buffer, maxSendingBufferSize + 1);
     ck_assert(SOPC_STATUS_OK == status);
 
-    SOPC_SecureChannels_EnqueueEvent(SC_SERVICE_SND_MSG, scConfigIdx, (void*) buffer, pendingRequestHandle);
+    SOPC_SecureChannels_EnqueueEvent(SC_SERVICE_SND_MSG, scConfigIdx, (uintptr_t) buffer, pendingRequestHandle);
 
     // Check first message is a partial chunk of maxSendingBufferSize length
     socketEvent = Check_Socket_Event_Received(SOCKET_WRITE, scConfigIdx, 0);
-    ck_assert(socketEvent != NULL && socketEvent->params != NULL);
+    ck_assert_ptr_nonnull(socketEvent);
+    ck_assert_ptr_nonnull((void*) socketEvent->params);
 
     buffer = (SOPC_Buffer*) socketEvent->params;
     res = hexlify(buffer->data, hexOutput, buffer->length);
@@ -538,7 +540,8 @@ START_TEST(test_expected_send_multi_chunks)
 
     // Check second message is a final chunk of headers + 1 bytes length
     socketEvent = Check_Socket_Event_Received(SOCKET_WRITE, scConfigIdx, 0);
-    ck_assert(socketEvent != NULL && socketEvent->params != NULL);
+    ck_assert_ptr_nonnull(socketEvent);
+    ck_assert_ptr_nonnull((void*) socketEvent->params);
 
     buffer = (SOPC_Buffer*) socketEvent->params;
     res = hexlify(buffer->data, hexOutput, buffer->length);
@@ -579,11 +582,12 @@ START_TEST(test_expected_send_abort_chunk)
     ck_assert(SOPC_STATUS_OK == status);
 
     const uint32_t newPendingRequestHandle = 10;
-    SOPC_SecureChannels_EnqueueEvent(SC_SERVICE_SND_MSG, scConfigIdx, (void*) buffer, newPendingRequestHandle);
+    SOPC_SecureChannels_EnqueueEvent(SC_SERVICE_SND_MSG, scConfigIdx, (uintptr_t) buffer, newPendingRequestHandle);
 
     // Check first message is a partial chunk of maxSendingBufferSize length
     socketEvent = Check_Socket_Event_Received(SOCKET_WRITE, scConfigIdx, 0);
-    ck_assert(socketEvent != NULL && socketEvent->params != NULL);
+    ck_assert_ptr_nonnull(socketEvent);
+    ck_assert_ptr_nonnull((void*) socketEvent->params);
 
     buffer = (SOPC_Buffer*) socketEvent->params;
     res = hexlify(buffer->data, hexOutput, buffer->length);
@@ -609,7 +613,7 @@ START_TEST(test_expected_send_abort_chunk)
 
     serviceEvent = Check_Service_Event_Received(SC_SND_FAILURE, scConfigIdx, OpcUa_BadRequestTooLarge);
     ck_assert_uint_eq(newPendingRequestHandle, (uintptr_t) serviceEvent->params);
-    ck_assert(NULL != serviceEvent);
+    ck_assert_ptr_nonnull(serviceEvent);
     SOPC_Free(serviceEvent);
     serviceEvent = NULL;
 }
@@ -629,12 +633,13 @@ START_TEST(test_expected_forced_send_abort_chunk)
 
     const uint32_t newPendingRequestHandle = 10;
     // Note: should be used only as server but it is functional
-    SOPC_SecureChannels_EnqueueEvent(SC_SERVICE_SND_MSG_ABORT, scConfigIdx,
-                                     (void*) (uintptr_t) OpcUa_BadRequestTooLarge, newPendingRequestHandle);
+    SOPC_SecureChannels_EnqueueEvent(SC_SERVICE_SND_MSG_ABORT, scConfigIdx, (uintptr_t) OpcUa_BadRequestTooLarge,
+                                     newPendingRequestHandle);
 
     // Check first message is a partial chunk of maxSendingBufferSize length
     socketEvent = Check_Socket_Event_Received(SOCKET_WRITE, scConfigIdx, 0);
-    ck_assert(socketEvent != NULL && socketEvent->params != NULL);
+    ck_assert_ptr_nonnull(socketEvent);
+    ck_assert_ptr_nonnull((void*) socketEvent->params);
 
     buffer = (SOPC_Buffer*) socketEvent->params;
     res = hexlify(buffer->data, hexOutput, buffer->length);
@@ -660,7 +665,7 @@ START_TEST(test_expected_forced_send_abort_chunk)
 
     serviceEvent = Check_Service_Event_Received(SC_SND_FAILURE, scConfigIdx, OpcUa_BadRequestTooLarge);
     ck_assert_uint_eq(newPendingRequestHandle, (uintptr_t) serviceEvent->params);
-    ck_assert(NULL != serviceEvent);
+    ck_assert_ptr_nonnull(serviceEvent);
     SOPC_Free(serviceEvent);
     serviceEvent = NULL;
 }
@@ -713,7 +718,7 @@ START_TEST(test_too_large_msg_size)
     status = SOPC_Buffer_SetDataLength(buffer, 500);
     ck_assert(SOPC_STATUS_OK == status);
 
-    SOPC_EventHandler_Post(socketsEventHandler, SOCKET_RCV_BYTES, scConfigIdx, (void*) buffer, 0);
+    SOPC_EventHandler_Post(socketsEventHandler, SOCKET_RCV_BYTES, scConfigIdx, (uintptr_t) buffer, 0);
 
     status = Check_Client_Closed_SC_Helper(OpcUa_BadTcpMessageTooLarge);
     ck_assert(SOPC_STATUS_OK == status);
@@ -797,8 +802,8 @@ START_TEST(test_valid_sc_request_id)
     ck_assert(SOPC_STATUS_OK == status);
 
     serviceEvent = Check_Service_Event_Received(SC_SERVICE_RCV_MSG, scConfigIdx, 0);
-    ck_assert(NULL != serviceEvent);
-    ck_assert(NULL != serviceEvent->params);
+    ck_assert_ptr_nonnull(serviceEvent);
+    ck_assert_ptr_nonnull((void*) serviceEvent->params);
     buffer = (SOPC_Buffer*) serviceEvent->params;
 
     // msg[57] max size but strlen("89abcdef") == 8 <=> buffer->length - buffer->position == 4
@@ -811,7 +816,7 @@ START_TEST(test_valid_sc_request_id)
     res = memcmp(msg, "89abcdef", strlen("89abcdef"));
     ck_assert(res == 0);
 
-    SOPC_Buffer_Delete(serviceEvent->params);
+    SOPC_Buffer_Delete((SOPC_Buffer*) serviceEvent->params);
     SOPC_Free(serviceEvent);
 }
 END_TEST

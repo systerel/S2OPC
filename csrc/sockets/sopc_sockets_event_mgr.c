@@ -456,14 +456,14 @@ static SOPC_ReturnStatus on_ready_read(SOPC_Socket* socket, uint32_t socket_id)
     status = SOPC_Buffer_SetDataLength(buffer, (uint32_t) readBytes);
     assert(status == SOPC_STATUS_OK);
 
-    SOPC_Sockets_Emit(SOCKET_RCV_BYTES, socket->connectionId, (void*) buffer, socket_id);
+    SOPC_Sockets_Emit(SOCKET_RCV_BYTES, socket->connectionId, (uintptr_t) buffer, socket_id);
 
     return SOPC_STATUS_OK;
 }
 
 void SOPC_SocketsEventMgr_Dispatcher(SOPC_Sockets_InputEvent socketEvent,
                                      uint32_t eltId,
-                                     void* params,
+                                     uintptr_t params,
                                      uintptr_t auxParam)
 {
     bool result = false;
@@ -485,11 +485,11 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_Sockets_InputEvent socketEvent,
         if (NULL != socketElt)
         {
             socketElt->connectionId = eltId;
-            SOPC_Sockets_Emit(SOCKET_LISTENER_OPENED, eltId, NULL, socketElt->socketIdx);
+            SOPC_Sockets_Emit(SOCKET_LISTENER_OPENED, eltId, (uintptr_t) NULL, socketElt->socketIdx);
         }
         else
         {
-            SOPC_Sockets_Emit(SOCKET_LISTENER_FAILURE, eltId, NULL, 0);
+            SOPC_Sockets_Emit(SOCKET_LISTENER_FAILURE, eltId, (uintptr_t) NULL, 0);
         }
         break;
     case SOCKET_ACCEPTED_CONNECTION:
@@ -525,7 +525,7 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_Sockets_InputEvent socketEvent,
         }
         else
         {
-            SOPC_Sockets_Emit(SOCKET_FAILURE, eltId, NULL, 0);
+            SOPC_Sockets_Emit(SOCKET_FAILURE, eltId, (uintptr_t) NULL, 0);
         }
         break;
     case SOCKET_CLOSE:
@@ -584,7 +584,7 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_Sockets_InputEvent socketEvent,
             status = SOPC_Buffer_SetPosition(buffer, 0);
             assert(SOPC_STATUS_OK == status);
             // Enqueue message buffer to send
-            status = SOPC_AsyncQueue_BlockingEnqueue(socketElt->writeQueue, params);
+            status = SOPC_AsyncQueue_BlockingEnqueue(socketElt->writeQueue, buffer);
             assert(SOPC_STATUS_OK == status);
             result = true;
             if (socketElt->isNotWritable == false)
@@ -605,7 +605,7 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_Sockets_InputEvent socketEvent,
 
         if (false == result)
         {
-            SOPC_Sockets_Emit(SOCKET_FAILURE, socketElt->connectionId, NULL, eltId);
+            SOPC_Sockets_Emit(SOCKET_FAILURE, socketElt->connectionId, (uintptr_t) NULL, eltId);
             // Definitively close the socket
             SOPC_SocketsInternalContext_CloseSocket(eltId);
         }
@@ -663,7 +663,7 @@ void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent eve
                 // association with connection index
                 SOPC_Sockets_Emit(SOCKET_LISTENER_CONNECTION,
                                   acceptSock->connectionId, // endpoint description config index
-                                  NULL, acceptSock->socketIdx);
+                                  (uintptr_t) NULL, acceptSock->socketIdx);
             }
             else
             {
@@ -685,7 +685,7 @@ void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent eve
             // No new attempt possible, indicates socket connection failed and close the socket
             SOPC_Sockets_Emit(SOCKET_FAILURE,
                               socketElt->connectionId, // endpoint description config index
-                              NULL, 0);
+                              (uintptr_t) NULL, 0);
             // Definitively close the socket
             SOPC_SocketsInternalContext_CloseSocket(socketIdx);
         }
@@ -708,7 +708,7 @@ void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent eve
         // Notify connection
         SOPC_Sockets_Emit(SOCKET_CONNECTION,
                           socketElt->connectionId, // secure channel connection index
-                          NULL, socketIdx);
+                          (uintptr_t) NULL, socketIdx);
         socketElt->state = SOCKET_STATE_CONNECTED;
 
         break;
@@ -717,11 +717,11 @@ void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent eve
 
         if (socketElt->state == SOCKET_STATE_LISTENING)
         {
-            SOPC_Sockets_Emit(SOCKET_LISTENER_FAILURE, socketElt->connectionId, NULL, socketIdx);
+            SOPC_Sockets_Emit(SOCKET_LISTENER_FAILURE, socketElt->connectionId, (uintptr_t) NULL, socketIdx);
         }
         else if (socketElt->state != SOCKET_STATE_CLOSED)
         {
-            SOPC_Sockets_Emit(SOCKET_FAILURE, socketElt->connectionId, NULL, socketIdx);
+            SOPC_Sockets_Emit(SOCKET_FAILURE, socketElt->connectionId, (uintptr_t) NULL, socketIdx);
         }
 
         SOPC_SocketsInternalContext_CloseSocket(socketIdx);
@@ -734,7 +734,7 @@ void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent eve
 
         if (status != SOPC_STATUS_OK)
         {
-            SOPC_Sockets_Emit(SOCKET_FAILURE, socketElt->connectionId, NULL, socketIdx);
+            SOPC_Sockets_Emit(SOCKET_FAILURE, socketElt->connectionId, (uintptr_t) NULL, socketIdx);
             SOPC_SocketsInternalContext_CloseSocket(socketIdx);
         }
 

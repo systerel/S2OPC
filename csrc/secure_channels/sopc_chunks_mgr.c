@@ -107,7 +107,7 @@ static uint32_t SC_Client_StartRequestTimeout(uint32_t connectionIdx, uint32_t r
     SOPC_Event event;
     event.event = TIMER_SC_REQUEST_TIMEOUT;
     event.eltId = connectionIdx;
-    event.params = NULL;
+    event.params = (uintptr_t) NULL;
     event.auxParam = requestId;
     return SOPC_EventTimer_Create(secureChannelsTimerEventHandler, event, SOPC_REQUEST_TIMEOUT_MS);
 }
@@ -2053,12 +2053,12 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
                 {
                     // Treat as prio events
                     SOPC_SecureChannels_EnqueueInternalEventAsNext(
-                        scEvent, scConnectionIdx, (void*) chunkCtx->currentMessageInputBuffer, requestId);
+                        scEvent, scConnectionIdx, (uintptr_t) chunkCtx->currentMessageInputBuffer, requestId);
                 }
                 else
                 {
-                    SOPC_SecureChannels_EnqueueInternalEvent(scEvent, scConnectionIdx,
-                                                             (void*) chunkCtx->currentMessageInputBuffer, requestId);
+                    SOPC_SecureChannels_EnqueueInternalEvent(
+                        scEvent, scConnectionIdx, (uintptr_t) chunkCtx->currentMessageInputBuffer, requestId);
                 }
                 SOPC_ScInternalContext_ClearInputChunksContext(chunkCtx);
             }
@@ -2072,7 +2072,8 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
             errorStatus, scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
 
         // Treat as prio events
-        SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_RCV_FAILURE, scConnectionIdx, NULL, errorStatus);
+        SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_RCV_FAILURE, scConnectionIdx, (uintptr_t) NULL,
+                                                       errorStatus);
         SOPC_Buffer_Delete(chunkCtx->currentChunkInputBuffer);
         SOPC_ScInternalContext_ClearInputChunksContext(chunkCtx);
     }
@@ -3825,12 +3826,12 @@ static bool SC_Chunks_TreatSendBufferMSGCLO(
     return result;
 }
 
-void SOPC_ChunksMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event, uint32_t eltId, void* params, uintptr_t auxParam)
+void SOPC_ChunksMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event, uint32_t eltId, uintptr_t params, uintptr_t auxParam)
 {
     (void) auxParam;
 
     SOPC_SecureConnection* scConnection = SC_GetConnection(eltId);
-    SOPC_Buffer* buffer = params;
+    SOPC_Buffer* buffer = (void*) params;
 
     if (scConnection == NULL || buffer == NULL || scConnection->state == SECURE_CONNECTION_STATE_SC_CLOSED)
     {
@@ -3855,7 +3856,8 @@ void SOPC_ChunksMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event, uint32_t eltId
                                    ")",
                                    OpcUa_BadInvalidArgument, scConnection->serverEndpointConfigIdx,
                                    scConnection->endpointConnectionConfigIdx);
-            SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_RCV_FAILURE, eltId, NULL, OpcUa_BadInvalidArgument);
+            SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_RCV_FAILURE, eltId, (uintptr_t) NULL,
+                                                           OpcUa_BadInvalidArgument);
             return;
         }
 
@@ -4065,7 +4067,7 @@ static bool SC_Chunks_TreatSendMessageBuffer(
         if (result)
         {
             // Require write of output buffer on socket
-            SOPC_Sockets_EnqueueEvent(SOCKET_WRITE, scConnection->socketIndex, (void*) outputChunkBuffer, 0);
+            SOPC_Sockets_EnqueueEvent(SOCKET_WRITE, scConnection->socketIndex, (uintptr_t) outputChunkBuffer, 0);
         }
     }
     else if (isOPN)
@@ -4079,7 +4081,7 @@ static bool SC_Chunks_TreatSendMessageBuffer(
         if (result)
         {
             // Require write of output buffer on socket
-            SOPC_Sockets_EnqueueEvent(SOCKET_WRITE, scConnection->socketIndex, (void*) outputChunkBuffer, 0);
+            SOPC_Sockets_EnqueueEvent(SOCKET_WRITE, scConnection->socketIndex, (uintptr_t) outputChunkBuffer, 0);
         }
     }
     else
@@ -4145,7 +4147,8 @@ static bool SC_Chunks_TreatSendMessageBuffer(
                 if (result)
                 {
                     // Require write of output buffer on socket
-                    SOPC_Sockets_EnqueueEvent(SOCKET_WRITE, scConnection->socketIndex, (void*) outputChunkBuffer, 0);
+                    SOPC_Sockets_EnqueueEvent(SOCKET_WRITE, scConnection->socketIndex, (uintptr_t) outputChunkBuffer,
+                                              0);
                 }
                 else
                 {
@@ -4196,7 +4199,7 @@ static bool SC_Chunks_TreatSendMessageBuffer(
             if (result)
             {
                 // Require write of output buffer on socket
-                SOPC_Sockets_EnqueueEvent(SOCKET_WRITE, scConnection->socketIndex, (void*) outputChunkBuffer, 0);
+                SOPC_Sockets_EnqueueEvent(SOCKET_WRITE, scConnection->socketIndex, (uintptr_t) outputChunkBuffer, 0);
                 // Final result is complete message cannot be sent even if abort message was
                 result = false;
             }
@@ -4223,7 +4226,7 @@ static bool SC_Chunks_TreatSendMessageBuffer(
 
 void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InternalEvent event,
                                uint32_t eltId,
-                               void* params,
+                               uintptr_t params,
                                uintptr_t auxParam)
 {
     SOPC_Msg_Type sendMsgType = SOPC_MSG_TYPE_INVALID;
@@ -4321,14 +4324,13 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InternalEvent event,
             {
                 if (failedWithAbortMessage)
                 {
-                    SOPC_SecureChannels_EnqueueInternalEvent(INT_SC_SENT_ABORT_FAILURE, eltId,
-                                                             (void*) (uintptr_t) auxParam, errorStatus);
+                    SOPC_SecureChannels_EnqueueInternalEvent(INT_SC_SENT_ABORT_FAILURE, eltId, auxParam, errorStatus);
                 }
                 else
                 {
                     // Treat as prio events
-                    SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_SND_FATAL_FAILURE, eltId,
-                                                                   (void*) (uintptr_t) auxParam, errorStatus);
+                    SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_SND_FATAL_FAILURE, eltId, auxParam,
+                                                                   errorStatus);
                 }
             }
             else

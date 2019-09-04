@@ -120,7 +120,7 @@ void service_mgr_bs__client_channel_connected_event_discovery(
                     if (elt != NULL)
                     {
                         SOPC_Services_EnqueueEvent(APP_TO_SE_SEND_DISCOVERY_REQUEST, service_mgr_bs__channel_config_idx,
-                                                   elt->msgToSend, elt->msgAppContext);
+                                                   (uintptr_t) elt->msgToSend, elt->msgAppContext);
                     }
                     SOPC_Free(elt);
                 }
@@ -144,7 +144,7 @@ static void SOPC_ServiceMgrBs_DicoveryReqSendingFailure(uint32_t id, void* val)
         {
             reqEncType = NULL; // request type expected
         }
-        SOPC_App_EnqueueComEvent(SE_SND_REQUEST_FAILED, SOPC_STATUS_CLOSED, NULL, elt->msgAppContext);
+        SOPC_App_EnqueueComEvent(SE_SND_REQUEST_FAILED, SOPC_STATUS_CLOSED, (uintptr_t) NULL, elt->msgAppContext);
         message_out_bs__dealloc_msg_out(elt->msgToSend);
         SOPC_Free(elt);
     }

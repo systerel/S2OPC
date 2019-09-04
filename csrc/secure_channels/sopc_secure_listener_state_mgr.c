@@ -67,7 +67,7 @@ static bool SOPC_SecureListenerStateMgr_CloseListener(uint32_t endpointConfigIdx
                 if (scListener->isUsedConnectionIdxArray[idx])
                 {
                     SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_EP_SC_CLOSE, scListener->connectionIdxArray[idx],
-                                                                   NULL, endpointConfigIdx);
+                                                                   (uintptr_t) NULL, endpointConfigIdx);
                     scListener->isUsedConnectionIdxArray[idx] = false;
                     scListener->connectionIdxArray[idx] = 0;
                 }
@@ -75,7 +75,7 @@ static bool SOPC_SecureListenerStateMgr_CloseListener(uint32_t endpointConfigIdx
             if (!socketFailure)
             {
                 // Close the socket listener in case it is not a socket failure (already done)
-                SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE_SERVER, scListener->socketIndex, NULL,
+                SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE_SERVER, scListener->socketIndex, (uintptr_t) NULL,
                                           (uintptr_t) endpointConfigIdx);
             }
             memset(scListener, 0, sizeof(SOPC_SecureListener));
@@ -143,7 +143,7 @@ static void SOPC_SecureListenerStateMgr_RemoveConnection(SOPC_SecureListener* sc
 
 void SOPC_SecureListenerStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalEvent event,
                                                  uint32_t eltId,
-                                                 void* params,
+                                                 uintptr_t params,
                                                  uintptr_t auxParam)
 {
     (void) params;
@@ -164,7 +164,7 @@ void SOPC_SecureListenerStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalEve
         if (NULL == scListener || scListener->state != SECURE_LISTENER_STATE_OPENED)
         {
             // Error case: require secure channel closure
-            SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_CLOSE, (uint32_t) auxParam, NULL, eltId);
+            SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_CLOSE, (uint32_t) auxParam, (uintptr_t) NULL, eltId);
         }
         else
         {
@@ -172,7 +172,7 @@ void SOPC_SecureListenerStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalEve
             if (!SOPC_SecureListenerStateMgr_AddConnection(scListener, (uint32_t) auxParam))
             {
                 // Error case: require secure channel closure
-                SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_CLOSE, (uint32_t) auxParam, NULL, eltId);
+                SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_CLOSE, (uint32_t) auxParam, (uintptr_t) NULL, eltId);
             }
         }
         break;
@@ -202,7 +202,7 @@ void SOPC_SecureListenerStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalEve
 
 void SOPC_SecureListenerStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
                                                uint32_t eltId,
-                                               void* params,
+                                               uintptr_t params,
                                                uintptr_t auxParam)
 {
     (void) params;
@@ -223,7 +223,7 @@ void SOPC_SecureListenerStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
         if (NULL == scListener || scListener->state != SECURE_LISTENER_STATE_OPENING)
         {
             // Error case: require socket closure
-            SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE_SERVER, (uint32_t) auxParam, NULL, (uintptr_t) eltId);
+            SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE_SERVER, (uint32_t) auxParam, (uintptr_t) NULL, (uintptr_t) eltId);
         }
         else
         {
@@ -245,12 +245,12 @@ void SOPC_SecureListenerStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
         if (NULL == scListener || scListener->state != SECURE_LISTENER_STATE_OPENED)
         {
             // Error case: require socket closure
-            SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, (uint32_t) auxParam, NULL, 0);
+            SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, (uint32_t) auxParam, (uintptr_t) NULL, 0);
         }
         else
         {
             // Request creation of a new secure connection with given socket
-            SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_CREATE, eltId, NULL, auxParam);
+            SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_CREATE, eltId, (uintptr_t) NULL, auxParam);
         }
         break;
     }
@@ -265,7 +265,7 @@ void SOPC_SecureListenerStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
             SOPC_SecureListenerStateMgr_CloseListener(eltId, true);
         }
         // Notify Services layer that EP_OPEN failed
-        SOPC_EventHandler_Post(secureChannelsEventHandler, EP_CLOSED, eltId, NULL, SOPC_STATUS_CLOSED);
+        SOPC_EventHandler_Post(secureChannelsEventHandler, EP_CLOSED, eltId, (uintptr_t) NULL, SOPC_STATUS_CLOSED);
         break;
     }
     default:
@@ -275,7 +275,7 @@ void SOPC_SecureListenerStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
 
 void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event,
                                             uint32_t eltId,
-                                            void* params,
+                                            uintptr_t params,
                                             uintptr_t auxParam)
 {
     (void) params;
@@ -305,7 +305,7 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
             // URL is not modified but API cannot allow to keep const qualifier: cast to const on treatment
             SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
             // Notify Sockets layer to create the listener
-            SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_SERVER, eltId, (void*) epConfig->endpointURL,
+            SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_SERVER, eltId, (uintptr_t) epConfig->endpointURL,
                                       SOPC_LISTENER_LISTEN_ALL_INTERFACES);
             SOPC_GCC_DIAGNOSTIC_RESTORE
         }
@@ -327,7 +327,7 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
             }
         }
         // Notify Services layer that EP_OPEN failed
-        SOPC_EventHandler_Post(secureChannelsEventHandler, EP_CLOSED, eltId, NULL, status);
+        SOPC_EventHandler_Post(secureChannelsEventHandler, EP_CLOSED, eltId, (uintptr_t) NULL, status);
         break;
     default:
         // Already filtered by secure channels API module

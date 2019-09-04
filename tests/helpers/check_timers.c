@@ -53,7 +53,11 @@ static SOPC_DateTime dateTimeResultsWithCancel[NB_TIMERS_WITH_CANCEL] = {0, 0, 0
 
 uint32_t timersId[NB_TIMERS];
 
-static void timeout_event(SOPC_EventHandler* handler, int32_t event, uint32_t eltId, void* params, uintptr_t auxParam)
+static void timeout_event(SOPC_EventHandler* handler,
+                          int32_t event,
+                          uint32_t eltId,
+                          uintptr_t params,
+                          uintptr_t auxParam)
 {
     /* avoid unused parameter compiler warning */
     (void) handler;
@@ -64,7 +68,7 @@ static void timeout_event(SOPC_EventHandler* handler, int32_t event, uint32_t el
     ck_assert(eltId < NB_TIMERS);
     ck_assert(eltId == eltsIdNoCancel[triggered]);
     ck_assert(auxParam == eltsIdNoCancel[triggered]);
-    SOPC_DateTime* dateTime = (SOPC_DateTime*) params;
+    SOPC_DateTime* dateTime = (void*) params;
     ck_assert(NULL != dateTime);
     *dateTime = SOPC_Time_GetCurrentTimeUTC();
 
@@ -95,7 +99,7 @@ START_TEST(test_timers)
     {
         event.eltId = i;
         event.auxParam = i;
-        event.params = &dateTimeResults[i];
+        event.params = (uintptr_t) &dateTimeResults[i];
         timerId = SOPC_EventTimer_Create(eventHandler, event, timersDelay[i]);
         ck_assert(timerId != 0);
     }
@@ -122,7 +126,7 @@ END_TEST
 static void canceled_timeout_event(SOPC_EventHandler* handler,
                                    int32_t event,
                                    uint32_t eltId,
-                                   void* params,
+                                   uintptr_t params,
                                    uintptr_t auxParam)
 {
     (void) handler;
@@ -133,7 +137,7 @@ static void canceled_timeout_event(SOPC_EventHandler* handler,
     ck_assert(eltId < NB_TIMERS);
     ck_assert(eltId == triggeredWithCancel);
     ck_assert(auxParam == triggeredWithCancel);
-    SOPC_DateTime* dateTime = (SOPC_DateTime*) params;
+    SOPC_DateTime* dateTime = (void*) params;
     ck_assert(NULL != dateTime);
     *dateTime = SOPC_Time_GetCurrentTimeUTC();
 
@@ -163,7 +167,7 @@ START_TEST(test_timers_with_cancellation)
     {
         event.eltId = i;
         event.auxParam = i;
-        event.params = &dateTimeResultsWithCancel[i];
+        event.params = (uintptr_t) &dateTimeResultsWithCancel[i];
         timersId[i] = SOPC_EventTimer_Create(eventHandler, event, timersDelayWithCancel[i]);
         ck_assert(timersId[i] != 0);
     }
@@ -172,7 +176,7 @@ START_TEST(test_timers_with_cancellation)
     {
         event.eltId = i;
         event.auxParam = i;
-        event.params = &dateTimeResults[i];
+        event.params = (uintptr_t) &dateTimeResults[i];
         timersId[i] = SOPC_EventTimer_Create(eventHandler, event, timersDelayWithCancel[i]);
         ck_assert(timersId[i] != 0);
     }

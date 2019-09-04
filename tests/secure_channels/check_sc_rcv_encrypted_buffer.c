@@ -217,7 +217,7 @@ static void establishSC(void)
     ck_assert(SOPC_STATUS_OK == SOPC_Toolkit_Configured());
 
     printf("SC_Rcv_Buffer Init: request connection to SC layer\n");
-    SOPC_SecureChannels_EnqueueEvent(SC_CONNECT, scConfigIdx, NULL, 0);
+    SOPC_SecureChannels_EnqueueEvent(SC_CONNECT, scConfigIdx, (uintptr_t) NULL, 0);
 
     // Retrieve socket event
     printf("SC_Rcv_Buffer Init: Checking correct socket creation event received\n");
@@ -236,7 +236,7 @@ static void establishSC(void)
     socketEvent = NULL;
 
     // Simulate event from socket
-    SOPC_EventHandler_Post(socketsEventHandler, SOCKET_CONNECTION, scConfigIdx, NULL, scConfigIdx);
+    SOPC_EventHandler_Post(socketsEventHandler, SOCKET_CONNECTION, scConfigIdx, (uintptr_t) NULL, scConfigIdx);
     printf("SC_Rcv_Buffer Init: Simulating socket connection\n");
 
     printf("SC_Rcv_Buffer Init: Checking correct HEL message requested to be sent\n");
@@ -375,10 +375,11 @@ static void establishSC(void)
     status = SOPC_Buffer_SetDataLength(buffer, 24);
     ck_assert(SOPC_STATUS_OK == status);
 
-    SOPC_SecureChannels_EnqueueEvent(SC_SERVICE_SND_MSG, scConfigIdx, (void*) buffer, pendingRequestHandle);
+    SOPC_SecureChannels_EnqueueEvent(SC_SERVICE_SND_MSG, scConfigIdx, (uintptr_t) buffer, pendingRequestHandle);
 
     socketEvent = Check_Socket_Event_Received(SOCKET_WRITE, scConfigIdx, 0);
-    ck_assert(socketEvent != NULL && socketEvent->params != NULL);
+    ck_assert_ptr_nonnull(socketEvent);
+    ck_assert_ptr_nonnull((void*) socketEvent->params);
 
     buffer = (SOPC_Buffer*) socketEvent->params;
     res = hexlify(buffer->data, hexOutput, buffer->length);
@@ -627,7 +628,7 @@ START_TEST(test_too_large_msg_size)
     status = SOPC_Buffer_SetDataLength(buffer, 500);
     ck_assert(SOPC_STATUS_OK == status);
 
-    SOPC_EventHandler_Post(socketsEventHandler, SOCKET_RCV_BYTES, scConfigIdx, (void*) buffer, 0);
+    SOPC_EventHandler_Post(socketsEventHandler, SOCKET_RCV_BYTES, scConfigIdx, (uintptr_t) buffer, 0);
 
     status = Check_Client_Closed_SC_Helper(OpcUa_BadTcpMessageTooLarge);
     ck_assert(SOPC_STATUS_OK == status);

@@ -32,7 +32,7 @@ struct Event
     SOPC_EventHandler* handler;
     int32_t event;
     uint32_t id;
-    void* params;
+    uintptr_t params;
     uintptr_t auxParam;
 };
 
@@ -40,7 +40,11 @@ static SOPC_AsyncQueue* queue = NULL;
 
 static int32_t block_queue = 0;
 
-static void test_callback(SOPC_EventHandler* handler, int32_t event, uint32_t eltId, void* params, uintptr_t auxParam)
+static void test_callback(SOPC_EventHandler* handler,
+                          int32_t event,
+                          uint32_t eltId,
+                          uintptr_t params,
+                          uintptr_t auxParam)
 {
     struct Event* ev = SOPC_Calloc(1, sizeof(struct Event));
     assert(ev != NULL);
@@ -59,7 +63,11 @@ static void test_callback(SOPC_EventHandler* handler, int32_t event, uint32_t el
     }
 }
 
-static void expect_event(SOPC_EventHandler* handler, int32_t event, uint32_t eltId, void* params, uintptr_t auxParam)
+static void expect_event(SOPC_EventHandler* handler,
+                         int32_t event,
+                         uint32_t eltId,
+                         uintptr_t params,
+                         uintptr_t auxParam)
 {
     struct Event* ev;
     ck_assert(SOPC_AsyncQueue_BlockingDequeue(queue, (void**) &ev) == SOPC_STATUS_OK);
@@ -67,7 +75,7 @@ static void expect_event(SOPC_EventHandler* handler, int32_t event, uint32_t elt
     ck_assert_ptr_eq(handler, ev->handler);
     ck_assert_int_eq(event, ev->event);
     ck_assert_uint_eq(eltId, ev->id);
-    ck_assert_ptr_eq(params, ev->params);
+    ck_assert_uint_eq(params, ev->params);
     ck_assert_uint_eq(auxParam, ev->auxParam);
 
     SOPC_Free(ev);
@@ -89,13 +97,13 @@ START_TEST(test_event_handler_post)
     SOPC_EventHandler* h1 = SOPC_EventHandler_Create(looper, test_callback);
     SOPC_EventHandler* h2 = SOPC_EventHandler_Create(looper, test_callback);
 
-    SOPC_EventHandler_Post(h1, 0, 0, NULL, 0);
-    SOPC_EventHandler_Post(h2, 1, 1, (void*) 0x01, 1);
-    SOPC_EventHandler_Post(h1, 2, 2, (void*) 0x02, 2);
+    SOPC_EventHandler_Post(h1, 0, 0, 0, 0);
+    SOPC_EventHandler_Post(h2, 1, 1, 0x01, 1);
+    SOPC_EventHandler_Post(h1, 2, 2, 0x02, 2);
 
-    expect_event(h1, 0, 0, NULL, 0);
-    expect_event(h2, 1, 1, (void*) 0x01, 1);
-    expect_event(h1, 2, 2, (void*) 0x02, 2);
+    expect_event(h1, 0, 0, 0, 0);
+    expect_event(h2, 1, 1, 0x01, 1);
+    expect_event(h1, 2, 2, 0x02, 2);
 
     SOPC_Looper_Delete(looper);
 }
@@ -109,15 +117,15 @@ START_TEST(test_event_handler_post_as_next)
     SOPC_EventHandler* h1 = SOPC_EventHandler_Create(looper, test_callback);
 
     SOPC_Atomic_Int_Set(&block_queue, 1);
-    SOPC_EventHandler_Post(h1, 0, 0, NULL, 0);
-    expect_event(h1, 0, 0, NULL, 0);
+    SOPC_EventHandler_Post(h1, 0, 0, 0, 0);
+    expect_event(h1, 0, 0, 0, 0);
 
-    SOPC_EventHandler_Post(h1, 1, 1, (void*) 0x01, 1);
-    SOPC_EventHandler_PostAsNext(h1, 2, 2, (void*) 0x02, 2);
+    SOPC_EventHandler_Post(h1, 1, 1, 0x01, 1);
+    SOPC_EventHandler_PostAsNext(h1, 2, 2, 0x02, 2);
     SOPC_Atomic_Int_Set(&block_queue, 0);
 
-    expect_event(h1, 2, 2, (void*) 0x02, 2);
-    expect_event(h1, 1, 1, (void*) 0x01, 1);
+    expect_event(h1, 2, 2, 0x02, 2);
+    expect_event(h1, 1, 1, 0x01, 1);
 
     SOPC_Looper_Delete(looper);
 }

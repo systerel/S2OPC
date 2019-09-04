@@ -90,7 +90,7 @@ typedef enum
 // Secure channel internal event enqueue function
 void SOPC_SecureChannels_EnqueueInternalEvent(SOPC_SecureChannels_InternalEvent event,
                                               uint32_t id,
-                                              void* params,
+                                              uintptr_t params,
                                               uintptr_t auxParam);
 
 /* Secure channel internal event enqueue function: event will be enqueued as next to be treated (only for close SC
@@ -98,7 +98,7 @@ void SOPC_SecureChannels_EnqueueInternalEvent(SOPC_SecureChannels_InternalEvent 
  * on a SC to be closed. */
 void SOPC_SecureChannels_EnqueueInternalEventAsNext(SOPC_SecureChannels_InternalEvent event,
                                                     uint32_t id,
-                                                    void* params,
+                                                    uintptr_t params,
                                                     uintptr_t auxParam);
 
 #endif /* SOPC_SECURE_CHANNELS_API_INTERNAL_H_ */

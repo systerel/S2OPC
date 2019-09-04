@@ -215,7 +215,7 @@ int main(int argc, char* argv[])
         status = SOPC_Toolkit_Configured();
         assert(status == SOPC_STATUS_OK);
 
-        SOPC_SecureChannels_EnqueueEvent(EP_OPEN, epConfigIdx, NULL, 0);
+        SOPC_SecureChannels_EnqueueEvent(EP_OPEN, epConfigIdx, (uintptr_t) NULL, 0);
 
         printf("<Stub_Server: Opening endpoint connection listener ...\n");
 
@@ -223,8 +223,7 @@ int main(int argc, char* argv[])
 
         if (serviceEvent->event == EP_CONNECTED)
         {
-            if (serviceEvent->eltId == epConfigIdx && serviceEvent->params != NULL &&
-                (uintptr_t) serviceEvent->params != 0 && // SC config index
+            if (serviceEvent->eltId == epConfigIdx && (uintptr_t) serviceEvent->params != 0 && // SC config index
                 serviceEvent->auxParam != 0)
             { // SC connection index
 
@@ -254,14 +253,14 @@ int main(int argc, char* argv[])
 
         if (serviceEvent->event == SC_SERVICE_RCV_MSG)
         {
-            if (serviceEvent->eltId == scConnectionId && serviceEvent->params != NULL &&
+            if (serviceEvent->eltId == scConnectionId && (void*) serviceEvent->params != NULL &&
                 serviceEvent->auxParam != 0) // request context
             {
                 SOPC_EncodeableType* encType = NULL;
                 status = SOPC_MsgBodyType_Read((SOPC_Buffer*) serviceEvent->params, &encType);
                 assert(status == SOPC_STATUS_OK);
                 SOPC_Buffer_Delete((SOPC_Buffer*) serviceEvent->params);
-                serviceEvent->params = NULL;
+                serviceEvent->params = (uintptr_t) NULL;
                 if (encType == &OpcUa_GetEndpointsRequest_EncodeableType)
                 {
                     printf("<Stub_Server: Received a GetEndpoint service request => OK\n");
@@ -280,7 +279,7 @@ int main(int argc, char* argv[])
                                                         &OpcUa_ResponseHeader_EncodeableType, (void*) &rHeader, NULL);
                     assert(SOPC_STATUS_OK == status);
 
-                    SOPC_SecureChannels_EnqueueEvent(SC_SERVICE_SND_MSG, scConnectionId, (void*) buffer,
+                    SOPC_SecureChannels_EnqueueEvent(SC_SERVICE_SND_MSG, scConnectionId, (uintptr_t) buffer,
                                                      serviceEvent->auxParam); // request context
                     printf("<Stub_Server: Responding with a service fault message \n");
                 }
@@ -329,7 +328,7 @@ int main(int argc, char* argv[])
         serviceEvent = NULL;
 
         // Close the endpoint connection listener
-        SOPC_SecureChannels_EnqueueEvent(EP_CLOSE, epConfigIdx, NULL, 0);
+        SOPC_SecureChannels_EnqueueEvent(EP_CLOSE, epConfigIdx, (uintptr_t) NULL, 0);
 
         WaitEvent(servicesEvents->events, (void**) &serviceEvent);
 

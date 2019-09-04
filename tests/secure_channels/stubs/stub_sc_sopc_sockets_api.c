@@ -30,7 +30,7 @@
 SOPC_AsyncQueue* socketsInputEvents = NULL;
 SOPC_EventHandler* socketsEventHandler = NULL;
 
-void SOPC_Sockets_EnqueueEvent(SOPC_Sockets_InputEvent scEvent, uint32_t id, void* params, uintptr_t auxParam)
+void SOPC_Sockets_EnqueueEvent(SOPC_Sockets_InputEvent scEvent, uint32_t id, uintptr_t params, uintptr_t auxParam)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_Event* scParams = SOPC_Calloc(1, sizeof(SOPC_Event));
@@ -171,7 +171,7 @@ SOPC_ReturnStatus Simulate_Received_Message(uint32_t scIdx, char* hexInputMsg)
         }
         if (SOPC_STATUS_OK == status)
         {
-            SOPC_EventHandler_Post(socketsEventHandler, SOCKET_RCV_BYTES, scIdx, (void*) buffer, 0);
+            SOPC_EventHandler_Post(socketsEventHandler, SOCKET_RCV_BYTES, scIdx, (uintptr_t) buffer, 0);
         }
     }
     else

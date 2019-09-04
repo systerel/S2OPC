@@ -25,10 +25,10 @@
 #include "sopc_secure_channels_api_internal.h"
 #include "sopc_sockets_api.h"
 
-void SOPC_ChunksMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event, uint32_t eltId, void* params, uintptr_t auxParam);
+void SOPC_ChunksMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event, uint32_t eltId, uintptr_t params, uintptr_t auxParam);
 void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InternalEvent event,
                                uint32_t eltId,
-                               void* params,
+                               uintptr_t params,
                                uintptr_t auxParam);
 
 #endif /* SOPC_CHUNKS_MGR_H_ */

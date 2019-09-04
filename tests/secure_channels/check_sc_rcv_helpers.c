@@ -81,7 +81,7 @@ SOPC_ReturnStatus Check_Client_Closed_SC(uint32_t scIdx,
     printf("               - CLO message requested to be sent\n");
     SOPC_Event* event = Check_Socket_Event_Received(SOCKET_WRITE, scConfigIdx, 0);
 
-    if (event == NULL || event->params == NULL)
+    if (event == NULL || (void*) event->params == NULL)
     {
         SOPC_Free(event);
         return SOPC_STATUS_NOK;

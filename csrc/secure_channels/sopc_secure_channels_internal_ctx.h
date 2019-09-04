@@ -247,22 +247,22 @@ void SOPC_ScInternalContext_ClearInputChunksContext(SOPC_SecureConnection_ChunkM
 void SOPC_SecureChannels_OnInternalEvent(SOPC_EventHandler* handler,
                                          int32_t event,
                                          uint32_t id,
-                                         void* params,
+                                         uintptr_t params,
                                          uintptr_t auxParam);
 void SOPC_SecureChannels_OnSocketsEvent(SOPC_EventHandler* handler,
                                         int32_t event,
                                         uint32_t id,
-                                        void* params,
+                                        uintptr_t params,
                                         uintptr_t auxParam);
 void SOPC_SecureChannels_OnTimerEvent(SOPC_EventHandler* handler,
                                       int32_t event,
                                       uint32_t id,
-                                      void* params,
+                                      uintptr_t params,
                                       uintptr_t auxParam);
 void SOPC_SecureChannels_OnInputEvent(SOPC_EventHandler* handler,
                                       int32_t event,
                                       uint32_t id,
-                                      void* params,
+                                      uintptr_t params,
                                       uintptr_t auxParam);
 
 #endif /* SOPC_SECURE_CHANNELS_INTERNAL_CTX_H_ */

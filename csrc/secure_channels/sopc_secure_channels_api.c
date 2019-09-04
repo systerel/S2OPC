@@ -33,7 +33,7 @@
 void SOPC_SecureChannels_OnInternalEvent(SOPC_EventHandler* handler,
                                          int32_t event,
                                          uint32_t eltId,
-                                         void* params,
+                                         uintptr_t params,
                                          uintptr_t auxParam)
 {
     (void) handler;
@@ -84,7 +84,7 @@ void SOPC_SecureChannels_OnInternalEvent(SOPC_EventHandler* handler,
 void SOPC_SecureChannels_OnSocketsEvent(SOPC_EventHandler* handler,
                                         int32_t event,
                                         uint32_t eltId,
-                                        void* params,
+                                        uintptr_t params,
                                         uintptr_t auxParam)
 {
     (void) handler;
@@ -116,7 +116,7 @@ void SOPC_SecureChannels_OnSocketsEvent(SOPC_EventHandler* handler,
 void SOPC_SecureChannels_OnTimerEvent(SOPC_EventHandler* handler,
                                       int32_t event,
                                       uint32_t id,
-                                      void* params,
+                                      uintptr_t params,
                                       uintptr_t auxParam)
 {
     (void) handler;
@@ -126,7 +126,7 @@ void SOPC_SecureChannels_OnTimerEvent(SOPC_EventHandler* handler,
 void SOPC_SecureChannels_OnInputEvent(SOPC_EventHandler* handler,
                                       int32_t event,
                                       uint32_t eltId,
-                                      void* params,
+                                      uintptr_t params,
                                       uintptr_t auxParam)
 {
     (void) handler;
@@ -156,7 +156,7 @@ void SOPC_SecureChannels_OnInputEvent(SOPC_EventHandler* handler,
 
 SOPC_ReturnStatus SOPC_SecureChannels_EnqueueEvent(SOPC_SecureChannels_InputEvent scEvent,
                                                    uint32_t id,
-                                                   void* params,
+                                                   uintptr_t params,
                                                    uintptr_t auxParam)
 {
     assert(secureChannelsInputEventHandler != NULL);
@@ -181,7 +181,7 @@ SOPC_ReturnStatus SOPC_SecureChannels_EnqueueEvent(SOPC_SecureChannels_InputEven
 
 void SOPC_SecureChannels_EnqueueInternalEvent(SOPC_SecureChannels_InternalEvent event,
                                               uint32_t id,
-                                              void* params,
+                                              uintptr_t params,
                                               uintptr_t auxParam)
 {
     assert(secureChannelsInternalEventHandler != NULL);
@@ -190,7 +190,7 @@ void SOPC_SecureChannels_EnqueueInternalEvent(SOPC_SecureChannels_InternalEvent 
 
 void SOPC_SecureChannels_EnqueueInternalEventAsNext(SOPC_SecureChannels_InternalEvent event,
                                                     uint32_t id,
-                                                    void* params,
+                                                    uintptr_t params,
                                                     uintptr_t auxParam)
 {
     assert(secureChannelsInternalEventHandler != NULL);

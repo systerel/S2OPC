@@ -86,14 +86,14 @@ void SOPC_SocketsInternalContext_CloseSocket(uint32_t socketIdx);
 /**
  * @brief Emits an output event to the recorded output event handler socketsEventHandler
  */
-void SOPC_Sockets_Emit(SOPC_Sockets_OutputEvent event, uint32_t eltId, void* params, uintptr_t auxParam);
+void SOPC_Sockets_Emit(SOPC_Sockets_OutputEvent event, uint32_t eltId, uintptr_t params, uintptr_t auxParam);
 
 /**
  * @brief Enqueues an input event to the queue of events managed by the socket event manager
  */
 SOPC_ReturnStatus SOPC_Sockets_EnqueueInputEvent(SOPC_Sockets_InputEvent socketEvent,
                                                  uint32_t id,
-                                                 void* params,
+                                                 uintptr_t params,
                                                  uintptr_t auxParam);
 
 /**

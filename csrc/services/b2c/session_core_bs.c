@@ -111,7 +111,7 @@ void session_core_bs__notify_set_session_state(
         /* CLIENT SIDE ONLY */
         if (session_core_bs__state == constants__e_session_userActivated)
         {
-            SOPC_App_EnqueueComEvent(SE_ACTIVATED_SESSION, (uint32_t) session_core_bs__session, NULL,
+            SOPC_App_EnqueueComEvent(SE_ACTIVATED_SESSION, (uint32_t) session_core_bs__session, (uintptr_t) NULL,
                                      session_client_app_context[session_core_bs__session]);
         }
         else if (session_core_bs__state == constants__e_session_scOrphaned ||
@@ -124,7 +124,7 @@ void session_core_bs__notify_set_session_state(
 
             // if orphaned will be reactivated or closed => notify as reactivating to avoid use of session by
             // application
-            SOPC_App_EnqueueComEvent(SE_SESSION_REACTIVATING, session_core_bs__session, NULL,
+            SOPC_App_EnqueueComEvent(SE_SESSION_REACTIVATING, session_core_bs__session, (uintptr_t) NULL,
                                      session_client_app_context[session_core_bs__session]);
         }
         else if (session_core_bs__state == constants__e_session_closed)
@@ -137,14 +137,14 @@ void session_core_bs__notify_set_session_state(
                 // If session not in closing state or already activated, it is in activation state regarding user app
                 // => notify activation failed
                 SOPC_App_EnqueueComEvent(
-                    SE_SESSION_ACTIVATION_FAILURE, session_core_bs__session, (void*) (uintptr_t) scReason,
+                    SE_SESSION_ACTIVATION_FAILURE, session_core_bs__session, (uintptr_t) scReason,
                     session_client_app_context[session_core_bs__session]); // user application session context
             }
             else
             {
                 // Activated session closing
                 SOPC_App_EnqueueComEvent(
-                    SE_CLOSED_SESSION, session_core_bs__session, (void*) (uintptr_t) scReason,
+                    SE_CLOSED_SESSION, session_core_bs__session, (uintptr_t) scReason,
                     session_client_app_context[session_core_bs__session]); // user application session context
             }
         }
@@ -160,7 +160,8 @@ void session_core_bs__notify_set_session_state(
             // - Session becomes inactive: subscription will clear session context only (publish requests)
             // - Session is closed: subscription will be closed
             SOPC_EventHandler_PostAsNext(SOPC_Services_GetEventHandler(), SE_TO_SE_SERVER_INACTIVATED_SESSION_PRIO,
-                                         (uint32_t) session_core_bs__session, NULL, (uintptr_t) session_core_bs__state);
+                                         (uint32_t) session_core_bs__session, (uintptr_t) NULL,
+                                         (uintptr_t) session_core_bs__state);
         }
 
         if (session_core_bs__state == constants__e_session_closed &&
@@ -1037,7 +1038,8 @@ void session_core_bs__client_gen_activate_orphaned_session_internal_event(
     const constants__t_channel_config_idx_i session_core_bs__channel_config_idx)
 {
     SOPC_EventHandler_Post(SOPC_Services_GetEventHandler(), SE_TO_SE_ACTIVATE_ORPHANED_SESSION,
-                           (uint32_t) session_core_bs__session, NULL, (uintptr_t) session_core_bs__channel_config_idx);
+                           (uint32_t) session_core_bs__session, (uintptr_t) NULL,
+                           (uintptr_t) session_core_bs__channel_config_idx);
 }
 
 void session_core_bs__client_gen_activate_user_session_internal_event(
@@ -1045,7 +1047,7 @@ void session_core_bs__client_gen_activate_user_session_internal_event(
     const constants__t_user_token_i session_core_bs__p_user_token)
 {
     SOPC_EventHandler_Post(SOPC_Services_GetEventHandler(), SE_TO_SE_ACTIVATE_SESSION, session_core_bs__session,
-                           (void*) session_core_bs__p_user_token, 0);
+                           (uintptr_t) session_core_bs__p_user_token, 0);
 }
 
 void session_core_bs__client_gen_create_session_internal_event(
@@ -1053,7 +1055,8 @@ void session_core_bs__client_gen_create_session_internal_event(
     const constants__t_channel_config_idx_i session_core_bs__channel_config_idx)
 {
     SOPC_EventHandler_Post(SOPC_Services_GetEventHandler(), SE_TO_SE_CREATE_SESSION,
-                           (uint32_t) session_core_bs__session, NULL, (uintptr_t) session_core_bs__channel_config_idx);
+                           (uint32_t) session_core_bs__session, (uintptr_t) NULL,
+                           (uintptr_t) session_core_bs__channel_config_idx);
 }
 
 void session_core_bs__server_session_timeout_evaluation(const constants__t_session_i session_core_bs__session,
@@ -1081,7 +1084,7 @@ void session_core_bs__server_session_timeout_evaluation(const constants__t_sessi
                 // Re-activate timer for next verification
                 event.eltId = session_core_bs__session;
                 event.event = TIMER_SE_EVAL_SESSION_TIMEOUT;
-                event.params = NULL;
+                event.params = (uintptr_t) NULL;
                 event.auxParam = 0;
                 // Note: next timer is not revised session timeout but revised timeout - latest msg received time
                 timerId = SOPC_EventTimer_Create(
@@ -1130,7 +1133,7 @@ void session_core_bs__server_session_timeout_start_timer(const constants__t_sess
         }
         event.eltId = session_core_bs__session;
         event.event = TIMER_SE_EVAL_SESSION_TIMEOUT;
-        event.params = NULL;
+        event.params = (uintptr_t) NULL;
         event.auxParam = 0;
         timerId = SOPC_EventTimer_Create(SOPC_Services_GetEventHandler(), event,
                                          session_RevisedSessionTimeout[session_core_bs__session]);

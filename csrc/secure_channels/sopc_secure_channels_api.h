@@ -55,7 +55,7 @@ typedef enum
 typedef enum
 {
     EP_CONNECTED = 0x300,  /* id = endpoint description config index,
-                              params = endpoint connection config index pointer,
+                              params = (uint32_t) endpoint connection config index,
                               auxParams = (uint32_t) secure channel connection index */
     EP_CLOSED,             /* id = endpoint description config index,
                                  auxParams = SOPC_ReturnStatus */
@@ -79,7 +79,7 @@ typedef enum
  * IMPORTANT NOTE: internal events use will cause an assertion error */
 SOPC_ReturnStatus SOPC_SecureChannels_EnqueueEvent(SOPC_SecureChannels_InputEvent scEvent,
                                                    uint32_t id,
-                                                   void* params,
+                                                   uintptr_t params,
                                                    uintptr_t auxParam);
 
 void SOPC_SecureChannels_Initialize(SOPC_SetListenerFunc setSocketsListener);

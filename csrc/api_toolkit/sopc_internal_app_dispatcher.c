@@ -33,10 +33,11 @@ SOPC_Looper* appLooper = NULL;
 SOPC_EventHandler* appComEventHandler = NULL;
 SOPC_EventHandler* appAddressSpaceNotificationHandler = NULL;
 
-static void onComEvent(SOPC_EventHandler* handler, int32_t event, uint32_t id, void* params, uintptr_t auxParam)
+static void onComEvent(SOPC_EventHandler* handler, int32_t event, uint32_t id, uintptr_t uintParams, uintptr_t auxParam)
 {
     (void) handler;
 
+    void* params = (void*) uintParams; // Always used as a pointer content here
     SOPC_App_Com_Event comEvent = (SOPC_App_Com_Event) event;
     SOPC_EncodeableType* encType = NULL;
 
@@ -118,11 +119,12 @@ static void onComEvent(SOPC_EventHandler* handler, int32_t event, uint32_t id, v
 static void onAddressSpaceNotification(SOPC_EventHandler* handler,
                                        int32_t event,
                                        uint32_t id,
-                                       void* params,
+                                       uintptr_t uintParams,
                                        uintptr_t auxParam)
 {
     (void) handler;
     (void) id;
+    void* params = (void*) uintParams; // Always used as a pointer content here
     OpcUa_WriteValue* wv = NULL;
 
     SOPC_App_AddSpace_Event asEvent = (SOPC_App_AddSpace_Event) event;
@@ -187,14 +189,14 @@ void SOPC_App_Clear(void)
     appAddressSpaceNotificationHandler = NULL;
 }
 
-SOPC_ReturnStatus SOPC_App_EnqueueComEvent(SOPC_App_Com_Event event, uint32_t id, void* params, uintptr_t auxParam)
+SOPC_ReturnStatus SOPC_App_EnqueueComEvent(SOPC_App_Com_Event event, uint32_t id, uintptr_t params, uintptr_t auxParam)
 {
     return SOPC_EventHandler_Post(appComEventHandler, (int32_t) event, id, params, auxParam);
 }
 
 SOPC_ReturnStatus SOPC_App_EnqueueAddressSpaceNotification(SOPC_App_AddSpace_Event event,
                                                            uint32_t id,
-                                                           void* params,
+                                                           uintptr_t params,
                                                            uintptr_t auxParam)
 {
     return SOPC_EventHandler_Post(appAddressSpaceNotificationHandler, (int32_t) event, id, params, auxParam);

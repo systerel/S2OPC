@@ -128,7 +128,7 @@ void msg_subscription_publish_bs__generate_internal_send_publish_response_event(
         eventData->requestId = msg_subscription_publish_bs__p_req_context;
 
         SOPC_EventHandler_PostAsNext(SOPC_Services_GetEventHandler(), SE_TO_SE_SERVER_SEND_ASYNC_PUB_RESP_PRIO,
-                                     (uint32_t) msg_subscription_publish_bs__p_session, eventData,
+                                     (uint32_t) msg_subscription_publish_bs__p_session, (uintptr_t) eventData,
                                      (uintptr_t) msg_subscription_publish_bs__p_statusCode);
     }
     else

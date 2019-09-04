@@ -100,7 +100,7 @@ typedef enum SOPC_Services_Event
 } SOPC_Services_Event;
 
 /* API to enqueue an event for services */
-void SOPC_Services_EnqueueEvent(SOPC_Services_Event seEvent, uint32_t id, void* params, uintptr_t auxParam);
+void SOPC_Services_EnqueueEvent(SOPC_Services_Event seEvent, uint32_t id, uintptr_t params, uintptr_t auxParam);
 
 /**
  *  \brief Initializes the services and application event dispatcher threads

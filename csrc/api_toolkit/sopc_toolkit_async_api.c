@@ -30,26 +30,28 @@
 void SOPC_ToolkitServer_AsyncOpenEndpoint(uint32_t endpointConfigIdx)
 {
     // TODO: check valid config and return bool
-    SOPC_Services_EnqueueEvent(APP_TO_SE_OPEN_ENDPOINT, endpointConfigIdx, NULL, 0);
+    SOPC_Services_EnqueueEvent(APP_TO_SE_OPEN_ENDPOINT, endpointConfigIdx, (uintptr_t) NULL, 0);
 }
 
 void SOPC_ToolkitServer_AsyncCloseEndpoint(uint32_t endpointConfigIdx)
 {
-    SOPC_Services_EnqueueEvent(APP_TO_SE_CLOSE_ENDPOINT, endpointConfigIdx, NULL, 0);
+    SOPC_Services_EnqueueEvent(APP_TO_SE_CLOSE_ENDPOINT, endpointConfigIdx, (uintptr_t) NULL, 0);
 }
 
 void SOPC_ToolkitServer_AsyncLocalServiceRequest(uint32_t endpointConfigIdx,
                                                  void* requestStruct,
                                                  uintptr_t requestContext)
 {
-    SOPC_Services_EnqueueEvent(APP_TO_SE_LOCAL_SERVICE_REQUEST, endpointConfigIdx, requestStruct, requestContext);
+    SOPC_Services_EnqueueEvent(APP_TO_SE_LOCAL_SERVICE_REQUEST, endpointConfigIdx, (uintptr_t) requestStruct,
+                               requestContext);
 }
 
 void SOPC_ToolkitClient_AsyncActivateSession(uint32_t endpointConnectionIdx,
                                              uintptr_t sessionContext,
                                              SOPC_ExtensionObject* userToken)
 {
-    SOPC_Services_EnqueueEvent(APP_TO_SE_ACTIVATE_SESSION, endpointConnectionIdx, userToken, sessionContext);
+    SOPC_Services_EnqueueEvent(APP_TO_SE_ACTIVATE_SESSION, endpointConnectionIdx, (uintptr_t) userToken,
+                               sessionContext);
 }
 
 SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Anonymous(uint32_t endpointConnectionIdx,
@@ -144,18 +146,18 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(uint3
 
 void SOPC_ToolkitClient_AsyncSendRequestOnSession(uint32_t sessionId, void* requestStruct, uintptr_t requestContext)
 {
-    SOPC_Services_EnqueueEvent(APP_TO_SE_SEND_SESSION_REQUEST, sessionId, requestStruct, requestContext);
+    SOPC_Services_EnqueueEvent(APP_TO_SE_SEND_SESSION_REQUEST, sessionId, (uintptr_t) requestStruct, requestContext);
 }
 
 void SOPC_ToolkitClient_AsyncCloseSession(uint32_t sessionId)
 {
-    SOPC_Services_EnqueueEvent(APP_TO_SE_CLOSE_SESSION, sessionId, NULL, 0);
+    SOPC_Services_EnqueueEvent(APP_TO_SE_CLOSE_SESSION, sessionId, (uintptr_t) NULL, 0);
 }
 
 void SOPC_ToolkitClient_AsyncSendDiscoveryRequest(uint32_t endpointConnectionIdx,
                                                   void* discoveryReqStruct,
                                                   uintptr_t requestContext)
 {
-    SOPC_Services_EnqueueEvent(APP_TO_SE_SEND_DISCOVERY_REQUEST, endpointConnectionIdx, discoveryReqStruct,
+    SOPC_Services_EnqueueEvent(APP_TO_SE_SEND_DISCOVERY_REQUEST, endpointConnectionIdx, (uintptr_t) discoveryReqStruct,
                                requestContext);
 }

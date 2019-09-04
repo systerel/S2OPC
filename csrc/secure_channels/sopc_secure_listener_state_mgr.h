@@ -28,17 +28,17 @@
 
 void SOPC_SecureListenerStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalEvent event,
                                                  uint32_t eltId,
-                                                 void* params,
+                                                 uintptr_t params,
                                                  uintptr_t auxParam);
 
 void SOPC_SecureListenerStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
                                                uint32_t eltId,
-                                               void* params,
+                                               uintptr_t params,
                                                uintptr_t auxParam);
 
 void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event,
                                             uint32_t eltId,
-                                            void* params,
+                                            uintptr_t params,
                                             uintptr_t auxParam);
 
 #endif /* SOPC_SECURE_LISTENER_STATE_MGR_H_ */

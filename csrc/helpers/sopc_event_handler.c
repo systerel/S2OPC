@@ -45,7 +45,7 @@ struct Event
     SOPC_EventHandler* handler;
     int32_t code;
     uint32_t id;
-    void* params;
+    uintptr_t params;
     uintptr_t auxParam;
 };
 
@@ -57,7 +57,7 @@ static void event_handler_delete(SOPC_EventHandler** handler)
 static SOPC_ReturnStatus post(SOPC_EventHandler* handler,
                               int32_t event,
                               uint32_t eltId,
-                              void* params,
+                              uintptr_t params,
                               uintptr_t auxParam,
                               bool asNext)
 {
@@ -132,7 +132,7 @@ SOPC_EventHandler* SOPC_EventHandler_Create(SOPC_Looper* looper, SOPC_EventHandl
 SOPC_ReturnStatus SOPC_EventHandler_Post(SOPC_EventHandler* handler,
                                          int32_t event,
                                          uint32_t eltId,
-                                         void* params,
+                                         uintptr_t params,
                                          uintptr_t auxParam)
 {
     return post(handler, event, eltId, params, auxParam, false);
@@ -141,7 +141,7 @@ SOPC_ReturnStatus SOPC_EventHandler_Post(SOPC_EventHandler* handler,
 SOPC_ReturnStatus SOPC_EventHandler_PostAsNext(SOPC_EventHandler* handler,
                                                int32_t event,
                                                uint32_t eltId,
-                                               void* params,
+                                               uintptr_t params,
                                                uintptr_t auxParam)
 {
     return post(handler, event, eltId, params, auxParam, true);
