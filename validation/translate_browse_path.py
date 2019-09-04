@@ -84,30 +84,33 @@ def translate_browse_paths_to_node_ids_tests(client, logger):
     tbpaths.clear()
     simple_paths.clear()
     expected_node_ids.clear()
+
+    not_expected_node_ids = []
     nsIndex = 0
     for var_type in var_types:
         for count in range(1,var_max_counter+1):
             target_name = "{}_{:03d}".format(var_type, count)
+            # build a target qname in NS=0
             target_qname = "{}:{}".format(nsIndex, target_name)
+            # in this case the valid nodeIds are the same target name in the NS=1 but we will ask for those in NS=0
             simple_paths.append("{}.{}.{}".format(var_path_prefixes[0], var_path_prefixes[1], target_qname))
-            # in this case nodeIds are the target name in the NS=1 but we will ask for those in NS=0
-            expected_node_ids.append(ua.NodeId(target_name, namespaceidx=1))
+            not_expected_node_ids.append(ua.NodeId(target_name, namespaceidx=0))
             tbpaths.append(get_bp_to_component_with_intermediate_organized_path(var_path_prefixes, target_qname))
 
     print("TranslateBrowsePathToNodeIds for paths with incorrect NS index {}".format(simple_paths))
     tbp_results = client.uaclient.translate_browsepaths_to_nodeids(tbpaths)
-    res = len(tbp_results) == len(expected_node_ids)
+    res = len(tbp_results) == len(not_expected_node_ids)
     if res:
         for i in range(0, len(tbp_results)):
             tbp_result = tbp_results[i]
             res = res and not tbp_result.StatusCode.is_good()
     logger.add_test('TBPtoNodeIds Test - NodeIds are not found for incorrect paths {}'.format(simple_paths), res)
 
-
     # Variable with common path name (but different qualified name or different final target node)
     tbpaths.clear()
     simple_paths.clear()
-    expected_node_ids.clear()
+    expected_node_ids.clear() 
+    not_expected_node_ids.clear()
     organized_path = "1:15361.1:BLOCKs.1:B_1.1:RM"
     component_qname = "1:LeftSubRoute"
     nsIndex = 1
