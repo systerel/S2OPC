@@ -486,6 +486,7 @@ START_TEST(test_wrapper_read)
             {.nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL}};
         SOPC_DataValue* readResults[1];
         ck_assert_int_eq(-100, SOPC_ClientHelper_Read(1, readValue, 1, readResults));
+        SOPC_Free(readResults[0]);
     }
 
     /* initialize wrapper */
@@ -497,6 +498,7 @@ START_TEST(test_wrapper_read)
             {.nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL}};
         SOPC_DataValue* readResults[1];
         ck_assert_int_eq(-100, SOPC_ClientHelper_Read(1, readValue, 1, readResults));
+        SOPC_Free(readResults[0]);
     }
 
     /* create a connection */
@@ -516,6 +518,7 @@ START_TEST(test_wrapper_read)
         /* invalid connection id */
         ck_assert_int_eq(-1, SOPC_ClientHelper_Read(-1, readValue, 1, readResults));
         ck_assert_int_eq(-100, SOPC_ClientHelper_Read(valid_con_id + 1, readValue, 1, readResults));
+        SOPC_Free(readResults[0]);
         /* invalid readValue */
         ck_assert_int_eq(-2, SOPC_ClientHelper_Read(valid_con_id, NULL, 1, readResults));
         /* invalid nbElements */
@@ -607,6 +610,7 @@ START_TEST(test_wrapper_read)
             {.nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL}};
         SOPC_DataValue* readResults5[1];
         ck_assert_int_eq(-100, SOPC_ClientHelper_Read(valid_con_id, readValue5, 1, readResults5));
+        SOPC_Free(readResults5[0]);
     }
 
     /* close wrapper */
@@ -618,6 +622,7 @@ START_TEST(test_wrapper_read)
             {.nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL}};
         SOPC_DataValue* readResults6[1];
         ck_assert_int_eq(-100, SOPC_ClientHelper_Read(valid_con_id, readValue6, 1, readResults6));
+        SOPC_Free(readResults6[0]);
     }
 }
 END_TEST
