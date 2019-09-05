@@ -413,38 +413,39 @@ static SOPC_ReturnStatus on_ready_read(SOPC_Socket* socket, uint32_t socket_id)
 
     SOPC_Buffer* buffer = NULL;
 
+    uint32_t bytesToRead = 0;
     uint32_t readBytes = 0;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
-    status = SOPC_Socket_BytesToRead(socket->sock, &readBytes);
+    status = SOPC_Socket_BytesToRead(socket->sock, &bytesToRead);
 
     if (SOPC_STATUS_OK != status)
     {
         // No information, use the minimum size of buffer
-        readBytes = SOPC_MIN_BYTE_BUFFER_SIZE_READ_SOCKET;
+        bytesToRead = SOPC_MIN_BYTE_BUFFER_SIZE_READ_SOCKET;
         status = SOPC_STATUS_OK;
     }
 
     if (SOPC_STATUS_OK == status)
     {
-        if (0 == readBytes)
+        if (0 == bytesToRead)
         {
             // Nothing to read, still allocate minimum size and make an attempt to at least check the socket closed case
-            readBytes = SOPC_MIN_BYTE_BUFFER_SIZE_READ_SOCKET;
+            bytesToRead = SOPC_MIN_BYTE_BUFFER_SIZE_READ_SOCKET;
         }
-        else if (readBytes > SOPC_TCP_UA_MAX_BUFFER_SIZE)
+        else if (bytesToRead > SOPC_TCP_UA_MAX_BUFFER_SIZE)
         {
             // Too many bytes to read for a chunk maximum size, allocate the maximum chunk size
-            readBytes = SOPC_TCP_UA_MAX_BUFFER_SIZE;
+            bytesToRead = SOPC_TCP_UA_MAX_BUFFER_SIZE;
         }
 
-        buffer = SOPC_Buffer_Create(readBytes);
+        buffer = SOPC_Buffer_Create(bytesToRead);
         status = NULL == buffer ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK;
     }
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_Socket_Read(socket->sock, buffer->data, readBytes, &readBytes);
+        status = SOPC_Socket_Read(socket->sock, buffer->data, bytesToRead, &readBytes);
     }
 
     if (status != SOPC_STATUS_OK)
@@ -453,7 +454,7 @@ static SOPC_ReturnStatus on_ready_read(SOPC_Socket* socket, uint32_t socket_id)
         return (status == SOPC_STATUS_WOULD_BLOCK) ? SOPC_STATUS_OK : status;
     }
 
-    status = SOPC_Buffer_SetDataLength(buffer, (uint32_t) readBytes);
+    status = SOPC_Buffer_SetDataLength(buffer, readBytes);
     assert(status == SOPC_STATUS_OK);
 
     SOPC_Sockets_Emit(SOCKET_RCV_BYTES, socket->connectionId, (uintptr_t) buffer, socket_id);

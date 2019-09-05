@@ -467,10 +467,12 @@ START_TEST(test_receive_intermediary_and_abort_chunk)
     simulate_N_chunks('C', 2, nb_intermediate_chunks);
 
     /* Simulate MSG / A / size 32 / SC id = 0xa2daa731 / tokenId = 0x3fc1046a / SN = 5 / requestId = 2 */
-    Simulate_Received_Message(scConfigIdx,
-                              "4d53474120000000a2daa7313fc1046a0500000002000000"
-                              "00008080"
-                              "00000000"); // error code OpcUa_BadTcpMessageTooLarge + empty reason
+    SOPC_StatusCode status =
+        Simulate_Received_Message(scConfigIdx,
+                                  "4d53474120000000a2daa7313fc1046a0500000002000000"
+                                  "00008080"
+                                  "00000000"); // error code OpcUa_BadTcpMessageTooLarge + empty reason
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     serviceEvent = Check_Service_Event_Received(SC_SND_FAILURE, scConfigIdx, OpcUa_BadTcpMessageTooLarge);
     ck_assert_uint_eq(pendingRequestHandle, (uintptr_t) serviceEvent->params);
@@ -488,10 +490,12 @@ START_TEST(test_receive_only_abort_chunk)
     printf("SC_Rcv_Buffer: Simulate only an abort chunk message received as response\n");
 
     /* Simulate MSG / A / size 32 / SC id = 0xa2daa731 / tokenId = 0x3fc1046a / SN = 2 / requestId = 2 */
-    Simulate_Received_Message(scConfigIdx,
-                              "4d53474120000000a2daa7313fc1046a0200000002000000"
-                              "00008080"
-                              "00000000"); // error code OpcUa_BadTcpMessageTooLarge + empty reason
+    SOPC_StatusCode status =
+        Simulate_Received_Message(scConfigIdx,
+                                  "4d53474120000000a2daa7313fc1046a0200000002000000"
+                                  "00008080"
+                                  "00000000"); // error code OpcUa_BadTcpMessageTooLarge + empty reason
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     serviceEvent = Check_Service_Event_Received(SC_SND_FAILURE, scConfigIdx, OpcUa_BadTcpMessageTooLarge);
     ck_assert_uint_eq(pendingRequestHandle, (uintptr_t) serviceEvent->params);

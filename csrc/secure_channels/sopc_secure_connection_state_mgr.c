@@ -2668,11 +2668,12 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
         /* eltId = secure channel connection index,
            params = (SOPC_Buffer*) buffer,
            auxParam = requestId */
+        status = SOPC_STATUS_NOK;
         scConnection = SC_GetConnection(eltId);
         errorStatus = SOPC_GoodGenericStatus;
         buffer = (void*) params;
 
-        if (buffer != NULL)
+        if (NULL != scConnection && NULL != buffer)
         {
             // Note: Abort chunk message has same message content than ERR message
             //       (except it was contained in a secure message with security layer)

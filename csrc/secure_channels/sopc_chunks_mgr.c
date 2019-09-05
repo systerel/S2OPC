@@ -3891,6 +3891,8 @@ static bool SC_Chunks_ComputeNbChunksToSend(SOPC_SecureConnection* scConnection,
 {
     assert(NULL != nbChunks);
     assert(NULL != errorStatus);
+    assert(SOPC_MSG_TYPE_SC_MSG == msgType || SOPC_MSG_TYPE_SC_CLO == msgType);
+
     bool result = false;
     SOPC_SecureConnection_TcpProperties* tcpProperties = &scConnection->tcpMsgProperties;
     if (0 == tcpProperties->sendMaxMessageSize || msgBodyLength <= tcpProperties->sendMaxMessageSize)
