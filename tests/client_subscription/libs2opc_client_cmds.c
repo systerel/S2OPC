@@ -822,9 +822,14 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
         assert(SOPC_STATUS_OK == statusMutex);
     }
 
-    if (SOPC_STATUS_OUT_OF_MEMORY == status)
+    if (SOPC_STATUS_OK != status)
     {
         SOPC_Free(request);
+        for (size_t i = 0; i < nbElements; i++)
+        {
+            SOPC_NodeId_Clear(&nodesToRead[i].NodeId);
+            // SOPC_Free(&nodesToRead[i].NodeId);
+        }
         SOPC_Free(nodesToRead);
     }
     SOPC_Free(ctx);
@@ -1129,7 +1134,7 @@ int32_t SOPC_ClientHelper_Write(int32_t connectionId,
         SOPC_Free(ctx->writeResults);
     }
 
-    if (SOPC_STATUS_OUT_OF_MEMORY == status)
+    if (SOPC_STATUS_OK != status)
     {
         SOPC_Free(request);
         SOPC_Free(nodesToWrite);
@@ -1384,9 +1389,16 @@ int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
             browseResults[i].references = SOPC_Array_Into_Raw(browseResultsListArray[i]);
         }
     }
+    else
+    {
+        for (size_t i = 0; i < nbElements; i++)
+        {
+            SOPC_Array_Delete(browseResultsListArray[i]);
+        }
+    }
 
     /* Free memory */
-    if (SOPC_STATUS_OUT_OF_MEMORY == status)
+    if (SOPC_STATUS_OK != status)
     {
         SOPC_Free(nodesToBrowse);
         SOPC_Free(request);
