@@ -2,11 +2,12 @@
   "name": "s2opc_client",
   "version": "0.0.1",
   "description": "Javascript wrapper for S2OPC client",
-  "main": "index.js",
+  "main": "sopc_client.js",
   "dependencies": {
     "enum": "^2.5.0",
     "ffi": "^2.3.0",
     "ref-array": "^1.2.0",
+    "ref-struct": "^1.1.0",
     "ref-union": "^1.0.1",
     "yargs": "^13.3.0"
   },
@@ -14,8 +15,10 @@
     "eslint": "^6.3.0"
   },
   "scripts": {
-    "test": "test()"
+    "client": "nodejs client.js"
   },
-  "author": "",
-  "license": "Apache-2.0"
+  "repository": "gitlab:systerel/S2OPC",
+  "author": "s2opc-support@systerel.fr",
+  "license": "Apache-2.0",
+  "private": true
 }
