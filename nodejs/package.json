@@ -10,7 +10,9 @@
     "ref-union": "^1.0.1",
     "yargs": "^13.3.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "eslint": "^6.3.0"
+  },
   "scripts": {
     "test": "test()"
   },
