@@ -167,4 +167,6 @@ module.exports.CStringArray = CStringArray
 module.exports.security_cfg = SOPC_ClientHelper_SecurityCfg;
 module.exports.SOPC_DataValue = SOPC_DataValue;
 module.exports.SOPC_BuiltinId = SOPC_BuiltinId;
+module.exports.SOPC_IdentifierType = SOPC_IdentifierType;
+module.exports.SOPC_VariantArrayType = SOPC_VariantArrayType;
 

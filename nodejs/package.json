@@ -2,7 +2,7 @@
   "name": "s2opc_client",
   "version": "0.0.1",
   "description": "Javascript wrapper for S2OPC client",
-  "main": "sopc_client.js",
+  "main": "./lib/sopc_client.js",
   "dependencies": {
     "enum": "^2.5.0",
     "ffi": "^2.3.0",

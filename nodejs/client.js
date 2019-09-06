@@ -1,5 +1,5 @@
 //const util = require('util');
-const sopc_client = require('./sopc_client');
+const sopc_client = require('./lib/sopc_client');
 
 const default_endpoint = "opc.tcp://localhost:4841";
 const default_security_policy = sopc_client.security_policy.None_URI;
@@ -28,7 +28,7 @@ if(status){
     throw "Missing node id(s). See '--help' option"
 }
 
-var callback = function(connectionId, nodeId, dataValue) {
+var dataChange_callback = function(connectionId, nodeId, dataValue) {
     console.log("connectionId:", connectionId);
     console.log("nodeId:", nodeId);
     console.log("value status:", dataValue.status);
@@ -51,7 +51,7 @@ if(status){
 
 if (status)
 {
-    status = sopc_client.createSubscription(connectionId, callback);
+    status = sopc_client.createSubscription(connectionId, dataChange_callback);
     console.log("Subscription status:", status ? "SUCCESS" : "FAILED");
 }
 

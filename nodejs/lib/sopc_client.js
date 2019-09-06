@@ -2,7 +2,6 @@ const bind = require('./bind_sopc_client')
 const ffi = require('ffi');
 const ref = require('ref');
 const Enum = require('enum');
-const Struct = require('ref-struct');
 const process = require('process');
 
 
