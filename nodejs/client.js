@@ -28,13 +28,13 @@ if(status){
     throw "Missing node id(s). See '--help' option"
 }
 
-var callback = function(connectionId, dataId, dataValue) {
-    console.log("connectionId: ", connectionId);
-    console.log("dataId: ", dataId);
-    console.log("value quality: ", dataValue.quality);
-    console.log("value source TS: ", dataValue.src_ts);
-    console.log("value server TS: ", dataValue.srv_ts);
-    console.log("value: ", dataValue.value);
+var callback = function(connectionId, nodeId, dataValue) {
+    console.log("connectionId:", connectionId);
+    console.log("nodeId:", nodeId);
+    console.log("value status:", dataValue.status);
+    console.log("value source TS:", dataValue.src_ts);
+    console.log("value server TS:", dataValue.srv_ts);
+    console.log("value:", dataValue.value);
 }
 
 var connectionId = 0;
@@ -43,9 +43,8 @@ if(status){
     var securityCfg = new sopc_client.SecurityCfg(default_security_policy,
                                               default_security_mode,
                                               default_user_security_policy_id);
-    var connectionRes = sopc_client.connect(endpoint, securityCfg);
-    status = connectionRes[0];
-    connectionId = connectionRes[1];
+    connectionId = sopc_client.connect(endpoint, securityCfg);
+    status = connectionId > 0;
     console.log("Connection status:", status ? "SUCCESS" : "FAILED");
     console.log("Connection Id:", connectionId);
 }
@@ -69,6 +68,7 @@ if(status){
 }
 
 function disconnect(connectionId){
+    console.log("Disconnecting client");
     sopc_client.disconnect(connectionId);
     sopc_client.finalize();
 }

@@ -19,51 +19,38 @@ const SOPC_MessageSecurityMode = new Enum({
     'SignAndEncrypt' : 3
 });
 
-//var SOPC_SecurityPolicy = new Enum({
-//    'None_URI' : "http://opcfoundation.org/UA/SecurityPolicy#None",
-//    'Basic256_URI' : "http://opcfoundation.org/UA/SecurityPolicy#Basic256",
-//    'Basic256Sha256_URI' : "http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"
-//});
-
 const SOPC_SecurityPolicy = {
     'None_URI' : "http://opcfoundation.org/UA/SecurityPolicy#None",
     'Basic256_URI' : "http://opcfoundation.org/UA/SecurityPolicy#Basic256",
     'Basic256Sha256_URI' : "http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"
 };
 
-const SOPC_LibSub_DataType = new Enum({
-    'bool': 1,
-    'integer': 2,
-    'string': 3,
-    'bytestring': 4,
-    'other': 5
-});
-
-const SOPC_LibSub_Value = Struct({
-    'type': 'int32',
-    'quality': 'uint32',
-    'value': 'pointer',
-    'source_timestamp': 'uint64',
-    'server_timestamp': 'uint64',
-    'raw_value': 'pointer'
-});
-
 function DataValue(value) {
-    console.log(value);
-    if(value.type == SOPC_LibSub_DataType.integer.value ||
-       value.type == SOPC_LibSub_DataType.bool.value){
-        var buffer = value.value
-        var intval = ref.readInt64LE(buffer, 0)
-        this.value = intval;
-    }else if(value.type == SOPC_LibSub_DataType.string.value ||
-             value.type == SOPC_LibSub_DataType.bytestring.value){
-        console.log("DataValue string value: TODO")
-    }else{
-        console.log("DataValue not managed: TODO");
+    const type_id = value.value.built_in_type_id;
+    this.value = null;
+    switch(type_id)
+    {
+        case bind.SOPC_BuiltinId.SOPC_Boolean_Id.value:
+            console.log("DataValue Boolean: TODO");
+            break;
+        case bind.SOPC_BuiltinId.SOPC_Int32_Id.value:
+            this.value = value.value.variant_value.int32;
+            break;
+        case bind.SOPC_BuiltinId.SOPC_String_Id.value:
+            this.value = ref.readCString(value.value.variant_value.string.data);
+            break;
+        case bind.SOPC_BuiltinId.SOPC_ByteString_Id.value:
+            console.log("DataValue ByteString: TODO");
+            break;
+        default:
+            console.log("DataValue type", type_id, "not managed: TODO");
+            break;
     }
-    this.quality = value.quality;
-    this.src_ts = value.source_timestamp;
-    this.srv_ts = value.server_timestamp;
+    this.status = value.status;
+    this.src_ts = value.src_ts;
+    this.src_ps = value.src_ps;
+    this.srv_ts = value.srv_ts;
+    this.srv_ps = value.srv_ps;
 }
 
 function SecurityCfg(security_policy, security_mode, user_policy_id,
@@ -83,11 +70,10 @@ function SecurityCfg(security_policy, security_mode, user_policy_id,
         user_password : user_password
     })
 
-    console.log(securityCfg);
     return securityCfg;
 }
 
-var SOPC_DataValuePtr = ref.refType(SOPC_LibSub_Value);
+var SOPC_DataValuePtr = ref.refType(bind.SOPC_DataValue);
 
 function initialize(toolkit_log_path, toolkit_log_level){
     return (0 == bind.sopc_client.SOPC_ClientHelper_Initialize(toolkit_log_path, toolkit_log_level.value));
@@ -98,9 +84,8 @@ function finalize(){
 }
 
 function connect(endpoint_url, security){
-    var connectionId = bind.sopc_client.SOPC_ClientHelper_Connect(endpoint_url,
-                                                                  security);
-    return [connectionId > 0, connectionId];
+    return bind.sopc_client.SOPC_ClientHelper_Connect(endpoint_url,
+                                                      security);
 }
 
 function createSubscription(connectionId, user_callback)
