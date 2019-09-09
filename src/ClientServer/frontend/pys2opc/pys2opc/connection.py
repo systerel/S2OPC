@@ -108,8 +108,11 @@ class BaseConnectionHandler:
     # Callbacks
     def on_datachanged(self, nodeId, dataValue):
         """
-        dataValue is copied from the SOPC_DataValue: it contains the value,
-        the source and server timestamps if available, and the status code.
+        This callback is called upon reception of a value change for a node.
+        See `pys2opc.connection.BaseConnectionHandler.add_nodes_to_subscription`.
+
+        `nodeId` is the string containing the NodeId of the changed node and
+        `dataValue` is the new value (see `pys2opc.types.DataValue`).
         """
         raise NotImplementedError
     def on_disconnect(self):
@@ -143,18 +146,28 @@ class BaseConnectionHandler:
 
     @property
     def connected(self):
+        """
+        Returns whether this connection is still active and usable.
+        """
         return self._connected
 
     # Subscription
     def add_nodes_to_subscription(self, nodeIds):
         """
         Subscribe to a list of string of NodeIds in the OPC-UA format:
+
         - "i=42" for an integer NodeId,
         - "s=Foobar" for a string NodeId,
         - "g=C496578A-0DFE-4b8f-870A-745238C6AEAE" for a GUID-NodeId,
         - "b=Barbar" for a ByteString.
+
         The string can be prepend by a "ns={};" which specifies the namespace index.
         This call is always synchroneous, so that the Toolkit waits for the server response to return.
+
+        :TODO: document NodeId once throughout the documentation.
+
+        The callback `pys2opc.connection.BaseConnectionHandler.on_datachanged` will be called once for each new value of the nodes.
+        In particular, the callback is at least called once for the initial value.
         """
         # TODO: check format?
         if nodeIds:
@@ -171,9 +184,8 @@ class BaseConnectionHandler:
     # Generic request sender
     def send_generic_request(self, request, bWaitResponse):
         """
-        Sends a request. When bWaitResponse:
-        - waits for the response and returns it,
-        - otherwise, returns the request, and the response will be available through get_response().
+        Sends a request. When `bWaitResponse`, waits for the response and returns it.
+        Otherwise, returns the `request`, and the response will be available through `pys2opc.connection.BaseConnectionHandler.get_response`.
         """
         reqCtx = int(request.requestContext)
         self._dRequestContexts[reqCtx] = request
@@ -198,15 +210,15 @@ class BaseConnectionHandler:
     def read_nodes(self, nodeIds, attributes=None, bWaitResponse=True):
         """
         Forges an OpcUa_ReadRequest and sends it.
-        When bWaitResponse, waits for and returns the ReadResponse,
+        When `bWaitResponse`, waits for and returns the `pys2opc.responses.ReadResponse`,
         which contains the attribute results storing the read value for the ith element.
-        Otherwise, returns the request.
+        Otherwise, returns the `pys2opc.types.Request`.
 
         Args:
             nodeIds: NodeId described as a string "[ns=x;]t=y" where x is the namespace index, t is the NodeId type
                      (s for a string NodeId, i for integer, b for bytestring, g for GUID), and y is typed content.
             attributes: Optional: a list of attributes to read. The list has the same length as nodeIds. When omited,
-                        reads the attribute Value (see :class:`AttributeId` for a list of attributes).
+                        reads the attribute Value (see `pys2opc.types.AttributeId` for a list of attributes).
         """
         if attributes is None:
             attributes = [AttributeId.Value for _ in nodeIds]
@@ -230,25 +242,26 @@ class BaseConnectionHandler:
     def write_nodes(self, nodeIds, datavalues, attributes=None, types=None, bWaitResponse=True):
         """
         Forges an OpcUa_WriteResponse and sends it.
-        When bWaitResponse, waits for  and returns the WriteResponse,
+        When `bWaitResponse`, waits for  and returns the `pys2opc.responses.WriteResponse`,
         which has accessors to check whether the writes were successful or not.
-        Otherwise, returns the request.
+        Otherwise, returns the `pys2opc.types.Request`.
 
-        Types are found in 3 places, for each NodeId and DataValue :
-        - in each datavalue.variantType,
+        Types are found in 3 places, for each NodeId and `pys2opc.types.DataValue` :
+
+        - in each `datavalue.variantType`,
         - in the `types` list,
-        - in a ReadResponse that is sent and waited upon if both previous sources are set to None.
+        - in a `ReadResponse` that is sent and waited upon if both previous sources are set to `None`.
 
-        The Read request is only sent when at least one datavalue lacks type in both datavalue.variantType and `types`.
-        If both datavalue.variantType and the type in `types` are given, they must be equal.
+        The ReadRequest is only sent when at least one datavalue lacks type in both `datavalue.variantType` and `types`.
+        If both `datavalue.variantType` and the type in `types` are given, they must be equal.
 
         Args:
             nodeIds: NodeId described as a string "[ns=x;]t=y" where x is the namespace index, t is the NodeId type
                      (s for a string NodeId, i for integer, b for bytestring, g for GUID), and y is typed content.
-            datavalues: A list of DataValue to write for each NodeId
+            datavalues: A list of `pys2opc.types.DataValue` to write for each NodeId, see `pys2opc.types.DataValue.from_python`
             attributes: Optional: a list of attributes to write. The list has the same length as nodeIds. When omitted,
-                        reads the attribute Value (see :class:`AttributeId` for a list of attributes).
-            types: Optional: a list of VariantType for each value to write.
+                        reads the attribute Value (see `pys2opc.types.AttributeId` for a list of attributes).
+            types: Optional: a list of `pys2opc.types.VariantType` for each value to write.
         """
         if attributes is None:
             attributes = [AttributeId.Value for _ in nodeIds]
@@ -298,9 +311,9 @@ class BaseConnectionHandler:
     def browse_nodes(self, nodeIds, maxReferencesPerNode=1000, bWaitResponse=True):
         """
         Forges an OpcUa_BrowseResponse and sends it.
-        When bWaitResponse, waits for  and returns the BrowseResponse,
-        which has a list BrowseResults in its `results` list.
-        Otherwise, returns the request.
+        When `bWaitResponse`, waits for  and returns the `pys2opc.responses.BrowseResponse`,
+        which has a list `pys2opc.types.BrowseResult`s in its `results` attribute.
+        Otherwise, returns the `pys2opc.types.Request`.
         """
         # Prepare the request, it will be freed by the Toolkit
         payload = allocator_no_gc('OpcUa_BrowseRequest *')

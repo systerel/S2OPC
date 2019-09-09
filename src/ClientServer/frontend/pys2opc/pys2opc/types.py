@@ -39,7 +39,7 @@ class Request:
         payload: An OpcUa_*Request.
 
     Attributes:
-        eventResponseReceived: Event that is set when the response is received and the on_generic_response()
+        eventResponseReceived: Event that is set when the response is received and the `pys2opc.connection.BaseConnectionHandler.on_generic_response`
                                of the connection has been called.
         requestContext: A (unique) identifier for the request (read-only).
     """
@@ -61,14 +61,14 @@ class Request:
 
 class NamedMembers:
     """
-    This class has the class function :func:`get_name_from_id` which takes an id of a member of the class
-    and returns the name of the member that has this value.
+    This class or its subclass is capable of returning the name of a member of this class from an id.
+    `pys2opc.types.NamedMembers.get_name_from_id` is particularly useful to translate OPC UA constants to readable strings.
     """
     _dCodeNames = None
     @classmethod
     def get_name_from_id(cls, memberId):
         """
-        Returns the name of the class member that has the :param:`memberId`.
+        Returns the name of the class member that has the given `memberId`.
         Exclude getters and private members.
         """
         if cls._dCodeNames is None:
@@ -94,16 +94,16 @@ class ReturnStatus(NamedMembers):
 
 class StatusCode(NamedMembers):
     """
-    The OpcUa status codes. Directly generated from src/opcua_types/opcua_statuscodes.h.
-    Status codes are used in various places among the OPC-UA protocol.
-    They usually represent the quality of a value (see DataValue),
-    or the status of the execution of a service (see WriteResponse).
+    The OpcUa status codes. Directly generated from src/Common/opcua_types/opcua_statuscodes.h.
+    Status codes are used in various places among the OPC UA protocol.
+    They usually represent the quality of a value (see `pys2opc.types.DataValue`),
+    or the status of the execution of a service (see `pys2opc.responses.WriteResponse`).
     """
     # Adds the generic good and bad values, which are only defined as masks in the OPC-UA protocol.
     Good = 0x00000000
     Bad = 0x80000000
     # Obtained with the following code snippet from S2OPC sources:
-    # for com, k, v in sorted(re.findall(r'/\*=+\n \* (.*)\n \*.+\n#define OpcUa_(\w+) (\w+)', open('src/opcua_types/opcua_statuscodes.h').read(), re.MULTILINE), key=lambda t:int(t[2], 16)): print('    {} = {}  # {}'.format(k, v, com))
+    # for com, k, v in sorted(re.findall(r'/\*=+\n \* (.*)\n \*.+\n#define OpcUa_(\w+) (\w+)', open('src/Common/opcua_types/opcua_statuscodes.h').read(), re.MULTILINE), key=lambda t:int(t[2], 16)): print('    {} = {}  # {}'.format(k, v, com))
     GoodSubscriptionTransferred = 0x002D0000  # The subscription was transferred to another session.
     GoodCompletesAsynchronously = 0x002E0000  # The processing will complete asynchronously.
     GoodOverload = 0x002F0000  # Sampling has slowed down due to resource limitations.
@@ -457,11 +457,12 @@ def ntp_to_python(i):
 @total_ordering
 class Variant:
     """
-    A Variant is the Pythonic representation of a SOPC_Variant.
+    A `Variant` is the Pythonic representation of a SOPC_Variant.
     The SOPC_Variant is a C-structure that can contain multiple built-in types,
     such as integers, floats, strings.
 
     A Variant instance supports the arithmetic, comparison operations, and increment operators of the Python types.
+    It can be used as any Python value.
     For instance:
     >>> Variant(2) + Variant(6)  # Produces a new Variant
     Variant(8)
@@ -474,11 +475,11 @@ class Variant:
     >>> Variant(2) == Variant(2) and Variant(2.) == Variant(2) and Variant(2.) == 2
     True
 
-    A SOPC_Variant can be converted to a Variant with the static method Variant.from_sopc_variant().
-    A Variant can be converted to a SOPC_Variant with the method to_sopc_variant().
+    A SOPC_Variant can be converted to a Variant with the static method `pys2opc.types.Variant.from_sopc_variant`.
+    A `Variant` can be converted to a SOPC_Variant with the method `pys2opc.types.Variant.to_sopc_variant`.
 
     Attributes:
-        variantType: Optional: The type of the Variant (see VariantType) when the value is produced from a SOPC_Variant*.
+        variantType: Optional: The type of the `Variant` (see `pys2opc.types.VariantType`) when the value is produced from a SOPC_Variant*.
     """
     def __init__(self, python_value, variantType=None):
         self._value = python_value
@@ -1044,12 +1045,12 @@ class DataValue:
     A Python representation of the DataValue.
 
     Attributes:
-        timestampSource: The last time the value changed, specified by the writer.
-        timestampServer: The last time the value changed, according to the server.
+        timestampSource: The last time the value changed, specified by the writer, as a Python timestamp.
+        timestampServer: The last time the value changed, according to the server, as a Python timestamp.
         statusCode: The quality associated to the value OR the reason why there is no available value.
-                    It is a value from the StatusCode enum (e.g. StatusCode.BadAttributeInvalid).
-        variant: The Variant storing the value.
-        variantType: An accessor to the :attr:`Variant.variantType`, see Variant.
+                    It is a value from the `pys2opc.types.StatusCode` enum (e.g. `pys2opc.types.StatusCode.BadAttributeIdInvalid`).
+        variant: The `pys2opc.types.Variant` storing the value.
+        variantType: An accessor to the `variantType` attribute of `pys2opc.types.Variant`.
     """
     def __init__(self, timestampSource, timestampServer, statusCode, variant):
         self.timestampSource = timestampSource
@@ -1083,7 +1084,7 @@ class DataValue:
     @staticmethod
     def from_sopc_datavalue(datavalue):
         """
-        Converts a SOPC_DataValue* or SOPC_DataValue to a Python DataValue.
+        Converts a SOPC_DataValue* or SOPC_DataValue to a Python `DataValue`.
         """
         return DataValue(datetime_to_float(ffi.new('SOPC_DateTime*', datavalue.SourceTimestamp)),
                          datetime_to_float(ffi.new('SOPC_DateTime*', datavalue.ServerTimestamp)),
@@ -1092,7 +1093,7 @@ class DataValue:
     @staticmethod
     def from_python(val):
         """
-        Creates a DataValue from a Python value or a Variant.
+        Creates a DataValue from a Python value or a `pys2opc.types.Variant`.
         Creates the Variant, sets the status code to OK, and set source timestamp to now.
         """
         if not isinstance(val, Variant):
@@ -1103,8 +1104,8 @@ class DataValue:
 
     def to_sopc_datavalue(self, *, copy_type_from_variant=None, sopc_variant_type=None, no_gc=False):
         """
-        Converts a new SOPC_DataValue from the Python DataValue.
-        See :func:`Variant.to_sopc_variant` for a documentation of the arguments.
+        Converts a new SOPC_DataValue from the Python `DataValue`.
+        See `pys2opc.types.Variant.to_sopc_variant` for a documentation of the arguments.
 
         The returned value is garbage collected when the returned value is not referenced anymore.
         """
@@ -1126,8 +1127,8 @@ class DataValue:
 
     def get_python(self):
         """
-        Returns the python object wrapped by this DataValue.
-        Accessor to Variant.get_python().
+        Returns the python object wrapped by this `DataValue`.
+        Accessor to `pys2opc.types.Variant.get_python`.
         Use this when it is known that the Variant object will not be reused (e.g. by a future call to write_nodes).
 
         Does not copy the object before returning it.
@@ -1184,7 +1185,7 @@ class EncodeableType(NamedMembers):
 
 class BrowseResult:
     """
-    The BrowseResult is a low-level structures that contains the list of References for a node,
+    The `BrowseResult` is a low-level structures that contains the list of `pys2opc.types.Reference`s for a node,
     but also the status code of the Browse operation, and, if needed, a continuation point.
     """
     def __init__(self, sopc_browseresult):
