@@ -34,6 +34,8 @@ var dataChange_callback = function(connectionId, nodeId, dataValue) {
     console.log("value status:", dataValue.status);
     console.log("value source TS:", dataValue.src_ts);
     console.log("value server TS:", dataValue.srv_ts);
+    console.log("value source PS:", dataValue.src_ps);
+    console.log("value server PS:", dataValue.srv_ps);
     console.log("value:", dataValue.value);
 }
 
@@ -63,8 +65,24 @@ if(status){
     });
     status = sopc_client.addMonitoredItems(connectionId, argv._);
     console.log("Adding monitored items status:", status ? "SUCCESS" : "FAILED");
-} else {
-    status = false;
+}
+
+if(status)
+{
+    argv._.forEach((v) => {
+        if(typeof v !== 'string'){
+            throw `'${v}' is not a string`
+        }
+    });
+    var data_value = new sopc_client.DataValue()
+                                    .setValue(1, 30);
+
+    var writeValue = new sopc_client.WriteValue()
+                          .setNodeId("ns=1;s=Int32_030")
+                          .setValue(data_value);
+    var writeValueArray = [ writeValue ];
+    status = sopc_client.write(connectionId, writeValueArray);
+    console.log("Writing nodes status : ", status ? "SUCCESS" : "FAILED");
 }
 
 function disconnect(connectionId){
