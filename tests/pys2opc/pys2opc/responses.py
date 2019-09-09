@@ -27,6 +27,7 @@ class Response:
     """
     Base class for Responses.
     Adds a reference to the request and the timestamp of the received time.
+    `pys2opc.s2opc.PyS2OPC` `pys2opc.responses.ReadResponse` `pys2opc.connection.BaseConnectionHandler`
 
     Args:
         payload: An OpcUa_*Response. The payload is optional. If the payload is given, its content

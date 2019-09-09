@@ -126,17 +126,17 @@ class PyS2OPC:
                                     sc_lifetime = 3600000,
                                     token_target = 3):
         """
-        Returns a configuration that can be later used in connect() or get_endpoints().
+        Returns a configuration that can be later used in `pys2opc.s2opc.PyS2OPC.connect` or `pys2opc.s2opc.PyS2OPC.get_endpoints`.
 
         Args:
             server_url: The endpoint and server url to connect to.
             publish_period: The period of the subscription, in ms.
             n_max_keepalive: The number of times the subscription has no notification to send before
-                             sending an empty PublishResponse (the KeepAlive message). It is necessary
-                             to keep `n_max_keepalive*timeout_ms*token_target < 5000ms`.
+                             sending an empty `PublishResponse` (the KeepAlive message). It is necessary
+                             to keep `n_max_keepalive*timeout_ms*token_target < REQUEST_TIMEOUT (5000ms)`.
             n_max_lifetime: The maximum number of times a subscription has notifications to send
                             but no available token. In this case, the subscription is destroyed.
-            timeout_ms: The connect() timeout, in ms.
+            timeout_ms: The `pys2opc.s2opc.PyS2OPC.connect` timeout, in ms.
             sc_lifetime: The target lifetime of the secure channel, before renewal, in ms.
             token_target: The number of subscription tokens (PublishRequest) that should be
                           made available to the server at anytime.
@@ -189,7 +189,7 @@ class PyS2OPC:
                                   path_cert_cli = '../../build/bin/client_public/client_2k_cert.der',
                                   path_key_cli = '../../build/bin/client_private/client_2k_key.pem'):
         """
-        Returns a configuration that can be later used in connect() or get_endpoints().
+        Returns a configuration that can be later used in `pys2opc.s2opc.PyS2OPC.connect` or `pys2opc.s2opc.PyS2OPC.get_endpoints`.
 
         Args:
             server_url: The endpoint and server url to connect to.
@@ -199,12 +199,12 @@ class PyS2OPC:
                              to keep `n_max_keepalive*timeout_ms*token_target < 5000ms`.
             n_max_lifetime: The maximum number of times a subscription has notifications to send
                             but no available token. In this case, the subscription is destroyed.
-            timeout_ms: The connect() timeout, in ms.
+            timeout_ms: The `pys2opc.s2opc.PyS2OPC.connect` timeout, in ms.
             sc_lifetime: The target lifetime of the secure channel, before renewal, in ms.
             token_target: The number of subscription tokens (PublishRequest) that should be
                           made available to the server at anytime.
-            security_mode: The configured security mode, one of the SecurityMode constants.
-            security_policy: The configured security policy, one of the SecurityPolicy constants.
+            security_mode: The configured security mode, one of the `pys2opc.types.SecurityMode` constants.
+            security_policy: The configured security policy, one of the `pys2opc.types.SecurityPolicy` constants.
             path_cert_auth: The path to the certificate authority (in DER or PEM format).
             path_cert_srv: The path to the expected server certificate (in DER or PEM format).
                            It must be signed by the certificate authority.
@@ -249,7 +249,7 @@ class PyS2OPC:
         """
         Change the default path for logs (the current working directory) to logPath. logPath is created
         if it does not exist.
-        This function must be called after PyS2OPC.initialize() and before PyS2OPC.mark_configured().
+        This function must be called after `pys2opc.s2opc.PyS2OPC.initialize` and before `pys2opc.s2opc.PyS2OPC.mark_configured`.
 
         Args:
             maxLogSize: The maximum size (best effort) of the log files, before changing the log index.
@@ -263,8 +263,8 @@ class PyS2OPC:
     @staticmethod
     def mark_configured():
         """
-        Must be called after all calls to add_configuration_unsecured() and add_configuration_secured(),
-        and before connect() or get_endpoints().
+        Must be called after all calls to `pys2opc.s2opc.PyS2OPC.add_configuration_unsecured` and `pys2opc.s2opc.PyS2OPC.add_configuration_secured`,
+        and before `pys2opc.s2opc.PyS2OPC.connect` or `pys2opc.s2opc.PyS2OPC.get_endpoints`.
 
         This tells S2OPC that the configuration phase is over.
         """
