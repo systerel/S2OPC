@@ -30,6 +30,8 @@ from pys2opc import PyS2OPC, BaseConnectionHandler, AttributeId
 from _connection_configuration import configuration_parameters_no_subscription
 
 
+ROOT_ID = 'ns=1;i=15361'
+
 if __name__ == '__main__':
     with PyS2OPC.initialize():
         config = PyS2OPC.add_configuration_unsecured(**configuration_parameters_no_subscription)
@@ -42,7 +44,7 @@ if __name__ == '__main__':
         dNodes['i=86'] = []  # Types
         dNodes['i=87'] = []  # Views
         # The structure to store known-but-yet-to-be-explored nodes
-        sCandidates = {'i=84'}  # The Root node
+        sCandidates = {ROOT_ID}  # The Root node
         with PyS2OPC.connect(config, BaseConnectionHandler) as connection:
             try:
                 while sCandidates:
@@ -90,5 +92,5 @@ if __name__ == '__main__':
         for subnode in dNodes.get(node, []):
             print_recurs(subnode, iIndent+1, sPrinted | {node})
 
-    print_recurs('i=84')
+    print_recurs(ROOT_ID)
     print('\nNombre d\'items affiches: {}'.format(sum(1 for v in dNodes.values() for _ in v)))
