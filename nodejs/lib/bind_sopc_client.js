@@ -204,6 +204,31 @@ const SOPC_ClientHelper_ReadValue = StructType({
 
 const SOPC_ClientHelper_ReadValueArray = ArrayType(SOPC_ClientHelper_ReadValue);
 
+const SOPC_ClientHelper_BrowseRequest = StructType({
+    nodeId : 'CString',
+    direction : 'int32',
+    referenceTypeId : 'CString',
+    includeSubtypes : 'bool'
+});
+
+const SOPC_ClientHelper_BrowseRequestArray = ArrayType(SOPC_ClientHelper_BrowseRequest);
+
+const SOPC_ClientHelper_BrowseResultReference = StructType({
+    referenceTypeId : 'CString',
+    isForward : 'bool',
+    nodeId : 'CString',
+    browseName : 'CString',
+    displayName : 'CString',
+    nodeClass : 'int32'
+});
+const SOPC_ClientHelper_BrowseResultReferenceArray = ArrayType(SOPC_ClientHelper_BrowseResultReference);
+const SOPC_ClientHelper_BrowseResult = StructType({
+    statusCode : 'uint32',
+    nbOfReferences : 'int32',
+    references : SOPC_ClientHelper_BrowseResultReferenceArray
+});
+const SOPC_ClientHelper_BrowseResultArray = ArrayType(SOPC_ClientHelper_BrowseResult);
+
 const sopc_client = ffi.Library('libclient_subscription', {
     'SOPC_ClientHelper_Initialize': ['int32', ['CString', 'int32']],
     'SOPC_ClientHelper_Finalize': ['void', []],
@@ -213,7 +238,8 @@ const sopc_client = ffi.Library('libclient_subscription', {
     'SOPC_ClientHelper_AddMonitoredItems': ['int32', ['int32', CStringArray, 'size_t']],
     'SOPC_ClientHelper_Unsubscribe': ['int32', ['int32']],
     'SOPC_ClientHelper_Write': ['int32', ['int32', SOPC_ClientHelper_WriteValueArray, 'size_t', UInt32Array]],
-    'SOPC_ClientHelper_Read': ['int32', ['int32', SOPC_ClientHelper_ReadValueArray, 'size_t', SOPC_DataValueArrayPtr]]
+    'SOPC_ClientHelper_Read': ['int32', ['int32', SOPC_ClientHelper_ReadValueArray, 'size_t', SOPC_DataValueArrayPtr]],
+    'SOPC_ClientHelper_Browse': ['int32', ['int32', SOPC_ClientHelper_BrowseRequestArray, 'size_t', SOPC_ClientHelper_BrowseResultArray]]
 });
 
 module.exports = {
@@ -230,4 +256,8 @@ module.exports = {
     SOPC_Variant,
     SOPC_ClientHelper_WriteValue,
     SOPC_ClientHelper_ReadValue,
+    SOPC_ClientHelper_BrowseRequest,
+    SOPC_ClientHelper_BrowseResultReference,
+    SOPC_ClientHelper_BrowseResult,
+    SOPC_ClientHelper_BrowseResultArray
 };

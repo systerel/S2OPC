@@ -106,6 +106,20 @@ if(status)
     console.log("Reading nodes status:", status ? "SUCCESS" : "FAILED");
 }
 
+if(status)
+{
+    var browse_req = new sopc_client.BrowseRequest()
+                                    .setNodeId("ns=1;s=Int32_030")
+                                    .setReferenceTypeId("")
+                                    .setDirection(1)
+                                    .setIncludeSubtypes(true);
+    var browse_req_array = [browse_req];
+    var browse_result_array;
+    [status, browse_result_array] = sopc_client.browse(connectionId, browse_req_array);
+    console.log(JSON.stringify(browse_result_array, null, 2));
+    console.log("Browsing nodes status:", status ? "SUCCESS" : "FAILED");
+}
+
 function disconnect(connectionId){
     console.log("Disconnecting client");
     sopc_client.unsubscribe(connectionId);

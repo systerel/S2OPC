@@ -8,6 +8,9 @@ const variant = require('./variant');
 const data_value = require('./datavalue');
 const write_value = require('./writevalue');
 const read_value = require('./readvalue');
+const browse_request = require('./browse_request');
+const browse_result = require('./browse_result');
+const browse_result_reference = require('./browse_result_reference');
 
 
 const SOPC_Toolkit_Log_Level = new Enum({
@@ -129,6 +132,24 @@ function read(connectionId, readValuesArray) {
     return [0 == status, resultDataValues];
 }
 
+function browse(connectionId, browseRequests) {
+    var browseRequestsC = [];
+    for(var elt of browseRequests) {
+        browseRequestsC.push(elt.ToC());
+    }
+    var browseResultsC = new bind.SOPC_ClientHelper_BrowseResultArray(browseRequestsC.length);
+    var status = bind.sopc_client.SOPC_ClientHelper_Browse(connectionId,
+                                                           browseRequestsC,
+                                                           browseRequestsC.length,
+                                                           browseResultsC);
+    var browseResults = [];
+    for (var i = 0; i < browseResultsC.length; i++) {
+        browseResults.push(new browse_result.BrowseResult()
+                                            .FromC(browseResultsC[i]));
+    }
+    return [0 === status, browseResults];
+}
+
 function unsubscribe(connectionId) {
     return (0 == bind.sopc_client.SOPC_ClientHelper_Unsubscribe(connectionId));
 }
@@ -154,5 +175,9 @@ module.exports = {
     write,
     WriteValue : write_value.WriteValue,
     read,
-    ReadValue : read_value.ReadValue
+    ReadValue : read_value.ReadValue,
+    browse,
+    BrowseRequest : browse_request.BrowseRequest,
+    BrowseResult : browse_result.BrowseResult,
+    BrowseResultReference : browse_result_reference.BrowseResultReference
 };
