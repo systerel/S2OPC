@@ -81,8 +81,29 @@ if(status)
                           .setNodeId("ns=1;s=Int32_030")
                           .setValue(data_value);
     var writeValueArray = [ writeValue ];
-    status = sopc_client.write(connectionId, writeValueArray);
+
+    var writeStatusCodes;
+    [status, writeStatusCodes] = sopc_client.write(connectionId, writeValueArray);
+    for (var i = 0; i < writeStatusCodes.length; i++) {
+        console.log(`write #${i} status:`, (writeStatusCodes[i] == 0) ? "SUCCESS" : "FAILURE");
+    }
     console.log("Writing nodes status : ", status ? "SUCCESS" : "FAILED");
+}
+
+if(status)
+{
+    var read_value = new sopc_client.ReadValue()
+                                    .setNodeId("ns=1;s=Int32_030")
+                                    .setAttributeId(13);
+    var read_values = [ read_value ];
+
+    var resultDataValues;
+    [status, resultDataValues] = sopc_client.read(connectionId,
+                                                      read_values);
+    for (var elt of resultDataValues) {
+        console.log(elt);
+    }
+    console.log("Reading nodes status:", status ? "SUCCESS" : "FAILED");
 }
 
 function disconnect(connectionId){

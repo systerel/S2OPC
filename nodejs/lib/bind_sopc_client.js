@@ -184,6 +184,8 @@ const SOPC_DataValue = StructType({
 });
 
 const SOPC_DataValue_ptr = ref.refType(SOPC_DataValue);
+const SOPC_DataValueArray = ArrayType(SOPC_DataValue);
+const SOPC_DataValueArrayPtr = ref.refType(SOPC_DataValueArray);
 
 const SOPC_ClientHelper_WriteValue = StructType({
     nodeId : 'CString',
@@ -194,6 +196,14 @@ const SOPC_ClientHelper_WriteValue = StructType({
 const SOPC_ClientHelper_WriteValueArray = ArrayType(SOPC_ClientHelper_WriteValue);
 const UInt32Array = ArrayType('uint32');
 
+const SOPC_ClientHelper_ReadValue = StructType({
+    nodeId : 'CString',
+    attributeId : 'uint32',
+    indexRange : 'CString'
+});
+
+const SOPC_ClientHelper_ReadValueArray = ArrayType(SOPC_ClientHelper_ReadValue);
+
 const sopc_client = ffi.Library('libclient_subscription', {
     'SOPC_ClientHelper_Initialize': ['int32', ['CString', 'int32']],
     'SOPC_ClientHelper_Finalize': ['void', []],
@@ -202,17 +212,26 @@ const sopc_client = ffi.Library('libclient_subscription', {
     'SOPC_ClientHelper_CreateSubscription': ['int32', ['int32', 'pointer']],
     'SOPC_ClientHelper_AddMonitoredItems': ['int32', ['int32', CStringArray, 'size_t']],
     'SOPC_ClientHelper_Unsubscribe': ['int32', ['int32']],
-    'SOPC_ClientHelper_Write': ['int32', ['int32', SOPC_ClientHelper_WriteValueArray, 'size_t', UInt32Array]]
+    'SOPC_ClientHelper_Write': ['int32', ['int32', SOPC_ClientHelper_WriteValueArray, 'size_t', UInt32Array]],
+    'SOPC_ClientHelper_Read': ['int32', ['int32', SOPC_ClientHelper_ReadValueArray, 'size_t', SOPC_DataValueArrayPtr]]
 });
 
 module.exports.sopc_client = sopc_client
+
 module.exports.CStringArray = CStringArray
+module.exports.UInt32Array = UInt32Array;
+
 module.exports.security_cfg = SOPC_ClientHelper_SecurityCfg;
+
 module.exports.SOPC_DataValue = SOPC_DataValue;
+module.exports.SOPC_DataValueArray = SOPC_DataValueArray;
+
 module.exports.SOPC_BuiltinId = SOPC_BuiltinId;
 module.exports.SOPC_IdentifierType = SOPC_IdentifierType;
+
 module.exports.SOPC_VariantArrayType = SOPC_VariantArrayType;
 module.exports.SOPC_VariantValue = SOPC_VariantValue;
 module.exports.SOPC_Variant = SOPC_Variant;
 module.exports.SOPC_ClientHelper_WriteValue = SOPC_ClientHelper_WriteValue;
-module.exports.UInt32Array = UInt32Array;
+
+module.exports.SOPC_ClientHelper_ReadValue = SOPC_ClientHelper_ReadValue;

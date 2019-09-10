@@ -1,11 +1,13 @@
-const bind = require('./bind_sopc_client')
 const ffi = require('ffi');
 const ref = require('ref');
 const Enum = require('enum');
 const process = require('process');
+
+const bind = require('./bind_sopc_client')
+const variant = require('./variant');
 const data_value = require('./datavalue');
 const write_value = require('./writevalue');
-const variant = require('./variant');
+const read_value = require('./readvalue');
 
 
 const SOPC_Toolkit_Log_Level = new Enum({
@@ -101,10 +103,30 @@ function write(connectionId, writeValueArray)
                                                           writeValueArrayC,
                                                           writeValueArrayC.length,
                                                           status_codes);
-    console.log("write status: ", status);
-    //TODO return status codes for each write
-    console.log("write status codes: ", status_codes);
-    return status == 0;
+    return [status == 0, status_codes.toArray()];
+}
+
+function read(connectionId, readValuesArray) {
+    var readValuesArrayC = [];
+    for (var elt of readValuesArray) {
+        readValuesArrayC.push(elt.ToC());
+    }
+    var dataValuesPtr = ref.alloc(bind.SOPC_DataValueArray);
+    var status = bind.sopc_client.SOPC_ClientHelper_Read(connectionId,
+                                                         readValuesArrayC,
+                                                         readValuesArrayC.length,
+                                                         dataValuesPtr);
+
+    var dataValueArray = dataValuesPtr.deref();
+    dataValueArray.length = readValuesArrayC.length;
+
+    var resultDataValues = [];
+    for (var i = 0; i < readValuesArrayC.length; i++) {
+        var dv = new data_value.DataValue()
+                               .FromC(dataValueArray[i]);
+        resultDataValues.push(dv);
+    }
+    return [0 == status, resultDataValues];
 }
 
 function disconnect(connectionId){
@@ -127,3 +149,6 @@ module.exports.DataValue = data_value.DataValue;
 
 module.exports.write = write;
 module.exports.WriteValue = write_value.WriteValue;
+
+module.exports.read = read;
+module.exports.ReadValue = read_value.ReadValue;
