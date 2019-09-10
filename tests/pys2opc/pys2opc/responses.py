@@ -27,7 +27,6 @@ class Response:
     """
     Base class for Responses.
     Adds a reference to the request and the timestamp of the received time.
-    `pys2opc.s2opc.PyS2OPC` `pys2opc.responses.ReadResponse` `pys2opc.connection.BaseConnectionHandler`
 
     Args:
         payload: An OpcUa_*Response. The payload is optional. If the payload is given, its content
@@ -52,7 +51,7 @@ class ReadResponse(Response):
     Parses an OpcUa_ReadResponse.
 
     Attributes:
-        results: List of DataValues corresponding to the read values. You should not modify elements of this list.
+        results: List of `pys2opc.types.DataValue`s corresponding to the read values. You should not modify elements of this list.
     """
     def __init__(self, payload):
         super().__init__(None)
@@ -66,7 +65,7 @@ class WriteResponse(Response):
     Parses an OpcUa_WriteResponse.
 
     Attributes:
-        results: List of StatusCode corresponding to the written values. See is_ok().
+        results: List of `pys2opc.types.StatusCode` corresponding to the written values. See pys2opc.responses.WriteResponse.is_ok`.
     """
     def __init__(self, payload):
         super().__init__(None)
@@ -86,7 +85,7 @@ class BrowseResponse(Response):
     Parses an OpcUa_BrowseResponse.
 
     Attributes:
-        results: A list of BrowseResults.
+        results: List of `pys2opc.types.BrowseResult`s.
     """
     def __init__(self, payload):
         super().__init__(None)
