@@ -59,6 +59,12 @@ static int32_t getEndpointsReceived = 0;
 
 static uint32_t cptReadResps = 0;
 
+#if 0 == WITH_NANO_EXTENDED
+#define TEST_SUB_SERVICE_UNSUPPORTED true
+#else
+#define TEST_SUB_SERVICE_UNSUPPORTED false
+#endif
+
 static void Test_ComEvent_FctClient(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, uintptr_t appContext)
 {
     uintptr_t sessionContext0 = (uintptr_t) SOPC_Atomic_Ptr_Get((void**) &sessionContext[0]);
@@ -96,6 +102,14 @@ static void Test_ComEvent_FctClient(SOPC_App_Com_Event event, uint32_t idOrStatu
                 printf(">>Test_Client_Toolkit: received WriteResponse \n");
                 OpcUa_WriteResponse* writeResp = (OpcUa_WriteResponse*) param;
                 test_results_set_service_result(tlibw_verify_response(test_results_get_WriteRequest(), writeResp));
+            }
+            else if (encType == &OpcUa_ServiceFault_EncodeableType)
+            {
+                printf(">>Test_Client_Toolkit: received ServiceFault \n");
+                OpcUa_ServiceFault* serviceFaultResp = (OpcUa_ServiceFault*) param;
+                test_results_set_service_result(OpcUa_BadServiceUnsupported == appContext &&
+                                                OpcUa_BadServiceUnsupported ==
+                                                    serviceFaultResp->ResponseHeader.ServiceResult);
             }
         }
     }
@@ -577,6 +591,50 @@ int main(void)
     test_results_set_WriteRequest(NULL);
     tlibw_free_WriteRequest((OpcUa_WriteRequest**) &pWriteReqCopy);
 
+    /* In case the subscription service shall not be supported, check service response is unsupported service*/
+    if (TEST_SUB_SERVICE_UNSUPPORTED)
+    {
+        if (SOPC_STATUS_OK == status)
+        {
+            OpcUa_CreateSubscriptionRequest* createSubReq = NULL;
+            status = SOPC_Encodeable_Create(&OpcUa_CreateSubscriptionRequest_EncodeableType, (void**) &createSubReq);
+            assert(SOPC_STATUS_OK == status);
+
+            createSubReq->MaxNotificationsPerPublish = 0;
+            createSubReq->Priority = 0;
+            createSubReq->PublishingEnabled = true;
+            createSubReq->RequestedLifetimeCount = 3;
+            createSubReq->RequestedMaxKeepAliveCount = 1;
+            createSubReq->RequestedPublishingInterval = 1000;
+
+            // Reset expected result
+            test_results_set_service_result(false);
+
+            SOPC_ToolkitClient_AsyncSendRequestOnSession((uint32_t) SOPC_Atomic_Int_Get((int32_t*) &session),
+                                                         createSubReq, OpcUa_BadServiceUnsupported);
+
+            printf(">>Test_Client_Toolkit: create subscription sending\n");
+        }
+
+        /* Wait until service response is received */
+        loopCpt = 0;
+        while (SOPC_STATUS_OK == status && test_results_get_service_result() == false &&
+               loopCpt * sleepTimeout <= loopTimeout)
+        {
+            loopCpt++;
+            SOPC_Sleep(sleepTimeout);
+        }
+
+        if (loopCpt * sleepTimeout > loopTimeout)
+        {
+            status = SOPC_STATUS_TIMEOUT;
+        }
+        else if (SOPC_Atomic_Int_Get(&sendFailures) > 0)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
     uint32_t session1_idx = (uint32_t) SOPC_Atomic_Int_Get((int32_t*) &session);
     uint32_t session2_idx = (uint32_t) SOPC_Atomic_Int_Get((int32_t*) &session2);
     uint32_t session3_idx = (uint32_t) SOPC_Atomic_Int_Get((int32_t*) &session3);
@@ -622,14 +680,12 @@ int main(void)
 
     if (SOPC_STATUS_OK == status && test_results_get_service_result() != false)
     {
-        printf(">>Test_Client_Toolkit: read request received ! \n");
         printf(">>Test_Client_Toolkit final result: OK\n");
         return 0;
     }
     else
     {
-        printf(">>Test_Client_Toolkit: read request not received or BAD status (%" PRIu32 ") ! \n", status);
-        printf(">>Test_Client_Toolkit final result: NOK\n");
+        printf(">>Test_Client_Toolkit final result: NOK (BAD status: %" PRIu32 ")\n", status);
         return 1;
     }
 }

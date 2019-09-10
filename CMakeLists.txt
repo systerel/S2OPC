@@ -470,6 +470,11 @@ add_executable(toolkit_test_client "tests/services/toolkit_test_client.c"
                                    "tests/services/test_results.c"
                                    "tests/services/testlib_read_response.c"
                                    ${TEST_DEMO_CLIENT_ADDRESS_SPACE_C})
+# Manage the Nano profiles extended mode
+if (WITH_NANO_EXTENDED)
+  set_target_properties(toolkit_test_client PROPERTIES COMPILE_DEFINITIONS "WITH_NANO_EXTENDED")
+endif()
+
 target_link_libraries(toolkit_test_client PRIVATE s2opc s2opc-loader-embedded)
 target_include_directories(toolkit_test_client PRIVATE ${S2OPC_PUBLIC_INCLUDES}
                                                        ${S2OPC_PRIVATE_INCLUDES})
