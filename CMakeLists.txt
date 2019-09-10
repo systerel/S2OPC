@@ -161,6 +161,8 @@ endif()
 
 option(WITH_STATIC_SECURITY_DATA "Use static security data for test" OFF)
 
+option(WITH_NANO_EXTENDED "Use Nano profile with additional services out of Nano scope" OFF)
+
 # Re-enable asserts for Release and RelWithDebInfo builds
 string(REGEX REPLACE "[-/]DNDEBUG" "" CMAKE_C_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
 string(REGEX REPLACE "[-/]DNDEBUG" "" CMAKE_C_FLAGS_RELWITHDEBINFO ${CMAKE_C_FLAGS_RELWITHDEBINFO})
@@ -296,6 +298,14 @@ add_dependencies(s2opc_obj build_info)
 
 # Needed if we want to use the objects in a shared library
 set_property(TARGET s2opc_obj PROPERTY POSITION_INDEPENDENT_CODE 1)
+
+# Manage the Nano profiles extended mode
+if (WITH_NANO_EXTENDED)
+  set_target_properties(s2opc_obj PROPERTIES COMPILE_DEFINITIONS "WITH_NANO_EXTENDED")
+  set(TOOLKIT_TEST_SERVER "toolkit_test_server")
+else()
+  set(TOOLKIT_TEST_SERVER "toolkit_test_nano_server")
+endif()
 
 # minimum Vista for IPV6 support
 if("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
@@ -443,14 +453,14 @@ add_custom_command(
 
 # Server test: local services
 add_executable(toolkit_test_server_local_service "tests/services/toolkit_test_server_local_service.c"
-                                                 "tests/services/wrap_read.c"
-                                                 "tests/services/testlib_write.c"
-                                                 "tests/services/test_results.c"
-                                                 "tests/services/testlib_read_response.c"
-                                                 ${TEST_LOCAL_DEMO_SERVER_ADDRESS_SPACE_C})
+                                                    "tests/services/wrap_read.c"
+                                                    "tests/services/testlib_write.c"
+                                                    "tests/services/test_results.c"
+                                                    "tests/services/testlib_read_response.c"
+                                                    ${TEST_LOCAL_DEMO_SERVER_ADDRESS_SPACE_C})
 target_link_libraries(toolkit_test_server_local_service PRIVATE s2opc s2opc-loader-embedded)
 target_include_directories(toolkit_test_server_local_service PRIVATE ${S2OPC_PUBLIC_INCLUDES}
-                                                                     ${S2OPC_PRIVATE_INCLUDES})
+                                                                        ${S2OPC_PRIVATE_INCLUDES})
 s2opc_unit_test(toolkit_test_server_local_service GENERATE_TAP)
 
 # Client tests
@@ -482,21 +492,21 @@ target_include_directories(toolkit_test_suite_client PRIVATE ${S2OPC_PUBLIC_INCL
                                                              ${CHECK_INCLUDE_DIRS})
 
 # Server test
-add_executable(toolkit_test_server
+add_executable(${TOOLKIT_TEST_SERVER}
     "tests/services/runtime_variables.c"
     "tests/services/toolkit_test_server.c"
     ${TEST_DEMO_SERVER_ADDRESS_SPACE_C})
-target_link_libraries(toolkit_test_server PRIVATE s2opc s2opc-loader-embedded)
-target_include_directories(toolkit_test_server PRIVATE ${S2OPC_PUBLIC_INCLUDES}
-                                                       ${S2OPC_PRIVATE_INCLUDES})
+target_link_libraries(${TOOLKIT_TEST_SERVER} PRIVATE s2opc s2opc-loader-embedded)
+target_include_directories(${TOOLKIT_TEST_SERVER} PRIVATE ${S2OPC_PUBLIC_INCLUDES}
+                                                          ${S2OPC_PRIVATE_INCLUDES})
 
 if (EXPAT_FOUND)
-	target_link_libraries(toolkit_test_server PRIVATE s2opc-loader-uanodeset-expat)
-	set_target_properties(toolkit_test_server PROPERTIES COMPILE_DEFINITIONS "WITH_EXPAT")
+	target_link_libraries(${TOOLKIT_TEST_SERVER} PRIVATE s2opc-loader-uanodeset-expat)
+	set_target_properties(${TOOLKIT_TEST_SERVER} PROPERTIES COMPILE_DEFINITIONS "WITH_EXPAT")
 endif()
 
 if (WITH_STATIC_SECURITY_DATA)
-    set_target_properties(toolkit_test_server PROPERTIES COMPILE_DEFINITIONS "WITH_STATIC_SECURITY_DATA")
+    set_target_properties(${TOOLKIT_TEST_SERVER} PROPERTIES COMPILE_DEFINITIONS "WITH_STATIC_SECURITY_DATA")
 endif()
 
 add_test(NAME "validation::client_server_test"
@@ -505,7 +515,7 @@ add_test(NAME "validation::client_server_test"
 	"${PYTHON_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tests/scripts/tap-wrap.py"
 	"${PYTHON_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-opc-server.py"
 	"--server-wd" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-	"--server-cmd" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/toolkit_test_server${FILE_EXT}"
+	"--server-cmd" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TOOLKIT_TEST_SERVER}${FILE_EXT}"
 	"./toolkit_test_client${FILE_EXT}")
 set_tests_properties("validation::client_server_test" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=client_server_test.tap")
 
@@ -515,7 +525,7 @@ add_test(NAME "validation::client_service_faults_test"
 	"${PYTHON_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tests/scripts/tap-wrap.py"
 	"${PYTHON_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-opc-server.py"
 	"--server-wd" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-	"--server-cmd" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/toolkit_test_server${FILE_EXT}"
+	"--server-cmd" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TOOLKIT_TEST_SERVER}${FILE_EXT}"
 	"./toolkit_test_client_service_faults${FILE_EXT}")
 set_tests_properties("validation::client_service_faults_test" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=client_service_faults_test.tap")
 
@@ -570,7 +580,7 @@ target_include_directories(s2opc_register PRIVATE "${ADDSPACEGEN_INCLUDE_DIR}"
                                                        ${S2OPC_PUBLIC_INCLUDES}
                                                        ${S2OPC_PRIVATE_INCLUDES})
 add_custom_command(
-    TARGET toolkit_test_server POST_BUILD
+    TARGET ${TOOLKIT_TEST_SERVER} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/revoked
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/untrusted
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/trusted
@@ -710,7 +720,7 @@ function(s2opc_server_validation_test name)
 		COMMAND
 		"${PYTHON_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-opc-server.py"
 		"--server-wd" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-		"--server-cmd" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/toolkit_test_server${FILE_EXT} ${no_ext_name}"
+		"--server-cmd" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TOOLKIT_TEST_SERVER}${FILE_EXT} ${no_ext_name}"
 		"${PYTHON_EXECUTABLE}" ${name})
 endfunction()
 
@@ -884,7 +894,7 @@ if(WITH_PYS2OPC)
                COMMAND
                    "${PYTHON_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-opc-server.py"
                    "--server-wd" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-                   "--server-cmd" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/toolkit_test_server${FILE_EXT} ${no_ext_name}"
+                   "--server-cmd" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TOOLKIT_TEST_SERVER}${FILE_EXT} ${no_ext_name}"
                    "${PYTHON_EXECUTABLE}" "${name}"
                )
       # ASan requires to be the first dynamically linked library to be loaded. This is done with LD_PRELOAD.

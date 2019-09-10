@@ -35,12 +35,12 @@ export SOPC_DOCKER_NEEDS_SUDO=1
 # Check rules on source code and automatic formatting compliance
 ./.check-in-docker.sh ./.check-code.sh
 # Build binaries for Linux target
-./clean.sh && ./.build-in-docker.sh ./build.sh
+./clean.sh && ./.build-in-docker.sh WITH_NANO_EXTENDED=1 ./build.sh
 # Run tests on Linux target
 ./.test-in-docker.sh ./test-all.sh
 # run acceptance tests on Linux target
 pushd acceptances_tests/
-../.run-uactt-in-docker.sh ./launch_acceptance_tests.sh
+../.run-uactt-in-docker.sh WITH_NANO_EXTENDED=1 ./launch_acceptance_tests.sh
 popd
 # Build binaries for Windows target on Linux host
 ./.mingwbuild-in-docker.sh ./build.sh

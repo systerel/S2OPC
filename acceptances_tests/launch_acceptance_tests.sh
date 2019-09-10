@@ -37,6 +37,19 @@ SERVER_ERROR=server_error.log
 SKIPPED_TESTS_FILE=skipped_tests.cfg
 KNOWN_BUGS_FILES=known_bugs.cfg
 
+if [[ -z "$WITH_NANO_EXTENDED" ]]
+then
+    TOOLKIT_TEST_SERVER=./toolkit_test_nano_server
+    SELECTION=Acceptation_S2OPC/Acceptation_S2OPC.nano.selection.xml
+elif [[ $WITH_NANO_EXTENDED -eq  0 ]]
+then
+    TOOLKIT_TEST_SERVER=./toolkit_test_nano_server
+    SELECTION=Acceptation_S2OPC/Acceptation_S2OPC.nano.selection.xml
+else
+    TOOLKIT_TEST_SERVER=./toolkit_test_server
+    SELECTION=Acceptation_S2OPC/Acceptation_S2OPC.selection.xml
+fi
+
 # this function takes two arguments:
 # - one test description file
 # - one test name
@@ -77,9 +90,9 @@ fi
 # main script
 
 rm -f $LOG_FILE $TAP_FILE
-echo "Launching server"
+echo "Launching server $TOOLKIT_TEST_SERVER"
 pushd ${ROOT_DIR}/build/bin
-./toolkit_test_server 2> $SERVER_ERROR &
+./$TOOLKIT_TEST_SERVER 2> $SERVER_ERROR &
 SERVER_PID=$!
 # wait for server to be up
 ${ROOT_DIR}/tests/scripts/wait_server.py

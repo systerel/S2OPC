@@ -125,7 +125,7 @@ build-linux64-coverity:
   script: |-
     mkdir build
     cd build
-    cmake -DWITH_COVERITY=1 -DCMAKE_BUILD_TYPE=Debug ..
+    cmake -DWITH_COVERITY=1 -DCMAKE_BUILD_TYPE=Debug -DWITH_NANO_EXTENDED=1 ..
     /opt/cov-analysis-linux64-2017.07/bin/cov-build --dir cov-int make
     tar czf cov-int.tar.gz cov-int
     curl -k --form token=${COVERITY_TOKEN} --form email=${COVERITY_EMAIL} --form version=${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA} --form description=${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA} --form file=@cov-int.tar.gz https://scan.coverity.com/builds?project=S2OPC

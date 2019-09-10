@@ -60,7 +60,8 @@ Server side (e.g.: tests/services/toolkit_test_server.c):
   - GetEndpoints service
   - FindServers service
   - RegisterNodes service
-  - Subscription services (simplified: no monitoredItems deletion, no subscription transfer)
+  - Only if compiled with WITH_NANO_EXTENDED set to 1:
+    - Subscription services (simplified: no monitoredItems filters or deletion, no subscription transfer)
 
 ### Cryptography services use constraints
 - Only one authority certificate can be provided by channel (/endpoint)
@@ -75,8 +76,8 @@ Server side (e.g.: tests/services/toolkit_test_server.c):
 - Security modes available: None, Sign and SignAndEncrypt
 - Server instantiation: several endpoint descriptions, 1 address space, multiple secure channel instances and session instances
 - Server discovery services: getEndpoints, findServers
-- Server services: read, write, browse, browseNext (1 continuation point per session), translateBrowsePath,
-                   subscription (no monitoredItems deletion, no subscription transfer), registerNodes
+- Server Nano profile services: read, write, browse, browseNext (1 continuation point per session), translateBrowsePath, registerNodes
+- Server extended services (only if compiled with WITH_NANO_EXTENDED set to 1): subscription (no monitoredItems deletion, no subscription transfer)
 - Server local services: read, write, browse and discovery services
 - Server address space modification:
   - mechanisms implemented for remote modification: variables modification with typechecking (data type and value rank), access level and user access level control
@@ -212,22 +213,23 @@ Run a particular test (build/bin/ directory):
 - Toolkit client library based command line samples: to see help execute: ./s2opc_browse, ./s2opc_discovery, ./s2opc_findserver, ./s2opc_read, ./s2opc_register, ./s2opc_subscription_client, ./s2opc_write
 - Toolkit address space parser test: execute ./s2opc_parse_uanodeset to see help
 - Toolkit client/server session and read/write service example:
-  execute ./toolkit_test_server and then ./toolkit_test_client in parallel
+  execute ./toolkit_test_nano_server and then ./toolkit_test_client in parallel
   (or toolkit_test_client_service_faults for service fault specialized test)
 - Toolkit server and read / write / browse service validation:
-  execute ./toolkit_test_server in build/bin/ directory and python3 client.py in validation/ directory
+  execute ./toolkit_test_nano_server in build/bin/ directory and python3 client.py in validation/ directory
   (depends on FreeOpcUa python client available on github)
 - Toolkit server and secure channel security token renewal validation:
-  execute ./toolkit_test_server in build/bin/ directory and python3
+  execute ./toolkit_test_nano_server in build/bin/ directory and python3
   client_sc_renew.py in validation/ directory (depends on FreeOpcUa
   python client available on github)
-- Toolkit server local services validation: execute ./toolkit_test_server_local_service
+- Toolkit server local services validation: execute ./toolkit_test_nano_server_local_service
 
 Run OPC UA Compliance Test Tool (UACTT: tool available for OPC foundation corporate members only):
-- Run toolkit server in build/bin/ directory: ./toolkit_test_server
+- Run toolkit server in build/bin/ directory: ./toolkit_test_nano_server
 - Run the UACTT tests using the UACTT project configuration file acceptances_tests/Acceptation_S2OPC/Acceptation_S2OPC.ctt.xml
 
-Note: ./toolkit_test_server shall be killed when test is finished
+Note: ./toolkit_test_nano_server shall be killed when test is finished
+Note 2: if compiled with WITH_NANO_EXTENDED set to 1, ./toolkit_test_nano_server binary name is changed to ./toolkit_test_server
 
 ## Licenses
 
