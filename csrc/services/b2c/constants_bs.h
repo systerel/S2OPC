@@ -141,6 +141,13 @@ extern const constants_bs__t_NodeId_i constants_bs__c_Null_Type_NodeId;
 #define constants_bs__c_Reference_indet 0
 #define constants_bs__c_RelativePathElt_indet 0
 #define constants_bs__c_RelativePath_indet 0
+
+#if 0 == WITH_NANO_EXTENDED
+#define constants_bs__c_Server_Nano_Extended false
+#else
+#define constants_bs__c_Server_Nano_Extended true
+#endif
+
 #define constants_bs__c_SignatureData_indet 0
 #define constants_bs__c_Timestamp_null \
     (SOPC_Value_Timestamp) { 0, 0 }

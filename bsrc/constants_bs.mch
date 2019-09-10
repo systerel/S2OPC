@@ -80,6 +80,8 @@ SETS
     t_ContinuationPointId_i
 
 CONCRETE_CONSTANTS
+    c_Server_Nano_Extended,
+    
     k_n_read_resp_max,
     k_n_WriteResponse_max,
     k_n_BrowseResponse_max,
@@ -208,6 +210,8 @@ ABSTRACT_CONSTANTS
     conv_ExpandedNodeId_NodeId
 
 PROPERTIES
+    c_Server_Nano_Extended : BOOL &
+    
     k_n_read_resp_max : NAT &
     k_n_WriteResponse_max : NAT &
     k_n_BrowseResponse_max : NAT &

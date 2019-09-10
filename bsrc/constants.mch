@@ -291,6 +291,8 @@ SETS
     t_ContinuationPointId_i
 
 CONCRETE_CONSTANTS
+    c_Server_Nano_Extended,
+    
     /*AddS,*/
     k_n_read_resp_max,
     k_n_WriteResponse_max,
@@ -481,6 +483,7 @@ ABSTRACT_CONSTANTS
     k_n_noRemainingPathIndex
 
 PROPERTIES
+    c_Server_Nano_Extended : BOOL &
 
     /*AddS <: t_Node &*/
     t_Variant <: t_Variant_i &

@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 27/08/2019 09:05:34
+ Date                 : 10/09/2019 14:03:16
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -260,20 +260,15 @@ void service_mgr__treat_session_local_service_req(
    }
 }
 
-void service_mgr__treat_session_service_req(
+void service_mgr__treat_session_nano_service_req(
    const constants__t_session_i service_mgr__session,
    const constants__t_msg_type_i service_mgr__req_typ,
-   const constants__t_server_request_handle_i service_mgr__req_handle,
-   const constants__t_request_context_i service_mgr__req_ctx,
-   const constants__t_msg_header_i service_mgr__req_header,
    const constants__t_msg_i service_mgr__req_msg,
    const constants__t_msg_i service_mgr__resp_msg,
-   constants_statuscodes_bs__t_StatusCode_i * const service_mgr__StatusCode_service,
-   t_bool * const service_mgr__async_resp_msg) {
+   constants_statuscodes_bs__t_StatusCode_i * const service_mgr__StatusCode_service) {
    {
       constants__t_user_i service_mgr__l_user;
       
-      *service_mgr__async_resp_msg = false;
       switch (service_mgr__req_typ) {
       case constants__e_msg_attribute_read_req:
          session_mgr__get_session_user_server(service_mgr__session,
@@ -306,6 +301,50 @@ void service_mgr__treat_session_service_req(
          break;
       case constants__e_msg_view_translate_browse_paths_to_node_ids_req:
          service_set_view__treat_translate_browse_paths_request(service_mgr__req_msg,
+            service_mgr__resp_msg,
+            service_mgr__StatusCode_service);
+         break;
+      case constants__e_msg_view_register_nodes_req:
+         service_register_nodes__treat_register_nodes_request(service_mgr__req_msg,
+            service_mgr__resp_msg,
+            service_mgr__StatusCode_service);
+         break;
+      case constants__e_msg_view_unregister_nodes_req:
+         service_unregister_nodes__treat_unregister_nodes_request(service_mgr__req_msg,
+            service_mgr__StatusCode_service);
+         break;
+      default:
+         *service_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_bad_service_unsupported;
+         break;
+      }
+   }
+}
+
+void service_mgr__treat_session_nano_extended_service_req(
+   const constants__t_session_i service_mgr__session,
+   const constants__t_msg_type_i service_mgr__req_typ,
+   const constants__t_server_request_handle_i service_mgr__req_handle,
+   const constants__t_request_context_i service_mgr__req_ctx,
+   const constants__t_msg_header_i service_mgr__req_header,
+   const constants__t_msg_i service_mgr__req_msg,
+   const constants__t_msg_i service_mgr__resp_msg,
+   constants_statuscodes_bs__t_StatusCode_i * const service_mgr__StatusCode_service,
+   t_bool * const service_mgr__async_resp_msg) {
+   {
+      constants__t_user_i service_mgr__l_user;
+      
+      *service_mgr__async_resp_msg = false;
+      switch (service_mgr__req_typ) {
+      case constants__e_msg_attribute_read_req:
+      case constants__e_msg_attribute_write_req:
+      case constants__e_msg_view_browse_req:
+      case constants__e_msg_view_browse_next_req:
+      case constants__e_msg_view_translate_browse_paths_to_node_ids_req:
+      case constants__e_msg_view_register_nodes_req:
+      case constants__e_msg_view_unregister_nodes_req:
+         service_mgr__treat_session_nano_service_req(service_mgr__session,
+            service_mgr__req_typ,
+            service_mgr__req_msg,
             service_mgr__resp_msg,
             service_mgr__StatusCode_service);
          break;
@@ -358,19 +397,41 @@ void service_mgr__treat_session_service_req(
             service_mgr__resp_msg,
             service_mgr__StatusCode_service);
          break;
-      case constants__e_msg_view_register_nodes_req:
-         service_register_nodes__treat_register_nodes_request(service_mgr__req_msg,
-            service_mgr__resp_msg,
-            service_mgr__StatusCode_service);
-         break;
-      case constants__e_msg_view_unregister_nodes_req:
-         service_unregister_nodes__treat_unregister_nodes_request(service_mgr__req_msg,
-            service_mgr__StatusCode_service);
-         break;
       default:
          *service_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_bad_service_unsupported;
          break;
       }
+   }
+}
+
+void service_mgr__treat_session_service_req(
+   const constants__t_session_i service_mgr__session,
+   const constants__t_msg_type_i service_mgr__req_typ,
+   const constants__t_server_request_handle_i service_mgr__req_handle,
+   const constants__t_request_context_i service_mgr__req_ctx,
+   const constants__t_msg_header_i service_mgr__req_header,
+   const constants__t_msg_i service_mgr__req_msg,
+   const constants__t_msg_i service_mgr__resp_msg,
+   constants_statuscodes_bs__t_StatusCode_i * const service_mgr__StatusCode_service,
+   t_bool * const service_mgr__async_resp_msg) {
+   *service_mgr__async_resp_msg = false;
+   if (constants__c_Server_Nano_Extended == true) {
+      service_mgr__treat_session_nano_extended_service_req(service_mgr__session,
+         service_mgr__req_typ,
+         service_mgr__req_handle,
+         service_mgr__req_ctx,
+         service_mgr__req_header,
+         service_mgr__req_msg,
+         service_mgr__resp_msg,
+         service_mgr__StatusCode_service,
+         service_mgr__async_resp_msg);
+   }
+   else {
+      service_mgr__treat_session_nano_service_req(service_mgr__session,
+         service_mgr__req_typ,
+         service_mgr__req_msg,
+         service_mgr__resp_msg,
+         service_mgr__StatusCode_service);
    }
 }
 

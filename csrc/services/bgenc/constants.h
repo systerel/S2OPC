@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 25/06/2019 19:01:44
+ Date                 : 10/09/2019 14:03:12
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -381,6 +381,7 @@ typedef enum {
 #define constants__c_Reference_indet constants_bs__c_Reference_indet
 #define constants__c_RelativePathElt_indet constants_bs__c_RelativePathElt_indet
 #define constants__c_RelativePath_indet constants_bs__c_RelativePath_indet
+#define constants__c_Server_Nano_Extended constants_bs__c_Server_Nano_Extended
 #define constants__c_SignatureData_indet constants_bs__c_SignatureData_indet
 #define constants__c_Timestamp_null constants_bs__c_Timestamp_null
 #define constants__c_Variant_indet constants_bs__c_Variant_indet

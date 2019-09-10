@@ -81,7 +81,48 @@ PROMOTES
     is_valid_subscription,
     server_subscription_data_changed,
     server_subscription_publish_timeout
+    
+DEFINITIONS
+    
+    d_treat_session_service_req == 
+        a_Value,
+        nb_WriteValue,
+        WriteValue_NodeId,
+        WriteValue_AttributeId,
+        WriteValue_DataValue,
 
+        nb_ReadValue,
+        ReadValue_NodeId,
+        ReadValue_AttributeId,
+        data_Value_Value,
+        data_Value_StatusCode,
+        StatusCode_service,
+        ResponseWrite_allocated,
+        ResponseWrite_StatusCode
+        :(
+            a_Value                  : t_Node +-> t_Variant          &
+            nb_ReadValue             : NAT                           &
+            nb_ReadValue            <= k_n_read_resp_max             &
+            ReadValue_NodeId         : t_ReadValue +-> t_NodeId      &
+            ReadValue_AttributeId    : t_ReadValue +-> t_AttributeId_i &
+            data_Value_Value         : t_ReadValue +-> t_Variant     &
+            data_Value_StatusCode    : t_ReadValue +-> t_RawStatusCode &
+            StatusCode_service       : t_StatusCode_i                &
+            StatusCode_service       : t_StatusCode                  &
+            ResponseWrite_allocated  : BOOL                          &
+            nb_WriteValue            : NAT                           &
+            nb_WriteValue <= k_n_WriteResponse_max                   &
+            WriteValue_NodeId        : t_WriteValue +-> t_NodeId     &
+            WriteValue_AttributeId   : t_WriteValue +-> t_AttributeId &
+            WriteValue_DataValue     : t_WriteValue +-> t_DataValue  &
+            a_Value                  : t_Node +-> t_Variant          &
+            dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value)       &
+            dom(a_Value) <: dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
+            ResponseWrite_StatusCode : t_WriteValue +-> t_StatusCode &
+            ResponseWrite_allocated  : BOOL
+        )
+    
+    
 LOCAL_OPERATIONS
 
     resp_msg_typ <-- get_response_type (req_msg_typ) =
@@ -172,6 +213,50 @@ LOCAL_OPERATIONS
 
     END
     ;
+    
+    StatusCode_service <-- treat_session_nano_service_req (session, req_typ, req_msg, resp_msg) =
+    PRE
+        session : t_session_i &
+        session : t_session &
+        req_typ : t_msg_type_i &
+        req_typ = a_msg_in_type &
+        a_msg_in_type : s_service_on_session_reqs &
+        c_msg_in_header : t_msg_header &
+        req_msg : t_msg_i &
+        req_msg = c_msg_in &
+        c_msg_in : t_msg &
+        resp_msg : t_msg_i &
+        resp_msg = c_msg_out &
+        c_msg_out : t_msg
+    THEN
+        d_treat_session_service_req
+    END
+    ;
+    
+    StatusCode_service, async_resp_msg <-- treat_session_nano_extended_service_req (session, req_typ, req_handle, req_ctx, req_header, req_msg, resp_msg) =
+    PRE
+        session : t_session_i &
+        session : t_session &
+        req_typ : t_msg_type_i &
+        req_typ = a_msg_in_type &
+        a_msg_in_type : s_service_on_session_reqs &
+        req_handle : t_server_request_handle_i &
+        req_ctx : t_request_context_i &
+        req_ctx : t_request_context &
+        req_header : t_msg_header_i &
+        req_header = c_msg_in_header &
+        c_msg_in_header : t_msg_header &
+        req_msg : t_msg_i &
+        req_msg = c_msg_in &
+        c_msg_in : t_msg &
+        resp_msg : t_msg_i &
+        resp_msg = c_msg_out &
+        c_msg_out : t_msg
+    THEN
+        d_treat_session_service_req ||
+        async_resp_msg :: BOOL
+    END
+    ;
 
     StatusCode_service, async_resp_msg <-- treat_session_service_req (session, req_typ, req_handle, req_ctx, req_header, req_msg, resp_msg) =
     PRE
@@ -193,44 +278,8 @@ LOCAL_OPERATIONS
         resp_msg = c_msg_out &
         c_msg_out : t_msg
     THEN
-        a_Value,
-        nb_WriteValue,
-        WriteValue_NodeId,
-        WriteValue_AttributeId,
-        WriteValue_DataValue,
-
-        nb_ReadValue,
-        ReadValue_NodeId,
-        ReadValue_AttributeId,
-        data_Value_Value,
-        data_Value_StatusCode,
-        StatusCode_service,
-        async_resp_msg,
-        ResponseWrite_allocated,
-        ResponseWrite_StatusCode
-        :(
-            a_Value                  : t_Node +-> t_Variant          &
-            nb_ReadValue             : NAT                           &
-            nb_ReadValue            <= k_n_read_resp_max             &
-            ReadValue_NodeId         : t_ReadValue +-> t_NodeId      &
-            ReadValue_AttributeId    : t_ReadValue +-> t_AttributeId_i &
-            data_Value_Value         : t_ReadValue +-> t_Variant     &
-            data_Value_StatusCode    : t_ReadValue +-> t_RawStatusCode &
-            StatusCode_service       : t_StatusCode_i                &
-            StatusCode_service       : t_StatusCode                  &
-            async_resp_msg           : BOOL                          &
-            ResponseWrite_allocated  : BOOL                          &
-            nb_WriteValue            : NAT                           &
-            nb_WriteValue <= k_n_WriteResponse_max                   &
-            WriteValue_NodeId        : t_WriteValue +-> t_NodeId     &
-            WriteValue_AttributeId   : t_WriteValue +-> t_AttributeId &
-            WriteValue_DataValue     : t_WriteValue +-> t_DataValue  &
-            a_Value                  : t_Node +-> t_Variant          &
-            dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value)       &
-            dom(a_Value) <: dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
-            ResponseWrite_StatusCode : t_WriteValue +-> t_StatusCode &
-            ResponseWrite_allocated  : BOOL
-        )
+        d_treat_session_service_req ||
+        async_resp_msg :: BOOL
     END
     ;
 
@@ -456,12 +505,11 @@ OPERATIONS
         END
     END
     ;
-
-    StatusCode_service, async_resp_msg <-- treat_session_service_req (session, req_typ, req_handle, req_ctx, req_header, req_msg, resp_msg) =
+    
+    StatusCode_service <-- treat_session_nano_service_req (session, req_typ, req_msg, resp_msg) =
     VAR
         l_user
     IN
-        async_resp_msg := FALSE;
         CASE req_typ OF
             EITHER e_msg_attribute_read_req THEN
                 l_user <-- get_session_user_server(session);
@@ -479,6 +527,32 @@ OPERATIONS
                 StatusCode_service <-- treat_browse_next_request(session, req_msg, resp_msg)
             OR e_msg_view_translate_browse_paths_to_node_ids_req THEN
                 StatusCode_service <-- treat_translate_browse_paths_request(req_msg, resp_msg)
+            OR e_msg_view_register_nodes_req THEN
+                StatusCode_service <-- treat_register_nodes_request (req_msg, resp_msg)
+            OR e_msg_view_unregister_nodes_req THEN
+                StatusCode_service <-- treat_unregister_nodes_request (req_msg)
+            ELSE
+                /* NOTE: when implementing Node Management service set, service_set_view_service_node_management_used shall be called on success */
+                /* service is not supported */
+                StatusCode_service := e_sc_bad_service_unsupported
+            END
+        END
+    END
+    ;
+    
+    StatusCode_service, async_resp_msg <-- treat_session_nano_extended_service_req (session, req_typ, req_handle, req_ctx, req_header, req_msg, resp_msg) =
+    VAR
+        l_user
+    IN
+        async_resp_msg := FALSE;
+        CASE req_typ OF
+            EITHER e_msg_attribute_read_req, e_msg_attribute_write_req, e_msg_view_browse_req, 
+                   e_msg_view_browse_next_req, e_msg_view_translate_browse_paths_to_node_ids_req, 
+                   e_msg_view_register_nodes_req, e_msg_view_unregister_nodes_req 
+            THEN
+                /* Nano profile services */
+                StatusCode_service <-- treat_session_nano_service_req (session, req_typ, req_msg, resp_msg)
+                /* Next services are out of the Nano scope */
             OR e_msg_subscription_create_req THEN
                 StatusCode_service <-- treat_create_subscription_request (session, req_msg, resp_msg)
             OR e_msg_subscription_modify_req THEN
@@ -495,15 +569,23 @@ OPERATIONS
             OR e_msg_monitored_items_create_req THEN
                 l_user <-- get_session_user_server(session);
                 StatusCode_service <-- treat_subscription_create_monitored_items_req (session, l_user, req_msg, resp_msg)
-            OR e_msg_view_register_nodes_req THEN
-                StatusCode_service <-- treat_register_nodes_request (req_msg, resp_msg)
-            OR e_msg_view_unregister_nodes_req THEN
-                StatusCode_service <-- treat_unregister_nodes_request (req_msg)
             ELSE
                 /* NOTE: when implementing Node Management service set, service_set_view_service_node_management_used shall be called on success */
                 /* service is not supported */
                 StatusCode_service := e_sc_bad_service_unsupported
             END
+        END
+    END
+    ;
+
+    StatusCode_service, async_resp_msg <-- treat_session_service_req (session, req_typ, req_handle, req_ctx, req_header, req_msg, resp_msg) =
+    BEGIN
+        async_resp_msg := FALSE;
+        IF c_Server_Nano_Extended = TRUE
+        THEN
+            StatusCode_service, async_resp_msg <-- treat_session_nano_extended_service_req (session, req_typ, req_handle, req_ctx, req_header, req_msg, resp_msg)
+        ELSE            
+            StatusCode_service <-- treat_session_nano_service_req (session, req_typ, req_msg, resp_msg)
         END
     END
     ;

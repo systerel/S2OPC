@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.h
 
- Date                 : 26/08/2019 13:30:43
+ Date                 : 10/09/2019 14:03:15
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -126,6 +126,22 @@ extern void service_mgr__treat_read_request(
    constants_statuscodes_bs__t_StatusCode_i * const service_mgr__StatusCode_service);
 extern void service_mgr__treat_session_local_service_req(
    const constants__t_endpoint_config_idx_i service_mgr__endpoint_config_idx,
+   const constants__t_msg_type_i service_mgr__req_typ,
+   const constants__t_msg_i service_mgr__req_msg,
+   const constants__t_msg_i service_mgr__resp_msg,
+   constants_statuscodes_bs__t_StatusCode_i * const service_mgr__StatusCode_service);
+extern void service_mgr__treat_session_nano_extended_service_req(
+   const constants__t_session_i service_mgr__session,
+   const constants__t_msg_type_i service_mgr__req_typ,
+   const constants__t_server_request_handle_i service_mgr__req_handle,
+   const constants__t_request_context_i service_mgr__req_ctx,
+   const constants__t_msg_header_i service_mgr__req_header,
+   const constants__t_msg_i service_mgr__req_msg,
+   const constants__t_msg_i service_mgr__resp_msg,
+   constants_statuscodes_bs__t_StatusCode_i * const service_mgr__StatusCode_service,
+   t_bool * const service_mgr__async_resp_msg);
+extern void service_mgr__treat_session_nano_service_req(
+   const constants__t_session_i service_mgr__session,
    const constants__t_msg_type_i service_mgr__req_typ,
    const constants__t_msg_i service_mgr__req_msg,
    const constants__t_msg_i service_mgr__resp_msg,
