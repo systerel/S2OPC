@@ -1,12 +1,13 @@
 const bind = require('./bind_sopc_client');
 const data_value = require('./datavalue');
+const ref = require('ref');
 
 class WriteValue
 {
     constructor(){
-        this.nodeId = '';
-        this.indexRange = '';
-        this.DataValueC = new data_value.DataValue();
+        this.nodeId = null;
+        this.indexRange = null;
+        this.DataValue = new data_value.DataValue();
     }
     setNodeId(nodeId) {
         this.nodeId = nodeId;
@@ -16,15 +17,14 @@ class WriteValue
         this.indexRange = indexRange;
     }
     setValue(data_value){
-        this.DataValueC = data_value
+        this.DataValue = data_value
         return this;
     }
     ToC() {
-        console.log(this);
         return new bind.SOPC_ClientHelper_WriteValue({
-            nodeId : this.nodeId,
-            indexRange : this.indexRange,
-            value : this.DataValueC.ToC()
+            nodeId : this.nodeId === null ? ref.NULL_POINTER : this.nodeId,
+            indexRange : this.indexRange === null ? ref.NULL_POINTER : this.indexRange,
+            value : this.DataValue.ToC().ref()
         });
     }
 }

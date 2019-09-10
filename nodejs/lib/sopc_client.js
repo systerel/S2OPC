@@ -5,6 +5,7 @@ const Enum = require('enum');
 const process = require('process');
 const data_value = require('./datavalue');
 const write_value = require('./writevalue');
+const variant = require('./variant');
 
 
 const SOPC_Toolkit_Log_Level = new Enum({
@@ -66,9 +67,9 @@ function createSubscription(connectionId, user_callback)
     var ffiCallback = ffi.Callback('void', ['int32', 'CString', SOPC_DataValuePtr],
                                    function(connectionId, nodeId, value) {
                                        var dereferenced_value = value.deref();
-                                       var data_value = new data_value.DataValue()
+                                       var dv = new data_value.DataValue()
                                                                       .FromC(dereferenced_value);
-                                       user_callback(connectionId, nodeId, data_value);
+                                       user_callback(connectionId, nodeId, dv);
                                    });
 
     // Make an extra reference to the callback pointer to avoid GC
@@ -95,10 +96,15 @@ function write(connectionId, writeValueArray)
     {
         writeValueArrayC.push(elt.ToC());
     }
-    return (0 == bind.sopc_client.SOPC_ClientHelper_Write(connectionId,
+    var status_codes = new bind.UInt32Array(writeValueArrayC.length);
+    var status = bind.sopc_client.SOPC_ClientHelper_Write(connectionId,
                                                           writeValueArrayC,
                                                           writeValueArrayC.length,
-                                                          ref.NULL));
+                                                          status_codes);
+    console.log("write status: ", status);
+    //TODO return status codes for each write
+    console.log("write status codes: ", status_codes);
+    return status == 0;
 }
 
 function disconnect(connectionId){
@@ -116,6 +122,7 @@ module.exports.disconnect = disconnect;
 module.exports.addMonitoredItems = addMonitoredItems;
 module.exports.createSubscription = createSubscription;
 
+module.exports.Variant = variant.Variant;
 module.exports.DataValue = data_value.DataValue;
 
 module.exports.write = write;

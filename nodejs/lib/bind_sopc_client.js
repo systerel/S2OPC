@@ -192,6 +192,7 @@ const SOPC_ClientHelper_WriteValue = StructType({
 });
 
 const SOPC_ClientHelper_WriteValueArray = ArrayType(SOPC_ClientHelper_WriteValue);
+const UInt32Array = ArrayType('uint32');
 
 const sopc_client = ffi.Library('libclient_subscription', {
     'SOPC_ClientHelper_Initialize': ['int32', ['CString', 'int32']],
@@ -201,7 +202,7 @@ const sopc_client = ffi.Library('libclient_subscription', {
     'SOPC_ClientHelper_CreateSubscription': ['int32', ['int32', 'pointer']],
     'SOPC_ClientHelper_AddMonitoredItems': ['int32', ['int32', CStringArray, 'size_t']],
     'SOPC_ClientHelper_Unsubscribe': ['int32', ['int32']],
-    'SOPC_ClientHelper_Write': ['int32', ['int32', SOPC_ClientHelper_WriteValueArray, 'size_t', uint32_ptr]]
+    'SOPC_ClientHelper_Write': ['int32', ['int32', SOPC_ClientHelper_WriteValueArray, 'size_t', UInt32Array]]
 });
 
 module.exports.sopc_client = sopc_client
@@ -214,3 +215,4 @@ module.exports.SOPC_VariantArrayType = SOPC_VariantArrayType;
 module.exports.SOPC_VariantValue = SOPC_VariantValue;
 module.exports.SOPC_Variant = SOPC_Variant;
 module.exports.SOPC_ClientHelper_WriteValue = SOPC_ClientHelper_WriteValue;
+module.exports.UInt32Array = UInt32Array;

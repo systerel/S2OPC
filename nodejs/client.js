@@ -31,12 +31,7 @@ if(status){
 var dataChange_callback = function(connectionId, nodeId, dataValue) {
     console.log("connectionId:", connectionId);
     console.log("nodeId:", nodeId);
-    console.log("value status:", dataValue.status);
-    console.log("value source TS:", dataValue.src_ts);
-    console.log("value server TS:", dataValue.srv_ts);
-    console.log("value source PS:", dataValue.src_ps);
-    console.log("value server PS:", dataValue.srv_ps);
-    console.log("value:", dataValue.value);
+    console.log("Data Value:", dataValue)
 }
 
 var connectionId = 0;
@@ -74,8 +69,13 @@ if(status)
             throw `'${v}' is not a string`
         }
     });
+
+    const getRandomInt32 = () => Math.floor(Math.random() * Math.floor(2**32 - 1)) - (2**31);
+
+    var variant = new sopc_client.Variant()
+                                 .setValue(6, 0, getRandomInt32());
     var data_value = new sopc_client.DataValue()
-                                    .setValue(1, 30);
+                                    .setValue(variant);
 
     var writeValue = new sopc_client.WriteValue()
                           .setNodeId("ns=1;s=Int32_030")
