@@ -29,4 +29,6 @@ class WriteValue
     }
 }
 
-module.exports.WriteValue = WriteValue;
+module.exports = {
+    WriteValue
+};

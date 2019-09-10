@@ -108,13 +108,14 @@ if(status)
 
 function disconnect(connectionId){
     console.log("Disconnecting client");
+    sopc_client.unsubscribe(connectionId);
     sopc_client.disconnect(connectionId);
     sopc_client.finalize();
 }
 
 if (status)
 {
-    setTimeout(disconnect, 1000000, connectionId);
+    setTimeout(disconnect, 10000, connectionId);
 }
 else
 {

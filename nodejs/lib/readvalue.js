@@ -32,4 +32,6 @@ class ReadValue {
     }
 }
 
-module.exports.ReadValue = ReadValue;
+module.exports = {
+    ReadValue
+};

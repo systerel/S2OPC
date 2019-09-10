@@ -61,4 +61,6 @@ class Variant
     }
 }
 
-module.exports.Variant = Variant;
+module.exports = {
+    Variant
+};

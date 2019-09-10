@@ -129,26 +129,30 @@ function read(connectionId, readValuesArray) {
     return [0 == status, resultDataValues];
 }
 
+function unsubscribe(connectionId) {
+    return (0 == bind.sopc_client.SOPC_ClientHelper_Unsubscribe(connectionId));
+}
+
 function disconnect(connectionId){
     return (0 == bind.sopc_client.SOPC_ClientHelper_Disconnect(connectionId));
 }
 
-module.exports.log_level = SOPC_Toolkit_Log_Level;
-module.exports.security_mode = SOPC_MessageSecurityMode;
-module.exports.security_policy = SOPC_SecurityPolicy;
-module.exports.SecurityCfg = SecurityCfg;
-module.exports.initialize = initialize;
-module.exports.finalize = finalize;
-module.exports.connect = connect;
-module.exports.disconnect = disconnect;
-module.exports.addMonitoredItems = addMonitoredItems;
-module.exports.createSubscription = createSubscription;
-
-module.exports.Variant = variant.Variant;
-module.exports.DataValue = data_value.DataValue;
-
-module.exports.write = write;
-module.exports.WriteValue = write_value.WriteValue;
-
-module.exports.read = read;
-module.exports.ReadValue = read_value.ReadValue;
+module.exports = {
+    log_level : SOPC_Toolkit_Log_Level,
+    security_mode : SOPC_MessageSecurityMode,
+    security_policy : SOPC_SecurityPolicy,
+    SecurityCfg,
+    initialize,
+    finalize,
+    connect,
+    disconnect,
+    addMonitoredItems,
+    createSubscription,
+    unsubscribe,
+    Variant : variant.Variant,
+    DataValue : data_value.DataValue,
+    write,
+    WriteValue : write_value.WriteValue,
+    read,
+    ReadValue : read_value.ReadValue
+};

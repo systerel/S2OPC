@@ -1,5 +1,4 @@
 const bind = require('./bind_sopc_client');
-const ref = require('ref');
 const variant = require('./variant');
 
 class DataValue
@@ -43,4 +42,6 @@ class DataValue
     }
 }
 
-module.exports.DataValue = DataValue;
+module.exports = {
+    DataValue
+ };

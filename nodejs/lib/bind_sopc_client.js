@@ -216,22 +216,18 @@ const sopc_client = ffi.Library('libclient_subscription', {
     'SOPC_ClientHelper_Read': ['int32', ['int32', SOPC_ClientHelper_ReadValueArray, 'size_t', SOPC_DataValueArrayPtr]]
 });
 
-module.exports.sopc_client = sopc_client
-
-module.exports.CStringArray = CStringArray
-module.exports.UInt32Array = UInt32Array;
-
-module.exports.security_cfg = SOPC_ClientHelper_SecurityCfg;
-
-module.exports.SOPC_DataValue = SOPC_DataValue;
-module.exports.SOPC_DataValueArray = SOPC_DataValueArray;
-
-module.exports.SOPC_BuiltinId = SOPC_BuiltinId;
-module.exports.SOPC_IdentifierType = SOPC_IdentifierType;
-
-module.exports.SOPC_VariantArrayType = SOPC_VariantArrayType;
-module.exports.SOPC_VariantValue = SOPC_VariantValue;
-module.exports.SOPC_Variant = SOPC_Variant;
-module.exports.SOPC_ClientHelper_WriteValue = SOPC_ClientHelper_WriteValue;
-
-module.exports.SOPC_ClientHelper_ReadValue = SOPC_ClientHelper_ReadValue;
+module.exports = {
+    sopc_client,
+    CStringArray,
+    UInt32Array,
+    security_cfg : SOPC_ClientHelper_SecurityCfg,
+    SOPC_DataValue,
+    SOPC_DataValueArray,
+    SOPC_BuiltinId,
+    SOPC_IdentifierType,
+    SOPC_VariantArrayType,
+    SOPC_VariantValue,
+    SOPC_Variant,
+    SOPC_ClientHelper_WriteValue,
+    SOPC_ClientHelper_ReadValue,
+};
