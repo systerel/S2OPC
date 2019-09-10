@@ -154,17 +154,8 @@ class BaseConnectionHandler:
     # Subscription
     def add_nodes_to_subscription(self, nodeIds):
         """
-        Subscribe to a list of string of NodeIds in the OPC-UA format:
-
-        - "i=42" for an integer NodeId,
-        - "s=Foobar" for a string NodeId,
-        - "g=C496578A-0DFE-4b8f-870A-745238C6AEAE" for a GUID-NodeId,
-        - "b=Barbar" for a ByteString.
-
-        The string can be prepend by a "ns={};" which specifies the namespace index.
+        Subscribe to a list of string of NodeIds in the OPC-UA format (see `pys2opc` module documentation).
         This call is always synchroneous, so that the Toolkit waits for the server response to return.
-
-        :TODO: document NodeId once throughout the documentation.
 
         The callback `pys2opc.connection.BaseConnectionHandler.on_datachanged` will be called once for each new value of the nodes.
         In particular, the callback is at least called once for the initial value.
@@ -215,8 +206,7 @@ class BaseConnectionHandler:
         Otherwise, returns the `pys2opc.types.Request`.
 
         Args:
-            nodeIds: NodeId described as a string "[ns=x;]t=y" where x is the namespace index, t is the NodeId type
-                     (s for a string NodeId, i for integer, b for bytestring, g for GUID), and y is typed content.
+            nodeIds: A list of NodeIds described as a strings (see `pys2opc` module documentation).
             attributes: Optional: a list of attributes to read. The list has the same length as nodeIds. When omited,
                         reads the attribute Value (see `pys2opc.types.AttributeId` for a list of attributes).
         """
@@ -256,8 +246,7 @@ class BaseConnectionHandler:
         If both `datavalue.variantType` and the type in `types` are given, they must be equal.
 
         Args:
-            nodeIds: NodeId described as a string "[ns=x;]t=y" where x is the namespace index, t is the NodeId type
-                     (s for a string NodeId, i for integer, b for bytestring, g for GUID), and y is typed content.
+            nodeIds: A list of NodeIds described as a strings (see `pys2opc` module documentation).
             datavalues: A list of `pys2opc.types.DataValue` to write for each NodeId, see `pys2opc.types.DataValue.from_python`
             attributes: Optional: a list of attributes to write. The list has the same length as nodeIds. When omitted,
                         reads the attribute Value (see `pys2opc.types.AttributeId` for a list of attributes).
@@ -314,6 +303,10 @@ class BaseConnectionHandler:
         When `bWaitResponse`, waits for  and returns the `pys2opc.responses.BrowseResponse`,
         which has a list `pys2opc.types.BrowseResult`s in its `results` attribute.
         Otherwise, returns the `pys2opc.types.Request`.
+
+        Args:
+            nodeIds: A list of NodeIds described as a strings (see `pys2opc` module documentation).
+            maxReferencesPerNode: Optional: The maximum number of returned references per node to browse.
         """
         # Prepare the request, it will be freed by the Toolkit
         payload = allocator_no_gc('OpcUa_BrowseRequest *')
