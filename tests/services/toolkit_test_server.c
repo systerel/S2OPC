@@ -310,7 +310,8 @@ int main(int argc, char* argv[])
             SOPC_String_Initialize(&epConfig.secuConfigurations[0].securityPolicy);
             status = SOPC_String_AttachFromCstring(&epConfig.secuConfigurations[0].securityPolicy,
                                                    SOPC_SecurityPolicy_Basic256Sha256_URI);
-            epConfig.secuConfigurations[0].securityModes = SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK;
+            epConfig.secuConfigurations[0].securityModes =
+                SOPC_SECURITY_MODE_SIGN_MASK | SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK;
             epConfig.secuConfigurations[0].nbOfUserTokenPolicies = 2;
             epConfig.secuConfigurations[0].userTokenPolicies[0] = c_userTokenPolicy_Anonymous;
             epConfig.secuConfigurations[0].userTokenPolicies[1] = c_userTokenPolicy_UserName_NoneSecurityPolicy;
