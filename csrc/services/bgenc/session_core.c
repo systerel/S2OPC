@@ -21,7 +21,7 @@
 
  File Name            : session_core.c
 
- Date                 : 15/07/2019 12:56:02
+ Date                 : 11/09/2019 12:35:38
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -405,11 +405,7 @@ void session_core__server_activate_session_req_and_resp_sm(
       else if (session_core__l_state == constants__e_session_userActivated) {
          session_core_1__get_session_user_server(session_core__session,
             &session_core__l_user);
-         session_core_1__is_same_user_server(session_core__l_user,
-            session_core__user,
-            &session_core__l_is_same_user);
-         if ((session_core__l_channel == session_core__channel) &&
-            (session_core__l_is_same_user == false)) {
+         if (session_core__l_channel == session_core__channel) {
             session_core__server_internal_activate_req_and_resp(session_core__channel,
                session_core__session,
                constants__e_session_userActivating,
@@ -424,20 +420,27 @@ void session_core__server_activate_session_req_and_resp_sm(
                session_core__l_ret = constants_statuscodes_bs__e_sc_bad_application_signature_invalid;
             }
          }
-         else if ((session_core__l_channel != session_core__channel) &&
-            (session_core__l_is_same_user == true)) {
-            session_core__server_internal_activate_req_and_resp(session_core__channel,
-               session_core__session,
-               constants__e_session_scActivating,
+         else if (session_core__l_channel != session_core__channel) {
+            session_core_1__is_same_user_server(session_core__l_user,
                session_core__user,
-               session_core__activate_req_msg,
-               session_core__activate_resp_msg,
-               &session_core__l_valid);
-            if (session_core__l_valid == true) {
-               session_core__l_ret = constants_statuscodes_bs__e_sc_ok;
+               &session_core__l_is_same_user);
+            if (session_core__l_is_same_user == true) {
+               session_core__server_internal_activate_req_and_resp(session_core__channel,
+                  session_core__session,
+                  constants__e_session_scActivating,
+                  session_core__user,
+                  session_core__activate_req_msg,
+                  session_core__activate_resp_msg,
+                  &session_core__l_valid);
+               if (session_core__l_valid == true) {
+                  session_core__l_ret = constants_statuscodes_bs__e_sc_ok;
+               }
+               else {
+                  session_core__l_ret = constants_statuscodes_bs__e_sc_bad_application_signature_invalid;
+               }
             }
             else {
-               session_core__l_ret = constants_statuscodes_bs__e_sc_bad_application_signature_invalid;
+               session_core__l_ret = constants_statuscodes_bs__e_sc_bad_invalid_state;
             }
          }
          else {

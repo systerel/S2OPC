@@ -535,10 +535,8 @@ OPERATIONS
         ELSIF l_state = e_session_userActivated
         THEN
             l_user <-- get_session_user_server (session);
-            l_is_same_user <-- is_same_user_server (l_user, user);
             /* User changed XOR channel changed */
-            IF l_channel = channel &
-                l_is_same_user = FALSE
+            IF l_channel = channel
             THEN
                 l_valid <-- server_internal_activate_req_and_resp (channel,
                                                                    session,
@@ -552,20 +550,26 @@ OPERATIONS
                     /* Note: it also might be an unexpected internal error */
                     l_ret := e_sc_bad_application_signature_invalid
                 END
-            ELSIF l_channel /= channel &
-                l_is_same_user = TRUE
+            ELSIF l_channel /= channel
             THEN
-                l_valid <-- server_internal_activate_req_and_resp (channel,
-                                                                   session,
-                                                                   e_session_scActivating,
-                                                                   user,
-                                                                   activate_req_msg,
-                                                                   activate_resp_msg);
-                IF l_valid = TRUE THEN
-                    l_ret := e_sc_ok
+                l_is_same_user <-- is_same_user_server (l_user, user);
+                /* User shall remain the same if channel is different */
+                IF l_is_same_user = TRUE
+                THEN
+                    l_valid <-- server_internal_activate_req_and_resp (channel,
+                        session,
+                        e_session_scActivating,
+                        user,
+                        activate_req_msg,
+                        activate_resp_msg);
+                    IF l_valid = TRUE THEN
+                        l_ret := e_sc_ok
+                    ELSE
+                        /* Note: it also might be an unexpected internal error */
+                        l_ret := e_sc_bad_application_signature_invalid
+                    END
                 ELSE
-                    /* Note: it also might be an unexpected internal error */
-                    l_ret := e_sc_bad_application_signature_invalid
+                    l_ret := e_sc_bad_invalid_state
                 END
             ELSE
                 l_ret := e_sc_bad_invalid_state
