@@ -203,6 +203,20 @@
      <TestCase name="012.js"/>
     </TestCases>
    </ConformanceUnit>
+   <ConformanceUnit name="Security Certificate Validation">
+    <TestCases>
+     <TestCase name="001.js"/>
+     <TestCase name="005.js"/>
+     <TestCase name="007.js"/>
+     <TestCase name="008.js"/>
+     <TestCase name="009.js"/>
+     <TestCase name="010.js"/>
+     <TestCase name="011.js"/>
+     <TestCase name="033.js"/>
+     <TestCase name="037.js"/>
+     <TestCase name="038.js"/>
+    </TestCases>
+   </ConformanceUnit>
    <ConformanceUnit name="Security None CreateSession ActivateSession">
     <TestCases>
      <TestCase name="001.js"/>
@@ -243,6 +257,16 @@
      <TestCase name="002.js"/>
      <TestCase name="004.js"/>
      <TestCase name="005.js"/>
+    </TestCases>
+   </ConformanceUnit>
+   <ConformanceUnit name="Security Encryption Required">
+    <TestCases>
+     <TestCase name="manual.js"/>
+    </TestCases>
+   </ConformanceUnit>
+   <ConformanceUnit name="Security Signing Required">
+    <TestCases>
+     <TestCase name="manual.js"/>
     </TestCases>
    </ConformanceUnit>
   </ConformanceGroup>

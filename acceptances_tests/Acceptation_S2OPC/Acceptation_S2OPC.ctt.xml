@@ -12687,7 +12687,7 @@
          </Column>
          <Column column="1">
           <ItemData role="0" rolename="DisplayRole">
-           <Value typename="QString" type="10" data="PKI/CA/certs/opcuactt_issued.der"/>
+           <Value typename="QString" type="10" data="../../tests/data/cert/client_2k_cert.der"/>
           </ItemData>
           <ChildRows size="0"/>
          </Column>
@@ -12725,7 +12725,7 @@
          </Column>
          <Column column="1">
           <ItemData role="0" rolename="DisplayRole">
-           <Value typename="QString" type="10" data="PKI/CA/private/opcuactt_issued.pem"/>
+           <Value typename="QString" type="10" data="../../tests/data/cert/client_2k_key.pem"/>
           </ItemData>
           <ChildRows size="0"/>
          </Column>
