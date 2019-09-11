@@ -99,8 +99,20 @@ const SOPC_NodeId = StructType({
     ns : 'uint16',
     data : SOPC_NodeIdData
 });
-
 const SOPC_NodeIdPtr = ref.refType(SOPC_NodeId);
+
+const SOPC_QualifiedName = StructType({
+    ns: 'uint16',
+    string: SOPC_String
+});
+const SOPC_QualifiedNamePtr = ref.refType(SOPC_QualifiedName);
+
+const SOPC_LocalizedText = StructType({
+    locale: SOPC_String,
+    text: SOPC_String
+});
+
+const SOPC_LocalizedTextPtr = ref.refType(SOPC_LocalizedText);
 
 const SOPC_VariantArrayValue = UnionType({
     //TODO to fill
@@ -152,14 +164,14 @@ const SOPC_VariantValue = UnionType({
     doublev: 'double',
     string: SOPC_String,
     date_time: 'int64',
-    guid: SOPC_GuidPtr,
+    //guid: SOPC_GuidPtr,
     bstring: SOPC_String,
     xml_elt: SOPC_String,
     node_id: SOPC_NodeIdPtr,
     //exp_node_id: SOPC_ExpandedNodeIdPtr,
     status: 'uint32',
-    //qname: SOPC_QualifiedNamePtr,
-    //localized_text: SOPC_LocalizedTextPtr,
+    qname: SOPC_QualifiedNamePtr,
+    localized_text: SOPC_LocalizedTextPtr,
     //extension_obj: SOPC_ExtensionObjectPtr,
     //data_value: SOPC_DataValuePtr,
     //diag_info: SOPC_DiagnosticInfoPtr,
@@ -184,8 +196,7 @@ const SOPC_DataValue = StructType({
 });
 
 const SOPC_DataValue_ptr = ref.refType(SOPC_DataValue);
-const SOPC_DataValueArray = ArrayType(SOPC_DataValue);
-const SOPC_DataValueArrayPtr = ref.refType(SOPC_DataValueArray);
+const SOPC_DataValuePtrArray = ArrayType(SOPC_DataValue_ptr);
 
 const SOPC_ClientHelper_WriteValue = StructType({
     nodeId : 'CString',
@@ -238,7 +249,7 @@ const sopc_client = ffi.Library('libclient_subscription', {
     'SOPC_ClientHelper_AddMonitoredItems': ['int32', ['int32', CStringArray, 'size_t']],
     'SOPC_ClientHelper_Unsubscribe': ['int32', ['int32']],
     'SOPC_ClientHelper_Write': ['int32', ['int32', SOPC_ClientHelper_WriteValueArray, 'size_t', UInt32Array]],
-    'SOPC_ClientHelper_Read': ['int32', ['int32', SOPC_ClientHelper_ReadValueArray, 'size_t', SOPC_DataValueArrayPtr]],
+    'SOPC_ClientHelper_Read': ['int32', ['int32', SOPC_ClientHelper_ReadValueArray, 'size_t', SOPC_DataValuePtrArray]],
     'SOPC_ClientHelper_Browse': ['int32', ['int32', SOPC_ClientHelper_BrowseRequestArray, 'size_t', SOPC_ClientHelper_BrowseResultArray]]
 });
 
@@ -248,7 +259,7 @@ module.exports = {
     UInt32Array,
     security_cfg : SOPC_ClientHelper_SecurityCfg,
     SOPC_DataValue,
-    SOPC_DataValueArray,
+    SOPC_DataValuePtrArray,
     SOPC_BuiltinId,
     SOPC_IdentifierType,
     SOPC_VariantArrayType,

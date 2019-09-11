@@ -12,10 +12,12 @@
     "yargs": "^13.3.0"
   },
   "devDependencies": {
-    "eslint": "^6.3.0"
+    "eslint": "^6.3.0",
+    "mocha": "^6.2.0"
   },
   "scripts": {
-    "client": "nodejs client.js"
+    "client": "nodejs client.js",
+    "test": "./node_modules/.bin/mocha --recursive --reporter spec"
   },
   "repository": "gitlab:systerel/S2OPC",
   "author": "s2opc-support@systerel.fr",

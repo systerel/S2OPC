@@ -52,7 +52,7 @@ function SecurityCfg(security_policy, security_mode, user_policy_id,
     return securityCfg;
 }
 
-var SOPC_DataValuePtr = ref.refType(bind.SOPC_DataValue);
+const SOPC_DataValuePtr = ref.refType(bind.SOPC_DataValue);
 
 function initialize(toolkit_log_path, toolkit_log_level){
     return (0 == bind.sopc_client.SOPC_ClientHelper_Initialize(toolkit_log_path, toolkit_log_level.value));
@@ -114,22 +114,22 @@ function read(connectionId, readValuesArray) {
     for (var elt of readValuesArray) {
         readValuesArrayC.push(elt.ToC());
     }
-    var dataValuesPtr = ref.alloc(bind.SOPC_DataValueArray);
+    var dataValuesPtrArray = new bind.SOPC_DataValuePtrArray(readValuesArrayC.length);
+
     var status = bind.sopc_client.SOPC_ClientHelper_Read(connectionId,
                                                          readValuesArrayC,
                                                          readValuesArrayC.length,
-                                                         dataValuesPtr);
-
-    var dataValueArray = dataValuesPtr.deref();
-    dataValueArray.length = readValuesArrayC.length;
+                                                         dataValuesPtrArray);
 
     var resultDataValues = [];
-    for (var i = 0; i < readValuesArrayC.length; i++) {
-        var dv = new data_value.DataValue()
-                               .FromC(dataValueArray[i]);
-        resultDataValues.push(dv);
+    if (status == 0) {
+        for (var i = 0; i < readValuesArrayC.length; i++) {
+            var dv = new data_value.DataValue()
+                .FromC(dataValuesPtrArray[i].deref());
+            resultDataValues.push(dv);
+        }
     }
-    return [0 == status, resultDataValues];
+    return [status, resultDataValues];
 }
 
 function browse(connectionId, browseRequests) {

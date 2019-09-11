@@ -103,6 +103,7 @@ if(status)
     for (var elt of resultDataValues) {
         console.log(elt);
     }
+    status = (status == 0);
     console.log("Reading nodes status:", status ? "SUCCESS" : "FAILED");
 }
 
