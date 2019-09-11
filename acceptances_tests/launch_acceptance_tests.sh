@@ -29,7 +29,6 @@ ROOT_DIR=$(cd $(dirname $0)/.. && pwd)
 LOG_FILE=server_acceptance_tests.log
 TMP_FILE=`mktemp`
 TAP_FILE=server_acceptance_tests.tap
-SELECTION=Acceptation_S2OPC/Acceptation_S2OPC.selection.xml
 UACTT_ERROR_FILE=uactt_error.log
 SERVER_ERROR=server_error.log
 
@@ -37,11 +36,7 @@ SERVER_ERROR=server_error.log
 SKIPPED_TESTS_FILE=skipped_tests.cfg
 KNOWN_BUGS_FILES=known_bugs.cfg
 
-if [[ -z "$WITH_NANO_EXTENDED" ]]
-then
-    TOOLKIT_TEST_SERVER=./toolkit_test_nano_server
-    SELECTION=Acceptation_S2OPC/Acceptation_S2OPC.nano.selection.xml
-elif [[ $WITH_NANO_EXTENDED -eq  0 ]]
+if [[ -z "$WITH_NANO_EXTENDED" ]] || [[ $WITH_NANO_EXTENDED -eq  0 ]]
 then
     TOOLKIT_TEST_SERVER=./toolkit_test_nano_server
     SELECTION=Acceptation_S2OPC/Acceptation_S2OPC.nano.selection.xml
