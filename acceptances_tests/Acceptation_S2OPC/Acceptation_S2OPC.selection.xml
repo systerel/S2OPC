@@ -358,6 +358,14 @@
      <TestCase name="004.js"/>
     </TestCases>
    </ConformanceUnit>
+   <ConformanceUnit name="Security Basic 256Sha256">
+    <TestCases>
+     <TestCase name="001.js"/>
+     <TestCase name="002.js"/>
+     <TestCase name="004.js"/>
+     <TestCase name="005.js"/>
+    </TestCases>
+   </ConformanceUnit>
    <ConformanceUnit name="Security Administration">
     <TestCases>
      <TestCase name="manual.js"/>
@@ -366,6 +374,14 @@
    <ConformanceUnit name="Security - No Application Authentication">
     <TestCases>
      <TestCase name="manual.js"/>
+    </TestCases>
+   </ConformanceUnit>
+   <ConformanceUnit name="Security Basic 256">
+    <TestCases>
+     <TestCase name="001.js"/>
+     <TestCase name="002.js"/>
+     <TestCase name="004.js"/>
+     <TestCase name="005.js"/>
     </TestCases>
    </ConformanceUnit>
   </ConformanceGroup>
