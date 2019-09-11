@@ -39,9 +39,30 @@
 #include "sopc_crypto_provider.h"
 #include "sopc_key_manager.h"
 
+#define SOPC_CertificateValidationError_Invalid 0x80120000
+#define SOPC_CertificateValidationError_TimeInvalid 0x80140000
+#define SOPC_CertificateValidationError_IssuerTimeInvalid 0x80150000
+#define SOPC_CertificateValidationError_HostNameInvalid 0x80160000
+#define SOPC_CertificateValidationError_UriInvalid 0x80170000
+#define SOPC_CertificateValidationError_UseNotAllowed 0x80180000
+#define SOPC_CertificateValidationError_IssuerUseNotAllowed 0x80190000
+#define SOPC_CertificateValidationError_Untrusted 0x801A0000
+#define SOPC_CertificateValidationError_RevocationUnknown 0x801B0000
+#define SOPC_CertificateValidationError_IssuerRevocationUnknown 0x801C0000
+#define SOPC_CertificateValidationError_Revoked 0x801D0000
+#define SOPC_CertificateValidationError_IssuerRevoked 0x801E0000
+#define SOPC_CertificateValidationError_ChainIncomplete 0x810D0000
+#define SOPC_CertificateValidationError_Unkown 0x80000000
+
 typedef void (*SOPC_PKIProvider_Free_Func)(SOPC_PKIProvider* pPKI);
+
+/**
+ * \brief \p error is only set if returned status is different from SOPC_STATUS_OK
+ *
+ */
 typedef SOPC_ReturnStatus (*SOPC_FnValidateCertificate)(const struct SOPC_PKIProvider* pPKI,
-                                                        const SOPC_Certificate* pToValidate);
+                                                        const SOPC_Certificate* pToValidate,
+                                                        uint32_t* error);
 
 /**
  * \brief   The PKIProvider object defines the common interface for the Public Key Infrastructure.

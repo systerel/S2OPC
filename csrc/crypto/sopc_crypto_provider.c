@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include <assert.h>
 #include <string.h>
 
 #include "sopc_crypto_provider.h"
@@ -1111,8 +1112,11 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricVerify(const SOPC_CryptoProvider
  */
 SOPC_ReturnStatus SOPC_CryptoProvider_Certificate_Validate(const SOPC_CryptoProvider* pProvider,
                                                            const SOPC_PKIProvider* pPKI,
-                                                           const SOPC_Certificate* pCert)
+                                                           const SOPC_Certificate* pCert,
+                                                           uint32_t* error)
 {
+    assert(NULL != error);
+
     // TODO: where is the key key_pub <-> key_priv association checked?
     if (NULL == pProvider || NULL == pProvider->pProfile || NULL == pProvider->pProfile->pFnCertVerify ||
         NULL == pPKI || NULL == pPKI->pFnValidateCertificate || NULL == pCert)
@@ -1120,8 +1124,11 @@ SOPC_ReturnStatus SOPC_CryptoProvider_Certificate_Validate(const SOPC_CryptoProv
 
     // Let the lib-specific code handle the verification for the current security policy
     if (pProvider->pProfile->pFnCertVerify(pProvider, pCert) != SOPC_STATUS_OK)
+    {
+        *error = SOPC_CertificateValidationError_Invalid;
         return SOPC_STATUS_NOK;
+    }
 
     // Verify certificate through PKIProvider callback
-    return pPKI->pFnValidateCertificate(pPKI, pCert);
+    return pPKI->pFnValidateCertificate(pPKI, pCert, error);
 }

@@ -436,16 +436,18 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
                                                                    (uint32_t) senderCertificate.Length, &cert);
                 if (SOPC_STATUS_OK == status)
                 {
-                    status = SOPC_CryptoProvider_Certificate_Validate(scConnection->cryptoProvider, pkiProvider, cert);
+                    status = SOPC_CryptoProvider_Certificate_Validate(scConnection->cryptoProvider, pkiProvider, cert,
+                                                                      errorStatus);
                 }
                 if (SOPC_STATUS_OK != status)
                 {
-                    *errorStatus = OpcUa_BadTcpInternalError;
-
                     SOPC_Logger_TraceError(
                         "ChunksMgr (asym cert): sender certificate validation failed (epCfgIdx=%" PRIu32
-                        " scCfgIdx=%" PRIu32 ")",
-                        epConfigIdx, scConfigIdx);
+                        " scCfgIdx=%" PRIu32 ") with error: %X",
+                        epConfigIdx, scConfigIdx, *errorStatus);
+
+                    // TODO:  keep reason in some cases ?
+                    *errorStatus = OpcUa_BadTcpInternalError;
                 }
 
                 if (!scConnection->isServerConnection || status != SOPC_STATUS_OK)
@@ -2000,6 +2002,7 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
                                           uint32_t scConnectionIdx,
                                           SOPC_Buffer* receivedBuffer)
 {
+    bool result = false;
     assert(scConnection != NULL);
     assert(receivedBuffer != NULL);
     assert(receivedBuffer->position == 0);
@@ -2044,6 +2047,7 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
         if (SC_Chunks_CheckMultiChunkContext(chunkCtx, &scConnection->tcpMsgProperties, &errorStatus) &&
             SC_Chunks_TreatTcpPayload(scConnection, &requestId, &errorStatus))
         {
+            result = true;
             // Current chunk shall have been moved into intermediate chunk buffers or into complete message buffer
             assert(NULL == chunkCtx->currentChunkInputBuffer);
             if (NULL != chunkCtx->currentMessageInputBuffer)
@@ -2069,7 +2073,7 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
         }
     }
 
-    if (errorStatus != SOPC_GoodGenericStatus)
+    if (!result)
     {
         SOPC_Logger_TraceError(
             "ChunksMgr: raised INT_SC_RCV_FAILURE: %" PRIX32 ": (epCfgIdx=%" PRIu32 ", scCfgIdx=%" PRIu32 ")",

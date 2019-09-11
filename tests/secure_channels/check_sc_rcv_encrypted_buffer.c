@@ -69,11 +69,14 @@ static SOPC_ReturnStatus Check_Client_Closed_SC_Helper(SOPC_StatusCode status)
     return Check_Client_Closed_SC(scConfigIdx, scConfigIdx, scConfigIdx, pendingRequestHandle, status);
 }
 
-static SOPC_ReturnStatus PKIStub_ValidateAnything(const SOPC_PKIProvider* pPKI, const SOPC_Certificate* pToValidate)
+static SOPC_ReturnStatus PKIStub_ValidateAnything(const SOPC_PKIProvider* pPKI,
+                                                  const SOPC_Certificate* pToValidate,
+                                                  uint32_t* error)
 {
     /* avoid unused parameter compiler warning */
     (void) (pPKI);
     (void) (pToValidate);
+    (void) (error);
 
     SOPC_Atomic_Int_Set(&pkiValidationAsked, true);
     return SOPC_STATUS_OK;

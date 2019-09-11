@@ -36,6 +36,8 @@
 
 #include "mbedtls/x509.h"
 
+#include <assert.h>
+
 /**
  * The minimal profile supported by the PKIProviderStack. It requires cacert signed with
  *  at least SHA-256, with an RSA key of at least 2048 bits.
@@ -49,10 +51,99 @@ static const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_minimal = {
     .rsa_min_bitlen = 2048,
 };
 
+static uint32_t PKIProviderStack_GetCertificateValidationError(uint32_t failure_reasons)
+{
+    if ((failure_reasons & MBEDTLS_X509_BADCERT_EXPIRED) != 0)
+    {
+        return SOPC_CertificateValidationError_TimeInvalid;
+    }
+    else if ((failure_reasons & MBEDTLS_X509_BADCERT_REVOKED) != 0)
+    {
+        return SOPC_CertificateValidationError_Revoked;
+    }
+    else if ((failure_reasons & MBEDTLS_X509_BADCERT_CN_MISMATCH) != 0)
+    {
+        return SOPC_CertificateValidationError_HostNameInvalid;
+    }
+    else if ((failure_reasons & MBEDTLS_X509_BADCERT_NOT_TRUSTED) != 0)
+    {
+        return SOPC_CertificateValidationError_Untrusted;
+    }
+    else if ((failure_reasons & MBEDTLS_X509_BADCRL_NOT_TRUSTED) != 0)
+    {
+        return SOPC_CertificateValidationError_RevocationUnknown;
+    }
+    else if ((failure_reasons & MBEDTLS_X509_BADCRL_EXPIRED) != 0)
+    {
+        return SOPC_CertificateValidationError_RevocationUnknown;
+    }
+    else if ((failure_reasons & MBEDTLS_X509_BADCERT_MISSING) != 0)
+    {
+        return SOPC_CertificateValidationError_Invalid;
+    }
+    else if ((failure_reasons & MBEDTLS_X509_BADCERT_SKIP_VERIFY) != 0)
+    {
+        return SOPC_CertificateValidationError_UseNotAllowed;
+    }
+    else if ((failure_reasons & MBEDTLS_X509_BADCERT_OTHER) != 0)
+    {
+        return SOPC_CertificateValidationError_Untrusted;
+    }
+    else if ((failure_reasons & MBEDTLS_X509_BADCERT_FUTURE) != 0)
+    {
+        return SOPC_CertificateValidationError_TimeInvalid;
+    }
+    else if ((failure_reasons & MBEDTLS_X509_BADCRL_FUTURE) != 0)
+    {
+        return SOPC_CertificateValidationError_RevocationUnknown;
+    }
+    else if ((failure_reasons & MBEDTLS_X509_BADCERT_KEY_USAGE) != 0)
+    {
+        return SOPC_CertificateValidationError_Invalid;
+    }
+    else if ((failure_reasons & MBEDTLS_X509_BADCERT_EXT_KEY_USAGE) != 0)
+    {
+        return SOPC_CertificateValidationError_Invalid;
+    }
+    else if ((failure_reasons & MBEDTLS_X509_BADCERT_NS_CERT_TYPE) != 0)
+    {
+        return SOPC_CertificateValidationError_Invalid;
+    }
+    else if ((failure_reasons & MBEDTLS_X509_BADCERT_BAD_MD) != 0)
+    {
+        return SOPC_CertificateValidationError_Invalid;
+    }
+    else if ((failure_reasons & MBEDTLS_X509_BADCERT_BAD_PK) != 0)
+    {
+        return SOPC_CertificateValidationError_Invalid;
+    }
+    else if ((failure_reasons & MBEDTLS_X509_BADCERT_BAD_KEY) != 0)
+    {
+        return SOPC_CertificateValidationError_Invalid;
+    }
+    else if ((failure_reasons & MBEDTLS_X509_BADCRL_BAD_MD) != 0)
+    {
+        return SOPC_CertificateValidationError_RevocationUnknown;
+    }
+    else if ((failure_reasons & MBEDTLS_X509_BADCRL_BAD_PK) != 0)
+    {
+        return SOPC_CertificateValidationError_RevocationUnknown;
+    }
+    else if ((failure_reasons & MBEDTLS_X509_BADCRL_BAD_KEY) != 0)
+    {
+        return SOPC_CertificateValidationError_RevocationUnknown;
+    }
+
+    return SOPC_CertificateValidationError_Unkown;
+}
+
 static SOPC_ReturnStatus PKIProviderStack_ValidateCertificate(const SOPC_PKIProvider* pPKI,
-                                                              const SOPC_Certificate* pToValidate)
+                                                              const SOPC_Certificate* pToValidate,
+                                                              uint32_t* error)
 {
     (void) (pPKI);
+    assert(NULL != error);
+    *error = SOPC_CertificateValidationError_Unkown;
     SOPC_Certificate* cert_ca = NULL;
     CertificateRevList* cert_rev_list = NULL;
     mbedtls_x509_crl* rev_list = NULL;
@@ -81,7 +172,7 @@ static SOPC_ReturnStatus PKIProviderStack_ValidateCertificate(const SOPC_PKIProv
             &mbedtls_x509_crt_profile_minimal, NULL, /* You can specify an expected Common Name here */
             &failure_reasons, NULL, NULL) != 0)
     {
-        // TODO: you could further analyze here...
+        *error = PKIProviderStack_GetCertificateValidationError(failure_reasons);
         return SOPC_STATUS_NOK;
     }
     SOPC_GCC_DIAGNOSTIC_RESTORE
