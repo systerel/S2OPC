@@ -134,6 +134,7 @@ void SOPC_ScInternalContext_ClearIntermediateInputChunks(SOPC_SecureConnection_C
         SOPC_SLinkedList_Apply(chunkCtx->intermediateChunksInputBuffers,
                                SOPC_ScInternalContext_DeleteIntermediateInputBuffer);
         SOPC_SLinkedList_Clear(chunkCtx->intermediateChunksInputBuffers);
+        chunkCtx->intermediateChunksInputBuffers = NULL;
     }
 }
 
@@ -141,9 +142,13 @@ void SOPC_ScInternalContext_ClearIntermediateInputChunks(SOPC_SecureConnection_C
 void SOPC_ScInternalContext_ClearCurrentInputChunkContext(SOPC_SecureConnection_ChunkMgrCtx* chunkCtx)
 {
     assert(NULL != chunkCtx);
-    SOPC_SLinkedList* backupIntermediateContext = chunkCtx->intermediateChunksInputBuffers;
-    memset(chunkCtx, 0, sizeof(SOPC_SecureConnection_ChunkMgrCtx));
-    chunkCtx->intermediateChunksInputBuffers = backupIntermediateContext;
+    SOPC_Buffer_Delete(chunkCtx->currentChunkInputBuffer);
+    chunkCtx->currentChunkInputBuffer = NULL;
+    chunkCtx->currentMsgSize = 0;
+    chunkCtx->currentMsgType = SOPC_MSG_TYPE_INVALID;
+    chunkCtx->currentMsgIsFinal = SOPC_MSG_ISFINAL_INVALID;
+    SOPC_Buffer_Delete(chunkCtx->currentMessageInputBuffer);
+    chunkCtx->currentMessageInputBuffer = NULL;
 }
 
 /** @brief Clear the current chunk and intermediate chunks context */
