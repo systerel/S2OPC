@@ -703,6 +703,10 @@ static SOPC_ReturnStatus ReadHelper_Initialize(SOPC_ReturnStatus status,
             {
                 status = SOPC_STATUS_OUT_OF_MEMORY;
             }
+            else
+            {
+                SOPC_DataValue_Initialize(values[i]);
+            }
         }
         if (SOPC_STATUS_OK != status)
         {
