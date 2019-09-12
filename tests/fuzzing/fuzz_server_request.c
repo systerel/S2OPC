@@ -70,8 +70,7 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
         // Decode OPC UA Secure Conversation MessageChunk specific headers if necessary (not HEL/ACK/ERR)
         if (SC_Chunks_TreatTcpPayload(sc, &request_id, &errorStatus))
         {
-            SOPC_Buffer_Delete(chunkCtx->currentChunkInputBuffer);
-            chunkCtx->currentChunkInputBuffer = NULL;
+            SOPC_ScInternalContext_ClearInputChunksContext(chunkCtx);
         }
         else
         {
