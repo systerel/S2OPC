@@ -34,6 +34,9 @@ generation:
     when: always
     expire_in: '1 month'
     when: always
+  except:
+    variables:
+      - $NO_GEN
 
 ###
 # Compilation jobs
@@ -55,6 +58,11 @@ generation:
       - 'install_linux64/'
       - 'build/'  # Required when using coverage analysis
     expire_in: '1 month'
+  except:
+    variables:
+      - $WINDOWS_TEST
+      - $CROSS_COMPILE
+      - $WITH_COVERITY
 
 # Used by "normal" pipeline
 build-linux64-ASan:
@@ -65,19 +73,21 @@ build-linux64-ASan:
   except:
     variables:
       - $NO_ASAN
+      - $WINDOWS_TEST # repeat those of build_linux since it will be overwritten
+      - $CROSS_COMPILE
+      - $WITH_COVERITY
+
 
 # Used by coverage
 build-linux64:
   <<: *build_linux
   only:
     variables:
-      - $WITH_COVERAGE
-      - $CROSS_COMPILE
-      - $WITH_PYS2OPC
+      - $NO_ASAN
 
 build-win64: &build_win64
   <<: *docker_job
-  stage: build-others
+  stage: build
   image: registry.gitlab.com/systerel/s2opc/mingw_build@sha256:2f795355fd5e4b9ce3da064f049d9bf1296a13aa1fea3092cc81937b00a2bc8e # digest of mingw_build:1.7
   script:
     # Manually disable PyS2OPC for windows cross builds. When set in "variables:", the value is overwritten.
@@ -142,7 +152,12 @@ build-linux64-coverity:
   stage: test
   except:
     variables:
-      - $NO_ASAN
+      - $NO_TESTS
+      - $CROSS_COMPILE
+      - $WINDOWS_TEST
+      - $WITH_COVERITY
+      - $WITH_PYS2OPC
+      - $WITH_COVERAGE
 
 # Test check belongs to the test part, however it does not depend on linux build.
 test-check:
@@ -174,9 +189,12 @@ test-unit:
     expire_in: '1 month'
   except:
     variables:
+      - $NO_TESTS
       - $CROSS_COMPILE
       - $WINDOWS_TEST
       - $WITH_COVERITY
+      - $WITH_PYS2OPC
+      # Overwrite test_linux except to re-activate only test-unit for WITH_COVERAGE case
 
 test-uactt:
   <<: *test_linux
@@ -194,8 +212,6 @@ test-uactt:
 test-pys2opc:
   <<: *test_linux
   image: registry.gitlab.com/systerel/s2opc/test@sha256:a315200c6a613d6d63e971c5c560caff4ded5d7c747941f0fc48c979fccb27ef  # digest of test:2.5
-  dependencies:
-    - build-linux64
   script:
     - cd build
     - ctest -T test -R pys2opc
@@ -209,7 +225,7 @@ test-pys2opc:
     variables:
       - $WITH_PYS2OPC
   except:
-    variables: []
+    variables: [] # overrides the except
 
 ###
 # Analysis jobs
