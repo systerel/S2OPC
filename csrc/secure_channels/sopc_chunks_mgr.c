@@ -1516,6 +1516,8 @@ static bool SC_Chunks_TreatMsgMultiChunks(SOPC_SecureConnection* scConnection, S
             *errorStatus = OpcUa_BadOutOfMemory;
             return false;
         }
+        /* currentChunkInputBuffer is lent to the linked list, which will free it */
+        chunkCtx->currentChunkInputBuffer = NULL;
         // No current chunk or message context kept
         SOPC_ScInternalContext_ClearCurrentInputChunkContext(chunkCtx);
     }
@@ -2060,6 +2062,8 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
                     SOPC_SecureChannels_EnqueueInternalEvent(
                         scEvent, scConnectionIdx, (uintptr_t) chunkCtx->currentMessageInputBuffer, requestId);
                 }
+                /* currentMessageInputBuffer is lent to the secure channel, which will free it */
+                chunkCtx->currentMessageInputBuffer = NULL;
                 SOPC_ScInternalContext_ClearInputChunksContext(chunkCtx);
             }
         }
@@ -2074,7 +2078,6 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
         // Treat as prio events
         SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_RCV_FAILURE, scConnectionIdx, (uintptr_t) NULL,
                                                        errorStatus);
-        SOPC_Buffer_Delete(chunkCtx->currentChunkInputBuffer);
         SOPC_ScInternalContext_ClearInputChunksContext(chunkCtx);
     }
 
