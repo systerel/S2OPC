@@ -1098,15 +1098,31 @@ static bool SC_Chunks_CheckSequenceHeaderRequestId(SOPC_SecureConnection* scConn
     assert(scConnection != NULL);
     assert(scConnection->chunksCtx.currentChunkInputBuffer != NULL);
 
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     bool result = true;
     SOPC_SecureConnection_ChunkMgrCtx* chunkCtx = &scConnection->chunksCtx;
 
     SOPC_SentRequestMsg_Context* recordedMsgCtx = NULL;
 
     // Retrieve request id
-    status = SOPC_UInt32_Read(requestId, chunkCtx->currentChunkInputBuffer);
-    if (SOPC_STATUS_OK == status)
+    result = SOPC_STATUS_OK == SOPC_UInt32_Read(requestId, chunkCtx->currentChunkInputBuffer);
+    if (!result)
+    {
+        result = false;
+        *errorStatus = OpcUa_BadTcpInternalError;
+    }
+
+    // (In case of multi-chunk message) Check it is the same requestId than previous chunks
+    if (result)
+    {
+        if (chunkCtx->hasCurrentMsgRequestId && *requestId != chunkCtx->currentMsgRequestId)
+        {
+            // Different requestId found
+            result = false;
+            *errorStatus = OpcUa_BadSecurityChecksFailed;
+        }
+    }
+
+    if (result)
     {
         if (isClient)
         {
@@ -1148,10 +1164,12 @@ static bool SC_Chunks_CheckSequenceHeaderRequestId(SOPC_SecureConnection* scConn
             }
         }
     }
-    else
+
+    if (result)
     {
-        result = false;
-        *errorStatus = OpcUa_BadTcpInternalError;
+        // We shall keep data to check same requestId is used for all chunks
+        chunkCtx->hasCurrentMsgRequestId = true;
+        chunkCtx->currentMsgRequestId = *requestId;
     }
 
     return result;

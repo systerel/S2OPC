@@ -147,8 +147,6 @@ void SOPC_ScInternalContext_ClearCurrentInputChunkContext(SOPC_SecureConnection_
     chunkCtx->currentMsgSize = 0;
     chunkCtx->currentMsgType = SOPC_MSG_TYPE_INVALID;
     chunkCtx->currentMsgIsFinal = SOPC_MSG_ISFINAL_INVALID;
-    SOPC_Buffer_Delete(chunkCtx->currentMessageInputBuffer);
-    chunkCtx->currentMessageInputBuffer = NULL;
 }
 
 /** @brief Clear the current chunk and intermediate chunks context */
@@ -157,4 +155,9 @@ void SOPC_ScInternalContext_ClearInputChunksContext(SOPC_SecureConnection_ChunkM
     assert(NULL != chunkCtx);
     SOPC_ScInternalContext_ClearIntermediateInputChunks(chunkCtx);
     SOPC_ScInternalContext_ClearCurrentInputChunkContext(chunkCtx);
+    // Delete complete message context:
+    SOPC_Buffer_Delete(chunkCtx->currentMessageInputBuffer);
+    chunkCtx->currentMessageInputBuffer = NULL;
+    chunkCtx->hasCurrentMsgRequestId = false;
+    chunkCtx->currentMsgRequestId = 0;
 }

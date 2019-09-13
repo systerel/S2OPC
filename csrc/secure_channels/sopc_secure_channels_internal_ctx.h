@@ -95,7 +95,11 @@ typedef struct SOPC_SecureConnection_ChunkMgrCtx
     SOPC_Msg_Type currentMsgType;
     SOPC_Msg_IsFinal currentMsgIsFinal;
     SOPC_SLinkedList* intermediateChunksInputBuffers;
-    SOPC_Buffer* currentMessageInputBuffer; // The message (from one or several chunks) received
+    bool hasCurrentMsgRequestId;            // Set to true if currentRequetId is set (set when first chunk received)
+    uint32_t currentMsgRequestId;           // The valid requestId of the current message in reception
+                                            // (shall be the same for all chunks)
+    SOPC_Buffer* currentMessageInputBuffer; // The message (from one or several chunks) received:
+                                            // only set when message is complete
 } SOPC_SecureConnection_ChunkMgrCtx;
 
 // Set on HEL/ACK exchange (see OPC UA specification Part 6 table 36/37)
