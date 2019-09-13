@@ -133,7 +133,7 @@ void SOPC_ScInternalContext_ClearIntermediateInputChunks(SOPC_SecureConnection_C
     {
         SOPC_SLinkedList_Apply(chunkCtx->intermediateChunksInputBuffers,
                                SOPC_ScInternalContext_DeleteIntermediateInputBuffer);
-        SOPC_SLinkedList_Clear(chunkCtx->intermediateChunksInputBuffers);
+        SOPC_SLinkedList_Delete(chunkCtx->intermediateChunksInputBuffers);
         chunkCtx->intermediateChunksInputBuffers = NULL;
     }
 }
@@ -157,6 +157,4 @@ void SOPC_ScInternalContext_ClearInputChunksContext(SOPC_SecureConnection_ChunkM
     assert(NULL != chunkCtx);
     SOPC_ScInternalContext_ClearIntermediateInputChunks(chunkCtx);
     SOPC_ScInternalContext_ClearCurrentInputChunkContext(chunkCtx);
-    SOPC_SLinkedList_Delete(chunkCtx->intermediateChunksInputBuffers);
-    chunkCtx->intermediateChunksInputBuffers = NULL;
 }
