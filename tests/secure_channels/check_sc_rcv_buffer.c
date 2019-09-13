@@ -371,7 +371,7 @@ END_TEST
 
 #define INTERMEDIATE_CHUNK_DATA "abcdefab"
 
-static void simulate_N_chunks(const char isFinal, uint8_t initialSN, uint8_t nbChunks)
+static void simulate_N_chunks(const char isFinal, uint8_t initialSN, uint8_t nbChunks, bool degradedRequestId)
 {
     assert(nbChunks < 16 - initialSN);       // Ensure SN <= 15
     assert('C' == isFinal || nbChunks == 1); // Only intermediate chunk sent several times
@@ -404,6 +404,14 @@ static void simulate_N_chunks(const char isFinal, uint8_t initialSN, uint8_t nbC
         // Set SN = initialSN + i
         char SNcharValue = (char) (48 /* encoded value of char '0' */ + initialSN + i);
         msg[33] = SNcharValue;
+
+        if (degradedRequestId)
+        {
+            // For degraded case, Set requestId = valid requestId + i
+            char requestIdCharValue = (char) (48 /* encoded value of char '0' */ + 2 /* valid request id*/ + i);
+            msg[41] = requestIdCharValue;
+        }
+
         status = Simulate_Received_Message(scConfigIdx, msg);
         ck_assert_int_eq(SOPC_STATUS_OK, status);
     }
@@ -418,9 +426,9 @@ START_TEST(test_expected_receive_multi_chunks)
 
     // 3 intermediate chunks starting from SN=2
     const uint8_t nb_intermediate_chunks = 3;
-    simulate_N_chunks('C', 2, nb_intermediate_chunks);
+    simulate_N_chunks('C', 2, nb_intermediate_chunks, false);
 
-    simulate_N_chunks('F', (uint8_t)(2 + nb_intermediate_chunks), 1);
+    simulate_N_chunks('F', (uint8_t)(2 + nb_intermediate_chunks), 1, false);
 
     serviceEvent = Check_Service_Event_Received(SC_SERVICE_RCV_MSG, scConfigIdx, 0);
     ck_assert_ptr_nonnull(serviceEvent);
@@ -440,13 +448,27 @@ START_TEST(test_expected_receive_multi_chunks)
 }
 END_TEST
 
+START_TEST(test_unexpected_receive_multi_chunks_different_requestId)
+{
+    printf("SC_Rcv_Buffer: Simulate unexpected intermediate chunks with different requestId received\n");
+
+    // 2 intermediate chunks starting from SN=2 and RequestId=2 and incrementing both on second chunk
+    simulate_N_chunks('C', 2, 2, true);
+
+    // Since requestId is not the same in all chunks, the secure channel will be closed with security issue
+
+    SOPC_ReturnStatus status = Check_Client_Closed_SC_Helper(OpcUa_BadSecurityChecksFailed);
+    ck_assert(SOPC_STATUS_OK == status);
+}
+END_TEST
+
 START_TEST(test_unexpected_receive_too_many_intermediate_chunks)
 {
     printf("SC_Rcv_Buffer: Simulate too many intermediate chunks message received\n");
 
     // SOPC_MAX_NB_CHUNKS intermediate chunks starting from SN=2
     const uint8_t nb_intermediate_chunks = SOPC_MAX_NB_CHUNKS;
-    simulate_N_chunks('C', 2, nb_intermediate_chunks);
+    simulate_N_chunks('C', 2, nb_intermediate_chunks, false);
 
     // Since MAX_NB_CHUNKS intermediate chunks were received no more chunks can be received and message is incomplete
     // SC will be closed
@@ -464,7 +486,7 @@ START_TEST(test_receive_intermediary_and_abort_chunk)
 
     // 3 intermediate chunks starting from SN=2
     const uint8_t nb_intermediate_chunks = 3;
-    simulate_N_chunks('C', 2, nb_intermediate_chunks);
+    simulate_N_chunks('C', 2, nb_intermediate_chunks, false);
 
     /* Simulate MSG / A / size 32 / SC id = 0xa2daa731 / tokenId = 0x3fc1046a / SN = 5 / requestId = 2 */
     SOPC_StatusCode status =
@@ -852,6 +874,7 @@ static Suite* tests_make_suite_invalid_buffers(void)
     tc_multichunks = tcase_create("Multichunk management");
     tcase_add_checked_fixture(tc_multichunks, establishSC, clearToolkit);
     tcase_add_test(tc_multichunks, test_expected_receive_multi_chunks);
+    tcase_add_test(tc_multichunks, test_unexpected_receive_multi_chunks_different_requestId);
     tcase_add_test(tc_multichunks, test_unexpected_receive_too_many_intermediate_chunks);
     tcase_add_test(tc_multichunks, test_receive_intermediary_and_abort_chunk);
     tcase_add_test(tc_multichunks, test_receive_only_abort_chunk);
