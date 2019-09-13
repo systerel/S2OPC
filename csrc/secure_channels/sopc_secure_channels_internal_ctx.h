@@ -156,7 +156,7 @@ typedef struct SOPC_SecureConnection
     // (Client side specific)
     uint32_t clientSecureChannelId; // Temporary recorded information from the OPN response TCP message
     // (Client side specific)
-    uint32_t clientLastReqId; // client last request Id used
+    uint32_t clientNextReqId; // client last request Id used
     // (Server side specific)
     SOPC_SecureConnection_TcpAsymmSecu
         serverAsymmSecuInfo; // Temporary recorded information form the OPN request asymmetric security header

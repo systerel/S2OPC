@@ -3292,6 +3292,7 @@ static bool SC_Chunks_EncodeSequenceNumber(SOPC_SecureConnection* scConnection,
 
 static bool SC_Chunks_EncodeRequestId(SOPC_SecureConnection* scConnection,
                                       SOPC_Buffer* nonEncryptedBuffer,
+                                      bool isFinalChunk,
                                       uint32_t requestIdOrHandle,
                                       uint32_t* outRequestId,
                                       SOPC_StatusCode* errorStatus)
@@ -3299,13 +3300,20 @@ static bool SC_Chunks_EncodeRequestId(SOPC_SecureConnection* scConnection,
     uint32_t requestId = 0;
     if (!scConnection->isServerConnection)
     {
-        // Client case: generate new request Id
-        requestId = (scConnection->clientLastReqId + 1) % UINT32_MAX;
-        if (requestId == 0)
+        // Client case: retrieve next requestId and generate next one if necessary
+        if (0 == scConnection->clientNextReqId)
         {
-            requestId = 1;
+            // We do not use the value 0 for requestId since it is reserved as invalid value by convention
+            scConnection->clientNextReqId = 1;
         }
-        scConnection->clientLastReqId = requestId;
+        // Retreive the requestId to encode
+        requestId = scConnection->clientNextReqId;
+
+        // Generate new request Id only if current chunk is final (keep same until final is sent)
+        if (isFinalChunk)
+        {
+            scConnection->clientNextReqId = (scConnection->clientNextReqId + 1) % UINT32_MAX;
+        }
     }
     else
     {
@@ -3588,8 +3596,8 @@ static bool SC_Chunks_TreatSendBufferOPN(
     if (result)
     {
         /* ENCODE REQUEST ID */
-        result =
-            SC_Chunks_EncodeRequestId(scConnection, nonEncryptedBuffer, requestIdOrHandle, &requestId, errorStatus);
+        result = SC_Chunks_EncodeRequestId(scConnection, nonEncryptedBuffer, true, requestIdOrHandle, &requestId,
+                                           errorStatus);
     }
 
     if (result)
@@ -3791,8 +3799,8 @@ static bool SC_Chunks_TreatSendBufferMSGCLO(
     {
         /* ENCODE REQUEST ID */
 
-        result =
-            SC_Chunks_EncodeRequestId(scConnection, nonEncryptedBuffer, requestIdOrHandle, &requestId, errorStatus);
+        result = SC_Chunks_EncodeRequestId(scConnection, nonEncryptedBuffer, isFinalChar != 'C', requestIdOrHandle,
+                                           &requestId, errorStatus);
     }
 
     if (result)
