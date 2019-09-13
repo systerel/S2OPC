@@ -1,4 +1,5 @@
-const sopc_client = require('../../lib/sopc_client');
+
+const sopc_client = require('../../../lib/sopc_client');
 const assert = require('assert');
 
 const default_endpoint = "opc.tcp://localhost:4841";
@@ -30,14 +31,14 @@ function disconnect(connectionId){
     sopc_client.finalize();
 }
 
-describe("Xml Elt type", function () {
-    before(function (done) {
+describe("String type", function () {
+    before(function(done) {
         connect();
         done();
     });
-    it("Every result shall be a scalar Xml Elt", function (done) {
+    it("Every result shall be a scalar string", function (done) {
         var read_value_string = new sopc_client.ReadValue()
-            .setNodeId("ns=1;i=1006")
+            .setNodeId("ns=1;s=String_030")
             .setAttributeId(13);
         var read_values = [read_value_string];
 
@@ -54,7 +55,7 @@ describe("Xml Elt type", function () {
         }
         done();
     });
-    after(function (done) {
+    after(function(done) {
         disconnect(connectionId);
         done();
     });

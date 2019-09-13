@@ -1,5 +1,5 @@
 
-const sopc_client = require('../../lib/sopc_client');
+const sopc_client = require('../../../lib/sopc_client');
 const assert = require('assert');
 
 const default_endpoint = "opc.tcp://localhost:4841";

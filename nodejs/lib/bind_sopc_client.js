@@ -258,6 +258,7 @@ module.exports = {
     CStringArray,
     UInt32Array,
     security_cfg : SOPC_ClientHelper_SecurityCfg,
+    SOPC_String,
     SOPC_DataValue,
     SOPC_DataValuePtrArray,
     SOPC_BuiltinId,

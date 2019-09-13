@@ -87,7 +87,7 @@ if(status)
     for (var i = 0; i < writeStatusCodes.length; i++) {
         console.log(`write #${i} status:`, (writeStatusCodes[i] == 0) ? "SUCCESS" : "FAILURE");
     }
-    console.log("Writing nodes status : ", status ? "SUCCESS" : "FAILED");
+    console.log("Writing nodes status : ", status == 0 ? "SUCCESS" : "FAILED");
 }
 
 if(status)

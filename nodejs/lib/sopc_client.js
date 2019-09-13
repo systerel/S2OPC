@@ -106,7 +106,7 @@ function write(connectionId, writeValueArray)
                                                           writeValueArrayC,
                                                           writeValueArrayC.length,
                                                           status_codes);
-    return [status == 0, status_codes.toArray()];
+    return [status, status_codes.toArray()];
 }
 
 function read(connectionId, readValuesArray) {

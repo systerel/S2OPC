@@ -1,5 +1,5 @@
 
-const sopc_client = require('../../lib/sopc_client');
+const sopc_client = require('../../../lib/sopc_client');
 const assert = require('assert');
 
 const default_endpoint = "opc.tcp://localhost:4841";
@@ -31,27 +31,27 @@ function disconnect(connectionId){
     sopc_client.finalize();
 }
 
-describe("String type", function () {
-    before(function(done) {
+describe("ByteString type", function () {
+    before(function(done){
         connect();
         done();
     });
-    it("Every result shall be a scalar string", function (done) {
-        var read_value_string = new sopc_client.ReadValue()
-            .setNodeId("ns=1;s=String_030")
-            .setAttributeId(13);
-        var read_values = [read_value_string];
-
-        var resultDataValues1;
+    it("Every result shall be a scalar byteString", function (done) {
+        var resultDataValues;
         var status;
-        [status, resultDataValues1] = sopc_client.read(connectionId,
+        var read_value_bstring = new sopc_client.ReadValue()
+            .setNodeId("ns=1;s=ByteString_029")
+            .setAttributeId(13);
+        var read_values = [read_value_bstring];
+
+        [status, resultDataValues] = sopc_client.read(connectionId,
             read_values);
-        assert.equal(resultDataValues1.length, 1);
         assert.equal(status, 0, `Status is ${status}`);
-        for (var elt of resultDataValues1) {
+        assert.equal(resultDataValues.length, 1);
+        for (var elt of resultDataValues) {
             assert.equal(elt.value.array_type, 0, `element is not a scalar`);
             assert.ok(typeof elt.value.value == "string",
-                `${elt.value.value} is not a string`);
+                `${elt.value.value} is not a byteString`);
         }
         done();
     });

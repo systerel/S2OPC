@@ -125,14 +125,120 @@ class Variant
 
     ToC() {
         var variant_value = ref.NULL;
-        switch(this.type_id) {
+        switch(this.type_id)
+        {
+            case bind.SOPC_BuiltinId.SOPC_Boolean_Id.value:
+                variant_value = new bind.SOPC_VariantValue({
+                    bool: this.value
+                });
+                break;
+            case bind.SOPC_BuiltinId.SOPC_SByte_Id.value:
+                variant_value = new bind.SOPC_VariantValue({
+                    sbyte: this.value
+                });
+                break;
+            case bind.SOPC_BuiltinId.SOPC_Byte_Id.value:
+                variant_value = new bind.SOPC_VariantValue({
+                    bytev: this.value
+                });
+                break;
+            case bind.SOPC_BuiltinId.SOPC_Int16_Id.value:
+                variant_value = new bind.SOPC_VariantValue({
+                    int16: this.value
+                });
+                break;
+            case bind.SOPC_BuiltinId.SOPC_UInt16_Id.value:
+                variant_value = new bind.SOPC_VariantValue({
+                    uint16: this.value
+                });
+                break;
             case bind.SOPC_BuiltinId.SOPC_Int32_Id.value:
                 variant_value = new bind.SOPC_VariantValue({
                     int32: this.value
                 });
                 break;
+            case bind.SOPC_BuiltinId.SOPC_UInt32_Id.value:
+                variant_value = new bind.SOPC_VariantValue({
+                    uint32: this.value
+                });
+                break;
+            case bind.SOPC_BuiltinId.SOPC_Int64_Id.value:
+                variant_value = new bind.SOPC_VariantValue({
+                    int64: this.value
+                });
+                break;
+            case bind.SOPC_BuiltinId.SOPC_UInt64_Id.value:
+                variant_value = new bind.SOPC_VariantValue({
+                    uint64: this.value
+                });
+                break;
+            case bind.SOPC_BuiltinId.SOPC_Float_Id.value:
+                variant_value = new bind.SOPC_VariantValue({
+                    floatv: this.value
+                });
+                break;
+            case bind.SOPC_BuiltinId.SOPC_Double_Id.value:
+                variant_value = new bind.SOPC_VariantValue({
+                    doublev: this.value
+                });
+                break;
+            case bind.SOPC_BuiltinId.SOPC_String_Id.value:
+                var buffer = new Buffer(this.value.length + 1);
+                ref.writeCString(buffer, 0, this.value);
+                variant_value = new bind.SOPC_VariantValue({
+                    string: new bind.SOPC_String({
+                        length: this.value.length,
+                        do_not_clear: true,
+                        data: buffer
+                    })
+                });
+                break;
+            case bind.SOPC_BuiltinId.SOPC_DateTime_Id.value:
+                throw Error("DateTime variant type not supported");
+            case bind.SOPC_BuiltinId.SOPC_Guid_Id.value:
+                throw Error("Guid variant type not supported");
+            case bind.SOPC_BuiltinId.SOPC_ByteString_Id.value:
+                var buffer = new Buffer(this.value.length + 1);
+                ref.writeCString(buffer, 0, this.value);
+                variant_value = new bind.SOPC_VariantValue({
+                    string: new bind.SOPC_String({
+                        length: this.value.length,
+                        do_not_clear: true,
+                        data: buffer
+                    })
+                });
+                break;
+            case bind.SOPC_BuiltinId.SOPC_XmlElement_Id.value:
+                var xml_buffer = new Buffer(this.value.length + 1);
+                ref.writeCString(xml_buffer, 0, this.value);
+                variant_value = new bind.SOPC_VariantValue({
+                    string: new bind.SOPC_String({
+                        length: this.value.length,
+                        do_not_clear: true,
+                        data: xml_buffer
+                    })
+                });
+                break;
+            case bind.SOPC_BuiltinId.SOPC_NodeId_Id.value:
+                throw Error("Node Id type not supported");
+            case bind.SOPC_BuiltinId.SOPC_ExpandedNodeId_Id.value:
+                throw Error("ExpandedNodeId variant type not supported");
+            case bind.SOPC_BuiltinId.SOPC_StatusCode_Id.value:
+                throw Error("StatusCode variant type not supported");
+            case bind.SOPC_BuiltinId.SOPC_QualifiedName_Id.value:
+                throw Error("QualifiedName type not supported");
+            case bind.SOPC_BuiltinId.SOPC_LocalizedText_Id.value:
+                throw Error("LocalizedText type not supported");
+            case bind.SOPC_BuiltinId.SOPC_ExtensionObject_Id.value:
+                throw Error("Extension Object variant type not supported");
+            case bind.SOPC_BuiltinId.SOPC_DataValueId.value:
+                throw Error("Data Value variant type not supported");
+            case bind.SOPC_BuiltinId.SOPC_Variant_Id.value:
+                throw Error("Variant variant type not supported");
+            case bind.SOPC_BuiltinId.SOPC_DiagnosticInfo_Id.value:
+                throw Error("DiagnosticInfo type not supported");
             default:
-                throw Error("Variant.setValue: TODO type not managed");
+                throw Error("Variant type with id ", this.type_id, " is not managed");
         }
         return new bind.SOPC_Variant({
             do_not_clear : false,
