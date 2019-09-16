@@ -3303,13 +3303,14 @@ static bool SC_Chunks_EncodeRequestId(SOPC_SecureConnection* scConnection,
         // Client case: retrieve next requestId and generate next one if necessary
         if (0 == scConnection->clientNextReqId)
         {
-            // We do not use the value 0 for requestId since it is reserved as invalid value by convention
+            // As client we do not use the value 0 for requestId, we reserve it to represent invalid value internally
+            // (not specified by OPC UA specification)
             scConnection->clientNextReqId = 1;
         }
-        // Retreive the requestId to encode
+        // Retrieve the requestId to encode
         requestId = scConnection->clientNextReqId;
 
-        // Generate new request Id only if current chunk is final (keep same until final is sent)
+        // Generate new requestId only if current chunk is final (keep same until final is sent)
         if (isFinalChunk)
         {
             scConnection->clientNextReqId = (scConnection->clientNextReqId + 1) % UINT32_MAX;
