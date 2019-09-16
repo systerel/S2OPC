@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include <inttypes.h>
 #include <stdbool.h>
 
 #include "sopc_async_queue.h"
@@ -30,6 +31,7 @@ struct SOPC_AsyncQueue
 {
     const char* debugQueueName;
     SOPC_SLinkedList* queueList;
+    uint32_t maxListLengthForWarning;
     Condition queueCond;
     Mutex queueMutex;
     uint32_t waitingThreads;
@@ -46,7 +48,15 @@ SOPC_ReturnStatus SOPC_AsyncQueue_Init(SOPC_AsyncQueue** queue, const char* queu
             status = SOPC_STATUS_OK;
             (*queue)->debugQueueName = queueName;
             (*queue)->waitingThreads = 0;
-            (*queue)->queueList = SOPC_SLinkedList_Create(SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE);
+            if (SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE_WARNING_ONLY)
+            {
+                (*queue)->queueList = SOPC_SLinkedList_Create(0);
+                (*queue)->maxListLengthForWarning = SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE;
+            }
+            else
+            {
+                (*queue)->queueList = SOPC_SLinkedList_Create(SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE);
+            }
             if (NULL == (*queue)->queueList)
             {
                 status = SOPC_STATUS_NOK;
@@ -108,6 +118,13 @@ static SOPC_ReturnStatus SOPC_AsyncQueue_BlockingEnqueueFirstOrLast(SOPC_AsyncQu
             if (queue->waitingThreads > 0)
             {
                 Condition_SignalAll(&queue->queueCond);
+            }
+            uint32_t queueLength = SOPC_SLinkedList_GetLength(queue->queueList);
+            if (queue->maxListLengthForWarning != 0 && queueLength > queue->maxListLengthForWarning &&
+                queueLength % ((SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE / 10) + 1) == 0)
+            {
+                SOPC_Logger_TraceWarning("Maximum length of queue '%s' exceeded: %" PRIu32 " (>%" PRIu32 ")",
+                                         queue->debugQueueName, queueLength, queue->maxListLengthForWarning);
             }
         }
         else
