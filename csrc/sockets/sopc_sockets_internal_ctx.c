@@ -52,7 +52,7 @@ void SOPC_SocketsInternalContext_Initialize()
         SOPC_Socket_Clear(&(socketsArray[idx].sock));
     }
 
-    SOPC_ReturnStatus status = SOPC_AsyncQueue_Init(&socketsInputEventQueue, "");
+    SOPC_ReturnStatus status = SOPC_AsyncQueue_Init(&socketsInputEventQueue, "SocketsInternalContext");
     assert(SOPC_STATUS_OK == status);
 }
 
