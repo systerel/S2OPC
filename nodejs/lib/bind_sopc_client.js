@@ -5,18 +5,23 @@ const ArrayType = require('ref-array');
 const UnionType = require('ref-union');
 const Enum = require('enum');
 
+const Bool_Array = ArrayType('bool');
+const Int8_Array = ArrayType('int8');
+const Int16_Array = ArrayType('int16');
+const Int32_Array = ArrayType('int32');
+const Int64_Array = ArrayType('int64');
+const Byte_Array = ArrayType('uint8');
+const Uint16_Array = ArrayType('uint16');
+const Uint32_Array = ArrayType('uint32');
+const Uint64_Array = ArrayType('uint64');
+const Float_Array = ArrayType('float');
+const Double_Array = ArrayType('double');
 const CStringArray = ArrayType(ref.types.CString);
 
-const int8_ptr = ref.refType('int8');
 const uint8_ptr = ref.refType('uint8');
-const int16_ptr = ref.refType('int16');
-const uint16_ptr = ref.refType('uint16');
 const int32_ptr = ref.refType('int32');
 const uint32_ptr = ref.refType('uint32');
 const int64_ptr = ref.refType('int64');
-const uint64_ptr = ref.refType('uint64');
-const float_ptr = ref.refType('float');
-const double_ptr = ref.refType('double');
 
 const SOPC_ClientHelper_SecurityCfg = StructType({
     security_policy: 'CString',
@@ -71,6 +76,8 @@ const SOPC_String = StructType({
     data: uint8_ptr
 });
 
+const SOPC_String_Array = ArrayType(SOPC_String);
+
 const SOPC_Guid = StructType({
     data1: 'uint32',
     data2: 'uint16',
@@ -116,22 +123,22 @@ const SOPC_LocalizedTextPtr = ref.refType(SOPC_LocalizedText);
 
 const SOPC_VariantArrayValue = UnionType({
     //TODO to fill
-    booleanArr : uint8_ptr,
-    sByteArr : int8_ptr,
-    byteArr : uint8_ptr,
-    int16Arr : int16_ptr,
-    uint16Arr : uint16_ptr,
-    int32Arr : int32_ptr,
-    uint32Arr : uint32_ptr,
-    int64Arr : int64_ptr,
-    uint64Arr : uint64_ptr,
-    floatVArr : float_ptr,
-    doubleVArr : double_ptr,
-    //stringArr : SOPC_String_ptr,
+    booleanArr : Bool_Array,
+    sByteArr : Int8_Array,
+    byteArr : Byte_Array,
+    int16Arr : Int16_Array,
+    uint16Arr : Uint16_Array,
+    int32Arr : Int32_Array,
+    uint32Arr : Uint32_Array,
+    int64Arr : Int64_Array,
+    uint64Arr : Uint64_Array,
+    floatVArr : Float_Array,
+    doubleVArr : Double_Array,
+    stringArr : SOPC_String_Array,
     dateArr : int64_ptr,
     //guidArr : SOPC_Guid_ptr,
-    //bStringArr : SOPC_String_ptr,
-    //xmlEltArr : SOPC_String_ptr,
+    bStringArr : SOPC_String_Array,
+    xmlEltArr : SOPC_String_Array,
     nodeIdArr : SOPC_NodeIdPtr,
     //expNodeIdArr : SOPC_ExpandedNodeId_ptr,
     statusArr : uint32_ptr,
@@ -141,6 +148,11 @@ const SOPC_VariantArrayValue = UnionType({
     //dataValueArr : SOPC_DataValue_ptr,
     //variantArr : SOPC_Variant_ptr,
     //diagInfoArr : SOPC_DiagnosticInfo_ptr
+});
+
+const SOPC_VariantArray = StructType({
+    length: 'int32',
+    content: SOPC_VariantArrayValue
 });
 
 const SOPC_VariantMatrix = StructType({
@@ -175,7 +187,7 @@ const SOPC_VariantValue = UnionType({
     //extension_obj: SOPC_ExtensionObjectPtr,
     //data_value: SOPC_DataValuePtr,
     //diag_info: SOPC_DiagnosticInfoPtr,
-    //array: SOPC_VariantArray,
+    array: SOPC_VariantArray,
     matrix: SOPC_VariantMatrix
 });
 
