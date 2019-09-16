@@ -26,7 +26,7 @@ def discovery_get_endpoints_tests(client, logger):
     endPoints = client.get_endpoints()
     #print('endPoints:', endPoints)
 
-    # three endpoints are expected: None, Basic256 and Basic256Sha256
+    # 5 endpoints are expected: None (1), Basic256 (1 SignOnly and 1 SignAndEncrypt) and Basic256Sha256 (1 SignOnly and 1 SignAndEncrypt)
     logger.add_test('Get Endpoints Test - Check number of endpoints', len(endPoints) == 5)
     # print('number of endPoints:', len(endPoints))
 
