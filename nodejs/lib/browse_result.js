@@ -10,8 +10,8 @@ class BrowseResult {
         this.status = value.statusCode;
         this.references = [];
         value.references.length = value.nbOfReferences;
-        for (var i = 0; i < value.nbOfReferences; i++) {
-            var browse_result_ref = new browse_result_reference.BrowseResultReference()
+        for (let i = 0; i < value.nbOfReferences; i++) {
+            let browse_result_ref = new browse_result_reference.BrowseResultReference()
                                                                .FromC(value.references[i]);
             this.references.push(browse_result_ref);
         }

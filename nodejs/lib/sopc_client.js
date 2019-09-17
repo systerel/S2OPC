@@ -37,7 +37,7 @@ function SecurityCfg(security_policy, security_mode, user_policy_id,
                      path_cert_cli = ref.NULL, path_key_cli = ref.NULL,
                      user_name = ref.NULL, user_password = ref.NULL)
 {
-    var securityCfg = bind.security_cfg({
+    let securityCfg = bind.security_cfg({
         security_policy : security_policy,
         security_mode : security_mode.value,
         path_cert_auth : path_cert_auth,
@@ -69,10 +69,10 @@ function connect(endpoint_url, security){
 
 function createSubscription(connectionId, user_callback)
 {
-    var ffiCallback = ffi.Callback('void', ['int32', 'CString', SOPC_DataValuePtr],
+    let ffiCallback = ffi.Callback('void', ['int32', 'CString', SOPC_DataValuePtr],
                                    function(connectionId, nodeId, value) {
-                                       var dereferenced_value = value.deref();
-                                       var dv = new data_value.DataValue()
+                                       let dereferenced_value = value.deref();
+                                       let dv = new data_value.DataValue()
                                                                       .FromC(dereferenced_value);
                                        user_callback(connectionId, nodeId, dv);
                                    });
@@ -96,13 +96,13 @@ function addMonitoredItems(connectionId, nodeIdArray){
 
 function write(connectionId, writeValueArray)
 {
-    var writeValueArrayC = [];
-    for (var elt of writeValueArray)
+    let writeValueArrayC = [];
+    for (let elt of writeValueArray)
     {
         writeValueArrayC.push(elt.ToC());
     }
-    var status_codes = new bind.UInt32Array(writeValueArrayC.length);
-    var status = bind.sopc_client.SOPC_ClientHelper_Write(connectionId,
+    let status_codes = new bind.UInt32Array(writeValueArrayC.length);
+    let status = bind.sopc_client.SOPC_ClientHelper_Write(connectionId,
                                                           writeValueArrayC,
                                                           writeValueArrayC.length,
                                                           status_codes);
@@ -110,21 +110,21 @@ function write(connectionId, writeValueArray)
 }
 
 function read(connectionId, readValuesArray) {
-    var readValuesArrayC = [];
-    for (var elt of readValuesArray) {
+    let readValuesArrayC = [];
+    for (let elt of readValuesArray) {
         readValuesArrayC.push(elt.ToC());
     }
-    var dataValuesPtrArray = new bind.SOPC_DataValuePtrArray(readValuesArrayC.length);
+    let dataValuesPtrArray = new bind.SOPC_DataValuePtrArray(readValuesArrayC.length);
 
-    var status = bind.sopc_client.SOPC_ClientHelper_Read(connectionId,
+    let status = bind.sopc_client.SOPC_ClientHelper_Read(connectionId,
                                                          readValuesArrayC,
                                                          readValuesArrayC.length,
                                                          dataValuesPtrArray);
 
-    var resultDataValues = [];
+    let resultDataValues = [];
     if (status == 0) {
-        for (var i = 0; i < readValuesArrayC.length; i++) {
-            var dv = new data_value.DataValue()
+        for (let i = 0; i < readValuesArrayC.length; i++) {
+            let dv = new data_value.DataValue()
                 .FromC(dataValuesPtrArray[i].deref());
             resultDataValues.push(dv);
         }
@@ -133,17 +133,17 @@ function read(connectionId, readValuesArray) {
 }
 
 function browse(connectionId, browseRequests) {
-    var browseRequestsC = [];
-    for(var elt of browseRequests) {
+    let browseRequestsC = [];
+    for(let elt of browseRequests) {
         browseRequestsC.push(elt.ToC());
     }
-    var browseResultsC = new bind.SOPC_ClientHelper_BrowseResultArray(browseRequestsC.length);
-    var status = bind.sopc_client.SOPC_ClientHelper_Browse(connectionId,
+    let browseResultsC = new bind.SOPC_ClientHelper_BrowseResultArray(browseRequestsC.length);
+    let status = bind.sopc_client.SOPC_ClientHelper_Browse(connectionId,
                                                            browseRequestsC,
                                                            browseRequestsC.length,
                                                            browseResultsC);
-    var browseResults = [];
-    for (var i = 0; i < browseResultsC.length; i++) {
+    let browseResults = [];
+    for (let i = 0; i < browseResultsC.length; i++) {
         browseResults.push(new browse_result.BrowseResult()
                                             .FromC(browseResultsC[i]));
     }

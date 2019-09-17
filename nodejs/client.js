@@ -20,7 +20,7 @@ const argv = yargs
     .alias('help', 'h')
     .argv;
 
-var status = argv._.length > 0;
+let status = argv._.length > 0;
 
 if(status){
     status = sopc_client.initialize("./log/", sopc_client.log_level.Debug);
@@ -28,16 +28,16 @@ if(status){
     throw "Missing node id(s). See '--help' option"
 }
 
-var dataChange_callback = function(connectionId, nodeId, dataValue) {
+let dataChange_callback = function(connectionId, nodeId, dataValue) {
     console.log("connectionId:", connectionId);
     console.log("nodeId:", nodeId);
     console.log("Data Value:", dataValue)
 }
 
-var connectionId = 0;
+let connectionId = 0;
 if(status){
-    var endpoint = (argv.endpoint ? argv.endpoint : default_endpoint);
-    var securityCfg = new sopc_client.SecurityCfg(default_security_policy,
+    let endpoint = (argv.endpoint ? argv.endpoint : default_endpoint);
+    let securityCfg = new sopc_client.SecurityCfg(default_security_policy,
                                               default_security_mode,
                                               default_user_security_policy_id);
     connectionId = sopc_client.connect(endpoint, securityCfg);
@@ -72,19 +72,19 @@ if(status)
 
     const getRandomInt32 = () => Math.floor(Math.random() * Math.floor(2**32 - 1)) - (2**31);
 
-    var variant = new sopc_client.Variant()
+    let variant = new sopc_client.Variant()
                                  .setValue(6, 0, getRandomInt32());
-    var data_value = new sopc_client.DataValue()
+    let data_value = new sopc_client.DataValue()
                                     .setValue(variant);
 
-    var writeValue = new sopc_client.WriteValue()
+    let writeValue = new sopc_client.WriteValue()
                           .setNodeId("ns=1;s=Int32_030")
                           .setValue(data_value);
-    var writeValueArray = [ writeValue ];
+    let writeValueArray = [ writeValue ];
 
-    var writeStatusCodes;
+    let writeStatusCodes;
     [status, writeStatusCodes] = sopc_client.write(connectionId, writeValueArray);
-    for (var i = 0; i < writeStatusCodes.length; i++) {
+    for (let i = 0; i < writeStatusCodes.length; i++) {
         console.log(`write #${i} status:`, (writeStatusCodes[i] == 0) ? "SUCCESS" : "FAILURE");
     }
     console.log("Writing nodes status : ", status == 0 ? "SUCCESS" : "FAILED");
@@ -92,15 +92,15 @@ if(status)
 
 if(status)
 {
-    var read_value = new sopc_client.ReadValue()
+    let read_value = new sopc_client.ReadValue()
                                     .setNodeId("ns=1;s=Int32_030")
                                     .setAttributeId(13);
-    var read_values = [ read_value ];
+    let read_values = [ read_value ];
 
-    var resultDataValues;
+    let resultDataValues;
     [status, resultDataValues] = sopc_client.read(connectionId,
                                                       read_values);
-    for (var elt of resultDataValues) {
+    for (let elt of resultDataValues) {
         console.log(elt);
     }
     status = (status == 0);
@@ -109,13 +109,13 @@ if(status)
 
 if(status)
 {
-    var browse_req = new sopc_client.BrowseRequest()
+    let browse_req = new sopc_client.BrowseRequest()
                                     .setNodeId("ns=1;s=Int32_030")
                                     .setReferenceTypeId("")
                                     .setDirection(1)
                                     .setIncludeSubtypes(true);
-    var browse_req_array = [browse_req];
-    var browse_result_array;
+    let browse_req_array = [browse_req];
+    let browse_result_array;
     [status, browse_result_array] = sopc_client.browse(connectionId, browse_req_array);
     console.log(JSON.stringify(browse_result_array, null, 2));
     console.log("Browsing nodes status:", status ? "SUCCESS" : "FAILED");

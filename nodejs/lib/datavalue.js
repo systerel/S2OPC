@@ -30,7 +30,7 @@ class DataValue
 
     ToC()
     {
-        var data_value = new bind.SOPC_DataValue({
+        let data_value = new bind.SOPC_DataValue({
             value : this.value.ToC(),
             status : this.status,
             src_ts : this.src_ts,
