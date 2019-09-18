@@ -16,7 +16,10 @@
     "mocha": "^6.2.0"
   },
   "scripts": {
-    "client": "nodejs client.js",
+    "read": "nodejs examples/read.js",
+    "write": "nodejs examples/write.js",
+    "browse": "nodejs examples/browse.js",
+    "subscribe": "nodejs examples/subscribe.js",
     "test": "./node_modules/.bin/mocha --recursive --reporter spec"
   },
   "repository": "gitlab:systerel/S2OPC",
