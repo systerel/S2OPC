@@ -137,7 +137,7 @@ Prerequisites:
 To build the Toolkit library and tests with default configuration on current 
 stable release:
 ```
-  git clone https://gitlab.com/systerel/S2OPC.git --branch S2OPC_Toolkit_0.7.0
+  git clone https://gitlab.com/systerel/S2OPC.git --branch S2OPC_Toolkit_0.7.1
   cd S2OPC
   ./build.sh
 ```
