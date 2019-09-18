@@ -25,7 +25,7 @@
 #include "lwip/sockets.h"
 
 #define SOPC_INVALID_SOCKET (-1)
-#define SOMAXCONN (2)
+#define SOPC_MAX_PENDING_CONNECTIONS (2)
 
 /**
  *  \brief Socket base type

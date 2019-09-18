@@ -170,7 +170,7 @@ SOPC_ReturnStatus SOPC_Socket_Listen(Socket sock, SOPC_Socket_AddressInfo* addr)
         bindListenStatus = bind(sock, addr->ai_addr, addr->ai_addrlen);
         if (bindListenStatus != -1)
         {
-            bindListenStatus = listen(sock, SOMAXCONN);
+            bindListenStatus = listen(sock, SOPC_MAX_PENDING_CONNECTIONS);
         }
     }
     if (bindListenStatus != -1)
