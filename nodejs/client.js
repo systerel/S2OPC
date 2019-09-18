@@ -118,7 +118,7 @@ if(status)
     let browse_result_array;
     [status, browse_result_array] = sopc_client.browse(connectionId, browse_req_array);
     console.log(JSON.stringify(browse_result_array, null, 2));
-    console.log("Browsing nodes status:", status ? "SUCCESS" : "FAILED");
+    console.log("Browsing nodes status:", status === 0 ? "SUCCESS" : "FAILED");
 }
 
 function disconnect(connectionId){

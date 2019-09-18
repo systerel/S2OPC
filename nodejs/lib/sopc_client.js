@@ -147,7 +147,7 @@ function browse(connectionId, browseRequests) {
         browseResults.push(new browse_result.BrowseResult()
                                             .FromC(browseResultsC[i]));
     }
-    return [0 === status, browseResults];
+    return [status, browseResults];
 }
 
 function unsubscribe(connectionId) {

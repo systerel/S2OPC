@@ -116,7 +116,7 @@ function valueFromCSingle(type_id, variant) {
         case bind.SOPC_BuiltinId.SOPC_ExtensionObject_Id.value: {
             throw Error("Extension Object variant type not supported");
         }
-        case bind.SOPC_BuiltinId.SOPC_DataValueId.value: {
+        case bind.SOPC_BuiltinId.SOPC_DataValue_Id.value: {
             throw Error("Data Value variant type not supported");
         }
         case bind.SOPC_BuiltinId.SOPC_Variant_Id.value: {
@@ -126,7 +126,7 @@ function valueFromCSingle(type_id, variant) {
             throw Error("DiagnosticInfo type not supported");
         }
         default: {
-            throw Error("Variant type with id ", this.type_id, " is not managed");
+            throw Error(`Variant type with id ${type_id} is not managed`);
         }
     }
     return value;
@@ -265,7 +265,7 @@ function valueFromCArray(type_id, variant) {
         case bind.SOPC_BuiltinId.SOPC_ExtensionObject_Id.value: {
             throw Error("Extension Object variant type not supported");
         }
-        case bind.SOPC_BuiltinId.SOPC_DataValueId.value: {
+        case bind.SOPC_BuiltinId.SOPC_DataValue_Id.value: {
             throw Error("Data Value variant type not supported");
         }
         case bind.SOPC_BuiltinId.SOPC_Variant_Id.value: {
@@ -275,7 +275,7 @@ function valueFromCArray(type_id, variant) {
             throw Error("DiagnosticInfo type not supported");
         }
         default: {
-            throw Error("Variant type with id ", this.type_id, " is not managed");
+            throw Error(`Variant type with id ${type_id} is not managed`);
         }
     }
     return value;
@@ -410,7 +410,7 @@ function ValueToCSingle(type_id, value) {
         case bind.SOPC_BuiltinId.SOPC_ExtensionObject_Id.value: {
             throw Error("Extension Object variant type not supported");
         }
-        case bind.SOPC_BuiltinId.SOPC_DataValueId.value: {
+        case bind.SOPC_BuiltinId.SOPC_DataValue_Id.value: {
             throw Error("Data Value variant type not supported");
         }
         case bind.SOPC_BuiltinId.SOPC_Variant_Id.value: {
@@ -420,7 +420,7 @@ function ValueToCSingle(type_id, value) {
             throw Error("DiagnosticInfo type not supported");
         }
         default: {
-            throw Error("Variant type with id ", type_id, " is not managed");
+            throw Error(`Variant type with id ${type_id} is not managed`);
         }
     }
     return variant_value;
@@ -571,7 +571,7 @@ function ValueToCArray(type_id, value) {
         case bind.SOPC_BuiltinId.SOPC_ExtensionObject_Id.value: {
             throw Error("Extension Object variant type not supported");
         }
-        case bind.SOPC_BuiltinId.SOPC_DataValueId.value: {
+        case bind.SOPC_BuiltinId.SOPC_DataValue_Id.value: {
             throw Error("Data Value variant type not supported");
         }
         case bind.SOPC_BuiltinId.SOPC_Variant_Id.value: {
@@ -581,7 +581,7 @@ function ValueToCArray(type_id, value) {
             throw Error("DiagnosticInfo type not supported");
         }
         default: {
-            throw Error("Variant type with id ", type_id, " is not managed");
+            throw Error(`Variant type with id ${type_id} is not managed`);
         }
     }
     if (null != array_content) {

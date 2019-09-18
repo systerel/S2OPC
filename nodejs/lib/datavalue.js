@@ -13,7 +13,9 @@ class DataValue
     }
 
     FromC(value) {
-        this.value.FromC(value.value);
+        if (value.status === 0) {
+            this.value.FromC(value.value);
+        }
         this.status = value.status;
         this.src_ts = value.src_ts;
         this.src_ps = value.src_ps;
