@@ -86,35 +86,25 @@ void SOPC_Socket_Clear(Socket* sock)
 
 static SOPC_ReturnStatus Socket_Configure(Socket sock, bool setNonBlocking)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    const int trueInt = true;
-    int setOptStatus = -1;
-
-    if (sock != SOPC_INVALID_SOCKET)
+    if (SOPC_INVALID_SOCKET == sock)
     {
-        status = SOPC_STATUS_OK;
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-        // Deactivate Nagle's algorithm since we always write a TCP UA binary message (and not just few bytes)
-        setOptStatus = setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (const void*) &trueInt, sizeof(int));
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    const int trueInt = true;
 
-        /*
-        if(setOptStatus != -1){
-            int rcvbufsize = UINT16_MAX;
-            setOptStatus = setsockopt(sock, SOL_SOCKET, SO_RCVBUF, &rcvbufsize, sizeof(int));
-        }
+    // Deactivate Nagle's algorithm since we always write a TCP UA binary message (and not just few bytes)
+    int setOptStatus = setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (const void*) &trueInt, sizeof(int));
+    if (0 != setOptStatus)
+    {
+        status = SOPC_STATUS_NOK;
+    }
 
-        if(setOptStatus != -1){
-            int sndbufsize = UINT16_MAX;
-            setOptStatus = setsockopt(sock, SOL_SOCKET, SO_SNDBUF, &sndbufsize, sizeof(int));
-        }
-        */
-
-        if (setOptStatus != -1 && setNonBlocking != false)
-        {
-            setOptStatus = fcntl(sock, F_SETFL, O_NONBLOCK);
-        }
-
-        if (setOptStatus < 0)
+    if (SOPC_STATUS_OK == status && setNonBlocking != false)
+    {
+        setOptStatus = fcntl(sock, F_SETFL, O_NONBLOCK);
+        if (0 != setOptStatus)
         {
             status = SOPC_STATUS_NOK;
         }
