@@ -132,44 +132,46 @@ SOPC_ReturnStatus SOPC_Socket_CreateNew(SOPC_Socket_AddressInfo* addr,
                                         bool setNonBlocking,
                                         Socket* sock)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    const int trueInt = true;
-    int setOptStatus = -1;
-    if (addr != NULL && sock != NULL)
+    if (NULL == addr || NULL == sock)
     {
-        *sock = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-        if (*sock != SOPC_INVALID_SOCKET)
-        {
-            status = Socket_Configure(*sock, setNonBlocking);
-        }
-        else
-        {
-            status = SOPC_STATUS_NOK;
-        }
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    int setOptStatus = 0;
 
-        if (SOPC_STATUS_OK == status)
-        {
-            setOptStatus = 0;
-        } // else -1 due to init
+    *sock = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
+    if (SOPC_INVALID_SOCKET == *sock)
+    {
+        status = SOPC_STATUS_NOK;
+    }
 
-        if (setOptStatus != -1 && setReuseAddr != false)
-        {
-            setOptStatus = setsockopt(*sock, SOL_SOCKET, SO_REUSEADDR, (const void*) &trueInt, sizeof(int));
-        }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = Socket_Configure(*sock, setNonBlocking);
+    }
 
-        // Enforce IPV6 sockets can be used for IPV4 connections (if socket is IPV6)
-        if (setOptStatus != -1 && addr->ai_family == AF_INET6)
-        {
-            const int falseInt = false;
-            setOptStatus = setsockopt(*sock, IPPROTO_IPV6, IPV6_V6ONLY, (const void*) &falseInt, sizeof(int));
-        }
-
-        if (setOptStatus < 0)
+    if (SOPC_STATUS_OK == status && setReuseAddr != false)
+    {
+        const int trueInt = true;
+        setOptStatus = setsockopt(*sock, SOL_SOCKET, SO_REUSEADDR, (const void*) &trueInt, sizeof(int));
+        if (0 != setOptStatus)
         {
             status = SOPC_STATUS_NOK;
         }
     }
+
+    // Enforce IPV6 sockets can be used for IPV4 connections (if socket is IPV6)
+    if (SOPC_STATUS_OK == status && AF_INET6 == addr->ai_family)
+    {
+        const int falseInt = false;
+        setOptStatus = setsockopt(*sock, IPPROTO_IPV6, IPV6_V6ONLY, (const void*) &falseInt, sizeof(int));
+        if (0 != setOptStatus)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
     return status;
 }
 
