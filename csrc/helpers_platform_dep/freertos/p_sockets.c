@@ -24,16 +24,12 @@
 
 bool SOPC_Socket_Network_Initialize()
 {
-    bool status = true;
-
-    return status;
+    return true;
 }
 
 bool SOPC_Socket_Network_Clear()
 {
-    bool status = true;
-
-    return status;
+    return true;
 }
 
 SOPC_ReturnStatus SOPC_Socket_AddrInfo_Get(char* hostname, char* port, SOPC_Socket_AddressInfo** addrs)
