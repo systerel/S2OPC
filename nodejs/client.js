@@ -24,6 +24,7 @@ let status = argv._.length > 0;
 
 if(status){
     status = sopc_client.initialize("./log/", sopc_client.log_level.Debug);
+    status = status === 0;
 }else{
     throw "Missing node id(s). See '--help' option"
 }
@@ -48,7 +49,8 @@ if(status){
 
 if (status)
 {
-    status = sopc_client.createSubscription(connectionId, dataChange_callback);
+    let res = sopc_client.createSubscription(connectionId, dataChange_callback);
+    status = res === 0;
     console.log("Subscription status:", status ? "SUCCESS" : "FAILED");
 }
 
@@ -59,6 +61,7 @@ if(status){
         }
     });
     status = sopc_client.addMonitoredItems(connectionId, argv._);
+    status = status === 0;
     console.log("Adding monitored items status:", status ? "SUCCESS" : "FAILED");
 }
 
@@ -87,7 +90,8 @@ if(status)
     for (let i = 0; i < writeStatusCodes.length; i++) {
         console.log(`write #${i} status:`, (writeStatusCodes[i] == 0) ? "SUCCESS" : "FAILURE");
     }
-    console.log("Writing nodes status : ", status == 0 ? "SUCCESS" : "FAILED");
+    status = status === 0;
+    console.log("Writing nodes status : ", status ? "SUCCESS" : "FAILED");
 }
 
 if(status)
@@ -103,7 +107,7 @@ if(status)
     for (let elt of resultDataValues) {
         console.log(elt);
     }
-    status = (status == 0);
+    status = (status === 0);
     console.log("Reading nodes status:", status ? "SUCCESS" : "FAILED");
 }
 
@@ -118,7 +122,8 @@ if(status)
     let browse_result_array;
     [status, browse_result_array] = sopc_client.browse(connectionId, browse_req_array);
     console.log(JSON.stringify(browse_result_array, null, 2));
-    console.log("Browsing nodes status:", status === 0 ? "SUCCESS" : "FAILED");
+    status = status === 0;
+    console.log("Browsing nodes status:", status ? "SUCCESS" : "FAILED");
 }
 
 function disconnect(connectionId){

@@ -11,6 +11,7 @@ function connect() {
     let status = true;
     if (status) {
         status = sopc_client.initialize("./log/", sopc_client.log_level.Error);
+        status = status === 0;
     }
 
     if (status) {

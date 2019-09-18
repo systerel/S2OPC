@@ -1,8 +1,18 @@
+/**
+ * DataValue object
+ *
+ * @module datavalue
+ * @see module:variant
+ */
 const bind = require('./bind_sopc_client');
 const variant = require('./variant');
 
+/** Class representing a DataValue */
 class DataValue
 {
+    /**
+     * Create an empty DataValue
+     */
     constructor() {
         this.value = new variant.Variant();
         this.status = 0;
@@ -12,6 +22,11 @@ class DataValue
         this.srv_ps = 0;
     }
 
+    /**
+     * Internal function used to convert C data value to JS
+     * @param {C_DataValue} value S2OPC library C data value to be converted
+     * @return this
+     */
     FromC(value) {
         if (value.status === 0) {
             this.value.FromC(value.value);
@@ -25,11 +40,20 @@ class DataValue
         return this;
     }
 
+    /**
+     * Set the DataValue Value (Variant)
+     * @param {Variant} variant variant to be set as value
+     * @see module:variant
+     */
     setValue(variant) {
         this.value = variant;
         return this;
     }
 
+    /**
+     * Internal function used to convert JS DataValue to C
+     * @return C_DataValue
+     */
     ToC()
     {
         let data_value = new bind.SOPC_DataValue({

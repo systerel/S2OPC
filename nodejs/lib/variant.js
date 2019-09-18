@@ -1,6 +1,17 @@
+/**
+ * Variant Object
+ *
+ * @module variant
+ */
 const bind = require('./bind_sopc_client');
 const ref = require('ref');
 
+/**
+ * Internal helper function used to convert single C variant value to JS
+ * @param {Number} type_id type identifier
+ * @param {C_Variant} variant C variant (containing a single value)
+ * @return JS Variant value
+ */
 function valueFromCSingle(type_id, variant) {
     let value = null;
     switch (type_id) {
@@ -132,6 +143,12 @@ function valueFromCSingle(type_id, variant) {
     return value;
 }
 
+/**
+ * Internal function used to convert C array variant value to JS
+ * @param {Number} type_id type identifier
+ * @param {C_Variant} variant C variant (containing an array)
+ * @returns JS variant value
+ */
 function valueFromCArray(type_id, variant) {
     let value = [];
     let count = 0;
@@ -281,6 +298,12 @@ function valueFromCArray(type_id, variant) {
     return value;
 }
 
+/**
+ * Internal function used to convert JS single variant value to C variant value
+ * @param {Number} type_id Type identifier
+ * @param {*} value value to be set in variant C data structure
+ * @returns C Variant value
+ */
 function ValueToCSingle(type_id, value) {
     let variant_value = null;
     switch (type_id) {
@@ -426,6 +449,12 @@ function ValueToCSingle(type_id, value) {
     return variant_value;
 }
 
+/**
+ * Internal function used to convert JS array variant value to C variant value
+ * @param {Number} type_id Type identifier
+ * @param {*[]} value array of values
+ * @returns C variant value
+ */
 function ValueToCArray(type_id, value) {
     let variant_value = null;
     let array_content = null;
@@ -596,14 +625,48 @@ function ValueToCArray(type_id, value) {
     return variant_value;
 }
 
+/** Class representing a Variant
+ *
+ * Supported array types: Single, Array
+ *
+ * Supported "Read" types:
+ * - Single: Bool, Signed Byte, Byte, Int16, UInt16, Int32, UInt32, Int64, UInt64,
+ *           Float, Double, String, ByteString, XmlElement, NodeId, LocalizedText,
+ *           QualifiedName
+ * - Array: Bool, Signed Byte, Byte, Int16, UInt16, Int32, UInt32, Int64, UInt64,
+ *          Float, Double, String, ByteString, XmlElement
+ * Supported "Write" types:
+ * - Single: Bool, Signed Byte, Byte, Int16, UInt16, Int32, UInt32, Int64, UInt64,
+ *           Float, Double, String, ByteString, XmlElement
+ * - Array: Bool, Signed Byte, Byte, Int16, UInt16, Int32, UInt32, Int64, UInt64,
+ *          Float, Double, String, ByteString, XmlElement
+ *
+ * Any unsupported type identifier or array type will cause an error
+ * The variant value set by the user shall match the type identifier,
+ * no type verification is made. Any incorrect type will result in an
+ * unpredicted behavior.
+ *
+ * Note: UInt64 and Int64 value may be stored in a string (Number JS type is too small
+ * to store some values)
+ */
 class Variant
 {
+    /**
+     * Create an empty variant
+     */
     constructor() {
         this.type_id = 0;
         this.array_type = 0;
         this.value = 0;
     }
 
+    /**
+     * set the variant value
+     * @param {Number} type_id Type identifier
+     * @param {Number} array_type Array Type
+     * @param {*} value variant value
+     * @returns this
+     */
     setValue(type_id, array_type, value) {
         this.type_id = type_id;
         this.array_type = array_type;
@@ -611,6 +674,11 @@ class Variant
         return this;
     }
 
+    /**
+     * Internal function used to convert C Variant to JS Variant
+     * @param {C_Variant} variant C variant
+     * @returns this
+     */
     FromC(variant) {
         this.type_id = variant.built_in_type_id;
         this.array_type = variant.variant_array_type;
@@ -629,6 +697,10 @@ class Variant
         return this;
     }
 
+    /**
+     * Internal function used to convert JS Variant to C Variant
+     * @returns C_Variant
+     */
     ToC() {
         let variant_value = ref.NULL;
         if (bind.SOPC_VariantArrayType.SOPC_VariantArrayType_SingleValue.value == this.array_type) {

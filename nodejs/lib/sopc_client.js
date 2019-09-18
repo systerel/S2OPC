@@ -1,3 +1,13 @@
+/**
+ * S2OPC Client module
+ *
+ * High level javascript module for the S2OPC C client library
+ *
+ * For restrictions, see restrictions of the C client library
+ * @module sopc_client
+ * @see module:datavalue
+ * @see module:variant
+ */
 const ffi = require('ffi');
 const ref = require('ref');
 const Enum = require('enum');
@@ -12,7 +22,7 @@ const browse_request = require('./browse_request');
 const browse_result = require('./browse_result');
 const browse_result_reference = require('./browse_result_reference');
 
-
+/** Log levels */
 const SOPC_Toolkit_Log_Level = new Enum({
     'Error': 0,
     'Warning': 1,
@@ -20,18 +30,32 @@ const SOPC_Toolkit_Log_Level = new Enum({
     'Debug': 3
 });
 
+/** Security modes */
 const SOPC_MessageSecurityMode = new Enum({
     'None' : 1,
     'Sign' : 2,
     'SignAndEncrypt' : 3
 });
 
+/** Security policies */
 const SOPC_SecurityPolicy = {
     'None_URI' : "http://opcfoundation.org/UA/SecurityPolicy#None",
     'Basic256_URI' : "http://opcfoundation.org/UA/SecurityPolicy#Basic256",
     'Basic256Sha256_URI' : "http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"
 };
 
+/**
+ * Create a C security configuration
+ * @param {String} security_policy
+ * @param {Number} security_mode
+ * @param {String} user_policy_id
+ * @param {String} path_cert_auth
+ * @param {String} path_cert_srv
+ * @param {String} path_cert_cli
+ * @param {String} path_key_cli
+ * @param {String} user_name
+ * @param {String} user_password
+ */
 function SecurityCfg(security_policy, security_mode, user_policy_id,
                      path_cert_auth=ref.NULL, path_cert_srv = ref.NULL,
                      path_cert_cli = ref.NULL, path_key_cli = ref.NULL,
@@ -54,19 +78,41 @@ function SecurityCfg(security_policy, security_mode, user_policy_id,
 
 const SOPC_DataValuePtr = ref.refType(bind.SOPC_DataValue);
 
+/**
+ * Initialize the S2OPC client library
+ * @param {String} toolkit_log_path path of the log directory (should end with a directory separator)
+ * @param {SOPC_Toolkit_Log_Level} toolkit_log_level log level
+ * @returns 0 if OK else C error code
+ */
 function initialize(toolkit_log_path, toolkit_log_level){
-    return (0 == bind.sopc_client.SOPC_ClientHelper_Initialize(toolkit_log_path, toolkit_log_level.value));
+    return bind.sopc_client.SOPC_ClientHelper_Initialize(toolkit_log_path, toolkit_log_level.value);
 }
 
+/**
+ * Close the S2OPC toolkit
+ * @returns 0 if OK else C error code
+ */
 function finalize(){
     return bind.sopc_client.SOPC_ClientHelper_Finalize();
 }
 
+/**
+ * Connect to an endpoint using given security configuration
+ * @param {String} endpoint_url url of the endpoint
+ * @param {SecurityCfg} security security configuration
+ * @returns 0 if OK else C error code
+ */
 function connect(endpoint_url, security){
     return bind.sopc_client.SOPC_ClientHelper_Connect(endpoint_url,
                                                       security);
 }
 
+/**
+ * Create a subscription
+ * @param {Number} connectionId id of the connection
+ * @param {Function} user_callback callback that will be callback when a datachange is received
+ * @returns 0 if OK else C error code
+ */
 function createSubscription(connectionId, user_callback)
 {
     let ffiCallback = ffi.Callback('void', ['int32', 'CString', SOPC_DataValuePtr],
@@ -86,14 +132,27 @@ function createSubscription(connectionId, user_callback)
         user_callback
     });
 
-
-    return (0 == bind.sopc_client.SOPC_ClientHelper_CreateSubscription(connectionId, ffiCallback));
+    return bind.sopc_client.SOPC_ClientHelper_CreateSubscription(connectionId, ffiCallback);
 }
 
+/**
+ * Add monitored items
+ * @param {Number} connectionId id of the connection
+ * @param {String[]} nodeIdArray node ids of items to monitor
+ * @returns 0 if OK else C error code
+ */
 function addMonitoredItems(connectionId, nodeIdArray){
-    return (0 == bind.sopc_client.SOPC_ClientHelper_AddMonitoredItems(connectionId, nodeIdArray, nodeIdArray.length));
+    return bind.sopc_client.SOPC_ClientHelper_AddMonitoredItems(connectionId, nodeIdArray, nodeIdArray.length);
 }
 
+/**
+ * Write values to attributes "Value" of one or more Nodes
+ * @param {Number} connectionId id of the connection
+ * @param {WriteValue[]} writeValueArray array of write values
+ * @see module:writevalue
+ * @return array containing two elements: the status code of the write response,
+ *         and an array containing the status codes of each write request.
+ */
 function write(connectionId, writeValueArray)
 {
     let writeValueArrayC = [];
@@ -109,6 +168,15 @@ function write(connectionId, writeValueArray)
     return [status, status_codes.toArray()];
 }
 
+/**
+ * Read attributes of one or more nodes
+ * @param {Number} connectionId id of the connection
+ * @param {ReadValue[]} readValuesArray array of read values
+ * @see module:readvalue
+ * @return array containing two elements: the status code of the read response,
+ *         and an array containing the data value of each read request.
+ * @see module:datavalue
+ */
 function read(connectionId, readValuesArray) {
     let readValuesArrayC = [];
     for (let elt of readValuesArray) {
@@ -132,6 +200,16 @@ function read(connectionId, readValuesArray) {
     return [status, resultDataValues];
 }
 
+/**
+ * Discover the references of a node using Browse and browseNext services
+ * @param {Number} connectionId id of the connection
+ * @param {BrowseRequest[]} browseRequests array of browse request
+ * @see module:browse_request
+ * @return array containing two elements: the status code of the browse response,
+ *         and an array containing the browse result of each browse request.
+ * @see module:browse_result
+ * @see module:browse_result_reference
+ */
 function browse(connectionId, browseRequests) {
     let browseRequestsC = [];
     for(let elt of browseRequests) {
@@ -150,12 +228,22 @@ function browse(connectionId, browseRequests) {
     return [status, browseResults];
 }
 
+/**
+ * Delete the current subscription
+ * @param {Number} connectionId id of the connection
+ * @return 0 if OK else C error code
+ */
 function unsubscribe(connectionId) {
-    return (0 == bind.sopc_client.SOPC_ClientHelper_Unsubscribe(connectionId));
+    return bind.sopc_client.SOPC_ClientHelper_Unsubscribe(connectionId);
 }
 
+/**
+ * Disconnect the given connection
+ * @param {Number} connectionId id of the connection
+ * @return 0 if OK else C error code
+ */
 function disconnect(connectionId){
-    return (0 == bind.sopc_client.SOPC_ClientHelper_Disconnect(connectionId));
+    return bind.sopc_client.SOPC_ClientHelper_Disconnect(connectionId);
 }
 
 module.exports = {

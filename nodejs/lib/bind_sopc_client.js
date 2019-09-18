@@ -1,3 +1,13 @@
+/**
+ * C Bindings for the S2OPC Client Wrapper library
+ *
+ * Shall not be used directly by JS user
+ * use higher level functions instead
+ *
+ * C-JS translation made using nodeFFI and ref packages
+ *
+ * @module:bind_sopc_client
+ */
 const ffi = require('ffi');
 const ref = require('ref');
 const StructType = require('ref-struct');
