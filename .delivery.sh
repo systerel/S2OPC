@@ -220,11 +220,12 @@ echo "Remove delivery script, docker scripts, .gitignore file and commit"
 git rm -rf .gitignore .*.yml *.yml .*.sh &> /dev/null || exit 1
 git commit -S -m "Remove delivery script, docker scripts and .gitignore file" &> /dev/null || exit 1
 echo "Generation of archive of version $DELIVERY_NAME"
-git archive --prefix=$DELIVERY_NAME/ -o $DELIVERY_NAME.tar.gz $DELIVERY_NAME || exit 1
+git archive --prefix=S2OPC-$DELIVERY_NAME/ -o $DELIVERY_NAME.tar.gz $DELIVERY_NAME || exit 1
 
 if [ $? -eq 0 ]; then
     echo "=============================================================="
     echo "Creation of delivery archive '$DELIVERY_NAME.tar.gz' succeeded"
+    echo "PLEASE USE ARCHIVE ONLY FOR TESTING PURPOSE: retrieve the final archive from gitlab directly to avoid md5sum possible issue (--prefix choice)"
     echo "Please push the $2-update-tagged-version branch as MR on gitlab closing issue #$2"
     echo "Please tag the $DELIVERY_NAME branch on bare repository WITH SIGNATURE: $DELIVERY_NAME and S2OPC_LibSub_$libsub_version"
 else
