@@ -613,7 +613,7 @@ function ValueToCArray(type_id, value) {
             throw Error(`Variant type with id ${type_id} is not managed`);
         }
     }
-    if (null != array_content) {
+    if (null !== array_content) {
             let array_value = new bind.SOPC_VariantArray({
                 length : value.length,
                 content : array_content
@@ -683,10 +683,10 @@ class Variant
         this.type_id = variant.built_in_type_id;
         this.array_type = variant.variant_array_type;
         this.value = null;
-        if (bind.SOPC_VariantArrayType.SOPC_VariantArrayType_SingleValue.value == this.array_type) {
+        if (bind.SOPC_VariantArrayType.SOPC_VariantArrayType_SingleValue.value === this.array_type) {
             this.value = valueFromCSingle(this.type_id, variant);
         }
-        else if (bind.SOPC_VariantArrayType.SOPC_VariantArrayType_Array.value == this.array_type)
+        else if (bind.SOPC_VariantArrayType.SOPC_VariantArrayType_Array.value === this.array_type)
         {
             this.value = valueFromCArray(this.type_id, variant);
         }
@@ -703,10 +703,10 @@ class Variant
      */
     ToC() {
         let variant_value = ref.NULL;
-        if (bind.SOPC_VariantArrayType.SOPC_VariantArrayType_SingleValue.value == this.array_type) {
+        if (bind.SOPC_VariantArrayType.SOPC_VariantArrayType_SingleValue.value === this.array_type) {
             variant_value = ValueToCSingle(this.type_id, this.value);
         }
-        else if (bind.SOPC_VariantArrayType.SOPC_VariantArrayType_Array.value == this.array_type)
+        else if (bind.SOPC_VariantArrayType.SOPC_VariantArrayType_Array.value === this.array_type)
         {
             variant_value = ValueToCArray(this.type_id, this.value);
         }

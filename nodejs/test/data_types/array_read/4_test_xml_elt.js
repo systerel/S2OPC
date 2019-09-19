@@ -25,7 +25,7 @@ describe("Xml Elt type", function () {
             assert.ok(Array.isArray(elt.value.value));
             assert.ok(elt.value.value.length > 0);
             for (let arrElt of elt.value.value) {
-                assert.ok(typeof arrElt == "string",
+                assert.ok(typeof arrElt === "string",
                     `${arrElt} is not a string`);
             }
         }

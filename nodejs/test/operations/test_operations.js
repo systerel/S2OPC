@@ -26,7 +26,7 @@ describe("Operations tests", function() {
                 assert.ok(Array.isArray(elt.value.value));
                 assert.ok(elt.value.value.length > 0);
                 for (let arrElt of elt.value.value) {
-                    assert.ok(typeof arrElt == "boolean",
+                    assert.ok(typeof arrElt === "boolean",
                         `${arrElt} is not a boolean`);
                 }
             }

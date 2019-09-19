@@ -23,7 +23,7 @@ describe("ByteString type", function () {
         assert.equal(resultDataValues.length, 1);
         for (let elt of resultDataValues) {
             assert.equal(elt.value.array_type, 0, `element is not a scalar`);
-            assert.ok(typeof elt.value.value == "string",
+            assert.ok(typeof elt.value.value === "string",
                 `${elt.value.value} is not a byteString`);
         }
         done();

@@ -190,7 +190,7 @@ function read(connectionId, readValuesArray) {
                                                          dataValuesPtrArray);
 
     let resultDataValues = [];
-    if (status == 0) {
+    if (status === 0) {
         for (let i = 0; i < readValuesArrayC.length; i++) {
             let dv = new data_value.DataValue()
                 .FromC(dataValuesPtrArray[i].deref());

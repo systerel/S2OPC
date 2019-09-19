@@ -23,7 +23,7 @@ describe("Scalar types", function() {
             assert.equal(resultDataValues.length, 1);
             for (let elt of resultDataValues) {
                 assert.equal(elt.value.array_type, 0, `element is not a scalar`);
-                assert.ok(typeof elt.value.value == "boolean",
+                assert.ok(typeof elt.value.value === "boolean",
                     `${elt.value.value} is not a boolean`);
             }
             done();
@@ -144,7 +144,7 @@ describe("Scalar types", function() {
             assert.equal(resultDataValues.length, 2);
             for (let elt of resultDataValues) {
                 assert.equal(elt.value.array_type, 0, `element is not a scalar`);
-                assert.ok(typeof elt.value.value == "number",
+                assert.ok(typeof elt.value.value === "number",
                     `${elt.value.value} is not a float`);
             }
             done();

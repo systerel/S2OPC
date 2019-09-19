@@ -22,7 +22,7 @@ describe("Qualified Name type", function () {
         assert.equal(status, 0, `Status is ${status}`);
         for (let elt of resultDataValues1) {
             assert.equal(elt.value.array_type, 0, `element is not a scalar`);
-            assert.ok(typeof elt.value.value == "string",
+            assert.ok(typeof elt.value.value === "string",
                 `${elt.value.value} is not a string`);
         }
         done();

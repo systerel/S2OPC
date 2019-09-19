@@ -73,7 +73,7 @@ if(status)
     let writeStatusCodes;
     [status, writeStatusCodes] = sopc_client.write(connectionId, writeValueArray);
     for (let i = 0; i < writeStatusCodes.length; i++) {
-        console.log(`write #${i} status:`, (writeStatusCodes[i] == 0) ? "SUCCESS" : "FAILURE");
+        console.log(`write #${i} status:`, (writeStatusCodes[i] === 0) ? "SUCCESS" : "FAILURE");
     }
     status = status === 0;
     console.log("Writing nodes status : ", status ? "SUCCESS" : "FAILED");
