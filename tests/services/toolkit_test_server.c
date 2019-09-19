@@ -186,6 +186,7 @@ static SOPC_ReturnStatus Server_Initialize(void)
 static SOPC_Endpoint_Config Server_CreateEnpointConfig(char* endpointURL)
 {
     SOPC_Endpoint_Config epConfig;
+    memset(&epConfig, 0, sizeof(epConfig));
     // Init unique endpoint structure
     epConfig.endpointURL = endpointURL;
 
