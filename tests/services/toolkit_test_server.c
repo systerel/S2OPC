@@ -294,7 +294,7 @@ static SOPC_ReturnStatus Server_SetCryptographicConfig(SOPC_Endpoint_Config* pEp
                                                                      output_serverCertificate);
         if (SOPC_STATUS_OK == status)
         {
-            pEpConfig->serverCertificate = serverCertificate;
+            pEpConfig->serverCertificate = *output_serverCertificate;
 
             status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromData(server_2k_key, sizeof(server_2k_key),
                                                                             output_serverKey);
@@ -302,9 +302,10 @@ static SOPC_ReturnStatus Server_SetCryptographicConfig(SOPC_Endpoint_Config* pEp
 
         if (SOPC_STATUS_OK == status)
         {
-            pEpConfig->serverKey = serverKey;
+            pEpConfig->serverKey = *output_serverKey;
 
-            status = SOPC_KeyManager_SerializedCertificate_CreateFromDER(cacert, sizeof(cacert), &authCertificate);
+            status =
+                SOPC_KeyManager_SerializedCertificate_CreateFromDER(cacert, sizeof(cacert), output_authCertificate);
         }
 #else // WITH_STATIC_SECURITY_DATA == false
         /* Load client/server certificates and server key from files */
