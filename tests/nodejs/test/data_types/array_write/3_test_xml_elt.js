@@ -3,7 +3,7 @@ const sopc_client = require('../../../lib/sopc_client');
 const test_helper = require('../../helpers/connection');
 const assert = require('assert');
 
-describe("Write XML Element type", function() {
+describe("Write Array XML Element type", function() {
     describe("XML Element type", function () {
         let connectionId = 0;
         before(function(done) {

@@ -1,17 +1,18 @@
+
 const sopc_client = require('../../../lib/sopc_client');
 const test_helper = require('../../helpers/connection');
 const assert = require('assert');
 
-describe("Localized Text type", function () {
+describe("Read Single String type", function () {
     let connectionId = 0;
-    before(function (done) {
+    before(function(done) {
         connectionId = test_helper.connect();
         done();
     });
-    it("Every result shall be a scalar localized text", function (done) {
+    it("Every result shall be a scalar string", function (done) {
         let read_value_string = new sopc_client.ReadValue()
             .setNodeId("ns=1;s=String_030")
-            .setAttributeId(4);
+            .setAttributeId(13);
         let read_values = [read_value_string];
 
         let resultDataValues1;
@@ -27,7 +28,7 @@ describe("Localized Text type", function () {
         }
         done();
     });
-    after(function (done) {
+    after(function(done) {
         test_helper.disconnect(connectionId);
         done();
     });

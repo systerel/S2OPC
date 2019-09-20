@@ -2,7 +2,7 @@ const sopc_client = require('../../../lib/sopc_client');
 const test_helper = require('../../helpers/connection');
 const assert = require('assert');
 
-describe("Write Scalar types", function() {
+describe("Write Single simple types", function() {
     describe("Boolean type", function () {
         let connectionId = 0;
         before(function(done) {

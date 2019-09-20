@@ -2,7 +2,7 @@ const sopc_client = require('../../../lib/sopc_client');
 const test_helper = require('../../helpers/connection');
 const assert = require('assert');
 
-describe("Qualified Name type", function () {
+describe("Read Single Qualified Name type", function () {
     let connectionId = 0;
     before(function (done) {
         connectionId = test_helper.connect();

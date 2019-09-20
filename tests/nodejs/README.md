@@ -11,7 +11,7 @@ In order for the package to work, you should have the `libclient_subscription` l
 ## Examples
 
 Examples are available in the `examples` folder and cover the basic services offered by the wrapper.
-They can be launched using `nodejs examples/<example>.js` or via `npm run <example>`.
+They can be launched using `node examples/<example>.js` or via `npm run <example>`.
 
 ## Running the tests
 

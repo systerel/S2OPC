@@ -70,6 +70,7 @@ else
     append_cmake_option WITH_COVERAGE
     append_cmake_option WITH_COVERITY
     append_cmake_option WITH_PYS2OPC
+    append_cmake_option WITH_NODEJS
     append_cmake_option WITH_CONST_ADDSPACE
     append_cmake_option WITH_STATIC_SECURITY_DATA
     append_cmake_option WITH_NANO_EXTENDED

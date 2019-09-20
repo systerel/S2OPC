@@ -13,14 +13,17 @@
   },
   "devDependencies": {
     "eslint": "^6.3.0",
-    "mocha": "^6.2.0"
+    "mocha": "^6.2.0",
+    "mocha-tap-reporter": "^0.1.3"
   },
   "scripts": {
-    "read": "nodejs examples/read.js",
-    "write": "nodejs examples/write.js",
-    "browse": "nodejs examples/browse.js",
-    "subscribe": "nodejs examples/subscribe.js",
-    "test": "./node_modules/.bin/mocha --recursive --reporter spec"
+    "read": "node examples/read.js",
+    "write": "node examples/write.js",
+    "browse": "node examples/browse.js",
+    "subscribe": "node examples/subscribe.js",
+    "test": "mocha --recursive --reporter spec",
+    "cmake_test": "export NODE_PATH=\"/usr/local/lib/node_modules\" && (mocha --recursive --reporter mocha-tap-reporter > nodejs_test.tap)"
+
   },
   "repository": "gitlab:systerel/S2OPC",
   "author": "s2opc-support@systerel.fr",

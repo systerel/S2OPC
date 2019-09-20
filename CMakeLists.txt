@@ -159,6 +159,16 @@ if(WITH_PYS2OPC AND (WITH_COVERAGE OR WITH_COVERITY OR WITH_CLANG_SOURCE_COVERAG
   message(WARNING "PyS²OPC relies on CFFI code generation, which may bend code analysis results.")
 endif()
 
+option(WITH_NODEJS "Also builds NodeJS" OFF)
+
+if(WITH_NODEJS AND (WITH_ASAN OR WITH_UBSAN OR WITH_TSAN))
+    message(FATAL_ERROR "Sanitizers are known to not work (yet) with WITH_NODEJS.")
+endif()
+
+if(WITH_NODEJS AND NOT BUILD_SHARED_LIBS)
+    message(FATAL_ERROR "NodeJS Client Wrapper require shared libraries")
+endif()
+
 option(WITH_STATIC_SECURITY_DATA "Use static security data for test" OFF)
 
 option(WITH_NANO_EXTENDED "Use Nano profile with additional services out of Nano scope" OFF)
@@ -934,6 +944,43 @@ if(WITH_PYS2OPC)
     endfunction()
 
     pys2opc_validation_test("pys2opc_client.py")
+  endif(ENABLE_TESTING)
+endif()
+
+###### NodeJS ######
+
+# The library is built by nodeJS. It may use the shared library but it must not be built with ASan.
+if(WITH_NODEJS)
+  set(NODEJS_PATH "${CMAKE_SOURCE_DIR}/tests/nodejs")
+  set(NODEJS_PLACEHOLDER ${CMAKE_BINARY_DIR}/nodejs_touch)
+  add_custom_command(OUTPUT ${NODEJS_PLACEHOLDER}
+                     COMMAND ${CMAKE_COMMAND} -E touch ${NODEJS_PLACEHOLDER}
+                     WORKING_DIRECTORY ${NODEJS_PATH})
+  add_custom_target(nodejs ALL
+                    DEPENDS ${NODEJS_PLACEHOLDER})
+  add_dependencies(nodejs s2opc_subscription_client)
+
+  # Validation test
+  if(ENABLE_TESTING)
+
+    function(nodejs_validation_test)
+      set(no_ext_name "nodejs_test")
+      set(test_name "validation::${no_ext_name}")
+      #run the toolkit_test_server and launch npm test from the ${NODEJS_PATH}
+      add_test(NAME "${test_name}"
+               WORKING_DIRECTORY "${NODEJS_PATH}"
+               COMMAND
+                   "${PYTHON_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/tests/scripts/with-opc-server.py"
+                   "--server-wd" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+                   "--server-cmd" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/toolkit_test_server${FILE_EXT} ${no_ext_name}"
+                   "npm" "run" "--silent" "cmake_test"
+               )
+      set(new_env "LD_LIBRARY_PATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
+      set_tests_properties(${test_name} PROPERTIES
+          ENVIRONMENT "${new_env}")
+    endfunction()
+
+    nodejs_validation_test()
   endif(ENABLE_TESTING)
 endif()
 

@@ -85,6 +85,17 @@ build-linux64:
     variables:
       - $NO_ASAN
 
+build-linux64-shared:
+  <<: *build_linux
+  variables:
+      BUILD_SHARED_LIBS: 1
+  only:
+    variables:
+      - $WITH_NODEJS
+  except:
+    variables:
+      - $WITH_PYS2OPC
+
 build-win64: &build_win64
   <<: *docker_job
   stage: build
@@ -149,6 +160,7 @@ build-linux64-coverity:
 
 .test-linux: &test_linux
   <<: *docker_job
+  image: registry.gitlab.com/systerel/s2opc/test@sha256:cfd7d20f861ba1554528dd6c5ca411b7ecf22f31b9e9a2d73bc147a3d97d7f03  # digest of test:2.6
   stage: test
   except:
     variables:
@@ -178,7 +190,6 @@ test-check:
 
 test-unit:
   <<: *test_linux
-  image: registry.gitlab.com/systerel/s2opc/test@sha256:a315200c6a613d6d63e971c5c560caff4ded5d7c747941f0fc48c979fccb27ef  # digest of test:2.5
   script:
     - ./test-all.sh
   artifacts:
@@ -212,6 +223,8 @@ test-uactt:
 test-pys2opc:
   <<: *test_linux
   image: registry.gitlab.com/systerel/s2opc/test@sha256:a315200c6a613d6d63e971c5c560caff4ded5d7c747941f0fc48c979fccb27ef  # digest of test:2.5
+  dependencies:
+    - build-linux64
   script:
     - cd build
     - ctest -T test -R pys2opc
@@ -227,6 +240,25 @@ test-pys2opc:
   except:
     variables: [] # overrides the except
 
+test-nodejs:
+  <<: *test_linux
+  dependencies:
+    - build-linux64-shared
+  script:
+    - cd build
+    - ctest -T test -R nodejs
+  artifacts:
+    name: 'test-nodejs-results-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
+    paths:
+      - 'build/'
+    when: on_failure
+    expire_in: '1 month'
+  only:
+    variables:
+      - $WITH_NODEJS
+  except:
+    variables: []
+
 ###
 # Analysis jobs
 ###
@@ -234,7 +266,7 @@ test-pys2opc:
 coverage-analysis:
   <<: *docker_job
   stage: analyses
-  image: registry.gitlab.com/systerel/s2opc/test@sha256:a315200c6a613d6d63e971c5c560caff4ded5d7c747941f0fc48c979fccb27ef  # digest of test:2.5
+  image: registry.gitlab.com/systerel/s2opc/test@sha256:cfd7d20f861ba1554528dd6c5ca411b7ecf22f31b9e9a2d73bc147a3d97d7f03  # digest of test:2.6
   script:
     - ./.gen_coverage.sh
   artifacts:

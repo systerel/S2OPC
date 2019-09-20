@@ -2,7 +2,7 @@ const sopc_client = require('../../../lib/sopc_client');
 const test_helper = require('../../helpers/connection');
 const assert = require('assert');
 
-describe("Array types", function() {
+describe("Read Array simple types", function() {
     describe("Boolean type", function () {
         let connectionId = 0;
         before(function(done) {

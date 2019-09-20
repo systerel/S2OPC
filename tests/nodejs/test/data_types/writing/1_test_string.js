@@ -2,7 +2,7 @@ const sopc_client = require('../../../lib/sopc_client');
 const test_helper = require('../../helpers/connection');
 const assert = require('assert');
 
-describe("Write String type", function() {
+describe("Write Single String type", function() {
     describe("String type", function () {
         let connectionId = 0;
         before(function(done) {

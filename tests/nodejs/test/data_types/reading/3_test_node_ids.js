@@ -3,7 +3,7 @@ const sopc_client = require('../../../lib/sopc_client');
 const test_helper = require('../../helpers/connection');
 const assert = require('assert');
 
-describe("Node Id types", function () {
+describe("Read Single Node Id types", function () {
     describe("Node id string type", function () {
         let connectionId = 0;
         before(function (done) {

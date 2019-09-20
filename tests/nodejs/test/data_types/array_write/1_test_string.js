@@ -1,9 +1,10 @@
+
 const sopc_client = require('../../../lib/sopc_client');
 const test_helper = require('../../helpers/connection');
 const assert = require('assert');
 
-describe("Write ByteString type", function() {
-    describe("ByteString type", function () {
+describe("Write Array String type", function() {
+    describe("String type", function () {
         let connectionId = 0;
         before(function(done) {
             connectionId = test_helper.connect();
@@ -11,11 +12,11 @@ describe("Write ByteString type", function() {
         });
         it("Every result shall be OK", function (done) {
             let variant = new sopc_client.Variant()
-                .setValue(15, 1, ["1a", "2b", "3c", "4d", "12345abcdef"]);
+                .setValue(12, 1, ["The lazy", "dog", "bites", "the quick", "brown fox"]);
             let data_value = new sopc_client.DataValue()
                                             .setValue(variant);
             let write_value_string = new sopc_client.WriteValue()
-                .setNodeId("ns=1;i=1027")
+                .setNodeId("ns=1;i=1026")
                 .setValue(data_value);
             let write_values = [write_value_string];
 
