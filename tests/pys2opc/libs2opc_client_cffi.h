@@ -254,6 +254,13 @@ typedef struct
 {
     SOPC_LibSub_LogCbk host_log_callback;
     SOPC_LibSub_DisconnectCbk disconnect_callback;
+    struct
+    {
+        SOPC_Toolkit_Log_Level level;
+        const char* log_path;
+        uint32_t maxBytes;
+        uint16_t maxFiles;
+    } toolkit_logger;
 } SOPC_LibSub_StaticCfg;
 
 /*

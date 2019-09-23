@@ -82,10 +82,17 @@ class PyS2OPC:
 
     @staticmethod
     @contextmanager
-    def initialize():
+    def initialize(logLevel=0, logPath='logs/', logFileMaxBytes=1048576, logMaxFileNumber=50):
         """
         Toolkit and LibSub initializations.
         Must be called exactly once per process.
+
+        Args:
+            logLevel: log level (0: error, 1: warning, 2: info, 3: debug)
+            logPath: the path for logs (the current working directory) to logPath.
+                     logPath is created if it does not exist.
+            logFileMAxBytes: The maximum size (best effort) of the log files, before changing the log index.
+            logMaxFileNumber: The maximum number of log indexes before cycling logs and reusing the first log.
 
         This function supports the context management:
         >>> with PyS2OPC.initialize():
@@ -97,7 +104,12 @@ class PyS2OPC:
         """
         assert not PyS2OPC._initialized, 'Library is alread initialized'
 
-        status = libsub.SOPC_LibSub_Initialize([(libsub._callback_log, libsub._callback_disconnected)])
+        status = libsub.SOPC_LibSub_Initialize([(libsub._callback_log,
+                                                 libsub._callback_disconnected,
+                                                 (logLevel,
+                                                  ffi.new('char[]', logPath.encode()),
+                                                  logFileMaxBytes,
+                                                  logMaxFileNumber))])
         assert status == ReturnStatus.OK, 'Library initialization failed with status code {}.'.format(status)
         PyS2OPC._initialized = True
 
@@ -245,22 +257,6 @@ class PyS2OPC:
         config = ClientConfiguration(cfgId, dConnectionParameters)
         PyS2OPC._dConfigurations[cfgId] = config
         return config
-
-    @staticmethod
-    def set_log_path(pathLog, maxLogSize = 1048576, maxFiles = 50):
-        """
-        Change the default path for logs (the current working directory) to logPath. logPath is created
-        if it does not exist.
-        This function must be called after PyS2OPC.initialize() and before PyS2OPC.mark_configured().
-
-        Args:
-            maxLogSize: The maximum size (best effort) of the log files, before changing the log index.
-            maxFiles: The maximum number of log indexes before cycling logs and reusing the first log.
-        """
-        assert PyS2OPC._initialized and not PyS2OPC._configured
-        PyS2OPC._pathLog = ffi.new('char[]', pathLog.encode())
-        assert libsub.SOPC_ToolkitConfig_SetCircularLogPath(PyS2OPC._pathLog, True) == ReturnStatus.OK
-        assert libsub.SOPC_ToolkitConfig_SetCircularLogProperties(maxLogSize, maxFiles) == ReturnStatus.OK
 
     @staticmethod
     def mark_configured():

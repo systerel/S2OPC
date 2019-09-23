@@ -49,11 +49,10 @@ if __name__ == '__main__':
     print()
 
     # Initialize the toolkit and automatically clean it when the script finishes
-    with PyS2OPC.initialize():
-        # Set the path for logs to a new temp dir, must be called before configured().
-        pathLog = tempfile.mkdtemp()
-        print('Log saved to', pathLog)
-        PyS2OPC.set_log_path(pathLog)
+    # Set the path for logs to a new temp dir
+    pathLog = tempfile.mkdtemp()
+    print('Log saved to', pathLog)
+    with PyS2OPC.initialize(logLevel=0, logPath=pathLog):
         # Configure a connection and freeze the S2OPC configurations.
         # See the documentation of this function for all the parameters.
         config = PyS2OPC.add_configuration_unsecured(**configuration_parameters_no_subscription)
