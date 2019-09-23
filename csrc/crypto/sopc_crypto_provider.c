@@ -31,6 +31,17 @@
 #include "sopc_secret_buffer.h"
 
 /* ------------------------------------------------------------------------------------------------
+ * Static getters to find whether the crypto provider is OPC UA or PubSub
+ * ------------------------------------------------------------------------------------------------
+ */
+
+/** \brief Returns the non NULL OPC UA Service crypto profile but returns NULL if the PubSub profile is non NULL. */
+const SOPC_CryptoProfile* get_profile_services(const SOPC_CryptoProvider* pProvider);
+
+/** \brief Returns the non NULL OPC UA PubSub crypto profile but returns NULL if the Services profile is non NULL. */
+const SOPC_CryptoProfile_PubSub* get_profile_pubsub(const SOPC_CryptoProvider* pProvider);
+
+/* ------------------------------------------------------------------------------------------------
  * CryptoProvider creation
  * ------------------------------------------------------------------------------------------------
  */
@@ -1131,4 +1142,28 @@ SOPC_ReturnStatus SOPC_CryptoProvider_Certificate_Validate(const SOPC_CryptoProv
 
     // Verify certificate through PKIProvider callback
     return pPKI->pFnValidateCertificate(pPKI, pCert, error);
+}
+
+/* ------------------------------------------------------------------------------------------------
+ * CryptoProvider -> CryptoProfile getters
+ * ------------------------------------------------------------------------------------------------
+ */
+const SOPC_CryptoProfile* get_profile_services(const SOPC_CryptoProvider* pProvider)
+{
+    assert(NULL != pProvider);
+    if (NULL != pProvider->pProfilePubSub)
+    {
+        return NULL;
+    }
+    return pProvider->pProfile;
+}
+
+const SOPC_CryptoProfile_PubSub* get_profile_pubsub(const SOPC_CryptoProvider* pProvider)
+{
+    assert(NULL != pProvider);
+    if (NULL != pProvider->pProfile)
+    {
+        return NULL;
+    }
+    return pProvider->pProfilePubSub;
 }
