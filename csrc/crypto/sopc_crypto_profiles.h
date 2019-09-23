@@ -137,17 +137,30 @@ typedef SOPC_ReturnStatus (*FnAsymmetricVerify)(const SOPC_CryptoProvider* pProv
                                                 const uint8_t* pSignature);
 typedef SOPC_ReturnStatus (*FnCertificateVerify)(const SOPC_CryptoProvider* pCrypto, const SOPC_Certificate* pCert);
 
+typedef SOPC_ReturnStatus (*FnPubSubCrypt)(const SOPC_CryptoProvider* pProvider,
+                                           const uint8_t* pInput,
+                                           uint32_t lenInput,
+                                           SOPC_SecretBuffer* pKey,
+                                           SOPC_SecretBuffer* pKeyNonce,
+                                           const SOPC_ExposedBuffer* pRandom,
+                                           uint32_t uSequenceNumber,
+                                           uint8_t* pOutput);
+
 /* ------------------------------------------------------------------------------------------------
- * The CryptoProfile definition
+ * The CryptoProfile definitions
  * ------------------------------------------------------------------------------------------------
  */
+
 /**
- * \brief   CryptoProfiles gather pointers to cryptographic functions associated to a security policy.
+ * \brief   CryptoProfiles gather pointers to cryptographic functions of the security policies of OPC UA Services.
  *
  * CryptoProfiles are defined as struct of pointers. These immutable struct are extern and const, because they are
- * lib-specific (hence CryptoProfile_Get and these variables are in different translation units).
- * The CryptoProfiles should be accessed through CryptoProfile_Get ONLY, and should not be modified,
- * as multiple calls to CryptoProfile_Get returns the same instances.
+ * lib-specific (hence SOPC_CryptoProfile_Get and these variables are in different translation units).
+ * The CryptoProfiles should be accessed through SOPC_CryptoProfile_Get ONLY, and should not be modified,
+ * as multiple calls to SOPC_CryptoProfile_Get returns the same instances.
+ *
+ * This crypto profile only handles the OPC UA Services security policies.
+ * See SOPC_CryptoProfile_PubSub for the PubSub security policies.
  */
 struct SOPC_CryptoProfile
 {
@@ -163,6 +176,23 @@ struct SOPC_CryptoProfile
     const FnAsymmetricSign pFnAsymSign;
     const FnAsymmetricVerify pFnAsymVerify;
     const FnCertificateVerify pFnCertVerify;
+};
+
+/**
+ * \brief   CryptoProfiles gather pointers to cryptographic functions of the security policies of OPC UA PubSub.
+ *
+ * CryptoProfiles are defined as struct of pointers. These immutable struct are extern and const, because they are
+ * lib-specific (hence SOPC_CryptoProfile_Get and these variables are in different translation units).
+ * The CryptoProfiles should be accessed through SOPC_CryptoProfile_Get ONLY, and should not be modified,
+ * as multiple calls to SOPC_CryptoProfile_Get returns the same instances.
+ */
+struct SOPC_CryptoProfile_PubSub
+{
+    const uint32_t SecurityPolicyID;
+    const FnPubSubCrypt pFnCrypt;
+    const FnSymmetricSign pFnSymmSign;
+    const FnSymmetricVerify pFnSymmVerif;
+    const FnGenerateRandom pFnGenRnd;
 };
 
 #endif /* SOPC_CRYPTO_PROFILES_H_ */
