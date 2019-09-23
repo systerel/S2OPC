@@ -54,7 +54,7 @@ SOPC_CryptoProvider* SOPC_CryptoProvider_Create(const char* uri)
     pProfile = SOPC_CryptoProfile_Get(uri);
     if (NULL != pProfile)
     {
-        pCryptoProvider = SOPC_Malloc(sizeof(SOPC_CryptoProvider));
+        pCryptoProvider = SOPC_Calloc(1, sizeof(SOPC_CryptoProvider));
         if (NULL != pCryptoProvider)
         {
             // The crypto provider profile shall be const after this init
@@ -89,10 +89,18 @@ void SOPC_CryptoProvider_Free(SOPC_CryptoProvider* pCryptoProvider)
 SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricGetLength_CryptoKey(const SOPC_CryptoProvider* pProvider,
                                                                    uint32_t* pLength)
 {
-    if (NULL == pProvider || NULL == pProvider->pProfile || NULL == pLength)
+    if (NULL == pProvider || NULL == pLength)
+    {
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    switch (pProvider->pProfile->SecurityPolicyID)
+    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    if (NULL == pProfile)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    switch (pProfile->SecurityPolicyID)
     {
     case SOPC_SecurityPolicy_Invalid_ID:
     case SOPC_SecurityPolicy_None_ID:
@@ -113,12 +121,18 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricGetLength_Encryption(const SOPC_C
                                                                     uint32_t lengthIn,
                                                                     uint32_t* pLengthOut)
 {
-    if (NULL == pProvider || NULL == pProvider->pProfile)
+    if (NULL == pProvider || NULL == pLengthOut)
+    {
         return SOPC_STATUS_INVALID_PARAMETERS;
-    if (NULL == pLengthOut)
-        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    switch (pProvider->pProfile->SecurityPolicyID)
+    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    if (NULL == pProfile)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    switch (pProfile->SecurityPolicyID)
     {
     case SOPC_SecurityPolicy_Invalid_ID:
     case SOPC_SecurityPolicy_None_ID:
@@ -137,12 +151,18 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricGetLength_Decryption(const SOPC_C
                                                                     uint32_t lengthIn,
                                                                     uint32_t* pLengthOut)
 {
-    if (NULL == pProvider || NULL == pProvider->pProfile)
+    if (NULL == pProvider || NULL == pLengthOut)
+    {
         return SOPC_STATUS_INVALID_PARAMETERS;
-    if (NULL == pLengthOut)
-        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    switch (pProvider->pProfile->SecurityPolicyID)
+    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    if (NULL == pProfile)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    switch (pProfile->SecurityPolicyID)
     {
     case SOPC_SecurityPolicy_Invalid_ID:
     case SOPC_SecurityPolicy_None_ID:
@@ -160,10 +180,18 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricGetLength_Decryption(const SOPC_C
 SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricGetLength_SignKey(const SOPC_CryptoProvider* pProvider,
                                                                  uint32_t* pLength)
 {
-    if (NULL == pProvider || NULL == pProvider->pProfile || NULL == pLength)
+    if (NULL == pProvider || NULL == pLength)
+    {
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    switch (pProvider->pProfile->SecurityPolicyID)
+    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    if (NULL == pProfile)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    switch (pProfile->SecurityPolicyID)
     {
     case SOPC_SecurityPolicy_Invalid_ID:
     case SOPC_SecurityPolicy_None_ID:
@@ -183,10 +211,18 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricGetLength_SignKey(const SOPC_Cryp
 SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricGetLength_Signature(const SOPC_CryptoProvider* pProvider,
                                                                    uint32_t* pLength)
 {
-    if (NULL == pProvider || NULL == pProvider->pProfile || NULL == pLength)
+    if (NULL == pProvider || NULL == pLength)
+    {
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    switch (pProvider->pProfile->SecurityPolicyID)
+    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    if (NULL == pProfile)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    switch (pProfile->SecurityPolicyID)
     {
     case SOPC_SecurityPolicy_Invalid_ID:
     case SOPC_SecurityPolicy_None_ID:
@@ -207,10 +243,18 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricGetLength_Blocks(const SOPC_Crypt
                                                                 uint32_t* pCipherTextBlockSize,
                                                                 uint32_t* pPlainTextBlockSize)
 {
-    if (NULL == pProvider || NULL == pProvider->pProfile)
+    if (NULL == pProvider)
+    {
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    switch (pProvider->pProfile->SecurityPolicyID)
+    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    if (NULL == pProfile)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    switch (pProfile->SecurityPolicyID)
     {
     case SOPC_SecurityPolicy_Invalid_ID:
     case SOPC_SecurityPolicy_None_ID:
@@ -218,15 +262,23 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricGetLength_Blocks(const SOPC_Crypt
         return SOPC_STATUS_INVALID_PARAMETERS;
     case SOPC_SecurityPolicy_Basic256Sha256_ID:
         if (NULL != pCipherTextBlockSize)
+        {
             *pCipherTextBlockSize = SOPC_SecurityPolicy_Basic256Sha256_SymmLen_Block;
+        }
         if (NULL != pPlainTextBlockSize)
+        {
             *pPlainTextBlockSize = SOPC_SecurityPolicy_Basic256Sha256_SymmLen_Block;
+        }
         break;
     case SOPC_SecurityPolicy_Basic256_ID:
         if (NULL != pCipherTextBlockSize)
+        {
             *pCipherTextBlockSize = SOPC_SecurityPolicy_Basic256_SymmLen_Block;
+        }
         if (NULL != pPlainTextBlockSize)
+        {
             *pPlainTextBlockSize = SOPC_SecurityPolicy_Basic256_SymmLen_Block;
+        }
         break;
     }
 
@@ -236,10 +288,18 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricGetLength_Blocks(const SOPC_Crypt
 SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricGetLength_SecureChannelNonce(const SOPC_CryptoProvider* pProvider,
                                                                             uint32_t* pLenNonce)
 {
-    if (NULL == pProvider || NULL == pProvider->pProfile)
+    if (NULL == pProvider)
+    {
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    switch (pProvider->pProfile->SecurityPolicyID)
+    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    if (NULL == pProfile)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    switch (pProfile->SecurityPolicyID)
     {
     case SOPC_SecurityPolicy_Invalid_ID:
     case SOPC_SecurityPolicy_None_ID:
@@ -260,7 +320,9 @@ SOPC_ReturnStatus SOPC_CryptoProvider_DeriveGetLengths(const SOPC_CryptoProvider
 
     if (NULL == pProvider || NULL == pSymmCryptoKeyLength || NULL == pSymmSignKeyLength ||
         NULL == pSymmInitVectorLength)
+    {
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
     *pSymmCryptoKeyLength = 0;
     *pSymmSignKeyLength = 0;
@@ -271,7 +333,9 @@ SOPC_ReturnStatus SOPC_CryptoProvider_DeriveGetLengths(const SOPC_CryptoProvider
     {
         status = SOPC_CryptoProvider_SymmetricGetLength_SignKey(pProvider, pSymmSignKeyLength);
         if (SOPC_STATUS_OK == status)
+        {
             status = SOPC_CryptoProvider_SymmetricGetLength_Blocks(pProvider, pSymmInitVectorLength, NULL);
+        }
     }
 
     return status;
@@ -291,23 +355,30 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricGetLength_KeyBytes(const SOPC_Cr
 }
 
 SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricGetLength_OAEPHashLength(const SOPC_CryptoProvider* pProvider,
-                                                                         uint32_t* length)
+                                                                         uint32_t* pLength)
 {
-    if (NULL == pProvider || NULL == pProvider->pProfile ||
-        SOPC_SecurityPolicy_Invalid_ID == pProvider->pProfile->SecurityPolicyID || NULL == length)
+    if (NULL == pProvider || NULL == pLength)
+    {
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    switch (pProvider->pProfile->SecurityPolicyID)
+    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    if (NULL == pProfile)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    switch (pProfile->SecurityPolicyID)
     {
     case SOPC_SecurityPolicy_Invalid_ID:
     case SOPC_SecurityPolicy_None_ID:
     default:
         return SOPC_STATUS_INVALID_PARAMETERS;
     case SOPC_SecurityPolicy_Basic256Sha256_ID:
-        *length = SOPC_SecurityPolicy_Basic256Sha256_AsymLen_OAEP_Hash;
+        *pLength = SOPC_SecurityPolicy_Basic256Sha256_AsymLen_OAEP_Hash;
         break;
     case SOPC_SecurityPolicy_Basic256_ID:
-        *length = SOPC_SecurityPolicy_Basic256_AsymLen_OAEP_Hash;
+        *pLength = SOPC_SecurityPolicy_Basic256_AsymLen_OAEP_Hash;
         break;
     }
 
@@ -416,11 +487,18 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricGetLength_Signature(const SOPC_C
 
 const char* SOPC_CryptoProvider_AsymmetricGetUri_SignAlgorithm(const SOPC_CryptoProvider* pProvider)
 {
-    if (NULL == pProvider || NULL == pProvider->pProfile ||
-        SOPC_SecurityPolicy_Invalid_ID == pProvider->pProfile->SecurityPolicyID)
+    if (NULL == pProvider)
+    {
         return NULL;
+    }
 
-    switch (pProvider->pProfile->SecurityPolicyID)
+    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    if (NULL == pProfile)
+    {
+        return NULL;
+    }
+
+    switch (pProfile->SecurityPolicyID)
     {
     case SOPC_SecurityPolicy_Invalid_ID:
     case SOPC_SecurityPolicy_None_ID:
@@ -436,11 +514,19 @@ const char* SOPC_CryptoProvider_AsymmetricGetUri_SignAlgorithm(const SOPC_Crypto
 SOPC_ReturnStatus SOPC_CryptoProvider_CertificateGetLength_Thumbprint(const SOPC_CryptoProvider* pProvider,
                                                                       uint32_t* pLength)
 {
-    if (NULL == pProvider || NULL == pProvider->pProfile || NULL == pLength)
+    if (NULL == pProvider)
+    {
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    if (NULL == pProfile)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
     *pLength = 0;
-    switch (pProvider->pProfile->SecurityPolicyID)
+    switch (pProfile->SecurityPolicyID)
     {
     case SOPC_SecurityPolicy_Invalid_ID:
     case SOPC_SecurityPolicy_None_ID:
@@ -469,22 +555,29 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricEncrypt(const SOPC_CryptoProvider
                                                        uint8_t* pOutput,
                                                        uint32_t lenOutput)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     const SOPC_ExposedBuffer* pExpKey = NULL;
     const SOPC_ExposedBuffer* pExpIV = NULL;
     uint32_t lenCiphered = 0;
 
-    if (NULL == pProvider || NULL == pProvider->pProfile || NULL == pInput || NULL == pKey || NULL == pIV ||
-        NULL == pOutput || NULL == pProvider->pProfile->pFnSymmEncrypt)
+    if (NULL == pProvider || NULL == pInput || NULL == pKey || NULL == pIV || NULL == pOutput)
+    {
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    if (SOPC_CryptoProvider_SymmetricGetLength_Encryption(pProvider, lenPlainText, &lenCiphered) != SOPC_STATUS_OK)
-        return SOPC_STATUS_NOK;
-    if (lenCiphered != lenOutput)
+    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    if (NULL == pProfile)
+    {
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_ReturnStatus status = SOPC_CryptoProvider_SymmetricGetLength_Encryption(pProvider, lenPlainText, &lenCiphered);
+    if (SOPC_STATUS_OK != status || lenCiphered != lenOutput)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
     // TODO: unit-test these watchdogs
-    switch (pProvider->pProfile->SecurityPolicyID)
+    switch (pProfile->SecurityPolicyID)
     {
     case SOPC_SecurityPolicy_Invalid_ID:
     case SOPC_SecurityPolicy_None_ID:
@@ -492,28 +585,38 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricEncrypt(const SOPC_CryptoProvider
         return SOPC_STATUS_INVALID_PARAMETERS;
     case SOPC_SecurityPolicy_Basic256Sha256_ID:
         if ((lenPlainText % SOPC_SecurityPolicy_Basic256Sha256_SymmLen_Block) != 0) // Not block-aligned
+        {
             return SOPC_STATUS_INVALID_PARAMETERS;
+        }
         if (SOPC_SecretBuffer_GetLength(pKey) != SOPC_SecurityPolicy_Basic256Sha256_SymmLen_CryptoKey) // Wrong key size
+        {
             return SOPC_STATUS_INVALID_PARAMETERS;
-        if (SOPC_SecretBuffer_GetLength(pIV) !=
-            SOPC_SecurityPolicy_Basic256Sha256_SymmLen_Block) // Wrong IV size (should be block size)
+        }
+        if (SOPC_SecretBuffer_GetLength(pIV) != SOPC_SecurityPolicy_Basic256Sha256_SymmLen_Block)
+        { // Wrong IV size (should be block size)
             return SOPC_STATUS_INVALID_PARAMETERS;
+        }
         break;
     case SOPC_SecurityPolicy_Basic256_ID:
         if ((lenPlainText % SOPC_SecurityPolicy_Basic256_SymmLen_Block) != 0) // Not block-aligned
+        {
             return SOPC_STATUS_INVALID_PARAMETERS;
+        }
         if (SOPC_SecretBuffer_GetLength(pKey) != SOPC_SecurityPolicy_Basic256_SymmLen_CryptoKey) // Wrong key size
+        {
             return SOPC_STATUS_INVALID_PARAMETERS;
-        if (SOPC_SecretBuffer_GetLength(pIV) !=
-            SOPC_SecurityPolicy_Basic256_SymmLen_Block) // Wrong IV size (should be block size)
+        }
+        if (SOPC_SecretBuffer_GetLength(pIV) != SOPC_SecurityPolicy_Basic256_SymmLen_Block)
+        { // Wrong IV size (should be block size)
             return SOPC_STATUS_INVALID_PARAMETERS;
+        }
         break;
     }
 
     pExpKey = SOPC_SecretBuffer_Expose(pKey);
     pExpIV = SOPC_SecretBuffer_Expose(pIV);
 
-    status = pProvider->pProfile->pFnSymmEncrypt(pProvider, pInput, lenPlainText, pExpKey, pExpIV, pOutput, lenOutput);
+    status = pProfile->pFnSymmEncrypt(pProvider, pInput, lenPlainText, pExpKey, pExpIV, pOutput, lenOutput);
 
     SOPC_SecretBuffer_Unexpose(pExpKey, pKey);
     SOPC_SecretBuffer_Unexpose(pExpIV, pIV);
@@ -529,22 +632,30 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricDecrypt(const SOPC_CryptoProvider
                                                        uint8_t* pOutput,
                                                        uint32_t lenOutput)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     const SOPC_ExposedBuffer* pExpKey = NULL;
     const SOPC_ExposedBuffer* pExpIV = NULL;
     uint32_t lenDeciphered = 0;
 
-    if (NULL == pProvider || NULL == pProvider->pProfile || NULL == pInput || NULL == pKey || NULL == pIV ||
-        NULL == pOutput || NULL == pProvider->pProfile->pFnSymmDecrypt)
+    if (NULL == pProvider || NULL == pInput || NULL == pKey || NULL == pIV || NULL == pOutput)
+    {
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    if (SOPC_CryptoProvider_SymmetricGetLength_Decryption(pProvider, lenCipherText, &lenDeciphered) != SOPC_STATUS_OK)
-        return SOPC_STATUS_NOK;
-    if (lenDeciphered != lenOutput)
+    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    if (NULL == pProfile)
+    {
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_ReturnStatus status =
+        SOPC_CryptoProvider_SymmetricGetLength_Decryption(pProvider, lenCipherText, &lenDeciphered);
+    if (SOPC_STATUS_OK != status || lenDeciphered != lenOutput)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
     // TODO: unit-test these watchdogs
-    switch (pProvider->pProfile->SecurityPolicyID)
+    switch (pProfile->SecurityPolicyID)
     {
     case SOPC_SecurityPolicy_Invalid_ID:
     case SOPC_SecurityPolicy_None_ID:
@@ -552,28 +663,38 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricDecrypt(const SOPC_CryptoProvider
         return SOPC_STATUS_INVALID_PARAMETERS;
     case SOPC_SecurityPolicy_Basic256Sha256_ID:
         if ((lenCipherText % SOPC_SecurityPolicy_Basic256Sha256_SymmLen_Block) != 0) // Not block-aligned
+        {
             return SOPC_STATUS_INVALID_PARAMETERS;
+        }
         if (SOPC_SecretBuffer_GetLength(pKey) != SOPC_SecurityPolicy_Basic256Sha256_SymmLen_CryptoKey) // Wrong key size
+        {
             return SOPC_STATUS_INVALID_PARAMETERS;
-        if (SOPC_SecretBuffer_GetLength(pIV) !=
-            SOPC_SecurityPolicy_Basic256Sha256_SymmLen_Block) // Wrong IV size (should be block size)
+        }
+        if (SOPC_SecretBuffer_GetLength(pIV) != SOPC_SecurityPolicy_Basic256Sha256_SymmLen_Block)
+        { // Wrong IV size (should be block size)
             return SOPC_STATUS_INVALID_PARAMETERS;
+        }
         break;
     case SOPC_SecurityPolicy_Basic256_ID:
         if ((lenCipherText % SOPC_SecurityPolicy_Basic256_SymmLen_Block) != 0) // Not block-aligned
+        {
             return SOPC_STATUS_INVALID_PARAMETERS;
+        }
         if (SOPC_SecretBuffer_GetLength(pKey) != SOPC_SecurityPolicy_Basic256_SymmLen_CryptoKey) // Wrong key size
+        {
             return SOPC_STATUS_INVALID_PARAMETERS;
-        if (SOPC_SecretBuffer_GetLength(pIV) !=
-            SOPC_SecurityPolicy_Basic256_SymmLen_Block) // Wrong IV size (should be block size)
+        }
+        if (SOPC_SecretBuffer_GetLength(pIV) != SOPC_SecurityPolicy_Basic256_SymmLen_Block)
+        { // Wrong IV size (should be block size)
             return SOPC_STATUS_INVALID_PARAMETERS;
+        }
         break;
     }
 
     pExpKey = SOPC_SecretBuffer_Expose(pKey);
     pExpIV = SOPC_SecretBuffer_Expose(pIV);
 
-    status = pProvider->pProfile->pFnSymmDecrypt(pProvider, pInput, lenCipherText, pExpKey, pExpIV, pOutput, lenOutput);
+    status = pProfile->pFnSymmDecrypt(pProvider, pInput, lenCipherText, pExpKey, pExpIV, pOutput, lenOutput);
 
     SOPC_SecretBuffer_Unexpose(pExpKey, pKey);
     SOPC_SecretBuffer_Unexpose(pExpIV, pIV);
@@ -592,9 +713,16 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricSign(const SOPC_CryptoProvider* p
     const SOPC_ExposedBuffer* pExpKey = NULL;
     uint32_t len;
 
-    if (NULL == pProvider || NULL == pProvider->pProfile || NULL == pInput || NULL == pKey || NULL == pOutput ||
-        NULL == pProvider->pProfile->pFnSymmSign)
+    if (NULL == pProvider || NULL == pInput || NULL == pKey || NULL == pOutput)
+    {
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    if (NULL == pProfile || NULL == pProfile->pFnSymmSign)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
     // Assert output size
     if (SOPC_CryptoProvider_SymmetricGetLength_Signature(pProvider, &len) != SOPC_STATUS_OK)
@@ -612,7 +740,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricSign(const SOPC_CryptoProvider* p
     if (NULL == pExpKey)
         return SOPC_STATUS_NOK;
 
-    status = pProvider->pProfile->pFnSymmSign(pProvider, pInput, lenInput, pExpKey, pOutput);
+    status = pProfile->pFnSymmSign(pProvider, pInput, lenInput, pExpKey, pOutput);
 
     SOPC_SecretBuffer_Unexpose(pExpKey, pKey);
     return status;
@@ -629,9 +757,16 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricVerify(const SOPC_CryptoProvider*
     const SOPC_ExposedBuffer* pExpKey = NULL;
     uint32_t len;
 
-    if (NULL == pProvider || NULL == pProvider->pProfile || NULL == pInput || NULL == pKey || NULL == pSignature ||
-        NULL == pProvider->pProfile->pFnSymmVerif)
+    if (NULL == pProvider || NULL == pInput || NULL == pKey || NULL == pSignature)
+    {
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    if (NULL == pProfile || NULL == pProfile->pFnSymmVerif)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
     // Assert output size
     if (SOPC_CryptoProvider_SymmetricGetLength_Signature(pProvider, &len) != SOPC_STATUS_OK)
@@ -649,7 +784,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricVerify(const SOPC_CryptoProvider*
     if (NULL == pExpKey)
         return SOPC_STATUS_NOK;
 
-    status = pProvider->pProfile->pFnSymmVerif(pProvider, pInput, lenInput, pExpKey, pSignature);
+    status = pProfile->pFnSymmVerif(pProvider, pInput, lenInput, pExpKey, pSignature);
 
     SOPC_SecretBuffer_Unexpose(pExpKey, pKey);
     return status;
@@ -664,30 +799,32 @@ SOPC_ReturnStatus SOPC_CryptoProvider_GenerateRandomBytes(const SOPC_CryptoProvi
                                                           uint32_t nBytes,
                                                           SOPC_ExposedBuffer** ppBuffer)
 {
+    if (NULL == pProvider || nBytes == 0 || NULL == ppBuffer)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    if (NULL == pProfile || NULL == pProfile->pFnGenRnd)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_ExposedBuffer* pExp = NULL;
 
-    if (NULL == pProvider || nBytes == 0 || NULL == ppBuffer || NULL == pProvider->pProfile ||
-        NULL == pProvider->pProfile->pFnGenRnd)
+    /* Empties pointer in case an error occurs after that point. */
+    *ppBuffer = NULL;
+
+    pExp = SOPC_Malloc(nBytes);
+    if (NULL == pExp)
     {
-        status = SOPC_STATUS_INVALID_PARAMETERS;
+        status = SOPC_STATUS_NOK;
     }
 
     if (SOPC_STATUS_OK == status)
     {
-        /* Empties pointer in case an error occurs after that point. */
-        *ppBuffer = NULL;
-
-        pExp = SOPC_Malloc(nBytes);
-        if (NULL == pExp)
-        {
-            status = SOPC_STATUS_NOK;
-        }
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = pProvider->pProfile->pFnGenRnd(pProvider, pExp, nBytes);
+        status = pProfile->pFnGenRnd(pProvider, pExp, nBytes);
         if (SOPC_STATUS_OK == status)
         {
             *ppBuffer = pExp;
@@ -704,17 +841,21 @@ SOPC_ReturnStatus SOPC_CryptoProvider_GenerateRandomBytes(const SOPC_CryptoProvi
 SOPC_ReturnStatus SOPC_CryptoProvider_GenerateSecureChannelNonce(const SOPC_CryptoProvider* pProvider,
                                                                  SOPC_SecretBuffer** ppNonce)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     uint32_t lenNonce;
     SOPC_ExposedBuffer* pExp;
 
-    if (NULL == pProvider || NULL == ppNonce || NULL == pProvider->pProfile || NULL == pProvider->pProfile->pFnGenRnd)
+    if (NULL == pProvider || NULL == ppNonce)
+    {
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    if (SOPC_CryptoProvider_SymmetricGetLength_SecureChannelNonce(pProvider, &lenNonce) != SOPC_STATUS_OK)
-        return SOPC_STATUS_NOK;
+    SOPC_ReturnStatus status = SOPC_CryptoProvider_SymmetricGetLength_SecureChannelNonce(pProvider, &lenNonce);
 
-    status = SOPC_CryptoProvider_GenerateRandomBytes(pProvider, lenNonce, &pExp);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_CryptoProvider_GenerateRandomBytes(pProvider, lenNonce, &pExp);
+    }
+
     if (SOPC_STATUS_OK == status)
     {
         *ppNonce = SOPC_SecretBuffer_NewFromExposedBuffer(pExp, lenNonce);
@@ -732,10 +873,18 @@ SOPC_ReturnStatus SOPC_CryptoProvider_GenerateSecureChannelNonce(const SOPC_Cryp
 
 SOPC_ReturnStatus SOPC_CryptoProvider_GenerateRandomID(const SOPC_CryptoProvider* pProvider, uint32_t* pID)
 {
-    if (NULL == pProvider || NULL == pID || NULL == pProvider->pProfile || NULL == pProvider->pProfile->pFnGenRnd)
+    if (NULL == pProvider || NULL == pID)
+    {
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    return pProvider->pProfile->pFnGenRnd(pProvider, (SOPC_ExposedBuffer*) pID, sizeof(uint32_t));
+    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    if (NULL == pProfile || NULL == pProfile->pFnGenRnd)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    return pProfile->pFnGenRnd(pProvider, (SOPC_ExposedBuffer*) pID, sizeof(uint32_t));
 }
 
 SOPC_ReturnStatus SOPC_CryptoProvider_DerivePseudoRandomData(const SOPC_CryptoProvider* pProvider,
@@ -746,12 +895,19 @@ SOPC_ReturnStatus SOPC_CryptoProvider_DerivePseudoRandomData(const SOPC_CryptoPr
                                                              SOPC_ExposedBuffer* pOutput,
                                                              uint32_t lenOutput)
 {
-    if (NULL == pProvider || NULL == pProvider->pCryptolibContext || NULL == pProvider->pProfile || NULL == pSecret ||
-        0 == lenSecret || NULL == pSeed || 0 == lenSeed || NULL == pOutput || 0 == lenOutput ||
-        NULL == pProvider->pProfile->pFnDeriveData)
+    if (NULL == pProvider || NULL == pProvider->pCryptolibContext || NULL == pSecret || 0 == lenSecret ||
+        NULL == pSeed || 0 == lenSeed || NULL == pOutput || 0 == lenOutput)
+    {
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    return pProvider->pProfile->pFnDeriveData(pProvider, pSecret, lenSecret, pSeed, lenSeed, pOutput, lenOutput);
+    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    if (NULL == pProfile || NULL == pProfile->pFnDeriveData)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    return pProfile->pFnDeriveData(pProvider, pSecret, lenSecret, pSeed, lenSeed, pOutput, lenOutput);
 }
 
 static inline SOPC_ReturnStatus DeriveKS(const SOPC_CryptoProvider* pProvider,
@@ -942,9 +1098,15 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricEncrypt(const SOPC_CryptoProvide
     uint32_t lenKey = 0;
 
     if (NULL == pProvider || NULL == pInput || 0 == lenInput || NULL == pKey || NULL == pOutput || 0 == lenOutput)
+    {
         return SOPC_STATUS_INVALID_PARAMETERS;
-    if (NULL == pProvider->pProfile || NULL == pProvider->pProfile->pFnAsymEncrypt)
+    }
+
+    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    if (NULL == pProfile || NULL == pProfile->pFnAsymEncrypt)
+    {
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
     // Check buffer length
     if (SOPC_CryptoProvider_AsymmetricGetLength_Encryption(pProvider, pKey, lenInput, &lenOutCalc) != SOPC_STATUS_OK)
@@ -955,7 +1117,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricEncrypt(const SOPC_CryptoProvide
     // Check key length
     if (SOPC_CryptoProvider_AsymmetricGetLength_KeyBits(pProvider, pKey, &lenKey) != SOPC_STATUS_OK)
         return SOPC_STATUS_INVALID_PARAMETERS;
-    switch (pProvider->pProfile->SecurityPolicyID)
+    switch (pProfile->SecurityPolicyID)
     {
     case SOPC_SecurityPolicy_Invalid_ID:
     case SOPC_SecurityPolicy_None_ID:
@@ -974,7 +1136,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricEncrypt(const SOPC_CryptoProvide
     }
 
     // We can now proceed
-    return pProvider->pProfile->pFnAsymEncrypt(pProvider, pInput, lenInput, pKey, pOutput);
+    return pProfile->pFnAsymEncrypt(pProvider, pInput, lenInput, pKey, pOutput);
 }
 
 SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricDecrypt(const SOPC_CryptoProvider* pProvider,
@@ -989,9 +1151,15 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricDecrypt(const SOPC_CryptoProvide
     uint32_t lenKey = 0;
 
     if (NULL == pProvider || NULL == pInput || 0 == lenInput || NULL == pKey || NULL == pOutput || 0 == lenOutput)
+    {
         return SOPC_STATUS_INVALID_PARAMETERS;
-    if (NULL == pProvider->pProfile || NULL == pProvider->pProfile->pFnAsymDecrypt)
+    }
+
+    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    if (NULL == pProfile || NULL == pProfile->pFnAsymDecrypt)
+    {
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
     // Check buffer length
     if (SOPC_CryptoProvider_AsymmetricGetLength_Decryption(pProvider, pKey, lenInput, &lenOutCalc) != SOPC_STATUS_OK)
@@ -1002,7 +1170,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricDecrypt(const SOPC_CryptoProvide
     // Check key length
     if (SOPC_CryptoProvider_AsymmetricGetLength_KeyBits(pProvider, pKey, &lenKey) != SOPC_STATUS_OK)
         return SOPC_STATUS_INVALID_PARAMETERS;
-    switch (pProvider->pProfile->SecurityPolicyID)
+    switch (pProfile->SecurityPolicyID)
     {
     case SOPC_SecurityPolicy_Invalid_ID:
     case SOPC_SecurityPolicy_None_ID:
@@ -1021,7 +1189,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricDecrypt(const SOPC_CryptoProvide
     }
 
     // We can now proceed
-    return pProvider->pProfile->pFnAsymDecrypt(pProvider, pInput, lenInput, pKey, pOutput, pLenWritten);
+    return pProfile->pFnAsymDecrypt(pProvider, pInput, lenInput, pKey, pOutput, pLenWritten);
 }
 
 /**
@@ -1042,9 +1210,15 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricSign(const SOPC_CryptoProvider* 
 
     if (NULL == pProvider || NULL == pInput || 0 == lenInput || NULL == pKeyPrivateLocal || NULL == pSignature ||
         0 == lenSignature)
+    {
         return SOPC_STATUS_INVALID_PARAMETERS;
-    if (NULL == pProvider->pProfile || NULL == pProvider->pProfile->pFnAsymSign)
+    }
+
+    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    if (NULL == pProfile || NULL == pProfile->pFnAsymSign)
+    {
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
     // Check lengths
     if (SOPC_CryptoProvider_AsymmetricGetLength_Signature(pProvider, pKeyPrivateLocal, &lenSigCalc) != SOPC_STATUS_OK)
@@ -1053,7 +1227,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricSign(const SOPC_CryptoProvider* 
         return SOPC_STATUS_INVALID_PARAMETERS;
     if (SOPC_CryptoProvider_AsymmetricGetLength_KeyBits(pProvider, pKeyPrivateLocal, &lenKey) != SOPC_STATUS_OK)
         return SOPC_STATUS_INVALID_PARAMETERS;
-    switch (pProvider->pProfile->SecurityPolicyID)
+    switch (pProfile->SecurityPolicyID)
     {
     case SOPC_SecurityPolicy_Invalid_ID:
     case SOPC_SecurityPolicy_None_ID:
@@ -1071,7 +1245,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricSign(const SOPC_CryptoProvider* 
         break;
     }
 
-    return pProvider->pProfile->pFnAsymSign(pProvider, pInput, lenInput, pKeyPrivateLocal, pSignature);
+    return pProfile->pFnAsymSign(pProvider, pInput, lenInput, pKeyPrivateLocal, pSignature);
 }
 
 SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricVerify(const SOPC_CryptoProvider* pProvider,
@@ -1085,9 +1259,15 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricVerify(const SOPC_CryptoProvider
 
     if (NULL == pProvider || NULL == pInput || 0 == lenInput || NULL == pKeyRemotePublic || NULL == pSignature ||
         0 == lenSignature)
+    {
         return SOPC_STATUS_INVALID_PARAMETERS;
-    if (NULL == pProvider->pProfile || NULL == pProvider->pProfile->pFnAsymVerify)
+    }
+
+    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    if (NULL == pProfile || NULL == pProfile->pFnAsymVerify)
+    {
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
     // Check lengths
     if (SOPC_CryptoProvider_AsymmetricGetLength_Signature(pProvider, pKeyRemotePublic, &lenSigCalc) != SOPC_STATUS_OK)
@@ -1096,7 +1276,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricVerify(const SOPC_CryptoProvider
         return SOPC_STATUS_INVALID_PARAMETERS;
     if (SOPC_CryptoProvider_AsymmetricGetLength_KeyBits(pProvider, pKeyRemotePublic, &lenKey) != SOPC_STATUS_OK)
         return SOPC_STATUS_INVALID_PARAMETERS;
-    switch (pProvider->pProfile->SecurityPolicyID)
+    switch (pProfile->SecurityPolicyID)
     {
     case SOPC_SecurityPolicy_Invalid_ID:
     case SOPC_SecurityPolicy_None_ID:
@@ -1114,7 +1294,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricVerify(const SOPC_CryptoProvider
         break;
     }
 
-    return pProvider->pProfile->pFnAsymVerify(pProvider, pInput, lenInput, pKeyRemotePublic, pSignature);
+    return pProfile->pFnAsymVerify(pProvider, pInput, lenInput, pKeyRemotePublic, pSignature);
 }
 
 /* ------------------------------------------------------------------------------------------------
@@ -1129,12 +1309,19 @@ SOPC_ReturnStatus SOPC_CryptoProvider_Certificate_Validate(const SOPC_CryptoProv
     assert(NULL != error);
 
     // TODO: where is the key key_pub <-> key_priv association checked?
-    if (NULL == pProvider || NULL == pProvider->pProfile || NULL == pProvider->pProfile->pFnCertVerify ||
-        NULL == pPKI || NULL == pPKI->pFnValidateCertificate || NULL == pCert)
+    if (NULL == pProvider || NULL == pPKI || NULL == pPKI->pFnValidateCertificate || NULL == pCert)
+    {
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    if (NULL == pProfile || NULL == pProfile->pFnCertVerify)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
     // Let the lib-specific code handle the verification for the current security policy
-    if (pProvider->pProfile->pFnCertVerify(pProvider, pCert) != SOPC_STATUS_OK)
+    if (pProfile->pFnCertVerify(pProvider, pCert) != SOPC_STATUS_OK)
     {
         *error = SOPC_CertificateValidationError_Invalid;
         return SOPC_STATUS_NOK;
