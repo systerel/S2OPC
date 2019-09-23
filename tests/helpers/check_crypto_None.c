@@ -76,11 +76,11 @@ START_TEST(test_crypto_symm_lengths_None)
     uint32_t len = 0, lenCiph = 0, lenDeci = 0;
 
     // Check sizes
-    ck_assert(SOPC_CryptoProvider_SymmetricGetLength_CryptoKey(crypto, &len) == SOPC_STATUS_NOK);
-    ck_assert(SOPC_CryptoProvider_SymmetricGetLength_SignKey(crypto, &len) == SOPC_STATUS_NOK);
-    ck_assert(SOPC_CryptoProvider_SymmetricGetLength_Signature(crypto, &len) == SOPC_STATUS_NOK);
-    ck_assert(SOPC_CryptoProvider_SymmetricGetLength_Encryption(crypto, 15, &len) == SOPC_STATUS_NOK);
-    ck_assert(SOPC_CryptoProvider_SymmetricGetLength_Decryption(crypto, 15, &len) == SOPC_STATUS_NOK);
+    ck_assert(SOPC_CryptoProvider_SymmetricGetLength_CryptoKey(crypto, &len) == SOPC_STATUS_INVALID_PARAMETERS);
+    ck_assert(SOPC_CryptoProvider_SymmetricGetLength_SignKey(crypto, &len) == SOPC_STATUS_INVALID_PARAMETERS);
+    ck_assert(SOPC_CryptoProvider_SymmetricGetLength_Signature(crypto, &len) == SOPC_STATUS_INVALID_PARAMETERS);
+    ck_assert(SOPC_CryptoProvider_SymmetricGetLength_Encryption(crypto, 15, &len) == SOPC_STATUS_INVALID_PARAMETERS);
+    ck_assert(SOPC_CryptoProvider_SymmetricGetLength_Decryption(crypto, 15, &len) == SOPC_STATUS_INVALID_PARAMETERS);
     ck_assert(SOPC_CryptoProvider_SymmetricGetLength_SecureChannelNonce(crypto, &len) ==
               SOPC_STATUS_INVALID_PARAMETERS);
     ck_assert(SOPC_CryptoProvider_SymmetricGetLength_Blocks(crypto, NULL, NULL) == SOPC_STATUS_INVALID_PARAMETERS);
@@ -196,7 +196,7 @@ START_TEST(test_crypto_generate_nonce_None)
 {
     SOPC_SecretBuffer* pSecNonce;
 
-    ck_assert(SOPC_CryptoProvider_GenerateSecureChannelNonce(crypto, &pSecNonce) == SOPC_STATUS_NOK);
+    ck_assert(SOPC_CryptoProvider_GenerateSecureChannelNonce(crypto, &pSecNonce) == SOPC_STATUS_INVALID_PARAMETERS);
 
     // Test invalid inputs
     ck_assert(SOPC_CryptoProvider_GenerateSecureChannelNonce(NULL, &pSecNonce) == SOPC_STATUS_INVALID_PARAMETERS);
@@ -225,7 +225,8 @@ START_TEST(test_crypto_derive_lengths_None)
     uint32_t lenCryptoKey = 0, lenSignKey = 0, lenIV = 0;
 
     // Check sizes
-    ck_assert(SOPC_CryptoProvider_DeriveGetLengths(crypto, &lenCryptoKey, &lenSignKey, &lenIV) == SOPC_STATUS_NOK);
+    ck_assert(SOPC_CryptoProvider_DeriveGetLengths(crypto, &lenCryptoKey, &lenSignKey, &lenIV) ==
+              SOPC_STATUS_INVALID_PARAMETERS);
 }
 END_TEST
 
@@ -235,9 +236,10 @@ START_TEST(test_crypto_derive_data_None)
     uint32_t lenKey, lenKeyBis, lenIV, lenSecr;
 
     // Context init
-    ck_assert(SOPC_CryptoProvider_DeriveGetLengths(crypto, &lenKey, &lenKeyBis, &lenIV) == SOPC_STATUS_NOK);
+    ck_assert(SOPC_CryptoProvider_DeriveGetLengths(crypto, &lenKey, &lenKeyBis, &lenIV) ==
+              SOPC_STATUS_INVALID_PARAMETERS);
     ck_assert(SOPC_CryptoProvider_SymmetricGetLength_CryptoKey(crypto, &lenSecr) ==
-              SOPC_STATUS_NOK); // TODO: use future GetLength_Nonce
+              SOPC_STATUS_INVALID_PARAMETERS); // TODO: use future GetLength_Nonce
 
     memset(secret, 0, 32);
     memset(seed, 0, 32);
@@ -254,9 +256,10 @@ START_TEST(test_crypto_derive_keysets_None)
     SOPC_SC_SecurityKeySet cliKS, serKS;
 
     // Context init
-    ck_assert(SOPC_CryptoProvider_DeriveGetLengths(crypto, &lenCryptoKey, &lenSignKey, &lenIV) == SOPC_STATUS_NOK);
+    ck_assert(SOPC_CryptoProvider_DeriveGetLengths(crypto, &lenCryptoKey, &lenSignKey, &lenIV) ==
+              SOPC_STATUS_INVALID_PARAMETERS);
     ck_assert(SOPC_CryptoProvider_SymmetricGetLength_CryptoKey(crypto, &lenCliNonce) ==
-              SOPC_STATUS_NOK); // TODO: use future GetLength_Nonce
+              SOPC_STATUS_INVALID_PARAMETERS); // TODO: use future GetLength_Nonce
 
     // Prepares security key sets
     memset(zeros, 0, 32);

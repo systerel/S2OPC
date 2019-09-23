@@ -105,7 +105,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricGetLength_CryptoKey(const SOPC_Cr
     case SOPC_SecurityPolicy_Invalid_ID:
     case SOPC_SecurityPolicy_None_ID:
     default:
-        return SOPC_STATUS_NOK;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     case SOPC_SecurityPolicy_Basic256Sha256_ID:
         *pLength = SOPC_SecurityPolicy_Basic256Sha256_SymmLen_CryptoKey;
         break;
@@ -137,7 +137,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricGetLength_Encryption(const SOPC_C
     case SOPC_SecurityPolicy_Invalid_ID:
     case SOPC_SecurityPolicy_None_ID:
     default:
-        return SOPC_STATUS_NOK;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     case SOPC_SecurityPolicy_Basic256Sha256_ID:
     case SOPC_SecurityPolicy_Basic256_ID:
         *pLengthOut = lengthIn;
@@ -167,7 +167,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricGetLength_Decryption(const SOPC_C
     case SOPC_SecurityPolicy_Invalid_ID:
     case SOPC_SecurityPolicy_None_ID:
     default:
-        return SOPC_STATUS_NOK;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     case SOPC_SecurityPolicy_Basic256Sha256_ID:
     case SOPC_SecurityPolicy_Basic256_ID:
         *pLengthOut = lengthIn;
@@ -196,7 +196,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricGetLength_SignKey(const SOPC_Cryp
     case SOPC_SecurityPolicy_Invalid_ID:
     case SOPC_SecurityPolicy_None_ID:
     default:
-        return SOPC_STATUS_NOK;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     case SOPC_SecurityPolicy_Basic256Sha256_ID:
         *pLength = SOPC_SecurityPolicy_Basic256Sha256_SymmLen_SignKey;
         break;
@@ -227,7 +227,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricGetLength_Signature(const SOPC_Cr
     case SOPC_SecurityPolicy_Invalid_ID:
     case SOPC_SecurityPolicy_None_ID:
     default:
-        return SOPC_STATUS_NOK;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     case SOPC_SecurityPolicy_Basic256Sha256_ID:
         *pLength = SOPC_SecurityPolicy_Basic256Sha256_SymmLen_Signature;
         break;
