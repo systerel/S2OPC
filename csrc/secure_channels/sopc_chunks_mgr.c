@@ -2020,7 +2020,7 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
                                           uint32_t scConnectionIdx,
                                           SOPC_Buffer* receivedBuffer)
 {
-    bool result = false;
+    bool result = true;
     assert(scConnection != NULL);
     assert(receivedBuffer != NULL);
     assert(receivedBuffer->position == 0);
@@ -2039,19 +2039,23 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
             if (NULL == chunkCtx->currentChunkInputBuffer)
             {
                 errorStatus = OpcUa_BadOutOfMemory;
+                // TREATMENT STOPPED HERE
                 break;
             }
         }
 
         if (!SC_Chunks_DecodeReceivedBuffer(chunkCtx, receivedBuffer, &errorStatus))
         {
+            // Note: if false is returned but no error status is set it only means there is not enough data
             if (errorStatus != SOPC_GoodGenericStatus)
             {
+                result = false;
                 SOPC_Logger_TraceError("ChunksMgr: TCP UA header decoding failed with statusCode=%" PRIX32
                                        " (epCfgIdx=%" PRIu32 ", scCfgIdx=%" PRIu32 ")",
                                        errorStatus, scConnection->serverEndpointConfigIdx,
                                        scConnection->endpointConnectionConfigIdx);
             }
+            // TREATMENT STOPPED HERE
             break;
         }
 
@@ -2065,7 +2069,6 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
         if (SC_Chunks_CheckMultiChunkContext(chunkCtx, &scConnection->tcpMsgProperties, &errorStatus) &&
             SC_Chunks_TreatTcpPayload(scConnection, &requestId, &errorStatus))
         {
-            result = true;
             // Current chunk shall have been moved into intermediate chunk buffers or into complete message buffer
             assert(NULL == chunkCtx->currentChunkInputBuffer);
             if (NULL != chunkCtx->currentMessageInputBuffer)
@@ -2088,6 +2091,10 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
                 chunkCtx->currentMessageInputBuffer = NULL;
                 SOPC_ScInternalContext_ClearInputChunksContext(chunkCtx);
             }
+        }
+        else
+        {
+            result = false;
         }
     }
 
