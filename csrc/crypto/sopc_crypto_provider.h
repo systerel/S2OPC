@@ -524,6 +524,42 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricDecrypt(const SOPC_CryptoProvider
                                                        uint32_t lenOutput);
 
 /**
+ * \brief           Encrypts or Decrypts a payload \p pInput of \p lenInput bytes.
+ *                  Specific to PubSub security policies.
+ *
+ *                  Writes the ciphered payload in \p pOutput of \p lenOutput bytes.
+ *                  The length of the output must be the same as the input.
+ *
+ *                  This mode of operation does not require block alignment or padding.
+ *
+ * \param pProvider An initialized cryptographic context.
+ * \param pInput    A valid pointer to the payload to cipher.
+ * \param lenPlainText  Length in bytes of the payload to cipher.
+ * \param pKey      A valid pointer to a SecretBuffer containing the symmetric encryption key.
+ * \param pKeyNonce A valid pointer to a SecretBuffer containing the key nonce associated to the key.
+ * \param pRandom   A valid pointer to an ExposedBuffer containing the random nonce of the message.
+ * \param lenRandom Length in bytes of the message random buffer.
+ * \param pOutput   A valid pointer to the buffer which will contain the transformed payload.
+ * \param lenOutput The output length must be the same as the input length.
+ *
+ * \note            Content of the output is unspecified when return value is not SOPC_STATUS_OK.
+ *
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL or
+ *                  \p pProvider not correctly initialized or \p pProvider is initialized for a client-server
+ *                  security policy or sizes are incorrect, and SOPC_STATUS_NOK when there was an error.
+ */
+SOPC_ReturnStatus SOPC_CryptoProvider_PubSubCrypt(const SOPC_CryptoProvider* pProvider,
+                                                  const uint8_t* pInput,
+                                                  uint32_t lenInput,
+                                                  SOPC_SecretBuffer* pKey,
+                                                  SOPC_SecretBuffer* pKeyNonce,
+                                                  const SOPC_ExposedBuffer* pRandom,
+                                                  uint32_t lenRandom,
+                                                  uint32_t uSequenceNumber,
+                                                  uint8_t* pOutput,
+                                                  uint32_t lenOutput);
+
+/**
  * \brief           Signs a payload \p pInput of \p lenInput bytes, writes the signature in \p pOutput of \p lenOutput
  * bytes.
  *
