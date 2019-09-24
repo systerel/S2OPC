@@ -37,17 +37,30 @@
 /**
  * \brief   The CryptoProvider context.
  *
- * A pointer to a const CryptoProfile which should not be modified and contains pointers to the
- * cryptographic functions associated to a SecurityPolicy,
- * and a CryptolibContext, which are library-specific structures defined in crypto_provider_lib.h/c
+ * Contains two pointers to a const SOPC_CryptoProfile and a SOPC_CryptoProfile_PubSub,
+ * which should not be modified and contains function pointers to the cryptographic functions associated to a chosen
+ * SecurityPolicy. Also contains a CryptolibContext, which are library-specific structures defined in
+ * crypto_provider_lib.h/c
  */
 struct SOPC_CryptoProvider
 {
-    const SOPC_CryptoProfile* const pProfile; /**< CryptoProfile associated to the chosen Security policy. You should
-                                                 not attempt to modify the content of this pointer. */
-    SOPC_CryptolibContext* pCryptolibContext; /**< A lib-specific context. This should not be accessed directly as its
-                                                 content may change depending on the chosen crypto-lib implementation.
-                                               */
+    /**
+     * CryptoProfile associated to the chosen Security Policy, to use with client-server security policies.
+     * You should not attempt to modify the content of this pointer.
+     * You should only access this pointer in the CryptoProvider implementation using get_profile_services().
+     */
+    const SOPC_CryptoProfile* const pProfile;
+    /**
+     * CryptoProfile associated to the chosen Security policy, to use with PubSub security policies.
+     * You should not attempt to modify the content of this pointer.
+     * You should only access this pointer in the CryptoProvider implementation using get_profile_pubsub().
+     */
+    const SOPC_CryptoProfile_PubSub* const pProfilePubSub;
+    /**
+     * A lib-specific context. This should not be accessed directly as its content may change depending on the chosen
+     * crypto-lib implementation.
+     */
+    SOPC_CryptolibContext* pCryptolibContext;
 };
 
 /* ------------------------------------------------------------------------------------------------
@@ -56,17 +69,36 @@ struct SOPC_CryptoProvider
  */
 
 /**
- * \brief       Creates an initialized CryptoProvider context from a string containing the desired
- *              security policy URI.
+ * \brief       Creates an initialized SOPC_CryptoProvider context for a client-server connection
+ *              from a string containing the desired security policy URI.
  *
- *              The CryptoProvider contains the CryptoProfile corresponding to the security policy.
+ *              The CryptoProvider contains the SOPC_CryptoProfile corresponding to the security policy.
  *              It should never be modified.
  *
  * \param uri   The URI describing the security policy. Should not be NULL.
+ *              Should describe only client-server security policies.
+ *
+ * \note        Use SOPC_CryptoProvider_CreatePubSub() to create a CryptoProvider for PubSub exchanges.
  *
  * \return      An initialized CryptoProvider* or NULL if the context could not be created.
  */
 SOPC_CryptoProvider* SOPC_CryptoProvider_Create(const char* uri);
+
+/**
+ * \brief       Creates an initialized SOPC_CryptoProvider context for PubSub exchanges
+ *              from a string containing the desired security policy URI.
+ *
+ *              The CryptoProvider contains the SOPC_CryptoProfile_PubSub corresponding to the security policy.
+ *              It should never be modified.
+ *
+ * \param uri   The URI describing the security policy. Should not be NULL.
+ *              Should describe only PubSub security policies.
+ *
+ * \note        Use SOPC_CryptoProvider_Create() to create a CryptoProvider for a client-server connection.
+ *
+ * \return      An initialized CryptoProvider* or NULL if the context could not be created.
+ */
+SOPC_CryptoProvider* SOPC_CryptoProvider_CreatePubSub(const char* uri);
 
 /**
  * \brief       Frees a CryptoProvider created with CryptoProvider_Create().
