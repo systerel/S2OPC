@@ -27,6 +27,7 @@
  *              nor sanitize their arguments.
  */
 
+#include <assert.h>
 #include <string.h>
 
 #include "sopc_crypto_profiles.h"
@@ -794,4 +795,60 @@ SOPC_ReturnStatus CryptoProvider_CertVerify_RSA_SHA1_SHA256_1024_2048(const SOPC
     // Does not verify that key is capable of encryption and signing... (!!!)
 
     return SOPC_STATUS_OK;
+}
+
+/* ------------------------------------------------------------------------------------------------
+ * PubSub AES-256
+ * ------------------------------------------------------------------------------------------------
+ */
+
+SOPC_ReturnStatus CryptoProvider_CTR_Crypt_AES256(const SOPC_CryptoProvider* pProvider,
+                                                  const uint8_t* pInput,
+                                                  uint32_t lenInput,
+                                                  const SOPC_ExposedBuffer* pExpKey,
+                                                  const SOPC_ExposedBuffer* pExpNonce,
+                                                  const SOPC_ExposedBuffer* pRandom,
+                                                  uint32_t uSequenceNumber,
+                                                  uint8_t* pOutput)
+{
+    (void) pProvider;
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    mbedtls_aes_context aes;
+
+    if (mbedtls_aes_setkey_enc(&aes, (const unsigned char*) pExpKey, 256) != 0)
+    {
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        /* Build the Nonce Counter */
+        /* 4 bytes KeyNonce, 4 bytes MessageRandom, 4 bytes SequenceNumber (endianness?), 4 null bytes */
+        assert(16 == (SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_KeyNonce +
+                      SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_MessageRandom + sizeof(uint32_t) +
+                      4 /* BlockCounter length */) &&
+               "Invalid AES-CTR parameters, lengths must add up to 16 bytes block, as per AES specification...");
+
+        uint8_t counter[16] = {0};
+        memcpy(counter, pExpNonce, SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_KeyNonce);
+        memcpy(counter + 4, pRandom, SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_MessageRandom);
+        /* TODO: find endianness of the SequenceNumber, or raise a Mantis issue */
+        memcpy(counter + 8, &uSequenceNumber, sizeof(uint32_t));
+        memset(counter + 12, 0, 4); /* BlockCounter, which is big endian */
+
+        size_t nc_off = 0; /* Offset in the current stream block. Unused, as there is only one stream per message */
+        uint8_t stream_block[16] = {0}; /* Stream block to resume operation. Unused, same as nc_off */
+        if (mbedtls_aes_crypt_ctr(&aes, lenInput, &nc_off, counter, stream_block, pInput, pOutput) != 0)
+        {
+            status = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+
+        /* stream_block contains sensitive materials, it must be cleared */
+        memset(stream_block, 0, sizeof(stream_block));
+    }
+
+    mbedtls_aes_free(&aes);
+
+    return status;
 }

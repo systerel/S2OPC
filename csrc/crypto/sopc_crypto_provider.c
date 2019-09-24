@@ -775,14 +775,17 @@ SOPC_ReturnStatus SOPC_CryptoProvider_PubSubCrypt(const SOPC_CryptoProvider* pPr
         break;
     }
 
-    const SOPC_ExposedBuffer* pExpKey = SOPC_SecretBuffer_Expose(pKey);
-    const SOPC_ExposedBuffer* pExpNonce = SOPC_SecretBuffer_Expose(pKeyNonce);
+    if (SOPC_STATUS_OK == status)
+    {
+        const SOPC_ExposedBuffer* pExpKey = SOPC_SecretBuffer_Expose(pKey);
+        const SOPC_ExposedBuffer* pExpNonce = SOPC_SecretBuffer_Expose(pKeyNonce);
 
-    status =
-        pProfilePubSub->pFnCrypt(pProvider, pInput, lenInput, pExpKey, pExpNonce, pRandom, uSequenceNumber, pOutput);
+        status = pProfilePubSub->pFnCrypt(pProvider, pInput, lenInput, pExpKey, pExpNonce, pRandom, uSequenceNumber,
+                                          pOutput);
 
-    SOPC_SecretBuffer_Unexpose(pExpKey, pKey);
-    SOPC_SecretBuffer_Unexpose(pExpNonce, pKeyNonce);
+        SOPC_SecretBuffer_Unexpose(pExpKey, pKey);
+        SOPC_SecretBuffer_Unexpose(pExpNonce, pKeyNonce);
+    }
 
     return status;
 }
