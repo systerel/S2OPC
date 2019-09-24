@@ -35,10 +35,10 @@
  * ------------------------------------------------------------------------------------------------
  */
 
-/** \brief Returns the non NULL OPC UA Service crypto profile but returns NULL if the PubSub profile is non NULL. */
+/** \brief Returns the non NULL client-server crypto profile but returns NULL if the PubSub profile is non NULL. */
 const SOPC_CryptoProfile* get_profile_services(const SOPC_CryptoProvider* pProvider);
 
-/** \brief Returns the non NULL OPC UA PubSub crypto profile but returns NULL if the Services profile is non NULL. */
+/** \brief Returns the non NULL PubSub crypto profile but returns NULL if the client-server profile is non NULL. */
 const SOPC_CryptoProfile_PubSub* get_profile_pubsub(const SOPC_CryptoProvider* pProvider);
 
 /* ------------------------------------------------------------------------------------------------
@@ -48,24 +48,50 @@ const SOPC_CryptoProfile_PubSub* get_profile_pubsub(const SOPC_CryptoProvider* p
 
 SOPC_CryptoProvider* SOPC_CryptoProvider_Create(const char* uri)
 {
-    SOPC_CryptoProvider* pCryptoProvider = NULL;
     const SOPC_CryptoProfile* pProfile = NULL;
 
     pProfile = SOPC_CryptoProfile_Get(uri);
-    if (NULL != pProfile)
+    if (NULL == pProfile)
     {
-        pCryptoProvider = SOPC_Calloc(1, sizeof(SOPC_CryptoProvider));
-        if (NULL != pCryptoProvider)
+        return NULL;
+    }
+
+    SOPC_CryptoProvider* pCryptoProvider = SOPC_Calloc(1, sizeof(SOPC_CryptoProvider));
+    if (NULL != pCryptoProvider)
+    {
+        // The crypto provider profile shall be const after this init
+        SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+        *(const SOPC_CryptoProfile**) (&pCryptoProvider->pProfile) = pProfile;
+        SOPC_GCC_DIAGNOSTIC_RESTORE
+        if (SOPC_STATUS_OK != SOPC_CryptoProvider_Init(pCryptoProvider))
         {
-            // The crypto provider profile shall be const after this init
-            SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-            *(const SOPC_CryptoProfile**) (&pCryptoProvider->pProfile) = pProfile;
-            SOPC_GCC_DIAGNOSTIC_RESTORE
-            if (SOPC_STATUS_OK != SOPC_CryptoProvider_Init(pCryptoProvider))
-            {
-                SOPC_Free(pCryptoProvider);
-                pCryptoProvider = NULL;
-            }
+            SOPC_Free(pCryptoProvider);
+            pCryptoProvider = NULL;
+        }
+    }
+
+    return pCryptoProvider;
+}
+
+SOPC_CryptoProvider* SOPC_CryptoProvider_CreatePubSub(const char* uri)
+{
+    const SOPC_CryptoProfile_PubSub* pProfilePubSub = SOPC_CryptoProfile_PubSub_Get(uri);
+    if (NULL == pProfilePubSub)
+    {
+        return NULL;
+    }
+
+    SOPC_CryptoProvider* pCryptoProvider = SOPC_Calloc(1, sizeof(SOPC_CryptoProvider));
+    if (NULL != pCryptoProvider)
+    {
+        // The crypto provider profile shall be const after this init
+        SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+        *(const SOPC_CryptoProfile_PubSub**) (&pCryptoProvider->pProfilePubSub) = pProfilePubSub;
+        SOPC_GCC_DIAGNOSTIC_RESTORE
+        if (SOPC_STATUS_OK != SOPC_CryptoProvider_Init(pCryptoProvider))
+        {
+            SOPC_Free(pCryptoProvider);
+            pCryptoProvider = NULL;
         }
     }
 
