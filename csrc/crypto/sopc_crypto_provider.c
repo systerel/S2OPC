@@ -728,6 +728,65 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricDecrypt(const SOPC_CryptoProvider
     return status;
 }
 
+SOPC_ReturnStatus SOPC_CryptoProvider_PubSubCrypt(const SOPC_CryptoProvider* pProvider,
+                                                  const uint8_t* pInput,
+                                                  uint32_t lenInput,
+                                                  SOPC_SecretBuffer* pKey,
+                                                  SOPC_SecretBuffer* pKeyNonce,
+                                                  const SOPC_ExposedBuffer* pRandom,
+                                                  uint32_t lenRandom,
+                                                  uint32_t uSequenceNumber,
+                                                  uint8_t* pOutput,
+                                                  uint32_t lenOutput)
+{
+    if (NULL == pProvider || NULL == pInput || NULL == pKey || NULL == pKeyNonce || NULL == pRandom || NULL == pOutput)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    if (lenInput != lenOutput || 0 == lenInput)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    const SOPC_CryptoProfile_PubSub* pProfilePubSub = get_profile_pubsub(pProvider);
+    if (NULL == pProfilePubSub)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    /* TODO: unit-test these watchdogs */
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    bool bInvalid = false;
+    switch (pProfilePubSub->SecurityPolicyID)
+    {
+    case SOPC_SecurityPolicy_Invalid_ID:
+    case SOPC_SecurityPolicy_None_ID:
+    default:
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    case SOPC_SecurityPolicy_PubSub_Aes256_ID:
+        /* Key size check, KeyNonce size check, MessageRandom size check */
+        bInvalid = (SOPC_SecretBuffer_GetLength(pKey) != SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_CryptoKey ||
+                    SOPC_SecretBuffer_GetLength(pKeyNonce) != SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_KeyNonce ||
+                    SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_MessageRandom != lenRandom);
+        if (bInvalid)
+        {
+            status = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+        break;
+    }
+
+    const SOPC_ExposedBuffer* pExpKey = SOPC_SecretBuffer_Expose(pKey);
+    const SOPC_ExposedBuffer* pExpNonce = SOPC_SecretBuffer_Expose(pKeyNonce);
+
+    status =
+        pProfilePubSub->pFnCrypt(pProvider, pInput, lenInput, pExpKey, pExpNonce, pRandom, uSequenceNumber, pOutput);
+
+    SOPC_SecretBuffer_Unexpose(pExpKey, pKey);
+    SOPC_SecretBuffer_Unexpose(pExpNonce, pKeyNonce);
+
+    return status;
+}
+
 SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricSign(const SOPC_CryptoProvider* pProvider,
                                                     const uint8_t* pInput,
                                                     uint32_t lenInput,
