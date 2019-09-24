@@ -25,18 +25,48 @@
 
 const SOPC_CryptoProfile* SOPC_CryptoProfile_Get(const char* uri)
 {
-    if (NULL != uri)
+    if (NULL == uri)
     {
-        // Compares len+1 to include the trailing \0 of the zero-terminated #defined URI.
-        // This avoids false positives with strings prefixed by a valid security policy.
-        if (SOPC_strncmp_ignore_case(uri, SOPC_SecurityPolicy_Basic256Sha256_URI,
-                                     strlen(SOPC_SecurityPolicy_Basic256Sha256_URI) + 1) == 0)
-            return &sopc_g_cpBasic256Sha256;
-        if (SOPC_strncmp_ignore_case(uri, SOPC_SecurityPolicy_Basic256_URI,
-                                     strlen(SOPC_SecurityPolicy_Basic256_URI) + 1) == 0)
-            return &sopc_g_cpBasic256;
-        if (SOPC_strncmp_ignore_case(uri, SOPC_SecurityPolicy_None_URI, strlen(SOPC_SecurityPolicy_None_URI) + 1) == 0)
-            return &sopc_g_cpNone;
+        return NULL;
+    }
+
+    /* Compares len+1 to include the trailing \0 of the zero-terminated #defined URI.
+     * This avoids false positives with strings prefixed by a valid security policy. */
+    if (SOPC_strncmp_ignore_case(uri, SOPC_SecurityPolicy_Basic256Sha256_URI,
+                                 strlen(SOPC_SecurityPolicy_Basic256Sha256_URI) + 1) == 0)
+    {
+        return &sopc_g_cpBasic256Sha256;
+    }
+    if (SOPC_strncmp_ignore_case(uri, SOPC_SecurityPolicy_Basic256_URI, strlen(SOPC_SecurityPolicy_Basic256_URI) + 1) ==
+        0)
+    {
+        return &sopc_g_cpBasic256;
+    }
+    if (SOPC_strncmp_ignore_case(uri, SOPC_SecurityPolicy_None_URI, strlen(SOPC_SecurityPolicy_None_URI) + 1) == 0)
+    {
+        return &sopc_g_cpNone;
+    }
+
+    return NULL;
+}
+
+const SOPC_CryptoProfile_PubSub* SOPC_CryptoProfile_PubSub_Get(const char* uri)
+{
+    if (NULL == uri)
+    {
+        return NULL;
+    }
+
+    /* Compares len+1 to include the trailing \0 of the zero-terminated #defined URI.
+     * This avoids false positives with strings prefixed by a valid security policy. */
+    if (SOPC_strncmp_ignore_case(uri, SOPC_SecurityPolicy_PubSub_Aes256_URI,
+                                 strlen(SOPC_SecurityPolicy_PubSub_Aes256_URI) + 1) == 0)
+    {
+        return &sopc_g_cppsPubSubAes256;
+    }
+    if (SOPC_strncmp_ignore_case(uri, SOPC_SecurityPolicy_None_URI, strlen(SOPC_SecurityPolicy_None_URI) + 1) == 0)
+    {
+        return &sopc_g_cppsNone;
     }
 
     return NULL;

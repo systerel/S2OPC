@@ -102,3 +102,21 @@ const SOPC_CryptoProfile sopc_g_cpNone = {
     .pFnAsymVerify = NULL,
     .pFnCertVerify = NULL,
 };
+
+/* PubSub security policies */
+
+const SOPC_CryptoProfile_PubSub sopc_g_cppsPubSubAes256 = {
+    .SecurityPolicyID = SOPC_SecurityPolicy_PubSub_Aes256_ID,
+    .pFnCrypt = &CryptoProvider_CTR_Crypt_AES256,
+    .pFnSymmSign = &CryptoProvider_SymmSign_HMAC_SHA256,
+    .pFnSymmVerif = &CryptoProvider_SymmVerify_HMAC_SHA256,
+    .pFnGenRnd = &CryptoProvider_GenTrueRnd,
+};
+
+const SOPC_CryptoProfile_PubSub sopc_g_cppsNone = {
+    .SecurityPolicyID = SOPC_SecurityPolicy_None_ID,
+    .pFnCrypt = NULL,
+    .pFnSymmSign = NULL,
+    .pFnSymmVerif = NULL,
+    .pFnGenRnd = &CryptoProvider_GenTrueRnd,
+};

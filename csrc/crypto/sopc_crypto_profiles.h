@@ -35,6 +35,9 @@
 
 // API
 const SOPC_CryptoProfile* SOPC_CryptoProfile_Get(const char* uri);
+const SOPC_CryptoProfile_PubSub* SOPC_CryptoProfile_PubSub_Get(const char* uri);
+
+// Client-server security policies
 
 // Crypto profiles uri and ID
 #define SOPC_SecurityPolicy_Invalid_ID 0
@@ -76,8 +79,22 @@ extern const SOPC_CryptoProfile sopc_g_cpBasic256Sha256;
 extern const SOPC_CryptoProfile sopc_g_cpBasic256;
 extern const SOPC_CryptoProfile sopc_g_cpNone;
 
-#include "sopc_crypto_decl.h"
-#include "sopc_secret_buffer.h"
+// PubSub security policies
+
+// Crypto profiles uri and ID, reuse None
+#define SOPC_SecurityPolicy_PubSub_Aes256_URI "http://opcfoundation.org/UA/SecurityPolicy#PubSub-Aes256-CTR"
+#define SOPC_SecurityPolicy_PubSub_Aes256_ID 4
+
+// Sizes in bytes
+#define SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_CryptoKey 32
+#define SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_SignKey 32
+#define SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_Signature 32
+#define SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_KeyNonce 4
+#define SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_MessageRandom 4
+
+// CryptoProfiles instances
+extern const SOPC_CryptoProfile_PubSub sopc_g_cppsPubSubAes256;
+extern const SOPC_CryptoProfile_PubSub sopc_g_cppsNone;
 
 /* ------------------------------------------------------------------------------------------------
  * Internal CryptoProfile function pointers.
@@ -143,8 +160,8 @@ typedef SOPC_ReturnStatus (*FnCertificateVerify)(const SOPC_CryptoProvider* pCry
 typedef SOPC_ReturnStatus (*FnPubSubCrypt)(const SOPC_CryptoProvider* pProvider,
                                            const uint8_t* pInput,
                                            uint32_t lenInput,
-                                           SOPC_SecretBuffer* pKey,
-                                           SOPC_SecretBuffer* pKeyNonce,
+                                           const SOPC_ExposedBuffer* pKey,
+                                           const SOPC_ExposedBuffer* pKeyNonce,
                                            const SOPC_ExposedBuffer* pRandom,
                                            uint32_t uSequenceNumber,
                                            uint8_t* pOutput);
