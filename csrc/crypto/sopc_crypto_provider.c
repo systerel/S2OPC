@@ -31,18 +31,7 @@
 #include "sopc_secret_buffer.h"
 
 /* ------------------------------------------------------------------------------------------------
- * Static getters to find whether the crypto provider is OPC UA or PubSub
- * ------------------------------------------------------------------------------------------------
- */
-
-/** \brief Returns the non NULL client-server crypto profile but returns NULL if the PubSub profile is non NULL. */
-const SOPC_CryptoProfile* get_profile_services(const SOPC_CryptoProvider* pProvider);
-
-/** \brief Returns the non NULL PubSub crypto profile but returns NULL if the client-server profile is non NULL. */
-const SOPC_CryptoProfile_PubSub* get_profile_pubsub(const SOPC_CryptoProvider* pProvider);
-
-/* ------------------------------------------------------------------------------------------------
- * CryptoProvider creation
+ * CryptoProvider
  * ------------------------------------------------------------------------------------------------
  */
 
@@ -107,6 +96,26 @@ void SOPC_CryptoProvider_Free(SOPC_CryptoProvider* pCryptoProvider)
     }
 }
 
+const SOPC_CryptoProfile* SOPC_CryptoProvider_GetProfileServices(const SOPC_CryptoProvider* pProvider)
+{
+    assert(NULL != pProvider);
+    if (NULL != pProvider->pProfilePubSub)
+    {
+        return NULL;
+    }
+    return pProvider->pProfile;
+}
+
+const SOPC_CryptoProfile_PubSub* SOPC_CryptoProvider_GetProfilePubSub(const SOPC_CryptoProvider* pProvider)
+{
+    assert(NULL != pProvider);
+    if (NULL != pProvider->pProfile)
+    {
+        return NULL;
+    }
+    return pProvider->pProfilePubSub;
+}
+
 /* ------------------------------------------------------------------------------------------------
  * CryptoProvider get-length operations
  * ------------------------------------------------------------------------------------------------
@@ -120,7 +129,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricGetLength_CryptoKey(const SOPC_Cr
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    const SOPC_CryptoProfile* pProfile = SOPC_CryptoProvider_GetProfileServices(pProvider);
     if (NULL == pProfile)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -152,7 +161,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricGetLength_Encryption(const SOPC_C
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    const SOPC_CryptoProfile* pProfile = SOPC_CryptoProvider_GetProfileServices(pProvider);
     if (NULL == pProfile)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -182,7 +191,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricGetLength_Decryption(const SOPC_C
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    const SOPC_CryptoProfile* pProfile = SOPC_CryptoProvider_GetProfileServices(pProvider);
     if (NULL == pProfile)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -211,7 +220,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricGetLength_SignKey(const SOPC_Cryp
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    const SOPC_CryptoProfile* pProfile = SOPC_CryptoProvider_GetProfileServices(pProvider);
     if (NULL == pProfile)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -242,7 +251,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricGetLength_Signature(const SOPC_Cr
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    const SOPC_CryptoProfile* pProfile = SOPC_CryptoProvider_GetProfileServices(pProvider);
     if (NULL == pProfile)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -274,7 +283,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricGetLength_Blocks(const SOPC_Crypt
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    const SOPC_CryptoProfile* pProfile = SOPC_CryptoProvider_GetProfileServices(pProvider);
     if (NULL == pProfile)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -319,7 +328,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricGetLength_SecureChannelNonce(cons
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    const SOPC_CryptoProfile* pProfile = SOPC_CryptoProvider_GetProfileServices(pProvider);
     if (NULL == pProfile)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -388,7 +397,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricGetLength_OAEPHashLength(const S
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    const SOPC_CryptoProfile* pProfile = SOPC_CryptoProvider_GetProfileServices(pProvider);
     if (NULL == pProfile)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -518,7 +527,7 @@ const char* SOPC_CryptoProvider_AsymmetricGetUri_SignAlgorithm(const SOPC_Crypto
         return NULL;
     }
 
-    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    const SOPC_CryptoProfile* pProfile = SOPC_CryptoProvider_GetProfileServices(pProvider);
     if (NULL == pProfile)
     {
         return NULL;
@@ -545,7 +554,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_CertificateGetLength_Thumbprint(const SOPC
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    const SOPC_CryptoProfile* pProfile = SOPC_CryptoProvider_GetProfileServices(pProvider);
     if (NULL == pProfile)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -590,7 +599,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricEncrypt(const SOPC_CryptoProvider
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    const SOPC_CryptoProfile* pProfile = SOPC_CryptoProvider_GetProfileServices(pProvider);
     if (NULL == pProfile)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -667,7 +676,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricDecrypt(const SOPC_CryptoProvider
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    const SOPC_CryptoProfile* pProfile = SOPC_CryptoProvider_GetProfileServices(pProvider);
     if (NULL == pProfile)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -748,7 +757,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_PubSubCrypt(const SOPC_CryptoProvider* pPr
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    const SOPC_CryptoProfile_PubSub* pProfilePubSub = get_profile_pubsub(pProvider);
+    const SOPC_CryptoProfile_PubSub* pProfilePubSub = SOPC_CryptoProvider_GetProfilePubSub(pProvider);
     if (NULL == pProfilePubSub)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -806,7 +815,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricSign(const SOPC_CryptoProvider* p
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    const SOPC_CryptoProfile* pProfile = SOPC_CryptoProvider_GetProfileServices(pProvider);
     if (NULL == pProfile || NULL == pProfile->pFnSymmSign)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -850,7 +859,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricVerify(const SOPC_CryptoProvider*
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    const SOPC_CryptoProfile* pProfile = SOPC_CryptoProvider_GetProfileServices(pProvider);
     if (NULL == pProfile || NULL == pProfile->pFnSymmVerif)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -892,7 +901,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_GenerateRandomBytes(const SOPC_CryptoProvi
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    const SOPC_CryptoProfile* pProfile = SOPC_CryptoProvider_GetProfileServices(pProvider);
     if (NULL == pProfile || NULL == pProfile->pFnGenRnd)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -966,7 +975,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_GenerateRandomID(const SOPC_CryptoProvider
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    const SOPC_CryptoProfile* pProfile = SOPC_CryptoProvider_GetProfileServices(pProvider);
     if (NULL == pProfile || NULL == pProfile->pFnGenRnd)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -989,7 +998,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_DerivePseudoRandomData(const SOPC_CryptoPr
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    const SOPC_CryptoProfile* pProfile = SOPC_CryptoProvider_GetProfileServices(pProvider);
     if (NULL == pProfile || NULL == pProfile->pFnDeriveData)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -1190,7 +1199,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricEncrypt(const SOPC_CryptoProvide
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    const SOPC_CryptoProfile* pProfile = SOPC_CryptoProvider_GetProfileServices(pProvider);
     if (NULL == pProfile || NULL == pProfile->pFnAsymEncrypt)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -1243,7 +1252,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricDecrypt(const SOPC_CryptoProvide
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    const SOPC_CryptoProfile* pProfile = SOPC_CryptoProvider_GetProfileServices(pProvider);
     if (NULL == pProfile || NULL == pProfile->pFnAsymDecrypt)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -1302,7 +1311,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricSign(const SOPC_CryptoProvider* 
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    const SOPC_CryptoProfile* pProfile = SOPC_CryptoProvider_GetProfileServices(pProvider);
     if (NULL == pProfile || NULL == pProfile->pFnAsymSign)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -1351,7 +1360,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricVerify(const SOPC_CryptoProvider
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    const SOPC_CryptoProfile* pProfile = SOPC_CryptoProvider_GetProfileServices(pProvider);
     if (NULL == pProfile || NULL == pProfile->pFnAsymVerify)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -1402,7 +1411,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_Certificate_Validate(const SOPC_CryptoProv
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    const SOPC_CryptoProfile* pProfile = get_profile_services(pProvider);
+    const SOPC_CryptoProfile* pProfile = SOPC_CryptoProvider_GetProfileServices(pProvider);
     if (NULL == pProfile || NULL == pProfile->pFnCertVerify)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -1417,28 +1426,4 @@ SOPC_ReturnStatus SOPC_CryptoProvider_Certificate_Validate(const SOPC_CryptoProv
 
     // Verify certificate through PKIProvider callback
     return pPKI->pFnValidateCertificate(pPKI, pCert, error);
-}
-
-/* ------------------------------------------------------------------------------------------------
- * CryptoProvider -> CryptoProfile getters
- * ------------------------------------------------------------------------------------------------
- */
-const SOPC_CryptoProfile* get_profile_services(const SOPC_CryptoProvider* pProvider)
-{
-    assert(NULL != pProvider);
-    if (NULL != pProvider->pProfilePubSub)
-    {
-        return NULL;
-    }
-    return pProvider->pProfile;
-}
-
-const SOPC_CryptoProfile_PubSub* get_profile_pubsub(const SOPC_CryptoProvider* pProvider)
-{
-    assert(NULL != pProvider);
-    if (NULL != pProvider->pProfile)
-    {
-        return NULL;
-    }
-    return pProvider->pProfilePubSub;
 }
