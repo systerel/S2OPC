@@ -466,6 +466,41 @@ const char* SOPC_CryptoProvider_AsymmetricGetUri_SignAlgorithm(const SOPC_Crypto
 SOPC_ReturnStatus SOPC_CryptoProvider_CertificateGetLength_Thumbprint(const SOPC_CryptoProvider* pProvider,
                                                                       uint32_t* pLength);
 
+/**
+ * \brief           Writes the length in bytes in \p pLength of the key nonce used for PubSub encryption/decryption.
+ *
+ *                  The length of the nonce depends on the security policy associated with \p pProvider.
+ *
+ * \param pProvider An initialized cryptographic context.
+ * \param pLength   A valid pointer to the length in bytes of the key. Its content is unspecified
+ *                  when return value is not SOPC_STATUS_OK.
+ *
+ * \note            Specific to PubSub security policies.
+ *
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL or
+ *                  \p pProvider not correctly initialized, and SOPC_STATUS_NOK for an unsupported
+ *                  security policy.
+ */
+SOPC_ReturnStatus SOPC_CryptoProvider_PubSubGetLength_KeyNonce(const SOPC_CryptoProvider* pProvider, uint32_t* pLength);
+
+/**
+ * \brief           Writes the length in bytes in \p pLength of the random bytes used for PubSub encryption/decryption.
+ *
+ *                  This length depends on the security policy associated with \p pProvider.
+ *
+ * \param pProvider An initialized cryptographic context.
+ * \param pLength   A valid pointer to the length in bytes of the key. Its content is unspecified
+ *                  when return value is not SOPC_STATUS_OK.
+ *
+ * \note            Specific to PubSub security policies.
+ *
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL or
+ *                  \p pProvider not correctly initialized, and SOPC_STATUS_NOK for an unsupported
+ *                  security policy.
+ */
+SOPC_ReturnStatus SOPC_CryptoProvider_PubSubGetLength_MessageRandom(const SOPC_CryptoProvider* pProvider,
+                                                                    uint32_t* pLength);
+
 /* ------------------------------------------------------------------------------------------------
  * Symmetric cryptography
  * ------------------------------------------------------------------------------------------------
