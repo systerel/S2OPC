@@ -578,6 +578,61 @@ SOPC_ReturnStatus SOPC_CryptoProvider_CertificateGetLength_Thumbprint(const SOPC
     return SOPC_STATUS_OK;
 }
 
+SOPC_ReturnStatus SOPC_CryptoProvider_PubSubGetLength_KeyNonce(const SOPC_CryptoProvider* pProvider, uint32_t* pLength)
+{
+    if (NULL == pProvider || NULL == pLength)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    const SOPC_CryptoProfile_PubSub* pProfilePubSub = SOPC_CryptoProvider_GetProfilePubSub(pProvider);
+    if (NULL == pProfilePubSub)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    switch (pProfilePubSub->SecurityPolicyID)
+    {
+    case SOPC_SecurityPolicy_Invalid_ID:
+    case SOPC_SecurityPolicy_None_ID:
+    default:
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    case SOPC_SecurityPolicy_PubSub_Aes256_ID:
+        *pLength = SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_KeyNonce;
+        break;
+    }
+
+    return SOPC_STATUS_OK;
+}
+
+SOPC_ReturnStatus SOPC_CryptoProvider_PubSubGetLength_MessageRandom(const SOPC_CryptoProvider* pProvider,
+                                                                    uint32_t* pLength)
+{
+    if (NULL == pProvider || NULL == pLength)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    const SOPC_CryptoProfile_PubSub* pProfilePubSub = SOPC_CryptoProvider_GetProfilePubSub(pProvider);
+    if (NULL == pProfilePubSub)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    switch (pProfilePubSub->SecurityPolicyID)
+    {
+    case SOPC_SecurityPolicy_Invalid_ID:
+    case SOPC_SecurityPolicy_None_ID:
+    default:
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    case SOPC_SecurityPolicy_PubSub_Aes256_ID:
+        *pLength = SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_MessageRandom;
+        break;
+    }
+
+    return SOPC_STATUS_OK;
+}
+
 /* ------------------------------------------------------------------------------------------------
  * Symmetric cryptography
  * ------------------------------------------------------------------------------------------------
