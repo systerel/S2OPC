@@ -56,8 +56,10 @@ static inline void teardown_crypto(void)
 
 START_TEST(test_crypto_load_PubSub256)
 {
-    ck_assert(NULL == SOPC_CryptoProvider_GetProfileServices(crypto));
+    ck_assert_ptr_null(SOPC_CryptoProvider_GetProfileServices(crypto));
     const SOPC_CryptoProfile_PubSub* profile = SOPC_CryptoProvider_GetProfilePubSub(crypto);
+    ck_assert_ptr_nonnull(profile);
+
     ck_assert(SOPC_SecurityPolicy_PubSub_Aes256_ID == profile->SecurityPolicyID);
     ck_assert(NULL != profile->pFnCrypt);
     ck_assert(NULL != profile->pFnSymmSign);

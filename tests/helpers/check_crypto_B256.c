@@ -56,19 +56,22 @@ static inline void teardown_crypto(void)
 
 START_TEST(test_crypto_load_B256)
 {
-    ck_assert(NULL != crypto->pProfile);
-    ck_assert(SOPC_SecurityPolicy_Basic256_ID == crypto->pProfile->SecurityPolicyID);
-    ck_assert(NULL != crypto->pProfile->pFnSymmEncrypt);
-    ck_assert(NULL != crypto->pProfile->pFnSymmDecrypt);
-    ck_assert(NULL != crypto->pProfile->pFnSymmSign);
-    ck_assert(NULL != crypto->pProfile->pFnSymmVerif);
-    ck_assert(NULL != crypto->pProfile->pFnGenRnd);
-    ck_assert(NULL != crypto->pProfile->pFnDeriveData);
-    ck_assert(NULL != crypto->pProfile->pFnAsymEncrypt);
-    ck_assert(NULL != crypto->pProfile->pFnAsymDecrypt);
-    ck_assert(NULL != crypto->pProfile->pFnAsymSign);
-    ck_assert(NULL != crypto->pProfile->pFnAsymVerify);
-    ck_assert(NULL != crypto->pProfile->pFnCertVerify);
+    ck_assert_ptr_null(SOPC_CryptoProvider_GetProfilePubSub(crypto));
+    const SOPC_CryptoProfile* profile = SOPC_CryptoProvider_GetProfileServices(crypto);
+    ck_assert_ptr_nonnull(profile);
+
+    ck_assert(SOPC_SecurityPolicy_Basic256_ID == profile->SecurityPolicyID);
+    ck_assert(NULL != profile->pFnSymmEncrypt);
+    ck_assert(NULL != profile->pFnSymmDecrypt);
+    ck_assert(NULL != profile->pFnSymmSign);
+    ck_assert(NULL != profile->pFnSymmVerif);
+    ck_assert(NULL != profile->pFnGenRnd);
+    ck_assert(NULL != profile->pFnDeriveData);
+    ck_assert(NULL != profile->pFnAsymEncrypt);
+    ck_assert(NULL != profile->pFnAsymDecrypt);
+    ck_assert(NULL != profile->pFnAsymSign);
+    ck_assert(NULL != profile->pFnAsymVerify);
+    ck_assert(NULL != profile->pFnCertVerify);
 }
 END_TEST
 
@@ -382,7 +385,7 @@ START_TEST(test_crypto_symm_sign_B256)
 }
 END_TEST
 
-/* This test is the same for security policy that are not None,
+/* This test is the same for security policies that are not None,
  * as its length is not specified by the policy.
  * It should not fail in None, but this is not required, as it is not used.
  */
