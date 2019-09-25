@@ -40,17 +40,22 @@
 
 // Using fixtures
 static SOPC_CryptoProvider* crypto = NULL;
+static SOPC_CryptoProvider* cryptops = NULL; /* None is supported in both client-server and PubSub cases */
 
 static inline void setup_crypto(void)
 {
     crypto = SOPC_CryptoProvider_Create(SOPC_SecurityPolicy_None_URI);
     ck_assert(NULL != crypto);
+    cryptops = SOPC_CryptoProvider_CreatePubSub(SOPC_SecurityPolicy_None_URI);
+    ck_assert(NULL != cryptops);
 }
 
 static inline void teardown_crypto(void)
 {
     SOPC_CryptoProvider_Free(crypto);
     crypto = NULL;
+    SOPC_CryptoProvider_Free(cryptops);
+    cryptops = NULL;
 }
 
 START_TEST(test_crypto_load_None)
@@ -71,6 +76,16 @@ START_TEST(test_crypto_load_None)
     ck_assert(NULL == profile->pFnAsymSign);
     ck_assert(NULL == profile->pFnAsymVerify);
     ck_assert(NULL == profile->pFnCertVerify);
+
+    ck_assert_ptr_null(SOPC_CryptoProvider_GetProfileServices(cryptops));
+    const SOPC_CryptoProfile_PubSub* profileps = SOPC_CryptoProvider_GetProfilePubSub(cryptops);
+    ck_assert_ptr_nonnull(profileps);
+
+    ck_assert(SOPC_SecurityPolicy_None_ID == profileps->SecurityPolicyID);
+    ck_assert(NULL == profileps->pFnCrypt);
+    ck_assert(NULL == profileps->pFnSymmSign);
+    ck_assert(NULL == profileps->pFnSymmVerif);
+    ck_assert(NULL != profileps->pFnGenRnd);
 }
 END_TEST
 
@@ -91,6 +106,14 @@ START_TEST(test_crypto_symm_lengths_None)
     ck_assert(SOPC_CryptoProvider_SymmetricGetLength_Blocks(crypto, NULL, &lenDeci) == SOPC_STATUS_INVALID_PARAMETERS);
     ck_assert(SOPC_CryptoProvider_SymmetricGetLength_Blocks(crypto, &lenCiph, &lenDeci) ==
               SOPC_STATUS_INVALID_PARAMETERS);
+
+    ck_assert(SOPC_CryptoProvider_SymmetricGetLength_CryptoKey(cryptops, &len) == SOPC_STATUS_INVALID_PARAMETERS);
+    ck_assert(SOPC_CryptoProvider_SymmetricGetLength_SignKey(cryptops, &len) == SOPC_STATUS_INVALID_PARAMETERS);
+    ck_assert(SOPC_CryptoProvider_SymmetricGetLength_Signature(cryptops, &len) == SOPC_STATUS_INVALID_PARAMETERS);
+    ck_assert(SOPC_CryptoProvider_SymmetricGetLength_Encryption(cryptops, 15, &len) == SOPC_STATUS_INVALID_PARAMETERS);
+    ck_assert(SOPC_CryptoProvider_SymmetricGetLength_Decryption(cryptops, 15, &len) == SOPC_STATUS_INVALID_PARAMETERS);
+    ck_assert(SOPC_CryptoProvider_PubSubGetLength_KeyNonce(cryptops, &len) == SOPC_STATUS_INVALID_PARAMETERS);
+    ck_assert(SOPC_CryptoProvider_PubSubGetLength_MessageRandom(cryptops, &len) == SOPC_STATUS_INVALID_PARAMETERS);
 }
 END_TEST
 
@@ -99,16 +122,22 @@ START_TEST(test_crypto_symm_crypt_None)
     uint32_t local = 0;
     unsigned char* input = (unsigned char*) &local;
     unsigned char* output = (unsigned char*) &local;
-    SOPC_SecretBuffer *pSecKey = NULL, *pSecIV = NULL;
+    unsigned char* random = (unsigned char*) &local;
+    SOPC_SecretBuffer *pSecKey = NULL, *pSecIV = NULL, *pSecNonce = NULL;
+    uint32_t uSeqNum = 42;
 
     pSecKey = SOPC_SecretBuffer_NewFromExposedBuffer((SOPC_ExposedBuffer*) &input, sizeof(local));
     ck_assert(NULL != pSecKey);
     pSecIV = SOPC_SecretBuffer_NewFromExposedBuffer((SOPC_ExposedBuffer*) &input, sizeof(local));
     ck_assert(NULL != pSecIV);
+    pSecNonce = SOPC_SecretBuffer_NewFromExposedBuffer((SOPC_ExposedBuffer*) &input, sizeof(local));
+    ck_assert(NULL != pSecNonce);
 
     // Encrypt
     ck_assert(SOPC_CryptoProvider_SymmetricEncrypt(crypto, input, 16, pSecKey, pSecIV, output, 16) ==
               SOPC_STATUS_INVALID_PARAMETERS);
+    ck_assert(SOPC_CryptoProvider_PubSubCrypt(cryptops, input, 100, pSecKey, pSecNonce, random, 4, uSeqNum, output,
+                                              100) == SOPC_STATUS_INVALID_PARAMETERS);
 
     // Decrypt
     ck_assert(SOPC_CryptoProvider_SymmetricDecrypt(crypto, input, 16, pSecKey, pSecIV, output, 16) ==
@@ -129,9 +158,28 @@ START_TEST(test_crypto_symm_crypt_None)
     ck_assert(SOPC_CryptoProvider_SymmetricDecrypt(crypto, input, 16, pSecKey, NULL, output, 16) != SOPC_STATUS_OK);
     ck_assert(SOPC_CryptoProvider_SymmetricDecrypt(crypto, input, 16, pSecKey, pSecIV, NULL, 16) != SOPC_STATUS_OK);
     ck_assert(SOPC_CryptoProvider_SymmetricDecrypt(crypto, input, 16, pSecKey, pSecIV, output, 15) != SOPC_STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_PubSubCrypt(NULL, input, 20, pSecKey, pSecNonce, random, 4, uSeqNum, output, 20) !=
+              SOPC_STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_PubSubCrypt(cryptops, NULL, 20, pSecKey, pSecNonce, random, 4, uSeqNum, output, 20) !=
+              SOPC_STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_PubSubCrypt(cryptops, input, 19, pSecKey, pSecNonce, random, 4, uSeqNum, output,
+                                              20) != SOPC_STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_PubSubCrypt(cryptops, input, 20, NULL, pSecNonce, random, 4, uSeqNum, output, 20) !=
+              SOPC_STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_PubSubCrypt(cryptops, input, 20, pSecKey, NULL, random, 4, uSeqNum, output, 20) !=
+              SOPC_STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_PubSubCrypt(cryptops, input, 20, pSecKey, pSecNonce, NULL, 4, uSeqNum, output, 20) !=
+              SOPC_STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_PubSubCrypt(cryptops, input, 20, pSecKey, pSecNonce, random, 3, uSeqNum, output,
+                                              20) != SOPC_STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_PubSubCrypt(cryptops, input, 20, pSecKey, pSecNonce, random, 4, uSeqNum, NULL, 20) !=
+              SOPC_STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_PubSubCrypt(cryptops, input, 20, pSecKey, pSecNonce, random, 4, uSeqNum, output,
+                                              19) != SOPC_STATUS_OK);
 
     SOPC_SecretBuffer_DeleteClear(pSecKey);
     SOPC_SecretBuffer_DeleteClear(pSecIV);
+    SOPC_SecretBuffer_DeleteClear(pSecNonce);
 }
 END_TEST
 
@@ -148,9 +196,13 @@ START_TEST(test_crypto_symm_sign_None)
     // Signature
     ck_assert(SOPC_CryptoProvider_SymmetricSign(crypto, input, 64, pSecKey, output, 20) ==
               SOPC_STATUS_INVALID_PARAMETERS);
+    ck_assert(SOPC_CryptoProvider_SymmetricSign(cryptops, input, 64, pSecKey, output, 32) ==
+              SOPC_STATUS_INVALID_PARAMETERS);
 
     // Check verify
     ck_assert(SOPC_CryptoProvider_SymmetricVerify(crypto, input, 64, pSecKey, output, 20) ==
+              SOPC_STATUS_INVALID_PARAMETERS);
+    ck_assert(SOPC_CryptoProvider_SymmetricVerify(crypto, input, 64, pSecKey, output, 32) ==
               SOPC_STATUS_INVALID_PARAMETERS);
 
     // Check invalid parameters (TODO: assert attended error code instead of != OK)
@@ -166,6 +218,16 @@ START_TEST(test_crypto_symm_sign_None)
     ck_assert(SOPC_CryptoProvider_SymmetricVerify(crypto, input, 64, pSecKey, NULL, 20) != SOPC_STATUS_OK);
     ck_assert(SOPC_CryptoProvider_SymmetricVerify(crypto, input, 64, pSecKey, output, 0) != SOPC_STATUS_OK);
     ck_assert(SOPC_CryptoProvider_SymmetricVerify(crypto, input, 64, pSecKey, output, 32) != SOPC_STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricSign(cryptops, NULL, 64, pSecKey, output, 32) != SOPC_STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricSign(cryptops, input, 64, NULL, output, 32) != SOPC_STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricSign(cryptops, input, 64, pSecKey, NULL, 32) != SOPC_STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricSign(cryptops, input, 64, pSecKey, output, 0) != SOPC_STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricSign(cryptops, input, 64, pSecKey, output, 31) != SOPC_STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricVerify(cryptops, NULL, 64, pSecKey, output, 32) != SOPC_STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricVerify(cryptops, input, 64, NULL, output, 32) != SOPC_STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricVerify(cryptops, input, 64, pSecKey, NULL, 32) != SOPC_STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricVerify(cryptops, input, 64, pSecKey, output, 0) != SOPC_STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_SymmetricVerify(cryptops, input, 64, pSecKey, output, 31) != SOPC_STATUS_OK);
 
     SOPC_SecretBuffer_DeleteClear(pSecKey);
 }
@@ -187,11 +249,19 @@ START_TEST(test_crypto_generate_nbytes_None)
                   "Randomly generated two times the same 64 bytes, which should happen once in pow(2, 512) tries.");
     SOPC_Free(pExpBuffer0);
     SOPC_Free(pExpBuffer1);
+    ck_assert(SOPC_CryptoProvider_GenerateRandomBytes(cryptops, 64, &pExpBuffer0) == SOPC_STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_GenerateRandomBytes(cryptops, 64, &pExpBuffer1) == SOPC_STATUS_OK);
+    ck_assert_msg(memcmp(pExpBuffer0, pExpBuffer1, 64) != 0,
+                  "Randomly generated two times the same 64 bytes, which should happen once in pow(2, 512) tries.");
+    SOPC_Free(pExpBuffer0);
+    SOPC_Free(pExpBuffer1);
 
     // Test invalid inputs
     ck_assert(SOPC_CryptoProvider_GenerateRandomBytes(NULL, 64, &pExpBuffer0) == SOPC_STATUS_INVALID_PARAMETERS);
     ck_assert(SOPC_CryptoProvider_GenerateRandomBytes(crypto, 0, &pExpBuffer0) == SOPC_STATUS_INVALID_PARAMETERS);
     ck_assert(SOPC_CryptoProvider_GenerateRandomBytes(crypto, 64, NULL) == SOPC_STATUS_INVALID_PARAMETERS);
+    ck_assert(SOPC_CryptoProvider_GenerateRandomBytes(cryptops, 0, &pExpBuffer0) == SOPC_STATUS_INVALID_PARAMETERS);
+    ck_assert(SOPC_CryptoProvider_GenerateRandomBytes(cryptops, 64, NULL) == SOPC_STATUS_INVALID_PARAMETERS);
 }
 END_TEST
 
@@ -739,7 +809,7 @@ Suite* tests_make_suite_crypto_None()
     TCase *tc_crypto_symm = NULL, *tc_providers = NULL, *tc_rands = NULL, *tc_derives = NULL, *tc_km = NULL,
           *tc_crypto_asym = NULL, *tc_pki_stack = NULL;
 
-    s = suite_create("Crypto tests None");
+    s = suite_create("Crypto tests None (incl. PubSub)");
     tc_crypto_symm = tcase_create("Symmetric Crypto");
     tc_providers = tcase_create("Crypto Provider");
     tc_rands = tcase_create("Random Generation");
