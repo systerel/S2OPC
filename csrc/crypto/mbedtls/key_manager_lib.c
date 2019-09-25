@@ -300,43 +300,59 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetThumbprint(const SOPC_CryptoPro
                                                             uint8_t* pDest,
                                                             uint32_t lenDest)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    if (NULL == pProvider || NULL == pCert || NULL == pDest || 0 == lenDest)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    const SOPC_CryptoProfile* pProfile = SOPC_CryptoProvider_GetProfileServices(pProvider);
+    if (NULL == pProfile)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
     uint32_t lenSupposed = 0;
-    uint8_t* pDER = NULL;
-    uint32_t lenDER = 0;
-    mbedtls_md_type_t type = MBEDTLS_MD_NONE;
-
-    if (NULL == pProvider || NULL == pProvider->pProfile || NULL == pCert || NULL == pDest || 0 == lenDest)
-        return SOPC_STATUS_INVALID_PARAMETERS;
-
-    if (SOPC_CryptoProvider_CertificateGetLength_Thumbprint(pProvider, &lenSupposed) != SOPC_STATUS_OK)
-        return SOPC_STATUS_NOK;
-
-    if (lenDest != lenSupposed)
-        return SOPC_STATUS_INVALID_PARAMETERS;
+    SOPC_ReturnStatus status = SOPC_CryptoProvider_CertificateGetLength_Thumbprint(pProvider, &lenSupposed);
+    if (SOPC_STATUS_OK == status)
+    {
+        if (lenDest != lenSupposed)
+        {
+            status = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+    }
 
     // Get DER
-    if (SOPC_KeyManager_Certificate_CopyDER(pCert, &pDER, &lenDER) != SOPC_STATUS_OK)
-        return SOPC_STATUS_NOK;
-
-    // Hash DER with SHA-1
-    switch (pProvider->pProfile->SecurityPolicyID)
+    uint8_t* pDER = NULL;
+    uint32_t lenDER = 0;
+    if (SOPC_STATUS_OK == status)
     {
-    case SOPC_SecurityPolicy_Invalid_ID:
-    default:
-        status = SOPC_STATUS_NOK;
-        break;
-    case SOPC_SecurityPolicy_Basic256Sha256_ID:
-    case SOPC_SecurityPolicy_Basic256_ID:
-        type = MBEDTLS_MD_SHA1;
-        break;
+        status = SOPC_KeyManager_Certificate_CopyDER(pCert, &pDER, &lenDER);
+    }
+
+    mbedtls_md_type_t type = MBEDTLS_MD_NONE;
+    if (SOPC_STATUS_OK == status)
+    {
+        // Hash DER with SHA-1
+        switch (pProfile->SecurityPolicyID)
+        {
+        case SOPC_SecurityPolicy_Invalid_ID:
+        default:
+            status = SOPC_STATUS_NOK;
+            break;
+        case SOPC_SecurityPolicy_Basic256Sha256_ID:
+        case SOPC_SecurityPolicy_Basic256_ID:
+            type = MBEDTLS_MD_SHA1;
+            break;
+        }
     }
 
     if (SOPC_STATUS_OK == status)
     {
         const mbedtls_md_info_t* pmd = mbedtls_md_info_from_type(type);
         if (mbedtls_md(pmd, pDER, lenDER, pDest) != 0)
+        {
             status = SOPC_STATUS_NOK;
+        }
     }
 
     SOPC_Free(pDER);
