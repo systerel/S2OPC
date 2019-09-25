@@ -59,6 +59,7 @@ int main(void)
     sr = srunner_create(tests_make_suite_crypto_B256S256());
     srunner_add_suite(sr, tests_make_suite_crypto_B256());
     srunner_add_suite(sr, tests_make_suite_crypto_None());
+    srunner_add_suite(sr, tests_make_suite_crypto_PubSub256());
     srunner_add_suite(sr, tests_make_suite_crypto_tools());
     srunner_add_suite(sr, tests_make_suite_tools());
     srunner_add_suite(sr, tests_make_suite_threads());
