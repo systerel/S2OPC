@@ -301,7 +301,7 @@ set_property(TARGET s2opc_obj PROPERTY POSITION_INDEPENDENT_CODE 1)
 
 # Manage the Nano profiles extended mode
 if (WITH_NANO_EXTENDED)
-  set_target_properties(s2opc_obj PROPERTIES COMPILE_DEFINITIONS "WITH_NANO_EXTENDED")
+  target_compile_definitions(s2opc_obj PRIVATE "WITH_NANO_EXTENDED")
   set(TOOLKIT_TEST_SERVER "toolkit_test_server")
 else()
   set(TOOLKIT_TEST_SERVER "toolkit_test_nano_server")
@@ -381,7 +381,7 @@ if (EXPAT_FOUND)
   add_library(s2opc-loader-uanodeset-expat STATIC csrc/address_space_loaders/uanodeset_expat/loader.c)
   target_link_libraries(s2opc-loader-uanodeset-expat PUBLIC ${EXPAT_LIBRARIES} PRIVATE s2opc)
   target_include_directories(s2opc-loader-uanodeset-expat PRIVATE ${S2OPC_PUBLIC_INCLUDES} ${EXPAT_INCLUDE_DIRS} PUBLIC "csrc/address_space_loaders")
-  set_target_properties(s2opc-loader-uanodeset-expat PROPERTIES COMPILE_DEFINITIONS "UANODESET_LOADER_LOG")
+  target_compile_definitions(s2opc-loader-uanodeset-expat PRIVATE "UANODESET_LOADER_LOG")
   set_target_properties(s2opc-loader-uanodeset-expat PROPERTIES PUBLIC_HEADER "csrc/address_space_loaders/uanodeset_expat/loader.h")
   install(TARGETS s2opc-loader-uanodeset-expat
           LIBRARY DESTINATION lib
@@ -435,7 +435,7 @@ target_include_directories(check_helpers PRIVATE ${S2OPC_PRIVATE_INCLUDES} ${MBE
 target_link_libraries(check_helpers PRIVATE s2opc ${CHECK_LIBRARIES} s2opc-loader-embedded)
 if (EXPAT_FOUND)
 	target_link_libraries(check_helpers PRIVATE s2opc-loader-uanodeset-expat)
-	set_target_properties(check_helpers PROPERTIES COMPILE_DEFINITIONS "WITH_EXPAT")
+	target_compile_definitions(check_helpers PRIVATE "WITH_EXPAT")
 endif()
 
 
@@ -472,7 +472,7 @@ add_executable(toolkit_test_client "tests/services/toolkit_test_client.c"
                                    ${TEST_DEMO_CLIENT_ADDRESS_SPACE_C})
 # Manage the Nano profiles extended mode
 if (WITH_NANO_EXTENDED)
-  set_target_properties(toolkit_test_client PROPERTIES COMPILE_DEFINITIONS "WITH_NANO_EXTENDED")
+  target_compile_definitions(toolkit_test_client PRIVATE "WITH_NANO_EXTENDED")
 endif()
 
 target_link_libraries(toolkit_test_client PRIVATE s2opc s2opc-loader-embedded)
@@ -506,12 +506,12 @@ target_include_directories(${TOOLKIT_TEST_SERVER} PRIVATE ${S2OPC_PUBLIC_INCLUDE
                                                           ${S2OPC_PRIVATE_INCLUDES})
 
 if (EXPAT_FOUND)
-	target_link_libraries(${TOOLKIT_TEST_SERVER} PRIVATE s2opc-loader-uanodeset-expat)
-	set_target_properties(${TOOLKIT_TEST_SERVER} PROPERTIES COMPILE_DEFINITIONS "WITH_EXPAT")
+  target_link_libraries(${TOOLKIT_TEST_SERVER} PRIVATE s2opc-loader-uanodeset-expat)
+  target_compile_definitions(${TOOLKIT_TEST_SERVER} PRIVATE "WITH_EXPAT")
 endif()
 
 if (WITH_STATIC_SECURITY_DATA)
-    set_target_properties(${TOOLKIT_TEST_SERVER} PROPERTIES COMPILE_DEFINITIONS "WITH_STATIC_SECURITY_DATA")
+  target_compile_definitions(${TOOLKIT_TEST_SERVER} PRIVATE "WITH_STATIC_SECURITY_DATA")
 endif()
 
 add_test(NAME "validation::client_server_test"
