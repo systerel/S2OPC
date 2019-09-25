@@ -82,16 +82,28 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricGetLength_KeyBits(const SOPC_Cry
                                                                   const SOPC_AsymmetricKey* pKey,
                                                                   uint32_t* lenKeyBits)
 {
-    size_t lenBits = 0;
+    if (NULL == pProvider || NULL == pKey || NULL == lenKeyBits)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    if (NULL == pProvider || NULL == pProvider->pProfile || NULL == pKey || NULL == lenKeyBits)
+    const SOPC_CryptoProfile* pProfile = SOPC_CryptoProvider_GetProfileServices(pProvider);
+    if (NULL == pProfile)
+    {
         return SOPC_STATUS_INVALID_PARAMETERS;
-    if (SOPC_SecurityPolicy_Invalid_ID == pProvider->pProfile->SecurityPolicyID)
+    }
+
+    size_t lenBits = 0;
+    if (pProfile->SecurityPolicyID == SOPC_SecurityPolicy_Invalid_ID)
+    {
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
     lenBits = mbedtls_pk_get_bitlen(&pKey->pk);
     if (lenBits > UINT32_MAX)
+    {
         return SOPC_STATUS_NOK;
+    }
 
     *lenKeyBits = (uint32_t) lenBits;
 
@@ -102,36 +114,37 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricGetLength_MsgPlainText(const SOP
                                                                        const SOPC_AsymmetricKey* pKey,
                                                                        uint32_t* pLenMsg)
 {
-    uint32_t lenHash = 0;
-    size_t lenMessage = 0;
-
-    if (NULL == pProvider || NULL == pProvider->pProfile || NULL == pKey || NULL == pLenMsg)
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    if (SOPC_SecurityPolicy_Invalid_ID == pProvider->pProfile->SecurityPolicyID)
-        return SOPC_STATUS_INVALID_PARAMETERS;
-
-    lenMessage = mbedtls_pk_get_len(&pKey->pk);
-    if (lenMessage > UINT32_MAX)
-        return SOPC_STATUS_NOK;
-
-    *pLenMsg = (uint32_t) lenMessage;
-    if (*pLenMsg == 0)
-        return SOPC_STATUS_NOK;
-
-    switch (pProvider->pProfile->SecurityPolicyID) // TODO: should we build some API to fetch the SecurityPolicyID, or
-                                                   // avoid to switch on it at all?
+    if (NULL == pProvider || NULL == pKey || NULL == pLenMsg)
     {
-    case SOPC_SecurityPolicy_Invalid_ID:
-    default:
-        return SOPC_STATUS_NOK;
-    case SOPC_SecurityPolicy_Basic256Sha256_ID: // TODO: this seems overkill to fetch the size of the chosen OAEP
-                                                // hash function...
-    case SOPC_SecurityPolicy_Basic256_ID:
-        if (SOPC_CryptoProvider_AsymmetricGetLength_OAEPHashLength(pProvider, &lenHash) != SOPC_STATUS_OK)
-            return SOPC_STATUS_NOK;
-        *pLenMsg -= 2 * lenHash + 2; // TODO: check for underflow?
-        break;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
+
+    const SOPC_CryptoProfile* pProfile = SOPC_CryptoProvider_GetProfileServices(pProvider);
+    if (NULL == pProfile)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    uint32_t uSeqPolID = pProfile->SecurityPolicyID;
+    if (uSeqPolID == SOPC_SecurityPolicy_Invalid_ID)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    size_t lenMessage = mbedtls_pk_get_len(&pKey->pk);
+    if (0 == lenMessage || lenMessage > UINT32_MAX)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    uint32_t lenHash = 0;
+    if (SOPC_CryptoProvider_AsymmetricGetLength_OAEPHashLength(pProvider, &lenHash) != SOPC_STATUS_OK)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    lenMessage -= 2 * lenHash + 2; // TODO: check for underflow?
+    *pLenMsg = (uint32_t) lenMessage;
 
     return SOPC_STATUS_OK;
 }
