@@ -117,25 +117,93 @@ SOPC_ReturnStatus CryptoProvider_SymmDecrypt_AES256(const SOPC_CryptoProvider* p
     return SOPC_STATUS_OK;
 }
 
+static inline SOPC_ReturnStatus HMAC_hashtype_sign(const SOPC_CryptoProvider* pProvider,
+                                                   const uint8_t* pInput,
+                                                   uint32_t lenInput,
+                                                   const SOPC_ExposedBuffer* pKey,
+                                                   uint8_t* pOutput,
+                                                   mbedtls_md_type_t hash_type);
+static inline SOPC_ReturnStatus HMAC_hashtype_verify(const SOPC_CryptoProvider* pProvider,
+                                                     const uint8_t* pInput,
+                                                     uint32_t lenInput,
+                                                     const SOPC_ExposedBuffer* pKey,
+                                                     const uint8_t* pSignature,
+                                                     mbedtls_md_type_t hash_type);
+
+static inline SOPC_ReturnStatus HMAC_hashtype_sign(const SOPC_CryptoProvider* pProvider,
+                                                   const uint8_t* pInput,
+                                                   uint32_t lenInput,
+                                                   const SOPC_ExposedBuffer* pKey,
+                                                   uint8_t* pOutput,
+                                                   mbedtls_md_type_t hash_type)
+{
+    if (NULL == pInput || NULL == pKey || NULL == pOutput)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    uint32_t lenKey = 0;
+    if (SOPC_CryptoProvider_SymmetricGetLength_SignKey(pProvider, &lenKey) != SOPC_STATUS_OK)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    const mbedtls_md_info_t* pinfo = mbedtls_md_info_from_type(hash_type);
+    if (mbedtls_md_hmac(pinfo, pKey, lenKey, pInput, lenInput, pOutput) != 0)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    return SOPC_STATUS_OK;
+}
+
+static inline SOPC_ReturnStatus HMAC_hashtype_verify(const SOPC_CryptoProvider* pProvider,
+                                                     const uint8_t* pInput,
+                                                     uint32_t lenInput,
+                                                     const SOPC_ExposedBuffer* pKey,
+                                                     const uint8_t* pSignature,
+                                                     mbedtls_md_type_t hash_type)
+{
+    if (NULL == pSignature)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    uint32_t lenSig = 0;
+    uint8_t* pCalcSig = NULL;
+    SOPC_ReturnStatus status = SOPC_CryptoProvider_SymmetricGetLength_Signature(pProvider, &lenSig);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        pCalcSig = SOPC_Malloc(lenSig);
+        if (NULL == pCalcSig)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = HMAC_hashtype_sign(pProvider, pInput, lenInput, pKey, pCalcSig, hash_type);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = memcmp(pSignature, pCalcSig, lenSig) != 0 ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
+    }
+
+    SOPC_Free(pCalcSig);
+
+    return status;
+}
+
 SOPC_ReturnStatus CryptoProvider_SymmSign_HMAC_SHA256(const SOPC_CryptoProvider* pProvider,
                                                       const uint8_t* pInput,
                                                       uint32_t lenInput,
                                                       const SOPC_ExposedBuffer* pKey,
                                                       uint8_t* pOutput)
 {
-    uint32_t lenKey;
-
-    if (NULL == pProvider || NULL == pProvider->pProfile || NULL == pInput || NULL == pKey || NULL == pOutput)
-        return SOPC_STATUS_INVALID_PARAMETERS;
-
-    if (SOPC_CryptoProvider_SymmetricGetLength_SignKey(pProvider, &lenKey) != SOPC_STATUS_OK)
-        return SOPC_STATUS_NOK;
-
-    const mbedtls_md_info_t* pinfo = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
-    if (mbedtls_md_hmac(pinfo, pKey, lenKey, pInput, lenInput, pOutput) != 0)
-        return SOPC_STATUS_NOK;
-
-    return SOPC_STATUS_OK;
+    return HMAC_hashtype_sign(pProvider, pInput, lenInput, pKey, pOutput, MBEDTLS_MD_SHA256);
 }
 
 SOPC_ReturnStatus CryptoProvider_SymmVerify_HMAC_SHA256(const SOPC_CryptoProvider* pProvider,
@@ -144,32 +212,7 @@ SOPC_ReturnStatus CryptoProvider_SymmVerify_HMAC_SHA256(const SOPC_CryptoProvide
                                                         const SOPC_ExposedBuffer* pKey,
                                                         const uint8_t* pSignature)
 {
-    uint32_t lenKey, lenSig;
-    uint8_t* pCalcSig;
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-
-    if (NULL == pProvider || NULL == pProvider->pProfile || NULL == pInput || NULL == pKey || NULL == pSignature)
-        return SOPC_STATUS_INVALID_PARAMETERS;
-
-    if (SOPC_CryptoProvider_SymmetricGetLength_SignKey(pProvider, &lenKey) != SOPC_STATUS_OK)
-        return SOPC_STATUS_NOK;
-
-    if (SOPC_CryptoProvider_SymmetricGetLength_Signature(pProvider, &lenSig) != SOPC_STATUS_OK)
-        return SOPC_STATUS_NOK;
-
-    pCalcSig = SOPC_Malloc(lenSig);
-    if (NULL == pCalcSig)
-        return SOPC_STATUS_NOK;
-
-    const mbedtls_md_info_t* pinfo = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
-    status = mbedtls_md_hmac(pinfo, pKey, lenKey, pInput, lenInput, pCalcSig) != 0 ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
-
-    if (SOPC_STATUS_OK == status)
-        status = memcmp(pSignature, pCalcSig, lenSig) != 0 ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
-
-    SOPC_Free(pCalcSig);
-
-    return status;
+    return HMAC_hashtype_verify(pProvider, pInput, lenInput, pKey, pSignature, MBEDTLS_MD_SHA256);
 }
 
 // Fills a buffer with "truly" random data
@@ -594,55 +637,16 @@ SOPC_ReturnStatus CryptoProvider_SymmSign_HMAC_SHA1(const SOPC_CryptoProvider* p
                                                     const SOPC_ExposedBuffer* pKey,
                                                     uint8_t* pOutput)
 {
-    uint32_t lenKey;
-
-    if (NULL == pProvider || NULL == pProvider->pProfile || NULL == pInput || NULL == pKey || NULL == pOutput)
-        return SOPC_STATUS_INVALID_PARAMETERS;
-
-    if (SOPC_CryptoProvider_SymmetricGetLength_SignKey(pProvider, &lenKey) != SOPC_STATUS_OK)
-        return SOPC_STATUS_NOK;
-
-    const mbedtls_md_info_t* pinfo = mbedtls_md_info_from_type(MBEDTLS_MD_SHA1);
-    if (mbedtls_md_hmac(pinfo, pKey, lenKey, pInput, lenInput, pOutput) != 0)
-        return SOPC_STATUS_NOK;
-
-    return SOPC_STATUS_OK;
+    return HMAC_hashtype_sign(pProvider, pInput, lenInput, pKey, pOutput, MBEDTLS_MD_SHA1);
 }
-
 SOPC_ReturnStatus CryptoProvider_SymmVerify_HMAC_SHA1(const SOPC_CryptoProvider* pProvider,
                                                       const uint8_t* pInput,
                                                       uint32_t lenInput,
                                                       const SOPC_ExposedBuffer* pKey,
                                                       const uint8_t* pSignature)
 {
-    uint32_t lenKey, lenSig;
-    uint8_t* pCalcSig;
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-
-    if (NULL == pProvider || NULL == pProvider->pProfile || NULL == pInput || NULL == pKey || NULL == pSignature)
-        return SOPC_STATUS_INVALID_PARAMETERS;
-
-    if (SOPC_CryptoProvider_SymmetricGetLength_SignKey(pProvider, &lenKey) != SOPC_STATUS_OK)
-        return SOPC_STATUS_NOK;
-
-    if (SOPC_CryptoProvider_SymmetricGetLength_Signature(pProvider, &lenSig) != SOPC_STATUS_OK)
-        return SOPC_STATUS_NOK;
-
-    pCalcSig = SOPC_Malloc(lenSig);
-    if (NULL == pCalcSig)
-        return SOPC_STATUS_NOK;
-
-    const mbedtls_md_info_t* pinfo = mbedtls_md_info_from_type(MBEDTLS_MD_SHA1);
-    status = mbedtls_md_hmac(pinfo, pKey, lenKey, pInput, lenInput, pCalcSig) != 0 ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
-
-    if (SOPC_STATUS_OK == status)
-        status = memcmp(pSignature, pCalcSig, lenSig) != 0 ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
-
-    SOPC_Free(pCalcSig);
-
-    return status;
+    return HMAC_hashtype_verify(pProvider, pInput, lenInput, pKey, pSignature, MBEDTLS_MD_SHA1);
 }
-
 SOPC_ReturnStatus CryptoProvider_DeriveData_PRF_SHA1(const SOPC_CryptoProvider* pProvider,
                                                      const SOPC_ExposedBuffer* pSecret,
                                                      uint32_t lenSecret,
