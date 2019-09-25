@@ -47,13 +47,15 @@ struct SOPC_CryptoProvider
     /**
      * CryptoProfile associated to the chosen Security Policy, to use with client-server security policies.
      * You should not attempt to modify the content of this pointer.
-     * You should only access this pointer in the CryptoProvider implementation using get_profile_services().
+     * You should only access this pointer in the CryptoProvider implementation using
+     * SOPC_CryptoProvider_GetProfileServices().
      */
     const SOPC_CryptoProfile* const pProfile;
     /**
      * CryptoProfile associated to the chosen Security policy, to use with PubSub security policies.
      * You should not attempt to modify the content of this pointer.
-     * You should only access this pointer in the CryptoProvider implementation using get_profile_pubsub().
+     * You should only access this pointer in the CryptoProvider implementation using
+     * SOPC_CryptoProvider_GetProfilePubSub().
      */
     const SOPC_CryptoProfile_PubSub* const pProfilePubSub;
     /**
@@ -64,7 +66,7 @@ struct SOPC_CryptoProvider
 };
 
 /* ------------------------------------------------------------------------------------------------
- * CryptoProvider creation
+ * CryptoProvider
  * ------------------------------------------------------------------------------------------------
  */
 
@@ -92,7 +94,7 @@ SOPC_CryptoProvider* SOPC_CryptoProvider_Create(const char* uri);
  *              It should never be modified.
  *
  * \param uri   The URI describing the security policy. Should not be NULL.
- *              Should describe only PubSub security policies.
+ *              Should only describe PubSub security policies.
  *
  * \note        Use SOPC_CryptoProvider_Create() to create a CryptoProvider for a client-server connection.
  *
@@ -124,6 +126,20 @@ SOPC_ReturnStatus SOPC_CryptoProvider_Init(SOPC_CryptoProvider* pCryptoProvider)
  * \note        Internal API.
  */
 SOPC_ReturnStatus SOPC_CryptoProvider_Deinit(SOPC_CryptoProvider* pCryptoProvider);
+
+/**
+ * \brief       Returns the non NULL client-server crypto profile but returns NULL if the PubSub profile is non NULL.
+ *
+ * \note        Internal API.
+ */
+const SOPC_CryptoProfile* SOPC_CryptoProvider_GetProfileServices(const SOPC_CryptoProvider* pProvider);
+
+/**
+ *\brief        Returns the non NULL PubSub crypto profile but returns NULL if the client-server profile is non NULL.
+ *
+ * \note        Internal API.
+ */
+const SOPC_CryptoProfile_PubSub* SOPC_CryptoProvider_GetProfilePubSub(const SOPC_CryptoProvider* pProvider);
 
 /* ------------------------------------------------------------------------------------------------
  * CryptoProvider get-length & uris operations
