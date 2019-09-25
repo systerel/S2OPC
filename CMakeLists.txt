@@ -505,6 +505,9 @@ target_link_libraries(${TOOLKIT_TEST_SERVER} PRIVATE s2opc s2opc-loader-embedded
 target_include_directories(${TOOLKIT_TEST_SERVER} PRIVATE ${S2OPC_PUBLIC_INCLUDES}
                                                           ${S2OPC_PRIVATE_INCLUDES})
 
+if (WITH_NANO_EXTENDED)
+  target_compile_definitions(${TOOLKIT_TEST_SERVER} PRIVATE "WITH_NANO_EXTENDED")
+endif()
 if (EXPAT_FOUND)
   target_link_libraries(${TOOLKIT_TEST_SERVER} PRIVATE s2opc-loader-uanodeset-expat)
   target_compile_definitions(${TOOLKIT_TEST_SERVER} PRIVATE "WITH_EXPAT")

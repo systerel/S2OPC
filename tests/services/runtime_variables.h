@@ -31,6 +31,7 @@ typedef struct _RuntimeVariables
     OpcUa_BuildInfo build_info;
     SOPC_Byte service_level;
     bool auditing;
+    uint32_t maximum_operation_per_request;
 } RuntimeVariables;
 
 /**
