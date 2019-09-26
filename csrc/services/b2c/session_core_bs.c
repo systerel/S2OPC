@@ -180,12 +180,16 @@ void session_core_bs__server_get_session_from_token(const constants__t_session_t
 {
     constants__t_session_i result = constants__c_session_indet;
     SOPC_NodeId* requestedToken = session_core_bs__session_token;
+    int32_t comparison = 1;
 
-    if (requestedToken->IdentifierType == SOPC_IdentifierType_Numeric && requestedToken->Data.Numeric > 0 &&
-        requestedToken->Data.Numeric <= INT32_MAX)
+    for (uint32_t idx = (uint32_t) constants__t_session_i_max; constants__c_session_indet == result && idx > 0; idx--)
     {
-        // Note: on server side, token <=> session index
-        result = requestedToken->Data.Numeric;
+        SOPC_ReturnStatus status =
+            SOPC_NodeId_Compare(&sessionDataArray[idx].sessionToken, requestedToken, &comparison);
+        if (SOPC_STATUS_OK == status && 0 == comparison)
+        {
+            result = idx;
+        }
     }
 
     *session_core_bs__session = result;
@@ -204,16 +208,34 @@ void session_core_bs__client_get_token_from_session(const constants__t_session_i
     }
 }
 
-void session_core_bs__server_get_fresh_session_token(const constants__t_session_i session_core_bs__session,
-                                                     constants__t_session_token_i* const session_core_bs__token)
+void session_core_bs__server_get_fresh_session_token(
+    const constants__t_channel_config_idx_i session_core_bs__p_channel_config_idx,
+    const constants__t_session_i session_core_bs__session,
+    constants__t_session_token_i* const session_core_bs__token)
 {
+    SOPC_CryptoProvider* pProvider = NULL;
+    SOPC_SecureChannel_Config* pSCCfg = NULL;
+
     // Important note: on server side, token is session index
     if (constants__c_session_indet != session_core_bs__session)
     {
+        pSCCfg = SOPC_ToolkitServer_GetSecureChannelConfig(session_core_bs__p_channel_config_idx);
+        pProvider = SOPC_CryptoProvider_Create(pSCCfg->reqSecuPolicyUri);
+        assert(pProvider != NULL);
         // Note: Namespace = 0 for session token ?
         sessionDataArray[session_core_bs__session].sessionToken.IdentifierType = SOPC_IdentifierType_Numeric;
-        sessionDataArray[session_core_bs__session].sessionToken.Data.Numeric = session_core_bs__session;
+        if (NULL != pProvider)
+        {
+            SOPC_CryptoProvider_GenerateRandomID(pProvider,
+                                                 &sessionDataArray[session_core_bs__session].sessionToken.Data.Numeric);
+        }
+        else
+        {
+            sessionDataArray[session_core_bs__session].sessionToken.Data.Numeric = session_core_bs__session;
+        }
         *session_core_bs__token = &(sessionDataArray[session_core_bs__session].sessionToken);
+
+        SOPC_CryptoProvider_Free(pProvider);
     }
     else
     {

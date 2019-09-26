@@ -103,8 +103,10 @@ OPERATIONS
     END
     ;
 
-    token <-- server_get_fresh_session_token (session) =
+    token <-- server_get_fresh_session_token (p_channel_config_idx, session) =
     PRE
+        p_channel_config_idx : t_channel_config_idx_i &
+        p_channel_config_idx : t_channel_config_idx &
         session : t_session_i &
         session : t_session &
         session /: ran(a_server_token)

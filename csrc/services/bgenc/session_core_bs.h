@@ -21,7 +21,7 @@
 
  File Name            : session_core_bs.h
 
- Date                 : 19/04/2019 16:19:57
+ Date                 : 26/09/2019 12:31:26
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -146,6 +146,7 @@ extern void session_core_bs__server_create_session_req_do_crypto(
    constants_statuscodes_bs__t_StatusCode_i * const session_core_bs__status,
    constants__t_SignatureData_i * const session_core_bs__signature);
 extern void session_core_bs__server_get_fresh_session_token(
+   const constants__t_channel_config_idx_i session_core_bs__p_channel_config_idx,
    const constants__t_session_i session_core_bs__session,
    constants__t_session_token_i * const session_core_bs__token);
 extern void session_core_bs__server_get_session_from_token(

@@ -21,7 +21,7 @@
 
  File Name            : message_out_bs.h
 
- Date                 : 26/08/2019 13:31:00
+ Date                 : 26/09/2019 16:17:45
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -123,6 +123,7 @@ extern void message_out_bs__write_create_session_msg_session_revised_timeout(
    const constants__t_msg_i message_out_bs__resp_msg);
 extern void message_out_bs__write_create_session_msg_session_token(
    const constants__t_msg_i message_out_bs__msg,
+   const constants__t_session_i message_out_bs__session,
    const constants__t_session_token_i message_out_bs__session_token);
 extern void message_out_bs__write_create_session_req_msg_crypto(
    const constants__t_msg_i message_out_bs__p_req_msg,

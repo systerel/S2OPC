@@ -314,11 +314,13 @@ OPERATIONS
     END
     ;
 
-    write_create_session_msg_session_token (msg, session_token) =
+    write_create_session_msg_session_token (msg, session, session_token) =
     PRE
         msg : t_msg_i &
         msg = c_msg_out &
         c_msg_out : t_msg &
+        session : t_session_i &
+        session : t_session &
         session_token : t_session_token_i &
         session_token : t_session_token &
         a_msg_out_type = e_msg_session_create_resp
