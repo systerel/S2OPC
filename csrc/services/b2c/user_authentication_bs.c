@@ -35,7 +35,7 @@
  * but its authorization manager is changed according to the endpoint configuration */
 static SOPC_UserWithAuthorization user_local = {.user = NULL, .authorizationManager = NULL};
 
-static const SOPC_String SOPC_SECURITY_POLICY_NONE = {sizeof(SECURITY_POLICY_NONE), true,
+static const SOPC_String SOPC_SECURITY_POLICY_NONE = {sizeof(SECURITY_POLICY_NONE) - 1, true,
                                                       (SOPC_Byte*) SECURITY_POLICY_NONE};
 
 /*------------------------
