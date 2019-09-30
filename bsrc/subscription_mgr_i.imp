@@ -356,6 +356,7 @@ LOCAL_OPERATIONS
                 a_maxNotifsPerPublish := l_deleted_subs <<| a_maxNotifsPerPublish ||
 
                 a_subscription_state := l_deleted_subs <<| a_subscription_state ||
+                a_MoreNotifications := a_MoreNotifications - l_deleted_subs ||
                 a_LifetimeCounter := l_deleted_subs <<| a_LifetimeCounter ||
                 a_KeepAliveCounter := l_deleted_subs <<| a_KeepAliveCounter ||
                 a_MessageSent := a_MessageSent - l_deleted_subs               ||
@@ -392,7 +393,8 @@ LOCAL_OPERATIONS
                     a_monitoredItemQueue[l_deleted_subs]
                     <<| a_defined_monitored_items |>>
                     s_removedMonitoredItemPointer
-                END
+                END ||
+                a_publishTimer := l_deleted_subs <<| a_publishTimer
             END
         END
     END

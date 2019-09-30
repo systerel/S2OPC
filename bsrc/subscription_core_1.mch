@@ -221,6 +221,7 @@ OPERATIONS
         a_maxNotifsPerPublish := {p_subscription} <<| a_maxNotifsPerPublish ||
 
         a_subscription_state := {p_subscription} <<| a_subscription_state ||
+        a_MoreNotifications := a_MoreNotifications - {p_subscription} ||
         a_LifetimeCounter := {p_subscription} <<| a_LifetimeCounter ||
         a_KeepAliveCounter := {p_subscription} <<| a_KeepAliveCounter ||
         a_MessageSent := a_MessageSent - {p_subscription}               ||

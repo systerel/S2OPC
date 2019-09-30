@@ -21,7 +21,7 @@
 
  File Name            : subscription_core_1.c
 
- Date                 : 19/04/2019 16:19:42
+ Date                 : 30/09/2019 13:35:27
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -240,12 +240,13 @@ void subscription_core_1__delete_subscription(
    subscription_core_1__a_subscription_session_i[subscription_core_1__p_subscription] = constants__c_session_indet;
    subscription_core_1__a_publishInterval_i[subscription_core_1__p_subscription] = constants__c_opcua_duration_indet;
    subscription_core_1__a_lifetimeExpCount_i[subscription_core_1__p_subscription] = 0;
-   subscription_core_1__a_LifetimeCounter_i[subscription_core_1__p_subscription] = 0;
    subscription_core_1__a_keepAliveExpCount_i[subscription_core_1__p_subscription] = 0;
-   subscription_core_1__a_KeepAliveCounter_i[subscription_core_1__p_subscription] = 0;
    subscription_core_1__a_maxNotifsPerPublish_i[subscription_core_1__p_subscription] = 0;
-   subscription_core_1__a_MessageSent_i[subscription_core_1__p_subscription] = false;
    subscription_core_1__a_PublishingEnabled_i[subscription_core_1__p_subscription] = false;
+   subscription_core_1__a_MoreNotifications_i[subscription_core_1__p_subscription] = false;
+   subscription_core_1__a_LifetimeCounter_i[subscription_core_1__p_subscription] = 0;
+   subscription_core_1__a_KeepAliveCounter_i[subscription_core_1__p_subscription] = 0;
+   subscription_core_1__a_MessageSent_i[subscription_core_1__p_subscription] = false;
    subscription_core_1__a_SeqNum_i[subscription_core_1__p_subscription] = constants__c_sub_seq_num_indet;
    subscription_core_1__a_pendingNotificationQueue_i[subscription_core_1__p_subscription] = constants__c_notificationQueue_indet;
    subscription_core_1__a_publishRequestQueue_i[subscription_core_1__p_subscription] = constants__c_publishReqQueue_indet;

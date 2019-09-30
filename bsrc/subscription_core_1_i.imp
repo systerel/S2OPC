@@ -210,12 +210,13 @@ OPERATIONS
 
         a_publishInterval_i(p_subscription) := c_opcua_duration_indet;
         a_lifetimeExpCount_i(p_subscription) := 0;
-        a_LifetimeCounter_i(p_subscription) := 0;
         a_keepAliveExpCount_i(p_subscription) := 0;
-        a_KeepAliveCounter_i(p_subscription) := 0;
         a_maxNotifsPerPublish_i(p_subscription) := 0;
-        a_MessageSent_i(p_subscription) := FALSE;
         a_PublishingEnabled_i(p_subscription) := FALSE;
+        a_MoreNotifications_i(p_subscription) := FALSE;
+        a_LifetimeCounter_i(p_subscription) := 0;
+        a_KeepAliveCounter_i(p_subscription) := 0;
+        a_MessageSent_i(p_subscription) := FALSE;
         a_SeqNum_i (p_subscription) := c_sub_seq_num_indet;
         a_pendingNotificationQueue_i(p_subscription) := c_notificationQueue_indet;
         a_publishRequestQueue_i(p_subscription) := c_publishReqQueue_indet;
