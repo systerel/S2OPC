@@ -849,8 +849,7 @@ OPERATIONS
         p_aid : t_AttributeId_i &
         p_aid : t_AttributeId &
         p_indexRange : t_IndexRange_i &
-        p_value : t_Variant_i &
-        p_value : t_Variant &
+        p_value : t_Variant_i & /* value may be indet if status code /= Good */
         p_valueSc : t_RawStatusCode &
         p_val_ts_src : t_Timestamp &
         p_val_ts_srv : t_Timestamp &

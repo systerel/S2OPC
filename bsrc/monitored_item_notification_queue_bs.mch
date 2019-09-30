@@ -89,8 +89,7 @@ OPERATIONS
         p_nid : t_NodeId &
         p_aid : t_AttributeId_i &
         p_aid : t_AttributeId &
-        p_VariantValuePointer : t_Variant_i &
-        p_VariantValuePointer : t_Variant &
+        p_VariantValuePointer : t_Variant_i & /* value may be indet if status code /= Good */
         p_ValueSc : t_RawStatusCode &
         p_val_ts_src : t_Timestamp &
         p_val_ts_srv : t_Timestamp

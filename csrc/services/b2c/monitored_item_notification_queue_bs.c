@@ -130,6 +130,7 @@ void monitored_item_notification_queue_bs__add_first_monitored_item_notification
     t_bool* const monitored_item_notification_queue_bs__bres)
 {
     *monitored_item_notification_queue_bs__bres = false;
+    SOPC_StatusCode valueStatus = monitored_item_notification_queue_bs__p_ValueSc;
     if (SOPC_SLinkedList_GetLength(monitored_item_notification_queue_bs__p_queue) >=
         INT32_MAX) // number of notifications returned in B model as a int32
     {
@@ -149,8 +150,21 @@ void monitored_item_notification_queue_bs__add_first_monitored_item_notification
     OpcUa_WriteValue_Initialize(pNewWriteValue);
     notifElt->monitoredItemPointer = monitored_item_notification_queue_bs__p_monitoredItem;
     notifElt->value = pNewWriteValue;
-    retStatus =
-        SOPC_Variant_Copy(&pNewWriteValue->Value.Value, monitored_item_notification_queue_bs__p_VariantValuePointer);
+
+    if (constants__c_Variant_indet != monitored_item_notification_queue_bs__p_VariantValuePointer)
+    {
+        retStatus = SOPC_Variant_Copy(&pNewWriteValue->Value.Value,
+                                      monitored_item_notification_queue_bs__p_VariantValuePointer);
+    }
+    else
+    {
+        // The status shall be != Good if the variant is null
+        if ((valueStatus & SOPC_GoodStatusOppositeMask) == 0)
+        {
+            // The status is good whereas no value is provided, it is unexpected
+            valueStatus = OpcUa_BadInternalError;
+        }
+    }
 
     if (monitored_item_notification_queue_bs__p_aid == constants__c_AttributeId_indet)
     {
@@ -162,10 +176,9 @@ void monitored_item_notification_queue_bs__add_first_monitored_item_notification
         SOPC_String indexRangeString;
         SOPC_String_Initialize(&indexRangeString);
         retStatus = SOPC_InternalAddCommonFinishAddNotifElt(
-            monitored_item_notification_queue_bs__p_queue, notifElt, &indexRangeString,
-            monitored_item_notification_queue_bs__p_ValueSc, monitored_item_notification_queue_bs__p_val_ts_src,
-            monitored_item_notification_queue_bs__p_val_ts_srv, monitored_item_notification_queue_bs__p_nid,
-            (uint32_t) monitored_item_notification_queue_bs__p_aid);
+            monitored_item_notification_queue_bs__p_queue, notifElt, &indexRangeString, valueStatus,
+            monitored_item_notification_queue_bs__p_val_ts_src, monitored_item_notification_queue_bs__p_val_ts_srv,
+            monitored_item_notification_queue_bs__p_nid, (uint32_t) monitored_item_notification_queue_bs__p_aid);
     }
 
     if (SOPC_STATUS_OK == retStatus)
