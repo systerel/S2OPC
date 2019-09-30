@@ -547,6 +547,11 @@
      <TestCase name="Err-030.js"/>
     </TestCases>
    </ConformanceUnit>
+   <ConformanceUnit name="Subscription Publish Discard Policy">
+    <TestCases>
+     <TestCase name="manual.js"/>
+    </TestCases>
+   </ConformanceUnit>
    <ConformanceUnit name="Subscription Minimum 1">
     <TestCases>
      <TestCase name="001.js"/>
