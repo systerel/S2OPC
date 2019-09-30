@@ -485,11 +485,9 @@ void message_out_bs__write_create_session_msg_session_token(
     const SOPC_NodeId* nodeId = message_out_bs__session_token;
     status = SOPC_NodeId_Copy(&createSessionResp->AuthenticationToken, nodeId);
     assert(SOPC_STATUS_OK == status);
-    status = SOPC_NodeId_Copy(&createSessionResp->SessionId, nodeId);
     createSessionResp->SessionId.IdentifierType = SOPC_IdentifierType_Numeric;
     createSessionResp->SessionId.Data.Numeric = message_out_bs__session;
     createSessionResp->SessionId.Data.Numeric += 10000;
-    assert(SOPC_STATUS_OK == status);
 }
 
 void message_out_bs__write_create_session_msg_session_revised_timeout(const constants__t_msg_i message_out_bs__req_msg,
