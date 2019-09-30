@@ -350,7 +350,6 @@
      <TestCase name="008.js"/>
      <TestCase name="009.js"/>
      <TestCase name="010.js"/>
-     <TestCase name="011.js"/>
      <TestCase name="033.js"/>
      <TestCase name="037.js"/>
      <TestCase name="038.js"/>
@@ -445,6 +444,7 @@
      <TestCase name="Err-010.js"/>
      <TestCase name="Err-013.js"/>
      <TestCase name="Err-014.js"/>
+     <TestCase name="Err-022.js"/>
     </TestCases>
    </ConformanceUnit>
   </ConformanceGroup>
