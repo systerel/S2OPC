@@ -29,6 +29,7 @@
     <Alias Alias="Integer">i=27</Alias>
     <Alias Alias="UInteger">i=28</Alias>
     <Alias Alias="HasComponent">i=47</Alias>
+    <Alias Alias="HasOrderedComponent">i=49</Alias>
     <Alias Alias="HasProperty">i=46</Alias>
     <Alias Alias="Organizes">i=35</Alias>
     <Alias Alias="HasEventSource">i=36</Alias>
@@ -1667,6 +1668,9 @@
     <References>
       <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=Level2Folder3</Reference>
+      <Reference IsForward="false" ReferenceType="HasOrderedComponent">ns=1;s=Level2Folder3</Reference>
     </References>
     <Value>
         <uax:Boolean>true</uax:Boolean>
@@ -2498,6 +2502,9 @@
       <Reference ReferenceType="Organizes">ns=1;s=Level3Folder1</Reference>
       <Reference ReferenceType="Organizes">ns=1;s=Level3Folder2</Reference>
       <Reference ReferenceType="Organizes">ns=1;s=Level3Folder3</Reference>
+
+      <Reference ReferenceType="HasComponent">ns=1;i=1029</Reference>
+      <Reference ReferenceType="HasOrderedComponent">ns=1;i=1029</Reference>
     </References>
   </UAObject>
   <!-- Level 3 -->
