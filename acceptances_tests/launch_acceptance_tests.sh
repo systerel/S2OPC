@@ -93,7 +93,7 @@ SERVER_PID=$!
 ${ROOT_DIR}/tests/scripts/wait_server.py
 popd
 
-echo "Launching Acceptance Test Tool"
+echo "Launching Acceptance Test Tool: uacompliancetest -s ./Acceptation_S2OPC/Acceptation_S2OPC.ctt.xml --selection $SELECTION -h -c -r ./$LOG_FILE 2>$UACTT_ERROR_FILE"
 
 /opt/opcfoundation/uactt_1.03/bin/uacompliancetest -s ./Acceptation_S2OPC/Acceptation_S2OPC.ctt.xml --selection $SELECTION -h -c -r ./$LOG_FILE 2>$UACTT_ERROR_FILE
 
