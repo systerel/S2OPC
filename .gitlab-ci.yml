@@ -162,7 +162,7 @@ build-linux64-coverity:
 # Test check belongs to the test part, however it does not depend on linux build.
 test-check:
   <<: *test_linux
-  image: registry.gitlab.com/systerel/s2opc/check@sha256:b6015ef22721888b754d83849bc41792869ffefb83bc2471b88d71d2682f187d # digest of check:1.6
+  image: registry.gitlab.com/systerel/s2opc/check@sha256:fb0b936a39e455a786a30506b7606a2539458f24983bac95bf3f3423f5119444 # digest of check:1.7
   script:
     - ./.check-code.sh
   dependencies:
