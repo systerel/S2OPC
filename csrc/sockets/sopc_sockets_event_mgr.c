@@ -651,9 +651,6 @@ void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent eve
             {
                 acceptSock->isServerConnection = true;
                 acceptSock->listenerSocketIdx = socketElt->socketIdx;
-                // Temporarly copy endpoint description config index (waiting for new SC connection
-                // index once created)
-                acceptSock->connectionId = socketElt->connectionId;
                 // Set initial state of new socket
                 acceptSock->state = SOCKET_STATE_ACCEPTED;
 
@@ -663,7 +660,7 @@ void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent eve
                 // Send to the secure channel listener state manager and wait for SOCKET_ACCEPTED_CONNECTION for
                 // association with connection index
                 SOPC_Sockets_Emit(SOCKET_LISTENER_CONNECTION,
-                                  acceptSock->connectionId, // endpoint description config index
+                                  socketElt->connectionId, // endpoint description config index
                                   (uintptr_t) NULL, acceptSock->socketIdx);
             }
             else
