@@ -29,7 +29,7 @@
 /** @brief Version of the toolkit */
 #define SOPC_TOOLKIT_VERSION_MAJOR 0
 #define SOPC_TOOLKIT_VERSION_MEDIUM 7
-#define SOPC_TOOLKIT_VERSION_MINOR 1
+#define SOPC_TOOLKIT_VERSION_MINOR 2
 
 #define Q(x) #x
 #define QUOTE(x) Q(x)
