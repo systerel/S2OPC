@@ -19,6 +19,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include <winerror.h>
 
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
@@ -184,7 +185,6 @@ SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), v
     {
 /* API is available starting from Windows 10 */
 /* We need to check if the API is available  both at compile and execution time */
-#if _WIN32_WINNT >= 0x0A00
         HMODULE kernel32 = LoadLibraryW(L"kernel32");
         assert(kernel32 != NULL);
         pSetThreadDescription funcAddress = (pSetThreadDescription) GetProcAddress(kernel32, "SetThreadDescription");
@@ -199,7 +199,7 @@ SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), v
             if (0 == ret)
             {
                 HRESULT result = funcAddress(thread->thread, wcstr);
-                if (S_OK == result)
+                if (SUCCEEDED(result))
                 {
                     status = SOPC_STATUS_OK;
                 }
@@ -219,10 +219,6 @@ SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), v
         {
             status = SOPC_STATUS_OK;
         }
-#else
-        (void) name;
-        status = SOPC_STATUS_OK;
-#endif
     }
 
     return status;
