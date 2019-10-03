@@ -115,6 +115,24 @@ OPERATIONS
     END
     ;
 
+    is_known_encoding, data_encoding <-- getall_req_ReadValue_DataEncoding(msg, rvi) =
+    PRE
+        msg  : t_msg_i &
+        msg  = c_msg_in &
+        c_msg_in : t_msg &
+        a_msg_in_type = e_msg_attribute_read_req &
+        rvi : t_ReadValue_i &
+        rvi : t_ReadValue &
+        rvi : dom(ReadValue_NodeId)
+    THEN
+        is_known_encoding,
+        data_encoding :(data_encoding : t_QualifiedName_i &
+                        is_known_encoding : BOOL &
+                        /* If encoding is not defined, it is considered as known (use default) */
+                        (data_encoding = c_QualifiedName_indet => is_known_encoding = TRUE))
+    END
+    ;
+
     index_range <-- getall_req_ReadValue_IndexRange(msg, rvi) =
     PRE
         msg  : t_msg_i &

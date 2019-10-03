@@ -76,10 +76,22 @@ OPERATIONS
     ;
 
     p_sc, p_nid, p_aid, p_index_range <-- getall_ReadValue_NodeId_AttributeId(p_msg, p_rvi) =
-    BEGIN
+    VAR
+        l_data_encoding,
+        l_is_known_data
+    IN
         p_nid <-- getall_req_ReadValue_NodeId(p_msg, p_rvi);
         p_sc, p_aid <-- getall_req_ReadValue_AttributeId(p_msg, p_rvi);
-        p_index_range <-- getall_req_ReadValue_IndexRange(p_msg, p_rvi)
+        p_index_range <-- getall_req_ReadValue_IndexRange(p_msg, p_rvi);
+        l_is_known_data, l_data_encoding <-- getall_req_ReadValue_DataEncoding(p_msg, p_rvi);
+        IF p_sc = e_sc_ok & l_data_encoding /= c_QualifiedName_indet
+        THEN
+            IF p_aid /= e_aid_Value or l_is_known_data = FALSE
+            THEN
+                p_sc := e_sc_bad_data_encoding_invalid;
+                p_aid := c_AttributeId_indet
+            END
+        END
     END
     ;
 

@@ -21,7 +21,7 @@
 
  File Name            : msg_read_request_bs.h
 
- Date                 : 19/04/2019 16:19:50
+ Date                 : 03/10/2019 15:38:21
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -55,6 +55,11 @@ extern void msg_read_request_bs__getall_req_ReadValue_AttributeId(
    const constants__t_ReadValue_i msg_read_request_bs__rvi,
    constants_statuscodes_bs__t_StatusCode_i * const msg_read_request_bs__p_sc,
    constants__t_AttributeId_i * const msg_read_request_bs__aid);
+extern void msg_read_request_bs__getall_req_ReadValue_DataEncoding(
+   const constants__t_msg_i msg_read_request_bs__msg,
+   const constants__t_ReadValue_i msg_read_request_bs__rvi,
+   t_bool * const msg_read_request_bs__is_known_encoding,
+   constants__t_QualifiedName_i * const msg_read_request_bs__data_encoding);
 extern void msg_read_request_bs__getall_req_ReadValue_IndexRange(
    const constants__t_msg_i msg_read_request_bs__msg,
    const constants__t_ReadValue_i msg_read_request_bs__rvi,

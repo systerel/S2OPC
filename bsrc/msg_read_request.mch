@@ -112,7 +112,7 @@ OPERATIONS
         p_aid,
         p_index_range
         :(p_sc : t_StatusCode_i &
-          p_sc : {e_sc_ok, e_sc_bad_node_id_invalid, e_sc_bad_attribute_id_invalid, e_sc_bad_index_range_invalid} &
+          p_sc : {e_sc_ok, e_sc_bad_node_id_invalid, e_sc_bad_attribute_id_invalid, e_sc_bad_index_range_invalid, e_sc_bad_data_encoding_invalid} &
             p_nid : t_NodeId_i                   &
             p_nid : t_NodeId                     &
             p_aid : t_AttributeId_i              &

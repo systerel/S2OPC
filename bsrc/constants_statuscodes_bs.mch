@@ -84,7 +84,8 @@ SETS
                       e_sc_uncertain_reference_out_of_server,
                       e_sc_bad_too_many_matches,
                       e_sc_bad_query_too_complex,
-                      e_sc_bad_no_match}
+                      e_sc_bad_no_match,
+                      e_sc_bad_data_encoding_invalid}
 
 ABSTRACT_CONSTANTS
     c_RawStatusCode_BadInvalidState,

@@ -21,7 +21,7 @@
 
  File Name            : msg_read_request.c
 
- Date                 : 19/04/2019 16:19:35
+ Date                 : 03/10/2019 15:37:59
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -96,16 +96,33 @@ void msg_read_request__getall_ReadValue_NodeId_AttributeId(
    constants__t_NodeId_i * const msg_read_request__p_nid,
    constants__t_AttributeId_i * const msg_read_request__p_aid,
    constants__t_IndexRange_i * const msg_read_request__p_index_range) {
-   msg_read_request_bs__getall_req_ReadValue_NodeId(msg_read_request__p_msg,
-      msg_read_request__p_rvi,
-      msg_read_request__p_nid);
-   msg_read_request_bs__getall_req_ReadValue_AttributeId(msg_read_request__p_msg,
-      msg_read_request__p_rvi,
-      msg_read_request__p_sc,
-      msg_read_request__p_aid);
-   msg_read_request_bs__getall_req_ReadValue_IndexRange(msg_read_request__p_msg,
-      msg_read_request__p_rvi,
-      msg_read_request__p_index_range);
+   {
+      constants__t_QualifiedName_i msg_read_request__l_data_encoding;
+      t_bool msg_read_request__l_is_known_data;
+      
+      msg_read_request_bs__getall_req_ReadValue_NodeId(msg_read_request__p_msg,
+         msg_read_request__p_rvi,
+         msg_read_request__p_nid);
+      msg_read_request_bs__getall_req_ReadValue_AttributeId(msg_read_request__p_msg,
+         msg_read_request__p_rvi,
+         msg_read_request__p_sc,
+         msg_read_request__p_aid);
+      msg_read_request_bs__getall_req_ReadValue_IndexRange(msg_read_request__p_msg,
+         msg_read_request__p_rvi,
+         msg_read_request__p_index_range);
+      msg_read_request_bs__getall_req_ReadValue_DataEncoding(msg_read_request__p_msg,
+         msg_read_request__p_rvi,
+         &msg_read_request__l_is_known_data,
+         &msg_read_request__l_data_encoding);
+      if ((*msg_read_request__p_sc == constants_statuscodes_bs__e_sc_ok) &&
+         (msg_read_request__l_data_encoding != constants__c_QualifiedName_indet)) {
+         if ((*msg_read_request__p_aid != constants__e_aid_Value) ||
+            (msg_read_request__l_is_known_data == false)) {
+            *msg_read_request__p_sc = constants_statuscodes_bs__e_sc_bad_data_encoding_invalid;
+            *msg_read_request__p_aid = constants__c_AttributeId_indet;
+         }
+      }
+   }
 }
 
 void msg_read_request__get_nb_ReadValue(

@@ -801,6 +801,9 @@ void util_status_code__B_to_C(constants_statuscodes_bs__t_StatusCode_i bstatus, 
     case constants_statuscodes_bs__e_sc_bad_no_match:
         *status = OpcUa_BadNoMatch;
         break;
+    case constants_statuscodes_bs__e_sc_bad_data_encoding_invalid:
+        *status = OpcUa_BadDataEncodingInvalid;
+        break;
     case constants_statuscodes_bs__e_sc_uncertain_reference_out_of_server:
         *status = OpcUa_UncertainReferenceOutOfServer;
         break;
@@ -1067,6 +1070,9 @@ void util_status_code__C_to_B(SOPC_StatusCode status, constants_statuscodes_bs__
         break;
     case OpcUa_BadNoMatch:
         *bstatus = constants_statuscodes_bs__e_sc_bad_no_match;
+        break;
+    case OpcUa_BadDataEncodingInvalid:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_data_encoding_invalid;
         break;
     case OpcUa_UncertainReferenceOutOfServer:
         *bstatus = constants_statuscodes_bs__e_sc_uncertain_reference_out_of_server;

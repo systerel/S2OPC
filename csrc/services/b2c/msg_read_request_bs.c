@@ -33,6 +33,11 @@
 #include "sopc_logger.h"
 #include "sopc_types.h"
 
+#define DEFAULT_BINARY "Default Binary"
+#define DEFAULT_XML "Default XML"
+static const SOPC_String SOPC_DEFAULT_BINARY = {sizeof(DEFAULT_BINARY) - 1, true, (SOPC_Byte*) DEFAULT_BINARY};
+static const SOPC_String SOPC_DEFAULT_XML = {sizeof(DEFAULT_XML) - 1, true, (SOPC_Byte*) DEFAULT_XML};
+
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
@@ -62,6 +67,44 @@ void msg_read_request_bs__getall_req_ReadValue_AttributeId(
         {
             SOPC_Logger_TraceWarning("msg_read_request_bs__getall_req_ReadValue_AttributeId: unsupported attribute id");
             bWarned = true;
+        }
+    }
+}
+
+void msg_read_request_bs__getall_req_ReadValue_DataEncoding(
+    const constants__t_msg_i msg_read_request_bs__msg,
+    const constants__t_ReadValue_i msg_read_request_bs__rvi,
+    t_bool* const msg_read_request_bs__is_known_encoding,
+    constants__t_QualifiedName_i* const msg_read_request_bs__data_encoding)
+{
+    assert(msg_read_request_bs__rvi >= 0);
+
+    OpcUa_ReadRequest* request = msg_read_request_bs__msg;
+    size_t node_index = (size_t) msg_read_request_bs__rvi - 1;
+
+    SOPC_QualifiedName* dataEncoding = &request->NodesToRead[node_index].DataEncoding;
+
+    // Check if dataEncoding is defined or not
+    if (dataEncoding->Name.Length <= 0 && 0 == dataEncoding->NamespaceIndex)
+    {
+        // DataEncoding not defined
+        *msg_read_request_bs__data_encoding = constants__c_QualifiedName_indet;
+        *msg_read_request_bs__is_known_encoding = true;
+    }
+    else
+    {
+        *msg_read_request_bs__data_encoding = dataEncoding;
+        *msg_read_request_bs__is_known_encoding = true;
+        if (OPCUA_NAMESPACE_INDEX != dataEncoding->NamespaceIndex)
+        {
+            *msg_read_request_bs__is_known_encoding = false;
+        }
+        else
+        {
+            bool is_binary = SOPC_String_Equal(&SOPC_DEFAULT_BINARY, &dataEncoding->Name);
+            bool is_xml = SOPC_String_Equal(&SOPC_DEFAULT_XML, &dataEncoding->Name);
+
+            *msg_read_request_bs__is_known_encoding = is_binary || is_xml;
         }
     }
 }
