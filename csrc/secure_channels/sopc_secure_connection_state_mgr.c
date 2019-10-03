@@ -2492,6 +2492,9 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
             //             / nothing to send to SC listener state manager (no record of new connection in it for
             //             now)
             SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, (uint32_t) auxParam, (uintptr_t) NULL, 0);
+            SOPC_Logger_TraceWarning("ScStateMgr: INT_EP_SC_CREATE failed (no more SCs available) epCfgIdx=%" PRIu32
+                                     " socketIdx=%" PRIuPTR,
+                                     eltId, auxParam);
         }
         break;
     }
