@@ -21,6 +21,7 @@
 #define SOPC_HELPER_STRING_H_
 
 #include <inttypes.h>
+#include <stdbool.h>
 #include <stddef.h>
 
 #include "sopc_enums.h"
@@ -77,5 +78,51 @@ SOPC_ReturnStatus SOPC_strtouint16_t(const char* sz, uint16_t* n, int base, char
  * \return     SOPC_STATUS_OK if read was done successfully, in which case *n is modified.
  */
 SOPC_ReturnStatus SOPC_strtouint32_t(const char* sz, uint32_t* n, int base, char cEnd);
+
+/**
+ * \brief        Read a signed integer from the string with strtol.
+ *
+ * \param data   A pointer to the CString containing the number in base 10
+ * \param len    The length of the CString to use for parsing, it shall be <= 20
+ * \param width  The number of bits of the signed integer
+ * \param dest   The destination pointer containing the integer value parsed, it shall be of integer type int<width>_t
+ *
+ * \return       true in case of success false otherwise
+ */
+bool SOPC_strtoint(const char* data, size_t len, uint8_t width, void* dest);
+
+/**
+ * \brief        Read an unsigned integer from the string with strtoul.
+ *
+ * \param data   A pointer to the CString containing the number in base 10
+ * \param len    The length of the CString to use for parsing, it shall be <= 20
+ * \param width  The number of bits of the unsigned integer
+ * \param dest   The destination pointer containing the integer value parsed, it shall be of integer type uint<width>_t
+ *
+ * \return       true in case of success false otherwise
+ */
+bool SOPC_strtouint(const char* data, size_t len, uint8_t width, void* dest);
+
+/**
+ * \brief        Read a double from the string with strtod.
+ *
+ * \param data   A pointer to the CString containing the double value
+ * \param len    The length of the CString to use for parsing, it shall be <= 339
+ * \param width  The number of bits of the double
+ * \param dest   The destination pointer containing the integer value parsed,
+ *               it shall be of type float if width == 32 and double if width == 64
+ *
+ * \return       true in case of success false otherwise
+ */
+bool SOPC_strtodouble(const char* data, size_t len, uint8_t width, void* dest);
+
+/**
+ * \brief    Duplicate the given C string and return copy
+ *
+ * \param s  The C string to duplicate
+ *
+ * \return   The duplicated C string or NULL in case of copy failure
+ */
+char* SOPC_strdup(const char* s);
 
 #endif /* SOPC_HELPER_STRING_H_ */

@@ -40,7 +40,7 @@
 #include "test_results.h"
 #include "testlib_read_response.h"
 
-#include "embedded/loader.h"
+#include "embedded/sopc_addspace_loader.h"
 
 #define ENDPOINT_URL "opc.tcp://localhost:4841"
 

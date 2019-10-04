@@ -30,9 +30,9 @@
 
 #include "check_helpers.h"
 
-#include "embedded/loader.h"
+#include "embedded/sopc_addspace_loader.h"
 #ifdef WITH_EXPAT
-#include "uanodeset_expat/loader.h"
+#include "xml_expat/sopc_uanodeset_loader.h"
 #endif
 
 #include "sopc_macros.h"

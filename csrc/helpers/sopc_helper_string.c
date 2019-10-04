@@ -21,8 +21,12 @@
 
 #include <ctype.h>
 #include <errno.h>
+#include <float.h>
 #include <limits.h>
 #include <stdlib.h> /* strtoul */
+#include <string.h>
+
+#include "sopc_mem_alloc.h"
 
 int SOPC_strncmp_ignore_case(const char* s1, const char* s2, size_t size)
 {
@@ -160,4 +164,149 @@ SOPC_ReturnStatus SOPC_strtouint32_t(const char* sz, uint32_t* n, int base, char
     }
 
     return status;
+}
+
+bool SOPC_strtoint(const char* data, size_t len, uint8_t width, void* dest)
+{
+    char buf[21];
+
+    if (len > (sizeof(buf) / sizeof(char) - 1))
+    {
+        return false;
+    }
+
+    memcpy(buf, data, len);
+    buf[len] = '\0';
+
+    char* endptr;
+    int64_t val = strtol(buf, &endptr, 10);
+
+    if (endptr != (buf + len))
+    {
+        return false;
+    }
+
+    if (width == 8 && val >= INT8_MIN && val <= INT8_MAX)
+    {
+        *((int8_t*) dest) = (int8_t) val;
+        return true;
+    }
+    else if (width == 16 && val >= INT16_MIN && val <= INT16_MAX)
+    {
+        *((int16_t*) dest) = (int16_t) val;
+        return true;
+    }
+    else if (width == 32 && val >= INT32_MIN && val <= INT32_MAX)
+    {
+        *((int32_t*) dest) = (int32_t) val;
+        return true;
+    }
+    else if (width == 64)
+    {
+        *((int64_t*) dest) = (int64_t) val;
+        return true;
+    }
+    else
+    {
+        // Invalid width and/or out of bounds value
+        return false;
+    }
+}
+
+bool SOPC_strtouint(const char* data, size_t len, uint8_t width, void* dest)
+{
+    char buf[21];
+
+    if (len > (sizeof(buf) / sizeof(char) - 1))
+    {
+        return false;
+    }
+
+    memcpy(buf, data, len);
+    buf[len] = '\0';
+
+    char* endptr;
+    uint64_t val = strtoul(buf, &endptr, 10);
+
+    if (endptr != (buf + len))
+    {
+        return false;
+    }
+
+    if (width == 8 && val <= UINT8_MAX)
+    {
+        *((uint8_t*) dest) = (uint8_t) val;
+        return true;
+    }
+    else if (width == 16 && val <= UINT16_MAX)
+    {
+        *((uint16_t*) dest) = (uint16_t) val;
+        return true;
+    }
+    else if (width == 32 && val <= UINT32_MAX)
+    {
+        *((uint32_t*) dest) = (uint32_t) val;
+        return true;
+    }
+    else if (width == 64)
+    {
+        *((uint64_t*) dest) = (uint64_t) val;
+        return true;
+    }
+    else
+    {
+        // Invalid width and/or out of bounds value
+        return false;
+    }
+}
+
+bool SOPC_strtodouble(const char* data, size_t len, uint8_t width, void* dest)
+{
+    char buf[340];
+
+    if (len > (sizeof(buf) / sizeof(char) - 1))
+    {
+        return false;
+    }
+
+    memcpy(buf, data, len);
+    buf[len] = '\0';
+
+    char* endptr;
+    double val = strtod(buf, &endptr);
+
+    if (endptr != (buf + len))
+    {
+        return false;
+    }
+
+    if (width == 32 && val >= -FLT_MAX && val <= FLT_MAX)
+    {
+        *((float*) dest) = (float) val;
+        return true;
+    }
+    else if (width == 64 && val >= -DBL_MAX && val <= DBL_MAX)
+    {
+        *((double*) dest) = val;
+        return true;
+    }
+    else
+    {
+        // Invalid width and/or out of bounds value
+        return false;
+    }
+}
+
+char* SOPC_strdup(const char* s)
+{
+    size_t len = strlen(s);
+    char* res = SOPC_Calloc(1 + len, sizeof(char));
+
+    if (res == NULL)
+    {
+        return NULL;
+    }
+
+    memcpy(res, s, len * sizeof(char));
+    return res;
 }

@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <uanodeset_expat/loader.h>
+#include "xml_expat/sopc_uanodeset_loader.h"
 
 static void usage(char** argv)
 {

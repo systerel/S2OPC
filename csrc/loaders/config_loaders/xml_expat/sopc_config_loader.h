@@ -17,11 +17,14 @@
  * under the License.
  */
 
-#ifndef SOPC_ADDSPACE_H_
-#define SOPC_ADDSPACE_H_
+#include <stdio.h>
 
-#include <sopc_address_space.h>
+#include "sopc_user_app_itf.h"
 
-SOPC_AddressSpace* SOPC_Embedded_AddressSpace_Load(void);
-
-#endif /* SOPC_ADDSPACE_H_ */
+/* Parse the XML configuration file
+ *
+ * \param fd    Path to XML file compliant with s2opc_config.xsd schema
+ *
+ * \return      A list of endpoint configuration NULL terminated
+ * */
+SOPC_Endpoint_Config* SOPC_Config_Parse(FILE* fd);

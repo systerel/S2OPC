@@ -348,10 +348,10 @@ if(${WITH_CONST_ADDSPACE})
   set(const_addspace "--const_addspace")
 endif()
 
-add_library(s2opc-loader-embedded STATIC csrc/address_space_loaders/embedded/loader.c)
+add_library(s2opc-loader-embedded STATIC csrc/loaders/address_space_loaders/embedded/sopc_addspace_loader.c)
 target_link_libraries(s2opc-loader-embedded PRIVATE s2opc)
-target_include_directories(s2opc-loader-embedded PRIVATE ${S2OPC_PUBLIC_INCLUDES} PUBLIC "csrc/address_space_loaders")
-set_target_properties(s2opc-loader-embedded PROPERTIES PUBLIC_HEADER "csrc/address_space_loaders/embedded/loader.h")
+target_include_directories(s2opc-loader-embedded PRIVATE ${S2OPC_PUBLIC_INCLUDES} PUBLIC "csrc/loaders/address_space_loaders")
+set_target_properties(s2opc-loader-embedded PROPERTIES PUBLIC_HEADER "csrc/loaders/address_space_loaders/embedded/sopc_addspace_loader.h")
 install(TARGETS s2opc-loader-embedded
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
@@ -377,15 +377,20 @@ endfunction()
 find_package(EXPAT)
 
 if (EXPAT_FOUND)
-  add_library(s2opc-loader-uanodeset-expat STATIC csrc/address_space_loaders/uanodeset_expat/loader.c)
-  target_link_libraries(s2opc-loader-uanodeset-expat PUBLIC ${EXPAT_LIBRARIES} PRIVATE s2opc)
-  target_include_directories(s2opc-loader-uanodeset-expat PRIVATE ${S2OPC_PUBLIC_INCLUDES} ${EXPAT_INCLUDE_DIRS} PUBLIC "csrc/address_space_loaders")
-  target_compile_definitions(s2opc-loader-uanodeset-expat PRIVATE "UANODESET_LOADER_LOG")
-  set_target_properties(s2opc-loader-uanodeset-expat PROPERTIES PUBLIC_HEADER "csrc/address_space_loaders/uanodeset_expat/loader.h")
-  install(TARGETS s2opc-loader-uanodeset-expat
+  add_library(s2opc-xml-loaders-expat STATIC csrc/loaders/helpers/sopc_helper_expat.c
+                                             csrc/loaders/address_space_loaders/xml_expat/sopc_uanodeset_loader.c
+                                             csrc/loaders/config_loaders/xml_expat/sopc_config_loader.c)
+  target_link_libraries(s2opc-xml-loaders-expat PUBLIC ${EXPAT_LIBRARIES} PRIVATE s2opc)
+  target_include_directories(s2opc-xml-loaders-expat PRIVATE ${S2OPC_PUBLIC_INCLUDES} ${EXPAT_INCLUDE_DIRS} PUBLIC "csrc/loaders/address_space_loaders"
+                                                                                                                   "csrc/loaders/config_loaders"
+                                                                                                                   "csrc/loaders/helpers")
+  target_compile_definitions(s2opc-xml-loaders-expat PRIVATE "UANODESET_LOADER_LOG")
+  set_target_properties(s2opc-xml-loaders-expat PROPERTIES PUBLIC_HEADER "csrc/loaders/address_space_loaders/xml_expat/sopc_uanodeset_loader.h"
+                                                           PUBLIC_HEADER "csrc/loaders/config_loaders/xml_expat/sopc_config_loader.h")
+  install(TARGETS s2opc-xml-loaders-expat
           LIBRARY DESTINATION lib
           ARCHIVE DESTINATION lib
-          PUBLIC_HEADER DESTINATION "include/uanodeset_expat")
+          PUBLIC_HEADER DESTINATION "include/xml_expat")
 endif()
 
 # S2OPC tests ################################################################################
@@ -433,7 +438,7 @@ add_executable(check_helpers ${INTERNAL_TESTS_SRCS} ${TEST_CHECK_HELPERS_ADDRESS
 target_include_directories(check_helpers PRIVATE ${S2OPC_PRIVATE_INCLUDES} ${MBEDTLS_INCLUDE_DIRS} ${CHECK_INCLUDE_DIRS})
 target_link_libraries(check_helpers PRIVATE s2opc ${CHECK_LIBRARIES} s2opc-loader-embedded)
 if (EXPAT_FOUND)
-	target_link_libraries(check_helpers PRIVATE s2opc-loader-uanodeset-expat)
+	target_link_libraries(check_helpers PRIVATE s2opc-xml-loaders-expat)
 	target_compile_definitions(check_helpers PRIVATE "WITH_EXPAT")
 endif()
 
@@ -508,7 +513,7 @@ if (WITH_NANO_EXTENDED)
   target_compile_definitions(${TOOLKIT_TEST_SERVER} PRIVATE "WITH_NANO_EXTENDED")
 endif()
 if (EXPAT_FOUND)
-  target_link_libraries(${TOOLKIT_TEST_SERVER} PRIVATE s2opc-loader-uanodeset-expat)
+  target_link_libraries(${TOOLKIT_TEST_SERVER} PRIVATE s2opc-xml-loaders-expat)
   target_compile_definitions(${TOOLKIT_TEST_SERVER} PRIVATE "WITH_EXPAT")
 endif()
 
@@ -778,7 +783,7 @@ target_include_directories(bench_tool PRIVATE ${S2OPC_PUBLIC_INCLUDES} ${S2OPC_P
 
 if (EXPAT_FOUND)
 	add_executable(s2opc_parse_uanodeset "tests/demo/s2opc_parse_uanodeset.c")
-	target_link_libraries(s2opc_parse_uanodeset PRIVATE s2opc "s2opc-loader-uanodeset-expat")
+	target_link_libraries(s2opc_parse_uanodeset PRIVATE s2opc "s2opc-xml-loaders-expat")
 	target_include_directories(s2opc_parse_uanodeset PRIVATE ${S2OPC_PUBLIC_INCLUDES})
 endif()
 

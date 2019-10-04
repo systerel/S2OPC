@@ -17,7 +17,7 @@
  * under the License.
  */
 
-#include "loader.h"
+#include "sopc_addspace_loader.h"
 
 extern const bool sopc_embedded_is_const_addspace;
 
