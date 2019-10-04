@@ -41,6 +41,7 @@ DEFINITIONS
         a_EventNotifier,
         a_DataType,
         a_ValueRank,
+        a_ArrayDimensions,
         a_AccessLevel,
         a_UserAccessLevel,
         a_Historizing,
@@ -93,6 +94,9 @@ DEFINITIONS
 
         a_ValueRank : t_Node +-> t_ValueRank &
         dom(a_ValueRank) = dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
+        
+        a_ArrayDimensions : t_Node +-> t_ArrayDimensions &
+        dom(a_ArrayDimensions) = dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
 
         a_AccessLevel : t_Node +-> t_access_level &
         dom(a_AccessLevel) = dom(a_NodeClass|>{e_ncl_Variable}) &
@@ -518,6 +522,26 @@ OPERATIONS
                 sc = e_sc_bad_out_of_memory)
         OR
             variant :(variant : t_Variant_i & variant = AttributeID_Node_Variant(e_aid_ValueRank)(p_node)) ||
+            sc := e_sc_ok
+        END
+    END
+    ;
+
+    sc, variant <-- read_AddressSpace_ArrayDimensions_value(p_node) =
+    PRE
+        p_node : t_Node_i          &
+        p_node : t_Node           &
+        p_node : dom(a_NodeId)    &
+        p_node : dom(a_NodeClass) &
+        p_node : dom(AttributeID_Node_Variant(e_aid_ArrayDimensions))
+    THEN
+        CHOICE
+            variant := c_Variant_indet ||
+            sc
+            :(sc : t_StatusCode_i &
+                sc = e_sc_bad_out_of_memory)
+        OR
+            variant :(variant : t_Variant_i & variant = AttributeID_Node_Variant(e_aid_ArrayDimensions)(p_node)) ||
             sc := e_sc_ok
         END
     END

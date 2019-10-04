@@ -77,7 +77,8 @@ SETS
     t_timer_id_i;
     t_IndexRange_i;
     t_ContinuationPoint_i;
-    t_ContinuationPointId_i
+    t_ContinuationPointId_i;
+    t_ArrayDimensions_i
 
 CONCRETE_CONSTANTS
     c_Server_Nano_Extended,
@@ -151,6 +152,7 @@ CONCRETE_CONSTANTS
     c_IndexRange_indet,
     c_ContinuationPoint_indet,
     c_ContinuationPointId_indet,
+    c_ArrayDimensions_indet,
     c_browsePath_indet,
     c_RelativePath_indet,
     c_RelativePathElt_indet
@@ -206,6 +208,7 @@ ABSTRACT_CONSTANTS
     t_IndexRange,
     t_ContinuationPoint,
     t_ContinuationPointId,
+    t_ArrayDimensions,
 
     conv_ExpandedNodeId_NodeId
 
@@ -421,6 +424,9 @@ PROPERTIES
 
     c_ContinuationPointId_indet : t_ContinuationPointId_i &
     t_ContinuationPointId = t_ContinuationPointId_i - {c_ContinuationPointId_indet} &
+
+    c_ArrayDimensions_indet : t_ArrayDimensions_i &
+    t_ArrayDimensions = t_ArrayDimensions_i - {c_ArrayDimensions_indet} &
 
     conv_ExpandedNodeId_NodeId : t_ExpandedNodeId +-> t_NodeId &
 

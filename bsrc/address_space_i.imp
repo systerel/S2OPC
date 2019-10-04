@@ -98,10 +98,12 @@ DEFINITIONS
     (dvNcl = e_ncl_Variable & /* VARIABLE */
         (dvAid = e_aid_AccessLevel or dvAid = e_aid_DataType or
             dvAid = e_aid_Historizing or dvAid = e_aid_UserAccessLevel or
-            dvAid = e_aid_Value or dvAid = e_aid_ValueRank)
+            dvAid = e_aid_Value or dvAid = e_aid_ValueRank or
+            dvAid = e_aid_ArrayDimensions)
     ) or
     (dvNcl = e_ncl_VariableType & /* VARIABLE TYPE */
-        (dvAid = e_aid_DataType or dvAid = e_aid_IsAbstract or dvAid = e_aid_ValueRank)
+        (dvAid = e_aid_DataType or dvAid = e_aid_IsAbstract or
+         dvAid = e_aid_ValueRank or dvAid = e_aid_ArrayDimensions)
     ) or
     (dvNcl = e_ncl_Object & /* OBJECT */
         dvAid = e_aid_EventNotifier
@@ -423,9 +425,11 @@ OPERATIONS
                 EITHER e_ncl_Variable THEN /* VARIABLE */
                     bres := bool(p_aid = e_aid_AccessLevel or p_aid = e_aid_DataType or
                         p_aid = e_aid_Historizing or p_aid = e_aid_UserAccessLevel or
-                        p_aid = e_aid_Value or p_aid = e_aid_ValueRank)
+                        p_aid = e_aid_Value or p_aid = e_aid_ValueRank or
+                        p_aid = e_aid_ArrayDimensions)
                 OR e_ncl_VariableType THEN /* VARIABLE TYPE */
-                    bres := bool(p_aid = e_aid_DataType or p_aid = e_aid_IsAbstract or p_aid = e_aid_ValueRank)
+                    bres := bool(p_aid = e_aid_DataType or p_aid = e_aid_IsAbstract or
+                        p_aid = e_aid_ValueRank or p_aid = e_aid_ArrayDimensions)
                 OR e_ncl_Object THEN /* OBJECT */
                     bres := bool(p_aid = e_aid_EventNotifier)
                 OR e_ncl_ObjectType THEN /* OBJECT TYPE */
@@ -709,6 +713,8 @@ OPERATIONS
                     sc, val, val_sc, val_ts_src, val_ts_srv <-- read_AddressSpace_Value_value(p_node, p_index_range)
                 OR e_aid_ValueRank THEN
                     sc, val <-- read_AddressSpace_ValueRank_value(p_node)
+                OR e_aid_ArrayDimensions THEN
+                    sc, val <-- read_AddressSpace_ArrayDimensions_value(p_node)
                 END
             END
         END

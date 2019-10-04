@@ -288,7 +288,9 @@ SETS
                           e_operation_type_write};
 
     t_ContinuationPoint_i;
-    t_ContinuationPointId_i
+    t_ContinuationPointId_i;
+    
+    t_ArrayDimensions_i /* int32 array size and content with product of values <= INT32_MAX */
 
 CONCRETE_CONSTANTS
     c_Server_Nano_Extended,
@@ -373,6 +375,7 @@ CONCRETE_CONSTANTS
     c_ValueRank_ScalarOrOneDimension,
     c_ContinuationPoint_indet,
     c_ContinuationPointId_indet,
+    c_ArrayDimensions_indet,
     c_BrowseResultMask_all,
 
     t_counter,
@@ -389,6 +392,7 @@ ABSTRACT_CONSTANTS
     conv_NodeClass_Variant,
     conv_NodeId_Variant,
     conv_ValueRank_Variant,
+    conv_ArrayDimensions_Variant,
 
     conv_AccessLevel_CurrentWrite,
     conv_AccessLevel_CurrentRead,
@@ -468,6 +472,7 @@ ABSTRACT_CONSTANTS
     t_unregisterNodesReqIndex,
     t_ContinuationPoint,
     t_ContinuationPointId,
+    t_ArrayDimensions,
 
     s_session_treatment_reqs,
     s_session_treatment_resps,
@@ -777,6 +782,9 @@ PROPERTIES
     c_ContinuationPointId_indet : t_ContinuationPointId_i &
     t_ContinuationPointId = t_ContinuationPointId_i - {c_ContinuationPointId_indet} &
 
+    c_ArrayDimensions_indet : t_ArrayDimensions_i &
+    t_ArrayDimensions = t_ArrayDimensions_i - {c_ArrayDimensions_indet} &
+
     t_buffer_in_state = { e_buffer_in_msg_not_read,
         e_buffer_in_msg_type_read,
         e_buffer_in_msg_header_read,
@@ -906,6 +914,7 @@ PROPERTIES
     conv_NodeClass_Variant : t_NodeClass --> t_Variant &
     conv_NodeId_Variant : t_NodeId --> t_Variant &
     conv_ValueRank_Variant : t_ValueRank --> t_Variant &
+    conv_ArrayDimensions_Variant : t_ArrayDimensions --> t_Variant &
 
 
     conv_AccessLevel_CurrentWrite : t_access_level --> BOOL &
