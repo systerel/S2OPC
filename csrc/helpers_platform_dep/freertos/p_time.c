@@ -22,9 +22,6 @@
 /* Private time api */
 
 #define SECOND_TO_100NS ((uint64_t) 10000000)
-#ifndef UTC
-#define UTC (-2)
-#endif
 
 /* Number of ticks since FreeRTOS' EPOCH, which is 01/01/1970 00:00:00 UTC.
  * There are configTICK_RATE_HZ per second.
@@ -109,7 +106,7 @@ void P_TIME_SetInitialDateToBuildTime(void)
     char* ptrM = strtok(NULL, ":");
     char* ptrS = strtok(NULL, ":");
 
-    today.tm_hour = (atoi(ptrH)) + UTC;
+    today.tm_hour = (atoi(ptrH));
     today.tm_min = (atoi(ptrM));
     today.tm_sec = (atoi(ptrS));
 
