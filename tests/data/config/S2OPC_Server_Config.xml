@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='utf-8'?>
+<S2OPC xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s2opc_config.xsd">
+  <ServerConfiguration>
+    <Namespaces>
+      <Namespace uri="urn:S2OPC:MY_SERVER_HOST"/>
+    </Namespaces>
+    <ApplicationCertificates>
+      <ServerCertificate path="/mypath/mycert.der"/>
+      <ServerKey path="/mypath/mykey.pem"/>
+      <!-- We should support several CA / Trusted certificates soon -->
+      <TrustedCertificates>
+        <TrustedCertificate path="/mypath/cacert.der"/>
+      </TrustedCertificates>
+    </ApplicationCertificates>
+    <ApplicationDescription>
+      <ApplicationURI uri="urn:S2OPC:MY_SERVER_HOST"/>
+      <ProductURI uri="urn:S2OPC:MY_SERVER_HOST"/>
+      <ApplicationName text="S2OPC toolkit server example" locale="en"/>
+      <!-- No discovery URL: we only support current endpoint URL as discovery URL for now -->
+    </ApplicationDescription>
+    <Endpoints>
+      <!-- Note: Endpoint no transport URI (only TCP available) and no security level (computed by server) -->
+      <Endpoint url="opc.tcp://MY_SERVER_HOST:4841/MY_ENPOINT_NAME">
+        <SecurityPolicies>
+          <!-- Only None/Basic256/Basic256Sha256 available -->
+          <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#None">
+            <SecurityModes>
+              <SecurityMode mode="None"/>
+            </SecurityModes>
+            <!-- Undefined => no session possible -->
+            <UserPolicies/>
+          </SecurityPolicy>
+          <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256">
+            <SecurityModes>
+              <SecurityMode mode="Sign"/>
+              <SecurityMode mode="SignAndEncrypt"/>
+            </SecurityModes>
+            <UserPolicies>
+              <!-- Available token types are only anonymous and username. Security URI available is only None -->
+              <UserPolicy policyId="anon" tokenType="anonymous"/>
+              <UserPolicy policyId="user" tokenType="username" securityUri="http://opcfoundation.org/UA/SecurityPolicy#None"/>
+            </UserPolicies>
+          </SecurityPolicy>
+        </SecurityPolicies>
+      </Endpoint>
+    </Endpoints>
+  </ServerConfiguration>
+</S2OPC>
