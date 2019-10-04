@@ -17,42 +17,25 @@
  * under the License.
  */
 
-#include "loader.h"
+#include "sopc_uanodeset_loader.h"
 
 #include <assert.h>
 #include <errno.h>
-#include <float.h>
 #include <stdio.h>
 #include <string.h>
 
-#include <expat.h>
+#include "expat.h"
+
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
 #include "sopc_array.h"
 #include "sopc_dict.h"
 #include "sopc_encoder.h"
 #include "sopc_hash.h"
+#include "sopc_helper_expat.h"
+#include "sopc_helper_string.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
-
-#ifdef UANODESET_LOADER_LOG
-#define LOG(str) fprintf(stderr, "UANODESET_LOADER: %s:%d: %s\n", __FILE__, __LINE__, (str))
-#define LOG_XML_ERROR(str)                                                                        \
-    fprintf(stderr, "UANODESET_LOADER: %s:%d: at line %lu, column %lu: %s\n", __FILE__, __LINE__, \
-            XML_GetCurrentLineNumber(ctx->parser), XML_GetCurrentColumnNumber(ctx->parser), (str))
-
-#define LOGF(format, ...) fprintf(stderr, "UANODESET_LOADER: %s:%d: " format "\n", __FILE__, __LINE__, __VA_ARGS__)
-#define LOG_XML_ERRORF(format, ...)                                                                       \
-    fprintf(stderr, "UANODESET_LOADER: %s:%d: at line %lu, column %lu: " format "\n", __FILE__, __LINE__, \
-            XML_GetCurrentLineNumber(ctx->parser), XML_GetCurrentColumnNumber(ctx->parser), __VA_ARGS__)
-#else
-#define LOG(str)
-#define LOG_XML_ERROR(str)
-#define LOGF(format, ...)
-#define LOG_XML_ERRORF(format, ...)
-#endif
-
-#define LOG_MEMORY_ALLOCATION_FAILURE LOG("Memory allocation failure")
 
 typedef enum
 {
@@ -70,25 +53,12 @@ typedef enum
     PARSE_NODE_VALUE_ARRAY,  // ... for an array type
 } parse_state_t;
 
-#define SKIP_TAG_LEN 256
-
 struct parse_context_t
 {
-    XML_Parser parser;
+    SOPC_HelperExpatCtx helper_ctx;
+
     SOPC_AddressSpace* space;
     parse_state_t state;
-    char skip_tag[SKIP_TAG_LEN]; // If set, start_tag events are ignored until this tag is closed
-
-    // 0 terminated buffer for the char data handler (a single piece of char
-    // data in the XML can be broken across many callbacks).
-    char* char_data_buffer;
-
-    // strlen of the text in char_data_buffer
-    size_t char_data_len;
-
-    // allocated size of char_data_buffer, at least char_data_len + 1 (for the
-    // NULL terminator).
-    size_t char_data_cap;
 
     SOPC_Dict* aliases;
     char* current_alias_alias;
@@ -104,75 +74,6 @@ struct parse_context_t
 #define UA_NODESET_NS "http://opcfoundation.org/UA/2011/03/UANodeSet.xsd"
 #define UA_TYPES_NS "http://opcfoundation.org/UA/2008/02/Types.xsd"
 #define NS(ns, tag) ns NS_SEPARATOR tag
-
-static bool is_whitespace_char(char c)
-{
-    switch (c)
-    {
-    case ' ':
-    case '\t':
-    case '\n':
-        return true;
-    default:
-        return false;
-    }
-}
-
-static const char* strip_whitespace(char* s, size_t len)
-{
-    char* end = s + len - 1;
-    for (; ((*s) != '\0') && is_whitespace_char(*s); ++s)
-    {
-    }
-    for (; (end >= s) && is_whitespace_char(*end); --end)
-    {
-    }
-    *(end + 1) = '\0';
-    return s;
-}
-
-static bool ctx_char_data_append(struct parse_context_t* ctx, const char* data, size_t len)
-{
-    size_t required_cap = ctx->char_data_len + len + 1;
-
-    if (required_cap > ctx->char_data_cap)
-    {
-        size_t cap = 2 * ctx->char_data_cap;
-
-        while (cap < required_cap)
-        {
-            cap = 2 * cap;
-        }
-
-        char* dataBuff = SOPC_Realloc(ctx->char_data_buffer, ctx->char_data_cap * sizeof(char), cap * sizeof(char));
-
-        if (dataBuff == NULL)
-        {
-            LOG_MEMORY_ALLOCATION_FAILURE;
-            return false;
-        }
-
-        ctx->char_data_buffer = dataBuff;
-        ctx->char_data_cap = cap;
-    }
-
-    memcpy(ctx->char_data_buffer + ctx->char_data_len, data, len);
-    ctx->char_data_len += len;
-    ctx->char_data_buffer[ctx->char_data_len] = '\0';
-
-    return true;
-}
-
-static void ctx_char_data_reset(struct parse_context_t* ctx)
-{
-    ctx->char_data_buffer[0] = '\0';
-    ctx->char_data_len = 0;
-}
-
-static const char* ctx_char_data_stripped(struct parse_context_t* ctx)
-{
-    return strip_whitespace(ctx->char_data_buffer, ctx->char_data_len);
-}
 
 static SOPC_ReturnStatus parse(XML_Parser parser, FILE* fd)
 {
@@ -214,152 +115,6 @@ static SOPC_ReturnStatus parse(XML_Parser parser, FILE* fd)
     return SOPC_STATUS_OK;
 }
 
-// strdup is POSIX only...
-static char* dup_c_string(const char* s)
-{
-    size_t len = strlen(s);
-    char* res = SOPC_Calloc(1 + len, sizeof(char));
-
-    if (res == NULL)
-    {
-        return NULL;
-    }
-
-    memcpy(res, s, len * sizeof(char));
-    return res;
-}
-
-static bool parse_signed_value(const char* data, size_t len, uint8_t width, void* dest)
-{
-    char buf[21];
-
-    if (len > (sizeof(buf) / sizeof(char) - 1))
-    {
-        return false;
-    }
-
-    memcpy(buf, data, len);
-    buf[len] = '\0';
-
-    char* endptr;
-    int64_t val = strtol(buf, &endptr, 10);
-
-    if (endptr != (buf + len))
-    {
-        return false;
-    }
-
-    if (width == 8 && val >= INT8_MIN && val <= INT8_MAX)
-    {
-        *((int8_t*) dest) = (int8_t) val;
-        return true;
-    }
-    else if (width == 16 && val >= INT16_MIN && val <= INT16_MAX)
-    {
-        *((int16_t*) dest) = (int16_t) val;
-        return true;
-    }
-    else if (width == 32 && val >= INT32_MIN && val <= INT32_MAX)
-    {
-        *((int32_t*) dest) = (int32_t) val;
-        return true;
-    }
-    else if (width == 64)
-    {
-        *((int64_t*) dest) = (int64_t) val;
-        return true;
-    }
-    else
-    {
-        // Invalid width and/or out of bounds value
-        return false;
-    }
-}
-
-static bool parse_unsigned_value(const char* data, size_t len, uint8_t width, void* dest)
-{
-    char buf[21];
-
-    if (len > (sizeof(buf) / sizeof(char) - 1))
-    {
-        return false;
-    }
-
-    memcpy(buf, data, len);
-    buf[len] = '\0';
-
-    char* endptr;
-    uint64_t val = strtoul(buf, &endptr, 10);
-
-    if (endptr != (buf + len))
-    {
-        return false;
-    }
-
-    if (width == 8 && val <= UINT8_MAX)
-    {
-        *((uint8_t*) dest) = (uint8_t) val;
-        return true;
-    }
-    else if (width == 16 && val <= UINT16_MAX)
-    {
-        *((uint16_t*) dest) = (uint16_t) val;
-        return true;
-    }
-    else if (width == 32 && val <= UINT32_MAX)
-    {
-        *((uint32_t*) dest) = (uint32_t) val;
-        return true;
-    }
-    else if (width == 64)
-    {
-        *((uint64_t*) dest) = (uint64_t) val;
-        return true;
-    }
-    else
-    {
-        // Invalid width and/or out of bounds value
-        return false;
-    }
-}
-
-static bool parse_float_value(const char* data, size_t len, uint8_t width, void* dest)
-{
-    char buf[340];
-
-    if (len > (sizeof(buf) / sizeof(char) - 1))
-    {
-        return false;
-    }
-
-    memcpy(buf, data, len);
-    buf[len] = '\0';
-
-    char* endptr;
-    double val = strtod(buf, &endptr);
-
-    if (endptr != (buf + len))
-    {
-        return false;
-    }
-
-    if (width == 32 && val >= -FLT_MAX && val <= FLT_MAX)
-    {
-        *((float*) dest) = (float) val;
-        return true;
-    }
-    else if (width == 64 && val >= -DBL_MAX && val <= DBL_MAX)
-    {
-        *((double*) dest) = val;
-        return true;
-    }
-    else
-    {
-        // Invalid width and/or out of bounds value
-        return false;
-    }
-}
-
 static bool start_alias(struct parse_context_t* ctx, const XML_Char** attrs)
 {
     assert(ctx->current_alias_alias == NULL);
@@ -371,7 +126,7 @@ static bool start_alias(struct parse_context_t* ctx, const XML_Char** attrs)
         if (strcmp(attr, "Alias") == 0)
         {
             const char* val = attrs[++i];
-            ctx->current_alias_alias = dup_c_string(val);
+            ctx->current_alias_alias = SOPC_strdup(val);
 
             if (ctx->current_alias_alias == NULL)
             {
@@ -498,7 +253,7 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
 
             if (attr_val == NULL)
             {
-                LOG_XML_ERROR("Missing value for NodeId attribute");
+                LOG_XML_ERROR(ctx->helper_ctx.parser, "Missing value for NodeId attribute");
                 return false;
             }
 
@@ -506,7 +261,7 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
 
             if (id == NULL)
             {
-                LOG_XML_ERRORF("Invalid variable NodeId: %s", attr_val);
+                LOG_XML_ERRORF(ctx->helper_ctx.parser, "Invalid variable NodeId: %s", attr_val);
                 return false;
             }
 
@@ -536,7 +291,7 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
 
             if (status != SOPC_STATUS_OK)
             {
-                LOG_XML_ERRORF("Invalid browse name: %s", attr_val);
+                LOG_XML_ERRORF(ctx->helper_ctx.parser, "Invalid browse name: %s", attr_val);
                 return false;
             }
         }
@@ -544,7 +299,8 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
         {
             if (OpcUa_NodeClass_Variable != element_type && OpcUa_NodeClass_VariableType != element_type)
             {
-                LOG_XML_ERRORF("Unexpected DataType attribute (value '%s') on node of class = %s", attrs[++i],
+                LOG_XML_ERRORF(ctx->helper_ctx.parser,
+                               "Unexpected DataType attribute (value '%s') on node of class = %s", attrs[++i],
                                tag_from_element_id(element_type));
                 return false;
             }
@@ -553,7 +309,7 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
 
             if (attr_val == NULL)
             {
-                LOG_XML_ERROR("Missing value for DataType attribute");
+                LOG_XML_ERROR(ctx->helper_ctx.parser, "Missing value for DataType attribute");
                 return false;
             }
 
@@ -570,7 +326,7 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
 
             if (id == NULL)
             {
-                LOG_XML_ERRORF("Invalid variable NodeId: %s", attr_val);
+                LOG_XML_ERRORF(ctx->helper_ctx.parser, "Invalid variable NodeId: %s", attr_val);
                 return false;
             }
 
@@ -589,7 +345,8 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
         {
             if (OpcUa_NodeClass_Variable != element_type && OpcUa_NodeClass_VariableType != element_type)
             {
-                LOG_XML_ERRORF("Unexpected ValueRank attribute (value '%s') on node of class = %s", attrs[++i],
+                LOG_XML_ERRORF(ctx->helper_ctx.parser,
+                               "Unexpected ValueRank attribute (value '%s') on node of class = %s", attrs[++i],
                                tag_from_element_id(element_type));
                 return false;
             }
@@ -598,16 +355,16 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
 
             if (attr_val == NULL)
             {
-                LOG_XML_ERROR("Missing value for ValueRank attribute");
+                LOG_XML_ERROR(ctx->helper_ctx.parser, "Missing value for ValueRank attribute");
                 return false;
             }
 
             int32_t parsedValueRank;
-            bool result = parse_signed_value(attr_val, (size_t) strlen(attr_val), 32, &parsedValueRank);
+            bool result = SOPC_strtoint(attr_val, (size_t) strlen(attr_val), 32, &parsedValueRank);
 
             if (!result)
             {
-                LOG_XML_ERROR("Incorrect value for ValueRank attribute");
+                LOG_XML_ERROR(ctx->helper_ctx.parser, "Incorrect value for ValueRank attribute");
                 return false;
             }
 
@@ -619,16 +376,17 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
             assert(OpcUa_NodeClass_Variable == element_type);
             if (OpcUa_NodeClass_Variable != element_type)
             {
-                LOG_XML_ERRORF("Unexpected AccessLevel attribute (value '%s') on node of class = %s", attrs[++i],
+                LOG_XML_ERRORF(ctx->helper_ctx.parser,
+                               "Unexpected AccessLevel attribute (value '%s') on node of class = %s", attrs[++i],
                                tag_from_element_id(element_type));
                 return false;
             }
 
             const char* attr_val = attrs[++i];
 
-            if (!parse_unsigned_value(attr_val, strlen(attr_val), 8, &ctx->node.data.variable.AccessLevel))
+            if (!SOPC_strtouint(attr_val, strlen(attr_val), 8, &ctx->node.data.variable.AccessLevel))
             {
-                LOG_XML_ERRORF("Invalid AccessLevel on node value: '%s", attr_val);
+                LOG_XML_ERRORF(ctx->helper_ctx.parser, "Invalid AccessLevel on node value: '%s", attr_val);
                 return false;
             }
         }
@@ -668,7 +426,7 @@ static bool start_node_reference(struct parse_context_t* ctx, const XML_Char** a
 
             if (nodeid == NULL)
             {
-                LOG_XML_ERRORF("Error while parsing ReferenceType '%s' into a NodeId\n.", val);
+                LOG_XML_ERRORF(ctx->helper_ctx.parser, "Error while parsing ReferenceType '%s' into a NodeId\n.", val);
                 return false;
             }
 
@@ -726,13 +484,6 @@ static bool start_node_value_array(struct parse_context_t* ctx)
     return true;
 }
 
-static void skip_tag(struct parse_context_t* ctx, const char* name)
-{
-    assert(ctx->skip_tag[0] == 0);
-    assert(strlen(name) < SKIP_TAG_LEN);
-    strncpy(ctx->skip_tag, name, SKIP_TAG_LEN - 1);
-}
-
 static bool current_element_has_value(struct parse_context_t* ctx)
 {
     switch (ctx->node.node_class)
@@ -781,8 +532,9 @@ static uint32_t element_id_from_tag(const char* tag)
 static void start_element_handler(void* user_data, const XML_Char* name, const XML_Char** attrs)
 {
     struct parse_context_t* ctx = user_data;
+    SOPC_HelperExpatCtx* helperCtx = &ctx->helper_ctx;
 
-    if (ctx->skip_tag[0] != 0)
+    if (SOPC_HelperExpat_IsSkipTagActive(helperCtx))
     {
         return; // We're skipping until the end of a tag
     }
@@ -792,8 +544,8 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
     case PARSE_START:
         if (strcmp(name, NS(UA_NODESET_NS, "UANodeSet")) != 0)
         {
-            LOG_XML_ERRORF("Unexpected tag %s", name);
-            XML_StopParser(ctx->parser, 0);
+            LOG_XML_ERRORF(helperCtx->parser, "Unexpected tag %s", name);
+            XML_StopParser(helperCtx->parser, 0);
             return;
         }
 
@@ -807,7 +559,7 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         {
             if (!start_node(ctx, element_type, attrs))
             {
-                XML_StopParser(ctx->parser, 0);
+                XML_StopParser(helperCtx->parser, 0);
                 return;
             }
         }
@@ -817,7 +569,7 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         }
         else
         {
-            skip_tag(ctx, name);
+            SOPC_HelperExpat_PushSkipTag(&ctx->helper_ctx, name);
         }
         break;
     }
@@ -840,7 +592,7 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         }
         else
         {
-            skip_tag(ctx, name);
+            SOPC_HelperExpat_PushSkipTag(&ctx->helper_ctx, name);
         }
         break;
     case PARSE_NODE_REFERENCES:
@@ -848,13 +600,13 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         {
             if (!start_node_reference(ctx, attrs))
             {
-                XML_StopParser(ctx->parser, 0);
+                XML_StopParser(helperCtx->parser, 0);
                 return;
             }
         }
         else
         {
-            skip_tag(ctx, name);
+            SOPC_HelperExpat_PushSkipTag(&ctx->helper_ctx, name);
         }
         break;
     case PARSE_ALIASES:
@@ -862,13 +614,13 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         {
             if (!start_alias(ctx, attrs))
             {
-                XML_StopParser(ctx->parser, 0);
+                XML_StopParser(helperCtx->parser, 0);
                 return;
             }
         }
         else
         {
-            skip_tag(ctx, name);
+            SOPC_HelperExpat_PushSkipTag(&ctx->helper_ctx, name);
         }
         break;
     case PARSE_NODE_VALUE:
@@ -880,8 +632,8 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
 
         if (!type_id_from_tag(name, &type_id, &array_type))
         {
-            LOG_XML_ERRORF("Unsupported value type: %s", name);
-            skip_tag(ctx, name);
+            LOG_XML_ERRORF(helperCtx->parser, "Unsupported value type: %s", name);
+            SOPC_HelperExpat_PushSkipTag(&ctx->helper_ctx, name);
             return;
         }
 
@@ -891,7 +643,7 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
 
         if (array_type == SOPC_VariantArrayType_Array && !start_node_value_array(ctx))
         {
-            XML_StopParser(ctx->parser, false);
+            XML_StopParser(helperCtx->parser, false);
             return;
         }
 
@@ -900,8 +652,8 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         break;
     }
     case PARSE_NODE_VALUE_SCALAR:
-        LOG_XML_ERROR("Unexpected tag while parsing scalar value");
-        XML_StopParser(ctx->parser, false);
+        LOG_XML_ERROR(helperCtx->parser, "Unexpected tag while parsing scalar value");
+        XML_StopParser(helperCtx->parser, false);
         return;
     case PARSE_NODE_VALUE_ARRAY:
     {
@@ -913,22 +665,22 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
 
         if (!type_id_from_tag(name, &type_id, &array_type))
         {
-            LOG_XML_ERRORF("Unsupported value type: %s", name);
-            skip_tag(ctx, name);
+            LOG_XML_ERRORF(helperCtx->parser, "Unsupported value type: %s", name);
+            SOPC_HelperExpat_PushSkipTag(&ctx->helper_ctx, name);
             return;
         }
 
         if (type_id != ctx->current_value_type)
         {
-            LOG_XML_ERRORF("Array value of type %s does not match array type", name);
-            skip_tag(ctx, name);
+            LOG_XML_ERRORF(helperCtx->parser, "Array value of type %s does not match array type", name);
+            SOPC_HelperExpat_PushSkipTag(&ctx->helper_ctx, name);
             return;
         }
 
         if (array_type != SOPC_VariantArrayType_SingleValue)
         {
-            LOG_XML_ERROR("Arrays cannot be nested");
-            skip_tag(ctx, name);
+            LOG_XML_ERROR(helperCtx->parser, "Arrays cannot be nested");
+            SOPC_HelperExpat_PushSkipTag(&ctx->helper_ctx, name);
             return;
         }
 
@@ -944,12 +696,12 @@ static bool finalize_alias(struct parse_context_t* ctx)
 {
     if (ctx->current_alias_alias == NULL)
     {
-        LOG_XML_ERROR("Missing Alias attribute on Alias.");
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "Missing Alias attribute on Alias.");
         return false;
     }
 
-    char* target = dup_c_string(ctx_char_data_stripped(ctx));
-    ctx_char_data_reset(ctx);
+    char* target = SOPC_strdup(SOPC_HelperExpat_CharDataStripped(&ctx->helper_ctx));
+    SOPC_HelperExpat_CharDataReset(&ctx->helper_ctx);
 
     if (target == NULL || !SOPC_Dict_Insert(ctx->aliases, ctx->current_alias_alias, target))
     {
@@ -969,16 +721,16 @@ static bool finalize_reference(struct parse_context_t* ctx)
     assert(n_refs > 0);
 
     OpcUa_ReferenceNode* ref = SOPC_Array_Get_Ptr(ctx->references, n_refs - 1);
-    const char* text = ctx_char_data_stripped(ctx);
+    const char* text = SOPC_HelperExpat_CharDataStripped(&ctx->helper_ctx);
     SOPC_NodeId* target_id = SOPC_NodeId_FromCString(text, (int32_t) strlen(text));
 
     if (target_id == NULL)
     {
-        LOG_XML_ERRORF("Cannot parse reference target '%s' into a NodeId.", text);
+        LOG_XML_ERRORF(ctx->helper_ctx.parser, "Cannot parse reference target '%s' into a NodeId.", text);
         return false;
     }
 
-    ctx_char_data_reset(ctx);
+    SOPC_HelperExpat_CharDataReset(&ctx->helper_ctx);
 
     SOPC_ReturnStatus status = SOPC_NodeId_Copy(&ref->TargetId.NodeId, target_id);
     SOPC_NodeId_Clear(target_id);
@@ -1027,21 +779,21 @@ static uint8_t type_width(SOPC_BuiltinId ty)
 #define FOREACH_UNSIGNED_VALUE_TYPE(x) \
     x(SOPC_Byte_Id, Byte) x(SOPC_UInt16_Id, Uint16) x(SOPC_UInt32_Id, Uint32) x(SOPC_UInt64_Id, Uint64)
 
-#define SET_INT_ELEMENT_VALUE_CASE(id, field, signed_or_unsigned)                                    \
-    case id:                                                                                         \
-        if (parse_##signed_or_unsigned##_value(val, strlen(val), type_width(id), &var->Value.field)) \
-        {                                                                                            \
-            var->BuiltInTypeId = id;                                                                 \
-            return true;                                                                             \
-        }                                                                                            \
-        else                                                                                         \
-        {                                                                                            \
-            LOGF("Invalid integer value: '%s'", val);                                                \
-            return false;                                                                            \
+#define SET_INT_ELEMENT_VALUE_CASE(id, field, int_or_uint)                                \
+    case id:                                                                              \
+        if (SOPC_strto##int_or_uint(val, strlen(val), type_width(id), &var->Value.field)) \
+        {                                                                                 \
+            var->BuiltInTypeId = id;                                                      \
+            return true;                                                                  \
+        }                                                                                 \
+        else                                                                              \
+        {                                                                                 \
+            LOGF("Invalid integer value: '%s'", val);                                     \
+            return false;                                                                 \
         }
 
-#define SET_SIGNED_INT_ELEMENT_VALUE_CASE(id, field) SET_INT_ELEMENT_VALUE_CASE(id, field, signed)
-#define SET_UNSIGNED_INT_ELEMENT_VALUE_CASE(id, field) SET_INT_ELEMENT_VALUE_CASE(id, field, unsigned)
+#define SET_SIGNED_INT_ELEMENT_VALUE_CASE(id, field) SET_INT_ELEMENT_VALUE_CASE(id, field, int)
+#define SET_UNSIGNED_INT_ELEMENT_VALUE_CASE(id, field) SET_INT_ELEMENT_VALUE_CASE(id, field, uint)
 
 #define SET_STR_ELEMENT_VALUE_CASE(field)                                      \
     if (SOPC_String_CopyFromCString(&var->Value.field, val) == SOPC_STATUS_OK) \
@@ -1312,7 +1064,7 @@ static bool set_variant_value(SOPC_Variant* var, SOPC_BuiltinId type_id, const c
         FOREACH_SIGNED_VALUE_TYPE(SET_SIGNED_INT_ELEMENT_VALUE_CASE)
         FOREACH_UNSIGNED_VALUE_TYPE(SET_UNSIGNED_INT_ELEMENT_VALUE_CASE)
     case SOPC_Float_Id:
-        if (parse_float_value(val, strlen(val), 32, &var->Value.Floatv))
+        if (SOPC_strtodouble(val, strlen(val), 32, &var->Value.Floatv))
         {
             var->BuiltInTypeId = SOPC_Float_Id;
             return true;
@@ -1323,7 +1075,7 @@ static bool set_variant_value(SOPC_Variant* var, SOPC_BuiltinId type_id, const c
             return false;
         }
     case SOPC_Double_Id:
-        if (parse_float_value(val, strlen(val), 64, &var->Value.Doublev))
+        if (SOPC_strtodouble(val, strlen(val), 64, &var->Value.Doublev))
         {
             var->BuiltInTypeId = SOPC_Double_Id;
             return true;
@@ -1357,8 +1109,8 @@ static bool set_element_value_scalar(struct parse_context_t* ctx)
     assert(ctx->current_array_type == SOPC_VariantArrayType_SingleValue);
 
     SOPC_Variant* var = SOPC_AddressSpace_Get_Value(ctx->space, &ctx->node);
-    bool ok = set_variant_value(var, ctx->current_value_type, ctx_char_data_stripped(ctx));
-    ctx_char_data_reset(ctx);
+    bool ok = set_variant_value(var, ctx->current_value_type, SOPC_HelperExpat_CharDataStripped(&ctx->helper_ctx));
+    SOPC_HelperExpat_CharDataReset(&ctx->helper_ctx);
 
     if (ok)
     {
@@ -1380,8 +1132,8 @@ static bool append_element_value(struct parse_context_t* ctx)
         return false;
     }
 
-    bool ok = set_variant_value(var, ctx->current_value_type, ctx_char_data_stripped(ctx));
-    ctx_char_data_reset(ctx);
+    bool ok = set_variant_value(var, ctx->current_value_type, SOPC_HelperExpat_CharDataStripped(&ctx->helper_ctx));
+    SOPC_HelperExpat_CharDataReset(&ctx->helper_ctx);
 
     if (!ok)
     {
@@ -1485,9 +1237,8 @@ static void end_element_handler(void* user_data, const XML_Char* name)
 {
     struct parse_context_t* ctx = user_data;
 
-    if ((ctx->skip_tag[0] != 0) && (strcmp(ctx->skip_tag, name) == 0))
+    if (SOPC_HelperExpat_PopSkipTag(&ctx->helper_ctx, name))
     {
-        ctx->skip_tag[0] = 0;
         return;
     }
 
@@ -1505,7 +1256,7 @@ static void end_element_handler(void* user_data, const XML_Char* name)
 
         if (!ok)
         {
-            XML_StopParser(ctx->parser, false);
+            XML_StopParser(ctx->helper_ctx.parser, false);
             return;
         }
 
@@ -1517,15 +1268,15 @@ static void end_element_handler(void* user_data, const XML_Char* name)
     {
         SOPC_LocalizedText* lt = element_localized_text_for_state(ctx);
         SOPC_String_Clear(&lt->Text);
-        const char* stripped = ctx_char_data_stripped(ctx);
+        const char* stripped = SOPC_HelperExpat_CharDataStripped(&ctx->helper_ctx);
         SOPC_ReturnStatus status =
             (strlen(stripped) == 0) ? SOPC_STATUS_OK : SOPC_String_CopyFromCString(&lt->Text, stripped);
-        ctx_char_data_reset(ctx);
+        SOPC_HelperExpat_CharDataReset(&ctx->helper_ctx);
 
         if (status != SOPC_STATUS_OK)
         {
             LOG_MEMORY_ALLOCATION_FAILURE;
-            XML_StopParser(ctx->parser, false);
+            XML_StopParser(ctx->helper_ctx.parser, false);
             return;
         }
 
@@ -1542,7 +1293,7 @@ static void end_element_handler(void* user_data, const XML_Char* name)
         {
             if (!set_element_value_scalar(ctx))
             {
-                XML_StopParser(ctx->parser, false);
+                XML_StopParser(ctx->helper_ctx.parser, false);
                 return;
             }
 
@@ -1553,7 +1304,7 @@ static void end_element_handler(void* user_data, const XML_Char* name)
         {
             if (!append_element_value(ctx))
             {
-                XML_StopParser(ctx->parser, false);
+                XML_StopParser(ctx->helper_ctx.parser, false);
                 return;
             }
 
@@ -1570,7 +1321,7 @@ static void end_element_handler(void* user_data, const XML_Char* name)
 
         if (!set_element_value_array(ctx))
         {
-            XML_StopParser(ctx->parser, false);
+            XML_StopParser(ctx->helper_ctx.parser, false);
             return;
         }
         ctx->current_array_type = SOPC_VariantArrayType_SingleValue;
@@ -1587,7 +1338,7 @@ static void end_element_handler(void* user_data, const XML_Char* name)
         if (!ok)
         {
             SOPC_AddressSpace_Node_Clear(ctx->space, &ctx->node);
-            XML_StopParser(ctx->parser, false);
+            XML_StopParser(ctx->helper_ctx.parser, false);
             return;
         }
 
@@ -1598,7 +1349,7 @@ static void end_element_handler(void* user_data, const XML_Char* name)
     case PARSE_NODE_REFERENCE:
         if (!finalize_reference(ctx))
         {
-            XML_StopParser(ctx->parser, false);
+            XML_StopParser(ctx->helper_ctx.parser, false);
             return;
         }
 
@@ -1625,9 +1376,9 @@ static void char_data_handler(void* user_data, const XML_Char* s, int len)
     case PARSE_ALIAS:
     case PARSE_NODE_REFERENCE:
     case PARSE_NODE_VALUE_SCALAR:
-        if (!ctx_char_data_append(ctx, s, (size_t) len))
+        if (!SOPC_HelperExpat_CharDataAppend(&ctx->helper_ctx, s, (size_t) len))
         {
-            XML_StopParser(ctx->parser, false);
+            XML_StopParser(ctx->helper_ctx.parser, false);
             return;
         }
 
@@ -1671,10 +1422,10 @@ SOPC_AddressSpace* SOPC_UANodeSet_Parse(FILE* fd)
 
     ctx.aliases = aliases;
     ctx.state = PARSE_START;
-    ctx.parser = parser;
+    ctx.helper_ctx.parser = parser;
     ctx.space = space;
-    ctx.char_data_buffer = char_data_buffer;
-    ctx.char_data_cap = char_data_cap_initial;
+    ctx.helper_ctx.char_data_buffer = char_data_buffer;
+    ctx.helper_ctx.char_data_cap = char_data_cap_initial;
 
     XML_SetElementHandler(parser, start_element_handler, end_element_handler);
     XML_SetCharacterDataHandler(parser, char_data_handler);
@@ -1683,7 +1434,7 @@ SOPC_AddressSpace* SOPC_UANodeSet_Parse(FILE* fd)
     XML_ParserFree(parser);
     SOPC_Dict_Delete(aliases);
     SOPC_Free(ctx.current_alias_alias);
-    SOPC_Free(ctx.char_data_buffer);
+    SOPC_Free(ctx.helper_ctx.char_data_buffer);
     SOPC_Array_Delete(ctx.references);
     SOPC_Array_Delete(ctx.list_nodes);
 

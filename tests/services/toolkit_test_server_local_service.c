@@ -35,7 +35,7 @@
 #include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config.h"
 
-#include "embedded/loader.h"
+#include "embedded/sopc_addspace_loader.h"
 #include "test_results.h"
 #include "testlib_read_response.h"
 #include "testlib_write.h"

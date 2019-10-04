@@ -37,11 +37,11 @@
 #include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config.h"
 
-#include "embedded/loader.h"
+#include "embedded/sopc_addspace_loader.h"
 #include "runtime_variables.h"
 
 #ifdef WITH_EXPAT
-#include "uanodeset_expat/loader.h"
+#include "xml_expat/sopc_uanodeset_loader.h"
 #endif
 
 #ifdef WITH_STATIC_SECURITY_DATA

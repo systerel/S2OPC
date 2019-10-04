@@ -17,7 +17,12 @@
  * under the License.
  */
 
-#include <sopc_address_space.h>
+#ifndef SOPC_NODESET_LOADER_H_
+#define SOPC_NODESET_LOADER_H_
+
 #include <stdio.h>
+#include "sopc_address_space.h"
 
 SOPC_AddressSpace* SOPC_UANodeSet_Parse(FILE* fd);
+
+#endif /* SOPC_NODESET_LOADER_H_ */
