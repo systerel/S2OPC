@@ -21,7 +21,7 @@
 
  File Name            : channel_mgr_bs.h
 
- Date                 : 26/08/2019 13:30:57
+ Date                 : 04/10/2019 15:27:17
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
