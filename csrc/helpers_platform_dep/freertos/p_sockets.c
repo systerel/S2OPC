@@ -211,13 +211,16 @@ SOPC_ReturnStatus SOPC_Socket_Accept(Socket listeningSock, bool setNonBlocking, 
 SOPC_ReturnStatus SOPC_Socket_Connect(Socket sock, SOPC_Socket_AddressInfo* addr)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    int optErr = 0;
+    socklen_t optErrSize = sizeof(optErr);
     int connectStatus = -1;
     if (addr != NULL && sock != -1)
     {
         connectStatus = connect(sock, addr->ai_addr, addr->ai_addrlen);
         if (connectStatus < 0)
         {
-            if (errno == EINPROGRESS)
+            getsockopt(sock, SOL_SOCKET, SO_ERROR, &optErr, &optErrSize);
+            if (EINPROGRESS == optErr)
             {
                 // Non blocking connection started
                 connectStatus = 0;
@@ -344,6 +347,8 @@ int32_t SOPC_Socket_WaitSocketEvents(SOPC_SocketSet* readSet,
 SOPC_ReturnStatus SOPC_Socket_Write(Socket sock, const uint8_t* data, uint32_t count, uint32_t* sentBytes)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    int optErr = 0;
+    socklen_t optErrSize = sizeof(optErr);
     ssize_t res = 0;
     if (sock != SOPC_INVALID_SOCKET && data != NULL && count <= INT32_MAX && sentBytes != NULL)
     {
@@ -358,7 +363,8 @@ SOPC_ReturnStatus SOPC_Socket_Write(Socket sock, const uint8_t* data, uint32_t c
         else
         {
             *sentBytes = 0;
-            if (errno == EAGAIN || errno == EWOULDBLOCK)
+            getsockopt(sock, SOL_SOCKET, SO_ERROR, &optErr, &optErrSize);
+            if (EAGAIN == optErr || EWOULDBLOCK == optErr)
             {
                 status = SOPC_STATUS_WOULD_BLOCK;
             }
@@ -370,6 +376,8 @@ SOPC_ReturnStatus SOPC_Socket_Write(Socket sock, const uint8_t* data, uint32_t c
 SOPC_ReturnStatus SOPC_Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize, uint32_t* readCount)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    int optErr = 0;
+    socklen_t optErrSize = sizeof(optErr);
     ssize_t sReadCount = 0;
     if (sock != SOPC_INVALID_SOCKET && data != NULL && dataSize > 0)
     {
@@ -388,7 +396,8 @@ SOPC_ReturnStatus SOPC_Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize
         else if (sReadCount == -1)
         {
             *readCount = 0;
-            if (errno == EAGAIN || errno == EWOULDBLOCK)
+            getsockopt(sock, SOL_SOCKET, SO_ERROR, &optErr, &optErrSize);
+            if (EAGAIN == optErr || EWOULDBLOCK == optErr)
             {
                 status = SOPC_STATUS_WOULD_BLOCK;
             }
