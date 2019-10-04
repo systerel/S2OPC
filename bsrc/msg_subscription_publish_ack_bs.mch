@@ -74,9 +74,11 @@ OPERATIONS
         p_req_msg = c_msg_in &
         a_msg_in_type = e_msg_subscription_publish_req
     THEN
-        p_nb_acks, nb_subscription_acks, subscription_ack_req_ackSeqNum
+        p_nb_acks, nb_subscription_acks, subscription_ack_req_ackSeqNum,
+        subscription_ack_req_subscription
         :(p_nb_acks : NAT & p_nb_acks = nb_subscription_acks &
-          subscription_ack_req_ackSeqNum : 1..p_nb_acks --> t_sub_seq_num_i)
+          subscription_ack_req_ackSeqNum : 1..p_nb_acks --> t_sub_seq_num_i &
+          subscription_ack_req_subscription : 1..p_nb_acks --> t_subscription_i)
     END
     ;
 

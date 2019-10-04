@@ -88,6 +88,7 @@ DEFINITIONS
     d_variables_in,
     d_variables_out
         :(
+            IsDecoded : BOOL &
             BrowsePaths                   = {} &
             BrowsePath_StartingNode       = {} &
             BrowsePath_RelativePath       = {} &
@@ -175,32 +176,31 @@ OPERATIONS
 
     p_nb_BrowsePaths <-- read_nb_BrowsePaths =
     PRE
-        IsDecoded = TRUE       &
-        p_nb_BrowsePaths : NAT
+        IsDecoded = TRUE
     THEN
-        p_nb_BrowsePaths := card(BrowsePaths)
+        p_nb_BrowsePaths :(p_nb_BrowsePaths : NAT & p_nb_BrowsePaths = card(BrowsePaths))
     END
     ;
 
     nodeId <-- read_BrowsePath_StartingNode(browsePath) =
     PRE
         browsePath : t_BrowsePath_i &
-        browsePath : BrowsePaths    &
-        nodeId : t_NodeId_i         &
-        nodeId : t_NodeId
+        browsePath : BrowsePaths
     THEN
-        nodeId := BrowsePath_StartingNode(browsePath)
+        nodeId :(
+            nodeId : t_NodeId_i &
+            nodeId = BrowsePath_StartingNode(browsePath))
     END
     ;
 
     relativePath <-- read_BrowsePath_RelativePath(browsePath) =
     PRE
         browsePath : t_BrowsePath_i     &
-        browsePath : BrowsePaths        &
-        relativePath : t_RelativePath_i &
-        relativePath : t_RelativePath
+        browsePath : BrowsePaths
     THEN
-        relativePath := BrowsePath_RelativePath(browsePath)
+        relativePath :(
+            relativePath : t_RelativePath_i &
+            relativePath = BrowsePath_RelativePath(browsePath))
     END
     ;
 
@@ -220,11 +220,11 @@ OPERATIONS
         relativePath : t_RelativePath   &
         relativePath : dom(RelativePath_RelativePathElt) &
         index : NAT &
-        index : dom(RelativePath_RelativePathElt(relativePath)) &
-        relativePathElt : t_RelativePathElt_i &
-        relativePathElt : t_RelativePathElt
+        index : dom(RelativePath_RelativePathElt(relativePath))
     THEN
-        relativePathElt := RelativePath_RelativePathElt(relativePath)(index)
+        relativePathElt :(
+            relativePathElt : t_RelativePathElt_i &
+            relativePathElt = RelativePath_RelativePathElt(relativePath)(index))
     END
     ;
 
@@ -307,7 +307,8 @@ OPERATIONS
         browsePath : t_BrowsePath_i &
         browsePath : BrowsePaths    &
         statusCode : t_StatusCode_i &
-        statusCode : t_StatusCode
+        statusCode : t_StatusCode   &
+        dom(BrowsePath_Res_StatusCode) = BrowsePaths
     THEN
         BrowsePath_Res_StatusCode(browsePath) := statusCode
     END
@@ -318,7 +319,8 @@ OPERATIONS
         browsePath : t_BrowsePath_i &
         browsePath : BrowsePaths    &
         nbTargetMax : NAT1 &
-        IsDecoded = TRUE
+        IsDecoded = TRUE   &
+        dom(BrowsePath_Res_NbTargetMax) = BrowsePaths
     THEN
         BrowsePath_Res_NbTargetMax,
         BrowsePath_Res_Target_Node,
