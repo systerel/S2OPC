@@ -60,6 +60,9 @@ OPERATIONS
         UnregisterNodesReq_NodeId
         :(  p_sc       : t_StatusCode &
             p_nb_nodes : NAT &
+            nb_nodes <= k_n_unregisterNodes_max &
+            UnregisterNodesReq_NodeId : t_unregisterNodesReqIndex +-> t_NodeId &
+
             (p_sc = e_sc_ok
                 =>
                 p_nb_nodes : t_unregisterNodesReqIndex &
@@ -83,7 +86,7 @@ OPERATIONS
         p_index > 0 &
         p_index <= nb_nodes
     THEN
-        p_node_id, UnregisterNodesReq_NodeId :(p_node_id : t_NodeId_i &  p_node_id = UnregisterNodesReq_NodeId(p_index))
+        p_node_id:(p_node_id : t_NodeId_i &  p_node_id = UnregisterNodesReq_NodeId(p_index))
     END
 
 END

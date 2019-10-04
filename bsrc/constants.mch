@@ -510,6 +510,10 @@ PROPERTIES
     c_Byte_Type_NodeId : t_NodeId_i &
     c_Byte_Type_NodeId : t_NodeId &
 
+    c_Null_Type_NodeId       /= c_ByteString_Type_NodeId &
+    c_ByteString_Type_NodeId /= c_Byte_Type_NodeId &
+    c_Byte_Type_NodeId       /= c_Null_Type_NodeId &
+
     t_ExpandedNodeId <: t_ExpandedNodeId_i &
     c_ExpandedNodeId_indet : t_ExpandedNodeId_i &
     c_ExpandedNodeId_indet /: t_ExpandedNodeId &
@@ -893,9 +897,9 @@ PROPERTIES
                                  e_bd_both    |-> TRUE  |-> TRUE} &
 
     conv_AccessLevel_Variant : t_access_level --> t_Variant &
-    conv_QualifiedName_Variant : t_QualifiedName_i --> t_Variant &
+    conv_QualifiedName_Variant : t_QualifiedName_i +-> t_Variant &
     dom(conv_QualifiedName_Variant) = t_QualifiedName &
-    conv_LocalizedText_Variant : t_LocalizedText_i --> t_Variant &
+    conv_LocalizedText_Variant : t_LocalizedText_i +-> t_Variant &
     dom(conv_LocalizedText_Variant) = t_LocalizedText &
     conv_Boolean_Variant : BOOL --> t_Variant &
     conv_Byte_Variant : t_Byte --> t_Variant &
@@ -909,7 +913,15 @@ PROPERTIES
     conv_AccessLevel_StatusWrite : t_access_level --> BOOL &
     conv_AccessLevel_TimestampWrite : t_access_level --> BOOL &
 
-    conv_ExpandedNodeId_NodeId : t_ExpandedNodeId +-> t_NodeId
+    conv_ExpandedNodeId_NodeId : t_ExpandedNodeId +-> t_NodeId &
+
+    k_n_read_resp_max <= card(t_ReadValue) &
+    k_n_WriteResponse_max <= card(t_WriteValue) &
+    k_n_BrowseResponse_max <= card(t_BrowseValue) &
+    1..k_n_monitoredItem_max <: t_monitoredItemReqIndex &
+    1..k_n_monitoredItemNotif_max <: t_monitoredItemNotifIndex &
+    1..k_n_registerNodes_max <: t_registerNodesReqIndex &
+    1..k_n_unregisterNodes_max <: t_unregisterNodesReqIndex
 
 OPERATIONS
 

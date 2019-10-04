@@ -75,7 +75,7 @@ OPERATIONS
         p_req_msg : t_msg_i &
         p_req_msg : t_msg &
         p_req_msg = c_msg_in &
-        a_msg_in_type = e_msg_subscription_create_req
+        a_msg_in_type = e_msg_subscription_modify_req
     THEN
         subscription,
         reqPublishInterval,
@@ -98,7 +98,7 @@ OPERATIONS
         p_resp_msg : t_msg_i &
         p_resp_msg : t_msg &
         p_resp_msg = c_msg_out &
-        a_msg_out_type = e_msg_subscription_create_resp &
+        a_msg_out_type = e_msg_subscription_modify_resp &
         p_revisedPublishInterval : t_opcua_duration_i &
         p_revisedLifetimeCount : t_counter &
         p_revisedMaxKeepAlive : t_counter &

@@ -244,6 +244,7 @@ OPERATIONS
         (RequestBrowse_nb_BrowseTargetMax > 0 =>
             p_nb_targets <= RequestBrowse_nb_BrowseTargetMax) &
         p_browseResultReferences : t_BrowseResultReferences_i &
+        p_browseResultReferences : t_BrowseResultReferences &
         ResponseBrowse = p_resp_msg
     THEN
         ResponseBrowse_ResultReferences (p_bvi) := p_browseResultReferences

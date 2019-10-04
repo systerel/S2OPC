@@ -67,6 +67,9 @@ OPERATIONS
         RegisterNodesReq_NodeId
         :(  p_sc       : t_StatusCode &
             p_nb_nodes : NAT &
+            nb_nodes <= k_n_registerNodes_max &
+            RegisterNodesReq_NodeId : t_registerNodesReqIndex +-> t_NodeId &
+
             (p_sc = e_sc_ok
                 =>
                 p_nb_nodes : t_registerNodesReqIndex &
@@ -128,8 +131,7 @@ OPERATIONS
     THEN
         bres, RegisterNodesResp_NodeId :(
             bres : BOOL &
-            RegisterNodesResp_NodeId(p_index) = p_node_id &
-            RegisterNodesResp_NodeId = {}
+            RegisterNodesResp_NodeId = RegisterNodesResp_NodeId$0<+{p_index |-> p_node_id}
         )
     END
 

@@ -46,6 +46,7 @@ INITIALISATION
         ReadValue_NodeId      = {} &
         ReadValue_AttributeId = {} &
         ReadValue_IndexRange  = {} &
+        ReadValue_MaxAge : INT &
         ReadValue_MaxAge < 0
      )
 
