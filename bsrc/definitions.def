@@ -35,5 +35,6 @@ DEFINITIONS
         e_aid_UserAccessLevel |-> (a_UserAccessLevel;conv_AccessLevel_Variant),
         e_aid_UserExecutable |-> (a_UserExecutable;conv_Boolean_Variant),
         e_aid_Value |-> a_Value,
-        e_aid_ValueRank |-> (a_ValueRank;conv_ValueRank_Variant)
+        e_aid_ValueRank |-> (a_ValueRank;conv_ValueRank_Variant),
+        e_aid_ArrayDimensions |-> (a_ArrayDimensions;conv_ArrayDimensions_Variant)
     })

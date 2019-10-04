@@ -53,6 +53,7 @@
 /*-----------------------------
    SETS Clause: deferred sets
   -----------------------------*/
+typedef void* constants_bs__t_ArrayDimensions_i;
 typedef uint32_t constants_bs__t_BrowseNodeClassMask_i;
 typedef uint32_t constants_bs__t_BrowsePath_i;
 typedef uint32_t constants_bs__t_BrowseResultMask_i;

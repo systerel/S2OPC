@@ -41,6 +41,7 @@ DEFINITIONS
         a_EventNotifier,
         a_DataType,
         a_ValueRank,
+        a_ArrayDimensions,
         a_AccessLevel,
         a_UserAccessLevel,
         a_Historizing,
@@ -108,6 +109,8 @@ DEFINITIONS
         a_DataType : a_NodeClass~[{e_ncl_Variable, e_ncl_VariableType}] --> t_NodeId &
 
         a_ValueRank : a_NodeClass~[{e_ncl_Variable, e_ncl_VariableType}] --> t_ValueRank &
+
+        a_ArrayDimensions : a_NodeClass~[{e_ncl_Variable, e_ncl_VariableType}] --> t_ArrayDimensions &
 
         a_AccessLevel : a_NodeClass~[{e_ncl_Variable}] --> t_access_level &
 

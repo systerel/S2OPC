@@ -21,7 +21,7 @@
 
  File Name            : address_space.c
 
- Date                 : 04/10/2019 15:22:31
+ Date                 : 10/10/2019 07:09:40
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -58,17 +58,19 @@ void address_space__is_mandatory_attribute(
    if (*address_space__bres == false) {
       switch (address_space__p_ncl) {
       case constants__e_ncl_Variable:
-         *address_space__bres = ((((((address_space__p_aid == constants__e_aid_AccessLevel) ||
+         *address_space__bres = (((((((address_space__p_aid == constants__e_aid_AccessLevel) ||
             (address_space__p_aid == constants__e_aid_DataType)) ||
             (address_space__p_aid == constants__e_aid_Historizing)) ||
             (address_space__p_aid == constants__e_aid_UserAccessLevel)) ||
             (address_space__p_aid == constants__e_aid_Value)) ||
-            (address_space__p_aid == constants__e_aid_ValueRank));
+            (address_space__p_aid == constants__e_aid_ValueRank)) ||
+            (address_space__p_aid == constants__e_aid_ArrayDimensions));
          break;
       case constants__e_ncl_VariableType:
-         *address_space__bres = (((address_space__p_aid == constants__e_aid_DataType) ||
+         *address_space__bres = ((((address_space__p_aid == constants__e_aid_DataType) ||
             (address_space__p_aid == constants__e_aid_IsAbstract)) ||
-            (address_space__p_aid == constants__e_aid_ValueRank));
+            (address_space__p_aid == constants__e_aid_ValueRank)) ||
+            (address_space__p_aid == constants__e_aid_ArrayDimensions));
          break;
       case constants__e_ncl_Object:
          *address_space__bres = (address_space__p_aid == constants__e_aid_EventNotifier);
@@ -550,6 +552,11 @@ void address_space__read_AddressSpace_Attribute_value(
             break;
          case constants__e_aid_ValueRank:
             address_space_bs__read_AddressSpace_ValueRank_value(address_space__p_node,
+               address_space__sc,
+               address_space__val);
+            break;
+         case constants__e_aid_ArrayDimensions:
+            address_space_bs__read_AddressSpace_ArrayDimensions_value(address_space__p_node,
                address_space__sc,
                address_space__val);
             break;

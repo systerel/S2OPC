@@ -102,6 +102,44 @@ void address_space_bs__read_AddressSpace_AccessLevel_value(
     }
 }
 
+void address_space_bs__read_AddressSpace_ArrayDimensions_value(
+    const constants__t_Node_i address_space_bs__p_node,
+    constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
+    constants__t_Variant_i* const address_space_bs__variant)
+{
+    assert(address_space_bs__p_node->node_class == OpcUa_NodeClass_Variable ||
+           address_space_bs__p_node->node_class == OpcUa_NodeClass_VariableType);
+    *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
+    int32_t* valueRank = SOPC_AddressSpace_Get_ValueRank(address_space_bs__nodes, address_space_bs__p_node);
+    SOPC_Variant* variant = SOPC_Variant_Create();
+    if (variant == NULL)
+    {
+        *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+    }
+    else
+    {
+        // See table 1 of part 5, we return unknown size or NULL value
+        if (*valueRank > 0)
+        {
+            int32_t* arrayDimensionsArray = SOPC_Calloc((size_t) *valueRank, sizeof(int32_t));
+            if (NULL != arrayDimensionsArray)
+            {
+                variant->BuiltInTypeId = SOPC_Int32_Id;
+                variant->ArrayType = SOPC_VariantArrayType_Array;
+                variant->Value.Array.Length = *valueRank;
+                variant->Value.Array.Content.Int32Arr = arrayDimensionsArray; // All items already set to 0 by alloc
+            }
+            else
+            {
+                *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+                SOPC_Variant_Delete(variant);
+                variant = NULL;
+            }
+        } // else NULL variant content (nothing to do in variant content)
+    }
+    *address_space_bs__variant = variant;
+}
+
 void address_space_bs__read_AddressSpace_BrowseName_value(
     const constants__t_Node_i address_space_bs__p_node,
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
