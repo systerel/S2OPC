@@ -158,8 +158,7 @@ const SOPC_CryptoProfile_PubSub* SOPC_CryptoProvider_GetProfilePubSub(const SOPC
  * \note            For both client-server and PubSub security policies.
  *
  * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL or
- *                  \p pProvider not correctly initialized, and SOPC_STATUS_NOK for an unsupported
- *                  security policy.
+ *                  \p pProvider not correctly initialized.
  */
 SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricGetLength_CryptoKey(const SOPC_CryptoProvider* pProvider,
                                                                    uint32_t* pLength);
@@ -627,16 +626,22 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricDecrypt(const SOPC_CryptoProvider
  *                  This mode of operation does not require block alignment or padding.
  *
  * \param pProvider An initialized cryptographic context.
- * \param pInput    A valid pointer to the payload to cipher.
- * \param lenPlainText  Length in bytes of the payload to cipher.
+ * \param pInput    A valid pointer to the payload to cipher/decipher.
+ * \param lenInput  Length in bytes of the payload to cipher/decipher.
  * \param pKey      A valid pointer to a SecretBuffer containing the symmetric encryption key.
  * \param pKeyNonce A valid pointer to a SecretBuffer containing the key nonce associated to the key.
  * \param pRandom   A valid pointer to an ExposedBuffer containing the random nonce of the message.
  * \param lenRandom Length in bytes of the message random buffer.
+ * \param uSequenceNumber  The sequence number of the message. It forms the block counter alongside the
+                           key nonce and random.
  * \param pOutput   A valid pointer to the buffer which will contain the transformed payload.
  * \param lenOutput The output length must be the same as the input length.
  *
  * \note            Content of the output is unspecified when return value is not SOPC_STATUS_OK.
+ *
+ * \note            See SOPC_CryptoProvider_SymmetricGetLength_CryptoKey() for the key length,
+ *                  SOPC_CryptoProvider_PubSubGetLength_KeyNonce() for the nonce length,
+ *                  and SOPC_CryptoProvider_PubSubGetLength_MessageRandom() for \p lenRandom.
  *
  * \note            Specific to PubSub security policies.
  *
