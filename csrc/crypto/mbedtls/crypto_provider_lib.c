@@ -125,8 +125,8 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricGetLength_MsgPlainText(const SOP
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    uint32_t uSeqPolID = pProfile->SecurityPolicyID;
-    if (uSeqPolID == SOPC_SecurityPolicy_Invalid_ID)
+    uint32_t uSecPolID = pProfile->SecurityPolicyID;
+    if (SOPC_SecurityPolicy_Invalid_ID == uSecPolID)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }

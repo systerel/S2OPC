@@ -716,7 +716,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricEncrypt(const SOPC_CryptoProvider
     }
 
     const SOPC_CryptoProfile* pProfile = SOPC_CryptoProvider_GetProfileServices(pProvider);
-    if (NULL == pProfile)
+    if (NULL == pProfile || NULL == pProfile->pFnSymmEncrypt)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -793,7 +793,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricDecrypt(const SOPC_CryptoProvider
     }
 
     const SOPC_CryptoProfile* pProfile = SOPC_CryptoProvider_GetProfileServices(pProvider);
-    if (NULL == pProfile)
+    if (NULL == pProfile || NULL == pProfile->pFnSymmDecrypt)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -874,7 +874,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_PubSubCrypt(const SOPC_CryptoProvider* pPr
     }
 
     const SOPC_CryptoProfile_PubSub* pProfilePubSub = SOPC_CryptoProvider_GetProfilePubSub(pProvider);
-    if (NULL == pProfilePubSub)
+    if (NULL == pProfilePubSub || NULL == pProfilePubSub->pFnCrypt)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
