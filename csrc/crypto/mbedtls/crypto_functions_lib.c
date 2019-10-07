@@ -835,11 +835,17 @@ SOPC_ReturnStatus CryptoProvider_CTR_Crypt_AES256(const SOPC_CryptoProvider* pPr
                "Invalid AES-CTR parameters, lengths must add up to 16 bytes block, as per AES specification...");
 
         uint8_t counter[16] = {0};
-        memcpy(counter, pExpNonce, SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_KeyNonce);
-        memcpy(counter + 4, pRandom, SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_MessageRandom);
+        uint8_t* p = counter;
+        memcpy(p, pExpNonce, SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_KeyNonce);
+        p += SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_KeyNonce;
+        memcpy(p, pRandom, SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_MessageRandom);
+        p += SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_MessageRandom;
         /* TODO: find endianness of the SequenceNumber, or raise a Mantis issue */
-        memcpy(counter + 8, &uSequenceNumber, sizeof(uint32_t));
-        memset(counter + 12, 0, 4); /* BlockCounter, which is big endian */
+        memcpy(p, &uSequenceNumber, sizeof(uint32_t));
+        p += sizeof(uint32_t);
+        memset(p, 0, 4); /* BlockCounter, which is big endian */
+        p += 4;
+        assert(p - counter == 16 && "Invalid pointer arithmetics");
 
         size_t nc_off = 0; /* Offset in the current stream block. Unused, as there is only one stream per message */
         uint8_t stream_block[16] = {0}; /* Stream block to resume operation. Unused, same as nc_off */
