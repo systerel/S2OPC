@@ -58,9 +58,9 @@ typedef struct SOPC_HelperExpatCtx
             XML_GetCurrentLineNumber(parser), XML_GetCurrentColumnNumber(parser), __VA_ARGS__)
 #else
 #define LOG(str)
-#define LOG_XML_ERROR(ctx, str)
+#define LOG_XML_ERROR(parser, str)
 #define LOGF(format, ...)
-#define LOG_XML_ERRORF(ctx, format, ...)
+#define LOG_XML_ERRORF(parser, format, ...)
 #endif
 
 #define LOG_MEMORY_ALLOCATION_FAILURE LOG("Memory allocation failure")

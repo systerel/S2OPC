@@ -23,8 +23,9 @@
 
 /* Parse the XML configuration file
  *
- * \param fd    Path to XML file compliant with s2opc_config.xsd schema
+ * \param fd      Path to XML file compliant with s2opc_config.xsd schema
+ * \param config  (ouput) Server configuration structure to be filled
  *
- * \return      A list of endpoint configuration NULL terminated
+ * \return        true if the parsing succeeded, false otherwise
  * */
-SOPC_Endpoint_Config* SOPC_Config_Parse(FILE* fd);
+bool SOPC_Config_Parse(FILE* fd, SOPC_S2OPC_Config* config);

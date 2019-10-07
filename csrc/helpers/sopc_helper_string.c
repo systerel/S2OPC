@@ -299,6 +299,11 @@ bool SOPC_strtodouble(const char* data, size_t len, uint8_t width, void* dest)
 
 char* SOPC_strdup(const char* s)
 {
+    if (NULL == s)
+    {
+        return NULL;
+    }
+
     size_t len = strlen(s);
     char* res = SOPC_Calloc(1 + len, sizeof(char));
 
