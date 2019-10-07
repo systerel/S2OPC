@@ -19,7 +19,7 @@
 
 /** \file
  *
- * \brief Defines the part of the CryptoProvider which is lib-specific: CryptolibContext.
+ * \brief Defines the part of the SOPC_CryptoProvider which is lib-specific: SOPC_CryptolibContext.
  */
 
 #ifndef SOPC_CRYPTO_PROVIDER_LIB_H_

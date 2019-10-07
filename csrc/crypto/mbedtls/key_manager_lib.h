@@ -19,7 +19,7 @@
 
 /** \file key_manager_lib.h
  *
- * Implementations for AsymmetricKey and Certificate are mainly lib-specific.
+ * Implementations for SOPC_AsymmetricKey and SOPC_Certificate are mainly lib-specific.
  */
 
 #ifndef SOPC_KEY_MANAGER_LIB_H_
@@ -74,13 +74,14 @@ typedef struct SOPC_CertificateRevList
 /**
  * \brief           Returns the internal public key of the given signed public key.
  *
- * \warning         The returned AsymmetricKey must not be freed with KeyManager_AsymmetricKey_Free()
- *                  and the key must not be used after the Certificate is freed by KeyManager_Certificate_Free().
+ * \warning         The returned SOPC_AsymmetricKey must not be freed with SOPC_KeyManager_AsymmetricKey_Free()
+ *                  and the key must not be used after the SOPC_Certificate is freed by
+ *                  SOPC_KeyManager_Certificate_Free().
  *
- *                  A special flag \p isBorrowedFromCert is set to !FALSE in this case in the AsymmetricKey.
+ *                  A special flag \p isBorrowedFromCert is set to !FALSE in this case in the SOPC_AsymmetricKey.
  *
  * \param pCert     A valid pointer to the signed public key.
- * \param pKey      A valid pointer to the AsymmetricKey which will be rewritten to contain the public key.
+ * \param pKey      A valid pointer to the SOPC_AsymmetricKey which will be rewritten to contain the public key.
  *                  This is not a deep copy, and the key is not valid anymore when the certificate is not valid.
  *
  * \note            Content of the certificate is unspecified when return value is not SOPC_STATUS_OK.

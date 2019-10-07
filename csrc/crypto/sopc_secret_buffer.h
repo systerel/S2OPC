@@ -46,7 +46,7 @@ typedef uint8_t SOPC_ExposedBuffer;
  *                  Copies \p buf, so it can be de-allocated after that call.
  *                  This function does not clear the exposed secrets from \p buf.
  *
- *                  SecretBuffer shall be de-allocated with SecretBuffer_DeleteClear().
+ *                  SecretBuffer shall be de-allocated with SOPC_SecretBuffer_DeleteClear().
  *
  * \param buf       The ExposedBuffer.
  * \param len       Number of bytes of the buffer.
@@ -88,9 +88,9 @@ uint32_t SOPC_SecretBuffer_GetLength(const SOPC_SecretBuffer* sec);
 /**
  * \brief           Creates a ExposedBuffer from a SecretBuffer.
  *
- *                  Each call to _Expose shoud be followed by a call to SecretBuffer_Unexpose().
+ *                  Each call to _Expose shoud be followed by a call to SOPC_SecretBuffer_Unexpose().
  *
- * \warning         \p sec shall not be de-allocated before the call to SecretBuffer_Unexpose().
+ * \warning         \p sec shall not be de-allocated before the call to SOPC_SecretBuffer_Unexpose().
  * \warning         The exposed buffer shall not be modified by the caller.
  *
  * \param sec       The SecretBuffer to expose.
@@ -111,9 +111,9 @@ void SOPC_SecretBuffer_Unexpose(const SOPC_ExposedBuffer* buf, const SOPC_Secret
 /**
  * \brief           Creates a ExposedBuffer from a SecretBuffer for modification.
  *
- *                  Each call to _Expose shoud be followed by a call to SecretBuffer_Unexpose().
+ *                  Each call to _Expose shoud be followed by a call to SOPC_SecretBuffer_Unexpose().
  *
- * \warning         \p sec shall not be de-allocated before the call to SecretBuffer_Unexpose().
+ * \warning         \p sec shall not be de-allocated before the call to SOPC_SecretBuffer_Unexpose().
  *
  * \param sec       The SecretBuffer to expose.
  *

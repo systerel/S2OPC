@@ -172,12 +172,12 @@ typedef SOPC_ReturnStatus (*FnPubSubCrypt)(const SOPC_CryptoProvider* pProvider,
  */
 
 /**
- * \brief   CryptoProfiles gather pointers to cryptographic functions of the security policies of OPC UA Services.
+ * \brief   SOPC_CryptoProfiles gather pointers to cryptographic functions of the security policies of OPC UA Services.
  *
- * CryptoProfiles are defined as struct of pointers. These immutable struct are extern and const, because they are
+ * Crypto profiles are defined as struct of pointers. These immutable struct are extern and const, because they are
  * lib-specific (hence SOPC_CryptoProfile_Get and these variables are in different translation units).
- * The CryptoProfiles should be accessed through SOPC_CryptoProfile_Get ONLY, and should not be modified,
- * as multiple calls to SOPC_CryptoProfile_Get returns the same instances.
+ * SOPC_CryptoProfile should be accessed through SOPC_CryptoProfile_Get ONLY, and should not be modified,
+ * as multiple calls to SOPC_CryptoProfile_Get returns the same instance.
  *
  * This crypto profile only handles the OPC UA Services security policies.
  * See SOPC_CryptoProfile_PubSub for the PubSub security policies.
@@ -199,12 +199,13 @@ struct SOPC_CryptoProfile
 };
 
 /**
- * \brief   CryptoProfiles gather pointers to cryptographic functions of the security policies of OPC UA PubSub.
+ * \brief   SOPC_CryptoProfiles_PubSub gather pointers to cryptographic functions of the security policies of OPC UA
+ * PubSub.
  *
- * CryptoProfiles are defined as struct of pointers. These immutable struct are extern and const, because they are
- * lib-specific (hence SOPC_CryptoProfile_Get and these variables are in different translation units).
- * The CryptoProfiles should be accessed through SOPC_CryptoProfile_Get ONLY, and should not be modified,
- * as multiple calls to SOPC_CryptoProfile_Get returns the same instances.
+ * Crypto profiles are defined as struct of pointers. These immutable struct are extern and const, because they are
+ * lib-specific (hence SOPC_CryptoProfile_PubSub_Get and these variables are in different translation units).
+ * SOPC_CryptoProfile_PubSub should be accessed through SOPC_CryptoProfile_PubSub_Get ONLY, and should not be modified,
+ * as multiple calls to SOPC_CryptoProfile_PubSub_Get returns the same instance.
  */
 struct SOPC_CryptoProfile_PubSub
 {
