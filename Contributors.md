@@ -13,6 +13,7 @@ the legal rights to contribute.
 * Pierre-Antoine <brameret@systerel.fr>
 * Vincent Lacroix <vincent.lacroix@systerel.fr>
 * Paul Luperini <paul.luperini@systerel.fr>
+* Minh-Thang KHUU <khuu@systerel.fr>
 
 # Contributor list
 * Anthony Reyre <anthony.reyre-stg@systerel.fr>
