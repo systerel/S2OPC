@@ -41,6 +41,7 @@
 #include "runtime_variables.h"
 
 #ifdef WITH_EXPAT
+#include "xml_expat/sopc_config_loader.h"
 #include "xml_expat/sopc_uanodeset_loader.h"
 #endif
 
@@ -68,6 +69,14 @@ typedef enum
     AS_LOADER_EXPAT,
 #endif
 } AddressSpaceLoader;
+
+typedef enum
+{
+    SRV_LOADER_DEFAULT_CONFIG,
+#ifdef WITH_EXPAT
+    SRV_LOADER_EXPAT_XML_CONFIG,
+#endif
+} ServerConfigLoader;
 
 /*---------------------------------------------------------------------------
  *                          Callbacks definition
@@ -176,9 +185,9 @@ static SOPC_ReturnStatus Server_Initialize(void)
  *                             Server configuration
  *---------------------------------------------------------------------------*/
 
-/*---------------------------------
- * Endpoint security configuration:
- *---------------------------------*/
+/*----------------------------------------------------
+ * Application description and endpoint configuration:
+ *---------------------------------------------------*/
 
 /*
  * Default server configuration loader
@@ -284,14 +293,69 @@ static bool Server_LoadDefaultConfiguration(SOPC_S2OPC_Config* output_s2opcConfi
     return SOPC_STATUS_OK == status;
 }
 
+#ifdef WITH_EXPAT
+static bool load_config_from_file(const char* filename, SOPC_S2OPC_Config* s2opcConfig)
+{
+    FILE* fd = fopen(filename, "r");
+
+    if (fd == NULL)
+    {
+        printf("<Test_Server_Toolkit: Error while opening %s: %s\n", filename, strerror(errno));
+        return false;
+    }
+
+    bool res = SOPC_Config_Parse(fd, s2opcConfig);
+    fclose(fd);
+
+    if (res)
+    {
+        printf("<Test_Server_Toolkit: Loaded configuration from %s\n", filename);
+    }
+    else
+    {
+        printf("<Test_Server_Toolkit: Error while parsing XML configuration file\n");
+    }
+
+    return res;
+}
+#endif
+
 static SOPC_ReturnStatus Server_LoadServerConfiguration(SOPC_S2OPC_Config* output_s2opcConfig)
 {
-    /* Load embedded default demo server configuration. */
+    /* Load server endpoints configuration
+     * If WITH_EXPAT environment variable defined,
+     * retrieve XML file path from environment variable TEST_SERVER_XML_CONFIG.
+     * In case of success, use the dynamic server configuration loader from an XML file.
+     *
+     * Otherwise use an embedded default demo server configuration.
+     */
     assert(NULL != output_s2opcConfig);
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    ServerConfigLoader config_loader = SRV_LOADER_DEFAULT_CONFIG;
 
-    bool res = Server_LoadDefaultConfiguration(output_s2opcConfig);
+#ifdef WITH_EXPAT
+    const char* xml_file_path = getenv("TEST_SERVER_XML_CONFIG");
+
+    if (xml_file_path != NULL)
+    {
+        config_loader = SRV_LOADER_EXPAT_XML_CONFIG;
+    }
+#endif
+
+    bool res = false;
+    /* Load the address space using loader */
+    switch (config_loader)
+    {
+    case SRV_LOADER_DEFAULT_CONFIG:
+        res = Server_LoadDefaultConfiguration(output_s2opcConfig);
+        break;
+#ifdef WITH_EXPAT
+    case SRV_LOADER_EXPAT_XML_CONFIG:
+        res = load_config_from_file(xml_file_path, output_s2opcConfig);
+        break;
+#endif
+    }
 
     /* Check properties on configuration */
     if (res)
