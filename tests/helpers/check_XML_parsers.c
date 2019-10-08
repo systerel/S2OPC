@@ -32,12 +32,15 @@
 
 #include "embedded/sopc_addspace_loader.h"
 #ifdef WITH_EXPAT
+#include "xml_expat/sopc_config_loader.h"
 #include "xml_expat/sopc_uanodeset_loader.h"
 #endif
 
 #include "sopc_macros.h"
+#include "sopc_user_app_itf.h"
 
-#define XML_NAME "s2opc.xml"
+#define XML_UA_NODESET_NAME "s2opc.xml"
+#define XML_SRV_CONFIG_NAME "S2OPC_Test_XML_Config.xml"
 
 // Avoid unused functions and variables when EXPAT is not available
 #ifdef WITH_EXPAT
@@ -248,7 +251,7 @@ START_TEST(test_same_address_space_results)
     SOPC_AddressSpace* spaceEmbedded = SOPC_Embedded_AddressSpace_Load();
 
     /* Dynamic parsing of address space */
-    FILE* fd = fopen(XML_NAME, "r");
+    FILE* fd = fopen(XML_UA_NODESET_NAME, "r");
 
     ck_assert_ptr_nonnull(fd);
 
@@ -272,15 +275,176 @@ START_TEST(test_same_address_space_results)
 }
 END_TEST
 
+const char* expectedNamespaces[3] = {"urn:S2OPC:MY_SERVER_HOST", "urn:S2OPC:MY_SERVER_HOST:2", NULL};
+
+static void check_parsed_s2opc_config(SOPC_S2OPC_Config* s2opcConfig)
+{
+    SOPC_Server_Config* sConfig = &s2opcConfig->serverConfig;
+    /* Check namespaces */
+    int nsCounter = 0;
+    while (sConfig->namespaces[nsCounter] != NULL && expectedNamespaces[nsCounter] != NULL)
+    {
+        ck_assert_int_eq(0, strcmp(sConfig->namespaces[nsCounter], expectedNamespaces[nsCounter]));
+        nsCounter++;
+    }
+    ck_assert_ptr_null(sConfig->namespaces[nsCounter]);
+    ck_assert_ptr_null(expectedNamespaces[nsCounter]);
+
+    /* Check application certificates */
+    ck_assert_int_eq(0, strcmp("/mypath/mycert.der", sConfig->serverCertPath));
+    ck_assert_int_eq(0, strcmp("/mypath/mykey.pem", sConfig->serverKeyPath));
+    ck_assert_int_eq(0, strcmp("/mypath/cacert.der", sConfig->certificateAuthorityPath));
+
+    /* Check application description */
+    ck_assert_int_eq(0, strcmp("urn:S2OPC:MY_SERVER_HOST:app",
+                               SOPC_String_GetRawCString(&sConfig->serverDescription.ApplicationUri)));
+    ck_assert_int_eq(
+        0, strcmp("urn:S2OPC:MY_SERVER_HOST:prod", SOPC_String_GetRawCString(&sConfig->serverDescription.ProductUri)));
+    ck_assert_int_eq(0, strcmp("S2OPC toolkit conifg example",
+                               SOPC_String_GetRawCString(&sConfig->serverDescription.ApplicationName.Text)));
+    ck_assert_int_eq(0, strcmp("en", SOPC_String_GetRawCString(&sConfig->serverDescription.ApplicationName.Locale)));
+
+    /* Check endpoints */
+    ck_assert_uint_eq(2, sConfig->nbEndpoints);
+
+    /* 1st endpoint */
+    SOPC_Endpoint_Config* epConfig = &sConfig->endpoints[0];
+    ck_assert_ptr_eq(epConfig->serverConfigPtr, sConfig);
+    ck_assert_int_eq(0, strcmp("opc.tcp://MY_SERVER_HOST:4841/MY_ENPOINT_NAME", epConfig->endpointURL));
+
+    /* Check security policies */
+    ck_assert_uint_eq(3, epConfig->nbSecuConfigs);
+
+    /* 1st secu policy */
+    SOPC_SecurityPolicy* secuPolicy = &epConfig->secuConfigurations[0];
+    int strEqual = strcmp("http://opcfoundation.org/UA/SecurityPolicy#None",
+                          SOPC_String_GetRawCString(&secuPolicy->securityPolicy));
+    ck_assert_int_eq(0, strEqual);
+    ck_assert_int_eq(secuPolicy->securityModes & SOPC_SECURITY_MODE_NONE_MASK, SOPC_SECURITY_MODE_NONE_MASK);
+    ck_assert_int_eq(secuPolicy->securityModes | SOPC_SECURITY_MODE_NONE_MASK, SOPC_SECURITY_MODE_NONE_MASK);
+    ck_assert_uint_eq(0, secuPolicy->nbOfUserTokenPolicies);
+
+    /* 2nd secu policy */
+    secuPolicy = &epConfig->secuConfigurations[1];
+    strEqual = strcmp("http://opcfoundation.org/UA/SecurityPolicy#Basic256",
+                      SOPC_String_GetRawCString(&secuPolicy->securityPolicy));
+    ck_assert_int_eq(0, strEqual);
+    // Support None security mode
+    ck_assert_int_eq(secuPolicy->securityModes & SOPC_SECURITY_MODE_SIGN_MASK, SOPC_SECURITY_MODE_SIGN_MASK);
+    // And only None security mode
+    ck_assert_int_eq(secuPolicy->securityModes | SOPC_SECURITY_MODE_SIGN_MASK, SOPC_SECURITY_MODE_SIGN_MASK);
+    ck_assert_uint_eq(1, secuPolicy->nbOfUserTokenPolicies);
+
+    OpcUa_UserTokenPolicy* userPolicy = &secuPolicy->userTokenPolicies[0];
+    ck_assert_int_ge(0, userPolicy->IssuedTokenType.Length);
+    ck_assert_int_ge(0, userPolicy->IssuerEndpointUrl.Length);
+    ck_assert_int_eq(0, strcmp("anon1", SOPC_String_GetRawCString(&userPolicy->PolicyId)));
+    ck_assert_int_eq(OpcUa_UserTokenType_Anonymous, userPolicy->TokenType);
+    ck_assert_int_ge(0, userPolicy->SecurityPolicyUri.Length);
+
+    /* 3rd secu policy */
+    secuPolicy = &epConfig->secuConfigurations[2];
+    strEqual = strcmp("http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256",
+                      SOPC_String_GetRawCString(&secuPolicy->securityPolicy));
+    ck_assert_int_eq(0, strEqual);
+    ck_assert_int_eq(secuPolicy->securityModes & SOPC_SECURITY_MODE_SIGN_MASK, SOPC_SECURITY_MODE_SIGN_MASK);
+    ck_assert_int_eq(secuPolicy->securityModes & SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK,
+                     SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK);
+    ck_assert_int_eq(secuPolicy->securityModes | SOPC_SECURITY_MODE_SIGN_MASK | SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK,
+                     SOPC_SECURITY_MODE_SIGN_MASK | SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK);
+    ck_assert_uint_eq(2, secuPolicy->nbOfUserTokenPolicies);
+
+    // 1st user policy
+    userPolicy = &secuPolicy->userTokenPolicies[0];
+    ck_assert_int_ge(0, userPolicy->IssuedTokenType.Length);
+    ck_assert_int_ge(0, userPolicy->IssuerEndpointUrl.Length);
+    ck_assert_int_eq(0, strcmp("anon2", SOPC_String_GetRawCString(&userPolicy->PolicyId)));
+    ck_assert_int_eq(OpcUa_UserTokenType_Anonymous, userPolicy->TokenType);
+    ck_assert_int_ge(0, userPolicy->SecurityPolicyUri.Length);
+    // 2nd user policy
+    userPolicy = &secuPolicy->userTokenPolicies[1];
+    ck_assert_int_ge(0, userPolicy->IssuedTokenType.Length);
+    ck_assert_int_ge(0, userPolicy->IssuerEndpointUrl.Length);
+    ck_assert_int_eq(0, strcmp("user1", SOPC_String_GetRawCString(&userPolicy->PolicyId)));
+    ck_assert_int_eq(OpcUa_UserTokenType_UserName, userPolicy->TokenType);
+    ck_assert_int_eq(0, strcmp("http://opcfoundation.org/UA/SecurityPolicy#None",
+                               SOPC_String_GetRawCString(&userPolicy->SecurityPolicyUri)));
+
+    /* 2nd endpoint */
+    epConfig = &sConfig->endpoints[1];
+    ck_assert_ptr_eq(epConfig->serverConfigPtr, sConfig);
+    ck_assert_int_eq(0, strcmp("opc.tcp://MY_SERVER_HOST:4841/MY_ENPOINT_NAME_2", epConfig->endpointURL));
+
+    /* Check security policies */
+    ck_assert_uint_eq(2, epConfig->nbSecuConfigs);
+
+    /* 1st secu policy */
+    secuPolicy = &epConfig->secuConfigurations[0];
+    strEqual = strcmp("http://opcfoundation.org/UA/SecurityPolicy#None",
+                      SOPC_String_GetRawCString(&secuPolicy->securityPolicy));
+    ck_assert_int_eq(0, strEqual);
+    ck_assert_int_eq(secuPolicy->securityModes & SOPC_SECURITY_MODE_NONE_MASK, SOPC_SECURITY_MODE_NONE_MASK);
+    ck_assert_int_eq(secuPolicy->securityModes | SOPC_SECURITY_MODE_NONE_MASK, SOPC_SECURITY_MODE_NONE_MASK);
+    ck_assert_uint_eq(0, secuPolicy->nbOfUserTokenPolicies);
+
+    /* 2nd secu policy */
+    secuPolicy = &epConfig->secuConfigurations[1];
+    strEqual = strcmp("http://opcfoundation.org/UA/SecurityPolicy#Basic256",
+                      SOPC_String_GetRawCString(&secuPolicy->securityPolicy));
+    ck_assert_int_eq(0, strEqual);
+    // Support None security mode
+    ck_assert_int_eq(secuPolicy->securityModes & SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK,
+                     SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK);
+    // And only None security mode
+    ck_assert_int_eq(secuPolicy->securityModes | SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK,
+                     SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK);
+    ck_assert_uint_eq(1, secuPolicy->nbOfUserTokenPolicies);
+
+    userPolicy = &secuPolicy->userTokenPolicies[0];
+    ck_assert_int_ge(0, userPolicy->IssuedTokenType.Length);
+    ck_assert_int_ge(0, userPolicy->IssuerEndpointUrl.Length);
+    ck_assert_int_eq(0, strcmp("username", SOPC_String_GetRawCString(&userPolicy->PolicyId)));
+    ck_assert_int_eq(OpcUa_UserTokenType_UserName, userPolicy->TokenType);
+    strEqual = strcmp("http://opcfoundation.org/UA/SecurityPolicy#None",
+                      SOPC_String_GetRawCString(&userPolicy->SecurityPolicyUri));
+    ck_assert_int_eq(0, strEqual);
+}
+
+START_TEST(test_XML_server_configuration)
+{
+// Without EXPAT test cannot be done
+#ifdef WITH_EXPAT
+    FILE* fd = fopen(XML_SRV_CONFIG_NAME, "r");
+
+    ck_assert_ptr_nonnull(fd);
+
+    SOPC_S2OPC_Config s2opcConfig;
+    SOPC_S2OPC_Config_Initialize(&s2opcConfig);
+
+    bool result = SOPC_Config_Parse(fd, &s2opcConfig);
+
+    ck_assert(result);
+
+    check_parsed_s2opc_config(&s2opcConfig);
+
+    SOPC_S2OPC_Config_Clear(&s2opcConfig);
+
+#else
+    printf("Test test_XML_server_configuration ignored since EXPAT is not available\n");
+#endif
+}
+END_TEST
+
 Suite* tests_make_suite_XML_parsers(void)
 {
     Suite* s;
-    TCase* tc_logger;
+    TCase* tc_XML_parsers;
 
     s = suite_create("XML parsers tests");
-    tc_logger = tcase_create("XML parsers");
-    tcase_add_test(tc_logger, test_same_address_space_results);
-    suite_add_tcase(s, tc_logger);
+    tc_XML_parsers = tcase_create("XML parsers");
+    tcase_add_test(tc_XML_parsers, test_same_address_space_results);
+    tcase_add_test(tc_XML_parsers, test_XML_server_configuration);
+    suite_add_tcase(s, tc_XML_parsers);
 
     return s;
 }
