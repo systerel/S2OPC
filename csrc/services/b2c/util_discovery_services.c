@@ -52,35 +52,35 @@ static void SOPC_SetServerCertificate(SOPC_Endpoint_Config* sopcEndpointConfig, 
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     uint32_t tmpLength = 0;
 
-    if (sopcEndpointConfig->serverCertificate == NULL)
+    if (sopcEndpointConfig->serverConfigPtr->serverCertificate == NULL)
     {
         return;
     }
 
-    assert(sopcEndpointConfig->serverCertificate->length <= INT32_MAX);
-    status = SOPC_ByteString_CopyFromBytes(serverCert, sopcEndpointConfig->serverCertificate->data,
-                                           (int32_t) sopcEndpointConfig->serverCertificate->length);
+    assert(sopcEndpointConfig->serverConfigPtr->serverCertificate->length <= INT32_MAX);
+    status = SOPC_ByteString_CopyFromBytes(serverCert, sopcEndpointConfig->serverConfigPtr->serverCertificate->data,
+                                           (int32_t) sopcEndpointConfig->serverConfigPtr->serverCertificate->length);
     assert(SOPC_STATUS_OK == status);
     assert(tmpLength <= INT32_MAX);
-    serverCert->Length = (int32_t) sopcEndpointConfig->serverCertificate->length;
+    serverCert->Length = (int32_t) sopcEndpointConfig->serverConfigPtr->serverCertificate->length;
 }
 
 static void SOPC_SetServerApplicationDescription(SOPC_Endpoint_Config* sopcEndpointConfig,
                                                  OpcUa_ApplicationDescription* appDesc)
 {
     int32_t idx = 0;
-    SOPC_String_AttachFrom(&appDesc->ApplicationUri, &sopcEndpointConfig->serverDescription.ApplicationUri);
-    SOPC_String_AttachFrom(&appDesc->ProductUri, &sopcEndpointConfig->serverDescription.ProductUri);
-    SOPC_LocalizedText_Copy(&appDesc->ApplicationName, &sopcEndpointConfig->serverDescription.ApplicationName);
-    assert(sopcEndpointConfig->serverDescription.ApplicationType != OpcUa_ApplicationType_Client);
-    appDesc->ApplicationType = sopcEndpointConfig->serverDescription.ApplicationType;
-    SOPC_String_AttachFrom(&appDesc->GatewayServerUri, &sopcEndpointConfig->serverDescription.GatewayServerUri);
-    SOPC_String_AttachFrom(&appDesc->DiscoveryProfileUri, &sopcEndpointConfig->serverDescription.DiscoveryProfileUri);
+    OpcUa_ApplicationDescription* desc = &sopcEndpointConfig->serverConfigPtr->serverDescription;
+    SOPC_String_AttachFrom(&appDesc->ApplicationUri, &desc->ApplicationUri);
+    SOPC_String_AttachFrom(&appDesc->ProductUri, &desc->ProductUri);
+    SOPC_LocalizedText_Copy(&appDesc->ApplicationName, &desc->ApplicationName);
+    assert(desc->ApplicationType != OpcUa_ApplicationType_Client);
+    appDesc->ApplicationType = desc->ApplicationType;
+    SOPC_String_AttachFrom(&appDesc->GatewayServerUri, &desc->GatewayServerUri);
+    SOPC_String_AttachFrom(&appDesc->DiscoveryProfileUri, &desc->DiscoveryProfileUri);
 
-    if (sopcEndpointConfig->serverDescription.NoOfDiscoveryUrls > 0)
+    if (desc->NoOfDiscoveryUrls > 0)
     {
-        appDesc->DiscoveryUrls =
-            SOPC_Calloc((size_t) sopcEndpointConfig->serverDescription.NoOfDiscoveryUrls, sizeof(SOPC_String));
+        appDesc->DiscoveryUrls = SOPC_Calloc((size_t) desc->NoOfDiscoveryUrls, sizeof(SOPC_String));
     }
     else
     {
@@ -88,14 +88,13 @@ static void SOPC_SetServerApplicationDescription(SOPC_Endpoint_Config* sopcEndpo
     }
     if (appDesc->DiscoveryUrls != NULL)
     {
-        if (sopcEndpointConfig->serverDescription.NoOfDiscoveryUrls > 0)
+        if (desc->NoOfDiscoveryUrls > 0)
         {
-            appDesc->NoOfDiscoveryUrls = sopcEndpointConfig->serverDescription.NoOfDiscoveryUrls;
+            appDesc->NoOfDiscoveryUrls = desc->NoOfDiscoveryUrls;
             // Copy the discovery URLs provided by configuration
-            for (idx = 0; idx < sopcEndpointConfig->serverDescription.NoOfDiscoveryUrls; idx++)
+            for (idx = 0; idx < desc->NoOfDiscoveryUrls; idx++)
             {
-                SOPC_String_AttachFrom(&appDesc->DiscoveryUrls[idx],
-                                       &sopcEndpointConfig->serverDescription.DiscoveryUrls[idx]);
+                SOPC_String_AttachFrom(&appDesc->DiscoveryUrls[idx], &desc->DiscoveryUrls[idx]);
             }
         }
         else
@@ -264,7 +263,7 @@ constants_statuscodes_bs__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions
                     {
                         // Set Server.ApplicationUri only (see mantis #3578 + part 4 v1.04 RC)
                         SOPC_String_AttachFrom(&newEndPointDescription->Server.ApplicationUri,
-                                               &sopcEndpointConfig->serverDescription.ApplicationUri);
+                                               &sopcEndpointConfig->serverConfigPtr->serverDescription.ApplicationUri);
                     }
 
                     nbEndpointDescription++;
@@ -302,7 +301,7 @@ constants_statuscodes_bs__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions
                     {
                         // Set Server.ApplicationUri only (see mantis #3578 + part 4 v1.04 RC)
                         SOPC_String_AttachFrom(&newEndPointDescription->Server.ApplicationUri,
-                                               &sopcEndpointConfig->serverDescription.ApplicationUri);
+                                               &sopcEndpointConfig->serverConfigPtr->serverDescription.ApplicationUri);
                     }
 
                     nbEndpointDescription++;
@@ -339,7 +338,7 @@ constants_statuscodes_bs__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions
                     {
                         // Set Server.ApplicationUri only (see mantis #3578 + part 4 v1.04 RC)
                         SOPC_String_AttachFrom(&newEndPointDescription->Server.ApplicationUri,
-                                               &sopcEndpointConfig->serverDescription.ApplicationUri);
+                                               &sopcEndpointConfig->serverConfigPtr->serverDescription.ApplicationUri);
                     }
 
                     nbEndpointDescription++;

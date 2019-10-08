@@ -76,7 +76,7 @@ void service_find_servers_bs__treat_find_servers_request(
 
     response->NoOfServers = 1;
 
-    const OpcUa_ApplicationDescription* src_desc = &endpoint_config->serverDescription;
+    const OpcUa_ApplicationDescription* src_desc = &endpoint_config->serverConfigPtr->serverDescription;
     OpcUa_ApplicationDescription* dst_desc = &response->Servers[0];
 
     dst_desc->DiscoveryUrls = SOPC_Calloc(1, sizeof(SOPC_String));

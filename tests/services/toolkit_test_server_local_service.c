@@ -22,20 +22,20 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "opcua_identifiers.h"
+#include "opcua_statuscodes.h"
 #include "sopc_atomic.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_crypto_provider.h"
-#include "sopc_pki_stack.h"
-
-#include "opcua_identifiers.h"
-#include "opcua_statuscodes.h"
 #include "sopc_encodeable.h"
+#include "sopc_mem_alloc.h"
+#include "sopc_pki_stack.h"
 #include "sopc_time.h"
-
 #include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config.h"
 
 #include "embedded/sopc_addspace_loader.h"
+
 #include "test_results.h"
 #include "testlib_read_response.h"
 #include "testlib_write.h"
@@ -168,7 +168,14 @@ int main(int argc, char* argv[])
     OpcUa_WriteRequest* pWriteReqCopy = NULL;
 
     uint32_t epConfigIdx = 0;
-    SOPC_Endpoint_Config epConfig;
+    SOPC_S2OPC_Config s2opcConfig;
+    SOPC_S2OPC_Config_Initialize(&s2opcConfig);
+    SOPC_Server_Config* sConfig = &s2opcConfig.serverConfig;
+    sConfig->endpoints = SOPC_Calloc(sizeof(SOPC_Endpoint_Config), 1);
+    assert(NULL != sConfig->endpoints);
+    sConfig->nbEndpoints = 1;
+    SOPC_Endpoint_Config* epConfig = &sConfig->endpoints[0];
+    epConfig->serverConfigPtr = sConfig;
     // Sleep timeout in milliseconds
     const uint32_t sleepTimeout = 50;
     // Loop timeout in milliseconds
@@ -186,29 +193,29 @@ int main(int argc, char* argv[])
 
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_String_Initialize(&epConfig.secuConfigurations[0].securityPolicy);
-        status = SOPC_String_AttachFromCstring(&epConfig.secuConfigurations[0].securityPolicy,
+        SOPC_String_Initialize(&epConfig->secuConfigurations[0].securityPolicy);
+        status = SOPC_String_AttachFromCstring(&epConfig->secuConfigurations[0].securityPolicy,
                                                SOPC_SecurityPolicy_Basic256Sha256_URI);
-        epConfig.secuConfigurations[0].securityModes = SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK;
-        epConfig.secuConfigurations[0].nbOfUserTokenPolicies = 1;
-        epConfig.secuConfigurations[0].userTokenPolicies[0] = c_userTokenPolicy_Anonymous;
+        epConfig->secuConfigurations[0].securityModes = SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK;
+        epConfig->secuConfigurations[0].nbOfUserTokenPolicies = 1;
+        epConfig->secuConfigurations[0].userTokenPolicies[0] = c_userTokenPolicy_Anonymous;
     }
 
     if (SOPC_STATUS_OK == status)
     {
         // Init unique endpoint structure
-        epConfig.endpointURL = ENDPOINT_URL;
+        epConfig->endpointURL = ENDPOINT_URL;
 
         status = SOPC_KeyManager_SerializedCertificate_CreateFromFile("./server_public/server_2k_cert.der",
                                                                       &serverCertificate);
-        epConfig.serverCertificate = serverCertificate;
+        sConfig->serverCertificate = serverCertificate;
     }
 
     if (SOPC_STATUS_OK == status)
     {
         status =
             SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile("./server_private/server_2k_key.pem", &serverKey);
-        epConfig.serverKey = serverKey;
+        sConfig->serverKey = serverKey;
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -218,7 +225,7 @@ int main(int argc, char* argv[])
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_PKIProviderStack_Create(authCertificate, NULL, &pkiProvider);
-        epConfig.pki = pkiProvider;
+        sConfig->pki = pkiProvider;
     }
     if (SOPC_STATUS_OK != status)
     {
@@ -229,14 +236,14 @@ int main(int argc, char* argv[])
         printf("<Test_Server_Local_Service: Certificates and key loaded\n");
     }
 
-    epConfig.nbSecuConfigs = 1;
+    epConfig->nbSecuConfigs = 1;
 
     // Application description configuration
-    OpcUa_ApplicationDescription_Initialize(&epConfig.serverDescription);
-    SOPC_String_AttachFromCstring(&epConfig.serverDescription.ApplicationUri, APPLICATION_URI);
-    SOPC_String_AttachFromCstring(&epConfig.serverDescription.ProductUri, PRODUCT_URI);
-    epConfig.serverDescription.ApplicationType = OpcUa_ApplicationType_Server;
-    SOPC_String_AttachFromCstring(&epConfig.serverDescription.ApplicationName.Text, "S2OPC toolkit server example");
+    OpcUa_ApplicationDescription_Initialize(&sConfig->serverDescription);
+    SOPC_String_AttachFromCstring(&sConfig->serverDescription.ApplicationUri, APPLICATION_URI);
+    SOPC_String_AttachFromCstring(&sConfig->serverDescription.ProductUri, PRODUCT_URI);
+    sConfig->serverDescription.ApplicationType = OpcUa_ApplicationType_Server;
+    SOPC_String_AttachFromCstring(&sConfig->serverDescription.ApplicationName.Text, "S2OPC toolkit server example");
 
     SOPC_UserAuthentication_Manager* authenticationManager = NULL;
     SOPC_UserAuthorization_Manager* authorizationManager = NULL;
@@ -253,8 +260,8 @@ int main(int argc, char* argv[])
 
     if (SOPC_STATUS_OK == status)
     {
-        epConfig.authenticationManager = authenticationManager;
-        epConfig.authorizationManager = authorizationManager;
+        epConfig->authenticationManager = authenticationManager;
+        epConfig->authorizationManager = authorizationManager;
     }
 
     // Init stack configuration
@@ -312,7 +319,7 @@ int main(int argc, char* argv[])
     // Add endpoint description configuration
     if (SOPC_STATUS_OK == status)
     {
-        epConfigIdx = SOPC_ToolkitServer_AddEndpointConfig(&epConfig);
+        epConfigIdx = SOPC_ToolkitServer_AddEndpointConfig(epConfig);
         if (epConfigIdx != 0)
         {
             status = SOPC_Toolkit_Configured();
@@ -495,15 +502,9 @@ int main(int argc, char* argv[])
     }
 
     // Deallocate locally allocated data
+    SOPC_S2OPC_Config_Clear(&s2opcConfig);
 
-    SOPC_KeyManager_SerializedCertificate_Delete(serverCertificate);
-    SOPC_KeyManager_SerializedAsymmetricKey_Delete(serverKey);
-    SOPC_KeyManager_SerializedCertificate_Delete(authCertificate);
-    SOPC_PKIProvider_Free(&pkiProvider);
     SOPC_AddressSpace_Delete(address_space);
-
-    SOPC_UserAuthentication_FreeManager(&authenticationManager);
-    SOPC_UserAuthorization_FreeManager(&authorizationManager);
 
     return (status == SOPC_STATUS_OK) ? 0 : 1;
 }

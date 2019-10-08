@@ -463,8 +463,9 @@ void session_core_bs__server_create_session_req_do_crypto(
 
         if (SOPC_STATUS_OK == status)
         {
-            assert(pECfg->serverKey != NULL);
-            status = SOPC_KeyManager_SerializedAsymmetricKey_Deserialize(pECfg->serverKey, false, &privateKey);
+            assert(pECfg->serverConfigPtr->serverKey != NULL);
+            status = SOPC_KeyManager_SerializedAsymmetricKey_Deserialize(pECfg->serverConfigPtr->serverKey, false,
+                                                                         &privateKey);
         }
 
         if (SOPC_STATUS_OK == status)

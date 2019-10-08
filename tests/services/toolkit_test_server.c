@@ -181,27 +181,43 @@ static SOPC_ReturnStatus Server_Initialize(void)
  *---------------------------------*/
 
 /*
- * Create an empty endpoint configuration with given URL
+ * Default server configuration loader
  */
-static SOPC_Endpoint_Config Server_CreateEnpointConfig(char* endpointURL)
+static bool Server_LoadDefaultConfiguration(SOPC_S2OPC_Config* output_s2opcConfig)
 {
-    SOPC_Endpoint_Config epConfig;
-    memset(&epConfig, 0, sizeof(epConfig));
-    // Init unique endpoint structure
-    epConfig.endpointURL = endpointURL;
-
-    return epConfig;
-}
-
-/*
- * Define the security policies, security modes and user token policies supported by endpoint
- */
-static SOPC_ReturnStatus Server_SetEnpointSecurityConfig(SOPC_Endpoint_Config* pEpConfig)
-{
+    assert(NULL != output_s2opcConfig);
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
+    //  Set application description of server to be returned by discovery services (GetEndpoints, FindServers)
+    OpcUa_ApplicationDescription* serverDescription = &output_s2opcConfig->serverConfig.serverDescription;
+    OpcUa_ApplicationDescription_Initialize(serverDescription);
+    SOPC_String_AttachFromCstring(&serverDescription->ApplicationUri, APPLICATION_URI);
+    SOPC_String_AttachFromCstring(&serverDescription->ProductUri, PRODUCT_URI);
+    serverDescription->ApplicationType = OpcUa_ApplicationType_Server;
+    SOPC_String_AttachFromCstring(&serverDescription->ApplicationName.Text, "S2OPC toolkit server example");
+    SOPC_String_AttachFromCstring(&serverDescription->ApplicationName.Locale, "en-US");
+
+    output_s2opcConfig->serverConfig.endpoints = SOPC_Calloc(sizeof(SOPC_Endpoint_Config), 1);
+
+    if (NULL == output_s2opcConfig->serverConfig.endpoints)
+    {
+        return false;
+    }
+
+    output_s2opcConfig->serverConfig.nbEndpoints = 1;
+    SOPC_Endpoint_Config* pEpConfig = &output_s2opcConfig->serverConfig.endpoints[0];
+    pEpConfig->serverConfigPtr = &output_s2opcConfig->serverConfig;
+    pEpConfig->endpointURL = ENDPOINT_URL;
+
+    /*
+     * Define the certificates, security policies, security modes and user token policies supported by endpoint
+     */
     if (secuActive)
     {
+        output_s2opcConfig->serverConfig.serverCertPath = "./server_public/server_2k_cert.der";
+        output_s2opcConfig->serverConfig.serverKeyPath = "./server_private/server_2k_key.pem";
+        output_s2opcConfig->serverConfig.certificateAuthorityPath = "./trusted/cacert.der";
+
         /*
          * 1st Security policy is Basic256Sha256 with anonymous and username (non encrypted) authentication allowed
          */
@@ -265,6 +281,71 @@ static SOPC_ReturnStatus Server_SetEnpointSecurityConfig(SOPC_Endpoint_Config* p
         pEpConfig->nbSecuConfigs = 1;
     }
 
+    return SOPC_STATUS_OK == status;
+}
+
+static SOPC_ReturnStatus Server_LoadServerConfiguration(SOPC_S2OPC_Config* output_s2opcConfig)
+{
+    /* Load embedded default demo server configuration. */
+    assert(NULL != output_s2opcConfig);
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    bool res = Server_LoadDefaultConfiguration(output_s2opcConfig);
+
+    /* Check properties on configuration */
+    if (res)
+    {
+        status = SOPC_STATUS_OK;
+
+        // Only 1 endpoint supported in demo server
+        if (output_s2opcConfig->serverConfig.nbEndpoints > 1)
+        {
+            printf("<Test_Server_Toolkit: Error only 1 endpoint supported but %" PRIu8 " in configuration\n",
+                   output_s2opcConfig->serverConfig.nbEndpoints);
+            status = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+
+        if (SOPC_STATUS_OK == status)
+        {
+            SOPC_Endpoint_Config* epConfig = &output_s2opcConfig->serverConfig.endpoints[0];
+            for (int i = 0; i < epConfig->nbSecuConfigs; i++)
+            {
+                SOPC_SecurityPolicy* secuPolicy = &epConfig->secuConfigurations[i];
+                const char* secuPolicyURI = SOPC_String_GetRawCString(&secuPolicy->securityPolicy);
+                // Only None, Basic256 and Basic256Sha256 policies supported
+                if (0 != strcmp(SOPC_SecurityPolicy_None_URI, secuPolicyURI) &&
+                    0 != strcmp(SOPC_SecurityPolicy_Basic256_URI, secuPolicyURI) &&
+                    0 != strcmp(SOPC_SecurityPolicy_Basic256Sha256_URI, secuPolicyURI))
+                {
+                    printf("<Test_Server_Toolkit: Error invalid or unsupported security policy %s in configuration\n",
+                           secuPolicyURI);
+                    status = SOPC_STATUS_INVALID_PARAMETERS;
+                }
+
+                // UserName token type is only supported with security policy None
+                for (int j = 0; j < secuPolicy->nbOfUserTokenPolicies; j++)
+                {
+                    secuPolicyURI = SOPC_String_GetRawCString(&secuPolicy->userTokenPolicies[j].SecurityPolicyUri);
+                    if (secuPolicy->userTokenPolicies[j].TokenType == OpcUa_UserTokenType_UserName &&
+                        0 != strcmp(SOPC_SecurityPolicy_None_URI, secuPolicyURI))
+                    {
+                        printf(
+                            "<Test_Server_Toolkit: Error invalid or unsupported username user security policy %s in "
+                            "configuration\n",
+                            secuPolicyURI);
+                        status = SOPC_STATUS_INVALID_PARAMETERS;
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        printf("<Test_Server_Toolkit: Failed to load the server configuration\n");
+        status = SOPC_STATUS_NOK;
+    }
+
     return status;
 }
 
@@ -273,16 +354,9 @@ static SOPC_ReturnStatus Server_SetEnpointSecurityConfig(SOPC_Endpoint_Config* p
  * - Server certificate and key
  * - Public Key Infrastructure: using a single certificate as Certificate Authority or Trusted Certificate
  */
-static SOPC_ReturnStatus Server_SetCryptographicConfig(SOPC_Endpoint_Config* pEpConfig,
-                                                       SOPC_SerializedCertificate** output_serverCertificate,
-                                                       SOPC_SerializedAsymmetricKey** output_serverKey,
-                                                       SOPC_SerializedCertificate** output_authCertificate,
-                                                       SOPC_PKIProvider** output_pkiProvider)
+static SOPC_ReturnStatus Server_SetCryptographicConfig(SOPC_Server_Config* serverConfig)
 {
-    assert(NULL != output_serverCertificate);
-    assert(NULL != output_serverKey);
-    assert(NULL != output_authCertificate);
-    assert(NULL != output_pkiProvider);
+    assert(NULL != serverConfig);
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
@@ -291,47 +365,40 @@ static SOPC_ReturnStatus Server_SetCryptographicConfig(SOPC_Endpoint_Config* pEp
 #ifdef WITH_STATIC_SECURITY_DATA
         /* Load client/server certificates and server key from C source files (no filesystem needed) */
         status = SOPC_KeyManager_SerializedCertificate_CreateFromDER(server_2k_cert, sizeof(server_2k_cert),
-                                                                     output_serverCertificate);
+                                                                     &serverConfig->serverCertificate);
         if (SOPC_STATUS_OK == status)
         {
-            pEpConfig->serverCertificate = *output_serverCertificate;
-
             status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromData(server_2k_key, sizeof(server_2k_key),
-                                                                            output_serverKey);
+                                                                            &serverConfig->serverKey);
         }
 
         if (SOPC_STATUS_OK == status)
         {
             pEpConfig->serverKey = *output_serverKey;
 
-            status =
-                SOPC_KeyManager_SerializedCertificate_CreateFromDER(cacert, sizeof(cacert), output_authCertificate);
+            status = SOPC_KeyManager_SerializedCertificate_CreateFromDER(cacert, sizeof(cacert),
+                                                                         &serverConfig->certificateAuthority);
         }
 #else // WITH_STATIC_SECURITY_DATA == false
         /* Load client/server certificates and server key from files */
-        status = SOPC_KeyManager_SerializedCertificate_CreateFromFile("./server_public/server_2k_cert.der",
-                                                                      output_serverCertificate);
+        status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(serverConfig->serverCertPath,
+                                                                      &serverConfig->serverCertificate);
         if (SOPC_STATUS_OK == status)
         {
-            pEpConfig->serverCertificate = *output_serverCertificate;
-
-            status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile("./server_private/server_2k_key.pem",
-                                                                            output_serverKey);
+            status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(serverConfig->serverKeyPath,
+                                                                            &serverConfig->serverKey);
         }
         if (SOPC_STATUS_OK == status)
         {
-            pEpConfig->serverKey = *output_serverKey;
-
-            status =
-                SOPC_KeyManager_SerializedCertificate_CreateFromFile("./trusted/cacert.der", output_authCertificate);
+            status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(serverConfig->certificateAuthorityPath,
+                                                                          &serverConfig->certificateAuthority);
         }
 #endif
 
         /* Create the PKI (Public Key Infrastructure) provider */
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_PKIProviderStack_Create(*output_authCertificate, NULL, output_pkiProvider);
-            pEpConfig->pki = *output_pkiProvider;
+            status = SOPC_PKIProviderStack_Create(serverConfig->certificateAuthority, NULL, &serverConfig->pki);
         }
 
         if (SOPC_STATUS_OK != status)
@@ -343,32 +410,8 @@ static SOPC_ReturnStatus Server_SetCryptographicConfig(SOPC_Endpoint_Config* pEp
             printf("<Test_Server_Toolkit: Certificates and key loaded\n");
         }
     }
-    else
-    {
-        pEpConfig->serverCertificate = NULL;
-        pEpConfig->serverKey = NULL;
-        pEpConfig->pki = NULL;
-    }
 
     return status;
-}
-
-/*---------------------------------
- * Server application description :
- *---------------------------------*/
-
-/*
- * Application description of server to be returned by discovery services (GetEndpoints, FindServers)
- */
-static void Server_SetApplicationDescriptionConfig(SOPC_Endpoint_Config* pEpConfig)
-{
-    // Application description configuration
-    OpcUa_ApplicationDescription_Initialize(&pEpConfig->serverDescription);
-    SOPC_String_AttachFromCstring(&pEpConfig->serverDescription.ApplicationUri, APPLICATION_URI);
-    SOPC_String_AttachFromCstring(&pEpConfig->serverDescription.ProductUri, PRODUCT_URI);
-    pEpConfig->serverDescription.ApplicationType = OpcUa_ApplicationType_Server;
-    SOPC_String_AttachFromCstring(&pEpConfig->serverDescription.ApplicationName.Text, "S2OPC toolkit server example");
-    SOPC_String_AttachFromCstring(&pEpConfig->serverDescription.ApplicationName.Locale, "en-US");
 }
 
 /*----------------------------------------
@@ -652,13 +695,11 @@ int main(int argc, char* argv[])
 
     char* logDirPath = NULL;
 
-    SOPC_Endpoint_Config epConfig;
+    SOPC_S2OPC_Config s2opcConfig;
+    SOPC_S2OPC_Config_Initialize(&s2opcConfig);
+    SOPC_Server_Config* serverConfig = &s2opcConfig.serverConfig;
+    SOPC_Endpoint_Config* epConfig = NULL;
     uint32_t epConfigIdx = 0;
-
-    SOPC_SerializedCertificate* serverCertificate = NULL;
-    SOPC_SerializedAsymmetricKey* serverKey = NULL;
-    SOPC_SerializedCertificate* authCertificate = NULL;
-    SOPC_PKIProvider* pkiProvider = NULL;
 
     SOPC_UserAuthentication_Manager* authenticationManager = NULL;
     SOPC_UserAuthorization_Manager* authorizationManager = NULL;
@@ -683,7 +724,7 @@ int main(int argc, char* argv[])
      * DEBUG traces generated in ./<argv[0]>_<argv[1]>_logs/ */
     logDirPath = Server_ConfigureLogger(argc, argv);
 
-    /* Prepare configuration of server endpoint:
+    /* Configuration of server endpoint:
        - Enpoint URL,
        - Security endpoint properties,
        - Cryptographic parameters,
@@ -692,31 +733,28 @@ int main(int argc, char* argv[])
     */
     if (SOPC_STATUS_OK == status)
     {
-        epConfig = Server_CreateEnpointConfig(ENDPOINT_URL);
-
-        status = Server_SetEnpointSecurityConfig(&epConfig);
+        status = Server_LoadServerConfiguration(&s2opcConfig);
 
         if (SOPC_STATUS_OK == status)
         {
-            status = Server_SetCryptographicConfig(&epConfig, &serverCertificate, &serverKey, &authCertificate,
-                                                   &pkiProvider);
+            epConfig = &serverConfig->endpoints[0];
         }
+    }
 
-        if (SOPC_STATUS_OK == status)
-        {
-            status = Server_SetUserManagementConfig(&epConfig, &authenticationManager, &authorizationManager);
-        }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = Server_SetCryptographicConfig(serverConfig);
+    }
 
-        if (SOPC_STATUS_OK == status)
-        {
-            Server_SetApplicationDescriptionConfig(&epConfig);
-        }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = Server_SetUserManagementConfig(epConfig, &authenticationManager, &authorizationManager);
     }
 
     /* Set endpoint configuration: keep endpoint configuration identifier for opening it later */
     if (SOPC_STATUS_OK == status)
     {
-        epConfigIdx = SOPC_ToolkitServer_AddEndpointConfig(&epConfig);
+        epConfigIdx = SOPC_ToolkitServer_AddEndpointConfig(epConfig);
         status = (epConfigIdx != 0 ? SOPC_STATUS_OK : SOPC_STATUS_NOK);
     }
 
@@ -818,18 +856,7 @@ int main(int argc, char* argv[])
     /* Deallocate all locally created structures: */
 
     SOPC_AddressSpace_Delete(address_space);
-
-    if (secuActive)
-    {
-        SOPC_KeyManager_SerializedCertificate_Delete(serverCertificate);
-        SOPC_KeyManager_SerializedAsymmetricKey_Delete(serverKey);
-        SOPC_KeyManager_SerializedCertificate_Delete(authCertificate);
-        SOPC_PKIProvider_Free(&pkiProvider);
-    }
-
-    SOPC_UserAuthentication_FreeManager(&authenticationManager);
-    SOPC_UserAuthorization_FreeManager(&authorizationManager);
-
+    SOPC_S2OPC_Config_Clear(&s2opcConfig);
     SOPC_Free(logDirPath);
 
     return (status == SOPC_STATUS_OK) ? 0 : 1;
