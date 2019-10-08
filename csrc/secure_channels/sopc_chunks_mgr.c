@@ -351,7 +351,7 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
         // SERVER side: client config could be defined or not (new secure channel opening)
         assert(epConfig != NULL);
         runningAppCert = scConnection->serverCertificate;
-        pkiProvider = epConfig->pki;
+        pkiProvider = epConfig->serverConfigPtr->pki;
         if (scConfig != NULL)
         {
             enforceSecuMode = true;

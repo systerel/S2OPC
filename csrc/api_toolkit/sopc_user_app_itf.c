@@ -19,6 +19,12 @@
 
 #include "sopc_user_app_itf.h"
 
+#include <assert.h>
+#include <string.h>
+
+#include "sopc_mem_alloc.h"
+#include "sopc_pki.h"
+
 /** Anonymous user security policy supported configuration */
 const OpcUa_UserTokenPolicy c_userTokenPolicy_Anonymous = {
     .TokenType = OpcUa_UserTokenType_Anonymous,
@@ -40,3 +46,73 @@ const OpcUa_UserTokenPolicy c_userTokenPolicy_UserName_NoneSecurityPolicy = {
                           (SOPC_Byte*) SOPC_SecurityPolicy_None_URI}, /* None security policy shall be used only when
                          secure channel security policy is non-None since password will be non-encrypted */
 };
+
+static void SOPC_EndpointConfig_Clear(SOPC_Endpoint_Config* epConfig, bool freeCstringsFlag)
+{
+    if (freeCstringsFlag)
+    {
+        SOPC_Free(epConfig->endpointURL);
+    }
+
+    for (int i = 0; i < epConfig->nbSecuConfigs && i < SOPC_MAX_SECU_POLICIES_CFG; i++)
+    {
+        SOPC_String_Clear(&epConfig->secuConfigurations[i].securityPolicy);
+        for (int j = 0; j < epConfig->secuConfigurations[i].nbOfUserTokenPolicies && j < SOPC_MAX_SECU_POLICIES_CFG;
+             j++)
+        {
+            OpcUa_UserTokenPolicy_Clear(&epConfig->secuConfigurations[i].userTokenPolicies[j]);
+        }
+    }
+
+    SOPC_UserAuthentication_FreeManager(&epConfig->authenticationManager);
+    SOPC_UserAuthorization_FreeManager(&epConfig->authorizationManager);
+}
+
+static void SOPC_ServerConfig_Intialize(SOPC_Server_Config* config)
+{
+    memset(config, 0, sizeof(*config));
+    OpcUa_ApplicationDescription_Initialize(&config->serverDescription);
+}
+
+void SOPC_S2OPC_Config_Initialize(SOPC_S2OPC_Config* config)
+{
+    SOPC_ServerConfig_Intialize(&config->serverConfig);
+}
+
+static void SOPC_ServerConfig_Clear(SOPC_Server_Config* config)
+{
+    assert(NULL != config);
+    if (config->freeCstringsFlag)
+    {
+        for (int i = 0; NULL != config->namespaces[i]; i++)
+        {
+            SOPC_Free(config->namespaces[i]);
+        }
+        SOPC_Free(config->namespaces);
+    }
+
+    OpcUa_ApplicationDescription_Clear(&config->serverDescription);
+    if (config->freeCstringsFlag)
+    {
+        SOPC_Free(config->serverCertPath);
+        SOPC_Free(config->serverKeyPath);
+        SOPC_Free(config->certificateAuthorityPath);
+    }
+    for (int i = 0; i < config->nbEndpoints; i++)
+    {
+        SOPC_EndpointConfig_Clear(&config->endpoints[i], config->freeCstringsFlag);
+    }
+    SOPC_Free(config->endpoints);
+
+    SOPC_KeyManager_SerializedCertificate_Delete(config->serverCertificate);
+    SOPC_KeyManager_SerializedAsymmetricKey_Delete(config->serverKey);
+    SOPC_KeyManager_SerializedCertificate_Delete(config->certificateAuthority);
+    SOPC_PKIProvider_Free(&config->pki);
+
+    memset(config, 0, sizeof(*config));
+}
+
+void SOPC_S2OPC_Config_Clear(SOPC_S2OPC_Config* config)
+{
+    SOPC_ServerConfig_Clear(&config->serverConfig);
+}

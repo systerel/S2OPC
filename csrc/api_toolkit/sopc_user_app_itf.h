@@ -75,19 +75,55 @@ typedef struct SOPC_SecurityPolicy
                                                         */
 } SOPC_SecurityPolicy;
 
+typedef struct SOPC_Server_Config SOPC_Server_Config;
+
 /* Server static configuration of a Endpoint listener */
 typedef struct SOPC_Endpoint_Config
 {
-    char* endpointURL;
+    struct SOPC_Server_Config* serverConfigPtr; /**< Pointer to the server configuration containing this endpoint */
+    char* endpointURL;                          /**< Endpoint URL: opc.tcp://<IP/HOSTNAME>:<PORT>(/<NAME>)*/
+    uint8_t nbSecuConfigs;                      /**< Number of security configuration (<= SOPC_MAX_SECU_POLICIES_CFG) */
+    SOPC_SecurityPolicy
+        secuConfigurations[SOPC_MAX_SECU_POLICIES_CFG]; /**< Security configuration array of size nbSecuConfigs */
+
+    /* To be instantiated by applicative code: */
+    SOPC_UserAuthentication_Manager*
+        authenticationManager; /**< The user authentication manager: user authentication on session activation */
+    SOPC_UserAuthorization_Manager*
+        authorizationManager; /**< The user authorization manager: user access level evaluation */
+} SOPC_Endpoint_Config;
+
+/* OPC UA server configuration structure */
+struct SOPC_Server_Config
+{
+    bool freeCstringsFlag; /**< A flag to indicate if the C strings contained in the server configuration
+                                (and endpoints) shall be freed */
+    char** namespaces;     /**< An array of namespaces terminated by a NULL pointer.
+                                Index in array is the namespace index. */
+    OpcUa_ApplicationDescription serverDescription; /**< Application description of the server.
+                                                         Limitations: the gateway and discovery properties are ignored
+                                                         (each endpoint returns its URL as discovery URL)*/
+    char* serverCertPath;                           /**< Temporary path to the server certificate
+                                                         (serverCertificate shall be instantiated by applicative code) */
+    char* serverKeyPath;                            /**< Temporary path to the server key
+                                                         (serverCertificate shall be instantiated by applicative code) */
+    char* certificateAuthorityPath;                 /**< Temporary path to the certificate authority
+                                                         (pki shall be instantiated with the CA by applicative code) */
+    uint8_t nbEndpoints;                            /**< Number of endpoints defined by the server */
+    SOPC_Endpoint_Config* endpoints;                /**< Endpoint configuration array */
+
+    /* To be instantiated by applicative code: */
     SOPC_SerializedCertificate* serverCertificate;
     SOPC_SerializedAsymmetricKey* serverKey;
+    SOPC_SerializedCertificate* certificateAuthority;
     SOPC_PKIProvider* pki;
-    uint8_t nbSecuConfigs;
-    SOPC_SecurityPolicy secuConfigurations[SOPC_MAX_SECU_POLICIES_CFG];
-    OpcUa_ApplicationDescription serverDescription;
-    SOPC_UserAuthentication_Manager* authenticationManager;
-    SOPC_UserAuthorization_Manager* authorizationManager;
-} SOPC_Endpoint_Config;
+};
+
+/* S2OPC server configuration */
+typedef struct SOPC_S2OPC_Config
+{
+    SOPC_Server_Config serverConfig;
+} SOPC_S2OPC_Config;
 
 /* Client and Server communication events to be managed by applicative code*/
 typedef enum SOPC_App_Com_Event
@@ -167,5 +203,17 @@ typedef struct
     char* toolkitDockerId;
     char* toolkitBuildDate;
 } SOPC_Build_Info;
+
+/* \brief Initalize the content of the SOPC_S2OPC_Config
+ *
+ * \param config  The s2opc server configuration to clear
+ */
+void SOPC_S2OPC_Config_Initialize(SOPC_S2OPC_Config* config);
+
+/* \brief Clear the content of the SOPC_S2OPC_Config
+ *
+ * \param config  The s2opc server configuration to clear
+ */
+void SOPC_S2OPC_Config_Clear(SOPC_S2OPC_Config* config);
 
 #endif // SOPC_USER_APP_ITF_H_

@@ -235,22 +235,21 @@ void SOPC_Toolkit_Clear()
 
 uint32_t SOPC_ToolkitClient_AddSecureChannelConfig(SOPC_SecureChannel_Config* scConfig)
 {
+    assert(NULL != scConfig);
     uint32_t result = 0;
-    if (NULL != scConfig)
+
+    // TODO: check all parameters of scConfig (requested lifetime >= MIN, etc)
+    if (tConfig.initDone != false)
     {
-        // TODO: check all parameters of scConfig (requested lifetime >= MIN, etc)
-        if (tConfig.initDone != false)
+        Mutex_Lock(&tConfig.mut);
+        if (tConfig.scConfigIdxMax < SOPC_MAX_SECURE_CONNECTIONS)
         {
-            Mutex_Lock(&tConfig.mut);
-            if (tConfig.scConfigIdxMax < SOPC_MAX_SECURE_CONNECTIONS)
-            {
-                tConfig.scConfigIdxMax++; // Minimum used == 1 && Maximum used == MAX + 1
-                assert(NULL == tConfig.scConfigs[tConfig.scConfigIdxMax]);
-                tConfig.scConfigs[tConfig.scConfigIdxMax] = scConfig;
-                result = tConfig.scConfigIdxMax;
-            }
-            Mutex_Unlock(&tConfig.mut);
+            tConfig.scConfigIdxMax++; // Minimum used == 1 && Maximum used == MAX + 1
+            assert(NULL == tConfig.scConfigs[tConfig.scConfigIdxMax]);
+            tConfig.scConfigs[tConfig.scConfigIdxMax] = scConfig;
+            result = tConfig.scConfigIdxMax;
         }
+        Mutex_Unlock(&tConfig.mut);
     }
     return result;
 }
@@ -275,35 +274,35 @@ SOPC_SecureChannel_Config* SOPC_ToolkitClient_GetSecureChannelConfig(uint32_t sc
 
 uint32_t SOPC_ToolkitServer_AddSecureChannelConfig(SOPC_SecureChannel_Config* scConfig)
 {
+    assert(NULL != scConfig);
+
     uint32_t lastScIdx = 0;
     uint32_t idxWithServerOffset = 0;
-    if (NULL != scConfig)
+
+    // TODO: check all parameters of scConfig (requested lifetime >= MIN, etc)
+    if (tConfig.initDone != false)
     {
-        // TODO: check all parameters of scConfig (requested lifetime >= MIN, etc)
-        if (tConfig.initDone != false)
+        Mutex_Lock(&tConfig.mut);
+        lastScIdx = tConfig.serverScLastConfigIdx;
+        do
         {
-            Mutex_Lock(&tConfig.mut);
-            lastScIdx = tConfig.serverScLastConfigIdx;
-            do
+            if (lastScIdx < SOPC_MAX_SECURE_CONNECTIONS)
             {
-                if (lastScIdx < SOPC_MAX_SECURE_CONNECTIONS)
+                lastScIdx++; // Minimum used == 1 && Maximum used == MAX + 1
+                if (NULL == tConfig.serverScConfigs[lastScIdx])
                 {
-                    lastScIdx++; // Minimum used == 1 && Maximum used == MAX + 1
-                    if (NULL == tConfig.serverScConfigs[lastScIdx])
-                    {
-                        tConfig.serverScLastConfigIdx = lastScIdx;
-                        tConfig.serverScConfigs[lastScIdx] = scConfig;
-                        idxWithServerOffset =
-                            SOPC_MAX_SECURE_CONNECTIONS + lastScIdx; // disjoint with SC config indexes for client
-                    }
+                    tConfig.serverScLastConfigIdx = lastScIdx;
+                    tConfig.serverScConfigs[lastScIdx] = scConfig;
+                    idxWithServerOffset =
+                        SOPC_MAX_SECURE_CONNECTIONS + lastScIdx; // disjoint with SC config indexes for client
                 }
-                else
-                {
-                    lastScIdx = 0; // lastScIdx++ <=> lastScIdx = 1 will be tested next time
-                }
-            } while (0 == idxWithServerOffset && lastScIdx != tConfig.serverScLastConfigIdx);
-            Mutex_Unlock(&tConfig.mut);
-        }
+            }
+            else
+            {
+                lastScIdx = 0; // lastScIdx++ <=> lastScIdx = 1 will be tested next time
+            }
+        } while (0 == idxWithServerOffset && lastScIdx != tConfig.serverScLastConfigIdx);
+        Mutex_Unlock(&tConfig.mut);
     }
     return idxWithServerOffset;
 }
@@ -358,25 +357,25 @@ bool SOPC_ToolkitServer_RemoveSecureChannelConfig(uint32_t serverScConfigIdx)
 uint32_t SOPC_ToolkitServer_AddEndpointConfig(SOPC_Endpoint_Config* epConfig)
 {
     uint32_t result = 0;
-    if (NULL != epConfig)
+    assert(NULL != epConfig);
+    assert(NULL != epConfig->serverConfigPtr);
+
+    // TODO: check all parameters of epConfig: certificate presence w.r.t. secu policy, app desc (Uris are valid
+    // w.r.t. part 6), etc.
+    if (tConfig.initDone != false)
     {
-        // TODO: check all parameters of epConfig: certificate presence w.r.t. secu policy, app desc (Uris are valid
-        // w.r.t. part 6), etc.
-        if (tConfig.initDone != false)
+        Mutex_Lock(&tConfig.mut);
+        if (false == tConfig.locked)
         {
-            Mutex_Lock(&tConfig.mut);
-            if (false == tConfig.locked)
+            if (tConfig.epConfigIdxMax < SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS)
             {
-                if (tConfig.epConfigIdxMax < SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS)
-                {
-                    tConfig.epConfigIdxMax++;
-                    assert(NULL == tConfig.epConfigs[tConfig.epConfigIdxMax]);
-                    tConfig.epConfigs[tConfig.epConfigIdxMax] = epConfig;
-                    result = tConfig.epConfigIdxMax;
-                }
+                tConfig.epConfigIdxMax++;
+                assert(NULL == tConfig.epConfigs[tConfig.epConfigIdxMax]);
+                tConfig.epConfigs[tConfig.epConfigIdxMax] = epConfig;
+                result = tConfig.epConfigIdxMax;
             }
-            Mutex_Unlock(&tConfig.mut);
         }
+        Mutex_Unlock(&tConfig.mut);
     }
     return result;
 }

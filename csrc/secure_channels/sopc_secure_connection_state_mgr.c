@@ -1646,11 +1646,11 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
         if (result)
         {
             nconfig->crt_cli = cert_buffer;
-            nconfig->crt_srv = epConfig->serverCertificate;
+            nconfig->crt_srv = epConfig->serverConfigPtr->serverCertificate;
             nconfig->isClientSc = false;
             nconfig->key_priv_cli = NULL;
             nconfig->msgSecurityMode = opnReq->SecurityMode;
-            nconfig->pki = epConfig->pki;
+            nconfig->pki = epConfig->serverConfigPtr->pki;
             nconfig->reqSecuPolicyUri = scConnection->serverAsymmSecuInfo.securityPolicyUri;
             nconfig->requestedLifetime = opnReq->RequestedLifetime;
             nconfig->url = epConfig->endpointURL;
@@ -2238,8 +2238,8 @@ static bool sc_init_key_and_certs(SOPC_SecureConnection* sc)
     {
         SOPC_Endpoint_Config* epConfig = SOPC_ToolkitServer_GetEndpointConfig(sc->serverEndpointConfigIdx);
         assert(epConfig != NULL);
-        serialized_private_key = epConfig->serverKey;
-        cert_data = epConfig->serverCertificate;
+        serialized_private_key = epConfig->serverConfigPtr->serverKey;
+        cert_data = epConfig->serverConfigPtr->serverCertificate;
     }
     else
     {

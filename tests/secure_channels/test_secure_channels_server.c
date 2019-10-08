@@ -54,7 +54,11 @@ int main(int argc, char* argv[])
     SOPC_SerializedAsymmetricKey* priv_srv = NULL;
 
     // Services side stub code
+    SOPC_Server_Config sConfig;
+    sConfig.nbEndpoints = 1;
     SOPC_Endpoint_Config epConfig;
+    epConfig.serverConfigPtr = &sConfig;
+    sConfig.endpoints = &epConfig;
     uint32_t epConfigIdx = 0;
     uint32_t scConfigIdx = 0;
     uint32_t scConnectionId = 0;
@@ -201,9 +205,9 @@ int main(int argc, char* argv[])
     {
         epConfig.endpointURL = endpointUrl;
         epConfig.nbSecuConfigs = NB_SECU_POLICY_CONFIGS;
-        epConfig.serverCertificate = crt_srv;
-        epConfig.serverKey = priv_srv;
-        epConfig.pki = pki;
+        epConfig.serverConfigPtr->serverCertificate = crt_srv;
+        epConfig.serverConfigPtr->serverKey = priv_srv;
+        epConfig.serverConfigPtr->pki = pki;
 
         epConfigIdx = SOPC_ToolkitServer_AddEndpointConfig(&epConfig);
 
