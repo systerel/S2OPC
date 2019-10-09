@@ -408,9 +408,7 @@ void SOPC_Socket_Close(Socket* sock)
 {
     if (sock != NULL && *sock != SOPC_INVALID_SOCKET)
     {
-        if (close(*sock) != -1)
-        {
-            *sock = SOPC_INVALID_SOCKET;
-        }
+        close(*sock);
+        *sock = SOPC_INVALID_SOCKET;
     }
 }
