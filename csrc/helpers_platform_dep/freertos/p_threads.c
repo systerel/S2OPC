@@ -144,13 +144,14 @@ P_THREAD_Create(tPtrFct fct,              // Callback
         memset(ptrWks, 0, sizeof(Thread));
 
         // Initialization
-        if (P_THREAD_Init(ptrWks,                              //
-                          MAX_THREADS,                         //
-                          fct,                                 //
-                          args,                                //
-                          taskName,                            //
-                          fctWatingForJoin,                    //
-                          fctReadyToSignal) != SOPC_STATUS_OK) //
+        SOPC_ReturnStatus result = P_THREAD_Init(ptrWks,            //
+                                                 MAX_THREADS,       //
+                                                 fct,               //
+                                                 args,              //
+                                                 taskName,          //
+                                                 fctWatingForJoin,  //
+                                                 fctReadyToSignal); //
+        if (SOPC_STATUS_OK != result)                               //
         {
             P_THREAD_Destroy(&ptrWks);
             ptrWks = NULL;
