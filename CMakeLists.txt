@@ -422,9 +422,9 @@ endfunction()
 
 enable_testing()
 
-set(TEST_CONFIG_XML "${CMAKE_SOURCE_DIR}/tests/data/config/S2OPC_Test_XML_Config.xml")
-
-set(TEST_SERVER_CONFIG_XML "${CMAKE_SOURCE_DIR}/tests/data/config/S2OPC_Server_Config.xml")
+set(TEST_CONFIG_XML              "${CMAKE_SOURCE_DIR}/tests/data/config/S2OPC_Test_XML_Config.xml")
+set(TEST_SERVER_DEMO_CONFIG_XML  "${CMAKE_SOURCE_DIR}/tests/data/config/S2OPC_Server_Demo_Config.xml")
+set(TEST_SERVER_UACTT_CONFIG_XML "${CMAKE_SOURCE_DIR}/tests/data/config/S2OPC_Server_UACTT_Config.xml")
 
 set(TEST_ADDRESS_SPACE_XML "${CMAKE_SOURCE_DIR}/tests/data/address_space/s2opc.xml")
 set(TEST_CHECK_HELPERS_ADDRESS_SPACE_C "check_helpers_address_space.c")
@@ -458,7 +458,8 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tests/data/logger/logTest.ref2 ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tests/data/logger/logTest.ref3 ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     COMMAND ${CMAKE_COMMAND} -E copy ${TEST_CONFIG_XML} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-    COMMAND ${CMAKE_COMMAND} -E copy ${TEST_SERVER_CONFIG_XML} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+    COMMAND ${CMAKE_COMMAND} -E copy ${TEST_SERVER_DEMO_CONFIG_XML} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+    COMMAND ${CMAKE_COMMAND} -E copy ${TEST_SERVER_UACTT_CONFIG_XML} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     COMMAND ${CMAKE_COMMAND} -E copy ${TEST_ADDRESS_SPACE_XML} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 # Server test: local services

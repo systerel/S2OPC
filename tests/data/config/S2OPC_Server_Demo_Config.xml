@@ -7,7 +7,7 @@
     <ApplicationCertificates>
       <ServerCertificate path="./server_public/server_2k_cert.der"/>
       <ServerKey path="./server_private/server_2k_key.pem"/>
-      <!-- Only one CA supported for now -->
+      <!-- Only one CA supported -->
       <TrustedCertificates>
         <TrustedCertificate path="./trusted/cacert.der"/>
       </TrustedCertificates>
@@ -16,18 +16,18 @@
       <ApplicationURI uri="urn:S2OPC:localhost"/>
       <ProductURI uri="urn:S2OPC:localhost"/>
       <ApplicationName text="S2OPC toolkit server example" locale="en"/>
-      <!-- No discovery URL: we only support current endpoint URL as discovery URL for now -->
+      <!-- No discovery URL: use of endpoint URL as discovery URL -->
     </ApplicationDescription>
     <Endpoints>
       <!-- Note: Endpoint no transport URI (only TCP available) and no security level (computed by server) -->
       <Endpoint url="opc.tcp://localhost:4841">
-        <SecurityPolicies>
           <!-- Only None/Basic256/Basic256Sha256 available -->
+        <SecurityPolicies>
           <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#None">
             <SecurityModes>
               <SecurityMode mode="None"/>
             </SecurityModes>
-            <!-- Undefined => no session possible -->
+            <!-- Undefined: no session activation possible (discovery services only) -->
             <UserPolicies/>
           </SecurityPolicy>
           <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256">
