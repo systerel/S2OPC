@@ -17,11 +17,7 @@
  * under the License.
  */
 
-#include <inttypes.h> /* stdlib includes */
-#include <limits.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <string.h>
+#include <stdbool.h>
 
 #include "FreeRTOS.h" /* freeRtos includes */
 #include "queue.h"
