@@ -220,7 +220,7 @@ SOPC_ReturnStatus P_SYNCHRO_SignalConditionVariable(Condition* pConditionVariabl
                                                                NULL,                          //
                                                                &wCurrentSlotId);              // Slot id
 
-            if (handle != NULL)
+            if (NULL != handle)
             {
                 // Remove task before notify it
                 P_UTILS_LIST_RemoveElt(&pConditionVariable->taskList, //
