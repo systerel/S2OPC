@@ -46,55 +46,51 @@ SOPC_ReturnStatus P_SYNCHRO_ClearConditionVariable(Condition* pConditionVariable
     uint32_t wClearSignal = 0;
     uint32_t wSignal = 0;
 
-    if (pConditionVariable != NULL)
+    if (NULL == pConditionVariable)
     {
-        if ((E_COND_VAR_STATUS_INITIALIZED == pConditionVariable->status) // Workspace initialized
-            && (NULL != pConditionVariable->handleLockCounter))           // Critical section token exist
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    if ((E_COND_VAR_STATUS_INITIALIZED != pConditionVariable->status) // Workspace initialized
+        || (NULL == pConditionVariable->handleLockCounter))           // Critical section token exist
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+
+    xSemaphoreTake(pConditionVariable->handleLockCounter, portMAX_DELAY); // Critical section
+    {
+        pConditionVariable->status = E_COND_VAR_STATUS_NOT_INITIALIZED; // Mark as not initialized
+
+        // Indicate for each registered task that clearing signal is pending
+        wCurrentSlotId = UINT16_MAX;
+        do
         {
-            xSemaphoreTake(pConditionVariable->handleLockCounter, portMAX_DELAY); // Critical section
+            handle = (TaskHandle_t) P_UTILS_LIST_ParseValueElt(&pConditionVariable->taskList, //
+                                                               &wSignal,                      //
+                                                               &wClearSignal,                 //
+                                                               NULL,                          //
+                                                               &wCurrentSlotId);              //
+            if (handle != NULL)
             {
-                pConditionVariable->status = E_COND_VAR_STATUS_NOT_INITIALIZED; // Mark as not initialized
+                // Remove task before notify it
+                P_UTILS_LIST_RemoveElt(&pConditionVariable->taskList, //
+                                       handle,                        //
+                                       wSignal,                       //
+                                       wClearSignal,                  //
+                                       &wCurrentSlotId);              //
 
-                // Indicate for each registered task that clearing signal is pending
-                wCurrentSlotId = UINT16_MAX;
-                do
-                {
-                    handle = (TaskHandle_t) P_UTILS_LIST_ParseValueElt(&pConditionVariable->taskList, //
-                                                                       &wSignal,                      //
-                                                                       &wClearSignal,                 //
-                                                                       NULL,                          //
-                                                                       &wCurrentSlotId);              //
-                    if (handle != NULL)
-                    {
-                        // Remove task before notify it
-                        P_UTILS_LIST_RemoveElt(&pConditionVariable->taskList, //
-                                               handle,                        //
-                                               wSignal,                       //
-                                               wClearSignal,                  //
-                                               &wCurrentSlotId);              //
-
-                        xTaskGenericNotify(handle, wClearSignal, eSetBits, NULL);
-                    }
-                } while (wCurrentSlotId != UINT16_MAX);
-
-                // Task list destruction
-                P_UTILS_LIST_DeInit(&pConditionVariable->taskList);
+                xTaskGenericNotify(handle, wClearSignal, eSetBits, NULL);
             }
+        } while (wCurrentSlotId != UINT16_MAX);
 
-            vQueueDelete(pConditionVariable->handleLockCounter); // End of critical section. Destroy it on clear
-            pConditionVariable->handleLockCounter = NULL;
-            DEBUG_decrementCpt();
-            memset(pConditionVariable, 0, sizeof(Condition)); // Raz on leave memory
-        }
-        else
-        {
-            result = SOPC_STATUS_INVALID_STATE;
-        }
+        // Task list destruction
+        P_UTILS_LIST_DeInit(&pConditionVariable->taskList);
     }
-    else
-    {
-        result = SOPC_STATUS_INVALID_PARAMETERS;
-    }
+
+    vQueueDelete(pConditionVariable->handleLockCounter); // End of critical section. Destroy it on clear
+    pConditionVariable->handleLockCounter = NULL;
+    DEBUG_decrementCpt();
+    memset(pConditionVariable, 0, sizeof(Condition)); // Raz on leave memory
+
     return result;
 }
 
@@ -156,7 +152,7 @@ SOPC_ReturnStatus P_SYNCHRO_InitConditionVariable(Condition* pConditionVariable,
 // Destruction of condition variable if created via CreateConditionVariable.
 void P_SYNCHRO_DestroyConditionVariable(Condition** ppConditionVariable)
 {
-    if ((ppConditionVariable != NULL) && ((*ppConditionVariable) != NULL))
+    if (NULL != ppConditionVariable && NULL != *ppConditionVariable)
     {
         P_SYNCHRO_ClearConditionVariable(*ppConditionVariable);
         memset(*ppConditionVariable, 0, sizeof(Condition));
@@ -171,7 +167,7 @@ Condition* P_SYNCHRO_CreateConditionVariable(uint16_t wMaxRDV)
 {
     Condition* pConditionVariable = NULL;
     pConditionVariable = (Condition*) SOPC_Malloc(sizeof(Condition));
-    if (pConditionVariable != NULL)
+    if (NULL != pConditionVariable)
     {
         DEBUG_incrementCpt();
         // Raz handle
