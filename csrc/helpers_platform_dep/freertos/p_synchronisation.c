@@ -232,7 +232,7 @@ SOPC_ReturnStatus P_SYNCHRO_SignalConditionVariable(Condition* pConditionVariabl
                 configASSERT(pdPASS == xTaskGenericNotify(handle, signal, eSetBits, NULL));
                 result = SOPC_STATUS_OK;
             }
-        } while ((UINT16_MAX != wCurrentSlotId) && (true == bSignalAll));
+        } while (UINT16_MAX != wCurrentSlotId && bSignalAll);
     }
     xSemaphoreGive(pConditionVariable->handleLockCounter); // End critical section
 
