@@ -19,6 +19,19 @@
 
 #include "p_time.h"
 
+#include <assert.h>
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "sopc_builtintypes.h"
+#include "sopc_enums.h" /* s2opc includes */
+#include "sopc_time.h"
+
+#include "FreeRTOS.h"       /* freeRtos includes */
+#include "FreeRTOSConfig.h" /* freeRtos includes */
+
 /* Private time api */
 
 #define SECOND_TO_100NS ((uint64_t) 10000000)

@@ -17,29 +17,8 @@
  * under the License.
  */
 
-#ifndef FREERTOS_P_TIME_H_
-#define FREERTOS_P_TIME_H_
-
-#include <assert.h>
-#include <limits.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <stdio.h> /* stdlib includes */
-#include <stdlib.h>
-#include <string.h>
-#include <sys/time.h>
-#include <time.h>
-
-#include "sopc_builtintypes.h"
-#include "sopc_enums.h" /* s2opc includes */
-#include "sopc_time.h"
-
-#include "FreeRTOS.h"       /* freeRtos includes */
-#include "FreeRTOSConfig.h" /* freeRtos includes */
-#include "queue.h"
-#include "semphr.h"
-#include "task.h"
-#include "timers.h"
+#ifndef SOPC_P_TIME_H_
+#define SOPC_P_TIME_H_
 
 void P_TIME_SetInitialDateToBuildTime(void);
 
