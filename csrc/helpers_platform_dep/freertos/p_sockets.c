@@ -41,9 +41,10 @@ SOPC_ReturnStatus SOPC_Socket_AddrInfo_Get(char* hostname, char* port, SOPC_Sock
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
 
-    if ((hostname != NULL || port != NULL) && addrs != NULL)
+    if ((NULL != hostname || NULL != port) && NULL != addrs)
     {
-        if (getaddrinfo(hostname, port, &hints, addrs) != 0)
+        int ret = getaddrinfo(hostname, port, &hints, addrs);
+        if (ret != 0)
         {
             status = SOPC_STATUS_NOK;
         }
@@ -58,7 +59,7 @@ SOPC_ReturnStatus SOPC_Socket_AddrInfo_Get(char* hostname, char* port, SOPC_Sock
 SOPC_Socket_AddressInfo* SOPC_Socket_AddrInfo_IterNext(SOPC_Socket_AddressInfo* addr)
 {
     SOPC_Socket_AddressInfo* res = NULL;
-    if (addr != NULL)
+    if (NULL != addr)
     {
         res = addr->ai_next;
     }
@@ -72,7 +73,7 @@ uint8_t SOPC_Socket_AddrInfo_IsIPV6(SOPC_Socket_AddressInfo* addr)
 
 void SOPC_Socket_AddrInfoDelete(SOPC_Socket_AddressInfo** addrs)
 {
-    if (addrs != NULL)
+    if (NULL != addrs)
     {
         freeaddrinfo(*addrs);
         *addrs = NULL;
@@ -165,15 +166,15 @@ SOPC_ReturnStatus SOPC_Socket_Listen(Socket sock, SOPC_Socket_AddressInfo* addr)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     int bindListenStatus = -1;
-    if (addr != NULL)
+    if (NULL != addr)
     {
         bindListenStatus = bind(sock, addr->ai_addr, addr->ai_addrlen);
-        if (bindListenStatus != -1)
+        if (-1 != bindListenStatus)
         {
             bindListenStatus = listen(sock, SOPC_MAX_PENDING_CONNECTIONS);
         }
     }
-    if (bindListenStatus != -1)
+    if (-1 != bindListenStatus)
     {
         status = SOPC_STATUS_OK;
     }
@@ -185,10 +186,10 @@ SOPC_ReturnStatus SOPC_Socket_Accept(Socket listeningSock, bool setNonBlocking, 
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     struct sockaddr remoteAddr;
     socklen_t addrLen = 0;
-    if (listeningSock != -1 && acceptedSock != NULL)
+    if (SOPC_INVALID_SOCKET != listeningSock && NULL != acceptedSock)
     {
         *acceptedSock = accept(listeningSock, &remoteAddr, &addrLen);
-        if (*acceptedSock != SOPC_INVALID_SOCKET)
+        if (-1 != *acceptedSock)
         {
             status = Socket_Configure(*acceptedSock, setNonBlocking);
         }
@@ -202,24 +203,31 @@ SOPC_ReturnStatus SOPC_Socket_Connect(Socket sock, SOPC_Socket_AddressInfo* addr
     int optErr = 0;
     socklen_t optErrSize = sizeof(optErr);
     int connectStatus = -1;
-    if (addr != NULL && sock != -1)
+    if (NULL == addr || SOPC_INVALID_SOCKET == sock)
     {
-        connectStatus = connect(sock, addr->ai_addr, addr->ai_addrlen);
-        if (connectStatus < 0)
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    connectStatus = connect(sock, addr->ai_addr, addr->ai_addrlen);
+    if (connectStatus < 0)
+    {
+        int ret = getsockopt(sock, SOL_SOCKET, SO_ERROR, &optErr, &optErrSize);
+        if (ret < 0)
         {
-            getsockopt(sock, SOL_SOCKET, SO_ERROR, &optErr, &optErrSize);
-            if (EINPROGRESS == optErr)
-            {
-                // Non blocking connection started
-                connectStatus = 0;
-            }
+            return SOPC_STATUS_NOK;
         }
-        if (connectStatus == 0)
+        if (EINPROGRESS == optErr)
         {
-            status = SOPC_STATUS_OK;
+            // Non blocking connection started
+            connectStatus = 0;
         }
     }
-    return status;
+    if (connectStatus == 0)
+    {
+        return SOPC_STATUS_OK;
+    }
+
+    return SOPC_STATUS_NOK;
 }
 
 SOPC_ReturnStatus SOPC_Socket_ConnectToLocal(Socket from, Socket to)
@@ -231,8 +239,8 @@ SOPC_ReturnStatus SOPC_Socket_ConnectToLocal(Socket from, Socket to)
     memset(&saddr, 0, sizeof(struct sockaddr));
     addr.ai_addr = &saddr;
     addr.ai_addrlen = sizeof(struct sockaddr);
-
-    if (0 == getsockname(to, addr.ai_addr, &addr.ai_addrlen))
+    int ret = getsockname(to, addr.ai_addr, &addr.ai_addrlen);
+    if (0 == ret)
     {
         status = SOPC_Socket_Connect(from, &addr);
     }
@@ -242,26 +250,23 @@ SOPC_ReturnStatus SOPC_Socket_ConnectToLocal(Socket from, Socket to)
 
 SOPC_ReturnStatus SOPC_Socket_CheckAckConnect(Socket sock)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     int error = 0;
     socklen_t len = sizeof(int);
-    if (sock != -1)
+    if (SOPC_INVALID_SOCKET == sock)
     {
-        if (getsockopt(sock, SOL_SOCKET, SO_ERROR, &error, &len) < 0 || error != 0)
-        {
-            status = SOPC_STATUS_NOK;
-        }
-        else
-        {
-            status = SOPC_STATUS_OK;
-        }
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    return status;
+    int ret = getsockopt(sock, SOL_SOCKET, SO_ERROR, &error, &len);
+    if (ret < 0 || error != 0)
+    {
+        return SOPC_STATUS_NOK;
+    }
+    return SOPC_STATUS_OK;
 }
 
 void SOPC_SocketSet_Add(Socket sock, SOPC_SocketSet* sockSet)
 {
-    if (sock != -1 && sockSet != NULL)
+    if (SOPC_INVALID_SOCKET != sock && NULL != sockSet)
     {
         FD_SET(sock, &sockSet->set);
         if (sock > sockSet->fdmax)
@@ -273,7 +278,7 @@ void SOPC_SocketSet_Add(Socket sock, SOPC_SocketSet* sockSet)
 
 bool SOPC_SocketSet_IsPresent(Socket sock, SOPC_SocketSet* sockSet)
 {
-    if (sock != -1 && sockSet != NULL)
+    if (SOPC_INVALID_SOCKET != sock && NULL != sockSet)
     {
         if (false == FD_ISSET(sock, &sockSet->set))
         {
@@ -406,7 +411,7 @@ SOPC_ReturnStatus SOPC_Socket_BytesToRead(Socket sock, uint32_t* bytesToRead)
 
 void SOPC_Socket_Close(Socket* sock)
 {
-    if (sock != NULL && *sock != SOPC_INVALID_SOCKET)
+    if (NULL != sock && SOPC_INVALID_SOCKET != *sock)
     {
         close(*sock);
         *sock = SOPC_INVALID_SOCKET;
