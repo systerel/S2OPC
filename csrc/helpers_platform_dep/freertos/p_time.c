@@ -33,7 +33,7 @@ void P_TIME_SetInitialDateToBuildTime(void)
 {
     // Get today date numerics values
     struct tm today = {};
-    static char buffer[32] = {0};
+    static char buffer[12] = {0};
 
     // Initial date set to build value, always "MMM DD YYYY",
     // DD is left padded with a space if it is less than 10.
