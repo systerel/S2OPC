@@ -199,18 +199,17 @@ SOPC_ReturnStatus SOPC_Socket_Accept(Socket listeningSock, bool setNonBlocking, 
 
 SOPC_ReturnStatus SOPC_Socket_Connect(Socket sock, SOPC_Socket_AddressInfo* addr)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    int optErr = 0;
-    socklen_t optErrSize = sizeof(optErr);
-    int connectStatus = -1;
     if (NULL == addr || SOPC_INVALID_SOCKET == sock)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
+    int connectStatus = -1;
     connectStatus = connect(sock, addr->ai_addr, addr->ai_addrlen);
     if (connectStatus < 0)
     {
+        int optErr = 0;
+        socklen_t optErrSize = sizeof(optErr);
         int ret = getsockopt(sock, SOL_SOCKET, SO_ERROR, &optErr, &optErrSize);
         if (ret < 0)
         {
@@ -250,14 +249,15 @@ SOPC_ReturnStatus SOPC_Socket_ConnectToLocal(Socket from, Socket to)
 
 SOPC_ReturnStatus SOPC_Socket_CheckAckConnect(Socket sock)
 {
-    int error = 0;
-    socklen_t len = sizeof(int);
     if (SOPC_INVALID_SOCKET == sock)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
+
+    int error = 0;
+    socklen_t len = sizeof(int);
     int ret = getsockopt(sock, SOL_SOCKET, SO_ERROR, &error, &len);
-    if (ret < 0 || error != 0)
+    if (ret < 0 || 0 != error)
     {
         return SOPC_STATUS_NOK;
     }
@@ -294,7 +294,7 @@ bool SOPC_SocketSet_IsPresent(Socket sock, SOPC_SocketSet* sockSet)
 
 void SOPC_SocketSet_Clear(SOPC_SocketSet* sockSet)
 {
-    if (sockSet != NULL)
+    if (NULL != sockSet)
     {
         FD_ZERO(&sockSet->set);
         sockSet->fdmax = 0;
@@ -339,68 +339,65 @@ int32_t SOPC_Socket_WaitSocketEvents(SOPC_SocketSet* readSet,
 
 SOPC_ReturnStatus SOPC_Socket_Write(Socket sock, const uint8_t* data, uint32_t count, uint32_t* sentBytes)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    if (SOPC_INVALID_SOCKET == sock || NULL == data || count > INT32_MAX || sentBytes == NULL)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    ssize_t res = 0;
+    res = send(sock, data, count, 0);
+
+    if (res >= 0)
+    {
+        *sentBytes = (uint32_t) res;
+        return SOPC_STATUS_OK;
+    }
+
+    *sentBytes = 0;
     int optErr = 0;
     socklen_t optErrSize = sizeof(optErr);
-    ssize_t res = 0;
-    if (sock != SOPC_INVALID_SOCKET && data != NULL && count <= INT32_MAX && sentBytes != NULL)
+    res = getsockopt(sock, SOL_SOCKET, SO_ERROR, &optErr, &optErrSize);
+    if (res >= 0 && (EAGAIN == optErr || EWOULDBLOCK == optErr))
     {
-        status = SOPC_STATUS_NOK;
-        res = send(sock, data, count, 0);
-
-        if (res >= 0)
-        {
-            status = SOPC_STATUS_OK;
-            *sentBytes = (uint32_t) res;
-        }
-        else
-        {
-            *sentBytes = 0;
-            getsockopt(sock, SOL_SOCKET, SO_ERROR, &optErr, &optErrSize);
-            if (EAGAIN == optErr || EWOULDBLOCK == optErr)
-            {
-                status = SOPC_STATUS_WOULD_BLOCK;
-            }
-        }
+        return SOPC_STATUS_WOULD_BLOCK;
     }
-    return status;
+
+    return SOPC_STATUS_NOK;
 }
 
 SOPC_ReturnStatus SOPC_Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize, uint32_t* readCount)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    if (SOPC_INVALID_SOCKET == sock || NULL == data || 0 >= dataSize)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    ssize_t sReadCount = 0;
+    sReadCount = recv(sock, data, dataSize, 0);
+
+    if (sReadCount > 0)
+    {
+        *readCount = (uint32_t) sReadCount;
+        return SOPC_STATUS_OK;
+    }
+
+    if (sReadCount == 0)
+    {
+        *readCount = 0;
+        return SOPC_STATUS_CLOSED;
+    }
+
+    *readCount = 0;
     int optErr = 0;
     socklen_t optErrSize = sizeof(optErr);
-    ssize_t sReadCount = 0;
-    if (sock != SOPC_INVALID_SOCKET && data != NULL && dataSize > 0)
-    {
-        sReadCount = recv(sock, data, dataSize, 0);
 
-        if (sReadCount > 0)
-        {
-            *readCount = (uint32_t) sReadCount;
-            status = SOPC_STATUS_OK;
-        }
-        else if (sReadCount == 0)
-        {
-            *readCount = 0;
-            status = SOPC_STATUS_CLOSED;
-        }
-        else if (sReadCount == -1)
-        {
-            *readCount = 0;
-            getsockopt(sock, SOL_SOCKET, SO_ERROR, &optErr, &optErrSize);
-            if (EAGAIN == optErr || EWOULDBLOCK == optErr)
-            {
-                status = SOPC_STATUS_WOULD_BLOCK;
-            }
-        }
-        else
-        {
-            status = SOPC_STATUS_NOK;
-        }
+    int res = getsockopt(sock, SOL_SOCKET, SO_ERROR, &optErr, &optErrSize);
+    if (res >= 0 && (EAGAIN == optErr || EWOULDBLOCK == optErr))
+    {
+        return SOPC_STATUS_WOULD_BLOCK;
     }
-    return status;
+
+    return SOPC_STATUS_NOK;
 }
 
 SOPC_ReturnStatus SOPC_Socket_BytesToRead(Socket sock, uint32_t* bytesToRead)
