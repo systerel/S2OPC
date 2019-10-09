@@ -249,7 +249,7 @@ static inline SOPC_ReturnStatus P_SYNCHRO_WaitSignal(uint32_t* pNotificationValu
     }
     else
     {
-        while (false == bQuit)
+        while (!bQuit)
         {
             vTaskSetTimeOutState(&xTimeOut); // RAZ timeout
             // Wait for specified signal bit 0 -> 30. Bit 31 = CLEARING_SIGNAL
