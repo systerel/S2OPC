@@ -24,7 +24,6 @@
 #include <string.h>
 
 #include "FreeRTOS.h" /* freeRtos includes */
-#include "queue.h"
 #include "semphr.h"
 #include "task.h"
 #include "timers.h"
@@ -49,14 +48,14 @@ typedef struct T_THREAD_ARGS
 
 typedef struct T_THREAD_WKS
 {
-    tUtilsList taskList;              // Task list joining this task
-    tPtrFct cbWaitingForJoin;         // Debug callback
-    tPtrFct cbReadyToSignal;          // Debug callback
-    TaskHandle_t handleTask;          // Handle freeRtos task
-    QueueHandle_t lockRecHandle;      // Critical section
-    QueueHandle_t signalReadyToWait;  // Task wait for at least one join call
-    QueueHandle_t signalReadyToStart; // Autorize user callback execution
-    Condition* pSignalThreadJoined;   // Cond var used to signal task end
+    tUtilsList taskList;                  // Task list joining this task
+    tPtrFct cbWaitingForJoin;             // Debug callback
+    tPtrFct cbReadyToSignal;              // Debug callback
+    TaskHandle_t handleTask;              // Handle freeRtos task
+    SemaphoreHandle_t lockRecHandle;      // Critical section
+    SemaphoreHandle_t signalReadyToWait;  // Task wait for at least one join call
+    SemaphoreHandle_t signalReadyToStart; // Autorize user callback execution
+    Condition* pSignalThreadJoined;       // Cond var used to signal task end
     tThreadArgs args;
 } tThreadWks;
 
@@ -565,7 +564,7 @@ SOPC_ReturnStatus P_THREAD_Join(Thread* pHandle)
     {
         // Unlink the condition variable and the mutex to avoid deadlock in multiple
         // calls of Join
-        QueueHandle_t tempLock = pThread->lockRecHandle;
+        SemaphoreHandle_t tempLock = pThread->lockRecHandle;
         pThread->lockRecHandle = NULL;
 
         // After wait, clear and destroy condition variable. Unlock other join if necessary.
