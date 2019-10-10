@@ -300,7 +300,7 @@ static void check_parsed_s2opc_config(SOPC_S2OPC_Config* s2opcConfig)
                                SOPC_String_GetRawCString(&sConfig->serverDescription.ApplicationUri)));
     ck_assert_int_eq(
         0, strcmp("urn:S2OPC:MY_SERVER_HOST:prod", SOPC_String_GetRawCString(&sConfig->serverDescription.ProductUri)));
-    ck_assert_int_eq(0, strcmp("S2OPC toolkit conifg example",
+    ck_assert_int_eq(0, strcmp("S2OPC toolkit config example",
                                SOPC_String_GetRawCString(&sConfig->serverDescription.ApplicationName.Text)));
     ck_assert_int_eq(0, strcmp("en", SOPC_String_GetRawCString(&sConfig->serverDescription.ApplicationName.Locale)));
 

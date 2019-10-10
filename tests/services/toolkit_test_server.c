@@ -355,6 +355,8 @@ static SOPC_ReturnStatus Server_LoadServerConfiguration(SOPC_S2OPC_Config* outpu
         res = load_config_from_file(xml_file_path, output_s2opcConfig);
         break;
 #endif
+    default:
+        assert(false);
     }
 
     /* Check properties on configuration */
@@ -659,6 +661,8 @@ static SOPC_ReturnStatus Server_ConfigureAddressSpace(SOPC_AddressSpace** output
         status = (NULL != *output_addressSpace) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
         break;
 #endif
+    default:
+        assert(false);
     }
 
     /* Set the loaded address space as the current server address space configuration */

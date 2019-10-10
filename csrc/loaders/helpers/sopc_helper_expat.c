@@ -95,7 +95,7 @@ const char* SOPC_HelperExpat_CharDataStripped(SOPC_HelperExpatCtx* ctx)
 
 void SOPC_HelperExpat_PushSkipTag(SOPC_HelperExpatCtx* ctx, const char* name)
 {
-    assert(ctx->skip_tag[0] == 0);
+    assert(0 == ctx->skip_tag[0]);
     assert(strlen(name) < SKIP_TAG_LEN);
     strncpy(ctx->skip_tag, name, SKIP_TAG_LEN - 1);
 }
