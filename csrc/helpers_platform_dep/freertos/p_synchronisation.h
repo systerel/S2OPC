@@ -30,7 +30,7 @@
 #include "sopc_enums.h"
 
 #include "FreeRTOS.h"
-#include "queue.h"
+#include "semphr.h"
 #include "task.h"
 
 #include "p_utils.h"
@@ -53,9 +53,9 @@ typedef enum T_CONDITION_VARIABLE_STATUS
 
 typedef struct tConditionVariable
 {
-    eConditionVariableStatus status; // Status condition variable
-    QueueHandle_t handleLockCounter; // Critical section token
-    tUtilsList taskList;             // List of task with signal expected, calling unlock and wait
+    eConditionVariableStatus status;     // Status condition variable
+    SemaphoreHandle_t handleLockCounter; // Critical section token
+    tUtilsList taskList;                 // List of task with signal expected, calling unlock and wait
 } Condition;
 
 Condition* P_SYNCHRO_CreateConditionVariable(uint16_t wMaxRDV);
