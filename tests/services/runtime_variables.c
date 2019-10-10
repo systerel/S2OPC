@@ -99,7 +99,7 @@ RuntimeVariables build_runtime_variables(SOPC_Build_Info build_info,
     runtimeVariables.build_info.BuildDate = buildDate;
 
     runtimeVariables.service_level = 255;
-    runtimeVariables.auditing = true;
+    runtimeVariables.auditing = false;
 
     runtimeVariables.maximum_operation_per_request = SOPC_MAX_OPERATIONS_PER_MSG;
 
