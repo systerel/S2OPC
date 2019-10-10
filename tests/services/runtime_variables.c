@@ -66,7 +66,9 @@ RuntimeVariables build_runtime_variables(SOPC_Build_Info build_info,
     runtimeVariables.server_uri = product_uri;
     runtimeVariables.app_namespace_uris = app_namespace_uris;
 
+    runtimeVariables.secondsTillShutdown = 0;
     runtimeVariables.server_state = OpcUa_ServerState_Running;
+    SOPC_LocalizedText_Initialize(&runtimeVariables.shutdownReason);
 
     OpcUa_BuildInfo_Initialize(&runtimeVariables.build_info);
 
@@ -165,6 +167,27 @@ static bool set_write_value_datetime(OpcUa_WriteValue* wv, uint32_t id, SOPC_Dat
     return true;
 }
 
+static bool set_write_value_uint32(OpcUa_WriteValue* wv, uint32_t id, uint32_t value)
+{
+    set_write_value_id(wv, id);
+    set_variant_scalar(&wv->Value.Value, SOPC_UInt32_Id);
+    wv->Value.Value.Value.Uint32 = value;
+    return true;
+}
+
+static bool set_write_value_localized_text(OpcUa_WriteValue* wv, uint32_t id, SOPC_LocalizedText value)
+{
+    set_write_value_id(wv, id);
+    set_variant_scalar(&wv->Value.Value, SOPC_LocalizedText_Id);
+    wv->Value.Value.Value.LocalizedText = SOPC_Malloc(sizeof(SOPC_LocalizedText));
+    assert(NULL != wv->Value.Value.Value.LocalizedText);
+    SOPC_LocalizedText_Initialize(wv->Value.Value.Value.LocalizedText);
+    SOPC_ReturnStatus status = SOPC_LocalizedText_Copy(wv->Value.Value.Value.LocalizedText, &value);
+    assert(SOPC_STATUS_OK == status);
+
+    return true;
+}
+
 static bool set_write_value_build_info(OpcUa_WriteValue* wv, const OpcUa_BuildInfo* build_info)
 {
     /* create extension object */
@@ -227,14 +250,61 @@ static bool set_server_server_status_state_value(OpcUa_WriteValue* wv, OpcUa_Ser
     return true;
 }
 
+static bool set_write_value_server_status(OpcUa_WriteValue* wv, RuntimeVariables vars)
+{
+    const OpcUa_BuildInfo* build_info = &vars.build_info;
+    /* create extension object */
+    SOPC_ExtensionObject* extObject = SOPC_Calloc(1, sizeof(SOPC_ExtensionObject));
+    OpcUa_ServerStatusDataType* server_status_in_extObject = NULL;
+    SOPC_ReturnStatus status;
+
+    SOPC_ExtensionObject_Initialize(extObject);
+    status = SOPC_Encodeable_CreateExtension(extObject, &OpcUa_ServerStatusDataType_EncodeableType,
+                                             (void**) &server_status_in_extObject);
+    assert(SOPC_STATUS_OK == status);
+
+    /* copy values */
+    status = SOPC_String_Copy(&server_status_in_extObject->BuildInfo.ProductUri, &build_info->ProductUri);
+    assert(SOPC_STATUS_OK == status);
+    status = SOPC_String_Copy(&server_status_in_extObject->BuildInfo.ManufacturerName, &build_info->ManufacturerName);
+    assert(SOPC_STATUS_OK == status);
+    status = SOPC_String_Copy(&server_status_in_extObject->BuildInfo.ProductName, &build_info->ProductName);
+    assert(SOPC_STATUS_OK == status);
+    status = SOPC_String_Copy(&server_status_in_extObject->BuildInfo.SoftwareVersion, &build_info->SoftwareVersion);
+    assert(SOPC_STATUS_OK == status);
+    status = SOPC_String_Copy(&server_status_in_extObject->BuildInfo.BuildNumber, &build_info->BuildNumber);
+    assert(SOPC_STATUS_OK == status);
+    server_status_in_extObject->BuildInfo.BuildDate = build_info->BuildDate;
+
+    server_status_in_extObject->CurrentTime = SOPC_Time_GetCurrentTimeUTC();
+    server_status_in_extObject->SecondsTillShutdown = vars.secondsTillShutdown;
+    status = SOPC_LocalizedText_Copy(&server_status_in_extObject->ShutdownReason, &vars.shutdownReason);
+    assert(SOPC_STATUS_OK == status);
+    server_status_in_extObject->State = vars.server_state;
+    server_status_in_extObject->StartTime = SOPC_Time_GetCurrentTimeUTC();
+
+    /* Prepare write of this extension object */
+    set_write_value_id(wv, OpcUaId_Server_ServerStatus);
+    wv->Value.Value.ArrayType = SOPC_VariantArrayType_SingleValue;
+    wv->Value.Value.BuiltInTypeId = SOPC_ExtensionObject_Id;
+    wv->Value.Value.Value.ExtObject = extObject;
+
+    return true;
+}
+
 static bool set_server_server_status_variables(SOPC_Array* write_values, RuntimeVariables vars)
 {
-    OpcUa_WriteValue* values = append_write_values(write_values, 3);
+    OpcUa_WriteValue* values = append_write_values(write_values, 6);
     return values != NULL &&
            set_write_value_datetime(&values[0], OpcUaId_Server_ServerStatus_StartTime, SOPC_Time_GetCurrentTimeUTC()) &&
            set_write_value_datetime(&values[1], OpcUaId_Server_ServerStatus_CurrentTime,
                                     SOPC_Time_GetCurrentTimeUTC()) &&
            set_server_server_status_state_value(&values[2], vars.server_state) &&
+           set_write_value_uint32(&values[3], OpcUaId_Server_ServerStatus_SecondsTillShutdown,
+                                  vars.secondsTillShutdown) &&
+           set_write_value_localized_text(&values[4], OpcUaId_Server_ServerStatus_ShutdownReason,
+                                          vars.shutdownReason) &&
+           set_write_value_server_status(&values[5], vars) &&
            set_server_server_status_build_info_variables(write_values, &vars.build_info);
 }
 
