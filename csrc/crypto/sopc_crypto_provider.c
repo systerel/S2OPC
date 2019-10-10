@@ -1107,8 +1107,8 @@ SOPC_ReturnStatus SOPC_CryptoProvider_GenerateRandomBytes(const SOPC_CryptoProvi
 SOPC_ReturnStatus SOPC_CryptoProvider_GenerateSecureChannelNonce(const SOPC_CryptoProvider* pProvider,
                                                                  SOPC_SecretBuffer** ppNonce)
 {
-    uint32_t lenNonce;
-    SOPC_ExposedBuffer* pExp;
+    uint32_t lenNonce = 0;
+    SOPC_ExposedBuffer* pExp = NULL;
 
     if (NULL == pProvider || NULL == ppNonce)
     {
