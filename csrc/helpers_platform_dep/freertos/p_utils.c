@@ -27,7 +27,6 @@
 #include "sopc_mem_alloc.h" /*s2opc*/
 
 #include "FreeRTOS.h" /*freeRtos*/
-#include "queue.h"
 #include "semphr.h"
 #include "task.h"
 #include "timers.h"
@@ -394,7 +393,7 @@ SOPC_ReturnStatus P_UTILS_LIST_InitMT(tUtilsList* ptr, uint16_t wMaxRDV)
         status = P_UTILS_LIST_Init(ptr, wMaxRDV);
         if (SOPC_STATUS_OK == status)
         {
-            ptr->lockHandle = xQueueCreateMutex(queueQUEUE_TYPE_BINARY_SEMAPHORE);
+            ptr->lockHandle = xSemaphoreCreateMutex();
             if (ptr->lockHandle == NULL)
             {
                 P_UTILS_LIST_DeInit(ptr);
@@ -416,7 +415,7 @@ void P_UTILS_LIST_DeInitMT(tUtilsList* ptr)
         {
             P_UTILS_LIST_DeInit(ptr);
         }
-        vQueueDelete(ptr->lockHandle);
+        vSemaphoreDelete(ptr->lockHandle);
         ptr->lockHandle = NULL;
         DEBUG_decrementCpt();
     }
