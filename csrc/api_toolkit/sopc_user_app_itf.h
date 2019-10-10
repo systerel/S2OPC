@@ -206,7 +206,7 @@ typedef struct
 
 /* \brief Initalize the content of the SOPC_S2OPC_Config
  *
- * \param config  The s2opc server configuration to clear
+ * \param config  The s2opc server configuration to initialize
  */
 void SOPC_S2OPC_Config_Initialize(SOPC_S2OPC_Config* config);
 

@@ -16,7 +16,7 @@
     <ApplicationDescription>
       <ApplicationURI uri="urn:S2OPC:MY_SERVER_HOST:app"/>
       <ProductURI uri="urn:S2OPC:MY_SERVER_HOST:prod"/>
-      <ApplicationName text="S2OPC toolkit conifg example" locale="en"/>
+      <ApplicationName text="S2OPC toolkit config example" locale="en"/>
       <!-- No discovery URL: we only support current endpoint URL as discovery URL for now -->
     </ApplicationDescription>
     <Endpoints>
