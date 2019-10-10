@@ -20,7 +20,6 @@
 #include <stdbool.h>
 
 #include "FreeRTOS.h" /* freeRtos includes */
-#include "queue.h"
 #include "semphr.h"
 #include "task.h"
 #include "timers.h"
@@ -82,7 +81,7 @@ SOPC_ReturnStatus P_SYNCHRO_ClearConditionVariable(Condition* pConditionVariable
         P_UTILS_LIST_DeInit(&pConditionVariable->taskList);
     }
 
-    vQueueDelete(pConditionVariable->handleLockCounter); // End of critical section. Destroy it on clear
+    vSemaphoreDelete(pConditionVariable->handleLockCounter); // End of critical section. Destroy it on clear
     pConditionVariable->handleLockCounter = NULL;
     DEBUG_decrementCpt();
     memset(pConditionVariable, 0, sizeof(Condition)); // Raz on leave memory
@@ -201,7 +200,7 @@ SOPC_ReturnStatus P_SYNCHRO_SignalConditionVariable(Condition* pConditionVariabl
         return SOPC_STATUS_INVALID_STATE;
     }
 
-    xQueueSemaphoreTake(pConditionVariable->handleLockCounter, portMAX_DELAY); // Critical section
+    xSemaphoreTake(pConditionVariable->handleLockCounter, portMAX_DELAY); // Critical section
     {
         wCurrentSlotId = UINT16_MAX;
         do
@@ -345,7 +344,7 @@ SOPC_ReturnStatus P_SYNCHRO_UnlockAndWaitForConditionVariable(
         return SOPC_STATUS_INVALID_STATE;
     }
     // Critical section
-    xQueueSemaphoreTake(pConditionVariable->handleLockCounter, portMAX_DELAY);
+    xSemaphoreTake(pConditionVariable->handleLockCounter, portMAX_DELAY);
     {
         handleTask = xTaskGetCurrentTaskHandle();
 
@@ -409,7 +408,7 @@ SOPC_ReturnStatus P_SYNCHRO_UnlockAndWaitForConditionVariable(
         // If timeout occured, remove the task from the list.
         if (SOPC_STATUS_TIMEOUT == result)
         {
-            xQueueSemaphoreTake(pConditionVariable->handleLockCounter, portMAX_DELAY); // Critical section
+            xSemaphoreTake(pConditionVariable->handleLockCounter, portMAX_DELAY); // Critical section
             {
                 P_UTILS_LIST_RemoveElt(&pConditionVariable->taskList, //
                                        handleTask,                    //
@@ -485,11 +484,11 @@ SOPC_ReturnStatus Condition_SignalAll(Condition* cond)
 SOPC_ReturnStatus Mutex_UnlockAndTimedWaitCond(Condition* cond, Mutex* mut, uint32_t milliSecs)
 {
     SOPC_ReturnStatus resSOPC = SOPC_STATUS_INVALID_PARAMETERS;
-    QueueHandle_t* pFreeRtosMutex = mut;
+    SemaphoreHandle_t* pFreeRtosMutex = mut;
 
     if (NULL != cond && NULL != mut && NULL != (*mut))
     {
-        pFreeRtosMutex = ((QueueHandle_t*) mut);
+        pFreeRtosMutex = ((SemaphoreHandle_t*) mut);
         resSOPC = P_SYNCHRO_UnlockAndWaitForConditionVariable(cond,                //
                                                               pFreeRtosMutex,      //
                                                               APP_DEFAULT_SIGNAL,  //
@@ -509,7 +508,7 @@ SOPC_ReturnStatus Mutex_UnlockAndWaitCond(Condition* cond, Mutex* mut)
 SOPC_ReturnStatus Mutex_Initialization(Mutex* mut)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
-    QueueHandle_t freeRtosMutex = NULL;
+    SemaphoreHandle_t freeRtosMutex = NULL;
 
     if (mut == NULL)
     {
@@ -535,7 +534,7 @@ SOPC_ReturnStatus Mutex_Initialization(Mutex* mut)
 /*Destroy recursive mutex*/
 SOPC_ReturnStatus Mutex_Clear(Mutex* mut)
 {
-    QueueHandle_t freeRtosMutex = NULL;
+    SemaphoreHandle_t freeRtosMutex = NULL;
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
     if ((NULL == mut) || (NULL == (*mut)))
@@ -544,7 +543,7 @@ SOPC_ReturnStatus Mutex_Clear(Mutex* mut)
     }
     else
     {
-        freeRtosMutex = (QueueHandle_t)(*mut);
+        freeRtosMutex = (SemaphoreHandle_t)(*mut);
         vSemaphoreDelete(freeRtosMutex);
         *mut = NULL;
     }
@@ -556,14 +555,14 @@ SOPC_ReturnStatus Mutex_Lock(Mutex* mut)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
     BaseType_t resRtos = pdPASS;
-    QueueHandle_t freeRtosMutex = NULL;
+    SemaphoreHandle_t freeRtosMutex = NULL;
     if ((NULL == mut) || (NULL == (*mut)))
     {
         result = SOPC_STATUS_INVALID_PARAMETERS;
     }
     else
     {
-        freeRtosMutex = *((QueueHandle_t*) (mut));
+        freeRtosMutex = *((SemaphoreHandle_t*) (mut));
 
         resRtos = xQueueTakeMutexRecursive(freeRtosMutex, portMAX_DELAY);
         if (pdPASS == resRtos)
@@ -581,7 +580,7 @@ SOPC_ReturnStatus Mutex_Lock(Mutex* mut)
 // Unlock recursive mutex
 SOPC_ReturnStatus Mutex_Unlock(Mutex* mut)
 {
-    QueueHandle_t freeRtosMutex = NULL;
+    SemaphoreHandle_t freeRtosMutex = NULL;
     BaseType_t resRtos = pdPASS;
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
     if ((NULL == mut) || ((*mut) == NULL))
@@ -590,7 +589,7 @@ SOPC_ReturnStatus Mutex_Unlock(Mutex* mut)
     }
     else
     {
-        freeRtosMutex = *((QueueHandle_t*) (mut));
+        freeRtosMutex = *((SemaphoreHandle_t*) (mut));
         resRtos = xQueueGiveMutexRecursive(freeRtosMutex);
         if (pdPASS == resRtos)
         {
