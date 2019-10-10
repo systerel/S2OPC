@@ -23,7 +23,7 @@
 #include "sopc_enums.h"
 
 #include "FreeRTOS.h"
-#include "queue.h"
+#include "semphr.h"
 #include "task.h"
 
 #define MAX_P_UTILS_LIST (16)
@@ -48,7 +48,7 @@ typedef struct T_TASK_LIST
     uint16_t firstFree;
     uint16_t wMaxWaitingTasks;
     uint16_t wNbRegisteredTasks;
-    QueueHandle_t lockHandle;
+    SemaphoreHandle_t lockHandle;
 } tUtilsList;
 
 /* Non Thread safe private list api */
