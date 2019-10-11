@@ -526,7 +526,10 @@
     <Description>The base type for all object nodes.</Description>
     <References>
       <Reference ReferenceType="HasSubtype">i=2013</Reference>
+      <Reference ReferenceType="HasSubtype">i=77</Reference>
       <Reference ReferenceType="HasSubtype">i=61</Reference>
+      <Reference ReferenceType="HasSubtype">i=2033</Reference>
+      <Reference ReferenceType="HasSubtype">i=2034</Reference>
     </References>
   </UAObjectType>
   <UAObjectType NodeId="i=61" BrowseName="FolderType">
@@ -553,6 +556,79 @@
       <Reference ReferenceType="HasSubtype">i=3051</Reference>
     </References>
   </UAVariableType>
+    <UAObjectType NodeId="i=77" BrowseName="ModellingRuleType">
+      <DisplayName>ModellingRuleType</DisplayName>
+      <Description>The type for an object that describes how an instance declaration is used when a type is instantiated.</Description>
+      <References>
+         <Reference ReferenceType="HasProperty">i=111</Reference>
+         <Reference ReferenceType="HasSubtype" IsForward="false">i=58</Reference>
+      </References>
+  </UAObjectType>
+  <UAVariable NodeId="i=111" BrowseName="NamingRule" ParentNodeId="i=77" DataType="i=120">
+      <DisplayName>NamingRule</DisplayName>
+      <Description>Specified the significances of the BrowseName when a type is instantiated.</Description>
+      <References>
+         <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+         <Reference ReferenceType="HasModellingRule">i=78</Reference>
+         <Reference ReferenceType="HasProperty" IsForward="false">i=77</Reference>
+      </References>
+      <Value>
+         <uax:Int32>1</uax:Int32>
+      </Value>
+  </UAVariable>
+  <UAObject NodeId="i=78" BrowseName="Mandatory" SymbolicName="ModellingRule_Mandatory">
+      <DisplayName>Mandatory</DisplayName>
+      <Description>Specifies that an instance with the attributes and references of the instance declaration must appear when a type is instantiated.</Description>
+      <References>
+         <Reference ReferenceType="HasProperty">i=112</Reference>
+         <Reference ReferenceType="HasTypeDefinition">i=77</Reference>
+         <Reference ReferenceType="Organizes" IsForward="false">i=2996</Reference>
+         <Reference ReferenceType="HasModellingRule" IsForward="false">i=111</Reference>
+      </References>
+  </UAObject>
+  <UAVariable NodeId="i=112" BrowseName="NamingRule" ParentNodeId="i=78" DataType="i=120">
+      <DisplayName>NamingRule</DisplayName>
+      <Description>Specified the significances of the BrowseName when a type is instantiated.</Description>
+      <References>
+         <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+         <Reference ReferenceType="HasProperty" IsForward="false">i=78</Reference>
+      </References>
+      <Value>
+         <uax:Int32>1</uax:Int32>
+      </Value>
+  </UAVariable>
+  <UAObject NodeId="i=80" BrowseName="Optional" SymbolicName="ModellingRule_Optional">
+      <DisplayName>Optional</DisplayName>
+      <Description>Specifies that an instance with the attributes and references of the instance declaration may appear when a type is instantiated.</Description>
+      <References>
+         <Reference ReferenceType="HasProperty">i=113</Reference>
+         <Reference ReferenceType="HasTypeDefinition">i=77</Reference>
+         <Reference ReferenceType="Organizes" IsForward="false">i=2996</Reference>
+         <Reference ReferenceType="HasModellingRule" IsForward="false">i=11565</Reference>
+         <Reference ReferenceType="HasModellingRule" IsForward="false">i=12161</Reference>
+         <Reference ReferenceType="HasModellingRule" IsForward="false">i=12162</Reference>
+         <Reference ReferenceType="HasModellingRule" IsForward="false">i=11567</Reference>
+         <Reference ReferenceType="HasModellingRule" IsForward="false">i=12163</Reference>
+         <Reference ReferenceType="HasModellingRule" IsForward="false">i=12164</Reference>
+         <Reference ReferenceType="HasModellingRule" IsForward="false">i=11569</Reference>
+         <Reference ReferenceType="HasModellingRule" IsForward="false">i=11570</Reference>
+         <Reference ReferenceType="HasModellingRule" IsForward="false">i=11571</Reference>
+         <Reference ReferenceType="HasModellingRule" IsForward="false">i=11572</Reference>
+         <Reference ReferenceType="HasModellingRule" IsForward="false">i=11573</Reference>
+         <Reference ReferenceType="HasModellingRule" IsForward="false">i=11574</Reference>
+      </References>
+  </UAObject>
+  <UAVariable NodeId="i=113" BrowseName="NamingRule" ParentNodeId="i=80" DataType="i=120">
+      <DisplayName>NamingRule</DisplayName>
+      <Description>Specified the significances of the BrowseName when a type is instantiated.</Description>
+      <References>
+         <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+         <Reference ReferenceType="HasProperty" IsForward="false">i=80</Reference>
+      </References>
+      <Value>
+         <uax:Int32>2</uax:Int32>
+      </Value>
+  </UAVariable>
   <UAObject NodeId="i=84" BrowseName="Root" SymbolicName="RootFolder">
     <DisplayName>Root</DisplayName>
     <Description>The root of the server address space.</Description>
@@ -666,6 +742,7 @@
     <Description>The maximum number of operations in a single Read request.</Description>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasModellingRule">i=80</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">i=11564</Reference>
     </References>
   </UAVariable>
@@ -674,6 +751,7 @@
     <Description>The maximum number of operations in a single data HistoryRead request.</Description>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasModellingRule">i=80</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">i=11564</Reference>
     </References>
   </UAVariable>
@@ -682,6 +760,7 @@
     <Description>The maximum number of operations in a single event HistoryRead request.</Description>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasModellingRule">i=80</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">i=11564</Reference>
     </References>
   </UAVariable>
@@ -690,6 +769,7 @@
     <Description>The maximum number of operations in a single Write request.</Description>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasModellingRule">i=80</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">i=11564</Reference>
     </References>
   </UAVariable>
@@ -698,6 +778,7 @@
     <Description>The maximum number of operations in a single data HistoryUpdate request.</Description>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasModellingRule">i=80</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">i=11564</Reference>
     </References>
   </UAVariable>
@@ -706,6 +787,7 @@
     <Description>The maximum number of operations in a single event HistoryUpdate request.</Description>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasModellingRule">i=80</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">i=11564</Reference>
     </References>
   </UAVariable>
@@ -714,6 +796,7 @@
     <Description>The maximum number of operations in a single Call request.</Description>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasModellingRule">i=80</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">i=11564</Reference>
     </References>
   </UAVariable>
@@ -722,6 +805,7 @@
     <Description>The maximum number of operations in a single Browse request.</Description>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+         <Reference ReferenceType="HasModellingRule">i=80</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">i=11564</Reference>
     </References>
   </UAVariable>
@@ -730,6 +814,7 @@
     <Description>The maximum number of operations in a single RegisterNodes request.</Description>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasModellingRule">i=80</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">i=11564</Reference>
     </References>
   </UAVariable>
@@ -738,6 +823,7 @@
     <Description>The maximum number of operations in a single TranslateBrowsePathsToNodeIds request.</Description>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasModellingRule">i=80</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">i=11564</Reference>
     </References>
   </UAVariable>
@@ -746,6 +832,7 @@
     <Description>The maximum number of operations in a single AddNodes, AddReferences, DeleteNodes or DeleteReferences request.</Description>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasModellingRule">i=80</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">i=11564</Reference>
     </References>
   </UAVariable>
@@ -754,6 +841,7 @@
     <Description>The maximum number of operations in a single MonitoredItem related request.</Description>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasModellingRule">i=80</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">i=11564</Reference>
     </References>
   </UAVariable>
@@ -852,6 +940,8 @@
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
       <Reference ReferenceType="HasComponent" IsForward="false">i=2268</Reference>
+      <Reference ReferenceType="Organizes">i=78</Reference>
+      <Reference ReferenceType="Organizes">i=80</Reference>
     </References>
   </UAObject>
   <UAObject NodeId="i=2997" BrowseName="AggregateFunctions" ParentNodeId="i=2268">
