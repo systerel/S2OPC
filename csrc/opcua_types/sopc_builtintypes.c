@@ -4963,6 +4963,8 @@ const SOPC_NodeId* SOPC_Variant_Get_DataType(const SOPC_Variant* var)
                 // TODO / Note: if the type is unknown we cannot guarantee here the NodeId is a DataType, since it could
                 // be the DefaultEncoding Object instead.
                 // Returns the generic Structure type instead
+
+                // Will fail at typecheck if Variable DataType is not Structure (i=22)
                 return &SOPC_Structure_Type;
             }
         }
@@ -4970,6 +4972,10 @@ const SOPC_NodeId* SOPC_Variant_Get_DataType(const SOPC_Variant* var)
         {
             /* If type defined in another server or variant is an array, no guarantee that all are of same type. Keep
              * "Structure" generic type. */
+
+            // Will fail at typecheck if Variable DataType is not Structure (i=22)
+            // + caller shall manage a case of Array with size 0
+
             return &SOPC_Structure_Type;
         }
     default:
