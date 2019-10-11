@@ -471,3 +471,28 @@ bool set_runtime_variables(uint32_t endpoint_config_idx, RuntimeVariables vars)
 
     return true;
 }
+
+bool update_server_status_runtime_variables(uint32_t endpoint_config_idx, RuntimeVariables vars)
+{
+    OpcUa_WriteRequest* request = SOPC_Calloc(1, sizeof(OpcUa_WriteRequest));
+    SOPC_Array* write_values = SOPC_Array_Create(sizeof(OpcUa_WriteValue), 0, OpcUa_WriteValue_Clear);
+
+    bool ok = (write_values != NULL && request != NULL && set_server_server_status_variables(write_values, vars));
+
+    if (!ok)
+    {
+        SOPC_Array_Delete(write_values);
+        SOPC_Free(request);
+        return false;
+    }
+
+    size_t n_values = SOPC_Array_Size(write_values);
+    assert(n_values <= INT32_MAX);
+
+    OpcUa_WriteRequest_Initialize(request);
+    request->NodesToWrite = SOPC_Array_Into_Raw(write_values);
+    request->NoOfNodesToWrite = (int32_t) n_values;
+    SOPC_ToolkitServer_AsyncLocalServiceRequest(endpoint_config_idx, request, 0);
+
+    return true;
+}

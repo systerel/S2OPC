@@ -78,6 +78,8 @@ typedef enum
 #endif
 } ServerConfigLoader;
 
+#define SHUTDOWN_PHASE_IN_SECONDS 5
+
 /*---------------------------------------------------------------------------
  *                          Callbacks definition
  *---------------------------------------------------------------------------*/
@@ -90,13 +92,19 @@ static void Test_StopSignal(int sig)
     /* avoid unused parameter compiler warning */
     (void) sig;
 
-    if (stopServer != 0)
+    /*
+     * Signal steps:
+     * - 1st signal: activate server shutdown phase of OPC UA server (will stop after <SHUTDOWN_PHASE_IN_SECONDS>s)
+     * - 2nd signal: activate ASAP server shutdown gracefully closing all connections and clearing context
+     * - 3rd signal: abrupt exit with error code '1'
+     */
+    if (stopServer > 1)
     {
         exit(1);
     }
     else
     {
-        stopServer = 1;
+        stopServer++;
     }
 }
 
@@ -776,6 +784,7 @@ int main(int argc, char* argv[])
     const uint32_t sleepTimeout = 500;
 
     /* Get the toolkit build information and print it */
+    RuntimeVariables runtime_vars;
     SOPC_Build_Info build_info = SOPC_ToolkitConfig_GetBuildInfo();
     printf("toolkitVersion: %s\n", build_info.toolkitVersion);
     printf("toolkitSrcCommit: %s\n", build_info.toolkitSrcCommit);
@@ -871,8 +880,7 @@ int main(int argc, char* argv[])
     /* Update server information runtime variables in address space */
     if (SOPC_STATUS_OK == status)
     {
-        RuntimeVariables runtime_vars =
-            build_runtime_variables(build_info, PRODUCT_URI, app_namespace_uris, "Systerel");
+        runtime_vars = build_runtime_variables(build_info, PRODUCT_URI, app_namespace_uris, "Systerel");
 
         if (!set_runtime_variables(epConfigIdx, runtime_vars))
         {
@@ -886,6 +894,43 @@ int main(int argc, char* argv[])
     while (SOPC_STATUS_OK == status && stopServer == 0 && SOPC_Atomic_Int_Get(&endpointClosed) == 0)
     {
         SOPC_Sleep(sleepTimeout);
+    }
+
+    /**
+     * On first stop signal received, the OPC UA server indicate it will shutdown during
+     * <SHUTDOWN_PHASE_IN_SECONDS>s and then stop.
+     */
+    SOPC_TimeReference targetTime = SOPC_TimeReference_GetCurrent() + SHUTDOWN_PHASE_IN_SECONDS * 1000;
+    bool targetTimeReached = false;
+    uint32_t secondsTillShutdown = SHUTDOWN_PHASE_IN_SECONDS;
+    // From part 5: "The server has shut down or is in the process of shutting down."
+    runtime_vars.server_state = OpcUa_ServerState_Shutdown;
+    SOPC_String_AttachFromCstring(&runtime_vars.shutdownReason.Locale, "en");
+    SOPC_String_AttachFromCstring(&runtime_vars.shutdownReason.Text, "Requested shutdown");
+    while (SOPC_STATUS_OK == status && stopServer == 1 && SOPC_Atomic_Int_Get(&endpointClosed) == 0 &&
+           !targetTimeReached)
+    {
+        // Update the seconds till shutdown value
+        runtime_vars.secondsTillShutdown = secondsTillShutdown;
+        if (!update_server_status_runtime_variables(epConfigIdx, runtime_vars))
+        {
+            printf("<Test_Server_Toolkit: Failed to updated Server object");
+            status = SOPC_STATUS_NOK;
+        }
+        else
+        {
+            SOPC_Sleep(sleepTimeout);
+        }
+        // Evaluation of seconds till shutdown
+        SOPC_TimeReference currentTime = SOPC_TimeReference_GetCurrent();
+        if (currentTime < targetTime)
+        {
+            secondsTillShutdown = (uint32_t)((targetTime - currentTime) / 1000);
+        }
+        else
+        {
+            targetTimeReached = true;
+        }
     }
 
     /* Asynchronous request to close the endpoint */
