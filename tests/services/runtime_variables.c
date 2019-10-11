@@ -175,6 +175,14 @@ static bool set_write_value_uint32(OpcUa_WriteValue* wv, uint32_t id, uint32_t v
     return true;
 }
 
+static bool set_write_value_int32(OpcUa_WriteValue* wv, uint32_t id, int32_t value)
+{
+    set_write_value_id(wv, id);
+    set_variant_scalar(&wv->Value.Value, SOPC_Int32_Id);
+    wv->Value.Value.Value.Int32 = value;
+    return true;
+}
+
 static bool set_write_value_localized_text(OpcUa_WriteValue* wv, uint32_t id, SOPC_LocalizedText value)
 {
     set_write_value_id(wv, id);
@@ -437,12 +445,14 @@ static bool set_server_maximum_operations_variables(SOPC_Array* write_values, Ru
 
 static bool set_server_variables(SOPC_Array* write_values, RuntimeVariables vars)
 {
-    OpcUa_WriteValue* values = append_write_values(write_values, 5);
+    OpcUa_WriteValue* values = append_write_values(write_values, 6);
     return values != NULL && set_server_server_array_value(&values[0], vars.server_uri) &&
            set_server_namespace_array_value(&values[1], vars.app_namespace_uris) &&
            set_server_service_level_value(&values[2], vars.service_level) &&
            set_write_value_bool(&values[3], OpcUaId_Server_Auditing, vars.auditing) &&
            set_write_value_bool(&values[4], OpcUaId_Server_ServerDiagnostics_EnabledFlag, false) &&
+           set_write_value_int32(&values[5], OpcUaId_Server_ServerRedundancy_RedundancySupport,
+                                 OpcUa_RedundancySupport_None) &&
            set_server_server_status_variables(write_values, vars) &&
            set_server_maximum_operations_variables(write_values, vars);
 }

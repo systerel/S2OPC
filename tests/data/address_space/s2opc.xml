@@ -890,7 +890,7 @@
       <Reference ReferenceType="HasComponent" IsForward="false">i=2253</Reference>
     </References>
   </UAObject>
-  <UAVariable NodeId="i=3709" BrowseName="RedundancySupport" ParentNodeId="i=2296" DataType="i=851">
+  <UAVariable NodeId="i=3709" BrowseName="RedundancySupport" ParentNodeId="i=2296" DataType="Int32">
     <DisplayName>RedundancySupport</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
