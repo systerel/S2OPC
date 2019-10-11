@@ -440,8 +440,6 @@ static SOPC_ReturnStatus Server_SetCryptographicConfig(SOPC_Server_Config* serve
 
         if (SOPC_STATUS_OK == status)
         {
-            pEpConfig->serverKey = *output_serverKey;
-
             status = SOPC_KeyManager_SerializedCertificate_CreateFromDER(cacert, sizeof(cacert),
                                                                          &serverConfig->certificateAuthority);
         }
