@@ -258,9 +258,9 @@ static bool set_server_server_status_state_value(OpcUa_WriteValue* wv, OpcUa_Ser
     return true;
 }
 
-static bool set_write_value_server_status(OpcUa_WriteValue* wv, RuntimeVariables vars)
+static bool set_write_value_server_status(OpcUa_WriteValue* wv, RuntimeVariables* vars)
 {
-    const OpcUa_BuildInfo* build_info = &vars.build_info;
+    const OpcUa_BuildInfo* build_info = &vars->build_info;
     /* create extension object */
     SOPC_ExtensionObject* extObject = SOPC_Calloc(1, sizeof(SOPC_ExtensionObject));
     OpcUa_ServerStatusDataType* server_status_in_extObject = NULL;
@@ -285,10 +285,10 @@ static bool set_write_value_server_status(OpcUa_WriteValue* wv, RuntimeVariables
     server_status_in_extObject->BuildInfo.BuildDate = build_info->BuildDate;
 
     server_status_in_extObject->CurrentTime = SOPC_Time_GetCurrentTimeUTC();
-    server_status_in_extObject->SecondsTillShutdown = vars.secondsTillShutdown;
-    status = SOPC_LocalizedText_Copy(&server_status_in_extObject->ShutdownReason, &vars.shutdownReason);
+    server_status_in_extObject->SecondsTillShutdown = vars->secondsTillShutdown;
+    status = SOPC_LocalizedText_Copy(&server_status_in_extObject->ShutdownReason, &vars->shutdownReason);
     assert(SOPC_STATUS_OK == status);
-    server_status_in_extObject->State = vars.server_state;
+    server_status_in_extObject->State = vars->server_state;
     server_status_in_extObject->StartTime = SOPC_Time_GetCurrentTimeUTC();
 
     /* Prepare write of this extension object */
@@ -300,20 +300,20 @@ static bool set_write_value_server_status(OpcUa_WriteValue* wv, RuntimeVariables
     return true;
 }
 
-static bool set_server_server_status_variables(SOPC_Array* write_values, RuntimeVariables vars)
+static bool set_server_server_status_variables(SOPC_Array* write_values, RuntimeVariables* vars)
 {
     OpcUa_WriteValue* values = append_write_values(write_values, 6);
     return values != NULL &&
            set_write_value_datetime(&values[0], OpcUaId_Server_ServerStatus_StartTime, SOPC_Time_GetCurrentTimeUTC()) &&
            set_write_value_datetime(&values[1], OpcUaId_Server_ServerStatus_CurrentTime,
                                     SOPC_Time_GetCurrentTimeUTC()) &&
-           set_server_server_status_state_value(&values[2], vars.server_state) &&
+           set_server_server_status_state_value(&values[2], vars->server_state) &&
            set_write_value_uint32(&values[3], OpcUaId_Server_ServerStatus_SecondsTillShutdown,
-                                  vars.secondsTillShutdown) &&
+                                  vars->secondsTillShutdown) &&
            set_write_value_localized_text(&values[4], OpcUaId_Server_ServerStatus_ShutdownReason,
-                                          vars.shutdownReason) &&
+                                          vars->shutdownReason) &&
            set_write_value_server_status(&values[5], vars) &&
-           set_server_server_status_build_info_variables(write_values, &vars.build_info);
+           set_server_server_status_build_info_variables(write_values, &vars->build_info);
 }
 
 static bool set_server_server_array_value(OpcUa_WriteValue* wv, const char* server_uri)
@@ -408,7 +408,7 @@ static void set_server_maximum_operations_per_request(OpcUa_WriteValue* wv, uint
     wv->Value.Value.Value.Uint32 = nbOperations;
 }
 
-static bool set_server_maximum_operations_variables(SOPC_Array* write_values, RuntimeVariables vars)
+static bool set_server_maximum_operations_variables(SOPC_Array* write_values, RuntimeVariables* vars)
 {
     size_t nbNodesToSet = 5;
 #if 0 != WITH_NANO_EXTENDED
@@ -422,34 +422,34 @@ static bool set_server_maximum_operations_variables(SOPC_Array* write_values, Ru
     // Set limits for implemented services only, other keep NULL default value
     set_server_maximum_operations_per_request(&values[0],
                                               OpcUaId_Server_ServerCapabilities_OperationLimits_MaxNodesPerRead,
-                                              vars.maximum_operation_per_request);
+                                              vars->maximum_operation_per_request);
     set_server_maximum_operations_per_request(&values[1],
                                               OpcUaId_Server_ServerCapabilities_OperationLimits_MaxNodesPerWrite,
-                                              vars.maximum_operation_per_request);
+                                              vars->maximum_operation_per_request);
     set_server_maximum_operations_per_request(&values[2],
                                               OpcUaId_Server_ServerCapabilities_OperationLimits_MaxNodesPerBrowse,
-                                              vars.maximum_operation_per_request);
+                                              vars->maximum_operation_per_request);
     set_server_maximum_operations_per_request(
         &values[3], OpcUaId_Server_ServerCapabilities_OperationLimits_MaxNodesPerRegisterNodes,
-        vars.maximum_operation_per_request);
+        vars->maximum_operation_per_request);
     set_server_maximum_operations_per_request(
         &values[4], OpcUaId_Server_ServerCapabilities_OperationLimits_MaxNodesPerTranslateBrowsePathsToNodeIds,
-        vars.maximum_operation_per_request);
+        vars->maximum_operation_per_request);
 #if 0 != WITH_NANO_EXTENDED
     set_server_maximum_operations_per_request(
         &values[5], OpcUaId_Server_ServerCapabilities_OperationLimits_MaxMonitoredItemsPerCall,
-        vars.maximum_operation_per_request);
+        vars->maximum_operation_per_request);
 #endif
     return true;
 }
 
-static bool set_server_variables(SOPC_Array* write_values, RuntimeVariables vars)
+static bool set_server_variables(SOPC_Array* write_values, RuntimeVariables* vars)
 {
     OpcUa_WriteValue* values = append_write_values(write_values, 6);
-    return values != NULL && set_server_server_array_value(&values[0], vars.server_uri) &&
-           set_server_namespace_array_value(&values[1], vars.app_namespace_uris) &&
-           set_server_service_level_value(&values[2], vars.service_level) &&
-           set_write_value_bool(&values[3], OpcUaId_Server_Auditing, vars.auditing) &&
+    return values != NULL && set_server_server_array_value(&values[0], vars->server_uri) &&
+           set_server_namespace_array_value(&values[1], vars->app_namespace_uris) &&
+           set_server_service_level_value(&values[2], vars->service_level) &&
+           set_write_value_bool(&values[3], OpcUaId_Server_Auditing, vars->auditing) &&
            set_write_value_bool(&values[4], OpcUaId_Server_ServerDiagnostics_EnabledFlag, false) &&
            set_write_value_int32(&values[5], OpcUaId_Server_ServerRedundancy_RedundancySupport,
                                  OpcUa_RedundancySupport_None) &&
@@ -457,7 +457,7 @@ static bool set_server_variables(SOPC_Array* write_values, RuntimeVariables vars
            set_server_maximum_operations_variables(write_values, vars);
 }
 
-bool set_runtime_variables(uint32_t endpoint_config_idx, RuntimeVariables vars)
+bool set_runtime_variables(uint32_t endpoint_config_idx, RuntimeVariables* vars)
 {
     OpcUa_WriteRequest* request = SOPC_Calloc(1, sizeof(OpcUa_WriteRequest));
     SOPC_Array* write_values = SOPC_Array_Create(sizeof(OpcUa_WriteValue), 0, OpcUa_WriteValue_Clear);
@@ -482,7 +482,7 @@ bool set_runtime_variables(uint32_t endpoint_config_idx, RuntimeVariables vars)
     return true;
 }
 
-bool update_server_status_runtime_variables(uint32_t endpoint_config_idx, RuntimeVariables vars)
+bool update_server_status_runtime_variables(uint32_t endpoint_config_idx, RuntimeVariables* vars)
 {
     OpcUa_WriteRequest* request = SOPC_Calloc(1, sizeof(OpcUa_WriteRequest));
     SOPC_Array* write_values = SOPC_Array_Create(sizeof(OpcUa_WriteValue), 0, OpcUa_WriteValue_Clear);

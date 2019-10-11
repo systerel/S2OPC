@@ -72,7 +72,7 @@ RuntimeVariables build_runtime_variables(SOPC_Build_Info build_info,
  * might be a delay between when this function returns, and when the values are
  * observable in the address space.
  */
-bool set_runtime_variables(uint32_t endpoint_config_idx, RuntimeVariables vars);
+bool set_runtime_variables(uint32_t endpoint_config_idx, RuntimeVariables* vars);
 
 /**
  * \brief Update the server status values runtime variables in the address space.
@@ -91,6 +91,6 @@ bool set_runtime_variables(uint32_t endpoint_config_idx, RuntimeVariables vars);
  * might be a delay between when this function returns, and when the values are
  * observable in the address space.
  */
-bool update_server_status_runtime_variables(uint32_t endpoint_config_idx, RuntimeVariables vars);
+bool update_server_status_runtime_variables(uint32_t endpoint_config_idx, RuntimeVariables* vars);
 
 #endif

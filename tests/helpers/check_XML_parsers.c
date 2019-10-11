@@ -425,7 +425,7 @@ START_TEST(test_XML_server_configuration)
     SOPC_S2OPC_Config_Initialize(&s2opcConfig);
 
     bool result = SOPC_Config_Parse(fd, &s2opcConfig);
-
+    fclose(fd);
     ck_assert(result);
 
     check_parsed_s2opc_config(&s2opcConfig);

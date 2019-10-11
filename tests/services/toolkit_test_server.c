@@ -882,7 +882,7 @@ int main(int argc, char* argv[])
     {
         runtime_vars = build_runtime_variables(build_info, PRODUCT_URI, app_namespace_uris, "Systerel");
 
-        if (!set_runtime_variables(epConfigIdx, runtime_vars))
+        if (!set_runtime_variables(epConfigIdx, &runtime_vars))
         {
             printf("<Test_Server_Toolkit: Failed to populate Server object");
             status = SOPC_STATUS_NOK;
@@ -912,7 +912,7 @@ int main(int argc, char* argv[])
     {
         // Update the seconds till shutdown value
         runtime_vars.secondsTillShutdown = secondsTillShutdown;
-        if (!update_server_status_runtime_variables(epConfigIdx, runtime_vars))
+        if (!update_server_status_runtime_variables(epConfigIdx, &runtime_vars))
         {
             printf("<Test_Server_Toolkit: Failed to updated Server object");
             status = SOPC_STATUS_NOK;

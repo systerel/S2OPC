@@ -220,16 +220,19 @@ void session_core_bs__server_get_fresh_session_token(
     if (constants__c_session_indet != session_core_bs__session)
     {
         pSCCfg = SOPC_ToolkitServer_GetSecureChannelConfig(session_core_bs__p_channel_config_idx);
-        pProvider = SOPC_CryptoProvider_Create(pSCCfg->reqSecuPolicyUri);
-        assert(pProvider != NULL);
+        if (NULL != pSCCfg)
+        {
+            pProvider = SOPC_CryptoProvider_Create(pSCCfg->reqSecuPolicyUri);
+        }
         // Note: Namespace = 0 for session token ?
         sessionDataArray[session_core_bs__session].sessionToken.IdentifierType = SOPC_IdentifierType_Numeric;
-        if (NULL != pProvider)
+        SOPC_ReturnStatus status = NULL != pProvider ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+        if (SOPC_STATUS_OK == status)
         {
-            SOPC_CryptoProvider_GenerateRandomID(pProvider,
-                                                 &sessionDataArray[session_core_bs__session].sessionToken.Data.Numeric);
+            status = SOPC_CryptoProvider_GenerateRandomID(
+                pProvider, &sessionDataArray[session_core_bs__session].sessionToken.Data.Numeric);
         }
-        else
+        if (SOPC_STATUS_OK != status)
         {
             sessionDataArray[session_core_bs__session].sessionToken.Data.Numeric = session_core_bs__session;
         }
