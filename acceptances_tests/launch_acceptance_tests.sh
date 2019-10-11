@@ -100,7 +100,8 @@ echo "Closing Acceptance Test Tool"
 
 # kill virtual display since not necessary anymore
 kill -9 $XVFB_PID
-# kill server not necessary anymore
+# kill server not necessary anymore (2 times to avoid OPCUA shutdown phase)
+kill $SERVER_PID
 kill $SERVER_PID
 wait $SERVER_PID
 mv ${ROOT_DIR}/build/bin/$SERVER_ERROR .

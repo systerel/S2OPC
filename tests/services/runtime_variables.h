@@ -74,4 +74,23 @@ RuntimeVariables build_runtime_variables(SOPC_Build_Info build_info,
  */
 bool set_runtime_variables(uint32_t endpoint_config_idx, RuntimeVariables vars);
 
+/**
+ * \brief Update the server status values runtime variables in the address space.
+ *
+ * \param endpoint_config_idx  Config index of the endpoint where to send the
+ *                             write request.
+ * \param vars                 Values of the runtime variables.
+ * \return \c TRUE on success, \c FALSE in case of failure.
+ *
+ * This function gathers all the server status values passed as parameters into a
+ * single write request sent to the given endpoint. This write request may fail,
+ * the application should watch the \c SE_LOCAL_SERVICE_RESPONSE event to be
+ * informed of success or failure.
+ *
+ * This function returns as soon as the write request is sent, which means there
+ * might be a delay between when this function returns, and when the values are
+ * observable in the address space.
+ */
+bool update_server_status_runtime_variables(uint32_t endpoint_config_idx, RuntimeVariables vars);
+
 #endif

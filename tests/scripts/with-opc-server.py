@@ -57,6 +57,8 @@ if __name__ == '__main__':
 
     if not wait_server.wait_server(wait_server.DEFAULT_URL, wait_server.TIMEOUT):
         log('Timeout for starting server')
+        # 2 times to avoid OPCUA shutdown phase
+        server_process.kill()
         server_process.kill()
         server_process.wait()
         sys.exit(1)
