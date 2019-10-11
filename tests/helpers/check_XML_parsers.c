@@ -277,6 +277,8 @@ END_TEST
 
 const char* expectedNamespaces[3] = {"urn:S2OPC:MY_SERVER_HOST", "urn:S2OPC:MY_SERVER_HOST:2", NULL};
 
+// Without EXPAT function is detected as unused and compilation fails
+#ifdef WITH_EXPAT
 static void check_parsed_s2opc_config(SOPC_S2OPC_Config* s2opcConfig)
 {
     SOPC_Server_Config* sConfig = &s2opcConfig->serverConfig;
@@ -409,6 +411,7 @@ static void check_parsed_s2opc_config(SOPC_S2OPC_Config* s2opcConfig)
                       SOPC_String_GetRawCString(&userPolicy->SecurityPolicyUri));
     ck_assert_int_eq(0, strEqual);
 }
+#endif
 
 START_TEST(test_XML_server_configuration)
 {
