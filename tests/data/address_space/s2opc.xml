@@ -890,7 +890,7 @@
       <Reference ReferenceType="HasComponent" IsForward="false">i=2253</Reference>
     </References>
   </UAObject>
-  <UAVariable NodeId="i=3709" BrowseName="RedundancySupport" ParentNodeId="i=2296" DataType="Int32">
+  <UAVariable NodeId="i=3709" BrowseName="RedundancySupport" ParentNodeId="i=2296" DataType="i=851">
     <DisplayName>RedundancySupport</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -944,21 +944,21 @@
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
   </UAVariable>
-  <UAVariable BrowseName="StartTime" NodeId="i=2257" DataType="DateTime">
+  <UAVariable BrowseName="StartTime" NodeId="i=2257" DataType="i=294">
     <DisplayName>StartTime</DisplayName>
     <References>
       <Reference ReferenceType="HasComponent" IsForward="false">i=2256</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
   </UAVariable>
-  <UAVariable BrowseName="CurrentTime" NodeId="i=2258" DataType="DateTime">
+  <UAVariable BrowseName="CurrentTime" NodeId="i=2258" DataType="i=294">
     <DisplayName>CurrentTime</DisplayName>
     <References>
       <Reference ReferenceType="HasComponent" IsForward="false">i=2256</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
   </UAVariable>
-  <UAVariable BrowseName="State" NodeId="i=2259" DataType="Int32">
+  <UAVariable BrowseName="State" NodeId="i=2259" DataType="i=852">
     <DisplayName>State</DisplayName>
     <References>
       <Reference ReferenceType="HasComponent" IsForward="false">i=2256</Reference>
@@ -1013,7 +1013,7 @@
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
   </UAVariable>
-  <UAVariable BrowseName="BuildDate" NodeId="i=2266" DataType="DateTime">
+  <UAVariable BrowseName="BuildDate" NodeId="i=2266" DataType="i=294">
     <DisplayName>BuildDate</DisplayName>
     <References>
       <Reference ReferenceType="HasComponent" IsForward="false">i=2260</Reference>
