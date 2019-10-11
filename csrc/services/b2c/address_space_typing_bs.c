@@ -137,7 +137,7 @@ static bool recursive_is_transitive_subtype(int recursionLimit,
                                             const SOPC_NodeId* expectedParentType)
 {
     recursionLimit--;
-    if (recursionLimit <= 0)
+    if (recursionLimit < 0)
     {
         return false;
     }
@@ -166,6 +166,55 @@ void address_space_typing_bs__is_transitive_subtype(const constants__t_NodeId_i 
     *address_space_typing_bs__bres =
         recursive_is_transitive_subtype(RECURSION_LIMIT, address_space_typing_bs__p_subtype,
                                         address_space_typing_bs__p_subtype, address_space_typing_bs__p_parent_type);
+}
+
+static SOPC_NodeId Enumeration_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 29};
+
+void address_space_typing_bs__is_compatible_simple_type_or_enumeration(
+    const constants__t_NodeId_i address_space_typing_bs__p_value_type,
+    const constants__t_NodeId_i address_space_typing_bs__p_data_type,
+    t_bool* const address_space_typing_bs__bres)
+{
+    SOPC_NodeId* const valueType = address_space_typing_bs__p_value_type;
+    SOPC_NodeId* const dataType = address_space_typing_bs__p_data_type;
+
+    /* Two possibilities for compatibility:
+     * 1. DataType is a simple type which means it is encoded as a Built-In type
+     * 2. DataType is an enumeration of enumeration subtype, it is encoded as a Int32
+     *
+     * Pre-requesite: the actual value type shall be a Built-In type (except Structure type (i=22))
+     * Evaluation of compatibility:
+     * Case 1.: DataType is direct subtype of the value type built-in type => compatible simple type
+     * Case 2.: Value built-in type is Int32 and DataType is transitive subtype of Enumeration type (i=29)
+     * */
+    *address_space_typing_bs__bres = false;
+    // Pre-requesite
+    if (SOPC_IdentifierType_Numeric != valueType->IdentifierType || OPCUA_NAMESPACE_INDEX != valueType->Namespace ||
+        valueType->Data.Numeric > SOPC_BUILTINID_MAX || SOPC_ExtensionObject_Id == valueType->Data.Numeric)
+    {
+        // Not a built-in type (or Structure built-in type)
+        return;
+    }
+
+    // Case 1 evaluation
+    bool res = recursive_is_transitive_subtype(1, dataType, dataType, valueType);
+
+    // Case 2 evaluation
+    if (!res && SOPC_Int32_Id == valueType->Data.Numeric)
+    {
+        if (SOPC_NodeId_Equal(&Enumeration_Type, dataType))
+        {
+            // DataType is the EnumarationType
+            res = true;
+        }
+        else
+        {
+            // Check if DataType is a subtype of EnumerationType
+            address_space_typing_bs__is_transitive_subtype(dataType, &Enumeration_Type, &res);
+        }
+    }
+
+    *address_space_typing_bs__bres = res;
 }
 
 void address_space_typing_bs__is_valid_ReferenceTypeId(const constants__t_NodeId_i address_space_typing_bs__p_nodeId,

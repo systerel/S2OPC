@@ -49,5 +49,14 @@ OPERATIONS
             bres := bool(p_expValueRank = p_concValueRank)
         END
     END
+    ;
+    
+    bres <-- is_transitive_subtype_or_compatible_simple_type_or_enumeration(p_res_is_transitive_type, p_actual_value_type, p_exp_data_type) =
+    BEGIN
+        bres := p_res_is_transitive_type;
+        IF bres = FALSE THEN
+            bres <-- is_compatible_simple_type_or_enumeration (p_actual_value_type, p_exp_data_type)
+        END
+    END
 
 END

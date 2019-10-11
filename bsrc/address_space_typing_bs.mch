@@ -28,12 +28,14 @@ DEFINITIONS
     d_variables ==
 
         Type_IsTransitiveSubtype,
+        Type_IsCompatSimpleTypeOrEnumeration,
         Type_IsReferenceTypeIdValid
     ;
 
     d_inv ==
     (
         Type_IsTransitiveSubtype : t_NodeId <-> t_NodeId &
+        Type_IsCompatSimpleTypeOrEnumeration : t_NodeId <-> t_NodeId &
         Type_IsReferenceTypeIdValid <: t_NodeId
     );
 
@@ -59,6 +61,17 @@ OPERATIONS
         p_parent_type : t_NodeId
     THEN
         bres := bool(p_subtype |-> p_parent_type : Type_IsTransitiveSubtype)
+    END
+    ;
+    
+    bres <-- is_compatible_simple_type_or_enumeration(p_value_type, p_data_type) =
+    PRE
+        p_value_type : t_NodeId_i &
+        p_value_type : t_NodeId &
+        p_data_type : t_NodeId_i &
+        p_data_type : t_NodeId
+    THEN
+        bres := bool(p_value_type |-> p_data_type : Type_IsCompatSimpleTypeOrEnumeration)
     END
     ;
 

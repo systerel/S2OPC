@@ -608,6 +608,7 @@ OPERATIONS
         l_node_ids_eq,
         l_dv_is_null_type,
         l_dv_is_sub_typ,
+        l_dv_is_sub_typ_or_compat,
         l_dv_is_byte_type,
         l_dv_is_bytestring_type,
         l_var_is_byte_type,
@@ -631,7 +632,8 @@ OPERATIONS
                 l_typ_is_ok := TRUE
             ELSE
                 l_dv_is_sub_typ <-- is_transitive_subtype(p_dv_typ_nid, p_var_typ_nid);
-                IF l_dv_is_sub_typ = TRUE THEN
+                l_dv_is_sub_typ_or_compat <-- is_transitive_subtype_or_compatible_simple_type_or_enumeration(l_dv_is_sub_typ, p_dv_typ_nid, p_var_typ_nid);
+                IF l_dv_is_sub_typ_or_compat = TRUE THEN
                     l_typ_is_ok := TRUE
                 ELSE
                     l_dv_is_bytestring_type <-- is_NodeId_equal(p_dv_typ_nid, c_ByteString_Type_NodeId);

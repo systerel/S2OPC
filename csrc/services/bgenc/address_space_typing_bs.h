@@ -21,7 +21,7 @@
 
  File Name            : address_space_typing_bs.h
 
- Date                 : 04/10/2019 15:26:55
+ Date                 : 11/10/2019 10:53:10
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -48,6 +48,10 @@ extern void address_space_typing_bs__INITIALISATION(void);
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+extern void address_space_typing_bs__is_compatible_simple_type_or_enumeration(
+   const constants__t_NodeId_i address_space_typing_bs__p_value_type,
+   const constants__t_NodeId_i address_space_typing_bs__p_data_type,
+   t_bool * const address_space_typing_bs__bres);
 extern void address_space_typing_bs__is_transitive_subtype(
    const constants__t_NodeId_i address_space_typing_bs__p_subtype,
    const constants__t_NodeId_i address_space_typing_bs__p_parent_type,
