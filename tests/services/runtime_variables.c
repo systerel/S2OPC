@@ -443,6 +443,32 @@ static bool set_server_maximum_operations_variables(SOPC_Array* write_values, Ru
     return true;
 }
 
+static bool set_server_capabilties_software_certificate_variable(SOPC_Array* write_values, RuntimeVariables vars)
+{
+    // Avoid unused warning
+    (void) vars;
+    OpcUa_WriteValue* values = append_write_values(write_values, 1);
+
+    OpcUa_WriteValue* wv = &values[0];
+
+    set_write_value_id(wv, OpcUaId_ServerType_ServerCapabilities_SoftwareCertificates);
+
+    SOPC_Variant* variant = &wv->Value.Value;
+    variant->ArrayType = SOPC_VariantArrayType_Array;
+    variant->BuiltInTypeId = SOPC_ExtensionObject_Id;
+    variant->DoNotClear = false;
+
+    wv->Value.Value.Value.Array.Length = 0;
+
+    return true;
+}
+
+static bool set_server_capabilities_variables(SOPC_Array* write_values, RuntimeVariables vars)
+{
+    return set_server_capabilties_software_certificate_variable(write_values, vars) &&
+           set_server_maximum_operations_variables(write_values, vars);
+}
+
 static bool set_server_variables(SOPC_Array* write_values, RuntimeVariables vars)
 {
     OpcUa_WriteValue* values = append_write_values(write_values, 6);
@@ -454,7 +480,7 @@ static bool set_server_variables(SOPC_Array* write_values, RuntimeVariables vars
            set_write_value_int32(&values[5], OpcUaId_Server_ServerRedundancy_RedundancySupport,
                                  OpcUa_RedundancySupport_None) &&
            set_server_server_status_variables(write_values, vars) &&
-           set_server_maximum_operations_variables(write_values, vars);
+           set_server_capabilities_variables(write_values, vars);
 }
 
 bool set_runtime_variables(uint32_t endpoint_config_idx, RuntimeVariables vars)
