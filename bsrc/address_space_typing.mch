@@ -28,6 +28,7 @@ DEFINITIONS
 
         /* Typing */
         Type_IsTransitiveSubtype,
+        Type_IsCompatSimpleTypeOrEnumeration,
         Type_IsIncludedValueRank,
         Type_IsReferenceTypeIdValid
     ;
@@ -36,6 +37,7 @@ DEFINITIONS
     (
         /* Typing */
         Type_IsTransitiveSubtype : t_NodeId <-> t_NodeId &
+        Type_IsCompatSimpleTypeOrEnumeration : t_NodeId <-> t_NodeId &
         Type_IsIncludedValueRank : t_ConcreteValueRank <-> t_ValueRank &
         Type_IsReferenceTypeIdValid <: t_NodeId
     )
@@ -65,7 +67,23 @@ OPERATIONS
         bres := bool(p_subtype |-> p_parent_type : Type_IsTransitiveSubtype)
     END
     ;
-
+    
+    bres <-- is_transitive_subtype_or_compatible_simple_type_or_enumeration(p_res_is_transitive_type, p_actual_value_type, p_exp_data_type) =
+    PRE
+        p_res_is_transitive_type : BOOL &
+        p_actual_value_type : t_NodeId_i &
+        p_actual_value_type : t_NodeId &
+        p_exp_data_type : t_NodeId_i &
+        p_exp_data_type : t_NodeId
+    THEN
+        bres 
+        :(bres : BOOL &
+          (p_res_is_transitive_type = TRUE => bres = TRUE) &
+          (p_res_is_transitive_type = FALSE => 
+            bres = bool(p_actual_value_type |-> p_exp_data_type : Type_IsCompatSimpleTypeOrEnumeration)))
+    END
+    ;
+   
     bres <-- is_included_ValueRank(p_concValueRank, p_expValueRank) =
     PRE
         p_concValueRank : t_ConcreteValueRank &

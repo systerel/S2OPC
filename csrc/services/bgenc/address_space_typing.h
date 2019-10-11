@@ -21,7 +21,7 @@
 
  File Name            : address_space_typing.h
 
- Date                 : 04/10/2019 15:22:47
+ Date                 : 11/10/2019 10:52:49
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -62,6 +62,11 @@ extern void address_space_typing__INITIALISATION(void);
 extern void address_space_typing__is_included_ValueRank(
    const t_entier4 address_space_typing__p_concValueRank,
    const t_entier4 address_space_typing__p_expValueRank,
+   t_bool * const address_space_typing__bres);
+extern void address_space_typing__is_transitive_subtype_or_compatible_simple_type_or_enumeration(
+   const t_bool address_space_typing__p_res_is_transitive_type,
+   const constants__t_NodeId_i address_space_typing__p_actual_value_type,
+   const constants__t_NodeId_i address_space_typing__p_exp_data_type,
    t_bool * const address_space_typing__bres);
 
 #endif

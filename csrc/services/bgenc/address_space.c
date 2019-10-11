@@ -21,7 +21,7 @@
 
  File Name            : address_space.c
 
- Date                 : 10/10/2019 07:09:40
+ Date                 : 11/10/2019 10:52:48
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -350,6 +350,7 @@ void address_space__is_variable_compat_type(
       t_bool address_space__l_node_ids_eq;
       t_bool address_space__l_dv_is_null_type;
       t_bool address_space__l_dv_is_sub_typ;
+      t_bool address_space__l_dv_is_sub_typ_or_compat;
       t_bool address_space__l_dv_is_byte_type;
       t_bool address_space__l_dv_is_bytestring_type;
       t_bool address_space__l_var_is_byte_type;
@@ -383,7 +384,11 @@ void address_space__is_variable_compat_type(
             address_space_typing__is_transitive_subtype(address_space__p_dv_typ_nid,
                address_space__p_var_typ_nid,
                &address_space__l_dv_is_sub_typ);
-            if (address_space__l_dv_is_sub_typ == true) {
+            address_space_typing__is_transitive_subtype_or_compatible_simple_type_or_enumeration(address_space__l_dv_is_sub_typ,
+               address_space__p_dv_typ_nid,
+               address_space__p_var_typ_nid,
+               &address_space__l_dv_is_sub_typ_or_compat);
+            if (address_space__l_dv_is_sub_typ_or_compat == true) {
                address_space__l_typ_is_ok = true;
             }
             else {
