@@ -63,9 +63,9 @@ DEFINITIONS
         in_session                       : t_session_i           &
         in_maxReferencesPerNode          : NAT                   &
         in_BrowseView                    : t_NodeId_i            &
-        in_BrowseValue_NodeId            : t_NodeId              &
+        in_BrowseValue_NodeId            : t_NodeId_i            &
         in_BrowseValue_BrowseDirection   : t_BrowseDirection_i   &
-        in_BrowseValue_ReferenceTypeId   : t_NodeId              &
+        in_BrowseValue_ReferenceTypeId   : t_NodeId_i            &
         in_BrowseValue_IncludeSubtypes   : BOOL                  &
         in_BrowseValue_NodeClassMask     : t_BrowseNodeClassMask_i &
         in_BrowseValue_ResultMask        : t_BrowseResultMask_i  &
@@ -81,7 +81,8 @@ DEFINITIONS
         out_BrowseResult_BrowseStatus      : t_StatusCode_i             &
         out_BrowseResult_ContinuationPointId : t_ContinuationPointId_i  &
         out_BrowseResult_nb_References     : NAT                        &
-        out_BrowseResult_nb_References     <= in_maxReferencesPerNode   &
+        (isBrowseValueContextDefined = TRUE =>
+            out_BrowseResult_nb_References <= in_maxReferencesPerNode)  &
         out_BrowseResult_ReferenceTypeId   : NAT +-> t_NodeId           &
         out_BrowseResult_isForward         : NAT +-> BOOL               &
         out_BrowseResult_NodeId            : NAT +-> t_ExpandedNodeId   &
@@ -131,40 +132,23 @@ DEFINITIONS
             out_BrowseResult_TypeDefinition    = {}                         &
             out_BrowseResultReferences         = c_BrowseResultReferences_indet &
             isBrowseResultComputed             = FALSE
-        );
+        )
 
-    d_variables_it ==
-    browseResult_to_iterate,
-    browseResult_iterated,
-    nb_browseResult_max_refs
-    ;
-
-    d_inv_it ==
-    (
-    nb_browseResult_max_refs : NAT &
-    browseResult_to_iterate <: NAT &
-    browseResult_iterated   <: NAT &
-    browseResult_to_iterate /\ browseResult_iterated = {} &
-    nb_browseResult_max_refs = card(browseResult_to_iterate \/ browseResult_iterated)
-    )
 
 ABSTRACT_VARIABLES
     d_variables_in,
     d_variables_persist,
-    d_variables_out,
-    d_variables_it
+    d_variables_out
 
 INVARIANT
     d_inv_in &
     d_inv_persist &
-    d_inv_out &
-    d_inv_it
+    d_inv_out
 
 INITIALISATION
     d_init_in ||
     d_init_persist ||
-    d_init_out ||
-    d_variables_it :( d_inv_it )
+    d_init_out
 
 OPERATIONS
 
@@ -188,11 +172,12 @@ OPERATIONS
         p_includeSubtypes : BOOL
     THEN
         /* Reset output result on new context*/
-        d_variables_out :(d_inv_out) ||
+        d_variables_out,
         /* Set new input context */
         p_service_StatusCode,
         d_variables_in
-        :(
+        :(      d_inv_out &
+
                 p_service_StatusCode : {e_sc_ok, e_sc_bad_out_of_memory} &
                 d_inv_in &
                 (p_service_StatusCode = e_sc_ok =>
@@ -222,13 +207,15 @@ OPERATIONS
         p_continuationPointId : t_ContinuationPointId_i
     THEN
         /* Reset output result on new context*/
-        d_variables_out :(d_inv_out) ||
+        d_variables_out,
         /* Set new input context */
         d_variables_in,
         d_variables_persist,
         p_service_StatusCode
         :(  p_service_StatusCode : {e_sc_ok, e_sc_bad_out_of_memory, e_sc_bad_continuation_point_invalid} &
             d_inv_in &
+            d_inv_out &
+
             isBrowseValueContextDefined = bool(p_service_StatusCode = e_sc_ok) &
             /* If context is set then the continuation point is released */
             (p_service_StatusCode = e_sc_ok =>
@@ -391,46 +378,18 @@ OPERATIONS
 
     p_nb_references, p_browseResult <-- getall_and_move_browse_result =
     PRE
+        isBrowseValueContextDefined = FALSE &
         isBrowseResultComputed = TRUE
     THEN
         p_nb_references := out_BrowseResult_nb_References ||
         p_browseResult := out_BrowseResultReferences || /* Transfer ownership of BrowseResultReferences to caller */
-        d_init_in ||
         d_init_out
     END
     ;
-
 
     clear_browse_result =
     BEGIN
-        d_init_in ||
         d_init_out
     END
-    ;
 
-    p_continue <-- init_iter_browseResult(p_nb_browseResult_max_refs) =
-    PRE
-        p_nb_browseResult_max_refs : NAT
-    THEN
-        browseResult_iterated    := {}        ||
-        browseResult_to_iterate  := 1..p_nb_browseResult_max_refs ||
-        nb_browseResult_max_refs := p_nb_browseResult_max_refs ||
-        p_continue               := bool(p_nb_browseResult_max_refs > 0)
-    END
-    ;
-
-    p_continue, p_browseResultIdx <-- continue_iter_browseResult =
-    PRE
-        browseResult_to_iterate /= {}
-    THEN
-        ANY l_browseResult WHERE
-            l_browseResult : NAT &
-            l_browseResult : browseResult_to_iterate
-        THEN
-            browseResult_iterated   := browseResult_iterated   \/ {l_browseResult} ||
-            browseResult_to_iterate := browseResult_to_iterate -  {l_browseResult} ||
-            p_browseResultIdx        := l_browseResult                               ||
-            p_continue               := bool(browseResult_to_iterate /= {l_browseResult})
-        END
-    END
 END

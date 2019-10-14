@@ -1,0 +1,71 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+IMPLEMENTATION
+    translate_browse_path_result_it_i
+
+REFINES
+    translate_browse_path_result_it
+
+SEES
+    constants
+
+CONCRETE_VARIABLES
+
+    currentBrowseResultIdx_i,
+    nb_browseResult_max_refs_i
+
+INVARIANT
+    currentBrowseResultIdx_i : NAT &
+    nb_browseResult_max_refs_i : NAT &
+
+    nb_browseResult_max_refs = nb_browseResult_max_refs_i &
+    currentBrowseResultIdx_i : 0..nb_browseResult_max_refs_i &
+
+    (nb_browseResult_max_refs_i = 0 =>
+        browseResult_to_iterate = {} &
+        browseResult_iterated = {}
+    ) &
+    (nb_browseResult_max_refs_i /= 0 =>
+        browseResult_to_iterate = currentBrowseResultIdx_i+1..nb_browseResult_max_refs_i &
+        browseResult_iterated = 1..currentBrowseResultIdx_i)
+
+INITIALISATION
+    currentBrowseResultIdx_i := 0;
+    nb_browseResult_max_refs_i := 0
+
+OPERATIONS
+
+
+    p_continue <-- init_iter_browseResult(p_nb_browseResult_max_refs) =
+    BEGIN
+        nb_browseResult_max_refs_i := p_nb_browseResult_max_refs;
+        currentBrowseResultIdx_i := 0;
+        p_continue := bool (0 < p_nb_browseResult_max_refs)
+    END
+    ;
+
+    p_continue, p_browseResultIdx <-- continue_iter_browseResult =
+    BEGIN
+        currentBrowseResultIdx_i := currentBrowseResultIdx_i + 1;
+        p_browseResultIdx := currentBrowseResultIdx_i;
+        p_continue := bool (currentBrowseResultIdx_i < nb_browseResult_max_refs_i)
+    END
+
+END
