@@ -49,7 +49,7 @@ INVARIANT
     BrowsePathRemainingNodeId      = 1..BrowsePathRemainingNodeId_size_i <| BrowsePathRemainingNodeId_tab_i &
 
     BrowsePathRemainingIndex_tab_i  : t_BrowsePathResPerElt_i --> NAT     &
-    BrowsePathRemainingIndex      = 1..BrowsePathRemainingNodeId_size_i <| BrowsePathRemainingIndex_tab_i |> {0}
+    BrowsePathRemainingIndex      = 1..BrowsePathRemainingNodeId_size_i <| BrowsePathRemainingIndex_tab_i |>> {0}
 
 INITIALISATION
 
