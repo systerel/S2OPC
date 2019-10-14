@@ -81,7 +81,7 @@ typedef struct SOPC_Server_Config SOPC_Server_Config;
 typedef struct SOPC_Endpoint_Config
 {
     struct SOPC_Server_Config* serverConfigPtr; /**< Pointer to the server configuration containing this endpoint */
-    char* endpointURL;                          /**< Endpoint URL: opc.tcp://<IP/HOSTNAME>:<PORT>(/<NAME>)*/
+    char* endpointURL;                          /**< Endpoint URL: opc.tcp://IP-HOSTNAME:PORT(/NAME)*/
     uint8_t nbSecuConfigs;                      /**< Number of security configuration (<= SOPC_MAX_SECU_POLICIES_CFG) */
     SOPC_SecurityPolicy
         secuConfigurations[SOPC_MAX_SECU_POLICIES_CFG]; /**< Security configuration array of size nbSecuConfigs */
