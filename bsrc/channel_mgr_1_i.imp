@@ -55,7 +55,9 @@ INVARIANT
     card_channel_connected_i      = card(s_channel_connected)                                      &
     a_channel_connected_time      = s_channel_connected <| a_channel_connected_time_i |> t_timeref &
     a_config                      = t_channel            <| a_config_i     |> t_channel_config_idx &
-    a_config~                     = t_channel_config_idx <| a_config_inv_i |> t_channel
+    a_config~                     = t_channel_config_idx <| a_config_inv_i |> t_channel            &
+
+    a_endpoint                    = t_channel            <| a_endpoint_i |> t_endpoint_config_idx
 
 INITIALISATION
     s_cli_channel_connecting_i    := t_channel_config_idx_i * {FALSE};
