@@ -21,7 +21,7 @@
 
  File Name            : service_get_endpoints_bs.h
 
- Date                 : 04/10/2019 15:30:03
+ Date                 : 21/11/2019 15:48:51
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 

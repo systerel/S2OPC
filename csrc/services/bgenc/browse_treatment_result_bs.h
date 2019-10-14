@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment_result_bs.h
 
- Date                 : 04/10/2019 15:27:11
+ Date                 : 21/11/2019 15:46:00
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 

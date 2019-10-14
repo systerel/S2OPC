@@ -19,16 +19,16 @@
 
 /******************************************************************************
 
- File Name            : channel_mgr_it.h
+ File Name            : translate_browse_path_result_it.h
 
- Date                 : 21/11/2019 15:42:21
+ Date                 : 21/11/2019 15:45:17
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
 ******************************************************************************/
 
-#ifndef _channel_mgr_it_h
-#define _channel_mgr_it_h
+#ifndef _translate_browse_path_result_it_h
+#define _translate_browse_path_result_it_h
 
 /*--------------------------
    Added by the Translator
@@ -43,20 +43,22 @@
 /*----------------------------
    CONCRETE_VARIABLES Clause
   ----------------------------*/
-extern t_entier4 channel_mgr_it__channel_i;
+extern t_entier4 translate_browse_path_result_it__currentBrowseResultIdx_i;
+extern t_entier4 translate_browse_path_result_it__nb_browseResult_max_refs_i;
 
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
-extern void channel_mgr_it__INITIALISATION(void);
+extern void translate_browse_path_result_it__INITIALISATION(void);
 
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-extern void channel_mgr_it__continue_iter_channel(
-   t_bool * const channel_mgr_it__p_continue,
-   constants__t_channel_i * const channel_mgr_it__p_channel);
-extern void channel_mgr_it__init_iter_channel(
-   t_bool * const channel_mgr_it__p_continue);
+extern void translate_browse_path_result_it__continue_iter_browseResult(
+   t_bool * const translate_browse_path_result_it__p_continue,
+   t_entier4 * const translate_browse_path_result_it__p_browseResultIdx);
+extern void translate_browse_path_result_it__init_iter_browseResult(
+   const t_entier4 translate_browse_path_result_it__p_nb_browseResult_max_refs,
+   t_bool * const translate_browse_path_result_it__p_continue);
 
 #endif

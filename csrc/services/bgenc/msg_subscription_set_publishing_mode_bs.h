@@ -21,7 +21,7 @@
 
  File Name            : msg_subscription_set_publishing_mode_bs.h
 
- Date                 : 04/10/2019 15:29:09
+ Date                 : 21/11/2019 15:47:58
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
