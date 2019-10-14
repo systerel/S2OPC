@@ -131,6 +131,7 @@
 #include "translate_browse_path_1.h"
 #include "translate_browse_path_element_it.h"
 #include "translate_browse_path_it.h"
+#include "translate_browse_path_result_it.h"
 #include "translate_browse_path_source_it.h"
 #include "unregister_nodes_it.h"
 #include "user_authentication.h"
@@ -192,6 +193,7 @@ void INITIALISATION(void) {
    msg_translate_browse_path_bs__INITIALISATION();
    translate_browse_path_element_it__INITIALISATION();
    translate_browse_path_source_it__INITIALISATION();
+   translate_browse_path_result_it__INITIALISATION();
    browse_treatment_context_bs__INITIALISATION();
    node_id_pointer_bs__INITIALISATION();
    browse_treatment_context__INITIALISATION();

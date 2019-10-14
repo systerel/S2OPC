@@ -21,7 +21,7 @@
 
  File Name            : translate_browse_path.h
 
- Date                 : 04/10/2019 15:26:23
+ Date                 : 21/11/2019 15:45:06
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -42,6 +42,7 @@
 #include "msg_translate_browse_path_bs.h"
 #include "translate_browse_path_1.h"
 #include "translate_browse_path_element_it.h"
+#include "translate_browse_path_result_it.h"
 #include "translate_browse_path_source_it.h"
 
 /*--------------
