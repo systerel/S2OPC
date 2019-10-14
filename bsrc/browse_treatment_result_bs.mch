@@ -157,7 +157,7 @@ OPERATIONS
         p_TypeDefinition : t_ExpandedNodeId_i
     THEN
         CHOICE
-            p_alloc_failed := TRUE ||
+            p_alloc_failed := FALSE ||
             out_BrowseResult_ReferenceTypeId ( p_refIndex ) := p_refTypeId ||
             out_BrowseResult_isForward ( p_refIndex ) := p_isForward ||
             out_BrowseResult_NodeId ( p_refIndex ) := p_NodeId ||
@@ -167,7 +167,7 @@ OPERATIONS
             out_BrowseResult_TypeDefinition ( p_refIndex ) := p_TypeDefinition ||
             out_BrowseResult_nb_References := p_refIndex
         OR
-            p_alloc_failed := FALSE
+            p_alloc_failed := TRUE
         END
     END
     ;
@@ -209,7 +209,8 @@ OPERATIONS
         isBrowseResultAllocated = TRUE
     THEN
         p_browseResult := out_BrowseResultReferences ||
-        p_nb_references := out_BrowseResult_nb_References
+        p_nb_references := out_BrowseResult_nb_References ||
+        d_init_out
     END
     ;
 
