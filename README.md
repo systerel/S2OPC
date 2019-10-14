@@ -66,9 +66,6 @@ Server side (e.g.: tests/services/toolkit_test_server.c):
 ### Cryptography services use constraints
 - Only one authority certificate can be provided by channel (/endpoint)
   for server (/client) certificates validation,
-- Authority certificate must be present in provided
-  "TrustListLocation" path in DER format and must be named
-  "cacert.der"
 
 ## Current status
 
