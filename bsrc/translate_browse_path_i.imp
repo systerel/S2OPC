@@ -35,6 +35,7 @@ IMPORTS
     msg_translate_browse_path_bs,
     translate_browse_path_element_it,
     translate_browse_path_source_it,
+    translate_browse_path_result_it,
     browse_treatment
 
 PROMOTES
