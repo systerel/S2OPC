@@ -55,7 +55,10 @@ DEFINITIONS
         in_BrowseValue_NodeClassesInMask <: t_NodeClass_i         &
         in_BrowseValue_ResultMask        : t_BrowseResultMask_i &
         in_ReleasePrevContinuationPoint  : BOOL & /* Automatic release of previous continuation flag */
-        isBrowseValueContextDefined      : BOOL
+        isBrowseValueContextDefined      : BOOL &
+        (isBrowseValueContextDefined = TRUE =>
+            in_BrowseValue_BrowseDirection : t_BrowseDirection &
+            in_BrowseValue_NodeId : t_NodeId)
     ;
     d_init_in ==
         d_variables_in
