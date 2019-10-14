@@ -41,7 +41,10 @@ DEFINITIONS
         Type_IsCompatSimpleTypeOrEnumeration : t_NodeId <-> t_NodeId &
         Type_IsIncludedValueRank : t_ConcreteValueRank <-> t_ValueRank &
         Type_IsReferenceTypeIdValid <: t_NodeId &
-        Object_HasMethod : t_NodeId <-> t_NodeId
+        Object_HasMethod : t_NodeId <-> t_NodeId &
+
+        c_ByteString_Type_NodeId |->  c_Byte_Type_NodeId /: Type_IsTransitiveSubtype &
+        c_Byte_Type_NodeId |-> c_ByteString_Type_NodeId  /: Type_IsTransitiveSubtype
     )
 
 ABSTRACT_VARIABLES
