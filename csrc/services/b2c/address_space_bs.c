@@ -121,13 +121,13 @@ void address_space_bs__read_AddressSpace_ArrayDimensions_value(
         // See table 1 of part 5, we return unknown size or NULL value
         if (*valueRank > 0)
         {
-            int32_t* arrayDimensionsArray = SOPC_Calloc((size_t) *valueRank, sizeof(int32_t));
+            uint32_t* arrayDimensionsArray = SOPC_Calloc((size_t) *valueRank, sizeof(uint32_t));
             if (NULL != arrayDimensionsArray)
             {
-                variant->BuiltInTypeId = SOPC_Int32_Id;
+                variant->BuiltInTypeId = SOPC_UInt32_Id;
                 variant->ArrayType = SOPC_VariantArrayType_Array;
                 variant->Value.Array.Length = *valueRank;
-                variant->Value.Array.Content.Int32Arr = arrayDimensionsArray; // All items already set to 0 by alloc
+                variant->Value.Array.Content.Uint32Arr = arrayDimensionsArray; // All items already set to 0 by alloc
             }
             else
             {
