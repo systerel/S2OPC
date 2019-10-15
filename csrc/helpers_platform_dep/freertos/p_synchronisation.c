@@ -328,7 +328,7 @@ SOPC_ReturnStatus P_SYNCHRO_UnlockAndWaitForConditionVariable(
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    if (uwTimeOutMs >= (portMAX_DELAY / (configTICK_RATE_HZ * ((uint32_t) 1000))))
+    if ((TickType_t) uwTimeOutMs / (TickType_t) 1000 >= (TickType_t) portMAX_DELAY / (TickType_t) configTICK_RATE_HZ)
     {
         xTimeToWait = portMAX_DELAY;
     }
