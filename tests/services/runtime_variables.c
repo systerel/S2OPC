@@ -167,6 +167,14 @@ static bool set_write_value_datetime(OpcUa_WriteValue* wv, uint32_t id, SOPC_Dat
     return true;
 }
 
+static bool set_write_value_uint16(OpcUa_WriteValue* wv, uint32_t id, uint16_t value)
+{
+    set_write_value_id(wv, id);
+    set_variant_scalar(&wv->Value.Value, SOPC_UInt16_Id);
+    wv->Value.Value.Value.Uint16 = value;
+    return true;
+}
+
 static bool set_write_value_uint32(OpcUa_WriteValue* wv, uint32_t id, uint32_t value)
 {
     set_write_value_id(wv, id);
@@ -401,14 +409,21 @@ static bool set_server_service_level_value(OpcUa_WriteValue* wv, SOPC_Byte level
     return true;
 }
 
-static void set_server_maximum_operations_per_request(OpcUa_WriteValue* wv, uint32_t id, uint32_t nbOperations)
+static bool set_server_capabilities_max_variables(SOPC_Array* write_values)
 {
-    set_write_value_id(wv, id);
-    set_variant_scalar(&wv->Value.Value, SOPC_UInt32_Id);
-    wv->Value.Value.Value.Uint32 = nbOperations;
+    OpcUa_WriteValue* values = append_write_values(write_values, 1);
+    if (NULL == values)
+    {
+        return false;
+    }
+    // Set only limit for MaxBrowseContinuationPoints, other max variables are optional or for unsuported services
+
+    /* MaxBrowseContinuationPoints: only 1 supported per session */
+    set_write_value_uint16(&values[0], OpcUaId_Server_ServerCapabilities_MaxBrowseContinuationPoints, 1);
+    return true;
 }
 
-static bool set_server_maximum_operations_variables(SOPC_Array* write_values, RuntimeVariables* vars)
+static bool set_server_capabilities_operation_limits_variables(SOPC_Array* write_values, RuntimeVariables* vars)
 {
     size_t nbNodesToSet = 5;
 #if 0 != WITH_NANO_EXTENDED
@@ -420,32 +435,55 @@ static bool set_server_maximum_operations_variables(SOPC_Array* write_values, Ru
         return false;
     }
     // Set limits for implemented services only, other keep NULL default value
-    set_server_maximum_operations_per_request(&values[0],
-                                              OpcUaId_Server_ServerCapabilities_OperationLimits_MaxNodesPerRead,
-                                              vars->maximum_operation_per_request);
-    set_server_maximum_operations_per_request(&values[1],
-                                              OpcUaId_Server_ServerCapabilities_OperationLimits_MaxNodesPerWrite,
-                                              vars->maximum_operation_per_request);
-    set_server_maximum_operations_per_request(&values[2],
-                                              OpcUaId_Server_ServerCapabilities_OperationLimits_MaxNodesPerBrowse,
-                                              vars->maximum_operation_per_request);
-    set_server_maximum_operations_per_request(
-        &values[3], OpcUaId_Server_ServerCapabilities_OperationLimits_MaxNodesPerRegisterNodes,
-        vars->maximum_operation_per_request);
-    set_server_maximum_operations_per_request(
-        &values[4], OpcUaId_Server_ServerCapabilities_OperationLimits_MaxNodesPerTranslateBrowsePathsToNodeIds,
-        vars->maximum_operation_per_request);
+    set_write_value_uint32(&values[0], OpcUaId_Server_ServerCapabilities_OperationLimits_MaxNodesPerRead,
+                           vars->maximum_operation_per_request);
+    set_write_value_uint32(&values[1], OpcUaId_Server_ServerCapabilities_OperationLimits_MaxNodesPerWrite,
+                           vars->maximum_operation_per_request);
+    set_write_value_uint32(&values[2], OpcUaId_Server_ServerCapabilities_OperationLimits_MaxNodesPerBrowse,
+                           vars->maximum_operation_per_request);
+    set_write_value_uint32(&values[3], OpcUaId_Server_ServerCapabilities_OperationLimits_MaxNodesPerRegisterNodes,
+                           vars->maximum_operation_per_request);
+    set_write_value_uint32(&values[4],
+                           OpcUaId_Server_ServerCapabilities_OperationLimits_MaxNodesPerTranslateBrowsePathsToNodeIds,
+                           vars->maximum_operation_per_request);
 #if 0 != WITH_NANO_EXTENDED
-    set_server_maximum_operations_per_request(
+    set_write_value_uint32(
         &values[5], OpcUaId_Server_ServerCapabilities_OperationLimits_MaxMonitoredItemsPerCall,
         vars->maximum_operation_per_request);
 #endif
     return true;
 }
 
+static bool set_server_capabilities_server_profile_array(OpcUa_WriteValue* wv)
+{
+    set_write_value_id(wv, OpcUaId_Server_ServerCapabilities_ServerProfileArray);
+    wv->Value.Value.ArrayType = SOPC_VariantArrayType_Array;
+    wv->Value.Value.BuiltInTypeId = SOPC_String_Id;
+
+    SOPC_String* profiles = SOPC_Malloc(sizeof(SOPC_String));
+    if (profiles == NULL)
+    {
+        return false;
+    }
+
+    SOPC_String_Initialize(&profiles[0]);
+
+    wv->Value.Value.Value.Array.Content.StringArr = profiles;
+    wv->Value.Value.Value.Array.Length = 1;
+
+    SOPC_ReturnStatus status =
+        SOPC_String_CopyFromCString(&profiles[0], "http://opcfoundation.org/UA-Profile/Server/NanoEmbeddedDevice");
+    if (status != SOPC_STATUS_OK)
+    {
+        return false;
+    }
+
+    return true;
+}
+
 static bool set_server_variables(SOPC_Array* write_values, RuntimeVariables* vars)
 {
-    OpcUa_WriteValue* values = append_write_values(write_values, 6);
+    OpcUa_WriteValue* values = append_write_values(write_values, 7);
     return values != NULL && set_server_server_array_value(&values[0], vars->server_uri) &&
            set_server_namespace_array_value(&values[1], vars->app_namespace_uris) &&
            set_server_service_level_value(&values[2], vars->service_level) &&
@@ -453,8 +491,10 @@ static bool set_server_variables(SOPC_Array* write_values, RuntimeVariables* var
            set_write_value_bool(&values[4], OpcUaId_Server_ServerDiagnostics_EnabledFlag, false) &&
            set_write_value_int32(&values[5], OpcUaId_Server_ServerRedundancy_RedundancySupport,
                                  OpcUa_RedundancySupport_None) &&
+           set_server_capabilities_server_profile_array(&values[6]) &&
            set_server_server_status_variables(write_values, vars) &&
-           set_server_maximum_operations_variables(write_values, vars);
+           set_server_capabilities_max_variables(write_values) &&
+           set_server_capabilities_operation_limits_variables(write_values, vars);
 }
 
 bool set_runtime_variables(uint32_t endpoint_config_idx, RuntimeVariables* vars)
