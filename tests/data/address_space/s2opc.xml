@@ -1129,6 +1129,8 @@
          <Reference ReferenceType="HasTypeDefinition" IsForward="false">ns=1;i=1004</Reference>
          <Reference ReferenceType="HasTypeDefinition" IsForward="false">ns=1;i=1005</Reference>
          <Reference ReferenceType="HasTypeDefinition" IsForward="false">ns=1;i=1006</Reference>
+         <Reference ReferenceType="HasTypeDefinition" IsForward="false">ns=1;s=WriteOnlySByte</Reference>
+         <Reference ReferenceType="HasTypeDefinition" IsForward="false">ns=1;s=ReadOnlySByte</Reference>
          <Reference ReferenceType="HasTypeDefinition" IsForward="false">ns=1;i=1007</Reference>
          <Reference ReferenceType="HasTypeDefinition" IsForward="false">ns=1;i=1008</Reference>
          <Reference ReferenceType="HasTypeDefinition" IsForward="false">ns=1;i=1009</Reference>
@@ -23306,6 +23308,8 @@
          <Reference ReferenceType="HasComponent">ns=1;i=1004</Reference>
          <Reference ReferenceType="HasComponent">ns=1;i=1005</Reference>
          <Reference ReferenceType="HasComponent">ns=1;i=1006</Reference>
+         <Reference ReferenceType="HasComponent">ns=1;s=WriteOnlySByte</Reference>
+         <Reference ReferenceType="HasComponent">ns=1;s=ReadOnlySByte</Reference>
          <Reference ReferenceType="HasComponent">ns=1;i=1007</Reference>
          <Reference ReferenceType="HasComponent">ns=1;i=1008</Reference>
          <Reference ReferenceType="HasComponent">ns=1;i=1009</Reference>
@@ -23313,7 +23317,6 @@
          <Reference ReferenceType="HasComponent">ns=1;i=1011</Reference>
          <Reference ReferenceType="HasComponent">ns=1;i=1012</Reference>
          <Reference ReferenceType="HasComponent">ns=1;i=1013</Reference>
-
          <Reference ReferenceType="HasComponent">ns=1;i=1015</Reference>
          <Reference ReferenceType="HasComponent">ns=1;i=1016</Reference>
          <Reference ReferenceType="HasComponent">ns=1;i=1017</Reference>
@@ -23409,6 +23412,27 @@
       </Value>
   </UAVariable>
   <!-- END OF COMMON PART WITH READ/WRITE TEST -->
+  <UAVariable AccessLevel="98" BrowseName="1:WriteOnlySByte" DataType="SByte"
+               NodeId="ns=1;s=WriteOnlySByte">
+      <DisplayName>WriteOnlySByte</DisplayName>
+      <Description>WriteOnlySByte</Description>
+      <References>
+         <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
+         <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+      </References>
+  </UAVariable>
+  <UAVariable AccessLevel="1" BrowseName="1:ReadOnlySByte" DataType="SByte"
+               NodeId="ns=1;s=ReadOnlySByte">
+      <DisplayName>ReadOnlySByte</DisplayName>
+      <Description>ReadOnlySByte</Description>
+      <References>
+         <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
+         <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+      </References>
+      <Value>
+         <uax:SByte>1</uax:SByte>
+      </Value>
+  </UAVariable>
   <UAVariable AccessLevel="99" BrowseName="1:SByte" DataType="SByte" NodeId="ns=1;i=1007"
                ParentNodeId="ns=1;i=1000">
       <DisplayName>SByte_1dn</DisplayName>
@@ -24035,7 +24059,6 @@
       <References>
          <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level9Folder1</Reference>
          <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
-
       </References>
   </UAObject>  
 </UANodeSet>
