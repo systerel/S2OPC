@@ -1383,9 +1383,6 @@
          <Reference ReferenceType="HasTypeDefinition" IsForward="false">i=2736</Reference>
          <Reference ReferenceType="HasTypeDefinition" IsForward="false">i=2737</Reference>
          <Reference ReferenceType="HasTypeDefinition" IsForward="false">i=3704</Reference>
-         <Reference ReferenceType="HasTypeDefinition" IsForward="false">i=11702</Reference>
-         <Reference ReferenceType="HasTypeDefinition" IsForward="false">i=11703</Reference>
-         <Reference ReferenceType="HasTypeDefinition" IsForward="false">i=12911</Reference>
          <Reference ReferenceType="HasTypeDefinition" IsForward="false">i=11705</Reference>
          <Reference ReferenceType="HasTypeDefinition" IsForward="false">i=12165</Reference>
          <Reference ReferenceType="HasTypeDefinition" IsForward="false">i=12166</Reference>
@@ -10669,9 +10666,6 @@
          <Reference ReferenceType="HasProperty">i=2736</Reference>
          <Reference ReferenceType="HasProperty">i=2737</Reference>
          <Reference ReferenceType="HasProperty">i=3704</Reference>
-         <Reference ReferenceType="HasProperty">i=11702</Reference>
-         <Reference ReferenceType="HasProperty">i=11703</Reference>
-         <Reference ReferenceType="HasProperty">i=12911</Reference>
          <Reference ReferenceType="HasComponent">i=11704</Reference>
          <Reference ReferenceType="HasComponent">i=2996</Reference>
          <Reference ReferenceType="HasComponent">i=2997</Reference>
@@ -10699,6 +10693,12 @@
          <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
          <Reference ReferenceType="HasProperty" IsForward="false">i=2268</Reference>
       </References>
+      <Value>
+         <uax:ListOfString>
+            <uax:String>en</uax:String>
+            <uax:String>en-US</uax:String>
+         </uax:ListOfString>
+      </Value>
   </UAVariable>
   <UAVariable NodeId="i=2272" BrowseName="MinSupportedSampleRate" ParentNodeId="i=2268"
                DataType="i=290">
@@ -10746,33 +10746,33 @@
          <Reference ReferenceType="HasProperty" IsForward="false">i=2268</Reference>
       </References>
   </UAVariable>
-  <UAVariable NodeId="i=11702" BrowseName="MaxArrayLength" ParentNodeId="i=2268"
-               DataType="UInt32">
-      <DisplayName>MaxArrayLength</DisplayName>
-      <Description>The maximum length for an array value supported by the server.</Description>
-      <References>
-         <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
-         <Reference ReferenceType="HasProperty" IsForward="false">i=2268</Reference>
-      </References>
+  <!-- Optional nodes -->
+  <!--
+  <UAVariable NodeId="i=11702" BrowseName="MaxArrayLength" ParentNodeId="i=2268" DataType="UInt32">
+    <DisplayName>MaxArrayLength</DisplayName>
+    <Description>The maximum length for an array value supported by the server.</Description>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasProperty" IsForward="false">i=2268</Reference>
+    </References>
   </UAVariable>
-  <UAVariable NodeId="i=11703" BrowseName="MaxStringLength" ParentNodeId="i=2268"
-               DataType="UInt32">
-      <DisplayName>MaxStringLength</DisplayName>
-      <Description>The maximum length for a string value supported by the server.</Description>
-      <References>
-         <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
-         <Reference ReferenceType="HasProperty" IsForward="false">i=2268</Reference>
-      </References>
+  <UAVariable NodeId="i=11703" BrowseName="MaxStringLength" ParentNodeId="i=2268" DataType="UInt32">
+    <DisplayName>MaxStringLength</DisplayName>
+    <Description>The maximum length for a string value supported by the server.</Description>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasProperty" IsForward="false">i=2268</Reference>
+    </References>
   </UAVariable>
-  <UAVariable NodeId="i=12911" BrowseName="MaxByteStringLength" ParentNodeId="i=2268"
-               DataType="UInt32">
-      <DisplayName>MaxByteStringLength</DisplayName>
-      <Description>The maximum length for a byte string value supported by the server.</Description>
-      <References>
-         <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
-         <Reference ReferenceType="HasProperty" IsForward="false">i=2268</Reference>
-      </References>
-  </UAVariable>
+  <UAVariable NodeId="i=12911" BrowseName="MaxByteStringLength" ParentNodeId="i=2268" DataType="UInt32">
+    <DisplayName>MaxByteStringLength</DisplayName>
+    <Description>The maximum length for a byte string value supported by the server.</Description>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasProperty" IsForward="false">i=2268</Reference>
+    </References>
+    </UAVariable>
+  -->
   <UAObject NodeId="i=11704" BrowseName="OperationLimits" ParentNodeId="i=2268">
       <DisplayName>OperationLimits</DisplayName>
       <Description>Defines the limits supported by the server for different operations.</Description>
