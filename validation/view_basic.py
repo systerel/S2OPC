@@ -23,12 +23,12 @@ from common import sUri, browseSubTree
 
 def browse_tests(client, logger):
 
-    nid, subPostfixNodeIdHierarchical, subNodeIdNonHierarchical = browseSubTree
+    nid, subPostfixNodeIdHierarchical, subNodeIdNonHierarchical, parentNid = browseSubTree
 
     # Hierarchical referenced node
     childrenNids = list()
     for bn in subPostfixNodeIdHierarchical:
-        childrenNids.append(nid + '.' + bn)
+        childrenNids.append('ns=1;s=' + bn)
     print("Browsing children of node {} expecting nodes {}".format(nid, childrenNids))
     n1 = client.get_node(nid)
      # Get all children of a node. By default hierarchical references and all node classes are returned.
@@ -36,14 +36,13 @@ def browse_tests(client, logger):
     # Checking number of children and their associated ids
     logger.add_test('Browse Test - number of children for Node {}. Expecting {} == {}'.format(nid, len(childrenNids), len(children)), len(childrenNids) == len(children))
     # There shall not be backward references
-    parentNid = nid[:nid.rfind('.')]
     node = Node(sUri, parentNid)
     logger.add_test('Browse Test - parent {} is not in browsed children'.format(parentNid), node not in children)
     # Checking forward references
     for childNid in childrenNids:
         print(childNid)
         node = Node(sUri, childNid)
-        logger.add_test('Browse Test - child retrieved in browsed children'.format(childNid), node in children)
+        logger.add_test('Browse Test - child {} retrieved in browsed children'.format(childNid), node in children)
 
     nonHierarchicalNids = list(subNodeIdNonHierarchical)
     nonHierChildren = n1.get_children(refs=32) #NonHierarchicalReferences

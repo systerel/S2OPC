@@ -49,11 +49,13 @@ variantInfoList = [ ('Int64', ua.VariantType.Int64, -1000, random.randint(-92233
                   ]
 
 # Expected browse subtree. The backward reference should point to the same node, but wihout the trailing BALA_RLDS_G019
-browseSubTree = ('ns=1;s=Objects.15361.SIGNALs.BALA_RDLS_G019',
+browseSubTree = ('ns=1;s=Level1Folder3',
                  # Forward hierarchical references (i=33) BrowseNames
-                 ('RM', 'RC', 'SendCommand', 'OffBlocking-K', 'OffBlocking-CC'),
+                 ('Level2Folder1', 'Level2Folder2', 'Level2Folder3'),
                  # Forward non-hierarchical references (i=32) nodeIds
-                 ('i=61',),
+                 ('i=61', ),
+                 # Backward reference (shall be unique)
+                 ('ns=1;s=TestReferencesFolder')
                 )
 
 def create_client(uri=sUri):
