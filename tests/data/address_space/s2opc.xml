@@ -4180,9 +4180,7 @@ v      <Reference ReferenceType="HasTypeDefinition">i=2243</Reference>
       </References>
   </UAVariable>
   <UAVariable NodeId="i=3114" BrowseName="EnabledFlag" ParentNodeId="i=2010"
-               DataType="Boolean"
-               AccessLevel="3"
-               UserAccessLevel="3">
+               DataType="Boolean">
       <DisplayName>EnabledFlag</DisplayName>
       <Description>If TRUE the diagnostics collection is enabled.</Description>
       <References>
@@ -4689,9 +4687,7 @@ v      <Reference ReferenceType="HasTypeDefinition">i=2243</Reference>
       </References>
   </UAVariable>
   <UAVariable NodeId="i=2025" BrowseName="EnabledFlag" ParentNodeId="i=2020"
-               DataType="Boolean"
-               AccessLevel="3"
-               UserAccessLevel="3">
+               DataType="Boolean">
       <DisplayName>EnabledFlag</DisplayName>
       <Description>If TRUE the diagnostics collection is enabled.</Description>
       <References>
@@ -11056,9 +11052,7 @@ v      <Reference ReferenceType="HasTypeDefinition">i=2243</Reference>
       </References>
   </UAVariable>
   <UAVariable NodeId="i=2294" BrowseName="EnabledFlag" ParentNodeId="i=2274"
-               DataType="Boolean"
-               AccessLevel="3"
-               UserAccessLevel="3">
+               DataType="Boolean">
       <DisplayName>EnabledFlag</DisplayName>
       <Description>If TRUE the diagnostics collection is enabled.</Description>
       <References>
