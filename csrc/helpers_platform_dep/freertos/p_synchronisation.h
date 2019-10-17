@@ -37,6 +37,7 @@
 
 /*****Private condition variable api*****/
 
+/* Warning: MAX_WAITERS shall be equal to or smaller than MAX_P_UTILS_LIST */
 #define MAX_WAITERS (MAX_P_UTILS_LIST)
 
 #define JOINTURE_SIGNAL (0x80000000)
