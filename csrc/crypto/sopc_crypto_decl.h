@@ -32,7 +32,7 @@ typedef struct SOPC_CryptoProfile SOPC_CryptoProfile;
 typedef struct SOPC_CryptoProfile_PubSub SOPC_CryptoProfile_PubSub;
 typedef struct SOPC_CryptolibContext SOPC_CryptolibContext;
 typedef struct SOPC_AsymmetricKey SOPC_AsymmetricKey;
-typedef struct SOPC_Certificate SOPC_Certificate;
+typedef struct SOPC_CertificateList SOPC_CertificateList;
 typedef struct SOPC_PKIProvider SOPC_PKIProvider;
 
 #endif /* SOPC_CRYPTO_DECL_H_ */

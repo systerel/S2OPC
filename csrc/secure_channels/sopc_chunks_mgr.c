@@ -293,7 +293,7 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
                                                             SOPC_Endpoint_Config* epConfig,
                                                             SOPC_SecureChannel_Config* scConfig,
                                                             bool* senderCertificatePresence,
-                                                            SOPC_Certificate** clientSenderCertificate,
+                                                            SOPC_CertificateList** clientSenderCertificate,
                                                             bool* receiverCertificatePresence,
                                                             SOPC_StatusCode* errorStatus)
 {
@@ -316,7 +316,7 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
     bool toSign = true;
     SOPC_ByteString otherBsAppCert;
     SOPC_ByteString_Initialize(&otherBsAppCert);
-    const SOPC_Certificate* runningAppCert = NULL;
+    const SOPC_CertificateList* runningAppCert = NULL;
     const SOPC_PKIProvider* pkiProvider = NULL;
     SOPC_ByteString senderCertificate;
     SOPC_ByteString_Initialize(&senderCertificate);
@@ -431,7 +431,7 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
 
             if (SOPC_STATUS_OK == status)
             {
-                SOPC_Certificate* cert = NULL;
+                SOPC_CertificateList* cert = NULL;
                 status = SOPC_KeyManager_Certificate_CreateFromDER(senderCertificate.Data,
                                                                    (uint32_t) senderCertificate.Length, &cert);
                 if (SOPC_STATUS_OK == status)
@@ -642,7 +642,7 @@ static bool SC_Chunks_CheckAsymmetricSecurityHeader(SOPC_SecureConnection* scCon
     SOPC_Endpoint_Config* serverConfig = NULL;
     bool senderCertifPresence = false;
     bool receiverCertifThumbprintPresence = false;
-    SOPC_Certificate* clientCertificate = NULL;
+    SOPC_CertificateList* clientCertificate = NULL;
     int32_t compareRes = -1;
     uint32_t idx = 0;
     uint32_t scConfigIdx = 0;
@@ -1373,7 +1373,7 @@ static bool SC_Chunks_VerifyMsgSignature(SOPC_SecureConnection* scConnection,
     if (!isSymmetric)
     {
         SOPC_AsymmetricKey* publicKey = NULL;
-        const SOPC_Certificate* otherAppCertificate = NULL;
+        const SOPC_CertificateList* otherAppCertificate = NULL;
         SOPC_SecureChannel_Config* scConfig = SOPC_Toolkit_GetSecureChannelConfig(scConnection);
 
         if (NULL == scConfig && scConnection->isServerConnection)
@@ -2255,7 +2255,7 @@ static bool SC_Chunks_EncodeAsymSecurityHeader(uint32_t scConnectionIdx,
     if (result)
     {
         uint32_t length = 0;
-        const SOPC_Certificate* senderCert = SC_OwnCertificate(scConnection);
+        const SOPC_CertificateList* senderCert = SC_OwnCertificate(scConnection);
 
         if (senderCert != NULL)
         {
@@ -2302,7 +2302,7 @@ static bool SC_Chunks_EncodeAsymSecurityHeader(uint32_t scConnectionIdx,
     // Receiver Certificate Thumbprint:
     if (result)
     {
-        const SOPC_Certificate* receiverCertCrypto = SC_PeerCertificate(scConnection);
+        const SOPC_CertificateList* receiverCertCrypto = SC_PeerCertificate(scConnection);
 
         // Note: part 6 v1.03 table 27: This field shall be null if the Message is not encrypted
         if (toEncrypt && receiverCertCrypto != NULL)
@@ -2480,8 +2480,8 @@ static bool SC_Chunks_GetSendingCryptoSizes(SOPC_SecureConnection* scConnection,
         {
             SOPC_AsymmetricKey* receiverPublicKey = NULL;
             SOPC_AsymmetricKey* senderPublicKey = NULL;
-            const SOPC_Certificate* receiverAppCertificate = SC_PeerCertificate(scConnection);
-            const SOPC_Certificate* senderAppCertificate = SC_OwnCertificate(scConnection);
+            const SOPC_CertificateList* receiverAppCertificate = SC_PeerCertificate(scConnection);
+            const SOPC_CertificateList* senderAppCertificate = SC_OwnCertificate(scConnection);
 
             // Asymmetric case: used only for opening channel, signature AND encryption mandatory in this case
             *toEncrypt = true;
@@ -2859,7 +2859,7 @@ static bool SC_Chunks_GetEncryptedDataLength(SOPC_SecureConnection* scConnection
 
     if (!isSymmetricAlgo)
     {
-        const SOPC_Certificate* otherAppCertificate = SC_PeerCertificate(scConnection);
+        const SOPC_CertificateList* otherAppCertificate = SC_PeerCertificate(scConnection);
 
         if (NULL == otherAppCertificate)
         {
@@ -3031,7 +3031,7 @@ static bool SC_Chunks_EncryptMsg(SOPC_SecureConnection* scConnection,
     {
         /* ASYMMETRIC CASE */
 
-        const SOPC_Certificate* otherAppCertificate = NULL;
+        const SOPC_CertificateList* otherAppCertificate = NULL;
         if (!scConnection->isServerConnection)
         {
             // Client side

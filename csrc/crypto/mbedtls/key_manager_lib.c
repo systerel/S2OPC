@@ -131,7 +131,7 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromFile(const char* szPat
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(const SOPC_Certificate* pCert,
+SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(const SOPC_CertificateList* pCert,
                                                                       SOPC_AsymmetricKey** pKey)
 {
     if (NULL == pCert || NULL == pKey)
@@ -207,16 +207,16 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_ToDER(const SOPC_AsymmetricKey* 
  */
 SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateFromDER(const uint8_t* bufferDER,
                                                             uint32_t lenDER,
-                                                            SOPC_Certificate** ppCert)
+                                                            SOPC_CertificateList** ppCert)
 {
     mbedtls_x509_crt* crt = NULL;
-    SOPC_Certificate* certif = NULL;
+    SOPC_CertificateList* certif = NULL;
 
     if (NULL == bufferDER || 0 == lenDER || NULL == ppCert)
         return SOPC_STATUS_INVALID_PARAMETERS;
 
     // Mem alloc
-    certif = SOPC_Malloc(sizeof(SOPC_Certificate));
+    certif = SOPC_Malloc(sizeof(SOPC_CertificateList));
     if (NULL == certif)
         return SOPC_STATUS_NOK;
 
@@ -248,16 +248,16 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateFromDER(const uint8_t* buffe
  * \note    Same as CreateFromDER, except for a single call, can we refactor?
  *
  */
-SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateFromFile(const char* szPath, SOPC_Certificate** ppCert)
+SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateFromFile(const char* szPath, SOPC_CertificateList** ppCert)
 {
     mbedtls_x509_crt* crt = NULL;
-    SOPC_Certificate* certif = NULL;
+    SOPC_CertificateList* certif = NULL;
 
     if (NULL == szPath || NULL == ppCert)
         return SOPC_STATUS_INVALID_PARAMETERS;
 
     // Mem alloc
-    certif = SOPC_Malloc(sizeof(SOPC_Certificate));
+    certif = SOPC_Malloc(sizeof(SOPC_CertificateList));
     if (NULL == certif)
         return SOPC_STATUS_NOK;
 
@@ -284,7 +284,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateFromFile(const char* szPath,
     }
 }
 
-void SOPC_KeyManager_Certificate_Free(SOPC_Certificate* pCert)
+void SOPC_KeyManager_Certificate_Free(SOPC_CertificateList* pCert)
 {
     if (NULL == pCert)
         return;
@@ -296,7 +296,7 @@ void SOPC_KeyManager_Certificate_Free(SOPC_Certificate* pCert)
 }
 
 SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetThumbprint(const SOPC_CryptoProvider* pProvider,
-                                                            const SOPC_Certificate* pCert,
+                                                            const SOPC_CertificateList* pCert,
                                                             uint8_t* pDest,
                                                             uint32_t lenDest)
 {
@@ -364,7 +364,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetThumbprint(const SOPC_CryptoPro
  * \brief       Fills \p pKey with public key information retrieved from \p pCert.
  * \warning     \p pKey is not valid anymore when \p pCert is freed.
  */
-SOPC_ReturnStatus KeyManager_Certificate_GetPublicKey(const SOPC_Certificate* pCert, SOPC_AsymmetricKey* pKey)
+SOPC_ReturnStatus KeyManager_Certificate_GetPublicKey(const SOPC_CertificateList* pCert, SOPC_AsymmetricKey* pKey)
 {
     if (NULL == pCert || NULL == pKey)
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -416,7 +416,7 @@ static void* mem_search(const void* mem, size_t mem_len, const void* needle, siz
 }
 
 /* Does not copy the string. Returns NULL if nothing found. In this case str_len might have been modified. */
-static const uint8_t* get_application_uri_ptr_from_crt_data(const SOPC_Certificate* crt, uint8_t* str_len)
+static const uint8_t* get_application_uri_ptr_from_crt_data(const SOPC_CertificateList* crt, uint8_t* str_len)
 {
     // Number belows are taken from ASN1 and RFC5280 section 4.2.1.6
     static const uint8_t ASN_SEQUENCE_TAG = 0x30;
@@ -507,7 +507,7 @@ static const uint8_t* get_application_uri_ptr_from_crt_data(const SOPC_Certifica
     return (((const uint8_t*) uri_start) + 2);
 }
 
-bool SOPC_KeyManager_Certificate_CheckApplicationUri(const SOPC_Certificate* pCert, const char* application_uri)
+bool SOPC_KeyManager_Certificate_CheckApplicationUri(const SOPC_CertificateList* pCert, const char* application_uri)
 {
     assert(pCert != NULL);
     assert(application_uri != NULL);
@@ -528,7 +528,7 @@ bool SOPC_KeyManager_Certificate_CheckApplicationUri(const SOPC_Certificate* pCe
     return strncmp(application_uri, str_data, str_len) == 0;
 }
 
-SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetMaybeApplicationUri(const SOPC_Certificate* pCert,
+SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetMaybeApplicationUri(const SOPC_CertificateList* pCert,
                                                                      char** ppApplicationUri,
                                                                      size_t* pStringLength)
 {

@@ -349,7 +349,7 @@ void session_core_bs__get_session_user_client(const constants__t_session_i sessi
  */
 static SOPC_ReturnStatus check_application_uri(const SOPC_ByteString* certData, const SOPC_String* appUri, bool* ok)
 {
-    SOPC_Certificate* certificate = NULL;
+    SOPC_CertificateList* certificate = NULL;
 
     *ok = false;
 
@@ -887,7 +887,7 @@ void session_core_bs__client_create_session_check_crypto(
     SessionData* pSession = NULL;
     const OpcUa_CreateSessionResponse* pResp = (OpcUa_CreateSessionResponse*) session_core_bs__p_resp_msg;
     const OpcUa_SignatureData* pSignCandid = &pResp->ServerSignature;
-    SOPC_Certificate* pCrtSrv = NULL;
+    SOPC_CertificateList* pCrtSrv = NULL;
     SOPC_AsymmetricKey* pKeyCrtSrv = NULL;
 
     /* Default answer */
@@ -954,7 +954,7 @@ void session_core_bs__server_activate_session_check_crypto(
     SOPC_ByteString* pNonce = NULL;
     const OpcUa_ActivateSessionRequest* pReq = (OpcUa_ActivateSessionRequest*) session_core_bs__activate_req_msg;
     const OpcUa_SignatureData* pSignCandid = &pReq->ClientSignature;
-    SOPC_Certificate* pCrtCli = NULL;
+    SOPC_CertificateList* pCrtCli = NULL;
     SOPC_AsymmetricKey* pKeyCrtCli = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 

@@ -123,7 +123,7 @@ typedef struct SOPC_SecureConnection_TcpOpnReqAsymmSecu
     uint16_t validSecurityModes; // accepted security mode for the valid security policy requested
     bool isSecureModeActive; // a secure mode is active (sign or signAndEncrypt) choice based on certificates presence
                              // in OPN
-    SOPC_Certificate* clientCertificate; /* temporary record of the client certificate */
+    SOPC_CertificateList* clientCertificate; /* temporary record of the client certificate */
 } SOPC_SecureConnection_TcpAsymmSecu;
 
 // See Part 6 table 29
@@ -193,8 +193,8 @@ typedef struct SOPC_SecureConnection
     uint32_t serverEndpointConfigIdx; // endpoint description configuration association
 
     SOPC_AsymmetricKey* privateKey;
-    SOPC_Certificate* serverCertificate;
-    SOPC_Certificate* clientCertificate;
+    SOPC_CertificateList* serverCertificate;
+    SOPC_CertificateList* clientCertificate;
 } SOPC_SecureConnection;
 
 typedef struct SOPC_SecureListener
@@ -229,8 +229,8 @@ void SOPC_SecureChannelsInternalContext_Clear(void);
 
 SOPC_SecureConnection* SC_GetConnection(uint32_t connectionIdx);
 
-const SOPC_Certificate* SC_OwnCertificate(SOPC_SecureConnection* conn);
-const SOPC_Certificate* SC_PeerCertificate(SOPC_SecureConnection* conn);
+const SOPC_CertificateList* SC_OwnCertificate(SOPC_SecureConnection* conn);
+const SOPC_CertificateList* SC_PeerCertificate(SOPC_SecureConnection* conn);
 
 /** @brief Retrieve the number of intermediate chunks already received */
 uint32_t SOPC_ScInternalContext_GetNbIntermediateInputChunks(SOPC_SecureConnection_ChunkMgrCtx* chunkCtx);

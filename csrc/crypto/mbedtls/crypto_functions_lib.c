@@ -589,7 +589,7 @@ SOPC_ReturnStatus CryptoProvider_AsymVerify_RSASSA_PKCS1_v15_w_SHA256(const SOPC
 }
 
 SOPC_ReturnStatus CryptoProvider_CertVerify_RSA_SHA256_2048_4096(const SOPC_CryptoProvider* pCrypto,
-                                                                 const SOPC_Certificate* pCert)
+                                                                 const SOPC_CertificateList* pCert)
 {
     SOPC_AsymmetricKey pub_key;
     uint32_t key_length = 0;
@@ -758,7 +758,7 @@ SOPC_ReturnStatus CryptoProvider_AsymVerify_RSASSA_PKCS1_v15_w_SHA1(const SOPC_C
 }
 
 SOPC_ReturnStatus CryptoProvider_CertVerify_RSA_SHA1_SHA256_1024_2048(const SOPC_CryptoProvider* pCrypto,
-                                                                      const SOPC_Certificate* pCert)
+                                                                      const SOPC_CertificateList* pCert)
 {
     SOPC_AsymmetricKey pub_key;
     uint32_t key_length = 0;

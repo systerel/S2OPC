@@ -449,7 +449,7 @@ void message_out_bs__write_create_session_req_msg_crypto(
     if (SOPC_STATUS_OK != status)
         return;
 
-    SOPC_Certificate* pCertCli = NULL;
+    SOPC_CertificateList* pCertCli = NULL;
 
     if (SOPC_STATUS_OK != SOPC_KeyManager_SerializedCertificate_Deserialize(pSerialCertCli, &pCertCli))
         return;

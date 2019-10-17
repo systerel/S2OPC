@@ -23,7 +23,7 @@
 #include "sopc_mem_alloc.h"
 
 static SOPC_ReturnStatus PKIPermissive_ValidateAnything(const SOPC_PKIProvider* pPKI,
-                                                        const SOPC_Certificate* pToValidate,
+                                                        const SOPC_CertificateList* pToValidate,
                                                         uint32_t* error)
 {
     /* avoid unused parameter compiler warning */

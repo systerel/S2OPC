@@ -1445,7 +1445,7 @@ static bool SC_ServerTransition_TcpNegotiate_To_ScInit(SOPC_SecureConnection* sc
     return status == SOPC_STATUS_OK;
 }
 
-static bool get_certificate_der(SOPC_Certificate* cert, SOPC_Buffer** buffer)
+static bool get_certificate_der(SOPC_CertificateList* cert, SOPC_Buffer** buffer)
 {
     if (cert == NULL)
     {
@@ -2256,7 +2256,7 @@ static bool sc_init_key_and_certs(SOPC_SecureConnection* sc)
         return true;
     }
 
-    SOPC_Certificate** cert = sc->isServerConnection ? &sc->serverCertificate : &sc->clientCertificate;
+    SOPC_CertificateList** cert = sc->isServerConnection ? &sc->serverCertificate : &sc->clientCertificate;
 
     if (SOPC_KeyManager_SerializedAsymmetricKey_Deserialize(serialized_private_key, false, &sc->privateKey) !=
             SOPC_STATUS_OK ||

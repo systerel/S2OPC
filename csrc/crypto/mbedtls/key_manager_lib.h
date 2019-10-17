@@ -19,7 +19,7 @@
 
 /** \file key_manager_lib.h
  *
- * Implementations for SOPC_AsymmetricKey and SOPC_Certificate are mainly lib-specific.
+ * Implementations for SOPC_AsymmetricKey and SOPC_CertificateList are mainly lib-specific.
  */
 
 #ifndef SOPC_KEY_MANAGER_LIB_H_
@@ -47,12 +47,18 @@ struct SOPC_AsymmetricKey
 };
 
 /**
- * \brief   The signed public key representation.
+ * \brief   The signed public key representation, or a chained list of such keys.
  *
  *          It should be treated as an abstract handle.
- *          The certificate structure is mainly lib-specific. Its content can be enriched for future uses.
+ *          The certificate structure is mainly lib-specific.
+ *          mbedtls certificates are chained.
+ *          This structures represents a chained list of certificates.
+ *
+ *          Usually, the CertificateList has length 1 when working with asymmetric cryptographic primitives,
+ *          and the CertificateList has length > 1 when working with certificate validation.
+ *          In the latter case, the certificates are in fact certificate authorities.
  */
-struct SOPC_Certificate
+struct SOPC_CertificateList
 {
     mbedtls_x509_crt crt; /**< Certificate as a lib-dependent format */
     uint8_t*
@@ -61,21 +67,26 @@ struct SOPC_Certificate
 };
 
 /**
- * \brief   Certificate Revocation List.
+ * \brief   A list of Certificate Revocation Lists.
  *
- *          Unspecified yet.
- *          This current  implementation might be too much tainted by mbedtls.
+ *          It should be treated as an abstract handle.
+ *          The revocation list structure is mainly lib-specific.
+ *          mbedtls revocation lists are chained.
+ *
+ *          Usually, this structure is a list of known revocation lists for the trusted certificates.
+ *          Each revocation list in the list is associated to one certificate authority in the
+ *          trusted certificate chain.
  */
-typedef struct SOPC_CertificateRevList
+typedef struct SOPC_CRLList
 {
     mbedtls_x509_crl crl;
-} CertificateRevList;
+} SOPC_CRLList;
 
 /**
  * \brief           Returns the internal public key of the given signed public key.
  *
  * \warning         The returned SOPC_AsymmetricKey must not be freed with SOPC_KeyManager_AsymmetricKey_Free()
- *                  and the key must not be used after the SOPC_Certificate is freed by
+ *                  and the key must not be used after the SOPC_CertificateList is freed by
  *                  SOPC_KeyManager_Certificate_Free().
  *
  *                  A special flag \p isBorrowedFromCert is set to !FALSE in this case in the SOPC_AsymmetricKey.
@@ -89,6 +100,6 @@ typedef struct SOPC_CertificateRevList
  * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
  *                  and SOPC_STATUS_NOK when there was an error.
  */
-SOPC_ReturnStatus KeyManager_Certificate_GetPublicKey(const SOPC_Certificate* pCert, SOPC_AsymmetricKey* pKey);
+SOPC_ReturnStatus KeyManager_Certificate_GetPublicKey(const SOPC_CertificateList* pCert, SOPC_AsymmetricKey* pKey);
 
 #endif /* SOPC_KEY_MANAGER_LIB_H_ */

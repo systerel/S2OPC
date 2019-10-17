@@ -690,7 +690,7 @@ START_TEST(test_crypto_derive_keysets_B256S256)
 END_TEST
 
 // Fixture for certificate load
-static SOPC_Certificate* crt_pub = NULL;
+static SOPC_CertificateList* crt_pub = NULL;
 
 static inline void setup_certificate(void)
 {

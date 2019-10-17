@@ -32,7 +32,7 @@
 #include "sopc_key_manager.h"
 #include "sopc_pki.h"
 
-struct SOPC_CertificateRevList;
+struct SOPC_CRLList;
 
 /**
  * \brief           Creates the minimal validation implementation provided by the stack, which fulfills the PKIProvider
@@ -59,7 +59,7 @@ struct SOPC_CertificateRevList;
  *                  and SOPC_STATUS_NOK when there was an error.
  */
 SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_SerializedCertificate* pCertAuth,
-                                               struct SOPC_CertificateRevList* pRevocationList,
+                                               struct SOPC_CRLList* pRevocationList,
                                                SOPC_PKIProvider** ppPKI);
 
 #endif /* SOPC_PKI_STACK_H_ */

@@ -61,7 +61,7 @@ typedef void (*SOPC_PKIProvider_Free_Func)(SOPC_PKIProvider* pPKI);
  *
  */
 typedef SOPC_ReturnStatus (*SOPC_FnValidateCertificate)(const struct SOPC_PKIProvider* pPKI,
-                                                        const SOPC_Certificate* pToValidate,
+                                                        const SOPC_CertificateList* pToValidate,
                                                         uint32_t* error);
 
 /**

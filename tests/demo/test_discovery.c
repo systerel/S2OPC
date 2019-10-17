@@ -67,7 +67,7 @@ void EventDispatcher_ValidateGetEndpoints(SOPC_App_Com_Event event, uint32_t arg
     SOPC_Byte iSecLevelB256 = 0;
     SOPC_Byte iSecLevelB256S256 = 0;
     SOPC_ByteString* pBufCert = NULL;
-    SOPC_Certificate* pCert = NULL;
+    SOPC_CertificateList* pCert = NULL;
 
     // Set result is still validating since machine state will change on next instruction
     SOPC_Atomic_Int_Set(&atomicValidatingResult, 1);

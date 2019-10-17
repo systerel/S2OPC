@@ -166,14 +166,14 @@ static int verify_cert(void* trust_li, mbedtls_x509_crt* crt, int certificate_de
 }
 
 static SOPC_ReturnStatus PKIProviderStack_ValidateCertificate(const SOPC_PKIProvider* pPKI,
-                                                              const SOPC_Certificate* pToValidate,
+                                                              const SOPC_CertificateList* pToValidate,
                                                               uint32_t* error)
 {
     (void) (pPKI);
     assert(NULL != error);
     *error = SOPC_CertificateValidationError_Unkown;
-    SOPC_Certificate* cert_ca = NULL;
-    CertificateRevList* cert_rev_list = NULL;
+    SOPC_CertificateList* cert_ca = NULL;
+    SOPC_CRLList* cert_rev_list = NULL;
     mbedtls_x509_crl* rev_list = NULL;
     uint32_t failure_reasons = 0;
 
@@ -185,10 +185,10 @@ static SOPC_ReturnStatus PKIProviderStack_ValidateCertificate(const SOPC_PKIProv
     // Gathers certificates from pki structure
     if (NULL != pPKI->pUserCertRevocList)
     {
-        cert_rev_list = (CertificateRevList*) (pPKI->pUserCertRevocList);
+        cert_rev_list = (SOPC_CRLList*) (pPKI->pUserCertRevocList);
         rev_list = (mbedtls_x509_crl*) (&cert_rev_list->crl);
     }
-    cert_ca = (SOPC_Certificate*) (pPKI->pUserCertAuthList);
+    cert_ca = (SOPC_CertificateList*) (pPKI->pUserCertAuthList);
 
     // Now, verifies the certificate
     // crt are not const in crt_verify, but this function does not look like to modify them
@@ -220,11 +220,11 @@ static void PKIProviderStack_Free(SOPC_PKIProvider* pPKI)
 }
 
 SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_SerializedCertificate* pCertAuth,
-                                               struct SOPC_CertificateRevList* pRevocationList,
+                                               SOPC_CRLList* pRevocationList,
                                                SOPC_PKIProvider** ppPKI)
 {
     SOPC_PKIProvider* pki = NULL;
-    SOPC_Certificate* caCert = NULL;
+    SOPC_CertificateList* caCert = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     if (NULL == pCertAuth || NULL == ppPKI)

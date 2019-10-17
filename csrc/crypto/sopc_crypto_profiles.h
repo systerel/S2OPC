@@ -155,7 +155,7 @@ typedef SOPC_ReturnStatus (*FnAsymmetricVerify)(const SOPC_CryptoProvider* pProv
                                                 uint32_t lenInput,
                                                 const SOPC_AsymmetricKey* pKey,
                                                 const uint8_t* pSignature);
-typedef SOPC_ReturnStatus (*FnCertificateVerify)(const SOPC_CryptoProvider* pCrypto, const SOPC_Certificate* pCert);
+typedef SOPC_ReturnStatus (*FnCertificateVerify)(const SOPC_CryptoProvider* pCrypto, const SOPC_CertificateList* pCert);
 
 typedef SOPC_ReturnStatus (*FnPubSubCrypt)(const SOPC_CryptoProvider* pProvider,
                                            const uint8_t* pInput,

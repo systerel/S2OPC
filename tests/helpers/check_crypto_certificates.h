@@ -32,6 +32,6 @@ const char* SRV_CRT_THUMB;
 const char* CA_CRT;
 const size_t CA_CRT_LEN;
 
-SOPC_Certificate* SOPC_UnhexlifyCertificate(const char* hex_data);
+SOPC_CertificateList* SOPC_UnhexlifyCertificate(const char* hex_data);
 
 #endif /* SOPC_CHECK_CRYPTO_CERTIFICATES_H_ */

@@ -76,12 +76,12 @@ void SOPC_SecureChannelsInternalContext_Clear()
     SOPC_Looper_Delete(secureChannelsLooper);
 }
 
-const SOPC_Certificate* SC_OwnCertificate(SOPC_SecureConnection* conn)
+const SOPC_CertificateList* SC_OwnCertificate(SOPC_SecureConnection* conn)
 {
     return conn->isServerConnection ? conn->serverCertificate : conn->clientCertificate;
 }
 
-const SOPC_Certificate* SC_PeerCertificate(SOPC_SecureConnection* conn)
+const SOPC_CertificateList* SC_PeerCertificate(SOPC_SecureConnection* conn)
 {
     return conn->isServerConnection ? conn->clientCertificate : conn->serverCertificate;
 }

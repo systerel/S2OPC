@@ -43,7 +43,7 @@
  * Cert API
  * ------------------------------------------------------------------------------------------------
  */
-SOPC_ReturnStatus SOPC_KeyManager_Certificate_CopyDER(const SOPC_Certificate* pCert,
+SOPC_ReturnStatus SOPC_KeyManager_Certificate_CopyDER(const SOPC_CertificateList* pCert,
                                                       uint8_t** ppDest,
                                                       uint32_t* pLenAllocated)
 {
@@ -140,7 +140,7 @@ SOPC_ReturnStatus SOPC_KeyManager_SerializedCertificate_CreateFromFile(const cha
 }
 
 SOPC_ReturnStatus SOPC_KeyManager_SerializedCertificate_Deserialize(const SOPC_SerializedCertificate* cert,
-                                                                    SOPC_Certificate** res)
+                                                                    SOPC_CertificateList** res)
 {
     return SOPC_KeyManager_Certificate_CreateFromDER(cert->data, cert->length, res);
 }

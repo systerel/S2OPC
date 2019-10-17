@@ -124,7 +124,7 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromFile(const char* szPat
  * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
  *                  and SOPC_STATUS_NOK when there was an error.
  */
-SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(const SOPC_Certificate* pCert,
+SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(const SOPC_CertificateList* pCert,
                                                                       SOPC_AsymmetricKey** pKey);
 
 /**
@@ -186,7 +186,7 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_ToDER(const SOPC_AsymmetricKey* 
  */
 SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateFromDER(const uint8_t* bufferDER,
                                                             uint32_t lenDER,
-                                                            SOPC_Certificate** ppCert);
+                                                            SOPC_CertificateList** ppCert);
 
 /**
  * \brief           Creates a new Certificate (signed public key) from a file in the DER or PEM format.
@@ -203,7 +203,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateFromDER(const uint8_t* buffe
  * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
  *                  and SOPC_STATUS_NOK when there was an error.
  */
-SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateFromFile(const char* szPath, SOPC_Certificate** ppCert);
+SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateFromFile(const char* szPath, SOPC_CertificateList** ppCert);
 
 /**
  * \brief           Frees a Certificate created with SOPC_KeyManager_Certificate_CreateFromFile() or
@@ -215,7 +215,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateFromFile(const char* szPath,
  *
  * \param pCert     The Certificate to free.
  */
-void SOPC_KeyManager_Certificate_Free(SOPC_Certificate* pCert);
+void SOPC_KeyManager_Certificate_Free(SOPC_CertificateList* pCert);
 
 /**
  * \brief           Copies a DER description of \p pCert.
@@ -230,7 +230,7 @@ void SOPC_KeyManager_Certificate_Free(SOPC_Certificate* pCert);
  * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
  *                  and SOPC_STATUS_NOK when there was an error.
  */
-SOPC_ReturnStatus SOPC_KeyManager_Certificate_CopyDER(const SOPC_Certificate* pCert,
+SOPC_ReturnStatus SOPC_KeyManager_Certificate_CopyDER(const SOPC_CertificateList* pCert,
                                                       uint8_t** ppDest,
                                                       uint32_t* pLenAllocated);
 
@@ -253,7 +253,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CopyDER(const SOPC_Certificate* pC
  *                  and SOPC_STATUS_NOK when there was an error.
  */
 SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetThumbprint(const SOPC_CryptoProvider* pProvider,
-                                                            const SOPC_Certificate* pCert,
+                                                            const SOPC_CertificateList* pCert,
                                                             uint8_t* pDest,
                                                             uint32_t lenDest);
 
@@ -271,7 +271,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetThumbprint(const SOPC_CryptoPro
  *
  * \return \c TRUE if the values match, \c FALSE else.
  */
-bool SOPC_KeyManager_Certificate_CheckApplicationUri(const SOPC_Certificate* pCert, const char* applicationUri);
+bool SOPC_KeyManager_Certificate_CheckApplicationUri(const SOPC_CertificateList* pCert, const char* applicationUri);
 
 /**
  * \brief           Copy the application URI embedded in a certificate.
@@ -288,7 +288,7 @@ bool SOPC_KeyManager_Certificate_CheckApplicationUri(const SOPC_Certificate* pCe
  *
  * \return          SOPC_STATUS_OK when successfully copied.
  */
-SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetMaybeApplicationUri(const SOPC_Certificate* pCert,
+SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetMaybeApplicationUri(const SOPC_CertificateList* pCert,
                                                                      char** ppApplicationUri,
                                                                      size_t* pStringLength);
 
@@ -364,12 +364,12 @@ SOPC_ReturnStatus SOPC_KeyManager_SerializedCertificate_CreateFromFile(const cha
  * \brief Deserializes a serialized certificate.
  *
  * \param cert  the serialized certificate
- * \param res   out parameter, the decoded certificate as a newly allocated SOPC_Certificate
+ * \param res   out parameter, the decoded certificate as a newly allocated SOPC_CertificateList
  *
  * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
  */
 SOPC_ReturnStatus SOPC_KeyManager_SerializedCertificate_Deserialize(const SOPC_SerializedCertificate* cert,
-                                                                    SOPC_Certificate** res);
+                                                                    SOPC_CertificateList** res);
 
 /**
  * \brief Returns the data held in a serialized certificate

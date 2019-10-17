@@ -29,13 +29,13 @@
 
 START_TEST(test_crypto_check_app_uri)
 {
-    SOPC_Certificate* crt_uri = SOPC_UnhexlifyCertificate(SRV_CRT);
+    SOPC_CertificateList* crt_uri = SOPC_UnhexlifyCertificate(SRV_CRT);
     ck_assert(SOPC_KeyManager_Certificate_CheckApplicationUri(crt_uri, "urn:S2OPC:localhost"));
     ck_assert(!SOPC_KeyManager_Certificate_CheckApplicationUri(crt_uri, "urn:S1OPC:localhost"));
     ck_assert(!SOPC_KeyManager_Certificate_CheckApplicationUri(crt_uri, "urn:S2OPC:localhost-postfix"));
     SOPC_KeyManager_Certificate_Free(crt_uri);
 
-    SOPC_Certificate* crt_no_uri = SOPC_UnhexlifyCertificate(CA_CRT);
+    SOPC_CertificateList* crt_no_uri = SOPC_UnhexlifyCertificate(CA_CRT);
     ck_assert(!SOPC_KeyManager_Certificate_CheckApplicationUri(crt_no_uri, "urn:S2OPC:localhost"));
     SOPC_KeyManager_Certificate_Free(crt_no_uri);
 }
@@ -46,13 +46,13 @@ START_TEST(test_crypto_get_app_uri)
     char* appUri = NULL;
     size_t len = 0;
 
-    SOPC_Certificate* crt_uri = SOPC_UnhexlifyCertificate(SRV_CRT);
+    SOPC_CertificateList* crt_uri = SOPC_UnhexlifyCertificate(SRV_CRT);
     ck_assert(SOPC_STATUS_OK == SOPC_KeyManager_Certificate_GetMaybeApplicationUri(crt_uri, &appUri, &len));
     ck_assert(strcmp(appUri, "urn:S2OPC:localhost") == 0);
     SOPC_Free(appUri);
     SOPC_KeyManager_Certificate_Free(crt_uri);
 
-    SOPC_Certificate* crt_no_uri = SOPC_UnhexlifyCertificate(CA_CRT);
+    SOPC_CertificateList* crt_no_uri = SOPC_UnhexlifyCertificate(CA_CRT);
     ck_assert(SOPC_STATUS_OK != SOPC_KeyManager_Certificate_GetMaybeApplicationUri(crt_no_uri, &appUri, &len));
     SOPC_KeyManager_Certificate_Free(crt_no_uri);
 }

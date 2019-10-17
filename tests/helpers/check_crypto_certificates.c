@@ -86,14 +86,14 @@ const char* SRV_CRT_THUMB = "c6c2b0a7f627b8d0fd6166631d1be00e186119f5";
 const char* CA_CRT = CA_CRT_DEFINE;
 const size_t CA_CRT_LEN = sizeof(CA_CRT_DEFINE) / 2;
 
-SOPC_Certificate* SOPC_UnhexlifyCertificate(const char* hex_data)
+SOPC_CertificateList* SOPC_UnhexlifyCertificate(const char* hex_data)
 {
     size_t der_len = strlen(hex_data) / 2;
     uint8_t* der_data = SOPC_Calloc(der_len, sizeof(uint8_t));
     ck_assert_ptr_nonnull(der_data);
 
     ck_assert(unhexlify(hex_data, der_data, der_len) == (int) der_len);
-    SOPC_Certificate* crt = NULL;
+    SOPC_CertificateList* crt = NULL;
     ck_assert(der_len <= SIZE_MAX);
     ck_assert_uint_eq(SOPC_STATUS_OK, SOPC_KeyManager_Certificate_CreateFromDER(der_data, (uint32_t) der_len, &crt));
     SOPC_Free(der_data);

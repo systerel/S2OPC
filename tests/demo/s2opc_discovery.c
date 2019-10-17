@@ -146,7 +146,7 @@ static void PrintEndpoints(OpcUa_GetEndpointsResponse* pResp)
     OpcUa_UserTokenPolicy* pPol = NULL;
     SOPC_ByteString* pBufCert = NULL;
     SOPC_CryptoProvider* pProvider = NULL;
-    SOPC_Certificate* pCert = NULL;
+    SOPC_CertificateList* pCert = NULL;
     uint32_t lenThmb = 0;
     char* pThmb = NULL;
 
