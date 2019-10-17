@@ -93,55 +93,40 @@ SOPC_ReturnStatus P_SYNCHRO_ClearConditionVariable(Condition* pConditionVariable
 SOPC_ReturnStatus P_SYNCHRO_InitConditionVariable(Condition* pConditionVariable, // Condition variable handle
                                                   uint16_t wMaxWaiters)          // max parallel waiting tasks
 {
-    SOPC_ReturnStatus result = SOPC_STATUS_OK;
     QueueHandle_t pMutex = NULL;
 
     if ((MAX_WAITERS < wMaxWaiters) || (NULL == pConditionVariable))
     {
-        result = SOPC_STATUS_INVALID_PARAMETERS;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else
-    {
-        if (E_COND_VAR_STATUS_NOT_INITIALIZED == pConditionVariable->status) // Check if workspace already exists
-        {
-            // Raz allocated workspaace
-            memset(pConditionVariable, 0, sizeof(Condition));
-            pMutex = xQueueCreateMutex(queueQUEUE_TYPE_MUTEX);
-            if (pMutex != NULL)
-            {
-                DEBUG_incrementCpt();
-                // Allocate list of waiters
-                P_UTILS_LIST_Init(&pConditionVariable->taskList, wMaxWaiters);
-                if (pConditionVariable->taskList.list == NULL)
-                {
-                    vQueueDelete(pMutex);
-                    pMutex = NULL;
 
-                    // Raz leaved memory
-                    memset(pConditionVariable, 0, sizeof(Condition));
-                    DEBUG_decrementCpt();
-                    result = SOPC_STATUS_OUT_OF_MEMORY;
-                }
-                else
-                {
-                    pConditionVariable->handleLockCounter = pMutex;
-                    pConditionVariable->status = E_COND_VAR_STATUS_INITIALIZED;
-                    result = SOPC_STATUS_OK;
-                }
-            }
-            else
-            {
-                /* Raz leaved memory*/
-                memset(pConditionVariable, 0, sizeof(Condition));
-                result = SOPC_STATUS_OUT_OF_MEMORY;
-            }
-        }
-        else
-        {
-            result = SOPC_STATUS_INVALID_STATE;
-        }
+    /* Check if workspace already exists */
+    if (E_COND_VAR_STATUS_NOT_INITIALIZED != pConditionVariable->status)
+    {
+        return SOPC_STATUS_INVALID_STATE;
     }
-    return result;
+
+    /* Raz allocated workspace */
+    memset(pConditionVariable, 0, sizeof(Condition));
+    pMutex = xQueueCreateMutex(queueQUEUE_TYPE_MUTEX);
+
+    /* Allocate list of waiters */
+    P_UTILS_LIST_Init(&pConditionVariable->taskList, wMaxWaiters);
+    if ((pMutex == NULL) || (NULL == pConditionVariable->taskList.list))
+    {
+        /* Raz leaved memory*/
+        memset(pConditionVariable, 0, sizeof(Condition));
+        vQueueDelete(pMutex);
+        pMutex = NULL;
+
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    DEBUG_incrementCpt();
+    pConditionVariable->handleLockCounter = pMutex;
+    pConditionVariable->status = E_COND_VAR_STATUS_INITIALIZED;
+
+    return SOPC_STATUS_OK;
 }
 
 // Destruction of condition variable if created via CreateConditionVariable.
