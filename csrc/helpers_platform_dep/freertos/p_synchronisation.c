@@ -568,22 +568,22 @@ SOPC_ReturnStatus Mutex_Unlock(Mutex* mut)
     SemaphoreHandle_t freeRtosMutex = NULL;
     BaseType_t resRtos = pdPASS;
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
-    if ((NULL == mut) || ((*mut) == NULL))
+
+    if ((NULL == mut) || (NULL == (*mut)))
     {
-        result = SOPC_STATUS_INVALID_PARAMETERS;
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    freeRtosMutex = *((SemaphoreHandle_t*) (mut));
+    resRtos = xQueueGiveMutexRecursive(freeRtosMutex);
+    if (pdPASS == resRtos)
+    {
+        result = SOPC_STATUS_OK;
     }
     else
     {
-        freeRtosMutex = *((SemaphoreHandle_t*) (mut));
-        resRtos = xQueueGiveMutexRecursive(freeRtosMutex);
-        if (pdPASS == resRtos)
-        {
-            result = SOPC_STATUS_OK;
-        }
-        else
-        {
-            result = SOPC_STATUS_NOK;
-        }
+        result = SOPC_STATUS_NOK;
     }
+
     return result;
 }
