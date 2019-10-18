@@ -785,8 +785,8 @@ START_TEST(test_cert_copyder_None)
                         der_cert, 1215) == 1215);
 
     // Extract 2 copies from loaded certificate
-    ck_assert(SOPC_KeyManager_Certificate_CopyDER(crt_pub, &buffer0, &lenAlloc0) == SOPC_STATUS_OK);
-    ck_assert(SOPC_KeyManager_Certificate_CopyDER(crt_pub, &buffer1, &lenAlloc1) == SOPC_STATUS_OK);
+    ck_assert(SOPC_KeyManager_Certificate_ToDER(crt_pub, &buffer0, &lenAlloc0) == SOPC_STATUS_OK);
+    ck_assert(SOPC_KeyManager_Certificate_ToDER(crt_pub, &buffer1, &lenAlloc1) == SOPC_STATUS_OK);
 
     // Both should be identical, and identical to der_cert
     ck_assert(lenAlloc0 == lenAlloc1);

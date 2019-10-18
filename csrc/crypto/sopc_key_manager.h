@@ -230,9 +230,9 @@ void SOPC_KeyManager_Certificate_Free(SOPC_CertificateList* pCert);
  * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
  *                  and SOPC_STATUS_NOK when there was an error.
  */
-SOPC_ReturnStatus SOPC_KeyManager_Certificate_CopyDER(const SOPC_CertificateList* pCert,
-                                                      uint8_t** ppDest,
-                                                      uint32_t* pLenAllocated);
+SOPC_ReturnStatus SOPC_KeyManager_Certificate_ToDER(const SOPC_CertificateList* pCert,
+                                                    uint8_t** ppDest,
+                                                    uint32_t* pLenAllocated);
 
 /**
  * \brief           Computes and writes the thumbprint of \p pCert to \p pDest.

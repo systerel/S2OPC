@@ -295,6 +295,37 @@ void SOPC_KeyManager_Certificate_Free(SOPC_CertificateList* pCert)
     SOPC_Free(pCert);
 }
 
+SOPC_ReturnStatus SOPC_KeyManager_Certificate_ToDER(const SOPC_CertificateList* pCert,
+                                                    uint8_t** ppDest,
+                                                    uint32_t* pLenAllocated)
+{
+    uint32_t lenToAllocate = 0;
+
+    if (NULL == pCert || NULL == ppDest || 0 == pLenAllocated)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    // Allocation
+    lenToAllocate = (uint32_t) pCert->crt.raw.len;
+    if (lenToAllocate == 0)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    (*ppDest) = SOPC_Malloc(lenToAllocate);
+    if (NULL == *ppDest)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    // Copy
+    memcpy((void*) (*ppDest), (void*) (pCert->crt.raw.p), lenToAllocate);
+    *pLenAllocated = lenToAllocate;
+
+    return SOPC_STATUS_OK;
+}
+
 SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetThumbprint(const SOPC_CryptoProvider* pProvider,
                                                             const SOPC_CertificateList* pCert,
                                                             uint8_t* pDest,
@@ -326,7 +357,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetThumbprint(const SOPC_CryptoPro
     uint32_t lenDER = 0;
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_Certificate_CopyDER(pCert, &pDER, &lenDER);
+        status = SOPC_KeyManager_Certificate_ToDER(pCert, &pDER, &lenDER);
     }
 
     mbedtls_md_type_t type = MBEDTLS_MD_NONE;

@@ -43,9 +43,9 @@
  * Cert API
  * ------------------------------------------------------------------------------------------------
  */
-SOPC_ReturnStatus SOPC_KeyManager_Certificate_CopyDER(const SOPC_CertificateList* pCert,
-                                                      uint8_t** ppDest,
-                                                      uint32_t* pLenAllocated)
+SOPC_ReturnStatus SOPC_KeyManager_Certificate_ToDER(const SOPC_CertificateList* pCert,
+                                                    uint8_t** ppDest,
+                                                    uint32_t* pLenAllocated)
 {
     uint32_t lenToAllocate = 0;
 

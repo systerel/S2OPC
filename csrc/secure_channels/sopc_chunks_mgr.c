@@ -337,7 +337,7 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
         {
             // retrieve expected sender certificate as a ByteString
             status =
-                SOPC_KeyManager_Certificate_CopyDER(scConnection->serverCertificate, &otherBsAppCert.Data, &tmpLength);
+                SOPC_KeyManager_Certificate_ToDER(scConnection->serverCertificate, &otherBsAppCert.Data, &tmpLength);
             if (SOPC_STATUS_OK == status && tmpLength > 0)
             {
                 otherBsAppCert.Length = (int32_t) tmpLength;
@@ -358,8 +358,8 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
             if (scConfig->crt_cli != NULL)
             {
                 // retrieve expected sender certificate as a ByteString
-                status = SOPC_KeyManager_Certificate_CopyDER(scConnection->clientCertificate, &otherBsAppCert.Data,
-                                                             &tmpLength);
+                status = SOPC_KeyManager_Certificate_ToDER(scConnection->clientCertificate, &otherBsAppCert.Data,
+                                                           &tmpLength);
                 if (SOPC_STATUS_OK == status && tmpLength > 0)
                 {
                     otherBsAppCert.Length = (int32_t) tmpLength;
@@ -2259,7 +2259,7 @@ static bool SC_Chunks_EncodeAsymSecurityHeader(uint32_t scConnectionIdx,
 
         if (senderCert != NULL)
         {
-            status = SOPC_KeyManager_Certificate_CopyDER(senderCert, &bsSenderCert.Data, &length);
+            status = SOPC_KeyManager_Certificate_ToDER(senderCert, &bsSenderCert.Data, &length);
             if (SOPC_STATUS_OK == status && length <= INT32_MAX)
             {
                 bsSenderCert.Length = (int32_t) length;

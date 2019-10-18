@@ -1457,7 +1457,7 @@ static bool get_certificate_der(SOPC_CertificateList* cert, SOPC_Buffer** buffer
     uint32_t cert_len = 0;
     SOPC_Buffer* cert_buffer = NULL;
 
-    if (SOPC_KeyManager_Certificate_CopyDER(cert, &cert_data, &cert_len) != SOPC_STATUS_OK)
+    if (SOPC_KeyManager_Certificate_ToDER(cert, &cert_data, &cert_len) != SOPC_STATUS_OK)
     {
         return false;
     }
