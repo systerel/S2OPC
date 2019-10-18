@@ -57,6 +57,7 @@ struct SOPC_AsymmetricKey
  *          Usually, the CertificateList has length 1 when working with asymmetric cryptographic primitives,
  *          and the CertificateList has length > 1 when working with certificate validation.
  *          In the latter case, the certificates are in fact certificate authorities.
+ *          See SOPC_KeyManager_Certificate_GetListLength.
  */
 struct SOPC_CertificateList
 {

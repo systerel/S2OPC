@@ -293,6 +293,23 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetMaybeApplicationUri(const SOPC_
                                                                      size_t* pStringLength);
 
 /**
+ * \brief           Return the number of chained certificates in the certificate list \p pCert.
+ *
+ * \param pCert     The certificate or certificate list.
+ * \param pLength   A valid pointer to the computed length of the list.
+ *
+ * \note            Content of the output is unspecified when return value is not SOPC_STATUS_OK.
+ *
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL.
+ */
+SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetListLength(const SOPC_CertificateList* pCert, size_t* pLength);
+
+/* ------------------------------------------------------------------------------------------------
+ * Serialization/Deserialization API
+ * ------------------------------------------------------------------------------------------------
+ */
+
+/**
  * \brief Creates a serialized asymmetric key from a DER or PEM payload.
  *
  * \param data   the key data in DER or PEM format

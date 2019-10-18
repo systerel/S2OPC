@@ -590,3 +590,22 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetMaybeApplicationUri(const SOPC_
 
     return SOPC_STATUS_OK;
 }
+
+SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetListLength(const SOPC_CertificateList* pCert, size_t* pLength)
+{
+    if (NULL == pCert || NULL == pLength)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    const mbedtls_x509_crt* cert = &pCert->crt;
+    size_t i = 0;
+    for (; NULL != cert; ++i)
+    {
+        cert = cert->next;
+    }
+
+    *pLength = i;
+
+    return SOPC_STATUS_OK;
+}
