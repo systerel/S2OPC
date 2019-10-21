@@ -62,9 +62,6 @@ struct SOPC_AsymmetricKey
 struct SOPC_CertificateList
 {
     mbedtls_x509_crt crt; /**< Certificate as a lib-dependent format */
-    uint8_t*
-        crt_der; /**< Certificate in the DER format, which should be canonical. Points to internal mbedtls buffer.*/
-    uint32_t len_der; /**< Length of crt_der. */
 };
 
 /**

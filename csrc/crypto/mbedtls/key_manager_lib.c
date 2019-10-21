@@ -223,24 +223,22 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateFromDER(const uint8_t* buffe
     // Init
     crt = &certif->crt;
     mbedtls_x509_crt_init(crt);
-    certif->crt_der = NULL;
-    certif->len_der = 0;
 
     // Parsing
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     int status_code = mbedtls_x509_crt_parse(crt, bufferDER, lenDER);
     if (status_code == 0 && crt->raw.len <= UINT32_MAX)
     {
-        certif->crt_der = certif->crt.raw.p;
-        certif->len_der = (uint32_t) certif->crt.raw.len;
         *ppCert = certif;
-        return SOPC_STATUS_OK;
     }
     else
     {
-        SOPC_Logger_TraceError("Crypto: certificate parse failed with error code: %i", status_code);
+        status = SOPC_STATUS_NOK;
+        SOPC_Logger_TraceError("Crypto: certificate buffer parse failed with error code: %i", status_code);
         SOPC_KeyManager_Certificate_Free(certif);
-        return SOPC_STATUS_NOK;
     }
+
+    return status;
 }
 
 /**
@@ -264,24 +262,22 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateFromFile(const char* szPath,
     // Init
     crt = &certif->crt;
     mbedtls_x509_crt_init(crt);
-    certif->crt_der = NULL;
-    certif->len_der = 0;
 
     // Parsing
-    if (mbedtls_x509_crt_parse_file(crt, szPath) == 0)
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    int status_code = mbedtls_x509_crt_parse_file(crt, szPath);
+    if (status_code == 0 && crt->raw.len <= UINT32_MAX)
     {
-        certif->crt_der = certif->crt.raw.p;
-        if (certif->crt.raw.len > UINT32_MAX)
-            return SOPC_STATUS_NOK;
-        certif->len_der = (uint32_t) certif->crt.raw.len;
         *ppCert = certif;
-        return SOPC_STATUS_OK;
     }
     else
     {
+        status = SOPC_STATUS_NOK;
+        SOPC_Logger_TraceError("Crypto: certificate file parse failed with error code: %i", status_code);
         SOPC_KeyManager_Certificate_Free(certif);
-        return SOPC_STATUS_NOK;
     }
+
+    return status;
 }
 
 void SOPC_KeyManager_Certificate_Free(SOPC_CertificateList* pCert)
@@ -290,8 +286,6 @@ void SOPC_KeyManager_Certificate_Free(SOPC_CertificateList* pCert)
         return;
 
     mbedtls_x509_crt_free(&pCert->crt);
-    pCert->crt_der = NULL;
-    pCert->len_der = 0;
     SOPC_Free(pCert);
 }
 
