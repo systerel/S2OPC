@@ -154,7 +154,7 @@ static DWORD WINAPI SOPC_Thread_StartFct(LPVOID args)
     return 0;
 }
 
-SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), void* startArgs, const char* name)
+SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), void* startArgs, const char* taskName)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     DWORD threadId = 0;
@@ -192,9 +192,9 @@ SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), v
         if (NULL != funcAddress)
         {
             size_t returnValue;
-            size_t targetSize = (strlen(name) + 1) * sizeof(wchar_t);
+            size_t targetSize = (strlen(taskName) + 1) * sizeof(wchar_t);
             wchar_t* wcstr = SOPC_Malloc(targetSize);
-            errno_t ret = mbstowcs_s(&returnValue, wcstr, targetSize, name, strlen(name));
+            errno_t ret = mbstowcs_s(&returnValue, wcstr, targetSize, taskName, strlen(taskName));
 
             if (0 == ret)
             {
