@@ -30,28 +30,56 @@
 #include "opcua_statuscodes.h"
 #include "sopc_array.h"
 #include "sopc_dict.h"
+#include "sopc_encodeable.h"
 #include "sopc_encoder.h"
 #include "sopc_hash.h"
 #include "sopc_helper_expat.h"
 #include "sopc_helper_string.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_singly_linked_list.h"
 
 typedef enum
 {
-    PARSE_START,             // Beginning of file
-    PARSE_NODESET,           // In a UANodeSet
-    PARSE_ALIASES,           // In an Aliases tag
-    PARSE_ALIAS,             // ... in its Alias
-    PARSE_NODE,              // In a UANode subtype tag
-    PARSE_NODE_DISPLAYNAME,  // ... in its DisplayName
-    PARSE_NODE_DESCRIPTION,  // ... in its Description
-    PARSE_NODE_REFERENCES,   // ... in its References
-    PARSE_NODE_REFERENCE,    // ... in its References/Reference
-    PARSE_NODE_VALUE,        // In the Value tag of a UAVariable/UAVariableType tag
-    PARSE_NODE_VALUE_SCALAR, // ... for a scalar type
-    PARSE_NODE_VALUE_ARRAY,  // ... for an array type
+    PARSE_START,                     // Beginning of file
+    PARSE_NODESET,                   // In a UANodeSet
+    PARSE_ALIASES,                   // In an Aliases tag
+    PARSE_ALIAS,                     // ... in its Alias
+    PARSE_NODE,                      // In a UANode subtype tag
+    PARSE_NODE_DISPLAYNAME,          // ... in its DisplayName
+    PARSE_NODE_DESCRIPTION,          // ... in its Description
+    PARSE_NODE_REFERENCES,           // ... in its References
+    PARSE_NODE_REFERENCE,            // ... in its References/Reference
+    PARSE_NODE_VALUE,                // In the Value tag of a UAVariable/UAVariableType tag
+    PARSE_NODE_VALUE_SCALAR,         // ... for a scalar type
+    PARSE_NODE_VALUE_SCALAR_COMPLEX, //     ... which is a complex value (sub-tags to manage)
+    PARSE_NODE_VALUE_ARRAY,          // ... for an array type
 } parse_state_t;
+
+typedef struct parse_complex_value_tag_t parse_complex_value_tag_t;
+
+typedef parse_complex_value_tag_t* parse_complex_value_tag_array_t;
+
+struct parse_complex_value_tag_t
+{
+    const char* name;
+    const bool is_array;
+    parse_complex_value_tag_array_t childs; // C-array of tags
+
+    bool set;
+    char* single_value;       // shall remain NULL if is_array == true
+    SOPC_Array* array_values; // shall remain null if is_array == false
+    void* user_data;          // Only used to store EncodeableType pointer for Extension object for now
+};
+
+/* Context used to parse 1 complex value (sub-tags to manage) */
+typedef struct parse_complex_value_context_t
+{
+    bool is_extension_object; // Extension object need a specific treatment since (typeId needed to know body content)
+    const char* value_tag;
+    parse_complex_value_tag_array_t tags;          // C-array of tags
+    SOPC_SLinkedList* end_element_restore_context; // restore the C-array of tags on end_element
+} parse_complex_value_context_t;
 
 struct parse_context_t
 {
@@ -62,18 +90,24 @@ struct parse_context_t
 
     SOPC_Dict* aliases;
     char* current_alias_alias;
+
+    // Variable Value management
     SOPC_BuiltinId current_value_type;
     SOPC_VariantArrayType current_array_type;
+    parse_complex_value_context_t complex_value_ctx;
+    SOPC_Array* list_nodes;
+
     SOPC_AddressSpace_Node node;
     // Temporary array to store the references.
     SOPC_Array* references;
-    SOPC_Array* list_nodes;
 };
 
 #define NS_SEPARATOR "|"
 #define UA_NODESET_NS "http://opcfoundation.org/UA/2011/03/UANodeSet.xsd"
 #define UA_TYPES_NS "http://opcfoundation.org/UA/2008/02/Types.xsd"
 #define NS(ns, tag) ns NS_SEPARATOR tag
+#define UA_EXTENSION_OBJECT_VALUE UA_TYPES_NS NS_SEPARATOR "ExtensionObject"
+#define UA_LIST_EXTENSION_OBJECT_VALUE UA_TYPES_NS NS_SEPARATOR "ListOfExtensionObject"
 
 static SOPC_ReturnStatus parse(XML_Parser parser, FILE* fd)
 {
@@ -143,55 +177,112 @@ static bool start_alias(struct parse_context_t* ctx, const XML_Char** attrs)
     return true;
 }
 
-static bool type_id_from_name(const char* name, SOPC_BuiltinId* type_id, SOPC_VariantArrayType* array_type)
+/* Encode complex values as parse_complex_value_tag_t structures*/
+
+// element to mark end of parse_complex_value_tag_t array (name == NULL)
+#define END_COMPLEX_VALUE_TAG                      \
+    {                                              \
+        NULL, false, NULL, false, NULL, NULL, NULL \
+    }
+
+// Note use #define to could use it as distinct context storage during same complex value parsing (here several NodeIds)
+#define COMPLEX_VALUE_NODE_ID_TAGS                                                  \
+    {                                                                               \
+        {"Identifier", false, NULL, false, NULL, NULL, NULL}, END_COMPLEX_VALUE_TAG \
+    }
+
+static parse_complex_value_tag_t complex_value_node_id_tags[] = COMPLEX_VALUE_NODE_ID_TAGS;
+
+#define COMPLEX_VALUE_LOCALIZED_TEXT_TAGS                                                                 \
+    {                                                                                                     \
+        {"Locale", false, NULL, false, NULL, NULL, NULL}, {"Text", false, NULL, false, NULL, NULL, NULL}, \
+            END_COMPLEX_VALUE_TAG                                                                         \
+    }
+
+static parse_complex_value_tag_t complex_value_localized_text_tags[] = COMPLEX_VALUE_LOCALIZED_TEXT_TAGS;
+
+static parse_complex_value_tag_t complex_value_empty_ext_obj_tags[] = {
+    {"TypeId", false, (parse_complex_value_tag_t[]) COMPLEX_VALUE_NODE_ID_TAGS, false, NULL, NULL, NULL},
+    {"Body", false, NULL, false, NULL, NULL, NULL},
+    END_COMPLEX_VALUE_TAG};
+
+/* ExtensionObject Body content complex values definition */
+static parse_complex_value_tag_t complex_value_ext_obj_argument_tags[] = {
+
+    {"Argument", false,
+     (parse_complex_value_tag_t[]){
+         {"Name", false, NULL, false, NULL, NULL, NULL},
+         {"DataType", false, (parse_complex_value_tag_t[]) COMPLEX_VALUE_NODE_ID_TAGS, false, NULL, NULL, NULL},
+         {"ValueRank", false, NULL, false, NULL, NULL, NULL},
+         {"ArrayDimensions", false, (parse_complex_value_tag_t[]){{"UInt32", true, NULL, false, NULL, NULL, NULL}},
+          false, NULL, NULL, NULL},
+         {"Description", false, (parse_complex_value_tag_t[]) COMPLEX_VALUE_LOCALIZED_TEXT_TAGS, false, NULL, NULL,
+          NULL},
+     },
+     false, NULL, NULL, NULL},
+    END_COMPLEX_VALUE_TAG};
+
+/*
+ * Returns the extension object body tags expected for given TypeId nodeId as output parameter if available.
+ * In case of success the EncodeableType pointer is returned and shall be used to create the extension object.
+ * In case of failure, NULL is returned.
+ */
+static void* ext_obj_body_from_its_type_id(uint32_t nid_in_NS0, parse_complex_value_tag_array_t* body_tags)
+{
+    assert(NULL != body_tags);
+    void* encType = NULL;
+
+    switch (nid_in_NS0)
+    {
+    case 296: // Argument datatype nodeId
+    case 297: // Argument XML encoding nodeId
+        encType = &OpcUa_Argument_EncodeableType;
+        *body_tags = complex_value_ext_obj_argument_tags;
+        break;
+    default:
+        encType = NULL;
+        break;
+    }
+    return encType;
+}
+
+static bool type_id_from_name(const char* name,
+                              SOPC_BuiltinId* type_id,
+                              bool* is_simple_type,
+                              parse_complex_value_tag_array_t* tags)
 {
     static const struct
     {
         const char* name;
         SOPC_BuiltinId id;
-        SOPC_VariantArrayType array_type;
+        bool is_simple_type; /* true => only text value to retrieve / false => sub-tags to manage */
+        parse_complex_value_tag_array_t tags;
     } TYPE_IDS[] = {
-        {"Boolean", SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue},
-        {"SByte", SOPC_SByte_Id, SOPC_VariantArrayType_SingleValue},
-        {"Byte", SOPC_Byte_Id, SOPC_VariantArrayType_SingleValue},
-        {"Int16", SOPC_Int16_Id, SOPC_VariantArrayType_SingleValue},
-        {"UInt16", SOPC_UInt16_Id, SOPC_VariantArrayType_SingleValue},
-        {"Int32", SOPC_Int32_Id, SOPC_VariantArrayType_SingleValue},
-        {"UInt32", SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue},
-        {"Int64", SOPC_Int64_Id, SOPC_VariantArrayType_SingleValue},
-        {"UInt64", SOPC_UInt64_Id, SOPC_VariantArrayType_SingleValue},
-        {"Float", SOPC_Float_Id, SOPC_VariantArrayType_SingleValue},
-        {"Double", SOPC_Double_Id, SOPC_VariantArrayType_SingleValue},
-        {"String", SOPC_String_Id, SOPC_VariantArrayType_SingleValue},
-        {"DateTime", SOPC_DateTime_Id, SOPC_VariantArrayType_SingleValue},
-        {"Guid", SOPC_Guid_Id, SOPC_VariantArrayType_SingleValue},
-        {"ByteString", SOPC_ByteString_Id, SOPC_VariantArrayType_SingleValue},
-        {"XmlElement", SOPC_XmlElement_Id, SOPC_VariantArrayType_SingleValue},
-        {"NodeId", SOPC_NodeId_Id, SOPC_VariantArrayType_SingleValue},
-        {"ExpandedNodeId", SOPC_ExpandedNodeId_Id, SOPC_VariantArrayType_SingleValue},
-        {"StatusCode", SOPC_StatusCode_Id, SOPC_VariantArrayType_SingleValue},
-        {"QualifiedName", SOPC_QualifiedName_Id, SOPC_VariantArrayType_SingleValue},
-        {"LocalizedText", SOPC_LocalizedText_Id, SOPC_VariantArrayType_SingleValue},
-        {"ExtenstionObject", SOPC_ExtensionObject_Id, SOPC_VariantArrayType_SingleValue},
-        {"Structure", SOPC_ExtensionObject_Id, SOPC_VariantArrayType_SingleValue},
-        {"ListOfBoolean", SOPC_Boolean_Id, SOPC_VariantArrayType_Array},
-        {"ListOfSByte", SOPC_SByte_Id, SOPC_VariantArrayType_Array},
-        {"ListOfByte", SOPC_Byte_Id, SOPC_VariantArrayType_Array},
-        {"ListOfInt16", SOPC_Int16_Id, SOPC_VariantArrayType_Array},
-        {"ListOfUInt16", SOPC_UInt16_Id, SOPC_VariantArrayType_Array},
-        {"ListOfInt32", SOPC_Int32_Id, SOPC_VariantArrayType_Array},
-        {"ListOfUInt32", SOPC_UInt32_Id, SOPC_VariantArrayType_Array},
-        {"ListOfInt64", SOPC_Int64_Id, SOPC_VariantArrayType_Array},
-        {"ListOfUInt64", SOPC_UInt64_Id, SOPC_VariantArrayType_Array},
-        {"ListOfFloat", SOPC_Float_Id, SOPC_VariantArrayType_Array},
-        {"ListOfDouble", SOPC_Double_Id, SOPC_VariantArrayType_Array},
-        {"ListOfString", SOPC_String_Id, SOPC_VariantArrayType_Array},
-        {"ListOfDateTime", SOPC_DateTime_Id, SOPC_VariantArrayType_Array},
-        {"ListOfGuid", SOPC_Guid_Id, SOPC_VariantArrayType_Array},
-        {"ListOfByteString", SOPC_ByteString_Id, SOPC_VariantArrayType_Array},
-        {"ListOfXmlElement", SOPC_XmlElement_Id, SOPC_VariantArrayType_Array},
+        {"Boolean", SOPC_Boolean_Id, true, NULL},
+        {"SByte", SOPC_SByte_Id, true, NULL},
+        {"Byte", SOPC_Byte_Id, true, NULL},
+        {"Int16", SOPC_Int16_Id, true, NULL},
+        {"UInt16", SOPC_UInt16_Id, true, NULL},
+        {"Int32", SOPC_Int32_Id, true, NULL},
+        {"UInt32", SOPC_UInt32_Id, true, NULL},
+        {"Int64", SOPC_Int64_Id, true, NULL},
+        {"UInt64", SOPC_UInt64_Id, true, NULL},
+        {"Float", SOPC_Float_Id, true, NULL},
+        {"Double", SOPC_Double_Id, true, NULL},
+        {"String", SOPC_String_Id, true, NULL},
+        {"DateTime", SOPC_DateTime_Id, true, NULL},
+        {"Guid", SOPC_Guid_Id, false, NULL},
+        {"ByteString", SOPC_ByteString_Id, true, NULL},
+        {"XmlElement", SOPC_XmlElement_Id, true, NULL}, // Shall be XML to be interpreted as string
+        {"NodeId", SOPC_NodeId_Id, false, complex_value_node_id_tags},
+        {"ExpandedNodeId", SOPC_ExpandedNodeId_Id, false, NULL},
+        {"StatusCode", SOPC_StatusCode_Id, true, NULL},
+        {"QualifiedName", SOPC_QualifiedName_Id, false, NULL},
+        {"LocalizedText", SOPC_LocalizedText_Id, false, complex_value_localized_text_tags},
+        {"ExtensionObject", SOPC_ExtensionObject_Id, false, complex_value_empty_ext_obj_tags},
+        {"Structure", SOPC_ExtensionObject_Id, false, complex_value_empty_ext_obj_tags},
 
-        {NULL, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue},
+        {NULL, SOPC_Null_Id, true, NULL},
     };
 
     for (size_t i = 0; TYPE_IDS[i].name != NULL; ++i)
@@ -199,7 +290,8 @@ static bool type_id_from_name(const char* name, SOPC_BuiltinId* type_id, SOPC_Va
         if (strcmp(name, TYPE_IDS[i].name) == 0)
         {
             *type_id = TYPE_IDS[i].id;
-            *array_type = TYPE_IDS[i].array_type;
+            *is_simple_type = TYPE_IDS[i].is_simple_type;
+            *tags = TYPE_IDS[i].tags;
             return true;
         }
     }
@@ -496,7 +588,47 @@ static bool current_element_has_value(struct parse_context_t* ctx)
     }
 }
 
-static bool type_id_from_tag(const char* tag, SOPC_BuiltinId* type_id, SOPC_VariantArrayType* array_type)
+static void clear_complex_value_tag_array_content(parse_complex_value_tag_array_t complex_type_tags)
+{
+    int index = 0;
+    parse_complex_value_tag_t* current = &complex_type_tags[index];
+    while (NULL != current->name)
+    {
+        if (NULL != current->childs)
+        {
+            clear_complex_value_tag_array_content(current->childs);
+        }
+        if (current->is_array)
+        {
+            SOPC_Array_Delete(current->array_values);
+            current->array_values = NULL;
+        }
+        else
+        {
+            SOPC_Free(current->single_value);
+            current->single_value = NULL;
+        }
+        current->set = false;
+        index++;
+        current = &complex_type_tags[index];
+    }
+}
+
+static void clear_complex_value_context(parse_complex_value_context_t* complex_value_ctx)
+{
+    clear_complex_value_tag_array_content(complex_value_ctx->tags);
+    complex_value_ctx->tags = NULL;
+    SOPC_SLinkedList_Delete(complex_value_ctx->end_element_restore_context);
+    complex_value_ctx->end_element_restore_context = NULL;
+    complex_value_ctx->is_extension_object = false;
+    complex_value_ctx->value_tag = NULL;
+}
+
+static bool type_id_from_tag(const char* tag,
+                             SOPC_BuiltinId* type_id,
+                             SOPC_VariantArrayType* array_type,
+                             bool* is_simple_type,
+                             parse_complex_value_tag_array_t* complex_type_tags)
 {
     // tag should have the correct namespace
     if (strncmp(tag, UA_TYPES_NS NS_SEPARATOR, strlen(UA_TYPES_NS NS_SEPARATOR)) != 0)
@@ -506,7 +638,55 @@ static bool type_id_from_tag(const char* tag, SOPC_BuiltinId* type_id, SOPC_Vari
 
     const char* name = tag + strlen(UA_TYPES_NS NS_SEPARATOR);
 
-    return type_id_from_name(name, type_id, array_type);
+    if (strncmp(name, "ListOf", strlen("ListOf")) == 0)
+    {
+        *array_type = SOPC_VariantArrayType_Array;
+        name = name + strlen("ListOf");
+    }
+    else
+    {
+        *array_type = SOPC_VariantArrayType_SingleValue;
+    }
+
+    return type_id_from_name(name, type_id, is_simple_type, complex_type_tags);
+}
+
+static bool complex_value_tag_from_tag_name_no_namespace(const char* tag_name,
+                                                         parse_complex_value_tag_array_t inCurrentCtx,
+                                                         parse_complex_value_tag_t** outTagCtx)
+{
+    assert(NULL != inCurrentCtx);
+    assert(NULL != outTagCtx);
+
+    *outTagCtx = NULL;
+    int index = 0;
+    parse_complex_value_tag_t* current = &inCurrentCtx[index];
+    while (NULL != current->name)
+    {
+        if (strcmp(tag_name, current->name) == 0)
+        {
+            *outTagCtx = current;
+            return true;
+        }
+        index++;
+        current = &inCurrentCtx[index];
+    }
+    return false;
+}
+
+static bool complex_value_tag_from_tag(const char* tag,
+                                       parse_complex_value_tag_array_t inCurrentCtx,
+                                       parse_complex_value_tag_t** outTagCtx)
+{
+    // tag should have the correct namespace
+    if (strncmp(tag, UA_TYPES_NS NS_SEPARATOR, strlen(UA_TYPES_NS NS_SEPARATOR)) != 0)
+    {
+        return false;
+    }
+
+    const char* name = tag + strlen(UA_TYPES_NS NS_SEPARATOR);
+
+    return complex_value_tag_from_tag_name_no_namespace(name, inCurrentCtx, outTagCtx);
 }
 
 static uint32_t element_id_from_tag(const char* tag)
@@ -527,6 +707,101 @@ static uint32_t element_id_from_tag(const char* tag)
     }
 
     return 0;
+}
+
+static bool init_value_complex_ctx(struct parse_context_t* ctx,
+                                   const char* value_tag,
+                                   parse_complex_value_tag_array_t complex_type_tags)
+{
+    /* Manage complex types */
+    if (NULL == complex_type_tags)
+    {
+        LOG_XML_ERRORF(ctx->helper_ctx.parser, "Unsupported value type: %s", value_tag);
+        SOPC_HelperExpat_PushSkipTag(&ctx->helper_ctx, value_tag);
+        SOPC_Array_Delete(ctx->list_nodes);
+        ctx->list_nodes = NULL;
+        ctx->current_value_type = SOPC_Null_Id;
+        ctx->current_array_type = SOPC_VariantArrayType_SingleValue;
+        return false;
+    }
+    ctx->complex_value_ctx.value_tag = value_tag;
+    ctx->complex_value_ctx.tags = complex_type_tags;
+    ctx->complex_value_ctx.end_element_restore_context = SOPC_SLinkedList_Create(0);
+    /* Append current value complex type context into context stack:
+       when stack is empty it indicates end of the value tag */
+    void* appended = SOPC_SLinkedList_Append(ctx->complex_value_ctx.end_element_restore_context, 0, complex_type_tags);
+    if (ctx->complex_value_ctx.end_element_restore_context == NULL || appended == NULL)
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        XML_StopParser(ctx->helper_ctx.parser, false);
+        return false;
+    }
+
+    if (strncmp(UA_EXTENSION_OBJECT_VALUE, value_tag, strlen(UA_EXTENSION_OBJECT_VALUE)) == 0)
+    {
+        ctx->complex_value_ctx.is_extension_object = true;
+    }
+    else
+    {
+        ctx->complex_value_ctx.is_extension_object = false;
+    }
+
+    return true;
+}
+
+static bool start_in_extension_object(struct parse_context_t* ctx, parse_complex_value_tag_t* currentTagCtx)
+{
+    bool ok = false;
+
+    if (0 == strncmp("Body", currentTagCtx->name, strlen("Body")))
+    {
+        // Only check if body children defined
+        ok = NULL != currentTagCtx->childs;
+        // Do not consider ExtensionObject exceptional case anymore to parse body content
+        ctx->complex_value_ctx.is_extension_object = false;
+    }
+    else if (0 == strncmp("TypeId", currentTagCtx->name, strlen("TypedId")))
+    {
+        // Nothing to do on start
+        ok = true;
+    }
+    else if (0 == strncmp("Identifier", currentTagCtx->name, strlen("Identifier")))
+    {
+        // Nothing to do on start
+        ok = true;
+    }
+    else
+    {
+        assert(false);
+    }
+
+    if (!ok)
+    {
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "Unsupported Body defined first in ExtensionObject");
+        // Clear all extension object (or list of) context
+        clear_complex_value_context(&ctx->complex_value_ctx);
+        // Clear value parsing context
+        ctx->current_value_type = SOPC_Null_Id;
+        SOPC_Array_Delete(ctx->list_nodes);
+        ctx->list_nodes = NULL;
+        // Skip until end of the Value
+        if (SOPC_VariantArrayType_SingleValue == ctx->current_array_type)
+        {
+            SOPC_HelperExpat_PushSkipTag(&ctx->helper_ctx, UA_EXTENSION_OBJECT_VALUE);
+        }
+        else if (SOPC_VariantArrayType_Array == ctx->current_array_type)
+        {
+            SOPC_HelperExpat_PushSkipTag(&ctx->helper_ctx, UA_LIST_EXTENSION_OBJECT_VALUE);
+        }
+        else
+        {
+            assert(false);
+        }
+        ctx->current_array_type = SOPC_VariantArrayType_SingleValue;
+        ctx->state = PARSE_NODE_VALUE;
+    }
+
+    return ok;
 }
 
 static void start_element_handler(void* user_data, const XML_Char* name, const XML_Char** attrs)
@@ -629,8 +904,10 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
 
         SOPC_BuiltinId type_id;
         SOPC_VariantArrayType array_type;
+        bool is_simple_type;
+        parse_complex_value_tag_array_t complex_type_tags = NULL;
 
-        if (!type_id_from_tag(name, &type_id, &array_type))
+        if (!type_id_from_tag(name, &type_id, &array_type, &is_simple_type, &complex_type_tags))
         {
             LOG_XML_ERRORF(helperCtx->parser, "Unsupported value type: %s", name);
             SOPC_HelperExpat_PushSkipTag(&ctx->helper_ctx, name);
@@ -638,6 +915,7 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         }
 
         assert(ctx->current_value_type == SOPC_Null_Id);
+
         ctx->current_value_type = type_id;
         ctx->current_array_type = array_type;
 
@@ -647,8 +925,26 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
             return;
         }
 
-        ctx->state =
-            (array_type == SOPC_VariantArrayType_SingleValue) ? PARSE_NODE_VALUE_SCALAR : PARSE_NODE_VALUE_ARRAY;
+        if (array_type == SOPC_VariantArrayType_SingleValue)
+        {
+            if (is_simple_type)
+            {
+                ctx->state = PARSE_NODE_VALUE_SCALAR;
+            }
+            else
+            {
+                if (!init_value_complex_ctx(ctx, name, complex_type_tags))
+                {
+                    return;
+                }
+                ctx->state = PARSE_NODE_VALUE_SCALAR_COMPLEX;
+            }
+        }
+        else
+        {
+            ctx->state = PARSE_NODE_VALUE_ARRAY;
+        }
+
         break;
     }
     case PARSE_NODE_VALUE_SCALAR:
@@ -662,8 +958,10 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
 
         SOPC_BuiltinId type_id;
         SOPC_VariantArrayType array_type;
+        bool is_simple_type;
+        parse_complex_value_tag_t* complex_type_tags = NULL;
 
-        if (!type_id_from_tag(name, &type_id, &array_type))
+        if (!type_id_from_tag(name, &type_id, &array_type, &is_simple_type, &complex_type_tags))
         {
             LOG_XML_ERRORF(helperCtx->parser, "Unsupported value type: %s", name);
             SOPC_HelperExpat_PushSkipTag(&ctx->helper_ctx, name);
@@ -684,7 +982,56 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
             return;
         }
 
-        ctx->state = PARSE_NODE_VALUE_SCALAR;
+        if (is_simple_type)
+        {
+            ctx->state = PARSE_NODE_VALUE_SCALAR;
+        }
+        else
+        {
+            if (!init_value_complex_ctx(ctx, name, complex_type_tags))
+            {
+                return;
+            }
+            ctx->state = PARSE_NODE_VALUE_SCALAR_COMPLEX;
+        }
+        break;
+    case PARSE_NODE_VALUE_SCALAR_COMPLEX:
+        assert(current_element_has_value(ctx));
+        assert(NULL != ctx->complex_value_ctx.tags);
+        assert(NULL != ctx->complex_value_ctx.end_element_restore_context);
+
+        parse_complex_value_tag_t* currentTagCtx = NULL;
+        if (!complex_value_tag_from_tag(name, ctx->complex_value_ctx.tags, &currentTagCtx))
+        {
+            LOG_XML_ERRORF(helperCtx->parser, "Unexpected tag in complex value: %s for BuiltInId type %d", name,
+                           ctx->current_value_type);
+            XML_StopParser(helperCtx->parser, 0);
+            return;
+        }
+
+        /* Special treatment of ExtensionObject case: "TypeId" => fill body children*/
+        if (ctx->complex_value_ctx.is_extension_object)
+        {
+            if (!start_in_extension_object(ctx, currentTagCtx))
+            {
+                return;
+            }
+        }
+
+        // Enqueue the current context to be restored on end_element_handler
+        SOPC_SLinkedList_Prepend(ctx->complex_value_ctx.end_element_restore_context, 0, ctx->complex_value_ctx.tags);
+
+        if (NULL != currentTagCtx->childs)
+        {
+            // Replace current context by childs context until end_element_handler of this tag (using
+            // end_element_restore_context)
+            ctx->complex_value_ctx.tags = currentTagCtx->childs;
+        }
+        else
+        {
+            ctx->complex_value_ctx.tags = NULL;
+        }
+
         break;
     }
     default:
@@ -955,61 +1302,31 @@ static bool set_variant_value_bstring(SOPC_Variant* var, const char* bstring_str
     return true;
 }
 
-static bool set_variant_value_guid(SOPC_Variant* var, const char* guid_str)
+static bool set_variant_value_localized_text(SOPC_LocalizedText** plt, parse_complex_value_tag_array_t tagsContext)
 {
-    SOPC_Guid* guid = SOPC_Calloc(1, sizeof(SOPC_Guid));
+    assert(plt != NULL);
 
-    if (guid == NULL)
+    parse_complex_value_tag_t* currentTagCtx = NULL;
+    bool locale_ok = complex_value_tag_from_tag_name_no_namespace("Locale", tagsContext, &currentTagCtx);
+    assert(locale_ok);
+
+    const char* locale = currentTagCtx->single_value;
+    if (!currentTagCtx->set)
     {
-        return false;
+        // Empty locale
+        locale = "";
     }
 
-    SOPC_Guid_Initialize(guid);
+    bool text_ok = complex_value_tag_from_tag_name_no_namespace("Text", tagsContext, &currentTagCtx);
+    assert(text_ok);
 
-    if (SOPC_Guid_FromCString(guid, guid_str, strlen(guid_str)) != SOPC_STATUS_OK)
+    const char* text = currentTagCtx->single_value;
+    if (!currentTagCtx->set)
     {
-        LOGF("Invalid GUID: '%s'", guid_str);
-        SOPC_Guid_Clear(guid);
-        SOPC_Free(guid);
-        return false;
+        // Empty text
+        text = "";
     }
 
-    var->BuiltInTypeId = SOPC_Guid_Id;
-    var->Value.Guid = guid;
-    return true;
-}
-
-static bool set_variant_value_qname(SOPC_Variant* var, const char* qname_str)
-{
-    SOPC_QualifiedName* qname = SOPC_Calloc(1, sizeof(SOPC_QualifiedName));
-
-    if (qname == NULL)
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        SOPC_Free(qname);
-        return false;
-    }
-
-    SOPC_QualifiedName_Initialize(qname);
-    SOPC_ReturnStatus status = SOPC_QualifiedName_ParseCString(qname, qname_str);
-
-    if (status == SOPC_STATUS_OK)
-    {
-        var->BuiltInTypeId = SOPC_QualifiedName_Id;
-        var->Value.Qname = qname;
-        return true;
-    }
-    else
-    {
-        LOGF("Invalid qualified name: '%s'", qname_str);
-        SOPC_QualifiedName_Clear(qname);
-        SOPC_Free(qname);
-        return false;
-    }
-}
-
-static bool set_variant_value_localized_text(SOPC_Variant* var, const char* text)
-{
     SOPC_LocalizedText* lt = SOPC_Calloc(1, sizeof(SOPC_LocalizedText));
 
     if (lt == NULL)
@@ -1021,6 +1338,14 @@ static bool set_variant_value_localized_text(SOPC_Variant* var, const char* text
 
     SOPC_LocalizedText_Initialize(lt);
 
+    if (SOPC_String_CopyFromCString(&lt->Locale, locale) != SOPC_STATUS_OK)
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        SOPC_LocalizedText_Clear(lt);
+        SOPC_Free(lt);
+        return false;
+    }
+
     if (SOPC_String_CopyFromCString(&lt->Text, text) != SOPC_STATUS_OK)
     {
         LOG_MEMORY_ALLOCATION_FAILURE;
@@ -1028,29 +1353,195 @@ static bool set_variant_value_localized_text(SOPC_Variant* var, const char* text
         SOPC_Free(lt);
         return false;
     }
-    else
-    {
-        var->BuiltInTypeId = SOPC_LocalizedText_Id;
-        var->Value.LocalizedText = lt;
-        return true;
-    }
+
+    *plt = lt;
+    return true;
 }
 
-static bool set_variant_value_nodeid(SOPC_Variant* var, const char* id)
+static bool set_variant_value_nodeid(SOPC_NodeId** nodeId, parse_complex_value_tag_array_t tagsContext)
 {
+    assert(NULL != nodeId);
+
+    parse_complex_value_tag_t* currentTagCtx = NULL;
+    bool id_tag_ok = complex_value_tag_from_tag_name_no_namespace("Identifier", tagsContext, &currentTagCtx);
+    assert(id_tag_ok);
+
+    const char* id = currentTagCtx->single_value;
+    if (!currentTagCtx->set)
+    {
+        // Null identifier
+        id = "i=0";
+    }
+
     size_t len = strlen(id);
     assert(len <= INT32_MAX);
 
-    var->Value.NodeId = SOPC_NodeId_FromCString(id, (int32_t) len);
+    *nodeId = SOPC_NodeId_FromCString(id, (int32_t) len);
 
-    if (var->Value.NodeId == NULL)
+    if (*nodeId == NULL)
     {
         LOGF("Invalid NodeId: '%s'", id);
         return false;
     }
 
-    var->BuiltInTypeId = SOPC_NodeId_Id;
     return true;
+}
+
+static bool set_variant_value_extobj_argument(OpcUa_Argument* argument,
+                                              parse_complex_value_tag_array_t bodyChildsTagContext)
+{
+    bool result = true;
+
+    parse_complex_value_tag_t* argumentTagCtx = NULL;
+    bool argument_tag_ok =
+        complex_value_tag_from_tag_name_no_namespace("Argument", bodyChildsTagContext, &argumentTagCtx);
+    assert(argument_tag_ok);
+
+    parse_complex_value_tag_t* nameTagCtx = NULL;
+    bool name_tag_ok = complex_value_tag_from_tag_name_no_namespace("Name", argumentTagCtx->childs, &nameTagCtx);
+    assert(name_tag_ok);
+
+    parse_complex_value_tag_t* dataTypeTagCtx = NULL;
+    bool dataType_tag_ok =
+        complex_value_tag_from_tag_name_no_namespace("DataType", argumentTagCtx->childs, &dataTypeTagCtx);
+    assert(dataType_tag_ok);
+
+    parse_complex_value_tag_t* dataTypeIdTagCtx = NULL;
+    bool id_tag_ok =
+        complex_value_tag_from_tag_name_no_namespace("Identifier", dataTypeTagCtx->childs, &dataTypeIdTagCtx);
+    assert(id_tag_ok);
+
+    parse_complex_value_tag_t* valueRankTagCtx = NULL;
+    bool valueRank_tag_ok =
+        complex_value_tag_from_tag_name_no_namespace("ValueRank", argumentTagCtx->childs, &valueRankTagCtx);
+    assert(valueRank_tag_ok);
+
+    parse_complex_value_tag_t* arrayDimensionsTagCtx = NULL;
+    bool arrayDimensions_tag_ok =
+        complex_value_tag_from_tag_name_no_namespace("ArrayDimensions", argumentTagCtx->childs, &arrayDimensionsTagCtx);
+    assert(arrayDimensions_tag_ok);
+
+    parse_complex_value_tag_t* arrayDimUInt32TagCtx = NULL;
+    bool arrayDimUInt32_tag_ok =
+        complex_value_tag_from_tag_name_no_namespace("UInt32", arrayDimensionsTagCtx->childs, &arrayDimUInt32TagCtx);
+    assert(arrayDimUInt32_tag_ok);
+
+    parse_complex_value_tag_t* descriptionTagCtx = NULL;
+    bool description_tag_ok =
+        complex_value_tag_from_tag_name_no_namespace("Description", argumentTagCtx->childs, &descriptionTagCtx);
+    assert(description_tag_ok);
+
+    if (nameTagCtx->set)
+    {
+        SOPC_ReturnStatus status = SOPC_String_CopyFromCString(&argument->Name, nameTagCtx->single_value);
+        if (SOPC_STATUS_OK != status)
+        {
+            LOG_MEMORY_ALLOCATION_FAILURE;
+            result = false;
+        }
+    }
+
+    if (result && dataTypeIdTagCtx->set)
+    {
+        SOPC_NodeId* nodeId =
+            SOPC_NodeId_FromCString(dataTypeIdTagCtx->single_value, (int32_t) strlen(dataTypeIdTagCtx->single_value));
+        if (NULL == nodeId)
+        {
+            LOG_MEMORY_ALLOCATION_FAILURE;
+            result = false;
+        }
+        argument->DataType = *nodeId;
+        SOPC_Free(nodeId);
+    }
+
+    if (result && valueRankTagCtx->set)
+    {
+        result = SOPC_strtoint(valueRankTagCtx->single_value, (size_t) strlen(valueRankTagCtx->single_value), 32,
+                               &argument->ValueRank);
+    }
+
+    if (result && arrayDimUInt32TagCtx->set)
+    {
+        argument->NoOfArrayDimensions = (int32_t) SOPC_Array_Size(arrayDimUInt32TagCtx->array_values);
+        argument->ArrayDimensions = SOPC_Array_Into_Raw(arrayDimUInt32TagCtx->array_values);
+        arrayDimUInt32TagCtx->array_values = NULL;
+    }
+
+    if (result && descriptionTagCtx->set)
+    {
+        SOPC_LocalizedText* lt = NULL;
+        result = set_variant_value_localized_text(&lt, descriptionTagCtx->childs);
+
+        if (result)
+        {
+            argument->Description = *lt;
+            SOPC_Free(lt);
+        }
+    }
+
+    if (!result)
+    {
+        OpcUa_Argument_Clear(argument);
+    }
+
+    return result;
+}
+
+static bool set_variant_value_extensionobject(SOPC_ExtensionObject** extObj,
+                                              parse_complex_value_tag_array_t tagsContext)
+{
+    assert(NULL != extObj);
+
+    parse_complex_value_tag_t* typeIdTagCtx = NULL;
+    bool typeid_tag_ok = complex_value_tag_from_tag_name_no_namespace("TypeId", tagsContext, &typeIdTagCtx);
+    assert(typeid_tag_ok);
+    assert(NULL != typeIdTagCtx->user_data);
+    SOPC_EncodeableType* encType = typeIdTagCtx->user_data;
+
+    parse_complex_value_tag_t* bodyTagCtx = NULL;
+    bool body_tag_ok = complex_value_tag_from_tag_name_no_namespace("Body", tagsContext, &bodyTagCtx);
+    assert(body_tag_ok);
+    assert(NULL != bodyTagCtx->childs);
+
+    SOPC_ExtensionObject* newExtObj = SOPC_Malloc(sizeof(SOPC_ExtensionObject));
+    if (NULL == newExtObj)
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+
+    SOPC_ExtensionObject_Initialize(newExtObj);
+    void* object = NULL;
+    SOPC_ReturnStatus status = SOPC_Encodeable_CreateExtension(newExtObj, encType, &object);
+
+    if (SOPC_STATUS_OK != status)
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        SOPC_Free(newExtObj);
+        return false;
+    }
+
+    bool result = false;
+
+    switch (encType->TypeId)
+    {
+    case OpcUaId_Argument:
+        result = set_variant_value_extobj_argument((OpcUa_Argument*) object, bodyTagCtx->childs);
+        break;
+    default:
+        assert(false);
+    }
+
+    if (!result)
+    {
+        SOPC_ExtensionObject_Clear(newExtObj);
+        SOPC_Free(newExtObj);
+        newExtObj = NULL;
+    }
+
+    *extObj = newExtObj;
+
+    return result;
 }
 
 static bool set_variant_value(SOPC_Variant* var, SOPC_BuiltinId type_id, const char* val)
@@ -1089,19 +1580,55 @@ static bool set_variant_value(SOPC_Variant* var, SOPC_BuiltinId type_id, const c
         SET_STR_ELEMENT_VALUE_CASE(String)
     case SOPC_ByteString_Id:
         return set_variant_value_bstring(var, val);
-    case SOPC_XmlElement_Id:
+    case SOPC_XmlElement_Id: // TODO: should be a not simple type
         SET_STR_ELEMENT_VALUE_CASE(XmlElt)
-    case SOPC_Guid_Id:
-        return set_variant_value_guid(var, val);
-    case SOPC_NodeId_Id:
-        return set_variant_value_nodeid(var, val);
-    case SOPC_QualifiedName_Id:
-        return set_variant_value_qname(var, val);
-    case SOPC_LocalizedText_Id:
-        return set_variant_value_localized_text(var, val);
     default:
         assert(false && "Cannot parse current value type.");
     }
+
+    return false;
+}
+
+static bool set_variant_value_complex(SOPC_Variant* var,
+                                      SOPC_BuiltinId type_id,
+                                      parse_complex_value_tag_array_t tagsContext)
+{
+    bool ok = false;
+    switch (type_id)
+    {
+    case SOPC_Boolean_Id:
+    case SOPC_Float_Id:
+    case SOPC_Double_Id:
+    case SOPC_String_Id:
+    case SOPC_ByteString_Id:
+    case SOPC_XmlElement_Id: // TODO: not a simple type but not a complex one neither
+        assert(false && "Unexpected simple type");
+        break;
+    case SOPC_Guid_Id:
+        assert(false && "Guid not managed yet");
+        break;
+    case SOPC_QualifiedName_Id:
+        assert(false && "QualifiedName not managed yet");
+        break;
+    case SOPC_LocalizedText_Id:
+        ok = set_variant_value_localized_text(&var->Value.LocalizedText, tagsContext);
+        break;
+    case SOPC_NodeId_Id:
+        ok = set_variant_value_nodeid(&var->Value.NodeId, tagsContext);
+        break;
+    case SOPC_ExtensionObject_Id:
+        ok = set_variant_value_extensionobject(&var->Value.ExtObject, tagsContext);
+        break;
+    default:
+        assert(false && "Cannot parse current value type.");
+    }
+
+    if (ok)
+    {
+        var->BuiltInTypeId = type_id;
+    }
+
+    return ok;
 }
 
 static bool set_element_value_scalar(struct parse_context_t* ctx)
@@ -1109,8 +1636,16 @@ static bool set_element_value_scalar(struct parse_context_t* ctx)
     assert(ctx->current_array_type == SOPC_VariantArrayType_SingleValue);
 
     SOPC_Variant* var = SOPC_AddressSpace_Get_Value(ctx->space, &ctx->node);
-    bool ok = set_variant_value(var, ctx->current_value_type, SOPC_HelperExpat_CharDataStripped(&ctx->helper_ctx));
-    SOPC_HelperExpat_CharDataReset(&ctx->helper_ctx);
+    bool ok = false;
+    if (PARSE_NODE_VALUE_SCALAR == ctx->state)
+    {
+        ok = set_variant_value(var, ctx->current_value_type, SOPC_HelperExpat_CharDataStripped(&ctx->helper_ctx));
+        SOPC_HelperExpat_CharDataReset(&ctx->helper_ctx);
+    }
+    else if (PARSE_NODE_VALUE_SCALAR_COMPLEX == ctx->state)
+    {
+        ok = set_variant_value_complex(var, ctx->current_value_type, ctx->complex_value_ctx.tags);
+    }
 
     if (ok)
     {
@@ -1132,8 +1667,16 @@ static bool append_element_value(struct parse_context_t* ctx)
         return false;
     }
 
-    bool ok = set_variant_value(var, ctx->current_value_type, SOPC_HelperExpat_CharDataStripped(&ctx->helper_ctx));
-    SOPC_HelperExpat_CharDataReset(&ctx->helper_ctx);
+    bool ok = false;
+    if (PARSE_NODE_VALUE_SCALAR == ctx->state)
+    {
+        ok = set_variant_value(var, ctx->current_value_type, SOPC_HelperExpat_CharDataStripped(&ctx->helper_ctx));
+        SOPC_HelperExpat_CharDataReset(&ctx->helper_ctx);
+    }
+    else if (PARSE_NODE_VALUE_SCALAR_COMPLEX == ctx->state)
+    {
+        ok = set_variant_value_complex(var, ctx->current_value_type, ctx->complex_value_ctx.tags);
+    }
 
     if (!ok)
     {
@@ -1233,6 +1776,117 @@ static bool finalize_node(struct parse_context_t* ctx)
     }
 }
 
+static void end_of_single_value_parsing(struct parse_context_t* ctx)
+{
+    if (ctx->current_array_type == SOPC_VariantArrayType_SingleValue)
+    {
+        if (!set_element_value_scalar(ctx))
+        {
+            XML_StopParser(ctx->helper_ctx.parser, false);
+            return;
+        }
+
+        ctx->current_value_type = SOPC_Null_Id;
+        ctx->state = PARSE_NODE_VALUE;
+    }
+    else if (ctx->current_array_type == SOPC_VariantArrayType_Array)
+    {
+        if (!append_element_value(ctx))
+        {
+            XML_StopParser(ctx->helper_ctx.parser, false);
+            return;
+        }
+
+        ctx->state = PARSE_NODE_VALUE_ARRAY;
+    }
+    else
+    {
+        assert(false);
+    }
+}
+
+static bool end_in_extension_object(struct parse_context_t* ctx, parse_complex_value_tag_t* currentTagCtx)
+{
+    bool ok = false;
+    char* typeIdChar = NULL;
+
+    if (0 == strncmp("TypeId", currentTagCtx->name, strlen("TypedId")))
+    {
+        // We have to associate the body children tags with body if type is known
+
+        // Retrieve identifier of nodeId
+        parse_complex_value_tag_t* identifierTagCtx = NULL;
+        bool id_tag_ok =
+            complex_value_tag_from_tag_name_no_namespace("Identifier", currentTagCtx->childs, &identifierTagCtx);
+        assert(id_tag_ok);
+
+        SOPC_NodeId* nodeId =
+            SOPC_NodeId_FromCString(identifierTagCtx->single_value, (int32_t) strlen(identifierTagCtx->single_value));
+        typeIdChar = identifierTagCtx->single_value;
+        // Check nodeId is in NS0
+        if (NULL != nodeId && SOPC_IdentifierType_Numeric == nodeId->IdentifierType && 0 == nodeId->Namespace)
+        {
+            // Retrieve context of Body tag
+            parse_complex_value_tag_t* bodyTagCtx = NULL;
+            bool body_tag_ok =
+                complex_value_tag_from_tag_name_no_namespace("Body", ctx->complex_value_ctx.tags, &bodyTagCtx);
+            assert(body_tag_ok);
+            // Fill the Body tag children context and retrieve encodeableType
+            void* encType = ext_obj_body_from_its_type_id(nodeId->Data.Numeric, &bodyTagCtx->childs);
+            if (NULL != encType)
+            {
+                currentTagCtx->user_data = encType;
+                currentTagCtx->set = true;
+                ok = true;
+            }
+        }
+        SOPC_NodeId_Clear(nodeId);
+        SOPC_Free(nodeId);
+    }
+    else if (0 == strncmp("Body", currentTagCtx->name, strlen("Body")))
+    {
+        currentTagCtx->set = true;
+        ok = true;
+    }
+    else if (0 == strncmp("Identifier", currentTagCtx->name, strlen("Identifier")))
+    {
+        // Skip until end of TypeId
+        ok = true;
+    }
+    else
+    {
+        assert(false);
+    }
+
+    if (!ok)
+    {
+        // Note: if the current tag ctx is the body, it means body is first in XML
+        LOG_XML_ERRORF(ctx->helper_ctx.parser, "Unsupported extension object typeId '%s'", typeIdChar);
+        // Clear all extension object (or list of) context
+        clear_complex_value_context(&ctx->complex_value_ctx);
+        ctx->current_value_type = SOPC_Null_Id;
+        SOPC_Array_Delete(ctx->list_nodes);
+        ctx->list_nodes = NULL;
+        // Skip until end of the Value
+        if (SOPC_VariantArrayType_SingleValue == ctx->current_array_type)
+        {
+            SOPC_HelperExpat_PushSkipTag(&ctx->helper_ctx, UA_EXTENSION_OBJECT_VALUE);
+        }
+        else if (SOPC_VariantArrayType_Array == ctx->current_array_type)
+        {
+            SOPC_HelperExpat_PushSkipTag(&ctx->helper_ctx, UA_LIST_EXTENSION_OBJECT_VALUE);
+        }
+        else
+        {
+            assert(false);
+        }
+        ctx->current_array_type = SOPC_VariantArrayType_SingleValue;
+        ctx->state = PARSE_NODE_VALUE;
+    }
+
+    return ok;
+}
+
 static void end_element_handler(void* user_data, const XML_Char* name)
 {
     struct parse_context_t* ctx = user_data;
@@ -1289,31 +1943,68 @@ static void end_element_handler(void* user_data, const XML_Char* name)
     case PARSE_NODE_VALUE_SCALAR:
         assert(ctx->current_value_type != SOPC_Null_Id);
 
-        if (ctx->current_array_type == SOPC_VariantArrayType_SingleValue)
+        end_of_single_value_parsing(ctx);
+
+        break;
+    case PARSE_NODE_VALUE_SCALAR_COMPLEX:
+        assert(current_element_has_value(ctx));
+        assert(NULL != ctx->complex_value_ctx.end_element_restore_context);
+        // Restore context of current tag
+        ctx->complex_value_ctx.tags = SOPC_SLinkedList_PopHead(ctx->complex_value_ctx.end_element_restore_context);
+        assert(NULL != ctx->complex_value_ctx.tags);
+
+        // Check if it is the complex value closing node
+        if (0 == SOPC_SLinkedList_GetLength(ctx->complex_value_ctx.end_element_restore_context))
         {
-            if (!set_element_value_scalar(ctx))
+            assert(strncmp(name, ctx->complex_value_ctx.value_tag, strlen(name)) == 0);
+
+            end_of_single_value_parsing(ctx);
+            clear_complex_value_context(&ctx->complex_value_ctx);
+            return;
+        }
+        // else: it is still internal treatment of complex value
+
+        /* Retrieve current tag name in expected children of parent tag*/
+        parse_complex_value_tag_t* currentTagCtx = NULL;
+        if (!complex_value_tag_from_tag(name, ctx->complex_value_ctx.tags, &currentTagCtx))
+        {
+            LOG_XML_ERRORF(ctx->helper_ctx.parser, "Unexpected end tag in complex value: %s for BuiltInId type %d",
+                           name, ctx->current_value_type);
+            XML_StopParser(ctx->helper_ctx.parser, 0);
+            return;
+        }
+
+        // We retrieve the tag content only if no children defined
+        if (NULL == currentTagCtx->childs)
+        {
+            if (!currentTagCtx->is_array)
             {
-                XML_StopParser(ctx->helper_ctx.parser, false);
-                return;
+                // Retrieve text value
+                currentTagCtx->single_value = SOPC_strdup(SOPC_HelperExpat_CharDataStripped(&ctx->helper_ctx));
+            }
+            else
+            {
+                if (NULL == currentTagCtx->array_values)
+                {
+                    currentTagCtx->array_values = SOPC_Array_Create(sizeof(char*), 1, SOPC_Free);
+                }
+                SOPC_Array_Append_Values(currentTagCtx->array_values,
+                                         SOPC_strdup(SOPC_HelperExpat_CharDataStripped(&ctx->helper_ctx)), 1);
             }
 
-            ctx->current_value_type = SOPC_Null_Id;
-            ctx->state = PARSE_NODE_VALUE;
+            currentTagCtx->set = true;
         }
-        else if (ctx->current_array_type == SOPC_VariantArrayType_Array)
+
+        /* Special treatment of ExtensionObject case: "TypeId" => fill body children*/
+        if (ctx->complex_value_ctx.is_extension_object)
         {
-            if (!append_element_value(ctx))
+            if (!end_in_extension_object(ctx, currentTagCtx))
             {
-                XML_StopParser(ctx->helper_ctx.parser, false);
                 return;
             }
+        }
 
-            ctx->state = PARSE_NODE_VALUE_ARRAY;
-        }
-        else
-        {
-            assert(false);
-        }
+        SOPC_HelperExpat_CharDataReset(&ctx->helper_ctx);
 
         break;
     case PARSE_NODE_VALUE_ARRAY:
@@ -1376,6 +2067,7 @@ static void char_data_handler(void* user_data, const XML_Char* s, int len)
     case PARSE_ALIAS:
     case PARSE_NODE_REFERENCE:
     case PARSE_NODE_VALUE_SCALAR:
+    case PARSE_NODE_VALUE_SCALAR_COMPLEX:
         if (!SOPC_HelperExpat_CharDataAppend(&ctx->helper_ctx, s, (size_t) len))
         {
             XML_StopParser(ctx->helper_ctx.parser, false);
