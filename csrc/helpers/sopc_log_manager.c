@@ -172,6 +172,10 @@ static bool SOPC_Log_Start(SOPC_Log_Instance* pLogInst)
                 }
             }
         }
+        else
+        {
+            printf("Log error: impossible to write in NULL stream.");
+        }
         Mutex_Unlock(&pLogInst->file->fileMutex);
     }
     return result;
