@@ -43,30 +43,11 @@
  * Cert API
  * ------------------------------------------------------------------------------------------------
  */
-SOPC_ReturnStatus SOPC_KeyManager_Certificate_ToDER(const SOPC_CertificateList* pCert,
-                                                    uint8_t** ppDest,
-                                                    uint32_t* pLenAllocated)
-{
-    uint32_t lenToAllocate = 0;
 
-    if (NULL == pCert || NULL == ppDest || 0 == pLenAllocated)
-        return SOPC_STATUS_INVALID_PARAMETERS;
-
-    // Allocation
-    lenToAllocate = pCert->len_der;
-    if (lenToAllocate == 0)
-        return SOPC_STATUS_NOK;
-
-    (*ppDest) = SOPC_Malloc(lenToAllocate);
-    if (NULL == *ppDest)
-        return SOPC_STATUS_NOK;
-
-    // Copy
-    memcpy((void*) (*ppDest), (void*) (pCert->crt_der), lenToAllocate);
-    *pLenAllocated = lenToAllocate;
-
-    return SOPC_STATUS_OK;
-}
+/* ------------------------------------------------------------------------------------------------
+ * Serialization/Deserialization API
+ * ------------------------------------------------------------------------------------------------
+ */
 
 SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_CreateFromData(const uint8_t* data,
                                                                          uint32_t len,

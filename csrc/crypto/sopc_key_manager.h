@@ -218,16 +218,17 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateFromFile(const char* szPath,
 void SOPC_KeyManager_Certificate_Free(SOPC_CertificateList* pCert);
 
 /**
- * \brief           Copies a DER description of \p pCert.
+ * \brief           Encodes a \p pCert as a DER buffer and writes the result in \p ppDest.
  *
- * \param pCert     A valid pointer to the Certificate.
+ * \param pCert     A valid pointer to the Certificate. There must be only one certificate in the list.
  * \param ppDest    A valid pointer to the newly created buffer that stores the DER description of the signed public
  *                  key. The allocated buffer must be freed by the caller.
  * \param pLenAllocated  A valid pointer to the length allocated by this operation.
  *
  * \note            Content of the output is unspecified when return value is not SOPC_STATUS_OK.
  *
- * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL
+ *                  or the certificate list contains more than one certificate,
  *                  and SOPC_STATUS_NOK when there was an error.
  */
 SOPC_ReturnStatus SOPC_KeyManager_Certificate_ToDER(const SOPC_CertificateList* pCert,
