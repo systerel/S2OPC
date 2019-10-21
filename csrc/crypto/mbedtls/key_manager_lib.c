@@ -300,24 +300,40 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_ToDER(const SOPC_CertificateList* 
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    // Allocation
-    lenToAllocate = (uint32_t) pCert->crt.raw.len;
-    if (lenToAllocate == 0)
+    /* Assert single certificate */
+    size_t nCert = 0;
+    SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_GetListLength(pCert, &nCert);
+    if (SOPC_STATUS_OK == status && 1 != nCert)
     {
-        return SOPC_STATUS_INVALID_PARAMETERS;
+        status = SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    (*ppDest) = SOPC_Malloc(lenToAllocate);
-    if (NULL == *ppDest)
+    /* Allocation */
+    if (SOPC_STATUS_OK == status)
     {
-        return SOPC_STATUS_NOK;
+        lenToAllocate = (uint32_t) pCert->crt.raw.len;
+        if (lenToAllocate == 0)
+        {
+            status = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        (*ppDest) = SOPC_Malloc(lenToAllocate);
+        if (NULL == *ppDest)
+        {
+            status = SOPC_STATUS_NOK;
+        }
     }
 
-    // Copy
-    memcpy((void*) (*ppDest), (void*) (pCert->crt.raw.p), lenToAllocate);
-    *pLenAllocated = lenToAllocate;
+    /* Copy */
+    if (SOPC_STATUS_OK == status)
+    {
+        memcpy((void*) (*ppDest), (void*) (pCert->crt.raw.p), lenToAllocate);
+        *pLenAllocated = lenToAllocate;
+    }
 
-    return SOPC_STATUS_OK;
+    return status;
 }
 
 SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetThumbprint(const SOPC_CryptoProvider* pProvider,

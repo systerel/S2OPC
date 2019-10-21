@@ -227,6 +227,8 @@ void SOPC_KeyManager_Certificate_Free(SOPC_CertificateList* pCert);
  *
  * \note            Content of the output is unspecified when return value is not SOPC_STATUS_OK.
  *
+ * \warning         \p pCert must contain a single certificate.
+ *
  * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL
  *                  or the certificate list contains more than one certificate,
  *                  and SOPC_STATUS_NOK when there was an error.
