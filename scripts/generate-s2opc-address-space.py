@@ -26,6 +26,7 @@ import sys
 import uuid
 import os
 from xml.etree.ElementTree import iterparse, Element
+from functools import partial
 
 UA_NODESET_NS = '{http://opcfoundation.org/UA/2011/03/UANodeSet.xsd}'
 UA_NODESET_TAG = UA_NODESET_NS + 'UANodeSet'
@@ -69,8 +70,23 @@ UA_VALUE_TYPE_STRING = UA_TYPES_NS + 'String'
 UA_VALUE_TYPE_BYTESTRING = UA_TYPES_NS + 'ByteString'
 UA_VALUE_TYPE_XMLELEMENT = UA_TYPES_NS + 'XmlElement'
 UA_VALUE_TYPE_DATETIME = UA_TYPES_NS + 'DateTime'
-UA_VALUE_TYPE_LISTOFBOOLEANS = UA_TYPES_NS + 'ListOfBoolean'
-UA_VALUE_TYPE_LISTOFSTRINGS = UA_TYPES_NS + 'ListOfString'
+UA_VALUE_TYPE_EXTENSIONOBJECT = UA_TYPES_NS + 'ExtensionObject'
+UA_VALUE_TYPE_LOCALIZEDTEXT = UA_TYPES_NS + 'LocalizedText'
+# NodeId tags
+UA_VALUE_IDENTIFIER_TAG = UA_TYPES_NS + 'Identifier'
+# LocalizedText tags
+UA_VALUE_LOCALE_TAG = UA_TYPES_NS + 'Locale'
+UA_VALUE_TEXT_TAG = UA_TYPES_NS + 'Text'
+# Extension object tags
+UA_VALUE_TYPEID_TAG = UA_TYPES_NS + 'TypeId'
+UA_VALUE_BODY_TAG = UA_TYPES_NS + 'Body'
+# Argument structure tags
+UA_VALUE_ARGUMENT_TAG = UA_TYPES_NS + 'Argument'
+UA_VALUE_NAME_TAG = UA_TYPES_NS + 'Name'
+UA_VALUE_DATATYPE_TAG = UA_TYPES_NS + 'DataType'
+UA_VALUE_VALUERANK_TAG = UA_TYPES_NS + 'ValueRank'
+UA_VALUE_ARRAYDIMENSIONS_TAG = UA_TYPES_NS + 'ArrayDimensions'
+UA_VALUE_DESCRIPTION_TAG = UA_TYPES_NS + 'Description'
 
 VALUE_TYPE_BOOL = 0
 VALUE_TYPE_BYTE = 1
@@ -89,6 +105,12 @@ VALUE_TYPE_STRING = 13
 VALUE_TYPE_BYTESTRING = 14
 VALUE_TYPE_XMLELEMENT = 15
 VALUE_TYPE_DATETIME = 16
+VALUE_TYPE_EXTENSIONOBJECT = 17
+VALUE_TYPE_EXTENSIONOBJECT_ARGUMENT = 18
+VALUE_TYPE_EXTENSIONOBJECT_ENUMVALUETYPE = 19
+VALUE_TYPE_LOCALIZEDTEXT = 19
+
+UNSUPPORTED_POINTER_VARIANT_TYPES = {VALUE_TYPE_GUID, VALUE_TYPE_DATETIME}
 
 C_IDENTIFIER_TYPES = [
     'SOPC_IdentifierType_Numeric',
@@ -96,7 +118,6 @@ C_IDENTIFIER_TYPES = [
     'SOPC_IdentifierType_Guid',
     'SOPC_IdentifierType_ByteString'
 ]
-
 
 c_header = '''
 /*
@@ -294,7 +315,27 @@ class Reference(object):
         self.target = target
         self.is_forward = is_forward
 
+# Extension objects (non-built in Structure) classes:
 
+class ExtensionObject(object):
+    __slots__ = 'extobj_typeid', 'extobj_objtype'
+
+    def __init__(self, extobj_typeid, extobj_objtype):
+        self.extobj_typeid = extobj_typeid
+        self.extobj_objtype = extobj_objtype
+
+class Argument(ExtensionObject):
+    __slots__ = 'name', 'datatype', 'valuerank', 'arraydimensions', 'description'
+
+    def __init__(self, name, datatype, valuerank, arraydimensions, description):
+        self.extobj_typeid = NodeId.parse('i=296')
+        self.extobj_objtype = '&OpcUa_Argument_EncodeableType'
+        self.name = name
+        self.datatype = datatype
+        self.valuerank = valuerank
+        self.arraydimensions = arraydimensions
+        self.description = description
+        
 def expect_element(source, name=None):
     ev, n = next(source)
 
@@ -405,8 +446,11 @@ def boolean_to_string(val):
 
 
 # Collects all the uax:{tag_name} items in a uax:ListOfXXX element
-def collect_list_items(n, tag_name, parse_func):
-    return list(map(lambda x: parse_func(x.text), n.findall(tag_name)))
+def collect_list_items(n, tag_name, is_simple_type, parse_func):
+    if is_simple_type:
+        return list(map(lambda x: parse_func(x.text), n.findall(tag_name)))
+    else:
+        return list(map(parse_func, n.findall(tag_name)))
 
 
 # Parses the base type of a value tag name (eg. uax:Boolean, uax:ListOfString...)
@@ -437,6 +481,93 @@ def decode_bytestring(x):
     else:
         return binascii.a2b_base64(x.encode('utf-8')).decode('utf-8')
 
+# NodeId values are complex data types
+def parse_node_id(n):
+    identifier = n.find(UA_VALUE_IDENTIFIER_TAG)
+    if identifier is None:
+        return NodeId.parse("i=0")
+    else:
+        return NodeId.parse(identifier.text)
+
+def parse_localized_text(n):
+    locale = n.find(UA_VALUE_LOCALE_TAG)
+    text = n.find(UA_VALUE_TEXT_TAG)
+    locale_text = None if locale is None else locale.text
+    text_text = None if text is None else text.text
+    return LocalizedText(locale_text, text_text)   
+
+# Extension object values: manage some extensions objects
+    
+def parse_argument_body(n):
+    argument = n.find(UA_VALUE_ARGUMENT_TAG)
+    if argument is None:
+        raise ParseError('Argument extension object without Argument tag')
+    name = argument.find(UA_VALUE_NAME_TAG)
+    datatype = argument.find(UA_VALUE_DATATYPE_TAG)
+    valuerank = argument.find(UA_VALUE_VALUERANK_TAG)
+    arraydimensions = argument.find(UA_VALUE_ARRAYDIMENSIONS_TAG)
+    descriptions = argument.find(UA_VALUE_DESCRIPTION_TAG)
+    if datatype is None:
+        raise ParseError('Argument extension object without DataType')
+    if valuerank is None:
+        raise ParseError('Argument extension object without ValueRank')
+
+    datatype_nodeid = parse_node_id(datatype)
+    if datatype_nodeid is None:
+        raise ParseError('Argument extension object with invalid DataType nodeId %s' % datatype_nodeid)
+    if arraydimensions is None:
+        arraydimensions_list = []
+    else:
+        arraydimensions_list = collect_list_items(arraydimensions, UA_VALUE_TYPE_UINT32, True, int)
+    if descriptions is not None:
+        descriptions = parse_localized_text(descriptions)
+    
+    return Argument(name.text, datatype_nodeid, int(valuerank.text), arraydimensions_list, descriptions)
+
+def parse_enum_value_type_body(n):
+    return None
+
+EXTENSION_OBJECT_PARSERS_DICT = {
+    # Argument XML encoding nodeId
+    297: (parse_argument_body, VALUE_TYPE_EXTENSIONOBJECT_ARGUMENT),
+    # Argument datatype nodeId
+    296: (parse_argument_body, VALUE_TYPE_EXTENSIONOBJECT_ARGUMENT),
+
+    # EnumValueType XML encoding nodeId
+    7616 : (parse_enum_value_type_body, VALUE_TYPE_EXTENSIONOBJECT_ENUMVALUETYPE),
+    # EnumValueType datataype nodeId
+    7594 : (parse_enum_value_type_body, VALUE_TYPE_EXTENSIONOBJECT_ENUMVALUETYPE),
+}
+
+def get_extension_object_parser_and_type(nodeid):
+    # nodeid should either be the DataType nodeId, or the HasEncoding node nodeId associated
+    if ID_TYPE_NUMERIC == nodeid.ty and nodeid.ns in (None, 0):
+        # support only some of OPC UA namespace types
+        return EXTENSION_OBJECT_PARSERS_DICT.get(int(nodeid.data), None)
+    return (None, None)
+
+def get_extension_object_type(n):
+    typeid = n.find(UA_VALUE_TYPEID_TAG)
+    body = n.find(UA_VALUE_BODY_TAG)
+    if typeid is None or body is None:
+        raise ParseError('TypeId or Body missing in ExtensionObject value')
+    else:
+        datatype_or_encoding_nodeid = parse_node_id(typeid)
+        _ , ty = get_extension_object_parser_and_type(datatype_or_encoding_nodeid)
+    return ty
+    
+def parse_extension_object(n):
+    typeid = n.find(UA_VALUE_TYPEID_TAG)
+    body = n.find(UA_VALUE_BODY_TAG)
+    if typeid is None or body is None:
+        raise ParseError('TypeId or Body missing in ExtensionObject value')
+    else:
+        datatype_or_encoding_nodeid = parse_node_id(typeid)
+        extension_object_parser, _ = get_extension_object_parser_and_type(datatype_or_encoding_nodeid)
+        if extension_object_parser is None:
+            raise ParseError('TypeId or Body missing in ExtensionObject value')
+        return extension_object_parser(body)
+    
 # Returns a VariableValue object
 def collect_variable_value(n):
 
@@ -452,6 +583,9 @@ def collect_variable_value(n):
     value = list(value_node)[0]
     base_type, is_array = parse_value_tag(value.tag)
 
+    # is_simple_type == True => value is just the text tag content 
+    is_simple_type = True
+    
     if base_type == UA_VALUE_TYPE_BOOL:
         ty = VALUE_TYPE_BOOL
         parse_func = parse_boolean_value
@@ -468,11 +602,13 @@ def collect_variable_value(n):
         ty = VALUE_TYPE_INT64
         parse_func = int
     elif base_type == UA_VALUE_TYPE_GUID:
+        is_simple_type = False
         ty = VALUE_TYPE_GUID
         parse_func = parse_guid
     elif base_type == UA_VALUE_TYPE_NODEID:
+        is_simple_type = False
         ty = VALUE_TYPE_NODEID
-        parse_func = identity
+        parse_func = parse_node_id
     elif base_type == UA_VALUE_TYPE_SBYTE:
         ty = VALUE_TYPE_SBYTE
         parse_func = int
@@ -498,15 +634,37 @@ def collect_variable_value(n):
         ty = VALUE_TYPE_BYTESTRING
         parse_func = decode_bytestring
     elif base_type == UA_VALUE_TYPE_XMLELEMENT:
+        # TODO: is_simple_type = False => rest of XML shall be converted to string
         ty = VALUE_TYPE_XMLELEMENT
         parse_func = identity
     elif base_type == UA_VALUE_TYPE_DATETIME:
         ty = VALUE_TYPE_DATETIME
         parse_func = identity
+    elif base_type == UA_VALUE_TYPE_LOCALIZEDTEXT:
+        is_simple_type = False
+        ty = VALUE_TYPE_LOCALIZEDTEXT
+        parse_func = parse_localized_text
+    elif base_type == UA_VALUE_TYPE_EXTENSIONOBJECT:
+        is_simple_type = False
+        # Define type of extension object (from TypeId)
+        if is_array:
+            # All extension objects shall be the same in case of an array
+            ty_list = collect_list_items(value, base_type, is_simple_type, get_extension_object_type)
+            for x in ty_list:
+                if x != ty_list[0]:
+                    raise ParseError('Different types in a ExtensionObject List of node %s' % n.attrib['NodeId'])
+            ty = ty_list[0]
+        else:
+            ty = get_extension_object_type(value)
+        parse_func = parse_extension_object
     else:
         raise ParseError('Unknown value type %s for node %s' % (value.tag, n.attrib['NodeId']))
 
-    val = collect_list_items(value, base_type, parse_func) if is_array else parse_func(value.text)
+    if is_array:
+        val = collect_list_items(value, base_type, is_simple_type, parse_func)
+    else:
+        val_in = value.text if is_simple_type else value
+        val = parse_func(val_in)
 
     return VariableValue(ty, val, is_array)
 
@@ -528,6 +686,8 @@ def generate_string(data):
     assert data is None or isinstance(data, str), "Invalid string data: %r" % data
 
     if data is not None:
+        # remove linebreaks
+        data = data.replace('\n', '').replace('\r', '')
         return '{sizeof("%s")-1, 1, (SOPC_Byte*) "%s"}' % (data.replace('"', '\\"'), data.replace('"', '\\"'))
 
     return '{0, 0, NULL}'
@@ -570,26 +730,78 @@ def generate_nodeid(nodeid):
 
     return '{%s, %d, %s = %s}' % (id_type, nodeid.ns or 0, data_struct_field, data_struct_val)
 
+def generate_nodeid_pointer(val):
+    return '(SOPC_NodeId[]) {%s}' % generate_nodeid(val)    
 
 def generate_localized_text(text):
     if text is None:
         return '{%s, %s}' % (generate_string(None), generate_string(None))
 
+    if text.locale is not None:
+        # remove linebreaks and whitespaces (should not exist in locale)
+        text.locale = text.locale.replace('\n', '').replace('\r', '').replace(' ','')
     return '{%s, %s}' % (generate_string(text.locale), generate_string(text.text))
 
+def generate_localized_text_pointer(ltext):
+    return '(SOPC_LocalizedText[]) {%s}' % generate_localized_text(ltext)
 
 def generate_variant(type_id, c_type, field, val, is_array, generate_func):
     if is_array:
         field += 'Arr'
         c_array = '(%s[]){%s}' % (c_type, ','.join(map(generate_func, val))) if val else 'NULL'
-        return '{true, %s, SOPC_VariantArrayType_Array, {.Array = {%d, {.%s = %s}}}}' % (type_id, len(val), field, c_array)
+        return '''
+                  {true, 
+                   %s, 
+                   SOPC_VariantArrayType_Array, 
+                   {.Array = 
+                     {%d, {.%s = %s}}}}''' % (type_id, len(val), field, c_array)
     else:
-        return '{true, %s, SOPC_VariantArrayType_SingleValue, {.%s = %s}}' % (type_id, field, generate_func(val))
+        return '''
+                  {true, 
+                   %s, 
+                   SOPC_VariantArrayType_SingleValue, 
+                   {.%s = %s}}''' % (type_id, field, generate_func(val))
 
+# Generic extension object generator
+def generate_extension_object(ext_obj, gen=None, is_array=False):
+    type_id_field = '{%s, %s, 0}' % (generate_nodeid(ext_obj.extobj_typeid), generate_string(None))
+    encoding = 'SOPC_ExtObjBodyEncoding_Object'
+    body = '.Body.Object = {%s, %s}' % (gen(ext_obj), ext_obj.extobj_objtype)
+    ext_obj = '{%s,%s,%s}' % (type_id_field, encoding, body)
+    if is_array:        
+        return ext_obj
+    else:
+        # extension object is a pointer in variant, trick the compiler using a 1-element array
+        return '''
+                  (SOPC_ExtensionObject[]) 
+                  {%s}
+               ''' % ext_obj
 
-POINTER_VARIANT_TYPES = {VALUE_TYPE_GUID, VALUE_TYPE_NODEID, VALUE_TYPE_DATETIME}
+# Specific extension object content generators
 
-
+def generate_argument_ext_obj(obj):
+    array_dimensions =('(uint32_t[]){%s}' % ','.join(obj.arraydimensions)
+                       if obj.arraydimensions not in (None, []) else 'NULL')
+    return ('''
+               (OpcUa_Argument[]) 
+               {{%s, 
+                 %s, 
+                 %s, 
+                 %d, 
+                 %d, 
+                 %s, 
+                 %s}}
+            ''' %
+            (obj.extobj_objtype,
+             generate_string(obj.name),
+             generate_nodeid(obj.datatype),
+             obj.valuerank,
+             len(obj.arraydimensions),
+             array_dimensions,
+             generate_localized_text(obj.description)
+            )
+           )
+    
 def generate_value_variant(val):
     if val is None:
         return '{true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}}'
@@ -622,7 +834,21 @@ def generate_value_variant(val):
         return generate_variant('SOPC_ByteString_Id', 'SOPC_ByteString', 'Bstring', val.val, val.is_array, generate_string)
     elif val.ty == VALUE_TYPE_XMLELEMENT:
         return generate_variant('SOPC_XmlElement_Id', 'SOPC_XmlElement', 'XmlElt', val.val, val.is_array, generate_string)
-    elif val.ty in POINTER_VARIANT_TYPES:
+    elif val.ty == VALUE_TYPE_LOCALIZEDTEXT:
+        return generate_variant('SOPC_LocalizedText_Id', 'SOPC_LocalizedText', 'LocalizedText',
+                                val.val, val.is_array,
+                                generate_localized_text if val.is_array else generate_localized_text_pointer)
+    elif val.ty == VALUE_TYPE_NODEID:
+        return generate_variant('SOPC_NodeId_Id', 'SOPC_NodeId', 'NodeId',
+                                val.val, val.is_array,
+                                generate_nodeid if val.is_array else generate_nodeid_pointer)
+    elif val.ty == VALUE_TYPE_EXTENSIONOBJECT_ARGUMENT:
+        # Partial evaluation of generate_extension_object to make it compatible with generate_variant
+        extension_object_generator = partial(generate_extension_object,
+                                             gen=generate_argument_ext_obj, is_array=val.is_array)
+        return generate_variant('SOPC_ExtensionObject_Id', 'SOPC_ExtensionObject' , 'ExtObject', 
+                                val.val, val.is_array, extension_object_generator)
+    elif val.ty in UNSUPPORTED_POINTER_VARIANT_TYPES:
         # FIXME: The variant requires a pointer here, we need to wrap the value inside a 1-sized
         # array to trick the compiler.
         raise CodeGenerationError('This value type is not supported yet')
@@ -879,7 +1105,7 @@ def main():
         try:
             generate_address_space(args.const_addspace, iterparse(xml_fd, events=('start', 'end')), out_fd)
         except ParseError as e:
-            sys.stderr.write('Woops, an error occurred: %s\n' % str(e))
+            sys.stderr.write('Woops, an error occurred: %s \n' % str(e))
             sys.exit(1)
 
     print('Done.')
