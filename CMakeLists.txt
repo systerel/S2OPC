@@ -385,8 +385,8 @@ if (EXPAT_FOUND)
                                                                                                                    "csrc/loaders/config_loaders"
                                                                                                                    "csrc/loaders/helpers")
   target_compile_definitions(s2opc-xml-loaders-expat PRIVATE "UANODESET_LOADER_LOG")
-  set_target_properties(s2opc-xml-loaders-expat PROPERTIES PUBLIC_HEADER "csrc/loaders/address_space_loaders/xml_expat/sopc_uanodeset_loader.h"
-                                                           PUBLIC_HEADER "csrc/loaders/config_loaders/xml_expat/sopc_config_loader.h")
+  set_property(TARGET s2opc-xml-loaders-expat PROPERTY PUBLIC_HEADER "csrc/loaders/address_space_loaders/xml_expat/sopc_uanodeset_loader.h"
+                                                                     "csrc/loaders/config_loaders/xml_expat/sopc_config_loader.h")
   install(TARGETS s2opc-xml-loaders-expat
           LIBRARY DESTINATION lib
           ARCHIVE DESTINATION lib
