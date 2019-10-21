@@ -252,7 +252,10 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_ToDER(const SOPC_CertificateList* 
  *
  * \note            Content of the output is unspecified when return value is not SOPC_STATUS_OK.
  *
- * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
+ * \warning         \p pCert must contain a single certificate.
+ *
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL
+ *                  or the certificate list contains more than one certificate,
  *                  and SOPC_STATUS_NOK when there was an error.
  */
 SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetThumbprint(const SOPC_CryptoProvider* pProvider,
@@ -272,7 +275,11 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetThumbprint(const SOPC_CryptoPro
  * \param applicationUri  The value that should be stored in the URI subject altName of the certificate.
                           This should be a zero-terminated string.
  *
- * \return \c TRUE if the values match, \c FALSE else.
+ * \warning         \p pCert must contain a single certificate.
+ *
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL
+ *                  or the certificate list contains more than one certificate,
+ * \return \c TRUE if the values match, return \c FALSE else.
  */
 bool SOPC_KeyManager_Certificate_CheckApplicationUri(const SOPC_CertificateList* pCert, const char* applicationUri);
 
@@ -288,6 +295,8 @@ bool SOPC_KeyManager_Certificate_CheckApplicationUri(const SOPC_CertificateList*
  * \param pCert     The certificate.
  * \param ppApplicationUri  A pointer to the newly allocated zero-terminated string containing the application URI.
  * \param pStringLength     Optional pointer to the string length (excluding the trailing \0).
+ *
+ * \warning         \p pCert must contain a single certificate.
  *
  * \return          SOPC_STATUS_OK when successfully copied.
  */

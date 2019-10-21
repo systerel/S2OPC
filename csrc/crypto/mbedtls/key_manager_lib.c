@@ -352,8 +352,20 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetThumbprint(const SOPC_CryptoPro
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
+    /* Assert single certificate */
+    size_t nCert = 0;
+    SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_GetListLength(pCert, &nCert);
+    if (SOPC_STATUS_OK == status && 1 != nCert)
+    {
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    /* Assert allocation length */
     uint32_t lenSupposed = 0;
-    SOPC_ReturnStatus status = SOPC_CryptoProvider_CertificateGetLength_Thumbprint(pProvider, &lenSupposed);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_CryptoProvider_CertificateGetLength_Thumbprint(pProvider, &lenSupposed);
+    }
     if (SOPC_STATUS_OK == status)
     {
         if (lenDest != lenSupposed)
@@ -552,6 +564,9 @@ bool SOPC_KeyManager_Certificate_CheckApplicationUri(const SOPC_CertificateList*
 {
     assert(pCert != NULL);
     assert(application_uri != NULL);
+    size_t nCert = 0;
+    SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_GetListLength(pCert, &nCert);
+    assert(SOPC_STATUS_OK == status && 1 == nCert);
 
     uint8_t str_len = 0;
     const void* str_data = get_application_uri_ptr_from_crt_data(pCert, &str_len);
@@ -575,6 +590,9 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetMaybeApplicationUri(const SOPC_
 {
     assert(NULL != pCert);
     assert(NULL != ppApplicationUri);
+    size_t nCert = 0;
+    SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_GetListLength(pCert, &nCert);
+    assert(SOPC_STATUS_OK == status && 1 == nCert);
 
     uint8_t str_len = 0;
     const void* str_data = get_application_uri_ptr_from_crt_data(pCert, &str_len);
