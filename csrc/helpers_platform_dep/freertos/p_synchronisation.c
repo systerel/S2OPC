@@ -64,7 +64,7 @@ SOPC_ReturnStatus P_SYNCHRO_ClearConditionVariable(Condition* pConditionVariable
                                                                &wClearSignal,                 //
                                                                NULL,                          //
                                                                &wCurrentSlotId);              //
-            if (handle != NULL)
+            if (NULL != handle)
             {
                 // Remove task before notify it
                 P_UTILS_LIST_RemoveElt(&pConditionVariable->taskList, //
@@ -75,7 +75,7 @@ SOPC_ReturnStatus P_SYNCHRO_ClearConditionVariable(Condition* pConditionVariable
 
                 xTaskGenericNotify(handle, wClearSignal, eSetBits, NULL);
             }
-        } while (wCurrentSlotId != UINT16_MAX);
+        } while (UINT16_MAX != wCurrentSlotId);
 
         // Task list destruction
         P_UTILS_LIST_DeInit(&pConditionVariable->taskList);
@@ -112,7 +112,7 @@ SOPC_ReturnStatus P_SYNCHRO_InitConditionVariable(Condition* pConditionVariable,
 
     /* Allocate list of waiters */
     P_UTILS_LIST_Init(&pConditionVariable->taskList, wMaxWaiters);
-    if ((pMutex == NULL) || (NULL == pConditionVariable->taskList.list))
+    if ((NULL == pMutex) || (NULL == pConditionVariable->taskList.list))
     {
         /* Raz leaved memory*/
         memset(pConditionVariable, 0, sizeof(Condition));
@@ -147,21 +147,26 @@ Condition* P_SYNCHRO_CreateConditionVariable(uint16_t wMaxRDV)
 {
     Condition* pConditionVariable = NULL;
     pConditionVariable = (Condition*) SOPC_Malloc(sizeof(Condition));
-    if (NULL != pConditionVariable)
+    if (NULL == pConditionVariable)
     {
-        DEBUG_incrementCpt();
+        return NULL;
+    }
+
+    DEBUG_incrementCpt();
+    // Raz handle
+    memset(pConditionVariable, 0, sizeof(Condition));
+    SOPC_ReturnStatus status = P_SYNCHRO_InitConditionVariable(pConditionVariable, wMaxRDV);
+
+    if (SOPC_STATUS_OK != status)
+    {
+        P_SYNCHRO_ClearConditionVariable(pConditionVariable);
         // Raz handle
         memset(pConditionVariable, 0, sizeof(Condition));
-        if (P_SYNCHRO_InitConditionVariable(pConditionVariable, wMaxRDV) != SOPC_STATUS_OK)
-        {
-            P_SYNCHRO_ClearConditionVariable(pConditionVariable);
-            // Raz handle
-            memset(pConditionVariable, 0, sizeof(Condition));
-            SOPC_Free(pConditionVariable);
-            pConditionVariable = NULL;
-            DEBUG_decrementCpt();
-        }
+        SOPC_Free(pConditionVariable);
+        pConditionVariable = NULL;
+        DEBUG_decrementCpt();
     }
+
     return pConditionVariable;
 }
 
@@ -475,74 +480,65 @@ SOPC_ReturnStatus Mutex_UnlockAndWaitCond(Condition* cond, Mutex* mut)
 /*Create recursive mutex*/
 SOPC_ReturnStatus Mutex_Initialization(Mutex* mut)
 {
-    SOPC_ReturnStatus result = SOPC_STATUS_OK;
     SemaphoreHandle_t freeRtosMutex = NULL;
 
-    if (mut == NULL)
+    if (NULL == mut)
     {
-        result = SOPC_STATUS_INVALID_PARAMETERS;
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    freeRtosMutex = xSemaphoreCreateRecursiveMutex();
+    if (NULL == freeRtosMutex)
+    {
+        *mut = NULL;
+        return SOPC_STATUS_OUT_OF_MEMORY;
     }
     else
     {
-        freeRtosMutex = xSemaphoreCreateRecursiveMutex();
-        if (freeRtosMutex == NULL)
-        {
-            result = SOPC_STATUS_OUT_OF_MEMORY;
-            *mut = NULL;
-        }
-        else
-        {
-            result = SOPC_STATUS_OK;
-            *mut = (Mutex) freeRtosMutex;
-        }
+        *mut = (Mutex) freeRtosMutex;
+        return SOPC_STATUS_OK;
     }
-    return result;
 }
 
 /*Destroy recursive mutex*/
 SOPC_ReturnStatus Mutex_Clear(Mutex* mut)
 {
     SemaphoreHandle_t freeRtosMutex = NULL;
-    SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
     if ((NULL == mut) || (NULL == (*mut)))
     {
-        result = SOPC_STATUS_INVALID_PARAMETERS;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else
-    {
-        freeRtosMutex = (SemaphoreHandle_t)(*mut);
-        vSemaphoreDelete(freeRtosMutex);
-        *mut = NULL;
-    }
-    return result;
+
+    freeRtosMutex = (SemaphoreHandle_t)(*mut);
+    vSemaphoreDelete(freeRtosMutex);
+    *mut = NULL;
+
+    return SOPC_STATUS_OK;
 }
 
 // Lock recursive mutex
 SOPC_ReturnStatus Mutex_Lock(Mutex* mut)
 {
-    SOPC_ReturnStatus result = SOPC_STATUS_OK;
     BaseType_t resRtos = pdPASS;
     SemaphoreHandle_t freeRtosMutex = NULL;
+
     if ((NULL == mut) || (NULL == (*mut)))
     {
-        result = SOPC_STATUS_INVALID_PARAMETERS;
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    freeRtosMutex = *((SemaphoreHandle_t*) (mut));
+
+    resRtos = xQueueTakeMutexRecursive(freeRtosMutex, portMAX_DELAY);
+    if (pdPASS == resRtos)
+    {
+        return SOPC_STATUS_OK;
     }
     else
     {
-        freeRtosMutex = *((SemaphoreHandle_t*) (mut));
-
-        resRtos = xQueueTakeMutexRecursive(freeRtosMutex, portMAX_DELAY);
-        if (pdPASS == resRtos)
-        {
-            result = SOPC_STATUS_OK;
-        }
-        else
-        {
-            result = SOPC_STATUS_NOK;
-        }
+        return SOPC_STATUS_NOK;
     }
-    return result;
 }
 
 // Unlock recursive mutex

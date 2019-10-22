@@ -70,35 +70,35 @@ static void cbInternalCallback(void* ptr)
 {
     Thread ptrArgs = (Thread) ptr;
 
-    if (ptrArgs != NULL)
+    if (NULL != ptrArgs)
     {
-        if (ptrArgs->signalReadyToStart != NULL)
+        if (NULL != ptrArgs->signalReadyToStart)
         {
             xSemaphoreTake(ptrArgs->signalReadyToStart, portMAX_DELAY);
         }
 
-        if (ptrArgs->args.cbExternalCallback != NULL)
+        if (NULL != ptrArgs->args.cbExternalCallback)
         {
             ptrArgs->args.cbExternalCallback(ptrArgs->args.ptrStartArgs);
         }
 
-        if (ptrArgs->cbWaitingForJoin != NULL)
+        if (NULL != ptrArgs->cbWaitingForJoin)
         {
             ptrArgs->cbWaitingForJoin(ptrArgs->args.ptrStartArgs);
         }
 
-        if (ptrArgs->signalReadyToWait != NULL)
+        if (NULL != ptrArgs->signalReadyToWait)
         {
             xSemaphoreTake(ptrArgs->signalReadyToWait, portMAX_DELAY);
         }
 
-        if (ptrArgs->cbReadyToSignal != NULL)
+        if (NULL != ptrArgs->cbReadyToSignal)
         {
             ptrArgs->cbReadyToSignal(ptrArgs->args.ptrStartArgs);
         }
 
         // At this level, wait for release mutex by condition variable called from join function
-        if (ptrArgs->lockRecHandle != NULL)
+        if (NULL != ptrArgs->lockRecHandle)
         {
             xSemaphoreTakeRecursive(ptrArgs->lockRecHandle, portMAX_DELAY);
 
@@ -310,26 +310,26 @@ SOPC_ReturnStatus P_THREAD_Init(Thread* ptrWks,            // Workspace
     else
     {
         /* Error: clean partially initialized components */
-        if (handleWks->handleTask != NULL)
+        if (NULL != handleWks->handleTask)
         {
             vTaskSuspend(handleWks->handleTask);
             vTaskDelete(handleWks->handleTask);
             handleWks->handleTask = NULL;
             DEBUG_decrementCpt();
         }
-        if (handleWks->lockRecHandle != NULL)
+        if (NULL != handleWks->lockRecHandle)
         {
             vSemaphoreDelete(handleWks->lockRecHandle);
             handleWks->lockRecHandle = NULL;
             DEBUG_decrementCpt();
         }
-        if (handleWks->signalReadyToWait != NULL)
+        if (NULL != handleWks->signalReadyToWait)
         {
             vQueueDelete(handleWks->signalReadyToWait);
             handleWks->signalReadyToWait = NULL;
             DEBUG_decrementCpt();
         }
-        if (handleWks->signalReadyToStart != NULL)
+        if (NULL != handleWks->signalReadyToStart)
         {
             vQueueDelete(handleWks->signalReadyToStart);
             handleWks->signalReadyToStart = NULL;
@@ -672,7 +672,7 @@ SOPC_ReturnStatus SOPC_Thread_Join(Thread thread)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
 
-    if (thread != NULL)
+    if (NULL != thread)
     {
         status = P_THREAD_Join(&thread);
     }

@@ -17,6 +17,13 @@
  * under the License.
  */
 
+/* Copy-paste from
+ * mcuxpressoide-10.3.1_2233/ide/plugins/com.nxp.mcuxpresso.tools.linux_10.3.0.201811011841/tools/arm-none-eabi/include/inttypes.h
+ * as there seems to be a bug: __int64_t_defined is defined,
+ * but only after the corresponding section is included,
+ * so the PRI*64 directives are not defined...
+ */
+
 /*
  * Copyright (c) 2004, 2005 by
  * Ralf Corsepius, Ulm/Germany. All rights reserved.
