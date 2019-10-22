@@ -170,44 +170,48 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_ToDER(const SOPC_AsymmetricKey* 
  */
 
 /**
- * \brief           Creates a new Certificate (signed public key) from a DER encoded buffer.
+ * \brief           Creates a new Certificate (signed public key) from a DER encoded buffer,
+ *                  or add it to an existing certificate list.
  *
  *                  \p bufferDER is \p lenDER long, and describes the certificate in the DER format.
  *
  * \param bufferDER A valid pointer to the buffer containing the DER description.
  * \param lenDER    The length in bytes of the DER description of the certificate.
- * \param ppCert    A valid handle to the newly created Certificate.
- *                  This object must be freed with a call to SOPC_KeyManager_Certificate_Free().
+ * \param ppCert    Creation: a valid handle which will point to the newly created Certificate.
+ *                  Addition: a pointer to a pointer to a Certificate list to which add the certificate.
+ *                  In either cases, this object must be freed with a call to SOPC_KeyManager_Certificate_Free().
  *
  * \note            Content of the certificate is unspecified when return value is not SOPC_STATUS_OK.
  *
  * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
  *                  and SOPC_STATUS_NOK when there was an error.
  */
-SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateFromDER(const uint8_t* bufferDER,
-                                                            uint32_t lenDER,
-                                                            SOPC_CertificateList** ppCert);
+SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromDER(const uint8_t* bufferDER,
+                                                                 uint32_t lenDER,
+                                                                 SOPC_CertificateList** ppCert);
 
 /**
- * \brief           Creates a new Certificate (signed public key) from a file in the DER or PEM format.
+ * \brief           Creates a new Certificate (signed public key) from a file in the DER or PEM format,
+ *                  or add it to an existing certificate list.
  *
  *                  \p szPath is the path to the file containing the key. It should be zero-terminated.
  *                  The key may be described in the DER of PEM format.
  *
  * \param szPath    The path to the DER/PEM file.
- * \param ppCert    A valid handle to the newly created Certificate.
- *                  This object must be freed with a call to SOPC_KeyManager_Certificate_Free().
+ * \param ppCert    Creation: a valid handle which will point to the newly created Certificate.
+ *                  Addition: a pointer to a pointer to a Certificate list to which add the certificate.
+ *                  In either cases, this object must be freed with a call to SOPC_KeyManager_Certificate_Free().
  *
  * \note            Content of the certificate is unspecified when return value is not SOPC_STATUS_OK.
  *
  * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
  *                  and SOPC_STATUS_NOK when there was an error.
  */
-SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateFromFile(const char* szPath, SOPC_CertificateList** ppCert);
+SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromFile(const char* szPath, SOPC_CertificateList** ppCert);
 
 /**
- * \brief           Frees a Certificate created with SOPC_KeyManager_Certificate_CreateFromFile() or
- *                  SOPC_KeyManager_Certificate_CreateFromDER()
+ * \brief           Frees a Certificate created with SOPC_KeyManager_Certificate_CreateOrAddFromFile() or
+ *                  SOPC_KeyManager_Certificate_CreateOrAddFromDER()
  *
  * \warning         You must not free a Certificate for which a key is still being used.
  *                  See SOPC_KeyManager_Certificate_GetPublicKey() and

@@ -422,7 +422,7 @@ static inline void setup_certificate(void)
                         "fa067ba9c1255458d6d570a15f715bc00c2d405809652ac372e2cbc2fdfd7b20681310829ca88ef844ccd8c89a8c5b"
                         "e2bf893c1299380675e82455cbef6ccc",
                         der_cert, 1215) == 1215);
-    ck_assert(SOPC_KeyManager_Certificate_CreateFromDER(der_cert, 1215, &crt_pub) == SOPC_STATUS_OK);
+    ck_assert(SOPC_KeyManager_Certificate_CreateOrAddFromDER(der_cert, 1215, &crt_pub) == SOPC_STATUS_OK);
 }
 
 static inline void teardown_certificate(void)
@@ -516,7 +516,8 @@ static inline void setup_asym_keys(void)
 
     // Loads certificate from DER
     ck_assert(unhexlify(DER_ASYM_PUB_HEXA, der_cert, DER_ASYM_PUB_LENG) == DER_ASYM_PUB_LENG);
-    ck_assert(SOPC_KeyManager_Certificate_CreateFromDER(der_cert, DER_ASYM_PUB_LENG, &crt_pub) == SOPC_STATUS_OK); //*/
+    ck_assert(SOPC_KeyManager_Certificate_CreateOrAddFromDER(der_cert, DER_ASYM_PUB_LENG, &crt_pub) ==
+              SOPC_STATUS_OK); //*/
 
     // Loads the public key from cert
     ck_assert(SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(crt_pub, &key_pub) == SOPC_STATUS_OK);

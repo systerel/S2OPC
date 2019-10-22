@@ -363,7 +363,7 @@ static SOPC_ReturnStatus check_application_uri(const SOPC_ByteString* certData, 
     }
 
     SOPC_ReturnStatus status =
-        SOPC_KeyManager_Certificate_CreateFromDER(certData->Data, (uint32_t) certData->Length, &certificate);
+        SOPC_KeyManager_Certificate_CreateOrAddFromDER(certData->Data, (uint32_t) certData->Length, &certificate);
 
     if (status != SOPC_STATUS_OK)
     {

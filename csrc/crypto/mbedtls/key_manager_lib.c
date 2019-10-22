@@ -205,9 +205,9 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_ToDER(const SOPC_AsymmetricKey* 
  * Cert API
  * ------------------------------------------------------------------------------------------------
  */
-SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateFromDER(const uint8_t* bufferDER,
-                                                            uint32_t lenDER,
-                                                            SOPC_CertificateList** ppCert)
+SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromDER(const uint8_t* bufferDER,
+                                                                 uint32_t lenDER,
+                                                                 SOPC_CertificateList** ppCert)
 {
     mbedtls_x509_crt* crt = NULL;
     SOPC_CertificateList* certif = NULL;
@@ -246,7 +246,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateFromDER(const uint8_t* buffe
  * \note    Same as CreateFromDER, except for a single call, can we refactor?
  *
  */
-SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateFromFile(const char* szPath, SOPC_CertificateList** ppCert)
+SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromFile(const char* szPath, SOPC_CertificateList** ppCert)
 {
     mbedtls_x509_crt* crt = NULL;
     SOPC_CertificateList* certif = NULL;

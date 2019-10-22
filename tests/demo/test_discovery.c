@@ -110,8 +110,8 @@ void EventDispatcher_ValidateGetEndpoints(SOPC_App_Com_Event event, uint32_t arg
                 bB256Checked = true;
                 iSecLevelB256 = pEndp->SecurityLevel;
                 pBufCert = &pEndp->ServerCertificate;
-                ck_assert(SOPC_KeyManager_Certificate_CreateFromDER(pBufCert->Data, (uint32_t) pBufCert->Length,
-                                                                    &pCert) == SOPC_STATUS_OK);
+                ck_assert(SOPC_KeyManager_Certificate_CreateOrAddFromDER(pBufCert->Data, (uint32_t) pBufCert->Length,
+                                                                         &pCert) == SOPC_STATUS_OK);
                 SOPC_KeyManager_Certificate_Free(pCert);
                 pCert = NULL;
                 pBufCert = NULL;
@@ -124,8 +124,8 @@ void EventDispatcher_ValidateGetEndpoints(SOPC_App_Com_Event event, uint32_t arg
                 bB256S256Checked = true;
                 iSecLevelB256S256 = pEndp->SecurityLevel;
                 pBufCert = &pEndp->ServerCertificate;
-                ck_assert(SOPC_KeyManager_Certificate_CreateFromDER(pBufCert->Data, (uint32_t) pBufCert->Length,
-                                                                    &pCert) == SOPC_STATUS_OK);
+                ck_assert(SOPC_KeyManager_Certificate_CreateOrAddFromDER(pBufCert->Data, (uint32_t) pBufCert->Length,
+                                                                         &pCert) == SOPC_STATUS_OK);
                 SOPC_KeyManager_Certificate_Free(pCert);
                 pCert = NULL;
                 pBufCert = NULL;

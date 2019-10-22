@@ -199,8 +199,8 @@ static void PrintEndpoints(OpcUa_GetEndpointsResponse* pResp)
             }
             else
             {
-                if (SOPC_KeyManager_Certificate_CreateFromDER(pBufCert->Data, (uint32_t) pBufCert->Length, &pCert) !=
-                    SOPC_STATUS_OK)
+                if (SOPC_KeyManager_Certificate_CreateOrAddFromDER(pBufCert->Data, (uint32_t) pBufCert->Length,
+                                                                   &pCert) != SOPC_STATUS_OK)
                 {
                     printf("<error creating certificate>\n");
                 }

@@ -2260,10 +2260,10 @@ static bool sc_init_key_and_certs(SOPC_SecureConnection* sc)
 
     if (SOPC_KeyManager_SerializedAsymmetricKey_Deserialize(serialized_private_key, false, &sc->privateKey) !=
             SOPC_STATUS_OK ||
-        SOPC_KeyManager_Certificate_CreateFromDER(cert_data->data, cert_data->length, cert) != SOPC_STATUS_OK ||
+        SOPC_KeyManager_Certificate_CreateOrAddFromDER(cert_data->data, cert_data->length, cert) != SOPC_STATUS_OK ||
         (peer_cert_data != NULL &&
-         SOPC_KeyManager_Certificate_CreateFromDER(peer_cert_data->data, peer_cert_data->length,
-                                                   &sc->serverCertificate) != SOPC_STATUS_OK))
+         SOPC_KeyManager_Certificate_CreateOrAddFromDER(peer_cert_data->data, peer_cert_data->length,
+                                                        &sc->serverCertificate) != SOPC_STATUS_OK))
     {
         SOPC_KeyManager_AsymmetricKey_Free(sc->privateKey);
         sc->privateKey = NULL;

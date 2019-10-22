@@ -432,8 +432,8 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
             if (SOPC_STATUS_OK == status)
             {
                 SOPC_CertificateList* cert = NULL;
-                status = SOPC_KeyManager_Certificate_CreateFromDER(senderCertificate.Data,
-                                                                   (uint32_t) senderCertificate.Length, &cert);
+                status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(senderCertificate.Data,
+                                                                        (uint32_t) senderCertificate.Length, &cert);
                 if (SOPC_STATUS_OK == status)
                 {
                     status = SOPC_CryptoProvider_Certificate_Validate(scConnection->cryptoProvider, pkiProvider, cert,
