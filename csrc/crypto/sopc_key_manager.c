@@ -123,6 +123,11 @@ SOPC_ReturnStatus SOPC_KeyManager_SerializedCertificate_CreateFromFile(const cha
 SOPC_ReturnStatus SOPC_KeyManager_SerializedCertificate_Deserialize(const SOPC_SerializedCertificate* cert,
                                                                     SOPC_CertificateList** res)
 {
+    if (NULL == res || NULL != *res)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
     return SOPC_KeyManager_Certificate_CreateOrAddFromDER(cert->data, cert->length, res);
 }
 
