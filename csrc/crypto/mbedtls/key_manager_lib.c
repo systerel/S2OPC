@@ -209,33 +209,48 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromDER(const uint8_t* 
                                                                  uint32_t lenDER,
                                                                  SOPC_CertificateList** ppCert)
 {
-    mbedtls_x509_crt* crt = NULL;
-    SOPC_CertificateList* certif = NULL;
-
     if (NULL == bufferDER || 0 == lenDER || NULL == ppCert)
-        return SOPC_STATUS_INVALID_PARAMETERS;
-
-    // Mem alloc
-    certif = SOPC_Malloc(sizeof(SOPC_CertificateList));
-    if (NULL == certif)
-        return SOPC_STATUS_NOK;
-
-    // Init
-    crt = &certif->crt;
-    mbedtls_x509_crt_init(crt);
-
-    // Parsing
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    int status_code = mbedtls_x509_crt_parse(crt, bufferDER, lenDER);
-    if (status_code == 0 && crt->raw.len <= UINT32_MAX)
     {
-        *ppCert = certif;
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    /* Mem alloc */
+    SOPC_CertificateList* certif = *ppCert;
+    if (NULL == certif)
+    {
+        certif = SOPC_Calloc(1, sizeof(SOPC_CertificateList)); /* Also init certificate */
+    }
+    if (NULL == certif)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    /* Parsing */
+    mbedtls_x509_crt* crt = &certif->crt;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    int err = mbedtls_x509_crt_parse(crt, bufferDER, lenDER);
+    if (0 != err)
+    {
+        status = SOPC_STATUS_NOK;
+        SOPC_Logger_TraceError("Crypto: certificate buffer parse failed with error code: 0x%x", err);
+        SOPC_KeyManager_Certificate_Free(certif);
     }
     else
     {
-        status = SOPC_STATUS_NOK;
-        SOPC_Logger_TraceError("Crypto: certificate buffer parse failed with error code: %i", status_code);
-        SOPC_KeyManager_Certificate_Free(certif);
+        /* Check that all loaded certificates fit in uint32-addressable buffers */
+        for (; NULL != crt && SOPC_STATUS_OK == status; crt = crt->next)
+        {
+            if (crt->raw.len > UINT32_MAX)
+            {
+                status = SOPC_STATUS_NOK;
+            }
+        }
+    }
+
+    /* Update the output (may be redundant if a certificate was given as input) */
+    if (SOPC_STATUS_OK == status)
+    {
+        *ppCert = certif;
     }
 
     return status;
@@ -285,6 +300,7 @@ void SOPC_KeyManager_Certificate_Free(SOPC_CertificateList* pCert)
     if (NULL == pCert)
         return;
 
+    /* Frees all the certiciates in the chain */
     mbedtls_x509_crt_free(&pCert->crt);
     SOPC_Free(pCert);
 }
