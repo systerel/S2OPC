@@ -164,6 +164,12 @@ void constants_bs__get_cast_t_BrowsePath(const t_entier4 constants_bs__p_ind,
     *constants_bs__p_browsePath = (uint32_t) constants_bs__p_ind; // TODO: add precondition in B model
 }
 
+void constants_bs__get_cast_t_CallMethod(const t_entier4 constants_bs__p_ind,
+                                         constants_bs__t_CallMethod_i* const constants_bs__p_callMethod)
+{
+    *constants_bs__p_callMethod = (uint32_t) constants_bs__p_ind; // TODO: add precondition in B model
+}
+
 void constants_bs__is_QualifiedNames_Empty(const constants_bs__t_QualifiedName_i constants_bs__name,
                                            t_bool* const constants_bs__p_bool)
 {

@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 31/10/2019 10:59:06
+ Date                 : 09/03/2020 15:28:42
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -414,6 +414,12 @@ void service_mgr__treat_session_nano_extended_service_req(
             &service_mgr__l_user);
          subscription_mgr__treat_subscription_create_monitored_items_req(service_mgr__session,
             service_mgr__l_user,
+            service_mgr__req_msg,
+            service_mgr__resp_msg,
+            service_mgr__StatusCode_service);
+         break;
+      case constants__e_msg_method_call_req:
+         call_method_mgr__treat_method_call_request(service_mgr__session,
             service_mgr__req_msg,
             service_mgr__resp_msg,
             service_mgr__StatusCode_service);

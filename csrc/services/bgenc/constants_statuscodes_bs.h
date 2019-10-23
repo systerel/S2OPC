@@ -21,7 +21,7 @@
 
  File Name            : constants_statuscodes_bs.h
 
- Date                 : 04/10/2019 15:27:27
+ Date                 : 23/10/2019 09:09:28
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -64,7 +64,12 @@ typedef enum {
    constants_statuscodes_bs__e_sc_bad_decoding_error,
    constants_statuscodes_bs__e_sc_bad_request_too_large,
    constants_statuscodes_bs__e_sc_bad_response_too_large,
+   constants_statuscodes_bs__e_sc_bad_arguments_missing,
+   constants_statuscodes_bs__e_sc_bad_too_many_arguments,
    constants_statuscodes_bs__e_sc_bad_invalid_argument,
+   constants_statuscodes_bs__e_sc_bad_method_invalid,
+   constants_statuscodes_bs__e_sc_bad_not_implemented,
+   constants_statuscodes_bs__e_sc_bad_not_executable,
    constants_statuscodes_bs__e_sc_bad_unexpected_error,
    constants_statuscodes_bs__e_sc_bad_out_of_memory,
    constants_statuscodes_bs__e_sc_bad_nothing_to_do,

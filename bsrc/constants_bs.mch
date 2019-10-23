@@ -42,6 +42,7 @@ SETS
     t_BrowsePath_i;
     t_RelativePath_i;
     t_RelativePathElt_i;
+    t_CallMethod_i;
     t_session_token_i;
     t_user_i;
     t_user_token_i;
@@ -159,8 +160,9 @@ CONCRETE_CONSTANTS
     c_LocaleIds_empty,
     c_browsePath_indet,
     c_RelativePath_indet,
-    c_RelativePathElt_indet
-
+    c_RelativePathElt_indet,
+    c_CallMethod_indet
+    
 ABSTRACT_CONSTANTS
 
     t_Variant,
@@ -177,6 +179,8 @@ ABSTRACT_CONSTANTS
     cast_t_BrowsePath,
     t_RelativePath,
     t_RelativePathElt,
+    t_CallMethod,
+    cast_t_CallMethod,
     t_session_token,
     t_user,
     t_user_token,
@@ -454,7 +458,14 @@ PROPERTIES
 
     t_RelativePathElt <: t_RelativePathElt_i &
     c_RelativePathElt_indet : t_RelativePathElt_i &
-    c_RelativePathElt_indet /: t_RelativePathElt
+    c_RelativePathElt_indet /: t_RelativePathElt &
+    
+    t_CallMethod <: t_CallMethod_i &
+    c_CallMethod_indet : t_CallMethod_i &
+    c_CallMethod_indet /: t_CallMethod &
+    cast_t_CallMethod : NAT +-> t_CallMethod_i &
+    cast_t_CallMethod : perm(t_CallMethod)
+
 
 OPERATIONS
 
@@ -581,6 +592,15 @@ OPERATIONS
         p_ind : dom(cast_t_BrowsePath)
     THEN
         p_browsePath := cast_t_BrowsePath(p_ind)
+    END
+    ;
+
+    p_callMethod <-- get_cast_t_CallMethod(p_ind) =
+    PRE
+        p_ind : NAT &
+        p_ind : dom(cast_t_CallMethod)
+    THEN
+        p_callMethod := cast_t_CallMethod(p_ind)
     END
     ;
 

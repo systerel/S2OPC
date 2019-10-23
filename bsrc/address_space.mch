@@ -585,5 +585,14 @@ OPERATIONS
     THEN
         p_authorized := bool(p_operation_type |-> p_node_id |-> p_attribute_id |-> p_user : s_AuthorizedOperations)
     END
-
+    ;
+    
+    p_bool <-- get_Executable(p_node) =
+    PRE
+        p_node : t_Node_i &
+        p_node : dom(a_Executable)
+    THEN
+        p_bool := a_Executable(p_node)
+    END
+    
 END

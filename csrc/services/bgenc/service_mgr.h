@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.h
 
- Date                 : 08/11/2019 16:15:01
+ Date                 : 09/03/2020 15:28:42
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -39,6 +39,7 @@
    IMPORTS Clause
   -----------------*/
 #include "address_space.h"
+#include "call_method_mgr.h"
 #include "message_in_bs.h"
 #include "message_out_bs.h"
 #include "request_handle_bs.h"

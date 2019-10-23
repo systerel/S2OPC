@@ -104,6 +104,7 @@ SETS
     t_BrowsePath_i;
     t_RelativePath_i;
     t_RelativePathElt_i;
+    t_CallMethod_i;
     t_session_token_i; /* (SOPC_NodeId*) */
     t_user_i; /* Server-side user */
     t_user_token_i; /* Raw OPC UA user token */
@@ -285,7 +286,8 @@ SETS
     /* User authorization operation type, see SOPC_UserAuthorization_Manager */
     t_operation_type_i = {c_operation_type_indet,
                           e_operation_type_read,
-                          e_operation_type_write};
+                          e_operation_type_write,
+                      	  e_operation_type_executable};
 
     t_ContinuationPoint_i;
     t_ContinuationPointId_i;
@@ -341,6 +343,7 @@ CONCRETE_CONSTANTS
     c_browsePath_indet,
     c_RelativePath_indet,
     c_RelativePathElt_indet,
+    c_CallMethod_indet,
     c_session_token_indet,
     c_Nonce_indet,
     c_SignatureData_indet,
@@ -427,6 +430,7 @@ ABSTRACT_CONSTANTS
 
     cast_t_session,
     cast_t_BrowsePath,
+    cast_t_CallMethod,
     cast_t_channel,
     cast_t_subscription,
     cast_t_ReadValue,
@@ -438,6 +442,7 @@ ABSTRACT_CONSTANTS
     t_BrowsePath,
     t_RelativePath,
     t_RelativePathElt,
+    t_CallMethod,
     t_session_token,
     t_user,
     t_user_token,
@@ -654,7 +659,13 @@ PROPERTIES
     c_RelativePathElt_indet /: t_RelativePathElt &
 
     t_BrowsePathResPerElt_i = 0..k_n_BrowsePathResPerElt_max &
-
+    
+    t_CallMethod <: t_CallMethod_i &
+    c_CallMethod_indet : t_CallMethod_i &
+    c_CallMethod_indet /: t_CallMethod &
+    cast_t_CallMethod : NAT +-> t_CallMethod_i &
+    cast_t_CallMethod : perm(t_CallMethod) &
+    
     t_session_token <: t_session_token_i &
     c_session_token_indet : t_session_token_i &
     c_session_token_indet /: t_session_token &
@@ -803,7 +814,8 @@ PROPERTIES
         e_buffer_in_msg_read } &
 
     t_operation_type = {e_operation_type_read,
-                        e_operation_type_write} &
+                        e_operation_type_write,
+                        e_operation_type_executable} &
 
     s_session_treatment_reqs = {e_msg_session_create_req,
         e_msg_session_activate_req,
@@ -983,6 +995,15 @@ OPERATIONS
         p_ind : dom(cast_t_BrowsePath)
     THEN
         p_browsePath := cast_t_BrowsePath(p_ind)
+    END
+    ;
+
+    p_callMethod <-- get_cast_t_CallMethod(p_ind) =
+    PRE
+        p_ind : NAT &
+        p_ind : dom(cast_t_CallMethod)
+    THEN
+        p_callMethod := cast_t_CallMethod(p_ind)
     END
     ;
 

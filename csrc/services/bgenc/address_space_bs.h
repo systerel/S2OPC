@@ -21,7 +21,7 @@
 
  File Name            : address_space_bs.h
 
- Date                 : 31/10/2019 08:34:28
+ Date                 : 09/03/2020 15:28:52
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -63,6 +63,9 @@ extern void address_space_bs__get_DataType(
 extern void address_space_bs__get_DisplayName(
    const constants__t_Node_i address_space_bs__p_node,
    constants__t_LocalizedText_i * const address_space_bs__p_display_name);
+extern void address_space_bs__get_Executable(
+   const constants__t_Node_i address_space_bs__p_node,
+   t_bool * const address_space_bs__p_bool);
 extern void address_space_bs__get_NodeClass(
    const constants__t_Node_i address_space_bs__p_node,
    constants__t_NodeClass_i * const address_space_bs__p_node_class);
@@ -160,6 +163,7 @@ extern void address_space_bs__read_AddressSpace_UserAccessLevel_value(
    constants__t_Variant_i * const address_space_bs__variant);
 extern void address_space_bs__read_AddressSpace_UserExecutable_value(
    const constants__t_Node_i address_space_bs__p_node,
+   const t_bool address_space_bs__p_is_user_executable_auth,
    constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc,
    constants__t_Variant_i * const address_space_bs__variant);
 extern void address_space_bs__read_AddressSpace_ValueRank_value(

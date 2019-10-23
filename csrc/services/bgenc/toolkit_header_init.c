@@ -21,7 +21,7 @@
 
  File Name            : toolkit_header_init.c
 
- Date                 : 08/11/2019 16:48:22
+ Date                 : 09/03/2020 15:29:10
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -51,6 +51,10 @@
 #include "browse_treatment_result_bs.h"
 #include "browse_treatment_result_it.h"
 #include "browse_treatment_target_it.h"
+#include "call_method_bs.h"
+#include "call_method_it.h"
+#include "call_method_mgr.h"
+#include "call_method_result_it.h"
 #include "channel_mgr.h"
 #include "channel_mgr_1.h"
 #include "channel_mgr_bs.h"
@@ -69,6 +73,7 @@
 #include "monitored_item_queue_it_bs.h"
 #include "msg_browse_bs.h"
 #include "msg_browse_next_bs.h"
+#include "msg_call_method_bs.h"
 #include "msg_read_request.h"
 #include "msg_read_request_bs.h"
 #include "msg_read_response_bs.h"
@@ -229,6 +234,11 @@ void INITIALISATION(void) {
    msg_unregister_nodes__INITIALISATION();
    unregister_nodes_it__INITIALISATION();
    service_unregister_nodes__INITIALISATION();
+   call_method_bs__INITIALISATION();
+   msg_call_method_bs__INITIALISATION();
+   call_method_it__INITIALISATION();
+   call_method_result_it__INITIALISATION();
+   call_method_mgr__INITIALISATION();
    service_mgr__INITIALISATION();
    io_dispatch_mgr__INITIALISATION();
    toolkit_header__INITIALISATION();

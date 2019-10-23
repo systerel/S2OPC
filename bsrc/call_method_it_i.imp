@@ -1,0 +1,65 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+IMPLEMENTATION
+    call_method_it_i
+
+REFINES
+    call_method_it
+
+SEES
+    constants,
+    msg_call_method_bs
+
+CONCRETE_VARIABLES
+
+    current_callMethod_idx,
+    nb_callMethods_to_iterate
+
+INVARIANT
+    current_callMethod_idx : NAT &
+    nb_callMethods_to_iterate : NAT &
+
+    current_callMethod_idx : 0..nb_callMethods_to_iterate &
+    callMethods_to_iterate = cast_t_CallMethod[1..current_callMethod_idx] &
+    callMethods_iterated = cast_t_CallMethod[current_callMethod_idx+1..nb_callMethods_to_iterate]
+
+INITIALISATION
+    current_callMethod_idx := 0;
+    nb_callMethods_to_iterate := 0
+
+OPERATIONS
+
+
+    p_continue <-- init_iter_callMethods (p_req_msg) =
+    BEGIN
+        nb_callMethods_to_iterate <-- read_nb_CallMethods(p_req_msg);
+        current_callMethod_idx := nb_callMethods_to_iterate;
+        p_continue := bool (0 < current_callMethod_idx)
+    END
+    ;
+
+    p_continue, p_callMethod <-- continue_iter_callMethod =
+    BEGIN
+        p_callMethod <-- get_cast_t_CallMethod(current_callMethod_idx);
+        current_callMethod_idx := current_callMethod_idx - 1;
+        p_continue := bool (0 < current_callMethod_idx)
+    END
+
+END

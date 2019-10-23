@@ -328,6 +328,7 @@ void address_space_bs__read_AddressSpace_UserAccessLevel_value(
     constants__t_Variant_i* const address_space_bs__variant)
 {
     assert(address_space_bs__p_node->node_class == OpcUa_NodeClass_Variable);
+    /* UserAccess Level can be only more restrictive than access level  */
     SOPC_Byte accessLevel = address_space_bs__p_node->data.variable.AccessLevel;
     SOPC_Byte userAccessLevel = 0;
     if (address_space_bs__p_is_user_read_auth)
@@ -354,13 +355,15 @@ void address_space_bs__read_AddressSpace_UserAccessLevel_value(
 
 void address_space_bs__read_AddressSpace_UserExecutable_value(
     const constants__t_Node_i address_space_bs__p_node,
+    const t_bool address_space_bs__p_is_user_executable_auth,
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
     constants__t_Variant_i* const address_space_bs__variant)
 {
     assert(address_space_bs__p_node->node_class == OpcUa_NodeClass_Method);
     *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
-    // Note: always returns false since we do not implement method execution
-    *address_space_bs__variant = util_variant__new_Variant_from_Bool(false);
+    /* UserExecutable Level can be only more restrictive than access level  */
+    *address_space_bs__variant = util_variant__new_Variant_from_Bool(address_space_bs__p_node->data.method.Executable &&
+                                                                     address_space_bs__p_is_user_executable_auth);
     if (*address_space_bs__variant == NULL)
     {
         *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
@@ -903,6 +906,13 @@ void address_space_bs__get_DisplayName(const constants__t_Node_i address_space_b
 {
     SOPC_AddressSpace_Node* node = address_space_bs__p_node;
     *address_space_bs__p_display_name = SOPC_AddressSpace_Get_DisplayName(address_space_bs__nodes, node);
+}
+
+void address_space_bs__get_Executable(const constants__t_Node_i address_space_bs__p_node,
+                                      t_bool* const address_space_bs__p_bool)
+{
+    SOPC_AddressSpace_Node* node = address_space_bs__p_node;
+    *address_space_bs__p_bool = SOPC_AddressSpace_Get_Executable(address_space_bs__nodes, node);
 }
 
 void address_space_bs__get_NodeClass(const constants__t_Node_i address_space_bs__p_node,

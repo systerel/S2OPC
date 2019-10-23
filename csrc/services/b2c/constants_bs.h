@@ -59,6 +59,7 @@ typedef uint32_t constants_bs__t_BrowsePath_i;
 typedef uint32_t constants_bs__t_BrowseResultMask_i;
 typedef OpcUa_ReferenceDescription* constants_bs__t_BrowseResultReferences_i;
 typedef uint8_t constants_bs__t_Byte;
+typedef uint32_t constants_bs__t_CallMethod_i;
 typedef uint64_t constants_bs__t_ContinuationPointId_i;
 typedef SOPC_ContinuationPointData constants_bs__t_ContinuationPoint_i;
 typedef SOPC_DataValue* constants_bs__t_DataValue_i;
@@ -130,6 +131,7 @@ typedef SOPC_ExtensionObject* constants_bs__t_user_token_i;
 #define constants_bs__c_BrowseResultReferences_indet NULL
 extern const constants_bs__t_NodeId_i constants_bs__c_ByteString_Type_NodeId;
 extern const constants_bs__t_NodeId_i constants_bs__c_Byte_Type_NodeId;
+#define constants_bs__c_CallMethod_indet 0
 #define constants_bs__c_ContinuationPointId_indet 0
 #define constants_bs__c_ContinuationPoint_indet sopc_continuationPointData_empty;
 #define constants_bs__c_DataValue_indet NULL
@@ -222,7 +224,8 @@ extern void constants_bs__get_card_t_session(t_entier4* const constants_bs__p_ca
 extern void constants_bs__get_card_t_subscription(t_entier4* const constants_bs__p_card_subscription);
 extern void constants_bs__get_cast_t_BrowsePath(const t_entier4 constants_bs__p_ind,
                                                 constants_bs__t_BrowsePath_i* const constants_bs__p_browsePath);
-
+extern void constants_bs__get_cast_t_CallMethod(const t_entier4 constants_bs__p_ind,
+                                                constants_bs__t_CallMethod_i* const constants_bs__p_callMethod);
 extern void constants_bs__get_cast_t_channel(const t_entier4 constants_bs__p_ind,
                                              constants_bs__t_channel_i* const constants_bs__p_channel);
 extern void constants_bs__get_cast_t_session(const t_entier4 constants_bs__p_ind,
