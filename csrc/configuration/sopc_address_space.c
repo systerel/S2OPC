@@ -250,6 +250,20 @@ SOPC_Byte SOPC_AddressSpace_Get_AccessLevel(SOPC_AddressSpace* space, SOPC_Addre
     }
 }
 
+SOPC_Boolean SOPC_AddressSpace_Get_Executable(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node)
+{
+    assert(space != NULL);
+
+    switch (node->node_class)
+    {
+    case OpcUa_NodeClass_Method:
+        return node->data.method.Executable;
+    default:
+        assert(false && "Current element has no Executable attribute.");
+        return false;
+    }
+}
+
 SOPC_Boolean* SOPC_AddressSpace_Get_IsAbstract(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node)
 {
     assert(space != NULL);
