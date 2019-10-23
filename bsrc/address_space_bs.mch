@@ -446,13 +446,14 @@ OPERATIONS
     END
     ;
 
-    sc, variant <-- read_AddressSpace_UserExecutable_value(p_node) =
+    sc, variant <-- read_AddressSpace_UserExecutable_value(p_node, p_is_user_executable_auth) =
     PRE
         p_node : t_Node_i         &
         p_node : t_Node           &
         p_node : dom(a_NodeId)    &
         p_node : dom(a_NodeClass) &
-        p_node : dom(AttributeID_Node_Variant(e_aid_UserExecutable))
+        p_node : dom(AttributeID_Node_Variant(e_aid_UserExecutable)) &
+        p_is_user_executable_auth : BOOL
     THEN
         CHOICE
             variant := c_Variant_indet ||
@@ -738,6 +739,15 @@ OPERATIONS
     THEN
         p_access_level :(p_access_level : t_access_level &
                          p_access_level = a_AccessLevel(p_node))
+    END
+    ;
+    
+    p_bool <-- get_Executable(p_node) =
+    PRE
+        p_node : t_Node_i &
+        p_node : dom(a_Executable)
+    THEN
+        p_bool := a_Executable(p_node)
     END
     ;
 

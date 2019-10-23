@@ -807,6 +807,22 @@ void util_status_code__B_to_C(constants_statuscodes_bs__t_StatusCode_i bstatus, 
     case constants_statuscodes_bs__e_sc_uncertain_reference_out_of_server:
         *status = OpcUa_UncertainReferenceOutOfServer;
         break;
+    case constants_statuscodes_bs__e_sc_bad_arguments_missing:
+        *status = OpcUa_BadArgumentsMissing;
+        break;
+    case constants_statuscodes_bs__e_sc_bad_too_many_arguments:
+        *status = OpcUa_BadTooManyArguments;
+        break;
+    case constants_statuscodes_bs__e_sc_bad_method_invalid:
+        *status = OpcUa_BadMethodInvalid;
+        break;
+    case constants_statuscodes_bs__e_sc_bad_not_implemented:
+        *status = OpcUa_BadNotImplemented;
+        break;
+        /*case constants_statuscodes_bs__e_sc_bad_not_executable,
+         *status = OpcUa_BadNotExecutable;
+          break;
+        */
     default:
         *status = OpcUa_BadInternalError;
     }
@@ -1330,6 +1346,9 @@ void util_operation_type__B_to_C(constants__t_operation_type_i boptype, SOPC_Use
         break;
     case constants__e_operation_type_write:
         *pcoptype = SOPC_USER_AUTHORIZATION_OPERATION_WRITE;
+        break;
+    case constants__e_operation_type_executable:
+        *pcoptype = SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE;
         break;
     default:
         assert(false); /* Unexpected operation type */

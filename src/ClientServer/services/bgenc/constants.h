@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 08/11/2019 18:03:56
+ Date                 : 18/02/2020 10:34:38
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -49,6 +49,7 @@
 #define constants__t_BrowseResultMask_i constants_bs__t_BrowseResultMask_i
 #define constants__t_BrowseResultReferences_i constants_bs__t_BrowseResultReferences_i
 #define constants__t_Byte constants_bs__t_Byte
+#define constants__t_CallMethod_i constants_bs__t_CallMethod_i
 #define constants__t_ContinuationPointId_i constants_bs__t_ContinuationPointId_i
 #define constants__t_ContinuationPoint_i constants_bs__t_ContinuationPoint_i
 #define constants__t_DataValue_i constants_bs__t_DataValue_i
@@ -271,7 +272,8 @@ typedef enum {
 typedef enum {
    constants__c_operation_type_indet,
    constants__e_operation_type_read,
-   constants__e_operation_type_write
+   constants__e_operation_type_write,
+   constants__e_operation_type_executable
 } constants__t_operation_type_i;
 typedef enum {
    constants__e_session_init,
@@ -307,6 +309,7 @@ typedef enum {
 #define constants__t_BrowseResultMask_i_max constants_bs__t_BrowseResultMask_i_max
 #define constants__t_BrowseResultReferences_i_max constants_bs__t_BrowseResultReferences_i_max
 #define constants__t_Byte_max constants_bs__t_Byte_max
+#define constants__t_CallMethod_i_max constants_bs__t_CallMethod_i_max
 #define constants__t_ContinuationPointId_i_max constants_bs__t_ContinuationPointId_i_max
 #define constants__t_ContinuationPoint_i_max constants_bs__t_ContinuationPoint_i_max
 #define constants__t_DataValue_i_max constants_bs__t_DataValue_i_max
@@ -372,6 +375,7 @@ typedef enum {
 #define constants__c_BrowseResultReferences_indet constants_bs__c_BrowseResultReferences_indet
 #define constants__c_ByteString_Type_NodeId constants_bs__c_ByteString_Type_NodeId
 #define constants__c_Byte_Type_NodeId constants_bs__c_Byte_Type_NodeId
+#define constants__c_CallMethod_indet constants_bs__c_CallMethod_indet
 #define constants__c_ContinuationPointId_indet constants_bs__c_ContinuationPointId_indet
 #define constants__c_ContinuationPoint_indet constants_bs__c_ContinuationPoint_indet
 #define constants__c_DataValue_indet constants_bs__c_DataValue_indet
@@ -463,6 +467,7 @@ extern void constants__INITIALISATION(void);
 #define constants__get_card_t_session constants_bs__get_card_t_session
 #define constants__get_card_t_subscription constants_bs__get_card_t_subscription
 #define constants__get_cast_t_BrowsePath constants_bs__get_cast_t_BrowsePath
+#define constants__get_cast_t_CallMethod constants_bs__get_cast_t_CallMethod
 #define constants__get_cast_t_channel constants_bs__get_cast_t_channel
 #define constants__get_cast_t_session constants_bs__get_cast_t_session
 #define constants__get_cast_t_subscription constants_bs__get_cast_t_subscription

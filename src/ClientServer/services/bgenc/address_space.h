@@ -21,7 +21,7 @@
 
  File Name            : address_space.h
 
- Date                 : 31/10/2019 08:34:07
+ Date                 : 18/02/2020 10:34:29
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -71,6 +71,7 @@ extern void address_space__INITIALISATION(void);
   -------------------------------*/
 #define address_space__get_BrowseName address_space_bs__get_BrowseName
 #define address_space__get_DisplayName address_space_bs__get_DisplayName
+#define address_space__get_Executable address_space_bs__get_Executable
 #define address_space__get_NodeClass address_space_bs__get_NodeClass
 #define address_space__get_Node_RefIndexEnd address_space_bs__get_Node_RefIndexEnd
 #define address_space__get_RefIndex_Reference address_space_bs__get_RefIndex_Reference

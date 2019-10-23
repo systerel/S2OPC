@@ -68,6 +68,9 @@ void user_authorization_bs__get_user_authorization(
         case SOPC_USER_AUTHORIZATION_OPERATION_WRITE:
             operation = "write";
             break;
+        case SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE:
+            operation = "executable";
+            break;
         default:
             operation = "unknown";
             break;

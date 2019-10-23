@@ -21,7 +21,7 @@
 
  File Name            : address_space.c
 
- Date                 : 31/10/2019 08:34:07
+ Date                 : 18/02/2020 10:34:29
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -457,6 +457,7 @@ void address_space__read_AddressSpace_Attribute_value(
       t_bool address_space__l_user_read_auth;
       t_bool address_space__l_user_write_auth;
       t_bool address_space__l_is_range_defined;
+      t_bool address_space__l_user_executable_auth;
       
       *address_space__sc = constants_statuscodes_bs__e_sc_ok;
       constants_statuscodes_bs__get_const_RawStatusCode_Good(address_space__val_sc);
@@ -550,7 +551,13 @@ void address_space__read_AddressSpace_Attribute_value(
                address_space__val);
             break;
          case constants__e_aid_UserExecutable:
+            user_authorization_bs__get_user_authorization(constants__e_operation_type_executable,
+               address_space__p_nid,
+               constants__e_aid_Executable,
+               address_space__p_user,
+               &address_space__l_user_executable_auth);
             address_space_bs__read_AddressSpace_UserExecutable_value(address_space__p_node,
+               address_space__l_user_executable_auth,
                address_space__sc,
                address_space__val);
             break;
