@@ -205,16 +205,15 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_ToDER(const SOPC_AsymmetricKey* 
  * Cert API
  * ------------------------------------------------------------------------------------------------
  */
-SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromDER(const uint8_t* bufferDER,
-                                                                 uint32_t lenDER,
-                                                                 SOPC_CertificateList** ppCert)
+
+/* Create a certificate if \p ppCert points to NULL, do nothing otherwise */
+static SOPC_ReturnStatus certificate_maybe_create(SOPC_CertificateList** ppCert)
 {
-    if (NULL == bufferDER || 0 == lenDER || NULL == ppCert)
+    if (NULL == ppCert)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    /* Mem alloc */
     SOPC_CertificateList* certif = *ppCert;
     if (NULL == certif)
     {
@@ -225,32 +224,60 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromDER(const uint8_t* 
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
 
-    /* Parsing */
-    mbedtls_x509_crt* crt = &certif->crt;
+    *ppCert = certif;
+
+    return SOPC_STATUS_OK;
+}
+
+/* Check lengths of loaded certificates */
+static SOPC_ReturnStatus certificate_check_length(SOPC_CertificateList* pCert)
+{
+    /* Check that all loaded certificates fit in uint32-addressable buffers */
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    int err = mbedtls_x509_crt_parse(crt, bufferDER, lenDER);
-    if (0 != err)
+    mbedtls_x509_crt* crt = &pCert->crt;
+    for (; NULL != crt && SOPC_STATUS_OK == status; crt = crt->next)
     {
-        status = SOPC_STATUS_NOK;
-        SOPC_Logger_TraceError("Crypto: certificate buffer parse failed with error code: 0x%x", err);
-        SOPC_KeyManager_Certificate_Free(certif);
-    }
-    else
-    {
-        /* Check that all loaded certificates fit in uint32-addressable buffers */
-        for (; NULL != crt && SOPC_STATUS_OK == status; crt = crt->next)
+        if (crt->raw.len > UINT32_MAX)
         {
-            if (crt->raw.len > UINT32_MAX)
-            {
-                status = SOPC_STATUS_NOK;
-            }
+            status = SOPC_STATUS_NOK;
         }
     }
 
-    /* Update the output (may be redundant if a certificate was given as input) */
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromDER(const uint8_t* bufferDER,
+                                                                 uint32_t lenDER,
+                                                                 SOPC_CertificateList** ppCert)
+{
+    if (NULL == bufferDER || 0 == lenDER)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_ReturnStatus status = certificate_maybe_create(ppCert);
+    SOPC_CertificateList* pCert = *ppCert;
+
     if (SOPC_STATUS_OK == status)
     {
-        *ppCert = certif;
+        int err = mbedtls_x509_crt_parse(&pCert->crt, bufferDER, lenDER);
+        if (0 != err)
+        {
+            status = SOPC_STATUS_NOK;
+            SOPC_Logger_TraceError("Crypto: certificate buffer parse failed with error code: 0x%x", err);
+            SOPC_KeyManager_Certificate_Free(pCert);
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = certificate_check_length(pCert);
+    }
+
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_KeyManager_Certificate_Free(pCert);
+        *ppCert = NULL;
     }
 
     return status;
@@ -258,38 +285,36 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromDER(const uint8_t* 
 
 /**
  * \note    Tested but not part of the test suites.
- * \note    Same as CreateFromDER, except for a single call, can we refactor?
- *
  */
 SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromFile(const char* szPath, SOPC_CertificateList** ppCert)
 {
-    mbedtls_x509_crt* crt = NULL;
-    SOPC_CertificateList* certif = NULL;
-
-    if (NULL == szPath || NULL == ppCert)
+    if (NULL == szPath)
+    {
         return SOPC_STATUS_INVALID_PARAMETERS;
-
-    // Mem alloc
-    certif = SOPC_Malloc(sizeof(SOPC_CertificateList));
-    if (NULL == certif)
-        return SOPC_STATUS_NOK;
-
-    // Init
-    crt = &certif->crt;
-    mbedtls_x509_crt_init(crt);
-
-    // Parsing
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    int status_code = mbedtls_x509_crt_parse_file(crt, szPath);
-    if (status_code == 0 && crt->raw.len <= UINT32_MAX)
-    {
-        *ppCert = certif;
     }
-    else
+
+    SOPC_ReturnStatus status = certificate_maybe_create(ppCert);
+    SOPC_CertificateList* pCert = *ppCert;
+
+    if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_STATUS_NOK;
-        SOPC_Logger_TraceError("Crypto: certificate file parse failed with error code: %i", status_code);
-        SOPC_KeyManager_Certificate_Free(certif);
+        int err = mbedtls_x509_crt_parse_file(&pCert->crt, szPath);
+        if (0 != err)
+        {
+            status = SOPC_STATUS_NOK;
+            SOPC_Logger_TraceError("Crypto: certificate buffer parse failed with error code: 0x%x", err);
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = certificate_check_length(pCert);
+    }
+
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_KeyManager_Certificate_Free(pCert);
+        *ppCert = NULL;
     }
 
     return status;
