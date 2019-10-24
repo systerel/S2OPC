@@ -2968,12 +2968,10 @@ void SOPC_SecureConnectionStateMgr_OnTimerEvent(SOPC_SecureChannels_TimerEvent e
 
         SOPC_SecureConnection* scConnection = SC_GetConnection(eltId);
 
-        if (scConnection == NULL)
+        if (scConnection == NULL || scConnection->state == SECURE_CONNECTION_STATE_SC_CLOSED)
         {
             return;
         }
-
-        assert(scConnection->state != SECURE_CONNECTION_STATE_SC_CLOSED);
 
         SOPC_SentRequestMsg_Context* msgCtx =
             SOPC_SLinkedList_RemoveFromId(scConnection->tcpSeqProperties.sentRequestIds, (uint32_t) auxParam);
