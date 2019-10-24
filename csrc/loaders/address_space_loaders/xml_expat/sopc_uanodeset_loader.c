@@ -214,11 +214,12 @@ static parse_complex_value_tag_t complex_value_ext_obj_argument_tags[] = {
          {"Name", false, NULL, false, NULL, NULL, NULL},
          {"DataType", false, (parse_complex_value_tag_t[]) COMPLEX_VALUE_NODE_ID_TAGS, false, NULL, NULL, NULL},
          {"ValueRank", false, NULL, false, NULL, NULL, NULL},
-         {"ArrayDimensions", false, (parse_complex_value_tag_t[]){{"UInt32", true, NULL, false, NULL, NULL, NULL}},
-          false, NULL, NULL, NULL},
+         {"ArrayDimensions", false,
+          (parse_complex_value_tag_t[]){{"UInt32", true, NULL, false, NULL, NULL, NULL}, END_COMPLEX_VALUE_TAG}, false,
+          NULL, NULL, NULL},
          {"Description", false, (parse_complex_value_tag_t[]) COMPLEX_VALUE_LOCALIZED_TEXT_TAGS, false, NULL, NULL,
           NULL},
-     },
+         END_COMPLEX_VALUE_TAG},
      false, NULL, NULL, NULL},
     END_COMPLEX_VALUE_TAG};
 
@@ -1450,7 +1451,10 @@ static bool set_variant_value_extobj_argument(OpcUa_Argument* argument,
             LOG_MEMORY_ALLOCATION_FAILURE;
             result = false;
         }
-        argument->DataType = *nodeId;
+        else
+        {
+            argument->DataType = *nodeId;
+        }
         SOPC_Free(nodeId);
     }
 
