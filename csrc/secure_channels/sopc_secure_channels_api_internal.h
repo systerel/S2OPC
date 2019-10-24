@@ -84,6 +84,7 @@ typedef enum
     TIMER_SC_CONNECTION_TIMEOUT = 0x500, /* id = secure channel connection index */
     TIMER_SC_CLIENT_OPN_RENEW,           /* id = secure channel connection index */
     TIMER_SC_REQUEST_TIMEOUT,            /* id = secure channel connection index
+                                            params = (uint32_t) requestHandle // Debug purpose only
                                             auxParam = (uint32_t) requestId */
 } SOPC_SecureChannels_TimerEvent;
 

@@ -102,12 +102,12 @@ static SOPC_SecureChannel_Config* SOPC_Toolkit_GetSecureChannelConfig(SOPC_Secur
     }
 }
 
-static uint32_t SC_Client_StartRequestTimeout(uint32_t connectionIdx, uint32_t requestId)
+static uint32_t SC_Client_StartRequestTimeout(uint32_t connectionIdx, uint32_t requestHandle, uint32_t requestId)
 {
     SOPC_Event event;
     event.event = TIMER_SC_REQUEST_TIMEOUT;
     event.eltId = connectionIdx;
-    event.params = (uintptr_t) NULL;
+    event.params = requestHandle;
     event.auxParam = requestId;
     return SOPC_EventTimer_Create(secureChannelsTimerEventHandler, event, SOPC_REQUEST_TIMEOUT_MS);
 }
@@ -3408,7 +3408,7 @@ static bool SC_Chunks_CreateClientSentRequestContext(uint32_t scConnectionIdx,
             msgCtx->scConnectionIdx = scConnectionIdx;
             msgCtx->requestHandle = requestIdOrHandle; // Client side: it contains request handle
             msgCtx->msgType = sendMsgType;
-            msgCtx->timerId = SC_Client_StartRequestTimeout(scConnectionIdx, requestId);
+            msgCtx->timerId = SC_Client_StartRequestTimeout(scConnectionIdx, requestIdOrHandle, requestId);
             msgCtxRes =
                 SOPC_SLinkedList_Append(scConnection->tcpSeqProperties.sentRequestIds, requestId, (void*) msgCtx);
 

@@ -2962,8 +2962,9 @@ void SOPC_SecureConnectionStateMgr_OnTimerEvent(SOPC_SecureChannels_TimerEvent e
     {
         assert(auxParam <= UINT32_MAX);
 
-        SOPC_Logger_TraceDebug("ScStateMgr: TIMER_SC_REQUEST_TIMEOUT scIdx=%" PRIu32 " reqId=%" PRIuPTR, eltId,
-                               auxParam);
+        SOPC_Logger_TraceDebug("ScStateMgr: TIMER_SC_REQUEST_TIMEOUT scIdx=%" PRIu32 " reqId=%" PRIuPTR
+                               " reqHandle=%" PRIuPTR,
+                               eltId, auxParam, params);
 
         SOPC_SecureConnection* scConnection = SC_GetConnection(eltId);
 
