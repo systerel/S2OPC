@@ -86,7 +86,11 @@ static void check_variable_and_type_common(SOPC_AddressSpace* leftSpace,
 
     SOPC_ReturnStatus status = SOPC_Variant_Compare(SOPC_AddressSpace_Get_Value(leftSpace, left),
                                                     SOPC_AddressSpace_Get_Value(rightSpace, right), &compare);
-    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    // Note: we can't compare value if comparison not supported
+    if (SOPC_STATUS_NOT_SUPPORTED != status)
+    {
+        ck_assert_int_eq(SOPC_STATUS_OK, status);
+    }
     ck_assert_int_eq(0, compare);
 
     status = SOPC_NodeId_Compare(SOPC_AddressSpace_Get_DataType(leftSpace, left),
