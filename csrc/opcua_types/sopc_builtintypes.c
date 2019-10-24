@@ -2635,6 +2635,35 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Copy(SOPC_ExtensionObject* dest, const SO
     return status;
 }
 
+SOPC_ReturnStatus SOPC_ExtensionObject_Move(SOPC_ExtensionObject* dest, SOPC_ExtensionObject* src)
+{
+    if (NULL == dest || NULL == src)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    dest->Encoding = src->Encoding;
+    dest->Length = src->Length;
+    dest->TypeId = src->TypeId;
+    switch (src->Encoding)
+    {
+    case SOPC_ExtObjBodyEncoding_None:
+        break;
+    case SOPC_ExtObjBodyEncoding_ByteString:
+        dest->Body.Bstring = src->Body.Bstring;
+        break;
+    case SOPC_ExtObjBodyEncoding_XMLElement:
+        dest->Body.Xml = src->Body.Xml;
+        break;
+    case SOPC_ExtObjBodyEncoding_Object:
+        dest->Body.Object = src->Body.Object;
+        break;
+    }
+    SOPC_ExtensionObject_Initialize(src);
+
+    return SOPC_STATUS_OK;
+}
+
 SOPC_ReturnStatus SOPC_ExtensionObject_CopyAux(void* dest, const void* src)
 {
     return SOPC_ExtensionObject_Copy((SOPC_ExtensionObject*) dest, (const SOPC_ExtensionObject*) src);

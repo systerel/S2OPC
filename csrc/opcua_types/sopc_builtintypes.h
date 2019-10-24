@@ -538,6 +538,11 @@ void SOPC_ExtensionObject_InitializeAux(void* value);
  * Note: reason is we do not have a copy method for Object type but we have an encoder
  */
 SOPC_ReturnStatus SOPC_ExtensionObject_Copy(SOPC_ExtensionObject* dest, const SOPC_ExtensionObject* src);
+/* Move extension object content from src to dest.
+ * Note: this function is provided to allow to keep the object format when no copy is needed
+ *       (since copy encode the object)
+ */
+SOPC_ReturnStatus SOPC_ExtensionObject_Move(SOPC_ExtensionObject* dest, SOPC_ExtensionObject* src);
 SOPC_ReturnStatus SOPC_ExtensionObject_CopyAux(void* dest, const void* src);
 // Only for non object representation
 SOPC_ReturnStatus SOPC_ExtensionObject_Compare(const SOPC_ExtensionObject* left,
