@@ -328,7 +328,7 @@ class Argument(ExtensionObject):
     __slots__ = 'name', 'datatype', 'valuerank', 'arraydimensions', 'description'
 
     def __init__(self, name, datatype, valuerank, arraydimensions, description):
-        self.extobj_typeid = NodeId.parse('i=296')
+        self.extobj_typeid = NodeId.parse('i=298') # use binary encoding of datatype
         self.extobj_objtype = '&OpcUa_Argument_EncodeableType'
         self.name = name
         self.datatype = datatype
