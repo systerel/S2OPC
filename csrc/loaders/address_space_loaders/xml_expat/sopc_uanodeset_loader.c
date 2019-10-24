@@ -1698,6 +1698,17 @@ static bool append_element_value(struct parse_context_t* ctx)
     return true;
 }
 
+static bool SOPC_Variant_MoveExtensionObjectInto_ArrayValueAt(const SOPC_Variant* var,
+                                                              int32_t index,
+                                                              SOPC_ExtensionObject* extObj)
+{
+    assert(SOPC_VariantArrayType_Array == var->ArrayType);
+    assert(SOPC_ExtensionObject_Id == var->BuiltInTypeId);
+    assert(var->Value.Array.Length > index);
+
+    return SOPC_STATUS_OK == SOPC_ExtensionObject_Move(&var->Value.Array.Content.ExtObjectArr[index], extObj);
+}
+
 static bool SOPC_Array_Of_Variant_Into_Variant_Array(SOPC_Array* var_arr, SOPC_BuiltinId builtInId, SOPC_Variant* var)
 {
     size_t length = SOPC_Array_Size(var_arr);
@@ -1716,7 +1727,16 @@ static bool SOPC_Array_Of_Variant_Into_Variant_Array(SOPC_Array* var_arr, SOPC_B
         SOPC_Variant* lvar = SOPC_Array_Get_Ptr(var_arr, i);
         assert(builtInId == lvar->BuiltInTypeId);
         const void* value = SOPC_Variant_Get_SingleValue(lvar, builtInId);
-        res = SOPC_Variant_CopyInto_ArrayValueAt(var, builtInId, (int32_t) i, value);
+        if (SOPC_ExtensionObject_Id != builtInId)
+        {
+            res = SOPC_Variant_CopyInto_ArrayValueAt(var, builtInId, (int32_t) i, value);
+        }
+        else
+        {
+            // Note: specific case for ExtensionObject: if a copy is made the object is encoded as ByteString.
+            //       We use Move to keep object format to have same format with static and dynamic parsing
+            res = SOPC_Variant_MoveExtensionObjectInto_ArrayValueAt(var, (int32_t) i, lvar->Value.ExtObject);
+        }
     }
 
     if (!res)
