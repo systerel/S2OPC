@@ -57,8 +57,9 @@ INITIALISATION
 
 OPERATIONS
 
-    delete_session_token(p_session) =
+    delete_session_token(p_session, p_is_client) =
     PRE
+        p_is_client : BOOL &
         p_session : t_session_i &
         p_session : t_session
     THEN
@@ -291,10 +292,11 @@ OPERATIONS
     END
     ;
 
-    clear_Signature(p_session, p_signature) =
+    clear_Signature(p_session, p_is_client, p_signature) =
     PRE
         p_session : t_session_i &
         p_session : t_session   &
+        p_is_client : BOOL &
         p_signature : t_SignatureData_i &
         p_signature : t_SignatureData
     THEN
@@ -302,11 +304,12 @@ OPERATIONS
     END
     ;
 
-    nonce <-- get_NonceServer(p_session) =
+    nonce <-- get_NonceServer(p_session, p_is_client) =
     PRE
         p_session : t_session_i &
         p_session : t_session   &
-        p_session : dom(a_NonceServer)
+        p_session : dom(a_NonceServer) &
+        p_is_client : BOOL
     THEN
         nonce :(
             nonce : t_Nonce_i &
@@ -359,21 +362,24 @@ OPERATIONS
         )
     END
     ;
-
+    
+    // Nonce client only used by client
     drop_NonceClient(p_session) =
     PRE
         p_session : t_session_i &
-        p_session : t_session /* PROOF  &
+        p_session : t_session
+        /* PROOF  &
         p_session : dom(a_NonceClient) */
     THEN
         a_NonceClient := {p_session} <<| a_NonceClient
     END
     ;
 
-    remove_NonceServer(p_session) =
+    remove_NonceServer(p_session, p_is_client) =
     PRE
         p_session : t_session_i &
-        p_session : t_session
+        p_session : t_session &
+        p_is_client : BOOL
     THEN
         a_NonceServer := {p_session} <<| a_NonceServer
     END
