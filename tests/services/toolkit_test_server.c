@@ -752,6 +752,7 @@ static SOPC_ReturnStatus Server_SetCryptographicConfig(SOPC_Server_Config* serve
                                                                       &serverConfig->serverCertificate);
         if (SOPC_STATUS_OK == status)
         {
+            /* NOTE: TPM2: szPath must be a 0-terminated buffer */
             status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(serverConfig->serverKeyPath,
                                                                             &serverConfig->serverKey);
         }

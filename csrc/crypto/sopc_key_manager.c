@@ -26,12 +26,14 @@
  * Most of the functions are lib-dependent. This file defines the others.
  */
 
+#include <assert.h>
 #include <string.h>
 
 #include "key_manager_lib.h"
 #include "sopc_crypto_decl.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_key_manager.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
 /* ------------------------------------------------------------------------------------------------
@@ -71,7 +73,10 @@ SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_CreateFromData(const u
 SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(const char* path,
                                                                          SOPC_SerializedAsymmetricKey** key)
 {
-    SOPC_SecretBuffer* sec = SOPC_SecretBuffer_NewFromFile(path);
+    /* Asymm key creation, assumes we're going to call the TPM2 primitives upon deserialization */
+    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+    SOPC_SecretBuffer* sec = SOPC_SecretBuffer_NewFromExposedBuffer((uint8_t *)path, (uint32_t) strlen(path));
+    SOPC_GCC_DIAGNOSTIC_RESTORE
 
     if (sec == NULL)
     {
@@ -86,8 +91,12 @@ SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_Deserialize(const SOPC
                                                                       bool is_public,
                                                                       SOPC_AsymmetricKey** res)
 {
+    /* TPM2: I checked that this call is only made for private keys, but I'm not 100% sure... */
+    /* TPM2: We don't want to use the TPM for public key operations */
+    assert(! is_public);
+    /* TPM2: cert is the given path in SerAsymm_CrateFromFile */
     uint32_t len = SOPC_SecretBuffer_GetLength(cert);
-    const SOPC_ExposedBuffer* buf = SOPC_SecretBuffer_Expose(cert);
+    const SOPC_ExposedBuffer* buf = SOPC_SecretBuffer_Expose(cert); /* 0-terminated */
     SOPC_ReturnStatus status = SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(buf, len, is_public, res);
     SOPC_SecretBuffer_Unexpose(buf, cert);
     return status;
