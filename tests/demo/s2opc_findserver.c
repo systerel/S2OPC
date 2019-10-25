@@ -155,7 +155,7 @@ static void PrintServers(OpcUa_FindServersResponse* pResp)
         printf("- Server\n");
         printf("  ApplicationUri: %s\n", SOPC_String_GetRawCString(&pAppDesc->ApplicationUri));
         printf("  ProductUri: %s\n", SOPC_String_GetRawCString(&pAppDesc->ProductUri));
-        printf("  ApplicationName: %s\n", SOPC_String_GetRawCString(&pAppDesc->ApplicationName.Text));
+        printf("  ApplicationName: %s\n", SOPC_String_GetRawCString(&pAppDesc->ApplicationName.defaultText));
         printf("  ApplicationType: ");
         switch (pAppDesc->ApplicationType)
         {

@@ -376,8 +376,8 @@ static SOPC_ReturnStatus fillRegisterServerRequest(OpcUa_RegisteredServer* pServ
         (SOPC_STATUS_OK == SOPC_String_AttachFromCstring(&pServ->ProductUri, PRODUCT_URI)) &&
         (SOPC_STATUS_OK == SOPC_String_AttachFromCstring(&pServ->GatewayServerUri, GATEWAY_SERVER_URI)) &&
         (SOPC_STATUS_OK == SOPC_String_AttachFromCstring(&pServ->SemaphoreFilePath, "")) &&
-        (SOPC_STATUS_OK == SOPC_String_AttachFromCstring(&serverName->Locale, "Locale")) &&
-        (SOPC_STATUS_OK == SOPC_String_AttachFromCstring(&serverName->Text, "Text")) &&
+        (SOPC_STATUS_OK == SOPC_String_AttachFromCstring(&serverName->defaultLocale, "Locale")) &&
+        (SOPC_STATUS_OK == SOPC_String_AttachFromCstring(&serverName->defaultText, "Text")) &&
         (SOPC_STATUS_OK == SOPC_String_InitializeFromCString(discoveryURL, "opc.tcp://test"));
 
     pServ->NoOfServerNames = 1;

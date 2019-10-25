@@ -129,7 +129,7 @@ void browse_treatment_result_bs__getall_browse_result_reference_at(
         *browse_treatment_result_bs__p_BrowseName = constants__c_QualifiedName_indet;
     }
     // Optional DisplayName
-    if (refDesc->DisplayName.Text.Length > 0 || refDesc->DisplayName.Locale.Length > 0)
+    if (refDesc->DisplayName.defaultText.Length > 0 || refDesc->DisplayName.defaultLocale.Length > 0)
     {
         *browse_treatment_result_bs__p_DisplayName = &refDesc->DisplayName;
     }

@@ -211,8 +211,8 @@ static bool Server_LoadDefaultConfiguration(SOPC_S2OPC_Config* output_s2opcConfi
     SOPC_String_AttachFromCstring(&serverDescription->ApplicationUri, APPLICATION_URI);
     SOPC_String_AttachFromCstring(&serverDescription->ProductUri, PRODUCT_URI);
     serverDescription->ApplicationType = OpcUa_ApplicationType_Server;
-    SOPC_String_AttachFromCstring(&serverDescription->ApplicationName.Text, "S2OPC toolkit server example");
-    SOPC_String_AttachFromCstring(&serverDescription->ApplicationName.Locale, "en-US");
+    SOPC_String_AttachFromCstring(&serverDescription->ApplicationName.defaultText, "S2OPC toolkit server example");
+    SOPC_String_AttachFromCstring(&serverDescription->ApplicationName.defaultLocale, "en-US");
 
     output_s2opcConfig->serverConfig.endpoints = SOPC_Calloc(sizeof(SOPC_Endpoint_Config), 1);
 
@@ -905,8 +905,8 @@ int main(int argc, char* argv[])
     uint32_t secondsTillShutdown = SHUTDOWN_PHASE_IN_SECONDS;
     // From part 5: "The server has shut down or is in the process of shutting down."
     runtime_vars.server_state = OpcUa_ServerState_Shutdown;
-    SOPC_String_AttachFromCstring(&runtime_vars.shutdownReason.Locale, "en");
-    SOPC_String_AttachFromCstring(&runtime_vars.shutdownReason.Text, "Requested shutdown");
+    SOPC_String_AttachFromCstring(&runtime_vars.shutdownReason.defaultLocale, "en");
+    SOPC_String_AttachFromCstring(&runtime_vars.shutdownReason.defaultText, "Requested shutdown");
     while (SOPC_STATUS_OK == status && stopServer == 1 && SOPC_Atomic_Int_Get(&endpointClosed) == 0 &&
            !targetTimeReached)
     {

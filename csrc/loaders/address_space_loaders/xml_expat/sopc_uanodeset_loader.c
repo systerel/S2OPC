@@ -1355,7 +1355,7 @@ static bool set_variant_value_localized_text(SOPC_LocalizedText** plt, parse_com
 
     SOPC_LocalizedText_Initialize(lt);
 
-    if (SOPC_String_CopyFromCString(&lt->Locale, locale) != SOPC_STATUS_OK)
+    if (SOPC_String_CopyFromCString(&lt->defaultLocale, locale) != SOPC_STATUS_OK)
     {
         LOG_MEMORY_ALLOCATION_FAILURE;
         SOPC_LocalizedText_Clear(lt);
@@ -1363,7 +1363,7 @@ static bool set_variant_value_localized_text(SOPC_LocalizedText** plt, parse_com
         return false;
     }
 
-    if (SOPC_String_CopyFromCString(&lt->Text, text) != SOPC_STATUS_OK)
+    if (SOPC_String_CopyFromCString(&lt->defaultText, text) != SOPC_STATUS_OK)
     {
         LOG_MEMORY_ALLOCATION_FAILURE;
         SOPC_LocalizedText_Clear(lt);
@@ -1964,10 +1964,10 @@ static void end_element_handler(void* user_data, const XML_Char* name)
     case PARSE_NODE_DESCRIPTION:
     {
         SOPC_LocalizedText* lt = element_localized_text_for_state(ctx);
-        SOPC_String_Clear(&lt->Text);
+        SOPC_String_Clear(&lt->defaultText);
         const char* stripped = SOPC_HelperExpat_CharDataStripped(&ctx->helper_ctx);
         SOPC_ReturnStatus status =
-            (strlen(stripped) == 0) ? SOPC_STATUS_OK : SOPC_String_CopyFromCString(&lt->Text, stripped);
+            (strlen(stripped) == 0) ? SOPC_STATUS_OK : SOPC_String_CopyFromCString(&lt->defaultText, stripped);
         SOPC_HelperExpat_CharDataReset(&ctx->helper_ctx);
 
         if (status != SOPC_STATUS_OK)

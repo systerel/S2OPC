@@ -1517,11 +1517,11 @@ static SOPC_Byte GetLocalizedTextEncodingByte(const SOPC_LocalizedText* ltext)
 {
     assert(ltext != NULL);
     SOPC_Byte encodingByte = 0;
-    if (ltext->Locale.Length > 0)
+    if (ltext->defaultLocale.Length > 0)
     {
         encodingByte |= SOPC_LocalizedText_Locale;
     }
-    if (ltext->Text.Length > 0)
+    if (ltext->defaultText.Length > 0)
     {
         encodingByte |= SOPC_LocalizedText_Text;
     }
@@ -1544,11 +1544,11 @@ SOPC_ReturnStatus SOPC_LocalizedText_Write(const SOPC_LocalizedText* localizedTe
     }
     if (SOPC_STATUS_OK == status && (encodingByte & SOPC_LocalizedText_Locale) != 0)
     {
-        status = SOPC_String_Write(&localizedText->Locale, buf);
+        status = SOPC_String_Write(&localizedText->defaultLocale, buf);
     }
     if (SOPC_STATUS_OK == status && (encodingByte & SOPC_LocalizedText_Text) != 0)
     {
-        status = SOPC_String_Write(&localizedText->Text, buf);
+        status = SOPC_String_Write(&localizedText->defaultText, buf);
     }
     return status;
 }
@@ -1568,16 +1568,16 @@ SOPC_ReturnStatus SOPC_LocalizedText_Read(SOPC_LocalizedText* localizedText, SOP
     }
     if (SOPC_STATUS_OK == status && (encodingByte & SOPC_LocalizedText_Locale) != 0)
     {
-        status = SOPC_String_Read(&localizedText->Locale, buf);
+        status = SOPC_String_Read(&localizedText->defaultLocale, buf);
     }
     if (SOPC_STATUS_OK == status && (encodingByte & SOPC_LocalizedText_Text) != 0)
     {
-        status = SOPC_String_Read(&localizedText->Text, buf);
+        status = SOPC_String_Read(&localizedText->defaultText, buf);
     }
 
     if (status != SOPC_STATUS_OK && localizedText != NULL)
     {
-        SOPC_String_Clear(&localizedText->Locale);
+        SOPC_String_Clear(&localizedText->defaultLocale);
         // No clear for last since it should manage it itself in case of failure
     }
 

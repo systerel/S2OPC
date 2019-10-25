@@ -2479,8 +2479,9 @@ void SOPC_LocalizedText_Initialize(SOPC_LocalizedText* localizedText)
 {
     if (localizedText != NULL)
     {
-        SOPC_String_Initialize(&localizedText->Locale);
-        SOPC_String_Initialize(&localizedText->Text);
+        SOPC_String_Initialize(&localizedText->defaultLocale);
+        SOPC_String_Initialize(&localizedText->defaultText);
+        localizedText->localizedTextList = NULL;
     }
 }
 
@@ -2489,10 +2490,10 @@ SOPC_ReturnStatus SOPC_LocalizedText_Copy(SOPC_LocalizedText* dest, const SOPC_L
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (NULL != dest && NULL != src)
     {
-        status = SOPC_String_Copy(&dest->Locale, &src->Locale);
+        status = SOPC_String_Copy(&dest->defaultLocale, &src->defaultLocale);
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_String_Copy(&dest->Text, &src->Text);
+            status = SOPC_String_Copy(&dest->defaultText, &src->defaultText);
         }
         if (SOPC_STATUS_OK != status)
         {
@@ -2509,10 +2510,10 @@ SOPC_ReturnStatus SOPC_LocalizedText_Compare(const SOPC_LocalizedText* left,
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (NULL != left && NULL != right)
     {
-        status = SOPC_String_Compare(&left->Locale, &right->Locale, false, comparison);
+        status = SOPC_String_Compare(&left->defaultLocale, &right->defaultLocale, false, comparison);
         if (SOPC_STATUS_OK == status && *comparison == 0)
         {
-            status = SOPC_String_Compare(&left->Text, &right->Text, false, comparison);
+            status = SOPC_String_Compare(&left->defaultText, &right->defaultText, false, comparison);
         }
     }
     return status;
@@ -2533,12 +2534,26 @@ void SOPC_LocalizedText_ClearAux(void* value)
     SOPC_LocalizedText_Clear((SOPC_LocalizedText*) value);
 }
 
+static void SOPC_LocalizedText_ListEltFree(uint32_t id, void* val)
+{
+    (void) id;
+    SOPC_LocalizedText_ClearAux(val);
+    SOPC_Free(val);
+}
+
 void SOPC_LocalizedText_Clear(SOPC_LocalizedText* localizedText)
 {
     if (localizedText != NULL)
     {
-        SOPC_String_Clear(&localizedText->Locale);
-        SOPC_String_Clear(&localizedText->Text);
+        SOPC_String_Clear(&localizedText->defaultLocale);
+        SOPC_String_Clear(&localizedText->defaultText);
+
+        if (NULL != localizedText->localizedTextList)
+        {
+            SOPC_SLinkedList_Apply(localizedText->localizedTextList, SOPC_LocalizedText_ListEltFree);
+            SOPC_SLinkedList_Delete(localizedText->localizedTextList);
+            localizedText->localizedTextList = NULL;
+        }
     }
 }
 

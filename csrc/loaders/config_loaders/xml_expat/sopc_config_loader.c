@@ -258,7 +258,7 @@ static bool end_app_desc(struct parse_context_t* ctx)
         return false;
     }
 
-    if (ctx->appDesc.ApplicationName.Text.Length <= 0)
+    if (ctx->appDesc.ApplicationName.defaultText.Length <= 0)
     {
         LOG_XML_ERROR(ctx->helper_ctx.parser, "ApplicationName not defined");
         return false;
@@ -325,7 +325,7 @@ static bool start_prod_uri(struct parse_context_t* ctx, const XML_Char** attrs)
 
 static bool start_app_name(struct parse_context_t* ctx, const XML_Char** attrs)
 {
-    if (ctx->appDesc.ApplicationName.Text.Length > 0)
+    if (ctx->appDesc.ApplicationName.defaultText.Length > 0)
     {
         LOG_XML_ERROR(ctx->helper_ctx.parser, "ApplicationName defined several times");
         return false;
@@ -333,14 +333,14 @@ static bool start_app_name(struct parse_context_t* ctx, const XML_Char** attrs)
 
     const char* attr_val = get_attr(ctx, "text", attrs);
 
-    SOPC_ReturnStatus status = SOPC_String_CopyFromCString(&ctx->appDesc.ApplicationName.Text, attr_val);
+    SOPC_ReturnStatus status = SOPC_String_CopyFromCString(&ctx->appDesc.ApplicationName.defaultText, attr_val);
 
     if (SOPC_STATUS_OK != status)
     {
         LOG_MEMORY_ALLOCATION_FAILURE;
         return false;
     }
-    else if (ctx->appDesc.ApplicationName.Text.Length <= 0)
+    else if (ctx->appDesc.ApplicationName.defaultText.Length <= 0)
     {
         LOG_XML_ERROR(ctx->helper_ctx.parser, "Empty ApplicationName uri");
         return false;
@@ -350,7 +350,7 @@ static bool start_app_name(struct parse_context_t* ctx, const XML_Char** attrs)
 
     if (NULL != attr_val)
     {
-        status = SOPC_String_CopyFromCString(&ctx->appDesc.ApplicationName.Locale, attr_val);
+        status = SOPC_String_CopyFromCString(&ctx->appDesc.ApplicationName.defaultLocale, attr_val);
 
         if (SOPC_STATUS_OK != status)
         {

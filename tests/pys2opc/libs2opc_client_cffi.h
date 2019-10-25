@@ -669,8 +669,8 @@ typedef struct SOPC_QualifiedName
 
 typedef struct SOPC_LocalizedText
 {
-    SOPC_String Locale;
-    SOPC_String Text;
+    SOPC_String defaultLocale;
+    SOPC_String defaultText;
 } SOPC_LocalizedText;
 
 typedef enum SOPC_ExtObjectBodyEncoding

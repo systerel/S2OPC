@@ -243,7 +243,8 @@ int main(int argc, char* argv[])
     SOPC_String_AttachFromCstring(&sConfig->serverDescription.ApplicationUri, APPLICATION_URI);
     SOPC_String_AttachFromCstring(&sConfig->serverDescription.ProductUri, PRODUCT_URI);
     sConfig->serverDescription.ApplicationType = OpcUa_ApplicationType_Server;
-    SOPC_String_AttachFromCstring(&sConfig->serverDescription.ApplicationName.Text, "S2OPC toolkit server example");
+    SOPC_String_AttachFromCstring(&sConfig->serverDescription.ApplicationName.defaultText,
+                                  "S2OPC toolkit server example");
 
     SOPC_UserAuthentication_Manager* authenticationManager = NULL;
     SOPC_UserAuthorization_Manager* authorizationManager = NULL;

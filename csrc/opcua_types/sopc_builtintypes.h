@@ -28,6 +28,7 @@
 #include "sopc_encodeabletype.h"
 #include "sopc_enums.h"
 #include "sopc_numeric_range.h"
+#include "sopc_singly_linked_list.h"
 
 typedef uint32_t SOPC_StatusCode;
 
@@ -166,8 +167,10 @@ typedef struct SOPC_QualifiedName
 
 typedef struct SOPC_LocalizedText
 {
-    SOPC_String Locale;
-    SOPC_String Text;
+    SOPC_String defaultLocale;
+    SOPC_String defaultText;
+
+    SOPC_SLinkedList* localizedTextList; // If NULL => no other localized text defined
 } SOPC_LocalizedText;
 
 typedef enum SOPC_ExtObjectBodyEncoding
