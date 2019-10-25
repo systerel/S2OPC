@@ -21,7 +21,7 @@
 
  File Name            : session_core_bs.h
 
- Date                 : 04/10/2019 15:30:24
+ Date                 : 10/01/2020 17:41:50
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -55,6 +55,7 @@ extern void session_core_bs__INITIALISATION(void);
   --------------------*/
 extern void session_core_bs__clear_Signature(
    const constants__t_session_i session_core_bs__p_session,
+   const t_bool session_core_bs__p_is_client,
    const constants__t_SignatureData_i session_core_bs__p_signature);
 extern void session_core_bs__client_activate_session_req_do_crypto(
    const constants__t_session_i session_core_bs__session,
@@ -100,7 +101,8 @@ extern void session_core_bs__client_set_session_token(
 extern void session_core_bs__delete_session_application_context(
    const constants__t_session_i session_core_bs__p_session);
 extern void session_core_bs__delete_session_token(
-   const constants__t_session_i session_core_bs__p_session);
+   const constants__t_session_i session_core_bs__p_session,
+   const t_bool session_core_bs__p_is_client);
 extern void session_core_bs__drop_NonceClient(
    const constants__t_session_i session_core_bs__p_session);
 extern void session_core_bs__drop_user_server(
@@ -110,6 +112,7 @@ extern void session_core_bs__get_NonceClient(
    constants__t_Nonce_i * const session_core_bs__nonce);
 extern void session_core_bs__get_NonceServer(
    const constants__t_session_i session_core_bs__p_session,
+   const t_bool session_core_bs__p_is_client,
    constants__t_Nonce_i * const session_core_bs__nonce);
 extern void session_core_bs__get_session_user_client(
    const constants__t_session_i session_core_bs__session,
@@ -128,7 +131,8 @@ extern void session_core_bs__notify_set_session_state(
    const constants_statuscodes_bs__t_StatusCode_i session_core_bs__sc_reason,
    const t_bool session_core_bs__is_client);
 extern void session_core_bs__remove_NonceServer(
-   const constants__t_session_i session_core_bs__p_session);
+   const constants__t_session_i session_core_bs__p_session,
+   const t_bool session_core_bs__p_is_client);
 extern void session_core_bs__server_activate_session_check_crypto(
    const constants__t_session_i session_core_bs__p_session,
    const constants__t_channel_i session_core_bs__p_channel,
