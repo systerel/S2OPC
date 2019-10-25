@@ -63,7 +63,8 @@ typedef struct SessionData
     constants__t_user_token_i user_client; /* TODO: remove user management */
 } SessionData;
 
-static SessionData sessionDataArray[constants__t_session_i_max + 1]; // index 0 is indet session
+static SessionData serverSessionDataArray[constants__t_session_i_max + 1]; // index 0 is indet session
+static SessionData clientSessionDataArray[constants__t_session_i_max + 1]; // index 0 is indet session
 
 static constants__t_application_context_i session_client_app_context[SOPC_MAX_SESSIONS + 1];
 
@@ -79,7 +80,17 @@ void session_core_bs__INITIALISATION(void)
     SessionData* sData = NULL;
     for (int32_t idx = 0; idx <= constants__t_session_i_max; idx++)
     {
-        sData = &(sessionDataArray[idx]);
+        for (int8_t j = 0; j < 2; j++)
+        {
+            if (j == 0)
+            {
+                sData = &(serverSessionDataArray[idx]);
+            }
+            else
+            {
+                sData = &(clientSessionDataArray[idx]);
+            }
+        }
         SOPC_NodeId_Initialize(&sData->sessionToken);
         SOPC_ByteString_Initialize(&sData->nonceClient);
         SOPC_ByteString_Initialize(&sData->nonceServer);
@@ -185,7 +196,7 @@ void session_core_bs__server_get_session_from_token(const constants__t_session_t
     for (uint32_t idx = (uint32_t) constants__t_session_i_max; constants__c_session_indet == result && idx > 0; idx--)
     {
         SOPC_ReturnStatus status =
-            SOPC_NodeId_Compare(&sessionDataArray[idx].sessionToken, requestedToken, &comparison);
+            SOPC_NodeId_Compare(&serverSessionDataArray[idx].sessionToken, requestedToken, &comparison);
         if (SOPC_STATUS_OK == status && 0 == comparison)
         {
             result = idx;
@@ -200,7 +211,7 @@ void session_core_bs__client_get_token_from_session(const constants__t_session_i
 {
     if (constants__c_session_indet != session_core_bs__session)
     {
-        *session_core_bs__session_token = &(sessionDataArray[session_core_bs__session].sessionToken);
+        *session_core_bs__session_token = &(clientSessionDataArray[session_core_bs__session].sessionToken);
     }
     else
     {
@@ -225,18 +236,18 @@ void session_core_bs__server_get_fresh_session_token(
             pProvider = SOPC_CryptoProvider_Create(pSCCfg->reqSecuPolicyUri);
         }
         // Note: Namespace = 0 for session token ?
-        sessionDataArray[session_core_bs__session].sessionToken.IdentifierType = SOPC_IdentifierType_Numeric;
+        serverSessionDataArray[session_core_bs__session].sessionToken.IdentifierType = SOPC_IdentifierType_Numeric;
         SOPC_ReturnStatus status = NULL != pProvider ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
         if (SOPC_STATUS_OK == status)
         {
             status = SOPC_CryptoProvider_GenerateRandomID(
-                pProvider, &sessionDataArray[session_core_bs__session].sessionToken.Data.Numeric);
+                pProvider, &serverSessionDataArray[session_core_bs__session].sessionToken.Data.Numeric);
         }
         if (SOPC_STATUS_OK != status)
         {
-            sessionDataArray[session_core_bs__session].sessionToken.Data.Numeric = session_core_bs__session;
+            serverSessionDataArray[session_core_bs__session].sessionToken.Data.Numeric = session_core_bs__session;
         }
-        *session_core_bs__token = &(sessionDataArray[session_core_bs__session].sessionToken);
+        *session_core_bs__token = &(serverSessionDataArray[session_core_bs__session].sessionToken);
 
         SOPC_CryptoProvider_Free(pProvider);
     }
@@ -260,7 +271,7 @@ void session_core_bs__client_set_session_token(const constants__t_session_i sess
     if (constants__c_session_indet != session_core_bs__session &&
         constants__c_session_token_indet != session_core_bs__token)
     {
-        sessionToken = &(sessionDataArray[session_core_bs__session].sessionToken);
+        sessionToken = &(clientSessionDataArray[session_core_bs__session].sessionToken);
         status = SOPC_NodeId_Copy(sessionToken, session_core_bs__token);
         if (SOPC_STATUS_OK != status)
         {
@@ -270,12 +281,22 @@ void session_core_bs__client_set_session_token(const constants__t_session_i sess
     }
 }
 
-void session_core_bs__delete_session_token(const constants__t_session_i session_core_bs__p_session)
+void session_core_bs__delete_session_token(const constants__t_session_i session_core_bs__p_session,
+                                           const t_bool session_core_bs__p_is_client)
 {
-    SOPC_NodeId_Clear(&sessionDataArray[session_core_bs__p_session].sessionToken);
-    SOPC_ExtensionObject_Clear(sessionDataArray[session_core_bs__p_session].user_client);
-    SOPC_Free(sessionDataArray[session_core_bs__p_session].user_client);
-    sessionDataArray[session_core_bs__p_session].user_client = NULL;
+    SessionData* sData = NULL;
+    if (session_core_bs__p_is_client)
+    {
+        sData = &clientSessionDataArray[session_core_bs__p_session];
+    }
+    else
+    {
+        sData = &serverSessionDataArray[session_core_bs__p_session];
+    }
+    SOPC_NodeId_Clear(&sData->sessionToken);
+    SOPC_ExtensionObject_Clear(sData->user_client);
+    SOPC_Free(sData->user_client);
+    sData->user_client = NULL;
 }
 
 void session_core_bs__delete_session_application_context(const constants__t_session_i session_core_bs__p_session)
@@ -285,9 +306,9 @@ void session_core_bs__delete_session_application_context(const constants__t_sess
 
 void session_core_bs__drop_user_server(const constants__t_session_i session_core_bs__p_session)
 {
-    SOPC_UserWithAuthorization* userauthz = sessionDataArray[session_core_bs__p_session].user_server;
+    SOPC_UserWithAuthorization* userauthz = serverSessionDataArray[session_core_bs__p_session].user_server;
     SOPC_UserWithAuthorization_Free(&userauthz);
-    sessionDataArray[session_core_bs__p_session].user_server = NULL;
+    serverSessionDataArray[session_core_bs__p_session].user_server = NULL;
 }
 
 void session_core_bs__set_session_user_server(const constants__t_session_i session_core_bs__session,
@@ -295,7 +316,7 @@ void session_core_bs__set_session_user_server(const constants__t_session_i sessi
 {
     if (constants__c_session_indet != session_core_bs__session)
     {
-        sessionDataArray[session_core_bs__session].user_server = session_core_bs__p_user;
+        serverSessionDataArray[session_core_bs__session].user_server = session_core_bs__p_user;
     }
 }
 
@@ -304,7 +325,7 @@ void session_core_bs__set_session_user_client(const constants__t_session_i sessi
 {
     if (constants__c_session_indet != session_core_bs__session)
     {
-        sessionDataArray[session_core_bs__session].user_client = session_core_bs__p_user_token;
+        clientSessionDataArray[session_core_bs__session].user_client = session_core_bs__p_user_token;
     }
 }
 
@@ -313,7 +334,7 @@ void session_core_bs__get_session_user_server(const constants__t_session_i sessi
 {
     if (constants__c_session_indet != session_core_bs__session)
     {
-        *session_core_bs__p_user = sessionDataArray[session_core_bs__session].user_server;
+        *session_core_bs__p_user = serverSessionDataArray[session_core_bs__session].user_server;
     }
     else
     {
@@ -335,7 +356,7 @@ void session_core_bs__get_session_user_client(const constants__t_session_i sessi
 {
     if (constants__c_session_indet != session_core_bs__session)
     {
-        *session_core_bs__p_user_token = sessionDataArray[session_core_bs__session].user_client;
+        *session_core_bs__p_user_token = clientSessionDataArray[session_core_bs__session].user_client;
     }
     else
     {
@@ -406,7 +427,7 @@ void session_core_bs__server_create_session_req_do_crypto(
         return;
     }
 
-    pSession = &sessionDataArray[session_core_bs__p_session];
+    pSession = &serverSessionDataArray[session_core_bs__p_session];
 
     /* Retrieve the security policy and mode */
     pSCCfg = SOPC_ToolkitServer_GetSecureChannelConfig(session_core_bs__p_channel_config_idx);
@@ -561,11 +582,21 @@ void session_core_bs__server_create_session_req_do_crypto(
 }
 
 void session_core_bs__clear_Signature(const constants__t_session_i session_core_bs__p_session,
+                                      const t_bool session_core_bs__p_is_client,
                                       const constants__t_SignatureData_i session_core_bs__p_signature)
 {
+    SessionData* sData = NULL;
+    if (session_core_bs__p_is_client)
+    {
+        sData = &clientSessionDataArray[session_core_bs__p_session];
+    }
+    else
+    {
+        sData = &serverSessionDataArray[session_core_bs__p_session];
+    }
     // Check same signature since not proved by model
-    assert(session_core_bs__p_signature == &sessionDataArray[session_core_bs__p_session].signatureData);
-    OpcUa_SignatureData_Clear(&sessionDataArray[session_core_bs__p_session].signatureData);
+    assert(session_core_bs__p_signature == &sData->signatureData);
+    OpcUa_SignatureData_Clear(&sData->signatureData);
 }
 
 void session_core_bs__client_activate_session_req_do_crypto(
@@ -595,7 +626,7 @@ void session_core_bs__client_activate_session_req_do_crypto(
         return;
     }
 
-    pSession = &sessionDataArray[session_core_bs__session];
+    pSession = &clientSessionDataArray[session_core_bs__session];
     /* Retrieve the security policy and mode */
     pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig(session_core_bs__channel_config_idx);
     if ((NULL == pSCCfg) || (NULL == pSCCfg->crt_srv))
@@ -714,11 +745,22 @@ void session_core_bs__client_activate_session_req_do_crypto(
 }
 
 void session_core_bs__get_NonceServer(const constants__t_session_i session_core_bs__p_session,
+                                      const t_bool session_core_bs__p_is_client,
                                       constants__t_Nonce_i* const session_core_bs__nonce)
 {
+    SessionData* sData = NULL;
+    if (session_core_bs__p_is_client)
+    {
+        sData = &clientSessionDataArray[session_core_bs__p_session];
+    }
+    else
+    {
+        sData = &serverSessionDataArray[session_core_bs__p_session];
+    }
+
     if (constants__c_session_indet != session_core_bs__p_session)
     {
-        *session_core_bs__nonce = &(sessionDataArray[session_core_bs__p_session].nonceServer);
+        *session_core_bs__nonce = &(sData->nonceServer);
     }
     else
     {
@@ -726,9 +768,19 @@ void session_core_bs__get_NonceServer(const constants__t_session_i session_core_
     }
 }
 
-void session_core_bs__remove_NonceServer(const constants__t_session_i session_core_bs__p_session)
+void session_core_bs__remove_NonceServer(const constants__t_session_i session_core_bs__p_session,
+                                         const t_bool session_core_bs__p_is_client)
 {
-    SOPC_ByteString_Clear(&sessionDataArray[session_core_bs__p_session].nonceServer);
+    SessionData* sData = NULL;
+    if (session_core_bs__p_is_client)
+    {
+        sData = &clientSessionDataArray[session_core_bs__p_session];
+    }
+    else
+    {
+        sData = &serverSessionDataArray[session_core_bs__p_session];
+    }
+    SOPC_ByteString_Clear(&sData->nonceServer);
 }
 
 void session_core_bs__client_create_session_req_do_crypto(
@@ -752,7 +804,7 @@ void session_core_bs__client_create_session_req_do_crypto(
 
     if (constants__c_session_indet != session_core_bs__p_session)
     {
-        pSession = &sessionDataArray[session_core_bs__p_session];
+        pSession = &clientSessionDataArray[session_core_bs__p_session];
 
         /* Retrieve the security policy */
         pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig(session_core_bs__p_channel_config_idx);
@@ -795,7 +847,7 @@ void session_core_bs__get_NonceClient(const constants__t_session_i session_core_
 {
     if (constants__c_session_indet != session_core_bs__p_session)
     {
-        *session_core_bs__nonce = &sessionDataArray[session_core_bs__p_session].nonceClient;
+        *session_core_bs__nonce = &clientSessionDataArray[session_core_bs__p_session].nonceClient;
     }
     else
     {
@@ -805,7 +857,7 @@ void session_core_bs__get_NonceClient(const constants__t_session_i session_core_
 
 void session_core_bs__drop_NonceClient(const constants__t_session_i session_core_bs__p_session)
 {
-    SOPC_ByteString_Clear(&sessionDataArray[session_core_bs__p_session].nonceClient);
+    SOPC_ByteString_Clear(&clientSessionDataArray[session_core_bs__p_session].nonceClient);
 }
 
 static SOPC_ReturnStatus check_signature_with_provider(SOPC_CryptoProvider* provider,
@@ -901,7 +953,7 @@ void session_core_bs__client_create_session_check_crypto(
         return;
     }
 
-    pSession = &sessionDataArray[session_core_bs__p_session];
+    pSession = &clientSessionDataArray[session_core_bs__p_session];
 
     /* Check server signature algorithm is not empty */
     if (NULL == pSignCandid->Algorithm.Data || pSignCandid->Algorithm.Length <= 0)
@@ -969,7 +1021,7 @@ void session_core_bs__server_activate_session_check_crypto(
         return;
     }
 
-    pSession = &sessionDataArray[session_core_bs__session];
+    pSession = &serverSessionDataArray[session_core_bs__session];
 
     /* Check client signature algorithm is not empty */
     if (NULL == pSignCandid->Algorithm.Data || pSignCandid->Algorithm.Length <= 0)

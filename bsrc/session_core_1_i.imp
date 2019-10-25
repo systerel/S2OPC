@@ -187,18 +187,16 @@ OPERATIONS
 
     set_session_state_closed (session, sc_reason, is_client) =
     VAR
-        l_prec_state,
-        l_user
+        l_prec_state
     IN
         /* First notify of state change to have access to data before removing all session data */
         l_prec_state <-- get_session_state(session);
-        l_user <-- get_session_user_server(session);
         notify_set_session_state(session, l_prec_state, e_session_closed, sc_reason, is_client);
 
         reset_session_channel(session);
         // a_channel
 
-        delete_session_token(session);
+        delete_session_token(session, is_client);
         // a_user_server
         // a_user_client
         // a_server_token
@@ -213,7 +211,7 @@ OPERATIONS
         // a_server_client_locales
         drop_NonceClient(session);
         // a_NonceClient
-        remove_NonceServer(session);
+        remove_NonceServer(session, is_client);
         // a_NonceServer
         remove_session(session);
         // s_session
@@ -223,6 +221,9 @@ OPERATIONS
         THEN
             server_session_timeout_stop_timer(session);
             drop_user_server(session)
+        ELSE
+            drop_NonceClient(session)
+            // a_NonceClient
         END
     END
     ;

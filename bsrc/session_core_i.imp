@@ -303,7 +303,7 @@ OPERATIONS
         IF l_secpol /= e_secpol_None THEN
             res_activated <-- server_activate_session_check_crypto(session, channel, l_channel_config_idx, activate_req_msg);
             IF res_activated = TRUE THEN
-                l_nonce <-- get_NonceServer(session);
+                l_nonce <-- get_NonceServer(session, FALSE);
                 write_activate_session_resp_msg_crypto(activate_resp_msg, l_nonce)
             END
         ELSE
@@ -390,9 +390,9 @@ OPERATIONS
                         l_config_idx <-- get_channel_info(channel); /* MAYBE this is denoted client side only... */
                         l_crypto_status, l_signature <-- server_create_session_req_do_crypto(l_nsession, create_req_msg, l_endpoint_config_idx, l_config_idx);
                         IF  l_crypto_status = e_sc_ok THEN
-                            l_nonce <-- get_NonceServer(l_nsession);
+                            l_nonce <-- get_NonceServer(l_nsession, FALSE);
                             l_bret <-- write_create_session_resp_msg_crypto(create_resp_msg, l_config_idx, l_nonce, l_signature);
-                            clear_Signature(l_nsession, l_signature);
+                            clear_Signature(l_nsession, FALSE, l_signature);
                             IF l_bret = FALSE THEN
                                 service_ret := e_sc_bad_unexpected_error
                             END
@@ -466,12 +466,12 @@ OPERATIONS
             write_activate_msg_user(activate_req_msg, p_user_token);
             l_secpol <-- get_SecurityPolicy(channel);
             IF l_secpol /= e_secpol_None THEN
-                l_server_nonce <-- get_NonceServer(session);
+                l_server_nonce <-- get_NonceServer(session, TRUE);
                 // TODO: validate server nonce ? Or guaranteed by session state ?
                 l_valid_crypto, l_signature <-- client_activate_session_req_do_crypto(session, l_channel_config_idx, l_server_nonce);
                 IF l_valid_crypto = TRUE THEN
                     l_bret <-- write_activate_session_req_msg_crypto(activate_req_msg, l_signature);
-                    clear_Signature(session, l_signature);
+                    clear_Signature(session, TRUE, l_signature);
                     IF l_bret = TRUE THEN
                         ret := e_sc_ok
                     ELSE

@@ -21,7 +21,7 @@
 
  File Name            : service_write_decode_bs.h
 
- Date                 : 26/11/2019 10:37:07
+ Date                 : 06/03/2020 14:49:50
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
