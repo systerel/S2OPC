@@ -21,7 +21,7 @@
 
  File Name            : msg_browse_bs.h
 
- Date                 : 04/10/2019 15:28:15
+ Date                 : 25/10/2019 15:32:03
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 

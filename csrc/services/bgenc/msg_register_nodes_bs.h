@@ -21,7 +21,7 @@
 
  File Name            : msg_register_nodes_bs.h
 
- Date                 : 04/10/2019 15:28:37
+ Date                 : 25/10/2019 15:32:05
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 

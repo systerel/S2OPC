@@ -21,7 +21,7 @@
 
  File Name            : session_core.c
 
- Date                 : 04/10/2019 15:25:18
+ Date                 : 25/10/2019 15:31:46
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -66,6 +66,7 @@ void session_core__server_internal_activate_req_and_resp(
             session_core__res_activated);
          if (*session_core__res_activated == true) {
             session_core_1__get_NonceServer(session_core__session,
+               false,
                &session_core__l_nonce);
             message_out_bs__write_activate_session_resp_msg_crypto(session_core__activate_resp_msg,
                session_core__l_nonce);
@@ -196,6 +197,7 @@ void session_core__server_create_session_req_and_resp_sm(
                      &session_core__l_signature);
                   if (session_core__l_crypto_status == constants_statuscodes_bs__e_sc_ok) {
                      session_core_1__get_NonceServer(session_core__l_nsession,
+                        false,
                         &session_core__l_nonce);
                      message_out_bs__write_create_session_resp_msg_crypto(session_core__create_resp_msg,
                         session_core__l_config_idx,
@@ -203,6 +205,7 @@ void session_core__server_create_session_req_and_resp_sm(
                         session_core__l_signature,
                         &session_core__l_bret);
                      session_core_1__clear_Signature(session_core__l_nsession,
+                        false,
                         session_core__l_signature);
                      if (session_core__l_bret == false) {
                         *session_core__service_ret = constants_statuscodes_bs__e_sc_bad_unexpected_error;
@@ -306,6 +309,7 @@ void session_core__client_user_activate_session_req_sm(
             &session_core__l_secpol);
          if (session_core__l_secpol != constants__e_secpol_None) {
             session_core_1__get_NonceServer(session_core__session,
+               true,
                &session_core__l_server_nonce);
             session_core_1__client_activate_session_req_do_crypto(session_core__session,
                session_core__l_channel_config_idx,
@@ -317,6 +321,7 @@ void session_core__client_user_activate_session_req_sm(
                   session_core__l_signature,
                   &session_core__l_bret);
                session_core_1__clear_Signature(session_core__session,
+                  true,
                   session_core__l_signature);
                if (session_core__l_bret == true) {
                   *session_core__ret = constants_statuscodes_bs__e_sc_ok;
