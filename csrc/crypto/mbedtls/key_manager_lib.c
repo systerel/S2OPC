@@ -20,6 +20,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdio.h>  /* TPM2: printf */
 
 #include "sopc_crypto_profiles.h"
 #include "sopc_crypto_provider.h"
@@ -32,6 +33,15 @@
 
 #include "mbedtls/pk.h"
 #include "mbedtls/x509.h"
+
+int void_pk_rsa_alt_decrypt_func( void *ctx, int mode, size_t *olen,
+                    const unsigned char *input, unsigned char *output,
+                    size_t output_max_len );
+int void_pk_rsa_alt_sign_func( void *ctx,
+                    int (*f_rng)(void *, unsigned char *, size_t), void *p_rng,
+                    int mode, mbedtls_md_type_t md_alg, unsigned int hashlen,
+                    const unsigned char *hash, unsigned char *sig );
+size_t void_pk_rsa_alt_key_len_func( void *ctx );
 
 /* ------------------------------------------------------------------------------------------------
  * AsymmetricKey API
@@ -46,6 +56,9 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t* 
                                                                  bool is_public,
                                                                  SOPC_AsymmetricKey** ppKey)
 {
+    /* TPM2: I checked that this call is only made for private keys, but I'm not 100% sure... */
+    /* TPM2: We don't want to use the TPM for public key operations */
+    assert(! is_public);
     SOPC_AsymmetricKey* key = NULL;
 
     if (NULL == buffer || 0 == lenBuf || NULL == ppKey)
@@ -57,31 +70,10 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t* 
     key->isBorrowedFromCert = false;
     mbedtls_pk_init(&key->pk);
 
-    int res = -1;
-
-    // MbedTLS fix: mbedtls_pk_parse_key needs a NULL terminated buffer to parse
-    // PEM keys.
-    if (buffer[lenBuf - 1] != '\0')
-    {
-        uint8_t* null_terminated_buffer = SOPC_Calloc(1 + lenBuf, sizeof(uint8_t));
-
-        if (null_terminated_buffer == NULL)
-        {
-            SOPC_Free(key);
-            return SOPC_STATUS_OUT_OF_MEMORY;
-        }
-
-        memcpy(null_terminated_buffer, buffer, lenBuf);
-        res = is_public ? mbedtls_pk_parse_public_key(&key->pk, null_terminated_buffer, 1 + lenBuf)
-                        : mbedtls_pk_parse_key(&key->pk, null_terminated_buffer, 1 + lenBuf, NULL, 0);
-        SOPC_Free(null_terminated_buffer);
-    }
-
-    if (res != 0)
-    {
-        res = is_public ? mbedtls_pk_parse_public_key(&key->pk, buffer, lenBuf)
-                        : mbedtls_pk_parse_key(&key->pk, buffer, lenBuf, NULL, 0);
-    }
+    /* TPM2: directly use pk_setup_rsa_alt to plug private keys */
+    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+    int res = mbedtls_pk_setup_rsa_alt(&key->pk, (char *)buffer, void_pk_rsa_alt_decrypt_func, void_pk_rsa_alt_sign_func, void_pk_rsa_alt_key_len_func);
+    SOPC_GCC_DIAGNOSTIC_RESTORE
 
     if (res != 0)
     {
@@ -978,4 +970,40 @@ void SOPC_KeyManager_CRL_Free(SOPC_CRLList* pCRL)
     /* Frees all the crls in the chain */
     mbedtls_x509_crl_free(&pCRL->crl);
     SOPC_Free(pCRL);
+}
+
+/* Void prototypes */
+/* --------------- */
+int void_pk_rsa_alt_decrypt_func( void *ctx, int mode, size_t *olen,
+                    const unsigned char *input, unsigned char *output,
+                    size_t output_max_len )
+{
+    printf("decrypt key: %s\n", (char *)ctx);
+    assert(MBEDTLS_RSA_PRIVATE == mode);
+    *olen = output_max_len;
+    memset(output, 0, *olen);
+    (void) input;
+    return -1;
+}
+
+int void_pk_rsa_alt_sign_func( void *ctx,
+                    int (*f_rng)(void *, unsigned char *, size_t), void *p_rng,
+                    int mode, mbedtls_md_type_t md_alg, unsigned int hashlen,
+                    const unsigned char *hash, unsigned char *sig )
+{
+    printf("sign key: %s\nmd_alg: %i\n", (char *)ctx, md_alg);
+    assert(MBEDTLS_RSA_PRIVATE == mode);
+    (void) f_rng;
+    (void) p_rng;
+    (void) hashlen;
+    (void) hash;
+    (void) sig;
+    return -1;
+}
+
+/* In bytes */
+size_t void_pk_rsa_alt_key_len_func( void *ctx )
+{
+    (void) ctx;
+    return 256;
 }
