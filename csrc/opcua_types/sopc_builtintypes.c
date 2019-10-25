@@ -2485,15 +2485,53 @@ void SOPC_LocalizedText_Initialize(SOPC_LocalizedText* localizedText)
     }
 }
 
-SOPC_ReturnStatus SOPC_LocalizedText_Copy(SOPC_LocalizedText* dest, const SOPC_LocalizedText* src)
+static SOPC_ReturnStatus SOPC_LocalizedText_Copy_Internal(int recursionLimit,
+                                                          SOPC_LocalizedText* dest,
+                                                          const SOPC_LocalizedText* src)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+
+    if (recursionLimit < 0)
+    {
+        return status;
+    }
+    recursionLimit--;
+
     if (NULL != dest && NULL != src)
     {
         status = SOPC_String_Copy(&dest->defaultLocale, &src->defaultLocale);
         if (SOPC_STATUS_OK == status)
         {
             status = SOPC_String_Copy(&dest->defaultText, &src->defaultText);
+        }
+        if (SOPC_STATUS_OK == status && NULL != src->localizedTextList)
+        {
+            dest->localizedTextList = SOPC_SLinkedList_Create(0);
+            if (NULL == dest->localizedTextList)
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+            SOPC_SLinkedListIterator it = SOPC_SLinkedList_GetIterator(src->localizedTextList);
+            while (SOPC_SLinkedList_HasNext(&it) && SOPC_STATUS_OK == status)
+            {
+                SOPC_LocalizedText* lt = SOPC_SLinkedList_Next(&it);
+                assert(NULL != lt);
+                SOPC_LocalizedText* newLt = SOPC_Malloc(sizeof(*newLt));
+                SOPC_LocalizedText_Initialize(newLt);
+                status = SOPC_LocalizedText_Copy_Internal(recursionLimit, newLt, lt);
+                if (SOPC_STATUS_OK == status)
+                {
+                    void* appended = SOPC_SLinkedList_Append(dest->localizedTextList, 0, newLt);
+                    if (NULL == appended)
+                    {
+                        status = SOPC_STATUS_OUT_OF_MEMORY;
+                    }
+                }
+                else
+                {
+                    status = SOPC_STATUS_OUT_OF_MEMORY;
+                }
+            }
         }
         if (SOPC_STATUS_OK != status)
         {
@@ -2503,11 +2541,24 @@ SOPC_ReturnStatus SOPC_LocalizedText_Copy(SOPC_LocalizedText* dest, const SOPC_L
     return status;
 }
 
-SOPC_ReturnStatus SOPC_LocalizedText_Compare(const SOPC_LocalizedText* left,
-                                             const SOPC_LocalizedText* right,
-                                             int32_t* comparison)
+SOPC_ReturnStatus SOPC_LocalizedText_Copy(SOPC_LocalizedText* dest, const SOPC_LocalizedText* src)
+{
+    // We authorize only 1 level of LocalizedText contained in a LocalizedText
+    return SOPC_LocalizedText_Copy_Internal(1, dest, src);
+}
+
+static SOPC_ReturnStatus SOPC_LocalizedText_Compare_Internal(int recursionLimit,
+                                                             const SOPC_LocalizedText* left,
+                                                             const SOPC_LocalizedText* right,
+                                                             int32_t* comparison)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    if (recursionLimit < 0)
+    {
+        return status;
+    }
+    recursionLimit--;
+
     if (NULL != left && NULL != right)
     {
         status = SOPC_String_Compare(&left->defaultLocale, &right->defaultLocale, false, comparison);
@@ -2515,8 +2566,53 @@ SOPC_ReturnStatus SOPC_LocalizedText_Compare(const SOPC_LocalizedText* left,
         {
             status = SOPC_String_Compare(&left->defaultText, &right->defaultText, false, comparison);
         }
+        if (SOPC_STATUS_OK == status && *comparison == 0)
+        {
+            if (NULL != left->localizedTextList && NULL != right->localizedTextList)
+            {
+                uint32_t lengthLeft = SOPC_SLinkedList_GetLength(left->localizedTextList);
+                uint32_t lengthRight = SOPC_SLinkedList_GetLength(right->localizedTextList);
+                if (lengthLeft == lengthRight)
+                {
+                    SOPC_SLinkedListIterator itLeft = SOPC_SLinkedList_GetIterator(left->localizedTextList);
+                    SOPC_SLinkedListIterator itRight = SOPC_SLinkedList_GetIterator(right->localizedTextList);
+                    while (SOPC_SLinkedList_HasNext(&itLeft) && SOPC_STATUS_OK == status && *comparison == 0)
+                    {
+                        SOPC_LocalizedText* ltLeft = SOPC_SLinkedList_Next(&itLeft);
+                        SOPC_LocalizedText* ltRight = SOPC_SLinkedList_Next(&itRight);
+                        assert(NULL != ltLeft);
+                        assert(NULL != ltRight);
+                        status = SOPC_LocalizedText_Compare_Internal(recursionLimit, ltLeft, ltRight, comparison);
+                    }
+                }
+                else if (lengthLeft > lengthRight)
+                {
+                    *comparison = +1;
+                }
+                else
+                {
+                    *comparison = -1;
+                }
+            }
+            else if (NULL != left->localizedTextList)
+            {
+                *comparison = 0 == SOPC_SLinkedList_GetLength(left->localizedTextList) ? 0 : +1;
+            }
+            else if (NULL != right->localizedTextList)
+            {
+                *comparison = 0 == SOPC_SLinkedList_GetLength(right->localizedTextList) ? 0 : -1;
+            }
+        }
     }
     return status;
+}
+
+SOPC_ReturnStatus SOPC_LocalizedText_Compare(const SOPC_LocalizedText* left,
+                                             const SOPC_LocalizedText* right,
+                                             int32_t* comparison)
+{
+    // We authorize only 1 level of LocalizedText contained in a LocalizedText
+    return SOPC_LocalizedText_Compare_Internal(1, left, right, comparison);
 }
 
 SOPC_ReturnStatus SOPC_LocalizedText_CompareAux(const void* left, const void* right, int32_t* comparison)
@@ -2555,6 +2651,316 @@ void SOPC_LocalizedText_Clear(SOPC_LocalizedText* localizedText)
             localizedText->localizedTextList = NULL;
         }
     }
+}
+
+static SOPC_ReturnStatus SOPC_LocalizedText_AddOrSetLocale_Internal_SetSupported(SOPC_LocalizedText* destSetOfLt,
+                                                                                 const SOPC_LocalizedText* src)
+{
+    assert(NULL != destSetOfLt);
+    assert(NULL != src);
+    assert(src->defaultText.Length > 0);
+    // Set a new localized text we know to be supported locale
+
+    // Compare the default locale to the one to add/set
+    bool addToList = true;
+    int32_t comparison = -1;
+    SOPC_ReturnStatus status = SOPC_String_Compare(&destSetOfLt->defaultLocale, &src->defaultLocale, true, &comparison);
+    if (SOPC_STATUS_OK != status)
+    {
+        return status;
+    }
+
+    if (0 == comparison)
+    {
+        // Default localized text is the one to set
+        SOPC_String_Clear(&destSetOfLt->defaultText);
+        status = SOPC_String_Copy(&destSetOfLt->defaultText, &src->defaultText);
+        addToList = false;
+    }
+    else if (NULL != destSetOfLt->localizedTextList)
+    {
+        // Search for same locale already defined
+        SOPC_SLinkedListIterator it = SOPC_SLinkedList_GetIterator(destSetOfLt->localizedTextList);
+        while (SOPC_STATUS_OK == status && addToList && SOPC_SLinkedList_HasNext(&it))
+        {
+            SOPC_LocalizedText* lt = SOPC_SLinkedList_Next(&it);
+            status = SOPC_String_Compare(&lt->defaultLocale, &src->defaultLocale, true, &comparison);
+            if (SOPC_STATUS_OK != status)
+            {
+                return status;
+            }
+            // If same locale found, set it with new value
+            if (0 == comparison)
+            {
+                // Default localized text is the one to set
+                SOPC_String_Clear(&lt->defaultText);
+                status = SOPC_String_Copy(&lt->defaultText, &src->defaultText);
+                addToList = false;
+            }
+        }
+    }
+    else
+    {
+        destSetOfLt->localizedTextList = SOPC_SLinkedList_Create(0);
+        if (NULL == destSetOfLt->localizedTextList)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+
+    // There is no localized text existent for this locale, create a new one
+    if (SOPC_STATUS_OK == status && addToList)
+    {
+        SOPC_LocalizedText* newLT = SOPC_Malloc(sizeof(SOPC_LocalizedText));
+        SOPC_LocalizedText_Initialize(newLT);
+        if (NULL == newLT)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        else
+        {
+            status = SOPC_LocalizedText_Copy(newLT, src);
+        }
+
+        if (SOPC_STATUS_OK == status)
+        {
+            void* appended = SOPC_SLinkedList_Append(destSetOfLt->localizedTextList, 0, newLT);
+            if (NULL == appended)
+            {
+                SOPC_LocalizedText_Clear(newLT);
+                SOPC_Free(newLT);
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+        }
+    }
+
+    return status;
+}
+
+static SOPC_ReturnStatus SOPC_LocalizedText_AddOrSetLocale_Internal_RemoveSupported(SOPC_LocalizedText* destSetOfLt,
+                                                                                    const SOPC_LocalizedText* src)
+{
+    assert(NULL != destSetOfLt);
+    assert(NULL != src);
+    assert(src->defaultText.Length <= 0);
+    assert(src->defaultLocale.Length > 0);
+
+    // Remove a localized text if existing for supported locale
+
+    // Compare the default locale to the one to add/set
+    int32_t comparison = -1;
+    SOPC_ReturnStatus status = SOPC_String_Compare(&destSetOfLt->defaultLocale, &src->defaultLocale, true, &comparison);
+    if (SOPC_STATUS_OK != status)
+    {
+        return status;
+    }
+
+    SOPC_LocalizedText* ltToRemoveFromList = NULL;
+
+    if (0 == comparison)
+    {
+        // Default localized text is the one to set
+        SOPC_String_Clear(&destSetOfLt->defaultText);
+        SOPC_String_Clear(&destSetOfLt->defaultLocale);
+        if (NULL != destSetOfLt->localizedTextList && SOPC_SLinkedList_GetLength(destSetOfLt->localizedTextList) > 0)
+        {
+            // Replace default by first available in list
+            SOPC_LocalizedText* lt = SOPC_SLinkedList_PopHead(destSetOfLt->localizedTextList);
+            assert(NULL != lt);
+            status = SOPC_String_Copy(&destSetOfLt->defaultLocale, &lt->defaultLocale);
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_String_Copy(&destSetOfLt->defaultText, &lt->defaultText);
+            }
+
+            // In any case clear the localized text popped from list
+            SOPC_LocalizedText_Clear(lt);
+            SOPC_Free(lt);
+        }
+    }
+    else if (NULL != destSetOfLt->localizedTextList)
+    {
+        // Search for same locale already defined
+        SOPC_SLinkedListIterator it = SOPC_SLinkedList_GetIterator(destSetOfLt->localizedTextList);
+        while (SOPC_STATUS_OK == status && NULL == ltToRemoveFromList && SOPC_SLinkedList_HasNext(&it))
+        {
+            SOPC_LocalizedText* lt = SOPC_SLinkedList_Next(&it);
+            status = SOPC_String_Compare(&lt->defaultLocale, &src->defaultLocale, true, &comparison);
+
+            // If same locale found, set it with new value
+            if (SOPC_STATUS_OK == status && 0 == comparison)
+            {
+                ltToRemoveFromList = lt;
+            }
+        }
+
+        // There is localized text existent for this locale remove it
+        if (SOPC_STATUS_OK == status && NULL != ltToRemoveFromList)
+        {
+            SOPC_LocalizedText* ltRemoved =
+                SOPC_SLinkedList_RemoveFromValuePtr(destSetOfLt->localizedTextList, ltToRemoveFromList);
+            if (ltRemoved == ltToRemoveFromList)
+            {
+                SOPC_LocalizedText_Clear(ltRemoved);
+                SOPC_Free(ltRemoved);
+            }
+            else
+            {
+                status = SOPC_STATUS_NOK;
+            }
+        }
+    }
+
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_LocalizedText_AddOrSetLocale(SOPC_LocalizedText* destSetOfLt,
+                                                    char** supportedLocaleIds,
+                                                    const SOPC_LocalizedText* src)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    if (destSetOfLt != NULL && src != NULL && NULL != supportedLocaleIds && NULL == src->localizedTextList)
+    {
+        if (src->defaultLocale.Length <= 0 && src->defaultText.Length <= 0)
+        {
+            // It indicates all locales shall be erased:
+            SOPC_LocalizedText_Clear(destSetOfLt);
+            status = SOPC_STATUS_OK;
+        }
+        else
+        {
+            /*
+             * Check if the locale to set is supported or not including invariant locale case:
+             * Part 4 §5.10.4.1 (v1.03): "Writing a null String for the locale and
+             *                            a non-null String for the text is setting the text for an invariant locale."
+             * Erase all locales except this one since it is an invariant LocalizedText.
+             */
+            bool supportedLocale = src->defaultLocale.Length <= 0;
+            int index = 0;
+            const char* locale = supportedLocaleIds[index];
+            const char* setLocale = SOPC_String_GetRawCString(&src->defaultLocale);
+            while (!supportedLocale && NULL != locale)
+            {
+                int res = SOPC_strcmp_ignore_case(locale, setLocale);
+                supportedLocale = 0 == res;
+                index++;
+                locale = supportedLocaleIds[index];
+            }
+
+            if (!supportedLocale)
+            {
+                return SOPC_STATUS_NOT_SUPPORTED;
+            }
+
+            if (src->defaultText.Length > 0)
+            {
+                if (destSetOfLt->defaultLocale.Length <= 0 && destSetOfLt->defaultText.Length <= 0 &&
+                    (NULL == destSetOfLt->localizedTextList ||
+                     0 == SOPC_SLinkedList_GetLength(destSetOfLt->localizedTextList)))
+                {
+                    // The target localized text is empty, only copy it
+                    status = SOPC_LocalizedText_Copy(destSetOfLt, src);
+                }
+                else
+                {
+                    // Define text for an existing or new supported locale
+                    status = SOPC_LocalizedText_AddOrSetLocale_Internal_SetSupported(destSetOfLt, src);
+                }
+            }
+            else
+            {
+                // Remove text supported locale
+                status = SOPC_LocalizedText_AddOrSetLocale_Internal_RemoveSupported(destSetOfLt, src);
+            }
+        }
+    }
+
+    return status;
+}
+
+static int SOPC_LocalizedText_CompareLocales(const char* s1, const char* s2, bool includesCountryRegion)
+{
+    if (includesCountryRegion)
+    {
+        return SOPC_strcmp_ignore_case(s1, s2);
+    }
+    else
+    {
+        // Compare considering the language - coutry/region separator '-' as equivalent to '\0'
+        return SOPC_strcmp_ignore_case_alt_end(s1, s2, '-');
+    }
+}
+
+SOPC_ReturnStatus SOPC_LocalizedText_GetPreferredLocale(SOPC_LocalizedText* dest,
+                                                        char** localeIds,
+                                                        const SOPC_LocalizedText* srcSetOfLt)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    if (dest != NULL && dest->localizedTextList == NULL && localeIds != NULL && srcSetOfLt != NULL)
+    {
+        int comparisonCounter = 0; // 2 types of comparison shall be done
+        // First: attempt to find exact language+coutry/region locale match
+        // Second: attempt to find language match only
+        bool cmpWithCountryRegion = true;
+        bool localeMatch = false;
+
+        while (!localeMatch && comparisonCounter < 2)
+        {
+            int index = 0;
+            const char* localeId = localeIds[index];
+
+            while (localeId != NULL && !localeMatch)
+            {
+                // Check all available locales in source localized text
+
+                // Check default localized text content
+                int res = SOPC_strcmp_ignore_case(localeId, SOPC_String_GetRawCString(&srcSetOfLt->defaultLocale));
+                localeMatch = 0 == res;
+
+                if (localeMatch)
+                {
+                    status = SOPC_String_Copy(&dest->defaultLocale, &srcSetOfLt->defaultLocale);
+                    if (SOPC_STATUS_OK == status)
+                    {
+                        status = SOPC_String_Copy(&dest->defaultText, &srcSetOfLt->defaultText);
+                    }
+                }
+                else if (srcSetOfLt->localizedTextList != NULL)
+                {
+                    // Check other localized texts content
+                    SOPC_SLinkedListIterator it = SOPC_SLinkedList_GetIterator(srcSetOfLt->localizedTextList);
+                    while (!localeMatch && SOPC_SLinkedList_HasNext(&it))
+                    {
+                        const SOPC_LocalizedText* lt = SOPC_SLinkedList_Next(&it);
+                        assert(NULL != lt);
+                        res = SOPC_LocalizedText_CompareLocales(localeId, SOPC_String_GetRawCString(&lt->defaultLocale),
+                                                                cmpWithCountryRegion);
+                        localeMatch = 0 == res;
+                        if (localeMatch)
+                        {
+                            status = SOPC_LocalizedText_Copy(dest, lt);
+                        }
+                    }
+                }
+                index++;
+                localeId = localeIds[index];
+            }
+            comparisonCounter++;
+            cmpWithCountryRegion = false;
+        }
+
+        if (!localeMatch)
+        {
+            // Set default locale
+            status = SOPC_String_Copy(&dest->defaultLocale, &srcSetOfLt->defaultLocale);
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_String_Copy(&dest->defaultText, &srcSetOfLt->defaultText);
+            }
+        }
+    }
+
+    return status;
 }
 
 void SOPC_ExtensionObject_InitializeAux(void* value)

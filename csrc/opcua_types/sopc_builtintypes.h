@@ -167,6 +167,7 @@ typedef struct SOPC_QualifiedName
 
 typedef struct SOPC_LocalizedText
 {
+    /* The default locale shall be stored only here and not in the list */
     SOPC_String defaultLocale;
     SOPC_String defaultText;
 
@@ -530,6 +531,43 @@ SOPC_ReturnStatus SOPC_LocalizedText_Compare(const SOPC_LocalizedText* left,
 SOPC_ReturnStatus SOPC_LocalizedText_CompareAux(const void* left, const void* right, int32_t* comparison);
 void SOPC_LocalizedText_Clear(SOPC_LocalizedText* localizedText);
 void SOPC_LocalizedText_ClearAux(void* value);
+
+/**
+ * \brief Add a src LocalizedText to the LocalizedText list of dest.
+ * If locale already exists overwrite it, if it is a NULL LocalizedText clear all localized text stored
+ * Note: src shall not contain a list of localized text, only default localized text fields
+ *
+ * \param destSetOfLt        The localizedText object in which additional (or existent) localized text will be added
+ * \param supportedLocaleIds The NULL terminated list of supported locales of the owner of the localizedText object
+ *                           (use as read only)
+ * \param src                The localizedText object containing a single localized text, the locale shall be "" or one
+ *                           of the locales supported. Otherwise the SOPC_STATUS_NOT_SUPPORTED is returned.
+ *
+ * \return SOPC_STATUS_OK if the operation succeeded and error status otherwise
+ */
+SOPC_ReturnStatus SOPC_LocalizedText_AddOrSetLocale(SOPC_LocalizedText* destSetOfLt,
+                                                    char** supportedLocaleIds,
+                                                    const SOPC_LocalizedText* src);
+
+/**
+ * \brief Set the single localized text \p dest with preferred locale from the multiple localized texts contained in \p
+ * src. The preferred locale is selected using the preferred locale Ids array \p localeIds (ordered by preference
+ * priority).
+ * 1. Attempt to find the first matching locale considering the whole localeId which may contain
+ * [language]-[courntry/region] or only [language]
+ * 2. Attempt to find the first matching locale considering only the [language] part
+ * 3. If no there is no locale match, returns the default locale of \p src localized text
+ *
+ * \param dest               The empty or single value localizedText object in a preferred localized text shall be set
+ * \param preferredLocaleIds The NULL terminated list of preferred locales by priority order (use as read only)
+ * \param srcSetOfLt         The localizedText object containing multiple localized texts in which the preferred one
+ *                           shall be chosen. If none is compatible, choose the default one.
+ *
+ * \return SOPC_STATUS_OK if the operation succeeded and error status otherwise
+ */
+SOPC_ReturnStatus SOPC_LocalizedText_GetPreferredLocale(SOPC_LocalizedText* dest,
+                                                        char** preferredLocaleIds,
+                                                        const SOPC_LocalizedText* srcSetOfLt);
 
 void SOPC_ExtensionObject_Initialize(SOPC_ExtensionObject* extObj);
 void SOPC_ExtensionObject_InitializeAux(void* value);
