@@ -36,6 +36,7 @@
 #include "sopc_secret_buffer.h"
 
 #include "crypto_functions_lib.h"
+#include "sopc_macros.h"
 #include "crypto_provider_lib.h"
 #include "key_manager_lib.h"
 
@@ -446,7 +447,6 @@ SOPC_ReturnStatus CryptoProvider_AsymDecrypt_RSA_OAEP(const SOPC_CryptoProvider*
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     uint32_t lenMsgPlain = 0, lenMsgCiph = 0;
     size_t lenDeciphed = 0;
-    mbedtls_rsa_context* prsa = NULL;
 
     if (NULL != pLenWritten)
         *pLenWritten = 0;
@@ -455,10 +455,13 @@ SOPC_ReturnStatus CryptoProvider_AsymDecrypt_RSA_OAEP(const SOPC_CryptoProvider*
     if (mbedtls_pk_get_type(&pKey->pk) != MBEDTLS_PK_RSA) // TODO: maybe we should accept RSASSA_PSS... Undocumented.
         return SOPC_STATUS_INVALID_PARAMETERS;
 
-    prsa = mbedtls_pk_rsa(pKey->pk);
+    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+    mbedtls_pk_context *pk = (mbedtls_pk_context *)&pKey->pk;
+    SOPC_GCC_DIAGNOSTIC_RESTORE
 
     // Sets the appropriate padding mode (SHA-1 for encryption/decryption but SHA-256 for signing/verifying)
-    mbedtls_rsa_set_padding(prsa, MBEDTLS_RSA_PKCS_V21, MBEDTLS_MD_SHA1);
+    /* TODO: TPM2 */
+    //mbedtls_rsa_set_padding(prsa, MBEDTLS_RSA_PKCS_V21, MBEDTLS_MD_SHA1);
 
     // Input must be split into pieces that can be eaten by a single pass of rsa_*_decrypt
     if (SOPC_CryptoProvider_AsymmetricGetLength_Msgs(pProvider, pKey, &lenMsgCiph, &lenMsgPlain) != SOPC_STATUS_OK)
@@ -468,9 +471,10 @@ SOPC_ReturnStatus CryptoProvider_AsymDecrypt_RSA_OAEP(const SOPC_CryptoProvider*
     {
         // TODO: this might fail because of lenMsgPlain (doc recommend that it is at least sizeof(modulus), but here it
         // is the length of the content)
-        if (mbedtls_rsa_rsaes_oaep_decrypt(prsa, mbedtls_ctr_drbg_random, &pProvider->pCryptolibContext->ctxDrbg,
-                                           MBEDTLS_RSA_PRIVATE, NULL, 0, &lenDeciphed, (const unsigned char*) pInput,
-                                           (unsigned char*) pOutput, lenMsgPlain) != 0)
+        int res = mbedtls_pk_decrypt(pk, (const unsigned char*)pInput, lenMsgCiph,
+                                     (unsigned char*) pOutput, &lenDeciphed, lenMsgPlain,
+                                     mbedtls_ctr_drbg_random, &pProvider->pCryptolibContext->ctxDrbg);
+        if (0 != res)
         {
             status = SOPC_STATUS_NOK;
             break;
@@ -531,28 +535,30 @@ SOPC_ReturnStatus CryptoProvider_AsymSign_RSASSA_PKCS1_v15_w_SHA256(const SOPC_C
                                                                     const SOPC_AsymmetricKey* pKey,
                                                                     uint8_t* pSignature)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     uint8_t* hash = NULL;
-    mbedtls_rsa_context* prsa = NULL;
     const mbedtls_md_info_t* pmd_info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256); // Hash the message with SHA-256
+    uint32_t sigLength = 0; /* TPM2: sig length was asserted up in the calls, but it's required for pk_sign */
+
+    //SOPC_ReturnStatus status =  SOPC_CryptoProvider_AsymmetricGetLength_Signature(pProvider, pKey, &sigLength);
+    //assert(SOPC_STATUS_OK == status);
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+    mbedtls_pk_context *pk = (mbedtls_pk_context *)&pKey->pk;
+    SOPC_GCC_DIAGNOSTIC_RESTORE
 
     if (NewMsgDigestBuffer(pInput, lenInput, pmd_info, &hash) == SOPC_STATUS_OK)
     {
         // Sets the appropriate padding mode (no hash-id for PKCS_V15)
-        prsa = mbedtls_pk_rsa(pKey->pk);
-        mbedtls_rsa_set_padding(prsa, MBEDTLS_RSA_PKCS_V15, 0);
-
-        if (mbedtls_rsa_rsassa_pkcs1_v15_sign(prsa, mbedtls_ctr_drbg_random, &pProvider->pCryptolibContext->ctxDrbg,
-                                              MBEDTLS_RSA_PRIVATE, MBEDTLS_MD_SHA256,
-                                              32,                     // hashlen is optional, as md_alg is not MD_NONE
-                                              hash, pSignature) != 0) // signature is as long as the key
+        /* TODO: TPM2 MBEDTLS_RSA_PKCS_V15, 0 */
+        int res = mbedtls_pk_sign(pk, MBEDTLS_MD_SHA256, hash, 32, pSignature, (size_t *) &sigLength,
+                                  mbedtls_ctr_drbg_random, &pProvider->pCryptolibContext->ctxDrbg);
+        if(0 != res)
+        {
             status = SOPC_STATUS_NOK;
-        else
-            status = SOPC_STATUS_OK;
+        }
     }
 
-    if (NULL != hash)
-        SOPC_Free(hash);
+    SOPC_Free(hash);
     return status;
 }
 
@@ -700,28 +706,30 @@ SOPC_ReturnStatus CryptoProvider_AsymSign_RSASSA_PKCS1_v15_w_SHA1(const SOPC_Cry
                                                                   const SOPC_AsymmetricKey* pKey,
                                                                   uint8_t* pSignature)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     uint8_t* hash = NULL;
-    mbedtls_rsa_context* prsa = NULL;
     const mbedtls_md_info_t* pmd_info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA1);
+    uint32_t sigLength = 0; /* TPM2: sig length was asserted up in the calls, but it's required for pk_sign */
+
+    //SOPC_ReturnStatus status =  SOPC_CryptoProvider_AsymmetricGetLength_Signature(pProvider, pKey, &sigLength);
+    //assert(SOPC_STATUS_OK == status);
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+    mbedtls_pk_context *pk = (mbedtls_pk_context *)&pKey->pk;
+    SOPC_GCC_DIAGNOSTIC_RESTORE
 
     if (NewMsgDigestBuffer(pInput, lenInput, pmd_info, &hash) == SOPC_STATUS_OK)
     {
         // Sets the appropriate padding mode (no hash-id for PKCS_V15)
-        prsa = mbedtls_pk_rsa(pKey->pk);
-        mbedtls_rsa_set_padding(prsa, MBEDTLS_RSA_PKCS_V15, 0);
-
-        if (mbedtls_rsa_rsassa_pkcs1_v15_sign(prsa, mbedtls_ctr_drbg_random, &pProvider->pCryptolibContext->ctxDrbg,
-                                              MBEDTLS_RSA_PRIVATE, MBEDTLS_MD_SHA1,
-                                              20,                     // hashlen is optional, as md_alg is not MD_NONE
-                                              hash, pSignature) != 0) // signature is as long as the key
+        /* TODO: TPM2 MBEDTLS_RSA_PKCS_V15, 0 */
+        int res = mbedtls_pk_sign(pk, MBEDTLS_MD_SHA1, hash, 20, pSignature, (size_t *)&sigLength,
+                                  mbedtls_ctr_drbg_random, &pProvider->pCryptolibContext->ctxDrbg);
+        if(0 != res)
+        {
             status = SOPC_STATUS_NOK;
-        else
-            status = SOPC_STATUS_OK;
+        }
     }
 
-    if (NULL != hash)
-        SOPC_Free(hash);
+    SOPC_Free(hash);
     return status;
 }
 
