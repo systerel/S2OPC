@@ -266,6 +266,9 @@ file(GLOB S2OPC_INCLUDE_FILES
     "csrc/helpers_platform_dep/*.h"
     "csrc/services/b2c/*.h")
 
+find_library(TPM2_LIBRARIES crypto_tpm2 HINTS "../crypto-tpm2")
+find_path(TPM2_INCLUDE_DIRS crypto_tpm2.h HINTS "../crypto-tpm2")
+
 set(S2OPC_PUBLIC_INCLUDES
     "csrc/api_toolkit"
     "csrc/configuration"
@@ -275,6 +278,7 @@ set(S2OPC_PUBLIC_INCLUDES
     "csrc/helpers_platform_dep"
     "csrc/helpers_platform_dep/${PLATFORM_DIR}"
     "csrc/services/b2c"
+    "${TPM2_INCLUDE_DIRS}"
 )
 
 set(S2OPC_PRIVATE_INCLUDES
@@ -286,13 +290,13 @@ set(S2OPC_PRIVATE_INCLUDES
 )
 
 # Define S2OPC library dependencies
-set(S2OPC_DEP_LIBS ${MBEDTLS_LIBRARIES} ${MATH_LIB} ${THREAD_LIB} ${SOCK_LIB})
-set(S2OPC_STATIC_DEP_LIBS ${MBEDTLS_STATIC_LIBRARIES} ${MATH_LIB} ${THREAD_LIB} ${SOCK_LIB})
+set(S2OPC_DEP_LIBS ${MBEDTLS_LIBRARIES} ${MATH_LIB} ${THREAD_LIB} ${SOCK_LIB} ${TPM2_LIBRARIES})
+set(S2OPC_STATIC_DEP_LIBS ${MBEDTLS_STATIC_LIBRARIES} ${MATH_LIB} ${THREAD_LIB} ${SOCK_LIB} ${TPM2_LIBRARIES})
 
 add_library(s2opc_obj OBJECT ${PLATFORM_SRCS} ${S2OPC_SRCS})
 target_include_directories(s2opc_obj BEFORE
 	PUBLIC  ${S2OPC_PUBLIC_INCLUDES}
-	PRIVATE ${S2OPC_PRIVATE_INCLUDES} ${MBEDTLS_INCLUDE_DIRS}
+	PRIVATE ${S2OPC_PRIVATE_INCLUDES} ${MBEDTLS_INCLUDE_DIRS} ${TPM2_INCLUDE_DIRS}
 )
 add_dependencies(s2opc_obj build_info)
 

@@ -23,6 +23,7 @@
 set -e
 
 DOCKER_IMAGE=sha256:c1958a853af652ee12a74d6eee23e7af746711e10ff1e2a58453cf1e21f85b49 # build:1.15
+DOCKER_IMAGE=817d42f50067  # Temp docker that has mbedtls with RSA_ALT_SUPPORT
 
 if [[ -z $SOPC_DOCKER_NEEDS_SUDO ]]; then
     /etc/scripts/run-in-docker $DOCKER_IMAGE DOCKER_IMAGE=$DOCKER_IMAGE "$@"
