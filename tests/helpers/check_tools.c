@@ -3483,6 +3483,313 @@ START_TEST(test_ua_string_type)
 }
 END_TEST
 
+START_TEST(test_ua_localized_text_type)
+{
+    // Non regression test on string copy
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    bool result = false;
+    int32_t comp_res = -1;
+
+    SOPC_LocalizedText singleLt, single2Lt;
+    SOPC_LocalizedText setOfLt;
+
+    SOPC_LocalizedText_Initialize(&singleLt);
+    SOPC_LocalizedText_Initialize(&single2Lt);
+
+    SOPC_LocalizedText_Initialize(&setOfLt);
+
+    /* Test copy and comparison */
+
+    /** Degraded **/
+
+    status = SOPC_LocalizedText_Copy(&singleLt, NULL);
+    ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
+    status = SOPC_LocalizedText_Copy(NULL, &singleLt);
+    ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
+
+    status = SOPC_LocalizedText_Compare(NULL, &singleLt, &comp_res);
+    ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
+    status = SOPC_LocalizedText_Compare(&singleLt, NULL, &comp_res);
+    ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
+    status = SOPC_LocalizedText_Compare(&singleLt, &singleLt, NULL);
+    ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
+
+    /** Nominal **/
+
+    // Test a NULL LocalizedText with lengths=-1 copy
+    singleLt.defaultLocale.Length = -1;
+    singleLt.defaultText.Length = -1;
+    status = SOPC_LocalizedText_Copy(&single2Lt, &singleLt);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_LocalizedText_Compare(&singleLt, &single2Lt, &comp_res);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(0, comp_res);
+
+    // Test 2 possible forms of NULL LocalizedText equality
+    singleLt.defaultLocale.Length = -1;
+    singleLt.defaultText.Length = 0;
+    single2Lt.defaultLocale.Length = 0;
+    single2Lt.defaultText.Length = -1;
+    status = SOPC_LocalizedText_Compare(&singleLt, &single2Lt, &comp_res);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(0, comp_res);
+    status = SOPC_LocalizedText_Compare(&single2Lt, &singleLt, &comp_res);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(0, comp_res);
+
+    // Test LocalizedText single value copy
+    singleLt.defaultLocale.Length = -1;
+    singleLt.defaultText.Length = 0;
+    status = SOPC_String_AttachFromCstring(&singleLt.defaultLocale, "en-US");
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_String_AttachFromCstring(&singleLt.defaultText, "safeguard");
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_LocalizedText_Compare(&singleLt, &single2Lt, &comp_res);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_ne(0, comp_res);
+
+    status = SOPC_LocalizedText_Copy(&single2Lt, &singleLt);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_LocalizedText_Compare(&single2Lt, &singleLt, &comp_res);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(0, comp_res);
+
+    /* Test set of localized text */
+
+    /** Nominal **/
+
+    // Test LocalizedText with a set of localized texts
+    char* supportedLocales[] = {"en-US", "en-UK", "fr-FR", NULL};
+    // Define a invariant default localized text
+    status = SOPC_String_AttachFromCstring(&setOfLt.defaultText, "*");
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    // Check invariant locale can still be modified
+    SOPC_String_Clear(&singleLt.defaultLocale); // remove locale Id
+    status = SOPC_LocalizedText_AddOrSetLocale(&setOfLt, supportedLocales, &singleLt);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    result = SOPC_String_Equal(&setOfLt.defaultLocale, &singleLt.defaultLocale);
+    ck_assert_int_eq(true, result);
+    result = SOPC_String_Equal(&setOfLt.defaultText, &singleLt.defaultText);
+    ck_assert_int_eq(true, result);
+
+    // Check supported locales can be set
+    SOPC_LocalizedText_Clear(&singleLt);
+    status = SOPC_String_AttachFromCstring(&singleLt.defaultLocale, "en-UK");
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_String_AttachFromCstring(&singleLt.defaultText, "shield");
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_LocalizedText_AddOrSetLocale(&setOfLt, supportedLocales, &singleLt);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    SOPC_LocalizedText_Clear(&singleLt);
+    status = SOPC_String_AttachFromCstring(&singleLt.defaultLocale, "en-US");
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_String_AttachFromCstring(&singleLt.defaultText, "bumper");
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_LocalizedText_AddOrSetLocale(&setOfLt, supportedLocales, &singleLt);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    SOPC_LocalizedText_Clear(&singleLt);
+    status = SOPC_String_AttachFromCstring(&singleLt.defaultLocale, "fr-FR");
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_String_AttachFromCstring(&singleLt.defaultText, "pare-choc");
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_LocalizedText_AddOrSetLocale(&setOfLt, supportedLocales, &singleLt);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    // Check supported locales can be overwritten
+    SOPC_String_Clear(&singleLt.defaultLocale); // remove locale Id
+    status = SOPC_String_AttachFromCstring(&singleLt.defaultLocale, "fr-FR");
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    SOPC_String_Clear(&singleLt.defaultText); // remove text
+    status = SOPC_String_AttachFromCstring(&singleLt.defaultText, "pare-chocs");
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_LocalizedText_AddOrSetLocale(&setOfLt, supportedLocales, &singleLt);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    // Check unsupported locales cannot be set
+    SOPC_String_Clear(&singleLt.defaultLocale); // remove locale Id
+    status = SOPC_String_AttachFromCstring(&singleLt.defaultLocale, "fr-BE");
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    SOPC_String_Clear(&singleLt.defaultText); // remove text
+    status = SOPC_String_AttachFromCstring(&singleLt.defaultText, "pare-chocs");
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_LocalizedText_AddOrSetLocale(&setOfLt, supportedLocales, &singleLt);
+    ck_assert_int_eq(SOPC_STATUS_NOT_SUPPORTED, status);
+
+    // Check preferred locale can be retrieved
+    char* preferredLocales[] = {"de-DE", "en-UK", "en-US", "fr-FR", NULL};
+
+    // en-UK shall be preferred
+    SOPC_LocalizedText_Clear(&single2Lt);
+    SOPC_LocalizedText_GetPreferredLocale(&single2Lt, preferredLocales, &setOfLt);
+    // expected:
+    SOPC_LocalizedText_Clear(&singleLt);
+    status = SOPC_String_AttachFromCstring(&singleLt.defaultLocale, "en-UK");
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_String_AttachFromCstring(&singleLt.defaultText, "shield");
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    // compare:
+    status = SOPC_LocalizedText_Compare(&singleLt, &single2Lt, &comp_res);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(0, comp_res);
+
+    char* preferredLocales2[] = {"de-DE", "fr-FR", "en-UK", "en-US", NULL};
+
+    // fr-FR shall be preferred
+    SOPC_LocalizedText_Clear(&single2Lt);
+    SOPC_LocalizedText_GetPreferredLocale(&single2Lt, preferredLocales2, &setOfLt);
+    // expected:
+    SOPC_LocalizedText_Clear(&singleLt);
+    status = SOPC_String_AttachFromCstring(&singleLt.defaultLocale, "fr-FR");
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_String_AttachFromCstring(&singleLt.defaultText, "pare-chocs");
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    // compare:
+    status = SOPC_LocalizedText_Compare(&singleLt, &single2Lt, &comp_res);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(0, comp_res);
+
+    // Delete the "en-UK" locale
+    //   Create empty string for locale en-UK:
+    SOPC_LocalizedText_Clear(&singleLt);
+    status = SOPC_String_AttachFromCstring(&singleLt.defaultLocale, "en-UK");
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_LocalizedText_AddOrSetLocale(&setOfLt, supportedLocales, &singleLt);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    // Keep only en-UK as english preferred locale and do not keep another exactly valid neither
+    char* preferredLocales3[] = {"de-DE", "en-UK", "fr-BE", NULL};
+
+    // en-US shall be preferred
+    SOPC_LocalizedText_Clear(&single2Lt);
+    SOPC_LocalizedText_GetPreferredLocale(&single2Lt, preferredLocales3, &setOfLt);
+    // expected:
+    SOPC_LocalizedText_Clear(&singleLt);
+    status = SOPC_String_AttachFromCstring(&singleLt.defaultLocale, "en-US");
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_String_AttachFromCstring(&singleLt.defaultText, "bumper");
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    // compare:
+    status = SOPC_LocalizedText_Compare(&singleLt, &single2Lt, &comp_res);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(0, comp_res);
+
+    // Keep only 'en' as english preferred locale and do not keep another exactly valid neither
+    char* preferredLocales4[] = {"de-DE", "en", "fr-BE", NULL};
+    // en-US shall be preferred
+    SOPC_LocalizedText_Clear(&single2Lt);
+    SOPC_LocalizedText_GetPreferredLocale(&single2Lt, preferredLocales4, &setOfLt);
+    // expected: keep last 'en-US' localized text expected
+    // compare:
+    status = SOPC_LocalizedText_Compare(&singleLt, &single2Lt, &comp_res);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(0, comp_res);
+
+    // Keep only en-UK as english preferred locale but also keep fr-FR exact and valid locale
+    char* preferredLocales5[] = {"de-DE", "en-UK", "fr-FR", NULL};
+
+    // fr-FR shall be preferred
+    SOPC_LocalizedText_Clear(&single2Lt);
+    SOPC_LocalizedText_GetPreferredLocale(&single2Lt, preferredLocales5, &setOfLt);
+    // expected:
+    SOPC_LocalizedText_Clear(&singleLt);
+    status = SOPC_String_AttachFromCstring(&singleLt.defaultLocale, "fr-FR");
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_String_AttachFromCstring(&singleLt.defaultText, "pare-chocs");
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    // compare:
+    status = SOPC_LocalizedText_Compare(&singleLt, &single2Lt, &comp_res);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(0, comp_res);
+
+    // Keep only language compatible preferred locale but set fr-BE first
+    char* preferredLocales6[] = {"de-DE", "fr-BE", "en-UK", NULL};
+
+    // fr-FR shall be preferred
+    SOPC_LocalizedText_Clear(&single2Lt);
+    SOPC_LocalizedText_GetPreferredLocale(&single2Lt, preferredLocales6, &setOfLt);
+    // expected: keep fr-FR localized text
+    // compare:
+    status = SOPC_LocalizedText_Compare(&singleLt, &single2Lt, &comp_res);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(0, comp_res);
+
+    // Keep only unsupported languages
+    char* preferredLocales7[] = {"de-DE", "es-ES", "et-EE", NULL};
+
+    // default localized text shall be preferred
+    SOPC_LocalizedText_Clear(&single2Lt);
+    SOPC_LocalizedText_GetPreferredLocale(&single2Lt, preferredLocales7, &setOfLt);
+    // expected: default of setOfLt
+    // compare:
+    result = SOPC_String_Equal(&setOfLt.defaultLocale, &single2Lt.defaultLocale);
+    ck_assert_int_eq(true, result);
+    result = SOPC_String_Equal(&setOfLt.defaultText, &single2Lt.defaultText);
+    ck_assert_int_eq(true, result);
+
+    // Set the default locale to specialized locale: test specific case of deletion of the default one
+    status = SOPC_String_AttachFromCstring(&setOfLt.defaultLocale, "en-UK");
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    // Delete the "en-UK" locale
+    //   Create empty string for locale en-UK:
+    SOPC_LocalizedText_Clear(&singleLt);
+    status = SOPC_String_AttachFromCstring(&singleLt.defaultLocale, "en-UK");
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    //   Set empty value
+    status = SOPC_LocalizedText_AddOrSetLocale(&setOfLt, supportedLocales, &singleLt);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    // Check a new default value is present
+    // expected: en-US localized text
+    SOPC_LocalizedText_Clear(&singleLt);
+    status = SOPC_String_AttachFromCstring(&singleLt.defaultLocale, "en-US");
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_String_AttachFromCstring(&singleLt.defaultText, "bumper");
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    // compare:
+    result = SOPC_String_Equal(&setOfLt.defaultLocale, &singleLt.defaultLocale);
+    ck_assert_int_eq(true, result);
+    result = SOPC_String_Equal(&setOfLt.defaultText, &singleLt.defaultText);
+    ck_assert_int_eq(true, result);
+
+    // Delete the invariant locale => delete all localized texts
+    //   Create empty string for invariant locale:
+    SOPC_LocalizedText_Clear(&singleLt);
+    //   Set empty value
+    status = SOPC_LocalizedText_AddOrSetLocale(&setOfLt, supportedLocales, &singleLt);
+    // All localized text shall be removed
+    ck_assert_int_ge(0, setOfLt.defaultLocale.Length);
+    ck_assert_int_ge(0, setOfLt.defaultText.Length);
+    if (setOfLt.localizedTextList != NULL)
+    {
+        ck_assert_int_eq(0, SOPC_SLinkedList_GetLength(setOfLt.localizedTextList));
+    }
+
+    /** Degraded **/
+    SOPC_LocalizedText_Clear(&singleLt);
+
+    status = SOPC_LocalizedText_AddOrSetLocale(&setOfLt, supportedLocales, NULL);
+    ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
+    status = SOPC_LocalizedText_AddOrSetLocale(NULL, supportedLocales, &singleLt);
+    ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
+    status = SOPC_LocalizedText_AddOrSetLocale(&setOfLt, NULL, &singleLt);
+    ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
+
+    status = SOPC_LocalizedText_GetPreferredLocale(&setOfLt, preferredLocales, NULL);
+    ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
+    status = SOPC_LocalizedText_GetPreferredLocale(&setOfLt, NULL, &singleLt);
+    ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
+    status = SOPC_LocalizedText_GetPreferredLocale(NULL, preferredLocales, &singleLt);
+    ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
+
+    SOPC_LocalizedText_Clear(&singleLt);
+    SOPC_LocalizedText_Clear(&single2Lt);
+    SOPC_LocalizedText_Clear(&setOfLt);
+}
+END_TEST
+
 START_TEST(test_ua_qname_parse)
 {
     static const struct
@@ -3979,6 +4286,7 @@ Suite* tests_make_suite_tools(void)
 
     tc_ua_types = tcase_create("UA Types");
     tcase_add_test(tc_ua_types, test_ua_string_type);
+    tcase_add_test(tc_ua_types, test_ua_localized_text_type);
     tcase_add_test(tc_ua_types, test_ua_qname_parse);
     tcase_add_test(tc_ua_types, test_ua_guid_parse);
     tcase_add_test(tc_ua_types, test_ua_variant_get_range_scalar);
