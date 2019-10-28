@@ -2609,6 +2609,9 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Copy(SOPC_ExtensionObject* dest, const SO
             SOPC_Buffer_Delete(encodedObject);
             encodedObject = NULL;
         }
+        break;
+    default:
+        assert(false);
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -2658,6 +2661,8 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Move(SOPC_ExtensionObject* dest, SOPC_Ext
     case SOPC_ExtObjBodyEncoding_Object:
         dest->Body.Object = src->Body.Object;
         break;
+    default:
+        assert(false);
     }
     SOPC_ExtensionObject_Initialize(src);
 
@@ -2706,6 +2711,9 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Compare(const SOPC_ExtensionObject* left,
             case SOPC_ExtObjBodyEncoding_Object:
                 // TODO: compare encoded values or add a compare function in encodeable types
                 status = SOPC_STATUS_NOT_SUPPORTED;
+                break;
+            default:
+                assert(false);
             }
         }
     }
@@ -2744,6 +2752,8 @@ void SOPC_ExtensionObject_Clear(SOPC_ExtensionObject* extObj)
             SOPC_Free(extObj->Body.Object.Value);
             extObj->Body.Object.Value = NULL;
             break;
+        default:
+            assert(false);
         }
         extObj->Length = -1;
     }
