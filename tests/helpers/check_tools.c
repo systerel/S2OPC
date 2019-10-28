@@ -845,7 +845,7 @@ START_TEST(test_linked_list)
     ck_assert(value == NULL);
     ck_assert(3 == SOPC_SLinkedList_GetLength(list));
 
-    value = SOPC_SLinkedList_RemoveFromId(list, 2);
+    value = SOPC_SLinkedList_RemoveFromValuePtr(list, &value2);
     ck_assert(value == &value2);
     ck_assert(2 == SOPC_SLinkedList_GetLength(list));
 
