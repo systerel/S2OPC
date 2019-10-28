@@ -89,6 +89,12 @@ static void SOPC_ServerConfig_Clear(SOPC_Server_Config* config)
             SOPC_Free(config->namespaces[i]);
         }
         SOPC_Free(config->namespaces);
+
+        for (int i = 0; NULL != config->localeIds[i]; i++)
+        {
+            SOPC_Free(config->localeIds[i]);
+        }
+        SOPC_Free(config->localeIds);
     }
 
     OpcUa_ApplicationDescription_Clear(&config->serverDescription);

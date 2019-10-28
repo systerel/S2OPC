@@ -100,6 +100,10 @@ struct SOPC_Server_Config
                                 (and endpoints) shall be freed */
     char** namespaces;     /**< An array of namespaces terminated by a NULL pointer.
                                 Index in array is the namespace index. */
+
+    char** localeIds; /**< An array of locale ids supported by the server terminated by a NULL pointer.
+                           The OpcUa_ApplicationDescription ApplicationName shall contains a definition for each
+                           supported locale (use SOPC_LocalizedText_AddOrSetLocalizedText to add them manually) */
     OpcUa_ApplicationDescription serverDescription; /**< Application description of the server.
                                                          Limitations: the gateway and discovery properties are ignored
                                                          (each endpoint returns its URL as discovery URL)*/
