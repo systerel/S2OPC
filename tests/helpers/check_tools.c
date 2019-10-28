@@ -994,7 +994,7 @@ START_TEST(test_sorted_linked_list)
 }
 END_TEST
 
-START_TEST(test_base_tools)
+START_TEST(test_strncmp_ignore_case)
 {
     char test1[] = "te";
     char test2[] = "Te";
@@ -1004,78 +1004,238 @@ START_TEST(test_base_tools)
     char ntest2[] = "De";
     char ntest3[] = "ta";
     char ntest4[] = "tA";
+    char long_test1[] = "tes";
 
     // Test nominal case (equality result)
     //// Each possible size class
-    ck_assert(0 == SOPC_strncmp_ignore_case(test1, test2, 0));
-    ck_assert(0 == SOPC_strncmp_ignore_case(test1, test2, 1));
-    ck_assert(0 == SOPC_strncmp_ignore_case(test1, test2, 2));
-    ck_assert(0 == SOPC_strncmp_ignore_case(test1, test2, 3));
-    ck_assert(0 == SOPC_strncmp_ignore_case(test1, test2, 4));
+    ck_assert_int_eq(0, SOPC_strncmp_ignore_case(test1, test2, 0));
+    ck_assert_int_eq(0, SOPC_strncmp_ignore_case(test1, test2, 1));
+    ck_assert_int_eq(0, SOPC_strncmp_ignore_case(test1, test2, 2));
+    ck_assert_int_eq(0, SOPC_strncmp_ignore_case(test1, test2, 3));
+    ck_assert_int_eq(0, SOPC_strncmp_ignore_case(test1, test2, 4));
     //// Each possible combination of case
-    ck_assert(0 == SOPC_strncmp_ignore_case(test1, test1, 2));
-    ck_assert(0 == SOPC_strncmp_ignore_case(test1, test2, 2));
-    ck_assert(0 == SOPC_strncmp_ignore_case(test1, test3, 2));
-    ck_assert(0 == SOPC_strncmp_ignore_case(test1, test4, 2));
-    ck_assert(0 == SOPC_strncmp_ignore_case(test2, test1, 2));
-    ck_assert(0 == SOPC_strncmp_ignore_case(test2, test2, 2));
-    ck_assert(0 == SOPC_strncmp_ignore_case(test2, test3, 2));
-    ck_assert(0 == SOPC_strncmp_ignore_case(test2, test4, 2));
-    ck_assert(0 == SOPC_strncmp_ignore_case(test3, test1, 2));
-    ck_assert(0 == SOPC_strncmp_ignore_case(test3, test2, 2));
-    ck_assert(0 == SOPC_strncmp_ignore_case(test3, test3, 2));
-    ck_assert(0 == SOPC_strncmp_ignore_case(test3, test4, 2));
-    ck_assert(0 == SOPC_strncmp_ignore_case(test4, test1, 2));
-    ck_assert(0 == SOPC_strncmp_ignore_case(test4, test2, 2));
-    ck_assert(0 == SOPC_strncmp_ignore_case(test4, test3, 2));
-    ck_assert(0 == SOPC_strncmp_ignore_case(test4, test4, 2));
+    ck_assert_int_eq(0, SOPC_strncmp_ignore_case(test1, test1, 2));
+    ck_assert_int_eq(0, SOPC_strncmp_ignore_case(test1, test2, 2));
+    ck_assert_int_eq(0, SOPC_strncmp_ignore_case(test1, test3, 2));
+    ck_assert_int_eq(0, SOPC_strncmp_ignore_case(test1, test4, 2));
+    ck_assert_int_eq(0, SOPC_strncmp_ignore_case(test2, test1, 2));
+    ck_assert_int_eq(0, SOPC_strncmp_ignore_case(test2, test2, 2));
+    ck_assert_int_eq(0, SOPC_strncmp_ignore_case(test2, test3, 2));
+    ck_assert_int_eq(0, SOPC_strncmp_ignore_case(test2, test4, 2));
+    ck_assert_int_eq(0, SOPC_strncmp_ignore_case(test3, test1, 2));
+    ck_assert_int_eq(0, SOPC_strncmp_ignore_case(test3, test2, 2));
+    ck_assert_int_eq(0, SOPC_strncmp_ignore_case(test3, test3, 2));
+    ck_assert_int_eq(0, SOPC_strncmp_ignore_case(test3, test4, 2));
+    ck_assert_int_eq(0, SOPC_strncmp_ignore_case(test4, test1, 2));
+    ck_assert_int_eq(0, SOPC_strncmp_ignore_case(test4, test2, 2));
+    ck_assert_int_eq(0, SOPC_strncmp_ignore_case(test4, test3, 2));
+    ck_assert_int_eq(0, SOPC_strncmp_ignore_case(test4, test4, 2));
 
     // Test nominal case (non equality result)
     //// Each possible size class
-    ck_assert(0 == SOPC_strncmp_ignore_case(test1, ntest1, 0));
-    ck_assert(+1 == SOPC_strncmp_ignore_case(test1, ntest1, 1));
-    ck_assert(-1 == SOPC_strncmp_ignore_case(ntest1, test1, 1));
-    ck_assert(+1 == SOPC_strncmp_ignore_case(test1, ntest1, 2));
-    ck_assert(-1 == SOPC_strncmp_ignore_case(ntest1, test1, 2));
-    ck_assert(+1 == SOPC_strncmp_ignore_case(test1, ntest1, 3));
-    ck_assert(-1 == SOPC_strncmp_ignore_case(ntest1, test1, 3));
-    ck_assert(+1 == SOPC_strncmp_ignore_case(test1, ntest1, 4));
-    ck_assert(-1 == SOPC_strncmp_ignore_case(ntest1, test1, 4));
+    ck_assert_int_eq(0, SOPC_strncmp_ignore_case(test1, ntest1, 0));
+    ck_assert_int_eq(+1, SOPC_strncmp_ignore_case(test1, ntest1, 1));
+    ck_assert_int_eq(-1, SOPC_strncmp_ignore_case(ntest1, test1, 1));
+    ck_assert_int_eq(+1, SOPC_strncmp_ignore_case(test1, ntest1, 2));
+    ck_assert_int_eq(-1, SOPC_strncmp_ignore_case(ntest1, test1, 2));
+    ck_assert_int_eq(+1, SOPC_strncmp_ignore_case(test1, ntest1, 3));
+    ck_assert_int_eq(-1, SOPC_strncmp_ignore_case(ntest1, test1, 3));
+    ck_assert_int_eq(+1, SOPC_strncmp_ignore_case(test1, ntest1, 4));
+    ck_assert_int_eq(-1, SOPC_strncmp_ignore_case(ntest1, test1, 4));
 
     //// Each possible combination of case
-    ck_assert(+1 == SOPC_strncmp_ignore_case(test1, ntest1, 2));
-    ck_assert(+1 == SOPC_strncmp_ignore_case(test1, ntest2, 2));
-    ck_assert(+1 == SOPC_strncmp_ignore_case(test1, ntest3, 2));
-    ck_assert(+1 == SOPC_strncmp_ignore_case(test1, ntest4, 2));
-    ck_assert(+1 == SOPC_strncmp_ignore_case(test2, ntest1, 2));
-    ck_assert(+1 == SOPC_strncmp_ignore_case(test2, ntest2, 2));
-    ck_assert(+1 == SOPC_strncmp_ignore_case(test2, ntest3, 2));
-    ck_assert(+1 == SOPC_strncmp_ignore_case(test2, ntest4, 2));
-    ck_assert(+1 == SOPC_strncmp_ignore_case(test3, ntest1, 2));
-    ck_assert(+1 == SOPC_strncmp_ignore_case(test3, ntest2, 2));
-    ck_assert(+1 == SOPC_strncmp_ignore_case(test3, ntest3, 2));
-    ck_assert(+1 == SOPC_strncmp_ignore_case(test3, ntest4, 2));
-    ck_assert(+1 == SOPC_strncmp_ignore_case(test4, ntest1, 2));
-    ck_assert(+1 == SOPC_strncmp_ignore_case(test4, ntest2, 2));
-    ck_assert(+1 == SOPC_strncmp_ignore_case(test4, ntest3, 2));
-    ck_assert(+1 == SOPC_strncmp_ignore_case(test4, ntest4, 2));
+    ck_assert_int_eq(+1, SOPC_strncmp_ignore_case(test1, ntest1, 2));
+    ck_assert_int_eq(+1, SOPC_strncmp_ignore_case(test1, ntest2, 2));
+    ck_assert_int_eq(+1, SOPC_strncmp_ignore_case(test1, ntest3, 2));
+    ck_assert_int_eq(+1, SOPC_strncmp_ignore_case(test1, ntest4, 2));
+    ck_assert_int_eq(+1, SOPC_strncmp_ignore_case(test2, ntest1, 2));
+    ck_assert_int_eq(+1, SOPC_strncmp_ignore_case(test2, ntest2, 2));
+    ck_assert_int_eq(+1, SOPC_strncmp_ignore_case(test2, ntest3, 2));
+    ck_assert_int_eq(+1, SOPC_strncmp_ignore_case(test2, ntest4, 2));
+    ck_assert_int_eq(+1, SOPC_strncmp_ignore_case(test3, ntest1, 2));
+    ck_assert_int_eq(+1, SOPC_strncmp_ignore_case(test3, ntest2, 2));
+    ck_assert_int_eq(+1, SOPC_strncmp_ignore_case(test3, ntest3, 2));
+    ck_assert_int_eq(+1, SOPC_strncmp_ignore_case(test3, ntest4, 2));
+    ck_assert_int_eq(+1, SOPC_strncmp_ignore_case(test4, ntest1, 2));
+    ck_assert_int_eq(+1, SOPC_strncmp_ignore_case(test4, ntest2, 2));
+    ck_assert_int_eq(+1, SOPC_strncmp_ignore_case(test4, ntest3, 2));
+    ck_assert_int_eq(+1, SOPC_strncmp_ignore_case(test4, ntest4, 2));
 
-    ck_assert(-1 == SOPC_strncmp_ignore_case(ntest1, test1, 2));
-    ck_assert(-1 == SOPC_strncmp_ignore_case(ntest1, test2, 2));
-    ck_assert(-1 == SOPC_strncmp_ignore_case(ntest1, test3, 2));
-    ck_assert(-1 == SOPC_strncmp_ignore_case(ntest1, test4, 2));
-    ck_assert(-1 == SOPC_strncmp_ignore_case(ntest2, test1, 2));
-    ck_assert(-1 == SOPC_strncmp_ignore_case(ntest2, test2, 2));
-    ck_assert(-1 == SOPC_strncmp_ignore_case(ntest2, test3, 2));
-    ck_assert(-1 == SOPC_strncmp_ignore_case(ntest2, test4, 2));
-    ck_assert(-1 == SOPC_strncmp_ignore_case(ntest3, test1, 2));
-    ck_assert(-1 == SOPC_strncmp_ignore_case(ntest3, test2, 2));
-    ck_assert(-1 == SOPC_strncmp_ignore_case(ntest3, test3, 2));
-    ck_assert(-1 == SOPC_strncmp_ignore_case(ntest3, test4, 2));
-    ck_assert(-1 == SOPC_strncmp_ignore_case(ntest4, test1, 2));
-    ck_assert(-1 == SOPC_strncmp_ignore_case(ntest4, test2, 2));
-    ck_assert(-1 == SOPC_strncmp_ignore_case(ntest4, test3, 2));
-    ck_assert(-1 == SOPC_strncmp_ignore_case(ntest4, test4, 2));
+    ck_assert_int_eq(-1, SOPC_strncmp_ignore_case(ntest1, test1, 2));
+    ck_assert_int_eq(-1, SOPC_strncmp_ignore_case(ntest1, test2, 2));
+    ck_assert_int_eq(-1, SOPC_strncmp_ignore_case(ntest1, test3, 2));
+    ck_assert_int_eq(-1, SOPC_strncmp_ignore_case(ntest1, test4, 2));
+    ck_assert_int_eq(-1, SOPC_strncmp_ignore_case(ntest2, test1, 2));
+    ck_assert_int_eq(-1, SOPC_strncmp_ignore_case(ntest2, test2, 2));
+    ck_assert_int_eq(-1, SOPC_strncmp_ignore_case(ntest2, test3, 2));
+    ck_assert_int_eq(-1, SOPC_strncmp_ignore_case(ntest2, test4, 2));
+    ck_assert_int_eq(-1, SOPC_strncmp_ignore_case(ntest3, test1, 2));
+    ck_assert_int_eq(-1, SOPC_strncmp_ignore_case(ntest3, test2, 2));
+    ck_assert_int_eq(-1, SOPC_strncmp_ignore_case(ntest3, test3, 2));
+    ck_assert_int_eq(-1, SOPC_strncmp_ignore_case(ntest3, test4, 2));
+    ck_assert_int_eq(-1, SOPC_strncmp_ignore_case(ntest4, test1, 2));
+    ck_assert_int_eq(-1, SOPC_strncmp_ignore_case(ntest4, test2, 2));
+    ck_assert_int_eq(-1, SOPC_strncmp_ignore_case(ntest4, test3, 2));
+    ck_assert_int_eq(-1, SOPC_strncmp_ignore_case(ntest4, test4, 2));
+
+    // Test nominal case (equality on 2 characters only then inequality)
+    ck_assert_int_eq(0, SOPC_strncmp_ignore_case(test1, long_test1, 0));
+    ck_assert_int_eq(0, SOPC_strncmp_ignore_case(test1, long_test1, 1));
+    ck_assert_int_eq(0, SOPC_strncmp_ignore_case(long_test1, test1, 1));
+    ck_assert_int_eq(0, SOPC_strncmp_ignore_case(test1, long_test1, 2));
+    ck_assert_int_eq(0, SOPC_strncmp_ignore_case(long_test1, test1, 2));
+    ck_assert_int_eq(-1, SOPC_strncmp_ignore_case(test1, long_test1, 3));
+    ck_assert_int_eq(+1, SOPC_strncmp_ignore_case(long_test1, test1, 3));
+    ck_assert_int_eq(-1, SOPC_strncmp_ignore_case(test1, long_test1, 4));
+    ck_assert_int_eq(+1, SOPC_strncmp_ignore_case(long_test1, test1, 4));
+}
+END_TEST
+
+START_TEST(test_strcmp_ignore_case)
+{
+    char test1[] = "te";
+    char test2[] = "Te";
+    char test3[] = "tE";
+    char test4[] = "TE";
+    char ntest1[] = "de";
+    char ntest2[] = "De";
+    char ntest3[] = "ta";
+    char ntest4[] = "tA";
+    char long_test1[] = "tes";
+
+    // Test nominal case (equality result)
+    //// Each possible combination of case
+    ck_assert_int_eq(0, SOPC_strcmp_ignore_case(test1, test1));
+    ck_assert_int_eq(0, SOPC_strcmp_ignore_case(test1, test2));
+    ck_assert_int_eq(0, SOPC_strcmp_ignore_case(test1, test3));
+    ck_assert_int_eq(0, SOPC_strcmp_ignore_case(test1, test4));
+    ck_assert_int_eq(0, SOPC_strcmp_ignore_case(test2, test1));
+    ck_assert_int_eq(0, SOPC_strcmp_ignore_case(test2, test2));
+    ck_assert_int_eq(0, SOPC_strcmp_ignore_case(test2, test3));
+    ck_assert_int_eq(0, SOPC_strcmp_ignore_case(test2, test4));
+    ck_assert_int_eq(0, SOPC_strcmp_ignore_case(test3, test1));
+    ck_assert_int_eq(0, SOPC_strcmp_ignore_case(test3, test2));
+    ck_assert_int_eq(0, SOPC_strcmp_ignore_case(test3, test3));
+    ck_assert_int_eq(0, SOPC_strcmp_ignore_case(test3, test4));
+    ck_assert_int_eq(0, SOPC_strcmp_ignore_case(test4, test1));
+    ck_assert_int_eq(0, SOPC_strcmp_ignore_case(test4, test2));
+    ck_assert_int_eq(0, SOPC_strcmp_ignore_case(test4, test3));
+    ck_assert_int_eq(0, SOPC_strcmp_ignore_case(test4, test4));
+
+    // Test nominal case (non equality result)
+    //// Each possible combination of case
+    ck_assert_int_eq(+1, SOPC_strcmp_ignore_case(test1, ntest1));
+    ck_assert_int_eq(+1, SOPC_strcmp_ignore_case(test1, ntest2));
+    ck_assert_int_eq(+1, SOPC_strcmp_ignore_case(test1, ntest3));
+    ck_assert_int_eq(+1, SOPC_strcmp_ignore_case(test1, ntest4));
+    ck_assert_int_eq(+1, SOPC_strcmp_ignore_case(test2, ntest1));
+    ck_assert_int_eq(+1, SOPC_strcmp_ignore_case(test2, ntest2));
+    ck_assert_int_eq(+1, SOPC_strcmp_ignore_case(test2, ntest3));
+    ck_assert_int_eq(+1, SOPC_strcmp_ignore_case(test2, ntest4));
+    ck_assert_int_eq(+1, SOPC_strcmp_ignore_case(test3, ntest1));
+    ck_assert_int_eq(+1, SOPC_strcmp_ignore_case(test3, ntest2));
+    ck_assert_int_eq(+1, SOPC_strcmp_ignore_case(test3, ntest3));
+    ck_assert_int_eq(+1, SOPC_strcmp_ignore_case(test3, ntest4));
+    ck_assert_int_eq(+1, SOPC_strcmp_ignore_case(test4, ntest1));
+    ck_assert_int_eq(+1, SOPC_strcmp_ignore_case(test4, ntest2));
+    ck_assert_int_eq(+1, SOPC_strcmp_ignore_case(test4, ntest3));
+    ck_assert_int_eq(+1, SOPC_strcmp_ignore_case(test4, ntest4));
+
+    ck_assert_int_eq(-1, SOPC_strcmp_ignore_case(ntest1, test1));
+    ck_assert_int_eq(-1, SOPC_strcmp_ignore_case(ntest1, test2));
+    ck_assert_int_eq(-1, SOPC_strcmp_ignore_case(ntest1, test3));
+    ck_assert_int_eq(-1, SOPC_strcmp_ignore_case(ntest1, test4));
+    ck_assert_int_eq(-1, SOPC_strcmp_ignore_case(ntest2, test1));
+    ck_assert_int_eq(-1, SOPC_strcmp_ignore_case(ntest2, test2));
+    ck_assert_int_eq(-1, SOPC_strcmp_ignore_case(ntest2, test3));
+    ck_assert_int_eq(-1, SOPC_strcmp_ignore_case(ntest2, test4));
+    ck_assert_int_eq(-1, SOPC_strcmp_ignore_case(ntest3, test1));
+    ck_assert_int_eq(-1, SOPC_strcmp_ignore_case(ntest3, test2));
+    ck_assert_int_eq(-1, SOPC_strcmp_ignore_case(ntest3, test3));
+    ck_assert_int_eq(-1, SOPC_strcmp_ignore_case(ntest3, test4));
+    ck_assert_int_eq(-1, SOPC_strcmp_ignore_case(ntest4, test1));
+    ck_assert_int_eq(-1, SOPC_strcmp_ignore_case(ntest4, test2));
+    ck_assert_int_eq(-1, SOPC_strcmp_ignore_case(ntest4, test3));
+    ck_assert_int_eq(-1, SOPC_strcmp_ignore_case(ntest4, test4));
+
+    // Test nominal case (inequality with different sizes)
+
+    ck_assert_int_eq(-1, SOPC_strcmp_ignore_case(test1, long_test1));
+    ck_assert_int_eq(+1, SOPC_strcmp_ignore_case(long_test1, test1));
+}
+END_TEST
+
+START_TEST(test_strcmp_ignore_case_alt_end)
+{
+    char test1[] = "te";
+    char test2[] = "Te-az";
+    char test3[] = "tE/ee";
+    char test4[] = "TE?r";
+    char ntest1[] = "de";
+    char ntest2[] = "De-uz";
+    char ntest3[] = "ta";
+    char ntest4[] = "tA-Zz";
+    char long_test1[] = "tes";
+
+    // Test nominal case (equality result)
+    //// Each possible combination of case
+    ck_assert_int_eq(0, SOPC_strcmp_ignore_case_alt_end(test1, test1, '-'));
+    ck_assert_int_eq(0, SOPC_strcmp_ignore_case_alt_end(test1, test2, '-'));
+    ck_assert_int_eq(0, SOPC_strcmp_ignore_case_alt_end(test1, test3, '/'));
+    ck_assert_int_eq(0, SOPC_strcmp_ignore_case_alt_end(test1, test4, '?'));
+    ck_assert_int_eq(0, SOPC_strcmp_ignore_case_alt_end(test2, test1, '-'));
+    ck_assert_int_eq(0, SOPC_strcmp_ignore_case_alt_end(test2, test2, '-'));
+    ck_assert_int_eq(-1, SOPC_strcmp_ignore_case_alt_end(test2, test3, '-'));
+    ck_assert_int_eq(-1, SOPC_strcmp_ignore_case_alt_end(test2, test4, '-'));
+    ck_assert_int_eq(0, SOPC_strcmp_ignore_case_alt_end(test3, test1, '/'));
+    ck_assert_int_eq(+1, SOPC_strcmp_ignore_case_alt_end(test3, test2, '-'));
+    ck_assert_int_eq(0, SOPC_strcmp_ignore_case_alt_end(test3, test3, '/'));
+    ck_assert_int_eq(+1, SOPC_strcmp_ignore_case_alt_end(test3, test4, '?'));
+    ck_assert_int_eq(0, SOPC_strcmp_ignore_case_alt_end(test4, test1, '?'));
+    ck_assert_int_eq(+1, SOPC_strcmp_ignore_case_alt_end(test4, test2, '-'));
+    ck_assert_int_eq(+1, SOPC_strcmp_ignore_case_alt_end(test4, test3, '/'));
+    ck_assert_int_eq(0, SOPC_strcmp_ignore_case_alt_end(test4, test4, '?'));
+
+    // Test nominal case (non equality result)
+    //// Each possible combination of case
+    ck_assert_int_eq(+1, SOPC_strcmp_ignore_case_alt_end(test1, ntest1, '-'));
+    ck_assert_int_eq(+1, SOPC_strcmp_ignore_case_alt_end(test1, ntest2, '-'));
+    ck_assert_int_eq(+1, SOPC_strcmp_ignore_case_alt_end(test1, ntest3, '-'));
+    ck_assert_int_eq(+1, SOPC_strcmp_ignore_case_alt_end(test1, ntest4, '-'));
+    ck_assert_int_eq(+1, SOPC_strcmp_ignore_case_alt_end(test2, ntest1, '-'));
+    ck_assert_int_eq(+1, SOPC_strcmp_ignore_case_alt_end(test2, ntest2, '-'));
+    ck_assert_int_eq(+1, SOPC_strcmp_ignore_case_alt_end(test2, ntest3, '-'));
+    ck_assert_int_eq(+1, SOPC_strcmp_ignore_case_alt_end(test2, ntest4, '-'));
+    ck_assert_int_eq(+1, SOPC_strcmp_ignore_case_alt_end(test3, ntest1, '-'));
+    ck_assert_int_eq(+1, SOPC_strcmp_ignore_case_alt_end(test3, ntest2, '-'));
+    ck_assert_int_eq(+1, SOPC_strcmp_ignore_case_alt_end(test3, ntest3, '-'));
+    ck_assert_int_eq(+1, SOPC_strcmp_ignore_case_alt_end(test3, ntest4, '-'));
+    ck_assert_int_eq(+1, SOPC_strcmp_ignore_case_alt_end(test4, ntest1, '-'));
+    ck_assert_int_eq(+1, SOPC_strcmp_ignore_case_alt_end(test4, ntest2, '-'));
+    ck_assert_int_eq(+1, SOPC_strcmp_ignore_case_alt_end(test4, ntest3, '-'));
+    ck_assert_int_eq(+1, SOPC_strcmp_ignore_case_alt_end(test4, ntest4, '-'));
+
+    ck_assert_int_eq(-1, SOPC_strcmp_ignore_case_alt_end(ntest1, test1, '-'));
+    ck_assert_int_eq(-1, SOPC_strcmp_ignore_case_alt_end(ntest1, test2, '-'));
+    ck_assert_int_eq(-1, SOPC_strcmp_ignore_case_alt_end(ntest1, test3, '-'));
+    ck_assert_int_eq(-1, SOPC_strcmp_ignore_case_alt_end(ntest1, test4, '-'));
+    ck_assert_int_eq(-1, SOPC_strcmp_ignore_case_alt_end(ntest2, test1, '-'));
+    ck_assert_int_eq(-1, SOPC_strcmp_ignore_case_alt_end(ntest2, test2, '-'));
+    ck_assert_int_eq(-1, SOPC_strcmp_ignore_case_alt_end(ntest2, test3, '-'));
+    ck_assert_int_eq(-1, SOPC_strcmp_ignore_case_alt_end(ntest2, test4, '-'));
+    ck_assert_int_eq(-1, SOPC_strcmp_ignore_case_alt_end(ntest3, test1, '-'));
+    ck_assert_int_eq(-1, SOPC_strcmp_ignore_case_alt_end(ntest3, test2, '-'));
+    ck_assert_int_eq(-1, SOPC_strcmp_ignore_case_alt_end(ntest3, test3, '-'));
+    ck_assert_int_eq(-1, SOPC_strcmp_ignore_case_alt_end(ntest3, test4, '-'));
+    ck_assert_int_eq(-1, SOPC_strcmp_ignore_case_alt_end(ntest4, test1, '-'));
+    ck_assert_int_eq(-1, SOPC_strcmp_ignore_case_alt_end(ntest4, test2, '-'));
+    ck_assert_int_eq(-1, SOPC_strcmp_ignore_case_alt_end(ntest4, test3, '-'));
+    ck_assert_int_eq(-1, SOPC_strcmp_ignore_case_alt_end(ntest4, test4, '-'));
+
+    // Test nominal case (inequality with different sizes)
+
+    ck_assert_int_eq(-1, SOPC_strcmp_ignore_case_alt_end(test1, long_test1, '-'));
+    ck_assert_int_eq(+1, SOPC_strcmp_ignore_case_alt_end(long_test1, test1, '-'));
 }
 END_TEST
 
@@ -3780,7 +3940,9 @@ Suite* tests_make_suite_tools(void)
 
     s = suite_create("Tools");
     tc_basetools = tcase_create("String tools");
-    tcase_add_test(tc_basetools, test_base_tools);
+    tcase_add_test(tc_basetools, test_strncmp_ignore_case);
+    tcase_add_test(tc_basetools, test_strcmp_ignore_case);
+    tcase_add_test(tc_basetools, test_strcmp_ignore_case_alt_end);
     tcase_add_test(tc_basetools, test_helper_uri);
     tcase_add_test(tc_basetools, test_strtouint);
     tcase_add_test(tc_basetools, test_string_nodeid);
