@@ -143,6 +143,16 @@ void SOPC_SLinkedList_Apply(SOPC_SLinkedList* list, void (*pFn)(uint32_t id, voi
 void* SOPC_SLinkedList_RemoveFromId(SOPC_SLinkedList* list, uint32_t id);
 
 /**
+ *  \brief              Find and remove the first value pointer equal (FIFO) in the linked list
+ *
+ *  \param list     Pointer on the linked list in which element must be found
+ *  \param value    Pointer on the value to remove from list
+ *
+ *  \return         Pointer to the value removed if succeeded, NULL otherwise
+ */
+void* SOPC_SLinkedList_RemoveFromValuePtr(SOPC_SLinkedList* list, void* value);
+
+/**
  *  \brief          Delete all elements of the given linked list
  *
  *  \param list     Pointer to the list of elements to be deleted

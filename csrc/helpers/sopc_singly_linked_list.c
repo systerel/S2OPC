@@ -254,6 +254,14 @@ static bool SOPC_InternalSLinkedList_IsEltIdEqualToEltToRemove(SOPC_SLinkedList_
     return left->id == right->id;
 }
 
+static bool SOPC_InternalSLinkedList_IsEltValueEqualToEltToRemove(SOPC_SLinkedList_Elt* left,
+                                                                  SOPC_SLinkedList_Elt* right)
+{
+    assert(left != NULL);
+    assert(right != NULL);
+    return left->value == right->value;
+}
+
 static void* SOPC_SLinkedList_RemoveFromElt(SOPC_SLinkedList* list,
                                             SOPC_SLinkedList_Elt* eltToRemove,
                                             bool (*isElementFct)(SOPC_SLinkedList_Elt* left,
@@ -367,6 +375,15 @@ void* SOPC_SLinkedList_RemoveFromId(SOPC_SLinkedList* list, uint32_t id)
     SOPC_SLinkedList_Elt eltToRemove = {id, NULL, NULL};
 
     return SOPC_SLinkedList_RemoveFromElt(list, &eltToRemove, SOPC_InternalSLinkedList_IsEltIdEqualToEltToRemove);
+}
+
+void* SOPC_SLinkedList_RemoveFromValuePtr(SOPC_SLinkedList* list, void* value)
+{
+    assert(list != NULL);
+
+    SOPC_SLinkedList_Elt eltToRemove = {0, value, NULL};
+
+    return SOPC_SLinkedList_RemoveFromElt(list, &eltToRemove, SOPC_InternalSLinkedList_IsEltValueEqualToEltToRemove);
 }
 
 void SOPC_SLinkedList_Clear(SOPC_SLinkedList* list)
