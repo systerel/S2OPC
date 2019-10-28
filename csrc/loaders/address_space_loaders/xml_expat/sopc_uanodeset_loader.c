@@ -760,6 +760,7 @@ static bool start_in_extension_object(struct parse_context_t* ctx, parse_complex
         ok = NULL != currentTagCtx->childs;
         // Do not consider ExtensionObject exceptional case anymore to parse body content
         ctx->complex_value_ctx.is_extension_object = false;
+        currentTagCtx->set = true;
     }
     else if (0 == strncmp("TypeId", currentTagCtx->name, strlen("TypedId")))
     {
@@ -1499,12 +1500,20 @@ static bool set_variant_value_extensionobject(SOPC_ExtensionObject** extObj,
     parse_complex_value_tag_t* typeIdTagCtx = NULL;
     bool typeid_tag_ok = complex_value_tag_from_tag_name_no_namespace("TypeId", tagsContext, &typeIdTagCtx);
     assert(typeid_tag_ok);
+    if (!typeIdTagCtx->set)
+    {
+        return false;
+    }
     assert(NULL != typeIdTagCtx->user_data);
     SOPC_EncodeableType* encType = typeIdTagCtx->user_data;
 
     parse_complex_value_tag_t* bodyTagCtx = NULL;
     bool body_tag_ok = complex_value_tag_from_tag_name_no_namespace("Body", tagsContext, &bodyTagCtx);
     assert(body_tag_ok);
+    if (!bodyTagCtx->set)
+    {
+        return false;
+    }
     assert(NULL != bodyTagCtx->childs);
 
     SOPC_ExtensionObject* newExtObj = SOPC_Malloc(sizeof(SOPC_ExtensionObject));
@@ -1867,17 +1876,12 @@ static bool end_in_extension_object(struct parse_context_t* ctx, parse_complex_v
         SOPC_NodeId_Clear(nodeId);
         SOPC_Free(nodeId);
     }
-    else if (0 == strncmp("Body", currentTagCtx->name, strlen("Body")))
-    {
-        currentTagCtx->set = true;
-        ok = true;
-    }
     else if (0 == strncmp("Identifier", currentTagCtx->name, strlen("Identifier")))
     {
         // Skip until end of TypeId
         ok = true;
     }
-    else
+    else // end of Body shall not trigger this function (is_extension_object set to false on Body start)
     {
         assert(false);
     }
