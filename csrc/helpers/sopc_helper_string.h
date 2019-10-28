@@ -41,6 +41,32 @@
 int SOPC_strncmp_ignore_case(const char* s1, const char* s2, size_t size);
 
 /**
+ *  \brief Compare 2 string in a case-insensitive manner.
+ *  Comparison returns 0 if all characters are identical
+ *
+ *  \param s1    A non null string terminated by '\0' character
+ *  \param s2    A non null string terminated by '\0' character
+ *
+ *  \return      0 if string are identical in a case-insensitive way, -1 if s1 < s2 and +1 if s1 > s2
+ *              (based on first lower case character value comparison).
+ */
+int SOPC_strcmp_ignore_case(const char* s1, const char* s2);
+
+/**
+ *  \brief Compare 2 string in a case-insensitive manner until \p endCharacter or '\0' character found.
+ *  Comparison returns 0 if all characters are identical and \p s1 and \p s2 end is reached with
+ *  \p endCharacter or '\0' character.
+ *
+ *  \param s1            A non null string terminated by '\0' character (and which might contain \p endCharacter)
+ *  \param s2            A non null string terminated by '\0' character (and which might contain \p endCharacter)
+ *  \param endCharacter  An alternative endCharacter to consider for stopping comparison.
+ *
+ *  \return      0 if string are identical in a case-insensitive way, -1 if s1 < s2 and +1 if s1 > s2
+ *              (based on first lower case character value comparison).
+ */
+int SOPC_strcmp_ignore_case_alt_end(const char* s1, const char* s2, char endCharacter);
+
+/**
  * \brief      Read a uint8_t from the string with strtoul.
  *
  * \param sz   A pointer to the CString containing the number.
