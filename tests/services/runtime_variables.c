@@ -55,16 +55,14 @@ static time_t parse_build_date(const char* build_date)
 }
 
 RuntimeVariables build_runtime_variables(SOPC_Build_Info build_info,
-                                         const char* product_uri,
-                                         char** app_namespace_uris,
+                                         SOPC_Server_Config* server_config,
                                          const char* manufacturer_name)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     RuntimeVariables runtimeVariables;
 
-    runtimeVariables.server_uri = product_uri;
-    runtimeVariables.app_namespace_uris = app_namespace_uris;
+    runtimeVariables.serverConfig = server_config;
 
     runtimeVariables.secondsTillShutdown = 0;
     runtimeVariables.server_state = OpcUa_ServerState_Running;
@@ -74,7 +72,8 @@ RuntimeVariables build_runtime_variables(SOPC_Build_Info build_info,
 
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
 
-    status = SOPC_String_AttachFromCstring(&runtimeVariables.build_info.ProductUri, (char*) product_uri);
+    status =
+        SOPC_String_AttachFrom(&runtimeVariables.build_info.ProductUri, &server_config->serverDescription.ProductUri);
     assert(SOPC_STATUS_OK == status);
 
     status = SOPC_String_AttachFromCstring(&runtimeVariables.build_info.ManufacturerName, (char*) manufacturer_name);
@@ -324,7 +323,7 @@ static bool set_server_server_status_variables(SOPC_Array* write_values, Runtime
            set_server_server_status_build_info_variables(write_values, &vars->build_info);
 }
 
-static bool set_server_server_array_value(OpcUa_WriteValue* wv, const char* server_uri)
+static bool set_server_server_array_value(OpcUa_WriteValue* wv, const SOPC_String* server_uri)
 {
     set_write_value_id(wv, OpcUaId_Server_ServerArray);
     wv->Value.Value.ArrayType = SOPC_VariantArrayType_Array;
@@ -339,7 +338,7 @@ static bool set_server_server_array_value(OpcUa_WriteValue* wv, const char* serv
 
     SOPC_String_Initialize(uri_copy);
 
-    if (SOPC_String_CopyFromCString(uri_copy, server_uri) != SOPC_STATUS_OK)
+    if (SOPC_String_Copy(uri_copy, server_uri) != SOPC_STATUS_OK)
     {
         SOPC_String_Clear(uri_copy);
         SOPC_Free(uri_copy);
@@ -393,6 +392,50 @@ static bool set_server_namespace_array_value(OpcUa_WriteValue* wv, char** app_na
     for (size_t i = 0; i < n_app_namespace_uris - 1; ++i)
     {
         if (SOPC_String_CopyFromCString(&uris[1 + i], app_namespace_uris[i]) != SOPC_STATUS_OK)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+static bool set_server_capabilities_locale_ids_array_value(OpcUa_WriteValue* wv, char** app_locale_ids)
+{
+    set_write_value_id(wv, OpcUaId_Server_ServerCapabilities_LocaleIdArray);
+    wv->Value.Value.ArrayType = SOPC_VariantArrayType_Array;
+    wv->Value.Value.BuiltInTypeId = SOPC_String_Id;
+
+    size_t n_locale_ids = 0;
+
+    if (app_locale_ids != NULL)
+    {
+        for (size_t i = 0; app_locale_ids[i] != NULL; ++i)
+        {
+            ++n_locale_ids;
+        }
+    }
+
+    assert(n_locale_ids <= INT32_MAX);
+
+    SOPC_String* localeIds = SOPC_Calloc(n_locale_ids, sizeof(SOPC_String));
+
+    if (localeIds == NULL)
+    {
+        return false;
+    }
+
+    for (size_t i = 0; i < n_locale_ids; i++)
+    {
+        SOPC_String_Initialize(&localeIds[i]);
+    }
+
+    wv->Value.Value.Value.Array.Content.StringArr = localeIds;
+    wv->Value.Value.Value.Array.Length = (int32_t) n_locale_ids;
+
+    for (size_t i = 0; i < n_locale_ids; i++)
+    {
+        if (SOPC_String_CopyFromCString(&localeIds[i], app_locale_ids[i]) != SOPC_STATUS_OK)
         {
             return false;
         }
@@ -483,15 +526,17 @@ static bool set_server_capabilities_server_profile_array(OpcUa_WriteValue* wv)
 
 static bool set_server_variables(SOPC_Array* write_values, RuntimeVariables* vars)
 {
-    OpcUa_WriteValue* values = append_write_values(write_values, 7);
-    return values != NULL && set_server_server_array_value(&values[0], vars->server_uri) &&
-           set_server_namespace_array_value(&values[1], vars->app_namespace_uris) &&
+    OpcUa_WriteValue* values = append_write_values(write_values, 8);
+    return values != NULL &&
+           set_server_server_array_value(&values[0], &vars->serverConfig->serverDescription.ProductUri) &&
+           set_server_namespace_array_value(&values[1], vars->serverConfig->namespaces) &&
            set_server_service_level_value(&values[2], vars->service_level) &&
            set_write_value_bool(&values[3], OpcUaId_Server_Auditing, vars->auditing) &&
            set_write_value_bool(&values[4], OpcUaId_Server_ServerDiagnostics_EnabledFlag, false) &&
            set_write_value_int32(&values[5], OpcUaId_Server_ServerRedundancy_RedundancySupport,
                                  OpcUa_RedundancySupport_None) &&
            set_server_capabilities_server_profile_array(&values[6]) &&
+           set_server_capabilities_locale_ids_array_value(&values[7], vars->serverConfig->localeIds) &&
            set_server_server_status_variables(write_values, vars) &&
            set_server_capabilities_max_variables(write_values) &&
            set_server_capabilities_operation_limits_variables(write_values, vars);

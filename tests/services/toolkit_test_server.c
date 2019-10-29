@@ -898,9 +898,7 @@ int main(int argc, char* argv[])
     /* Update server information runtime variables in address space */
     if (SOPC_STATUS_OK == status)
     {
-        runtime_vars =
-            build_runtime_variables(build_info, SOPC_String_GetRawCString(&serverConfig->serverDescription.ProductUri),
-                                    serverConfig->namespaces, "Systerel");
+        runtime_vars = build_runtime_variables(build_info, serverConfig, "Systerel");
 
         if (!set_runtime_variables(epConfigIdx, &runtime_vars))
         {

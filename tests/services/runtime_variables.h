@@ -25,8 +25,7 @@
 
 typedef struct _RuntimeVariables
 {
-    const char* server_uri;
-    char** app_namespace_uris;
+    SOPC_Server_Config* serverConfig;
     uint32_t secondsTillShutdown;
     SOPC_LocalizedText shutdownReason;
     OpcUa_ServerState server_state;
@@ -41,9 +40,7 @@ typedef struct _RuntimeVariables
  *
  * \param build_info  Toolkit build information structure
  *
- * \param product_uri Server product URI
- *
- * \param app_namespace_uris Server namespace URIs
+ * \param server_config Server configuration data
  *
  * \param  manufacturer_name Sever manufacturer name.
  *
@@ -51,8 +48,7 @@ typedef struct _RuntimeVariables
  *
  */
 RuntimeVariables build_runtime_variables(SOPC_Build_Info build_info,
-                                         const char* product_uri,
-                                         char** app_namespace_uris,
+                                         SOPC_Server_Config* server_config,
                                          const char* manufacturer_name);
 
 /**
