@@ -41,9 +41,9 @@
 #include "testlib_write.h"
 #include "util_variant.h"
 
-#define ENDPOINT_URL "opc.tcp://localhost:4841"
-#define APPLICATION_URI "urn:S2OPC:localhost"
-#define PRODUCT_URI "urn:S2OPC:localhost"
+#define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"
+#define DEFAULT_APPLICATION_URI "urn:S2OPC:localhost"
+#define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost"
 
 static int endpointClosed = false;
 static int getEndpointsReceived = false;
@@ -100,7 +100,7 @@ static void Test_ComEvent_FctServer(SOPC_App_Com_Event event, uint32_t idOrStatu
             printf("<Test_Server_Local_Service: received GetEndpointsResponse \n");
             SOPC_String endpointUrl;
             SOPC_String_Initialize(&endpointUrl);
-            SOPC_ReturnStatus testStatus = SOPC_String_AttachFromCstring(&endpointUrl, ENDPOINT_URL);
+            SOPC_ReturnStatus testStatus = SOPC_String_AttachFromCstring(&endpointUrl, DEFAULT_ENDPOINT_URL);
             bool validEndpoints = true;
             OpcUa_GetEndpointsResponse* getEndpointsResp = (OpcUa_GetEndpointsResponse*) param;
 
@@ -140,7 +140,7 @@ static void* getGetEndpoints_message(void)
     status = SOPC_Encodeable_Create(&OpcUa_GetEndpointsRequest_EncodeableType, (void**) &getEndpointReq);
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_String_AttachFromCstring(&getEndpointReq->EndpointUrl, ENDPOINT_URL);
+        status = SOPC_String_AttachFromCstring(&getEndpointReq->EndpointUrl, DEFAULT_ENDPOINT_URL);
     }
     return getEndpointReq;
 }
@@ -204,7 +204,7 @@ int main(int argc, char* argv[])
     if (SOPC_STATUS_OK == status)
     {
         // Init unique endpoint structure
-        epConfig->endpointURL = ENDPOINT_URL;
+        epConfig->endpointURL = DEFAULT_ENDPOINT_URL;
 
         status = SOPC_KeyManager_SerializedCertificate_CreateFromFile("./server_public/server_2k_cert.der",
                                                                       &serverCertificate);
@@ -240,8 +240,8 @@ int main(int argc, char* argv[])
 
     // Application description configuration
     OpcUa_ApplicationDescription_Initialize(&sConfig->serverDescription);
-    SOPC_String_AttachFromCstring(&sConfig->serverDescription.ApplicationUri, APPLICATION_URI);
-    SOPC_String_AttachFromCstring(&sConfig->serverDescription.ProductUri, PRODUCT_URI);
+    SOPC_String_AttachFromCstring(&sConfig->serverDescription.ApplicationUri, DEFAULT_APPLICATION_URI);
+    SOPC_String_AttachFromCstring(&sConfig->serverDescription.ProductUri, DEFAULT_PRODUCT_URI);
     sConfig->serverDescription.ApplicationType = OpcUa_ApplicationType_Server;
     SOPC_String_AttachFromCstring(&sConfig->serverDescription.ApplicationName.defaultText,
                                   "S2OPC toolkit server example");

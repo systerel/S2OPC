@@ -32,8 +32,8 @@
 
 /* Secure Channel configuration */
 extern char* ENDPOINT_URL; // See config.c, possible override by main
-#define APPLICATION_URI "urn:S2OPC:localhost"
-#define PRODUCT_URI "urn:S2OPC:localhost"
+#define DEFAULT_APPLICATION_URI "urn:S2OPC:localhost"
+#define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost"
 #define GATEWAY_SERVER_URI ""
 
 /* Security Policy is None or Basic256 or Basic256Sha256 */

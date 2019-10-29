@@ -35,7 +35,7 @@
 #include "libs2opc_client.h"
 
 /* Secure Channel configuration */
-#define ENDPOINT_URL "opc.tcp://localhost:4841"
+#define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"
 /* Security Policy is None or Basic256 or Basic256Sha256 */
 #define SECURITY_POLICY SOPC_SecurityPolicy_None_URI
 /* Security Mode is None or Sign or SignAndEncrypt */
@@ -365,8 +365,8 @@ static bool parse_options(cmd_line_options_t* o, int argc, char* const* argv)
 
     if (NULL == o->endpoint_url)
     {
-        o->endpoint_url = malloc(strlen(ENDPOINT_URL) + 1);
-        strcpy(o->endpoint_url, ENDPOINT_URL);
+        o->endpoint_url = malloc(strlen(DEFAULT_ENDPOINT_URL) + 1);
+        strcpy(o->endpoint_url, DEFAULT_ENDPOINT_URL);
     }
     if (NULL == o->policyId)
     {

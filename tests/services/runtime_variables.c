@@ -56,7 +56,7 @@ static time_t parse_build_date(const char* build_date)
 
 RuntimeVariables build_runtime_variables(SOPC_Build_Info build_info,
                                          const char* product_uri,
-                                         const char** app_namespace_uris,
+                                         char** app_namespace_uris,
                                          const char* manufacturer_name)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
@@ -352,7 +352,7 @@ static bool set_server_server_array_value(OpcUa_WriteValue* wv, const char* serv
     return true;
 }
 
-static bool set_server_namespace_array_value(OpcUa_WriteValue* wv, const char** app_namespace_uris)
+static bool set_server_namespace_array_value(OpcUa_WriteValue* wv, char** app_namespace_uris)
 {
     set_write_value_id(wv, OpcUaId_Server_NamespaceArray);
     wv->Value.Value.ArrayType = SOPC_VariantArrayType_Array;

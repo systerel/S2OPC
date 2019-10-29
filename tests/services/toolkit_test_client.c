@@ -42,7 +42,7 @@
 
 #include "embedded/sopc_addspace_loader.h"
 
-#define ENDPOINT_URL "opc.tcp://localhost:4841"
+#define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"
 
 static int32_t sessionsActivated = 0;
 static int32_t sessionsClosed = 0;
@@ -126,7 +126,7 @@ static void Test_ComEvent_FctClient(SOPC_App_Com_Event event, uint32_t idOrStatu
                 printf(">>Test_Client_Toolkit: received GetEndpointsResponse \n");
                 SOPC_String endpointUrl;
                 SOPC_String_Initialize(&endpointUrl);
-                SOPC_ReturnStatus testStatus = SOPC_String_AttachFromCstring(&endpointUrl, ENDPOINT_URL);
+                SOPC_ReturnStatus testStatus = SOPC_String_AttachFromCstring(&endpointUrl, DEFAULT_ENDPOINT_URL);
                 bool validEndpoints = true;
                 OpcUa_GetEndpointsResponse* getEndpointsResp = (OpcUa_GetEndpointsResponse*) param;
 
@@ -229,14 +229,14 @@ static void* getGetEndpoints_message(void)
     status = SOPC_Encodeable_Create(&OpcUa_GetEndpointsRequest_EncodeableType, (void**) &getEndpointReq);
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_String_AttachFromCstring(&getEndpointReq->EndpointUrl, ENDPOINT_URL);
+        status = SOPC_String_AttachFromCstring(&getEndpointReq->EndpointUrl, DEFAULT_ENDPOINT_URL);
     }
     return getEndpointReq;
 }
 
 // A Secure channel connection configuration
 SOPC_SecureChannel_Config scConfig = {.isClientSc = true,
-                                      .url = ENDPOINT_URL,
+                                      .url = DEFAULT_ENDPOINT_URL,
                                       .crt_cli = NULL,
                                       .key_priv_cli = NULL,
                                       .crt_srv = NULL,

@@ -36,7 +36,7 @@
 #include "sopc_toolkit_config.h"
 #include "sopc_types.h"
 
-#define ENDPOINT_URL "opc.tcp://localhost:4841"
+#define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"
 
 #define UNEXPECTED_ERROR 1
 #define UNEXPECTED_STATUS_CODE 2
@@ -170,7 +170,7 @@ static void Test_ComEvent_FctClient(SOPC_App_Com_Event event, uint32_t idOrStatu
 
 // A Secure channel connection configuration
 SOPC_SecureChannel_Config scConfig = {.isClientSc = true,
-                                      .url = ENDPOINT_URL,
+                                      .url = DEFAULT_ENDPOINT_URL,
                                       .crt_cli = NULL,
                                       .key_priv_cli = NULL,
                                       .crt_srv = NULL,

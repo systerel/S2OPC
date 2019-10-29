@@ -49,13 +49,13 @@
 #include "static_security_data.h"
 #endif
 
-#define ENDPOINT_URL "opc.tcp://localhost:4841"
-#define APPLICATION_URI "urn:S2OPC:localhost"
-#define PRODUCT_URI "urn:S2OPC:localhost"
-#define PRODUCT_URI_2 "urn:S2OPC:localhost_2"
+#define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"
+#define DEFAULT_APPLICATION_URI "urn:S2OPC:localhost"
+#define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost"
+#define DEFAULT_PRODUCT_URI_2 "urn:S2OPC:localhost_2"
 
 /* Define application namespaces: ns=1 and ns=2 (NULL terminated array) */
-static const char* app_namespace_uris[] = {(const char*) PRODUCT_URI, PRODUCT_URI_2, NULL};
+static char* default_app_namespace_uris[] = {DEFAULT_PRODUCT_URI, DEFAULT_PRODUCT_URI_2, NULL};
 
 static int32_t endpointClosed = 0;
 static bool secuActive = true;
@@ -205,11 +205,14 @@ static bool Server_LoadDefaultConfiguration(SOPC_S2OPC_Config* output_s2opcConfi
     assert(NULL != output_s2opcConfig);
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
-    //  Set application description of server to be returned by discovery services (GetEndpoints, FindServers)
+    // Set namespaces
+    output_s2opcConfig->serverConfig.namespaces = default_app_namespace_uris;
+
+    // Set application description of server to be returned by discovery services (GetEndpoints, FindServers)
     OpcUa_ApplicationDescription* serverDescription = &output_s2opcConfig->serverConfig.serverDescription;
     OpcUa_ApplicationDescription_Initialize(serverDescription);
-    SOPC_String_AttachFromCstring(&serverDescription->ApplicationUri, APPLICATION_URI);
-    SOPC_String_AttachFromCstring(&serverDescription->ProductUri, PRODUCT_URI);
+    SOPC_String_AttachFromCstring(&serverDescription->ApplicationUri, DEFAULT_APPLICATION_URI);
+    SOPC_String_AttachFromCstring(&serverDescription->ProductUri, DEFAULT_PRODUCT_URI);
     serverDescription->ApplicationType = OpcUa_ApplicationType_Server;
     SOPC_String_AttachFromCstring(&serverDescription->ApplicationName.defaultText, "S2OPC toolkit server example");
     SOPC_String_AttachFromCstring(&serverDescription->ApplicationName.defaultLocale, "en-US");
@@ -224,7 +227,7 @@ static bool Server_LoadDefaultConfiguration(SOPC_S2OPC_Config* output_s2opcConfi
     output_s2opcConfig->serverConfig.nbEndpoints = 1;
     SOPC_Endpoint_Config* pEpConfig = &output_s2opcConfig->serverConfig.endpoints[0];
     pEpConfig->serverConfigPtr = &output_s2opcConfig->serverConfig;
-    pEpConfig->endpointURL = ENDPOINT_URL;
+    pEpConfig->endpointURL = DEFAULT_ENDPOINT_URL;
 
     /*
      * Define the certificates, security policies, security modes and user token policies supported by endpoint
@@ -880,7 +883,9 @@ int main(int argc, char* argv[])
     /* Update server information runtime variables in address space */
     if (SOPC_STATUS_OK == status)
     {
-        runtime_vars = build_runtime_variables(build_info, PRODUCT_URI, app_namespace_uris, "Systerel");
+        runtime_vars =
+            build_runtime_variables(build_info, SOPC_String_GetRawCString(&serverConfig->serverDescription.ProductUri),
+                                    serverConfig->namespaces, "Systerel");
 
         if (!set_runtime_variables(epConfigIdx, &runtime_vars))
         {
@@ -905,7 +910,7 @@ int main(int argc, char* argv[])
     uint32_t secondsTillShutdown = SHUTDOWN_PHASE_IN_SECONDS;
     // From part 5: "The server has shut down or is in the process of shutting down."
     runtime_vars.server_state = OpcUa_ServerState_Shutdown;
-    SOPC_String_AttachFromCstring(&runtime_vars.shutdownReason.defaultLocale, "en");
+    SOPC_String_AttachFromCstring(&runtime_vars.shutdownReason.defaultLocale, "");
     SOPC_String_AttachFromCstring(&runtime_vars.shutdownReason.defaultText, "Requested shutdown");
     while (SOPC_STATUS_OK == status && stopServer == 1 && SOPC_Atomic_Int_Get(&endpointClosed) == 0 &&
            !targetTimeReached)
