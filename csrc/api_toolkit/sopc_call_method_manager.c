@@ -23,10 +23,25 @@
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
-typedef struct SOPC_MethodCallManager_FuncWrapper
+static void SOPC_MethodCallManager_Free_MF(void* data)
 {
-    SOPC_Method_Func methodFunc;
-} SOPC_MethodCallManager_FuncWrapper;
+    if (NULL == data)
+    {
+        return;
+    }
+
+    SOPC_MethodCallFunc* mf = (SOPC_MethodCallFunc*) data;
+
+    if (NULL == mf->pFnFree || NULL == mf->pParam)
+    {
+        return;
+    }
+
+    mf->pMethodFunc = NULL;
+    mf->pFnFree(mf->pParam);
+    mf->pParam = NULL;
+    SOPC_Free(mf);
+}
 
 static void SOPC_MethodCallManager_Free(SOPC_MethodCallManager* mcm)
 {
@@ -45,7 +60,7 @@ static void SOPC_MethodCallManager_Free(SOPC_MethodCallManager* mcm)
     }
 }
 
-static SOPC_Method_Func SOPC_MethodCallManager_Get(SOPC_MethodCallManager* mcm, SOPC_NodeId* methodId)
+static SOPC_MethodCallFunc* SOPC_MethodCallManager_Get(SOPC_MethodCallManager* mcm, SOPC_NodeId* methodId)
 {
     if (NULL == mcm || NULL == methodId)
     {
@@ -53,13 +68,7 @@ static SOPC_Method_Func SOPC_MethodCallManager_Get(SOPC_MethodCallManager* mcm, 
     }
     SOPC_Dict* dict = (SOPC_Dict*) mcm->pUserData;
     assert(NULL != dict);
-    SOPC_Method_Func methodFunc = NULL;
-    SOPC_MethodCallManager_FuncWrapper* wrapper =
-        (SOPC_MethodCallManager_FuncWrapper*) SOPC_Dict_Get(dict, methodId, NULL);
-    if (NULL != wrapper)
-    {
-        methodFunc = wrapper->methodFunc;
-    }
+    SOPC_MethodCallFunc* methodFunc = (SOPC_MethodCallFunc*) SOPC_Dict_Get(dict, methodId, NULL);
     return methodFunc;
 }
 
@@ -71,7 +80,7 @@ SOPC_MethodCallManager* SOPC_MethodCallManager_Create()
         return NULL;
     }
 
-    mcm->pUserData = SOPC_NodeId_Dict_Create(false, &SOPC_Free);
+    mcm->pUserData = SOPC_NodeId_Dict_Create(false, &SOPC_MethodCallManager_Free_MF);
     if (NULL == mcm->pUserData)
     {
         SOPC_Free(mcm);
@@ -87,32 +96,27 @@ SOPC_MethodCallManager* SOPC_MethodCallManager_Create()
     return mcm;
 }
 
-/**
- * \brief Associate a C function to a NodeId of a Method.
- * This function should be used only with the basic implementation of SOPC_MethodCallManager provided by the toolkit.
- *
- * \param mcm   a valid pointer on a SOPC_MethodCallManager returned by SOPC_MethodCallManager_Create().
- * \param methodId        a valid pointer on a SOPC_NodeId of the method.
- * \param methodFunc      a valid pointer on a C function to associate with the given methodId.
- *
- * \return SOPC_STATUS_OK when the function succeed, SOPC_STATUS_INVALID_PARAMETERS or SOPC_STATUS_OUT_OF_MEMORY.
- */
 SOPC_ReturnStatus SOPC_MethodCallManager_AddMethod(SOPC_MethodCallManager* mcm,
                                                    SOPC_NodeId* methodId,
-                                                   SOPC_Method_Func methodFunc)
+                                                   SOPC_MethodCallFunc_Ptr methodFunc,
+                                                   void* param,
+                                                   SOPC_MethodCallFunc_Free_Func fnFree)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_Dict* dict = (SOPC_Dict*) mcm->pUserData;
     assert(NULL != dict);
 
-    SOPC_MethodCallManager_FuncWrapper* wrapper = SOPC_Calloc(1, sizeof(SOPC_MethodCallManager_FuncWrapper));
+    SOPC_MethodCallFunc* wrapper = SOPC_Calloc(1, sizeof(SOPC_MethodCallFunc));
     if (NULL == wrapper)
     {
         status = SOPC_STATUS_OUT_OF_MEMORY;
     }
     else
     {
-        wrapper->methodFunc = methodFunc;
+        wrapper->pFnFree = fnFree;
+        wrapper->pMethodFunc = methodFunc;
+        wrapper->pParam = param;
+
         bool b = SOPC_Dict_Insert(dict, methodId, wrapper);
         if (false == b)
         {

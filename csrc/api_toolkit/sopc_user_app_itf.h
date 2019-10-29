@@ -146,9 +146,10 @@ struct SOPC_Server_Config
     SOPC_SerializedCertificate* serverCertificate;
     SOPC_SerializedAsymmetricKey* serverKey;
     SOPC_PKIProvider* pki;
-    SOPC_MethodCallManager*
-        mcm; /**< Method Call service configuration. Can be instantiated with SOPC_MethodCallManager_Create()
-                  or specific code by applicative code. Can be NULL if Method Call service is not used. */
+    SOPC_MethodCallManager* mcm; /**< Method Call service configuration.
+                                      Can be instantiated with SOPC_MethodCallManager_Create()
+                                      or specific code by applicative code.
+                                      Can be NULL if Method Call service is not used. */
 };
 
 /* S2OPC server configuration */
