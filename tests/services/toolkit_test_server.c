@@ -56,6 +56,7 @@
 
 /* Define application namespaces: ns=1 and ns=2 (NULL terminated array) */
 static char* default_app_namespace_uris[] = {DEFAULT_PRODUCT_URI, DEFAULT_PRODUCT_URI_2, NULL};
+static char* default_locale_ids[] = {"en-US", "fr-FR", NULL};
 
 static int32_t endpointClosed = 0;
 static bool secuActive = true;
@@ -207,6 +208,8 @@ static bool Server_LoadDefaultConfiguration(SOPC_S2OPC_Config* output_s2opcConfi
 
     // Set namespaces
     output_s2opcConfig->serverConfig.namespaces = default_app_namespace_uris;
+    // Set locale ids
+    output_s2opcConfig->serverConfig.localeIds = default_locale_ids;
 
     // Set application description of server to be returned by discovery services (GetEndpoints, FindServers)
     OpcUa_ApplicationDescription* serverDescription = &output_s2opcConfig->serverConfig.serverDescription;
@@ -216,6 +219,18 @@ static bool Server_LoadDefaultConfiguration(SOPC_S2OPC_Config* output_s2opcConfi
     serverDescription->ApplicationType = OpcUa_ApplicationType_Server;
     SOPC_String_AttachFromCstring(&serverDescription->ApplicationName.defaultText, "S2OPC toolkit server example");
     SOPC_String_AttachFromCstring(&serverDescription->ApplicationName.defaultLocale, "en-US");
+    SOPC_LocalizedText appNameFr;
+    SOPC_LocalizedText_Initialize(&appNameFr);
+    SOPC_String_AttachFromCstring(&appNameFr.defaultText, "S2OPC toolkit: exemple de serveur");
+    SOPC_String_AttachFromCstring(&appNameFr.defaultLocale, "fr-FR");
+
+    status = SOPC_LocalizedText_AddOrSetLocale(&serverDescription->ApplicationName,
+                                               output_s2opcConfig->serverConfig.localeIds, &appNameFr);
+    SOPC_LocalizedText_Clear(&appNameFr);
+    if (SOPC_STATUS_OK != status)
+    {
+        printf("<Test_Server_Toolkit: Error setting second locale application name\n");
+    }
 
     output_s2opcConfig->serverConfig.endpoints = SOPC_Calloc(sizeof(SOPC_Endpoint_Config), 1);
 
