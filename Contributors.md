@@ -4,6 +4,7 @@ you abide by the Apache 2.0 licence and recognize you have
 the legal rights to contribute.
 
 # Main Contributor list
+* Anthony Reyre <anthony.reyre@systerel.fr>
 * Aurelien GILLES <aurelien.gilles@systerel.fr>
 * Aurelien NOTTIN <aurelien.nottin@systerel.fr>
 * Frederic Badeau <frederic.badeau@systerel.fr>
