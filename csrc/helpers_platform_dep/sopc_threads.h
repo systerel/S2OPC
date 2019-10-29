@@ -35,7 +35,7 @@
  *  \param thread      Return parameter for the created thread
  *  \param startFct    Function called at thread start
  *  \param startArgs   Arguments of the start function
- *  \param name        Name of the created thread
+ *  \param taskName    Name of the created thread
  *
  *  \return            SOPC_STATUS_OK if operation succeeded, SOPC_STATUS_INVALID_PARAMETERS
  *      or SOPC_STATUS_NOK otherwise.
