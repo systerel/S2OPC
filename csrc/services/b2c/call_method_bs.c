@@ -81,7 +81,7 @@ extern void call_method_bs__exec_callMethod(
 
     /* Get the C function corresponding to the method */
     SOPC_NodeId* methodId = &methodToCall->MethodId;
-    SOPC_Method_Func method_c = mcm->pFnGetMethod(mcm, methodId);
+    SOPC_MethodCallFunc* method_c = mcm->pFnGetMethod(mcm, methodId);
     if (NULL == method_c)
     {
         *call_method_bs__statusCode = constants_statuscodes_bs__e_sc_bad_not_implemented;
@@ -93,8 +93,8 @@ extern void call_method_bs__exec_callMethod(
                                                                   : 0; /* convert to avoid compilator error */
     SOPC_Variant* inputArgs = methodToCall->InputArguments;
     uint32_t noOfOutput;
-    SOPC_StatusCode status_c =
-        method_c(objectId, nbInputArgs, inputArgs, &noOfOutput, &call_method_bs__execResults.variants);
+    SOPC_StatusCode status_c = method_c->pMethodFunc(objectId, nbInputArgs, inputArgs, &noOfOutput,
+                                                     &call_method_bs__execResults.variants, method_c->pParam);
 
     if (noOfOutput <= INT32_MAX)
     {
