@@ -32,21 +32,24 @@ ABSTRACT_VARIABLES
     a_state,
     a_channel,
     a_client_to_create,
-    a_client_orphaned
+    a_client_orphaned,
+    a_server_client_locales
 
 INVARIANT
     s_session         <: t_session                            &
     a_state            : t_session +-> t_sessionState         &
     a_channel          : t_session +-> t_channel              &
     a_client_to_create : t_session +-> t_channel_config_idx_i &
-    a_client_orphaned  : t_session +-> t_channel_config_idx_i
+    a_client_orphaned  : t_session +-> t_channel_config_idx_i &
+    a_server_client_locales : t_session --> t_LocaleIds
 
 INITIALISATION
     s_session          := {} ||
     a_state            := {} ||
     a_channel          := {} ||
     a_client_to_create := {} ||
-    a_client_orphaned  := {}
+    a_client_orphaned  := {} ||
+    a_server_client_locales := t_session * {c_LocaleIds_empty}
 
 OPERATIONS
 
@@ -217,6 +220,43 @@ OPERATIONS
         p_channel_config_idx : t_channel_config_idx
     THEN
         a_client_orphaned(p_session) := p_channel_config_idx
+    END
+    ;
+
+    set_server_session_preferred_locales(p_session, p_localesIds) =
+    PRE
+        p_session    : t_session_i &
+        p_session    : t_session &
+        p_localesIds : t_LocaleIds_i &
+        p_localesIds : t_LocaleIds
+    THEN
+        a_server_client_locales(p_session) := p_localesIds
+    END
+    ;
+
+    p_localeIds <-- get_server_session_preferred_locales(p_session) =
+    PRE
+        p_session    : t_session_i &
+        p_session    : t_session
+    THEN
+        p_localeIds :(p_localeIds : t_LocaleIds_i & p_localeIds = a_server_client_locales(p_session))
+    END
+    ;
+
+    p_localeIds <-- reset_server_session_preferred_locales(p_session) =
+    PRE
+        p_session            : t_session_i &
+        p_session            : t_session
+    THEN
+        /* Retrieve recorded localeIds if not the empty one (constant value) and reset to empty one */
+        p_localeIds,
+        a_server_client_locales 
+        :(p_localeIds : t_LocaleIds_i &
+          a_server_client_locales : t_session --> t_LocaleIds &
+          (a_server_client_locales$0(p_session) = c_LocaleIds_empty => p_localeIds = c_LocaleIds_indet) &
+          (a_server_client_locales$0(p_session) /= c_LocaleIds_empty => p_localeIds = a_server_client_locales$0(p_session)) &
+          {p_session} <<| a_server_client_locales = {p_session} <<| a_server_client_locales$0 &
+          {p_session} <| a_server_client_locales = {p_session |-> c_LocaleIds_empty})
     END
 
 END

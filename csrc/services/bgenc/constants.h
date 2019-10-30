@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 10/10/2019 07:09:46
+ Date                 : 30/10/2019 13:43:53
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -55,6 +55,7 @@
 #define constants__t_ExpandedNodeId_i constants_bs__t_ExpandedNodeId_i
 #define constants__t_IndexRange_i constants_bs__t_IndexRange_i
 #define constants__t_Int32 constants_bs__t_Int32
+#define constants__t_LocaleIds_i constants_bs__t_LocaleIds_i
 #define constants__t_LocalizedText_i constants_bs__t_LocalizedText_i
 #define constants__t_NodeId_i constants_bs__t_NodeId_i
 #define constants__t_Node_i constants_bs__t_Node_i
@@ -312,6 +313,7 @@ typedef enum {
 #define constants__t_ExpandedNodeId_i_max constants_bs__t_ExpandedNodeId_i_max
 #define constants__t_IndexRange_i_max constants_bs__t_IndexRange_i_max
 #define constants__t_Int32_max constants_bs__t_Int32_max
+#define constants__t_LocaleIds_i_max constants_bs__t_LocaleIds_i_max
 #define constants__t_LocalizedText_i_max constants_bs__t_LocalizedText_i_max
 #define constants__t_NodeId_i_max constants_bs__t_NodeId_i_max
 #define constants__t_Node_i_max constants_bs__t_Node_i_max
@@ -375,6 +377,8 @@ typedef enum {
 #define constants__c_DataValue_indet constants_bs__c_DataValue_indet
 #define constants__c_ExpandedNodeId_indet constants_bs__c_ExpandedNodeId_indet
 #define constants__c_IndexRange_indet constants_bs__c_IndexRange_indet
+#define constants__c_LocaleIds_empty constants_bs__c_LocaleIds_empty
+#define constants__c_LocaleIds_indet constants_bs__c_LocaleIds_indet
 #define constants__c_LocalizedText_indet constants_bs__c_LocalizedText_indet
 #define constants__c_NodeId_indet constants_bs__c_NodeId_indet
 #define constants__c_Node_indet constants_bs__c_Node_indet
@@ -452,6 +456,7 @@ extern void constants__INITIALISATION(void);
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
 #define constants__free_ExpandedNodeId constants_bs__free_ExpandedNodeId
+#define constants__free_LocaleIds constants_bs__free_LocaleIds
 #define constants__get_card_t_channel constants_bs__get_card_t_channel
 #define constants__get_card_t_session constants_bs__get_card_t_session
 #define constants__get_card_t_subscription constants_bs__get_card_t_subscription

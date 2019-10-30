@@ -21,7 +21,7 @@
 
  File Name            : session_core_2.h
 
- Date                 : 04/10/2019 15:25:13
+ Date                 : 30/10/2019 15:48:49
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -50,6 +50,7 @@
 extern constants__t_channel_i session_core_2__a_channel_i[constants__t_session_i_max+1];
 extern constants__t_channel_config_idx_i session_core_2__a_client_orphaned_i[constants__t_session_i_max+1];
 extern constants__t_channel_config_idx_i session_core_2__a_client_to_create_i[constants__t_session_i_max+1];
+extern constants__t_LocaleIds_i session_core_2__a_server_client_locales_i[constants__t_session_i_max+1];
 extern constants__t_sessionState session_core_2__a_state_i[constants__t_session_i_max+1];
 extern t_bool session_core_2__s_session_i[constants__t_session_i_max+1];
 
@@ -64,6 +65,9 @@ extern void session_core_2__INITIALISATION(void);
 extern void session_core_2__add_session(
    const constants__t_session_i session_core_2__p_session,
    const constants__t_sessionState session_core_2__p_state);
+extern void session_core_2__get_server_session_preferred_locales(
+   const constants__t_session_i session_core_2__p_session,
+   constants__t_LocaleIds_i * const session_core_2__p_localeIds);
 extern void session_core_2__get_session_channel(
    const constants__t_session_i session_core_2__session,
    constants__t_channel_i * const session_core_2__channel);
@@ -87,12 +91,18 @@ extern void session_core_2__is_valid_session(
    t_bool * const session_core_2__ret);
 extern void session_core_2__remove_session(
    const constants__t_session_i session_core_2__p_session);
+extern void session_core_2__reset_server_session_preferred_locales(
+   const constants__t_session_i session_core_2__p_session,
+   constants__t_LocaleIds_i * const session_core_2__p_localeIds);
 extern void session_core_2__reset_session_channel(
    const constants__t_session_i session_core_2__p_session);
 extern void session_core_2__reset_session_orphaned(
    const constants__t_session_i session_core_2__p_session);
 extern void session_core_2__reset_session_to_create(
    const constants__t_session_i session_core_2__p_session);
+extern void session_core_2__set_server_session_preferred_locales(
+   const constants__t_session_i session_core_2__p_session,
+   const constants__t_LocaleIds_i session_core_2__p_localesIds);
 extern void session_core_2__set_session_channel(
    const constants__t_session_i session_core_2__session,
    const constants__t_channel_i session_core_2__channel);

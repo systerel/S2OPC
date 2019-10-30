@@ -58,7 +58,8 @@ PROMOTES
     server_session_timeout_msg_received,
     set_session_user_client,
     get_session_user_client,
-    get_session_user_server
+    get_session_user_server,
+    get_server_session_preferred_locales
 
 LOCAL_OPERATIONS
 
@@ -293,7 +294,8 @@ OPERATIONS
     VAR
         l_channel_config_idx,
         l_secpol,
-        l_nonce
+        l_nonce,
+        l_localeIds
     IN
         l_channel_config_idx <-- get_channel_info (channel);
         l_secpol <-- get_SecurityPolicy(channel);
@@ -311,6 +313,8 @@ OPERATIONS
             drop_user_server (session); // In case a previous user was set, drop it
             set_session_user_server (session, p_user);
             set_session_channel (session, channel);
+            l_localeIds <-- read_activate_req_msg_locales (activate_req_msg);
+            set_server_session_preferred_locales_or_indet (session, l_localeIds);
             set_session_state (session, e_session_userActivated, FALSE)
         END
     END

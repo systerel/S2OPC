@@ -21,7 +21,7 @@
 
  File Name            : session_core_2.c
 
- Date                 : 04/10/2019 15:25:13
+ Date                 : 30/10/2019 15:48:49
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -38,6 +38,7 @@
 constants__t_channel_i session_core_2__a_channel_i[constants__t_session_i_max+1];
 constants__t_channel_config_idx_i session_core_2__a_client_orphaned_i[constants__t_session_i_max+1];
 constants__t_channel_config_idx_i session_core_2__a_client_to_create_i[constants__t_session_i_max+1];
+constants__t_LocaleIds_i session_core_2__a_server_client_locales_i[constants__t_session_i_max+1];
 constants__t_sessionState session_core_2__a_state_i[constants__t_session_i_max+1];
 t_bool session_core_2__s_session_i[constants__t_session_i_max+1];
 
@@ -73,6 +74,12 @@ void session_core_2__INITIALISATION(void) {
       t_entier4 i;
       for (i = constants__t_session_i_max; 0 <= i; i = i - 1) {
          session_core_2__a_client_orphaned_i[i] = constants__c_channel_config_idx_indet;
+      }
+   }
+   {
+      t_entier4 i;
+      for (i = constants__t_session_i_max; 0 <= i; i = i - 1) {
+         session_core_2__a_server_client_locales_i[i] = constants__c_LocaleIds_empty;
       }
    }
 }
@@ -174,5 +181,34 @@ void session_core_2__set_session_orphaned_1(
    const constants__t_session_i session_core_2__p_session,
    const constants__t_channel_config_idx_i session_core_2__p_channel_config_idx) {
    session_core_2__a_client_orphaned_i[session_core_2__p_session] = session_core_2__p_channel_config_idx;
+}
+
+void session_core_2__set_server_session_preferred_locales(
+   const constants__t_session_i session_core_2__p_session,
+   const constants__t_LocaleIds_i session_core_2__p_localesIds) {
+   session_core_2__a_server_client_locales_i[session_core_2__p_session] = session_core_2__p_localesIds;
+}
+
+void session_core_2__get_server_session_preferred_locales(
+   const constants__t_session_i session_core_2__p_session,
+   constants__t_LocaleIds_i * const session_core_2__p_localeIds) {
+   *session_core_2__p_localeIds = session_core_2__a_server_client_locales_i[session_core_2__p_session];
+}
+
+void session_core_2__reset_server_session_preferred_locales(
+   const constants__t_session_i session_core_2__p_session,
+   constants__t_LocaleIds_i * const session_core_2__p_localeIds) {
+   {
+      constants__t_LocaleIds_i session_core_2__l_old_localeIds;
+      
+      session_core_2__l_old_localeIds = session_core_2__a_server_client_locales_i[session_core_2__p_session];
+      if (session_core_2__l_old_localeIds == constants__c_LocaleIds_empty) {
+         *session_core_2__p_localeIds = constants__c_LocaleIds_indet;
+      }
+      else {
+         *session_core_2__p_localeIds = session_core_2__l_old_localeIds;
+      }
+      session_core_2__a_server_client_locales_i[session_core_2__p_session] = constants__c_LocaleIds_empty;
+   }
 }
 

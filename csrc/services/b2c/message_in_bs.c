@@ -281,6 +281,21 @@ void message_in_bs__read_activate_req_msg_identity_token(const constants__t_msg_
     }
 }
 
+void message_in_bs__read_activate_req_msg_locales(const constants__t_msg_i message_in_bs__p_msg,
+                                                  constants__t_LocaleIds_i* const message_in_bs__p_localeIds)
+{
+    OpcUa_ActivateSessionRequest* activateSessionReq = (OpcUa_ActivateSessionRequest*) message_in_bs__p_msg;
+    if (activateSessionReq->NoOfLocaleIds > 0)
+    {
+        *message_in_bs__p_localeIds =
+            SOPC_String_GetRawCStringArray(activateSessionReq->NoOfLocaleIds, activateSessionReq->LocaleIds);
+    }
+    else
+    {
+        *message_in_bs__p_localeIds = constants__c_LocaleIds_indet;
+    }
+}
+
 void message_in_bs__read_create_session_msg_session_token(
     const constants__t_msg_i message_in_bs__msg,
     constants__t_session_token_i* const message_in_bs__session_token)

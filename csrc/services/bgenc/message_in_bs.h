@@ -21,7 +21,7 @@
 
  File Name            : message_in_bs.h
 
- Date                 : 04/10/2019 15:27:43
+ Date                 : 30/10/2019 12:24:55
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -103,6 +103,9 @@ extern void message_in_bs__read_activate_req_msg_identity_token(
    const constants__t_msg_i message_in_bs__p_msg,
    t_bool * const message_in_bs__p_valid_user_token,
    constants__t_user_token_i * const message_in_bs__p_user_token);
+extern void message_in_bs__read_activate_req_msg_locales(
+   const constants__t_msg_i message_in_bs__p_msg,
+   constants__t_LocaleIds_i * const message_in_bs__p_localeIds);
 extern void message_in_bs__read_create_session_msg_session_token(
    const constants__t_msg_i message_in_bs__msg,
    constants__t_session_token_i * const message_in_bs__session_token);

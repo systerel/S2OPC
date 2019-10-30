@@ -42,7 +42,8 @@ PROMOTES
     server_secure_channel_lost_session_sm,
     server_close_session_sm,
     get_session_user_server,
-    get_local_user
+    get_local_user,
+    get_server_session_preferred_locales
 
 LOCAL_OPERATIONS
 

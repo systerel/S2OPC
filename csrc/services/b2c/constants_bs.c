@@ -37,6 +37,7 @@ static SOPC_NodeId Null_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 
 const constants_bs__t_NodeId_i constants_bs__c_ByteString_Type_NodeId = &ByteString_Type;
 const constants_bs__t_NodeId_i constants_bs__c_Byte_Type_NodeId = &Byte_Type;
 const constants_bs__t_NodeId_i constants_bs__c_Null_Type_NodeId = &Null_Type;
+constants_bs__t_LocaleIds_i constants_bs__c_LocaleIds_empty = {NULL};
 
 void constants_bs__INITIALISATION(void) {}
 
@@ -197,6 +198,13 @@ void constants_bs__free_ExpandedNodeId(const constants_bs__t_ExpandedNodeId_i co
         SOPC_Free(constants_bs__p_in);
         SOPC_GCC_DIAGNOSTIC_RESTORE
     }
+}
+
+void constants_bs__free_LocaleIds(const constants_bs__t_LocaleIds_i constants_bs__p_in)
+{
+    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+    SOPC_Free(constants_bs__p_in);
+    SOPC_GCC_DIAGNOSTIC_RESTORE
 }
 
 void constants_bs__get_copy_ExpandedNodeId(const constants_bs__t_ExpandedNodeId_i constants_bs__p_in,

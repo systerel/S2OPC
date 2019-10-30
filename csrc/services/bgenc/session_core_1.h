@@ -21,7 +21,7 @@
 
  File Name            : session_core_1.h
 
- Date                 : 04/10/2019 15:25:02
+ Date                 : 30/10/2019 15:48:48
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -76,6 +76,7 @@ extern void session_core_1__INITIALISATION(void);
 #define session_core_1__drop_user_server session_core_bs__drop_user_server
 #define session_core_1__get_NonceClient session_core_bs__get_NonceClient
 #define session_core_1__get_NonceServer session_core_bs__get_NonceServer
+#define session_core_1__get_server_session_preferred_locales session_core_2__get_server_session_preferred_locales
 #define session_core_1__get_session_channel session_core_2__get_session_channel
 #define session_core_1__get_session_state session_core_2__get_session_state
 #define session_core_1__get_session_user_client session_core_bs__get_session_user_client
@@ -105,6 +106,8 @@ extern void session_core_1__INITIALISATION(void);
 /*--------------------------
    LOCAL_OPERATIONS Clause
   --------------------------*/
+extern void session_core_1__l_reset_server_session_preferred_locales(
+   const constants__t_session_i session_core_1__p_session);
 extern void session_core_1__l_set_session_state(
    const constants__t_session_i session_core_1__p_session,
    const constants__t_sessionState session_core_1__p_state,
@@ -121,6 +124,9 @@ extern void session_core_1__create_session(
 extern void session_core_1__init_new_session(
    const t_bool session_core_1__is_client,
    constants__t_session_i * const session_core_1__p_session);
+extern void session_core_1__set_server_session_preferred_locales_or_indet(
+   const constants__t_session_i session_core_1__p_session,
+   const constants__t_LocaleIds_i session_core_1__p_localesIds);
 extern void session_core_1__set_session_orphaned(
    const constants__t_session_i session_core_1__session,
    const constants__t_channel_config_idx_i session_core_1__channel_config_idx);

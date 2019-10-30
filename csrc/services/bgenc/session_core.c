@@ -21,7 +21,7 @@
 
  File Name            : session_core.c
 
- Date                 : 04/10/2019 15:25:18
+ Date                 : 30/10/2019 12:24:43
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -53,6 +53,7 @@ void session_core__server_internal_activate_req_and_resp(
       constants__t_channel_config_idx_i session_core__l_channel_config_idx;
       constants__t_SecurityPolicy session_core__l_secpol;
       constants__t_Nonce_i session_core__l_nonce;
+      constants__t_LocaleIds_i session_core__l_localeIds;
       
       channel_mgr__get_channel_info(session_core__channel,
          &session_core__l_channel_config_idx);
@@ -83,6 +84,10 @@ void session_core__server_internal_activate_req_and_resp(
             session_core__p_user);
          session_core_1__set_session_channel(session_core__session,
             session_core__channel);
+         message_in_bs__read_activate_req_msg_locales(session_core__activate_req_msg,
+            &session_core__l_localeIds);
+         session_core_1__set_server_session_preferred_locales_or_indet(session_core__session,
+            session_core__l_localeIds);
          session_core_1__set_session_state(session_core__session,
             constants__e_session_userActivated,
             false);

@@ -313,6 +313,19 @@ OPERATIONS
     END
     ;
 
+    p_localeIds <-- read_activate_req_msg_locales (p_msg) =
+    PRE
+        p_msg : t_msg_i &
+        p_msg = c_msg_in &
+        c_msg_in : t_msg &
+        a_msg_in_type = e_msg_session_activate_req
+    THEN
+        /* Note: p_localeIds shall be either indet (NULL) 
+        or contain at least one element (not empty) */
+        p_localeIds :(p_localeIds : t_LocaleIds_i & p_localeIds /= c_LocaleIds_empty)
+    END
+    ;
+
     status <-- read_msg_resp_header_service_status (msg_header) =
     PRE
         msg_header : t_msg_header_i &

@@ -290,7 +290,8 @@ SETS
     t_ContinuationPoint_i;
     t_ContinuationPointId_i;
     
-    t_ArrayDimensions_i /* int32 array size and content with product of values <= INT32_MAX */
+    t_ArrayDimensions_i; /* int32 array size and content with product of values <= INT32_MAX */
+    t_LocaleIds_i /* char* array NULL terminated of locales ids */
 
 CONCRETE_CONSTANTS
     c_Server_Nano_Extended,
@@ -376,6 +377,8 @@ CONCRETE_CONSTANTS
     c_ContinuationPoint_indet,
     c_ContinuationPointId_indet,
     c_ArrayDimensions_indet,
+    c_LocaleIds_indet,
+    c_LocaleIds_empty,
     c_BrowseResultMask_all,
 
     t_counter,
@@ -473,6 +476,7 @@ ABSTRACT_CONSTANTS
     t_ContinuationPoint,
     t_ContinuationPointId,
     t_ArrayDimensions,
+    t_LocaleIds,
 
     s_session_treatment_reqs,
     s_session_treatment_resps,
@@ -784,6 +788,11 @@ PROPERTIES
 
     c_ArrayDimensions_indet : t_ArrayDimensions_i &
     t_ArrayDimensions = t_ArrayDimensions_i - {c_ArrayDimensions_indet} &
+    
+    c_LocaleIds_indet : t_LocaleIds_i &
+    t_LocaleIds = t_LocaleIds_i - {c_LocaleIds_indet} &
+    c_LocaleIds_empty : t_LocaleIds_i &
+    c_LocaleIds_empty : t_LocaleIds &
 
     t_buffer_in_state = { e_buffer_in_msg_not_read,
         e_buffer_in_msg_type_read,
@@ -1134,6 +1143,15 @@ OPERATIONS
     PRE
         p_in : t_ExpandedNodeId_i &
         p_in : t_ExpandedNodeId
+    THEN
+        skip
+    END
+    ;
+    
+    free_LocaleIds(p_in) =
+    PRE
+        p_in : t_LocaleIds_i &
+        p_in : t_LocaleIds
     THEN
         skip
     END

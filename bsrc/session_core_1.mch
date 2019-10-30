@@ -41,7 +41,8 @@ DEFINITIONS
     a_user_server,
     a_user_client,
     a_NonceServer,
-    a_NonceClient;
+    a_NonceClient,
+    a_server_client_locales;
 
     d_typing ==
     s_session                   <: t_session                             &
@@ -55,7 +56,8 @@ DEFINITIONS
     a_user_server                : t_session +-> t_user                  &
     a_user_client                : t_session +-> t_user_token            &
     a_NonceServer                : t_session +-> t_Nonce                 &
-    a_NonceClient                : t_session +-> t_Nonce
+    a_NonceClient                : t_session +-> t_Nonce                 &
+    a_server_client_locales      : t_session --> t_LocaleIds
 
 ABSTRACT_VARIABLES
     d_variables
@@ -75,7 +77,8 @@ INITIALISATION
     a_user_server                := {} ||
     a_user_client                := {} ||
     a_NonceServer                := {} ||
-    a_NonceClient                := {}
+    a_NonceClient                := {} ||
+    a_server_client_locales := t_session * {c_LocaleIds_empty}
 
 OPERATIONS
 
@@ -745,6 +748,28 @@ OPERATIONS
         session : t_session
     THEN
         skip
+    END
+    ;
+
+    set_server_session_preferred_locales_or_indet(p_session, p_localesIds) =
+    PRE
+        p_session    : t_session_i &
+        p_session    : t_session &
+        p_localesIds : t_LocaleIds_i
+    THEN
+        IF p_localesIds /= c_LocaleIds_indet
+        THEN
+            a_server_client_locales(p_session) := p_localesIds
+        END /* ELSE keep existent locale (at least empty) */
+    END
+    ;
+
+    p_localeIds <-- get_server_session_preferred_locales(p_session) =
+    PRE
+        p_session    : t_session_i &
+        p_session    : t_session
+    THEN
+        p_localeIds :(p_localeIds : t_LocaleIds_i & p_localeIds = a_server_client_locales(p_session))
     END
 
 END

@@ -77,7 +77,8 @@ PROMOTES
     client_gen_activate_user_session_internal_event,
     server_session_timeout_start_timer,
     server_session_timeout_evaluation,
-    server_session_timeout_msg_received
+    server_session_timeout_msg_received,
+    get_server_session_preferred_locales
 
 LOCAL_OPERATIONS
 
@@ -91,6 +92,15 @@ LOCAL_OPERATIONS
         is_client : BOOL
     THEN
         a_state(p_session) := p_state
+    END
+    ;
+    
+    l_reset_server_session_preferred_locales(p_session) = 
+    PRE 
+        p_session : t_session_i &
+        p_session : dom(a_state)
+    THEN
+        a_server_client_locales(p_session) := c_LocaleIds_empty
     END
 
 OPERATIONS
@@ -107,6 +117,17 @@ OPERATIONS
     END
     ;
 
+    l_reset_server_session_preferred_locales(p_session) = 
+    VAR
+        l_old_localeIds
+    IN
+        l_old_localeIds <-- reset_server_session_preferred_locales(p_session);
+        IF l_old_localeIds /= c_LocaleIds_indet
+        THEN
+            free_LocaleIds(l_old_localeIds)
+        END
+    END
+    ;
 
     /* Global operations */
 
@@ -187,6 +208,8 @@ OPERATIONS
         // a_client_app_context
         reset_session_orphaned(session);
         // a_client_orphaned
+        l_reset_server_session_preferred_locales (session);
+        // a_server_client_locales
         drop_NonceClient(session);
         // a_NonceClient
         remove_NonceServer(session);
@@ -211,6 +234,23 @@ OPERATIONS
         l_bool <-- is_t_channel_config_idx(channel_config_idx);
         IF  l_bool = TRUE THEN
             set_session_orphaned_1(session, channel_config_idx)
+        END
+    END
+    ;
+    
+    set_server_session_preferred_locales_or_indet(p_session, p_localesIds) =
+    VAR
+        l_old_localeIds
+    IN
+        IF p_localesIds /= c_LocaleIds_indet
+        THEN
+            l_old_localeIds <-- reset_server_session_preferred_locales(p_session);
+            IF l_old_localeIds /= c_LocaleIds_indet
+            THEN
+                free_LocaleIds(l_old_localeIds)
+            END
+            ;
+            set_server_session_preferred_locales(p_session, p_localesIds)
         END
     END
 

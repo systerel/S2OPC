@@ -21,7 +21,7 @@
 
  File Name            : session_core_1.c
 
- Date                 : 04/10/2019 15:25:02
+ Date                 : 30/10/2019 17:08:29
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -57,6 +57,19 @@ void session_core_1__l_set_session_state(
          session_core_1__p_state,
          constants_statuscodes_bs__c_StatusCode_indet,
          session_core_1__is_client);
+   }
+}
+
+void session_core_1__l_reset_server_session_preferred_locales(
+   const constants__t_session_i session_core_1__p_session) {
+   {
+      constants__t_LocaleIds_i session_core_1__l_old_localeIds;
+      
+      session_core_2__reset_server_session_preferred_locales(session_core_1__p_session,
+         &session_core_1__l_old_localeIds);
+      if (session_core_1__l_old_localeIds != constants__c_LocaleIds_indet) {
+         constants__free_LocaleIds(session_core_1__l_old_localeIds);
+      }
    }
 }
 
@@ -137,6 +150,7 @@ void session_core_1__set_session_state_closed(
       session_core_2__reset_session_to_create(session_core_1__session);
       session_core_bs__delete_session_application_context(session_core_1__session);
       session_core_2__reset_session_orphaned(session_core_1__session);
+      session_core_1__l_reset_server_session_preferred_locales(session_core_1__session);
       session_core_bs__drop_NonceClient(session_core_1__session);
       session_core_bs__remove_NonceServer(session_core_1__session);
       session_core_2__remove_session(session_core_1__session);
@@ -159,6 +173,24 @@ void session_core_1__set_session_orphaned(
       if (session_core_1__l_bool == true) {
          session_core_2__set_session_orphaned_1(session_core_1__session,
             session_core_1__channel_config_idx);
+      }
+   }
+}
+
+void session_core_1__set_server_session_preferred_locales_or_indet(
+   const constants__t_session_i session_core_1__p_session,
+   const constants__t_LocaleIds_i session_core_1__p_localesIds) {
+   {
+      constants__t_LocaleIds_i session_core_1__l_old_localeIds;
+      
+      if (session_core_1__p_localesIds != constants__c_LocaleIds_indet) {
+         session_core_2__reset_server_session_preferred_locales(session_core_1__p_session,
+            &session_core_1__l_old_localeIds);
+         if (session_core_1__l_old_localeIds != constants__c_LocaleIds_indet) {
+            constants__free_LocaleIds(session_core_1__l_old_localeIds);
+         }
+         session_core_2__set_server_session_preferred_locales(session_core_1__p_session,
+            session_core_1__p_localesIds);
       }
    }
 }

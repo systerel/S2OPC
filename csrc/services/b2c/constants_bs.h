@@ -65,6 +65,7 @@ typedef SOPC_DataValue* constants_bs__t_DataValue_i;
 typedef SOPC_ExpandedNodeId* constants_bs__t_ExpandedNodeId_i;
 typedef SOPC_String* constants_bs__t_IndexRange_i;
 typedef int32_t constants_bs__t_Int32;
+typedef char** constants_bs__t_LocaleIds_i;
 typedef SOPC_LocalizedText* constants_bs__t_LocalizedText_i;
 typedef SOPC_NodeId* constants_bs__t_NodeId_i;
 typedef SOPC_AddressSpace_Node* constants_bs__t_Node_i;
@@ -122,6 +123,7 @@ typedef SOPC_ExtensionObject* constants_bs__t_user_token_i;
 /*------------------------------------------------
    CONCRETE_CONSTANTS Clause: scalars and arrays
   ------------------------------------------------*/
+#define constants_bs__c_ArrayDimensions_indet 0
 #define constants_bs__c_BrowseNodeClassMask_indet 0
 #define constants_bs__c_BrowseResultMask_all 63
 #define constants_bs__c_BrowseResultMask_indet 0
@@ -133,6 +135,8 @@ extern const constants_bs__t_NodeId_i constants_bs__c_Byte_Type_NodeId;
 #define constants_bs__c_DataValue_indet NULL
 #define constants_bs__c_ExpandedNodeId_indet NULL
 #define constants_bs__c_IndexRange_indet 0
+extern constants_bs__t_LocaleIds_i constants_bs__c_LocaleIds_empty;
+#define constants_bs__c_LocaleIds_indet NULL
 #define constants_bs__c_LocalizedText_indet 0
 #define constants_bs__c_NodeId_indet NULL
 #define constants_bs__c_Node_indet 0
@@ -185,6 +189,8 @@ extern const constants_bs__t_NodeId_i constants_bs__c_Null_Type_NodeId;
 #define constants_bs__c_timeref_indet 0
 #define constants_bs__c_user_indet 0
 #define constants_bs__c_user_token_indet 0
+#define constants_bs__k_n_BrowsePathResPerElt_max SOPC_MAX_TRANSLATE_BROWSE_PATH_MATCHES
+#define constants_bs__k_n_BrowsePathResPerPath_max SOPC_MAX_TRANSLATE_BROWSE_PATH_MATCHES
 #define constants_bs__k_n_BrowseResponse_max SOPC_MAX_OPERATIONS_PER_MSG
 #define constants_bs__k_n_BrowseTarget_max SOPC_MAX_OPERATIONS_PER_MSG
 #define constants_bs__k_n_IndexRange_max 0
@@ -197,8 +203,6 @@ extern const constants_bs__t_NodeId_i constants_bs__c_Null_Type_NodeId;
 #define constants_bs__k_n_registerNodes_max SOPC_MAX_OPERATIONS_PER_MSG
 #define constants_bs__k_n_republishNotifPerSub_max (2 * SOPC_MAX_SUBSCRIPTION_PUBLISH_REQUESTS)
 #define constants_bs__k_n_unregisterNodes_max SOPC_MAX_OPERATIONS_PER_MSG
-#define constants_bs__k_n_BrowsePathResPerElt_max SOPC_MAX_TRANSLATE_BROWSE_PATH_MATCHES
-#define constants_bs__k_n_BrowsePathResPerPath_max SOPC_MAX_TRANSLATE_BROWSE_PATH_MATCHES
 
 /*------------------------
    INITIALISATION Clause
@@ -209,6 +213,7 @@ extern void constants_bs__INITIALISATION(void);
    OPERATIONS Clause
   --------------------*/
 extern void constants_bs__free_ExpandedNodeId(const constants_bs__t_ExpandedNodeId_i constants_bs__p_in);
+extern void constants_bs__free_LocaleIds(const constants_bs__t_LocaleIds_i constants_bs__p_in);
 extern void constants_bs__get_card_t_channel(t_entier4* const constants_bs__p_card_channel);
 extern void constants_bs__get_card_t_session(t_entier4* const constants_bs__p_card_session);
 extern void constants_bs__get_card_t_subscription(t_entier4* const constants_bs__p_card_subscription);

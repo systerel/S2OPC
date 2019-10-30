@@ -400,5 +400,14 @@ OPERATIONS
         p_user :( p_user : t_user_i &
                   p_user : t_user )
     END
+    ;
+
+    p_localeIds <-- get_server_session_preferred_locales(p_session) =
+    PRE
+        p_session    : t_session_i &
+        p_session    : t_session
+    THEN
+        p_localeIds :(p_localeIds : t_LocaleIds_i & p_localeIds : t_LocaleIds)
+    END
 
 END

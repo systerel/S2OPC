@@ -35,7 +35,8 @@ CONCRETE_VARIABLES
     a_state_i,
     a_channel_i,
     a_client_to_create_i,
-    a_client_orphaned_i
+    a_client_orphaned_i,
+    a_server_client_locales_i
 
 INVARIANT
     s_session_i          : t_session_i --> BOOL                                      &
@@ -43,19 +44,22 @@ INVARIANT
     a_channel_i          : t_session_i --> t_channel_i                               &
     a_client_to_create_i : t_session_i --> t_channel_config_idx_i                    &
     a_client_orphaned_i  : t_session_i --> t_channel_config_idx_i                    &
+    a_server_client_locales_i : t_session_i --> t_LocaleIds_i                        &
     s_session            = s_session_i~[{TRUE}]                                      &
     dom(a_state)         = s_session                                                 &
     a_state             <: a_state_i                                                 &
     a_channel            = t_session <| a_channel_i |> t_channel                     &
     a_client_to_create   = t_session <| a_client_to_create_i |> t_channel_config_idx &
-    a_client_orphaned    = t_session <| a_client_orphaned_i |> t_channel_config_idx
+    a_client_orphaned    = t_session <| a_client_orphaned_i |> t_channel_config_idx  &
+    a_server_client_locales = t_session <| a_server_client_locales_i
 
 INITIALISATION
     s_session_i  := t_session_i * {FALSE};
     a_state_i    := t_session_i * {e_session_closed};
     a_channel_i  := t_session_i * {c_channel_indet};
     a_client_to_create_i := t_session_i * {c_channel_config_idx_indet};
-    a_client_orphaned_i := t_session_i * {c_channel_config_idx_indet}
+    a_client_orphaned_i := t_session_i * {c_channel_config_idx_indet};
+    a_server_client_locales_i := t_session_i * {c_LocaleIds_empty}
 
 OPERATIONS
 
@@ -150,6 +154,33 @@ OPERATIONS
     set_session_orphaned_1(p_session, p_channel_config_idx) =
     BEGIN
         a_client_orphaned_i(p_session) := p_channel_config_idx
+    END;
+
+    set_server_session_preferred_locales(p_session, p_localesIds) =
+    BEGIN
+        a_server_client_locales_i(p_session) := p_localesIds
+    END
+    ;
+    
+    p_localeIds <-- get_server_session_preferred_locales(p_session) =
+    BEGIN
+        p_localeIds := a_server_client_locales_i(p_session)
+    END
+    ;
+
+    p_localeIds <-- reset_server_session_preferred_locales(p_session) =
+    VAR
+        l_old_localeIds
+    IN
+        l_old_localeIds := a_server_client_locales_i(p_session);
+        IF l_old_localeIds = c_LocaleIds_empty
+        THEN
+            p_localeIds := c_LocaleIds_indet
+        ELSE
+            p_localeIds := l_old_localeIds
+        END
+        ;
+        a_server_client_locales_i(p_session) := c_LocaleIds_empty
     END
 
 END
