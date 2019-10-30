@@ -253,8 +253,7 @@ file(GLOB_RECURSE S2OPC_SRCS
     "csrc/opcua_types/*.c"
     "csrc/sockets/*.c"
     "csrc/secure_channels/*.c"
-    "csrc/services/*.c"
-)
+    "csrc/services/*.c")
 
 # Define S2OPC library includes
 file(GLOB S2OPC_INCLUDE_FILES
@@ -264,7 +263,8 @@ file(GLOB S2OPC_INCLUDE_FILES
     "csrc/opcua_types/*.h"
     "csrc/crypto/*.h"
     "csrc/helpers_platform_dep/*.h"
-    "csrc/services/b2c/*.h")
+    "csrc/services/b2c/*.h"
+)
 
 set(S2OPC_PUBLIC_INCLUDES
     "csrc/api_toolkit"
@@ -843,23 +843,34 @@ endif()
 
 # Fuzzing
 set(FUZZING_PATH "tests/fuzzing")
+set(FUZZING_RECEIVE_MSG_BUFFER "${FUZZING_PATH}/fuzz_mgr__receive_msg_buffer")
 
 # Local Fuzzing
 function(s2opc_fuzzer name src_file)
+	set(s2opc_fuzzer_loop_counter "0")	#For each counter
 	set(standalone_target_name "${name}.standalone")
 	set(fuzz_target_name "${name}.libfuzzer")
 
-	add_executable(${standalone_target_name} "${FUZZING_PATH}/${src_file}" "tests/fuzzing/standalone_fuzzer.c" ${TEST_ADDRESS_SPACE_C})
-	target_include_directories(${standalone_target_name} PRIVATE ${S2OPC_PUBLIC_INCLUDES} ${S2OPC_PRIVATE_INCLUDES})
-	target_link_libraries(${standalone_target_name} PRIVATE s2opc s2opc-loader-embedded)
+	add_executable(${standalone_target_name} "${src_file}" "${FUZZING_PATH}/standalone_fuzzer.c")
+	target_include_directories(${standalone_target_name} PRIVATE ${S2OPC_PUBLIC_INCLUDES} ${S2OPC_PRIVATE_INCLUDES} "tests/services")
+	target_link_libraries(${standalone_target_name} s2opc s2opc-loader-embedded)
 	add_dependencies(fuzzers ${standalone_target_name})
 
-	add_executable(${fuzz_target_name} "${FUZZING_PATH}/${src_file}" ${TEST_ADDRESS_SPACE_C})
+	add_executable(${fuzz_target_name} "${src_file}" ${TEST_DEMO_SERVER_ADDRESS_SPACE_C})
 	set_target_properties(${fuzz_target_name} PROPERTIES COMPILE_FLAGS "-fsanitize=fuzzer")
 	set_target_properties(${fuzz_target_name} PROPERTIES LINK_FLAGS "-fsanitize=fuzzer")
 	target_include_directories(${fuzz_target_name} PRIVATE ${S2OPC_PUBLIC_INCLUDES} ${S2OPC_PRIVATE_INCLUDES})
-	target_link_libraries(${fuzz_target_name} PRIVATE s2opc s2opc-loader-embedded)
+	target_link_libraries(${fuzz_target_name} s2opc s2opc-loader-embedded)
 	add_dependencies(fuzzers ${fuzz_target_name})
+
+	#link dynamically extra parameters
+	foreach(param ${ARGV})
+		if (NOT (${s2opc_fuzzer_loop_counter} MATCHES "0" OR ${s2opc_fuzzer_loop_counter} MATCHES "1"))
+			target_sources(${standalone_target_name} PUBLIC "${param}")
+			target_sources(${fuzz_target_name} PUBLIC "${param}")
+		endif()
+		MATH(EXPR s2opc_fuzzer_loop_counter "${s2opc_fuzzer_loop_counter}+1") #Counter incrementation
+	endforeach()
 endfunction()
 
 if (NOT WITH_OSS_FUZZ AND "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
@@ -868,9 +879,14 @@ if (NOT WITH_OSS_FUZZ AND "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
 		message(STATUS "Your version of Clang (${CMAKE_C_COMPILER_ID}) is not recent enough to have LibFuzzer")
 	else()
 		add_custom_target(fuzzers)
-		s2opc_fuzzer(mgr__receive_msg_buffer "fuzz_mgr__receive_msg_buffer.c")
-		s2opc_fuzzer(server_request_fuzzer "fuzz_server_request.c")
-		s2opc_fuzzer(parse_tcp_uri_fuzzer "fuzz_parse_tcp_uri.c")
+		s2opc_fuzzer(receive_msg_buffer_fuzzer  "${FUZZING_RECEIVE_MSG_BUFFER}/fuzz_main.c"
+												"${FUZZING_RECEIVE_MSG_BUFFER}/fuzz_server.c"
+												"${FUZZING_RECEIVE_MSG_BUFFER}/fuzz_client.c"
+												"${TEST_DEMO_SERVER_ADDRESS_SPACE_C}"
+                                                "tests/services/test_results.c"
+                                                )
+		s2opc_fuzzer(server_request_fuzzer "${FUZZING_PATH}/fuzz_server_request.c")
+		s2opc_fuzzer(parse_tcp_uri_fuzzer "${FUZZING_PATH}/fuzz_parse_tcp_uri.c")
 	endif()
 endif()
 
@@ -878,15 +894,24 @@ endif(ENABLE_TESTING)
 
 # OSS Fuzzing
 function(s2opc_oss_fuzzer target_name src_file)
+  set(s2opc_fuzzer_loop_counter "0")	#For each counter
   add_executable(${target_name} "${FUZZING_PATH}/${src_file}")
   target_include_directories(${target_name} PRIVATE ${S2OPC_PUBLIC_INCLUDES} ${S2OPC_PRIVATE_INCLUDES})
   target_link_libraries(${target_name} s2opc $ENV{LIB_FUZZING_ENGINE})
   add_dependencies(fuzzers ${target_name})
+  
+  	foreach(param ${ARGV})
+		if (NOT (${s2opc_fuzzer_loop_counter} MATCHES "0" OR ${s2opc_fuzzer_loop_counter} MATCHES "1"))
+			target_sources(${standalone_target_name} PUBLIC "${FUZZING_PATH}/${param}")
+			target_sources(${fuzz_target_name} PUBLIC "${FUZZING_PATH}/${param}")
+		endif()
+		MATH(EXPR s2opc_fuzzer_loop_counter "${s2opc_fuzzer_loop_counter}+1") #Counter incrementation
+	endforeach()
 endfunction()
 
 if(WITH_OSS_FUZZ)
   add_custom_target(fuzzers)
-  s2opc_oss_fuzzer(mgr__receive_msg_buffer "fuzz_mgr__receive_msg_buffer.c")
+  s2opc_oss_fuzzer(receive_msg_buffer_fuzzer "${FUZZING_RECEIVE_MSG_BUFFER}/fuzz_main.c" "${FUZZING_RECEIVE_MSG_BUFFER}/fuzz_server.c" "${FUZZING_RECEIVE_MSG_BUFFER}/fuzz_client.c" )
   s2opc_oss_fuzzer(server_request_fuzzer "fuzz_server_request.c")
   s2opc_oss_fuzzer(parse_tcp_uri_fuzzer "fuzz_parse_tcp_uri.c")
 endif()
