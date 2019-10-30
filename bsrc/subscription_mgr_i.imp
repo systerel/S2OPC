@@ -141,7 +141,7 @@ LOCAL_OPERATIONS
     END
     ;
 
-    fill_response_subscription_create_monitored_items (p_subscription, p_tsToReturn, p_user, p_req_msg, p_resp_msg, p_nb_monitored_items) =
+    fill_response_subscription_create_monitored_items (p_subscription, p_tsToReturn, p_user, p_locales, p_req_msg, p_resp_msg, p_nb_monitored_items) =
     PRE
         p_subscription : t_subscription_i &
         p_subscription : s_subscription &
@@ -149,6 +149,8 @@ LOCAL_OPERATIONS
         p_tsToReturn : t_TimestampsToReturn &
         p_user : t_user_i &
         p_user : t_user   &
+        p_locales : t_LocaleIds_i &
+        p_locales : t_LocaleIds   &
         p_req_msg : t_msg_i &
         p_req_msg : t_msg &
         p_req_msg = c_msg_in &
@@ -531,7 +533,7 @@ OPERATIONS
     END
     ;
 
-    fill_response_subscription_create_monitored_items (p_subscription, p_tsToReturn, p_user, p_req_msg, p_resp_msg, p_nb_monitored_items) =
+    fill_response_subscription_create_monitored_items (p_subscription, p_tsToReturn, p_user, p_locales, p_req_msg, p_resp_msg, p_nb_monitored_items) =
     VAR
         l_continue,
         l_index,
@@ -574,7 +576,7 @@ OPERATIONS
                     l_sc := e_sc_bad_node_id_unknown
                 ELSE
                     /* Read monitored item value */
-                    l_sc, l_value, l_valueSc, l_val_ts_src, l_val_ts_srv <-- read_Node_Attribute(p_user, l_node, l_nid, l_aid, l_indexRange);
+                    l_sc, l_value, l_valueSc, l_val_ts_src, l_val_ts_srv <-- read_Node_Attribute(p_user, p_locales, l_node, l_nid, l_aid, l_indexRange);
                     /* Create monitored item */
                     /* From part 4:
                        When a user adds a monitored item that the user is denied read access to, the add operation for
@@ -1008,6 +1010,7 @@ OPERATIONS
         l_valid_subscription,
         l_timestampToRet,
         l_nb_monitored_items,
+        l_locales,
         l_bres
     IN
         l_sc, l_subscription, l_timestampToRet, l_nb_monitored_items <-- getall_msg_create_monitored_items_req_params (p_req_msg);
@@ -1019,8 +1022,9 @@ OPERATIONS
                 l_bres <-- alloc_msg_create_monitored_items_resp_results (p_resp_msg, l_nb_monitored_items);
                 IF l_bres = TRUE
                 THEN
+                    l_locales <-- get_server_session_preferred_locales(p_session);
                     fill_response_subscription_create_monitored_items
-                      (l_subscription, l_timestampToRet, p_user, p_req_msg, p_resp_msg, l_nb_monitored_items);
+                      (l_subscription, l_timestampToRet, p_user, l_locales, p_req_msg, p_resp_msg, l_nb_monitored_items);
                     StatusCode_service := e_sc_ok
                 ELSE
                     StatusCode_service := e_sc_bad_out_of_memory

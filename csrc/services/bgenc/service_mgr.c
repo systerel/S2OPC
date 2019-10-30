@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 04/10/2019 15:24:29
+ Date                 : 31/10/2019 10:59:06
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -164,6 +164,7 @@ void service_mgr__get_response_type(
 
 void service_mgr__treat_read_request(
    const constants__t_user_i service_mgr__p_user,
+   const constants__t_LocaleIds_i service_mgr__p_locales,
    const constants__t_msg_i service_mgr__p_request_msg,
    const constants__t_msg_i service_mgr__p_response_msg,
    constants_statuscodes_bs__t_StatusCode_i * const service_mgr__StatusCode_service) {
@@ -184,6 +185,7 @@ void service_mgr__treat_read_request(
          if (service_mgr__l_is_valid == true) {
             service_read__fill_read_response(service_mgr__l_TimestampsToReturn,
                service_mgr__p_user,
+               service_mgr__p_locales,
                service_mgr__p_request_msg,
                service_mgr__p_response_msg);
          }
@@ -196,6 +198,7 @@ void service_mgr__treat_read_request(
 
 void service_mgr__treat_write_request(
    const constants__t_user_i service_mgr__p_user,
+   const constants__t_LocaleIds_i service_mgr__p_locales,
    const constants__t_msg_i service_mgr__write_msg,
    constants_statuscodes_bs__t_StatusCode_i * const service_mgr__StatusCode_service) {
    {
@@ -210,6 +213,7 @@ void service_mgr__treat_write_request(
             &service_mgr__l_bret);
          if (service_mgr__l_bret == true) {
             address_space__treat_write_request_WriteValues(service_mgr__p_user,
+               service_mgr__p_locales,
                service_mgr__StatusCode_service);
          }
          else {
@@ -228,12 +232,16 @@ void service_mgr__treat_session_local_service_req(
    constants_statuscodes_bs__t_StatusCode_i * const service_mgr__StatusCode_service) {
    {
       constants__t_user_i service_mgr__l_user;
+      constants__t_LocaleIds_i service_mgr__l_supported_locales;
       
       switch (service_mgr__req_typ) {
       case constants__e_msg_attribute_read_req:
          session_mgr__get_local_user(service_mgr__endpoint_config_idx,
             &service_mgr__l_user);
+         constants__get_SupportedLocales(service_mgr__endpoint_config_idx,
+            &service_mgr__l_supported_locales);
          service_mgr__treat_read_request(service_mgr__l_user,
+            service_mgr__l_supported_locales,
             service_mgr__req_msg,
             service_mgr__resp_msg,
             service_mgr__StatusCode_service);
@@ -241,7 +249,10 @@ void service_mgr__treat_session_local_service_req(
       case constants__e_msg_attribute_write_req:
          session_mgr__get_local_user(service_mgr__endpoint_config_idx,
             &service_mgr__l_user);
+         constants__get_SupportedLocales(service_mgr__endpoint_config_idx,
+            &service_mgr__l_supported_locales);
          service_mgr__treat_write_request(service_mgr__l_user,
+            service_mgr__l_supported_locales,
             service_mgr__req_msg,
             service_mgr__StatusCode_service);
          address_space__write_WriteResponse_msg_out(service_mgr__resp_msg);
@@ -261,6 +272,7 @@ void service_mgr__treat_session_local_service_req(
 }
 
 void service_mgr__treat_session_nano_service_req(
+   const constants__t_endpoint_config_idx_i service_mgr__endpoint_config_idx,
    const constants__t_session_i service_mgr__session,
    const constants__t_msg_type_i service_mgr__req_typ,
    const constants__t_msg_i service_mgr__req_msg,
@@ -268,12 +280,16 @@ void service_mgr__treat_session_nano_service_req(
    constants_statuscodes_bs__t_StatusCode_i * const service_mgr__StatusCode_service) {
    {
       constants__t_user_i service_mgr__l_user;
+      constants__t_LocaleIds_i service_mgr__l_locales;
       
       switch (service_mgr__req_typ) {
       case constants__e_msg_attribute_read_req:
          session_mgr__get_session_user_server(service_mgr__session,
             &service_mgr__l_user);
+         session_mgr__get_server_session_preferred_locales(service_mgr__session,
+            &service_mgr__l_locales);
          service_mgr__treat_read_request(service_mgr__l_user,
+            service_mgr__l_locales,
             service_mgr__req_msg,
             service_mgr__resp_msg,
             service_mgr__StatusCode_service);
@@ -281,7 +297,10 @@ void service_mgr__treat_session_nano_service_req(
       case constants__e_msg_attribute_write_req:
          session_mgr__get_session_user_server(service_mgr__session,
             &service_mgr__l_user);
+         constants__get_SupportedLocales(service_mgr__endpoint_config_idx,
+            &service_mgr__l_locales);
          service_mgr__treat_write_request(service_mgr__l_user,
+            service_mgr__l_locales,
             service_mgr__req_msg,
             service_mgr__StatusCode_service);
          address_space__write_WriteResponse_msg_out(service_mgr__resp_msg);
@@ -321,6 +340,7 @@ void service_mgr__treat_session_nano_service_req(
 }
 
 void service_mgr__treat_session_nano_extended_service_req(
+   const constants__t_endpoint_config_idx_i service_mgr__endpoint_config_idx,
    const constants__t_session_i service_mgr__session,
    const constants__t_msg_type_i service_mgr__req_typ,
    const constants__t_server_request_handle_i service_mgr__req_handle,
@@ -342,7 +362,8 @@ void service_mgr__treat_session_nano_extended_service_req(
       case constants__e_msg_view_translate_browse_paths_to_node_ids_req:
       case constants__e_msg_view_register_nodes_req:
       case constants__e_msg_view_unregister_nodes_req:
-         service_mgr__treat_session_nano_service_req(service_mgr__session,
+         service_mgr__treat_session_nano_service_req(service_mgr__endpoint_config_idx,
+            service_mgr__session,
             service_mgr__req_typ,
             service_mgr__req_msg,
             service_mgr__resp_msg,
@@ -405,6 +426,7 @@ void service_mgr__treat_session_nano_extended_service_req(
 }
 
 void service_mgr__treat_session_service_req(
+   const constants__t_endpoint_config_idx_i service_mgr__endpoint_config_idx,
    const constants__t_session_i service_mgr__session,
    const constants__t_msg_type_i service_mgr__req_typ,
    const constants__t_server_request_handle_i service_mgr__req_handle,
@@ -416,7 +438,8 @@ void service_mgr__treat_session_service_req(
    t_bool * const service_mgr__async_resp_msg) {
    *service_mgr__async_resp_msg = false;
    if (constants__c_Server_Nano_Extended == true) {
-      service_mgr__treat_session_nano_extended_service_req(service_mgr__session,
+      service_mgr__treat_session_nano_extended_service_req(service_mgr__endpoint_config_idx,
+         service_mgr__session,
          service_mgr__req_typ,
          service_mgr__req_handle,
          service_mgr__req_ctx,
@@ -427,7 +450,8 @@ void service_mgr__treat_session_service_req(
          service_mgr__async_resp_msg);
    }
    else {
-      service_mgr__treat_session_nano_service_req(service_mgr__session,
+      service_mgr__treat_session_nano_service_req(service_mgr__endpoint_config_idx,
+         service_mgr__session,
          service_mgr__req_typ,
          service_mgr__req_msg,
          service_mgr__resp_msg,
@@ -748,6 +772,8 @@ void service_mgr__server_receive_session_service_req(
       t_bool service_mgr__l_is_valid_resp;
       constants__t_byte_buffer_i service_mgr__l_buffer_out;
       constants__t_channel_i service_mgr__l_session_channel;
+      constants__t_endpoint_config_idx_i service_mgr__l_endpoint_config_idx;
+      t_bool service_mgr__l_is_valid_ep_config_idx;
       
       *service_mgr__sc = constants_statuscodes_bs__c_StatusCode_indet;
       service_mgr__l_is_valid_req_on_session = false;
@@ -775,7 +801,12 @@ void service_mgr__server_receive_session_service_req(
             &service_mgr__l_is_valid_req_on_session,
             &service_mgr__l_session,
             &service_mgr__l_ret);
-         if (service_mgr__l_is_valid_req_on_session == true) {
+         channel_mgr__server_get_endpoint_config(service_mgr__channel,
+            &service_mgr__l_endpoint_config_idx);
+         channel_mgr__is_valid_endpoint_config_idx(service_mgr__l_endpoint_config_idx,
+            &service_mgr__l_is_valid_ep_config_idx);
+         if ((service_mgr__l_is_valid_req_on_session == true) &&
+            (service_mgr__l_is_valid_ep_config_idx == true)) {
             message_in_bs__decode_msg(service_mgr__req_typ,
                service_mgr__msg_buffer,
                &service_mgr__l_req_msg);
@@ -794,7 +825,8 @@ void service_mgr__server_receive_session_service_req(
                if ((service_mgr__l_valid_msg == true) &&
                   (service_mgr__l_valid_resp_header == true)) {
                   service_mgr__l_resp_msg_allocated = true;
-                  service_mgr__treat_session_service_req(service_mgr__l_session,
+                  service_mgr__treat_session_service_req(service_mgr__l_endpoint_config_idx,
+                     service_mgr__l_session,
                      service_mgr__req_typ,
                      service_mgr__l_request_handle,
                      service_mgr__req_context,

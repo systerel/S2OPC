@@ -62,7 +62,11 @@ DEFINITIONS
 
         IsRangeDefined, /* <=> range string != NULL */
         IsValid_VariantIndex, /* Valid (or none) index range value for Variant */
-        HasRange_VariantIndex /* Valid index range but has no range in  Variant */
+        HasRange_VariantIndex, /* Valid index range but has no range in  Variant */
+        
+        /* LocalizedText supported locales */
+        IsSupportedLocales_Variant
+
     ;
 
     d_inv ==
@@ -131,7 +135,9 @@ DEFINITIONS
 
         IsRangeDefined : t_IndexRange_i --> BOOL &
         IsValid_VariantIndex : t_Variant * t_IndexRange +-> BOOL &
-        HasRange_VariantIndex  : t_Variant * t_IndexRange +-> BOOL
+        HasRange_VariantIndex  : t_Variant * t_IndexRange +-> BOOL &
+
+        IsSupportedLocales_Variant : t_Variant * t_LocaleIds --> BOOL
     );
 
     d_init ==
@@ -255,8 +261,10 @@ OPERATIONS
     END
     ;
 
-    sc, variant <-- read_AddressSpace_DisplayName_value(p_node) =
+    sc, variant <-- read_AddressSpace_DisplayName_value(p_locales, p_node) =
     PRE
+        p_locales : t_LocaleIds_i &
+        p_locales : t_LocaleIds   &
         p_node : t_Node_i         &
         p_node : t_Node           &
         p_node : dom(a_NodeId)    &
@@ -458,8 +466,10 @@ OPERATIONS
     END
     ;
 
-    sc, variant, val_sc, val_ts_src, val_ts_srv <-- read_AddressSpace_Value_value(p_node, index_range) =
+    sc, variant, val_sc, val_ts_src, val_ts_srv <-- read_AddressSpace_Value_value(p_locales, p_node, index_range) =
     PRE
+        p_locales : t_LocaleIds_i &
+        p_locales : t_LocaleIds   &
         p_node : t_Node_i         &
         p_node : t_Node           &
         p_node : dom(a_NodeId)    &
@@ -548,10 +558,12 @@ OPERATIONS
     ;
 
     /* a_Value, setter */
-    serviceStatusCode, prev_dataValue <-- set_Value(p_user, node, variant, toConvert, index_range) =
+    serviceStatusCode, prev_dataValue <-- set_Value(p_user, p_locales, node, variant, toConvert, index_range) =
     PRE
         p_user : t_user_i   &
         p_user : t_user     &
+        p_locales : t_LocaleIds_i &
+        p_locales : t_LocaleIds   &
         node  : t_Node_i    &
         node  : t_Node      &
         a_NodeClass(node) = e_ncl_Variable &
@@ -565,7 +577,8 @@ OPERATIONS
     THEN
         CHOICE
             IF IsValid_VariantIndex(variant |-> index_range) = TRUE &
-                HasRange_VariantIndex(variant |-> index_range) = TRUE
+                HasRange_VariantIndex(variant |-> index_range) = TRUE &
+                IsSupportedLocales_Variant(variant |-> p_locales) = TRUE
             THEN
                 serviceStatusCode := e_sc_ok ||
                 prev_dataValue :(prev_dataValue : t_DataValue_i &
@@ -578,8 +591,12 @@ OPERATIONS
             THEN
                 serviceStatusCode := e_sc_bad_index_range_invalid ||
                 prev_dataValue := c_DataValue_indet
-            ELSE
+            ELSIF HasRange_VariantIndex(variant |-> index_range) = FALSE
+            THEN
                 serviceStatusCode := e_sc_bad_index_range_no_data ||
+                prev_dataValue := c_DataValue_indet
+            ELSE /* Locale unsupported: note that it should be Bad_LocaleNotSupported but it is not defined in schemas */
+                serviceStatusCode := e_sc_bad_invalid_argument ||
                 prev_dataValue := c_DataValue_indet
             END
         OR

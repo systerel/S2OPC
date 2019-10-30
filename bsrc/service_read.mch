@@ -123,12 +123,14 @@ OPERATIONS
     END
     ;
 
-    fill_read_response(p_TimestampsToReturn, p_user, req_msg, resp_msg) =
+    fill_read_response(p_TimestampsToReturn, p_user, p_locales, req_msg, resp_msg) =
     PRE
         p_TimestampsToReturn : t_TimestampsToReturn_i &
         p_TimestampsToReturn : t_TimestampsToReturn   &
         p_user    : t_user_i &
         p_user    : t_user   &
+        p_locales : t_LocaleIds_i &
+        p_locales : t_LocaleIds &
         req_msg   : t_msg_i &
         req_msg   = c_msg_in &
         c_msg_in  : t_msg &

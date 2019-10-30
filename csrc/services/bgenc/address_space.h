@@ -21,7 +21,7 @@
 
  File Name            : address_space.h
 
- Date                 : 04/10/2019 15:22:31
+ Date                 : 31/10/2019 08:34:07
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -106,6 +106,7 @@ extern void address_space__is_variable_compat_type(
    t_bool * const address_space__btyp_need_conv);
 extern void address_space__read_AddressSpace_Attribute_value(
    const constants__t_user_i address_space__p_user,
+   const constants__t_LocaleIds_i address_space__p_locales,
    const constants__t_Node_i address_space__p_node,
    const constants__t_NodeId_i address_space__p_nid,
    const constants__t_AttributeId_i address_space__p_aid,
@@ -119,6 +120,7 @@ extern void address_space__treat_write_1(
    const t_bool address_space__isvalid,
    const constants_statuscodes_bs__t_StatusCode_i address_space__status,
    const constants__t_user_i address_space__p_user,
+   const constants__t_LocaleIds_i address_space__p_locales,
    const constants__t_NodeId_i address_space__nid,
    const constants__t_AttributeId_i address_space__aid,
    const constants__t_DataValue_i address_space__dataValue,
@@ -128,6 +130,7 @@ extern void address_space__treat_write_1(
    constants__t_Node_i * const address_space__node);
 extern void address_space__treat_write_request_WriteValue(
    const constants__t_user_i address_space__p_user,
+   const constants__t_LocaleIds_i address_space__p_locales,
    const constants__t_WriteValue_i address_space__p_wvi);
 
 /*--------------------
@@ -139,6 +142,7 @@ extern void address_space__alloc_write_request_responses(
 extern void address_space__dealloc_write_request_responses(void);
 extern void address_space__read_Node_Attribute(
    const constants__t_user_i address_space__p_user,
+   const constants__t_LocaleIds_i address_space__p_locales,
    const constants__t_Node_i address_space__p_node,
    const constants__t_NodeId_i address_space__p_nid,
    const constants__t_AttributeId_i address_space__p_aid,
@@ -150,6 +154,7 @@ extern void address_space__read_Node_Attribute(
    constants__t_Timestamp * const address_space__val_ts_srv);
 extern void address_space__treat_write_request_WriteValues(
    const constants__t_user_i address_space__p_user,
+   const constants__t_LocaleIds_i address_space__p_locales,
    constants_statuscodes_bs__t_StatusCode_i * const address_space__StatusCode_service);
 
 #endif

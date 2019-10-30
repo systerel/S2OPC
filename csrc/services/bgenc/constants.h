@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 30/10/2019 13:43:53
+ Date                 : 31/10/2019 10:59:02
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -457,6 +457,7 @@ extern void constants__INITIALISATION(void);
   -------------------------------*/
 #define constants__free_ExpandedNodeId constants_bs__free_ExpandedNodeId
 #define constants__free_LocaleIds constants_bs__free_LocaleIds
+#define constants__get_SupportedLocales constants_bs__get_SupportedLocales
 #define constants__get_card_t_channel constants_bs__get_card_t_channel
 #define constants__get_card_t_session constants_bs__get_card_t_session
 #define constants__get_card_t_subscription constants_bs__get_card_t_subscription

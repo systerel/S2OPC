@@ -137,10 +137,12 @@ LOCAL_OPERATIONS
     END
     ;
 
-    StatusCode_service <-- treat_read_request(p_user, p_request_msg, p_response_msg) =
+    StatusCode_service <-- treat_read_request(p_user, p_locales, p_request_msg, p_response_msg) =
     PRE
         p_user         : t_user_i  &
         p_user         : t_user    &
+        p_locales      : t_LocaleIds_i &
+        p_locales      : t_LocaleIds &
         p_request_msg  : t_msg_i   &
         p_request_msg  = c_msg_in  &
         p_response_msg : t_msg_i   &
@@ -167,10 +169,12 @@ LOCAL_OPERATIONS
     END
     ;
 
-    StatusCode_service <-- treat_write_request(p_user, write_msg) =
+    StatusCode_service <-- treat_write_request(p_user, p_locales, write_msg) =
     PRE
         p_user : t_user_i    &
         p_user : t_user      &
+        p_locales : t_LocaleIds_i &
+        p_locales : t_LocaleIds   &
         write_msg : t_msg_i  &
         write_msg = c_msg_in &
         c_msg_in : t_msg     &
@@ -214,8 +218,10 @@ LOCAL_OPERATIONS
     END
     ;
     
-    StatusCode_service <-- treat_session_nano_service_req (session, req_typ, req_msg, resp_msg) =
+    StatusCode_service <-- treat_session_nano_service_req (endpoint_config_idx, session, req_typ, req_msg, resp_msg) =
     PRE
+        endpoint_config_idx : t_endpoint_config_idx_i &
+        endpoint_config_idx : t_endpoint_config_idx   &
         session : t_session_i &
         session : t_session &
         req_typ : t_msg_type_i &
@@ -233,8 +239,11 @@ LOCAL_OPERATIONS
     END
     ;
     
-    StatusCode_service, async_resp_msg <-- treat_session_nano_extended_service_req (session, req_typ, req_handle, req_ctx, req_header, req_msg, resp_msg) =
+    StatusCode_service, async_resp_msg <-- treat_session_nano_extended_service_req (endpoint_config_idx, session, req_typ, 
+                                                                                    req_handle, req_ctx, req_header, req_msg, resp_msg) =
     PRE
+        endpoint_config_idx : t_endpoint_config_idx_i &
+        endpoint_config_idx : t_endpoint_config_idx   &
         session : t_session_i &
         session : t_session &
         req_typ : t_msg_type_i &
@@ -258,8 +267,11 @@ LOCAL_OPERATIONS
     END
     ;
 
-    StatusCode_service, async_resp_msg <-- treat_session_service_req (session, req_typ, req_handle, req_ctx, req_header, req_msg, resp_msg) =
+    StatusCode_service, async_resp_msg <-- treat_session_service_req (endpoint_config_idx, session, req_typ, 
+                                                                      req_handle, req_ctx, req_header, req_msg, resp_msg) =
     PRE
+        endpoint_config_idx : t_endpoint_config_idx_i &
+        endpoint_config_idx : t_endpoint_config_idx   &
         session : t_session_i &
         session : t_session &
         req_typ : t_msg_type_i &
@@ -441,7 +453,7 @@ OPERATIONS
     END
     ;
 
-    StatusCode_service <-- treat_read_request(p_user, p_request_msg, p_response_msg) =
+    StatusCode_service <-- treat_read_request(p_user, p_locales, p_request_msg, p_response_msg) =
     VAR
         l_nb_ReadValue,
         l_is_valid,
@@ -451,7 +463,7 @@ OPERATIONS
         IF  l_is_valid = TRUE THEN
             l_is_valid <-- alloc_read_response(l_nb_ReadValue, p_response_msg);
             IF  l_is_valid = TRUE THEN
-                fill_read_response(l_TimestampsToReturn, p_user, p_request_msg, p_response_msg)
+                fill_read_response(l_TimestampsToReturn, p_user, p_locales, p_request_msg, p_response_msg)
             ELSE
                 StatusCode_service := e_sc_bad_out_of_memory
             END
@@ -459,7 +471,7 @@ OPERATIONS
     END
     ;
 
-    StatusCode_service <-- treat_write_request(p_user, write_msg) =
+    StatusCode_service <-- treat_write_request(p_user, p_locales, write_msg) =
     VAR
         l_nb_req,
         l_bret
@@ -471,7 +483,7 @@ OPERATIONS
             l_bret <-- alloc_write_request_responses(l_nb_req);
             IF l_bret = TRUE
             THEN
-                StatusCode_service <-- treat_write_request_WriteValues(p_user)
+                StatusCode_service <-- treat_write_request_WriteValues(p_user, p_locales)
             ELSE
                 StatusCode_service := e_sc_bad_out_of_memory
             END
@@ -482,16 +494,19 @@ OPERATIONS
 
     StatusCode_service <-- treat_session_local_service_req (endpoint_config_idx, req_typ, req_msg, resp_msg) =
     VAR
-        l_user
+        l_user,
+        l_supported_locales
     IN
         CASE req_typ OF
             EITHER e_msg_attribute_read_req THEN
                 l_user <-- get_local_user (endpoint_config_idx);
-                StatusCode_service <-- treat_read_request (l_user, req_msg, resp_msg)
+                l_supported_locales <-- get_SupportedLocales (endpoint_config_idx);
+                StatusCode_service <-- treat_read_request (l_user, l_supported_locales, req_msg, resp_msg)
             OR e_msg_attribute_write_req THEN
                 // Write request case
                 l_user <-- get_local_user (endpoint_config_idx);
-                StatusCode_service <-- treat_write_request (l_user, req_msg);
+                l_supported_locales <-- get_SupportedLocales (endpoint_config_idx);
+                StatusCode_service <-- treat_write_request (l_user, l_supported_locales, req_msg);
                 /* TODO: the following may fail (malloc) */
                 write_WriteResponse_msg_out(resp_msg);
                 dealloc_write_request_responses
@@ -506,18 +521,21 @@ OPERATIONS
     END
     ;
     
-    StatusCode_service <-- treat_session_nano_service_req (session, req_typ, req_msg, resp_msg) =
+    StatusCode_service <-- treat_session_nano_service_req (endpoint_config_idx, session, req_typ, req_msg, resp_msg) =
     VAR
-        l_user
+        l_user,
+        l_locales
     IN
         CASE req_typ OF
             EITHER e_msg_attribute_read_req THEN
                 l_user <-- get_session_user_server(session);
-                StatusCode_service <-- treat_read_request (l_user, req_msg, resp_msg)
+                l_locales <-- get_server_session_preferred_locales(session);
+                StatusCode_service <-- treat_read_request (l_user, l_locales, req_msg, resp_msg)
             OR e_msg_attribute_write_req THEN
                 // Write request case
                 l_user <-- get_session_user_server(session);
-                StatusCode_service <-- treat_write_request (l_user, req_msg);
+                l_locales <-- get_SupportedLocales (endpoint_config_idx);
+                StatusCode_service <-- treat_write_request (l_user, l_locales, req_msg);
                 /* TODO: the following may fail (malloc) */
                 write_WriteResponse_msg_out(resp_msg);
                 dealloc_write_request_responses
@@ -540,7 +558,9 @@ OPERATIONS
     END
     ;
     
-    StatusCode_service, async_resp_msg <-- treat_session_nano_extended_service_req (session, req_typ, req_handle, req_ctx, req_header, req_msg, resp_msg) =
+    StatusCode_service, async_resp_msg <-- treat_session_nano_extended_service_req (endpoint_config_idx, session, 
+                                                                                    req_typ, req_handle, req_ctx, 
+                                                                                    req_header, req_msg, resp_msg) =
     VAR
         l_user
     IN
@@ -551,7 +571,7 @@ OPERATIONS
                    e_msg_view_register_nodes_req, e_msg_view_unregister_nodes_req 
             THEN
                 /* Nano profile services */
-                StatusCode_service <-- treat_session_nano_service_req (session, req_typ, req_msg, resp_msg)
+                StatusCode_service <-- treat_session_nano_service_req (endpoint_config_idx, session, req_typ, req_msg, resp_msg)
                 /* Next services are out of the Nano scope */
             OR e_msg_subscription_create_req THEN
                 StatusCode_service <-- treat_create_subscription_request (session, req_msg, resp_msg)
@@ -578,14 +598,16 @@ OPERATIONS
     END
     ;
 
-    StatusCode_service, async_resp_msg <-- treat_session_service_req (session, req_typ, req_handle, req_ctx, req_header, req_msg, resp_msg) =
+    StatusCode_service, async_resp_msg <-- treat_session_service_req (endpoint_config_idx, session, req_typ, req_handle, 
+                                                                      req_ctx, req_header, req_msg, resp_msg) =
     BEGIN
         async_resp_msg := FALSE;
         IF c_Server_Nano_Extended = TRUE
         THEN
-            StatusCode_service, async_resp_msg <-- treat_session_nano_extended_service_req (session, req_typ, req_handle, req_ctx, req_header, req_msg, resp_msg)
+            StatusCode_service, async_resp_msg <-- treat_session_nano_extended_service_req 
+             (endpoint_config_idx, session, req_typ, req_handle, req_ctx, req_header, req_msg, resp_msg)
         ELSE            
-            StatusCode_service <-- treat_session_nano_service_req (session, req_typ, req_msg, resp_msg)
+            StatusCode_service <-- treat_session_nano_service_req (endpoint_config_idx, session, req_typ, req_msg, resp_msg)
         END
     END
     ;
@@ -828,7 +850,9 @@ OPERATIONS
         l_ret2,
         l_is_valid_resp,
         l_buffer_out,
-        l_session_channel
+        l_session_channel,
+        l_endpoint_config_idx,
+        l_is_valid_ep_config_idx
     IN
         sc := c_StatusCode_indet;
         l_is_valid_req_on_session := FALSE;
@@ -850,7 +874,9 @@ OPERATIONS
             /* Check valid session token used */
             l_session_token <-- read_msg_req_header_session_token (l_req_msg_header);
             l_is_valid_req_on_session, l_session, l_ret <-- server_validate_session_service_req (channel, l_session_token);
-            IF l_is_valid_req_on_session = TRUE
+            l_endpoint_config_idx <-- server_get_endpoint_config (channel);
+            l_is_valid_ep_config_idx <-- is_valid_endpoint_config_idx (l_endpoint_config_idx);
+            IF l_is_valid_req_on_session = TRUE & l_is_valid_ep_config_idx = TRUE
             THEN
                 /* Decode message */
                 l_req_msg <-- decode_msg (req_typ, msg_buffer);
@@ -867,8 +893,9 @@ OPERATIONS
                     THEN
                         l_resp_msg_allocated := TRUE;
                         // Call local operation to dispatch the service request on right service
-                            l_ret, async_resp
-                              <-- treat_session_service_req (l_session,
+                        l_ret, async_resp
+                              <-- treat_session_service_req (l_endpoint_config_idx,
+                                                             l_session,
                                                              req_typ,
                                                              l_request_handle,
                                                              req_context,

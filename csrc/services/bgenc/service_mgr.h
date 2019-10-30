@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.h
 
- Date                 : 04/10/2019 15:24:29
+ Date                 : 31/10/2019 10:59:06
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -121,6 +121,7 @@ extern void service_mgr__treat_discovery_service_req(
    constants_statuscodes_bs__t_StatusCode_i * const service_mgr__StatusCode_service);
 extern void service_mgr__treat_read_request(
    const constants__t_user_i service_mgr__p_user,
+   const constants__t_LocaleIds_i service_mgr__p_locales,
    const constants__t_msg_i service_mgr__p_request_msg,
    const constants__t_msg_i service_mgr__p_response_msg,
    constants_statuscodes_bs__t_StatusCode_i * const service_mgr__StatusCode_service);
@@ -131,6 +132,7 @@ extern void service_mgr__treat_session_local_service_req(
    const constants__t_msg_i service_mgr__resp_msg,
    constants_statuscodes_bs__t_StatusCode_i * const service_mgr__StatusCode_service);
 extern void service_mgr__treat_session_nano_extended_service_req(
+   const constants__t_endpoint_config_idx_i service_mgr__endpoint_config_idx,
    const constants__t_session_i service_mgr__session,
    const constants__t_msg_type_i service_mgr__req_typ,
    const constants__t_server_request_handle_i service_mgr__req_handle,
@@ -141,12 +143,14 @@ extern void service_mgr__treat_session_nano_extended_service_req(
    constants_statuscodes_bs__t_StatusCode_i * const service_mgr__StatusCode_service,
    t_bool * const service_mgr__async_resp_msg);
 extern void service_mgr__treat_session_nano_service_req(
+   const constants__t_endpoint_config_idx_i service_mgr__endpoint_config_idx,
    const constants__t_session_i service_mgr__session,
    const constants__t_msg_type_i service_mgr__req_typ,
    const constants__t_msg_i service_mgr__req_msg,
    const constants__t_msg_i service_mgr__resp_msg,
    constants_statuscodes_bs__t_StatusCode_i * const service_mgr__StatusCode_service);
 extern void service_mgr__treat_session_service_req(
+   const constants__t_endpoint_config_idx_i service_mgr__endpoint_config_idx,
    const constants__t_session_i service_mgr__session,
    const constants__t_msg_type_i service_mgr__req_typ,
    const constants__t_server_request_handle_i service_mgr__req_handle,
@@ -158,6 +162,7 @@ extern void service_mgr__treat_session_service_req(
    t_bool * const service_mgr__async_resp_msg);
 extern void service_mgr__treat_write_request(
    const constants__t_user_i service_mgr__p_user,
+   const constants__t_LocaleIds_i service_mgr__p_locales,
    const constants__t_msg_i service_mgr__write_msg,
    constants_statuscodes_bs__t_StatusCode_i * const service_mgr__StatusCode_service);
 

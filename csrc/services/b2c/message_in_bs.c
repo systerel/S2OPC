@@ -288,7 +288,7 @@ void message_in_bs__read_activate_req_msg_locales(const constants__t_msg_i messa
     if (activateSessionReq->NoOfLocaleIds > 0)
     {
         *message_in_bs__p_localeIds =
-            SOPC_String_GetRawCStringArray(activateSessionReq->NoOfLocaleIds, activateSessionReq->LocaleIds);
+            SOPC_String_GetCStringArray(activateSessionReq->NoOfLocaleIds, activateSessionReq->LocaleIds);
     }
     else
     {

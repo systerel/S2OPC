@@ -21,7 +21,7 @@
 
  File Name            : address_space.c
 
- Date                 : 11/10/2019 10:52:48
+ Date                 : 31/10/2019 08:34:07
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -101,6 +101,7 @@ void address_space__is_mandatory_attribute(
 
 void address_space__treat_write_request_WriteValue(
    const constants__t_user_i address_space__p_user,
+   const constants__t_LocaleIds_i address_space__p_locales,
    const constants__t_WriteValue_i address_space__p_wvi) {
    {
       constants__t_AttributeId_i address_space__l_aid;
@@ -134,6 +135,7 @@ void address_space__treat_write_request_WriteValue(
       address_space__treat_write_1(address_space__l_isvalid,
          address_space__l_status1,
          address_space__p_user,
+         address_space__p_locales,
          address_space__l_nid,
          address_space__l_aid,
          address_space__l_dataValue,
@@ -154,6 +156,7 @@ void address_space__treat_write_request_WriteValue(
          if (address_space__l_access_read == true) {
             address_space_local__set_local_service_treatment();
             address_space__read_AddressSpace_Attribute_value(address_space__p_user,
+               address_space__p_locales,
                address_space__l_node,
                address_space__l_nid,
                address_space__l_aid,
@@ -200,6 +203,7 @@ void address_space__treat_write_1(
    const t_bool address_space__isvalid,
    const constants_statuscodes_bs__t_StatusCode_i address_space__status,
    const constants__t_user_i address_space__p_user,
+   const constants__t_LocaleIds_i address_space__p_locales,
    const constants__t_NodeId_i address_space__nid,
    const constants__t_AttributeId_i address_space__aid,
    const constants__t_DataValue_i address_space__dataValue,
@@ -261,6 +265,7 @@ void address_space__treat_write_1(
                      &address_space__l_raw_sc);
                   if (address_space__l_local_treatment == true) {
                      address_space_bs__set_Value(address_space__p_user,
+                        address_space__p_locales,
                         *address_space__node,
                         address_space__l_variant,
                         address_space__l_compat_with_conv,
@@ -293,6 +298,7 @@ void address_space__treat_write_1(
                            &address_space__l_authorized_write);
                         if (address_space__l_authorized_write == true) {
                            address_space_bs__set_Value(address_space__p_user,
+                              address_space__p_locales,
                               *address_space__node,
                               address_space__l_variant,
                               address_space__l_compat_with_conv,
@@ -437,6 +443,7 @@ void address_space__is_variable_compat_type(
 
 void address_space__read_AddressSpace_Attribute_value(
    const constants__t_user_i address_space__p_user,
+   const constants__t_LocaleIds_i address_space__p_locales,
    const constants__t_Node_i address_space__p_node,
    const constants__t_NodeId_i address_space__p_nid,
    const constants__t_AttributeId_i address_space__p_aid,
@@ -485,7 +492,8 @@ void address_space__read_AddressSpace_Attribute_value(
                address_space__val);
             break;
          case constants__e_aid_DisplayName:
-            address_space_bs__read_AddressSpace_DisplayName_value(address_space__p_node,
+            address_space_bs__read_AddressSpace_DisplayName_value(address_space__p_locales,
+               address_space__p_node,
                address_space__sc,
                address_space__val);
             break;
@@ -547,7 +555,8 @@ void address_space__read_AddressSpace_Attribute_value(
                address_space__val);
             break;
          case constants__e_aid_Value:
-            address_space_bs__read_AddressSpace_Value_value(address_space__p_node,
+            address_space_bs__read_AddressSpace_Value_value(address_space__p_locales,
+               address_space__p_node,
                address_space__p_index_range,
                address_space__sc,
                address_space__val,
@@ -574,6 +583,7 @@ void address_space__read_AddressSpace_Attribute_value(
 
 void address_space__read_Node_Attribute(
    const constants__t_user_i address_space__p_user,
+   const constants__t_LocaleIds_i address_space__p_locales,
    const constants__t_Node_i address_space__p_node,
    const constants__t_NodeId_i address_space__p_nid,
    const constants__t_AttributeId_i address_space__p_aid,
@@ -607,6 +617,7 @@ void address_space__read_Node_Attribute(
             address_space_local__is_local_service_treatment(&address_space__l_is_local_read);
             if (address_space__l_is_local_read == true) {
                address_space__read_AddressSpace_Attribute_value(address_space__p_user,
+                  address_space__p_locales,
                   address_space__p_node,
                   address_space__p_nid,
                   address_space__p_aid,
@@ -630,6 +641,7 @@ void address_space__read_Node_Attribute(
                      &address_space__l_user_auth);
                   if (address_space__l_user_auth == true) {
                      address_space__read_AddressSpace_Attribute_value(address_space__p_user,
+                        address_space__p_locales,
                         address_space__p_node,
                         address_space__p_nid,
                         address_space__p_aid,
@@ -651,6 +663,7 @@ void address_space__read_Node_Attribute(
          }
          else {
             address_space__read_AddressSpace_Attribute_value(address_space__p_user,
+               address_space__p_locales,
                address_space__p_node,
                address_space__p_nid,
                address_space__p_aid,
@@ -680,6 +693,7 @@ void address_space__alloc_write_request_responses(
 
 void address_space__treat_write_request_WriteValues(
    const constants__t_user_i address_space__p_user,
+   const constants__t_LocaleIds_i address_space__p_locales,
    constants_statuscodes_bs__t_StatusCode_i * const address_space__StatusCode_service) {
    {
       t_entier4 address_space__l_nb_req;
@@ -694,6 +708,7 @@ void address_space__treat_write_request_WriteValues(
          address_space_it__continue_iter_write_request(&address_space__l_continue,
             &address_space__l_wvi);
          address_space__treat_write_request_WriteValue(address_space__p_user,
+            address_space__p_locales,
             address_space__l_wvi);
       }
    }

@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.h
 
- Date                 : 04/10/2019 15:26:01
+ Date                 : 30/10/2019 16:33:14
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -98,6 +98,7 @@ extern void subscription_mgr__fill_response_subscription_create_monitored_items(
    const constants__t_subscription_i subscription_mgr__p_subscription,
    const constants__t_TimestampsToReturn_i subscription_mgr__p_tsToReturn,
    const constants__t_user_i subscription_mgr__p_user,
+   const constants__t_LocaleIds_i subscription_mgr__p_locales,
    const constants__t_msg_i subscription_mgr__p_req_msg,
    const constants__t_msg_i subscription_mgr__p_resp_msg,
    const t_entier4 subscription_mgr__p_nb_monitored_items);

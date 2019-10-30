@@ -1154,6 +1154,14 @@ OPERATIONS
         p_in : t_LocaleIds
     THEN
         skip
+    END;
+
+    p_localeIds <-- get_SupportedLocales(p_in) =
+    PRE
+        p_in : t_endpoint_config_idx_i &
+        p_in : t_endpoint_config_idx
+    THEN
+        p_localeIds :(p_localeIds : t_LocaleIds_i & p_localeIds : t_LocaleIds)
     END
 
 END

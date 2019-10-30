@@ -139,10 +139,12 @@ LOCAL_OPERATIONS
     END
     ;
 
-    treat_write_request_WriteValue (p_user, p_wvi) =
+    treat_write_request_WriteValue (p_user, p_locales, p_wvi) =
     PRE
         p_user : t_user_i &
         p_user : t_user &
+        p_locales : t_LocaleIds_i &
+        p_locales : t_LocaleIds &
         p_wvi : t_WriteValue_i &
         p_wvi : t_WriteValue &
         p_wvi : cast_t_WriteValue[1..nb_WriteValue]
@@ -163,14 +165,20 @@ LOCAL_OPERATIONS
                                      TRUE  |-> {FALSE |-> e_sc_bad_type_mismatch,
                                                 TRUE |-> {TRUE |-> {FALSE |-> e_sc_bad_index_range_invalid,
                                                                     TRUE |-> {FALSE |-> e_sc_bad_index_range_no_data,
-                                                                              TRUE |-> e_sc_ok
+                                                                              TRUE |-> {FALSE |-> e_sc_bad_invalid_argument,
+                                                                                        TRUE |-> e_sc_ok
+                                                                                       }(IsSupportedLocales_Variant
+                                                                                           (DataValue_Variant(dataValue) |-> p_locales))
                                                                              }(HasRange_VariantIndex(DataValue_Variant(dataValue) |-> index_range))
                                                                    }(IsValid_VariantIndex(DataValue_Variant(dataValue) |-> index_range)),
                                                           FALSE |-> {FALSE |-> e_sc_bad_not_writable,
                                                                      TRUE |-> {FALSE |-> e_sc_bad_user_access_denied,
                                                                                TRUE |-> {FALSE |-> e_sc_bad_index_range_invalid,
                                                                                          TRUE |-> {FALSE |-> e_sc_bad_index_range_no_data,
-                                                                                                   TRUE |-> e_sc_ok
+                                                                                                   TRUE |-> {FALSE |-> e_sc_bad_invalid_argument,
+                                                                                                             TRUE |-> e_sc_ok
+                                                                                                            }(IsSupportedLocales_Variant
+                                                                                                               (DataValue_Variant(dataValue) |-> p_locales))
                                                                                                   }(HasRange_VariantIndex(DataValue_Variant(dataValue) |-> index_range))
                                                                                         }(IsValid_VariantIndex(DataValue_Variant(dataValue) |-> index_range))
                                                                               }(bool(e_operation_type_write |-> nid |-> aid |-> p_user : s_AuthorizedOperations))
@@ -193,12 +201,14 @@ LOCAL_OPERATIONS
     ;
 
     /* Outer treat operation. Validates isvalid, validates user, records the write. */
-    serviceStatusCode, prev_dataValue, node <-- treat_write_1(isvalid, status, p_user, nid, aid, dataValue, index_range) =
+    serviceStatusCode, prev_dataValue, node <-- treat_write_1(isvalid, status, p_user, p_locales, nid, aid, dataValue, index_range) =
     PRE
         isvalid : BOOL &
         status : t_StatusCode_i &
         p_user : t_user_i &
         p_user : t_user   &
+        p_locales : t_LocaleIds_i &
+        p_locales : t_LocaleIds   &
         nid : t_NodeId_i &
         aid : t_AttributeId_i &
         dataValue : t_DataValue_i &
@@ -280,7 +290,7 @@ LOCAL_OPERATIONS
              serviceStatusCode :
              {e_sc_bad_out_of_memory, e_sc_bad_attribute_id_invalid, e_sc_bad_index_range_invalid,
                  e_sc_bad_node_id_unknown, e_sc_bad_not_writable, e_sc_bad_type_mismatch,
-                 e_sc_bad_user_access_denied, e_sc_bad_index_range_no_data} &
+                 e_sc_bad_user_access_denied, e_sc_bad_index_range_no_data, e_sc_bad_invalid_argument} &
              /* TODO: out of memory case */
              serviceStatusCode =
               {FALSE |-> status,
@@ -296,7 +306,10 @@ LOCAL_OPERATIONS
                                                                      TRUE |-> {FALSE |-> e_sc_bad_user_access_denied,
                                                                                TRUE |-> {FALSE |-> e_sc_bad_index_range_invalid,
                                                                                          TRUE |-> {FALSE |-> e_sc_bad_index_range_no_data,
-                                                                                                   TRUE |-> e_sc_ok
+                                                                                                   TRUE |-> {FALSE |-> e_sc_bad_invalid_argument,
+                                                                                                             TRUE |-> e_sc_ok
+                                                                                                            }(IsSupportedLocales_Variant
+                                                                                                               (DataValue_Variant(dataValue) |-> p_locales))
                                                                                                   }(HasRange_VariantIndex(DataValue_Variant(dataValue) |-> index_range))
                                                                                         }(IsValid_VariantIndex(DataValue_Variant(dataValue) |-> index_range))
                                                                               }(bool(e_operation_type_write |-> nid |-> aid |-> p_user : s_AuthorizedOperations))
@@ -327,10 +340,12 @@ LOCAL_OPERATIONS
     END
     ;
 
-    sc, val, val_sc, val_ts_src, val_ts_srv <-- read_AddressSpace_Attribute_value(p_user, p_node, p_nid, p_aid, p_index_range) =
+    sc, val, val_sc, val_ts_src, val_ts_srv <-- read_AddressSpace_Attribute_value(p_user, p_locales, p_node, p_nid, p_aid, p_index_range) =
     PRE
         p_user : t_user_i &
         p_user : t_user   &
+        p_locales  : t_LocaleIds_i &
+        p_locales  : t_LocaleIds   &
         p_node : t_Node_i &
         p_node : t_Node &
         p_nid : t_NodeId_i &
@@ -448,7 +463,7 @@ OPERATIONS
     END
     ;
 
-    treat_write_request_WriteValue (p_user, p_wvi) =
+    treat_write_request_WriteValue (p_user, p_locales, p_wvi) =
     VAR
         l_aid,
         l_nid,
@@ -473,7 +488,7 @@ OPERATIONS
     IN
         l_isvalid, l_status1, l_nid, l_aid, l_dataValue, l_index_range <-- getall_WriteValue(p_wvi);
         /* Avoids the IFs with a local operation. */
-        l_status2, l_prev_dataValue, l_node <-- treat_write_1(l_isvalid, l_status1, p_user, l_nid, l_aid, l_dataValue, l_index_range);
+        l_status2, l_prev_dataValue, l_node <-- treat_write_1(l_isvalid, l_status1, p_user, p_locales, l_nid, l_aid, l_dataValue, l_index_range);
         l_new_val := c_Variant_indet;
         set_ResponseWrite_StatusCode(p_wvi, l_status2);
         l_wv <-- getall_WriteValuePointer(p_wvi);
@@ -492,7 +507,7 @@ OPERATIONS
                 /* Set local treatment since user can be anyone in subscription: avoid user right verification */
                 set_local_service_treatment;
                 l_new_sc, l_new_val, l_new_val_sc, l_new_val_ts_src, l_new_val_ts_srv
-                <-- read_AddressSpace_Attribute_value(p_user, l_node, l_nid, l_aid, l_index_range);
+                <-- read_AddressSpace_Attribute_value(p_user, p_locales, l_node, l_nid, l_aid, l_index_range);
                 unset_local_service_treatment;
                 IF l_new_sc = e_sc_ok THEN
                     gen_data_changed_event (l_nid, l_aid, l_prev_dataValue, l_new_val, l_new_val_sc, l_new_val_ts_src, l_new_val_ts_srv)
@@ -517,7 +532,7 @@ OPERATIONS
     END
     ;
 
-    serviceStatusCode, prev_dataValue, node <-- treat_write_1(isvalid, status, p_user, nid, aid, dataValue, index_range) =
+    serviceStatusCode, prev_dataValue, node <-- treat_write_1(isvalid, status, p_user, p_locales, nid, aid, dataValue, index_range) =
     VAR
         l_isvalid,
         l_ncl,
@@ -557,7 +572,7 @@ OPERATIONS
                         l_raw_sc <-- get_conv_DataValue_Status(dataValue);
                         IF l_local_treatment = TRUE THEN
                             /* No access authorization check for local treatment */
-                            serviceStatusCode, prev_dataValue <-- set_Value(p_user, node, l_variant, l_compat_with_conv, index_range);
+                            serviceStatusCode, prev_dataValue <-- set_Value(p_user, p_locales, node, l_variant, l_compat_with_conv, index_range);
                             IF serviceStatusCode = e_sc_ok THEN
                                 set_Value_StatusCode(p_user, node, l_raw_sc);
                                 set_Value_SourceTimestamp(p_user, node, l_source_ts)
@@ -572,7 +587,7 @@ OPERATIONS
                                 l_authorized_write <-- get_user_authorization(e_operation_type_write, nid, aid, p_user);
                                 IF l_authorized_write = TRUE THEN
                                     serviceStatusCode, prev_dataValue
-                                      <-- set_Value(p_user, node, l_variant, l_compat_with_conv,  index_range);
+                                      <-- set_Value(p_user, p_locales, node, l_variant, l_compat_with_conv,  index_range);
                                     IF serviceStatusCode = e_sc_ok THEN
                                         IF l_access_write_status = TRUE THEN
                                             set_Value_StatusCode(p_user, node, l_raw_sc)
@@ -665,7 +680,7 @@ OPERATIONS
     END
     ;
 
-    sc, val, val_sc, val_ts_src, val_ts_srv <-- read_AddressSpace_Attribute_value(p_user, p_node, p_nid, p_aid, p_index_range) =
+    sc, val, val_sc, val_ts_src, val_ts_srv <-- read_AddressSpace_Attribute_value(p_user, p_locales, p_node, p_nid, p_aid, p_index_range) =
     VAR
         l_user_read_auth,
         l_user_write_auth,
@@ -690,7 +705,7 @@ OPERATIONS
                 OR e_aid_DataType THEN
                     sc, val <-- read_AddressSpace_DataType_value(p_node)
                 OR e_aid_DisplayName THEN
-                    sc, val <-- read_AddressSpace_DisplayName_value(p_node)
+                    sc, val <-- read_AddressSpace_DisplayName_value(p_locales, p_node)
                 OR e_aid_EventNotifier THEN
                     sc, val <-- read_AddressSpace_EventNotifier_value(p_node)
                 OR e_aid_Executable THEN
@@ -712,7 +727,7 @@ OPERATIONS
                 OR e_aid_UserExecutable THEN
                     sc, val <-- read_AddressSpace_UserExecutable_value(p_node)
                 OR e_aid_Value THEN
-                    sc, val, val_sc, val_ts_src, val_ts_srv <-- read_AddressSpace_Value_value(p_node, p_index_range)
+                    sc, val, val_sc, val_ts_src, val_ts_srv <-- read_AddressSpace_Value_value(p_locales, p_node, p_index_range)
                 OR e_aid_ValueRank THEN
                     sc, val <-- read_AddressSpace_ValueRank_value(p_node)
                 OR e_aid_ArrayDimensions THEN
@@ -726,7 +741,7 @@ OPERATIONS
 
     /* END LOCAL_OPERATIONS */
 
-    sc, val, val_sc, val_ts_src, val_ts_srv <-- read_Node_Attribute(p_user, p_node, p_nid, p_aid, p_index_range) =
+    sc, val, val_sc, val_ts_src, val_ts_srv <-- read_Node_Attribute(p_user, p_locales, p_node, p_nid, p_aid, p_index_range) =
     VAR
         l_is_mandatory_attribute,
         l_ncl,
@@ -747,14 +762,14 @@ OPERATIONS
                 l_is_local_read <-- is_local_service_treatment;
                 IF l_is_local_read = TRUE THEN
                     /* local read service call is always authorized */
-                    sc, val, val_sc, val_ts_src, val_ts_srv <-- read_AddressSpace_Attribute_value(p_user, p_node, p_nid, p_aid, p_index_range)
+                    sc, val, val_sc, val_ts_src, val_ts_srv <-- read_AddressSpace_Attribute_value(p_user, p_locales, p_node, p_nid, p_aid, p_index_range)
                 ELSE
                     l_access_lvl <-- get_AccessLevel(p_node);
                     l_access_read <-- is_t_access_level_currentRead(l_access_lvl);
                     IF l_access_read = TRUE THEN
                         l_user_auth <-- get_user_authorization(e_operation_type_read, p_nid, p_aid, p_user);
                         IF l_user_auth = TRUE THEN
-                            sc, val, val_sc, val_ts_src, val_ts_srv <-- read_AddressSpace_Attribute_value(p_user, p_node, p_nid, p_aid, p_index_range)
+                            sc, val, val_sc, val_ts_src, val_ts_srv <-- read_AddressSpace_Attribute_value(p_user, p_locales, p_node, p_nid, p_aid, p_index_range)
                         ELSE
                             sc := e_sc_bad_user_access_denied
                         END
@@ -764,7 +779,7 @@ OPERATIONS
                 END
             ELSE
                 /* If not a Variable Value, read is always authorized (no access rights) */
-                sc, val, val_sc, val_ts_src, val_ts_srv <-- read_AddressSpace_Attribute_value(p_user, p_node, p_nid, p_aid, p_index_range)
+                sc, val, val_sc, val_ts_src, val_ts_srv <-- read_AddressSpace_Attribute_value(p_user, p_locales, p_node, p_nid, p_aid, p_index_range)
             END
         END
     END
@@ -784,7 +799,7 @@ OPERATIONS
     END
     ;
 
-    StatusCode_service <-- treat_write_request_WriteValues (p_user) =
+    StatusCode_service <-- treat_write_request_WriteValues (p_user, p_locales) =
     VAR
         l_nb_req,
         l_continue,
@@ -795,7 +810,7 @@ OPERATIONS
         l_continue <-- init_iter_write_request(l_nb_req);
         WHILE l_continue = TRUE DO
             l_continue, l_wvi <-- continue_iter_write_request;
-            treat_write_request_WriteValue (p_user, l_wvi)
+            treat_write_request_WriteValue (p_user, p_locales, l_wvi)
         INVARIANT
             wreqs_to_iterate <: t_WriteValue &
             wreqs_iterated <: t_WriteValue &

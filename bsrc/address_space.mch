@@ -67,7 +67,7 @@ DEFINITIONS
         IsRangeDefined,
         IsValid_VariantIndex,
         HasRange_VariantIndex,
-
+        
         /* Local treament */
         local_service_treatment,
 
@@ -177,10 +177,12 @@ INITIALISATION
 OPERATIONS
 
     /* a_NodeClass(node) and any_attribute(node) */
-    sc, val, val_sc, val_ts_src, val_ts_srv <-- read_Node_Attribute(p_user, p_node, p_nid, p_aid, p_index_range) =
+    sc, val, val_sc, val_ts_src, val_ts_srv <-- read_Node_Attribute(p_user, p_locales, p_node, p_nid, p_aid, p_index_range) =
     PRE
         p_user : t_user_i &
         p_user : t_user   &
+        p_locales  : t_LocaleIds_i &
+        p_locales  : t_LocaleIds   &
         p_node : t_Node_i &
         p_node : t_Node &
         p_nid : t_NodeId_i &
@@ -501,10 +503,12 @@ OPERATIONS
     /* --------------------------------------------------------------------- */
     /* Service Write */
 
-    StatusCode_service <-- treat_write_request_WriteValues (p_user) =
+    StatusCode_service <-- treat_write_request_WriteValues (p_user, p_locales) =
     PRE
         p_user : t_user_i &
         p_user : t_user   &
+        p_locales : t_LocaleIds_i &
+        p_locales : t_LocaleIds   &
         ResponseWrite_allocated = TRUE
     THEN
         StatusCode_service,

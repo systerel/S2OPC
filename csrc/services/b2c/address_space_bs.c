@@ -189,6 +189,7 @@ void address_space_bs__read_AddressSpace_DataType_value(
 }
 
 void address_space_bs__read_AddressSpace_DisplayName_value(
+    const constants__t_LocaleIds_i address_space_bs__p_locales,
     const constants__t_Node_i address_space_bs__p_node,
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
     constants__t_Variant_i* const address_space_bs__variant)
@@ -200,6 +201,11 @@ void address_space_bs__read_AddressSpace_DisplayName_value(
     {
         *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
         *address_space_bs__variant = NULL;
+    }
+    else
+    {
+        *address_space_bs__variant = util_variant__set_PreferredLocalizedText_from_LocalizedText_Variant(
+            *address_space_bs__variant, address_space_bs__p_locales);
     }
 }
 
@@ -380,6 +386,7 @@ void address_space_bs__read_AddressSpace_ValueRank_value(
 }
 
 void address_space_bs__read_AddressSpace_Value_value(
+    const constants__t_LocaleIds_i address_space_bs__p_locales,
     const constants__t_Node_i address_space_bs__p_node,
     const constants__t_IndexRange_i address_space_bs__index_range,
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
@@ -388,6 +395,7 @@ void address_space_bs__read_AddressSpace_Value_value(
     constants__t_Timestamp* const address_space_bs__val_ts_src,
     constants__t_Timestamp* const address_space_bs__val_ts_srv)
 {
+    (void) address_space_bs__p_locales;
     assert(address_space_bs__p_node->node_class == OpcUa_NodeClass_Variable ||
            address_space_bs__p_node->node_class == OpcUa_NodeClass_VariableType);
     *address_space_bs__val_sc = OpcUa_BadInvalidState;
@@ -402,6 +410,15 @@ void address_space_bs__read_AddressSpace_Value_value(
         *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
         *address_space_bs__variant = NULL;
         return;
+    }
+    else
+    {
+        if (SOPC_LocalizedText_Id == value->BuiltInTypeId)
+        {
+            // Get preferred localized text(s) (single value, array or matrix)
+            value =
+                util_variant__set_PreferredLocalizedText_from_LocalizedText_Variant(value, address_space_bs__p_locales);
+        }
     }
 
     if (address_space_bs__index_range == NULL || address_space_bs__index_range->Length <= 0)
@@ -450,17 +467,153 @@ void address_space_bs__read_AddressSpace_Value_value(
     }
 }
 
-static constants_statuscodes_bs__t_StatusCode_i set_value_full(SOPC_Variant* node_value,
+static SOPC_ReturnStatus modify_localized_text(char** supportedLocales,
+                                               SOPC_Variant* node_value,
+                                               const SOPC_Variant* new_value,
+                                               SOPC_Variant* previous_value)
+{
+    assert(SOPC_LocalizedText_Id == new_value->BuiltInTypeId);
+    assert(SOPC_LocalizedText_Id == node_value->BuiltInTypeId);
+    assert(node_value->ArrayType == new_value->ArrayType);
+    previous_value->ArrayType = node_value->ArrayType;
+    previous_value->BuiltInTypeId = node_value->BuiltInTypeId;
+    /* Important note: we shall use Move because the initial variant value might be part of initial address space
+     * (DoNotClear flag set to true if constant declaration). Since we will modify variant content it will lead to an
+     * hybrid content (constant and not constant) if we do not make a copy before modification.
+     * 1. Move current value to previous value variant
+     * 2. Copy previous value content to node value
+     * 3. Modify node value with new content
+     */
+
+    // 1. Move current value to previous value
+    SOPC_Variant_Move(previous_value, node_value);
+    SOPC_Variant_Clear(node_value); // Reset DoNotClear flag
+    // 2. Make a copy of the variant to could modify it and ensure clear (DoNotClear flag ensured to be false)
+    SOPC_ReturnStatus status = SOPC_Variant_Copy(node_value, previous_value);
+    if (SOPC_STATUS_OK != status)
+    {
+        // Restore node value
+        SOPC_Variant_Move(node_value, previous_value);
+        return status;
+    }
+
+    // 3. Modify node value with new content
+    if (SOPC_VariantArrayType_SingleValue == node_value->ArrayType)
+    {
+        status = SOPC_LocalizedText_AddOrSetLocale(node_value->Value.LocalizedText, supportedLocales,
+                                                   new_value->Value.LocalizedText);
+    }
+    else if (SOPC_VariantArrayType_Array == node_value->ArrayType)
+    {
+        assert(node_value->Value.Array.Length == new_value->Value.Array.Length);
+        for (int32_t i = 0; SOPC_STATUS_OK == status && i < new_value->Value.Array.Length; i++)
+        {
+            status = SOPC_LocalizedText_AddOrSetLocale(&node_value->Value.Array.Content.LocalizedTextArr[i],
+                                                       supportedLocales,
+                                                       &new_value->Value.Array.Content.LocalizedTextArr[i]);
+        }
+    }
+    else if (SOPC_VariantArrayType_Matrix == node_value->ArrayType)
+    {
+        assert(node_value->Value.Matrix.Dimensions == new_value->Value.Matrix.Dimensions);
+        int32_t matrixLength = 1;
+        for (int32_t i = 0; i < new_value->Value.Matrix.Dimensions; i++)
+        {
+            assert(node_value->Value.Matrix.ArrayDimensions[i] == new_value->Value.Matrix.ArrayDimensions[i]);
+            matrixLength *= node_value->Value.Matrix.ArrayDimensions[i];
+        }
+        for (int32_t i = 0; SOPC_STATUS_OK == status && i < matrixLength; i++)
+        {
+            status = SOPC_LocalizedText_AddOrSetLocale(&node_value->Value.Matrix.Content.LocalizedTextArr[i],
+                                                       supportedLocales,
+                                                       &new_value->Value.Matrix.Content.LocalizedTextArr[i]);
+        }
+    }
+    else
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Variant_Clear(node_value);
+        SOPC_Variant_Move(node_value, previous_value);
+        SOPC_Variant_Clear(previous_value);
+    }
+    return status;
+}
+
+static bool is_localized_text_modification(SOPC_Variant* node_value, const SOPC_Variant* new_value)
+{
+    bool modifyLocalizedText = false;
+    if (SOPC_LocalizedText_Id == node_value->BuiltInTypeId && SOPC_LocalizedText_Id == new_value->BuiltInTypeId)
+    {
+        if (node_value->ArrayType == new_value->ArrayType)
+        {
+            if (SOPC_VariantArrayType_SingleValue == node_value->ArrayType)
+            {
+                modifyLocalizedText = true;
+            }
+            else if (SOPC_VariantArrayType_Array == node_value->ArrayType)
+            {
+                modifyLocalizedText = node_value->Value.Array.Length == new_value->Value.Array.Length;
+            }
+            else if (SOPC_VariantArrayType_Matrix == node_value->ArrayType)
+            {
+                if (node_value->Value.Matrix.Dimensions == new_value->Value.Matrix.Dimensions)
+                {
+                    modifyLocalizedText = true;
+                    for (int32_t i = 0; i < node_value->Value.Matrix.Dimensions; i++)
+                    {
+                        if (node_value->Value.Matrix.ArrayDimensions[i] != new_value->Value.Matrix.ArrayDimensions[i])
+                        {
+                            modifyLocalizedText = false;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                return constants_statuscodes_bs__e_sc_bad_write_not_supported;
+            }
+        } // otherwise we should overwrite since it is not same type
+    }
+    // else: it is not a localized text or it is possible to have different types (new value can be NULL)
+
+    return modifyLocalizedText;
+}
+
+static constants_statuscodes_bs__t_StatusCode_i set_value_full(char** supportedLocales,
+                                                               SOPC_Variant* node_value,
                                                                const SOPC_Variant* new_value,
                                                                SOPC_Variant* previous_value)
 {
-    SOPC_Variant_Move(previous_value, node_value);
-    SOPC_Variant_Clear(node_value);
-    SOPC_Variant_Initialize(node_value);
-    SOPC_ReturnStatus status = SOPC_Variant_Copy(node_value, new_value);
+    bool modifyLocalizedText = is_localized_text_modification(node_value, new_value);
 
-    return (status == SOPC_STATUS_OK) ? constants_statuscodes_bs__e_sc_ok
-                                      : constants_statuscodes_bs__e_sc_bad_internal_error;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    if (modifyLocalizedText)
+    {
+        status = modify_localized_text(supportedLocales, node_value, new_value, previous_value);
+    }
+    else
+    {
+        // Overwrite current value
+        SOPC_Variant_Move(previous_value, node_value);
+        SOPC_Variant_Clear(node_value);
+        SOPC_Variant_Initialize(node_value);
+        status = SOPC_Variant_Copy(node_value, new_value);
+    }
+
+    switch (status)
+    {
+    case SOPC_STATUS_OK:
+        return constants_statuscodes_bs__e_sc_ok;
+    case SOPC_STATUS_NOT_SUPPORTED:
+        // Note: should be BadLocaleNotSupported regarding spec 1.03 but does not exist in 1.03 schemas / uactt
+        return constants_statuscodes_bs__e_sc_bad_invalid_argument;
+    default:
+        return constants_statuscodes_bs__e_sc_bad_internal_error;
+    }
 }
 
 static constants_statuscodes_bs__t_StatusCode_i set_value_indexed_helper(SOPC_Variant* node_value,
@@ -571,6 +724,7 @@ static SOPC_Variant* convertVariantType_ByteArrayByteString(SOPC_Variant* toConv
 }
 
 void address_space_bs__set_Value(const constants__t_user_i address_space_bs__p_user,
+                                 const constants__t_LocaleIds_i address_space_bs__p_locales,
                                  const constants__t_Node_i address_space_bs__node,
                                  const constants__t_Variant_i address_space_bs__variant,
                                  const t_bool address_space_bs__toConvert,
@@ -584,7 +738,8 @@ void address_space_bs__set_Value(const constants__t_user_i address_space_bs__p_u
     SOPC_Variant* convertedValue = NULL;
     const SOPC_Variant* newValue = address_space_bs__variant;
 
-    *address_space_bs__prev_dataValue = SOPC_Calloc(1, sizeof(SOPC_DataValue));
+    *address_space_bs__prev_dataValue = SOPC_Malloc(sizeof(SOPC_DataValue));
+    SOPC_DataValue_Initialize(*address_space_bs__prev_dataValue);
 
     if (address_space_bs__toConvert)
     {
@@ -600,11 +755,13 @@ void address_space_bs__set_Value(const constants__t_user_i address_space_bs__p_u
 
     if (address_space_bs__index_range->Length <= 0)
     {
-        *address_space_bs__serviceStatusCode =
-            set_value_full(pvar, address_space_bs__variant, &(*address_space_bs__prev_dataValue)->Value);
+        *address_space_bs__serviceStatusCode = set_value_full(
+            address_space_bs__p_locales, pvar, address_space_bs__variant, &(*address_space_bs__prev_dataValue)->Value);
     }
     else
     {
+        // Note: set_value_indexed on single value will always fail except on ByteString/String
+        // Note2: set_value_indexed does not support partial update of localized text (whole overwrite)
         *address_space_bs__serviceStatusCode =
             set_value_indexed(pvar, address_space_bs__variant, address_space_bs__index_range,
                               &(*address_space_bs__prev_dataValue)->Value);

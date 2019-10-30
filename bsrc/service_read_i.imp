@@ -44,15 +44,17 @@ PROMOTES
 
 LOCAL_OPERATIONS
 
-    fill_read_response_1(p_TimestampsToReturn, p_user, p_resp_msg, p_sc, p_nid, p_aid, p_index_range, p_rvi) =
+    fill_read_response_1(p_TimestampsToReturn, p_user, p_locales, p_resp_msg, p_sc, p_nid, p_aid, p_index_range, p_rvi) =
     PRE
         p_TimestampsToReturn : t_TimestampsToReturn_i &
         p_TimestampsToReturn : t_TimestampsToReturn   &
         p_user     : t_user_i &
         p_user     : t_user   &
-        p_resp_msg : t_msg_i         &
+        p_locales  : t_LocaleIds_i &
+        p_locales  : t_LocaleIds   &
+        p_resp_msg : t_msg_i &
         p_sc       : t_StatusCode_i &
-        p_sc       : t_StatusCode &
+        p_sc       : t_StatusCode   &
         p_nid      : t_NodeId_i      &
         p_aid      : t_AttributeId_i &
         p_index_range : t_IndexRange_i &
@@ -132,7 +134,7 @@ LOCAL_OPERATIONS
 
 OPERATIONS
 
-    fill_read_response_1(p_TimestampsToReturn, p_user, p_resp_msg, p_sc, p_nid, p_aid, p_index_range, p_rvi) =
+    fill_read_response_1(p_TimestampsToReturn, p_user, p_locales, p_resp_msg, p_sc, p_nid, p_aid, p_index_range, p_rvi) =
     VAR
         l_is_valid,
         l_node,
@@ -146,7 +148,7 @@ OPERATIONS
         THEN
             l_is_valid, l_node <-- readall_AddressSpace_Node(p_nid);
             IF l_is_valid = TRUE THEN
-                l_sc, l_value, l_raw_sc, l_ts_src, l_ts_srv <-- read_Node_Attribute(p_user, l_node, p_nid, p_aid, p_index_range);
+                l_sc, l_value, l_raw_sc, l_ts_src, l_ts_srv <-- read_Node_Attribute(p_user, p_locales, l_node, p_nid, p_aid, p_index_range);
                 IF  l_sc = e_sc_ok
                 THEN
                     CASE p_TimestampsToReturn OF
@@ -180,7 +182,7 @@ OPERATIONS
     END
     ;
 
-    fill_read_response(p_TimestampsToReturn, p_user, req_msg, resp_msg) =
+    fill_read_response(p_TimestampsToReturn, p_user, p_locales, req_msg, resp_msg) =
     VAR
         l_nb_ReadValue,
         l_continue,
@@ -195,7 +197,7 @@ OPERATIONS
         WHILE l_continue = TRUE DO
             l_continue, l_rvi <-- continue_iter_read_request;
             l_sc, l_nid, l_aid, l_index_range <-- getall_ReadValue_NodeId_AttributeId(req_msg, l_rvi);
-            fill_read_response_1(p_TimestampsToReturn, p_user, resp_msg, l_sc, l_nid, l_aid, l_index_range, l_rvi)
+            fill_read_response_1(p_TimestampsToReturn, p_user, p_locales, resp_msg, l_sc, l_nid, l_aid, l_index_range, l_rvi)
         INVARIANT
             rreqs_to_iterate <: t_ReadValue &
             rreqs_iterated   <: t_ReadValue &

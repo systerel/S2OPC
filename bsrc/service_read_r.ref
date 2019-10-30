@@ -109,7 +109,7 @@ OPERATIONS
     END
     ;
 
-    fill_read_response(p_TimestampsToReturn, p_user, req_msg, resp_msg) =
+    fill_read_response(p_TimestampsToReturn, p_user, p_locales, req_msg, resp_msg) =
     BEGIN
         data_Value_Value,
         data_Value_StatusCode

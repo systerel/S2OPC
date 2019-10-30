@@ -21,7 +21,7 @@
 
  File Name            : service_read.c
 
- Date                 : 04/10/2019 15:24:35
+ Date                 : 30/10/2019 16:33:06
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -44,6 +44,7 @@ void service_read__INITIALISATION(void) {
 void service_read__fill_read_response_1(
    const constants__t_TimestampsToReturn_i service_read__p_TimestampsToReturn,
    const constants__t_user_i service_read__p_user,
+   const constants__t_LocaleIds_i service_read__p_locales,
    const constants__t_msg_i service_read__p_resp_msg,
    const constants_statuscodes_bs__t_StatusCode_i service_read__p_sc,
    const constants__t_NodeId_i service_read__p_nid,
@@ -65,6 +66,7 @@ void service_read__fill_read_response_1(
             &service_read__l_node);
          if (service_read__l_is_valid == true) {
             address_space__read_Node_Attribute(service_read__p_user,
+               service_read__p_locales,
                service_read__l_node,
                service_read__p_nid,
                service_read__p_aid,
@@ -135,6 +137,7 @@ void service_read__fill_read_response_1(
 void service_read__fill_read_response(
    const constants__t_TimestampsToReturn_i service_read__p_TimestampsToReturn,
    const constants__t_user_i service_read__p_user,
+   const constants__t_LocaleIds_i service_read__p_locales,
    const constants__t_msg_i service_read__req_msg,
    const constants__t_msg_i service_read__resp_msg) {
    {
@@ -160,6 +163,7 @@ void service_read__fill_read_response(
             &service_read__l_index_range);
          service_read__fill_read_response_1(service_read__p_TimestampsToReturn,
             service_read__p_user,
+            service_read__p_locales,
             service_read__resp_msg,
             service_read__l_sc,
             service_read__l_nid,

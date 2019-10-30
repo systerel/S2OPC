@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include <assert.h>
 #include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
@@ -87,6 +88,86 @@ SOPC_Variant* util_variant__new_Variant_from_LocalizedText(SOPC_LocalizedText* l
     pvar->DoNotClear = true; // It is shallow copy of provided node
 
     return pvar;
+}
+
+SOPC_Variant* util_variant__set_PreferredLocalizedText_from_LocalizedText_Variant(SOPC_Variant* v,
+                                                                                  char** preferredLocales)
+{
+    assert(SOPC_LocalizedText_Id == v->BuiltInTypeId);
+    assert(v->DoNotClear); // it was a shallow copy
+
+    SOPC_Variant* result = NULL;
+
+    if (SOPC_VariantArrayType_SingleValue == v->ArrayType)
+    {
+        SOPC_LocalizedText* newLt = SOPC_Malloc(sizeof(*newLt));
+        SOPC_LocalizedText_Initialize(newLt);
+        SOPC_ReturnStatus status =
+            SOPC_LocalizedText_GetPreferredLocale(newLt, preferredLocales, v->Value.LocalizedText);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Free(newLt);
+        }
+        else
+        {
+            v->Value.LocalizedText = newLt;
+            v->DoNotClear = false; // it is not anymore a shallow copy
+            result = v;
+        }
+    }
+    else if (SOPC_VariantArrayType_Array == v->ArrayType || SOPC_VariantArrayType_Matrix == v->ArrayType)
+    {
+        // Create a deep copy that will allocate the same
+        result = SOPC_Variant_Create();
+        SOPC_ReturnStatus status = SOPC_Variant_Copy(result, v);
+
+        if (SOPC_STATUS_OK == status)
+        {
+            int32_t length = -1;
+            SOPC_LocalizedText* srcLtArray = NULL;
+            SOPC_LocalizedText* destLtArray = NULL;
+            if (SOPC_VariantArrayType_Matrix == v->ArrayType)
+            {
+                length = 1;
+                // Compute total length of flattened matrix
+                for (int32_t i = 0; i < v->Value.Matrix.Dimensions; i++)
+                {
+                    length *= v->Value.Matrix.ArrayDimensions[i];
+                }
+                srcLtArray = v->Value.Matrix.Content.LocalizedTextArr;
+                destLtArray = result->Value.Matrix.Content.LocalizedTextArr;
+            }
+            else
+            {
+                length = v->Value.Array.Length;
+                srcLtArray = v->Value.Array.Content.LocalizedTextArr;
+                destLtArray = result->Value.Array.Content.LocalizedTextArr;
+            }
+
+            for (int32_t i = 0; SOPC_STATUS_OK == status && i < length; i++)
+            {
+                SOPC_LocalizedText_Clear(&destLtArray[i]); // Clear the initial copy and retrieved preferred locale
+                status = SOPC_LocalizedText_GetPreferredLocale(&destLtArray[i], preferredLocales, &srcLtArray[i]);
+            }
+        }
+
+        if (SOPC_STATUS_OK == status)
+        {
+            // Preferred localized text array created, remove source one
+            SOPC_Variant_Clear(v);
+        }
+        else
+        {
+            // Do not compute preferred localized texts and keep default ones
+            SOPC_Variant_Clear(result);
+            result = v;
+        }
+    }
+    else
+    {
+        assert(false);
+    }
+    return result;
 }
 
 SOPC_Variant* util_variant__new_Variant_from_Indet(void)

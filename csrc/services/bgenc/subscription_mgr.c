@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.c
 
- Date                 : 04/10/2019 15:26:01
+ Date                 : 30/10/2019 16:33:14
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -155,6 +155,7 @@ void subscription_mgr__fill_response_subscription_create_monitored_items(
    const constants__t_subscription_i subscription_mgr__p_subscription,
    const constants__t_TimestampsToReturn_i subscription_mgr__p_tsToReturn,
    const constants__t_user_i subscription_mgr__p_user,
+   const constants__t_LocaleIds_i subscription_mgr__p_locales,
    const constants__t_msg_i subscription_mgr__p_req_msg,
    const constants__t_msg_i subscription_mgr__p_resp_msg,
    const t_entier4 subscription_mgr__p_nb_monitored_items) {
@@ -211,6 +212,7 @@ void subscription_mgr__fill_response_subscription_create_monitored_items(
             }
             else {
                address_space__read_Node_Attribute(subscription_mgr__p_user,
+                  subscription_mgr__p_locales,
                   subscription_mgr__l_node,
                   subscription_mgr__l_nid,
                   subscription_mgr__l_aid,
@@ -739,6 +741,7 @@ void subscription_mgr__treat_subscription_create_monitored_items_req(
       t_bool subscription_mgr__l_valid_subscription;
       constants__t_TimestampsToReturn_i subscription_mgr__l_timestampToRet;
       t_entier4 subscription_mgr__l_nb_monitored_items;
+      constants__t_LocaleIds_i subscription_mgr__l_locales;
       t_bool subscription_mgr__l_bres;
       
       msg_subscription_create_monitored_item__getall_msg_create_monitored_items_req_params(subscription_mgr__p_req_msg,
@@ -755,9 +758,12 @@ void subscription_mgr__treat_subscription_create_monitored_items_req(
                subscription_mgr__l_nb_monitored_items,
                &subscription_mgr__l_bres);
             if (subscription_mgr__l_bres == true) {
+               session_mgr__get_server_session_preferred_locales(subscription_mgr__p_session,
+                  &subscription_mgr__l_locales);
                subscription_mgr__fill_response_subscription_create_monitored_items(subscription_mgr__l_subscription,
                   subscription_mgr__l_timestampToRet,
                   subscription_mgr__p_user,
+                  subscription_mgr__l_locales,
                   subscription_mgr__p_req_msg,
                   subscription_mgr__p_resp_msg,
                   subscription_mgr__l_nb_monitored_items);

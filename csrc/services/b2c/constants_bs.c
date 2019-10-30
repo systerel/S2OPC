@@ -22,12 +22,15 @@
  * Implements the base machine for the constants
  */
 
-#include "constants_bs.h"
+#include <assert.h>
+
 #include "b2c.h"
+#include "constants_bs.h"
 #include "sopc_builtintypes.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_toolkit_config_internal.h"
 #include "sopc_types.h"
 
 static SOPC_NodeId ByteString_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_ByteString};
@@ -37,7 +40,9 @@ static SOPC_NodeId Null_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 
 const constants_bs__t_NodeId_i constants_bs__c_ByteString_Type_NodeId = &ByteString_Type;
 const constants_bs__t_NodeId_i constants_bs__c_Byte_Type_NodeId = &Byte_Type;
 const constants_bs__t_NodeId_i constants_bs__c_Null_Type_NodeId = &Null_Type;
-constants_bs__t_LocaleIds_i constants_bs__c_LocaleIds_empty = {NULL};
+
+static char* EmptyLocaleIds[] = {NULL};
+constants_bs__t_LocaleIds_i constants_bs__c_LocaleIds_empty = EmptyLocaleIds;
 
 void constants_bs__INITIALISATION(void) {}
 
@@ -202,9 +207,29 @@ void constants_bs__free_ExpandedNodeId(const constants_bs__t_ExpandedNodeId_i co
 
 void constants_bs__free_LocaleIds(const constants_bs__t_LocaleIds_i constants_bs__p_in)
 {
+    assert(constants_bs__c_LocaleIds_indet != constants_bs__p_in);
+    uint32_t idx = 0;
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-    SOPC_Free(constants_bs__p_in);
+    char* cstring = constants_bs__p_in[idx];
+    while (NULL != cstring)
+    {
+        SOPC_Free(cstring);
+        idx++;
+        cstring = constants_bs__p_in[idx];
+    }
     SOPC_GCC_DIAGNOSTIC_RESTORE
+    SOPC_Free(constants_bs__p_in);
+}
+
+void constants_bs__get_SupportedLocales(const constants_bs__t_endpoint_config_idx_i constants_bs__p_in,
+                                        constants_bs__t_LocaleIds_i* const constants_bs__p_localeIds)
+{
+    *constants_bs__p_localeIds = constants_bs__c_LocaleIds_empty;
+    SOPC_Endpoint_Config* ep = SOPC_ToolkitServer_GetEndpointConfig(constants_bs__p_in);
+    if (NULL != ep && ep->serverConfigPtr->localeIds != NULL)
+    {
+        *constants_bs__p_localeIds = ep->serverConfigPtr->localeIds;
+    }
 }
 
 void constants_bs__get_copy_ExpandedNodeId(const constants_bs__t_ExpandedNodeId_i constants_bs__p_in,

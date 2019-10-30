@@ -21,7 +21,7 @@
 
  File Name            : address_space_bs.h
 
- Date                 : 10/10/2019 07:10:01
+ Date                 : 31/10/2019 08:34:28
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -120,6 +120,7 @@ extern void address_space_bs__read_AddressSpace_DataType_value(
    constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc,
    constants__t_Variant_i * const address_space_bs__variant);
 extern void address_space_bs__read_AddressSpace_DisplayName_value(
+   const constants__t_LocaleIds_i address_space_bs__p_locales,
    const constants__t_Node_i address_space_bs__p_node,
    constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc,
    constants__t_Variant_i * const address_space_bs__variant);
@@ -166,6 +167,7 @@ extern void address_space_bs__read_AddressSpace_ValueRank_value(
    constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc,
    constants__t_Variant_i * const address_space_bs__variant);
 extern void address_space_bs__read_AddressSpace_Value_value(
+   const constants__t_LocaleIds_i address_space_bs__p_locales,
    const constants__t_Node_i address_space_bs__p_node,
    const constants__t_IndexRange_i address_space_bs__index_range,
    constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc,
@@ -183,6 +185,7 @@ extern void address_space_bs__readall_AddressSpace_Node(
    constants__t_Node_i * const address_space_bs__node);
 extern void address_space_bs__set_Value(
    const constants__t_user_i address_space_bs__p_user,
+   const constants__t_LocaleIds_i address_space_bs__p_locales,
    const constants__t_Node_i address_space_bs__node,
    const constants__t_Variant_i address_space_bs__variant,
    const t_bool address_space_bs__toConvert,

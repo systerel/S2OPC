@@ -21,7 +21,7 @@
 
  File Name            : service_read.h
 
- Date                 : 04/10/2019 15:24:35
+ Date                 : 30/10/2019 16:33:06
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -68,6 +68,7 @@ extern void service_read__INITIALISATION(void);
 extern void service_read__fill_read_response_1(
    const constants__t_TimestampsToReturn_i service_read__p_TimestampsToReturn,
    const constants__t_user_i service_read__p_user,
+   const constants__t_LocaleIds_i service_read__p_locales,
    const constants__t_msg_i service_read__p_resp_msg,
    const constants_statuscodes_bs__t_StatusCode_i service_read__p_sc,
    const constants__t_NodeId_i service_read__p_nid,
@@ -81,6 +82,7 @@ extern void service_read__fill_read_response_1(
 extern void service_read__fill_read_response(
    const constants__t_TimestampsToReturn_i service_read__p_TimestampsToReturn,
    const constants__t_user_i service_read__p_user,
+   const constants__t_LocaleIds_i service_read__p_locales,
    const constants__t_msg_i service_read__req_msg,
    const constants__t_msg_i service_read__resp_msg);
 
