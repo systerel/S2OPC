@@ -1244,6 +1244,58 @@ bool SOPC_String_Equal(const SOPC_String* left, const SOPC_String* right)
     return result;
 }
 
+const char** SOPC_String_GetRawCStringArray(int32_t nbOfStrings, SOPC_String* stringArray)
+{
+    if (nbOfStrings > 0 && NULL == stringArray)
+    {
+        return NULL;
+    }
+
+    if (nbOfStrings < 0)
+    {
+        nbOfStrings = 0;
+    }
+
+    const char** cStringArray = SOPC_Calloc((size_t) nbOfStrings + 1, sizeof(char*));
+
+    if (cStringArray != NULL)
+    {
+        for (int32_t i = 0; i < nbOfStrings; i++)
+        {
+            cStringArray[i] = SOPC_String_GetRawCString(&stringArray[i]);
+        }
+        cStringArray[nbOfStrings] = NULL;
+    }
+
+    return cStringArray;
+}
+
+char** SOPC_String_GetCStringArray(int32_t nbOfStrings, SOPC_String* stringArray)
+{
+    if (nbOfStrings > 0 && NULL == stringArray)
+    {
+        return NULL;
+    }
+
+    if (nbOfStrings < 0)
+    {
+        nbOfStrings = 0;
+    }
+
+    char** cStringArray = SOPC_Calloc((size_t) nbOfStrings + 1, sizeof(char*));
+
+    if (cStringArray != NULL)
+    {
+        for (int32_t i = 0; i < nbOfStrings; i++)
+        {
+            cStringArray[i] = SOPC_String_GetCString(&stringArray[i]);
+        }
+        cStringArray[nbOfStrings] = NULL;
+    }
+
+    return cStringArray;
+}
+
 void SOPC_XmlElement_InitializeAux(void* value)
 {
     SOPC_XmlElement_Initialize((SOPC_XmlElement*) value);

@@ -432,6 +432,34 @@ SOPC_ReturnStatus SOPC_String_CompareAux(const void* left, const void* right, in
 
 bool SOPC_String_Equal(const SOPC_String* left, const SOPC_String* right);
 
+/**
+ * \brief Returns a NULL terminated C-string array without copying the strings.
+ *        The caller is responsible to NOT modify the content of the returned array and
+ *        to call SOPC_Free on the array (and NOT the array content) after user.
+ *
+ * \param nbOfStrings  The number of elements in \p stringArray
+ * \param stringArray  The array of SOPC_String to retrieve as C-string array
+ *
+ *
+ * \return C-String array containing the strings contains in the SOPC_String array without string copy.
+ *         NULL is returned in case of invalid arguments, and {NULL} in case of empty SOPC_String array.
+ *
+ */
+const char** SOPC_String_GetRawCStringArray(int32_t nbOfStrings, SOPC_String* stringArray);
+
+/**
+ * \brief Returns a NULL terminated C-string array copying the strings.
+ *
+ * \param nbOfStrings  The number of elements in \p stringArray
+ * \param stringArray  The array of SOPC_String to retrieve as C-string array
+ *
+ *
+ * \return C-String array containing the strings contains in the SOPC_String array without string copy.
+ *         NULL is returned in case of invalid arguments, and {NULL} in case of empty SOPC_String array.
+ *
+ */
+char** SOPC_String_GetCStringArray(int32_t nbOfStrings, SOPC_String* stringArray);
+
 void SOPC_XmlElement_Initialize(SOPC_XmlElement* xmlElt);
 void SOPC_XmlElement_InitializeAux(void* value);
 SOPC_ReturnStatus SOPC_XmlElement_Copy(SOPC_XmlElement* dest, const SOPC_XmlElement* src);
