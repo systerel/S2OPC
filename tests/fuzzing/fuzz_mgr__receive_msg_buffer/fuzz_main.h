@@ -13,26 +13,31 @@
 #define ENDPOINT_URL "opc.tcp://localhost:4841"
 
 void Fuzz_Event_Fct(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, uintptr_t appContext);
+SOPC_ReturnStatus SOPC_EpConfig_serv();
 
-typedef struct s_Cerkey_suck // serialized for unit test certificate and key
+typedef struct s_Cerkey
 {
-    SOPC_SerializedCertificate* Certificate = NULL;
-    SOPC_SerializedAsymmetricKey* Key = NULL;
-    SOPC_SerializedCertificate* authCertificate = NULL;
-    SOPC_PKIProvider* pkiProvider = NULL;
+    SOPC_SerializedCertificate* Certificate;
+    SOPC_SerializedAsymmetricKey* Key;
+    SOPC_SerializedCertificate* authCertificate;
+    SOPC_PKIProvider* pkiProvider;
 } t_CerKey;
 
 typedef enum
 {
     SESSION_CONN_FAILED = -1,
-    SESSION_CONN_PENDING,
+    SESSION_CONN_CLOSED,
+    SESSION_CONN_NEW,
     SESSION_CONN_CONNECTED,
+	SESSION_CONN_MSG_RECEIVED,
 } SessionConnectedState;
 
-bool debug = true;
-uint32_t session = 0;
+extern bool debug;
+extern int32_t sendFailures;
+extern bool secuActive;
+extern SOPC_SecureChannel_Config scConfig;
 
-SessionConnectedState scState = SESSION_CONN_PENDING;
-SOPC_SecureChannel_Config* scConfig = NULL;
+extern SOPC_Endpoint_Config epConfig;
+extern SOPC_S2OPC_Config output_s2opcConfig;
 
 #endif // FUZZ_MGR__RECEIVE_MSG_BUFFER
