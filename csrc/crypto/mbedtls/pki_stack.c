@@ -219,39 +219,58 @@ static void PKIProviderStack_Free(SOPC_PKIProvider* pPKI)
     SOPC_Free(pPKI);
 }
 
+static SOPC_PKIProvider* create_pkistack(SOPC_CertificateList* ca, SOPC_CRLList* crl, void* pUserData)
+{
+    SOPC_PKIProvider* pki = SOPC_Malloc(sizeof(SOPC_PKIProvider));
+
+    if (NULL != pki)
+    {
+        /* The pki function pointer shall be const after this init */
+        SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+        *(SOPC_PKIProvider_Free_Func*) (&pki->pFnFree) = &PKIProviderStack_Free;
+        *(SOPC_FnValidateCertificate*) (&pki->pFnValidateCertificate) = &PKIProviderStack_ValidateCertificate;
+        SOPC_GCC_DIAGNOSTIC_RESTORE
+
+        pki->pUserCertAuthList = ca;
+        pki->pUserCertRevocList = crl;
+        pki->pUserData = pUserData;
+    }
+
+    return pki;
+}
+
 SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_SerializedCertificate* pCertAuth,
                                                SOPC_CRLList* pRevocationList,
                                                SOPC_PKIProvider** ppPKI)
 {
-    SOPC_PKIProvider* pki = NULL;
-    SOPC_CertificateList* caCert = NULL;
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-
     if (NULL == pCertAuth || NULL == ppPKI)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    pki = SOPC_Malloc(sizeof(SOPC_PKIProvider));
-    status = SOPC_KeyManager_SerializedCertificate_Deserialize(pCertAuth, &caCert);
+    SOPC_CertificateList* caCert = NULL;
+    SOPC_PKIProvider* pki = NULL;
+    SOPC_ReturnStatus status = SOPC_KeyManager_SerializedCertificate_Deserialize(pCertAuth, &caCert);
 
-    if (NULL == pki || status != SOPC_STATUS_OK)
+    if (SOPC_STATUS_OK == status)
+    {
+        pki = create_pkistack(caCert, pRevocationList, NULL);
+        if (NULL == pki)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        *ppPKI = pki;
+    }
+    /* Clear partial alloc */
+    else
     {
         SOPC_KeyManager_Certificate_Free(caCert);
         SOPC_Free(pki);
-        return SOPC_STATUS_NOK;
     }
 
-    // The pki function pointer shall be const after this init
-    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-    *(SOPC_PKIProvider_Free_Func*) (&pki->pFnFree) = &PKIProviderStack_Free;
-    *(SOPC_FnValidateCertificate*) (&pki->pFnValidateCertificate) = &PKIProviderStack_ValidateCertificate;
-    SOPC_GCC_DIAGNOSTIC_RESTORE
-
-    pki->pUserCertAuthList = caCert;
-    pki->pUserCertRevocList = pRevocationList; // Can be NULL
-    pki->pUserData = NULL;
-    *ppPKI = pki;
-
-    return SOPC_STATUS_OK;
+    return status;
 }
