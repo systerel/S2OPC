@@ -31,7 +31,9 @@ constants_statuscodes_bs__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions
     const constants__t_endpoint_config_idx_i endpoint_config_idx,
     bool isCreateSessionResponse,
     SOPC_String* EndpointUrl,
-    uint32_t* nbOfEndpointDescriptions,
-    OpcUa_EndpointDescription** endpointDescriptions);
+    int32_t nbOfLocaleIds,
+    SOPC_String* localeIdArray,
+    uint32_t* nbOfEndpointDescriptions,                // output param
+    OpcUa_EndpointDescription** endpointDescriptions); // output param
 
 #endif /* UTIL_DISCOVERY_SERVICES_H_ */

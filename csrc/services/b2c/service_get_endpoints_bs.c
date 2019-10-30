@@ -63,7 +63,8 @@ void service_get_endpoints_bs__treat_get_endpoints_request(
     {
         *service_get_endpoints_bs__ret = SOPC_Discovery_GetEndPointsDescriptions(
             service_get_endpoints_bs__endpoint_config_idx, false, &getEndpointsReq->EndpointUrl,
-            (uint32_t*) &getEndpointsResp->NoOfEndpoints, &getEndpointsResp->Endpoints);
+            getEndpointsReq->NoOfLocaleIds, getEndpointsReq->LocaleIds, (uint32_t*) &getEndpointsResp->NoOfEndpoints,
+            &getEndpointsResp->Endpoints);
     }
     else
     {

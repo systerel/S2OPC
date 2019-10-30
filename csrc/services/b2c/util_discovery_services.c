@@ -18,9 +18,12 @@
  */
 
 #include <assert.h>
+#include <stdlib.h>
 
 #include "constants.h"
 #include "sopc_crypto_profiles.h"
+#include "sopc_logger.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_toolkit_config_internal.h"
 #include "util_discovery_services.h"
@@ -66,17 +69,39 @@ static void SOPC_SetServerCertificate(SOPC_Endpoint_Config* sopcEndpointConfig, 
 }
 
 static void SOPC_SetServerApplicationDescription(SOPC_Endpoint_Config* sopcEndpointConfig,
+                                                 char** preferredLocales,
                                                  OpcUa_ApplicationDescription* appDesc)
 {
     int32_t idx = 0;
     OpcUa_ApplicationDescription* desc = &sopcEndpointConfig->serverConfigPtr->serverDescription;
-    SOPC_String_AttachFrom(&appDesc->ApplicationUri, &desc->ApplicationUri);
-    SOPC_String_AttachFrom(&appDesc->ProductUri, &desc->ProductUri);
-    SOPC_LocalizedText_Copy(&appDesc->ApplicationName, &desc->ApplicationName);
     assert(desc->ApplicationType != OpcUa_ApplicationType_Client);
+
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+
+    if (preferredLocales != NULL)
+    {
+        status =
+            SOPC_LocalizedText_GetPreferredLocale(&appDesc->ApplicationName, preferredLocales, &desc->ApplicationName);
+
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Logger_TraceWarning("Failed to set Application in application description of response");
+        }
+    }
+
     appDesc->ApplicationType = desc->ApplicationType;
-    SOPC_String_AttachFrom(&appDesc->GatewayServerUri, &desc->GatewayServerUri);
-    SOPC_String_AttachFrom(&appDesc->DiscoveryProfileUri, &desc->DiscoveryProfileUri);
+
+    status = SOPC_String_AttachFrom(&appDesc->ApplicationUri, &desc->ApplicationUri);
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Logger_TraceWarning("Failed to set Application URI in application description of response");
+    }
+
+    status = SOPC_String_AttachFrom(&appDesc->DiscoveryProfileUri, &desc->DiscoveryProfileUri);
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Logger_TraceWarning("Failed to set DiscoveryProfileURI in application description of response");
+    }
 
     if (desc->NoOfDiscoveryUrls > 0)
     {
@@ -91,18 +116,35 @@ static void SOPC_SetServerApplicationDescription(SOPC_Endpoint_Config* sopcEndpo
         if (desc->NoOfDiscoveryUrls > 0)
         {
             appDesc->NoOfDiscoveryUrls = desc->NoOfDiscoveryUrls;
+            status = SOPC_STATUS_OK;
             // Copy the discovery URLs provided by configuration
-            for (idx = 0; idx < desc->NoOfDiscoveryUrls; idx++)
+            for (idx = 0; SOPC_STATUS_OK == status && idx < desc->NoOfDiscoveryUrls; idx++)
             {
-                SOPC_String_AttachFrom(&appDesc->DiscoveryUrls[idx], &desc->DiscoveryUrls[idx]);
+                status = SOPC_String_AttachFrom(&appDesc->DiscoveryUrls[idx], &desc->DiscoveryUrls[idx]);
             }
         }
         else
         {
             appDesc->NoOfDiscoveryUrls = 1;
             // If not provided by configuration: we set the endpoint URL as default discovery URL since it is mandatory
-            SOPC_String_AttachFromCstring(&appDesc->DiscoveryUrls[0], sopcEndpointConfig->endpointURL);
+            status = SOPC_String_AttachFromCstring(&appDesc->DiscoveryUrls[0], sopcEndpointConfig->endpointURL);
         }
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Logger_TraceWarning("Failed to set DiscoveryUrl(s) in application description of response");
+        }
+    }
+
+    status = SOPC_String_AttachFrom(&appDesc->GatewayServerUri, &desc->GatewayServerUri);
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Logger_TraceWarning("Failed to set GatewayServerURI in application description of response");
+    }
+
+    status = SOPC_String_AttachFrom(&appDesc->ProductUri, &desc->ProductUri);
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Logger_TraceWarning("Failed to set Application URI in application description of response");
     }
 }
 
@@ -181,6 +223,8 @@ constants_statuscodes_bs__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions
     const constants__t_endpoint_config_idx_i endpoint_config_idx,
     bool isCreateSessionResponse,
     SOPC_String* requestEndpointUrl,
+    int32_t nbOfLocaleIds,
+    SOPC_String* localeIdArray,
     uint32_t* nbOfEndpointDescriptions,
     OpcUa_EndpointDescription** endpointDescriptions)
 {
@@ -214,6 +258,10 @@ constants_statuscodes_bs__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions
 
     if (constants_statuscodes_bs__e_sc_ok == serviceResult)
     {
+        SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+        char** preferredLocales = (char**) SOPC_String_GetRawCStringArray(nbOfLocaleIds, localeIdArray);
+        SOPC_GCC_DIAGNOSTIC_RESTORE
+
         nbSecuConfigs = sopcEndpointConfig->nbSecuConfigs;
         tabSecurityPolicy = sopcEndpointConfig->secuConfigurations;
 
@@ -257,7 +305,8 @@ constants_statuscodes_bs__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions
                     if (false == isCreateSessionResponse)
                     {
                         // Set ApplicationDescription
-                        SOPC_SetServerApplicationDescription(sopcEndpointConfig, &newEndPointDescription->Server);
+                        SOPC_SetServerApplicationDescription(sopcEndpointConfig, preferredLocales,
+                                                             &newEndPointDescription->Server);
                     }
                     else
                     {
@@ -295,7 +344,8 @@ constants_statuscodes_bs__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions
                         // Set serverCertificate
                         SOPC_SetServerCertificate(sopcEndpointConfig, &newEndPointDescription->ServerCertificate);
                         // Set ApplicationDescription
-                        SOPC_SetServerApplicationDescription(sopcEndpointConfig, &newEndPointDescription->Server);
+                        SOPC_SetServerApplicationDescription(sopcEndpointConfig, preferredLocales,
+                                                             &newEndPointDescription->Server);
                     }
                     else
                     {
@@ -332,7 +382,8 @@ constants_statuscodes_bs__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions
                         // Set serverCertificate
                         SOPC_SetServerCertificate(sopcEndpointConfig, &newEndPointDescription->ServerCertificate);
                         // Set ApplicationDescription
-                        SOPC_SetServerApplicationDescription(sopcEndpointConfig, &newEndPointDescription->Server);
+                        SOPC_SetServerApplicationDescription(sopcEndpointConfig, preferredLocales,
+                                                             &newEndPointDescription->Server);
                     }
                     else
                     {
@@ -374,6 +425,8 @@ constants_statuscodes_bs__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions
         {
             SOPC_Free(currentConfig_EndpointDescription);
         }
+
+        SOPC_Free(preferredLocales);
     }
 
     return serviceResult;

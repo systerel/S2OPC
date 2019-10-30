@@ -520,7 +520,7 @@ void message_out_bs__write_create_session_msg_server_endpoints(
     OpcUa_CreateSessionResponse* createSessionResp = (OpcUa_CreateSessionResponse*) message_out_bs__resp_msg;
 
     *message_out_bs__ret = SOPC_Discovery_GetEndPointsDescriptions(
-        message_out_bs__endpoint_config_idx, true, &createSessionReq->EndpointUrl,
+        message_out_bs__endpoint_config_idx, true, &createSessionReq->EndpointUrl, 0, NULL,
         (uint32_t*) &createSessionResp->NoOfServerEndpoints, &createSessionResp->ServerEndpoints);
 }
 

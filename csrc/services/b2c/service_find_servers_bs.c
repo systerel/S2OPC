@@ -29,6 +29,7 @@
 
 #include "b2c.h"
 #include "opcua_statuscodes.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_toolkit_config_internal.h"
 #include "sopc_types.h"
@@ -48,7 +49,7 @@ void service_find_servers_bs__treat_find_servers_request(
     const constants__t_endpoint_config_idx_i service_find_servers_bs__endpoint_config_idx,
     constants_statuscodes_bs__t_StatusCode_i* const service_find_servers_bs__ret)
 {
-    (void) service_find_servers_bs__req_msg;
+    OpcUa_FindServersRequest* req = service_find_servers_bs__req_msg;
     OpcUa_FindServersResponse* response = service_find_servers_bs__resp_msg;
 
     SOPC_Endpoint_Config* endpoint_config =
@@ -91,11 +92,18 @@ void service_find_servers_bs__treat_find_servers_request(
     dst_desc->NoOfDiscoveryUrls = 1;
     dst_desc->ApplicationType = src_desc->ApplicationType;
 
+    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+    char** preferredLocales = (char**) SOPC_String_GetRawCStringArray(req->NoOfLocaleIds, req->LocaleIds);
+    SOPC_GCC_DIAGNOSTIC_RESTORE
+
     bool ok =
         (SOPC_String_Copy(&dst_desc->ApplicationUri, &src_desc->ApplicationUri) == SOPC_STATUS_OK) &&
         (SOPC_String_Copy(&dst_desc->ProductUri, &src_desc->ProductUri) == SOPC_STATUS_OK) &&
-        (SOPC_LocalizedText_Copy(&dst_desc->ApplicationName, &src_desc->ApplicationName) == SOPC_STATUS_OK) &&
+        (SOPC_LocalizedText_GetPreferredLocale(&dst_desc->ApplicationName, preferredLocales,
+                                               &src_desc->ApplicationName) == SOPC_STATUS_OK) &&
         (SOPC_String_CopyFromCString(&dst_desc->DiscoveryUrls[0], endpoint_config->endpointURL) == SOPC_STATUS_OK);
+
+    SOPC_Free(preferredLocales);
 
     *service_find_servers_bs__ret =
         (ok ? constants_statuscodes_bs__e_sc_ok : constants_statuscodes_bs__e_sc_bad_out_of_memory);
