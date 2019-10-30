@@ -35,8 +35,8 @@
 struct SOPC_CRLList;
 
 /**
- * \brief           Creates the minimal validation implementation provided by the stack, which fulfills the PKIProvider
- * interface.
+ * \brief           Creates the minimal validation implementation provided by the stack,
+ *                  which fulfills the SOPC_PKIProvider interface.
  *
  *                  This verifies the certificate in the safest manner (whole certificate chain, with date validation),
  *                  with a single certificate authority, and an optional revocation list.
@@ -47,8 +47,8 @@ struct SOPC_CRLList;
  *
  * \param pCertAuth A valid pointer to the Certificate of the certification authority.
  * \param pRevocationList  An optional certificate chain containing the revocation list. If NULL, no revocation list is
- *                  checked.
- * \param ppPKI     A valid pointer to the newly created PKIProvider. You should free such provider with
+ *                  not checked.
+ * \param ppPKI     A valid pointer to the newly created SOPC_PKIProvider. You should free such provider with
  *                  SOPC_PKIProvider_Free().
  *
  * \note            Content of the pki is unspecified when return value is not SOPC_STATUS_OK.
@@ -61,5 +61,35 @@ struct SOPC_CRLList;
 SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_SerializedCertificate* pCertAuth,
                                                struct SOPC_CRLList* pRevocationList,
                                                SOPC_PKIProvider** ppPKI);
+
+/**
+ * \brief           Creates a SOPC_PKIProviderStack using lists of paths.
+ *
+ *                  This verifies the certificate in the safest manner (whole certificate chain, with date validation,
+ *                  mandatory certificate revocation lists).
+ *                  Certificate authority requirements depend on the chose OPC UA security policy.
+ *
+ *                  Issued certificates are also accepted (certificates whose chain is not trusted)
+ *                  and must be added to the certificate authority list.
+ *
+ * \param lPathCA   A pointer to an array of paths to each certificate (or trusted certificate) to use
+ *                  in the validation chain.
+ *                  The array must contain a NULL pointer to indicate its end.
+ *                  Each path is a zero-terminated relative path to the certificate from the current working directory.
+ * \param lPathCRL  A pointer to an array of paths to each certificate revocation list to use.
+ *                  Each certificate of the CA list must have a valid CRL in the CRL list.
+ *                  The array must contain a NULL pointer to indicate its end.
+ *                  Each path is a zero-terminated relative path to the CRL from the current working directory.
+ * \param ppPKI     A valid pointer to the newly created PKIProvider. You should free such provider with
+ *                  SOPC_PKIProvider_Free().
+ *
+ * \note            Content of the pki is unspecified when return value is not SOPC_STATUS_OK.
+ *
+ * \note            The pki is not safe to share across threads.
+ *
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
+ *                  and SOPC_STATUS_NOK when there was an error.
+ */
+SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathCA, char** lPathCRL, SOPC_PKIProvider** ppPKI);
 
 #endif /* SOPC_PKI_STACK_H_ */

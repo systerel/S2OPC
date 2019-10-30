@@ -274,3 +274,54 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_SerializedCertificate* pCert
 
     return status;
 }
+
+SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathCA, char** lPathCRL, SOPC_PKIProvider** ppPKI)
+{
+    if (NULL == lPathCA || NULL == lPathCRL || NULL == ppPKI)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_CertificateList* ca = NULL;
+    char *cur = *lPathCA;
+    while (NULL != cur && SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_Certificate_CreateOrAddFromFile(cur, &ca);
+        ++lPathCA;
+        cur = *lPathCA;
+    }
+
+    SOPC_CRLList* crl = NULL;
+    cur = *lPathCRL;
+    while (NULL != cur && SOPC_STATUS_OK == status)
+    {
+        /* TODO: first create the CRL API */
+        status = SOPC_STATUS_OK;
+        ++lPathCRL;
+        cur = *lPathCRL;
+    }
+
+    SOPC_PKIProvider* pki = NULL;
+    if (SOPC_STATUS_OK == status)
+    {
+        pki = create_pkistack(ca, crl, NULL);
+        if (NULL == pki)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        *ppPKI = pki;
+    }
+    /* Clear partial alloc */
+    else
+    {
+        SOPC_KeyManager_Certificate_Free(ca);
+        /* TODO: CRL Free */
+    }
+
+    return status;
+}
