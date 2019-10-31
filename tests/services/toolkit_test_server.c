@@ -491,7 +491,10 @@ static SOPC_ReturnStatus Server_SetCryptographicConfig(SOPC_Server_Config* serve
         /* Create the PKI (Public Key Infrastructure) provider */
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_PKIProviderStack_Create(serverConfig->certificateAuthority, NULL, &serverConfig->pki);
+            //status = SOPC_PKIProviderStack_Create(serverConfig->certificateAuthority, NULL, &serverConfig->pki);
+            char *lPathCA[] = {serverConfig->certificateAuthorityPath, "trusted/ctt_ca1I_appT.der", "trusted/ctt_appTSha256_2048.der", "trusted/ctt_appTSha256_4096.der", NULL};
+            char *lPathCRL[] = {NULL};
+            status = SOPC_PKIProviderStack_CreateFromPaths(lPathCA, lPathCRL, &serverConfig->pki);
         }
 
         if (SOPC_STATUS_OK != status)
