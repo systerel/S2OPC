@@ -30,7 +30,8 @@ DEFINITIONS
         Type_IsTransitiveSubtype,
         Type_IsCompatSimpleTypeOrEnumeration,
         Type_IsIncludedValueRank,
-        Type_IsReferenceTypeIdValid
+        Type_IsReferenceTypeIdValid,
+        Object_HasMethod
     ;
 
     d_inv ==
@@ -39,7 +40,8 @@ DEFINITIONS
         Type_IsTransitiveSubtype : t_NodeId <-> t_NodeId &
         Type_IsCompatSimpleTypeOrEnumeration : t_NodeId <-> t_NodeId &
         Type_IsIncludedValueRank : t_ConcreteValueRank <-> t_ValueRank &
-        Type_IsReferenceTypeIdValid <: t_NodeId
+        Type_IsReferenceTypeIdValid <: t_NodeId &
+        Object_HasMethod : t_NodeId <-> t_NodeId
     )
 
 ABSTRACT_VARIABLES
@@ -110,6 +112,17 @@ OPERATIONS
         p_nodeId : t_NodeId
     THEN
         bres := bool(p_nodeId : Type_IsReferenceTypeIdValid)
+    END
+    ;
+    
+    p_bool <-- check_object_has_method(p_object, p_method) =
+    PRE
+        p_method : t_NodeId_i &
+        p_method : t_NodeId   &
+        p_object : t_NodeId_i &
+        p_object : t_NodeId
+    THEN
+        p_bool := bool(p_object |-> p_method : Object_HasMethod)
     END
 
 END

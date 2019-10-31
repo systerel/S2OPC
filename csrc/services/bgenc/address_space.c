@@ -21,7 +21,7 @@
 
  File Name            : address_space.c
 
- Date                 : 09/03/2020 15:28:33
+ Date                 : 09/03/2020 15:35:15
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -724,5 +724,20 @@ void address_space__treat_write_request_WriteValues(
 void address_space__dealloc_write_request_responses(void) {
    address_space__ResponseWrite_allocated = false;
    response_write_bs__reset_ResponseWrite();
+}
+
+void address_space__read_variable_compat_type(
+   const constants__t_NodeId_i address_space__p_dv_typ_nid,
+   const t_entier4 address_space__p_dv_vr,
+   const constants__t_NodeId_i address_space__p_var_typ_nid,
+   const t_entier4 address_space__p_var_vr,
+   t_bool * const address_space__btyp_ok,
+   t_bool * const address_space__btyp_need_conv) {
+   address_space__is_variable_compat_type(address_space__p_dv_typ_nid,
+      address_space__p_dv_vr,
+      address_space__p_var_typ_nid,
+      address_space__p_var_vr,
+      address_space__btyp_ok,
+      address_space__btyp_need_conv);
 }
 

@@ -21,7 +21,7 @@
 
  File Name            : call_method_mgr.c
 
- Date                 : 28/10/2019 13:09:20
+ Date                 : 06/11/2019 09:07:36
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -106,6 +106,7 @@ void call_method_mgr__treat_one_method_call(
    call_method_mgr__check_method_call_inputs(call_method_mgr__p_session,
       call_method_mgr__p_req_msg,
       call_method_mgr__p_callMethod,
+      call_method_mgr__p_res_msg,
       call_method_mgr__StatusCode);
    if (*call_method_mgr__StatusCode == constants_statuscodes_bs__e_sc_ok) {
       call_method_bs__exec_callMethod(call_method_mgr__p_req_msg,
@@ -113,14 +114,9 @@ void call_method_mgr__treat_one_method_call(
          call_method_mgr__p_endpoint_config_idx,
          call_method_mgr__StatusCode);
       if (*call_method_mgr__StatusCode == constants_statuscodes_bs__e_sc_ok) {
-         call_method_mgr__check_exec_result(call_method_mgr__p_req_msg,
+         call_method_mgr__copy_exec_result(call_method_mgr__p_res_msg,
             call_method_mgr__p_callMethod,
             call_method_mgr__StatusCode);
-         if (*call_method_mgr__StatusCode == constants_statuscodes_bs__e_sc_ok) {
-            call_method_mgr__copy_exec_result(call_method_mgr__p_res_msg,
-               call_method_mgr__p_callMethod,
-               call_method_mgr__StatusCode);
-         }
       }
       call_method_bs__free_exec_result();
    }
@@ -133,6 +129,7 @@ void call_method_mgr__check_method_call_inputs(
    const constants__t_session_i call_method_mgr__p_session,
    const constants__t_msg_i call_method_mgr__p_req_msg,
    const constants__t_CallMethod_i call_method_mgr__p_callMethod,
+   const constants__t_msg_i call_method_mgr__p_res_msg,
    constants_statuscodes_bs__t_StatusCode_i * const call_method_mgr__StatusCode) {
    {
       constants__t_Node_i call_method_mgr__l_object;
@@ -142,18 +139,19 @@ void call_method_mgr__check_method_call_inputs(
       constants__t_user_i call_method_mgr__l_user;
       t_bool call_method_mgr__l_valid_executable;
       t_bool call_method_mgr__l_valid_user_executable;
+      t_bool call_method_mgr__l_object_has_method;
       
       msg_call_method_bs__read_CallMethod_Objectid(call_method_mgr__p_req_msg,
          call_method_mgr__p_callMethod,
          &call_method_mgr__l_objectid);
-      call_method_mgr__check_nodeId(call_method_mgr__l_objectid,
+      call_method_mgr__check_nodeId_isValid(call_method_mgr__l_objectid,
          call_method_mgr__StatusCode,
          &call_method_mgr__l_object);
       if (*call_method_mgr__StatusCode == constants_statuscodes_bs__e_sc_ok) {
          msg_call_method_bs__read_CallMethod_MethodId(call_method_mgr__p_req_msg,
             call_method_mgr__p_callMethod,
             &call_method_mgr__l_methodid);
-         call_method_mgr__check_nodeId(call_method_mgr__l_methodid,
+         call_method_mgr__check_nodeId_isValid(call_method_mgr__l_methodid,
             call_method_mgr__StatusCode,
             &call_method_mgr__l_method);
          if (*call_method_mgr__StatusCode == constants_statuscodes_bs__e_sc_ok) {
@@ -168,10 +166,22 @@ void call_method_mgr__check_method_call_inputs(
                &call_method_mgr__l_valid_user_executable);
             if ((call_method_mgr__l_valid_executable == true) &&
                (call_method_mgr__l_valid_user_executable == true)) {
-               *call_method_mgr__StatusCode = constants_statuscodes_bs__e_sc_bad_user_access_denied;
+               address_space__check_object_has_method(call_method_mgr__l_objectid,
+                  call_method_mgr__l_methodid,
+                  &call_method_mgr__l_object_has_method);
+               if (call_method_mgr__l_object_has_method == true) {
+                  call_method_mgr__check_method_call_arguments(call_method_mgr__p_req_msg,
+                     call_method_mgr__p_callMethod,
+                     call_method_mgr__l_method,
+                     call_method_mgr__p_res_msg,
+                     call_method_mgr__StatusCode);
+               }
+               else {
+                  *call_method_mgr__StatusCode = constants_statuscodes_bs__e_sc_bad_method_invalid;
+               }
             }
             else {
-               *call_method_mgr__StatusCode = constants_statuscodes_bs__e_sc_ok;
+               *call_method_mgr__StatusCode = constants_statuscodes_bs__e_sc_bad_user_access_denied;
             }
          }
          else {
@@ -181,16 +191,107 @@ void call_method_mgr__check_method_call_inputs(
    }
 }
 
-void call_method_mgr__check_exec_result(
+void call_method_mgr__check_method_call_arguments(
    const constants__t_msg_i call_method_mgr__p_req_msg,
    const constants__t_CallMethod_i call_method_mgr__p_callMethod,
+   const constants__t_Node_i call_method_mgr__p_method_node,
+   const constants__t_msg_i call_method_mgr__p_res_msg,
    constants_statuscodes_bs__t_StatusCode_i * const call_method_mgr__StatusCode) {
-   if ((call_method_mgr__p_req_msg != constants__c_msg_indet) &&
-      (call_method_mgr__p_callMethod != constants__c_CallMethod_indet)) {
-      *call_method_mgr__StatusCode = constants_statuscodes_bs__e_sc_ok;
+   {
+      t_entier4 call_method_mgr__l_nb_req_arg;
+      t_entier4 call_method_mgr__l_nb_method_arg;
+      t_bool call_method_mgr__l_continue;
+      constants__t_Variant_i call_method_mgr__l_input_arg_variant;
+      t_entier4 call_method_mgr__l_index;
+      constants__t_Argument_i call_method_mgr__l_arg_desc;
+      constants__t_Variant_i call_method_mgr__l_val;
+      constants_statuscodes_bs__t_StatusCode_i call_method_mgr__l_arg_status;
+      
+      address_space__get_InputArguments(call_method_mgr__p_method_node,
+         &call_method_mgr__l_input_arg_variant);
+      argument_pointer_bs__read_variant_nb_argument(call_method_mgr__l_input_arg_variant,
+         &call_method_mgr__l_nb_method_arg);
+      msg_call_method_bs__read_CallMethod_Nb_InputArguments(call_method_mgr__p_req_msg,
+         call_method_mgr__p_callMethod,
+         &call_method_mgr__l_nb_req_arg);
+      if (call_method_mgr__l_nb_req_arg < call_method_mgr__l_nb_method_arg) {
+         *call_method_mgr__StatusCode = constants_statuscodes_bs__e_sc_bad_arguments_missing;
+      }
+      else if (call_method_mgr__l_nb_req_arg > call_method_mgr__l_nb_method_arg) {
+         *call_method_mgr__StatusCode = constants_statuscodes_bs__e_sc_bad_too_many_arguments;
+      }
+      else {
+         *call_method_mgr__StatusCode = constants_statuscodes_bs__e_sc_ok;
+         call_method_result_it__init_iter_callMethodResultIdx(call_method_mgr__l_nb_req_arg,
+            &call_method_mgr__l_continue);
+         if (call_method_mgr__l_continue == true) {
+            msg_call_method_bs__alloc_CallMethod_Res_InputArgumentResult(call_method_mgr__p_res_msg,
+               call_method_mgr__p_callMethod,
+               call_method_mgr__l_nb_req_arg,
+               call_method_mgr__StatusCode);
+            call_method_mgr__l_continue = (*call_method_mgr__StatusCode == constants_statuscodes_bs__e_sc_ok);
+            while (call_method_mgr__l_continue == true) {
+               call_method_result_it__continue_iter_callMethodResultIdx(&call_method_mgr__l_continue,
+                  &call_method_mgr__l_index);
+               argument_pointer_bs__read_variant_argument(call_method_mgr__l_input_arg_variant,
+                  call_method_mgr__l_index,
+                  &call_method_mgr__l_arg_desc);
+               msg_call_method_bs__read_CallMethod_InputArguments(call_method_mgr__p_req_msg,
+                  call_method_mgr__p_callMethod,
+                  call_method_mgr__l_index,
+                  &call_method_mgr__l_val);
+               call_method_mgr__check_method_call_one_arguments(call_method_mgr__l_val,
+                  call_method_mgr__l_arg_desc,
+                  &call_method_mgr__l_arg_status);
+               msg_call_method_bs__write_CallMethod_Res_InputArgumentResult(call_method_mgr__p_res_msg,
+                  call_method_mgr__p_callMethod,
+                  call_method_mgr__l_index,
+                  call_method_mgr__l_arg_status);
+               if (call_method_mgr__l_arg_status != constants_statuscodes_bs__e_sc_ok) {
+                  *call_method_mgr__StatusCode = constants_statuscodes_bs__e_sc_bad_invalid_argument;
+               }
+            }
+            if (*call_method_mgr__StatusCode == constants_statuscodes_bs__e_sc_ok) {
+               msg_call_method_bs__free_CallMethod_Res_InputArgument(call_method_mgr__p_res_msg,
+                  call_method_mgr__p_callMethod);
+            }
+         }
+      }
    }
-   else {
-      *call_method_mgr__StatusCode = constants_statuscodes_bs__e_sc_bad_method_invalid;
+}
+
+void call_method_mgr__check_method_call_one_arguments(
+   const constants__t_Variant_i call_method_mgr__p_value,
+   const constants__t_Argument_i call_method_mgr__p_arg,
+   constants_statuscodes_bs__t_StatusCode_i * const call_method_mgr__StatusCode) {
+   {
+      constants__t_NodeId_i call_method_mgr__l_value_type;
+      t_entier4 call_method_mgr__l_value_valueRank;
+      constants__t_NodeId_i call_method_mgr__l_arg_type;
+      t_entier4 call_method_mgr__l_arg_valueRank;
+      t_bool call_method_mgr__l_bool;
+      t_bool call_method_mgr__l_compat_with_conv;
+      
+      address_space__get_conv_Variant_Type(call_method_mgr__p_value,
+         &call_method_mgr__l_value_type);
+      address_space__get_conv_Variant_ValueRank(call_method_mgr__p_value,
+         &call_method_mgr__l_value_valueRank);
+      argument_pointer_bs__read_argument_type(call_method_mgr__p_arg,
+         &call_method_mgr__l_arg_type);
+      argument_pointer_bs__read_argument_valueRank(call_method_mgr__p_arg,
+         &call_method_mgr__l_arg_valueRank);
+      address_space__read_variable_compat_type(call_method_mgr__l_value_type,
+         call_method_mgr__l_value_valueRank,
+         call_method_mgr__l_arg_type,
+         call_method_mgr__l_arg_valueRank,
+         &call_method_mgr__l_bool,
+         &call_method_mgr__l_compat_with_conv);
+      if (call_method_mgr__l_bool == false) {
+         *call_method_mgr__StatusCode = constants_statuscodes_bs__e_sc_bad_type_mismatch;
+      }
+      else {
+         *call_method_mgr__StatusCode = constants_statuscodes_bs__e_sc_ok;
+      }
    }
 }
 
@@ -237,7 +338,7 @@ void call_method_mgr__copy_exec_result(
    }
 }
 
-void call_method_mgr__check_nodeId(
+void call_method_mgr__check_nodeId_isValid(
    const constants__t_NodeId_i call_method_mgr__nodeid,
    constants_statuscodes_bs__t_StatusCode_i * const call_method_mgr__statusCode,
    constants__t_Node_i * const call_method_mgr__node) {

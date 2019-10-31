@@ -28,6 +28,7 @@
 #include <inttypes.h>
 
 #include "address_space_impl.h"
+#include "util_address_space.h"
 
 #include "sopc_address_space.h"
 #include "sopc_embedded_nodeset2.h"
@@ -42,6 +43,9 @@ void address_space_typing_bs__INITIALISATION(void) {}
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+
+static bool is_component_of(const SOPC_NodeId* component, const constants__t_Node_i node);
+static bool recursive_check_object_has_method(int recursionLimit, const SOPC_NodeId* object, const SOPC_NodeId* method);
 
 static void log_error_for_unknown_node(const SOPC_NodeId* nodeId, const char* node_adjective, const char* error)
 {
@@ -241,4 +245,96 @@ void address_space_typing_bs__is_valid_ReferenceTypeId(const constants__t_NodeId
             *address_space_typing_bs__bres = OpcUa_NodeClass_ReferenceType == node->node_class;
         }
     }
+}
+
+static bool recursive_check_object_has_method(int recursionLimit,
+                                              const SOPC_NodeId* objectId,
+                                              const SOPC_NodeId* methodId)
+{
+    recursionLimit--;
+    if (recursionLimit < 0)
+    {
+        return false;
+    }
+
+    if (NULL == objectId || NULL == methodId)
+    {
+        return false;
+    }
+
+    bool res;
+    constants__t_ExpandedNodeId_i type;
+
+    SOPC_AddressSpace_Node* object = SOPC_AddressSpace_Get_Node(address_space_bs__nodes, objectId, &res);
+
+    if (!res)
+    {
+        return false;
+    }
+
+    /* Try direct reference */
+    res = is_component_of(methodId, object); /* Sub type of hasComponent is not managed */
+    if (!res)
+    {
+        /* Object has not a direct reference with the method.
+           Try with its type or subtype */
+        switch (object->node_class)
+        {
+        case OpcUa_NodeClass_Object:
+            util_get_TypeDefinition(object, &type);
+            if (NULL != type && type->ServerIndex == 0 && type->NamespaceUri.Length <= 0)
+            { // Shall be on same server and shall use only NodeId
+                res = recursive_check_object_has_method(recursionLimit, &type->NodeId, methodId);
+            }
+            break;
+
+        case OpcUa_NodeClass_ObjectType:
+            res = recursive_check_object_has_method(recursionLimit, get_direct_parent(objectId), methodId);
+            break;
+
+        default:
+            return res = false;
+        }
+    }
+    return res;
+}
+
+void address_space_typing_bs__check_object_has_method(const constants__t_NodeId_i address_space_typing_bs__p_object,
+                                                      const constants__t_NodeId_i address_space_typing_bs__p_method,
+                                                      t_bool* const address_space_typing_bs__p_bool)
+{
+    assert(NULL != address_space_typing_bs__p_object);
+    assert(NULL != address_space_typing_bs__p_method);
+    const SOPC_NodeId* object = (SOPC_NodeId*) address_space_typing_bs__p_object;
+    const SOPC_NodeId* method = (SOPC_NodeId*) address_space_typing_bs__p_method;
+
+    *address_space_typing_bs__p_bool = recursive_check_object_has_method(RECURSION_LIMIT, object, method);
+}
+
+static bool is_component_of(const SOPC_NodeId* component, const constants__t_Node_i node)
+{
+    assert(NULL != node);
+    assert(NULL != component);
+
+    int32_t* n_refs = SOPC_AddressSpace_Get_NoOfReferences(address_space_bs__nodes, node);
+    OpcUa_ReferenceNode** refs = SOPC_AddressSpace_Get_References(address_space_bs__nodes, node);
+    bool res = false;
+
+    for (int32_t i = 0; i < *n_refs; ++i)
+    {
+        OpcUa_ReferenceNode* ref = &(*refs)[i];
+
+        if (is_component(ref))
+        {
+            if (ref->TargetId.ServerIndex == 0 && ref->TargetId.NamespaceUri.Length <= 0)
+            { // Shall be on same server and shall use only NodeId
+                if (SOPC_NodeId_Equal(&ref->TargetId.NodeId, component))
+                {
+                    res = true;
+                    break;
+                }
+            }
+        }
+    }
+    return res;
 }

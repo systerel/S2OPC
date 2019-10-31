@@ -53,6 +53,7 @@
 /*-----------------------------
    SETS Clause: deferred sets
   -----------------------------*/
+typedef OpcUa_Argument* constants_bs__t_Argument_i;
 typedef void* constants_bs__t_ArrayDimensions_i;
 typedef uint32_t constants_bs__t_BrowseNodeClassMask_i;
 typedef uint32_t constants_bs__t_BrowsePath_i;
@@ -125,6 +126,7 @@ typedef SOPC_ExtensionObject* constants_bs__t_user_token_i;
    CONCRETE_CONSTANTS Clause: scalars and arrays
   ------------------------------------------------*/
 #define constants_bs__c_ArrayDimensions_indet 0
+#define constants_bs__c_Argument_indet NULL
 #define constants_bs__c_BrowseNodeClassMask_indet 0
 #define constants_bs__c_BrowseResultMask_all 63
 #define constants_bs__c_BrowseResultMask_indet 0

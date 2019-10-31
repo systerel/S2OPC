@@ -39,7 +39,8 @@ IMPORTS
     call_method_bs,
     call_method_it,
     call_method_result_it,
-    msg_call_method_bs
+    msg_call_method_bs,
+    argument_pointer_bs
     
 LOCAL_OPERATIONS
     
@@ -67,7 +68,9 @@ LOCAL_OPERATIONS
         CallMethodRes_OutputArgument
         :(
             StatusCode : t_StatusCode_i &
-            StatusCode : {e_sc_bad_arguments_missing,
+            StatusCode : {
+                e_sc_ok,
+                e_sc_bad_arguments_missing,
                 e_sc_bad_too_many_arguments,
                 e_sc_bad_invalid_argument,
                 e_sc_bad_method_invalid,
@@ -111,7 +114,7 @@ LOCAL_OPERATIONS
     /*
     Check object, method and inputArgument
     */
-    StatusCode <-- check_method_call_inputs (p_session, p_req_msg, p_callMethod)=
+    StatusCode <-- check_method_call_inputs (p_session, p_req_msg, p_callMethod, p_res_msg)=
     PRE
         p_session : t_session_i &
         p_session : t_session &
@@ -119,10 +122,13 @@ LOCAL_OPERATIONS
         p_req_msg : t_msg &
         p_req_msg = CallMethod_Msg &
         p_callMethod : t_CallMethod_i &
-        p_callMethod : CallMethods
-        
+        p_callMethod : CallMethods &
+        p_res_msg : t_msg_i &
+        p_res_msg : t_msg
     THEN
-        StatusCode
+        StatusCode,
+        CallMethodRes_AllocatedInputArgumentResult,
+        CallMethodRes_InputArgumentResult
         :(
             StatusCode : t_StatusCode_i &
             StatusCode :
@@ -132,24 +138,100 @@ LOCAL_OPERATIONS
                 e_sc_bad_invalid_argument,
                 e_sc_bad_method_invalid,
                 e_sc_bad_not_executable
-            }
+            } &
+            
+            CallMethodRes_AllocatedInputArgumentResult : t_CallMethod --> NAT1          &
+            CallMethodRes_InputArgumentResult    : t_CallMethod --> seq(t_StatusCode_i) &
+            
+            {p_callMethod} <<| CallMethodRes_AllocatedInputArgumentResult =
+            {p_callMethod} <<| CallMethodRes_AllocatedInputArgumentResult$0 &
+            {p_callMethod} <<| CallMethodRes_InputArgumentResult =
+            {p_callMethod} <<| CallMethodRes_InputArgumentResult$0 &
+            
+            ( StatusCode /= e_sc_bad_invalid_argument
+                =>
+                CallMethodRes_AllocatedInputArgumentResult(p_callMethod) = 0 &
+                size(CallMethodRes_InputArgumentResult(p_callMethod)) = 0
+            ) &
+            ( StatusCode = e_sc_bad_invalid_argument
+                =>
+                CallMethodRes_AllocatedInputArgumentResult(p_callMethod) = size(CallMethod_InputArguments(p_callMethod)) &
+                size(CallMethodRes_InputArgumentResult(p_callMethod)) = size(CallMethod_InputArguments(p_callMethod)) 
+            )
         )
     END
     ;
     
-    StatusCode <-- check_exec_result (p_req_msg, p_callMethod)=
+    /**
+	* Verify the Arguments against Method description
+    */
+    StatusCode <-- check_method_call_arguments (p_req_msg, p_callMethod, p_method_node, p_res_msg)=
     PRE
         p_req_msg : t_msg_i &
         p_req_msg : t_msg &
-        p_req_msg = CallMethod_Msg &
         p_callMethod : t_CallMethod_i &
-        p_callMethod : CallMethods
-        
+        p_callMethod : CallMethods &
+        p_method_node : t_Node_i &
+        p_method_node : t_Node &
+        p_req_msg = CallMethod_Msg &
+        p_res_msg : t_msg_i &
+        p_res_msg : t_msg
     THEN
-        StatusCode :: t_StatusCode_i /* TODO */
+        StatusCode,
+        CallMethodRes_AllocatedInputArgumentResult,
+        CallMethodRes_InputArgumentResult
+        :(
+            StatusCode : t_StatusCode_i &
+            StatusCode :
+            {
+                e_sc_bad_arguments_missing,
+                e_sc_bad_too_many_arguments,
+                e_sc_bad_invalid_argument
+            } &
+            
+            CallMethodRes_AllocatedInputArgumentResult : t_CallMethod --> NAT1          &
+            CallMethodRes_InputArgumentResult    : t_CallMethod --> seq(t_StatusCode_i) &
+            
+            {p_callMethod} <<| CallMethodRes_AllocatedInputArgumentResult =
+            {p_callMethod} <<| CallMethodRes_AllocatedInputArgumentResult$0 &
+            {p_callMethod} <<| CallMethodRes_InputArgumentResult =
+            {p_callMethod} <<| CallMethodRes_InputArgumentResult$0 &
+            
+            ( StatusCode /= e_sc_bad_invalid_argument
+                =>
+                CallMethodRes_AllocatedInputArgumentResult(p_callMethod) = 0 &
+                size(CallMethodRes_InputArgumentResult(p_callMethod)) = 0
+            ) &
+            ( StatusCode = e_sc_bad_invalid_argument
+                =>
+                CallMethodRes_AllocatedInputArgumentResult(p_callMethod) = size(CallMethod_InputArguments(p_callMethod)) &
+                size(CallMethodRes_InputArgumentResult(p_callMethod)) = size(CallMethod_InputArguments(p_callMethod)) 
+            )
+        )
     END
     ;
     
+    StatusCode <-- check_method_call_one_arguments (p_value, p_arg) =
+    PRE
+        p_value : t_Variant_i &
+        p_value : t_Variant &
+        p_arg : t_Argument_i &
+        p_arg : t_Argument
+    THEN
+        StatusCode
+        :(
+            StatusCode : t_StatusCode_i &
+            StatusCode :
+            {
+                e_sc_ok,
+                e_sc_bad_arguments_missing,
+                e_sc_bad_too_many_arguments,
+                e_sc_bad_invalid_argument
+            }
+        )
+    END
+    ;
+
     StatusCode <-- copy_exec_result (p_res_msg, p_callMethod)=
     PRE
         p_res_msg : t_msg_i &
@@ -182,7 +264,7 @@ LOCAL_OPERATIONS
     END
     ;
     
-    statusCode, node <-- check_nodeId(nodeid)=
+    statusCode, node <-- check_nodeId_isValid(nodeid)=
     PRE
         nodeid : t_NodeId_i &
         nodeid : t_NodeId
@@ -215,7 +297,6 @@ OPERATIONS
     
     StatusCode_service <-- treat_method_call_request (p_session, p_req_msg, p_resp_msg) =
     VAR
-        
         l_endpoint_config_idx ,
         l_continue,
         l_nb,
@@ -243,9 +324,13 @@ OPERATIONS
                             StatusCode_service := e_sc_bad_out_of_memory
                         END
                     INVARIANT
-                        0 = 1
+                        callMethods_to_iterate <: t_CallMethod &
+                        callMethods_iterated   <: t_CallMethod &
+                        callMethods_to_iterate /\ callMethods_iterated = {} &
+                        callMethods_to_iterate \/ callMethods_iterated = CallMethods &
+                        l_continue = bool(callMethods_to_iterate /= {} & l_status_op /= e_sc_bad_out_of_memory)
                     VARIANT
-                        0
+                        card(callMethods_to_iterate)
                     END
                 END
             END
@@ -260,15 +345,12 @@ OPERATIONS
     
     StatusCode <-- treat_one_method_call (p_session, p_req_msg, p_res_msg, p_callMethod, p_endpoint_config_idx) =
     BEGIN
-        StatusCode <-- check_method_call_inputs (p_session, p_req_msg, p_callMethod);
+        StatusCode <-- check_method_call_inputs (p_session, p_req_msg, p_callMethod, p_res_msg);
         IF StatusCode  = e_sc_ok THEN
             
             StatusCode <-- exec_callMethod(p_req_msg, p_callMethod, p_endpoint_config_idx);
             IF StatusCode  = e_sc_ok THEN
-                StatusCode <-- check_exec_result (p_req_msg, p_callMethod);
-                IF StatusCode = e_sc_ok THEN
-                    StatusCode <-- copy_exec_result (p_res_msg, p_callMethod)
-                END
+                StatusCode <-- copy_exec_result (p_res_msg, p_callMethod)
             END
             ;
             free_exec_result
@@ -278,7 +360,7 @@ OPERATIONS
     END
     ;
             
-    StatusCode <-- check_method_call_inputs (p_session, p_req_msg, p_callMethod)=
+    StatusCode <-- check_method_call_inputs (p_session, p_req_msg, p_callMethod, p_res_msg)=
     VAR
         l_object,
         l_objectid,
@@ -286,47 +368,147 @@ OPERATIONS
         l_methodid,
         l_user,
         l_valid_executable,
-        l_valid_user_executable
+        l_valid_user_executable,
+        l_object_has_method
     IN
-        
         l_objectid <-- read_CallMethod_Objectid (p_req_msg, p_callMethod);
         /* Treat e_sc_bad_node_id_invalid and e_sc_bad_node_id_unknown */
-        StatusCode, l_object <-- check_nodeId(l_objectid);
+        StatusCode, l_object <-- check_nodeId_isValid(l_objectid);
         IF StatusCode = e_sc_ok THEN
             l_methodid <-- read_CallMethod_MethodId (p_req_msg, p_callMethod);
-            StatusCode, l_method <-- check_nodeId(l_methodid);
+            StatusCode, l_method <-- check_nodeId_isValid(l_methodid);
             IF StatusCode = e_sc_ok THEN
-                /* TODO check method belong to object
-                StatusCode := e_sc_bad_method_invalid; */
+				/* method is executable by user */
                 l_user <-- get_session_user_server(p_session);
                 l_valid_executable <-- get_Executable(l_method);  /* TODO change by e_sc_bad_not_executable when update to Spec 1.04 */
                 l_valid_user_executable <-- get_user_authorization (e_operation_type_executable, l_methodid, e_aid_UserExecutable, l_user);
                 IF l_valid_executable = TRUE &
                     l_valid_user_executable = TRUE
                 THEN
-                    StatusCode := e_sc_bad_user_access_denied
+                    /* method belongs to object */
+                    l_object_has_method <-- check_object_has_method(l_objectid, l_methodid);
+                    IF l_object_has_method = TRUE THEN
+                        StatusCode <-- check_method_call_arguments(p_req_msg, p_callMethod, l_method, p_res_msg)
+                    ELSE
+                        StatusCode := e_sc_bad_method_invalid
+                    END
                 ELSE
-                    StatusCode := e_sc_ok
+                    StatusCode := e_sc_bad_user_access_denied
                 END
             ELSE
                 /* Since invalid and unknown are reserved for objectId, use method invalid */
-	            StatusCode := e_sc_bad_method_invalid
-			END            
+                StatusCode := e_sc_bad_method_invalid
+            END            
         END
-        /* Check object */
-        
-         /* Check Argument {e_sc_bad_argument_missing, e_sc_bad_too_many_argument, e_sc_bad_invalid_argument}*/
         
     END
     ;
     
-    StatusCode <-- check_exec_result (p_req_msg, p_callMethod)=
-    BEGIN
-        IF p_req_msg /= c_msg_indet &
-            p_callMethod /= c_CallMethod_indet THEN
-            StatusCode := e_sc_ok /* TODO return BAD if error */
+    /**
+	* Verify the Arguments against Method description
+    */
+    StatusCode <-- check_method_call_arguments (p_req_msg, p_callMethod, p_method_node, p_res_msg)=
+    VAR
+        l_nb_req_arg,
+        l_nb_method_arg,
+        l_continue,
+        l_input_arg_variant,
+        l_index,
+        l_arg_desc,
+        l_val,
+        l_arg_status
+    IN
+        
+        l_input_arg_variant <-- get_InputArguments(p_method_node);
+        l_nb_method_arg <-- read_variant_nb_argument(l_input_arg_variant);
+        l_nb_req_arg <-- read_CallMethod_Nb_InputArguments (p_req_msg, p_callMethod);
+        IF l_nb_req_arg < l_nb_method_arg
+        THEN
+            StatusCode := e_sc_bad_arguments_missing
+        ELSIF l_nb_req_arg > l_nb_method_arg
+        THEN
+            StatusCode := e_sc_bad_too_many_arguments
         ELSE
-            StatusCode := e_sc_bad_method_invalid
+            /* Number of input argument is that was expected, check each argument */
+            /* Same index is used for request arguments and method argument */
+            StatusCode := e_sc_ok;
+            l_continue <-- init_iter_callMethodResultIdx(l_nb_req_arg);
+            IF l_continue = TRUE THEN
+                StatusCode <-- alloc_CallMethod_Res_InputArgumentResult(p_res_msg, p_callMethod, l_nb_req_arg);
+                l_continue := bool(StatusCode = e_sc_ok);
+                WHILE l_continue = TRUE
+                DO
+                    l_continue, l_index <-- continue_iter_callMethodResultIdx;
+                    l_arg_desc <-- read_variant_argument(l_input_arg_variant, l_index);
+                    l_val <-- read_CallMethod_InputArguments (p_req_msg, p_callMethod, l_index);
+                    l_arg_status <-- check_method_call_one_arguments (l_val, l_arg_desc);
+                    write_CallMethod_Res_InputArgumentResult(p_res_msg, p_callMethod, l_index, l_arg_status);
+                    IF l_arg_status /= e_sc_ok
+                    THEN
+                        StatusCode := e_sc_bad_invalid_argument
+                    END
+                INVARIANT
+                    
+                    callMethodResultIdx_to_iterate <: NAT1 &
+                    callMethodResultIdx_iterated   <: NAT1 &
+                    callMethodResultIdx_to_iterate /\ callMethodResultIdx_iterated = {} &
+                    size(CallMethod_InputArguments(p_callMethod)) = card(callMethodResultIdx_to_iterate \/ callMethodResultIdx_iterated) &
+                    
+                    callMethodResultIdx_iterated   = 1 .. l_index &
+                    callMethodResultIdx_to_iterate = l_index + 1 .. nb_callMethodResultIdx_max_refs &
+                    l_continue                     = bool(l_index + 1 /= nb_callMethodResultIdx_max_refs) &
+                    
+                    StatusCode : { e_sc_ok, e_sc_bad_invalid_argument } &
+                    
+                    CallMethodRes_AllocatedInputArgumentResult : t_CallMethod --> NAT1          &
+                    CallMethodRes_InputArgumentResult    : t_CallMethod --> seq(t_StatusCode_i) &
+                    
+                    /* TODO $0 is not allowed..
+                    {p_callMethod} <<| CallMethodRes_AllocatedInputArgumentResult =
+                    {p_callMethod} <<| CallMethodRes_AllocatedInputArgumentResult$0 &
+                    {p_callMethod} <<| CallMethodRes_InputArgumentResult =
+                    {p_callMethod} <<| CallMethodRes_InputArgumentResult$0 &
+                    */
+                    
+                    CallMethodRes_AllocatedInputArgumentResult(p_callMethod) = size(CallMethod_InputArguments(p_callMethod)) &
+                    size(CallMethodRes_InputArgumentResult(p_callMethod)) = card(callMethodResultIdx_iterated)
+                    
+                VARIANT
+                    card(callMethodResultIdx_to_iterate)
+                END
+                ;
+                IF StatusCode = e_sc_ok THEN
+                    free_CallMethod_Res_InputArgument(p_res_msg, p_callMethod)
+                END
+            END
+        END
+    END
+    ;
+    
+    StatusCode <-- check_method_call_one_arguments (p_value, p_arg) =
+    VAR
+        l_value_type,
+        l_value_valueRank,
+        l_arg_type,
+        l_arg_valueRank,
+        l_bool,
+        l_compat_with_conv
+    IN
+        
+        l_value_type <-- get_conv_Variant_Type(p_value);
+        l_value_valueRank <-- get_conv_Variant_ValueRank(p_value);
+        
+        l_arg_type <-- read_argument_type(p_arg);
+        l_arg_valueRank <-- read_argument_valueRank(p_arg);
+        
+        l_bool, l_compat_with_conv
+        <-- read_variable_compat_type(l_value_type, l_value_valueRank, l_arg_type, l_arg_valueRank);
+        /* l_compat_with_conv is not used */
+        
+        IF l_bool = FALSE THEN
+            StatusCode := e_sc_bad_type_mismatch
+        ELSE
+            StatusCode := e_sc_ok
         END
     END
     ;
@@ -353,9 +535,31 @@ OPERATIONS
                 StatusCode <-- write_CallMethod_Res_OutputArgument(p_res_msg, p_callMethod, l_index, l_value);
                 l_continue := bool(l_continue = TRUE & StatusCode = e_sc_ok)
             INVARIANT
-                1 = 0
+                
+                callMethodResultIdx_to_iterate <: NAT1 &
+                callMethodResultIdx_iterated   <: NAT1 &
+                callMethodResultIdx_to_iterate /\ callMethodResultIdx_iterated = {} &
+                nb_callMethodResultIdx_max_refs = card(callMethodResultIdx_to_iterate \/ callMethodResultIdx_iterated) &
+                
+                callMethodResultIdx_iterated   = 1 .. l_index &
+                callMethodResultIdx_to_iterate = l_index + 1 .. nb_callMethodResultIdx_max_refs &
+                l_continue                     = bool(l_index + 1 /= nb_callMethodResultIdx_max_refs) &
+                
+                StatusCode : { e_sc_ok, e_sc_bad_out_of_memory } &
+                
+                /* TODO $0 is not allowed..
+                {p_callMethod} <<| CallMethodRes_AllocatedOutputArgument =
+                {p_callMethod} <<| CallMethodRes_AllocatedOutputArgument$0 &
+                {p_callMethod} <<| CallMethodRes_OutputArgument = {p_callMethod} <<| CallMethodRes_OutputArgument$0 &
+                */
+                (StatusCode = e_sc_ok
+                    =>
+                    CallMethodRes_AllocatedOutputArgument(p_callMethod) = size(exec_result) &
+                    CallMethodRes_OutputArgument(p_callMethod) = callMethodResultIdx_iterated <| exec_result 
+                )
+                
             VARIANT
-                0
+                card(callMethodResultIdx_to_iterate)
             END
             ;
             IF StatusCode = e_sc_bad_out_of_memory THEN
@@ -365,7 +569,7 @@ OPERATIONS
     END
     ;
     
-    statusCode, node <-- check_nodeId(nodeid) =
+    statusCode, node <-- check_nodeId_isValid(nodeid) =
     VAR
         l_isvalid
     IN
@@ -382,7 +586,7 @@ OPERATIONS
             END
         END
     END
-    ;  
+    ;
     
     /* Get access to server configuration */
     endpoint_config_idx <-- session_get_endpoint_config(p_session) =

@@ -475,7 +475,7 @@ static bool set_server_capabilities_operation_limits_variables(SOPC_Array* write
 {
     size_t nbNodesToSet = 5;
 #if 0 != WITH_NANO_EXTENDED
-    nbNodesToSet += 1; // Subscription operations
+    nbNodesToSet += 2; // Subscription and MethodCall operations
 #endif
     OpcUa_WriteValue* values = append_write_values(write_values, nbNodesToSet);
     if (NULL == values)
@@ -497,6 +497,9 @@ static bool set_server_capabilities_operation_limits_variables(SOPC_Array* write
 #if 0 != WITH_NANO_EXTENDED
     set_write_value_uint32(
         &values[5], OpcUaId_Server_ServerCapabilities_OperationLimits_MaxMonitoredItemsPerCall,
+        vars->maximum_operation_per_request);
+    set_write_value_uint32(
+        &values[6], OpcUaId_Server_ServerCapabilities_OperationLimits_MaxNodesPerMethodCall,
         vars->maximum_operation_per_request);
 #endif
     return true;

@@ -148,6 +148,7 @@ static void SOPC_ServerConfig_Clear(SOPC_Server_Config* config)
     SOPC_KeyManager_SerializedCertificate_Delete(config->serverCertificate);
     SOPC_KeyManager_SerializedAsymmetricKey_Delete(config->serverKey);
     SOPC_PKIProvider_Free(&config->pki);
+    SOPC_MethodCallManager_Free(config->mcm);
 
     memset(config, 0, sizeof(*config));
 }

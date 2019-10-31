@@ -21,7 +21,7 @@
 
  File Name            : address_space.h
 
- Date                 : 09/03/2020 15:28:33
+ Date                 : 09/03/2020 15:35:15
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -69,9 +69,11 @@ extern void address_space__INITIALISATION(void);
 /*-------------------------------
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
+#define address_space__check_object_has_method address_space_typing__check_object_has_method
 #define address_space__get_BrowseName address_space_bs__get_BrowseName
 #define address_space__get_DisplayName address_space_bs__get_DisplayName
 #define address_space__get_Executable address_space_bs__get_Executable
+#define address_space__get_InputArguments address_space_bs__get_InputArguments
 #define address_space__get_NodeClass address_space_bs__get_NodeClass
 #define address_space__get_Node_RefIndexEnd address_space_bs__get_Node_RefIndexEnd
 #define address_space__get_RefIndex_Reference address_space_bs__get_RefIndex_Reference
@@ -80,6 +82,8 @@ extern void address_space__INITIALISATION(void);
 #define address_space__get_Reference_TargetNode address_space_bs__get_Reference_TargetNode
 #define address_space__get_TypeDefinition address_space_bs__get_TypeDefinition
 #define address_space__get_Value_StatusCode address_space_bs__get_Value_StatusCode
+#define address_space__get_conv_Variant_Type address_space_bs__get_conv_Variant_Type
+#define address_space__get_conv_Variant_ValueRank address_space_bs__get_conv_Variant_ValueRank
 #define address_space__get_user_authorization user_authorization_bs__get_user_authorization
 #define address_space__is_NodeId_equal address_space_bs__is_NodeId_equal
 #define address_space__is_transitive_subtype address_space_typing__is_transitive_subtype
@@ -153,6 +157,13 @@ extern void address_space__read_Node_Attribute(
    constants__t_RawStatusCode * const address_space__val_sc,
    constants__t_Timestamp * const address_space__val_ts_src,
    constants__t_Timestamp * const address_space__val_ts_srv);
+extern void address_space__read_variable_compat_type(
+   const constants__t_NodeId_i address_space__p_dv_typ_nid,
+   const t_entier4 address_space__p_dv_vr,
+   const constants__t_NodeId_i address_space__p_var_typ_nid,
+   const t_entier4 address_space__p_var_vr,
+   t_bool * const address_space__btyp_ok,
+   t_bool * const address_space__btyp_need_conv);
 extern void address_space__treat_write_request_WriteValues(
    const constants__t_user_i address_space__p_user,
    const constants__t_LocaleIds_i address_space__p_locales,

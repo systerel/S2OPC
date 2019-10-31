@@ -21,7 +21,7 @@
 
  File Name            : address_space_bs.h
 
- Date                 : 09/03/2020 15:28:52
+ Date                 : 09/03/2020 15:35:35
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -66,6 +66,9 @@ extern void address_space_bs__get_DisplayName(
 extern void address_space_bs__get_Executable(
    const constants__t_Node_i address_space_bs__p_node,
    t_bool * const address_space_bs__p_bool);
+extern void address_space_bs__get_InputArguments(
+   const constants__t_Node_i address_space_bs__p_node,
+   constants__t_Variant_i * const address_space_bs__p_input_arg);
 extern void address_space_bs__get_NodeClass(
    const constants__t_Node_i address_space_bs__p_node,
    constants__t_NodeClass_i * const address_space_bs__p_node_class);
@@ -95,6 +98,12 @@ extern void address_space_bs__get_Value_StatusCode(
    const constants__t_user_i address_space_bs__p_user,
    const constants__t_Node_i address_space_bs__node,
    constants__t_RawStatusCode * const address_space_bs__sc);
+extern void address_space_bs__get_conv_Variant_Type(
+   const constants__t_Variant_i address_space_bs__p_variant,
+   constants__t_NodeId_i * const address_space_bs__p_type);
+extern void address_space_bs__get_conv_Variant_ValueRank(
+   const constants__t_Variant_i address_space_bs__p_variant,
+   t_entier4 * const address_space_bs__p_valueRank);
 extern void address_space_bs__is_IndexRangeDefined(
    const constants__t_IndexRange_i address_space_bs__p_index_range,
    t_bool * const address_space_bs__bres);
