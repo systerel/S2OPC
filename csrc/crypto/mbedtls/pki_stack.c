@@ -169,41 +169,37 @@ static SOPC_ReturnStatus PKIProviderStack_ValidateCertificate(const SOPC_PKIProv
                                                               const SOPC_CertificateList* pToValidate,
                                                               uint32_t* error)
 {
-    (void) (pPKI);
-    assert(NULL != error);
-    *error = SOPC_CertificateValidationError_Unkown;
-    SOPC_CertificateList* cert_ca = NULL;
-    SOPC_CRLList* cert_rev_list = NULL;
-    mbedtls_x509_crl* rev_list = NULL;
-    uint32_t failure_reasons = 0;
 
-    if (NULL == pPKI || NULL == pToValidate)
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    if (NULL == pPKI->pFnValidateCertificate || NULL == pPKI->pUserCertAuthList) // TODO: useful pFn verification?
-        return SOPC_STATUS_INVALID_PARAMETERS;
-
-    // Gathers certificates from pki structure
-    if (NULL != pPKI->pUserCertRevocList)
+    if (NULL == pPKI || NULL == pToValidate || NULL == error)
     {
-        cert_rev_list = (SOPC_CRLList*) (pPKI->pUserCertRevocList);
-        rev_list = (mbedtls_x509_crl*) (&cert_rev_list->crl);
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    cert_ca = (SOPC_CertificateList*) (pPKI->pUserCertAuthList);
+    *error = SOPC_CertificateValidationError_Unkown;
 
-    // Now, verifies the certificate
-    // crt are not const in crt_verify, but this function does not look like to modify them
-
-    // Assumption that certificate is not modified by mbedtls
+    /* Gathers certificates from pki structure */
+    SOPC_CertificateList* cert_ca = (SOPC_CertificateList*) (pPKI->pUserCertAuthList);
+    SOPC_CRLList* cert_crl = (SOPC_CRLList*) (pPKI->pUserCertRevocList);
+    if (NULL == cert_ca || NULL == cert_crl)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    /* Assumes that mbedtls does not modify the certificates */
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-    if (mbedtls_x509_crt_verify_with_profile(
-            (mbedtls_x509_crt*) (&pToValidate->crt), (mbedtls_x509_crt*) (&cert_ca->crt), rev_list,
-            &mbedtls_x509_crt_profile_minimal, NULL, /* You can specify an expected Common Name here */
-            &failure_reasons, verify_cert, &cert_ca->crt) != 0)
+    mbedtls_x509_crt* mbed_ca = (mbedtls_x509_crt*) (&cert_ca->crt);
+    mbedtls_x509_crt* mbed_chall = (mbedtls_x509_crt*) (&pToValidate->crt);
+    mbedtls_x509_crl* mbed_crl = (mbedtls_x509_crl*) (&cert_crl->crl);
+    SOPC_GCC_DIAGNOSTIC_RESTORE
+
+    /* TODO: verify CRL <-> CA association */
+
+    uint32_t failure_reasons = 0;
+    if (mbedtls_x509_crt_verify_with_profile(mbed_chall, mbed_ca, mbed_crl, &mbedtls_x509_crt_profile_minimal,
+                                             NULL, /* You can specify an expected Common Name here */
+                                             &failure_reasons, verify_cert, mbed_ca) != 0)
     {
         *error = PKIProviderStack_GetCertificateValidationError(failure_reasons);
         return SOPC_STATUS_NOK;
     }
-    SOPC_GCC_DIAGNOSTIC_RESTORE
 
     return SOPC_STATUS_OK;
 }
