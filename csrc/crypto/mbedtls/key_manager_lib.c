@@ -678,3 +678,108 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetListLength(const SOPC_Certifica
 
     return SOPC_STATUS_OK;
 }
+
+/* ------------------------------------------------------------------------------------------------
+ * Certificate Revocation List API
+ * ------------------------------------------------------------------------------------------------
+ */
+
+/* Create a certificate if \p ppCert points to NULL, do nothing otherwise */
+static SOPC_ReturnStatus crl_maybe_create(SOPC_CRLList** ppCRL)
+{
+    if (NULL == ppCRL)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_CRLList* crl = *ppCRL;
+    if (NULL == crl)
+    {
+        crl = SOPC_Calloc(1, sizeof(SOPC_CRLList)); /* Also init certificate */
+    }
+    if (NULL == crl)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    *ppCRL = crl;
+
+    return SOPC_STATUS_OK;
+}
+
+/**
+ * \note    Neither tested nor part of the test suites.
+ */
+SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromDER(const uint8_t* bufferDER,
+                                                         uint32_t lenDER,
+                                                         SOPC_CRLList** ppCRL)
+{
+    if (NULL == bufferDER || 0 == lenDER)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_ReturnStatus status = crl_maybe_create(ppCRL);
+    SOPC_CRLList* pCRL = *ppCRL;
+
+    if (SOPC_STATUS_OK == status)
+    {
+        int err = mbedtls_x509_crl_parse(&pCRL->crl, bufferDER, lenDER);
+        if (0 != err)
+        {
+            status = SOPC_STATUS_NOK;
+            SOPC_Logger_TraceError("Crypto: crl buffer parse failed with error code: 0x%x", err);
+            SOPC_KeyManager_Certificate_Free(pCert);
+        }
+    }
+
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_KeyManager_CRL_Free(pCert);
+        *ppCRL = NULL;
+    }
+
+    return status;
+}
+
+/**
+ * \note    Tested but not part of the test suites.
+ */
+SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromFile(const char* szPath, SOPC_CRLList** ppCRL)
+{
+    if (NULL == szPath)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_ReturnStatus status = crl_maybe_create(ppCRL);
+    SOPC_CRLList* pCRL = *ppCRL;
+
+    if (SOPC_STATUS_OK == status)
+    {
+        int err = mbedtls_x509_crl_parse_file(&pCRL->crl, szPath);
+        if (0 != err)
+        {
+            status = SOPC_STATUS_NOK;
+            SOPC_Logger_TraceError("Crypto: crl buffer parse failed with error code: 0x%x", err);
+        }
+    }
+
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_KeyManager_CRL_Free(pCRL);
+        *ppCRL = NULL;
+    }
+
+    return status;
+}
+
+void SOPC_KeyManager_CRL_Free(SOPC_CRLList* pCRL)
+{
+    if (NULL == pCRL)
+        return;
+
+    /* Frees all the crls in the chain */
+    mbedtls_x509_crl_free(&pCRL->crl);
+    SOPC_Free(pCRL);
+}

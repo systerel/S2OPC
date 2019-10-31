@@ -420,4 +420,61 @@ const SOPC_Buffer* SOPC_KeyManager_SerializedCertificate_Data(const SOPC_Seriali
  */
 void SOPC_KeyManager_SerializedCertificate_Delete(SOPC_SerializedCertificate* cert);
 
+/* ------------------------------------------------------------------------------------------------
+ * Certificate Revocation List API
+ * ------------------------------------------------------------------------------------------------
+ */
+
+/**
+ * \brief           Creates a new Certificate Revocation List (CRL) from a DER encoded buffer,
+ *                  or add it to an existing CRL list.
+ *
+ *                  \p bufferDER is \p lenDER long, and describes one CRL in the DER format.
+ *
+ * \param bufferDER A valid pointer to the buffer containing the DER description.
+ * \param lenDER    The length in bytes of the DER description of the certificate.
+ * \param ppCRL     Creation: a valid handle which will point to the newly created CRL.
+ *                  Addition: a pointer to a pointer to a CRL list to which add the CRL.
+ *                  In either cases, this object must be freed with a call to SOPC_KeyManager_CRL_Free().
+ *
+ * \note            Content of the CRL is unspecified when return value is not SOPC_STATUS_OK.
+ *                  However, in case of a failed addition, the whole CRL list is freed,
+ *                  and \p ppCert set to NULL to avoid double frees.
+ *
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
+ *                  and SOPC_STATUS_NOK when there was an error.
+ */
+SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromDER(const uint8_t* bufferDER,
+                                                         uint32_t lenDER,
+                                                         SOPC_CRLList** ppCRL);
+
+/**
+ * \brief           Creates a new Certificate Revocation List (CRL) from a file in the DER or PEM format,
+ *                  or add it to an existing CRL list.
+ *
+ *                  \p szPath is the path to the file containing the key. It should be zero-terminated.
+ *                  The key may be described in the DER of PEM format.
+ *
+ * \param szPath    The path to the DER/PEM file.
+ * \param ppCRL     Creation: a valid handle which will point to the newly created CRL.
+ *                  Addition: a pointer to a pointer to a CRL list to which add the CRL.
+ *                  In either cases, this object must be freed with a call to SOPC_KeyManager_CRL_Free().
+ *
+ * \note            Content of the certificate is unspecified when return value is not SOPC_STATUS_OK.
+ *                  However, in case of a failed addition, the whole CRL list is freed,
+ *                  and \p ppCert set to NULL to avoid double frees.
+ *
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
+ *                  and SOPC_STATUS_NOK when there was an error.
+ */
+SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromFile(const char* szPath, SOPC_CRLList** ppCRL);
+
+/**
+ * \brief           Frees a Certificate created with SOPC_KeyManager_CRL_CreateOrAddFromFile() or
+ *                  SOPC_KeyManager_CRL_CreateOrAddFromDER()
+ *
+ * \param pCRL      The CRL to free.
+ */
+void SOPC_KeyManager_CRL_Free(SOPC_CRLList* pCRL);
+
 #endif /* SOPC_KEY_MANAGER_H_ */

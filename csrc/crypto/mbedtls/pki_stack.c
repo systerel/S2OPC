@@ -216,6 +216,7 @@ static void PKIProviderStack_Free(SOPC_PKIProvider* pPKI)
     }
 
     SOPC_KeyManager_Certificate_Free(pPKI->pUserCertAuthList);
+    SOPC_KeyManager_CRL_Free(pPKI->pUserCertRevocList);
     SOPC_Free(pPKI);
 }
 
@@ -296,8 +297,7 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathCA, char** l
     cur = *lPathCRL;
     while (NULL != cur && SOPC_STATUS_OK == status)
     {
-        /* TODO: first create the CRL API */
-        status = SOPC_STATUS_OK;
+        status = SOPC_KeyManager_CRL_CreateOrAddFromFile(cur, &crl);
         ++lPathCRL;
         cur = *lPathCRL;
     }
@@ -320,7 +320,7 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathCA, char** l
     else
     {
         SOPC_KeyManager_Certificate_Free(ca);
-        /* TODO: CRL Free */
+        SOPC_KeyManager_CRL_Free(crl);
     }
 
     return status;
