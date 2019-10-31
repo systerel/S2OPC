@@ -21,7 +21,7 @@
 
  File Name            : call_method_mgr.h
 
- Date                 : 28/10/2019 11:36:46
+ Date                 : 06/11/2019 09:07:36
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -38,6 +38,7 @@
 /*-----------------
    IMPORTS Clause
   -----------------*/
+#include "argument_pointer_bs.h"
 #include "call_method_bs.h"
 #include "call_method_it.h"
 #include "call_method_result_it.h"
@@ -63,16 +64,23 @@ extern void call_method_mgr__INITIALISATION(void);
 /*--------------------------
    LOCAL_OPERATIONS Clause
   --------------------------*/
-extern void call_method_mgr__check_exec_result(
+extern void call_method_mgr__check_method_call_arguments(
    const constants__t_msg_i call_method_mgr__p_req_msg,
    const constants__t_CallMethod_i call_method_mgr__p_callMethod,
+   const constants__t_Node_i call_method_mgr__p_method_node,
+   const constants__t_msg_i call_method_mgr__p_res_msg,
    constants_statuscodes_bs__t_StatusCode_i * const call_method_mgr__StatusCode);
 extern void call_method_mgr__check_method_call_inputs(
    const constants__t_session_i call_method_mgr__p_session,
    const constants__t_msg_i call_method_mgr__p_req_msg,
    const constants__t_CallMethod_i call_method_mgr__p_callMethod,
+   const constants__t_msg_i call_method_mgr__p_res_msg,
    constants_statuscodes_bs__t_StatusCode_i * const call_method_mgr__StatusCode);
-extern void call_method_mgr__check_nodeId(
+extern void call_method_mgr__check_method_call_one_arguments(
+   const constants__t_Variant_i call_method_mgr__p_value,
+   const constants__t_Argument_i call_method_mgr__p_arg,
+   constants_statuscodes_bs__t_StatusCode_i * const call_method_mgr__StatusCode);
+extern void call_method_mgr__check_nodeId_isValid(
    const constants__t_NodeId_i call_method_mgr__nodeid,
    constants_statuscodes_bs__t_StatusCode_i * const call_method_mgr__statusCode,
    constants__t_Node_i * const call_method_mgr__node);

@@ -260,6 +260,20 @@ OPERATIONS
     END
     ;
     
+    free_CallMethod_Res_InputArgument(p_res_msg, callMethod) =
+    PRE
+        p_res_msg : t_msg_i   &
+        p_res_msg = c_msg_out &
+        card(CallMethods) > 0       &
+        callMethod : t_CallMethod_i &
+        callMethod : CallMethods    &
+        callMethod : dom(CallMethodRes_InputArgumentResult)
+    THEN
+        CallMethodRes_AllocatedInputArgumentResult(callMethod) := 0 ||
+        CallMethodRes_InputArgumentResult(callMethod) := {}
+    END
+    ;
+    
     write_CallMethod_Res_InputArgumentResult(p_res_msg, callMethod, index, statusCode) =
     PRE
         p_res_msg : t_msg_i &
@@ -286,7 +300,7 @@ OPERATIONS
         card(CallMethods) > 0       &
         callMethod : t_CallMethod_i &
         callMethod : CallMethods    &
-        callMethod : dom(CallMethodRes_InputArgumentResult) &
+        callMethod : dom(CallMethodRes_OutputArgument) &
         nb         : NAT1 /* TODO check max size ? */
     THEN
         CallMethodRes_AllocatedOutputArgument,
@@ -318,7 +332,7 @@ OPERATIONS
         card(CallMethods) > 0       &
         callMethod : t_CallMethod_i &
         callMethod : CallMethods    &
-        callMethod : dom(CallMethodRes_InputArgumentResult)
+        callMethod : dom(CallMethodRes_OutputArgument)
     THEN
         CallMethodRes_AllocatedOutputArgument(callMethod) := 0 ||
         CallMethodRes_OutputArgument(callMethod) := {}
@@ -337,6 +351,7 @@ OPERATIONS
         callMethod : dom(CallMethodRes_OutputArgument) &
         index      : NAT1           &
         index      = size(CallMethodRes_OutputArgument(callMethod)) + 1 &
+        index      <= CallMethodRes_AllocatedOutputArgument(callMethod) &
         value : t_Variant_i &
         value : t_Variant
     THEN

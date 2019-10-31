@@ -19,16 +19,16 @@
 
 /******************************************************************************
 
- File Name            : address_space_typing_bs.h
+ File Name            : argument_pointer_bs.h
 
- Date                 : 04/11/2019 18:07:54
+ Date                 : 31/10/2019 16:26:42
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
 ******************************************************************************/
 
-#ifndef _address_space_typing_bs_h
-#define _address_space_typing_bs_h
+#ifndef _argument_pointer_bs_h
+#define _argument_pointer_bs_h
 
 /*--------------------------
    Added by the Translator
@@ -39,29 +39,28 @@
    SEES Clause
   --------------*/
 #include "constants.h"
+#include "constants_statuscodes_bs.h"
 
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
-extern void address_space_typing_bs__INITIALISATION(void);
+extern void argument_pointer_bs__INITIALISATION(void);
 
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-extern void address_space_typing_bs__check_object_has_method(
-   const constants__t_NodeId_i address_space_typing_bs__p_object,
-   const constants__t_NodeId_i address_space_typing_bs__p_method,
-   t_bool * const address_space_typing_bs__p_bool);
-extern void address_space_typing_bs__is_compatible_simple_type_or_enumeration(
-   const constants__t_NodeId_i address_space_typing_bs__p_value_type,
-   const constants__t_NodeId_i address_space_typing_bs__p_data_type,
-   t_bool * const address_space_typing_bs__bres);
-extern void address_space_typing_bs__is_transitive_subtype(
-   const constants__t_NodeId_i address_space_typing_bs__p_subtype,
-   const constants__t_NodeId_i address_space_typing_bs__p_parent_type,
-   t_bool * const address_space_typing_bs__bres);
-extern void address_space_typing_bs__is_valid_ReferenceTypeId(
-   const constants__t_NodeId_i address_space_typing_bs__p_nodeId,
-   t_bool * const address_space_typing_bs__bres);
+extern void argument_pointer_bs__read_argument_type(
+   const constants__t_Argument_i argument_pointer_bs__p_arg,
+   constants__t_NodeId_i * const argument_pointer_bs__p_type);
+extern void argument_pointer_bs__read_argument_valueRank(
+   const constants__t_Argument_i argument_pointer_bs__p_arg,
+   t_entier4 * const argument_pointer_bs__p_vr);
+extern void argument_pointer_bs__read_variant_argument(
+   const constants__t_Variant_i argument_pointer_bs__p_variant,
+   const t_entier4 argument_pointer_bs__p_index,
+   constants__t_Argument_i * const argument_pointer_bs__p_arg);
+extern void argument_pointer_bs__read_variant_nb_argument(
+   const constants__t_Variant_i argument_pointer_bs__p_variant,
+   t_entier4 * const argument_pointer_bs__p_nb);
 
 #endif

@@ -75,8 +75,8 @@ struct SOPC_MethodCallFunc
     void* pParam;
 };
 
-/* Type of the function to freed a SOPC_MethodCallManager */
-typedef void (*SOPC_MethodCallManager_Free_Func)(SOPC_MethodCallManager* mcm);
+/* Type of the function to freed SOPC_MethodCallManager internal data */
+typedef void (*SOPC_MethodCallManager_Free_Func)(void* data);
 
 /* Type of the function to get a C function associated to a SOPC_NodeId of a Method */
 typedef SOPC_MethodCallFunc* (*SOPC_MethodCallManager_Get_Func)(SOPC_MethodCallManager* mcm, SOPC_NodeId* methodId);
@@ -118,11 +118,17 @@ struct SOPC_MethodCallManager
 
 /**
  * \brief Provide a basic implementation of MethodCallManager.
- * This implementation can be used with SOPC_MethodCallManager_AddMethod to
+ * This implementation can be used with SOPC_MethodCallManager_AddMethod to add method
  *
  * \return a valid SOPC_MethodCallManager pointer or NULL on memory allocation failure.
  */
 SOPC_MethodCallManager* SOPC_MethodCallManager_Create(void);
+
+/**
+ * \brief Free MethodCallManager create with SOPC_MethodCallManager_Create.
+ *
+ */
+void SOPC_MethodCallManager_Free(SOPC_MethodCallManager* mcm);
 
 /**
  * \brief Associate a C function to a NodeId of a Method.

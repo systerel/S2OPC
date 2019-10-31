@@ -31,7 +31,8 @@ DEFINITIONS
         Type_IsTransitiveSubtype,
         Type_IsCompatSimpleTypeOrEnumeration,
         Type_IsIncludedValueRank,
-        Type_IsReferenceTypeIdValid
+        Type_IsReferenceTypeIdValid,
+        Object_HasMethod
     ;
 
     d_inv ==
@@ -40,7 +41,8 @@ DEFINITIONS
         Type_IsTransitiveSubtype : t_NodeId <-> t_NodeId &
         Type_IsCompatSimpleTypeOrEnumeration : t_NodeId <-> t_NodeId &
         Type_IsIncludedValueRank : NAT1 \/ {-1} <-> INT &
-        Type_IsReferenceTypeIdValid <: t_NodeId
+        Type_IsReferenceTypeIdValid <: t_NodeId &
+        Object_HasMethod : t_NodeId <-> t_NodeId
 
 ABSTRACT_VARIABLES
     d_variables

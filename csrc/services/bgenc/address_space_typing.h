@@ -21,7 +21,7 @@
 
  File Name            : address_space_typing.h
 
- Date                 : 11/10/2019 10:52:49
+ Date                 : 04/11/2019 18:07:35
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -53,6 +53,7 @@ extern void address_space_typing__INITIALISATION(void);
 /*-------------------------------
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
+#define address_space_typing__check_object_has_method address_space_typing_bs__check_object_has_method
 #define address_space_typing__is_transitive_subtype address_space_typing_bs__is_transitive_subtype
 #define address_space_typing__is_valid_ReferenceTypeId address_space_typing_bs__is_valid_ReferenceTypeId
 

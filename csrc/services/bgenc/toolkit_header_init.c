@@ -21,7 +21,7 @@
 
  File Name            : toolkit_header_init.c
 
- Date                 : 23/10/2019 09:09:42
+ Date                 : 31/10/2019 16:26:59
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -41,6 +41,7 @@
 #include "address_space_local.h"
 #include "address_space_typing.h"
 #include "address_space_typing_bs.h"
+#include "argument_pointer_bs.h"
 #include "browse_treatment.h"
 #include "browse_treatment_1.h"
 #include "browse_treatment_context.h"
@@ -234,6 +235,7 @@ void INITIALISATION(void) {
    msg_call_method_bs__INITIALISATION();
    call_method_it__INITIALISATION();
    call_method_result_it__INITIALISATION();
+   argument_pointer_bs__INITIALISATION();
    call_method_mgr__INITIALISATION();
    service_mgr__INITIALISATION();
    io_dispatch_mgr__INITIALISATION();

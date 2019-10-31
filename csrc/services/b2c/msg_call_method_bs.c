@@ -129,7 +129,7 @@ void msg_call_method_bs__alloc_CallMethod_Res_OutputArgument(
         result->NoOfOutputArguments = 0;
         return;
     }
-    result->NoOfOutputArguments = msg_call_method_bs__nb;
+    result->NoOfOutputArguments = 0; /* number of copied elements */
     *msg_call_method_bs__statusCode = constants_statuscodes_bs__e_sc_ok;
 }
 
@@ -160,13 +160,30 @@ void msg_call_method_bs__alloc_CallMethod_Result(
     }
 }
 
+void msg_call_method_bs__free_CallMethod_Res_InputArgument(
+    const constants__t_msg_i msg_call_method_bs__p_res_msg,
+    const constants__t_CallMethod_i msg_call_method_bs__callMethod)
+{
+    OpcUa_CallMethodResult* result =
+        msg_call_method_bs__getCallResult(msg_call_method_bs__p_res_msg, msg_call_method_bs__callMethod);
+
+    SOPC_Free(result->InputArgumentResults);
+    result->InputArgumentResults = NULL;
+    result->NoOfInputArgumentResults = 0;
+}
+
 void msg_call_method_bs__free_CallMethod_Res_OutputArgument(
     const constants__t_msg_i msg_call_method_bs__p_res_msg,
     const constants__t_CallMethod_i msg_call_method_bs__callMethod)
 {
     OpcUa_CallMethodResult* result =
         msg_call_method_bs__getCallResult(msg_call_method_bs__p_res_msg, msg_call_method_bs__callMethod);
+    for (int i = 0; i < result->NoOfOutputArguments; i++)
+    {
+        SOPC_Variant_Clear(&result->OutputArguments[i]);
+    }
     SOPC_Free(result->OutputArguments);
+    result->OutputArguments = NULL;
     result->NoOfOutputArguments = 0;
 }
 
@@ -245,7 +262,8 @@ void msg_call_method_bs__write_CallMethod_Res_InputArgumentResult(
         msg_call_method_bs__getCallResult(msg_call_method_bs__p_res_msg, msg_call_method_bs__callMethod);
     /* ensured by B model */
     assert(0 < msg_call_method_bs__index && msg_call_method_bs__index <= result->NoOfInputArgumentResults);
-    result->InputArgumentResults[msg_call_method_bs__index - 1] = msg_call_method_bs__statusCode;
+    util_status_code__B_to_C(msg_call_method_bs__statusCode,
+                             &result->InputArgumentResults[msg_call_method_bs__index - 1]);
 }
 
 void msg_call_method_bs__write_CallMethod_Res_OutputArgument(
@@ -260,9 +278,13 @@ void msg_call_method_bs__write_CallMethod_Res_OutputArgument(
     OpcUa_CallMethodResult* result =
         msg_call_method_bs__getCallResult(msg_call_method_bs__p_res_msg, msg_call_method_bs__callMethod);
     /* ensured by B model */
-    assert(0 < msg_call_method_bs__index && msg_call_method_bs__index <= result->NoOfOutputArguments);
+    assert(0 < msg_call_method_bs__index && msg_call_method_bs__index == result->NoOfOutputArguments + 1);
     SOPC_StatusCode status =
         SOPC_Variant_Copy(&result->OutputArguments[msg_call_method_bs__index - 1], msg_call_method_bs__value);
+    if (SOPC_STATUS_OK == status)
+    {
+        result->NoOfOutputArguments++;
+    }
     util_status_code__C_to_B(status, msg_call_method_bs__statusCode);
 }
 

@@ -23,6 +23,7 @@
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
+// Use when clear internal Dict
 static void SOPC_MethodCallManager_Free_MF(void* data)
 {
     if (NULL == data)
@@ -32,32 +33,23 @@ static void SOPC_MethodCallManager_Free_MF(void* data)
 
     SOPC_MethodCallFunc* mf = (SOPC_MethodCallFunc*) data;
 
-    if (NULL == mf->pFnFree || NULL == mf->pParam)
+    if (NULL != mf->pFnFree && NULL != mf->pParam)
     {
-        return;
+        mf->pFnFree(mf->pParam);
     }
 
     mf->pMethodFunc = NULL;
-    mf->pFnFree(mf->pParam);
     mf->pParam = NULL;
     SOPC_Free(mf);
 }
 
-static void SOPC_MethodCallManager_Free(SOPC_MethodCallManager* mcm)
+static void SOPC_MethodCallManager_InternalData_Free(void* data)
 {
-    if (NULL == mcm)
+    if (NULL == data)
     {
         return;
     }
-    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-    *(SOPC_MethodCallManager_Free_Func*) (&mcm->pFnFree) = NULL;
-    *(SOPC_MethodCallManager_Get_Func*) (&mcm->pFnGetMethod) = NULL;
-    SOPC_GCC_DIAGNOSTIC_RESTORE
-    if (NULL != mcm->pUserData)
-    {
-        SOPC_Dict_Delete(mcm->pUserData);
-        mcm->pUserData = NULL;
-    }
+    SOPC_Dict_Delete((SOPC_Dict*) data);
 }
 
 static SOPC_MethodCallFunc* SOPC_MethodCallManager_Get(SOPC_MethodCallManager* mcm, SOPC_NodeId* methodId)
@@ -88,12 +80,31 @@ SOPC_MethodCallManager* SOPC_MethodCallManager_Create()
     else
     {
         SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-        *(SOPC_MethodCallManager_Free_Func*) (&mcm->pFnFree) = &SOPC_MethodCallManager_Free;
+        *(SOPC_MethodCallManager_Free_Func*) (&mcm->pFnFree) = &SOPC_MethodCallManager_InternalData_Free;
         *(SOPC_MethodCallManager_Get_Func*) (&mcm->pFnGetMethod) = &SOPC_MethodCallManager_Get;
         SOPC_GCC_DIAGNOSTIC_RESTORE
     }
 
     return mcm;
+}
+
+void SOPC_MethodCallManager_Free(SOPC_MethodCallManager* mcm)
+{
+    if (NULL == mcm)
+    {
+        return;
+    }
+    if (NULL != mcm->pFnFree && NULL != mcm->pUserData)
+    {
+        mcm->pFnFree(mcm->pUserData);
+    }
+
+    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+    *(SOPC_MethodCallManager_Free_Func*) (&mcm->pFnFree) = NULL;
+    *(SOPC_MethodCallManager_Get_Func*) (&mcm->pFnGetMethod) = NULL;
+    SOPC_GCC_DIAGNOSTIC_RESTORE
+    mcm->pUserData = NULL;
+    SOPC_Free(mcm);
 }
 
 SOPC_ReturnStatus SOPC_MethodCallManager_AddMethod(SOPC_MethodCallManager* mcm,
@@ -120,6 +131,10 @@ SOPC_ReturnStatus SOPC_MethodCallManager_AddMethod(SOPC_MethodCallManager* mcm,
         bool b = SOPC_Dict_Insert(dict, methodId, wrapper);
         if (false == b)
         {
+            wrapper->pFnFree = NULL;
+            wrapper->pMethodFunc = NULL;
+            wrapper->pParam = NULL;
+            SOPC_Free(wrapper);
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
     }
