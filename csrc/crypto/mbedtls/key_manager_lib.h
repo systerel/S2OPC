@@ -75,10 +75,10 @@ struct SOPC_CertificateList
  *          Each revocation list in the list is associated to one certificate authority in the
  *          trusted certificate chain.
  */
-typedef struct SOPC_CRLList
+struct SOPC_CRLList
 {
     mbedtls_x509_crl crl;
-} SOPC_CRLList;
+};
 
 /**
  * \brief           Returns the internal public key of the given signed public key.

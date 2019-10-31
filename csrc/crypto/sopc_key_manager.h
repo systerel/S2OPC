@@ -164,6 +164,50 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_ToDER(const SOPC_AsymmetricKey* 
                                                       uint32_t lenDest,
                                                       uint32_t* pLenWritten);
 
+/**
+ * \brief Creates a serialized asymmetric key from a DER or PEM payload.
+ *
+ * \param data   the key data in DER or PEM format
+ * \param len   length of the data
+ * \param key  out parameter, the created serialized key
+ *
+ * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
+ */
+SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_CreateFromData(const uint8_t* data,
+                                                                         uint32_t len,
+                                                                         SOPC_SerializedAsymmetricKey** key);
+
+/**
+ * \brief Creates a serialized asymmetric key from a file in DER or PEM format.
+ *
+ * \param path  path to the file
+ * \param key   out parameter, the created serialized key
+ *
+ * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
+ */
+SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(const char* path,
+                                                                         SOPC_SerializedAsymmetricKey** key);
+
+/**
+ * \brief Deserializes a serialized key.
+ *
+ * \param key        the serialized key
+ * \param is_public  whether the serialized key is a public or a private key
+ * \param res        out parameter, the decoded key as a newly allocated SOPC_AsymmetricKey
+ *
+ * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
+ */
+SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_Deserialize(const SOPC_SerializedAsymmetricKey* key,
+                                                                      bool is_public,
+                                                                      SOPC_AsymmetricKey** res);
+
+/**
+ * \brief Releases all resources associated to a serialized asymmetric key.
+ *
+ * \param key  The serialized key
+ */
+void SOPC_KeyManager_SerializedAsymmetricKey_Delete(SOPC_SerializedAsymmetricKey* key);
+
 /* ------------------------------------------------------------------------------------------------
  * Cert API
  * ------------------------------------------------------------------------------------------------
@@ -182,6 +226,8 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_ToDER(const SOPC_AsymmetricKey* 
  *                  In either cases, this object must be freed with a call to SOPC_KeyManager_Certificate_Free().
  *
  * \note            Content of the certificate is unspecified when return value is not SOPC_STATUS_OK.
+ *                  However, in case of a failed addition, the whole certificate list is freed,
+ *                  and \p ppCert set to NULL to avoid double frees.
  *
  * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
  *                  and SOPC_STATUS_NOK when there was an error.
@@ -203,6 +249,8 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromDER(const uint8_t* 
  *                  In either cases, this object must be freed with a call to SOPC_KeyManager_Certificate_Free().
  *
  * \note            Content of the certificate is unspecified when return value is not SOPC_STATUS_OK.
+ *                  However, in case of a failed addition, the whole certificate list is freed,
+ *                  and \p ppCert set to NULL to avoid double frees.
  *
  * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
  *                  and SOPC_STATUS_NOK when there was an error.
@@ -319,55 +367,6 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetMaybeApplicationUri(const SOPC_
  * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL.
  */
 SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetListLength(const SOPC_CertificateList* pCert, size_t* pLength);
-
-/* ------------------------------------------------------------------------------------------------
- * Serialization/Deserialization API
- * ------------------------------------------------------------------------------------------------
- */
-
-/**
- * \brief Creates a serialized asymmetric key from a DER or PEM payload.
- *
- * \param data   the key data in DER or PEM format
- * \param len   length of the data
- * \param key  out parameter, the created serialized key
- *
- * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
- */
-SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_CreateFromData(const uint8_t* data,
-                                                                         uint32_t len,
-                                                                         SOPC_SerializedAsymmetricKey** key);
-
-/**
- * \brief Creates a serialized asymmetric key from a file in DER or PEM format.
- *
- * \param path  path to the file
- * \param key   out parameter, the created serialized key
- *
- * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
- */
-SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(const char* path,
-                                                                         SOPC_SerializedAsymmetricKey** key);
-
-/**
- * \brief Deserializes a serialized key.
- *
- * \param key        the serialized key
- * \param is_public  whether the serialized key is a public or a private key
- * \param res        out parameter, the decoded key as a newly allocated SOPC_AsymmetricKey
- *
- * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
- */
-SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_Deserialize(const SOPC_SerializedAsymmetricKey* key,
-                                                                      bool is_public,
-                                                                      SOPC_AsymmetricKey** res);
-
-/**
- * \brief Releases all resources associated to a serialized asymmetric key.
- *
- * \param key  The serialized key
- */
-void SOPC_KeyManager_SerializedAsymmetricKey_Delete(SOPC_SerializedAsymmetricKey* key);
 
 /**
  * \brief Creates a serialized certificate from a DER payload.
