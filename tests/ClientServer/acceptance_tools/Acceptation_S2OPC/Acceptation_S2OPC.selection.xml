@@ -174,6 +174,23 @@
     </TestCases>
    </ConformanceUnit>
   </ConformanceGroup>
+  <ConformanceGroup name="Method Services">
+   <ConformanceUnit name="Method Call">
+    <TestCases>
+     <TestCase name="001.js"/>
+     <TestCase name="002.js"/>
+     <TestCase name="003.js"/>
+     <TestCase name="004.js"/>
+     <TestCase name="005.js"/>
+     <TestCase name="006.js"/>
+     <TestCase name="016.js"/>
+     <TestCase name="Err-001.js"/>
+     <TestCase name="Err-002.js"/>
+     <TestCase name="Err-003.js"/>
+     <TestCase name="Err-004.js"/>
+    </TestCases>
+   </ConformanceUnit>
+  </ConformanceGroup>
   <ConformanceGroup name="Monitored Item Services">
    <ConformanceUnit name="Monitor Basic">
     <TestCases>

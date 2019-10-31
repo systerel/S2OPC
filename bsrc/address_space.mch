@@ -53,7 +53,13 @@ DEFINITIONS
         /* Types */
         Type_IsTransitiveSubtype,
         Type_IsReferenceTypeIdValid,
-
+        
+       	/* Objects */
+       	Object_HasMethod,
+       	
+        Variant_LocalDataType,
+        Variant_ValueRank,
+        
         /* References */
         Reference_SourceNode,
         Reference_ReferenceType,
@@ -129,6 +135,12 @@ DEFINITIONS
         /* Types */
         Type_IsTransitiveSubtype : t_NodeId <-> t_NodeId &
         Type_IsReferenceTypeIdValid <: t_NodeId &
+        
+        /* Objects */
+        Object_HasMethod : t_NodeId <-> t_NodeId &
+		
+		Variant_LocalDataType : t_Variant --> t_NodeId &
+        Variant_ValueRank : t_Variant --> t_ConcreteValueRank &
 
         /* Special reference (see def) */
         Ref_HasTypeDefinition : t_Node +-> t_ExpandedNodeId &
@@ -594,5 +606,59 @@ OPERATIONS
     THEN
         p_bool := a_Executable(p_node)
     END
+    ;
     
+    p_input_arg <-- get_InputArguments(p_node) =
+    PRE
+        p_node : t_Node_i &
+        p_node : dom(a_NodeClass) &
+        a_NodeClass(p_node) = e_ncl_Method
+    THEN
+        p_input_arg :: t_Variant_i
+    END
+    ;
+    
+    p_valueRank <-- get_conv_Variant_ValueRank(p_variant) =
+    PRE
+        p_variant : t_Variant_i &
+        p_variant : t_Variant 
+    THEN
+        p_valueRank := Variant_ValueRank(p_variant)
+    END
+    ;
+    
+    p_type <-- get_conv_Variant_Type(p_variant) =
+    PRE
+        p_variant : t_Variant_i &
+        p_variant : t_Variant
+    THEN
+        p_type :( p_type : t_NodeId_i & p_type = Variant_LocalDataType(p_variant))
+    END
+    ;
+    
+    /* Computes if DataValue has a compatible type or compatible subtype */
+    btyp_ok, btyp_need_conv <-- read_variable_compat_type(p_dv_typ_nid, p_dv_vr, p_var_typ_nid, p_var_vr) =
+    PRE
+        p_dv_typ_nid : t_NodeId_i &
+        p_dv_vr : t_ConcreteValueRank &
+        p_var_typ_nid : t_NodeId_i &
+        p_var_typ_nid : t_NodeId &
+        p_var_vr : t_ValueRank
+    THEN
+        btyp_ok :: BOOL ||
+        btyp_need_conv :: BOOL
+    END
+    ;
+
+    p_bool <-- check_object_has_method(p_object, p_method) =
+    PRE
+        p_method : t_NodeId_i &
+        p_method : t_NodeId   &
+		p_object : t_NodeId_i &
+        p_object : t_NodeId
+    THEN
+        p_bool := bool(p_object |-> p_method : Object_HasMethod)
+    END
+
+
 END

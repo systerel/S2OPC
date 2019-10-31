@@ -44,11 +44,10 @@ void call_method_bs__INITIALISATION(void) {}
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-extern void call_method_bs__exec_callMethod(
-    const constants__t_msg_i call_method_bs__p_req_msg,
-    const constants__t_CallMethod_i call_method_bs__p_callMethod,
-    const constants__t_endpoint_config_idx_i call_method_bs__p_endpoint_config_idx,
-    constants_statuscodes_bs__t_StatusCode_i* const call_method_bs__statusCode)
+void call_method_bs__exec_callMethod(const constants__t_msg_i call_method_bs__p_req_msg,
+                                     const constants__t_CallMethod_i call_method_bs__p_callMethod,
+                                     const constants__t_endpoint_config_idx_i call_method_bs__p_endpoint_config_idx,
+                                     constants_statuscodes_bs__t_StatusCode_i* const call_method_bs__statusCode)
 {
     /* Do not call before the memory is freed */
     assert(0 == call_method_bs__execResults.nb && NULL == call_method_bs__execResults.variants);

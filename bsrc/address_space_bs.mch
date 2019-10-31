@@ -828,5 +828,33 @@ OPERATIONS
     THEN
         bres := IsRangeDefined(p_index_range)
     END
+    ;
+    
+    p_input_arg <-- get_InputArguments(p_node) =
+    PRE
+        p_node : t_Node_i &
+        p_node : dom(a_NodeClass) &
+        a_NodeClass(p_node) = e_ncl_Method
+    THEN
+        p_input_arg :: t_Variant_i
+    END
+    ;
+    
+    p_valueRank <-- get_conv_Variant_ValueRank(p_variant) =
+    PRE
+        p_variant : t_Variant_i &
+        p_variant : t_Variant 
+    THEN
+        p_valueRank :: t_ConcreteValueRank
+    END
+    ;
+    
+    p_type <-- get_conv_Variant_Type(p_variant) =
+    PRE
+        p_variant : t_Variant_i &
+        p_variant : t_Variant
+    THEN
+        p_type :: t_NodeId_i
+    END
 
 END

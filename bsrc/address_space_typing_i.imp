@@ -31,7 +31,8 @@ IMPORTS
 
 PROMOTES
     is_transitive_subtype,
-    is_valid_ReferenceTypeId
+    is_valid_ReferenceTypeId,
+    check_object_has_method
 
 OPERATIONS
 

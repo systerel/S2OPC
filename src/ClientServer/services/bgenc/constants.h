@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 18/02/2020 10:34:38
+ Date                 : 18/02/2020 10:56:51
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -43,6 +43,7 @@
 /*-----------------------------
    SETS Clause: deferred sets
   -----------------------------*/
+#define constants__t_Argument_i constants_bs__t_Argument_i
 #define constants__t_ArrayDimensions_i constants_bs__t_ArrayDimensions_i
 #define constants__t_BrowseNodeClassMask_i constants_bs__t_BrowseNodeClassMask_i
 #define constants__t_BrowsePath_i constants_bs__t_BrowsePath_i
@@ -303,6 +304,7 @@ typedef enum {
 /*--------------------------
    Added by the Translator
   --------------------------*/
+#define constants__t_Argument_i_max constants_bs__t_Argument_i_max
 #define constants__t_ArrayDimensions_i_max constants_bs__t_ArrayDimensions_i_max
 #define constants__t_BrowseNodeClassMask_i_max constants_bs__t_BrowseNodeClassMask_i_max
 #define constants__t_BrowsePath_i_max constants_bs__t_BrowsePath_i_max
@@ -368,6 +370,7 @@ typedef enum {
 /*------------------------------------------------
    CONCRETE_CONSTANTS Clause: scalars and arrays
   ------------------------------------------------*/
+#define constants__c_Argument_indet constants_bs__c_Argument_indet
 #define constants__c_ArrayDimensions_indet constants_bs__c_ArrayDimensions_indet
 #define constants__c_BrowseNodeClassMask_indet constants_bs__c_BrowseNodeClassMask_indet
 #define constants__c_BrowseResultMask_all constants_bs__c_BrowseResultMask_all

@@ -25,15 +25,18 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "address_space_bs.h"
 #include "b2c.h"
+#include "util_address_space.h"
 
 #include "address_space_impl.h"
 #include "opcua_identifiers.h"
 #include "sopc_builtintypes.h"
 #include "sopc_dict.h"
 #include "sopc_logger.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_numeric_range.h"
 #include "sopc_user_manager.h"
@@ -42,6 +45,10 @@
 
 bool sopc_addressSpace_configured = false;
 SOPC_AddressSpace* address_space_bs__nodes = NULL;
+
+#define sopc_address_space_bs__InputArguments_BrowseName "InputArguments"
+
+static bool is_inputArgument(const OpcUa_VariableNode* node);
 
 /*------------------------
    INITIALISATION Clause
@@ -232,9 +239,10 @@ void address_space_bs__read_AddressSpace_Executable_value(
     constants__t_Variant_i* const address_space_bs__variant)
 {
     assert(address_space_bs__p_node->node_class == OpcUa_NodeClass_Method);
+    bool executable;
     *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
-    // Note: always returns false since we do not implement method execution
-    *address_space_bs__variant = util_variant__new_Variant_from_Bool(false);
+    address_space_bs__get_Executable(address_space_bs__p_node, &executable);
+    *address_space_bs__variant = util_variant__new_Variant_from_Bool(executable);
     if (*address_space_bs__variant == NULL)
     {
         *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
@@ -944,36 +952,28 @@ void address_space_bs__get_ValueRank(const constants__t_Node_i address_space_bs_
     *address_space_bs__p_value_rank = *SOPC_AddressSpace_Get_ValueRank(address_space_bs__nodes, node);
 }
 
-static bool is_type_definition(const OpcUa_ReferenceNode* ref)
+static bool is_inputArgument(const OpcUa_VariableNode* node)
 {
-    if (ref->IsInverse)
+    if (NULL == node || &OpcUa_VariableNode_EncodeableType != node->encodeableType)
     {
         return false;
     }
 
-    return ref->ReferenceTypeId.IdentifierType == SOPC_IdentifierType_Numeric &&
-           ref->ReferenceTypeId.Data.Numeric == OpcUaId_HasTypeDefinition;
+    /* Type should be Argument */
+    if (!(SOPC_IdentifierType_Numeric == node->DataType.IdentifierType &&
+          OpcUaId_Argument == node->DataType.Data.Numeric))
+    {
+        return false;
+    }
+
+    return (strcmp(SOPC_String_GetRawCString(&node->BrowseName.Name),
+                   sopc_address_space_bs__InputArguments_BrowseName) == 0);
 }
 
 void address_space_bs__get_TypeDefinition(const constants__t_Node_i address_space_bs__p_node,
                                           constants__t_ExpandedNodeId_i* const address_space_bs__p_type_def)
 {
-    assert(NULL != address_space_bs__p_node);
-    SOPC_AddressSpace_Node* node = address_space_bs__p_node;
-    int32_t* n_refs = SOPC_AddressSpace_Get_NoOfReferences(address_space_bs__nodes, node);
-    OpcUa_ReferenceNode** refs = SOPC_AddressSpace_Get_References(address_space_bs__nodes, node);
-    *address_space_bs__p_type_def = constants__c_ExpandedNodeId_indet;
-
-    for (int32_t i = 0; i < *n_refs; ++i)
-    {
-        OpcUa_ReferenceNode* ref = &(*refs)[i];
-
-        if (is_type_definition(ref))
-        {
-            *address_space_bs__p_type_def = &ref->TargetId;
-            break;
-        }
-    }
+    util_get_TypeDefinition(address_space_bs__p_node, address_space_bs__p_type_def);
 }
 
 void address_space_bs__get_Reference_ReferenceType(const constants__t_Reference_i address_space_bs__p_ref,
@@ -1018,4 +1018,57 @@ void address_space_bs__get_RefIndex_Reference(const constants__t_Node_i address_
     assert(address_space_bs__p_ref_index <= *n_refs);
 
     *address_space_bs__p_ref = &(*refs)[address_space_bs__p_ref_index - 1];
+}
+
+void address_space_bs__get_InputArguments(const constants__t_Node_i address_space_bs__p_node,
+                                          constants__t_Variant_i* const address_space_bs__p_input_arg)
+{
+    assert(NULL != address_space_bs__p_node);
+    assert(NULL != address_space_bs__p_input_arg);
+
+    constants__t_Variant_i result = NULL;
+    t_entier4 indexEnd;
+    OpcUa_ReferenceNode* ref;
+    bool found;
+    SOPC_AddressSpace_Node* targetNode;
+
+    address_space_bs__get_Node_RefIndexEnd(address_space_bs__p_node, &indexEnd);
+
+    for (int i = 1; i <= indexEnd && NULL == result; i++)
+    { /* stop when input argument is found */
+        address_space_bs__get_RefIndex_Reference(address_space_bs__p_node, i, &ref);
+        if (is_property(ref))
+        {
+            if (ref->TargetId.ServerIndex == 0 && ref->TargetId.NamespaceUri.Length <= 0)
+            { // Shall be on same server and shall use only NodeId
+                targetNode = SOPC_AddressSpace_Get_Node(address_space_bs__nodes, &ref->TargetId.NodeId, &found);
+                if (found && NULL != targetNode && OpcUa_NodeClass_Variable == targetNode->node_class)
+                {
+                    if (is_inputArgument(&targetNode->data.variable))
+                    {
+                        result = &targetNode->data.variable.Value;
+                    }
+                }
+            }
+        }
+    }
+    *address_space_bs__p_input_arg = result;
+}
+
+void address_space_bs__get_conv_Variant_Type(const constants__t_Variant_i address_space_bs__p_variant,
+                                             constants__t_NodeId_i* const address_space_bs__p_type)
+{
+    assert(NULL != address_space_bs__p_variant);
+    assert(NULL != address_space_bs__p_type);
+    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+    *address_space_bs__p_type = (SOPC_NodeId*) SOPC_Variant_Get_DataType(address_space_bs__p_variant);
+    SOPC_GCC_DIAGNOSTIC_RESTORE
+}
+
+void address_space_bs__get_conv_Variant_ValueRank(const constants__t_Variant_i address_space_bs__p_variant,
+                                                  t_entier4* const address_space_bs__p_valueRank)
+{
+    assert(NULL != address_space_bs__p_variant);
+    assert(NULL != address_space_bs__p_valueRank);
+    *address_space_bs__p_valueRank = SOPC_Variant_Get_ValueRank(address_space_bs__p_variant);
 }

@@ -61,7 +61,11 @@ PROMOTES
     unset_local_service_treatment,
     write_WriteResponse_msg_out,
     get_user_authorization,
-    get_Executable
+    get_Executable,
+    get_InputArguments,
+    get_conv_Variant_ValueRank,
+    get_conv_Variant_Type,
+    check_object_has_method
 
 CONCRETE_VARIABLES
     ResponseWrite_allocated
@@ -727,7 +731,6 @@ OPERATIONS
                     l_user_write_auth <-- get_user_authorization(e_operation_type_write, p_nid, e_aid_Value, p_user);
                     sc, val <-- read_AddressSpace_UserAccessLevel_value(p_node, l_user_read_auth, l_user_write_auth)
                 OR e_aid_UserExecutable THEN
-                    /* TODO Fct applicatif  pour le Client S2OPC */
                     l_user_executable_auth <-- get_user_authorization(e_operation_type_executable, p_nid, e_aid_Executable, p_user);
                     sc, val <-- read_AddressSpace_UserExecutable_value(p_node, l_user_executable_auth)
                 OR e_aid_Value THEN
@@ -844,5 +847,8 @@ OPERATIONS
         ResponseWrite_allocated := FALSE;
         reset_ResponseWrite
     END
-
+    ;
+    
+    btyp_ok, btyp_need_conv <-- read_variable_compat_type(p_dv_typ_nid, p_dv_vr, p_var_typ_nid, p_var_vr) =
+	btyp_ok, btyp_need_conv <-- is_variable_compat_type(p_dv_typ_nid, p_dv_vr, p_var_typ_nid, p_var_vr)
 END

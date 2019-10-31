@@ -43,6 +43,7 @@ SETS
     t_RelativePath_i;
     t_RelativePathElt_i;
     t_CallMethod_i;
+    t_Argument_i;
     t_session_token_i;
     t_user_i;
     t_user_token_i;
@@ -161,7 +162,8 @@ CONCRETE_CONSTANTS
     c_browsePath_indet,
     c_RelativePath_indet,
     c_RelativePathElt_indet,
-    c_CallMethod_indet
+    c_CallMethod_indet,
+    c_Argument_indet
     
 ABSTRACT_CONSTANTS
 
@@ -181,6 +183,7 @@ ABSTRACT_CONSTANTS
     t_RelativePathElt,
     t_CallMethod,
     cast_t_CallMethod,
+    t_Argument,
     t_session_token,
     t_user,
     t_user_token,
@@ -464,8 +467,11 @@ PROPERTIES
     c_CallMethod_indet : t_CallMethod_i &
     c_CallMethod_indet /: t_CallMethod &
     cast_t_CallMethod : NAT +-> t_CallMethod_i &
-    cast_t_CallMethod : perm(t_CallMethod)
-
+    cast_t_CallMethod : perm(t_CallMethod) &
+    
+    t_Argument <: t_Argument_i &
+    c_Argument_indet : t_Argument_i &
+    c_Argument_indet /: t_Argument
 
 OPERATIONS
 
