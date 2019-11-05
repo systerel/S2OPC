@@ -159,7 +159,7 @@ static SOPC_ReturnStatus GenEndpoingConfig()
 
     if (SOPC_STATUS_OK == status)
     {
-        authenticationManager = SOPC_Calloc(1, sizeof(SOPC_UserAuthentication_Manager));
+        authenticationManager = SOPC_UserAuthentication_CreateManager_AllowAll();
         authorizationManager = SOPC_UserAuthorization_CreateManager_AllowAll();
         if (NULL == authenticationManager || NULL == authorizationManager)
         {
@@ -336,14 +336,32 @@ SOPC_ReturnStatus SOPC_EpConfig_serv()
 SOPC_ReturnStatus Teardown_serv()
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-
+    // Sleep timeout in milliseconds
+    const uint32_t sleepTimeout = 400;
+    // Loop timeout in milliseconds
+    const uint32_t loopTimeout = 3000;
+    // Counter to stop waiting on timeout
+    uint32_t loopCpt = 0;
 
     SOPC_ToolkitServer_AsyncCloseEndpoint(epConfigIdx);
+
+    /* Wait until ep is closed or timeout */
+    while (SOPC_Atomic_Int_Get(&scState) != SESSION_CONN_CLOSED && loopCpt * sleepTimeout <= loopTimeout)
+    {
+        loopCpt++;
+        // Retrieve received messages on socket
+        SOPC_Sleep(sleepTimeout);
+    }
+    if (loopCpt * sleepTimeout > loopTimeout)
+    {
+        status = SOPC_STATUS_TIMEOUT;
+    }
 
     // Clear the toolkit configuration and stop toolkit threads
 
     // Deallocate locally allocated data
     SOPC_AddressSpace_Delete(address_space);
+    address_space = NULL;
     if (true == secuActive)
     {
         SOPC_KeyManager_SerializedCertificate_Delete(ck_serv.Certificate);
@@ -352,10 +370,10 @@ SOPC_ReturnStatus Teardown_serv()
         SOPC_PKIProvider_Free(&(ck_serv).pkiProvider);
     }
 
-//    SOPC_UserAuthentication_FreeManager(&authenticationManager);
-//    SOPC_UserAuthorization_FreeManager(&authorizationManager);
+    SOPC_UserAuthentication_FreeManager(&authenticationManager);
+    SOPC_UserAuthorization_FreeManager(&authorizationManager);
 
     SOPC_Toolkit_Clear();
-    printf("all cleared\n");
+    printf("-------------All cleared-------------\n");
     return (status);
 }

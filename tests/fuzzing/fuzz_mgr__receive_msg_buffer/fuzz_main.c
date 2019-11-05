@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 #include <assert.h>
 #include <errno.h>
 #include <inttypes.h>
@@ -183,9 +182,9 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
 
     if (!init)
     {
-        // must be activated and deactivated depending
-        //        secuActive = false;
-        //        secuActive = true;
+//         must be activated and deactivated depending
+//                secuActive = false;
+//                secuActive = true;
         status = Setup_serv();
         if (SOPC_STATUS_NOK == status)
         {
@@ -219,6 +218,8 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
 
     if (true == init && SOPC_STATUS_OK == status)
     {
+//        if (SOPC_STATUS_OK == status)
+//        {
         char* buf_copy = SOPC_Calloc(1 + len, sizeof(char));
         assert(buf_copy != NULL);
 
@@ -243,6 +244,7 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
         }
 
         Teardown_client();
+//        Teardown_serv();
         SOPC_Free(buf_copy);
     }
     else
