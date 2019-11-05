@@ -679,6 +679,48 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetListLength(const SOPC_Certifica
     return SOPC_STATUS_OK;
 }
 
+/* Creates a new string: free the result */
+static char *get_raw_sha1(const mbedtls_x509_buf* raw)
+{
+    assert(NULL != crt);
+
+    /* Make SHA-1 thumbprint */
+    const mbedtls_md_info_t* pmd = mbedtls_md_info_from_type(MBEDTLS_MD_SHA1);
+    uint8_t pDest[20];
+
+    int err = mbedtls_md(pmd, raw->p, raw->len, pDest);
+    if (0 != err)
+    {
+        SOPC_Logger_TraceError("Cannot compute thumbprint of certificate, err=%i", err);
+        return NULL;
+    }
+
+    /* Poor-man's SHA-1 format */
+    char *ret = SOPC_Calloc(60, sizeof(char));
+    if(NULL == ret)
+    {
+        return NULL;
+    }
+    for (size_t i = 0; i < 20; ++i)
+    {
+        sprintf(ret+3*i, "%02X:", pDest[i]);
+    }
+    ret[59] = '\0';
+
+    return ret;
+}
+
+/* Creates a new string: free the result */
+static char *get_crt_sha1(const mbedtls_x509_crt* crt)
+{
+    return get_raw_sha1(&crt->raw);
+}
+/* Creates a new string: free the result */
+static char *get_crl_sha1(const mbedtls_x509_crl* crl)
+{
+    return get_raw_sha1(&crl->raw);
+}
+
 /* ------------------------------------------------------------------------------------------------
  * Certificate Revocation List API
  * ------------------------------------------------------------------------------------------------
