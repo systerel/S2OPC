@@ -483,6 +483,21 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
                 return false;
             }
         }
+        else if (strcmp("Executable", attr) == 0)
+        {
+            assert(OpcUa_NodeClass_Method == element_type);
+            if (OpcUa_NodeClass_Method != element_type)
+            {
+                LOG_XML_ERRORF(ctx->helper_ctx.parser,
+                               "Unexpected Executable attribute (value '%s') on node of class = %s", attrs[++i],
+                               tag_from_element_id(element_type));
+                return false;
+            }
+
+            const char* attr_val = attrs[++i];
+
+            ctx->node.data.method.Executable = (strcmp(attr_val, "true") == 0);
+        }
         else
         {
             ++i; // Skip value of unknown attribute

@@ -73,7 +73,7 @@ void SOPC_AddressSpace_Node_Initialize(SOPC_AddressSpace* space,
     OpcUa_NodeClass* nodeClass = SOPC_AddressSpace_Get_NodeClass(space, node);
     *nodeClass = node_class;
 
-    if (node_class == OpcUa_NodeClass_Variable)
+    if (OpcUa_NodeClass_Variable == node_class)
     {
         node->value_status = SOPC_GoodGenericStatus;
         /*Note: set an initial timestamp to return non null timestamps */
@@ -82,12 +82,16 @@ void SOPC_AddressSpace_Node_Initialize(SOPC_AddressSpace* space,
         node->data.variable.ValueRank = -1;
         node->data.variable.AccessLevel = 1;
     }
-    else if (node_class == OpcUa_NodeClass_VariableType)
+    else if (OpcUa_NodeClass_VariableType == node_class)
     {
         node->value_status = SOPC_GoodGenericStatus;
         node->value_source_ts.timestamp = 0;
         node->value_source_ts.picoSeconds = 0;
         node->data.variable_type.ValueRank = -1;
+    }
+    else if (OpcUa_NodeClass_Method == node_class)
+    {
+        node->data.method.Executable = true;
     }
     else
     {
