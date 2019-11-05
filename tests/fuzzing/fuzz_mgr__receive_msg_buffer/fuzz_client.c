@@ -355,12 +355,10 @@ SOPC_ReturnStatus Teardown_client()
 
     /* Close the session */
 	SessionConnectedState scStateCompare = SOPC_Atomic_Int_Get(&scState);
-    if (0 != session1_idx &&  scStateCompare != SESSION_CONN_CLOSED && scStateCompare != SESSION_CONN_FAILED && scStateCompare != SESSION_CONN_NEW)
+    if (0 != session1_idx && (scStateCompare == SESSION_CONN_MSG_RECEIVED || scStateCompare == SESSION_CONN_CONNECTED))
     {
         SOPC_ToolkitClient_AsyncCloseSession(session1_idx);
     }
-//    atomic set session ?session
     SOPC_Atomic_Int_Set((SessionConnectedState*) &scState, (SessionConnectedState) SESSION_CONN_NEW);
-    /* Wait until session is closed or timeout */
     return (status);
 }
