@@ -291,7 +291,7 @@ class VariableValue(object):
 
 class Node(object):
     __slots__ = 'tag', 'nodeid', 'browse_name', 'description', 'display_name', 'references',\
-                'idonly', 'value', 'data_type', 'value_rank', 'accesslevel'
+                'idonly', 'value', 'data_type', 'value_rank', 'accesslevel', 'executable'
 
     def __init__(self, tag, nodeid, browse_name, description, display_name, references):
         self.tag = tag
@@ -305,6 +305,7 @@ class Node(object):
         self.data_type = None
         self.value_rank = None
         self.accesslevel = None
+        self.executable = None
 
 
 class Reference(object):
@@ -891,6 +892,9 @@ def parse_uanode(xml_node, source, aliases):
             except ValueError:
                 raise ParseError('Non integer AccessLevel for node %s' % xml_node['NodeId'])
 
+    if xml_node.tag == UA_METHOD_TAG:
+        node.executable = (parse_boolean_value(xml_node.get('Executable', 'true')))
+
     return node
 
 
@@ -994,7 +998,8 @@ def generate_item_data_type(is_const_addspace, ua_node):
 
 
 def generate_item_method(is_const_addspace, ua_node):
-    return generate_item(is_const_addspace, ua_node, 'Method', 'method')
+    return generate_item(is_const_addspace, ua_node, 'Method', 'method',
+                         Executable= 'true' if ua_node.executable else 'false')
 
 
 GEN_ITEM_FUNCS = {
