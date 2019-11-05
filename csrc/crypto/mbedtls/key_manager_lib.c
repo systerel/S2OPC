@@ -715,11 +715,6 @@ static char *get_crt_sha1(const mbedtls_x509_crt* crt)
 {
     return get_raw_sha1(&crt->raw);
 }
-/* Creates a new string: free the result */
-static char *get_crl_sha1(const mbedtls_x509_crl* crl)
-{
-    return get_raw_sha1(&crl->raw);
-}
 
 /* ------------------------------------------------------------------------------------------------
  * Certificate Revocation List API
