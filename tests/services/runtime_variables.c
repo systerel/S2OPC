@@ -81,7 +81,8 @@ RuntimeVariables build_runtime_variables(SOPC_Build_Info build_info,
 
     SOPC_GCC_DIAGNOSTIC_RESTORE
 
-    status = SOPC_String_AttachFromCstring(&runtimeVariables.build_info.ProductName, "S2OPC");
+    status = SOPC_String_AttachFrom(&runtimeVariables.build_info.ProductName,
+                                    &server_config->serverDescription.ApplicationName.defaultText);
     assert(SOPC_STATUS_OK == status);
 
     status =
