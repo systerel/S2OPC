@@ -5,6 +5,11 @@
       <Namespace uri="urn:S2OPC:MY_SERVER_HOST"/>
       <Namespace uri="urn:S2OPC:MY_SERVER_HOST:2"/>
     </Namespaces>
+    <Locales>
+      <Locale id="en"/>
+      <Locale id="es-ES"/>
+      <Locale id="fr-FR"/>
+    </Locales>
     <ApplicationCertificates>
       <ServerCertificate path="/mypath/mycert.der"/>
       <ServerKey path="/mypath/mykey.pem"/>
@@ -16,7 +21,9 @@
     <ApplicationDescription>
       <ApplicationURI uri="urn:S2OPC:MY_SERVER_HOST:app"/>
       <ProductURI uri="urn:S2OPC:MY_SERVER_HOST:prod"/>
-      <ApplicationName text="S2OPC toolkit config example" locale="en"/>
+      <ApplicationName text="S2OPC toolkit configuration example" locale="en"/>
+      <ApplicationName text="S2OPC toolkit: ejemplo de configuración" locale="es-ES"/>
+      <ApplicationName text="S2OPC toolkit: exemple de configuration" locale="fr-FR"/>
       <!-- No discovery URL: we only support current endpoint URL as discovery URL for now -->
     </ApplicationDescription>
     <Endpoints>

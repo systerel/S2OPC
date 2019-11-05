@@ -4,6 +4,10 @@
     <Namespaces>
       <Namespace uri="urn:S2OPC:localhost"/>
     </Namespaces>
+    <Locales>
+      <Locale id="en-US"/>
+      <Locale id="fr-FR"/>
+    </Locales>
     <ApplicationCertificates>
       <ServerCertificate path="./server_public/server_2k_cert.der"/>
       <ServerKey path="./server_private/server_2k_key.pem"/>
@@ -14,7 +18,8 @@
     <ApplicationDescription>
       <ApplicationURI uri="urn:S2OPC:localhost"/>
       <ProductURI uri="urn:S2OPC:localhost"/>
-      <ApplicationName text="S2OPC toolkit server example" locale="en"/>
+      <ApplicationName text="S2OPC toolkit server example" locale="en-US"/>
+      <ApplicationName text="S2OPC toolkit: exemple de serveur" locale="fr-FR"/>
     </ApplicationDescription>
     <Endpoints>
       <Endpoint url="opc.tcp://localhost:4841">

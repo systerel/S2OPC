@@ -33,6 +33,18 @@
       <xs:element type="NamespaceType" name="Namespace" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
+  <xs:complexType name="LocaleType">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute type="xs:string" name="id" use="required"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="LocalesType">
+    <xs:sequence>
+      <xs:element type="LocaleType" name="Locale" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
   <xs:complexType name="ServerCertificateType">
     <xs:simpleContent>
       <xs:extension base="xs:string">
@@ -96,7 +108,7 @@
     <xs:sequence>
       <xs:element type="ApplicationURIType" name="ApplicationURI" />
       <xs:element type="ProductURIType" name="ProductURI" />
-      <xs:element type="ApplicationNameType" name="ApplicationName" />
+      <xs:element type="ApplicationNameType" name="ApplicationName" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="SecurityModeType">
@@ -174,6 +186,7 @@
   <xs:complexType name="ServerConfigurationType">
     <xs:sequence>
       <xs:element type="NamespacesType" name="Namespaces" />
+      <xs:element type="LocalesType" name="Locales" />
       <xs:element type="ApplicationCertificatesType" name="ApplicationCertificates" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:documentation>Certificates not necessary if only security policy None is used</xs:documentation>

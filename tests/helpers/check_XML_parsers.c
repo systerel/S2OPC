@@ -280,6 +280,7 @@ START_TEST(test_same_address_space_results)
 END_TEST
 
 const char* expectedNamespaces[3] = {"urn:S2OPC:MY_SERVER_HOST", "urn:S2OPC:MY_SERVER_HOST:2", NULL};
+const char* expectedLocales[4] = {"en", "es-ES", "fr-FR", NULL};
 
 // Without EXPAT function is detected as unused and compilation fails
 #ifdef WITH_EXPAT
@@ -296,6 +297,16 @@ static void check_parsed_s2opc_config(SOPC_S2OPC_Config* s2opcConfig)
     ck_assert_ptr_null(sConfig->namespaces[nsCounter]);
     ck_assert_ptr_null(expectedNamespaces[nsCounter]);
 
+    /* Check locales */
+    int localeCounter = 0;
+    while (sConfig->localeIds[localeCounter] != NULL && expectedLocales[localeCounter] != NULL)
+    {
+        ck_assert_int_eq(0, strcmp(sConfig->localeIds[localeCounter], expectedLocales[localeCounter]));
+        localeCounter++;
+    }
+    ck_assert_ptr_null(sConfig->localeIds[localeCounter]);
+    ck_assert_ptr_null(expectedLocales[localeCounter]);
+
     /* Check application certificates */
     ck_assert_int_eq(0, strcmp("/mypath/mycert.der", sConfig->serverCertPath));
     ck_assert_int_eq(0, strcmp("/mypath/mykey.pem", sConfig->serverKeyPath));
@@ -307,11 +318,40 @@ static void check_parsed_s2opc_config(SOPC_S2OPC_Config* s2opcConfig)
     ck_assert_int_eq(0, res);
     res = strcmp("urn:S2OPC:MY_SERVER_HOST:prod", SOPC_String_GetRawCString(&sConfig->serverDescription.ProductUri));
     ck_assert_int_eq(0, res);
-    res = strcmp("S2OPC toolkit config example",
+    /* Application names */
+    // default name
+    res = strcmp("S2OPC toolkit configuration example",
                  SOPC_String_GetRawCString(&sConfig->serverDescription.ApplicationName.defaultText));
     ck_assert_int_eq(0, res);
     res = strcmp("en", SOPC_String_GetRawCString(&sConfig->serverDescription.ApplicationName.defaultLocale));
     ck_assert_int_eq(0, res);
+
+    // other names
+    localeCounter = 1;
+    ck_assert_ptr_nonnull(sConfig->serverDescription.ApplicationName.localizedTextList);
+    SOPC_SLinkedListIterator it =
+        SOPC_SLinkedList_GetIterator(sConfig->serverDescription.ApplicationName.localizedTextList);
+    while (SOPC_SLinkedList_HasNext(&it))
+    {
+        localeCounter++;
+        SOPC_LocalizedText* lt = SOPC_SLinkedList_Next(&it);
+        ck_assert_ptr_nonnull(lt);
+        if (2 == localeCounter)
+        {
+            res = strcmp("S2OPC toolkit: ejemplo de configuración", SOPC_String_GetRawCString(&lt->defaultText));
+            ck_assert_int_eq(0, res);
+            res = strcmp("es-ES", SOPC_String_GetRawCString(&lt->defaultLocale));
+            ck_assert_int_eq(0, res);
+        }
+        else if (3 == localeCounter)
+        {
+            res = strcmp("S2OPC toolkit: exemple de configuration", SOPC_String_GetRawCString(&lt->defaultText));
+            ck_assert_int_eq(0, res);
+            res = strcmp("fr-FR", SOPC_String_GetRawCString(&lt->defaultLocale));
+            ck_assert_int_eq(0, res);
+        }
+    }
+    ck_assert_int_eq(3, localeCounter);
 
     /* Check endpoints */
     ck_assert_uint_eq(2, sConfig->nbEndpoints);

@@ -65,6 +65,8 @@ typedef enum
     PARSE_SRVCONFIG,         // ..In a server config tag
     PARSE_NAMESPACES,        // ....In namespaces
     PARSE_NAMESPACE,         // ......In namespace
+    PARSE_LOCALES,           // ....In locales
+    PARSE_LOCALE,            // ......In locale
     PARSE_APPLICATION_DESC,  // ....In application description
     PARSE_APPLICATION_URI,   // ......Application URI
     PARSE_PRODUCT_URI,       // ......Product URI
@@ -90,6 +92,9 @@ struct parse_context_t
 
     bool namespacesSet;
     SOPC_Array* namespaces;
+
+    bool localesSet;
+    SOPC_Array* localeIds;
 
     bool appDescSet;
     OpcUa_ApplicationDescription appDesc;
@@ -183,6 +188,12 @@ static bool end_server_config(struct parse_context_t* ctx)
         return false;
     }
 
+    if (!ctx->localesSet)
+    {
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "no locales defined for the server");
+        return false;
+    }
+
     if (!ctx->appDescSet)
     {
         LOG_XML_ERROR(ctx->helper_ctx.parser, "no application description defined for the server");
@@ -240,6 +251,52 @@ static bool start_namespace(struct parse_context_t* ctx, const XML_Char** attrs)
     }
 
     ctx->state = PARSE_NAMESPACE;
+
+    return true;
+}
+
+static bool end_locales(struct parse_context_t* ctx)
+{
+    if (0 == SOPC_Array_Size(ctx->localeIds))
+    {
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "no locales defined for the server");
+        return false;
+    }
+    if (!SOPC_Array_Append_Values(ctx->localeIds, NULL, 1))
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+    ctx->serverConfigPtr->localeIds = SOPC_Array_Into_Raw(ctx->localeIds);
+    if (NULL == ctx->serverConfigPtr->localeIds)
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+    ctx->localeIds = NULL;
+    return true;
+}
+
+static bool start_locale(struct parse_context_t* ctx, const XML_Char** attrs)
+{
+    const char* attr_val = get_attr(ctx, "id", attrs);
+
+    char* id = SOPC_strdup(attr_val);
+
+    if (id == NULL)
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+
+    if (!SOPC_Array_Append(ctx->localeIds, id))
+    {
+        SOPC_Free(id);
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+
+    ctx->state = PARSE_LOCALE;
 
     return true;
 }
@@ -325,38 +382,50 @@ static bool start_prod_uri(struct parse_context_t* ctx, const XML_Char** attrs)
 
 static bool start_app_name(struct parse_context_t* ctx, const XML_Char** attrs)
 {
-    if (ctx->appDesc.ApplicationName.defaultText.Length > 0)
+    const char* attr_text = get_attr(ctx, "text", attrs);
+    const char* attr_locale = get_attr(ctx, "locale", attrs);
+
+    if (NULL == attr_text || attr_text[0] == '\0')
     {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "ApplicationName defined several times");
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "Empty ApplicationName text");
         return false;
     }
 
-    const char* attr_val = get_attr(ctx, "text", attrs);
+    if (NULL == attr_locale)
+    {
+        attr_locale = "";
+    }
 
-    SOPC_ReturnStatus status = SOPC_String_CopyFromCString(&ctx->appDesc.ApplicationName.defaultText, attr_val);
-
+    SOPC_LocalizedText tmp;
+    SOPC_LocalizedText_Initialize(&tmp);
+    SOPC_ReturnStatus status = SOPC_String_CopyFromCString(&tmp.defaultLocale, attr_locale);
     if (SOPC_STATUS_OK != status)
     {
         LOG_MEMORY_ALLOCATION_FAILURE;
         return false;
     }
-    else if (ctx->appDesc.ApplicationName.defaultText.Length <= 0)
+    status = SOPC_String_CopyFromCString(&tmp.defaultText, attr_text);
+
+    if (SOPC_STATUS_OK == status)
     {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "Empty ApplicationName uri");
-        return false;
-    }
+        // Additional definitions
+        status =
+            SOPC_LocalizedText_AddOrSetLocale(&ctx->appDesc.ApplicationName, ctx->serverConfigPtr->localeIds, &tmp);
 
-    attr_val = get_attr(ctx, "locale", attrs);
-
-    if (NULL != attr_val)
-    {
-        status = SOPC_String_CopyFromCString(&ctx->appDesc.ApplicationName.defaultLocale, attr_val);
-
-        if (SOPC_STATUS_OK != status)
+        if (SOPC_STATUS_NOT_SUPPORTED == status)
         {
-            LOG_MEMORY_ALLOCATION_FAILURE;
+            SOPC_LocalizedText_Clear(&tmp);
+            LOG_XML_ERRORF(ctx->helper_ctx.parser, "Application name provided for an unsupported locale %s",
+                           attr_locale);
             return false;
         }
+    }
+    SOPC_LocalizedText_Clear(&tmp);
+
+    if (SOPC_STATUS_OK != status)
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
     }
 
     ctx->state = PARSE_APPLICATION_NAME;
@@ -692,6 +761,11 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
             ctx->namespacesSet = true;
             ctx->state = PARSE_NAMESPACES;
         }
+        else if (strcmp(name, "Locales") == 0 && !ctx->localesSet)
+        {
+            ctx->localesSet = true;
+            ctx->state = PARSE_LOCALES;
+        }
         else if (strcmp(name, "ApplicationDescription") == 0 && !ctx->appDescSet)
         {
             ctx->appDescSet = true;
@@ -720,6 +794,22 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         if (strcmp(name, "Namespace") == 0)
         {
             if (!start_namespace(ctx, attrs))
+            {
+                XML_StopParser(helperCtx->parser, 0);
+                return;
+            }
+        }
+        else
+        {
+            LOG_XML_ERRORF(helperCtx->parser, "Unexpected tag %s", name);
+            XML_StopParser(helperCtx->parser, 0);
+            return;
+        }
+        break;
+    case PARSE_LOCALES:
+        if (strcmp(name, "Locale") == 0)
+        {
+            if (!start_locale(ctx, attrs))
             {
                 XML_StopParser(helperCtx->parser, 0);
                 return;
@@ -996,6 +1086,17 @@ static void end_element_handler(void* user_data, const XML_Char* name)
         }
         ctx->state = PARSE_SRVCONFIG;
         break;
+    case PARSE_LOCALE:
+        ctx->state = PARSE_LOCALES;
+        break;
+    case PARSE_LOCALES:
+        if (!end_locales(ctx))
+        {
+            XML_StopParser(ctx->helper_ctx.parser, 0);
+            return;
+        }
+        ctx->state = PARSE_SRVCONFIG;
+        break;
     case PARSE_SRVCONFIG:
         if (!end_server_config(ctx))
         {
@@ -1029,13 +1130,15 @@ bool SOPC_Config_Parse(FILE* fd, SOPC_S2OPC_Config* config)
 
     SOPC_Array* endpoints = SOPC_Array_Create(sizeof(SOPC_Endpoint_Config), 1, NULL);
     SOPC_Array* ns = SOPC_Array_Create(sizeof(char*), 1, SOPC_Free_CstringFromPtr);
+    SOPC_Array* locales = SOPC_Array_Create(sizeof(char*), 1, SOPC_Free_CstringFromPtr);
 
-    if ((NULL == parser) || (NULL == endpoints) || (NULL == ns))
+    if ((NULL == parser) || (NULL == endpoints) || (NULL == ns) || (NULL == locales))
     {
         LOG_MEMORY_ALLOCATION_FAILURE;
         XML_ParserFree(parser);
         SOPC_Array_Delete(endpoints);
         SOPC_Array_Delete(ns);
+        SOPC_Array_Delete(locales);
         return false;
     }
 
@@ -1047,6 +1150,7 @@ bool SOPC_Config_Parse(FILE* fd, SOPC_S2OPC_Config* config)
     ctx.helper_ctx.parser = parser;
     ctx.endpoints = endpoints;
     ctx.namespaces = ns;
+    ctx.localeIds = locales;
     ctx.serverConfigPtr = &config->serverConfig;
     ctx.helper_ctx.char_data_buffer = NULL;
     ctx.helper_ctx.char_data_cap = 0;
@@ -1057,6 +1161,7 @@ bool SOPC_Config_Parse(FILE* fd, SOPC_S2OPC_Config* config)
     SOPC_ReturnStatus res = parse(parser, fd);
     XML_ParserFree(parser);
     SOPC_Array_Delete(ctx.namespaces);
+    SOPC_Array_Delete(ctx.localeIds);
 
     size_t nbEndpoints = SOPC_Array_Size(endpoints);
 
