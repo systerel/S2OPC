@@ -84,8 +84,17 @@ Server side (e.g.: tests/services/toolkit_test_server.c):
 - Address space with all mandatory attributes: AccessLevel, BrowseName, ContainsNoLoop, DataType, DisplayName, EvenNotifier, Executable, Historizing,
   IsAbstract, NodeClass, NodeId, Symmetric, UserAccessLevel, UserExecutable, Value (with single value and array Variants), ValueRank (and References)
 
-## Address space generation
+## Address space definition and generation
 
+### Definition of XML address space
+The address space should be defined with an XML using the UANodeSet XML format.
+All the reciprocal references between nodes shall be present in it, the script `scripts/gen-reciprocal-refs-address-space.xslt`
+might be used to generate reciprocal references missing (XSLT 2.0 processor required).
+
+Once the XML address space is defined, the C structure to be used for toolkit configuration shall be generated.
+It could be done using the Python C code generator prior to compilation or using the dynamic XML loader using Expat library.
+
+### Generation of C structure address space
 The `scripts/generate-s2opc-address-space.py` tool converts a UANodeSet XML file into a
 C file that can be compiled in the binary, and used with the embedded address
 space loader (see the `tests/data/address_space/parts/s2opc.xml`
