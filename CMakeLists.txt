@@ -899,11 +899,10 @@ function(s2opc_oss_fuzzer target_name src_file)
   target_include_directories(${target_name} PRIVATE ${S2OPC_PUBLIC_INCLUDES} ${S2OPC_PRIVATE_INCLUDES})
   target_link_libraries(${target_name} s2opc $ENV{LIB_FUZZING_ENGINE})
   add_dependencies(fuzzers ${target_name})
-  
-  	foreach(param ${ARGV})
+
+  foreach(param ${ARGV})
 		if (NOT (${s2opc_fuzzer_loop_counter} MATCHES "0" OR ${s2opc_fuzzer_loop_counter} MATCHES "1"))
-			target_sources(${standalone_target_name} PUBLIC "${FUZZING_PATH}/${param}")
-			target_sources(${fuzz_target_name} PUBLIC "${FUZZING_PATH}/${param}")
+			target_sources(${target_name} PRIVATE "${param}")
 		endif()
 		MATH(EXPR s2opc_fuzzer_loop_counter "${s2opc_fuzzer_loop_counter}+1") #Counter incrementation
 	endforeach()
@@ -911,7 +910,9 @@ endfunction()
 
 if(WITH_OSS_FUZZ)
   add_custom_target(fuzzers)
-  s2opc_oss_fuzzer(receive_msg_buffer_fuzzer "${FUZZING_RECEIVE_MSG_BUFFER}/fuzz_main.c" "${FUZZING_RECEIVE_MSG_BUFFER}/fuzz_server.c" "${FUZZING_RECEIVE_MSG_BUFFER}/fuzz_client.c" )
+  s2opc_oss_fuzzer(receive_msg_buffer_fuzzer "${FUZZING_RECEIVE_MSG_BUFFER}/fuzz_main.c"
+  											 "${FUZZING_RECEIVE_MSG_BUFFER}/fuzz_server.c"
+                                             "${FUZZING_RECEIVE_MSG_BUFFER}/fuzz_client.c" )
   s2opc_oss_fuzzer(server_request_fuzzer "fuzz_server_request.c")
   s2opc_oss_fuzzer(parse_tcp_uri_fuzzer "fuzz_parse_tcp_uri.c")
 endif()
