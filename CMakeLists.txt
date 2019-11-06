@@ -895,7 +895,7 @@ endif(ENABLE_TESTING)
 # OSS Fuzzing
 function(s2opc_oss_fuzzer target_name src_file)
   set(s2opc_fuzzer_loop_counter "0")	#For each counter
-  add_executable(${target_name} "${FUZZING_PATH}/${src_file}")
+  add_executable(${target_name} "${src_file}")
   target_include_directories(${target_name} PRIVATE ${S2OPC_PUBLIC_INCLUDES} ${S2OPC_PRIVATE_INCLUDES})
   target_link_libraries(${target_name} s2opc $ENV{LIB_FUZZING_ENGINE})
   add_dependencies(fuzzers ${target_name})
