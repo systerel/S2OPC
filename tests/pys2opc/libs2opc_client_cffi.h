@@ -671,6 +671,8 @@ typedef struct SOPC_LocalizedText
 {
     SOPC_String defaultLocale;
     SOPC_String defaultText;
+
+    void* localizedTextList; // Unused field on client side => hide type
 } SOPC_LocalizedText;
 
 typedef enum SOPC_ExtObjectBodyEncoding

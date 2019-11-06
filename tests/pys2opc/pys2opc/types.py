@@ -756,7 +756,7 @@ class Variant:
                 return Variant((Qname.NamespaceIndex, string_to_str(Qname.Name)), sopc_type)
             elif sopc_type == libsub.SOPC_LocalizedText_Id:
                 LocalizedText = variant.Value.LocalizedText
-                return Variant((string_to_str(LocalizedText.Locale), string_to_str(LocalizedText.Text)), sopc_type)
+                return Variant((string_to_str(LocalizedText.defaultLocale), string_to_str(LocalizedText.defaultText)), sopc_type)
             #elif sopc_type == libsub.SOPC_ExtensionObject_Id:
             #    return Variant(variant.Value., sopc_type)
             #elif sopc_type == libsub.SOPC_DataValue_Id:
@@ -815,7 +815,7 @@ class Variant:
                 return [Variant((Qname.NamespaceIndex, string_to_str(Qname.Name.Data)), sopc_type) for i in range(length)]
             elif sopc_type == libsub.SOPC_LocalizedText_Id:
                 LocalizedText = content.LocalizedTextArr[i]
-                return [Variant((string_to_str(LocalizedText.Locale), string_to_str(LocalizedText.Text)), sopc_type) for i in range(length)]
+                return [Variant((string_to_str(LocalizedText.defaultLocale), string_to_str(LocalizedText.defaultText)), sopc_type) for i in range(length)]
             #elif sopc_type == libsub.SOPC_ExtensionObject_Id:
             #    return [Variant(content., sopc_type) for i in range(length)]
             #elif sopc_type == libsub.SOPC_DataValue_Id:
@@ -916,7 +916,7 @@ class Variant:
                 variant.Value.Qname = qname
             elif sopc_type == libsub.SOPC_LocalizedText_Id:
                 loc = allocator_no_gc('SOPC_LocalizedText *')
-                loc.Locale, loc.Text = map(lambda s:str_to_string(s, no_gc=True)[0], self._value)
+                loc.defaultLocale, loc.defaultText = map(lambda s:str_to_string(s, no_gc=True)[0], self._value)
                 variant.Value.LocalizedText = loc
             #elif sopc_type == libsub.SOPC_ExtensionObject_Id:
             #    variant.Value. = self._value
@@ -983,7 +983,7 @@ class Variant:
             elif sopc_type == libsub.SOPC_LocalizedText_Id:
                 locs = allocator_no_gc('SOPC_LocalizedText[]', len(self._value))
                 for i,v in enumerate(self._value):
-                    locs[i].Locale, locs[i].Text = map(lambda s:str_to_string(s, no_gc=True), v)
+                    locs[i].defaultLocale, locs[i].defaultText = map(lambda s:str_to_string(s, no_gc=True), v)
                 content.LocalizedTextArr = locs
             #elif sopc_type == libsub.SOPC_ExtensionObject_Id:
             #    content.Arr = allocator_no_gc('[]', self._value)
@@ -1198,7 +1198,8 @@ class BrowseResult:
             fwd = sopc_ref.IsForward
             expNid = expandednodeid_to_str(ffi.addressof(sopc_ref.NodeId))
             bwsName = (sopc_ref.BrowseName.NamespaceIndex, string_to_str(sopc_ref.BrowseName.Name))
-            dispName = (string_to_str(sopc_ref.DisplayName.Locale), string_to_str(sopc_ref.DisplayName.Text))
+            dispName = (string_to_str(sopc_ref.DisplayName.defaultLocale),
+                        string_to_str(sopc_ref.DisplayName.defaultText))
             nodCls = sopc_ref.NodeClass
             typeDef = expandednodeid_to_str(ffi.addressof(sopc_ref.TypeDefinition))
             self.references.append(Reference(refType, fwd, expNid, bwsName, dispName, nodCls, typeDef))
