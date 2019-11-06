@@ -896,9 +896,10 @@ endif(ENABLE_TESTING)
 function(s2opc_oss_fuzzer target_name src_file)
   set(s2opc_fuzzer_loop_counter "0")	#For each counter
   add_executable(${target_name} "${src_file}")
+
+  add_executable(${target_name} "${src_file}" ${TEST_DEMO_SERVER_ADDRESS_SPACE_C})
   target_include_directories(${target_name} PRIVATE ${S2OPC_PUBLIC_INCLUDES} ${S2OPC_PRIVATE_INCLUDES} "tests/services")  
   target_link_libraries(${target_name} s2opc s2opc-loader-embedded)
-  target_include_directories(${target_name} PRIVATE ${S2OPC_PUBLIC_INCLUDES} ${S2OPC_PRIVATE_INCLUDES})
   target_link_libraries(${target_name} s2opc $ENV{LIB_FUZZING_ENGINE})
   add_dependencies(fuzzers ${target_name})
 
