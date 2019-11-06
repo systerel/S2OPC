@@ -258,20 +258,19 @@ class ConnectionHandler(BaseConnectionHandler):
         Sends a Browse requests, waits for the response and analyzes it.
         """
         self.logger.begin_section('Browse Tests -')
-        nid, subBrowseNames, subNids = browseSubTree
-        subNids = list(subNids)
-        for bn in subBrowseNames:
-            subNids.append(nid + '.' + bn)
+        nid, forwardHierBrowseNames, forwardNonHierNids, backwardNid = browseSubTree
+        forwardNonHierNids = list(forwardNonHierNids)
+        for bn in forwardHierBrowseNames:
+            forwardNonHierNids.append('ns=1;s=' + bn)
         # Make the request
         response = self.browse_nodes([nid])
         result, = response.results  # Asserts that there is a single response
         self.logger.add_test('Response status OK', result.status == StatusCode.Good)
         # Expects forward references to sub nodes, computes the parent and expects it in the backward references
-        childNodes = set(ref.nodeId for ref in result.references if ref.isForward)
-        self.logger.add_test('Children are correct', set(subNids) == childNodes)
-        parentNodes = set(ref.nodeId for ref in result.references if not ref.isForward)
-        parentNid = nid[:nid.rfind('.')]
-        self.logger.add_test('Parent is correct', {parentNid} == parentNodes)
+        forwardNodes = set(ref.nodeId for ref in result.references if ref.isForward)
+        self.logger.add_test('Forward references are correct', set(forwardNonHierNids) == forwardNodes)
+        backwardNodes = set(ref.nodeId for ref in result.references if not ref.isForward)
+        self.logger.add_test('Backward is correct', {backwardNid} == backwardNodes)
 
     def configure_subscription(self):
         if self.configuration.parameters['token_target'] > 0:
