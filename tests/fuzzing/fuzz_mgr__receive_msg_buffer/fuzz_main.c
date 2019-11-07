@@ -46,7 +46,7 @@
 #include "static_security_data.h"
 #endif
 
-bool debug = true;
+bool debug = false;
 int32_t sendFailures = 0;
 bool secuActive = false;
 SOPC_SecureChannel_Config scConfig;
