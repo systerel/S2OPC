@@ -41,9 +41,9 @@
 
 #include "embedded/sopc_addspace_loader.h"
 
-#include "fuzz_server.h"
 #include "fuzz_client.h"
 #include "fuzz_main.h"
+#include "fuzz_server.h"
 
 #ifdef WITH_STATIC_SECURITY_DATA
 #include "static_security_data.h"
@@ -90,13 +90,14 @@ static SOPC_ReturnStatus CerAndKeyLoader_serv()
 
         if (SOPC_STATUS_OK == status)
         {
-            status =
-                SOPC_KeyManager_SerializedAsymmetricKey_CreateFromData(server_2k_key, sizeof(server_2k_key), &(ck_serv).Key);
+            status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromData(server_2k_key, sizeof(server_2k_key),
+                                                                            &(ck_serv).Key);
             output_s2opcConfig.serverConfig.serverKey = &(ck_serv).Key;
         }
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_KeyManager_SerializedCertificate_CreateFromDER(cacert, sizeof(cacert), &(ck_serv).authCertificate);
+            status =
+                SOPC_KeyManager_SerializedCertificate_CreateFromDER(cacert, sizeof(cacert), &(ck_serv).authCertificate);
         }
 #else
         if (true == debug)
@@ -170,7 +171,6 @@ static SOPC_ReturnStatus GenEndpoingConfig()
             }
         }
     }
-
 
     if (secuActive)
     {
@@ -278,7 +278,7 @@ SOPC_ReturnStatus Setup_serv(void)
         address_space = SOPC_Embedded_AddressSpace_Load();
         if (NULL == address_space)
         {
-        	status = SOPC_STATUS_NOK;
+            status = SOPC_STATUS_NOK;
         }
     }
 
@@ -307,7 +307,7 @@ SOPC_ReturnStatus Setup_serv(void)
         // Add endpoint description configuration
         if (true == debug)
         {
-        	printf("<<FUZZ_server: Opening endpoint... \n");
+            printf("<<FUZZ_server: Opening endpoint... \n");
         }
         epConfigIdx = SOPC_ToolkitServer_AddEndpointConfig(&epConfig);
         status = (epConfigIdx != 0 ? SOPC_STATUS_OK : SOPC_STATUS_NOK);

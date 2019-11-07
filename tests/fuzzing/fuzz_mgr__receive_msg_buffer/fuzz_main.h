@@ -29,7 +29,7 @@ typedef enum
     SESSION_CONN_CLOSED,
     SESSION_CONN_NEW,
     SESSION_CONN_CONNECTED,
-	SESSION_CONN_MSG_RECEIVED,
+    SESSION_CONN_MSG_RECEIVED,
 } SessionConnectedState;
 
 extern bool debug;
