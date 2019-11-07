@@ -242,7 +242,8 @@ OPERATIONS
         a_server_token               := a_server_token |>> {session}               || /* If session had token, remove this relation */
         a_client_token               := {session} <<| a_client_token               ||
         a_NonceServer                := {session} <<| a_NonceServer                ||
-        a_NonceClient                := {session} <<| a_NonceClient
+        a_NonceClient                := {session} <<| a_NonceClient                ||
+        a_server_client_locales(session) := c_LocaleIds_empty
     END
     ;
 
