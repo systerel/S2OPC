@@ -1,9 +1,9 @@
 #ifndef FUZZ_MGR__RECEIVE_MSG_BUFFER_SERVER
 #define FUZZ_MGR__RECEIVE_MSG_BUFFER_SERVER
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "fuzz_main.h"
 
@@ -12,9 +12,9 @@
 #define PRODUCT_URI "urn:S2OPC:localhost"
 
 // def! setup and teardown
-SOPC_ReturnStatus Setup_serv(void);		 // Server initialization
-void StopSignal_serv(int sig);     		 // Catch the sigint and call Teardown_serv function
-SOPC_ReturnStatus Teardown_serv(void);   // Free memory
+SOPC_ReturnStatus Setup_serv(void);    // Server initialization
+void StopSignal_serv(int sig);         // Catch the sigint and call Teardown_serv function
+SOPC_ReturnStatus Teardown_serv(void); // Free memory
 // !endef
 
 typedef enum
