@@ -41,6 +41,7 @@
 
 #include "key_manager_lib.h"
 
+#include "mbedtls/oid.h"
 #include "mbedtls/x509.h"
 
 /**
@@ -166,6 +167,37 @@ static int verify_cert(void* trust_li, mbedtls_x509_crt* crt, int certificate_de
     return 0;
 }
 
+/* Returns 0 if all key usages and extended key usages are ok */
+static SOPC_ReturnStatus check_key_usages(const mbedtls_x509_crt* crt)
+{
+    unsigned int usages = MBEDTLS_X509_KU_DIGITAL_SIGNATURE | MBEDTLS_X509_KU_NON_REPUDIATION |
+                          MBEDTLS_X509_KU_KEY_ENCIPHERMENT | MBEDTLS_X509_KU_DATA_ENCIPHERMENT;
+    int err = mbedtls_x509_crt_check_key_usage(crt, usages);
+
+    if (0 == err)
+    {
+        /* If the ext usage is neither server auth nor client auth, it shall be rejected */
+        /* TODO: check whether the crt is for a server or a client, and only check the corresponding ext usage */
+        bool missSer = mbedtls_x509_crt_check_extended_key_usage(crt, MBEDTLS_OID_SERVER_AUTH,
+                                                                 MBEDTLS_OID_SIZE(MBEDTLS_OID_SERVER_AUTH));
+        bool missCli = mbedtls_x509_crt_check_extended_key_usage(crt, MBEDTLS_OID_CLIENT_AUTH,
+                                                                 MBEDTLS_OID_SIZE(MBEDTLS_OID_CLIENT_AUTH));
+        if (missSer && missCli)
+        {
+            err = 1;
+        }
+    }
+
+    if (0 == err)
+    {
+        return SOPC_STATUS_OK;
+    }
+    else
+    {
+        return SOPC_STATUS_NOK;
+    }
+}
+
 static SOPC_ReturnStatus PKIProviderStack_ValidateCertificate(const SOPC_PKIProvider* pPKI,
                                                               const SOPC_CertificateList* pToValidate,
                                                               uint32_t* error)
@@ -190,18 +222,28 @@ static SOPC_ReturnStatus PKIProviderStack_ValidateCertificate(const SOPC_PKIProv
     mbedtls_x509_crl* mbed_crl = (mbedtls_x509_crl*) (&cert_crl->crl);
     SOPC_GCC_DIAGNOSTIC_RESTORE
 
-    /* TODO: verify CRL <-> CA association */
-
-    uint32_t failure_reasons = 0;
-    if (mbedtls_x509_crt_verify_with_profile(mbed_chall, mbed_ca, mbed_crl, &mbedtls_x509_crt_profile_minimal,
-                                             NULL, /* You can specify an expected Common Name here */
-                                             &failure_reasons, verify_cert, mbed_ca) != 0)
+    /* Check certificate usages and certificate chain */
+    SOPC_ReturnStatus status = check_key_usages(mbed_chall);
+    if (SOPC_STATUS_OK != status)
     {
-        *error = PKIProviderStack_GetCertificateValidationError(failure_reasons);
-        return SOPC_STATUS_NOK;
+        *error = SOPC_CertificateValidationError_UseNotAllowed;
     }
 
-    return SOPC_STATUS_OK;
+    /* TODO: verify CRL <-> CA association */
+
+    if (SOPC_STATUS_OK == status)
+    {
+        uint32_t failure_reasons = 0;
+        if (mbedtls_x509_crt_verify_with_profile(mbed_chall, mbed_ca, mbed_crl, &mbedtls_x509_crt_profile_minimal,
+                                                 NULL /* You can specify an expected Common Name here */,
+                                                 &failure_reasons, verify_cert, mbed_ca) != 0)
+        {
+            *error = PKIProviderStack_GetCertificateValidationError(failure_reasons);
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
+    return status;
 }
 
 static void PKIProviderStack_Free(SOPC_PKIProvider* pPKI)
