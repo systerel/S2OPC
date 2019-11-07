@@ -4,6 +4,8 @@
 #define NB_SESSIONS 1
 #define DESIGNATE_NEW(T, ...) memcpy(SOPC_Malloc(sizeof(T)), &(T const){__VA_ARGS__}, sizeof(T))
 
+#include "fuzz_main.h"
+
 // Prototypage
 SOPC_ReturnStatus Wait_response_client();
 OpcUa_WriteRequest* newWriteRequest_client(const char* buff, size_t len);
