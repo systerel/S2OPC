@@ -85,6 +85,40 @@ if(ENABLE_SAMPLES)
     message(WARNING "Demo server ${TOOLKIT_DEMO_SERVER} executable will not be compiled since Expat library not available.")
   endif()
 
+  if (WITH_NANO_EXTENDED)
+    set(TEST_SERVER_ADDRESS_SPACE_C "test_sks_address_space.c")
+    set(TEST_ADDRESS_SPACE_XML "${S2OPC_ROOT_PATH}/samples/ClientServer/data/address_space/s2opc.xml")
+    s2opc_embed_address_space(${TEST_SERVER_ADDRESS_SPACE_C} ${TEST_ADDRESS_SPACE_XML})
+    add_custom_target(make-sks-address-space DEPENDS ${TEST_SERVER_ADDRESS_SPACE_C})
+    
+    set(TOOLKIT_DEMO_SKS "toolkit_demo_sks")
+    add_executable(${TOOLKIT_DEMO_SKS}
+      "demo_server/toolkit_demo_sks.c"
+      ${TEST_SERVER_ADDRESS_SPACE_C})
+    target_link_libraries(${TOOLKIT_DEMO_SKS} PRIVATE s2opc_clientserver s2opc_clientserver-loader-embedded)
+    target_compile_options(${TOOLKIT_DEMO_SKS} PRIVATE ${S2OPC_COMPILER_FLAGS})
+    target_compile_definitions(${TOOLKIT_DEMO_SKS} PRIVATE ${S2OPC_DEFINITIONS})
+
+    if (EXPAT_FOUND)
+      target_link_libraries(${TOOLKIT_DEMO_SKS} PRIVATE s2opc_clientserver-xml-loaders-expat)
+      target_compile_definitions(${TOOLKIT_DEMO_SKS} PRIVATE "WITH_EXPAT")
+    endif()
+
+    if (WITH_STATIC_SECURITY_DATA)
+      target_compile_definitions(${TOOLKIT_DEMO_SKS} PRIVATE "WITH_STATIC_SECURITY_DATA")
+    endif()
+
+    add_custom_command(
+      TARGET ${TOOLKIT_DEMO_SKS} POST_BUILD
+      
+      COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/sks_private
+      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/security/signingKey.key ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/sks_private/
+      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/security/encryptKey.key ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/sks_private/
+      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/security/keyNonce.key ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/sks_private/
+      )
+    
+  endif()
+  
   # Demo clients (S2OPC only without extension)
   set(S2OPC_DEMOCLIENT_COMMON
     "demo_client/argparse.c"

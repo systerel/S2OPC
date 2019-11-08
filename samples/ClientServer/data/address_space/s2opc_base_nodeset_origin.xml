@@ -23955,4 +23955,203 @@
   <UAObject NodeId="i=100020" BrowseName="SessionPlaceHolder20">
     <DisplayName>SessionPlaceHolder 20</DisplayName>
   </UAObject>
+  <!-- SKS nodes (TODO: use 1.04 NodeIds + add types) -->
+  <UAObject BrowseName="PublishSubscribe" NodeId="i=15000" ParentNodeId="i=2253">
+    <DisplayName>PublishSubscribe</DisplayName>
+    <Description>The base type for all object nodes.</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">i=2253</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=58</Reference>
+      <Reference ReferenceType="HasComponent">i=15001</Reference>
+   </References>
+  </UAObject>
+  <UAMethod BrowseName="getSecurityKeys" NodeId="i=15001" ParentNodeId="i=15000" MethodDeclarationId="">
+    <DisplayName>getSecurityKeys</DisplayName>
+    <Description>getSecurityKeys</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">i=15000</Reference>
+      <Reference ReferenceType="HasProperty">i=15201</Reference>
+    <Reference ReferenceType="HasProperty">i=15202</Reference>
+    </References>
+  </UAMethod>
+  <UAVariable BrowseName="InputArguments" DataType="i=296" NodeId="i=15201" ParentNodeId="i=15001" ValueRank="0">
+    <DisplayName>InputArguments</DisplayName>
+    <Description>InputArguments</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasProperty">i=15001</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+    </References>
+    <Value>
+      <ListOfExtensionObject xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+        <ExtensionObject>
+          <TypeId>
+            <Identifier>i=297</Identifier>
+          </TypeId>
+          <Body>
+            <Argument>
+              <Name>SecurityGroupId</Name>
+              <DataType>
+                <Identifier>i=12</Identifier>
+              </DataType>
+              <ValueRank>-1</ValueRank>
+              <ArrayDimensions />
+              <Description></Description>
+            </Argument>
+          </Body>
+        </ExtensionObject>
+        <ExtensionObject>
+          <TypeId>
+            <Identifier>i=297</Identifier>
+          </TypeId>
+          <Body>
+            <Argument>
+              <Name>StartingTokenId</Name>
+              <DataType>
+                <Identifier>i=7</Identifier>
+              </DataType>
+              <ValueRank>-1</ValueRank>
+              <ArrayDimensions />
+              <Description>
+                <Encoding>0</Encoding>
+                <Locale />
+                <Text />
+              </Description>
+            </Argument>
+          </Body>
+        </ExtensionObject>
+        <ExtensionObject>
+          <TypeId>
+            <Identifier>i=297</Identifier>
+          </TypeId>
+          <Body>
+            <Argument>
+              <Name>RequestedKeyCount</Name>
+              <DataType>
+                <Identifier>i=7</Identifier>
+              </DataType>
+              <ValueRank>-1</ValueRank>
+              <ArrayDimensions />
+              <Description>
+                <Encoding>0</Encoding>
+                <Locale />
+                <Text />
+              </Description>
+            </Argument>
+          </Body>
+          </ExtensionObject>
+      </ListOfExtensionObject>
+    </Value>
+  </UAVariable>
+  <UAVariable BrowseName="OutputArguments" DataType="i=296" NodeId="i=15202" ParentNodeId="i=15001" ValueRank="0">
+    <DisplayName>OutputArguments</DisplayName>
+    <Description>OutputArguments</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasProperty">i=15001</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+    </References>
+    <Value>
+        <ListOfExtensionObject xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+        <ExtensionObject>
+          <TypeId>
+            <Identifier>i=297</Identifier>
+          </TypeId>
+          <Body>
+            <Argument>
+              <Name>SecurityPolicyUri</Name>
+              <DataType>
+                <Identifier>i=12</Identifier>
+              </DataType>
+              <ValueRank>-1</ValueRank>
+              <ArrayDimensions />
+              <Description>
+                <Encoding>0</Encoding>
+                <Locale />
+                <Text />
+              </Description>
+            </Argument>
+          </Body>
+        </ExtensionObject>
+        <ExtensionObject>
+          <TypeId>
+            <Identifier>i=297</Identifier>
+          </TypeId>
+          <Body>
+            <Argument>
+              <Name>FirstTokenId</Name>
+              <DataType>
+                <Identifier>i=288</Identifier>
+              </DataType>
+              <ValueRank>-1</ValueRank>
+              <ArrayDimensions />
+              <Description>
+                <Encoding>0</Encoding>
+                <Locale />
+                <Text />
+              </Description>
+            </Argument>
+          </Body>
+        </ExtensionObject>
+        <ExtensionObject>
+          <TypeId>
+            <Identifier>i=297</Identifier>
+          </TypeId>
+          <Body>
+            <Argument>
+              <Name>Keys</Name>
+              <DataType>
+                <Identifier>i=15</Identifier>
+              </DataType>
+              <ValueRank>1</ValueRank>
+              <ArrayDimensions />
+              <Description>
+                <Encoding>0</Encoding>
+                <Locale />
+                <Text />
+              </Description>
+            </Argument>
+          </Body>
+        </ExtensionObject>
+        <ExtensionObject>
+          <TypeId>
+            <Identifier>i=297</Identifier>
+          </TypeId>
+          <Body>
+            <Argument>
+              <Name>TimeToNextKey</Name>
+              <DataType>
+                <Identifier>i=290</Identifier>
+              </DataType>
+              <ValueRank>-1</ValueRank>
+              <ArrayDimensions />
+              <Description>
+                <Encoding>0</Encoding>
+                <Locale />
+                <Text />
+              </Description>
+            </Argument>
+          </Body>
+        </ExtensionObject>
+        <ExtensionObject>
+          <TypeId>
+            <Identifier>i=297</Identifier>
+          </TypeId>
+          <Body>
+            <Argument>
+              <Name>KeyLifetime</Name>
+              <DataType>
+                <Identifier>i=290</Identifier>
+              </DataType>
+              <ValueRank>-1</ValueRank>
+              <ArrayDimensions />
+              <Description>
+                <Encoding>0</Encoding>
+                <Locale />
+                <Text />
+              </Description>
+            </Argument>
+          </Body>
+        </ExtensionObject>
+      </ListOfExtensionObject>
+    </Value>
+  </UAVariable>
 </UANodeSet>
