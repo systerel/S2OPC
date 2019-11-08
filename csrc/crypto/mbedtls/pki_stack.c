@@ -28,6 +28,7 @@
 #include <assert.h>
 #include <dirent.h>
 #include <errno.h>
+#include <string.h>
 #include <sys/types.h>
 
 #include "sopc_crypto_provider.h"
@@ -40,9 +41,6 @@
 #include "key_manager_lib.h"
 
 #include "mbedtls/x509.h"
-
-#include <stdio.h>
-#include <string.h>
 
 /**
  * The minimal profile supported by the PKIProviderStack. It requires cacert signed with
@@ -143,33 +141,8 @@ static uint32_t PKIProviderStack_GetCertificateValidationError(uint32_t failure_
     return SOPC_CertificateValidationError_Unkown;
 }
 
-static int print_thumb(const mbedtls_x509_crt* crt)
-{
-    /* Make thumbprint SHA-1 */
-    const mbedtls_md_info_t* pmd = mbedtls_md_info_from_type(MBEDTLS_MD_SHA1);
-    uint8_t pDest[20];
-    if (mbedtls_md(pmd, crt->raw.p, crt->raw.len, pDest) != 0)
-    {
-        return MBEDTLS_ERR_X509_FATAL_ERROR;
-    }
-
-    /* Poor-man's hexlify */
-    for (int i = 0; i < 20; ++i)
-    {
-        printf("%02X:", pDest[i]);
-    }
-    printf("\b \n");
-
-    return 0;
-}
-
 static int verify_cert(void* trust_li, mbedtls_x509_crt* crt, int certificate_depth, uint32_t* flags)
 {
-    printf("-> step %i, flags 0x%X, cert ", certificate_depth, *flags);
-    int res = print_thumb(crt);
-    if (res)
-        return res;
-
     /* When we have an issued certificate that is trusted, but we don't trust its parents,
      * we have verified the chain certificates, but we should still mark the certificate as trusted.
      * "NOT_TRUSTED" should be the sole problem.
@@ -180,12 +153,9 @@ static int verify_cert(void* trust_li, mbedtls_x509_crt* crt, int certificate_de
         /* x509_crt_check_ee_locally_trusted() does this but only for self-signed end-entity certificates (!) */
         for (mbedtls_x509_crt* cur = (mbedtls_x509_crt*) trust_li; NULL != cur; cur = cur->next)
         {
-            printf("--> ");
-            print_thumb(cur);
             if (crt->raw.len == cur->raw.len && 0 == memcmp(crt->raw.p, cur->raw.p, crt->raw.len))
             {
                 *flags = 0;
-                printf("---> EE validated certificate :+1:\n");
                 break;
             }
         }
@@ -224,8 +194,6 @@ static SOPC_ReturnStatus PKIProviderStack_ValidateCertificate(const SOPC_PKIProv
     // crt are not const in crt_verify, but this function does not look like to modify them
 
     // Assumption that certificate is not modified by mbedtls
-    printf("Verifying: ");
-    print_thumb(&pToValidate->crt);
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
     if (mbedtls_x509_crt_verify_with_profile(
             (mbedtls_x509_crt*) (&pToValidate->crt), (mbedtls_x509_crt*) (&cert_ca->crt), rev_list,
