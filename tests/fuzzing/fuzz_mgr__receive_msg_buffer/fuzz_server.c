@@ -229,6 +229,7 @@ static SOPC_ReturnStatus GenEndpoingConfig()
 SOPC_ReturnStatus Setup_serv(void)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
     // Get Toolkit Configuration
     SOPC_Build_Info build_info = SOPC_ToolkitConfig_GetBuildInfo();
 
@@ -240,6 +241,7 @@ SOPC_ReturnStatus Setup_serv(void)
         printf("toolkitBuildDate: %s\n", build_info.toolkitBuildDate);
     }
 
+    /* config the endpoint config */
     status = GenEndpoingConfig();
 
     // Init stack configuration
@@ -344,6 +346,7 @@ SOPC_ReturnStatus Teardown_serv()
     uint32_t loopCpt = 0;
 
     SOPC_ToolkitServer_AsyncCloseEndpoint(epConfigIdx);
+    epConfigIdx = 0;
 
     /* Wait until ep is closed or timeout */
     while (SOPC_Atomic_Int_Get(&scState) != SESSION_CONN_CLOSED && loopCpt * sleepTimeout <= loopTimeout)
@@ -372,8 +375,13 @@ SOPC_ReturnStatus Teardown_serv()
 
     SOPC_UserAuthentication_FreeManager(&authenticationManager);
     SOPC_UserAuthorization_FreeManager(&authorizationManager);
+    authenticationManager = NULL;
+    authorizationManager = NULL;
 
     SOPC_Toolkit_Clear();
-    printf("-------------All cleared-------------\n");
+    if (true == debug)
+    {
+        printf("-------------All cleared-------------\n");
+    }
     return (status);
 }
