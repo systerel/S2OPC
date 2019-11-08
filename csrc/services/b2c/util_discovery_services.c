@@ -97,10 +97,13 @@ static void SOPC_SetServerApplicationDescription(SOPC_Endpoint_Config* sopcEndpo
         SOPC_Logger_TraceWarning("Failed to set Application URI in application description of response");
     }
 
-    status = SOPC_String_AttachFrom(&appDesc->DiscoveryProfileUri, &desc->DiscoveryProfileUri);
-    if (SOPC_STATUS_OK != status)
+    if (desc->DiscoveryProfileUri.Length > 0)
     {
-        SOPC_Logger_TraceWarning("Failed to set DiscoveryProfileURI in application description of response");
+        status = SOPC_String_AttachFrom(&appDesc->DiscoveryProfileUri, &desc->DiscoveryProfileUri);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Logger_TraceWarning("Failed to set DiscoveryProfileURI in application description of response");
+        }
     }
 
     if (desc->NoOfDiscoveryUrls > 0)
@@ -135,10 +138,13 @@ static void SOPC_SetServerApplicationDescription(SOPC_Endpoint_Config* sopcEndpo
         }
     }
 
-    status = SOPC_String_AttachFrom(&appDesc->GatewayServerUri, &desc->GatewayServerUri);
-    if (SOPC_STATUS_OK != status)
+    if (desc->GatewayServerUri.Length > 0)
     {
-        SOPC_Logger_TraceWarning("Failed to set GatewayServerURI in application description of response");
+        status = SOPC_String_AttachFrom(&appDesc->GatewayServerUri, &desc->GatewayServerUri);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Logger_TraceWarning("Failed to set GatewayServerURI in application description of response");
+        }
     }
 
     status = SOPC_String_AttachFrom(&appDesc->ProductUri, &desc->ProductUri);
