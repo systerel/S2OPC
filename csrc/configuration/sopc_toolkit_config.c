@@ -220,6 +220,8 @@ void SOPC_Toolkit_Clear()
         SOPC_Logger_Clear();
         appEventCallback = NULL;
         appAddressSpaceNotificationCallback = NULL;
+        address_space_bs__nodes = NULL;
+        sopc_addressSpace_configured = false;
         // Reset values to init value
         tConfig.initDone = false;
         tConfig.locked = false;
