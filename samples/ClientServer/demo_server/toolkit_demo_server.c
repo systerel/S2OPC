@@ -147,7 +147,7 @@ typedef enum
 #define SHUTDOWN_PHASE_IN_SECONDS 5
 
 /* NodeIds of method for Call Method Service */
-SOPC_NodeId* methodIds[4] = {NULL};
+SOPC_NodeId* methodIds[1] = {NULL};
 uint32_t nbMethodIds = 0;
 
 static SOPC_StatusCode Server_InitDefaultCallMethodService(SOPC_Server_Config* serverConfig);
@@ -156,39 +156,107 @@ static SOPC_StatusCode Server_InitDefaultCallMethodService(SOPC_Server_Config* s
  *                          Callbacks definition
  *---------------------------------------------------------------------------*/
 
-static SOPC_StatusCode SOPC_Method_Func_Test_Generic(const SOPC_NodeId* objectId,
-                                                     uint32_t nbInputArgs,
-                                                     const SOPC_Variant* inputArgs,
-                                                     uint32_t* nbOutputArgs,
-                                                     SOPC_Variant** outputArgs,
-                                                     void* param)
+static SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_getSecurityKeys(const SOPC_NodeId* objectId,
+                                                                         uint32_t nbInputArgs,
+                                                                         const SOPC_Variant* inputArgs,
+                                                                         uint32_t* nbOutputArgs,
+                                                                         SOPC_Variant** outputArgs,
+                                                                         void* param)
 {
-    (void) objectId;
-    (void) nbInputArgs;
+    (void) objectId;    /* Should be "i=15000"*/
+    (void) nbInputArgs; /* Should be 3*/
     (void) inputArgs;
-    *nbOutputArgs = 0;
-    *outputArgs = NULL;
-    (void) param;
-    return SOPC_STATUS_OK;
-}
+    (void) param; /* Should be NULL */
+    *nbOutputArgs = 5;
+    *outputArgs = SOPC_Calloc(5, sizeof(SOPC_Variant));
+    SOPC_StatusCode status = SOPC_STATUS_OK;
+    if (NULL == *outputArgs)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
 
-static SOPC_StatusCode SOPC_Method_Func_Test_CreateSigningRequest(const SOPC_NodeId* objectId,
-                                                                  uint32_t nbInputArgs,
-                                                                  const SOPC_Variant* inputArgs,
-                                                                  uint32_t* nbOutputArgs,
-                                                                  SOPC_Variant** outputArgs,
-                                                                  void* param)
-{
-    (void) objectId;
-    (void) nbInputArgs;
-    (void) inputArgs;
-    *nbOutputArgs = 1;
-    *outputArgs = SOPC_Calloc(1, sizeof(SOPC_Variant));
-    assert(NULL != *outputArgs);
-    SOPC_Variant_Initialize(&((*outputArgs)[0]));
-    (*outputArgs)[0].BuiltInTypeId = SOPC_UInt32_Id;
-    (*outputArgs)[0].Value.Uint32 = 42;
-    (void) param;
+    SOPC_Variant* variant;
+    for (uint32_t i = 0; i < 5; i++)
+    {
+        variant = &((*outputArgs)[i]);
+        SOPC_Variant_Initialize(variant);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        /* SecurityPolicyUri */
+        variant = &((*outputArgs)[0]);
+        variant->BuiltInTypeId = SOPC_String_Id;
+        variant->ArrayType = SOPC_VariantArrayType_SingleValue;
+        SOPC_String_CopyFromCString(&variant->Value.String, SOPC_SecurityPolicy_PubSub_Aes256_URI);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        /* FirstTokenId */
+        variant = &((*outputArgs)[1]);
+        variant->BuiltInTypeId = SOPC_UInt32_Id; /* IntegerId */
+        variant->ArrayType = SOPC_VariantArrayType_SingleValue;
+        variant->Value.Uint32 = 1;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        /* Keys */
+        variant = &((*outputArgs)[2]);
+        variant->BuiltInTypeId = SOPC_ByteString_Id;
+        variant->ArrayType = SOPC_VariantArrayType_Array;
+        // SigningKey + EncryptingKey + KeyNonce
+        variant->Value.Array.Length = 1;
+        variant->Value.Array.Content.BstringArr = SOPC_Calloc(1, sizeof(SOPC_ByteString));
+        if (NULL == *outputArgs)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        else
+        {
+            uint32_t size = 32 + 32 + 4;
+            SOPC_Byte* keys = SOPC_Calloc(size, sizeof(SOPC_Byte));
+            SOPC_Byte j = 0x21;
+            for (uint32_t i = 0; i < size; i++)
+            {
+              keys[i] = j;
+              j++;
+            }
+            SOPC_ByteString_CopyFromBytes(&variant->Value.Array.Content.BstringArr[0], keys, 32 + 32 + 4);
+            SOPC_Free(keys);
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        /* TimeToNextKey */
+        variant = &((*outputArgs)[3]);
+        variant->BuiltInTypeId = SOPC_Double_Id; /* Duration */
+        variant->ArrayType = SOPC_VariantArrayType_SingleValue;
+        variant->Value.Doublev = 0;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        /* KeyLifetime */
+        variant = &((*outputArgs)[4]);
+        variant->BuiltInTypeId = SOPC_Double_Id; /* Duration */
+        variant->ArrayType = SOPC_VariantArrayType_SingleValue;
+        variant->Value.Doublev = 0;
+    }
+
+    if (SOPC_STATUS_OK != status)
+    {
+        for (uint32_t i = 0; i < 5; i++)
+        {
+            variant = &((*outputArgs)[i]);
+            SOPC_Variant_Clear(variant);
+        }
+        SOPC_Free(*outputArgs);
+        *outputArgs = NULL;
+    }
+
     return SOPC_STATUS_OK;
 }
 
@@ -304,6 +372,32 @@ static SOPC_ReturnStatus Server_Initialize(void)
 /*----------------------------------------------------
  * Application description and endpoint configuration:
  *---------------------------------------------------*/
+
+static SOPC_StatusCode Server_InitDefaultCallMethodService(SOPC_Server_Config* serverConfig)
+{
+    SOPC_NodeId* methodId;
+    SOPC_MethodCallFunc_Ptr methodFunc;
+    serverConfig->mcm = SOPC_MethodCallManager_Create();
+    SOPC_StatusCode status = (NULL != serverConfig->mcm) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+    if (SOPC_STATUS_OK == status)
+    {
+        /* Input, output */
+        /* CreateSigningRequest */
+        methodId = SOPC_NodeId_FromCString("i=15001", 7);
+        if (NULL != methodId)
+        {
+            methodIds[nbMethodIds] = methodId;
+            nbMethodIds++;
+            methodFunc = &SOPC_Method_Func_PublishSubscribe_getSecurityKeys;
+            status = SOPC_MethodCallManager_AddMethod(serverConfig->mcm, methodId, methodFunc, NULL, NULL);
+        }
+        else
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+    return status;
+}
 
 /*
  * Default server configuration loader (without XML configuration)
@@ -825,93 +919,6 @@ static SOPC_ReturnStatus Server_ConfigureAddressSpace(SOPC_AddressSpace** output
         }
     }
 
-    return status;
-}
-
-/*-------------------------
- * Method call management :
- *-------------------------*/
-
-static SOPC_StatusCode Server_InitDefaultCallMethodService(SOPC_Server_Config* serverConfig)
-{
-    char* sNodeId;
-    SOPC_NodeId* methodId;
-    SOPC_MethodCallFunc_Ptr methodFunc;
-    serverConfig->mcm = SOPC_MethodCallManager_Create();
-    SOPC_StatusCode status = (NULL != serverConfig->mcm) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
-    if (SOPC_STATUS_OK == status)
-    {
-        /* No input, no output */
-        sNodeId = "ns=1;s=MethodNoArg";
-        methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t) strlen(sNodeId));
-        if (NULL != methodId)
-        {
-            methodIds[nbMethodIds] = methodId;
-            nbMethodIds++;
-            methodFunc = &SOPC_Method_Func_Test_Generic;
-            status =
-                SOPC_MethodCallManager_AddMethod(serverConfig->mcm, methodId, methodFunc, "No input, no output", NULL);
-        }
-        else
-        {
-            status = SOPC_STATUS_NOK;
-        }
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        /* Only input, no output */
-        sNodeId = "ns=1;s=MethodI";
-        methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t) strlen(sNodeId));
-        if (NULL != methodId)
-        {
-            methodIds[nbMethodIds] = methodId;
-            nbMethodIds++;
-            methodFunc = &SOPC_Method_Func_Test_Generic;
-            status = SOPC_MethodCallManager_AddMethod(serverConfig->mcm, methodId, methodFunc, "Only input, no output",
-                                                      NULL);
-        }
-        else
-        {
-            status = SOPC_STATUS_NOK;
-        }
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        /* No input, only output */
-        sNodeId = "ns=1;s=MethodO";
-        methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t) strlen(sNodeId));
-        if (NULL != methodId)
-        {
-            methodIds[nbMethodIds] = methodId;
-            nbMethodIds++;
-            methodFunc = &SOPC_Method_Func_Test_Generic;
-            status = SOPC_MethodCallManager_AddMethod(serverConfig->mcm, methodId, methodFunc, "No input, only output",
-                                                      NULL);
-        }
-        else
-        {
-            status = SOPC_STATUS_NOK;
-        }
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        /* Input, output */
-        sNodeId = "ns=1;s=MethodIO";
-        methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t) strlen(sNodeId));
-        if (NULL != methodId)
-        {
-            methodIds[nbMethodIds] = methodId;
-            nbMethodIds++;
-            methodFunc = &SOPC_Method_Func_Test_CreateSigningRequest;
-            status = SOPC_MethodCallManager_AddMethod(serverConfig->mcm, methodId, methodFunc, "Input, output", NULL);
-        }
-        else
-        {
-            status = SOPC_STATUS_NOK;
-        }
-    }
     return status;
 }
 

@@ -5,3 +5,4 @@ Directory content:
   - `gen-reciprocal-refs-address-space.xslt`: manually run on an address space XML file compliant with `UANodeSet.xsd` schema to generate all reciprocal references in the address space (all reciprocal references shall be defined to be used as address space configuration)
   - `gen-sopc-types.py`: manually run to generate `src/Common/opcua_types/sopc_types[.h|.c]` from OPC UA foundation `Opc.Ua.Types.bsd` file
   - `remove-methods-address-space.xslt`: manually run on an address space XML file compliant with `UANodeSet.xsd` schema to remove all method instance nodes (MethodDeclarationId attribute shall be declared) and their arguments
+  - `remove-pubsub-address-space.xslt`: manually run on an address space XML file compliant with `UANodeSet.xsd` schema to remove PublishSubscribe node
