@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 04/10/2019 15:23:52
+ Date                 : 08/11/2019 16:14:58
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -217,6 +217,26 @@ void io_dispatch_mgr__get_msg_service_class(
    default:
       *io_dispatch_mgr__service_class = constants__e_msg_service_fault_class;
       break;
+   }
+}
+
+void io_dispatch_mgr__l_evaluate_auto_close_secure_channel(
+   t_bool * const io_dispatch_mgr__l_is_one_sc_closing) {
+   {
+      t_bool io_dispatch_mgr__l_is_active;
+      t_bool io_dispatch_mgr__l_has_channel_to_close;
+      constants__t_channel_i io_dispatch_mgr__l_channel_to_close;
+      
+      *io_dispatch_mgr__l_is_one_sc_closing = false;
+      channel_mgr__is_auto_close_channel_active(&io_dispatch_mgr__l_is_active);
+      if (io_dispatch_mgr__l_is_active == true) {
+         service_mgr__find_channel_to_close(&io_dispatch_mgr__l_has_channel_to_close,
+            &io_dispatch_mgr__l_channel_to_close);
+         if (io_dispatch_mgr__l_has_channel_to_close == true) {
+            channel_mgr__close_secure_channel(io_dispatch_mgr__l_channel_to_close);
+            *io_dispatch_mgr__l_is_one_sc_closing = true;
+         }
+      }
    }
 }
 
@@ -450,10 +470,16 @@ void io_dispatch_mgr__server_channel_connected_event(
    const constants__t_channel_config_idx_i io_dispatch_mgr__channel_config_idx,
    const constants__t_channel_i io_dispatch_mgr__channel,
    t_bool * const io_dispatch_mgr__bres) {
-   channel_mgr__srv_new_secure_channel(io_dispatch_mgr__endpoint_config_idx,
-      io_dispatch_mgr__channel_config_idx,
-      io_dispatch_mgr__channel,
-      io_dispatch_mgr__bres);
+   {
+      t_bool io_dispatch_mgr__l_is_one_sc_closing;
+      
+      io_dispatch_mgr__l_evaluate_auto_close_secure_channel(&io_dispatch_mgr__l_is_one_sc_closing);
+      channel_mgr__srv_new_secure_channel(io_dispatch_mgr__endpoint_config_idx,
+         io_dispatch_mgr__channel_config_idx,
+         io_dispatch_mgr__channel,
+         io_dispatch_mgr__l_is_one_sc_closing,
+         io_dispatch_mgr__bres);
+   }
 }
 
 void io_dispatch_mgr__client_activate_new_session(
@@ -464,6 +490,7 @@ void io_dispatch_mgr__client_activate_new_session(
    {
       constants__t_channel_i io_dispatch_mgr__l_channel;
       t_bool io_dispatch_mgr__l_connected_channel;
+      t_bool io_dispatch_mgr__l_is_one_sc_closing;
       
       channel_mgr__is_valid_channel_config_idx(io_dispatch_mgr__channel_config_idx,
          io_dispatch_mgr__bres);
@@ -473,7 +500,9 @@ void io_dispatch_mgr__client_activate_new_session(
          channel_mgr__is_connected_channel(io_dispatch_mgr__l_channel,
             &io_dispatch_mgr__l_connected_channel);
          if (io_dispatch_mgr__l_connected_channel == false) {
+            io_dispatch_mgr__l_evaluate_auto_close_secure_channel(&io_dispatch_mgr__l_is_one_sc_closing);
             channel_mgr__cli_open_secure_channel(io_dispatch_mgr__channel_config_idx,
+               io_dispatch_mgr__l_is_one_sc_closing,
                io_dispatch_mgr__bres);
             if (*io_dispatch_mgr__bres == true) {
                service_mgr__client_async_activate_new_session_without_channel(io_dispatch_mgr__channel_config_idx,
@@ -603,6 +632,7 @@ void io_dispatch_mgr__client_send_discovery_request(
       constants__t_byte_buffer_i io_dispatch_mgr__l_buffer_out;
       constants__t_client_request_handle_i io_dispatch_mgr__l_req_handle;
       constants__t_request_context_i io_dispatch_mgr__l_req_handle_in_req_id;
+      t_bool io_dispatch_mgr__l_is_one_sc_closing;
       
       service_mgr__is_valid_app_msg_out(io_dispatch_mgr__req_msg,
          &io_dispatch_mgr__l_valid_msg,
@@ -616,7 +646,9 @@ void io_dispatch_mgr__client_send_discovery_request(
          channel_mgr__is_connected_channel(io_dispatch_mgr__l_channel,
             &io_dispatch_mgr__l_connected_channel);
          if (io_dispatch_mgr__l_connected_channel == false) {
+            io_dispatch_mgr__l_evaluate_auto_close_secure_channel(&io_dispatch_mgr__l_is_one_sc_closing);
             channel_mgr__cli_open_secure_channel(io_dispatch_mgr__channel_config_idx,
+               io_dispatch_mgr__l_is_one_sc_closing,
                &io_dispatch_mgr__l_bres);
             if (io_dispatch_mgr__l_bres == true) {
                service_mgr__client_async_discovery_request_without_channel(io_dispatch_mgr__channel_config_idx,
@@ -827,6 +859,7 @@ void io_dispatch_mgr__secure_channel_lost(
       constants__t_channel_config_idx_i io_dispatch_mgr__l_channel_config_idx;
       constants__t_channel_i io_dispatch_mgr__l_new_channel;
       t_bool io_dispatch_mgr__l_bres;
+      t_bool io_dispatch_mgr__l_is_one_sc_closing;
       
       channel_mgr__is_connected_channel(io_dispatch_mgr__channel,
          &io_dispatch_mgr__l_connected_channel);
@@ -844,7 +877,9 @@ void io_dispatch_mgr__secure_channel_lost(
                channel_mgr__get_connected_channel(io_dispatch_mgr__l_channel_config_idx,
                   &io_dispatch_mgr__l_new_channel);
                if (io_dispatch_mgr__l_new_channel == constants__c_channel_indet) {
+                  io_dispatch_mgr__l_evaluate_auto_close_secure_channel(&io_dispatch_mgr__l_is_one_sc_closing);
                   channel_mgr__cli_open_secure_channel(io_dispatch_mgr__l_channel_config_idx,
+                     io_dispatch_mgr__l_is_one_sc_closing,
                      &io_dispatch_mgr__l_bres);
                }
                channel_mgr__is_connected_channel(io_dispatch_mgr__l_new_channel,

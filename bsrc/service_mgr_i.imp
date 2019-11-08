@@ -76,6 +76,7 @@ PROMOTES
     server_evaluate_session_timeout,
     get_session_user_server,
     get_local_user,
+    find_channel_to_close,
 
     /* subscription_mgr */
     is_valid_subscription,

@@ -409,5 +409,17 @@ OPERATIONS
     THEN
         p_localeIds :(p_localeIds : t_LocaleIds_i & p_localeIds : t_LocaleIds)
     END
+    ;
+
+    p_has_channel_to_close, p_channel_to_close <-- find_channel_to_close =
+     BEGIN
+         p_has_channel_to_close,
+         p_channel_to_close
+         :(p_has_channel_to_close : BOOL & 
+             p_channel_to_close : t_channel_i &
+             (p_has_channel_to_close = TRUE => p_channel_to_close : s_channel_connected) &
+             (p_has_channel_to_close = FALSE => p_channel_to_close = c_channel_indet)
+         )
+     END
 
 END

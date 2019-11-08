@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.h
 
- Date                 : 04/10/2019 15:23:52
+ Date                 : 08/11/2019 16:47:44
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -42,6 +42,7 @@
 #include "data_value_pointer_bs.h"
 #include "node_id_pointer_bs.h"
 #include "service_mgr.h"
+#include "time_reference_bs.h"
 #include "write_value_pointer_bs.h"
 
 /*--------------
@@ -69,6 +70,8 @@ extern void io_dispatch_mgr__get_msg_header_type(
 extern void io_dispatch_mgr__get_msg_service_class(
    const constants__t_msg_type_i io_dispatch_mgr__msg_typ,
    constants__t_msg_service_class_i * const io_dispatch_mgr__service_class);
+extern void io_dispatch_mgr__l_evaluate_auto_close_secure_channel(
+   t_bool * const io_dispatch_mgr__l_is_one_sc_closing);
 
 /*--------------------
    OPERATIONS Clause

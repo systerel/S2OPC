@@ -21,7 +21,7 @@
 
  File Name            : session_core.c
 
- Date                 : 30/10/2019 12:24:43
+ Date                 : 15/11/2019 08:29:18
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -721,6 +721,59 @@ void session_core__get_session_state_or_closed(
       }
       else {
          *session_core__state = constants__e_session_closed;
+      }
+   }
+}
+
+void session_core__find_channel_to_close(
+   t_bool * const session_core__p_has_channel_to_close,
+   constants__t_channel_i * const session_core__p_channel_to_close) {
+   {
+      t_bool session_core__l_continue;
+      constants__t_channel_i session_core__l_channel;
+      t_bool session_core__l_connected;
+      constants__t_session_i session_core__l_session;
+      constants__t_timeref_i session_core__l_timeref;
+      t_bool session_core__l_is_older_than;
+      constants__t_channel_i session_core__l_oldest_channel;
+      constants__t_timeref_i session_core__l_oldest_channel_timeref;
+      
+      session_core__l_oldest_channel = constants__c_channel_indet;
+      session_core__l_oldest_channel_timeref = constants__c_timeref_indet;
+      session_channel_it__init_iter_channel(&session_core__l_continue);
+      while (session_core__l_continue == true) {
+         session_channel_it__continue_iter_channel(&session_core__l_continue,
+            &session_core__l_channel);
+         channel_mgr__is_connected_channel(session_core__l_channel,
+            &session_core__l_connected);
+         session_core_1__get_channel_session(session_core__l_channel,
+            &session_core__l_session);
+         if ((session_core__l_connected == true) &&
+            (session_core__l_session == constants__c_session_indet)) {
+            channel_mgr__get_connection_time(session_core__l_channel,
+               &session_core__l_timeref);
+            if (session_core__l_oldest_channel_timeref == constants__c_timeref_indet) {
+               session_core__l_oldest_channel_timeref = session_core__l_timeref;
+               session_core__l_oldest_channel = session_core__l_channel;
+            }
+            else {
+               time_reference_bs__is_less_than_TimeReference(session_core__l_timeref,
+                  session_core__l_oldest_channel_timeref,
+                  &session_core__l_is_older_than);
+               if (session_core__l_is_older_than == true) {
+                  session_core__l_oldest_channel_timeref = session_core__l_timeref;
+                  session_core__l_oldest_channel = session_core__l_channel;
+               }
+            }
+         }
+      }
+      if (session_core__l_oldest_channel_timeref == constants__c_timeref_indet) {
+         *session_core__p_has_channel_to_close = false;
+         *session_core__p_channel_to_close = constants__c_channel_indet;
+      }
+      else {
+         *session_core__p_has_channel_to_close = true;
+         *session_core__p_channel_to_close = session_core__l_oldest_channel;
       }
    }
 }

@@ -21,7 +21,7 @@
 
  File Name            : channel_mgr.h
 
- Date                 : 04/10/2019 15:23:35
+ Date                 : 08/11/2019 16:47:43
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -47,6 +47,7 @@
   --------------*/
 #include "constants.h"
 #include "constants_statuscodes_bs.h"
+#include "time_reference_bs.h"
 
 /*----------------------------
    CONCRETE_VARIABLES Clause
@@ -65,6 +66,7 @@ extern void channel_mgr__INITIALISATION(void);
 #define channel_mgr__get_SecurityPolicy channel_mgr_bs__get_SecurityPolicy
 #define channel_mgr__get_channel_info channel_mgr_1__get_channel_info
 #define channel_mgr__get_connected_channel channel_mgr_1__get_connected_channel
+#define channel_mgr__get_connection_time channel_mgr_1__get_connection_time
 #define channel_mgr__is_client_channel channel_mgr_1__is_client_channel
 #define channel_mgr__is_connected_channel channel_mgr_1__is_connected_channel
 #define channel_mgr__is_disconnecting_channel channel_mgr_1__is_disconnecting_channel
@@ -80,6 +82,9 @@ extern void channel_mgr__INITIALISATION(void);
 extern void channel_mgr__l_check_all_channel_lost(void);
 extern void channel_mgr__l_close_secure_channel(
    const constants__t_channel_i channel_mgr__p_channel);
+extern void channel_mgr__l_is_new_sc_connection_allowed(
+   const t_bool channel_mgr__is_one_sc_auto_closing,
+   t_bool * const channel_mgr__l_allowed_new_sc);
 
 /*--------------------
    OPERATIONS Clause
@@ -88,6 +93,7 @@ extern void channel_mgr__channel_lost(
    const constants__t_channel_i channel_mgr__channel);
 extern void channel_mgr__cli_open_secure_channel(
    const constants__t_channel_config_idx_i channel_mgr__config_idx,
+   const t_bool channel_mgr__is_one_sc_auto_closing,
    t_bool * const channel_mgr__bres);
 extern void channel_mgr__cli_set_connected_channel(
    const constants__t_channel_config_idx_i channel_mgr__config_idx,
@@ -100,10 +106,13 @@ extern void channel_mgr__close_all_channel(
    t_bool * const channel_mgr__bres);
 extern void channel_mgr__close_secure_channel(
    const constants__t_channel_i channel_mgr__channel);
+extern void channel_mgr__is_auto_close_channel_active(
+   t_bool * const channel_mgr__p_auto_closed_active);
 extern void channel_mgr__srv_new_secure_channel(
    const constants__t_endpoint_config_idx_i channel_mgr__endpoint_config_idx,
    const constants__t_channel_config_idx_i channel_mgr__channel_config_idx,
    const constants__t_channel_i channel_mgr__channel,
+   const t_bool channel_mgr__is_one_sc_auto_closing,
    t_bool * const channel_mgr__bres);
 
 #endif

@@ -21,7 +21,7 @@
 
  File Name            : toolkit_header_init.c
 
- Date                 : 04/10/2019 15:30:57
+ Date                 : 08/11/2019 16:48:22
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -103,6 +103,7 @@
 #include "service_set_view.h"
 #include "service_unregister_nodes.h"
 #include "service_write_decode_bs.h"
+#include "session_channel_it.h"
 #include "session_core.h"
 #include "session_core_1.h"
 #include "session_core_1_it.h"
@@ -118,6 +119,7 @@
 #include "subscription_core_it.h"
 #include "subscription_create_monitored_item_it.h"
 #include "subscription_mgr.h"
+#include "time_reference_bs.h"
 #include "toolkit_header.h"
 #include "translate_browse_path.h"
 #include "translate_browse_path_1.h"
@@ -143,6 +145,7 @@ void INITIALISATION(void) {
    channel_mgr_1__INITIALISATION();
    channel_mgr_it__INITIALISATION();
    channel_mgr_bs__INITIALISATION();
+   time_reference_bs__INITIALISATION();
    channel_mgr__INITIALISATION();
    service_mgr_bs__INITIALISATION();
    session_core_1_it__INITIALISATION();
@@ -150,6 +153,7 @@ void INITIALISATION(void) {
    session_core_bs__INITIALISATION();
    session_core_1__INITIALISATION();
    session_core_it__INITIALISATION();
+   session_channel_it__INITIALISATION();
    session_core__INITIALISATION();
    session_mgr_it__INITIALISATION();
    session_request_handle_bs__INITIALISATION();

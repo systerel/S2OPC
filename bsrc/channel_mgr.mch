@@ -29,6 +29,7 @@ DEFINITIONS
     s_cli_channel_connecting,
     s_cli_channel_disconnecting,
     s_channel_connected,
+    a_channel_connected_time,
     a_config,
     a_endpoint,
     a_SecurityPolicy;
@@ -37,6 +38,7 @@ DEFINITIONS
     s_cli_channel_connecting <: t_channel_config_idx &
     s_cli_channel_disconnecting <: t_channel_config_idx &
     s_channel_connected <: t_channel &
+    a_channel_connected_time : t_channel +-> t_timeref &
     /* each created channel has a configuration
        and there is at most 1 channel per configuration */
     a_config : s_channel_connected >-> t_channel_config_idx &
@@ -55,10 +57,11 @@ INITIALISATION
 
 OPERATIONS
 
-    bres <-- cli_open_secure_channel (config_idx) =
+    bres <-- cli_open_secure_channel (config_idx, is_one_sc_auto_closing) =
     PRE
         config_idx : t_channel_config_idx_i &
-        config_idx : t_channel_config_idx
+        config_idx : t_channel_config_idx &
+        is_one_sc_auto_closing : BOOL /* TRUE => a SC has been closed by auto-close prior to calling this operation */
     THEN
         bres,
         s_cli_channel_connecting
@@ -68,14 +71,15 @@ OPERATIONS
     END
     ;
 
-    bres <-- srv_new_secure_channel (endpoint_config_idx, channel_config_idx, channel) =
+    bres <-- srv_new_secure_channel (endpoint_config_idx, channel_config_idx, channel, is_one_sc_auto_closing) =
     PRE
         endpoint_config_idx : t_endpoint_config_idx_i &
         endpoint_config_idx : t_endpoint_config_idx &
         channel_config_idx : t_channel_config_idx_i &
         channel_config_idx : t_channel_config_idx &
         channel : t_channel_i &
-        channel : t_channel
+        channel : t_channel &
+        is_one_sc_auto_closing : BOOL /* TRUE => a SC has been closed by auto-close prior to calling this operation */
     THEN
        bres,
        s_channel_connected,
@@ -288,5 +292,19 @@ OPERATIONS
     THEN
         skip
     END
+    ;
 
+    p_timeref <-- get_connection_time(p_channel) =
+    PRE
+        p_channel : t_channel_i &
+        p_channel : s_channel_connected
+    THEN
+        p_timeref :(p_timeref : t_timeref_i & p_timeref = a_channel_connected_time(p_channel))
+    END
+    ;
+    
+    p_auto_closed_active <-- is_auto_close_channel_active =
+    BEGIN
+        p_auto_closed_active := bool(card(s_cli_channel_connecting) + card(s_channel_connected) > 3 * card(t_channel) / 4)
+    END
 END

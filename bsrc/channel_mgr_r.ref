@@ -29,9 +29,11 @@ SEES
 
 DEFINITIONS
     d_variables ==
+    
     s_cli_channel_connecting,
     s_cli_channel_disconnecting,
     s_channel_connected,
+    a_channel_connected_time,
     a_config,
     a_endpoint,
     a_SecurityPolicy
@@ -43,16 +45,20 @@ INITIALISATION
     s_cli_channel_connecting    := {} ||
     s_cli_channel_disconnecting := {} ||
     s_channel_connected         := {} ||
+    a_channel_connected_time    := {} ||
     a_config                    := {} ||
     a_endpoint                  := {} ||
     a_SecurityPolicy            := {}
 
 OPERATIONS
 
-    bres <-- cli_open_secure_channel (config_idx) =
+    bres <-- cli_open_secure_channel (config_idx, is_one_sc_auto_closing) =
     BEGIN
        IF  config_idx /: dom(a_config~) &
-           card(s_cli_channel_connecting) + card(s_channel_connected) /= card(t_channel)
+           card(s_cli_channel_connecting) + card(s_channel_connected) /= card(t_channel) & /* No slot remaining */
+           (card(s_cli_channel_connecting) + card(s_channel_connected) /= card(t_channel) - 1
+            or is_one_sc_auto_closing = TRUE)  /* 1 slot is always kept for auto closing evaluation 
+                                                 (if a SC is already auto closing it is used because 1 will be released soon) */
        THEN
            s_cli_channel_connecting := s_cli_channel_connecting \/ {config_idx} ||
            bres := TRUE
@@ -62,10 +68,14 @@ OPERATIONS
     END
     ;
 
-    bres <-- srv_new_secure_channel (endpoint_config_idx, channel_config_idx, channel) =
+    bres <-- srv_new_secure_channel (endpoint_config_idx, channel_config_idx, channel, is_one_sc_auto_closing) =
     BEGIN
         IF channel /: s_channel_connected &
-           channel_config_idx /: ran(a_config)
+            channel_config_idx /: ran(a_config) &
+            card(s_cli_channel_connecting) + card(s_channel_connected) /= card(t_channel) & /* No slot remaining */
+           (card(s_cli_channel_connecting) + card(s_channel_connected) /= card(t_channel) - 1
+            or is_one_sc_auto_closing = TRUE)  /* 1 slot is always kept for auto closing evaluation 
+                                                 (if a SC is already auto closing it is used because 1 will be released soon) */
         THEN
             s_channel_connected := s_channel_connected \/ {channel} ||
             a_config(channel)   := channel_config_idx ||
@@ -88,8 +98,9 @@ OPERATIONS
         channel : t_channel_i &
         channel : t_channel
     THEN
-        IF channel : s_channel_connected
+        IF channel : s_channel_connected & channel /: dom(a_endpoint)
         THEN
+            /* client case only */
             s_cli_channel_disconnecting := s_cli_channel_disconnecting \/ {a_config(channel)}
         END
     END;

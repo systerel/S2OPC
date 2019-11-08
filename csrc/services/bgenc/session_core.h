@@ -21,7 +21,7 @@
 
  File Name            : session_core.h
 
- Date                 : 30/10/2019 15:48:49
+ Date                 : 08/11/2019 16:47:52
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -38,6 +38,7 @@
 /*-----------------
    IMPORTS Clause
   -----------------*/
+#include "session_channel_it.h"
 #include "session_core_1.h"
 #include "session_core_it.h"
 
@@ -50,6 +51,7 @@
 #include "message_in_bs.h"
 #include "message_out_bs.h"
 #include "request_handle_bs.h"
+#include "time_reference_bs.h"
 
 /*------------------------
    INITIALISATION Clause
@@ -153,6 +155,9 @@ extern void session_core__client_user_activate_session_req_sm(
    constants_statuscodes_bs__t_StatusCode_i * const session_core__ret,
    constants__t_channel_i * const session_core__channel,
    constants__t_session_token_i * const session_core__session_token);
+extern void session_core__find_channel_to_close(
+   t_bool * const session_core__p_has_channel_to_close,
+   constants__t_channel_i * const session_core__p_channel_to_close);
 extern void session_core__get_session_state_or_closed(
    const constants__t_session_i session_core__session,
    constants__t_sessionState * const session_core__state);

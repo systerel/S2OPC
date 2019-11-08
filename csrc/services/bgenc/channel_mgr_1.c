@@ -21,7 +21,7 @@
 
  File Name            : channel_mgr_1.c
 
- Date                 : 04/10/2019 15:23:30
+ Date                 : 15/11/2019 08:29:07
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -35,6 +35,7 @@
 /*----------------------------
    CONCRETE_VARIABLES Clause
   ----------------------------*/
+constants__t_timeref_i channel_mgr_1__a_channel_connected_time_i[constants__t_channel_i_max+1];
 constants__t_channel_config_idx_i channel_mgr_1__a_config_i[constants__t_channel_i_max+1];
 constants__t_channel_i channel_mgr_1__a_config_inv_i[constants__t_channel_config_idx_i_max+1];
 constants__t_endpoint_config_idx_i channel_mgr_1__a_endpoint_i[constants__t_channel_i_max+1];
@@ -68,6 +69,12 @@ void channel_mgr_1__INITIALISATION(void) {
       }
    }
    channel_mgr_1__card_channel_connected_i = 0;
+   {
+      t_entier4 i;
+      for (i = constants__t_channel_i_max; 0 <= i; i = i - 1) {
+         channel_mgr_1__a_channel_connected_time_i[i] = constants__c_timeref_indet;
+      }
+   }
    {
       t_entier4 i;
       for (i = constants__t_channel_i_max; 0 <= i; i = i - 1) {
@@ -189,6 +196,12 @@ void channel_mgr_1__get_card_channel_connected(
    *channel_mgr_1__p_card_connected = channel_mgr_1__card_channel_connected_i;
 }
 
+void channel_mgr_1__get_card_channel_used(
+   t_entier4 * const channel_mgr_1__p_card_used) {
+   *channel_mgr_1__p_card_used = channel_mgr_1__card_cli_channel_connecting_i +
+      channel_mgr_1__card_channel_connected_i;
+}
+
 void channel_mgr_1__add_cli_channel_connecting(
    const constants__t_channel_config_idx_i channel_mgr_1__p_config_idx) {
    {
@@ -210,7 +223,8 @@ void channel_mgr_1__is_channel_connected(
 }
 
 void channel_mgr_1__add_channel_connected(
-   const constants__t_channel_i channel_mgr_1__p_channel) {
+   const constants__t_channel_i channel_mgr_1__p_channel,
+   const constants__t_timeref_i channel_mgr_1__p_timeref) {
    {
       t_bool channel_mgr_1__l_res;
       
@@ -219,6 +233,7 @@ void channel_mgr_1__add_channel_connected(
          channel_mgr_1__s_channel_connected_i[channel_mgr_1__p_channel] = true;
          channel_mgr_1__card_channel_connected_i = channel_mgr_1__card_channel_connected_i +
             1;
+         channel_mgr_1__a_channel_connected_time_i[channel_mgr_1__p_channel] = channel_mgr_1__p_timeref;
       }
    }
 }
@@ -269,6 +284,7 @@ void channel_mgr_1__remove_channel_connected(
          channel_mgr_1__s_channel_connected_i[channel_mgr_1__p_channel] = false;
          channel_mgr_1__card_channel_connected_i = channel_mgr_1__card_channel_connected_i -
             1;
+         channel_mgr_1__a_channel_connected_time_i[channel_mgr_1__p_channel] = constants__c_timeref_indet;
       }
    }
 }
@@ -306,5 +322,11 @@ void channel_mgr_1__remove_cli_channel_connecting(
             1;
       }
    }
+}
+
+void channel_mgr_1__get_connection_time(
+   const constants__t_channel_i channel_mgr_1__p_channel,
+   constants__t_timeref_i * const channel_mgr_1__p_timeref) {
+   *channel_mgr_1__p_timeref = channel_mgr_1__a_channel_connected_time_i[channel_mgr_1__p_channel];
 }
 

@@ -43,7 +43,8 @@ PROMOTES
     server_close_session_sm,
     get_session_user_server,
     get_local_user,
-    get_server_session_preferred_locales
+    get_server_session_preferred_locales,
+    find_channel_to_close
 
 LOCAL_OPERATIONS
 

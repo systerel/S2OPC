@@ -285,6 +285,18 @@ OPERATIONS
     END
     ;
 
+    p_session <-- get_channel_session (p_channel) =
+    PRE
+        p_channel : t_channel_i &
+        p_channel : t_channel
+    THEN
+        p_session 
+        :(p_session : t_session_i &
+            (p_channel : dom(a_channel~) => p_session = a_channel~(p_channel)) &
+            (p_channel /: dom(a_channel~) => p_session = c_session_indet)
+        )
+    END
+    ;
 
     p_dom, p_channel_config_idx <-- getall_to_create(p_session) =
     PRE

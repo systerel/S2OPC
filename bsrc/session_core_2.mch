@@ -38,7 +38,7 @@ ABSTRACT_VARIABLES
 INVARIANT
     s_session         <: t_session                            &
     a_state            : t_session +-> t_sessionState         &
-    a_channel          : t_session +-> t_channel              &
+    a_channel          : t_session >+> t_channel              &
     a_client_to_create : t_session +-> t_channel_config_idx_i &
     a_client_orphaned  : t_session +-> t_channel_config_idx_i &
     a_server_client_locales : t_session --> t_LocaleIds
@@ -164,6 +164,19 @@ OPERATIONS
     THEN
         channel :(channel : t_channel_i &
                   channel = a_channel(session))
+    END
+    ;
+
+    p_session <-- get_channel_session (p_channel) =
+    PRE
+        p_channel : t_channel_i &
+        p_channel : t_channel
+    THEN
+        p_session 
+        :(p_session : t_session_i &
+            (p_channel : dom(a_channel~) => p_session = a_channel~(p_channel)) &
+            (p_channel /: dom(a_channel~) => p_session = c_session_indet)
+        )
     END
     ;
 

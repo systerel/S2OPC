@@ -114,8 +114,8 @@ typedef SOPC_ExtensionObject* constants_bs__t_user_token_i;
 /*--------------------------
    Added by the Translator
   --------------------------*/
-#define constants_bs__t_channel_config_idx_i_max (2 * SOPC_MAX_SECURE_CONNECTIONS)
-#define constants_bs__t_channel_i_max SOPC_MAX_SECURE_CONNECTIONS
+#define constants_bs__t_channel_config_idx_i_max (2 * SOPC_MAX_SECURE_CONNECTIONS_PLUS_1)
+#define constants_bs__t_channel_i_max SOPC_MAX_SECURE_CONNECTIONS_PLUS_1
 #define constants_bs__t_endpoint_config_idx_i_max SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS
 #define constants_bs__t_session_i_max SOPC_MAX_SESSIONS
 #define constants_bs__t_subscription_i_max SOPC_MAX_SESSIONS // 1 sub / session

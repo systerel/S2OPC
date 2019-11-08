@@ -28,6 +28,7 @@ DEFINITIONS
     s_cli_channel_connecting,
     s_cli_channel_disconnecting,
     s_channel_connected,
+    a_channel_connected_time,
     a_config,
     a_endpoint
     ;
@@ -36,6 +37,8 @@ DEFINITIONS
     s_cli_channel_connecting    <: t_channel_config_idx                &
     s_cli_channel_disconnecting <: t_channel_config_idx                &
     s_channel_connected         <: t_channel                           &
+    a_channel_connected_time     : t_channel +-> t_timeref             &
+    dom(a_channel_connected_time) = s_channel_connected                &
     a_config                     : t_channel +-> t_channel_config_idx  &
     a_endpoint                   : t_channel +-> t_endpoint_config_idx
 
@@ -49,6 +52,7 @@ INITIALISATION
     s_cli_channel_connecting    := {} ||
     s_cli_channel_disconnecting := {} ||
     s_channel_connected         := {} ||
+    a_channel_connected_time    := {} ||
     a_config                    := {} ||
     a_endpoint                  := {}
 
@@ -147,6 +151,12 @@ OPERATIONS
     END
     ;
 
+    p_card_used <-- get_card_channel_used =
+    BEGIN
+        p_card_used := card(s_cli_channel_connecting) + card(s_channel_connected)
+    END
+    ;
+
     add_cli_channel_connecting(p_config_idx) =
     PRE
         p_config_idx : t_channel_config_idx_i &
@@ -165,12 +175,21 @@ OPERATIONS
     END
     ;
 
-    add_channel_connected(p_channel) =
+    add_channel_connected(p_channel, p_timeref) =
     PRE
         p_channel : t_channel_i &
-        p_channel : t_channel
+        p_channel : t_channel   &
+        p_timeref : t_timeref_i &
+        p_timeref : t_timeref
     THEN
-        s_channel_connected := s_channel_connected \/ {p_channel}
+        s_channel_connected,
+        a_channel_connected_time
+        :(s_channel_connected = s_channel_connected$0 \/ {p_channel} &
+          (p_channel : s_channel_connected => 
+              a_channel_connected_time = a_channel_connected_time$0) &
+          (p_channel /: s_channel_connected => 
+              a_channel_connected_time = a_channel_connected_time$0 <+ {p_channel |-> p_timeref})
+          )
     END
     ;
 
@@ -233,7 +252,8 @@ OPERATIONS
         p_channel : t_channel_i &
         p_channel : t_channel
     THEN
-        s_channel_connected := s_channel_connected - {p_channel}
+        s_channel_connected := s_channel_connected - {p_channel} ||
+        a_channel_connected_time := {p_channel} <<| a_channel_connected_time
     END
     ;
 
@@ -270,6 +290,15 @@ OPERATIONS
         p_config_idx : t_channel_config_idx
     THEN
         s_cli_channel_connecting := s_cli_channel_connecting - {p_config_idx}
+    END
+    ;
+
+    p_timeref <-- get_connection_time(p_channel) =
+    PRE
+        p_channel : t_channel_i &
+        p_channel : s_channel_connected
+    THEN
+        p_timeref :(p_timeref : t_timeref_i & p_timeref = a_channel_connected_time(p_channel))
     END
 
 END

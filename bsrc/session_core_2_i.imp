@@ -34,6 +34,7 @@ CONCRETE_VARIABLES
     s_session_i,
     a_state_i,
     a_channel_i,
+    a_reverse_channel_i,
     a_client_to_create_i,
     a_client_orphaned_i,
     a_server_client_locales_i
@@ -42,6 +43,7 @@ INVARIANT
     s_session_i          : t_session_i --> BOOL                                      &
     a_state_i            : t_session_i --> t_sessionState                            &
     a_channel_i          : t_session_i --> t_channel_i                               &
+    a_reverse_channel_i  : t_channel_i --> t_session_i                               &
     a_client_to_create_i : t_session_i --> t_channel_config_idx_i                    &
     a_client_orphaned_i  : t_session_i --> t_channel_config_idx_i                    &
     a_server_client_locales_i : t_session_i --> t_LocaleIds_i                        &
@@ -49,6 +51,7 @@ INVARIANT
     dom(a_state)         = s_session                                                 &
     a_state             <: a_state_i                                                 &
     a_channel            = t_session <| a_channel_i |> t_channel                     &
+    a_channel~           = t_channel <| a_reverse_channel_i |> t_session             &
     a_client_to_create   = t_session <| a_client_to_create_i |> t_channel_config_idx &
     a_client_orphaned    = t_session <| a_client_orphaned_i |> t_channel_config_idx  &
     a_server_client_locales = t_session <| a_server_client_locales_i
@@ -57,6 +60,7 @@ INITIALISATION
     s_session_i  := t_session_i * {FALSE};
     a_state_i    := t_session_i * {e_session_closed};
     a_channel_i  := t_session_i * {c_channel_indet};
+    a_reverse_channel_i := t_channel_i * {c_session_indet};
     a_client_to_create_i := t_session_i * {c_channel_config_idx_indet};
     a_client_orphaned_i := t_session_i * {c_channel_config_idx_indet};
     a_server_client_locales_i := t_session_i * {c_LocaleIds_empty}
@@ -78,6 +82,7 @@ OPERATIONS
 
     reset_session_channel(p_session) =
     BEGIN
+        a_reverse_channel_i(a_channel_i(p_session)) := c_session_indet;
         a_channel_i(p_session) := c_channel_indet
     END
     ;
@@ -114,7 +119,9 @@ OPERATIONS
 
     set_session_channel (session, channel) =
     BEGIN
-        a_channel_i(session) := channel
+        a_reverse_channel_i(a_channel_i(session)) := c_session_indet;
+        a_channel_i(session) := channel;
+        a_reverse_channel_i(channel) := session
     END
     ;
 
@@ -128,6 +135,12 @@ OPERATIONS
     channel <-- get_session_channel (session) =
     BEGIN
         channel := a_channel_i(session)
+    END
+    ;
+    
+    p_session <-- get_channel_session (p_channel) =
+    BEGIN
+        p_session := a_reverse_channel_i(p_channel)
     END
     ;
 

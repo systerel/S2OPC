@@ -32,11 +32,13 @@ SEES
     message_in_bs,
     message_out_bs,
     channel_mgr,
-    request_handle_bs
+    request_handle_bs,
+    time_reference_bs
 
 IMPORTS
     session_core_1,
-    session_core_it
+    session_core_it,
+    session_channel_it
 
 PROMOTES
     server_get_session_from_token,
@@ -286,7 +288,6 @@ LOCAL_OPERATIONS
             )
         )
     END
-
 
 OPERATIONS
 
@@ -826,6 +827,75 @@ OPERATIONS
             state <-- get_session_state (session)
         ELSE
             state := e_session_closed
+        END
+    END
+    ;
+
+    p_has_channel_to_close, p_channel_to_close <-- find_channel_to_close =
+    VAR
+        l_continue,
+        l_channel,
+        l_connected,
+        l_session,
+        l_timeref,
+        l_is_older_than,
+        l_oldest_channel,
+        l_oldest_channel_timeref
+    IN
+        l_oldest_channel := c_channel_indet;
+        l_oldest_channel_timeref := c_timeref_indet;
+        l_continue <-- init_iter_channel;
+        WHILE
+            l_continue = TRUE
+        DO
+            l_continue, l_channel <-- continue_iter_channel;
+            l_connected <-- is_connected_channel(l_channel);
+            l_session <-- get_channel_session(l_channel);
+            IF l_connected = TRUE & l_session = c_session_indet
+            THEN
+                l_timeref <-- get_connection_time(l_channel);
+                IF l_oldest_channel_timeref = c_timeref_indet
+                THEN
+                    /* first secure channel we are allowed to close found */
+                    l_oldest_channel_timeref := l_timeref;
+                    l_oldest_channel := l_channel
+                ELSE
+                    l_is_older_than <-- is_less_than_TimeReference(l_timeref, l_oldest_channel_timeref);
+                    IF l_is_older_than = TRUE
+                    THEN
+                        /* older secure channel to close found */
+                        l_oldest_channel_timeref := l_timeref;
+                        l_oldest_channel := l_channel
+                    END
+                END
+            END // ELSE: we cannot close a channel with a session
+        INVARIANT
+            channels_to_iterate <: t_channel &
+            channels_iterated   <: t_channel &
+            channels_to_iterate /\ channels_iterated = {} &
+            channels_to_iterate \/ channels_iterated = t_channel &
+            (channels_iterated /\ s_channel_connected - ran(a_channel) /= {} =>
+                !(p_channel).(p_channel : channels_iterated /\ s_channel_connected - ran(a_channel) =>
+                    /* Oldest timeref is less than any other timeref */
+                    (l_oldest_channel_timeref /= a_channel_connected_time(p_channel) =>
+                      l_oldest_channel_timeref |-> a_channel_connected_time(p_channel) : TimeReference_IsLessThan) &
+                    l_oldest_channel : a_channel_connected_time~[{l_oldest_channel_timeref}]
+                )
+            ) &
+            (channels_iterated /\ s_channel_connected - ran(a_channel) = {} =>
+                l_oldest_channel_timeref = c_timeref_indet &
+                l_oldest_channel = c_channel_indet
+            )
+        VARIANT
+            card(channels_to_iterate)
+        END;
+        IF l_oldest_channel_timeref = c_timeref_indet
+        THEN
+            p_has_channel_to_close := FALSE;
+            p_channel_to_close := c_channel_indet
+        ELSE
+            p_has_channel_to_close := TRUE;
+            p_channel_to_close := l_oldest_channel
         END
     END
 

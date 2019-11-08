@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.h
 
- Date                 : 31/10/2019 10:59:06
+ Date                 : 08/11/2019 16:15:01
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -83,6 +83,7 @@ extern void service_mgr__INITIALISATION(void);
 #define service_mgr__client_secure_channel_lost_session_sm session_mgr__client_secure_channel_lost_session_sm
 #define service_mgr__dealloc_msg_out message_out_bs__dealloc_msg_out
 #define service_mgr__decode_msg_type message_in_bs__decode_msg_type
+#define service_mgr__find_channel_to_close session_mgr__find_channel_to_close
 #define service_mgr__get_local_user session_mgr__get_local_user
 #define service_mgr__get_session_user_server session_mgr__get_session_user_server
 #define service_mgr__is_valid_app_msg_in message_in_bs__is_valid_app_msg_in

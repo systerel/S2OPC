@@ -98,8 +98,9 @@ static void onSecureChannelEvent(SOPC_EventHandler* handler,
         io_dispatch_mgr__server_channel_connected_event(id, channel_config_idx, (uint32_t) auxParam, &bres);
         if (bres == false)
         {
-            SOPC_Logger_TraceError("Services: channel state incoherent epCfgIdx=%" PRIu32 " scIdx=%" PRIuPTR, id,
-                                   auxParam);
+            SOPC_Logger_TraceError("Services: channel state incoherent or maximum reached epCfgIdx=%" PRIu32
+                                   " scIdx=%" PRIuPTR,
+                                   id, auxParam);
 
             SOPC_SecureChannels_EnqueueEvent(SC_DISCONNECT, (uint32_t) auxParam, (uintptr_t) NULL, 0);
         }

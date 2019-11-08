@@ -32,6 +32,7 @@ CONCRETE_VARIABLES
     s_cli_channel_disconnecting_i,
     s_channel_connected_i,
     card_channel_connected_i,
+    a_channel_connected_time_i,
     a_config_i,
     a_config_inv_i,
     a_endpoint_i
@@ -42,6 +43,7 @@ INVARIANT
     s_cli_channel_disconnecting_i : t_channel_config_idx_i --> BOOL         &
     s_channel_connected_i         : t_channel_i            --> BOOL         &
     card_channel_connected_i      : NAT                                     &
+    a_channel_connected_time_i    : t_channel_i --> t_timeref_i             &
     a_config_i                    : t_channel_i --> t_channel_config_idx_i  &
     a_config_inv_i                : t_channel_config_idx_i --> t_channel_i  &
     a_endpoint_i                  : t_channel_i --> t_endpoint_config_idx_i &
@@ -51,6 +53,7 @@ INVARIANT
     s_cli_channel_disconnecting   = s_cli_channel_disconnecting_i~[{TRUE}] /\ t_channel_config_idx &
     s_channel_connected           = s_channel_connected_i~[{TRUE}]                                 &
     card_channel_connected_i      = card(s_channel_connected)                                      &
+    a_channel_connected_time      = s_channel_connected <| a_channel_connected_time_i |> t_timeref &
     a_config                      = t_channel            <| a_config_i     |> t_channel_config_idx &
     a_config~                     = t_channel_config_idx <| a_config_inv_i |> t_channel
 
@@ -60,6 +63,7 @@ INITIALISATION
     s_cli_channel_disconnecting_i := t_channel_config_idx_i * {FALSE};
     s_channel_connected_i         := t_channel_i            * {FALSE};
     card_channel_connected_i      := 0;
+    a_channel_connected_time_i    := t_channel_i            * {c_timeref_indet};
     a_config_i                    := t_channel_i            * {c_channel_config_idx_indet};
     a_config_inv_i                := t_channel_config_idx_i * {c_channel_indet};
     a_endpoint_i                  := t_channel_i            * {c_endpoint_config_idx_indet}
@@ -151,6 +155,12 @@ OPERATIONS
     END
     ;
 
+    p_card_used <-- get_card_channel_used =
+    BEGIN
+        p_card_used := card_cli_channel_connecting_i + card_channel_connected_i
+    END
+    ;
+
     add_cli_channel_connecting(p_config_idx) =
     VAR
         l_res
@@ -169,14 +179,15 @@ OPERATIONS
     END
     ;
 
-    add_channel_connected(p_channel) =
+    add_channel_connected(p_channel, p_timeref) =
     VAR
         l_res
     IN
         l_res := s_channel_connected_i(p_channel);
         IF  l_res = FALSE THEN
             s_channel_connected_i(p_channel) := TRUE;
-            card_channel_connected_i := card_channel_connected_i + 1
+            card_channel_connected_i := card_channel_connected_i + 1;
+            a_channel_connected_time_i(p_channel) := p_timeref
         END
     END
     ;
@@ -223,7 +234,8 @@ OPERATIONS
         l_res := s_channel_connected_i(p_channel);
         IF  l_res = TRUE THEN
             s_channel_connected_i(p_channel) := FALSE;
-            card_channel_connected_i := card_channel_connected_i - 1
+            card_channel_connected_i := card_channel_connected_i - 1;
+            a_channel_connected_time_i(p_channel) := c_timeref_indet
         END
     END
     ;
@@ -259,6 +271,12 @@ OPERATIONS
             s_cli_channel_connecting_i(p_config_idx) := FALSE;
             card_cli_channel_connecting_i := card_cli_channel_connecting_i - 1
         END
+    END
+    ;
+    
+    p_timeref <-- get_connection_time(p_channel) =
+    BEGIN
+        p_timeref := a_channel_connected_time_i(p_channel)
     END
 
 END
