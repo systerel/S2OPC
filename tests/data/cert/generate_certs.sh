@@ -23,6 +23,8 @@ touch index.txt
 touch index.txt.attr
 echo 00 > serial.txt  # Current serial
 CONF_FILE=cassl.cnf
+CONF_CLI=cli_req.cnf
+CONF_SRV=srv_req.cnf
 CA_KEY=cakey.pem
 CA_CERT=cacert.pem
 
@@ -35,15 +37,21 @@ openssl req -config $CONF_FILE -new -x509 -key $CA_KEY -out $CA_CERT -days 36500
 openssl ca -config $CONF_FILE -gencrl -crldays 36500 -out cacrl.pem
 openssl crl -in cacrl.pem -outform der -out cacrl.der
 
-# Generate, for both client and server, and both 2048 and 4096 key lengths, a new key pair and sign them, for the next century
+# Generate, for both client and server, and both 2048 and 4096 key lengths, a new key pair
 openssl req -config $CONF_FILE -extensions server_cert -sha256 -nodes -newkey rsa:2048 -keyout client_2k_key.pem -out client_2k.csr
 openssl req -config $CONF_FILE -extensions server_cert -sha256 -nodes -newkey rsa:4096 -keyout client_4k_key.pem -out client_4k.csr
 openssl req -config $CONF_FILE -extensions server_cert -sha256 -nodes -newkey rsa:2048 -keyout server_2k_key.pem -out server_2k.csr
 openssl req -config $CONF_FILE -extensions server_cert -sha256 -nodes -newkey rsa:4096 -keyout server_4k_key.pem -out server_4k.csr
-openssl ca -batch -config $CONF_FILE -policy signing_policy -days 36500 -in client_2k.csr -out client_2k_cert.pem
-openssl ca -batch -config $CONF_FILE -policy signing_policy -days 36500 -in client_4k.csr -out client_4k_cert.pem
-openssl ca -batch -config $CONF_FILE -policy signing_policy -days 36500 -in server_2k.csr -out server_2k_cert.pem
-openssl ca -batch -config $CONF_FILE -policy signing_policy -days 36500 -in server_4k.csr -out server_4k_cert.pem
+# Or create csr for existing certificates
+#openssl req -new -config $CONF_CLI -sha256 -key client_2k_key.pem -reqexts client_cert -out client_2k.csr
+#openssl req -new -config $CONF_CLI -sha256 -key client_4k_key.pem -reqexts client_cert -out client_4k.csr
+#openssl req -new -config $CONF_SRV -sha256 -key server_2k_key.pem -reqexts server_cert -out server_2k.csr
+#openssl req -new -config $CONF_SRV -sha256 -key server_4k_key.pem -reqexts server_cert -out server_4k.csr
+# And sign them, for the next century
+openssl ca -batch -config $CONF_FILE -policy signing_policy -extensions client_signing_req -days 36500 -in client_2k.csr -out client_2k_cert.pem
+openssl ca -batch -config $CONF_FILE -policy signing_policy -extensions client_signing_req -days 36500 -in client_4k.csr -out client_4k_cert.pem
+openssl ca -batch -config $CONF_FILE -policy signing_policy -extensions server_signing_req -days 36500 -in server_2k.csr -out server_2k_cert.pem
+openssl ca -batch -config $CONF_FILE -policy signing_policy -extensions server_signing_req -days 36500 -in server_4k.csr -out server_4k_cert.pem
 
 # Output certificates in DER format for UA stack
 for fradix in ca client_2k_ client_4k_ server_2k_ server_4k_; do
