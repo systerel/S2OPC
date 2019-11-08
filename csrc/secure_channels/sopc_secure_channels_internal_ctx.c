@@ -25,7 +25,7 @@
 #include "sopc_sockets_api.h"
 
 SOPC_SecureListener secureListenersArray[SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS + 1];
-SOPC_SecureConnection secureConnectionsArray[SOPC_MAX_SECURE_CONNECTIONS_PLUS_1 + 1];
+SOPC_SecureConnection secureConnectionsArray[SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED + 1];
 uint32_t lastSecureConnectionArrayIdx = 0;
 
 SOPC_Looper* secureChannelsLooper = NULL;
@@ -38,7 +38,7 @@ SOPC_EventHandler* secureChannelsEventHandler = NULL;
 void SOPC_SecureChannelsInternalContext_Initialize(SOPC_SetListenerFunc setSocketsListener)
 {
     memset(secureListenersArray, 0, sizeof(SOPC_SecureListener) * (SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS + 1));
-    memset(secureConnectionsArray, 0, sizeof(SOPC_SecureConnection) * (SOPC_MAX_SECURE_CONNECTIONS_PLUS_1 + 1));
+    memset(secureConnectionsArray, 0, sizeof(SOPC_SecureConnection) * (SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED + 1));
     lastSecureConnectionArrayIdx = 0;
 
     secureChannelsLooper = SOPC_Looper_Create("Secure_Channels");
@@ -64,7 +64,7 @@ void SOPC_SecureChannelsInternalContext_Initialize(SOPC_SetListenerFunc setSocke
 SOPC_SecureConnection* SC_GetConnection(uint32_t connectionIdx)
 {
     SOPC_SecureConnection* scConnection = NULL;
-    if (connectionIdx > 0 && connectionIdx <= SOPC_MAX_SECURE_CONNECTIONS_PLUS_1)
+    if (connectionIdx > 0 && connectionIdx <= SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED)
     {
         scConnection = &(secureConnectionsArray[connectionIdx]);
     }

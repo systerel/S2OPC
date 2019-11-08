@@ -120,10 +120,11 @@
 #endif /* SOPC_MAX_SECURE_CONNECTIONS */
 
 /** @brief SOPC_MAX_SECURE_CONNECTIONS defines the simultaneous stable SC,
- *         1 more slot is used to check if an old connection can be closed when maximum is reached.
- *         If old connection is closed the last one is kept, otherwise it is closed.
+ *         More slots are used (+0.25%) to check if old connection can be closed when maximum is reached.
+ *         If an old connection is closed for each of the buffered new connection attempt,
+ *         those are kept otherwise buffered new connection are closed
  */
-#define SOPC_MAX_SECURE_CONNECTIONS_PLUS_1 (SOPC_MAX_SECURE_CONNECTIONS + 1)
+#define SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED (5 * SOPC_MAX_SECURE_CONNECTIONS / 4)
 
 /* Minimum value for OPN requestedLifetime parameter */
 #ifndef SOPC_MINIMUM_SECURE_CONNECTION_LIFETIME

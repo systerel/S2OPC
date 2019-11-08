@@ -29,12 +29,12 @@
 #error "Max number of endpoint descriptions cannot be more than INT32_MAX"
 #endif
 
-#if SOPC_MAX_SECURE_CONNECTIONS_PLUS_1 > SOPC_MAX_SOCKETS
+#if SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED > SOPC_MAX_SOCKETS
 #error "Max number of secure connections cannot be greater than max number of sockets"
 #endif
 
 /* Maximum value accepted in B model */
-#if SOPC_MAX_SECURE_CONNECTIONS_PLUS_1 > INT32_MAX
+#if SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED > INT32_MAX
 #error "Max number of secure connections cannot be more than INT32_MAX"
 #endif
 
