@@ -39,7 +39,7 @@ else()
   set(DEMO_ADDRESS_SPACE_XML_FILE "S2OPC_Demo_Nano_NodeSet.xml")
 endif()
 
-# Manage the Nano profiles extended mode
+# Manage the Nano profile mode
 if (NOT S2OPC_NANO_PROFILE)
   set(TOOLKIT_DEMO_SERVER "toolkit_demo_server")
 else()
@@ -99,6 +99,22 @@ if (expat_FOUND)
     )
 else()
   message(WARNING "Demo server ${TOOLKIT_DEMO_SERVER} executable will not be compiled since Expat library not available.")
+endif()
+
+# Demo server with SKS (Security Key Service) for Pub/Sub
+if (expat_FOUND AND NOT S2OPC_NANO_PROFILE)
+  set(SKS_DEMO_ADDRESS_SPACE_XML "${CMAKE_CURRENT_SOURCE_DIR}/data/address_space/s2opc_sks.xml")
+  add_executable(sks_demo_server
+    "demo_server/sks_demo_server_methods.c"
+    "demo_server/sks_demo_server.c")
+  target_link_libraries(sks_demo_server PRIVATE s2opc_serverwrapper)
+  target_compile_options(sks_demo_server PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(sks_demo_server PRIVATE ${S2OPC_DEFINITIONS})
+  add_custom_command(
+    TARGET sks_demo_server POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${SKS_DEMO_ADDRESS_SPACE_XML} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+else()
+  message(WARNING "Demo SKS server sks_demo_server executable will not be compiled since Expat library not available or Nano profile activated.")
 endif()
 
 if (expat_FOUND)

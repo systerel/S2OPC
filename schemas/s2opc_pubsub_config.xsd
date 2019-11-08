@@ -59,6 +59,8 @@
   </xs:complexType>
   <xs:complexType name="message">
     <xs:sequence>
+      <!-- at least one if securityMode is defined and not none -->
+      <xs:element type="skserver" name="skserver" minOccurs="0" maxOccurs="unbounded"/>
       <xs:element type="dataset" name="dataset" maxOccurs="unbounded"/>
     </xs:sequence>
     <xs:attribute name="publishingInterval" type="xs:double" use="required"/>
@@ -69,7 +71,11 @@
     <xs:attribute name="groupVersion" type="xs:unsignedInt" use="optional"/>
     <xs:attribute name="keepAliveTime" type="xs:double" use="optional"/> <!-- required if is acyclic publisher. Time scale is milliseconds -->
     <xs:attribute name="mqttTopic" type="xs:string" use="optional"/> <!-- mandatory when mqtt protocol is used-->
-   </xs:complexType>
+  </xs:complexType>
+  <xs:complexType name="skserver">
+        <xs:attribute name="endpointUrl" type="xs:string" use="required"/>
+        <xs:attribute name="serverCertPath" type="xs:string" use="required"/>
+  </xs:complexType>
   <xs:complexType name="dataset">
     <xs:sequence>
       <xs:element type="variable" name="variable" maxOccurs="unbounded"/>

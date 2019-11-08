@@ -3,6 +3,7 @@
     <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="42">
         <!-- one to many -->
         <message groupId="14" groupVersion="1" publishingInterval="100." securityMode="signAndEncrypt">
+          <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/server_2k_cert.der" />
           <dataset>
           <!-- one to many -->
             <variable nodeId="ns=1;s=PubBool" displayName="varBool" dataType="Boolean"/>
@@ -21,6 +22,7 @@
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
         <!-- one to many -->
         <message groupId="14" groupVersion="1" publishingInterval="100." publisherId="42" securityMode="signAndEncrypt">
+          <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/server_2k_cert.der" />
           <dataset>
             <!-- one to many -->
             <variable nodeId="ns=1;s=SubBool" displayName="varBool" dataType="Boolean"/>

@@ -32,7 +32,7 @@
 
 START_TEST(test_pub_xml_parsing)
 {
-    fprintf(stderr, "opening 'config_pub.xml'\n"); // TODO JCH
+    fprintf(stderr, "opening 'config_pub.xml'\n");
     FILE* fd = fopen("./config_pub.xml", "r");
     ck_assert_ptr_nonnull(fd);
 
@@ -72,6 +72,8 @@ START_TEST(test_pub_xml_parsing)
     ck_assert_int_eq(10, SOPC_WriterGroup_Get_PublishingOffset(writerGroup));
     ck_assert_uint_eq(1, SOPC_WriterGroup_Get_Version(writerGroup));
     ck_assert_uint_eq(SOPC_SecurityMode_None, SOPC_WriterGroup_Get_SecurityMode(writerGroup));
+    ck_assert_uint_eq(0, SOPC_WriterGroup_Nb_SecurityKeyServices(writerGroup));
+
     ck_assert_uint_eq(2, SOPC_WriterGroup_Nb_DataSetWriter(writerGroup));
     // DataSetWriter 1
     SOPC_DataSetWriter* dataSetWriter = SOPC_WriterGroup_Get_DataSetWriter_At(writerGroup, 0);
@@ -99,6 +101,19 @@ START_TEST(test_pub_xml_parsing)
     ck_assert_uint_eq(0, SOPC_WriterGroup_Get_Version(writerGroup));
     ck_assert_uint_eq(SOPC_SecurityMode_SignAndEncrypt, SOPC_WriterGroup_Get_SecurityMode(writerGroup));
     ck_assert_uint_eq(1, SOPC_WriterGroup_Nb_DataSetWriter(writerGroup));
+
+    ck_assert_uint_eq(2, SOPC_WriterGroup_Nb_SecurityKeyServices(writerGroup));
+
+    SOPC_SecurityKeyServices* sks = SOPC_WriterGroup_Get_SecurityKeyServices_At(writerGroup, 0);
+    ck_assert_ptr_nonnull(sks);
+    ck_assert_str_eq("opc.tcp://localhost:4841", SOPC_SecurityKeyServices_Get_EndpointUrl(sks));
+    ck_assert_ptr_nonnull(SOPC_SecurityKeyServices_Get_ServerCertificate(sks));
+
+    sks = SOPC_WriterGroup_Get_SecurityKeyServices_At(writerGroup, 1);
+    ck_assert_ptr_nonnull(sks);
+    ck_assert_str_eq("opc.tcp://localhost:4842", SOPC_SecurityKeyServices_Get_EndpointUrl(sks));
+    ck_assert_ptr_nonnull(SOPC_SecurityKeyServices_Get_ServerCertificate(sks));
+
     // DataSetWriter
     dataSetWriter = SOPC_WriterGroup_Get_DataSetWriter_At(writerGroup, 0);
     ck_assert_uint_eq(52, SOPC_DataSetWriter_Get_Id(dataSetWriter));
@@ -174,7 +189,7 @@ END_TEST
 
 START_TEST(test_pub_acyclic_xml_parsing)
 {
-    fprintf(stderr, "opening 'config_pub_acyclic.xml'\n"); // TODO JCH
+    fprintf(stderr, "opening 'config_pub_acyclic.xml'\n");
     FILE* fd = fopen("./config_pub_acyclic.xml", "r");
     ck_assert_ptr_nonnull(fd);
     SOPC_PubSubConfiguration* config = SOPC_PubSubConfig_ParseXML(fd);
@@ -244,6 +259,9 @@ START_TEST(test_pub_acyclic_xml_parsing)
     ck_assert_uint_eq(SOPC_SecurityMode_SignAndEncrypt, SOPC_WriterGroup_Get_SecurityMode(writerGroup));
     ck_assert_uint_eq(1, SOPC_WriterGroup_Nb_DataSetWriter(writerGroup));
     ck_assert_double_eq(3000., SOPC_WriterGroup_Get_KeepAlive(writerGroup));
+
+    ck_assert_uint_eq(0, SOPC_WriterGroup_Nb_SecurityKeyServices(writerGroup));
+
     // DataSetWriter
     dataSetWriter = SOPC_WriterGroup_Get_DataSetWriter_At(writerGroup, 0);
     ck_assert_uint_eq(52, SOPC_DataSetWriter_Get_Id(dataSetWriter));
@@ -318,7 +336,7 @@ START_TEST(test_pub_acyclic_xml_parsing)
 
 START_TEST(test_sub_xml_parsing)
 {
-    fprintf(stderr, "opening 'config_sub.xml'\n"); // TODO JCH
+    fprintf(stderr, "opening 'config_sub.xml'\n");
     FILE* fd = fopen("./config_sub.xml", "r");
     ck_assert_ptr_nonnull(fd);
 
@@ -361,8 +379,12 @@ START_TEST(test_sub_xml_parsing)
     ck_assert_uint_eq(1, SOPC_ReaderGroup_Get_GroupVersion(readerGroup));
     uint16_t writerGroupId = SOPC_ReaderGroup_Get_GroupId(readerGroup);
     ck_assert_uint_eq(14, writerGroupId); // message Id
+
     uint16_t writerId = SOPC_DataSetReader_Get_DataSetWriterId(dataSetReader);
     ck_assert_uint_eq(0, writerId);
+
+    // Test sks
+    ck_assert_uint_eq(0, SOPC_ReaderGroup_Nb_SecurityKeyServices(readerGroup));
 
     double timeoutMs = SOPC_DataSetReader_Get_ReceiveTimeout(dataSetReader);
     ck_assert_double_eq(2 * 50., timeoutMs); // 2*publishingInternval
@@ -453,6 +475,18 @@ START_TEST(test_sub_xml_parsing)
     ck_assert_uint_eq(15, writerGroupId); // message Id
     writerId = SOPC_DataSetReader_Get_DataSetWriterId(dataSetReader);
     ck_assert_uint_eq(52, writerId); // same as writeGroupId
+
+    // Test sks
+    ck_assert_uint_eq(2, SOPC_ReaderGroup_Nb_SecurityKeyServices(readerGroup));
+    SOPC_SecurityKeyServices* sks = SOPC_ReaderGroup_Get_SecurityKeyServices_At(readerGroup, 0);
+    ck_assert_ptr_nonnull(sks);
+    ck_assert_str_eq("opc.tcp://localhost:4851", SOPC_SecurityKeyServices_Get_EndpointUrl(sks));
+    ck_assert_ptr_nonnull(SOPC_SecurityKeyServices_Get_ServerCertificate(sks));
+
+    sks = SOPC_ReaderGroup_Get_SecurityKeyServices_At(readerGroup, 1);
+    ck_assert_ptr_nonnull(sks);
+    ck_assert_str_eq("opc.tcp://localhost:4852", SOPC_SecurityKeyServices_Get_EndpointUrl(sks));
+    ck_assert_ptr_nonnull(SOPC_SecurityKeyServices_Get_ServerCertificate(sks));
 
     timeoutMs = SOPC_DataSetReader_Get_ReceiveTimeout(dataSetReader);
     ck_assert_double_eq(2 * 100., timeoutMs); // 2*publishingInternval

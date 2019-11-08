@@ -42,6 +42,9 @@
 #define SOPC_MAX_LENGTH_UINT16_TO_STRING \
     6 /* 2^16 = 65536 maximum number you could represent using maximum chars would be 65536 plus \0 at the end */
 
+// Number of requested token per getSecurityKeys call
+#define SOPC_PUBSUB_SKS_MAX_TOKEN_PER_CALL 5
+
 // Pub Sub Security Policy
 #define SOPC_PUBSUB_SECURITY_POLICY SOPC_SecurityPolicy_PubSub_Aes256_URI
 

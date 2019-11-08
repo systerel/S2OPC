@@ -27,6 +27,8 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_pubsub_protocol.h"
 
+#define TCP_PREFIX "opc.tcp://"
+
 static bool SOPC_Internal_PubSubHelpers_ParseAddressUDP(const char* address,
                                                         SOPC_Socket_AddressInfo** multicastAddr,
                                                         char** port)
@@ -113,7 +115,7 @@ bool SOPC_Helper_URI_ParseUri_WithPrefix(const char* prefix,
     }
     // We only accept UADP or MQTT prefix in this function
     if (0 != strncmp(prefix, UADP_PREFIX, strlen(UADP_PREFIX)) &&
-        0 != strncmp(prefix, MQTT_PREFIX, strlen(MQTT_PREFIX)))
+        0 != strncmp(prefix, MQTT_PREFIX, strlen(MQTT_PREFIX)) && 0 != strncmp(prefix, TCP_PREFIX, strlen(TCP_PREFIX)))
     {
         return false;
     }

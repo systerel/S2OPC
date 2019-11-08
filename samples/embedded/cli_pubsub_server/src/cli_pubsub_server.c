@@ -55,7 +55,6 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
 #include "sopc_pub_scheduler.h"
-#include "sopc_pubsub_local_sks.h"
 #include "sopc_sub_scheduler.h"
 #include "sopc_threads.h"
 #include "sopc_time.h"
@@ -601,8 +600,7 @@ static void setupPubSub(void)
     SOPC_ASSERT(NULL != pSourceConfig && "SOPC_PubSourceVariableConfig_Create failed");
 
     // Configure SKS for PubSub
-    SOPC_KeyBunch_init_static(pubSub_keySign, sizeof(pubSub_keySign), pubSub_keyEncrypt, sizeof(pubSub_keyEncrypt),
-                              pubSub_keyNonce, sizeof(pubSub_keyNonce));
+    // TODO
 
     Cache_Initialize(pPubSubConfig);
 }

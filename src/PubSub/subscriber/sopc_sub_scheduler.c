@@ -93,12 +93,15 @@ typedef struct SOPC_SubScheduler_Security_Reader_Ctx
  * Context related to publisher of configured messages.
  * These structure links a publisher id to a sequence number and a list of the security configuration.
  *  - pubId : Publisher id to identify this Publisher context
+ *  - currentTokenId : last processed Token Id. When Publisher switch to next token Id, message with previous Token Id
+ * are rejected.
  *  - currentSequenceNumber : last processed sequence number of this publisher
  *  - readers : array of SOPC_SubScheduler_Security_Reader_Ctx containing writer group and security information
  */
 typedef struct SOPC_SubScheduler_Security_Pub_Ctx
 {
     SOPC_Conf_PublisherId pubId;
+    uint32_t currentTokenId;
     uint32_t currentSequenceNumber; // TODO : for future version, it should be an array, one per token id
     SOPC_Array* readers;            // SOPC_SubScheduler_Security_Reader_Ctx
 } SOPC_SubScheduler_Security_Pub_Ctx;
@@ -115,15 +118,13 @@ static SOPC_SubScheduler_Security_Pub_Ctx* SOPC_SubScheduler_Pub_Ctx_Create(cons
 static void SOPC_SubScheduler_Pub_Ctx_Clear(SOPC_SubScheduler_Security_Pub_Ctx* ctx);
 
 /**
- * Search in Subscriber security context the data associated to a token id and a publisher.
+ * Search in Subscriber security context the data associated a publisher.
  * If no context is found, it means the subscriber is not configured to manage security from this publisher
  *
- * \param tokenId tokenId of a received message
  * \param tokenId publisher id of a received message
  * \return a context related to a publisher or NULL if not found
  */
-static SOPC_SubScheduler_Security_Pub_Ctx* SOPC_SubScheduler_Get_Security_Pub_Ctx(uint32_t tokenId,
-                                                                                  const SOPC_Conf_PublisherId pubId);
+static SOPC_SubScheduler_Security_Pub_Ctx* SOPC_SubScheduler_Get_Security_Pub_Ctx(const SOPC_Conf_PublisherId pubId);
 
 /**
  * Create of Reader Context or NULL if out of memory.
@@ -864,14 +865,8 @@ static void SOPC_SubScheduler_CtxEth_Clear(SOPC_SubScheduler_TransportCtx* ctx)
  * Implementation
  ********************************************************************************************************/
 
-static SOPC_SubScheduler_Security_Pub_Ctx* SOPC_SubScheduler_Get_Security_Pub_Ctx(uint32_t tokenId,
-                                                                                  const SOPC_Conf_PublisherId pubId)
+static SOPC_SubScheduler_Security_Pub_Ctx* SOPC_SubScheduler_Get_Security_Pub_Ctx(const SOPC_Conf_PublisherId pubId)
 {
-    if (SOPC_PUBSUB_SKS_DEFAULT_TOKENID != tokenId)
-    {
-        // only one token id is managed
-        return NULL;
-    }
     // only Integer publisher id is managed
     SOPC_ASSERT(SOPC_UInteger_PublisherId == pubId.type);
     // get keys
@@ -892,7 +887,7 @@ static SOPC_PubSub_SecurityType* SOPC_SubScheduler_Get_Security_Infos(uint32_t t
                                                                       const SOPC_Conf_PublisherId pubId,
                                                                       uint16_t writerGroupId)
 {
-    SOPC_SubScheduler_Security_Pub_Ctx* pubCtx = SOPC_SubScheduler_Get_Security_Pub_Ctx(tokenId, pubId);
+    SOPC_SubScheduler_Security_Pub_Ctx* pubCtx = SOPC_SubScheduler_Get_Security_Pub_Ctx(pubId);
     if (NULL == pubCtx)
     {
         // no security context associated to this publisher
@@ -906,7 +901,45 @@ static SOPC_PubSub_SecurityType* SOPC_SubScheduler_Get_Security_Infos(uint32_t t
         // bad configuration or message not for this subscriber
         return NULL;
     }
-    return &readerCtx->security;
+
+    /* Check the validity of the request.
+
+     */
+    SOPC_PubSub_SecurityType* security = NULL;
+
+    /* Keys is not set or new token id used by this publisher */
+    if (NULL == readerCtx->security.groupKeys || tokenId > readerCtx->security.groupKeys->tokenId)
+    {
+        SOPC_PubSubSKS_Keys* keys = SOPC_PubSubSKS_GetSecurityKeys(SOPC_PUBSUB_SKS_DEFAULT_GROUPID, tokenId);
+        if (NULL != keys && tokenId == keys->tokenId)
+        {
+            security = &readerCtx->security;
+            SOPC_PubSubSKS_Keys_Delete(security->groupKeys);
+            SOPC_Free(security->groupKeys);
+            security->groupKeys = keys;
+            security->sequenceNumber = 0;
+        }
+        else
+        {
+            SOPC_PubSubSKS_Keys_Delete(keys);
+            SOPC_Free(keys);
+            SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB,
+                                  "# Error: Subscriber cannot retrieve Security Keys for Publisher %" PRIu64
+                                  " and token %" PRIu32 ". \n",
+                                  pubId.data.uint, tokenId);
+        }
+    }
+    else if (tokenId < readerCtx->security.groupKeys->tokenId)
+    {
+        // this token id is not too old. The message is not managed
+        security = NULL;
+    }
+    else
+    {
+        // this token is still used
+        security = &readerCtx->security;
+    }
+    return security;
 }
 
 static void SOPC_SubScheduler_Add_Security_Ctx(SOPC_ReaderGroup* group)
@@ -926,8 +959,7 @@ static void SOPC_SubScheduler_Add_Security_Ctx(SOPC_ReaderGroup* group)
     SOPC_ASSERT(NULL != pubId); // Reader without publisher id are not managed
 
     // check the publisher id is already registered.
-    SOPC_SubScheduler_Security_Pub_Ctx* pubCtx =
-        SOPC_SubScheduler_Get_Security_Pub_Ctx(SOPC_PUBSUB_SKS_DEFAULT_TOKENID, *pubId);
+    SOPC_SubScheduler_Security_Pub_Ctx* pubCtx = SOPC_SubScheduler_Get_Security_Pub_Ctx(*pubId);
 
     if (NULL == pubCtx)
     {
@@ -990,9 +1022,9 @@ static SOPC_SubScheduler_Security_Reader_Ctx* SOPC_SubScheduler_Reader_Ctx_Creat
     SOPC_ASSERT(SOPC_SecurityMode_Invalid != mode && SOPC_SecurityMode_None != mode);
     ctx->security.mode = mode;
     ctx->security.sequenceNumber = 0;
-    ctx->security.groupKeys = SOPC_LocalSKS_GetSecurityKeys(SOPC_PUBSUB_SKS_DEFAULT_GROUPID, 0);
+    ctx->security.groupKeys = NULL;
     ctx->security.provider = SOPC_CryptoProvider_CreatePubSub(SOPC_PUBSUB_SECURITY_POLICY);
-    if (NULL == ctx->security.provider || NULL == ctx->security.groupKeys)
+    if (NULL == ctx->security.provider)
     {
         SOPC_PubSub_Security_Clear(&ctx->security);
         SOPC_Free(ctx);
@@ -1030,6 +1062,7 @@ static SOPC_SubScheduler_Security_Pub_Ctx* SOPC_SubScheduler_Pub_Ctx_Create(cons
         return NULL;
     }
     ctx->pubId = *pubId;
+    ctx->currentTokenId = 0;
     ctx->currentSequenceNumber = 0;
     ctx->readers =
         SOPC_Array_Create(sizeof(SOPC_SubScheduler_Security_Reader_Ctx*), SOPC_PUBSUB_MAX_MESSAGE_PER_PUBLISHER, NULL);

@@ -440,6 +440,13 @@ SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm,
 
     if (NULL != security)
     {
+        if (NULL == security->groupKeys)
+        {
+            // Keys needed when security is enabled
+            set_status_default(&status, SOPC_UADP_NetworkMessage_Error_Read_SecurityConf_Failed);
+            SOPC_Buffer_Delete(buffer);
+            return NULL;
+        }
         signedEnabled =
             (SOPC_SecurityMode_Sign == security->mode || SOPC_SecurityMode_SignAndEncrypt == security->mode);
         encryptedEnabled = (SOPC_SecurityMode_SignAndEncrypt == security->mode);

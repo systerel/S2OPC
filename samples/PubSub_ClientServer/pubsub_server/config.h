@@ -35,11 +35,14 @@
 #define PASSWORD_ENV_NAME "TEST_PASSWORD_PRIVATE_KEY"
 #define CA_CERT_PATH "./trusted/cacert.der"
 #define CA_CRL_PATH "./revoked/cacrl.der"
-#define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"
+#define CLIENT_CERT_PATH "./client_public/client_2k_cert.der"
+#define CLIENT_KEY_PATH "./client_private/encrypted_client_2k_key.pem"
+#define ENCRYPTED_CLIENT_KEY true /* set to false otherwise */
+#define SKS_SERVER_CERT_PATH "./client_public/sks_2k_cert.der"
+#define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4843"
 #define APPLICATION_URI "urn:S2OPC:localhost"
 #define PRODUCT_URI "urn:S2OPC:localhost"
 #define SERVER_DESCRIPTION "S2OPC Server + PubSub"
-#define LOG_PATH "./logs/"
 #define ADDRESS_SPACE_PATH "./pubsub_server.xml"
 #define SLEEP_TIMEOUT 100
 #define NODEID_PUBSUB_STATUS "ns=1;s=PubSubStatus"

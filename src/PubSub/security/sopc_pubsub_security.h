@@ -23,7 +23,7 @@
 #include "sopc_crypto_provider.h"
 #include "sopc_enums.h"
 #include "sopc_pubsub_conf.h"
-#include "sopc_pubsub_local_sks.h"
+#include "sopc_pubsub_sks.h"
 
 /**
  * Security data related to a WriterGroup or ReaderGroup
@@ -32,7 +32,7 @@ typedef struct SOPC_PubSub_SecurityType
 {
     SOPC_SecurityMode_Type mode;
     SOPC_CryptoProvider* provider;
-    SOPC_KeyBunch_Keys* groupKeys;
+    SOPC_PubSubSKS_Keys* groupKeys;
     SOPC_ExposedBuffer* msgNonceRandom;
     uint32_t sequenceNumber;
 } SOPC_PubSub_SecurityType;

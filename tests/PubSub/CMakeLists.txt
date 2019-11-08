@@ -54,7 +54,7 @@ endfunction()
 
 # Function to add a validation test using the pubsub server code
 # Note: no tap-wrap used in this case, as caller is directly calling TapLogger (python script).
-function(s2opc_server_validation_test name)
+function(s2opc_pubsub_server_validation_test name)
   set(test_name "validation::${name}")
   if(PUBSUB_STATIC_CONFIG)
     set(test_server_static "--static")
@@ -62,13 +62,17 @@ function(s2opc_server_validation_test name)
     set(test_server_static "")
   endif()
 
-  # Note: use absolute path for scripts to allow ctest to be run from another path
-  add_test(NAME "${test_name}"
-    WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-    COMMAND
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
-    "--publisher-cmd" $<TARGET_FILE:pubsub_server>
-    "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/validation_tools/${name}" ${test_server_static})
+  if(NOT S2OPC_NANO_PROFILE)
+    # Note: use absolute path for scripts to allow ctest to be run from another path
+    add_test(NAME "${test_name}"
+      WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+      COMMAND
+      "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
+      --sks-cmd $<TARGET_FILE:test_server_sks>
+      "--publisher-cmd" $<TARGET_FILE:pubsub_server>
+      "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/validation_tools/${name}" "--tap" "pubsub_server_test.tap" ${test_server_static})
+  endif()
+
 endfunction()
 
 ## S2OPC PubSub unit tests ##
@@ -250,7 +254,7 @@ set_tests_properties("validation::ll_multi_pub_sub_test" PROPERTIES ENVIRONMENT 
 if(S2OPC_PUBSUB_ONLY OR S2OPC_CLIENTSERVER_ONLY)
   # This test requires both PubSub and ClientServer libraries
 else()
-  s2opc_server_validation_test("pubsub_server_test.py")
+  s2opc_pubsub_server_validation_test("pubsub_server_test.py")
 endif()
 
 ## S2OPC PubSub interoperability tests ##

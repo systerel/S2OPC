@@ -26,6 +26,8 @@ import time
 
 import wait_publisher
 
+from time import sleep
+
 description = '''Runs a program with a test S2OPC publisher running in the
 background.
 
@@ -39,6 +41,7 @@ def log(msg):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument('--publisher-cmd', metavar='CMD', help='The command to start the background publisher')
+    parser.add_argument('--sks-cmd', metavar='CMD', help='The command to start the background Security Keys Server')
     parser.add_argument('--no-wait-pub-message', action='store_true', default=False, help='The script does not wait for a publisher message to start subscriber: only sleep(1)')
     parser.add_argument('--wait-publisher', action='store_true', default=False,
                         help='Wait for the publisher to exit instead of killing it when the client is done')
@@ -52,15 +55,37 @@ if __name__ == '__main__':
         sys.stderr.write('Missing publisher command.\n')
         sys.exit(1)
 
+    sks_process = None
+    if args.sks_cmd is None:
+        log('No Security Keys Server')
+    else:
+        log('Starting Security Keys Server')
+        sks_process = subprocess.Popen([args.sks_cmd, "master"])
+
+    if sks_process is not None and not wait_publisher.wait_server(wait_publisher.DEFAULT_SKS_URL, wait_publisher.TIMEOUT):
+        log('Timeout for starting SKS server')
+        sks_process.kill()
+        sks_process.wait()
+
+        sys.exit(1)
+    elif sks_process is not None:
+        # Ensure SKS service is ready for tests
+        # TODO: find a better way to ensure that (call get keys as client ?)
+        sleep(1)
+
     log('Starting publisher')
     publisher_process = subprocess.Popen(shlex.split(args.publisher_cmd))
 
     if args.no_wait_pub_message:
         time.sleep(1)
-    elif not wait_publisher.wait_publisher(wait_publisher.DEFAULT_URL, wait_publisher.TIMEOUT):
+    elif not wait_publisher.wait_publisher(wait_publisher.DEFAULT_PUB_URL, wait_publisher.TIMEOUT):
         log('Timeout for starting publisher')
         publisher_process.kill()
         publisher_process.wait()
+        if sks_process is not None:
+            sks_process.kill()
+            sks_process.wait()
+
         sys.exit(1)
 
     cmd = [args.cmd] + args.args
@@ -83,6 +108,11 @@ if __name__ == '__main__':
 
     log('Waiting for publisher to exit')
     publisher_ret = publisher_process.wait()
+
+    if sks_process is not None:
+        log('killing Security Keys Server')
+        sks_process.kill()
+        sks_process.wait()
 
     log('Done')
     running_in_windows = sys.platform.startswith('win32')

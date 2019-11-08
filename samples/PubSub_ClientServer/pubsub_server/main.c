@@ -20,16 +20,30 @@
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "sopc_assert.h"
+#include "sopc_atomic.h"
+#include "sopc_common.h"
 #include "sopc_helper_uri.h"
+#include "sopc_logger.h"
 #include "sopc_macros.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_pubsub_helpers.h"
 #include "sopc_time.h"
+#include "sopc_toolkit_config.h"
 
+#include "client.h"
 #include "config.h"
 #include "pubsub.h"
 #include "server.h"
+
+static void ClientServer_Event_Toolkit(SOPC_App_Com_Event event,
+                                       uint32_t idOrStatus,
+                                       void* param,
+                                       uintptr_t appContext);
+static SOPC_ReturnStatus ClientServer_Initialize(char* logPath);
+static char* ClientServer_GetLogPath(const char* binName, const char* port);
 
 volatile sig_atomic_t stopSignal = 0;
 static void signal_stop_server(int sig)
@@ -44,6 +58,128 @@ static void signal_stop_server(int sig)
     {
         stopSignal = 1;
     }
+}
+
+static void ClientServer_Event_Toolkit(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, uintptr_t appContext)
+{
+    switch (event)
+    {
+    /* Client application events */
+    case SE_SESSION_ACTIVATION_FAILURE:
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_PUBSUB, "SE_SESSION_ACTIVATION_FAILURE RECEIVED");
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_PUBSUB, "appContext: %" PRIuPTR, appContext);
+        if (0 != appContext && appContext == g_Client_SessionContext)
+        {
+            SOPC_Atomic_Int_Set((SessionConnectedState*) &g_scState, (SessionConnectedState) SESSION_CONN_FAILED);
+        }
+        else
+        {
+            SOPC_ASSERT(false && ">>Client : bad app context");
+        }
+        break;
+    case SE_ACTIVATED_SESSION:
+        SOPC_Atomic_Int_Set((int32_t*) &g_session, (int32_t) idOrStatus);
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_PUBSUB, "SE_ACTIVATED_SESSION RECEIVED");
+        SOPC_Atomic_Int_Set((SessionConnectedState*) &g_scState, (SessionConnectedState) SESSION_CONN_CONNECTED);
+        break;
+    case SE_SESSION_REACTIVATING:
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_PUBSUB, "SE_SESSION_REACTIVATING RECEIVED");
+        break;
+    case SE_RCV_SESSION_RESPONSE:
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_PUBSUB, "SE_RCV_SESSION_RESPONSE RECEIVED");
+        Client_Treat_Session_Response(param, appContext);
+        break;
+    case SE_CLOSED_SESSION:
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_PUBSUB, "SE_CLOSED_SESSION RECEIVED");
+        break;
+
+    case SE_RCV_DISCOVERY_RESPONSE:
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_PUBSUB, "SE_RCV_DISCOVERY_RESPONSE RECEIVED");
+        break;
+
+    case SE_SND_REQUEST_FAILED:
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_PUBSUB, "SE_SND_REQUEST_FAILED RECEIVED");
+        SOPC_Atomic_Int_Add(&g_sendFailures, 1);
+        break;
+
+        /* SERVER EVENT */
+    case SE_CLOSED_ENDPOINT:
+        SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Closed endpoint event");
+        SOPC_Atomic_Int_Set(&serverOnline, 0);
+        return;
+    case SE_LOCAL_SERVICE_RESPONSE:
+        Server_Treat_Local_Service_Response(param, appContext);
+        return;
+    default:
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB, "Unexpected endpoint event: %d", event);
+        return;
+    }
+}
+
+static SOPC_ReturnStatus ClientServer_Initialize(char* logPath)
+{
+    SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
+    logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = logPath;
+    logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
+    SOPC_ReturnStatus status = SOPC_Common_Initialize(logConfiguration);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_Toolkit_Initialize(ClientServer_Event_Toolkit);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Server initialized");
+    }
+    else
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Server initialization failed");
+    }
+    return status;
+}
+
+static char* ClientServer_GetLogPath(const char* binName, const char* port)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    // './' + <name> + <port> + '_logs/'
+    char* logPath = SOPC_Calloc(strlen(binName) + strlen(port) + 6 + 1, sizeof(char));
+    if (NULL == logPath)
+    {
+        return NULL;
+    }
+    char* res = strcpy(logPath, binName);
+    if (res == logPath)
+    {
+        res = strcpy(logPath + strlen(binName), port);
+        if (res == logPath + strlen(binName))
+        {
+            res = strcpy(logPath + strlen(binName) + strlen(port), "_logs/");
+            if (res != logPath + strlen(binName) + strlen(port))
+            {
+                status = SOPC_STATUS_NOK;
+            }
+        }
+        else
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+    else
+    {
+        status = SOPC_STATUS_NOK;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Server log path initialized to '%s'", logPath);
+    }
+    else
+    {
+        SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Server log initialized with default configuration './logs'");
+        res = strcpy(logPath, "./logs");
+    }
+    return logPath;
 }
 
 int main(int argc, char* const argv[])
@@ -70,11 +206,20 @@ int main(int argc, char* const argv[])
         ENDPOINT_URL = DEFAULT_ENDPOINT_URL;
     }
 
+    size_t hostNameLength, portIdx, portLength;
+    bool res = SOPC_Helper_URI_ParseUri_WithPrefix("opc.tcp://", ENDPOINT_URL, &hostNameLength, &portIdx, &portLength);
+    if (!res)
+    {
+        printf("Invalid OPC UA server address: %s", ENDPOINT_URL);
+        exit(1);
+    }
+
     /* Initialize S2OPC Server */
-    SOPC_ReturnStatus status = Server_Initialize();
+    char* logDirPath = ClientServer_GetLogPath(argv[0], &ENDPOINT_URL[portIdx]);
+    SOPC_ReturnStatus status = ClientServer_Initialize(logDirPath);
     if (SOPC_STATUS_OK != status)
     {
-        printf("# Error: Could not initialize the server.\n");
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Could not initialize the PubSub client/server");
     }
 
     /* Configure the Server */
@@ -86,7 +231,7 @@ int main(int argc, char* const argv[])
         status = Server_CreateServerConfig(&s2opcConfig);
         if (SOPC_STATUS_OK != status)
         {
-            printf("# Error: Could not create the server configuration.\n");
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Could not create the server configuration");
         }
     }
 
@@ -116,18 +261,19 @@ int main(int argc, char* const argv[])
         if (Server_PubSubStop_Requested())
         {
             PubSub_Stop();
-            printf("# Info: PubSub stopped through Start/Stop Command.\n");
+            SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "PubSub stopped through Start/Stop Command");
         }
         if (Server_PubSubStart_Requested())
         {
             status = PubSub_Configure();
             if (SOPC_STATUS_OK == status)
             {
-                printf("# Info: PubSub configured through Start/Stop Command.\n");
+                SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "PubSub configured through Start/Stop Command");
             }
             else
             {
-                printf("# Warning: Start/Stop Command failed to configure the PubSub module.\n");
+                SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB,
+                                         "Start/Stop Command failed to configure the PubSub module");
             }
 
             if (SOPC_STATUS_OK == status)
@@ -140,16 +286,17 @@ int main(int argc, char* const argv[])
             }
             if (SOPC_STATUS_OK == status)
             {
-                printf("# Info: PubSub started through Start/Stop Command.\n");
+                SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "PubSub started through Start/Stop Command");
             }
             else
             {
-                printf("# Warning: Start/Stop Command failed to start the PubSub module.\n");
+                SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB,
+                                         "Start/Stop Command failed to start the PubSub module");
             }
         }
         if (SOPC_STATUS_OK != status)
         {
-            printf("# Warning: waiting for a new configure + start command !\n");
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB, "waiting for a new configure + start command !");
             status = SOPC_STATUS_OK;
         }
         /* Writer Group Id cannot be equal to 0 if Acyclic publisher have been triggered to send something writer group
@@ -171,6 +318,8 @@ int main(int argc, char* const argv[])
 
     /* Clean and quit */
     PubSub_StopAndClear();
+    Client_Clear();
     Server_StopAndClear(&s2opcConfig);
-    printf("# Info: Server closed.\n");
+    SOPC_Free(logDirPath);
+    SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Server closed");
 }

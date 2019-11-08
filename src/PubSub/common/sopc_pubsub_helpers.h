@@ -74,7 +74,7 @@ bool SOPC_PubSubHelpers_IsCompatibleVariant(const SOPC_FieldMetaData* fieldMetaD
                                             bool* out_isBad);
 
 // TODO: to be defined in S2OPC
-// Note: only suitable for UDP / MQTT prefixes
+// Note: only suitable for TCP / UDP / MQTT prefixes
 bool SOPC_Helper_URI_ParseUri_WithPrefix(const char* prefix,
                                          const char* uri,
                                          size_t* hostnameLength,

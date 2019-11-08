@@ -53,6 +53,10 @@ ATTRIBUTE_VARIABLE_NODEID = "nodeId"
 ATTRIBUTE_VARIABLE_NAME = "displayName"
 ATTRIBUTE_VARIABLE_TYPE = "dataType"
 
+TAG_SKSERVER = "skserver"
+ATTRIBUTE_SKSERVER_URL = "endpointUrl"
+ATTRIBUTE_SKSERVER_CERT = "serverCertPath"
+
 TYPE_IDS = {"Null": "SOPC_Null_Id",
             "Boolean": "SOPC_Boolean_Id",
             "SByte": "SOPC_SByte_Id",
@@ -334,6 +338,21 @@ def handlePubMessage(cnxContext, message, msgIndex, result):
     for dataset in datasets:
         handleDataset(PUB_MODE, msgContext, dataset, dsIndex, result)
         dsIndex += 1
+    
+        skservers = message.findall(TAG_SKSERVER)
+
+    if len(skservers) > 0:
+        result.add("""
+    if (alloc)
+    {
+        alloc = SOPC_WriterGroup_Allocate_SecurityKeyServices_Array(writerGroup, %d);
+    }
+    """ % len(skservers))
+        index = 0
+        for sks in skservers:
+            handleSkserver("Pub", sks, index, result)
+            index += 1
+
 
 def handleDataset(mode, msgContext : MessageContext, dataset, dsIndex, result):
     global IS_DEFINED_C_WRITER
@@ -431,6 +450,31 @@ def handleVariable(mode, variable, index, result):
         DEFINE_C_SETSUBVARIABLEAT = True
     else: assert(false)
 
+# type is Pub or Sub
+def handleSkserver(mode, skserver, index, result):
+    url = skserver.get(ATTRIBUTE_SKSERVER_URL)
+    cert = skserver.get(ATTRIBUTE_SKSERVER_CERT)
+    result.add("""
+    if (alloc)
+    {
+    """)
+    if mode == "Pub":
+        result.add("""
+        SOPC_SecurityKeyServices* sks = SOPC_WriterGroup_Get_SecurityKeyServices_At(writerGroup, %d);""" % (index))
+    else:
+        result.add("""
+        SOPC_SecurityKeyServices* sks = SOPC_ReaderGroup_Get_SecurityKeyServices_At(readerGroup, %d);""" % (index))
+
+    result.add("""
+        SOPC_SerializedCertificate* cert = NULL;
+        alloc = SOPC_SecurityKeyServices_Set_EndpointUrl(sks, "%s");
+        SOPC_ReturnStatus status = SOPC_KeyManager_SerializedCertificate_CreateFromFile("%s", &cert);
+        if(SOPC_STATUS_OK == status) {
+            SOPC_SecurityKeyServices_Set_ServerCertificate(sks, cert);
+        }
+        alloc = (alloc && SOPC_STATUS_OK == status);
+    }""" % (url, cert))
+
 def handleSubConnection(connection, index, result):
     cnxContext = CnxContext(connection)
 
@@ -522,6 +566,20 @@ def handleSubMessage(cnxContext : CnxContext, message, index, result):
         handleDataset(SUB_MODE, msgContext, dataset, dsIndex, result)
         dsIndex += 1
 
+    skservers = message.findall(TAG_SKSERVER)
+
+    if len(skservers) > 0:
+
+        result.add("""
+    if (alloc)
+    {
+        alloc = SOPC_ReaderGroup_Allocate_SecurityKeyServices_Array(readerGroup, %d);
+    }
+    """ % len(skservers))
+        index = 0
+        for sks in skservers:
+            handleSkserver("Sub", sks, index, result)
+            index += 1
 
 
 def generate_pubsub_config(xml_file_in, c_file_out):

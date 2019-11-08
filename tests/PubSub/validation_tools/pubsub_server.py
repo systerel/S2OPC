@@ -83,14 +83,14 @@ class PubSubServer:
                 timeout = timeout - PUBSUBSERVER_TIMEOUT_STEP
             # TODO: what if we reached the timeout?
         except e:  # TODO: exception too broad
-            print('Client probably not connected to PubSubServer', e)
+            print('__setStartStop({}): Client probably not connected to PubSubServer'.format(value), e)
 
     # Is Pub/Sub module started
     def isStart(self):  # TODO: not connected does not mean that the module is not started
         try:
             return bool(self.nodeStartStop.get_value())
         except:  # TODO: exception too broad
-            print('Client probably not connected to PubSubServer')
+            print('isStart: Client probably not connected to PubSubServer')
             return False
 
     # Start the Pub/Sub module
@@ -108,7 +108,7 @@ class PubSubServer:
         try:
             return PubSubState(self.nodeStatus.get_value())
         except:  # TODO: exception too broad
-            print('Client probably not connected to PubSubServer')
+            print('getStatus: Client probably not connected to PubSubServer')
             return PubSubState.EXCEPTION
 
     # Set the Pub/Sub module configuration
@@ -117,14 +117,14 @@ class PubSubServer:
         try:
             self.nodeConfiguration.set_value(ua.DataValue(variant=ua.Variant(value, ua.VariantType.String)))
         except:  # TODO: exception too broad
-            print('Client probably not connected to PubSubServer')
+            print('setConfiguration: Client probably not connected to PubSubServer')
 
     # Get the Pub/Sub module configuration as XML string
     def getConfiguration(self):
         try:
             return self.nodeConfiguration.get_value()
         except:  # TODO: exception too broad
-            print('Client probably not connected to PubSubServer')
+            print('getConfiguration: Client probably not connected to PubSubServer')
             return None
 
     # Set Writer group Id on node Acyclic send

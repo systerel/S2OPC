@@ -142,6 +142,15 @@ add_test(NAME "unit:ask_password"
   )
 set_tests_properties("unit:ask_password" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=ask_password.tap")
 
+# SKS tests
+file(GLOB INTERNAL_TESTS_SKS_SRCS "unit_tests/sks/*.c")
+add_executable(check_sks ${INTERNAL_TESTS_SKS_SRCS})
+target_include_directories(check_sks PRIVATE ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
+target_compile_options(check_sks PRIVATE ${S2OPC_COMPILER_FLAGS})
+target_compile_definitions(check_sks PRIVATE ${S2OPC_DEFINITIONS})
+target_link_libraries(check_sks PRIVATE Check::check s2opc_clientserver)
+s2opc_unit_test(check_sks)
+
 # Sockets layer tests
 
 add_executable(check_sockets "unit_tests/sockets/check_sockets.c")
@@ -252,7 +261,8 @@ target_compile_options(test_secure_channels_server PRIVATE ${S2OPC_COMPILER_FLAG
 target_compile_definitions(test_secure_channels_server PRIVATE ${S2OPC_DEFINITIONS})
 target_include_directories(test_secure_channels_server PRIVATE "unit_tests/secure_channels/stubs"
   ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
-## S2OPC validation tests ##
+
+  ## S2OPC validation tests ##
 
 # Tests compilation definition #
 
@@ -390,6 +400,35 @@ endif()
 
 if (WITH_STATIC_SECURITY_DATA)
   target_compile_definitions(${TOOLKIT_TEST_SERVER} PRIVATE "WITH_STATIC_SECURITY_DATA")
+endif()
+
+
+# Test server SKS
+
+if (NOT S2OPC_NANO_PROFILE)
+  set(TEST_SKS_ADDRESS_SPACE_C "test_sks_address_space.c")
+  set(TEST_SKS_ADDRESS_SPACE_XML "${S2OPC_ROOT_PATH}/samples/ClientServer/data/address_space/s2opc_sks.xml")
+  s2opc_embed_address_space(${TEST_SKS_ADDRESS_SPACE_C} ${TEST_SKS_ADDRESS_SPACE_XML})
+  add_custom_target(make-sks-address-space DEPENDS ${TEST_SKS_ADDRESS_SPACE_C})
+  add_executable(test_server_sks
+    "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_server/sks_demo_server_methods.c"
+    "validation_tests/server/test_sks_server.c"
+    ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES}
+    ${TEST_SKS_ADDRESS_SPACE_C})
+  target_link_libraries(test_server_sks PRIVATE s2opc_serverwrapper s2opc_clientserver-loader-embedded)
+  target_include_directories(test_server_sks PRIVATE
+    ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES}
+    "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_server")
+  target_compile_options(test_server_sks PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(test_server_sks PRIVATE ${S2OPC_DEFINITIONS})
+  if (expat_FOUND)
+    target_link_libraries(test_server_sks PRIVATE s2opc_clientserver-xml-loaders-expat)
+    target_compile_definitions(test_server_sks PRIVATE "WITH_EXPAT")
+  endif()
+  if (WITH_STATIC_SECURITY_DATA)
+    target_include_directories(test_server_sks PRIVATE ${S2OPC_ROOT_PATH}/tests/ClientServer/validation_tests/server)
+    target_compile_definitions(test_server_sks PRIVATE "WITH_STATIC_SECURITY_DATA")
+  endif()
 endif()
 
 add_custom_command(

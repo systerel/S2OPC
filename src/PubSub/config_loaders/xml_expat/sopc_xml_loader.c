@@ -73,6 +73,7 @@
 #define TAG_MESSAGE "message"
 #define TAG_DATASET "dataset"
 #define TAG_VARIABLE "variable"
+#define TAG_SKS_SERVER "skserver"
 
 #define ATTR_CONNECTION_PUB_ID "publisherId" // TODO: remove Publisher Id from CONNECTION level
 #define ATTR_CONNECTION_ADDR "address"
@@ -90,6 +91,7 @@
 #define ATTR_MESSAGE_SECURITY_VAL_NONE "none"
 #define ATTR_MESSAGE_SECURITY_VAL_SIGN "sign"
 #define ATTR_MESSAGE_SECURITY_VAL_SIGNANDENCRYPT "signAndEncrypt"
+
 #define ATTR_MESSAGE_PUBLISHER_ID "publisherId"
 #define ATTR_MESSAGE_GROUP_ID "groupId"
 #define ATTR_MESSAGE_GROUP_VERSION "groupVersion"
@@ -104,6 +106,10 @@
 #define ATTR_VARIABLE_VALUE_RANK "valueRank"
 
 #define SCALAR_ARRAY_RANK -1
+
+#define ATTR_SKS_ENDPOINT_URL "endpointUrl"
+#define ATTR_SKS_SERVER_CERT_PATH "serverCertPath"
+
 typedef enum
 {
     PARSE_START,      // Beginning of file
@@ -112,6 +118,7 @@ typedef enum
     PARSE_DATASET,    // In a DataSet
     PARSE_MESSAGE,    // In a connection message
     PARSE_VARIABLE,   // In a message variable
+    PARSE_SKS,        // In a SKS Server
 } parse_state_t;
 
 struct sopc_xml_pubsub_variable_t
@@ -131,6 +138,15 @@ struct sopc_xml_pubsub_dataset_t
     struct sopc_xml_pubsub_variable_t* variableArr;
 };
 
+/**
+ * \brief Structure to defines access to a Security Keys Server
+ */
+struct sopc_xml_pubsub_sks_t
+{
+    char* endpointUrl;
+    char* serverCertPath;
+};
+
 struct sopc_xml_pubsub_message_t
 {
     double publishing_interval;
@@ -144,6 +160,11 @@ struct sopc_xml_pubsub_message_t
     char* mqttTopic;
     struct sopc_xml_pubsub_dataset_t* datasetArr;
     double keepAliveTime;
+
+    /* Array of to define Security Key Servers (SKS) that manage the security keys for the SecurityGroup
+       assigned to the PubSubGroup. Null if the SecurityMode is None. */
+    uint32_t nb_sks;
+    struct sopc_xml_pubsub_sks_t* sksArr;
 };
 
 struct sopc_xml_pubsub_connection_t
@@ -475,7 +496,7 @@ static bool parse_message_attributes(const char* attr_name,
                                      struct parse_context_t* ctx,
                                      void* user_param)
 {
-    (void) ctx;
+    SOPC_UNUSED_ARG(ctx);
     bool result = false;
     SOPC_ASSERT(NULL != user_param);
     struct sopc_xml_pubsub_message_t* msg = (struct sopc_xml_pubsub_message_t*) user_param;
@@ -596,7 +617,7 @@ static bool parse_dataset_attributes(const char* attr_name,
                                      struct parse_context_t* ctx,
                                      void* user_param)
 {
-    (void) ctx;
+    SOPC_UNUSED_ARG(ctx);
     bool result = false;
     SOPC_ASSERT(NULL != user_param);
     struct sopc_xml_pubsub_dataset_t* ds = (struct sopc_xml_pubsub_dataset_t*) user_param;
@@ -657,7 +678,7 @@ static bool parse_variable_attributes(const char* attr_name,
                                       struct parse_context_t* ctx,
                                       void* user_param)
 {
-    (void) ctx;
+    SOPC_UNUSED_ARG(ctx);
     bool result = false;
     SOPC_ASSERT(NULL != user_param);
     struct sopc_xml_pubsub_variable_t* var = (struct sopc_xml_pubsub_variable_t*) user_param;
@@ -744,12 +765,88 @@ static bool start_variable(struct parse_context_t* ctx, struct sopc_xml_pubsub_v
     return result;
 }
 
+static bool start_sks(struct parse_context_t* ctx, struct sopc_xml_pubsub_sks_t* sks, const XML_Char** attrs)
+{
+    bool endpointUrl = false;
+    bool serverCert = false;
+
+    memset(sks, 0, sizeof *sks);
+
+    for (size_t i = 0; attrs[i]; ++i)
+    {
+        // Current attribute name
+        const char* attr = attrs[i];
+
+        if (strcmp(ATTR_SKS_ENDPOINT_URL, attr) == 0)
+        {
+            const char* attr_val = attrs[++i];
+
+            if (NULL == attr_val)
+            {
+                LOG_XML_ERROR("Missing value for sks endpointUrl");
+                return false;
+            }
+
+            SOPC_ASSERT(strlen(attr_val) <= INT32_MAX);
+            sks->endpointUrl = SOPC_Malloc(strlen(attr_val) + 1);
+            if (NULL == sks->endpointUrl)
+            {
+                LOG_MEMORY_ALLOCATION_FAILURE;
+                return false;
+            }
+            sks->endpointUrl = strcpy(sks->endpointUrl, attr_val);
+            endpointUrl = true;
+        }
+        else if (strcmp(ATTR_SKS_SERVER_CERT_PATH, attr) == 0)
+        {
+            const char* attr_val = attrs[++i];
+
+            if (NULL == attr_val)
+            {
+                LOG_XML_ERROR("Missing value for sks serverCertPath");
+                return false;
+            }
+
+            SOPC_ASSERT(strlen(attr_val) <= INT32_MAX);
+            sks->serverCertPath = SOPC_Malloc(strlen(attr_val) + 1);
+            if (NULL == sks->serverCertPath)
+            {
+                LOG_MEMORY_ALLOCATION_FAILURE;
+                return false;
+            }
+            sks->serverCertPath = strcpy(sks->serverCertPath, attr_val);
+            serverCert = true;
+        }
+        else
+        {
+            ++i; // Skip value of unknown attribute
+        }
+    }
+
+    if (!endpointUrl)
+    {
+        LOG_XML_ERROR("SKS endpointUrl is missing");
+        return false;
+    }
+    else if (!serverCert)
+    {
+        LOG_XML_ERROR("SKS serverCertPath is missing");
+        return false;
+    }
+
+    ctx->state = PARSE_SKS;
+    return true;
+}
+
 static void start_element_handler(void* user_data, const XML_Char* name, const XML_Char** attrs)
 {
     struct parse_context_t* ctx = user_data;
     struct sopc_xml_pubsub_connection_t* connection = NULL;
     struct sopc_xml_pubsub_message_t* msg = NULL;
     struct sopc_xml_pubsub_dataset_t* ds = NULL;
+
+    bool isDataSet = false;
+    bool isSkserver = false;
 
     switch (ctx->state)
     {
@@ -822,7 +919,9 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         }
         break;
     case PARSE_MESSAGE:
-        if (strcmp(name, TAG_DATASET) != 0)
+        isDataSet = (strcmp(name, TAG_DATASET) == 0);
+        isSkserver = (strcmp(name, TAG_SKS_SERVER) == 0);
+        if (!(isDataSet || isSkserver))
         {
             LOG_XML_ERRORF("Unexpected tag '%s' (expected '" TAG_DATASET "')", name);
             XML_StopParser(ctx->parser, 0);
@@ -832,25 +931,53 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         SOPC_ASSERT(NULL != connection);
         msg = &connection->messageArr[connection->nb_messages - 1];
         ctx->currentMessage = msg;
-        if (NULL == msg->datasetArr)
+
+        if (isDataSet)
         {
-            SOPC_ASSERT(msg->nb_datasets == 0);
-            msg->datasetArr = SOPC_Malloc(sizeof *msg->datasetArr);
-            msg->nb_datasets = 1;
-            SOPC_ASSERT(NULL != msg->datasetArr);
+            if (NULL == msg->datasetArr)
+            {
+                SOPC_ASSERT(msg->nb_datasets == 0);
+                msg->datasetArr = SOPC_Malloc(sizeof *msg->datasetArr);
+                msg->nb_datasets = 1;
+                SOPC_ASSERT(NULL != msg->datasetArr);
+            }
+            else
+            {
+                SOPC_ASSERT(msg->nb_datasets > 0);
+                msg->nb_datasets++;
+                msg->datasetArr =
+                    SOPC_Realloc(msg->datasetArr, (size_t)(msg->nb_datasets - 1) * sizeof *msg->datasetArr,
+                                 msg->nb_datasets * sizeof *msg->datasetArr);
+                SOPC_ASSERT(NULL != msg->datasetArr);
+            }
+            if (!start_dataset(ctx, &msg->datasetArr[msg->nb_datasets - 1], attrs))
+            {
+                XML_StopParser(ctx->parser, 0);
+                return;
+            }
         }
         else
         {
-            SOPC_ASSERT(msg->nb_datasets > 0);
-            msg->nb_datasets++;
-            msg->datasetArr = SOPC_Realloc(msg->datasetArr, (size_t)(msg->nb_datasets - 1) * sizeof *msg->datasetArr,
-                                           msg->nb_datasets * sizeof *msg->datasetArr);
-            SOPC_ASSERT(NULL != msg->datasetArr);
-        }
-        if (!start_dataset(ctx, &msg->datasetArr[msg->nb_datasets - 1], attrs))
-        {
-            XML_StopParser(ctx->parser, 0);
-            return;
+            if (NULL == msg->sksArr)
+            {
+                SOPC_ASSERT(msg->nb_sks == 0);
+                msg->sksArr = SOPC_Malloc(sizeof *msg->sksArr);
+                msg->nb_sks = 1;
+                SOPC_ASSERT(NULL != msg->sksArr);
+            }
+            else
+            {
+                SOPC_ASSERT(msg->nb_sks > 0);
+                msg->nb_sks++;
+                msg->sksArr = SOPC_Realloc(msg->sksArr, (size_t)(msg->nb_sks - 1) * sizeof(*msg->sksArr),
+                                           (size_t) msg->nb_sks * sizeof(*msg->sksArr));
+                SOPC_ASSERT(NULL != msg->sksArr);
+            }
+            if (!start_sks(ctx, &msg->sksArr[msg->nb_sks - 1], attrs))
+            {
+                XML_StopParser(ctx->parser, 0);
+                return;
+            }
         }
         break;
     case PARSE_DATASET:
@@ -972,6 +1099,9 @@ static void end_element_handler(void* user_data, const XML_Char* name)
         ctx->nb_datasets++;
         ctx->state = PARSE_MESSAGE;
         break;
+    case PARSE_SKS:
+        ctx->state = PARSE_MESSAGE;
+        break;
     case PARSE_PUBSUB:
         break;
     case PARSE_START:
@@ -1053,7 +1183,27 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                 allocSuccess = SOPC_WriterGroup_Allocate_DataSetWriter_Array(writerGroup, (uint8_t) msg->nb_datasets);
                 // msg->publisher_id ignored if present
 
-                SOPC_WriterGroup_Set_MqttTopic(writerGroup, msg->mqttTopic);
+                if (allocSuccess)
+                {
+                    SOPC_WriterGroup_Set_MqttTopic(writerGroup, msg->mqttTopic);
+                }
+
+                if (NULL != msg->sksArr && allocSuccess)
+                {
+                    allocSuccess = SOPC_WriterGroup_Allocate_SecurityKeyServices_Array(writerGroup, msg->nb_sks);
+                    for (uint32_t isks = 0; isks < msg->nb_sks && allocSuccess; isks++)
+                    {
+                        SOPC_SerializedCertificate* cert = NULL;
+                        struct sopc_xml_pubsub_sks_t* xmlsks = &msg->sksArr[isks];
+                        SOPC_SecurityKeyServices* sks = SOPC_WriterGroup_Get_SecurityKeyServices_At(writerGroup, isks);
+                        SOPC_ASSERT(sks != NULL);
+                        allocSuccess = SOPC_SecurityKeyServices_Set_EndpointUrl(sks, xmlsks->endpointUrl);
+                        SOPC_ReturnStatus status =
+                            SOPC_KeyManager_SerializedCertificate_CreateFromFile(xmlsks->serverCertPath, &cert);
+                        SOPC_SecurityKeyServices_Set_ServerCertificate(sks, cert);
+                        allocSuccess = (allocSuccess && SOPC_STATUS_OK == status);
+                    }
+                }
 
                 for (uint8_t ids = 0; ids < msg->nb_datasets && allocSuccess; ids++)
                 {
@@ -1112,7 +1262,26 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                 SOPC_ReaderGroup_Set_MqttTopic(readerGroup, msg->mqttTopic);
 
                 SOPC_ASSERT(msg->nb_datasets < 0x100);
-                allocSuccess = SOPC_ReaderGroup_Allocate_DataSetReader_Array(readerGroup, (uint8_t) msg->nb_datasets);
+
+                allocSuccess = SOPC_ReaderGroup_Allocate_SecurityKeyServices_Array(readerGroup, msg->nb_sks);
+                for (uint32_t isks = 0; isks < msg->nb_sks && allocSuccess; isks++)
+                {
+                    SOPC_SerializedCertificate* cert = NULL;
+                    struct sopc_xml_pubsub_sks_t* xmlsks = &msg->sksArr[isks];
+                    SOPC_SecurityKeyServices* sks = SOPC_ReaderGroup_Get_SecurityKeyServices_At(readerGroup, isks);
+                    SOPC_ASSERT(sks != NULL);
+                    allocSuccess = SOPC_SecurityKeyServices_Set_EndpointUrl(sks, xmlsks->endpointUrl);
+                    SOPC_ReturnStatus status =
+                        SOPC_KeyManager_SerializedCertificate_CreateFromFile(xmlsks->serverCertPath, &cert);
+                    SOPC_SecurityKeyServices_Set_ServerCertificate(sks, cert);
+                    allocSuccess = (allocSuccess && SOPC_STATUS_OK == status);
+                }
+
+                if (allocSuccess)
+                {
+                    allocSuccess =
+                        SOPC_ReaderGroup_Allocate_DataSetReader_Array(readerGroup, (uint8_t) msg->nb_datasets);
+                }
 
                 for (uint8_t ids = 0; ids < msg->nb_datasets && allocSuccess; ids++)
                 {
@@ -1207,6 +1376,16 @@ static void clear_xml_pubsub_config(struct parse_context_t* ctx)
             msg->datasetArr = NULL;
             SOPC_Free(msg->mqttTopic);
             msg->mqttTopic = NULL;
+
+            for (uint16_t isks = 0; isks < msg->nb_sks; isks++)
+            {
+                struct sopc_xml_pubsub_sks_t* sks = &msg->sksArr[isks];
+                SOPC_Free(sks->endpointUrl);
+                SOPC_Free(sks->serverCertPath);
+            }
+            SOPC_Free(msg->sksArr);
+            msg->sksArr = NULL;
+            msg->nb_sks = 0;
         }
 
         SOPC_Free(p_connection->address);

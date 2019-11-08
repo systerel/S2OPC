@@ -28,9 +28,9 @@
 #include "sopc_askpass.h"
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
-#include "sopc_common.h"
 #include "sopc_encodeable.h"
 #include "sopc_helper_string.h"
+#include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
@@ -45,6 +45,7 @@
 #include "static_security_data.h"
 #endif
 
+#include "client.h"
 #include "config.h"
 #include "helpers.h"
 #include "server.h"
@@ -53,7 +54,7 @@
  * This would mimic class instances and avoid global variables.
  */
 static uint32_t epConfigIdx = 0;
-static int32_t serverOnline = 0;
+int32_t serverOnline = 0;
 static int32_t pubSubStopRequested = false;
 static int32_t pubSubStartRequested = false;
 static int32_t pubAcyclicSendRequest = false;
@@ -76,37 +77,13 @@ typedef enum PublisherSendStatus
 } PublisherSendStatus;
 
 static SOPC_ReturnStatus Server_SetAddressSpace(void);
+
 static void Server_Event_AddressSpace(const SOPC_CallContext* callCtxPtr,
                                       SOPC_App_AddSpace_Event event,
                                       void* opParam,
                                       SOPC_StatusCode opStatus);
-static void Server_Event_Toolkit(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, uintptr_t appContext);
 static void Server_Event_Write(OpcUa_WriteValue* pwv);
 static void Server_request_change_sendAcyclicStatus(PublisherSendStatus state);
-
-SOPC_ReturnStatus Server_Initialize(void)
-{
-    SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
-    logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = LOG_PATH;
-    logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
-    SOPC_ReturnStatus status = SOPC_Common_Initialize(logConfiguration);
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_Toolkit_Initialize(Server_Event_Toolkit);
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        printf("# Info: Server initialized.\n");
-    }
-    else
-    {
-        printf("# Error: Server initialization failed.\n");
-    }
-
-    return status;
-}
 
 /* SOPC_ReturnStatus Server_SetRuntimeVariables(void); */
 
@@ -191,7 +168,7 @@ SOPC_ReturnStatus Server_CreateServerConfig(SOPC_S2OPC_Config* output_s2opcConfi
 
     if (SOPC_STATUS_OK != status)
     {
-        printf("# Error: Failed loading certificates and key (check paths are valid).\n");
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Failed loading certificates and key (check paths are valid)");
     }
 #else
 
@@ -243,7 +220,7 @@ SOPC_ReturnStatus Server_CreateServerConfig(SOPC_S2OPC_Config* output_s2opcConfi
 
     if (SOPC_STATUS_OK != status)
     {
-        printf("# Error: Failed loading certificates and key (check paths are valid).\n");
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Failed loading certificates and key (check paths are valid)");
     }
 #endif
 
@@ -309,7 +286,8 @@ SOPC_ReturnStatus Server_CreateServerConfig(SOPC_S2OPC_Config* output_s2opcConfi
         authorizationManager = SOPC_UserAuthorization_CreateManager_AllowAll();
         if (NULL == authenticationManager || NULL == authorizationManager)
         {
-            printf("# Error: Failed to create user authentication and authorization managers.\n");
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
+                                   "Failed to create user authentication and authorization managers");
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
     }
@@ -336,7 +314,7 @@ static SOPC_ReturnStatus Server_SetAddressSpace(void)
     address_space = SOPC_Embedded_AddressSpace_Load();
     if (NULL == address_space)
     {
-        printf("# Error: Cannot load static address space.\n");
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Cannot load static address space");
         status = SOPC_STATUS_NOK;
     }
     return status;
@@ -353,7 +331,7 @@ static SOPC_ReturnStatus Server_SetAddressSpace(void)
     /* Load address space from XML file */
     if (NULL == fd)
     {
-        printf("# Error: Cannot open " xstr(ADDRESS_SPACE_PATH) ": %s.\n", strerror(errno));
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Cannot open " xstr(ADDRESS_SPACE_PATH) ": %s", strerror(errno));
         status = SOPC_STATUS_NOK;
     }
 
@@ -369,11 +347,11 @@ static SOPC_ReturnStatus Server_SetAddressSpace(void)
 
     if (SOPC_STATUS_OK == status)
     {
-        printf("# Info: Loaded address space from " xstr(ADDRESS_SPACE_PATH) ".\n");
+        SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Loaded address space from " xstr(ADDRESS_SPACE_PATH));
     }
     else
     {
-        printf("# Error: Cannot parse XML address space " xstr(ADDRESS_SPACE_PATH) ".\n");
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Cannot parse XML address space " xstr(ADDRESS_SPACE_PATH));
         SOPC_AddressSpace_Delete(address_space);
     }
 
@@ -398,7 +376,7 @@ SOPC_ReturnStatus Server_LoadAddressSpace(void)
 
         if (SOPC_STATUS_OK != status)
         {
-            printf("# Error: Failed to set the address space configuration.\n");
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Failed to set the address space configuration");
         }
     }
 
@@ -407,7 +385,8 @@ SOPC_ReturnStatus Server_LoadAddressSpace(void)
         status = SOPC_ToolkitServer_SetAddressSpaceNotifCb(&Server_Event_AddressSpace);
         if (SOPC_STATUS_OK != status)
         {
-            printf("# Error: Failed to configure the address space notification callback.\n");
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
+                                   "Failed to configure the address space notification callback");
         }
     }
 
@@ -425,36 +404,24 @@ SOPC_ReturnStatus Server_ConfigureStartServer(SOPC_Endpoint_Config* pEpConfig)
     }
     else
     {
-        printf("# Error: Failed to configure the endpoint.\n");
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Failed to configure the endpoint");
         status = SOPC_STATUS_NOK;
     }
 
     if (SOPC_STATUS_OK == status)
     {
-        printf("# Info: Endpoint and Toolkit configured.\n");
+        SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Endpoint and Toolkit configured");
     }
 
     /* Starts the server */
     if (SOPC_STATUS_OK == status)
     {
         SOPC_ToolkitServer_AsyncOpenEndpoint(epConfigIdx);
-        SOPC_Atomic_Int_Set(&serverOnline, 1);
-        printf("# Info: Server started.\n");
+        SOPC_Atomic_Int_Set(&serverOnline, true);
+        SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Server started");
     }
 
     /* TODO: Integrate runtime variables */
-    /* if (SOPC_STATUS_OK == status)
-     * {
-     *     RuntimeVariables runtime_vars =
-     *         build_runtime_variables(build_info, PRODUCT_URI, app_namespace_uris, "Systerel");
-     *
-     *     if (!set_runtime_variables(epConfigIdx, runtime_vars))
-     *     {
-     *         printf("<Test_Server_Toolkit: Failed to populate Server object");
-     *         status = SOPC_STATUS_NOK;
-     *     }
-     * }
-     */
 
     return status;
 }
@@ -536,7 +503,7 @@ SOPC_ReturnStatus Server_WritePubSubNodes(void)
     FILE* fd = fopen(PUBSUB_CONFIG_PATH, "r");
     if (NULL == fd)
     {
-        printf("# Error: could not open configuration (file: %s).\n", PUBSUB_CONFIG_PATH);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "could not open configuration (file: %s)", PUBSUB_CONFIG_PATH);
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
 
@@ -546,7 +513,8 @@ SOPC_ReturnStatus Server_WritePubSubNodes(void)
         int res = fseek(fd, 0, SEEK_END);
         if (0 != res)
         {
-            printf("# Error: could not seek from end of file (file: %s)\n", PUBSUB_CONFIG_PATH);
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "invalid configuration file size (file: %s)",
+                                   PUBSUB_CONFIG_PATH);
             status = SOPC_STATUS_INVALID_STATE;
         }
         if (SOPC_STATUS_OK == status)
@@ -573,7 +541,7 @@ SOPC_ReturnStatus Server_WritePubSubNodes(void)
             char* Xml_config = SOPC_Calloc((size_t) fileSize + 1, sizeof(char));
             if (NULL == Xml_config)
             {
-                printf("# Error: while allocating memory for xml configuration\n");
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "while allocating memory for xml configuration");
                 status = SOPC_STATUS_OUT_OF_MEMORY;
             }
 
@@ -582,7 +550,8 @@ SOPC_ReturnStatus Server_WritePubSubNodes(void)
                 size_t size = fread(Xml_config, sizeof(char), (size_t) fileSize, fd);
                 if (size <= 0)
                 {
-                    printf("# Error: while reading xml configuration (file: %s)\n", PUBSUB_CONFIG_PATH);
+                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "while reading xml configuration (file: %s)",
+                                           PUBSUB_CONFIG_PATH);
                     status = SOPC_STATUS_INVALID_STATE;
                 }
                 else
@@ -627,7 +596,7 @@ SOPC_ReturnStatus Server_WritePubSubNodes(void)
 
     if (SOPC_STATUS_OK != status)
     {
-        printf("# Error: Could not write to local nodes.\n");
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Could not write to local nodes");
     }
 
     /* Clean */
@@ -669,7 +638,7 @@ void Server_StopAndClear(SOPC_S2OPC_Config* pConfig)
 
     if (Server_IsRunning())
     {
-        SOPC_Atomic_Int_Set(&serverOnline, 0);
+        SOPC_Atomic_Int_Set(&serverOnline, false);
     }
 
     SOPC_AddressSpace_Delete(address_space);
@@ -695,92 +664,20 @@ static void Server_Event_AddressSpace(const SOPC_CallContext* callCtxPtr,
     /* Watch modifications of configuration paths and the start/stop command */
     if (AS_WRITE_EVENT != event)
     {
-        printf("# Warning: Received unexpected event in address space notification handler: %d.\n", event);
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB,
+                                 "Received unexpected event in address space notification handler: %d", event);
         return;
     }
 
     if ((opStatus & SOPC_GoodStatusOppositeMask) != 0)
     {
-        printf("# Warning: Received address space event which status code is not good: 0x%08X. Ignored\n",
-               (unsigned int) opStatus);
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB,
+                                 "Received address space event which status code is not good: 0x%08X. Ignored",
+                                 (unsigned int) opStatus);
         return;
     }
 
     Server_Event_Write((OpcUa_WriteValue*) opParam);
-}
-
-static void Server_Event_Toolkit(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, uintptr_t appContext)
-{
-    SOPC_UNUSED_ARG(idOrStatus);
-    SOPC_EncodeableType* message_type = NULL;
-    OpcUa_WriteResponse* writeResponse = NULL;
-    OpcUa_ReadResponse* response = NULL;
-    SOPC_ReturnStatus statusCopy = SOPC_STATUS_NOK;
-    SOPC_PubSheduler_GetVariableRequestContext* ctx = NULL;
-
-    switch (event)
-    {
-    case SE_CLOSED_ENDPOINT:
-        printf("# Info: Closed endpoint event.\n");
-        SOPC_Atomic_Int_Set(&serverOnline, 0);
-        return;
-    case SE_LOCAL_SERVICE_RESPONSE:
-        message_type = *((SOPC_EncodeableType**) param);
-
-        /* Listen for ReadResponses, used in GetSourceVariables */
-        ctx = (SOPC_PubSheduler_GetVariableRequestContext*) appContext;
-        if (message_type == &OpcUa_ReadResponse_EncodeableType && NULL != ctx)
-        {
-            SOPC_Mutex_Lock(&ctx->mut);
-
-            statusCopy = SOPC_STATUS_OK;
-            response = (OpcUa_ReadResponse*) param;
-
-            if (NULL != response) // Response if deleted by scheduler !!!
-            {
-                // Allocate data values
-                ctx->ldv = SOPC_Calloc((size_t) ctx->NoOfNodesToRead, sizeof(SOPC_DataValue));
-
-                // Copy to response
-                if (NULL != ctx->ldv)
-                {
-                    for (size_t i = 0; i < (size_t) ctx->NoOfNodesToRead && SOPC_STATUS_OK == statusCopy; ++i)
-                    {
-                        statusCopy = SOPC_DataValue_Copy(&ctx->ldv[i], &response->Results[i]);
-                    }
-
-                    // Error, free allocated data values
-                    if (SOPC_STATUS_OK != statusCopy)
-                    {
-                        for (size_t i = 0; i < (size_t) ctx->NoOfNodesToRead; ++i)
-                        {
-                            SOPC_DataValue_Clear(&ctx->ldv[i]);
-                        }
-                        SOPC_Free(ctx->ldv);
-                        ctx->ldv = NULL;
-                    }
-                }
-            }
-
-            SOPC_Condition_SignalAll(&ctx->cond);
-
-            SOPC_Mutex_Unlock(&ctx->mut);
-        }
-        else if (message_type == &OpcUa_WriteResponse_EncodeableType)
-        {
-            writeResponse = param;
-            // Service should have succeeded
-            SOPC_ASSERT(0 == (SOPC_GoodStatusOppositeMask & writeResponse->ResponseHeader.ServiceResult));
-        }
-        else
-        {
-            SOPC_ASSERT(false);
-        }
-        return;
-    default:
-        printf("# Warning: Unexpected endpoint event: %d.\n", event);
-        return;
-    }
 }
 
 static void Server_request_change_sendAcyclicStatus(PublisherSendStatus state)
@@ -788,7 +685,7 @@ static void Server_request_change_sendAcyclicStatus(PublisherSendStatus state)
     /* Create a WriteRequest with a single WriteValue */
     OpcUa_WriteRequest* request = NULL;
     SOPC_ReturnStatus status = SOPC_Encodeable_Create(&OpcUa_WriteRequest_EncodeableType, (void**) &request);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
     OpcUa_WriteValue* wv = SOPC_Calloc(1, sizeof(OpcUa_WriteValue));
 
     /* Avoid the creation of the NodeId each call of the function */
@@ -840,15 +737,16 @@ static void Server_Event_Write(OpcUa_WriteValue* pwv)
 {
     if (NULL == pwv)
     {
-        printf("# Warning: NULL pointer passed instead of WriteValue to address space notification callback.\n");
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB,
+                                 "NULL pointer passed instead of WriteValue to address space notification callback");
         return;
     }
 
     /* IndexRange should be empty (entire Value) */
     if (0 < pwv->IndexRange.Length)
     {
-        printf("# Warning: Address space notification with non empty IndexRange: %s.\n",
-               SOPC_String_GetRawCString(&pwv->IndexRange));
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB, "Address space notification with non empty IndexRange: %s",
+                                 SOPC_String_GetRawCString(&pwv->IndexRange));
         /* return; */
     }
 
@@ -889,7 +787,7 @@ static void Server_Event_Write(OpcUa_WriteValue* pwv)
     /* If send changes, Send every writer group with new values stored in address space */
     int32_t cmpSend = -1;
     status = SOPC_NodeId_Compare(nidSend, &pwv->NodeId, &cmpSend);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
     SOPC_NodeId_Clear(nidSend);
     SOPC_Free(nidSend);
     nidSend = NULL;
@@ -906,20 +804,23 @@ static void Server_Event_Write(OpcUa_WriteValue* pwv)
         SOPC_DataValue* dv = &pwv->Value;
         if ((dv->Status & SOPC_GoodStatusOppositeMask) != 0)
         {
-            printf("# Warning: Status Code not Good, ignoring Configuration path.\n");
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB, "Status Code not Good, ignoring Configuration path");
             return;
         }
 
         SOPC_Variant* variant = &dv->Value;
         if (variant->BuiltInTypeId != SOPC_String_Id)
         {
-            printf("# Warning: Configuration path value is of invalid type. Expected String, actual type id is %d.\n",
-                   variant->BuiltInTypeId);
+            SOPC_Logger_TraceWarning(
+                SOPC_LOG_MODULE_PUBSUB,
+                "Configuration path value is of invalid type. Expected String, actual type id is %d",
+                variant->BuiltInTypeId);
             return;
         }
         if (variant->ArrayType != SOPC_VariantArrayType_SingleValue)
         {
-            printf("# Warning: Configuration path must be a single value, not an array nor a matrix.\n");
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB,
+                                     "Configuration path must be a single value, not an array nor a matrix");
             return;
         }
 
@@ -933,20 +834,22 @@ static void Server_Event_Write(OpcUa_WriteValue* pwv)
         SOPC_DataValue* dv = &pwv->Value;
         if ((dv->Status & SOPC_GoodStatusOppositeMask) != 0)
         {
-            printf("# Warning: Status Code not Good, ignoring Start/Stop Command.\n");
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB, "Status Code not Good, ignoring Start/Stop Command");
             return;
         }
 
         SOPC_Variant* variant = &dv->Value;
         if (variant->BuiltInTypeId != SOPC_Byte_Id)
         {
-            printf("# Warning: Start/Stop Command value is of invalid type. Expected Byte, actual type id is %d.\n",
-                   variant->BuiltInTypeId);
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB,
+                                     "Start/Stop Command value is of invalid type. Expected Byte, actual type id is %d",
+                                     variant->BuiltInTypeId);
             return;
         }
         if (variant->ArrayType != SOPC_VariantArrayType_SingleValue)
         {
-            printf("# Warning: Start/Stop Command must be a single value, not an array nor a matrix.\n");
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB,
+                                     "Start/Stop Command must be a single value, not an array nor a matrix");
             return;
         }
 
@@ -1157,4 +1060,63 @@ SOPC_DataValue* Server_GetSourceVariables(OpcUa_ReadValueId* lrv, int32_t nbValu
     SOPC_Free(requestContext);
 
     return ldv;
+}
+
+void Server_Treat_Local_Service_Response(void* param, uintptr_t appContext)
+{
+    SOPC_EncodeableType* message_type = *((SOPC_EncodeableType**) param);
+    OpcUa_WriteResponse* writeResponse = NULL;
+    OpcUa_ReadResponse* response = NULL;
+    SOPC_ReturnStatus statusCopy = SOPC_STATUS_NOK;
+
+    /* Listen for WriteResponses, which only contain status codes */
+
+    SOPC_PubSheduler_GetVariableRequestContext* ctx = (SOPC_PubSheduler_GetVariableRequestContext*) appContext;
+    if (message_type == &OpcUa_ReadResponse_EncodeableType && NULL != ctx)
+    {
+        SOPC_Mutex_Lock(&ctx->mut);
+
+        statusCopy = SOPC_STATUS_OK;
+        response = (OpcUa_ReadResponse*) param;
+
+        if (NULL != response) // Response if deleted by scheduler !!!
+        {
+            // Allocate data values
+            ctx->ldv = SOPC_Calloc((size_t) ctx->NoOfNodesToRead, sizeof(SOPC_DataValue));
+
+            // Copy to response
+            if (NULL != ctx->ldv)
+            {
+                for (size_t i = 0; i < (size_t) ctx->NoOfNodesToRead && SOPC_STATUS_OK == statusCopy; ++i)
+                {
+                    statusCopy = SOPC_DataValue_Copy(&ctx->ldv[i], &response->Results[i]);
+                }
+
+                // Error, free allocated data values
+                if (SOPC_STATUS_OK != statusCopy)
+                {
+                    for (size_t i = 0; i < (size_t) ctx->NoOfNodesToRead; ++i)
+                    {
+                        SOPC_DataValue_Clear(&ctx->ldv[i]);
+                    }
+                    SOPC_Free(ctx->ldv);
+                    ctx->ldv = NULL;
+                }
+            }
+        }
+
+        SOPC_Condition_SignalAll(&ctx->cond);
+
+        SOPC_Mutex_Unlock(&ctx->mut);
+    }
+    else if (message_type == &OpcUa_WriteResponse_EncodeableType)
+    {
+        writeResponse = param;
+        // Service should have succeeded
+        SOPC_ASSERT(0 == (SOPC_GoodStatusOppositeMask & writeResponse->ResponseHeader.ServiceResult));
+    }
+    else
+    {
+        SOPC_ASSERT(false);
+    }
 }

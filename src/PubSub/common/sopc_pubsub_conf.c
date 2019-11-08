@@ -140,10 +140,20 @@ struct SOPC_WriterGroup
 
     double keepAliveTimeMs;
 
+    char* securityGroupId;
+    SOPC_SecurityKeyServices* securityKeyServices;
+    uint32_t securityKeyServices_length;
+
     // For the next version:
     // Priority
     // LocaleIds
     // transportSettings
+};
+
+struct SOPC_SecurityKeyServices
+{
+    char* endpointUrl;
+    SOPC_SerializedCertificate* serverCertificate;
 };
 
 struct SOPC_DataSetWriter
@@ -165,7 +175,13 @@ struct SOPC_DataSetWriter
 struct SOPC_ReaderGroup
 {
     SOPC_SecurityMode_Type securityMode;
+
     SOPC_Conf_PublisherId publisherId;
+
+    char* securityGroupId;
+
+    SOPC_SecurityKeyServices* securityKeyServices;
+    uint32_t securityKeyServices_length;
 
     uint8_t dataSetReaders_length;
     SOPC_DataSetReader* dataSetReaders;
@@ -237,6 +253,8 @@ static void SOPC_PubSubConnection_Clear(SOPC_PubSubConnection* connection);
 static void SOPC_PublishedDataSet_Clear(SOPC_PublishedDataSet* dataset);
 
 static void SOPC_WriterGroup_Clear(SOPC_WriterGroup* group);
+
+static void SOPC_SecurityKeyServices_Clear(SOPC_SecurityKeyServices* sks);
 
 static void SOPC_ReaderGroup_Clear(SOPC_ReaderGroup* group);
 
@@ -607,6 +625,40 @@ void SOPC_ReaderGroup_Set_SecurityMode(SOPC_ReaderGroup* group, SOPC_SecurityMod
     group->securityMode = mode;
 }
 
+bool SOPC_ReaderGroup_Set_SecurityGroupId(SOPC_ReaderGroup* group, char* securityGroupId)
+{
+    SOPC_ASSERT(NULL != group);
+    group->securityGroupId = SOPC_PubSub_String_Copy(securityGroupId);
+    return (NULL != group->securityGroupId);
+}
+
+bool SOPC_ReaderGroup_Allocate_SecurityKeyServices_Array(SOPC_ReaderGroup* group, uint32_t nb)
+{
+    SOPC_ASSERT(NULL != group);
+    // free in SOPC_ReaderGroup_Clear
+    group->securityKeyServices = SOPC_Calloc(nb, sizeof(SOPC_SecurityKeyServices));
+    if (NULL == group->securityKeyServices)
+    {
+        return false;
+    }
+    group->securityKeyServices_length = nb;
+    return true;
+}
+
+uint32_t SOPC_ReaderGroup_Nb_SecurityKeyServices(const SOPC_ReaderGroup* group)
+{
+    SOPC_ASSERT(NULL != group);
+    return group->securityKeyServices_length;
+}
+
+SOPC_SecurityKeyServices* SOPC_ReaderGroup_Get_SecurityKeyServices_At(const SOPC_ReaderGroup* group, uint32_t index)
+{
+    SOPC_ASSERT(NULL != group);
+    SOPC_ASSERT(index < group->securityKeyServices_length);
+    SOPC_ASSERT(NULL != group->securityKeyServices);
+    return &group->securityKeyServices[index];
+}
+
 bool SOPC_ReaderGroup_Allocate_DataSetReader_Array(SOPC_ReaderGroup* group, uint8_t nb)
 {
     SOPC_ASSERT(NULL != group);
@@ -966,6 +1018,69 @@ void SOPC_WriterGroup_Set_SecurityMode(SOPC_WriterGroup* group, SOPC_SecurityMod
     group->securityMode = mode;
 }
 
+bool SOPC_WriterGroup_Set_SecurityGroupId(SOPC_WriterGroup* group, char* securityGroupId)
+{
+    SOPC_ASSERT(NULL != group);
+    group->securityGroupId = SOPC_PubSub_String_Copy(securityGroupId);
+    return (NULL != group->securityGroupId);
+}
+
+bool SOPC_WriterGroup_Allocate_SecurityKeyServices_Array(SOPC_WriterGroup* group, uint32_t nb)
+{
+    SOPC_ASSERT(NULL != group);
+    // free in SOPC_WriterGroup_Clear
+    group->securityKeyServices = SOPC_Calloc(nb, sizeof(SOPC_SecurityKeyServices));
+    if (NULL == group->securityKeyServices)
+    {
+        return false;
+    }
+    group->securityKeyServices_length = nb;
+    return true;
+}
+
+uint32_t SOPC_WriterGroup_Nb_SecurityKeyServices(const SOPC_WriterGroup* group)
+{
+    SOPC_ASSERT(NULL != group);
+    return group->securityKeyServices_length;
+}
+
+SOPC_SecurityKeyServices* SOPC_WriterGroup_Get_SecurityKeyServices_At(const SOPC_WriterGroup* group, uint32_t index)
+{
+    SOPC_ASSERT(NULL != group);
+    SOPC_ASSERT(index < group->securityKeyServices_length);
+    SOPC_ASSERT(NULL != group->securityKeyServices);
+    return &group->securityKeyServices[index];
+}
+
+/** SecurityKeyServices **/
+
+const char* SOPC_SecurityKeyServices_Get_EndpointUrl(const SOPC_SecurityKeyServices* sks)
+{
+    SOPC_ASSERT(NULL != sks);
+    return sks->endpointUrl;
+}
+
+bool SOPC_SecurityKeyServices_Set_EndpointUrl(SOPC_SecurityKeyServices* sks, const char* uri)
+{
+    SOPC_ASSERT(NULL != sks);
+    sks->endpointUrl = SOPC_PubSub_String_Copy(uri);
+    return (NULL != sks->endpointUrl);
+}
+
+SOPC_SerializedCertificate* SOPC_SecurityKeyServices_Get_ServerCertificate(const SOPC_SecurityKeyServices* sks)
+{
+    SOPC_ASSERT(NULL != sks);
+    return sks->serverCertificate;
+}
+
+bool SOPC_SecurityKeyServices_Set_ServerCertificate(SOPC_SecurityKeyServices* sks,
+                                                    SOPC_SerializedCertificate* serverCertificate)
+{
+    SOPC_ASSERT(NULL != sks);
+    sks->serverCertificate = serverCertificate;
+    return (NULL != sks->serverCertificate);
+}
+
 bool SOPC_WriterGroup_Allocate_DataSetWriter_Array(SOPC_WriterGroup* group, uint8_t nb)
 {
     SOPC_ASSERT(NULL != group);
@@ -1208,18 +1323,55 @@ static void SOPC_WriterGroup_Clear(SOPC_WriterGroup* group)
 {
     if (NULL != group)
     {
+        SOPC_Free(group->securityGroupId);
+        // securityKeyServices_length /= 0 => securityKeyServices /= NULL
+        SOPC_ASSERT(0 == group->securityKeyServices_length || NULL != group->securityKeyServices);
+        for (uint32_t i = 0; i < group->securityKeyServices_length; i++)
+        {
+            SOPC_SecurityKeyServices_Clear(&group->securityKeyServices[i]);
+        }
+        SOPC_Free(group->securityKeyServices);
+        group->securityKeyServices = NULL;
+        group->securityKeyServices_length = 0;
         group->dataSetWriters_length = 0;
         /* IMPORTANT NOTE: No memory management to do in dataSetWriter(s), publishedDataSet managed in config struct
          * => no need to iterate on array */
         SOPC_Free(group->dataSetWriters);
         SOPC_Free(group->mqttTopic);
+        group->dataSetWriters = NULL;
+        group->mqttTopic = NULL;
     }
+}
+
+static void SOPC_SecurityKeyServices_Clear(SOPC_SecurityKeyServices* sks)
+{
+    if (NULL == sks)
+    {
+        return;
+    }
+
+    SOPC_Free(sks->endpointUrl);
+    sks->endpointUrl = NULL;
+    SOPC_KeyManager_SerializedCertificate_Delete(sks->serverCertificate);
+    sks->serverCertificate = NULL;
 }
 
 static void SOPC_ReaderGroup_Clear(SOPC_ReaderGroup* group)
 {
     if (NULL != group)
     {
+        SOPC_Free(group->securityGroupId);
+
+        // securityKeyServices_length /= 0 => securityKeyServices /= NULL
+        SOPC_ASSERT(0 == group->securityKeyServices_length || NULL != group->securityKeyServices);
+        for (uint32_t i = 0; i < group->securityKeyServices_length; i++)
+        {
+            SOPC_SecurityKeyServices_Clear(&group->securityKeyServices[i]);
+        }
+        SOPC_Free(group->securityKeyServices);
+        group->securityKeyServices = NULL;
+        group->securityKeyServices_length = 0;
+
         for (int i = 0; i < group->dataSetReaders_length; i++)
         {
             SOPC_DataSetMetaData_Clear(&(group->dataSetReaders[i].metaData));
@@ -1248,4 +1400,38 @@ static void SOPC_PublishedVariable_Clear(SOPC_PublishedVariable* variable)
         SOPC_NodeId_Clear(variable->nodeId);
         SOPC_Free(variable->nodeId);
     }
+}
+
+/* Helper Functions*/
+
+bool SOPC_EndpointDescription_Create_From_URL(char* url, OpcUa_EndpointDescription** endpoint_out)
+{
+    SOPC_ASSERT(NULL != endpoint_out);
+    *endpoint_out = NULL;
+
+    bool allocSuccess = true;
+    OpcUa_EndpointDescription* endpoint;
+    if (NULL == url)
+    {
+        return true;
+    }
+    endpoint = SOPC_Calloc(1, sizeof(OpcUa_EndpointDescription));
+    if (NULL == endpoint)
+    {
+        return false;
+    }
+
+    OpcUa_EndpointDescription_Initialize(endpoint);
+    SOPC_String_Initialize(&endpoint->EndpointUrl);
+    SOPC_ReturnStatus status = SOPC_String_CopyFromCString(&endpoint->EndpointUrl, url);
+    if (SOPC_STATUS_OK == status)
+    {
+        *endpoint_out = endpoint;
+    }
+    else
+    {
+        allocSuccess = false;
+        SOPC_Free(endpoint);
+    }
+    return allocSuccess;
 }
