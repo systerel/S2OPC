@@ -305,6 +305,6 @@ OPERATIONS
     
     p_auto_closed_active <-- is_auto_close_channel_active =
     BEGIN
-        p_auto_closed_active := bool(card(s_cli_channel_connecting) + card(s_channel_connected) > 3 * card(t_channel) / 4)
+        p_auto_closed_active := bool(card(s_cli_channel_connecting) + card(s_channel_connected) >= c_max_channels_connected)
     END
 END

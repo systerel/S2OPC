@@ -114,8 +114,8 @@ typedef SOPC_ExtensionObject* constants_bs__t_user_token_i;
 /*--------------------------
    Added by the Translator
   --------------------------*/
-#define constants_bs__t_channel_config_idx_i_max (2 * SOPC_MAX_SECURE_CONNECTIONS_PLUS_1)
-#define constants_bs__t_channel_i_max SOPC_MAX_SECURE_CONNECTIONS_PLUS_1
+#define constants_bs__t_channel_config_idx_i_max (2 * SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED)
+#define constants_bs__t_channel_i_max SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED
 #define constants_bs__t_endpoint_config_idx_i_max SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS
 #define constants_bs__t_session_i_max SOPC_MAX_SESSIONS
 #define constants_bs__t_subscription_i_max SOPC_MAX_SESSIONS // 1 sub / session
@@ -164,6 +164,7 @@ extern const constants_bs__t_NodeId_i constants_bs__c_Null_Type_NodeId;
 #define constants_bs__c_channel_indet 0
 #define constants_bs__c_client_request_handle_indet 0
 #define constants_bs__c_endpoint_config_idx_indet 0
+#define constants_bs__c_max_channels_connected SOPC_MAX_SECURE_CONNECTIONS
 #define constants_bs__c_monitoredItemId_indet 0
 #define constants_bs__c_monitoredItemPointer_indet 0
 #define constants_bs__c_monitoredItemQueueIterator_indet 0

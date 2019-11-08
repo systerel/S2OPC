@@ -110,6 +110,7 @@ CONCRETE_CONSTANTS
     c_byte_buffer_indet,
 
     c_channel_indet,
+    c_max_channels_connected,
     c_user_indet,
     c_user_token_indet,
     c_session_indet,
@@ -269,6 +270,8 @@ PROPERTIES
     c_channel_indet /: t_channel &
     cast_t_channel : NAT +-> t_channel_i &
     cast_t_channel : perm(t_channel) &
+
+    c_max_channels_connected : NAT &
 
     t_session <: t_session_i &
     c_session_indet : t_session_i &

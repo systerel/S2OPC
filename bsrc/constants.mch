@@ -364,6 +364,7 @@ CONCRETE_CONSTANTS
     c_request_context_indet,
     c_channel_config_idx_indet,
     c_channel_indet,
+    c_max_channels_connected,
     c_client_request_handle_indet,
     c_server_request_handle_any,
     c_no_application_context,
@@ -625,6 +626,8 @@ PROPERTIES
     c_channel_indet /: t_channel &
     cast_t_channel : NAT +-> t_channel_i &
     cast_t_channel : perm(t_channel) &
+
+    c_max_channels_connected : NAT &
 
     t_endpoint_config_idx <: t_endpoint_config_idx_i &
     c_endpoint_config_idx_indet : t_endpoint_config_idx_i &

@@ -87,9 +87,8 @@ LOCAL_OPERATIONS
      THEN
         l_allowed_new_sc :=
         bool(card(s_cli_channel_connecting) + card(s_channel_connected) /= card(t_channel) & /* No slot remaining */
-            (card(s_cli_channel_connecting) + card(s_channel_connected) /= card(t_channel) - 1
-                or is_one_sc_auto_closing = TRUE)  /* 1 slot is always kept for auto closing evaluation 
-            (if a SC is already auto closing it is used because 1 will be released soon) */)
+            (card(s_cli_channel_connecting) + card(s_channel_connected) < c_max_channels_connected
+             or is_one_sc_auto_closing = TRUE)  /* we accept a connection after the maximum if a connection was released in exchange */)
      END
 
 OPERATIONS
@@ -148,20 +147,18 @@ OPERATIONS
     l_allowed_new_sc <-- l_is_new_sc_connection_allowed (is_one_sc_auto_closing) =
     VAR
         l_card_used,
-        l_card_channel,
-        l_card_channel_minus_1
+        l_card_channel
     IN
         l_allowed_new_sc := FALSE;
         l_card_used <-- get_card_channel_used;
         l_card_channel <-- get_card_t_channel;
-        l_card_channel_minus_1 := l_card_channel - 1;
-        /* It is possible to have no slot at all when a channel is already disconnecting, wait a channel slot to be freed */
+        /* It is possible to have no slot at all when channels are already disconnecting due to auto close, wait a channel slot to be freed */
         IF l_card_used /= l_card_channel THEN 
             /* Check we keep at least one channel slot to allow auto close channel to be evaluated later in services layer.
             If we accept a connection and reach cardinal the secure channel layer will not accept any new connection and
             service layer will not be aware of next connections attempts to evaluate possible auto close.
             */
-            IF l_card_used /= l_card_channel_minus_1 or is_one_sc_auto_closing = TRUE
+            IF l_card_used < c_max_channels_connected or is_one_sc_auto_closing = TRUE
             THEN
                 l_allowed_new_sc := TRUE
             END
@@ -317,14 +314,12 @@ OPERATIONS
     p_auto_closed_active <-- is_auto_close_channel_active =
     VAR
         l_card_used,
-        l_card_channel,
-        l_card_limit
+        l_card_channel
     IN
         p_auto_closed_active := FALSE;
         l_card_used <-- get_card_channel_used;
         l_card_channel <-- get_card_t_channel;
-        l_card_limit := 3 * l_card_channel / 4;
-        p_auto_closed_active := bool(l_card_used > l_card_limit)
+        p_auto_closed_active := bool(l_card_used >= c_max_channels_connected)
     END
 
 END
