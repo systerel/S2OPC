@@ -46,11 +46,19 @@
 #include "static_security_data.h"
 #endif
 
+/* activate or deactivate log print */
 bool debug = false;
+
+/* set to 1 in case of failure */
 int32_t sendFailures = 0;
+
+/* not implemented yet: activate or deactivate security mode */
 bool secuActive = false;
+
+/* secure chanel config */
 SOPC_SecureChannel_Config scConfig;
 
+/* endpoint config */
 SOPC_Endpoint_Config epConfig;
 SOPC_S2OPC_Config output_s2opcConfig;
 
@@ -73,7 +81,6 @@ void Fuzz_Event_Fct(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, 
         {
             SOPC_Atomic_Int_Set((SessionConnectedState*) &scState, (SessionConnectedState) SESSION_CONN_FAILED);
         }
-        //        elseif onsecu
         else
         {
             assert(false && ">>Fuzz_Server_event: bad app context");
@@ -174,17 +181,21 @@ void Fuzz_Event_Fct(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, 
 
 int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
 {
-    // Install signal handler to close the server gracefully when server needs to stop
+	/*  Install signal handler to close the server gracefully when
+	 * server needs to stop from a signal
+	 */
     signal(SIGINT, StopSignal_serv);
     signal(SIGTERM, StopSignal_serv);
+
+    /* Used to initialize the server on the first iteration only */
     static bool init = false;
+
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
+
+    /* one time initialization */
     if (!init)
     {
-        //         must be activated and deactivated depending
-        //                secuActive = false;
-        //                secuActive = true;
         status = Setup_serv();
         if (SOPC_STATUS_NOK == status)
         {
@@ -202,7 +213,7 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
         {
             status = AddSecureChannelconfig_client();
         }
-        if (SOPC_STATUS_OK == status) // || channel_config_uix[secu] != 0
+        if (SOPC_STATUS_OK == status)
         {
             status = SOPC_Toolkit_Configured();
         }
@@ -216,16 +227,14 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
         }
     }
 
+    /* create a client, send a request and free the client */
     if (true == init && SOPC_STATUS_OK == status)
     {
-        //        if (SOPC_STATUS_OK == status)
-        //        {
         char* buf_copy = SOPC_Calloc(1 + len, sizeof(char));
         assert(buf_copy != NULL);
 
         memcpy(buf_copy, buf, len);
 
-        // secuActive
         status = Run_client(buf_copy, len);
 
         if (SOPC_STATUS_OK != status)
@@ -244,7 +253,6 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
         }
 
         Teardown_client();
-        //        Teardown_serv();
         SOPC_Free(buf_copy);
     }
     else

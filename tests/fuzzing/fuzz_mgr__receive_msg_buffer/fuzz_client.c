@@ -194,6 +194,7 @@ SOPC_ReturnStatus Wait_response_client()
     uint32_t loopCpt = 0;
 
     loopCpt = 0;
+    // Wait until the server receive the msg sent or timeout
     while (SOPC_STATUS_OK == status && SOPC_Atomic_Int_Get(&scState) != SESSION_CONN_MSG_RECEIVED &&
            loopCpt * sleepTimeout <= loopTimeout)
     {
@@ -351,5 +352,6 @@ SOPC_ReturnStatus Teardown_client()
         SOPC_ToolkitClient_AsyncCloseSession(session1_idx);
     }
     SOPC_Atomic_Int_Set((SessionConnectedState*) &scState, (SessionConnectedState) SESSION_CONN_NEW);
+
     return (status);
 }
