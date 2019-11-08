@@ -378,6 +378,7 @@ SOPC_ReturnStatus Teardown_serv()
     authenticationManager = NULL;
     authorizationManager = NULL;
 
+    SOPC_S2OPC_Config_Clear(&output_s2opcConfig);
     SOPC_Toolkit_Clear();
     if (true == debug)
     {

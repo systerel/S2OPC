@@ -181,9 +181,9 @@ void Fuzz_Event_Fct(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, 
 
 int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
 {
-	/*  Install signal handler to close the server gracefully when
-	 * server needs to stop from a signal
-	 */
+    /*  Install signal handler to close the server gracefully when
+     * server needs to stop from a signal
+     */
     signal(SIGINT, StopSignal_serv);
     signal(SIGTERM, StopSignal_serv);
 
@@ -191,7 +191,6 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
     static bool init = false;
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-
 
     /* one time initialization */
     if (!init)
