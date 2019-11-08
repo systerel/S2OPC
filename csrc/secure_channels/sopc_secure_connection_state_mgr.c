@@ -53,7 +53,7 @@ bool SC_InitNewConnection(uint32_t* newConnectionIdx)
     uint32_t connectionIdx = lastSecureConnectionArrayIdx;
     do
     {
-        if (connectionIdx < SOPC_MAX_SECURE_CONNECTIONS)
+        if (connectionIdx < SOPC_MAX_SECURE_CONNECTIONS_PLUS_1)
         {
             connectionIdx++; // Minimum used == 1 && Maximum used == MAX + 1
             if (secureConnectionsArray[connectionIdx].state == SECURE_CONNECTION_STATE_SC_CLOSED)
@@ -128,7 +128,7 @@ bool SC_CloseConnection(uint32_t connectionIdx, bool socketFailure)
     SOPC_SecureConnection* scConnection = NULL;
     bool result = false;
     bool configRes = false;
-    if (connectionIdx > 0 && connectionIdx <= SOPC_MAX_SECURE_CONNECTIONS)
+    if (connectionIdx > 0 && connectionIdx <= SOPC_MAX_SECURE_CONNECTIONS_PLUS_1)
     {
         scConnection = &(secureConnectionsArray[connectionIdx]);
         if (scConnection->state != SECURE_CONNECTION_STATE_SC_CLOSED)
@@ -225,7 +225,7 @@ bool SC_CloseConnection(uint32_t connectionIdx, bool socketFailure)
 static uint32_t SC_StartConnectionEstablishTimer(uint32_t connectionIdx)
 {
     assert(connectionIdx > 0);
-    assert(connectionIdx <= SOPC_MAX_SECURE_CONNECTIONS);
+    assert(connectionIdx <= SOPC_MAX_SECURE_CONNECTIONS_PLUS_1);
     SOPC_Event event;
     event.eltId = connectionIdx;
     event.event = TIMER_SC_CONNECTION_TIMEOUT;
@@ -237,7 +237,7 @@ static uint32_t SC_StartConnectionEstablishTimer(uint32_t connectionIdx)
 static uint32_t SC_Client_StartOPNrenewTimer(uint32_t connectionIdx, uint32_t timeoutMs)
 {
     assert(connectionIdx > 0);
-    assert(connectionIdx <= SOPC_MAX_SECURE_CONNECTIONS);
+    assert(connectionIdx <= SOPC_MAX_SECURE_CONNECTIONS_PLUS_1);
     SOPC_Event event;
     event.eltId = connectionIdx;
     event.event = TIMER_SC_CLIENT_OPN_RENEW;
@@ -3073,11 +3073,22 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         scConnection = SC_GetConnection(eltId);
         if (scConnection != NULL)
         {
-            if (!scConnection->isServerConnection &&
-                (scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED ||
-                 scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW))
+            if (scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED ||
+                scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW)
             {
-                SC_ClientTransition_Connected_To_Disconnected(scConnection, eltId);
+                if (scConnection->isServerConnection)
+                {
+                    // Server side
+                    // Too many channels connected to accept a new one or closing the oldest without session
+                    SC_CloseSecureConnection(
+                        scConnection, eltId, false, false, OpcUa_BadSecureChannelClosed,
+                        "Closing secure channel due to maximum reached (last attempt or oldest without session)");
+                }
+                else
+                {
+                    // Client side
+                    SC_ClientTransition_Connected_To_Disconnected(scConnection, eltId);
+                }
                 result = true;
             }
             if (!result)

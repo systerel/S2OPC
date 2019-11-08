@@ -50,8 +50,8 @@ static struct
     uint8_t initDone;
     uint8_t locked;
     Mutex mut;
-    SOPC_SecureChannel_Config* scConfigs[SOPC_MAX_SECURE_CONNECTIONS + 1];
-    SOPC_SecureChannel_Config* serverScConfigs[SOPC_MAX_SECURE_CONNECTIONS + 1];
+    SOPC_SecureChannel_Config* scConfigs[SOPC_MAX_SECURE_CONNECTIONS_PLUS_1 + 1];
+    SOPC_SecureChannel_Config* serverScConfigs[SOPC_MAX_SECURE_CONNECTIONS_PLUS_1 + 1];
     SOPC_Endpoint_Config* epConfigs[SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS + 1]; // index 0 reserved
     uint32_t scConfigIdxMax;
     uint32_t serverScLastConfigIdx;
@@ -101,7 +101,7 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
 
         SOPC_Helper_EndiannessCfg_Initialize();
 
-        if (SIZE_MAX / (SOPC_MAX_SECURE_CONNECTIONS + 1) < sizeof(SOPC_SecureChannel_Config*) ||
+        if (SIZE_MAX / (SOPC_MAX_SECURE_CONNECTIONS_PLUS_1 + 1) < sizeof(SOPC_SecureChannel_Config*) ||
             SIZE_MAX / (SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS + 1) < sizeof(SOPC_Endpoint_Config*))
         {
             status = SOPC_STATUS_NOK;
@@ -109,8 +109,8 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
 
         if (SOPC_STATUS_OK == status)
         {
-            memset(tConfig.scConfigs, 0, (SOPC_MAX_SECURE_CONNECTIONS + 1) * sizeof(SOPC_SecureChannel_Config*));
-            memset(tConfig.serverScConfigs, 0, (SOPC_MAX_SECURE_CONNECTIONS + 1) * sizeof(SOPC_SecureChannel_Config*));
+            memset(tConfig.scConfigs, 0, (SOPC_MAX_SECURE_CONNECTIONS_PLUS_1 + 1) * sizeof(SOPC_SecureChannel_Config*));
+            memset(tConfig.serverScConfigs, 0, (SOPC_MAX_SECURE_CONNECTIONS_PLUS_1 + 1) * sizeof(SOPC_SecureChannel_Config*));
             memset(tConfig.epConfigs, 0,
                    (SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS + 1) * sizeof(SOPC_Endpoint_Config*));
             SOPC_EventTimer_Initialize();
@@ -172,7 +172,7 @@ static void SOPC_ToolkitServer_ClearScConfig_WithoutLock(uint32_t serverScConfig
 static void SOPC_Toolkit_ClearServerScConfigs_WithoutLock(void)
 {
     // Index 0 reserved for indet, index = MAX valid
-    for (uint32_t i = 1; i <= SOPC_MAX_SECURE_CONNECTIONS; i++)
+    for (uint32_t i = 1; i <= SOPC_MAX_SECURE_CONNECTIONS_PLUS_1; i++)
     {
         SOPC_ToolkitServer_ClearScConfig_WithoutLock(i);
     }
@@ -214,7 +214,7 @@ uint32_t SOPC_ToolkitClient_AddSecureChannelConfig(SOPC_SecureChannel_Config* sc
         if (tConfig.initDone != false)
         {
             Mutex_Lock(&tConfig.mut);
-            if (tConfig.scConfigIdxMax < SOPC_MAX_SECURE_CONNECTIONS)
+            if (tConfig.scConfigIdxMax < SOPC_MAX_SECURE_CONNECTIONS_PLUS_1)
             {
                 tConfig.scConfigIdxMax++; // Minimum used == 1 && Maximum used == MAX + 1
                 assert(NULL == tConfig.scConfigs[tConfig.scConfigIdxMax]);
@@ -230,7 +230,7 @@ uint32_t SOPC_ToolkitClient_AddSecureChannelConfig(SOPC_SecureChannel_Config* sc
 SOPC_SecureChannel_Config* SOPC_ToolkitClient_GetSecureChannelConfig(uint32_t scConfigIdx)
 {
     SOPC_SecureChannel_Config* res = NULL;
-    if (scConfigIdx > 0 && scConfigIdx <= SOPC_MAX_SECURE_CONNECTIONS)
+    if (scConfigIdx > 0 && scConfigIdx <= SOPC_MAX_SECURE_CONNECTIONS_PLUS_1)
     {
         if (tConfig.initDone != false)
         {
@@ -258,7 +258,7 @@ uint32_t SOPC_ToolkitServer_AddSecureChannelConfig(SOPC_SecureChannel_Config* sc
             lastScIdx = tConfig.serverScLastConfigIdx;
             do
             {
-                if (lastScIdx < SOPC_MAX_SECURE_CONNECTIONS)
+                if (lastScIdx < SOPC_MAX_SECURE_CONNECTIONS_PLUS_1)
                 {
                     lastScIdx++; // Minimum used == 1 && Maximum used == MAX + 1
                     if (NULL == tConfig.serverScConfigs[lastScIdx])
@@ -266,7 +266,7 @@ uint32_t SOPC_ToolkitServer_AddSecureChannelConfig(SOPC_SecureChannel_Config* sc
                         tConfig.serverScLastConfigIdx = lastScIdx;
                         tConfig.serverScConfigs[lastScIdx] = scConfig;
                         idxWithServerOffset =
-                            SOPC_MAX_SECURE_CONNECTIONS + lastScIdx; // disjoint with SC config indexes for client
+                            SOPC_MAX_SECURE_CONNECTIONS_PLUS_1 + lastScIdx; // disjoint with SC config indexes for client
                     }
                 }
                 else
@@ -283,10 +283,10 @@ uint32_t SOPC_ToolkitServer_AddSecureChannelConfig(SOPC_SecureChannel_Config* sc
 static uint32_t SOPC_ToolkitServer_TranslateSecureChannelConfigIdxOffset(uint32_t serverScConfigIdx)
 {
     uint32_t res = 0;
-    if (serverScConfigIdx > SOPC_MAX_SECURE_CONNECTIONS &&
-        serverScConfigIdx <= 2 * SOPC_MAX_SECURE_CONNECTIONS) // disjoint with SC config indexes for client
+    if (serverScConfigIdx > SOPC_MAX_SECURE_CONNECTIONS_PLUS_1 &&
+        serverScConfigIdx <= 2 * SOPC_MAX_SECURE_CONNECTIONS_PLUS_1) // disjoint with SC config indexes for client
     {
-        res = serverScConfigIdx - SOPC_MAX_SECURE_CONNECTIONS;
+        res = serverScConfigIdx - SOPC_MAX_SECURE_CONNECTIONS_PLUS_1;
     }
     return res;
 }
