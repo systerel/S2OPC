@@ -680,9 +680,9 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetListLength(const SOPC_Certifica
 }
 
 /* Creates a new string: free the result */
-static char *get_raw_sha1(const mbedtls_x509_buf* raw)
+static char* get_raw_sha1(const mbedtls_x509_buf* raw)
 {
-    assert(NULL != crt);
+    assert(NULL != raw);
 
     /* Make SHA-1 thumbprint */
     const mbedtls_md_info_t* pmd = mbedtls_md_info_from_type(MBEDTLS_MD_SHA1);
@@ -696,14 +696,14 @@ static char *get_raw_sha1(const mbedtls_x509_buf* raw)
     }
 
     /* Poor-man's SHA-1 format */
-    char *ret = SOPC_Calloc(60, sizeof(char));
-    if(NULL == ret)
+    char* ret = SOPC_Calloc(60, sizeof(char));
+    if (NULL == ret)
     {
         return NULL;
     }
     for (size_t i = 0; i < 20; ++i)
     {
-        sprintf(ret+3*i, "%02X:", pDest[i]);
+        sprintf(ret + 3 * i, "%02X:", pDest[i]);
     }
     ret[59] = '\0';
 
@@ -711,9 +711,69 @@ static char *get_raw_sha1(const mbedtls_x509_buf* raw)
 }
 
 /* Creates a new string: free the result */
-static char *get_crt_sha1(const mbedtls_x509_crt* crt)
+static char* get_crt_sha1(const mbedtls_x509_crt* crt)
 {
     return get_raw_sha1(&crt->raw);
+}
+
+SOPC_ReturnStatus SOPC_KeyManager_CertificateList_MatchCRLList(const SOPC_CertificateList* pCert,
+                                                               const SOPC_CRLList* pCRL,
+                                                               bool* pbMatch)
+{
+    if (NULL == pCert || NULL == pCRL || NULL == pbMatch)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    /* For each CA, find its CRL. If not found, log and match = false */
+    bool list_match = true;
+    const mbedtls_x509_crt* crt = &pCert->crt;
+    for (; NULL != crt; crt = crt->next)
+    {
+        /* Skip certificates that are not authorities */
+        if (!crt->ca_istrue)
+        {
+            continue;
+        }
+
+        bool crl_found = false;
+        const mbedtls_x509_crl* crl = &pCRL->crl;
+        for (; NULL != crl; crl = crl->next)
+        {
+            /* This is the test done by mbedtls internally in x509_crt_verifycrl.
+             * It verifies the subject only, but further verifications are done by mbedtls.
+             * With this test, we restrict the CA list to have only one CA with a given subject.
+             * Without this restriction, we could have a newer and an older version of the same CA,
+             * which in any case would be confusing for end users. */
+            bool match = crl->issuer_raw.len == crt->subject_raw.len &&
+                         memcmp(crl->issuer_raw.p, crt->subject_raw.p, crl->issuer_raw.len) == 0;
+            if (crl_found && match)
+            {
+                char* fpr = get_crt_sha1(crt);
+                SOPC_Logger_TraceError("Certificate with SHA-1 fingerprint %s has more than one associated CRL.", fpr);
+                SOPC_Free(fpr);
+                crl_found = false;
+            }
+            else if (match)
+            {
+                crl_found = true;
+            }
+        }
+
+        if (!crl_found)
+        {
+            list_match = false;
+            char* fpr = get_crt_sha1(crt);
+            SOPC_Logger_TraceError("Certificate with SHA-1 fingerprint %s has no CRL or multiple CRLs.", fpr);
+            SOPC_Free(fpr);
+
+            /* Do not break, test all the certificates */
+        }
+    }
+
+    *pbMatch = list_match; /* There may be unused CRLs */
+
+    return SOPC_STATUS_OK;
 }
 
 /* ------------------------------------------------------------------------------------------------
@@ -766,13 +826,13 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromDER(const uint8_t* bufferDE
         {
             status = SOPC_STATUS_NOK;
             SOPC_Logger_TraceError("Crypto: crl buffer parse failed with error code: 0x%x", err);
-            SOPC_KeyManager_Certificate_Free(pCert);
+            SOPC_KeyManager_CRL_Free(pCRL);
         }
     }
 
     if (SOPC_STATUS_OK != status)
     {
-        SOPC_KeyManager_CRL_Free(pCert);
+        SOPC_KeyManager_CRL_Free(pCRL);
         *ppCRL = NULL;
     }
 

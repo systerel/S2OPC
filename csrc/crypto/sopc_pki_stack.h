@@ -39,15 +39,14 @@ struct SOPC_CRLList;
  *                  which fulfills the SOPC_PKIProvider interface.
  *
  *                  This verifies the certificate in the safest manner (whole certificate chain, with date validation),
- *                  with a single certificate authority, and an optional revocation list.
- *                  It requires a certificate authority signed with SHA-256, and an RSA private key which is at least
- *                  2048 bits long.
+ *                  with a single certificate authority, and its revocation list.
+ *                  Certificate authority requirements depend on the chosen OPC UA security policy.
+ *                  The CRL must be the CRL of the certificate authority.
  *
  * \warning         Provided certificates must be valid until the destruction of the created PKI (they are not copied).
  *
  * \param pCertAuth A valid pointer to the Certificate of the certification authority.
- * \param pRevocationList  An optional certificate chain containing the revocation list. If NULL, no revocation list is
- *                  not checked.
+ * \param pRevocationList  An certificate chain containing the revocation list of the certificate authority.
  * \param ppPKI     A valid pointer to the newly created SOPC_PKIProvider. You should free such provider with
  *                  SOPC_PKIProvider_Free().
  *
@@ -67,10 +66,13 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_SerializedCertificate* pCert
  *
  *                  This verifies the certificate in the safest manner (whole certificate chain, with date validation,
  *                  mandatory certificate revocation lists).
- *                  Certificate authority requirements depend on the chose OPC UA security policy.
+ *                  Certificate Authority (CA) requirements depend on the chosen OPC UA security policy.
+ *                  The list of Certificate Revocation List (CRL) must contain exactly one list for each CA of the
+ *                  CA list.
  *
  *                  Issued certificates are also accepted (certificates whose chain is not trusted)
  *                  and must be added to the certificate authority list.
+ *                  Each of them must also have exactly one matching CRL in the CRL list.
  *
  * \param lPathCA   A pointer to an array of paths to each certificate (or trusted certificate) to use
  *                  in the validation chain.

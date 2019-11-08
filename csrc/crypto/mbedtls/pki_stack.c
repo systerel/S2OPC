@@ -33,6 +33,7 @@
 
 #include "sopc_crypto_provider.h"
 #include "sopc_key_manager.h"
+#include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki.h"
@@ -169,7 +170,6 @@ static SOPC_ReturnStatus PKIProviderStack_ValidateCertificate(const SOPC_PKIProv
                                                               const SOPC_CertificateList* pToValidate,
                                                               uint32_t* error)
 {
-
     if (NULL == pPKI || NULL == pToValidate || NULL == error)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -249,6 +249,20 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_SerializedCertificate* pCert
     SOPC_PKIProvider* pki = NULL;
     SOPC_ReturnStatus status = SOPC_KeyManager_SerializedCertificate_Deserialize(pCertAuth, &caCert);
 
+    /* Check the CRL-CA assocation before creating the PKI */
+    if (SOPC_STATUS_OK == status)
+    {
+        bool match = false;
+        status = SOPC_KeyManager_CertificateList_MatchCRLList(caCert, pRevocationList, &match);
+        if (SOPC_STATUS_OK == status && !match)
+        {
+            // status = SOPC_STATUS_NOK;
+            SOPC_Logger_TraceWarning(
+                "Not all certificate authorities have a single certificate revocation list! CRL verification is "
+                "disabled for certificates signed by such CA.");
+        }
+    }
+
     if (SOPC_STATUS_OK == status)
     {
         pki = create_pkistack(caCert, pRevocationList, NULL);
@@ -281,7 +295,7 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathCA, char** l
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_CertificateList* ca = NULL;
-    char *cur = *lPathCA;
+    char* cur = *lPathCA;
     while (NULL != cur && SOPC_STATUS_OK == status)
     {
         status = SOPC_KeyManager_Certificate_CreateOrAddFromFile(cur, &ca);
@@ -296,6 +310,20 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathCA, char** l
         status = SOPC_KeyManager_CRL_CreateOrAddFromFile(cur, &crl);
         ++lPathCRL;
         cur = *lPathCRL;
+    }
+
+    /* Check the CRL-CA assocation before creating the PKI */
+    if (SOPC_STATUS_OK == status)
+    {
+        bool match = false;
+        status = SOPC_KeyManager_CertificateList_MatchCRLList(ca, crl, &match);
+        if (SOPC_STATUS_OK == status && !match)
+        {
+            // status = SOPC_STATUS_NOK;
+            SOPC_Logger_TraceWarning(
+                "Not all certificate authorities have a single certificate revocation list! CRL verification is "
+                "disabled for certificates signed by such CA.");
+        }
     }
 
     SOPC_PKIProvider* pki = NULL;
