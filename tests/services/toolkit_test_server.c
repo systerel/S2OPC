@@ -491,9 +491,15 @@ static SOPC_ReturnStatus Server_SetCryptographicConfig(SOPC_Server_Config* serve
         /* Create the PKI (Public Key Infrastructure) provider */
         if (SOPC_STATUS_OK == status)
         {
-            //status = SOPC_PKIProviderStack_Create(serverConfig->certificateAuthority, NULL, &serverConfig->pki);
-            char *lPathCA[] = {serverConfig->certificateAuthorityPath, "trusted/ctt_ca1I_appT.der", "trusted/ctt_appTSha256_2048.der", "trusted/ctt_appTSha256_4096.der", NULL};
-            char *lPathCRL[] = {NULL};
+            // status = SOPC_PKIProviderStack_Create(serverConfig->certificateAuthority, NULL, &serverConfig->pki);
+            char* lPathCA[] = {serverConfig->certificateAuthorityPath,
+                               "trusted/ctt_ca1I_appT.der" /* Test 044 */,
+                               "trusted/ctt_ca1T.der" /* Tests 029, 037 */,
+                               "trusted/ctt_appT.der" /* Test 048 */,
+                               "trusted/ctt_appTSha256_2048.der" /* Test 051 */,
+                               "trusted/ctt_appTSha256_4096.der" /* Test 052 still fails */,
+                               NULL};
+            char* lPathCRL[] = {"revoked/cacrl.der", "revoked/revocation_list_ctt_ca1T.crl", NULL};
             status = SOPC_PKIProviderStack_CreateFromPaths(lPathCA, lPathCRL, &serverConfig->pki);
         }
 
