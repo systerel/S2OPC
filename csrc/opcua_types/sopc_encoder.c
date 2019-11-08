@@ -3101,6 +3101,11 @@ SOPC_ReturnStatus SOPC_DecodeMsg_HeaderOrBody(SOPC_Buffer* buffer,
         if (*encodeableObj != NULL)
         {
             status = msgEncType->Decode(*encodeableObj, buffer);
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_Free(*encodeableObj);
+                *encodeableObj = NULL;
+            }
         }
         else
         {
