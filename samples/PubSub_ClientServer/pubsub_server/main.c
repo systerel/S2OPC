@@ -22,13 +22,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "sopc_atomic.h"
+#include "sopc_common.h"
 #include "sopc_helper_uri.h"
 #include "sopc_pubsub_helpers.h"
 #include "sopc_time.h"
+#include "sopc_toolkit_config.h"
 
+#include "client.h"
 #include "config.h"
 #include "pubsub.h"
 #include "server.h"
+
+static void ClientServer_Event_Toolkit(SOPC_App_Com_Event event,
+                                       uint32_t idOrStatus,
+                                       void* param,
+                                       uintptr_t appContext);
+static SOPC_ReturnStatus ClientServer_Initialize(void);
 
 volatile sig_atomic_t stopSignal = 0;
 static void signal_stop_server(int sig)
@@ -43,6 +53,109 @@ static void signal_stop_server(int sig)
     {
         stopSignal = 1;
     }
+}
+
+static void ClientServer_Event_Toolkit(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, uintptr_t appContext)
+{
+    (void) idOrStatus;
+    bool debug = false;
+    switch (event)
+    {
+    /* Client application events */
+    case SE_SESSION_ACTIVATION_FAILURE:
+        if (debug)
+        {
+            printf(">>Client debug : SE_SESSION_ACTIVATION_FAILURE RECEIVED\n");
+            printf(">>Client debug : appContext: %lu\n", appContext);
+        }
+        if (0 != appContext && appContext == Client_SessionContext)
+        {
+            SOPC_Atomic_Int_Set((SessionConnectedState*) &scState, (SessionConnectedState) SESSION_CONN_FAILED);
+        }
+        else
+        {
+            assert(false && ">>Client : bad app context");
+        }
+        break;
+    case SE_ACTIVATED_SESSION:
+        SOPC_Atomic_Int_Set((int32_t*) &session, (int32_t) idOrStatus);
+        if (debug)
+        {
+            printf(">>Client debug : SE_ACTIVATED_SESSION RECEIVED\n");
+        }
+        SOPC_Atomic_Int_Set((SessionConnectedState*) &scState, (SessionConnectedState) SESSION_CONN_CONNECTED);
+        break;
+    case SE_SESSION_REACTIVATING:
+        if (debug)
+        {
+            printf(">>Client debug : SE_SESSION_REACTIVATING RECEIVED\n");
+        }
+        break;
+    case SE_RCV_SESSION_RESPONSE:
+        if (debug)
+        {
+            printf(">>Client debug : SE_RCV_SESSION_RESPONSE RECEIVED\n");
+        }
+        Client_Treat_Session_Response(param);
+        break;
+    case SE_CLOSED_SESSION:
+        if (debug == true)
+        {
+            printf(">>Client debug : SE_CLOSED_SESSION RECEIVED\n");
+        }
+        break;
+
+    case SE_RCV_DISCOVERY_RESPONSE:
+        if (debug == true)
+        {
+            printf(">>Client debug : SE_RCV_DISCOVERY_RESPONSE RECEIVED\n");
+        }
+        break;
+
+    case SE_SND_REQUEST_FAILED:
+        if (debug == true)
+        {
+            printf(">>Client debug : SE_SND_REQUEST_FAILED RECEIVED\n");
+        }
+        SOPC_Atomic_Int_Add(&sendFailures, 1);
+        break;
+
+        /* SERVER EVENT */
+    case SE_CLOSED_ENDPOINT:
+        printf("# Info: Closed endpoint event.\n");
+        SOPC_Atomic_Int_Set(&serverOnline, 0);
+        return;
+    case SE_LOCAL_SERVICE_RESPONSE:
+        Server_Treat_Local_Service_Response(param, appContext);
+        return;
+    default:
+        printf("# Warning: Unexpected endpoint event: %d.\n", event);
+        return;
+    }
+}
+
+SOPC_ReturnStatus ClientServer_Initialize(void)
+{
+    SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
+    logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = LOG_PATH;
+    logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
+    SOPC_ReturnStatus status = SOPC_Common_Initialize(logConfiguration);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_Toolkit_Initialize(ClientServer_Event_Toolkit);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        printf("# Info: Server initialized.\n");
+    }
+    else
+    {
+        printf("# Error: Server initialization failed.\n");
+    }
+
+    return status;
 }
 
 int main(int argc, char* const argv[])
@@ -70,10 +183,10 @@ int main(int argc, char* const argv[])
     }
 
     /* Initialize S2OPC Server */
-    SOPC_ReturnStatus status = Server_Initialize();
+    SOPC_ReturnStatus status = ClientServer_Initialize();
     if (SOPC_STATUS_OK != status)
     {
-        printf("# Error: Could not initialize the server.\n");
+        printf("# Error: Could not initialize the PubSub client/server.\n");
     }
 
     /* Configure the Server */

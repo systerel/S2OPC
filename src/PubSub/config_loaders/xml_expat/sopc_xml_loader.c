@@ -71,6 +71,8 @@
 #define ATTR_MESSAGE_SECURITY_VAL_NONE "none"
 #define ATTR_MESSAGE_SECURITY_VAL_SIGN "sign"
 #define ATTR_MESSAGE_SECURITY_VAL_SIGNANDENCRYPT "signAndEncrypt"
+#define ATTR_MESSAGE_SECURITY_SKS_ADDR "sksAddress"
+
 #define ATTR_MESSAGE_PUBLISHER_ID "publisherId"
 
 #define ATTR_VARIABLE_NODE_ID "nodeId"
@@ -100,6 +102,7 @@ struct sopc_xml_pubsub_message_t
     uint64_t publisher_id;
     uint32_t version;
     SOPC_SecurityMode_Type security_mode;
+    char* sks_address;
     uint16_t nb_variables;
     struct sopc_xml_pubsub_variable_t* variableArr;
 };
@@ -389,6 +392,24 @@ static bool start_message(struct parse_context_t* ctx, struct sopc_xml_pubsub_me
                 LOG_XML_ERRORF("Invalid message security mode value: '%s", attr_val);
                 return false;
             }
+        }
+        else if (strcmp(ATTR_MESSAGE_SECURITY_SKS_ADDR, attr) == 0)
+        {
+            const char* attr_val = attrs[++i];
+
+            if (attr_val == NULL)
+            {
+                LOG_XML_ERROR("Missing value for message SKS address attribute");
+                return false;
+            }
+
+            msg->sks_address = SOPC_Malloc(strlen(attr_val) + 1);
+            if (NULL == msg->sks_address)
+            {
+                LOG_MEMORY_ALLOCATION_FAILURE;
+                return false;
+            }
+            msg->sks_address = strcpy(msg->sks_address, attr_val);
         }
         else if (strcmp(ATTR_MESSAGE_PUBLISHER_ID, attr) == 0)
         {
@@ -758,22 +779,32 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
             for (uint16_t imsg = 0; imsg < p_connection->nb_messages && allocSuccess; imsg++)
             {
                 struct sopc_xml_pubsub_message_t* msg = &p_connection->messageArr[imsg];
+                OpcUa_EndpointDescription* endpoint = NULL;
+
                 // Create writer group
                 SOPC_WriterGroup* writerGroup = SOPC_PubSubConnection_Get_WriterGroup_At(connection, imsg);
                 SOPC_WriterGroup_Set_Id(writerGroup, msg->id);
                 SOPC_WriterGroup_Set_PublishingInterval(writerGroup, msg->publishing_interval);
                 SOPC_WriterGroup_Set_Version(writerGroup, msg->version);
                 SOPC_WriterGroup_Set_SecurityMode(writerGroup, msg->security_mode);
-
+                allocSuccess = SOPC_EndpointDescription_Create_From_URL(msg->sks_address, &endpoint);
+                if (allocSuccess && NULL != endpoint)
+                {
+                    // only one endpoint is created
+                    SOPC_WriterGroup_Set_EndPointDescription(writerGroup, endpoint, 1);
+                }
                 // msg->publisher_id ignored if present
 
-                SOPC_PublishedDataSet* pubDataSet =
-                    SOPC_PubSubConfiguration_Get_PublishedDataSet_At(config, nb_publishedDataSet);
-                nb_publishedDataSet++;
-                SOPC_PublishedDataSet_Init(pubDataSet, SOPC_PublishedDataItemsDataType, msg->nb_variables);
+                SOPC_PublishedDataSet* pubDataSet;
+                if (allocSuccess)
+                {
+                    pubDataSet = SOPC_PubSubConfiguration_Get_PublishedDataSet_At(config, nb_publishedDataSet);
+                    nb_publishedDataSet++;
+                    SOPC_PublishedDataSet_Init(pubDataSet, SOPC_PublishedDataItemsDataType, msg->nb_variables);
 
-                // Associate dataSet with writer
-                allocSuccess = SOPC_WriterGroup_Allocate_DataSetWriter_Array(writerGroup, 1);
+                    // Associate dataSet with writer
+                    allocSuccess = SOPC_WriterGroup_Allocate_DataSetWriter_Array(writerGroup, 1);
+                }
                 if (allocSuccess)
                 {
                     SOPC_DataSetWriter* dataSetWriter = SOPC_WriterGroup_Get_DataSetWriter_At(writerGroup, 0);
@@ -812,12 +843,23 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
             for (uint16_t imsg = 0; imsg < p_connection->nb_messages && allocSuccess; imsg++)
             {
                 struct sopc_xml_pubsub_message_t* msg = &p_connection->messageArr[imsg];
+                OpcUa_EndpointDescription* endpoint = NULL;
                 // Create writer group
                 SOPC_ReaderGroup* readerGroup = SOPC_PubSubConnection_Get_ReaderGroup_At(connection, imsg);
                 assert(readerGroup != NULL);
                 SOPC_ReaderGroup_Set_SecurityMode(readerGroup, msg->security_mode);
-                allocSuccess = SOPC_ReaderGroup_Allocate_DataSetReader_Array(readerGroup, 1);
+                allocSuccess = SOPC_EndpointDescription_Create_From_URL(msg->sks_address, &endpoint);
 
+                if (allocSuccess && NULL != endpoint)
+                {
+                    // only one endpoint is created
+                    SOPC_ReaderGroup_Set_EndPointDescription(readerGroup, endpoint, 1);
+                }
+
+                if (allocSuccess)
+                {
+                    allocSuccess = SOPC_ReaderGroup_Allocate_DataSetReader_Array(readerGroup, 1);
+                }
                 if (allocSuccess)
                 {
                     SOPC_DataSetReader* dataSetReader = SOPC_ReaderGroup_Get_DataSetReader_At(readerGroup, 0);
@@ -890,6 +932,10 @@ static void clear_xml_pubsub_config(struct parse_context_t* ctx)
                 var->nodeId = NULL;
             }
 
+            if (NULL != msg->sks_address)
+            {
+                SOPC_Free(msg->sks_address);
+            }
             SOPC_Free(msg->variableArr);
             msg->variableArr = NULL;
         }

@@ -34,9 +34,13 @@
 #include "sopc_sub_scheduler.h"
 #include "sopc_user_app_itf.h"
 
+extern int32_t serverOnline;
+
 /* Running the Server */
 
-SOPC_ReturnStatus Server_Initialize(void);
+/* Event management */
+void Server_Treat_Local_Service_Response(void* param, uintptr_t appContext);
+
 /* SOPC_ReturnStatus Server_SetRuntimeVariables(void); */ /* Future */
 SOPC_ReturnStatus Server_CreateServerConfig(SOPC_S2OPC_Config* output_s2opcConfig);
 SOPC_ReturnStatus Server_LoadAddressSpace(void);

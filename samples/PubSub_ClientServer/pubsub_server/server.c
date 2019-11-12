@@ -26,7 +26,6 @@
 #include "embedded/sopc_addspace_loader.h"
 #include "sopc_address_space.h"
 #include "sopc_atomic.h"
-#include "sopc_common.h"
 #include "sopc_encodeable.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
@@ -41,6 +40,7 @@
 #include "static_security_data.h"
 #endif
 
+#include "client.h"
 #include "config.h"
 #include "helpers.h"
 #include "server.h"
@@ -49,7 +49,7 @@
  * This would mimic class instances and avoid global variables.
  */
 static uint32_t epConfigIdx = 0;
-static int32_t serverOnline = 0;
+int32_t serverOnline = 0;
 static int32_t pubSubStopRequested = false;
 static int32_t pubSubStartRequested = false;
 
@@ -62,36 +62,12 @@ static char* default_revoked_certs[] = {CA_CRL_PATH, NULL};
 static char* empty_certs[] = {NULL};
 
 static SOPC_ReturnStatus Server_SetAddressSpace(void);
+
 static void Server_Event_AddressSpace(const SOPC_CallContext* callCtxPtr,
                                       SOPC_App_AddSpace_Event event,
                                       void* opParam,
                                       SOPC_StatusCode opStatus);
-static void Server_Event_Toolkit(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, uintptr_t appContext);
 static void Server_Event_Write(OpcUa_WriteValue* pwv);
-
-SOPC_ReturnStatus Server_Initialize(void)
-{
-    SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
-    logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = LOG_PATH;
-    logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
-    SOPC_ReturnStatus status = SOPC_Common_Initialize(logConfiguration);
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_Toolkit_Initialize(Server_Event_Toolkit);
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        printf("# Info: Server initialized.\n");
-    }
-    else
-    {
-        printf("# Error: Server initialization failed.\n");
-    }
-
-    return status;
-}
 
 /* SOPC_ReturnStatus Server_SetRuntimeVariables(void); */
 
@@ -597,80 +573,6 @@ static void Server_Event_AddressSpace(const SOPC_CallContext* callCtxPtr,
     Server_Event_Write((OpcUa_WriteValue*) opParam);
 }
 
-static void Server_Event_Toolkit(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, uintptr_t appContext)
-{
-    (void) idOrStatus;
-    SOPC_EncodeableType* message_type = NULL;
-    OpcUa_WriteResponse* writeResponse = NULL;
-    OpcUa_ReadResponse* response = NULL;
-    SOPC_ReturnStatus statusCopy = SOPC_STATUS_NOK;
-    SOPC_PubSheduler_GetVariableRequestContext* ctx = NULL;
-
-    switch (event)
-    {
-    case SE_CLOSED_ENDPOINT:
-        printf("# Info: Closed endpoint event.\n");
-        SOPC_Atomic_Int_Set(&serverOnline, 0);
-        return;
-    case SE_LOCAL_SERVICE_RESPONSE:
-        message_type = *((SOPC_EncodeableType**) param);
-
-        /* Listen for ReadResponses, used in GetSourceVariables */
-        ctx = (SOPC_PubSheduler_GetVariableRequestContext*) appContext;
-        if (message_type == &OpcUa_ReadResponse_EncodeableType && NULL != ctx)
-        {
-            Mutex_Lock(&ctx->mut);
-
-            statusCopy = SOPC_STATUS_OK;
-            response = (OpcUa_ReadResponse*) param;
-
-            if (NULL != response) // Response if deleted by scheduler !!!
-            {
-                // Allocate data values
-                ctx->ldv = SOPC_Calloc((size_t) ctx->NoOfNodesToRead, sizeof(SOPC_DataValue));
-
-                // Copy to response
-                if (NULL != ctx->ldv)
-                {
-                    for (size_t i = 0; i < (size_t) ctx->NoOfNodesToRead && SOPC_STATUS_OK == statusCopy; ++i)
-                    {
-                        statusCopy = SOPC_DataValue_Copy(&ctx->ldv[i], &response->Results[i]);
-                    }
-
-                    // Error, free allocated data values
-                    if (SOPC_STATUS_OK != statusCopy)
-                    {
-                        for (size_t i = 0; i < (size_t) ctx->NoOfNodesToRead; ++i)
-                        {
-                            SOPC_DataValue_Clear(&ctx->ldv[i]);
-                        }
-                        SOPC_Free(ctx->ldv);
-                        ctx->ldv = NULL;
-                    }
-                }
-            }
-
-            Condition_SignalAll(&ctx->cond);
-
-            Mutex_Unlock(&ctx->mut);
-        }
-        else if (message_type == &OpcUa_WriteResponse_EncodeableType)
-        {
-            writeResponse = param;
-            // Service should have succeeded
-            assert(0 == (SOPC_GoodStatusOppositeMask & writeResponse->ResponseHeader.ServiceResult));
-        }
-        else
-        {
-            assert(false);
-        }
-        return;
-    default:
-        printf("# Warning: Unexpected endpoint event: %d.\n", event);
-        return;
-    }
-}
-
 static void Server_Event_Write(OpcUa_WriteValue* pwv)
 {
     if (NULL == pwv)
@@ -952,4 +854,59 @@ SOPC_DataValue* Server_GetSourceVariables(OpcUa_ReadValueId* lrv, int32_t nbValu
     SOPC_Free(requestContext);
 
     return ldv;
+}
+
+void Server_Treat_Local_Service_Response(void* param, uintptr_t appContext)
+{
+    SOPC_EncodeableType* message_type = *((SOPC_EncodeableType**) param);
+    /* Listen for WriteResponses, which only contain status codes */
+
+    SOPC_PubSheduler_GetVariableRequestContext* ctx = (SOPC_PubSheduler_GetVariableRequestContext*) appContext;
+    if (message_type == &OpcUa_ReadResponse_EncodeableType && NULL != ctx)
+    {
+        Mutex_Lock(&ctx->mut);
+
+        SOPC_ReturnStatus statusCopy = SOPC_STATUS_OK;
+        OpcUa_ReadResponse* response = (OpcUa_ReadResponse*) param;
+
+        if (NULL != response) // Response if deleted by scheduler !!!
+        {
+            // Allocate data values
+            ctx->ldv = SOPC_Calloc((size_t) ctx->NoOfNodesToRead, sizeof(SOPC_DataValue));
+
+            // Copy to response
+            if (NULL != ctx->ldv)
+            {
+                for (size_t i = 0; i < (size_t) ctx->NoOfNodesToRead && SOPC_STATUS_OK == statusCopy; ++i)
+                {
+                    statusCopy = SOPC_DataValue_Copy(&ctx->ldv[i], &response->Results[i]);
+                }
+
+                // Error, free allocated data values
+                if (SOPC_STATUS_OK != statusCopy)
+                {
+                    for (size_t i = 0; i < (size_t) ctx->NoOfNodesToRead; ++i)
+                    {
+                        SOPC_DataValue_Clear(&ctx->ldv[i]);
+                    }
+                    SOPC_Free(ctx->ldv);
+                    ctx->ldv = NULL;
+                }
+            }
+        }
+
+        Condition_SignalAll(&ctx->cond);
+
+        Mutex_Unlock(&ctx->mut);
+    }
+    else if (message_type == &OpcUa_WriteResponse_EncodeableType)
+    {
+        OpcUa_WriteResponse* writeResponse = param;
+        // Service should have succeeded
+        assert(0 == (SOPC_GoodStatusOppositeMask & writeResponse->ResponseHeader.ServiceResult));
+    }
+    else
+    {
+        assert(false);
+    }
 }

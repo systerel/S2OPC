@@ -21,6 +21,7 @@
 #define SOPC_PUBSUB_CONF_H_
 
 #include "sopc_builtintypes.h"
+#include "sopc_types.h"
 
 typedef struct SOPC_PubSubConfiguration SOPC_PubSubConfiguration;
 typedef struct SOPC_PubSubConnection SOPC_PubSubConnection;
@@ -149,6 +150,13 @@ SOPC_ReaderGroup* SOPC_PubSubConnection_Get_ReaderGroup_At(const SOPC_PubSubConn
 /** Reader Group **/
 SOPC_SecurityMode_Type SOPC_ReaderGroup_Get_SecurityMode(const SOPC_ReaderGroup* group);
 void SOPC_ReaderGroup_Set_SecurityMode(SOPC_ReaderGroup* group, SOPC_SecurityMode_Type mode);
+// make a copy of id
+bool SOPC_ReaderGroup_Set_SecurityGroupId(SOPC_ReaderGroup* group, char* securityGroupId);
+void SOPC_ReaderGroup_Set_EndPointDescription(SOPC_ReaderGroup* group,
+                                              OpcUa_EndpointDescription* endpoints,
+                                              uint32_t nb);
+uint32_t SOPC_ReaderGroup_Nb_EndPointDescription(SOPC_ReaderGroup* group);
+OpcUa_EndpointDescription* SOPC_ReaderGroup_Get_EndPointDescription(SOPC_ReaderGroup* group, uint32_t index);
 
 bool SOPC_ReaderGroup_Allocate_DataSetReader_Array(SOPC_ReaderGroup* group, uint8_t nb);
 uint8_t SOPC_ReaderGroup_Nb_DataSetReader(const SOPC_ReaderGroup* group);
@@ -221,6 +229,13 @@ void SOPC_WriterGroup_Set_NetworkMessageContentMask(SOPC_WriterGroup* group,
 
 SOPC_SecurityMode_Type SOPC_WriterGroup_Get_SecurityMode(const SOPC_WriterGroup* group);
 void SOPC_WriterGroup_Set_SecurityMode(SOPC_WriterGroup* group, SOPC_SecurityMode_Type mode);
+// make a copy of id
+bool SOPC_WriterGroup_Set_SecurityGroupId(SOPC_WriterGroup* group, char* securityGroupId);
+void SOPC_WriterGroup_Set_EndPointDescription(SOPC_WriterGroup* group,
+                                              OpcUa_EndpointDescription* endpoint,
+                                              uint32_t nb);
+uint32_t SOPC_WriterGroup_Nb_EndPointDescription(SOPC_WriterGroup* group);
+OpcUa_EndpointDescription* SOPC_WriterGroup_Get_EndPointDescription(SOPC_WriterGroup* group, uint32_t index);
 
 bool SOPC_WriterGroup_Allocate_DataSetWriter_Array(SOPC_WriterGroup* group, uint8_t nb);
 uint8_t SOPC_WriterGroup_Nb_DataSetWriter(const SOPC_WriterGroup* group);
@@ -275,5 +290,13 @@ void SOPC_FieldMetaData_Set_BuiltinType(SOPC_FieldMetaData* metadata, SOPC_Built
 SOPC_FieldTarget* SOPC_FieldMetaData_Get_TargetVariable(const SOPC_FieldMetaData* fieldMetaData);
 // only for Publisher
 SOPC_PublishedVariable* SOPC_FieldMetaData_Get_PublishedVariable(const SOPC_FieldMetaData* fieldMetaData);
+
+/* Helper Functions*/
+
+/* Create an endpoint description and set the url. Other field values are 0
+   return True if url is NULL or EndpointDescription is created and initialized.
+   Otherwise return false ( out of memory )
+*/
+bool SOPC_EndpointDescription_Create_From_URL(char* url, OpcUa_EndpointDescription** endpoint_out);
 
 #endif /* SOPC_PUBSUB_CONF_H_ */

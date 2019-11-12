@@ -1,0 +1,609 @@
+/* Copyright (C) Systerel SAS 2019, all rights reserved. */
+
+#include <assert.h>
+#include <errno.h>
+#include <inttypes.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
+
+#include "opcua_statuscodes.h"
+
+#include "sopc_atomic.h"
+#include "sopc_crypto_profiles.h"
+#include "sopc_encodeable.h"
+#include "sopc_mem_alloc.h"
+#include "sopc_pki_stack.h"
+#include "sopc_time.h"
+#include "sopc_toolkit_async_api.h"
+#include "sopc_toolkit_config.h"
+#include "sopc_types.h"
+
+#include "client.h"
+#include "config.h"
+
+#define CLIENT_SECURITY_GROUPID "sgid_1"
+#define CLIENT_STARTING_TOKENID 0
+#define CLIENT_REQUESTED_KEY_COUNT 0
+
+typedef struct s_Cerkey
+{
+    SOPC_SerializedCertificate* client_cert;
+    SOPC_SerializedAsymmetricKey* client_key;
+    SOPC_SerializedCertificate* server_cert;
+    SOPC_SerializedCertificate* crt_ca;
+    SOPC_PKIProvider* pkiProvider;
+} t_CerKey;
+t_CerKey ck_cli;
+
+Client_Keys_Type Client_Keys = {.init = false};
+
+uint32_t session = 0;
+SessionConnectedState scState = SESSION_CONN_NEW;
+uint32_t channel_config_idx = 0;
+// use to identify the active session response
+uintptr_t Client_SessionContext = 1;
+
+SOPC_SecureChannel_Config scConfig;
+bool isScCreated = false;
+int32_t sendFailures = 0;
+
+static SOPC_ReturnStatus CerAndKeyLoader_client(void);
+static SOPC_ReturnStatus Wait_response_client(void);
+static SOPC_ReturnStatus Client_SaveKeys(SOPC_ByteString* key, char* path);
+SOPC_ReturnStatus Client_CloseSession(void);
+
+static SOPC_ReturnStatus Client_SaveKeys(SOPC_ByteString* key, char* path)
+{
+    if (NULL == key || 0 >= key->Length || NULL == key->Data || NULL == path)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_ReturnStatus result = SOPC_STATUS_OK;
+    FILE* fd = fopen(path, "w");
+    if (NULL != fd)
+    {
+        size_t len = (size_t) key->Length;
+
+        char* buf = SOPC_Calloc(len + 1, sizeof(char));
+        if (NULL == buf)
+        {
+            printf("# Error: Out of memory when saving key in %s\n", path);
+            result = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        else
+        {
+            memcpy(buf, key->Data, len);
+            buf[len] = '\0';
+            const int ret = fputs(buf, fd);
+            if (EOF == ret)
+            {
+                printf("# Error: Cannot write key in %s\n", path);
+                result = SOPC_STATUS_NOK;
+            }
+            SOPC_Free(buf);
+            fclose(fd);
+        }
+    }
+    else
+    {
+        printf("# Error: Cannot open \"%s\": %s\n", path, strerror(errno));
+        result = SOPC_STATUS_NOK;
+    }
+    return result;
+}
+
+// Configure the 2 secure channel connections to use and retrieve channel configuration index
+static SOPC_ReturnStatus CerAndKeyLoader_client()
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(CLIENT_CERT_PATH, &ck_cli.client_cert);
+    if (SOPC_STATUS_OK != status)
+    {
+        printf("# Error: Client failed to load client certificate\n");
+    }
+    else
+    {
+        scConfig.crt_cli = ck_cli.client_cert;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(CLIENT_KEY_PATH, &ck_cli.client_key);
+        if (SOPC_STATUS_OK != status)
+        {
+            printf("# Error: Client failed to load private key\n");
+        }
+        else
+        {
+            scConfig.key_priv_cli = ck_cli.client_key;
+        }
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(SKS_SERVER_CERT_PATH, &ck_cli.server_cert);
+        if (SOPC_STATUS_OK != status)
+        {
+            printf("# Error: Client failed to load server certificate\n");
+        }
+        else
+        {
+            scConfig.crt_srv = ck_cli.server_cert;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        // Certificate Authority: load
+        if (SOPC_STATUS_OK != SOPC_KeyManager_SerializedCertificate_CreateFromFile(CA_CERT_PATH, &ck_cli.crt_ca))
+        {
+            printf("# Error : Client failed to load Certificate Authority\n");
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_PKIProviderStack_Create(ck_cli.crt_ca, NULL, &ck_cli.pkiProvider);
+        if (SOPC_STATUS_OK != status)
+        {
+            printf("# Error: Client failed to create PKI\n");
+        }
+        else
+        {
+            scConfig.pki = ck_cli.pkiProvider;
+        }
+    }
+    if (SOPC_STATUS_OK != status)
+    {
+        printf("# Error: Client failed loading certificates and key (check paths are valid)\n");
+    }
+    return (status);
+}
+
+SOPC_ReturnStatus Client_Setup()
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    // A Secure channel connection configuration
+    scConfig.isClientSc = true;
+    scConfig.url = NULL;
+    scConfig.crt_cli = NULL;
+    scConfig.key_priv_cli = NULL;
+    scConfig.crt_srv = NULL;
+    scConfig.pki = NULL;
+    scConfig.reqSecuPolicyUri = SOPC_SecurityPolicy_Basic256Sha256_URI;
+    scConfig.requestedLifetime = 20000;
+    scConfig.msgSecurityMode = OpcUa_MessageSecurityMode_SignAndEncrypt;
+
+    status = CerAndKeyLoader_client();
+    if (SOPC_STATUS_OK != status)
+    {
+        printf("# Error: FAILED on configuring Certificate, key and Sc\n");
+    }
+
+    return (status);
+}
+
+SOPC_ReturnStatus Client_AddSecureChannelconfig(const char* endpoint_url)
+{
+    assert(NULL != endpoint_url);
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    scConfig.url = endpoint_url;
+    if (!isScCreated)
+    {
+        channel_config_idx = SOPC_ToolkitClient_AddSecureChannelConfig(&scConfig);
+        if (0 == channel_config_idx)
+        {
+            printf("# Error: Failed to configure the secure channel connections\n");
+            status = SOPC_STATUS_NOK;
+        }
+        else
+        {
+            isScCreated = true;
+        }
+    }
+    return status;
+}
+
+SOPC_ReturnStatus Wait_response_client()
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    // Sleep timeout in milliseconds
+    const uint32_t sleepTimeout = 20;
+    // Loop timeout in milliseconds
+    const uint32_t loopTimeout = 3000;
+    // Counter to stop waiting on timeout
+    uint32_t loopCpt = 0;
+
+    loopCpt = 0;
+    while (SOPC_STATUS_OK == status && SOPC_Atomic_Int_Get(&scState) != SESSION_CONN_MSG_RECEIVED &&
+           loopCpt * sleepTimeout <= loopTimeout)
+    {
+        loopCpt++;
+        SOPC_Sleep(sleepTimeout);
+    }
+
+    if (loopCpt * sleepTimeout > loopTimeout)
+    {
+        status = SOPC_STATUS_TIMEOUT;
+    }
+    else if (SOPC_Atomic_Int_Get(&sendFailures) > 0)
+    {
+        status = SOPC_STATUS_NOK;
+    }
+
+    return (status);
+}
+
+static SOPC_ReturnStatus ActivateSessionWait_client(void)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    // Sleep timeout in milliseconds
+    const uint32_t sleepTimeout = 20;
+    // Loop timeout in milliseconds
+    const uint32_t loopTimeout = 3000;
+    // Counter to stop waiting on timeout
+    uint32_t loopCpt = 0;
+
+    /* Wait until session is activated or timeout */
+    while (SOPC_Atomic_Int_Get(&scState) != SESSION_CONN_CONNECTED && loopCpt * sleepTimeout <= loopTimeout)
+    {
+        loopCpt++;
+        // Retrieve received messages on socket
+        SOPC_Sleep(sleepTimeout);
+    }
+    if (loopCpt * sleepTimeout > loopTimeout)
+    {
+        status = SOPC_STATUS_TIMEOUT;
+    }
+
+    if (SOPC_Atomic_Int_Get(&scState) == SESSION_CONN_CONNECTED && SOPC_Atomic_Int_Get(&sendFailures) == 0)
+    {
+        printf("# Info: Client sessions activated: OK'\n");
+    }
+    else
+    {
+        printf("# Error: Client sessions activated: NOK'\n");
+        status = SOPC_STATUS_NOK;
+    }
+    return (status);
+}
+
+static OpcUa_CallRequest* newCallRequest_client(const char* securityGroupId,
+                                                uint32_t startingTokenId,
+                                                uint32_t requestedKeyCount)
+{
+    SOPC_Variant* arguments = SOPC_Calloc(3, sizeof(SOPC_Variant));
+    if (NULL == arguments)
+    {
+        return NULL;
+    }
+
+    /* Build Method Call */
+
+    SOPC_Variant* variant;
+
+    // Security Group id
+    variant = &arguments[0];
+    SOPC_Variant_Initialize(variant);
+    variant->BuiltInTypeId = SOPC_String_Id;
+    variant->ArrayType = SOPC_VariantArrayType_SingleValue;
+    SOPC_String_Initialize(&(variant->Value.String));
+    SOPC_String_CopyFromCString(&(variant->Value.String), securityGroupId);
+
+    // Starting Token Id
+    variant = &arguments[1];
+    SOPC_Variant_Initialize(variant);
+    variant->BuiltInTypeId = SOPC_UInt32_Id;
+    variant->ArrayType = SOPC_VariantArrayType_SingleValue;
+    variant->Value.Uint32 = startingTokenId;
+
+    // Starting Token Id
+    variant = &arguments[1];
+    SOPC_Variant_Initialize(variant);
+    variant->BuiltInTypeId = SOPC_UInt32_Id;
+    variant->ArrayType = SOPC_VariantArrayType_SingleValue;
+    variant->Value.Uint32 = requestedKeyCount;
+
+    OpcUa_CallMethodRequest* call = SOPC_Calloc(1, sizeof(OpcUa_CallMethodRequest));
+    if (NULL == call)
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            SOPC_Variant_Clear(&arguments[i]);
+        }
+        SOPC_Free(arguments);
+        return NULL;
+    }
+
+    call->encodeableType = &OpcUa_CallMethodRequest_EncodeableType;
+
+    call->ObjectId =
+        (SOPC_NodeId){.IdentifierType = SOPC_IdentifierType_Numeric, .Namespace = 0, .Data = {.Numeric = 15000}};
+    call->MethodId =
+        (SOPC_NodeId){.IdentifierType = SOPC_IdentifierType_Numeric, .Namespace = 0, .Data = {.Numeric = 15001}};
+
+    call->NoOfInputArguments = (int32_t) 3;
+    call->InputArguments = arguments;
+
+    /* Build Message */
+    OpcUa_CallRequest* req = SOPC_Calloc(1, sizeof(OpcUa_CallRequest));
+    if (NULL == req)
+    {
+        OpcUa_CallMethodRequest_Clear(call);
+        SOPC_Free(arguments);
+        return NULL;
+    }
+    req->encodeableType = &OpcUa_CallRequest_EncodeableType;
+    req->NoOfMethodsToCall = 1;
+    req->MethodsToCall = call;
+
+    return req;
+}
+
+SOPC_ReturnStatus Client_GetSecurityKeys(void)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    const char* pwd = "password";
+    // status = SOPC_ToolkitClient_AsyncActivateSession_Anonymous(channel_config_idx, Client_SessionContext,
+    // "anonymous");
+    status = SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(channel_config_idx, 1, "username", "user1",
+                                                                      (const uint8_t*) pwd, (int32_t) strlen(pwd));
+    if (SOPC_STATUS_OK == status)
+    {
+        status = ActivateSessionWait_client();
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        // Create CallRequest to be sent (deallocated by toolkit)
+        OpcUa_CallRequest* callReq =
+            newCallRequest_client(CLIENT_SECURITY_GROUPID, CLIENT_STARTING_TOKENID, CLIENT_REQUESTED_KEY_COUNT);
+        SOPC_ToolkitClient_AsyncSendRequestOnSession((uint32_t) SOPC_Atomic_Int_Get((int32_t*) &session), callReq, 1);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = Wait_response_client();
+    }
+
+    /* Save received keys */
+    if (SOPC_STATUS_OK == status && Client_Keys.init)
+    {
+        status = Client_SaveKeys(&(Client_Keys.SigningKey), PUBSUB_SKS_SIGNING_KEY);
+    }
+    if (SOPC_STATUS_OK == status && Client_Keys.init)
+    {
+        status = Client_SaveKeys(&(Client_Keys.EncryptingKey), PUBSUB_SKS_ENCRYPT_KEY);
+    }
+    if (SOPC_STATUS_OK == status && Client_Keys.init)
+    {
+        status = Client_SaveKeys(&(Client_Keys.KeyNonce), PUBSUB_SKS_KEY_NONCE);
+    }
+
+    Client_CloseSession();
+
+    return (status);
+}
+
+SOPC_ReturnStatus Client_CloseSession(void)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    uint32_t session1_idx = (uint32_t) SOPC_Atomic_Int_Get((int32_t*) &session);
+
+    sendFailures = 0;
+
+    /* Close the session */
+    SessionConnectedState scStateCompare = SOPC_Atomic_Int_Get(&scState);
+    if (0 != session1_idx && (scStateCompare == SESSION_CONN_MSG_RECEIVED || scStateCompare == SESSION_CONN_CONNECTED))
+    {
+        SOPC_ToolkitClient_AsyncCloseSession(session1_idx);
+    }
+    SOPC_Atomic_Int_Set((SessionConnectedState*) &scState, (SessionConnectedState) SESSION_CONN_NEW);
+    return (status);
+}
+
+void Client_Teardown()
+{
+    SOPC_KeyManager_SerializedCertificate_Delete(ck_cli.client_cert);
+    SOPC_KeyManager_SerializedAsymmetricKey_Delete(ck_cli.client_key);
+    SOPC_KeyManager_SerializedCertificate_Delete(ck_cli.server_cert);
+    SOPC_KeyManager_SerializedCertificate_Delete(ck_cli.crt_ca);
+    SOPC_PKIProvider_Free(&ck_cli.pkiProvider);
+    ck_cli.client_cert = NULL;
+    ck_cli.client_key = NULL;
+    ck_cli.server_cert = NULL;
+    ck_cli.crt_ca = NULL;
+    ck_cli.pkiProvider = NULL;
+    scConfig.crt_cli = NULL;
+    scConfig.key_priv_cli = NULL;
+    scConfig.crt_srv = NULL;
+    scConfig.pki = NULL;
+    Client_KeysClear();
+}
+
+void Client_KeysClear(void)
+{
+    if (Client_Keys.init)
+    {
+        SOPC_ByteString_Clear(&(Client_Keys.SigningKey));
+        SOPC_ByteString_Clear(&(Client_Keys.EncryptingKey));
+        SOPC_ByteString_Clear(&(Client_Keys.KeyNonce));
+    }
+    Client_Keys.init = false;
+}
+
+void Client_Treat_Session_Response(void* param)
+{
+    if (NULL != param)
+    {
+        SOPC_EncodeableType* encType = *(SOPC_EncodeableType**) param;
+
+        if (encType == &OpcUa_CallResponse_EncodeableType)
+        {
+            SOPC_Atomic_Int_Set((SessionConnectedState*) &scState, (SessionConnectedState) SESSION_CONN_MSG_RECEIVED);
+            OpcUa_CallResponse* callResp = (OpcUa_CallResponse*) param;
+
+            if (NULL != callResp && 1 == callResp->NoOfResults)
+            {
+                OpcUa_CallMethodResult* callResult = &callResp->Results[0];
+                if (SOPC_STATUS_OK == callResult->StatusCode)
+                {
+                    if (5 == callResult->NoOfOutputArguments && NULL != callResult->OutputArguments)
+                    {
+                        SOPC_Variant* variant;
+                        bool isValid = true;
+                        /* SecurityPolicyUri */
+                        variant = &(callResult->OutputArguments[0]);
+                        if (SOPC_String_Id == variant->BuiltInTypeId &&
+                            variant->ArrayType == SOPC_VariantArrayType_SingleValue)
+                        {
+                            if (0 != strcmp(SOPC_String_GetRawCString(&variant->Value.String),
+                                            SOPC_SecurityPolicy_PubSub_Aes256_URI))
+                            {
+                                printf("# Warning: GetSecurityKeys SecurityPolicyUri is not valid : %s .\n",
+                                       SOPC_String_GetRawCString(&variant->Value.String));
+                                isValid = false;
+                            }
+                        }
+                        else
+                        {
+                            printf("# Warning: GetSecurityKeys output argument 1 is not valid.\n");
+                            isValid = false;
+                        }
+
+                        if (isValid)
+                        {
+                            /* FirstTokenId */
+                            variant = &(callResult->OutputArguments[1]);
+                            if (SOPC_UInt32_Id == variant->BuiltInTypeId &&
+                                variant->ArrayType == SOPC_VariantArrayType_SingleValue)
+                            {
+                                if (1 != variant->Value.Uint32)
+                                {
+                                    printf("# Warning: GetSecurityKeys FirstTokenId is not valid : %d .\n",
+                                           variant->Value.Uint32);
+                                    isValid = false;
+                                }
+                            }
+                            else
+                            {
+                                printf("# Warning: GetSecurityKeys output argument 2 is not valid.\n");
+                                isValid = false;
+                            }
+                        }
+                        if (isValid)
+                        {
+                            /* Keys */
+                            variant = &(callResult->OutputArguments[2]);
+
+                            /* ByteString Array of 1 element */
+                            if (SOPC_ByteString_Id == variant->BuiltInTypeId &&
+                                variant->ArrayType == SOPC_VariantArrayType_Array && 1 == variant->Value.Array.Length &&
+                                NULL != variant->Value.Array.Content.BstringArr)
+                            {
+                                SOPC_ByteString* byteString = &(variant->Value.Array.Content.BstringArr[0]);
+                                if (32 + 32 + 4 == byteString->Length)
+                                {
+                                    SOPC_ReturnStatus status;
+                                    Client_KeysClear();
+                                    SOPC_ByteString_Initialize(&(Client_Keys.SigningKey));
+                                    SOPC_ByteString_Initialize(&(Client_Keys.EncryptingKey));
+                                    SOPC_ByteString_Initialize(&(Client_Keys.KeyNonce));
+                                    Client_Keys.init = true;
+                                    status =
+                                        SOPC_ByteString_CopyFromBytes(&(Client_Keys.SigningKey), byteString->Data, 32);
+                                    if (SOPC_STATUS_OK == status)
+                                    {
+                                        status = SOPC_ByteString_CopyFromBytes(&(Client_Keys.EncryptingKey),
+                                                                               &(byteString->Data[32]), 32);
+                                    }
+                                    if (SOPC_STATUS_OK == status)
+                                    {
+                                        status = SOPC_ByteString_CopyFromBytes(&(Client_Keys.KeyNonce),
+                                                                               &(byteString->Data[64]), 4);
+                                    }
+                                    if (SOPC_STATUS_OK != status)
+                                    {
+                                        Client_KeysClear();
+                                        isValid = false;
+                                    }
+                                }
+                                else
+                                {
+                                    printf("# Warning: GetSecurityKeys Keys size is not valid : %d .\n",
+                                           byteString->Length);
+                                    isValid = false;
+                                }
+                            }
+                            else
+                            {
+                                printf("# Warning: GetSecurityKeys output argument 3 is not valid.\n");
+                                isValid = false;
+                            }
+                        }
+
+                        if (isValid)
+                        {
+                            /* TimeToNextKey */
+                            variant = &(callResult->OutputArguments[3]);
+                            if (SOPC_Double_Id == variant->BuiltInTypeId &&
+                                variant->ArrayType == SOPC_VariantArrayType_SingleValue)
+                            {
+                                if (0 != variant->Value.Doublev)
+                                {
+                                    printf("# Warning: GetSecurityKeys TimeToNextKey is not valid : %d .\n",
+                                           variant->Value.Uint32);
+                                    isValid = false;
+                                }
+                            }
+                            else
+                            {
+                                printf("# Warning: GetSecurityKeys output argument 3 is not valid.\n");
+                                isValid = false;
+                            }
+                        }
+                        if (isValid)
+                        {
+                            /* KeyLifetime */
+                            variant = &(callResult->OutputArguments[4]);
+                            if (SOPC_Double_Id == variant->BuiltInTypeId &&
+                                variant->ArrayType == SOPC_VariantArrayType_SingleValue)
+                            {
+                                if (0 != variant->Value.Doublev)
+                                {
+                                    printf("# Warning: GetSecurityKeys KeyLifetime is not valid : %d .\n",
+                                           variant->Value.Uint32);
+                                    isValid = false;
+                                }
+                            }
+                            else
+                            {
+                                printf("# Warning: GetSecurityKeys output argument 4 is not valid.\n");
+                                isValid = false;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        printf("# Warning: GetSecurityKeys does not return expected arguments.\n");
+                    }
+                }
+                else
+                {
+                    printf("# Warning: GetSecurityKeys failed. Returned status is %d.\n", callResult->StatusCode);
+                }
+            }
+            else
+            {
+                printf("# Warning: Call request should have returned one result but returned %d instead of.\n",
+                       callResp->NoOfResults);
+            }
+        }
+        else
+        {
+            printf("# Warning: Type of receive message not managed in client side.\n");
+        }
+    }
+}

@@ -38,6 +38,8 @@ ATTRIBUTE_MESSAGE_SECURITY_MODE = "securityMode"
 VALUE_MESSAGE_SECURITY_MODE_NONE = "none"
 VALUE_MESSAGE_SECURITY_MODE_SIGN = "sign"
 VALUE_MESSAGE_SECURITY_MODE_SIGNANDENCRYPT = "signAndEncrypt"
+ATTRIBUTE_MESSAGE_SECURITY_SKS_ADDR = "sksAddress"
+
 ATTRIBUTE_MESSAGE_PUBLISHERID = "publisherId"
 
 TAG_VARIABLE = "variable"
@@ -238,6 +240,9 @@ def handlePubMessage(message, index, result):
     interval = float(message.get(ATTRIBUTE_MESSAGE_INTERVAL))
     securityMode = message.get(ATTRIBUTE_MESSAGE_SECURITY_MODE, VALUE_MESSAGE_SECURITY_MODE_NONE)
 
+    sksAddress = message.get(ATTRIBUTE_MESSAGE_SECURITY_SKS_ADDR, None)
+    sksAddress = 'NULL' if sksAddress is None else '"%s"' % sksAddress
+
     variables = message.findall(TAG_VARIABLE)
 
     result.add("""
@@ -253,10 +258,10 @@ def handlePubMessage(message, index, result):
     result.add("""
     if (alloc)
     {
-        writer = SOPC_PubSubConfig_SetPubMessageAt(connection, %d, %d, %d, %f, %s);
+        writer = SOPC_PubSubConfig_SetPubMessageAt(connection, %d, %d, %d, %f, %s, %s);
         alloc = NULL != writer;
     }
-    """ % (index, id, version, interval, getCSecurityMode(securityMode)))
+    """ % (index, id, version, interval, getCSecurityMode(securityMode), sksAddress))
 
     if len(variables) > 0:
 
@@ -348,6 +353,8 @@ def handleSubMessage(message, index, result):
     version = int(message.get(ATTRIBUTE_MESSAGE_VERSION), 10)
     interval = float(message.get(ATTRIBUTE_MESSAGE_INTERVAL))
     securityMode = message.get(ATTRIBUTE_MESSAGE_SECURITY_MODE, VALUE_MESSAGE_SECURITY_MODE_NONE)
+    sksAddress = message.get(ATTRIBUTE_MESSAGE_SECURITY_SKS_ADDR, None)
+    sksAddress = 'NULL' if sksAddress is None else '"%s"' % sksAddress
     publisherId = int(message.get(ATTRIBUTE_MESSAGE_PUBLISHERID), 10)
     variables = message.findall(TAG_VARIABLE)
 
@@ -364,10 +371,10 @@ def handleSubMessage(message, index, result):
     result.add("""
     if (alloc)
     {
-        reader = SOPC_PubSubConfig_SetSubMessageAt(connection, %d, %d, %d, %d, %f, %s);
+        reader = SOPC_PubSubConfig_SetSubMessageAt(connection, %d, %d, %d, %d, %f, %s, %s);
         alloc = NULL != reader;
     }
-    """ % (index, publisherId, id, version, interval, getCSecurityMode(securityMode)))
+    """ % (index, publisherId, id, version, interval, getCSecurityMode(securityMode), sksAddress))
 
     if len(variables) > 0:
 
@@ -420,18 +427,38 @@ static SOPC_DataSetWriter* SOPC_PubSubConfig_SetPubMessageAt(SOPC_PubSubConnecti
                                                              uint16_t messageId,
                                                              uint32_t version,
                                                              double interval,
-                                                             SOPC_SecurityMode_Type securityMode)
+                                                             SOPC_SecurityMode_Type securityMode,
+                                                             char* sksAddress)
 {
+    bool alloc;
+    OpcUa_EndpointDescription* endpoint = NULL;
+    SOPC_DataSetWriter* writer = NULL;
     SOPC_WriterGroup* group = SOPC_PubSubConnection_Get_WriterGroup_At(connection, index);
     SOPC_WriterGroup_Set_Id(group, messageId);
     SOPC_WriterGroup_Set_Version(group, version);
     SOPC_WriterGroup_Set_PublishingInterval(group, interval);
     SOPC_WriterGroup_Set_SecurityMode(group, securityMode);
 
+    alloc = SOPC_EndpointDescription_Create_From_URL(sksAddress, &endpoint);
+    if(alloc && NULL != endpoint) {
+        // only one endpoint is created
+        SOPC_WriterGroup_Set_EndPointDescription(group, endpoint, 1);
+    }
+
     // Create one DataSet Writer
-    SOPC_WriterGroup_Allocate_DataSetWriter_Array(group, 1);
-    SOPC_DataSetWriter* writer = SOPC_WriterGroup_Get_DataSetWriter_At(group, 0);
-    SOPC_DataSetWriter_Set_Id(writer, messageId);
+    if (alloc)
+    {
+        alloc = SOPC_WriterGroup_Allocate_DataSetWriter_Array(group, 1);
+    }
+    if (alloc)
+    {
+        writer = SOPC_WriterGroup_Get_DataSetWriter_At(group, 0);
+        alloc = NULL != writer;
+    }
+    if (alloc)
+    {
+        SOPC_DataSetWriter_Set_Id(writer, messageId);
+    }
     return writer;
 }
 
@@ -482,13 +509,22 @@ static SOPC_DataSetReader* SOPC_PubSubConfig_SetSubMessageAt(SOPC_PubSubConnecti
                                                              uint16_t messageId,
                                                              uint32_t version,
                                                              double interval,
-                                                             SOPC_SecurityMode_Type securityMode)
+                                                             SOPC_SecurityMode_Type securityMode,
+                                                             char* sksAddress)
 {
+    bool alloc;
+    OpcUa_EndpointDescription* endpoint = NULL;
     SOPC_ReaderGroup* readerGroup = SOPC_PubSubConnection_Get_ReaderGroup_At(connection, index);
     assert(readerGroup != NULL);
     SOPC_ReaderGroup_Set_SecurityMode(readerGroup, securityMode);
-    bool allocSuccess = SOPC_ReaderGroup_Allocate_DataSetReader_Array(readerGroup, 1);
-    if (allocSuccess)
+    alloc = SOPC_EndpointDescription_Create_From_URL(sksAddress, &endpoint);
+    if(alloc && NULL != endpoint) {
+        // only one endpoint is created
+        SOPC_ReaderGroup_Set_EndPointDescription(readerGroup, endpoint, 1);
+    }
+
+    alloc = SOPC_ReaderGroup_Allocate_DataSetReader_Array(readerGroup, 1);
+    if (alloc)
     {
         SOPC_DataSetReader* reader = SOPC_ReaderGroup_Get_DataSetReader_At(readerGroup, 0);
         assert(reader != NULL);
