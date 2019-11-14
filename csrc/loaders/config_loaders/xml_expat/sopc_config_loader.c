@@ -385,7 +385,7 @@ static bool start_app_name(struct parse_context_t* ctx, const XML_Char** attrs)
     const char* attr_text = get_attr(ctx, "text", attrs);
     const char* attr_locale = get_attr(ctx, "locale", attrs);
 
-    if (NULL == attr_text || attr_text[0] == '\0')
+    if (NULL == attr_text || '\0' == attr_text[0])
     {
         LOG_XML_ERROR(ctx->helper_ctx.parser, "Empty ApplicationName text");
         return false;

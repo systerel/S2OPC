@@ -394,6 +394,8 @@ static bool set_server_namespace_array_value(OpcUa_WriteValue* wv, char** app_na
     {
         if (SOPC_String_CopyFromCString(&uris[1 + i], app_namespace_uris[i]) != SOPC_STATUS_OK)
         {
+            wv->Value.Value.Value.Array.Length = (int32_t) i; // limit to previous index for clear operation
+            SOPC_Variant_Clear(&wv->Value.Value);
             return false;
         }
     }
@@ -438,6 +440,8 @@ static bool set_server_capabilities_locale_ids_array_value(OpcUa_WriteValue* wv,
     {
         if (SOPC_String_CopyFromCString(&localeIds[i], app_locale_ids[i]) != SOPC_STATUS_OK)
         {
+            wv->Value.Value.Value.Array.Length = (int32_t) i; // limit to previous index for clear operation
+            SOPC_Variant_Clear(&wv->Value.Value);
             return false;
         }
     }

@@ -488,7 +488,7 @@ static SOPC_ReturnStatus modify_localized_text(char** supportedLocales,
     // 1. Move current value to previous value
     SOPC_Variant_Move(previous_value, node_value);
     SOPC_Variant_Clear(node_value); // Reset DoNotClear flag
-    // 2. Make a copy of the variant to could modify it and ensure clear (DoNotClear flag ensured to be false)
+    // 2. Make a copy of the variant to modify it and ensure clear (DoNotClear flag ensured to be false)
     SOPC_ReturnStatus status = SOPC_Variant_Copy(node_value, previous_value);
     if (SOPC_STATUS_OK != status)
     {
@@ -531,7 +531,7 @@ static SOPC_ReturnStatus modify_localized_text(char** supportedLocales,
     }
     else
     {
-        return SOPC_STATUS_INVALID_PARAMETERS;
+        status = SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     if (SOPC_STATUS_OK != status)
@@ -543,42 +543,46 @@ static SOPC_ReturnStatus modify_localized_text(char** supportedLocales,
     return status;
 }
 
-static bool is_localized_text_modification(SOPC_Variant* node_value, const SOPC_Variant* new_value)
+static bool is_localized_text_and_modifiable(SOPC_Variant* node_value, const SOPC_Variant* new_value)
 {
     bool modifyLocalizedText = false;
-    if (SOPC_LocalizedText_Id == node_value->BuiltInTypeId && SOPC_LocalizedText_Id == new_value->BuiltInTypeId)
+    if (SOPC_LocalizedText_Id != node_value->BuiltInTypeId || SOPC_LocalizedText_Id != new_value->BuiltInTypeId)
     {
-        if (node_value->ArrayType == new_value->ArrayType)
+        // it is not a localized text or it is possible to have different types (new value can be NULL)
+        return false;
+    }
+    if (node_value->ArrayType != new_value->ArrayType)
+    {
+        // we should overwrite and not modify since it is not same array type
+        return false;
+    }
+
+    if (SOPC_VariantArrayType_SingleValue == node_value->ArrayType)
+    {
+        modifyLocalizedText = true;
+    }
+    else if (SOPC_VariantArrayType_Array == node_value->ArrayType)
+    {
+        modifyLocalizedText = node_value->Value.Array.Length == new_value->Value.Array.Length;
+    }
+    else if (SOPC_VariantArrayType_Matrix == node_value->ArrayType)
+    {
+        if (node_value->Value.Matrix.Dimensions == new_value->Value.Matrix.Dimensions)
         {
-            if (SOPC_VariantArrayType_SingleValue == node_value->ArrayType)
+            modifyLocalizedText = true;
+            for (int32_t i = 0; i < node_value->Value.Matrix.Dimensions; i++)
             {
-                modifyLocalizedText = true;
-            }
-            else if (SOPC_VariantArrayType_Array == node_value->ArrayType)
-            {
-                modifyLocalizedText = node_value->Value.Array.Length == new_value->Value.Array.Length;
-            }
-            else if (SOPC_VariantArrayType_Matrix == node_value->ArrayType)
-            {
-                if (node_value->Value.Matrix.Dimensions == new_value->Value.Matrix.Dimensions)
+                if (node_value->Value.Matrix.ArrayDimensions[i] != new_value->Value.Matrix.ArrayDimensions[i])
                 {
-                    modifyLocalizedText = true;
-                    for (int32_t i = 0; i < node_value->Value.Matrix.Dimensions; i++)
-                    {
-                        if (node_value->Value.Matrix.ArrayDimensions[i] != new_value->Value.Matrix.ArrayDimensions[i])
-                        {
-                            modifyLocalizedText = false;
-                        }
-                    }
+                    modifyLocalizedText = false;
                 }
             }
-            else
-            {
-                return constants_statuscodes_bs__e_sc_bad_write_not_supported;
-            }
-        } // otherwise we should overwrite since it is not same type
+        }
     }
-    // else: it is not a localized text or it is possible to have different types (new value can be NULL)
+    else
+    {
+        return constants_statuscodes_bs__e_sc_bad_write_not_supported;
+    }
 
     return modifyLocalizedText;
 }
@@ -588,7 +592,7 @@ static constants_statuscodes_bs__t_StatusCode_i set_value_full(char** supportedL
                                                                const SOPC_Variant* new_value,
                                                                SOPC_Variant* previous_value)
 {
-    bool modifyLocalizedText = is_localized_text_modification(node_value, new_value);
+    bool modifyLocalizedText = is_localized_text_and_modifiable(node_value, new_value);
 
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (modifyLocalizedText)

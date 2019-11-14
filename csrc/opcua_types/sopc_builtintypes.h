@@ -435,7 +435,7 @@ bool SOPC_String_Equal(const SOPC_String* left, const SOPC_String* right);
 /**
  * \brief Returns a NULL terminated C-string array without copying the strings.
  *        The caller is responsible to NOT modify the content of the returned array and
- *        to call SOPC_Free on the array (and NOT the array content) after user.
+ *        to call SOPC_Free on the array (and NOT the array content) after use.
  *
  * \param nbOfStrings  The number of elements in \p stringArray
  * \param stringArray  The array of SOPC_String to retrieve as C-string array
