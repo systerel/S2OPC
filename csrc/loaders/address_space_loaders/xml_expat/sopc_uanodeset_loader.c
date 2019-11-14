@@ -1933,6 +1933,7 @@ static bool end_in_extension_object(struct parse_context_t* ctx, parse_complex_v
 static void end_element_handler(void* user_data, const XML_Char* name)
 {
     struct parse_context_t* ctx = user_data;
+    bool appended = false;
 
     if (SOPC_HelperExpat_PopSkipTag(&ctx->helper_ctx, name))
     {
@@ -2031,8 +2032,15 @@ static void end_element_handler(void* user_data, const XML_Char* name)
                 {
                     currentTagCtx->array_values = SOPC_Array_Create(sizeof(char*), 1, SOPC_Free);
                 }
-                SOPC_Array_Append_Values(currentTagCtx->array_values,
-                                         SOPC_strdup(SOPC_HelperExpat_CharDataStripped(&ctx->helper_ctx)), 1);
+                char* str_value = SOPC_strdup(SOPC_HelperExpat_CharDataStripped(&ctx->helper_ctx));
+                appended = SOPC_Array_Append_Values(currentTagCtx->array_values, str_value, 1);
+                if (!appended)
+                {
+                    SOPC_Free(str_value);
+                    LOG_MEMORY_ALLOCATION_FAILURE;
+                    XML_StopParser(ctx->helper_ctx.parser, false);
+                    return;
+                }
             }
 
             currentTagCtx->set = true;
