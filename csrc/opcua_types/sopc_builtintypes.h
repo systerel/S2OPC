@@ -167,10 +167,14 @@ typedef struct SOPC_QualifiedName
 
 typedef struct SOPC_LocalizedText
 {
-    /* The default locale shall be stored only here and not in the list */
+    /* The default locale shall be stored only here and not in the list.
+     * It is the only one encoded / decoded for SOPC_LocalizedText structure. */
     SOPC_String defaultLocale;
     SOPC_String defaultText;
 
+    /* This field is only used on SERVER side for toolkit configuration structures (OpcUa_ApplicationDescription)
+     * or for node values (of type localized text) in the address space to store several locales.
+     * On CLIENT side this field is always NULL and shall be ignored. */
     SOPC_SLinkedList* localizedTextList; // If NULL => no other localized text defined
 } SOPC_LocalizedText;
 
