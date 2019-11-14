@@ -124,6 +124,12 @@ void message_in_bs__decode_msg_header(const t_bool message_in_bs__is_request,
     if (false == message_in_bs__is_request)
     {
         status = SOPC_DecodeMsg_HeaderOrBody(message_in_bs__msg_buffer, &OpcUa_ResponseHeader_EncodeableType, &header);
+
+        if (SOPC_STATUS_OK == status)
+        {
+            SOPC_Logger_TraceDebug("Services: decoded input message header statusCode= '%X'",
+                                   ((OpcUa_ResponseHeader*) header)->ServiceResult);
+        }
     }
     else
     {
