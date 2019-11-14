@@ -2795,7 +2795,9 @@ static SOPC_ReturnStatus SOPC_LocalizedText_AddOrSetLocale_Internal_RemoveSuppor
 {
     assert(NULL != destSetOfLt);
     assert(NULL != src);
+    // Removing a localized text is only triggered when set with LT containing empty text for the given locale
     assert(src->defaultText.Length <= 0);
+    // If locale also empty all localized texts content is cleared at once and this function is not called
     assert(src->defaultLocale.Length > 0);
 
     // Remove a localized text if existing for supported locale
@@ -2872,39 +2874,43 @@ SOPC_ReturnStatus SOPC_LocalizedText_AddOrSetLocale(SOPC_LocalizedText* destSetO
                                                     const SOPC_LocalizedText* src)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (destSetOfLt != NULL && src != NULL && NULL != supportedLocaleIds && NULL == src->localizedTextList)
+    if (NULL == destSetOfLt || NULL == src || NULL == supportedLocaleIds || NULL != src->localizedTextList)
     {
-        if (src->defaultLocale.Length <= 0 && src->defaultText.Length <= 0)
+        return status;
+    }
+
+    if (src->defaultLocale.Length <= 0 && src->defaultText.Length <= 0)
+    {
+        // It indicates all locales shall be erased:
+        SOPC_LocalizedText_Clear(destSetOfLt);
+        status = SOPC_STATUS_OK;
+    }
+    else
+    {
+        /*
+         * Check if the locale to set is supported or not including invariant locale case:
+         * Part 4 §5.10.4.1 (v1.03): "Writing a null String for the locale and
+         *                            a non-null String for the text is setting the text for an invariant locale."
+         * Erase all locales except this one since it is an invariant LocalizedText.
+         */
+        bool supportedLocale = src->defaultLocale.Length <= 0;
+        int index = 0;
+        const char* locale = supportedLocaleIds[index];
+        const char* setLocale = SOPC_String_GetRawCString(&src->defaultLocale);
+        while (!supportedLocale && NULL != locale)
         {
-            // It indicates all locales shall be erased:
-            SOPC_LocalizedText_Clear(destSetOfLt);
-            status = SOPC_STATUS_OK;
+            int res = SOPC_strcmp_ignore_case(locale, setLocale);
+            supportedLocale = (0 == res);
+            index++;
+            locale = supportedLocaleIds[index];
+        }
+
+        if (!supportedLocale)
+        {
+            status = SOPC_STATUS_NOT_SUPPORTED;
         }
         else
         {
-            /*
-             * Check if the locale to set is supported or not including invariant locale case:
-             * Part 4 §5.10.4.1 (v1.03): "Writing a null String for the locale and
-             *                            a non-null String for the text is setting the text for an invariant locale."
-             * Erase all locales except this one since it is an invariant LocalizedText.
-             */
-            bool supportedLocale = src->defaultLocale.Length <= 0;
-            int index = 0;
-            const char* locale = supportedLocaleIds[index];
-            const char* setLocale = SOPC_String_GetRawCString(&src->defaultLocale);
-            while (!supportedLocale && NULL != locale)
-            {
-                int res = SOPC_strcmp_ignore_case(locale, setLocale);
-                supportedLocale = 0 == res;
-                index++;
-                locale = supportedLocaleIds[index];
-            }
-
-            if (!supportedLocale)
-            {
-                return SOPC_STATUS_NOT_SUPPORTED;
-            }
-
             if (src->defaultText.Length > 0)
             {
                 if (destSetOfLt->defaultLocale.Length <= 0 && destSetOfLt->defaultText.Length <= 0 &&
@@ -2949,67 +2955,69 @@ SOPC_ReturnStatus SOPC_LocalizedText_GetPreferredLocale(SOPC_LocalizedText* dest
                                                         const SOPC_LocalizedText* srcSetOfLt)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (dest != NULL && dest->localizedTextList == NULL && localeIds != NULL && srcSetOfLt != NULL)
+    if (NULL == dest || NULL != dest->localizedTextList || NULL == localeIds || NULL == srcSetOfLt)
     {
-        int comparisonCounter = 0; // 2 types of comparison shall be done
-        // First: attempt to find exact language+coutry/region locale match
-        // Second: attempt to find language match only
-        bool cmpWithCountryRegion = true;
-        bool localeMatch = false;
+        return status;
+    }
 
-        while (!localeMatch && comparisonCounter < 2)
+    int comparisonCounter = 0; // 2 types of comparison shall be done
+    // First: attempt to find exact language+coutry/region locale match
+    // Second: attempt to find language match only
+    bool cmpWithCountryRegion = true;
+    bool localeMatch = false;
+
+    while (!localeMatch && comparisonCounter < 2)
+    {
+        int index = 0;
+        const char* localeId = localeIds[index];
+
+        while (NULL != localeId && !localeMatch)
         {
-            int index = 0;
-            const char* localeId = localeIds[index];
+            // Check all available locales in source localized text
 
-            while (localeId != NULL && !localeMatch)
+            // Check default localized text content
+            int res = SOPC_strcmp_ignore_case(localeId, SOPC_String_GetRawCString(&srcSetOfLt->defaultLocale));
+            localeMatch = (0 == res);
+
+            if (localeMatch)
             {
-                // Check all available locales in source localized text
-
-                // Check default localized text content
-                int res = SOPC_strcmp_ignore_case(localeId, SOPC_String_GetRawCString(&srcSetOfLt->defaultLocale));
-                localeMatch = 0 == res;
-
-                if (localeMatch)
+                status = SOPC_String_Copy(&dest->defaultLocale, &srcSetOfLt->defaultLocale);
+                if (SOPC_STATUS_OK == status)
                 {
-                    status = SOPC_String_Copy(&dest->defaultLocale, &srcSetOfLt->defaultLocale);
-                    if (SOPC_STATUS_OK == status)
-                    {
-                        status = SOPC_String_Copy(&dest->defaultText, &srcSetOfLt->defaultText);
-                    }
+                    status = SOPC_String_Copy(&dest->defaultText, &srcSetOfLt->defaultText);
                 }
-                else if (srcSetOfLt->localizedTextList != NULL)
-                {
-                    // Check other localized texts content
-                    SOPC_SLinkedListIterator it = SOPC_SLinkedList_GetIterator(srcSetOfLt->localizedTextList);
-                    while (!localeMatch && SOPC_SLinkedList_HasNext(&it))
-                    {
-                        const SOPC_LocalizedText* lt = SOPC_SLinkedList_Next(&it);
-                        assert(NULL != lt);
-                        res = SOPC_LocalizedText_CompareLocales(localeId, SOPC_String_GetRawCString(&lt->defaultLocale),
-                                                                cmpWithCountryRegion);
-                        localeMatch = 0 == res;
-                        if (localeMatch)
-                        {
-                            status = SOPC_LocalizedText_Copy(dest, lt);
-                        }
-                    }
-                }
-                index++;
-                localeId = localeIds[index];
             }
-            comparisonCounter++;
-            cmpWithCountryRegion = false;
+            else if (srcSetOfLt->localizedTextList != NULL)
+            {
+                // Check other localized texts content
+                SOPC_SLinkedListIterator it = SOPC_SLinkedList_GetIterator(srcSetOfLt->localizedTextList);
+                while (!localeMatch && SOPC_SLinkedList_HasNext(&it))
+                {
+                    const SOPC_LocalizedText* lt = SOPC_SLinkedList_Next(&it);
+                    assert(NULL != lt);
+                    res = SOPC_LocalizedText_CompareLocales(localeId, SOPC_String_GetRawCString(&lt->defaultLocale),
+                                                            cmpWithCountryRegion);
+                    localeMatch = (0 == res);
+                    if (localeMatch)
+                    {
+                        status = SOPC_LocalizedText_Copy(dest, lt);
+                    }
+                }
+            }
+            index++;
+            localeId = localeIds[index];
         }
+        comparisonCounter++;
+        cmpWithCountryRegion = false;
+    }
 
-        if (!localeMatch)
+    if (!localeMatch)
+    {
+        // Set default locale
+        status = SOPC_String_Copy(&dest->defaultLocale, &srcSetOfLt->defaultLocale);
+        if (SOPC_STATUS_OK == status)
         {
-            // Set default locale
-            status = SOPC_String_Copy(&dest->defaultLocale, &srcSetOfLt->defaultLocale);
-            if (SOPC_STATUS_OK == status)
-            {
-                status = SOPC_String_Copy(&dest->defaultText, &srcSetOfLt->defaultText);
-            }
+            status = SOPC_String_Copy(&dest->defaultText, &srcSetOfLt->defaultText);
         }
     }
 
