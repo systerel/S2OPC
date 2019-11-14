@@ -9,7 +9,7 @@ describe("Operations tests", function() {
             connectionId = test_helper.connect();
             done();
         });
-        it("Read shall be sucessful", function (done) {
+        it("Read shall be successful", function (done) {
             let read_value_bool = new sopc_client.ReadValue()
                 .setNodeId("ns=1;i=1015")
                 .setAttributeId(13);

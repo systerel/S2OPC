@@ -12,6 +12,7 @@ const ffi = require('ffi');
 const ref = require('ref');
 const Enum = require('enum');
 const process = require('process');
+const fs = require('fs');
 
 const bind = require('./bind_sopc_client')
 const variant = require('./variant');
@@ -57,10 +58,38 @@ const SOPC_SecurityPolicy = {
  * @param {String} user_password
  */
 function SecurityCfg(security_policy, security_mode, user_policy_id,
-                     path_cert_auth=ref.NULL, path_cert_srv = ref.NULL,
+                     path_cert_auth = ref.NULL, path_cert_srv = ref.NULL,
                      path_cert_cli = ref.NULL, path_key_cli = ref.NULL,
                      user_name = ref.NULL, user_password = ref.NULL)
 {
+    if (Object.values(SOPC_SecurityPolicy).indexOf(security_policy) < 0) {
+        throw `Invalid security_policy (${security_policy}).`;
+    }
+
+    if (user_policy_id !== "anonymous" && user_policy_id !== "username") {
+        throw `user_policy_id value (${user_policy_id}) is not correct("anonymous" or "username").`;
+    }
+
+    if (user_policy_id === "username" && (user_name === ref.NULL || user_password === ref.NULL)) {
+        throw `user_name and user_password shall be specified when using username policy.`;
+    }
+
+    if (user_policy_id === "anonymous" && (user_name !== ref.NULL || user_password !== ref.NULL)) {
+        throw `user_name and user_password shall not be specified when using anonymous policy.`;
+    }
+
+    let fileList = [path_cert_auth, path_cert_srv, path_cert_cli, path_key_cli];
+    if (security_mode === SOPC_MessageSecurityMode.Sign || security_mode === SOPC_MessageSecurityMode.SignAndEncrypt) {
+        for (let file of fileList) {
+            if (file === ref.NULL) {
+                throw "All certificates and keys shall be specified when using Sign or SignAndEncrypt.";
+            }
+            else if (!fs.existsSync(file)) {
+                throw `${file} is specified but does not exist.`;
+            }
+        }
+    }
+
     let securityCfg = bind.security_cfg({
         security_policy : security_policy,
         security_mode : security_mode.value,
@@ -69,9 +98,9 @@ function SecurityCfg(security_policy, security_mode, user_policy_id,
         path_cert_cli : path_cert_cli,
         path_key_cli : path_key_cli,
         policyId : user_policy_id,
-        user_name : user_name,
-        user_password : user_password
-    })
+        username : user_name,
+        password : user_password
+    });
 
     return securityCfg;
 }
