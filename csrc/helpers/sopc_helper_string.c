@@ -33,26 +33,28 @@ int SOPC_strncmp_ignore_case(const char* s1, const char* s2, size_t size)
     int lc1, lc2;
     size_t idx;
     int res = -1000;
-    if (NULL != s1 && NULL != s2)
+    if (NULL == s1 || NULL == s2)
     {
-        res = 0;
-        for (idx = 0; idx < size && res == 0; idx++)
+        return res;
+    }
+
+    res = 0;
+    for (idx = 0; idx < size && res == 0; idx++)
+    {
+        lc1 = tolower((unsigned char) s1[idx]);
+        lc2 = tolower((unsigned char) s2[idx]);
+        if (lc1 < lc2)
         {
-            lc1 = tolower((unsigned char) s1[idx]);
-            lc2 = tolower((unsigned char) s2[idx]);
-            if (lc1 < lc2)
-            {
-                res = -1;
-            }
-            else if (lc1 > lc2)
-            {
-                res = +1;
-            }
-            else if (lc1 == '\0')
-            {
-                // In case we reached end of both strings, stop comparison here
-                return res;
-            }
+            res = -1;
+        }
+        else if (lc1 > lc2)
+        {
+            res = +1;
+        }
+        else if (lc1 == '\0')
+        {
+            // In case we reached end of both strings, stop comparison here
+            return res;
         }
     }
     return res;
@@ -61,24 +63,26 @@ int SOPC_strncmp_ignore_case(const char* s1, const char* s2, size_t size)
 int SOPC_strcmp_ignore_case(const char* s1, const char* s2)
 {
     int res = -1000;
-    if (NULL != s1 && NULL != s2)
+    if (NULL == s1 || NULL == s2)
     {
-        size_t s1_len = strlen(s1);
-        size_t s2_len = strlen(s2);
-        if (s1_len == s2_len)
+        return res;
+    }
+
+    size_t s1_len = strlen(s1);
+    size_t s2_len = strlen(s2);
+    if (s1_len == s2_len)
+    {
+        return SOPC_strncmp_ignore_case(s1, s2, s1_len);
+    }
+    else
+    {
+        if (s1_len < s2_len)
         {
-            return SOPC_strncmp_ignore_case(s1, s2, s1_len);
+            res = -1;
         }
         else
         {
-            if (s1_len < s2_len)
-            {
-                res = -1;
-            }
-            else
-            {
-                res = +1;
-            }
+            res = +1;
         }
     }
     return res;
@@ -90,42 +94,47 @@ int SOPC_strcmp_ignore_case_alt_end(const char* s1, const char* s2, char endChar
     int endChar = tolower((unsigned char) endCharacter);
     size_t idx;
     int res = -1000;
-    if (NULL != s1 && NULL != s2)
-    {
-        res = 0;
-        for (idx = 0; res == 0; idx++)
-        {
-            lc1 = tolower((unsigned char) s1[idx]);
-            lc2 = tolower((unsigned char) s2[idx]);
-            bool lc1_is_endchar = endChar == lc1 || '\0' == lc1;
-            bool lc2_is_endchar = endChar == lc2 || '\0' == lc2;
+    bool lc1_is_endchar = false;
+    bool lc2_is_endchar = false;
 
-            if (!lc1_is_endchar && !lc2_is_endchar)
+    if (NULL == s1 || NULL == s2)
+    {
+        return res;
+    }
+
+    res = 0;
+    for (idx = 0; res == 0; idx++)
+    {
+        lc1 = tolower((unsigned char) s1[idx]);
+        lc2 = tolower((unsigned char) s2[idx]);
+        lc1_is_endchar = endChar == lc1 || '\0' == lc1;
+        lc2_is_endchar = endChar == lc2 || '\0' == lc2;
+
+        if (!lc1_is_endchar && !lc2_is_endchar)
+        {
+            if (lc1 < lc2)
             {
-                if (lc1 < lc2)
-                {
-                    res = -1;
-                }
-                else if (lc1 > lc2)
-                {
-                    res = +1;
-                }
+                res = -1;
+            }
+            else if (lc1 > lc2)
+            {
+                res = +1;
+            }
+        }
+        else
+        {
+            if (lc1_is_endchar && lc2_is_endchar)
+            {
+                // In case we reached end of both strings, stop comparison here
+                return res;
+            }
+            else if (lc1_is_endchar)
+            {
+                res = -1;
             }
             else
             {
-                if (lc1_is_endchar && lc2_is_endchar)
-                {
-                    // In case we reached end of both strings, stop comparison here
-                    return res;
-                }
-                else if (lc1_is_endchar)
-                {
-                    res = -1;
-                }
-                else
-                {
-                    res = +1;
-                }
+                res = +1;
             }
         }
     }

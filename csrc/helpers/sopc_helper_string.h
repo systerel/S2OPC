@@ -36,7 +36,7 @@
  *  \param size  Maximum number of characters compared for computing result.
  *
  *  \return      0 if string are identical in a case-insensitive way, -1 if s1 < s2 and +1 if s1 > s2
- *              (based on first lower case character value comparison).
+ *              (based on first lower case character value comparison). -1000 in case of invalid parameter.
  */
 int SOPC_strncmp_ignore_case(const char* s1, const char* s2, size_t size);
 
@@ -48,7 +48,7 @@ int SOPC_strncmp_ignore_case(const char* s1, const char* s2, size_t size);
  *  \param s2    A non null string terminated by '\0' character
  *
  *  \return      0 if string are identical in a case-insensitive way, -1 if s1 < s2 and +1 if s1 > s2
- *              (based on first lower case character value comparison).
+ *              (based on first lower case character value comparison).  -1000 in case of invalid parameter.
  */
 int SOPC_strcmp_ignore_case(const char* s1, const char* s2);
 
@@ -62,7 +62,7 @@ int SOPC_strcmp_ignore_case(const char* s1, const char* s2);
  *  \param endCharacter  An alternative endCharacter to consider for stopping comparison.
  *
  *  \return      0 if string are identical in a case-insensitive way, -1 if s1 < s2 and +1 if s1 > s2
- *              (based on first lower case character value comparison).
+ *              (based on first lower case character value comparison). -1000 in case of invalid parameter.
  */
 int SOPC_strcmp_ignore_case_alt_end(const char* s1, const char* s2, char endCharacter);
 
