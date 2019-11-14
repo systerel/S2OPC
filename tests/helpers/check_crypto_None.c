@@ -582,14 +582,15 @@ START_TEST(test_crypto_asym_crypt_None)
 {
     uint8_t input[688], output[1024], input_bis[688];
     uint32_t len = 0;
+    const char* errorReason = "";
 
     // Encryption/Decryption
     memset(input, 0, 688);
     memset(output, 0, 1024);
     strncpy((char*) input, "Test S2OPC Test", 32);
-    ck_assert(SOPC_CryptoProvider_AsymmetricEncrypt(crypto, input, 32, key_pub, output, 128) ==
+    ck_assert(SOPC_CryptoProvider_AsymmetricEncrypt(crypto, input, 32, key_pub, output, 128, &errorReason) ==
               SOPC_STATUS_INVALID_PARAMETERS);
-    ck_assert(SOPC_CryptoProvider_AsymmetricDecrypt(crypto, output, 128, key_priv, input_bis, 86, &len) ==
+    ck_assert(SOPC_CryptoProvider_AsymmetricDecrypt(crypto, output, 128, key_priv, input_bis, 86, &len, &errorReason) ==
               SOPC_STATUS_INVALID_PARAMETERS);
 }
 END_TEST
@@ -597,14 +598,15 @@ END_TEST
 START_TEST(test_crypto_asym_sign_verify_None)
 {
     uint8_t input[688], sig[128];
+    const char* errorReason = "";
 
     // Signature
     memset(input, 0, 688);
     memset(sig, 0, 128);
     strncpy((char*) input, "Test S2OPC Test", 32);
-    ck_assert(SOPC_CryptoProvider_AsymmetricSign(crypto, input, 32, key_priv, sig, 128) ==
+    ck_assert(SOPC_CryptoProvider_AsymmetricSign(crypto, input, 32, key_priv, sig, 128, &errorReason) ==
               SOPC_STATUS_INVALID_PARAMETERS);
-    ck_assert(SOPC_CryptoProvider_AsymmetricVerify(crypto, input, 32, key_pub, sig, 128) ==
+    ck_assert(SOPC_CryptoProvider_AsymmetricVerify(crypto, input, 32, key_pub, sig, 128, &errorReason) ==
               SOPC_STATUS_INVALID_PARAMETERS);
 }
 END_TEST

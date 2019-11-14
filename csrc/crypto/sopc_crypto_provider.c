@@ -1358,51 +1358,78 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricEncrypt(const SOPC_CryptoProvide
                                                         uint32_t lenInput,
                                                         const SOPC_AsymmetricKey* pKey,
                                                         uint8_t* pOutput,
-                                                        uint32_t lenOutput)
+                                                        uint32_t lenOutput,
+                                                        const char** errorReason)
 {
+    assert(NULL != errorReason);
+    *errorReason = "";
+
     uint32_t lenOutCalc = 0;
     uint32_t lenKey = 0;
 
     if (NULL == pProvider || NULL == pInput || 0 == lenInput || NULL == pKey || NULL == pOutput || 0 == lenOutput)
     {
+        *errorReason = "NULL parameter or 0 length provided";
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     const SOPC_CryptoProfile* pProfile = SOPC_CryptoProvider_GetProfileServices(pProvider);
     if (NULL == pProfile || NULL == pProfile->pFnAsymEncrypt)
     {
+        *errorReason = "invalid cryptographic provider (invalid profile)";
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     // Check buffer length
     if (SOPC_CryptoProvider_AsymmetricGetLength_Encryption(pProvider, pKey, lenInput, &lenOutCalc) != SOPC_STATUS_OK)
+    {
+        *errorReason = "error during computation of encrypted message size from public key";
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
     if (lenOutput != lenOutCalc)
+    {
+        *errorReason = "computed encrypted length from public key is not equal to output buffer provided";
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
     // Check key length
     if (SOPC_CryptoProvider_AsymmetricGetLength_KeyBits(pProvider, pKey, &lenKey) != SOPC_STATUS_OK)
+    {
+        *errorReason = "error extracting key length from public key";
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
     switch (pProfile->SecurityPolicyID)
     {
     case SOPC_SecurityPolicy_Invalid_ID:
     case SOPC_SecurityPolicy_None_ID:
     default:
+        *errorReason = "invalid security policy in cryptographic provider";
         return SOPC_STATUS_INVALID_PARAMETERS;
     case SOPC_SecurityPolicy_Basic256Sha256_ID:
         if (lenKey < SOPC_SecurityPolicy_Basic256Sha256_AsymLen_KeyMinBits ||
             lenKey > SOPC_SecurityPolicy_Basic256Sha256_AsymLen_KeyMaxBits)
+        {
+            *errorReason = "invalid public key size for Basic256Sha256 profile, expected 2048 <= keyLength <= 4096";
             return SOPC_STATUS_INVALID_PARAMETERS;
+        }
         break;
     case SOPC_SecurityPolicy_Basic256_ID:
         if (lenKey < SOPC_SecurityPolicy_Basic256_AsymLen_KeyMinBits ||
             lenKey > SOPC_SecurityPolicy_Basic256_AsymLen_KeyMaxBits)
+        {
+            *errorReason = "invalid public key size for Basic256 profile, expected 1024 <= keyLength <= 2048";
             return SOPC_STATUS_INVALID_PARAMETERS;
+        }
         break;
     }
 
     // We can now proceed
-    return pProfile->pFnAsymEncrypt(pProvider, pInput, lenInput, pKey, pOutput);
+    SOPC_ReturnStatus status = pProfile->pFnAsymEncrypt(pProvider, pInput, lenInput, pKey, pOutput);
+    if (SOPC_STATUS_OK != status)
+    {
+        *errorReason = "encryption processing failed (invalid key type or message length)";
+    }
+    return status;
 }
 
 SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricDecrypt(const SOPC_CryptoProvider* pProvider,
@@ -1411,51 +1438,78 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricDecrypt(const SOPC_CryptoProvide
                                                         const SOPC_AsymmetricKey* pKey,
                                                         uint8_t* pOutput,
                                                         uint32_t lenOutput,
-                                                        uint32_t* pLenWritten)
+                                                        uint32_t* pLenWritten,
+                                                        const char** errorReason)
 {
+    assert(NULL != errorReason);
+    *errorReason = "";
+
     uint32_t lenOutCalc = 0;
     uint32_t lenKey = 0;
 
     if (NULL == pProvider || NULL == pInput || 0 == lenInput || NULL == pKey || NULL == pOutput || 0 == lenOutput)
     {
+        *errorReason = "NULL parameter or 0 length provided";
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     const SOPC_CryptoProfile* pProfile = SOPC_CryptoProvider_GetProfileServices(pProvider);
     if (NULL == pProfile || NULL == pProfile->pFnAsymDecrypt)
     {
+        *errorReason = "invalid cryptographic provider (invalid profile)";
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     // Check buffer length
     if (SOPC_CryptoProvider_AsymmetricGetLength_Decryption(pProvider, pKey, lenInput, &lenOutCalc) != SOPC_STATUS_OK)
+    {
+        *errorReason = "error during computation of encrypted message size from private key";
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
     if (lenOutput != lenOutCalc)
+    {
+        *errorReason = "computed encrypted length from private key is not equal to output buffer provided";
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
     // Check key length
     if (SOPC_CryptoProvider_AsymmetricGetLength_KeyBits(pProvider, pKey, &lenKey) != SOPC_STATUS_OK)
+    {
+        *errorReason = "error extracting key length from private key";
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
     switch (pProfile->SecurityPolicyID)
     {
     case SOPC_SecurityPolicy_Invalid_ID:
     case SOPC_SecurityPolicy_None_ID:
     default:
+        *errorReason = "invalid security policy in cryptographic provider";
         return SOPC_STATUS_INVALID_PARAMETERS;
     case SOPC_SecurityPolicy_Basic256Sha256_ID:
         if (lenKey < SOPC_SecurityPolicy_Basic256Sha256_AsymLen_KeyMinBits ||
             lenKey > SOPC_SecurityPolicy_Basic256Sha256_AsymLen_KeyMaxBits)
+        {
+            *errorReason = "invalid private key size for Basic256Sha256 profile, expected 2048 <= keyLength <= 4096";
             return SOPC_STATUS_INVALID_PARAMETERS;
+        }
         break;
     case SOPC_SecurityPolicy_Basic256_ID:
         if (lenKey < SOPC_SecurityPolicy_Basic256_AsymLen_KeyMinBits ||
             lenKey > SOPC_SecurityPolicy_Basic256_AsymLen_KeyMaxBits)
+        {
+            *errorReason = "invalid private key size for Basic256 profile, expected 1024 <= keyLength <= 2048";
             return SOPC_STATUS_INVALID_PARAMETERS;
+        }
         break;
     }
 
     // We can now proceed
-    return pProfile->pFnAsymDecrypt(pProvider, pInput, lenInput, pKey, pOutput, pLenWritten);
+    SOPC_ReturnStatus status = pProfile->pFnAsymDecrypt(pProvider, pInput, lenInput, pKey, pOutput, pLenWritten);
+    if (SOPC_STATUS_OK != status)
+    {
+        *errorReason = "decryption processing failed (invalid key type or message length)";
+    }
+    return status;
 }
 
 /**
@@ -1470,48 +1524,75 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricSign(const SOPC_CryptoProvider* 
                                                      uint32_t lenInput,
                                                      const SOPC_AsymmetricKey* pKeyPrivateLocal,
                                                      uint8_t* pSignature,
-                                                     uint32_t lenSignature)
+                                                     uint32_t lenSignature,
+                                                     const char** errorReason)
 {
+    assert(NULL != errorReason);
+    *errorReason = "";
+
     uint32_t lenSigCalc = 0, lenKey = 0;
 
     if (NULL == pProvider || NULL == pInput || 0 == lenInput || NULL == pKeyPrivateLocal || NULL == pSignature ||
         0 == lenSignature)
     {
+        *errorReason = "NULL parameter or 0 length provided";
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     const SOPC_CryptoProfile* pProfile = SOPC_CryptoProvider_GetProfileServices(pProvider);
     if (NULL == pProfile || NULL == pProfile->pFnAsymSign)
     {
+        *errorReason = "invalid cryptographic provider (invalid profile)";
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     // Check lengths
     if (SOPC_CryptoProvider_AsymmetricGetLength_Signature(pProvider, pKeyPrivateLocal, &lenSigCalc) != SOPC_STATUS_OK)
+    {
+        *errorReason = "error during computation of signature size from private key";
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
     if (lenSignature != lenSigCalc)
+    {
+        *errorReason = "computed signature length from private key is not equal to the one computed from public key";
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
     if (SOPC_CryptoProvider_AsymmetricGetLength_KeyBits(pProvider, pKeyPrivateLocal, &lenKey) != SOPC_STATUS_OK)
+    {
+        *errorReason = "error extracting key length from private key";
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
     switch (pProfile->SecurityPolicyID)
     {
     case SOPC_SecurityPolicy_Invalid_ID:
     case SOPC_SecurityPolicy_None_ID:
     default:
+        *errorReason = "invalid security policy in cryptographic provider";
         return SOPC_STATUS_INVALID_PARAMETERS;
     case SOPC_SecurityPolicy_Basic256Sha256_ID:
         if (lenKey < SOPC_SecurityPolicy_Basic256Sha256_AsymLen_KeyMinBits ||
             lenKey > SOPC_SecurityPolicy_Basic256Sha256_AsymLen_KeyMaxBits)
+        {
+            *errorReason = "invalid private key size for Basic256Sha256 profile, expected 2048 <= keyLength <= 4096";
             return SOPC_STATUS_INVALID_PARAMETERS;
+        }
         break;
     case SOPC_SecurityPolicy_Basic256_ID:
         if (lenKey < SOPC_SecurityPolicy_Basic256_AsymLen_KeyMinBits ||
             lenKey > SOPC_SecurityPolicy_Basic256_AsymLen_KeyMaxBits)
+        {
+            *errorReason = "invalid private key size for Basic256 profile, expected 1024 <= keyLength <= 2048";
             return SOPC_STATUS_INVALID_PARAMETERS;
+        }
         break;
     }
 
-    return pProfile->pFnAsymSign(pProvider, pInput, lenInput, pKeyPrivateLocal, pSignature);
+    SOPC_ReturnStatus status = pProfile->pFnAsymSign(pProvider, pInput, lenInput, pKeyPrivateLocal, pSignature);
+    if (SOPC_STATUS_OK != status)
+    {
+        *errorReason = "signature processing failed";
+    }
+    return status;
 }
 
 SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricVerify(const SOPC_CryptoProvider* pProvider,
@@ -1519,48 +1600,75 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricVerify(const SOPC_CryptoProvider
                                                        uint32_t lenInput,
                                                        const SOPC_AsymmetricKey* pKeyRemotePublic,
                                                        const uint8_t* pSignature,
-                                                       uint32_t lenSignature)
+                                                       uint32_t lenSignature,
+                                                       const char** errorReason)
 {
+    assert(NULL != errorReason);
+    *errorReason = "";
+
     uint32_t lenSigCalc = 0, lenKey = 0;
 
     if (NULL == pProvider || NULL == pInput || 0 == lenInput || NULL == pKeyRemotePublic || NULL == pSignature ||
         0 == lenSignature)
     {
+        *errorReason = "NULL parameter or 0 length provided";
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     const SOPC_CryptoProfile* pProfile = SOPC_CryptoProvider_GetProfileServices(pProvider);
     if (NULL == pProfile || NULL == pProfile->pFnAsymVerify)
     {
+        *errorReason = "invalid cryptographic provider (invalid profile)";
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     // Check lengths
     if (SOPC_CryptoProvider_AsymmetricGetLength_Signature(pProvider, pKeyRemotePublic, &lenSigCalc) != SOPC_STATUS_OK)
+    {
+        *errorReason = "error during computation of signature size from public key";
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
     if (lenSignature != lenSigCalc)
+    {
+        *errorReason = "computed signature length is not equal to output buffer provided";
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
     if (SOPC_CryptoProvider_AsymmetricGetLength_KeyBits(pProvider, pKeyRemotePublic, &lenKey) != SOPC_STATUS_OK)
+    {
+        *errorReason = "error extracting key length from public key";
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
     switch (pProfile->SecurityPolicyID)
     {
     case SOPC_SecurityPolicy_Invalid_ID:
     case SOPC_SecurityPolicy_None_ID:
     default:
+        *errorReason = "invalid security policy in cryptographic provider";
         return SOPC_STATUS_INVALID_PARAMETERS;
     case SOPC_SecurityPolicy_Basic256Sha256_ID:
         if (lenKey < SOPC_SecurityPolicy_Basic256Sha256_AsymLen_KeyMinBits ||
             lenKey > SOPC_SecurityPolicy_Basic256Sha256_AsymLen_KeyMaxBits)
+        {
+            *errorReason = "invalid public key size for Basic256Sha256 profile, expected 2048 <= keyLength <= 4096";
             return SOPC_STATUS_INVALID_PARAMETERS;
+        }
         break;
     case SOPC_SecurityPolicy_Basic256_ID:
         if (lenKey < SOPC_SecurityPolicy_Basic256_AsymLen_KeyMinBits ||
             lenKey > SOPC_SecurityPolicy_Basic256_AsymLen_KeyMaxBits)
+        {
+            *errorReason = "invalid public key size for Basic256 profile, expected 1024 <= keyLength <= 2048";
             return SOPC_STATUS_INVALID_PARAMETERS;
+        }
         break;
     }
 
-    return pProfile->pFnAsymVerify(pProvider, pInput, lenInput, pKeyRemotePublic, pSignature);
+    SOPC_ReturnStatus status = pProfile->pFnAsymVerify(pProvider, pInput, lenInput, pKeyRemotePublic, pSignature);
+    if (SOPC_STATUS_OK != status)
+    {
+        *errorReason = "signature processing failed";
+    }
+    return status;
 }
 
 /* ------------------------------------------------------------------------------------------------

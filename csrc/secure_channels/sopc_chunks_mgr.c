@@ -1205,7 +1205,10 @@ static bool SC_Chunks_GetSecurityKeySets(SOPC_SecureConnection* scConnection,
     return true;
 }
 
-static bool SC_Chunks_DecryptMsg(SOPC_SecureConnection* scConnection, bool isSymmetric, bool isPrevCryptoData)
+static bool SC_Chunks_DecryptMsg(SOPC_SecureConnection* scConnection,
+                                 bool isSymmetric,
+                                 bool isPrevCryptoData,
+                                 const char** errorReason)
 {
     assert(scConnection != NULL);
     SOPC_Buffer* encryptedBuffer = scConnection->chunksCtx.currentChunkInputBuffer;
@@ -1252,9 +1255,10 @@ static bool SC_Chunks_DecryptMsg(SOPC_SecureConnection* scConnection, bool isSym
             }
             if (result)
             {
-                status = SOPC_CryptoProvider_AsymmetricDecrypt(
-                    scConnection->cryptoProvider, dataToDecrypt, lengthToDecrypt, scConnection->privateKey,
-                    &(plainBuffer->data[sequenceNumberPosition]), decryptedTextLength, &decryptedTextLength);
+                status = SOPC_CryptoProvider_AsymmetricDecrypt(scConnection->cryptoProvider, dataToDecrypt,
+                                                               lengthToDecrypt, scConnection->privateKey,
+                                                               &(plainBuffer->data[sequenceNumberPosition]),
+                                                               decryptedTextLength, &decryptedTextLength, errorReason);
                 if (SOPC_STATUS_OK == status)
                 {
                     status = SOPC_Buffer_SetDataLength(plainBuffer, sequenceNumberPosition + decryptedTextLength);
@@ -1357,7 +1361,8 @@ static bool SC_Chunks_DecryptMsg(SOPC_SecureConnection* scConnection, bool isSym
 static bool SC_Chunks_VerifyMsgSignature(SOPC_SecureConnection* scConnection,
                                          bool isSymmetric,
                                          bool isPrevCryptoData,
-                                         uint32_t* sigPosition)
+                                         uint32_t* sigPosition,
+                                         const char** errorReason)
 {
     assert(scConnection != NULL);
     SOPC_Buffer* buffer = scConnection->chunksCtx.currentChunkInputBuffer;
@@ -1407,7 +1412,8 @@ static bool SC_Chunks_VerifyMsgSignature(SOPC_SecureConnection* scConnection,
             signaturePosition = buffer->length - signatureSize;
 
             status = SOPC_CryptoProvider_AsymmetricVerify(scConnection->cryptoProvider, buffer->data, signaturePosition,
-                                                          publicKey, &(buffer->data[signaturePosition]), signatureSize);
+                                                          publicKey, &(buffer->data[signaturePosition]), signatureSize,
+                                                          errorReason);
         }
 
         SOPC_KeyManager_AsymmetricKey_Free(publicKey);
@@ -1619,6 +1625,7 @@ bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection, uint32_t* re
     SOPC_SecureChannel_Config* scConfig = NULL;
 
     uint32_t signaturePosition = 0;
+    const char* errorReason = "";
 
     // Note: for non secure message we already check those messages are expected
     //       regarding the connection type (client/server)
@@ -1863,13 +1870,14 @@ bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection, uint32_t* re
         // Decrypt the message
         result = SC_Chunks_DecryptMsg(scConnection,
                                       false == isOPN, // isSymmetric
-                                      isPrevCryptoData);
+                                      isPrevCryptoData, &errorReason);
         if (!result)
         {
             *errorStatus = OpcUa_BadSecurityChecksFailed;
 
-            SOPC_Logger_TraceError("ChunksMgr: decryption failed (epCfgIdx=%" PRIu32 ", scCfgIdx=%" PRIu32 ")",
-                                   scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
+            SOPC_Logger_TraceError("ChunksMgr: decryption failed (epCfgIdx=%" PRIu32 ", scCfgIdx=%" PRIu32 "): %s",
+                                   scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx,
+                                   errorReason);
         }
     }
 
@@ -1878,7 +1886,7 @@ bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection, uint32_t* re
         // Check decrypted message signature
         result = SC_Chunks_VerifyMsgSignature(scConnection,
                                               false == isOPN, // isSymmetric
-                                              isPrevCryptoData, &signaturePosition);
+                                              isPrevCryptoData, &signaturePosition, &errorReason);
         if (result)
         {
             // Set signature bytes as unreadable in the buffer (signature uses last bytes)
@@ -1890,9 +1898,9 @@ bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection, uint32_t* re
         {
             *errorStatus = OpcUa_BadSecurityChecksFailed;
 
-            SOPC_Logger_TraceError("ChunksMgr: signature verification failed (epCfgIdx=%" PRIu32 ", scCfgIdx=%" PRIu32
-                                   ")",
-                                   scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
+            SOPC_Logger_TraceError(
+                "ChunksMgr: signature verification failed (epCfgIdx=%" PRIu32 ", scCfgIdx=%" PRIu32 "): %s",
+                scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx, errorReason);
         }
     }
 
@@ -2914,7 +2922,8 @@ static bool SC_Chunks_EncodeSignatureNoError(SOPC_SecureConnection* scConnection
                                              SOPC_Buffer* buffer,
                                              bool symmetricAlgo,
                                              bool isPrevCryptoData,
-                                             uint32_t signatureSize)
+                                             uint32_t signatureSize,
+                                             const char** errorReason)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_ByteString signedData;
@@ -2934,7 +2943,7 @@ static bool SC_Chunks_EncodeSignatureNoError(SOPC_SecureConnection* scConnection
             {
                 status = SOPC_CryptoProvider_AsymmetricSign(scConnection->cryptoProvider, buffer->data, buffer->length,
                                                             scConnection->privateKey, signedData.Data,
-                                                            (uint32_t) signedData.Length);
+                                                            (uint32_t) signedData.Length, errorReason);
             }
             else
             {
@@ -2993,15 +3002,16 @@ static bool SC_Chunks_EncodeSignature(uint32_t scConnectionIdx,
                                       uint32_t signatureSize,
                                       SOPC_StatusCode* errorStatus)
 {
-    bool result =
-        SC_Chunks_EncodeSignatureNoError(scConnection, buffer, symmetricAlgo, isPrevCryptoData, signatureSize);
+    const char* errorReason = "";
+    bool result = SC_Chunks_EncodeSignatureNoError(scConnection, buffer, symmetricAlgo, isPrevCryptoData, signatureSize,
+                                                   &errorReason);
     if (!result)
     {
         *errorStatus = OpcUa_BadEncodingError;
 
         SOPC_Logger_TraceError("ChunksMgr: treat send buffer: encoding signature failed : (scIdx=%" PRIu32
-                               ", scCfgIdx=%" PRIu32 ")",
-                               scConnectionIdx, scConnection->endpointConnectionConfigIdx);
+                               ", scCfgIdx=%" PRIu32 "): %s",
+                               scConnectionIdx, scConnection->endpointConnectionConfigIdx, errorReason);
     }
     return result;
 }
@@ -3021,6 +3031,7 @@ static bool SC_Chunks_EncryptMsg(SOPC_SecureConnection* scConnection,
     assert(errorStatus != NULL);
     bool result = false;
 
+    const char* errorReason = "";
     SOPC_SecureChannel_Config* scConfig = NULL;
 
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
@@ -3094,9 +3105,9 @@ static bool SC_Chunks_EncryptMsg(SOPC_SecureConnection* scConnection,
         // Encrypt
         if (result)
         {
-            status = SOPC_CryptoProvider_AsymmetricEncrypt(scConnection->cryptoProvider, dataToEncrypt,
-                                                           dataToEncryptLength, otherAppPublicKey,
-                                                           &encryptedData[sequenceNumberPosition], encryptedDataLength);
+            status = SOPC_CryptoProvider_AsymmetricEncrypt(
+                scConnection->cryptoProvider, dataToEncrypt, dataToEncryptLength, otherAppPublicKey,
+                &encryptedData[sequenceNumberPosition], encryptedDataLength, &errorReason);
 
             if (SOPC_STATUS_OK != status)
             {
@@ -3105,8 +3116,8 @@ static bool SC_Chunks_EncryptMsg(SOPC_SecureConnection* scConnection,
 
                 SOPC_Logger_TraceError(
                     "ChunksMgr: encrypt message (asymm): failed to encrypt message "
-                    "(scConfigIdx=%" PRIu32 ")",
-                    scConnection->endpointConnectionConfigIdx);
+                    "(scConfigIdx=%" PRIu32 "): %s",
+                    scConnection->endpointConnectionConfigIdx, errorReason);
             }
         }
 

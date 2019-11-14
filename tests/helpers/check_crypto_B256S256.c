@@ -886,15 +886,17 @@ START_TEST(test_crypto_asym_crypt_B256S256)
     uint8_t input[856], output[1024], input_bis[856];
     uint32_t len = 0;
     SOPC_ExposedBuffer clientNonce[32], serverNonce[32];
+    const char* errorReason = "";
 
     // Encryption/Decryption
     // a) Single message (< 214)
     memset(input, 0, 856);
     memset(output, 0, 1024);
     strncpy((char*) input, "Test S2OPC Test", 32); // And test padding btw...
-    ck_assert(SOPC_CryptoProvider_AsymmetricEncrypt(crypto, input, 32, key_pub, output, 256) == SOPC_STATUS_OK);
-    ck_assert(SOPC_CryptoProvider_AsymmetricDecrypt(crypto, output, 256, key_priv, input_bis, 214, &len) ==
+    ck_assert(SOPC_CryptoProvider_AsymmetricEncrypt(crypto, input, 32, key_pub, output, 256, &errorReason) ==
               SOPC_STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_AsymmetricDecrypt(crypto, output, 256, key_priv, input_bis, 214, &len,
+                                                    &errorReason) == SOPC_STATUS_OK);
     ck_assert(len == 32);
     ck_assert(memcmp(input, input_bis, 32) == 0);
     // b) Multiple messages (> 214, and as output is 1024, < 856)
@@ -903,9 +905,10 @@ START_TEST(test_crypto_asym_crypt_B256S256)
     ck_assert(unhexlify("ccee418cbc77c2ebb38d5ffac9d2a9d0a6821fa211798e71b2d65b3abb6aec8f", serverNonce, 32) == 32);
     ck_assert(SOPC_CryptoProvider_DerivePseudoRandomData(crypto, clientNonce, 32, serverNonce, 32, input + 32,
                                                          856 - 32) == SOPC_STATUS_OK);
-    ck_assert(SOPC_CryptoProvider_AsymmetricEncrypt(crypto, input, 856, key_pub, output, 1024) == SOPC_STATUS_OK);
-    ck_assert(SOPC_CryptoProvider_AsymmetricDecrypt(crypto, output, 1024, key_priv, input_bis, 856, &len) ==
+    ck_assert(SOPC_CryptoProvider_AsymmetricEncrypt(crypto, input, 856, key_pub, output, 1024, &errorReason) ==
               SOPC_STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_AsymmetricDecrypt(crypto, output, 1024, key_priv, input_bis, 856, &len,
+                                                    &errorReason) == SOPC_STATUS_OK);
     ck_assert(len == 856);
     ck_assert(memcmp(input, input_bis, 856) == 0);
 }
@@ -915,22 +918,27 @@ START_TEST(test_crypto_asym_sign_verify_B256S256)
 {
     uint8_t input[856], sig[256];
     SOPC_ExposedBuffer clientNonce[32], serverNonce[32];
+    const char* errorReason = "";
 
     // Signature
     // a) Single message (< 214)
     memset(input, 0, 856);
     memset(sig, 0, 256);
     strncpy((char*) input, "Test S2OPC Test", 32); // And test padding btw...
-    ck_assert(SOPC_CryptoProvider_AsymmetricSign(crypto, input, 32, key_priv, sig, 256) == SOPC_STATUS_OK);
-    ck_assert(SOPC_CryptoProvider_AsymmetricVerify(crypto, input, 32, key_pub, sig, 256) == SOPC_STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_AsymmetricSign(crypto, input, 32, key_priv, sig, 256, &errorReason) ==
+              SOPC_STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_AsymmetricVerify(crypto, input, 32, key_pub, sig, 256, &errorReason) ==
+              SOPC_STATUS_OK);
     // b) Multiple messages (> 214, and as output is 1024, < 856)
     //  Using previously generated nonce, to fill input[32:856]
     ck_assert(unhexlify("3d3b4768f275d5023c2145cbe3a4a592fb843643d791f7bd7fce75ff25128b68", clientNonce, 32) == 32);
     ck_assert(unhexlify("ccee418cbc77c2ebb38d5ffac9d2a9d0a6821fa211798e71b2d65b3abb6aec8f", serverNonce, 32) == 32);
     ck_assert(SOPC_CryptoProvider_DerivePseudoRandomData(crypto, clientNonce, 32, serverNonce, 32, input + 32,
                                                          856 - 32) == SOPC_STATUS_OK);
-    ck_assert(SOPC_CryptoProvider_AsymmetricSign(crypto, input, 856, key_priv, sig, 256) == SOPC_STATUS_OK);
-    ck_assert(SOPC_CryptoProvider_AsymmetricVerify(crypto, input, 856, key_pub, sig, 256) == SOPC_STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_AsymmetricSign(crypto, input, 856, key_priv, sig, 256, &errorReason) ==
+              SOPC_STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_AsymmetricVerify(crypto, input, 856, key_pub, sig, 256, &errorReason) ==
+              SOPC_STATUS_OK);
 }
 END_TEST
 

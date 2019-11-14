@@ -872,14 +872,16 @@ START_TEST(test_crypto_asym_crypt_B256)
     uint8_t input[688], output[1024], input_bis[688];
     uint32_t len = 0;
     SOPC_ExposedBuffer clientNonce[32], serverNonce[32];
+    const char* errorReason = "";
 
     // Encryption/Decryption
     // a) Single message (< 214)
     memset(input, 0, 688);
     memset(output, 0, 1024);
     strncpy((char*) input, "Test S2OPC Test", 32); // And test padding btw...
-    ck_assert(SOPC_CryptoProvider_AsymmetricEncrypt(crypto, input, 32, key_pub, output, 128) == SOPC_STATUS_OK);
-    ck_assert(SOPC_CryptoProvider_AsymmetricDecrypt(crypto, output, 128, key_priv, input_bis, 86, &len) ==
+    ck_assert(SOPC_CryptoProvider_AsymmetricEncrypt(crypto, input, 32, key_pub, output, 128, &errorReason) ==
+              SOPC_STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_AsymmetricDecrypt(crypto, output, 128, key_priv, input_bis, 86, &len, &errorReason) ==
               SOPC_STATUS_OK);
     ck_assert(len == 32);
     ck_assert(memcmp(input, input_bis, 32) == 0);
@@ -889,9 +891,10 @@ START_TEST(test_crypto_asym_crypt_B256)
     ck_assert(unhexlify("9b8a2d541f4b3ed8ae69111cc85c4ea875fb7e2a541aa87d703fe1a5d037dcfc", serverNonce, 32) == 32);
     ck_assert(SOPC_CryptoProvider_DerivePseudoRandomData(crypto, clientNonce, 32, serverNonce, 32, input + 32,
                                                          688 - 32) == SOPC_STATUS_OK);
-    ck_assert(SOPC_CryptoProvider_AsymmetricEncrypt(crypto, input, 688, key_pub, output, 1024) == SOPC_STATUS_OK);
-    ck_assert(SOPC_CryptoProvider_AsymmetricDecrypt(crypto, output, 1024, key_priv, input_bis, 688, &len) ==
+    ck_assert(SOPC_CryptoProvider_AsymmetricEncrypt(crypto, input, 688, key_pub, output, 1024, &errorReason) ==
               SOPC_STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_AsymmetricDecrypt(crypto, output, 1024, key_priv, input_bis, 688, &len,
+                                                    &errorReason) == SOPC_STATUS_OK);
     ck_assert(len == 688);
     ck_assert(memcmp(input, input_bis, 688) == 0);
 }
@@ -901,22 +904,27 @@ START_TEST(test_crypto_asym_sign_verify_B256)
 {
     uint8_t input[688], sig[128];
     SOPC_ExposedBuffer clientNonce[32], serverNonce[32];
+    const char* errorReason = "";
 
     // Signature
     // a) Single message (< 214)
     memset(input, 0, 688);
     memset(sig, 0, 128);
     strncpy((char*) input, "Test S2OPC Test", 32); // And test padding btw...
-    ck_assert(SOPC_CryptoProvider_AsymmetricSign(crypto, input, 32, key_priv, sig, 128) == SOPC_STATUS_OK);
-    ck_assert(SOPC_CryptoProvider_AsymmetricVerify(crypto, input, 32, key_pub, sig, 128) == SOPC_STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_AsymmetricSign(crypto, input, 32, key_priv, sig, 128, &errorReason) ==
+              SOPC_STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_AsymmetricVerify(crypto, input, 32, key_pub, sig, 128, &errorReason) ==
+              SOPC_STATUS_OK);
     // b) Multiple messages (> 214, and as output is 1024, < 856)
     //  Using previously generated nonce, to fill input[32:856]
     ck_assert(unhexlify("c3cc8578608ae88e9690b921254d028e1b9cdc75fbf5070c4e39e5712b4a8bdf", clientNonce, 32) == 32);
     ck_assert(unhexlify("9b8a2d541f4b3ed8ae69111cc85c4ea875fb7e2a541aa87d703fe1a5d037dcfc", serverNonce, 32) == 32);
     ck_assert(SOPC_CryptoProvider_DerivePseudoRandomData(crypto, clientNonce, 32, serverNonce, 32, input + 32,
                                                          688 - 32) == SOPC_STATUS_OK);
-    ck_assert(SOPC_CryptoProvider_AsymmetricSign(crypto, input, 688, key_priv, sig, 128) == SOPC_STATUS_OK);
-    ck_assert(SOPC_CryptoProvider_AsymmetricVerify(crypto, input, 688, key_pub, sig, 128) == SOPC_STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_AsymmetricSign(crypto, input, 688, key_priv, sig, 128, &errorReason) ==
+              SOPC_STATUS_OK);
+    ck_assert(SOPC_CryptoProvider_AsymmetricVerify(crypto, input, 688, key_pub, sig, 128, &errorReason) ==
+              SOPC_STATUS_OK);
 }
 END_TEST
 

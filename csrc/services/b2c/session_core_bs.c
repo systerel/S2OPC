@@ -396,6 +396,7 @@ void session_core_bs__server_create_session_req_do_crypto(
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     uint32_t sigLength = 0;
     SOPC_AsymmetricKey* privateKey = NULL;
+    const char* errorReason = "";
 
     *session_core_bs__signature = constants__c_SignatureData_indet;
 
@@ -502,8 +503,9 @@ void session_core_bs__server_create_session_req_do_crypto(
 
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_CryptoProvider_AsymmetricSign(pProvider, pToSign, lenToSign, privateKey,
-                                                        pSign->Signature.Data, (uint32_t) pSign->Signature.Length);
+            status =
+                SOPC_CryptoProvider_AsymmetricSign(pProvider, pToSign, lenToSign, privateKey, pSign->Signature.Data,
+                                                   (uint32_t) pSign->Signature.Length, &errorReason);
         }
 
         SOPC_KeyManager_AsymmetricKey_Free(privateKey);
@@ -584,6 +586,7 @@ void session_core_bs__client_activate_session_req_do_crypto(
     uint8_t* pToSign = NULL;
     uint32_t lenToSign = 0;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    const char* errorReason = "";
 
     *session_core_bs__valid = false;
     *session_core_bs__signature = constants__c_SignatureData_indet;
@@ -674,7 +677,7 @@ void session_core_bs__client_activate_session_req_do_crypto(
         if (SOPC_STATUS_OK == status)
         {
             status = SOPC_CryptoProvider_AsymmetricSign(pProvider, pToSign, lenToSign, clientKey, pSign->Signature.Data,
-                                                        (uint32_t) pSign->Signature.Length);
+                                                        (uint32_t) pSign->Signature.Length, &errorReason);
         }
 
         SOPC_KeyManager_AsymmetricKey_Free(clientKey);
@@ -824,6 +827,7 @@ static SOPC_ReturnStatus check_signature_with_provider(SOPC_CryptoProvider* prov
     assert(NULL != signature);
     assert(NULL != signature->Data);
     assert(signature->Length > 0);
+    const char* errorReason = "";
 
     /* Verify signature algorithm URI */
     const char* algorithm = SOPC_CryptoProvider_AsymmetricGetUri_SignAlgorithm(provider);
@@ -846,7 +850,7 @@ static SOPC_ReturnStatus check_signature_with_provider(SOPC_CryptoProvider* prov
         memcpy(verify_payload + payload->length, nonce->Data, LENGTH_NONCE);
 
         status = SOPC_CryptoProvider_AsymmetricVerify(provider, verify_payload, verify_len, publicKey, signature->Data,
-                                                      (uint32_t) signature->Length);
+                                                      (uint32_t) signature->Length, &errorReason);
         SOPC_Free(verify_payload);
     }
     else

@@ -927,6 +927,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_DeriveKeySetsServer(const SOPC_CryptoProvi
  * \param pOutput   A valid pointer to the buffer which will contain the ciphered payload.
  * \param lenOutput The exact length of the ciphered payload. SOPC_CryptoProvider_AsymmetricGetLength_Encryption()
  *                  provides the expected size of this buffer.
+ * \param errorReason  Pointer to a C string used to point on error reason string when returned status != SOPC_STATUS_OK
  *
  * \note            Contents of the outputs is unspecified when return value is not SOPC_STATUS_OK.
  *
@@ -941,7 +942,8 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricEncrypt(const SOPC_CryptoProvide
                                                         uint32_t lenInput,
                                                         const SOPC_AsymmetricKey* pKey,
                                                         uint8_t* pOutput,
-                                                        uint32_t lenOutput);
+                                                        uint32_t lenOutput,
+                                                        const char** errorReason);
 
 /**
  * \brief           Decrypts a payload \p pInput of \p lenInput bytes.
@@ -965,6 +967,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricEncrypt(const SOPC_CryptoProvide
  *                  provides the expected size of this buffer.
  * \param pLenWritten  An optional pointer to the length in bytes that are written to the \p pOutput buffer.
  *                     Useful to determine the actual size of the plain text.
+ * \param errorReason  Pointer to a C string used to point on error reason string when returned status != SOPC_STATUS_OK
  *
  * \note            Contents of the outputs is unspecified when return value is not SOPC_STATUS_OK.
  *
@@ -980,7 +983,8 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricDecrypt(const SOPC_CryptoProvide
                                                         const SOPC_AsymmetricKey* pKey,
                                                         uint8_t* pOutput,
                                                         uint32_t lenOutput,
-                                                        uint32_t* pLenWritten);
+                                                        uint32_t* pLenWritten,
+                                                        const char** errorReason);
 
 /**
  * \brief           Signs a payload \p pInput of \p lenInput bytes.
@@ -1008,6 +1012,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricDecrypt(const SOPC_CryptoProvide
  * \param pSignature  A valid pointer to the buffer which will contain the signature.
  * \param lenSignature  The exact length of the signature payload.
                         SOPC_CryptoProvider_AsymmetricGetLength_Signature() provides the expected size of this buffer.
+ * \param errorReason  Pointer to a C string used to point on error reason string when returned status != SOPC_STATUS_OK
  *
  * \note            Contents of the outputs is unspecified when return value is not SOPC_STATUS_OK.
  *
@@ -1022,7 +1027,8 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricSign(const SOPC_CryptoProvider* 
                                                      uint32_t lenInput,
                                                      const SOPC_AsymmetricKey* pKeyPrivateLocal,
                                                      uint8_t* pSignature,
-                                                     uint32_t lenSignature);
+                                                     uint32_t lenSignature,
+                                                     const char** errorReason);
 
 /**
  * \brief           Verifies the signature \p pSignature of a payload \p pInput of \p lenInput bytes.
@@ -1046,6 +1052,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricSign(const SOPC_CryptoProvider* 
  * \param pSignature  A valid pointer to the buffer which will contain the signature.
  * \param lenSignature  The exact length of the signature payload.
                         SOPC_CryptoProvider_AsymmetricGetLength_Signature() provides the expected size of this buffer.
+ * \param errorReason  Pointer to a C string used to point on error reason string when returned status != SOPC_STATUS_OK
  *
  * \note            Contents of the outputs is unspecified when return value is not SOPC_STATUS_OK.
  *
@@ -1060,7 +1067,8 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricVerify(const SOPC_CryptoProvider
                                                        uint32_t lenInput,
                                                        const SOPC_AsymmetricKey* pKeyRemotePublic,
                                                        const uint8_t* pSignature,
-                                                       uint32_t lenSignature);
+                                                       uint32_t lenSignature,
+                                                       const char** errorReason);
 
 /* ------------------------------------------------------------------------------------------------
  * Certificate validation
