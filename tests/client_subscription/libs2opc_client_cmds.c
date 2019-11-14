@@ -64,15 +64,6 @@ uint32_t CfgMaxReferencesPerNode = 0;
 /* Number of targeted publish token */
 #define PUBLISH_N_TOKEN 3
 
-/* Path to the certificate authority */
-#define PATH_CACERT_PUBL "./trusted/cacert.der"
-/* Path to the server certificate */
-#define PATH_SERVER_PUBL "./server_public/server_2k_cert.der"
-/* Path to the client certificate */
-#define PATH_CLIENT_PUBL "./client_public/client_2k_cert.der"
-/* Path to the client private key */
-#define PATH_CLIENT_PRIV "./client_private/client_2k_key.pem"
-
 typedef struct
 {
     char* endpoint_url;
@@ -353,17 +344,6 @@ static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_
     cfg_con->sc_lifetime = SC_LIFETIME_MS;
     cfg_con->token_target = PUBLISH_N_TOKEN;
     cfg_con->generic_response_callback = SOPC_ClientHelper_GenericCallback;
-
-    if (cfg_con->security_mode != OpcUa_MessageSecurityMode_None)
-    {
-        cfg_con->path_cert_srv = PATH_SERVER_PUBL;
-        cfg_con->path_cert_cli = PATH_CLIENT_PUBL;
-        cfg_con->path_key_cli = PATH_CLIENT_PRIV;
-    }
-    if (!cfg_con->disable_certificate_verification)
-    {
-        cfg_con->path_cert_auth = PATH_CACERT_PUBL;
-    }
 
     return 0;
 }
