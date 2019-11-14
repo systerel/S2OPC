@@ -2777,12 +2777,13 @@ static SOPC_ReturnStatus SOPC_LocalizedText_AddOrSetLocale_Internal_SetSupported
         if (SOPC_STATUS_OK == status)
         {
             void* appended = SOPC_SLinkedList_Append(destSetOfLt->localizedTextList, 0, newLT);
-            if (NULL == appended)
-            {
-                SOPC_LocalizedText_Clear(newLT);
-                SOPC_Free(newLT);
-                status = SOPC_STATUS_OUT_OF_MEMORY;
-            }
+            status = NULL == appended ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
+        }
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_LocalizedText_Clear(newLT);
+            SOPC_Free(newLT);
+            status = SOPC_STATUS_OUT_OF_MEMORY;
         }
     }
 

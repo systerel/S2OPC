@@ -42,7 +42,10 @@ SOPC_Variant* util_variant__new_Variant_from_QualifiedName(SOPC_QualifiedName* q
 
 SOPC_Variant* util_variant__new_Variant_from_LocalizedText(SOPC_LocalizedText* lt);
 
-SOPC_Variant* util_variant__set_PreferredLocalizedText_from_LocalizedText_Variant(SOPC_Variant* v,
+/**
+ * The input variant is returned as result or is freed if the output variant is a new structure
+ */
+SOPC_Variant* util_variant__set_PreferredLocalizedText_from_LocalizedText_Variant(SOPC_Variant** v,
                                                                                   char** preferredLocales);
 /**
  * The returned Variant is malloced and shall be freed by the consumer.

@@ -90,57 +90,60 @@ SOPC_Variant* util_variant__new_Variant_from_LocalizedText(SOPC_LocalizedText* l
     return pvar;
 }
 
-SOPC_Variant* util_variant__set_PreferredLocalizedText_from_LocalizedText_Variant(SOPC_Variant* v,
+SOPC_Variant* util_variant__set_PreferredLocalizedText_from_LocalizedText_Variant(SOPC_Variant** v,
                                                                                   char** preferredLocales)
 {
-    assert(SOPC_LocalizedText_Id == v->BuiltInTypeId);
-    assert(v->DoNotClear); // it was a shallow copy
+    assert(NULL != v);
+    SOPC_Variant* value = *v;
+
+    assert(SOPC_LocalizedText_Id == value->BuiltInTypeId);
+    assert(value->DoNotClear); // it was a shallow copy
 
     SOPC_Variant* result = NULL;
 
-    if (SOPC_VariantArrayType_SingleValue == v->ArrayType)
+    if (SOPC_VariantArrayType_SingleValue == value->ArrayType)
     {
         SOPC_LocalizedText* newLt = SOPC_Malloc(sizeof(*newLt));
         SOPC_LocalizedText_Initialize(newLt);
         SOPC_ReturnStatus status =
-            SOPC_LocalizedText_GetPreferredLocale(newLt, preferredLocales, v->Value.LocalizedText);
+            SOPC_LocalizedText_GetPreferredLocale(newLt, preferredLocales, value->Value.LocalizedText);
         if (SOPC_STATUS_OK != status)
         {
             SOPC_Free(newLt);
         }
         else
         {
-            v->Value.LocalizedText = newLt;
-            v->DoNotClear = false; // it is not anymore a shallow copy
-            result = v;
+            value->Value.LocalizedText = newLt;
+            value->DoNotClear = false; // it is not anymore a shallow copy
+            result = value;
         }
     }
-    else if (SOPC_VariantArrayType_Array == v->ArrayType || SOPC_VariantArrayType_Matrix == v->ArrayType)
+    else if (SOPC_VariantArrayType_Array == value->ArrayType || SOPC_VariantArrayType_Matrix == value->ArrayType)
     {
         // Create a deep copy that will allocate the same
         result = SOPC_Variant_Create();
-        SOPC_ReturnStatus status = SOPC_Variant_Copy(result, v);
+        SOPC_ReturnStatus status = SOPC_Variant_Copy(result, value);
 
         if (SOPC_STATUS_OK == status)
         {
             int32_t length = -1;
             SOPC_LocalizedText* srcLtArray = NULL;
             SOPC_LocalizedText* destLtArray = NULL;
-            if (SOPC_VariantArrayType_Matrix == v->ArrayType)
+            if (SOPC_VariantArrayType_Matrix == value->ArrayType)
             {
                 length = 1;
                 // Compute total length of flattened matrix
-                for (int32_t i = 0; i < v->Value.Matrix.Dimensions; i++)
+                for (int32_t i = 0; i < value->Value.Matrix.Dimensions; i++)
                 {
-                    length *= v->Value.Matrix.ArrayDimensions[i];
+                    length *= value->Value.Matrix.ArrayDimensions[i];
                 }
-                srcLtArray = v->Value.Matrix.Content.LocalizedTextArr;
+                srcLtArray = value->Value.Matrix.Content.LocalizedTextArr;
                 destLtArray = result->Value.Matrix.Content.LocalizedTextArr;
             }
             else
             {
-                length = v->Value.Array.Length;
-                srcLtArray = v->Value.Array.Content.LocalizedTextArr;
+                length = value->Value.Array.Length;
+                srcLtArray = value->Value.Array.Content.LocalizedTextArr;
                 destLtArray = result->Value.Array.Content.LocalizedTextArr;
             }
 
@@ -154,13 +157,16 @@ SOPC_Variant* util_variant__set_PreferredLocalizedText_from_LocalizedText_Varian
         if (SOPC_STATUS_OK == status)
         {
             // Preferred localized text array created, remove source one
-            SOPC_Variant_Clear(v);
+            SOPC_Variant_Clear(value);
+            SOPC_Free(value);
+            *v = NULL;
         }
         else
         {
             // Do not compute preferred localized texts and keep default ones
             SOPC_Variant_Clear(result);
-            result = v;
+            SOPC_Free(result);
+            result = value;
         }
     }
     else
