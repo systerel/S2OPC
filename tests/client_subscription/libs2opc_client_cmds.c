@@ -518,7 +518,7 @@ static void GenericCallbackHelper_Browse(SOPC_StatusCode status, const void* res
                 resultReference.referenceTypeId = SOPC_NodeId_ToCString(&reference->ReferenceTypeId);
                 resultReference.nodeId = SOPC_NodeId_ToCString(&reference->NodeId.NodeId);
                 resultReference.browseName = SOPC_String_GetCString(&reference->BrowseName.Name);
-                resultReference.displayName = SOPC_String_GetCString(&reference->DisplayName.Text);
+                resultReference.displayName = SOPC_String_GetCString(&reference->DisplayName.defaultText);
                 resultReference.isForward = reference->IsForward;
                 resultReference.nodeClass = (int32_t) reference->NodeClass;
                 SOPC_Array_Append(ctx->browseResults[i], resultReference);
@@ -580,7 +580,7 @@ static void GenericCallbackHelper_BrowseNext(SOPC_StatusCode status, const void*
                 resultReference.referenceTypeId = SOPC_NodeId_ToCString(&reference->ReferenceTypeId);
                 resultReference.nodeId = SOPC_NodeId_ToCString(&reference->NodeId.NodeId);
                 resultReference.browseName = SOPC_String_GetCString(&reference->BrowseName.Name);
-                resultReference.displayName = SOPC_String_GetCString(&reference->DisplayName.Text);
+                resultReference.displayName = SOPC_String_GetCString(&reference->DisplayName.defaultText);
                 resultReference.isForward = reference->IsForward;
                 resultReference.nodeClass = (int32_t) reference->NodeClass;
                 SOPC_Array_Append(ctx->browseResults[index], resultReference);
