@@ -371,7 +371,14 @@ static void check_parsed_s2opc_config(SOPC_S2OPC_Config* s2opcConfig)
     ck_assert_int_eq(0, strEqual);
     ck_assert_int_eq(secuPolicy->securityModes & SOPC_SECURITY_MODE_NONE_MASK, SOPC_SECURITY_MODE_NONE_MASK);
     ck_assert_int_eq(secuPolicy->securityModes | SOPC_SECURITY_MODE_NONE_MASK, SOPC_SECURITY_MODE_NONE_MASK);
-    ck_assert_uint_eq(0, secuPolicy->nbOfUserTokenPolicies);
+    ck_assert_uint_eq(1, secuPolicy->nbOfUserTokenPolicies);
+
+    OpcUa_UserTokenPolicy* userPolicy = &secuPolicy->userTokenPolicies[0];
+    ck_assert_int_ge(0, userPolicy->IssuedTokenType.Length);
+    ck_assert_int_ge(0, userPolicy->IssuerEndpointUrl.Length);
+    ck_assert_int_eq(0, strcmp("anon", SOPC_String_GetRawCString(&userPolicy->PolicyId)));
+    ck_assert_int_eq(OpcUa_UserTokenType_Anonymous, userPolicy->TokenType);
+    ck_assert_int_ge(0, userPolicy->SecurityPolicyUri.Length);
 
     /* 2nd secu policy */
     secuPolicy = &epConfig->secuConfigurations[1];
@@ -384,7 +391,7 @@ static void check_parsed_s2opc_config(SOPC_S2OPC_Config* s2opcConfig)
     ck_assert_int_eq(secuPolicy->securityModes | SOPC_SECURITY_MODE_SIGN_MASK, SOPC_SECURITY_MODE_SIGN_MASK);
     ck_assert_uint_eq(1, secuPolicy->nbOfUserTokenPolicies);
 
-    OpcUa_UserTokenPolicy* userPolicy = &secuPolicy->userTokenPolicies[0];
+    userPolicy = &secuPolicy->userTokenPolicies[0];
     ck_assert_int_ge(0, userPolicy->IssuedTokenType.Length);
     ck_assert_int_ge(0, userPolicy->IssuerEndpointUrl.Length);
     ck_assert_int_eq(0, strcmp("anon1", SOPC_String_GetRawCString(&userPolicy->PolicyId)));
@@ -434,7 +441,14 @@ static void check_parsed_s2opc_config(SOPC_S2OPC_Config* s2opcConfig)
     ck_assert_int_eq(0, strEqual);
     ck_assert_int_eq(secuPolicy->securityModes & SOPC_SECURITY_MODE_NONE_MASK, SOPC_SECURITY_MODE_NONE_MASK);
     ck_assert_int_eq(secuPolicy->securityModes | SOPC_SECURITY_MODE_NONE_MASK, SOPC_SECURITY_MODE_NONE_MASK);
-    ck_assert_uint_eq(0, secuPolicy->nbOfUserTokenPolicies);
+    ck_assert_uint_eq(1, secuPolicy->nbOfUserTokenPolicies);
+
+    userPolicy = &secuPolicy->userTokenPolicies[0];
+    ck_assert_int_ge(0, userPolicy->IssuedTokenType.Length);
+    ck_assert_int_ge(0, userPolicy->IssuerEndpointUrl.Length);
+    ck_assert_int_eq(0, strcmp("anon", SOPC_String_GetRawCString(&userPolicy->PolicyId)));
+    ck_assert_int_eq(OpcUa_UserTokenType_Anonymous, userPolicy->TokenType);
+    ck_assert_int_ge(0, userPolicy->SecurityPolicyUri.Length);
 
     /* 2nd secu policy */
     secuPolicy = &epConfig->secuConfigurations[1];

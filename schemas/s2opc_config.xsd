@@ -129,10 +129,7 @@
       <xs:element name="UserPolicies">
         <xs:complexType mixed="true">
           <xs:sequence>
-            <xs:element type="UserPolicyType" name="UserPolicy" maxOccurs="5" minOccurs="0">
-              <xs:annotation>
-                <xs:documentation>if no UserPolicy defined no session activation possible</xs:documentation>
-              </xs:annotation>
+            <xs:element type="UserPolicyType" name="UserPolicy" maxOccurs="5">
             </xs:element>
           </xs:sequence>
         </xs:complexType>

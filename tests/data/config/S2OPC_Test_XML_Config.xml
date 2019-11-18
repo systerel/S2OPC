@@ -35,14 +35,15 @@
             <SecurityModes>
               <SecurityMode mode="None"/>
             </SecurityModes>
-            <UserPolicies/>
+            <UserPolicies>
+              <UserPolicy policyId="anon" tokenType="anonymous"/>
+            </UserPolicies>
           </SecurityPolicy>
           <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Basic256">
             <SecurityModes>
               <SecurityMode mode="Sign"/>
             </SecurityModes>
             <UserPolicies>
-              <!-- Available token types are only anonymous and username. Security URI available is only None -->
               <UserPolicy policyId="anon1" tokenType="anonymous"/>
             </UserPolicies>
           </SecurityPolicy>
@@ -65,7 +66,9 @@
             <SecurityModes>
               <SecurityMode mode="None"/>
             </SecurityModes>
-            <UserPolicies/>
+            <UserPolicies>
+              <UserPolicy policyId="anon" tokenType="anonymous"/>
+            </UserPolicies>
           </SecurityPolicy>
           <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Basic256">
             <SecurityModes>

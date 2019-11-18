@@ -602,9 +602,14 @@ static bool start_policy(struct parse_context_t* ctx, const XML_Char** attrs)
 static bool end_policy(struct parse_context_t* ctx)
 {
     SOPC_Endpoint_Config* epConfig = ctx->currentEpConfig;
-    if ((SOPC_SECURITY_MODE_ANY_MASK & epConfig->secuConfigurations[epConfig->nbSecuConfigs].securityModes) == 0)
+    if (0 == (SOPC_SECURITY_MODE_ANY_MASK & epConfig->secuConfigurations[epConfig->nbSecuConfigs].securityModes))
     {
         LOG_XML_ERROR(ctx->helper_ctx.parser, "No security mode defined");
+        return false;
+    }
+    if (0 == epConfig->secuConfigurations[epConfig->nbSecuConfigs].nbOfUserTokenPolicies)
+    {
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "No user token policy defined");
         return false;
     }
     epConfig->nbSecuConfigs++;
