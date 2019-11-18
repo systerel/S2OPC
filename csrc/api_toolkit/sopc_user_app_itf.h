@@ -84,7 +84,12 @@ typedef struct SOPC_Endpoint_Config
     char* endpointURL;                          /**< Endpoint URL: opc.tcp://IP-HOSTNAME:PORT(/NAME)*/
     uint8_t nbSecuConfigs;                      /**< Number of security configuration (<= SOPC_MAX_SECU_POLICIES_CFG) */
     SOPC_SecurityPolicy
-        secuConfigurations[SOPC_MAX_SECU_POLICIES_CFG]; /**< Security configuration array of size nbSecuConfigs */
+        secuConfigurations[SOPC_MAX_SECU_POLICIES_CFG]; /**< Security policies defined for the current endpoint URL.
+                                                         * An implicit discovery endpoint will be defined with this URL
+                                                         * if SecurityPolicy None is not present. Otherwise the
+                                                         * discovery endpoint and session endpoint are the same for this
+                                                         * endpoint URL.
+                                                         */
 
     /* To be instantiated by applicative code: */
     SOPC_UserAuthentication_Manager*

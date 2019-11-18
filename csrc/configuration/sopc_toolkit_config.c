@@ -357,11 +357,55 @@ bool SOPC_ToolkitServer_RemoveSecureChannelConfig(uint32_t serverScConfigIdx)
     return res;
 }
 
+static bool SOPC_ToolkitServer_AddEndpointConfig_HasOrAddDiscoveryEndpoint(SOPC_Endpoint_Config* epConfig)
+{
+    assert(epConfig->nbSecuConfigs <= SOPC_MAX_SECU_POLICIES_CFG);
+    int res = 0;
+    bool hasNoneSecurityConfig = false;
+    for (uint8_t i = 0; i < epConfig->nbSecuConfigs && !hasNoneSecurityConfig; i++)
+    {
+        res = strcmp(SOPC_SecurityPolicy_None_URI,
+                     SOPC_String_GetRawCString(&epConfig->secuConfigurations[i].securityPolicy));
+        hasNoneSecurityConfig = (0 == res);
+    }
+
+    if (!hasNoneSecurityConfig)
+    {
+        if (epConfig->nbSecuConfigs < SOPC_MAX_SECU_POLICIES_CFG)
+        {
+            SOPC_SecurityPolicy* secuPolicy = &epConfig->secuConfigurations[epConfig->nbSecuConfigs];
+            // No user token policy defined to forbid any session to be activated on discovery endpoint only
+            secuPolicy->nbOfUserTokenPolicies = 0;
+            secuPolicy->securityModes = SOPC_SECURITY_MODE_NONE_MASK;
+            SOPC_ReturnStatus status =
+                SOPC_String_AttachFromCstring(&secuPolicy->securityPolicy, SOPC_SecurityPolicy_None_URI);
+            if (SOPC_STATUS_OK == status)
+            {
+                // Implicit discovery endpoint added
+                epConfig->nbSecuConfigs++;
+                hasNoneSecurityConfig = true;
+            }
+        } // else: no remaining config to add a discovery endpoint configuration
+    }
+
+    return hasNoneSecurityConfig;
+}
+
 uint32_t SOPC_ToolkitServer_AddEndpointConfig(SOPC_Endpoint_Config* epConfig)
 {
     uint32_t result = 0;
     assert(NULL != epConfig);
     assert(NULL != epConfig->serverConfigPtr);
+
+    if (epConfig->nbSecuConfigs > SOPC_MAX_SECU_POLICIES_CFG)
+    {
+        return result;
+    }
+
+    if (!SOPC_ToolkitServer_AddEndpointConfig_HasOrAddDiscoveryEndpoint(epConfig))
+    {
+        return result;
+    }
 
     // TODO: check all parameters of epConfig: certificate presence w.r.t. secu policy, app desc (Uris are valid
     // w.r.t. part 6), etc.

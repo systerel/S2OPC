@@ -102,13 +102,15 @@ SOPC_ReturnStatus SOPC_ToolkitServer_SetAddressSpaceNotifCb(SOPC_AddressSpaceNot
 uint32_t SOPC_ToolkitClient_AddSecureChannelConfig(SOPC_SecureChannel_Config* scConfig);
 
 /**
- *  \brief Record the given secure channel configuration in given index
+ *  \brief Record the given endpoint configuration in given index
  *  (SOPC_Toolkit_Initialize required, !SOPC_Toolkit_Configured required)
- *  Note: it is forbidden to have 2 configurations with same endpointURL
+ *
+ *  Note1: it is forbidden to have 2 configurations with same endpointURL
+ *  Note2: if security policy None is not activated, less than SOPC_MAX_SECU_POLICIES_CFG
+ *         shall be defined to allow discovery services access to be added.
  *
  *  \return endpoint configuration index configuration succeeded,
- *  0 if toolkit is not initialized, already
- *  configured or otherwise
+ *  0 if toolkit is not initialized, already configured or parameters provided are incorrect
  */
 uint32_t SOPC_ToolkitServer_AddEndpointConfig(SOPC_Endpoint_Config* config);
 
