@@ -498,6 +498,7 @@ void SOPC_Log_VTrace(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level, const ch
                 {
                     pLogInst->file->nbBytes = UINT32_MAX;
                 }
+                fflush(pLogInst->file->pFile);
             }
             else
             {
