@@ -287,6 +287,18 @@ constants_statuscodes_bs__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions
                 SOPC_SecurityPolicy currentSecurityPolicy = tabSecurityPolicy[iSecuConfig];
                 uint16_t securityModes = currentSecurityPolicy.securityModes;
 
+                if (0 == currentSecurityPolicy.nbOfUserTokenPolicies)
+                {
+                    /*
+                     *  GetEndPointsDescriptions shall not return endpoint descriptions with empty UserTokenPolicies.
+                     *  This kind of endpoint configuration is only used to declare implicit discovery endpoint
+                     *  and shall not be returned by this service since only the endpoint description allowing sessions
+                     * activation are allowed.
+                     *
+                     */
+                    continue;
+                }
+
                 // Add an EndpointDescription per security mode
                 if ((SOPC_SECURITY_MODE_NONE_MASK & securityModes) != 0)
                 {
