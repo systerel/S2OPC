@@ -256,7 +256,6 @@ int main(void)
 
     SOPC_PKIProvider* pki = NULL;
     SOPC_SerializedCertificate *crt_cli = NULL, *crt_srv = NULL;
-    SOPC_SerializedCertificate* crt_ca = NULL;
     SOPC_SerializedAsymmetricKey* priv_cli = NULL;
 
     uint32_t channel_config_idx = 0;
@@ -330,23 +329,14 @@ int main(void)
         }
     }
 
-    if (scConfig.msgSecurityMode != OpcUa_MessageSecurityMode_None && SOPC_STATUS_OK == status)
-    {
-        // Certificate Authority: load
-        if (SOPC_STATUS_OK != SOPC_KeyManager_SerializedCertificate_CreateFromFile("./trusted/cacert.der", &crt_ca))
-        {
-            printf(">>Stub_Client: Failed to load CA\n");
-        }
-        else
-        {
-            printf(">>Stub_Client: CA certificate loaded\n");
-        }
-    }
-
     // Init PKI provider with certificate authority
     if (SOPC_STATUS_OK == status)
     {
-        if (SOPC_STATUS_OK != SOPC_PKIProviderStack_Create(crt_ca, NULL, &pki))
+        // status = SOPC_PKIProviderStack_Create(serverConfig->certificateAuthority, NULL, &serverConfig->pki);
+        char* lPathCA[] = {"./trusted/cacert.der", NULL};
+        char* lPathCRL[] = {"./revoked/cacrl.der", NULL};
+        status = SOPC_PKIProviderStack_CreateFromPaths(lPathCA, lPathCRL, &pki);
+        if (SOPC_STATUS_OK != status)
         {
             printf(">>Stub_Client: Failed to create PKI\n");
         }
@@ -672,7 +662,6 @@ int main(void)
         SOPC_KeyManager_SerializedCertificate_Delete(crt_cli);
         SOPC_KeyManager_SerializedCertificate_Delete(crt_srv);
         SOPC_KeyManager_SerializedAsymmetricKey_Delete(priv_cli);
-        SOPC_KeyManager_SerializedCertificate_Delete(crt_ca);
         SOPC_PKIProvider_Free(&pki);
     }
 
