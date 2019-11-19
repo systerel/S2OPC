@@ -21,7 +21,7 @@
 
  File Name            : call_method_bs.h
 
- Date                 : 23/10/2019 09:09:27
+ Date                 : 19/11/2019 08:58:35
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -56,6 +56,7 @@ extern void call_method_bs__exec_callMethod(
    const constants__t_msg_i call_method_bs__p_req_msg,
    const constants__t_CallMethod_i call_method_bs__p_callMethod,
    const constants__t_endpoint_config_idx_i call_method_bs__p_endpoint_config_idx,
+   const constants__t_user_i call_method_bs__p_user,
    constants_statuscodes_bs__t_StatusCode_i * const call_method_bs__statusCode);
 extern void call_method_bs__free_exec_result(void);
 extern void call_method_bs__read_exec_result(
