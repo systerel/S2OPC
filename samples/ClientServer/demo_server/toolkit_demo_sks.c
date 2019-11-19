@@ -512,6 +512,8 @@ static SOPC_StatusCode Server_InitDefaultCallMethodService(SOPC_Server_Config* s
  */
 static bool Server_LoadDefaultConfiguration(SOPC_S2OPC_Config* output_s2opcConfig)
 {
+    /* Security is mandatory to ensure that PubSub Security key are encrypt */
+    assert(secuActive);
     assert(NULL != output_s2opcConfig);
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
@@ -569,13 +571,12 @@ static bool Server_LoadDefaultConfiguration(SOPC_S2OPC_Config* output_s2opcConfi
         output_s2opcConfig->serverConfig.certificateRevocationPathList = default_revoked_certs;
 
         /*
-         * 1st Security policy is Basic256Sha256 with anonymous and username (non encrypted) authentication allowed
+         * 1st Security policy is Basic256Sha256 with anonymous and username (encrypted) authentication allowed
          */
         SOPC_String_Initialize(&pEpConfig->secuConfigurations[0].securityPolicy);
         status = SOPC_String_AttachFromCstring(&pEpConfig->secuConfigurations[0].securityPolicy,
                                                SOPC_SecurityPolicy_Basic256Sha256_URI);
-        pEpConfig->secuConfigurations[0].securityModes =
-            SOPC_SECURITY_MODE_SIGN_MASK | SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK;
+        pEpConfig->secuConfigurations[0].securityModes = SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK;
         pEpConfig->secuConfigurations[0].nbOfUserTokenPolicies = 2;
         pEpConfig->secuConfigurations[0].userTokenPolicies[0] = SOPC_UserTokenPolicy_Anonymous;
         pEpConfig->secuConfigurations[0].userTokenPolicies[1] = SOPC_UserTokenPolicy_UserName_NoneSecurityPolicy;
@@ -588,47 +589,16 @@ static bool Server_LoadDefaultConfiguration(SOPC_S2OPC_Config* output_s2opcConfi
             SOPC_String_Initialize(&pEpConfig->secuConfigurations[1].securityPolicy);
             status = SOPC_String_AttachFromCstring(&pEpConfig->secuConfigurations[1].securityPolicy,
                                                    SOPC_SecurityPolicy_Basic256_URI);
-            pEpConfig->secuConfigurations[1].securityModes =
-                SOPC_SECURITY_MODE_SIGN_MASK | SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK;
+            pEpConfig->secuConfigurations[1].securityModes = SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK;
             pEpConfig->secuConfigurations[1].nbOfUserTokenPolicies = 2;
             pEpConfig->secuConfigurations[1].userTokenPolicies[0] = SOPC_UserTokenPolicy_Anonymous;
             pEpConfig->secuConfigurations[1].userTokenPolicies[1] = SOPC_UserTokenPolicy_UserName_NoneSecurityPolicy;
         }
     }
 
-    /*
-     * 3rd Security policy is None with anonymous and username (non encrypted) authentication allowed
-     * (for tests only, otherwise users on unsecure channel shall be forbidden)
-     */
-    uint8_t NoneSecuConfigIdx = 2;
-    if (!secuActive)
-    {
-        // Keep only None secu and set it as first secu config in this case
-        NoneSecuConfigIdx = 0;
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        SOPC_String_Initialize(&pEpConfig->secuConfigurations[NoneSecuConfigIdx].securityPolicy);
-        status = SOPC_String_AttachFromCstring(&pEpConfig->secuConfigurations[NoneSecuConfigIdx].securityPolicy,
-                                               SOPC_SecurityPolicy_None_URI);
-        pEpConfig->secuConfigurations[NoneSecuConfigIdx].securityModes = SOPC_SECURITY_MODE_NONE_MASK;
-        pEpConfig->secuConfigurations[NoneSecuConfigIdx].nbOfUserTokenPolicies =
-            2; /* Necessary for tests only: it shall be 0 when
-                  security is None to avoid any possible session without security */
-        pEpConfig->secuConfigurations[NoneSecuConfigIdx].userTokenPolicies[0] =
-            SOPC_UserTokenPolicy_Anonymous; /* Necessary for tests only */
-        pEpConfig->secuConfigurations[NoneSecuConfigIdx].userTokenPolicies[1] =
-            SOPC_UserTokenPolicy_UserName_NoneSecurityPolicy; /* Necessary for UACTT tests only */
-    }
-
     if (secuActive)
     {
-        pEpConfig->nbSecuConfigs = 3;
-    }
-    else
-    {
-        // Only one security config if no secure endpoint defined
-        pEpConfig->nbSecuConfigs = 1;
+        pEpConfig->nbSecuConfigs = 2;
     }
 
     return SOPC_STATUS_OK == status;
