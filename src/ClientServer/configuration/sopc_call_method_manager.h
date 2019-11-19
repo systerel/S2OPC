@@ -24,6 +24,7 @@
  */
 
 #include "sopc_builtintypes.h"
+#include "sopc_user_manager.h"
 
 typedef struct SOPC_MethodCallManager SOPC_MethodCallManager;
 typedef struct SOPC_MethodCallFunc SOPC_MethodCallFunc;
@@ -41,6 +42,8 @@ typedef struct SOPC_MethodCallFunc SOPC_MethodCallFunc;
  * \param inputArgs       an array of input argument of the method. The size is nbInputArgs.
  * \param nbOutputArgs    a valid pointer in which the number of output argument is written by the function
  * \param outputArgs      a valid pointer in which the output argument is written by the function
+ * \param user            a valid pointer to the user object. Should not be modified.
+ * \param param           a pointer to user application context. Can be NULL.
  * \return status code of the function. Should be SOPC_STATUS_OK if succeeded.
  */
 typedef SOPC_StatusCode (*SOPC_MethodCallFunc_Ptr)(const SOPC_NodeId* objectId,
@@ -48,6 +51,7 @@ typedef SOPC_StatusCode (*SOPC_MethodCallFunc_Ptr)(const SOPC_NodeId* objectId,
                                                    const SOPC_Variant* inputArgs,
                                                    uint32_t* nbOutputArgs,
                                                    SOPC_Variant** outputArgs,
+                                                   const SOPC_User* user,
                                                    void* param);
 
 /**

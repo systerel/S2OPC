@@ -47,6 +47,7 @@ void call_method_bs__INITIALISATION(void) {}
 void call_method_bs__exec_callMethod(const constants__t_msg_i call_method_bs__p_req_msg,
                                      const constants__t_CallMethod_i call_method_bs__p_callMethod,
                                      const constants__t_endpoint_config_idx_i call_method_bs__p_endpoint_config_idx,
+                                     const constants__t_user_i call_method_bs__p_user,
                                      constants_statuscodes_bs__t_StatusCode_i* const call_method_bs__statusCode)
 {
     /* Do not call before the memory is freed */
@@ -89,9 +90,11 @@ void call_method_bs__exec_callMethod(const constants__t_msg_i call_method_bs__p_
     uint32_t nbInputArgs = (0 < methodToCall->NoOfInputArguments) ? (uint32_t) methodToCall->NoOfInputArguments
                                                                   : 0; /* convert to avoid compilator error */
     SOPC_Variant* inputArgs = methodToCall->InputArguments;
-    uint32_t noOfOutput;
+    uint32_t noOfOutput = 0;
+
+    const SOPC_User* user = SOPC_UserWithAuthorization_GetUser(call_method_bs__p_user);
     SOPC_StatusCode status_c = method_c->pMethodFunc(objectId, nbInputArgs, inputArgs, &noOfOutput,
-                                                     &call_method_bs__execResults.variants, method_c->pParam);
+                                                     &call_method_bs__execResults.variants, user, method_c->pParam);
 
     if (noOfOutput <= INT32_MAX)
     {
@@ -109,6 +112,10 @@ void call_method_bs__free_exec_result(void)
 {
     if (NULL != call_method_bs__execResults.variants)
     {
+        for (int32_t i = 0; i < call_method_bs__execResults.nb; i++)
+        {
+            SOPC_Variant_Clear(&(call_method_bs__execResults.variants[i]));
+        }
         SOPC_Free(call_method_bs__execResults.variants);
         call_method_bs__execResults.variants = NULL;
     }
