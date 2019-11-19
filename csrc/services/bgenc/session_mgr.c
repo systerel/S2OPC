@@ -21,7 +21,7 @@
 
  File Name            : session_mgr.c
 
- Date                 : 04/10/2019 15:25:29
+ Date                 : 19/11/2019 10:10:06
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -289,20 +289,33 @@ void session_mgr__server_receive_session_req(
       constants__t_user_token_i session_mgr__l_user_token;
       constants__t_channel_config_idx_i session_mgr__l_channel_config_idx;
       constants__t_endpoint_config_idx_i session_mgr__l_endpoint_config_idx;
+      t_bool session_mgr__l_has_user_token_policy_available;
       constants__t_user_i session_mgr__l_user;
       
       *session_mgr__session = constants__c_session_indet;
       *session_mgr__service_ret = constants_statuscodes_bs__c_StatusCode_indet;
       switch (session_mgr__req_typ) {
       case constants__e_msg_session_create_req:
-         session_core__server_create_session_req_and_resp_sm(session_mgr__channel,
-            session_mgr__req_msg,
-            session_mgr__resp_msg,
-            session_mgr__session,
-            session_mgr__service_ret);
-         if (*session_mgr__service_ret == constants_statuscodes_bs__e_sc_ok) {
-            session_core__server_session_timeout_start_timer(*session_mgr__session,
-               session_mgr__resp_msg);
+         channel_mgr__get_channel_info(session_mgr__channel,
+            &session_mgr__l_channel_config_idx);
+         channel_mgr__server_get_endpoint_config(session_mgr__channel,
+            &session_mgr__l_endpoint_config_idx);
+         user_authentication__has_user_token_policy_available(session_mgr__l_channel_config_idx,
+            session_mgr__l_endpoint_config_idx,
+            &session_mgr__l_has_user_token_policy_available);
+         if (session_mgr__l_has_user_token_policy_available == true) {
+            session_core__server_create_session_req_and_resp_sm(session_mgr__channel,
+               session_mgr__req_msg,
+               session_mgr__resp_msg,
+               session_mgr__session,
+               session_mgr__service_ret);
+            if (*session_mgr__service_ret == constants_statuscodes_bs__e_sc_ok) {
+               session_core__server_session_timeout_start_timer(*session_mgr__session,
+                  session_mgr__resp_msg);
+            }
+         }
+         else {
+            *session_mgr__service_ret = constants_statuscodes_bs__e_sc_bad_service_unsupported;
          }
          break;
       case constants__e_msg_session_activate_req:

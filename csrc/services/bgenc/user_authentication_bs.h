@@ -21,7 +21,7 @@
 
  File Name            : user_authentication_bs.h
 
- Date                 : 04/10/2019 15:30:40
+ Date                 : 19/11/2019 10:10:37
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -62,6 +62,10 @@ extern void user_authentication_bs__get_local_user(
 extern void user_authentication_bs__get_user_token_type_from_token(
    const constants__t_user_token_i user_authentication_bs__p_user_token,
    constants__t_user_token_type_i * const user_authentication_bs__p_user_token_type);
+extern void user_authentication_bs__has_user_token_policy_available(
+   const constants__t_channel_config_idx_i user_authentication_bs__p_channel_config_idx,
+   const constants__t_endpoint_config_idx_i user_authentication_bs__p_endpoint_config_idx,
+   t_bool * const user_authentication_bs__p_user_token_policy_available);
 extern void user_authentication_bs__is_user_token_supported(
    const constants__t_user_token_type_i user_authentication_bs__p_user_token_type,
    const constants__t_user_token_i user_authentication_bs__p_user_token,

@@ -32,7 +32,8 @@ IMPORTS
 
 PROMOTES
     deallocate_user,
-    get_local_user
+    get_local_user,
+    has_user_token_policy_available
 
 LOCAL_OPERATIONS
 

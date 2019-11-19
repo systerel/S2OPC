@@ -39,6 +39,18 @@ OPERATIONS
         END
     END
     ;
+    
+    /* Check if there is a user token policy available in the endpoint config compatible with the channel config */
+    p_user_token_policy_available <-- has_user_token_policy_available (p_channel_config_idx, p_endpoint_config_idx) =
+    PRE
+        p_channel_config_idx : t_channel_config_idx_i &
+        p_channel_config_idx : t_channel_config_idx &
+        p_endpoint_config_idx : t_endpoint_config_idx_i &
+        p_endpoint_config_idx : t_endpoint_config_idx
+    THEN
+        p_user_token_policy_available :: BOOL
+    END
+    ;
 
     p_supported_user_token_type <-- is_user_token_supported (p_user_token_type, p_user_token, p_channel_config_idx, p_endpoint_config_idx) =
     PRE

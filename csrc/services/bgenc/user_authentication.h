@@ -21,7 +21,7 @@
 
  File Name            : user_authentication.h
 
- Date                 : 04/10/2019 15:26:45
+ Date                 : 19/11/2019 10:10:16
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -56,6 +56,7 @@ extern void user_authentication__INITIALISATION(void);
   -------------------------------*/
 #define user_authentication__deallocate_user user_authentication_bs__deallocate_user
 #define user_authentication__get_local_user user_authentication_bs__get_local_user
+#define user_authentication__has_user_token_policy_available user_authentication_bs__has_user_token_policy_available
 
 /*--------------------------
    LOCAL_OPERATIONS Clause

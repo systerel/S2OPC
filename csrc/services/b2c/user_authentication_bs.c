@@ -164,6 +164,65 @@ static bool secuModeEnumIncludedInSecuModeMasks(OpcUa_MessageSecurityMode msgSec
     }
 }
 
+/*
+ * If user token is provided we check it is compatible with 1 user token policy,
+ * otherwise we only check some user policies are available */
+static bool SOPC_UserTokenPolicyEval_Internal(
+    const constants__t_channel_config_idx_i user_authentication_bs__p_channel_config_idx,
+    const constants__t_endpoint_config_idx_i user_authentication_bs__p_endpoint_config_idx,
+    const constants__t_user_token_type_i user_authentication_bs__p_user_token_type,
+    const constants__t_user_token_i user_authentication_bs__p_user_token)
+{
+    bool compliantPolicyOrAvailable = false;
+
+    SOPC_Endpoint_Config* epConfig =
+        SOPC_ToolkitServer_GetEndpointConfig(user_authentication_bs__p_endpoint_config_idx);
+    assert(NULL != epConfig);
+    SOPC_SecureChannel_Config* scConfig =
+        SOPC_ToolkitServer_GetSecureChannelConfig(user_authentication_bs__p_channel_config_idx);
+    assert(NULL != scConfig);
+
+    for (uint8_t epSecPolIdx = 0; epSecPolIdx < epConfig->nbSecuConfigs && compliantPolicyOrAvailable == false;
+         epSecPolIdx++)
+    {
+        SOPC_SecurityPolicy* secPol = &epConfig->secuConfigurations[epSecPolIdx];
+
+        if (0 == strcmp(scConfig->reqSecuPolicyUri, SOPC_String_GetRawCString(&secPol->securityPolicy)) &&
+            secuModeEnumIncludedInSecuModeMasks(scConfig->msgSecurityMode, secPol->securityModes))
+        {
+            if (constants__c_userTokenType_indet != user_authentication_bs__p_user_token_type)
+            {
+                // User token type provided for evaluation, check if it is compatible
+                for (uint8_t userTokenIdx = 0;
+                     userTokenIdx < secPol->nbOfUserTokenPolicies && compliantPolicyOrAvailable == false;
+                     userTokenIdx++)
+                {
+                    compliantPolicyOrAvailable = isCompliantWithUserTokenPolicy(
+                        &secPol->userTokenPolicies[userTokenIdx], user_authentication_bs__p_user_token_type,
+                        user_authentication_bs__p_user_token);
+                }
+            }
+            else
+            {
+                // No user token type provided for evaluation, we only check some policies are available
+                compliantPolicyOrAvailable = (secPol->nbOfUserTokenPolicies > 0);
+            }
+        }
+    }
+
+    return compliantPolicyOrAvailable;
+}
+
+void user_authentication_bs__has_user_token_policy_available(
+    const constants__t_channel_config_idx_i user_authentication_bs__p_channel_config_idx,
+    const constants__t_endpoint_config_idx_i user_authentication_bs__p_endpoint_config_idx,
+    t_bool* const user_authentication_bs__p_user_token_policy_available)
+{
+    *user_authentication_bs__p_user_token_policy_available = SOPC_UserTokenPolicyEval_Internal(
+        user_authentication_bs__p_channel_config_idx, user_authentication_bs__p_endpoint_config_idx,
+        constants__c_userTokenType_indet, NULL);
+}
+
 void user_authentication_bs__is_user_token_supported(
     const constants__t_user_token_type_i user_authentication_bs__p_user_token_type,
     const constants__t_user_token_i user_authentication_bs__p_user_token,
@@ -177,30 +236,9 @@ void user_authentication_bs__is_user_token_supported(
         return;
     }
 
-    SOPC_Endpoint_Config* epConfig =
-        SOPC_ToolkitServer_GetEndpointConfig(user_authentication_bs__p_endpoint_config_idx);
-    assert(NULL != epConfig);
-    SOPC_SecureChannel_Config* scConfig =
-        SOPC_ToolkitServer_GetSecureChannelConfig(user_authentication_bs__p_channel_config_idx);
-    assert(NULL != scConfig);
-
-    bool compliantPolicy = false;
-    for (uint8_t epSecPolIdx = 0; epSecPolIdx < epConfig->nbSecuConfigs && compliantPolicy == false; epSecPolIdx++)
-    {
-        SOPC_SecurityPolicy* secPol = &epConfig->secuConfigurations[epSecPolIdx];
-
-        if (0 == strcmp(scConfig->reqSecuPolicyUri, SOPC_String_GetRawCString(&secPol->securityPolicy)) &&
-            secuModeEnumIncludedInSecuModeMasks(scConfig->msgSecurityMode, secPol->securityModes))
-        {
-            for (uint8_t userTokenIdx = 0; userTokenIdx < secPol->nbOfUserTokenPolicies && compliantPolicy == false;
-                 userTokenIdx++)
-            {
-                compliantPolicy = isCompliantWithUserTokenPolicy(&secPol->userTokenPolicies[userTokenIdx],
-                                                                 user_authentication_bs__p_user_token_type,
-                                                                 user_authentication_bs__p_user_token);
-            }
-        }
-    }
+    bool compliantPolicy = SOPC_UserTokenPolicyEval_Internal(
+        user_authentication_bs__p_channel_config_idx, user_authentication_bs__p_endpoint_config_idx,
+        user_authentication_bs__p_user_token_type, user_authentication_bs__p_user_token);
 
     if (!compliantPolicy)
     {

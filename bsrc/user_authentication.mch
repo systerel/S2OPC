@@ -63,5 +63,16 @@ OPERATIONS
         p_user :( p_user : t_user_i &
                   p_user : t_user )
     END
+    ;
+
+    p_user_token_policy_available <-- has_user_token_policy_available (p_channel_config_idx, p_endpoint_config_idx) =
+    PRE
+        p_channel_config_idx : t_channel_config_idx_i &
+        p_channel_config_idx : t_channel_config_idx &
+        p_endpoint_config_idx : t_endpoint_config_idx_i &
+        p_endpoint_config_idx : t_endpoint_config_idx
+    THEN
+        p_user_token_policy_available :: BOOL
+    END
 
 END
