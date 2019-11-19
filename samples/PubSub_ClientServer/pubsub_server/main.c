@@ -268,6 +268,7 @@ int main(int argc, char* const argv[])
 
     /* Clean and quit */
     PubSub_StopAndClear();
+    Client_Teardown();
     Server_StopAndClear(&s2opcConfig);
     printf("# Info: Server closed.\n");
 }

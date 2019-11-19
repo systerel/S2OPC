@@ -12,11 +12,13 @@
 #include "sopc_atomic.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_encodeable.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
 #include "sopc_time.h"
 #include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config.h"
+#include "sopc_toolkit_config_constants.h"
 #include "sopc_types.h"
 
 #include "client.h"
@@ -34,7 +36,6 @@ typedef struct s_Cerkey
     SOPC_SerializedCertificate* crt_ca;
     SOPC_PKIProvider* pkiProvider;
 } t_CerKey;
-t_CerKey ck_cli;
 
 Client_Keys_Type Client_Keys = {.init = false};
 
@@ -44,7 +45,11 @@ uint32_t channel_config_idx = 0;
 // use to identify the active session response
 uintptr_t Client_SessionContext = 1;
 
-SOPC_SecureChannel_Config scConfig;
+int32_t scConfigs_idx = -1;
+SOPC_SecureChannel_Config scConfigs[SOPC_MAX_SECURE_CONNECTIONS];
+/* only one Secure Channel is used, keep all config to free memory when quit */
+t_CerKey ck_cli[SOPC_MAX_SECURE_CONNECTIONS];
+
 bool isScCreated = false;
 int32_t sendFailures = 0;
 
@@ -97,46 +102,48 @@ static SOPC_ReturnStatus Client_SaveKeys(SOPC_ByteString* key, char* path)
 static SOPC_ReturnStatus CerAndKeyLoader_client()
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-
-    status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(CLIENT_CERT_PATH, &ck_cli.client_cert);
+    status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(CLIENT_CERT_PATH, &ck_cli[scConfigs_idx].client_cert);
     if (SOPC_STATUS_OK != status)
     {
         printf("# Error: Client failed to load client certificate\n");
     }
     else
     {
-        scConfig.crt_cli = ck_cli.client_cert;
+        scConfigs[scConfigs_idx].crt_cli = ck_cli[scConfigs_idx].client_cert;
     }
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(CLIENT_KEY_PATH, &ck_cli.client_key);
+        status =
+            SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(CLIENT_KEY_PATH, &ck_cli[scConfigs_idx].client_key);
         if (SOPC_STATUS_OK != status)
         {
             printf("# Error: Client failed to load private key\n");
         }
         else
         {
-            scConfig.key_priv_cli = ck_cli.client_key;
+            scConfigs[scConfigs_idx].key_priv_cli = ck_cli[scConfigs_idx].client_key;
         }
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(SKS_SERVER_CERT_PATH, &ck_cli.server_cert);
+        status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(SKS_SERVER_CERT_PATH,
+                                                                      &ck_cli[scConfigs_idx].server_cert);
         if (SOPC_STATUS_OK != status)
         {
             printf("# Error: Client failed to load server certificate\n");
         }
         else
         {
-            scConfig.crt_srv = ck_cli.server_cert;
+            scConfigs[scConfigs_idx].crt_srv = ck_cli[scConfigs_idx].server_cert;
         }
     }
 
     if (SOPC_STATUS_OK == status)
     {
         // Certificate Authority: load
-        if (SOPC_STATUS_OK != SOPC_KeyManager_SerializedCertificate_CreateFromFile(CA_CERT_PATH, &ck_cli.crt_ca))
+        if (SOPC_STATUS_OK !=
+            SOPC_KeyManager_SerializedCertificate_CreateFromFile(CA_CERT_PATH, &ck_cli[scConfigs_idx].crt_ca))
         {
             printf("# Error : Client failed to load Certificate Authority\n");
         }
@@ -144,14 +151,14 @@ static SOPC_ReturnStatus CerAndKeyLoader_client()
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_PKIProviderStack_Create(ck_cli.crt_ca, NULL, &ck_cli.pkiProvider);
+        status = SOPC_PKIProviderStack_Create(ck_cli[scConfigs_idx].crt_ca, NULL, &ck_cli[scConfigs_idx].pkiProvider);
         if (SOPC_STATUS_OK != status)
         {
             printf("# Error: Client failed to create PKI\n");
         }
         else
         {
-            scConfig.pki = ck_cli.pkiProvider;
+            scConfigs[scConfigs_idx].pki = ck_cli[scConfigs_idx].pkiProvider;
         }
     }
     if (SOPC_STATUS_OK != status)
@@ -164,24 +171,6 @@ static SOPC_ReturnStatus CerAndKeyLoader_client()
 SOPC_ReturnStatus Client_Setup()
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-
-    // A Secure channel connection configuration
-    scConfig.isClientSc = true;
-    scConfig.url = NULL;
-    scConfig.crt_cli = NULL;
-    scConfig.key_priv_cli = NULL;
-    scConfig.crt_srv = NULL;
-    scConfig.pki = NULL;
-    scConfig.reqSecuPolicyUri = SOPC_SecurityPolicy_Basic256Sha256_URI;
-    scConfig.requestedLifetime = 20000;
-    scConfig.msgSecurityMode = OpcUa_MessageSecurityMode_SignAndEncrypt;
-
-    status = CerAndKeyLoader_client();
-    if (SOPC_STATUS_OK != status)
-    {
-        printf("# Error: FAILED on configuring Certificate, key and Sc\n");
-    }
-
     return (status);
 }
 
@@ -189,19 +178,38 @@ SOPC_ReturnStatus Client_AddSecureChannelconfig(const char* endpoint_url)
 {
     assert(NULL != endpoint_url);
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    scConfig.url = endpoint_url;
-    if (!isScCreated)
+
+    if (SOPC_MAX_SECURE_CONNECTIONS <= scConfigs_idx + 1)
     {
-        channel_config_idx = SOPC_ToolkitClient_AddSecureChannelConfig(&scConfig);
-        if (0 == channel_config_idx)
-        {
-            printf("# Error: Failed to configure the secure channel connections\n");
-            status = SOPC_STATUS_NOK;
-        }
-        else
-        {
-            isScCreated = true;
-        }
+        printf("# Error : Too many secure channel created\n");
+        return SOPC_STATUS_NOK;
+    }
+    scConfigs_idx++;
+
+    // A Secure channel connection configuration
+    scConfigs[scConfigs_idx].isClientSc = true;
+    scConfigs[scConfigs_idx].url = NULL;
+    scConfigs[scConfigs_idx].crt_cli = NULL;
+    scConfigs[scConfigs_idx].key_priv_cli = NULL;
+    scConfigs[scConfigs_idx].crt_srv = NULL;
+    scConfigs[scConfigs_idx].pki = NULL;
+    scConfigs[scConfigs_idx].reqSecuPolicyUri = SOPC_SecurityPolicy_Basic256Sha256_URI;
+    scConfigs[scConfigs_idx].requestedLifetime = 20000;
+    scConfigs[scConfigs_idx].msgSecurityMode = OpcUa_MessageSecurityMode_SignAndEncrypt;
+
+    status = CerAndKeyLoader_client();
+    if (SOPC_STATUS_OK != status)
+    {
+        printf("# Error: FAILED on configuring Certificate, key and Sc\n");
+    }
+
+    scConfigs[scConfigs_idx].url = endpoint_url;
+
+    channel_config_idx = SOPC_ToolkitClient_AddSecureChannelConfig(&(scConfigs[scConfigs_idx]));
+    if (0 == channel_config_idx)
+    {
+        printf("# Error: Failed to configure the secure channel connections\n");
+        status = SOPC_STATUS_NOK;
     }
     return status;
 }
@@ -406,20 +414,27 @@ SOPC_ReturnStatus Client_CloseSession(void)
 
 void Client_Teardown()
 {
-    SOPC_KeyManager_SerializedCertificate_Delete(ck_cli.client_cert);
-    SOPC_KeyManager_SerializedAsymmetricKey_Delete(ck_cli.client_key);
-    SOPC_KeyManager_SerializedCertificate_Delete(ck_cli.server_cert);
-    SOPC_KeyManager_SerializedCertificate_Delete(ck_cli.crt_ca);
-    SOPC_PKIProvider_Free(&ck_cli.pkiProvider);
-    ck_cli.client_cert = NULL;
-    ck_cli.client_key = NULL;
-    ck_cli.server_cert = NULL;
-    ck_cli.crt_ca = NULL;
-    ck_cli.pkiProvider = NULL;
-    scConfig.crt_cli = NULL;
-    scConfig.key_priv_cli = NULL;
-    scConfig.crt_srv = NULL;
-    scConfig.pki = NULL;
+    for (int32_t i = 0; i <= scConfigs_idx; i++)
+    {
+        SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+        SOPC_KeyManager_SerializedCertificate_Delete((SOPC_SerializedCertificate*) scConfigs[i].crt_cli);
+        SOPC_KeyManager_SerializedAsymmetricKey_Delete((SOPC_SerializedAsymmetricKey*) scConfigs[i].key_priv_cli);
+        SOPC_KeyManager_SerializedCertificate_Delete((SOPC_SerializedCertificate*) scConfigs[i].crt_srv);
+        SOPC_PKIProvider_Free((SOPC_PKIProvider**) &(scConfigs[i].pki));
+        SOPC_KeyManager_SerializedCertificate_Delete((SOPC_SerializedCertificate*) ck_cli[i].crt_ca);
+        SOPC_GCC_DIAGNOSTIC_RESTORE
+
+        scConfigs[i].crt_cli = NULL;
+        scConfigs[i].key_priv_cli = NULL;
+        scConfigs[i].crt_srv = NULL;
+        scConfigs[i].pki = NULL;
+        ck_cli[i].client_cert = NULL;
+        ck_cli[i].client_key = NULL;
+        ck_cli[i].server_cert = NULL;
+        ck_cli[i].crt_ca = NULL;
+        ck_cli[i].pkiProvider = NULL;
+    }
+
     Client_KeysClear();
 }
 

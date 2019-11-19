@@ -177,13 +177,6 @@ SOPC_ReturnStatus PubSub_Configure(void)
     /* Retrieve Security Keys from SKS */
     if (SOPC_STATUS_OK == status && isSecurity && NULL != sksAddress)
     {
-        /* Client manage only one secure channel => setup and teardown at PubSub start */
-        status = Client_Setup();
-        if (SOPC_STATUS_OK != status)
-        {
-            printf("# Error: Could not initialize the client.\n");
-        }
-
         if (SOPC_STATUS_OK == status)
         {
             status = Client_AddSecureChannelconfig(sksAddress);
@@ -198,7 +191,6 @@ SOPC_ReturnStatus PubSub_Configure(void)
         {
             printf("# Error: PubSub Security Keys cannot be retrieved from SKS\n");
         }
-        Client_Teardown();
     }
 
     if (SOPC_STATUS_OK == status)
@@ -207,6 +199,12 @@ SOPC_ReturnStatus PubSub_Configure(void)
         g_pPubSubConfig = pPubSubConfig;
         g_pTargetConfig = pTargetConfig;
         g_pSourceConfig = pSourceConfig;
+    }
+    else
+    {
+        SOPC_SubTargetVariableConfig_Delete(pTargetConfig);
+        SOPC_PubSourceVariableConfig_Delete(pSourceConfig);
+        SOPC_PubSubConfiguration_Delete(pPubSubConfig);
     }
 
 #ifndef PUBSUB_STATIC_CONFIG
