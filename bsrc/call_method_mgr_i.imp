@@ -344,11 +344,13 @@ OPERATIONS
     /* LOCAL OPERATIONS */
     
     StatusCode <-- treat_one_method_call (p_session, p_req_msg, p_res_msg, p_callMethod, p_endpoint_config_idx) =
-    BEGIN
+    VAR
+        l_user
+    IN
         StatusCode <-- check_method_call_inputs (p_session, p_req_msg, p_callMethod, p_res_msg);
         IF StatusCode  = e_sc_ok THEN
-            
-            StatusCode <-- exec_callMethod(p_req_msg, p_callMethod, p_endpoint_config_idx);
+            l_user <-- get_session_user_server(p_session);
+            StatusCode <-- exec_callMethod(p_req_msg, p_callMethod, p_endpoint_config_idx, l_user);
             IF StatusCode  = e_sc_ok THEN
                 StatusCode <-- copy_exec_result (p_res_msg, p_callMethod)
             END
