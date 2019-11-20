@@ -646,7 +646,8 @@ SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendRequestOnSession(SOPC_LibSub_Connec
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_StaMac_SendRequest(pSM, requestStruct, requestContext, SOPC_REQUEST_SCOPE_APPLICATION);
+        status = SOPC_StaMac_SendRequest(pSM, requestStruct, requestContext, SOPC_REQUEST_SCOPE_APPLICATION,
+                                         SOPC_REQUEST_TYPE_USER);
     }
 
     mutStatus = Mutex_Unlock(&mutex);
