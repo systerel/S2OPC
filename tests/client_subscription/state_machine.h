@@ -65,10 +65,20 @@ typedef enum
     stActivated,
     stCreatingSubscr,
     stCreatingMonIt,
-    stCreatingPubReq,
     stDeletingSubscr,
     stClosing
 } SOPC_StaMac_State;
+
+/* Request types */
+typedef enum
+{
+    SOPC_REQUEST_TYPE_UNKNOWN = 0,            /* Unknown Request */
+    SOPC_REQUEST_TYPE_USER,                   /* User Crafted Request */
+    SOPC_REQUEST_TYPE_PUBLISH,                /* PublishRequest */
+    SOPC_REQUEST_TYPE_CREATE_SUBSCRIPTION,    /* CreateSubscriptionRequest */
+    SOPC_REQUEST_TYPE_CREATE_MONITORED_ITEMS, /* CreateMonitoredItemsRequest */
+    SOPC_REQUEST_TYPE_DELETE_SUBSCRIPTION     /* DeleteSubscriptionRequest */
+} SOPC_StaMac_RequestType;
 
 /* Request scopes */
 typedef enum
@@ -157,12 +167,15 @@ SOPC_ReturnStatus SOPC_StaMac_StopSession(SOPC_StaMac_Machine* pSM);
  *
  * \param requestStruct The structure of the request, see SOPC_ToolkitClient_AsyncSendRequestOnSession()
  * \param appCtx        An ID that will be given back through the call to the event handler.
-                        The value 0 indicates "no ID".
+ *                      The value 0 indicates "no ID".
+ * \param requestScope scope of the request (state machine or application)
+ * \param requestType  type of the request
  */
 SOPC_ReturnStatus SOPC_StaMac_SendRequest(SOPC_StaMac_Machine* pSM,
                                           void* requestStruct,
                                           uintptr_t appCtx,
-                                          SOPC_StaMac_RequestScope requestScope);
+                                          SOPC_StaMac_RequestScope requestScope,
+                                          SOPC_StaMac_RequestType requestType);
 
 /*
  * TODO
