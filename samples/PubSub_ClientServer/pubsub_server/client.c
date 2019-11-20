@@ -220,7 +220,7 @@ SOPC_ReturnStatus Wait_response_client()
     // Sleep timeout in milliseconds
     const uint32_t sleepTimeout = 20;
     // Loop timeout in milliseconds
-    const uint32_t loopTimeout = 3000;
+    const uint32_t loopTimeout = 30000;
     // Counter to stop waiting on timeout
     uint32_t loopCpt = 0;
 
@@ -250,7 +250,7 @@ static SOPC_ReturnStatus ActivateSessionWait_client(void)
     // Sleep timeout in milliseconds
     const uint32_t sleepTimeout = 20;
     // Loop timeout in milliseconds
-    const uint32_t loopTimeout = 3000;
+    const uint32_t loopTimeout = 30000;
     // Counter to stop waiting on timeout
     uint32_t loopCpt = 0;
 
