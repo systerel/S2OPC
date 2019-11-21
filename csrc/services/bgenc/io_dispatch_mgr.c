@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 08/11/2019 16:14:58
+ Date                 : 21/11/2019 14:52:38
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -220,7 +220,7 @@ void io_dispatch_mgr__get_msg_service_class(
    }
 }
 
-void io_dispatch_mgr__l_evaluate_auto_close_secure_channel(
+void io_dispatch_mgr__l_may_close_secure_channel_without_session(
    t_bool * const io_dispatch_mgr__l_is_one_sc_closing) {
    {
       t_bool io_dispatch_mgr__l_is_active;
@@ -473,7 +473,7 @@ void io_dispatch_mgr__server_channel_connected_event(
    {
       t_bool io_dispatch_mgr__l_is_one_sc_closing;
       
-      io_dispatch_mgr__l_evaluate_auto_close_secure_channel(&io_dispatch_mgr__l_is_one_sc_closing);
+      io_dispatch_mgr__l_may_close_secure_channel_without_session(&io_dispatch_mgr__l_is_one_sc_closing);
       channel_mgr__srv_new_secure_channel(io_dispatch_mgr__endpoint_config_idx,
          io_dispatch_mgr__channel_config_idx,
          io_dispatch_mgr__channel,
@@ -500,7 +500,7 @@ void io_dispatch_mgr__client_activate_new_session(
          channel_mgr__is_connected_channel(io_dispatch_mgr__l_channel,
             &io_dispatch_mgr__l_connected_channel);
          if (io_dispatch_mgr__l_connected_channel == false) {
-            io_dispatch_mgr__l_evaluate_auto_close_secure_channel(&io_dispatch_mgr__l_is_one_sc_closing);
+            io_dispatch_mgr__l_may_close_secure_channel_without_session(&io_dispatch_mgr__l_is_one_sc_closing);
             channel_mgr__cli_open_secure_channel(io_dispatch_mgr__channel_config_idx,
                io_dispatch_mgr__l_is_one_sc_closing,
                io_dispatch_mgr__bres);
@@ -646,7 +646,7 @@ void io_dispatch_mgr__client_send_discovery_request(
          channel_mgr__is_connected_channel(io_dispatch_mgr__l_channel,
             &io_dispatch_mgr__l_connected_channel);
          if (io_dispatch_mgr__l_connected_channel == false) {
-            io_dispatch_mgr__l_evaluate_auto_close_secure_channel(&io_dispatch_mgr__l_is_one_sc_closing);
+            io_dispatch_mgr__l_may_close_secure_channel_without_session(&io_dispatch_mgr__l_is_one_sc_closing);
             channel_mgr__cli_open_secure_channel(io_dispatch_mgr__channel_config_idx,
                io_dispatch_mgr__l_is_one_sc_closing,
                &io_dispatch_mgr__l_bres);
@@ -877,7 +877,7 @@ void io_dispatch_mgr__secure_channel_lost(
                channel_mgr__get_connected_channel(io_dispatch_mgr__l_channel_config_idx,
                   &io_dispatch_mgr__l_new_channel);
                if (io_dispatch_mgr__l_new_channel == constants__c_channel_indet) {
-                  io_dispatch_mgr__l_evaluate_auto_close_secure_channel(&io_dispatch_mgr__l_is_one_sc_closing);
+                  io_dispatch_mgr__l_may_close_secure_channel_without_session(&io_dispatch_mgr__l_is_one_sc_closing);
                   channel_mgr__cli_open_secure_channel(io_dispatch_mgr__l_channel_config_idx,
                      io_dispatch_mgr__l_is_one_sc_closing,
                      &io_dispatch_mgr__l_bres);

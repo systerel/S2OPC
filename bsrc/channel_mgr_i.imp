@@ -64,7 +64,9 @@ LOCAL_OPERATIONS
         p_channel : t_channel_i &
         p_channel : t_channel
     THEN
-        IF  p_channel : s_channel_connected & p_channel /: dom(a_endpoint) THEN
+        IF  p_channel : s_channel_connected & 
+            p_channel /: dom(a_endpoint) /* Client side only: */
+        THEN
             s_cli_channel_disconnecting := s_cli_channel_disconnecting \/ {a_config(p_channel)}
         END
     END
@@ -316,7 +318,6 @@ OPERATIONS
         l_card_used,
         l_card_channel
     IN
-        p_auto_closed_active := FALSE;
         l_card_used <-- get_card_channel_used;
         l_card_channel <-- get_card_t_channel;
         p_auto_closed_active := bool(l_card_used >= c_max_channels_connected)

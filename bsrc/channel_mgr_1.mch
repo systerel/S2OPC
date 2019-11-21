@@ -179,17 +179,15 @@ OPERATIONS
     PRE
         p_channel : t_channel_i &
         p_channel : t_channel   &
+        p_channel : s_channel_connected &
+
         p_timeref : t_timeref_i &
         p_timeref : t_timeref
     THEN
         s_channel_connected,
         a_channel_connected_time
         :(s_channel_connected = s_channel_connected$0 \/ {p_channel} &
-          (p_channel : s_channel_connected => 
-              a_channel_connected_time = a_channel_connected_time$0) &
-          (p_channel /: s_channel_connected => 
-              a_channel_connected_time = a_channel_connected_time$0 <+ {p_channel |-> p_timeref})
-          )
+          a_channel_connected_time = a_channel_connected_time$0 <+ {p_channel |-> p_timeref})
     END
     ;
 

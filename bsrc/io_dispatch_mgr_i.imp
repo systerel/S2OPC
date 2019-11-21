@@ -85,10 +85,17 @@ LOCAL_OPERATIONS
         )
     END
     ;
-    
-    l_is_one_sc_closing <-- l_evaluate_auto_close_secure_channel =
+
+    /* Check if auto-closing should be activated and 
+       close oldest secure channel without session if available */
+    l_is_one_sc_closing <-- l_may_close_secure_channel_without_session =
     BEGIN
-        l_is_one_sc_closing :: BOOL
+        l_is_one_sc_closing,
+        s_cli_channel_disconnecting
+        :(s_cli_channel_disconnecting <: t_channel_config_idx &
+          l_is_one_sc_closing : BOOL &
+          (s_cli_channel_disconnecting /= s_cli_channel_disconnecting$0 => l_is_one_sc_closing = TRUE))
+      /* s_cli_channel_disconnecting is modified only if a channel is closing and we are on client side */
     END
 
 OPERATIONS
@@ -272,7 +279,7 @@ OPERATIONS
     END
     ;
     
-    l_is_one_sc_closing <-- l_evaluate_auto_close_secure_channel =
+    l_is_one_sc_closing <-- l_may_close_secure_channel_without_session =
     VAR
         l_is_active,
         l_has_channel_to_close,
@@ -474,7 +481,7 @@ OPERATIONS
     VAR
         l_is_one_sc_closing
     IN
-        l_is_one_sc_closing <-- l_evaluate_auto_close_secure_channel;
+        l_is_one_sc_closing <-- l_may_close_secure_channel_without_session;
         bres <-- srv_new_secure_channel (endpoint_config_idx, channel_config_idx, channel, l_is_one_sc_closing)
     END
     ;
@@ -492,7 +499,7 @@ OPERATIONS
             l_connected_channel <-- is_connected_channel (l_channel);
             IF l_connected_channel = FALSE
             THEN
-                l_is_one_sc_closing <-- l_evaluate_auto_close_secure_channel;
+                l_is_one_sc_closing <-- l_may_close_secure_channel_without_session;
                 bres <-- cli_open_secure_channel (channel_config_idx, l_is_one_sc_closing);
                 IF bres = TRUE
                 THEN
@@ -602,7 +609,7 @@ OPERATIONS
             l_connected_channel <-- is_connected_channel (l_channel);
             IF l_connected_channel = FALSE
             THEN
-                l_is_one_sc_closing <-- l_evaluate_auto_close_secure_channel;
+                l_is_one_sc_closing <-- l_may_close_secure_channel_without_session;
                 l_bres <-- cli_open_secure_channel (channel_config_idx, l_is_one_sc_closing);
                 IF l_bres = TRUE
                 THEN
@@ -787,7 +794,7 @@ OPERATIONS
                         l_new_channel <-- get_connected_channel (l_channel_config_idx);
                         IF l_new_channel = c_channel_indet
                         THEN
-                            l_is_one_sc_closing <-- l_evaluate_auto_close_secure_channel;
+                            l_is_one_sc_closing <-- l_may_close_secure_channel_without_session;
                             l_bres <-- cli_open_secure_channel (l_channel_config_idx, l_is_one_sc_closing)
                             // async operation => cannot use channel until connection is effective ?
                         END;

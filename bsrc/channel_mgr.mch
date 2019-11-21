@@ -42,7 +42,12 @@ DEFINITIONS
     /* each created channel has a configuration
        and there is at most 1 channel per configuration */
     a_config : s_channel_connected >-> t_channel_config_idx &
-    a_endpoint : s_channel_connected +-> t_endpoint_config_idx & /* TODO: add in invariants that it is empty for clients */
+    /* a_endpoint is used to retrieve the endpoint configuration index 
+       on which channel is connected (server side only):
+       channel :  dom(a_endpoint) => channels connected onto current server instance & 
+       channel /: dom(a_endpoint) => channels of the current client instance 
+    */
+    a_endpoint : s_channel_connected +-> t_endpoint_config_idx &
     a_SecurityPolicy : s_channel_connected --> t_SecurityPolicy
 
 

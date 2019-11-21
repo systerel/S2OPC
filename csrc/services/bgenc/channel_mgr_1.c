@@ -21,7 +21,7 @@
 
  File Name            : channel_mgr_1.c
 
- Date                 : 15/11/2019 08:29:07
+ Date                 : 21/11/2019 14:52:36
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -225,17 +225,10 @@ void channel_mgr_1__is_channel_connected(
 void channel_mgr_1__add_channel_connected(
    const constants__t_channel_i channel_mgr_1__p_channel,
    const constants__t_timeref_i channel_mgr_1__p_timeref) {
-   {
-      t_bool channel_mgr_1__l_res;
-      
-      channel_mgr_1__l_res = channel_mgr_1__s_channel_connected_i[channel_mgr_1__p_channel];
-      if (channel_mgr_1__l_res == false) {
-         channel_mgr_1__s_channel_connected_i[channel_mgr_1__p_channel] = true;
-         channel_mgr_1__card_channel_connected_i = channel_mgr_1__card_channel_connected_i +
-            1;
-         channel_mgr_1__a_channel_connected_time_i[channel_mgr_1__p_channel] = channel_mgr_1__p_timeref;
-      }
-   }
+   channel_mgr_1__s_channel_connected_i[channel_mgr_1__p_channel] = true;
+   channel_mgr_1__card_channel_connected_i = channel_mgr_1__card_channel_connected_i +
+      1;
+   channel_mgr_1__a_channel_connected_time_i[channel_mgr_1__p_channel] = channel_mgr_1__p_timeref;
 }
 
 void channel_mgr_1__set_config(

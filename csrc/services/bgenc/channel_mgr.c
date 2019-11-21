@@ -21,7 +21,7 @@
 
  File Name            : channel_mgr.c
 
- Date                 : 08/11/2019 18:03:55
+ Date                 : 21/11/2019 14:52:37
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -289,7 +289,6 @@ void channel_mgr__is_auto_close_channel_active(
       t_entier4 channel_mgr__l_card_used;
       t_entier4 channel_mgr__l_card_channel;
       
-      *channel_mgr__p_auto_closed_active = false;
       channel_mgr_1__get_card_channel_used(&channel_mgr__l_card_used);
       constants__get_card_t_channel(&channel_mgr__l_card_channel);
       *channel_mgr__p_auto_closed_active = (channel_mgr__l_card_used >= constants__c_max_channels_connected);
