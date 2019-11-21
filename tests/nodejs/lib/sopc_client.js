@@ -22,6 +22,7 @@ const read_value = require('./readvalue');
 const browse_request = require('./browse_request');
 const browse_result = require('./browse_result');
 const browse_result_reference = require('./browse_result_reference');
+const endpoint_desc = require('./endpoint_description');
 
 /** Log levels */
 const SOPC_Toolkit_Log_Level = new Enum({
@@ -64,18 +65,6 @@ function SecurityCfg(security_policy, security_mode, user_policy_id,
 {
     if (Object.values(SOPC_SecurityPolicy).indexOf(security_policy) < 0) {
         throw `Invalid security_policy (${security_policy}).`;
-    }
-
-    if (user_policy_id !== "anonymous" && user_policy_id !== "username") {
-        throw `user_policy_id value (${user_policy_id}) is not correct("anonymous" or "username").`;
-    }
-
-    if (user_policy_id === "username" && (user_name === ref.NULL || user_password === ref.NULL)) {
-        throw `user_name and user_password shall be specified when using username policy.`;
-    }
-
-    if (user_policy_id === "anonymous" && (user_name !== ref.NULL || user_password !== ref.NULL)) {
-        throw `user_name and user_password shall not be specified when using anonymous policy.`;
     }
 
     let fileList = [path_cert_auth, path_cert_srv, path_cert_cli, path_key_cli];
@@ -275,6 +264,42 @@ function disconnect(connectionId){
     return bind.sopc_client.SOPC_ClientHelper_Disconnect(connectionId);
 }
 
+/**
+ * Retrieve endpoints information
+ * @param {String} endpointUrl url of the endpoint
+ * @return array containing two elements: the status code of the get endpoints response,
+ *         and an array containing endpoints information.
+ * @see module:get_endpoints_result
+ */
+function getEndpoints(endpointUrl) {
+
+    let endpointValues = [];
+
+    let getEndpointsResultPtrPtr = ref.alloc(bind.SOPC_ClientHelper_GetEndpointsResultPtr);
+
+    let status = bind.sopc_client.SOPC_ClientHelper_GetEndpoints(endpointUrl, getEndpointsResultPtrPtr);
+
+    let endpointsResultPtr = getEndpointsResultPtrPtr.deref();
+
+    if (!ref.isNull(endpointsResultPtr))
+    {
+        let endpointsResult = endpointsResultPtr.deref();
+
+        endpointsResult.endpoints.length = endpointsResult.nbOfEndpoints;
+
+        if (status === 0) {
+            for (let i = 0; i < endpointsResult.nbOfEndpoints; i++) {
+                let endpoint = new endpoint_desc
+                                    .EndpointDescription()
+                                    .FromC(endpointsResult.endpoints[i]);
+                endpointValues.push(endpoint);
+            }
+        }
+    }
+
+    return [status, endpointValues];
+}
+
 module.exports = {
     log_level : SOPC_Toolkit_Log_Level,
     security_mode : SOPC_MessageSecurityMode,
@@ -296,5 +321,6 @@ module.exports = {
     browse,
     BrowseRequest : browse_request.BrowseRequest,
     BrowseResult : browse_result.BrowseResult,
-    BrowseResultReference : browse_result_reference.BrowseResultReference
+    BrowseResultReference : browse_result_reference.BrowseResultReference,
+    getEndpoints
 };

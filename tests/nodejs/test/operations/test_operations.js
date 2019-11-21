@@ -209,4 +209,29 @@ describe("Operations tests", function() {
             done();
         });
     });
+    describe("Successful GetEnpoints", function () {
+        it("GetEndpoints request shall be OK", function () {
+            assert.equal(sopc_client.initialize("./log/", sopc_client.log_level.Error), 0);
+            let endpoint_url = "opc.tcp://localhost:4841";
+            let res = -1;
+            let endpoints = [];
+            [res, endpoints] = sopc_client.getEndpoints(endpoint_url);
+            assert.equal(res, 0);
+            assert.ok(endpoints.length > 0);
+            sopc_client.finalize();
+        });
+    });
+
+    describe("Failed GetEnpoints", function () {
+        it("GetEndpoints request shall be KO", function () {
+            assert.equal(sopc_client.initialize("./log/", sopc_client.log_level.Error), 0);
+            let endpoint_url = "opc.tcp://not_a_valid_endpoint_123456:4841";
+            let res = -1;
+            let endpoints = [];
+            [res, endpoints] = sopc_client.getEndpoints(endpoint_url);
+            assert.equal(res, -100);
+            assert.equal(endpoints.length, 0);
+            sopc_client.finalize();
+        });
+    });
 });

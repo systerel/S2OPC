@@ -1,5 +1,6 @@
 const sopc_client = require('../lib/sopc_client');
 const path = require('path');
+const ref = require('ref');
 
 const default_endpoint = "opc.tcp://localhost:4841";
 //const default_security_policy = sopc_client.security_policy.Basic256_URI;
@@ -7,8 +8,10 @@ const default_security_policy = sopc_client.security_policy.Basic256Sha256_URI;
 //const default_security_mode = sopc_client.security_mode.Sign;
 const default_security_mode = sopc_client.security_mode.SignAndEncrypt;
 const default_user_security_policy_id = "username";
-const default_user_name="user1";
-const default_user_password="password";
+//const default_user_name="user1";
+const default_user_name=ref.NULL;
+//const default_user_password="password";
+const default_user_password=ref.NULL;
 
 const yargs = require('yargs');
 
@@ -53,6 +56,7 @@ let path_cert_cli  = path.join(prefixPathCert, "client_2k_cert.der");
 let path_cert_auth = path.join(prefixPathCert, "cacert.der");
 let path_cert_srv  = path.join(prefixPathCert, "server_2k_cert.der");
 let path_key_cli   = path.join(prefixPathCert, "client_2k_key.pem");
+
 
 let connectionId = 0;
 if(status){

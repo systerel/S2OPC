@@ -262,6 +262,36 @@ const SOPC_ClientHelper_BrowseResult = StructType({
 });
 const SOPC_ClientHelper_BrowseResultArray = ArrayType(SOPC_ClientHelper_BrowseResult);
 
+const SOPC_ClientHelper_UserIdentityToken = StructType({
+    policyId : 'CString',
+    tokenType : 'int32',
+    issuedTokenType : 'CString',
+    issuerEndpointUrl : 'CString',
+    securityPolicyUri : 'CString'
+});
+
+const SOPC_ClientHelper_UserIdentityTokenArray = ArrayType(SOPC_ClientHelper_UserIdentityToken);
+
+const SOPC_ClientHelper_EndpointDescription = StructType({
+    endpointUrl : 'CString',
+    security_mode : 'int32',
+    security_policyUri : 'CString',
+    nbOfUserIdentityTokens : 'int32',
+    userIdentityTokens : SOPC_ClientHelper_UserIdentityTokenArray,
+    transportProfileUri: 'CString',
+    securityLevel: 'int32'
+});
+
+const SOPC_ClientHelper_EndpointDescriptionArray = ArrayType(SOPC_ClientHelper_EndpointDescription);
+
+const SOPC_ClientHelper_GetEndpointsResult = StructType({
+    nbOfEndpoints : 'int32',
+    endpoints : SOPC_ClientHelper_EndpointDescriptionArray
+});
+
+const SOPC_ClientHelper_GetEndpointsResultPtr = ref.refType(SOPC_ClientHelper_GetEndpointsResult);
+const SOPC_ClientHelper_GetEndpointsResultPtrPtr = ref.refType(SOPC_ClientHelper_GetEndpointsResultPtr);
+
 const sopc_client = ffi.Library('libclient_subscription', {
     'SOPC_ClientHelper_Initialize': ['int32', ['CString', 'int32']],
     'SOPC_ClientHelper_Finalize': ['void', []],
@@ -272,7 +302,8 @@ const sopc_client = ffi.Library('libclient_subscription', {
     'SOPC_ClientHelper_Unsubscribe': ['int32', ['int32']],
     'SOPC_ClientHelper_Write': ['int32', ['int32', SOPC_ClientHelper_WriteValueArray, 'size_t', UInt32Array]],
     'SOPC_ClientHelper_Read': ['int32', ['int32', SOPC_ClientHelper_ReadValueArray, 'size_t', SOPC_DataValuePtrArray]],
-    'SOPC_ClientHelper_Browse': ['int32', ['int32', SOPC_ClientHelper_BrowseRequestArray, 'size_t', SOPC_ClientHelper_BrowseResultArray]]
+    'SOPC_ClientHelper_Browse': ['int32', ['int32', SOPC_ClientHelper_BrowseRequestArray, 'size_t', SOPC_ClientHelper_BrowseResultArray]],
+    'SOPC_ClientHelper_GetEndpoints': ['int32', ['CString', SOPC_ClientHelper_GetEndpointsResultPtrPtr]]
 });
 
 module.exports = {
@@ -296,5 +327,7 @@ module.exports = {
     SOPC_ClientHelper_BrowseRequest,
     SOPC_ClientHelper_BrowseResultReference,
     SOPC_ClientHelper_BrowseResult,
-    SOPC_ClientHelper_BrowseResultArray
+    SOPC_ClientHelper_BrowseResultArray,
+    SOPC_ClientHelper_GetEndpointsResult,
+    SOPC_ClientHelper_GetEndpointsResultPtr
 };

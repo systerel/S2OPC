@@ -17,6 +17,7 @@
     "mocha-tap-reporter": "^0.1.3"
   },
   "scripts": {
+    "get_endpoints": "node examples/get_endpoints.js",
     "read": "node examples/read.js",
     "write": "node examples/write.js",
     "browse": "node examples/browse.js",
