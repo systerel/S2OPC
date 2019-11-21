@@ -76,6 +76,8 @@ typedef enum
     PARSE_SERVER_KEY,        // ......Server key
     PARSE_TRUSTED_CERTS,     // ......Trusted certificates
     PARSE_TRUSTED_CERT,      // ........Trusted certificate
+    PARSE_REVOKED_CERTS,     // ......Revoked certificates
+    PARSE_REVOKED_CERT,      // ........Revoked certificate
     PARSE_ENDPOINTS,         // ....In an Endpoints tag
     PARSE_ENDPOINT,          // ......In an Endpoint tag
     PARSE_SECURITY_POLICIES, // ........In security policies tag
@@ -102,7 +104,10 @@ struct parse_context_t
     bool appCertSet;
     char* serverCertificate;
     char* serverKey;
-    char* caCertificate;
+    bool caSet;
+    SOPC_Array* caCertificates;
+    bool crlSet;
+    SOPC_Array* crlCertificates;
 
     bool endpointsSet;
     SOPC_Array* endpoints;
@@ -483,14 +488,30 @@ static bool start_server_key(struct parse_context_t* ctx, const XML_Char** attrs
     return true;
 }
 
-static bool start_trusted_cert(struct parse_context_t* ctx, const XML_Char** attrs)
+static bool end_trusted_certs(struct parse_context_t* ctx)
 {
-    if (ctx->caCertificate != NULL)
+    if (0 == SOPC_Array_Size(ctx->caCertificates))
     {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "Multiple CA certificates not supported");
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "no trusted certificate defined");
         return false;
     }
+    if (!SOPC_Array_Append_Values(ctx->caCertificates, NULL, 1))
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+    ctx->serverConfigPtr->certificateAuthorityPathList = SOPC_Array_Into_Raw(ctx->caCertificates);
+    if (NULL == ctx->serverConfigPtr->certificateAuthorityPathList)
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+    ctx->caCertificates = NULL;
+    return true;
+}
 
+static bool start_trusted_cert(struct parse_context_t* ctx, const XML_Char** attrs)
+{
     const char* attr_val = get_attr(ctx, "path", attrs);
 
     char* path = SOPC_strdup(attr_val);
@@ -501,9 +522,55 @@ static bool start_trusted_cert(struct parse_context_t* ctx, const XML_Char** att
         return false;
     }
 
-    ctx->caCertificate = path;
+    if (!SOPC_Array_Append(ctx->caCertificates, path))
+    {
+        SOPC_Free(path);
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
 
     ctx->state = PARSE_TRUSTED_CERT;
+
+    return true;
+}
+
+static bool end_revoked_certs(struct parse_context_t* ctx)
+{
+    if (!SOPC_Array_Append_Values(ctx->crlCertificates, NULL, 1))
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+    ctx->serverConfigPtr->certificateRevocationPathList = SOPC_Array_Into_Raw(ctx->crlCertificates);
+    if (NULL == ctx->serverConfigPtr->certificateRevocationPathList)
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+    ctx->crlCertificates = NULL;
+    return true;
+}
+
+static bool start_revoked_cert(struct parse_context_t* ctx, const XML_Char** attrs)
+{
+    const char* attr_val = get_attr(ctx, "path", attrs);
+
+    char* path = SOPC_strdup(attr_val);
+
+    if (path == NULL)
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+
+    if (!SOPC_Array_Append(ctx->crlCertificates, path))
+    {
+        SOPC_Free(path);
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+
+    ctx->state = PARSE_REVOKED_CERT;
 
     return true;
 }
@@ -880,6 +947,10 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         {
             ctx->state = PARSE_TRUSTED_CERTS;
         }
+        else if (strcmp(name, "RevokedCertificates") == 0)
+        {
+            ctx->state = PARSE_REVOKED_CERTS;
+        }
         else
         {
             LOG_XML_ERRORF(helperCtx->parser, "Unexpected tag %s", name);
@@ -891,6 +962,22 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         if (strcmp(name, "TrustedCertificate") == 0)
         {
             if (!start_trusted_cert(ctx, attrs))
+            {
+                XML_StopParser(helperCtx->parser, 0);
+                return;
+            }
+        }
+        else
+        {
+            LOG_XML_ERRORF(helperCtx->parser, "Unexpected tag %s", name);
+            XML_StopParser(helperCtx->parser, 0);
+            return;
+        }
+        break;
+    case PARSE_REVOKED_CERTS:
+        if (strcmp(name, "RevokedCertificate") == 0)
+        {
+            if (!start_revoked_cert(ctx, attrs))
             {
                 XML_StopParser(helperCtx->parser, 0);
                 return;
@@ -1052,6 +1139,22 @@ static void end_element_handler(void* user_data, const XML_Char* name)
         ctx->state = PARSE_TRUSTED_CERTS;
         break;
     case PARSE_TRUSTED_CERTS:
+        if (!end_trusted_certs(ctx))
+        {
+            XML_StopParser(ctx->helper_ctx.parser, 0);
+            return;
+        }
+        ctx->state = PARSE_APPLICATION_CERT;
+        break;
+    case PARSE_REVOKED_CERT:
+        ctx->state = PARSE_REVOKED_CERTS;
+        break;
+    case PARSE_REVOKED_CERTS:
+        if (!end_revoked_certs(ctx))
+        {
+            XML_StopParser(ctx->helper_ctx.parser, 0);
+            return;
+        }
         ctx->state = PARSE_APPLICATION_CERT;
         break;
     case PARSE_SERVER_KEY:
@@ -1136,14 +1239,19 @@ bool SOPC_Config_Parse(FILE* fd, SOPC_S2OPC_Config* config)
     SOPC_Array* endpoints = SOPC_Array_Create(sizeof(SOPC_Endpoint_Config), 1, NULL);
     SOPC_Array* ns = SOPC_Array_Create(sizeof(char*), 1, SOPC_Free_CstringFromPtr);
     SOPC_Array* locales = SOPC_Array_Create(sizeof(char*), 1, SOPC_Free_CstringFromPtr);
+    SOPC_Array* trustedCerts = SOPC_Array_Create(sizeof(char*), 1, SOPC_Free_CstringFromPtr);
+    SOPC_Array* revokedListCerts = SOPC_Array_Create(sizeof(char*), 1, SOPC_Free_CstringFromPtr);
 
-    if ((NULL == parser) || (NULL == endpoints) || (NULL == ns) || (NULL == locales))
+    if ((NULL == parser) || (NULL == endpoints) || (NULL == ns) || (NULL == locales) || (NULL == trustedCerts) ||
+        (NULL == revokedListCerts))
     {
         LOG_MEMORY_ALLOCATION_FAILURE;
         XML_ParserFree(parser);
         SOPC_Array_Delete(endpoints);
         SOPC_Array_Delete(ns);
         SOPC_Array_Delete(locales);
+        SOPC_Array_Delete(trustedCerts);
+        SOPC_Array_Delete(revokedListCerts);
         return false;
     }
 
@@ -1156,6 +1264,8 @@ bool SOPC_Config_Parse(FILE* fd, SOPC_S2OPC_Config* config)
     ctx.endpoints = endpoints;
     ctx.namespaces = ns;
     ctx.localeIds = locales;
+    ctx.caCertificates = trustedCerts;
+    ctx.crlCertificates = revokedListCerts;
     ctx.serverConfigPtr = &config->serverConfig;
     ctx.helper_ctx.char_data_buffer = NULL;
     ctx.helper_ctx.char_data_cap = 0;
@@ -1167,12 +1277,13 @@ bool SOPC_Config_Parse(FILE* fd, SOPC_S2OPC_Config* config)
     XML_ParserFree(parser);
     SOPC_Array_Delete(ctx.namespaces);
     SOPC_Array_Delete(ctx.localeIds);
+    SOPC_Array_Delete(ctx.caCertificates);
+    SOPC_Array_Delete(ctx.crlCertificates);
 
     size_t nbEndpoints = SOPC_Array_Size(endpoints);
 
     if (res == SOPC_STATUS_OK && nbEndpoints <= UINT32_MAX)
     {
-        config->serverConfig.certificateAuthorityPath = ctx.caCertificate;
         config->serverConfig.endpoints = SOPC_Array_Into_Raw(ctx.endpoints);
         ctx.endpoints = NULL;
         assert(NULL != config->serverConfig.endpoints);

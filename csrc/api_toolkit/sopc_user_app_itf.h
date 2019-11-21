@@ -116,15 +116,16 @@ struct SOPC_Server_Config
                                                          (serverCertificate shall be instantiated by applicative code) */
     char* serverKeyPath;                            /**< Temporary path to the server key
                                                          (serverCertificate shall be instantiated by applicative code) */
-    char* certificateAuthorityPath;                 /**< Temporary path to the certificate authority
-                                                         (pki shall be instantiated with the CA by applicative code) */
-    uint8_t nbEndpoints;                            /**< Number of endpoints defined by the server */
-    SOPC_Endpoint_Config* endpoints;                /**< Endpoint configuration array */
+    char** certificateAuthorityPathList;  /**< Temporary list of paths to the certificate authority terminated by a NULL
+                                             pointer (pki shall be instantiated with the CA list by applicative code) */
+    char** certificateRevocationPathList; /**< Temporary list of paths to the certificate authority terminated by a NULL
+                                             pointer (pki shall be instantiated with the CRL by applicative code) */
+    uint8_t nbEndpoints;                  /**< Number of endpoints defined by the server */
+    SOPC_Endpoint_Config* endpoints;      /**< Endpoint configuration array */
 
     /* To be instantiated by applicative code: */
     SOPC_SerializedCertificate* serverCertificate;
     SOPC_SerializedAsymmetricKey* serverKey;
-    SOPC_SerializedCertificate* certificateAuthority;
     SOPC_PKIProvider* pki;
 };
 

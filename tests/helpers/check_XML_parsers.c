@@ -281,6 +281,8 @@ END_TEST
 
 const char* expectedNamespaces[3] = {"urn:S2OPC:MY_SERVER_HOST", "urn:S2OPC:MY_SERVER_HOST:2", NULL};
 const char* expectedLocales[4] = {"en", "es-ES", "fr-FR", NULL};
+const char* expectedCertAuths[3] = {"/mypath/cacert.der", "/mypath/othercacert.der", NULL};
+const char* expectedCertAuthCRLs[3] = {"/mypath/cacrl.der", "/mypath/othercacrl.der", NULL};
 
 // Without EXPAT function is detected as unused and compilation fails
 #ifdef WITH_EXPAT
@@ -310,7 +312,27 @@ static void check_parsed_s2opc_config(SOPC_S2OPC_Config* s2opcConfig)
     /* Check application certificates */
     ck_assert_int_eq(0, strcmp("/mypath/mycert.der", sConfig->serverCertPath));
     ck_assert_int_eq(0, strcmp("/mypath/mykey.pem", sConfig->serverKeyPath));
-    ck_assert_int_eq(0, strcmp("/mypath/cacert.der", sConfig->certificateAuthorityPath));
+
+    /* Check CAs */
+    int caCounter = 0;
+    for (caCounter = 0; sConfig->certificateAuthorityPathList[caCounter] != NULL && expectedCertAuths[caCounter];
+         caCounter++)
+    {
+        ck_assert_int_eq(0, strcmp(sConfig->certificateAuthorityPathList[caCounter], expectedCertAuths[caCounter]));
+    }
+    ck_assert_ptr_null(sConfig->certificateAuthorityPathList[caCounter]);
+    ck_assert_ptr_null(expectedCertAuths[caCounter]);
+
+    /* Check CRLs */
+    int crlCounter = 0;
+    for (crlCounter = 0; sConfig->certificateRevocationPathList[crlCounter] != NULL && expectedCertAuthCRLs[crlCounter];
+         crlCounter++)
+    {
+        ck_assert_int_eq(0,
+                         strcmp(sConfig->certificateRevocationPathList[crlCounter], expectedCertAuthCRLs[crlCounter]));
+    }
+    ck_assert_ptr_null(sConfig->certificateRevocationPathList[crlCounter]);
+    ck_assert_ptr_null(expectedCertAuthCRLs[crlCounter]);
 
     /* Check application description */
     int res =

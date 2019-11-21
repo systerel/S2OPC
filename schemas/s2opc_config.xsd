@@ -70,7 +70,23 @@
     <xs:sequence>
       <xs:element type="TrustedCertificateType" name="TrustedCertificate" >
         <xs:annotation>
-          <xs:documentation>Only one CA supported for now</xs:documentation>
+          <xs:documentation>One or several CA or trusted certificates</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="RevokedCertificateType">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute type="xs:string" name="path" use="required"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="RevokedCertificatesType">
+    <xs:sequence>
+      <xs:element type="RevokedCertificateType" name="RevokedCertificate" >
+        <xs:annotation>
+          <xs:documentation>One CRL for one CA defined</xs:documentation>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
@@ -80,6 +96,7 @@
       <xs:element type="ServerCertificateType" name="ServerCertificate" />
       <xs:element type="ServerKeyType" name="ServerKey" />
       <xs:element type="TrustedCertificatesType" name="TrustedCertificates" />
+      <xs:element type="RevokedCertificatesType" name="RevokedCertificates" minOccurs="0" />
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="ApplicationURIType">

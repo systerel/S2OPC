@@ -57,6 +57,19 @@
 /* Define application namespaces: ns=1 and ns=2 (NULL terminated array) */
 static char* default_app_namespace_uris[] = {DEFAULT_PRODUCT_URI, DEFAULT_PRODUCT_URI_2, NULL};
 static char* default_locale_ids[] = {"en-US", "fr-FR", NULL};
+static char* default_trusted_certs[] = {"trusted/cacert.der",
+                                        "trusted/ctt_ca1I_appT.der" /* Test 044 */,
+                                        "trusted/ctt_ca1T.der" /* Tests 029, 037 */,
+                                        "trusted/ctt_appT.der" /* Test 048 */,
+                                        "trusted/ctt_appTSha256_2048.der" /* Test 051 */,
+                                        "trusted/ctt_appTSha256_4096.der" /* Test 052 still fails */,
+                                        NULL};
+static char* default_revoked_certs[] = {"revoked/cacrl.der",
+                                        "revoked/revocation_list_ctt_ca1T.crl",
+                                        "revoked/ctt_appT_crl.pem",
+                                        "revoked/ctt_appTSha256_2048_crl.pem",
+                                        "revoked/ctt_appTSha256_4096_crl.pem",
+                                        NULL};
 
 static int32_t endpointClosed = 0;
 static bool secuActive = true;
@@ -251,7 +264,8 @@ static bool Server_LoadDefaultConfiguration(SOPC_S2OPC_Config* output_s2opcConfi
     {
         output_s2opcConfig->serverConfig.serverCertPath = "./server_public/server_2k_cert.der";
         output_s2opcConfig->serverConfig.serverKeyPath = "./server_private/server_2k_key.pem";
-        output_s2opcConfig->serverConfig.certificateAuthorityPath = "./trusted/cacert.der";
+        output_s2opcConfig->serverConfig.certificateAuthorityPathList = default_trusted_certs;
+        output_s2opcConfig->serverConfig.certificateRevocationPathList = default_revoked_certs;
 
         /*
          * 1st Security policy is Basic256Sha256 with anonymous and username (non encrypted) authentication allowed
@@ -464,12 +478,13 @@ static SOPC_ReturnStatus Server_SetCryptographicConfig(SOPC_Server_Config* serve
                                                                             &serverConfig->serverKey);
         }
 
-        if (SOPC_STATUS_OK == status)
+        /*if (SOPC_STATUS_OK == status)
         {
             status = SOPC_KeyManager_SerializedCertificate_CreateFromDER(cacert, sizeof(cacert),
                                                                          &serverConfig->certificateAuthority);
-        }
-#else // WITH_STATIC_SECURITY_DATA == false
+        }*/
+        assert(false); // TODO: create local variable and instantiate PKI here
+#else                  // WITH_STATIC_SECURITY_DATA == false
         /* Load client/server certificates and server key from files */
         status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(serverConfig->serverCertPath,
                                                                       &serverConfig->serverCertificate);
@@ -478,32 +493,15 @@ static SOPC_ReturnStatus Server_SetCryptographicConfig(SOPC_Server_Config* serve
             status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(serverConfig->serverKeyPath,
                                                                             &serverConfig->serverKey);
         }
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(serverConfig->certificateAuthorityPath,
-                                                                          &serverConfig->certificateAuthority);
-        }
-#endif
 
         /* Create the PKI (Public Key Infrastructure) provider */
         if (SOPC_STATUS_OK == status)
         {
-            // status = SOPC_PKIProviderStack_Create(serverConfig->certificateAuthority, NULL, &serverConfig->pki);
-            char* lPathsCA[] = {serverConfig->certificateAuthorityPath,
-                                "trusted/ctt_ca1I_appT.der" /* Test 044 */,
-                                "trusted/ctt_ca1T.der" /* Tests 029, 037 */,
-                                "trusted/ctt_appT.der" /* Test 048 */,
-                                "trusted/ctt_appTSha256_2048.der" /* Test 051 */,
-                                "trusted/ctt_appTSha256_4096.der" /* Test 052 still fails */,
-                                NULL};
-            char* lPathsCRL[] = {"revoked/cacrl.der",
-                                 "revoked/revocation_list_ctt_ca1T.crl",
-                                 "revoked/ctt_appT_crl.pem",
-                                 "revoked/ctt_appTSha256_2048_crl.pem",
-                                 "revoked/ctt_appTSha256_4096_crl.pem",
-                                 NULL};
-            status = SOPC_PKIProviderStack_CreateFromPaths(lPathsCA, lPathsCRL, &serverConfig->pki);
+            status =
+                SOPC_PKIProviderStack_CreateFromPaths(serverConfig->certificateAuthorityPathList,
+                                                      serverConfig->certificateRevocationPathList, &serverConfig->pki);
         }
+#endif
 
         if (SOPC_STATUS_OK != status)
         {

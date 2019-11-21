@@ -13,10 +13,15 @@
     <ApplicationCertificates>
       <ServerCertificate path="/mypath/mycert.der"/>
       <ServerKey path="/mypath/mykey.pem"/>
-      <!-- We should support several CA / Trusted certificates soon -->
       <TrustedCertificates>
         <TrustedCertificate path="/mypath/cacert.der"/>
+        <TrustedCertificate path="/mypath/othercacert.der"/>
       </TrustedCertificates>
+      <RevokedCertificates>
+        <!-- One certificate revocation list shall be defined for each CA -->
+        <RevokedCertificate path="/mypath/cacrl.der"/>
+        <RevokedCertificate path="/mypath/othercacrl.der"/>
+      </RevokedCertificates>
     </ApplicationCertificates>
     <ApplicationDescription>
       <ApplicationURI uri="urn:S2OPC:MY_SERVER_HOST:app"/>

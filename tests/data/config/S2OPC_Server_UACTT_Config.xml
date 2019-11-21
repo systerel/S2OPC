@@ -12,8 +12,20 @@
       <ServerCertificate path="./server_public/server_2k_cert.der"/>
       <ServerKey path="./server_private/server_2k_key.pem"/>
       <TrustedCertificates>
-        <TrustedCertificate path="./trusted/cacert.der"/>
+        <TrustedCertificate path="trusted/cacert.der"/>
+        <TrustedCertificate path="trusted/ctt_ca1I_appT.der"/>
+        <TrustedCertificate path="trusted/ctt_ca1T.der"/>
+        <TrustedCertificate path="trusted/ctt_appT.der"/>
+        <TrustedCertificate path="trusted/ctt_appTSha256_2048.der"/>
+        <TrustedCertificate path="trusted/ctt_appTSha256_4096.der"/>
       </TrustedCertificates>
+      <RevokedCertificates>
+        <RevokedCertificate path="revoked/cacrl.der"/>
+        <RevokedCertificate path="revoked/revocation_list_ctt_ca1T.crl"/>
+        <RevokedCertificate path="revoked/ctt_appT_crl.pem"/>
+        <RevokedCertificate path="revoked/ctt_appTSha256_2048_crl.pem"/>
+        <RevokedCertificate path="revoked/ctt_appTSha256_4096_crl.pem"/>
+      </RevokedCertificates>
     </ApplicationCertificates>
     <ApplicationDescription>
       <ApplicationURI uri="urn:S2OPC:localhost"/>

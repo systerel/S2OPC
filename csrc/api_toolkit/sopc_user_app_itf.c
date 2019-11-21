@@ -95,6 +95,18 @@ static void SOPC_ServerConfig_Clear(SOPC_Server_Config* config)
             SOPC_Free(config->localeIds[i]);
         }
         SOPC_Free(config->localeIds);
+
+        for (int i = 0; NULL != config->certificateAuthorityPathList[i]; i++)
+        {
+            SOPC_Free(config->certificateAuthorityPathList[i]);
+        }
+        SOPC_Free(config->certificateAuthorityPathList);
+
+        for (int i = 0; NULL != config->certificateRevocationPathList[i]; i++)
+        {
+            SOPC_Free(config->certificateRevocationPathList[i]);
+        }
+        SOPC_Free(config->certificateRevocationPathList);
     }
 
     OpcUa_ApplicationDescription_Clear(&config->serverDescription);
@@ -102,7 +114,6 @@ static void SOPC_ServerConfig_Clear(SOPC_Server_Config* config)
     {
         SOPC_Free(config->serverCertPath);
         SOPC_Free(config->serverKeyPath);
-        SOPC_Free(config->certificateAuthorityPath);
     }
     for (int i = 0; i < config->nbEndpoints; i++)
     {
@@ -112,7 +123,6 @@ static void SOPC_ServerConfig_Clear(SOPC_Server_Config* config)
 
     SOPC_KeyManager_SerializedCertificate_Delete(config->serverCertificate);
     SOPC_KeyManager_SerializedAsymmetricKey_Delete(config->serverKey);
-    SOPC_KeyManager_SerializedCertificate_Delete(config->certificateAuthority);
     SOPC_PKIProvider_Free(&config->pki);
 
     memset(config, 0, sizeof(*config));
