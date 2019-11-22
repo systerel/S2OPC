@@ -966,12 +966,12 @@ END_TEST
 
 // Fixtures for PKI: server.der certificate and CA
 static SOPC_SerializedCertificate* crt_ca = NULL;
+static SOPC_CRLList* crl = NULL;
 static SOPC_PKIProvider* pki = NULL;
-static uint8_t* der_ca = NULL;
 
 static inline void setup_pki_stack(void)
 {
-    der_ca = SOPC_Malloc(CA_CRT_LEN);
+    uint8_t* der_ca = SOPC_Malloc(CA_CRT_LEN);
     ck_assert_ptr_nonnull(der_ca);
 
     setup_certificate();
@@ -981,15 +981,17 @@ static inline void setup_pki_stack(void)
     ck_assert(SOPC_KeyManager_SerializedCertificate_CreateFromDER(der_ca, (uint32_t)(CA_CRT_LEN), &crt_ca) ==
               SOPC_STATUS_OK);
 
+    crl = SOPC_UnhexlifyCRL(CA_CRL);
+
     // Creates PKI with ca
-    ck_assert(SOPC_PKIProviderStack_Create(crt_ca, NULL, &pki) == SOPC_STATUS_OK);
+    ck_assert(SOPC_PKIProviderStack_Create(crt_ca, crl, &pki) == SOPC_STATUS_OK);
+    SOPC_Free(der_ca);
 }
 
 static inline void teardown_pki_stack(void)
 {
     SOPC_PKIProvider_Free(&pki);
     SOPC_KeyManager_SerializedCertificate_Delete(crt_ca);
-    SOPC_Free(der_ca);
 
     teardown_certificate();
 }

@@ -62,6 +62,12 @@ done
 echo "Server signed public key:"
 hexdump -ve '/1 "%02x"' server_2k_cert.der
 echo
+echo -e "\nServer's thumbprint (SHA-1):"
+openssl x509 -noout -fingerprint -in server_2k_cert.pem
+echo
 echo -e "\nCertificate Authority signed public key:"
 hexdump -ve '/1 "%02x"' cacert.der
+echo
+echo -e "\nCRL of the CA:"
+hexdump -ve '/1 "%02x"' cacrl.der
 echo

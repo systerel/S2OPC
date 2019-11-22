@@ -27,6 +27,7 @@
 #include <check.h>
 #include <stdio.h>
 
+#include "check_crypto_certificates.h"
 #include "check_helpers.h"
 #include "crypto_provider_lib.h"
 #include "hexlify.h"
@@ -651,68 +652,26 @@ END_TEST
 
 // Fixtures for PKI: server.der certificate and CA
 static SOPC_SerializedCertificate* crt_ca = NULL;
+static SOPC_CRLList* crl = NULL;
 static SOPC_PKIProvider* pki = NULL;
 
 static inline void setup_pki_stack(void)
 {
-    uint8_t der_ca[1529];
+    uint8_t* der_ca = SOPC_Malloc(CA_CRT_LEN);
+    ck_assert_ptr_nonnull(der_ca);
 
     setup_certificate();
 
     // Loads CA cert which signed server.der. This is trusted/cacert.der.
-    ck_assert(unhexlify("308205f5308203dda003020102020900e90749109a17369b300d06092a864886f70d01010b0500308188310b300906"
-                        "0355040613024652310c300a0603550408"
-                        "0c03494446310e300c06035504070c0550415249533110300e060355040a0c07494e474f5043533110300e06035504"
-                        "0b0c07494e474f50435331133011060355"
-                        "04030c0a494e474f5043532043413122302006092a864886f70d0109011613696e676f70637340737973746572656c"
-                        "2e6672301e170d31363035313931343533"
-                        "30345a170d3137303531393134353330345a308188310b3009060355040613024652310c300a06035504080c034944"
-                        "46310e300c06035504070c055041524953"
-                        "3110300e060355040a0c07494e474f5043533110300e060355040b0c07494e474f5043533113301106035504030c0a"
-                        "494e474f5043532043413122302006092a"
-                        "864886f70d0109011613696e676f70637340737973746572656c2e667230820222300d06092a864886f70d01010105"
-                        "000382020f003082020a0282020100abed"
-                        "f46dfda704bf8335fb15dcc4e506bcd788085db31484cab130d470dcb2b7cf79a8a173312ba70ba3f4c8db69dd2f32"
-                        "1f72784b23552b57bf7d4a40e1d92a73ed"
-                        "ea41347bcdd48e9d14e83bfb6b462d272fc768063df0335e4db34b8bb98de42ce4f9be0927ddcd6e1906bc8ea1e66b"
-                        "5f115fe08576f4be4e0f09c43ae11ec291"
-                        "d7573a260095754a3df53c6c8e96842f46adf87984e7529c535a818d05db40a683301f9a9cc69d511c6eaf409df692"
-                        "5ff1693d33dbb01622369d678b5731b774"
-                        "b09796eb91f49064f7f93932599f66bdf55362bf39ddee38ec311e921b7f5f7840c67314664a9cedb2a922e9adce5c"
-                        "a9caeb734df90dbf1c5a472e1b4a57bb9a"
-                        "bc77c84d9a02bfc6bb21e70d69836e93f6fd6dddb14f7bc13a20e279ebaeb22d8bc96984b6427c686b2b4fa44dd1fe"
-                        "c1d534c19baf6f7c2794fb3019276d3929"
-                        "e949670ef6da4667b8c54c5d2dedd430c6aca907a76ed8d8ec0809af203e64a0b5321af3fb636cf3aadbdbdcf6cb18"
-                        "dcb085bd9a38328b7f96f8e59498650fd1"
-                        "67ea8277cf552eb8e33ac3e68ac8351b4c5f673732d7e4f972889e2ae38b4700e6d675a7a720ef9a264cdca78090ad"
-                        "a9873656fa81463d59ec5b053ac73b066e"
-                        "83e46d7248cfa47545bebed6885538d9ca87ed0761ff121f85544e6663f0ce4376fa03dc95edb16b0299eb0981ff92"
-                        "31080e881a6a16ecb424de0f4da7990203"
-                        "010001a360305e301d0603551d0e04160414db180c557814e7cffd868827b7b00d28f572abb2301f0603551d230418"
-                        "30168014db180c557814e7cffd868827b7"
-                        "b00d28f572abb2300f0603551d130101ff040530030101ff300b0603551d0f040403020106300d06092a864886f70d"
-                        "01010b05000382020100a1c3776b6048f0"
-                        "658860386ad7b45daba729bf9be81c5ca217a496dbcb0663ecf70e9d7f45c818f9574f8b0c53a378927ddec7ec81a2"
-                        "db09994f4cad32421cbdc23dd5cd1c52ae"
-                        "98c8073da99a333c7ba91691339ae50457c3be352d34af45d93c25107065b3d7652e02ba1a80bea8501d8817186c6e"
-                        "cc7f28cfd903aa74926278668d2f6504ff"
-                        "1491e024aab85e00d700d51d846655660e4ec59c225cec51b51150e91dba37ae953612758b5e79ca7c6ad56bd835bc"
-                        "4be28f95c5e2e34ab843fa569ff3f075ca"
-                        "85d9d18715109a835478fde87368f0a8ab372a01a671ef307ec60564b031561806bb9a8c614aa480e1e1340c1eb67d"
-                        "5ace997996721c18016e3ac00f67e92499"
-                        "b51ffef8d1f0f492b6209f41dff2c36507bdcb3b2ca36d24406444c48fbefa996801fd0611c6050745c15305547510"
-                        "814febcc39567b0fee022d380c6e8479bf"
-                        "9018106a023e121848a1b6c30052e4f22d43dcc44896b6d2acfc63916b2e7eb0eb4c5061e9a09c50c8a81c293ef121"
-                        "a7b71d35bdca67b3d6c5bedc868c4511cb"
-                        "06348fcc19015025e7dfd53d94fe46f7358e0c3dbb3929583001dc1a88d848e4ef229f3cf882f52a06641facd14529"
-                        "a39c4625ad43c7f7b9e1e9496f5ffcb219"
-                        "b146d7ce56ad379adf4d2da72e7f1d7338e3b21df188c51d19b89a090ca514c7723213af58af2151e10890f2385103"
-                        "0f801d0e241038462d3a",
-                        der_ca, 1529) == 1529);
-    ck_assert(SOPC_KeyManager_SerializedCertificate_CreateFromDER(der_ca, 1529, &crt_ca) == SOPC_STATUS_OK);
+    ck_assert(unhexlify(CA_CRT, der_ca, CA_CRT_LEN) == (int) (CA_CRT_LEN));
+    ck_assert(SOPC_KeyManager_SerializedCertificate_CreateFromDER(der_ca, (uint32_t)(CA_CRT_LEN), &crt_ca) ==
+              SOPC_STATUS_OK);
+
+    crl = SOPC_UnhexlifyCRL(CA_CRL);
 
     // Creates PKI with ca
-    ck_assert(SOPC_PKIProviderStack_Create(crt_ca, NULL, &pki) == SOPC_STATUS_OK);
+    ck_assert(SOPC_PKIProviderStack_Create(crt_ca, crl, &pki) == SOPC_STATUS_OK);
+    SOPC_Free(der_ca);
 }
 
 static inline void teardown_pki_stack(void)
