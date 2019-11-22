@@ -20,6 +20,7 @@
 #include <assert.h>
 #include <inttypes.h>
 
+#include "app_cb_call_context_internal.h"
 #include "sopc_encodeable.h"
 #include "sopc_encodeabletype.h"
 #include "sopc_internal_app_dispatcher.h"
@@ -135,6 +136,13 @@ static void onAddressSpaceNotification(SOPC_EventHandler* handler,
     (void) id;
     void* params = (void*) uintParams; // Always used as a pointer content here
     OpcUa_WriteValue* wv = NULL;
+    SOPC_CallContext* cc = (SOPC_CallContext*) auxParam;
+    uintptr_t initialAuxParam = 0;
+
+    if (NULL != cc)
+    {
+        initialAuxParam = cc->auxParam;
+    }
 
     SOPC_App_AddSpace_Event asEvent = (SOPC_App_AddSpace_Event) event;
 
@@ -152,7 +160,7 @@ static void onAddressSpaceNotification(SOPC_EventHandler* handler,
                 SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
                                        "App: AS_WRITE_EVENT on NodeId: %s, AttributeId: %" PRIu32
                                        ", Write status: %" PRIX32,
-                                       nodeId, wv->AttributeId, (SOPC_StatusCode) auxParam);
+                                       nodeId, wv->AttributeId, (SOPC_StatusCode) initialAuxParam);
                 SOPC_Free(nodeId);
             }
             else
@@ -164,7 +172,7 @@ static void onAddressSpaceNotification(SOPC_EventHandler* handler,
 
         if (NULL != appAddressSpaceNotificationCallback)
         {
-            appAddressSpaceNotificationCallback(asEvent, params, (SOPC_StatusCode) auxParam);
+            appAddressSpaceNotificationCallback(cc, asEvent, params, (SOPC_StatusCode) initialAuxParam);
         }
 
         if (NULL != params)
@@ -178,6 +186,8 @@ static void onAddressSpaceNotification(SOPC_EventHandler* handler,
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "App: UNKOWN AS EVENT");
         break;
     }
+
+    SOPC_CallContext_Free(cc);
 }
 
 void SOPC_App_Initialize(void)
@@ -200,6 +210,16 @@ void SOPC_App_Clear(void)
     appAddressSpaceNotificationHandler = NULL;
 }
 
+static uintptr_t getCurrentContextCopyWithAuxParams(uintptr_t auxParam)
+{
+    SOPC_CallContext* newCC = SOPC_CallContext_Copy(SOPC_CallContext_GetCurrent());
+    if (NULL != newCC)
+    {
+        newCC->auxParam = auxParam;
+    }
+    return (uintptr_t) newCC;
+}
+
 SOPC_ReturnStatus SOPC_App_EnqueueComEvent(SOPC_App_Com_Event event, uint32_t id, uintptr_t params, uintptr_t auxParam)
 {
     return SOPC_EventHandler_Post(appComEventHandler, (int32_t) event, id, params, auxParam);
@@ -210,5 +230,6 @@ SOPC_ReturnStatus SOPC_App_EnqueueAddressSpaceNotification(SOPC_App_AddSpace_Eve
                                                            uintptr_t params,
                                                            uintptr_t auxParam)
 {
-    return SOPC_EventHandler_Post(appAddressSpaceNotificationHandler, (int32_t) event, id, params, auxParam);
+    return SOPC_EventHandler_Post(appAddressSpaceNotificationHandler, (int32_t) event, id, params,
+                                  getCurrentContextCopyWithAuxParams(auxParam));
 }

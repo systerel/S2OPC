@@ -30,7 +30,8 @@ IMPORTS
     node_id_pointer_bs,
     write_value_pointer_bs,
     data_value_pointer_bs,
-    time_reference_bs
+    time_reference_bs,
+    app_cb_call_context_bs
 
 PROMOTES
     internal_server_inactive_session_prio_event
@@ -96,6 +97,19 @@ LOCAL_OPERATIONS
           l_is_one_sc_closing : BOOL &
           (s_cli_channel_disconnecting /= s_cli_channel_disconnecting$0 => l_is_one_sc_closing = TRUE))
       /* s_cli_channel_disconnecting is modified only if a channel is closing and we are on client side */
+    END
+    ;
+
+    /* Set application context for the channel used:
+     * for now used only when message received because it is only used
+     * during a server service treatment.
+     * It might be extended later to client side or others treatments / events.
+     */
+    l_set_app_call_context_channel_config (p_channel) =
+    PRE
+        p_channel : t_channel_i
+    THEN
+        skip
     END
 
 OPERATIONS
@@ -299,6 +313,22 @@ OPERATIONS
     END
     ;
 
+    l_set_app_call_context_channel_config (p_channel) =
+    VAR
+        l_is_connected,
+        l_channel_config,
+        l_endpoint_config
+    IN
+        l_is_connected <-- is_connected_channel (p_channel);
+        IF l_is_connected = TRUE
+        THEN
+            l_channel_config <-- get_channel_info (p_channel);
+            l_endpoint_config <-- server_get_endpoint_config (p_channel);
+            set_app_call_context_channel_config (l_channel_config, l_endpoint_config)
+        END
+    END
+    ;
+
     /* END OF LOCAL OPERATIONS */
 
     valid_msg <-- receive_msg_buffer (channel, buffer, request_context) =
@@ -329,6 +359,7 @@ OPERATIONS
             l_is_client <-- is_client_channel (channel);
             l_msg_header_type <-- get_msg_header_type (l_msg_type);
             l_msg_service_class <-- get_msg_service_class (l_msg_type);
+            l_set_app_call_context_channel_config (channel);
             /* TODO: check that channel is secured if service class /= discovery class */
             CASE l_msg_header_type OF
                 EITHER e_msg_request_type THEN
@@ -407,6 +438,8 @@ OPERATIONS
                 END
             END
         END
+        ;
+        clear_app_call_context
     END
     ;
 

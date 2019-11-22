@@ -22,6 +22,7 @@
 #include <assert.h>
 #include <string.h>
 
+#include "app_cb_call_context_internal.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki.h"
 
@@ -160,4 +161,24 @@ static void SOPC_ServerConfig_Clear(SOPC_Server_Config* config)
 void SOPC_S2OPC_Config_Clear(SOPC_S2OPC_Config* config)
 {
     SOPC_ServerConfig_Clear(&config->serverConfig);
+}
+
+const SOPC_User* SOPC_CallContext_GetUser(const SOPC_CallContext* callContextPtr)
+{
+    return callContextPtr->user;
+}
+
+OpcUa_MessageSecurityMode SOPC_CallContext_GetSecurityMode(const SOPC_CallContext* callContextPtr)
+{
+    return callContextPtr->msgSecurityMode;
+}
+
+const char* SOPC_CallContext_GetSecurityPolicy(const SOPC_CallContext* callContextPtr)
+{
+    return callContextPtr->secuPolicyUri;
+}
+
+uint32_t SOPC_CallContext_GetEndpointConfigIdx(const SOPC_CallContext* callContextPtr)
+{
+    return callContextPtr->endpointConfigIdx;
 }

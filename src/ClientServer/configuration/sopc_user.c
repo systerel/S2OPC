@@ -19,6 +19,7 @@
 
 #include <assert.h>
 
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_user.h"
 
@@ -131,4 +132,41 @@ void SOPC_User_Free(SOPC_User** ppUser)
         SOPC_Free(user);
     }
     *ppUser = NULL;
+}
+
+SOPC_User* SOPC_User_Copy(const SOPC_User* user)
+{
+    SOPC_User* userCopy = NULL;
+    if (NULL == user)
+    {
+        return NULL;
+    }
+    if (SOPC_User_IsLocal(user))
+    {
+        SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+        userCopy = (SOPC_User*) SOPC_User_GetLocal();
+        SOPC_GCC_DIAGNOSTIC_RESTORE
+    }
+    else if (SOPC_User_IsAnonymous(user))
+    {
+        SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+        userCopy = (SOPC_User*) SOPC_User_GetAnonymous();
+        SOPC_GCC_DIAGNOSTIC_RESTORE
+    }
+    else
+    {
+        SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+        userCopy = SOPC_Calloc(1, sizeof(*userCopy));
+        if (NULL != userCopy)
+        {
+            userCopy->type = user->type;
+            status = SOPC_String_Copy(&userCopy->data.username, &user->data.username);
+        }
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Free(userCopy);
+            userCopy = NULL;
+        }
+    }
+    return userCopy;
 }

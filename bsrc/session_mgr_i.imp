@@ -28,7 +28,8 @@ SEES
     message_in_bs,
     message_out_bs,
     channel_mgr,
-    request_handle_bs
+    request_handle_bs,
+    app_cb_call_context_bs
 
 IMPORTS
     session_core,
@@ -531,7 +532,8 @@ OPERATIONS
         l_session,
         l_valid_session,
         l_session_state,
-        l_session_channel
+        l_session_channel,
+        l_user
     IN
         l_session <-- server_get_session_from_token (session_token);
         l_valid_session <-- is_valid_session (l_session);
@@ -549,6 +551,8 @@ OPERATIONS
                 session := l_session;
                 IF is_valid_res = TRUE
                 THEN
+                    l_user <-- get_session_user_server (l_session);
+                    set_app_call_context_session (l_user);
                     server_session_timeout_msg_received (l_session)
                 END
             ELSE

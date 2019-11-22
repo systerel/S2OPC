@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.h
 
- Date                 : 06/03/2020 14:49:10
+ Date                 : 27/04/2021 13:57:18
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -38,6 +38,7 @@
 /*-----------------
    IMPORTS Clause
   -----------------*/
+#include "app_cb_call_context_bs.h"
 #include "channel_mgr.h"
 #include "data_value_pointer_bs.h"
 #include "node_id_pointer_bs.h"
@@ -72,6 +73,8 @@ extern void io_dispatch_mgr__get_msg_service_class(
    constants__t_msg_service_class_i * const io_dispatch_mgr__service_class);
 extern void io_dispatch_mgr__l_may_close_secure_channel_without_session(
    t_bool * const io_dispatch_mgr__l_is_one_sc_closing);
+extern void io_dispatch_mgr__l_set_app_call_context_channel_config(
+   const constants__t_channel_i io_dispatch_mgr__p_channel);
 
 /*--------------------
    OPERATIONS Clause

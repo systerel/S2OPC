@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 13/03/2020 10:52:37
+ Date                 : 27/04/2021 13:57:18
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -240,6 +240,26 @@ void io_dispatch_mgr__l_may_close_secure_channel_without_session(
    }
 }
 
+void io_dispatch_mgr__l_set_app_call_context_channel_config(
+   const constants__t_channel_i io_dispatch_mgr__p_channel) {
+   {
+      t_bool io_dispatch_mgr__l_is_connected;
+      constants__t_channel_config_idx_i io_dispatch_mgr__l_channel_config;
+      constants__t_endpoint_config_idx_i io_dispatch_mgr__l_endpoint_config;
+      
+      channel_mgr__is_connected_channel(io_dispatch_mgr__p_channel,
+         &io_dispatch_mgr__l_is_connected);
+      if (io_dispatch_mgr__l_is_connected == true) {
+         channel_mgr__get_channel_info(io_dispatch_mgr__p_channel,
+            &io_dispatch_mgr__l_channel_config);
+         channel_mgr__server_get_endpoint_config(io_dispatch_mgr__p_channel,
+            &io_dispatch_mgr__l_endpoint_config);
+         app_cb_call_context_bs__set_app_call_context_channel_config(io_dispatch_mgr__l_channel_config,
+            io_dispatch_mgr__l_endpoint_config);
+      }
+   }
+}
+
 void io_dispatch_mgr__receive_msg_buffer(
    const constants__t_channel_i io_dispatch_mgr__channel,
    const constants__t_byte_buffer_i io_dispatch_mgr__buffer,
@@ -277,6 +297,7 @@ void io_dispatch_mgr__receive_msg_buffer(
             &io_dispatch_mgr__l_msg_header_type);
          io_dispatch_mgr__get_msg_service_class(io_dispatch_mgr__l_msg_type,
             &io_dispatch_mgr__l_msg_service_class);
+         io_dispatch_mgr__l_set_app_call_context_channel_config(io_dispatch_mgr__channel);
          switch (io_dispatch_mgr__l_msg_header_type) {
          case constants__e_msg_request_type:
             io_dispatch_mgr__l_valid_req = false;
@@ -386,6 +407,7 @@ void io_dispatch_mgr__receive_msg_buffer(
             break;
          }
       }
+      app_cb_call_context_bs__clear_app_call_context();
    }
 }
 

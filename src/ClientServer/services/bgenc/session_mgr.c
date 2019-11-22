@@ -21,7 +21,7 @@
 
  File Name            : session_mgr.c
 
- Date                 : 06/03/2020 14:49:21
+ Date                 : 27/04/2021 13:57:30
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -488,6 +488,7 @@ void session_mgr__server_validate_session_service_req(
       t_bool session_mgr__l_valid_session;
       constants__t_sessionState session_mgr__l_session_state;
       constants__t_channel_i session_mgr__l_session_channel;
+      constants__t_user_i session_mgr__l_user;
       
       session_core__server_get_session_from_token(session_mgr__session_token,
          &session_mgr__l_session);
@@ -507,6 +508,9 @@ void session_mgr__server_validate_session_service_req(
             *session_mgr__status_code_err = constants_statuscodes_bs__e_sc_ok;
             *session_mgr__session = session_mgr__l_session;
             if (*session_mgr__is_valid_res == true) {
+               session_core__get_session_user_server(session_mgr__l_session,
+                  &session_mgr__l_user);
+               app_cb_call_context_bs__set_app_call_context_session(session_mgr__l_user);
                session_core__server_session_timeout_msg_received(session_mgr__l_session);
             }
          }

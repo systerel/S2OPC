@@ -73,4 +73,7 @@ bool SOPC_User_Equal(const SOPC_User* left, const SOPC_User* right);
 /** \brief User deletion, should not be called on local and anonymous users. */
 void SOPC_User_Free(SOPC_User** ppUser);
 
+/** \brief Copy the given user */
+SOPC_User* SOPC_User_Copy(const SOPC_User* user);
+
 #endif /* SOPC_USER_H_ */
