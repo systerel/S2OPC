@@ -47,6 +47,8 @@
 
 #ifdef WITH_STATIC_SECURITY_DATA
 #include "static_security_data.h"
+static SOPC_SerializedCertificate* static_cacert = NULL;
+static SOPC_CRLList* static_cacrl = NULL;
 #endif
 
 #define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"
@@ -478,13 +480,22 @@ static SOPC_ReturnStatus Server_SetCryptographicConfig(SOPC_Server_Config* serve
                                                                             &serverConfig->serverKey);
         }
 
-        /*if (SOPC_STATUS_OK == status)
+        if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_KeyManager_SerializedCertificate_CreateFromDER(cacert, sizeof(cacert),
-                                                                         &serverConfig->certificateAuthority);
-        }*/
-        assert(false); // TODO: create local variable and instantiate PKI here
-#else                  // WITH_STATIC_SECURITY_DATA == false
+            status = SOPC_KeyManager_SerializedCertificate_CreateFromDER(cacert, sizeof(cacert), &static_cacert);
+        }
+
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_KeyManager_CRL_CreateOrAddFromDER(cacrl, sizeof(cacrl), &static_cacrl);
+        }
+
+        /* Create the PKI (Public Key Infrastructure) provider */
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_PKIProviderStack_Create(static_cacert, static_cacrl, &serverConfig->pki);
+        }
+#else // WITH_STATIC_SECURITY_DATA == false
         /* Load client/server certificates and server key from files */
         status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(serverConfig->serverCertPath,
                                                                       &serverConfig->serverCertificate);
@@ -999,6 +1010,9 @@ int main(int argc, char* argv[])
     SOPC_AddressSpace_Delete(address_space);
     SOPC_S2OPC_Config_Clear(&s2opcConfig);
     SOPC_Free(logDirPath);
+#ifdef WITH_STATIC_SECURITY_DATA
+    SOPC_KeyManager_SerializedCertificate_Delete(static_cacert);
+#endif
 
     return (status == SOPC_STATUS_OK) ? 0 : 1;
 }
