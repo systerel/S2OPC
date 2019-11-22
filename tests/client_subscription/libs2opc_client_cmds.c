@@ -152,6 +152,25 @@ static SOPC_ReturnStatus SOPC_BrowseContext_Initialization(BrowseContext* ctx)
     return status;
 }
 
+typedef struct
+{
+    Mutex mutex; /* protect this context */
+    Condition condition;
+
+    SOPC_ClientHelper_GetEndpointsResult* endpoints;
+    SOPC_StatusCode status;
+    bool finish;
+} GetEndpointsContext;
+
+static SOPC_ReturnStatus SOPC_GetEndpointsContext_Initialization(GetEndpointsContext* ctx)
+{
+    SOPC_ReturnStatus status = Mutex_Initialization(&ctx->mutex);
+    ctx->endpoints = NULL;
+    ctx->status = SOPC_STATUS_NOK;
+    ctx->finish = false;
+    return status;
+}
+
 /* Callbacks */
 static void log_callback(const SOPC_Toolkit_Log_Level log_level, SOPC_LibSub_CstString text);
 static void disconnect_callback(const SOPC_LibSub_ConnectionId c_id);
@@ -184,6 +203,10 @@ static SOPC_ReturnStatus BrowseHelper_InitializeNodesToBrowse(size_t nbElements,
 static SOPC_ReturnStatus BrowseHelper_InitializeBrowseResults(size_t nbElements,
                                                               SOPC_ReturnStatus status,
                                                               SOPC_Array** browseResultsListArray);
+
+static void GenericCallback_GetEndpoints(const SOPC_StatusCode requestStatus,
+                                         const void* response,
+                                         uintptr_t responseContext);
 static void GenericCallbackHelper_Read(SOPC_StatusCode status, const void* response, uintptr_t responseContext);
 static void GenericCallbackHelper_Write(SOPC_StatusCode status, const void* response, uintptr_t responseContext);
 static void GenericCallbackHelper_Browse(SOPC_StatusCode status, const void* response, uintptr_t responseContext);
@@ -234,7 +257,7 @@ int32_t SOPC_ClientHelper_Initialize(const char* log_path, int32_t log_level)
         .disconnect_callback = disconnect_callback,
         .toolkit_logger = {.level = level, .log_path = log_path, .maxBytes = 1048576, .maxFiles = 50}};
 
-    SOPC_ReturnStatus status = SOPC_ClientCommon_Initialize(&cfg_cli);
+    SOPC_ReturnStatus status = SOPC_ClientCommon_Initialize(&cfg_cli, GenericCallback_GetEndpoints);
 
     if (!log_level_set)
     {
@@ -260,6 +283,90 @@ void SOPC_ClientHelper_Finalize(void)
     Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Closing the Toolkit.");
     SOPC_ClientCommon_Clear();
     Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Toolkit closed.");
+}
+
+int32_t SOPC_ClientHelper_GetEndpoints(const char* endpointUrl, SOPC_ClientHelper_GetEndpointsResult** result)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_ReturnStatus statusMutex = SOPC_STATUS_OK;
+    GetEndpointsContext* ctx = NULL;
+    int32_t res = 0;
+
+    if (NULL == endpointUrl)
+    {
+        return -1;
+    }
+    else if (NULL == result)
+    {
+        return -2;
+    }
+
+    status = SOPC_ClientCommon_Configured();
+    if (SOPC_STATUS_OK != status)
+    {
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not configure the toolkit");
+        res = -100;
+    }
+
+    /* allocate context */
+    if (SOPC_STATUS_OK == status)
+    {
+        ctx = SOPC_Calloc(1, sizeof(GetEndpointsContext));
+        if (NULL == ctx)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+
+    /* Initialize context */
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_GetEndpointsContext_Initialization(ctx);
+    }
+
+    /* wait for the request result */
+    if (SOPC_STATUS_OK == status)
+    {
+        /* Prepare the synchronous context */
+        Condition_Init(&ctx->condition);
+        assert(SOPC_STATUS_OK == statusMutex);
+        statusMutex = Mutex_Lock(&ctx->mutex);
+        assert(SOPC_STATUS_OK == statusMutex);
+
+        status = SOPC_ClientCommon_AsyncSendDiscoveryRequest(endpointUrl, (uintptr_t) ctx);
+
+        /* Wait for the response */
+        while (SOPC_STATUS_OK == status && !ctx->finish)
+        {
+            statusMutex = Mutex_UnlockAndTimedWaitCond(&ctx->condition, &ctx->mutex, SYNCHRONOUS_REQUEST_TIMEOUT);
+            assert(SOPC_STATUS_TIMEOUT != statusMutex); /* TODO return error */
+            assert(SOPC_STATUS_OK == statusMutex);
+        }
+        status = ctx->status;
+
+        /* Free the context */
+        statusMutex = Mutex_Unlock(&ctx->mutex);
+        assert(SOPC_STATUS_OK == statusMutex);
+        statusMutex = Condition_Clear(&ctx->condition);
+        assert(SOPC_STATUS_OK == statusMutex);
+        statusMutex = Mutex_Clear(&ctx->mutex);
+        assert(SOPC_STATUS_OK == statusMutex);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        *result = ctx->endpoints;
+    }
+
+    /* request was not successful*/
+    if (SOPC_STATUS_OK != status)
+    {
+        res = -100;
+    }
+
+    SOPC_Free(ctx);
+
+    return res;
 }
 
 static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_con,
@@ -412,6 +519,130 @@ int32_t SOPC_ClientHelper_Connect(const char* endpointUrl, SOPC_ClientHelper_Sec
     assert(con_id > 0);
     assert(con_id <= INT32_MAX);
     return (int32_t) con_id;
+}
+
+static void GenericCallback_GetEndpoints(const SOPC_StatusCode requestStatus,
+                                         const void* response,
+                                         uintptr_t responseContext)
+{
+    SOPC_StatusCode status = SOPC_STATUS_OK;
+    SOPC_StatusCode statusMutex = SOPC_STATUS_OK;
+
+    GetEndpointsContext* ctx = (GetEndpointsContext*) responseContext;
+    const OpcUa_GetEndpointsResponse* getEndpointsResp = (const OpcUa_GetEndpointsResponse*) response;
+    (void) getEndpointsResp;
+
+    statusMutex = Mutex_Lock(&ctx->mutex);
+    assert(SOPC_STATUS_OK == statusMutex);
+
+    if (SOPC_STATUS_OK != requestStatus)
+    {
+        status = requestStatus;
+        /* free the reqCtx ? ? */
+    }
+
+    /* convert getEndpointsResp to SOPC_ClientHelper_GetEndpointsResult */
+    if (SOPC_STATUS_OK == status && 0 != getEndpointsResp->NoOfEndpoints)
+    {
+        ctx->endpoints = SOPC_Calloc(1, sizeof(SOPC_ClientHelper_GetEndpointsResult));
+
+        if (NULL == ctx->endpoints)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+
+        if (SOPC_STATUS_OK == status)
+        {
+            ctx->endpoints->nbOfEndpoints = getEndpointsResp->NoOfEndpoints;
+
+            SOPC_ClientHelper_EndpointDescription* endpoints =
+                SOPC_Calloc((size_t) getEndpointsResp->NoOfEndpoints, sizeof(SOPC_ClientHelper_EndpointDescription));
+            if (NULL == endpoints)
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+
+            if (SOPC_STATUS_OK == status)
+            {
+                ctx->endpoints->endpoints = endpoints;
+
+                OpcUa_EndpointDescription* descriptions = getEndpointsResp->Endpoints;
+                for (int32_t i = 0; i < getEndpointsResp->NoOfEndpoints; i++)
+                {
+                    /* convert OpcUa_EndpointDescription to SOPC_ClientHelper_EndpointDescription */
+                    endpoints[i].endpointUrl = SOPC_String_GetCString(&descriptions[i].EndpointUrl);
+                    endpoints[i].security_mode = (int32_t) descriptions[i].SecurityMode;
+                    endpoints[i].security_policyUri = SOPC_String_GetCString(&descriptions[i].SecurityPolicyUri);
+                    endpoints[i].nbOfUserIdentityTokens = descriptions[i].NoOfUserIdentityTokens;
+                    endpoints[i].transportProfileUri = SOPC_String_GetCString(&descriptions[i].TransportProfileUri);
+                    endpoints[i].securityLevel = descriptions[i].SecurityLevel;
+
+                    SOPC_ClientHelper_UserIdentityToken* userIds = SOPC_Calloc(
+                        (size_t) descriptions[i].NoOfUserIdentityTokens, sizeof(SOPC_ClientHelper_UserIdentityToken));
+                    if (NULL == userIds)
+                    {
+                        status = SOPC_STATUS_OUT_OF_MEMORY;
+                    }
+
+                    if (SOPC_STATUS_OK == status)
+                    {
+                        endpoints[i].userIdentityTokens = userIds;
+
+                        OpcUa_UserTokenPolicy* tokensPolicies = descriptions[i].UserIdentityTokens;
+                        for (int32_t j = 0; j < descriptions[i].NoOfUserIdentityTokens; j++)
+                        {
+                            /* convert OpcUa_UserTokenPolicy to SOPC_ClientHelper_UserIdentityToken */
+                            userIds[j].policyId = SOPC_String_GetCString(&tokensPolicies[j].PolicyId);
+                            userIds[j].tokenType = (int32_t) tokensPolicies[j].TokenType;
+                            userIds[j].issuedTokenType = SOPC_String_GetCString(&tokensPolicies[j].IssuedTokenType);
+                            userIds[j].issuerEndpointUrl = SOPC_String_GetCString(&tokensPolicies[j].IssuerEndpointUrl);
+                            userIds[j].securityPolicyUri = SOPC_String_GetCString(&tokensPolicies[j].SecurityPolicyUri);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /* clean up allocations if an error occured */
+    if (SOPC_STATUS_OK != status)
+    {
+        if (NULL != ctx->endpoints)
+        {
+            if (NULL != ctx->endpoints->endpoints)
+            {
+                for (int32_t i = 0; i < ctx->endpoints->nbOfEndpoints; i++)
+                {
+                    SOPC_Free(ctx->endpoints->endpoints[i].endpointUrl);
+                    SOPC_Free(ctx->endpoints->endpoints[i].security_policyUri);
+                    SOPC_Free(ctx->endpoints->endpoints[i].transportProfileUri);
+                    if (NULL != ctx->endpoints->endpoints[i].userIdentityTokens)
+                    {
+                        for (int32_t j = 0; j < ctx->endpoints->endpoints[i].nbOfUserIdentityTokens; j++)
+                        {
+                            SOPC_Free(ctx->endpoints->endpoints[i].userIdentityTokens[j].policyId);
+                            SOPC_Free(ctx->endpoints->endpoints[i].userIdentityTokens[j].issuedTokenType);
+                            SOPC_Free(ctx->endpoints->endpoints[i].userIdentityTokens[j].issuerEndpointUrl);
+                            SOPC_Free(ctx->endpoints->endpoints[i].userIdentityTokens[j].securityPolicyUri);
+                        }
+                        SOPC_Free(ctx->endpoints->endpoints[i].userIdentityTokens);
+                    }
+                }
+                SOPC_Free(ctx->endpoints->endpoints);
+            }
+            SOPC_Free(ctx->endpoints);
+        }
+    }
+
+    /* transmit request status in ctx->status and avoid the status being the mutex and condition results */
+    ctx->status = status;
+    ctx->finish = true;
+
+    statusMutex = Mutex_Unlock(&ctx->mutex);
+    assert(SOPC_STATUS_OK == statusMutex);
+    /* Signal that the response is available */
+    statusMutex = Condition_SignalAll(&ctx->condition);
+    assert(SOPC_STATUS_OK == statusMutex);
 }
 
 static void GenericCallbackHelper_Read(SOPC_StatusCode status, const void* response, uintptr_t responseContext)
@@ -830,7 +1061,6 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
 
 int32_t SOPC_ClientHelper_CreateSubscription(int32_t connectionId, SOPC_ClientHelper_DataChangeCbk callback)
 {
-    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_DEBUG, "SOPC_ClientHelper_CreateSubscription");
     int32_t res = 0;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
