@@ -696,14 +696,14 @@ static char* get_raw_sha1(const mbedtls_x509_buf* raw)
     }
 
     /* Poor-man's SHA-1 format */
-    char* ret = SOPC_Calloc(60, sizeof(char));
+    char* ret = SOPC_Calloc(61, sizeof(char));
     if (NULL == ret)
     {
         return NULL;
     }
     for (size_t i = 0; i < 20; ++i)
     {
-        sprintf(ret + 3 * i, "%02X:", pDest[i]);
+        snprintf(ret + 3 * i, 4, "%02X:", pDest[i]);
     }
     ret[59] = '\0';
 
@@ -742,7 +742,7 @@ SOPC_ReturnStatus SOPC_KeyManager_CertificateList_MatchCRLList(const SOPC_Certif
         {
             /* This is the test done by mbedtls internally in x509_crt_verifycrl.
              * It verifies the subject only, but further verifications are done by mbedtls.
-             * With this test, we restrict the CA list to have only one CA with a given subject.
+             * With this test, the CA list is restricted to have only one CA with a given subject.
              * Without this restriction, we could have a newer and an older version of the same CA,
              * which in any case would be confusing for end users. */
             bool match = crl->issuer_raw.len == crt->subject_raw.len &&
@@ -804,9 +804,6 @@ static SOPC_ReturnStatus crl_maybe_create(SOPC_CRLList** ppCRL)
     return SOPC_STATUS_OK;
 }
 
-/**
- * \note    Neither tested nor part of the test suites.
- */
 SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromDER(const uint8_t* bufferDER,
                                                          uint32_t lenDER,
                                                          SOPC_CRLList** ppCRL)
