@@ -50,6 +50,7 @@ extern char* ENDPOINT_URL; // See config.c, possible override by main
 #define PATH_CLIENT_PRIV "./client_private/client_4k_key.pem"
 #define PATH_SERVER_PUBL "./server_public/server_4k_cert.der"
 #define PATH_CACERT_PUBL "./trusted/cacert.der"
+#define PATH_CACRL "./revoked/cacrl.der"
 
 /* The policyId of the chosen IdentityToken */
 #define ANONYMOUS_POLICY_ID "anonymous"

@@ -186,7 +186,6 @@ int main(int argc, char* argv[])
     // Secu policy configuration:
     static SOPC_SerializedCertificate* serverCertificate = NULL;
     static SOPC_SerializedAsymmetricKey* serverKey = NULL;
-    static SOPC_SerializedCertificate* authCertificate = NULL;
     static SOPC_PKIProvider* pkiProvider = NULL;
 
     SOPC_AddressSpace* address_space = SOPC_Embedded_AddressSpace_Load();
@@ -217,14 +216,12 @@ int main(int argc, char* argv[])
             SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile("./server_private/server_2k_key.pem", &serverKey);
         sConfig->serverKey = serverKey;
     }
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_KeyManager_SerializedCertificate_CreateFromFile("./trusted/cacert.der", &authCertificate);
-    }
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_PKIProviderStack_Create(authCertificate, NULL, &pkiProvider);
+        char* lPathsCA[] = {"./trusted/cacert.der", NULL};
+        char* lPathsCRL[] = {"./revoked/cacrl.der", NULL};
+        status = SOPC_PKIProviderStack_CreateFromPaths(lPathsCA, lPathsCRL, &pkiProvider);
         sConfig->pki = pkiProvider;
     }
     if (SOPC_STATUS_OK != status)

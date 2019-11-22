@@ -33,7 +33,6 @@ int nCfgCreated = 0; /* Number of created configs with certificates, to remember
 SOPC_SerializedCertificate* pCrtCli = NULL;
 SOPC_SerializedCertificate* pCrtSrv = NULL;
 SOPC_SerializedAsymmetricKey* pKeyCli = NULL;
-SOPC_SerializedCertificate* pCrtCAu = NULL;
 SOPC_PKIProvider* pPki = NULL;
 
 SOPC_ReturnStatus Config_LoadCertificates(void);
@@ -111,12 +110,10 @@ void Config_DeleteSCConfig(SOPC_SecureChannel_Config** ppscConfig)
         SOPC_KeyManager_SerializedCertificate_Delete(pCrtSrv);
         SOPC_KeyManager_SerializedAsymmetricKey_Delete(pKeyCli);
         SOPC_PKIProvider_Free(&pPki);
-        SOPC_KeyManager_SerializedCertificate_Delete(pCrtCAu);
         pCrtCli = NULL;
         pCrtSrv = NULL;
         pKeyCli = NULL;
         pPki = NULL;
-        pCrtCAu = NULL;
     }
 }
 
@@ -152,16 +149,9 @@ SOPC_ReturnStatus Config_LoadCertificates(void)
 
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(PATH_CACERT_PUBL, &pCrtCAu);
-            if (SOPC_STATUS_OK != status)
-            {
-                printf("# Error: Failed to load CA\n");
-            }
-        }
-
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_PKIProviderStack_Create(pCrtCAu, NULL, &pPki);
+            char* lPathsCA[] = {PATH_CACERT_PUBL, NULL};
+            char* lPathsCRL[] = {PATH_CACRL, NULL};
+            status = SOPC_PKIProviderStack_CreateFromPaths(lPathsCA, lPathsCRL, &pPki);
             if (SOPC_STATUS_OK != status)
             {
                 printf("# Error: Failed to create PKI\n");

@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
     uint32_t scConnectionId = 0;
 
     SOPC_PKIProvider* pki = NULL;
-    SOPC_SerializedCertificate *crt_cli = NULL, *crt_srv = NULL, *crt_ca = NULL;
+    SOPC_SerializedCertificate *crt_cli = NULL, *crt_srv = NULL;
     SOPC_SerializedAsymmetricKey* priv_cli = NULL;
 
     // Endpoint URL
@@ -207,25 +207,13 @@ int main(int argc, char* argv[])
         }
     }
 
-    if (messageSecurityMode != OpcUa_MessageSecurityMode_None && SOPC_STATUS_OK == status)
-    {
-        // Certificate Authority: load
-        status = SOPC_KeyManager_SerializedCertificate_CreateFromFile("./trusted/cacert.der", &crt_ca);
-        if (SOPC_STATUS_OK != status)
-        {
-            printf(">>Stub_Client: Failed to load CA\n");
-        }
-        else
-        {
-            printf(">>Stub_Client: CA certificate loaded\n");
-        }
-    }
-
     // Init PKI provider and parse certificate and private key
     // PKIConfig is just used to create the provider but only configuration of PKIType is useful here (paths not used)
     if (messageSecurityMode != OpcUa_MessageSecurityMode_None && SOPC_STATUS_OK == status)
     {
-        status = SOPC_PKIProviderStack_Create(crt_ca, NULL, &pki);
+        char* lPathsCA[] = {"./trusted/cacert.der", NULL};
+        char* lPathsCRL[] = {"./revoked/cacrl.der", NULL};
+        status = SOPC_PKIProviderStack_CreateFromPaths(lPathsCA, lPathsCRL, &pki);
         if (SOPC_STATUS_OK != status)
         {
             printf(">>Stub_Client: Failed to create PKI\n");
@@ -420,7 +408,6 @@ int main(int argc, char* argv[])
     SOPC_String_Clear(&stEndpointUrl);
     SOPC_KeyManager_SerializedCertificate_Delete(crt_cli);
     SOPC_KeyManager_SerializedCertificate_Delete(crt_srv);
-    SOPC_KeyManager_SerializedCertificate_Delete(crt_ca);
     SOPC_KeyManager_SerializedAsymmetricKey_Delete(priv_cli);
     SOPC_EventRecorder_Delete(servicesEvents);
 

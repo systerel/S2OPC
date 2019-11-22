@@ -53,7 +53,6 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_SecureChannel_Config* pscConfig = NULL;
-    SOPC_SerializedCertificate* pCrtCAu = NULL;
     SOPC_SerializedCertificate* pCrtSrv = NULL;
     SOPC_SerializedCertificate* pCrtCli = NULL;
     SOPC_SerializedAsymmetricKey* pKeyCli = NULL;
@@ -97,37 +96,18 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    /* Load the certificates & CRL before the creation of the PKI, then the config */
-    if (!bDisablePKI)
-    {
-        status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(szPathCertifAuth, &pCrtCAu);
-        if (SOPC_STATUS_OK != status)
-        {
-            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Failed to load the CA.");
-        }
-    }
-    /* TODO: handle Revocation list */
-    if (SOPC_STATUS_OK == status && NULL != szPathCrl)
-    {
-        status = SOPC_STATUS_INVALID_PARAMETERS;
-        if (SOPC_STATUS_OK != status)
-        {
-            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Failed to load Certificate Revocation List.");
-        }
-    }
     if (SOPC_STATUS_OK == status)
     {
         if (!bDisablePKI)
         {
-            status = SOPC_PKIProviderStack_Create(pCrtCAu, NULL, &pPki);
+            SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+            char* lPathsCA[] = {(char*) szPathCertifAuth, NULL};
+            char* lPathsCRL[] = {(char*) szPathCrl, NULL};
+            SOPC_GCC_DIAGNOSTIC_RESTORE
+            status = SOPC_PKIProviderStack_CreateFromPaths(lPathsCA, lPathsCRL, &pPki);
             if (SOPC_STATUS_OK != status)
             {
                 Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Failed to create PKI.");
-            }
-            else
-            {
-                SOPC_KeyManager_SerializedCertificate_Delete(pCrtCAu);
-                pCrtCAu = NULL;
             }
         }
         else
@@ -212,7 +192,6 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
 
     if (SOPC_STATUS_OK != status)
     {
-        SOPC_KeyManager_SerializedCertificate_Delete(pCrtCAu);
         SOPC_PKIProvider_Free(&pPki);
         SOPC_KeyManager_SerializedCertificate_Delete(pCrtSrv);
         SOPC_KeyManager_SerializedCertificate_Delete(pCrtCli);
