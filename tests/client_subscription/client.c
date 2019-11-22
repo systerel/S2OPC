@@ -99,6 +99,8 @@ typedef struct
 static bool parse_options(cmd_line_options_t* o, int argc, char* const* argv);
 static void free_options(cmd_line_options_t* o);
 static void print_usage(const char* exe);
+static void print_endpoints(SOPC_ClientHelper_GetEndpointsResult* result);
+static void free_endpoints(SOPC_ClientHelper_GetEndpointsResult* result);
 
 static void datachange_callback(const int32_t c_id, const char* node_id, const SOPC_DataValue* value)
 {
@@ -126,17 +128,68 @@ static void datachange_callback(const int32_t c_id, const char* node_id, const S
         {
             snprintf(sz + n, sizeof(sz) / sizeof(sz[0]) - n, "%" PRIu64, (int64_t) variant.Value.Uint64);
         }
-        // else if (SOPC_Int64_Id == variant.BuiltInTypeId)
-        //{
-        //    snprintf(sz + n, sizeof(sz) / sizeof(sz[0]) - n, "%" PRIi64, (int64_t) variant.Value);
-        //}
-        // else
-        //{
-        //    snprintf(sz + n, sizeof(sz) / sizeof(sz[0]) - n, "%s", (SOPC_LibSub_CstString) variant.Value);
-        //}
     }
 
     printf("%s", sz);
+}
+
+static void print_endpoints(SOPC_ClientHelper_GetEndpointsResult* result)
+{
+    if (NULL == result)
+    {
+        return;
+    }
+    printf("Server has %d endpoints.\n", result->nbOfEndpoints);
+
+    for (int32_t i = 0; i < result->nbOfEndpoints; i++)
+    {
+        printf("Endpoint #%d:\n", i);
+        printf(" - url: %s\n", result->endpoints[i].endpointUrl);
+        printf(" - security level: %d\n", result->endpoints[i].securityLevel);
+        printf(" - security mode: %d\n", result->endpoints[i].security_mode);
+        printf(" - security policy Uri: %s\n", result->endpoints[i].security_policyUri);
+        printf(" - transport profile Uri: %s\n", result->endpoints[i].transportProfileUri);
+
+        SOPC_ClientHelper_UserIdentityToken* userIds = result->endpoints[i].userIdentityTokens;
+        for (int32_t j = 0; j < result->endpoints[i].nbOfUserIdentityTokens; j++)
+        {
+            printf("  - User Identity #%d\n", j);
+            printf("    - policy Id: %s\n", userIds[j].policyId);
+            printf("    - token type: %d\n", userIds[j].tokenType);
+            printf("    - issued token type: %s\n", userIds[j].issuedTokenType);
+            printf("    - issuer endpoint Url: %s\n", userIds[j].issuerEndpointUrl);
+            printf("    - security policy Uri: %s\n", userIds[j].securityPolicyUri);
+        }
+    }
+}
+
+static void free_endpoints(SOPC_ClientHelper_GetEndpointsResult* result)
+{
+    if (NULL != result)
+    {
+        if (NULL != result->endpoints)
+        {
+            for (int32_t i = 0; i < result->nbOfEndpoints; i++)
+            {
+                free(result->endpoints[i].endpointUrl);
+                free(result->endpoints[i].security_policyUri);
+                free(result->endpoints[i].transportProfileUri);
+                if (NULL != result->endpoints[i].userIdentityTokens)
+                {
+                    for (int32_t j = 0; j < result->endpoints[i].nbOfUserIdentityTokens; j++)
+                    {
+                        free(result->endpoints[i].userIdentityTokens[j].policyId);
+                        free(result->endpoints[i].userIdentityTokens[j].issuedTokenType);
+                        free(result->endpoints[i].userIdentityTokens[j].issuerEndpointUrl);
+                        free(result->endpoints[i].userIdentityTokens[j].securityPolicyUri);
+                    }
+                    free(result->endpoints[i].userIdentityTokens);
+                }
+            }
+            free(result->endpoints);
+        }
+        free(result);
+    }
 }
 
 /* Main subscribing client */
@@ -164,6 +217,20 @@ int main(int argc, char* const argv[])
         .username = options.username,
         .password = options.password,
     };
+
+    /* GetEndpoints */
+    SOPC_ClientHelper_GetEndpointsResult* getEndpointResult;
+    res = SOPC_ClientHelper_GetEndpoints(options.endpoint_url, &getEndpointResult);
+
+    if (0 == res)
+    {
+        print_endpoints(getEndpointResult);
+        free_endpoints(getEndpointResult);
+    }
+    else
+    {
+        printf("GetEndpoints FAILED, error code: %d\n", res);
+    }
 
     int32_t connectionId = SOPC_ClientHelper_Connect(options.endpoint_url, security);
 
@@ -230,7 +297,7 @@ int main(int argc, char* const argv[])
                 free(browseResults[j].references[i].browseName);
                 free(browseResults[j].references[i].referenceTypeId);
             }
-            printf("==========================================================\n");
+            printf("=========================================================\n");
             free(browseResults[j].references);
         }
 

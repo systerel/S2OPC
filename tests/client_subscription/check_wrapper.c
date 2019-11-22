@@ -950,6 +950,72 @@ START_TEST(test_wrapper_browse)
 }
 END_TEST
 
+START_TEST(test_wrapper_get_endpoints)
+{
+    /* get endpoints before initialization */
+    {
+        SOPC_ClientHelper_GetEndpointsResult* result;
+        ck_assert_int_eq(-100, SOPC_ClientHelper_GetEndpoints(valid_url, &result));
+    }
+
+    /* initialize wrapper */
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0));
+
+    /* get endpoints  valid request */
+    {
+        SOPC_ClientHelper_GetEndpointsResult* result;
+        ck_assert_int_eq(0, SOPC_ClientHelper_GetEndpoints(valid_url, &result));
+        /* check result content */
+        /* free result */
+        if (NULL != result)
+        {
+            if (NULL != result->endpoints)
+            {
+                for (int32_t i = 0; i < result->nbOfEndpoints; i++)
+                {
+                    SOPC_Free(result->endpoints[i].endpointUrl);
+                    SOPC_Free(result->endpoints[i].security_policyUri);
+                    SOPC_Free(result->endpoints[i].transportProfileUri);
+                    if (NULL != result->endpoints[i].userIdentityTokens)
+                    {
+                        for (int32_t j = 0; j < result->endpoints[i].nbOfUserIdentityTokens; j++)
+                        {
+                            SOPC_Free(result->endpoints[i].userIdentityTokens[j].policyId);
+                            SOPC_Free(result->endpoints[i].userIdentityTokens[j].issuedTokenType);
+                            SOPC_Free(result->endpoints[i].userIdentityTokens[j].issuerEndpointUrl);
+                            SOPC_Free(result->endpoints[i].userIdentityTokens[j].securityPolicyUri);
+                        }
+                        SOPC_Free(result->endpoints[i].userIdentityTokens);
+                    }
+                }
+                SOPC_Free(result->endpoints);
+            }
+            SOPC_Free(result);
+        }
+    }
+
+    /* invalid arguments */
+    {
+        SOPC_ClientHelper_GetEndpointsResult* result;
+        /* bad url NULL */
+        ck_assert_int_eq(-1, SOPC_ClientHelper_GetEndpoints(NULL, &result));
+        /* bad result NULL */
+        ck_assert_int_eq(-2, SOPC_ClientHelper_GetEndpoints(valid_url, NULL));
+        /* bad invalid_url */
+        ck_assert_int_eq(-100, SOPC_ClientHelper_GetEndpoints(invalid_url, &result));
+    }
+
+    /* close wrapper */
+    SOPC_ClientHelper_Finalize();
+
+    /* get endpoints after toolkit is closed */
+    {
+        SOPC_ClientHelper_GetEndpointsResult* result;
+        ck_assert_int_eq(-100, SOPC_ClientHelper_GetEndpoints(valid_url, &result));
+    }
+}
+END_TEST
+
 static Suite* tests_make_suite_wrapper(void)
 {
     Suite* s = NULL;
@@ -970,6 +1036,7 @@ static Suite* tests_make_suite_wrapper(void)
     tcase_add_test(tc_wrapper, test_wrapper_read);
     tcase_add_test(tc_wrapper, test_wrapper_write);
     tcase_add_test(tc_wrapper, test_wrapper_browse);
+    tcase_add_test(tc_wrapper, test_wrapper_get_endpoints);
     tcase_set_timeout(tc_wrapper, 0);
     suite_add_tcase(s, tc_wrapper);
 

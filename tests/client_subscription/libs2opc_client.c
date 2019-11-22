@@ -49,7 +49,7 @@ SOPC_LibSub_CstString SOPC_LibSub_GetVersion(void)
 
 SOPC_ReturnStatus SOPC_LibSub_Initialize(const SOPC_LibSub_StaticCfg* pCfg)
 {
-    SOPC_ReturnStatus status = SOPC_ClientCommon_Initialize(pCfg);
+    SOPC_ReturnStatus status = SOPC_ClientCommon_Initialize(pCfg, NULL);
     return status;
 }
 

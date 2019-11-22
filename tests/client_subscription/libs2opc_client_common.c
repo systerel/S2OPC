@@ -37,6 +37,9 @@
 #include "sopc_toolkit_config.h"
 #include "sopc_version.h"
 
+#include "sopc_encodeable.h"
+#include "sopc_toolkit_async_api.h"
+
 #include "sopc_builtintypes.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_time.h"
@@ -61,6 +64,7 @@ static int32_t libInitialized = 0;
 static int32_t libConfigured = 0;
 static Mutex mutex; /* Mutex which protects global variables except libInitialized and libConfigured */
 static SOPC_LibSub_DisconnectCbk cbkDisco = NULL;
+static SOPC_ClientCommon_GetEndpointsCbk getEndpointsCbk = NULL;
 static SOPC_SLinkedList* pListConfig = NULL; /* IDs are cfgId == Toolkit cfgScId, value is SOPC_LibSub_ConnectionCfg */
 static SOPC_SLinkedList* pListClient = NULL; /* IDs are cliId, value is a StaMac */
 static SOPC_LibSub_ConnectionId nCreatedClient = 0;
@@ -74,7 +78,8 @@ static void ToolkitEventCallback(SOPC_App_Com_Event event, uint32_t IdOrStatus, 
  * ==================
  */
 
-SOPC_ReturnStatus SOPC_ClientCommon_Initialize(const SOPC_LibSub_StaticCfg* pCfg)
+SOPC_ReturnStatus SOPC_ClientCommon_Initialize(const SOPC_LibSub_StaticCfg* pCfg,
+                                               const SOPC_ClientCommon_GetEndpointsCbk cbkGetEndpoints)
 {
     if (NULL == pCfg || NULL == pCfg->host_log_callback || NULL == pCfg->disconnect_callback)
     {
@@ -132,6 +137,11 @@ SOPC_ReturnStatus SOPC_ClientCommon_Initialize(const SOPC_LibSub_StaticCfg* pCfg
         {
             Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not configure SDK logger.");
         }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        getEndpointsCbk = cbkGetEndpoints;
     }
 
     if (SOPC_STATUS_OK != status)
@@ -656,6 +666,89 @@ SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendRequestOnSession(SOPC_LibSub_Connec
     return status;
 }
 
+SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendDiscoveryRequest(const char* endpointUrl, uintptr_t requestContext)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_SecureChannel_Config* pscConfig = NULL;
+    uint32_t iscConfig = 0;
+    SOPC_StaMac_ReqCtx* pReqCtx = NULL;
+
+    if (SOPC_Atomic_Int_Get(&libInitialized) == 0)
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+
+    /* configure a secure channel */
+    const char* security_policy = SOPC_SecurityPolicy_None_URI;
+    const int32_t security_mode = OpcUa_MessageSecurityMode_None;
+
+    status = Helpers_NewSCConfigFromLibSubCfg(endpointUrl, security_policy, security_mode, true, NULL, NULL, NULL, NULL,
+                                              NULL, 0, &pscConfig);
+
+    if (SOPC_STATUS_OK == status && NULL == pscConfig)
+    {
+        status = SOPC_STATUS_NOK;
+    }
+
+    /* add a secure channel */
+    if (SOPC_STATUS_OK == status)
+    {
+        iscConfig = SOPC_ToolkitClient_AddSecureChannelConfig(pscConfig);
+        if (0 == iscConfig)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
+    /* send a discovery request without going through the StaMac */
+    OpcUa_GetEndpointsRequest* pReq = NULL;
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_Encodeable_Create(&OpcUa_GetEndpointsRequest_EncodeableType, (void**) &pReq);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_String_CopyFromCString(&pReq->EndpointUrl, endpointUrl);
+        }
+        if (SOPC_STATUS_OK != status)
+        {
+            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "# Error: Could not create the GetEndpointsRequest.\n");
+        }
+    }
+
+    /* create a context wrapper */
+    if (SOPC_STATUS_OK == status)
+    {
+        pReqCtx = SOPC_Calloc(1, sizeof(SOPC_StaMac_ReqCtx));
+        if (NULL == pReqCtx)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+
+    /* wrap the application context */
+    if (SOPC_STATUS_OK == status)
+    {
+        pReqCtx->uid = 0;
+        pReqCtx->appCtx = requestContext;
+        pReqCtx->requestScope = SOPC_REQUEST_SCOPE_DISCOVERY;
+        pReqCtx->requestType = SOPC_REQUEST_TYPE_GET_ENDPOINTS;
+    }
+
+    /* send the request */
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_ToolkitClient_AsyncSendDiscoveryRequest(iscConfig, pReq, (uintptr_t) pReqCtx);
+    }
+
+    /* free if needed */
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Free(pReq);
+    }
+
+    return status;
+}
+
 SOPC_ReturnStatus SOPC_ClientCommon_Disconnect(const SOPC_LibSub_ConnectionId cliId)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -734,7 +827,6 @@ SOPC_ReturnStatus SOPC_ClientCommon_CreateSubscription(const SOPC_LibSub_Connect
 
     if (SOPC_STATUS_OK == status)
     {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_DEBUG, "Create Subscription.");
         status = SOPC_StaMac_CreateSubscription(pSM);
     }
 
@@ -837,6 +929,48 @@ SOPC_ReturnStatus SOPC_ClientCommon_DeleteSubscription(const SOPC_LibSub_Connect
  * ========================
  */
 
+static bool LibCommon_IsDiscoveryEvent(SOPC_App_Com_Event event, uintptr_t appCtx)
+{
+    bool bDiscovery = true;
+    SOPC_StaMac_RequestScope scope = SOPC_REQUEST_SCOPE_APPLICATION;
+
+    /* Depending on the event, check whether it targets a state machine or not */
+    switch (event)
+    {
+    /* appCtx is request context */
+    case SE_RCV_DISCOVERY_RESPONSE:
+    case SE_SND_REQUEST_FAILED:
+        if (0 != appCtx)
+        {
+            scope = ((SOPC_StaMac_ReqCtx*) appCtx)->requestScope;
+        }
+
+        if (SOPC_REQUEST_SCOPE_DISCOVERY == scope)
+        {
+            bDiscovery = true;
+        }
+        else
+        {
+            bDiscovery = false;
+        }
+        break;
+    /* appCtx is session context */
+    case SE_RCV_SESSION_RESPONSE:
+    case SE_SESSION_ACTIVATION_FAILURE:
+    case SE_ACTIVATED_SESSION:
+    case SE_SESSION_REACTIVATING:
+    case SE_CLOSED_SESSION:
+        bDiscovery = false;
+        break;
+    default:
+        bDiscovery = false;
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Unexpected event %d received.", event);
+        break;
+    }
+
+    return bDiscovery;
+}
+
 static void ToolkitEventCallback(SOPC_App_Com_Event event, uint32_t IdOrStatus, void* param, uintptr_t appContext)
 {
     SOPC_SLinkedListIterator pIterCli = NULL;
@@ -852,26 +986,50 @@ static void ToolkitEventCallback(SOPC_App_Com_Event event, uint32_t IdOrStatus, 
     SOPC_ReturnStatus mutStatus = Mutex_Lock(&mutex);
     assert(SOPC_STATUS_OK == mutStatus);
 
-    /* List through known clients and call state machine event callback */
-    pIterCli = SOPC_SLinkedList_GetIterator(pListClient);
-    while (NULL != pIterCli)
+    /* check for event type */
+    if (LibCommon_IsDiscoveryEvent(event, appContext))
     {
-        pSM = SOPC_SLinkedList_NextWithId(&pIterCli, &cliId);
-        /* No more than one machine shall process the event */
-        if (SOPC_StaMac_EventDispatcher(pSM, NULL, event, IdOrStatus, param, appContext))
+        if (NULL != getEndpointsCbk)
         {
-            assert(!bProcessed);
-            bProcessed = true;
-            /* Post process the event for callbacks. */
-            if (SE_CLOSED_SESSION == event || SE_SESSION_ACTIVATION_FAILURE == event)
+            /* intercept discovery response and call SOPC_ClientCommon_GetEndpointCbk if not NULL */
+            if (SE_RCV_DISCOVERY_RESPONSE == event)
             {
-                /* The disconnect callback shall be called after the client has been destroyed */
-                cbkDisco(cliId);
+                getEndpointsCbk(SOPC_STATUS_OK, param, ((SOPC_StaMac_ReqCtx*) appContext)->appCtx);
+            }
+            else
+            {
+                getEndpointsCbk(SOPC_STATUS_NOK, param, ((SOPC_StaMac_ReqCtx*) appContext)->appCtx);
+            }
+            bProcessed = true;
+        }
+        SOPC_Free((SOPC_StaMac_ReqCtx*) appContext);
+    }
+    else
+    {
+        /* List through known clients and call state machine event callback */
+        pIterCli = SOPC_SLinkedList_GetIterator(pListClient);
+        while (NULL != pIterCli)
+        {
+            pSM = SOPC_SLinkedList_NextWithId(&pIterCli, &cliId);
+            /* No more than one machine shall process the event */
+            if (SOPC_StaMac_EventDispatcher(pSM, NULL, event, IdOrStatus, param, appContext))
+            {
+                assert(!bProcessed);
+                bProcessed = true;
+                /* Post process the event for callbacks. */
+                if (SE_CLOSED_SESSION == event || SE_SESSION_ACTIVATION_FAILURE == event)
+                {
+                    /* The disconnect callback shall be called after the client has been destroyed */
+                    cbkDisco(cliId);
+                }
             }
         }
     }
 
-    /* At least one machine should have processed the event */
+    /* TODO we receive a SE_SND_REQUEST_FAILED  when we try to send a GetEndpoint to a non-existing server */
+    /* What should we do ? */
+
+    /* At least one machine or a generic callback should have processed the event */
     assert(bProcessed);
 
     mutStatus = Mutex_Unlock(&mutex);

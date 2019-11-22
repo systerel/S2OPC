@@ -32,6 +32,26 @@
 #include "libs2opc_client_cmds.h"
 
 /*
+ * ================
+ * TYPE DEFINITIONS
+ * ================
+ */
+
+/**
+ * @description
+ *   Callback type for get endpoints event
+ * @param requestStatus
+ *   status code of the request
+ * @param response
+ *   getEndpoints request response
+ * @param responseContext
+ *   context of the response
+ */
+typedef void (*SOPC_ClientCommon_GetEndpointsCbk)(const SOPC_StatusCode requestStatus,
+                                                  const void* response,
+                                                  const uintptr_t responseContext);
+
+/*
  ===================
  SERVICES DEFINITION
  =================== */
@@ -45,10 +65,12 @@
  @param pCfg
     Non null pointer to the static configuration. The content of the configuration is copied
     and the object pointed by /p pCfg can be freed by the caller.
+ @param cbkGetEndpoints
+    GetEndpoints request callback, NULL if not used
  @return
     The operation status */
-// TODO inline all struct parameters ?
-SOPC_ReturnStatus SOPC_ClientCommon_Initialize(const SOPC_LibSub_StaticCfg* pCfg);
+SOPC_ReturnStatus SOPC_ClientCommon_Initialize(const SOPC_LibSub_StaticCfg* pCfg,
+                                               const SOPC_ClientCommon_GetEndpointsCbk cbkGetEndpoints);
 
 /*
  @description
@@ -68,7 +90,6 @@ void SOPC_ClientCommon_Clear(void);
     The configuration connection id. Set when the value returned is "SOPC_STATUS_OK".
  @return
     The operation status */
-// TODO inline all struct parameters ?
 SOPC_ReturnStatus SOPC_ClientCommon_ConfigureConnection(const SOPC_LibSub_ConnectionCfg* pCfg,
                                                         SOPC_LibSub_ConfigurationId* pCfgId);
 
@@ -87,7 +108,6 @@ SOPC_ReturnStatus SOPC_ClientCommon_Configured(void);
  @description
     Creates a new connection to a remote OPC server from configuration id cfg_id.
     The connection represent the whole client and is later identified by the returned cli_id.
-    //TODO separate the subscription creation in another function
     A subscription is created and associated with this client.
     The function waits until the client is effectively connected and the subscription created,
     or the Toolkit times out.
@@ -103,7 +123,6 @@ SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConnectionId cfgId
 /*
  * @description
  *    Create a subscription.
- *    TODO
  * @param cliId
  *    The connection id.
  * @param cbkWrapper
@@ -173,6 +192,19 @@ SOPC_ReturnStatus SOPC_ClientCommon_DeleteSubscription(const SOPC_LibSub_Connect
 SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendRequestOnSession(SOPC_LibSub_ConnectionId cliId,
                                                               void* requestStruct,
                                                               uintptr_t requestContext);
+
+/**
+ * @description
+ *    sends a Discovery (GetEndpoints) request
+ * @param endpointUrl
+ *    url of the endpoint
+ * @param requestContext
+ *    context of the request. It will be passed alongside the response.
+ * @return
+ *    the operation status
+ */
+SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendDiscoveryRequest(const char* endpointUrl, uintptr_t requestContext);
+
 /*
  @description
     Disconnect from a remote OPC server.

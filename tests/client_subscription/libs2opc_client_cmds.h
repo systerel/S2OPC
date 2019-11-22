@@ -214,6 +214,83 @@ typedef struct
 } SOPC_ClientHelper_BrowseResult;
 
 /*
+ * @description
+ *   structure containing a user identity token
+ * @field policyId
+ *   policy id
+ * @field tokenType
+ *   type of token:
+ *    - 0: anonymous
+ *    - 1: username
+ *    - 2: certificate
+ *    - 3: IssuedToken
+ *    - 4: Kerberos
+ * @field issuedTokenType
+ *   name of the token type
+ * @field issuerEndpointUrl
+ *   endpoint Url of the issuer
+ * @field securityPolicyUri
+ *   Uri of the security policy
+ */
+typedef struct
+{
+    char* policyId;
+    int32_t tokenType;
+    char* issuedTokenType;
+    char* issuerEndpointUrl;
+    char* securityPolicyUri;
+} SOPC_ClientHelper_UserIdentityToken;
+
+/*
+ * @description
+ *   structure containing an endpoint description
+ * @field endpointUrl
+ *   url of the endpoint
+ * @field security_mode
+ *   the security mode of the endpoint:
+ *    - 0: invalid
+ *    - 1: None
+ *    - 2: Sign
+ *    - 3: SignAndEncrypt
+ * @field security_policyUri
+ *   Uri of the security policy
+ * @field nbOfUserIdentityTokens
+ *   The number of user identity tokens in userIdentityTokens array
+ * @field userIdentityTokens
+ *   The array containing user identity tokens
+ * @field transportProfileUri
+ *   Uri of the transport profile
+ * @field securityLevel
+ *   the security level of the endpoint relative to other available endpoints
+ *   on the server (the higher the better)
+ */
+typedef struct
+{
+    char* endpointUrl;
+    int32_t security_mode;
+    char* security_policyUri;
+    int32_t nbOfUserIdentityTokens;
+    SOPC_ClientHelper_UserIdentityToken* userIdentityTokens;
+    char* transportProfileUri;
+    int32_t securityLevel;
+} SOPC_ClientHelper_EndpointDescription;
+
+/*
+ * @description
+ *   structure containing the result of a GetEndpoints request
+ *
+ * @field nbOfEndpoints
+ *   the number of endpoints in the endpoints array
+ * @field endpoints
+ *   array of endpoints
+ */
+typedef struct
+{
+    int32_t nbOfEndpoints;
+    SOPC_ClientHelper_EndpointDescription* endpoints;
+} SOPC_ClientHelper_GetEndpointsResult;
+
+/*
  @description
     Configure the library. This function shall be called once by the host application
     before any other service can be used.
@@ -245,6 +322,25 @@ int32_t SOPC_ClientHelper_Initialize(const char* log_path, int32_t log_level);
  @warning
     As this function should be called only once, it is not threadsafe. */
 void SOPC_ClientHelper_Finalize(void);
+
+/*
+ * @description
+ *   Sends a GetEndpoints request to the endpointUrl and provide the results
+ * @param endpointUrl
+ *   Url of the endpoint
+ * @param result
+ *   result of the request, shall not be used if function result is not 0.
+ * @return
+ *   multiple error codes:
+ *    - (0): everything is OK.
+ *    - (-1): endpointUrl is NULL.
+ *    - (-2): result is NULL.
+ *    - (-100): the request failed.
+ * @note
+ *   results content is dynamically allocated. It is up to the caller to free
+ *   this memory.
+ */
+int32_t SOPC_ClientHelper_GetEndpoints(const char* endpointUrl, SOPC_ClientHelper_GetEndpointsResult** result);
 
 /*
  @description

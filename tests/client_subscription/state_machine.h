@@ -77,19 +77,30 @@ typedef enum
     SOPC_REQUEST_TYPE_PUBLISH,                /* PublishRequest */
     SOPC_REQUEST_TYPE_CREATE_SUBSCRIPTION,    /* CreateSubscriptionRequest */
     SOPC_REQUEST_TYPE_CREATE_MONITORED_ITEMS, /* CreateMonitoredItemsRequest */
-    SOPC_REQUEST_TYPE_DELETE_SUBSCRIPTION     /* DeleteSubscriptionRequest */
+    SOPC_REQUEST_TYPE_DELETE_SUBSCRIPTION,    /* DeleteSubscriptionRequest */
+    SOPC_REQUEST_TYPE_GET_ENDPOINTS           /* GetEndpointsRequest */
 } SOPC_StaMac_RequestType;
 
 /* Request scopes */
 typedef enum
 {
     SOPC_REQUEST_SCOPE_STATE_MACHINE, /** The request is part of the inner working of the state machine */
-    SOPC_REQUEST_SCOPE_APPLICATION    /** The request is issued by the applicative layer and the response
-                                       * will be forwarded to the generic event callback */
+    SOPC_REQUEST_SCOPE_APPLICATION,   /** The request is issued by the applicative layer and the response
+                                       *  will be forwarded to the generic event callback */
+    SOPC_REQUEST_SCOPE_DISCOVERY      /** The request is a discovery request and shall not be
+                                       *  processed by a StaMac */
 } SOPC_StaMac_RequestScope;
 
+typedef struct
+{
+    uint32_t uid;                          /* Unique request identifier */
+    uintptr_t appCtx;                      /* Application context, chosen outside of the state machine */
+    SOPC_StaMac_RequestScope requestScope; /* Whether the request is started by the state machine or the applicative */
+    SOPC_StaMac_RequestType requestType;   /* the type of request */
+} SOPC_StaMac_ReqCtx;
+
 /* Machine content is private to the implementation */
-typedef struct SOPC_StaMac_ReqCtx SOPC_StaMac_ReqCtx;
+// typedef struct SOPC_StaMac_ReqCtx SOPC_StaMac_ReqCtx;
 typedef struct SOPC_StaMac_Machine SOPC_StaMac_Machine;
 
 /* Machine lifecycle */
