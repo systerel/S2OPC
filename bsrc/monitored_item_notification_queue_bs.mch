@@ -68,7 +68,8 @@ OPERATIONS
         p_queue : t_notificationQueue_i &
         p_queue : s_notificationQueue
     THEN
-        s_notificationQueue := s_notificationQueue - {p_queue}
+        s_notificationQueue := s_notificationQueue - {p_queue} ||
+        a_monitored_item_notifications :=  {p_queue} <<| a_monitored_item_notifications
     END
     ;
 

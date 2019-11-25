@@ -65,6 +65,7 @@ OPERATIONS
                                                                                          p_clientHandle) =
     PRE
         p_subscription : t_subscription_i &
+        p_subscription : t_subscription &
         p_nid : t_NodeId_i &
         p_nid : t_NodeId &
         p_aid : t_AttributeId_i &
