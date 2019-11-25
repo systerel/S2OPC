@@ -330,6 +330,19 @@ void SOPC_KeyManager_Certificate_Free(SOPC_CertificateList* pCert)
     SOPC_Free(pCert);
 }
 
+/** Assert that a certificate is passed, returns SOPC_STATUS_OK if the certificate chain is of length 1 */
+static SOPC_ReturnStatus certificate_check_single(const SOPC_CertificateList* pCert)
+{
+    size_t nCert = 0;
+    SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_GetListLength(pCert, &nCert);
+    if (SOPC_STATUS_OK == status && 1 != nCert)
+    {
+        status = SOPC_STATUS_NOK;
+    }
+
+    return status;
+}
+
 SOPC_ReturnStatus SOPC_KeyManager_Certificate_ToDER(const SOPC_CertificateList* pCert,
                                                     uint8_t** ppDest,
                                                     uint32_t* pLenAllocated)
@@ -341,13 +354,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_ToDER(const SOPC_CertificateList* 
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    /* Assert single certificate */
-    size_t nCert = 0;
-    SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_GetListLength(pCert, &nCert);
-    if (SOPC_STATUS_OK == status && 1 != nCert)
-    {
-        status = SOPC_STATUS_INVALID_PARAMETERS;
-    }
+    SOPC_ReturnStatus status = certificate_check_single(pCert);
 
     /* Allocation */
     if (SOPC_STATUS_OK == status)
@@ -393,13 +400,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetThumbprint(const SOPC_CryptoPro
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    /* Assert single certificate */
-    size_t nCert = 0;
-    SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_GetListLength(pCert, &nCert);
-    if (SOPC_STATUS_OK == status && 1 != nCert)
-    {
-        status = SOPC_STATUS_INVALID_PARAMETERS;
-    }
+    SOPC_ReturnStatus status = certificate_check_single(pCert);
 
     /* Assert allocation length */
     uint32_t lenSupposed = 0;
@@ -605,24 +606,29 @@ bool SOPC_KeyManager_Certificate_CheckApplicationUri(const SOPC_CertificateList*
 {
     assert(pCert != NULL);
     assert(application_uri != NULL);
-    size_t nCert = 0;
-    SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_GetListLength(pCert, &nCert);
-    assert(SOPC_STATUS_OK == status && 1 == nCert);
+    SOPC_ReturnStatus status = certificate_check_single(pCert);
 
     uint8_t str_len = 0;
-    const void* str_data = get_application_uri_ptr_from_crt_data(pCert, &str_len);
+    const void* str_data = NULL;
 
-    if (NULL == str_data)
+    if (SOPC_STATUS_OK == status)
     {
-        return false;
+        str_data = get_application_uri_ptr_from_crt_data(pCert, &str_len);
+        if (NULL == str_data)
+        {
+            status = SOPC_STATUS_NOK;
+        }
     }
 
-    if (strlen(application_uri) != str_len)
+    if (SOPC_STATUS_OK == status)
     {
-        return false;
+        if (strlen(application_uri) != str_len)
+        {
+            return false;
+        }
     }
 
-    return strncmp(application_uri, str_data, str_len) == 0;
+    return SOPC_STATUS_OK == status && strncmp(application_uri, str_data, str_len) == 0;
 }
 
 SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetMaybeApplicationUri(const SOPC_CertificateList* pCert,
@@ -631,33 +637,42 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetMaybeApplicationUri(const SOPC_
 {
     assert(NULL != pCert);
     assert(NULL != ppApplicationUri);
-    size_t nCert = 0;
-    SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_GetListLength(pCert, &nCert);
-    assert(SOPC_STATUS_OK == status && 1 == nCert);
+    SOPC_ReturnStatus status = certificate_check_single(pCert);
 
     uint8_t str_len = 0;
-    const void* str_data = get_application_uri_ptr_from_crt_data(pCert, &str_len);
+    const void* str_data = NULL;
 
-    if (NULL == str_data)
+    if (SOPC_STATUS_OK == status)
     {
-        return SOPC_STATUS_NOK;
+        str_data = get_application_uri_ptr_from_crt_data(pCert, &str_len);
+        if (NULL == str_data)
+        {
+            status = SOPC_STATUS_NOK;
+        }
     }
 
-    char* data_copy = SOPC_Calloc(str_len + 1U, sizeof(char));
+    char* data_copy = NULL;
 
-    if (NULL == data_copy)
+    if (SOPC_STATUS_OK == status)
     {
-        return SOPC_STATUS_OUT_OF_MEMORY;
+        data_copy = SOPC_Calloc(str_len + 1U, sizeof(char));
+        if (NULL == data_copy)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
     }
 
-    memcpy(data_copy, str_data, str_len);
-    *ppApplicationUri = data_copy;
-    if (NULL != pStringLength)
+    if (SOPC_STATUS_OK == status)
     {
-        *pStringLength = str_len;
+        memcpy(data_copy, str_data, str_len);
+        *ppApplicationUri = data_copy;
+        if (NULL != pStringLength)
+        {
+            *pStringLength = str_len;
+        }
     }
 
-    return SOPC_STATUS_OK;
+    return status;
 }
 
 SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetListLength(const SOPC_CertificateList* pCert, size_t* pLength)
