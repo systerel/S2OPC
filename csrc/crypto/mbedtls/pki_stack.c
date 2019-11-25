@@ -163,7 +163,9 @@ static int verify_cert(void* trust_li, mbedtls_x509_crt* crt, int certificate_de
         }
     }
 
-    /* Other errors are MBEDTLS_ERR_X509_FATAL_ERROR, or app specific */
+    /* Only fatal errors whould be returned here, as this error code will be forwarded to the caller of
+     * mbedtls_x509_crt_verify_with_profile, and the verification stopped.
+     * Errors may be MBEDTLS_ERR_X509_FATAL_ERROR, or application specific */
     return 0;
 }
 
@@ -228,8 +230,6 @@ static SOPC_ReturnStatus PKIProviderStack_ValidateCertificate(const SOPC_PKIProv
     {
         *error = SOPC_CertificateValidationError_UseNotAllowed;
     }
-
-    /* TODO: verify CRL <-> CA association */
 
     if (SOPC_STATUS_OK == status)
     {

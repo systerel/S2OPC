@@ -72,7 +72,9 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_SerializedCertificate* pCert
  *
  *                  Issued certificates are also accepted (certificates whose chain is not trusted)
  *                  and must be added to the certificate authority list.
- *                  Each of them must also have exactly one matching CRL in the CRL list.
+ *                  Issued certificates are always trusted, they cannot be revoked,
+ *                  as they cannot appear on a CRL of a trusted CA.
+ *                  They have no CRL, as they don't sign other certificates (otherwise, they are regular CAs).
  *
  * \param lPathCA   A pointer to an array of paths to each certificate (or trusted certificate) to use
  *                  in the validation chain.

@@ -40,9 +40,6 @@
 #include "embedded/sopc_addspace_loader.h"
 #include "runtime_variables.h"
 
-#include "key_manager_lib.h"
-#include "mbedtls/x509.h"
-
 #ifdef WITH_EXPAT
 #include "xml_expat/sopc_config_loader.h"
 #include "xml_expat/sopc_uanodeset_loader.h"

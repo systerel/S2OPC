@@ -461,7 +461,7 @@ void SOPC_KeyManager_SerializedCertificate_Delete(SOPC_SerializedCertificate* ce
  *
  * \note            Content of the CRL is unspecified when return value is not SOPC_STATUS_OK.
  *                  However, in case of a failed addition, the whole CRL list is freed,
- *                  and \p ppCert set to NULL to avoid double frees.
+ *                  and \p ppCRL set to NULL to avoid double frees.
  *
  * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
  *                  and SOPC_STATUS_NOK when there was an error.
@@ -484,7 +484,7 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromDER(const uint8_t* bufferDE
  *
  * \note            Content of the certificate is unspecified when return value is not SOPC_STATUS_OK.
  *                  However, in case of a failed addition, the whole CRL list is freed,
- *                  and \p ppCert set to NULL to avoid double frees.
+ *                  and \p ppCRL set to NULL to avoid double frees.
  *
  * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
  *                  and SOPC_STATUS_NOK when there was an error.

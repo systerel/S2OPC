@@ -250,7 +250,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromDER(const uint8_t* 
                                                                  uint32_t lenDER,
                                                                  SOPC_CertificateList** ppCert)
 {
-    if (NULL == bufferDER || 0 == lenDER)
+    if (NULL == bufferDER || 0 == lenDER || NULL == ppCert)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -265,7 +265,6 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromDER(const uint8_t* 
         {
             status = SOPC_STATUS_NOK;
             SOPC_Logger_TraceError("Crypto: certificate buffer parse failed with error code: 0x%x", err);
-            SOPC_KeyManager_Certificate_Free(pCert);
         }
     }
 
@@ -288,7 +287,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromDER(const uint8_t* 
  */
 SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromFile(const char* szPath, SOPC_CertificateList** ppCert)
 {
-    if (NULL == szPath)
+    if (NULL == szPath || NULL == ppCert)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -349,7 +348,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_ToDER(const SOPC_CertificateList* 
 {
     uint32_t lenToAllocate = 0;
 
-    if (NULL == pCert || NULL == ppDest || 0 == pLenAllocated)
+    if (NULL == pCert || NULL == ppDest || NULL == pLenAllocated)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -823,7 +822,7 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromDER(const uint8_t* bufferDE
                                                          uint32_t lenDER,
                                                          SOPC_CRLList** ppCRL)
 {
-    if (NULL == bufferDER || 0 == lenDER)
+    if (NULL == bufferDER || 0 == lenDER || NULL == ppCRL)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -838,7 +837,6 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromDER(const uint8_t* bufferDE
         {
             status = SOPC_STATUS_NOK;
             SOPC_Logger_TraceError("Crypto: crl buffer parse failed with error code: 0x%x", err);
-            SOPC_KeyManager_CRL_Free(pCRL);
         }
     }
 
@@ -856,7 +854,7 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromDER(const uint8_t* bufferDE
  */
 SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromFile(const char* szPath, SOPC_CRLList** ppCRL)
 {
-    if (NULL == szPath)
+    if (NULL == szPath || NULL == ppCRL)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
