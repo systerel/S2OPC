@@ -49,9 +49,8 @@ static OpcUa_CallMethodResult* msg_call_method_bs__getCallResult(
     const constants__t_CallMethod_i msg_call_method_bs__callMethod)
 {
     OpcUa_CallResponse* response = msg_call_method_bs__getCallResponse(msg_call_method_bs__p_res_msg);
-    uint32_t noOfResults = (0 < response->NoOfResults) ? (uint32_t) response->NoOfResults : 0;
     /* ensured by B model */
-    assert(0 < msg_call_method_bs__callMethod && msg_call_method_bs__callMethod <= noOfResults);
+    assert(0 < msg_call_method_bs__callMethod && msg_call_method_bs__callMethod <= response->NoOfResults);
 
     OpcUa_CallMethodResult* result = &response->Results[msg_call_method_bs__callMethod - 1];
     assert(NULL != result);
@@ -72,9 +71,8 @@ static OpcUa_CallMethodRequest* msg_call_method_bs__getCallMethod(
 {
     OpcUa_CallRequest* request = msg_call_method_bs__getCallRequest(msg_call_method_bs__p_req_msg);
 
-    uint32_t noOfMethodsToCall = (0 < request->NoOfMethodsToCall) ? (uint32_t) request->NoOfMethodsToCall : 0;
     /* ensured by B model */
-    assert(0 < msg_call_method_bs__callMethod && msg_call_method_bs__callMethod <= noOfMethodsToCall);
+    assert(0 < msg_call_method_bs__callMethod && msg_call_method_bs__callMethod <= request->NoOfMethodsToCall);
 
     OpcUa_CallMethodRequest* method = &request->MethodsToCall[msg_call_method_bs__callMethod - 1];
     assert(NULL != method);
@@ -270,22 +268,15 @@ void msg_call_method_bs__write_CallMethod_Res_OutputArgument(
     const constants__t_msg_i msg_call_method_bs__p_res_msg,
     const constants__t_CallMethod_i msg_call_method_bs__callMethod,
     const t_entier4 msg_call_method_bs__index,
-    const constants__t_Variant_i msg_call_method_bs__value,
-    constants_statuscodes_bs__t_StatusCode_i* const msg_call_method_bs__statusCode)
+    const constants__t_Variant_i msg_call_method_bs__value)
 {
     assert(NULL != msg_call_method_bs__value);
-    assert(NULL != msg_call_method_bs__statusCode);
     OpcUa_CallMethodResult* result =
         msg_call_method_bs__getCallResult(msg_call_method_bs__p_res_msg, msg_call_method_bs__callMethod);
     /* ensured by B model */
     assert(0 < msg_call_method_bs__index && msg_call_method_bs__index == result->NoOfOutputArguments + 1);
-    SOPC_StatusCode status =
-        SOPC_Variant_Copy(&result->OutputArguments[msg_call_method_bs__index - 1], msg_call_method_bs__value);
-    if (SOPC_STATUS_OK == status)
-    {
-        result->NoOfOutputArguments++;
-    }
-    util_status_code__C_to_B(status, msg_call_method_bs__statusCode);
+    SOPC_Variant_Move(&result->OutputArguments[msg_call_method_bs__index - 1], msg_call_method_bs__value);
+    result->NoOfOutputArguments++;
 }
 
 void msg_call_method_bs__write_CallMethod_Res_Status(

@@ -412,14 +412,23 @@ OPERATIONS
     ;
 
     p_has_channel_to_close, p_channel_to_close <-- find_channel_to_close =
-     BEGIN
-         p_has_channel_to_close,
-         p_channel_to_close
-         :(p_has_channel_to_close : BOOL & 
-             p_channel_to_close : t_channel_i &
-             (p_has_channel_to_close = TRUE => p_channel_to_close : s_channel_connected) &
-             (p_has_channel_to_close = FALSE => p_channel_to_close = c_channel_indet)
-         )
-     END
+    BEGIN
+        p_has_channel_to_close,
+        p_channel_to_close
+        :(p_has_channel_to_close : BOOL & 
+            p_channel_to_close : t_channel_i &
+            (p_has_channel_to_close = TRUE => p_channel_to_close : s_channel_connected) &
+            (p_has_channel_to_close = FALSE => p_channel_to_close = c_channel_indet)
+        )
+    END
+    ;
+    
+    endpoint_config_idx <-- session_get_endpoint_config(p_session) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session
+    THEN
+        endpoint_config_idx :: t_endpoint_config_idx_i
+    END
 
 END

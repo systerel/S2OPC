@@ -21,7 +21,7 @@
 
  File Name            : address_space.c
 
- Date                 : 18/02/2020 10:56:45
+ Date                 : 18/02/2020 11:18:25
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -724,6 +724,29 @@ void address_space__treat_write_request_WriteValues(
 void address_space__dealloc_write_request_responses(void) {
    address_space__ResponseWrite_allocated = false;
    response_write_bs__reset_ResponseWrite();
+}
+
+void address_space__check_nodeId_isValid(
+   const constants__t_NodeId_i address_space__nodeid,
+   constants_statuscodes_bs__t_StatusCode_i * const address_space__statusCode,
+   constants__t_Node_i * const address_space__node) {
+   {
+      t_bool address_space__l_isvalid;
+      
+      *address_space__statusCode = constants_statuscodes_bs__e_sc_ok;
+      *address_space__node = constants__c_Node_indet;
+      if (address_space__nodeid == constants__c_NodeId_indet) {
+         *address_space__statusCode = constants_statuscodes_bs__e_sc_bad_node_id_invalid;
+      }
+      else {
+         address_space_bs__readall_AddressSpace_Node(address_space__nodeid,
+            &address_space__l_isvalid,
+            address_space__node);
+         if (address_space__l_isvalid == false) {
+            *address_space__statusCode = constants_statuscodes_bs__e_sc_bad_node_id_unknown;
+         }
+      }
+   }
 }
 
 void address_space__read_variable_compat_type(

@@ -59,7 +59,12 @@ OPERATIONS
         p_variant: t_Variant &
         p_variant : dom(Variant_Arguments)
     THEN
-        p_nb := size(Variant_Arguments(p_variant))
+        IF p_variant : dom(Variant_Arguments)
+        THEN
+            p_nb := size(Variant_Arguments(p_variant))
+        ELSE
+            p_nb := 0
+        END
     END
     ;
     

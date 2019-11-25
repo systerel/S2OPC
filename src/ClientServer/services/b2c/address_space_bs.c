@@ -102,10 +102,9 @@ void address_space_bs__read_AddressSpace_AccessLevel_value(
                                   SOPC_AccessLevelMask_StatusWrite | SOPC_AccessLevelMask_TimestampWrite));
     *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
     *address_space_bs__variant = util_variant__new_Variant_from_Byte(accessLevel);
-    if (*address_space_bs__variant == NULL)
+    if (NULL == *address_space_bs__variant)
     {
         *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
-        *address_space_bs__variant = NULL;
     }
 }
 
@@ -155,10 +154,9 @@ void address_space_bs__read_AddressSpace_BrowseName_value(
     *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
     *address_space_bs__variant = util_variant__new_Variant_from_QualifiedName(
         SOPC_AddressSpace_Get_BrowseName(address_space_bs__nodes, address_space_bs__p_node));
-    if (*address_space_bs__variant == NULL)
+    if (NULL == *address_space_bs__variant)
     {
         *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
-        *address_space_bs__variant = NULL;
     }
 }
 
@@ -171,10 +169,9 @@ void address_space_bs__read_AddressSpace_ContainsNoLoops_value(
     *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
     // Note: always returns false since we do not check this property
     *address_space_bs__variant = util_variant__new_Variant_from_Bool(false);
-    if (*address_space_bs__variant == NULL)
+    if (NULL == *address_space_bs__variant)
     {
         *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
-        *address_space_bs__variant = NULL;
     }
 }
 
@@ -188,10 +185,9 @@ void address_space_bs__read_AddressSpace_DataType_value(
     *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
     *address_space_bs__variant = util_variant__new_Variant_from_NodeId(
         SOPC_AddressSpace_Get_DataType(address_space_bs__nodes, address_space_bs__p_node));
-    if (*address_space_bs__variant == NULL)
+    if (NULL == *address_space_bs__variant)
     {
         *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
-        *address_space_bs__variant = NULL;
     }
 }
 
@@ -204,10 +200,9 @@ void address_space_bs__read_AddressSpace_DisplayName_value(
     *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
     *address_space_bs__variant = util_variant__new_Variant_from_LocalizedText(
         SOPC_AddressSpace_Get_DisplayName(address_space_bs__nodes, address_space_bs__p_node));
-    if (*address_space_bs__variant == NULL)
+    if (NULL == *address_space_bs__variant)
     {
         *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
-        *address_space_bs__variant = NULL;
     }
     else
     {
@@ -226,10 +221,9 @@ void address_space_bs__read_AddressSpace_EventNotifier_value(
     *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
     // Note: always returns 0 since we do not implement events
     *address_space_bs__variant = util_variant__new_Variant_from_Byte(0);
-    if (*address_space_bs__variant == NULL)
+    if (NULL == *address_space_bs__variant)
     {
         *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
-        *address_space_bs__variant = NULL;
     }
 }
 
@@ -243,10 +237,9 @@ void address_space_bs__read_AddressSpace_Executable_value(
     *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
     address_space_bs__get_Executable(address_space_bs__p_node, &executable);
     *address_space_bs__variant = util_variant__new_Variant_from_Bool(executable);
-    if (*address_space_bs__variant == NULL)
+    if (NULL == *address_space_bs__variant)
     {
         *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
-        *address_space_bs__variant = NULL;
     }
 }
 
@@ -259,10 +252,9 @@ void address_space_bs__read_AddressSpace_Historizing_value(
     *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
     // Note: always returns false since we do not implement historization
     *address_space_bs__variant = util_variant__new_Variant_from_Bool(false);
-    if (*address_space_bs__variant == NULL)
+    if (NULL == *address_space_bs__variant)
     {
         *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
-        *address_space_bs__variant = NULL;
     }
 }
 
@@ -278,10 +270,9 @@ void address_space_bs__read_AddressSpace_IsAbstract_value(
     *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
     *address_space_bs__variant = util_variant__new_Variant_from_Bool(
         SOPC_AddressSpace_Get_IsAbstract(address_space_bs__nodes, address_space_bs__p_node));
-    if (*address_space_bs__variant == NULL)
+    if (NULL == *address_space_bs__variant)
     {
         *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
-        *address_space_bs__variant = NULL;
     }
 }
 
@@ -292,10 +283,9 @@ void address_space_bs__read_AddressSpace_NodeClass_value(
 {
     *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
     *address_space_bs__variant = util_variant__new_Variant_from_NodeClass(address_space_bs__p_node->node_class);
-    if (*address_space_bs__variant == NULL)
+    if (NULL == *address_space_bs__variant)
     {
         *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
-        *address_space_bs__variant = NULL;
     }
 }
 
@@ -306,10 +296,9 @@ void address_space_bs__read_AddressSpace_NodeId_value(
 {
     *address_space_bs__variant = util_variant__new_Variant_from_NodeId(
         SOPC_AddressSpace_Get_NodeId(address_space_bs__nodes, address_space_bs__p_node));
-    if (*address_space_bs__variant == NULL)
+    if (NULL == *address_space_bs__variant)
     {
         *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
-        *address_space_bs__variant = NULL;
     }
 }
 void address_space_bs__read_AddressSpace_Symmetric_value(
@@ -321,10 +310,9 @@ void address_space_bs__read_AddressSpace_Symmetric_value(
     *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
     *address_space_bs__variant =
         util_variant__new_Variant_from_Bool(address_space_bs__p_node->data.reference_type.Symmetric);
-    if (*address_space_bs__variant == NULL)
+    if (NULL == *address_space_bs__variant)
     {
         *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
-        *address_space_bs__variant = NULL;
     }
 }
 
@@ -354,10 +342,9 @@ void address_space_bs__read_AddressSpace_UserAccessLevel_value(
 
     *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
     *address_space_bs__variant = util_variant__new_Variant_from_Byte(userAccessLevel);
-    if (*address_space_bs__variant == NULL)
+    if (NULL == *address_space_bs__variant)
     {
         *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
-        *address_space_bs__variant = NULL;
     }
 }
 
@@ -369,13 +356,12 @@ void address_space_bs__read_AddressSpace_UserExecutable_value(
 {
     assert(address_space_bs__p_node->node_class == OpcUa_NodeClass_Method);
     *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
-    /* UserExecutable Level can be only more restrictive than access level  */
+    /* UserExecutable Level can be only more restrictive than executable attribute */
     *address_space_bs__variant = util_variant__new_Variant_from_Bool(address_space_bs__p_node->data.method.Executable &&
                                                                      address_space_bs__p_is_user_executable_auth);
-    if (*address_space_bs__variant == NULL)
+    if (NULL == *address_space_bs__variant)
     {
         *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
-        *address_space_bs__variant = NULL;
     }
 }
 
@@ -389,10 +375,9 @@ void address_space_bs__read_AddressSpace_ValueRank_value(
     *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
     *address_space_bs__variant = util_variant__new_Variant_from_int32(
         *SOPC_AddressSpace_Get_ValueRank(address_space_bs__nodes, address_space_bs__p_node));
-    if (*address_space_bs__variant == NULL)
+    if (NULL == *address_space_bs__variant)
     {
         *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
-        *address_space_bs__variant = NULL;
     }
 }
 
@@ -441,7 +426,7 @@ void address_space_bs__read_AddressSpace_Value_value(
     {
         *address_space_bs__variant = SOPC_Variant_Create();
 
-        if (*address_space_bs__variant == NULL)
+        if (NULL == *address_space_bs__variant)
         {
             *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
         }
@@ -973,7 +958,7 @@ static bool is_inputArgument(const OpcUa_VariableNode* node)
 void address_space_bs__get_TypeDefinition(const constants__t_Node_i address_space_bs__p_node,
                                           constants__t_ExpandedNodeId_i* const address_space_bs__p_type_def)
 {
-    util_get_TypeDefinition(address_space_bs__p_node, address_space_bs__p_type_def);
+    util_addspace__get_TypeDefinition(address_space_bs__p_node, address_space_bs__p_type_def);
 }
 
 void address_space_bs__get_Reference_ReferenceType(const constants__t_Reference_i address_space_bs__p_ref,
@@ -1027,17 +1012,15 @@ void address_space_bs__get_InputArguments(const constants__t_Node_i address_spac
     assert(NULL != address_space_bs__p_input_arg);
 
     constants__t_Variant_i result = NULL;
-    t_entier4 indexEnd;
-    OpcUa_ReferenceNode* ref;
     bool found;
     SOPC_AddressSpace_Node* targetNode;
 
-    address_space_bs__get_Node_RefIndexEnd(address_space_bs__p_node, &indexEnd);
-
-    for (int i = 1; i <= indexEnd && NULL == result; i++)
+    int32_t* n_refs = SOPC_AddressSpace_Get_NoOfReferences(address_space_bs__nodes, address_space_bs__p_node);
+    OpcUa_ReferenceNode** refs = SOPC_AddressSpace_Get_References(address_space_bs__nodes, address_space_bs__p_node);
+    for (int32_t i = 0; i < *n_refs && NULL == result; ++i)
     { /* stop when input argument is found */
-        address_space_bs__get_RefIndex_Reference(address_space_bs__p_node, i, &ref);
-        if (is_property(ref))
+        OpcUa_ReferenceNode* ref = &(*refs)[i];
+        if (util_addspace__is_property(ref))
         {
             if (ref->TargetId.ServerIndex == 0 && ref->TargetId.NamespaceUri.Length <= 0)
             { // Shall be on same server and shall use only NodeId

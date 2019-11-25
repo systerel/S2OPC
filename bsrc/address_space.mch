@@ -138,8 +138,8 @@ DEFINITIONS
         
         /* Objects */
         Object_HasMethod : t_NodeId <-> t_NodeId &
-		
-		Variant_LocalDataType : t_Variant --> t_NodeId &
+
+        Variant_LocalDataType : t_Variant --> t_NodeId &
         Variant_ValueRank : t_Variant --> t_ConcreteValueRank &
 
         /* Special reference (see def) */
@@ -659,6 +659,25 @@ OPERATIONS
     THEN
         p_bool := bool(p_object |-> p_method : Object_HasMethod)
     END
-
+    ;
+    
+    statusCode, node <-- check_nodeId_isValid(nodeid)=
+    PRE
+        nodeid : t_NodeId_i &
+        nodeid : t_NodeId
+    THEN
+        IF nodeid = c_NodeId_indet
+        THEN
+            statusCode := e_sc_bad_node_id_invalid ||
+            node := c_Node_indet
+        ELSIF nodeid /: dom(a_NodeId~)
+        THEN
+            statusCode := e_sc_bad_node_id_unknown ||
+            node := c_Node_indet
+        ELSE
+            statusCode := e_sc_ok ||
+            node := a_NodeId~(nodeid)
+        END
+    END
 
 END

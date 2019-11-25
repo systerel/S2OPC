@@ -21,7 +21,7 @@
 
  File Name            : session_mgr.c
 
- Date                 : 19/11/2019 10:10:06
+ Date                 : 18/02/2020 11:18:49
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -125,23 +125,6 @@ void session_mgr__local_client_close_sessions_on_SC_final_connection_failure(
             }
          }
       }
-   }
-}
-
-void session_mgr__getall_valid_session_channel(
-   const constants__t_session_i session_mgr__session,
-   t_bool * const session_mgr__bres,
-   constants__t_channel_i * const session_mgr__channel) {
-   session_core__is_valid_session(session_mgr__session,
-      session_mgr__bres);
-   if (*session_mgr__bres == true) {
-      session_core__get_session_channel(session_mgr__session,
-         session_mgr__channel);
-   }
-   else {
-      session_core__getall_session_channel(session_mgr__session,
-         session_mgr__bres,
-         session_mgr__channel);
    }
 }
 
@@ -859,6 +842,24 @@ void session_mgr__server_evaluate_session_timeout(
       if (session_mgr__l_session_expired == true) {
          session_core__server_close_session_sm(session_mgr__session,
             constants_statuscodes_bs__e_sc_bad_timeout);
+      }
+   }
+}
+
+void session_mgr__session_get_endpoint_config(
+   const constants__t_session_i session_mgr__p_session,
+   constants__t_endpoint_config_idx_i * const session_mgr__endpoint_config_idx) {
+   {
+      constants__t_channel_i session_mgr__l_channel;
+      t_bool session_mgr__l_continue;
+      
+      *session_mgr__endpoint_config_idx = constants__c_endpoint_config_idx_indet;
+      session_core__getall_valid_session_channel(session_mgr__p_session,
+         &session_mgr__l_continue,
+         &session_mgr__l_channel);
+      if (session_mgr__l_continue == true) {
+         channel_mgr__server_get_endpoint_config(session_mgr__l_channel,
+            session_mgr__endpoint_config_idx);
       }
    }
 }

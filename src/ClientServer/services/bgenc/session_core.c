@@ -21,7 +21,7 @@
 
  File Name            : session_core.c
 
- Date                 : 15/11/2019 08:29:18
+ Date                 : 18/02/2020 11:18:47
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -775,6 +775,23 @@ void session_core__find_channel_to_close(
          *session_core__p_has_channel_to_close = true;
          *session_core__p_channel_to_close = session_core__l_oldest_channel;
       }
+   }
+}
+
+void session_core__getall_valid_session_channel(
+   const constants__t_session_i session_core__session,
+   t_bool * const session_core__bres,
+   constants__t_channel_i * const session_core__channel) {
+   session_core_1__is_valid_session(session_core__session,
+      session_core__bres);
+   if (*session_core__bres == true) {
+      session_core_1__get_session_channel(session_core__session,
+         session_core__channel);
+   }
+   else {
+      session_core_1__getall_session_channel(session_core__session,
+         session_core__bres,
+         session_core__channel);
    }
 }
 

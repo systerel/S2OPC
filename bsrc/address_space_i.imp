@@ -849,6 +849,25 @@ OPERATIONS
     END
     ;
     
+    statusCode, node <-- check_nodeId_isValid(nodeid) =
+    VAR
+        l_isvalid
+    IN
+        statusCode := e_sc_ok;
+        node := c_Node_indet;
+        IF nodeid = c_NodeId_indet
+        THEN
+            statusCode := e_sc_bad_node_id_invalid
+        ELSE
+            l_isvalid, node <-- readall_AddressSpace_Node(nodeid);
+            IF l_isvalid = FALSE
+            THEN
+                statusCode := e_sc_bad_node_id_unknown
+            END
+        END
+    END
+    ;
+    
     btyp_ok, btyp_need_conv <-- read_variable_compat_type(p_dv_typ_nid, p_dv_vr, p_var_typ_nid, p_var_vr) =
 	btyp_ok, btyp_need_conv <-- is_variable_compat_type(p_dv_typ_nid, p_dv_vr, p_var_typ_nid, p_var_vr)
 END

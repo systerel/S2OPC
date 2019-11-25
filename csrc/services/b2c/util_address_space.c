@@ -18,30 +18,17 @@
  */
 
 #include <assert.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <string.h>
 
 #include "constants.h"
-#include "constants_statuscodes_bs.h"
 
-#include "b2c.h"
+#include "sopc_types.h"
 #include "util_address_space.h"
 
 #include "address_space_impl.h"
 #include "opcua_identifiers.h"
-#include "sopc_builtintypes.h"
-#include "sopc_dict.h"
-#include "sopc_logger.h"
-#include "sopc_macros.h"
-#include "sopc_mem_alloc.h"
-#include "sopc_numeric_range.h"
-#include "sopc_user_manager.h"
-#include "util_b2c.h"
-#include "util_variant.h"
 
-void util_get_TypeDefinition(const constants__t_Node_i address_space_bs__p_node,
-                             constants__t_ExpandedNodeId_i* const address_space_bs__p_type_def)
+void util_addspace__get_TypeDefinition(const constants__t_Node_i address_space_bs__p_node,
+                                       constants__t_ExpandedNodeId_i* const address_space_bs__p_type_def)
 {
     assert(NULL != address_space_bs__p_node);
     SOPC_AddressSpace_Node* node = address_space_bs__p_node;
@@ -53,7 +40,7 @@ void util_get_TypeDefinition(const constants__t_Node_i address_space_bs__p_node,
     {
         OpcUa_ReferenceNode* ref = &(*refs)[i];
 
-        if (is_type_definition(ref))
+        if (util_addspace__is_type_definition(ref))
         {
             *address_space_bs__p_type_def = &ref->TargetId;
             break;
@@ -61,7 +48,7 @@ void util_get_TypeDefinition(const constants__t_Node_i address_space_bs__p_node,
     }
 }
 
-bool is_component(const OpcUa_ReferenceNode* ref)
+bool util_addspace__is_component(const OpcUa_ReferenceNode* ref)
 {
     if (ref->IsInverse)
     {
@@ -72,7 +59,7 @@ bool is_component(const OpcUa_ReferenceNode* ref)
            OpcUaId_HasComponent == ref->ReferenceTypeId.Data.Numeric;
 }
 
-bool is_type_definition(const OpcUa_ReferenceNode* ref)
+bool util_addspace__is_type_definition(const OpcUa_ReferenceNode* ref)
 {
     if (ref->IsInverse)
     {
@@ -83,7 +70,7 @@ bool is_type_definition(const OpcUa_ReferenceNode* ref)
            OpcUaId_HasTypeDefinition == ref->ReferenceTypeId.Data.Numeric;
 }
 
-bool is_property(const OpcUa_ReferenceNode* ref)
+bool util_addspace__is_property(const OpcUa_ReferenceNode* ref)
 {
     if (ref->IsInverse)
     {
@@ -92,4 +79,16 @@ bool is_property(const OpcUa_ReferenceNode* ref)
 
     return SOPC_IdentifierType_Numeric == ref->ReferenceTypeId.IdentifierType &&
            OpcUaId_HasProperty == ref->ReferenceTypeId.Data.Numeric;
+}
+
+bool util_addspace__is_reversed_has_child(const OpcUa_ReferenceNode* ref)
+{
+    if (false == ref->IsInverse)
+    {
+        return false;
+    }
+
+    return ref->ReferenceTypeId.Namespace == OPCUA_NAMESPACE_INDEX &&
+           ref->ReferenceTypeId.IdentifierType == SOPC_IdentifierType_Numeric &&
+           ref->ReferenceTypeId.Data.Numeric == OpcUaId_HasSubtype;
 }

@@ -58,9 +58,7 @@ void call_method_bs__exec_callMethod(const constants__t_msg_i call_method_bs__p_
     SOPC_EncodeableType* encType = *(SOPC_EncodeableType**) call_method_bs__p_req_msg;
     assert(encType == &OpcUa_CallRequest_EncodeableType);
     OpcUa_CallRequest* callRequest = (OpcUa_CallRequest*) call_method_bs__p_req_msg;
-    uint32_t noOfMethodsToCall = (0 < callRequest->NoOfMethodsToCall) ? (uint32_t) callRequest->NoOfMethodsToCall
-                                                                      : 0; /* convert to avoid compilator error */
-    assert(0 < call_method_bs__p_callMethod && call_method_bs__p_callMethod <= noOfMethodsToCall);
+    assert(0 < call_method_bs__p_callMethod && call_method_bs__p_callMethod <= callRequest->NoOfMethodsToCall);
     OpcUa_CallMethodRequest* methodToCall = &callRequest->MethodsToCall[call_method_bs__p_callMethod - 1];
     assert(NULL != methodToCall);
 
@@ -74,7 +72,7 @@ void call_method_bs__exec_callMethod(const constants__t_msg_i call_method_bs__p_
     SOPC_MethodCallManager* mcm = endpoint_config->serverConfigPtr->mcm;
     if (NULL == mcm || NULL == mcm->pFnGetMethod)
     {
-        *call_method_bs__statusCode = constants_statuscodes_bs__e_sc_bad_internal_error;
+        *call_method_bs__statusCode = constants_statuscodes_bs__e_sc_bad_not_implemented;
         return;
     }
 

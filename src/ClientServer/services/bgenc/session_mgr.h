@@ -21,7 +21,7 @@
 
  File Name            : session_mgr.h
 
- Date                 : 08/11/2019 16:15:07
+ Date                 : 18/02/2020 11:18:49
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -66,6 +66,7 @@ extern void session_mgr__INITIALISATION(void);
 #define session_mgr__get_local_user user_authentication__get_local_user
 #define session_mgr__get_server_session_preferred_locales session_core__get_server_session_preferred_locales
 #define session_mgr__get_session_user_server session_core__get_session_user_server
+#define session_mgr__getall_valid_session_channel session_core__getall_valid_session_channel
 #define session_mgr__is_valid_session session_core__is_valid_session
 #define session_mgr__server_close_session_sm session_core__server_close_session_sm
 #define session_mgr__server_secure_channel_lost_session_sm session_core__server_secure_channel_lost_session_sm
@@ -153,10 +154,6 @@ extern void session_mgr__client_validate_session_service_resp(
    const constants__t_client_request_handle_i session_mgr__req_handle,
    t_bool * const session_mgr__bres,
    constants__t_session_i * const session_mgr__session);
-extern void session_mgr__getall_valid_session_channel(
-   const constants__t_session_i session_mgr__session,
-   t_bool * const session_mgr__bres,
-   constants__t_channel_i * const session_mgr__channel);
 extern void session_mgr__server_evaluate_session_timeout(
    const constants__t_session_i session_mgr__session);
 extern void session_mgr__server_receive_session_req(
@@ -178,5 +175,8 @@ extern void session_mgr__server_validate_session_service_resp(
    t_bool * const session_mgr__is_valid_res,
    constants_statuscodes_bs__t_StatusCode_i * const session_mgr__status_code_err,
    constants__t_channel_i * const session_mgr__channel);
+extern void session_mgr__session_get_endpoint_config(
+   const constants__t_session_i session_mgr__p_session,
+   constants__t_endpoint_config_idx_i * const session_mgr__endpoint_config_idx);
 
 #endif

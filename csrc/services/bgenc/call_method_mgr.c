@@ -21,7 +21,7 @@
 
  File Name            : call_method_mgr.c
 
- Date                 : 06/11/2019 09:07:36
+ Date                 : 25/11/2019 16:52:55
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -53,7 +53,7 @@ void call_method_mgr__treat_method_call_request(
       constants_statuscodes_bs__t_StatusCode_i call_method_mgr__l_status_op;
       constants__t_CallMethod_i call_method_mgr__l_callMethod;
       
-      call_method_mgr__session_get_endpoint_config(call_method_mgr__p_session,
+      session_mgr__session_get_endpoint_config(call_method_mgr__p_session,
          &call_method_mgr__l_endpoint_config_idx);
       if (call_method_mgr__l_endpoint_config_idx != constants__c_endpoint_config_idx_indet) {
          msg_call_method_bs__read_call_method_request(call_method_mgr__p_req_msg,
@@ -144,14 +144,14 @@ void call_method_mgr__check_method_call_inputs(
       msg_call_method_bs__read_CallMethod_Objectid(call_method_mgr__p_req_msg,
          call_method_mgr__p_callMethod,
          &call_method_mgr__l_objectid);
-      call_method_mgr__check_nodeId_isValid(call_method_mgr__l_objectid,
+      address_space__check_nodeId_isValid(call_method_mgr__l_objectid,
          call_method_mgr__StatusCode,
          &call_method_mgr__l_object);
       if (*call_method_mgr__StatusCode == constants_statuscodes_bs__e_sc_ok) {
          msg_call_method_bs__read_CallMethod_MethodId(call_method_mgr__p_req_msg,
             call_method_mgr__p_callMethod,
             &call_method_mgr__l_methodid);
-         call_method_mgr__check_nodeId_isValid(call_method_mgr__l_methodid,
+         address_space__check_nodeId_isValid(call_method_mgr__l_methodid,
             call_method_mgr__StatusCode,
             &call_method_mgr__l_method);
          if (*call_method_mgr__StatusCode == constants_statuscodes_bs__e_sc_ok) {
@@ -240,7 +240,7 @@ void call_method_mgr__check_method_call_arguments(
                   call_method_mgr__p_callMethod,
                   call_method_mgr__l_index,
                   &call_method_mgr__l_val);
-               call_method_mgr__check_method_call_one_arguments(call_method_mgr__l_val,
+               call_method_mgr__check_method_call_one_argument_type(call_method_mgr__l_val,
                   call_method_mgr__l_arg_desc,
                   &call_method_mgr__l_arg_status);
                msg_call_method_bs__write_CallMethod_Res_InputArgumentResult(call_method_mgr__p_res_msg,
@@ -260,7 +260,7 @@ void call_method_mgr__check_method_call_arguments(
    }
 }
 
-void call_method_mgr__check_method_call_one_arguments(
+void call_method_mgr__check_method_call_one_argument_type(
    const constants__t_Variant_i call_method_mgr__p_value,
    const constants__t_Argument_i call_method_mgr__p_arg,
    constants_statuscodes_bs__t_StatusCode_i * const call_method_mgr__StatusCode) {
@@ -325,56 +325,9 @@ void call_method_mgr__copy_exec_result(
             msg_call_method_bs__write_CallMethod_Res_OutputArgument(call_method_mgr__p_res_msg,
                call_method_mgr__p_callMethod,
                call_method_mgr__l_index,
-               call_method_mgr__l_value,
-               call_method_mgr__StatusCode);
-            call_method_mgr__l_continue = ((call_method_mgr__l_continue == true) &&
-               (*call_method_mgr__StatusCode == constants_statuscodes_bs__e_sc_ok));
+               call_method_mgr__l_value);
+            call_method_mgr__l_continue = (call_method_mgr__l_continue == true);
          }
-         if (*call_method_mgr__StatusCode == constants_statuscodes_bs__e_sc_bad_out_of_memory) {
-            msg_call_method_bs__free_CallMethod_Res_OutputArgument(call_method_mgr__p_res_msg,
-               call_method_mgr__p_callMethod);
-         }
-      }
-   }
-}
-
-void call_method_mgr__check_nodeId_isValid(
-   const constants__t_NodeId_i call_method_mgr__nodeid,
-   constants_statuscodes_bs__t_StatusCode_i * const call_method_mgr__statusCode,
-   constants__t_Node_i * const call_method_mgr__node) {
-   {
-      t_bool call_method_mgr__l_isvalid;
-      
-      *call_method_mgr__statusCode = constants_statuscodes_bs__e_sc_ok;
-      *call_method_mgr__node = constants__c_Node_indet;
-      if (call_method_mgr__nodeid == constants__c_NodeId_indet) {
-         *call_method_mgr__statusCode = constants_statuscodes_bs__e_sc_bad_node_id_invalid;
-      }
-      else {
-         address_space__readall_AddressSpace_Node(call_method_mgr__nodeid,
-            &call_method_mgr__l_isvalid,
-            call_method_mgr__node);
-         if (call_method_mgr__l_isvalid == false) {
-            *call_method_mgr__statusCode = constants_statuscodes_bs__e_sc_bad_node_id_unknown;
-         }
-      }
-   }
-}
-
-void call_method_mgr__session_get_endpoint_config(
-   const constants__t_session_i call_method_mgr__p_session,
-   constants__t_endpoint_config_idx_i * const call_method_mgr__endpoint_config_idx) {
-   {
-      constants__t_channel_i call_method_mgr__l_channel;
-      t_bool call_method_mgr__l_continue;
-      
-      *call_method_mgr__endpoint_config_idx = constants__c_endpoint_config_idx_indet;
-      session_mgr__getall_valid_session_channel(call_method_mgr__p_session,
-         &call_method_mgr__l_continue,
-         &call_method_mgr__l_channel);
-      if (call_method_mgr__l_continue == true) {
-         channel_mgr__server_get_endpoint_config(call_method_mgr__l_channel,
-            call_method_mgr__endpoint_config_idx);
       }
    }
 }

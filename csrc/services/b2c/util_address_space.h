@@ -20,11 +20,13 @@
 #ifndef UTIL_ADDRESS_SPACE_H_
 #define UTIL_ADDRESS_SPACE_H_
 
-bool is_type_definition(const OpcUa_ReferenceNode* ref);
-bool is_component(const OpcUa_ReferenceNode* ref);
-bool is_property(const OpcUa_ReferenceNode* ref);
+bool util_addspace__is_type_definition(const OpcUa_ReferenceNode* ref);
+bool util_addspace__is_component(const OpcUa_ReferenceNode* ref);
+bool util_addspace__is_property(const OpcUa_ReferenceNode* ref);
 
-void util_get_TypeDefinition(const constants__t_Node_i address_space_bs__p_node,
-                             constants__t_ExpandedNodeId_i* const address_space_bs__p_type_def);
+void util_addspace__get_TypeDefinition(const constants__t_Node_i address_space_bs__p_node,
+                                       constants__t_ExpandedNodeId_i* const address_space_bs__p_type_def);
+
+bool util_addspace__is_reversed_has_child(const OpcUa_ReferenceNode* ref);
 
 #endif /* UTIL_ADDRESS_SPACE_H_ */

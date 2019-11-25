@@ -21,7 +21,7 @@
 
  File Name            : session_core.h
 
- Date                 : 08/11/2019 16:47:52
+ Date                 : 18/02/2020 11:18:47
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -161,6 +161,10 @@ extern void session_core__find_channel_to_close(
 extern void session_core__get_session_state_or_closed(
    const constants__t_session_i session_core__session,
    constants__t_sessionState * const session_core__state);
+extern void session_core__getall_valid_session_channel(
+   const constants__t_session_i session_core__session,
+   t_bool * const session_core__bres,
+   constants__t_channel_i * const session_core__channel);
 extern void session_core__is_session_valid_for_service(
    const constants__t_channel_i session_core__channel,
    const constants__t_session_i session_core__session,
