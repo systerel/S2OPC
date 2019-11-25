@@ -35,6 +35,7 @@
 #define ATTRIBUTEID_VALUE 13
 #define ATTRIBUTEID_ACCESSLEVEL 17
 #define ATTRIBUTEID_USERACCESSLEVEL 18
+#define ATTRIBUTEID_EXECUTABLE 21
 
 /* Fixtures global variables */
 static SOPC_User* gUser = NULL;
@@ -144,6 +145,12 @@ static SOPC_ReturnStatus selectiveAuthorizationAllow(SOPC_UserAuthorization_Mana
         break;
     case SOPC_USER_AUTHORIZATION_OPERATION_WRITE:
         if (13 == attributeId)
+        {
+            *authorized = 0 == cmpNid;
+        }
+        break;
+    case SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE:
+        if (ATTRIBUTEID_EXECUTABLE == attributeId)
         {
             *authorized = 0 == cmpNid;
         }
@@ -354,6 +361,12 @@ START_TEST(test_authorization_allow_all)
     TEST_AUTHZ(userLocal, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &authorizedNodeId, ATTRIBUTEID_VALUE, true)
     TEST_AUTHZ(userLocal, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &unauthorizedNodeId, ATTRIBUTEID_BROWSENAME, true)
     TEST_AUTHZ(userLocal, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &unauthorizedNodeId, ATTRIBUTEID_ACCESSLEVEL, true)
+    TEST_AUTHZ(userLocal, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &authorizedNodeId, ATTRIBUTEID_EXECUTABLE, true)
+    TEST_AUTHZ(userLocal, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &authorizedNodeId, ATTRIBUTEID_VALUE, true)
+    TEST_AUTHZ(userLocal, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &unauthorizedNodeId, ATTRIBUTEID_EXECUTABLE,
+               true)
+    TEST_AUTHZ(userLocal, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &unauthorizedNodeId, ATTRIBUTEID_BROWSENAME,
+               true)
 
     TEST_AUTHZ(userAnonymous, SOPC_USER_AUTHORIZATION_OPERATION_READ, &authorizedNodeId, ATTRIBUTEID_BROWSENAME, true)
     TEST_AUTHZ(userAnonymous, SOPC_USER_AUTHORIZATION_OPERATION_READ, &authorizedNodeId, ATTRIBUTEID_VALUE, true)
@@ -366,6 +379,13 @@ START_TEST(test_authorization_allow_all)
                true)
     TEST_AUTHZ(userAnonymous, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &unauthorizedNodeId, ATTRIBUTEID_ACCESSLEVEL,
                true)
+    TEST_AUTHZ(userAnonymous, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &authorizedNodeId, ATTRIBUTEID_EXECUTABLE,
+               true)
+    TEST_AUTHZ(userAnonymous, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &authorizedNodeId, ATTRIBUTEID_VALUE, true)
+    TEST_AUTHZ(userAnonymous, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &unauthorizedNodeId, ATTRIBUTEID_EXECUTABLE,
+               true)
+    TEST_AUTHZ(userAnonymous, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &unauthorizedNodeId, ATTRIBUTEID_BROWSENAME,
+               true)
 
     TEST_AUTHZ(userUsername, SOPC_USER_AUTHORIZATION_OPERATION_READ, &authorizedNodeId, ATTRIBUTEID_BROWSENAME, true)
     TEST_AUTHZ(userUsername, SOPC_USER_AUTHORIZATION_OPERATION_READ, &authorizedNodeId, ATTRIBUTEID_VALUE, true)
@@ -375,6 +395,13 @@ START_TEST(test_authorization_allow_all)
     TEST_AUTHZ(userUsername, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &authorizedNodeId, ATTRIBUTEID_VALUE, true)
     TEST_AUTHZ(userUsername, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &unauthorizedNodeId, ATTRIBUTEID_BROWSENAME, true)
     TEST_AUTHZ(userUsername, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &unauthorizedNodeId, ATTRIBUTEID_ACCESSLEVEL,
+               true)
+    TEST_AUTHZ(userUsername, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &authorizedNodeId, ATTRIBUTEID_EXECUTABLE,
+               true)
+    TEST_AUTHZ(userUsername, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &authorizedNodeId, ATTRIBUTEID_VALUE, true)
+    TEST_AUTHZ(userUsername, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &unauthorizedNodeId, ATTRIBUTEID_EXECUTABLE,
+               true)
+    TEST_AUTHZ(userUsername, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &unauthorizedNodeId, ATTRIBUTEID_BROWSENAME,
                true)
 
 #undef TEST_AUTHZ
@@ -407,6 +434,13 @@ START_TEST(test_authorization_selective)
     TEST_AUTHZ(userLocal, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &authorizedNodeId, ATTRIBUTEID_VALUE, false)
     TEST_AUTHZ(userLocal, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &unauthorizedNodeId, ATTRIBUTEID_BROWSENAME, false)
     TEST_AUTHZ(userLocal, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &unauthorizedNodeId, ATTRIBUTEID_ACCESSLEVEL, false)
+    TEST_AUTHZ(userLocal, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &authorizedNodeId, ATTRIBUTEID_EXECUTABLE,
+               false)
+    TEST_AUTHZ(userLocal, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &authorizedNodeId, ATTRIBUTEID_VALUE, false)
+    TEST_AUTHZ(userLocal, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &unauthorizedNodeId, ATTRIBUTEID_EXECUTABLE,
+               false)
+    TEST_AUTHZ(userLocal, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &unauthorizedNodeId, ATTRIBUTEID_BROWSENAME,
+               false)
 
     TEST_AUTHZ(userAnonymous, SOPC_USER_AUTHORIZATION_OPERATION_READ, &authorizedNodeId, ATTRIBUTEID_BROWSENAME, false)
     TEST_AUTHZ(userAnonymous, SOPC_USER_AUTHORIZATION_OPERATION_READ, &authorizedNodeId, ATTRIBUTEID_VALUE, false)
@@ -420,6 +454,13 @@ START_TEST(test_authorization_selective)
                false)
     TEST_AUTHZ(userAnonymous, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &unauthorizedNodeId, ATTRIBUTEID_ACCESSLEVEL,
                false)
+    TEST_AUTHZ(userAnonymous, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &authorizedNodeId, ATTRIBUTEID_EXECUTABLE,
+               false)
+    TEST_AUTHZ(userAnonymous, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &authorizedNodeId, ATTRIBUTEID_VALUE, false)
+    TEST_AUTHZ(userAnonymous, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &unauthorizedNodeId, ATTRIBUTEID_EXECUTABLE,
+               false)
+    TEST_AUTHZ(userAnonymous, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &unauthorizedNodeId, ATTRIBUTEID_BROWSENAME,
+               false)
 
     TEST_AUTHZ(userUsername, SOPC_USER_AUTHORIZATION_OPERATION_READ, &authorizedNodeId, ATTRIBUTEID_BROWSENAME, true)
     TEST_AUTHZ(userUsername, SOPC_USER_AUTHORIZATION_OPERATION_READ, &authorizedNodeId, ATTRIBUTEID_VALUE, true)
@@ -431,6 +472,13 @@ START_TEST(test_authorization_selective)
     TEST_AUTHZ(userUsername, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &unauthorizedNodeId, ATTRIBUTEID_BROWSENAME,
                false)
     TEST_AUTHZ(userUsername, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &unauthorizedNodeId, ATTRIBUTEID_ACCESSLEVEL,
+               false)
+    TEST_AUTHZ(userUsername, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &authorizedNodeId, ATTRIBUTEID_EXECUTABLE,
+               true)
+    TEST_AUTHZ(userUsername, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &authorizedNodeId, ATTRIBUTEID_VALUE, false)
+    TEST_AUTHZ(userUsername, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &unauthorizedNodeId, ATTRIBUTEID_EXECUTABLE,
+               false);
+    TEST_AUTHZ(userUsername, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &unauthorizedNodeId, ATTRIBUTEID_BROWSENAME,
                false)
 
 #undef TEST_AUTHZ

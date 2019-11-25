@@ -800,5 +800,19 @@ OPERATIONS
     THEN
         skip
     END
+    ;
+    
+    bres, channel <-- getall_valid_session_channel (session) =
+    PRE
+        session  : t_session_i
+    THEN
+        CHOICE
+            bres := FALSE ||
+            channel := c_channel_indet
+        OR
+            bres := TRUE ||
+            channel :(channel : t_channel_i & channel : t_channel)
+        END
+    END
 
 END

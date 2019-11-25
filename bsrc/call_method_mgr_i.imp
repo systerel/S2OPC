@@ -79,9 +79,9 @@ LOCAL_OPERATIONS
             CallMethodRes_Msg                    : t_msg_i &
             CallMethodRes_status                 : t_CallMethod --> t_StatusCode_i      &
             CallMethodRes_AllocatedInputArgumentResult : t_CallMethod --> NAT1          &
-            CallMethodRes_InputArgumentResult    : t_CallMethod --> seq(t_StatusCode_i) &
+            CallMethodRes_InputArgumentResult    : t_CallMethod --> seq(t_StatusCode) &
             CallMethodRes_AllocatedOutputArgument      : t_CallMethod --> NAT1          &
-            CallMethodRes_OutputArgument         : t_CallMethod --> seq(t_Variant_i)    &
+            CallMethodRes_OutputArgument         : t_CallMethod --> seq(t_Variant)    &
             dom(CallMethodRes_status) = dom(CallMethodRes_InputArgumentResult)          &
             dom(CallMethodRes_status) = dom(CallMethodRes_OutputArgument) &
             
@@ -104,7 +104,13 @@ LOCAL_OPERATIONS
                 =>
                 CallMethodRes_AllocatedInputArgumentResult(p_callMethod) = size(CallMethod_InputArguments(p_callMethod)) &
                 size(CallMethodRes_InputArgumentResult(p_callMethod)) = size(CallMethod_InputArguments(p_callMethod)) 
+            ) &
+            ( StatusCode /= e_sc_ok
+                =>
+                CallMethodRes_AllocatedOutputArgument(p_callMethod) = 0 &
+                CallMethodRes_OutputArgument(p_callMethod) = {}
             )
+
             
         )
         
@@ -124,7 +130,8 @@ LOCAL_OPERATIONS
         p_callMethod : t_CallMethod_i &
         p_callMethod : CallMethods &
         p_res_msg : t_msg_i &
-        p_res_msg : t_msg
+        p_res_msg : t_msg &
+        p_res_msg = CallMethodRes_Msg
     THEN
         StatusCode,
         CallMethodRes_AllocatedInputArgumentResult,
@@ -137,11 +144,12 @@ LOCAL_OPERATIONS
                 e_sc_bad_too_many_arguments,
                 e_sc_bad_invalid_argument,
                 e_sc_bad_method_invalid,
-                e_sc_bad_not_executable
+                e_sc_bad_not_executable,
+                e_sc_ok
             } &
             
             CallMethodRes_AllocatedInputArgumentResult : t_CallMethod --> NAT1          &
-            CallMethodRes_InputArgumentResult    : t_CallMethod --> seq(t_StatusCode_i) &
+            CallMethodRes_InputArgumentResult    : t_CallMethod --> seq(t_StatusCode) &
             
             {p_callMethod} <<| CallMethodRes_AllocatedInputArgumentResult =
             {p_callMethod} <<| CallMethodRes_AllocatedInputArgumentResult$0 &
@@ -175,7 +183,8 @@ LOCAL_OPERATIONS
         p_method_node : t_Node &
         p_req_msg = CallMethod_Msg &
         p_res_msg : t_msg_i &
-        p_res_msg : t_msg
+        p_res_msg : t_msg   &
+        p_res_msg = CallMethodRes_Msg
     THEN
         StatusCode,
         CallMethodRes_AllocatedInputArgumentResult,
@@ -186,11 +195,12 @@ LOCAL_OPERATIONS
             {
                 e_sc_bad_arguments_missing,
                 e_sc_bad_too_many_arguments,
-                e_sc_bad_invalid_argument
+                e_sc_bad_invalid_argument,
+                e_sc_ok
             } &
             
             CallMethodRes_AllocatedInputArgumentResult : t_CallMethod --> NAT1          &
-            CallMethodRes_InputArgumentResult    : t_CallMethod --> seq(t_StatusCode_i) &
+            CallMethodRes_InputArgumentResult    : t_CallMethod --> seq(t_StatusCode) &
             
             {p_callMethod} <<| CallMethodRes_AllocatedInputArgumentResult =
             {p_callMethod} <<| CallMethodRes_AllocatedInputArgumentResult$0 &
@@ -211,7 +221,7 @@ LOCAL_OPERATIONS
     END
     ;
     
-    StatusCode <-- check_method_call_one_arguments (p_value, p_arg) =
+    StatusCode <-- check_method_call_one_argument_type (p_value, p_arg) =
     PRE
         p_value : t_Variant_i &
         p_value : t_Variant &
@@ -224,9 +234,7 @@ LOCAL_OPERATIONS
             StatusCode :
             {
                 e_sc_ok,
-                e_sc_bad_arguments_missing,
-                e_sc_bad_too_many_arguments,
-                e_sc_bad_invalid_argument
+                e_sc_bad_type_mismatch
             }
         )
     END
@@ -262,36 +270,7 @@ LOCAL_OPERATIONS
             )
         )
     END
-    ;
-    
-    statusCode, node <-- check_nodeId_isValid(nodeid)=
-    PRE
-        nodeid : t_NodeId_i &
-        nodeid : t_NodeId
-    THEN
-        IF nodeid = c_NodeId_indet
-        THEN
-            statusCode := e_sc_bad_node_id_invalid ||
-            node := c_Node_indet
-        ELSIF nodeid /: dom(a_NodeId~)
-        THEN
-            statusCode := e_sc_bad_node_id_unknown ||
-            node := c_Node_indet
-        ELSE
-            statusCode := e_sc_ok ||
-            node := a_NodeId~(nodeid)
-        END
-    END
-    ;
-    
-    endpoint_config_idx <-- session_get_endpoint_config(p_session) =
-    PRE
-        p_session : t_session_i &
-        p_session : t_session
-    THEN
-        endpoint_config_idx :: t_endpoint_config_idx_i
-    END
-    
+
 OPERATIONS
     
     
@@ -441,7 +420,7 @@ OPERATIONS
                     l_continue, l_index <-- continue_iter_callMethodResultIdx;
                     l_arg_desc <-- read_variant_argument(l_input_arg_variant, l_index);
                     l_val <-- read_CallMethod_InputArguments (p_req_msg, p_callMethod, l_index);
-                    l_arg_status <-- check_method_call_one_arguments (l_val, l_arg_desc);
+                    l_arg_status <-- check_method_call_one_argument_type (l_val, l_arg_desc);
                     write_CallMethod_Res_InputArgumentResult(p_res_msg, p_callMethod, l_index, l_arg_status);
                     IF l_arg_status /= e_sc_ok
                     THEN
@@ -456,12 +435,12 @@ OPERATIONS
                     
                     callMethodResultIdx_iterated   = 1 .. l_index &
                     callMethodResultIdx_to_iterate = l_index + 1 .. nb_callMethodResultIdx_max_refs &
-                    l_continue                     = bool(l_index + 1 /= nb_callMethodResultIdx_max_refs) &
+                    l_continue                     = bool(l_index /= nb_callMethodResultIdx_max_refs) &
                     
                     StatusCode : { e_sc_ok, e_sc_bad_invalid_argument } &
                     
                     CallMethodRes_AllocatedInputArgumentResult : t_CallMethod --> NAT1          &
-                    CallMethodRes_InputArgumentResult    : t_CallMethod --> seq(t_StatusCode_i) &
+                    CallMethodRes_InputArgumentResult    : t_CallMethod --> seq(t_StatusCode) &
                     
                     /* TODO $0 is not allowed..
                     {p_callMethod} <<| CallMethodRes_AllocatedInputArgumentResult =
@@ -485,7 +464,7 @@ OPERATIONS
     END
     ;
     
-    StatusCode <-- check_method_call_one_arguments (p_value, p_arg) =
+    StatusCode <-- check_method_call_one_argument_type (p_value, p_arg) =
     VAR
         l_value_type,
         l_value_valueRank,
@@ -532,8 +511,8 @@ OPERATIONS
             DO
                 l_continue, l_index <-- continue_iter_callMethodResultIdx;
                 l_value <-- read_exec_result(l_index);
-                StatusCode <-- write_CallMethod_Res_OutputArgument(p_res_msg, p_callMethod, l_index, l_value);
-                l_continue := bool(l_continue = TRUE & StatusCode = e_sc_ok)
+                write_CallMethod_Res_OutputArgument(p_res_msg, p_callMethod, l_index, l_value);
+                l_continue := bool(l_continue = TRUE)
             INVARIANT
                 
                 callMethodResultIdx_to_iterate <: NAT1 &
@@ -543,61 +522,20 @@ OPERATIONS
                 
                 callMethodResultIdx_iterated   = 1 .. l_index &
                 callMethodResultIdx_to_iterate = l_index + 1 .. nb_callMethodResultIdx_max_refs &
-                l_continue                     = bool(l_index + 1 /= nb_callMethodResultIdx_max_refs) &
-                
-                StatusCode : { e_sc_ok, e_sc_bad_out_of_memory } &
+                l_continue                     = bool(callMethodResultIdx_to_iterate /= {}) &
                 
                 /* TODO $0 is not allowed..
                 {p_callMethod} <<| CallMethodRes_AllocatedOutputArgument =
                 {p_callMethod} <<| CallMethodRes_AllocatedOutputArgument$0 &
                 {p_callMethod} <<| CallMethodRes_OutputArgument = {p_callMethod} <<| CallMethodRes_OutputArgument$0 &
                 */
-                (StatusCode = e_sc_ok
-                    =>
-                    CallMethodRes_AllocatedOutputArgument(p_callMethod) = size(exec_result) &
-                    CallMethodRes_OutputArgument(p_callMethod) = callMethodResultIdx_iterated <| exec_result 
-                )
+                CallMethodRes_AllocatedOutputArgument(p_callMethod) = size(exec_result) &
+                CallMethodRes_OutputArgument(p_callMethod) = callMethodResultIdx_iterated <| exec_result 
                 
             VARIANT
                 card(callMethodResultIdx_to_iterate)
             END
-            ;
-            IF StatusCode = e_sc_bad_out_of_memory THEN
-                free_CallMethod_Res_OutputArgument(p_res_msg, p_callMethod)
-            END
         END
     END
-    ;
-    
-    statusCode, node <-- check_nodeId_isValid(nodeid) =
-    VAR
-        l_isvalid
-    IN
-        statusCode := e_sc_ok;
-        node := c_Node_indet;
-        IF nodeid = c_NodeId_indet
-        THEN
-            statusCode := e_sc_bad_node_id_invalid
-        ELSE
-            l_isvalid, node <-- readall_AddressSpace_Node(nodeid);
-            IF l_isvalid = FALSE
-            THEN
-                statusCode := e_sc_bad_node_id_unknown
-            END
-        END
-    END
-    ;
-    
-    /* Get access to server configuration */
-    endpoint_config_idx <-- session_get_endpoint_config(p_session) =
-    VAR
-        l_channel,
-        l_continue
-    IN        
-        endpoint_config_idx := c_endpoint_config_idx_indet;
-        l_continue, l_channel <-- getall_valid_session_channel (p_session);
-        IF l_continue = TRUE THEN
-            endpoint_config_idx <-- server_get_endpoint_config (l_channel)
-        END
-    END	
+
 END

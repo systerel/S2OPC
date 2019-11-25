@@ -21,7 +21,7 @@
 
  File Name            : address_space.h
 
- Date                 : 05/11/2019 11:46:16
+ Date                 : 25/11/2019 10:49:23
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -141,6 +141,10 @@ extern void address_space__treat_write_request_WriteValue(
 extern void address_space__alloc_write_request_responses(
    const t_entier4 address_space__nb_req,
    t_bool * const address_space__bret);
+extern void address_space__check_nodeId_isValid(
+   const constants__t_NodeId_i address_space__nodeid,
+   constants_statuscodes_bs__t_StatusCode_i * const address_space__statusCode,
+   constants__t_Node_i * const address_space__node);
 extern void address_space__dealloc_write_request_responses(void);
 extern void address_space__read_Node_Attribute(
    const constants__t_user_i address_space__p_user,

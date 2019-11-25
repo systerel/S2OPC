@@ -824,5 +824,17 @@ OPERATIONS
             state := e_session_closed
         END
     END
+    ;
+
+    bres, channel <-- getall_valid_session_channel (session) =
+    BEGIN
+        bres <-- is_valid_session (session);
+        IF bres = TRUE
+        THEN
+            channel <-- get_session_channel (session)
+        ELSE
+            bres, channel <-- getall_session_channel (session)
+        END
+    END
 
 END

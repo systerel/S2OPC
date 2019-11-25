@@ -819,10 +819,6 @@ void util_status_code__B_to_C(constants_statuscodes_bs__t_StatusCode_i bstatus, 
     case constants_statuscodes_bs__e_sc_bad_not_implemented:
         *status = OpcUa_BadNotImplemented;
         break;
-        /*case constants_statuscodes_bs__e_sc_bad_not_executable,
-         *status = OpcUa_BadNotExecutable;
-          break;
-        */
     default:
         *status = OpcUa_BadInternalError;
     }
@@ -1092,6 +1088,18 @@ void util_status_code__C_to_B(SOPC_StatusCode status, constants_statuscodes_bs__
         break;
     case OpcUa_UncertainReferenceOutOfServer:
         *bstatus = constants_statuscodes_bs__e_sc_uncertain_reference_out_of_server;
+        break;
+    case OpcUa_BadArgumentsMissing:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_arguments_missing;
+        break;
+    case OpcUa_BadTooManyArguments:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_too_many_arguments;
+        break;
+    case OpcUa_BadMethodInvalid:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_method_invalid;
+        break;
+    case OpcUa_BadNotImplemented:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_not_implemented;
         break;
 
     default:

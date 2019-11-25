@@ -60,7 +60,7 @@ typedef uint32_t constants_bs__t_BrowsePath_i;
 typedef uint32_t constants_bs__t_BrowseResultMask_i;
 typedef OpcUa_ReferenceDescription* constants_bs__t_BrowseResultReferences_i;
 typedef uint8_t constants_bs__t_Byte;
-typedef uint32_t constants_bs__t_CallMethod_i;
+typedef int32_t constants_bs__t_CallMethod_i;
 typedef uint64_t constants_bs__t_ContinuationPointId_i;
 typedef SOPC_ContinuationPointData constants_bs__t_ContinuationPoint_i;
 typedef SOPC_DataValue* constants_bs__t_DataValue_i;

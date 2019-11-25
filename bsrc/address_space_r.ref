@@ -129,7 +129,7 @@ DEFINITIONS
         /* Objects */
         Object_HasMethod : t_NodeId <-> t_NodeId &
 
-		Variant_LocalDataType : t_Variant --> t_NodeId &
+        Variant_LocalDataType : t_Variant --> t_NodeId &
         Variant_ValueRank : t_Variant --> t_ConcreteValueRank &
 		
         /* References */

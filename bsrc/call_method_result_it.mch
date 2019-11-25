@@ -73,7 +73,7 @@ OPERATIONS
         callMethodResultIdx_to_iterate := nextCallMethodResultIdx + 1 .. nb_callMethodResultIdx_max_refs ||
         p_callMethodResultIdx          := nextCallMethodResultIdx ||
         nextCallMethodResultIdx        := nextCallMethodResultIdx + 1 ||
-        p_continue                     := bool(nextCallMethodResultIdx + 1 /= nb_callMethodResultIdx_max_refs)
+        p_continue                     := bool(nextCallMethodResultIdx /= nb_callMethodResultIdx_max_refs)
     END
 
 END

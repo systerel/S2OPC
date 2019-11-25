@@ -21,7 +21,7 @@
 
  File Name            : msg_call_method_bs.h
 
- Date                 : 06/11/2019 09:08:01
+ Date                 : 25/11/2019 16:53:17
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -105,8 +105,7 @@ extern void msg_call_method_bs__write_CallMethod_Res_OutputArgument(
    const constants__t_msg_i msg_call_method_bs__p_res_msg,
    const constants__t_CallMethod_i msg_call_method_bs__callMethod,
    const t_entier4 msg_call_method_bs__index,
-   const constants__t_Variant_i msg_call_method_bs__value,
-   constants_statuscodes_bs__t_StatusCode_i * const msg_call_method_bs__statusCode);
+   const constants__t_Variant_i msg_call_method_bs__value);
 extern void msg_call_method_bs__write_CallMethod_Res_Status(
    const constants__t_msg_i msg_call_method_bs__p_res_msg,
    const constants__t_CallMethod_i msg_call_method_bs__callMethod,

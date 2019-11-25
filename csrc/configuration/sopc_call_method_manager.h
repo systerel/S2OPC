@@ -31,31 +31,34 @@ typedef struct SOPC_MethodCallFunc SOPC_MethodCallFunc;
 /**
  * \brief  Type of the function to call associated to a method
  *
- * \param objectId        a valid pointer to the object on which the method is called or a type is the method is static
+ * Method call service verifies the input arguments before calling a SOPC_MethodCallFunc_Ptr function.
+ *
+ * Note: a ByteString could be provided instead of an expected array of Byte and conversely (See Spec 1.03 part 4 -
+ * table 66)
+ *
+ * \param objectId        a valid pointer to the object on which the method is called or a type if the method is static
  * \param nbInputArgs     number of input argument
- * \param inputArgs       an array of input argument of the method. The size is nbInputArgs
+ * \param inputArgs       an array of input argument of the method. The size is nbInputArgs.
  * \param nbOutputArgs    a valid pointer in which the number of output argument is written by the function
  * \param outputArgs      a valid pointer in which the output argument is written by the function
- * \return status code of the function. Should be SOPC_STATUS_OK if succeed.
+ * \return status code of the function. Should be SOPC_STATUS_OK if succeeded.
  */
-typedef SOPC_StatusCode (*SOPC_MethodCallFunc_Ptr)(SOPC_NodeId* objectId,
+typedef SOPC_StatusCode (*SOPC_MethodCallFunc_Ptr)(const SOPC_NodeId* objectId,
                                                    uint32_t nbInputArgs,
-                                                   SOPC_Variant* inputArgs,
+                                                   const SOPC_Variant* inputArgs,
                                                    uint32_t* nbOutputArgs,
                                                    SOPC_Variant** outputArgs,
                                                    void* param);
 
 /**
- * \brief  Type of the function to freed param of SOPC_MethodCallFunc.
+ * \brief  Type of the function to free param of SOPC_MethodCallFunc.
  *
- * \param param           a pointer to the object to free. Can be NULL
+ * \param data           a pointer to the object to free. Can be NULL
  */
 typedef void (*SOPC_MethodCallFunc_Free_Func)(void* data);
 
 /**
  * \brief  Object to describe of function associated to a method and user parameter
- *
- * \param param           a pointer to the object to free. Can be NULL
  */
 struct SOPC_MethodCallFunc
 {
@@ -75,7 +78,7 @@ struct SOPC_MethodCallFunc
     void* pParam;
 };
 
-/* Type of the function to freed SOPC_MethodCallManager internal data */
+/* Type of the function to free SOPC_MethodCallManager internal data */
 typedef void (*SOPC_MethodCallManager_Free_Func)(void* data);
 
 /* Type of the function to get a C function associated to a SOPC_NodeId of a Method */
@@ -125,7 +128,7 @@ struct SOPC_MethodCallManager
 SOPC_MethodCallManager* SOPC_MethodCallManager_Create(void);
 
 /**
- * \brief Free MethodCallManager create with SOPC_MethodCallManager_Create.
+ * \brief Free MethodCallManager created with SOPC_MethodCallManager_Create.
  *
  */
 void SOPC_MethodCallManager_Free(SOPC_MethodCallManager* mcm);
@@ -138,7 +141,7 @@ void SOPC_MethodCallManager_Free(SOPC_MethodCallManager* mcm);
  * \param methodId        a valid pointer on a SOPC_NodeId of the method.
  * \param methodFunc      a valid pointer on a C function to associate with the given methodId.
  * \param param           a pointer on data to give as parameter when call methodFunc. Can be NULL.
- * \param fnFree          a pointer on a C function to freed param. Can be NULL.
+ * \param fnFree          a pointer on a C function to free param. Can be NULL.
  *
  * \return SOPC_STATUS_OK when the function succeed, SOPC_STATUS_INVALID_PARAMETERS or SOPC_STATUS_OUT_OF_MEMORY.
  */

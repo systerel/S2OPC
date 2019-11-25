@@ -400,5 +400,14 @@ OPERATIONS
         p_user :( p_user : t_user_i &
                   p_user : t_user )
     END
+    ;
+
+    endpoint_config_idx <-- session_get_endpoint_config(p_session) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session
+    THEN
+        endpoint_config_idx :: t_endpoint_config_idx_i
+    END
 
 END
