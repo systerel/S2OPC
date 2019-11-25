@@ -136,7 +136,8 @@ OPERATIONS
         c_msg_in  : t_msg &
         resp_msg  : t_msg_i &
         resp_msg  = c_msg_out &
-        c_msg_out : t_msg
+        c_msg_out : t_msg &
+        nb_ReadValue > 0
     THEN
         data_Value_Value,
         data_Value_StatusCode,
