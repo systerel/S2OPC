@@ -204,6 +204,7 @@ int main(int argc, char* argv[])
     {
         // Init unique endpoint structure
         epConfig->endpointURL = DEFAULT_ENDPOINT_URL;
+        epConfig->hasDiscoveryEndpoint = true;
 
         status = SOPC_KeyManager_SerializedCertificate_CreateFromFile("./server_public/server_2k_cert.der",
                                                                       &serverCertificate);

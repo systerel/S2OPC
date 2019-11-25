@@ -82,7 +82,8 @@ typedef struct SOPC_Endpoint_Config
 {
     struct SOPC_Server_Config* serverConfigPtr; /**< Pointer to the server configuration containing this endpoint */
     char* endpointURL;                          /**< Endpoint URL: opc.tcp://IP-HOSTNAME:PORT(/NAME)*/
-    uint8_t nbSecuConfigs;                      /**< Number of security configuration (<= SOPC_MAX_SECU_POLICIES_CFG) */
+    bool hasDiscoveryEndpoint; /**< Implicit discovery endpoint with same endpoint URL is added if necessary when set */
+    uint8_t nbSecuConfigs;     /**< Number of security configuration (<= SOPC_MAX_SECU_POLICIES_CFG) */
     SOPC_SecurityPolicy
         secuConfigurations[SOPC_MAX_SECU_POLICIES_CFG]; /**< Security policies defined for the current endpoint URL.
                                                          * An implicit discovery endpoint will be defined with this URL

@@ -258,6 +258,7 @@ static bool Server_LoadDefaultConfiguration(SOPC_S2OPC_Config* output_s2opcConfi
     SOPC_Endpoint_Config* pEpConfig = &output_s2opcConfig->serverConfig.endpoints[0];
     pEpConfig->serverConfigPtr = &output_s2opcConfig->serverConfig;
     pEpConfig->endpointURL = DEFAULT_ENDPOINT_URL;
+    pEpConfig->hasDiscoveryEndpoint = true;
 
     /*
      * Define the certificates, security policies, security modes and user token policies supported by endpoint

@@ -402,7 +402,7 @@ uint32_t SOPC_ToolkitServer_AddEndpointConfig(SOPC_Endpoint_Config* epConfig)
         return result;
     }
 
-    if (!SOPC_ToolkitServer_AddEndpointConfig_HasOrAddDiscoveryEndpoint(epConfig))
+    if (epConfig->hasDiscoveryEndpoint && !SOPC_ToolkitServer_AddEndpointConfig_HasOrAddDiscoveryEndpoint(epConfig))
     {
         return result;
     }

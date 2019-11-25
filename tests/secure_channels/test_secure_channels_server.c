@@ -193,6 +193,7 @@ int main(int argc, char* argv[])
     if (SOPC_STATUS_OK == status)
     {
         epConfig.endpointURL = endpointUrl;
+        epConfig.hasDiscoveryEndpoint = true;
         epConfig.nbSecuConfigs = NB_SECU_POLICY_CONFIGS;
         epConfig.serverConfigPtr->serverCertificate = crt_srv;
         epConfig.serverConfigPtr->serverKey = priv_srv;

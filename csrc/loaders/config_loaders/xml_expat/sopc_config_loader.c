@@ -609,6 +609,18 @@ static bool start_endpoint(struct parse_context_t* ctx, const XML_Char** attrs)
 
     epConfig.endpointURL = url;
 
+    // Manage the hasDiscoveryEndpoint flag
+    attr_val = get_attr(ctx, "hasDiscoveryEndpoint", attrs);
+
+    if (attr_val == NULL)
+    {
+        epConfig.hasDiscoveryEndpoint = true; // default value
+    }
+    else
+    {
+        epConfig.hasDiscoveryEndpoint = (strcmp(attr_val, "true") == 0);
+    }
+
     if (!SOPC_Array_Append(ctx->endpoints, epConfig) || SOPC_Array_Size(ctx->endpoints) > UINT8_MAX)
     {
         LOG_MEMORY_ALLOCATION_FAILURE;

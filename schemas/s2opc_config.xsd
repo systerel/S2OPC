@@ -187,6 +187,11 @@
       <xs:element type="SecurityPoliciesType" name="SecurityPolicies" />
     </xs:sequence>
     <xs:attribute type="xs:anyURI" name="url" use="required"/>
+    <xs:attribute type="xs:boolean" name="hasDiscoveryEndpoint" use="optional" default="true">
+        <xs:annotation>
+          <xs:documentation>By default each endpoint has an implicit discovery endpoint if security mode None is not available. Set to 'false' to deactivate.</xs:documentation>
+        </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
   <xs:complexType name="EndpointsType">
     <xs:sequence>

@@ -43,6 +43,19 @@ void service_find_servers_bs__INITIALISATION(void) {}
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+
+static bool has_none_security_mode(SOPC_Endpoint_Config* epConfig)
+{
+    for (int i = 0; i < epConfig->nbSecuConfigs; i++)
+    {
+        if ((epConfig->secuConfigurations[i].securityModes & SOPC_SECURITY_MODE_NONE_MASK) != 0)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 void service_find_servers_bs__treat_find_servers_request(
     const constants__t_msg_i service_find_servers_bs__req_msg,
     const constants__t_msg_i service_find_servers_bs__resp_msg,
@@ -80,28 +93,36 @@ void service_find_servers_bs__treat_find_servers_request(
     const OpcUa_ApplicationDescription* src_desc = &endpoint_config->serverConfigPtr->serverDescription;
     OpcUa_ApplicationDescription* dst_desc = &response->Servers[0];
 
-    dst_desc->DiscoveryUrls = SOPC_Calloc(1, sizeof(SOPC_String));
-    SOPC_String_Initialize(dst_desc->DiscoveryUrls);
-
-    if (dst_desc->DiscoveryUrls == NULL)
+    if (endpoint_config->hasDiscoveryEndpoint || has_none_security_mode(endpoint_config))
     {
-        *service_find_servers_bs__ret = constants_statuscodes_bs__e_sc_bad_out_of_memory;
-        return;
-    }
+        // There is an endpoint with SecurityMode None allowed or an implicit discovery endpoint is added
+        dst_desc->DiscoveryUrls = SOPC_Calloc(1, sizeof(SOPC_String));
+        SOPC_String_Initialize(dst_desc->DiscoveryUrls);
 
-    dst_desc->NoOfDiscoveryUrls = 1;
+        if (dst_desc->DiscoveryUrls == NULL)
+        {
+            *service_find_servers_bs__ret = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+            return;
+        }
+
+        if (SOPC_STATUS_OK != SOPC_String_CopyFromCString(&dst_desc->DiscoveryUrls[0], endpoint_config->endpointURL))
+        {
+            *service_find_servers_bs__ret = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+            return;
+        }
+
+        dst_desc->NoOfDiscoveryUrls = 1;
+    }
     dst_desc->ApplicationType = src_desc->ApplicationType;
 
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
     char** preferredLocales = (char**) SOPC_String_GetRawCStringArray(req->NoOfLocaleIds, req->LocaleIds);
     SOPC_GCC_DIAGNOSTIC_RESTORE
 
-    bool ok =
-        (SOPC_String_Copy(&dst_desc->ApplicationUri, &src_desc->ApplicationUri) == SOPC_STATUS_OK) &&
-        (SOPC_String_Copy(&dst_desc->ProductUri, &src_desc->ProductUri) == SOPC_STATUS_OK) &&
-        (SOPC_LocalizedText_GetPreferredLocale(&dst_desc->ApplicationName, preferredLocales,
-                                               &src_desc->ApplicationName) == SOPC_STATUS_OK) &&
-        (SOPC_String_CopyFromCString(&dst_desc->DiscoveryUrls[0], endpoint_config->endpointURL) == SOPC_STATUS_OK);
+    bool ok = (SOPC_String_Copy(&dst_desc->ApplicationUri, &src_desc->ApplicationUri) == SOPC_STATUS_OK) &&
+              (SOPC_String_Copy(&dst_desc->ProductUri, &src_desc->ProductUri) == SOPC_STATUS_OK) &&
+              (SOPC_LocalizedText_GetPreferredLocale(&dst_desc->ApplicationName, preferredLocales,
+                                                     &src_desc->ApplicationName) == SOPC_STATUS_OK);
 
     SOPC_Free(preferredLocales);
 
