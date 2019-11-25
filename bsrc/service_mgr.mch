@@ -66,10 +66,10 @@ OPERATIONS
     THEN
         CHOICE
             valid := TRUE ||
-            resp_typ
+            resp_typ, a_msg_in_type
             :(resp_typ : t_msg_type_i &
-              resp_typ : s_service_resps - {e_msg_service_fault_resp}) ||
-            a_msg_in_type := resp_typ
+              resp_typ : s_service_resps - {e_msg_service_fault_resp} &
+              a_msg_in_type = resp_typ)
         OR
             valid := FALSE ||
             resp_typ := c_msg_type_indet
@@ -619,8 +619,9 @@ OPERATIONS
     THEN
         CHOICE
             a_buffer_in_state := e_buffer_in_msg_type_read ||
-            a_msg_in_type :(a_msg_in_type : t_msg_type_i & a_msg_in_type : t_msg_type) ||
-            msg_typ := a_msg_in_type
+            a_msg_in_type, msg_typ
+            :(a_msg_in_type : t_msg_type_i & a_msg_in_type : t_msg_type &
+              msg_typ = a_msg_in_type)
         OR
             a_buffer_in_state := c_buffer_in_state_indet ||
             msg_typ := c_msg_type_indet

@@ -53,12 +53,16 @@ LOCAL_OPERATIONS
         p_locales  : t_LocaleIds_i &
         p_locales  : t_LocaleIds   &
         p_resp_msg : t_msg_i &
+        p_resp_msg = c_msg_out &
         p_sc       : t_StatusCode_i &
         p_sc       : t_StatusCode   &
         p_nid      : t_NodeId_i      &
         p_aid      : t_AttributeId_i &
         p_index_range : t_IndexRange_i &
-        p_rvi      : t_ReadValue_i
+        p_rvi      : t_ReadValue_i &
+        p_rvi      : t_ReadValue &
+        c_msg_out  : t_msg &
+        (p_sc = e_sc_ok =>  p_aid : t_AttributeId)
     THEN
         data_Value_Value,
         data_Value_StatusCode,
