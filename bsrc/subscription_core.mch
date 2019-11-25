@@ -1097,7 +1097,8 @@ OPERATIONS
         p_subscription : a_MoreNotifications &
         a_subscription_state (p_subscription) = e_subscriptionState_normal &
         a_pendingNotificationQueue [{p_subscription}] /= {} &
-        validPublishReqQueued = TRUE
+        validPublishReqQueued = TRUE &
+        a_notifRepublishQueue(p_subscription) : s_republishQueue
     THEN
         d_dequeue_publish_req (p_subscription, p_publish_resp_msg) ||
         // return notifications (dequeue notifications) + update MoreNotification variable
@@ -1235,9 +1236,7 @@ OPERATIONS
         p_queue : t_notifRepublishQueue_i &
         p_queue : s_republishQueue &
         p_seq_num : t_sub_seq_num_i &
-        p_seq_num : t_sub_seq_num &
-        p_notif_msg : t_notif_msg_i &
-        p_notif_msg : t_notif_msg
+        p_seq_num : t_sub_seq_num
     THEN
         IF p_seq_num : a_notification_seq_num[a_republish_notification~[{p_queue}]]
         THEN
@@ -1374,7 +1373,7 @@ OPERATIONS
             continue := bool(s_mi_to_iterate_it /= {l_monitoredItem}) ||
             p_monitoredItem := l_monitoredItem ||
             s_mi_to_iterate_it := s_mi_to_iterate_it - {p_monitoredItem} ||
-            s_mi_iterated_it := s_mi_to_iterate_it \/ {p_monitoredItem}
+            s_mi_iterated_it := s_mi_iterated_it \/ {p_monitoredItem}
         END
     END
 END
