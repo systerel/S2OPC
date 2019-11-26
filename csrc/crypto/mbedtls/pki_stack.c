@@ -298,8 +298,10 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_SerializedCertificate* pCert
         status = SOPC_KeyManager_CertificateList_MatchCRLList(caCert, pRevocationList, &match);
         if (SOPC_STATUS_OK == status && !match)
         {
-            // status = SOPC_STATUS_NOK;
-            SOPC_Logger_TraceWarning(
+            /* mbedtls does not verify that each CA has a CRL, so we must do it ourselves
+             * We must fail here, otherwise we can't report misconfigurations to the users */
+            status = SOPC_STATUS_NOK;
+            SOPC_Logger_TraceError(
                 "Not all certificate authorities have a single certificate revocation list! CRL verification is "
                 "disabled for certificates signed by such CA.");
         }
@@ -361,8 +363,10 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathCA, char** l
         status = SOPC_KeyManager_CertificateList_MatchCRLList(ca, crl, &match);
         if (SOPC_STATUS_OK == status && !match)
         {
-            // status = SOPC_STATUS_NOK;
-            SOPC_Logger_TraceWarning(
+            /* mbedtls does not verify that each CA has a CRL, so we must do it ourselves
+             * We must fail here, otherwise we can't report misconfigurations to the users */
+            status = SOPC_STATUS_NOK;
+            SOPC_Logger_TraceError(
                 "Not all certificate authorities have a single certificate revocation list! CRL verification is "
                 "disabled for certificates signed by such CA.");
         }
