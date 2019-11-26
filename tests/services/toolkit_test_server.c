@@ -496,7 +496,12 @@ static SOPC_ReturnStatus Server_SetCryptographicConfig(SOPC_Server_Config* serve
                                 "trusted/ctt_appTSha256_2048.der" /* Test 051 */,
                                 "trusted/ctt_appTSha256_4096.der" /* Test 052 still fails */,
                                 NULL};
-            char* lPathsCRL[] = {"revoked/cacrl.der", "revoked/revocation_list_ctt_ca1T.crl", NULL};
+            char* lPathsCRL[] = {"revoked/cacrl.der",
+                                 "revoked/revocation_list_ctt_ca1T.crl",
+                                 "revoked/ctt_appT_crl.pem",
+                                 "revoked/ctt_appTSha256_2048_crl.pem",
+                                 "revoked/ctt_appTSha256_4096_crl.pem",
+                                 NULL};
             status = SOPC_PKIProviderStack_CreateFromPaths(lPathsCA, lPathsCRL, &serverConfig->pki);
         }
 
