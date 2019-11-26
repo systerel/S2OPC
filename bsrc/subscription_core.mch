@@ -508,64 +508,53 @@ OPERATIONS
             StatusCode_service := e_sc_bad_too_many_subscriptions ||
             subscription := c_subscription_indet
         ELSE
-            ANY l_subscription WHERE
-                l_subscription : t_subscription - s_subscription
-            THEN
-                IF t_monitoredItemQueue /= s_monitoredItemQueue &
-                   t_notificationQueue /= s_notificationQueue &
-                   t_publishReqQueue /= s_publishReqQueue
-                THEN
+            StatusCode_service, subscription,
+            s_publishReqQueue, s_notificationQueue, s_republishQueue, s_monitoredItemQueue,
+            /* case of e_sc_ok */
+            s_subscription, a_subscription_state, a_subscription_session,
+            a_publishInterval, a_lifetimeExpCount, a_LifetimeCounter,
+            a_keepAliveExpCount, a_KeepAliveCounter,
+            a_maxNotifsPerPublish, a_MessageSent, a_PublishingEnabled, a_SeqNum,
+            a_pendingNotificationQueue, a_publishRequestQueue, a_notifRepublishQueue,
+            a_monitoredItemQueue, a_publishTimer,
+            /* case of e_sc_bad_out_of_memory */
+            a_monitored_item_notifications, 
+            a_publish_responses,
+            a_republish_notification, a_notification_seq_num,
+            a_defined_monitored_items:(
+                d_typing &
+
+                StatusCode_service : t_StatusCode_i &
+                subscription : t_subscription_i &
+
+                (t_monitoredItemQueue /= s_monitoredItemQueue$0 &
+                 t_notificationQueue /= s_notificationQueue$0 &
+                 t_publishReqQueue /= s_publishReqQueue$0 &
+                 t_notifRepublishQueue /= s_republishQueue$0
+                =>
                     /* Transition #1 + #3 */
-                    StatusCode_service := e_sc_ok ||
-
-                    subscription := l_subscription ||
-                    s_subscription := s_subscription \/ {l_subscription} ||
-
-                    a_subscription_session (l_subscription) := p_session ||
-                    a_publishInterval (l_subscription) := p_revPublishInterval ||
-                    a_lifetimeExpCount (l_subscription) := p_revLifetimeCount  ||
-                    a_keepAliveExpCount (l_subscription) := p_revMaxKeepAlive  ||
-                    a_maxNotifsPerPublish (l_subscription) := p_maxNotificationsPerPublish ||
-
-                    a_subscription_state (l_subscription) := e_subscriptionState_normal   ||
-                    a_LifetimeCounter (l_subscription) := p_revLifetimeCount         ||
-                    a_KeepAliveCounter (l_subscription) := p_revMaxKeepAlive         ||
-                    a_MessageSent := a_MessageSent \/ {l_subscription}               ||
-                    a_PublishingEnabled := a_PublishingEnabled \/ {l_subscription}   ||
-                    a_SeqNum (l_subscription)            := c_sub_seq_num_indet      ||
-
-                    ANY l_notifQueue WHERE
-                        l_notifQueue : t_notificationQueue_i &
-                        l_notifQueue : t_notificationQueue &
-                        l_notifQueue /: s_notificationQueue
-                    THEN
-                        s_notificationQueue := s_notificationQueue \/ {l_notifQueue} ||
-                        a_pendingNotificationQueue := a_pendingNotificationQueue \/ {l_subscription |-> l_notifQueue}
-                    END ||
-
-                    ANY l_publishQueue WHERE
-                        l_publishQueue : t_publishReqQueue_i &
-                        l_publishQueue : t_publishReqQueue &
-                        l_publishQueue /: s_publishReqQueue
-                    THEN
-                        s_publishReqQueue := s_publishReqQueue \/ {l_publishQueue} ||
-                        a_publishRequestQueue := a_publishRequestQueue \/ {l_subscription |-> l_publishQueue}
-                    END ||
-
-                    ANY l_monitoredItemQueue WHERE
-                        l_monitoredItemQueue : t_monitoredItemQueue_i &
-                        l_monitoredItemQueue : t_monitoredItemQueue &
-                        l_monitoredItemQueue /: s_monitoredItemQueue
-                    THEN
-                        s_monitoredItemQueue := s_monitoredItemQueue \/ {l_monitoredItemQueue} ||
-                        a_monitoredItemQueue := a_monitoredItemQueue \/ {l_subscription |-> l_monitoredItemQueue}
-                    END
-                ELSE
+                    (   StatusCode_service = e_sc_ok &
+                        subscription : t_subscription - s_subscription$0 &
+                        s_subscription = s_subscription$0 \/ {subscription}
+                    ) or
                     /* Transition #1 + #2 */
-                    StatusCode_service := e_sc_bad_out_of_memory ||
-                    subscription := c_subscription_indet
-                END
-            END
+                    /* to deal with indeterminated timer creation for a_publishTimer */
+                    (   StatusCode_service = e_sc_bad_out_of_memory &
+                        subscription = c_subscription_indet &
+                        s_subscription = s_subscription$0
+                    )                     
+                ) &
+                /* Transition #1 + #2 */
+                (not(t_monitoredItemQueue /= s_monitoredItemQueue$0 &
+                     t_notificationQueue /= s_notificationQueue$0 &
+                     t_publishReqQueue /= s_publishReqQueue$0 &
+                     t_notifRepublishQueue /= s_republishQueue$0)
+                =>
+                    StatusCode_service = e_sc_bad_out_of_memory &
+                    subscription = c_subscription_indet &
+                    s_subscription = s_subscription$0
+                )
+            )
         END
     END
     ;
