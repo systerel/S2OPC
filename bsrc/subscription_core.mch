@@ -868,25 +868,31 @@ OPERATIONS
             monitoredItemId := c_monitoredItemId_indet
         ELSIF p_indexRange : t_IndexRange /* It means it is null or it can be parsed */
         THEN
-            ANY l_monitoredItem, l_monitoredItemId WHERE
-                l_monitoredItem : t_monitoredItemPointer - s_monitoredItemPointer &
-                l_monitoredItemId : t_monitoredItemId - s_monitoredItemId
-            THEN
-                StatusCode_service := e_sc_ok ||
-                s_monitoredItemPointer := s_monitoredItemPointer \/ {l_monitoredItem} ||
-                s_monitoredItemId := s_monitoredItemId \/ {l_monitoredItemId} ||
-                a_monitoredItemId(l_monitoredItem) := l_monitoredItemId ||
-                a_monitoredItemSubs(l_monitoredItem) := p_subscription ||
-                a_monitoredItemNodeId(l_monitoredItem) := p_nid ||
-                monitoredItemPointer := l_monitoredItem ||
-                monitoredItemId := l_monitoredItemId ||
-                /* a notification is enqueued with current value of monitored item */
-                a_monitored_item_notifications :=
-                a_monitored_item_notifications \/ {a_pendingNotificationQueue(p_subscription) |-> l_monitoredItem} ||
-                /* add monitored item to both queues */
-                a_defined_monitored_items :=
-                a_defined_monitored_items \/ {a_monitoredItemQueue(p_subscription) |-> l_monitoredItem}
-                                          \/ {a_nodeToMonitoredItemQueue(p_nid) |-> l_monitoredItem}
+            CHOICE
+                ANY l_monitoredItem, l_monitoredItemId WHERE
+                    l_monitoredItem : t_monitoredItemPointer - s_monitoredItemPointer &
+                    l_monitoredItemId : t_monitoredItemId - s_monitoredItemId
+                THEN
+                    StatusCode_service := e_sc_ok ||
+                    s_monitoredItemPointer := s_monitoredItemPointer \/ {l_monitoredItem} ||
+                    s_monitoredItemId := s_monitoredItemId \/ {l_monitoredItemId} ||
+                    a_monitoredItemId(l_monitoredItem) := l_monitoredItemId ||
+                    a_monitoredItemSubs(l_monitoredItem) := p_subscription ||
+                    a_monitoredItemNodeId(l_monitoredItem) := p_nid ||
+                    monitoredItemPointer := l_monitoredItem ||
+                    monitoredItemId := l_monitoredItemId ||
+                    /* a notification is enqueued with current value of monitored item */
+                    a_monitored_item_notifications :=
+                    a_monitored_item_notifications \/ {a_pendingNotificationQueue(p_subscription) |-> l_monitoredItem} ||
+                    /* add monitored item to both queues */
+                    a_defined_monitored_items :=
+                    a_defined_monitored_items \/ {a_monitoredItemQueue(p_subscription) |-> l_monitoredItem}
+                                              \/ {a_nodeToMonitoredItemQueue(p_nid) |-> l_monitoredItem}
+                END
+            OR
+                StatusCode_service := e_sc_bad_out_of_memory ||
+                monitoredItemPointer := c_monitoredItemPointer_indet ||
+                monitoredItemId := c_monitoredItemId_indet
             END
         ELSE
             StatusCode_service := e_sc_bad_index_range_invalid ||
