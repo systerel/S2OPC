@@ -38,10 +38,10 @@ openssl ca -config $CONF_FILE -gencrl -crldays 36500 -out cacrl.pem
 openssl crl -in cacrl.pem -outform der -out cacrl.der
 
 # Generate, for both client and server, and both 2048 and 4096 key lengths, a new key pair
-openssl req -config $CONF_FILE -extensions server_cert -sha256 -nodes -newkey rsa:2048 -keyout client_2k_key.pem -out client_2k.csr
-openssl req -config $CONF_FILE -extensions server_cert -sha256 -nodes -newkey rsa:4096 -keyout client_4k_key.pem -out client_4k.csr
-openssl req -config $CONF_FILE -extensions server_cert -sha256 -nodes -newkey rsa:2048 -keyout server_2k_key.pem -out server_2k.csr
-openssl req -config $CONF_FILE -extensions server_cert -sha256 -nodes -newkey rsa:4096 -keyout server_4k_key.pem -out server_4k.csr
+openssl req -config $CONF_CLI -reqexts client_cert -sha256 -nodes -newkey rsa:2048 -keyout client_2k_key.pem -out client_2k.csr
+openssl req -config $CONF_CLI -reqexts client_cert -sha256 -nodes -newkey rsa:4096 -keyout client_4k_key.pem -out client_4k.csr
+openssl req -config $CONF_SRV -reqexts server_cert -sha256 -nodes -newkey rsa:2048 -keyout server_2k_key.pem -out server_2k.csr
+openssl req -config $CONF_SRV -reqexts server_cert -sha256 -nodes -newkey rsa:4096 -keyout server_4k_key.pem -out server_4k.csr
 # Or create csr for existing certificates
 #openssl req -new -config $CONF_CLI -sha256 -key client_2k_key.pem -reqexts client_cert -out client_2k.csr
 #openssl req -new -config $CONF_CLI -sha256 -key client_4k_key.pem -reqexts client_cert -out client_4k.csr
