@@ -45,8 +45,10 @@ struct SOPC_CRLList;
  *
  * \warning         Provided certificates must be valid until the destruction of the created PKI (they are not copied).
  *
- * \param pCertAuth A valid pointer to the Certificate of the certification authority.
+ * \param pCertAuth A valid pointer to the serialized certificate of the certification authority.
+ *                  This object is internally copied, and only the internal copy is freed by SOPC_PKIProvider_Free.
  * \param pRevocationList  An certificate chain containing the revocation list of the certificate authority.
+ *                  This object is borrowed and is freed by SOPC_PKIProvider_Free.
  * \param ppPKI     A valid pointer to the newly created SOPC_PKIProvider. You should free such provider with
  *                  SOPC_PKIProvider_Free().
  *
