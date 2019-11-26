@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.h
 
- Date                 : 21/11/2019 15:44:44
+ Date                 : 26/11/2019 10:32:45
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
