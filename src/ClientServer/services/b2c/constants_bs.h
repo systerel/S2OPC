@@ -69,14 +69,16 @@ typedef SOPC_String* constants_bs__t_IndexRange_i;
 typedef int32_t constants_bs__t_Int32;
 typedef char** constants_bs__t_LocaleIds_i;
 typedef SOPC_LocalizedText* constants_bs__t_LocalizedText_i;
+typedef OpcUa_MdnsDiscoveryConfiguration* constants_bs__t_MdnsDiscoveryConfig_i;
 typedef SOPC_NodeId* constants_bs__t_NodeId_i;
 typedef SOPC_AddressSpace_Node* constants_bs__t_Node_i;
 typedef SOPC_ByteString* constants_bs__t_Nonce_i;
 typedef SOPC_QualifiedName* constants_bs__t_QualifiedName_i;
 typedef SOPC_StatusCode constants_bs__t_RawStatusCode;
 typedef OpcUa_ReferenceNode* constants_bs__t_Reference_i;
-typedef OpcUa_RelativePath* constants_bs__t_RelativePath_i;
+typedef OpcUa_RegisteredServer* constants_bs__t_RegisteredServer_i;
 typedef OpcUa_RelativePathElement* constants_bs__t_RelativePathElt_i;
+typedef OpcUa_RelativePath* constants_bs__t_RelativePath_i;
 typedef OpcUa_SignatureData* constants_bs__t_SignatureData_i;
 typedef SOPC_Value_Timestamp constants_bs__t_Timestamp;
 typedef SOPC_Variant* constants_bs__t_Variant_i;
@@ -142,12 +144,14 @@ extern const constants_bs__t_NodeId_i constants_bs__c_Byte_Type_NodeId;
 extern constants_bs__t_LocaleIds_i constants_bs__c_LocaleIds_empty;
 #define constants_bs__c_LocaleIds_indet NULL
 #define constants_bs__c_LocalizedText_indet 0
+#define constants_bs__c_MdnsDiscoveryConfig_indet NULL
 #define constants_bs__c_NodeId_indet NULL
 #define constants_bs__c_Node_indet 0
 #define constants_bs__c_Nonce_indet 0
 extern const constants_bs__t_NodeId_i constants_bs__c_Null_Type_NodeId;
 #define constants_bs__c_QualifiedName_indet 0
 #define constants_bs__c_Reference_indet 0
+#define constants_bs__c_RegisteredServer_indet NULL
 #define constants_bs__c_RelativePathElt_indet 0
 #define constants_bs__c_RelativePath_indet 0
 

@@ -804,6 +804,21 @@ void util_status_code__B_to_C(constants_statuscodes_bs__t_StatusCode_i bstatus, 
     case constants_statuscodes_bs__e_sc_bad_data_encoding_invalid:
         *status = OpcUa_BadDataEncodingInvalid;
         break;
+    case constants_statuscodes_bs__e_sc_bad_server_uri_invalid:
+        *status = OpcUa_BadServerUriInvalid;
+        break;
+    case constants_statuscodes_bs__e_sc_bad_server_name_missing:
+        *status = OpcUa_BadServerNameMissing;
+        break;
+    case constants_statuscodes_bs__e_sc_bad_discovery_url_missing:
+        *status = OpcUa_BadDiscoveryUrlMissing;
+        break;
+    case constants_statuscodes_bs__e_sc_bad_semaphore_file_missing:
+        *status = OpcUa_BadSempahoreFileMissing;
+        break;
+    case constants_statuscodes_bs__e_sc_bad_not_supported:
+        *status = OpcUa_BadNotSupported;
+        break;
     case constants_statuscodes_bs__e_sc_uncertain_reference_out_of_server:
         *status = OpcUa_UncertainReferenceOutOfServer;
         break;
@@ -1085,6 +1100,21 @@ void util_status_code__C_to_B(SOPC_StatusCode status, constants_statuscodes_bs__
         break;
     case OpcUa_BadDataEncodingInvalid:
         *bstatus = constants_statuscodes_bs__e_sc_bad_data_encoding_invalid;
+        break;
+    case OpcUa_BadServerUriInvalid:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_server_uri_invalid;
+        break;
+    case OpcUa_BadServerNameMissing:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_server_name_missing;
+        break;
+    case OpcUa_BadDiscoveryUrlMissing:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_discovery_url_missing;
+        break;
+    case OpcUa_BadSempahoreFileMissing:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_semaphore_file_missing;
+        break;
+    case OpcUa_BadNotSupported:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_not_supported;
         break;
     case OpcUa_UncertainReferenceOutOfServer:
         *bstatus = constants_statuscodes_bs__e_sc_uncertain_reference_out_of_server;

@@ -21,7 +21,7 @@
 
  File Name            : toolkit_header_init.c
 
- Date                 : 25/02/2020 14:25:54
+ Date                 : 26/02/2020 10:46:35
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -80,6 +80,8 @@
 #include "msg_read_response_bs.h"
 #include "msg_register_nodes.h"
 #include "msg_register_nodes_bs.h"
+#include "msg_register_server2.h"
+#include "msg_register_server2_bs.h"
 #include "msg_subscription_create_bs.h"
 #include "msg_subscription_create_monitored_item.h"
 #include "msg_subscription_create_monitored_item_bs.h"
@@ -106,6 +108,7 @@
 #include "service_read_it.h"
 #include "service_register_nodes.h"
 #include "service_response_cb_bs.h"
+#include "service_set_discovery_server.h"
 #include "service_set_view.h"
 #include "service_unregister_nodes.h"
 #include "service_write_decode_bs.h"
@@ -229,6 +232,9 @@ void INITIALISATION(void) {
    subscription_create_monitored_item_it__INITIALISATION();
    subscription_mgr__INITIALISATION();
    service_find_servers_bs__INITIALISATION();
+   msg_register_server2_bs__INITIALISATION();
+   msg_register_server2__INITIALISATION();
+   service_set_discovery_server__INITIALISATION();
    msg_register_nodes_bs__INITIALISATION();
    msg_register_nodes__INITIALISATION();
    register_nodes_it__INITIALISATION();

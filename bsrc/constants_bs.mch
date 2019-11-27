@@ -81,7 +81,9 @@ SETS
     t_ContinuationPoint_i;
     t_ContinuationPointId_i;
     t_ArrayDimensions_i;
-    t_LocaleIds_i
+    t_LocaleIds_i;
+    t_RegisteredServer_i;
+    t_MdnsDiscoveryConfig_i
 
 CONCRETE_CONSTANTS
     c_Server_Nano_Extended,
@@ -163,8 +165,10 @@ CONCRETE_CONSTANTS
     c_RelativePath_indet,
     c_RelativePathElt_indet,
     c_CallMethod_indet,
-    c_Argument_indet
-    
+    c_Argument_indet,
+    c_RegisteredServer_indet,
+    c_MdnsDiscoveryConfig_indet
+
 ABSTRACT_CONSTANTS
 
     t_Variant,
@@ -221,6 +225,8 @@ ABSTRACT_CONSTANTS
     t_ContinuationPointId,
     t_ArrayDimensions,
     t_LocaleIds,
+    t_RegisteredServer,
+    t_MdnsDiscoveryConfig,
 
     conv_ExpandedNodeId_NodeId
 
@@ -446,6 +452,12 @@ PROPERTIES
     t_LocaleIds = t_LocaleIds_i - {c_LocaleIds_indet} &
     c_LocaleIds_empty : t_LocaleIds_i &
     c_LocaleIds_empty : t_LocaleIds &
+
+    c_RegisteredServer_indet : t_RegisteredServer_i &
+    t_RegisteredServer = t_RegisteredServer_i - {c_RegisteredServer_indet} &
+
+    c_MdnsDiscoveryConfig_indet : t_MdnsDiscoveryConfig_i &
+    t_MdnsDiscoveryConfig = t_MdnsDiscoveryConfig_i - {c_MdnsDiscoveryConfig_indet} &
 
     conv_ExpandedNodeId_NodeId : t_ExpandedNodeId +-> t_NodeId &
 

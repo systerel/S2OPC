@@ -21,7 +21,7 @@
 
  File Name            : constants_bs.h
 
- Date                 : 25/02/2020 14:25:35
+ Date                 : 26/02/2020 10:46:18
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -54,12 +54,14 @@
 #define constants_bs__t_Int32 t_entier4
 #define constants_bs__t_LocaleIds_i t_entier4
 #define constants_bs__t_LocalizedText_i t_entier4
+#define constants_bs__t_MdnsDiscoveryConfig_i t_entier4
 #define constants_bs__t_NodeId_i t_entier4
 #define constants_bs__t_Node_i t_entier4
 #define constants_bs__t_Nonce_i t_entier4
 #define constants_bs__t_QualifiedName_i t_entier4
 #define constants_bs__t_RawStatusCode t_entier4
 #define constants_bs__t_Reference_i t_entier4
+#define constants_bs__t_RegisteredServer_i t_entier4
 #define constants_bs__t_RelativePathElt_i t_entier4
 #define constants_bs__t_RelativePath_i t_entier4
 #define constants_bs__t_SignatureData_i t_entier4
@@ -117,12 +119,14 @@
 #define constants_bs__t_Int32_max (-1)
 #define constants_bs__t_LocaleIds_i_max (-1)
 #define constants_bs__t_LocalizedText_i_max (-1)
+#define constants_bs__t_MdnsDiscoveryConfig_i_max (-1)
 #define constants_bs__t_NodeId_i_max (-1)
 #define constants_bs__t_Node_i_max (-1)
 #define constants_bs__t_Nonce_i_max (-1)
 #define constants_bs__t_QualifiedName_i_max (-1)
 #define constants_bs__t_RawStatusCode_max (-1)
 #define constants_bs__t_Reference_i_max (-1)
+#define constants_bs__t_RegisteredServer_i_max (-1)
 #define constants_bs__t_RelativePathElt_i_max (-1)
 #define constants_bs__t_RelativePath_i_max (-1)
 #define constants_bs__t_SignatureData_i_max (-1)
@@ -181,12 +185,14 @@
 #define constants_bs__c_LocaleIds_empty 0
 #define constants_bs__c_LocaleIds_indet 0
 #define constants_bs__c_LocalizedText_indet 0
+#define constants_bs__c_MdnsDiscoveryConfig_indet 0
 #define constants_bs__c_NodeId_indet 0
 #define constants_bs__c_Node_indet 0
 #define constants_bs__c_Nonce_indet 0
 #define constants_bs__c_Null_Type_NodeId 0
 #define constants_bs__c_QualifiedName_indet 0
 #define constants_bs__c_Reference_indet 0
+#define constants_bs__c_RegisteredServer_indet 0
 #define constants_bs__c_RelativePathElt_indet 0
 #define constants_bs__c_RelativePath_indet 0
 #define constants_bs__c_Server_Nano_Extended false

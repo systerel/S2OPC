@@ -1,0 +1,58 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+IMPLEMENTATION
+   service_set_discovery_server_i
+REFINES
+   service_set_discovery_server
+IMPORTS
+    service_find_servers_bs,
+    msg_register_server2
+SEES
+   constants,
+   constants_statuscodes_bs,
+   message_in_bs,
+   message_out_bs
+PROMOTES
+    treat_find_servers_request
+OPERATIONS
+
+    ret <-- treat_find_servers_on_network_request (req_msg, resp_msg, endpoint_config_idx) =
+    BEGIN
+        ret := e_sc_bad_service_unsupported
+    END
+    ;
+    
+    ret <-- treat_register_server2_request (req_msg, resp_msg, endpoint_config_idx) =
+    VAR
+        l_is_online,
+        l_nb_discovery_config, 
+        l_mdns_config_index,
+        l_registered_server,
+        l_mdns_config
+    IN
+        ret, l_is_online, l_nb_discovery_config, l_mdns_config_index, l_registered_server, l_mdns_config
+          <-- check_register_server2_req (req_msg);
+        IF ret = e_sc_ok THEN
+            ret <-- set_register_server2_resp_configuration_results (resp_msg, l_nb_discovery_config, l_mdns_config_index)
+            // TODO: treatment
+        END
+    END
+
+END

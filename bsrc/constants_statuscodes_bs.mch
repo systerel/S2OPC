@@ -90,7 +90,12 @@ SETS
                       e_sc_bad_too_many_matches,
                       e_sc_bad_query_too_complex,
                       e_sc_bad_no_match,
-                      e_sc_bad_data_encoding_invalid}
+                      e_sc_bad_data_encoding_invalid,
+                      e_sc_bad_server_uri_invalid, 
+                      e_sc_bad_server_name_missing, 
+                      e_sc_bad_discovery_url_missing,
+                      e_sc_bad_semaphore_file_missing,
+                      e_sc_bad_not_supported}
 
 ABSTRACT_CONSTANTS
     c_RawStatusCode_BadInvalidState,

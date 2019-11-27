@@ -1,0 +1,106 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+IMPLEMENTATION
+    msg_register_server2_i
+
+REFINES
+    msg_register_server2
+
+IMPORTS
+    msg_register_server2_bs
+
+SEES
+    constants,
+    constants_statuscodes_bs,
+    message_in_bs,
+    message_out_bs
+
+PROMOTES
+    set_register_server2_resp_configuration_results
+
+OPERATIONS
+
+    p_sc, p_is_online, p_nb_discovery_config, p_mdns_discovery_config_index, p_registered_server, p_mdns_config
+      <-- check_register_server2_req (p_req) =
+    VAR
+        l_valid_server_uri,
+        l_valid_product_uri,
+        l_valid_server_names,
+        l_valid_server_type,
+        l_valid_discovery_url,
+        l_valid_semaphore_file,
+        l_has_discovery_configuration, 
+        l_has_one_and_only_one_mdns_config,
+        l_valid_mdns_server_name,
+        l_valid_server_capabilities
+    IN
+        p_registered_server <-- get_register_server2_req_registered_server (p_req);
+        l_valid_server_uri <-- check_registered_server_uri (p_registered_server);
+        l_valid_product_uri <-- check_registered_product_uri (p_registered_server);
+        l_valid_server_names <-- check_registered_server_names (p_registered_server);
+        l_valid_server_type <-- check_registered_server_type (p_registered_server);
+        l_valid_discovery_url <-- check_registered_discovery_url (p_registered_server);
+        l_valid_semaphore_file <-- check_registered_semaphore_file (p_registered_server);
+        p_is_online <-- get_registered_server_is_online (p_registered_server);
+        l_has_discovery_configuration, l_has_one_and_only_one_mdns_config, 
+        p_mdns_config, p_nb_discovery_config, p_mdns_discovery_config_index 
+          <-- getall_register_server2_req_msdn_discovery_config (p_req);
+        IF l_has_discovery_configuration = TRUE & l_has_discovery_configuration = TRUE
+        THEN            
+            l_valid_mdns_server_name <-- check_mdns_server_name (p_mdns_config);
+            l_valid_server_capabilities <-- check_mdns_server_capabilities (p_mdns_config)
+        ELSE
+            l_valid_mdns_server_name := FALSE;
+            l_valid_server_capabilities := FALSE
+        END
+        ;
+        // Unless some argument is invalid result is ok
+        p_sc := e_sc_ok;
+        IF l_valid_server_uri = FALSE
+        THEN
+            p_sc := e_sc_bad_server_uri_invalid
+        ELSIF l_valid_product_uri = FALSE
+        THEN
+            p_sc := e_sc_bad_invalid_argument
+        ELSIF l_valid_server_names = FALSE 
+        THEN
+            p_sc := e_sc_bad_server_name_missing
+        ELSIF l_valid_server_type = FALSE
+        THEN
+            p_sc := e_sc_bad_invalid_argument
+        ELSIF l_valid_discovery_url = FALSE
+        THEN
+            p_sc := e_sc_bad_discovery_url_missing
+        ELSIF l_valid_semaphore_file = FALSE
+        THEN
+            p_sc := e_sc_bad_semaphore_file_missing
+        ELSIF l_has_discovery_configuration = FALSE or l_has_one_and_only_one_mdns_config = FALSE
+        THEN
+            p_sc := e_sc_bad_invalid_argument
+        ELSIF l_valid_mdns_server_name = FALSE or l_valid_server_capabilities = FALSE
+        THEN
+            /* It is part of the specific discovery configuration we are supporting, 
+               but service shall still fail if the configuration is not correct in it 
+               and configurationResult[] will not exist in ServiceFault */
+            p_sc := e_sc_bad_invalid_argument
+        END
+    END
+    
+END
