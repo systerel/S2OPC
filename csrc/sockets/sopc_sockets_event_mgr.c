@@ -596,11 +596,8 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_Sockets_InputEvent socketEvent,
         }
         else
         {
-            if (NULL != buffer)
-            {
-                // Free the buffer
-                SOPC_Buffer_Delete(buffer);
-            }
+            // Free the buffer if not NULL
+            SOPC_Buffer_Delete(buffer);
             result = false;
         }
 

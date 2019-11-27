@@ -2681,8 +2681,6 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
             // Note: Abort chunk message has same message content than ERR message
             //       (except it was contained in a secure message with security layer)
             status = SC_ClientTransition_ReceivedErrorMsg(buffer, &errorStatus, &errorReason);
-
-            SOPC_Buffer_Delete(buffer);
         }
 
         if (SOPC_STATUS_OK == status)
@@ -2717,6 +2715,9 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
             SC_CloseSecureConnection(scConnection, eltId, false, false, OpcUa_BadDecodingError,
                                      "Invalid abort message received");
         }
+
+        // Always delete buffer if not NULL
+        SOPC_Buffer_Delete(buffer);
         break;
     case INT_SC_RCV_FAILURE:
     {
@@ -2808,7 +2809,8 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
                                      OpcUa_BadSecureChannelClosed, "ERR message received");
         }
 
-        SOPC_Buffer_Delete((SOPC_Buffer*) params);
+        // Always delete buffer if not NULL
+        SOPC_Buffer_Delete(buffer);
         break;
     }
     case INT_EP_SC_CLOSE:
@@ -3126,10 +3128,12 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                                    auxParam,     // request Id
                                    errorStatus); // error status
 
+            // buffer: deleted if not NULL
             SOPC_Buffer_Delete((SOPC_Buffer*) params);
         }
         else
         {
+            // buffer: transfered to be sent
             SOPC_SecureChannels_EnqueueInternalEvent(INT_SC_SND_MSG_CHUNKS, eltId, params, auxParam);
         }
         break;

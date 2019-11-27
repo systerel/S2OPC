@@ -3876,6 +3876,7 @@ void SOPC_ChunksMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event, uint32_t eltId
 
     if (scConnection == NULL || buffer == NULL || scConnection->state == SECURE_CONNECTION_STATE_SC_CLOSED)
     {
+        SOPC_Buffer_Delete(buffer);
         return;
     }
 
@@ -4387,9 +4388,6 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InternalEvent event,
         }
     }
 
-    if (NULL != buffer)
-    {
-        SOPC_Buffer_Delete(buffer);
-        buffer = NULL;
-    }
+    // Always free buffer if not NULL
+    SOPC_Buffer_Delete(buffer);
 }
