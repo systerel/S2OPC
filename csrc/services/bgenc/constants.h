@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 08/11/2019 18:03:56
+ Date                 : 28/11/2019 15:01:44
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -57,12 +57,14 @@
 #define constants__t_Int32 constants_bs__t_Int32
 #define constants__t_LocaleIds_i constants_bs__t_LocaleIds_i
 #define constants__t_LocalizedText_i constants_bs__t_LocalizedText_i
+#define constants__t_MdnsDiscoveryConfig_i constants_bs__t_MdnsDiscoveryConfig_i
 #define constants__t_NodeId_i constants_bs__t_NodeId_i
 #define constants__t_Node_i constants_bs__t_Node_i
 #define constants__t_Nonce_i constants_bs__t_Nonce_i
 #define constants__t_QualifiedName_i constants_bs__t_QualifiedName_i
 #define constants__t_RawStatusCode constants_bs__t_RawStatusCode
 #define constants__t_Reference_i constants_bs__t_Reference_i
+#define constants__t_RegisteredServer_i constants_bs__t_RegisteredServer_i
 #define constants__t_RelativePathElt_i constants_bs__t_RelativePathElt_i
 #define constants__t_RelativePath_i constants_bs__t_RelativePath_i
 #define constants__t_SignatureData_i constants_bs__t_SignatureData_i
@@ -315,12 +317,14 @@ typedef enum {
 #define constants__t_Int32_max constants_bs__t_Int32_max
 #define constants__t_LocaleIds_i_max constants_bs__t_LocaleIds_i_max
 #define constants__t_LocalizedText_i_max constants_bs__t_LocalizedText_i_max
+#define constants__t_MdnsDiscoveryConfig_i_max constants_bs__t_MdnsDiscoveryConfig_i_max
 #define constants__t_NodeId_i_max constants_bs__t_NodeId_i_max
 #define constants__t_Node_i_max constants_bs__t_Node_i_max
 #define constants__t_Nonce_i_max constants_bs__t_Nonce_i_max
 #define constants__t_QualifiedName_i_max constants_bs__t_QualifiedName_i_max
 #define constants__t_RawStatusCode_max constants_bs__t_RawStatusCode_max
 #define constants__t_Reference_i_max constants_bs__t_Reference_i_max
+#define constants__t_RegisteredServer_i_max constants_bs__t_RegisteredServer_i_max
 #define constants__t_RelativePathElt_i_max constants_bs__t_RelativePathElt_i_max
 #define constants__t_RelativePath_i_max constants_bs__t_RelativePath_i_max
 #define constants__t_SignatureData_i_max constants_bs__t_SignatureData_i_max
@@ -380,12 +384,14 @@ typedef enum {
 #define constants__c_LocaleIds_empty constants_bs__c_LocaleIds_empty
 #define constants__c_LocaleIds_indet constants_bs__c_LocaleIds_indet
 #define constants__c_LocalizedText_indet constants_bs__c_LocalizedText_indet
+#define constants__c_MdnsDiscoveryConfig_indet constants_bs__c_MdnsDiscoveryConfig_indet
 #define constants__c_NodeId_indet constants_bs__c_NodeId_indet
 #define constants__c_Node_indet constants_bs__c_Node_indet
 #define constants__c_Nonce_indet constants_bs__c_Nonce_indet
 #define constants__c_Null_Type_NodeId constants_bs__c_Null_Type_NodeId
 #define constants__c_QualifiedName_indet constants_bs__c_QualifiedName_indet
 #define constants__c_Reference_indet constants_bs__c_Reference_indet
+#define constants__c_RegisteredServer_indet constants_bs__c_RegisteredServer_indet
 #define constants__c_RelativePathElt_indet constants_bs__c_RelativePathElt_indet
 #define constants__c_RelativePath_indet constants_bs__c_RelativePath_indet
 #define constants__c_Server_Nano_Extended constants_bs__c_Server_Nano_Extended

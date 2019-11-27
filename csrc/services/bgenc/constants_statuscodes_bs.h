@@ -21,7 +21,7 @@
 
  File Name            : constants_statuscodes_bs.h
 
- Date                 : 04/10/2019 15:27:27
+ Date                 : 28/11/2019 15:02:03
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -106,7 +106,12 @@ typedef enum {
    constants_statuscodes_bs__e_sc_bad_too_many_matches,
    constants_statuscodes_bs__e_sc_bad_query_too_complex,
    constants_statuscodes_bs__e_sc_bad_no_match,
-   constants_statuscodes_bs__e_sc_bad_data_encoding_invalid
+   constants_statuscodes_bs__e_sc_bad_data_encoding_invalid,
+   constants_statuscodes_bs__e_sc_bad_server_uri_invalid,
+   constants_statuscodes_bs__e_sc_bad_server_name_missing,
+   constants_statuscodes_bs__e_sc_bad_discovery_url_missing,
+   constants_statuscodes_bs__e_sc_bad_semaphore_file_missing,
+   constants_statuscodes_bs__e_sc_bad_not_supported
 } constants_statuscodes_bs__t_StatusCode_i;
 
 /*------------------------
