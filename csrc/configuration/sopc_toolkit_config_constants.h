@@ -138,7 +138,7 @@
 
 /** @brief Maximum time before a response shall be received after sending a request */
 #ifndef SOPC_REQUEST_TIMEOUT_MS
-#define SOPC_REQUEST_TIMEOUT_MS 5000
+#define SOPC_REQUEST_TIMEOUT_MS 20000
 #endif
 
 /** @brief Elapsed time after which SC connection establishment is considered timeout
