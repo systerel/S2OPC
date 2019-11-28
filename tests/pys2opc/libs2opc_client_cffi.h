@@ -318,10 +318,10 @@ typedef struct
     OpcUa_MessageSecurityMode security_mode;
     uint8_t disable_certificate_verification;
     SOPC_LibSub_CstString path_cert_auth;
+    SOPC_LibSub_CstString path_crl;
     SOPC_LibSub_CstString path_cert_srv;
     SOPC_LibSub_CstString path_cert_cli;
     SOPC_LibSub_CstString path_key_cli;
-    SOPC_LibSub_CstString path_crl;
     SOPC_LibSub_CstString policyId;
     SOPC_LibSub_CstString username;
     SOPC_LibSub_CstString password;

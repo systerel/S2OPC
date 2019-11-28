@@ -62,6 +62,7 @@ config_no_security = {'add_configuration_function': PyS2OPC.add_configuration_un
 config_security = {'security_mode': SecurityMode.Sign,
                    'security_policy': SecurityPolicy.Basic256,
                    'path_cert_auth': '../../../build/bin/trusted/cacert.der',
+                   'path_crl': '../../../build/bin/revoked/cacrl.der',
                    'path_cert_srv': '../../../build/bin/server_public/server_2k_cert.der',
                    'path_cert_cli': '../../../build/bin/client_public/client_2k_cert.der',
                    'path_key_cli': '../../../build/bin/client_private/client_2k_key.pem',

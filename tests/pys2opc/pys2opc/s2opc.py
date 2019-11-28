@@ -185,6 +185,7 @@ class PyS2OPC:
                                   security_mode = SecurityMode.Sign,
                                   security_policy = SecurityPolicy.Basic256,
                                   path_cert_auth = '../../build/bin/trusted/cacert.der',
+                                  path_crl = '../../build/bin/revoked/cacrl.der',
                                   path_cert_srv = '../../build/bin/server_public/server_2k_cert.der',
                                   path_cert_cli = '../../build/bin/client_public/client_2k_cert.der',
                                   path_key_cli = '../../build/bin/client_private/client_2k_key.pem'):
@@ -206,6 +207,7 @@ class PyS2OPC:
             security_mode: The configured security mode, one of the SecurityMode constants.
             security_policy: The configured security policy, one of the SecurityPolicy constants.
             path_cert_auth: The path to the certificate authority (in DER or PEM format).
+            path_crl      : The path to the CertificateRevocationList of the certificate authority (mandatory)
             path_cert_srv: The path to the expected server certificate (in DER or PEM format).
                            It must be signed by the certificate authority.
             path_cert_cli: The path to the certificate of the client.
@@ -221,10 +223,10 @@ class PyS2OPC:
                                  'security_mode': security_mode,
                                  'disable_certificate_verification': False,
                                  'path_cert_auth': ffi.new('char[]', path_cert_auth.encode()),
+                                 'path_crl': ffi.new('char[]', path_crl.encode()),
                                  'path_cert_srv': ffi.new('char[]', path_cert_srv.encode()),
                                  'path_cert_cli': ffi.new('char[]', path_cert_cli.encode()),
                                  'path_key_cli': ffi.new('char[]', path_key_cli.encode()),
-                                 'path_crl': NULL,
                                  'policyId': ffi.new('char[]', b"anonymous"),
                                  'username': NULL,
                                  'password': NULL,
