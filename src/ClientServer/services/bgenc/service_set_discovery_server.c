@@ -21,7 +21,7 @@
 
  File Name            : service_set_discovery_server.c
 
- Date                 : 28/11/2019 15:01:50
+ Date                 : 02/12/2019 12:51:29
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -52,7 +52,6 @@ void service_set_discovery_server__treat_find_servers_on_network_request(
 void service_set_discovery_server__treat_register_server2_request(
    const constants__t_msg_i service_set_discovery_server__req_msg,
    const constants__t_msg_i service_set_discovery_server__resp_msg,
-   const constants__t_endpoint_config_idx_i service_set_discovery_server__endpoint_config_idx,
    constants_statuscodes_bs__t_StatusCode_i * const service_set_discovery_server__ret) {
    {
       t_bool service_set_discovery_server__l_is_online;
@@ -69,11 +68,25 @@ void service_set_discovery_server__treat_register_server2_request(
          &service_set_discovery_server__l_registered_server,
          &service_set_discovery_server__l_mdns_config);
       if (*service_set_discovery_server__ret == constants_statuscodes_bs__e_sc_ok) {
+         if (service_set_discovery_server__l_is_online == true) {
+            service_register_server2__register_server2_create_or_update(service_set_discovery_server__l_registered_server,
+               service_set_discovery_server__l_mdns_config,
+               service_set_discovery_server__ret);
+         }
+         else {
+            service_register_server2__register_server2_remove(service_set_discovery_server__l_registered_server);
+         }
+      }
+      if (*service_set_discovery_server__ret == constants_statuscodes_bs__e_sc_ok) {
          msg_register_server2__set_register_server2_resp_configuration_results(service_set_discovery_server__resp_msg,
             service_set_discovery_server__l_nb_discovery_config,
             service_set_discovery_server__l_mdns_config_index,
             service_set_discovery_server__ret);
       }
    }
+}
+
+void service_set_discovery_server__service_set_discovery_server_UNINITIALISATION(void) {
+   service_register_server2__service_register_server2_UNINITIALISATION();
 }
 

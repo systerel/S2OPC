@@ -35,6 +35,7 @@
 
 #include "continuation_point_impl.h"
 #include "opcua_identifiers.h"
+#include "service_register_server2_set_internal.h"
 #include "sopc_address_space.h"
 #include "sopc_buffer.h"
 #include "sopc_builtintypes.h"
@@ -76,9 +77,11 @@ typedef SOPC_ByteString* constants_bs__t_Nonce_i;
 typedef SOPC_QualifiedName* constants_bs__t_QualifiedName_i;
 typedef SOPC_StatusCode constants_bs__t_RawStatusCode;
 typedef OpcUa_ReferenceNode* constants_bs__t_Reference_i;
+typedef SOPC_RegisterServer2Record_Internal* constants_bs__t_RegisteredServer2Info_i;
 typedef OpcUa_RegisteredServer* constants_bs__t_RegisteredServer_i;
 typedef OpcUa_RelativePathElement* constants_bs__t_RelativePathElt_i;
 typedef OpcUa_RelativePath* constants_bs__t_RelativePath_i;
+typedef SOPC_String* constants_bs__t_ServerUri;
 typedef OpcUa_SignatureData* constants_bs__t_SignatureData_i;
 typedef SOPC_Value_Timestamp constants_bs__t_Timestamp;
 typedef SOPC_Variant* constants_bs__t_Variant_i;
@@ -151,6 +154,7 @@ extern constants_bs__t_LocaleIds_i constants_bs__c_LocaleIds_empty;
 extern const constants_bs__t_NodeId_i constants_bs__c_Null_Type_NodeId;
 #define constants_bs__c_QualifiedName_indet 0
 #define constants_bs__c_Reference_indet 0
+#define constants_bs__c_RegisteredServer2Info_indet NULL
 #define constants_bs__c_RegisteredServer_indet NULL
 #define constants_bs__c_RelativePathElt_indet 0
 #define constants_bs__c_RelativePath_indet 0

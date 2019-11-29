@@ -21,7 +21,7 @@
 
  File Name            : msg_register_server2.c
 
- Date                 : 26/02/2020 10:46:00
+ Date                 : 26/02/2020 10:56:22
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -84,7 +84,7 @@ void msg_register_server2__check_register_server2_req(
          msg_register_server2__p_nb_discovery_config,
          msg_register_server2__p_mdns_discovery_config_index);
       if ((msg_register_server2__l_has_discovery_configuration == true) &&
-         (msg_register_server2__l_has_discovery_configuration == true)) {
+         (msg_register_server2__l_has_one_and_only_one_mdns_config == true)) {
          msg_register_server2_bs__check_mdns_server_name(*msg_register_server2__p_mdns_config,
             &msg_register_server2__l_valid_mdns_server_name);
          msg_register_server2_bs__check_mdns_server_capabilities(*msg_register_server2__p_mdns_config,

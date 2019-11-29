@@ -21,7 +21,7 @@
 
  File Name            : constants_bs.h
 
- Date                 : 26/02/2020 10:46:18
+ Date                 : 26/02/2020 10:56:40
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -61,9 +61,11 @@
 #define constants_bs__t_QualifiedName_i t_entier4
 #define constants_bs__t_RawStatusCode t_entier4
 #define constants_bs__t_Reference_i t_entier4
+#define constants_bs__t_RegisteredServer2Info_i t_entier4
 #define constants_bs__t_RegisteredServer_i t_entier4
 #define constants_bs__t_RelativePathElt_i t_entier4
 #define constants_bs__t_RelativePath_i t_entier4
+#define constants_bs__t_ServerUri t_entier4
 #define constants_bs__t_SignatureData_i t_entier4
 #define constants_bs__t_Timestamp t_entier4
 #define constants_bs__t_Variant_i t_entier4
@@ -126,9 +128,11 @@
 #define constants_bs__t_QualifiedName_i_max (-1)
 #define constants_bs__t_RawStatusCode_max (-1)
 #define constants_bs__t_Reference_i_max (-1)
+#define constants_bs__t_RegisteredServer2Info_i_max (-1)
 #define constants_bs__t_RegisteredServer_i_max (-1)
 #define constants_bs__t_RelativePathElt_i_max (-1)
 #define constants_bs__t_RelativePath_i_max (-1)
+#define constants_bs__t_ServerUri_max (-1)
 #define constants_bs__t_SignatureData_i_max (-1)
 #define constants_bs__t_Timestamp_max (-1)
 #define constants_bs__t_Variant_i_max (-1)
@@ -192,9 +196,11 @@
 #define constants_bs__c_Null_Type_NodeId 0
 #define constants_bs__c_QualifiedName_indet 0
 #define constants_bs__c_Reference_indet 0
+#define constants_bs__c_RegisteredServer2Info_indet 0
 #define constants_bs__c_RegisteredServer_indet 0
 #define constants_bs__c_RelativePathElt_indet 0
 #define constants_bs__c_RelativePath_indet 0
+#define constants_bs__c_ServerUri_empty 0
 #define constants_bs__c_Server_Nano_Extended false
 #define constants_bs__c_SignatureData_indet 0
 #define constants_bs__c_Timestamp_null 0

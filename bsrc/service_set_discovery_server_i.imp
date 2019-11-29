@@ -23,7 +23,9 @@ REFINES
    service_set_discovery_server
 IMPORTS
     service_find_servers_bs,
-    msg_register_server2
+    msg_register_server2,
+    service_register_server2,
+    service_set_discovery_server_data_bs
 SEES
    constants,
    constants_statuscodes_bs,
@@ -39,7 +41,7 @@ OPERATIONS
     END
     ;
     
-    ret <-- treat_register_server2_request (req_msg, resp_msg, endpoint_config_idx) =
+    ret <-- treat_register_server2_request (req_msg, resp_msg) =
     VAR
         l_is_online,
         l_nb_discovery_config, 
@@ -50,9 +52,23 @@ OPERATIONS
         ret, l_is_online, l_nb_discovery_config, l_mdns_config_index, l_registered_server, l_mdns_config
           <-- check_register_server2_req (req_msg);
         IF ret = e_sc_ok THEN
-            ret <-- set_register_server2_resp_configuration_results (resp_msg, l_nb_discovery_config, l_mdns_config_index)
-            // TODO: treatment
+            IF l_is_online = TRUE
+            THEN
+                ret <-- register_server2_create_or_update (l_registered_server, l_mdns_config)
+            ELSE
+                register_server2_remove (l_registered_server)
+            END
         END
+        ;
+        IF ret = e_sc_ok THEN
+            ret <-- set_register_server2_resp_configuration_results (resp_msg, l_nb_discovery_config, l_mdns_config_index)
+        END
+    END
+    ;
+
+    service_set_discovery_server_UNINITIALISATION =
+    BEGIN
+        service_register_server2_UNINITIALISATION
     END
 
 END

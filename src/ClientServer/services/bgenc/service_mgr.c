@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 26/02/2020 10:46:02
+ Date                 : 26/02/2020 10:56:25
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -496,7 +496,6 @@ void service_mgr__treat_discovery_service_req(
       case constants__e_msg_discovery_register_server2_req:
          service_set_discovery_server__treat_register_server2_request(service_mgr__req_msg,
             service_mgr__resp_msg,
-            service_mgr__endpoint_config_idx,
             &service_mgr__l_ret);
          break;
       default:
@@ -1857,6 +1856,7 @@ void service_mgr__internal_server_inactive_session_prio_event(
 void service_mgr__service_mgr_UNINITIALISATION(void) {
    subscription_mgr__subscription_mgr_UNINITIALISATION();
    service_set_view__service_set_view_UNINITIALISATION();
+   service_set_discovery_server__service_set_discovery_server_UNINITIALISATION();
    service_mgr_bs__service_mgr_bs_UNINITIALISATION();
 }
 

@@ -80,7 +80,7 @@ OPERATIONS
               RegisterServer2_NbDiscoveryConfigs = p_nb_discovery_config &
               RegisterServer2_MdnsDiscoveryConfigIdx = p_mdns_discovery_config_index
           ) &
-          (p_sc = e_sc_ok => 
+          (p_sc /= e_sc_ok =>
               RegisterServer2_NbDiscoveryConfigs = 0 &
               RegisterServer2_MdnsDiscoveryConfigIdx = 0)
         )

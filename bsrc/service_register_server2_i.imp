@@ -1,0 +1,166 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+IMPLEMENTATION
+   service_register_server2_i
+REFINES
+   service_register_server2
+
+SEES
+   constants ,
+   constants_statuscodes_bs,
+   service_set_discovery_server_data_bs
+
+IMPORTS
+    service_register_server2_set_it_bs
+
+CONCRETE_VARIABLES
+    RegisteredServer2_Counter_i
+
+INVARIANT
+    RegisteredServer2_Counter_i : NAT &
+    RegisteredServer2_Counter_i = RegisteredServer2_Counter
+    
+INITIALISATION
+    RegisteredServer2_Counter_i := 0
+
+LOCAL_OPERATIONS
+
+    hasServerUri, recordId <-- local_need_register_server2_update (p_registered_server) =
+    PRE
+        p_registered_server : t_RegisteredServer_i &
+        p_registered_server : t_RegisteredServer
+    THEN
+        IF RegisteredServer_ServerUri(p_registered_server) /:
+            RegisteredServer_ServerUri[ran(a_RegisteredServer2_RegisteredServer)]
+        THEN
+            hasServerUri := FALSE ||
+            recordId :: NAT
+        ELSE
+            hasServerUri := TRUE ||
+            ANY serverUriRecordId WHERE
+                serverUriRecordId : /* Choose recordId with same serverUri: it is unique due set construction mechanism */
+                 a_RegisteredServer2_RecordId[
+                   /* <: t_RegisteredServer s_RegisteredServer2 with same serverUri: there is only one element by construction */
+                   a_RegisteredServer2_RegisteredServer~[
+                     /*<: t_RegisteredServer with same serverUri*/
+                     RegisteredServer_ServerUri~[{RegisteredServer_ServerUri(p_registered_server)}]]] 
+            THEN
+                recordId := serverUriRecordId
+            END
+        END
+    END
+
+OPERATIONS
+
+    /* LOCAL_OPERATIONS */
+    hasServerUri, recordId <-- local_need_register_server2_update (p_registered_server) =
+    VAR
+        l_continue,
+        l_registeredServerInfo,
+        l_registeredServer,
+        l_newServerUri,
+        l_recordedServerUri
+    IN
+        recordId := 0;
+        hasServerUri := FALSE;
+        l_continue <-- init_iter_registered_server2_set;
+        l_newServerUri <-- get_RegisteredServer_ServerUri (p_registered_server);
+        WHILE l_continue = TRUE & hasServerUri = FALSE DO
+            l_continue, l_registeredServerInfo <-- continue_iter_monitored_item;
+            l_registeredServer <-- get_registered_server2_registered_server (l_registeredServerInfo);
+            l_recordedServerUri <-- get_RegisteredServer_ServerUri (l_registeredServer);
+            hasServerUri <-- is_equal_ServerUri (l_newServerUri, l_recordedServerUri);
+            IF hasServerUri = TRUE
+            THEN
+                recordId <-- get_registered_server2_recordId (l_registeredServerInfo)
+            END
+        INVARIANT
+            hasServerUri = 
+              bool(RegisteredServer_ServerUri(p_registered_server) :
+                    RegisteredServer_ServerUri[a_RegisteredServer2_RegisteredServer[s_registered_server2_iterated_it]]) &
+            (hasServerUri = TRUE => 
+                /* since we stop iteration once found, there is only one element, moreover there is only 1 by construction */
+                card(a_RegisteredServer2_RegisteredServer~
+                      [RegisteredServer_ServerUri~
+                       [{RegisteredServer_ServerUri(p_registered_server)}]]) = 1 &
+                /* recordId is contained in a set of 1 element */
+                recordId : a_RegisteredServer2_RecordId
+                             [a_RegisteredServer2_RegisteredServer~
+                               [RegisteredServer_ServerUri~
+                                 [{RegisteredServer_ServerUri(p_registered_server)}]]]
+            )
+        VARIANT
+            card(s_registered_server2_to_iterate_it)
+        END
+        ;
+        clear_iter_registered_server2_set
+    END
+    ;
+
+    /* OPERATIONS */
+    p_sc <-- register_server2_create_or_update (p_registered_server , p_mdns_config) =
+    VAR
+        l_hasAlreadyServerUri,
+        l_recordIdToRemove,
+        l_allocSuccess
+    IN
+        p_sc := e_sc_ok;
+        IF RegisteredServer2_Counter_i = MAXINT THEN
+            reset_registered_server2_set;
+            RegisteredServer2_Counter_i := 0
+        END
+        ;
+        /* Generate new recordId */
+        RegisteredServer2_Counter_i := RegisteredServer2_Counter_i + 1;
+        l_hasAlreadyServerUri, l_recordIdToRemove <-- local_need_register_server2_update (p_registered_server);
+        l_allocSuccess <-- add_to_registered_server2_set (p_registered_server, p_mdns_config, RegisteredServer2_Counter_i);
+        IF l_hasAlreadyServerUri = TRUE & l_allocSuccess = TRUE
+        THEN
+            /* Remove the old record since new one has been added */
+            remove_from_registered_server2_set (l_recordIdToRemove)
+        ELSIF l_allocSuccess = FALSE
+        THEN
+            /* Restore counter in case of error */
+            RegisteredServer2_Counter_i := RegisteredServer2_Counter_i - 1;
+            p_sc := e_sc_bad_out_of_memory
+        END
+    END
+    ;
+
+    register_server2_remove (p_registered_server) =
+    VAR
+        l_hasAlreadyServerUri, 
+        l_recordIdToRemove
+    IN
+        l_hasAlreadyServerUri, l_recordIdToRemove <-- local_need_register_server2_update (p_registered_server);
+        IF l_hasAlreadyServerUri = TRUE
+        THEN
+            /* Remove the old record */
+            remove_from_registered_server2_set (l_recordIdToRemove)
+        END
+    END
+    ;
+
+    service_register_server2_UNINITIALISATION =
+    BEGIN
+        service_register_server2_set_it_bs_UNINITIALISATION
+    END
+
+END

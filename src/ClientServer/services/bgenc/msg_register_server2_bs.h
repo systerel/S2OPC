@@ -21,7 +21,7 @@
 
  File Name            : msg_register_server2_bs.h
 
- Date                 : 26/02/2020 10:46:23
+ Date                 : 26/02/2020 10:56:46
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 

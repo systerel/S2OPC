@@ -62,7 +62,7 @@ OPERATIONS
         l_has_discovery_configuration, l_has_one_and_only_one_mdns_config, 
         p_mdns_config, p_nb_discovery_config, p_mdns_discovery_config_index 
           <-- getall_register_server2_req_msdn_discovery_config (p_req);
-        IF l_has_discovery_configuration = TRUE & l_has_discovery_configuration = TRUE
+        IF l_has_discovery_configuration = TRUE & l_has_one_and_only_one_mdns_config = TRUE
         THEN            
             l_valid_mdns_server_name <-- check_mdns_server_name (p_mdns_config);
             l_valid_server_capabilities <-- check_mdns_server_capabilities (p_mdns_config)

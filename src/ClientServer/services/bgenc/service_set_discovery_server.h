@@ -21,7 +21,7 @@
 
  File Name            : service_set_discovery_server.h
 
- Date                 : 28/11/2019 15:01:50
+ Date                 : 02/12/2019 10:19:11
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -40,6 +40,8 @@
   -----------------*/
 #include "msg_register_server2.h"
 #include "service_find_servers_bs.h"
+#include "service_register_server2.h"
+#include "service_set_discovery_server_data_bs.h"
 
 /*--------------
    SEES Clause
@@ -62,6 +64,7 @@ extern void service_set_discovery_server__INITIALISATION(void);
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+extern void service_set_discovery_server__service_set_discovery_server_UNINITIALISATION(void);
 extern void service_set_discovery_server__treat_find_servers_on_network_request(
    const constants__t_msg_i service_set_discovery_server__req_msg,
    const constants__t_msg_i service_set_discovery_server__resp_msg,
@@ -70,7 +73,6 @@ extern void service_set_discovery_server__treat_find_servers_on_network_request(
 extern void service_set_discovery_server__treat_register_server2_request(
    const constants__t_msg_i service_set_discovery_server__req_msg,
    const constants__t_msg_i service_set_discovery_server__resp_msg,
-   const constants__t_endpoint_config_idx_i service_set_discovery_server__endpoint_config_idx,
    constants_statuscodes_bs__t_StatusCode_i * const service_set_discovery_server__ret);
 
 #endif

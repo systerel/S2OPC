@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 26/02/2020 10:45:58
+ Date                 : 26/02/2020 10:56:20
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -66,9 +66,11 @@
 #define constants__t_QualifiedName_i constants_bs__t_QualifiedName_i
 #define constants__t_RawStatusCode constants_bs__t_RawStatusCode
 #define constants__t_Reference_i constants_bs__t_Reference_i
+#define constants__t_RegisteredServer2Info_i constants_bs__t_RegisteredServer2Info_i
 #define constants__t_RegisteredServer_i constants_bs__t_RegisteredServer_i
 #define constants__t_RelativePathElt_i constants_bs__t_RelativePathElt_i
 #define constants__t_RelativePath_i constants_bs__t_RelativePath_i
+#define constants__t_ServerUri constants_bs__t_ServerUri
 #define constants__t_SignatureData_i constants_bs__t_SignatureData_i
 #define constants__t_Timestamp constants_bs__t_Timestamp
 #define constants__t_Variant_i constants_bs__t_Variant_i
@@ -329,9 +331,11 @@ typedef enum {
 #define constants__t_QualifiedName_i_max constants_bs__t_QualifiedName_i_max
 #define constants__t_RawStatusCode_max constants_bs__t_RawStatusCode_max
 #define constants__t_Reference_i_max constants_bs__t_Reference_i_max
+#define constants__t_RegisteredServer2Info_i_max constants_bs__t_RegisteredServer2Info_i_max
 #define constants__t_RegisteredServer_i_max constants_bs__t_RegisteredServer_i_max
 #define constants__t_RelativePathElt_i_max constants_bs__t_RelativePathElt_i_max
 #define constants__t_RelativePath_i_max constants_bs__t_RelativePath_i_max
+#define constants__t_ServerUri_max constants_bs__t_ServerUri_max
 #define constants__t_SignatureData_i_max constants_bs__t_SignatureData_i_max
 #define constants__t_Timestamp_max constants_bs__t_Timestamp_max
 #define constants__t_Variant_i_max constants_bs__t_Variant_i_max
@@ -398,9 +402,11 @@ typedef enum {
 #define constants__c_Null_Type_NodeId constants_bs__c_Null_Type_NodeId
 #define constants__c_QualifiedName_indet constants_bs__c_QualifiedName_indet
 #define constants__c_Reference_indet constants_bs__c_Reference_indet
+#define constants__c_RegisteredServer2Info_indet constants_bs__c_RegisteredServer2Info_indet
 #define constants__c_RegisteredServer_indet constants_bs__c_RegisteredServer_indet
 #define constants__c_RelativePathElt_indet constants_bs__c_RelativePathElt_indet
 #define constants__c_RelativePath_indet constants_bs__c_RelativePath_indet
+#define constants__c_ServerUri_empty constants_bs__c_ServerUri_empty
 #define constants__c_Server_Nano_Extended constants_bs__c_Server_Nano_Extended
 #define constants__c_SignatureData_indet constants_bs__c_SignatureData_indet
 #define constants__c_Timestamp_null constants_bs__c_Timestamp_null

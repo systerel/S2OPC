@@ -296,7 +296,9 @@ SETS
     t_ArrayDimensions_i; /* int32 array size and content with product of values <= INT32_MAX */
     t_LocaleIds_i; /* char* array NULL terminated of locales ids */
     t_RegisteredServer_i; /* (OpcUa_RegisteredServer*) */
-    t_MdnsDiscoveryConfig_i /* (OpcUa_MdnsDiscoveryConfiguration*) */
+    t_MdnsDiscoveryConfig_i; /* (OpcUa_MdnsDiscoveryConfiguration*) */
+    t_RegisteredServer2Info_i;
+    t_ServerUri /* (SOPC_String*) */
 
 CONCRETE_CONSTANTS
     c_Server_Nano_Extended,
@@ -390,6 +392,8 @@ CONCRETE_CONSTANTS
     c_BrowseResultMask_all,
     c_RegisteredServer_indet,
     c_MdnsDiscoveryConfig_indet,
+    c_RegisteredServer2Info_indet,
+    c_ServerUri_empty,
 
     t_counter,
     t_ValueRank,
@@ -492,6 +496,7 @@ ABSTRACT_CONSTANTS
     t_LocaleIds,
     t_RegisteredServer,
     t_MdnsDiscoveryConfig,
+    t_RegisteredServer2Info,
 
     s_session_treatment_reqs,
     s_session_treatment_resps,
@@ -826,6 +831,11 @@ PROPERTIES
 
     c_MdnsDiscoveryConfig_indet : t_MdnsDiscoveryConfig_i &
     t_MdnsDiscoveryConfig = t_MdnsDiscoveryConfig_i - {c_MdnsDiscoveryConfig_indet} &
+
+    c_RegisteredServer2Info_indet : t_RegisteredServer2Info_i &
+    t_RegisteredServer2Info = t_RegisteredServer2Info_i - {c_RegisteredServer2Info_indet} &
+
+    c_ServerUri_empty : t_ServerUri &
 
     t_buffer_in_state = { e_buffer_in_msg_not_read,
         e_buffer_in_msg_type_read,
