@@ -422,6 +422,7 @@ void SOPC_SLinkedList_EltGenericFree(uint32_t id, void* val)
 
 SOPC_SLinkedListIterator SOPC_SLinkedList_GetIterator(SOPC_SLinkedList* list)
 {
+    assert(NULL != list);
     return list->first;
 }
 
