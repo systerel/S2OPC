@@ -21,7 +21,7 @@
 
  File Name            : msg_register_server2.c
 
- Date                 : 28/11/2019 15:01:46
+ Date                 : 03/12/2019 17:31:19
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -54,7 +54,6 @@ void msg_register_server2__check_register_server2_req(
       t_bool msg_register_server2__l_valid_product_uri;
       t_bool msg_register_server2__l_valid_server_names;
       t_bool msg_register_server2__l_valid_server_type;
-      t_bool msg_register_server2__l_valid_gateway_url;
       t_bool msg_register_server2__l_valid_discovery_url;
       t_bool msg_register_server2__l_valid_semaphore_file;
       t_bool msg_register_server2__l_has_discovery_configuration;
@@ -72,8 +71,6 @@ void msg_register_server2__check_register_server2_req(
          &msg_register_server2__l_valid_server_names);
       msg_register_server2_bs__check_registered_server_type(*msg_register_server2__p_registered_server,
          &msg_register_server2__l_valid_server_type);
-      msg_register_server2_bs__check_registered_gateway_url(*msg_register_server2__p_registered_server,
-         &msg_register_server2__l_valid_gateway_url);
       msg_register_server2_bs__check_registered_discovery_url(*msg_register_server2__p_registered_server,
          &msg_register_server2__l_valid_discovery_url);
       msg_register_server2_bs__check_registered_semaphore_file(*msg_register_server2__p_registered_server,
@@ -87,7 +84,7 @@ void msg_register_server2__check_register_server2_req(
          msg_register_server2__p_nb_discovery_config,
          msg_register_server2__p_mdns_discovery_config_index);
       if ((msg_register_server2__l_has_discovery_configuration == true) &&
-         (msg_register_server2__l_has_discovery_configuration == true)) {
+         (msg_register_server2__l_has_one_and_only_one_mdns_config == true)) {
          msg_register_server2_bs__check_mdns_server_name(*msg_register_server2__p_mdns_config,
             &msg_register_server2__l_valid_mdns_server_name);
          msg_register_server2_bs__check_mdns_server_capabilities(*msg_register_server2__p_mdns_config,
@@ -107,8 +104,7 @@ void msg_register_server2__check_register_server2_req(
       else if (msg_register_server2__l_valid_server_names == false) {
          *msg_register_server2__p_sc = constants_statuscodes_bs__e_sc_bad_server_name_missing;
       }
-      else if ((msg_register_server2__l_valid_server_type == false) ||
-         (msg_register_server2__l_valid_gateway_url == false)) {
+      else if (msg_register_server2__l_valid_server_type == false) {
          *msg_register_server2__p_sc = constants_statuscodes_bs__e_sc_bad_invalid_argument;
       }
       else if (msg_register_server2__l_valid_discovery_url == false) {

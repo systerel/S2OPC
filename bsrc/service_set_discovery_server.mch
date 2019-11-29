@@ -61,10 +61,8 @@ OPERATIONS
     END
     ;
     
-    ret <-- treat_register_server2_request (req_msg, resp_msg, endpoint_config_idx) =
+    ret <-- treat_register_server2_request (req_msg, resp_msg) =
     PRE
-        endpoint_config_idx : t_endpoint_config_idx_i &
-        endpoint_config_idx : t_endpoint_config_idx &
         req_msg : t_msg_i &
         req_msg = c_msg_in &
         c_msg_in : t_msg &
@@ -75,6 +73,12 @@ OPERATIONS
         a_msg_out_type = e_msg_discovery_register_server2_resp
     THEN
         ret :(ret : t_StatusCode_i & ret : t_StatusCode)
+    END
+    ;
+
+    service_set_discovery_server_UNINITIALISATION =
+    BEGIN
+        skip
     END
 
 END

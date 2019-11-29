@@ -21,7 +21,7 @@
 
  File Name            : msg_register_server2_bs.h
 
- Date                 : 28/11/2019 15:02:09
+ Date                 : 29/11/2019 15:10:22
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -60,9 +60,6 @@ extern void msg_register_server2_bs__check_mdns_server_name(
 extern void msg_register_server2_bs__check_registered_discovery_url(
    const constants__t_RegisteredServer_i msg_register_server2_bs__p_registered_server,
    t_bool * const msg_register_server2_bs__p_valid_discovery_url);
-extern void msg_register_server2_bs__check_registered_gateway_url(
-   const constants__t_RegisteredServer_i msg_register_server2_bs__p_registered_server,
-   t_bool * const msg_register_server2_bs__p_valid_gateway_url);
 extern void msg_register_server2_bs__check_registered_product_uri(
    const constants__t_RegisteredServer_i msg_register_server2_bs__p_registered_server,
    t_bool * const msg_register_server2_bs__p_valid_product_uri);
