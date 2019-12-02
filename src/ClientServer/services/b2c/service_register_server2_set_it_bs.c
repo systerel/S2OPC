@@ -18,10 +18,9 @@
  */
 
 #include "service_register_server2_set_it_bs.h"
-#include "service_register_server2_set_internal.h"
-
 #include <assert.h>
 
+#include "service_discovery_servers_internal.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_singly_linked_list.h"
 

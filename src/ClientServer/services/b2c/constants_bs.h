@@ -35,7 +35,7 @@
 
 #include "continuation_point_impl.h"
 #include "opcua_identifiers.h"
-#include "service_register_server2_set_internal.h"
+#include "service_discovery_servers_internal.h"
 #include "sopc_address_space.h"
 #include "sopc_buffer.h"
 #include "sopc_builtintypes.h"
@@ -81,6 +81,7 @@ typedef SOPC_RegisterServer2Record_Internal* constants_bs__t_RegisteredServer2In
 typedef OpcUa_RegisteredServer* constants_bs__t_RegisteredServer_i;
 typedef OpcUa_RelativePathElement* constants_bs__t_RelativePathElt_i;
 typedef OpcUa_RelativePath* constants_bs__t_RelativePath_i;
+typedef SOPC_ServerCapabilities_Internal constants_bs__t_ServerCapabilities;
 typedef SOPC_String* constants_bs__t_ServerUri;
 typedef OpcUa_SignatureData* constants_bs__t_SignatureData_i;
 typedef SOPC_Value_Timestamp constants_bs__t_Timestamp;

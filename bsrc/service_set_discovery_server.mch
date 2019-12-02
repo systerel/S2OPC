@@ -44,10 +44,8 @@ OPERATIONS
     END
     ;
     
-    ret <-- treat_find_servers_on_network_request (req_msg, resp_msg, endpoint_config_idx) =
+    ret <-- treat_find_servers_on_network_request (req_msg, resp_msg) =
     PRE
-        endpoint_config_idx : t_endpoint_config_idx_i &
-        endpoint_config_idx : t_endpoint_config_idx &
         req_msg : t_msg_i &
         req_msg = c_msg_in &
         c_msg_in : t_msg &

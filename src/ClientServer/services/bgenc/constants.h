@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 26/02/2020 10:56:20
+ Date                 : 26/02/2020 11:00:39
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -70,6 +70,7 @@
 #define constants__t_RegisteredServer_i constants_bs__t_RegisteredServer_i
 #define constants__t_RelativePathElt_i constants_bs__t_RelativePathElt_i
 #define constants__t_RelativePath_i constants_bs__t_RelativePath_i
+#define constants__t_ServerCapabilities constants_bs__t_ServerCapabilities
 #define constants__t_ServerUri constants_bs__t_ServerUri
 #define constants__t_SignatureData_i constants_bs__t_SignatureData_i
 #define constants__t_Timestamp constants_bs__t_Timestamp
@@ -335,6 +336,7 @@ typedef enum {
 #define constants__t_RegisteredServer_i_max constants_bs__t_RegisteredServer_i_max
 #define constants__t_RelativePathElt_i_max constants_bs__t_RelativePathElt_i_max
 #define constants__t_RelativePath_i_max constants_bs__t_RelativePath_i_max
+#define constants__t_ServerCapabilities_max constants_bs__t_ServerCapabilities_max
 #define constants__t_ServerUri_max constants_bs__t_ServerUri_max
 #define constants__t_SignatureData_i_max constants_bs__t_SignatureData_i_max
 #define constants__t_Timestamp_max constants_bs__t_Timestamp_max

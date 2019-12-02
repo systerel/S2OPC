@@ -55,15 +55,39 @@ DEFINITIONS
         a_RegisteredServer2_RegisteredServer = {} &
         a_RegisteredServer2_mDNSconfig = {}
         )
+    ;
+
+    d_variables_set_it ==
+    s_registered_server2_to_iterate_it,
+    s_registered_server2_iterated_it
+    ;
+
+    d_inv_set_it ==
+    s_registered_server2_to_iterate_it <: s_RegisteredServer2 &
+    s_registered_server2_iterated_it <: s_RegisteredServer2 &
+    s_registered_server2_to_iterate_it /\ s_registered_server2_iterated_it = {} &
+    s_registered_server2_to_iterate_it \/ s_registered_server2_iterated_it = s_RegisteredServer2 &
+    /* RecordId is always strictly increasing during iteration: */
+    (s_registered_server2_iterated_it /= {} & s_registered_server2_to_iterate_it /= {} =>
+        max(a_RegisteredServer2_RecordId[s_registered_server2_iterated_it])
+        < min(a_RegisteredServer2_RecordId[s_registered_server2_to_iterate_it]))
+    ;
+
+    d_init_set_it ==
+    s_registered_server2_to_iterate_it :(s_registered_server2_to_iterate_it = {}) ||
+    s_registered_server2_iterated_it :(s_registered_server2_iterated_it = {})
         
 ABSTRACT_VARIABLES
-    d_variables
+    d_variables,
+    d_variables_set_it
 
 INVARIANT
-    d_inv
+    d_inv &
+    d_inv_set_it
 
 INITIALISATION
-    d_init
+    d_init ||
+    d_init_set_it
 
 OPERATIONS
 
@@ -179,6 +203,88 @@ OPERATIONS
     service_register_server2_UNINITIALISATION =
     BEGIN
         skip
+    END
+    ;
+
+    /* PROMOTED */
+    /* iterator on set */
+    
+    continue <-- init_iter_registered_server2_set =
+    BEGIN
+        s_registered_server2_to_iterate_it,
+        s_registered_server2_iterated_it,
+        continue
+        :(s_registered_server2_to_iterate_it <: s_RegisteredServer2 &
+          s_registered_server2_iterated_it <: s_RegisteredServer2 &
+          continue : BOOL &
+          s_registered_server2_to_iterate_it = s_RegisteredServer2 &
+          s_registered_server2_iterated_it = {} &
+          continue = bool(s_registered_server2_to_iterate_it /= {})
+        )
+    END
+    ;
+
+    clear_iter_registered_server2_set =
+    BEGIN
+        s_registered_server2_to_iterate_it := {} ||
+        s_registered_server2_iterated_it := {}
+    END
+    ;
+
+    continue, p_registeredServerInfo <-- continue_iter_monitored_item =
+    PRE
+        s_registered_server2_to_iterate_it /= {}
+    THEN
+        ANY l_registeredServerInfo WHERE
+            l_registeredServerInfo : t_RegisteredServer2Info_i &
+            l_registeredServerInfo : s_registered_server2_to_iterate_it &
+            a_RegisteredServer2_RecordId(l_registeredServerInfo) =
+              min(a_RegisteredServer2_RecordId[s_registered_server2_to_iterate_it])
+        THEN
+            continue := bool(s_registered_server2_to_iterate_it /= {l_registeredServerInfo}) ||
+            p_registeredServerInfo := l_registeredServerInfo ||
+            s_registered_server2_to_iterate_it := s_registered_server2_to_iterate_it - {l_registeredServerInfo} ||
+            s_registered_server2_iterated_it := s_registered_server2_iterated_it \/ {l_registeredServerInfo}
+        END
+    END
+    ;
+
+    /* Last reset timestamp */
+    p_timestamp <-- get_registered_server2_counter_reset_time =
+    BEGIN
+        p_timestamp := RegisteredServer2_CounterResetTime
+    END
+    ;
+
+    /* Operations on set elements */
+    p_registered_server <-- get_registered_server2_registered_server (p_registeredServerInfo) =
+    PRE
+        p_registeredServerInfo : t_RegisteredServer2Info_i &
+        p_registeredServerInfo : s_RegisteredServer2
+    THEN
+        p_registered_server 
+        :(p_registered_server : t_RegisteredServer_i &
+          p_registered_server = a_RegisteredServer2_RegisteredServer (p_registeredServerInfo))
+    END
+    ;
+
+    p_recordId <-- get_registered_server2_recordId (p_registeredServerInfo) =
+    PRE
+        p_registeredServerInfo : t_RegisteredServer2Info_i &
+        p_registeredServerInfo : s_RegisteredServer2
+    THEN
+        p_recordId := a_RegisteredServer2_RecordId (p_registeredServerInfo)
+    END
+    ;
+
+    p_mdns_config <-- get_registered_server2_mdns_config (p_registeredServerInfo) =
+    PRE
+        p_registeredServerInfo : t_RegisteredServer2Info_i &
+        p_registeredServerInfo : s_RegisteredServer2
+    THEN
+        p_mdns_config
+        :(p_mdns_config : t_MdnsDiscoveryConfig_i &
+          p_mdns_config = a_RegisteredServer2_mDNSconfig (p_registeredServerInfo))
     END
 
 END

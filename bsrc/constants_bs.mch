@@ -85,7 +85,8 @@ SETS
     t_RegisteredServer_i;
     t_MdnsDiscoveryConfig_i;
     t_RegisteredServer2Info_i;
-    t_ServerUri
+    t_ServerUri;
+    t_ServerCapabilities
 
 CONCRETE_CONSTANTS
     c_Server_Nano_Extended,

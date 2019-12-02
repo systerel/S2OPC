@@ -21,7 +21,7 @@
 
  File Name            : service_set_discovery_server.c
 
- Date                 : 02/12/2019 12:51:29
+ Date                 : 03/12/2019 10:31:10
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -41,12 +41,127 @@ void service_set_discovery_server__INITIALISATION(void) {
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+void service_set_discovery_server__local_get_nb_servers_on_network_to_return(
+   const t_entier4 service_set_discovery_server__p_starting_record_id,
+   const t_entier4 service_set_discovery_server__p_max_records_to_return,
+   const constants__t_ServerCapabilities service_set_discovery_server__p_serverCapabilities,
+   t_entier4 * const service_set_discovery_server__p_nb_servers) {
+   {
+      t_bool service_set_discovery_server__l_continue;
+      constants__t_RegisteredServer2Info_i service_set_discovery_server__l_registeredServerInfo;
+      t_entier4 service_set_discovery_server__l_recordId;
+      constants__t_MdnsDiscoveryConfig_i service_set_discovery_server__l_mdnsConfig;
+      t_bool service_set_discovery_server__l_compatServerCapabilities;
+      
+      *service_set_discovery_server__p_nb_servers = 0;
+      service_register_server2__init_iter_registered_server2_set(&service_set_discovery_server__l_continue);
+      while ((service_set_discovery_server__l_continue == true) &&
+         ((service_set_discovery_server__p_max_records_to_return == 0) ||
+         (*service_set_discovery_server__p_nb_servers < service_set_discovery_server__p_max_records_to_return))) {
+         service_register_server2__continue_iter_monitored_item(&service_set_discovery_server__l_continue,
+            &service_set_discovery_server__l_registeredServerInfo);
+         service_register_server2__get_registered_server2_recordId(service_set_discovery_server__l_registeredServerInfo,
+            &service_set_discovery_server__l_recordId);
+         if (service_set_discovery_server__l_recordId >= service_set_discovery_server__p_starting_record_id) {
+            service_register_server2__get_registered_server2_mdns_config(service_set_discovery_server__l_registeredServerInfo,
+               &service_set_discovery_server__l_mdnsConfig);
+            service_set_discovery_server_data_bs__has_ServerCapabilities(service_set_discovery_server__l_mdnsConfig,
+               service_set_discovery_server__p_serverCapabilities,
+               &service_set_discovery_server__l_compatServerCapabilities);
+            if (service_set_discovery_server__l_compatServerCapabilities == true) {
+               *service_set_discovery_server__p_nb_servers = *service_set_discovery_server__p_nb_servers +
+                  1;
+            }
+         }
+      }
+      service_register_server2__clear_iter_registered_server2_set();
+   }
+}
+
+void service_set_discovery_server__local_set_servers_on_network_to_return(
+   const constants__t_msg_i service_set_discovery_server__p_resp,
+   const t_entier4 service_set_discovery_server__p_starting_record_id,
+   const constants__t_ServerCapabilities service_set_discovery_server__p_serverCapabilities,
+   const t_entier4 service_set_discovery_server__p_nb_servers) {
+   {
+      t_bool service_set_discovery_server__l_continue;
+      t_entier4 service_set_discovery_server__l_nb_servers;
+      constants__t_RegisteredServer2Info_i service_set_discovery_server__l_registeredServerInfo;
+      t_entier4 service_set_discovery_server__l_recordId;
+      constants__t_RegisteredServer_i service_set_discovery_server__l_registeredServer;
+      constants__t_MdnsDiscoveryConfig_i service_set_discovery_server__l_mdnsConfig;
+      t_bool service_set_discovery_server__l_compatServerCapabilities;
+      
+      service_set_discovery_server__l_nb_servers = 0;
+      service_register_server2__init_iter_registered_server2_set(&service_set_discovery_server__l_continue);
+      while ((service_set_discovery_server__l_continue == true) &&
+         (service_set_discovery_server__l_nb_servers < service_set_discovery_server__p_nb_servers)) {
+         service_register_server2__continue_iter_monitored_item(&service_set_discovery_server__l_continue,
+            &service_set_discovery_server__l_registeredServerInfo);
+         service_register_server2__get_registered_server2_recordId(service_set_discovery_server__l_registeredServerInfo,
+            &service_set_discovery_server__l_recordId);
+         if (service_set_discovery_server__l_recordId >= service_set_discovery_server__p_starting_record_id) {
+            service_register_server2__get_registered_server2_registered_server(service_set_discovery_server__l_registeredServerInfo,
+               &service_set_discovery_server__l_registeredServer);
+            service_register_server2__get_registered_server2_mdns_config(service_set_discovery_server__l_registeredServerInfo,
+               &service_set_discovery_server__l_mdnsConfig);
+            service_set_discovery_server_data_bs__has_ServerCapabilities(service_set_discovery_server__l_mdnsConfig,
+               service_set_discovery_server__p_serverCapabilities,
+               &service_set_discovery_server__l_compatServerCapabilities);
+            if (service_set_discovery_server__l_compatServerCapabilities == true) {
+               msg_find_servers_on_network_bs__set_find_servers_on_network_server(service_set_discovery_server__p_resp,
+                  service_set_discovery_server__l_nb_servers,
+                  service_set_discovery_server__l_recordId,
+                  service_set_discovery_server__l_registeredServer,
+                  service_set_discovery_server__l_mdnsConfig);
+               service_set_discovery_server__l_nb_servers = service_set_discovery_server__l_nb_servers +
+                  1;
+            }
+         }
+      }
+      service_register_server2__clear_iter_registered_server2_set();
+   }
+}
+
 void service_set_discovery_server__treat_find_servers_on_network_request(
    const constants__t_msg_i service_set_discovery_server__req_msg,
    const constants__t_msg_i service_set_discovery_server__resp_msg,
-   const constants__t_endpoint_config_idx_i service_set_discovery_server__endpoint_config_idx,
    constants_statuscodes_bs__t_StatusCode_i * const service_set_discovery_server__ret) {
-   *service_set_discovery_server__ret = constants_statuscodes_bs__e_sc_bad_service_unsupported;
+   {
+      t_entier4 service_set_discovery_server__l_startingRecordId;
+      t_entier4 service_set_discovery_server__l_maxRecordsToReturn;
+      constants__t_ServerCapabilities service_set_discovery_server__l_serverCapabilities;
+      constants__t_Timestamp service_set_discovery_server__l_counter_reset_time;
+      t_entier4 service_set_discovery_server__l_nb_servers;
+      t_bool service_set_discovery_server__l_alloc_success;
+      
+      *service_set_discovery_server__ret = constants_statuscodes_bs__e_sc_ok;
+      msg_find_servers_on_network_bs__get_find_servers_on_network_req_params(service_set_discovery_server__req_msg,
+         &service_set_discovery_server__l_startingRecordId,
+         &service_set_discovery_server__l_maxRecordsToReturn,
+         &service_set_discovery_server__l_serverCapabilities);
+      service_register_server2__get_registered_server2_counter_reset_time(&service_set_discovery_server__l_counter_reset_time);
+      msg_find_servers_on_network_bs__set_find_servers_on_network_resp(service_set_discovery_server__resp_msg,
+         service_set_discovery_server__l_counter_reset_time);
+      service_set_discovery_server__local_get_nb_servers_on_network_to_return(service_set_discovery_server__l_startingRecordId,
+         service_set_discovery_server__l_maxRecordsToReturn,
+         service_set_discovery_server__l_serverCapabilities,
+         &service_set_discovery_server__l_nb_servers);
+      if (service_set_discovery_server__l_nb_servers > 0) {
+         msg_find_servers_on_network_bs__alloc_find_servers_on_network_servers(service_set_discovery_server__resp_msg,
+            service_set_discovery_server__l_nb_servers,
+            &service_set_discovery_server__l_alloc_success);
+         if (service_set_discovery_server__l_alloc_success == true) {
+            service_set_discovery_server__local_set_servers_on_network_to_return(service_set_discovery_server__resp_msg,
+               service_set_discovery_server__l_startingRecordId,
+               service_set_discovery_server__l_serverCapabilities,
+               service_set_discovery_server__l_nb_servers);
+         }
+         else {
+            *service_set_discovery_server__ret = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+         }
+      }
+   }
 }
 
 void service_set_discovery_server__treat_register_server2_request(

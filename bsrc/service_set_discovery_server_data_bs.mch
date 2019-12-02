@@ -24,11 +24,15 @@ SEES
     constants
 
 ABSTRACT_VARIABLES
-    RegisteredServer_ServerUri
+    RegisteredServer_ServerUri,
+    MdnsDiscoveryConfig_HasServerCapabilities
 INVARIANT
-    RegisteredServer_ServerUri : t_RegisteredServer --> t_ServerUri
+    RegisteredServer_ServerUri : t_RegisteredServer --> t_ServerUri &
+    MdnsDiscoveryConfig_HasServerCapabilities : t_MdnsDiscoveryConfig <-> t_ServerCapabilities
 INITIALISATION
-    RegisteredServer_ServerUri :(RegisteredServer_ServerUri : t_RegisteredServer --> t_ServerUri)
+    RegisteredServer_ServerUri :(RegisteredServer_ServerUri : t_RegisteredServer --> t_ServerUri) ||
+    MdnsDiscoveryConfig_HasServerCapabilities
+     :(MdnsDiscoveryConfig_HasServerCapabilities : t_MdnsDiscoveryConfig <-> t_ServerCapabilities)
 
 OPERATIONS
 
@@ -55,6 +59,16 @@ OPERATIONS
         p_server_uri : t_ServerUri
     THEN
         p_bool := bool(p_server_uri = c_ServerUri_empty)
+    END
+    ;
+
+    p_bool <-- has_ServerCapabilities (p_mdns_config, p_server_capabilities) =
+    PRE
+        p_mdns_config : t_MdnsDiscoveryConfig_i &
+        p_mdns_config : t_MdnsDiscoveryConfig &
+        p_server_capabilities : t_ServerCapabilities
+    THEN
+        p_bool := bool(p_mdns_config |-> p_server_capabilities : MdnsDiscoveryConfig_HasServerCapabilities)
     END
 
 END

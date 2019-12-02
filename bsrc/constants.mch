@@ -297,8 +297,9 @@ SETS
     t_LocaleIds_i; /* char* array NULL terminated of locales ids */
     t_RegisteredServer_i; /* (OpcUa_RegisteredServer*) */
     t_MdnsDiscoveryConfig_i; /* (OpcUa_MdnsDiscoveryConfiguration*) */
-    t_RegisteredServer2Info_i;
-    t_ServerUri /* (SOPC_String*) */
+    t_RegisteredServer2Info_i; /* (SOPC_RegisterServer2Record_Internal*) */
+    t_ServerUri; /* (SOPC_String*) */
+    t_ServerCapabilities /* SOPC_ServerCapabilities_Internal */
 
 CONCRETE_CONSTANTS
     c_Server_Nano_Extended,

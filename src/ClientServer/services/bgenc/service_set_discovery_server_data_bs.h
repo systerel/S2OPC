@@ -21,7 +21,7 @@
 
  File Name            : service_set_discovery_server_data_bs.h
 
- Date                 : 29/11/2019 15:10:31
+ Date                 : 03/12/2019 08:45:27
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -51,6 +51,10 @@ extern void service_set_discovery_server_data_bs__INITIALISATION(void);
 extern void service_set_discovery_server_data_bs__get_RegisteredServer_ServerUri(
    const constants__t_RegisteredServer_i service_set_discovery_server_data_bs__p_reg_server,
    constants__t_ServerUri * const service_set_discovery_server_data_bs__p_server_uri);
+extern void service_set_discovery_server_data_bs__has_ServerCapabilities(
+   const constants__t_MdnsDiscoveryConfig_i service_set_discovery_server_data_bs__p_mdns_config,
+   const constants__t_ServerCapabilities service_set_discovery_server_data_bs__p_server_capabilities,
+   t_bool * const service_set_discovery_server_data_bs__p_bool);
 extern void service_set_discovery_server_data_bs__is_empty_ServerUri(
    const constants__t_ServerUri service_set_discovery_server_data_bs__p_server_uri,
    t_bool * const service_set_discovery_server_data_bs__p_bool);
