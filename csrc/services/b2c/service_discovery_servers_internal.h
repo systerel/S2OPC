@@ -27,4 +27,10 @@ typedef struct SOPC_RegisterServer2Record_Internal
     int32_t recordId;
 } SOPC_RegisterServer2Record_Internal;
 
+typedef struct SOPC_ServerCapabilities_Internal
+{
+    int32_t NoOfServerCapabilityFilter;
+    SOPC_String* ServerCapabilityFilter;
+} SOPC_ServerCapabilities_Internal;
+
 #endif

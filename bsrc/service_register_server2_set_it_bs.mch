@@ -49,16 +49,14 @@ DEFINITIONS
         a_RegisteredServer2_RegisteredServer = {} &
         a_RegisteredServer2_mDNSconfig = {}
     )
+    ;
 
-ABSTRACT_VARIABLES
-    d_variables_set,
-
+    d_variables_set_it ==
     s_registered_server2_to_iterate_it,
     s_registered_server2_iterated_it
-
-INVARIANT
-    d_inv_set &
-
+    ;
+    
+    d_inv_set_it ==
     s_registered_server2_to_iterate_it <: s_RegisteredServer2 &
     s_registered_server2_iterated_it <: s_RegisteredServer2 &
     s_registered_server2_to_iterate_it /\ s_registered_server2_iterated_it = {} &
@@ -67,12 +65,26 @@ INVARIANT
     (s_registered_server2_iterated_it /= {} & s_registered_server2_to_iterate_it /= {} =>
         max(a_RegisteredServer2_RecordId[s_registered_server2_iterated_it])
         < min(a_RegisteredServer2_RecordId[s_registered_server2_to_iterate_it]))
+    ;
+
+    d_init_set_it ==
+    s_registered_server2_to_iterate_it :(s_registered_server2_to_iterate_it = {}) ||
+    s_registered_server2_iterated_it :(s_registered_server2_iterated_it = {})
+
+ABSTRACT_VARIABLES
+    d_variables_set,
+
+    d_variables_set_it
+
+INVARIANT
+    d_inv_set &
+
+    d_inv_set_it
 
 INITIALISATION
     d_init_set ||
     
-    s_registered_server2_to_iterate_it :(s_registered_server2_to_iterate_it = {}) ||
-    s_registered_server2_iterated_it :(s_registered_server2_iterated_it = {})
+    d_init_set_it
 
 OPERATIONS
     
@@ -117,7 +129,7 @@ OPERATIONS
         END
     END
     ;
-
+    
     /* Operations on set */
     reset_registered_server2_set =
     BEGIN

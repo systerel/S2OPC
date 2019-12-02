@@ -21,7 +21,7 @@
 
  File Name            : toolkit_header_init.c
 
- Date                 : 29/11/2019 15:10:37
+ Date                 : 03/12/2019 08:45:32
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -69,6 +69,7 @@
 #include "monitored_item_queue_it_bs.h"
 #include "msg_browse_bs.h"
 #include "msg_browse_next_bs.h"
+#include "msg_find_servers_on_network_bs.h"
 #include "msg_read_request.h"
 #include "msg_read_request_bs.h"
 #include "msg_read_response_bs.h"
@@ -232,6 +233,7 @@ void INITIALISATION(void) {
    service_register_server2_set_it_bs__INITIALISATION();
    service_set_discovery_server_data_bs__INITIALISATION();
    service_register_server2__INITIALISATION();
+   msg_find_servers_on_network_bs__INITIALISATION();
    service_set_discovery_server__INITIALISATION();
    msg_register_nodes_bs__INITIALISATION();
    msg_register_nodes__INITIALISATION();
