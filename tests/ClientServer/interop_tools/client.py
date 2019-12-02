@@ -38,6 +38,7 @@ from attribute_read import attribute_read_tests
 from attribute_write_values import attribute_write_values_tests, attribute_write_values_two_clients_tests
 from safety_secure_channels import secure_channels_connect
 from discovery_get_endpoints import discovery_get_endpoints_tests
+from client_discovery_server_services import discovery_server_tests
 from view_basic import browse_tests
 from translate_browse_path import translate_browse_paths_to_node_ids_tests
 from common import sUri, create_client
@@ -57,6 +58,9 @@ if __name__=='__main__':
         try:
             # secure channel connection
             secure_channels_connect(client, sp)
+
+            # register server 2:
+            discovery_server_tests(client, logger)
 
             # check endpoints
             discovery_get_endpoints_tests(client, logger)
