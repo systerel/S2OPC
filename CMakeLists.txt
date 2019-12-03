@@ -266,8 +266,25 @@ file(GLOB S2OPC_INCLUDE_FILES
     "csrc/helpers_platform_dep/*.h"
     "csrc/services/b2c/*.h")
 
-find_library(TPM2_LIBRARIES crypto_tpm2 HINTS "../crypto-tpm2")
-find_path(TPM2_INCLUDE_DIRS crypto_tpm2.h HINTS "../crypto-tpm2")
+if(NOT EXISTS "${TPM2_LIBRARY_DIRS}")
+    message(FATAL_ERROR "The TPM2_LIBRARY_DIRS variable should point to an existing location")
+endif()
+if(NOT EXISTS "${TPM2_INCLUDE_DIRS}")
+    message(FATAL_ERROR "The TPM2_INCLUDE_DIRS variable should point to an existing location")
+endif()
+find_library(TPM2_LIBRARY_A "mbedtls-tpm2" HINTS "${TPM2_LIBRARY_DIRS}")
+find_library(TPM2_LIBRARY_E "ssl" HINTS "${TPM2_LIBRARY_DIRS}")
+find_library(TPM2_LIBRARY_G "crypto" HINTS "${TPM2_LIBRARY_DIRS}")
+find_library(TPM2_LIBRARY_F "common" HINTS "${TPM2_LIBRARY_DIRS}")
+find_library(TPM2_LIBRARY_B "tss2-esys" HINTS "${TPM2_LIBRARY_DIRS}")
+find_library(TPM2_LIBRARY_C "tss2-mu" HINTS "${TPM2_LIBRARY_DIRS}")
+find_library(TPM2_LIBRARY_D "tss2-sys" HINTS "${TPM2_LIBRARY_DIRS}")
+find_library(TPM2_LIBRARY_H "tss2-tcti-device" HINTS "${TPM2_LIBRARY_DIRS}")
+find_library(TPM2_LIBRARY_I "tss2-tcti-mssim" HINTS "${TPM2_LIBRARY_DIRS}")
+#find_library(TPM2_LIBRARY_J "tss2-tcti-tabrmd" HINTS "${TPM2_LIBRARY_DIRS}")
+set(TPM2_LIBRARIES "dl" "${TPM2_LIBRARY_A}" "${TPM2_LIBRARY_B}" "${TPM2_LIBRARY_C}" "${TPM2_LIBRARY_D}"
+                   "${TPM2_LIBRARY_E}" "${TPM2_LIBRARY_F}" "${TPM2_LIBRARY_G}"
+                   "${TPM2_LIBRARY_H}" "${TPM2_LIBRARY_I}" "${TPM2_LIBRARY_J}")
 
 set(S2OPC_PUBLIC_INCLUDES
     "csrc/api_toolkit"
