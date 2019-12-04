@@ -670,7 +670,7 @@ OPERATIONS
                 THEN
                     set_req_handle_channel (l_req_handle, channel);
                     client_write_msg_out_header_req_handle (l_msg_header, l_req_handle);
-                    ret, l_buffer <-- encode_msg (e_msg_request_type, e_msg_session_close_req, l_msg_header, req_msg);
+                    ret, l_buffer <-- encode_msg (e_msg_request_type, l_req_typ, l_msg_header, req_msg);
                     l_valid_buffer <-- is_valid_buffer_out (l_buffer);
                     IF l_valid_buffer = FALSE
                     THEN
