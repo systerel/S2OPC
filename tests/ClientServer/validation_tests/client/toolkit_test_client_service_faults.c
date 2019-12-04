@@ -374,8 +374,8 @@ int main(void)
     if (SOPC_STATUS_OK == status)
     {
         /* Create a service request message with nothing to do and send it through session (read service)*/
-        OpcUa_RegisterServer2Request* notSupportedServiceReq = NULL;
-        SOPC_Encodeable_Create(&OpcUa_RegisterServer2Request_EncodeableType, (void**) &notSupportedServiceReq);
+        OpcUa_RegisterServerRequest* notSupportedServiceReq = NULL;
+        SOPC_Encodeable_Create(&OpcUa_RegisterServerRequest_EncodeableType, (void**) &notSupportedServiceReq);
 
         SOPC_ToolkitClient_AsyncSendRequestOnSession((uint32_t) SOPC_Atomic_Int_Get(&sessionActivated),
                                                      notSupportedServiceReq, 1);
@@ -419,8 +419,8 @@ int main(void)
         SOPC_Atomic_Int_Set(&discoveryServiceFault, false); // Reset the flag
 
         /* Create a service request message with nothing to do and send it through session (read service)*/
-        OpcUa_RegisterServer2Request* notSupportedServiceReq = NULL;
-        SOPC_Encodeable_Create(&OpcUa_RegisterServer2Request_EncodeableType, (void**) &notSupportedServiceReq);
+        OpcUa_RegisterServerRequest* notSupportedServiceReq = NULL;
+        SOPC_Encodeable_Create(&OpcUa_RegisterServerRequest_EncodeableType, (void**) &notSupportedServiceReq);
 
         SOPC_ToolkitClient_AsyncSendDiscoveryRequest(channel_config_idx, notSupportedServiceReq, 1);
         printf(">>Test_Client_Toolkit: unsupported discovery request sending (using discovery API)\n");
