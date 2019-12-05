@@ -601,3 +601,138 @@ bool update_server_status_runtime_variables(uint32_t endpoint_config_idx, Runtim
 
     return true;
 }
+
+static bool has_none_security_mode(SOPC_Endpoint_Config* epConfig)
+{
+    for (int i = 0; i < epConfig->nbSecuConfigs; i++)
+    {
+        if ((epConfig->secuConfigurations[i].securityModes & SOPC_SECURITY_MODE_NONE_MASK) != 0)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool register_server(SOPC_Endpoint_Config* epConfig, uint32_t endpoint_config_idx)
+{
+    assert(NULL != epConfig);
+    assert(NULL != epConfig->serverConfigPtr);
+    OpcUa_ApplicationDescription* srcDesc = &epConfig->serverConfigPtr->serverDescription;
+    OpcUa_MdnsDiscoveryConfiguration* mdnsObj = NULL;
+    OpcUa_RegisterServer2Request* request = SOPC_Calloc(1, sizeof(OpcUa_RegisterServer2Request));
+    OpcUa_RegisterServer2Request_Initialize(request);
+    if (NULL == request)
+    {
+        return false;
+    }
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    request->DiscoveryConfiguration = SOPC_Calloc(1, sizeof(SOPC_ExtensionObject));
+    status = (NULL == request->DiscoveryConfiguration ? SOPC_STATUS_NOK : SOPC_STATUS_OK);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        request->NoOfDiscoveryConfiguration = 1;
+        status = SOPC_Encodeable_CreateExtension(request->DiscoveryConfiguration,
+                                                 &OpcUa_MdnsDiscoveryConfiguration_EncodeableType, (void**) &mdnsObj);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        if (srcDesc->NoOfDiscoveryUrls > 0)
+        {
+            request->Server.DiscoveryUrls = SOPC_Calloc((size_t) srcDesc->NoOfDiscoveryUrls, sizeof(SOPC_String));
+
+            if (request->Server.DiscoveryUrls != NULL)
+            {
+                request->Server.NoOfDiscoveryUrls = srcDesc->NoOfDiscoveryUrls;
+            }
+            for (int32_t i = 0; SOPC_STATUS_OK == status && i < srcDesc->NoOfDiscoveryUrls; i++)
+            {
+                status = SOPC_String_AttachFrom(&request->Server.DiscoveryUrls[i], &srcDesc->DiscoveryUrls[i]);
+            }
+        }
+        else
+        {
+            // DiscoveryUrl is mandatory for RegisterServer2, check if current is compatible
+            if (epConfig->hasDiscoveryEndpoint || has_none_security_mode(epConfig))
+            {
+                // There is an endpoint with SecurityMode None allowed or an implicit discovery endpoint is added
+                request->Server.DiscoveryUrls = SOPC_Calloc(1, sizeof(SOPC_String));
+                SOPC_String_Initialize(request->Server.DiscoveryUrls);
+
+                if (request->Server.DiscoveryUrls == NULL)
+                {
+                    status = SOPC_STATUS_OUT_OF_MEMORY;
+                }
+
+                status = (SOPC_STATUS_OK !=
+                          SOPC_String_AttachFromCstring(&request->Server.DiscoveryUrls[0], epConfig->endpointURL));
+
+                if (SOPC_STATUS_OK == status)
+                {
+                    request->Server.NoOfDiscoveryUrls = 1;
+                }
+            }
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_LocalizedText_CopyToArray(&request->Server.ServerNames, &request->Server.NoOfServerNames,
+                                                &srcDesc->ApplicationName);
+    }
+
+    if (SOPC_STATUS_OK == status && srcDesc->GatewayServerUri.Length > 0)
+    {
+        status = SOPC_String_AttachFrom(&request->Server.GatewayServerUri, &srcDesc->GatewayServerUri);
+    }
+
+    if (SOPC_STATUS_OK == status && srcDesc->ProductUri.Length > 0)
+    {
+        status = SOPC_String_AttachFrom(&request->Server.ProductUri, &srcDesc->ProductUri);
+    }
+
+    if (SOPC_STATUS_OK == status && srcDesc->ProductUri.Length > 0)
+    {
+        status = SOPC_String_AttachFrom(&request->Server.ProductUri, &srcDesc->ProductUri);
+    }
+
+    if (SOPC_STATUS_OK == status && srcDesc->ApplicationUri.Length > 0)
+    {
+        status = SOPC_String_AttachFrom(&request->Server.ServerUri, &srcDesc->ApplicationUri);
+    }
+
+    if (SOPC_STATUS_OK == status && srcDesc->ApplicationName.defaultText.Length > 0)
+    {
+        status = SOPC_String_AttachFrom(&mdnsObj->MdnsServerName, &srcDesc->ApplicationName.defaultText);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        mdnsObj->ServerCapabilities = SOPC_Calloc(1, sizeof(SOPC_String));
+        if (NULL == mdnsObj->ServerCapabilities)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        else
+        {
+            mdnsObj->NoOfServerCapabilities = 1;
+            status = SOPC_String_AttachFromCstring(mdnsObj->ServerCapabilities, "DA"); // Supports only DA
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        request->Server.IsOnline = true;
+        request->Server.ServerType = srcDesc->ApplicationType;
+        SOPC_ToolkitServer_AsyncLocalServiceRequest(endpoint_config_idx, request, 0);
+        return true;
+    }
+    else
+    {
+        OpcUa_RegisterServer2Request_Clear(request);
+        SOPC_Free(request);
+        return false;
+    }
+}
