@@ -59,7 +59,7 @@ if __name__=='__main__':
             # secure channel connection
             secure_channels_connect(client, sp)
 
-            # register server 2:
+            # discovery server services
             discovery_server_tests(client, logger)
 
             # check endpoints

@@ -22,7 +22,7 @@ from opcua import ua
 import sys
 import copy
 
-allServerCapabilities = ["NA", "DA",  "HD",  "AC",   "HE",  "GDS", "LDS", "DI", "ADI", "FDI", "FDIC", "PLC", "S95"]
+allServerCapabilities = ["DA",  "HD",  "AC",   "HE",  "GDS", "LDS", "DI", "ADI", "FDI", "FDIC", "PLC", "S95"]
 
 def register_server2_test(client, logger):
     # RegisterServer2 test
@@ -286,6 +286,7 @@ def local_register_server2(client, logger, name, address, capabilities, isOnline
                         .format(name, isOnline, configResults[0].value),
                         ua.uatypes.StatusCode("Good") == configResults[0])
 
+
 def find_servers_on_network_test(client, logger):
     defaultAddress = "opc.tcp://localhost:4841"
     # No filters in FindServersOnNetworkRequest by default
@@ -320,18 +321,18 @@ def find_servers_on_network_test(client, logger):
                      allServerCapabilities == results.Servers[0].ServerCapabilities)
                     )
 
-    # Register a second server without any capabilities
-    local_register_server2(client, logger, "TestServer2", defaultAddress, [], True)
+    # Register a second server with unknown capabilities
+    local_register_server2(client, logger, "TestServer2", defaultAddress, ["NA"], True)
     results = client.uaclient.find_servers_on_network(params)
     logger.add_test('FindServersOnNetwork test - expect 2 registered server 1 with all and 1 without capabilities',
                     (2 == len(results.Servers) and
                      "TestServer1" == results.Servers[0].ServerName and
                      allServerCapabilities == results.Servers[0].ServerCapabilities and
                      "TestServer2" == results.Servers[1].ServerName and
-                     [] == results.Servers[1].ServerCapabilities)
+                     ["NA"] == results.Servers[1].ServerCapabilities)
                     )
 
-    # Register a third server without only 'LDS' capability
+    # Register a third server with only 'LDS' capability
     local_register_server2(client, logger, "TestServer3", defaultAddress, ["LDS"], True)
     results = client.uaclient.find_servers_on_network(params)
     logger.add_test('FindServersOnNetwork test - expect 3 registered server 1 with all, 1 without capabilities and 1 with "LDS" only',
@@ -339,7 +340,7 @@ def find_servers_on_network_test(client, logger):
                      "TestServer1" == results.Servers[0].ServerName and
                      allServerCapabilities == results.Servers[0].ServerCapabilities and
                      "TestServer2" == results.Servers[1].ServerName and
-                     [] == results.Servers[1].ServerCapabilities and
+                     ["NA"] == results.Servers[1].ServerCapabilities and
                      "TestServer3" == results.Servers[2].ServerName and
                      ["LDS"] == results.Servers[2].ServerCapabilities)
                     )
@@ -470,9 +471,113 @@ def find_servers_on_network_test(client, logger):
     local_register_server2(client, logger, "TestServer1", defaultAddress, [], False)
     local_register_server2(client, logger, "TestServer2", defaultAddress, [], False)
     local_register_server2(client, logger, "TestServer3", defaultAddress, [], False)
+
+
+def find_servers_test(client, logger):
+    # Note: LocaleIds are not tested here because it is already done in UACTT
+    
+    defaultAddress = "opc.tcp://localhost:4841"
+    # No filters in FindServers by default
+    params = ua.FindServersParameters()
+
+    # Register 0 servers: retrieve server-Self
+    Servers = client.uaclient.find_servers(params)
+    logger.add_test('FindServers test - expect 0 registered server but self returned "{}"'
+                    .format("urn:S2OPC:localhost"),
+                    (1 == len(Servers) and
+                     "urn:S2OPC:localhost" == Servers[0].ApplicationUri and
+                     1 == len(Servers[0].DiscoveryUrls) and
+                     defaultAddress == Servers[0].DiscoveryUrls[0])
+                    )  
+    
+    # Register 1 server and retrieve it
+    local_register_server2(client, logger, "TestServer1", defaultAddress, allServerCapabilities, True)
+    Servers = client.uaclient.find_servers(params)
+    logger.add_test('FindServers test - expect 1 registered server "{}" + self'
+                    .format("urn:S2OPC:TestServer1"),
+                    (2 == len(Servers) and
+                     "urn:S2OPC:TestServer1" == Servers[0].ApplicationUri and
+                     defaultAddress == Servers[0].DiscoveryUrls[0])
+                    )
+
+    # UnRegister 1 server and check not present anymore
+    local_register_server2(client, logger, "TestServer1", defaultAddress, allServerCapabilities, False)
+    Servers = client.uaclient.find_servers(params)
+    logger.add_test('FindServers test - expect 0 registered server + self',
+                    1 == len(Servers))
+
+    # Register 2 times same server name: expect only last record to be returned
+    local_register_server2(client, logger, "TestServer1", defaultAddress, allServerCapabilities, True)
+    local_register_server2(client, logger, "TestServer1", "opc.tcp://test:1000", allServerCapabilities, True)
+    Servers = client.uaclient.find_servers(params)
+    logger.add_test('FindServers test - expect only 1 registered server "{}" with last record content + self'
+                    .format("urn:S2OPC:TestServer1"),
+                    (2 == len(Servers) and
+                     "urn:S2OPC:TestServer1" == Servers[0].ApplicationUri and
+                     "opc.tcp://test:1000" == Servers[0].DiscoveryUrls[0])
+                    )
+
+    # Register a second server with unknown capabilities
+    local_register_server2(client, logger, "TestServer2", defaultAddress, ["NA"], True)
+    Servers = client.uaclient.find_servers(params)
+    logger.add_test('FindServers test - expect 2 registered server 1 with all and 1 without capabilities',
+                    (3 == len(Servers) and
+                     "urn:S2OPC:TestServer1" == Servers[0].ApplicationUri and
+                     "urn:S2OPC:TestServer2" == Servers[1].ApplicationUri)
+                    )
+
+    # Register a third server with only 'LDS' capability
+    local_register_server2(client, logger, "TestServer3", defaultAddress, ["LDS"], True)
+    Servers = client.uaclient.find_servers(params)
+    logger.add_test('FindServers test - expect 3 registered server 1 with all, 1 without capabilities and 1 with "LDS" only',
+                    (4 == len(Servers) and
+                     "urn:S2OPC:TestServer1" == Servers[0].ApplicationUri and
+                     "urn:S2OPC:TestServer2" == Servers[1].ApplicationUri and
+                     "urn:S2OPC:TestServer3" == Servers[2].ApplicationUri)
+                    )
+
+    # Filter using the serverUri: request server 1
+    params.ServerUris = ["urn:S2OPC:TestServer1"]
+    Servers = client.uaclient.find_servers(params)
+    logger.add_test('FindServers test - filter with serverUri of server 1: expect only 1 registered server',
+                    (1 == len(Servers) and
+                     "urn:S2OPC:TestServer1" == Servers[0].ApplicationUri)
+                    )
+
+    # Filter using the serverUri: request server 3
+    params.ServerUris = ["urn:S2OPC:TestServer3"]
+    Servers = client.uaclient.find_servers(params)
+    logger.add_test('FindServers test - filter with serverUri of server 3: expect only 3 registered server',
+                    (1 == len(Servers) and
+                     "urn:S2OPC:TestServer3" == Servers[0].ApplicationUri)
+                    )
+
+    # Filter using the serverUri: request server 1 & 2
+    params.ServerUris = ["urn:S2OPC:TestServer1", "urn:S2OPC:TestServer2"]
+    Servers = client.uaclient.find_servers(params)
+    logger.add_test('FindServers test - filter with serverUri of server 1 & 2: expect 2 registered server',
+                    (2 == len(Servers) and
+                     "urn:S2OPC:TestServer1" == Servers[0].ApplicationUri and
+                     "urn:S2OPC:TestServer2" == Servers[1].ApplicationUri)
+                    )
+   
+    # Filter using the serverUri: request server 1 & 2 & 3
+    params.ServerUris = ["urn:S2OPC:TestServer1", "urn:S2OPC:TestServer2", "urn:S2OPC:TestServer3"]
+    Servers = client.uaclient.find_servers(params)
+    logger.add_test('FindServers test - filter with serverUri of server 1 & 2 & 3: expect 3 registered server',
+                    (3 == len(Servers) and
+                     "urn:S2OPC:TestServer1" == Servers[0].ApplicationUri and
+                     "urn:S2OPC:TestServer2" == Servers[1].ApplicationUri and
+                     "urn:S2OPC:TestServer3" == Servers[2].ApplicationUri)
+                    )
+
+    # UnRegister all servers
+    local_register_server2(client, logger, "TestServer1", defaultAddress, [], False)
+    local_register_server2(client, logger, "TestServer2", defaultAddress, [], False)
+    local_register_server2(client, logger, "TestServer3", defaultAddress, [], False)
     
 
-    
 def discovery_server_tests(client, logger):
     register_server2_test(client, logger)
     find_servers_on_network_test(client, logger)
+    find_servers_test(client, logger)
