@@ -19,6 +19,10 @@
 
 #include "service_set_discovery_server_data_bs.h"
 
+#include "sopc_mem_alloc.h"
+#include "sopc_toolkit_config_internal.h"
+#include "sopc_types.h"
+
 #include <assert.h>
 
 /*------------------------
@@ -35,6 +39,81 @@ void service_set_discovery_server_data_bs__get_RegisteredServer_ServerUri(
 {
     *service_set_discovery_server_data_bs__p_server_uri =
         &service_set_discovery_server_data_bs__p_reg_server->ServerUri;
+}
+
+static bool has_none_security_mode(SOPC_Endpoint_Config* epConfig)
+{
+    for (int i = 0; i < epConfig->nbSecuConfigs; i++)
+    {
+        if ((epConfig->secuConfigurations[i].securityModes & SOPC_SECURITY_MODE_NONE_MASK) != 0)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+void service_set_discovery_server_data_bs__get_ApplicationDescription(
+    const constants__t_endpoint_config_idx_i service_set_discovery_server_data_bs__p_endpoint_config_idx,
+    t_bool* const service_set_discovery_server_data_bs__p_bres,
+    constants__t_ApplicationDescription_i* const service_set_discovery_server_data_bs__p_app_desc)
+{
+    *service_set_discovery_server_data_bs__p_app_desc = constants__c_ApplicationDescription_indet;
+    *service_set_discovery_server_data_bs__p_bres = false;
+
+    SOPC_Endpoint_Config* endpoint_config =
+        SOPC_ToolkitServer_GetEndpointConfig(service_set_discovery_server_data_bs__p_endpoint_config_idx);
+
+    if (endpoint_config == NULL)
+    {
+        return;
+    }
+
+    OpcUa_ApplicationDescription* dst_desc = &endpoint_config->serverConfigPtr->serverDescription;
+
+    if (dst_desc->NoOfDiscoveryUrls <= 0)
+    {
+        /* If no discovery URL already defined for the current endpoint, try to find one.
+         * It has one, if either the current endpoint has an implicit discovery endpoint
+         * or the current endpoint accepts None security mode.
+         * Otherwise we are not able to define automatically a discovery endpoint.
+         *
+         */
+        if (endpoint_config->hasDiscoveryEndpoint || has_none_security_mode(endpoint_config))
+        {
+            // There is an endpoint with SecurityMode None allowed or an implicit discovery endpoint is added
+            dst_desc->DiscoveryUrls = SOPC_Calloc(1, sizeof(SOPC_String));
+            SOPC_String_Initialize(dst_desc->DiscoveryUrls);
+
+            if (dst_desc->DiscoveryUrls == NULL)
+            {
+                *service_set_discovery_server_data_bs__p_bres = false;
+                return;
+            }
+
+            if (SOPC_STATUS_OK !=
+                SOPC_String_CopyFromCString(&dst_desc->DiscoveryUrls[0], endpoint_config->endpointURL))
+            {
+                *service_set_discovery_server_data_bs__p_bres = false;
+                SOPC_Free(dst_desc->DiscoveryUrls);
+                dst_desc->DiscoveryUrls = NULL;
+                return;
+            }
+
+            dst_desc->NoOfDiscoveryUrls = 1;
+        }
+    }
+    *service_set_discovery_server_data_bs__p_bres = true;
+    *service_set_discovery_server_data_bs__p_app_desc = dst_desc;
+}
+
+void service_set_discovery_server_data_bs__get_ApplicationDescription_ServerUri(
+    const constants__t_ApplicationDescription_i service_set_discovery_server_data_bs__p_app_desc,
+    constants__t_ServerUri* const service_set_discovery_server_data_bs__p_ServerUri)
+{
+    assert(NULL != service_set_discovery_server_data_bs__p_app_desc);
+    *service_set_discovery_server_data_bs__p_ServerUri =
+        &service_set_discovery_server_data_bs__p_app_desc->ApplicationUri;
 }
 
 void service_set_discovery_server_data_bs__has_ServerCapabilities(
@@ -73,6 +152,24 @@ void service_set_discovery_server_data_bs__has_ServerCapabilities(
         allCapabilitiesFound &= capabilityAvailable;
     }
     *service_set_discovery_server_data_bs__p_bool = allCapabilitiesFound;
+}
+
+void service_set_discovery_server_data_bs__has_ServerUri(
+    const constants__t_ServerUri service_set_discovery_server_data_bs__p_singleServerUri,
+    const t_entier4 service_set_discovery_server_data_bs__p_nbServerUri,
+    const constants__t_ServerUris service_set_discovery_server_data_bs__p_ServerUris,
+    t_bool* const service_set_discovery_server_data_bs__p_bool)
+{
+    assert(service_set_discovery_server_data_bs__p_nbServerUri > 0);
+    assert(service_set_discovery_server_data_bs__p_ServerUris != NULL);
+    bool hasServerUri = false;
+    for (int32_t i = 0; !hasServerUri && i < service_set_discovery_server_data_bs__p_nbServerUri; i++)
+    {
+        service_set_discovery_server_data_bs__is_equal_ServerUri(
+            service_set_discovery_server_data_bs__p_singleServerUri,
+            &service_set_discovery_server_data_bs__p_ServerUris[i], &hasServerUri);
+    }
+    *service_set_discovery_server_data_bs__p_bool = hasServerUri;
 }
 
 void service_set_discovery_server_data_bs__is_empty_ServerUri(

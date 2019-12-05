@@ -21,7 +21,7 @@
 
  File Name            : service_set_discovery_server_data_bs.h
 
- Date                 : 03/12/2019 08:45:27
+ Date                 : 04/12/2019 17:13:03
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -48,12 +48,24 @@ extern void service_set_discovery_server_data_bs__INITIALISATION(void);
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+extern void service_set_discovery_server_data_bs__get_ApplicationDescription(
+   const constants__t_endpoint_config_idx_i service_set_discovery_server_data_bs__p_endpoint_config_idx,
+   t_bool * const service_set_discovery_server_data_bs__p_bres,
+   constants__t_ApplicationDescription_i * const service_set_discovery_server_data_bs__p_app_desc);
+extern void service_set_discovery_server_data_bs__get_ApplicationDescription_ServerUri(
+   const constants__t_ApplicationDescription_i service_set_discovery_server_data_bs__p_app_desc,
+   constants__t_ServerUri * const service_set_discovery_server_data_bs__p_ServerUri);
 extern void service_set_discovery_server_data_bs__get_RegisteredServer_ServerUri(
    const constants__t_RegisteredServer_i service_set_discovery_server_data_bs__p_reg_server,
    constants__t_ServerUri * const service_set_discovery_server_data_bs__p_server_uri);
 extern void service_set_discovery_server_data_bs__has_ServerCapabilities(
    const constants__t_MdnsDiscoveryConfig_i service_set_discovery_server_data_bs__p_mdns_config,
    const constants__t_ServerCapabilities service_set_discovery_server_data_bs__p_server_capabilities,
+   t_bool * const service_set_discovery_server_data_bs__p_bool);
+extern void service_set_discovery_server_data_bs__has_ServerUri(
+   const constants__t_ServerUri service_set_discovery_server_data_bs__p_singleServerUri,
+   const t_entier4 service_set_discovery_server_data_bs__p_nbServerUri,
+   const constants__t_ServerUris service_set_discovery_server_data_bs__p_ServerUris,
    t_bool * const service_set_discovery_server_data_bs__p_bool);
 extern void service_set_discovery_server_data_bs__is_empty_ServerUri(
    const constants__t_ServerUri service_set_discovery_server_data_bs__p_server_uri,

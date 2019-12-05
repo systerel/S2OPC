@@ -21,7 +21,7 @@
 
  File Name            : service_set_discovery_server.c
 
- Date                 : 03/12/2019 10:31:10
+ Date                 : 05/12/2019 09:57:14
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -123,6 +123,137 @@ void service_set_discovery_server__local_set_servers_on_network_to_return(
    }
 }
 
+void service_set_discovery_server__local_get_nb_servers_to_return(
+   const t_entier4 service_set_discovery_server__p_nbServerUri,
+   const constants__t_ServerUris service_set_discovery_server__p_ServerUris,
+   t_entier4 * const service_set_discovery_server__p_nb_servers) {
+   {
+      t_bool service_set_discovery_server__l_continue;
+      constants__t_RegisteredServer2Info_i service_set_discovery_server__l_registeredServerInfo;
+      constants__t_RegisteredServer_i service_set_discovery_server__l_registeredServer;
+      constants__t_ServerUri service_set_discovery_server__l_serverUri;
+      t_bool service_set_discovery_server__l_compatServerUri;
+      
+      if (service_set_discovery_server__p_nbServerUri <= 0) {
+         service_register_server2__get_card_register2_set(service_set_discovery_server__p_nb_servers);
+      }
+      else {
+         *service_set_discovery_server__p_nb_servers = 0;
+         service_register_server2__init_iter_registered_server2_set(&service_set_discovery_server__l_continue);
+         while (service_set_discovery_server__l_continue == true) {
+            service_register_server2__continue_iter_monitored_item(&service_set_discovery_server__l_continue,
+               &service_set_discovery_server__l_registeredServerInfo);
+            service_register_server2__get_registered_server2_registered_server(service_set_discovery_server__l_registeredServerInfo,
+               &service_set_discovery_server__l_registeredServer);
+            service_set_discovery_server_data_bs__get_RegisteredServer_ServerUri(service_set_discovery_server__l_registeredServer,
+               &service_set_discovery_server__l_serverUri);
+            service_set_discovery_server_data_bs__has_ServerUri(service_set_discovery_server__l_serverUri,
+               service_set_discovery_server__p_nbServerUri,
+               service_set_discovery_server__p_ServerUris,
+               &service_set_discovery_server__l_compatServerUri);
+            if (service_set_discovery_server__l_compatServerUri == true) {
+               *service_set_discovery_server__p_nb_servers = *service_set_discovery_server__p_nb_servers +
+                  1;
+            }
+         }
+         service_register_server2__clear_iter_registered_server2_set();
+      }
+   }
+}
+
+void service_set_discovery_server__local_add_self_server_to_return(
+   const constants__t_endpoint_config_idx_i service_set_discovery_server__p_endpoint_config_idx,
+   const t_entier4 service_set_discovery_server__p_nbServerUri,
+   const constants__t_ServerUris service_set_discovery_server__p_ServerUris,
+   const t_entier4 service_set_discovery_server__p_nbServersIn,
+   t_bool * const service_set_discovery_server__p_allocSuccess,
+   t_bool * const service_set_discovery_server__p_compatSelf,
+   constants__t_ApplicationDescription_i * const service_set_discovery_server__p_appDesc,
+   t_entier4 * const service_set_discovery_server__p_nbServersOut) {
+   {
+      constants__t_ServerUri service_set_discovery_server__l_serverUri;
+      
+      *service_set_discovery_server__p_nbServersOut = service_set_discovery_server__p_nbServersIn;
+      *service_set_discovery_server__p_compatSelf = false;
+      service_set_discovery_server_data_bs__get_ApplicationDescription(service_set_discovery_server__p_endpoint_config_idx,
+         service_set_discovery_server__p_allocSuccess,
+         service_set_discovery_server__p_appDesc);
+      if (*service_set_discovery_server__p_allocSuccess == true) {
+         service_set_discovery_server_data_bs__get_ApplicationDescription_ServerUri(*service_set_discovery_server__p_appDesc,
+            &service_set_discovery_server__l_serverUri);
+         if (service_set_discovery_server__p_nbServerUri > 0) {
+            service_set_discovery_server_data_bs__has_ServerUri(service_set_discovery_server__l_serverUri,
+               service_set_discovery_server__p_nbServerUri,
+               service_set_discovery_server__p_ServerUris,
+               service_set_discovery_server__p_compatSelf);
+         }
+         else {
+            *service_set_discovery_server__p_compatSelf = true;
+         }
+         if (*service_set_discovery_server__p_compatSelf == true) {
+            *service_set_discovery_server__p_nbServersOut = service_set_discovery_server__p_nbServersIn +
+               1;
+         }
+      }
+   }
+}
+
+void service_set_discovery_server__local_set_servers_to_return(
+   const constants__t_msg_i service_set_discovery_server__p_resp,
+   const constants__t_LocaleIds_i service_set_discovery_server__p_localeIds,
+   const t_entier4 service_set_discovery_server__p_nbServerUri,
+   const constants__t_ServerUris service_set_discovery_server__p_ServerUris,
+   const t_entier4 service_set_discovery_server__p_nb_servers,
+   constants_statuscodes_bs__t_StatusCode_i * const service_set_discovery_server__ret) {
+   {
+      t_bool service_set_discovery_server__l_continue;
+      t_entier4 service_set_discovery_server__l_nb_servers;
+      constants__t_RegisteredServer2Info_i service_set_discovery_server__l_registeredServerInfo;
+      constants__t_RegisteredServer_i service_set_discovery_server__l_registeredServer;
+      constants__t_ServerUri service_set_discovery_server__l_serverUri;
+      t_bool service_set_discovery_server__l_compatServerUri;
+      
+      *service_set_discovery_server__ret = constants_statuscodes_bs__e_sc_ok;
+      service_set_discovery_server__l_nb_servers = 0;
+      service_register_server2__init_iter_registered_server2_set(&service_set_discovery_server__l_continue);
+      while (((*service_set_discovery_server__ret == constants_statuscodes_bs__e_sc_ok) &&
+         (service_set_discovery_server__l_continue == true)) &&
+         (service_set_discovery_server__l_nb_servers < service_set_discovery_server__p_nb_servers)) {
+         service_register_server2__continue_iter_monitored_item(&service_set_discovery_server__l_continue,
+            &service_set_discovery_server__l_registeredServerInfo);
+         service_register_server2__get_registered_server2_registered_server(service_set_discovery_server__l_registeredServerInfo,
+            &service_set_discovery_server__l_registeredServer);
+         if (service_set_discovery_server__p_nbServerUri > 0) {
+            service_set_discovery_server_data_bs__get_RegisteredServer_ServerUri(service_set_discovery_server__l_registeredServer,
+               &service_set_discovery_server__l_serverUri);
+            service_set_discovery_server_data_bs__has_ServerUri(service_set_discovery_server__l_serverUri,
+               service_set_discovery_server__p_nbServerUri,
+               service_set_discovery_server__p_ServerUris,
+               &service_set_discovery_server__l_compatServerUri);
+            if (service_set_discovery_server__l_compatServerUri == true) {
+               msg_find_servers_bs__set_find_servers_server(service_set_discovery_server__p_resp,
+                  service_set_discovery_server__l_nb_servers,
+                  service_set_discovery_server__p_localeIds,
+                  service_set_discovery_server__l_registeredServer,
+                  service_set_discovery_server__ret);
+               service_set_discovery_server__l_nb_servers = service_set_discovery_server__l_nb_servers +
+                  1;
+            }
+         }
+         else {
+            msg_find_servers_bs__set_find_servers_server(service_set_discovery_server__p_resp,
+               service_set_discovery_server__l_nb_servers,
+               service_set_discovery_server__p_localeIds,
+               service_set_discovery_server__l_registeredServer,
+               service_set_discovery_server__ret);
+            service_set_discovery_server__l_nb_servers = service_set_discovery_server__l_nb_servers +
+               1;
+         }
+      }
+      service_register_server2__clear_iter_registered_server2_set();
+   }
+}
+
 void service_set_discovery_server__treat_find_servers_on_network_request(
    const constants__t_msg_i service_set_discovery_server__req_msg,
    const constants__t_msg_i service_set_discovery_server__resp_msg,
@@ -198,6 +329,67 @@ void service_set_discovery_server__treat_register_server2_request(
             service_set_discovery_server__l_mdns_config_index,
             service_set_discovery_server__ret);
       }
+   }
+}
+
+void service_set_discovery_server__treat_find_servers_request(
+   const constants__t_msg_i service_set_discovery_server__req_msg,
+   const constants__t_msg_i service_set_discovery_server__resp_msg,
+   const constants__t_endpoint_config_idx_i service_set_discovery_server__endpoint_config_idx,
+   constants_statuscodes_bs__t_StatusCode_i * const service_set_discovery_server__ret) {
+   {
+      constants__t_LocaleIds_i service_set_discovery_server__l_LocaleIds;
+      t_entier4 service_set_discovery_server__l_nbServerUri;
+      constants__t_ServerUris service_set_discovery_server__l_ServerUris;
+      t_entier4 service_set_discovery_server__l_nbServers;
+      t_entier4 service_set_discovery_server__l_nbServersPlusSelf;
+      constants__t_ApplicationDescription_i service_set_discovery_server__l_appDesc;
+      t_bool service_set_discovery_server__l_isCurrentCompat;
+      t_bool service_set_discovery_server__l_allocSuccess;
+      
+      *service_set_discovery_server__ret = constants_statuscodes_bs__e_sc_ok;
+      msg_find_servers_bs__get_find_servers_req_params(service_set_discovery_server__req_msg,
+         &service_set_discovery_server__l_LocaleIds,
+         &service_set_discovery_server__l_nbServerUri,
+         &service_set_discovery_server__l_ServerUris);
+      service_set_discovery_server__local_get_nb_servers_to_return(service_set_discovery_server__l_nbServerUri,
+         service_set_discovery_server__l_ServerUris,
+         &service_set_discovery_server__l_nbServers);
+      service_set_discovery_server__local_add_self_server_to_return(service_set_discovery_server__endpoint_config_idx,
+         service_set_discovery_server__l_nbServerUri,
+         service_set_discovery_server__l_ServerUris,
+         service_set_discovery_server__l_nbServers,
+         &service_set_discovery_server__l_allocSuccess,
+         &service_set_discovery_server__l_isCurrentCompat,
+         &service_set_discovery_server__l_appDesc,
+         &service_set_discovery_server__l_nbServersPlusSelf);
+      if ((service_set_discovery_server__l_allocSuccess == true) &&
+         (service_set_discovery_server__l_nbServersPlusSelf > 0)) {
+         msg_find_servers_bs__alloc_find_servers(service_set_discovery_server__resp_msg,
+            service_set_discovery_server__l_nbServersPlusSelf,
+            &service_set_discovery_server__l_allocSuccess);
+         if (service_set_discovery_server__l_allocSuccess == true) {
+            service_set_discovery_server__local_set_servers_to_return(service_set_discovery_server__resp_msg,
+               service_set_discovery_server__l_LocaleIds,
+               service_set_discovery_server__l_nbServerUri,
+               service_set_discovery_server__l_ServerUris,
+               service_set_discovery_server__l_nbServers,
+               service_set_discovery_server__ret);
+            if ((*service_set_discovery_server__ret == constants_statuscodes_bs__e_sc_ok) &&
+               (service_set_discovery_server__l_isCurrentCompat == true)) {
+               msg_find_servers_bs__set_find_servers_server_ApplicationDescription(service_set_discovery_server__resp_msg,
+                  service_set_discovery_server__l_nbServersPlusSelf -
+                  1,
+                  service_set_discovery_server__l_LocaleIds,
+                  service_set_discovery_server__l_appDesc,
+                  service_set_discovery_server__ret);
+            }
+         }
+         else {
+            *service_set_discovery_server__ret = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+         }
+      }
+      constants__free_LocaleIds(service_set_discovery_server__l_LocaleIds);
    }
 }
 

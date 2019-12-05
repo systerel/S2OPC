@@ -149,6 +149,20 @@ void service_register_server2_set_it_bs__reset_registered_server2_set(void)
     resetTime.timestamp = SOPC_Time_GetCurrentTimeUTC();
 }
 
+void service_register_server2_set_it_bs__get_card_register2_set(
+    t_entier4* const service_register_server2_set_it_bs__card_set)
+{
+    uint32_t length = SOPC_SLinkedList_GetLength(registeredServer2List);
+    if (length > INT32_MAX)
+    {
+        *service_register_server2_set_it_bs__card_set = INT32_MAX;
+    }
+    else
+    {
+        *service_register_server2_set_it_bs__card_set = (int32_t) length;
+    }
+}
+
 void service_register_server2_set_it_bs__get_registered_server2_counter_reset_time(
     constants__t_Timestamp* const service_register_server2_set_it_bs__p_timestamp)
 {

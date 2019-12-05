@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 03/12/2019 10:31:08
+ Date                 : 04/12/2019 17:12:34
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -546,7 +546,7 @@ void service_mgr__local_client_discovery_service_request(
             message_out_bs__client_write_msg_out_header_req_handle(service_mgr__l_msg_header,
                service_mgr__l_req_handle);
             message_out_bs__encode_msg(constants__e_msg_request_type,
-               constants__e_msg_session_close_req,
+               service_mgr__l_req_typ,
                service_mgr__l_msg_header,
                service_mgr__req_msg,
                service_mgr__ret,

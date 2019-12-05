@@ -54,6 +54,7 @@
 /*-----------------------------
    SETS Clause: deferred sets
   -----------------------------*/
+typedef OpcUa_ApplicationDescription* constants_bs__t_ApplicationDescription_i;
 typedef void* constants_bs__t_ArrayDimensions_i;
 typedef uint32_t constants_bs__t_BrowseNodeClassMask_i;
 typedef uint32_t constants_bs__t_BrowsePath_i;
@@ -81,6 +82,7 @@ typedef OpcUa_RelativePathElement* constants_bs__t_RelativePathElt_i;
 typedef OpcUa_RelativePath* constants_bs__t_RelativePath_i;
 typedef SOPC_ServerCapabilities_Internal constants_bs__t_ServerCapabilities;
 typedef SOPC_String* constants_bs__t_ServerUri;
+typedef SOPC_String* constants_bs__t_ServerUris;
 typedef OpcUa_SignatureData* constants_bs__t_SignatureData_i;
 typedef SOPC_Value_Timestamp constants_bs__t_Timestamp;
 typedef SOPC_Variant* constants_bs__t_Variant_i;
@@ -129,6 +131,7 @@ typedef SOPC_ExtensionObject* constants_bs__t_user_token_i;
 /*------------------------------------------------
    CONCRETE_CONSTANTS Clause: scalars and arrays
   ------------------------------------------------*/
+#define constants_bs__c_ApplicationDescription_indet NULL
 #define constants_bs__c_ArrayDimensions_indet 0
 #define constants_bs__c_BrowseNodeClassMask_indet 0
 #define constants_bs__c_BrowseResultMask_all 63

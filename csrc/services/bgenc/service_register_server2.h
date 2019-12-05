@@ -21,7 +21,7 @@
 
  File Name            : service_register_server2.h
 
- Date                 : 03/12/2019 10:31:10
+ Date                 : 04/12/2019 17:12:36
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -62,6 +62,7 @@ extern void service_register_server2__INITIALISATION(void);
   -------------------------------*/
 #define service_register_server2__clear_iter_registered_server2_set service_register_server2_set_it_bs__clear_iter_registered_server2_set
 #define service_register_server2__continue_iter_monitored_item service_register_server2_set_it_bs__continue_iter_monitored_item
+#define service_register_server2__get_card_register2_set service_register_server2_set_it_bs__get_card_register2_set
 #define service_register_server2__get_registered_server2_counter_reset_time service_register_server2_set_it_bs__get_registered_server2_counter_reset_time
 #define service_register_server2__get_registered_server2_mdns_config service_register_server2_set_it_bs__get_registered_server2_mdns_config
 #define service_register_server2__get_registered_server2_recordId service_register_server2_set_it_bs__get_registered_server2_recordId

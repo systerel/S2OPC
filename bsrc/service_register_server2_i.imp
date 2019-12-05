@@ -34,6 +34,7 @@ PROMOTES
     init_iter_registered_server2_set,
     clear_iter_registered_server2_set,
     continue_iter_monitored_item,
+    get_card_register2_set,
     get_registered_server2_counter_reset_time,
     get_registered_server2_registered_server,
     get_registered_server2_recordId,

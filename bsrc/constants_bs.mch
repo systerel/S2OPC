@@ -81,9 +81,11 @@ SETS
     t_ArrayDimensions_i;
     t_LocaleIds_i;
     t_RegisteredServer_i;
+    t_ApplicationDescription_i;
     t_MdnsDiscoveryConfig_i;
     t_RegisteredServer2Info_i;
     t_ServerUri;
+    t_ServerUris;
     t_ServerCapabilities
 
 CONCRETE_CONSTANTS
@@ -166,6 +168,7 @@ CONCRETE_CONSTANTS
     c_RelativePath_indet,
     c_RelativePathElt_indet,
     c_RegisteredServer_indet,
+    c_ApplicationDescription_indet,
     c_MdnsDiscoveryConfig_indet,
     c_RegisteredServer2Info_indet,
     c_ServerUri_empty
@@ -224,6 +227,7 @@ ABSTRACT_CONSTANTS
     t_ArrayDimensions,
     t_LocaleIds,
     t_RegisteredServer,
+    t_ApplicationDescription,
     t_MdnsDiscoveryConfig,
     t_RegisteredServer2Info,
 
@@ -454,6 +458,9 @@ PROPERTIES
 
     c_RegisteredServer_indet : t_RegisteredServer_i &
     t_RegisteredServer = t_RegisteredServer_i - {c_RegisteredServer_indet} &
+    
+    c_ApplicationDescription_indet : t_ApplicationDescription_i &
+    t_ApplicationDescription = t_ApplicationDescription_i - {c_ApplicationDescription_indet} &
 
     c_MdnsDiscoveryConfig_indet : t_MdnsDiscoveryConfig_i &
     t_MdnsDiscoveryConfig = t_MdnsDiscoveryConfig_i - {c_MdnsDiscoveryConfig_indet} &

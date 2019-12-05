@@ -21,7 +21,7 @@
 
  File Name            : service_register_server2_set_it_bs.h
 
- Date                 : 02/12/2019 10:19:38
+ Date                 : 04/12/2019 17:13:02
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -57,6 +57,8 @@ extern void service_register_server2_set_it_bs__clear_iter_registered_server2_se
 extern void service_register_server2_set_it_bs__continue_iter_monitored_item(
    t_bool * const service_register_server2_set_it_bs__continue,
    constants__t_RegisteredServer2Info_i * const service_register_server2_set_it_bs__p_registeredServerInfo);
+extern void service_register_server2_set_it_bs__get_card_register2_set(
+   t_entier4 * const service_register_server2_set_it_bs__card_set);
 extern void service_register_server2_set_it_bs__get_registered_server2_counter_reset_time(
    constants__t_Timestamp * const service_register_server2_set_it_bs__p_timestamp);
 extern void service_register_server2_set_it_bs__get_registered_server2_mdns_config(
