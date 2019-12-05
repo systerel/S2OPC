@@ -565,6 +565,37 @@ void SOPC_LocalizedText_Clear(SOPC_LocalizedText* localizedText);
 void SOPC_LocalizedText_ClearAux(void* value);
 
 /**
+ * \brief Copy into the given empty localized text an array of localized text to create a LocalizedText set.
+ * Note: array is considered to contain only LocalizedText single values (other values than default fields are ignored)
+ *
+ * \param destSetOfLt   The destination empty LocalizedText which will contain data of the LocalizedText array
+ *                      (default field will contain index 0 of array and the list the rest)
+ * \param nbElts        Number of element of the array
+ * \param srcArrayOfLt  The source array of LocalizedText to be copied into a unique LocalizedText structure (as a set).
+ *                      The array should contain only single LocalizedText value (default fields only), the rest will be
+ *                      ignored.
+ *
+ * \return SOPC_STATUS_OK in case of success
+ */
+SOPC_ReturnStatus SOPC_LocalizedText_CopyFromArray(SOPC_LocalizedText* destSetOfLt,
+                                                   int32_t nbElts,
+                                                   const SOPC_LocalizedText* srcArrayOfLt);
+
+/**
+ * \brief Copy into a new LocalizedText array the content of a LocalizedText set (or single value).
+ *
+ * \param dstArray      The destination pointer in which the array of LocalizedText will be allocated.
+ *                      The array contain only single LocalizedText value (default fields only).
+ * \param nbElts        The destination pointer in which the number of elements in the array will be stored
+ * \param srcSetOfLt    The source LocalizedText set (or single value) to be copied into the array.
+ *
+ * \return SOPC_STATUS_OK in case of success
+ */
+SOPC_ReturnStatus SOPC_LocalizedText_CopyToArray(SOPC_LocalizedText** dstArray,
+                                                 int32_t* nbElts,
+                                                 const SOPC_LocalizedText* srcSetOfLt);
+
+/**
  * \brief Add a src LocalizedText to the LocalizedText list of dest.
  * If locale already exists overwrite it, if it is a NULL LocalizedText clear all localized text stored
  * Note: src shall not contain a list of localized text, only default localized text fields
@@ -572,8 +603,8 @@ void SOPC_LocalizedText_ClearAux(void* value);
  * \param destSetOfLt        The localizedText object in which additional (or existent) localized text will be added
  * \param supportedLocaleIds The NULL terminated list of supported locales of the owner of the localizedText object
  *                           (use as read only)
- * \param src                The localizedText object containing a single localized text, the locale shall be "" or one
- *                           of the locales supported. Otherwise the SOPC_STATUS_NOT_SUPPORTED is returned.
+ * \param src                The localizedText object containing a single localized text, the locale shall be "" or
+ * one of the locales supported. Otherwise the SOPC_STATUS_NOT_SUPPORTED is returned.
  *
  * \return SOPC_STATUS_OK if the operation succeeded and error status otherwise
  */
@@ -600,6 +631,12 @@ SOPC_ReturnStatus SOPC_LocalizedText_AddOrSetLocale(SOPC_LocalizedText* destSetO
 SOPC_ReturnStatus SOPC_LocalizedText_GetPreferredLocale(SOPC_LocalizedText* dest,
                                                         char** preferredLocaleIds,
                                                         const SOPC_LocalizedText* srcSetOfLt);
+
+/* Same as SOPC_LocalizedText_GetPreferredLocale but using an array of single LocalizedText as source */
+SOPC_ReturnStatus SOPC_LocalizedTextArray_GetPreferredLocale(SOPC_LocalizedText* dest,
+                                                             char** preferredLocaleIds,
+                                                             int32_t nbLocalizedText,
+                                                             const SOPC_LocalizedText* srcArray);
 
 void SOPC_ExtensionObject_Initialize(SOPC_ExtensionObject* extObj);
 void SOPC_ExtensionObject_InitializeAux(void* value);

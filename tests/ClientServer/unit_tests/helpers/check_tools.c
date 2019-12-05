@@ -3490,11 +3490,14 @@ START_TEST(test_ua_localized_text_type)
     bool result = false;
     int32_t comp_res = -1;
 
-    SOPC_LocalizedText singleLt, single2Lt;
+    SOPC_LocalizedText singleLt, single2Lt, single3Lt;
     SOPC_LocalizedText setOfLt;
+    SOPC_LocalizedText* arrayOfLt;
+    int32_t nbElts = 0;
 
     SOPC_LocalizedText_Initialize(&singleLt);
     SOPC_LocalizedText_Initialize(&single2Lt);
+    SOPC_LocalizedText_Initialize(&single3Lt);
 
     SOPC_LocalizedText_Initialize(&setOfLt);
 
@@ -3620,9 +3623,25 @@ START_TEST(test_ua_localized_text_type)
     // Check preferred locale can be retrieved
     char* preferredLocales[] = {"de-DE", "en-UK", "en-US", "fr-FR", NULL};
 
+    // Check at same time resolution on a LocalizedText array instead of set:
+    status = SOPC_LocalizedText_CopyToArray(&arrayOfLt, &nbElts, &setOfLt);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    // Check Set -> Array -> Set is equivalent to first Set
+    SOPC_LocalizedText setOfLt2;
+    SOPC_LocalizedText_Initialize(&setOfLt2);
+    status = SOPC_LocalizedText_CopyFromArray(&setOfLt2, nbElts, arrayOfLt);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_LocalizedText_Compare(&setOfLt, &setOfLt2, &comp_res);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(0, comp_res);
+    SOPC_LocalizedText_Clear(&setOfLt2);
+
     // en-UK shall be preferred
     SOPC_LocalizedText_Clear(&single2Lt);
     SOPC_LocalizedText_GetPreferredLocale(&single2Lt, preferredLocales, &setOfLt);
+
+    SOPC_LocalizedText_Clear(&single3Lt); // same with an LT array
+    SOPC_LocalizedTextArray_GetPreferredLocale(&single3Lt, preferredLocales, nbElts, arrayOfLt);
     // expected:
     SOPC_LocalizedText_Clear(&singleLt);
     status = SOPC_String_AttachFromCstring(&singleLt.defaultLocale, "en-UK");
@@ -3634,11 +3653,18 @@ START_TEST(test_ua_localized_text_type)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq(0, comp_res);
 
+    status = SOPC_LocalizedText_Compare(&singleLt, &single3Lt, &comp_res); // same with an LT array
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(0, comp_res);
+
     char* preferredLocales2[] = {"de-DE", "fr-FR", "en-UK", "en-US", NULL};
 
     // fr-FR shall be preferred
     SOPC_LocalizedText_Clear(&single2Lt);
     SOPC_LocalizedText_GetPreferredLocale(&single2Lt, preferredLocales2, &setOfLt);
+
+    SOPC_LocalizedText_Clear(&single3Lt); // same with an LT array
+    SOPC_LocalizedTextArray_GetPreferredLocale(&single3Lt, preferredLocales2, nbElts, arrayOfLt);
     // expected:
     SOPC_LocalizedText_Clear(&singleLt);
     status = SOPC_String_AttachFromCstring(&singleLt.defaultLocale, "fr-FR");
@@ -3649,6 +3675,14 @@ START_TEST(test_ua_localized_text_type)
     status = SOPC_LocalizedText_Compare(&singleLt, &single2Lt, &comp_res);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq(0, comp_res);
+
+    status = SOPC_LocalizedText_Compare(&singleLt, &single3Lt, &comp_res); // same with an LT array
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(0, comp_res);
+
+    // End of LT array tests
+    SOPC_LocalizedText_Clear(&single3Lt);
+    SOPC_Clear_Array(&nbElts, (void**) &arrayOfLt, sizeof(SOPC_LocalizedText), SOPC_LocalizedText_ClearAux);
 
     // Delete the "en-UK" locale
     //   Create empty string for locale en-UK:
