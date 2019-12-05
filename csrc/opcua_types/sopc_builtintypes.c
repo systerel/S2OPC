@@ -2558,7 +2558,7 @@ static SOPC_ReturnStatus SOPC_LocalizedText_Copy_Internal(int recursionLimit,
         }
         if (SOPC_STATUS_OK == status && NULL != src->localizedTextList)
         {
-            dest->localizedTextList = SOPC_SLinkedList_Create(0);
+            dest->localizedTextList = SOPC_SLinkedList_Create(INT32_MAX);
             if (NULL == dest->localizedTextList)
             {
                 status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -2705,6 +2705,105 @@ void SOPC_LocalizedText_Clear(SOPC_LocalizedText* localizedText)
     }
 }
 
+SOPC_ReturnStatus SOPC_LocalizedText_CopyFromArray(SOPC_LocalizedText* destSetOfLt,
+                                                   int32_t nbElts,
+                                                   const SOPC_LocalizedText* srcArrayOfLt)
+{
+    if (NULL == destSetOfLt || NULL != destSetOfLt->localizedTextList || destSetOfLt->defaultLocale.Length > 0 ||
+        destSetOfLt->defaultText.Length > 0 || nbElts <= 0 || NULL == srcArrayOfLt)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    // Do not use LocalizedText_Copy to avoid possible set of LT in the array:
+    // array are considered to contain only single value
+    SOPC_ReturnStatus status = SOPC_String_Copy(&destSetOfLt->defaultLocale, &srcArrayOfLt[0].defaultLocale);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_String_Copy(&destSetOfLt->defaultText, &srcArrayOfLt[0].defaultText);
+    }
+    if (nbElts > 1)
+    {
+        destSetOfLt->localizedTextList = SOPC_SLinkedList_Create(INT32_MAX);
+        status = (NULL == destSetOfLt->localizedTextList ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK);
+
+        for (int32_t i = 1; SOPC_STATUS_OK == status && i < nbElts; i++)
+        {
+            SOPC_LocalizedText* lt = SOPC_Calloc(1, sizeof(SOPC_LocalizedText));
+            if (NULL == lt)
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+            // Do not use LocalizedText_Copy to avoid possible set of LT in the array:
+            // array are considered to contain only single value
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_String_Copy(&lt->defaultLocale, &srcArrayOfLt[i].defaultLocale);
+            }
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_String_Copy(&lt->defaultText, &srcArrayOfLt[i].defaultText);
+            }
+            if (SOPC_STATUS_OK == status)
+            {
+                void* added = SOPC_SLinkedList_Append(destSetOfLt->localizedTextList, 0, lt);
+                status = (lt != added ? SOPC_STATUS_NOK : SOPC_STATUS_OK);
+            }
+        }
+    }
+
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_LocalizedText_Clear(destSetOfLt);
+    }
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_LocalizedText_CopyToArray(SOPC_LocalizedText** dstArray,
+                                                 int32_t* nbElts,
+                                                 const SOPC_LocalizedText* srcSetOfLt)
+{
+    if (NULL == dstArray || NULL == nbElts || NULL == srcSetOfLt)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    // There is always at least 1 element (default LT: it might be empty)
+    *nbElts = 1;
+    if (srcSetOfLt->localizedTextList != NULL)
+    {
+        // And there might be a set of LT in addition to the default LT
+        *nbElts += (int32_t) SOPC_SLinkedList_GetLength(srcSetOfLt->localizedTextList);
+    }
+    *dstArray = SOPC_Calloc(sizeof(*nbElts), sizeof(SOPC_LocalizedText));
+
+    SOPC_ReturnStatus status = (NULL == *dstArray ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK);
+    if (SOPC_STATUS_OK == status)
+    {
+        // Avoid copying the list in root LocalizedText
+        status = SOPC_String_Copy(&(*dstArray)[0].defaultLocale, &srcSetOfLt->defaultLocale);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_String_Copy(&(*dstArray)[0].defaultText, &srcSetOfLt->defaultText);
+        }
+        if (*nbElts > 1)
+        {
+            SOPC_SLinkedListIterator it = SOPC_SLinkedList_GetIterator(srcSetOfLt->localizedTextList);
+            for (int32_t i = 1; SOPC_STATUS_OK == status && i < *nbElts && SOPC_SLinkedList_HasNext(&it); i++)
+            {
+                SOPC_LocalizedText* lt = SOPC_SLinkedList_Next(&it);
+                status = SOPC_LocalizedText_Copy(&(*dstArray)[i], lt);
+            }
+        }
+    }
+
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Clear_Array(nbElts, (void**) dstArray, sizeof(SOPC_LocalizedText), SOPC_LocalizedText_ClearAux);
+        *nbElts = 0;
+    }
+    return status;
+}
+
 static SOPC_ReturnStatus SOPC_LocalizedText_AddOrSetLocale_Internal_SetSupported(SOPC_LocalizedText* destSetOfLt,
                                                                                  const SOPC_LocalizedText* src)
 {
@@ -2753,7 +2852,7 @@ static SOPC_ReturnStatus SOPC_LocalizedText_AddOrSetLocale_Internal_SetSupported
     }
     else
     {
-        destSetOfLt->localizedTextList = SOPC_SLinkedList_Create(0);
+        destSetOfLt->localizedTextList = SOPC_SLinkedList_Create(INT32_MAX);
         if (NULL == destSetOfLt->localizedTextList)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -3018,6 +3117,66 @@ SOPC_ReturnStatus SOPC_LocalizedText_GetPreferredLocale(SOPC_LocalizedText* dest
         if (SOPC_STATUS_OK == status)
         {
             status = SOPC_String_Copy(&dest->defaultText, &srcSetOfLt->defaultText);
+        }
+    }
+
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_LocalizedTextArray_GetPreferredLocale(SOPC_LocalizedText* dest,
+                                                             char** preferredLocaleIds,
+                                                             int32_t nbLocalizedText,
+                                                             const SOPC_LocalizedText* srcArray)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    if (NULL == dest || NULL != dest->localizedTextList || NULL == preferredLocaleIds || NULL == srcArray ||
+        0 >= nbLocalizedText)
+    {
+        return status;
+    }
+
+    int comparisonCounter = 0; // 2 types of comparison shall be done
+    // First: attempt to find exact language+coutry/region locale match
+    // Second: attempt to find language match only
+    bool cmpWithCountryRegion = true;
+    bool localeMatch = false;
+
+    while (nbLocalizedText > 1 && !localeMatch && comparisonCounter < 2)
+    {
+        int index = 0;
+        const char* localeId = preferredLocaleIds[index];
+
+        while (NULL != localeId && !localeMatch)
+        {
+            // Check all available locales in source localized text
+
+            // Check other localized texts content
+            for (int32_t i = 0; !localeMatch && i < nbLocalizedText; i++)
+            {
+                const SOPC_LocalizedText* lt = &srcArray[i];
+                assert(NULL != lt);
+                int res = SOPC_LocalizedText_CompareLocales(localeId, SOPC_String_GetRawCString(&lt->defaultLocale),
+                                                            cmpWithCountryRegion);
+                localeMatch = (0 == res);
+                if (localeMatch)
+                {
+                    status = SOPC_LocalizedText_Copy(dest, lt);
+                }
+            }
+            index++;
+            localeId = preferredLocaleIds[index];
+        }
+        comparisonCounter++;
+        cmpWithCountryRegion = false;
+    }
+
+    if (!localeMatch)
+    {
+        // Set default locale
+        status = SOPC_String_Copy(&dest->defaultLocale, &srcArray[0].defaultLocale);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_String_Copy(&dest->defaultText, &srcArray[0].defaultText);
         }
     }
 
