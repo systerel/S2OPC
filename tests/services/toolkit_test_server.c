@@ -926,7 +926,7 @@ int main(int argc, char* argv[])
 
         if (!set_runtime_variables(epConfigIdx, &runtime_vars))
         {
-            printf("<Test_Server_Toolkit: Failed to populate Server object");
+            printf("<Test_Server_Toolkit: Failed to populate Server object\n");
             status = SOPC_STATUS_NOK;
         }
     }
