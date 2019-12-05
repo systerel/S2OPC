@@ -21,7 +21,7 @@
 
  File Name            : service_set_discovery_server.h
 
- Date                 : 03/12/2019 10:31:10
+ Date                 : 05/12/2019 08:48:30
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -38,9 +38,9 @@
 /*-----------------
    IMPORTS Clause
   -----------------*/
+#include "msg_find_servers_bs.h"
 #include "msg_find_servers_on_network_bs.h"
 #include "msg_register_server2.h"
-#include "service_find_servers_bs.h"
 #include "service_register_server2.h"
 #include "service_set_discovery_server_data_bs.h"
 
@@ -57,24 +57,39 @@
   ------------------------*/
 extern void service_set_discovery_server__INITIALISATION(void);
 
-/*-------------------------------
-   PROMOTES and EXTENDS Clauses
-  -------------------------------*/
-#define service_set_discovery_server__treat_find_servers_request service_find_servers_bs__treat_find_servers_request
-
 /*--------------------------
    LOCAL_OPERATIONS Clause
   --------------------------*/
+extern void service_set_discovery_server__local_add_self_server_to_return(
+   const constants__t_endpoint_config_idx_i service_set_discovery_server__p_endpoint_config_idx,
+   const t_entier4 service_set_discovery_server__p_nbServerUri,
+   const constants__t_ServerUris service_set_discovery_server__p_ServerUris,
+   const t_entier4 service_set_discovery_server__p_nbServersIn,
+   t_bool * const service_set_discovery_server__p_allocSuccess,
+   t_bool * const service_set_discovery_server__p_compatSelf,
+   constants__t_ApplicationDescription_i * const service_set_discovery_server__p_appDesc,
+   t_entier4 * const service_set_discovery_server__p_nbServersOut);
 extern void service_set_discovery_server__local_get_nb_servers_on_network_to_return(
    const t_entier4 service_set_discovery_server__p_starting_record_id,
    const t_entier4 service_set_discovery_server__p_max_records_to_return,
    const constants__t_ServerCapabilities service_set_discovery_server__p_serverCapabilities,
+   t_entier4 * const service_set_discovery_server__p_nb_servers);
+extern void service_set_discovery_server__local_get_nb_servers_to_return(
+   const t_entier4 service_set_discovery_server__p_nbServerUri,
+   const constants__t_ServerUris service_set_discovery_server__p_ServerUris,
    t_entier4 * const service_set_discovery_server__p_nb_servers);
 extern void service_set_discovery_server__local_set_servers_on_network_to_return(
    const constants__t_msg_i service_set_discovery_server__p_resp,
    const t_entier4 service_set_discovery_server__p_starting_record_id,
    const constants__t_ServerCapabilities service_set_discovery_server__p_serverCapabilities,
    const t_entier4 service_set_discovery_server__p_nb_servers);
+extern void service_set_discovery_server__local_set_servers_to_return(
+   const constants__t_msg_i service_set_discovery_server__p_resp,
+   const constants__t_LocaleIds_i service_set_discovery_server__p_localeIds,
+   const t_entier4 service_set_discovery_server__p_nbServerUri,
+   const constants__t_ServerUris service_set_discovery_server__p_ServerUris,
+   const t_entier4 service_set_discovery_server__p_nb_servers,
+   constants_statuscodes_bs__t_StatusCode_i * const service_set_discovery_server__ret);
 
 /*--------------------
    OPERATIONS Clause
@@ -83,6 +98,11 @@ extern void service_set_discovery_server__service_set_discovery_server_UNINITIAL
 extern void service_set_discovery_server__treat_find_servers_on_network_request(
    const constants__t_msg_i service_set_discovery_server__req_msg,
    const constants__t_msg_i service_set_discovery_server__resp_msg,
+   constants_statuscodes_bs__t_StatusCode_i * const service_set_discovery_server__ret);
+extern void service_set_discovery_server__treat_find_servers_request(
+   const constants__t_msg_i service_set_discovery_server__req_msg,
+   const constants__t_msg_i service_set_discovery_server__resp_msg,
+   const constants__t_endpoint_config_idx_i service_set_discovery_server__endpoint_config_idx,
    constants_statuscodes_bs__t_StatusCode_i * const service_set_discovery_server__ret);
 extern void service_set_discovery_server__treat_register_server2_request(
    const constants__t_msg_i service_set_discovery_server__req_msg,

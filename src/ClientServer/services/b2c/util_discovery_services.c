@@ -150,7 +150,7 @@ static void SOPC_SetServerApplicationDescription(SOPC_Endpoint_Config* sopcEndpo
     status = SOPC_String_AttachFrom(&appDesc->ProductUri, &desc->ProductUri);
     if (SOPC_STATUS_OK != status)
     {
-        SOPC_Logger_TraceWarning("Failed to set Application URI in application description of response");
+        SOPC_Logger_TraceWarning("Failed to set Product URI in application description of response");
     }
 }
 

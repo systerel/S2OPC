@@ -296,9 +296,11 @@ SETS
     t_ArrayDimensions_i; /* int32 array size and content with product of values <= INT32_MAX */
     t_LocaleIds_i; /* char* array NULL terminated of locales ids */
     t_RegisteredServer_i; /* (OpcUa_RegisteredServer*) */
+    t_ApplicationDescription_i; /* (OpcUa_ApplicationDescription*) */
     t_MdnsDiscoveryConfig_i; /* (OpcUa_MdnsDiscoveryConfiguration*) */
     t_RegisteredServer2Info_i; /* (SOPC_RegisterServer2Record_Internal*) */
     t_ServerUri; /* (SOPC_String*) */
+    t_ServerUris; /* (SOPC_String[]) */
     t_ServerCapabilities /* SOPC_ServerCapabilities_Internal */
 
 CONCRETE_CONSTANTS
@@ -392,6 +394,7 @@ CONCRETE_CONSTANTS
     c_LocaleIds_empty,
     c_BrowseResultMask_all,
     c_RegisteredServer_indet,
+    c_ApplicationDescription_indet,
     c_MdnsDiscoveryConfig_indet,
     c_RegisteredServer2Info_indet,
     c_ServerUri_empty,
@@ -496,6 +499,7 @@ ABSTRACT_CONSTANTS
     t_ArrayDimensions,
     t_LocaleIds,
     t_RegisteredServer,
+    t_ApplicationDescription,
     t_MdnsDiscoveryConfig,
     t_RegisteredServer2Info,
 
@@ -829,6 +833,9 @@ PROPERTIES
 
     c_RegisteredServer_indet : t_RegisteredServer_i &
     t_RegisteredServer = t_RegisteredServer_i - {c_RegisteredServer_indet} &
+
+    c_ApplicationDescription_indet : t_ApplicationDescription_i &
+    t_ApplicationDescription = t_ApplicationDescription_i - {c_ApplicationDescription_indet} &
 
     c_MdnsDiscoveryConfig_indet : t_MdnsDiscoveryConfig_i &
     t_MdnsDiscoveryConfig = t_MdnsDiscoveryConfig_i - {c_MdnsDiscoveryConfig_indet} &

@@ -22,18 +22,16 @@ IMPLEMENTATION
 REFINES
    service_set_discovery_server
 IMPORTS
-    service_find_servers_bs,
     msg_register_server2,
     service_register_server2,
     service_set_discovery_server_data_bs,
-    msg_find_servers_on_network_bs
+    msg_find_servers_on_network_bs,
+    msg_find_servers_bs
 SEES
    constants,
    constants_statuscodes_bs,
    message_in_bs,
    message_out_bs
-PROMOTES
-    treat_find_servers_request
 
 DEFINITIONS
 
@@ -43,8 +41,12 @@ DEFINITIONS
 
     /* a_RegisteredServer2_RecordId restricted to the mDNSconfig and recordIds compatible with the FindServersOnNetwork request */
     a_FindServersOnNetworkCompat_RecordId ==
-      (dom(a_FindServersOnNetworkCompat_mDNSconfig) <| a_RegisteredServer2_RecordId |> FindServersOnNetworkReq_StartingRecordId..MAXINT)
-    
+      (dom(a_FindServersOnNetworkCompat_mDNSconfig) <| a_RegisteredServer2_RecordId |> FindServersOnNetworkReq_StartingRecordId..MAXINT);
+      
+    /* a_RegisteredServer2_RegisteredServer restricted to the ServerURI compatible with the FindServers request */
+    a_FindServersCompat_RegisteredServer ==
+      (a_RegisteredServer2_RegisteredServer |> dom(RegisteredServer_ServerUri |> ServerUriArray_HasServerUri[{FindServersReq_ServerUris}]))
+
 LOCAL_OPERATIONS
 
     p_nb_servers <-- local_get_nb_servers_on_network_to_return (p_starting_record_id, p_max_records_to_return, p_serverCapabilities) =
@@ -75,6 +77,7 @@ LOCAL_OPERATIONS
         p_serverCapabilities : t_ServerCapabilities &
         p_serverCapabilities = FindServersOnNetworkReq_ServerCapabilities &
         p_nb_servers : NAT &
+        p_nb_servers = FindServersOnNetworkResp_NbServers &
         p_nb_servers > 0 &
         p_nb_servers = min({FindServersOnNetworkReq_MaxRecordsToReturn, 
                            card(a_FindServersOnNetworkCompat_RecordId)})
@@ -88,7 +91,6 @@ LOCAL_OPERATIONS
             FindServersOnNetworkResp_ServerMdnsConfig : seq(t_MdnsDiscoveryConfig) &
 
             ran(FindServersOnNetworkResp_ServerRecordId) <: ran(a_FindServersOnNetworkCompat_RecordId) &
-            card(FindServersOnNetworkResp_ServerRecordId) = p_nb_servers &
             /* In case we do not use all compatible records we shall return the first compatible recordIds in numerical order */
             (ran(FindServersOnNetworkResp_ServerRecordId) /= ran(a_FindServersOnNetworkCompat_RecordId) =>
                 max(ran(FindServersOnNetworkResp_ServerRecordId)) 
@@ -103,6 +105,87 @@ LOCAL_OPERATIONS
                 FindServersOnNetworkResp_ServerMdnsConfig(p_index) =
                  a_RegisteredServer2_mDNSconfig(a_RegisteredServer2_RecordId~(FindServersOnNetworkResp_ServerRecordId(p_index)))
             )
+        )
+    END
+    ;
+
+    p_nb_servers <-- local_get_nb_servers_to_return (p_nbServerUri, p_ServerUris) =
+    PRE
+        p_nbServerUri : NAT &
+        p_nbServerUri = FindServersReq_NbServerUri &
+        p_ServerUris : t_ServerUris &
+        p_ServerUris = FindServersReq_ServerUris
+    THEN
+        IF p_nbServerUri <= 0
+        THEN
+            p_nb_servers := card(s_RegisteredServer2)
+        ELSE
+            p_nb_servers := card(a_FindServersCompat_RegisteredServer)
+        END
+    END
+    ;
+    
+    p_allocSuccess, p_compatSelf, p_appDesc, p_nbServersOut
+      <-- local_add_self_server_to_return (p_endpoint_config_idx, p_nbServerUri, p_ServerUris, p_nbServersIn) =
+    PRE
+        p_endpoint_config_idx : t_endpoint_config_idx_i &
+        p_endpoint_config_idx : t_endpoint_config_idx &
+        p_nbServerUri : NAT &
+        p_nbServerUri = FindServersReq_NbServerUri &
+        p_ServerUris : t_ServerUris &
+        p_ServerUris = FindServersReq_ServerUris &
+        p_nbServersIn : NAT
+    THEN
+        p_allocSuccess,
+        p_compatSelf,
+        p_appDesc,
+        p_nbServersOut
+        :(p_allocSuccess : BOOL &
+          p_compatSelf : BOOL &
+          p_appDesc : t_ApplicationDescription_i &
+          p_nbServersOut : NAT &
+            (p_allocSuccess = TRUE =>
+                (p_compatSelf = TRUE =>
+                    p_nbServersOut = p_nbServersIn + 1 &
+                    p_appDesc : t_ApplicationDescription) &
+                (p_compatSelf = FALSE =>
+                    p_nbServersOut = p_nbServersIn)
+            )
+          )
+    END
+    ;
+
+    ret <-- local_set_servers_to_return (p_resp, p_localeIds, p_nbServerUri, p_ServerUris, p_nb_servers) =
+    PRE
+        p_resp : t_msg_i &
+        p_resp = FindServersResp &
+        p_localeIds : t_LocaleIds_i &
+        p_localeIds : t_LocaleIds &
+        p_localeIds = FindServersReq_LocaleIds &
+        p_nbServerUri : NAT &
+        p_nbServerUri = FindServersReq_NbServerUri &
+        p_ServerUris : t_ServerUris &
+        p_ServerUris = FindServersReq_ServerUris &
+        p_nb_servers : NAT &
+        p_nb_servers > 0 &
+        p_nb_servers = FindServersResp_NbServers - 1 & // current endpoint server added
+        (p_nbServerUri > 0 => p_nb_servers = card(a_FindServersCompat_RegisteredServer)) &
+        (p_nbServerUri = 0 => p_nb_servers = card(s_RegisteredServer2))
+    THEN
+        ret,
+        FindServersResp_ApplicationDescription
+        :(
+            ret : {e_sc_ok, e_sc_bad_out_of_memory} &
+            FindServersResp_ApplicationDescription : seq(t_ApplicationDescription) &
+            (ret = e_sc_ok => 
+                /* No filter: all RegisteredServer config are returned */
+                (p_nbServerUri <= 0 =>
+                    ran(FindServersResp_ApplicationDescription)
+                    = ran(a_RegisteredServer2_RegisteredServer;FindServers_RegisteredServerToApplicationDesc)) &
+                /* No filter: all RegisteredServer config compatible with ServerUri array provided in FindServers request */
+                (p_nbServerUri > 0 =>
+                    ran(FindServersResp_ApplicationDescription)
+                    = ran(a_FindServersCompat_RegisteredServer;FindServers_RegisteredServerToApplicationDesc)))
         )
     END
 
@@ -202,6 +285,116 @@ OPERATIONS
         clear_iter_registered_server2_set
     END
     ;
+
+    p_nb_servers <-- local_get_nb_servers_to_return (p_nbServerUri, p_ServerUris) =
+    VAR
+        l_continue,
+        l_registeredServerInfo,
+        l_registeredServer,
+        l_serverUri,
+        l_compatServerUri
+    IN
+        IF p_nbServerUri <= 0
+        THEN
+            p_nb_servers <-- get_card_register2_set
+        ELSE
+            p_nb_servers := 0;
+            l_continue <-- init_iter_registered_server2_set;
+            WHILE l_continue = TRUE DO
+                l_continue, l_registeredServerInfo <-- continue_iter_monitored_item;
+                l_registeredServer <-- get_registered_server2_registered_server (l_registeredServerInfo);
+                l_serverUri <-- get_RegisteredServer_ServerUri (l_registeredServer);
+                l_compatServerUri <-- has_ServerUri (l_serverUri, p_nbServerUri, p_ServerUris);
+                IF l_compatServerUri = TRUE
+                THEN
+                    p_nb_servers := p_nb_servers + 1
+                END
+            INVARIANT
+                l_continue = bool(s_registered_server2_to_iterate_it /= {}) &
+                p_nb_servers = card(s_registered_server2_iterated_it <| a_FindServersCompat_RegisteredServer)
+            VARIANT
+                card(s_registered_server2_to_iterate_it)
+            END
+            ;
+            clear_iter_registered_server2_set
+        END
+    END
+    ;
+
+    p_allocSuccess, p_compatSelf, p_appDesc, p_nbServersOut
+      <-- local_add_self_server_to_return (p_endpoint_config_idx, p_nbServerUri, p_ServerUris, p_nbServersIn) =
+    VAR
+        l_serverUri
+    IN
+        p_nbServersOut := p_nbServersIn;
+        p_compatSelf := FALSE;
+        p_allocSuccess, p_appDesc <-- get_ApplicationDescription (p_endpoint_config_idx);
+        IF p_allocSuccess = TRUE
+        THEN
+            l_serverUri <-- get_ApplicationDescription_ServerUri (p_appDesc);
+            IF p_nbServerUri > 0
+            THEN
+                p_compatSelf <-- has_ServerUri (l_serverUri, p_nbServerUri, p_ServerUris)
+            ELSE
+                p_compatSelf := TRUE
+            END
+            ;
+            IF p_compatSelf = TRUE
+            THEN
+                p_nbServersOut := p_nbServersIn + 1
+            END
+        END
+    END
+    ;
+    
+    ret <-- local_set_servers_to_return (p_resp, p_localeIds, p_nbServerUri, p_ServerUris, p_nb_servers) =
+    VAR
+        l_continue,
+        l_nb_servers,
+        l_registeredServerInfo,
+        l_registeredServer,
+        l_serverUri,
+        l_compatServerUri
+    IN
+        ret := e_sc_ok;
+        l_nb_servers := 0;
+        l_continue <-- init_iter_registered_server2_set;
+        WHILE ret = e_sc_ok & l_continue = TRUE & l_nb_servers < p_nb_servers DO
+            l_continue, l_registeredServerInfo <-- continue_iter_monitored_item;
+            l_registeredServer <-- get_registered_server2_registered_server (l_registeredServerInfo);
+            IF p_nbServerUri > 0
+            THEN
+                l_serverUri <-- get_RegisteredServer_ServerUri (l_registeredServer);
+                l_compatServerUri <-- has_ServerUri (l_serverUri, p_nbServerUri, p_ServerUris);
+                IF l_compatServerUri = TRUE
+                THEN
+                    ret <-- set_find_servers_server (p_resp, l_nb_servers, p_localeIds, l_registeredServer);
+                    l_nb_servers := l_nb_servers + 1
+                END
+            ELSE
+                ret <-- set_find_servers_server (p_resp, l_nb_servers, p_localeIds, l_registeredServer);
+                l_nb_servers := l_nb_servers + 1
+            END
+        INVARIANT
+            l_continue = bool(s_registered_server2_to_iterate_it /= {}) &
+            l_nb_servers <= p_nb_servers &
+            (ret = e_sc_ok =>
+                (p_nbServerUri <= 0 => /* No filter: all RegisteredServer config are returned */
+                    ran(FindServersResp_ApplicationDescription)
+                     = ran(s_registered_server2_iterated_it <| a_RegisteredServer2_RegisteredServer;FindServers_RegisteredServerToApplicationDesc) &
+                    l_nb_servers = card(s_registered_server2_iterated_it)) &
+                (p_nbServerUri > 0 => /* No filter: all RegisteredServer config compatible with ServerUri array provided in FindServers request */
+                    ran(FindServersResp_ApplicationDescription)
+                     = ran(s_registered_server2_iterated_it <| a_FindServersCompat_RegisteredServer;FindServers_RegisteredServerToApplicationDesc) &
+                    l_nb_servers = card(s_registered_server2_iterated_it <| a_FindServersCompat_RegisteredServer))
+            )
+        VARIANT
+            card(s_registered_server2_to_iterate_it)
+        END
+        ;
+        clear_iter_registered_server2_set
+    END
+    ;
     /* END OF LOCAL OPERATIONS */
 
     ret <-- treat_find_servers_on_network_request (req_msg, resp_msg) =
@@ -253,6 +446,43 @@ OPERATIONS
         IF ret = e_sc_ok THEN
             ret <-- set_register_server2_resp_configuration_results (resp_msg, l_nb_discovery_config, l_mdns_config_index)
         END
+    END
+    ;
+
+    ret <-- treat_find_servers_request (req_msg, resp_msg, endpoint_config_idx) =
+    VAR
+        l_LocaleIds,
+        l_nbServerUri,
+        l_ServerUris,
+        l_nbServers,
+        l_nbServersPlusSelf,
+        l_appDesc,
+        l_isCurrentCompat,
+        l_allocSuccess
+    IN
+        ret := e_sc_ok;
+        l_LocaleIds, l_nbServerUri, l_ServerUris <-- get_find_servers_req_params (req_msg);
+        l_nbServers <-- local_get_nb_servers_to_return (l_nbServerUri, l_ServerUris);
+        // Check if we add the current endpoint server information
+        l_allocSuccess, l_isCurrentCompat, l_appDesc, l_nbServersPlusSelf 
+          <-- local_add_self_server_to_return (endpoint_config_idx, l_nbServerUri, l_ServerUris, l_nbServers);
+        
+        IF l_allocSuccess = TRUE & l_nbServersPlusSelf > 0 
+        THEN
+            l_allocSuccess <-- alloc_find_servers (resp_msg, l_nbServersPlusSelf);
+            IF l_allocSuccess = TRUE
+            THEN
+                ret <-- local_set_servers_to_return (resp_msg, l_LocaleIds, l_nbServerUri, l_ServerUris, l_nbServers);
+                IF ret = e_sc_ok & l_isCurrentCompat = TRUE
+                THEN
+                    ret <-- set_find_servers_server_ApplicationDescription (resp_msg, l_nbServersPlusSelf - 1, l_LocaleIds, l_appDesc)
+                END
+            ELSE
+                ret := e_sc_bad_out_of_memory
+            END
+        END
+        ;
+        free_LocaleIds(l_LocaleIds)
     END
     ;
 

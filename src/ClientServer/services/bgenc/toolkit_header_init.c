@@ -21,7 +21,7 @@
 
  File Name            : toolkit_header_init.c
 
- Date                 : 26/02/2020 11:01:27
+ Date                 : 26/02/2020 11:05:45
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -75,6 +75,7 @@
 #include "msg_browse_bs.h"
 #include "msg_browse_next_bs.h"
 #include "msg_call_method_bs.h"
+#include "msg_find_servers_bs.h"
 #include "msg_find_servers_on_network_bs.h"
 #include "msg_read_request.h"
 #include "msg_read_request_bs.h"
@@ -101,7 +102,6 @@
 #include "request_handle_bs.h"
 #include "response_write_bs.h"
 #include "service_browse_it.h"
-#include "service_find_servers_bs.h"
 #include "service_get_endpoints_bs.h"
 #include "service_mgr.h"
 #include "service_mgr_bs.h"
@@ -235,13 +235,13 @@ void INITIALISATION(void) {
    msg_subscription_create_monitored_item__INITIALISATION();
    subscription_create_monitored_item_it__INITIALISATION();
    subscription_mgr__INITIALISATION();
-   service_find_servers_bs__INITIALISATION();
    msg_register_server2_bs__INITIALISATION();
    msg_register_server2__INITIALISATION();
    service_register_server2_set_it_bs__INITIALISATION();
    service_set_discovery_server_data_bs__INITIALISATION();
    service_register_server2__INITIALISATION();
    msg_find_servers_on_network_bs__INITIALISATION();
+   msg_find_servers_bs__INITIALISATION();
    service_set_discovery_server__INITIALISATION();
    msg_register_nodes_bs__INITIALISATION();
    msg_register_nodes__INITIALISATION();

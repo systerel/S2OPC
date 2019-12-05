@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 26/02/2020 11:00:39
+ Date                 : 26/02/2020 11:05:06
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -43,6 +43,7 @@
 /*-----------------------------
    SETS Clause: deferred sets
   -----------------------------*/
+#define constants__t_ApplicationDescription_i constants_bs__t_ApplicationDescription_i
 #define constants__t_Argument_i constants_bs__t_Argument_i
 #define constants__t_ArrayDimensions_i constants_bs__t_ArrayDimensions_i
 #define constants__t_BrowseNodeClassMask_i constants_bs__t_BrowseNodeClassMask_i
@@ -72,6 +73,7 @@
 #define constants__t_RelativePath_i constants_bs__t_RelativePath_i
 #define constants__t_ServerCapabilities constants_bs__t_ServerCapabilities
 #define constants__t_ServerUri constants_bs__t_ServerUri
+#define constants__t_ServerUris constants_bs__t_ServerUris
 #define constants__t_SignatureData_i constants_bs__t_SignatureData_i
 #define constants__t_Timestamp constants_bs__t_Timestamp
 #define constants__t_Variant_i constants_bs__t_Variant_i
@@ -309,6 +311,7 @@ typedef enum {
 /*--------------------------
    Added by the Translator
   --------------------------*/
+#define constants__t_ApplicationDescription_i_max constants_bs__t_ApplicationDescription_i_max
 #define constants__t_Argument_i_max constants_bs__t_Argument_i_max
 #define constants__t_ArrayDimensions_i_max constants_bs__t_ArrayDimensions_i_max
 #define constants__t_BrowseNodeClassMask_i_max constants_bs__t_BrowseNodeClassMask_i_max
@@ -338,6 +341,7 @@ typedef enum {
 #define constants__t_RelativePath_i_max constants_bs__t_RelativePath_i_max
 #define constants__t_ServerCapabilities_max constants_bs__t_ServerCapabilities_max
 #define constants__t_ServerUri_max constants_bs__t_ServerUri_max
+#define constants__t_ServerUris_max constants_bs__t_ServerUris_max
 #define constants__t_SignatureData_i_max constants_bs__t_SignatureData_i_max
 #define constants__t_Timestamp_max constants_bs__t_Timestamp_max
 #define constants__t_Variant_i_max constants_bs__t_Variant_i_max
@@ -380,6 +384,7 @@ typedef enum {
 /*------------------------------------------------
    CONCRETE_CONSTANTS Clause: scalars and arrays
   ------------------------------------------------*/
+#define constants__c_ApplicationDescription_indet constants_bs__c_ApplicationDescription_indet
 #define constants__c_Argument_indet constants_bs__c_Argument_indet
 #define constants__c_ArrayDimensions_indet constants_bs__c_ArrayDimensions_indet
 #define constants__c_BrowseNodeClassMask_indet constants_bs__c_BrowseNodeClassMask_indet

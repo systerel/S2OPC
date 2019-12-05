@@ -249,6 +249,13 @@ OPERATIONS
     END
     ;
 
+    /* Operations on set */
+    card_set <-- get_card_register2_set =
+    BEGIN
+        card_set := card(s_RegisteredServer2)
+    END
+    ;
+
     /* Last reset timestamp */
     p_timestamp <-- get_registered_server2_counter_reset_time =
     BEGIN

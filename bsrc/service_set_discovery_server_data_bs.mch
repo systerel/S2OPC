@@ -25,14 +25,17 @@ SEES
 
 ABSTRACT_VARIABLES
     RegisteredServer_ServerUri,
-    MdnsDiscoveryConfig_HasServerCapabilities
+    MdnsDiscoveryConfig_HasServerCapabilities,
+    ServerUriArray_HasServerUri
 INVARIANT
     RegisteredServer_ServerUri : t_RegisteredServer --> t_ServerUri &
-    MdnsDiscoveryConfig_HasServerCapabilities : t_MdnsDiscoveryConfig <-> t_ServerCapabilities
+    MdnsDiscoveryConfig_HasServerCapabilities : t_MdnsDiscoveryConfig <-> t_ServerCapabilities &
+    ServerUriArray_HasServerUri : t_ServerUris <-> t_ServerUri
 INITIALISATION
     RegisteredServer_ServerUri :(RegisteredServer_ServerUri : t_RegisteredServer --> t_ServerUri) ||
     MdnsDiscoveryConfig_HasServerCapabilities
-     :(MdnsDiscoveryConfig_HasServerCapabilities : t_MdnsDiscoveryConfig <-> t_ServerCapabilities)
+     :(MdnsDiscoveryConfig_HasServerCapabilities : t_MdnsDiscoveryConfig <-> t_ServerCapabilities) ||
+    ServerUriArray_HasServerUri :(ServerUriArray_HasServerUri : t_ServerUris <-> t_ServerUri)
 
 OPERATIONS
 
@@ -69,6 +72,40 @@ OPERATIONS
         p_server_capabilities : t_ServerCapabilities
     THEN
         p_bool := bool(p_mdns_config |-> p_server_capabilities : MdnsDiscoveryConfig_HasServerCapabilities)
+    END
+    ;
+    
+    p_bool <-- has_ServerUri (p_singleServerUri, p_nbServerUri, p_ServerUris) =
+    PRE
+        p_singleServerUri : t_ServerUri &
+        p_nbServerUri : INT &
+        p_nbServerUri > 0 &
+        p_ServerUris : t_ServerUris
+    THEN
+        p_bool := bool(p_ServerUris |-> p_singleServerUri : ServerUriArray_HasServerUri)
+    END
+    ;
+
+    p_bres, p_app_desc <-- get_ApplicationDescription (p_endpoint_config_idx) =
+    PRE
+        p_endpoint_config_idx : t_endpoint_config_idx_i &
+        p_endpoint_config_idx : t_endpoint_config_idx
+    THEN
+        p_bres,
+        p_app_desc 
+        :(p_bres : BOOL &
+          p_app_desc : t_ApplicationDescription_i &
+          (p_bres = TRUE => p_app_desc : t_ApplicationDescription)
+        )
+    END
+    ;
+    
+    p_ServerUri <-- get_ApplicationDescription_ServerUri (p_app_desc) =
+    PRE
+        p_app_desc : t_ApplicationDescription_i &
+        p_app_desc : t_ApplicationDescription
+    THEN
+        p_ServerUri :: t_ServerUri
     END
 
 END

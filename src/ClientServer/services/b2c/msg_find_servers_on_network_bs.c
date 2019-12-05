@@ -21,7 +21,7 @@
 
 #include <assert.h>
 
-#include "sopc_macros.h"
+#include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
 
 /*------------------------
@@ -105,9 +105,16 @@ void msg_find_servers_on_network_bs__set_find_servers_on_network_server(
     server->RecordId = (uint32_t) msg_find_servers_on_network_bs__p_recordId;
     SOPC_ReturnStatus status =
         SOPC_String_AttachFrom(&server->ServerName, &msg_find_servers_on_network_bs__p_mdns_config->MdnsServerName);
-    assert(SOPC_STATUS_OK == status); // Guaranteed by input provided, no allocation
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Logger_TraceWarning("Failed to set ServerName in registered server of response");
+    }
     status = SOPC_String_AttachFrom(&server->DiscoveryUrl,
                                     &msg_find_servers_on_network_bs__p_registered_server->DiscoveryUrls[0]);
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Logger_TraceWarning("Failed to set DiscoveryUrl in registered server of response");
+    }
     if (SOPC_STATUS_OK == status && msg_find_servers_on_network_bs__p_mdns_config->NoOfServerCapabilities > 0)
     {
         server->ServerCapabilities =
@@ -119,7 +126,10 @@ void msg_find_servers_on_network_bs__set_find_servers_on_network_server(
             {
                 status = SOPC_String_AttachFrom(&server->ServerCapabilities[i],
                                                 &msg_find_servers_on_network_bs__p_mdns_config->ServerCapabilities[i]);
-                assert(SOPC_STATUS_OK == status); // Guaranteed by input provided, no allocation
+                if (SOPC_STATUS_OK != status)
+                {
+                    SOPC_Logger_TraceWarning("Failed to set ServerCapability in registered server of response");
+                }
             }
             server->NoOfServerCapabilities = msg_find_servers_on_network_bs__p_mdns_config->NoOfServerCapabilities;
         } // else: array is empty but we do not fail
