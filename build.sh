@@ -77,6 +77,8 @@ else
     append_cmake_option CMAKE_BUILD_TYPE RelWithDebInfo
     append_cmake_option CMAKE_C_FLAGS
     append_cmake_option CMAKE_EXE_LINKER_FLAGS
+    append_cmake_option TPM2_LIBRARY_DIRS
+    append_cmake_option TPM2_INCLUDE_DIRS
     echo "cmake $CMAKE_OPTIONS .." >> $CURDIR/build.log
     cmake $CMAKE_OPTIONS .. >> $CURDIR/build.log
     cd - > /dev/null || exit 1
