@@ -618,15 +618,15 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tests/data/cert/server_4k_key.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_private/
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tests/data/cert/server_4k_cert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_public/
     # Add UaCTT CAs / CRLs
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/acceptances_tests/Acceptation_S2OPC/PKI/CA/certs/ctt_appT.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/trusted
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/acceptances_tests/Acceptation_S2OPC/PKI/CA/certs/ctt_ca1I_appT.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/trusted
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/acceptances_tests/Acceptation_S2OPC/PKI/CA/certs/ctt_ca1T.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/trusted
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/acceptances_tests/Acceptation_S2OPC/PKI/CA/certs/ctt_appTSha256_2048.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/trusted
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/acceptances_tests/Acceptation_S2OPC/PKI/CA/certs/ctt_appTSha256_4096.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/trusted
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/acceptances_tests/Acceptation_S2OPC/PKI/CA/crl/revocation_list_ctt_ca1T.crl ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/revoked
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tests/data/cert/ctt_appT_crl.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/revoked/
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tests/data/cert/ctt_appTSha256_2048_crl.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/revoked/
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tests/data/cert/ctt_appTSha256_4096_crl.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/revoked/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tests/data/cert/uactt/ApplicationInstance_PKI/trusted/certs/ctt_appT.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/trusted
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tests/data/cert/uactt/ApplicationInstance_PKI/trusted/certs/ctt_ca1I_appT.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/trusted
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tests/data/cert/uactt/ApplicationInstance_PKI/trusted/certs/ctt_ca1T.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/trusted
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tests/data/cert/uactt/ApplicationInstance_PKI/trusted/certs/ctt_appTSha256_2048.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/trusted
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tests/data/cert/uactt/ApplicationInstance_PKI/trusted/certs/ctt_appTSha256_4096.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/trusted
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tests/data/cert/uactt/ApplicationInstance_PKI/trusted/crl/revocation_list_ctt_ca1T.crl ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/revoked
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tests/data/cert/uactt/ApplicationInstance_PKI/trusted/crl/ctt_appT_crl.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/revoked/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tests/data/cert/uactt/ApplicationInstance_PKI/trusted/crl/ctt_appTSha256_2048_crl.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/revoked/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tests/data/cert/uactt/ApplicationInstance_PKI/trusted/crl/ctt_appTSha256_4096_crl.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/revoked/
     )
 
 # Sockets layer tests
