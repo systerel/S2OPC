@@ -11781,7 +11781,7 @@
             </Column>
             <Column column="1">
              <ItemData role="0" rolename="DisplayRole">
-              <Value typename="QString" type="10" data="../../tests/data/cert/client_2k_cert.der"/>
+              <Value typename="QString" type="10" data="PKI/CA/certs/ctt_appT.der"/>
              </ItemData>
              <ChildRows size="0"/>
             </Column>
@@ -11819,7 +11819,7 @@
             </Column>
             <Column column="1">
              <ItemData role="0" rolename="DisplayRole">
-              <Value typename="QString" type="10" data="../../tests/data/cert/client_2k_key.pem"/>
+              <Value typename="QString" type="10" data="PKI/CA/private/ctt_appT.pem"/>
              </ItemData>
              <ChildRows size="0"/>
             </Column>
@@ -13301,7 +13301,7 @@
             </Column>
             <Column column="1">
              <ItemData role="0" rolename="DisplayRole">
-              <Value typename="QString" type="10" data="../../tests/data/cert/client_2k_cert.der"/>
+              <Value typename="QString" type="10" data="PKI/CA/certs/ctt_ca1T_appT.der"/>
              </ItemData>
              <ChildRows size="0"/>
             </Column>
@@ -13339,7 +13339,7 @@
             </Column>
             <Column column="1">
              <ItemData role="0" rolename="DisplayRole">
-              <Value typename="QString" type="10" data="../../tests/data/cert/client_2k_key.pem"/>
+              <Value typename="QString" type="10" data="PKI/CA/private/ctt_ca1T_appT.pem"/>
              </ItemData>
              <ChildRows size="0"/>
             </Column>
@@ -18389,7 +18389,7 @@
          </Column>
          <Column column="1">
           <ItemData role="0" rolename="DisplayRole">
-           <Value typename="QString" type="10" data="../../tests/data/cert"/>
+           <Value typename="QString" type="10" data="PKI/CA/certs"/>
           </ItemData>
           <ChildRows size="0"/>
          </Column>
