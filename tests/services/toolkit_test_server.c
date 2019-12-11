@@ -40,6 +40,8 @@
 #include "embedded/sopc_addspace_loader.h"
 #include "runtime_variables.h"
 
+#include "crypto_tpm2.h"
+
 #ifdef WITH_EXPAT
 #include "xml_expat/sopc_config_loader.h"
 #include "xml_expat/sopc_uanodeset_loader.h"
@@ -834,6 +836,14 @@ int main(int argc, char* argv[])
     printf("toolkitDockerId: %s\n", build_info.toolkitDockerId);
     printf("toolkitBuildDate: %s\n", build_info.toolkitBuildDate);
 
+    /* Initialize the TPM2 module */
+    int ret = mbedtls_tpm2_init();
+    if(ret)
+    {
+        printf("Could not initialize the TPM2 module.\n");
+        return ret;
+    }
+
     /* Initialize the server library (start library threads)
      * and define communication events callback */
     status = Server_Initialize();
@@ -1015,6 +1025,9 @@ int main(int argc, char* argv[])
 #ifdef WITH_STATIC_SECURITY_DATA
     SOPC_KeyManager_SerializedCertificate_Delete(static_cacert);
 #endif
+
+    /* Deinitialize the TPM2 module */
+    mbedtls_tpm2_flush();
 
     return (status == SOPC_STATUS_OK) ? 0 : 1;
 }
