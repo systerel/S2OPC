@@ -36,13 +36,41 @@ SERVER_ERROR=server_error.log
 SKIPPED_TESTS_FILE=skipped_tests.cfg
 KNOWN_BUGS_FILES=known_bugs.cfg
 
+S2OPC_UACTT_CONFIG=Acceptation_S2OPC
+S2OPC_CERTS_CONFIG=../tests/data/cert
+UACTT_PROJECT_PATH=/UACTT_project
+
 if [[ -z "$WITH_NANO_EXTENDED" ]] || [[ $WITH_NANO_EXTENDED -eq  0 ]]
 then
     TOOLKIT_TEST_SERVER=./toolkit_test_nano_server
-    SELECTION=Acceptation_S2OPC/Acceptation_S2OPC.nano.selection.xml
+    SELECTION=$UACTT_PROJECT_PATH/Acceptation_S2OPC.nano.selection.xml
 else
     TOOLKIT_TEST_SERVER=./toolkit_test_server
-    SELECTION=Acceptation_S2OPC/Acceptation_S2OPC.selection.xml
+    SELECTION=$UACTT_PROJECT_PATH/Acceptation_S2OPC.selection.xml
+fi
+
+# Copy the local S2OPC UACTT configuration files to the UACTT project (overwrite ones in docker)
+echo "Copy the S2OPC repository configuration files into UACTT project (overwrite)"
+cp -v $S2OPC_UACTT_CONFIG/* $UACTT_PROJECT_PATH/
+if [ $? -ne 0 ]
+then
+    echo "Copy failed"
+    exit -1
+fi
+
+# Copy the CA of S2OPC to UACTT certificates
+echo "Copy the S2OPC CA certificates into UACTT PKI configuration"
+cp -v $S2OPC_CERTS_CONFIG/cacert.der $UACTT_PROJECT_PATH/PKI/CA/certs/
+if [ $? -ne 0 ]
+then
+    echo "Copy failed"
+    exit -1
+fi
+cp -v $S2OPC_CERTS_CONFIG/cacrl.der $UACTT_PROJECT_PATH/PKI/CA/crl/
+if [ $? -ne 0 ]
+then
+    echo "Copy failed"
+    exit -1
 fi
 
 # this function takes two arguments:
@@ -92,9 +120,9 @@ SERVER_PID=$!
 ${ROOT_DIR}/tests/scripts/wait_server.py
 popd
 
-echo "Launching Acceptance Test Tool: uacompliancetest -s ./Acceptation_S2OPC/Acceptation_S2OPC.ctt.xml --selection $SELECTION -h -c -r ./$LOG_FILE 2>$UACTT_ERROR_FILE"
+echo "Launching Acceptance Test Tool: uacompliancetest -s $UACTT_PROJECT_PATH/Acceptation_S2OPC.ctt.xml --selection $SELECTION -h -c -r ./$LOG_FILE 2>$UACTT_ERROR_FILE"
 
-/opt/opcfoundation/uactt_1.03/bin/uacompliancetest -s ./Acceptation_S2OPC/Acceptation_S2OPC.ctt.xml --selection $SELECTION -h -c -r ./$LOG_FILE 2>$UACTT_ERROR_FILE
+/opt/opcfoundation/uactt_1.03/bin/uacompliancetest -s $UACTT_PROJECT_PATH/Acceptation_S2OPC.ctt.xml --selection $SELECTION -h -c -r ./$LOG_FILE 2>$UACTT_ERROR_FILE
 
 echo "Closing Acceptance Test Tool"
 
