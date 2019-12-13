@@ -100,7 +100,6 @@ typedef struct
 } SOPC_StaMac_ReqCtx;
 
 /* Machine content is private to the implementation */
-// typedef struct SOPC_StaMac_ReqCtx SOPC_StaMac_ReqCtx;
 typedef struct SOPC_StaMac_Machine SOPC_StaMac_Machine;
 
 /* Machine lifecycle */
