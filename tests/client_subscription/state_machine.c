@@ -46,22 +46,17 @@
  */
 
 /* Structures */
-struct SOPC_StaMac_ReqCtx
-{
-    uint32_t uid;                          /* Unique request identifier */
-    uintptr_t appCtx;                      /* Application context, chosen outside of the state machine */
-    SOPC_StaMac_RequestScope requestScope; /* Whether the request is started by the state machine or the applicative */
-    SOPC_StaMac_RequestType requestType;   /* the type of request */
-};
-
 struct SOPC_StaMac_Machine
 {
     Mutex mutex;
     SOPC_StaMac_State state;
     uint32_t iscConfig;                                         /* Toolkit scConfig ID */
     uint32_t iCliId;                                            /* LibSub connection ID, used by the callback */
+
+    /* Keeping two callbacks to avoid modification of LibSub API */
     SOPC_LibSub_DataChangeCbk cbkLibSubDataChanged;             /* Callback when subscribed data changed */
     SOPC_ClientHelper_DataChangeCbk cbkClientHelperDataChanged; /* Callback when subscribed data changed */
+
     SOPC_LibSub_EventCbk cbkGenericEvent; /* Callback when received event that is out of the LibSub scope */
     uintptr_t iSessionCtx;                /* Toolkit Session Context, used to identify session events */
     uint32_t iSessionID;                  /* S2OPC Session ID */
@@ -840,7 +835,7 @@ static bool StaMac_GiveAuthorization_stCreatingSubscr(SOPC_StaMac_Machine* pSM,
     switch (event)
     {
     case SE_RCV_SESSION_RESPONSE:
-        if (pEncType == &OpcUa_CreateSubscriptionResponse_EncodeableType)
+        if (&OpcUa_CreateSubscriptionResponse_EncodeableType == pEncType)
         {
             authorization = true;
         }
@@ -863,7 +858,7 @@ static bool StaMac_GiveAuthorization_stCreatingMonIt(SOPC_StaMac_Machine* pSM,
     switch (event)
     {
     case SE_RCV_SESSION_RESPONSE:
-        if (pEncType == &OpcUa_CreateMonitoredItemsResponse_EncodeableType ||
+        if (&OpcUa_CreateMonitoredItemsResponse_EncodeableType == pEncType ||
             &OpcUa_PublishResponse_EncodeableType == pEncType)
         {
             authorization = true;
@@ -887,7 +882,7 @@ static bool StaMac_GiveAuthorization_stDeletingSubscr(SOPC_StaMac_Machine* pSM,
     switch (event)
     {
     case SE_RCV_SESSION_RESPONSE:
-        if (pEncType == &OpcUa_DeleteSubscriptionsResponse_EncodeableType ||
+        if (&OpcUa_DeleteSubscriptionsResponse_EncodeableType == pEncType ||
             &OpcUa_PublishResponse_EncodeableType == pEncType)
         {
             authorization = true;
@@ -995,19 +990,19 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                 }
                 else if (SE_RCV_SESSION_RESPONSE == event)
                 {
-                    if (pEncType == &OpcUa_PublishResponse_EncodeableType)
+                    if (&OpcUa_PublishResponse_EncodeableType == pEncType)
                     {
                         StaMac_ProcessMsg_PublishResponse(pSM, arg, pParam, intAppCtx);
                     }
-                    else if (pEncType == &OpcUa_CreateMonitoredItemsResponse_EncodeableType)
+                    else if (&OpcUa_CreateMonitoredItemsResponse_EncodeableType == pEncType)
                     {
                         StaMac_ProcessMsg_CreateMonitoredItemsResponse(pSM, arg, pParam, intAppCtx);
                     }
-                    else if (pEncType == &OpcUa_CreateSubscriptionResponse_EncodeableType)
+                    else if (&OpcUa_CreateSubscriptionResponse_EncodeableType == pEncType)
                     {
                         StaMac_ProcessMsg_CreateSubscriptionResponse(pSM, arg, pParam, intAppCtx);
                     }
-                    else if (pEncType == &OpcUa_DeleteSubscriptionsResponse_EncodeableType)
+                    else if (&OpcUa_DeleteSubscriptionsResponse_EncodeableType == pEncType)
                     {
                         StaMac_ProcessMsg_DeleteSubscriptionResponse(pSM, arg, pParam, intAppCtx);
                     }
@@ -1130,7 +1125,7 @@ static bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
                 {
                     *pRequestScope = ((SOPC_StaMac_ReqCtx*) appCtx)->requestScope;
                 }
-                if (SOPC_SLinkedList_RemoveFromId(pSM->pListReqCtx, ((SOPC_StaMac_ReqCtx*) appCtx)->uid) == NULL)
+                if (NULL == SOPC_SLinkedList_RemoveFromId(pSM->pListReqCtx, ((SOPC_StaMac_ReqCtx*) appCtx)->uid))
                 {
                     Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_WARNING, "failed to pop the request from the pListReqCtx.");
                 }
@@ -1256,8 +1251,9 @@ static void StaMac_ProcessMsg_CreateSubscriptionResponse(SOPC_StaMac_Machine* pS
 {
     (void) (arg);
     (void) (appCtx);
+    /* TODO: verify revised values?? */
 
-    assert(pSM->iSubscriptionID == 0);
+    assert(0 == pSM->iSubscriptionID);
     pSM->iSubscriptionID = ((OpcUa_CreateSubscriptionResponse*) pParam)->SubscriptionId;
     Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Subscription created.");
     pSM->state = stActivated;
@@ -1274,7 +1270,7 @@ static void StaMac_ProcessMsg_DeleteSubscriptionResponse(SOPC_StaMac_Machine* pS
     assert(pSM->iSubscriptionID != 0);
     if (1 != ((OpcUa_DeleteSubscriptionsResponse*) pParam)->NoOfResults)
     {
-        /* we should have deteled only one subscription */
+        /* we should have deleted only one subscription */
         pSM->state = stError;
     }
     else if (0 != ((OpcUa_DeleteSubscriptionsResponse*) pParam)->Results[0])
@@ -1282,7 +1278,6 @@ static void StaMac_ProcessMsg_DeleteSubscriptionResponse(SOPC_StaMac_Machine* pS
         /* delete subscription went wrong */
         pSM->state = stError;
     }
-    // TODO clear any remaining information about previous subscription
     pSM->iSubscriptionID = 0;
     SOPC_SLinkedList_Clear(pSM->pListMonIt);
     SOPC_SLinkedList_Apply(pSM->dataIdToNodeIdList, SOPC_SLinkedList_EltGenericFree);

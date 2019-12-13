@@ -130,19 +130,16 @@ typedef struct
 
 /*
   @description
-    Structure defining a node, an attribute and a value.
+    Structure defining a node, an attribute.
   @field nodeId
     NodeId of the Node that contains the attribute to read. zero-terminated string
   @field attributeId
-    AttributeId of the Node that contains the value to write. 0 is not valid.
+    AttributeId of the Node that contains the value to read. 0 is not valid.
     Ids of attributes are defined in Part 6.
   @field indexRange
     Used only if the attribute 'Value' is an array. Otherwise, it should be NULL.
     Index of a single value or range of value in the array.
     See NumericRange defined in the OPC UA Reference, Part 4 Chapter 7.
-  @field value
-    Value to write in the attribute 'Value'.
-    If indexRange is specified, value should be an array (value.value.ArrayType = Array).
 */
 typedef struct
 {
@@ -191,8 +188,6 @@ typedef struct
     DisplayName of the target node. zero-terminated string.
   @field nodeClass
     NodeClass identifier of the target node.
-  @field type
-    Type definition of target node. Used only if NodeClass is Object or Variable. Otherwise, it is NULL.
 */
 typedef struct
 {
@@ -492,7 +487,7 @@ int32_t SOPC_ClientHelper_Write(int32_t connectionId,
     Its content can be freed after the function returned.
     It should be not NULL and be at least \p nbElements long.
  @param nbElements
-    Number of elements to write. It should be between 1 and INT32_MAX
+    Number of elements to read. It should be between 1 and INT32_MAX
  @param values [out, not null]
     A pre-allocated array to the output list of pointers of Attribute values.
     It should be at least \p nElements long.
@@ -515,12 +510,12 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
 /*
  @description
     Discover the references of a Node using Browse and browseNext services.
-    If Browse Request returns ContinuationPoint, a BrowseNext Request is sent until no ContinuationPoint is returned.
+    If Browse Response returns ContinuationPoint, a BrowseNext Request is sent until no ContinuationPoint is returned.
 
     Restrictions:
     - Views are not managed
     - requestedMaxReferencesPerNode is set to 0
-    - nodeClassMask is set to 0 (object)
+    - nodeClassMask is set to 0 (all NodeClasses)
     - resultMask specifies all fields are returned
     - browse cannot be called several times simultaneously
 
@@ -535,7 +530,7 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
  @param browseResults [out, not null]
     A pre-allocated array to the output list of BrowseResult.
     It should be at least \p nElements long.
-    When return, the order of this list matches the order of \p readValues.
+    When return, the order of this list matches the order of \p browseRequests.
     The ownership of the data moved to caller which should free the content of this array.
 
  @return
