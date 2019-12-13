@@ -54,6 +54,14 @@ typedef void (*SOPC_ClientHelper_DataChangeCbk)(const int32_t connectionId,
                                                 const char* nodeId,
                                                 const SOPC_DataValue* value);
 
+/**
+ * @description
+ *   Callback type for disconnection
+ * @param connectionId
+ *   The disconnected connection id
+ */
+typedef void (*SOPC_ClientHelper_DisconnectCbk)(const uint32_t connectionId);
+
 /*
  @description
    Connection configuration to a remote OPC server
@@ -310,11 +318,13 @@ typedef struct
     - 3: DEBUG.
     This list is decreasing. It means ERROR level is the maximum value and DEBUG level is the minimum value.
     If level is not an accepted value, DEBUG is used by default.
+ @param disconnect_callback
+    Optional, can be NULL. Callback called when a connection is disconnected.
  @return
    '0' if operation succeed
    '-2' if toolkit not initialized
  */
-int32_t SOPC_ClientHelper_Initialize(const char* log_path, int32_t log_level);
+int32_t SOPC_ClientHelper_Initialize(const char* log_path, int32_t log_level, const SOPC_ClientHelper_DisconnectCbk disconnect_callback);
 
 /*
  @description
