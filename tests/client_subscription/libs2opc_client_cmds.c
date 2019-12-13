@@ -173,7 +173,7 @@ static SOPC_ReturnStatus SOPC_GetEndpointsContext_Initialization(GetEndpointsCon
 
 /* Callbacks */
 static void log_callback(const SOPC_Toolkit_Log_Level log_level, SOPC_LibSub_CstString text);
-static void disconnect_callback(const SOPC_LibSub_ConnectionId c_id);
+static void default_disconnect_callback(const SOPC_LibSub_ConnectionId c_id);
 static void SOPC_ClientHelper_GenericCallback(SOPC_LibSub_ConnectionId c_id,
                                               SOPC_LibSub_ApplicativeEvent event,
                                               SOPC_StatusCode status,
@@ -189,7 +189,7 @@ static SOPC_ReturnStatus ReadHelper_Initialize(SOPC_ReturnStatus status,
                                                OpcUa_ReadValueId* nodesToRead,
                                                SOPC_ClientHelper_ReadValue* readValues,
                                                SOPC_DataValue** values);
-static SOPC_ReturnStatus WriteHelper_InitialiazeValues(size_t nbElements,
+static SOPC_ReturnStatus WriteHelper_InitializeValues(size_t nbElements,
                                                        SOPC_ReturnStatus status,
                                                        OpcUa_WriteValue* nodesToWrite,
                                                        SOPC_ClientHelper_WriteValue* writeValues);
@@ -221,7 +221,7 @@ static SOPC_ReturnStatus BrowseNext(int32_t connectionId,
 /* Functions */
 
 // Return 0 if succeeded
-int32_t SOPC_ClientHelper_Initialize(const char* log_path, int32_t log_level)
+int32_t SOPC_ClientHelper_Initialize(const char* log_path, int32_t log_level, const SOPC_ClientHelper_DisconnectCbk disconnect_callback)
 {
     SOPC_Toolkit_Log_Level level = SOPC_TOOLKIT_LOG_LEVEL_DEBUG;
     bool log_level_set = true;
@@ -254,7 +254,7 @@ int32_t SOPC_ClientHelper_Initialize(const char* log_path, int32_t log_level)
 
     SOPC_LibSub_StaticCfg cfg_cli = {
         .host_log_callback = log_callback,
-        .disconnect_callback = disconnect_callback,
+        .disconnect_callback = disconnect_callback != NULL ? disconnect_callback : default_disconnect_callback,
         .toolkit_logger = {.level = level, .log_path = log_path, .maxBytes = 1048576, .maxFiles = 50}};
 
     SOPC_ReturnStatus status = SOPC_ClientCommon_Initialize(&cfg_cli, GenericCallback_GetEndpoints);
@@ -1204,12 +1204,12 @@ static void log_callback(const SOPC_Toolkit_Log_Level log_level, SOPC_LibSub_Cst
     Helpers_LoggerStdout(log_level, text);
 }
 
-static void disconnect_callback(const SOPC_LibSub_ConnectionId c_id)
+static void default_disconnect_callback(const uint32_t c_id)
 {
     Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Client %" PRIu32 " disconnected.", c_id);
 }
 
-static SOPC_ReturnStatus WriteHelper_InitialiazeValues(size_t nbElements,
+static SOPC_ReturnStatus WriteHelper_InitializeValues(size_t nbElements,
                                                        SOPC_ReturnStatus status,
                                                        OpcUa_WriteValue* nodesToWrite,
                                                        SOPC_ClientHelper_WriteValue* writeValues)
@@ -1289,7 +1289,7 @@ int32_t SOPC_ClientHelper_Write(int32_t connectionId,
 
     if (SOPC_STATUS_OK == status)
     {
-        status = WriteHelper_InitialiazeValues(nbElements, status, nodesToWrite, writeValues);
+        status = WriteHelper_InitializeValues(nbElements, status, nodesToWrite, writeValues);
     }
 
     if (SOPC_STATUS_OK == status)

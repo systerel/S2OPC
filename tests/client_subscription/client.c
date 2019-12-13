@@ -192,6 +192,10 @@ static void free_endpoints(SOPC_ClientHelper_GetEndpointsResult* result)
     }
 }
 
+static void disconnect_callback(const uint32_t c_id) {
+    printf("===> connection #%d has been terminated!\n", c_id);
+}
+
 /* Main subscribing client */
 int main(int argc, char* const argv[])
 {
@@ -204,7 +208,7 @@ int main(int argc, char* const argv[])
         return 1;
     }
 
-    SOPC_ClientHelper_Initialize("./client_subscription_logs/", SOPC_TOOLKIT_LOG_LEVEL_DEBUG);
+    SOPC_ClientHelper_Initialize("./client_subscription_logs/", SOPC_TOOLKIT_LOG_LEVEL_DEBUG, disconnect_callback);
 
     SOPC_ClientHelper_Security security = {
         .security_policy = SECURITY_POLICY,

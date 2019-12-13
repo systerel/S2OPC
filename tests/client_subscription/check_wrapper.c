@@ -102,20 +102,20 @@ static void datachange_callback_check_counter(const int32_t c_id, const char* no
 START_TEST(test_wrapper_initialize_finalize)
 {
     /* simple initialization */
-    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0, NULL));
     /* double finalize shall not fail*/
     SOPC_ClientHelper_Finalize();
     SOPC_ClientHelper_Finalize();
 
     /* double initialization shall fail */
-    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0));
-    ck_assert_int_eq(-2, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0, NULL));
+    ck_assert_int_eq(-2, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0, NULL));
 }
 END_TEST
 
 START_TEST(test_wrapper_connect)
 {
-    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0, NULL));
 
     /* connection to a valid endpoint */
     int32_t valid_con_id = SOPC_ClientHelper_Connect(valid_url, valid_security_none);
@@ -155,7 +155,7 @@ END_TEST
 
 START_TEST(test_wrapper_connect_invalid_arguments)
 {
-    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0, NULL));
 
     /* invalid arguments */
     ck_assert_int_eq(-1, SOPC_ClientHelper_Connect(NULL, valid_security_none));
@@ -209,7 +209,7 @@ START_TEST(test_wrapper_disconnect)
     /* disconnect before wrapper has been initialized */
     ck_assert_int_eq(-2, SOPC_ClientHelper_Disconnect(1));
 
-    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0, NULL));
 
     /* connection to a valid endpoint */
     int32_t valid_con_id = SOPC_ClientHelper_Connect(valid_url, valid_security_none);
@@ -240,7 +240,7 @@ START_TEST(test_wrapper_create_subscription)
     ck_assert_int_eq(-100, SOPC_ClientHelper_CreateSubscription(1, datachange_callback_none));
 
     /* initialize wrapper */
-    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0, NULL));
 
     /* create a connection */
     int32_t valid_con_id = SOPC_ClientHelper_Connect(valid_url, valid_security_none);
@@ -280,7 +280,7 @@ END_TEST
 START_TEST(test_wrapper_create_subscription_after_disconnect)
 {
     /* initialize wrapper */
-    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0, NULL));
 
     /* create a connection */
     int32_t valid_con_id = SOPC_ClientHelper_Connect(valid_url, valid_security_none);
@@ -310,7 +310,7 @@ START_TEST(test_wrapper_add_monitored_items)
     ck_assert_int_eq(-100, SOPC_ClientHelper_AddMonitoredItems(1, nodeIds1, 1));
 
     /* initialize wrapper */
-    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0, NULL));
 
     /* add monitored items before being connected */
     ck_assert_int_eq(-100, SOPC_ClientHelper_AddMonitoredItems(1, nodeIds1, 1));
@@ -367,7 +367,7 @@ START_TEST(test_wrapper_add_monitored_items_callback_called)
     char* nodeIds[1] = {"ns=0;s=Counter"};
 
     /* initialize wrapper */
-    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0, NULL));
 
     /* create a connection */
     int32_t valid_con_id = SOPC_ClientHelper_Connect(valid_url, valid_security_none);
@@ -435,7 +435,7 @@ START_TEST(test_wrapper_unsubscribe)
     ck_assert_int_eq(-100, SOPC_ClientHelper_Unsubscribe(1));
 
     /* initialize wrapper */
-    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0, NULL));
 
     /* delete subscription before connection */
     ck_assert_int_eq(-100, SOPC_ClientHelper_Unsubscribe(1));
@@ -490,7 +490,7 @@ START_TEST(test_wrapper_read)
     }
 
     /* initialize wrapper */
-    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0, NULL));
 
     /* read before connection is created */
     {
@@ -645,7 +645,7 @@ START_TEST(test_wrapper_write)
     }
 
     /* initialize wrapper */
-    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0, NULL));
 
     /* write a node before connection */
     {
@@ -780,7 +780,7 @@ START_TEST(test_wrapper_browse)
     }
 
     /* initialize wrapper */
-    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0, NULL));
 
     /* browse before connection */
     {
@@ -959,7 +959,7 @@ START_TEST(test_wrapper_get_endpoints)
     }
 
     /* initialize wrapper */
-    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0, NULL));
 
     /* get endpoints  valid request */
     {
