@@ -44,6 +44,7 @@
 #include "mbedtls/ctr_drbg.h"
 #include "mbedtls/entropy.h"
 #include "mbedtls/md.h"
+#include "mbedtls/pk.h"
 #include "mbedtls/rsa.h"
 
 /* ------------------------------------------------------------------------------------------------
@@ -452,8 +453,16 @@ SOPC_ReturnStatus CryptoProvider_AsymDecrypt_RSA_OAEP(const SOPC_CryptoProvider*
         *pLenWritten = 0;
 
     // Verify the type of the key (this is done here because it is more convenient (lib-specific))
-    if (mbedtls_pk_get_type(&pKey->pk) != MBEDTLS_PK_RSA) // TODO: maybe we should accept RSASSA_PSS... Undocumented.
+    mbedtls_pk_type_t key_type = mbedtls_pk_get_type(&pKey->pk);
+    // TODO: maybe we should accept RSASSA_PSS... Undocumented.
+    switch(key_type)
+    {
+    case MBEDTLS_PK_RSA:
+    case MBEDTLS_PK_RSA_ALT:
+        break;
+    default:
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
     mbedtls_pk_context *pk = (mbedtls_pk_context *)&pKey->pk;
