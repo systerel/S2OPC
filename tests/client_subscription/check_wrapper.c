@@ -30,12 +30,17 @@
 #include <stdlib.h> /* EXIT_* */
 
 #include "assert.h"
+#include "sopc_atomic.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
+#include "sopc_time.h" /* SOPC_Sleep */
 #include "string.h"
 
 #include "libs2opc_client_cmds.h"
 #include "libs2opc_client_cmds_internal_api.h"
+
+#define SLEEP_TIME 10
+#define CONNECTION_TIMEOUT 10000
 
 static const char* valid_url = "opc.tcp://localhost:4841";
 static const char* invalid_url = "opc.tcp://localhost:5841";
@@ -83,6 +88,13 @@ static Condition check_counter_condition;
 static int32_t check_counter_connection_id = 0;
 static int32_t check_counter_node_id_comparison_result = 1;
 static SOPC_DataValue check_counter_data_value;
+static int32_t disconnected = 0;
+
+static void disconnect_callback(const uint32_t c_id)
+{
+    (void) (c_id);
+    SOPC_Atomic_Int_Set(&disconnected, 1);
+}
 
 static void datachange_callback_check_counter(const int32_t c_id, const char* node_id, const SOPC_DataValue* value)
 {
@@ -1016,6 +1028,34 @@ START_TEST(test_wrapper_get_endpoints)
 }
 END_TEST
 
+START_TEST(test_wrapper_disconnect_callback)
+{
+    /* initialize wrapper */
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0, disconnect_callback));
+
+    /* create a connection */
+    int32_t valid_con_id = SOPC_ClientHelper_Connect(valid_url, valid_security_none);
+    ck_assert_int_gt(valid_con_id, 0);
+
+    /* disconnect */
+    ck_assert_int_eq(0, SOPC_ClientHelper_Disconnect(valid_con_id));
+
+    /* wait until timeout or until callback is called */
+    int iCnt = 0;
+    while (iCnt * SLEEP_TIME <= CONNECTION_TIMEOUT && SOPC_Atomic_Int_Get(&disconnected) == 0)
+    {
+        SOPC_Sleep(SLEEP_TIME);
+        iCnt++;
+    }
+
+    /* verify that the disconnect callback has been called */
+    ck_assert(SOPC_Atomic_Int_Get(&disconnected) == 1);
+
+    /* Close wrapper */
+    SOPC_ClientHelper_Finalize();
+}
+END_TEST
+
 static Suite* tests_make_suite_wrapper(void)
 {
     Suite* s = NULL;
@@ -1037,6 +1077,7 @@ static Suite* tests_make_suite_wrapper(void)
     tcase_add_test(tc_wrapper, test_wrapper_write);
     tcase_add_test(tc_wrapper, test_wrapper_browse);
     tcase_add_test(tc_wrapper, test_wrapper_get_endpoints);
+    tcase_add_test(tc_wrapper, test_wrapper_disconnect_callback);
     tcase_set_timeout(tc_wrapper, 0);
     suite_add_tcase(s, tc_wrapper);
 

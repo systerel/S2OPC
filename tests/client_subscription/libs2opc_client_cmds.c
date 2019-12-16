@@ -190,9 +190,9 @@ static SOPC_ReturnStatus ReadHelper_Initialize(SOPC_ReturnStatus status,
                                                SOPC_ClientHelper_ReadValue* readValues,
                                                SOPC_DataValue** values);
 static SOPC_ReturnStatus WriteHelper_InitializeValues(size_t nbElements,
-                                                       SOPC_ReturnStatus status,
-                                                       OpcUa_WriteValue* nodesToWrite,
-                                                       SOPC_ClientHelper_WriteValue* writeValues);
+                                                      SOPC_ReturnStatus status,
+                                                      OpcUa_WriteValue* nodesToWrite,
+                                                      SOPC_ClientHelper_WriteValue* writeValues);
 static SOPC_ReturnStatus BrowseHelper_InitializeContinuationPoints(size_t nbElements,
                                                                    SOPC_ReturnStatus status,
                                                                    SOPC_ByteString** continuationPointsArray);
@@ -221,7 +221,9 @@ static SOPC_ReturnStatus BrowseNext(int32_t connectionId,
 /* Functions */
 
 // Return 0 if succeeded
-int32_t SOPC_ClientHelper_Initialize(const char* log_path, int32_t log_level, const SOPC_ClientHelper_DisconnectCbk disconnect_callback)
+int32_t SOPC_ClientHelper_Initialize(const char* log_path,
+                                     int32_t log_level,
+                                     const SOPC_ClientHelper_DisconnectCbk disconnect_callback)
 {
     SOPC_Toolkit_Log_Level level = SOPC_TOOLKIT_LOG_LEVEL_DEBUG;
     bool log_level_set = true;
@@ -1210,9 +1212,9 @@ static void default_disconnect_callback(const uint32_t c_id)
 }
 
 static SOPC_ReturnStatus WriteHelper_InitializeValues(size_t nbElements,
-                                                       SOPC_ReturnStatus status,
-                                                       OpcUa_WriteValue* nodesToWrite,
-                                                       SOPC_ClientHelper_WriteValue* writeValues)
+                                                      SOPC_ReturnStatus status,
+                                                      OpcUa_WriteValue* nodesToWrite,
+                                                      SOPC_ClientHelper_WriteValue* writeValues)
 {
     for (size_t i = 0; i < nbElements && SOPC_STATUS_OK == status; i++)
     {

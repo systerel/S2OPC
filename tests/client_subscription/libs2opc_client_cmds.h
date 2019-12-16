@@ -319,7 +319,9 @@ typedef struct
    '0' if operation succeed
    '-2' if toolkit not initialized
  */
-int32_t SOPC_ClientHelper_Initialize(const char* log_path, int32_t log_level, const SOPC_ClientHelper_DisconnectCbk disconnect_callback);
+int32_t SOPC_ClientHelper_Initialize(const char* log_path,
+                                     int32_t log_level,
+                                     const SOPC_ClientHelper_DisconnectCbk disconnect_callback);
 
 /*
  @description

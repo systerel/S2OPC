@@ -50,8 +50,8 @@ struct SOPC_StaMac_Machine
 {
     Mutex mutex;
     SOPC_StaMac_State state;
-    uint32_t iscConfig;                                         /* Toolkit scConfig ID */
-    uint32_t iCliId;                                            /* LibSub connection ID, used by the callback */
+    uint32_t iscConfig; /* Toolkit scConfig ID */
+    uint32_t iCliId;    /* LibSub connection ID, used by the callback */
 
     /* Keeping two callbacks to avoid modification of LibSub API */
     SOPC_LibSub_DataChangeCbk cbkLibSubDataChanged;             /* Callback when subscribed data changed */

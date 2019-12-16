@@ -192,7 +192,8 @@ static void free_endpoints(SOPC_ClientHelper_GetEndpointsResult* result)
     }
 }
 
-static void disconnect_callback(const uint32_t c_id) {
+static void disconnect_callback(const uint32_t c_id)
+{
     printf("===> connection #%d has been terminated!\n", c_id);
 }
 
