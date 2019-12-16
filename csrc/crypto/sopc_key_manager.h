@@ -391,6 +391,26 @@ SOPC_ReturnStatus SOPC_KeyManager_CertificateList_MatchCRLList(const SOPC_Certif
                                                                bool* pbMatch);
 
 /**
+ * \brief           Finds whether a certificate is in the given certificate list or not.
+ *
+ * \param pList     An optional pointer to the Certificate list.
+ * \param pCert     An optional pointer to a single Certificate to find in the list.
+ * \param pbMatch   A valid pointer to the result of the find.
+ *                  True indicates that the certificate was found in the list.
+ *                  Otherwise false.
+ *
+ * \warning         \p pCert must contain a single certificate.
+ *
+ * \note            Content of the output is unspecified when return value is not SOPC_STATUS_OK.
+ *
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL
+ *                  or \p pCert has more than one certificate.
+ */
+SOPC_ReturnStatus SOPC_KeyManager_CertificateList_FindCertInList(const SOPC_CertificateList* pList,
+                                                                 const SOPC_CertificateList* pCert,
+                                                                 bool* pbMatch);
+
+/**
  * \brief Creates a serialized certificate from a DER payload.
  *
  * \param der   the certificate data in DER format
