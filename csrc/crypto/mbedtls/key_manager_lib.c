@@ -790,6 +790,42 @@ SOPC_ReturnStatus SOPC_KeyManager_CertificateList_MatchCRLList(const SOPC_Certif
     return SOPC_STATUS_OK;
 }
 
+SOPC_ReturnStatus SOPC_KeyManager_CertificateList_FindCertInList(const SOPC_CertificateList* pList,
+                                                                 const SOPC_CertificateList* pCert,
+                                                                 bool* pbMatch)
+{
+    if (NULL == pbMatch)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    *pbMatch = false;
+    if (NULL == pList || NULL == pCert)
+    {
+        return SOPC_STATUS_OK;
+    }
+
+    size_t nCert = 0;
+    SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_GetListLength(pCert, &nCert);
+    if (SOPC_STATUS_OK != status && nCert > 1)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    const mbedtls_x509_crt* haystack = &pList->crt;
+    const mbedtls_x509_crt* needle = &pCert->crt;
+    for (; NULL != haystack; haystack = haystack->next)
+    {
+        if (haystack->raw.len == needle->raw.len && 0 == memcmp(haystack->raw.p, needle->raw.p, needle->raw.len))
+        {
+            *pbMatch = true;
+            haystack = NULL;
+        }
+    }
+
+    return SOPC_STATUS_OK;
+}
+
 /* ------------------------------------------------------------------------------------------------
  * Certificate Revocation List API
  * ------------------------------------------------------------------------------------------------
