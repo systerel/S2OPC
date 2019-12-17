@@ -32,8 +32,6 @@
 #include "sopc_key_manager.h"
 #include "sopc_pki.h"
 
-struct SOPC_CRLList;
-
 /**
  * \brief           Creates the minimal validation implementation provided by the stack,
  *                  which fulfills the SOPC_PKIProvider interface.
