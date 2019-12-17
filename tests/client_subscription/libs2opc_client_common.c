@@ -666,14 +666,14 @@ SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendRequestOnSession(SOPC_LibSub_Connec
     return status;
 }
 
-SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendDiscoveryRequest(const char* endpointUrl, uintptr_t requestContext)
+SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendGetEndpointsRequest(const char* endpointUrl, uintptr_t requestContext)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_SecureChannel_Config* pscConfig = NULL;
     uint32_t iscConfig = 0;
     SOPC_StaMac_ReqCtx* pReqCtx = NULL;
 
-    if (SOPC_Atomic_Int_Get(&libInitialized) == 0)
+    if (SOPC_Atomic_Int_Get(&libInitialized) == 0 || SOPC_Atomic_Int_Get(&libConfigured) == 0)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -762,7 +762,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_Disconnect(const SOPC_LibSub_ConnectionId cl
     SOPC_ReturnStatus mutStatus = Mutex_Lock(&mutex);
     assert(SOPC_STATUS_OK == mutStatus);
 
-    /* Retrieve the machine to disconnect */
+    /* Retrieve the state machine */
     pSM = SOPC_SLinkedList_FindFromId(pListClient, cliId);
     if (NULL == pSM)
     {
@@ -813,7 +813,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_CreateSubscription(const SOPC_LibSub_Connect
     SOPC_ReturnStatus mutStatus = Mutex_Lock(&mutex);
     assert(SOPC_STATUS_OK == mutStatus);
 
-    /* Retrieve the machine to disconnect */
+    /* Retrieve the machine */
     pSM = SOPC_SLinkedList_FindFromId(pListClient, cliId);
     if (NULL == pSM)
     {

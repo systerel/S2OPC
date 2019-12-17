@@ -108,9 +108,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_Configured(void);
  @description
     Creates a new connection to a remote OPC server from configuration id cfg_id.
     The connection represent the whole client and is later identified by the returned cli_id.
-    A subscription is created and associated with this client.
-    The function waits until the client is effectively connected and the subscription created,
-    or the Toolkit times out.
+    The function waits until the client is effectively connected, or the Toolkit times out.
  @param cfgId
     The parameters of the connection to create, return by SOPC_ClientCommon_ConfigureConnection().
  @param pCliId [out, not null]
@@ -157,7 +155,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_DeleteSubscription(const SOPC_LibSub_Connect
  @param lDataId [out, not null]
     A pre-allocated array to the output unique variable data identifiers.
     It should be at least \p nElements long.
-    The values will be used in call to data_change_callback.
+    The values will be used in call to SOPC_LibSub_DataChangeCbk data_change_callback.
  @return
     The operation status. lDataId is only valid when the return status is SOPC_STATUS_OK.
     SOPC_STATUS_TIMEOUT is returned when the timeout expires before receiving a response. */
@@ -195,7 +193,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendRequestOnSession(SOPC_LibSub_Connec
 
 /**
  * @description
- *    sends a Discovery (GetEndpoints) request
+ *    sends a GetEndpoints request
  * @param endpointUrl
  *    url of the endpoint
  * @param requestContext
@@ -203,7 +201,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendRequestOnSession(SOPC_LibSub_Connec
  * @return
  *    the operation status
  */
-SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendDiscoveryRequest(const char* endpointUrl, uintptr_t requestContext);
+SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendGetEndpointsRequest(const char* endpointUrl, uintptr_t requestContext);
 
 /*
  @description
