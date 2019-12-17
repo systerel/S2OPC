@@ -752,8 +752,8 @@ static void GenericCallbackHelper_Browse(SOPC_StatusCode status, const void* res
     BrowseContext* ctx = (BrowseContext*) responseContext;
     const OpcUa_BrowseResponse* browseResp = (const OpcUa_BrowseResponse*) response;
 
-    ctx->status = Mutex_Lock(&ctx->mutex);
-    assert(SOPC_STATUS_OK == ctx->status);
+    SOPC_ReturnStatus statusMutex = Mutex_Lock(&ctx->mutex);
+    assert(SOPC_STATUS_OK == statusMutex);
 
     ctx->status = status;
     if (ctx->nbElements != browseResp->NoOfResults)
@@ -772,11 +772,26 @@ static void GenericCallbackHelper_Browse(SOPC_StatusCode status, const void* res
                 SOPC_ClientHelper_BrowseResultReference resultReference;
                 OpcUa_ReferenceDescription* reference = &browseResp->Results[i].References[j];
 
-                // TODO check mallocs ?
                 resultReference.referenceTypeId = SOPC_NodeId_ToCString(&reference->ReferenceTypeId);
+                if (NULL == resultReference.referenceTypeId)
+                {
+                    ctx->status = SOPC_STATUS_OUT_OF_MEMORY;
+                }
                 resultReference.nodeId = SOPC_NodeId_ToCString(&reference->NodeId.NodeId);
+                if (NULL == resultReference.nodeId)
+                {
+                    ctx->status = SOPC_STATUS_OUT_OF_MEMORY;
+                }
                 resultReference.browseName = SOPC_String_GetCString(&reference->BrowseName.Name);
+                if (NULL == resultReference.browseName)
+                {
+                    ctx->status = SOPC_STATUS_OUT_OF_MEMORY;
+                }
                 resultReference.displayName = SOPC_String_GetCString(&reference->DisplayName.defaultText);
+                if (NULL == resultReference.displayName)
+                {
+                    ctx->status = SOPC_STATUS_OUT_OF_MEMORY;
+                }
                 resultReference.isForward = reference->IsForward;
                 resultReference.nodeClass = (int32_t) reference->NodeClass;
                 SOPC_Array_Append(ctx->browseResults[i], resultReference);
@@ -785,11 +800,10 @@ static void GenericCallbackHelper_Browse(SOPC_StatusCode status, const void* res
     }
     ctx->finish = true;
 
-    ctx->status = Mutex_Unlock(&ctx->mutex);
-    assert(SOPC_STATUS_OK == ctx->status);
+    statusMutex = Mutex_Unlock(&ctx->mutex);
+    assert(SOPC_STATUS_OK == statusMutex);
     /* Signal that the response is available */
     status = Condition_SignalAll(&ctx->condition);
-    assert(SOPC_STATUS_OK == status);
 }
 
 static void GenericCallbackHelper_BrowseNext(SOPC_StatusCode status, const void* response, uintptr_t responseContext)
@@ -797,8 +811,8 @@ static void GenericCallbackHelper_BrowseNext(SOPC_StatusCode status, const void*
     BrowseContext* ctx = (BrowseContext*) responseContext;
     const OpcUa_BrowseNextResponse* browseNextResp = (const OpcUa_BrowseNextResponse*) response;
 
-    ctx->status = Mutex_Lock(&ctx->mutex);
-    assert(SOPC_STATUS_OK == ctx->status);
+    SOPC_ReturnStatus statusMutex = Mutex_Lock(&ctx->mutex);
+    assert(SOPC_STATUS_OK == statusMutex);
 
     ctx->status = status;
     if (ctx->nbElements < browseNextResp->NoOfResults)
@@ -811,6 +825,15 @@ static void GenericCallbackHelper_BrowseNext(SOPC_StatusCode status, const void*
         int32_t index = 0;
         for (int32_t i = 0; i < browseNextResp->NoOfResults && index < ctx->nbElements; i++)
         {
+            /* we look for continuation points */
+            /* with every consecutive request, we have the same number or less continuation points */
+            /* some browse next requests are done, some need to continue */
+            /* for instance if we have 3 request A,B & C, and B is done, */
+            /* in the request context, B continuation point will be of length 0 */
+            /* the browseNext answer will contain A & C results */
+            /* we look for the first non 0 length continuation point in the context to find the index of A (index=0) */
+            /* next loop iteration, we do the same and find the index of C (index=2) */
+            /* these variable `index` allows us to fill a general context containing all browse requests results */
             bool found = false;
             while (index < ctx->nbElements && !found)
             {
@@ -834,11 +857,26 @@ static void GenericCallbackHelper_BrowseNext(SOPC_StatusCode status, const void*
                 SOPC_ClientHelper_BrowseResultReference resultReference;
                 OpcUa_ReferenceDescription* reference = &browseNextResp->Results[i].References[j];
 
-                // TODO check mallocs ?
                 resultReference.referenceTypeId = SOPC_NodeId_ToCString(&reference->ReferenceTypeId);
+                if (NULL == resultReference.referenceTypeId)
+                {
+                    ctx->status = SOPC_STATUS_OUT_OF_MEMORY;
+                }
                 resultReference.nodeId = SOPC_NodeId_ToCString(&reference->NodeId.NodeId);
+                if (NULL == resultReference.nodeId)
+                {
+                    ctx->status = SOPC_STATUS_OUT_OF_MEMORY;
+                }
                 resultReference.browseName = SOPC_String_GetCString(&reference->BrowseName.Name);
+                if (NULL == resultReference.browseName)
+                {
+                    ctx->status = SOPC_STATUS_OUT_OF_MEMORY;
+                }
                 resultReference.displayName = SOPC_String_GetCString(&reference->DisplayName.defaultText);
+                if (NULL == resultReference.displayName)
+                {
+                    ctx->status = SOPC_STATUS_OUT_OF_MEMORY;
+                }
                 resultReference.isForward = reference->IsForward;
                 resultReference.nodeClass = (int32_t) reference->NodeClass;
                 SOPC_Array_Append(ctx->browseResults[index], resultReference);
@@ -849,11 +887,10 @@ static void GenericCallbackHelper_BrowseNext(SOPC_StatusCode status, const void*
     }
     ctx->finish = true;
 
-    ctx->status = Mutex_Unlock(&ctx->mutex);
-    assert(SOPC_STATUS_OK == ctx->status);
+    statusMutex = Mutex_Unlock(&ctx->mutex);
+    assert(SOPC_STATUS_OK == statusMutex);
     /* Signal that the response is available */
     status = Condition_SignalAll(&ctx->condition);
-    assert(SOPC_STATUS_OK == status);
 }
 
 void SOPC_ClientHelper_GenericCallback(SOPC_LibSub_ConnectionId c_id,

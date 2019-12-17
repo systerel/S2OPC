@@ -39,17 +39,19 @@
 
 /**
  * @description
- *   Callback type for get endpoints event
+ *   Callback type for discovery events
  * @param requestStatus
  *   status code of the request
  * @param response
- *   getEndpoints request response
+ *   discovery request response
  * @param responseContext
  *   context of the response
+ * @warning
+ *   ServiceFault can be retrieve instead of the expected response
  */
-typedef void (*SOPC_ClientCommon_GetEndpointsCbk)(const SOPC_StatusCode requestStatus,
-                                                  const void* response,
-                                                  const uintptr_t responseContext);
+typedef void (*SOPC_ClientCommon_DiscoveryCbk)(const SOPC_StatusCode requestStatus,
+                                               const void* response,
+                                               const uintptr_t responseContext);
 
 /*
  ===================
@@ -70,7 +72,7 @@ typedef void (*SOPC_ClientCommon_GetEndpointsCbk)(const SOPC_StatusCode requestS
  @return
     The operation status */
 SOPC_ReturnStatus SOPC_ClientCommon_Initialize(const SOPC_LibSub_StaticCfg* pCfg,
-                                               const SOPC_ClientCommon_GetEndpointsCbk cbkGetEndpoints);
+                                               const SOPC_ClientCommon_DiscoveryCbk cbkGetEndpoints);
 
 /*
  @description

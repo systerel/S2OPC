@@ -81,7 +81,7 @@ typedef void (*SOPC_ClientHelper_DisconnectCbk)(const uint32_t connectionId);
  @field path_cert_cli
    Zero-terminated path to the client certificate in the DER format, signed by the root certificate authority
  @field path_key_cli
-   Zero-terminated path to the client private key which is paired to the public key signed server certificate,
+   Zero-terminated path to the client private key which is paired to the public key signed client certificate,
    in the DER format
  @field policyId
    Zero-terminated policy id. To know which policy id to use, please read a
