@@ -253,7 +253,12 @@ static void PKIProviderStack_Free(SOPC_PKIProvider* pPKI)
         return;
     }
 
+    /* Deleting the untrusted list will also clear the trusted list, as they are linked.
+     * mbedtls zeroizes the elements upon clear, so we can call Certificate_Free on issuers.
+     */
+    SOPC_KeyManager_Certificate_Free(pPKI->pUserUntrustedIssuersList);
     SOPC_KeyManager_Certificate_Free(pPKI->pUserTrustedIssuersList);
+    SOPC_KeyManager_Certificate_Free(pPKI->pUserIssuedCertsList);
     SOPC_KeyManager_CRL_Free(pPKI->pUserCertRevocList);
     SOPC_Free(pPKI);
 }
@@ -275,7 +280,7 @@ static SOPC_PKIProvider* create_pkistack(SOPC_CertificateList* issuers,
         SOPC_GCC_DIAGNOSTIC_RESTORE
 
         pki->pUserTrustedIssuersList = issuers;
-        pki->pUserIssuedList = issued;
+        pki->pUserIssuedCertsList = issued;
         pki->pUserUntrustedIssuersList = untrusted;
         pki->pUserCertRevocList = crl;
         pki->pUserData = pUserData;
@@ -329,13 +334,7 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_SerializedCertificate* pCert
     /* Clear partial alloc */
     else
     {
-        /* Deleting the untrusted list will also clear the trusted list, as they are linked.
-         * mbedtls zeroizes the elements upon clear, so we can call Certificate_Free on issuers.
-         */
-        SOPC_KeyManager_Certificate_Free(untrusted);
         SOPC_KeyManager_Certificate_Free(caCert);
-        SOPC_KeyManager_Certificate_Free(issued);
-        SOPC_KeyManager_CRL_Free(crl);
         SOPC_Free(pki);
     }
 
@@ -348,20 +347,44 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
                                                         char** lPathCRL,
                                                         SOPC_PKIProvider** ppPKI)
 {
-    if (NULL == lPathTrustedIssuers || NULL == lPathIssued || NULL == lPathUntrustedIssuers || NULL == lPathCRL ||
+    if (NULL == lPathTrustedIssuers || NULL == lPathIssuedCerts || NULL == lPathUntrustedIssuers || NULL == lPathCRL ||
         NULL == ppPKI)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
+    /* Creates a chain that contain all issuers (trusted and untrusted)
+     * which will be used to verify the issued certificates.
+     * Then creates the trusted issuers list, which is used to verify the other certificates.
+     * In practise, as certificates are linked lists in mbedtls,
+     * we create a single list, and chain them: untrusted -> trusted.
+     */
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_CertificateList* ca = NULL;
-    char* cur = *lPathCA;
+    SOPC_CertificateList* untrusted = NULL;
+    char* cur = *lPathUntrustedIssuers;
     while (NULL != cur && SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_Certificate_CreateOrAddFromFile(cur, &ca);
-        ++lPathCA;
-        cur = *lPathCA;
+        status = SOPC_KeyManager_Certificate_CreateOrAddFromFile(cur, &untrusted);
+        ++lPathUntrustedIssuers;
+        cur = *lPathUntrustedIssuers;
+    }
+
+    SOPC_CertificateList* issued = NULL;
+    cur = *lPathIssuedCerts;
+    while (NULL != cur && SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_Certificate_CreateOrAddFromFile(cur, &issued);
+        ++lPathIssuedCerts;
+        cur = *lPathIssuedCerts;
+    }
+
+    SOPC_CertificateList* trusted = NULL;
+    cur = *lPathTrustedIssuers;
+    while (NULL != cur && SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_Certificate_CreateOrAddFromFile(cur, &trusted);
+        ++lPathTrustedIssuers;
+        cur = *lPathTrustedIssuers;
     }
 
     SOPC_CRLList* crl = NULL;
@@ -373,11 +396,43 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
         cur = *lPathCRL;
     }
 
-    /* Check the CRL-CA assocation before creating the PKI */
+    /* Link the untrusted list with the trusted list */
+    if (SOPC_STATUS_OK == status)
+    {
+        if (NULL != untrusted && NULL != trusted)
+        {
+            mbedtls_x509_crt* crt = &untrusted->crt;
+            /* crt should not be NULL, as either untrusted is NULL or at least one cert was created */
+            assert(NULL != crt);
+            while (NULL != crt->next)
+            {
+                crt = crt->next;
+            }
+            /* crt is now the last certificate of the chain, link it with trusted */
+            crt->next = &trusted->crt;
+        }
+        else if (NULL != trusted)
+        {
+            /* When there are no untrusted, we must create the structure */
+            /* TODO: avoid the duplication of the first element of trusted */
+            status =
+                SOPC_KeyManager_Certificate_CreateOrAddFromDER(trusted->crt.raw.p, (uint32_t) trusted->crt.raw.len, &untrusted);
+            if (SOPC_STATUS_OK == status)
+            {
+                untrusted->crt.next = &trusted->crt;
+            }
+        }
+        else
+        {
+            assert(false && "TODO: handle the case where NULL trusted and NULL untrusted");
+        }
+    }
+
+    /* Check the CRL-CA association before creating the PKI */
     if (SOPC_STATUS_OK == status)
     {
         bool match = false;
-        status = SOPC_KeyManager_CertificateList_MatchCRLList(ca, crl, &match);
+        status = SOPC_KeyManager_CertificateList_MatchCRLList(untrusted, crl, &match);
         if (SOPC_STATUS_OK == status && !match)
         {
             /* mbedtls does not verify that each CA has a CRL, so we must do it ourselves.
@@ -386,6 +441,24 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
             printf(
                 "> PKI creation error: Not all certificate authorities have a single certificate revocation list! "
                 "Certificates issued by these CAs will be refused.\n");
+        }
+    }
+
+    /* TODO: Check that all issued certificates have a CA in untrusted
+     * This is already checked when receiving an issued certificate,
+     * but it would be useful to report this misconfiguration.
+     */
+
+    /* Simpler case: check and warn that there is at least an issued certificate or an issuer */
+    if (SOPC_STATUS_OK == status)
+    {
+        bool bIssuedXorUntrusted = (NULL == untrusted) ^ (NULL == issued);
+        if (bIssuedXorUntrusted)
+        {
+            printf(
+                "> PKI creation warning: issued certificates are given but no untrusted CA are given, or untrusted "
+                "certificates are given but no issued certificates are given. Issued certificates without untrusted CA "
+                "will never be accepted while creating a secure connection.\n");
         }
     }
 
@@ -406,8 +479,14 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
     /* Clear partial alloc */
     else
     {
+        /* Deleting the untrusted list will also clear the trusted list, as they are linked.
+         * mbedtls zeroizes the elements upon clear, so we can call Certificate_Free on issuers.
+         */
+        SOPC_KeyManager_Certificate_Free(untrusted);
         SOPC_KeyManager_Certificate_Free(trusted);
+        SOPC_KeyManager_Certificate_Free(issued);
         SOPC_KeyManager_CRL_Free(crl);
+        SOPC_Free(pki);
     }
 
     return status;
