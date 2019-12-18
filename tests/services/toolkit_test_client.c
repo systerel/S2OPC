@@ -332,10 +332,11 @@ int main(void)
     // Init PKI provider with certificate authority
     if (SOPC_STATUS_OK == status)
     {
-        // status = SOPC_PKIProviderStack_Create(serverConfig->certificateAuthority, NULL, &serverConfig->pki);
-        char* lPathCA[] = {"./trusted/cacert.der", NULL};
+        char* lPathTrusted[] = {"./trusted/cacert.der", NULL};
+        char* lPathIssuedCerts[] = {NULL};
+        char* lPathUntrusted[] = {NULL};
         char* lPathCRL[] = {"./revoked/cacrl.der", NULL};
-        status = SOPC_PKIProviderStack_CreateFromPaths(lPathCA, lPathCRL, &pki);
+        status = SOPC_PKIProviderStack_CreateFromPaths(lPathTrusted, lPathIssuedCerts, lPathUntrusted, lPathCRL, &pki);
         if (SOPC_STATUS_OK != status)
         {
             printf(">>Stub_Client: Failed to create PKI\n");
