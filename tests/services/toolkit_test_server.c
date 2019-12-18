@@ -59,18 +59,15 @@ static SOPC_CRLList* static_cacrl = NULL;
 /* Define application namespaces: ns=1 and ns=2 (NULL terminated array) */
 static char* default_app_namespace_uris[] = {DEFAULT_PRODUCT_URI, DEFAULT_PRODUCT_URI_2, NULL};
 static char* default_locale_ids[] = {"en-US", "fr-FR", NULL};
-static char* default_trusted_certs[] = {"trusted/cacert.der",
-                                        "trusted/ctt_ca1I_appT.der" /* Test 044 */,
-                                        "trusted/ctt_ca1T.der" /* Tests 029, 037 */,
-                                        "trusted/ctt_appT.der" /* Test 048 */,
-                                        "trusted/ctt_appTSha256_2048.der" /* Test 051 */,
-                                        "trusted/ctt_appTSha256_4096.der" /* Test 052 still fails */,
-                                        NULL};
-static char* default_revoked_certs[] = {"revoked/cacrl.der",
-                                        "revoked/revocation_list_ctt_ca1T.crl",
-                                        "revoked/ctt_appT_crl.pem",
-                                        "revoked/ctt_appTSha256_2048_crl.pem",
-                                        "revoked/ctt_appTSha256_4096_crl.pem",
+static char* default_trusted_certs[] = {"trusted/cacert.der", "trusted/ctt_ca1T.der" /* Tests 029, 037 */, NULL};
+static char* default_issued_certs[] = {"issued/ctt_ca1I_appT.der" /* Test 044 */,
+                                       "issued/ctt_appT.der" /* Test 048 */,
+                                       "issued/ctt_appTSha256_2048.der" /* Test 051 */,
+                                       "issued/ctt_appTSha256_4096.der" /* Test 052 still fails */, NULL};
+static char* default_untrusted_certs[] = {"untrusted/ctt_ca1I.der" /* Test 044 */, NULL};
+static char* default_revoked_certs[] = {"revoked/cacrl.der", "revoked/revocation_list_ctt_ca1T.crl",
+                                        "revoked/revocation_list_ctt_ca1I.crl",
+                                        /*"revoked/revocation_list_ctt_ca1I_ca2T.crl",*/
                                         NULL};
 
 static int32_t endpointClosed = 0;

@@ -176,9 +176,12 @@ int main(int argc, char* argv[])
     // PKIConfig is just used to create the provider but only configuration of PKIType is useful here (paths not used)
     if (SOPC_STATUS_OK == status && cryptoDeactivated == false)
     {
-        char* lPathsCA[] = {"./trusted/cacert.der", NULL};
+        char* lPathsTrusted[] = {"./trusted/cacert.der", NULL};
+        char* lPathsIssuedCerts[] = {NULL};
+        char* lPathsUntrusted[] = {NULL};
         char* lPathsCRL[] = {"./revoked/cacrl.der", NULL};
-        status = SOPC_PKIProviderStack_CreateFromPaths(lPathsCA, lPathsCRL, &pki);
+        status =
+            SOPC_PKIProviderStack_CreateFromPaths(lPathsTrusted, lPathsIssuedCerts, lPathsUntrusted, lPathsCRL, &pki);
         if (SOPC_STATUS_OK != status)
         {
             printf("<Stub_Server: Failed to create PKI\n");

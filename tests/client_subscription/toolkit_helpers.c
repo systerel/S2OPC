@@ -101,10 +101,13 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
         if (!bDisablePKI)
         {
             SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-            char* lPathsCA[] = {(char*) szPathCertifAuth, NULL};
+            char* lPathsTrusted[] = {(char*) szPathCertifAuth, NULL};
             char* lPathsCRL[] = {(char*) szPathCrl, NULL};
             SOPC_GCC_DIAGNOSTIC_RESTORE
-            status = SOPC_PKIProviderStack_CreateFromPaths(lPathsCA, lPathsCRL, &pPki);
+            char* lPathsIssuedCerts[] = {NULL};
+            char* lPathsUntrusted[] = {NULL};
+            status = SOPC_PKIProviderStack_CreateFromPaths(lPathsTrusted, lPathsIssuedCerts, lPathsUntrusted, lPathsCRL,
+                                                           &pPki);
             if (SOPC_STATUS_OK != status)
             {
                 Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Failed to create PKI.");

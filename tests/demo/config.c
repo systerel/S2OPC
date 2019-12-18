@@ -149,9 +149,12 @@ SOPC_ReturnStatus Config_LoadCertificates(void)
 
         if (SOPC_STATUS_OK == status)
         {
-            char* lPathsCA[] = {PATH_CACERT_PUBL, NULL};
+            char* lPathsTrusted[] = {PATH_CACERT_PUBL, NULL};
+            char* lPathsIssuedCerts[] = {NULL};
+            char* lPathsUntrusted[] = {NULL};
             char* lPathsCRL[] = {PATH_CACRL, NULL};
-            status = SOPC_PKIProviderStack_CreateFromPaths(lPathsCA, lPathsCRL, &pPki);
+            status = SOPC_PKIProviderStack_CreateFromPaths(lPathsTrusted, lPathsIssuedCerts, lPathsUntrusted, lPathsCRL,
+                                                           &pPki);
             if (SOPC_STATUS_OK != status)
             {
                 printf("# Error: Failed to create PKI\n");
