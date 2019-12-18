@@ -426,7 +426,11 @@ set(TEST_CONFIG_XML              "${CMAKE_SOURCE_DIR}/tests/data/config/S2OPC_Te
 set(TEST_SERVER_DEMO_CONFIG_XML  "${CMAKE_SOURCE_DIR}/tests/data/config/S2OPC_Server_Demo_Config.xml")
 set(TEST_SERVER_UACTT_CONFIG_XML "${CMAKE_SOURCE_DIR}/tests/data/config/S2OPC_Server_UACTT_Config.xml")
 
-set(TEST_ADDRESS_SPACE_XML "${CMAKE_SOURCE_DIR}/tests/data/address_space/s2opc.xml")
+if (WITH_NANO_EXTENDED)
+  set(TEST_ADDRESS_SPACE_XML "${CMAKE_SOURCE_DIR}/tests/data/address_space/s2opc.xml")
+else()
+  set(TEST_ADDRESS_SPACE_XML "${CMAKE_SOURCE_DIR}/tests/data/address_space/s2opc_nano.xml")
+endif()
 set(TEST_CHECK_HELPERS_ADDRESS_SPACE_C "check_helpers_address_space.c")
 set(TEST_DEMO_SERVER_ADDRESS_SPACE_C "demo_server_address_space.c")
 set(TEST_LOCAL_DEMO_SERVER_ADDRESS_SPACE_C "local_demo_server_test_address_space.c")
