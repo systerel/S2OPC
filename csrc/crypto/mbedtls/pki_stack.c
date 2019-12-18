@@ -27,6 +27,7 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
 
@@ -296,7 +297,7 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_SerializedCertificate* pCert
     SOPC_PKIProvider* pki = NULL;
     SOPC_ReturnStatus status = SOPC_KeyManager_SerializedCertificate_Deserialize(pCertAuth, &caCert);
 
-    /* Check the CRL-CA assocation before creating the PKI */
+    /* Check the CRL-CA association before creating the PKI */
     if (SOPC_STATUS_OK == status)
     {
         bool match = false;
@@ -306,9 +307,9 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_SerializedCertificate* pCert
             /* mbedtls does not verify that each CA has a CRL, so we must do it ourselves
              * We must fail here, otherwise we can't report misconfigurations to the users */
             status = SOPC_STATUS_NOK;
-            SOPC_Logger_TraceError(
-                "Not all certificate authorities have a single certificate revocation list! CRL verification is "
-                "disabled for certificates signed by such CA.");
+            printf(
+                "> PKI creation error: Not all certificate authorities have a single certificate revocation list! "
+                "Certificates issued by these CAs will be refused.\n");
         }
     }
 
@@ -379,12 +380,12 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
         status = SOPC_KeyManager_CertificateList_MatchCRLList(ca, crl, &match);
         if (SOPC_STATUS_OK == status && !match)
         {
-            /* mbedtls does not verify that each CA has a CRL, so we must do it ourselves
+            /* mbedtls does not verify that each CA has a CRL, so we must do it ourselves.
              * We must fail here, otherwise we can't report misconfigurations to the users */
             status = SOPC_STATUS_NOK;
-            SOPC_Logger_TraceError(
-                "Not all certificate authorities have a single certificate revocation list! CRL verification is "
-                "disabled for certificates signed by such CA.");
+            printf(
+                "> PKI creation error: Not all certificate authorities have a single certificate revocation list! "
+                "Certificates issued by these CAs will be refused.\n");
         }
     }
 
