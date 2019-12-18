@@ -18,6 +18,7 @@
  */
 
 #include <assert.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "sopc_crypto_profiles.h"
@@ -264,7 +265,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromDER(const uint8_t* 
         if (0 != err)
         {
             status = SOPC_STATUS_NOK;
-            SOPC_Logger_TraceError("Crypto: certificate buffer parse failed with error code: 0x%x", err);
+            printf("> KeyManager: certificate buffer parse failed with error code: 0x%x\n", err);
         }
     }
 
@@ -301,7 +302,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromFile(const char* sz
         if (0 != err)
         {
             status = SOPC_STATUS_NOK;
-            SOPC_Logger_TraceError("Crypto: certificate buffer parse failed with error code: 0x%x", err);
+            printf("> KeyManager: certificate buffer parse failed with error code: 0x%x\n", err);
         }
     }
 
@@ -324,7 +325,7 @@ void SOPC_KeyManager_Certificate_Free(SOPC_CertificateList* pCert)
     if (NULL == pCert)
         return;
 
-    /* Frees all the certiciates in the chain */
+    /* Frees all the certificates in the chain */
     mbedtls_x509_crt_free(&pCert->crt);
     SOPC_Free(pCert);
 }
@@ -705,7 +706,7 @@ static char* get_raw_sha1(const mbedtls_x509_buf* raw)
     int err = mbedtls_md(pmd, raw->p, raw->len, pDest);
     if (0 != err)
     {
-        SOPC_Logger_TraceError("Cannot compute thumbprint of certificate, err=%i", err);
+        printf("Cannot compute thumbprint of certificate, err=%i\n", err);
         return NULL;
     }
 
@@ -764,7 +765,9 @@ SOPC_ReturnStatus SOPC_KeyManager_CertificateList_MatchCRLList(const SOPC_Certif
             if (crl_found && match)
             {
                 char* fpr = get_crt_sha1(crt);
-                SOPC_Logger_TraceError("Certificate with SHA-1 fingerprint %s has more than one associated CRL.", fpr);
+                printf(
+                    "> MatchCRLList error: Certificate with SHA-1 fingerprint %s has more than one associated CRL.\n",
+                    fpr);
                 SOPC_Free(fpr);
                 crl_found = false;
             }
@@ -778,7 +781,7 @@ SOPC_ReturnStatus SOPC_KeyManager_CertificateList_MatchCRLList(const SOPC_Certif
         {
             list_match = false;
             char* fpr = get_crt_sha1(crt);
-            SOPC_Logger_TraceError("Certificate with SHA-1 fingerprint %s has no CRL or multiple CRLs.", fpr);
+            printf("> MatchCRLList error: Certificate with SHA-1 fingerprint %s has no CRL or multiple CRLs.\n", fpr);
             SOPC_Free(fpr);
 
             /* Do not break, test all the certificates */
@@ -872,7 +875,7 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromDER(const uint8_t* bufferDE
         if (0 != err)
         {
             status = SOPC_STATUS_NOK;
-            SOPC_Logger_TraceError("Crypto: crl buffer parse failed with error code: 0x%x", err);
+            printf("> KeyManager: crl buffer parse failed with error code: 0x%x\n", err);
         }
     }
 
@@ -904,7 +907,7 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromFile(const char* szPath, SO
         if (0 != err)
         {
             status = SOPC_STATUS_NOK;
-            SOPC_Logger_TraceError("Crypto: crl buffer parse failed with error code: 0x%x", err);
+            printf("> KeyManager: crl buffer parse failed with error code: 0x%x", err);
         }
     }
 
