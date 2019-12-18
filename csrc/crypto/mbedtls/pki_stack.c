@@ -210,7 +210,7 @@ static SOPC_ReturnStatus PKIProviderStack_ValidateCertificate(const SOPC_PKIProv
     *error = SOPC_CertificateValidationError_Unkown;
 
     /* Gathers certificates from pki structure */
-    SOPC_CertificateList* cert_ca = (SOPC_CertificateList*) (pPKI->pUserCertAuthList);
+    SOPC_CertificateList* cert_ca = (SOPC_CertificateList*) (pPKI->pUserTrustedIssuersList);
     SOPC_CRLList* cert_crl = (SOPC_CRLList*) (pPKI->pUserCertRevocList);
     if (NULL == cert_ca || NULL == cert_crl)
     {
@@ -252,12 +252,16 @@ static void PKIProviderStack_Free(SOPC_PKIProvider* pPKI)
         return;
     }
 
-    SOPC_KeyManager_Certificate_Free(pPKI->pUserCertAuthList);
+    SOPC_KeyManager_Certificate_Free(pPKI->pUserTrustedIssuersList);
     SOPC_KeyManager_CRL_Free(pPKI->pUserCertRevocList);
     SOPC_Free(pPKI);
 }
 
-static SOPC_PKIProvider* create_pkistack(SOPC_CertificateList* ca, SOPC_CRLList* crl, void* pUserData)
+static SOPC_PKIProvider* create_pkistack(SOPC_CertificateList* issuers,
+                                         SOPC_CertificateList* issued,
+                                         SOPC_CertificateList* untrusted,
+                                         SOPC_CRLList* crl,
+                                         void* pUserData)
 {
     SOPC_PKIProvider* pki = SOPC_Malloc(sizeof(SOPC_PKIProvider));
 
@@ -269,7 +273,9 @@ static SOPC_PKIProvider* create_pkistack(SOPC_CertificateList* ca, SOPC_CRLList*
         *(SOPC_FnValidateCertificate*) (&pki->pFnValidateCertificate) = &PKIProviderStack_ValidateCertificate;
         SOPC_GCC_DIAGNOSTIC_RESTORE
 
-        pki->pUserCertAuthList = ca;
+        pki->pUserTrustedIssuersList = issuers;
+        pki->pUserIssuedList = issued;
+        pki->pUserUntrustedIssuersList = untrusted;
         pki->pUserCertRevocList = crl;
         pki->pUserData = pUserData;
     }
@@ -308,7 +314,7 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_SerializedCertificate* pCert
 
     if (SOPC_STATUS_OK == status)
     {
-        pki = create_pkistack(caCert, pRevocationList, NULL);
+        pki = create_pkistack(caCert, NULL, NULL, pRevocationList, NULL);
         if (NULL == pki)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -322,16 +328,27 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_SerializedCertificate* pCert
     /* Clear partial alloc */
     else
     {
+        /* Deleting the untrusted list will also clear the trusted list, as they are linked.
+         * mbedtls zeroizes the elements upon clear, so we can call Certificate_Free on issuers.
+         */
+        SOPC_KeyManager_Certificate_Free(untrusted);
         SOPC_KeyManager_Certificate_Free(caCert);
+        SOPC_KeyManager_Certificate_Free(issued);
+        SOPC_KeyManager_CRL_Free(crl);
         SOPC_Free(pki);
     }
 
     return status;
 }
 
-SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathCA, char** lPathCRL, SOPC_PKIProvider** ppPKI)
+SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssuers,
+                                                        char** lPathIssuedCerts,
+                                                        char** lPathUntrustedIssuers,
+                                                        char** lPathCRL,
+                                                        SOPC_PKIProvider** ppPKI)
 {
-    if (NULL == lPathCA || NULL == lPathCRL || NULL == ppPKI)
+    if (NULL == lPathTrustedIssuers || NULL == lPathIssued || NULL == lPathUntrustedIssuers || NULL == lPathCRL ||
+        NULL == ppPKI)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -374,7 +391,7 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathCA, char** l
     SOPC_PKIProvider* pki = NULL;
     if (SOPC_STATUS_OK == status)
     {
-        pki = create_pkistack(ca, crl, NULL);
+        pki = create_pkistack(trusted, issued, untrusted, crl, NULL);
         if (NULL == pki)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -388,7 +405,7 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathCA, char** l
     /* Clear partial alloc */
     else
     {
-        SOPC_KeyManager_Certificate_Free(ca);
+        SOPC_KeyManager_Certificate_Free(trusted);
         SOPC_KeyManager_CRL_Free(crl);
     }
 

@@ -89,8 +89,15 @@ struct SOPC_PKIProvider
      */
     const SOPC_FnValidateCertificate pFnValidateCertificate;
 
-    /** \brief PKI implementations can use this placeholder to store handles to certificate authorities. */
-    void* pUserCertAuthList;
+    /** \brief  PKI implementations can use this placeholder to store handles to
+     *          trusted issuers (certificate authorities). */
+    void* pUserTrustedIssuersList;
+    /** \brief  PKI implementations can use this placeholder to store handles to
+     *          issued certificates trusted on a one by one basis. */
+    void* pUserIssuedCertsList;
+    /** \brief  PKI implementations can use this placeholder to store handles to
+     *          untrusted issuers (certificate authorities that are used to validate issued certificates). */
+    void* pUserUntrustedIssuersList;
     /** \brief PKI implementations can use this placeholder to store handles to certificate revocation list(s). */
     void* pUserCertRevocList;
     /** \brief PKI implementations can use this placeholder to store more specific data. */

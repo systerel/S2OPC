@@ -66,22 +66,41 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_SerializedCertificate* pCert
  *
  *                  This verifies the certificate in the safest manner (whole certificate chain, with date validation,
  *                  mandatory certificate revocation lists).
- *                  Certificate Authority (CA) requirements depend on the chosen OPC UA security policy.
+ *                  Certificate Authority (CA) requirements (such as the hash algorithm used for the signature)
+ *                  depend on the chosen OPC UA security policy.
+ *
+ *                  There are 3 types of certificates to provide to the PKI:
+ *                  - The "trusted issuers" are CAs which issued certificates are also trusted.
+ *                    All the certificates of the signing chain including the root CA must be provided.
+ *                  - The "issued certificates" are certificates issued by untrusted CA.
+ *                    These certificates are considered trustworthy.
+ *                    The difference between trusted issuers and trusted issued certificates is that issued
+ *                    certificates are trusted on a one by one basis, whereas the trusted issuer may emit a large
+ *                    number of trusted certificates.
+ *                  - The "untrusted issuers" are CAs that are used to verify the signing chain of the
+ *                    "issued certificates". Each issued certificate must have its whole signing CA chain in the
+ *                    untrusted issuers or the trusted issuers up to the root CA.
+ *
  *                  The list of Certificate Revocation List (CRL) must contain exactly one list for each CA of the
- *                  CA list.
+ *                  trusted issuers CA list and for each of the untrusted issuers CA list.
  *
- *                  Issued certificates are also accepted (certificates whose chain is not trusted)
- *                  and must be added to the certificate authority list.
- *                  Issued certificates are always trusted, they cannot be revoked,
- *                  as they cannot appear on a CRL of a trusted CA.
- *                  They have no CRL, as they don't sign other certificates (otherwise, they are regular CAs).
+ *                  Issued certificates should not have CRLs, as they cannot be used to trust any other certificate.
+ *                  When an issued certificate is used to protect a Secure Channel, it's signing chain will be verified.
+ *                  For instance, if the certificate is not self signed and appears on the CRL of its signing CA,
+ *                  the connection will fail as the certificate is in fact invalid.
  *
- * \param lPathCA   A pointer to an array of paths to each certificate (or trusted certificate) to use
- *                  in the validation chain.
+ * \param lPathTrustedIssuers   A pointer to an array of paths to each trusted issuer to use in the validation chain.
+ *                  The array must contain a NULL pointer to indicate its end.
+ *                  Each path is a zero-terminated relative path to the certificate from the current working directory.
+ * \param lPathIssuedCerts  A pointer to an array of paths to each issued certificate to use in the validation chain.
+ *                  The array must contain a NULL pointer to indicate its end.
+ *                  Each path is a zero-terminated relative path to the certificate from the current working directory.
+ * \param lPathUntrustedIssuers A pointer to an array of paths to each untrusted issuer to use in the validation chain.
+                    Each issued certificate must have its signing certificate chain in the untrusted issuers list.
  *                  The array must contain a NULL pointer to indicate its end.
  *                  Each path is a zero-terminated relative path to the certificate from the current working directory.
  * \param lPathCRL  A pointer to an array of paths to each certificate revocation list to use.
- *                  Each certificate of the CA list must have a valid CRL in the CRL list.
+ *                  Each CA of the trusted issuers list and the untrusted issuers list must have a CRL in the list.
  *                  The array must contain a NULL pointer to indicate its end.
  *                  Each path is a zero-terminated relative path to the CRL from the current working directory.
  * \param ppPKI     A valid pointer to the newly created PKIProvider. You should free such provider with
@@ -94,6 +113,10 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_SerializedCertificate* pCert
  * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
  *                  and SOPC_STATUS_NOK when there was an error.
  */
-SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathCA, char** lPathCRL, SOPC_PKIProvider** ppPKI);
+SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssuers,
+                                                        char** lPathIssuedCerts,
+                                                        char **lPathUntrustedIssuers,
+                                                        char** lPathCRL,
+                                                        SOPC_PKIProvider** ppPKI);
 
 #endif /* SOPC_PKI_STACK_H_ */
