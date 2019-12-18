@@ -265,7 +265,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromDER(const uint8_t* 
         if (0 != err)
         {
             status = SOPC_STATUS_NOK;
-            printf("> KeyManager: certificate buffer parse failed with error code: 0x%x\n", err);
+            printf("> KeyManager: certificate buffer parse failed with error code: -0x%X\n", -err);
         }
     }
 
@@ -302,7 +302,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromFile(const char* sz
         if (0 != err)
         {
             status = SOPC_STATUS_NOK;
-            printf("> KeyManager: certificate buffer parse failed with error code: 0x%x\n", err);
+            printf("> KeyManager: certificate file \"%s\" parse failed with error code: -0x%X\n", szPath, -err);
         }
     }
 
@@ -706,7 +706,7 @@ static char* get_raw_sha1(const mbedtls_x509_buf* raw)
     int err = mbedtls_md(pmd, raw->p, raw->len, pDest);
     if (0 != err)
     {
-        printf("Cannot compute thumbprint of certificate, err=%i\n", err);
+        printf("Cannot compute thumbprint of certificate, err -0x%X\n", -err);
         return NULL;
     }
 
@@ -875,7 +875,7 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromDER(const uint8_t* bufferDE
         if (0 != err)
         {
             status = SOPC_STATUS_NOK;
-            printf("> KeyManager: crl buffer parse failed with error code: 0x%x\n", err);
+            printf("> KeyManager: crl buffer parse failed with error code: -0x%X\n", -err);
         }
     }
 
@@ -907,7 +907,7 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromFile(const char* szPath, SO
         if (0 != err)
         {
             status = SOPC_STATUS_NOK;
-            printf("> KeyManager: crl buffer parse failed with error code: 0x%x", err);
+            printf("> KeyManager: crl file \"%s\" parse failed with error code: -0x%X", szPath, -err);
         }
     }
 
