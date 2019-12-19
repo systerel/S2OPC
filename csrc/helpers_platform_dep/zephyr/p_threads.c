@@ -30,10 +30,7 @@
 
 #include "p_threads.h"
 
-#define MAX_WAITERS (8)
-#define MAX_STACK_SIZE (4096)
-#define SOPC_PRIORITY (5)
-#define P_THREAD_DEBUG (1)
+#define P_THREAD_DEBUG (0)
 #ifndef NULL
 #define NULL ((void*) 0)
 #endif
@@ -50,7 +47,7 @@ typedef enum E_THREAD_STATUS
     E_THREAD_STATUS_INITIALIZED,
 } eThreadStatus;
 
-struct T_THREAD_HANDLE
+struct tThreadHandle
 {
     volatile uint32_t slotId;
 };
@@ -64,17 +61,17 @@ typedef struct T_THREAD_WKS
     struct k_sem kSemThreadEnded;
     volatile uint32_t nbThreadsJoining;
     volatile eThreadStatus status;
-    volatile struct T_THREAD_HANDLE* debugExternalHandle;
+    volatile struct tThreadHandle* debugExternalHandle;
     ptrFct userCallback;
     void* userContext;
 } tThreadWks __attribute__((aligned(STACK_ALIGN)));
 
-struct T_GLOBAL_THREAD_WKS
+static struct T_GLOBAL_THREAD_WKS
 {
-    volatile bool bInitialized;
+    volatile uint32_t bInitialized;
     struct k_mutex kLock;
-    tThreadWks tab[MAX_WAITERS];
-} gGlbThreadWks = {.bInitialized = false};
+    tThreadWks tab[MAX_NB_THREADS];
+} gGlbThreadWks;
 
 static void P_THREAD_InternalCallback(void* pContext, void* pNotUsed1, void* pNotUsed2)
 {
@@ -111,7 +108,7 @@ tThreadHandle* P_THREAD_Create(ptrFct callback, void* pCtx, const char* taskName
         return NULL;
     }
 
-    pWks = calloc(1, sizeof(struct T_THREAD_HANDLE));
+    pWks = calloc(1, sizeof(struct tThreadHandle));
 
     if (NULL == pWks)
     {
@@ -167,22 +164,33 @@ eThreadResult P_THREAD_Init(tThreadHandle* pWks, ptrFct callback, void* pCtx, co
         return E_THREAD_RESULT_INVALID_PARAMETERS;
     }
     // Check first thread creation, if yes create workspace critical section
-    if (false == gGlbThreadWks.bInitialized)
+
+    bool transition = __sync_val_compare_and_swap(&gGlbThreadWks.bInitialized, 0, 1);
+
+    if (transition == 0)
     {
         memset(&gGlbThreadWks, 0, sizeof(struct T_GLOBAL_THREAD_WKS));
-        gGlbThreadWks.bInitialized = true;
         k_mutex_init(&gGlbThreadWks.kLock);
+        gGlbThreadWks.bInitialized = 2;
 
 #if (P_THREAD_DEBUG == 1)
         printk("\r\nP_THREAD: Thread middleware not initialized, so initializing it...\r\n");
 #endif
     }
 
+    while (gGlbThreadWks.bInitialized != 2)
+    {
+#if (P_THREAD_DEBUG == 1)
+        printk("\r\nP_THREAD: Thread middleware initializing, so wait...\r\n");
+#endif
+        k_yield();
+    }
+
     // Lock workspace
     k_mutex_lock(&gGlbThreadWks.kLock, K_FOREVER);
 
     // Search for empty slot
-    for (uint32_t iIter = 0; false == bFound && iIter < MAX_WAITERS; iIter++)
+    for (uint32_t iIter = 0; false == bFound && iIter < MAX_NB_THREADS; iIter++)
     {
         if (E_THREAD_STATUS_NOT_INITIALIZED == gGlbThreadWks.tab[iIter].status)
         {
@@ -213,7 +221,7 @@ eThreadResult P_THREAD_Init(tThreadHandle* pWks, ptrFct callback, void* pCtx, co
                             &gGlbThreadWks.tab[slotId - 1],                    //
                             NULL,                                              //
                             NULL,                                              //
-                            SOPC_PRIORITY,                                     //
+                            SOPC_THREAD_PRIORITY,                              //
                             0,                                                 //
                             K_NO_WAIT);                                        //
 
@@ -257,7 +265,7 @@ eThreadResult P_THREAD_Join(tThreadHandle* pWks)
     eThreadResult result = E_THREAD_RESULT_OK;
 
     // Check parameters validity
-    if (NULL == pWks || 0 == pWks->slotId || pWks->slotId > MAX_WAITERS || false == gGlbThreadWks.bInitialized ||
+    if (NULL == pWks || 0 == pWks->slotId || pWks->slotId > MAX_NB_THREADS || false == gGlbThreadWks.bInitialized ||
         pWks != gGlbThreadWks.tab[pWks->slotId - 1].debugExternalHandle)
     {
         return E_THREAD_RESULT_INVALID_PARAMETERS;
@@ -365,7 +373,7 @@ SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), v
 // Join then destroy a thread
 SOPC_ReturnStatus SOPC_Thread_Join(Thread thread)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_ReturnStatus resultSOPC = SOPC_STATUS_OK;
 
     if (NULL == thread)
     {
@@ -376,15 +384,16 @@ SOPC_ReturnStatus SOPC_Thread_Join(Thread thread)
            thread->slotId,                                        //
            (long unsigned int) thread);                           //
 #endif
-    eThreadResult result = P_THREAD_Join(thread);
+    eThreadResult resultPTHREAD = P_THREAD_Join(thread);
 
-    if (result == E_THREAD_RESULT_OK)
+    if (resultPTHREAD == E_THREAD_RESULT_OK)
     {
 #if (P_THREAD_DEBUG == 1)
         printk("\r\nP_THREAD: Destroy for thread handle = %08lX\r\n", //
                (long unsigned int) thread);                           //
 #endif
         P_THREAD_Destroy(&thread);
+        resultSOPC = SOPC_STATUS_OK;
     }
     else
     {
@@ -392,10 +401,10 @@ SOPC_ReturnStatus SOPC_Thread_Join(Thread thread)
         printk("\r\nP_THREAD: Error on join, do not destroy thread handle = %08lX\r\n", //
                (long unsigned int) thread);                                             //
 #endif
-        result = SOPC_STATUS_INVALID_STATE;
+        resultSOPC = SOPC_STATUS_INVALID_STATE;
     }
 
-    return result;
+    return resultSOPC;
 }
 
 SOPC_ReturnStatus SOPC_Sleep(unsigned int milliseconds)

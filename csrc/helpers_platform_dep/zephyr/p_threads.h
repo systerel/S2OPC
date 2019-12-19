@@ -21,7 +21,12 @@
 #define SOPC_P_THREADS_H_
 
 #include <stdint.h>
+
 #include "sopc_enums.h"
+
+#define MAX_NB_THREADS (8)
+#define MAX_STACK_SIZE (4096)
+#define SOPC_THREAD_PRIORITY (5)
 
 typedef enum E_THREAD_RESULT
 {
@@ -31,7 +36,7 @@ typedef enum E_THREAD_RESULT
     E_THREAD_RESULT_JOINING
 } eThreadResult;
 
-typedef struct T_THREAD_HANDLE tThreadHandle;
+typedef struct tThreadHandle tThreadHandle;
 typedef void* (*ptrFct)(void* pCtx);
 
 typedef tThreadHandle* Thread;
