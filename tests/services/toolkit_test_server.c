@@ -60,15 +60,21 @@ static SOPC_CRLList* static_cacrl = NULL;
 static char* default_app_namespace_uris[] = {DEFAULT_PRODUCT_URI, DEFAULT_PRODUCT_URI_2, NULL};
 static char* default_locale_ids[] = {"en-US", "fr-FR", NULL};
 static char* default_trusted_certs[] = {"trusted/cacert.der", "trusted/ctt_ca1T.der" /* Tests 029, 037 */, NULL};
-static char* default_issued_certs[] = {"issued/ctt_ca1I_appT.der" /* Test 044 */,
-                                       "issued/ctt_appT.der" /* Test 048 */,
+static char* default_issued_certs[] = {"issued/ctt_appT.der" /* Test 048 */,
+                                       "issued/ctt_appTE.der" /* Test 007 */,
+                                       "issued/ctt_appTV.der" /* Test 008 */,
                                        "issued/ctt_appTSha256_2048.der" /* Test 051 */,
-                                       "issued/ctt_appTSha256_4096.der" /* Test 052 still fails */, NULL};
-static char* default_untrusted_certs[] = {"untrusted/ctt_ca1I.der" /* Test 044 */, NULL};
+                                       "issued/ctt_appTSha256_4096.der" /* Test 052 still fails */,
+                                       "issued/ctt_appTSincorrect.der" /* Test 010 */,
+                                       "issued/ctt_ca1I_appT.der" /* Test 044 */,
+                                       "issued/ctt_ca1TC_ca2I_appT.der" /* Test 002 */,
+                                       "issued/ctt_ca1U_appT.der" /* Test 046 */,
+                                       NULL};
+static char* default_untrusted_certs[] = {"untrusted/ctt_ca1I.der" /* Test 044 */,
+                                          "untrusted/ctt_ca1TC_ca2I.der" /* Test 002 */, NULL};
 static char* default_revoked_certs[] = {"revoked/cacrl.der", "revoked/revocation_list_ctt_ca1T.crl",
                                         "revoked/revocation_list_ctt_ca1I.crl",
-                                        /*"revoked/revocation_list_ctt_ca1I_ca2T.crl",*/
-                                        NULL};
+                                        "revoked/revocation_list_ctt_ca1TC_ca2I.crl", NULL};
 
 static int32_t endpointClosed = 0;
 static bool secuActive = true;
