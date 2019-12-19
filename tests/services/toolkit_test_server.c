@@ -506,9 +506,10 @@ static SOPC_ReturnStatus Server_SetCryptographicConfig(SOPC_Server_Config* serve
         /* Create the PKI (Public Key Infrastructure) provider */
         if (SOPC_STATUS_OK == status)
         {
-            status =
-                SOPC_PKIProviderStack_CreateFromPaths(serverConfig->certificateAuthorityPathList,
-                                                      serverConfig->certificateRevocationPathList, &serverConfig->pki);
+            /* TODO: patch me here to use serverConfig instead of default config! */
+            status = SOPC_PKIProviderStack_CreateFromPaths(default_trusted_certs, default_issued_certs,
+                                                           default_untrusted_certs, default_revoked_certs,
+                                                           &serverConfig->pki);
         }
 #endif
 
