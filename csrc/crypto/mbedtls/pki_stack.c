@@ -268,10 +268,9 @@ static void PKIProviderStack_Free(SOPC_PKIProvider* pPKI)
     }
 
     /* Deleting the untrusted list will also clear the trusted list, as they are linked.
-     * mbedtls zeroizes the elements upon clear, so we can call Certificate_Free on issuers.
+     * Hence mbedtls will call free on (&pPKI->pUserTrustedIssersList.crt), which is pPKI->pUserTrustedIssersList.
      */
     SOPC_KeyManager_Certificate_Free(pPKI->pUserUntrustedIssuersList);
-    SOPC_KeyManager_Certificate_Free(pPKI->pUserTrustedIssuersList);
     SOPC_KeyManager_Certificate_Free(pPKI->pUserIssuedCertsList);
     SOPC_KeyManager_CRL_Free(pPKI->pUserCertRevocList);
     SOPC_Free(pPKI);
@@ -494,10 +493,9 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
     else
     {
         /* Deleting the untrusted list will also clear the trusted list, as they are linked.
-         * mbedtls zeroizes the elements upon clear, so we can call Certificate_Free on issuers.
+         * Hence mbedtls will call free on (&pPKI->pUserTrustedIssersList.crt), which is pPKI->pUserTrustedIssersList.
          */
         SOPC_KeyManager_Certificate_Free(untrusted);
-        SOPC_KeyManager_Certificate_Free(trusted);
         SOPC_KeyManager_Certificate_Free(issued);
         SOPC_KeyManager_CRL_Free(crl);
         SOPC_Free(pki);
