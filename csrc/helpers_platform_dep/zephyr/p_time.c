@@ -27,7 +27,7 @@
 #include <stdlib.h>
 //
 //#include "sopc_builtintypes.h"
-//#include "sopc_enums.h" /* s2opc includes */
+#include "sopc_enums.h" /* s2opc includes */
 //#include "sopc_time.h"
 //
 ///* Private time api */
@@ -101,3 +101,9 @@
 //{
 //    return (gmtime_r(&t, tm) == NULL) ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
 //}
+
+SOPC_ReturnStatus SOPC_Sleep(unsigned int milliseconds)
+{
+    k_sleep(milliseconds);
+    return SOPC_STATUS_OK;
+}
