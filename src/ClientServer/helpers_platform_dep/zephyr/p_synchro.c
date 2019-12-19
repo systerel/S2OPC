@@ -30,8 +30,8 @@
 
 #include "p_synchro.h"
 
-#define P_SYNCHRO_CONDITION_DEBUG (1)
-#define P_SYNCHRO_MUTEX_DEBUG (1)
+#define P_SYNCHRO_CONDITION_DEBUG (0)
+#define P_SYNCHRO_MUTEX_DEBUG (0)
 
 #ifndef NULL
 #define NULL ((void*) 0)
@@ -310,7 +310,15 @@ eSynchroResult P_SYNCHRO_CONDITION_UnlockAndWait(tCondVarHandle slotId, // Handl
                        signalId);                                                                    //
 #endif
                 int sem_take_res = 0; // Used to check timeout.
-                sem_take_res = k_sem_take(&p->tabSignals[signalId].signal, K_MSEC(timeoutMs));
+
+                if (timeoutMs == UINT32_MAX)
+                {
+                    sem_take_res = k_sem_take(&p->tabSignals[signalId].signal, K_FOREVER);
+                }
+                else
+                {
+                    sem_take_res = k_sem_take(&p->tabSignals[signalId].signal, K_MSEC(timeoutMs));
+                }
 
                 // Mark signal as not reserved
                 p->tabSignals[signalId].sigStatus = E_SIG_STATUS_NOT_RESERVED;
@@ -529,6 +537,8 @@ eSynchroResult P_SYNCHRO_MUTEX_Clear(tMutVarHandle slotId)
         return E_SYNCHRO_RESULT_NOK;
     }
 
+    tMutVar* p = &gMutVarWks.tabWks[slotId];
+
     do
     {
         {
@@ -536,31 +546,36 @@ eSynchroResult P_SYNCHRO_MUTEX_Clear(tMutVarHandle slotId)
             printk("\r\nP_MUTEX: Slot id %d - clear set flag\r\n", //
                    slotId);                                        //
 #endif
-            P_SYNCHRO_Mutex_Set_Quit_Flag(&gMutVarWks.tabWks[slotId]);
+            // Set quit flag
+            P_SYNCHRO_Mutex_Set_Quit_Flag(p);
 
 #if P_SYNCHRO_MUTEX_DEBUG == 1
             printk("\r\nP_MUTEX: Slot id %d - clear sig all to unblock waiting thread\r\n", //
                    slotId);                                                                 //
 #endif
 
-            P_SYNCHRO_CONDITION_SignalAll(gMutVarWks.tabWks[slotId].condVarHdl);
+            // Signal all to unlock all P_SYNCHRO_MUTEX_Lock function
+            P_SYNCHRO_CONDITION_SignalAll(p->condVarHdl);
 
-            eSyncStatus fromStatus = __sync_val_compare_and_swap(&gMutVarWks.tabWks[slotId].status,              //
+            // Try to go to de initializing status
+            eSyncStatus fromStatus = __sync_val_compare_and_swap(&p->status,                                     //
                                                                  E_SYNC_STATUS_INITIALIZED | MASK_SET_QUIT_FLAG, //
                                                                  E_SYNC_STATUS_DEINITIALIZING);                  //
 
+            // If successful clear condition variable, else yield and retry
             if ((fromStatus & ~MASK_SET_QUIT_FLAG) == E_SYNC_STATUS_INITIALIZED)
             {
 #if P_SYNCHRO_MUTEX_DEBUG == 1
                 printk("\r\nP_MUTEX: Slot id %d - clear performed successfully !!!\r\n", //
                        slotId);                                                          //
 #endif
-                P_SYNCHRO_CONDITION_Clear(gMutVarWks.tabWks[slotId].condVarHdl);
-                gMutVarWks.tabWks[slotId].condVarHdl = UINT32_MAX;
-                gMutVarWks.tabWks[slotId].lockCounter = 0;
-                gMutVarWks.tabWks[slotId].ownerThread = NULL;
-                gMutVarWks.tabWks[slotId].status = E_SYNC_STATUS_NOT_INITIALIZED;
-                result = E_SYNCHRO_RESULT_OK;
+
+                P_SYNCHRO_CONDITION_Clear(p->condVarHdl);  // Clear condition variable
+                p->condVarHdl = UINT32_MAX;                // Handle set to invalid handle
+                p->lockCounter = 0;                        // Reset lock counter
+                p->ownerThread = NULL;                     // Reset owner thread
+                p->status = E_SYNC_STATUS_NOT_INITIALIZED; // Set status to not initialized
+                result = E_SYNCHRO_RESULT_OK;              // Terminates loop
             }
             else if (((fromStatus & ~MASK_SET_QUIT_FLAG) == E_SYNC_STATUS_DEINITIALIZING) ||
                      ((fromStatus & ~MASK_SET_QUIT_FLAG) == E_SYNC_STATUS_INITIALIZING) ||
@@ -570,7 +585,7 @@ eSynchroResult P_SYNCHRO_MUTEX_Clear(tMutVarHandle slotId)
                 printk("\r\nP_MUTEX: Slot id %d - clear can't be performed, yield and retry...\r\n", //
                        slotId);                                                                      //
 #endif
-                result = E_SYNCHRO_RESULT_INVALID_STATE;
+                result = E_SYNCHRO_RESULT_INVALID_STATE; // Invalid state, retry...
                 k_yield();
             }
             else
@@ -579,7 +594,7 @@ eSynchroResult P_SYNCHRO_MUTEX_Clear(tMutVarHandle slotId)
                 printk("\r\nP_MUTEX: Slot id %d - clear not performed, already cleared\r\n", //
                        slotId);                                                              //
 #endif
-                result = E_SYNCHRO_RESULT_NOK;
+                result = E_SYNCHRO_RESULT_NOK; // Already cleared, nok, terminates loop
             }
         }
     } while (E_SYNCHRO_RESULT_INVALID_STATE == result);
@@ -587,6 +602,7 @@ eSynchroResult P_SYNCHRO_MUTEX_Clear(tMutVarHandle slotId)
     return result;
 }
 
+// Lock a mutex object. Ok if successfully locked. Nok if cleared or invalid handle.
 eSynchroResult P_SYNCHRO_MUTEX_Lock(tMutVarHandle slotId)
 {
     eSynchroResult result = E_SYNCHRO_RESULT_OK;
@@ -599,7 +615,10 @@ eSynchroResult P_SYNCHRO_MUTEX_Lock(tMutVarHandle slotId)
         return E_SYNCHRO_RESULT_NOK;
     }
 
-    if ((gMutVarWks.tabWks[slotId].status & MASK_SET_QUIT_FLAG) != 0)
+    tMutVar* p = &gMutVarWks.tabWks[slotId];
+
+    // Verify if quit operation on going.
+    if ((p->status & MASK_SET_QUIT_FLAG) != 0)
     {
 #if P_SYNCHRO_MUTEX_DEBUG == 1
         printk("\r\nP_MUTEX: Slot id %d - Lock - Failure, quit request set\r\n", //
@@ -608,22 +627,28 @@ eSynchroResult P_SYNCHRO_MUTEX_Lock(tMutVarHandle slotId)
         return E_SYNCHRO_RESULT_NOK;
     }
 
-    eSyncStatus currentStatus = P_SYNCHRO_Mutex_Add_Api_User(&gMutVarWks.tabWks[slotId]);
+    // Check if well initialized
+    eSyncStatus currentStatus = P_SYNCHRO_Mutex_Add_Api_User(p);
 
     if ((currentStatus & ~MASK_SET_QUIT_FLAG) > E_SYNC_STATUS_INITIALIZED)
     {
-        k_mutex_lock(&gMutVarWks.tabWks[slotId].lock, K_FOREVER);
+        // Start critical section
+        k_mutex_lock(&p->lock, K_FOREVER);
         {
-            if (gMutVarWks.tabWks[slotId].lockCounter == 0)
+            // Check if lock counter incremented. If 0, else mutex can be locked.
+            // Initialized new owner.
+            if (p->lockCounter == 0)
             {
 #if P_SYNCHRO_MUTEX_DEBUG == 1
                 printk("\r\nP_MUTEX: Slot id %d - Lock - First lock\r\n", //
                        slotId);                                           //
 #endif
-                gMutVarWks.tabWks[slotId].ownerThread = k_current_get();
+                p->ownerThread = k_current_get();
             }
 
-            if (gMutVarWks.tabWks[slotId].ownerThread != k_current_get())
+            // If current owner is not current thread, mutex can't be locked.
+            // Quit critical section and wait for unlock mutex complete operation
+            if (p->ownerThread != k_current_get())
             {
                 do
                 {
@@ -631,16 +656,17 @@ eSynchroResult P_SYNCHRO_MUTEX_Lock(tMutVarHandle slotId)
                     printk("\r\nP_MUTEX: Slot id %d - Try Lock by thread %08lX owned by %08lX\r\n", //
                            slotId,                                                                  //
                            (unsigned long int) k_current_get(),                                     //
-                           (unsigned long int) gMutVarWks.tabWks[slotId].ownerThread);              //
+                           (unsigned long int) p->ownerThread);                                     //
 #endif
 
-                    result = P_SYNCHRO_CONDITION_UnlockAndWait(gMutVarWks.tabWks[slotId].condVarHdl,                  //
-                                                               (void*) &gMutVarWks.tabWks[slotId].lock,               //
+                    result = P_SYNCHRO_CONDITION_UnlockAndWait(p->condVarHdl,                                         //
+                                                               (void*) &p->lock,                                      //
                                                                P_SYNCHRO_MUTEX_CondVar_UnlockAndWait_Lock_Callback,   //
                                                                P_SYNCHRO_MUTEX_CondVar_UnlockAndWait_UnLock_Callback, //
                                                                UINT32_MAX);                                           //
-
-                    if ((gMutVarWks.tabWks[slotId].status & MASK_SET_QUIT_FLAG) != 0)
+                    // Reentering critical section. Verify if qui status has been mounted.
+                    // If yes, return NOK.
+                    if ((p->status & MASK_SET_QUIT_FLAG) != 0)
                     {
 #if P_SYNCHRO_MUTEX_DEBUG == 1
                         printk("\r\nP_MUTEX: Slot id %d - Try lock - ignore, quit request set\r\n", //
@@ -650,24 +676,28 @@ eSynchroResult P_SYNCHRO_MUTEX_Lock(tMutVarHandle slotId)
                     }
                     else
                     {
-                        if (E_SYNCHRO_RESULT_OK == result && gMutVarWks.tabWks[slotId].lockCounter == 0)
+                        // If signal received and lock counter not incremented, so mutex can be locked.
+                        // Raz lock counter and increment it.
+                        if (E_SYNCHRO_RESULT_OK == result && p->lockCounter == 0)
                         {
 #if P_SYNCHRO_MUTEX_DEBUG == 1
                             printk("\r\nP_MUTEX: Slot id %d - Try Lock successful by %08lX \r\n", //
                                    slotId,                                                        //
                                    (unsigned long int) k_current_get());                          //
 #endif
-                            gMutVarWks.tabWks[slotId].ownerThread = k_current_get();
-                            gMutVarWks.tabWks[slotId].lockCounter = 1;
+                            p->ownerThread = k_current_get();
+                            p->lockCounter = 1;
                         }
                         else
                         {
-                            if (E_SYNCHRO_RESULT_OK == result && gMutVarWks.tabWks[slotId].lockCounter > 0)
+                            // If lock counter already incremented, wait for new unlock operation...
+                            if (E_SYNCHRO_RESULT_OK == result && p->lockCounter > 0)
                             {
                                 result = E_SYNCHRO_RESULT_INVALID_STATE;
                             }
                             else
                             {
+                                // If condition variable invalid, returns NOK
 #if P_SYNCHRO_MUTEX_DEBUG == 1
                                 printk("\r\nP_MUTEX: Slot id %d - Try Lock failed by %08lX \r\n", //
                                        slotId,                                                    //
@@ -682,14 +712,16 @@ eSynchroResult P_SYNCHRO_MUTEX_Lock(tMutVarHandle slotId)
             }
             else
             {
+                // Current thread is the mutex owner, increment counter.
 #if P_SYNCHRO_MUTEX_DEBUG == 1
                 printk("\r\nP_MUTEX: Slot id %d - Lock - Recursive lock\r\n", //
                        slotId);                                               //
 #endif
-                gMutVarWks.tabWks[slotId].lockCounter++;
+                p->lockCounter++;
             }
         }
-        k_mutex_unlock(&gMutVarWks.tabWks[slotId].lock);
+        // End critical section
+        k_mutex_unlock(&p->lock);
 
         P_SYNCHRO_Mutex_Remove_Api_User(&gMutVarWks.tabWks[slotId]);
     }
@@ -704,7 +736,8 @@ eSynchroResult P_SYNCHRO_MUTEX_Lock(tMutVarHandle slotId)
     return result;
 }
 
-eSynchroResult P_SYNCHRO_MUTEX_Unlock(tMutVarHandle slotId)
+// Unlock a mutex object
+eSynchroResult P_SYNCHRO_MUTEX_Unlock(tMutVarHandle slotId) // Mutex handle
 {
     if (slotId >= MAX_MUT_VAR)
     {
@@ -715,7 +748,9 @@ eSynchroResult P_SYNCHRO_MUTEX_Unlock(tMutVarHandle slotId)
         return E_SYNCHRO_RESULT_NOK;
     }
 
-    if ((gMutVarWks.tabWks[slotId].status & MASK_SET_QUIT_FLAG) != 0)
+    tMutVar* p = &gMutVarWks.tabWks[slotId];
+
+    if ((p->status & MASK_SET_QUIT_FLAG) != 0)
     {
 #if P_SYNCHRO_MUTEX_DEBUG == 1
         printk("\r\nP_MUTEX: Slot id %d - UnLock - Failure, quit request set\r\n", slotId);
@@ -725,34 +760,42 @@ eSynchroResult P_SYNCHRO_MUTEX_Unlock(tMutVarHandle slotId)
 
     eSynchroResult result = E_SYNCHRO_RESULT_OK;
 
-    eSyncStatus currentStatus = P_SYNCHRO_Mutex_Add_Api_User(&gMutVarWks.tabWks[slotId]);
+    eSyncStatus currentStatus = P_SYNCHRO_Mutex_Add_Api_User(p);
 
+    // Check if mutex is well initialized.
     if ((currentStatus & ~MASK_SET_QUIT_FLAG) > E_SYNC_STATUS_INITIALIZED)
     {
-        k_mutex_lock(&gMutVarWks.tabWks[slotId].lock, K_FOREVER);
+        // Enter critical section
+        k_mutex_lock(&p->lock, K_FOREVER);
         {
-            if (gMutVarWks.tabWks[slotId].ownerThread == k_current_get())
+            // If current thread is the owner, unlock operation can be performed. Else returns NOK.
+            if (p->ownerThread == k_current_get())
             {
 #if P_SYNCHRO_MUTEX_DEBUG == 1
                 printk("\r\nP_MUTEX: Slot id %d - UnLock - valid thread %08lX\r\n", //
                        slotId,                                                      //
-                       (unsigned long int) gMutVarWks.tabWks[slotId].ownerThread);  //
+                       (unsigned long int) p->ownerThread);                         //
 #endif
-                if (gMutVarWks.tabWks[slotId].lockCounter > 0)
+                // Decrement lock counter.
+                // If reaches 0, signal to all trying lock that mutex has been unlocked by owner thread.
+                if (p->lockCounter > 0)
                 {
-                    gMutVarWks.tabWks[slotId].lockCounter--;
-                    if (gMutVarWks.tabWks[slotId].lockCounter == 0)
+                    p->lockCounter--;
+                    if (p->lockCounter == 0)
                     {
 #if P_SYNCHRO_MUTEX_DEBUG == 1
                         printk("\r\nP_MUTEX: Slot id %d - UnLock - no owner, signal all from %08lX\r\n", //
                                slotId,                                                                   //
                                (unsigned long int) k_current_get());                                     //
 #endif
-                        gMutVarWks.tabWks[slotId].ownerThread = NULL;
-                        result = P_SYNCHRO_CONDITION_SignalAll(gMutVarWks.tabWks[slotId].condVarHdl);
+                        p->ownerThread = NULL;
+                        // Result of signal all indicates NO_WAITERS if no thread are trying to lock this mutex.
+                        // Else, OK is returned.
+                        result = P_SYNCHRO_CONDITION_SignalAll(p->condVarHdl);
                     }
                     else
                     {
+                        // Waiters (even if exist) are ignored if lock counter is > 0
                         result = E_SYNCHRO_RESULT_NO_WAITERS;
                     }
                 }
@@ -766,10 +809,11 @@ eSynchroResult P_SYNCHRO_MUTEX_Unlock(tMutVarHandle slotId)
                 result = E_SYNCHRO_RESULT_NOK;
             }
         }
-        k_mutex_unlock(&gMutVarWks.tabWks[slotId].lock);
+        k_mutex_unlock(&p->lock);
         P_SYNCHRO_Mutex_Remove_Api_User(&gMutVarWks.tabWks[slotId]);
 
-        // This result indicates successful with waiters on this mutex. So, yield !!!
+        // This result indicates successful with waiters on this mutex. So, yield to avoid mutex starving
+        // by a thread looping on this mutex.
         if (E_SYNCHRO_RESULT_OK == result)
 
         {
@@ -913,4 +957,246 @@ static inline eSyncStatus P_SYNCHRO_Mutex_Remove_Api_User(tMutVar* p)
     } while (!bTransition);
 
     return newStatus;
+}
+
+// *** Public SOPC synchro api ***
+
+// Initilize condition variable
+SOPC_ReturnStatus Condition_Init(Condition* cond)
+{
+    if (NULL == cond)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_ReturnStatus result = SOPC_STATUS_OK;
+    tCondVarHandle handle = P_SYNCHRO_CONDITION_Initialize();
+    *cond = handle;
+
+    if (handle == UINT32_MAX)
+    {
+        result = SOPC_STATUS_NOK;
+    }
+
+    return result;
+}
+
+// Clear condition variable
+SOPC_ReturnStatus Condition_Clear(Condition* cond)
+{
+    if (NULL == cond)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_ReturnStatus resSOPC = SOPC_STATUS_OK;
+    eSynchroResult resSync = E_SYNCHRO_RESULT_OK;
+
+    tCondVarHandle handle = *cond;
+
+    resSync = P_SYNCHRO_CONDITION_Clear(handle);
+
+    if (E_SYNCHRO_RESULT_OK == resSync)
+    {
+        resSOPC = SOPC_STATUS_OK;
+    }
+    else
+    {
+        resSOPC = SOPC_STATUS_NOK;
+    }
+
+    return resSOPC;
+}
+
+// Must be called between lock and unlock of Mutex ued to wait on condition
+SOPC_ReturnStatus Condition_SignalAll(Condition* cond)
+{
+    if (NULL == cond)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_ReturnStatus resSOPC = SOPC_STATUS_OK;
+    eSynchroResult resSync = E_SYNCHRO_RESULT_OK;
+
+    tCondVarHandle handle = *cond;
+
+    resSync = P_SYNCHRO_CONDITION_SignalAll(handle);
+
+    if (E_SYNCHRO_RESULT_OK == resSync)
+    {
+        resSOPC = SOPC_STATUS_OK;
+    }
+    else if (E_SYNCHRO_RESULT_NO_WAITERS == resSync)
+    {
+        resSOPC = SOPC_STATUS_INVALID_STATE;
+    }
+    else
+    {
+        resSOPC = SOPC_STATUS_NOK;
+    }
+
+    return resSOPC;
+}
+
+// Initialize mutex
+SOPC_ReturnStatus Mutex_Initialization(Mutex* mut)
+{
+    if (NULL == mut)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_ReturnStatus resSOPC = SOPC_STATUS_OK;
+
+    tMutVarHandle handle = P_SYNCHRO_MUTEX_Initialize();
+    *mut = handle;
+    if (UINT32_MAX == handle)
+    {
+        resSOPC = SOPC_STATUS_NOK;
+    }
+
+    return resSOPC;
+}
+
+// Clear mutex
+SOPC_ReturnStatus Mutex_Clear(Mutex* mut)
+{
+    if (NULL == mut)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_ReturnStatus resSOPC = SOPC_STATUS_OK;
+    eSynchroResult resSync = E_SYNCHRO_RESULT_OK;
+
+    tMutVarHandle handle = *mut;
+
+    resSync = P_SYNCHRO_MUTEX_Clear(handle);
+
+    if (E_SYNCHRO_RESULT_OK == resSync)
+    {
+        resSOPC = SOPC_STATUS_OK;
+    }
+    else
+    {
+        resSOPC = SOPC_STATUS_NOK;
+    }
+
+    return resSOPC;
+}
+
+// Lock mutex
+SOPC_ReturnStatus Mutex_Lock(Mutex* mut)
+{
+    if (NULL == mut)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_ReturnStatus resSOPC = SOPC_STATUS_OK;
+    eSynchroResult resSync = E_SYNCHRO_RESULT_OK;
+
+    tMutVarHandle handle = *mut;
+
+    resSync = P_SYNCHRO_MUTEX_Lock(handle);
+
+    if (E_SYNCHRO_RESULT_OK == resSync)
+    {
+        resSOPC = SOPC_STATUS_OK;
+    }
+    else
+    {
+        resSOPC = SOPC_STATUS_NOK;
+    }
+
+    return resSOPC;
+}
+
+// Unlock mutex
+SOPC_ReturnStatus Mutex_Unlock(Mutex* mut)
+{
+    if (NULL == mut)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_ReturnStatus resSOPC = SOPC_STATUS_OK;
+    eSynchroResult resSync = E_SYNCHRO_RESULT_OK;
+
+    tMutVarHandle handle = *mut;
+
+    resSync = P_SYNCHRO_MUTEX_Unlock(handle);
+
+    if (E_SYNCHRO_RESULT_OK == resSync)
+    {
+        resSOPC = SOPC_STATUS_OK;
+    }
+    else
+    {
+        resSOPC = SOPC_STATUS_NOK;
+    }
+
+    return resSOPC;
+}
+
+// Callback which defines lock and unlock implementation
+static void Mutex_UnlockAndTimedWaitCond_LockCallback(void* pMutex)
+{
+    tMutVarHandle* pHandle = (tMutVarHandle*) pMutex;
+    if (pHandle != NULL)
+    {
+        P_SYNCHRO_MUTEX_Lock(*pHandle);
+    }
+
+    return;
+}
+
+static void Mutex_UnlockAndTimedWaitCond_UnLockCallback(void* pMutex)
+{
+    tMutVarHandle* pHandle = (tMutVarHandle*) pMutex;
+    if (pHandle != NULL)
+    {
+        P_SYNCHRO_MUTEX_Unlock(*pHandle);
+    }
+    return;
+}
+
+// Lock on return. Return SOPC_STATUS_TIMEOUT in case of timeout before condition signaled
+SOPC_ReturnStatus Mutex_UnlockAndTimedWaitCond(Condition* cond, Mutex* mut, uint32_t milliSecs)
+{
+    if (NULL == cond || NULL == mut)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_ReturnStatus resSOPC = SOPC_STATUS_OK;
+    eSynchroResult resSync = E_SYNCHRO_RESULT_OK;
+
+    tMutVarHandle handleMut = *mut;
+    tCondVarHandle handleCond = *cond;
+
+    resSync = P_SYNCHRO_CONDITION_UnlockAndWait(handleCond,                                  //
+                                                &handleMut,                                  //
+                                                Mutex_UnlockAndTimedWaitCond_LockCallback,   //
+                                                Mutex_UnlockAndTimedWaitCond_UnLockCallback, //
+                                                milliSecs);                                  //
+
+    switch (resSync)
+    {
+    case E_SYNCHRO_RESULT_OK:
+        resSOPC = SOPC_STATUS_OK;
+        break;
+    case E_SYNCHRO_RESULT_TMO:
+        resSOPC = SOPC_STATUS_TIMEOUT;
+        break;
+    default:
+        resSOPC = SOPC_STATUS_NOK;
+        break;
+    }
+
+    return resSOPC;
+}
+
+// Lock on return
+SOPC_ReturnStatus Mutex_UnlockAndWaitCond(Condition* cond, Mutex* mut)
+{
+    return Mutex_UnlockAndTimedWaitCond(cond, mut, UINT32_MAX);
 }

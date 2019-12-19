@@ -24,6 +24,8 @@
 
 #include "sopc_enums.h"
 
+/*****Private synchro api*****/
+
 #define MAX_COND_VAR_WAITERS (8)
 #define MAX_MUT_VAR (32)
 #define MAX_COND_VAR (MAX_MUT_VAR * 2)
@@ -44,6 +46,8 @@ typedef uint32_t tMutVarHandle;
 typedef void (*pLockCb)(void*);
 typedef void (*pUnlockCb)(void*);
 
+// Condition variable API
+
 tCondVarHandle P_SYNCHRO_CONDITION_Initialize(void);
 eSynchroResult P_SYNCHRO_CONDITION_Clear(tCondVarHandle syncId);
 eSynchroResult P_SYNCHRO_CONDITION_SignalAll(tCondVarHandle syncId);
@@ -53,9 +57,16 @@ eSynchroResult P_SYNCHRO_CONDITION_UnlockAndWait(tCondVarHandle syncId,
                                                  pUnlockCb cbUnlock,
                                                  uint32_t timeoutMs);
 
+// Mutex variable API
+
 tMutVarHandle P_SYNCHRO_MUTEX_Initialize(void);
 eSynchroResult P_SYNCHRO_MUTEX_Clear(tMutVarHandle idSlot);
 eSynchroResult P_SYNCHRO_MUTEX_Lock(tMutVarHandle idSlot);
 eSynchroResult P_SYNCHRO_MUTEX_Unlock(tMutVarHandle idSlot);
+
+/*****Public synchro api*****/
+
+typedef tCondVarHandle Condition;
+typedef tMutVarHandle Mutex;
 
 #endif /* SOPC_SYNCHRO_H */
