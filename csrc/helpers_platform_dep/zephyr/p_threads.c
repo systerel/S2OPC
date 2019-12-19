@@ -27,6 +27,7 @@
 #include <stdlib.h>
 
 #include "sopc_enums.h" /* s2opc includes */
+#include "sopc_mem_alloc.h"
 
 #include "p_threads.h"
 
@@ -41,16 +42,22 @@
 #define K_NO_WAIT 0
 #endif
 
+// *** Private enumeration definition ***
+
 typedef enum E_THREAD_STATUS
 {
     E_THREAD_STATUS_NOT_INITIALIZED,
     E_THREAD_STATUS_INITIALIZED,
 } eThreadStatus;
 
+// *** Public thread handle definition ***
+
 struct tThreadHandle
 {
     volatile uint32_t slotId;
 };
+
+// *** Private thread workspace definition ***
 
 typedef struct T_THREAD_WKS
 {
@@ -66,6 +73,8 @@ typedef struct T_THREAD_WKS
     void* userContext;
 } tThreadWks __attribute__((aligned(STACK_ALIGN)));
 
+// *** Private threads workspaces tab ***
+
 static struct T_GLOBAL_THREAD_WKS
 {
     volatile uint32_t bInitialized;
@@ -73,6 +82,11 @@ static struct T_GLOBAL_THREAD_WKS
     tThreadWks tab[MAX_NB_THREADS];
 } gGlbThreadWks;
 
+// Thread initialization. Called from P_THREAD_Create
+static eThreadResult P_THREAD_Init(tThreadHandle* pWks, ptrFct callback, void* pCtx, const char* taskName);
+static eThreadResult P_THREAD_Join(tThreadHandle* pWks);
+
+// Thread internal callback
 static void P_THREAD_InternalCallback(void* pContext, void* pNotUsed1, void* pNotUsed2)
 {
     (void) pNotUsed1;
@@ -98,6 +112,9 @@ static void P_THREAD_InternalCallback(void* pContext, void* pNotUsed1, void* pNo
     return;
 }
 
+// *** Private threads api ***
+
+// Thread creation
 tThreadHandle* P_THREAD_Create(ptrFct callback, void* pCtx, const char* taskName)
 {
     eThreadResult result = E_THREAD_RESULT_OK;
@@ -108,7 +125,7 @@ tThreadHandle* P_THREAD_Create(ptrFct callback, void* pCtx, const char* taskName
         return NULL;
     }
 
-    pWks = calloc(1, sizeof(struct tThreadHandle));
+    pWks = SOPC_Calloc(1, sizeof(struct tThreadHandle));
 
     if (NULL == pWks)
     {
@@ -122,13 +139,14 @@ tThreadHandle* P_THREAD_Create(ptrFct callback, void* pCtx, const char* taskName
 
     if (E_THREAD_RESULT_OK != result)
     {
-        free(pWks);
+        SOPC_Free(pWks);
         pWks = NULL;
     }
 
     return pWks;
 }
 
+// Thread destruction. Shall be called after join successful if multi join is used.
 eThreadResult P_THREAD_Destroy(tThreadHandle** ppWks)
 {
     eThreadResult result = E_THREAD_RESULT_OK;
@@ -138,15 +156,28 @@ eThreadResult P_THREAD_Destroy(tThreadHandle** ppWks)
         return E_THREAD_RESULT_INVALID_PARAMETERS;
     }
 
-    (void) P_THREAD_Join(*ppWks);
+    result = P_THREAD_Join(*ppWks);
 
-    free(*ppWks);
-    *ppWks = NULL;
+    if (E_THREAD_RESULT_OK == result)
+    {
+#if (P_THREAD_DEBUG == 1)
+        printk("\r\nP_THREAD: Thread joined, handle well destroyed\r\n");
+#endif
+        SOPC_Free(*ppWks);
+        *ppWks = NULL;
+    }
+    else
+    {
+#if (P_THREAD_DEBUG == 1)
+        printk("\r\nP_THREAD: Thread not joined, handle NOT destroyed\r\n");
+#endif
+    }
 
     return result;
 }
 
-eThreadResult P_THREAD_Init(tThreadHandle* pWks, ptrFct callback, void* pCtx, const char* taskName)
+// Thread initialization
+static eThreadResult P_THREAD_Init(tThreadHandle* pWks, ptrFct callback, void* pCtx, const char* taskName)
 {
     eThreadResult result = E_THREAD_RESULT_OK;
     uint32_t slotId = 0;
@@ -260,7 +291,8 @@ eThreadResult P_THREAD_Init(tThreadHandle* pWks, ptrFct callback, void* pCtx, co
     return result;
 }
 
-eThreadResult P_THREAD_Join(tThreadHandle* pWks)
+// Thread join
+static eThreadResult P_THREAD_Join(tThreadHandle* pWks)
 {
     eThreadResult result = E_THREAD_RESULT_OK;
 
@@ -351,6 +383,9 @@ eThreadResult P_THREAD_Join(tThreadHandle* pWks)
     return result;
 }
 
+// *** Public SOPC threads api ***
+
+// Create a thread
 SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), void* startArgs, const char* taskName)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
@@ -384,7 +419,7 @@ SOPC_ReturnStatus SOPC_Thread_Join(Thread thread)
            thread->slotId,                                        //
            (long unsigned int) thread);                           //
 #endif
-    eThreadResult resultPTHREAD = P_THREAD_Join(thread);
+    eThreadResult resultPTHREAD = P_THREAD_Destroy(&thread);
 
     if (resultPTHREAD == E_THREAD_RESULT_OK)
     {
@@ -392,7 +427,7 @@ SOPC_ReturnStatus SOPC_Thread_Join(Thread thread)
         printk("\r\nP_THREAD: Destroy for thread handle = %08lX\r\n", //
                (long unsigned int) thread);                           //
 #endif
-        P_THREAD_Destroy(&thread);
+        // P_THREAD_Destroy(&thread);
         resultSOPC = SOPC_STATUS_OK;
     }
     else
@@ -405,10 +440,4 @@ SOPC_ReturnStatus SOPC_Thread_Join(Thread thread)
     }
 
     return resultSOPC;
-}
-
-SOPC_ReturnStatus SOPC_Sleep(unsigned int milliseconds)
-{
-    k_sleep(milliseconds);
-    return SOPC_STATUS_OK;
 }

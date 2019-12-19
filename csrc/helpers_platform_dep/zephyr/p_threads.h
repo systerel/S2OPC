@@ -24,6 +24,10 @@
 
 #include "sopc_enums.h"
 
+#include "p_synchro.h"
+
+/*****Private threads api*****/
+
 #define MAX_NB_THREADS (8)
 #define MAX_STACK_SIZE (4096)
 #define SOPC_THREAD_PRIORITY (5)
@@ -36,14 +40,19 @@ typedef enum E_THREAD_RESULT
     E_THREAD_RESULT_JOINING
 } eThreadResult;
 
-typedef struct tThreadHandle tThreadHandle;
-typedef void* (*ptrFct)(void* pCtx);
+typedef struct tThreadHandle tThreadHandle; // Thread handle
+typedef void* (*ptrFct)(void* pCtx);        // Thread callback
+
+// Create an handle of a thread and initialize it.
+tThreadHandle* P_THREAD_Create(ptrFct callback,       // Callback
+                               void* pCtx,            // Context
+                               const char* taskName); // Thread name
+
+// Join and destroy a thread
+eThreadResult P_THREAD_Destroy(tThreadHandle** ppWks);
+
+/*****Public threads api*****/
 
 typedef tThreadHandle* Thread;
-
-tThreadHandle* P_THREAD_Create(ptrFct callback, void* pCtx, const char* taskName);
-eThreadResult P_THREAD_Init(tThreadHandle* pWks, ptrFct callback, void* pCtx, const char* taskName);
-eThreadResult P_THREAD_Join(tThreadHandle* pWks);
-eThreadResult P_THREAD_Destroy(tThreadHandle** ppWks);
 
 #endif /* SRC_P_THREAD_H_ */
