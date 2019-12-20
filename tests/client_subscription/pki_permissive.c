@@ -60,10 +60,10 @@ SOPC_ReturnStatus SOPC_PKIPermissive_Create(SOPC_PKIProvider** ppPKI)
     *(SOPC_FnValidateCertificate*) (&pki->pFnValidateCertificate) = &PKIPermissive_ValidateAnything;
     SOPC_GCC_DIAGNOSTIC_RESTORE
 
-    pki->pUserTrustedIssuersList = NULL;
-    pki->pUserIssuedCertsList = NULL;
-    pki->pUserUntrustedIssuersList = NULL;
-    pki->pUserCertRevocList = NULL; // Can be NULL
+    pki->pTrustedIssuerRootsList = NULL;
+    pki->pIssuedCertsList = NULL;
+    pki->pUntrustedIssuerRootsList = NULL;
+    pki->pCertRevocList = NULL; // Can be NULL
     pki->pUserData = NULL;
     *ppPKI = pki;
 
