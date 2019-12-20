@@ -449,7 +449,10 @@ if (EXPAT_FOUND)
 	target_link_libraries(check_helpers PRIVATE s2opc-xml-loaders-expat)
 	target_compile_definitions(check_helpers PRIVATE "WITH_EXPAT")
 endif()
-
+# Manage the Nano profiles extended mode
+if (WITH_NANO_EXTENDED)
+  target_compile_definitions(check_helpers PRIVATE "WITH_NANO_EXTENDED")
+endif()
 
 s2opc_unit_test(check_helpers)
 

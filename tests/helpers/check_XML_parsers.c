@@ -39,7 +39,12 @@
 #include "sopc_macros.h"
 #include "sopc_user_app_itf.h"
 
+#if 0 == WITH_NANO_EXTENDED
+#define XML_UA_NODESET_NAME "s2opc_nano.xml"
+#else
 #define XML_UA_NODESET_NAME "s2opc.xml"
+#endif
+
 #define XML_SRV_CONFIG_NAME "S2OPC_Test_XML_Config.xml"
 
 // Avoid unused functions and variables when EXPAT is not available

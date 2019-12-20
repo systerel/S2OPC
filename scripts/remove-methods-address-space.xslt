@@ -21,7 +21,8 @@ under the License.
 This script removes the method nodes instances (but not the method nodes in type definition)
 
 Script use example:
-saxonb-xslt -s:$S2OPC_REPO/tests/data/address_space/s2opc.xml -xsl:$S2OPC_REPO/scripts/remove-methods-address-space.xslt -o:$S2OPC_REPO/tests/data/address_space/s2opc_nano.xml -->
+saxonb-xslt -s:$S2OPC_REPO/tests/data/address_space/s2opc_origin.xml -xsl:$S2OPC_REPO/scripts/remove-methods-address-space.xslt -o:$S2OPC_REPO/tests/data/address_space/s2opc_nano_tmp.xml
+-->
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns="http://opcfoundation.org/UA/2011/03/UANodeSet.xsd" xpath-default-namespace="http://opcfoundation.org/UA/2011/03/UANodeSet.xsd" version="2.0"  >
     <xsl:output method="xml"  encoding="UTF-8" indent="yes"/>
 
@@ -37,9 +38,9 @@ saxonb-xslt -s:$S2OPC_REPO/tests/data/address_space/s2opc.xml -xsl:$S2OPC_REPO/s
       </xsl:if>
     </xsl:template>
 
-    <!-- delete children variables of method nodes deleted -->
+    <!-- delete children variables of method nodes deleted + MaxNodesPerMethodCall -->
     <xsl:template match="UAVariable">
-      <xsl:if test="not(@ParentNodeId = //UAMethod[not(count(@MethodDeclarationId)=0)]/@NodeId)">
+      <xsl:if test="not(@ParentNodeId = //UAMethod[not(count(@MethodDeclarationId)=0)]/@NodeId) and not(@NodeId = 'i=11709')">
         <xsl:copy>
             <xsl:apply-templates select="@*|node()"/>
         </xsl:copy>
