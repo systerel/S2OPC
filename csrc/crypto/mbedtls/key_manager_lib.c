@@ -817,12 +817,11 @@ SOPC_ReturnStatus SOPC_KeyManager_CertificateList_FindCertInList(const SOPC_Cert
 
     const mbedtls_x509_crt* haystack = &pList->crt;
     const mbedtls_x509_crt* needle = &pCert->crt;
-    for (; NULL != haystack; haystack = haystack->next)
+    for (; (!*pbMatch) && NULL != haystack; haystack = haystack->next)
     {
         if (haystack->raw.len == needle->raw.len && 0 == memcmp(haystack->raw.p, needle->raw.p, needle->raw.len))
         {
             *pbMatch = true;
-            haystack = NULL;
         }
     }
 
