@@ -279,6 +279,7 @@ static void PKIProviderStack_Free(SOPC_PKIProvider* pPKI)
 static SOPC_PKIProvider* create_pkistack(SOPC_CertificateList* issuers,
                                          SOPC_CertificateList* issued,
                                          SOPC_CertificateList* untrusted,
+                                         SOPC_CertificateList* links,
                                          SOPC_CRLList* crl,
                                          void* pUserData)
 {
@@ -295,6 +296,7 @@ static SOPC_PKIProvider* create_pkistack(SOPC_CertificateList* issuers,
         pki->pTrustedIssuerRootsList = issuers;
         pki->pIssuedCertsList = issued;
         pki->pUntrustedIssuerRootsList = untrusted;
+        pki->pIssuerLinksList = links;
         pki->pCertRevocList = crl;
         pki->pUserData = pUserData;
     }
@@ -354,9 +356,10 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_SerializedCertificate* pCert
     return status;
 }
 
-SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssuers,
+SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssuerRoots,
                                                         char** lPathIssuedCerts,
-                                                        char** lPathUntrustedIssuers,
+                                                        char** lPathUntrustedIssuerRoots,
+                                                        char** lPathIssuerLinks,
                                                         char** lPathCRL,
                                                         SOPC_PKIProvider** ppPKI)
 {

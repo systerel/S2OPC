@@ -81,30 +81,44 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_SerializedCertificate* pCert
  *                    "issued certificates". Each issued certificate must have its whole signing CA chain in the
  *                    untrusted issuers or the trusted issuers up to the root CA.
  *
+ *                  In addition, there are two more concepts:
+ *                  - A link CA is part of the certificate validation chain.
+ *                    All links between a certificate and a root certificate must be provided.
+ *                  - A root CA is all always trusted, even if there are other root CAs that signed it.
+ *                    Hence the parent of root CAs will never be checked, and the validation stops on root CAs.
+ *
  *                  The list of Certificate Revocation List (CRL) must contain exactly one list for each CA of the
- *                  trusted issuers CA list and for each of the untrusted issuers CA list.
+ *                  provided CAs, either link or root, trusted or untrusted.
  *
  *                  Issued certificates should not have CRLs, as they cannot be used to trust any other certificate.
  *                  When an issued certificate is used to protect a Secure Channel, it's signing chain will be verified.
  *                  For instance, if the certificate is not self signed and appears on the CRL of its signing CA,
  *                  the connection will fail as the certificate is in fact invalid.
  *
- * \param lPathTrustedIssuers   A pointer to an array of paths to each trusted issuer to use in the validation chain.
+ * \param lPathTrustedIssuerRoots   A pointer to an array of paths to root trusted issuers of the validation chains.
  *                  The array must contain a NULL pointer to indicate its end.
  *                  Each path is a zero-terminated relative path to the certificate from the current working directory.
- * \param lPathIssuedCerts  A pointer to an array of paths to each issued certificate to use in the validation chain.
+ * \param lPathIssuedCerts  A pointer to an array of paths to issued certificates.
  *                  The array must contain a NULL pointer to indicate its end.
  *                  Each path is a zero-terminated relative path to the certificate from the current working directory.
- * \param lPathUntrustedIssuers A pointer to an array of paths to each untrusted issuer to use in the validation chain.
-                    Each issued certificate must have its signing certificate chain in the untrusted issuers list.
+ * \param lPathUntrustedIssuerRoots A pointer to an array of paths to root untrusted issuers of the validation chains.
  *                  The array must contain a NULL pointer to indicate its end.
  *                  Each path is a zero-terminated relative path to the certificate from the current working directory.
+ * \param lPathIssuerLinks  A pointer to an array of paths to intermediate certificate authorities.
+ *                  This list contain both the trusted and untrusted intermediate issuers.
+                    This list must be ordered so that certificate signed by a parent must be present in the list
+                    before its signing parent.
+ *                  Each issued certificate must have its signing certificate chain in this list.
  * \param lPathCRL  A pointer to an array of paths to each certificate revocation list to use.
  *                  Each CA of the trusted issuers list and the untrusted issuers list must have a CRL in the list.
  *                  The array must contain a NULL pointer to indicate its end.
  *                  Each path is a zero-terminated relative path to the CRL from the current working directory.
  * \param ppPKI     A valid pointer to the newly created PKIProvider. You should free such provider with
  *                  SOPC_PKIProvider_Free().
+ *
+ * \warning         The \p lPathsIssuerLinksList must be sorted, and certificates must be provided in the child ->
+ *                  parent order. There may be several chains provided in the list, but a signed certificate
+ *                  must always be provided before the certificate that signed it.
  *
  * \note            Content of the pki is unspecified when return value is not SOPC_STATUS_OK.
  *
@@ -113,9 +127,10 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_SerializedCertificate* pCert
  * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
  *                  and SOPC_STATUS_NOK when there was an error.
  */
-SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssuers,
+SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssuerRoots,
                                                         char** lPathIssuedCerts,
-                                                        char **lPathUntrustedIssuers,
+                                                        char** lPathUntrustedIssuerRoots,
+                                                        char** lPathIssuerLinks,
                                                         char** lPathCRL,
                                                         SOPC_PKIProvider** ppPKI);
 
