@@ -58,23 +58,23 @@ static SOPC_ClientHelper_Security valid_security_none = {.security_policy = SOPC
 static SOPC_ClientHelper_Security valid_security_sign_b256 = {.security_policy = SOPC_SecurityPolicy_Basic256_URI,
                                                               .security_mode = OpcUa_MessageSecurityMode_Sign,
                                                               .path_cert_auth = "./trusted/cacert.der",
-                                                              .path_cert_srv = "TODO",
-                                                              .path_cert_cli = "TODO",
-                                                              .path_key_cli = "TODO",
-                                                              .policyId = "TODO",
-                                                              .username = "TODO",
-                                                              .password = "TODO"};
+                                                              .path_cert_srv = "path_cert_srv",
+                                                              .path_cert_cli = "path_cert_cli",
+                                                              .path_key_cli = "path_key_cli",
+                                                              .policyId = "policyId",
+                                                              .username = "username",
+                                                              .password = "password"};
 
 static SOPC_ClientHelper_Security valid_security_signAndEncrypt_b256 = {
     .security_policy = SOPC_SecurityPolicy_Basic256_URI,
     .security_mode = OpcUa_MessageSecurityMode_SignAndEncrypt,
     .path_cert_auth = "./trusted/cacert.der",
-    .path_cert_srv = "TODO",
-    .path_cert_cli = "TODO",
-    .path_key_cli = "TODO",
-    .policyId = "TODO",
-    .username = "TODO",
-    .password = "TODO"};
+    .path_cert_srv = "path_cert_srv",
+    .path_cert_cli = "path_cert_cli",
+    .path_key_cli = "path_key_cli",
+    .policyId = "policyId",
+    .username = "username",
+    .password = "password"};
 
 static void datachange_callback_none(const int32_t c_id, const char* node_id, const SOPC_DataValue* value)
 {
