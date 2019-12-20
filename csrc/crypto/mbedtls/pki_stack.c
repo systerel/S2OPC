@@ -358,9 +358,10 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_SerializedCertificate* pCert
 }
 
 SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssuerRoots,
-                                                        char** lPathIssuedCerts,
+                                                        char** lPathTrustedIssuerLinks,
                                                         char** lPathUntrustedIssuerRoots,
-                                                        char** lPathIssuerLinks,
+                                                        char** lPathUntrustedIssuerLinks,
+                                                        char** lPathIssuedCerts,
                                                         char** lPathCRL,
                                                         SOPC_PKIProvider** ppPKI)
 {
@@ -460,7 +461,7 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
 
     /* Check the CRL-CA association before creating the PKI.
      * Untrusted list contains all known root CAs,
-     * and issuer lLinks contains all intermediate CAs. */
+     * and issuer links contains all intermediate CAs. */
     bool bRootsCRL = false;
     bool bLinksCRL = false;
     if (SOPC_STATUS_OK == status)
@@ -485,7 +486,7 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
         if (!bLinksCRL)
         {
             printf(
-                "> PKI creation error: Not all certificate authorities in given issuer lLinks have a single "
+                "> PKI creation error: Not all certificate authorities in given issuer links have a single "
                 "certificate revocation list! Certificates issued by these CAs will be refused.\n");
         }
     }
