@@ -1646,18 +1646,16 @@ int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
     bool containsContinuationPoint = ContainsContinuationPoints(continuationPointsArray, nbElements);
     bool maxRequestNumberReached = false;
 
+    uint32_t j = 0;
+    for (; j < CfgMaxBrowseNextRequests && containsContinuationPoint && SOPC_STATUS_OK == status; j++)
     {
-        uint32_t i = 0;
-        for (; i < CfgMaxBrowseNextRequests && containsContinuationPoint && SOPC_STATUS_OK == status; i++)
-        {
-            status = BrowseNext(connectionId, statusCodes, browseResultsListArray, nbElements, continuationPointsArray);
-            containsContinuationPoint = ContainsContinuationPoints(continuationPointsArray, nbElements);
-        }
-        if (i >= CfgMaxBrowseNextRequests && ContainsContinuationPoints(continuationPointsArray, nbElements))
-        {
-            status = SOPC_STATUS_NOK;
-            maxRequestNumberReached = true;
-        }
+        status = BrowseNext(connectionId, statusCodes, browseResultsListArray, nbElements, continuationPointsArray);
+        containsContinuationPoint = ContainsContinuationPoints(continuationPointsArray, nbElements);
+    }
+    if (j >= CfgMaxBrowseNextRequests && ContainsContinuationPoints(continuationPointsArray, nbElements))
+    {
+        status = SOPC_STATUS_NOK;
+        maxRequestNumberReached = true;
     }
 
     /* process browseResultsListArray */

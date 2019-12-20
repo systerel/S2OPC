@@ -874,7 +874,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_DeleteSubscription(const SOPC_LibSub_Connect
     SOPC_ReturnStatus mutStatus = Mutex_Lock(&mutex);
     assert(SOPC_STATUS_OK == mutStatus);
 
-    /* Retrieve the machine to disconnect */
+    /* Retrieve the machine */
     pSM = SOPC_SLinkedList_FindFromId(pListClient, cliId);
     if (NULL == pSM)
     {
