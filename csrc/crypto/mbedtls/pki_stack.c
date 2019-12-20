@@ -373,6 +373,51 @@ static SOPC_CertificateList* load_certificate_list(char** paths, SOPC_ReturnStat
     return certs;
 }
 
+/** \brief Create the prev list if required */
+static SOPC_ReturnStatus link_certificates(SOPC_CertificateList** ppPrev, SOPC_CertificateList** ppNext)
+{
+    assert(NULL != ppPrev && NULL != ppNext);
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_CertificateList* prev = *ppPrev;
+    SOPC_CertificateList* next = *ppNext;
+    /* Link two existing lists */
+    if (NULL != prev && NULL != next)
+    {
+        mbedtls_x509_crt* crt = &prev->crt;
+        /* crt should not be NULL, as either untrusted is NULL or at least one cert was created */
+        assert(NULL != crt);
+        while (NULL != crt->next)
+        {
+            crt = crt->next;
+        }
+        /* crt is now the last certificate of the chain, link it with trusted */
+        crt->next = &next->crt;
+    }
+    /* The second list exists, but not the first */
+    else if (NULL != next)
+    {
+        /* When there are no untrusted, we must create the structure */
+        /* TODO: avoid the duplication of the first element of trusted */
+        status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(next->crt.raw.p, (uint32_t) next->crt.raw.len, ppPrev);
+        if (SOPC_STATUS_OK == status)
+        {
+            prev = *ppPrev;
+            prev->crt.next = &next->crt;
+        }
+    }
+    /* The first list exists, but not the second: nothing to do */
+    else if (NULL != prev)
+    {
+    }
+    else
+    {
+        assert(false && "TODO: handle the case where NULL trusted and NULL untrusted");
+    }
+
+    return status;
+}
+
 SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssuerRoots,
                                                         char** lPathTrustedIssuerLinks,
                                                         char** lPathUntrustedIssuerRoots,
@@ -413,36 +458,15 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
         cur = *lPathCRL;
     }
 
-    /* Link the untrusted list with the trusted list */
+    /* Link the untrusted lists with the trusted lists
+     * (untrusted roots -> trusted roots, untrusted links -> trusted links) */
     if (SOPC_STATUS_OK == status)
     {
-        if (NULL != lRootsUntrusted && NULL != lRootsTrusted)
-        {
-            mbedtls_x509_crt* crt = &lRootsUntrusted->crt;
-            /* crt should not be NULL, as either untrusted is NULL or at least one cert was created */
-            assert(NULL != crt);
-            while (NULL != crt->next)
-            {
-                crt = crt->next;
-            }
-            /* crt is now the last certificate of the chain, link it with trusted */
-            crt->next = &lRootsTrusted->crt;
-        }
-        else if (NULL != lRootsTrusted)
-        {
-            /* When there are no untrusted, we must create the structure */
-            /* TODO: avoid the duplication of the first element of trusted */
-            status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(
-                lRootsTrusted->crt.raw.p, (uint32_t) lRootsTrusted->crt.raw.len, &lRootsUntrusted);
-            if (SOPC_STATUS_OK == status)
-            {
-                lRootsUntrusted->crt.next = &lRootsTrusted->crt;
-            }
-        }
-        else
-        {
-            assert(false && "TODO: handle the case where NULL trusted and NULL untrusted");
-        }
+        status = link_certificates(&lRootsUntrusted, &lRootsTrusted);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = link_certificates(&lLinksUntrusted, &lLinksTrusted);
     }
 
     /* Check the CRL-CA association before creating the PKI.
