@@ -358,6 +358,8 @@ int32_t SOPC_ClientHelper_GetEndpoints(const char* endpointUrl, SOPC_ClientHelpe
     All parameters are copied and can be freed by the caller.
  @param endpointUrl
    Zero-terminated path to server URL
+ @param security
+    security configuration to use (policy, mode, certificates, ...)
  @return
     If this operation succeeded, return a connection id > 0.
     If invalid endpointUrl detected, return -1.

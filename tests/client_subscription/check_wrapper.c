@@ -878,7 +878,11 @@ START_TEST(test_wrapper_browse)
     }
     /* browse too many browse requests */
     {
-        // TODO
+        // FreeOPCUA is ignoring the maxReferencesPerNode and sends only one response,
+        // no BrowseNextRequest. I need at least one or two to trigger the "too many"
+        // browse next requests.
+        // This test should work with a server that is not ignoring maxReferencesPerNode.
+        // TODO see if upgrading FreeOPCUA solves the problem, else use another one
         // SOPC_ClientHelper_BrowseRequest browseRequest[1] = {
         //        { .nodeId = "ns=0;i=7617", .direction = 0, .referenceTypeId = "ns=0;i=33", .includeSubtypes = true }
         //};
