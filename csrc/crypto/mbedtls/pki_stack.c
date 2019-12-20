@@ -357,6 +357,22 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_SerializedCertificate* pCert
     return status;
 }
 
+static SOPC_CertificateList* load_certificate_list(char** paths, SOPC_ReturnStatus* status)
+{
+    assert(NULL != paths && NULL != certs);
+
+    SOPC_CertificateList* certs = NULL;
+    char* cur = *paths;
+    while (NULL != cur && SOPC_STATUS_OK == *status)
+    {
+        *status = SOPC_KeyManager_Certificate_CreateOrAddFromFile(cur, certs);
+        ++paths;
+        cur = *paths;
+    }
+
+    return certs;
+}
+
 SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssuerRoots,
                                                         char** lPathTrustedIssuerLinks,
                                                         char** lPathUntrustedIssuerRoots,
@@ -382,41 +398,11 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
      * we create a single list, and chain them: untrusted -> trusted.
      */
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_CertificateList* lRootsUntrusted = NULL;
-    char* cur = *lPathUntrustedIssuerRoots;
-    while (NULL != cur && SOPC_STATUS_OK == status)
-    {
-        status = SOPC_KeyManager_Certificate_CreateOrAddFromFile(cur, &lRootsUntrusted);
-        ++lPathUntrustedIssuerRoots;
-        cur = *lPathUntrustedIssuerRoots;
-    }
-
-    SOPC_CertificateList* lIssued = NULL;
-    cur = *lPathIssuedCerts;
-    while (NULL != cur && SOPC_STATUS_OK == status)
-    {
-        status = SOPC_KeyManager_Certificate_CreateOrAddFromFile(cur, &lIssued);
-        ++lPathIssuedCerts;
-        cur = *lPathIssuedCerts;
-    }
-
-    SOPC_CertificateList* lRootsTrusted = NULL;
-    cur = *lPathTrustedIssuerRoots;
-    while (NULL != cur && SOPC_STATUS_OK == status)
-    {
-        status = SOPC_KeyManager_Certificate_CreateOrAddFromFile(cur, &lRootsTrusted);
-        ++lPathTrustedIssuerRoots;
-        cur = *lPathTrustedIssuerRoots;
-    }
-
-    SOPC_CertificateList* lLinks = NULL;
-    cur = *lPathIssuerLinks;
-    while (NULL != cur && SOPC_STATUS_OK == status)
-    {
-        status = SOPC_KeyManager_Certificate_CreateOrAddFromFile(cur, &lLinks);
-        ++lPathIssuerLinks;
-        cur = *lPathIssuerLinks;
-    }
+    SOPC_CertificateList* lRootsTrusted = load_certificate_list(lPathTrustedIssuerRoots, &status);
+    SOPC_CertificateList* lLinksTrusted = load_certificate_list(lPathTrustedIssuerLinks, &status);
+    SOPC_CertificateList* lRootsUntrusted = load_certificate_list(lPathUntrustedIssuerRoots, &status);
+    SOPC_CertificateList* lLinksUntrusted = load_certificate_list(lPathUntrustedIssuerLinks, &status);
+    SOPC_CertificateList* lIssued = load_certificate_list(lPathIssuedCerts, &status);
 
     SOPC_CRLList* lCrls = NULL;
     cur = *lPathCRL;
