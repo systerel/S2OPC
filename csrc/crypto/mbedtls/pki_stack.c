@@ -417,11 +417,11 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
         cur = *lPathIssuerLinks;
     }
 
-    SOPC_CRLList* crl = NULL;
+    SOPC_CRLList* lCrls = NULL;
     cur = *lPathCRL;
     while (NULL != cur && SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_CRL_CreateOrAddFromFile(cur, &crl);
+        status = SOPC_KeyManager_CRL_CreateOrAddFromFile(cur, &lCrls);
         ++lPathCRL;
         cur = *lPathCRL;
     }
@@ -467,11 +467,11 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
     {
         /* mbedtls does not verify that each CA has a CRL, so we must do it ourselves.
          * We must fail here, otherwise we can't report misconfigurations to the users */
-        status = SOPC_KeyManager_CertificateList_MatchCRLList(lRootsUntrusted, crl, &bRootsCRL);
+        status = SOPC_KeyManager_CertificateList_MatchCRLList(lRootsUntrusted, lCrls, &bRootsCRL);
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_CertificateList_MatchCRLList(lLinks, crl, &bLinksCRL);
+        status = SOPC_KeyManager_CertificateList_MatchCRLList(lLinks, lCrls, &bLinksCRL);
     }
     if (SOPC_STATUS_OK == status && (!bRootsCRL || !bLinksCRL))
     {
@@ -511,7 +511,7 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
     SOPC_PKIProvider* pki = NULL;
     if (SOPC_STATUS_OK == status)
     {
-        pki = create_pkistack(lRootsTrusted, lIssued, lRootsUntrusted, lLinks, crl, NULL);
+        pki = create_pkistack(lRootsTrusted, lIssued, lRootsUntrusted, lLinks, lCrls, NULL);
         if (NULL == pki)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -531,7 +531,7 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
         SOPC_KeyManager_Certificate_Free(lRootsUntrusted);
         SOPC_KeyManager_Certificate_Free(lIssued);
         SOPC_KeyManager_Certificate_Free(lLinks);
-        SOPC_KeyManager_CRL_Free(crl);
+        SOPC_KeyManager_CRL_Free(lCrls);
         SOPC_Free(pki);
     }
 
