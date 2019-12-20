@@ -217,14 +217,14 @@ static SOPC_ReturnStatus PKIProviderStack_ValidateCertificate(const SOPC_PKIProv
      */
     bool bIssued = false;
     SOPC_ReturnStatus status =
-        SOPC_KeyManager_CertificateList_FindCertInList(pPKI->pUserIssuedCertsList, pToValidate, &bIssued);
+        SOPC_KeyManager_CertificateList_FindCertInList(pPKI->pIssuedCertsList, pToValidate, &bIssued);
     if (SOPC_STATUS_OK != status)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    SOPC_CertificateList* trust_chain = bIssued ? pPKI->pUserUntrustedIssuersList : pPKI->pUserTrustedIssuersList;
-    SOPC_CRLList* cert_crl = pPKI->pUserCertRevocList;
+    SOPC_CertificateList* trust_chain = bIssued ? pPKI->pUntrustedIssuerRootsList : pPKI->pTrustedIssuerRootsList;
+    SOPC_CRLList* cert_crl = pPKI->pCertRevocList;
     /* TODO: Is NULL trust_chain a valid case? */
     if (NULL == trust_chain || NULL == cert_crl)
     {
@@ -270,9 +270,9 @@ static void PKIProviderStack_Free(SOPC_PKIProvider* pPKI)
     /* Deleting the untrusted list will also clear the trusted list, as they are linked.
      * Hence mbedtls will call free on (&pPKI->pUserTrustedIssersList.crt), which is pPKI->pUserTrustedIssersList.
      */
-    SOPC_KeyManager_Certificate_Free(pPKI->pUserUntrustedIssuersList);
-    SOPC_KeyManager_Certificate_Free(pPKI->pUserIssuedCertsList);
-    SOPC_KeyManager_CRL_Free(pPKI->pUserCertRevocList);
+    SOPC_KeyManager_Certificate_Free(pPKI->pUntrustedIssuerRootsList);
+    SOPC_KeyManager_Certificate_Free(pPKI->pIssuedCertsList);
+    SOPC_KeyManager_CRL_Free(pPKI->pCertRevocList);
     SOPC_Free(pPKI);
 }
 
@@ -292,10 +292,10 @@ static SOPC_PKIProvider* create_pkistack(SOPC_CertificateList* issuers,
         *(SOPC_FnValidateCertificate*) (&pki->pFnValidateCertificate) = &PKIProviderStack_ValidateCertificate;
         SOPC_GCC_DIAGNOSTIC_RESTORE
 
-        pki->pUserTrustedIssuersList = issuers;
-        pki->pUserIssuedCertsList = issued;
-        pki->pUserUntrustedIssuersList = untrusted;
-        pki->pUserCertRevocList = crl;
+        pki->pTrustedIssuerRootsList = issuers;
+        pki->pIssuedCertsList = issued;
+        pki->pUntrustedIssuerRootsList = untrusted;
+        pki->pCertRevocList = crl;
         pki->pUserData = pUserData;
     }
 

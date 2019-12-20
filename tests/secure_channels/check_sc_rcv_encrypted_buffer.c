@@ -183,10 +183,10 @@ static void establishSC(void)
         *(SOPC_PKIProvider_Free_Func*) (&pki.pFnFree) = &PKIStub_Free;
         *(SOPC_FnValidateCertificate*) (&pki.pFnValidateCertificate) = &PKIStub_ValidateAnything;
         SOPC_GCC_DIAGNOSTIC_RESTORE
-        pki.pUserTrustedIssuersList = NULL;
-        pki.pUserIssuedCertsList = NULL;
-        pki.pUserUntrustedIssuersList = NULL;
-        pki.pUserCertRevocList = NULL;
+        pki.pTrustedIssuerRootsList = NULL;
+        pki.pIssuedCertsList = NULL;
+        pki.pUntrustedIssuerRootsList = NULL;
+        pki.pCertRevocList = NULL;
         pki.pUserData = NULL;
     }
 
