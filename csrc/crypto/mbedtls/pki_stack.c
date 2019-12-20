@@ -232,19 +232,30 @@ static SOPC_ReturnStatus PKIProviderStack_ValidateCertificate(const SOPC_PKIProv
     }
 
     /* Assumes that mbedtls does not modify the certificates */
-    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
     mbedtls_x509_crt* mbed_ca = (mbedtls_x509_crt*) (&trust_chain->crt);
+    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
     mbedtls_x509_crt* mbed_chall = (mbedtls_x509_crt*) (&pToValidate->crt);
     mbedtls_x509_crl* mbed_crl = (mbedtls_x509_crl*) (&cert_crl->crl);
     SOPC_GCC_DIAGNOSTIC_RESTORE
 
-    /* Check certificate usages and certificate chain */
+    /* Check certificate usages */
     status = check_key_usages(mbed_chall);
     if (SOPC_STATUS_OK != status)
     {
         *error = SOPC_CertificateValidationError_UseNotAllowed;
     }
 
+    /* Link certificate to validate with intermediate certificates (trusted links or untrusted links) */
+    mbedtls_x509_crt* end_of_chall = mbed_chall;
+    assert(NULL != end_of_chall);
+    while (NULL != end_of_chall->next)
+    {
+        end_of_chall = end_of_chall->next;
+    }
+    /* end_of_chall is now the last certificate of the chain, link it with links */
+    end_of_chall->next = bIssued ? pPKI->pUntrustedIssuerLinksList : pPKI->pTrustedIssuerLinksList;
+
+    /* Verify the certificate chain */
     if (SOPC_STATUS_OK == status)
     {
         uint32_t failure_reasons = 0;
@@ -256,6 +267,9 @@ static SOPC_ReturnStatus PKIProviderStack_ValidateCertificate(const SOPC_PKIProv
             status = SOPC_STATUS_NOK;
         }
     }
+
+    /* Unlink end_of_chall, otherwise destroying the pToValidate will also destroy trusted or untrusted links */
+    end_of_chall->next = NULL;
 
     return status;
 }
