@@ -220,12 +220,15 @@ int main(int argc, char* argv[])
 
     if (SOPC_STATUS_OK == status)
     {
-        char* lPathsTrusted[] = {"./trusted/cacert.der", NULL};
+        char* lPathsTrustedRoots[] = {"./trusted/cacert.der", NULL};
+        char* lPathsTrustedLinks[] = {NULL};
+        char* lPathsUntrustedRoots[] = {NULL};
+        char* lPathsUntrustedLinks[] = {NULL};
         char* lPathsIssuedCerts[] = {NULL};
-        char* lPathsUntrusted[] = {NULL};
         char* lPathsCRL[] = {"./revoked/cacrl.der", NULL};
-        status = SOPC_PKIProviderStack_CreateFromPaths(lPathsTrusted, lPathsIssuedCerts, lPathsUntrusted, lPathsCRL,
-                                                       &pkiProvider);
+        status =
+            SOPC_PKIProviderStack_CreateFromPaths(lPathsTrustedRoots, lPathsTrustedLinks, lPathsUntrustedRoots,
+                                                  lPathsUntrustedLinks, lPathsIssuedCerts, lPathsCRL, &pkiProvider);
         sConfig->pki = pkiProvider;
     }
     if (SOPC_STATUS_OK != status)

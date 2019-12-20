@@ -59,7 +59,10 @@ static SOPC_CRLList* static_cacrl = NULL;
 /* Define application namespaces: ns=1 and ns=2 (NULL terminated array) */
 static char* default_app_namespace_uris[] = {DEFAULT_PRODUCT_URI, DEFAULT_PRODUCT_URI_2, NULL};
 static char* default_locale_ids[] = {"en-US", "fr-FR", NULL};
-static char* default_trusted_certs[] = {"trusted/cacert.der", "trusted/ctt_ca1T.der" /* Tests 029, 037 */, NULL};
+static char* default_trusted_roots[] = {"trusted/cacert.der", "trusted/ctt_ca1T.der" /* Tests 029, 037 */, NULL};
+static char* default_trusted_links[] = {NULL};
+static char* default_untrusted_roots[] = {"untrusted/ctt_ca1I.der" /* Test 044 */, NULL};
+static char* default_untrusted_links[] = {"untrusted/ctt_ca1TC_ca2I.der" /* Test 002 */, NULL};
 static char* default_issued_certs[] = {"issued/ctt_appT.der" /* Test 048 */,
                                        "issued/ctt_appTE.der" /* Test 007 */,
                                        "issued/ctt_appTV.der" /* Test 008 */,
@@ -70,8 +73,6 @@ static char* default_issued_certs[] = {"issued/ctt_appT.der" /* Test 048 */,
                                        "issued/ctt_ca1TC_ca2I_appT.der" /* Test 002 */,
                                        "issued/ctt_ca1U_appT.der" /* Test 046 */,
                                        NULL};
-static char* default_untrusted_certs[] = {"untrusted/ctt_ca1I.der" /* Test 044 */,
-                                          "untrusted/ctt_ca1TC_ca2I.der" /* Test 002 */, NULL};
 static char* default_revoked_certs[] = {"revoked/cacrl.der", "revoked/revocation_list_ctt_ca1T.crl",
                                         "revoked/revocation_list_ctt_ca1I.crl",
                                         "revoked/revocation_list_ctt_ca1TC_ca2I.crl", NULL};
@@ -270,7 +271,7 @@ static bool Server_LoadDefaultConfiguration(SOPC_S2OPC_Config* output_s2opcConfi
     {
         output_s2opcConfig->serverConfig.serverCertPath = "./server_public/server_2k_cert.der";
         output_s2opcConfig->serverConfig.serverKeyPath = "./server_private/server_2k_key.pem";
-        output_s2opcConfig->serverConfig.certificateAuthorityPathList = default_trusted_certs;
+        output_s2opcConfig->serverConfig.certificateAuthorityPathList = default_trusted_roots;
         output_s2opcConfig->serverConfig.certificateRevocationPathList = default_revoked_certs;
 
         /*
@@ -513,9 +514,9 @@ static SOPC_ReturnStatus Server_SetCryptographicConfig(SOPC_Server_Config* serve
         if (SOPC_STATUS_OK == status)
         {
             /* TODO: patch me here to use serverConfig instead of default config! */
-            status = SOPC_PKIProviderStack_CreateFromPaths(default_trusted_certs, default_issued_certs,
-                                                           default_untrusted_certs, default_revoked_certs,
-                                                           &serverConfig->pki);
+            status = SOPC_PKIProviderStack_CreateFromPaths(
+                default_trusted_roots, default_trusted_links, default_untrusted_roots, default_untrusted_links,
+                default_issued_certs, default_revoked_certs, &serverConfig->pki);
         }
 #endif
 
