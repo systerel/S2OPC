@@ -143,31 +143,32 @@ static uint32_t PKIProviderStack_GetCertificateValidationError(uint32_t failure_
     return SOPC_CertificateValidationError_Unkown;
 }
 
-// static int verify_cert(void* trust_li, mbedtls_x509_crt* crt, int certificate_depth, uint32_t* flags)
-//{
-//    /* When we have an issued certificate that is trusted, but we don't trust its parents,
-//     * we have verified the chain certificates, but we should still mark the certificate as trusted.
-//     * "NOT_TRUSTED" should be the sole problem.
-//     */
-//    if (NULL != trust_li && 0 == certificate_depth && MBEDTLS_X509_BADCERT_NOT_TRUSTED == *flags)
-//    {
-//        /* Verify if crt is in trust_li */
-//        /* x509_crt_check_ee_locally_trusted() does this but only for self-signed end-entity certificates (!) */
-//        for (mbedtls_x509_crt* cur = (mbedtls_x509_crt*) trust_li; NULL != cur; cur = cur->next)
-//        {
-//            if (crt->raw.len == cur->raw.len && 0 == memcmp(crt->raw.p, cur->raw.p, crt->raw.len))
-//            {
-//                *flags = 0;
-//                break;
-//            }
-//        }
-//    }
-//
-//    /* Only fatal errors whould be returned here, as this error code will be forwarded to the caller of
-//     * mbedtls_x509_crt_verify_with_profile, and the verification stopped.
-//     * Errors may be MBEDTLS_ERR_X509_FATAL_ERROR, or application specific */
-//    return 0;
-//}
+static int verify_cert(void* trust_li, mbedtls_x509_crt* crt, int certificate_depth, uint32_t* flags)
+{
+    /* When we have an issued certificate that is trusted, but we don't trust its parents,
+     * we have verified the chain certificates, but we should still mark the certificate as trusted.
+     * "NOT_TRUSTED" should be the sole problem.
+     */
+    if (NULL != trust_li && 0 == certificate_depth && MBEDTLS_X509_BADCERT_NOT_TRUSTED == *flags)
+    {
+        /* Verify if crt is in trust_li */
+        /* x509_crt_check_ee_locally_trusted() does this but only for self-signed end-entity certificates (!) */
+        /* TODO: factorise with Certificate_FindInCertList() */
+        for (mbedtls_x509_crt* cur = (mbedtls_x509_crt*) trust_li; NULL != cur; cur = cur->next)
+        {
+            if (crt->raw.len == cur->raw.len && 0 == memcmp(crt->raw.p, cur->raw.p, crt->raw.len))
+            {
+                *flags = 0;
+                break;
+            }
+        }
+    }
+
+    /* Only fatal errors whould be returned here, as this error code will be forwarded to the caller of
+     * mbedtls_x509_crt_verify_with_profile, and the verification stopped.
+     * Errors may be MBEDTLS_ERR_X509_FATAL_ERROR, or application specific */
+    return 0;
+}
 
 /* Returns 0 if all key usages and extended key usages are ok */
 static SOPC_ReturnStatus check_key_usages(const mbedtls_x509_crt* crt)
@@ -236,6 +237,7 @@ static SOPC_ReturnStatus PKIProviderStack_ValidateCertificate(const SOPC_PKIProv
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
     mbedtls_x509_crt* mbed_chall = (mbedtls_x509_crt*) (&pToValidate->crt);
     mbedtls_x509_crl* mbed_crl = (mbedtls_x509_crl*) (&cert_crl->crl);
+    SOPC_CertificateList* issued = (SOPC_CertificateList*)pPKI->pIssuedCertsList;
     SOPC_GCC_DIAGNOSTIC_RESTORE
 
     /* Check certificate usages */
@@ -261,7 +263,7 @@ static SOPC_ReturnStatus PKIProviderStack_ValidateCertificate(const SOPC_PKIProv
         uint32_t failure_reasons = 0;
         if (mbedtls_x509_crt_verify_with_profile(mbed_chall, mbed_ca, mbed_crl, &mbedtls_x509_crt_profile_minimal,
                                                  NULL /* You can specify an expected Common Name here */,
-                                                 &failure_reasons, NULL, NULL) != 0)
+                                                 &failure_reasons, verify_cert, &issued->crt) != 0)
         {
             *error = PKIProviderStack_GetCertificateValidationError(failure_reasons);
             status = SOPC_STATUS_NOK;
