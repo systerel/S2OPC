@@ -271,17 +271,18 @@ static void PKIProviderStack_Free(SOPC_PKIProvider* pPKI)
      * Hence mbedtls will call free on (&pPKI->pUserTrustedIssersList.crt), which is pPKI->pUserTrustedIssersList.
      */
     SOPC_KeyManager_Certificate_Free(pPKI->pUntrustedIssuerRootsList);
+    SOPC_KeyManager_Certificate_Free(pPKI->pUntrustedIssuerLinksList);
     SOPC_KeyManager_Certificate_Free(pPKI->pIssuedCertsList);
-    SOPC_KeyManager_Certificate_Free(pPKI->pIssuerLinksList);
     SOPC_KeyManager_CRL_Free(pPKI->pCertRevocList);
     SOPC_Free(pPKI);
 }
 
-static SOPC_PKIProvider* create_pkistack(SOPC_CertificateList* issuers,
-                                         SOPC_CertificateList* issued,
-                                         SOPC_CertificateList* untrusted,
-                                         SOPC_CertificateList* links,
-                                         SOPC_CRLList* crl,
+static SOPC_PKIProvider* create_pkistack(SOPC_CertificateList* lRootsTrusted,
+                                         SOPC_CertificateList* lLinksTrusted,
+                                         SOPC_CertificateList* lRootsUntrusted,
+                                         SOPC_CertificateList* lLinksUntrusted,
+                                         SOPC_CertificateList* lIssued,
+                                         SOPC_CRLList* lCrl,
                                          void* pUserData)
 {
     SOPC_PKIProvider* pki = SOPC_Malloc(sizeof(SOPC_PKIProvider));
@@ -294,11 +295,12 @@ static SOPC_PKIProvider* create_pkistack(SOPC_CertificateList* issuers,
         *(SOPC_FnValidateCertificate*) (&pki->pFnValidateCertificate) = &PKIProviderStack_ValidateCertificate;
         SOPC_GCC_DIAGNOSTIC_RESTORE
 
-        pki->pTrustedIssuerRootsList = issuers;
-        pki->pIssuedCertsList = issued;
-        pki->pUntrustedIssuerRootsList = untrusted;
-        pki->pIssuerLinksList = links;
-        pki->pCertRevocList = crl;
+        pki->pTrustedIssuerRootsList = lRootsTrusted;
+        pki->pTrustedIssuerLinksList = lLinksTrusted;
+        pki->pUntrustedIssuerRootsList = lRootsUntrusted;
+        pki->pUntrustedIssuerLinksList = lLinksUntrusted;
+        pki->pIssuedCertsList = lIssued;
+        pki->pCertRevocList = lCrl;
         pki->pUserData = pUserData;
     }
 
@@ -336,7 +338,7 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_SerializedCertificate* pCert
 
     if (SOPC_STATUS_OK == status)
     {
-        pki = create_pkistack(caCert, NULL, NULL, NULL, pRevocationList, NULL);
+        pki = create_pkistack(caCert, NULL, NULL, NULL, NULL, pRevocationList, NULL);
         if (NULL == pki)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -359,13 +361,13 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_SerializedCertificate* pCert
 
 static SOPC_CertificateList* load_certificate_list(char** paths, SOPC_ReturnStatus* status)
 {
-    assert(NULL != paths && NULL != certs);
+    assert(NULL != paths && NULL != status);
 
     SOPC_CertificateList* certs = NULL;
     char* cur = *paths;
     while (NULL != cur && SOPC_STATUS_OK == *status)
     {
-        *status = SOPC_KeyManager_Certificate_CreateOrAddFromFile(cur, certs);
+        *status = SOPC_KeyManager_Certificate_CreateOrAddFromFile(cur, &certs);
         ++paths;
         cur = *paths;
     }
@@ -406,13 +408,9 @@ static SOPC_ReturnStatus link_certificates(SOPC_CertificateList** ppPrev, SOPC_C
             prev->crt.next = &next->crt;
         }
     }
-    /* The first list exists, but not the second: nothing to do */
-    else if (NULL != prev)
-    {
-    }
+    /* The first list exists, but not the second, or both don't exist: nothing to do */
     else
     {
-        assert(false && "TODO: handle the case where NULL trusted and NULL untrusted");
     }
 
     return status;
@@ -426,8 +424,8 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
                                                         char** lPathCRL,
                                                         SOPC_PKIProvider** ppPKI)
 {
-    if (NULL == lPathTrustedIssuerRoots || NULL == lPathIssuedCerts || NULL == lPathUntrustedIssuerRoots ||
-        NULL == lPathIssuerLinks || NULL == lPathCRL || NULL == ppPKI)
+    if (NULL == lPathTrustedIssuerRoots || NULL == lPathTrustedIssuerLinks || NULL == lPathUntrustedIssuerRoots ||
+        NULL == lPathUntrustedIssuerLinks || NULL == lPathIssuedCerts || NULL == lPathCRL || NULL == ppPKI)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -450,7 +448,7 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
     SOPC_CertificateList* lIssued = load_certificate_list(lPathIssuedCerts, &status);
 
     SOPC_CRLList* lCrls = NULL;
-    cur = *lPathCRL;
+    char* cur = *lPathCRL;
     while (NULL != cur && SOPC_STATUS_OK == status)
     {
         status = SOPC_KeyManager_CRL_CreateOrAddFromFile(cur, &lCrls);
@@ -482,7 +480,7 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_CertificateList_MatchCRLList(lLinks, lCrls, &bLinksCRL);
+        status = SOPC_KeyManager_CertificateList_MatchCRLList(lLinksUntrusted, lCrls, &bLinksCRL);
     }
     if (SOPC_STATUS_OK == status && (!bRootsCRL || !bLinksCRL))
     {
@@ -522,7 +520,7 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
     SOPC_PKIProvider* pki = NULL;
     if (SOPC_STATUS_OK == status)
     {
-        pki = create_pkistack(lRootsTrusted, lIssued, lRootsUntrusted, lLinks, lCrls, NULL);
+        pki = create_pkistack(lRootsTrusted, lLinksTrusted, lRootsUntrusted, lLinksUntrusted, lIssued, lCrls, NULL);
         if (NULL == pki)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -540,8 +538,8 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
          * Hence mbedtls will call free on (&pPKI->pTrustedIssuerRootsList.crt), which is pPKI->pTrustedIssuerRootsList.
          */
         SOPC_KeyManager_Certificate_Free(lRootsUntrusted);
+        SOPC_KeyManager_Certificate_Free(lLinksUntrusted);
         SOPC_KeyManager_Certificate_Free(lIssued);
-        SOPC_KeyManager_Certificate_Free(lLinks);
         SOPC_KeyManager_CRL_Free(lCrls);
         SOPC_Free(pki);
     }
