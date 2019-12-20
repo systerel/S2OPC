@@ -735,14 +735,14 @@ SOPC_ReturnStatus SOPC_KeyManager_CertificateList_MatchCRLList(const SOPC_Certif
                                                                const SOPC_CRLList* pCRL,
                                                                bool* pbMatch)
 {
-    if (NULL == pCert || NULL == pCRL || NULL == pbMatch)
+    if (NULL == pCRL || NULL == pbMatch)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     /* For each CA, find its CRL. If not found, log and match = false */
     bool list_match = true;
-    const mbedtls_x509_crt* crt = &pCert->crt;
+    const mbedtls_x509_crt* crt = NULL != pCert ? &pCert->crt : NULL;
     for (; NULL != crt; crt = crt->next)
     {
         /* Skip certificates that are not authorities */
