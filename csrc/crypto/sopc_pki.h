@@ -93,6 +93,8 @@ struct SOPC_PKIProvider
     void* pTrustedIssuerRootsList;
     /** \brief Placeholder for CAs of untrusted issuer roots (CAs used to validate issued certififcates, only roots). */
     void* pUntrustedIssuerRootsList;
+    /** \brief Placeholder for CAs of issuers links (between a certificate to validate and a root). */
+    void* pIssuerLinksList;
     /** \brief Placeholder for issued certificates that are trusted on a one by one basis. */
     void* pIssuedCertsList;
     /** \brief PKI implementations can use this placeholder to store handles to certificate revocation list(s). */
