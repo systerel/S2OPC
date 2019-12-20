@@ -211,12 +211,14 @@ int main(int argc, char* argv[])
     // PKIConfig is just used to create the provider but only configuration of PKIType is useful here (paths not used)
     if (messageSecurityMode != OpcUa_MessageSecurityMode_None && SOPC_STATUS_OK == status)
     {
-        char* lPathsTrusted[] = {"./trusted/cacert.der", NULL};
+        char* lPathsTrustedRoots[] = {"./trusted/cacert.der", NULL};
+        char* lPathsTrustedLinks[] = {NULL};
+        char* lPathsUntrustedRoots[] = {NULL};
+        char* lPathsUntrustedLinks[] = {NULL};
         char* lPathsIssuedCerts[] = {NULL};
-        char* lPathsUntrusted[] = {NULL};
         char* lPathsCRL[] = {"./revoked/cacrl.der", NULL};
-        status =
-            SOPC_PKIProviderStack_CreateFromPaths(lPathsTrusted, lPathsIssuedCerts, lPathsUntrusted, lPathsCRL, &pki);
+        status = SOPC_PKIProviderStack_CreateFromPaths(lPathsTrustedRoots, lPathsTrustedLinks, lPathsUntrustedRoots,
+                                                       lPathsUntrustedLinks, lPathsIssuedCerts, lPathsCRL, &pki);
         if (SOPC_STATUS_OK != status)
         {
             printf(">>Stub_Client: Failed to create PKI\n");
