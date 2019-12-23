@@ -96,11 +96,35 @@ static void SOPC_ServerConfig_Clear(SOPC_Server_Config* config)
         }
         SOPC_Free(config->localeIds);
 
-        for (int i = 0; NULL != config->certificateAuthorityPathList[i]; i++)
+        for (int i = 0; NULL != config->trustedRootIssuersList[i]; i++)
         {
-            SOPC_Free(config->certificateAuthorityPathList[i]);
+            SOPC_Free(config->trustedRootIssuersList[i]);
         }
-        SOPC_Free(config->certificateAuthorityPathList);
+        SOPC_Free(config->trustedRootIssuersList);
+
+        for (int i = 0; NULL != config->trustedIntermediateIssuersList[i]; i++)
+        {
+            SOPC_Free(config->trustedIntermediateIssuersList[i]);
+        }
+        SOPC_Free(config->trustedIntermediateIssuersList);
+
+        for (int i = 0; NULL != config->issuedCertificatesList[i]; i++)
+        {
+            SOPC_Free(config->issuedCertificatesList[i]);
+        }
+        SOPC_Free(config->issuedCertificatesList);
+
+        for (int i = 0; NULL != config->untrustedRootIssuersList[i]; i++)
+        {
+            SOPC_Free(config->untrustedRootIssuersList[i]);
+        }
+        SOPC_Free(config->untrustedRootIssuersList);
+
+        for (int i = 0; NULL != config->untrustedIntermediateIssuersList[i]; i++)
+        {
+            SOPC_Free(config->untrustedIntermediateIssuersList[i]);
+        }
+        SOPC_Free(config->untrustedIntermediateIssuersList);
 
         for (int i = 0; NULL != config->certificateRevocationPathList[i]; i++)
         {

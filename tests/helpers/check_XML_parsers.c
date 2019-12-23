@@ -286,8 +286,18 @@ END_TEST
 
 const char* expectedNamespaces[3] = {"urn:S2OPC:MY_SERVER_HOST", "urn:S2OPC:MY_SERVER_HOST:2", NULL};
 const char* expectedLocales[4] = {"en", "es-ES", "fr-FR", NULL};
-const char* expectedCertAuths[3] = {"/mypath/cacert.der", "/mypath/othercacert.der", NULL};
-const char* expectedCertAuthCRLs[3] = {"/mypath/cacrl.der", "/mypath/othercacrl.der", NULL};
+const char* expectedTrustedRootIssuers[3] = {"/mypath/cacert.der", "/mypath/othercacert.der", NULL};
+const char* expectedTrustedIntermediateIssuers[2] = {"/mypath/intermediate_cacert.der", NULL};
+
+const char* expectedIssuedCerts[3] = {"/mypath/self_signed.der", "/mypath/signed_by_not_trusted_ca.der", NULL};
+const char* expectedUntrustedRootIssuers[2] = {"/mypath/not_trusted_ca.der", NULL};
+const char* expectedUntrustedIntermediateIssuers[2] = {"/mypath/not_trusted_intermediate_ca.der", NULL};
+const char* expectedIssuersCRLs[6] = {"/mypath/cacrl.der",
+                                      "/mypath/othercacrl.der",
+                                      "/mypath/intermediate_cacrl.der",
+                                      "/mypath/not_trusted_revoked.crl",
+                                      "/mypath/not_trusted_intermediate_revoked.crl",
+                                      NULL};
 
 // Without EXPAT function is detected as unused and compilation fails
 #ifdef WITH_EXPAT
@@ -308,7 +318,8 @@ static void check_parsed_s2opc_config(SOPC_S2OPC_Config* s2opcConfig)
     int localeCounter = 0;
     while (sConfig->localeIds[localeCounter] != NULL && expectedLocales[localeCounter] != NULL)
     {
-        ck_assert_int_eq(0, strcmp(sConfig->localeIds[localeCounter], expectedLocales[localeCounter]));
+        int cmp_res = strcmp(sConfig->localeIds[localeCounter], expectedLocales[localeCounter]);
+        ck_assert_int_eq(0, cmp_res);
         localeCounter++;
     }
     ck_assert_ptr_null(sConfig->localeIds[localeCounter]);
@@ -318,26 +329,75 @@ static void check_parsed_s2opc_config(SOPC_S2OPC_Config* s2opcConfig)
     ck_assert_int_eq(0, strcmp("/mypath/mycert.der", sConfig->serverCertPath));
     ck_assert_int_eq(0, strcmp("/mypath/mykey.pem", sConfig->serverKeyPath));
 
-    /* Check CAs */
+    /* Check trusted CAs */
     int caCounter = 0;
-    for (caCounter = 0; sConfig->certificateAuthorityPathList[caCounter] != NULL && expectedCertAuths[caCounter];
+    // Root CA
+    for (caCounter = 0; sConfig->trustedRootIssuersList[caCounter] != NULL && expectedTrustedRootIssuers[caCounter];
          caCounter++)
     {
-        ck_assert_int_eq(0, strcmp(sConfig->certificateAuthorityPathList[caCounter], expectedCertAuths[caCounter]));
+        int cmp_res = strcmp(sConfig->trustedRootIssuersList[caCounter], expectedTrustedRootIssuers[caCounter]);
+        ck_assert_int_eq(0, cmp_res);
     }
-    ck_assert_ptr_null(sConfig->certificateAuthorityPathList[caCounter]);
-    ck_assert_ptr_null(expectedCertAuths[caCounter]);
+    ck_assert_ptr_null(sConfig->trustedRootIssuersList[caCounter]);
+    ck_assert_ptr_null(expectedTrustedRootIssuers[caCounter]);
+    // Intermediate CA:
+    for (caCounter = 0;
+         sConfig->trustedIntermediateIssuersList[caCounter] != NULL && expectedTrustedIntermediateIssuers[caCounter];
+         caCounter++)
+    {
+        int cmp_res =
+            strcmp(sConfig->trustedIntermediateIssuersList[caCounter], expectedTrustedIntermediateIssuers[caCounter]);
+        ck_assert_int_eq(0, cmp_res);
+    }
+    ck_assert_ptr_null(sConfig->trustedIntermediateIssuersList[caCounter]);
+    ck_assert_ptr_null(expectedTrustedIntermediateIssuers[caCounter]);
+
+    /* Check trusted issued certificates */
+    int issuedCounter = 0;
+    for (issuedCounter = 0;
+         sConfig->issuedCertificatesList[issuedCounter] != NULL && expectedIssuedCerts[issuedCounter]; issuedCounter++)
+    {
+        int cmp_res = strcmp(sConfig->issuedCertificatesList[issuedCounter], expectedIssuedCerts[issuedCounter]);
+        ck_assert_int_eq(0, cmp_res);
+    }
+    ck_assert_ptr_null(sConfig->issuedCertificatesList[issuedCounter]);
+    ck_assert_ptr_null(expectedIssuedCerts[issuedCounter]);
+
+    /* Check untrusted CAs (used to check issued certificate trust chain) */
+    int untrustedCAcounter = 0;
+    // Root CA:
+    for (untrustedCAcounter = 0; sConfig->untrustedRootIssuersList[untrustedCAcounter] != NULL &&
+                                 expectedUntrustedRootIssuers[untrustedCAcounter];
+         untrustedCAcounter++)
+    {
+        int cmp_res = strcmp(sConfig->untrustedRootIssuersList[untrustedCAcounter],
+                             expectedUntrustedRootIssuers[untrustedCAcounter]);
+        ck_assert_int_eq(0, cmp_res);
+    }
+    ck_assert_ptr_null(sConfig->untrustedRootIssuersList[untrustedCAcounter]);
+    ck_assert_ptr_null(expectedUntrustedRootIssuers[untrustedCAcounter]);
+    // Intermediate CA:
+    for (untrustedCAcounter = 0; sConfig->untrustedIntermediateIssuersList[untrustedCAcounter] != NULL &&
+                                 expectedUntrustedIntermediateIssuers[untrustedCAcounter];
+         untrustedCAcounter++)
+    {
+        int cmp_res = strcmp(sConfig->untrustedIntermediateIssuersList[untrustedCAcounter],
+                             expectedUntrustedIntermediateIssuers[untrustedCAcounter]);
+        ck_assert_int_eq(0, cmp_res);
+    }
+    ck_assert_ptr_null(sConfig->untrustedIntermediateIssuersList[untrustedCAcounter]);
+    ck_assert_ptr_null(expectedUntrustedIntermediateIssuers[untrustedCAcounter]);
 
     /* Check CRLs */
     int crlCounter = 0;
-    for (crlCounter = 0; sConfig->certificateRevocationPathList[crlCounter] != NULL && expectedCertAuthCRLs[crlCounter];
+    for (crlCounter = 0; sConfig->certificateRevocationPathList[crlCounter] != NULL && expectedIssuersCRLs[crlCounter];
          crlCounter++)
     {
-        ck_assert_int_eq(0,
-                         strcmp(sConfig->certificateRevocationPathList[crlCounter], expectedCertAuthCRLs[crlCounter]));
+        int cmp_res = strcmp(sConfig->certificateRevocationPathList[crlCounter], expectedIssuersCRLs[crlCounter]);
+        ck_assert_int_eq(0, cmp_res);
     }
     ck_assert_ptr_null(sConfig->certificateRevocationPathList[crlCounter]);
-    ck_assert_ptr_null(expectedCertAuthCRLs[crlCounter]);
+    ck_assert_ptr_null(expectedIssuersCRLs[crlCounter]);
 
     /* Check application description */
     int res =

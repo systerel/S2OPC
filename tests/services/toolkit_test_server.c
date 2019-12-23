@@ -59,24 +59,51 @@ static SOPC_CRLList* static_cacrl = NULL;
 /* Define application namespaces: ns=1 and ns=2 (NULL terminated array) */
 static char* default_app_namespace_uris[] = {DEFAULT_PRODUCT_URI, DEFAULT_PRODUCT_URI_2, NULL};
 static char* default_locale_ids[] = {"en-US", "fr-FR", NULL};
-static char* default_trusted_roots[] = {"trusted/cacert.der", "trusted/ctt_ca1T.der" /* Tests 029, 037 */,
-                                        "trusted/ctt_ca1TC.der" /* Tests 042, 043 */, NULL};
-static char* default_trusted_links[] = {NULL};
-static char* default_untrusted_roots[] = {"untrusted/ctt_ca1I.der" /* Test 044 */, NULL};
-static char* default_untrusted_links[] = {"untrusted/ctt_ca1TC_ca2I.der" /* Test 002 */, NULL};
-static char* default_issued_certs[] = {"issued/ctt_appT.der" /* Test 048 */,
-                                       "issued/ctt_appTE.der" /* Test 007 */,
-                                       "issued/ctt_appTV.der" /* Test 008 */,
-                                       "issued/ctt_appTSha256_2048.der" /* Test 051 */,
-                                       "issued/ctt_appTSha256_4096.der" /* Test 052 still fails */,
-                                       "issued/ctt_appTSincorrect.der" /* Test 010 */,
-                                       "issued/ctt_ca1I_appT.der" /* Test 044 */,
-                                       "issued/ctt_ca1TC_ca2I_appT.der" /* Test 002 */,
-                                       "issued/ctt_ca1U_appT.der" /* Test 046 */,
+
+static char* default_trusted_root_issuers[] = {
+    "trusted/ctt_ca1TC.der" /* Will be ignored because no CRL associated. Tests 042, 043 */,
+    "trusted/cacert.der", /* Demo CA */
+    "trusted/ctt_ca1T.der" /* Tests 029, 037 */, NULL};
+static char* default_trusted_intermediate_issuers[] = {"trusted/ctt_ca1I_ca2T.der", NULL};
+static char* default_issued_certs[] = {"issued/ctt_appT.der",  /* Test 048 */
+                                       "issued/ctt_appTE.der", /* Test 007 */
+                                       "issued/ctt_appTSha1_1024.der",
+                                       "issued/ctt_appTSha1_2048.der",
+                                       "issued/ctt_appTSha256_2048.der", /* Test 051 */
+                                       "issued/ctt_appTSha256_4096.der", /* Test 052 still fails */
+                                       "issued/ctt_appTSincorrect.der",  /* Test 010 */
+                                       "issued/ctt_appTSip.der",
+                                       "issued/ctt_appTSuri.der",
+                                       "issued/ctt_appTV.der",     /* Test 008 */
+                                       "issued/ctt_ca1I_appT.der", /* Test 044 */
+                                       "issued/ctt_ca1I_appTR.der",
+                                       "issued/ctt_ca1I_ca2T_appT.der",
+                                       "issued/ctt_ca1I_ca2T_appTR.der",
+                                       "issued/ctt_ca1IC_appT.der",
+                                       "issued/ctt_ca1IC_appTR.der",
+                                       "issued/ctt_ca1T_appT.der",
+                                       "issued/ctt_ca1T_appTR.der",
+                                       "issued/ctt_ca1T_ca2U_appT.der",
+                                       "issued/ctt_ca1T_ca2U_appTR.der",
+                                       "issued/ctt_ca1TC_appT.der",
+                                       "issued/ctt_ca1TC_appTR.der",
+                                       "issued/ctt_ca1TC_ca2I_appT.der", /* Test 002 */
+                                       "issued/ctt_ca1TC_ca2I_appTR.der",
+                                       "issued/ctt_ca1U_appT.der", /* Test 046 */
+                                       "issued/ctt_ca1U_appTR.der",
                                        NULL};
-static char* default_revoked_certs[] = {"revoked/cacrl.der", "revoked/revocation_list_ctt_ca1T.crl",
+static char* default_untrusted_root_issuers[] = {
+    "untrusted/ctt_ca1IC.der", /* Will be ignored because no CRL associated */
+    "untrusted/ctt_ca1I.der" /* Test 044 */,
+
+    NULL};
+static char* default_untrusted_intermediate_issuers[] = {"untrusted/ctt_ca1TC_ca2I.der" /* Test 002 */, NULL};
+static char* default_revoked_certs[] = {"revoked/cacrl.der",
+                                        "revoked/revocation_list_ctt_ca1T.crl",
                                         "revoked/revocation_list_ctt_ca1I.crl",
-                                        "revoked/revocation_list_ctt_ca1TC_ca2I.crl", NULL};
+                                        "revoked/revocation_list_ctt_ca1I_ca2T.crl",
+                                        "revoked/revocation_list_ctt_ca1TC_ca2I.crl",
+                                        NULL};
 
 static int32_t endpointClosed = 0;
 static bool secuActive = true;
@@ -272,7 +299,11 @@ static bool Server_LoadDefaultConfiguration(SOPC_S2OPC_Config* output_s2opcConfi
     {
         output_s2opcConfig->serverConfig.serverCertPath = "./server_public/server_2k_cert.der";
         output_s2opcConfig->serverConfig.serverKeyPath = "./server_private/server_2k_key.pem";
-        output_s2opcConfig->serverConfig.certificateAuthorityPathList = default_trusted_roots;
+        output_s2opcConfig->serverConfig.trustedRootIssuersList = default_trusted_root_issuers;
+        output_s2opcConfig->serverConfig.trustedIntermediateIssuersList = default_trusted_intermediate_issuers;
+        output_s2opcConfig->serverConfig.issuedCertificatesList = default_issued_certs;
+        output_s2opcConfig->serverConfig.untrustedRootIssuersList = default_untrusted_root_issuers;
+        output_s2opcConfig->serverConfig.untrustedIntermediateIssuersList = default_untrusted_intermediate_issuers;
         output_s2opcConfig->serverConfig.certificateRevocationPathList = default_revoked_certs;
 
         /*
@@ -514,10 +545,10 @@ static SOPC_ReturnStatus Server_SetCryptographicConfig(SOPC_Server_Config* serve
         /* Create the PKI (Public Key Infrastructure) provider */
         if (SOPC_STATUS_OK == status)
         {
-            /* TODO: patch me here to use serverConfig instead of default config! */
             status = SOPC_PKIProviderStack_CreateFromPaths(
-                default_trusted_roots, default_trusted_links, default_untrusted_roots, default_untrusted_links,
-                default_issued_certs, default_revoked_certs, &serverConfig->pki);
+                serverConfig->trustedRootIssuersList, serverConfig->trustedIntermediateIssuersList,
+                serverConfig->untrustedRootIssuersList, serverConfig->untrustedIntermediateIssuersList,
+                serverConfig->issuedCertificatesList, serverConfig->certificateRevocationPathList, &serverConfig->pki);
         }
 #endif
 
