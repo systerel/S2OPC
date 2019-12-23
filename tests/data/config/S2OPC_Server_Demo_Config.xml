@@ -11,14 +11,10 @@
     <ApplicationCertificates>
       <ServerCertificate path="server_public/server_2k_cert.der"/>
       <ServerKey path="server_private/server_2k_key.pem"/>
-      <TrustedCertificates>
+      <TrustedIssuers>
         <!-- List of CAs or trusted certicates -->
-        <TrustedCertificate path="trusted/cacert.der"/>
-      </TrustedCertificates>
-      <RevokedCertificates>
-        <!-- One certificate revocation list shall be defined for each CA -->
-        <RevokedCertificate path="revoked/cacrl.der"/>
-      </RevokedCertificates>
+        <TrustedIssuer root="true" cert_path="trusted/cacert.der" revocation_list_path="revoked/cacrl.der"/>
+      </TrustedIssuers>
     </ApplicationCertificates>
     <ApplicationDescription>
       <ApplicationURI uri="urn:S2OPC:localhost"/>

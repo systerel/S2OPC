@@ -13,15 +13,19 @@
     <ApplicationCertificates>
       <ServerCertificate path="/mypath/mycert.der"/>
       <ServerKey path="/mypath/mykey.pem"/>
-      <TrustedCertificates>
-        <TrustedCertificate path="/mypath/cacert.der"/>
-        <TrustedCertificate path="/mypath/othercacert.der"/>
-      </TrustedCertificates>
-      <RevokedCertificates>
-        <!-- One certificate revocation list shall be defined for each CA -->
-        <RevokedCertificate path="/mypath/cacrl.der"/>
-        <RevokedCertificate path="/mypath/othercacrl.der"/>
-      </RevokedCertificates>
+      <TrustedIssuers>
+        <TrustedIssuer root="true" cert_path="/mypath/cacert.der" revocation_list_path="/mypath/cacrl.der"/>
+        <TrustedIssuer root="true" cert_path="/mypath/othercacert.der" revocation_list_path="/mypath/othercacrl.der"/>
+        <TrustedIssuer root="false" cert_path="/mypath/intermediate_cacert.der" revocation_list_path="/mypath/intermediate_cacrl.der"/>
+      </TrustedIssuers>
+      <IssuedCertificates>
+        <IssuedCertificate path="/mypath/self_signed.der"/>
+        <IssuedCertificate path="/mypath/signed_by_not_trusted_ca.der"/>
+      </IssuedCertificates>
+      <UntrustedIssuers>
+        <UntrustedIssuer root="true" cert_path="/mypath/not_trusted_ca.der" revocation_list_path="/mypath/not_trusted_revoked.crl"/>
+        <UntrustedIssuer root="false" cert_path="/mypath/not_trusted_intermediate_ca.der" revocation_list_path="/mypath/not_trusted_intermediate_revoked.crl"/>
+      </UntrustedIssuers>
     </ApplicationCertificates>
     <ApplicationDescription>
       <ApplicationURI uri="urn:S2OPC:MY_SERVER_HOST:app"/>
