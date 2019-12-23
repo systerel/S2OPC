@@ -237,7 +237,7 @@ static SOPC_ReturnStatus PKIProviderStack_ValidateCertificate(const SOPC_PKIProv
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
     mbedtls_x509_crt* mbed_chall = (mbedtls_x509_crt*) (&pToValidate->crt);
     mbedtls_x509_crl* mbed_crl = (mbedtls_x509_crl*) (&cert_crl->crl);
-    SOPC_CertificateList* issued = (SOPC_CertificateList*)pPKI->pIssuedCertsList;
+    SOPC_CertificateList* issued = (SOPC_CertificateList*) pPKI->pIssuedCertsList;
     SOPC_GCC_DIAGNOSTIC_RESTORE
 
     /* Check certificate usages */

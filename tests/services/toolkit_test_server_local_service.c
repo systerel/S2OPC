@@ -226,8 +226,9 @@ int main(int argc, char* argv[])
         char* lPathsUntrustedLinks[] = {NULL};
         char* lPathsIssuedCerts[] = {NULL};
         char* lPathsCRL[] = {"./revoked/cacrl.der", NULL};
-        status = SOPC_PKIProviderStack_CreateFromPaths(lPathsTrustedRoots, lPathsTrustedLinks, lPathsUntrustedRoots,
-                                                       lPathsUntrustedLinks, lPathsIssuedCerts, lPathsCRL, &pkiProvider);
+        status =
+            SOPC_PKIProviderStack_CreateFromPaths(lPathsTrustedRoots, lPathsTrustedLinks, lPathsUntrustedRoots,
+                                                  lPathsUntrustedLinks, lPathsIssuedCerts, lPathsCRL, &pkiProvider);
         sConfig->pki = pkiProvider;
     }
     if (SOPC_STATUS_OK != status)
