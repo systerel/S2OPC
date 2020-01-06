@@ -1088,12 +1088,13 @@ static bool SC_Chunks_CheckSequenceHeaderSN(SOPC_SecureConnection* scConnection,
     return result;
 }
 
-static bool SC_Chunks_CheckSequenceHeaderRequestId(SOPC_SecureConnection* scConnection,
-                                                   bool isClient,
-                                                   SOPC_Msg_IsFinal receivedMsgIsFinal,
-                                                   SOPC_Msg_Type receivedMsgType,
-                                                   uint32_t* requestId, // for server or requestHandle for client
-                                                   SOPC_StatusCode* errorStatus)
+static bool SC_Chunks_CheckSequenceHeaderRequestId(
+    SOPC_SecureConnection* scConnection,
+    bool isClient,
+    SOPC_Msg_IsFinal receivedMsgIsFinal,
+    SOPC_Msg_Type receivedMsgType,
+    uint32_t* requestIdOrHandle, // for server or requestHandle for client
+    SOPC_StatusCode* errorStatus)
 {
     assert(scConnection != NULL);
     assert(scConnection->chunksCtx.currentChunkInputBuffer != NULL);
@@ -1104,7 +1105,7 @@ static bool SC_Chunks_CheckSequenceHeaderRequestId(SOPC_SecureConnection* scConn
     SOPC_SentRequestMsg_Context* recordedMsgCtx = NULL;
 
     // Retrieve request id
-    result = SOPC_STATUS_OK == SOPC_UInt32_Read(requestId, chunkCtx->currentChunkInputBuffer);
+    result = SOPC_STATUS_OK == SOPC_UInt32_Read(requestIdOrHandle, chunkCtx->currentChunkInputBuffer);
     if (!result)
     {
         result = false;
@@ -1114,7 +1115,7 @@ static bool SC_Chunks_CheckSequenceHeaderRequestId(SOPC_SecureConnection* scConn
     // (In case of multi-chunk message) Check it is the same requestId than previous chunks
     if (result)
     {
-        if (chunkCtx->hasCurrentMsgRequestId && *requestId != chunkCtx->currentMsgRequestId)
+        if (chunkCtx->hasCurrentMsgRequestId && *requestIdOrHandle != chunkCtx->currentMsgRequestId)
         {
             // Different requestId found
             result = false;
@@ -1127,7 +1128,8 @@ static bool SC_Chunks_CheckSequenceHeaderRequestId(SOPC_SecureConnection* scConn
         if (isClient)
         {
             // Check received request Id was expected for the received message type
-            recordedMsgCtx = SOPC_SLinkedList_RemoveFromId(scConnection->tcpSeqProperties.sentRequestIds, *requestId);
+            recordedMsgCtx =
+                SOPC_SLinkedList_RemoveFromId(scConnection->tcpSeqProperties.sentRequestIds, *requestIdOrHandle);
             if (recordedMsgCtx != NULL)
             {
                 if (recordedMsgCtx->msgType != receivedMsgType)
@@ -1135,7 +1137,7 @@ static bool SC_Chunks_CheckSequenceHeaderRequestId(SOPC_SecureConnection* scConn
                     SOPC_EventTimer_Cancel(recordedMsgCtx->timerId); // Deactivate timer for this request
 
                     // Re-enqueue the request id in order application receive the request timeout on SC closure
-                    SOPC_SLinkedList_Append(scConnection->tcpSeqProperties.sentRequestIds, *requestId,
+                    SOPC_SLinkedList_Append(scConnection->tcpSeqProperties.sentRequestIds, *requestIdOrHandle,
                                             (void*) recordedMsgCtx);
                     result = false;
                     *errorStatus = OpcUa_BadSecurityChecksFailed;
@@ -1146,13 +1148,13 @@ static bool SC_Chunks_CheckSequenceHeaderRequestId(SOPC_SecureConnection* scConn
                     // do not deactivate timer and re-enqueue the request id as expected id
                     // (Note: prepend since other chunks for this message shall be the next ones)
                     void* prependedCtx = SOPC_SLinkedList_Prepend(scConnection->tcpSeqProperties.sentRequestIds,
-                                                                  *requestId, (void*) recordedMsgCtx);
+                                                                  *requestIdOrHandle, (void*) recordedMsgCtx);
                     result = prependedCtx == recordedMsgCtx;
                 }
                 else
                 {
                     // Set the requestHandle (only used in case of abort message)
-                    *requestId = recordedMsgCtx->requestHandle;
+                    *requestIdOrHandle = recordedMsgCtx->requestHandle;
                     // We received the complete response message
                     SOPC_Free(recordedMsgCtx);
                 }
@@ -1169,7 +1171,7 @@ static bool SC_Chunks_CheckSequenceHeaderRequestId(SOPC_SecureConnection* scConn
     {
         // We shall keep data to check same requestId is used for all chunks
         chunkCtx->hasCurrentMsgRequestId = true;
-        chunkCtx->currentMsgRequestId = *requestId;
+        chunkCtx->currentMsgRequestId = *requestIdOrHandle;
     }
 
     return result;
@@ -1603,9 +1605,11 @@ static bool SC_Chunks_TreatMsgMultiChunks(SOPC_SecureConnection* scConnection, S
     return true;
 }
 
-bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection, uint32_t* requestId, SOPC_StatusCode* errorStatus)
+bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
+                               uint32_t* requestIdOrHandle,
+                               SOPC_StatusCode* errorStatus)
 {
-    assert(requestId != NULL);
+    assert(requestIdOrHandle != NULL);
 
     bool result = true;
     SOPC_SecureConnection_ChunkMgrCtx* chunkCtx = &scConnection->chunksCtx;
@@ -1913,13 +1917,14 @@ bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection, uint32_t* re
             result = SC_Chunks_CheckSequenceHeaderRequestId(scConnection,
                                                             false == scConnection->isServerConnection, // isClient
                                                             chunkCtx->currentMsgIsFinal, chunkCtx->currentMsgType,
-                                                            requestId, errorStatus);
+                                                            requestIdOrHandle, errorStatus);
             if (!result)
             {
-                SOPC_Logger_TraceError(
-                    "ChunksMgr: request Id=%" PRIu32 " (or associated type) verification failed (epCfgIdx=%" PRIu32
-                    ", scCfgIdx=%" PRIu32 ")",
-                    *requestId, scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
+                SOPC_Logger_TraceError("ChunksMgr: request Id/Handle=%" PRIu32
+                                       " (or associated type) verification failed (epCfgIdx=%" PRIu32
+                                       ", scCfgIdx=%" PRIu32 ")",
+                                       *requestIdOrHandle, scConnection->serverEndpointConfigIdx,
+                                       scConnection->endpointConnectionConfigIdx);
             }
         }
         else
@@ -2034,7 +2039,7 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
     assert(receivedBuffer->position == 0);
 
     SOPC_StatusCode errorStatus = SOPC_GoodGenericStatus; // Good
-    uint32_t requestId = 0;
+    uint32_t requestIdOrHandle = 0;
     SOPC_SecureConnection_ChunkMgrCtx* chunkCtx = &scConnection->chunksCtx;
 
     // Continue until an error occurred OR received buffer is empty (could contain 1 or several messages)
@@ -2075,7 +2080,7 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
 
         // Decode OPC UA Secure Conversation MessageChunk specific headers if necessary (not HEL/ACK/ERR)
         if (SC_Chunks_CheckMultiChunkContext(chunkCtx, &scConnection->tcpMsgProperties, &errorStatus) &&
-            SC_Chunks_TreatTcpPayload(scConnection, &requestId, &errorStatus))
+            SC_Chunks_TreatTcpPayload(scConnection, &requestIdOrHandle, &errorStatus))
         {
             // Current chunk shall have been moved into intermediate chunk buffers or into complete message buffer
             assert(NULL == chunkCtx->currentChunkInputBuffer);
@@ -2088,12 +2093,12 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
                 {
                     // Treat as prio events
                     SOPC_SecureChannels_EnqueueInternalEventAsNext(
-                        scEvent, scConnectionIdx, (uintptr_t) chunkCtx->currentMessageInputBuffer, requestId);
+                        scEvent, scConnectionIdx, (uintptr_t) chunkCtx->currentMessageInputBuffer, requestIdOrHandle);
                 }
                 else
                 {
                     SOPC_SecureChannels_EnqueueInternalEvent(
-                        scEvent, scConnectionIdx, (uintptr_t) chunkCtx->currentMessageInputBuffer, requestId);
+                        scEvent, scConnectionIdx, (uintptr_t) chunkCtx->currentMessageInputBuffer, requestIdOrHandle);
                 }
                 /* currentMessageInputBuffer is lent to the secure channel, which will free it */
                 chunkCtx->currentMessageInputBuffer = NULL;

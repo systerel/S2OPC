@@ -2629,7 +2629,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
     {
         /* eltId = secure channel connection index,
            params = (SOPC_Buffer*) buffer,
-           auxParam = requestId */
+           auxParam = requestId (server) or requestHandle (client)*/
         SOPC_Logger_TraceDebug("ScStateMgr: INT_SC_RCV_MSG_CHUNKS scIdx=%" PRIu32 " reqId=%" PRIuPTR, eltId, auxParam);
 
         scConnection = SC_GetConnection(eltId);
