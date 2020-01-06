@@ -26,27 +26,40 @@
  */
 
 #include <check.h>
+#include <time.h>
 
 #include "check_helpers.h"
 
 #include "sopc_time.h"
 
-static const int64_t UNIX_EPOCH_01012017_SECS = 1483228800;
-static const int64_t UNIX_EPOCH_01012020_SECS = 1577836800;
 /*
  * It represents the number of seconds between the OPC-UA (Windows) which starts on 1601/01/01 (supposedly 00:00:00
  * UTC), and Linux times starts on epoch, 1970/01/01 00:00:00 UTC.
  * */
 static const int64_t SOPC_SECONDS_BETWEEN_EPOCHS = 11644473600;
+/*
+ * It represents the number of seconds between the 1900/01/01 00:00:00 UTC
+ * and Linux times starts on epoch, 1970/01/01 00:00:00 UTC.
+ * */
+static const int64_t SOPC_SECONDS_SINCE_1900 = 2208988800;
+static const int64_t SOPC_SECONDS_BETWEEN_1601_1900 = SOPC_SECONDS_BETWEEN_EPOCHS - SOPC_SECONDS_SINCE_1900;
+
 static const int64_t SOPC_SECONDS_TO_100_NANOSECONDS = 10000000; // 10^7
+static const int64_t SOPC_SECONDS_IN_ONE_YEAR = 31556926;        // approximation: 365.24 days
 
 START_TEST(test_current_time)
 {
-    /* Check date is between 01/01/2017 and 01/01/2020 */
+    time_t cTime;
+    cTime = time(&cTime);
+    struct tm* cStructTime = gmtime(&cTime);
+    /* Check date is between 01/01/<current_year> and 01/01/<current_year + 1> */
     int64_t vDate = SOPC_Time_GetCurrentTimeUTC();
     ck_assert(vDate != 0);
-    ck_assert(vDate > (UNIX_EPOCH_01012017_SECS + SOPC_SECONDS_BETWEEN_EPOCHS) * SOPC_SECONDS_TO_100_NANOSECONDS);
-    ck_assert(vDate < (UNIX_EPOCH_01012020_SECS + SOPC_SECONDS_BETWEEN_EPOCHS) * SOPC_SECONDS_TO_100_NANOSECONDS);
+    // tm_year field is the number of years since 1900: obtain the number of seconds and add the delta with year 1601
+    ck_assert(vDate > (cStructTime->tm_year * SOPC_SECONDS_IN_ONE_YEAR + SOPC_SECONDS_BETWEEN_1601_1900) *
+                          SOPC_SECONDS_TO_100_NANOSECONDS);
+    ck_assert(vDate < ((cStructTime->tm_year + 1) * SOPC_SECONDS_IN_ONE_YEAR + SOPC_SECONDS_BETWEEN_1601_1900) *
+                          SOPC_SECONDS_TO_100_NANOSECONDS);
 }
 END_TEST
 
