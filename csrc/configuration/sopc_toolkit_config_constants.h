@@ -136,7 +136,7 @@
 #define SOPC_MAX_PENDING_REQUESTS 128
 #endif
 
-/** @brief Maximum time before a response shall be received after sending a request */
+/** @brief Maximum time before a response shall be received after sending a request (0 means no limit) */
 #ifndef SOPC_REQUEST_TIMEOUT_MS
 #define SOPC_REQUEST_TIMEOUT_MS 5000
 #endif

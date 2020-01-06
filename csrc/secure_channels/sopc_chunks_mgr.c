@@ -104,6 +104,12 @@ static SOPC_SecureChannel_Config* SOPC_Toolkit_GetSecureChannelConfig(SOPC_Secur
 
 static uint32_t SC_Client_StartRequestTimeout(uint32_t connectionIdx, uint32_t requestHandle, uint32_t requestId)
 {
+    if (SOPC_REQUEST_TIMEOUT_MS <= 0)
+    {
+        // No request timeout: no timer created
+        return 0;
+    }
+
     SOPC_Event event;
     event.event = TIMER_SC_REQUEST_TIMEOUT;
     event.eltId = connectionIdx;
