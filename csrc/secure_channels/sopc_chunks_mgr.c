@@ -2038,7 +2038,7 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
     SOPC_SecureConnection_ChunkMgrCtx* chunkCtx = &scConnection->chunksCtx;
 
     // Continue until an error occurred OR received buffer is empty (could contain 1 or several messages)
-    while (SOPC_Buffer_Remaining(receivedBuffer) > 0)
+    while (result && SOPC_Buffer_Remaining(receivedBuffer) > 0)
     {
         if (NULL == chunkCtx->currentChunkInputBuffer)
         {
