@@ -36,12 +36,13 @@
  * It represents the number of seconds between the OPC-UA (Windows) which starts on 1601/01/01 (supposedly 00:00:00
  * UTC), and Linux times starts on epoch, 1970/01/01 00:00:00 UTC.
  * */
-static const int64_t SOPC_SECONDS_BETWEEN_EPOCHS = 11644473600;
+#define SOPC_SECONDS_BETWEEN_EPOCHS 11644473600
 /*
  * It represents the number of seconds between the 1900/01/01 00:00:00 UTC
  * and Linux times starts on epoch, 1970/01/01 00:00:00 UTC.
  * */
-static const int64_t SOPC_SECONDS_SINCE_1900 = 2208988800;
+#define SOPC_SECONDS_SINCE_1900 2208988800
+
 static const int64_t SOPC_SECONDS_BETWEEN_1601_1900 = SOPC_SECONDS_BETWEEN_EPOCHS - SOPC_SECONDS_SINCE_1900;
 
 static const int64_t SOPC_SECONDS_TO_100_NANOSECONDS = 10000000; // 10^7
