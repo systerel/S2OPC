@@ -993,7 +993,8 @@ OPERATIONS
               )
         THEN
             set_subscription_state (p_subscription, e_subscriptionState_keepAlive);
-            reset_subscription_KeepAliveCounter (p_subscription)
+            reset_subscription_KeepAliveCounter (p_subscription);
+            decrement_subscription_KeepAliveCounter (p_subscription)
 
         /* #12 transition */
         ELSIF l_State = e_subscriptionState_late
@@ -1023,7 +1024,7 @@ OPERATIONS
         /* #15 transition */
         ELSIF l_State = e_subscriptionState_keepAlive &
               p_validPublishReqQueued = TRUE &
-              l_KeepAliveCounter = 1 &
+              l_KeepAliveCounter <= 1 &
               (l_PublishingEnabled = FALSE
                or
                (l_PublishingEnabled = TRUE &
@@ -1055,7 +1056,7 @@ OPERATIONS
         /* #17 transition */
         ELSIF l_State = e_subscriptionState_keepAlive &
               p_validPublishReqQueued = FALSE &
-              (l_KeepAliveCounter = 1
+              (l_KeepAliveCounter <= 1
                or
                (l_KeepAliveCounter > 1 &
                 l_PublishingEnabled = TRUE &

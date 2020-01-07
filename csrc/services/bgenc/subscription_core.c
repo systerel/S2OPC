@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.c
 
- Date                 : 04/10/2019 15:25:45
+ Date                 : 09/01/2020 10:40:04
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -970,6 +970,7 @@ void subscription_core__server_subscription_core_publish_timeout(
          subscription_core_1__set_subscription_state(subscription_core__p_subscription,
             constants__e_subscriptionState_keepAlive);
          subscription_core_1__reset_subscription_KeepAliveCounter(subscription_core__p_subscription);
+         subscription_core_1__decrement_subscription_KeepAliveCounter(subscription_core__p_subscription);
       }
       else if (subscription_core__l_State == constants__e_subscriptionState_late) {
          ;
@@ -1036,7 +1037,7 @@ void subscription_core__server_subscription_core_publish_timeout(
       }
       else if ((((subscription_core__l_State == constants__e_subscriptionState_keepAlive) &&
          (subscription_core__p_validPublishReqQueued == true)) &&
-         (subscription_core__l_KeepAliveCounter == 1)) &&
+         (subscription_core__l_KeepAliveCounter <= 1)) &&
          ((subscription_core__l_PublishingEnabled == false) ||
          ((subscription_core__l_PublishingEnabled == true) &&
          (subscription_core__l_NotificationAvailable == false)))) {
@@ -1067,7 +1068,7 @@ void subscription_core__server_subscription_core_publish_timeout(
       }
       else if (((subscription_core__l_State == constants__e_subscriptionState_keepAlive) &&
          (subscription_core__p_validPublishReqQueued == false)) &&
-         ((subscription_core__l_KeepAliveCounter == 1) ||
+         ((subscription_core__l_KeepAliveCounter <= 1) ||
          (((subscription_core__l_KeepAliveCounter > 1) &&
          (subscription_core__l_PublishingEnabled == true)) &&
          (subscription_core__l_NotificationAvailable == true)))) {
