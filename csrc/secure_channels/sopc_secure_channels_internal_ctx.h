@@ -70,6 +70,7 @@ typedef enum
  */
 typedef struct
 {
+    bool timeoutExpired; // set to true if the response shall now be ignored
     uint32_t scConnectionIdx;
     uint32_t requestHandle;
     SOPC_Msg_Type msgType;

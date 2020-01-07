@@ -1100,15 +1100,20 @@ static bool SC_Chunks_CheckSequenceHeaderRequestId(
     SOPC_Msg_IsFinal receivedMsgIsFinal,
     SOPC_Msg_Type receivedMsgType,
     uint32_t* requestIdOrHandle, // for server or requestHandle for client
+    bool* messageTimeoutExpired,
     SOPC_StatusCode* errorStatus)
 {
     assert(scConnection != NULL);
     assert(scConnection->chunksCtx.currentChunkInputBuffer != NULL);
+    assert(requestIdOrHandle != NULL);
+    assert(messageTimeoutExpired != NULL);
 
     bool result = true;
     SOPC_SecureConnection_ChunkMgrCtx* chunkCtx = &scConnection->chunksCtx;
 
     SOPC_SentRequestMsg_Context* recordedMsgCtx = NULL;
+    // Except if it is a response to an expired request, the message is not expired
+    *messageTimeoutExpired = false;
 
     // Retrieve request id
     result = SOPC_STATUS_OK == SOPC_UInt32_Read(requestIdOrHandle, chunkCtx->currentChunkInputBuffer);
@@ -1138,6 +1143,7 @@ static bool SC_Chunks_CheckSequenceHeaderRequestId(
                 SOPC_SLinkedList_RemoveFromId(scConnection->tcpSeqProperties.sentRequestIds, *requestIdOrHandle);
             if (recordedMsgCtx != NULL)
             {
+                *messageTimeoutExpired = recordedMsgCtx->timeoutExpired;
                 if (recordedMsgCtx->msgType != receivedMsgType)
                 {
                     SOPC_EventTimer_Cancel(recordedMsgCtx->timerId); // Deactivate timer for this request
@@ -1613,9 +1619,12 @@ static bool SC_Chunks_TreatMsgMultiChunks(SOPC_SecureConnection* scConnection, S
 
 bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
                                uint32_t* requestIdOrHandle,
+                               bool* ignoreExpiredMessage,
                                SOPC_StatusCode* errorStatus)
 {
     assert(requestIdOrHandle != NULL);
+    assert(ignoreExpiredMessage != NULL);
+    *ignoreExpiredMessage = false; // default value
 
     bool result = true;
     SOPC_SecureConnection_ChunkMgrCtx* chunkCtx = &scConnection->chunksCtx;
@@ -1923,7 +1932,7 @@ bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
             result = SC_Chunks_CheckSequenceHeaderRequestId(scConnection,
                                                             false == scConnection->isServerConnection, // isClient
                                                             chunkCtx->currentMsgIsFinal, chunkCtx->currentMsgType,
-                                                            requestIdOrHandle, errorStatus);
+                                                            requestIdOrHandle, ignoreExpiredMessage, errorStatus);
             if (!result)
             {
                 SOPC_Logger_TraceError("ChunksMgr: request Id/Handle=%" PRIu32
@@ -2046,6 +2055,7 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
 
     SOPC_StatusCode errorStatus = SOPC_GoodGenericStatus; // Good
     uint32_t requestIdOrHandle = 0;
+    bool ignoreExpiredMessage = false; // Set to true if message is response to expired request
     SOPC_SecureConnection_ChunkMgrCtx* chunkCtx = &scConnection->chunksCtx;
 
     // Continue until an error occurred OR received buffer is empty (could contain 1 or several messages)
@@ -2086,29 +2096,46 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
 
         // Decode OPC UA Secure Conversation MessageChunk specific headers if necessary (not HEL/ACK/ERR)
         if (SC_Chunks_CheckMultiChunkContext(chunkCtx, &scConnection->tcpMsgProperties, &errorStatus) &&
-            SC_Chunks_TreatTcpPayload(scConnection, &requestIdOrHandle, &errorStatus))
+            SC_Chunks_TreatTcpPayload(scConnection, &requestIdOrHandle, &ignoreExpiredMessage, &errorStatus))
         {
             // Current chunk shall have been moved into intermediate chunk buffers or into complete message buffer
             assert(NULL == chunkCtx->currentChunkInputBuffer);
             if (NULL != chunkCtx->currentMessageInputBuffer)
             {
-                // Transmit OPC UA message to secure connection state manager
-                SOPC_SecureChannels_InternalEvent scEvent =
-                    SC_Chunks_MsgTypeToRcvEvent(chunkCtx->currentMsgType, chunkCtx->currentMsgIsFinal);
-                if (scEvent == INT_SC_RCV_ERR || scEvent == INT_SC_RCV_CLO)
+                if (!ignoreExpiredMessage)
                 {
-                    // Treat as prio events
-                    SOPC_SecureChannels_EnqueueInternalEventAsNext(
-                        scEvent, scConnectionIdx, (uintptr_t) chunkCtx->currentMessageInputBuffer, requestIdOrHandle);
+                    // Transmit OPC UA message to secure connection state manager
+                    SOPC_SecureChannels_InternalEvent scEvent =
+                        SC_Chunks_MsgTypeToRcvEvent(chunkCtx->currentMsgType, chunkCtx->currentMsgIsFinal);
+                    if (scEvent == INT_SC_RCV_ERR || scEvent == INT_SC_RCV_CLO)
+                    {
+                        // Treat as prio events
+                        SOPC_SecureChannels_EnqueueInternalEventAsNext(scEvent, scConnectionIdx,
+                                                                       (uintptr_t) chunkCtx->currentMessageInputBuffer,
+                                                                       requestIdOrHandle);
+                    }
+                    else
+                    {
+                        SOPC_SecureChannels_EnqueueInternalEvent(scEvent, scConnectionIdx,
+                                                                 (uintptr_t) chunkCtx->currentMessageInputBuffer,
+                                                                 requestIdOrHandle);
+                    }
+                    /* currentMessageInputBuffer is lent to the secure channel, which will free it */
+                    chunkCtx->currentMessageInputBuffer = NULL;
+                    SOPC_ScInternalContext_ClearInputChunksContext(chunkCtx);
                 }
                 else
                 {
-                    SOPC_SecureChannels_EnqueueInternalEvent(
-                        scEvent, scConnectionIdx, (uintptr_t) chunkCtx->currentMessageInputBuffer, requestIdOrHandle);
+                    SOPC_Logger_TraceInfo("ChunksMgr: ignored response of expired request with requestHandle=%" PRIu32
+                                          " (epCfgIdx=%" PRIu32 ", scCfgIdx=%" PRIu32 ")",
+                                          requestIdOrHandle, scConnection->serverEndpointConfigIdx,
+                                          scConnection->endpointConnectionConfigIdx);
+
+                    // Message shall be ignored since it is response to an expired request
+                    SOPC_Buffer_Delete(chunkCtx->currentMessageInputBuffer);
+                    chunkCtx->currentMessageInputBuffer = NULL;
+                    SOPC_ScInternalContext_ClearInputChunksContext(chunkCtx);
                 }
-                /* currentMessageInputBuffer is lent to the secure channel, which will free it */
-                chunkCtx->currentMessageInputBuffer = NULL;
-                SOPC_ScInternalContext_ClearInputChunksContext(chunkCtx);
             }
         }
         else
@@ -3427,6 +3454,7 @@ static bool SC_Chunks_CreateClientSentRequestContext(uint32_t scConnectionIdx,
         msgCtx = SOPC_Calloc(1, sizeof(SOPC_SentRequestMsg_Context));
         if (msgCtx != NULL)
         {
+            msgCtx->timeoutExpired = false;
             msgCtx->scConnectionIdx = scConnectionIdx;
             msgCtx->requestHandle = requestIdOrHandle; // Client side: it contains request handle
             msgCtx->msgType = sendMsgType;

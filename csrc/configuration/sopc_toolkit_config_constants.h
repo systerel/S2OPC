@@ -136,9 +136,11 @@
 #define SOPC_MAX_PENDING_REQUESTS 128
 #endif
 
-/** @brief Maximum time before a response shall be received after sending a request (0 means no limit) */
+/** @brief Maximum time before a response shall be received after sending a request (0 means no limit).
+ *  Note: the request timeoutHint parameter is set to SOPC_REQUEST_TIMEOUT_MS/2 to let a margin regarding timeoutHint.
+ */
 #ifndef SOPC_REQUEST_TIMEOUT_MS
-#define SOPC_REQUEST_TIMEOUT_MS 5000
+#define SOPC_REQUEST_TIMEOUT_MS 10000
 #endif
 
 /** @brief Elapsed time after which SC connection establishment is considered timeout

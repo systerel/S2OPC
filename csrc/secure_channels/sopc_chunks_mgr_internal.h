@@ -26,6 +26,9 @@ bool SC_Chunks_DecodeReceivedBuffer(SOPC_SecureConnection_ChunkMgrCtx* ctx,
                                     SOPC_Buffer* receivedBuffer,
                                     SOPC_StatusCode* error);
 
-bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection, uint32_t* requestId, SOPC_StatusCode* errorStatus);
+bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
+                               uint32_t* requestIdOrHandle,
+                               bool* ignoreExpiredMessage,
+                               SOPC_StatusCode* errorStatus);
 
 #endif // SOPC_CHUNKS_MGR_INTERNAL_H_

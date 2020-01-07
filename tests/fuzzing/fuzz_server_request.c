@@ -52,6 +52,7 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
     SOPC_SecureConnection_ChunkMgrCtx* chunkCtx = &sc->chunksCtx;
     SOPC_StatusCode errorStatus = SOPC_GoodGenericStatus;
     uint32_t request_id;
+    bool ignore_msg;
 
     while (SOPC_Buffer_Remaining(sopc_buffer) > 0)
     {
@@ -68,7 +69,7 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
         }
 
         // Decode OPC UA Secure Conversation MessageChunk specific headers if necessary (not HEL/ACK/ERR)
-        if (SC_Chunks_TreatTcpPayload(sc, &request_id, &errorStatus))
+        if (SC_Chunks_TreatTcpPayload(sc, &request_id, &ignore_msg, &errorStatus))
         {
             SOPC_ScInternalContext_ClearInputChunksContext(chunkCtx);
         }

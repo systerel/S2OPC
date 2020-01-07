@@ -2976,7 +2976,7 @@ void SOPC_SecureConnectionStateMgr_OnTimerEvent(SOPC_SecureChannels_TimerEvent e
         }
 
         SOPC_SentRequestMsg_Context* msgCtx =
-            SOPC_SLinkedList_RemoveFromId(scConnection->tcpSeqProperties.sentRequestIds, (uint32_t) auxParam);
+            SOPC_SLinkedList_FindFromId(scConnection->tcpSeqProperties.sentRequestIds, (uint32_t) auxParam);
 
         if (msgCtx == NULL)
         {
@@ -2999,7 +2999,8 @@ void SOPC_SecureConnectionStateMgr_OnTimerEvent(SOPC_SecureChannels_TimerEvent e
             break;
         }
 
-        SOPC_Free(msgCtx);
+        // Set the response message as in expired to be ignored if received
+        msgCtx->timeoutExpired = true;
 
         break;
     }
