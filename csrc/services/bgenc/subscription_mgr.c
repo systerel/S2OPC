@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.c
 
- Date                 : 30/10/2019 16:33:14
+ Date                 : 07/01/2020 15:55:41
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -225,7 +225,7 @@ void subscription_mgr__fill_response_subscription_create_monitored_items(
                if ((subscription_mgr__l_sc != constants_statuscodes_bs__e_sc_ok) &&
                   (((subscription_mgr__l_sc == constants_statuscodes_bs__e_sc_bad_not_readable) ||
                   (subscription_mgr__l_sc == constants_statuscodes_bs__e_sc_bad_user_access_denied)) ||
-                  (subscription_mgr__l_sc == constants_statuscodes_bs__e_sc_bad_index_range_invalid))) {
+                  (subscription_mgr__l_sc == constants_statuscodes_bs__e_sc_bad_index_range_no_data))) {
                   constants_statuscodes_bs__getall_conv_StatusCode_To_RawStatusCode(subscription_mgr__l_sc,
                      &subscription_mgr__l_valueSc);
                   subscription_mgr__l_sc = constants_statuscodes_bs__e_sc_ok;

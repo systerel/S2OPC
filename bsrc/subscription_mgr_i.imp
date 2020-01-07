@@ -587,7 +587,7 @@ OPERATIONS
                     */
                     IF l_sc /= e_sc_ok & (l_sc = e_sc_bad_not_readable or
                                           l_sc = e_sc_bad_user_access_denied or
-                                          l_sc = e_sc_bad_index_range_invalid)
+                                          l_sc = e_sc_bad_index_range_no_data)
                     THEN
                         /* For PublishResponse */
                         l_valueSc <-- getall_conv_StatusCode_To_RawStatusCode(l_sc);
