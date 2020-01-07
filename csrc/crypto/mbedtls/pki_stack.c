@@ -143,23 +143,40 @@ static uint32_t PKIProviderStack_GetCertificateValidationError(uint32_t failure_
     return SOPC_CertificateValidationError_Unkown;
 }
 
-static int verify_cert(void* trust_li, mbedtls_x509_crt* crt, int certificate_depth, uint32_t* flags)
+static int verify_cert(void* is_issued, mbedtls_x509_crt* crt, int certificate_depth, uint32_t* flags)
 {
-    /* When we have an issued certificate that is trusted, but we don't trust its parents,
-     * we have verified the chain certificates, but we should still mark the certificate as trusted.
-     * "NOT_TRUSTED" should be the sole problem.
+    /* The purpose of this callback is solely to treat self-signed issued certificates.
+     * When a certificate is issued and self-signed, mbedtls does not find its parent,
+     * and marks it as NOT_TRUSTED.
+     * So, for issued certificates that are NOT_TRUSTED, we verify:
+     * - it is self-signed
+     * - its signature is correct
+     * - (dates are already checked by mbedtls)
+     * - (signature algorithms are also already checked)
      */
-    if (NULL != trust_li && 0 == certificate_depth && MBEDTLS_X509_BADCERT_NOT_TRUSTED == *flags)
+    bool bIssued = *(bool*) is_issued;
+    if (bIssued && 0 == certificate_depth && MBEDTLS_X509_BADCERT_NOT_TRUSTED == *flags)
     {
-        /* Verify if crt is in trust_li */
-        /* x509_crt_check_ee_locally_trusted() does this but only for self-signed end-entity certificates (!) */
-        /* TODO: factorise with Certificate_FindInCertList() */
-        for (mbedtls_x509_crt* cur = (mbedtls_x509_crt*) trust_li; NULL != cur; cur = cur->next)
+        /* Is it self-signed? Issuer and subject are the same.
+         * Note: this verification is not sufficient by itself to conclude that the certificate is self-signed,
+         * but the self-signature verification is².
+         */
+        if (crt->issuer_raw.len == crt->subject_raw.len &&
+            0 == memcmp(crt->issuer_raw.p, crt->subject_raw.p, crt->issuer_raw.len))
         {
-            if (crt->raw.len == cur->raw.len && 0 == memcmp(crt->raw.p, cur->raw.p, crt->raw.len))
+            /* Is it correctly signed? Inspired by x509_crt_check_signature */
+            const mbedtls_md_info_t* md_info = mbedtls_md_info_from_type(crt->sig_md);
+            unsigned char hash[MBEDTLS_MD_MAX_SIZE];
+
+            /* First hash the certificate, then verify it is signed */
+            if (mbedtls_md(md_info, crt->tbs.p, crt->tbs.len, hash) == 0)
             {
-                *flags = 0;
-                break;
+                if (mbedtls_pk_verify_ext(crt->sig_pk, crt->sig_opts, &crt->pk, crt->sig_md, hash,
+                                          mbedtls_md_get_size(md_info), crt->sig.p, crt->sig.len) == 0)
+                {
+                    /* Finally accept the certificate */
+                    *flags = 0;
+                }
             }
         }
     }
@@ -237,7 +254,6 @@ static SOPC_ReturnStatus PKIProviderStack_ValidateCertificate(const SOPC_PKIProv
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
     mbedtls_x509_crt* mbed_chall = (mbedtls_x509_crt*) (&pToValidate->crt);
     mbedtls_x509_crl* mbed_crl = (mbedtls_x509_crl*) (&cert_crl->crl);
-    SOPC_CertificateList* issued = (SOPC_CertificateList*)pPKI->pIssuedCertsList;
     SOPC_GCC_DIAGNOSTIC_RESTORE
 
     /* Check certificate usages */
@@ -263,7 +279,7 @@ static SOPC_ReturnStatus PKIProviderStack_ValidateCertificate(const SOPC_PKIProv
         uint32_t failure_reasons = 0;
         if (mbedtls_x509_crt_verify_with_profile(mbed_chall, mbed_ca, mbed_crl, &mbedtls_x509_crt_profile_minimal,
                                                  NULL /* You can specify an expected Common Name here */,
-                                                 &failure_reasons, verify_cert, &issued->crt) != 0)
+                                                 &failure_reasons, verify_cert, &bIssued) != 0)
         {
             *error = PKIProviderStack_GetCertificateValidationError(failure_reasons);
             status = SOPC_STATUS_NOK;
