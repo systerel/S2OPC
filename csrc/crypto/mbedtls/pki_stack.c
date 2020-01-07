@@ -362,9 +362,9 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_SerializedCertificate* pCert
             /* mbedtls does not verify that each CA has a CRL, so we must do it ourselves
              * We must fail here, otherwise we can't report misconfigurations to the users */
             status = SOPC_STATUS_NOK;
-            printf(
-                "> PKI creation error: Not all certificate authorities have a single certificate revocation list! "
-                "Certificates issued by these CAs will be refused.\n");
+            fprintf(stderr,
+                    "> PKI creation error: Not all certificate authorities have a single certificate revocation list! "
+                    "Certificates issued by these CAs will be refused.\n");
         }
     }
 
@@ -440,10 +440,7 @@ static SOPC_ReturnStatus link_certificates(SOPC_CertificateList** ppPrev, SOPC_C
             prev->crt.next = &next->crt;
         }
     }
-    /* The first list exists, but not the second, or both don't exist: nothing to do */
-    else
-    {
-    }
+    /* else: The first list exists, but not the second, or both don't exist: nothing to do */
 
     return status;
 }
@@ -468,6 +465,7 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
      * Trusted roots are used to verify unknown certificates.
      * Links issuers are used to complete the chain between end-entry certificates
      * (certificate received in the OPN process) and the roots.
+     *
      * In practise, as certificates are linked lists in mbedtls,
      * to verify issued certificates, we chain untrusted and trusted certificates,
      * we create a single list, and chain them: untrusted -> trusted.
@@ -519,33 +517,31 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
         status = SOPC_STATUS_NOK;
         if (!bRootsCRL)
         {
-            printf(
-                "> PKI creation error: Not all certificate authorities in given roots have a single certificate "
-                "revocation list! Certificates issued by these CAs will be refused.\n");
+            fprintf(stderr,
+                    "> PKI creation error: Not all certificate authorities in given roots have a single certificate "
+                    "revocation list! Certificates issued by these CAs will be refused.\n");
         }
         if (!bLinksCRL)
         {
-            printf(
-                "> PKI creation error: Not all certificate authorities in given issuer links have a single "
-                "certificate revocation list! Certificates issued by these CAs will be refused.\n");
+            fprintf(stderr,
+                    "> PKI creation error: Not all certificate authorities in given issuer links have a single "
+                    "certificate revocation list! Certificates issued by these CAs will be refused.\n");
         }
     }
 
-    /* TODO: Check that all issued certificates have a CA in untrusted
-     * This is already checked when receiving an issued certificate,
+    /* TODO: Check that all issued certificates are either self-signed or have a CA in the untrusted+trusted list.
+     * This is checked when receiving an issued certificate,
      * but it would be useful to report this misconfiguration.
      */
 
-    /* Simpler case: check and warn that there is at least an issued certificate or an issuer */
+    /* Simpler case: check and warn that there is untrusted issuers but no issued certificates */
     if (SOPC_STATUS_OK == status)
     {
-        bool bIssuedXorUntrusted = (NULL == lRootsUntrusted) ^ (NULL == lIssued);
+        bool bIssuedXorUntrusted = (NULL != lRootsUntrusted) && (NULL == lIssued);
         if (bIssuedXorUntrusted)
         {
-            printf(
-                "> PKI creation warning: issued certificates are given but no untrusted CA are given, or untrusted "
-                "certificates are given but no issued certificates are given. Issued certificates without untrusted CA "
-                "will never be accepted while creating a secure connection.\n");
+            fprintf(stderr,
+                    "> PKI creation warning: untrusted certificates are given but no issued certificates are given.\n");
         }
     }
 
