@@ -944,7 +944,15 @@ static void StaMac_ProcessEvent_stActivated(SOPC_StaMac_Machine* pSM,
         }
         break;
     case SE_SND_REQUEST_FAILED:
-        pSM->state = stError;
+        if (&OpcUa_PublishRequest_EncodeableType == pParam)
+        {
+            // Do not set in error, only indicate less token available
+            pSM->nTokenUsable -= 1;
+        }
+        else
+        {
+            pSM->state = stError;
+        }
         Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Send request failed, type %s, context 0x%" PRIxPTR ".",
                     ((SOPC_EncodeableType*) pParam)->TypeName, appCtx);
         break;
