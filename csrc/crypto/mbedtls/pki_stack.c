@@ -159,7 +159,7 @@ static int verify_cert(void* is_issued, mbedtls_x509_crt* crt, int certificate_d
     {
         /* Is it self-signed? Issuer and subject are the same.
          * Note: this verification is not sufficient by itself to conclude that the certificate is self-signed,
-         * but the self-signature verification is².
+         * but the self-signature verification is.
          */
         if (crt->issuer_raw.len == crt->subject_raw.len &&
             0 == memcmp(crt->issuer_raw.p, crt->subject_raw.p, crt->issuer_raw.len))
@@ -241,16 +241,16 @@ static SOPC_ReturnStatus PKIProviderStack_ValidateCertificate(const SOPC_PKIProv
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    SOPC_CertificateList* trust_chain = bIssued ? pPKI->pUntrustedIssuerRootsList : pPKI->pTrustedIssuerRootsList;
+    SOPC_CertificateList* trust_list = bIssued ? pPKI->pUntrustedIssuerRootsList : pPKI->pTrustedIssuerRootsList;
     SOPC_CRLList* cert_crl = pPKI->pCertRevocList;
-    /* TODO: Is NULL trust_chain a valid case? */
-    if (NULL == trust_chain || NULL == cert_crl)
+    /* TODO: Is an empty trust_list a valid case? */
+    if (NULL == trust_list || NULL == cert_crl)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     /* Assumes that mbedtls does not modify the certificates */
-    mbedtls_x509_crt* mbed_ca = (mbedtls_x509_crt*) (&trust_chain->crt);
+    mbedtls_x509_crt* mbed_ca = (mbedtls_x509_crt*) (&trust_list->crt);
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
     mbedtls_x509_crt* mbed_chall = (mbedtls_x509_crt*) (&pToValidate->crt);
     mbedtls_x509_crl* mbed_crl = (mbedtls_x509_crl*) (&cert_crl->crl);
@@ -515,8 +515,8 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
     }
 
     /* Check the CRL-CA association before creating the PKI.
-     * Untrusted list contains all known root CAs,
-     * and issuer links contains all intermediate CAs. */
+     * Untrusted root list contains all known root CAs,
+     * and untrusted link list contains all intermediate CAs. */
     bool bRootsCRL = false;
     bool bLinksCRL = false;
     if (SOPC_STATUS_OK == status)

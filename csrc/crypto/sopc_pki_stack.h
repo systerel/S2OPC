@@ -121,8 +121,9 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_SerializedCertificate* pCert
  * \param ppPKI     A valid pointer to the newly created PKIProvider. You should free such provider with
  *                  SOPC_PKIProvider_Free().
  *
- * \warning         The \p lPathsIssuerLinksList must be sorted, and certificates must be provided in the child ->
- *                  parent order. There may be several chains provided in the list, but a signed certificate
+ * \warning         The \p lPathTrustedIssuerLinks and \p lPathUntrustedIssuerLinks must be sorted:
+ *                  certificates must be provided in the child ->  parent order.
+ *                  In other words, there may be several chains provided in the list, but a signed certificate
  *                  must always be provided before the certificate that signed it.
  *
  * \note            Content of the pki is unspecified when return value is not SOPC_STATUS_OK.
