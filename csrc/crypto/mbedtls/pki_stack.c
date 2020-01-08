@@ -372,15 +372,13 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_SerializedCertificate* pCert
     /* Check the CRL-CA association before creating the PKI */
     if (SOPC_STATUS_OK == status)
     {
+        /* mbedtls does not verify that each CA has a CRL, so we must do it ourselves */
         bool match = false;
-        status = SOPC_KeyManager_CertificateList_MatchCRLList(caCert, pRevocationList, &match);
+        status = SOPC_KeyManager_CertificateList_RemoveUnmatchedCRL(caCert, pRevocationList, &match);
         if (SOPC_STATUS_OK == status && !match)
         {
-            /* mbedtls does not verify that each CA has a CRL, so we must do it ourselves
-             * We must fail here, otherwise we can't report misconfigurations to the users */
-            status = SOPC_STATUS_NOK;
             fprintf(stderr,
-                    "> PKI creation error: Not all certificate authorities have a single certificate revocation list! "
+                    "> PKI creation warning: Not all certificate authorities have a single certificate revocation list! "
                     "Certificates issued by these CAs will be refused.\n");
         }
     }
@@ -523,25 +521,24 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
     {
         /* mbedtls does not verify that each CA has a CRL, so we must do it ourselves.
          * We must fail here, otherwise we can't report misconfigurations to the users */
-        status = SOPC_KeyManager_CertificateList_MatchCRLList(lRootsUntrusted, lCrls, &bRootsCRL);
+        status = SOPC_KeyManager_CertificateList_RemoveUnmatchedCRL(lRootsUntrusted, lCrls, &bRootsCRL);
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_CertificateList_MatchCRLList(lLinksUntrusted, lCrls, &bLinksCRL);
+        status = SOPC_KeyManager_CertificateList_RemoveUnmatchedCRL(lLinksUntrusted, lCrls, &bLinksCRL);
     }
     if (SOPC_STATUS_OK == status && (!bRootsCRL || !bLinksCRL))
     {
-        status = SOPC_STATUS_NOK;
         if (!bRootsCRL)
         {
             fprintf(stderr,
-                    "> PKI creation error: Not all certificate authorities in given roots have a single certificate "
+                    "> PKI creation warning: Not all certificate authorities in given roots have a single certificate "
                     "revocation list! Certificates issued by these CAs will be refused.\n");
         }
         if (!bLinksCRL)
         {
             fprintf(stderr,
-                    "> PKI creation error: Not all certificate authorities in given issuer links have a single "
+                    "> PKI creation warning: Not all certificate authorities in given issuer links have a single "
                     "certificate revocation list! Certificates issued by these CAs will be refused.\n");
         }
     }

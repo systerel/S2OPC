@@ -732,19 +732,20 @@ static char* get_crt_sha1(const mbedtls_x509_crt* crt)
     return get_raw_sha1(&crt->raw);
 }
 
-SOPC_ReturnStatus SOPC_KeyManager_CertificateList_MatchCRLList(const SOPC_CertificateList* pCert,
-                                                               const SOPC_CRLList* pCRL,
-                                                               bool* pbMatch)
+SOPC_ReturnStatus SOPC_KeyManager_CertificateList_RemoveUnmatchedCRL(SOPC_CertificateList* pCert,
+                                                                     const SOPC_CRLList* pCRL,
+                                                                     bool* pbMatch)
 {
-    if (NULL == pCRL || NULL == pbMatch)
+    if (NULL == pCRL)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     /* For each CA, find its CRL. If not found, log and match = false */
     bool list_match = true;
-    const mbedtls_x509_crt* crt = NULL != pCert ? &pCert->crt : NULL;
-    for (; NULL != crt; crt = crt->next)
+    mbedtls_x509_crt* crt = NULL != pCert ? &pCert->crt : NULL;
+    mbedtls_x509_crt* prev = NULL; /* Parent of current cert */
+    while (NULL != crt)
     {
         /* Skip certificates that are not authorities */
         if (!crt->ca_istrue)
@@ -752,7 +753,7 @@ SOPC_ReturnStatus SOPC_KeyManager_CertificateList_MatchCRLList(const SOPC_Certif
             continue;
         }
 
-        bool crl_found = false;
+        int crl_found = 0;
         const mbedtls_x509_crl* crl = &pCRL->crl;
         for (; NULL != crl; crl = crl->next)
         {
@@ -763,35 +764,68 @@ SOPC_ReturnStatus SOPC_KeyManager_CertificateList_MatchCRLList(const SOPC_Certif
              * which in any case would be confusing for end users. */
             bool match = crl->issuer_raw.len == crt->subject_raw.len &&
                          memcmp(crl->issuer_raw.p, crt->subject_raw.p, crl->issuer_raw.len) == 0;
-            if (crl_found && match)
+            if (crl_found > 0 && match)
             {
-                char* fpr = get_crt_sha1(crt);
-                fprintf(
-                    stderr,
-                    "> MatchCRLList error: Certificate with SHA-1 fingerprint %s has more than one associated CRL.\n",
-                    fpr);
-                SOPC_Free(fpr);
-                crl_found = false;
+                if (1 == crl_found)
+                {
+                    char* fpr = get_crt_sha1(crt);
+                    fprintf(stderr,
+                            "> MatchCRLList warning: Certificate with SHA-1 fingerprint %s has more than one associated "
+                            "CRL.\n",
+                            fpr);
+                    SOPC_Free(fpr);
+                }
+                if (crl_found < INT_MAX)
+                {
+                    ++crl_found;
+                }
             }
             else if (match)
             {
-                crl_found = true;
+                ++crl_found;
             }
         }
 
-        if (!crl_found)
+        if (1 != crl_found)
         {
             list_match = false;
             char* fpr = get_crt_sha1(crt);
             fprintf(stderr,
-                    "> MatchCRLList error: Certificate with SHA-1 fingerprint %s has no CRL or multiple CRLs.\n", fpr);
+                    "> MatchCRLList warning: Certificate with SHA-1 fingerprint %s has no CRL or multiple CRLs, and is "
+                    "removed from the CAs list.\n",
+                    fpr);
             SOPC_Free(fpr);
 
-            /* Do not break, test all the certificates */
+            /* Remove the certificate from the chain and safely delete it */
+            mbedtls_x509_crt* next = crt->next;
+            if (NULL == prev)
+            {
+                /* Head of the chain is a special case */
+                pCert->crt = *next;
+            }
+            else
+            {
+                prev->next = next;
+            }
+            crt->next = NULL;
+            mbedtls_x509_crt_free(crt);
+
+            /* Iterate */
+            crt = next;
+        }
+        else
+        {
+            /* Iterate */
+            prev = crt;
+            crt = crt->next;
         }
     }
 
-    *pbMatch = list_match; /* There may be unused CRLs */
+    /* There may be unused CRLs */
+    if (NULL != pbMatch)
+    {
+        *pbMatch = list_match;
+    }
 
     return SOPC_STATUS_OK;
 }

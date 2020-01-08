@@ -369,26 +369,27 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetMaybeApplicationUri(const SOPC_
 SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetListLength(const SOPC_CertificateList* pCert, size_t* pLength);
 
 /**
- * \brief           Evaluates whether all Certificate Authorities in \p pCert have a single matching revocation list
- *                  in \p pCRL or not.
+ * \brief           Removes (and frees) certificates from \p pCert that do not have exactly one revocation list
+ *                  in \p pCRL.
  *
  *                  This function does not set match to false if there are CRL that do not match any Certificate.
  *                  This function skips certificates in /p pCert that are not authorities.
  *
  * \param pCert     A valid pointer to the Certificate list.
  * \param pCRL      A valid pointer to the CRL list.
- * \param pbMatch   A valid pointer to the result of the test.
- *                  A true value indicates that each certificate in \p pCert has exactly one associated CRL in \p pCRL.
+ * \param pbMatch   An optional pointer to the result of the test.
+ *                  True value indicates that each certificate in \p pCert has exactly one associated CRL in \p pCRL,
+ *                  and no certificate has been freed.
  *                  Otherwise false.
  *
- * \note            Content of the output is unspecified when return value is not SOPC_STATUS_OK.
+ * \note            Content of \p pbMatch is unspecified when return value is not SOPC_STATUS_OK.
  *
  * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
  *                  and SOPC_STATUS_NOK when there was an error.
  */
-SOPC_ReturnStatus SOPC_KeyManager_CertificateList_MatchCRLList(const SOPC_CertificateList* pCert,
-                                                               const SOPC_CRLList* pCRL,
-                                                               bool* pbMatch);
+SOPC_ReturnStatus SOPC_KeyManager_CertificateList_RemoveUnmatchedCRL(SOPC_CertificateList* pCert,
+                                                                     const SOPC_CRLList* pCRL,
+                                                                     bool* pbMatch);
 
 /**
  * \brief           Finds whether a certificate is in the given certificate list or not.
