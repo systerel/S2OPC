@@ -59,7 +59,8 @@ static SOPC_CRLList* static_cacrl = NULL;
 /* Define application namespaces: ns=1 and ns=2 (NULL terminated array) */
 static char* default_app_namespace_uris[] = {DEFAULT_PRODUCT_URI, DEFAULT_PRODUCT_URI_2, NULL};
 static char* default_locale_ids[] = {"en-US", "fr-FR", NULL};
-static char* default_trusted_roots[] = {"trusted/cacert.der", "trusted/ctt_ca1T.der" /* Tests 029, 037 */, NULL};
+static char* default_trusted_roots[] = {"trusted/cacert.der", "trusted/ctt_ca1T.der" /* Tests 029, 037 */,
+                                        "trusted/ctt_ca1TC.der" /* Tests 042, 043 */, NULL};
 static char* default_trusted_links[] = {NULL};
 static char* default_untrusted_roots[] = {"untrusted/ctt_ca1I.der" /* Test 044 */, NULL};
 static char* default_untrusted_links[] = {"untrusted/ctt_ca1TC_ca2I.der" /* Test 002 */, NULL};
