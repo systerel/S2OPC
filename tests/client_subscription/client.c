@@ -48,14 +48,16 @@
 /* Default publish period */
 #define PUBLISH_PERIOD_MS 500
 /* Default max keep alive count */
-#define MAX_KEEP_ALIVE_COUNT 30
+#define MAX_KEEP_ALIVE_COUNT 2
 /* Lifetime Count of subscriptions */
 #define MAX_LIFETIME_COUNT 1000
 /* Number of targetted publish token */
-#define PUBLISH_N_TOKEN 3
+#define PUBLISH_N_TOKEN 2
 
 /* Path to the certificate authority */
 #define PATH_CACERT_PUBL "./trusted/cacert.der"
+/* Path to the CA CRL */
+#define PATH_CACRL_PUBL "./revoked/cacrl.der"
 /* Path to the server certificate */
 #define PATH_SERVER_PUBL "./server_public/server_2k_cert.der"
 /* Path to the client certificate */
@@ -150,6 +152,7 @@ int main(int argc, char* const argv[])
     if (!cfg_con.disable_certificate_verification)
     {
         cfg_con.path_cert_auth = PATH_CACERT_PUBL;
+        cfg_con.path_crl = PATH_CACRL_PUBL;
     }
 
     Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, SOPC_LibSub_GetVersion());

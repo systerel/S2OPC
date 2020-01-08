@@ -396,6 +396,7 @@ static const char* DEFAULT_KEY_PATH = "client_private/client_2k_key.pem";
 static const char* DEFAULT_CERT_PATH = "client_public/client_2k_cert.der";
 static const char* DEFAULT_SERVER_CERT_PATH = "server_public/server_2k_cert.der";
 static const char* DEFAULT_CA_PATH = "trusted/cacert.der";
+static const char* DEFAULT_CRL_PATH = "revoked/cacrl.der";
 
 static void usage(char** argv)
 {
@@ -421,13 +422,14 @@ static void usage(char** argv)
     printf(
         "\nIf a security policy is defined, the paths to the client key, certificate and to\n"
         "the certificate authority can be set using the environment variables SOPC_KEY, SOPC_CERT\n"
-        "and SOPC_CA. The default values for those variables are:\n"
+        "SOPC_CA and SOPC_CRL. The default values for those variables are:\n"
         "SOPC_KEY:         %s\n"
         "SOPC_CERT:        %s\n"
         "SOPC_SERVER_CERT: %s\n"
-        "SOPC_CA:          %s\n\n"
+        "SOPC_CA:          %s\n"
+        "SOPC_CRL:         %s\n\n"
         "Benchmark types:\n",
-        DEFAULT_KEY_PATH, DEFAULT_CERT_PATH, DEFAULT_SERVER_CERT_PATH, DEFAULT_CA_PATH);
+        DEFAULT_KEY_PATH, DEFAULT_CERT_PATH, DEFAULT_SERVER_CERT_PATH, DEFAULT_CA_PATH, DEFAULT_CRL_PATH);
 
     for (size_t i = 0; BENCH_FUNCS[i].name != NULL; ++i)
     {
@@ -478,12 +480,14 @@ static const char* getenv_default(const char* name, const char* default_value)
 static bool load_keys(SOPC_SerializedCertificate** cert,
                       SOPC_SerializedAsymmetricKey** key,
                       SOPC_SerializedCertificate** server_cert,
-                      SOPC_SerializedCertificate** ca)
+                      SOPC_SerializedCertificate** ca,
+                      SOPC_CRLList** cacrl)
 {
     const char* cert_path = getenv_default("SOPC_CERT", DEFAULT_CERT_PATH);
     const char* key_path = getenv_default("SOPC_KEY", DEFAULT_KEY_PATH);
     const char* server_cert_path = getenv_default("SOPC_SERVER_CERT", DEFAULT_SERVER_CERT_PATH);
     const char* ca_path = getenv_default("SOPC_CA", DEFAULT_CA_PATH);
+    const char* crl_path = getenv_default("SOPC_CRL", DEFAULT_CRL_PATH);
 
     if (SOPC_KeyManager_SerializedCertificate_CreateFromFile(cert_path, cert) != SOPC_STATUS_OK)
     {
@@ -505,6 +509,11 @@ static bool load_keys(SOPC_SerializedCertificate** cert,
         fprintf(stderr, "Error while loading CA certificate from %s\n", ca_path);
     }
 
+    if (SOPC_KeyManager_CRL_CreateOrAddFromFile(crl_path, cacrl) != SOPC_STATUS_OK)
+    {
+        fprintf(stderr, "Error while loading CA CRL from %s\n", crl_path);
+    }
+
     if (*cert == NULL || *key == NULL || *server_cert == NULL || *ca == NULL)
     {
         SOPC_KeyManager_SerializedCertificate_Delete(*cert);
@@ -518,6 +527,9 @@ static bool load_keys(SOPC_SerializedCertificate** cert,
 
         SOPC_KeyManager_SerializedCertificate_Delete(*ca);
         *ca = NULL;
+
+        SOPC_KeyManager_CRL_Free(*cacrl);
+        *cacrl = NULL;
 
         return false;
     }
@@ -613,12 +625,13 @@ int main(int argc, char** argv)
     SOPC_SerializedAsymmetricKey* key = NULL;
     SOPC_SerializedCertificate* server_cert = NULL;
     SOPC_SerializedCertificate* ca = NULL;
+    SOPC_CRLList* cacrl = NULL;
     SOPC_PKIProvider* pki = NULL;
 
     if (msg_sec_mode != OpcUa_MessageSecurityMode_None)
     {
-        if (!load_keys(&cert, &key, &server_cert, &ca) ||
-            SOPC_PKIProviderStack_Create(ca, NULL, &pki) != SOPC_STATUS_OK)
+        if (!load_keys(&cert, &key, &server_cert, &ca, &cacrl) ||
+            SOPC_PKIProviderStack_Create(ca, cacrl, &pki) != SOPC_STATUS_OK)
         {
             SOPC_PKIProvider_Free(&pki);
             SOPC_KeyManager_SerializedCertificate_Delete(cert);
