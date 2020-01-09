@@ -377,9 +377,10 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_SerializedCertificate* pCert
         status = SOPC_KeyManager_CertificateList_RemoveUnmatchedCRL(caCert, pRevocationList, &match);
         if (SOPC_STATUS_OK == status && !match)
         {
-            fprintf(stderr,
-                    "> PKI creation warning: Not all certificate authorities have a single certificate revocation list! "
-                    "Certificates issued by these CAs will be refused.\n");
+            fprintf(
+                stderr,
+                "> PKI creation warning: Not all certificate authorities have a single certificate revocation list! "
+                "Certificates issued by these CAs will be refused.\n");
         }
     }
 

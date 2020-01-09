@@ -294,7 +294,12 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromFile(const char* sz
     }
 
     SOPC_ReturnStatus status = certificate_maybe_create(ppCert);
-    SOPC_CertificateList* pCert = *ppCert;
+    SOPC_CertificateList* pCert = NULL;
+
+    if (SOPC_STATUS_OK == status)
+    {
+        pCert = *ppCert;
+    }
 
     if (SOPC_STATUS_OK == status)
     {
@@ -769,10 +774,11 @@ SOPC_ReturnStatus SOPC_KeyManager_CertificateList_RemoveUnmatchedCRL(SOPC_Certif
                 if (1 == crl_found)
                 {
                     char* fpr = get_crt_sha1(crt);
-                    fprintf(stderr,
-                            "> MatchCRLList warning: Certificate with SHA-1 fingerprint %s has more than one associated "
-                            "CRL.\n",
-                            fpr);
+                    fprintf(
+                        stderr,
+                        "> MatchCRLList warning: Certificate with SHA-1 fingerprint %s has more than one associated "
+                        "CRL.\n",
+                        fpr);
                     SOPC_Free(fpr);
                 }
                 if (crl_found < INT_MAX)
@@ -798,20 +804,28 @@ SOPC_ReturnStatus SOPC_KeyManager_CertificateList_RemoveUnmatchedCRL(SOPC_Certif
 
             /* Remove the certificate from the chain and safely delete it */
             mbedtls_x509_crt* next = crt->next;
+            crt->next = NULL;
+            mbedtls_x509_crt_free(crt);
+
+            /* Set new next certificate */
             if (NULL == prev)
             {
                 /* Head of the chain is a special case */
                 pCert->crt = *next;
+                /* We have to free the new next certificate (copied as first one) */
+                SOPC_Free(next);
+
+                /* Do not iterate: current certificate has changed */
             }
             else
             {
+                /* We have to free the certificate if it is not the first in the list */
+                SOPC_Free(crt);
                 prev->next = next;
-            }
-            crt->next = NULL;
-            mbedtls_x509_crt_free(crt);
 
-            /* Iterate */
-            crt = next;
+                /* Iterate */
+                crt = next;
+            }
         }
         else
         {
