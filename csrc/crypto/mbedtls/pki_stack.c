@@ -502,6 +502,62 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
         cur = *lPathCRL;
     }
 
+    /* Check the CRL-CA association before creating the PKI.
+     * Untrusted root list contains all known root CAs,
+     * and untrusted link list contains all intermediate CAs. */
+    bool bTrustedRootsCRL = false;
+    bool bUntrustedRootsCRL = false;
+    bool bTrustedLinksCRL = false;
+    bool bUntrustedLinksCRL = false;
+    if (SOPC_STATUS_OK == status)
+    {
+        /* mbedtls does not verify that each CA has a CRL, so we must do it ourselves.
+         * We must fail here, otherwise we can't report misconfigurations to the users */
+        status = SOPC_KeyManager_CertificateList_RemoveUnmatchedCRL(lRootsTrusted, lCrls, &bTrustedRootsCRL);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_CertificateList_RemoveUnmatchedCRL(lRootsUntrusted, lCrls, &bUntrustedRootsCRL);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_CertificateList_RemoveUnmatchedCRL(lLinksTrusted, lCrls, &bTrustedLinksCRL);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_CertificateList_RemoveUnmatchedCRL(lLinksUntrusted, lCrls, &bUntrustedLinksCRL);
+    }
+    if (SOPC_STATUS_OK == status &&
+        (!bTrustedRootsCRL || !bUntrustedRootsCRL || !bTrustedLinksCRL || !bUntrustedLinksCRL))
+    {
+        if (!bTrustedRootsCRL)
+        {
+            fprintf(stderr,
+                    "> PKI creation warning: Not all certificate authorities in given trusted roots have a single "
+                    "certificate revocation list! Certificates issued by these CAs will be refused.\n");
+        }
+        if (!bUntrustedRootsCRL)
+        {
+            fprintf(stderr,
+                    "> PKI creation warning: Not all certificate authorities in given untrusted roots have a single "
+                    "certificate revocation list! Certificates issued by these CAs will be refused.\n");
+        }
+        if (!bTrustedLinksCRL)
+        {
+            fprintf(
+                stderr,
+                "> PKI creation warning: Not all certificate authorities in given trusted issuer links have a single "
+                "certificate revocation list! Certificates issued by these CAs will be refused.\n");
+        }
+        if (!bUntrustedLinksCRL)
+        {
+            fprintf(
+                stderr,
+                "> PKI creation warning: Not all certificate authorities in given untrusted issuer links have a single "
+                "certificate revocation list! Certificates issued by these CAs will be refused.\n");
+        }
+    }
+
     /* Link the untrusted lists with the trusted lists
      * (untrusted roots -> trusted roots, untrusted links -> trusted links) */
     if (SOPC_STATUS_OK == status)
@@ -511,37 +567,6 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
     if (SOPC_STATUS_OK == status)
     {
         status = link_certificates(&lLinksUntrusted, &lLinksTrusted);
-    }
-
-    /* Check the CRL-CA association before creating the PKI.
-     * Untrusted root list contains all known root CAs,
-     * and untrusted link list contains all intermediate CAs. */
-    bool bRootsCRL = false;
-    bool bLinksCRL = false;
-    if (SOPC_STATUS_OK == status)
-    {
-        /* mbedtls does not verify that each CA has a CRL, so we must do it ourselves.
-         * We must fail here, otherwise we can't report misconfigurations to the users */
-        status = SOPC_KeyManager_CertificateList_RemoveUnmatchedCRL(lRootsUntrusted, lCrls, &bRootsCRL);
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_KeyManager_CertificateList_RemoveUnmatchedCRL(lLinksUntrusted, lCrls, &bLinksCRL);
-    }
-    if (SOPC_STATUS_OK == status && (!bRootsCRL || !bLinksCRL))
-    {
-        if (!bRootsCRL)
-        {
-            fprintf(stderr,
-                    "> PKI creation warning: Not all certificate authorities in given roots have a single certificate "
-                    "revocation list! Certificates issued by these CAs will be refused.\n");
-        }
-        if (!bLinksCRL)
-        {
-            fprintf(stderr,
-                    "> PKI creation warning: Not all certificate authorities in given issuer links have a single "
-                    "certificate revocation list! Certificates issued by these CAs will be refused.\n");
-        }
     }
 
     /* TODO: Check that all issued certificates are either self-signed or have a CA in the untrusted+trusted list.
