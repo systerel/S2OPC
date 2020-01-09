@@ -119,7 +119,12 @@ int main(int argc, char* const argv[])
     }
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_LibSub_StaticCfg cfg_cli = {.host_log_callback = log_callback, .disconnect_callback = disconnect_callback};
+    SOPC_LibSub_StaticCfg cfg_cli = {.host_log_callback = log_callback,
+                                     .disconnect_callback = disconnect_callback,
+                                     .toolkit_logger = {.level = SOPC_TOOLKIT_LOG_LEVEL_INFO,
+                                                        .log_path = "./client_subscription_logs/",
+                                                        .maxBytes = 1048576,
+                                                        .maxFiles = 50}};
     SOPC_LibSub_ConnectionCfg cfg_con = {.server_url = options.endpoint_url,
                                          .security_policy = SECURITY_POLICY,
                                          .security_mode = SECURITY_MODE,
@@ -163,12 +168,6 @@ int main(int argc, char* const argv[])
         Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not initialize library.");
         free_options(&options);
         return 2;
-    }
-
-    status = SOPC_ToolkitConfig_SetCircularLogPath("./client_subscription_logs/", true);
-    if (SOPC_STATUS_OK != status)
-    {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not configure SDK logger.");
     }
 
     status = SOPC_LibSub_ConfigureConnection(&cfg_con, &cfg_id);
