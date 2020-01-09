@@ -685,6 +685,15 @@ SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendGetEndpointsRequest(const char* end
     status = Helpers_NewSCConfigFromLibSubCfg(endpointUrl, security_policy, security_mode, true, NULL, NULL, NULL, NULL,
                                               NULL, 0, &pscConfig);
 
+    /* Store it to be able to free it on clear in SOPC_LibSub_Clear() */
+    if (SOPC_STATUS_OK == status)
+    {
+        if (!SOPC_Array_Append(pArrScConfig, pscConfig))
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+
     if (SOPC_STATUS_OK == status && NULL == pscConfig)
     {
         status = SOPC_STATUS_NOK;
