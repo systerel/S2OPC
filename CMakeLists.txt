@@ -914,9 +914,13 @@ if(ENABLE_TESTING)
 # s2opc_subscription_client is not built on Windows
 if(NOT WIN32)
 # Demo client
-add_executable(s2opc_subscription_client "${LIBSUBSCRIBE_PATH}/client.c"
-                                         )
+add_executable(s2opc_subscription_client "${LIBSUBSCRIBE_PATH}/client.c")
+
 target_link_libraries(s2opc_subscription_client PRIVATE client_subscription s2opc)
+
+add_executable(s2opc_wrapper_write "${LIBSUBSCRIBE_PATH}/examples/write.c")
+target_link_libraries(s2opc_wrapper_write PRIVATE client_subscription s2opc)
+
 endif(NOT WIN32)
 
 # Helpers unit tests
