@@ -22,7 +22,7 @@
  * \brief A write example using the high-level client API
  *
  * Requires the toolkit_test_server to be running.
- * Connect to the server and writes a UInt64 value to a predefined node id.
+ * Connect to the server and writes a UInt64 value to a predefined node.
  * Then disconnect and closes the toolkit.
  *
  */
