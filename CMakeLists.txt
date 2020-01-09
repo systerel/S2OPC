@@ -924,6 +924,9 @@ target_link_libraries(s2opc_wrapper_write PRIVATE client_subscription s2opc)
 add_executable(s2opc_wrapper_read "${LIBSUBSCRIBE_PATH}/examples/read.c")
 target_link_libraries(s2opc_wrapper_read PRIVATE client_subscription s2opc)
 
+add_executable(s2opc_wrapper_browse "${LIBSUBSCRIBE_PATH}/examples/browse.c")
+target_link_libraries(s2opc_wrapper_browse PRIVATE client_subscription s2opc)
+
 endif(NOT WIN32)
 
 # Helpers unit tests
