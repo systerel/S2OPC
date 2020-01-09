@@ -30,7 +30,7 @@
 #include <assert.h>
 #include <stdio.h>
 
-#include "../libs2opc_client_cmds.h"
+#include "libs2opc_client_cmds.h"
 
 static void print_endpoints(SOPC_ClientHelper_GetEndpointsResult* result)
 {

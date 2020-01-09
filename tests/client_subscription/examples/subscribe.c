@@ -32,7 +32,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "../libs2opc_client_cmds.h"
+#include "libs2opc_client_cmds.h"
 
 static void datachange_callback(const int32_t c_id, const char* node_id, const SOPC_DataValue* value)
 {

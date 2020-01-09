@@ -30,7 +30,7 @@
 #include <assert.h>
 #include <stdio.h>
 
-#include "../libs2opc_client_cmds.h"
+#include "libs2opc_client_cmds.h"
 
 static void disconnect_callback(const uint32_t c_id)
 {
