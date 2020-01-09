@@ -930,6 +930,9 @@ target_link_libraries(s2opc_wrapper_browse PRIVATE client_subscription s2opc)
 add_executable(s2opc_wrapper_get_endpoints "${LIBSUBSCRIBE_PATH}/examples/get_endpoints.c")
 target_link_libraries(s2opc_wrapper_get_endpoints PRIVATE client_subscription s2opc)
 
+add_executable(s2opc_wrapper_subscribe "${LIBSUBSCRIBE_PATH}/examples/subscribe.c")
+target_link_libraries(s2opc_wrapper_subscribe PRIVATE client_subscription s2opc)
+
 endif(NOT WIN32)
 
 # Helpers unit tests
