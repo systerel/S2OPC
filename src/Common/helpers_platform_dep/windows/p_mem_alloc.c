@@ -17,7 +17,22 @@
  * under the License.
  */
 
+#include <errno.h>
+#include <inttypes.h>
+#include <kernel.h>
+#include <limits.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
+
+#ifndef __INT32_MAX__
+#include <toolchain/xcc_missing_defs.h>
+#endif
+
+#ifndef NULL
+#define NULL ((void*) 0)
+#endif
 
 #include "sopc_mem_alloc.h"
 
