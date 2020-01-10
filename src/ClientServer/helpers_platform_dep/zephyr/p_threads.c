@@ -26,6 +26,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifndef __INT32_MAX__
+#include <toolchain/xcc_missing_defs.h>
+#endif
+
 #include "sopc_enums.h" /* s2opc includes */
 #include "sopc_mem_alloc.h"
 
