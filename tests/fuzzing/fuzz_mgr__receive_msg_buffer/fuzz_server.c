@@ -142,8 +142,8 @@ static SOPC_ReturnStatus GenEndpoingConfig()
         SOPC_String_AttachFromCstring(&serverDescription->ApplicationUri, APPLICATION_URI);
         SOPC_String_AttachFromCstring(&serverDescription->ProductUri, PRODUCT_URI);
         serverDescription->ApplicationType = OpcUa_ApplicationType_Server;
-        SOPC_String_AttachFromCstring(&serverDescription->ApplicationName.Text, "S2OPC fuzzing server");
-        SOPC_String_AttachFromCstring(&serverDescription->ApplicationName.Locale, "en-US");
+        SOPC_String_AttachFromCstring(&serverDescription->ApplicationName.defaultText, "S2OPC fuzzing server");
+        SOPC_String_AttachFromCstring(&serverDescription->ApplicationName.defaultLocale, "en-US");
 
         output_s2opcConfig.serverConfig.endpoints = SOPC_Calloc(sizeof(SOPC_Endpoint_Config), 1);
 

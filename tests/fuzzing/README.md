@@ -226,7 +226,7 @@ The latter starts a server on `localhost:8008` by default.
 ## Fetch the new corpus
 
 As the fuzzer explores new test case, it expands the input corpus.
-We can [get it](https://github.com/google/oss-fuzz/blob/master/docs/corpora.md).
+We can [get it](https://github.com/google/oss-fuzz/blob/master/docs/advanced-topics/corpora.md).
 It can then be merged to reduce its size, and added to our own corpus.
 It requires a Google account that is mentioned in our `project.yaml`.
 
