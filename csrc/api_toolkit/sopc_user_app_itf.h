@@ -113,34 +113,33 @@ struct SOPC_Server_Config
     OpcUa_ApplicationDescription serverDescription; /**< Application description of the server.
                                                          Limitations: the gateway and discovery properties are ignored
                                                          (each endpoint returns its URL as discovery URL)*/
-    char* serverCertPath;                           /**< Temporary path to the server certificate
-                                                         (serverCertificate shall be instantiated by applicative code) */
-    char* serverKeyPath;                            /**< Temporary path to the server key
-                                                         (serverCertificate shall be instantiated by applicative code) */
+    char* serverCertPath; /**< Temporary path to the server certificate (serverCertificate shall be instantiated by
+                             applicative code) */
+    char* serverKeyPath;  /**< Temporary path to the server key (serverCertificate shall be instantiated by applicative
+                             code) */
     char** trustedRootIssuersList; /**< A pointer to an array of paths to each trusted root CA issuer to use in the
-                                  validation chain. The array must contain a NULL pointer to indicate its end. (pki
-                                  shall be instantiated using it by applicative code) */
+                                  validation chain. The array must contain a NULL pointer to indicate its end. (PKI
+                                  provider shall be instantiated using it by applicative code) */
     char** trustedIntermediateIssuersList; /**< A pointer to an array of paths to each trusted intermediate CA issuer to
                                   use in the validation chain. The array must contain a NULL pointer to indicate its
-                                  end. (pki shall be instantiated using it by applicative code) */
+                                  end. (PKI provider shall be instantiated using it by applicative code) */
     char** issuedCertificatesList;         /**< A pointer to an array of paths to each issued certificate to use in the
-                                              validation chain. The array must contain a NULL pointer to indicate its end.
-                                              (pki shall be instantiated using it by applicative code) */
-    char**
-        untrustedRootIssuersList; /**< A pointer to an array of paths to each untrusted root CA issuer to use in the
-                                 validation chain.   Each issued certificate must have its signing certificate chain in
-                                 the
-                                 untrusted issuers list.   (pki shall be instantiated using it by applicative code) */
-    char**
-        untrustedIntermediateIssuersList; /**< A pointer to an array of paths to each untrusted intermediate CA issuer
-                                 to use in the validation chain.   Each issued certificate must have its signing
-                                 certificate chain in the
-                                 untrusted issuers list.   (pki shall be instantiated using it by applicative code) */
-    char** certificateRevocationPathList; /**<  A pointer to an array of paths to each certificate revocation list to
-                      use. Each CA of the trusted issuers list and the untrusted issuers list must have a CRL in the
-                      list. (pki shall be instantiated using it by applicative code)*/
-    uint8_t nbEndpoints;                  /**< Number of endpoints defined by the server */
-    SOPC_Endpoint_Config* endpoints;      /**< Endpoint configuration array */
+                                              validation chain. The array must contain a NULL pointer to indicate its end. (PKI
+                                              provider shall be instantiated using it by applicative code) */
+    char** untrustedRootIssuersList; /**< A pointer to an array of paths to each untrusted root CA issuer to use in the
+                                        validation chain. Each issued certificate must have its signing certificate
+                                        chain in the untrusted issuers list. (PKI provider shall be instantiated using
+                                        it by applicative code) */
+    char** untrustedIntermediateIssuersList; /**< A pointer to an array of paths to each untrusted intermediate CA
+                                                issuer to use in the validation chain.   Each issued certificate must
+                                                have its signing certificate chain in the untrusted issuers list. (PKI
+                                                provider shall be instantiated using it by applicative code) */
+    char** certificateRevocationPathList;    /**<  A pointer to an array of paths to each certificate revocation list to
+                                                use.    Each CA of the trusted issuers list and the untrusted issuers list
+                                                must have a    CRL in the list. (PKI provider shall be instantiated using
+                                                it    by applicative code)*/
+    uint8_t nbEndpoints;                     /**< Number of endpoints defined by the server */
+    SOPC_Endpoint_Config* endpoints;         /**< Endpoint configuration array */
 
     /* To be instantiated by applicative code: */
     SOPC_SerializedCertificate* serverCertificate;
