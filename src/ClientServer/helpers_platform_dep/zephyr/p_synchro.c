@@ -26,6 +26,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifndef __INT32_MAX__
+#include <toolchain/xcc_missing_defs.h>
+#endif
+
 #include "sopc_enums.h" /* s2opc includes */
 
 #include "p_synchro.h"
@@ -845,6 +849,7 @@ static inline eSyncStatus P_SYNCHRO_Condition_Set_Quit_Flag(tCondVar* p)
     bool bTransition = false;
     do
     {
+        currentStatus = p->status;
         newStatus = currentStatus | 0x80000000;
 
         bTransition = __sync_bool_compare_and_swap(&p->status, currentStatus, newStatus);
@@ -861,6 +866,7 @@ static inline eSyncStatus P_SYNCHRO_Condition_Add_Api_User(tCondVar* p)
     bool bTransition = false;
     do
     {
+        currentStatus = p->status;
         if ((currentStatus & ~MASK_SET_QUIT_FLAG) >= E_SYNC_STATUS_INITIALIZED)
         {
             newStatus = currentStatus + 1;
@@ -883,6 +889,7 @@ static inline eSyncStatus P_SYNCHRO_Condition_Remove_Api_User(tCondVar* p)
     bool bTransition = false;
     do
     {
+        currentStatus = p->status;
         if ((currentStatus & ~MASK_SET_QUIT_FLAG) > E_SYNC_STATUS_INITIALIZED)
         {
             newStatus = currentStatus - 1;
@@ -906,6 +913,7 @@ static inline eSyncStatus P_SYNCHRO_Mutex_Set_Quit_Flag(tMutVar* p)
     bool bTransition = false;
     do
     {
+        currentStatus = p->status;
         newStatus = currentStatus | 0x80000000;
 
         bTransition = __sync_bool_compare_and_swap(&p->status, currentStatus, newStatus);
@@ -922,6 +930,7 @@ static inline eSyncStatus P_SYNCHRO_Mutex_Add_Api_User(tMutVar* p)
     bool bTransition = false;
     do
     {
+        currentStatus = p->status;
         if ((currentStatus & ~MASK_SET_QUIT_FLAG) >= E_SYNC_STATUS_INITIALIZED)
         {
             newStatus = currentStatus + 1;
@@ -944,6 +953,7 @@ static inline eSyncStatus P_SYNCHRO_Mutex_Remove_Api_User(tMutVar* p)
     bool bTransition = false;
     do
     {
+        currentStatus = p->status;
         if ((currentStatus & ~MASK_SET_QUIT_FLAG) > E_SYNC_STATUS_INITIALIZED)
         {
             newStatus = currentStatus - 1;
