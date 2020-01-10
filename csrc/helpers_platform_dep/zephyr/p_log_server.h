@@ -50,7 +50,8 @@ typedef uint32_t SOPC_LogServer_Handle;
 // Log server print.
 SOPC_ReturnStatus SOPC_LogServer_Print(SOPC_LogServer_Handle handle, // Server instance handle
                                        const uint8_t* value,         // Data to log
-                                       uint32_t size);               // Data size
+                                       uint32_t size,
+                                       bool bIncludeDate); // Data size
 
 // Destruction of log server. Handle is set to invalid handle value
 SOPC_ReturnStatus SOPC_LogServer_Destroy(SOPC_LogServer_Handle* pHandle);

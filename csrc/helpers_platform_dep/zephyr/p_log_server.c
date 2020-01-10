@@ -49,7 +49,7 @@
 #define P_LOGSRV_DEBUG (0)
 
 #define LOGSRV_CONFIG_MAX_DATA_CHANNEL 512
-#define LOGSRV_CONFIG_MAX_EVENT_CHANNEL 16
+#define LOGSRV_CONFIG_MAX_EVENT_CHANNEL 2048
 #define LOGSRV_CONFIG_MAX_LOG_SRV 1
 #define LOGSRV_CONFIG_PERIOD_MS (5)
 
@@ -130,9 +130,9 @@ static inline int32_t P_LOGSRV_create_server_socket(tLogServer* pLogSrv);
 static inline uint32_t P_LOGSRV_accept_client_connection(tLogServer* pLogSrv);
 static inline void P_LOGSRV_close_client_connection(tLogServer* pLogSrv, uint32_t indexClient);
 
-static inline void P_LOGSRV_LOGCHANNEL_Push(tLogChannel* pCh, const uint8_t* buffer, uint32_t size);
+static inline void P_LOGSRV_LOGCHANNEL_Push(tLogChannel* pCh, const uint8_t* buffer, uint32_t size, bool bIncludeDate);
 
-static inline SOPC_ReturnStatus P_LOGSRV_Print(tLogServer* p, const uint8_t* buffer, uint32_t size);
+static inline SOPC_ReturnStatus P_LOGSRV_Print(tLogServer* p, const uint8_t* buffer, uint32_t size, bool bIncludeDate);
 static inline void P_LOGSRV_Destroy(tLogServer** p);
 static inline tLogServer* P_LOGSRV_Create(uint32_t port);
 
@@ -433,7 +433,7 @@ static inline uint32_t P_LOGSRV_accept_client_connection(tLogServer* pLogSrv)
 }
 
 // Write log to file
-static inline void P_LOGSRV_LOGCHANNEL_Push(tLogChannel* pCh, const uint8_t* buffer, uint32_t size)
+static inline void P_LOGSRV_LOGCHANNEL_Push(tLogChannel* pCh, const uint8_t* buffer, uint32_t size, bool bIncludeDate)
 {
     if (size + LOGSRV_TIMESTAMP_SIZE < LOGSRV_CONFIG_MAX_DATA_CHANNEL)
     {
@@ -459,25 +459,28 @@ static inline void P_LOGSRV_LOGCHANNEL_Push(tLogChannel* pCh, const uint8_t* buf
             nextWrite = (nextWrite + 1) % LOGSRV_CONFIG_MAX_EVENT_CHANNEL;
         }
 
-        // Get timestamp string
-        int64_t dt_100ns = SOPC_Time_GetCurrentTimeUTC();
-        time_t seconds = 0;
-        struct tm tm;
         uint32_t sizeLocalTime = 0;
-        SOPC_ReturnStatus resTime = SOPC_Time_ToTimeT(dt_100ns, &seconds);
-        if (SOPC_STATUS_OK == resTime)
+        if (bIncludeDate)
         {
-            resTime = SOPC_Time_Breakdown_UTC(seconds, &tm);
+            // Get timestamp string
+            int64_t dt_100ns = SOPC_Time_GetCurrentTimeUTC();
+            time_t seconds = 0;
+            struct tm tm;
+
+            SOPC_ReturnStatus resTime = SOPC_Time_ToTimeT(dt_100ns, &seconds);
+            if (SOPC_STATUS_OK == resTime)
+            {
+                resTime = SOPC_Time_Breakdown_UTC(seconds, &tm);
+            }
+
+            if (SOPC_STATUS_OK == resTime)
+            {
+                sizeLocalTime = strftime(pCh->lastUTCTimeStamp, LOGSRV_TIMESTAMP_SIZE - 1, "%Y/%m/%d %H:%M:%S", &tm);
+            }
+
+            sizeLocalTime += snprintf(pCh->lastUTCTimeStamp + sizeLocalTime, LOGSRV_TIMESTAMP_SIZE - sizeLocalTime - 1,
+                                      ".%03u ", (uint32_t)((dt_100ns / 10000) % 1000));
         }
-
-        if (SOPC_STATUS_OK == resTime)
-        {
-            sizeLocalTime = strftime(pCh->lastUTCTimeStamp, LOGSRV_TIMESTAMP_SIZE - 1, "%Y/%m/%d %H:%M:%S", &tm);
-        }
-
-        sizeLocalTime += snprintf(pCh->lastUTCTimeStamp + sizeLocalTime, LOGSRV_TIMESTAMP_SIZE - sizeLocalTime - 1,
-                                  ".%03u ", (uint32_t)((dt_100ns / 10000) % 1000));
-
         // Add new record info
         pCh->event[pCh->evtWr].size = sizeLocalTime + size;
         pCh->event[pCh->evtWr].offset = pCh->dataWr;
@@ -836,7 +839,7 @@ static void* P_LOGSRV_ThreadMonitorCallback(void* pCtx)
 //*** Internal function used by SOPC API ***
 
 // Thread safe print log
-static inline SOPC_ReturnStatus P_LOGSRV_Print(tLogServer* p, const uint8_t* buffer, uint32_t size)
+static inline SOPC_ReturnStatus P_LOGSRV_Print(tLogServer* p, const uint8_t* buffer, uint32_t size, bool bIncludeDate)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
     if (NULL == p)
@@ -846,7 +849,7 @@ static inline SOPC_ReturnStatus P_LOGSRV_Print(tLogServer* p, const uint8_t* buf
     result = Mutex_Lock(&p->lockLogChannel);
     if (SOPC_STATUS_OK == result)
     {
-        P_LOGSRV_LOGCHANNEL_Push(&p->logChannel, buffer, size);
+        P_LOGSRV_LOGCHANNEL_Push(&p->logChannel, buffer, size, bIncludeDate);
         Mutex_Unlock(&p->lockLogChannel);
     }
     return result;
@@ -1125,7 +1128,8 @@ SOPC_ReturnStatus SOPC_LogServer_Destroy(SOPC_LogServer_Handle* pHandle)
 // Log server print.
 SOPC_ReturnStatus SOPC_LogServer_Print(SOPC_LogServer_Handle handle, // Server instance handle
                                        const uint8_t* value,         // Data to log
-                                       uint32_t size)                // Data size
+                                       uint32_t size,
+                                       bool bIncludeDate) // Data size
 {
     if (handle >= LOGSRV_CONFIG_MAX_LOG_SRV || NULL == value || size == 0 || size > LOGSRV_CONFIG_MAX_DATA_CHANNEL)
     {
@@ -1145,7 +1149,7 @@ SOPC_ReturnStatus SOPC_LogServer_Print(SOPC_LogServer_Handle handle, // Server i
         else
         {
             tLogServer* pLogSrv = gLogSrvHandles[handle].pLogServer;
-            result = P_LOGSRV_Print(pLogSrv, value, size);
+            result = P_LOGSRV_Print(pLogSrv, value, size, bIncludeDate);
         }
         P_LOGSRV_SYNC_STATUS_decrement_in_use(handle);
     }
