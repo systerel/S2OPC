@@ -1165,6 +1165,10 @@ static bool SC_Chunks_CheckSequenceHeaderRequestId(
                 }
                 else
                 {
+                    // Complete response received
+
+                    // Deactivate timer for this request
+                    SOPC_EventTimer_Cancel(recordedMsgCtx->timerId);
                     // Set the requestHandle (only used in case of abort message)
                     *requestIdOrHandle = recordedMsgCtx->requestHandle;
                     // We received the complete response message
