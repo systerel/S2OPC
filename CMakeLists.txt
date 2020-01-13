@@ -94,6 +94,12 @@ if(WITH_UBSAN)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=undefined -fno-omit-frame-pointer")
 endif()
 
+option(WITH_MSAN "build with MSAN" OFF)
+if(WITH_MSAN)
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=memory -fno-omit-frame-pointer")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=memory -fno-omit-frame-pointer")
+endif()
+
 if(WITH_ASAN AND WITH_TSAN)
   message(FATAL_ERROR "ASan and TSan cannot be used at the same time")
 endif()

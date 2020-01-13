@@ -313,7 +313,11 @@ void SOPC_SocketSet_Clear(SOPC_SocketSet* sockSet)
     if (sockSet != NULL)
     {
         FD_ZERO(&sockSet->set);
-        sockSet->fdmax = 0;
+        //sockSet->fdmax = 0;
+        /* For MSan, the value is still uninitialized, as FD_ZERO is written in assembly
+         * https://salsa.debian.org/debian/mbedtls/commit/ec4733b645f8a3402c4e4adf454dab5ae565126a
+         */
+        memset(sockSet, 0, sizeof(SOPC_SocketSet));
     }
 }
 
