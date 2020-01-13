@@ -31,17 +31,18 @@ Let's first compile two versions of S2OPC, one with ASan+UBsan (which we'll use
 to run the fuzzing), and one with source code coverage enabled (to see what our
 fuzzing corpus actually covers). From the source directory, run:
 
+TODO: ajout de -DCMAKE_C_FLAGS='-fsanitize=fuzzer-no-link'
 ```
 mkdir build.san build.cov
 
 cd build.san && \
 CC=clang cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DWITH_ASAN=1 -DWITH_UBSAN=1 ../../.. && \
-make && \
+make -j8 fuzzers && \
 cd ..
 
 cd build.cov && \
 CC=clang cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DWITH_CLANG_SOURCE_COVERAGE=1 ../../.. && \
-make && \
+make -j8 fuzzers && \
 cd ..
 ```
 
