@@ -76,6 +76,8 @@ typedef void (*SOPC_ClientHelper_DisconnectCbk)(const uint32_t connectionId);
    - 3: signature and encryption.
  @field path_cert_auth
    Zero-terminated path to the root certificate authority in the DER format
+ @field path_crl
+   Zero-terminated path to the Certificate Revocation List (CRL) of the certificate authority in the DER format
  @field path_cert_srv
    Zero-terminated path to the server certificate in the DER format, signed by the root certificate authority
  @field path_cert_cli
@@ -99,6 +101,7 @@ typedef struct
     const char* security_policy;
     int32_t security_mode;
     const char* path_cert_auth;
+    const char* path_crl;
     const char* path_cert_srv;
     const char* path_cert_cli;
     const char* path_key_cli;

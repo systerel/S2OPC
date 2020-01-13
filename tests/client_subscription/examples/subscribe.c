@@ -77,6 +77,7 @@ int main(int argc, char* const argv[])
         .security_policy = SOPC_SecurityPolicy_None_URI,
         .security_mode = OpcUa_MessageSecurityMode_None,
         .path_cert_auth = "./trusted/cacert.der",
+        .path_crl = "./revoked/cacrl.der",
         .path_cert_srv = "./server_public/server_2k_cert.der",
         .path_cert_cli = "./client_public/client_2k_cert.der",
         .path_key_cli = "./client_private/client_2k_key.pem",

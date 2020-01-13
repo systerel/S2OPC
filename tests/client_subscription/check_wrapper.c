@@ -48,6 +48,7 @@ static const char* invalid_url = "opc.tcp://localhost:5841";
 static SOPC_ClientHelper_Security valid_security_none = {.security_policy = SOPC_SecurityPolicy_None_URI,
                                                          .security_mode = OpcUa_MessageSecurityMode_None,
                                                          .path_cert_auth = "./trusted/cacert.der",
+                                                         .path_crl = "./revoked/cacrl.der",
                                                          .path_cert_srv = NULL,
                                                          .path_cert_cli = NULL,
                                                          .path_key_cli = NULL,
@@ -58,6 +59,7 @@ static SOPC_ClientHelper_Security valid_security_none = {.security_policy = SOPC
 static SOPC_ClientHelper_Security valid_security_sign_b256 = {.security_policy = SOPC_SecurityPolicy_Basic256_URI,
                                                               .security_mode = OpcUa_MessageSecurityMode_Sign,
                                                               .path_cert_auth = "./trusted/cacert.der",
+                                                              .path_crl = "./revoked/cacrl.der",
                                                               .path_cert_srv = "path_cert_srv",
                                                               .path_cert_cli = "path_cert_cli",
                                                               .path_key_cli = "path_key_cli",
@@ -69,6 +71,7 @@ static SOPC_ClientHelper_Security valid_security_signAndEncrypt_b256 = {
     .security_policy = SOPC_SecurityPolicy_Basic256_URI,
     .security_mode = OpcUa_MessageSecurityMode_SignAndEncrypt,
     .path_cert_auth = "./trusted/cacert.der",
+    .path_crl = "./revoked/cacrl.der",
     .path_cert_srv = "path_cert_srv",
     .path_cert_cli = "path_cert_cli",
     .path_key_cli = "path_key_cli",
@@ -192,23 +195,28 @@ START_TEST(test_wrapper_connect_invalid_arguments)
     }
     {
         SOPC_ClientHelper_Security invalid_security = valid_security_signAndEncrypt_b256;
-        invalid_security.path_cert_srv = NULL;
+        invalid_security.path_crl = NULL;
         ck_assert_int_eq(-14, SOPC_ClientHelper_Connect(valid_url, invalid_security));
     }
     {
         SOPC_ClientHelper_Security invalid_security = valid_security_signAndEncrypt_b256;
-        invalid_security.path_cert_cli = NULL;
+        invalid_security.path_cert_srv = NULL;
         ck_assert_int_eq(-15, SOPC_ClientHelper_Connect(valid_url, invalid_security));
     }
     {
         SOPC_ClientHelper_Security invalid_security = valid_security_signAndEncrypt_b256;
-        invalid_security.path_key_cli = NULL;
+        invalid_security.path_cert_cli = NULL;
         ck_assert_int_eq(-16, SOPC_ClientHelper_Connect(valid_url, invalid_security));
     }
     {
         SOPC_ClientHelper_Security invalid_security = valid_security_signAndEncrypt_b256;
-        invalid_security.policyId = NULL;
+        invalid_security.path_key_cli = NULL;
         ck_assert_int_eq(-17, SOPC_ClientHelper_Connect(valid_url, invalid_security));
+    }
+    {
+        SOPC_ClientHelper_Security invalid_security = valid_security_signAndEncrypt_b256;
+        invalid_security.policyId = NULL;
+        ck_assert_int_eq(-18, SOPC_ClientHelper_Connect(valid_url, invalid_security));
     }
     /* cannot test username and password */
 
@@ -1060,6 +1068,13 @@ START_TEST(test_wrapper_disconnect_callback)
 }
 END_TEST
 
+static void setup(void) {}
+
+static void teardown(void)
+{
+    SOPC_ClientHelper_Finalize();
+}
+
 static Suite* tests_make_suite_wrapper(void)
 {
     Suite* s = NULL;
@@ -1068,6 +1083,8 @@ static Suite* tests_make_suite_wrapper(void)
     s = suite_create("Client subscription library");
 
     tc_wrapper = tcase_create("WrapperC");
+    // Add a teardown to guarantee the call to SOPC_ClientHelper_Finalize after each test
+    tcase_add_checked_fixture(tc_wrapper, setup, teardown);
     tcase_add_test(tc_wrapper, test_wrapper_initialize_finalize);
     tcase_add_test(tc_wrapper, test_wrapper_connect);
     tcase_add_test(tc_wrapper, test_wrapper_connect_invalid_arguments);

@@ -38,6 +38,7 @@ configuration_parameters_subscription = {'server_url': SERVER_URL,
                                          'token_target': 3}
 
 configuration_parameters_security = {'path_cert_auth': os.path.join(CERT_BASE_PATH, 'trusted', 'cacert.der'),
+                                     'path_crl': os.path.join(CERT_BASE_PATH, 'revoked', 'cacrl.der'),
                                      'path_cert_srv': os.path.join(CERT_BASE_PATH, 'server_public', 'server_2k_cert.der'),
                                      'path_cert_cli': os.path.join(CERT_BASE_PATH, 'client_public', 'client_2k_cert.der'),
                                      'path_key_cli': os.path.join(CERT_BASE_PATH, 'client_private', 'client_2k_key.pem')}

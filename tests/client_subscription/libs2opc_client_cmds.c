@@ -404,6 +404,7 @@ static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_
     OpcUa_MessageSecurityMode secuMode = OpcUa_MessageSecurityMode_Invalid;
     bool disable_verification = false;
     const char* cert_auth = security.path_cert_auth;
+    const char* ca_crl = security.path_crl;
     const char* cert_srv = security.path_cert_srv;
     const char* cert_cli = security.path_cert_cli;
     const char* key_cli = security.path_key_cli;
@@ -424,6 +425,7 @@ static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_
         disable_verification = true;
         secuMode = OpcUa_MessageSecurityMode_None;
         cert_auth = NULL;
+        ca_crl = NULL;
         cert_srv = NULL;
         cert_cli = NULL;
         key_cli = NULL;
@@ -442,21 +444,25 @@ static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_
     {
         return -13;
     }
-    if (!disable_verification && NULL == cert_srv)
+    if (!disable_verification && NULL == ca_crl)
     {
         return -14;
     }
-    if (!disable_verification && NULL == cert_cli)
+    if (!disable_verification && NULL == cert_srv)
     {
         return -15;
     }
-    if (!disable_verification && NULL == key_cli)
+    if (!disable_verification && NULL == cert_cli)
     {
         return -16;
     }
-    if (NULL == security.policyId)
+    if (!disable_verification && NULL == key_cli)
     {
         return -17;
+    }
+    if (NULL == security.policyId)
+    {
+        return -18;
     }
 
     cfg_con->server_url = endpointUrl;
@@ -467,7 +473,7 @@ static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_
     cfg_con->path_cert_srv = cert_srv;
     cfg_con->path_cert_cli = cert_cli;
     cfg_con->path_key_cli = key_cli;
-    cfg_con->path_crl = NULL;
+    cfg_con->path_crl = ca_crl;
     cfg_con->policyId = security.policyId;
     cfg_con->username = security.username;
     cfg_con->password = security.password;
