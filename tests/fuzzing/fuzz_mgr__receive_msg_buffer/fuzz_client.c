@@ -254,7 +254,7 @@ static SOPC_ReturnStatus ActivateSessionWait_client()
     return (status);
 }
 
-OpcUa_WriteRequest* newWriteRequest_client(const char* buff, size_t len)
+OpcUa_WriteRequest* newWriteRequest_client(const uint8_t* buff, size_t len)
 {
     OpcUa_WriteValue* lwv = NULL;
     SOPC_ByteString buf;
@@ -280,7 +280,7 @@ OpcUa_WriteRequest* newWriteRequest_client(const char* buff, size_t len)
                                 .IndexRange = {.Length = 0},
                                 .Value = {.Value = {.BuiltInTypeId = SOPC_ByteString_Id,
                                                     .ArrayType = SOPC_VariantArrayType_SingleValue,
-                                                    .Value.String = buf},
+                                                    .Value.Bstring = buf},
                                           .Status = SOPC_GoodGenericStatus}};
 
     OpcUa_WriteRequest* pReq = DESIGNATE_NEW(OpcUa_WriteRequest, .encodeableType = &OpcUa_WriteRequest_EncodeableType,
@@ -292,7 +292,7 @@ OpcUa_WriteRequest* newWriteRequest_client(const char* buff, size_t len)
     return (pReq);
 }
 
-SOPC_ReturnStatus Run_client(char* buff, size_t len)
+SOPC_ReturnStatus Run_client(const uint8_t* buff, size_t len)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
