@@ -1453,6 +1453,7 @@ bool SOPC_Config_Parse(FILE* fd, SOPC_S2OPC_Config* config)
         SOPC_Array_Delete(issuedCerts);
         SOPC_Array_Delete(untrustedRootIssuers);
         SOPC_Array_Delete(untrustedIntermediateIssuers);
+        SOPC_Array_Delete(revokedListCerts);
         return false;
     }
 
