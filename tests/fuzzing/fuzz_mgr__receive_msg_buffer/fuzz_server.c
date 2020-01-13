@@ -68,12 +68,14 @@ void StopSignal_serv(int sig)
     /* avoid unused parameter compiler warning */
     (void) sig;
 
+    printf("Stop signal received\n");
     while (stopServer == 0)
     {
         Teardown_client();
         Teardown_serv();
         stopServer = 1;
     }
+    printf("Teardown ok\n");
     exit(1);
 }
 
