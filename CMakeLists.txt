@@ -918,25 +918,25 @@ add_executable(s2opc_subscription_client "${LIBSUBSCRIBE_PATH}/client.c")
 
 target_link_libraries(s2opc_subscription_client PRIVATE client_subscription s2opc)
 
-add_executable(s2opc_wrapper_write "${LIBSUBSCRIBE_PATH}/examples/write.c")
-target_include_directories(s2opc_wrapper_write PRIVATE ${LIBSUBSCRIBE_PATH})
-target_link_libraries(s2opc_wrapper_write PRIVATE client_subscription s2opc)
+add_executable(example_wrapper_write "${LIBSUBSCRIBE_PATH}/examples/write.c")
+target_include_directories(example_wrapper_write PRIVATE ${LIBSUBSCRIBE_PATH})
+target_link_libraries(example_wrapper_write PRIVATE client_subscription s2opc)
 
-add_executable(s2opc_wrapper_read "${LIBSUBSCRIBE_PATH}/examples/read.c")
-target_include_directories(s2opc_wrapper_read PRIVATE ${LIBSUBSCRIBE_PATH})
-target_link_libraries(s2opc_wrapper_read PRIVATE client_subscription s2opc)
+add_executable(example_wrapper_read "${LIBSUBSCRIBE_PATH}/examples/read.c")
+target_include_directories(example_wrapper_read PRIVATE ${LIBSUBSCRIBE_PATH})
+target_link_libraries(example_wrapper_read PRIVATE client_subscription s2opc)
 
-add_executable(s2opc_wrapper_browse "${LIBSUBSCRIBE_PATH}/examples/browse.c")
-target_include_directories(s2opc_wrapper_browse PRIVATE ${LIBSUBSCRIBE_PATH})
-target_link_libraries(s2opc_wrapper_browse PRIVATE client_subscription s2opc)
+add_executable(example_wrapper_browse "${LIBSUBSCRIBE_PATH}/examples/browse.c")
+target_include_directories(example_wrapper_browse PRIVATE ${LIBSUBSCRIBE_PATH})
+target_link_libraries(example_wrapper_browse PRIVATE client_subscription s2opc)
 
-add_executable(s2opc_wrapper_get_endpoints "${LIBSUBSCRIBE_PATH}/examples/get_endpoints.c")
-target_include_directories(s2opc_wrapper_get_endpoints PRIVATE ${LIBSUBSCRIBE_PATH})
-target_link_libraries(s2opc_wrapper_get_endpoints PRIVATE client_subscription s2opc)
+add_executable(example_wrapper_get_endpoints "${LIBSUBSCRIBE_PATH}/examples/get_endpoints.c")
+target_include_directories(example_wrapper_get_endpoints PRIVATE ${LIBSUBSCRIBE_PATH})
+target_link_libraries(example_wrapper_get_endpoints PRIVATE client_subscription s2opc)
 
-add_executable(s2opc_wrapper_subscribe "${LIBSUBSCRIBE_PATH}/examples/subscribe.c")
-target_include_directories(s2opc_wrapper_subscribe PRIVATE ${LIBSUBSCRIBE_PATH})
-target_link_libraries(s2opc_wrapper_subscribe PRIVATE client_subscription s2opc)
+add_executable(example_wrapper_subscribe "${LIBSUBSCRIBE_PATH}/examples/subscribe.c")
+target_include_directories(example_wrapper_subscribe PRIVATE ${LIBSUBSCRIBE_PATH})
+target_link_libraries(example_wrapper_subscribe PRIVATE client_subscription s2opc)
 
 endif(NOT WIN32)
 

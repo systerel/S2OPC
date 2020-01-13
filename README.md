@@ -35,17 +35,17 @@ INGOPCS initial consortium:
     - http://opcfoundation.org/UA/SecurityPolicy#Basic256,
     - http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256.
 
-Client side (e.g.: tests/services/toolkit_test_client.c):
+Client side (e.g.: `tests/services/toolkit_test_client.c`):
 
 - Secure Channel configuration
 - Activate a session with an anonymous use or user identified by username/password
 - Send a service on session request (read, write, browse, subscribe, etc.)
 - Send a discovery service request (getEndpoints, findServer, registerServer, etc.)
-- Automated client library LibSub (simplified interface, automated subscription):
-  see tests/client_subscription/libs2opc_client.h (e.g. tests/client_subscription/client.c)
-- Python wrapper PyS2OPC for a client: see tests/pys2opc/README.md
+- Automated client libraries LibSub and wrapper (simplified interface, automated subscription):
+  see `tests/client_subscription/libs2opc_client.h` (e.g. `tests/client_subscription/client.c`) for LibSub or `tests/client_subscription/libs2opc_client_cmds.h` for the wrapper
+- Python wrapper PyS2OPC for a client: see  `tests/pys2opc/README.md`
 
-Server side (e.g.: tests/services/toolkit_test_server.c):
+Server side (e.g.: `tests/services/toolkit_test_server.c`):
 
 - Endpoint descriptions configuration on Toolkit initialization
 - 1 address space configuration on Toolkit initialization
@@ -146,7 +146,7 @@ Prerequisites:
 - [Check](https://libcheck.github.io/check/)(tested with libcheck version 0.12)
 - Python3 (tested with version 3.6.3)
 
-To build the Toolkit library and tests with default configuration on current 
+To build the Toolkit library and tests with default configuration on current
 stable release:
 ```
   git clone https://gitlab.com/systerel/S2OPC.git --branch S2OPC_Toolkit_0.10.0

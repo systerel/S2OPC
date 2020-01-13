@@ -1351,6 +1351,7 @@ static void StaMac_ProcessMsg_ServiceFault(SOPC_StaMac_Machine* pSM, uint32_t ar
         {
         case SOPC_REQUEST_TYPE_PUBLISH:
             /* ServiceFault on PublishRequest is allowed */
+            pSM->nTokenUsable -= 1;
             break;
         default:
             /* else go into error mode */
