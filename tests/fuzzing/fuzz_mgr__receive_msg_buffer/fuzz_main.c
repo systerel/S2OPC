@@ -214,6 +214,10 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
         }
         if (SOPC_STATUS_OK == status)
         {
+            status = SOPC_ToolkitConfig_SetLogLevel(SOPC_TOOLKIT_LOG_LEVEL_ERROR);
+        }
+        if (SOPC_STATUS_OK == status)
+        {
             status = SOPC_Toolkit_Configured();
         }
         if (SOPC_STATUS_OK == status)
