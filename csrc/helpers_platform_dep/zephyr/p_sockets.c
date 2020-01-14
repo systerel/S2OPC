@@ -34,6 +34,14 @@
 #define NULL ((void*) 0)
 #endif
 
+#ifndef MY_IP_ETH0
+#define MY_IP_ETH0 ((const char*) ("192.168.1.102"))
+#endif
+
+#ifndef MY_IP_MASK
+#define MY_IP_MASK ((const char*) ("255.255.255.0"))
+#endif
+
 #include <fcntl.h>
 #include <kernel.h>
 #include <net/socket.h>
@@ -44,7 +52,7 @@
 
 #include "p_sockets.h"
 
-#define P_SOCKET_DEBUG (0)
+#define P_SOCKET_DEBUG (1)
 
 static volatile uint32_t priv_nbSockets = 0;
 
@@ -97,6 +105,54 @@ uint32_t P_SOCKET_decrement_nb_socket(void)
 
 bool SOPC_Socket_Network_Initialize()
 {
+    struct net_if* ptrNetIf = NULL;
+    struct in_addr addressLoopBack;
+    struct in_addr addressLoopBackNetMask;
+    struct in_addr addressInterfaceEth;
+    struct in_addr addressInterfaceEthMask;
+    net_addr_pton(AF_INET, "127.0.0.1", (void*) &addressLoopBack);
+    net_addr_pton(AF_INET, "255.255.255.0", (void*) &addressLoopBackNetMask);
+
+    net_addr_pton(AF_INET, MY_IP_ETH0, (void*) &addressInterfaceEth);
+    net_addr_pton(AF_INET, MY_IP_MASK, (void*) &addressInterfaceEthMask);
+
+    if (net_if_ipv4_addr_lookup(&addressLoopBack, &ptrNetIf) == NULL)
+    {
+#if defined(CONFIG_NET_L2_DUMMY)
+        ptrNetIf = net_if_get_first_by_type(&NET_L2_GET_NAME(DUMMY));
+#endif
+        assert(NULL != ptrNetIf);
+        assert(NULL != net_if_ipv4_addr_add(ptrNetIf, &addressLoopBack, NET_ADDR_MANUAL, 0));
+        net_if_ipv4_set_netmask(ptrNetIf, &addressLoopBackNetMask);
+#if P_SOCKET_DEBUG == 1
+        printk("\r\nP_SOCKET: Loopback initialized\r\n");
+#endif
+    }
+    else
+    {
+#if P_SOCKET_DEBUG == 1
+        printk("\r\nP_SOCKET: Loopback already initialized\r\n");
+#endif
+    }
+
+    if (net_if_ipv4_addr_lookup(&addressInterfaceEth, &ptrNetIf) == NULL)
+    {
+#if defined(CONFIG_NET_L2_ETHERNET)
+        ptrNetIf = net_if_get_first_by_type(&NET_L2_GET_NAME(ETHERNET));
+#endif
+        assert(NULL != ptrNetIf);
+        assert(NULL != net_if_ipv4_addr_add(ptrNetIf, &addressInterfaceEth, NET_ADDR_MANUAL, 0));
+        net_if_ipv4_set_netmask(ptrNetIf, &addressInterfaceEthMask);
+#if P_SOCKET_DEBUG == 1
+        printk("\r\nP_SOCKET: Eth0 initialized\r\n");
+#endif
+    }
+    else
+    {
+#if P_SOCKET_DEBUG == 1
+        printk("\r\nP_SOCKET: Eth0 already initialized\r\n");
+#endif
+    }
     return true;
 }
 
@@ -114,6 +170,8 @@ SOPC_ReturnStatus SOPC_Socket_AddrInfo_Get(char* hostname, char* port, SOPC_Sock
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
 
+    // Check if loopback address exist.
+    // If not, add it to default interface
     if ((NULL != hostname || NULL != port) && NULL != addrs)
     {
         int ret = zsock_getaddrinfo(hostname, port, &hints, addrs);
@@ -309,7 +367,7 @@ SOPC_ReturnStatus SOPC_Socket_Accept(Socket listeningSock, bool setNonBlocking, 
                 else
                 {
 #if P_SOCKET_DEBUG == 1
-                    printk("\r\nsopc Accept to close can't be performed !!! Yield !!!\r\n");
+                    printk("\r\nP_SOCKET: Sopc Accept to close can't be performed !!! Yield !!!\r\n");
 #endif
                     P_SOCKET_decrement_nb_socket();
                     k_yield();
@@ -482,7 +540,10 @@ int32_t SOPC_Socket_WaitSocketEvents(SOPC_SocketSet* readSet,
     }
     nbReady = zsock_select(fdmax + 1, readSet != NULL ? &readSet->set : NULL, writeSet != NULL ? &writeSet->set : NULL,
                            exceptSet != NULL ? &exceptSet->set : NULL, val);
-    printk("\r\nselect result = %d\r\n", nbReady);
+
+#if P_SOCKET_DEBUG == 1
+    printk("\r\nP_SOCKET: Sopc select result = %d\r\n", nbReady);
+#endif
     return (int32_t) nbReady;
 }
 
