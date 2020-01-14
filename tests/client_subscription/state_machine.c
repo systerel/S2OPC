@@ -917,6 +917,31 @@ static bool StaMac_GiveAuthorization_stDeletingSubscr(SOPC_StaMac_Machine* pSM,
     return authorization;
 }
 
+static bool StaMac_GiveAuthorization_SendRequestFailed(SOPC_StaMac_Machine* pSM,
+                                                       SOPC_App_Com_Event event,
+                                                       SOPC_ReturnStatus failureStatus,
+                                                       SOPC_EncodeableType* pEncType)
+{
+    bool authorization = false;
+
+    (void) pSM;
+
+    switch (event)
+    {
+    case SE_SND_REQUEST_FAILED:
+        // We only treat a send request failed event if it concerns a timed out publish request
+        if (&OpcUa_PublishRequest_EncodeableType == pEncType && SOPC_STATUS_TIMEOUT == failureStatus)
+        {
+            authorization = true;
+        }
+        break;
+    default:
+        break;
+    }
+
+    return authorization;
+}
+
 bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                                  uintptr_t* pAppCtx,
                                  SOPC_App_Com_Event event,
@@ -952,7 +977,14 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
             if (NULL != pParam && (SE_RCV_SESSION_RESPONSE == event || SE_RCV_DISCOVERY_RESPONSE == event ||
                                    SE_SND_REQUEST_FAILED == event || SE_LOCAL_SERVICE_RESPONSE == event))
             {
-                pEncType = *(SOPC_EncodeableType**) pParam;
+                if (SE_SND_REQUEST_FAILED == event)
+                {
+                    pEncType = (SOPC_EncodeableType*) pParam;
+                }
+                else
+                {
+                    pEncType = *(SOPC_EncodeableType**) pParam;
+                }
             }
             /* Give authorization according to state (switch)*/
             switch (pSM->state)
@@ -999,6 +1031,14 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                 processingAuthorization = true;
             }
 
+            /* Authorize processing of send request failed if it is a timeout of PublishRequest */
+            if (SE_SND_REQUEST_FAILED == event)
+            {
+                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Dispatching event SE_SND_REQUEST_FAILED");
+                processingAuthorization =
+                    StaMac_GiveAuthorization_SendRequestFailed(pSM, event, (SOPC_ReturnStatus) arg, pEncType);
+            }
+
             /* Process message if authorization has been given, else go to stError */
             if (processingAuthorization)
             {
@@ -1038,6 +1078,11 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                         Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Received unknown message in event %d", event);
                         pSM->state = stError;
                     }
+                }
+                else if (SE_SND_REQUEST_FAILED == event)
+                {
+                    // Use same processing as service fault: it concerns only publish request
+                    StaMac_ProcessMsg_ServiceFault(pSM, arg, pParam, appCtx);
                 }
                 else
                 {
