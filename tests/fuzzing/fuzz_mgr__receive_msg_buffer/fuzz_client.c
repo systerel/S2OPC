@@ -261,14 +261,14 @@ OpcUa_WriteRequest* newWriteRequest_client(const uint8_t* buff, size_t len)
     SOPC_ByteString_Initialize(&buf);
 
     buf.Length = (int32_t) len;
-    buf.Data = SOPC_Malloc(len + 1);
+    buf.Data = SOPC_Malloc(len);
     lwv = SOPC_Malloc(sizeof(OpcUa_WriteValue));
     if (NULL == buf.Data)
     {
         exit(1);
     }
 
-    memcpy((void*) (buf.Data), buff, len + 1);
+    memcpy((void*) (buf.Data), buff, len);
 
     lwv[0] = (OpcUa_WriteValue){.encodeableType = &OpcUa_WriteValue_EncodeableType,
                                 .NodeId = {.IdentifierType = SOPC_IdentifierType_String,
