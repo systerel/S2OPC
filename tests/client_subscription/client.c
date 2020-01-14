@@ -425,7 +425,7 @@ static void print_usage(const char* exe)
     printf("Usage: %s [options] NODE_ID [NODE_ID...]\n", exe);
     printf("Options:\n");
     printf("  --endpoint URL        URL of the endpoint to connect to\n");
-    printf("  --policy-id POLICYID  Name of the selected UserIdentityToken policy id\n");
+    printf("  --policyId POLICYID  Name of the selected UserIdentityToken policy id\n");
     printf("  --username UNAME      Username of the session user\n");
     printf("  --password PWD        Password of the session user\n");
     printf("  --publish-period MILLISEC  Subscription publish cycle, in ms\n");
