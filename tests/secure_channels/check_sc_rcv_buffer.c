@@ -143,6 +143,7 @@ static void establishSC(void)
     }
     SOPC_Free(socketEvent);
     socketEvent = NULL;
+    ck_assert(SOPC_STATUS_OK == status);
 
     // Simulate event from socket
     SOPC_EventHandler_Post(socketsEventHandler, SOCKET_CONNECTION, scConfigIdx, (uintptr_t) NULL, scConfigIdx);

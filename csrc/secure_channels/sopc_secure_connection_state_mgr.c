@@ -112,8 +112,8 @@ static void SC_Client_ClearPendingRequest(uint32_t id, void* val)
         {
         case SOPC_MSG_TYPE_SC_MSG:
             // Notifies the upper layer
-            SOPC_EventHandler_Post(secureChannelsEventHandler, SC_REQUEST_TIMEOUT, msgCtx->scConnectionIdx,
-                                   (uintptr_t) NULL, msgCtx->requestHandle);
+            SOPC_EventHandler_Post(secureChannelsEventHandler, SC_SND_FAILURE, msgCtx->scConnectionIdx,
+                                   (uintptr_t) msgCtx->requestHandle, (uintptr_t) OpcUa_BadSecureChannelClosed);
             break;
         default:
             // Other cases are SC level requests pending: nothing to do

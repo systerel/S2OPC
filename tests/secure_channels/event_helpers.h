@@ -32,4 +32,11 @@ bool CheckEvent(const char* event_type,
                 uint32_t expected_id,
                 uintptr_t expected_aux);
 
+bool CheckEventAllParams(const char* event_type,
+                         SOPC_Event* event,
+                         int32_t expected_event,
+                         uint32_t expected_id,
+                         uintptr_t expected_param,
+                         uintptr_t expected_aux);
+
 #endif

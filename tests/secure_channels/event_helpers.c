@@ -67,10 +67,34 @@ bool CheckEvent(const char* event_type,
     }
     else
     {
-        printf("Unexpected %s event received event=%d (expected %d), eltId=%" PRIu32
+        printf("Unexpected %s event received event=%" PRIi32 " (expected %d), eltId=%" PRIu32
                " (expected "
                "%" PRIu32 "), auxParam=%" PRIuPTR " (expected %" PRIuPTR ")\n",
                event_type, event->event, expected_event, event->eltId, expected_id, event->auxParam, expected_aux);
         return false;
     }
+}
+
+bool CheckEventAllParams(const char* event_type,
+                         SOPC_Event* event,
+                         int32_t expected_event,
+                         uint32_t expected_id,
+                         uintptr_t expected_param,
+                         uintptr_t expected_aux)
+{
+    if (CheckEvent(event_type, event, expected_event, expected_id, expected_aux))
+    {
+        if (event->params == expected_param)
+        {
+            return true;
+        }
+        else
+        {
+            printf("Unexpected %s event received event=%" PRIi32 ", eltId=%" PRIu32 " , param=%" PRIuPTR
+                   "(expected %" PRIuPTR "), auxParam=%" PRIuPTR "\n",
+                   event_type, event->event, event->eltId, event->params, expected_param, event->auxParam);
+            return false;
+        }
+    }
+    return false;
 }

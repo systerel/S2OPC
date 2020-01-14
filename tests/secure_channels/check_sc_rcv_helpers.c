@@ -27,6 +27,7 @@
 
 #include "event_helpers.h"
 #include "hexlify.h"
+#include "opcua_statuscodes.h"
 #include "sopc_buffer.h"
 #include "sopc_helper_endianness_cfg.h"
 #include "sopc_ieee_check.h"
@@ -56,6 +57,25 @@ SOPC_Event* Check_Service_Event_Received(SOPC_SecureChannels_OutputEvent event, 
     WaitEvent(servicesEvents->events, (void**) &serviceEvent);
 
     if (CheckEvent("Services", serviceEvent, (int32_t) event, eltId, auxParam))
+    {
+        return serviceEvent;
+    }
+    else
+    {
+        SOPC_Free(serviceEvent);
+        return NULL;
+    }
+}
+
+SOPC_Event* Check_Service_Event_Received_AllParams(SOPC_SecureChannels_OutputEvent event,
+                                                   uint32_t eltId,
+                                                   uintptr_t param,
+                                                   uintptr_t auxParam)
+{
+    SOPC_Event* serviceEvent = NULL;
+    WaitEvent(servicesEvents->events, (void**) &serviceEvent);
+
+    if (CheckEventAllParams("Services", serviceEvent, (int32_t) event, eltId, param, auxParam))
     {
         return serviceEvent;
     }
@@ -118,8 +138,9 @@ SOPC_ReturnStatus Check_Client_Closed_SC(uint32_t scIdx,
     SOPC_Free(event);
     event = NULL;
 
-    printf("               - pending request indicated as in timeout to Services\n");
-    event = Check_Service_Event_Received(SC_REQUEST_TIMEOUT, scIdx, pendingRequestHandle);
+    printf("               - pending request indicated as send failed to Services\n");
+    event = Check_Service_Event_Received_AllParams(SC_SND_FAILURE, scIdx, pendingRequestHandle,
+                                                   OpcUa_BadSecureChannelClosed);
 
     if (NULL == event)
     {
