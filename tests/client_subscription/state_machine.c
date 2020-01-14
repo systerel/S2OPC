@@ -1227,7 +1227,10 @@ static void StaMac_ProcessMsg_PublishResponse(SOPC_StaMac_Machine* pSM, uint32_t
         /* Only take the last one when more than 1 is available */
         pSM->iAckSeqNum = pPubResp->AvailableSequenceNumbers[pPubResp->NoOfAvailableSequenceNumbers - 1];
     }
-    pSM->nTokenUsable -= 1;
+    if (pSM->nTokenUsable > 0) // Ensure we do not underflow
+    {
+        pSM->nTokenUsable -= 1;
+    }
     /* Traverse the notifications and calls the callback */
     pNotifMsg = &pPubResp->NotificationMessage;
     /* For now, only handles at most a NotificationData */
@@ -1373,7 +1376,10 @@ static void StaMac_ProcessMsg_ServiceFault(SOPC_StaMac_Machine* pSM, uint32_t ar
         {
         case SOPC_REQUEST_TYPE_PUBLISH:
             /* ServiceFault on PublishRequest is allowed */
-            pSM->nTokenUsable -= 1;
+            if (pSM->nTokenUsable > 0) // Ensure we do not underflow
+            {
+                pSM->nTokenUsable -= 1;
+            }
             break;
         default:
             /* else go into error mode */
