@@ -66,10 +66,10 @@ typedef enum
                               auxParam = SOPC_StatusCode
                             */
     SC_SERVICE_RCV_MSG,    /* id = secure channel connection index,
-                                 params = (SOPC_Buffer*) OPC UA message payload buffer,
-                                 auxParam = (uint32_t) request Id context (server side only, 0 if client) */
+                              params = (SOPC_Buffer*) OPC UA message payload buffer,
+                              auxParam = (uint32_t) request Id context (server side only, 0 if client) */
     SC_SND_FAILURE,        /* id = secure channel connection index,
-                              params = (uint32_t) requestId,
+                              params = (uint32_t) requestHandle for client / requestId for server (unused)
                               auxParam = SOPC_StatusCode */
     SC_REQUEST_TIMEOUT,    /* id = secure channel connection index,
                               auxParam = (uint32_t) request handle */

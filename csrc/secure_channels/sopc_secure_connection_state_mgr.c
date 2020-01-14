@@ -112,6 +112,7 @@ static void SC_Client_ClearPendingRequest(uint32_t id, void* val)
         {
         case SOPC_MSG_TYPE_SC_MSG:
             // Notifies the upper layer
+            /* Note: always sends requestHandle (as client), no pending requests possible on server side */
             SOPC_EventHandler_Post(secureChannelsEventHandler, SC_SND_FAILURE, msgCtx->scConnectionIdx,
                                    (uintptr_t) msgCtx->requestHandle, (uintptr_t) OpcUa_BadSecureChannelClosed);
             break;
@@ -2630,7 +2631,8 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
         /* eltId = secure channel connection index,
            params = (SOPC_Buffer*) buffer,
            auxParam = requestId (server) or requestHandle (client)*/
-        SOPC_Logger_TraceDebug("ScStateMgr: INT_SC_RCV_MSG_CHUNKS scIdx=%" PRIu32 " reqId=%" PRIuPTR, eltId, auxParam);
+        SOPC_Logger_TraceDebug("ScStateMgr: INT_SC_RCV_MSG_CHUNKS scIdx=%" PRIu32 " reqId/Handle=%" PRIuPTR, eltId,
+                               auxParam);
 
         scConnection = SC_GetConnection(eltId);
 
@@ -2742,7 +2744,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
 
         SOPC_EventHandler_Post(secureChannelsEventHandler, SC_SND_FAILURE,
                                eltId,     // secure connection id
-                               params,    // request Id
+                               params,    // request Id (server) / request Handle (client)
                                auxParam); // error status
 
         // else: without request Id, nothing can be treated for the failure
@@ -3126,7 +3128,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
             }
             SOPC_EventHandler_Post(secureChannelsEventHandler, SC_SND_FAILURE,
                                    eltId,        // secure connection id
-                                   auxParam,     // request Id
+                                   auxParam,     // request Id (server) / request Handle (client)
                                    errorStatus); // error status
 
             // buffer: deleted if not NULL

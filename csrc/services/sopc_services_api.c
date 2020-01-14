@@ -141,24 +141,25 @@ static void onSecureChannelEvent(SOPC_EventHandler* handler,
         io_dispatch_mgr__secure_channel_lost(id);
         break;
     case SC_SERVICE_RCV_MSG:
-        SOPC_Logger_TraceDebug("ServicesMgr: SC_SC_SERVICE_RCV_MSG scIdx=%" PRIu32 " reqId=%" PRIuPTR, id, auxParam);
+        SOPC_Logger_TraceDebug("ServicesMgr: SC_SC_SERVICE_RCV_MSG scIdx=%" PRIu32 " reqId/0=%" PRIuPTR, id, auxParam);
 
         // id ==  connection Id
         // params = message content (byte buffer)
-        // auxParam == context (request id)
+        // auxParam == requestId (server) / 0 (client)
         assert(NULL != (void*) params);
         io_dispatch_mgr__receive_msg_buffer(id, (constants__t_byte_buffer_i) params,
                                             (constants__t_request_context_i) auxParam, &bres);
         if (!bres)
         {
-            SOPC_Logger_TraceError("ServicesMgr: SC_SC_SERVICE_RCV_MSG scIdx=%" PRIu32 " reqId=%" PRIuPTR
+            SOPC_Logger_TraceError("ServicesMgr: SC_SC_SERVICE_RCV_MSG scIdx=%" PRIu32 " reqId/0=%" PRIuPTR
                                    " received message considered invalid",
                                    id, auxParam);
         }
         // params is freed by services manager
         break;
     case SC_SND_FAILURE:
-        SOPC_Logger_TraceDebug("ServicesMgr: SC_SND_FAILURE scIdx=%" PRIu32 " reqId=%" PRIuPTR " statusCode=%" PRIXPTR,
+        SOPC_Logger_TraceDebug("ServicesMgr: SC_SND_FAILURE scIdx=%" PRIu32 " reqId/Handle=%" PRIuPTR
+                               " statusCode=%" PRIXPTR,
                                id, (uintptr_t) params, auxParam);
 
         constants_statuscodes_bs__t_StatusCode_i statusCode;
