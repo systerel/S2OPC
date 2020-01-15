@@ -592,12 +592,19 @@ SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
             else
             {
                 strcpy(nodeId, lszNodeId[i]);
-                SOPC_SLinkedList_Append(pSM->dataIdToNodeIdList, (uint32_t) nSentReqs, nodeId);
+                void* result = SOPC_SLinkedList_Append(pSM->dataIdToNodeIdList, (uint32_t) nSentReqs, nodeId);
+                if (NULL == result)
+                {
+                    status = SOPC_STATUS_OUT_OF_MEMORY;
+                }
             }
         }
 
-        status = Helpers_NewCreateMonitoredItemsRequest(lpNid, liAttrId, nElems, pSM->iSubscriptionID,
-                                                        MONIT_TIMESTAMPS_TO_RETURN, lCliHndl, MONIT_QSIZE, &pReq);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = Helpers_NewCreateMonitoredItemsRequest(lpNid, liAttrId, nElems, pSM->iSubscriptionID,
+                                                            MONIT_TIMESTAMPS_TO_RETURN, lCliHndl, MONIT_QSIZE, &pReq);
+        }
     }
 
     /* Send it */
