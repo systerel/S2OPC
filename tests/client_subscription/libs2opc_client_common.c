@@ -558,7 +558,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConfigurationId cf
         mutStatus = Mutex_Unlock(&mutex);
         assert(SOPC_STATUS_OK == mutStatus);
     }
-    else
+    else if (NULL != pCliId)
     {
         *pCliId = clientId;
     }
