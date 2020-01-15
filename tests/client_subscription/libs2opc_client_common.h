@@ -114,10 +114,13 @@ SOPC_ReturnStatus SOPC_ClientCommon_Configured(void);
  @param cfgId
     The parameters of the connection to create, return by SOPC_ClientCommon_ConfigureConnection().
  @param pCliId [out, not null]
-    The connection id of the newly created client, set when return is SOPC_STATUS_OK.
+    The connection id of the newly created client, set when the state machine is successfully created.
  @return
     The operation status and SOPC_STATUS_TIMEOUT when connection hanged for more than
-    connection_cfg->timeout_ms milliseconds */
+    connection_cfg->timeout_ms milliseconds
+ @warning
+    The disconnect callback might be called before the end of the function
+ */
 SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConnectionId cfgId, SOPC_LibSub_ConnectionId* pCliId);
 
 /*

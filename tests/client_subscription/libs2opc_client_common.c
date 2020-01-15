@@ -508,9 +508,10 @@ SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConfigurationId cf
                                     pCfg->generic_response_callback, &pSM);
     }
 
-    /* Adds it to the list */
+    /* Adds it to the list and modify pCliId */
     if (SOPC_STATUS_OK == status)
     {
+        *pCliId = clientId;
         if (pSM != SOPC_SLinkedList_Append(pListClient, clientId, pSM))
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -552,15 +553,13 @@ SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConfigurationId cf
     {
         mutStatus = Mutex_Lock(&mutex);
         assert(SOPC_STATUS_OK == mutStatus);
+        /* make sure that nobody changes pCliId during the unlock-lock time */
+        assert(clientId == *pCliId);
         SOPC_StaMac_Machine* removedSM = (SOPC_StaMac_Machine*) SOPC_SLinkedList_RemoveFromId(pListClient, clientId);
         assert(pSM == removedSM);
         SOPC_StaMac_Delete(&pSM);
         mutStatus = Mutex_Unlock(&mutex);
         assert(SOPC_STATUS_OK == mutStatus);
-    }
-    else if (NULL != pCliId)
-    {
-        *pCliId = clientId;
     }
 
     return status;
