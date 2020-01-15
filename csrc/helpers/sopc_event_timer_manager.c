@@ -51,6 +51,7 @@ static SOPC_SLinkedList* periodicTimersToRestart = NULL;
 static Mutex timersMutex;
 static int32_t initialized = 0;
 static int32_t stop = 0;
+static bool timerCreationFailed = false;
 
 static Thread cyclicEvalThread;
 
@@ -354,8 +355,13 @@ static uint32_t SOPC_InternalEventTimer_Create(SOPC_EventHandler* eventHandler,
     } // else 0 is invalid value => no timer available
     else
     {
+        if (!timerCreationFailed) // Log only on first failure due to no timer available
+        {
+            SOPC_Logger_TraceError("EventTimerManager: failed to create a new timer since no timer available");
+        }
         SOPC_Free(newTimer);
     }
+    timerCreationFailed = (0 == result);
     Mutex_Unlock(&timersMutex);
 
     return result;

@@ -1123,8 +1123,8 @@ void session_core_bs__server_session_timeout_evaluation(const constants__t_sessi
                 session_expiration_timer[session_core_bs__session] = timerId;
                 if (0 == timerId)
                 {
-                    SOPC_Logger_TraceError("Services: session=%" PRId32 " expiration timer renew failed",
-                                           session_core_bs__session);
+                    SOPC_Logger_TraceWarning("Services: session=%" PRId32 " expiration timer renew failed",
+                                             session_core_bs__session);
                 }
             }
         }
@@ -1170,8 +1170,8 @@ void session_core_bs__server_session_timeout_start_timer(const constants__t_sess
         session_expiration_timer[session_core_bs__session] = timerId;
         if (0 == timerId)
         {
-            SOPC_Logger_TraceError("Services: session=%" PRId32 " expiration timer creation failed",
-                                   session_core_bs__session);
+            SOPC_Logger_TraceWarning("Services: session=%" PRId32 " expiration timer creation failed",
+                                     session_core_bs__session);
         }
     }
 }
