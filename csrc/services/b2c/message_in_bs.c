@@ -184,7 +184,15 @@ void message_in_bs__decode_msg(const constants__t_msg_type_i message_in_bs__msg_
     status = SOPC_DecodeMsg_HeaderOrBody(message_in_bs__msg_buffer, encType, &msg);
     if (SOPC_STATUS_OK == status)
     {
-        *message_in_bs__msg = (constants__t_msg_i) msg;
+        if (0 == SOPC_Buffer_Remaining(message_in_bs__msg_buffer))
+        {
+            *message_in_bs__msg = (constants__t_msg_i) msg;
+        }
+        else
+        {
+            SOPC_Logger_TraceError("Services: Bytes remaining after decoding input message type = '%s'",
+                                   SOPC_EncodeableType_GetName(encType));
+        }
     }
     else
     {
