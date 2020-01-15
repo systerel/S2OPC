@@ -1440,10 +1440,16 @@ static SOPC_ReturnStatus BrowseHelper_InitializeContinuationPoints(size_t nbElem
                                                                    SOPC_ByteString** continuationPointsArray)
 {
     size_t i = 0;
+
+    if (NULL == continuationPointsArray)
+    {
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
     for (; i < nbElements && SOPC_STATUS_OK == status; i++)
     {
         continuationPointsArray[i] = SOPC_ByteString_Create();
-        if (NULL == continuationPointsArray)
+        if (NULL == continuationPointsArray[i])
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
