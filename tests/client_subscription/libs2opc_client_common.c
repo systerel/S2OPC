@@ -466,6 +466,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConfigurationId cf
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_LibSub_ConnectionCfg* pCfg = NULL;
     SOPC_StaMac_Machine* pSM = NULL;
+    SOPC_LibSub_ConnectionId clientId = 0;
 
     if (SOPC_Atomic_Int_Get(&libInitialized) == 0 || SOPC_Atomic_Int_Get(&libConfigured) == 0)
     {
@@ -500,8 +501,8 @@ SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConfigurationId cf
     if (SOPC_STATUS_OK == status)
     {
         ++nCreatedClient;
-        *pCliId = nCreatedClient;
-        status = SOPC_StaMac_Create(cfgId, *pCliId, pCfg->policyId, pCfg->username, pCfg->password,
+        clientId = nCreatedClient;
+        status = SOPC_StaMac_Create(cfgId, clientId, pCfg->policyId, pCfg->username, pCfg->password,
                                     pCfg->data_change_callback, (double) pCfg->publish_period_ms, pCfg->n_max_keepalive,
                                     pCfg->n_max_lifetime, pCfg->token_target, pCfg->timeout_ms,
                                     pCfg->generic_response_callback, &pSM);
@@ -510,7 +511,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConfigurationId cf
     /* Adds it to the list */
     if (SOPC_STATUS_OK == status)
     {
-        if (pSM != SOPC_SLinkedList_Append(pListClient, *pCliId, pSM))
+        if (pSM != SOPC_SLinkedList_Append(pListClient, clientId, pSM))
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
@@ -551,11 +552,15 @@ SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConfigurationId cf
     {
         mutStatus = Mutex_Lock(&mutex);
         assert(SOPC_STATUS_OK == mutStatus);
-        SOPC_StaMac_Machine* removedSM = (SOPC_StaMac_Machine*) SOPC_SLinkedList_RemoveFromId(pListClient, *pCliId);
+        SOPC_StaMac_Machine* removedSM = (SOPC_StaMac_Machine*) SOPC_SLinkedList_RemoveFromId(pListClient, clientId);
         assert(pSM == removedSM);
         SOPC_StaMac_Delete(&pSM);
         mutStatus = Mutex_Unlock(&mutex);
         assert(SOPC_STATUS_OK == mutStatus);
+    }
+    else
+    {
+        *pCliId = clientId;
     }
 
     return status;
