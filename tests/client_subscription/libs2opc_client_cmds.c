@@ -1025,7 +1025,7 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
     {
         if (NULL == readValues[i].nodeId)
         {
-            return (int32_t) - (4 + i);
+            return -(4 + ((int32_t) i));
         }
     }
 
@@ -1750,11 +1750,16 @@ static SOPC_ReturnStatus BrowseNext(int32_t connectionId,
         status = SOPC_STATUS_OUT_OF_MEMORY;
     }
 
-    SOPC_ByteString* nextContinuationPoints = SOPC_Calloc(nbElements, sizeof(SOPC_ByteString));
+    SOPC_ByteString* nextContinuationPoints = NULL;
 
-    if (NULL == nextContinuationPoints)
+    if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_STATUS_OUT_OF_MEMORY;
+        nextContinuationPoints = SOPC_Calloc(nbElements, sizeof(SOPC_ByteString));
+
+        if (NULL == nextContinuationPoints)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
     }
 
     int32_t count = 0;
