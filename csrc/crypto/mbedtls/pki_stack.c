@@ -577,8 +577,9 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
     /* Simpler case: check and warn that there is untrusted issuers but no issued certificates */
     if (SOPC_STATUS_OK == status)
     {
-        bool bIssuedXorUntrusted = (NULL != lRootsUntrusted) && (NULL == lIssued);
-        if (bIssuedXorUntrusted)
+        // Use paths for untrusted issuers since the certificate list will never be empty (chained to trusted)
+        bool bUntrustedAndNoIssued = (NULL != *lPathUntrustedIssuerRoots) && (NULL == lIssued);
+        if (bUntrustedAndNoIssued)
         {
             fprintf(stderr,
                     "> PKI creation warning: untrusted certificates are given but no issued certificates are given.\n");
