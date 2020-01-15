@@ -1117,9 +1117,12 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
     if (SOPC_STATUS_OK != status)
     {
         SOPC_Free(request);
-        for (size_t i = 0; i < nbElements; i++)
+        if (NULL != nodesToRead)
         {
-            SOPC_NodeId_Clear(&nodesToRead[i].NodeId);
+            for (size_t i = 0; i < nbElements; i++)
+            {
+                SOPC_NodeId_Clear(&nodesToRead[i].NodeId);
+            }
         }
         SOPC_Free(nodesToRead);
     }
