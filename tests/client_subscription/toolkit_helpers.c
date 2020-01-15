@@ -601,8 +601,6 @@ SOPC_LibSub_Timestamp Helpers_OPCTimeToNTP(SOPC_DateTime ts)
 {
     /* We are not before 1601 */
     assert(0 <= ts);
-    /* We are not after year 30848 */
-    assert(INT64_MAX >= ts);
     /* So we can use unsigned arithmetics, and get rid of warnings. */
     uint64_t uts = (uint64_t) ts;
 
