@@ -1796,6 +1796,17 @@ static SOPC_ReturnStatus BrowseNext(int32_t connectionId,
         status = SOPC_BrowseContext_Initialization(ctx);
     }
 
+    /* free memory if something went wrong before sending the request */
+    if (SOPC_STATUS_OK != status)
+    {
+        for (int32_t i = 0; i < count; i++)
+        {
+            SOPC_ByteString_Delete(&nextContinuationPoints[i]);
+        }
+        SOPC_Free(nextContinuationPoints);
+        SOPC_Free(request);
+    }
+
     /* fill context */
     if (SOPC_STATUS_OK == status)
     {
@@ -1813,6 +1824,17 @@ static SOPC_ReturnStatus BrowseNext(int32_t connectionId,
 
         status = SOPC_ClientCommon_AsyncSendRequestOnSession((SOPC_LibSub_ConnectionId) connectionId, request,
                                                              (uintptr_t) ctx);
+        /* if status == SOPC_STATUS_OK, another thread has ownership of the memory
+         * else we need to free it */
+        if (SOPC_STATUS_OK != status)
+        {
+            for (int32_t i = 0; i < count; i++)
+            {
+                SOPC_ByteString_Delete(&nextContinuationPoints[i]);
+            }
+            SOPC_Free(nextContinuationPoints);
+            SOPC_Free(request);
+        }
 
         /* Wait for the response */
         while (SOPC_STATUS_OK == status && !ctx->finish)
