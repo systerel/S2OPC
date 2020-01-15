@@ -600,7 +600,7 @@ static void GenericCallback_GetEndpoints(const SOPC_StatusCode requestStatus,
                 ctx->endpoints->endpoints = endpoints;
 
                 OpcUa_EndpointDescription* descriptions = getEndpointsResp->Endpoints;
-                for (int32_t i = 0; i < getEndpointsResp->NoOfEndpoints; i++)
+                for (int32_t i = 0; i < getEndpointsResp->NoOfEndpoints && SOPC_STATUS_OK == status; i++)
                 {
                     /* convert OpcUa_EndpointDescription to SOPC_ClientHelper_EndpointDescription */
                     endpoints[i].endpointUrl = SOPC_String_GetCString(&descriptions[i].EndpointUrl);
