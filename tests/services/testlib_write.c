@@ -66,17 +66,17 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(const SOPC_AddressSpace* address_spac
     /* int64 */
     for (i = 0; i < N_VARS / N_GROUPS; ++i)
     {
-        lwv[i] =
-            (OpcUa_WriteValue){.encodeableType = &OpcUa_WriteValue_EncodeableType,
-                               .NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                          .Data.Numeric = (uint32_t) i + 1000 + 1,
-                                          .Namespace = 1},
-                               .AttributeId = constants__e_aid_Value,
-                               .IndexRange = {.Length = 0},
-                               .Value = {.Value = {.BuiltInTypeId = SOPC_Int64_Id,
-                                                   .ArrayType = SOPC_VariantArrayType_SingleValue,
-                                                   .Value.Int64 = (10000 + (int64_t) i) * ((int64_t) i % 2 ? 1 : -1)},
-                                         .Status = SOPC_GoodGenericStatus}};
+        /* with N_VARS = N_GROUPS, the only i value is 0 */
+        lwv[i] = (OpcUa_WriteValue){.encodeableType = &OpcUa_WriteValue_EncodeableType,
+                                    .NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
+                                               .Data.Numeric = (uint32_t) i + 1000 + 1,
+                                               .Namespace = 1},
+                                    .AttributeId = constants__e_aid_Value,
+                                    .IndexRange = {.Length = 0},
+                                    .Value = {.Value = {.BuiltInTypeId = SOPC_Int64_Id,
+                                                        .ArrayType = SOPC_VariantArrayType_SingleValue,
+                                                        .Value.Int64 = (10000 + (int64_t) i) * ((int64_t) 1)},
+                                              .Status = SOPC_GoodGenericStatus}};
     }
 
     /* uint32 */
