@@ -721,8 +721,8 @@ static void GenericCallbackHelper_Write(SOPC_StatusCode status, const void* resp
     WriteContext* ctx = (WriteContext*) responseContext;
     const OpcUa_WriteResponse* writeResp = (const OpcUa_WriteResponse*) response;
 
-    ctx->status = Mutex_Lock(&ctx->mutex);
-    assert(SOPC_STATUS_OK == ctx->status);
+    SOPC_ReturnStatus statusMutex = Mutex_Lock(&ctx->mutex);
+    assert(SOPC_STATUS_OK == statusMutex);
 
     ctx->status = status;
     if (ctx->nbElements != writeResp->NoOfResults)
@@ -746,11 +746,11 @@ static void GenericCallbackHelper_Write(SOPC_StatusCode status, const void* resp
     }
     ctx->finish = true;
 
-    ctx->status = Mutex_Unlock(&ctx->mutex);
-    assert(SOPC_STATUS_OK == ctx->status);
+    statusMutex = Mutex_Unlock(&ctx->mutex);
+    assert(SOPC_STATUS_OK == statusMutex);
     /* Signal that the response is available */
-    status = Condition_SignalAll(&ctx->condition);
-    assert(SOPC_STATUS_OK == status);
+    statusMutex = Condition_SignalAll(&ctx->condition);
+    assert(SOPC_STATUS_OK == statusMutex);
 }
 
 static void GenericCallbackHelper_Browse(SOPC_StatusCode status, const void* response, uintptr_t responseContext)
@@ -809,7 +809,8 @@ static void GenericCallbackHelper_Browse(SOPC_StatusCode status, const void* res
     statusMutex = Mutex_Unlock(&ctx->mutex);
     assert(SOPC_STATUS_OK == statusMutex);
     /* Signal that the response is available */
-    status = Condition_SignalAll(&ctx->condition);
+    statusMutex = Condition_SignalAll(&ctx->condition);
+    assert(SOPC_STATUS_OK == statusMutex);
 }
 
 static void GenericCallbackHelper_BrowseNext(SOPC_StatusCode status, const void* response, uintptr_t responseContext)
