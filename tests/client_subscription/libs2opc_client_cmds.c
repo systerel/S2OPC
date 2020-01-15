@@ -800,7 +800,11 @@ static void GenericCallbackHelper_Browse(SOPC_StatusCode status, const void* res
                 }
                 resultReference.isForward = reference->IsForward;
                 resultReference.nodeClass = (int32_t) reference->NodeClass;
-                SOPC_Array_Append(ctx->browseResults[i], resultReference);
+                bool result = SOPC_Array_Append(ctx->browseResults[i], resultReference);
+                if (!result)
+                {
+                    ctx->status = SOPC_STATUS_OUT_OF_MEMORY;
+                }
             }
         }
     }
@@ -886,7 +890,11 @@ static void GenericCallbackHelper_BrowseNext(SOPC_StatusCode status, const void*
                 }
                 resultReference.isForward = reference->IsForward;
                 resultReference.nodeClass = (int32_t) reference->NodeClass;
-                SOPC_Array_Append(ctx->browseResults[index], resultReference);
+                bool result = SOPC_Array_Append(ctx->browseResults[index], resultReference);
+                if (!result)
+                {
+                    ctx->status = SOPC_STATUS_OUT_OF_MEMORY;
+                }
             }
 
             index++;
