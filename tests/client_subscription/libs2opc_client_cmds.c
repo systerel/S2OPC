@@ -1511,10 +1511,16 @@ static SOPC_ReturnStatus BrowseHelper_InitializeBrowseResults(size_t nbElements,
                                                               SOPC_Array** browseResultsListArray)
 {
     size_t i = 0;
+
+    if (NULL == browseResultsListArray)
+    {
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
     for (; i < nbElements && SOPC_STATUS_OK == status; i++)
     {
         browseResultsListArray[i] = SOPC_Array_Create(sizeof(SOPC_ClientHelper_BrowseResultReference), 10, SOPC_Free);
-        if (NULL == browseResultsListArray)
+        if (NULL == browseResultsListArray[i])
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
