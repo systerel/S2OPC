@@ -2672,7 +2672,7 @@ static SOPC_ReturnStatus SOPC_Variant_Read_Internal(SOPC_Variant* variant,
                     for (idx = 0; idx < variant->Value.Matrix.Dimensions && SOPC_STATUS_OK == status; idx++)
                     {
                         status = SOPC_Int32_Read(&variant->Value.Matrix.ArrayDimensions[idx], buf);
-                        if (variant->Value.Matrix.ArrayDimensions[idx] > 0)
+                        if (SOPC_STATUS_OK == status && variant->Value.Matrix.ArrayDimensions[idx] > 0)
                         {
                             // valid value
                             matrixLength *= variant->Value.Matrix.ArrayDimensions[idx];
