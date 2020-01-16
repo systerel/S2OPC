@@ -21,7 +21,6 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
-#include <stdio.h>
 
 #include "sopc_encodeabletype.h"
 #include "sopc_types.h"
@@ -29,25 +28,14 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_helper_endianness_cfg.h"
 
-static int32_t counter = 0;
-
 int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
 {
     if (len <= 1)
     {
         return 0;
     }
-    counter++;
-    SOPC_Helper_EndiannessCfg_Initialize();
-    //printf("Iteration #%d\n", counter);
-    //printf("sizeofbuffer: %lu\n", sizeof(SOPC_Buffer));
 
-    //printf("input (size: %lu):\n", len);
-    for (size_t i = 0; i < len; i++)
-    {
-        //printf("%u ", buf[i]);
-    }
-    //printf("\n");
+    SOPC_Helper_EndiannessCfg_Initialize();
 
     const size_t type_index = buf[0] % SOPC_TypeInternalIndex_SIZE;
 
@@ -72,14 +60,10 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
     {
         SOPC_EncodeableObject_Clear(type, pValue);
     }
-    //printf("- AfterClear, status: %d\n", status);
 
     /* clear */
-    //SOPC_Buffer_Delete(buffer); // double free if uncommented
     SOPC_Free(buffer); // delete tries to free data which is also freed by libfuzzer
     SOPC_Free(pValue);
-
-    //printf("- AfterFree\n");
 
     return 0;
 }
