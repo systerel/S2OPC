@@ -740,7 +740,7 @@ static void GenericCallbackHelper_Write(SOPC_StatusCode status, const void* resp
             }
             else
             {
-                status = SOPC_STATUS_NOK;
+                ctx->status = SOPC_STATUS_NOK;
             }
         }
     }
@@ -769,11 +769,11 @@ static void GenericCallbackHelper_Browse(SOPC_StatusCode status, const void* res
     }
     if (SOPC_STATUS_OK == ctx->status)
     {
-        for (int32_t i = 0; i < browseResp->NoOfResults; i++)
+        for (int32_t i = 0; i < browseResp->NoOfResults && SOPC_STATUS_OK == ctx->status; i++)
         {
             ctx->statusCodes[i] = browseResp->Results[i].StatusCode;
-            SOPC_ByteString_Copy(ctx->continuationPoints[i], &browseResp->Results[i].ContinuationPoint);
-            for (int32_t j = 0; j < browseResp->Results[i].NoOfReferences; j++)
+            ctx->status = SOPC_ByteString_Copy(ctx->continuationPoints[i], &browseResp->Results[i].ContinuationPoint);
+            for (int32_t j = 0; j < browseResp->Results[i].NoOfReferences && SOPC_STATUS_OK == ctx->status; j++)
             {
                 SOPC_ClientHelper_BrowseResultReference resultReference;
                 OpcUa_ReferenceDescription* reference = &browseResp->Results[i].References[j];
@@ -862,8 +862,9 @@ static void GenericCallbackHelper_BrowseNext(SOPC_StatusCode status, const void*
 
             SOPC_ByteString_Delete(ctx->continuationPoints[index]);
             ctx->continuationPoints[index] = SOPC_ByteString_Create();
-            SOPC_ByteString_Copy(ctx->continuationPoints[index], &browseNextResp->Results[i].ContinuationPoint);
-            for (int32_t j = 0; j < browseNextResp->Results[i].NoOfReferences; j++)
+            ctx->status =
+                SOPC_ByteString_Copy(ctx->continuationPoints[index], &browseNextResp->Results[i].ContinuationPoint);
+            for (int32_t j = 0; j < browseNextResp->Results[i].NoOfReferences && SOPC_STATUS_OK == ctx->status; j++)
             {
                 SOPC_ClientHelper_BrowseResultReference resultReference;
                 OpcUa_ReferenceDescription* reference = &browseNextResp->Results[i].References[j];
@@ -1807,17 +1808,6 @@ static SOPC_ReturnStatus BrowseNext(int32_t connectionId,
         status = SOPC_BrowseContext_Initialization(ctx);
     }
 
-    /* free memory if something went wrong before sending the request */
-    if (SOPC_STATUS_OK != status)
-    {
-        for (int32_t i = 0; i < count; i++)
-        {
-            SOPC_ByteString_Delete(&nextContinuationPoints[i]);
-        }
-        SOPC_Free(nextContinuationPoints);
-        SOPC_Free(request);
-    }
-
     /* fill context */
     if (SOPC_STATUS_OK == status)
     {
@@ -1835,17 +1825,6 @@ static SOPC_ReturnStatus BrowseNext(int32_t connectionId,
 
         status = SOPC_ClientCommon_AsyncSendRequestOnSession((SOPC_LibSub_ConnectionId) connectionId, request,
                                                              (uintptr_t) ctx);
-        /* if status == SOPC_STATUS_OK, another thread has ownership of the memory
-         * else we need to free it */
-        if (SOPC_STATUS_OK != status)
-        {
-            for (int32_t i = 0; i < count; i++)
-            {
-                SOPC_ByteString_Delete(&nextContinuationPoints[i]);
-            }
-            SOPC_Free(nextContinuationPoints);
-            SOPC_Free(request);
-        }
 
         /* Wait for the response */
         while (SOPC_STATUS_OK == status && !ctx->finish)
@@ -1863,6 +1842,18 @@ static SOPC_ReturnStatus BrowseNext(int32_t connectionId,
         assert(SOPC_STATUS_OK == statusMutex);
         statusMutex = Mutex_Clear(&ctx->mutex);
         assert(SOPC_STATUS_OK == statusMutex);
+    }
+
+    /* if status == SOPC_STATUS_OK, another thread has ownership of the memory
+     * else we need to free it */
+    if (SOPC_STATUS_OK != status)
+    {
+        for (int32_t i = 0; i < count && NULL != nextContinuationPoints; i++)
+        {
+            SOPC_ByteString_Delete(&nextContinuationPoints[i]);
+        }
+        SOPC_Free(nextContinuationPoints);
+        SOPC_Free(request);
     }
 
     /* free memory */
