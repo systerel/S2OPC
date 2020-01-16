@@ -870,6 +870,7 @@ if (NOT WITH_OSS_FUZZ AND "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
 		add_custom_target(fuzzers)
 		s2opc_fuzzer(server_request_fuzzer "fuzz_server_request.c")
 		s2opc_fuzzer(parse_tcp_uri_fuzzer "fuzz_parse_tcp_uri.c")
+		s2opc_fuzzer(decode_fuzzer "fuzz_decoder.c")
 	endif()
 endif()
 
