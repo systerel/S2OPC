@@ -2722,9 +2722,14 @@ static bool SOPC_Chunks_EncodePadding(uint32_t scConnectionIdx,
     {
         *realPaddingLength =
             SC_Chunks_GetPaddingSize(buffer->length - sequenceNumberPosition, plainTextBlockSize, *signatureSize);
-        // Little endian conversion of padding:
-        SOPC_EncodeDecode_UInt16(realPaddingLength);
-        status = SOPC_Buffer_Write(buffer, (SOPC_Byte*) realPaddingLength, 1);
+        // Get the least significant byte value of the padding size
+        const uint8_t lsbPaddingSize = (uint8_t)(0x00FF & *realPaddingLength);
+        // Get the most significant byte value of the padding size
+        const uint8_t msbPaddingSize = (uint8_t)((0xFF00 & *realPaddingLength) >> 8);
+
+        // Use least significant byte value to define PaddingSize field
+        uint8_t paddingSizeField = lsbPaddingSize;
+        status = SOPC_Buffer_Write(buffer, &paddingSizeField, 1);
         if (SOPC_STATUS_OK != status)
         {
             result = false;
@@ -2732,8 +2737,6 @@ static bool SOPC_Chunks_EncodePadding(uint32_t scConnectionIdx,
 
         if (result)
         {
-            uint8_t paddingSizeField = 0;
-            paddingSizeField = (uint8_t)(0xFF & *realPaddingLength);
             // The value of each byte of the padding is equal to paddingSize:
             SOPC_Byte* paddingBytes = SOPC_Malloc(sizeof(SOPC_Byte) * (*realPaddingLength));
             if (paddingBytes != NULL)
@@ -2757,7 +2760,7 @@ static bool SOPC_Chunks_EncodePadding(uint32_t scConnectionIdx,
         {
             *hasExtraPadding = 1; // True
             // extra padding = most significant byte of 2 bytes padding size
-            SOPC_Byte extraPadding = (SOPC_Byte)(0x00FF & *realPaddingLength);
+            uint8_t extraPadding = msbPaddingSize;
             status = SOPC_Buffer_Write(buffer, &extraPadding, 1);
             if (SOPC_STATUS_OK != status)
             {
