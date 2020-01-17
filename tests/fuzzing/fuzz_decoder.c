@@ -30,7 +30,7 @@
 
 int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
 {
-    if (len <= 1)
+    if ((len <= 1) || ((2 * len) > UINT32_MAX))
     {
         return 0;
     }
@@ -56,8 +56,65 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
     SOPC_ReturnStatus status = SOPC_EncodeableObject_Decode(type,
                                                             pValue,
                                                             buffer);
+    /*  encode if decode was successful */
     if (SOPC_STATUS_OK == status)
     {
+        SOPC_Buffer* result_buffer = SOPC_Buffer_CreateResizable((uint32_t) len - 1, (uint32_t) (2 * len));
+        if (NULL == result_buffer)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_EncodeableObject_Encode(type, pValue, result_buffer);
+            /* we should succeed in encoding what we just decoded */
+            assert(SOPC_STATUS_OK == status);
+            /* we cannot verify that buffer == result_buffer since some things might vary
+             * such as string length for empty string etc. */
+
+            /* decode what we just encoded */
+            if (SOPC_STATUS_OK == status)
+            {
+                void* pValue2 = SOPC_Calloc(1, type->AllocationSize);
+                if (NULL == pValue2)
+                {
+                    status = SOPC_STATUS_OUT_OF_MEMORY;
+                }
+                if (SOPC_STATUS_OK == status)
+                {
+                    status = SOPC_Buffer_SetPosition(result_buffer, 0);
+                }
+                if (SOPC_STATUS_OK == status)
+                {
+                    status = SOPC_EncodeableObject_Decode(type,
+                                                          pValue2,
+                                                          result_buffer);
+                    assert(SOPC_STATUS_OK == status);
+
+                    /* encode again */
+                    SOPC_Buffer* result_buffer2 = SOPC_Buffer_CreateResizable((uint32_t) len - 1, (uint32_t) (2 * len));
+                    if (NULL == result_buffer2)
+                    {
+                        status = SOPC_STATUS_OUT_OF_MEMORY;
+                    }
+                    if (SOPC_STATUS_OK == status)
+                    {
+                        status = SOPC_EncodeableObject_Encode(type, pValue2, result_buffer2);
+                        /* we should succeed in encoding what we just decoded */
+                        assert(SOPC_STATUS_OK == status);
+                        /* compare result_buffer2 with result buffer */
+                        /* we should have the same buffers */
+                        assert(result_buffer2->length == result_buffer->length);
+                        assert(0 == memcmp(result_buffer2->data, result_buffer->data, result_buffer2->length));
+                    }
+
+                    SOPC_Buffer_Delete(result_buffer2);
+                    SOPC_EncodeableObject_Clear(type, pValue2);
+                    SOPC_Free(pValue2);
+                }
+            }
+        }
+        SOPC_Buffer_Delete(result_buffer);
         SOPC_EncodeableObject_Clear(type, pValue);
     }
 
