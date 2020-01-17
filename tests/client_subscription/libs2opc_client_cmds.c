@@ -1850,7 +1850,7 @@ static SOPC_ReturnStatus BrowseNext(int32_t connectionId,
     {
         for (int32_t i = 0; i < count && NULL != nextContinuationPoints; i++)
         {
-            SOPC_ByteString_Delete(&nextContinuationPoints[i]);
+            SOPC_ByteString_Clear(&nextContinuationPoints[i]);
         }
         SOPC_Free(nextContinuationPoints);
         SOPC_Free(request);
