@@ -119,7 +119,8 @@ SOPC_ReturnStatus SOPC_ClientCommon_Configured(void);
     The operation status and SOPC_STATUS_TIMEOUT when connection hanged for more than
     connection_cfg->timeout_ms milliseconds
  @warning
-    The disconnect callback might be called before the end of the function (in this case *pCliId is already set)
+    The disconnect callback might be called before the function returns if connection succeeds and then fails
+    immediately (in this case *pCliId is already set)
  */
 SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConnectionId cfgId, SOPC_LibSub_ConnectionId* pCliId);
 

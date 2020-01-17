@@ -369,7 +369,8 @@ int32_t SOPC_ClientHelper_GetEndpoints(const char* endpointUrl, SOPC_ClientHelpe
     If invalid security detected, return -<10+n> with <n> field number (starting from 1).
     If connection failed, return '-100'.
  @warning
-    The disconnect callback might be called before the end of the function
+    The disconnect callback might be called before the function returns if connection succeeds and then fails
+    immediately (in this case the connection id used in callback is not yet returned)
  */
 int32_t SOPC_ClientHelper_Connect(const char* endpointUrl, SOPC_ClientHelper_Security security);
 

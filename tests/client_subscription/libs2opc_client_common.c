@@ -524,10 +524,6 @@ SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConfigurationId cf
         status = SOPC_StaMac_StartSession(pSM);
     }
 
-    /* Release the lock so that the event handler can work properly while waiting */
-    mutStatus = Mutex_Unlock(&mutex);
-    assert(SOPC_STATUS_OK == mutStatus);
-
     /* Wait for the connection to be created */
     if (SOPC_STATUS_OK == status)
     {
@@ -535,8 +531,21 @@ SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConfigurationId cf
         while (!SOPC_StaMac_IsError(pSM) && !SOPC_StaMac_IsConnected(pSM) &&
                count * CONNECTION_TIMEOUT_MS_STEP < pCfg->timeout_ms)
         {
+            /* Release the lock so that the event handler can work properly while waiting
+             *
+             * Note: concurrent changes of state machines state are only allowed during sleep call in Connect function.
+             * It is necessary to manage inhibition of disconnection callback properly since it shall still be called if
+             * connection operation succeeded and then connection immediately fails before Connect function returns.
+             */
+            mutStatus = Mutex_Unlock(&mutex);
+            assert(SOPC_STATUS_OK == mutStatus);
+
             SOPC_Sleep(CONNECTION_TIMEOUT_MS_STEP);
             ++count;
+
+            /* Lock again to ensure no state change in state machine during next evaluations */
+            mutStatus = Mutex_Lock(&mutex);
+            assert(SOPC_STATUS_OK == mutStatus);
         }
         if (SOPC_StaMac_IsError(pSM))
         {
@@ -548,10 +557,6 @@ SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConfigurationId cf
             SOPC_StaMac_SetError(pSM);
         }
     }
-
-    /* Lock again to modify state machine states */
-    mutStatus = Mutex_Lock(&mutex);
-    assert(SOPC_STATUS_OK == mutStatus);
 
     if (SOPC_STATUS_OK == status)
     {
@@ -565,6 +570,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConfigurationId cf
         assert(pSM == removedSM);
         SOPC_StaMac_Delete(&pSM);
     }
+
     mutStatus = Mutex_Unlock(&mutex);
     assert(SOPC_STATUS_OK == mutStatus);
 
