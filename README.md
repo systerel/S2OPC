@@ -149,7 +149,7 @@ Prerequisites:
 To build the Toolkit library and tests with default configuration on current
 stable release:
 ```
-  git clone https://gitlab.com/systerel/S2OPC.git --branch S2OPC_Toolkit_0.10.0
+  git clone https://gitlab.com/systerel/S2OPC.git --branch S2OPC_Toolkit_0.11.0
   cd S2OPC
   ./build.sh
 ```
@@ -253,6 +253,5 @@ tool (UA-ModelCompiler) is distributed under the OPC Foundation MIT License 1.00
 
 ## Commercial support
 
-Commercial support is available on demand for custom development and maintenance support.
-Contact: s2opc-support@systerel.fr
+For S2OPC commercial support, see https://www.s2opc.com.
 
