@@ -119,6 +119,7 @@ typedef struct SOPC_StaMac_Machine SOPC_StaMac_Machine;
  *                                before killing the subscription
  * \param iTokenTarget            Number of subscription tokens the server should always have
  * \param iTimeoutMs              Timeout for the synchroneous calls
+ * \param userContext             Caller defined user context that could be retrieved or set using accessors
  * \param ppSM                    The returned machine, when successful
  *
  * \return SOPC_STATUS_OK when \p ppSM points to a pointer to a valid machine.
@@ -136,6 +137,7 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
                                      uint32_t iTokenTarget,
                                      int64_t iTimeoutMs,
                                      SOPC_LibSub_EventCbk cbkGenericEvent,
+                                     uintptr_t userContext,
                                      SOPC_StaMac_Machine** ppSM);
 
 /*
@@ -250,6 +252,16 @@ bool SOPC_StaMac_HasMonItByAppCtx(SOPC_StaMac_Machine* pSM, uintptr_t appCtx);
 
 /** \brief Returns the timeout of the machine, used for the synchroneous calls. */
 int64_t SOPC_StaMac_GetTimeout(SOPC_StaMac_Machine* pSM);
+
+/**
+ * \brief Returns the user context provided to SOPC_StaMac_Create or modified through SOPC_StaMac_SetUserContext
+ */
+uintptr_t SOPC_StaMac_GetUserContext(SOPC_StaMac_Machine* pSM);
+
+/**
+ * \brief Overwrite the user content in the given state machine
+ */
+void SOPC_StaMac_SetUserContext(SOPC_StaMac_Machine* pSM, uintptr_t userContext);
 
 /**
  * \brief Handles the events from the Toolkit and changes the state machine state.

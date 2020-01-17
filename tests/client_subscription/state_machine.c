@@ -79,6 +79,7 @@ struct SOPC_StaMac_Machine
     const char* szPassword;               /* See SOPC_LibSub_ConnectionCfg */
     int64_t iTimeoutMs;                   /* See SOPC_LibSub_ConnectionCfg.timeout_ms */
     SOPC_SLinkedList* dataIdToNodeIdList; /* A list of data ids to node ids */
+    uintptr_t userContext;                /* A state machine user defined context */
 };
 
 /* Global variables */
@@ -160,6 +161,7 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
                                      uint32_t iTokenTarget,
                                      int64_t iTimeoutMs,
                                      SOPC_LibSub_EventCbk cbkGenericEvent,
+                                     uintptr_t userContext,
                                      SOPC_StaMac_Machine** ppSM)
 {
     SOPC_StaMac_Machine* pSM = SOPC_Calloc(1, sizeof(SOPC_StaMac_Machine));
@@ -195,6 +197,7 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
         pSM->szPassword = NULL;
         pSM->iTimeoutMs = iTimeoutMs;
         pSM->dataIdToNodeIdList = SOPC_SLinkedList_Create(0);
+        pSM->userContext = userContext;
         if (NULL != szPolicyId)
         {
             pSM->szPolicyId = SOPC_Malloc(strlen(szPolicyId) + 1);
@@ -765,6 +768,18 @@ int64_t SOPC_StaMac_GetTimeout(SOPC_StaMac_Machine* pSM)
 {
     assert(NULL != pSM);
     return pSM->iTimeoutMs;
+}
+
+uintptr_t SOPC_StaMac_GetUserContext(SOPC_StaMac_Machine* pSM)
+{
+    assert(NULL != pSM);
+    return pSM->userContext;
+}
+
+void SOPC_StaMac_SetUserContext(SOPC_StaMac_Machine* pSM, uintptr_t userContext)
+{
+    assert(NULL != pSM);
+    pSM->userContext = userContext;
 }
 
 static bool StaMac_GiveAuthorization_stActivating(SOPC_StaMac_Machine* pSM,

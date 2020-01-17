@@ -467,6 +467,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConfigurationId cf
     SOPC_LibSub_ConnectionCfg* pCfg = NULL;
     SOPC_StaMac_Machine* pSM = NULL;
     SOPC_LibSub_ConnectionId clientId = 0;
+    bool inhibitDisconnectCallback = true;
 
     if (SOPC_Atomic_Int_Get(&libInitialized) == 0 || SOPC_Atomic_Int_Get(&libConfigured) == 0)
     {
@@ -505,7 +506,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConfigurationId cf
         status = SOPC_StaMac_Create(cfgId, clientId, pCfg->policyId, pCfg->username, pCfg->password,
                                     pCfg->data_change_callback, (double) pCfg->publish_period_ms, pCfg->n_max_keepalive,
                                     pCfg->n_max_lifetime, pCfg->token_target, pCfg->timeout_ms,
-                                    pCfg->generic_response_callback, &pSM);
+                                    pCfg->generic_response_callback, (uintptr_t) inhibitDisconnectCallback, &pSM);
     }
 
     /* Adds it to the list and modify pCliId */
@@ -548,20 +549,24 @@ SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConfigurationId cf
         }
     }
 
+    /* Lock again to modify state machine states */
+    mutStatus = Mutex_Lock(&mutex);
+    assert(SOPC_STATUS_OK == mutStatus);
+
     if (SOPC_STATUS_OK == status)
     {
         *pCliId = clientId;
+        inhibitDisconnectCallback = false;
+        SOPC_StaMac_SetUserContext(pSM, (uintptr_t) inhibitDisconnectCallback);
     }
     else if (NULL != pSM)
     {
-        mutStatus = Mutex_Lock(&mutex);
-        assert(SOPC_STATUS_OK == mutStatus);
         SOPC_StaMac_Machine* removedSM = (SOPC_StaMac_Machine*) SOPC_SLinkedList_RemoveFromId(pListClient, clientId);
         assert(pSM == removedSM);
         SOPC_StaMac_Delete(&pSM);
-        mutStatus = Mutex_Unlock(&mutex);
-        assert(SOPC_STATUS_OK == mutStatus);
     }
+    mutStatus = Mutex_Unlock(&mutex);
+    assert(SOPC_STATUS_OK == mutStatus);
 
     return status;
 }
@@ -1033,8 +1038,13 @@ static void ToolkitEventCallback(SOPC_App_Com_Event event, uint32_t IdOrStatus, 
                 /* Post process the event for callbacks. */
                 if (SE_CLOSED_SESSION == event || SE_SESSION_ACTIVATION_FAILURE == event)
                 {
-                    /* The disconnect callback shall be called after the client has been destroyed */
-                    cbkDisco(cliId);
+                    bool inhibitDisconnectCallback = (bool) SOPC_StaMac_GetUserContext(pSM);
+                    /* Check if the disconnection callback shall be inhibited (Connect operation still running) */
+                    if (!inhibitDisconnectCallback)
+                    {
+                        /* The disconnect callback shall be called after the client has been destroyed */
+                        cbkDisco(cliId);
+                    }
                 }
             }
         }
