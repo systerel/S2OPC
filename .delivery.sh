@@ -101,7 +101,7 @@ sed -i 's/#define SOPC_TOOLKIT_VERSION_MAJOR .*/#define SOPC_TOOLKIT_VERSION_MAJ
 sed -i 's/#define SOPC_TOOLKIT_VERSION_MEDIUM .*/#define SOPC_TOOLKIT_VERSION_MEDIUM '"$medium"'/' $VERSION_HEADER || exit 1
 sed -i 's/#define SOPC_TOOLKIT_VERSION_MINOR .*/#define SOPC_TOOLKIT_VERSION_MINOR '"$minor"'/' $VERSION_HEADER || exit 1
 echo "Update to $1 version in README.md file"
-sed -i 's/S2OPC_Toolkit_[0-9].[0-9].[0-9]/S2OPC_Toolkit_'"$1"'/' README.md || exit 1
+sed -i 's/S2OPC_Toolkit_[0-9]\+\.[0-9]\+\.[0-9]\+/S2OPC_Toolkit_'"$1"'/' README.md || exit 1
 
 echo "Update to $libsub_version* version in $LIBSUB_VERSION_HEADER"
 sed -i 's/#define SOPC_LIBSUB_VERSION .*/#define SOPC_LIBSUB_VERSION "'"$libsub_version"'*"/' $LIBSUB_VERSION_HEADER || exit 1
@@ -119,7 +119,7 @@ sed -i 's/#define SOPC_TOOLKIT_VERSION_MEDIUM .*/#define SOPC_TOOLKIT_VERSION_ME
 sed -i 's/#define SOPC_TOOLKIT_VERSION_MINOR .*/#define SOPC_TOOLKIT_VERSION_MINOR '"$minor"'/' $VERSION_HEADER || exit 1
 sed -i 's/ "\*"//' $VERSION_HEADER
 echo "Update to $1 version in README.md file"
-sed -i 's/S2OPC_Toolkit_[0-9].[0-9].[0-9]/S2OPC_Toolkit_'"$1"'/' README.md || exit 1
+sed -i 's/S2OPC_Toolkit_[0-9]\+\.[0-9]\+\.[0-9]\+/S2OPC_Toolkit_'"$1"'/' README.md || exit 1
 
 echo "Update to $libsub_version version in $LIBSUB_VERSION_HEADER"
 sed -i 's/#define SOPC_LIBSUB_VERSION .*/#define SOPC_LIBSUB_VERSION "'"$libsub_version"'"/' $LIBSUB_VERSION_HEADER || exit 1
