@@ -34,20 +34,64 @@
 #define NULL ((void*) 0)
 #endif
 
+#define P_MEM_ALLOC_DEBUG (0)
+#if P_MEM_ALLOC_DEBUG == 1
+volatile uint32_t counterAlloc = 0;
+#endif
+
 #include "sopc_mem_alloc.h"
 
 void* SOPC_Malloc(size_t size)
 {
+#if P_MEM_ALLOC_DEBUG == 1
+    bool bTransition = false;
+    uint32_t currentVal = 0;
+    uint32_t newVal = 0;
+    do
+    {
+        currentVal = counterAlloc;
+        newVal = counterAlloc + 1;
+        bTransition = __sync_bool_compare_and_swap(&counterAlloc, currentVal, newVal);
+    } while (bTransition == false);
+    printk("\r\nP_MEM_ALLOC %d\r\n", counterAlloc);
+#endif
     return malloc(size);
 }
 
 void SOPC_Free(void* ptr)
 {
+#if P_MEM_ALLOC_DEBUG == 1
+    bool bTransition = false;
+    uint32_t currentVal = 0;
+    uint32_t newVal = 0;
+    do
+    {
+        currentVal = counterAlloc;
+        if (currentVal > 0)
+        {
+            newVal = counterAlloc - 1;
+        }
+        bTransition = __sync_bool_compare_and_swap(&counterAlloc, currentVal, newVal);
+    } while (bTransition == false);
+    printk("\r\nP_MEM_ALLOC %d\r\n", counterAlloc);
+#endif
     free(ptr);
 }
 
 void* SOPC_Calloc(size_t nmemb, size_t size)
 {
+#if P_MEM_ALLOC_DEBUG == 1
+    bool bTransition = false;
+    uint32_t currentVal = 0;
+    uint32_t newVal = 0;
+    do
+    {
+        currentVal = counterAlloc;
+        newVal = counterAlloc + 1;
+        bTransition = __sync_bool_compare_and_swap(&counterAlloc, currentVal, newVal);
+    } while (bTransition == false);
+    printk("\r\nP_MEM_ALLOC %d\r\n", counterAlloc);
+#endif
     return calloc(nmemb, size);
 }
 
