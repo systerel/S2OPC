@@ -54,6 +54,13 @@
 #else
 #define MAX_SOCKET 4
 #endif
+
+#ifndef CONFIG_NET_IF_MCAST_IPV4_ADDR_COUNT
+#define CONFIG_NET_IF_MCAST_IPV4_ADDR_COUNT 16
+#endif
+
+#define MAX_MCAST CONFIG_NET_IF_MCAST_IPV4_ADDR_COUNT
+
 /**
  *  \brief Socket base type
  */
@@ -72,6 +79,13 @@ typedef struct
     int32_t fdmax;    /**< max of the set */
     zsock_fd_set set; /**< set */
 } SOPC_SocketSet;
+
+bool P_SOCKET_NETWORK_IsInitialized(void);
+
+SOPC_ReturnStatus P_SOCKET_MCAST_add_sock_to_mcast(int sock, struct in_addr* add);
+SOPC_ReturnStatus P_SOCKET_MCAST_join_mcast_group(int sock, struct in_addr* add);
+SOPC_ReturnStatus P_SOCKET_MCAST_leave_mcast_group(int sock, struct in_addr* add);
+void P_SOCKET_MCAST_remove_sock_from_mcast(int sock);
 
 uint32_t P_SOCKET_increment_nb_socket(void);
 uint32_t P_SOCKET_decrement_nb_socket(void);

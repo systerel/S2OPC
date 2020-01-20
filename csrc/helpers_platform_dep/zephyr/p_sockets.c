@@ -34,6 +34,10 @@
 #define NULL ((void*) 0)
 #endif
 
+#ifndef MY_IP_LB
+#define MY_IP_LB ((const char*) ("127.0.0.1"))
+#endif
+
 #ifndef MY_IP_ETH0
 #define MY_IP_ETH0 ((const char*) ("192.168.1.102"))
 #endif
@@ -42,8 +46,14 @@
 #define MY_IP_MASK ((const char*) ("255.255.255.0"))
 #endif
 
+#ifndef MY_IP_GW
+#define MY_IP_GW ((const char*) ("192.168.1.111"))
+#endif
+
 #include <fcntl.h>
 #include <kernel.h>
+#include <net/ethernet.h>
+#include <net/net_if.h>
 #include <net/socket.h>
 
 #include "sopc_mutexes.h"
@@ -52,9 +62,47 @@
 
 #include "p_sockets.h"
 
-#define P_SOCKET_DEBUG (1)
+#define P_SOCKET_DEBUG (0)
+#define P_SOCKET_MCAST_DEBUG (0)
 
-static volatile uint32_t priv_nbSockets = 0;
+static volatile uint32_t priv_P_SOCKET_nbSockets = 0;     // Allow to avoid max socket allocation
+static volatile uint32_t priv_P_SOCKET_networkStatus = 0; // Network status, 0 not init, 1 initalizing, 2 initialized
+
+// *** Multicast variable definitions ***
+
+static Mutex priv_lockL2;
+struct mCastRegistered
+{
+    int sock[MAX_SOCKET];
+    struct in_addr addr;
+    bool bIsJoined;
+};
+
+static struct mCastRegistered tabMCast[MAX_MCAST];
+
+// *** Multicast internal functions declarations ***
+
+static void inline P_SOCKET_LockMcastTable(void);
+static void inline P_SOCKET_UnLockMcastTable(void);
+
+// *** Multicast internal functions definitions ***
+
+static void inline P_SOCKET_LockMcastTable(void)
+{
+    Mutex_Lock(&priv_lockL2);
+}
+
+static void inline P_SOCKET_UnLockMcastTable(void)
+{
+    Mutex_Unlock(&priv_lockL2);
+}
+
+// *** Private api functions definitions used by P_SOCKET and P_SOCKET_UDP ***
+
+bool P_SOCKET_NETWORK_IsInitialized(void)
+{
+    return (priv_P_SOCKET_networkStatus == 2);
+}
 
 uint32_t P_SOCKET_increment_nb_socket(void)
 {
@@ -63,11 +111,9 @@ uint32_t P_SOCKET_increment_nb_socket(void)
     bool bTransition = false;
     do
     {
-        currentValue = priv_nbSockets;
-
+        currentValue = priv_P_SOCKET_nbSockets;
         newValue = currentValue + 1;
-
-        bTransition = __sync_bool_compare_and_swap(&priv_nbSockets, currentValue, newValue);
+        bTransition = __sync_bool_compare_and_swap(&priv_P_SOCKET_nbSockets, currentValue, newValue);
 
     } while (!bTransition);
 #if P_SOCKET_DEBUG == 1
@@ -83,8 +129,7 @@ uint32_t P_SOCKET_decrement_nb_socket(void)
     bool bTransition = false;
     do
     {
-        currentValue = priv_nbSockets;
-
+        currentValue = priv_P_SOCKET_nbSockets;
         if (currentValue > 0)
         {
             newValue = currentValue - 1;
@@ -93,9 +138,7 @@ uint32_t P_SOCKET_decrement_nb_socket(void)
         {
             newValue = currentValue;
         }
-
-        bTransition = __sync_bool_compare_and_swap(&priv_nbSockets, currentValue, newValue);
-
+        bTransition = __sync_bool_compare_and_swap(&priv_P_SOCKET_nbSockets, currentValue, newValue);
     } while (!bTransition);
 #if P_SOCKET_DEBUG == 1
     printk("\r\nP_SOCKET =====> + socket release exit - new value = %d\r\n", newValue);
@@ -103,57 +146,93 @@ uint32_t P_SOCKET_decrement_nb_socket(void)
     return newValue;
 }
 
+// *** Public SOCKET API functions definitions ***
+
 bool SOPC_Socket_Network_Initialize()
 {
-    struct net_if* ptrNetIf = NULL;
-    struct in_addr addressLoopBack;
-    struct in_addr addressLoopBackNetMask;
-    struct in_addr addressInterfaceEth;
-    struct in_addr addressInterfaceEthMask;
-    net_addr_pton(AF_INET, "127.0.0.1", (void*) &addressLoopBack);
-    net_addr_pton(AF_INET, "255.255.255.0", (void*) &addressLoopBackNetMask);
+    uint32_t nwStatus = 0;
 
-    net_addr_pton(AF_INET, MY_IP_ETH0, (void*) &addressInterfaceEth);
-    net_addr_pton(AF_INET, MY_IP_MASK, (void*) &addressInterfaceEthMask);
-
-    if (net_if_ipv4_addr_lookup(&addressLoopBack, &ptrNetIf) == NULL)
+    do
     {
+        nwStatus = __sync_val_compare_and_swap(&priv_P_SOCKET_networkStatus, //
+                                               0,                            //
+                                               1);                           //
+
+        if (nwStatus == 0)
+        {
+            assert(Mutex_Initialization(&priv_lockL2) == SOPC_STATUS_OK);
+
+            struct net_if* ptrNetIf = NULL;
+            struct in_addr addressLoopBack;
+            struct in_addr addressLoopBackNetMask;
+            struct in_addr addressInterfaceEth;
+            struct in_addr addressInterfaceEthMask;
+            struct in_addr addressInterfaceEthGtw;
+            net_addr_pton(AF_INET, MY_IP_LB, (void*) &addressLoopBack);
+            net_addr_pton(AF_INET, MY_IP_MASK, (void*) &addressLoopBackNetMask);
+
+            net_addr_pton(AF_INET, MY_IP_ETH0, (void*) &addressInterfaceEth);
+            net_addr_pton(AF_INET, MY_IP_MASK, (void*) &addressInterfaceEthMask);
+            net_addr_pton(AF_INET, MY_IP_GW, (void*) &addressInterfaceEthGtw);
+            if (net_if_ipv4_addr_lookup(&addressLoopBack, &ptrNetIf) == NULL)
+            {
 #if defined(CONFIG_NET_L2_DUMMY)
-        ptrNetIf = net_if_get_first_by_type(&NET_L2_GET_NAME(DUMMY));
+                ptrNetIf = net_if_get_first_by_type(&NET_L2_GET_NAME(DUMMY));
 #endif
-        assert(NULL != ptrNetIf);
-        assert(NULL != net_if_ipv4_addr_add(ptrNetIf, &addressLoopBack, NET_ADDR_MANUAL, 0));
-        net_if_ipv4_set_netmask(ptrNetIf, &addressLoopBackNetMask);
+                assert(NULL != ptrNetIf);
+                assert(NULL != net_if_ipv4_addr_add(ptrNetIf, &addressLoopBack, NET_ADDR_MANUAL, 0));
+                net_if_ipv4_set_netmask(ptrNetIf, &addressLoopBackNetMask);
 #if P_SOCKET_DEBUG == 1
-        printk("\r\nP_SOCKET: Loopback initialized\r\n");
+                printk("\r\nP_SOCKET: Loopback initialized\r\n");
 #endif
-    }
-    else
-    {
+            }
+            else
+            {
 #if P_SOCKET_DEBUG == 1
-        printk("\r\nP_SOCKET: Loopback already initialized\r\n");
+                printk("\r\nP_SOCKET: Loopback already initialized\r\n");
 #endif
-    }
+            }
 
-    if (net_if_ipv4_addr_lookup(&addressInterfaceEth, &ptrNetIf) == NULL)
-    {
+            if (net_if_ipv4_addr_lookup(&addressInterfaceEth, &ptrNetIf) == NULL)
+            {
 #if defined(CONFIG_NET_L2_ETHERNET)
-        ptrNetIf = net_if_get_first_by_type(&NET_L2_GET_NAME(ETHERNET));
+                ptrNetIf = net_if_get_first_by_type(&NET_L2_GET_NAME(ETHERNET));
 #endif
-        assert(NULL != ptrNetIf);
-        assert(NULL != net_if_ipv4_addr_add(ptrNetIf, &addressInterfaceEth, NET_ADDR_MANUAL, 0));
-        net_if_ipv4_set_netmask(ptrNetIf, &addressInterfaceEthMask);
+                assert(NULL != ptrNetIf);
+                assert(NULL != net_if_ipv4_addr_add(ptrNetIf, &addressInterfaceEth, NET_ADDR_MANUAL, 0));
+                net_if_ipv4_set_gw(ptrNetIf, &addressInterfaceEthGtw);
+                net_if_ipv4_set_netmask(ptrNetIf, &addressInterfaceEthMask);
 #if P_SOCKET_DEBUG == 1
-        printk("\r\nP_SOCKET: Eth0 initialized\r\n");
+                printk("\r\nP_SOCKET: Eth0 initialized\r\n");
 #endif
+            }
+            else
+            {
+#if P_SOCKET_DEBUG == 1
+                printk("\r\nP_SOCKET: Eth0 already initialized\r\n");
+#endif
+            }
+
+            priv_P_SOCKET_networkStatus = 2;
+            nwStatus = 2;
+        }
+        else
+        {
+            if (nwStatus == 1)
+            {
+                k_yield();
+            }
+        }
+    } while (nwStatus == 1);
+
+    if (nwStatus == 2)
+    {
+        return true;
     }
     else
     {
-#if P_SOCKET_DEBUG == 1
-        printk("\r\nP_SOCKET: Eth0 already initialized\r\n");
-#endif
+        return false;
     }
-    return true;
 }
 
 bool SOPC_Socket_Network_Clear()
@@ -163,6 +242,11 @@ bool SOPC_Socket_Network_Clear()
 
 SOPC_ReturnStatus SOPC_Socket_AddrInfo_Get(char* hostname, char* port, SOPC_Socket_AddressInfo** addrs)
 {
+    if (priv_P_SOCKET_networkStatus != 2)
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     SOPC_Socket_AddressInfo hints;
     memset(&hints, 0, sizeof(SOPC_Socket_AddressInfo));
@@ -170,8 +254,6 @@ SOPC_ReturnStatus SOPC_Socket_AddrInfo_Get(char* hostname, char* port, SOPC_Sock
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
 
-    // Check if loopback address exist.
-    // If not, add it to default interface
     if ((NULL != hostname || NULL != port) && NULL != addrs)
     {
         int ret = zsock_getaddrinfo(hostname, port, &hints, addrs);
@@ -189,6 +271,11 @@ SOPC_ReturnStatus SOPC_Socket_AddrInfo_Get(char* hostname, char* port, SOPC_Sock
 
 SOPC_Socket_AddressInfo* SOPC_Socket_AddrInfo_IterNext(SOPC_Socket_AddressInfo* addr)
 {
+    if (priv_P_SOCKET_networkStatus != 2)
+    {
+        return NULL;
+    }
+
     SOPC_Socket_AddressInfo* res = NULL;
     if (NULL != addr)
     {
@@ -218,6 +305,11 @@ void SOPC_Socket_Clear(Socket* sock)
 
 static SOPC_ReturnStatus Socket_Configure(Socket sock, bool setNonBlocking)
 {
+    if (priv_P_SOCKET_networkStatus != 2)
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+
     if (SOPC_INVALID_SOCKET == sock)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -250,6 +342,11 @@ SOPC_ReturnStatus SOPC_Socket_CreateNew(SOPC_Socket_AddressInfo* addr,
                                         bool setNonBlocking,
                                         Socket* sock)
 {
+    if (priv_P_SOCKET_networkStatus != 2)
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+
     if (NULL == addr || NULL == sock)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -312,6 +409,11 @@ SOPC_ReturnStatus SOPC_Socket_CreateNew(SOPC_Socket_AddressInfo* addr,
 
 SOPC_ReturnStatus SOPC_Socket_Listen(Socket sock, SOPC_Socket_AddressInfo* addr)
 {
+    if (priv_P_SOCKET_networkStatus != 2)
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     int bindListenStatus = -1;
     if (NULL != addr)
@@ -331,6 +433,11 @@ SOPC_ReturnStatus SOPC_Socket_Listen(Socket sock, SOPC_Socket_AddressInfo* addr)
 
 SOPC_ReturnStatus SOPC_Socket_Accept(Socket listeningSock, bool setNonBlocking, Socket* acceptedSock)
 {
+    if (priv_P_SOCKET_networkStatus != 2)
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     struct sockaddr remoteAddr;
     socklen_t addrLen = 0;
@@ -386,6 +493,11 @@ SOPC_ReturnStatus SOPC_Socket_Accept(Socket listeningSock, bool setNonBlocking, 
 
 SOPC_ReturnStatus SOPC_Socket_Connect(Socket sock, SOPC_Socket_AddressInfo* addr)
 {
+    if (priv_P_SOCKET_networkStatus != 2)
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+
     if (NULL == addr || SOPC_INVALID_SOCKET == sock)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -418,6 +530,11 @@ SOPC_ReturnStatus SOPC_Socket_Connect(Socket sock, SOPC_Socket_AddressInfo* addr
 
 SOPC_ReturnStatus SOPC_Socket_ConnectToLocal(Socket from, Socket to)
 {
+    if (priv_P_SOCKET_networkStatus != 2)
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     SOPC_Socket_AddressInfo addr;
     struct sockaddr saddr;
@@ -436,6 +553,11 @@ SOPC_ReturnStatus SOPC_Socket_ConnectToLocal(Socket from, Socket to)
 
 SOPC_ReturnStatus SOPC_Socket_CheckAckConnect(Socket sock)
 {
+    if (priv_P_SOCKET_networkStatus != 2)
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+
     if (SOPC_INVALID_SOCKET == sock)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -453,6 +575,11 @@ SOPC_ReturnStatus SOPC_Socket_CheckAckConnect(Socket sock)
 
 void SOPC_SocketSet_Add(Socket sock, SOPC_SocketSet* sockSet)
 {
+    if (priv_P_SOCKET_networkStatus != 2)
+    {
+        return;
+    }
+
     if (SOPC_INVALID_SOCKET != sock && NULL != sockSet)
     {
         ZSOCK_FD_SET(sock, &sockSet->set);
@@ -465,6 +592,11 @@ void SOPC_SocketSet_Add(Socket sock, SOPC_SocketSet* sockSet)
 
 void SOPC_SocketSet_Remove(Socket sock, SOPC_SocketSet* sockSet)
 {
+    if (priv_P_SOCKET_networkStatus != 2)
+    {
+        return;
+    }
+
     if (SOPC_INVALID_SOCKET != sock && NULL != sockSet)
     {
         ZSOCK_FD_CLR(sock, &sockSet->set);
@@ -473,6 +605,11 @@ void SOPC_SocketSet_Remove(Socket sock, SOPC_SocketSet* sockSet)
 
 bool SOPC_SocketSet_IsPresent(Socket sock, SOPC_SocketSet* sockSet)
 {
+    if (priv_P_SOCKET_networkStatus != 2)
+    {
+        return false;
+    }
+
     if (SOPC_INVALID_SOCKET != sock && NULL != sockSet)
     {
         if (false == ZSOCK_FD_ISSET(sock, &sockSet->set))
@@ -489,6 +626,11 @@ bool SOPC_SocketSet_IsPresent(Socket sock, SOPC_SocketSet* sockSet)
 
 void SOPC_SocketSet_Clear(SOPC_SocketSet* sockSet)
 {
+    if (priv_P_SOCKET_networkStatus != 2)
+    {
+        return;
+    }
+
     if (NULL != sockSet)
     {
         ZSOCK_FD_ZERO(&sockSet->set);
@@ -501,6 +643,11 @@ int32_t SOPC_Socket_WaitSocketEvents(SOPC_SocketSet* readSet,
                                      SOPC_SocketSet* exceptSet,
                                      uint32_t waitMs)
 {
+    if (priv_P_SOCKET_networkStatus != 2)
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+
     int32_t nbReady = 0;
     struct timeval timeout;
     struct timeval* val;
@@ -554,6 +701,11 @@ SOPC_ReturnStatus SOPC_Socket_Write(Socket sock, const uint8_t* data, uint32_t c
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
+    if (priv_P_SOCKET_networkStatus != 2)
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+
     ssize_t res = 0;
     res = send(sock, data, count, 0);
 
@@ -580,6 +732,11 @@ SOPC_ReturnStatus SOPC_Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize
     if (SOPC_INVALID_SOCKET == sock || NULL == data || 0 >= dataSize)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    if (priv_P_SOCKET_networkStatus != 2)
+    {
+        return SOPC_STATUS_INVALID_STATE;
     }
 
     ssize_t sReadCount = 0;
@@ -621,7 +778,7 @@ SOPC_ReturnStatus SOPC_Socket_BytesToRead(Socket sock, uint32_t* bytesToRead)
 
 void SOPC_Socket_Close(Socket* sock)
 {
-    if (NULL != sock && SOPC_INVALID_SOCKET != *sock)
+    if (NULL != sock && SOPC_INVALID_SOCKET != *sock && priv_P_SOCKET_networkStatus == 2)
     {
         zsock_shutdown(*sock, ZSOCK_SHUT_RDWR);
         if (zsock_close(*sock) == 0)
@@ -630,4 +787,461 @@ void SOPC_Socket_Close(Socket* sock)
             P_SOCKET_decrement_nb_socket();
         }
     }
+}
+
+// *** Multicast private function definitions
+
+#if P_SOCKET_MCAST_DEBUG == 1
+static inline void P_SOCKET_MCAST_print_sock_from_mcast(void);
+#endif
+
+SOPC_ReturnStatus P_SOCKET_MCAST_join_mcast_group(int sock, struct in_addr* add)
+{
+    uint32_t indexMacast = 0;
+    uint32_t indexMasock = 0;
+    bool bIsFound = false;
+    bool bSockIsFound = false;
+
+#if P_SOCKET_MCAST_DEBUG == 1
+    printk("\r\nP_SOCKET_UDP: Enter join_mcast_group\r\n");
+    P_SOCKET_MCAST_print_sock_from_mcast();
+#endif
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    if (SOPC_INVALID_SOCKET == sock || NULL == add)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    if (!net_ipv4_is_addr_mcast(add))
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    P_SOCKET_LockMcastTable();
+
+    // Search for already registered mcast
+    for (int i = 0; i < MAX_MCAST; i++)
+    {
+        if ((tabMCast[i].addr.s_addr == add->s_addr) && (tabMCast[i].addr.s_addr != 0))
+        {
+            bIsFound = true;
+            indexMacast = i;
+            break;
+        }
+    }
+
+    // If not registered mcast, add it
+    if (!bIsFound)
+    {
+        status = P_SOCKET_MCAST_add_sock_to_mcast(sock, add);
+        if (SOPC_STATUS_OK == status)
+        {
+            // Search mcast
+            for (int i = 0; i < MAX_MCAST; i++)
+            {
+                if ((tabMCast[i].addr.s_addr == add->s_addr) && (tabMCast[i].addr.s_addr != 0))
+                {
+                    bIsFound = true;
+                    indexMacast = i;
+                    break;
+                }
+            }
+        }
+    }
+
+    // Search for already registered socket
+    if (bIsFound)
+    {
+        for (int j = 0; j < MAX_SOCKET; j++)
+        {
+            if ((tabMCast[indexMacast].sock[j] == sock) && (tabMCast[indexMacast].sock[j] != SOPC_INVALID_SOCKET))
+            {
+                bSockIsFound = true;
+                indexMasock = j;
+                break;
+            }
+        }
+    }
+
+    // If socket not found, add it
+    if (!bSockIsFound)
+    {
+        for (int j = 0; j < MAX_SOCKET; j++)
+        {
+            if (tabMCast[indexMacast].sock[j] == SOPC_INVALID_SOCKET)
+            {
+                tabMCast[indexMacast].sock[j] = sock;
+                bSockIsFound = true;
+                indexMasock = j;
+#if P_SOCKET_MCAST_DEBUG == 1
+                {
+                    char addr_str[32];
+                    inet_ntop(AF_INET, add, addr_str, sizeof(addr_str));
+                    printk("\r\nP_SOCKET_UDP: register socket = %d for mcast ip = %s\r\n", //
+                           sock,                                                           //
+                           addr_str);                                                      //
+                }
+#endif
+                break;
+            }
+        }
+    }
+
+    // Verify mcast is already registered by L1
+    if (bIsFound && bSockIsFound)
+    {
+#if P_SOCKET_MCAST_DEBUG == 1
+        {
+            char addr_str[32];
+            inet_ntop(AF_INET, add, addr_str, sizeof(addr_str));
+            printk("\r\nP_SOCKET_UDP: verify for socket = %d if mcast ip = %s is already joined\r\n", //
+                   sock,                                                                              //
+                   addr_str);                                                                         //
+        }
+#endif
+
+        if (tabMCast[indexMacast].bIsJoined == false)
+        {
+#if P_SOCKET_MCAST_DEBUG == 1
+            {
+                char addr_str[32];
+                inet_ntop(AF_INET, add, addr_str, sizeof(addr_str));
+                printk("\r\nP_SOCKET_UDP: register mcast ip = %s to L1 (first register) for socket = %d\r\n", //
+                       addr_str,                                                                              //
+                       sock);                                                                                 //
+            }
+#endif
+            // Register L1 multicast
+            struct net_if* ptrNetIf = NULL;
+#if defined(CONFIG_NET_L2_ETHERNET)
+            ptrNetIf = net_if_get_first_by_type(&NET_L2_GET_NAME(ETHERNET));
+#endif
+            if (ptrNetIf != NULL)
+            {
+                ethernet_add_mcast(ptrNetIf, add);
+#if P_SOCKET_MCAST_DEBUG == 1
+                printk("\r\nP_SOCKET_UDP: Call ethernet mcast\r\n");
+#endif
+            }
+            tabMCast[indexMacast].bIsJoined = true;
+        }
+    }
+    else
+    {
+        status = SOPC_STATUS_NOK;
+    }
+
+    P_SOCKET_UnLockMcastTable();
+
+#if P_SOCKET_MCAST_DEBUG == 1
+    printk("\r\nP_SOCKET_UDP: Exit join_mcast_group\r\n");
+    P_SOCKET_MCAST_print_sock_from_mcast();
+#endif
+    return status;
+}
+
+SOPC_ReturnStatus P_SOCKET_MCAST_leave_mcast_group(int sock, struct in_addr* add)
+{
+    uint32_t indexMacast = 0;
+    uint32_t indexMasock = 0;
+    bool bIsFound = false;
+    bool bSockIsFound = false;
+
+#if P_SOCKET_MCAST_DEBUG == 1
+    printk("\r\nP_SOCKET_UDP: Enter leave mcast group\r\n");
+    P_SOCKET_MCAST_print_sock_from_mcast();
+#endif
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    if (SOPC_INVALID_SOCKET == sock || NULL == add)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    if (!net_ipv4_is_addr_mcast(add))
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    P_SOCKET_LockMcastTable();
+
+    // Search mcast
+    for (int i = 0; i < MAX_MCAST; i++)
+    {
+        if ((tabMCast[i].addr.s_addr == add->s_addr) && (tabMCast[i].addr.s_addr != 0))
+        {
+            bIsFound = true;
+            indexMacast = i;
+            break;
+        }
+    }
+
+    // Search sock
+    if (bIsFound)
+    {
+        for (int j = 0; j < MAX_SOCKET; j++)
+        {
+            if ((tabMCast[indexMacast].sock[j] == sock) && (tabMCast[indexMacast].sock[j] != SOPC_INVALID_SOCKET))
+            {
+                bSockIsFound = true;
+                indexMasock = j;
+                break;
+            }
+        }
+    }
+
+    // If mcast and sock found, remove sock
+    // Remove mcast from L2 and L1 is not further used
+    if (bIsFound && bSockIsFound)
+    {
+        tabMCast[indexMacast].sock[indexMasock] = SOPC_INVALID_SOCKET;
+        bSockIsFound = false;
+
+        for (int j = 0; j < MAX_SOCKET; j++)
+        {
+            if (tabMCast[indexMacast].sock[j] != SOPC_INVALID_SOCKET)
+            {
+                bSockIsFound = true;
+                indexMasock = j;
+                break;
+            }
+        }
+#if P_SOCKET_MCAST_DEBUG == 1
+        {
+            char addr_str[32];
+            inet_ntop(AF_INET, add, addr_str, sizeof(addr_str));
+            printk("\r\nP_SOCKET_UDP: remove socket = %d for mcast ip = %s\r\n", //
+                   sock,                                                         //
+                   addr_str                                                      //
+            );                                                                   //
+        }
+#endif
+        if (!bSockIsFound)
+        {
+#if P_SOCKET_MCAST_DEBUG == 1
+            {
+                char addr_str[32];
+                inet_ntop(AF_INET, add, addr_str, sizeof(addr_str));
+                printk(
+                    "\r\nP_SOCKET_UDP: remove mcast ip = %s (L1 and L2) for socket = %d because no more joined \r\n", //
+                    addr_str,                                                                                         //
+                    sock                                                                                              //
+                );                                                                                                    //
+            }
+#endif
+            // Unregister L1 and L2 multicast
+            struct net_if* ptrNetIf = NULL;
+#if defined(CONFIG_NET_L2_ETHERNET)
+            ptrNetIf = net_if_get_first_by_type(&NET_L2_GET_NAME(ETHERNET));
+#endif
+            if (ptrNetIf != NULL)
+            {
+                net_if_ipv4_maddr_rm(ptrNetIf, add);
+                ethernet_rm_mcast(ptrNetIf, add);
+            }
+
+            tabMCast[indexMacast].bIsJoined = false;
+            tabMCast[indexMacast].addr.s_addr = 0;
+        }
+    }
+    else
+    {
+        status = SOPC_STATUS_NOK;
+    }
+
+    P_SOCKET_UnLockMcastTable();
+
+#if P_SOCKET_MCAST_DEBUG == 1
+    printk("\r\nP_SOCKET_UDP: Exit leave mcast group\r\n");
+    P_SOCKET_MCAST_print_sock_from_mcast();
+#endif
+    return status;
+}
+
+#if P_SOCKET_MCAST_DEBUG == 1
+void P_SOCKET_MCAST_print_sock_from_mcast(void)
+{
+    // Search mcast
+    for (int i = 0; i < 1; i++)
+    {
+        printk("\r\nP_SOCKET_UDP: tabMCast[%d].addr.s_addr=%d\r\n", i, tabMCast[i].addr.s_addr);
+        for (int j = 0; j < 2; j++)
+        {
+            printk("\r\nP_SOCKET_UDP: tabMCast[%d].sock[%d]=%d\r\n", i, j, tabMCast[i].sock[j]);
+        }
+    }
+}
+#endif
+
+void P_SOCKET_MCAST_remove_sock_from_mcast(int sock)
+{
+#if P_SOCKET_MCAST_DEBUG == 1
+    printk("\r\nP_SOCKET_UDP: Enter remove_sock_from_mcast\r\n");
+    P_SOCKET_MCAST_print_sock_from_mcast();
+#endif
+    if (SOPC_INVALID_SOCKET == sock)
+    {
+        return;
+    }
+
+    // Remove socket from mcast and remove mcast if necessary
+    for (int i = 0; i < MAX_MCAST; i++)
+    {
+        for (int j = 0; j < MAX_SOCKET; j++)
+        {
+            (void) P_SOCKET_MCAST_leave_mcast_group(sock, &tabMCast[i].addr);
+        }
+    }
+#if P_SOCKET_MCAST_DEBUG == 1
+    printk("\r\nP_SOCKET_UDP: Exit remove_sock_from_mcast\r\n");
+    P_SOCKET_MCAST_print_sock_from_mcast();
+#endif
+}
+
+SOPC_ReturnStatus P_SOCKET_MCAST_add_sock_to_mcast(int sock, struct in_addr* add)
+{
+#if P_SOCKET_MCAST_DEBUG == 1
+    printk("\r\nP_SOCKET_UDP: Enter add_sock_to_mcast\r\n");
+    P_SOCKET_MCAST_print_sock_from_mcast();
+#endif
+
+    if (SOPC_INVALID_SOCKET == sock || NULL == add)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    uint32_t indexMacast = 0;
+    uint32_t indexMasock = 0;
+    bool bIsFound = false;
+    bool bSockIsFound = false;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    if (!net_ipv4_is_addr_mcast(add))
+    {
+        return SOPC_STATUS_OK;
+    }
+
+    P_SOCKET_LockMcastTable();
+
+    // Search for mcast slot already registered
+    for (int i = 0; i < MAX_MCAST; i++)
+    {
+        if ((tabMCast[i].addr.s_addr == add->s_addr) && (tabMCast[i].addr.s_addr != 0))
+        {
+            bIsFound = true;
+            indexMacast = i;
+            break;
+        }
+    }
+
+    if (!bIsFound)
+    {
+        for (int i = 0; i < MAX_MCAST; i++)
+        {
+            if (tabMCast[i].addr.s_addr == 0)
+            {
+#if P_SOCKET_MCAST_DEBUG == 1
+                {
+                    char addr_str[32];
+                    inet_ntop(AF_INET, add, addr_str, sizeof(addr_str));
+                    printk(
+                        "\r\nP_SOCKET_UDP: add new mcast ip = %s (L2) for to allow bind socket = %d"
+                        "\r\n",   //
+                        addr_str, //
+                        sock      //
+                    );            //
+                }
+#endif
+
+                // Register L2 multicast to allow bind
+
+                struct net_if* ptrNetIf = NULL;
+
+#if defined(CONFIG_NET_L2_ETHERNET)
+                ptrNetIf = net_if_get_first_by_type(&NET_L2_GET_NAME(ETHERNET));
+#endif
+                if (ptrNetIf != NULL)
+                {
+                    net_if_ipv4_maddr_add(ptrNetIf, add);
+                }
+
+                tabMCast[i].addr.s_addr = add->s_addr;
+                tabMCast[i].bIsJoined = false;
+
+                for (int j = 0; j < MAX_SOCKET; j++)
+                {
+                    tabMCast[i].sock[j] = SOPC_INVALID_SOCKET;
+                }
+
+                bIsFound = true;
+                indexMacast = i;
+                indexMasock = 0;
+                break;
+            }
+        }
+    }
+    else
+    {
+#if P_SOCKET_MCAST_DEBUG == 1
+        printk("\r\nP_SOCKET_UDP: add_sock_to_mcast / mcast already registered \r\n");
+#endif
+        // Search if already registered
+        for (int j = 0; j < MAX_SOCKET; j++)
+        {
+            if (tabMCast[indexMacast].sock[j] == sock)
+            {
+#if P_SOCKET_MCAST_DEBUG == 1
+                printk("\r\nP_SOCKET_UDP: add_sock_to_mcast / sock already registered \r\n");
+#endif
+                bSockIsFound = true;
+                indexMasock = j;
+                break;
+            }
+        }
+
+        if (!bSockIsFound)
+        {
+            for (int j = 0; j < MAX_SOCKET; j++)
+            {
+                if (tabMCast[indexMacast].sock[j] == SOPC_INVALID_SOCKET)
+                {
+                    indexMasock = j;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (bIsFound && !bSockIsFound)
+    {
+#if P_SOCKET_MCAST_DEBUG == 1
+        {
+            char addr_str[32];
+
+            inet_ntop(AF_INET, add, addr_str, sizeof(addr_str));
+
+            printk("\r\nP_SOCKET_UDP: add new socket = %d to mcast = %s \r\n", //
+                   sock,                                                       //
+                   addr_str                                                    //
+            );                                                                 //
+        }
+#endif
+        tabMCast[indexMacast].sock[indexMasock] = sock;
+    }
+    else
+    {
+        status = SOPC_STATUS_NOK;
+    }
+
+    P_SOCKET_UnLockMcastTable();
+
+#if P_SOCKET_MCAST_DEBUG == 1
+    printk("\r\nP_SOCKET_UDP: Exit add_sock_to_mcast\r\n");
+    P_SOCKET_MCAST_print_sock_from_mcast();
+#endif
+
+    return status;
 }
