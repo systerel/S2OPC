@@ -85,6 +85,7 @@ bool P_SOCKET_NETWORK_IsInitialized(void);
 SOPC_ReturnStatus P_SOCKET_MCAST_add_sock_to_mcast(int sock, struct in_addr* add);
 SOPC_ReturnStatus P_SOCKET_MCAST_join_mcast_group(int sock, struct in_addr* add);
 SOPC_ReturnStatus P_SOCKET_MCAST_leave_mcast_group(int sock, struct in_addr* add);
+bool P_SOCKET_MCAST_soft_filter(int sock, struct in_addr* add);
 void P_SOCKET_MCAST_remove_sock_from_mcast(int sock);
 
 uint32_t P_SOCKET_increment_nb_socket(void);

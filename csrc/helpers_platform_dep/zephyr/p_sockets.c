@@ -942,6 +942,68 @@ SOPC_ReturnStatus P_SOCKET_MCAST_join_mcast_group(int sock, struct in_addr* add)
     return status;
 }
 
+bool P_SOCKET_MCAST_soft_filter(int sock, struct in_addr* add)
+{
+    uint32_t indexMacast = 0;
+    uint32_t indexMasock = 0;
+    bool bIsFound = false;
+    bool bSockIsFound = false;
+    bool bResult = false;
+
+#if P_SOCKET_MCAST_DEBUG == 1
+    printk("\r\nP_SOCKET_UDP: Enter verify mcast group\r\n");
+    P_SOCKET_MCAST_print_sock_from_mcast();
+#endif
+
+    if (SOPC_INVALID_SOCKET == sock || NULL == add)
+    {
+        return false;
+    }
+
+    if (!net_ipv4_is_addr_mcast(add))
+    {
+        return false;
+    }
+
+    P_SOCKET_LockMcastTable();
+    // Search mcast
+    for (int i = 0; i < MAX_MCAST; i++)
+    {
+        if ((tabMCast[i].addr.s_addr == add->s_addr) && (tabMCast[i].addr.s_addr != 0))
+        {
+            bIsFound = true;
+            indexMacast = i;
+            break;
+        }
+    }
+
+    // Search sock
+    if (bIsFound)
+    {
+        for (int j = 0; j < MAX_SOCKET; j++)
+        {
+            if ((tabMCast[indexMacast].sock[j] == sock) && (tabMCast[indexMacast].sock[j] != SOPC_INVALID_SOCKET))
+            {
+                bSockIsFound = true;
+                indexMasock = j;
+                break;
+            }
+        }
+    }
+
+    // If mcast and sock found, remove sock
+    // Remove mcast from L2 and L1 is not further used
+    bResult = (bIsFound && bSockIsFound);
+
+    P_SOCKET_UnLockMcastTable();
+
+#if P_SOCKET_MCAST_DEBUG == 1
+    printk("\r\nP_SOCKET_UDP: Exit verify mcast group\r\n");
+    P_SOCKET_MCAST_print_sock_from_mcast();
+#endif
+    return bResult;
+}
+
 SOPC_ReturnStatus P_SOCKET_MCAST_leave_mcast_group(int sock, struct in_addr* add)
 {
     uint32_t indexMacast = 0;
