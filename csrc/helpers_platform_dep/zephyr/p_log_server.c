@@ -48,8 +48,8 @@
 
 #define P_LOGSRV_DEBUG (0)
 
-#define LOGSRV_CONFIG_MAX_DATA_CHANNEL 512
-#define LOGSRV_CONFIG_MAX_EVENT_CHANNEL 2048
+#define LOGSRV_CONFIG_MAX_DATA_CHANNEL 4096
+#define LOGSRV_CONFIG_MAX_EVENT_CHANNEL 4096
 #define LOGSRV_CONFIG_MAX_LOG_SRV 1
 #define LOGSRV_CONFIG_PERIOD_MS (5)
 
@@ -793,7 +793,9 @@ static void* P_LOGSRV_ThreadMonitorCallback(void* pCtx)
                     // Verify time elapsed from last periodic
                     uint64_t timestamp_temp = timestamp;
                     delta = k_uptime_delta_32(&timestamp_temp);
+#if P_LOGSRV_DEBUG == 1
                     printk("\r\nP_LOG_SRV: delta from last periodic tick = %u ms  \r\n", (uint32_t)(delta));
+#endif
                     if (delta <= LOGSRV_CONFIG_PERIOD_MS)
                     {
                         timeout.tv_sec = 0;
