@@ -40,6 +40,7 @@
 
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
+#include "sopc_raw_sockets.h"
 #include "sopc_threads.h"
 #include "sopc_time.h"
 
@@ -151,15 +152,15 @@ static inline void P_LOGSRV_SOCKET_SetBlocking(int socket, bool blockMode)
     assert(-1 != fl);
     if (blockMode)
     {
-        res &= ~O_NONBLOCK;
+        fl &= ~O_NONBLOCK;
     }
     else
     {
-        res |= O_NONBLOCK;
+        fl |= O_NONBLOCK;
     }
 
     res = fcntl(socket, F_SETFL, fl);
-    assert(-1 != fl);
+    assert(-1 != res);
 }
 
 // Close server socket
@@ -767,8 +768,9 @@ static void* P_LOGSRV_ThreadMonitorCallback(void* pCtx)
                             }
                             else
                             {
+                                uint8_t buffer[0];
                                 // Verify disconnection event
-                                socketResult = recv(iterSocket, NULL, 0, 0);
+                                socketResult = recv(iterSocket, buffer, 1, 0);
                                 if (socketResult <= 0)
                                 {
                                     // If disconnection event, search into list,
@@ -885,6 +887,8 @@ static inline tLogServer* P_LOGSRV_Create(uint32_t port)
     {
         return NULL;
     }
+
+    SOPC_Socket_Network_Initialize();
 
     tLogServer* pLogSrv = (tLogServer*) SOPC_Calloc(1, sizeof(tLogServer));
 
