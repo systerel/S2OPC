@@ -200,7 +200,7 @@ static eThreadResult P_THREAD_Init(tThreadHandle* pWks, ptrFct callback, void* p
     }
     // Check first thread creation, if yes create workspace critical section
 
-    bool transition = __sync_val_compare_and_swap(&gGlbThreadWks.bInitialized, 0, 1);
+    uint32_t transition = __sync_val_compare_and_swap(&gGlbThreadWks.bInitialized, 0, 1);
 
     if (transition == 0)
     {
