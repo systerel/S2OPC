@@ -1699,7 +1699,7 @@ int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
             browseResults[i].references = SOPC_Array_Into_Raw(browseResultsListArray[i]);
         }
     }
-    else
+    else if (NULL != browseResultsListArray)
     {
         for (size_t i = 0; i < nbElements; i++)
         {

@@ -4210,6 +4210,7 @@ static void test_ua_variant_set_range_array_helper(const char** initial_strs,
     ck_assert(variant->Value.Array.Length >= 0);
     ck_assert_uint_eq(n_expected_strs, (size_t) variant->Value.Array.Length);
 
+    ck_assert(NULL != expected_strs || (n_expected_strs <= 0 && NULL == expected_strs));
     for (size_t i = 0; i < n_expected_strs; ++i)
     {
         ck_assert_str_eq(STR_COALESCE(expected_strs[i]),
@@ -4223,20 +4224,20 @@ static void test_ua_variant_set_range_array_helper(const char** initial_strs,
 
 START_TEST(test_ua_variant_set_range_array)
 {
-    test_ua_variant_set_range_array_helper((const char* []){"hello", "world"}, 2, (const char* []){"you"}, 1, "1",
-                                           (const char* []){"hello", "you"}, 2);
-    test_ua_variant_set_range_array_helper((const char* []){"this", "is", "a", "long", "sentence"}, 5,
-                                           (const char* []){"my", "first", "kiwi"}, 3, "2:4",
-                                           (const char* []){"this", "is", "my", "first", "kiwi"}, 5);
-    test_ua_variant_set_range_array_helper((const char* []){"this", "is", "a", "long", "sentence"}, 5,
-                                           (const char* []){"my", "first", "kiwi", "in", "Alaska"}, 5, "2:6",
-                                           (const char* []){"this", "is", "my", "first", "kiwi"}, 5);
-    test_ua_variant_set_range_array_helper((const char* []){"nothing", "more"}, 2, (const char* []){"nothing", "less"},
-                                           2, "2:3", (const char* []){"nothing", "more"}, 2);
-    test_ua_variant_set_range_array_helper((const char* []){"nothing", "more"}, 2, (const char* []){"nothing", "less"},
-                                           2, "2:4", NULL, 0);
-    test_ua_variant_set_range_array_helper((const char* []){"nothing", "more"}, 2, NULL, 0, "1", NULL, 0);
-    test_ua_variant_set_range_array_helper(NULL, 0, (const char* []){"nothing", "less"}, 2, "2:3", NULL, 0);
+    test_ua_variant_set_range_array_helper((const char*[]){"hello", "world"}, 2, (const char*[]){"you"}, 1, "1",
+                                           (const char*[]){"hello", "you"}, 2);
+    test_ua_variant_set_range_array_helper((const char*[]){"this", "is", "a", "long", "sentence"}, 5,
+                                           (const char*[]){"my", "first", "kiwi"}, 3, "2:4",
+                                           (const char*[]){"this", "is", "my", "first", "kiwi"}, 5);
+    test_ua_variant_set_range_array_helper((const char*[]){"this", "is", "a", "long", "sentence"}, 5,
+                                           (const char*[]){"my", "first", "kiwi", "in", "Alaska"}, 5, "2:6",
+                                           (const char*[]){"this", "is", "my", "first", "kiwi"}, 5);
+    test_ua_variant_set_range_array_helper((const char*[]){"nothing", "more"}, 2, (const char*[]){"nothing", "less"}, 2,
+                                           "2:3", (const char*[]){"nothing", "more"}, 2);
+    test_ua_variant_set_range_array_helper((const char*[]){"nothing", "more"}, 2, (const char*[]){"nothing", "less"}, 2,
+                                           "2:4", NULL, 0);
+    test_ua_variant_set_range_array_helper((const char*[]){"nothing", "more"}, 2, NULL, 0, "1", NULL, 0);
+    test_ua_variant_set_range_array_helper(NULL, 0, (const char*[]){"nothing", "less"}, 2, "2:3", NULL, 0);
 }
 END_TEST
 
