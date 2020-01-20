@@ -22,11 +22,11 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "sopc_encodeabletype.h"
-#include "sopc_types.h"
 #include "sopc_buffer.h"
-#include "sopc_mem_alloc.h"
+#include "sopc_encodeabletype.h"
 #include "sopc_helper_endianness_cfg.h"
+#include "sopc_mem_alloc.h"
+#include "sopc_types.h"
 
 int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
 {
@@ -53,13 +53,11 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
     /* create a buffer using remaining data */
     SOPC_Buffer* buffer = SOPC_Buffer_Attach((uint8_t*) &buf[1], (uint32_t) len - 1);
 
-    SOPC_ReturnStatus status = SOPC_EncodeableObject_Decode(type,
-                                                            pValue,
-                                                            buffer);
+    SOPC_ReturnStatus status = SOPC_EncodeableObject_Decode(type, pValue, buffer);
     /*  encode if decode was successful */
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_Buffer* result_buffer = SOPC_Buffer_CreateResizable((uint32_t) len - 1, (uint32_t) (2 * len));
+        SOPC_Buffer* result_buffer = SOPC_Buffer_CreateResizable((uint32_t) len - 1, (uint32_t)(2 * len));
         if (NULL == result_buffer)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -86,13 +84,11 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
                 }
                 if (SOPC_STATUS_OK == status)
                 {
-                    status = SOPC_EncodeableObject_Decode(type,
-                                                          pValue2,
-                                                          result_buffer);
+                    status = SOPC_EncodeableObject_Decode(type, pValue2, result_buffer);
                     assert(SOPC_STATUS_OK == status);
 
                     /* encode again */
-                    SOPC_Buffer* result_buffer2 = SOPC_Buffer_CreateResizable((uint32_t) len - 1, (uint32_t) (2 * len));
+                    SOPC_Buffer* result_buffer2 = SOPC_Buffer_CreateResizable((uint32_t) len - 1, (uint32_t)(2 * len));
                     if (NULL == result_buffer2)
                     {
                         status = SOPC_STATUS_OUT_OF_MEMORY;
