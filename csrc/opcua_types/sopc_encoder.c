@@ -2648,6 +2648,22 @@ static SOPC_ReturnStatus SOPC_Variant_Read_Internal(SOPC_Variant* variant,
             {
                 // length of array
                 status = SOPC_Int32_Read(&variant->Value.Matrix.Dimensions, buf);
+
+                if (SOPC_STATUS_OK != status && arrayLength > 0)
+                {
+                    // if we cannot read dimensions, set correct values for cleaning (only if elements in array)
+                    variant->Value.Matrix.Dimensions = 1;
+                    int32_t* arrayDim = SOPC_Calloc(1, sizeof(int32_t));
+                    if (NULL != arrayDim)
+                    {
+                        arrayDim[0] = arrayLength;
+                        variant->Value.Matrix.ArrayDimensions = arrayDim;
+                    }
+                    else
+                    {
+                        status = SOPC_STATUS_OUT_OF_MEMORY;
+                    }
+                }
             }
 
             if (SOPC_STATUS_OK == status &&
@@ -2704,10 +2720,9 @@ static SOPC_ReturnStatus SOPC_Variant_Read_Internal(SOPC_Variant* variant,
                 status = SOPC_STATUS_ENCODING_ERROR;
             }
 
-            if (SOPC_STATUS_OK != status && variant->Value.Matrix.Content.BooleanArr != NULL)
+            if (SOPC_STATUS_OK != status)
             {
-                SOPC_Free((void*) variant->Value.Matrix.Content.BooleanArr);
-                variant->Value.Matrix.Content.BooleanArr = NULL;
+                SOPC_Variant_Clear(variant);
             }
 
             break;
