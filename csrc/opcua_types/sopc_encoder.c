@@ -2698,6 +2698,12 @@ static SOPC_ReturnStatus SOPC_Variant_Read_Internal(SOPC_Variant* variant,
                 }
             }
 
+            if (SOPC_STATUS_OK == status && matrixLength != arrayLength)
+            {
+                // Dimensions length and total length are not equal
+                status = SOPC_STATUS_ENCODING_ERROR;
+            }
+
             if (SOPC_STATUS_OK != status)
             {
                 if (arrayLength > 0)
@@ -2708,6 +2714,11 @@ static SOPC_ReturnStatus SOPC_Variant_Read_Internal(SOPC_Variant* variant,
                     if (NULL != arrayDim)
                     {
                         arrayDim[0] = arrayLength;
+                        /* free if memory was previously allocated */
+                        if (NULL != variant->Value.Matrix.ArrayDimensions)
+                        {
+                            SOPC_Free(variant->Value.Matrix.ArrayDimensions);
+                        }
                         variant->Value.Matrix.ArrayDimensions = arrayDim;
                     }
                     else
@@ -2721,11 +2732,6 @@ static SOPC_ReturnStatus SOPC_Variant_Read_Internal(SOPC_Variant* variant,
                 }
             }
 
-            if (SOPC_STATUS_OK == status && matrixLength != arrayLength)
-            {
-                // Dimensions length and total length are not equal
-                status = SOPC_STATUS_ENCODING_ERROR;
-            }
 
             if (SOPC_STATUS_OK != status)
             {
