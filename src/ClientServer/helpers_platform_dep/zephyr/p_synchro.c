@@ -1135,7 +1135,7 @@ SOPC_ReturnStatus Mutex_Unlock(Mutex* mut)
 
     resSync = P_SYNCHRO_MUTEX_Unlock(handle);
 
-    if (E_SYNCHRO_RESULT_OK == resSync)
+    if (E_SYNCHRO_RESULT_OK == resSync || E_SYNCHRO_RESULT_NO_WAITERS == resSync)
     {
         resSOPC = SOPC_STATUS_OK;
     }
