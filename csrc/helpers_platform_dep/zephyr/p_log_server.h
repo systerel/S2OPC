@@ -20,31 +20,13 @@
 #ifndef S2OPC_CSRC_HELPERS_PLATFORM_DEP_ZEPHYR_P_LOG_SERVER_H_
 #define S2OPC_CSRC_HELPERS_PLATFORM_DEP_ZEPHYR_P_LOG_SERVER_H_
 
-#include <errno.h>
-#include <inttypes.h>
-#include <kernel.h>
-#include <limits.h>
-#include <stdbool.h>
 #include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 #include "sopc_enums.h"
 
-#ifndef __INT32_MAX__
-#include <toolchain/xcc_missing_defs.h>
-#endif
-
-#ifndef NULL
-#define NULL ((void*) 0)
-#endif
-
-#include <fcntl.h>
-#include <kernel.h>
-#include <net/socket.h>
-
 #define SOPC_LOGSRV_INVALID_HANDLE (UINT32_MAX)
 
+// Log server handle
 typedef uint32_t SOPC_LogServer_Handle;
 
 // Log server print.

@@ -25,6 +25,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/printk.h>
 
 #ifndef __INT32_MAX__
 #include <toolchain/xcc_missing_defs.h>
@@ -35,8 +36,9 @@
 #endif
 
 #include <fcntl.h>
-#include <kernel.h>
 #include <net/socket.h>
+
+/* s2opc includes */
 
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
@@ -44,18 +46,40 @@
 #include "sopc_threads.h"
 #include "sopc_time.h"
 
+/* platform dep includes */
+
 #include "p_log_server.h"
 #include "p_sockets.h"
 
+/* debug printk activation */
+
 #define P_LOGSRV_DEBUG (0)
 
-#define LOGSRV_CONFIG_MAX_DATA_CHANNEL 4096
-#define LOGSRV_CONFIG_MAX_EVENT_CHANNEL 4096
-#define LOGSRV_CONFIG_MAX_LOG_SRV 1
-#define LOGSRV_CONFIG_PERIOD_MS (5)
+/* Max pending connection based on max pending connections allowed by zephyr */
+
+#ifdef CONFIG_NET_SOCKETS_POLL_MAX
+#define MAX_LOG_SRV_PENDING_CONNECTION CONFIG_NET_SOCKETS_POLL_MAX
+#else
+#define MAX_LOG_SRV_PENDING_CONNECTION 4
+#endif
+
+/* Max socket based on max connections allowed by zephyr */
+
+#ifdef CONFIG_NET_MAX_CONN
+#define MAX_LOG_SRV_CLIENTS_SOCKET (CONFIG_NET_MAX_CONN - 2)
+#else
+#define MAX_LOG_SRV_CLIENTS_SOCKET 4
+#endif
+
+/* log server configuration */
+
+#define LOGSRV_CONFIG_MAX_DATA_CHANNEL 4096  /*Max data*/
+#define LOGSRV_CONFIG_MAX_EVENT_CHANNEL 4096 /*Max events */
+#define LOGSRV_CONFIG_MAX_LOG_SRV 1          /*Max clients*/
+#define LOGSRV_CONFIG_PERIOD_MS (5)          /*Poll log mem file and send to connected clients*/
 
 #define LOGSRV_TIMESTAMP_SIZE 32
-#define LOGSRV_MAX_CLIENTS MAX_SOCKET
+#define LOGSRV_MAX_CLIENTS MAX_LOG_SRV_CLIENTS_SOCKET
 
 #define LOGSRV_PERIOD_US (LOGSRV_CONFIG_PERIOD_MS * 1000)
 
@@ -207,7 +231,7 @@ static inline int32_t P_LOGSRV_create_server_socket(tLogServer* pLogSrv)
     // Indicates to others application that one socket is needed
     uint32_t valueNbSocket = P_SOCKET_increment_nb_socket();
     // If result is beyond limit, return error
-    if (valueNbSocket > MAX_SOCKET)
+    if (valueNbSocket > MAX_LOG_SRV_CLIENTS_SOCKET)
     {
         P_SOCKET_decrement_nb_socket();
         socketResult = -1;
@@ -244,7 +268,7 @@ static inline int32_t P_LOGSRV_create_server_socket(tLogServer* pLogSrv)
                 if (0 == socketResult)
                 {
                     P_LOGSRV_SOCKET_SetBlocking(pLogSrv->sockLogServer, false);
-                    socketResult = zsock_listen(pLogSrv->sockLogServer, MAX_PENDING_CONNECTION);
+                    socketResult = zsock_listen(pLogSrv->sockLogServer, MAX_LOG_SRV_PENDING_CONNECTION);
                 }
             }
         } // socket creation error
@@ -299,7 +323,7 @@ static inline uint32_t P_LOGSRV_accept_client_connection(tLogServer* pLogSrv)
     int32_t socketResult = 0;
     uint32_t valueNbSockets = P_SOCKET_increment_nb_socket();
 
-    if (valueNbSockets > MAX_SOCKET) // If limit is reached, accept and destroy
+    if (valueNbSockets > MAX_LOG_SRV_CLIENTS_SOCKET) // If limit is reached, accept and destroy
     {
 #if P_LOGSRV_DEBUG == 1
         printk("\r\nP_LOG_SRV: Log server can't accept out memory, close !!!\r\n");
@@ -313,7 +337,7 @@ static inline uint32_t P_LOGSRV_accept_client_connection(tLogServer* pLogSrv)
             // Beyond MAX_SOCKET, only MAX_SOCKET + 1 can be accepted.
             // If beyond, yield then retry
             valueNbSockets = P_SOCKET_increment_nb_socket();
-            if ((MAX_SOCKET + 2) >= valueNbSockets)
+            if ((MAX_LOG_SRV_CLIENTS_SOCKET + 2) >= valueNbSockets)
             {
                 memset(&sin, 0, sizeof(struct sockaddr_in));
                 newSocket = zsock_accept(pLogSrv->sockLogServer,  //
@@ -337,7 +361,7 @@ static inline uint32_t P_LOGSRV_accept_client_connection(tLogServer* pLogSrv)
                 k_yield();
             }
             // While some process are processing this function
-        } while (valueNbSockets > (MAX_SOCKET + 2));
+        } while (valueNbSockets > (MAX_LOG_SRV_CLIENTS_SOCKET + 2));
 
         // Indicates one more free socket
         P_SOCKET_decrement_nb_socket();
