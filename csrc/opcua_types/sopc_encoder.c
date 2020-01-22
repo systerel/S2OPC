@@ -2708,7 +2708,7 @@ static SOPC_ReturnStatus SOPC_Variant_Read_Internal(SOPC_Variant* variant,
             {
                 if (arrayLength > 0)
                 {
-                    // if we cannot read dimensions, set correct values for cleaning (only if elements in array)
+                    // set correct values for cleaning (only if elements in array)
                     variant->Value.Matrix.Dimensions = 1;
                     int32_t* arrayDim = SOPC_Calloc(1, sizeof(int32_t));
                     if (NULL != arrayDim)
@@ -2731,7 +2731,6 @@ static SOPC_ReturnStatus SOPC_Variant_Read_Internal(SOPC_Variant* variant,
                     variant->Value.Matrix.Dimensions = 0;
                 }
             }
-
 
             if (SOPC_STATUS_OK != status)
             {
