@@ -25,6 +25,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/printk.h>
 
 #ifndef __INT32_MAX__
 #include <toolchain/xcc_missing_defs.h>
@@ -51,19 +52,47 @@
 #endif
 
 #include <fcntl.h>
-#include <kernel.h>
 #include <net/ethernet.h>
 #include <net/net_if.h>
 #include <net/socket.h>
 
+/* s2opc includes */
+
 #include "sopc_mutexes.h"
-#include "sopc_raw_sockets.h"
-#include "sopc_threads.h"
+
+/* platform dep includes */
 
 #include "p_sockets.h"
 
+/* debug printk activation*/
+
 #define P_SOCKET_DEBUG (0)
 #define P_SOCKET_MCAST_DEBUG (0)
+
+/* Max pending connection based on max pending connections allowed by zephyr */
+
+#ifdef CONFIG_NET_SOCKETS_POLL_MAX
+#define MAX_PENDING_CONNECTION CONFIG_NET_SOCKETS_POLL_MAX
+#else
+#define MAX_PENDING_CONNECTION 4
+#endif
+
+/* Max socket based on max connections allowed by zephyr */
+
+#ifdef CONFIG_NET_MAX_CONN
+#define MAX_ZEPHYR_SOCKET (CONFIG_NET_MAX_CONN - 2)
+#else
+#define MAX_ZEPHYR_SOCKET 4
+#endif
+
+/* Constant definitions MAX_MCAST, based on value allowed by zephyr configuration */
+#ifdef CONFIG_NET_IF_MCAST_IPV4_ADDR_COUNT
+#define MAX_MCAST CONFIG_NET_IF_MCAST_IPV4_ADDR_COUNT
+#else
+#define MAX_MCAST 16
+#endif
+
+/* Private global definitions */
 
 static volatile uint32_t priv_P_SOCKET_nbSockets = 0;     // Allow to avoid max socket allocation
 static volatile uint32_t priv_P_SOCKET_networkStatus = 0; // Network status, 0 not init, 1 initalizing, 2 initialized
@@ -73,7 +102,7 @@ static volatile uint32_t priv_P_SOCKET_networkStatus = 0; // Network status, 0 n
 static Mutex priv_lockL2;
 struct mCastRegistered
 {
-    int sock[MAX_SOCKET];
+    int sock[MAX_ZEPHYR_SOCKET];
     struct in_addr addr;
     bool bIsJoined;
 };
@@ -353,7 +382,7 @@ SOPC_ReturnStatus SOPC_Socket_CreateNew(SOPC_Socket_AddressInfo* addr,
     }
 
     uint32_t valAuthorization = P_SOCKET_increment_nb_socket();
-    if (valAuthorization <= MAX_SOCKET)
+    if (valAuthorization <= MAX_ZEPHYR_SOCKET)
     {
         SOPC_ReturnStatus status = SOPC_STATUS_OK;
         int setOptStatus = 0;
@@ -444,7 +473,7 @@ SOPC_ReturnStatus SOPC_Socket_Accept(Socket listeningSock, bool setNonBlocking, 
     if (SOPC_INVALID_SOCKET != listeningSock && NULL != acceptedSock)
     {
         uint32_t valAuthorization = P_SOCKET_increment_nb_socket();
-        if (valAuthorization <= MAX_SOCKET)
+        if (valAuthorization <= MAX_ZEPHYR_SOCKET)
         {
             *acceptedSock = zsock_accept(listeningSock, &remoteAddr, &addrLen);
             if (SOPC_INVALID_SOCKET != *acceptedSock)
@@ -461,7 +490,7 @@ SOPC_ReturnStatus SOPC_Socket_Accept(Socket listeningSock, bool setNonBlocking, 
             do
             {
                 valAuthorization = P_SOCKET_increment_nb_socket();
-                if ((MAX_SOCKET + 2) >= valAuthorization)
+                if ((MAX_ZEPHYR_SOCKET + 2) >= valAuthorization)
                 {
                     *acceptedSock = zsock_accept(listeningSock, &remoteAddr, &addrLen);
                     if (*acceptedSock >= 0)
@@ -480,7 +509,7 @@ SOPC_ReturnStatus SOPC_Socket_Accept(Socket listeningSock, bool setNonBlocking, 
                     k_yield();
                 }
 
-            } while (valAuthorization > (MAX_SOCKET + 2));
+            } while (valAuthorization > (MAX_ZEPHYR_SOCKET + 2));
 
             P_SOCKET_decrement_nb_socket();
 #if P_SOCKET_DEBUG == 1
@@ -854,7 +883,7 @@ SOPC_ReturnStatus P_SOCKET_MCAST_join_mcast_group(int sock, struct in_addr* add)
     // Search for already registered socket
     if (bIsFound)
     {
-        for (int j = 0; j < MAX_SOCKET; j++)
+        for (int j = 0; j < MAX_ZEPHYR_SOCKET; j++)
         {
             if ((tabMCast[indexMacast].sock[j] == sock) && (tabMCast[indexMacast].sock[j] != SOPC_INVALID_SOCKET))
             {
@@ -868,7 +897,7 @@ SOPC_ReturnStatus P_SOCKET_MCAST_join_mcast_group(int sock, struct in_addr* add)
     // If socket not found, add it
     if (!bSockIsFound)
     {
-        for (int j = 0; j < MAX_SOCKET; j++)
+        for (int j = 0; j < MAX_ZEPHYR_SOCKET; j++)
         {
             if (tabMCast[indexMacast].sock[j] == SOPC_INVALID_SOCKET)
             {
@@ -980,7 +1009,7 @@ bool P_SOCKET_MCAST_soft_filter(int sock, struct in_addr* add)
     // Search sock
     if (bIsFound)
     {
-        for (int j = 0; j < MAX_SOCKET; j++)
+        for (int j = 0; j < MAX_ZEPHYR_SOCKET; j++)
         {
             if ((tabMCast[indexMacast].sock[j] == sock) && (tabMCast[indexMacast].sock[j] != SOPC_INVALID_SOCKET))
             {
@@ -1044,7 +1073,7 @@ SOPC_ReturnStatus P_SOCKET_MCAST_leave_mcast_group(int sock, struct in_addr* add
     // Search sock
     if (bIsFound)
     {
-        for (int j = 0; j < MAX_SOCKET; j++)
+        for (int j = 0; j < MAX_ZEPHYR_SOCKET; j++)
         {
             if ((tabMCast[indexMacast].sock[j] == sock) && (tabMCast[indexMacast].sock[j] != SOPC_INVALID_SOCKET))
             {
@@ -1062,7 +1091,7 @@ SOPC_ReturnStatus P_SOCKET_MCAST_leave_mcast_group(int sock, struct in_addr* add
         tabMCast[indexMacast].sock[indexMasock] = SOPC_INVALID_SOCKET;
         bSockIsFound = false;
 
-        for (int j = 0; j < MAX_SOCKET; j++)
+        for (int j = 0; j < MAX_ZEPHYR_SOCKET; j++)
         {
             if (tabMCast[indexMacast].sock[j] != SOPC_INVALID_SOCKET)
             {
@@ -1152,7 +1181,7 @@ void P_SOCKET_MCAST_remove_sock_from_mcast(int sock)
     // Remove socket from mcast and remove mcast if necessary
     for (int i = 0; i < MAX_MCAST; i++)
     {
-        for (int j = 0; j < MAX_SOCKET; j++)
+        for (int j = 0; j < MAX_ZEPHYR_SOCKET; j++)
         {
             (void) P_SOCKET_MCAST_leave_mcast_group(sock, &tabMCast[i].addr);
         }
@@ -1233,7 +1262,7 @@ SOPC_ReturnStatus P_SOCKET_MCAST_add_sock_to_mcast(int sock, struct in_addr* add
                 tabMCast[i].addr.s_addr = add->s_addr;
                 tabMCast[i].bIsJoined = false;
 
-                for (int j = 0; j < MAX_SOCKET; j++)
+                for (int j = 0; j < MAX_ZEPHYR_SOCKET; j++)
                 {
                     tabMCast[i].sock[j] = SOPC_INVALID_SOCKET;
                 }
@@ -1251,7 +1280,7 @@ SOPC_ReturnStatus P_SOCKET_MCAST_add_sock_to_mcast(int sock, struct in_addr* add
         printk("\r\nP_SOCKET_UDP: add_sock_to_mcast / mcast already registered \r\n");
 #endif
         // Search if already registered
-        for (int j = 0; j < MAX_SOCKET; j++)
+        for (int j = 0; j < MAX_ZEPHYR_SOCKET; j++)
         {
             if (tabMCast[indexMacast].sock[j] == sock)
             {
@@ -1266,7 +1295,7 @@ SOPC_ReturnStatus P_SOCKET_MCAST_add_sock_to_mcast(int sock, struct in_addr* add
 
         if (!bSockIsFound)
         {
-            for (int j = 0; j < MAX_SOCKET; j++)
+            for (int j = 0; j < MAX_ZEPHYR_SOCKET; j++)
             {
                 if (tabMCast[indexMacast].sock[j] == SOPC_INVALID_SOCKET)
                 {

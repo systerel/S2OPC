@@ -20,73 +20,44 @@
 #ifndef SOPC_P_SOCKETS_HEADER_
 #define SOPC_P_SOCKETS_HEADER_
 
-#include <errno.h>
-#include <inttypes.h>
-#include <kernel.h>
-#include <limits.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
 
-#ifndef __INT32_MAX__
-#include <toolchain/xcc_missing_defs.h>
-#endif
-
-#ifndef NULL
-#define NULL ((void*) 0)
-#endif
-
-#include <fcntl.h>
-#include <kernel.h>
 #include <net/socket.h>
+
+#include "sopc_enums.h"
 
 #define SOPC_INVALID_SOCKET (-1)
 
-#ifdef CONFIG_NET_SOCKETS_POLL_MAX
-#define MAX_PENDING_CONNECTION CONFIG_NET_SOCKETS_POLL_MAX
-#else
-#define MAX_PENDING_CONNECTION 4
-#endif
+/* Socket definition */
 
-#ifdef CONFIG_NET_MAX_CONN
-#define MAX_SOCKET (CONFIG_NET_MAX_CONN - 2)
-#else
-#define MAX_SOCKET 4
-#endif
-
-#ifndef CONFIG_NET_IF_MCAST_IPV4_ADDR_COUNT
-#define CONFIG_NET_IF_MCAST_IPV4_ADDR_COUNT 16
-#endif
-
-#define MAX_MCAST CONFIG_NET_IF_MCAST_IPV4_ADDR_COUNT
-
-/**
- *  \brief Socket base type
- */
 typedef int Socket;
 
-/**
- *  \brief Socket addressing information for listening or connecting operation type
- */
+/* Addr info redefinition */
+
 typedef struct zsock_addrinfo SOPC_Socket_AddressInfo;
 
-/**
- *  \brief Set of sockets type
- */
+/* Socket set definition*/
+
 typedef struct
 {
     int32_t fdmax;    /**< max of the set */
     zsock_fd_set set; /**< set */
 } SOPC_SocketSet;
 
+/* Network initialized verification */
+
 bool P_SOCKET_NETWORK_IsInitialized(void);
+
+/* Multicast platform dep functions used by platform dep pub sub UDP */
 
 SOPC_ReturnStatus P_SOCKET_MCAST_add_sock_to_mcast(int sock, struct in_addr* add);
 SOPC_ReturnStatus P_SOCKET_MCAST_join_mcast_group(int sock, struct in_addr* add);
 SOPC_ReturnStatus P_SOCKET_MCAST_leave_mcast_group(int sock, struct in_addr* add);
 bool P_SOCKET_MCAST_soft_filter(int sock, struct in_addr* add);
 void P_SOCKET_MCAST_remove_sock_from_mcast(int sock);
+
+/* Verify current number of allocated socket. Shall not > MAX_SOCKET */
 
 uint32_t P_SOCKET_increment_nb_socket(void);
 uint32_t P_SOCKET_decrement_nb_socket(void);
