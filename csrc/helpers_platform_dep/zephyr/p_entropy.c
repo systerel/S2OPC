@@ -34,13 +34,13 @@
 #include <toolchain/xcc_missing_defs.h>
 #endif
 
-#include <fcntl.h>
-#include <kernel.h>
-#include <net/net_ip.h>
-#include <net/socket.h>
 #ifndef NULL
 #define NULL ((void*) 0)
 #endif
+
+#include <fcntl.h>
+#include <net/net_ip.h>
+#include <net/socket.h>
 
 #if defined(CONFIG_MBEDTLS)
 #if !defined(CONFIG_MBEDTLS_CFG_FILE)
