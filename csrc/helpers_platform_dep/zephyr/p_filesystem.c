@@ -19,8 +19,6 @@
 
 #include "sopc_filesystem.h"
 
-#include <errno.h>
-
 SOPC_FileSystem_CreationResult SOPC_FileSystem_mkdir(const char* directoryPath)
 {
     return SOPC_FileSystem_Creation_OK;
