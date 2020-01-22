@@ -22,8 +22,6 @@
 
 #include <stdint.h>
 
-#include "sopc_enums.h"
-
 /*****Private synchro api*****/
 
 #define MAX_COND_VAR_WAITERS (8)

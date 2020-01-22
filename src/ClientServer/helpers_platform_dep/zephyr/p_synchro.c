@@ -17,6 +17,8 @@
  * under the License.
  */
 
+/* Zephyr includes */
+
 #include <errno.h>
 #include <inttypes.h>
 #include <kernel.h>
@@ -25,17 +27,11 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/printk.h>
 
 #ifndef __INT32_MAX__
 #include <toolchain/xcc_missing_defs.h>
 #endif
-
-#include "sopc_enums.h" /* s2opc includes */
-
-#include "p_synchro.h"
-
-#define P_SYNCHRO_CONDITION_DEBUG (0)
-#define P_SYNCHRO_MUTEX_DEBUG (0)
 
 #ifndef NULL
 #define NULL ((void*) 0)
@@ -46,6 +42,21 @@
 #ifndef K_NO_WAIT
 #define K_NO_WAIT 0
 #endif
+
+/* s2opc includes */
+
+#include "sopc_enums.h"
+
+/* platform dep includes */
+
+#include "p_synchro.h"
+
+/* debug printk activation */
+
+#define P_SYNCHRO_CONDITION_DEBUG (0)
+#define P_SYNCHRO_MUTEX_DEBUG (0)
+
+/* Flag bit used into status uint32 value to indicates that quit request is on going */
 
 #define MASK_SET_QUIT_FLAG (0x80000000)
 
