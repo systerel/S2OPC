@@ -17,15 +17,6 @@
  * under the License.
  */
 
-#include <errno.h>
-#include <inttypes.h>
-#include <kernel.h>
-#include <limits.h>
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-
 #include "sopc_atomic.h"
 
 int32_t SOPC_Atomic_Int_Get(int32_t* atomic)
