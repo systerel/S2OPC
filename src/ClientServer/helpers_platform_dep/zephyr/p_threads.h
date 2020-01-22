@@ -28,7 +28,7 @@
 
 /*****Private threads api*****/
 
-#define MAX_NB_THREADS (8)
+#define MAX_NB_THREADS (16)
 #define MAX_STACK_SIZE (4096)
 #define SOPC_THREAD_PRIORITY (5)
 
