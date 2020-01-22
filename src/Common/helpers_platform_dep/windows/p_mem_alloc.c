@@ -25,6 +25,8 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/printk.h>
+#include <unistd.h>
 
 #ifndef __INT32_MAX__
 #include <toolchain/xcc_missing_defs.h>
