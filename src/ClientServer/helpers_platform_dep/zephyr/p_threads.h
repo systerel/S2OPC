@@ -20,10 +20,6 @@
 #ifndef SOPC_P_THREADS_H_
 #define SOPC_P_THREADS_H_
 
-#include <stdint.h>
-
-#include "sopc_enums.h"
-
 #include "p_synchro.h"
 
 /*****Private threads api*****/

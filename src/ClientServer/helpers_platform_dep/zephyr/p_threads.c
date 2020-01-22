@@ -25,17 +25,12 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/printk.h>
 
 #ifndef __INT32_MAX__
 #include <toolchain/xcc_missing_defs.h>
 #endif
 
-#include "sopc_enums.h" /* s2opc includes */
-#include "sopc_mem_alloc.h"
-
-#include "p_threads.h"
-
-#define P_THREAD_DEBUG (0)
 #ifndef NULL
 #define NULL ((void*) 0)
 #endif
@@ -45,6 +40,17 @@
 #ifndef K_NO_WAIT
 #define K_NO_WAIT 0
 #endif
+
+/* s2opc includes */
+
+#include "sopc_enums.h"
+#include "sopc_mem_alloc.h"
+
+/* platform dep includes */
+
+#include "p_threads.h"
+
+#define P_THREAD_DEBUG (0)
 
 // *** Private enumeration definition ***
 
