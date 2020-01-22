@@ -3230,9 +3230,12 @@ void SOPC_ExtensionObject_Clear(SOPC_ExtensionObject* extObj)
             SOPC_XmlElement_Clear(&extObj->Body.Xml);
             break;
         case SOPC_ExtObjBodyEncoding_Object:
-            extObj->Body.Object.ObjType->Clear(extObj->Body.Object.Value);
-            SOPC_Free(extObj->Body.Object.Value);
-            extObj->Body.Object.Value = NULL;
+            if (NULL != extObj->Body.Object.Value)
+            {
+                extObj->Body.Object.ObjType->Clear(extObj->Body.Object.Value);
+                SOPC_Free(extObj->Body.Object.Value);
+                extObj->Body.Object.Value = NULL;
+            }
             break;
         default:
             assert(false);
