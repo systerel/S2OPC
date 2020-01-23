@@ -56,7 +56,7 @@
 
 #define P_ENTROPY_DEBUG (0)
 
-int32_t mbedtls_hardware_poll(void* data, unsigned char* output, int32_t len, int32_t* olen)
+int32_t mbedtls_hardware_poll(void* data, uint8_t* output, int32_t len, int32_t* olen)
 {
 #if P_ENTROPY_DEBUG == 1
     printk("\r\n mbedtls_hardware_poll - %d - \r\n", len);
@@ -66,7 +66,7 @@ int32_t mbedtls_hardware_poll(void* data, unsigned char* output, int32_t len, in
     static struct device* dev;
     int err;
 
-    if ((output == NULL) || (olen == 0))
+    if ((NULL == output) || (NULL == olen) || (0 == len))
     {
         return -1;
     }
