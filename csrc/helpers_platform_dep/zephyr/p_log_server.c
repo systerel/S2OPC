@@ -201,7 +201,7 @@ static inline void P_LOGSRV_destroy_server_socket(tLogServer* pLogSrv)
         // Mark socket as invalid
         pLogSrv->sockLogServer = SOPC_INVALID_SOCKET;
         // Indicate to others applications one more free socket
-        P_SOCKET_decrement_nb_socket();
+        P_SOCKET_decrement_nb_sockets();
     }
 }
 
@@ -219,7 +219,7 @@ static inline void P_LOGSRV_close_client_connection(tLogServer* pLogSrv, uint32_
         // Mark socket as invalid
         pLogSrv->socketLogClt[indexClient] = SOPC_INVALID_SOCKET;
         // Indicate to others applications one more free socket
-        P_SOCKET_decrement_nb_socket();
+        P_SOCKET_decrement_nb_sockets();
     }
 }
 
@@ -229,11 +229,11 @@ static inline int32_t P_LOGSRV_create_server_socket(tLogServer* pLogSrv)
 {
     int32_t socketResult = 0;
     // Indicates to others application that one socket is needed
-    uint32_t valueNbSocket = P_SOCKET_increment_nb_socket();
+    uint32_t valueNbSocket = P_SOCKET_increment_nb_sockets();
     // If result is beyond limit, return error
     if (valueNbSocket > MAX_LOG_SRV_CLIENTS_SOCKET)
     {
-        P_SOCKET_decrement_nb_socket();
+        P_SOCKET_decrement_nb_sockets();
         socketResult = -1;
     }
 
@@ -275,7 +275,7 @@ static inline int32_t P_LOGSRV_create_server_socket(tLogServer* pLogSrv)
         else
         {
             //  Indicate to others applications one more free socket
-            P_SOCKET_decrement_nb_socket();
+            P_SOCKET_decrement_nb_sockets();
             socketResult = -1;
         }
     }
@@ -321,7 +321,7 @@ static inline int32_t P_LOGSRV_create_server_socket(tLogServer* pLogSrv)
 static inline uint32_t P_LOGSRV_accept_client_connection(tLogServer* pLogSrv)
 {
     int32_t socketResult = 0;
-    uint32_t valueNbSockets = P_SOCKET_increment_nb_socket();
+    uint32_t valueNbSockets = P_SOCKET_increment_nb_sockets();
 
     if (valueNbSockets > MAX_LOG_SRV_CLIENTS_SOCKET) // If limit is reached, accept and destroy
     {
@@ -336,7 +336,7 @@ static inline uint32_t P_LOGSRV_accept_client_connection(tLogServer* pLogSrv)
         {
             // Beyond MAX_SOCKET, only MAX_SOCKET + 1 can be accepted.
             // If beyond, yield then retry
-            valueNbSockets = P_SOCKET_increment_nb_socket();
+            valueNbSockets = P_SOCKET_increment_nb_sockets();
             if ((MAX_LOG_SRV_CLIENTS_SOCKET + 2) >= valueNbSockets)
             {
                 memset(&sin, 0, sizeof(struct sockaddr_in));
@@ -350,21 +350,21 @@ static inline uint32_t P_LOGSRV_accept_client_connection(tLogServer* pLogSrv)
                     zsock_close(newSocket);
                     newSocket = -1;
                 }
-                P_SOCKET_decrement_nb_socket();
+                P_SOCKET_decrement_nb_sockets();
             }
             else
             {
 #if P_LOGSRV_DEBUG == 1
                 printk("\r\nAccept to close can't be performed !!! Yield !!!\r\n");
 #endif
-                P_SOCKET_decrement_nb_socket();
+                P_SOCKET_decrement_nb_sockets();
                 k_yield();
             }
             // While some process are processing this function
         } while (valueNbSockets > (MAX_LOG_SRV_CLIENTS_SOCKET + 2));
 
         // Indicates one more free socket
-        P_SOCKET_decrement_nb_socket();
+        P_SOCKET_decrement_nb_sockets();
 
         socketResult = -1;
     }
@@ -404,7 +404,7 @@ static inline uint32_t P_LOGSRV_accept_client_connection(tLogServer* pLogSrv)
             printk("\r\nP_LOG_SRV: Log server accept error !!!\r\n");
 #endif
             // Indicate that system socket not used
-            P_SOCKET_decrement_nb_socket();
+            P_SOCKET_decrement_nb_sockets();
             socketResult = -1;
         }
         else
@@ -439,7 +439,7 @@ static inline uint32_t P_LOGSRV_accept_client_connection(tLogServer* pLogSrv)
                 newSocket = -1;
 
                 // Indicate that system socket not used
-                P_SOCKET_decrement_nb_socket();
+                P_SOCKET_decrement_nb_sockets();
                 socketResult = -1;
             }
             else
