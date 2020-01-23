@@ -62,6 +62,43 @@ SOPC_SecureChannel_Config scConfig;
 SOPC_Endpoint_Config epConfig;
 SOPC_S2OPC_Config output_s2opcConfig;
 
+
+/* static functions declarations */
+static SOPC_ReturnStatus InitToolkit(void);
+
+
+/* definitions */
+
+static SOPC_ReturnStatus InitToolkit(void)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_Toolkit_Initialize(Fuzz_Event_Fct);
+        if (SOPC_STATUS_OK == status)
+        {
+            log_debug(">>FUZZ_server: initialized\n");
+        }
+        else
+        {
+            log_debug(">>FUZZ_server: Failed initializing\n");
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ToolkitConfig_SetCircularLogPath("/tmp/mylogs/", true);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ToolkitConfig_SetLogLevel(SOPC_LOG_LEVEL);
+    }
+
+    return status;
+}
+
 void Fuzz_Event_Fct(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, uintptr_t appContext)
 {
     /* avoid unused parameter compiler warning */
@@ -150,35 +187,19 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
     /* one time initialization */
     if (!init)
     {
+        status = InitToolkit();
+        assert(SOPC_STATUS_OK == status);
         status = Setup_serv();
-        if (SOPC_STATUS_NOK == status)
-        {
-            assert(false && ">>FUZZ_main: Failed to setup the server\n");
-        }
-        if (SOPC_STATUS_OK == status)
-        {
-            status = Setup_client();
-        }
-        if (SOPC_STATUS_NOK == status)
-        {
-            assert(false && ">>FUZZ_main: Failed to setup the client\n");
-        }
-        if (SOPC_STATUS_OK == status)
-        {
-            status = AddSecureChannelconfig_client();
-        }
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_Toolkit_Configured();
-        }
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_EpConfig_serv();
-        }
-        if (SOPC_STATUS_OK == status)
-        {
-            init = true;
-        }
+        assert(SOPC_STATUS_OK == status);
+        status = Setup_client();
+        assert(SOPC_STATUS_OK == status);
+        status = AddSecureChannelconfig_client();
+        assert(SOPC_STATUS_OK == status);
+        status = SOPC_Toolkit_Configured();
+        assert(SOPC_STATUS_OK == status);
+        status = SOPC_EpConfig_serv();
+        assert(SOPC_STATUS_OK == status);
+        init = true;
     }
 
     /* create a client, send a request and free the client */

@@ -206,30 +206,6 @@ SOPC_ReturnStatus Setup_serv(void)
     /* config the endpoint config */
     status = GenEndpoingConfig();
 
-    // Init stack configuration
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_Toolkit_Initialize(Fuzz_Event_Fct);
-        if (SOPC_STATUS_OK == status)
-        {
-            log_debug(">>FUZZ_server: initialized\n");
-        }
-        else
-        {
-            log_debug(">>FUZZ_server: Failed initializing\n");
-        }
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_ToolkitConfig_SetCircularLogPath("/tmp/mylogs/", true);
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_ToolkitConfig_SetLogLevel(SOPC_LOG_LEVEL);
-    }
-
     // Define server address space
     if (SOPC_STATUS_OK == status)
     {
