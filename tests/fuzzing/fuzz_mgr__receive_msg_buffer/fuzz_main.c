@@ -190,6 +190,9 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
     /* create a client, send a request and free the client */
     if (true == init && SOPC_STATUS_OK == status)
     {
+        // reset sendFailures
+        SOPC_Atomic_Int_Set(&sendFailures, 0);
+
         status = Run_client(buf, len);
 
         if (SOPC_STATUS_OK != status)
