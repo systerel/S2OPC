@@ -190,12 +190,7 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
     /* create a client, send a request and free the client */
     if (true == init && SOPC_STATUS_OK == status)
     {
-        char* buf_copy = SOPC_Calloc(1 + len, sizeof(char));
-        assert(buf_copy != NULL);
-
-        memcpy(buf_copy, buf, len);
-
-        status = Run_client(buf_copy, len);
+        status = Run_client(buf, len);
 
         if (SOPC_STATUS_OK != status)
         {
@@ -207,7 +202,6 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
         }
 
         Teardown_client();
-        SOPC_Free(buf_copy);
     }
     else
     {

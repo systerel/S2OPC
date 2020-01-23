@@ -230,21 +230,18 @@ static SOPC_ReturnStatus ActivateSessionWait_client()
     return (status);
 }
 
-OpcUa_WriteRequest* newWriteRequest_client(const char* buff, size_t len)
+OpcUa_WriteRequest* newWriteRequest_client(const uint8_t* buff, size_t len)
 {
     OpcUa_WriteValue* lwv = NULL;
     SOPC_ByteString buf;
     SOPC_ByteString_Initialize(&buf);
 
     buf.Length = (int32_t) len;
-    buf.Data = SOPC_Malloc(len + 1);
-    lwv = SOPC_Malloc(sizeof(OpcUa_WriteValue));
-    if (NULL == buf.Data)
-    {
-        exit(1);
-    }
+    buf.Data = (SOPC_Byte*) buff;
+    buf.DoNotClear = true;
 
-    memcpy((void*) (buf.Data), buff, len + 1);
+    lwv = SOPC_Malloc(sizeof(OpcUa_WriteValue));
+    assert(NULL != buf.Data);
 
     lwv[0] = (OpcUa_WriteValue){.encodeableType = &OpcUa_WriteValue_EncodeableType,
                                 .NodeId = {.IdentifierType = SOPC_IdentifierType_String,
@@ -261,14 +258,11 @@ OpcUa_WriteRequest* newWriteRequest_client(const char* buff, size_t len)
 
     OpcUa_WriteRequest* pReq = DESIGNATE_NEW(OpcUa_WriteRequest, .encodeableType = &OpcUa_WriteRequest_EncodeableType,
                                              .NoOfNodesToWrite = (int32_t) 1, .NodesToWrite = lwv);
-    if (NULL == pReq)
-    {
-        exit(1);
-    }
+    assert(NULL != pReq);
     return (pReq);
 }
 
-SOPC_ReturnStatus Run_client(char* buff, size_t len)
+SOPC_ReturnStatus Run_client(const uint8_t* buff, size_t len)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 

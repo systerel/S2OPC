@@ -27,11 +27,11 @@
 
 // Prototypage
 SOPC_ReturnStatus Wait_response_client();
-OpcUa_WriteRequest* newWriteRequest_client(const char* buff, size_t len);
+OpcUa_WriteRequest* newWriteRequest_client(const uint8_t* buff, size_t len);
 SOPC_ReturnStatus AddSecureChannelconfig_client();
 
 SOPC_ReturnStatus Setup_client();
-SOPC_ReturnStatus Run_client(char* buff, size_t len);
+SOPC_ReturnStatus Run_client(const uint8_t* buff, size_t len);
 SOPC_ReturnStatus Teardown_client();
 
 extern OpcUa_WriteRequest* pWriteReq;
