@@ -142,12 +142,6 @@ void Fuzz_Event_Fct(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, 
 
 int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
 {
-    /*  Install signal handler to close the server gracefully when
-     * server needs to stop from a signal
-     */
-    signal(SIGINT, StopSignal_serv);
-    signal(SIGTERM, StopSignal_serv);
-
     /* Used to initialize the server on the first iteration only */
     static bool init = false;
 

@@ -56,26 +56,11 @@ static SOPC_ReturnStatus CerAndKeyLoader_serv();
 // These variables are global to be accessible from StopSignal_serv
 SOPC_AddressSpace* address_space = NULL;
 t_CerKey ck_serv;
-volatile sig_atomic_t stopServer = 0;
 uint32_t epConfigIdx = 0;
 
 // Secu policy configuration:
 SOPC_UserAuthentication_Manager* authenticationManager = NULL;
 SOPC_UserAuthorization_Manager* authorizationManager = NULL;
-
-void StopSignal_serv(int sig)
-{
-    /* avoid unused parameter compiler warning */
-    (void) sig;
-
-    while (stopServer == 0)
-    {
-        Teardown_client();
-        Teardown_serv();
-        stopServer = 1;
-    }
-    exit(1);
-}
 
 static SOPC_ReturnStatus CerAndKeyLoader_serv()
 {
@@ -300,54 +285,5 @@ SOPC_ReturnStatus SOPC_EpConfig_serv()
         log_debug("<<FUZZ_server: Failed to configure the endpoint\n");
     }
     SOPC_ToolkitServer_AsyncOpenEndpoint(epConfigIdx);
-    return (status);
-}
-
-SOPC_ReturnStatus Teardown_serv()
-{
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    // Sleep timeout in milliseconds
-    const uint32_t sleepTimeout = 400;
-    // Loop timeout in milliseconds
-    const uint32_t loopTimeout = 3000;
-    // Counter to stop waiting on timeout
-    uint32_t loopCpt = 0;
-
-    SOPC_ToolkitServer_AsyncCloseEndpoint(epConfigIdx);
-    epConfigIdx = 0;
-
-    /* Wait until ep is closed or timeout */
-    while (SOPC_Atomic_Int_Get(&scState) != SESSION_CONN_CLOSED && loopCpt * sleepTimeout <= loopTimeout)
-    {
-        loopCpt++;
-        // Retrieve received messages on socket
-        SOPC_Sleep(sleepTimeout);
-    }
-    if (loopCpt * sleepTimeout > loopTimeout)
-    {
-        status = SOPC_STATUS_TIMEOUT;
-    }
-
-    // Clear the toolkit configuration and stop toolkit threads
-
-    // Deallocate locally allocated data
-    SOPC_AddressSpace_Delete(address_space);
-    address_space = NULL;
-    if (true == secuActive)
-    {
-        SOPC_KeyManager_SerializedCertificate_Delete(ck_serv.Certificate);
-        SOPC_KeyManager_SerializedAsymmetricKey_Delete(ck_serv.Key);
-        SOPC_KeyManager_SerializedCertificate_Delete(ck_serv.authCertificate);
-        SOPC_PKIProvider_Free(&(ck_serv).pkiProvider);
-    }
-
-    SOPC_UserAuthentication_FreeManager(&authenticationManager);
-    SOPC_UserAuthorization_FreeManager(&authorizationManager);
-    authenticationManager = NULL;
-    authorizationManager = NULL;
-
-    SOPC_S2OPC_Config_Clear(&output_s2opcConfig);
-    SOPC_Toolkit_Clear();
-    log_debug("-------------All cleared-------------\n");
     return (status);
 }

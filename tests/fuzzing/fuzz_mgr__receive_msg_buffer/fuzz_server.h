@@ -26,10 +26,8 @@
 
 #include "fuzz_main.h"
 
-// def! setup and teardown
+// def! setup
 SOPC_ReturnStatus Setup_serv(void);    // Server initialization
-void StopSignal_serv(int sig);         // Catch the sigint and call Teardown_serv function
-SOPC_ReturnStatus Teardown_serv(void); // Free memory
 // !endef
 
 typedef enum
@@ -37,10 +35,8 @@ typedef enum
     AS_LOADER_EMBEDDED,
 } AddressSpaceLoader;
 
-// These variables are global to be accessible from StopSignal_serv
 extern SOPC_AddressSpace* address_space;
 extern t_CerKey ck_serv;
-extern volatile sig_atomic_t stopServer;
 extern uint32_t epConfigIdx;
 extern SOPC_UserAuthentication_Manager* authenticationManager;
 extern SOPC_UserAuthorization_Manager* authorizationManager;
