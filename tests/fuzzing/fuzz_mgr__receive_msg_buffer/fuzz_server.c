@@ -203,12 +203,6 @@ SOPC_ReturnStatus Setup_serv(void)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
-    // Log Toolkit Configuration Build Info
-    log_debug("toolkitVersion: %s\n", SOPC_ToolkitConfig_GetBuildInfo().toolkitVersion);
-    log_debug("toolkitSrcCommit: %s\n", SOPC_ToolkitConfig_GetBuildInfo().toolkitSrcCommit);
-    log_debug("toolkitDockerId: %s\n", SOPC_ToolkitConfig_GetBuildInfo().toolkitDockerId);
-    log_debug("toolkitBuildDate: %s\n", SOPC_ToolkitConfig_GetBuildInfo().toolkitBuildDate);
-
     /* config the endpoint config */
     status = GenEndpoingConfig();
 
