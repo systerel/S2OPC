@@ -26,10 +26,6 @@
 
 #include "fuzz_main.h"
 
-#define ENDPOINT_URL "opc.tcp://localhost:4841"
-#define APPLICATION_URI "urn:S2OPC:localhost"
-#define PRODUCT_URI "urn:S2OPC:localhost"
-
 // def! setup and teardown
 SOPC_ReturnStatus Setup_serv(void);    // Server initialization
 void StopSignal_serv(int sig);         // Catch the sigint and call Teardown_serv function
