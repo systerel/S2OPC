@@ -41,9 +41,6 @@
 #include "sopc_user_app_itf.h"
 #define SOPC_LOG_LEVEL SOPC_TOOLKIT_LOG_LEVEL_ERROR
 
-void Fuzz_Event_Fct(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, uintptr_t appContext);
-SOPC_ReturnStatus SOPC_EpConfig_serv();
-
 typedef struct s_Cerkey
 {
     SOPC_SerializedCertificate* Certificate;

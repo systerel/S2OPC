@@ -28,6 +28,8 @@
 
 // def! setup
 SOPC_ReturnStatus Setup_serv(void);    // Server initialization
+SOPC_ReturnStatus SOPC_EpConfig_serv();
+
 // !endef
 
 typedef enum

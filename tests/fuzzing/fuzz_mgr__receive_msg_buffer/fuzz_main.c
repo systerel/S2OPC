@@ -65,6 +65,7 @@ SOPC_S2OPC_Config output_s2opcConfig;
 
 /* static functions declarations */
 static SOPC_ReturnStatus InitToolkit(void);
+static void Fuzz_Event_Fct(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, uintptr_t appContext);
 
 
 /* definitions */
@@ -99,7 +100,7 @@ static SOPC_ReturnStatus InitToolkit(void)
     return status;
 }
 
-void Fuzz_Event_Fct(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, uintptr_t appContext)
+static void Fuzz_Event_Fct(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, uintptr_t appContext)
 {
     /* avoid unused parameter compiler warning */
     (void) idOrStatus;
