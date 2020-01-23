@@ -89,17 +89,11 @@ static SOPC_ReturnStatus CerAndKeyLoader_client()
 #endif
         if (SOPC_STATUS_OK != status)
         {
-            if (true == debug)
-            {
-                printf("<Test_Server_Toolkit: Failed loading certificates and key (check paths are valid)\n");
-            }
+            log_debug("<Test_Server_Toolkit: Failed loading certificates and key (check paths are valid)\n");
         }
         else
         {
-            if (true == debug)
-            {
-                printf("<Test_Server_Toolkit: Certificates and key loaded\n");
-            }
+            log_debug("<Test_Server_Toolkit: Certificates and key loaded\n");
         }
     }
     else
@@ -144,17 +138,11 @@ SOPC_ReturnStatus Setup_client()
     if (SOPC_STATUS_OK == status)
     {
         setScConfig_client(false);
-        if (true == debug)
-        {
-            printf(">>FUZZ_Client: Certificate, key and Sc configured successfully\n");
-        }
+        log_debug(">>FUZZ_Client: Certificate, key and Sc configured successfully\n");
     }
     else
     {
-        if (true == debug)
-        {
-            printf(">>FUZZ_Client: FAILED on configuring Certificate, key and Sc\n");
-        }
+        log_debug(">>FUZZ_Client: FAILED on configuring Certificate, key and Sc\n");
     }
 
     return (status);
@@ -167,17 +155,11 @@ SOPC_ReturnStatus AddSecureChannelconfig_client()
     channel_config_idx = SOPC_ToolkitClient_AddSecureChannelConfig(&scConfig);
     if (channel_config_idx != 0)
     {
-        if (true == debug)
-        {
-            printf(">>FUZZ_Client: Client configured\n");
-        }
+        log_debug(">>FUZZ_Client: Client configured\n");
     }
     else
     {
-        if (true == debug)
-        {
-            printf(">>FUZZ_Client: Failed to configure the secure channel connections\n");
-        }
+        log_debug(">>FUZZ_Client: Failed to configure the secure channel connections\n");
         status = SOPC_STATUS_NOK;
     }
     return (status);
@@ -238,17 +220,11 @@ static SOPC_ReturnStatus ActivateSessionWait_client()
 
     if (SOPC_Atomic_Int_Get(&scState) == SESSION_CONN_CONNECTED && SOPC_Atomic_Int_Get(&sendFailures) == 0)
     {
-        if (true == debug)
-        {
-            printf(">>FUZZ_Client: Sessions activated: OK'\n");
-        }
+        log_debug(">>FUZZ_Client: Sessions activated: OK'\n");
     }
     else
     {
-        if (true == debug)
-        {
-            printf(">>FUZZ_Client:: Sessions activated: NOK'\n");
-        }
+        log_debug(">>FUZZ_Client:: Sessions activated: NOK'\n");
         status = SOPC_STATUS_NOK;
     }
     return (status);
@@ -296,39 +272,24 @@ SOPC_ReturnStatus Run_client(char* buff, size_t len)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
-    if (true == debug)
-    {
-        printf(">>FUZZ_Client: Channel_config_idx :%d\n", channel_config_idx);
-    }
+    log_debug(">>FUZZ_Client: Channel_config_idx :%d\n", channel_config_idx);
     status = SOPC_ToolkitClient_AsyncActivateSession_Anonymous(channel_config_idx, 1, "anonymous");
     if (SOPC_STATUS_OK == status)
     {
-        if (true == debug)
-        {
-            printf(">>FUZZ_Client: SOPC_ToolkitClient_AsyncActivateSession_Anonymous request sent\n");
-        }
+        log_debug(">>FUZZ_Client: SOPC_ToolkitClient_AsyncActivateSession_Anonymous request sent\n");
         status = ActivateSessionWait_client();
-        if (true == debug)
-        {
-            printf(">>FUZZ_Client: Creating/Activating 1 sessions on 1 SC: OK\n");
-        }
+        log_debug(">>FUZZ_Client: Creating/Activating 1 sessions on 1 SC: OK\n");
     }
     else
     {
-        if (true == debug)
-        {
-            printf(">>FUZZ_Client: Failed to create/Activate session\n");
-        }
+        log_debug(">>FUZZ_Client: Failed to create/Activate session\n");
     }
     if (SOPC_STATUS_OK == status)
     {
         // Create WriteRequest to be sent (deallocated by toolkit)
         pWriteReq = newWriteRequest_client(buff, len);
 
-        if (true == debug)
-        {
-            printf(">>FUZZ_Client: write request sending\n");
-        }
+        log_debug(">>FUZZ_Client: write request sending\n");
         SOPC_ToolkitClient_AsyncSendRequestOnSession((uint32_t) SOPC_Atomic_Int_Get((int32_t*) &session), pWriteReq, 1);
     }
     if (SOPC_STATUS_OK == status)

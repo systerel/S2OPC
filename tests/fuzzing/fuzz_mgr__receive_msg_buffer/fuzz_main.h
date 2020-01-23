@@ -24,6 +24,14 @@
 #define APPLICATION_URI "urn:S2OPC:localhost"
 #define PRODUCT_URI "urn:S2OPC:localhost"
 
+#define DEBUG 0
+
+#if DEBUG > 0
+#define log_debug(...) (printf(__VA_ARGS__))
+#else
+#define log_debug(...)
+#endif
+
 #include <stdbool.h>
 
 #include "sopc_crypto_profiles.h"

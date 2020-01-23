@@ -71,12 +71,9 @@ void Fuzz_Event_Fct(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, 
     {
     /* Client application events */
     case SE_SESSION_ACTIVATION_FAILURE:
-        if (debug == true)
-        {
-            printf("SE_SESSION_ACTIVATION_FAILURE RECEIVED\n");
-            printf("appContext: %lu\n", appContext);
-            printf("sessionContext[appContext] = %lu\n", sessionContext[appContext]);
-        }
+        log_debug("SE_SESSION_ACTIVATION_FAILURE RECEIVED\n");
+        log_debug("appContext: %lu\n", appContext);
+        log_debug("sessionContext[appContext] = %lu\n", sessionContext[appContext]);
         if (0 != appContext && appContext == sessionContext[appContext])
         {
             SOPC_Atomic_Int_Set((SessionConnectedState*) &scState, (SessionConnectedState) SESSION_CONN_FAILED);
@@ -88,37 +85,22 @@ void Fuzz_Event_Fct(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, 
         break;
     case SE_ACTIVATED_SESSION:
         SOPC_Atomic_Int_Set((int32_t*) &session, (int32_t) idOrStatus);
-        if (debug == true)
-        {
-            printf("SE_ACTIVATED_SESSION RECEIVED\n");
-        }
-        if (true == debug)
-        {
-            printf(">>Fuzz_Server_event:: Session activated\n");
-        }
+        log_debug("SE_ACTIVATED_SESSION RECEIVED\n");
+        log_debug(">>Fuzz_Server_event:: Session activated\n");
         SOPC_Atomic_Int_Set((SessionConnectedState*) &scState, (SessionConnectedState) SESSION_CONN_CONNECTED);
         break;
     case SE_SESSION_REACTIVATING:
-        if (debug == true)
-        {
-            printf("SE_SESSION_REACTIVATING RECEIVED\n");
-        }
+        log_debug("SE_SESSION_REACTIVATING RECEIVED\n");
         break;
     case SE_RCV_SESSION_RESPONSE:
-        if (debug == true)
-        {
-            printf("SE_RCV_SESSION_RESPONSE RECEIVED\n");
-        }
+        log_debug("SE_RCV_SESSION_RESPONSE RECEIVED\n");
         if (NULL != param)
         {
             SOPC_EncodeableType* encType = *(SOPC_EncodeableType**) param;
 
             if (encType == &OpcUa_WriteResponse_EncodeableType)
             {
-                if (true == debug)
-                {
-                    printf(">>FUZZ_Client: received ReadResponse \n");
-                }
+                log_debug(">>FUZZ_Client: received ReadResponse \n");
                 SOPC_Atomic_Int_Set((SessionConnectedState*) &scState,
                                     (SessionConnectedState) SESSION_CONN_MSG_RECEIVED);
                 OpcUa_WriteResponse* writeResp = (OpcUa_WriteResponse*) param;
@@ -126,55 +108,34 @@ void Fuzz_Event_Fct(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, 
             }
             else
             {
-                if (debug == true)
-                {
-                    printf(">>FUZZ_Client: received ReadResponse Wrong context\n");
-                }
+                log_debug(">>FUZZ_Client: received ReadResponse Wrong context\n");
             }
         }
         break;
     case SE_CLOSED_SESSION:
-        if (debug == true)
-        {
-            printf("SE_CLOSED_SESSION RECEIVED\n");
-        }
+        log_debug("SE_CLOSED_SESSION RECEIVED\n");
         break;
 
     case SE_RCV_DISCOVERY_RESPONSE:
-        if (debug == true)
-        {
-            printf("SE_RCV_DISCOVERY_RESPONSE RECEIVED\n");
-        }
+        log_debug("SE_RCV_DISCOVERY_RESPONSE RECEIVED\n");
         break;
 
     case SE_SND_REQUEST_FAILED:
-        if (debug == true)
-        {
-            printf("SE_SND_REQUEST_FAILED RECEIVED\n");
-        }
+        log_debug("SE_SND_REQUEST_FAILED RECEIVED\n");
         SOPC_Atomic_Int_Add(&sendFailures, 1);
         break;
 
     /* Server application events */
     case SE_CLOSED_ENDPOINT:
-        if (true == debug)
-        {
-            printf(">>FUZZ_server: closed endpoint event: OK\n");
-        }
+        log_debug(">>FUZZ_server: closed endpoint event: OK\n");
         SOPC_Atomic_Int_Set(&scState, SESSION_CONN_CLOSED);
         break;
 
     case SE_LOCAL_SERVICE_RESPONSE:
-        if (true == debug)
-        {
-            printf("SE_LOCAL_SERVICE_RESPONSE RECEIVED\n");
-        }
+        log_debug("SE_LOCAL_SERVICE_RESPONSE RECEIVED\n");
         break;
     default:
-        if (true == debug)
-        {
-            printf(">>FUZZ_server: unexpected endpoint event %d : NOK\n", event);
-        }
+        log_debug(">>FUZZ_server: unexpected endpoint event %d : NOK\n", event);
         break;
     }
 }
@@ -238,17 +199,11 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
 
         if (SOPC_STATUS_OK != status)
         {
-            if (true == debug)
-            {
-                printf(">>FUZZ_main: run_client Failed\n");
-            }
+            log_debug(">>FUZZ_main: run_client Failed\n");
         }
         else
         {
-            if (true == debug)
-            {
-                printf(">>FUZZ_main: run_client SUCCESS\n");
-            }
+            log_debug(">>FUZZ_main: run_client SUCCESS\n");
         }
 
         Teardown_client();
@@ -256,10 +211,7 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
     }
     else
     {
-        if (true == debug)
-        {
-            printf("Configuration failed\n");
-        }
+        log_debug("Configuration failed\n");
         return (0);
     }
     return (1);

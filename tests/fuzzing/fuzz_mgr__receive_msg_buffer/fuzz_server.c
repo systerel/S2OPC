@@ -100,10 +100,7 @@ static SOPC_ReturnStatus CerAndKeyLoader_serv()
                 SOPC_KeyManager_SerializedCertificate_CreateFromDER(cacert, sizeof(cacert), &(ck_serv).authCertificate);
         }
 #else
-        if (true == debug)
-        {
-            printf("<<FUZZ: Must compile with: 'WITH_STATIC_SECURITY_DATA'\n");
-        }
+        printf("<<FUZZ: Must compile with: 'WITH_STATIC_SECURITY_DATA'\n");
 #endif
 
         if (SOPC_STATUS_OK == status)
@@ -113,17 +110,11 @@ static SOPC_ReturnStatus CerAndKeyLoader_serv()
         }
         if (SOPC_STATUS_OK == status)
         {
-            if (true == debug)
-            {
-                printf(">>FUZZ_server: Certificates and key loaded\n");
-            }
+            log_debug(">>FUZZ_server: Certificates and key loaded\n");
         }
         else
         {
-            if (true == debug)
-            {
-                printf(">>FUZZ_server: Failed loading certificates and key (check paths are valid)\n");
-            }
+            log_debug(">>FUZZ_server: Failed loading certificates and key (check paths are valid)\n");
         }
     }
     return (status);
@@ -165,10 +156,7 @@ static SOPC_ReturnStatus GenEndpoingConfig()
         if (NULL == authenticationManager || NULL == authorizationManager)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
-            if (true == debug)
-            {
-                printf("<Test_Server_Toolkit: Failed to create the user manager\n");
-            }
+            log_debug("<Test_Server_Toolkit: Failed to create the user manager\n");
         }
     }
 
@@ -230,16 +218,11 @@ SOPC_ReturnStatus Setup_serv(void)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
-    // Get Toolkit Configuration
-    SOPC_Build_Info build_info = SOPC_ToolkitConfig_GetBuildInfo();
-
-    if (true == debug)
-    {
-        printf("toolkitVersion: %s\n", build_info.toolkitVersion);
-        printf("toolkitSrcCommit: %s\n", build_info.toolkitSrcCommit);
-        printf("toolkitDockerId: %s\n", build_info.toolkitDockerId);
-        printf("toolkitBuildDate: %s\n", build_info.toolkitBuildDate);
-    }
+    // Log Toolkit Configuration Build Info
+    log_debug("toolkitVersion: %s\n", SOPC_ToolkitConfig_GetBuildInfo().toolkitVersion);
+    log_debug("toolkitSrcCommit: %s\n", SOPC_ToolkitConfig_GetBuildInfo().toolkitSrcCommit);
+    log_debug("toolkitDockerId: %s\n", SOPC_ToolkitConfig_GetBuildInfo().toolkitDockerId);
+    log_debug("toolkitBuildDate: %s\n", SOPC_ToolkitConfig_GetBuildInfo().toolkitBuildDate);
 
     /* config the endpoint config */
     status = GenEndpoingConfig();
@@ -250,17 +233,11 @@ SOPC_ReturnStatus Setup_serv(void)
         status = SOPC_Toolkit_Initialize(Fuzz_Event_Fct);
         if (SOPC_STATUS_OK == status)
         {
-            if (true == debug)
-            {
-                printf(">>FUZZ_server: initialized\n");
-            }
+            log_debug(">>FUZZ_server: initialized\n");
         }
         else
         {
-            if (true == debug)
-            {
-                printf(">>FUZZ_server: Failed initializing\n");
-            }
+            log_debug(">>FUZZ_server: Failed initializing\n");
         }
     }
 
@@ -290,27 +267,18 @@ SOPC_ReturnStatus Setup_serv(void)
 
         if (SOPC_STATUS_OK != status)
         {
-            if (true == debug)
-            {
-                printf("<<FUZZ_server: Failed to configure the @ space\n");
-            }
+            log_debug("<<FUZZ_server: Failed to configure the @ space\n");
         }
         else
         {
-            if (true == debug)
-            {
-                printf("<<FUZZ_server: @ space configured\n");
-            }
+            log_debug("<<FUZZ_server: @ space configured\n");
         }
     }
 
     if (SOPC_STATUS_OK == status)
     {
         // Add endpoint description configuration
-        if (true == debug)
-        {
-            printf("<<FUZZ_server: Opening endpoint... \n");
-        }
+        log_debug("<<FUZZ_server: Opening endpoint... \n");
         epConfigIdx = SOPC_ToolkitServer_AddEndpointConfig(&epConfig);
         status = (epConfigIdx != 0 ? SOPC_STATUS_OK : SOPC_STATUS_NOK);
     }
@@ -323,13 +291,13 @@ SOPC_ReturnStatus SOPC_EpConfig_serv()
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     // Asynchronous request to open the endpoint
-    if (true == debug && epConfigIdx != 0)
+    if (epConfigIdx != 0)
     {
-        printf("<<FUZZ_server: Endpoint configured\n");
+        log_debug("<<FUZZ_server: Endpoint configured\n");
     }
-    else if (true == debug)
+    else
     {
-        printf("<<FUZZ_server: Failed to configure the endpoint\n");
+        log_debug("<<FUZZ_server: Failed to configure the endpoint\n");
     }
     SOPC_ToolkitServer_AsyncOpenEndpoint(epConfigIdx);
     return (status);
@@ -380,9 +348,6 @@ SOPC_ReturnStatus Teardown_serv()
 
     SOPC_S2OPC_Config_Clear(&output_s2opcConfig);
     SOPC_Toolkit_Clear();
-    if (true == debug)
-    {
-        printf("-------------All cleared-------------\n");
-    }
+    log_debug("-------------All cleared-------------\n");
     return (status);
 }
