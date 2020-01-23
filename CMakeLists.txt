@@ -888,6 +888,7 @@ if(WITH_OSS_FUZZ)
   add_custom_target(fuzzers)
   s2opc_oss_fuzzer(server_request_fuzzer "fuzz_server_request.c")
   s2opc_oss_fuzzer(parse_tcp_uri_fuzzer "fuzz_parse_tcp_uri.c")
+  s2opc_oss_fuzzer(decode_fuzzer "fuzz_decoder.c")
 endif()
 
 ###### Subscribing client library and binary ######
