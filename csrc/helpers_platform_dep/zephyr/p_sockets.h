@@ -47,19 +47,19 @@ typedef struct
 
 /* Network initialized verification */
 
-bool P_SOCKET_NETWORK_IsInitialized(void);
+bool P_SOCKET_NETWORK_IsConfigured(void);
 
 /* Multicast platform dep functions used by platform dep pub sub UDP */
 
-SOPC_ReturnStatus P_SOCKET_MCAST_add_sock_to_mcast(int sock, struct in_addr* add);
-SOPC_ReturnStatus P_SOCKET_MCAST_join_mcast_group(int sock, struct in_addr* add);
-SOPC_ReturnStatus P_SOCKET_MCAST_leave_mcast_group(int sock, struct in_addr* add);
-bool P_SOCKET_MCAST_soft_filter(int sock, struct in_addr* add);
-void P_SOCKET_MCAST_remove_sock_from_mcast(int sock);
+SOPC_ReturnStatus P_SOCKET_MCAST_add_sock_to_mcast(int32_t sock, struct in_addr* add);
+SOPC_ReturnStatus P_SOCKET_MCAST_join_mcast_group(int32_t sock, struct in_addr* add);
+SOPC_ReturnStatus P_SOCKET_MCAST_leave_mcast_group(int32_t sock, struct in_addr* add);
+bool P_SOCKET_MCAST_soft_filter(int32_t sock, struct in_addr* add);
+void P_SOCKET_MCAST_remove_sock_from_mcast(int32_t sock);
 
 /* Verify current number of allocated socket. Shall not > MAX_SOCKET */
 
-uint32_t P_SOCKET_increment_nb_socket(void);
-uint32_t P_SOCKET_decrement_nb_socket(void);
+uint32_t P_SOCKET_increment_nb_sockets(void);
+uint32_t P_SOCKET_decrement_nb_sockets(void);
 
 #endif /* SOPC_P_SOCKETS_H_ */
