@@ -71,13 +71,13 @@ int32_t mbedtls_hardware_poll(void* data, uint8_t* output, int32_t len, int32_t*
         return -1;
     }
 
-    if (dev == NULL)
+    if (NULL == dev)
     {
 #if P_ENTROPY_DEBUG == 1
         printk("\r\nFirst call to obtain entropy device %s\r\n", CONFIG_ENTROPY_NAME);
 #endif
         dev = device_get_binding(CONFIG_ENTROPY_NAME);
-        if (dev == NULL)
+        if (NULL == dev)
         {
 #if P_ENTROPY_DEBUG == 1
             printk("\r\nFailed to obtain entropy device\r\n");
