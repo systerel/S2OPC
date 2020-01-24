@@ -153,7 +153,7 @@ tCondVarHandle P_SYNCHRO_CONDITION_Initialize(void)
                                                                  E_SYNC_STATUS_NOT_INITIALIZED, //
                                                                  E_SYNC_STATUS_INITIALIZING);   //
 
-            if (fromStatus == E_SYNC_STATUS_NOT_INITIALIZED)
+            if (E_SYNC_STATUS_NOT_INITIALIZED == fromStatus)
             {
 #if P_SYNCHRO_CONDITION_DEBUG == 1
                 printk("\r\nP_SYNCHRO: slot %d reserved\r\n", //
@@ -291,7 +291,7 @@ eSynchroResult P_SYNCHRO_CONDITION_UnlockAndWait(tCondVarHandle slotId, // Handl
         {
             bool bTransition = false;
             uint32_t signalId = 0;
-            for (uint32_t i = 0; i < MAX_COND_VAR_WAITERS && bTransition == false; i++)
+            for (uint32_t i = 0; i < MAX_COND_VAR_WAITERS && !bTransition; i++)
             {
                 bTransition = __sync_bool_compare_and_swap(&p->tabSignals[i].sigStatus, //
                                                            E_SIG_STATUS_NOT_RESERVED,   //
@@ -327,7 +327,7 @@ eSynchroResult P_SYNCHRO_CONDITION_UnlockAndWait(tCondVarHandle slotId, // Handl
 #endif
                 int sem_take_res = 0; // Used to check timeout.
 
-                if (timeoutMs == UINT32_MAX)
+                if (UINT32_MAX == timeoutMs)
                 {
                     sem_take_res = k_sem_take(&p->tabSignals[signalId].signal, K_FOREVER);
                 }
@@ -523,7 +523,7 @@ tMutVarHandle P_SYNCHRO_MUTEX_Initialize(void)
             eSyncStatus fromStatus = __sync_val_compare_and_swap(&gMutVarWks.tabWks[i].status,  //
                                                                  E_SYNC_STATUS_NOT_INITIALIZED, //
                                                                  E_SYNC_STATUS_INITIALIZING);   //
-            if (fromStatus == E_SYNC_STATUS_NOT_INITIALIZED)
+            if (E_SYNC_STATUS_NOT_INITIALIZED == fromStatus)
             {
 #if P_SYNCHRO_MUTEX_DEBUG == 1
                 printk("\r\nP_MUTEX: Slot id %d - Initialized\r\n", i);
@@ -579,7 +579,7 @@ eSynchroResult P_SYNCHRO_MUTEX_Clear(tMutVarHandle slotId)
                                                                  E_SYNC_STATUS_DEINITIALIZING);                  //
 
             // If successful clear condition variable, else yield and retry
-            if ((fromStatus & ~MASK_SET_QUIT_FLAG) == E_SYNC_STATUS_INITIALIZED)
+            if (E_SYNC_STATUS_INITIALIZED == (fromStatus & ~MASK_SET_QUIT_FLAG))
             {
 #if P_SYNCHRO_MUTEX_DEBUG == 1
                 printk("\r\nP_MUTEX: Slot id %d - clear performed successfully !!!\r\n", //
@@ -593,8 +593,8 @@ eSynchroResult P_SYNCHRO_MUTEX_Clear(tMutVarHandle slotId)
                 p->status = E_SYNC_STATUS_NOT_INITIALIZED; // Set status to not initialized
                 result = E_SYNCHRO_RESULT_OK;              // Terminates loop
             }
-            else if (((fromStatus & ~MASK_SET_QUIT_FLAG) == E_SYNC_STATUS_DEINITIALIZING) ||
-                     ((fromStatus & ~MASK_SET_QUIT_FLAG) == E_SYNC_STATUS_INITIALIZING) ||
+            else if ((E_SYNC_STATUS_DEINITIALIZING == (fromStatus & ~MASK_SET_QUIT_FLAG)) ||
+                     (E_SYNC_STATUS_INITIALIZING == (fromStatus & ~MASK_SET_QUIT_FLAG)) ||
                      ((fromStatus & ~MASK_SET_QUIT_FLAG) > E_SYNC_STATUS_INITIALIZED))
             {
 #if P_SYNCHRO_MUTEX_DEBUG == 1
@@ -653,7 +653,7 @@ eSynchroResult P_SYNCHRO_MUTEX_Lock(tMutVarHandle slotId)
         {
             // Check if lock counter incremented. If 0, else mutex can be locked.
             // Initialized new owner.
-            if (p->lockCounter == 0)
+            if (0 == p->lockCounter)
             {
 #if P_SYNCHRO_MUTEX_DEBUG == 1
                 printk("\r\nP_MUTEX: Slot id %d - Lock - First lock\r\n", //
@@ -694,7 +694,7 @@ eSynchroResult P_SYNCHRO_MUTEX_Lock(tMutVarHandle slotId)
                     {
                         // If signal received and lock counter not incremented, so mutex can be locked.
                         // Raz lock counter and increment it.
-                        if (E_SYNCHRO_RESULT_OK == result && p->lockCounter == 0)
+                        if (E_SYNCHRO_RESULT_OK == result && 0 == p->lockCounter)
                         {
 #if P_SYNCHRO_MUTEX_DEBUG == 1
                             printk("\r\nP_MUTEX: Slot id %d - Try Lock successful by %08lX \r\n", //
@@ -797,7 +797,7 @@ eSynchroResult P_SYNCHRO_MUTEX_Unlock(tMutVarHandle slotId) // Mutex handle
                 if (p->lockCounter > 0)
                 {
                     p->lockCounter--;
-                    if (p->lockCounter == 0)
+                    if (0 == p->lockCounter)
                     {
 #if P_SYNCHRO_MUTEX_DEBUG == 1
                         printk("\r\nP_MUTEX: Slot id %d - UnLock - no owner, signal all from %08lX\r\n", //
@@ -995,7 +995,7 @@ SOPC_ReturnStatus Condition_Init(Condition* cond)
     tCondVarHandle handle = P_SYNCHRO_CONDITION_Initialize();
     *cond = handle;
 
-    if (handle == UINT32_MAX)
+    if (UINT32_MAX == handle)
     {
         result = SOPC_STATUS_NOK;
     }
