@@ -56,7 +56,7 @@ void* SOPC_Malloc(size_t size)
         currentVal = counterAlloc;
         newVal = counterAlloc + 1;
         bTransition = __sync_bool_compare_and_swap(&counterAlloc, currentVal, newVal);
-    } while (bTransition == false);
+    } while (!bTransition);
     printk("\r\nP_MEM_ALLOC %d\r\n", counterAlloc);
 #endif
     return malloc(size);
@@ -76,7 +76,7 @@ void SOPC_Free(void* ptr)
             newVal = counterAlloc - 1;
         }
         bTransition = __sync_bool_compare_and_swap(&counterAlloc, currentVal, newVal);
-    } while (bTransition == false);
+    } while (!bTransition);
     printk("\r\nP_MEM_ALLOC %d\r\n", counterAlloc);
 #endif
     free(ptr);
@@ -93,7 +93,7 @@ void* SOPC_Calloc(size_t nmemb, size_t size)
         currentVal = counterAlloc;
         newVal = counterAlloc + 1;
         bTransition = __sync_bool_compare_and_swap(&counterAlloc, currentVal, newVal);
-    } while (bTransition == false);
+    } while (!bTransition);
     printk("\r\nP_MEM_ALLOC %d\r\n", counterAlloc);
 #endif
     return calloc(nmemb, size);
