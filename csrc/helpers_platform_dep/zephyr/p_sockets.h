@@ -23,7 +23,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include <net/socket.h>
+#include "net/socket.h"
 
 #include "sopc_enums.h"
 

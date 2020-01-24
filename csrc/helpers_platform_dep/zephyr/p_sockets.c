@@ -18,17 +18,22 @@
  */
 
 #include <errno.h>
+#include <fcntl.h>
 #include <inttypes.h>
-#include <kernel.h>
 #include <limits.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/printk.h>
+
+#include "kernel.h"
+#include "net/ethernet.h"
+#include "net/net_if.h"
+#include "net/socket.h"
+#include "sys/printk.h"
 
 #ifndef __INT32_MAX__
-#include <toolchain/xcc_missing_defs.h>
+#include "toolchain/xcc_missing_defs.h"
 #endif
 
 #ifndef NULL
@@ -50,11 +55,6 @@
 #ifndef MY_IP_GW
 #define MY_IP_GW ((const char*) ("192.168.1.111"))
 #endif
-
-#include <fcntl.h>
-#include <net/ethernet.h>
-#include <net/net_if.h>
-#include <net/socket.h>
 
 /* s2opc includes */
 
