@@ -92,13 +92,18 @@
 #define MAX_MCAST 16
 #endif
 
+typedef enum E_NETWORK_CONFIG_STATUS
+{
+    NETWORK_CONFIG_STATUS_NOT_INITIALIZED,
+    NETWORK_CONFIG_STATUS_INITIALIZING,
+    NETWORK_CONFIG_STATUS_INITIALIZED,
+    NETWORK_CONFIG_STATUS_SIZE = INT32_MAX
+} eNetworkConfigStatus;
+
 /* Private global definitions */
 
-static volatile uint32_t priv_P_SOCKET_nbSockets = 0;           // Allow to avoid max socket allocation
-static volatile uint32_t priv_P_SOCKET_networkConfigStatus = 0; // Network config status :
-// 0 not init,
-// 1 initalizing,
-// 2 initialized
+static volatile uint32_t priv_P_SOCKET_nbSockets = 0; // Allow to avoid max socket allocation
+static volatile eNetworkConfigStatus priv_P_SOCKET_networkConfigStatus = NETWORK_CONFIG_STATUS_NOT_INITIALIZED;
 
 // *** Multicast variable definitions ***
 
@@ -138,7 +143,7 @@ static inline SOPC_ReturnStatus P_SOCKET_Configure(Socket sock, bool setNonBlock
 // Get configuration status. True if configured (ip, gw, mask...)
 bool P_SOCKET_NETWORK_IsConfigured(void)
 {
-    return (priv_P_SOCKET_networkConfigStatus == 2);
+    return (NETWORK_CONFIG_STATUS_INITIALIZED == priv_P_SOCKET_networkConfigStatus);
 }
 
 // Increment socket counter. Can be compared to CONFIG_NET_MAX_CONN - 2
@@ -199,13 +204,13 @@ bool SOPC_Socket_Network_Initialize()
 
     do
     {
-        nwStatus = __sync_val_compare_and_swap(&priv_P_SOCKET_networkConfigStatus, //
-                                               0,                                  // Not initialized
-                                               1);                                 // Initializing
+        nwStatus = __sync_val_compare_and_swap(&priv_P_SOCKET_networkConfigStatus,    //
+                                               NETWORK_CONFIG_STATUS_NOT_INITIALIZED, // Not initialized
+                                               NETWORK_CONFIG_STATUS_INITIALIZING);   // Initializing
 
         if (0 == nwStatus)
         {
-            assert(Mutex_Initialization(&priv_lockL2) == SOPC_STATUS_OK);
+            assert(SOPC_STATUS_OK == Mutex_Initialization(&priv_lockL2));
 
             struct net_if* ptrNetIf = NULL;
             struct in_addr addressLoopBack;
@@ -219,7 +224,7 @@ bool SOPC_Socket_Network_Initialize()
             net_addr_pton(AF_INET, MY_IP_ETH0, (void*) &addressInterfaceEth);
             net_addr_pton(AF_INET, MY_IP_MASK, (void*) &addressInterfaceEthMask);
             net_addr_pton(AF_INET, MY_IP_GW, (void*) &addressInterfaceEthGtw);
-            if (net_if_ipv4_addr_lookup(&addressLoopBack, &ptrNetIf) == NULL)
+            if (NULL == net_if_ipv4_addr_lookup(&addressLoopBack, &ptrNetIf))
             {
 #if defined(CONFIG_NET_L2_DUMMY)
                 ptrNetIf = net_if_get_first_by_type(&NET_L2_GET_NAME(DUMMY));
@@ -238,7 +243,7 @@ bool SOPC_Socket_Network_Initialize()
 #endif
             }
 
-            if (net_if_ipv4_addr_lookup(&addressInterfaceEth, &ptrNetIf) == NULL)
+            if (NULL == net_if_ipv4_addr_lookup(&addressInterfaceEth, &ptrNetIf))
             {
 #if defined(CONFIG_NET_L2_ETHERNET)
                 ptrNetIf = net_if_get_first_by_type(&NET_L2_GET_NAME(ETHERNET));
@@ -258,21 +263,21 @@ bool SOPC_Socket_Network_Initialize()
 #endif
             }
 
-            priv_P_SOCKET_networkConfigStatus = 2;
-            nwStatus = 2;
+            priv_P_SOCKET_networkConfigStatus = NETWORK_CONFIG_STATUS_INITIALIZED;
+            nwStatus = NETWORK_CONFIG_STATUS_INITIALIZED;
         }
         else
         {
             // Initializing on going, yield and retry
-            if (nwStatus == 1)
+            if (NETWORK_CONFIG_STATUS_INITIALIZING == nwStatus)
             {
                 k_yield();
             }
         }
-    } while (nwStatus == 1);
+    } while (NETWORK_CONFIG_STATUS_INITIALIZING == nwStatus);
 
     // Initialized or not initialized
-    if (nwStatus == 2)
+    if (NETWORK_CONFIG_STATUS_INITIALIZED == nwStatus)
     {
         return true;
     }
@@ -293,7 +298,7 @@ SOPC_ReturnStatus SOPC_Socket_AddrInfo_Get(char* hostname,                  // H
                                            char* port,                      // Port
                                            SOPC_Socket_AddressInfo** addrs) // Socket address info object
 {
-    if (priv_P_SOCKET_networkConfigStatus != 2)
+    if (priv_P_SOCKET_networkConfigStatus != NETWORK_CONFIG_STATUS_INITIALIZED)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -322,7 +327,7 @@ SOPC_ReturnStatus SOPC_Socket_AddrInfo_Get(char* hostname,                  // H
 
 SOPC_Socket_AddressInfo* SOPC_Socket_AddrInfo_IterNext(SOPC_Socket_AddressInfo* addr)
 {
-    if (priv_P_SOCKET_networkConfigStatus != 2)
+    if (priv_P_SOCKET_networkConfigStatus != NETWORK_CONFIG_STATUS_INITIALIZED)
     {
         return NULL;
     }
@@ -337,7 +342,7 @@ SOPC_Socket_AddressInfo* SOPC_Socket_AddrInfo_IterNext(SOPC_Socket_AddressInfo* 
 
 uint8_t SOPC_Socket_AddrInfo_IsIPV6(SOPC_Socket_AddressInfo* addr)
 {
-    return addr->ai_family == PF_INET6;
+    return PF_INET6 == addr->ai_family;
 }
 
 void SOPC_Socket_AddrInfoDelete(SOPC_Socket_AddressInfo** addrs)
@@ -356,7 +361,7 @@ void SOPC_Socket_Clear(Socket* sock)
 
 static inline SOPC_ReturnStatus P_SOCKET_Configure(Socket sock, bool setNonBlocking)
 {
-    if (priv_P_SOCKET_networkConfigStatus != 2)
+    if (priv_P_SOCKET_networkConfigStatus != NETWORK_CONFIG_STATUS_INITIALIZED)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -393,7 +398,7 @@ SOPC_ReturnStatus SOPC_Socket_CreateNew(SOPC_Socket_AddressInfo* addr,
                                         bool setNonBlocking,
                                         Socket* sock)
 {
-    if (priv_P_SOCKET_networkConfigStatus != 2)
+    if (priv_P_SOCKET_networkConfigStatus != NETWORK_CONFIG_STATUS_INITIALIZED)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -460,7 +465,7 @@ SOPC_ReturnStatus SOPC_Socket_CreateNew(SOPC_Socket_AddressInfo* addr,
 
 SOPC_ReturnStatus SOPC_Socket_Listen(Socket sock, SOPC_Socket_AddressInfo* addr)
 {
-    if (priv_P_SOCKET_networkConfigStatus != 2)
+    if (priv_P_SOCKET_networkConfigStatus != NETWORK_CONFIG_STATUS_INITIALIZED)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -484,7 +489,7 @@ SOPC_ReturnStatus SOPC_Socket_Listen(Socket sock, SOPC_Socket_AddressInfo* addr)
 
 SOPC_ReturnStatus SOPC_Socket_Accept(Socket listeningSock, bool setNonBlocking, Socket* acceptedSock)
 {
-    if (priv_P_SOCKET_networkConfigStatus != 2)
+    if (priv_P_SOCKET_networkConfigStatus != NETWORK_CONFIG_STATUS_INITIALIZED)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -544,7 +549,7 @@ SOPC_ReturnStatus SOPC_Socket_Accept(Socket listeningSock, bool setNonBlocking, 
 
 SOPC_ReturnStatus SOPC_Socket_Connect(Socket sock, SOPC_Socket_AddressInfo* addr)
 {
-    if (priv_P_SOCKET_networkConfigStatus != 2)
+    if (priv_P_SOCKET_networkConfigStatus != NETWORK_CONFIG_STATUS_INITIALIZED)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -571,7 +576,7 @@ SOPC_ReturnStatus SOPC_Socket_Connect(Socket sock, SOPC_Socket_AddressInfo* addr
             connectStatus = 0;
         }
     }
-    if (connectStatus == 0)
+    if (0 == connectStatus)
     {
         return SOPC_STATUS_OK;
     }
@@ -581,7 +586,7 @@ SOPC_ReturnStatus SOPC_Socket_Connect(Socket sock, SOPC_Socket_AddressInfo* addr
 
 SOPC_ReturnStatus SOPC_Socket_ConnectToLocal(Socket from, Socket to)
 {
-    if (priv_P_SOCKET_networkConfigStatus != 2)
+    if (priv_P_SOCKET_networkConfigStatus != NETWORK_CONFIG_STATUS_INITIALIZED)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -604,7 +609,7 @@ SOPC_ReturnStatus SOPC_Socket_ConnectToLocal(Socket from, Socket to)
 
 SOPC_ReturnStatus SOPC_Socket_CheckAckConnect(Socket sock)
 {
-    if (priv_P_SOCKET_networkConfigStatus != 2)
+    if (priv_P_SOCKET_networkConfigStatus != NETWORK_CONFIG_STATUS_INITIALIZED)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -626,7 +631,7 @@ SOPC_ReturnStatus SOPC_Socket_CheckAckConnect(Socket sock)
 
 void SOPC_SocketSet_Add(Socket sock, SOPC_SocketSet* sockSet)
 {
-    if (priv_P_SOCKET_networkConfigStatus != 2)
+    if (priv_P_SOCKET_networkConfigStatus != NETWORK_CONFIG_STATUS_INITIALIZED)
     {
         return;
     }
@@ -643,7 +648,7 @@ void SOPC_SocketSet_Add(Socket sock, SOPC_SocketSet* sockSet)
 
 void SOPC_SocketSet_Remove(Socket sock, SOPC_SocketSet* sockSet)
 {
-    if (priv_P_SOCKET_networkConfigStatus != 2)
+    if (priv_P_SOCKET_networkConfigStatus != NETWORK_CONFIG_STATUS_INITIALIZED)
     {
         return;
     }
@@ -656,7 +661,7 @@ void SOPC_SocketSet_Remove(Socket sock, SOPC_SocketSet* sockSet)
 
 bool SOPC_SocketSet_IsPresent(Socket sock, SOPC_SocketSet* sockSet)
 {
-    if (priv_P_SOCKET_networkConfigStatus != 2)
+    if (priv_P_SOCKET_networkConfigStatus != NETWORK_CONFIG_STATUS_INITIALIZED)
     {
         return false;
     }
@@ -677,7 +682,7 @@ bool SOPC_SocketSet_IsPresent(Socket sock, SOPC_SocketSet* sockSet)
 
 void SOPC_SocketSet_Clear(SOPC_SocketSet* sockSet)
 {
-    if (priv_P_SOCKET_networkConfigStatus != 2)
+    if (priv_P_SOCKET_networkConfigStatus != NETWORK_CONFIG_STATUS_INITIALIZED)
     {
         return;
     }
@@ -694,7 +699,7 @@ int32_t SOPC_Socket_WaitSocketEvents(SOPC_SocketSet* readSet,
                                      SOPC_SocketSet* exceptSet,
                                      uint32_t waitMs)
 {
-    if (priv_P_SOCKET_networkConfigStatus != 2)
+    if (priv_P_SOCKET_networkConfigStatus != NETWORK_CONFIG_STATUS_INITIALIZED)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -704,12 +709,12 @@ int32_t SOPC_Socket_WaitSocketEvents(SOPC_SocketSet* readSet,
     struct timeval* val;
     int fdmax = 0;
 
-    if (readSet == NULL && writeSet == NULL)
+    if (NULL == readSet && NULL == writeSet)
     {
         return -1;
     }
 
-    if ((readSet != NULL) && (writeSet == NULL || readSet->fdmax > writeSet->fdmax))
+    if ((readSet != NULL) && (NULL == writeSet || readSet->fdmax > writeSet->fdmax))
     {
         fdmax = readSet->fdmax;
     }
@@ -726,7 +731,7 @@ int32_t SOPC_Socket_WaitSocketEvents(SOPC_SocketSet* readSet,
         fdmax = exceptSet->fdmax;
     }
 
-    if (waitMs == 0)
+    if (0 == waitMs)
     {
         val = NULL;
     }
@@ -747,12 +752,12 @@ int32_t SOPC_Socket_WaitSocketEvents(SOPC_SocketSet* readSet,
 
 SOPC_ReturnStatus SOPC_Socket_Write(Socket sock, const uint8_t* data, uint32_t count, uint32_t* sentBytes)
 {
-    if (SOPC_INVALID_SOCKET == sock || NULL == data || count > INT32_MAX || sentBytes == NULL)
+    if (SOPC_INVALID_SOCKET == sock || NULL == data || count > INT32_MAX || NULL == sentBytes)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    if (priv_P_SOCKET_networkConfigStatus != 2)
+    if (priv_P_SOCKET_networkConfigStatus != NETWORK_CONFIG_STATUS_INITIALIZED)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -785,7 +790,7 @@ SOPC_ReturnStatus SOPC_Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    if (priv_P_SOCKET_networkConfigStatus != 2)
+    if (priv_P_SOCKET_networkConfigStatus != NETWORK_CONFIG_STATUS_INITIALIZED)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -800,7 +805,7 @@ SOPC_ReturnStatus SOPC_Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize
         return SOPC_STATUS_OK;
     }
 
-    if (sReadCount == 0)
+    if (0 == sReadCount)
     {
         if (readCount != NULL)
             *readCount = 0;
@@ -829,10 +834,11 @@ SOPC_ReturnStatus SOPC_Socket_BytesToRead(Socket sock, uint32_t* bytesToRead)
 
 void SOPC_Socket_Close(Socket* sock)
 {
-    if (NULL != sock && SOPC_INVALID_SOCKET != *sock && 2 == priv_P_SOCKET_networkConfigStatus)
+    if (NULL != sock && SOPC_INVALID_SOCKET != *sock &&
+        NETWORK_CONFIG_STATUS_INITIALIZED == priv_P_SOCKET_networkConfigStatus)
     {
         zsock_shutdown(*sock, ZSOCK_SHUT_RDWR);
-        if (zsock_close(*sock) == 0)
+        if (0 == zsock_close(*sock))
         {
             *sock = SOPC_INVALID_SOCKET;
             P_SOCKET_decrement_nb_sockets();
@@ -923,7 +929,7 @@ SOPC_ReturnStatus P_SOCKET_MCAST_join_mcast_group(int32_t sock, struct in_addr* 
     {
         for (int j = 0; j < MAX_ZEPHYR_SOCKET; j++)
         {
-            if (tabMCast[indexMacast].sock[j] == SOPC_INVALID_SOCKET)
+            if (SOPC_INVALID_SOCKET == tabMCast[indexMacast].sock[j])
             {
                 tabMCast[indexMacast].sock[j] = sock;
                 bSockIsFound = true;
@@ -955,7 +961,7 @@ SOPC_ReturnStatus P_SOCKET_MCAST_join_mcast_group(int32_t sock, struct in_addr* 
         }
 #endif
 
-        if (tabMCast[indexMacast].bIsJoined == false)
+        if (!tabMCast[indexMacast].bIsJoined)
         {
 #if P_SOCKET_MCAST_DEBUG == 1
             {
