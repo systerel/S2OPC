@@ -239,7 +239,7 @@ static inline int32_t P_LOGSRV_create_server_socket(tLogServer* pLogSrv)
     }
 
     // If createion is allowed
-    if (socketResult == 0)
+    if (0 == socketResult)
     {
         // Create socket
         pLogSrv->sockLogServer = zsock_socket(AF_INET, SOCK_STREAM, 0);
@@ -415,7 +415,7 @@ static inline uint32_t P_LOGSRV_accept_client_connection(tLogServer* pLogSrv)
             for (uint32_t i = 0; i < LOGSRV_MAX_CLIENTS; i++)
             {
                 // Check if empty slot
-                if (pLogSrv->socketLogClt[i] == -1)
+                if (SOPC_INVALID_SOCKET == pLogSrv->socketLogClt[i])
                 {
                     // Register socket
                     pLogSrv->socketLogClt[i] = newSocket;
@@ -696,7 +696,7 @@ static void* P_LOGSRV_ThreadMonitorCallback(void* pCtx)
             }
             else
             {
-                if (socketResult == 0 || delta >= LOGSRV_CONFIG_PERIOD_MS)
+                if (0 == socketResult || delta >= LOGSRV_CONFIG_PERIOD_MS)
                 {
                     // Periodic zone ------------------------------------------------
                     timestamp = (uint64_t) k_uptime_get();
@@ -765,7 +765,7 @@ static void* P_LOGSRV_ThreadMonitorCallback(void* pCtx)
                                                       pLogSrv->logChannel.nbEvts) %
                                                      LOGSRV_CONFIG_MAX_EVENT_CHANNEL;
 
-                                    if (pLogSrv->logChannel.nbEvts == LOGSRV_CONFIG_MAX_EVENT_CHANNEL)
+                                    if (LOGSRV_CONFIG_MAX_EVENT_CHANNEL == pLogSrv->logChannel.nbEvts)
                                     {
                                         index = (index + 1) % LOGSRV_CONFIG_MAX_EVENT_CHANNEL;
 #if P_LOGSRV_DEBUG == 1
@@ -938,7 +938,7 @@ static inline tLogServer* P_LOGSRV_Create(uint32_t port)
     SOPC_ReturnStatus result = Mutex_Initialization(&pLogSrv->lockLogChannel);
 
     // Launch server thread
-    if (result == SOPC_STATUS_OK)
+    if (SOPC_STATUS_OK == result)
     {
         pLogSrv->port = port;
         pLogSrv->status = E_LOG_SRV_BINDING;
@@ -1043,7 +1043,7 @@ static inline eLogSrvSyncStatus P_LOGSRV_SYNC_STATUS_decrement_in_use(SOPC_LogSe
 SOPC_ReturnStatus SOPC_LogServer_Create(SOPC_LogServer_Handle* pHandle, // Returned log server instance handle
                                         uint32_t port)                  // TCP port between 60 and 120
 {
-    if (pHandle == NULL)
+    if (NULL == pHandle)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -1053,7 +1053,7 @@ SOPC_ReturnStatus SOPC_LogServer_Create(SOPC_LogServer_Handle* pHandle, // Retur
 
     eLogSrvSyncStatus status = E_LOG_SRV_SYNC_NOT_INITIALIZED;
 
-    for (uint32_t i = 0; i < LOGSRV_CONFIG_MAX_LOG_SRV && handle == SOPC_LOGSRV_INVALID_HANDLE; i++)
+    for (uint32_t i = 0; i < LOGSRV_CONFIG_MAX_LOG_SRV && SOPC_LOGSRV_INVALID_HANDLE == handle; i++)
     {
         status = __sync_val_compare_and_swap(&gLogSrvHandles[i].status,      //
                                              E_LOG_SRV_SYNC_NOT_INITIALIZED, //
@@ -1098,7 +1098,7 @@ SOPC_ReturnStatus SOPC_LogServer_Create(SOPC_LogServer_Handle* pHandle, // Retur
 // Destruction of log server. Handle is set to invalid handle value
 SOPC_ReturnStatus SOPC_LogServer_Destroy(SOPC_LogServer_Handle* pHandle)
 {
-    if (pHandle == NULL)
+    if (NULL == pHandle)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -1121,7 +1121,7 @@ SOPC_ReturnStatus SOPC_LogServer_Destroy(SOPC_LogServer_Handle* pHandle)
                                                  E_LOG_SRV_SYNC_INITIALIZED | 0x80000000, //
                                                  E_LOG_SRV_SYNC_DEINITIALIZING);          //
 
-        if ((fromStatus & (~0x80000000)) == E_LOG_SRV_SYNC_INITIALIZED)
+        if (E_LOG_SRV_SYNC_INITIALIZED == (fromStatus & (~0x80000000)))
         {
             P_LOGSRV_Destroy(&gLogSrvHandles[handle].pLogServer);
             gLogSrvHandles[handle].status = E_LOG_SRV_SYNC_NOT_INITIALIZED;
@@ -1131,8 +1131,8 @@ SOPC_ReturnStatus SOPC_LogServer_Destroy(SOPC_LogServer_Handle* pHandle)
             printk("\r\nSOPC_LOG_SRV: Log server %d destruction ok\r\n", handle);
 #endif
         }
-        else if ((fromStatus & (~0x80000000)) == E_LOG_SRV_SYNC_DEINITIALIZING ||
-                 (fromStatus & (~0x80000000)) == E_LOG_SRV_SYNC_INITIALIZING ||
+        else if (E_LOG_SRV_SYNC_DEINITIALIZING == (fromStatus & (~0x80000000)) ||
+                 E_LOG_SRV_SYNC_INITIALIZING == (fromStatus & (~0x80000000)) ||
                  (fromStatus & (~0x80000000)) > E_LOG_SRV_SYNC_INITIALIZED)
         {
 #if P_LOGSRV_DEBUG == 1
@@ -1162,7 +1162,7 @@ SOPC_ReturnStatus SOPC_LogServer_Print(SOPC_LogServer_Handle handle, // Server i
                                        uint32_t size,
                                        bool bIncludeDate) // Data size
 {
-    if (handle >= LOGSRV_CONFIG_MAX_LOG_SRV || NULL == value || size == 0 || size > LOGSRV_CONFIG_MAX_DATA_CHANNEL)
+    if (handle >= LOGSRV_CONFIG_MAX_LOG_SRV || NULL == value || 0 == size || size > LOGSRV_CONFIG_MAX_DATA_CHANNEL)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -1173,7 +1173,7 @@ SOPC_ReturnStatus SOPC_LogServer_Print(SOPC_LogServer_Handle handle, // Server i
 
     if ((status & (~0x80000000)) > E_LOG_SRV_SYNC_INITIALIZED)
     {
-        if ((status & 0x80000000) == 0x80000000)
+        if (0x80000000 == (status & 0x80000000))
         {
             result = SOPC_STATUS_INVALID_STATE;
         }
