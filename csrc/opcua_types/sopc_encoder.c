@@ -2708,7 +2708,9 @@ static SOPC_ReturnStatus SOPC_Variant_Read_Internal(SOPC_Variant* variant,
             {
                 if (arrayLength > 0)
                 {
-                    // set correct values for cleaning (only if elements in array)
+                    // manage cases in which Dimensions or ArrayDimensions are not correctly
+                    // decoded. Force to use only arrayLength value to ensure correct cleaning
+                    // of the matrix content.
                     variant->Value.Matrix.Dimensions = 1;
                     int32_t* arrayDim = SOPC_Calloc(1, sizeof(int32_t));
                     if (NULL != arrayDim)

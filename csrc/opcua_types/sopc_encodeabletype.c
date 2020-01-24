@@ -190,7 +190,10 @@ void SOPC_EncodeableObject_Initialize(SOPC_EncodeableType* type, void* pValue)
 void SOPC_EncodeableObject_Clear(SOPC_EncodeableType* type, void* pValue)
 {
     assert(type != NULL);
-    assert(pValue != NULL);
+    if (NULL == pValue)
+    {
+        return;
+    }
 
     for (int32_t i = 0; i < type->NoOfFields; ++i)
     {
