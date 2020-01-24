@@ -61,6 +61,14 @@ typedef enum E_THREAD_STATUS
     E_THREAD_STATUS_INITIALIZED,
 } eThreadStatus;
 
+typedef enum E_THREAD_WKS_STATUS
+{
+    E_THREAD_WKS_STATUS_NOT_INITIALIZED,
+    E_THREAD_WKS_STATUS_INITIALIZING,
+    E_THREAD_WKS_STATUS_INITIALIZED,
+    E_THREAD_WKS_STATUS_SIZE = INT32_MAX
+} eThreadWksStatus;
+
 // *** Public thread handle definition ***
 
 struct tThreadHandle
@@ -88,7 +96,7 @@ typedef struct T_THREAD_WKS
 
 static struct T_GLOBAL_THREAD_WKS
 {
-    volatile uint32_t bInitialized;
+    volatile eThreadWksStatus wGlobalWksStatus;
     struct k_mutex kLock;
     tThreadWks tab[MAX_NB_THREADS];
 } gGlbThreadWks;
@@ -207,20 +215,22 @@ static eThreadResult P_THREAD_Init(tThreadHandle* pWks, ptrFct callback, void* p
     }
     // Check first thread creation, if yes create workspace critical section
 
-    uint32_t transition = __sync_val_compare_and_swap(&gGlbThreadWks.bInitialized, 0, 1);
+    eThreadWksStatus fromStatus = __sync_val_compare_and_swap(&gGlbThreadWks.wGlobalWksStatus,     //
+                                                              E_THREAD_WKS_STATUS_NOT_INITIALIZED, //
+                                                              E_THREAD_WKS_STATUS_INITIALIZING);   //
 
-    if (transition == 0)
+    if (E_THREAD_WKS_STATUS_NOT_INITIALIZED == fromStatus)
     {
         memset(&gGlbThreadWks, 0, sizeof(struct T_GLOBAL_THREAD_WKS));
         k_mutex_init(&gGlbThreadWks.kLock);
-        gGlbThreadWks.bInitialized = 2;
+        gGlbThreadWks.wGlobalWksStatus = E_THREAD_WKS_STATUS_INITIALIZED;
 
 #if (P_THREAD_DEBUG == 1)
         printk("\r\nP_THREAD: Thread middleware not initialized, so initializing it...\r\n");
 #endif
     }
 
-    while (gGlbThreadWks.bInitialized != 2)
+    while (E_THREAD_WKS_STATUS_INITIALIZED != gGlbThreadWks.wGlobalWksStatus)
     {
 #if (P_THREAD_DEBUG == 1)
         printk("\r\nP_THREAD: Thread middleware initializing, so wait...\r\n");
@@ -308,7 +318,7 @@ static eThreadResult P_THREAD_Join(tThreadHandle* pWks)
     eThreadResult result = E_THREAD_RESULT_OK;
 
     // Check parameters validity
-    if (NULL == pWks || 0 == pWks->slotId || pWks->slotId > MAX_NB_THREADS || false == gGlbThreadWks.bInitialized ||
+    if (NULL == pWks || 0 == pWks->slotId || pWks->slotId > MAX_NB_THREADS || false == gGlbThreadWks.wGlobalWksStatus ||
         pWks != gGlbThreadWks.tab[pWks->slotId - 1].debugExternalHandle)
     {
         return E_THREAD_RESULT_INVALID_PARAMETERS;
@@ -330,7 +340,7 @@ static eThreadResult P_THREAD_Join(tThreadHandle* pWks)
             result = E_THREAD_RESULT_NOK;
         }
 
-        if (result == E_THREAD_RESULT_OK)
+        if (E_THREAD_RESULT_OK == result)
         {
             gGlbThreadWks.tab[slotId - 1].nbThreadsJoining++;
 #if (P_THREAD_DEBUG == 1)
@@ -344,7 +354,7 @@ static eThreadResult P_THREAD_Join(tThreadHandle* pWks)
     }
     k_mutex_unlock(&gGlbThreadWks.kLock);
 
-    if (result == E_THREAD_RESULT_OK)
+    if (E_THREAD_RESULT_OK == result)
     {
         // Unlock then wait
 #if (P_THREAD_DEBUG == 1)
@@ -370,7 +380,7 @@ static eThreadResult P_THREAD_Join(tThreadHandle* pWks)
             }
 
             // If end, OK, else JOINING on going...
-            if (gGlbThreadWks.tab[slotId - 1].nbThreadsJoining == 0)
+            if (0 == gGlbThreadWks.tab[slotId - 1].nbThreadsJoining)
             {
 #if (P_THREAD_DEBUG == 1)
                 printk("\r\nP_THREAD: Last join operation on thread %d - handle thread = %08lX\r\n", //
@@ -432,7 +442,7 @@ SOPC_ReturnStatus SOPC_Thread_Join(Thread thread)
 #endif
     eThreadResult resultPTHREAD = P_THREAD_Destroy(&thread);
 
-    if (resultPTHREAD == E_THREAD_RESULT_OK)
+    if (E_THREAD_RESULT_OK == resultPTHREAD)
     {
 #if (P_THREAD_DEBUG == 1)
         printk("\r\nP_THREAD: Destroy for thread handle = %08lX\r\n", //
