@@ -19,17 +19,19 @@
 
 #include <errno.h>
 #include <inttypes.h>
-#include <kernel.h>
+
 #include <limits.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/printk.h>
-#include <unistd.h>
+
+#include "kernel.h"
+#include "sys/printk.h"
 
 #ifndef __INT32_MAX__
-#include <toolchain/xcc_missing_defs.h>
+#include "toolchain/xcc_missing_defs.h"
+
 #endif
 
 #ifndef NULL
