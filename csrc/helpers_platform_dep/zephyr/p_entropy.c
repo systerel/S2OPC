@@ -17,30 +17,30 @@
  * under the License.
  */
 
-#include <device.h>
-#include <drivers/entropy.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <init.h>
 #include <inttypes.h>
-#include <kernel.h>
 #include <limits.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/printk.h>
+
+#include "device.h"
+#include "drivers/entropy.h"
+#include "kernel.h"
+#include "net/net_ip.h"
+#include "net/socket.h"
+#include "sys/printk.h"
 
 #ifndef __INT32_MAX__
-#include <toolchain/xcc_missing_defs.h>
+#include "toolchain/xcc_missing_defs.h"
 #endif
 
 #ifndef NULL
 #define NULL ((void*) 0)
 #endif
-
-#include <fcntl.h>
-#include <net/net_ip.h>
-#include <net/socket.h>
 
 #if defined(CONFIG_MBEDTLS)
 #if !defined(CONFIG_MBEDTLS_CFG_FILE)
