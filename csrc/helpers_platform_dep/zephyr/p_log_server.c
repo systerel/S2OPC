@@ -19,24 +19,25 @@
 
 #include <errno.h>
 #include <inttypes.h>
-#include <kernel.h>
+
+#include <fcntl.h>
 #include <limits.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/printk.h>
+
+#include "kernel.h"
+#include "net/socket.h"
+#include "sys/printk.h"
 
 #ifndef __INT32_MAX__
-#include <toolchain/xcc_missing_defs.h>
+#include "toolchain/xcc_missing_defs.h"
 #endif
 
 #ifndef NULL
 #define NULL ((void*) 0)
 #endif
-
-#include <fcntl.h>
-#include <net/socket.h>
 
 /* s2opc includes */
 
