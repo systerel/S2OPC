@@ -136,6 +136,10 @@ static void StaMac_ProcessMsg_DeleteSubscriptionResponse(SOPC_StaMac_Machine* pS
                                                          void* pParam,
                                                          uintptr_t appCtx);
 static void StaMac_ProcessMsg_ServiceFault(SOPC_StaMac_Machine* pSM, uint32_t arg, void* pParam, uintptr_t appCtx);
+static void StaMac_ProcessEvent_SendRequestFailed(SOPC_StaMac_Machine* pSM,
+                                                  uint32_t arg,
+                                                  void* pParam,
+                                                  uintptr_t appCtx);
 static void StaMac_ProcessEvent_stError(SOPC_StaMac_Machine* pSM,
                                         SOPC_App_Com_Event event,
                                         uint32_t arg,
@@ -1082,7 +1086,7 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                 else if (SE_SND_REQUEST_FAILED == event)
                 {
                     // Use same processing as service fault: it concerns only publish request
-                    StaMac_ProcessMsg_ServiceFault(pSM, arg, pParam, appCtx);
+                    StaMac_ProcessEvent_SendRequestFailed(pSM, arg, pParam, intAppCtx);
                 }
                 else
                 {
@@ -1276,6 +1280,11 @@ static void StaMac_ProcessMsg_PublishResponse(SOPC_StaMac_Machine* pSM, uint32_t
     {
         pSM->nTokenUsable -= 1;
     }
+    else
+    {
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_WARNING, "Unexpected number of PublishResponse received.");
+    }
+
     /* Traverse the notifications and calls the callback */
     pNotifMsg = &pPubResp->NotificationMessage;
     /* For now, only handles at most a NotificationData */
@@ -1425,11 +1434,52 @@ static void StaMac_ProcessMsg_ServiceFault(SOPC_StaMac_Machine* pSM, uint32_t ar
             {
                 pSM->nTokenUsable -= 1;
             }
+            else
+            {
+                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_WARNING, "Unexpected number of PublishResponse received.");
+            }
             break;
         default:
             /* else go into error mode */
             pSM->state = stError;
             break;
+        }
+    }
+}
+
+static void StaMac_ProcessEvent_SendRequestFailed(SOPC_StaMac_Machine* pSM,
+                                                  uint32_t arg,
+                                                  void* pParam,
+                                                  uintptr_t appCtx)
+{
+    (void) (arg);
+    (void) (appCtx);
+
+    if (NULL == pParam)
+    {
+        pSM->state = stError;
+    }
+    else
+    {
+        const SOPC_EncodeableType* pEncType = (SOPC_EncodeableType*) pParam;
+
+        /* We only process PublishRequest send failed for timeout reason
+         * (checked in StaMac_GiveAuthorization_SendRequestFailed) */
+        if (&OpcUa_PublishRequest_EncodeableType == pEncType)
+        {
+            if (pSM->nTokenUsable > 0) // Ensure we do not underflow
+            {
+                pSM->nTokenUsable -= 1;
+            }
+            else
+            {
+                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_WARNING, "Unexpected number of PublishResponse received.");
+            }
+        }
+        else
+        {
+            /* else go into error mode */
+            pSM->state = stError;
         }
     }
 }
