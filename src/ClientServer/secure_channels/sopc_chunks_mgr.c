@@ -215,7 +215,7 @@ static bool SC_Chunks_DecodeTcpMsgHeader(SOPC_SecureConnection_ChunkMgrCtx* chun
     // READ message size
     if (result)
     {
-        status = SOPC_UInt32_Read(&chunkCtx->currentMsgSize, chunkCtx->currentChunkInputBuffer);
+        status = SOPC_UInt32_Read(&chunkCtx->currentMsgSize, chunkCtx->currentChunkInputBuffer, 0);
         if (SOPC_STATUS_OK != status || chunkCtx->currentMsgSize <= SOPC_TCP_UA_HEADER_LENGTH)
         {
             // Message size cannot be less or equal to the TCP UA header length
@@ -385,7 +385,7 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
     // Sender Certificate:
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ByteString_Read(&senderCertificate, scConnection->chunksCtx.currentChunkInputBuffer);
+        status = SOPC_ByteString_Read(&senderCertificate, scConnection->chunksCtx.currentChunkInputBuffer, 0);
 
         if (SOPC_STATUS_OK != status)
         {
@@ -496,7 +496,7 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
     // Receiver Certificate Thumbprint:
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ByteString_Read(&receiverCertThumb, scConnection->chunksCtx.currentChunkInputBuffer);
+        status = SOPC_ByteString_Read(&receiverCertThumb, scConnection->chunksCtx.currentChunkInputBuffer, 0);
 
         if (SOPC_STATUS_OK == status)
         {
@@ -700,7 +700,7 @@ static bool SC_Chunks_CheckAsymmetricSecurityHeader(SOPC_SecureConnection* scCon
     if (result)
     {
         // Decode security policy (Part6: "this value shall not exceed 255 bytes")
-        status = SOPC_String_ReadWithLimitedLength(&securityPolicy, 255, chunkCtx->currentChunkInputBuffer);
+        status = SOPC_String_ReadWithLimitedLength(&securityPolicy, 255, chunkCtx->currentChunkInputBuffer, 0);
         if (SOPC_STATUS_OK != status)
         {
             result = false;
@@ -919,7 +919,7 @@ static bool SC_Chunks_CheckSymmetricSecurityHeader(SOPC_SecureConnection* scConn
     bool isTokenValid = false;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
-    status = SOPC_UInt32_Read(&tokenId, chunkCtx->currentChunkInputBuffer);
+    status = SOPC_UInt32_Read(&tokenId, chunkCtx->currentChunkInputBuffer, 0);
 
     if (SOPC_STATUS_OK == status)
     {
@@ -1079,7 +1079,7 @@ static bool SC_Chunks_CheckSequenceHeaderSN(SOPC_SecureConnection* scConnection,
     SOPC_SecureConnection_ChunkMgrCtx* chunkCtx = &scConnection->chunksCtx;
     uint32_t seqNumber = 0;
 
-    status = SOPC_UInt32_Read(&seqNumber, chunkCtx->currentChunkInputBuffer);
+    status = SOPC_UInt32_Read(&seqNumber, chunkCtx->currentChunkInputBuffer, 0);
 
     if (SOPC_STATUS_OK == status)
     {
@@ -1116,7 +1116,7 @@ static bool SC_Chunks_CheckSequenceHeaderRequestId(
     *messageTimeoutExpired = false;
 
     // Retrieve request id
-    result = SOPC_STATUS_OK == SOPC_UInt32_Read(requestIdOrHandle, chunkCtx->currentChunkInputBuffer);
+    result = SOPC_STATUS_OK == SOPC_UInt32_Read(requestIdOrHandle, chunkCtx->currentChunkInputBuffer, 0);
     if (!result)
     {
         result = false;
@@ -1744,7 +1744,7 @@ bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
     if (result && hasSecureChannelId)
     {
         // Decode secure channel id
-        result = (SOPC_UInt32_Read(&secureChannelId, chunkCtx->currentChunkInputBuffer) == SOPC_STATUS_OK);
+        result = (SOPC_UInt32_Read(&secureChannelId, chunkCtx->currentChunkInputBuffer, 0) == SOPC_STATUS_OK);
     }
 
     if (result && hasSecureChannelId)
@@ -2233,7 +2233,7 @@ static bool SC_Chunks_EncodeTcpMsgHeader(uint32_t scConnectionIdx,
         {
             messageSize = SOPC_TCP_UA_HEADER_LENGTH;
         }
-        status = SOPC_UInt32_Write(&messageSize, buffer);
+        status = SOPC_UInt32_Write(&messageSize, buffer, 0);
         if (SOPC_STATUS_OK != status)
         {
             result = false;
@@ -2293,7 +2293,7 @@ static bool SC_Chunks_EncodeAsymSecurityHeader(uint32_t scConnectionIdx,
 
     if (result)
     {
-        status = SOPC_String_Write(&strSecuPolicy, buffer);
+        status = SOPC_String_Write(&strSecuPolicy, buffer, 0);
         if (SOPC_STATUS_OK != status)
         {
             result = false;
@@ -2328,7 +2328,7 @@ static bool SC_Chunks_EncodeAsymSecurityHeader(uint32_t scConnectionIdx,
         if (toSign)
         {
             assert(bsSenderCert.Length > 0);
-            status = SOPC_ByteString_Write(&bsSenderCert, buffer);
+            status = SOPC_ByteString_Write(&bsSenderCert, buffer, 0);
             if (SOPC_STATUS_OK != status)
             {
                 result = false;
@@ -2339,7 +2339,7 @@ static bool SC_Chunks_EncodeAsymSecurityHeader(uint32_t scConnectionIdx,
         {
             // Note: foundation stack expects -1 value whereas 0 is also valid:
             const int32_t minusOne = -1;
-            status = SOPC_Int32_Write(&minusOne, buffer);
+            status = SOPC_Int32_Write(&minusOne, buffer, 0);
             if (SOPC_STATUS_OK != status)
             {
                 result = false;
@@ -2393,7 +2393,7 @@ static bool SC_Chunks_EncodeAsymSecurityHeader(uint32_t scConnectionIdx,
             }
             if (result)
             {
-                status = SOPC_ByteString_Write(&recCertThumbprint, buffer);
+                status = SOPC_ByteString_Write(&recCertThumbprint, buffer, 0);
                 if (SOPC_STATUS_OK != status)
                 {
                     result = false;
@@ -2406,7 +2406,7 @@ static bool SC_Chunks_EncodeAsymSecurityHeader(uint32_t scConnectionIdx,
         {
             // Note: foundation stack expects -1 value whereas 0 is also valid:
             const int32_t minusOne = -1;
-            status = SOPC_Int32_Write(&minusOne, buffer);
+            status = SOPC_Int32_Write(&minusOne, buffer, 0);
             if (SOPC_STATUS_OK != status)
             {
                 result = false;
@@ -3267,7 +3267,7 @@ static bool SC_Chunks_EncodeScMessageHeaderAdditionalField(SOPC_SecureConnection
                                                            SOPC_Buffer* nonEncryptedBuffer,
                                                            SOPC_StatusCode* errorStatus)
 {
-    SOPC_StatusCode status = SOPC_UInt32_Write(&scConnection->currentSecurityToken.secureChannelId, nonEncryptedBuffer);
+    SOPC_StatusCode status = SOPC_UInt32_Write(&scConnection->currentSecurityToken.secureChannelId, nonEncryptedBuffer, 0);
     if (SOPC_STATUS_OK != status)
     {
         *errorStatus = OpcUa_BadEncodingError;
@@ -3302,7 +3302,7 @@ static bool SC_Chunks_EncodeMessageSize(SOPC_SecureChannel_Config* scConfig,
         if (result)
         {
             messageSize = sequenceNumberPosition + *encryptedDataLength; // non encrypted length + encrypted length
-            status = SOPC_UInt32_Write(&messageSize, nonEncryptedBuffer);
+            status = SOPC_UInt32_Write(&messageSize, nonEncryptedBuffer, 0);
             result = (SOPC_STATUS_OK == status);
         }
     }
@@ -3310,7 +3310,7 @@ static bool SC_Chunks_EncodeMessageSize(SOPC_SecureChannel_Config* scConfig,
     {
         // Size = current buffer length + signature if signed
         messageSize = nonEncryptedBuffer->length + signatureSize;
-        status = SOPC_UInt32_Write(&messageSize, nonEncryptedBuffer);
+        status = SOPC_UInt32_Write(&messageSize, nonEncryptedBuffer, 0);
         result = (SOPC_STATUS_OK == status);
     }
 
@@ -3340,7 +3340,7 @@ static bool SC_Chunks_EncodeSequenceNumber(SOPC_SecureConnection* scConnection,
         {
             scConnection->tcpSeqProperties.lastSNsent = scConnection->tcpSeqProperties.lastSNsent + 1;
         }
-        status = SOPC_UInt32_Write(&scConnection->tcpSeqProperties.lastSNsent, nonEncryptedBuffer);
+        status = SOPC_UInt32_Write(&scConnection->tcpSeqProperties.lastSNsent, nonEncryptedBuffer, 0);
 
         result = (SOPC_STATUS_OK == status);
     }
@@ -3385,7 +3385,7 @@ static bool SC_Chunks_EncodeRequestId(SOPC_SecureConnection* scConnection,
         requestId = requestIdOrHandle;
     }
 
-    SOPC_StatusCode status = SOPC_UInt32_Write(&requestId, nonEncryptedBuffer);
+    SOPC_StatusCode status = SOPC_UInt32_Write(&requestId, nonEncryptedBuffer, 0);
     bool result = (SOPC_STATUS_OK == status);
     if (result)
     {
@@ -3810,7 +3810,7 @@ static bool SC_Chunks_TreatSendBufferMSGCLO(
             isPrevCryptoData = false;
         }
         //  encode tokenId
-        status = SOPC_UInt32_Write(&tokenId, nonEncryptedBuffer);
+        status = SOPC_UInt32_Write(&tokenId, nonEncryptedBuffer, 0);
         if (SOPC_STATUS_OK != status)
         {
             result = false;
@@ -4103,7 +4103,7 @@ static bool SC_Chunks_EncodeAbortMsg(SOPC_Buffer* inputMsgBuffer, SOPC_StatusCod
     {
         // This shall be one of the values listed in OPC UA TCP error codes table
         SOPC_StatusCode normalizedStatus = SOPC_StatusCode_ToTcpErrorCode(errorStatus);
-        status = SOPC_UInt32_Write(&normalizedStatus, inputMsgBuffer);
+        status = SOPC_UInt32_Write(&normalizedStatus, inputMsgBuffer, 0);
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -4111,7 +4111,7 @@ static bool SC_Chunks_EncodeAbortMsg(SOPC_Buffer* inputMsgBuffer, SOPC_StatusCod
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_String_Write(&tempString, inputMsgBuffer);
+        status = SOPC_String_Write(&tempString, inputMsgBuffer, 0);
     }
 
     SOPC_String_Clear(&tempString);

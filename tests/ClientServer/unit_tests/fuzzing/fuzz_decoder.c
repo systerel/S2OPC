@@ -53,7 +53,7 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
     /* create a buffer using remaining data */
     SOPC_Buffer* buffer = SOPC_Buffer_Attach((uint8_t*) &buf[1], (uint32_t) len - 1);
 
-    SOPC_ReturnStatus status = SOPC_EncodeableObject_Decode(type, pValue, buffer);
+    SOPC_ReturnStatus status = SOPC_EncodeableObject_Decode(type, pValue, buffer, 0);
     /*  encode if decode was successful */
     if (SOPC_STATUS_OK == status)
     {
@@ -64,7 +64,7 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
         }
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_EncodeableObject_Encode(type, pValue, result_buffer);
+            status = SOPC_EncodeableObject_Encode(type, pValue, result_buffer, 0);
             /* we should succeed in encoding what we just decoded */
             assert(SOPC_STATUS_OK == status);
             /* we cannot verify that buffer == result_buffer since some things might vary
@@ -84,7 +84,7 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
                 }
                 if (SOPC_STATUS_OK == status)
                 {
-                    status = SOPC_EncodeableObject_Decode(type, pValue2, result_buffer);
+                    status = SOPC_EncodeableObject_Decode(type, pValue2, result_buffer, 0);
                     assert(SOPC_STATUS_OK == status);
 
                     /* encode again */
@@ -95,7 +95,7 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
                     }
                     if (SOPC_STATUS_OK == status)
                     {
-                        status = SOPC_EncodeableObject_Encode(type, pValue2, result_buffer2);
+                        status = SOPC_EncodeableObject_Encode(type, pValue2, result_buffer2, 0);
                         /* we should succeed in encoding what we just decoded */
                         assert(SOPC_STATUS_OK == status);
                         /* compare result_buffer2 with result buffer */

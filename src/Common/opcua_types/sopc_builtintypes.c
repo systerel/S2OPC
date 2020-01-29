@@ -3256,7 +3256,7 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Copy(SOPC_ExtensionObject* dest, const SO
 
             if (SOPC_STATUS_OK == status)
             {
-                status = src->Body.Object.ObjType->Encode(src->Body.Object.Value, encodedObject);
+                status = src->Body.Object.ObjType->Encode(src->Body.Object.Value, encodedObject, 0);
             }
             if (SOPC_STATUS_OK == status)
             {

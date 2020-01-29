@@ -28,6 +28,7 @@
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_types.h"
+#include "sopc_toolkit_config_constants.h"
 
 const char* nullType = "NULL";
 const char* noNameType = "NoName";
@@ -229,15 +230,25 @@ void SOPC_EncodeableObject_Clear(SOPC_EncodeableType* type, void* pValue)
     }
 }
 
-SOPC_ReturnStatus SOPC_EncodeableObject_Encode(const SOPC_EncodeableType* type, const void* pValue, SOPC_Buffer* buf)
+SOPC_ReturnStatus SOPC_EncodeableObject_Encode(const SOPC_EncodeableType* type, const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
-    if (type != NULL && pValue != NULL && buf != NULL && *((SOPC_EncodeableType* const*) pValue) == type)
+    if (type == NULL || pValue == NULL || buf == NULL || *((SOPC_EncodeableType* const*) pValue) != type)
     {
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    else if (nestedStructLevel > SOPC_MAX_STRUCT_NESTED_LEVEL)
+    {
+        status = SOPC_STATUS_INVALID_STATE;
+    }
+    else
+    {
+        nestedStructLevel++;
         status = SOPC_STATUS_OK;
     }
-    else if (type != NULL && pValue != NULL && *((SOPC_EncodeableType* const*) pValue) != type)
+
+    if (type != NULL && pValue != NULL && *((SOPC_EncodeableType* const*) pValue) != type)
     {
         SOPC_Logger_TraceWarning(
             "Problem encoding type %s value. Value 'encodeableType' field incorrectly initialized.", type->TypeName);
@@ -271,25 +282,34 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Encode(const SOPC_EncodeableType* type, 
             size = getAllocationSize(arrayDesc);
             encodeFunction = getPfnEncode(arrayDesc);
 
-            status = SOPC_Write_Array(buf, pLength, pArray, size, encodeFunction);
+            status = SOPC_Write_Array(buf, pLength, pArray, size, encodeFunction, nestedStructLevel);
         }
         else
         {
             SOPC_EncodeableObject_PfnEncode* encodeFunction = getPfnEncode(desc);
-            status = encodeFunction(pField, buf);
+            status = encodeFunction(pField, buf, nestedStructLevel);
         }
     }
 
     return status;
 }
 
-SOPC_ReturnStatus SOPC_EncodeableObject_Decode(SOPC_EncodeableType* type, void* pValue, SOPC_Buffer* buf)
+SOPC_ReturnStatus SOPC_EncodeableObject_Decode(SOPC_EncodeableType* type, void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
 
     if (type != NULL && pValue != NULL && buf != NULL)
     {
         status = SOPC_STATUS_OK;
+    }
+
+    if (nestedStructLevel <= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    {
+        nestedStructLevel++; // increment for future calls
+    }
+    else
+    {
+        status = SOPC_STATUS_INVALID_STATE;
     }
 
     if (SOPC_STATUS_OK == status)
@@ -329,12 +349,12 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Decode(SOPC_EncodeableType* type, void* 
             initFunction = getPfnInitialize(arrayDesc);
             clearFunction = getPfnClear(arrayDesc);
 
-            status = SOPC_Read_Array(buf, pLength, pArray, size, decodeFunction, initFunction, clearFunction);
+            status = SOPC_Read_Array(buf, pLength, pArray, size, decodeFunction, initFunction, clearFunction, nestedStructLevel);
         }
         else
         {
             decodeFunction = getPfnDecode(desc);
-            status = decodeFunction(pField, buf);
+            status = decodeFunction(pField, buf, nestedStructLevel);
         }
     }
 

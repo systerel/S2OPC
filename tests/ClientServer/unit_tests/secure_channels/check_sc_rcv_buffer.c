@@ -231,7 +231,7 @@ static void establishSC(void)
     status = SOPC_Buffer_SetPosition(buffer, 20);
     ck_assert(SOPC_STATUS_OK == status);
 
-    status = SOPC_UInt32_Read(&requestId, buffer);
+    status = SOPC_UInt32_Read(&requestId, buffer, 0);
     ck_assert(SOPC_STATUS_OK == status);
     ck_assert(2 == requestId); // Expected as valid request Id in unit test
 
@@ -630,7 +630,7 @@ START_TEST(test_expected_send_abort_chunk)
     ck_assert(SOPC_STATUS_OK == status);
 
     SOPC_StatusCode errorStatus;
-    status = SOPC_UInt32_Read(&errorStatus, buffer);
+    status = SOPC_UInt32_Read(&errorStatus, buffer, 0);
     ck_assert(SOPC_STATUS_OK == status);
     ck_assert_uint_eq(errorStatus, OpcUa_BadTcpMessageTooLarge);
 
@@ -682,7 +682,7 @@ START_TEST(test_expected_forced_send_abort_chunk)
     ck_assert(SOPC_STATUS_OK == status);
 
     SOPC_StatusCode errorStatus;
-    status = SOPC_UInt32_Read(&errorStatus, buffer);
+    status = SOPC_UInt32_Read(&errorStatus, buffer, 0);
     ck_assert(SOPC_STATUS_OK == status);
     ck_assert_uint_eq(errorStatus, OpcUa_BadTcpMessageTooLarge);
 
@@ -725,22 +725,22 @@ START_TEST(test_too_large_msg_size)
     SOPC_Buffer* buffer = SOPC_Buffer_Create(1000);
     ck_assert(buffer != NULL);
     byte = 'M';
-    status = SOPC_Byte_Write(&byte, buffer);
+    status = SOPC_Byte_Write(&byte, buffer, 0);
     ck_assert(SOPC_STATUS_OK == status);
     byte = 'S';
-    status = SOPC_Byte_Write(&byte, buffer);
+    status = SOPC_Byte_Write(&byte, buffer, 0);
     ck_assert(SOPC_STATUS_OK == status);
     byte = 'G';
-    status = SOPC_Byte_Write(&byte, buffer);
+    status = SOPC_Byte_Write(&byte, buffer, 0);
     ck_assert(SOPC_STATUS_OK == status);
     byte = 'F';
-    status = SOPC_Byte_Write(&byte, buffer);
+    status = SOPC_Byte_Write(&byte, buffer, 0);
     ck_assert(SOPC_STATUS_OK == status);
     ui32 = SOPC_TCP_UA_MAX_BUFFER_SIZE + 1;
-    status = SOPC_UInt32_Write(&ui32, buffer);
+    status = SOPC_UInt32_Write(&ui32, buffer, 0);
     ck_assert(SOPC_STATUS_OK == status);
     ui32 = 833084066;
-    status = SOPC_UInt32_Write(&ui32, buffer);
+    status = SOPC_UInt32_Write(&ui32, buffer, 0);
     ck_assert(SOPC_STATUS_OK == status);
     status = SOPC_Buffer_SetDataLength(buffer, 500);
     ck_assert(SOPC_STATUS_OK == status);

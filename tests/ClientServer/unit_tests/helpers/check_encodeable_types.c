@@ -79,13 +79,13 @@ static void checkEncodeableType(SOPC_EncodeableType* encType,
     ck_assert_ptr_nonnull(obj);
 
     // Decode
-    ck_assert_ok(encType->Decode(obj, input));
+    ck_assert_ok(encType->Decode(obj, input, 0));
 
     // Check object content
     encodeableTypeChecker(obj);
 
     // Encode
-    ck_assert_ok(encType->Encode(obj, output));
+    ck_assert_ok(encType->Encode(obj, output, 0));
 
     // Check buffers
     ck_assert_uint_eq(output->position, frameSize);

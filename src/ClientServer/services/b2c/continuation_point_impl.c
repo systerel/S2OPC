@@ -39,7 +39,7 @@ SOPC_ReturnStatus SOPC_ContinuationPointId_Encode(uint64_t continuationPointId, 
         tmpBuf.length = 0;
         tmpBuf.position = 0;
 
-        status = SOPC_UInt64_Write(&continuationPointId, &tmpBuf);
+        status = SOPC_UInt64_Write(&continuationPointId, &tmpBuf, 0);
     }
 
     if (SOPC_STATUS_OK != status)
@@ -67,5 +67,5 @@ SOPC_ReturnStatus SOPC_ContinuationPointId_Decode(const SOPC_ByteString* bs, uin
     tmpBuf.length = sizeof(*continuationPointId);
     tmpBuf.position = 0;
 
-    return SOPC_UInt64_Read(continuationPointId, &tmpBuf);
+    return SOPC_UInt64_Read(continuationPointId, &tmpBuf, 0);
 }

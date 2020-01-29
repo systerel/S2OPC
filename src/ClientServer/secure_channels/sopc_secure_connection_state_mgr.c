@@ -260,10 +260,10 @@ static SOPC_ReturnStatus SC_ClientTransition_ReceivedErrorMsg(SOPC_Buffer* errBu
     SOPC_String_Initialize(&reason);
 
     // Read error code
-    status = SOPC_UInt32_Read(errorStatus, errBuffer);
+    status = SOPC_UInt32_Read(errorStatus, errBuffer, 0);
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_String_ReadWithLimitedLength(&reason, SOPC_TCP_UA_MAX_URL_AND_REASON_LENGTH, errBuffer);
+        status = SOPC_String_ReadWithLimitedLength(&reason, SOPC_TCP_UA_MAX_URL_AND_REASON_LENGTH, errBuffer, 0);
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -310,7 +310,7 @@ static bool SC_Server_SendErrorMsgAndClose(uint32_t scConnectionIdx, SOPC_Status
     {
         // This shall be one of the values listed in OPC UA TCP error codes table
         SOPC_StatusCode normalizedStatus = SOPC_StatusCode_ToTcpErrorCode(errorStatus);
-        status = SOPC_UInt32_Write(&normalizedStatus, buffer);
+        status = SOPC_UInt32_Write(&normalizedStatus, buffer, 0);
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -318,7 +318,7 @@ static bool SC_Server_SendErrorMsgAndClose(uint32_t scConnectionIdx, SOPC_Status
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_String_Write(&tempString, buffer);
+        status = SOPC_String_Write(&tempString, buffer, 0);
     }
 
     if (SOPC_STATUS_OK == status)
@@ -654,23 +654,23 @@ static bool SC_ClientTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
         // Encode Hello message body
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_UInt32_Write(&scConnection->tcpMsgProperties.protocolVersion, msgBuffer);
+            status = SOPC_UInt32_Write(&scConnection->tcpMsgProperties.protocolVersion, msgBuffer, 0);
         }
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_UInt32_Write(&scConnection->tcpMsgProperties.receiveBufferSize, msgBuffer);
+            status = SOPC_UInt32_Write(&scConnection->tcpMsgProperties.receiveBufferSize, msgBuffer, 0);
         }
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_UInt32_Write(&scConnection->tcpMsgProperties.sendBufferSize, msgBuffer);
+            status = SOPC_UInt32_Write(&scConnection->tcpMsgProperties.sendBufferSize, msgBuffer, 0);
         }
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_UInt32_Write(&scConnection->tcpMsgProperties.receiveMaxMessageSize, msgBuffer);
+            status = SOPC_UInt32_Write(&scConnection->tcpMsgProperties.receiveMaxMessageSize, msgBuffer, 0);
         }
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_UInt32_Write(&scConnection->tcpMsgProperties.receiveMaxChunkCount, msgBuffer);
+            status = SOPC_UInt32_Write(&scConnection->tcpMsgProperties.receiveMaxChunkCount, msgBuffer, 0);
         }
         if (SOPC_STATUS_OK == status)
         {
@@ -679,7 +679,7 @@ static bool SC_ClientTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
             status = SOPC_String_CopyFromCString(&tmpString, scConfig->url);
             if (SOPC_STATUS_OK == status)
             {
-                status = SOPC_String_Write(&tmpString, msgBuffer);
+                status = SOPC_String_Write(&tmpString, msgBuffer, 0);
             }
             SOPC_String_Clear(&tmpString);
         }
@@ -732,7 +732,7 @@ static bool SC_ClientTransition_TcpNegotiate_To_ScInit(SOPC_SecureConnection* sc
     // Read the Acknowledge message content
 
     // Read protocol version of server
-    status = SOPC_UInt32_Read(&tempValue, ackMsgBuffer);
+    status = SOPC_UInt32_Read(&tempValue, ackMsgBuffer, 0);
     if (SOPC_STATUS_OK == status)
     {
         // Check protocol version compatible
@@ -747,7 +747,7 @@ static bool SC_ClientTransition_TcpNegotiate_To_ScInit(SOPC_SecureConnection* sc
     if (SOPC_STATUS_OK == status)
     {
         // Read receive buffer size of SERVER
-        status = SOPC_UInt32_Read(&tempValue, ackMsgBuffer);
+        status = SOPC_UInt32_Read(&tempValue, ackMsgBuffer, 0);
         if (SOPC_STATUS_OK == status)
         {
             // Adapt send buffer size if needed
@@ -774,7 +774,7 @@ static bool SC_ClientTransition_TcpNegotiate_To_ScInit(SOPC_SecureConnection* sc
     if (SOPC_STATUS_OK == status)
     {
         // Read sending buffer size of SERVER
-        status = SOPC_UInt32_Read(&tempValue, ackMsgBuffer);
+        status = SOPC_UInt32_Read(&tempValue, ackMsgBuffer, 0);
         if (SOPC_STATUS_OK == status)
         {
             // Check size and adapt receive buffer size if needed
@@ -800,7 +800,7 @@ static bool SC_ClientTransition_TcpNegotiate_To_ScInit(SOPC_SecureConnection* sc
     // MaxMessageSize of SERVER: request received by server => sent by client
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_UInt32_Read(&tempValue, ackMsgBuffer);
+        status = SOPC_UInt32_Read(&tempValue, ackMsgBuffer, 0);
         if (SOPC_STATUS_OK == status)
         {
             if (scConnection->tcpMsgProperties.sendMaxMessageSize > tempValue ||
@@ -815,7 +815,7 @@ static bool SC_ClientTransition_TcpNegotiate_To_ScInit(SOPC_SecureConnection* sc
     // MaxChunkCount of SERVER: request received by server => sent by client
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_UInt32_Read(&tempValue, ackMsgBuffer);
+        status = SOPC_UInt32_Read(&tempValue, ackMsgBuffer, 0);
         if (SOPC_STATUS_OK == status)
         {
             if (scConnection->tcpMsgProperties.sendMaxChunkCount > tempValue ||
@@ -1250,7 +1250,7 @@ static bool SC_ServerTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
     // Read protocol version of server
     if (epConfig != NULL)
     {
-        status = SOPC_UInt32_Read(&tempValue, helloMsgBuffer);
+        status = SOPC_UInt32_Read(&tempValue, helloMsgBuffer, 0);
     }
     else
     {
@@ -1276,7 +1276,7 @@ static bool SC_ServerTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
     if (result)
     {
         // Read receive buffer size of CLIENT
-        status = SOPC_UInt32_Read(&tempValue, helloMsgBuffer);
+        status = SOPC_UInt32_Read(&tempValue, helloMsgBuffer, 0);
         if (SOPC_STATUS_OK == status)
         {
             // Adapt send buffer size if needed
@@ -1304,7 +1304,7 @@ static bool SC_ServerTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
     if (result)
     {
         // Read sending buffer size of CLIENT
-        status = SOPC_UInt32_Read(&tempValue, helloMsgBuffer);
+        status = SOPC_UInt32_Read(&tempValue, helloMsgBuffer, 0);
         if (SOPC_STATUS_OK == status)
         {
             // Check size and adapt receive buffer size if needed
@@ -1332,7 +1332,7 @@ static bool SC_ServerTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
     // MaxMessageSize of CLIENT: response received by client => sent by server
     if (result)
     {
-        status = SOPC_UInt32_Read(&tempValue, helloMsgBuffer);
+        status = SOPC_UInt32_Read(&tempValue, helloMsgBuffer, 0);
         if (SOPC_STATUS_OK == status)
         {
             if (scConnection->tcpMsgProperties.sendMaxMessageSize > tempValue ||
@@ -1351,7 +1351,7 @@ static bool SC_ServerTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
     // MaxChunkCount of CLIENT: response received by client => sent by server
     if (result)
     {
-        status = SOPC_UInt32_Read(&tempValue, helloMsgBuffer);
+        status = SOPC_UInt32_Read(&tempValue, helloMsgBuffer, 0);
         if (SOPC_STATUS_OK == status)
         {
             if (scConnection->tcpMsgProperties.sendMaxChunkCount > tempValue ||
@@ -1370,7 +1370,7 @@ static bool SC_ServerTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
     // EndpointURL
     if (result)
     {
-        status = SOPC_String_ReadWithLimitedLength(&url, SOPC_TCP_UA_MAX_URL_AND_REASON_LENGTH, helloMsgBuffer);
+        status = SOPC_String_ReadWithLimitedLength(&url, SOPC_TCP_UA_MAX_URL_AND_REASON_LENGTH, helloMsgBuffer, 0);
         // Note: this parameter is normally used to forward to an endpoint sharing the same port
         //       but not in the same process.
         //       This is not supported by S2OPC secure channels layer, as consequence expected URL is only the one
@@ -1454,23 +1454,23 @@ static bool SC_ServerTransition_TcpNegotiate_To_ScInit(SOPC_SecureConnection* sc
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_UInt32_Write(&scConnection->tcpMsgProperties.protocolVersion, ackMsgBuffer);
+        status = SOPC_UInt32_Write(&scConnection->tcpMsgProperties.protocolVersion, ackMsgBuffer, 0);
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_UInt32_Write(&scConnection->tcpMsgProperties.receiveBufferSize, ackMsgBuffer);
+        status = SOPC_UInt32_Write(&scConnection->tcpMsgProperties.receiveBufferSize, ackMsgBuffer, 0);
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_UInt32_Write(&scConnection->tcpMsgProperties.sendBufferSize, ackMsgBuffer);
+        status = SOPC_UInt32_Write(&scConnection->tcpMsgProperties.sendBufferSize, ackMsgBuffer, 0);
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_UInt32_Write(&scConnection->tcpMsgProperties.receiveMaxMessageSize, ackMsgBuffer);
+        status = SOPC_UInt32_Write(&scConnection->tcpMsgProperties.receiveMaxMessageSize, ackMsgBuffer, 0);
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_UInt32_Write(&scConnection->tcpMsgProperties.receiveMaxChunkCount, ackMsgBuffer);
+        status = SOPC_UInt32_Write(&scConnection->tcpMsgProperties.receiveMaxChunkCount, ackMsgBuffer, 0);
     }
 
     if (SOPC_STATUS_OK == status)

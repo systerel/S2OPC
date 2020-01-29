@@ -121,7 +121,7 @@ static const SOPC_NodeId* get_direct_parent(const SOPC_NodeId* childNodeId)
     return result;
 }
 
-#define RECURSION_LIMIT SOPC_MAX_VARIANT_NESTED_LEVEL
+#define RECURSION_LIMIT SOPC_MAX_STRING_LENGTH
 
 static bool recursive_is_transitive_subtype(int recursionLimit,
                                             const SOPC_NodeId* originSubtype,
