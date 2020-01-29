@@ -67,7 +67,7 @@ bool CheckEvent(const char* event_type,
     }
     else
     {
-        printf("Unexpected %s event received event=%" PRIi32 " (expected %d), eltId=%" PRIu32
+        printf("Unexpected %s event received event=%" PRIi32 " (expected %" PRIi32 "), eltId=%" PRIu32
                " (expected "
                "%" PRIu32 "), auxParam=%" PRIuPTR " (expected %" PRIuPTR ")\n",
                event_type, event->event, expected_event, event->eltId, expected_id, event->auxParam, expected_aux);
