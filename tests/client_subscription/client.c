@@ -289,7 +289,7 @@ static void datachange_callback(const SOPC_LibSub_ConnectionId c_id,
 #define FOREACH_OPT(x)                                                                                            \
     /* name of flag, is flag required, does flag requires argument, internal flag value, field of the C struct */ \
     x("endpoint", false, required_argument, OPT_ENDPOINT, endpoint_url)                                           \
-        x("policyId", false, required_argument, OPT_POLICYID, policyId)                                           \
+        x("policy-id", false, required_argument, OPT_POLICYID, policyId)                                          \
             x("username", false, required_argument, OPT_USERNAME, username)                                       \
                 x("password", false, required_argument, OPT_PASSWORD, password)                                   \
                     x("publish-period", false, required_argument, OPT_PUBLISH_PERIOD, publish_period_str)         \
@@ -425,7 +425,7 @@ static void print_usage(const char* exe)
     printf("Usage: %s [options] NODE_ID [NODE_ID...]\n", exe);
     printf("Options:\n");
     printf("  --endpoint URL        URL of the endpoint to connect to\n");
-    printf("  --policyId POLICYID  Name of the selected UserIdentityToken policy id\n");
+    printf("  --policy-id POLICYID  Name of the selected UserIdentityToken policy id\n");
     printf("  --username UNAME      Username of the session user\n");
     printf("  --password PWD        Password of the session user\n");
     printf("  --publish-period MILLISEC  Subscription publish cycle, in ms\n");
