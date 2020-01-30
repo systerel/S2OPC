@@ -510,14 +510,14 @@ SOPC_ReturnStatus SOPC_Int32_Read(int32_t* value, SOPC_Buffer* buf, uint32_t nes
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_Buffer_Read((SOPC_Byte*) value, buf, 4);
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        SOPC_EncodeDecode_Int32(value);
-    }
-    else
-    {
-        status = SOPC_STATUS_ENCODING_ERROR;
+        if (SOPC_STATUS_OK == status)
+        {
+            SOPC_EncodeDecode_Int32(value);
+        }
+        else
+        {
+            status = SOPC_STATUS_ENCODING_ERROR;
+        }
     }
     return status;
 }
@@ -578,14 +578,14 @@ SOPC_ReturnStatus SOPC_UInt32_Read(uint32_t* value, SOPC_Buffer* buf, uint32_t n
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_Buffer_Read((SOPC_Byte*) value, buf, 4);
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        SOPC_EncodeDecode_UInt32(value);
-    }
-    else
-    {
-        status = SOPC_STATUS_ENCODING_ERROR;
+        if (SOPC_STATUS_OK == status)
+        {
+            SOPC_EncodeDecode_UInt32(value);
+        }
+        else
+        {
+            status = SOPC_STATUS_ENCODING_ERROR;
+        }
     }
     return status;
 }
@@ -2225,11 +2225,21 @@ static SOPC_ReturnStatus SOPC_Read_Array_WithNestedLevel(SOPC_Buffer* buf,
                                                          SOPC_EncodeableObject_PfnClear* clearFct,
                                                          uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    printf("SOPC_Read_Array_WithNestedLevel - nestedStructLevel: %u\n", nestedStructLevel);
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_Byte* byteArray = NULL;
 
-    if (buf != NULL && noOfElts != NULL && eltsArray != NULL && NULL == *eltsArray && decodeFct != NULL)
+    if (buf == NULL || noOfElts == NULL || eltsArray == NULL || NULL != *eltsArray || decodeFct == NULL)
     {
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    else if (nestedStructLevel > SOPC_MAX_STRUCT_NESTED_LEVEL)
+    {
+        status = SOPC_STATUS_INVALID_STATE;
+    }
+    else
+    {
+        nestedStructLevel++;
         status = SOPC_STATUS_OK;
     }
 
@@ -2277,6 +2287,7 @@ static SOPC_ReturnStatus SOPC_Read_Array_WithNestedLevel(SOPC_Buffer* buf,
             pos = idx * sizeOfElt;
             initializeFct(&(byteArray[pos]));
             status = decodeFct(&(byteArray[pos]), buf, nestedStructLevel);
+            printf("SOPC_Read_Array_WithNestedLevel - status: %u\n", status);
         }
 
         if (SOPC_STATUS_OK != status)
@@ -2294,6 +2305,8 @@ static SOPC_ReturnStatus SOPC_Read_Array_WithNestedLevel(SOPC_Buffer* buf,
             *noOfElts = 0;
         }
     }
+
+    printf("SOPC_Read_Array_WithNestedLevel - status: %u, nestedStructLevel: %u\n", status, nestedStructLevel);
 
     return status;
 }
@@ -2611,7 +2624,7 @@ static SOPC_ReturnStatus WriteVariantArrayBuiltInType(SOPC_Buffer* buf,
             arr = array->VariantArr;
             status = SOPC_Write_Array_WithNestedLevel(buf, length, &arr, sizeof(SOPC_Variant), SOPC_Variant_WriteAux_Nested,
                                                       nestedStructLevel);
-            printf("WriteVariantArrayBuiltInType - 25 - status: %u\n", status);
+            printf("WriteVariantArrayBuiltInType - 25 - status: %u, nestedStructLevel: %u\n", status, nestedStructLevel);
             break;
         case SOPC_DiagnosticInfo_Id:
             arr = array->DiagInfoArr;
@@ -2654,6 +2667,7 @@ static SOPC_ReturnStatus SOPC_Variant_Write_Internal(const SOPC_Variant* variant
     }
     else
     {
+        nestedStructLevel++;
         status = SOPC_STATUS_OK;
     }
 
@@ -2992,6 +3006,7 @@ static SOPC_ReturnStatus ReadVariantArrayBuiltInType(SOPC_Buffer* buf,
                                                      int32_t* length,
                                                      uint32_t nestedStructLevel)
 {
+    printf("ReadVariantArrayBuiltInType\n");
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     switch (builtInTypeId)
     {
@@ -3106,6 +3121,7 @@ static SOPC_ReturnStatus ReadVariantArrayBuiltInType(SOPC_Buffer* buf,
         status = SOPC_STATUS_NOK;
         break;
     }
+    printf("ReadVariantArrayBuiltInType - status: %u, nestedStructLevel: %u\n", status, nestedStructLevel);
     return status;
 }
 
@@ -3132,7 +3148,7 @@ static SOPC_ReturnStatus SOPC_Variant_Read_Internal(SOPC_Variant* variant,
     }
     else
     {
-        // Increment of nestedStructLevel is handled by subcalls
+        nestedStructLevel++;
         status = SOPC_Byte_Read(&encodingByte, buf, nestedStructLevel);
     }
 

@@ -3129,7 +3129,7 @@ START_TEST(test_ua_decoder_allocation_limit)
     ck_assert(SOPC_STATUS_OK == status);
     // Read variant
     status = SOPC_Variant_Read(&v, buffer, 0);
-    ck_assert(SOPC_STATUS_OUT_OF_MEMORY == status);
+    ck_assert_int_eq(SOPC_STATUS_OUT_OF_MEMORY, status);
 
     // Reset position of buffer
     status = SOPC_Buffer_ResetAfterPosition(buffer, 0);
@@ -3138,9 +3138,9 @@ START_TEST(test_ua_decoder_allocation_limit)
     /* LIMIT OF NESTED VARIANT ELEMENTS */
 
     // ENCODING A VARIANT WITH SOPC_MAX_STRUCT_NESTED_LEVEL nested levels
-    // Variant/Array nested so limit has to be divided by 2
+    // Variant/Array nested so limit has to be divided by 2, minus 1 for fields
     pvar = &v;
-    for (idx = 1; idx <= SOPC_MAX_STRUCT_NESTED_LEVEL / 2; idx++)
+    for (idx = 1; idx <= SOPC_MAX_STRUCT_NESTED_LEVEL / 2 - 1; idx++)
     {
         pvar->BuiltInTypeId = SOPC_Variant_Id;
         pvar->ArrayType = SOPC_VariantArrayType_Array;
@@ -3194,9 +3194,9 @@ START_TEST(test_ua_decoder_allocation_limit)
     ck_assert(SOPC_STATUS_OK == status);
 
     // ENCODING A DATAVALUE WITH SOPC_MAX_STRUCT_NESTED_LEVEL Variant nested levels
-    // Variant/DataValue nested so limit has to be divided by 2
+    // Variant/DataValue nested so limit has to be divided by 2, minus one for fields
     pvar = &v;
-    for (idx = 1; idx <= SOPC_MAX_STRUCT_NESTED_LEVEL / 2; idx++)
+    for (idx = 1; idx <= SOPC_MAX_STRUCT_NESTED_LEVEL / 2 - 1; idx++)
     {
         pvar->BuiltInTypeId = SOPC_DataValue_Id;
         pvar->ArrayType = SOPC_VariantArrayType_SingleValue;
@@ -3228,9 +3228,10 @@ START_TEST(test_ua_decoder_allocation_limit)
 
     /* LIMIT + 1 OF NESTED VARIANT ELEMENTS */
 
-    // TEST ENCODER FAILURE OF A VARIANT WITH SOPC_MAX_STRUCT_NESTED_LEVEL + 1 nested levels
+    // TEST ENCODER FAILURE OF A VARIANT WITH SOPC_MAX_STRUCT_NESTED_LEVEL /2 nested levels
+    // Nested Variant/Datavalue, so limit has to be divided by 2 minus 1 for fields
     pvar = &v;
-    for (idx = 1; idx <= 2 * SOPC_MAX_STRUCT_NESTED_LEVEL + 10; idx++)
+    for (idx = 1; idx <= SOPC_MAX_STRUCT_NESTED_LEVEL / 2; idx++)
     {
         pvar->BuiltInTypeId = SOPC_DataValue_Id;
         pvar->ArrayType = SOPC_VariantArrayType_SingleValue;
@@ -3252,10 +3253,11 @@ START_TEST(test_ua_decoder_allocation_limit)
     status = SOPC_Buffer_ResetAfterPosition(buffer, 0);
     ck_assert(SOPC_STATUS_OK == status);
 
-    // MANUAL ENCODING A VARIANT WITH SOPC_MAX_STRUCT_NESTED_LEVEL + 1 nested levels
+    // MANUAL ENCODING A VARIANT WITH SOPC_MAX_STRUCT_NESTED_LEVEL/2 nested levels
+    // Nested Variant/Array so limit has to be divided by 2
     encodingByte = 152; // Variant Id + 2^7 bit to indicate an array
     length = 1;
-    for (idx = 1; idx <= SOPC_MAX_STRUCT_NESTED_LEVEL + 1; idx++)
+    for (idx = 1; idx <= SOPC_MAX_STRUCT_NESTED_LEVEL / 2; idx++)
     {
         // EncodingMask byte
         status = SOPC_Byte_Write(&encodingByte, buffer, 0);
@@ -3280,7 +3282,7 @@ START_TEST(test_ua_decoder_allocation_limit)
     ck_assert(SOPC_STATUS_OK == status);
     // Read variant
     status = SOPC_Variant_Read(&v, buffer, 0);
-    ck_assert(SOPC_STATUS_INVALID_STATE == status);
+    ck_assert_int_eq(SOPC_STATUS_INVALID_STATE, status);
 
     // Reset position of buffer
     status = SOPC_Buffer_ResetAfterPosition(buffer, 0);
