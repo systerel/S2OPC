@@ -3267,7 +3267,8 @@ static bool SC_Chunks_EncodeScMessageHeaderAdditionalField(SOPC_SecureConnection
                                                            SOPC_Buffer* nonEncryptedBuffer,
                                                            SOPC_StatusCode* errorStatus)
 {
-    SOPC_StatusCode status = SOPC_UInt32_Write(&scConnection->currentSecurityToken.secureChannelId, nonEncryptedBuffer, 0);
+    SOPC_StatusCode status =
+        SOPC_UInt32_Write(&scConnection->currentSecurityToken.secureChannelId, nonEncryptedBuffer, 0);
     if (SOPC_STATUS_OK != status)
     {
         *errorStatus = OpcUa_BadEncodingError;

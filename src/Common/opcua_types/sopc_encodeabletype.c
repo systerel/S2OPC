@@ -27,8 +27,8 @@
 #include "sopc_helper_string.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
-#include "sopc_types.h"
 #include "sopc_toolkit_config_constants.h"
+#include "sopc_types.h"
 
 const char* nullType = "NULL";
 const char* noNameType = "NoName";
@@ -230,7 +230,10 @@ void SOPC_EncodeableObject_Clear(SOPC_EncodeableType* type, void* pValue)
     }
 }
 
-SOPC_ReturnStatus SOPC_EncodeableObject_Encode(const SOPC_EncodeableType* type, const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus SOPC_EncodeableObject_Encode(const SOPC_EncodeableType* type,
+                                               const void* pValue,
+                                               SOPC_Buffer* buf,
+                                               uint32_t nestedStructLevel)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
@@ -294,7 +297,10 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Encode(const SOPC_EncodeableType* type, 
     return status;
 }
 
-SOPC_ReturnStatus SOPC_EncodeableObject_Decode(SOPC_EncodeableType* type, void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus SOPC_EncodeableObject_Decode(SOPC_EncodeableType* type,
+                                               void* pValue,
+                                               SOPC_Buffer* buf,
+                                               uint32_t nestedStructLevel)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
 
@@ -349,7 +355,8 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Decode(SOPC_EncodeableType* type, void* 
             initFunction = getPfnInitialize(arrayDesc);
             clearFunction = getPfnClear(arrayDesc);
 
-            status = SOPC_Read_Array(buf, pLength, pArray, size, decodeFunction, initFunction, clearFunction, nestedStructLevel);
+            status = SOPC_Read_Array(buf, pLength, pArray, size, decodeFunction, initFunction, clearFunction,
+                                     nestedStructLevel);
         }
         else
         {

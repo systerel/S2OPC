@@ -225,7 +225,10 @@ SOPC_ReturnStatus SOPC_String_Write(const SOPC_String* str, SOPC_Buffer* buf, ui
 SOPC_ReturnStatus SOPC_String_WriteAux(const void* value, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 SOPC_ReturnStatus SOPC_String_Read(SOPC_String* str, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 // Read with a limited length, returns SOPC_WOULD_BLOCK if length is more than restricted
-SOPC_ReturnStatus SOPC_String_ReadWithLimitedLength(SOPC_String* str, int32_t maxLength, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus SOPC_String_ReadWithLimitedLength(SOPC_String* str,
+                                                    int32_t maxLength,
+                                                    SOPC_Buffer* buf,
+                                                    uint32_t nestedStructLevel);
 SOPC_ReturnStatus SOPC_String_ReadAux(void* value, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 SOPC_ReturnStatus SOPC_XmlElement_Write(const SOPC_XmlElement* xml, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 SOPC_ReturnStatus SOPC_XmlElement_WriteAux(const void* value, SOPC_Buffer* buf, uint32_t nestedStructLevel);
@@ -239,29 +242,43 @@ SOPC_ReturnStatus SOPC_NodeId_Write(const SOPC_NodeId* nodeId, SOPC_Buffer* buf,
 SOPC_ReturnStatus SOPC_NodeId_WriteAux(const void* value, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 SOPC_ReturnStatus SOPC_NodeId_Read(SOPC_NodeId* nodeId, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 SOPC_ReturnStatus SOPC_NodeId_ReadAux(void* value, SOPC_Buffer* buf, uint32_t nestedStructLevel);
-SOPC_ReturnStatus SOPC_ExpandedNodeId_Write(const SOPC_ExpandedNodeId* expNodeId, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus SOPC_ExpandedNodeId_Write(const SOPC_ExpandedNodeId* expNodeId,
+                                            SOPC_Buffer* buf,
+                                            uint32_t nestedStructLevel);
 SOPC_ReturnStatus SOPC_ExpandedNodeId_WriteAux(const void* value, SOPC_Buffer* buf, uint32_t nestedStructLevel);
-SOPC_ReturnStatus SOPC_ExpandedNodeId_Read(SOPC_ExpandedNodeId* expNodeId, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus SOPC_ExpandedNodeId_Read(SOPC_ExpandedNodeId* expNodeId,
+                                           SOPC_Buffer* buf,
+                                           uint32_t nestedStructLevel);
 SOPC_ReturnStatus SOPC_ExpandedNodeId_ReadAux(void* value, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 SOPC_ReturnStatus SOPC_StatusCode_Write(const SOPC_StatusCode* status, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 SOPC_ReturnStatus SOPC_StatusCode_WriteAux(const void* value, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 SOPC_ReturnStatus SOPC_StatusCode_Read(SOPC_StatusCode* status, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 SOPC_ReturnStatus SOPC_StatusCode_ReadAux(void* value, SOPC_Buffer* buf, uint32_t nestedStructLevel);
-SOPC_ReturnStatus SOPC_DiagnosticInfo_Write(const SOPC_DiagnosticInfo* diagInfo, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus SOPC_DiagnosticInfo_Write(const SOPC_DiagnosticInfo* diagInfo,
+                                            SOPC_Buffer* buf,
+                                            uint32_t nestedStructLevel);
 SOPC_ReturnStatus SOPC_DiagnosticInfo_WriteAux(const void* value, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 SOPC_ReturnStatus SOPC_DiagnosticInfo_Read(SOPC_DiagnosticInfo* diagInfo, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 SOPC_ReturnStatus SOPC_DiagnosticInfo_ReadAux(void* value, SOPC_Buffer* buf, uint32_t nestedStructLevel);
-SOPC_ReturnStatus SOPC_QualifiedName_Write(const SOPC_QualifiedName* qname, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus SOPC_QualifiedName_Write(const SOPC_QualifiedName* qname,
+                                           SOPC_Buffer* buf,
+                                           uint32_t nestedStructLevel);
 SOPC_ReturnStatus SOPC_QualifiedName_WriteAux(const void* value, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 SOPC_ReturnStatus SOPC_QualifiedName_Read(SOPC_QualifiedName* qname, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 SOPC_ReturnStatus SOPC_QualifiedName_ReadAux(void* value, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 // Note: write only the defaultLocale and defaultText fields (should be the ones to send)
-SOPC_ReturnStatus SOPC_LocalizedText_Write(const SOPC_LocalizedText* localizedText, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus SOPC_LocalizedText_Write(const SOPC_LocalizedText* localizedText,
+                                           SOPC_Buffer* buf,
+                                           uint32_t nestedStructLevel);
 SOPC_ReturnStatus SOPC_LocalizedText_WriteAux(const void* value, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 // Note: set only the defaultLocale and defaultText fields since unique value received
-SOPC_ReturnStatus SOPC_LocalizedText_Read(SOPC_LocalizedText* localizedText, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus SOPC_LocalizedText_Read(SOPC_LocalizedText* localizedText,
+                                          SOPC_Buffer* buf,
+                                          uint32_t nestedStructLevel);
 SOPC_ReturnStatus SOPC_LocalizedText_ReadAux(void* value, SOPC_Buffer* buf, uint32_t nestedStructLevel);
-SOPC_ReturnStatus SOPC_ExtensionObject_Write(const SOPC_ExtensionObject* extObj, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus SOPC_ExtensionObject_Write(const SOPC_ExtensionObject* extObj,
+                                             SOPC_Buffer* buf,
+                                             uint32_t nestedStructLevel);
 SOPC_ReturnStatus SOPC_ExtensionObject_WriteAux(const void* value, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 SOPC_ReturnStatus SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 SOPC_ReturnStatus SOPC_ExtensionObject_ReadAux(void* value, SOPC_Buffer* buf, uint32_t nestedStructLevel);

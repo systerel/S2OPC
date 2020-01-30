@@ -867,7 +867,9 @@ void OpcUa_FindServersOnNetworkRequest_Initialize(void* pValue);
 
 void OpcUa_FindServersOnNetworkRequest_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_FindServersOnNetworkRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_FindServersOnNetworkRequest_Encode(const void* pValue,
+                                                           SOPC_Buffer* buf,
+                                                           uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_FindServersOnNetworkRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -895,7 +897,9 @@ void OpcUa_FindServersOnNetworkResponse_Initialize(void* pValue);
 
 void OpcUa_FindServersOnNetworkResponse_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_FindServersOnNetworkResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_FindServersOnNetworkResponse_Encode(const void* pValue,
+                                                            SOPC_Buffer* buf,
+                                                            uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_FindServersOnNetworkResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -1160,7 +1164,9 @@ void OpcUa_MdnsDiscoveryConfiguration_Initialize(void* pValue);
 
 void OpcUa_MdnsDiscoveryConfiguration_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_MdnsDiscoveryConfiguration_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_MdnsDiscoveryConfiguration_Encode(const void* pValue,
+                                                          SOPC_Buffer* buf,
+                                                          uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_MdnsDiscoveryConfiguration_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -1217,7 +1223,9 @@ void OpcUa_RegisterServer2Response_Initialize(void* pValue);
 
 void OpcUa_RegisterServer2Response_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_RegisterServer2Response_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_RegisterServer2Response_Encode(const void* pValue,
+                                                       SOPC_Buffer* buf,
+                                                       uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_RegisterServer2Response_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -1289,7 +1297,9 @@ void OpcUa_OpenSecureChannelRequest_Initialize(void* pValue);
 
 void OpcUa_OpenSecureChannelRequest_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_OpenSecureChannelRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_OpenSecureChannelRequest_Encode(const void* pValue,
+                                                        SOPC_Buffer* buf,
+                                                        uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_OpenSecureChannelRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -1317,7 +1327,9 @@ void OpcUa_OpenSecureChannelResponse_Initialize(void* pValue);
 
 void OpcUa_OpenSecureChannelResponse_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_OpenSecureChannelResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_OpenSecureChannelResponse_Encode(const void* pValue,
+                                                         SOPC_Buffer* buf,
+                                                         uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_OpenSecureChannelResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -1343,7 +1355,9 @@ void OpcUa_CloseSecureChannelRequest_Initialize(void* pValue);
 
 void OpcUa_CloseSecureChannelRequest_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_CloseSecureChannelRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_CloseSecureChannelRequest_Encode(const void* pValue,
+                                                         SOPC_Buffer* buf,
+                                                         uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_CloseSecureChannelRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -1368,7 +1382,9 @@ void OpcUa_CloseSecureChannelResponse_Initialize(void* pValue);
 
 void OpcUa_CloseSecureChannelResponse_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_CloseSecureChannelResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_CloseSecureChannelResponse_Encode(const void* pValue,
+                                                          SOPC_Buffer* buf,
+                                                          uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_CloseSecureChannelResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -1395,7 +1411,9 @@ void OpcUa_SignedSoftwareCertificate_Initialize(void* pValue);
 
 void OpcUa_SignedSoftwareCertificate_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_SignedSoftwareCertificate_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_SignedSoftwareCertificate_Encode(const void* pValue,
+                                                         SOPC_Buffer* buf,
+                                                         uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_SignedSoftwareCertificate_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -1710,7 +1728,9 @@ void OpcUa_ActivateSessionResponse_Initialize(void* pValue);
 
 void OpcUa_ActivateSessionResponse_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_ActivateSessionResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_ActivateSessionResponse_Encode(const void* pValue,
+                                                       SOPC_Buffer* buf,
+                                                       uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_ActivateSessionResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -2084,7 +2104,9 @@ void OpcUa_ReferenceTypeAttributes_Initialize(void* pValue);
 
 void OpcUa_ReferenceTypeAttributes_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_ReferenceTypeAttributes_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_ReferenceTypeAttributes_Encode(const void* pValue,
+                                                       SOPC_Buffer* buf,
+                                                       uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_ReferenceTypeAttributes_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -2485,7 +2507,9 @@ void OpcUa_DeleteReferencesRequest_Initialize(void* pValue);
 
 void OpcUa_DeleteReferencesRequest_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_DeleteReferencesRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_DeleteReferencesRequest_Encode(const void* pValue,
+                                                       SOPC_Buffer* buf,
+                                                       uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_DeleteReferencesRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -2514,7 +2538,9 @@ void OpcUa_DeleteReferencesResponse_Initialize(void* pValue);
 
 void OpcUa_DeleteReferencesResponse_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_DeleteReferencesResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_DeleteReferencesResponse_Encode(const void* pValue,
+                                                        SOPC_Buffer* buf,
+                                                        uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_DeleteReferencesResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -2977,9 +3003,13 @@ void OpcUa_TranslateBrowsePathsToNodeIdsRequest_Initialize(void* pValue);
 
 void OpcUa_TranslateBrowsePathsToNodeIdsRequest_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_TranslateBrowsePathsToNodeIdsRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_TranslateBrowsePathsToNodeIdsRequest_Encode(const void* pValue,
+                                                                    SOPC_Buffer* buf,
+                                                                    uint32_t nestedStructLevel);
 
-SOPC_ReturnStatus OpcUa_TranslateBrowsePathsToNodeIdsRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_TranslateBrowsePathsToNodeIdsRequest_Decode(void* pValue,
+                                                                    SOPC_Buffer* buf,
+                                                                    uint32_t nestedStructLevel);
 
 #endif
 
@@ -3006,9 +3036,13 @@ void OpcUa_TranslateBrowsePathsToNodeIdsResponse_Initialize(void* pValue);
 
 void OpcUa_TranslateBrowsePathsToNodeIdsResponse_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_TranslateBrowsePathsToNodeIdsResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_TranslateBrowsePathsToNodeIdsResponse_Encode(const void* pValue,
+                                                                     SOPC_Buffer* buf,
+                                                                     uint32_t nestedStructLevel);
 
-SOPC_ReturnStatus OpcUa_TranslateBrowsePathsToNodeIdsResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_TranslateBrowsePathsToNodeIdsResponse_Decode(void* pValue,
+                                                                     SOPC_Buffer* buf,
+                                                                     uint32_t nestedStructLevel);
 
 #endif
 #endif
@@ -3114,7 +3148,9 @@ void OpcUa_UnregisterNodesResponse_Initialize(void* pValue);
 
 void OpcUa_UnregisterNodesResponse_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_UnregisterNodesResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_UnregisterNodesResponse_Encode(const void* pValue,
+                                                       SOPC_Buffer* buf,
+                                                       uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_UnregisterNodesResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -3560,7 +3596,9 @@ void OpcUa_ContentFilterElementResult_Initialize(void* pValue);
 
 void OpcUa_ContentFilterElementResult_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_ContentFilterElementResult_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_ContentFilterElementResult_Encode(const void* pValue,
+                                                          SOPC_Buffer* buf,
+                                                          uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_ContentFilterElementResult_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -4454,7 +4492,9 @@ void OpcUa_UpdateStructureDataDetails_Initialize(void* pValue);
 
 void OpcUa_UpdateStructureDataDetails_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_UpdateStructureDataDetails_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_UpdateStructureDataDetails_Encode(const void* pValue,
+                                                          SOPC_Buffer* buf,
+                                                          uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_UpdateStructureDataDetails_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -4511,7 +4551,9 @@ void OpcUa_DeleteRawModifiedDetails_Initialize(void* pValue);
 
 void OpcUa_DeleteRawModifiedDetails_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_DeleteRawModifiedDetails_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_DeleteRawModifiedDetails_Encode(const void* pValue,
+                                                        SOPC_Buffer* buf,
+                                                        uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_DeleteRawModifiedDetails_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -4976,7 +5018,9 @@ void OpcUa_MonitoredItemCreateRequest_Initialize(void* pValue);
 
 void OpcUa_MonitoredItemCreateRequest_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_MonitoredItemCreateRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_MonitoredItemCreateRequest_Encode(const void* pValue,
+                                                          SOPC_Buffer* buf,
+                                                          uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_MonitoredItemCreateRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -5005,7 +5049,9 @@ void OpcUa_MonitoredItemCreateResult_Initialize(void* pValue);
 
 void OpcUa_MonitoredItemCreateResult_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_MonitoredItemCreateResult_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_MonitoredItemCreateResult_Encode(const void* pValue,
+                                                         SOPC_Buffer* buf,
+                                                         uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_MonitoredItemCreateResult_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -5034,7 +5080,9 @@ void OpcUa_CreateMonitoredItemsRequest_Initialize(void* pValue);
 
 void OpcUa_CreateMonitoredItemsRequest_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_CreateMonitoredItemsRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_CreateMonitoredItemsRequest_Encode(const void* pValue,
+                                                           SOPC_Buffer* buf,
+                                                           uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_CreateMonitoredItemsRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -5063,7 +5111,9 @@ void OpcUa_CreateMonitoredItemsResponse_Initialize(void* pValue);
 
 void OpcUa_CreateMonitoredItemsResponse_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_CreateMonitoredItemsResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_CreateMonitoredItemsResponse_Encode(const void* pValue,
+                                                            SOPC_Buffer* buf,
+                                                            uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_CreateMonitoredItemsResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -5090,7 +5140,9 @@ void OpcUa_MonitoredItemModifyRequest_Initialize(void* pValue);
 
 void OpcUa_MonitoredItemModifyRequest_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_MonitoredItemModifyRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_MonitoredItemModifyRequest_Encode(const void* pValue,
+                                                          SOPC_Buffer* buf,
+                                                          uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_MonitoredItemModifyRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -5118,7 +5170,9 @@ void OpcUa_MonitoredItemModifyResult_Initialize(void* pValue);
 
 void OpcUa_MonitoredItemModifyResult_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_MonitoredItemModifyResult_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_MonitoredItemModifyResult_Encode(const void* pValue,
+                                                         SOPC_Buffer* buf,
+                                                         uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_MonitoredItemModifyResult_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -5147,7 +5201,9 @@ void OpcUa_ModifyMonitoredItemsRequest_Initialize(void* pValue);
 
 void OpcUa_ModifyMonitoredItemsRequest_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_ModifyMonitoredItemsRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_ModifyMonitoredItemsRequest_Encode(const void* pValue,
+                                                           SOPC_Buffer* buf,
+                                                           uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_ModifyMonitoredItemsRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -5176,7 +5232,9 @@ void OpcUa_ModifyMonitoredItemsResponse_Initialize(void* pValue);
 
 void OpcUa_ModifyMonitoredItemsResponse_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_ModifyMonitoredItemsResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_ModifyMonitoredItemsResponse_Encode(const void* pValue,
+                                                            SOPC_Buffer* buf,
+                                                            uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_ModifyMonitoredItemsResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -5206,7 +5264,9 @@ void OpcUa_SetMonitoringModeRequest_Initialize(void* pValue);
 
 void OpcUa_SetMonitoringModeRequest_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_SetMonitoringModeRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_SetMonitoringModeRequest_Encode(const void* pValue,
+                                                        SOPC_Buffer* buf,
+                                                        uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_SetMonitoringModeRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -5235,7 +5295,9 @@ void OpcUa_SetMonitoringModeResponse_Initialize(void* pValue);
 
 void OpcUa_SetMonitoringModeResponse_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_SetMonitoringModeResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_SetMonitoringModeResponse_Encode(const void* pValue,
+                                                         SOPC_Buffer* buf,
+                                                         uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_SetMonitoringModeResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -5329,7 +5391,9 @@ void OpcUa_DeleteMonitoredItemsRequest_Initialize(void* pValue);
 
 void OpcUa_DeleteMonitoredItemsRequest_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_DeleteMonitoredItemsRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_DeleteMonitoredItemsRequest_Encode(const void* pValue,
+                                                           SOPC_Buffer* buf,
+                                                           uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_DeleteMonitoredItemsRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -5358,7 +5422,9 @@ void OpcUa_DeleteMonitoredItemsResponse_Initialize(void* pValue);
 
 void OpcUa_DeleteMonitoredItemsResponse_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_DeleteMonitoredItemsResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_DeleteMonitoredItemsResponse_Encode(const void* pValue,
+                                                            SOPC_Buffer* buf,
+                                                            uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_DeleteMonitoredItemsResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -5390,7 +5456,9 @@ void OpcUa_CreateSubscriptionRequest_Initialize(void* pValue);
 
 void OpcUa_CreateSubscriptionRequest_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_CreateSubscriptionRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_CreateSubscriptionRequest_Encode(const void* pValue,
+                                                         SOPC_Buffer* buf,
+                                                         uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_CreateSubscriptionRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -5419,7 +5487,9 @@ void OpcUa_CreateSubscriptionResponse_Initialize(void* pValue);
 
 void OpcUa_CreateSubscriptionResponse_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_CreateSubscriptionResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_CreateSubscriptionResponse_Encode(const void* pValue,
+                                                          SOPC_Buffer* buf,
+                                                          uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_CreateSubscriptionResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -5451,7 +5521,9 @@ void OpcUa_ModifySubscriptionRequest_Initialize(void* pValue);
 
 void OpcUa_ModifySubscriptionRequest_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_ModifySubscriptionRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_ModifySubscriptionRequest_Encode(const void* pValue,
+                                                         SOPC_Buffer* buf,
+                                                         uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_ModifySubscriptionRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -5479,7 +5551,9 @@ void OpcUa_ModifySubscriptionResponse_Initialize(void* pValue);
 
 void OpcUa_ModifySubscriptionResponse_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_ModifySubscriptionResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_ModifySubscriptionResponse_Encode(const void* pValue,
+                                                          SOPC_Buffer* buf,
+                                                          uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_ModifySubscriptionResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -5508,7 +5582,9 @@ void OpcUa_SetPublishingModeRequest_Initialize(void* pValue);
 
 void OpcUa_SetPublishingModeRequest_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_SetPublishingModeRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_SetPublishingModeRequest_Encode(const void* pValue,
+                                                        SOPC_Buffer* buf,
+                                                        uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_SetPublishingModeRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -5537,7 +5613,9 @@ void OpcUa_SetPublishingModeResponse_Initialize(void* pValue);
 
 void OpcUa_SetPublishingModeResponse_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_SetPublishingModeResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_SetPublishingModeResponse_Encode(const void* pValue,
+                                                         SOPC_Buffer* buf,
+                                                         uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_SetPublishingModeResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -5592,7 +5670,9 @@ void OpcUa_MonitoredItemNotification_Initialize(void* pValue);
 
 void OpcUa_MonitoredItemNotification_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_MonitoredItemNotification_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_MonitoredItemNotification_Encode(const void* pValue,
+                                                         SOPC_Buffer* buf,
+                                                         uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_MonitoredItemNotification_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -5699,7 +5779,9 @@ void OpcUa_StatusChangeNotification_Initialize(void* pValue);
 
 void OpcUa_StatusChangeNotification_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_StatusChangeNotification_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_StatusChangeNotification_Encode(const void* pValue,
+                                                        SOPC_Buffer* buf,
+                                                        uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_StatusChangeNotification_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -5725,7 +5807,9 @@ void OpcUa_SubscriptionAcknowledgement_Initialize(void* pValue);
 
 void OpcUa_SubscriptionAcknowledgement_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_SubscriptionAcknowledgement_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_SubscriptionAcknowledgement_Encode(const void* pValue,
+                                                           SOPC_Buffer* buf,
+                                                           uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_SubscriptionAcknowledgement_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -5896,7 +5980,9 @@ void OpcUa_TransferSubscriptionsRequest_Initialize(void* pValue);
 
 void OpcUa_TransferSubscriptionsRequest_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_TransferSubscriptionsRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_TransferSubscriptionsRequest_Encode(const void* pValue,
+                                                            SOPC_Buffer* buf,
+                                                            uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_TransferSubscriptionsRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -5925,9 +6011,13 @@ void OpcUa_TransferSubscriptionsResponse_Initialize(void* pValue);
 
 void OpcUa_TransferSubscriptionsResponse_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_TransferSubscriptionsResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_TransferSubscriptionsResponse_Encode(const void* pValue,
+                                                             SOPC_Buffer* buf,
+                                                             uint32_t nestedStructLevel);
 
-SOPC_ReturnStatus OpcUa_TransferSubscriptionsResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_TransferSubscriptionsResponse_Decode(void* pValue,
+                                                             SOPC_Buffer* buf,
+                                                             uint32_t nestedStructLevel);
 
 #endif
 #endif
@@ -5953,7 +6043,9 @@ void OpcUa_DeleteSubscriptionsRequest_Initialize(void* pValue);
 
 void OpcUa_DeleteSubscriptionsRequest_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_DeleteSubscriptionsRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_DeleteSubscriptionsRequest_Encode(const void* pValue,
+                                                          SOPC_Buffer* buf,
+                                                          uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_DeleteSubscriptionsRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -5982,7 +6074,9 @@ void OpcUa_DeleteSubscriptionsResponse_Initialize(void* pValue);
 
 void OpcUa_DeleteSubscriptionsResponse_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_DeleteSubscriptionsResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_DeleteSubscriptionsResponse_Encode(const void* pValue,
+                                                           SOPC_Buffer* buf,
+                                                           uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_DeleteSubscriptionsResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -6090,7 +6184,9 @@ void OpcUa_RedundantServerDataType_Initialize(void* pValue);
 
 void OpcUa_RedundantServerDataType_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_RedundantServerDataType_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_RedundantServerDataType_Encode(const void* pValue,
+                                                       SOPC_Buffer* buf,
+                                                       uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_RedundantServerDataType_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -6116,7 +6212,9 @@ void OpcUa_EndpointUrlListDataType_Initialize(void* pValue);
 
 void OpcUa_EndpointUrlListDataType_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_EndpointUrlListDataType_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_EndpointUrlListDataType_Encode(const void* pValue,
+                                                       SOPC_Buffer* buf,
+                                                       uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_EndpointUrlListDataType_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -6171,9 +6269,13 @@ void OpcUa_SamplingIntervalDiagnosticsDataType_Initialize(void* pValue);
 
 void OpcUa_SamplingIntervalDiagnosticsDataType_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_SamplingIntervalDiagnosticsDataType_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_SamplingIntervalDiagnosticsDataType_Encode(const void* pValue,
+                                                                   SOPC_Buffer* buf,
+                                                                   uint32_t nestedStructLevel);
 
-SOPC_ReturnStatus OpcUa_SamplingIntervalDiagnosticsDataType_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_SamplingIntervalDiagnosticsDataType_Decode(void* pValue,
+                                                                   SOPC_Buffer* buf,
+                                                                   uint32_t nestedStructLevel);
 
 #endif
 
@@ -6207,9 +6309,13 @@ void OpcUa_ServerDiagnosticsSummaryDataType_Initialize(void* pValue);
 
 void OpcUa_ServerDiagnosticsSummaryDataType_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_ServerDiagnosticsSummaryDataType_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_ServerDiagnosticsSummaryDataType_Encode(const void* pValue,
+                                                                SOPC_Buffer* buf,
+                                                                uint32_t nestedStructLevel);
 
-SOPC_ReturnStatus OpcUa_ServerDiagnosticsSummaryDataType_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_ServerDiagnosticsSummaryDataType_Decode(void* pValue,
+                                                                SOPC_Buffer* buf,
+                                                                uint32_t nestedStructLevel);
 
 #endif
 
@@ -6331,7 +6437,9 @@ void OpcUa_SessionDiagnosticsDataType_Initialize(void* pValue);
 
 void OpcUa_SessionDiagnosticsDataType_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_SessionDiagnosticsDataType_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_SessionDiagnosticsDataType_Encode(const void* pValue,
+                                                          SOPC_Buffer* buf,
+                                                          uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_SessionDiagnosticsDataType_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -6365,9 +6473,13 @@ void OpcUa_SessionSecurityDiagnosticsDataType_Initialize(void* pValue);
 
 void OpcUa_SessionSecurityDiagnosticsDataType_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_SessionSecurityDiagnosticsDataType_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_SessionSecurityDiagnosticsDataType_Encode(const void* pValue,
+                                                                  SOPC_Buffer* buf,
+                                                                  uint32_t nestedStructLevel);
 
-SOPC_ReturnStatus OpcUa_SessionSecurityDiagnosticsDataType_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_SessionSecurityDiagnosticsDataType_Decode(void* pValue,
+                                                                  SOPC_Buffer* buf,
+                                                                  uint32_t nestedStructLevel);
 
 #endif
 
@@ -6446,9 +6558,13 @@ void OpcUa_SubscriptionDiagnosticsDataType_Initialize(void* pValue);
 
 void OpcUa_SubscriptionDiagnosticsDataType_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_SubscriptionDiagnosticsDataType_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_SubscriptionDiagnosticsDataType_Encode(const void* pValue,
+                                                               SOPC_Buffer* buf,
+                                                               uint32_t nestedStructLevel);
 
-SOPC_ReturnStatus OpcUa_SubscriptionDiagnosticsDataType_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_SubscriptionDiagnosticsDataType_Decode(void* pValue,
+                                                               SOPC_Buffer* buf,
+                                                               uint32_t nestedStructLevel);
 
 #endif
 
@@ -6489,7 +6605,9 @@ void OpcUa_ModelChangeStructureDataType_Initialize(void* pValue);
 
 void OpcUa_ModelChangeStructureDataType_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_ModelChangeStructureDataType_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_ModelChangeStructureDataType_Encode(const void* pValue,
+                                                            SOPC_Buffer* buf,
+                                                            uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_ModelChangeStructureDataType_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -6515,9 +6633,13 @@ void OpcUa_SemanticChangeStructureDataType_Initialize(void* pValue);
 
 void OpcUa_SemanticChangeStructureDataType_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_SemanticChangeStructureDataType_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_SemanticChangeStructureDataType_Encode(const void* pValue,
+                                                               SOPC_Buffer* buf,
+                                                               uint32_t nestedStructLevel);
 
-SOPC_ReturnStatus OpcUa_SemanticChangeStructureDataType_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_SemanticChangeStructureDataType_Decode(void* pValue,
+                                                               SOPC_Buffer* buf,
+                                                               uint32_t nestedStructLevel);
 
 #endif
 
@@ -6635,7 +6757,9 @@ void OpcUa_DoubleComplexNumberType_Initialize(void* pValue);
 
 void OpcUa_DoubleComplexNumberType_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_DoubleComplexNumberType_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_DoubleComplexNumberType_Encode(const void* pValue,
+                                                       SOPC_Buffer* buf,
+                                                       uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_DoubleComplexNumberType_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -6727,7 +6851,9 @@ void OpcUa_ProgramDiagnosticDataType_Initialize(void* pValue);
 
 void OpcUa_ProgramDiagnosticDataType_Clear(void* pValue);
 
-SOPC_ReturnStatus OpcUa_ProgramDiagnosticDataType_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus OpcUa_ProgramDiagnosticDataType_Encode(const void* pValue,
+                                                         SOPC_Buffer* buf,
+                                                         uint32_t nestedStructLevel);
 
 SOPC_ReturnStatus OpcUa_ProgramDiagnosticDataType_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 
@@ -6782,7 +6908,9 @@ void SOPC_Clear_EnumeratedType(int32_t* enumerationValue);
 
 SOPC_ReturnStatus SOPC_Read_EnumeratedType(SOPC_Buffer* buf, int32_t* enumerationValue, uint32_t nestedStructLevel);
 
-SOPC_ReturnStatus SOPC_Write_EnumeratedType(SOPC_Buffer* buf, const int32_t* enumerationValue, uint32_t nestedStructLevel);
+SOPC_ReturnStatus SOPC_Write_EnumeratedType(SOPC_Buffer* buf,
+                                            const int32_t* enumerationValue,
+                                            uint32_t nestedStructLevel);
 
 /*============================================================================
  * Indexes in the table of known encodeable types.

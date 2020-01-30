@@ -51,12 +51,16 @@ typedef void(SOPC_EncodeableObject_PfnGetSize)(void);
 /**
  *  \brief Encoding function generic signature for an encodeable object
  */
-typedef SOPC_ReturnStatus(SOPC_EncodeableObject_PfnEncode)(const void* value, SOPC_Buffer* msgBuffer, uint32_t nestedStructLevel);
+typedef SOPC_ReturnStatus(SOPC_EncodeableObject_PfnEncode)(const void* value,
+                                                           SOPC_Buffer* msgBuffer,
+                                                           uint32_t nestedStructLevel);
 
 /**
  *  \brief Decoding function generic signature for an encodeable object
  */
-typedef SOPC_ReturnStatus(SOPC_EncodeableObject_PfnDecode)(void* value, SOPC_Buffer* msgBuffer, uint32_t nestedStructLevel);
+typedef SOPC_ReturnStatus(SOPC_EncodeableObject_PfnDecode)(void* value,
+                                                           SOPC_Buffer* msgBuffer,
+                                                           uint32_t nestedStructLevel);
 
 /*
  * \brief Description of an encodeable type field.
@@ -139,7 +143,10 @@ void SOPC_EncodeableObject_Clear(SOPC_EncodeableType* type, void* pValue);
  * The \c pValue parameter shall correspond to an object of the appropriate
  * type.
  */
-SOPC_ReturnStatus SOPC_EncodeableObject_Encode(const SOPC_EncodeableType* type, const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus SOPC_EncodeableObject_Encode(const SOPC_EncodeableType* type,
+                                               const void* pValue,
+                                               SOPC_Buffer* buf,
+                                               uint32_t nestedStructLevel);
 
 /**
  * \brief Decode an encodeable object.
@@ -147,6 +154,9 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Encode(const SOPC_EncodeableType* type, 
  * The \c pValue parameter shall correspond to an object of the appropriate
  * type.
  */
-SOPC_ReturnStatus SOPC_EncodeableObject_Decode(SOPC_EncodeableType* type, void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+SOPC_ReturnStatus SOPC_EncodeableObject_Decode(SOPC_EncodeableType* type,
+                                               void* pValue,
+                                               SOPC_Buffer* buf,
+                                               uint32_t nestedStructLevel);
 
 #endif /* SOPC_ENCODEABLETYPE_H_ */

@@ -17,10 +17,9 @@
  * under the License.
  */
 
-#include "opcua_identifiers.h"
 #include "sopc_types.h"
+#include "opcua_identifiers.h"
 #include "sopc_encoder.h"
-
 
 #ifndef OPCUA_EXCLUDE_ReferenceNode
 /*============================================================================
@@ -60,24 +59,24 @@ SOPC_ReturnStatus OpcUa_ReferenceNode_Decode(void* pValue, SOPC_Buffer* buf, uin
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ReferenceNode_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                     // isBuiltIn
+        false,                                                    // isArrayLength
+        true,                                                     // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                                // typeIndex
         (uint32_t) offsetof(OpcUa_ReferenceNode, ReferenceTypeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                               // isBuiltIn
+        false,                                              // isArrayLength
+        true,                                               // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                         // typeIndex
         (uint32_t) offsetof(OpcUa_ReferenceNode, IsInverse) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ExpandedNodeId_Id, // typeIndex
+        true,                                              // isBuiltIn
+        false,                                             // isArrayLength
+        true,                                              // isToEncode
+        (uint32_t) SOPC_ExpandedNodeId_Id,                 // typeIndex
         (uint32_t) offsetof(OpcUa_ReferenceNode, TargetId) // offset
     },
 };
@@ -85,8 +84,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReferenceNode_Fields[] = {
 /*============================================================================
  * Descriptor of the ReferenceNode encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_ReferenceNode_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_ReferenceNode_EncodeableType = {
     "ReferenceNode",
     OpcUaId_ReferenceNode,
     OpcUaId_ReferenceNode_Encoding_DefaultBinary,
@@ -99,8 +97,7 @@ SOPC_EncodeableType OpcUa_ReferenceNode_EncodeableType =
     OpcUa_ReferenceNode_Encode,
     OpcUa_ReferenceNode_Decode,
     sizeof ReferenceNode_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    ReferenceNode_Fields
-};
+    ReferenceNode_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_Node
@@ -141,89 +138,86 @@ SOPC_ReturnStatus OpcUa_Node_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nes
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor Node_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                   // isBuiltIn
+        false,                                  // isArrayLength
+        true,                                   // isToEncode
+        (uint32_t) SOPC_NodeId_Id,              // typeIndex
         (uint32_t) offsetof(OpcUa_Node, NodeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                      // isBuiltIn
+        false,                                     // isArrayLength
+        true,                                      // isToEncode
+        (uint32_t) SOPC_Int32_Id,                  // typeIndex
         (uint32_t) offsetof(OpcUa_Node, NodeClass) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_QualifiedName_Id, // typeIndex
+        true,                                       // isBuiltIn
+        false,                                      // isArrayLength
+        true,                                       // isToEncode
+        (uint32_t) SOPC_QualifiedName_Id,           // typeIndex
         (uint32_t) offsetof(OpcUa_Node, BrowseName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                        // isBuiltIn
+        false,                                       // isArrayLength
+        true,                                        // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,            // typeIndex
         (uint32_t) offsetof(OpcUa_Node, DisplayName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                        // isBuiltIn
+        false,                                       // isArrayLength
+        true,                                        // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,            // typeIndex
         (uint32_t) offsetof(OpcUa_Node, Description) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                      // isBuiltIn
+        false,                                     // isArrayLength
+        true,                                      // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                 // typeIndex
         (uint32_t) offsetof(OpcUa_Node, WriteMask) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                          // isBuiltIn
+        false,                                         // isArrayLength
+        true,                                          // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                     // typeIndex
         (uint32_t) offsetof(OpcUa_Node, UserWriteMask) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                           // isBuiltIn
+        true,                                           // isArrayLength
+        true,                                           // isToEncode
+        (uint32_t) SOPC_Int32_Id,                       // typeIndex
         (uint32_t) offsetof(OpcUa_Node, NoOfReferences) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
+        false,                                           // isBuiltIn
+        false,                                           // isArrayLength
+        true,                                            // isToEncode
         (uint32_t) SOPC_TypeInternalIndex_ReferenceNode, // typeIndex
-        (uint32_t) offsetof(OpcUa_Node, References) // offset
+        (uint32_t) offsetof(OpcUa_Node, References)      // offset
     },
 };
 
 /*============================================================================
  * Descriptor of the Node encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_Node_EncodeableType =
-{
-    "Node",
-    OpcUaId_Node,
-    OpcUaId_Node_Encoding_DefaultBinary,
-    OpcUaId_Node_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_Node),
-    OpcUa_Node_Initialize,
-    OpcUa_Node_Clear,
-    NULL,
-    OpcUa_Node_Encode,
-    OpcUa_Node_Decode,
-    sizeof Node_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    Node_Fields
-};
+SOPC_EncodeableType OpcUa_Node_EncodeableType = {"Node",
+                                                 OpcUaId_Node,
+                                                 OpcUaId_Node_Encoding_DefaultBinary,
+                                                 OpcUaId_Node_Encoding_DefaultXml,
+                                                 NULL,
+                                                 sizeof(OpcUa_Node),
+                                                 OpcUa_Node_Initialize,
+                                                 OpcUa_Node_Clear,
+                                                 NULL,
+                                                 OpcUa_Node_Encode,
+                                                 OpcUa_Node_Decode,
+                                                 sizeof Node_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
+                                                 Node_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_InstanceNode
@@ -264,66 +258,66 @@ SOPC_ReturnStatus OpcUa_InstanceNode_Decode(void* pValue, SOPC_Buffer* buf, uint
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor InstanceNode_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                           // isBuiltIn
+        false,                                          // isArrayLength
+        true,                                           // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                      // typeIndex
         (uint32_t) offsetof(OpcUa_InstanceNode, NodeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                              // isBuiltIn
+        false,                                             // isArrayLength
+        true,                                              // isToEncode
+        (uint32_t) SOPC_Int32_Id,                          // typeIndex
         (uint32_t) offsetof(OpcUa_InstanceNode, NodeClass) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_QualifiedName_Id, // typeIndex
+        true,                                               // isBuiltIn
+        false,                                              // isArrayLength
+        true,                                               // isToEncode
+        (uint32_t) SOPC_QualifiedName_Id,                   // typeIndex
         (uint32_t) offsetof(OpcUa_InstanceNode, BrowseName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                                // isBuiltIn
+        false,                                               // isArrayLength
+        true,                                                // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                    // typeIndex
         (uint32_t) offsetof(OpcUa_InstanceNode, DisplayName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                                // isBuiltIn
+        false,                                               // isArrayLength
+        true,                                                // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                    // typeIndex
         (uint32_t) offsetof(OpcUa_InstanceNode, Description) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                              // isBuiltIn
+        false,                                             // isArrayLength
+        true,                                              // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                         // typeIndex
         (uint32_t) offsetof(OpcUa_InstanceNode, WriteMask) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                  // isBuiltIn
+        false,                                                 // isArrayLength
+        true,                                                  // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                             // typeIndex
         (uint32_t) offsetof(OpcUa_InstanceNode, UserWriteMask) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                   // isBuiltIn
+        true,                                                   // isArrayLength
+        true,                                                   // isToEncode
+        (uint32_t) SOPC_Int32_Id,                               // typeIndex
         (uint32_t) offsetof(OpcUa_InstanceNode, NoOfReferences) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ReferenceNode, // typeIndex
+        false,                                              // isBuiltIn
+        false,                                              // isArrayLength
+        true,                                               // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ReferenceNode,    // typeIndex
         (uint32_t) offsetof(OpcUa_InstanceNode, References) // offset
     },
 };
@@ -331,8 +325,7 @@ static const SOPC_EncodeableType_FieldDescriptor InstanceNode_Fields[] = {
 /*============================================================================
  * Descriptor of the InstanceNode encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_InstanceNode_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_InstanceNode_EncodeableType = {
     "InstanceNode",
     OpcUaId_InstanceNode,
     OpcUaId_InstanceNode_Encoding_DefaultBinary,
@@ -345,8 +338,7 @@ SOPC_EncodeableType OpcUa_InstanceNode_EncodeableType =
     OpcUa_InstanceNode_Encode,
     OpcUa_InstanceNode_Decode,
     sizeof InstanceNode_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    InstanceNode_Fields
-};
+    InstanceNode_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_TypeNode
@@ -387,75 +379,74 @@ SOPC_ReturnStatus OpcUa_TypeNode_Decode(void* pValue, SOPC_Buffer* buf, uint32_t
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor TypeNode_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                       // isBuiltIn
+        false,                                      // isArrayLength
+        true,                                       // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                  // typeIndex
         (uint32_t) offsetof(OpcUa_TypeNode, NodeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                          // isBuiltIn
+        false,                                         // isArrayLength
+        true,                                          // isToEncode
+        (uint32_t) SOPC_Int32_Id,                      // typeIndex
         (uint32_t) offsetof(OpcUa_TypeNode, NodeClass) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_QualifiedName_Id, // typeIndex
+        true,                                           // isBuiltIn
+        false,                                          // isArrayLength
+        true,                                           // isToEncode
+        (uint32_t) SOPC_QualifiedName_Id,               // typeIndex
         (uint32_t) offsetof(OpcUa_TypeNode, BrowseName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                            // isBuiltIn
+        false,                                           // isArrayLength
+        true,                                            // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                // typeIndex
         (uint32_t) offsetof(OpcUa_TypeNode, DisplayName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                            // isBuiltIn
+        false,                                           // isArrayLength
+        true,                                            // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                // typeIndex
         (uint32_t) offsetof(OpcUa_TypeNode, Description) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                          // isBuiltIn
+        false,                                         // isArrayLength
+        true,                                          // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                     // typeIndex
         (uint32_t) offsetof(OpcUa_TypeNode, WriteMask) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                              // isBuiltIn
+        false,                                             // isArrayLength
+        true,                                              // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                         // typeIndex
         (uint32_t) offsetof(OpcUa_TypeNode, UserWriteMask) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                               // isBuiltIn
+        true,                                               // isArrayLength
+        true,                                               // isToEncode
+        (uint32_t) SOPC_Int32_Id,                           // typeIndex
         (uint32_t) offsetof(OpcUa_TypeNode, NoOfReferences) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
+        false,                                           // isBuiltIn
+        false,                                           // isArrayLength
+        true,                                            // isToEncode
         (uint32_t) SOPC_TypeInternalIndex_ReferenceNode, // typeIndex
-        (uint32_t) offsetof(OpcUa_TypeNode, References) // offset
+        (uint32_t) offsetof(OpcUa_TypeNode, References)  // offset
     },
 };
 
 /*============================================================================
  * Descriptor of the TypeNode encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_TypeNode_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_TypeNode_EncodeableType = {
     "TypeNode",
     OpcUaId_TypeNode,
     OpcUaId_TypeNode_Encoding_DefaultBinary,
@@ -468,8 +459,7 @@ SOPC_EncodeableType OpcUa_TypeNode_EncodeableType =
     OpcUa_TypeNode_Encode,
     OpcUa_TypeNode_Decode,
     sizeof TypeNode_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    TypeNode_Fields
-};
+    TypeNode_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ObjectNode
@@ -510,73 +500,73 @@ SOPC_ReturnStatus OpcUa_ObjectNode_Decode(void* pValue, SOPC_Buffer* buf, uint32
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ObjectNode_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                         // isBuiltIn
+        false,                                        // isArrayLength
+        true,                                         // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                    // typeIndex
         (uint32_t) offsetof(OpcUa_ObjectNode, NodeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                            // isBuiltIn
+        false,                                           // isArrayLength
+        true,                                            // isToEncode
+        (uint32_t) SOPC_Int32_Id,                        // typeIndex
         (uint32_t) offsetof(OpcUa_ObjectNode, NodeClass) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_QualifiedName_Id, // typeIndex
+        true,                                             // isBuiltIn
+        false,                                            // isArrayLength
+        true,                                             // isToEncode
+        (uint32_t) SOPC_QualifiedName_Id,                 // typeIndex
         (uint32_t) offsetof(OpcUa_ObjectNode, BrowseName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                              // isBuiltIn
+        false,                                             // isArrayLength
+        true,                                              // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                  // typeIndex
         (uint32_t) offsetof(OpcUa_ObjectNode, DisplayName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                              // isBuiltIn
+        false,                                             // isArrayLength
+        true,                                              // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                  // typeIndex
         (uint32_t) offsetof(OpcUa_ObjectNode, Description) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                            // isBuiltIn
+        false,                                           // isArrayLength
+        true,                                            // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                       // typeIndex
         (uint32_t) offsetof(OpcUa_ObjectNode, WriteMask) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                // isBuiltIn
+        false,                                               // isArrayLength
+        true,                                                // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                           // typeIndex
         (uint32_t) offsetof(OpcUa_ObjectNode, UserWriteMask) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                 // isBuiltIn
+        true,                                                 // isArrayLength
+        true,                                                 // isToEncode
+        (uint32_t) SOPC_Int32_Id,                             // typeIndex
         (uint32_t) offsetof(OpcUa_ObjectNode, NoOfReferences) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ReferenceNode, // typeIndex
+        false,                                            // isBuiltIn
+        false,                                            // isArrayLength
+        true,                                             // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ReferenceNode,  // typeIndex
         (uint32_t) offsetof(OpcUa_ObjectNode, References) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Byte_Id, // typeIndex
+        true,                                                // isBuiltIn
+        false,                                               // isArrayLength
+        true,                                                // isToEncode
+        (uint32_t) SOPC_Byte_Id,                             // typeIndex
         (uint32_t) offsetof(OpcUa_ObjectNode, EventNotifier) // offset
     },
 };
@@ -584,8 +574,7 @@ static const SOPC_EncodeableType_FieldDescriptor ObjectNode_Fields[] = {
 /*============================================================================
  * Descriptor of the ObjectNode encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_ObjectNode_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_ObjectNode_EncodeableType = {
     "ObjectNode",
     OpcUaId_ObjectNode,
     OpcUaId_ObjectNode_Encoding_DefaultBinary,
@@ -598,8 +587,7 @@ SOPC_EncodeableType OpcUa_ObjectNode_EncodeableType =
     OpcUa_ObjectNode_Encode,
     OpcUa_ObjectNode_Decode,
     sizeof ObjectNode_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    ObjectNode_Fields
-};
+    ObjectNode_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ObjectTypeNode
@@ -640,73 +628,73 @@ SOPC_ReturnStatus OpcUa_ObjectTypeNode_Decode(void* pValue, SOPC_Buffer* buf, ui
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ObjectTypeNode_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                             // isBuiltIn
+        false,                                            // isArrayLength
+        true,                                             // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                        // typeIndex
         (uint32_t) offsetof(OpcUa_ObjectTypeNode, NodeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                // isBuiltIn
+        false,                                               // isArrayLength
+        true,                                                // isToEncode
+        (uint32_t) SOPC_Int32_Id,                            // typeIndex
         (uint32_t) offsetof(OpcUa_ObjectTypeNode, NodeClass) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_QualifiedName_Id, // typeIndex
+        true,                                                 // isBuiltIn
+        false,                                                // isArrayLength
+        true,                                                 // isToEncode
+        (uint32_t) SOPC_QualifiedName_Id,                     // typeIndex
         (uint32_t) offsetof(OpcUa_ObjectTypeNode, BrowseName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                                  // isBuiltIn
+        false,                                                 // isArrayLength
+        true,                                                  // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                      // typeIndex
         (uint32_t) offsetof(OpcUa_ObjectTypeNode, DisplayName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                                  // isBuiltIn
+        false,                                                 // isArrayLength
+        true,                                                  // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                      // typeIndex
         (uint32_t) offsetof(OpcUa_ObjectTypeNode, Description) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                // isBuiltIn
+        false,                                               // isArrayLength
+        true,                                                // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                           // typeIndex
         (uint32_t) offsetof(OpcUa_ObjectTypeNode, WriteMask) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                    // isBuiltIn
+        false,                                                   // isArrayLength
+        true,                                                    // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                               // typeIndex
         (uint32_t) offsetof(OpcUa_ObjectTypeNode, UserWriteMask) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                     // isBuiltIn
+        true,                                                     // isArrayLength
+        true,                                                     // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                 // typeIndex
         (uint32_t) offsetof(OpcUa_ObjectTypeNode, NoOfReferences) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ReferenceNode, // typeIndex
+        false,                                                // isBuiltIn
+        false,                                                // isArrayLength
+        true,                                                 // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ReferenceNode,      // typeIndex
         (uint32_t) offsetof(OpcUa_ObjectTypeNode, References) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                 // isBuiltIn
+        false,                                                // isArrayLength
+        true,                                                 // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                           // typeIndex
         (uint32_t) offsetof(OpcUa_ObjectTypeNode, IsAbstract) // offset
     },
 };
@@ -714,8 +702,7 @@ static const SOPC_EncodeableType_FieldDescriptor ObjectTypeNode_Fields[] = {
 /*============================================================================
  * Descriptor of the ObjectTypeNode encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_ObjectTypeNode_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_ObjectTypeNode_EncodeableType = {
     "ObjectTypeNode",
     OpcUaId_ObjectTypeNode,
     OpcUaId_ObjectTypeNode_Encoding_DefaultBinary,
@@ -728,8 +715,7 @@ SOPC_EncodeableType OpcUa_ObjectTypeNode_EncodeableType =
     OpcUa_ObjectTypeNode_Encode,
     OpcUa_ObjectTypeNode_Decode,
     sizeof ObjectTypeNode_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    ObjectTypeNode_Fields
-};
+    ObjectTypeNode_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_VariableNode
@@ -770,129 +756,129 @@ SOPC_ReturnStatus OpcUa_VariableNode_Decode(void* pValue, SOPC_Buffer* buf, uint
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor VariableNode_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                           // isBuiltIn
+        false,                                          // isArrayLength
+        true,                                           // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                      // typeIndex
         (uint32_t) offsetof(OpcUa_VariableNode, NodeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                              // isBuiltIn
+        false,                                             // isArrayLength
+        true,                                              // isToEncode
+        (uint32_t) SOPC_Int32_Id,                          // typeIndex
         (uint32_t) offsetof(OpcUa_VariableNode, NodeClass) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_QualifiedName_Id, // typeIndex
+        true,                                               // isBuiltIn
+        false,                                              // isArrayLength
+        true,                                               // isToEncode
+        (uint32_t) SOPC_QualifiedName_Id,                   // typeIndex
         (uint32_t) offsetof(OpcUa_VariableNode, BrowseName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                                // isBuiltIn
+        false,                                               // isArrayLength
+        true,                                                // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                    // typeIndex
         (uint32_t) offsetof(OpcUa_VariableNode, DisplayName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                                // isBuiltIn
+        false,                                               // isArrayLength
+        true,                                                // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                    // typeIndex
         (uint32_t) offsetof(OpcUa_VariableNode, Description) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                              // isBuiltIn
+        false,                                             // isArrayLength
+        true,                                              // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                         // typeIndex
         (uint32_t) offsetof(OpcUa_VariableNode, WriteMask) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                  // isBuiltIn
+        false,                                                 // isArrayLength
+        true,                                                  // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                             // typeIndex
         (uint32_t) offsetof(OpcUa_VariableNode, UserWriteMask) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                   // isBuiltIn
+        true,                                                   // isArrayLength
+        true,                                                   // isToEncode
+        (uint32_t) SOPC_Int32_Id,                               // typeIndex
         (uint32_t) offsetof(OpcUa_VariableNode, NoOfReferences) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ReferenceNode, // typeIndex
+        false,                                              // isBuiltIn
+        false,                                              // isArrayLength
+        true,                                               // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ReferenceNode,    // typeIndex
         (uint32_t) offsetof(OpcUa_VariableNode, References) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Variant_Id, // typeIndex
+        true,                                          // isBuiltIn
+        false,                                         // isArrayLength
+        true,                                          // isToEncode
+        (uint32_t) SOPC_Variant_Id,                    // typeIndex
         (uint32_t) offsetof(OpcUa_VariableNode, Value) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                             // isBuiltIn
+        false,                                            // isArrayLength
+        true,                                             // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                        // typeIndex
         (uint32_t) offsetof(OpcUa_VariableNode, DataType) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                              // isBuiltIn
+        false,                                             // isArrayLength
+        true,                                              // isToEncode
+        (uint32_t) SOPC_Int32_Id,                          // typeIndex
         (uint32_t) offsetof(OpcUa_VariableNode, ValueRank) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                        // isBuiltIn
+        true,                                                        // isArrayLength
+        true,                                                        // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                    // typeIndex
         (uint32_t) offsetof(OpcUa_VariableNode, NoOfArrayDimensions) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                    // isBuiltIn
+        false,                                                   // isArrayLength
+        true,                                                    // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                               // typeIndex
         (uint32_t) offsetof(OpcUa_VariableNode, ArrayDimensions) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Byte_Id, // typeIndex
+        true,                                                // isBuiltIn
+        false,                                               // isArrayLength
+        true,                                                // isToEncode
+        (uint32_t) SOPC_Byte_Id,                             // typeIndex
         (uint32_t) offsetof(OpcUa_VariableNode, AccessLevel) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Byte_Id, // typeIndex
+        true,                                                    // isBuiltIn
+        false,                                                   // isArrayLength
+        true,                                                    // isToEncode
+        (uint32_t) SOPC_Byte_Id,                                 // typeIndex
         (uint32_t) offsetof(OpcUa_VariableNode, UserAccessLevel) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Double_Id, // typeIndex
+        true,                                                            // isBuiltIn
+        false,                                                           // isArrayLength
+        true,                                                            // isToEncode
+        (uint32_t) SOPC_Double_Id,                                       // typeIndex
         (uint32_t) offsetof(OpcUa_VariableNode, MinimumSamplingInterval) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                // isBuiltIn
+        false,                                               // isArrayLength
+        true,                                                // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                          // typeIndex
         (uint32_t) offsetof(OpcUa_VariableNode, Historizing) // offset
     },
 };
@@ -900,8 +886,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableNode_Fields[] = {
 /*============================================================================
  * Descriptor of the VariableNode encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_VariableNode_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_VariableNode_EncodeableType = {
     "VariableNode",
     OpcUaId_VariableNode,
     OpcUaId_VariableNode_Encoding_DefaultBinary,
@@ -914,8 +899,7 @@ SOPC_EncodeableType OpcUa_VariableNode_EncodeableType =
     OpcUa_VariableNode_Encode,
     OpcUa_VariableNode_Decode,
     sizeof VariableNode_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    VariableNode_Fields
-};
+    VariableNode_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_VariableTypeNode
@@ -956,108 +940,108 @@ SOPC_ReturnStatus OpcUa_VariableTypeNode_Decode(void* pValue, SOPC_Buffer* buf, 
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor VariableTypeNode_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                               // isBuiltIn
+        false,                                              // isArrayLength
+        true,                                               // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                          // typeIndex
         (uint32_t) offsetof(OpcUa_VariableTypeNode, NodeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                  // isBuiltIn
+        false,                                                 // isArrayLength
+        true,                                                  // isToEncode
+        (uint32_t) SOPC_Int32_Id,                              // typeIndex
         (uint32_t) offsetof(OpcUa_VariableTypeNode, NodeClass) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_QualifiedName_Id, // typeIndex
+        true,                                                   // isBuiltIn
+        false,                                                  // isArrayLength
+        true,                                                   // isToEncode
+        (uint32_t) SOPC_QualifiedName_Id,                       // typeIndex
         (uint32_t) offsetof(OpcUa_VariableTypeNode, BrowseName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                                    // isBuiltIn
+        false,                                                   // isArrayLength
+        true,                                                    // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                        // typeIndex
         (uint32_t) offsetof(OpcUa_VariableTypeNode, DisplayName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                                    // isBuiltIn
+        false,                                                   // isArrayLength
+        true,                                                    // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                        // typeIndex
         (uint32_t) offsetof(OpcUa_VariableTypeNode, Description) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                  // isBuiltIn
+        false,                                                 // isArrayLength
+        true,                                                  // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                             // typeIndex
         (uint32_t) offsetof(OpcUa_VariableTypeNode, WriteMask) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                 // typeIndex
         (uint32_t) offsetof(OpcUa_VariableTypeNode, UserWriteMask) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                       // isBuiltIn
+        true,                                                       // isArrayLength
+        true,                                                       // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                   // typeIndex
         (uint32_t) offsetof(OpcUa_VariableTypeNode, NoOfReferences) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ReferenceNode, // typeIndex
+        false,                                                  // isBuiltIn
+        false,                                                  // isArrayLength
+        true,                                                   // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ReferenceNode,        // typeIndex
         (uint32_t) offsetof(OpcUa_VariableTypeNode, References) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Variant_Id, // typeIndex
+        true,                                              // isBuiltIn
+        false,                                             // isArrayLength
+        true,                                              // isToEncode
+        (uint32_t) SOPC_Variant_Id,                        // typeIndex
         (uint32_t) offsetof(OpcUa_VariableTypeNode, Value) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                 // isBuiltIn
+        false,                                                // isArrayLength
+        true,                                                 // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                            // typeIndex
         (uint32_t) offsetof(OpcUa_VariableTypeNode, DataType) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                  // isBuiltIn
+        false,                                                 // isArrayLength
+        true,                                                  // isToEncode
+        (uint32_t) SOPC_Int32_Id,                              // typeIndex
         (uint32_t) offsetof(OpcUa_VariableTypeNode, ValueRank) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                            // isBuiltIn
+        true,                                                            // isArrayLength
+        true,                                                            // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                        // typeIndex
         (uint32_t) offsetof(OpcUa_VariableTypeNode, NoOfArrayDimensions) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                        // isBuiltIn
+        false,                                                       // isArrayLength
+        true,                                                        // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                   // typeIndex
         (uint32_t) offsetof(OpcUa_VariableTypeNode, ArrayDimensions) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                   // isBuiltIn
+        false,                                                  // isArrayLength
+        true,                                                   // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                             // typeIndex
         (uint32_t) offsetof(OpcUa_VariableTypeNode, IsAbstract) // offset
     },
 };
@@ -1065,8 +1049,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableTypeNode_Fields[] = {
 /*============================================================================
  * Descriptor of the VariableTypeNode encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_VariableTypeNode_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_VariableTypeNode_EncodeableType = {
     "VariableTypeNode",
     OpcUaId_VariableTypeNode,
     OpcUaId_VariableTypeNode_Encoding_DefaultBinary,
@@ -1079,8 +1062,7 @@ SOPC_EncodeableType OpcUa_VariableTypeNode_EncodeableType =
     OpcUa_VariableTypeNode_Encode,
     OpcUa_VariableTypeNode_Decode,
     sizeof VariableTypeNode_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    VariableTypeNode_Fields
-};
+    VariableTypeNode_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ReferenceTypeNode
@@ -1121,87 +1103,87 @@ SOPC_ReturnStatus OpcUa_ReferenceTypeNode_Decode(void* pValue, SOPC_Buffer* buf,
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ReferenceTypeNode_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                // isBuiltIn
+        false,                                               // isArrayLength
+        true,                                                // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                           // typeIndex
         (uint32_t) offsetof(OpcUa_ReferenceTypeNode, NodeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                   // isBuiltIn
+        false,                                                  // isArrayLength
+        true,                                                   // isToEncode
+        (uint32_t) SOPC_Int32_Id,                               // typeIndex
         (uint32_t) offsetof(OpcUa_ReferenceTypeNode, NodeClass) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_QualifiedName_Id, // typeIndex
+        true,                                                    // isBuiltIn
+        false,                                                   // isArrayLength
+        true,                                                    // isToEncode
+        (uint32_t) SOPC_QualifiedName_Id,                        // typeIndex
         (uint32_t) offsetof(OpcUa_ReferenceTypeNode, BrowseName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                                     // isBuiltIn
+        false,                                                    // isArrayLength
+        true,                                                     // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                         // typeIndex
         (uint32_t) offsetof(OpcUa_ReferenceTypeNode, DisplayName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                                     // isBuiltIn
+        false,                                                    // isArrayLength
+        true,                                                     // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                         // typeIndex
         (uint32_t) offsetof(OpcUa_ReferenceTypeNode, Description) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                   // isBuiltIn
+        false,                                                  // isArrayLength
+        true,                                                   // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                              // typeIndex
         (uint32_t) offsetof(OpcUa_ReferenceTypeNode, WriteMask) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                       // isBuiltIn
+        false,                                                      // isArrayLength
+        true,                                                       // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                  // typeIndex
         (uint32_t) offsetof(OpcUa_ReferenceTypeNode, UserWriteMask) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                        // isBuiltIn
+        true,                                                        // isArrayLength
+        true,                                                        // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                    // typeIndex
         (uint32_t) offsetof(OpcUa_ReferenceTypeNode, NoOfReferences) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ReferenceNode, // typeIndex
+        false,                                                   // isBuiltIn
+        false,                                                   // isArrayLength
+        true,                                                    // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ReferenceNode,         // typeIndex
         (uint32_t) offsetof(OpcUa_ReferenceTypeNode, References) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                    // isBuiltIn
+        false,                                                   // isArrayLength
+        true,                                                    // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                              // typeIndex
         (uint32_t) offsetof(OpcUa_ReferenceTypeNode, IsAbstract) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                   // isBuiltIn
+        false,                                                  // isArrayLength
+        true,                                                   // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                             // typeIndex
         (uint32_t) offsetof(OpcUa_ReferenceTypeNode, Symmetric) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                                     // isBuiltIn
+        false,                                                    // isArrayLength
+        true,                                                     // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                         // typeIndex
         (uint32_t) offsetof(OpcUa_ReferenceTypeNode, InverseName) // offset
     },
 };
@@ -1209,8 +1191,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReferenceTypeNode_Fields[] = {
 /*============================================================================
  * Descriptor of the ReferenceTypeNode encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_ReferenceTypeNode_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_ReferenceTypeNode_EncodeableType = {
     "ReferenceTypeNode",
     OpcUaId_ReferenceTypeNode,
     OpcUaId_ReferenceTypeNode_Encoding_DefaultBinary,
@@ -1223,8 +1204,7 @@ SOPC_EncodeableType OpcUa_ReferenceTypeNode_EncodeableType =
     OpcUa_ReferenceTypeNode_Encode,
     OpcUa_ReferenceTypeNode_Decode,
     sizeof ReferenceTypeNode_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    ReferenceTypeNode_Fields
-};
+    ReferenceTypeNode_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_MethodNode
@@ -1265,80 +1245,80 @@ SOPC_ReturnStatus OpcUa_MethodNode_Decode(void* pValue, SOPC_Buffer* buf, uint32
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor MethodNode_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                         // isBuiltIn
+        false,                                        // isArrayLength
+        true,                                         // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                    // typeIndex
         (uint32_t) offsetof(OpcUa_MethodNode, NodeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                            // isBuiltIn
+        false,                                           // isArrayLength
+        true,                                            // isToEncode
+        (uint32_t) SOPC_Int32_Id,                        // typeIndex
         (uint32_t) offsetof(OpcUa_MethodNode, NodeClass) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_QualifiedName_Id, // typeIndex
+        true,                                             // isBuiltIn
+        false,                                            // isArrayLength
+        true,                                             // isToEncode
+        (uint32_t) SOPC_QualifiedName_Id,                 // typeIndex
         (uint32_t) offsetof(OpcUa_MethodNode, BrowseName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                              // isBuiltIn
+        false,                                             // isArrayLength
+        true,                                              // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                  // typeIndex
         (uint32_t) offsetof(OpcUa_MethodNode, DisplayName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                              // isBuiltIn
+        false,                                             // isArrayLength
+        true,                                              // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                  // typeIndex
         (uint32_t) offsetof(OpcUa_MethodNode, Description) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                            // isBuiltIn
+        false,                                           // isArrayLength
+        true,                                            // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                       // typeIndex
         (uint32_t) offsetof(OpcUa_MethodNode, WriteMask) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                // isBuiltIn
+        false,                                               // isArrayLength
+        true,                                                // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                           // typeIndex
         (uint32_t) offsetof(OpcUa_MethodNode, UserWriteMask) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                 // isBuiltIn
+        true,                                                 // isArrayLength
+        true,                                                 // isToEncode
+        (uint32_t) SOPC_Int32_Id,                             // typeIndex
         (uint32_t) offsetof(OpcUa_MethodNode, NoOfReferences) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ReferenceNode, // typeIndex
+        false,                                            // isBuiltIn
+        false,                                            // isArrayLength
+        true,                                             // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ReferenceNode,  // typeIndex
         (uint32_t) offsetof(OpcUa_MethodNode, References) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                             // isBuiltIn
+        false,                                            // isArrayLength
+        true,                                             // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                       // typeIndex
         (uint32_t) offsetof(OpcUa_MethodNode, Executable) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                 // isBuiltIn
+        false,                                                // isArrayLength
+        true,                                                 // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                           // typeIndex
         (uint32_t) offsetof(OpcUa_MethodNode, UserExecutable) // offset
     },
 };
@@ -1346,8 +1326,7 @@ static const SOPC_EncodeableType_FieldDescriptor MethodNode_Fields[] = {
 /*============================================================================
  * Descriptor of the MethodNode encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_MethodNode_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_MethodNode_EncodeableType = {
     "MethodNode",
     OpcUaId_MethodNode,
     OpcUaId_MethodNode_Encoding_DefaultBinary,
@@ -1360,8 +1339,7 @@ SOPC_EncodeableType OpcUa_MethodNode_EncodeableType =
     OpcUa_MethodNode_Encode,
     OpcUa_MethodNode_Decode,
     sizeof MethodNode_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    MethodNode_Fields
-};
+    MethodNode_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ViewNode
@@ -1402,80 +1380,80 @@ SOPC_ReturnStatus OpcUa_ViewNode_Decode(void* pValue, SOPC_Buffer* buf, uint32_t
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ViewNode_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                       // isBuiltIn
+        false,                                      // isArrayLength
+        true,                                       // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                  // typeIndex
         (uint32_t) offsetof(OpcUa_ViewNode, NodeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                          // isBuiltIn
+        false,                                         // isArrayLength
+        true,                                          // isToEncode
+        (uint32_t) SOPC_Int32_Id,                      // typeIndex
         (uint32_t) offsetof(OpcUa_ViewNode, NodeClass) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_QualifiedName_Id, // typeIndex
+        true,                                           // isBuiltIn
+        false,                                          // isArrayLength
+        true,                                           // isToEncode
+        (uint32_t) SOPC_QualifiedName_Id,               // typeIndex
         (uint32_t) offsetof(OpcUa_ViewNode, BrowseName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                            // isBuiltIn
+        false,                                           // isArrayLength
+        true,                                            // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                // typeIndex
         (uint32_t) offsetof(OpcUa_ViewNode, DisplayName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                            // isBuiltIn
+        false,                                           // isArrayLength
+        true,                                            // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                // typeIndex
         (uint32_t) offsetof(OpcUa_ViewNode, Description) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                          // isBuiltIn
+        false,                                         // isArrayLength
+        true,                                          // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                     // typeIndex
         (uint32_t) offsetof(OpcUa_ViewNode, WriteMask) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                              // isBuiltIn
+        false,                                             // isArrayLength
+        true,                                              // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                         // typeIndex
         (uint32_t) offsetof(OpcUa_ViewNode, UserWriteMask) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                               // isBuiltIn
+        true,                                               // isArrayLength
+        true,                                               // isToEncode
+        (uint32_t) SOPC_Int32_Id,                           // typeIndex
         (uint32_t) offsetof(OpcUa_ViewNode, NoOfReferences) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
+        false,                                           // isBuiltIn
+        false,                                           // isArrayLength
+        true,                                            // isToEncode
         (uint32_t) SOPC_TypeInternalIndex_ReferenceNode, // typeIndex
-        (uint32_t) offsetof(OpcUa_ViewNode, References) // offset
+        (uint32_t) offsetof(OpcUa_ViewNode, References)  // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                // isBuiltIn
+        false,                                               // isArrayLength
+        true,                                                // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                          // typeIndex
         (uint32_t) offsetof(OpcUa_ViewNode, ContainsNoLoops) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Byte_Id, // typeIndex
+        true,                                              // isBuiltIn
+        false,                                             // isArrayLength
+        true,                                              // isToEncode
+        (uint32_t) SOPC_Byte_Id,                           // typeIndex
         (uint32_t) offsetof(OpcUa_ViewNode, EventNotifier) // offset
     },
 };
@@ -1483,8 +1461,7 @@ static const SOPC_EncodeableType_FieldDescriptor ViewNode_Fields[] = {
 /*============================================================================
  * Descriptor of the ViewNode encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_ViewNode_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_ViewNode_EncodeableType = {
     "ViewNode",
     OpcUaId_ViewNode,
     OpcUaId_ViewNode_Encoding_DefaultBinary,
@@ -1497,8 +1474,7 @@ SOPC_EncodeableType OpcUa_ViewNode_EncodeableType =
     OpcUa_ViewNode_Encode,
     OpcUa_ViewNode_Decode,
     sizeof ViewNode_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    ViewNode_Fields
-};
+    ViewNode_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_DataTypeNode
@@ -1539,73 +1515,73 @@ SOPC_ReturnStatus OpcUa_DataTypeNode_Decode(void* pValue, SOPC_Buffer* buf, uint
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DataTypeNode_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                           // isBuiltIn
+        false,                                          // isArrayLength
+        true,                                           // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                      // typeIndex
         (uint32_t) offsetof(OpcUa_DataTypeNode, NodeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                              // isBuiltIn
+        false,                                             // isArrayLength
+        true,                                              // isToEncode
+        (uint32_t) SOPC_Int32_Id,                          // typeIndex
         (uint32_t) offsetof(OpcUa_DataTypeNode, NodeClass) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_QualifiedName_Id, // typeIndex
+        true,                                               // isBuiltIn
+        false,                                              // isArrayLength
+        true,                                               // isToEncode
+        (uint32_t) SOPC_QualifiedName_Id,                   // typeIndex
         (uint32_t) offsetof(OpcUa_DataTypeNode, BrowseName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                                // isBuiltIn
+        false,                                               // isArrayLength
+        true,                                                // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                    // typeIndex
         (uint32_t) offsetof(OpcUa_DataTypeNode, DisplayName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                                // isBuiltIn
+        false,                                               // isArrayLength
+        true,                                                // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                    // typeIndex
         (uint32_t) offsetof(OpcUa_DataTypeNode, Description) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                              // isBuiltIn
+        false,                                             // isArrayLength
+        true,                                              // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                         // typeIndex
         (uint32_t) offsetof(OpcUa_DataTypeNode, WriteMask) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                  // isBuiltIn
+        false,                                                 // isArrayLength
+        true,                                                  // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                             // typeIndex
         (uint32_t) offsetof(OpcUa_DataTypeNode, UserWriteMask) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                   // isBuiltIn
+        true,                                                   // isArrayLength
+        true,                                                   // isToEncode
+        (uint32_t) SOPC_Int32_Id,                               // typeIndex
         (uint32_t) offsetof(OpcUa_DataTypeNode, NoOfReferences) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ReferenceNode, // typeIndex
+        false,                                              // isBuiltIn
+        false,                                              // isArrayLength
+        true,                                               // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ReferenceNode,    // typeIndex
         (uint32_t) offsetof(OpcUa_DataTypeNode, References) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                               // isBuiltIn
+        false,                                              // isArrayLength
+        true,                                               // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                         // typeIndex
         (uint32_t) offsetof(OpcUa_DataTypeNode, IsAbstract) // offset
     },
 };
@@ -1613,8 +1589,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataTypeNode_Fields[] = {
 /*============================================================================
  * Descriptor of the DataTypeNode encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_DataTypeNode_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_DataTypeNode_EncodeableType = {
     "DataTypeNode",
     OpcUaId_DataTypeNode,
     OpcUaId_DataTypeNode_Encoding_DefaultBinary,
@@ -1627,8 +1602,7 @@ SOPC_EncodeableType OpcUa_DataTypeNode_EncodeableType =
     OpcUa_DataTypeNode_Encode,
     OpcUa_DataTypeNode_Decode,
     sizeof DataTypeNode_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    DataTypeNode_Fields
-};
+    DataTypeNode_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_Argument
@@ -1669,45 +1643,45 @@ SOPC_ReturnStatus OpcUa_Argument_Decode(void* pValue, SOPC_Buffer* buf, uint32_t
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor Argument_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                     // isBuiltIn
+        false,                                    // isArrayLength
+        true,                                     // isToEncode
+        (uint32_t) SOPC_String_Id,                // typeIndex
         (uint32_t) offsetof(OpcUa_Argument, Name) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                         // isBuiltIn
+        false,                                        // isArrayLength
+        true,                                         // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                    // typeIndex
         (uint32_t) offsetof(OpcUa_Argument, DataType) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                          // isBuiltIn
+        false,                                         // isArrayLength
+        true,                                          // isToEncode
+        (uint32_t) SOPC_Int32_Id,                      // typeIndex
         (uint32_t) offsetof(OpcUa_Argument, ValueRank) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                    // isBuiltIn
+        true,                                                    // isArrayLength
+        true,                                                    // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                // typeIndex
         (uint32_t) offsetof(OpcUa_Argument, NoOfArrayDimensions) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                // isBuiltIn
+        false,                                               // isArrayLength
+        true,                                                // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                           // typeIndex
         (uint32_t) offsetof(OpcUa_Argument, ArrayDimensions) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                            // isBuiltIn
+        false,                                           // isArrayLength
+        true,                                            // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                // typeIndex
         (uint32_t) offsetof(OpcUa_Argument, Description) // offset
     },
 };
@@ -1715,8 +1689,7 @@ static const SOPC_EncodeableType_FieldDescriptor Argument_Fields[] = {
 /*============================================================================
  * Descriptor of the Argument encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_Argument_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_Argument_EncodeableType = {
     "Argument",
     OpcUaId_Argument,
     OpcUaId_Argument_Encoding_DefaultBinary,
@@ -1729,8 +1702,7 @@ SOPC_EncodeableType OpcUa_Argument_EncodeableType =
     OpcUa_Argument_Encode,
     OpcUa_Argument_Decode,
     sizeof Argument_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    Argument_Fields
-};
+    Argument_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_EnumValueType
@@ -1771,24 +1743,24 @@ SOPC_ReturnStatus OpcUa_EnumValueType_Decode(void* pValue, SOPC_Buffer* buf, uin
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor EnumValueType_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int64_Id, // typeIndex
+        true,                                           // isBuiltIn
+        false,                                          // isArrayLength
+        true,                                           // isToEncode
+        (uint32_t) SOPC_Int64_Id,                       // typeIndex
         (uint32_t) offsetof(OpcUa_EnumValueType, Value) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                                 // isBuiltIn
+        false,                                                // isArrayLength
+        true,                                                 // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                     // typeIndex
         (uint32_t) offsetof(OpcUa_EnumValueType, DisplayName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                                 // isBuiltIn
+        false,                                                // isArrayLength
+        true,                                                 // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                     // typeIndex
         (uint32_t) offsetof(OpcUa_EnumValueType, Description) // offset
     },
 };
@@ -1796,8 +1768,7 @@ static const SOPC_EncodeableType_FieldDescriptor EnumValueType_Fields[] = {
 /*============================================================================
  * Descriptor of the EnumValueType encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_EnumValueType_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_EnumValueType_EncodeableType = {
     "EnumValueType",
     OpcUaId_EnumValueType,
     OpcUaId_EnumValueType_Encoding_DefaultBinary,
@@ -1810,8 +1781,7 @@ SOPC_EncodeableType OpcUa_EnumValueType_EncodeableType =
     OpcUa_EnumValueType_Encode,
     OpcUa_EnumValueType_Decode,
     sizeof EnumValueType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    EnumValueType_Fields
-};
+    EnumValueType_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_EnumField
@@ -1852,31 +1822,31 @@ SOPC_ReturnStatus OpcUa_EnumField_Decode(void* pValue, SOPC_Buffer* buf, uint32_
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor EnumField_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int64_Id, // typeIndex
+        true,                                       // isBuiltIn
+        false,                                      // isArrayLength
+        true,                                       // isToEncode
+        (uint32_t) SOPC_Int64_Id,                   // typeIndex
         (uint32_t) offsetof(OpcUa_EnumField, Value) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                             // isBuiltIn
+        false,                                            // isArrayLength
+        true,                                             // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                 // typeIndex
         (uint32_t) offsetof(OpcUa_EnumField, DisplayName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                             // isBuiltIn
+        false,                                            // isArrayLength
+        true,                                             // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                 // typeIndex
         (uint32_t) offsetof(OpcUa_EnumField, Description) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                      // isBuiltIn
+        false,                                     // isArrayLength
+        true,                                      // isToEncode
+        (uint32_t) SOPC_String_Id,                 // typeIndex
         (uint32_t) offsetof(OpcUa_EnumField, Name) // offset
     },
 };
@@ -1884,8 +1854,7 @@ static const SOPC_EncodeableType_FieldDescriptor EnumField_Fields[] = {
 /*============================================================================
  * Descriptor of the EnumField encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_EnumField_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_EnumField_EncodeableType = {
     "EnumField",
     OpcUaId_EnumField,
     OpcUaId_EnumField_Encoding_DefaultBinary,
@@ -1898,8 +1867,7 @@ SOPC_EncodeableType OpcUa_EnumField_EncodeableType =
     OpcUa_EnumField_Encode,
     OpcUa_EnumField_Decode,
     sizeof EnumField_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    EnumField_Fields
-};
+    EnumField_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_OptionSet
@@ -1940,17 +1908,17 @@ SOPC_ReturnStatus OpcUa_OptionSet_Decode(void* pValue, SOPC_Buffer* buf, uint32_
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor OptionSet_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ByteString_Id, // typeIndex
+        true,                                       // isBuiltIn
+        false,                                      // isArrayLength
+        true,                                       // isToEncode
+        (uint32_t) SOPC_ByteString_Id,              // typeIndex
         (uint32_t) offsetof(OpcUa_OptionSet, Value) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ByteString_Id, // typeIndex
+        true,                                           // isBuiltIn
+        false,                                          // isArrayLength
+        true,                                           // isToEncode
+        (uint32_t) SOPC_ByteString_Id,                  // typeIndex
         (uint32_t) offsetof(OpcUa_OptionSet, ValidBits) // offset
     },
 };
@@ -1958,8 +1926,7 @@ static const SOPC_EncodeableType_FieldDescriptor OptionSet_Fields[] = {
 /*============================================================================
  * Descriptor of the OptionSet encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_OptionSet_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_OptionSet_EncodeableType = {
     "OptionSet",
     OpcUaId_OptionSet,
     OpcUaId_OptionSet_Encoding_DefaultBinary,
@@ -1972,8 +1939,7 @@ SOPC_EncodeableType OpcUa_OptionSet_EncodeableType =
     OpcUa_OptionSet_Encode,
     OpcUa_OptionSet_Decode,
     sizeof OptionSet_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    OptionSet_Fields
-};
+    OptionSet_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_TimeZoneDataType
@@ -2014,17 +1980,17 @@ SOPC_ReturnStatus OpcUa_TimeZoneDataType_Decode(void* pValue, SOPC_Buffer* buf, 
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor TimeZoneDataType_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int16_Id, // typeIndex
+        true,                                               // isBuiltIn
+        false,                                              // isArrayLength
+        true,                                               // isToEncode
+        (uint32_t) SOPC_Int16_Id,                           // typeIndex
         (uint32_t) offsetof(OpcUa_TimeZoneDataType, Offset) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                               // isBuiltIn
+        false,                                                              // isArrayLength
+        true,                                                               // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                                         // typeIndex
         (uint32_t) offsetof(OpcUa_TimeZoneDataType, DaylightSavingInOffset) // offset
     },
 };
@@ -2032,8 +1998,7 @@ static const SOPC_EncodeableType_FieldDescriptor TimeZoneDataType_Fields[] = {
 /*============================================================================
  * Descriptor of the TimeZoneDataType encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_TimeZoneDataType_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_TimeZoneDataType_EncodeableType = {
     "TimeZoneDataType",
     OpcUaId_TimeZoneDataType,
     OpcUaId_TimeZoneDataType_Encoding_DefaultBinary,
@@ -2046,8 +2011,7 @@ SOPC_EncodeableType OpcUa_TimeZoneDataType_EncodeableType =
     OpcUa_TimeZoneDataType_Encode,
     OpcUa_TimeZoneDataType_Decode,
     sizeof TimeZoneDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    TimeZoneDataType_Fields
-};
+    TimeZoneDataType_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ApplicationDescription
@@ -2088,59 +2052,59 @@ SOPC_ReturnStatus OpcUa_ApplicationDescription_Decode(void* pValue, SOPC_Buffer*
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ApplicationDescription_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                             // isBuiltIn
+        false,                                                            // isArrayLength
+        true,                                                             // isToEncode
+        (uint32_t) SOPC_String_Id,                                        // typeIndex
         (uint32_t) offsetof(OpcUa_ApplicationDescription, ApplicationUri) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                         // isBuiltIn
+        false,                                                        // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_String_Id,                                    // typeIndex
         (uint32_t) offsetof(OpcUa_ApplicationDescription, ProductUri) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                                              // isBuiltIn
+        false,                                                             // isArrayLength
+        true,                                                              // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                                  // typeIndex
         (uint32_t) offsetof(OpcUa_ApplicationDescription, ApplicationName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                              // isBuiltIn
+        false,                                                             // isArrayLength
+        true,                                                              // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                          // typeIndex
         (uint32_t) offsetof(OpcUa_ApplicationDescription, ApplicationType) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                               // isBuiltIn
+        false,                                                              // isArrayLength
+        true,                                                               // isToEncode
+        (uint32_t) SOPC_String_Id,                                          // typeIndex
         (uint32_t) offsetof(OpcUa_ApplicationDescription, GatewayServerUri) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                                  // isBuiltIn
+        false,                                                                 // isArrayLength
+        true,                                                                  // isToEncode
+        (uint32_t) SOPC_String_Id,                                             // typeIndex
         (uint32_t) offsetof(OpcUa_ApplicationDescription, DiscoveryProfileUri) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                // isBuiltIn
+        true,                                                                // isArrayLength
+        true,                                                                // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                            // typeIndex
         (uint32_t) offsetof(OpcUa_ApplicationDescription, NoOfDiscoveryUrls) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                            // isBuiltIn
+        false,                                                           // isArrayLength
+        true,                                                            // isToEncode
+        (uint32_t) SOPC_String_Id,                                       // typeIndex
         (uint32_t) offsetof(OpcUa_ApplicationDescription, DiscoveryUrls) // offset
     },
 };
@@ -2148,8 +2112,7 @@ static const SOPC_EncodeableType_FieldDescriptor ApplicationDescription_Fields[]
 /*============================================================================
  * Descriptor of the ApplicationDescription encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_ApplicationDescription_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_ApplicationDescription_EncodeableType = {
     "ApplicationDescription",
     OpcUaId_ApplicationDescription,
     OpcUaId_ApplicationDescription_Encoding_DefaultBinary,
@@ -2162,8 +2125,7 @@ SOPC_EncodeableType OpcUa_ApplicationDescription_EncodeableType =
     OpcUa_ApplicationDescription_Encode,
     OpcUa_ApplicationDescription_Decode,
     sizeof ApplicationDescription_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    ApplicationDescription_Fields
-};
+    ApplicationDescription_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_RequestHeader
@@ -2204,52 +2166,52 @@ SOPC_ReturnStatus OpcUa_RequestHeader_Decode(void* pValue, SOPC_Buffer* buf, uin
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor RequestHeader_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                         // isBuiltIn
+        false,                                                        // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                                    // typeIndex
         (uint32_t) offsetof(OpcUa_RequestHeader, AuthenticationToken) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DateTime_Id, // typeIndex
+        true,                                               // isBuiltIn
+        false,                                              // isArrayLength
+        true,                                               // isToEncode
+        (uint32_t) SOPC_DateTime_Id,                        // typeIndex
         (uint32_t) offsetof(OpcUa_RequestHeader, Timestamp) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                   // isBuiltIn
+        false,                                                  // isArrayLength
+        true,                                                   // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                              // typeIndex
         (uint32_t) offsetof(OpcUa_RequestHeader, RequestHandle) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                       // isBuiltIn
+        false,                                                      // isArrayLength
+        true,                                                       // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                  // typeIndex
         (uint32_t) offsetof(OpcUa_RequestHeader, ReturnDiagnostics) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                  // isBuiltIn
+        false,                                                 // isArrayLength
+        true,                                                  // isToEncode
+        (uint32_t) SOPC_String_Id,                             // typeIndex
         (uint32_t) offsetof(OpcUa_RequestHeader, AuditEntryId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                 // isBuiltIn
+        false,                                                // isArrayLength
+        true,                                                 // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                            // typeIndex
         (uint32_t) offsetof(OpcUa_RequestHeader, TimeoutHint) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ExtensionObject_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_ExtensionObject_Id,                        // typeIndex
         (uint32_t) offsetof(OpcUa_RequestHeader, AdditionalHeader) // offset
     },
 };
@@ -2257,8 +2219,7 @@ static const SOPC_EncodeableType_FieldDescriptor RequestHeader_Fields[] = {
 /*============================================================================
  * Descriptor of the RequestHeader encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_RequestHeader_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_RequestHeader_EncodeableType = {
     "RequestHeader",
     OpcUaId_RequestHeader,
     OpcUaId_RequestHeader_Encoding_DefaultBinary,
@@ -2271,8 +2232,7 @@ SOPC_EncodeableType OpcUa_RequestHeader_EncodeableType =
     OpcUa_RequestHeader_Encode,
     OpcUa_RequestHeader_Decode,
     sizeof RequestHeader_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    RequestHeader_Fields
-};
+    RequestHeader_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ResponseHeader
@@ -2313,52 +2273,52 @@ SOPC_ReturnStatus OpcUa_ResponseHeader_Decode(void* pValue, SOPC_Buffer* buf, ui
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ResponseHeader_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DateTime_Id, // typeIndex
+        true,                                                // isBuiltIn
+        false,                                               // isArrayLength
+        true,                                                // isToEncode
+        (uint32_t) SOPC_DateTime_Id,                         // typeIndex
         (uint32_t) offsetof(OpcUa_ResponseHeader, Timestamp) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                    // isBuiltIn
+        false,                                                   // isArrayLength
+        true,                                                    // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                               // typeIndex
         (uint32_t) offsetof(OpcUa_ResponseHeader, RequestHandle) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_StatusCode_Id, // typeIndex
+        true,                                                    // isBuiltIn
+        false,                                                   // isArrayLength
+        true,                                                    // isToEncode
+        (uint32_t) SOPC_StatusCode_Id,                           // typeIndex
         (uint32_t) offsetof(OpcUa_ResponseHeader, ServiceResult) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DiagnosticInfo_Id, // typeIndex
+        true,                                                         // isBuiltIn
+        false,                                                        // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_DiagnosticInfo_Id,                            // typeIndex
         (uint32_t) offsetof(OpcUa_ResponseHeader, ServiceDiagnostics) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        true,                                                      // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                  // typeIndex
         (uint32_t) offsetof(OpcUa_ResponseHeader, NoOfStringTable) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                  // isBuiltIn
+        false,                                                 // isArrayLength
+        true,                                                  // isToEncode
+        (uint32_t) SOPC_String_Id,                             // typeIndex
         (uint32_t) offsetof(OpcUa_ResponseHeader, StringTable) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ExtensionObject_Id, // typeIndex
+        true,                                                       // isBuiltIn
+        false,                                                      // isArrayLength
+        true,                                                       // isToEncode
+        (uint32_t) SOPC_ExtensionObject_Id,                         // typeIndex
         (uint32_t) offsetof(OpcUa_ResponseHeader, AdditionalHeader) // offset
     },
 };
@@ -2366,8 +2326,7 @@ static const SOPC_EncodeableType_FieldDescriptor ResponseHeader_Fields[] = {
 /*============================================================================
  * Descriptor of the ResponseHeader encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_ResponseHeader_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_ResponseHeader_EncodeableType = {
     "ResponseHeader",
     OpcUaId_ResponseHeader,
     OpcUaId_ResponseHeader_Encoding_DefaultBinary,
@@ -2380,8 +2339,7 @@ SOPC_EncodeableType OpcUa_ResponseHeader_EncodeableType =
     OpcUa_ResponseHeader_Encode,
     OpcUa_ResponseHeader_Decode,
     sizeof ResponseHeader_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    ResponseHeader_Fields
-};
+    ResponseHeader_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ServiceFault
@@ -2422,10 +2380,10 @@ SOPC_ReturnStatus OpcUa_ServiceFault_Decode(void* pValue, SOPC_Buffer* buf, uint
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ServiceFault_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        false, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader, // typeIndex
+        false,                                                  // isBuiltIn
+        false,                                                  // isArrayLength
+        false,                                                  // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader,       // typeIndex
         (uint32_t) offsetof(OpcUa_ServiceFault, ResponseHeader) // offset
     },
 };
@@ -2433,8 +2391,7 @@ static const SOPC_EncodeableType_FieldDescriptor ServiceFault_Fields[] = {
 /*============================================================================
  * Descriptor of the ServiceFault encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_ServiceFault_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_ServiceFault_EncodeableType = {
     "ServiceFault",
     OpcUaId_ServiceFault,
     OpcUaId_ServiceFault_Encoding_DefaultBinary,
@@ -2447,8 +2404,7 @@ SOPC_EncodeableType OpcUa_ServiceFault_EncodeableType =
     OpcUa_ServiceFault_Encode,
     OpcUa_ServiceFault_Decode,
     sizeof ServiceFault_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    ServiceFault_Fields
-};
+    ServiceFault_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_FindServers
@@ -2490,38 +2446,38 @@ SOPC_ReturnStatus OpcUa_FindServersRequest_Decode(void* pValue, SOPC_Buffer* buf
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor FindServersRequest_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_String_Id,                                 // typeIndex
         (uint32_t) offsetof(OpcUa_FindServersRequest, EndpointUrl) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                        // isBuiltIn
+        true,                                                        // isArrayLength
+        true,                                                        // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                    // typeIndex
         (uint32_t) offsetof(OpcUa_FindServersRequest, NoOfLocaleIds) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                    // isBuiltIn
+        false,                                                   // isArrayLength
+        true,                                                    // isToEncode
+        (uint32_t) SOPC_String_Id,                               // typeIndex
         (uint32_t) offsetof(OpcUa_FindServersRequest, LocaleIds) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                         // isBuiltIn
+        true,                                                         // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                     // typeIndex
         (uint32_t) offsetof(OpcUa_FindServersRequest, NoOfServerUris) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                     // isBuiltIn
+        false,                                                    // isArrayLength
+        true,                                                     // isToEncode
+        (uint32_t) SOPC_String_Id,                                // typeIndex
         (uint32_t) offsetof(OpcUa_FindServersRequest, ServerUris) // offset
     },
 };
@@ -2529,8 +2485,7 @@ static const SOPC_EncodeableType_FieldDescriptor FindServersRequest_Fields[] = {
 /*============================================================================
  * Descriptor of the FindServersRequest encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_FindServersRequest_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_FindServersRequest_EncodeableType = {
     "FindServersRequest",
     OpcUaId_FindServersRequest,
     OpcUaId_FindServersRequest_Encoding_DefaultBinary,
@@ -2543,8 +2498,7 @@ SOPC_EncodeableType OpcUa_FindServersRequest_EncodeableType =
     OpcUa_FindServersRequest_Encode,
     OpcUa_FindServersRequest_Decode,
     sizeof FindServersRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    FindServersRequest_Fields
-};
+    FindServersRequest_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_FindServersResponse
@@ -2585,33 +2539,32 @@ SOPC_ReturnStatus OpcUa_FindServersResponse_Decode(void* pValue, SOPC_Buffer* bu
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor FindServersResponse_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        false, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader, // typeIndex
+        false,                                                         // isBuiltIn
+        false,                                                         // isArrayLength
+        false,                                                         // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader,              // typeIndex
         (uint32_t) offsetof(OpcUa_FindServersResponse, ResponseHeader) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                       // isBuiltIn
+        true,                                                       // isArrayLength
+        true,                                                       // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                   // typeIndex
         (uint32_t) offsetof(OpcUa_FindServersResponse, NoOfServers) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
+        false,                                                    // isBuiltIn
+        false,                                                    // isArrayLength
+        true,                                                     // isToEncode
         (uint32_t) SOPC_TypeInternalIndex_ApplicationDescription, // typeIndex
-        (uint32_t) offsetof(OpcUa_FindServersResponse, Servers) // offset
+        (uint32_t) offsetof(OpcUa_FindServersResponse, Servers)   // offset
     },
 };
 
 /*============================================================================
  * Descriptor of the FindServersResponse encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_FindServersResponse_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_FindServersResponse_EncodeableType = {
     "FindServersResponse",
     OpcUaId_FindServersResponse,
     OpcUaId_FindServersResponse_Encoding_DefaultBinary,
@@ -2624,8 +2577,7 @@ SOPC_EncodeableType OpcUa_FindServersResponse_EncodeableType =
     OpcUa_FindServersResponse_Encode,
     OpcUa_FindServersResponse_Decode,
     sizeof FindServersResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    FindServersResponse_Fields
-};
+    FindServersResponse_Fields};
 #endif
 
 #endif
@@ -2667,38 +2619,38 @@ SOPC_ReturnStatus OpcUa_ServerOnNetwork_Decode(void* pValue, SOPC_Buffer* buf, u
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ServerOnNetwork_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                // isBuiltIn
+        false,                                               // isArrayLength
+        true,                                                // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                           // typeIndex
         (uint32_t) offsetof(OpcUa_ServerOnNetwork, RecordId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                  // isBuiltIn
+        false,                                                 // isArrayLength
+        true,                                                  // isToEncode
+        (uint32_t) SOPC_String_Id,                             // typeIndex
         (uint32_t) offsetof(OpcUa_ServerOnNetwork, ServerName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                    // isBuiltIn
+        false,                                                   // isArrayLength
+        true,                                                    // isToEncode
+        (uint32_t) SOPC_String_Id,                               // typeIndex
         (uint32_t) offsetof(OpcUa_ServerOnNetwork, DiscoveryUrl) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                              // isBuiltIn
+        true,                                                              // isArrayLength
+        true,                                                              // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                          // typeIndex
         (uint32_t) offsetof(OpcUa_ServerOnNetwork, NoOfServerCapabilities) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                          // isBuiltIn
+        false,                                                         // isArrayLength
+        true,                                                          // isToEncode
+        (uint32_t) SOPC_String_Id,                                     // typeIndex
         (uint32_t) offsetof(OpcUa_ServerOnNetwork, ServerCapabilities) // offset
     },
 };
@@ -2706,8 +2658,7 @@ static const SOPC_EncodeableType_FieldDescriptor ServerOnNetwork_Fields[] = {
 /*============================================================================
  * Descriptor of the ServerOnNetwork encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_ServerOnNetwork_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_ServerOnNetwork_EncodeableType = {
     "ServerOnNetwork",
     OpcUaId_ServerOnNetwork,
     OpcUaId_ServerOnNetwork_Encoding_DefaultBinary,
@@ -2720,8 +2671,7 @@ SOPC_EncodeableType OpcUa_ServerOnNetwork_EncodeableType =
     OpcUa_ServerOnNetwork_Encode,
     OpcUa_ServerOnNetwork_Decode,
     sizeof ServerOnNetwork_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    ServerOnNetwork_Fields
-};
+    ServerOnNetwork_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_FindServersOnNetwork
@@ -2745,9 +2695,12 @@ void OpcUa_FindServersOnNetworkRequest_Clear(void* pValue)
 /*============================================================================
  * OpcUa_FindServersOnNetworkRequest_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_FindServersOnNetworkRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_FindServersOnNetworkRequest_Encode(const void* pValue,
+                                                           SOPC_Buffer* buf,
+                                                           uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Encode(&OpcUa_FindServersOnNetworkRequest_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Encode(&OpcUa_FindServersOnNetworkRequest_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -2755,7 +2708,8 @@ SOPC_ReturnStatus OpcUa_FindServersOnNetworkRequest_Encode(const void* pValue, S
  *===========================================================================*/
 SOPC_ReturnStatus OpcUa_FindServersOnNetworkRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Decode(&OpcUa_FindServersOnNetworkRequest_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Decode(&OpcUa_FindServersOnNetworkRequest_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -2763,31 +2717,31 @@ SOPC_ReturnStatus OpcUa_FindServersOnNetworkRequest_Decode(void* pValue, SOPC_Bu
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor FindServersOnNetworkRequest_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                    // isBuiltIn
+        false,                                                                   // isArrayLength
+        true,                                                                    // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                               // typeIndex
         (uint32_t) offsetof(OpcUa_FindServersOnNetworkRequest, StartingRecordId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                      // isBuiltIn
+        false,                                                                     // isArrayLength
+        true,                                                                      // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                 // typeIndex
         (uint32_t) offsetof(OpcUa_FindServersOnNetworkRequest, MaxRecordsToReturn) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                              // isBuiltIn
+        true,                                                                              // isArrayLength
+        true,                                                                              // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                          // typeIndex
         (uint32_t) offsetof(OpcUa_FindServersOnNetworkRequest, NoOfServerCapabilityFilter) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                                          // isBuiltIn
+        false,                                                                         // isArrayLength
+        true,                                                                          // isToEncode
+        (uint32_t) SOPC_String_Id,                                                     // typeIndex
         (uint32_t) offsetof(OpcUa_FindServersOnNetworkRequest, ServerCapabilityFilter) // offset
     },
 };
@@ -2795,8 +2749,7 @@ static const SOPC_EncodeableType_FieldDescriptor FindServersOnNetworkRequest_Fie
 /*============================================================================
  * Descriptor of the FindServersOnNetworkRequest encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_FindServersOnNetworkRequest_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_FindServersOnNetworkRequest_EncodeableType = {
     "FindServersOnNetworkRequest",
     OpcUaId_FindServersOnNetworkRequest,
     OpcUaId_FindServersOnNetworkRequest_Encoding_DefaultBinary,
@@ -2809,8 +2762,7 @@ SOPC_EncodeableType OpcUa_FindServersOnNetworkRequest_EncodeableType =
     OpcUa_FindServersOnNetworkRequest_Encode,
     OpcUa_FindServersOnNetworkRequest_Decode,
     sizeof FindServersOnNetworkRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    FindServersOnNetworkRequest_Fields
-};
+    FindServersOnNetworkRequest_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_FindServersOnNetworkResponse
@@ -2833,9 +2785,12 @@ void OpcUa_FindServersOnNetworkResponse_Clear(void* pValue)
 /*============================================================================
  * OpcUa_FindServersOnNetworkResponse_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_FindServersOnNetworkResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_FindServersOnNetworkResponse_Encode(const void* pValue,
+                                                            SOPC_Buffer* buf,
+                                                            uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Encode(&OpcUa_FindServersOnNetworkResponse_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Encode(&OpcUa_FindServersOnNetworkResponse_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -2843,7 +2798,8 @@ SOPC_ReturnStatus OpcUa_FindServersOnNetworkResponse_Encode(const void* pValue, 
  *===========================================================================*/
 SOPC_ReturnStatus OpcUa_FindServersOnNetworkResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Decode(&OpcUa_FindServersOnNetworkResponse_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Decode(&OpcUa_FindServersOnNetworkResponse_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -2851,31 +2807,31 @@ SOPC_ReturnStatus OpcUa_FindServersOnNetworkResponse_Decode(void* pValue, SOPC_B
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor FindServersOnNetworkResponse_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        false, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader, // typeIndex
+        false,                                                                  // isBuiltIn
+        false,                                                                  // isArrayLength
+        false,                                                                  // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader,                       // typeIndex
         (uint32_t) offsetof(OpcUa_FindServersOnNetworkResponse, ResponseHeader) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DateTime_Id, // typeIndex
+        true,                                                                         // isBuiltIn
+        false,                                                                        // isArrayLength
+        true,                                                                         // isToEncode
+        (uint32_t) SOPC_DateTime_Id,                                                  // typeIndex
         (uint32_t) offsetof(OpcUa_FindServersOnNetworkResponse, LastCounterResetTime) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                // isBuiltIn
+        true,                                                                // isArrayLength
+        true,                                                                // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                            // typeIndex
         (uint32_t) offsetof(OpcUa_FindServersOnNetworkResponse, NoOfServers) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ServerOnNetwork, // typeIndex
+        false,                                                           // isBuiltIn
+        false,                                                           // isArrayLength
+        true,                                                            // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ServerOnNetwork,               // typeIndex
         (uint32_t) offsetof(OpcUa_FindServersOnNetworkResponse, Servers) // offset
     },
 };
@@ -2883,8 +2839,7 @@ static const SOPC_EncodeableType_FieldDescriptor FindServersOnNetworkResponse_Fi
 /*============================================================================
  * Descriptor of the FindServersOnNetworkResponse encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_FindServersOnNetworkResponse_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_FindServersOnNetworkResponse_EncodeableType = {
     "FindServersOnNetworkResponse",
     OpcUaId_FindServersOnNetworkResponse,
     OpcUaId_FindServersOnNetworkResponse_Encoding_DefaultBinary,
@@ -2897,8 +2852,7 @@ SOPC_EncodeableType OpcUa_FindServersOnNetworkResponse_EncodeableType =
     OpcUa_FindServersOnNetworkResponse_Encode,
     OpcUa_FindServersOnNetworkResponse_Decode,
     sizeof FindServersOnNetworkResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    FindServersOnNetworkResponse_Fields
-};
+    FindServersOnNetworkResponse_Fields};
 #endif
 
 #endif
@@ -2940,38 +2894,38 @@ SOPC_ReturnStatus OpcUa_UserTokenPolicy_Decode(void* pValue, SOPC_Buffer* buf, u
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor UserTokenPolicy_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                // isBuiltIn
+        false,                                               // isArrayLength
+        true,                                                // isToEncode
+        (uint32_t) SOPC_String_Id,                           // typeIndex
         (uint32_t) offsetof(OpcUa_UserTokenPolicy, PolicyId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                 // isBuiltIn
+        false,                                                // isArrayLength
+        true,                                                 // isToEncode
+        (uint32_t) SOPC_Int32_Id,                             // typeIndex
         (uint32_t) offsetof(OpcUa_UserTokenPolicy, TokenType) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                       // isBuiltIn
+        false,                                                      // isArrayLength
+        true,                                                       // isToEncode
+        (uint32_t) SOPC_String_Id,                                  // typeIndex
         (uint32_t) offsetof(OpcUa_UserTokenPolicy, IssuedTokenType) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                         // isBuiltIn
+        false,                                                        // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_String_Id,                                    // typeIndex
         (uint32_t) offsetof(OpcUa_UserTokenPolicy, IssuerEndpointUrl) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                         // isBuiltIn
+        false,                                                        // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_String_Id,                                    // typeIndex
         (uint32_t) offsetof(OpcUa_UserTokenPolicy, SecurityPolicyUri) // offset
     },
 };
@@ -2979,8 +2933,7 @@ static const SOPC_EncodeableType_FieldDescriptor UserTokenPolicy_Fields[] = {
 /*============================================================================
  * Descriptor of the UserTokenPolicy encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_UserTokenPolicy_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_UserTokenPolicy_EncodeableType = {
     "UserTokenPolicy",
     OpcUaId_UserTokenPolicy,
     OpcUaId_UserTokenPolicy_Encoding_DefaultBinary,
@@ -2993,8 +2946,7 @@ SOPC_EncodeableType OpcUa_UserTokenPolicy_EncodeableType =
     OpcUa_UserTokenPolicy_Encode,
     OpcUa_UserTokenPolicy_Decode,
     sizeof UserTokenPolicy_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    UserTokenPolicy_Fields
-};
+    UserTokenPolicy_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_EndpointDescription
@@ -3035,66 +2987,66 @@ SOPC_ReturnStatus OpcUa_EndpointDescription_Decode(void* pValue, SOPC_Buffer* bu
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor EndpointDescription_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                       // isBuiltIn
+        false,                                                      // isArrayLength
+        true,                                                       // isToEncode
+        (uint32_t) SOPC_String_Id,                                  // typeIndex
         (uint32_t) offsetof(OpcUa_EndpointDescription, EndpointUrl) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
+        false,                                                    // isBuiltIn
+        false,                                                    // isArrayLength
+        true,                                                     // isToEncode
         (uint32_t) SOPC_TypeInternalIndex_ApplicationDescription, // typeIndex
-        (uint32_t) offsetof(OpcUa_EndpointDescription, Server) // offset
+        (uint32_t) offsetof(OpcUa_EndpointDescription, Server)    // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ByteString_Id, // typeIndex
+        true,                                                             // isBuiltIn
+        false,                                                            // isArrayLength
+        true,                                                             // isToEncode
+        (uint32_t) SOPC_ByteString_Id,                                    // typeIndex
         (uint32_t) offsetof(OpcUa_EndpointDescription, ServerCertificate) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                        // isBuiltIn
+        false,                                                       // isArrayLength
+        true,                                                        // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                    // typeIndex
         (uint32_t) offsetof(OpcUa_EndpointDescription, SecurityMode) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                             // isBuiltIn
+        false,                                                            // isArrayLength
+        true,                                                             // isToEncode
+        (uint32_t) SOPC_String_Id,                                        // typeIndex
         (uint32_t) offsetof(OpcUa_EndpointDescription, SecurityPolicyUri) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                  // isBuiltIn
+        true,                                                                  // isArrayLength
+        true,                                                                  // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                              // typeIndex
         (uint32_t) offsetof(OpcUa_EndpointDescription, NoOfUserIdentityTokens) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_UserTokenPolicy, // typeIndex
+        false,                                                             // isBuiltIn
+        false,                                                             // isArrayLength
+        true,                                                              // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_UserTokenPolicy,                 // typeIndex
         (uint32_t) offsetof(OpcUa_EndpointDescription, UserIdentityTokens) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                               // isBuiltIn
+        false,                                                              // isArrayLength
+        true,                                                               // isToEncode
+        (uint32_t) SOPC_String_Id,                                          // typeIndex
         (uint32_t) offsetof(OpcUa_EndpointDescription, TransportProfileUri) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Byte_Id, // typeIndex
+        true,                                                         // isBuiltIn
+        false,                                                        // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_Byte_Id,                                      // typeIndex
         (uint32_t) offsetof(OpcUa_EndpointDescription, SecurityLevel) // offset
     },
 };
@@ -3102,8 +3054,7 @@ static const SOPC_EncodeableType_FieldDescriptor EndpointDescription_Fields[] = 
 /*============================================================================
  * Descriptor of the EndpointDescription encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_EndpointDescription_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_EndpointDescription_EncodeableType = {
     "EndpointDescription",
     OpcUaId_EndpointDescription,
     OpcUaId_EndpointDescription_Encoding_DefaultBinary,
@@ -3116,8 +3067,7 @@ SOPC_EncodeableType OpcUa_EndpointDescription_EncodeableType =
     OpcUa_EndpointDescription_Encode,
     OpcUa_EndpointDescription_Decode,
     sizeof EndpointDescription_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    EndpointDescription_Fields
-};
+    EndpointDescription_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_GetEndpoints
@@ -3159,38 +3109,38 @@ SOPC_ReturnStatus OpcUa_GetEndpointsRequest_Decode(void* pValue, SOPC_Buffer* bu
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor GetEndpointsRequest_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                       // isBuiltIn
+        false,                                                      // isArrayLength
+        true,                                                       // isToEncode
+        (uint32_t) SOPC_String_Id,                                  // typeIndex
         (uint32_t) offsetof(OpcUa_GetEndpointsRequest, EndpointUrl) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                         // isBuiltIn
+        true,                                                         // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                     // typeIndex
         (uint32_t) offsetof(OpcUa_GetEndpointsRequest, NoOfLocaleIds) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                     // isBuiltIn
+        false,                                                    // isArrayLength
+        true,                                                     // isToEncode
+        (uint32_t) SOPC_String_Id,                                // typeIndex
         (uint32_t) offsetof(OpcUa_GetEndpointsRequest, LocaleIds) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                           // isBuiltIn
+        true,                                                           // isArrayLength
+        true,                                                           // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                       // typeIndex
         (uint32_t) offsetof(OpcUa_GetEndpointsRequest, NoOfProfileUris) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                       // isBuiltIn
+        false,                                                      // isArrayLength
+        true,                                                       // isToEncode
+        (uint32_t) SOPC_String_Id,                                  // typeIndex
         (uint32_t) offsetof(OpcUa_GetEndpointsRequest, ProfileUris) // offset
     },
 };
@@ -3198,8 +3148,7 @@ static const SOPC_EncodeableType_FieldDescriptor GetEndpointsRequest_Fields[] = 
 /*============================================================================
  * Descriptor of the GetEndpointsRequest encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_GetEndpointsRequest_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_GetEndpointsRequest_EncodeableType = {
     "GetEndpointsRequest",
     OpcUaId_GetEndpointsRequest,
     OpcUaId_GetEndpointsRequest_Encoding_DefaultBinary,
@@ -3212,8 +3161,7 @@ SOPC_EncodeableType OpcUa_GetEndpointsRequest_EncodeableType =
     OpcUa_GetEndpointsRequest_Encode,
     OpcUa_GetEndpointsRequest_Decode,
     sizeof GetEndpointsRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    GetEndpointsRequest_Fields
-};
+    GetEndpointsRequest_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_GetEndpointsResponse
@@ -3254,24 +3202,24 @@ SOPC_ReturnStatus OpcUa_GetEndpointsResponse_Decode(void* pValue, SOPC_Buffer* b
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor GetEndpointsResponse_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        false, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader, // typeIndex
+        false,                                                          // isBuiltIn
+        false,                                                          // isArrayLength
+        false,                                                          // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader,               // typeIndex
         (uint32_t) offsetof(OpcUa_GetEndpointsResponse, ResponseHeader) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                          // isBuiltIn
+        true,                                                          // isArrayLength
+        true,                                                          // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                      // typeIndex
         (uint32_t) offsetof(OpcUa_GetEndpointsResponse, NoOfEndpoints) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_EndpointDescription, // typeIndex
+        false,                                                     // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_EndpointDescription,     // typeIndex
         (uint32_t) offsetof(OpcUa_GetEndpointsResponse, Endpoints) // offset
     },
 };
@@ -3279,8 +3227,7 @@ static const SOPC_EncodeableType_FieldDescriptor GetEndpointsResponse_Fields[] =
 /*============================================================================
  * Descriptor of the GetEndpointsResponse encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_GetEndpointsResponse_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_GetEndpointsResponse_EncodeableType = {
     "GetEndpointsResponse",
     OpcUaId_GetEndpointsResponse,
     OpcUaId_GetEndpointsResponse_Encoding_DefaultBinary,
@@ -3293,8 +3240,7 @@ SOPC_EncodeableType OpcUa_GetEndpointsResponse_EncodeableType =
     OpcUa_GetEndpointsResponse_Encode,
     OpcUa_GetEndpointsResponse_Decode,
     sizeof GetEndpointsResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    GetEndpointsResponse_Fields
-};
+    GetEndpointsResponse_Fields};
 #endif
 
 #endif
@@ -3336,73 +3282,73 @@ SOPC_ReturnStatus OpcUa_RegisteredServer_Decode(void* pValue, SOPC_Buffer* buf, 
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor RegisteredServer_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                  // isBuiltIn
+        false,                                                 // isArrayLength
+        true,                                                  // isToEncode
+        (uint32_t) SOPC_String_Id,                             // typeIndex
         (uint32_t) offsetof(OpcUa_RegisteredServer, ServerUri) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                   // isBuiltIn
+        false,                                                  // isArrayLength
+        true,                                                   // isToEncode
+        (uint32_t) SOPC_String_Id,                              // typeIndex
         (uint32_t) offsetof(OpcUa_RegisteredServer, ProductUri) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                        // isBuiltIn
+        true,                                                        // isArrayLength
+        true,                                                        // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                    // typeIndex
         (uint32_t) offsetof(OpcUa_RegisteredServer, NoOfServerNames) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                                    // isBuiltIn
+        false,                                                   // isArrayLength
+        true,                                                    // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                        // typeIndex
         (uint32_t) offsetof(OpcUa_RegisteredServer, ServerNames) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                   // isBuiltIn
+        false,                                                  // isArrayLength
+        true,                                                   // isToEncode
+        (uint32_t) SOPC_Int32_Id,                               // typeIndex
         (uint32_t) offsetof(OpcUa_RegisteredServer, ServerType) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                         // isBuiltIn
+        false,                                                        // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_String_Id,                                    // typeIndex
         (uint32_t) offsetof(OpcUa_RegisteredServer, GatewayServerUri) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                          // isBuiltIn
+        true,                                                          // isArrayLength
+        true,                                                          // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                      // typeIndex
         (uint32_t) offsetof(OpcUa_RegisteredServer, NoOfDiscoveryUrls) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_String_Id,                                 // typeIndex
         (uint32_t) offsetof(OpcUa_RegisteredServer, DiscoveryUrls) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                          // isBuiltIn
+        false,                                                         // isArrayLength
+        true,                                                          // isToEncode
+        (uint32_t) SOPC_String_Id,                                     // typeIndex
         (uint32_t) offsetof(OpcUa_RegisteredServer, SemaphoreFilePath) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                 // isBuiltIn
+        false,                                                // isArrayLength
+        true,                                                 // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                           // typeIndex
         (uint32_t) offsetof(OpcUa_RegisteredServer, IsOnline) // offset
     },
 };
@@ -3410,8 +3356,7 @@ static const SOPC_EncodeableType_FieldDescriptor RegisteredServer_Fields[] = {
 /*============================================================================
  * Descriptor of the RegisteredServer encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_RegisteredServer_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_RegisteredServer_EncodeableType = {
     "RegisteredServer",
     OpcUaId_RegisteredServer,
     OpcUaId_RegisteredServer_Encoding_DefaultBinary,
@@ -3424,8 +3369,7 @@ SOPC_EncodeableType OpcUa_RegisteredServer_EncodeableType =
     OpcUa_RegisteredServer_Encode,
     OpcUa_RegisteredServer_Decode,
     sizeof RegisteredServer_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    RegisteredServer_Fields
-};
+    RegisteredServer_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_RegisterServer
@@ -3467,10 +3411,10 @@ SOPC_ReturnStatus OpcUa_RegisterServerRequest_Decode(void* pValue, SOPC_Buffer* 
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor RegisterServerRequest_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_RegisteredServer, // typeIndex
+        false,                                                   // isBuiltIn
+        false,                                                   // isArrayLength
+        true,                                                    // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_RegisteredServer,      // typeIndex
         (uint32_t) offsetof(OpcUa_RegisterServerRequest, Server) // offset
     },
 };
@@ -3478,8 +3422,7 @@ static const SOPC_EncodeableType_FieldDescriptor RegisterServerRequest_Fields[] 
 /*============================================================================
  * Descriptor of the RegisterServerRequest encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_RegisterServerRequest_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_RegisterServerRequest_EncodeableType = {
     "RegisterServerRequest",
     OpcUaId_RegisterServerRequest,
     OpcUaId_RegisterServerRequest_Encoding_DefaultBinary,
@@ -3492,8 +3435,7 @@ SOPC_EncodeableType OpcUa_RegisterServerRequest_EncodeableType =
     OpcUa_RegisterServerRequest_Encode,
     OpcUa_RegisterServerRequest_Decode,
     sizeof RegisterServerRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    RegisterServerRequest_Fields
-};
+    RegisterServerRequest_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_RegisterServerResponse
@@ -3534,10 +3476,10 @@ SOPC_ReturnStatus OpcUa_RegisterServerResponse_Decode(void* pValue, SOPC_Buffer*
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor RegisterServerResponse_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        false, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader, // typeIndex
+        false,                                                            // isBuiltIn
+        false,                                                            // isArrayLength
+        false,                                                            // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader,                 // typeIndex
         (uint32_t) offsetof(OpcUa_RegisterServerResponse, ResponseHeader) // offset
     },
 };
@@ -3545,8 +3487,7 @@ static const SOPC_EncodeableType_FieldDescriptor RegisterServerResponse_Fields[]
 /*============================================================================
  * Descriptor of the RegisterServerResponse encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_RegisterServerResponse_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_RegisterServerResponse_EncodeableType = {
     "RegisterServerResponse",
     OpcUaId_RegisterServerResponse,
     OpcUaId_RegisterServerResponse_Encoding_DefaultBinary,
@@ -3559,8 +3500,7 @@ SOPC_EncodeableType OpcUa_RegisterServerResponse_EncodeableType =
     OpcUa_RegisterServerResponse_Encode,
     OpcUa_RegisterServerResponse_Decode,
     sizeof RegisterServerResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    RegisterServerResponse_Fields
-};
+    RegisterServerResponse_Fields};
 #endif
 
 #endif
@@ -3584,9 +3524,12 @@ void OpcUa_MdnsDiscoveryConfiguration_Clear(void* pValue)
 /*============================================================================
  * OpcUa_MdnsDiscoveryConfiguration_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_MdnsDiscoveryConfiguration_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_MdnsDiscoveryConfiguration_Encode(const void* pValue,
+                                                          SOPC_Buffer* buf,
+                                                          uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Encode(&OpcUa_MdnsDiscoveryConfiguration_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Encode(&OpcUa_MdnsDiscoveryConfiguration_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -3594,7 +3537,8 @@ SOPC_ReturnStatus OpcUa_MdnsDiscoveryConfiguration_Encode(const void* pValue, SO
  *===========================================================================*/
 SOPC_ReturnStatus OpcUa_MdnsDiscoveryConfiguration_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Decode(&OpcUa_MdnsDiscoveryConfiguration_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Decode(&OpcUa_MdnsDiscoveryConfiguration_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -3602,24 +3546,24 @@ SOPC_ReturnStatus OpcUa_MdnsDiscoveryConfiguration_Decode(void* pValue, SOPC_Buf
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor MdnsDiscoveryConfiguration_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                                 // isBuiltIn
+        false,                                                                // isArrayLength
+        true,                                                                 // isToEncode
+        (uint32_t) SOPC_String_Id,                                            // typeIndex
         (uint32_t) offsetof(OpcUa_MdnsDiscoveryConfiguration, MdnsServerName) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                         // isBuiltIn
+        true,                                                                         // isArrayLength
+        true,                                                                         // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                     // typeIndex
         (uint32_t) offsetof(OpcUa_MdnsDiscoveryConfiguration, NoOfServerCapabilities) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                                     // isBuiltIn
+        false,                                                                    // isArrayLength
+        true,                                                                     // isToEncode
+        (uint32_t) SOPC_String_Id,                                                // typeIndex
         (uint32_t) offsetof(OpcUa_MdnsDiscoveryConfiguration, ServerCapabilities) // offset
     },
 };
@@ -3627,8 +3571,7 @@ static const SOPC_EncodeableType_FieldDescriptor MdnsDiscoveryConfiguration_Fiel
 /*============================================================================
  * Descriptor of the MdnsDiscoveryConfiguration encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_MdnsDiscoveryConfiguration_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_MdnsDiscoveryConfiguration_EncodeableType = {
     "MdnsDiscoveryConfiguration",
     OpcUaId_MdnsDiscoveryConfiguration,
     OpcUaId_MdnsDiscoveryConfiguration_Encoding_DefaultBinary,
@@ -3641,8 +3584,7 @@ SOPC_EncodeableType OpcUa_MdnsDiscoveryConfiguration_EncodeableType =
     OpcUa_MdnsDiscoveryConfiguration_Encode,
     OpcUa_MdnsDiscoveryConfiguration_Decode,
     sizeof MdnsDiscoveryConfiguration_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    MdnsDiscoveryConfiguration_Fields
-};
+    MdnsDiscoveryConfiguration_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_RegisterServer2
@@ -3684,24 +3626,24 @@ SOPC_ReturnStatus OpcUa_RegisterServer2Request_Decode(void* pValue, SOPC_Buffer*
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor RegisterServer2Request_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_RegisteredServer, // typeIndex
+        false,                                                    // isBuiltIn
+        false,                                                    // isArrayLength
+        true,                                                     // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_RegisteredServer,       // typeIndex
         (uint32_t) offsetof(OpcUa_RegisterServer2Request, Server) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                         // isBuiltIn
+        true,                                                                         // isArrayLength
+        true,                                                                         // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                     // typeIndex
         (uint32_t) offsetof(OpcUa_RegisterServer2Request, NoOfDiscoveryConfiguration) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ExtensionObject_Id, // typeIndex
+        true,                                                                     // isBuiltIn
+        false,                                                                    // isArrayLength
+        true,                                                                     // isToEncode
+        (uint32_t) SOPC_ExtensionObject_Id,                                       // typeIndex
         (uint32_t) offsetof(OpcUa_RegisterServer2Request, DiscoveryConfiguration) // offset
     },
 };
@@ -3709,8 +3651,7 @@ static const SOPC_EncodeableType_FieldDescriptor RegisterServer2Request_Fields[]
 /*============================================================================
  * Descriptor of the RegisterServer2Request encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_RegisterServer2Request_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_RegisterServer2Request_EncodeableType = {
     "RegisterServer2Request",
     OpcUaId_RegisterServer2Request,
     OpcUaId_RegisterServer2Request_Encoding_DefaultBinary,
@@ -3723,8 +3664,7 @@ SOPC_EncodeableType OpcUa_RegisterServer2Request_EncodeableType =
     OpcUa_RegisterServer2Request_Encode,
     OpcUa_RegisterServer2Request_Decode,
     sizeof RegisterServer2Request_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    RegisterServer2Request_Fields
-};
+    RegisterServer2Request_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_RegisterServer2Response
@@ -3765,38 +3705,38 @@ SOPC_ReturnStatus OpcUa_RegisterServer2Response_Decode(void* pValue, SOPC_Buffer
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor RegisterServer2Response_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        false, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader, // typeIndex
+        false,                                                             // isBuiltIn
+        false,                                                             // isArrayLength
+        false,                                                             // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader,                  // typeIndex
         (uint32_t) offsetof(OpcUa_RegisterServer2Response, ResponseHeader) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                        // isBuiltIn
+        true,                                                                        // isArrayLength
+        true,                                                                        // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                    // typeIndex
         (uint32_t) offsetof(OpcUa_RegisterServer2Response, NoOfConfigurationResults) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_StatusCode_Id, // typeIndex
+        true,                                                                    // isBuiltIn
+        false,                                                                   // isArrayLength
+        true,                                                                    // isToEncode
+        (uint32_t) SOPC_StatusCode_Id,                                           // typeIndex
         (uint32_t) offsetof(OpcUa_RegisterServer2Response, ConfigurationResults) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                   // isBuiltIn
+        true,                                                                   // isArrayLength
+        true,                                                                   // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                               // typeIndex
         (uint32_t) offsetof(OpcUa_RegisterServer2Response, NoOfDiagnosticInfos) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DiagnosticInfo_Id, // typeIndex
+        true,                                                               // isBuiltIn
+        false,                                                              // isArrayLength
+        true,                                                               // isToEncode
+        (uint32_t) SOPC_DiagnosticInfo_Id,                                  // typeIndex
         (uint32_t) offsetof(OpcUa_RegisterServer2Response, DiagnosticInfos) // offset
     },
 };
@@ -3804,8 +3744,7 @@ static const SOPC_EncodeableType_FieldDescriptor RegisterServer2Response_Fields[
 /*============================================================================
  * Descriptor of the RegisterServer2Response encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_RegisterServer2Response_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_RegisterServer2Response_EncodeableType = {
     "RegisterServer2Response",
     OpcUaId_RegisterServer2Response,
     OpcUaId_RegisterServer2Response_Encoding_DefaultBinary,
@@ -3818,8 +3757,7 @@ SOPC_EncodeableType OpcUa_RegisterServer2Response_EncodeableType =
     OpcUa_RegisterServer2Response_Encode,
     OpcUa_RegisterServer2Response_Decode,
     sizeof RegisterServer2Response_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    RegisterServer2Response_Fields
-};
+    RegisterServer2Response_Fields};
 #endif
 
 #endif
@@ -3861,31 +3799,31 @@ SOPC_ReturnStatus OpcUa_ChannelSecurityToken_Decode(void* pValue, SOPC_Buffer* b
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ChannelSecurityToken_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                 // typeIndex
         (uint32_t) offsetof(OpcUa_ChannelSecurityToken, ChannelId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                    // isBuiltIn
+        false,                                                   // isArrayLength
+        true,                                                    // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                               // typeIndex
         (uint32_t) offsetof(OpcUa_ChannelSecurityToken, TokenId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DateTime_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_DateTime_Id,                               // typeIndex
         (uint32_t) offsetof(OpcUa_ChannelSecurityToken, CreatedAt) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                            // isBuiltIn
+        false,                                                           // isArrayLength
+        true,                                                            // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                       // typeIndex
         (uint32_t) offsetof(OpcUa_ChannelSecurityToken, RevisedLifetime) // offset
     },
 };
@@ -3893,8 +3831,7 @@ static const SOPC_EncodeableType_FieldDescriptor ChannelSecurityToken_Fields[] =
 /*============================================================================
  * Descriptor of the ChannelSecurityToken encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_ChannelSecurityToken_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_ChannelSecurityToken_EncodeableType = {
     "ChannelSecurityToken",
     OpcUaId_ChannelSecurityToken,
     OpcUaId_ChannelSecurityToken_Encoding_DefaultBinary,
@@ -3907,8 +3844,7 @@ SOPC_EncodeableType OpcUa_ChannelSecurityToken_EncodeableType =
     OpcUa_ChannelSecurityToken_Encode,
     OpcUa_ChannelSecurityToken_Decode,
     sizeof ChannelSecurityToken_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    ChannelSecurityToken_Fields
-};
+    ChannelSecurityToken_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_OpenSecureChannel
@@ -3932,7 +3868,9 @@ void OpcUa_OpenSecureChannelRequest_Clear(void* pValue)
 /*============================================================================
  * OpcUa_OpenSecureChannelRequest_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_OpenSecureChannelRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_OpenSecureChannelRequest_Encode(const void* pValue,
+                                                        SOPC_Buffer* buf,
+                                                        uint32_t nestedStructLevel)
 {
     return SOPC_EncodeableObject_Encode(&OpcUa_OpenSecureChannelRequest_EncodeableType, pValue, buf, nestedStructLevel);
 }
@@ -3950,38 +3888,38 @@ SOPC_ReturnStatus OpcUa_OpenSecureChannelRequest_Decode(void* pValue, SOPC_Buffe
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor OpenSecureChannelRequest_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                      // isBuiltIn
+        false,                                                                     // isArrayLength
+        true,                                                                      // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                 // typeIndex
         (uint32_t) offsetof(OpcUa_OpenSecureChannelRequest, ClientProtocolVersion) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                            // isBuiltIn
+        false,                                                           // isArrayLength
+        true,                                                            // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                        // typeIndex
         (uint32_t) offsetof(OpcUa_OpenSecureChannelRequest, RequestType) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                             // isBuiltIn
+        false,                                                            // isArrayLength
+        true,                                                             // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                         // typeIndex
         (uint32_t) offsetof(OpcUa_OpenSecureChannelRequest, SecurityMode) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ByteString_Id, // typeIndex
+        true,                                                            // isBuiltIn
+        false,                                                           // isArrayLength
+        true,                                                            // isToEncode
+        (uint32_t) SOPC_ByteString_Id,                                   // typeIndex
         (uint32_t) offsetof(OpcUa_OpenSecureChannelRequest, ClientNonce) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                  // isBuiltIn
+        false,                                                                 // isArrayLength
+        true,                                                                  // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                             // typeIndex
         (uint32_t) offsetof(OpcUa_OpenSecureChannelRequest, RequestedLifetime) // offset
     },
 };
@@ -3989,8 +3927,7 @@ static const SOPC_EncodeableType_FieldDescriptor OpenSecureChannelRequest_Fields
 /*============================================================================
  * Descriptor of the OpenSecureChannelRequest encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_OpenSecureChannelRequest_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_OpenSecureChannelRequest_EncodeableType = {
     "OpenSecureChannelRequest",
     OpcUaId_OpenSecureChannelRequest,
     OpcUaId_OpenSecureChannelRequest_Encoding_DefaultBinary,
@@ -4003,8 +3940,7 @@ SOPC_EncodeableType OpcUa_OpenSecureChannelRequest_EncodeableType =
     OpcUa_OpenSecureChannelRequest_Encode,
     OpcUa_OpenSecureChannelRequest_Decode,
     sizeof OpenSecureChannelRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    OpenSecureChannelRequest_Fields
-};
+    OpenSecureChannelRequest_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_OpenSecureChannelResponse
@@ -4027,9 +3963,12 @@ void OpcUa_OpenSecureChannelResponse_Clear(void* pValue)
 /*============================================================================
  * OpcUa_OpenSecureChannelResponse_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_OpenSecureChannelResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_OpenSecureChannelResponse_Encode(const void* pValue,
+                                                         SOPC_Buffer* buf,
+                                                         uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Encode(&OpcUa_OpenSecureChannelResponse_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Encode(&OpcUa_OpenSecureChannelResponse_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -4037,7 +3976,8 @@ SOPC_ReturnStatus OpcUa_OpenSecureChannelResponse_Encode(const void* pValue, SOP
  *===========================================================================*/
 SOPC_ReturnStatus OpcUa_OpenSecureChannelResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Decode(&OpcUa_OpenSecureChannelResponse_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Decode(&OpcUa_OpenSecureChannelResponse_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -4045,31 +3985,31 @@ SOPC_ReturnStatus OpcUa_OpenSecureChannelResponse_Decode(void* pValue, SOPC_Buff
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor OpenSecureChannelResponse_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        false, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader, // typeIndex
+        false,                                                               // isBuiltIn
+        false,                                                               // isArrayLength
+        false,                                                               // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader,                    // typeIndex
         (uint32_t) offsetof(OpcUa_OpenSecureChannelResponse, ResponseHeader) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                       // isBuiltIn
+        false,                                                                      // isArrayLength
+        true,                                                                       // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                  // typeIndex
         (uint32_t) offsetof(OpcUa_OpenSecureChannelResponse, ServerProtocolVersion) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ChannelSecurityToken, // typeIndex
+        false,                                                              // isBuiltIn
+        false,                                                              // isArrayLength
+        true,                                                               // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ChannelSecurityToken,             // typeIndex
         (uint32_t) offsetof(OpcUa_OpenSecureChannelResponse, SecurityToken) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ByteString_Id, // typeIndex
+        true,                                                             // isBuiltIn
+        false,                                                            // isArrayLength
+        true,                                                             // isToEncode
+        (uint32_t) SOPC_ByteString_Id,                                    // typeIndex
         (uint32_t) offsetof(OpcUa_OpenSecureChannelResponse, ServerNonce) // offset
     },
 };
@@ -4077,8 +4017,7 @@ static const SOPC_EncodeableType_FieldDescriptor OpenSecureChannelResponse_Field
 /*============================================================================
  * Descriptor of the OpenSecureChannelResponse encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_OpenSecureChannelResponse_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_OpenSecureChannelResponse_EncodeableType = {
     "OpenSecureChannelResponse",
     OpcUaId_OpenSecureChannelResponse,
     OpcUaId_OpenSecureChannelResponse_Encoding_DefaultBinary,
@@ -4091,8 +4030,7 @@ SOPC_EncodeableType OpcUa_OpenSecureChannelResponse_EncodeableType =
     OpcUa_OpenSecureChannelResponse_Encode,
     OpcUa_OpenSecureChannelResponse_Decode,
     sizeof OpenSecureChannelResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    OpenSecureChannelResponse_Fields
-};
+    OpenSecureChannelResponse_Fields};
 #endif
 
 #endif
@@ -4117,9 +4055,12 @@ void OpcUa_CloseSecureChannelRequest_Clear(void* pValue)
 /*============================================================================
  * OpcUa_CloseSecureChannelRequest_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_CloseSecureChannelRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_CloseSecureChannelRequest_Encode(const void* pValue,
+                                                         SOPC_Buffer* buf,
+                                                         uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Encode(&OpcUa_CloseSecureChannelRequest_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Encode(&OpcUa_CloseSecureChannelRequest_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -4127,14 +4068,14 @@ SOPC_ReturnStatus OpcUa_CloseSecureChannelRequest_Encode(const void* pValue, SOP
  *===========================================================================*/
 SOPC_ReturnStatus OpcUa_CloseSecureChannelRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Decode(&OpcUa_CloseSecureChannelRequest_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Decode(&OpcUa_CloseSecureChannelRequest_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
  * Descriptor of the CloseSecureChannelRequest encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_CloseSecureChannelRequest_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_CloseSecureChannelRequest_EncodeableType = {
     "CloseSecureChannelRequest",
     OpcUaId_CloseSecureChannelRequest,
     OpcUaId_CloseSecureChannelRequest_Encoding_DefaultBinary,
@@ -4147,8 +4088,7 @@ SOPC_EncodeableType OpcUa_CloseSecureChannelRequest_EncodeableType =
     OpcUa_CloseSecureChannelRequest_Encode,
     OpcUa_CloseSecureChannelRequest_Decode,
     0,
-    NULL
-};
+    NULL};
 #endif
 
 #ifndef OPCUA_EXCLUDE_CloseSecureChannelResponse
@@ -4171,9 +4111,12 @@ void OpcUa_CloseSecureChannelResponse_Clear(void* pValue)
 /*============================================================================
  * OpcUa_CloseSecureChannelResponse_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_CloseSecureChannelResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_CloseSecureChannelResponse_Encode(const void* pValue,
+                                                          SOPC_Buffer* buf,
+                                                          uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Encode(&OpcUa_CloseSecureChannelResponse_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Encode(&OpcUa_CloseSecureChannelResponse_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -4181,7 +4124,8 @@ SOPC_ReturnStatus OpcUa_CloseSecureChannelResponse_Encode(const void* pValue, SO
  *===========================================================================*/
 SOPC_ReturnStatus OpcUa_CloseSecureChannelResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Decode(&OpcUa_CloseSecureChannelResponse_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Decode(&OpcUa_CloseSecureChannelResponse_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -4189,10 +4133,10 @@ SOPC_ReturnStatus OpcUa_CloseSecureChannelResponse_Decode(void* pValue, SOPC_Buf
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor CloseSecureChannelResponse_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        false, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader, // typeIndex
+        false,                                                                // isBuiltIn
+        false,                                                                // isArrayLength
+        false,                                                                // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader,                     // typeIndex
         (uint32_t) offsetof(OpcUa_CloseSecureChannelResponse, ResponseHeader) // offset
     },
 };
@@ -4200,8 +4144,7 @@ static const SOPC_EncodeableType_FieldDescriptor CloseSecureChannelResponse_Fiel
 /*============================================================================
  * Descriptor of the CloseSecureChannelResponse encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_CloseSecureChannelResponse_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_CloseSecureChannelResponse_EncodeableType = {
     "CloseSecureChannelResponse",
     OpcUaId_CloseSecureChannelResponse,
     OpcUaId_CloseSecureChannelResponse_Encoding_DefaultBinary,
@@ -4214,8 +4157,7 @@ SOPC_EncodeableType OpcUa_CloseSecureChannelResponse_EncodeableType =
     OpcUa_CloseSecureChannelResponse_Encode,
     OpcUa_CloseSecureChannelResponse_Decode,
     sizeof CloseSecureChannelResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    CloseSecureChannelResponse_Fields
-};
+    CloseSecureChannelResponse_Fields};
 #endif
 
 #endif
@@ -4239,9 +4181,12 @@ void OpcUa_SignedSoftwareCertificate_Clear(void* pValue)
 /*============================================================================
  * OpcUa_SignedSoftwareCertificate_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SignedSoftwareCertificate_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_SignedSoftwareCertificate_Encode(const void* pValue,
+                                                         SOPC_Buffer* buf,
+                                                         uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Encode(&OpcUa_SignedSoftwareCertificate_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Encode(&OpcUa_SignedSoftwareCertificate_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -4249,7 +4194,8 @@ SOPC_ReturnStatus OpcUa_SignedSoftwareCertificate_Encode(const void* pValue, SOP
  *===========================================================================*/
 SOPC_ReturnStatus OpcUa_SignedSoftwareCertificate_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Decode(&OpcUa_SignedSoftwareCertificate_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Decode(&OpcUa_SignedSoftwareCertificate_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -4257,17 +4203,17 @@ SOPC_ReturnStatus OpcUa_SignedSoftwareCertificate_Decode(void* pValue, SOPC_Buff
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor SignedSoftwareCertificate_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ByteString_Id, // typeIndex
+        true,                                                                 // isBuiltIn
+        false,                                                                // isArrayLength
+        true,                                                                 // isToEncode
+        (uint32_t) SOPC_ByteString_Id,                                        // typeIndex
         (uint32_t) offsetof(OpcUa_SignedSoftwareCertificate, CertificateData) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ByteString_Id, // typeIndex
+        true,                                                           // isBuiltIn
+        false,                                                          // isArrayLength
+        true,                                                           // isToEncode
+        (uint32_t) SOPC_ByteString_Id,                                  // typeIndex
         (uint32_t) offsetof(OpcUa_SignedSoftwareCertificate, Signature) // offset
     },
 };
@@ -4275,8 +4221,7 @@ static const SOPC_EncodeableType_FieldDescriptor SignedSoftwareCertificate_Field
 /*============================================================================
  * Descriptor of the SignedSoftwareCertificate encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_SignedSoftwareCertificate_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_SignedSoftwareCertificate_EncodeableType = {
     "SignedSoftwareCertificate",
     OpcUaId_SignedSoftwareCertificate,
     OpcUaId_SignedSoftwareCertificate_Encoding_DefaultBinary,
@@ -4289,8 +4234,7 @@ SOPC_EncodeableType OpcUa_SignedSoftwareCertificate_EncodeableType =
     OpcUa_SignedSoftwareCertificate_Encode,
     OpcUa_SignedSoftwareCertificate_Decode,
     sizeof SignedSoftwareCertificate_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    SignedSoftwareCertificate_Fields
-};
+    SignedSoftwareCertificate_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_SignatureData
@@ -4331,17 +4275,17 @@ SOPC_ReturnStatus OpcUa_SignatureData_Decode(void* pValue, SOPC_Buffer* buf, uin
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor SignatureData_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                               // isBuiltIn
+        false,                                              // isArrayLength
+        true,                                               // isToEncode
+        (uint32_t) SOPC_String_Id,                          // typeIndex
         (uint32_t) offsetof(OpcUa_SignatureData, Algorithm) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ByteString_Id, // typeIndex
+        true,                                               // isBuiltIn
+        false,                                              // isArrayLength
+        true,                                               // isToEncode
+        (uint32_t) SOPC_ByteString_Id,                      // typeIndex
         (uint32_t) offsetof(OpcUa_SignatureData, Signature) // offset
     },
 };
@@ -4349,8 +4293,7 @@ static const SOPC_EncodeableType_FieldDescriptor SignatureData_Fields[] = {
 /*============================================================================
  * Descriptor of the SignatureData encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_SignatureData_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_SignatureData_EncodeableType = {
     "SignatureData",
     OpcUaId_SignatureData,
     OpcUaId_SignatureData_Encoding_DefaultBinary,
@@ -4363,8 +4306,7 @@ SOPC_EncodeableType OpcUa_SignatureData_EncodeableType =
     OpcUa_SignatureData_Encode,
     OpcUa_SignatureData_Decode,
     sizeof SignatureData_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    SignatureData_Fields
-};
+    SignatureData_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_CreateSession
@@ -4406,59 +4348,59 @@ SOPC_ReturnStatus OpcUa_CreateSessionRequest_Decode(void* pValue, SOPC_Buffer* b
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor CreateSessionRequest_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ApplicationDescription, // typeIndex
+        false,                                                             // isBuiltIn
+        false,                                                             // isArrayLength
+        true,                                                              // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ApplicationDescription,          // typeIndex
         (uint32_t) offsetof(OpcUa_CreateSessionRequest, ClientDescription) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_String_Id,                                 // typeIndex
         (uint32_t) offsetof(OpcUa_CreateSessionRequest, ServerUri) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                        // isBuiltIn
+        false,                                                       // isArrayLength
+        true,                                                        // isToEncode
+        (uint32_t) SOPC_String_Id,                                   // typeIndex
         (uint32_t) offsetof(OpcUa_CreateSessionRequest, EndpointUrl) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                        // isBuiltIn
+        false,                                                       // isArrayLength
+        true,                                                        // isToEncode
+        (uint32_t) SOPC_String_Id,                                   // typeIndex
         (uint32_t) offsetof(OpcUa_CreateSessionRequest, SessionName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ByteString_Id, // typeIndex
+        true,                                                        // isBuiltIn
+        false,                                                       // isArrayLength
+        true,                                                        // isToEncode
+        (uint32_t) SOPC_ByteString_Id,                               // typeIndex
         (uint32_t) offsetof(OpcUa_CreateSessionRequest, ClientNonce) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ByteString_Id, // typeIndex
+        true,                                                              // isBuiltIn
+        false,                                                             // isArrayLength
+        true,                                                              // isToEncode
+        (uint32_t) SOPC_ByteString_Id,                                     // typeIndex
         (uint32_t) offsetof(OpcUa_CreateSessionRequest, ClientCertificate) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Double_Id, // typeIndex
+        true,                                                                    // isBuiltIn
+        false,                                                                   // isArrayLength
+        true,                                                                    // isToEncode
+        (uint32_t) SOPC_Double_Id,                                               // typeIndex
         (uint32_t) offsetof(OpcUa_CreateSessionRequest, RequestedSessionTimeout) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                   // isBuiltIn
+        false,                                                                  // isArrayLength
+        true,                                                                   // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                              // typeIndex
         (uint32_t) offsetof(OpcUa_CreateSessionRequest, MaxResponseMessageSize) // offset
     },
 };
@@ -4466,8 +4408,7 @@ static const SOPC_EncodeableType_FieldDescriptor CreateSessionRequest_Fields[] =
 /*============================================================================
  * Descriptor of the CreateSessionRequest encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_CreateSessionRequest_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_CreateSessionRequest_EncodeableType = {
     "CreateSessionRequest",
     OpcUaId_CreateSessionRequest,
     OpcUaId_CreateSessionRequest_Encoding_DefaultBinary,
@@ -4480,8 +4421,7 @@ SOPC_EncodeableType OpcUa_CreateSessionRequest_EncodeableType =
     OpcUa_CreateSessionRequest_Encode,
     OpcUa_CreateSessionRequest_Decode,
     sizeof CreateSessionRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    CreateSessionRequest_Fields
-};
+    CreateSessionRequest_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_CreateSessionResponse
@@ -4522,87 +4462,87 @@ SOPC_ReturnStatus OpcUa_CreateSessionResponse_Decode(void* pValue, SOPC_Buffer* 
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor CreateSessionResponse_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        false, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader, // typeIndex
+        false,                                                           // isBuiltIn
+        false,                                                           // isArrayLength
+        false,                                                           // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader,                // typeIndex
         (uint32_t) offsetof(OpcUa_CreateSessionResponse, ResponseHeader) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                       // isBuiltIn
+        false,                                                      // isArrayLength
+        true,                                                       // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                                  // typeIndex
         (uint32_t) offsetof(OpcUa_CreateSessionResponse, SessionId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                                 // isBuiltIn
+        false,                                                                // isArrayLength
+        true,                                                                 // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                                            // typeIndex
         (uint32_t) offsetof(OpcUa_CreateSessionResponse, AuthenticationToken) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Double_Id, // typeIndex
+        true,                                                                   // isBuiltIn
+        false,                                                                  // isArrayLength
+        true,                                                                   // isToEncode
+        (uint32_t) SOPC_Double_Id,                                              // typeIndex
         (uint32_t) offsetof(OpcUa_CreateSessionResponse, RevisedSessionTimeout) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ByteString_Id, // typeIndex
+        true,                                                         // isBuiltIn
+        false,                                                        // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_ByteString_Id,                                // typeIndex
         (uint32_t) offsetof(OpcUa_CreateSessionResponse, ServerNonce) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ByteString_Id, // typeIndex
+        true,                                                               // isBuiltIn
+        false,                                                              // isArrayLength
+        true,                                                               // isToEncode
+        (uint32_t) SOPC_ByteString_Id,                                      // typeIndex
         (uint32_t) offsetof(OpcUa_CreateSessionResponse, ServerCertificate) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                 // isBuiltIn
+        true,                                                                 // isArrayLength
+        true,                                                                 // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                             // typeIndex
         (uint32_t) offsetof(OpcUa_CreateSessionResponse, NoOfServerEndpoints) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_EndpointDescription, // typeIndex
+        false,                                                            // isBuiltIn
+        false,                                                            // isArrayLength
+        true,                                                             // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_EndpointDescription,            // typeIndex
         (uint32_t) offsetof(OpcUa_CreateSessionResponse, ServerEndpoints) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                            // isBuiltIn
+        true,                                                                            // isArrayLength
+        true,                                                                            // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                        // typeIndex
         (uint32_t) offsetof(OpcUa_CreateSessionResponse, NoOfServerSoftwareCertificates) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_SignedSoftwareCertificate, // typeIndex
+        false,                                                                       // isBuiltIn
+        false,                                                                       // isArrayLength
+        true,                                                                        // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_SignedSoftwareCertificate,                 // typeIndex
         (uint32_t) offsetof(OpcUa_CreateSessionResponse, ServerSoftwareCertificates) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_SignatureData, // typeIndex
+        false,                                                            // isBuiltIn
+        false,                                                            // isArrayLength
+        true,                                                             // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_SignatureData,                  // typeIndex
         (uint32_t) offsetof(OpcUa_CreateSessionResponse, ServerSignature) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                   // isBuiltIn
+        false,                                                                  // isArrayLength
+        true,                                                                   // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                              // typeIndex
         (uint32_t) offsetof(OpcUa_CreateSessionResponse, MaxRequestMessageSize) // offset
     },
 };
@@ -4610,8 +4550,7 @@ static const SOPC_EncodeableType_FieldDescriptor CreateSessionResponse_Fields[] 
 /*============================================================================
  * Descriptor of the CreateSessionResponse encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_CreateSessionResponse_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_CreateSessionResponse_EncodeableType = {
     "CreateSessionResponse",
     OpcUaId_CreateSessionResponse,
     OpcUaId_CreateSessionResponse_Encoding_DefaultBinary,
@@ -4624,8 +4563,7 @@ SOPC_EncodeableType OpcUa_CreateSessionResponse_EncodeableType =
     OpcUa_CreateSessionResponse_Encode,
     OpcUa_CreateSessionResponse_Decode,
     sizeof CreateSessionResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    CreateSessionResponse_Fields
-};
+    CreateSessionResponse_Fields};
 #endif
 
 #endif
@@ -4667,10 +4605,10 @@ SOPC_ReturnStatus OpcUa_UserIdentityToken_Decode(void* pValue, SOPC_Buffer* buf,
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor UserIdentityToken_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                  // isBuiltIn
+        false,                                                 // isArrayLength
+        true,                                                  // isToEncode
+        (uint32_t) SOPC_String_Id,                             // typeIndex
         (uint32_t) offsetof(OpcUa_UserIdentityToken, PolicyId) // offset
     },
 };
@@ -4678,8 +4616,7 @@ static const SOPC_EncodeableType_FieldDescriptor UserIdentityToken_Fields[] = {
 /*============================================================================
  * Descriptor of the UserIdentityToken encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_UserIdentityToken_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_UserIdentityToken_EncodeableType = {
     "UserIdentityToken",
     OpcUaId_UserIdentityToken,
     OpcUaId_UserIdentityToken_Encoding_DefaultBinary,
@@ -4692,8 +4629,7 @@ SOPC_EncodeableType OpcUa_UserIdentityToken_EncodeableType =
     OpcUa_UserIdentityToken_Encode,
     OpcUa_UserIdentityToken_Decode,
     sizeof UserIdentityToken_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    UserIdentityToken_Fields
-};
+    UserIdentityToken_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_AnonymousIdentityToken
@@ -4734,10 +4670,10 @@ SOPC_ReturnStatus OpcUa_AnonymousIdentityToken_Decode(void* pValue, SOPC_Buffer*
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor AnonymousIdentityToken_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                       // isBuiltIn
+        false,                                                      // isArrayLength
+        true,                                                       // isToEncode
+        (uint32_t) SOPC_String_Id,                                  // typeIndex
         (uint32_t) offsetof(OpcUa_AnonymousIdentityToken, PolicyId) // offset
     },
 };
@@ -4745,8 +4681,7 @@ static const SOPC_EncodeableType_FieldDescriptor AnonymousIdentityToken_Fields[]
 /*============================================================================
  * Descriptor of the AnonymousIdentityToken encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_AnonymousIdentityToken_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_AnonymousIdentityToken_EncodeableType = {
     "AnonymousIdentityToken",
     OpcUaId_AnonymousIdentityToken,
     OpcUaId_AnonymousIdentityToken_Encoding_DefaultBinary,
@@ -4759,8 +4694,7 @@ SOPC_EncodeableType OpcUa_AnonymousIdentityToken_EncodeableType =
     OpcUa_AnonymousIdentityToken_Encode,
     OpcUa_AnonymousIdentityToken_Decode,
     sizeof AnonymousIdentityToken_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    AnonymousIdentityToken_Fields
-};
+    AnonymousIdentityToken_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_UserNameIdentityToken
@@ -4801,31 +4735,31 @@ SOPC_ReturnStatus OpcUa_UserNameIdentityToken_Decode(void* pValue, SOPC_Buffer* 
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor UserNameIdentityToken_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_String_Id,                                 // typeIndex
         (uint32_t) offsetof(OpcUa_UserNameIdentityToken, PolicyId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_String_Id,                                 // typeIndex
         (uint32_t) offsetof(OpcUa_UserNameIdentityToken, UserName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ByteString_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_ByteString_Id,                             // typeIndex
         (uint32_t) offsetof(OpcUa_UserNameIdentityToken, Password) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                                 // isBuiltIn
+        false,                                                                // isArrayLength
+        true,                                                                 // isToEncode
+        (uint32_t) SOPC_String_Id,                                            // typeIndex
         (uint32_t) offsetof(OpcUa_UserNameIdentityToken, EncryptionAlgorithm) // offset
     },
 };
@@ -4833,8 +4767,7 @@ static const SOPC_EncodeableType_FieldDescriptor UserNameIdentityToken_Fields[] 
 /*============================================================================
  * Descriptor of the UserNameIdentityToken encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_UserNameIdentityToken_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_UserNameIdentityToken_EncodeableType = {
     "UserNameIdentityToken",
     OpcUaId_UserNameIdentityToken,
     OpcUaId_UserNameIdentityToken_Encoding_DefaultBinary,
@@ -4847,8 +4780,7 @@ SOPC_EncodeableType OpcUa_UserNameIdentityToken_EncodeableType =
     OpcUa_UserNameIdentityToken_Encode,
     OpcUa_UserNameIdentityToken_Decode,
     sizeof UserNameIdentityToken_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    UserNameIdentityToken_Fields
-};
+    UserNameIdentityToken_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_X509IdentityToken
@@ -4889,17 +4821,17 @@ SOPC_ReturnStatus OpcUa_X509IdentityToken_Decode(void* pValue, SOPC_Buffer* buf,
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor X509IdentityToken_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                  // isBuiltIn
+        false,                                                 // isArrayLength
+        true,                                                  // isToEncode
+        (uint32_t) SOPC_String_Id,                             // typeIndex
         (uint32_t) offsetof(OpcUa_X509IdentityToken, PolicyId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ByteString_Id, // typeIndex
+        true,                                                         // isBuiltIn
+        false,                                                        // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_ByteString_Id,                                // typeIndex
         (uint32_t) offsetof(OpcUa_X509IdentityToken, CertificateData) // offset
     },
 };
@@ -4907,8 +4839,7 @@ static const SOPC_EncodeableType_FieldDescriptor X509IdentityToken_Fields[] = {
 /*============================================================================
  * Descriptor of the X509IdentityToken encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_X509IdentityToken_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_X509IdentityToken_EncodeableType = {
     "X509IdentityToken",
     OpcUaId_X509IdentityToken,
     OpcUaId_X509IdentityToken_Encoding_DefaultBinary,
@@ -4921,8 +4852,7 @@ SOPC_EncodeableType OpcUa_X509IdentityToken_EncodeableType =
     OpcUa_X509IdentityToken_Encode,
     OpcUa_X509IdentityToken_Decode,
     sizeof X509IdentityToken_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    X509IdentityToken_Fields
-};
+    X509IdentityToken_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_KerberosIdentityToken
@@ -4963,17 +4893,17 @@ SOPC_ReturnStatus OpcUa_KerberosIdentityToken_Decode(void* pValue, SOPC_Buffer* 
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor KerberosIdentityToken_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_String_Id,                                 // typeIndex
         (uint32_t) offsetof(OpcUa_KerberosIdentityToken, PolicyId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ByteString_Id, // typeIndex
+        true,                                                        // isBuiltIn
+        false,                                                       // isArrayLength
+        true,                                                        // isToEncode
+        (uint32_t) SOPC_ByteString_Id,                               // typeIndex
         (uint32_t) offsetof(OpcUa_KerberosIdentityToken, TicketData) // offset
     },
 };
@@ -4981,8 +4911,7 @@ static const SOPC_EncodeableType_FieldDescriptor KerberosIdentityToken_Fields[] 
 /*============================================================================
  * Descriptor of the KerberosIdentityToken encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_KerberosIdentityToken_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_KerberosIdentityToken_EncodeableType = {
     "KerberosIdentityToken",
     OpcUaId_KerberosIdentityToken,
     OpcUaId_KerberosIdentityToken_Encoding_DefaultBinary,
@@ -4995,8 +4924,7 @@ SOPC_EncodeableType OpcUa_KerberosIdentityToken_EncodeableType =
     OpcUa_KerberosIdentityToken_Encode,
     OpcUa_KerberosIdentityToken_Decode,
     sizeof KerberosIdentityToken_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    KerberosIdentityToken_Fields
-};
+    KerberosIdentityToken_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_IssuedIdentityToken
@@ -5037,24 +4965,24 @@ SOPC_ReturnStatus OpcUa_IssuedIdentityToken_Decode(void* pValue, SOPC_Buffer* bu
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor IssuedIdentityToken_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                    // isBuiltIn
+        false,                                                   // isArrayLength
+        true,                                                    // isToEncode
+        (uint32_t) SOPC_String_Id,                               // typeIndex
         (uint32_t) offsetof(OpcUa_IssuedIdentityToken, PolicyId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ByteString_Id, // typeIndex
+        true,                                                     // isBuiltIn
+        false,                                                    // isArrayLength
+        true,                                                     // isToEncode
+        (uint32_t) SOPC_ByteString_Id,                            // typeIndex
         (uint32_t) offsetof(OpcUa_IssuedIdentityToken, TokenData) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                               // isBuiltIn
+        false,                                                              // isArrayLength
+        true,                                                               // isToEncode
+        (uint32_t) SOPC_String_Id,                                          // typeIndex
         (uint32_t) offsetof(OpcUa_IssuedIdentityToken, EncryptionAlgorithm) // offset
     },
 };
@@ -5062,8 +4990,7 @@ static const SOPC_EncodeableType_FieldDescriptor IssuedIdentityToken_Fields[] = 
 /*============================================================================
  * Descriptor of the IssuedIdentityToken encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_IssuedIdentityToken_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_IssuedIdentityToken_EncodeableType = {
     "IssuedIdentityToken",
     OpcUaId_IssuedIdentityToken,
     OpcUaId_IssuedIdentityToken_Encoding_DefaultBinary,
@@ -5076,8 +5003,7 @@ SOPC_EncodeableType OpcUa_IssuedIdentityToken_EncodeableType =
     OpcUa_IssuedIdentityToken_Encode,
     OpcUa_IssuedIdentityToken_Decode,
     sizeof IssuedIdentityToken_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    IssuedIdentityToken_Fields
-};
+    IssuedIdentityToken_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ActivateSession
@@ -5119,52 +5045,52 @@ SOPC_ReturnStatus OpcUa_ActivateSessionRequest_Decode(void* pValue, SOPC_Buffer*
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ActivateSessionRequest_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_SignatureData, // typeIndex
+        false,                                                             // isBuiltIn
+        false,                                                             // isArrayLength
+        true,                                                              // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_SignatureData,                   // typeIndex
         (uint32_t) offsetof(OpcUa_ActivateSessionRequest, ClientSignature) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                             // isBuiltIn
+        true,                                                                             // isArrayLength
+        true,                                                                             // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                         // typeIndex
         (uint32_t) offsetof(OpcUa_ActivateSessionRequest, NoOfClientSoftwareCertificates) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_SignedSoftwareCertificate, // typeIndex
+        false,                                                                        // isBuiltIn
+        false,                                                                        // isArrayLength
+        true,                                                                         // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_SignedSoftwareCertificate,                  // typeIndex
         (uint32_t) offsetof(OpcUa_ActivateSessionRequest, ClientSoftwareCertificates) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                            // isBuiltIn
+        true,                                                            // isArrayLength
+        true,                                                            // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                        // typeIndex
         (uint32_t) offsetof(OpcUa_ActivateSessionRequest, NoOfLocaleIds) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                        // isBuiltIn
+        false,                                                       // isArrayLength
+        true,                                                        // isToEncode
+        (uint32_t) SOPC_String_Id,                                   // typeIndex
         (uint32_t) offsetof(OpcUa_ActivateSessionRequest, LocaleIds) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ExtensionObject_Id, // typeIndex
+        true,                                                                // isBuiltIn
+        false,                                                               // isArrayLength
+        true,                                                                // isToEncode
+        (uint32_t) SOPC_ExtensionObject_Id,                                  // typeIndex
         (uint32_t) offsetof(OpcUa_ActivateSessionRequest, UserIdentityToken) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_SignatureData, // typeIndex
+        false,                                                                // isBuiltIn
+        false,                                                                // isArrayLength
+        true,                                                                 // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_SignatureData,                      // typeIndex
         (uint32_t) offsetof(OpcUa_ActivateSessionRequest, UserTokenSignature) // offset
     },
 };
@@ -5172,8 +5098,7 @@ static const SOPC_EncodeableType_FieldDescriptor ActivateSessionRequest_Fields[]
 /*============================================================================
  * Descriptor of the ActivateSessionRequest encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_ActivateSessionRequest_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_ActivateSessionRequest_EncodeableType = {
     "ActivateSessionRequest",
     OpcUaId_ActivateSessionRequest,
     OpcUaId_ActivateSessionRequest_Encoding_DefaultBinary,
@@ -5186,8 +5111,7 @@ SOPC_EncodeableType OpcUa_ActivateSessionRequest_EncodeableType =
     OpcUa_ActivateSessionRequest_Encode,
     OpcUa_ActivateSessionRequest_Decode,
     sizeof ActivateSessionRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    ActivateSessionRequest_Fields
-};
+    ActivateSessionRequest_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ActivateSessionResponse
@@ -5228,45 +5152,45 @@ SOPC_ReturnStatus OpcUa_ActivateSessionResponse_Decode(void* pValue, SOPC_Buffer
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ActivateSessionResponse_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        false, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader, // typeIndex
+        false,                                                             // isBuiltIn
+        false,                                                             // isArrayLength
+        false,                                                             // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader,                  // typeIndex
         (uint32_t) offsetof(OpcUa_ActivateSessionResponse, ResponseHeader) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ByteString_Id, // typeIndex
+        true,                                                           // isBuiltIn
+        false,                                                          // isArrayLength
+        true,                                                           // isToEncode
+        (uint32_t) SOPC_ByteString_Id,                                  // typeIndex
         (uint32_t) offsetof(OpcUa_ActivateSessionResponse, ServerNonce) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                           // isBuiltIn
+        true,                                                           // isArrayLength
+        true,                                                           // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                       // typeIndex
         (uint32_t) offsetof(OpcUa_ActivateSessionResponse, NoOfResults) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_StatusCode_Id, // typeIndex
+        true,                                                       // isBuiltIn
+        false,                                                      // isArrayLength
+        true,                                                       // isToEncode
+        (uint32_t) SOPC_StatusCode_Id,                              // typeIndex
         (uint32_t) offsetof(OpcUa_ActivateSessionResponse, Results) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                   // isBuiltIn
+        true,                                                                   // isArrayLength
+        true,                                                                   // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                               // typeIndex
         (uint32_t) offsetof(OpcUa_ActivateSessionResponse, NoOfDiagnosticInfos) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DiagnosticInfo_Id, // typeIndex
+        true,                                                               // isBuiltIn
+        false,                                                              // isArrayLength
+        true,                                                               // isToEncode
+        (uint32_t) SOPC_DiagnosticInfo_Id,                                  // typeIndex
         (uint32_t) offsetof(OpcUa_ActivateSessionResponse, DiagnosticInfos) // offset
     },
 };
@@ -5274,8 +5198,7 @@ static const SOPC_EncodeableType_FieldDescriptor ActivateSessionResponse_Fields[
 /*============================================================================
  * Descriptor of the ActivateSessionResponse encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_ActivateSessionResponse_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_ActivateSessionResponse_EncodeableType = {
     "ActivateSessionResponse",
     OpcUaId_ActivateSessionResponse,
     OpcUaId_ActivateSessionResponse_Encoding_DefaultBinary,
@@ -5288,8 +5211,7 @@ SOPC_EncodeableType OpcUa_ActivateSessionResponse_EncodeableType =
     OpcUa_ActivateSessionResponse_Encode,
     OpcUa_ActivateSessionResponse_Decode,
     sizeof ActivateSessionResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    ActivateSessionResponse_Fields
-};
+    ActivateSessionResponse_Fields};
 #endif
 
 #endif
@@ -5332,10 +5254,10 @@ SOPC_ReturnStatus OpcUa_CloseSessionRequest_Decode(void* pValue, SOPC_Buffer* bu
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor CloseSessionRequest_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                               // isBuiltIn
+        false,                                                              // isArrayLength
+        true,                                                               // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                                         // typeIndex
         (uint32_t) offsetof(OpcUa_CloseSessionRequest, DeleteSubscriptions) // offset
     },
 };
@@ -5343,8 +5265,7 @@ static const SOPC_EncodeableType_FieldDescriptor CloseSessionRequest_Fields[] = 
 /*============================================================================
  * Descriptor of the CloseSessionRequest encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_CloseSessionRequest_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_CloseSessionRequest_EncodeableType = {
     "CloseSessionRequest",
     OpcUaId_CloseSessionRequest,
     OpcUaId_CloseSessionRequest_Encoding_DefaultBinary,
@@ -5357,8 +5278,7 @@ SOPC_EncodeableType OpcUa_CloseSessionRequest_EncodeableType =
     OpcUa_CloseSessionRequest_Encode,
     OpcUa_CloseSessionRequest_Decode,
     sizeof CloseSessionRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    CloseSessionRequest_Fields
-};
+    CloseSessionRequest_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_CloseSessionResponse
@@ -5399,10 +5319,10 @@ SOPC_ReturnStatus OpcUa_CloseSessionResponse_Decode(void* pValue, SOPC_Buffer* b
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor CloseSessionResponse_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        false, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader, // typeIndex
+        false,                                                          // isBuiltIn
+        false,                                                          // isArrayLength
+        false,                                                          // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader,               // typeIndex
         (uint32_t) offsetof(OpcUa_CloseSessionResponse, ResponseHeader) // offset
     },
 };
@@ -5410,8 +5330,7 @@ static const SOPC_EncodeableType_FieldDescriptor CloseSessionResponse_Fields[] =
 /*============================================================================
  * Descriptor of the CloseSessionResponse encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_CloseSessionResponse_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_CloseSessionResponse_EncodeableType = {
     "CloseSessionResponse",
     OpcUaId_CloseSessionResponse,
     OpcUaId_CloseSessionResponse_Encoding_DefaultBinary,
@@ -5424,8 +5343,7 @@ SOPC_EncodeableType OpcUa_CloseSessionResponse_EncodeableType =
     OpcUa_CloseSessionResponse_Encode,
     OpcUa_CloseSessionResponse_Decode,
     sizeof CloseSessionResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    CloseSessionResponse_Fields
-};
+    CloseSessionResponse_Fields};
 #endif
 
 #endif
@@ -5468,10 +5386,10 @@ SOPC_ReturnStatus OpcUa_CancelRequest_Decode(void* pValue, SOPC_Buffer* buf, uin
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor CancelRequest_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                   // isBuiltIn
+        false,                                                  // isArrayLength
+        true,                                                   // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                              // typeIndex
         (uint32_t) offsetof(OpcUa_CancelRequest, RequestHandle) // offset
     },
 };
@@ -5479,8 +5397,7 @@ static const SOPC_EncodeableType_FieldDescriptor CancelRequest_Fields[] = {
 /*============================================================================
  * Descriptor of the CancelRequest encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_CancelRequest_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_CancelRequest_EncodeableType = {
     "CancelRequest",
     OpcUaId_CancelRequest,
     OpcUaId_CancelRequest_Encoding_DefaultBinary,
@@ -5493,8 +5410,7 @@ SOPC_EncodeableType OpcUa_CancelRequest_EncodeableType =
     OpcUa_CancelRequest_Encode,
     OpcUa_CancelRequest_Decode,
     sizeof CancelRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    CancelRequest_Fields
-};
+    CancelRequest_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_CancelResponse
@@ -5535,17 +5451,17 @@ SOPC_ReturnStatus OpcUa_CancelResponse_Decode(void* pValue, SOPC_Buffer* buf, ui
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor CancelResponse_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        false, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader, // typeIndex
+        false,                                                    // isBuiltIn
+        false,                                                    // isArrayLength
+        false,                                                    // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader,         // typeIndex
         (uint32_t) offsetof(OpcUa_CancelResponse, ResponseHeader) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                  // isBuiltIn
+        false,                                                 // isArrayLength
+        true,                                                  // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                             // typeIndex
         (uint32_t) offsetof(OpcUa_CancelResponse, CancelCount) // offset
     },
 };
@@ -5553,8 +5469,7 @@ static const SOPC_EncodeableType_FieldDescriptor CancelResponse_Fields[] = {
 /*============================================================================
  * Descriptor of the CancelResponse encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_CancelResponse_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_CancelResponse_EncodeableType = {
     "CancelResponse",
     OpcUaId_CancelResponse,
     OpcUaId_CancelResponse_Encoding_DefaultBinary,
@@ -5567,8 +5482,7 @@ SOPC_EncodeableType OpcUa_CancelResponse_EncodeableType =
     OpcUa_CancelResponse_Encode,
     OpcUa_CancelResponse_Decode,
     sizeof CancelResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    CancelResponse_Fields
-};
+    CancelResponse_Fields};
 #endif
 
 #endif
@@ -5610,38 +5524,38 @@ SOPC_ReturnStatus OpcUa_NodeAttributes_Decode(void* pValue, SOPC_Buffer* buf, ui
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor NodeAttributes_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                          // isBuiltIn
+        false,                                                         // isArrayLength
+        true,                                                          // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                     // typeIndex
         (uint32_t) offsetof(OpcUa_NodeAttributes, SpecifiedAttributes) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                                  // isBuiltIn
+        false,                                                 // isArrayLength
+        true,                                                  // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                      // typeIndex
         (uint32_t) offsetof(OpcUa_NodeAttributes, DisplayName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                                  // isBuiltIn
+        false,                                                 // isArrayLength
+        true,                                                  // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                      // typeIndex
         (uint32_t) offsetof(OpcUa_NodeAttributes, Description) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                // isBuiltIn
+        false,                                               // isArrayLength
+        true,                                                // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                           // typeIndex
         (uint32_t) offsetof(OpcUa_NodeAttributes, WriteMask) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                    // isBuiltIn
+        false,                                                   // isArrayLength
+        true,                                                    // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                               // typeIndex
         (uint32_t) offsetof(OpcUa_NodeAttributes, UserWriteMask) // offset
     },
 };
@@ -5649,8 +5563,7 @@ static const SOPC_EncodeableType_FieldDescriptor NodeAttributes_Fields[] = {
 /*============================================================================
  * Descriptor of the NodeAttributes encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_NodeAttributes_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_NodeAttributes_EncodeableType = {
     "NodeAttributes",
     OpcUaId_NodeAttributes,
     OpcUaId_NodeAttributes_Encoding_DefaultBinary,
@@ -5663,8 +5576,7 @@ SOPC_EncodeableType OpcUa_NodeAttributes_EncodeableType =
     OpcUa_NodeAttributes_Encode,
     OpcUa_NodeAttributes_Decode,
     sizeof NodeAttributes_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    NodeAttributes_Fields
-};
+    NodeAttributes_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ObjectAttributes
@@ -5705,45 +5617,45 @@ SOPC_ReturnStatus OpcUa_ObjectAttributes_Decode(void* pValue, SOPC_Buffer* buf, 
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ObjectAttributes_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                            // isBuiltIn
+        false,                                                           // isArrayLength
+        true,                                                            // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                       // typeIndex
         (uint32_t) offsetof(OpcUa_ObjectAttributes, SpecifiedAttributes) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                                    // isBuiltIn
+        false,                                                   // isArrayLength
+        true,                                                    // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                        // typeIndex
         (uint32_t) offsetof(OpcUa_ObjectAttributes, DisplayName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                                    // isBuiltIn
+        false,                                                   // isArrayLength
+        true,                                                    // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                        // typeIndex
         (uint32_t) offsetof(OpcUa_ObjectAttributes, Description) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                  // isBuiltIn
+        false,                                                 // isArrayLength
+        true,                                                  // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                             // typeIndex
         (uint32_t) offsetof(OpcUa_ObjectAttributes, WriteMask) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                 // typeIndex
         (uint32_t) offsetof(OpcUa_ObjectAttributes, UserWriteMask) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Byte_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_Byte_Id,                                   // typeIndex
         (uint32_t) offsetof(OpcUa_ObjectAttributes, EventNotifier) // offset
     },
 };
@@ -5751,8 +5663,7 @@ static const SOPC_EncodeableType_FieldDescriptor ObjectAttributes_Fields[] = {
 /*============================================================================
  * Descriptor of the ObjectAttributes encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_ObjectAttributes_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_ObjectAttributes_EncodeableType = {
     "ObjectAttributes",
     OpcUaId_ObjectAttributes,
     OpcUaId_ObjectAttributes_Encoding_DefaultBinary,
@@ -5765,8 +5676,7 @@ SOPC_EncodeableType OpcUa_ObjectAttributes_EncodeableType =
     OpcUa_ObjectAttributes_Encode,
     OpcUa_ObjectAttributes_Decode,
     sizeof ObjectAttributes_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    ObjectAttributes_Fields
-};
+    ObjectAttributes_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_VariableAttributes
@@ -5807,101 +5717,101 @@ SOPC_ReturnStatus OpcUa_VariableAttributes_Decode(void* pValue, SOPC_Buffer* buf
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor VariableAttributes_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                              // isBuiltIn
+        false,                                                             // isArrayLength
+        true,                                                              // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                         // typeIndex
         (uint32_t) offsetof(OpcUa_VariableAttributes, SpecifiedAttributes) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                          // typeIndex
         (uint32_t) offsetof(OpcUa_VariableAttributes, DisplayName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                          // typeIndex
         (uint32_t) offsetof(OpcUa_VariableAttributes, Description) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                    // isBuiltIn
+        false,                                                   // isArrayLength
+        true,                                                    // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                               // typeIndex
         (uint32_t) offsetof(OpcUa_VariableAttributes, WriteMask) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                        // isBuiltIn
+        false,                                                       // isArrayLength
+        true,                                                        // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                   // typeIndex
         (uint32_t) offsetof(OpcUa_VariableAttributes, UserWriteMask) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Variant_Id, // typeIndex
+        true,                                                // isBuiltIn
+        false,                                               // isArrayLength
+        true,                                                // isToEncode
+        (uint32_t) SOPC_Variant_Id,                          // typeIndex
         (uint32_t) offsetof(OpcUa_VariableAttributes, Value) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                   // isBuiltIn
+        false,                                                  // isArrayLength
+        true,                                                   // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                              // typeIndex
         (uint32_t) offsetof(OpcUa_VariableAttributes, DataType) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                    // isBuiltIn
+        false,                                                   // isArrayLength
+        true,                                                    // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                // typeIndex
         (uint32_t) offsetof(OpcUa_VariableAttributes, ValueRank) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                              // isBuiltIn
+        true,                                                              // isArrayLength
+        true,                                                              // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                          // typeIndex
         (uint32_t) offsetof(OpcUa_VariableAttributes, NoOfArrayDimensions) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                          // isBuiltIn
+        false,                                                         // isArrayLength
+        true,                                                          // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                     // typeIndex
         (uint32_t) offsetof(OpcUa_VariableAttributes, ArrayDimensions) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Byte_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_Byte_Id,                                   // typeIndex
         (uint32_t) offsetof(OpcUa_VariableAttributes, AccessLevel) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Byte_Id, // typeIndex
+        true,                                                          // isBuiltIn
+        false,                                                         // isArrayLength
+        true,                                                          // isToEncode
+        (uint32_t) SOPC_Byte_Id,                                       // typeIndex
         (uint32_t) offsetof(OpcUa_VariableAttributes, UserAccessLevel) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Double_Id, // typeIndex
+        true,                                                                  // isBuiltIn
+        false,                                                                 // isArrayLength
+        true,                                                                  // isToEncode
+        (uint32_t) SOPC_Double_Id,                                             // typeIndex
         (uint32_t) offsetof(OpcUa_VariableAttributes, MinimumSamplingInterval) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                                // typeIndex
         (uint32_t) offsetof(OpcUa_VariableAttributes, Historizing) // offset
     },
 };
@@ -5909,8 +5819,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableAttributes_Fields[] = {
 /*============================================================================
  * Descriptor of the VariableAttributes encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_VariableAttributes_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_VariableAttributes_EncodeableType = {
     "VariableAttributes",
     OpcUaId_VariableAttributes,
     OpcUaId_VariableAttributes_Encoding_DefaultBinary,
@@ -5923,8 +5832,7 @@ SOPC_EncodeableType OpcUa_VariableAttributes_EncodeableType =
     OpcUa_VariableAttributes_Encode,
     OpcUa_VariableAttributes_Decode,
     sizeof VariableAttributes_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    VariableAttributes_Fields
-};
+    VariableAttributes_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_MethodAttributes
@@ -5965,52 +5873,52 @@ SOPC_ReturnStatus OpcUa_MethodAttributes_Decode(void* pValue, SOPC_Buffer* buf, 
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor MethodAttributes_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                            // isBuiltIn
+        false,                                                           // isArrayLength
+        true,                                                            // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                       // typeIndex
         (uint32_t) offsetof(OpcUa_MethodAttributes, SpecifiedAttributes) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                                    // isBuiltIn
+        false,                                                   // isArrayLength
+        true,                                                    // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                        // typeIndex
         (uint32_t) offsetof(OpcUa_MethodAttributes, DisplayName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                                    // isBuiltIn
+        false,                                                   // isArrayLength
+        true,                                                    // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                        // typeIndex
         (uint32_t) offsetof(OpcUa_MethodAttributes, Description) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                  // isBuiltIn
+        false,                                                 // isArrayLength
+        true,                                                  // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                             // typeIndex
         (uint32_t) offsetof(OpcUa_MethodAttributes, WriteMask) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                 // typeIndex
         (uint32_t) offsetof(OpcUa_MethodAttributes, UserWriteMask) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                   // isBuiltIn
+        false,                                                  // isArrayLength
+        true,                                                   // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                             // typeIndex
         (uint32_t) offsetof(OpcUa_MethodAttributes, Executable) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                       // isBuiltIn
+        false,                                                      // isArrayLength
+        true,                                                       // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                                 // typeIndex
         (uint32_t) offsetof(OpcUa_MethodAttributes, UserExecutable) // offset
     },
 };
@@ -6018,8 +5926,7 @@ static const SOPC_EncodeableType_FieldDescriptor MethodAttributes_Fields[] = {
 /*============================================================================
  * Descriptor of the MethodAttributes encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_MethodAttributes_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_MethodAttributes_EncodeableType = {
     "MethodAttributes",
     OpcUaId_MethodAttributes,
     OpcUaId_MethodAttributes_Encoding_DefaultBinary,
@@ -6032,8 +5939,7 @@ SOPC_EncodeableType OpcUa_MethodAttributes_EncodeableType =
     OpcUa_MethodAttributes_Encode,
     OpcUa_MethodAttributes_Decode,
     sizeof MethodAttributes_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    MethodAttributes_Fields
-};
+    MethodAttributes_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ObjectTypeAttributes
@@ -6074,45 +5980,45 @@ SOPC_ReturnStatus OpcUa_ObjectTypeAttributes_Decode(void* pValue, SOPC_Buffer* b
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ObjectTypeAttributes_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                // isBuiltIn
+        false,                                                               // isArrayLength
+        true,                                                                // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                           // typeIndex
         (uint32_t) offsetof(OpcUa_ObjectTypeAttributes, SpecifiedAttributes) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                                        // isBuiltIn
+        false,                                                       // isArrayLength
+        true,                                                        // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                            // typeIndex
         (uint32_t) offsetof(OpcUa_ObjectTypeAttributes, DisplayName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                                        // isBuiltIn
+        false,                                                       // isArrayLength
+        true,                                                        // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                            // typeIndex
         (uint32_t) offsetof(OpcUa_ObjectTypeAttributes, Description) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                 // typeIndex
         (uint32_t) offsetof(OpcUa_ObjectTypeAttributes, WriteMask) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                          // isBuiltIn
+        false,                                                         // isArrayLength
+        true,                                                          // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                     // typeIndex
         (uint32_t) offsetof(OpcUa_ObjectTypeAttributes, UserWriteMask) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                       // isBuiltIn
+        false,                                                      // isArrayLength
+        true,                                                       // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                                 // typeIndex
         (uint32_t) offsetof(OpcUa_ObjectTypeAttributes, IsAbstract) // offset
     },
 };
@@ -6120,8 +6026,7 @@ static const SOPC_EncodeableType_FieldDescriptor ObjectTypeAttributes_Fields[] =
 /*============================================================================
  * Descriptor of the ObjectTypeAttributes encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_ObjectTypeAttributes_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_ObjectTypeAttributes_EncodeableType = {
     "ObjectTypeAttributes",
     OpcUaId_ObjectTypeAttributes,
     OpcUaId_ObjectTypeAttributes_Encoding_DefaultBinary,
@@ -6134,8 +6039,7 @@ SOPC_EncodeableType OpcUa_ObjectTypeAttributes_EncodeableType =
     OpcUa_ObjectTypeAttributes_Encode,
     OpcUa_ObjectTypeAttributes_Decode,
     sizeof ObjectTypeAttributes_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    ObjectTypeAttributes_Fields
-};
+    ObjectTypeAttributes_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_VariableTypeAttributes
@@ -6176,80 +6080,80 @@ SOPC_ReturnStatus OpcUa_VariableTypeAttributes_Decode(void* pValue, SOPC_Buffer*
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor VariableTypeAttributes_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                  // isBuiltIn
+        false,                                                                 // isArrayLength
+        true,                                                                  // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                             // typeIndex
         (uint32_t) offsetof(OpcUa_VariableTypeAttributes, SpecifiedAttributes) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                                          // isBuiltIn
+        false,                                                         // isArrayLength
+        true,                                                          // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                              // typeIndex
         (uint32_t) offsetof(OpcUa_VariableTypeAttributes, DisplayName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                                          // isBuiltIn
+        false,                                                         // isArrayLength
+        true,                                                          // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                              // typeIndex
         (uint32_t) offsetof(OpcUa_VariableTypeAttributes, Description) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                        // isBuiltIn
+        false,                                                       // isArrayLength
+        true,                                                        // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                   // typeIndex
         (uint32_t) offsetof(OpcUa_VariableTypeAttributes, WriteMask) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                            // isBuiltIn
+        false,                                                           // isArrayLength
+        true,                                                            // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                       // typeIndex
         (uint32_t) offsetof(OpcUa_VariableTypeAttributes, UserWriteMask) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Variant_Id, // typeIndex
+        true,                                                    // isBuiltIn
+        false,                                                   // isArrayLength
+        true,                                                    // isToEncode
+        (uint32_t) SOPC_Variant_Id,                              // typeIndex
         (uint32_t) offsetof(OpcUa_VariableTypeAttributes, Value) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                       // isBuiltIn
+        false,                                                      // isArrayLength
+        true,                                                       // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                                  // typeIndex
         (uint32_t) offsetof(OpcUa_VariableTypeAttributes, DataType) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                        // isBuiltIn
+        false,                                                       // isArrayLength
+        true,                                                        // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                    // typeIndex
         (uint32_t) offsetof(OpcUa_VariableTypeAttributes, ValueRank) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                  // isBuiltIn
+        true,                                                                  // isArrayLength
+        true,                                                                  // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                              // typeIndex
         (uint32_t) offsetof(OpcUa_VariableTypeAttributes, NoOfArrayDimensions) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                              // isBuiltIn
+        false,                                                             // isArrayLength
+        true,                                                              // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                         // typeIndex
         (uint32_t) offsetof(OpcUa_VariableTypeAttributes, ArrayDimensions) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                         // isBuiltIn
+        false,                                                        // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                                   // typeIndex
         (uint32_t) offsetof(OpcUa_VariableTypeAttributes, IsAbstract) // offset
     },
 };
@@ -6257,8 +6161,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableTypeAttributes_Fields[]
 /*============================================================================
  * Descriptor of the VariableTypeAttributes encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_VariableTypeAttributes_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_VariableTypeAttributes_EncodeableType = {
     "VariableTypeAttributes",
     OpcUaId_VariableTypeAttributes,
     OpcUaId_VariableTypeAttributes_Encoding_DefaultBinary,
@@ -6271,8 +6174,7 @@ SOPC_EncodeableType OpcUa_VariableTypeAttributes_EncodeableType =
     OpcUa_VariableTypeAttributes_Encode,
     OpcUa_VariableTypeAttributes_Decode,
     sizeof VariableTypeAttributes_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    VariableTypeAttributes_Fields
-};
+    VariableTypeAttributes_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ReferenceTypeAttributes
@@ -6313,59 +6215,59 @@ SOPC_ReturnStatus OpcUa_ReferenceTypeAttributes_Decode(void* pValue, SOPC_Buffer
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ReferenceTypeAttributes_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                   // isBuiltIn
+        false,                                                                  // isArrayLength
+        true,                                                                   // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                              // typeIndex
         (uint32_t) offsetof(OpcUa_ReferenceTypeAttributes, SpecifiedAttributes) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                                           // isBuiltIn
+        false,                                                          // isArrayLength
+        true,                                                           // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                               // typeIndex
         (uint32_t) offsetof(OpcUa_ReferenceTypeAttributes, DisplayName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                                           // isBuiltIn
+        false,                                                          // isArrayLength
+        true,                                                           // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                               // typeIndex
         (uint32_t) offsetof(OpcUa_ReferenceTypeAttributes, Description) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                         // isBuiltIn
+        false,                                                        // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                    // typeIndex
         (uint32_t) offsetof(OpcUa_ReferenceTypeAttributes, WriteMask) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                             // isBuiltIn
+        false,                                                            // isArrayLength
+        true,                                                             // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                        // typeIndex
         (uint32_t) offsetof(OpcUa_ReferenceTypeAttributes, UserWriteMask) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                          // isBuiltIn
+        false,                                                         // isArrayLength
+        true,                                                          // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                                    // typeIndex
         (uint32_t) offsetof(OpcUa_ReferenceTypeAttributes, IsAbstract) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                         // isBuiltIn
+        false,                                                        // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                                   // typeIndex
         (uint32_t) offsetof(OpcUa_ReferenceTypeAttributes, Symmetric) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                                           // isBuiltIn
+        false,                                                          // isArrayLength
+        true,                                                           // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                               // typeIndex
         (uint32_t) offsetof(OpcUa_ReferenceTypeAttributes, InverseName) // offset
     },
 };
@@ -6373,8 +6275,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReferenceTypeAttributes_Fields[
 /*============================================================================
  * Descriptor of the ReferenceTypeAttributes encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_ReferenceTypeAttributes_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_ReferenceTypeAttributes_EncodeableType = {
     "ReferenceTypeAttributes",
     OpcUaId_ReferenceTypeAttributes,
     OpcUaId_ReferenceTypeAttributes_Encoding_DefaultBinary,
@@ -6387,8 +6288,7 @@ SOPC_EncodeableType OpcUa_ReferenceTypeAttributes_EncodeableType =
     OpcUa_ReferenceTypeAttributes_Encode,
     OpcUa_ReferenceTypeAttributes_Decode,
     sizeof ReferenceTypeAttributes_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    ReferenceTypeAttributes_Fields
-};
+    ReferenceTypeAttributes_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_DataTypeAttributes
@@ -6429,45 +6329,45 @@ SOPC_ReturnStatus OpcUa_DataTypeAttributes_Decode(void* pValue, SOPC_Buffer* buf
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DataTypeAttributes_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                              // isBuiltIn
+        false,                                                             // isArrayLength
+        true,                                                              // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                         // typeIndex
         (uint32_t) offsetof(OpcUa_DataTypeAttributes, SpecifiedAttributes) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                          // typeIndex
         (uint32_t) offsetof(OpcUa_DataTypeAttributes, DisplayName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                          // typeIndex
         (uint32_t) offsetof(OpcUa_DataTypeAttributes, Description) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                    // isBuiltIn
+        false,                                                   // isArrayLength
+        true,                                                    // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                               // typeIndex
         (uint32_t) offsetof(OpcUa_DataTypeAttributes, WriteMask) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                        // isBuiltIn
+        false,                                                       // isArrayLength
+        true,                                                        // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                   // typeIndex
         (uint32_t) offsetof(OpcUa_DataTypeAttributes, UserWriteMask) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                     // isBuiltIn
+        false,                                                    // isArrayLength
+        true,                                                     // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                               // typeIndex
         (uint32_t) offsetof(OpcUa_DataTypeAttributes, IsAbstract) // offset
     },
 };
@@ -6475,8 +6375,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataTypeAttributes_Fields[] = {
 /*============================================================================
  * Descriptor of the DataTypeAttributes encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_DataTypeAttributes_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_DataTypeAttributes_EncodeableType = {
     "DataTypeAttributes",
     OpcUaId_DataTypeAttributes,
     OpcUaId_DataTypeAttributes_Encoding_DefaultBinary,
@@ -6489,8 +6388,7 @@ SOPC_EncodeableType OpcUa_DataTypeAttributes_EncodeableType =
     OpcUa_DataTypeAttributes_Encode,
     OpcUa_DataTypeAttributes_Decode,
     sizeof DataTypeAttributes_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    DataTypeAttributes_Fields
-};
+    DataTypeAttributes_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ViewAttributes
@@ -6531,52 +6429,52 @@ SOPC_ReturnStatus OpcUa_ViewAttributes_Decode(void* pValue, SOPC_Buffer* buf, ui
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ViewAttributes_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                          // isBuiltIn
+        false,                                                         // isArrayLength
+        true,                                                          // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                     // typeIndex
         (uint32_t) offsetof(OpcUa_ViewAttributes, SpecifiedAttributes) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                                  // isBuiltIn
+        false,                                                 // isArrayLength
+        true,                                                  // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                      // typeIndex
         (uint32_t) offsetof(OpcUa_ViewAttributes, DisplayName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                                  // isBuiltIn
+        false,                                                 // isArrayLength
+        true,                                                  // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                      // typeIndex
         (uint32_t) offsetof(OpcUa_ViewAttributes, Description) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                // isBuiltIn
+        false,                                               // isArrayLength
+        true,                                                // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                           // typeIndex
         (uint32_t) offsetof(OpcUa_ViewAttributes, WriteMask) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                    // isBuiltIn
+        false,                                                   // isArrayLength
+        true,                                                    // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                               // typeIndex
         (uint32_t) offsetof(OpcUa_ViewAttributes, UserWriteMask) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                                // typeIndex
         (uint32_t) offsetof(OpcUa_ViewAttributes, ContainsNoLoops) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Byte_Id, // typeIndex
+        true,                                                    // isBuiltIn
+        false,                                                   // isArrayLength
+        true,                                                    // isToEncode
+        (uint32_t) SOPC_Byte_Id,                                 // typeIndex
         (uint32_t) offsetof(OpcUa_ViewAttributes, EventNotifier) // offset
     },
 };
@@ -6584,8 +6482,7 @@ static const SOPC_EncodeableType_FieldDescriptor ViewAttributes_Fields[] = {
 /*============================================================================
  * Descriptor of the ViewAttributes encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_ViewAttributes_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_ViewAttributes_EncodeableType = {
     "ViewAttributes",
     OpcUaId_ViewAttributes,
     OpcUaId_ViewAttributes_Encoding_DefaultBinary,
@@ -6598,8 +6495,7 @@ SOPC_EncodeableType OpcUa_ViewAttributes_EncodeableType =
     OpcUa_ViewAttributes_Encode,
     OpcUa_ViewAttributes_Decode,
     sizeof ViewAttributes_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    ViewAttributes_Fields
-};
+    ViewAttributes_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_AddNodesItem
@@ -6640,52 +6536,52 @@ SOPC_ReturnStatus OpcUa_AddNodesItem_Decode(void* pValue, SOPC_Buffer* buf, uint
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor AddNodesItem_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ExpandedNodeId_Id, // typeIndex
+        true,                                                 // isBuiltIn
+        false,                                                // isArrayLength
+        true,                                                 // isToEncode
+        (uint32_t) SOPC_ExpandedNodeId_Id,                    // typeIndex
         (uint32_t) offsetof(OpcUa_AddNodesItem, ParentNodeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                    // isBuiltIn
+        false,                                                   // isArrayLength
+        true,                                                    // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                               // typeIndex
         (uint32_t) offsetof(OpcUa_AddNodesItem, ReferenceTypeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ExpandedNodeId_Id, // typeIndex
+        true,                                                       // isBuiltIn
+        false,                                                      // isArrayLength
+        true,                                                       // isToEncode
+        (uint32_t) SOPC_ExpandedNodeId_Id,                          // typeIndex
         (uint32_t) offsetof(OpcUa_AddNodesItem, RequestedNewNodeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_QualifiedName_Id, // typeIndex
+        true,                                               // isBuiltIn
+        false,                                              // isArrayLength
+        true,                                               // isToEncode
+        (uint32_t) SOPC_QualifiedName_Id,                   // typeIndex
         (uint32_t) offsetof(OpcUa_AddNodesItem, BrowseName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                              // isBuiltIn
+        false,                                             // isArrayLength
+        true,                                              // isToEncode
+        (uint32_t) SOPC_Int32_Id,                          // typeIndex
         (uint32_t) offsetof(OpcUa_AddNodesItem, NodeClass) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ExtensionObject_Id, // typeIndex
+        true,                                                   // isBuiltIn
+        false,                                                  // isArrayLength
+        true,                                                   // isToEncode
+        (uint32_t) SOPC_ExtensionObject_Id,                     // typeIndex
         (uint32_t) offsetof(OpcUa_AddNodesItem, NodeAttributes) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ExpandedNodeId_Id, // typeIndex
+        true,                                                   // isBuiltIn
+        false,                                                  // isArrayLength
+        true,                                                   // isToEncode
+        (uint32_t) SOPC_ExpandedNodeId_Id,                      // typeIndex
         (uint32_t) offsetof(OpcUa_AddNodesItem, TypeDefinition) // offset
     },
 };
@@ -6693,8 +6589,7 @@ static const SOPC_EncodeableType_FieldDescriptor AddNodesItem_Fields[] = {
 /*============================================================================
  * Descriptor of the AddNodesItem encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_AddNodesItem_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_AddNodesItem_EncodeableType = {
     "AddNodesItem",
     OpcUaId_AddNodesItem,
     OpcUaId_AddNodesItem_Encoding_DefaultBinary,
@@ -6707,8 +6602,7 @@ SOPC_EncodeableType OpcUa_AddNodesItem_EncodeableType =
     OpcUa_AddNodesItem_Encode,
     OpcUa_AddNodesItem_Decode,
     sizeof AddNodesItem_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    AddNodesItem_Fields
-};
+    AddNodesItem_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_AddNodesResult
@@ -6749,17 +6643,17 @@ SOPC_ReturnStatus OpcUa_AddNodesResult_Decode(void* pValue, SOPC_Buffer* buf, ui
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor AddNodesResult_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_StatusCode_Id, // typeIndex
+        true,                                                 // isBuiltIn
+        false,                                                // isArrayLength
+        true,                                                 // isToEncode
+        (uint32_t) SOPC_StatusCode_Id,                        // typeIndex
         (uint32_t) offsetof(OpcUa_AddNodesResult, StatusCode) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                  // isBuiltIn
+        false,                                                 // isArrayLength
+        true,                                                  // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                             // typeIndex
         (uint32_t) offsetof(OpcUa_AddNodesResult, AddedNodeId) // offset
     },
 };
@@ -6767,8 +6661,7 @@ static const SOPC_EncodeableType_FieldDescriptor AddNodesResult_Fields[] = {
 /*============================================================================
  * Descriptor of the AddNodesResult encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_AddNodesResult_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_AddNodesResult_EncodeableType = {
     "AddNodesResult",
     OpcUaId_AddNodesResult,
     OpcUaId_AddNodesResult_Encoding_DefaultBinary,
@@ -6781,8 +6674,7 @@ SOPC_EncodeableType OpcUa_AddNodesResult_EncodeableType =
     OpcUa_AddNodesResult_Encode,
     OpcUa_AddNodesResult_Decode,
     sizeof AddNodesResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    AddNodesResult_Fields
-};
+    AddNodesResult_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_AddNodes
@@ -6824,17 +6716,17 @@ SOPC_ReturnStatus OpcUa_AddNodesRequest_Decode(void* pValue, SOPC_Buffer* buf, u
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor AddNodesRequest_Fields[] = {
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        true,                                                      // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                  // typeIndex
         (uint32_t) offsetof(OpcUa_AddNodesRequest, NoOfNodesToAdd) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_AddNodesItem, // typeIndex
+        false,                                                 // isBuiltIn
+        false,                                                 // isArrayLength
+        true,                                                  // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_AddNodesItem,        // typeIndex
         (uint32_t) offsetof(OpcUa_AddNodesRequest, NodesToAdd) // offset
     },
 };
@@ -6842,8 +6734,7 @@ static const SOPC_EncodeableType_FieldDescriptor AddNodesRequest_Fields[] = {
 /*============================================================================
  * Descriptor of the AddNodesRequest encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_AddNodesRequest_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_AddNodesRequest_EncodeableType = {
     "AddNodesRequest",
     OpcUaId_AddNodesRequest,
     OpcUaId_AddNodesRequest_Encoding_DefaultBinary,
@@ -6856,8 +6747,7 @@ SOPC_EncodeableType OpcUa_AddNodesRequest_EncodeableType =
     OpcUa_AddNodesRequest_Encode,
     OpcUa_AddNodesRequest_Decode,
     sizeof AddNodesRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    AddNodesRequest_Fields
-};
+    AddNodesRequest_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_AddNodesResponse
@@ -6898,38 +6788,38 @@ SOPC_ReturnStatus OpcUa_AddNodesResponse_Decode(void* pValue, SOPC_Buffer* buf, 
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor AddNodesResponse_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        false, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader, // typeIndex
+        false,                                                      // isBuiltIn
+        false,                                                      // isArrayLength
+        false,                                                      // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader,           // typeIndex
         (uint32_t) offsetof(OpcUa_AddNodesResponse, ResponseHeader) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                    // isBuiltIn
+        true,                                                    // isArrayLength
+        true,                                                    // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                // typeIndex
         (uint32_t) offsetof(OpcUa_AddNodesResponse, NoOfResults) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_AddNodesResult, // typeIndex
+        false,                                               // isBuiltIn
+        false,                                               // isArrayLength
+        true,                                                // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_AddNodesResult,    // typeIndex
         (uint32_t) offsetof(OpcUa_AddNodesResponse, Results) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                            // isBuiltIn
+        true,                                                            // isArrayLength
+        true,                                                            // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                        // typeIndex
         (uint32_t) offsetof(OpcUa_AddNodesResponse, NoOfDiagnosticInfos) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DiagnosticInfo_Id, // typeIndex
+        true,                                                        // isBuiltIn
+        false,                                                       // isArrayLength
+        true,                                                        // isToEncode
+        (uint32_t) SOPC_DiagnosticInfo_Id,                           // typeIndex
         (uint32_t) offsetof(OpcUa_AddNodesResponse, DiagnosticInfos) // offset
     },
 };
@@ -6937,8 +6827,7 @@ static const SOPC_EncodeableType_FieldDescriptor AddNodesResponse_Fields[] = {
 /*============================================================================
  * Descriptor of the AddNodesResponse encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_AddNodesResponse_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_AddNodesResponse_EncodeableType = {
     "AddNodesResponse",
     OpcUaId_AddNodesResponse,
     OpcUaId_AddNodesResponse_Encoding_DefaultBinary,
@@ -6951,8 +6840,7 @@ SOPC_EncodeableType OpcUa_AddNodesResponse_EncodeableType =
     OpcUa_AddNodesResponse_Encode,
     OpcUa_AddNodesResponse_Decode,
     sizeof AddNodesResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    AddNodesResponse_Fields
-};
+    AddNodesResponse_Fields};
 #endif
 
 #endif
@@ -6994,45 +6882,45 @@ SOPC_ReturnStatus OpcUa_AddReferencesItem_Decode(void* pValue, SOPC_Buffer* buf,
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor AddReferencesItem_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                                 // typeIndex
         (uint32_t) offsetof(OpcUa_AddReferencesItem, SourceNodeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                         // isBuiltIn
+        false,                                                        // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                                    // typeIndex
         (uint32_t) offsetof(OpcUa_AddReferencesItem, ReferenceTypeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                   // isBuiltIn
+        false,                                                  // isArrayLength
+        true,                                                   // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                             // typeIndex
         (uint32_t) offsetof(OpcUa_AddReferencesItem, IsForward) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                         // isBuiltIn
+        false,                                                        // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_String_Id,                                    // typeIndex
         (uint32_t) offsetof(OpcUa_AddReferencesItem, TargetServerUri) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ExpandedNodeId_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_ExpandedNodeId_Id,                         // typeIndex
         (uint32_t) offsetof(OpcUa_AddReferencesItem, TargetNodeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                         // isBuiltIn
+        false,                                                        // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                     // typeIndex
         (uint32_t) offsetof(OpcUa_AddReferencesItem, TargetNodeClass) // offset
     },
 };
@@ -7040,8 +6928,7 @@ static const SOPC_EncodeableType_FieldDescriptor AddReferencesItem_Fields[] = {
 /*============================================================================
  * Descriptor of the AddReferencesItem encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_AddReferencesItem_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_AddReferencesItem_EncodeableType = {
     "AddReferencesItem",
     OpcUaId_AddReferencesItem,
     OpcUaId_AddReferencesItem_Encoding_DefaultBinary,
@@ -7054,8 +6941,7 @@ SOPC_EncodeableType OpcUa_AddReferencesItem_EncodeableType =
     OpcUa_AddReferencesItem_Encode,
     OpcUa_AddReferencesItem_Decode,
     sizeof AddReferencesItem_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    AddReferencesItem_Fields
-};
+    AddReferencesItem_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_AddReferences
@@ -7097,17 +6983,17 @@ SOPC_ReturnStatus OpcUa_AddReferencesRequest_Decode(void* pValue, SOPC_Buffer* b
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor AddReferencesRequest_Fields[] = {
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                // isBuiltIn
+        true,                                                                // isArrayLength
+        true,                                                                // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                            // typeIndex
         (uint32_t) offsetof(OpcUa_AddReferencesRequest, NoOfReferencesToAdd) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_AddReferencesItem, // typeIndex
+        false,                                                           // isBuiltIn
+        false,                                                           // isArrayLength
+        true,                                                            // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_AddReferencesItem,             // typeIndex
         (uint32_t) offsetof(OpcUa_AddReferencesRequest, ReferencesToAdd) // offset
     },
 };
@@ -7115,8 +7001,7 @@ static const SOPC_EncodeableType_FieldDescriptor AddReferencesRequest_Fields[] =
 /*============================================================================
  * Descriptor of the AddReferencesRequest encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_AddReferencesRequest_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_AddReferencesRequest_EncodeableType = {
     "AddReferencesRequest",
     OpcUaId_AddReferencesRequest,
     OpcUaId_AddReferencesRequest_Encoding_DefaultBinary,
@@ -7129,8 +7014,7 @@ SOPC_EncodeableType OpcUa_AddReferencesRequest_EncodeableType =
     OpcUa_AddReferencesRequest_Encode,
     OpcUa_AddReferencesRequest_Decode,
     sizeof AddReferencesRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    AddReferencesRequest_Fields
-};
+    AddReferencesRequest_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_AddReferencesResponse
@@ -7171,38 +7055,38 @@ SOPC_ReturnStatus OpcUa_AddReferencesResponse_Decode(void* pValue, SOPC_Buffer* 
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor AddReferencesResponse_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        false, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader, // typeIndex
+        false,                                                           // isBuiltIn
+        false,                                                           // isArrayLength
+        false,                                                           // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader,                // typeIndex
         (uint32_t) offsetof(OpcUa_AddReferencesResponse, ResponseHeader) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                         // isBuiltIn
+        true,                                                         // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                     // typeIndex
         (uint32_t) offsetof(OpcUa_AddReferencesResponse, NoOfResults) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_StatusCode_Id, // typeIndex
+        true,                                                     // isBuiltIn
+        false,                                                    // isArrayLength
+        true,                                                     // isToEncode
+        (uint32_t) SOPC_StatusCode_Id,                            // typeIndex
         (uint32_t) offsetof(OpcUa_AddReferencesResponse, Results) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                 // isBuiltIn
+        true,                                                                 // isArrayLength
+        true,                                                                 // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                             // typeIndex
         (uint32_t) offsetof(OpcUa_AddReferencesResponse, NoOfDiagnosticInfos) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DiagnosticInfo_Id, // typeIndex
+        true,                                                             // isBuiltIn
+        false,                                                            // isArrayLength
+        true,                                                             // isToEncode
+        (uint32_t) SOPC_DiagnosticInfo_Id,                                // typeIndex
         (uint32_t) offsetof(OpcUa_AddReferencesResponse, DiagnosticInfos) // offset
     },
 };
@@ -7210,8 +7094,7 @@ static const SOPC_EncodeableType_FieldDescriptor AddReferencesResponse_Fields[] 
 /*============================================================================
  * Descriptor of the AddReferencesResponse encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_AddReferencesResponse_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_AddReferencesResponse_EncodeableType = {
     "AddReferencesResponse",
     OpcUaId_AddReferencesResponse,
     OpcUaId_AddReferencesResponse_Encoding_DefaultBinary,
@@ -7224,8 +7107,7 @@ SOPC_EncodeableType OpcUa_AddReferencesResponse_EncodeableType =
     OpcUa_AddReferencesResponse_Encode,
     OpcUa_AddReferencesResponse_Decode,
     sizeof AddReferencesResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    AddReferencesResponse_Fields
-};
+    AddReferencesResponse_Fields};
 #endif
 
 #endif
@@ -7267,17 +7149,17 @@ SOPC_ReturnStatus OpcUa_DeleteNodesItem_Decode(void* pValue, SOPC_Buffer* buf, u
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DeleteNodesItem_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                              // isBuiltIn
+        false,                                             // isArrayLength
+        true,                                              // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                         // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteNodesItem, NodeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                              // isBuiltIn
+        false,                                                             // isArrayLength
+        true,                                                              // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                                        // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteNodesItem, DeleteTargetReferences) // offset
     },
 };
@@ -7285,8 +7167,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteNodesItem_Fields[] = {
 /*============================================================================
  * Descriptor of the DeleteNodesItem encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_DeleteNodesItem_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_DeleteNodesItem_EncodeableType = {
     "DeleteNodesItem",
     OpcUaId_DeleteNodesItem,
     OpcUaId_DeleteNodesItem_Encoding_DefaultBinary,
@@ -7299,8 +7180,7 @@ SOPC_EncodeableType OpcUa_DeleteNodesItem_EncodeableType =
     OpcUa_DeleteNodesItem_Encode,
     OpcUa_DeleteNodesItem_Decode,
     sizeof DeleteNodesItem_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    DeleteNodesItem_Fields
-};
+    DeleteNodesItem_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_DeleteNodes
@@ -7342,17 +7222,17 @@ SOPC_ReturnStatus OpcUa_DeleteNodesRequest_Decode(void* pValue, SOPC_Buffer* buf
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DeleteNodesRequest_Fields[] = {
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                            // isBuiltIn
+        true,                                                            // isArrayLength
+        true,                                                            // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                        // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteNodesRequest, NoOfNodesToDelete) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_DeleteNodesItem, // typeIndex
+        false,                                                       // isBuiltIn
+        false,                                                       // isArrayLength
+        true,                                                        // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_DeleteNodesItem,           // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteNodesRequest, NodesToDelete) // offset
     },
 };
@@ -7360,8 +7240,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteNodesRequest_Fields[] = {
 /*============================================================================
  * Descriptor of the DeleteNodesRequest encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_DeleteNodesRequest_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_DeleteNodesRequest_EncodeableType = {
     "DeleteNodesRequest",
     OpcUaId_DeleteNodesRequest,
     OpcUaId_DeleteNodesRequest_Encoding_DefaultBinary,
@@ -7374,8 +7253,7 @@ SOPC_EncodeableType OpcUa_DeleteNodesRequest_EncodeableType =
     OpcUa_DeleteNodesRequest_Encode,
     OpcUa_DeleteNodesRequest_Decode,
     sizeof DeleteNodesRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    DeleteNodesRequest_Fields
-};
+    DeleteNodesRequest_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_DeleteNodesResponse
@@ -7416,38 +7294,38 @@ SOPC_ReturnStatus OpcUa_DeleteNodesResponse_Decode(void* pValue, SOPC_Buffer* bu
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DeleteNodesResponse_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        false, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader, // typeIndex
+        false,                                                         // isBuiltIn
+        false,                                                         // isArrayLength
+        false,                                                         // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader,              // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteNodesResponse, ResponseHeader) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                       // isBuiltIn
+        true,                                                       // isArrayLength
+        true,                                                       // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                   // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteNodesResponse, NoOfResults) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_StatusCode_Id, // typeIndex
+        true,                                                   // isBuiltIn
+        false,                                                  // isArrayLength
+        true,                                                   // isToEncode
+        (uint32_t) SOPC_StatusCode_Id,                          // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteNodesResponse, Results) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                               // isBuiltIn
+        true,                                                               // isArrayLength
+        true,                                                               // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                           // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteNodesResponse, NoOfDiagnosticInfos) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DiagnosticInfo_Id, // typeIndex
+        true,                                                           // isBuiltIn
+        false,                                                          // isArrayLength
+        true,                                                           // isToEncode
+        (uint32_t) SOPC_DiagnosticInfo_Id,                              // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteNodesResponse, DiagnosticInfos) // offset
     },
 };
@@ -7455,8 +7333,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteNodesResponse_Fields[] = 
 /*============================================================================
  * Descriptor of the DeleteNodesResponse encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_DeleteNodesResponse_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_DeleteNodesResponse_EncodeableType = {
     "DeleteNodesResponse",
     OpcUaId_DeleteNodesResponse,
     OpcUaId_DeleteNodesResponse_Encoding_DefaultBinary,
@@ -7469,8 +7346,7 @@ SOPC_EncodeableType OpcUa_DeleteNodesResponse_EncodeableType =
     OpcUa_DeleteNodesResponse_Encode,
     OpcUa_DeleteNodesResponse_Decode,
     sizeof DeleteNodesResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    DeleteNodesResponse_Fields
-};
+    DeleteNodesResponse_Fields};
 #endif
 
 #endif
@@ -7512,38 +7388,38 @@ SOPC_ReturnStatus OpcUa_DeleteReferencesItem_Decode(void* pValue, SOPC_Buffer* b
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DeleteReferencesItem_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                         // isBuiltIn
+        false,                                                        // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                                    // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteReferencesItem, SourceNodeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                            // isBuiltIn
+        false,                                                           // isArrayLength
+        true,                                                            // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                                       // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteReferencesItem, ReferenceTypeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                                // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteReferencesItem, IsForward) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ExpandedNodeId_Id, // typeIndex
+        true,                                                         // isBuiltIn
+        false,                                                        // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_ExpandedNodeId_Id,                            // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteReferencesItem, TargetNodeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                                // isBuiltIn
+        false,                                                               // isArrayLength
+        true,                                                                // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                                          // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteReferencesItem, DeleteBidirectional) // offset
     },
 };
@@ -7551,8 +7427,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteReferencesItem_Fields[] =
 /*============================================================================
  * Descriptor of the DeleteReferencesItem encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_DeleteReferencesItem_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_DeleteReferencesItem_EncodeableType = {
     "DeleteReferencesItem",
     OpcUaId_DeleteReferencesItem,
     OpcUaId_DeleteReferencesItem_Encoding_DefaultBinary,
@@ -7565,8 +7440,7 @@ SOPC_EncodeableType OpcUa_DeleteReferencesItem_EncodeableType =
     OpcUa_DeleteReferencesItem_Encode,
     OpcUa_DeleteReferencesItem_Decode,
     sizeof DeleteReferencesItem_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    DeleteReferencesItem_Fields
-};
+    DeleteReferencesItem_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_DeleteReferences
@@ -7608,17 +7482,17 @@ SOPC_ReturnStatus OpcUa_DeleteReferencesRequest_Decode(void* pValue, SOPC_Buffer
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DeleteReferencesRequest_Fields[] = {
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                      // isBuiltIn
+        true,                                                                      // isArrayLength
+        true,                                                                      // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                  // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteReferencesRequest, NoOfReferencesToDelete) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_DeleteReferencesItem, // typeIndex
+        false,                                                                 // isBuiltIn
+        false,                                                                 // isArrayLength
+        true,                                                                  // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_DeleteReferencesItem,                // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteReferencesRequest, ReferencesToDelete) // offset
     },
 };
@@ -7626,8 +7500,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteReferencesRequest_Fields[
 /*============================================================================
  * Descriptor of the DeleteReferencesRequest encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_DeleteReferencesRequest_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_DeleteReferencesRequest_EncodeableType = {
     "DeleteReferencesRequest",
     OpcUaId_DeleteReferencesRequest,
     OpcUaId_DeleteReferencesRequest_Encoding_DefaultBinary,
@@ -7640,8 +7513,7 @@ SOPC_EncodeableType OpcUa_DeleteReferencesRequest_EncodeableType =
     OpcUa_DeleteReferencesRequest_Encode,
     OpcUa_DeleteReferencesRequest_Decode,
     sizeof DeleteReferencesRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    DeleteReferencesRequest_Fields
-};
+    DeleteReferencesRequest_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_DeleteReferencesResponse
@@ -7664,7 +7536,9 @@ void OpcUa_DeleteReferencesResponse_Clear(void* pValue)
 /*============================================================================
  * OpcUa_DeleteReferencesResponse_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_DeleteReferencesResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_DeleteReferencesResponse_Encode(const void* pValue,
+                                                        SOPC_Buffer* buf,
+                                                        uint32_t nestedStructLevel)
 {
     return SOPC_EncodeableObject_Encode(&OpcUa_DeleteReferencesResponse_EncodeableType, pValue, buf, nestedStructLevel);
 }
@@ -7682,38 +7556,38 @@ SOPC_ReturnStatus OpcUa_DeleteReferencesResponse_Decode(void* pValue, SOPC_Buffe
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DeleteReferencesResponse_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        false, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader, // typeIndex
+        false,                                                              // isBuiltIn
+        false,                                                              // isArrayLength
+        false,                                                              // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader,                   // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteReferencesResponse, ResponseHeader) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                            // isBuiltIn
+        true,                                                            // isArrayLength
+        true,                                                            // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                        // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteReferencesResponse, NoOfResults) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_StatusCode_Id, // typeIndex
+        true,                                                        // isBuiltIn
+        false,                                                       // isArrayLength
+        true,                                                        // isToEncode
+        (uint32_t) SOPC_StatusCode_Id,                               // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteReferencesResponse, Results) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                    // isBuiltIn
+        true,                                                                    // isArrayLength
+        true,                                                                    // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteReferencesResponse, NoOfDiagnosticInfos) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DiagnosticInfo_Id, // typeIndex
+        true,                                                                // isBuiltIn
+        false,                                                               // isArrayLength
+        true,                                                                // isToEncode
+        (uint32_t) SOPC_DiagnosticInfo_Id,                                   // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteReferencesResponse, DiagnosticInfos) // offset
     },
 };
@@ -7721,8 +7595,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteReferencesResponse_Fields
 /*============================================================================
  * Descriptor of the DeleteReferencesResponse encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_DeleteReferencesResponse_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_DeleteReferencesResponse_EncodeableType = {
     "DeleteReferencesResponse",
     OpcUaId_DeleteReferencesResponse,
     OpcUaId_DeleteReferencesResponse_Encoding_DefaultBinary,
@@ -7735,8 +7608,7 @@ SOPC_EncodeableType OpcUa_DeleteReferencesResponse_EncodeableType =
     OpcUa_DeleteReferencesResponse_Encode,
     OpcUa_DeleteReferencesResponse_Decode,
     sizeof DeleteReferencesResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    DeleteReferencesResponse_Fields
-};
+    DeleteReferencesResponse_Fields};
 #endif
 
 #endif
@@ -7778,24 +7650,24 @@ SOPC_ReturnStatus OpcUa_ViewDescription_Decode(void* pValue, SOPC_Buffer* buf, u
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ViewDescription_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                              // isBuiltIn
+        false,                                             // isArrayLength
+        true,                                              // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                         // typeIndex
         (uint32_t) offsetof(OpcUa_ViewDescription, ViewId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DateTime_Id, // typeIndex
+        true,                                                 // isBuiltIn
+        false,                                                // isArrayLength
+        true,                                                 // isToEncode
+        (uint32_t) SOPC_DateTime_Id,                          // typeIndex
         (uint32_t) offsetof(OpcUa_ViewDescription, Timestamp) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                   // isBuiltIn
+        false,                                                  // isArrayLength
+        true,                                                   // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                              // typeIndex
         (uint32_t) offsetof(OpcUa_ViewDescription, ViewVersion) // offset
     },
 };
@@ -7803,8 +7675,7 @@ static const SOPC_EncodeableType_FieldDescriptor ViewDescription_Fields[] = {
 /*============================================================================
  * Descriptor of the ViewDescription encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_ViewDescription_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_ViewDescription_EncodeableType = {
     "ViewDescription",
     OpcUaId_ViewDescription,
     OpcUaId_ViewDescription_Encoding_DefaultBinary,
@@ -7817,8 +7688,7 @@ SOPC_EncodeableType OpcUa_ViewDescription_EncodeableType =
     OpcUa_ViewDescription_Encode,
     OpcUa_ViewDescription_Decode,
     sizeof ViewDescription_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    ViewDescription_Fields
-};
+    ViewDescription_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_BrowseDescription
@@ -7859,45 +7729,45 @@ SOPC_ReturnStatus OpcUa_BrowseDescription_Decode(void* pValue, SOPC_Buffer* buf,
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor BrowseDescription_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                // isBuiltIn
+        false,                                               // isArrayLength
+        true,                                                // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                           // typeIndex
         (uint32_t) offsetof(OpcUa_BrowseDescription, NodeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                         // isBuiltIn
+        false,                                                        // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                     // typeIndex
         (uint32_t) offsetof(OpcUa_BrowseDescription, BrowseDirection) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                         // isBuiltIn
+        false,                                                        // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                                    // typeIndex
         (uint32_t) offsetof(OpcUa_BrowseDescription, ReferenceTypeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                         // isBuiltIn
+        false,                                                        // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                                   // typeIndex
         (uint32_t) offsetof(OpcUa_BrowseDescription, IncludeSubtypes) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                       // isBuiltIn
+        false,                                                      // isArrayLength
+        true,                                                       // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                  // typeIndex
         (uint32_t) offsetof(OpcUa_BrowseDescription, NodeClassMask) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                    // isBuiltIn
+        false,                                                   // isArrayLength
+        true,                                                    // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                               // typeIndex
         (uint32_t) offsetof(OpcUa_BrowseDescription, ResultMask) // offset
     },
 };
@@ -7905,8 +7775,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrowseDescription_Fields[] = {
 /*============================================================================
  * Descriptor of the BrowseDescription encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_BrowseDescription_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_BrowseDescription_EncodeableType = {
     "BrowseDescription",
     OpcUaId_BrowseDescription,
     OpcUaId_BrowseDescription_Encoding_DefaultBinary,
@@ -7919,8 +7788,7 @@ SOPC_EncodeableType OpcUa_BrowseDescription_EncodeableType =
     OpcUa_BrowseDescription_Encode,
     OpcUa_BrowseDescription_Decode,
     sizeof BrowseDescription_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    BrowseDescription_Fields
-};
+    BrowseDescription_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ReferenceDescription
@@ -7961,52 +7829,52 @@ SOPC_ReturnStatus OpcUa_ReferenceDescription_Decode(void* pValue, SOPC_Buffer* b
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ReferenceDescription_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                            // isBuiltIn
+        false,                                                           // isArrayLength
+        true,                                                            // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                                       // typeIndex
         (uint32_t) offsetof(OpcUa_ReferenceDescription, ReferenceTypeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                                // typeIndex
         (uint32_t) offsetof(OpcUa_ReferenceDescription, IsForward) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ExpandedNodeId_Id, // typeIndex
+        true,                                                   // isBuiltIn
+        false,                                                  // isArrayLength
+        true,                                                   // isToEncode
+        (uint32_t) SOPC_ExpandedNodeId_Id,                      // typeIndex
         (uint32_t) offsetof(OpcUa_ReferenceDescription, NodeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_QualifiedName_Id, // typeIndex
+        true,                                                       // isBuiltIn
+        false,                                                      // isArrayLength
+        true,                                                       // isToEncode
+        (uint32_t) SOPC_QualifiedName_Id,                           // typeIndex
         (uint32_t) offsetof(OpcUa_ReferenceDescription, BrowseName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                                        // isBuiltIn
+        false,                                                       // isArrayLength
+        true,                                                        // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                            // typeIndex
         (uint32_t) offsetof(OpcUa_ReferenceDescription, DisplayName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                  // typeIndex
         (uint32_t) offsetof(OpcUa_ReferenceDescription, NodeClass) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ExpandedNodeId_Id, // typeIndex
+        true,                                                           // isBuiltIn
+        false,                                                          // isArrayLength
+        true,                                                           // isToEncode
+        (uint32_t) SOPC_ExpandedNodeId_Id,                              // typeIndex
         (uint32_t) offsetof(OpcUa_ReferenceDescription, TypeDefinition) // offset
     },
 };
@@ -8014,8 +7882,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReferenceDescription_Fields[] =
 /*============================================================================
  * Descriptor of the ReferenceDescription encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_ReferenceDescription_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_ReferenceDescription_EncodeableType = {
     "ReferenceDescription",
     OpcUaId_ReferenceDescription,
     OpcUaId_ReferenceDescription_Encoding_DefaultBinary,
@@ -8028,8 +7895,7 @@ SOPC_EncodeableType OpcUa_ReferenceDescription_EncodeableType =
     OpcUa_ReferenceDescription_Encode,
     OpcUa_ReferenceDescription_Decode,
     sizeof ReferenceDescription_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    ReferenceDescription_Fields
-};
+    ReferenceDescription_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_BrowseResult
@@ -8070,40 +7936,39 @@ SOPC_ReturnStatus OpcUa_BrowseResult_Decode(void* pValue, SOPC_Buffer* buf, uint
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor BrowseResult_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_StatusCode_Id, // typeIndex
+        true,                                               // isBuiltIn
+        false,                                              // isArrayLength
+        true,                                               // isToEncode
+        (uint32_t) SOPC_StatusCode_Id,                      // typeIndex
         (uint32_t) offsetof(OpcUa_BrowseResult, StatusCode) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ByteString_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_ByteString_Id,                             // typeIndex
         (uint32_t) offsetof(OpcUa_BrowseResult, ContinuationPoint) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                   // isBuiltIn
+        true,                                                   // isArrayLength
+        true,                                                   // isToEncode
+        (uint32_t) SOPC_Int32_Id,                               // typeIndex
         (uint32_t) offsetof(OpcUa_BrowseResult, NoOfReferences) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
+        false,                                                  // isBuiltIn
+        false,                                                  // isArrayLength
+        true,                                                   // isToEncode
         (uint32_t) SOPC_TypeInternalIndex_ReferenceDescription, // typeIndex
-        (uint32_t) offsetof(OpcUa_BrowseResult, References) // offset
+        (uint32_t) offsetof(OpcUa_BrowseResult, References)     // offset
     },
 };
 
 /*============================================================================
  * Descriptor of the BrowseResult encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_BrowseResult_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_BrowseResult_EncodeableType = {
     "BrowseResult",
     OpcUaId_BrowseResult,
     OpcUaId_BrowseResult_Encoding_DefaultBinary,
@@ -8116,8 +7981,7 @@ SOPC_EncodeableType OpcUa_BrowseResult_EncodeableType =
     OpcUa_BrowseResult_Encode,
     OpcUa_BrowseResult_Decode,
     sizeof BrowseResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    BrowseResult_Fields
-};
+    BrowseResult_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_Browse
@@ -8159,31 +8023,31 @@ SOPC_ReturnStatus OpcUa_BrowseRequest_Decode(void* pValue, SOPC_Buffer* buf, uin
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor BrowseRequest_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
+        false,                                             // isBuiltIn
+        false,                                             // isArrayLength
+        true,                                              // isToEncode
         (uint32_t) SOPC_TypeInternalIndex_ViewDescription, // typeIndex
-        (uint32_t) offsetof(OpcUa_BrowseRequest, View) // offset
+        (uint32_t) offsetof(OpcUa_BrowseRequest, View)     // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                   // isBuiltIn
+        false,                                                                  // isArrayLength
+        true,                                                                   // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                              // typeIndex
         (uint32_t) offsetof(OpcUa_BrowseRequest, RequestedMaxReferencesPerNode) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                       // isBuiltIn
+        true,                                                       // isArrayLength
+        true,                                                       // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                   // typeIndex
         (uint32_t) offsetof(OpcUa_BrowseRequest, NoOfNodesToBrowse) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_BrowseDescription, // typeIndex
+        false,                                                  // isBuiltIn
+        false,                                                  // isArrayLength
+        true,                                                   // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_BrowseDescription,    // typeIndex
         (uint32_t) offsetof(OpcUa_BrowseRequest, NodesToBrowse) // offset
     },
 };
@@ -8191,8 +8055,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrowseRequest_Fields[] = {
 /*============================================================================
  * Descriptor of the BrowseRequest encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_BrowseRequest_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_BrowseRequest_EncodeableType = {
     "BrowseRequest",
     OpcUaId_BrowseRequest,
     OpcUaId_BrowseRequest_Encoding_DefaultBinary,
@@ -8205,8 +8068,7 @@ SOPC_EncodeableType OpcUa_BrowseRequest_EncodeableType =
     OpcUa_BrowseRequest_Encode,
     OpcUa_BrowseRequest_Decode,
     sizeof BrowseRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    BrowseRequest_Fields
-};
+    BrowseRequest_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_BrowseResponse
@@ -8247,38 +8109,38 @@ SOPC_ReturnStatus OpcUa_BrowseResponse_Decode(void* pValue, SOPC_Buffer* buf, ui
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor BrowseResponse_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        false, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader, // typeIndex
+        false,                                                    // isBuiltIn
+        false,                                                    // isArrayLength
+        false,                                                    // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader,         // typeIndex
         (uint32_t) offsetof(OpcUa_BrowseResponse, ResponseHeader) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                  // isBuiltIn
+        true,                                                  // isArrayLength
+        true,                                                  // isToEncode
+        (uint32_t) SOPC_Int32_Id,                              // typeIndex
         (uint32_t) offsetof(OpcUa_BrowseResponse, NoOfResults) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_BrowseResult, // typeIndex
+        false,                                             // isBuiltIn
+        false,                                             // isArrayLength
+        true,                                              // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_BrowseResult,    // typeIndex
         (uint32_t) offsetof(OpcUa_BrowseResponse, Results) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                          // isBuiltIn
+        true,                                                          // isArrayLength
+        true,                                                          // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                      // typeIndex
         (uint32_t) offsetof(OpcUa_BrowseResponse, NoOfDiagnosticInfos) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DiagnosticInfo_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_DiagnosticInfo_Id,                         // typeIndex
         (uint32_t) offsetof(OpcUa_BrowseResponse, DiagnosticInfos) // offset
     },
 };
@@ -8286,8 +8148,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrowseResponse_Fields[] = {
 /*============================================================================
  * Descriptor of the BrowseResponse encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_BrowseResponse_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_BrowseResponse_EncodeableType = {
     "BrowseResponse",
     OpcUaId_BrowseResponse,
     OpcUaId_BrowseResponse_Encoding_DefaultBinary,
@@ -8300,8 +8161,7 @@ SOPC_EncodeableType OpcUa_BrowseResponse_EncodeableType =
     OpcUa_BrowseResponse_Encode,
     OpcUa_BrowseResponse_Decode,
     sizeof BrowseResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    BrowseResponse_Fields
-};
+    BrowseResponse_Fields};
 #endif
 
 #endif
@@ -8344,24 +8204,24 @@ SOPC_ReturnStatus OpcUa_BrowseNextRequest_Decode(void* pValue, SOPC_Buffer* buf,
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor BrowseNextRequest_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                                   // isBuiltIn
+        false,                                                                  // isArrayLength
+        true,                                                                   // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                                             // typeIndex
         (uint32_t) offsetof(OpcUa_BrowseNextRequest, ReleaseContinuationPoints) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                // isBuiltIn
+        true,                                                                // isArrayLength
+        true,                                                                // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                            // typeIndex
         (uint32_t) offsetof(OpcUa_BrowseNextRequest, NoOfContinuationPoints) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ByteString_Id, // typeIndex
+        true,                                                            // isBuiltIn
+        false,                                                           // isArrayLength
+        true,                                                            // isToEncode
+        (uint32_t) SOPC_ByteString_Id,                                   // typeIndex
         (uint32_t) offsetof(OpcUa_BrowseNextRequest, ContinuationPoints) // offset
     },
 };
@@ -8369,8 +8229,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrowseNextRequest_Fields[] = {
 /*============================================================================
  * Descriptor of the BrowseNextRequest encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_BrowseNextRequest_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_BrowseNextRequest_EncodeableType = {
     "BrowseNextRequest",
     OpcUaId_BrowseNextRequest,
     OpcUaId_BrowseNextRequest_Encoding_DefaultBinary,
@@ -8383,8 +8242,7 @@ SOPC_EncodeableType OpcUa_BrowseNextRequest_EncodeableType =
     OpcUa_BrowseNextRequest_Encode,
     OpcUa_BrowseNextRequest_Decode,
     sizeof BrowseNextRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    BrowseNextRequest_Fields
-};
+    BrowseNextRequest_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_BrowseNextResponse
@@ -8425,38 +8283,38 @@ SOPC_ReturnStatus OpcUa_BrowseNextResponse_Decode(void* pValue, SOPC_Buffer* buf
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor BrowseNextResponse_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        false, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader, // typeIndex
+        false,                                                        // isBuiltIn
+        false,                                                        // isArrayLength
+        false,                                                        // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader,             // typeIndex
         (uint32_t) offsetof(OpcUa_BrowseNextResponse, ResponseHeader) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        true,                                                      // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                  // typeIndex
         (uint32_t) offsetof(OpcUa_BrowseNextResponse, NoOfResults) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_BrowseResult, // typeIndex
+        false,                                                 // isBuiltIn
+        false,                                                 // isArrayLength
+        true,                                                  // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_BrowseResult,        // typeIndex
         (uint32_t) offsetof(OpcUa_BrowseNextResponse, Results) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                              // isBuiltIn
+        true,                                                              // isArrayLength
+        true,                                                              // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                          // typeIndex
         (uint32_t) offsetof(OpcUa_BrowseNextResponse, NoOfDiagnosticInfos) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DiagnosticInfo_Id, // typeIndex
+        true,                                                          // isBuiltIn
+        false,                                                         // isArrayLength
+        true,                                                          // isToEncode
+        (uint32_t) SOPC_DiagnosticInfo_Id,                             // typeIndex
         (uint32_t) offsetof(OpcUa_BrowseNextResponse, DiagnosticInfos) // offset
     },
 };
@@ -8464,8 +8322,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrowseNextResponse_Fields[] = {
 /*============================================================================
  * Descriptor of the BrowseNextResponse encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_BrowseNextResponse_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_BrowseNextResponse_EncodeableType = {
     "BrowseNextResponse",
     OpcUaId_BrowseNextResponse,
     OpcUaId_BrowseNextResponse_Encoding_DefaultBinary,
@@ -8478,8 +8335,7 @@ SOPC_EncodeableType OpcUa_BrowseNextResponse_EncodeableType =
     OpcUa_BrowseNextResponse_Encode,
     OpcUa_BrowseNextResponse_Decode,
     sizeof BrowseNextResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    BrowseNextResponse_Fields
-};
+    BrowseNextResponse_Fields};
 #endif
 
 #endif
@@ -8521,31 +8377,31 @@ SOPC_ReturnStatus OpcUa_RelativePathElement_Decode(void* pValue, SOPC_Buffer* bu
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor RelativePathElement_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                           // isBuiltIn
+        false,                                                          // isArrayLength
+        true,                                                           // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                                      // typeIndex
         (uint32_t) offsetof(OpcUa_RelativePathElement, ReferenceTypeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                     // isBuiltIn
+        false,                                                    // isArrayLength
+        true,                                                     // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                               // typeIndex
         (uint32_t) offsetof(OpcUa_RelativePathElement, IsInverse) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                           // isBuiltIn
+        false,                                                          // isArrayLength
+        true,                                                           // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                                     // typeIndex
         (uint32_t) offsetof(OpcUa_RelativePathElement, IncludeSubtypes) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_QualifiedName_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_QualifiedName_Id,                          // typeIndex
         (uint32_t) offsetof(OpcUa_RelativePathElement, TargetName) // offset
     },
 };
@@ -8553,8 +8409,7 @@ static const SOPC_EncodeableType_FieldDescriptor RelativePathElement_Fields[] = 
 /*============================================================================
  * Descriptor of the RelativePathElement encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_RelativePathElement_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_RelativePathElement_EncodeableType = {
     "RelativePathElement",
     OpcUaId_RelativePathElement,
     OpcUaId_RelativePathElement_Encoding_DefaultBinary,
@@ -8567,8 +8422,7 @@ SOPC_EncodeableType OpcUa_RelativePathElement_EncodeableType =
     OpcUa_RelativePathElement_Encode,
     OpcUa_RelativePathElement_Decode,
     sizeof RelativePathElement_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    RelativePathElement_Fields
-};
+    RelativePathElement_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_RelativePath
@@ -8609,26 +8463,25 @@ SOPC_ReturnStatus OpcUa_RelativePath_Decode(void* pValue, SOPC_Buffer* buf, uint
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor RelativePath_Fields[] = {
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                 // isBuiltIn
+        true,                                                 // isArrayLength
+        true,                                                 // isToEncode
+        (uint32_t) SOPC_Int32_Id,                             // typeIndex
         (uint32_t) offsetof(OpcUa_RelativePath, NoOfElements) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
+        false,                                                 // isBuiltIn
+        false,                                                 // isArrayLength
+        true,                                                  // isToEncode
         (uint32_t) SOPC_TypeInternalIndex_RelativePathElement, // typeIndex
-        (uint32_t) offsetof(OpcUa_RelativePath, Elements) // offset
+        (uint32_t) offsetof(OpcUa_RelativePath, Elements)      // offset
     },
 };
 
 /*============================================================================
  * Descriptor of the RelativePath encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_RelativePath_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_RelativePath_EncodeableType = {
     "RelativePath",
     OpcUaId_RelativePath,
     OpcUaId_RelativePath_Encoding_DefaultBinary,
@@ -8641,8 +8494,7 @@ SOPC_EncodeableType OpcUa_RelativePath_EncodeableType =
     OpcUa_RelativePath_Encode,
     OpcUa_RelativePath_Decode,
     sizeof RelativePath_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    RelativePath_Fields
-};
+    RelativePath_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_BrowsePath
@@ -8683,17 +8535,17 @@ SOPC_ReturnStatus OpcUa_BrowsePath_Decode(void* pValue, SOPC_Buffer* buf, uint32
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor BrowsePath_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                               // isBuiltIn
+        false,                                              // isArrayLength
+        true,                                               // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                          // typeIndex
         (uint32_t) offsetof(OpcUa_BrowsePath, StartingNode) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_RelativePath, // typeIndex
+        false,                                              // isBuiltIn
+        false,                                              // isArrayLength
+        true,                                               // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_RelativePath,     // typeIndex
         (uint32_t) offsetof(OpcUa_BrowsePath, RelativePath) // offset
     },
 };
@@ -8701,8 +8553,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrowsePath_Fields[] = {
 /*============================================================================
  * Descriptor of the BrowsePath encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_BrowsePath_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_BrowsePath_EncodeableType = {
     "BrowsePath",
     OpcUaId_BrowsePath,
     OpcUaId_BrowsePath_Encoding_DefaultBinary,
@@ -8715,8 +8566,7 @@ SOPC_EncodeableType OpcUa_BrowsePath_EncodeableType =
     OpcUa_BrowsePath_Encode,
     OpcUa_BrowsePath_Decode,
     sizeof BrowsePath_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    BrowsePath_Fields
-};
+    BrowsePath_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_BrowsePathTarget
@@ -8757,17 +8607,17 @@ SOPC_ReturnStatus OpcUa_BrowsePathTarget_Decode(void* pValue, SOPC_Buffer* buf, 
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor BrowsePathTarget_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ExpandedNodeId_Id, // typeIndex
+        true,                                                 // isBuiltIn
+        false,                                                // isArrayLength
+        true,                                                 // isToEncode
+        (uint32_t) SOPC_ExpandedNodeId_Id,                    // typeIndex
         (uint32_t) offsetof(OpcUa_BrowsePathTarget, TargetId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                           // isBuiltIn
+        false,                                                          // isArrayLength
+        true,                                                           // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                      // typeIndex
         (uint32_t) offsetof(OpcUa_BrowsePathTarget, RemainingPathIndex) // offset
     },
 };
@@ -8775,8 +8625,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrowsePathTarget_Fields[] = {
 /*============================================================================
  * Descriptor of the BrowsePathTarget encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_BrowsePathTarget_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_BrowsePathTarget_EncodeableType = {
     "BrowsePathTarget",
     OpcUaId_BrowsePathTarget,
     OpcUaId_BrowsePathTarget_Encoding_DefaultBinary,
@@ -8789,8 +8638,7 @@ SOPC_EncodeableType OpcUa_BrowsePathTarget_EncodeableType =
     OpcUa_BrowsePathTarget_Encode,
     OpcUa_BrowsePathTarget_Decode,
     sizeof BrowsePathTarget_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    BrowsePathTarget_Fields
-};
+    BrowsePathTarget_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_BrowsePathResult
@@ -8831,24 +8679,24 @@ SOPC_ReturnStatus OpcUa_BrowsePathResult_Decode(void* pValue, SOPC_Buffer* buf, 
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor BrowsePathResult_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_StatusCode_Id, // typeIndex
+        true,                                                   // isBuiltIn
+        false,                                                  // isArrayLength
+        true,                                                   // isToEncode
+        (uint32_t) SOPC_StatusCode_Id,                          // typeIndex
         (uint32_t) offsetof(OpcUa_BrowsePathResult, StatusCode) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                    // isBuiltIn
+        true,                                                    // isArrayLength
+        true,                                                    // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                // typeIndex
         (uint32_t) offsetof(OpcUa_BrowsePathResult, NoOfTargets) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_BrowsePathTarget, // typeIndex
+        false,                                               // isBuiltIn
+        false,                                               // isArrayLength
+        true,                                                // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_BrowsePathTarget,  // typeIndex
         (uint32_t) offsetof(OpcUa_BrowsePathResult, Targets) // offset
     },
 };
@@ -8856,8 +8704,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrowsePathResult_Fields[] = {
 /*============================================================================
  * Descriptor of the BrowsePathResult encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_BrowsePathResult_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_BrowsePathResult_EncodeableType = {
     "BrowsePathResult",
     OpcUaId_BrowsePathResult,
     OpcUaId_BrowsePathResult_Encoding_DefaultBinary,
@@ -8870,8 +8717,7 @@ SOPC_EncodeableType OpcUa_BrowsePathResult_EncodeableType =
     OpcUa_BrowsePathResult_Encode,
     OpcUa_BrowsePathResult_Decode,
     sizeof BrowsePathResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    BrowsePathResult_Fields
-};
+    BrowsePathResult_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_TranslateBrowsePathsToNodeIds
@@ -8895,17 +8741,23 @@ void OpcUa_TranslateBrowsePathsToNodeIdsRequest_Clear(void* pValue)
 /*============================================================================
  * OpcUa_TranslateBrowsePathsToNodeIdsRequest_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_TranslateBrowsePathsToNodeIdsRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_TranslateBrowsePathsToNodeIdsRequest_Encode(const void* pValue,
+                                                                    SOPC_Buffer* buf,
+                                                                    uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Encode(&OpcUa_TranslateBrowsePathsToNodeIdsRequest_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Encode(&OpcUa_TranslateBrowsePathsToNodeIdsRequest_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
  * OpcUa_TranslateBrowsePathsToNodeIdsRequest_Decode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_TranslateBrowsePathsToNodeIdsRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_TranslateBrowsePathsToNodeIdsRequest_Decode(void* pValue,
+                                                                    SOPC_Buffer* buf,
+                                                                    uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Decode(&OpcUa_TranslateBrowsePathsToNodeIdsRequest_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Decode(&OpcUa_TranslateBrowsePathsToNodeIdsRequest_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -8913,17 +8765,17 @@ SOPC_ReturnStatus OpcUa_TranslateBrowsePathsToNodeIdsRequest_Decode(void* pValue
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor TranslateBrowsePathsToNodeIdsRequest_Fields[] = {
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                            // isBuiltIn
+        true,                                                                            // isArrayLength
+        true,                                                                            // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                        // typeIndex
         (uint32_t) offsetof(OpcUa_TranslateBrowsePathsToNodeIdsRequest, NoOfBrowsePaths) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_BrowsePath, // typeIndex
+        false,                                                                       // isBuiltIn
+        false,                                                                       // isArrayLength
+        true,                                                                        // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_BrowsePath,                                // typeIndex
         (uint32_t) offsetof(OpcUa_TranslateBrowsePathsToNodeIdsRequest, BrowsePaths) // offset
     },
 };
@@ -8931,8 +8783,7 @@ static const SOPC_EncodeableType_FieldDescriptor TranslateBrowsePathsToNodeIdsRe
 /*============================================================================
  * Descriptor of the TranslateBrowsePathsToNodeIdsRequest encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_TranslateBrowsePathsToNodeIdsRequest_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_TranslateBrowsePathsToNodeIdsRequest_EncodeableType = {
     "TranslateBrowsePathsToNodeIdsRequest",
     OpcUaId_TranslateBrowsePathsToNodeIdsRequest,
     OpcUaId_TranslateBrowsePathsToNodeIdsRequest_Encoding_DefaultBinary,
@@ -8945,8 +8796,7 @@ SOPC_EncodeableType OpcUa_TranslateBrowsePathsToNodeIdsRequest_EncodeableType =
     OpcUa_TranslateBrowsePathsToNodeIdsRequest_Encode,
     OpcUa_TranslateBrowsePathsToNodeIdsRequest_Decode,
     sizeof TranslateBrowsePathsToNodeIdsRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    TranslateBrowsePathsToNodeIdsRequest_Fields
-};
+    TranslateBrowsePathsToNodeIdsRequest_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_TranslateBrowsePathsToNodeIdsResponse
@@ -8969,17 +8819,23 @@ void OpcUa_TranslateBrowsePathsToNodeIdsResponse_Clear(void* pValue)
 /*============================================================================
  * OpcUa_TranslateBrowsePathsToNodeIdsResponse_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_TranslateBrowsePathsToNodeIdsResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_TranslateBrowsePathsToNodeIdsResponse_Encode(const void* pValue,
+                                                                     SOPC_Buffer* buf,
+                                                                     uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Encode(&OpcUa_TranslateBrowsePathsToNodeIdsResponse_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Encode(&OpcUa_TranslateBrowsePathsToNodeIdsResponse_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
  * OpcUa_TranslateBrowsePathsToNodeIdsResponse_Decode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_TranslateBrowsePathsToNodeIdsResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_TranslateBrowsePathsToNodeIdsResponse_Decode(void* pValue,
+                                                                     SOPC_Buffer* buf,
+                                                                     uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Decode(&OpcUa_TranslateBrowsePathsToNodeIdsResponse_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Decode(&OpcUa_TranslateBrowsePathsToNodeIdsResponse_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -8987,38 +8843,38 @@ SOPC_ReturnStatus OpcUa_TranslateBrowsePathsToNodeIdsResponse_Decode(void* pValu
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor TranslateBrowsePathsToNodeIdsResponse_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        false, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader, // typeIndex
+        false,                                                                           // isBuiltIn
+        false,                                                                           // isArrayLength
+        false,                                                                           // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader,                                // typeIndex
         (uint32_t) offsetof(OpcUa_TranslateBrowsePathsToNodeIdsResponse, ResponseHeader) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                         // isBuiltIn
+        true,                                                                         // isArrayLength
+        true,                                                                         // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                     // typeIndex
         (uint32_t) offsetof(OpcUa_TranslateBrowsePathsToNodeIdsResponse, NoOfResults) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_BrowsePathResult, // typeIndex
+        false,                                                                    // isBuiltIn
+        false,                                                                    // isArrayLength
+        true,                                                                     // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_BrowsePathResult,                       // typeIndex
         (uint32_t) offsetof(OpcUa_TranslateBrowsePathsToNodeIdsResponse, Results) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                                 // isBuiltIn
+        true,                                                                                 // isArrayLength
+        true,                                                                                 // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                             // typeIndex
         (uint32_t) offsetof(OpcUa_TranslateBrowsePathsToNodeIdsResponse, NoOfDiagnosticInfos) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DiagnosticInfo_Id, // typeIndex
+        true,                                                                             // isBuiltIn
+        false,                                                                            // isArrayLength
+        true,                                                                             // isToEncode
+        (uint32_t) SOPC_DiagnosticInfo_Id,                                                // typeIndex
         (uint32_t) offsetof(OpcUa_TranslateBrowsePathsToNodeIdsResponse, DiagnosticInfos) // offset
     },
 };
@@ -9026,8 +8882,7 @@ static const SOPC_EncodeableType_FieldDescriptor TranslateBrowsePathsToNodeIdsRe
 /*============================================================================
  * Descriptor of the TranslateBrowsePathsToNodeIdsResponse encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_TranslateBrowsePathsToNodeIdsResponse_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_TranslateBrowsePathsToNodeIdsResponse_EncodeableType = {
     "TranslateBrowsePathsToNodeIdsResponse",
     OpcUaId_TranslateBrowsePathsToNodeIdsResponse,
     OpcUaId_TranslateBrowsePathsToNodeIdsResponse_Encoding_DefaultBinary,
@@ -9040,8 +8895,7 @@ SOPC_EncodeableType OpcUa_TranslateBrowsePathsToNodeIdsResponse_EncodeableType =
     OpcUa_TranslateBrowsePathsToNodeIdsResponse_Encode,
     OpcUa_TranslateBrowsePathsToNodeIdsResponse_Decode,
     sizeof TranslateBrowsePathsToNodeIdsResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    TranslateBrowsePathsToNodeIdsResponse_Fields
-};
+    TranslateBrowsePathsToNodeIdsResponse_Fields};
 #endif
 
 #endif
@@ -9084,17 +8938,17 @@ SOPC_ReturnStatus OpcUa_RegisterNodesRequest_Decode(void* pValue, SOPC_Buffer* b
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor RegisterNodesRequest_Fields[] = {
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                // isBuiltIn
+        true,                                                                // isArrayLength
+        true,                                                                // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                            // typeIndex
         (uint32_t) offsetof(OpcUa_RegisterNodesRequest, NoOfNodesToRegister) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                            // isBuiltIn
+        false,                                                           // isArrayLength
+        true,                                                            // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                                       // typeIndex
         (uint32_t) offsetof(OpcUa_RegisterNodesRequest, NodesToRegister) // offset
     },
 };
@@ -9102,8 +8956,7 @@ static const SOPC_EncodeableType_FieldDescriptor RegisterNodesRequest_Fields[] =
 /*============================================================================
  * Descriptor of the RegisterNodesRequest encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_RegisterNodesRequest_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_RegisterNodesRequest_EncodeableType = {
     "RegisterNodesRequest",
     OpcUaId_RegisterNodesRequest,
     OpcUaId_RegisterNodesRequest_Encoding_DefaultBinary,
@@ -9116,8 +8969,7 @@ SOPC_EncodeableType OpcUa_RegisterNodesRequest_EncodeableType =
     OpcUa_RegisterNodesRequest_Encode,
     OpcUa_RegisterNodesRequest_Decode,
     sizeof RegisterNodesRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    RegisterNodesRequest_Fields
-};
+    RegisterNodesRequest_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_RegisterNodesResponse
@@ -9158,24 +9010,24 @@ SOPC_ReturnStatus OpcUa_RegisterNodesResponse_Decode(void* pValue, SOPC_Buffer* 
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor RegisterNodesResponse_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        false, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader, // typeIndex
+        false,                                                           // isBuiltIn
+        false,                                                           // isArrayLength
+        false,                                                           // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader,                // typeIndex
         (uint32_t) offsetof(OpcUa_RegisterNodesResponse, ResponseHeader) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                   // isBuiltIn
+        true,                                                                   // isArrayLength
+        true,                                                                   // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                               // typeIndex
         (uint32_t) offsetof(OpcUa_RegisterNodesResponse, NoOfRegisteredNodeIds) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                               // isBuiltIn
+        false,                                                              // isArrayLength
+        true,                                                               // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                                          // typeIndex
         (uint32_t) offsetof(OpcUa_RegisterNodesResponse, RegisteredNodeIds) // offset
     },
 };
@@ -9183,8 +9035,7 @@ static const SOPC_EncodeableType_FieldDescriptor RegisterNodesResponse_Fields[] 
 /*============================================================================
  * Descriptor of the RegisterNodesResponse encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_RegisterNodesResponse_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_RegisterNodesResponse_EncodeableType = {
     "RegisterNodesResponse",
     OpcUaId_RegisterNodesResponse,
     OpcUaId_RegisterNodesResponse_Encoding_DefaultBinary,
@@ -9197,8 +9048,7 @@ SOPC_EncodeableType OpcUa_RegisterNodesResponse_EncodeableType =
     OpcUa_RegisterNodesResponse_Encode,
     OpcUa_RegisterNodesResponse_Decode,
     sizeof RegisterNodesResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    RegisterNodesResponse_Fields
-};
+    RegisterNodesResponse_Fields};
 #endif
 
 #endif
@@ -9241,17 +9091,17 @@ SOPC_ReturnStatus OpcUa_UnregisterNodesRequest_Decode(void* pValue, SOPC_Buffer*
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor UnregisterNodesRequest_Fields[] = {
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                    // isBuiltIn
+        true,                                                                    // isArrayLength
+        true,                                                                    // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                // typeIndex
         (uint32_t) offsetof(OpcUa_UnregisterNodesRequest, NoOfNodesToUnregister) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                                // isBuiltIn
+        false,                                                               // isArrayLength
+        true,                                                                // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                                           // typeIndex
         (uint32_t) offsetof(OpcUa_UnregisterNodesRequest, NodesToUnregister) // offset
     },
 };
@@ -9259,8 +9109,7 @@ static const SOPC_EncodeableType_FieldDescriptor UnregisterNodesRequest_Fields[]
 /*============================================================================
  * Descriptor of the UnregisterNodesRequest encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_UnregisterNodesRequest_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_UnregisterNodesRequest_EncodeableType = {
     "UnregisterNodesRequest",
     OpcUaId_UnregisterNodesRequest,
     OpcUaId_UnregisterNodesRequest_Encoding_DefaultBinary,
@@ -9273,8 +9122,7 @@ SOPC_EncodeableType OpcUa_UnregisterNodesRequest_EncodeableType =
     OpcUa_UnregisterNodesRequest_Encode,
     OpcUa_UnregisterNodesRequest_Decode,
     sizeof UnregisterNodesRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    UnregisterNodesRequest_Fields
-};
+    UnregisterNodesRequest_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_UnregisterNodesResponse
@@ -9315,10 +9163,10 @@ SOPC_ReturnStatus OpcUa_UnregisterNodesResponse_Decode(void* pValue, SOPC_Buffer
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor UnregisterNodesResponse_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        false, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader, // typeIndex
+        false,                                                             // isBuiltIn
+        false,                                                             // isArrayLength
+        false,                                                             // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader,                  // typeIndex
         (uint32_t) offsetof(OpcUa_UnregisterNodesResponse, ResponseHeader) // offset
     },
 };
@@ -9326,8 +9174,7 @@ static const SOPC_EncodeableType_FieldDescriptor UnregisterNodesResponse_Fields[
 /*============================================================================
  * Descriptor of the UnregisterNodesResponse encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_UnregisterNodesResponse_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_UnregisterNodesResponse_EncodeableType = {
     "UnregisterNodesResponse",
     OpcUaId_UnregisterNodesResponse,
     OpcUaId_UnregisterNodesResponse_Encoding_DefaultBinary,
@@ -9340,8 +9187,7 @@ SOPC_EncodeableType OpcUa_UnregisterNodesResponse_EncodeableType =
     OpcUa_UnregisterNodesResponse_Encode,
     OpcUa_UnregisterNodesResponse_Decode,
     sizeof UnregisterNodesResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    UnregisterNodesResponse_Fields
-};
+    UnregisterNodesResponse_Fields};
 #endif
 
 #endif
@@ -9383,66 +9229,66 @@ SOPC_ReturnStatus OpcUa_EndpointConfiguration_Decode(void* pValue, SOPC_Buffer* 
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor EndpointConfiguration_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                              // isBuiltIn
+        false,                                                             // isArrayLength
+        true,                                                              // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                          // typeIndex
         (uint32_t) offsetof(OpcUa_EndpointConfiguration, OperationTimeout) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                               // isBuiltIn
+        false,                                                              // isArrayLength
+        true,                                                               // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                                         // typeIndex
         (uint32_t) offsetof(OpcUa_EndpointConfiguration, UseBinaryEncoding) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                             // isBuiltIn
+        false,                                                            // isArrayLength
+        true,                                                             // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                         // typeIndex
         (uint32_t) offsetof(OpcUa_EndpointConfiguration, MaxStringLength) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                 // isBuiltIn
+        false,                                                                // isArrayLength
+        true,                                                                 // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                             // typeIndex
         (uint32_t) offsetof(OpcUa_EndpointConfiguration, MaxByteStringLength) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                            // isBuiltIn
+        false,                                                           // isArrayLength
+        true,                                                            // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                        // typeIndex
         (uint32_t) offsetof(OpcUa_EndpointConfiguration, MaxArrayLength) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                            // isBuiltIn
+        false,                                                           // isArrayLength
+        true,                                                            // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                        // typeIndex
         (uint32_t) offsetof(OpcUa_EndpointConfiguration, MaxMessageSize) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                           // isBuiltIn
+        false,                                                          // isArrayLength
+        true,                                                           // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                       // typeIndex
         (uint32_t) offsetof(OpcUa_EndpointConfiguration, MaxBufferSize) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                             // isBuiltIn
+        false,                                                            // isArrayLength
+        true,                                                             // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                         // typeIndex
         (uint32_t) offsetof(OpcUa_EndpointConfiguration, ChannelLifetime) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                   // isBuiltIn
+        false,                                                                  // isArrayLength
+        true,                                                                   // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                               // typeIndex
         (uint32_t) offsetof(OpcUa_EndpointConfiguration, SecurityTokenLifetime) // offset
     },
 };
@@ -9450,8 +9296,7 @@ static const SOPC_EncodeableType_FieldDescriptor EndpointConfiguration_Fields[] 
 /*============================================================================
  * Descriptor of the EndpointConfiguration encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_EndpointConfiguration_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_EndpointConfiguration_EncodeableType = {
     "EndpointConfiguration",
     OpcUaId_EndpointConfiguration,
     OpcUaId_EndpointConfiguration_Encoding_DefaultBinary,
@@ -9464,8 +9309,7 @@ SOPC_EncodeableType OpcUa_EndpointConfiguration_EncodeableType =
     OpcUa_EndpointConfiguration_Encode,
     OpcUa_EndpointConfiguration_Decode,
     sizeof EndpointConfiguration_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    EndpointConfiguration_Fields
-};
+    EndpointConfiguration_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_SupportedProfile
@@ -9506,52 +9350,52 @@ SOPC_ReturnStatus OpcUa_SupportedProfile_Decode(void* pValue, SOPC_Buffer* buf, 
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor SupportedProfile_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                        // isBuiltIn
+        false,                                                       // isArrayLength
+        true,                                                        // isToEncode
+        (uint32_t) SOPC_String_Id,                                   // typeIndex
         (uint32_t) offsetof(OpcUa_SupportedProfile, OrganizationUri) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                  // isBuiltIn
+        false,                                                 // isArrayLength
+        true,                                                  // isToEncode
+        (uint32_t) SOPC_String_Id,                             // typeIndex
         (uint32_t) offsetof(OpcUa_SupportedProfile, ProfileId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                       // isBuiltIn
+        false,                                                      // isArrayLength
+        true,                                                       // isToEncode
+        (uint32_t) SOPC_String_Id,                                  // typeIndex
         (uint32_t) offsetof(OpcUa_SupportedProfile, ComplianceTool) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DateTime_Id, // typeIndex
+        true,                                                       // isBuiltIn
+        false,                                                      // isArrayLength
+        true,                                                       // isToEncode
+        (uint32_t) SOPC_DateTime_Id,                                // typeIndex
         (uint32_t) offsetof(OpcUa_SupportedProfile, ComplianceDate) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                        // isBuiltIn
+        false,                                                       // isArrayLength
+        true,                                                        // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                    // typeIndex
         (uint32_t) offsetof(OpcUa_SupportedProfile, ComplianceLevel) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                               // isBuiltIn
+        true,                                                               // isArrayLength
+        true,                                                               // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                           // typeIndex
         (uint32_t) offsetof(OpcUa_SupportedProfile, NoOfUnsupportedUnitIds) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                           // isBuiltIn
+        false,                                                          // isArrayLength
+        true,                                                           // isToEncode
+        (uint32_t) SOPC_String_Id,                                      // typeIndex
         (uint32_t) offsetof(OpcUa_SupportedProfile, UnsupportedUnitIds) // offset
     },
 };
@@ -9559,8 +9403,7 @@ static const SOPC_EncodeableType_FieldDescriptor SupportedProfile_Fields[] = {
 /*============================================================================
  * Descriptor of the SupportedProfile encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_SupportedProfile_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_SupportedProfile_EncodeableType = {
     "SupportedProfile",
     OpcUaId_SupportedProfile,
     OpcUaId_SupportedProfile_Encoding_DefaultBinary,
@@ -9573,8 +9416,7 @@ SOPC_EncodeableType OpcUa_SupportedProfile_EncodeableType =
     OpcUa_SupportedProfile_Encode,
     OpcUa_SupportedProfile_Decode,
     sizeof SupportedProfile_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    SupportedProfile_Fields
-};
+    SupportedProfile_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_SoftwareCertificate
@@ -9615,80 +9457,80 @@ SOPC_ReturnStatus OpcUa_SoftwareCertificate_Decode(void* pValue, SOPC_Buffer* bu
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor SoftwareCertificate_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                       // isBuiltIn
+        false,                                                      // isArrayLength
+        true,                                                       // isToEncode
+        (uint32_t) SOPC_String_Id,                                  // typeIndex
         (uint32_t) offsetof(OpcUa_SoftwareCertificate, ProductName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_String_Id,                                 // typeIndex
         (uint32_t) offsetof(OpcUa_SoftwareCertificate, ProductUri) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_String_Id,                                 // typeIndex
         (uint32_t) offsetof(OpcUa_SoftwareCertificate, VendorName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ByteString_Id, // typeIndex
+        true,                                                                    // isBuiltIn
+        false,                                                                   // isArrayLength
+        true,                                                                    // isToEncode
+        (uint32_t) SOPC_ByteString_Id,                                           // typeIndex
         (uint32_t) offsetof(OpcUa_SoftwareCertificate, VendorProductCertificate) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                           // isBuiltIn
+        false,                                                          // isArrayLength
+        true,                                                           // isToEncode
+        (uint32_t) SOPC_String_Id,                                      // typeIndex
         (uint32_t) offsetof(OpcUa_SoftwareCertificate, SoftwareVersion) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                       // isBuiltIn
+        false,                                                      // isArrayLength
+        true,                                                       // isToEncode
+        (uint32_t) SOPC_String_Id,                                  // typeIndex
         (uint32_t) offsetof(OpcUa_SoftwareCertificate, BuildNumber) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DateTime_Id, // typeIndex
+        true,                                                     // isBuiltIn
+        false,                                                    // isArrayLength
+        true,                                                     // isToEncode
+        (uint32_t) SOPC_DateTime_Id,                              // typeIndex
         (uint32_t) offsetof(OpcUa_SoftwareCertificate, BuildDate) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                    // isBuiltIn
+        false,                                                   // isArrayLength
+        true,                                                    // isToEncode
+        (uint32_t) SOPC_String_Id,                               // typeIndex
         (uint32_t) offsetof(OpcUa_SoftwareCertificate, IssuedBy) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DateTime_Id, // typeIndex
+        true,                                                     // isBuiltIn
+        false,                                                    // isArrayLength
+        true,                                                     // isToEncode
+        (uint32_t) SOPC_DateTime_Id,                              // typeIndex
         (uint32_t) offsetof(OpcUa_SoftwareCertificate, IssueDate) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                 // isBuiltIn
+        true,                                                                 // isArrayLength
+        true,                                                                 // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                             // typeIndex
         (uint32_t) offsetof(OpcUa_SoftwareCertificate, NoOfSupportedProfiles) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_SupportedProfile, // typeIndex
+        false,                                                            // isBuiltIn
+        false,                                                            // isArrayLength
+        true,                                                             // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_SupportedProfile,               // typeIndex
         (uint32_t) offsetof(OpcUa_SoftwareCertificate, SupportedProfiles) // offset
     },
 };
@@ -9696,8 +9538,7 @@ static const SOPC_EncodeableType_FieldDescriptor SoftwareCertificate_Fields[] = 
 /*============================================================================
  * Descriptor of the SoftwareCertificate encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_SoftwareCertificate_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_SoftwareCertificate_EncodeableType = {
     "SoftwareCertificate",
     OpcUaId_SoftwareCertificate,
     OpcUaId_SoftwareCertificate_Encoding_DefaultBinary,
@@ -9710,8 +9551,7 @@ SOPC_EncodeableType OpcUa_SoftwareCertificate_EncodeableType =
     OpcUa_SoftwareCertificate_Encode,
     OpcUa_SoftwareCertificate_Decode,
     sizeof SoftwareCertificate_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    SoftwareCertificate_Fields
-};
+    SoftwareCertificate_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_QueryDataDescription
@@ -9752,24 +9592,24 @@ SOPC_ReturnStatus OpcUa_QueryDataDescription_Decode(void* pValue, SOPC_Buffer* b
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor QueryDataDescription_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_RelativePath, // typeIndex
+        false,                                                        // isBuiltIn
+        false,                                                        // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_RelativePath,               // typeIndex
         (uint32_t) offsetof(OpcUa_QueryDataDescription, RelativePath) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                        // isBuiltIn
+        false,                                                       // isArrayLength
+        true,                                                        // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                   // typeIndex
         (uint32_t) offsetof(OpcUa_QueryDataDescription, AttributeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                       // isBuiltIn
+        false,                                                      // isArrayLength
+        true,                                                       // isToEncode
+        (uint32_t) SOPC_String_Id,                                  // typeIndex
         (uint32_t) offsetof(OpcUa_QueryDataDescription, IndexRange) // offset
     },
 };
@@ -9777,8 +9617,7 @@ static const SOPC_EncodeableType_FieldDescriptor QueryDataDescription_Fields[] =
 /*============================================================================
  * Descriptor of the QueryDataDescription encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_QueryDataDescription_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_QueryDataDescription_EncodeableType = {
     "QueryDataDescription",
     OpcUaId_QueryDataDescription,
     OpcUaId_QueryDataDescription_Encoding_DefaultBinary,
@@ -9791,8 +9630,7 @@ SOPC_EncodeableType OpcUa_QueryDataDescription_EncodeableType =
     OpcUa_QueryDataDescription_Encode,
     OpcUa_QueryDataDescription_Decode,
     sizeof QueryDataDescription_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    QueryDataDescription_Fields
-};
+    QueryDataDescription_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_NodeTypeDescription
@@ -9833,31 +9671,31 @@ SOPC_ReturnStatus OpcUa_NodeTypeDescription_Decode(void* pValue, SOPC_Buffer* bu
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor NodeTypeDescription_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ExpandedNodeId_Id, // typeIndex
+        true,                                                              // isBuiltIn
+        false,                                                             // isArrayLength
+        true,                                                              // isToEncode
+        (uint32_t) SOPC_ExpandedNodeId_Id,                                 // typeIndex
         (uint32_t) offsetof(OpcUa_NodeTypeDescription, TypeDefinitionNode) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                           // isBuiltIn
+        false,                                                          // isArrayLength
+        true,                                                           // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                                     // typeIndex
         (uint32_t) offsetof(OpcUa_NodeTypeDescription, IncludeSubTypes) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                            // isBuiltIn
+        true,                                                            // isArrayLength
+        true,                                                            // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                        // typeIndex
         (uint32_t) offsetof(OpcUa_NodeTypeDescription, NoOfDataToReturn) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_QueryDataDescription, // typeIndex
+        false,                                                       // isBuiltIn
+        false,                                                       // isArrayLength
+        true,                                                        // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_QueryDataDescription,      // typeIndex
         (uint32_t) offsetof(OpcUa_NodeTypeDescription, DataToReturn) // offset
     },
 };
@@ -9865,8 +9703,7 @@ static const SOPC_EncodeableType_FieldDescriptor NodeTypeDescription_Fields[] = 
 /*============================================================================
  * Descriptor of the NodeTypeDescription encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_NodeTypeDescription_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_NodeTypeDescription_EncodeableType = {
     "NodeTypeDescription",
     OpcUaId_NodeTypeDescription,
     OpcUaId_NodeTypeDescription_Encoding_DefaultBinary,
@@ -9879,8 +9716,7 @@ SOPC_EncodeableType OpcUa_NodeTypeDescription_EncodeableType =
     OpcUa_NodeTypeDescription_Encode,
     OpcUa_NodeTypeDescription_Decode,
     sizeof NodeTypeDescription_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    NodeTypeDescription_Fields
-};
+    NodeTypeDescription_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_QueryDataSet
@@ -9921,31 +9757,31 @@ SOPC_ReturnStatus OpcUa_QueryDataSet_Decode(void* pValue, SOPC_Buffer* buf, uint
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor QueryDataSet_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ExpandedNodeId_Id, // typeIndex
+        true,                                           // isBuiltIn
+        false,                                          // isArrayLength
+        true,                                           // isToEncode
+        (uint32_t) SOPC_ExpandedNodeId_Id,              // typeIndex
         (uint32_t) offsetof(OpcUa_QueryDataSet, NodeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ExpandedNodeId_Id, // typeIndex
+        true,                                                       // isBuiltIn
+        false,                                                      // isArrayLength
+        true,                                                       // isToEncode
+        (uint32_t) SOPC_ExpandedNodeId_Id,                          // typeIndex
         (uint32_t) offsetof(OpcUa_QueryDataSet, TypeDefinitionNode) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                               // isBuiltIn
+        true,                                               // isArrayLength
+        true,                                               // isToEncode
+        (uint32_t) SOPC_Int32_Id,                           // typeIndex
         (uint32_t) offsetof(OpcUa_QueryDataSet, NoOfValues) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Variant_Id, // typeIndex
+        true,                                           // isBuiltIn
+        false,                                          // isArrayLength
+        true,                                           // isToEncode
+        (uint32_t) SOPC_Variant_Id,                     // typeIndex
         (uint32_t) offsetof(OpcUa_QueryDataSet, Values) // offset
     },
 };
@@ -9953,8 +9789,7 @@ static const SOPC_EncodeableType_FieldDescriptor QueryDataSet_Fields[] = {
 /*============================================================================
  * Descriptor of the QueryDataSet encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_QueryDataSet_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_QueryDataSet_EncodeableType = {
     "QueryDataSet",
     OpcUaId_QueryDataSet,
     OpcUaId_QueryDataSet_Encoding_DefaultBinary,
@@ -9967,8 +9802,7 @@ SOPC_EncodeableType OpcUa_QueryDataSet_EncodeableType =
     OpcUa_QueryDataSet_Encode,
     OpcUa_QueryDataSet_Decode,
     sizeof QueryDataSet_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    QueryDataSet_Fields
-};
+    QueryDataSet_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_NodeReference
@@ -10009,38 +9843,38 @@ SOPC_ReturnStatus OpcUa_NodeReference_Decode(void* pValue, SOPC_Buffer* buf, uin
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor NodeReference_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                            // isBuiltIn
+        false,                                           // isArrayLength
+        true,                                            // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                       // typeIndex
         (uint32_t) offsetof(OpcUa_NodeReference, NodeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                     // isBuiltIn
+        false,                                                    // isArrayLength
+        true,                                                     // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                                // typeIndex
         (uint32_t) offsetof(OpcUa_NodeReference, ReferenceTypeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                               // isBuiltIn
+        false,                                              // isArrayLength
+        true,                                               // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                         // typeIndex
         (uint32_t) offsetof(OpcUa_NodeReference, IsForward) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                           // isBuiltIn
+        true,                                                           // isArrayLength
+        true,                                                           // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                       // typeIndex
         (uint32_t) offsetof(OpcUa_NodeReference, NoOfReferencedNodeIds) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                       // isBuiltIn
+        false,                                                      // isArrayLength
+        true,                                                       // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                                  // typeIndex
         (uint32_t) offsetof(OpcUa_NodeReference, ReferencedNodeIds) // offset
     },
 };
@@ -10048,8 +9882,7 @@ static const SOPC_EncodeableType_FieldDescriptor NodeReference_Fields[] = {
 /*============================================================================
  * Descriptor of the NodeReference encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_NodeReference_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_NodeReference_EncodeableType = {
     "NodeReference",
     OpcUaId_NodeReference,
     OpcUaId_NodeReference_Encoding_DefaultBinary,
@@ -10062,8 +9895,7 @@ SOPC_EncodeableType OpcUa_NodeReference_EncodeableType =
     OpcUa_NodeReference_Encode,
     OpcUa_NodeReference_Decode,
     sizeof NodeReference_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    NodeReference_Fields
-};
+    NodeReference_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ContentFilterElement
@@ -10104,24 +9936,24 @@ SOPC_ReturnStatus OpcUa_ContentFilterElement_Decode(void* pValue, SOPC_Buffer* b
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ContentFilterElement_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                           // isBuiltIn
+        false,                                                          // isArrayLength
+        true,                                                           // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                       // typeIndex
         (uint32_t) offsetof(OpcUa_ContentFilterElement, FilterOperator) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                               // isBuiltIn
+        true,                                                               // isArrayLength
+        true,                                                               // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                           // typeIndex
         (uint32_t) offsetof(OpcUa_ContentFilterElement, NoOfFilterOperands) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ExtensionObject_Id, // typeIndex
+        true,                                                           // isBuiltIn
+        false,                                                          // isArrayLength
+        true,                                                           // isToEncode
+        (uint32_t) SOPC_ExtensionObject_Id,                             // typeIndex
         (uint32_t) offsetof(OpcUa_ContentFilterElement, FilterOperands) // offset
     },
 };
@@ -10129,8 +9961,7 @@ static const SOPC_EncodeableType_FieldDescriptor ContentFilterElement_Fields[] =
 /*============================================================================
  * Descriptor of the ContentFilterElement encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_ContentFilterElement_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_ContentFilterElement_EncodeableType = {
     "ContentFilterElement",
     OpcUaId_ContentFilterElement,
     OpcUaId_ContentFilterElement_Encoding_DefaultBinary,
@@ -10143,8 +9974,7 @@ SOPC_EncodeableType OpcUa_ContentFilterElement_EncodeableType =
     OpcUa_ContentFilterElement_Encode,
     OpcUa_ContentFilterElement_Decode,
     sizeof ContentFilterElement_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    ContentFilterElement_Fields
-};
+    ContentFilterElement_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ContentFilter
@@ -10185,26 +10015,25 @@ SOPC_ReturnStatus OpcUa_ContentFilter_Decode(void* pValue, SOPC_Buffer* buf, uin
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ContentFilter_Fields[] = {
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                  // isBuiltIn
+        true,                                                  // isArrayLength
+        true,                                                  // isToEncode
+        (uint32_t) SOPC_Int32_Id,                              // typeIndex
         (uint32_t) offsetof(OpcUa_ContentFilter, NoOfElements) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
+        false,                                                  // isBuiltIn
+        false,                                                  // isArrayLength
+        true,                                                   // isToEncode
         (uint32_t) SOPC_TypeInternalIndex_ContentFilterElement, // typeIndex
-        (uint32_t) offsetof(OpcUa_ContentFilter, Elements) // offset
+        (uint32_t) offsetof(OpcUa_ContentFilter, Elements)      // offset
     },
 };
 
 /*============================================================================
  * Descriptor of the ContentFilter encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_ContentFilter_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_ContentFilter_EncodeableType = {
     "ContentFilter",
     OpcUaId_ContentFilter,
     OpcUaId_ContentFilter_Encoding_DefaultBinary,
@@ -10217,8 +10046,7 @@ SOPC_EncodeableType OpcUa_ContentFilter_EncodeableType =
     OpcUa_ContentFilter_Encode,
     OpcUa_ContentFilter_Decode,
     sizeof ContentFilter_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    ContentFilter_Fields
-};
+    ContentFilter_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ElementOperand
@@ -10259,10 +10087,10 @@ SOPC_ReturnStatus OpcUa_ElementOperand_Decode(void* pValue, SOPC_Buffer* buf, ui
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ElementOperand_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                            // isBuiltIn
+        false,                                           // isArrayLength
+        true,                                            // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                       // typeIndex
         (uint32_t) offsetof(OpcUa_ElementOperand, Index) // offset
     },
 };
@@ -10270,8 +10098,7 @@ static const SOPC_EncodeableType_FieldDescriptor ElementOperand_Fields[] = {
 /*============================================================================
  * Descriptor of the ElementOperand encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_ElementOperand_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_ElementOperand_EncodeableType = {
     "ElementOperand",
     OpcUaId_ElementOperand,
     OpcUaId_ElementOperand_Encoding_DefaultBinary,
@@ -10284,8 +10111,7 @@ SOPC_EncodeableType OpcUa_ElementOperand_EncodeableType =
     OpcUa_ElementOperand_Encode,
     OpcUa_ElementOperand_Decode,
     sizeof ElementOperand_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    ElementOperand_Fields
-};
+    ElementOperand_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_LiteralOperand
@@ -10326,10 +10152,10 @@ SOPC_ReturnStatus OpcUa_LiteralOperand_Decode(void* pValue, SOPC_Buffer* buf, ui
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor LiteralOperand_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Variant_Id, // typeIndex
+        true,                                            // isBuiltIn
+        false,                                           // isArrayLength
+        true,                                            // isToEncode
+        (uint32_t) SOPC_Variant_Id,                      // typeIndex
         (uint32_t) offsetof(OpcUa_LiteralOperand, Value) // offset
     },
 };
@@ -10337,8 +10163,7 @@ static const SOPC_EncodeableType_FieldDescriptor LiteralOperand_Fields[] = {
 /*============================================================================
  * Descriptor of the LiteralOperand encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_LiteralOperand_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_LiteralOperand_EncodeableType = {
     "LiteralOperand",
     OpcUaId_LiteralOperand,
     OpcUaId_LiteralOperand_Encoding_DefaultBinary,
@@ -10351,8 +10176,7 @@ SOPC_EncodeableType OpcUa_LiteralOperand_EncodeableType =
     OpcUa_LiteralOperand_Encode,
     OpcUa_LiteralOperand_Decode,
     sizeof LiteralOperand_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    LiteralOperand_Fields
-};
+    LiteralOperand_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_AttributeOperand
@@ -10393,38 +10217,38 @@ SOPC_ReturnStatus OpcUa_AttributeOperand_Decode(void* pValue, SOPC_Buffer* buf, 
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor AttributeOperand_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                               // isBuiltIn
+        false,                                              // isArrayLength
+        true,                                               // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                          // typeIndex
         (uint32_t) offsetof(OpcUa_AttributeOperand, NodeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                              // isBuiltIn
+        false,                                             // isArrayLength
+        true,                                              // isToEncode
+        (uint32_t) SOPC_String_Id,                         // typeIndex
         (uint32_t) offsetof(OpcUa_AttributeOperand, Alias) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_RelativePath, // typeIndex
+        false,                                                  // isBuiltIn
+        false,                                                  // isArrayLength
+        true,                                                   // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_RelativePath,         // typeIndex
         (uint32_t) offsetof(OpcUa_AttributeOperand, BrowsePath) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                    // isBuiltIn
+        false,                                                   // isArrayLength
+        true,                                                    // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                               // typeIndex
         (uint32_t) offsetof(OpcUa_AttributeOperand, AttributeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                   // isBuiltIn
+        false,                                                  // isArrayLength
+        true,                                                   // isToEncode
+        (uint32_t) SOPC_String_Id,                              // typeIndex
         (uint32_t) offsetof(OpcUa_AttributeOperand, IndexRange) // offset
     },
 };
@@ -10432,8 +10256,7 @@ static const SOPC_EncodeableType_FieldDescriptor AttributeOperand_Fields[] = {
 /*============================================================================
  * Descriptor of the AttributeOperand encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_AttributeOperand_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_AttributeOperand_EncodeableType = {
     "AttributeOperand",
     OpcUaId_AttributeOperand,
     OpcUaId_AttributeOperand_Encoding_DefaultBinary,
@@ -10446,8 +10269,7 @@ SOPC_EncodeableType OpcUa_AttributeOperand_EncodeableType =
     OpcUa_AttributeOperand_Encode,
     OpcUa_AttributeOperand_Decode,
     sizeof AttributeOperand_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    AttributeOperand_Fields
-};
+    AttributeOperand_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_SimpleAttributeOperand
@@ -10488,38 +10310,38 @@ SOPC_ReturnStatus OpcUa_SimpleAttributeOperand_Decode(void* pValue, SOPC_Buffer*
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor SimpleAttributeOperand_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                               // isBuiltIn
+        false,                                                              // isArrayLength
+        true,                                                               // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                                          // typeIndex
         (uint32_t) offsetof(OpcUa_SimpleAttributeOperand, TypeDefinitionId) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                             // isBuiltIn
+        true,                                                             // isArrayLength
+        true,                                                             // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                         // typeIndex
         (uint32_t) offsetof(OpcUa_SimpleAttributeOperand, NoOfBrowsePath) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_QualifiedName_Id, // typeIndex
+        true,                                                         // isBuiltIn
+        false,                                                        // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_QualifiedName_Id,                             // typeIndex
         (uint32_t) offsetof(OpcUa_SimpleAttributeOperand, BrowsePath) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                          // isBuiltIn
+        false,                                                         // isArrayLength
+        true,                                                          // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                     // typeIndex
         (uint32_t) offsetof(OpcUa_SimpleAttributeOperand, AttributeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                         // isBuiltIn
+        false,                                                        // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_String_Id,                                    // typeIndex
         (uint32_t) offsetof(OpcUa_SimpleAttributeOperand, IndexRange) // offset
     },
 };
@@ -10527,8 +10349,7 @@ static const SOPC_EncodeableType_FieldDescriptor SimpleAttributeOperand_Fields[]
 /*============================================================================
  * Descriptor of the SimpleAttributeOperand encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_SimpleAttributeOperand_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_SimpleAttributeOperand_EncodeableType = {
     "SimpleAttributeOperand",
     OpcUaId_SimpleAttributeOperand,
     OpcUaId_SimpleAttributeOperand_Encoding_DefaultBinary,
@@ -10541,8 +10362,7 @@ SOPC_EncodeableType OpcUa_SimpleAttributeOperand_EncodeableType =
     OpcUa_SimpleAttributeOperand_Encode,
     OpcUa_SimpleAttributeOperand_Decode,
     sizeof SimpleAttributeOperand_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    SimpleAttributeOperand_Fields
-};
+    SimpleAttributeOperand_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ContentFilterElementResult
@@ -10565,9 +10385,12 @@ void OpcUa_ContentFilterElementResult_Clear(void* pValue)
 /*============================================================================
  * OpcUa_ContentFilterElementResult_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ContentFilterElementResult_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_ContentFilterElementResult_Encode(const void* pValue,
+                                                          SOPC_Buffer* buf,
+                                                          uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Encode(&OpcUa_ContentFilterElementResult_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Encode(&OpcUa_ContentFilterElementResult_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -10575,7 +10398,8 @@ SOPC_ReturnStatus OpcUa_ContentFilterElementResult_Encode(const void* pValue, SO
  *===========================================================================*/
 SOPC_ReturnStatus OpcUa_ContentFilterElementResult_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Decode(&OpcUa_ContentFilterElementResult_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Decode(&OpcUa_ContentFilterElementResult_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -10583,38 +10407,38 @@ SOPC_ReturnStatus OpcUa_ContentFilterElementResult_Decode(void* pValue, SOPC_Buf
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ContentFilterElementResult_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_StatusCode_Id, // typeIndex
+        true,                                                             // isBuiltIn
+        false,                                                            // isArrayLength
+        true,                                                             // isToEncode
+        (uint32_t) SOPC_StatusCode_Id,                                    // typeIndex
         (uint32_t) offsetof(OpcUa_ContentFilterElementResult, StatusCode) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                         // isBuiltIn
+        true,                                                                         // isArrayLength
+        true,                                                                         // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                     // typeIndex
         (uint32_t) offsetof(OpcUa_ContentFilterElementResult, NoOfOperandStatusCodes) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_StatusCode_Id, // typeIndex
+        true,                                                                     // isBuiltIn
+        false,                                                                    // isArrayLength
+        true,                                                                     // isToEncode
+        (uint32_t) SOPC_StatusCode_Id,                                            // typeIndex
         (uint32_t) offsetof(OpcUa_ContentFilterElementResult, OperandStatusCodes) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                             // isBuiltIn
+        true,                                                                             // isArrayLength
+        true,                                                                             // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                         // typeIndex
         (uint32_t) offsetof(OpcUa_ContentFilterElementResult, NoOfOperandDiagnosticInfos) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DiagnosticInfo_Id, // typeIndex
+        true,                                                                         // isBuiltIn
+        false,                                                                        // isArrayLength
+        true,                                                                         // isToEncode
+        (uint32_t) SOPC_DiagnosticInfo_Id,                                            // typeIndex
         (uint32_t) offsetof(OpcUa_ContentFilterElementResult, OperandDiagnosticInfos) // offset
     },
 };
@@ -10622,8 +10446,7 @@ static const SOPC_EncodeableType_FieldDescriptor ContentFilterElementResult_Fiel
 /*============================================================================
  * Descriptor of the ContentFilterElementResult encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_ContentFilterElementResult_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_ContentFilterElementResult_EncodeableType = {
     "ContentFilterElementResult",
     OpcUaId_ContentFilterElementResult,
     OpcUaId_ContentFilterElementResult_Encoding_DefaultBinary,
@@ -10636,8 +10459,7 @@ SOPC_EncodeableType OpcUa_ContentFilterElementResult_EncodeableType =
     OpcUa_ContentFilterElementResult_Encode,
     OpcUa_ContentFilterElementResult_Decode,
     sizeof ContentFilterElementResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    ContentFilterElementResult_Fields
-};
+    ContentFilterElementResult_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ContentFilterResult
@@ -10678,31 +10500,31 @@ SOPC_ReturnStatus OpcUa_ContentFilterResult_Decode(void* pValue, SOPC_Buffer* bu
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ContentFilterResult_Fields[] = {
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                              // isBuiltIn
+        true,                                                              // isArrayLength
+        true,                                                              // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                          // typeIndex
         (uint32_t) offsetof(OpcUa_ContentFilterResult, NoOfElementResults) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ContentFilterElementResult, // typeIndex
+        false,                                                         // isBuiltIn
+        false,                                                         // isArrayLength
+        true,                                                          // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ContentFilterElementResult,  // typeIndex
         (uint32_t) offsetof(OpcUa_ContentFilterResult, ElementResults) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                      // isBuiltIn
+        true,                                                                      // isArrayLength
+        true,                                                                      // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                  // typeIndex
         (uint32_t) offsetof(OpcUa_ContentFilterResult, NoOfElementDiagnosticInfos) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DiagnosticInfo_Id, // typeIndex
+        true,                                                                  // isBuiltIn
+        false,                                                                 // isArrayLength
+        true,                                                                  // isToEncode
+        (uint32_t) SOPC_DiagnosticInfo_Id,                                     // typeIndex
         (uint32_t) offsetof(OpcUa_ContentFilterResult, ElementDiagnosticInfos) // offset
     },
 };
@@ -10710,8 +10532,7 @@ static const SOPC_EncodeableType_FieldDescriptor ContentFilterResult_Fields[] = 
 /*============================================================================
  * Descriptor of the ContentFilterResult encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_ContentFilterResult_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_ContentFilterResult_EncodeableType = {
     "ContentFilterResult",
     OpcUaId_ContentFilterResult,
     OpcUaId_ContentFilterResult_Encoding_DefaultBinary,
@@ -10724,8 +10545,7 @@ SOPC_EncodeableType OpcUa_ContentFilterResult_EncodeableType =
     OpcUa_ContentFilterResult_Encode,
     OpcUa_ContentFilterResult_Decode,
     sizeof ContentFilterResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    ContentFilterResult_Fields
-};
+    ContentFilterResult_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ParsingResult
@@ -10766,38 +10586,38 @@ SOPC_ReturnStatus OpcUa_ParsingResult_Decode(void* pValue, SOPC_Buffer* buf, uin
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ParsingResult_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_StatusCode_Id, // typeIndex
+        true,                                                // isBuiltIn
+        false,                                               // isArrayLength
+        true,                                                // isToEncode
+        (uint32_t) SOPC_StatusCode_Id,                       // typeIndex
         (uint32_t) offsetof(OpcUa_ParsingResult, StatusCode) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                         // isBuiltIn
+        true,                                                         // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                     // typeIndex
         (uint32_t) offsetof(OpcUa_ParsingResult, NoOfDataStatusCodes) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_StatusCode_Id, // typeIndex
+        true,                                                     // isBuiltIn
+        false,                                                    // isArrayLength
+        true,                                                     // isToEncode
+        (uint32_t) SOPC_StatusCode_Id,                            // typeIndex
         (uint32_t) offsetof(OpcUa_ParsingResult, DataStatusCodes) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                             // isBuiltIn
+        true,                                                             // isArrayLength
+        true,                                                             // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                         // typeIndex
         (uint32_t) offsetof(OpcUa_ParsingResult, NoOfDataDiagnosticInfos) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DiagnosticInfo_Id, // typeIndex
+        true,                                                         // isBuiltIn
+        false,                                                        // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_DiagnosticInfo_Id,                            // typeIndex
         (uint32_t) offsetof(OpcUa_ParsingResult, DataDiagnosticInfos) // offset
     },
 };
@@ -10805,8 +10625,7 @@ static const SOPC_EncodeableType_FieldDescriptor ParsingResult_Fields[] = {
 /*============================================================================
  * Descriptor of the ParsingResult encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_ParsingResult_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_ParsingResult_EncodeableType = {
     "ParsingResult",
     OpcUaId_ParsingResult,
     OpcUaId_ParsingResult_Encoding_DefaultBinary,
@@ -10819,8 +10638,7 @@ SOPC_EncodeableType OpcUa_ParsingResult_EncodeableType =
     OpcUa_ParsingResult_Encode,
     OpcUa_ParsingResult_Decode,
     sizeof ParsingResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    ParsingResult_Fields
-};
+    ParsingResult_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_QueryFirst
@@ -10862,45 +10680,45 @@ SOPC_ReturnStatus OpcUa_QueryFirstRequest_Decode(void* pValue, SOPC_Buffer* buf,
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor QueryFirstRequest_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
+        false,                                             // isBuiltIn
+        false,                                             // isArrayLength
+        true,                                              // isToEncode
         (uint32_t) SOPC_TypeInternalIndex_ViewDescription, // typeIndex
         (uint32_t) offsetof(OpcUa_QueryFirstRequest, View) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                       // isBuiltIn
+        true,                                                       // isArrayLength
+        true,                                                       // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                   // typeIndex
         (uint32_t) offsetof(OpcUa_QueryFirstRequest, NoOfNodeTypes) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_NodeTypeDescription, // typeIndex
+        false,                                                  // isBuiltIn
+        false,                                                  // isArrayLength
+        true,                                                   // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_NodeTypeDescription,  // typeIndex
         (uint32_t) offsetof(OpcUa_QueryFirstRequest, NodeTypes) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ContentFilter, // typeIndex
+        false,                                               // isBuiltIn
+        false,                                               // isArrayLength
+        true,                                                // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ContentFilter,     // typeIndex
         (uint32_t) offsetof(OpcUa_QueryFirstRequest, Filter) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                             // isBuiltIn
+        false,                                                            // isArrayLength
+        true,                                                             // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                        // typeIndex
         (uint32_t) offsetof(OpcUa_QueryFirstRequest, MaxDataSetsToReturn) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                               // isBuiltIn
+        false,                                                              // isArrayLength
+        true,                                                               // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                          // typeIndex
         (uint32_t) offsetof(OpcUa_QueryFirstRequest, MaxReferencesToReturn) // offset
     },
 };
@@ -10908,8 +10726,7 @@ static const SOPC_EncodeableType_FieldDescriptor QueryFirstRequest_Fields[] = {
 /*============================================================================
  * Descriptor of the QueryFirstRequest encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_QueryFirstRequest_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_QueryFirstRequest_EncodeableType = {
     "QueryFirstRequest",
     OpcUaId_QueryFirstRequest,
     OpcUaId_QueryFirstRequest_Encoding_DefaultBinary,
@@ -10922,8 +10739,7 @@ SOPC_EncodeableType OpcUa_QueryFirstRequest_EncodeableType =
     OpcUa_QueryFirstRequest_Encode,
     OpcUa_QueryFirstRequest_Decode,
     sizeof QueryFirstRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    QueryFirstRequest_Fields
-};
+    QueryFirstRequest_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_QueryFirstResponse
@@ -10964,66 +10780,66 @@ SOPC_ReturnStatus OpcUa_QueryFirstResponse_Decode(void* pValue, SOPC_Buffer* buf
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor QueryFirstResponse_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        false, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader, // typeIndex
+        false,                                                        // isBuiltIn
+        false,                                                        // isArrayLength
+        false,                                                        // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader,             // typeIndex
         (uint32_t) offsetof(OpcUa_QueryFirstResponse, ResponseHeader) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                            // isBuiltIn
+        true,                                                            // isArrayLength
+        true,                                                            // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                        // typeIndex
         (uint32_t) offsetof(OpcUa_QueryFirstResponse, NoOfQueryDataSets) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_QueryDataSet, // typeIndex
+        false,                                                       // isBuiltIn
+        false,                                                       // isArrayLength
+        true,                                                        // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_QueryDataSet,              // typeIndex
         (uint32_t) offsetof(OpcUa_QueryFirstResponse, QueryDataSets) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ByteString_Id, // typeIndex
+        true,                                                            // isBuiltIn
+        false,                                                           // isArrayLength
+        true,                                                            // isToEncode
+        (uint32_t) SOPC_ByteString_Id,                                   // typeIndex
         (uint32_t) offsetof(OpcUa_QueryFirstResponse, ContinuationPoint) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                             // isBuiltIn
+        true,                                                             // isArrayLength
+        true,                                                             // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                         // typeIndex
         (uint32_t) offsetof(OpcUa_QueryFirstResponse, NoOfParsingResults) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ParsingResult, // typeIndex
+        false,                                                        // isBuiltIn
+        false,                                                        // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ParsingResult,              // typeIndex
         (uint32_t) offsetof(OpcUa_QueryFirstResponse, ParsingResults) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                              // isBuiltIn
+        true,                                                              // isArrayLength
+        true,                                                              // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                          // typeIndex
         (uint32_t) offsetof(OpcUa_QueryFirstResponse, NoOfDiagnosticInfos) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DiagnosticInfo_Id, // typeIndex
+        true,                                                          // isBuiltIn
+        false,                                                         // isArrayLength
+        true,                                                          // isToEncode
+        (uint32_t) SOPC_DiagnosticInfo_Id,                             // typeIndex
         (uint32_t) offsetof(OpcUa_QueryFirstResponse, DiagnosticInfos) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ContentFilterResult, // typeIndex
+        false,                                                      // isBuiltIn
+        false,                                                      // isArrayLength
+        true,                                                       // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ContentFilterResult,      // typeIndex
         (uint32_t) offsetof(OpcUa_QueryFirstResponse, FilterResult) // offset
     },
 };
@@ -11031,8 +10847,7 @@ static const SOPC_EncodeableType_FieldDescriptor QueryFirstResponse_Fields[] = {
 /*============================================================================
  * Descriptor of the QueryFirstResponse encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_QueryFirstResponse_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_QueryFirstResponse_EncodeableType = {
     "QueryFirstResponse",
     OpcUaId_QueryFirstResponse,
     OpcUaId_QueryFirstResponse_Encoding_DefaultBinary,
@@ -11045,8 +10860,7 @@ SOPC_EncodeableType OpcUa_QueryFirstResponse_EncodeableType =
     OpcUa_QueryFirstResponse_Encode,
     OpcUa_QueryFirstResponse_Decode,
     sizeof QueryFirstResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    QueryFirstResponse_Fields
-};
+    QueryFirstResponse_Fields};
 #endif
 
 #endif
@@ -11089,17 +10903,17 @@ SOPC_ReturnStatus OpcUa_QueryNextRequest_Decode(void* pValue, SOPC_Buffer* buf, 
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor QueryNextRequest_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                                 // isBuiltIn
+        false,                                                                // isArrayLength
+        true,                                                                 // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                                           // typeIndex
         (uint32_t) offsetof(OpcUa_QueryNextRequest, ReleaseContinuationPoint) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ByteString_Id, // typeIndex
+        true,                                                          // isBuiltIn
+        false,                                                         // isArrayLength
+        true,                                                          // isToEncode
+        (uint32_t) SOPC_ByteString_Id,                                 // typeIndex
         (uint32_t) offsetof(OpcUa_QueryNextRequest, ContinuationPoint) // offset
     },
 };
@@ -11107,8 +10921,7 @@ static const SOPC_EncodeableType_FieldDescriptor QueryNextRequest_Fields[] = {
 /*============================================================================
  * Descriptor of the QueryNextRequest encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_QueryNextRequest_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_QueryNextRequest_EncodeableType = {
     "QueryNextRequest",
     OpcUaId_QueryNextRequest,
     OpcUaId_QueryNextRequest_Encoding_DefaultBinary,
@@ -11121,8 +10934,7 @@ SOPC_EncodeableType OpcUa_QueryNextRequest_EncodeableType =
     OpcUa_QueryNextRequest_Encode,
     OpcUa_QueryNextRequest_Decode,
     sizeof QueryNextRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    QueryNextRequest_Fields
-};
+    QueryNextRequest_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_QueryNextResponse
@@ -11163,31 +10975,31 @@ SOPC_ReturnStatus OpcUa_QueryNextResponse_Decode(void* pValue, SOPC_Buffer* buf,
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor QueryNextResponse_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        false, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader, // typeIndex
+        false,                                                       // isBuiltIn
+        false,                                                       // isArrayLength
+        false,                                                       // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader,            // typeIndex
         (uint32_t) offsetof(OpcUa_QueryNextResponse, ResponseHeader) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                           // isBuiltIn
+        true,                                                           // isArrayLength
+        true,                                                           // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                       // typeIndex
         (uint32_t) offsetof(OpcUa_QueryNextResponse, NoOfQueryDataSets) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_QueryDataSet, // typeIndex
+        false,                                                      // isBuiltIn
+        false,                                                      // isArrayLength
+        true,                                                       // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_QueryDataSet,             // typeIndex
         (uint32_t) offsetof(OpcUa_QueryNextResponse, QueryDataSets) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ByteString_Id, // typeIndex
+        true,                                                                  // isBuiltIn
+        false,                                                                 // isArrayLength
+        true,                                                                  // isToEncode
+        (uint32_t) SOPC_ByteString_Id,                                         // typeIndex
         (uint32_t) offsetof(OpcUa_QueryNextResponse, RevisedContinuationPoint) // offset
     },
 };
@@ -11195,8 +11007,7 @@ static const SOPC_EncodeableType_FieldDescriptor QueryNextResponse_Fields[] = {
 /*============================================================================
  * Descriptor of the QueryNextResponse encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_QueryNextResponse_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_QueryNextResponse_EncodeableType = {
     "QueryNextResponse",
     OpcUaId_QueryNextResponse,
     OpcUaId_QueryNextResponse_Encoding_DefaultBinary,
@@ -11209,8 +11020,7 @@ SOPC_EncodeableType OpcUa_QueryNextResponse_EncodeableType =
     OpcUa_QueryNextResponse_Encode,
     OpcUa_QueryNextResponse_Decode,
     sizeof QueryNextResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    QueryNextResponse_Fields
-};
+    QueryNextResponse_Fields};
 #endif
 
 #endif
@@ -11252,31 +11062,31 @@ SOPC_ReturnStatus OpcUa_ReadValueId_Decode(void* pValue, SOPC_Buffer* buf, uint3
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ReadValueId_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                          // isBuiltIn
+        false,                                         // isArrayLength
+        true,                                          // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                     // typeIndex
         (uint32_t) offsetof(OpcUa_ReadValueId, NodeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                               // isBuiltIn
+        false,                                              // isArrayLength
+        true,                                               // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                          // typeIndex
         (uint32_t) offsetof(OpcUa_ReadValueId, AttributeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                              // isBuiltIn
+        false,                                             // isArrayLength
+        true,                                              // isToEncode
+        (uint32_t) SOPC_String_Id,                         // typeIndex
         (uint32_t) offsetof(OpcUa_ReadValueId, IndexRange) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_QualifiedName_Id, // typeIndex
+        true,                                                // isBuiltIn
+        false,                                               // isArrayLength
+        true,                                                // isToEncode
+        (uint32_t) SOPC_QualifiedName_Id,                    // typeIndex
         (uint32_t) offsetof(OpcUa_ReadValueId, DataEncoding) // offset
     },
 };
@@ -11284,8 +11094,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReadValueId_Fields[] = {
 /*============================================================================
  * Descriptor of the ReadValueId encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_ReadValueId_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_ReadValueId_EncodeableType = {
     "ReadValueId",
     OpcUaId_ReadValueId,
     OpcUaId_ReadValueId_Encoding_DefaultBinary,
@@ -11298,8 +11107,7 @@ SOPC_EncodeableType OpcUa_ReadValueId_EncodeableType =
     OpcUa_ReadValueId_Encode,
     OpcUa_ReadValueId_Decode,
     sizeof ReadValueId_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    ReadValueId_Fields
-};
+    ReadValueId_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_Read
@@ -11341,31 +11149,31 @@ SOPC_ReturnStatus OpcUa_ReadRequest_Decode(void* pValue, SOPC_Buffer* buf, uint3
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ReadRequest_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Double_Id, // typeIndex
+        true,                                          // isBuiltIn
+        false,                                         // isArrayLength
+        true,                                          // isToEncode
+        (uint32_t) SOPC_Double_Id,                     // typeIndex
         (uint32_t) offsetof(OpcUa_ReadRequest, MaxAge) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                  // typeIndex
         (uint32_t) offsetof(OpcUa_ReadRequest, TimestampsToReturn) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                   // isBuiltIn
+        true,                                                   // isArrayLength
+        true,                                                   // isToEncode
+        (uint32_t) SOPC_Int32_Id,                               // typeIndex
         (uint32_t) offsetof(OpcUa_ReadRequest, NoOfNodesToRead) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ReadValueId, // typeIndex
+        false,                                              // isBuiltIn
+        false,                                              // isArrayLength
+        true,                                               // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ReadValueId,      // typeIndex
         (uint32_t) offsetof(OpcUa_ReadRequest, NodesToRead) // offset
     },
 };
@@ -11373,8 +11181,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReadRequest_Fields[] = {
 /*============================================================================
  * Descriptor of the ReadRequest encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_ReadRequest_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_ReadRequest_EncodeableType = {
     "ReadRequest",
     OpcUaId_ReadRequest,
     OpcUaId_ReadRequest_Encoding_DefaultBinary,
@@ -11387,8 +11194,7 @@ SOPC_EncodeableType OpcUa_ReadRequest_EncodeableType =
     OpcUa_ReadRequest_Encode,
     OpcUa_ReadRequest_Decode,
     sizeof ReadRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    ReadRequest_Fields
-};
+    ReadRequest_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ReadResponse
@@ -11429,38 +11235,38 @@ SOPC_ReturnStatus OpcUa_ReadResponse_Decode(void* pValue, SOPC_Buffer* buf, uint
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ReadResponse_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        false, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader, // typeIndex
+        false,                                                  // isBuiltIn
+        false,                                                  // isArrayLength
+        false,                                                  // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader,       // typeIndex
         (uint32_t) offsetof(OpcUa_ReadResponse, ResponseHeader) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                // isBuiltIn
+        true,                                                // isArrayLength
+        true,                                                // isToEncode
+        (uint32_t) SOPC_Int32_Id,                            // typeIndex
         (uint32_t) offsetof(OpcUa_ReadResponse, NoOfResults) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DataValue_Id, // typeIndex
+        true,                                            // isBuiltIn
+        false,                                           // isArrayLength
+        true,                                            // isToEncode
+        (uint32_t) SOPC_DataValue_Id,                    // typeIndex
         (uint32_t) offsetof(OpcUa_ReadResponse, Results) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                        // isBuiltIn
+        true,                                                        // isArrayLength
+        true,                                                        // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                    // typeIndex
         (uint32_t) offsetof(OpcUa_ReadResponse, NoOfDiagnosticInfos) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DiagnosticInfo_Id, // typeIndex
+        true,                                                    // isBuiltIn
+        false,                                                   // isArrayLength
+        true,                                                    // isToEncode
+        (uint32_t) SOPC_DiagnosticInfo_Id,                       // typeIndex
         (uint32_t) offsetof(OpcUa_ReadResponse, DiagnosticInfos) // offset
     },
 };
@@ -11468,8 +11274,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReadResponse_Fields[] = {
 /*============================================================================
  * Descriptor of the ReadResponse encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_ReadResponse_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_ReadResponse_EncodeableType = {
     "ReadResponse",
     OpcUaId_ReadResponse,
     OpcUaId_ReadResponse_Encoding_DefaultBinary,
@@ -11482,8 +11287,7 @@ SOPC_EncodeableType OpcUa_ReadResponse_EncodeableType =
     OpcUa_ReadResponse_Encode,
     OpcUa_ReadResponse_Decode,
     sizeof ReadResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    ReadResponse_Fields
-};
+    ReadResponse_Fields};
 #endif
 
 #endif
@@ -11525,31 +11329,31 @@ SOPC_ReturnStatus OpcUa_HistoryReadValueId_Decode(void* pValue, SOPC_Buffer* buf
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor HistoryReadValueId_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                 // isBuiltIn
+        false,                                                // isArrayLength
+        true,                                                 // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                            // typeIndex
         (uint32_t) offsetof(OpcUa_HistoryReadValueId, NodeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                     // isBuiltIn
+        false,                                                    // isArrayLength
+        true,                                                     // isToEncode
+        (uint32_t) SOPC_String_Id,                                // typeIndex
         (uint32_t) offsetof(OpcUa_HistoryReadValueId, IndexRange) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_QualifiedName_Id, // typeIndex
+        true,                                                       // isBuiltIn
+        false,                                                      // isArrayLength
+        true,                                                       // isToEncode
+        (uint32_t) SOPC_QualifiedName_Id,                           // typeIndex
         (uint32_t) offsetof(OpcUa_HistoryReadValueId, DataEncoding) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ByteString_Id, // typeIndex
+        true,                                                            // isBuiltIn
+        false,                                                           // isArrayLength
+        true,                                                            // isToEncode
+        (uint32_t) SOPC_ByteString_Id,                                   // typeIndex
         (uint32_t) offsetof(OpcUa_HistoryReadValueId, ContinuationPoint) // offset
     },
 };
@@ -11557,8 +11361,7 @@ static const SOPC_EncodeableType_FieldDescriptor HistoryReadValueId_Fields[] = {
 /*============================================================================
  * Descriptor of the HistoryReadValueId encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_HistoryReadValueId_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_HistoryReadValueId_EncodeableType = {
     "HistoryReadValueId",
     OpcUaId_HistoryReadValueId,
     OpcUaId_HistoryReadValueId_Encoding_DefaultBinary,
@@ -11571,8 +11374,7 @@ SOPC_EncodeableType OpcUa_HistoryReadValueId_EncodeableType =
     OpcUa_HistoryReadValueId_Encode,
     OpcUa_HistoryReadValueId_Decode,
     sizeof HistoryReadValueId_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    HistoryReadValueId_Fields
-};
+    HistoryReadValueId_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_HistoryReadResult
@@ -11613,24 +11415,24 @@ SOPC_ReturnStatus OpcUa_HistoryReadResult_Decode(void* pValue, SOPC_Buffer* buf,
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor HistoryReadResult_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_StatusCode_Id, // typeIndex
+        true,                                                    // isBuiltIn
+        false,                                                   // isArrayLength
+        true,                                                    // isToEncode
+        (uint32_t) SOPC_StatusCode_Id,                           // typeIndex
         (uint32_t) offsetof(OpcUa_HistoryReadResult, StatusCode) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ByteString_Id, // typeIndex
+        true,                                                           // isBuiltIn
+        false,                                                          // isArrayLength
+        true,                                                           // isToEncode
+        (uint32_t) SOPC_ByteString_Id,                                  // typeIndex
         (uint32_t) offsetof(OpcUa_HistoryReadResult, ContinuationPoint) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ExtensionObject_Id, // typeIndex
+        true,                                                     // isBuiltIn
+        false,                                                    // isArrayLength
+        true,                                                     // isToEncode
+        (uint32_t) SOPC_ExtensionObject_Id,                       // typeIndex
         (uint32_t) offsetof(OpcUa_HistoryReadResult, HistoryData) // offset
     },
 };
@@ -11638,8 +11440,7 @@ static const SOPC_EncodeableType_FieldDescriptor HistoryReadResult_Fields[] = {
 /*============================================================================
  * Descriptor of the HistoryReadResult encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_HistoryReadResult_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_HistoryReadResult_EncodeableType = {
     "HistoryReadResult",
     OpcUaId_HistoryReadResult,
     OpcUaId_HistoryReadResult_Encoding_DefaultBinary,
@@ -11652,8 +11453,7 @@ SOPC_EncodeableType OpcUa_HistoryReadResult_EncodeableType =
     OpcUa_HistoryReadResult_Encode,
     OpcUa_HistoryReadResult_Decode,
     sizeof HistoryReadResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    HistoryReadResult_Fields
-};
+    HistoryReadResult_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_EventFilter
@@ -11694,24 +11494,24 @@ SOPC_ReturnStatus OpcUa_EventFilter_Decode(void* pValue, SOPC_Buffer* buf, uint3
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor EventFilter_Fields[] = {
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                     // isBuiltIn
+        true,                                                     // isArrayLength
+        true,                                                     // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                 // typeIndex
         (uint32_t) offsetof(OpcUa_EventFilter, NoOfSelectClauses) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
+        false,                                                    // isBuiltIn
+        false,                                                    // isArrayLength
+        true,                                                     // isToEncode
         (uint32_t) SOPC_TypeInternalIndex_SimpleAttributeOperand, // typeIndex
-        (uint32_t) offsetof(OpcUa_EventFilter, SelectClauses) // offset
+        (uint32_t) offsetof(OpcUa_EventFilter, SelectClauses)     // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ContentFilter, // typeIndex
+        false,                                              // isBuiltIn
+        false,                                              // isArrayLength
+        true,                                               // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ContentFilter,    // typeIndex
         (uint32_t) offsetof(OpcUa_EventFilter, WhereClause) // offset
     },
 };
@@ -11719,8 +11519,7 @@ static const SOPC_EncodeableType_FieldDescriptor EventFilter_Fields[] = {
 /*============================================================================
  * Descriptor of the EventFilter encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_EventFilter_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_EventFilter_EncodeableType = {
     "EventFilter",
     OpcUaId_EventFilter,
     OpcUaId_EventFilter_Encoding_DefaultBinary,
@@ -11733,8 +11532,7 @@ SOPC_EncodeableType OpcUa_EventFilter_EncodeableType =
     OpcUa_EventFilter_Encode,
     OpcUa_EventFilter_Decode,
     sizeof EventFilter_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    EventFilter_Fields
-};
+    EventFilter_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ReadEventDetails
@@ -11775,31 +11573,31 @@ SOPC_ReturnStatus OpcUa_ReadEventDetails_Decode(void* pValue, SOPC_Buffer* buf, 
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ReadEventDetails_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                         // isBuiltIn
+        false,                                                        // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                    // typeIndex
         (uint32_t) offsetof(OpcUa_ReadEventDetails, NumValuesPerNode) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DateTime_Id, // typeIndex
+        true,                                                  // isBuiltIn
+        false,                                                 // isArrayLength
+        true,                                                  // isToEncode
+        (uint32_t) SOPC_DateTime_Id,                           // typeIndex
         (uint32_t) offsetof(OpcUa_ReadEventDetails, StartTime) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DateTime_Id, // typeIndex
+        true,                                                // isBuiltIn
+        false,                                               // isArrayLength
+        true,                                                // isToEncode
+        (uint32_t) SOPC_DateTime_Id,                         // typeIndex
         (uint32_t) offsetof(OpcUa_ReadEventDetails, EndTime) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_EventFilter, // typeIndex
+        false,                                              // isBuiltIn
+        false,                                              // isArrayLength
+        true,                                               // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_EventFilter,      // typeIndex
         (uint32_t) offsetof(OpcUa_ReadEventDetails, Filter) // offset
     },
 };
@@ -11807,8 +11605,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReadEventDetails_Fields[] = {
 /*============================================================================
  * Descriptor of the ReadEventDetails encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_ReadEventDetails_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_ReadEventDetails_EncodeableType = {
     "ReadEventDetails",
     OpcUaId_ReadEventDetails,
     OpcUaId_ReadEventDetails_Encoding_DefaultBinary,
@@ -11821,8 +11618,7 @@ SOPC_EncodeableType OpcUa_ReadEventDetails_EncodeableType =
     OpcUa_ReadEventDetails_Encode,
     OpcUa_ReadEventDetails_Decode,
     sizeof ReadEventDetails_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    ReadEventDetails_Fields
-};
+    ReadEventDetails_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ReadRawModifiedDetails
@@ -11863,38 +11659,38 @@ SOPC_ReturnStatus OpcUa_ReadRawModifiedDetails_Decode(void* pValue, SOPC_Buffer*
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ReadRawModifiedDetails_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                             // isBuiltIn
+        false,                                                            // isArrayLength
+        true,                                                             // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                                       // typeIndex
         (uint32_t) offsetof(OpcUa_ReadRawModifiedDetails, IsReadModified) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DateTime_Id, // typeIndex
+        true,                                                        // isBuiltIn
+        false,                                                       // isArrayLength
+        true,                                                        // isToEncode
+        (uint32_t) SOPC_DateTime_Id,                                 // typeIndex
         (uint32_t) offsetof(OpcUa_ReadRawModifiedDetails, StartTime) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DateTime_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_DateTime_Id,                               // typeIndex
         (uint32_t) offsetof(OpcUa_ReadRawModifiedDetails, EndTime) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                               // isBuiltIn
+        false,                                                              // isArrayLength
+        true,                                                               // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                          // typeIndex
         (uint32_t) offsetof(OpcUa_ReadRawModifiedDetails, NumValuesPerNode) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                           // isBuiltIn
+        false,                                                          // isArrayLength
+        true,                                                           // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                                     // typeIndex
         (uint32_t) offsetof(OpcUa_ReadRawModifiedDetails, ReturnBounds) // offset
     },
 };
@@ -11902,8 +11698,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReadRawModifiedDetails_Fields[]
 /*============================================================================
  * Descriptor of the ReadRawModifiedDetails encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_ReadRawModifiedDetails_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_ReadRawModifiedDetails_EncodeableType = {
     "ReadRawModifiedDetails",
     OpcUaId_ReadRawModifiedDetails,
     OpcUaId_ReadRawModifiedDetails_Encoding_DefaultBinary,
@@ -11916,8 +11711,7 @@ SOPC_EncodeableType OpcUa_ReadRawModifiedDetails_EncodeableType =
     OpcUa_ReadRawModifiedDetails_Encode,
     OpcUa_ReadRawModifiedDetails_Decode,
     sizeof ReadRawModifiedDetails_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    ReadRawModifiedDetails_Fields
-};
+    ReadRawModifiedDetails_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_AggregateConfiguration
@@ -11958,38 +11752,38 @@ SOPC_ReturnStatus OpcUa_AggregateConfiguration_Decode(void* pValue, SOPC_Buffer*
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor AggregateConfiguration_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                                            // isBuiltIn
+        false,                                                                           // isArrayLength
+        true,                                                                            // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                                                      // typeIndex
         (uint32_t) offsetof(OpcUa_AggregateConfiguration, UseServerCapabilitiesDefaults) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                                  // isBuiltIn
+        false,                                                                 // isArrayLength
+        true,                                                                  // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                                            // typeIndex
         (uint32_t) offsetof(OpcUa_AggregateConfiguration, TreatUncertainAsBad) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Byte_Id, // typeIndex
+        true,                                                             // isBuiltIn
+        false,                                                            // isArrayLength
+        true,                                                             // isToEncode
+        (uint32_t) SOPC_Byte_Id,                                          // typeIndex
         (uint32_t) offsetof(OpcUa_AggregateConfiguration, PercentDataBad) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Byte_Id, // typeIndex
+        true,                                                              // isBuiltIn
+        false,                                                             // isArrayLength
+        true,                                                              // isToEncode
+        (uint32_t) SOPC_Byte_Id,                                           // typeIndex
         (uint32_t) offsetof(OpcUa_AggregateConfiguration, PercentDataGood) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                                     // isBuiltIn
+        false,                                                                    // isArrayLength
+        true,                                                                     // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                                               // typeIndex
         (uint32_t) offsetof(OpcUa_AggregateConfiguration, UseSlopedExtrapolation) // offset
     },
 };
@@ -11997,8 +11791,7 @@ static const SOPC_EncodeableType_FieldDescriptor AggregateConfiguration_Fields[]
 /*============================================================================
  * Descriptor of the AggregateConfiguration encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_AggregateConfiguration_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_AggregateConfiguration_EncodeableType = {
     "AggregateConfiguration",
     OpcUaId_AggregateConfiguration,
     OpcUaId_AggregateConfiguration_Encoding_DefaultBinary,
@@ -12011,8 +11804,7 @@ SOPC_EncodeableType OpcUa_AggregateConfiguration_EncodeableType =
     OpcUa_AggregateConfiguration_Encode,
     OpcUa_AggregateConfiguration_Decode,
     sizeof AggregateConfiguration_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    AggregateConfiguration_Fields
-};
+    AggregateConfiguration_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ReadProcessedDetails
@@ -12053,45 +11845,45 @@ SOPC_ReturnStatus OpcUa_ReadProcessedDetails_Decode(void* pValue, SOPC_Buffer* b
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ReadProcessedDetails_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DateTime_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_DateTime_Id,                               // typeIndex
         (uint32_t) offsetof(OpcUa_ReadProcessedDetails, StartTime) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DateTime_Id, // typeIndex
+        true,                                                    // isBuiltIn
+        false,                                                   // isArrayLength
+        true,                                                    // isToEncode
+        (uint32_t) SOPC_DateTime_Id,                             // typeIndex
         (uint32_t) offsetof(OpcUa_ReadProcessedDetails, EndTime) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Double_Id, // typeIndex
+        true,                                                               // isBuiltIn
+        false,                                                              // isArrayLength
+        true,                                                               // isToEncode
+        (uint32_t) SOPC_Double_Id,                                          // typeIndex
         (uint32_t) offsetof(OpcUa_ReadProcessedDetails, ProcessingInterval) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                              // isBuiltIn
+        true,                                                              // isArrayLength
+        true,                                                              // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                          // typeIndex
         (uint32_t) offsetof(OpcUa_ReadProcessedDetails, NoOfAggregateType) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                          // isBuiltIn
+        false,                                                         // isArrayLength
+        true,                                                          // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                                     // typeIndex
         (uint32_t) offsetof(OpcUa_ReadProcessedDetails, AggregateType) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_AggregateConfiguration, // typeIndex
+        false,                                                                  // isBuiltIn
+        false,                                                                  // isArrayLength
+        true,                                                                   // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_AggregateConfiguration,               // typeIndex
         (uint32_t) offsetof(OpcUa_ReadProcessedDetails, AggregateConfiguration) // offset
     },
 };
@@ -12099,8 +11891,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReadProcessedDetails_Fields[] =
 /*============================================================================
  * Descriptor of the ReadProcessedDetails encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_ReadProcessedDetails_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_ReadProcessedDetails_EncodeableType = {
     "ReadProcessedDetails",
     OpcUaId_ReadProcessedDetails,
     OpcUaId_ReadProcessedDetails_Encoding_DefaultBinary,
@@ -12113,8 +11904,7 @@ SOPC_EncodeableType OpcUa_ReadProcessedDetails_EncodeableType =
     OpcUa_ReadProcessedDetails_Encode,
     OpcUa_ReadProcessedDetails_Decode,
     sizeof ReadProcessedDetails_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    ReadProcessedDetails_Fields
-};
+    ReadProcessedDetails_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ReadAtTimeDetails
@@ -12155,24 +11945,24 @@ SOPC_ReturnStatus OpcUa_ReadAtTimeDetails_Decode(void* pValue, SOPC_Buffer* buf,
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ReadAtTimeDetails_Fields[] = {
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        true,                                                      // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                  // typeIndex
         (uint32_t) offsetof(OpcUa_ReadAtTimeDetails, NoOfReqTimes) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DateTime_Id, // typeIndex
+        true,                                                  // isBuiltIn
+        false,                                                 // isArrayLength
+        true,                                                  // isToEncode
+        (uint32_t) SOPC_DateTime_Id,                           // typeIndex
         (uint32_t) offsetof(OpcUa_ReadAtTimeDetails, ReqTimes) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                         // isBuiltIn
+        false,                                                        // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                                   // typeIndex
         (uint32_t) offsetof(OpcUa_ReadAtTimeDetails, UseSimpleBounds) // offset
     },
 };
@@ -12180,8 +11970,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReadAtTimeDetails_Fields[] = {
 /*============================================================================
  * Descriptor of the ReadAtTimeDetails encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_ReadAtTimeDetails_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_ReadAtTimeDetails_EncodeableType = {
     "ReadAtTimeDetails",
     OpcUaId_ReadAtTimeDetails,
     OpcUaId_ReadAtTimeDetails_Encoding_DefaultBinary,
@@ -12194,8 +11983,7 @@ SOPC_EncodeableType OpcUa_ReadAtTimeDetails_EncodeableType =
     OpcUa_ReadAtTimeDetails_Encode,
     OpcUa_ReadAtTimeDetails_Decode,
     sizeof ReadAtTimeDetails_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    ReadAtTimeDetails_Fields
-};
+    ReadAtTimeDetails_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_HistoryData
@@ -12236,17 +12024,17 @@ SOPC_ReturnStatus OpcUa_HistoryData_Decode(void* pValue, SOPC_Buffer* buf, uint3
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor HistoryData_Fields[] = {
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                  // isBuiltIn
+        true,                                                  // isArrayLength
+        true,                                                  // isToEncode
+        (uint32_t) SOPC_Int32_Id,                              // typeIndex
         (uint32_t) offsetof(OpcUa_HistoryData, NoOfDataValues) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DataValue_Id, // typeIndex
+        true,                                              // isBuiltIn
+        false,                                             // isArrayLength
+        true,                                              // isToEncode
+        (uint32_t) SOPC_DataValue_Id,                      // typeIndex
         (uint32_t) offsetof(OpcUa_HistoryData, DataValues) // offset
     },
 };
@@ -12254,8 +12042,7 @@ static const SOPC_EncodeableType_FieldDescriptor HistoryData_Fields[] = {
 /*============================================================================
  * Descriptor of the HistoryData encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_HistoryData_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_HistoryData_EncodeableType = {
     "HistoryData",
     OpcUaId_HistoryData,
     OpcUaId_HistoryData_Encoding_DefaultBinary,
@@ -12268,8 +12055,7 @@ SOPC_EncodeableType OpcUa_HistoryData_EncodeableType =
     OpcUa_HistoryData_Encode,
     OpcUa_HistoryData_Decode,
     sizeof HistoryData_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    HistoryData_Fields
-};
+    HistoryData_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ModificationInfo
@@ -12310,24 +12096,24 @@ SOPC_ReturnStatus OpcUa_ModificationInfo_Decode(void* pValue, SOPC_Buffer* buf, 
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ModificationInfo_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DateTime_Id, // typeIndex
+        true,                                                         // isBuiltIn
+        false,                                                        // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_DateTime_Id,                                  // typeIndex
         (uint32_t) offsetof(OpcUa_ModificationInfo, ModificationTime) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                   // isBuiltIn
+        false,                                                  // isArrayLength
+        true,                                                   // isToEncode
+        (uint32_t) SOPC_Int32_Id,                               // typeIndex
         (uint32_t) offsetof(OpcUa_ModificationInfo, UpdateType) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                 // isBuiltIn
+        false,                                                // isArrayLength
+        true,                                                 // isToEncode
+        (uint32_t) SOPC_String_Id,                            // typeIndex
         (uint32_t) offsetof(OpcUa_ModificationInfo, UserName) // offset
     },
 };
@@ -12335,8 +12121,7 @@ static const SOPC_EncodeableType_FieldDescriptor ModificationInfo_Fields[] = {
 /*============================================================================
  * Descriptor of the ModificationInfo encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_ModificationInfo_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_ModificationInfo_EncodeableType = {
     "ModificationInfo",
     OpcUaId_ModificationInfo,
     OpcUaId_ModificationInfo_Encoding_DefaultBinary,
@@ -12349,8 +12134,7 @@ SOPC_EncodeableType OpcUa_ModificationInfo_EncodeableType =
     OpcUa_ModificationInfo_Encode,
     OpcUa_ModificationInfo_Decode,
     sizeof ModificationInfo_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    ModificationInfo_Fields
-};
+    ModificationInfo_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_HistoryModifiedData
@@ -12391,31 +12175,31 @@ SOPC_ReturnStatus OpcUa_HistoryModifiedData_Decode(void* pValue, SOPC_Buffer* bu
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor HistoryModifiedData_Fields[] = {
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                          // isBuiltIn
+        true,                                                          // isArrayLength
+        true,                                                          // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                      // typeIndex
         (uint32_t) offsetof(OpcUa_HistoryModifiedData, NoOfDataValues) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DataValue_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_DataValue_Id,                              // typeIndex
         (uint32_t) offsetof(OpcUa_HistoryModifiedData, DataValues) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                 // isBuiltIn
+        true,                                                                 // isArrayLength
+        true,                                                                 // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                             // typeIndex
         (uint32_t) offsetof(OpcUa_HistoryModifiedData, NoOfModificationInfos) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ModificationInfo, // typeIndex
+        false,                                                            // isBuiltIn
+        false,                                                            // isArrayLength
+        true,                                                             // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ModificationInfo,               // typeIndex
         (uint32_t) offsetof(OpcUa_HistoryModifiedData, ModificationInfos) // offset
     },
 };
@@ -12423,8 +12207,7 @@ static const SOPC_EncodeableType_FieldDescriptor HistoryModifiedData_Fields[] = 
 /*============================================================================
  * Descriptor of the HistoryModifiedData encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_HistoryModifiedData_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_HistoryModifiedData_EncodeableType = {
     "HistoryModifiedData",
     OpcUaId_HistoryModifiedData,
     OpcUaId_HistoryModifiedData_Encoding_DefaultBinary,
@@ -12437,8 +12220,7 @@ SOPC_EncodeableType OpcUa_HistoryModifiedData_EncodeableType =
     OpcUa_HistoryModifiedData_Encode,
     OpcUa_HistoryModifiedData_Decode,
     sizeof HistoryModifiedData_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    HistoryModifiedData_Fields
-};
+    HistoryModifiedData_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_HistoryEventFieldList
@@ -12479,17 +12261,17 @@ SOPC_ReturnStatus OpcUa_HistoryEventFieldList_Decode(void* pValue, SOPC_Buffer* 
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor HistoryEventFieldList_Fields[] = {
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                             // isBuiltIn
+        true,                                                             // isArrayLength
+        true,                                                             // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                         // typeIndex
         (uint32_t) offsetof(OpcUa_HistoryEventFieldList, NoOfEventFields) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Variant_Id, // typeIndex
+        true,                                                         // isBuiltIn
+        false,                                                        // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_Variant_Id,                                   // typeIndex
         (uint32_t) offsetof(OpcUa_HistoryEventFieldList, EventFields) // offset
     },
 };
@@ -12497,8 +12279,7 @@ static const SOPC_EncodeableType_FieldDescriptor HistoryEventFieldList_Fields[] 
 /*============================================================================
  * Descriptor of the HistoryEventFieldList encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_HistoryEventFieldList_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_HistoryEventFieldList_EncodeableType = {
     "HistoryEventFieldList",
     OpcUaId_HistoryEventFieldList,
     OpcUaId_HistoryEventFieldList_Encoding_DefaultBinary,
@@ -12511,8 +12292,7 @@ SOPC_EncodeableType OpcUa_HistoryEventFieldList_EncodeableType =
     OpcUa_HistoryEventFieldList_Encode,
     OpcUa_HistoryEventFieldList_Decode,
     sizeof HistoryEventFieldList_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    HistoryEventFieldList_Fields
-};
+    HistoryEventFieldList_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_HistoryEvent
@@ -12553,26 +12333,25 @@ SOPC_ReturnStatus OpcUa_HistoryEvent_Decode(void* pValue, SOPC_Buffer* buf, uint
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor HistoryEvent_Fields[] = {
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                               // isBuiltIn
+        true,                                               // isArrayLength
+        true,                                               // isToEncode
+        (uint32_t) SOPC_Int32_Id,                           // typeIndex
         (uint32_t) offsetof(OpcUa_HistoryEvent, NoOfEvents) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
+        false,                                                   // isBuiltIn
+        false,                                                   // isArrayLength
+        true,                                                    // isToEncode
         (uint32_t) SOPC_TypeInternalIndex_HistoryEventFieldList, // typeIndex
-        (uint32_t) offsetof(OpcUa_HistoryEvent, Events) // offset
+        (uint32_t) offsetof(OpcUa_HistoryEvent, Events)          // offset
     },
 };
 
 /*============================================================================
  * Descriptor of the HistoryEvent encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_HistoryEvent_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_HistoryEvent_EncodeableType = {
     "HistoryEvent",
     OpcUaId_HistoryEvent,
     OpcUaId_HistoryEvent_Encoding_DefaultBinary,
@@ -12585,8 +12364,7 @@ SOPC_EncodeableType OpcUa_HistoryEvent_EncodeableType =
     OpcUa_HistoryEvent_Encode,
     OpcUa_HistoryEvent_Decode,
     sizeof HistoryEvent_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    HistoryEvent_Fields
-};
+    HistoryEvent_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_HistoryRead
@@ -12628,38 +12406,38 @@ SOPC_ReturnStatus OpcUa_HistoryReadRequest_Decode(void* pValue, SOPC_Buffer* buf
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor HistoryReadRequest_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ExtensionObject_Id, // typeIndex
+        true,                                                             // isBuiltIn
+        false,                                                            // isArrayLength
+        true,                                                             // isToEncode
+        (uint32_t) SOPC_ExtensionObject_Id,                               // typeIndex
         (uint32_t) offsetof(OpcUa_HistoryReadRequest, HistoryReadDetails) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                             // isBuiltIn
+        false,                                                            // isArrayLength
+        true,                                                             // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                         // typeIndex
         (uint32_t) offsetof(OpcUa_HistoryReadRequest, TimestampsToReturn) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                                    // isBuiltIn
+        false,                                                                   // isArrayLength
+        true,                                                                    // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                                              // typeIndex
         (uint32_t) offsetof(OpcUa_HistoryReadRequest, ReleaseContinuationPoints) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                          // isBuiltIn
+        true,                                                          // isArrayLength
+        true,                                                          // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                      // typeIndex
         (uint32_t) offsetof(OpcUa_HistoryReadRequest, NoOfNodesToRead) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_HistoryReadValueId, // typeIndex
+        false,                                                     // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_HistoryReadValueId,      // typeIndex
         (uint32_t) offsetof(OpcUa_HistoryReadRequest, NodesToRead) // offset
     },
 };
@@ -12667,8 +12445,7 @@ static const SOPC_EncodeableType_FieldDescriptor HistoryReadRequest_Fields[] = {
 /*============================================================================
  * Descriptor of the HistoryReadRequest encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_HistoryReadRequest_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_HistoryReadRequest_EncodeableType = {
     "HistoryReadRequest",
     OpcUaId_HistoryReadRequest,
     OpcUaId_HistoryReadRequest_Encoding_DefaultBinary,
@@ -12681,8 +12458,7 @@ SOPC_EncodeableType OpcUa_HistoryReadRequest_EncodeableType =
     OpcUa_HistoryReadRequest_Encode,
     OpcUa_HistoryReadRequest_Decode,
     sizeof HistoryReadRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    HistoryReadRequest_Fields
-};
+    HistoryReadRequest_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_HistoryReadResponse
@@ -12723,38 +12499,38 @@ SOPC_ReturnStatus OpcUa_HistoryReadResponse_Decode(void* pValue, SOPC_Buffer* bu
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor HistoryReadResponse_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        false, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader, // typeIndex
+        false,                                                         // isBuiltIn
+        false,                                                         // isArrayLength
+        false,                                                         // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader,              // typeIndex
         (uint32_t) offsetof(OpcUa_HistoryReadResponse, ResponseHeader) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                       // isBuiltIn
+        true,                                                       // isArrayLength
+        true,                                                       // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                   // typeIndex
         (uint32_t) offsetof(OpcUa_HistoryReadResponse, NoOfResults) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_HistoryReadResult, // typeIndex
+        false,                                                  // isBuiltIn
+        false,                                                  // isArrayLength
+        true,                                                   // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_HistoryReadResult,    // typeIndex
         (uint32_t) offsetof(OpcUa_HistoryReadResponse, Results) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                               // isBuiltIn
+        true,                                                               // isArrayLength
+        true,                                                               // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                           // typeIndex
         (uint32_t) offsetof(OpcUa_HistoryReadResponse, NoOfDiagnosticInfos) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DiagnosticInfo_Id, // typeIndex
+        true,                                                           // isBuiltIn
+        false,                                                          // isArrayLength
+        true,                                                           // isToEncode
+        (uint32_t) SOPC_DiagnosticInfo_Id,                              // typeIndex
         (uint32_t) offsetof(OpcUa_HistoryReadResponse, DiagnosticInfos) // offset
     },
 };
@@ -12762,8 +12538,7 @@ static const SOPC_EncodeableType_FieldDescriptor HistoryReadResponse_Fields[] = 
 /*============================================================================
  * Descriptor of the HistoryReadResponse encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_HistoryReadResponse_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_HistoryReadResponse_EncodeableType = {
     "HistoryReadResponse",
     OpcUaId_HistoryReadResponse,
     OpcUaId_HistoryReadResponse_Encoding_DefaultBinary,
@@ -12776,8 +12551,7 @@ SOPC_EncodeableType OpcUa_HistoryReadResponse_EncodeableType =
     OpcUa_HistoryReadResponse_Encode,
     OpcUa_HistoryReadResponse_Decode,
     sizeof HistoryReadResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    HistoryReadResponse_Fields
-};
+    HistoryReadResponse_Fields};
 #endif
 
 #endif
@@ -12819,31 +12593,31 @@ SOPC_ReturnStatus OpcUa_WriteValue_Decode(void* pValue, SOPC_Buffer* buf, uint32
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor WriteValue_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                         // isBuiltIn
+        false,                                        // isArrayLength
+        true,                                         // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                    // typeIndex
         (uint32_t) offsetof(OpcUa_WriteValue, NodeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                              // isBuiltIn
+        false,                                             // isArrayLength
+        true,                                              // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                         // typeIndex
         (uint32_t) offsetof(OpcUa_WriteValue, AttributeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                             // isBuiltIn
+        false,                                            // isArrayLength
+        true,                                             // isToEncode
+        (uint32_t) SOPC_String_Id,                        // typeIndex
         (uint32_t) offsetof(OpcUa_WriteValue, IndexRange) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DataValue_Id, // typeIndex
+        true,                                        // isBuiltIn
+        false,                                       // isArrayLength
+        true,                                        // isToEncode
+        (uint32_t) SOPC_DataValue_Id,                // typeIndex
         (uint32_t) offsetof(OpcUa_WriteValue, Value) // offset
     },
 };
@@ -12851,8 +12625,7 @@ static const SOPC_EncodeableType_FieldDescriptor WriteValue_Fields[] = {
 /*============================================================================
  * Descriptor of the WriteValue encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_WriteValue_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_WriteValue_EncodeableType = {
     "WriteValue",
     OpcUaId_WriteValue,
     OpcUaId_WriteValue_Encoding_DefaultBinary,
@@ -12865,8 +12638,7 @@ SOPC_EncodeableType OpcUa_WriteValue_EncodeableType =
     OpcUa_WriteValue_Encode,
     OpcUa_WriteValue_Decode,
     sizeof WriteValue_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    WriteValue_Fields
-};
+    WriteValue_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_Write
@@ -12908,17 +12680,17 @@ SOPC_ReturnStatus OpcUa_WriteRequest_Decode(void* pValue, SOPC_Buffer* buf, uint
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor WriteRequest_Fields[] = {
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                     // isBuiltIn
+        true,                                                     // isArrayLength
+        true,                                                     // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                 // typeIndex
         (uint32_t) offsetof(OpcUa_WriteRequest, NoOfNodesToWrite) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_WriteValue, // typeIndex
+        false,                                                // isBuiltIn
+        false,                                                // isArrayLength
+        true,                                                 // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_WriteValue,         // typeIndex
         (uint32_t) offsetof(OpcUa_WriteRequest, NodesToWrite) // offset
     },
 };
@@ -12926,8 +12698,7 @@ static const SOPC_EncodeableType_FieldDescriptor WriteRequest_Fields[] = {
 /*============================================================================
  * Descriptor of the WriteRequest encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_WriteRequest_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_WriteRequest_EncodeableType = {
     "WriteRequest",
     OpcUaId_WriteRequest,
     OpcUaId_WriteRequest_Encoding_DefaultBinary,
@@ -12940,8 +12711,7 @@ SOPC_EncodeableType OpcUa_WriteRequest_EncodeableType =
     OpcUa_WriteRequest_Encode,
     OpcUa_WriteRequest_Decode,
     sizeof WriteRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    WriteRequest_Fields
-};
+    WriteRequest_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_WriteResponse
@@ -12982,38 +12752,38 @@ SOPC_ReturnStatus OpcUa_WriteResponse_Decode(void* pValue, SOPC_Buffer* buf, uin
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor WriteResponse_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        false, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader, // typeIndex
+        false,                                                   // isBuiltIn
+        false,                                                   // isArrayLength
+        false,                                                   // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader,        // typeIndex
         (uint32_t) offsetof(OpcUa_WriteResponse, ResponseHeader) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                 // isBuiltIn
+        true,                                                 // isArrayLength
+        true,                                                 // isToEncode
+        (uint32_t) SOPC_Int32_Id,                             // typeIndex
         (uint32_t) offsetof(OpcUa_WriteResponse, NoOfResults) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_StatusCode_Id, // typeIndex
+        true,                                             // isBuiltIn
+        false,                                            // isArrayLength
+        true,                                             // isToEncode
+        (uint32_t) SOPC_StatusCode_Id,                    // typeIndex
         (uint32_t) offsetof(OpcUa_WriteResponse, Results) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                         // isBuiltIn
+        true,                                                         // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                     // typeIndex
         (uint32_t) offsetof(OpcUa_WriteResponse, NoOfDiagnosticInfos) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DiagnosticInfo_Id, // typeIndex
+        true,                                                     // isBuiltIn
+        false,                                                    // isArrayLength
+        true,                                                     // isToEncode
+        (uint32_t) SOPC_DiagnosticInfo_Id,                        // typeIndex
         (uint32_t) offsetof(OpcUa_WriteResponse, DiagnosticInfos) // offset
     },
 };
@@ -13021,8 +12791,7 @@ static const SOPC_EncodeableType_FieldDescriptor WriteResponse_Fields[] = {
 /*============================================================================
  * Descriptor of the WriteResponse encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_WriteResponse_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_WriteResponse_EncodeableType = {
     "WriteResponse",
     OpcUaId_WriteResponse,
     OpcUaId_WriteResponse_Encoding_DefaultBinary,
@@ -13035,8 +12804,7 @@ SOPC_EncodeableType OpcUa_WriteResponse_EncodeableType =
     OpcUa_WriteResponse_Encode,
     OpcUa_WriteResponse_Decode,
     sizeof WriteResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    WriteResponse_Fields
-};
+    WriteResponse_Fields};
 #endif
 
 #endif
@@ -13078,10 +12846,10 @@ SOPC_ReturnStatus OpcUa_HistoryUpdateDetails_Decode(void* pValue, SOPC_Buffer* b
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor HistoryUpdateDetails_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                   // isBuiltIn
+        false,                                                  // isArrayLength
+        true,                                                   // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                              // typeIndex
         (uint32_t) offsetof(OpcUa_HistoryUpdateDetails, NodeId) // offset
     },
 };
@@ -13089,8 +12857,7 @@ static const SOPC_EncodeableType_FieldDescriptor HistoryUpdateDetails_Fields[] =
 /*============================================================================
  * Descriptor of the HistoryUpdateDetails encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_HistoryUpdateDetails_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_HistoryUpdateDetails_EncodeableType = {
     "HistoryUpdateDetails",
     OpcUaId_HistoryUpdateDetails,
     OpcUaId_HistoryUpdateDetails_Encoding_DefaultBinary,
@@ -13103,8 +12870,7 @@ SOPC_EncodeableType OpcUa_HistoryUpdateDetails_EncodeableType =
     OpcUa_HistoryUpdateDetails_Encode,
     OpcUa_HistoryUpdateDetails_Decode,
     sizeof HistoryUpdateDetails_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    HistoryUpdateDetails_Fields
-};
+    HistoryUpdateDetails_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_UpdateDataDetails
@@ -13145,31 +12911,31 @@ SOPC_ReturnStatus OpcUa_UpdateDataDetails_Decode(void* pValue, SOPC_Buffer* buf,
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor UpdateDataDetails_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                // isBuiltIn
+        false,                                               // isArrayLength
+        true,                                                // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                           // typeIndex
         (uint32_t) offsetof(OpcUa_UpdateDataDetails, NodeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                              // isBuiltIn
+        false,                                                             // isArrayLength
+        true,                                                              // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                          // typeIndex
         (uint32_t) offsetof(OpcUa_UpdateDataDetails, PerformInsertReplace) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                          // isBuiltIn
+        true,                                                          // isArrayLength
+        true,                                                          // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                      // typeIndex
         (uint32_t) offsetof(OpcUa_UpdateDataDetails, NoOfUpdateValues) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DataValue_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_DataValue_Id,                              // typeIndex
         (uint32_t) offsetof(OpcUa_UpdateDataDetails, UpdateValues) // offset
     },
 };
@@ -13177,8 +12943,7 @@ static const SOPC_EncodeableType_FieldDescriptor UpdateDataDetails_Fields[] = {
 /*============================================================================
  * Descriptor of the UpdateDataDetails encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_UpdateDataDetails_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_UpdateDataDetails_EncodeableType = {
     "UpdateDataDetails",
     OpcUaId_UpdateDataDetails,
     OpcUaId_UpdateDataDetails_Encoding_DefaultBinary,
@@ -13191,8 +12956,7 @@ SOPC_EncodeableType OpcUa_UpdateDataDetails_EncodeableType =
     OpcUa_UpdateDataDetails_Encode,
     OpcUa_UpdateDataDetails_Decode,
     sizeof UpdateDataDetails_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    UpdateDataDetails_Fields
-};
+    UpdateDataDetails_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_UpdateStructureDataDetails
@@ -13215,9 +12979,12 @@ void OpcUa_UpdateStructureDataDetails_Clear(void* pValue)
 /*============================================================================
  * OpcUa_UpdateStructureDataDetails_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_UpdateStructureDataDetails_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_UpdateStructureDataDetails_Encode(const void* pValue,
+                                                          SOPC_Buffer* buf,
+                                                          uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Encode(&OpcUa_UpdateStructureDataDetails_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Encode(&OpcUa_UpdateStructureDataDetails_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -13225,7 +12992,8 @@ SOPC_ReturnStatus OpcUa_UpdateStructureDataDetails_Encode(const void* pValue, SO
  *===========================================================================*/
 SOPC_ReturnStatus OpcUa_UpdateStructureDataDetails_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Decode(&OpcUa_UpdateStructureDataDetails_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Decode(&OpcUa_UpdateStructureDataDetails_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -13233,31 +13001,31 @@ SOPC_ReturnStatus OpcUa_UpdateStructureDataDetails_Decode(void* pValue, SOPC_Buf
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor UpdateStructureDataDetails_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                         // isBuiltIn
+        false,                                                        // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                                    // typeIndex
         (uint32_t) offsetof(OpcUa_UpdateStructureDataDetails, NodeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                       // isBuiltIn
+        false,                                                                      // isArrayLength
+        true,                                                                       // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                   // typeIndex
         (uint32_t) offsetof(OpcUa_UpdateStructureDataDetails, PerformInsertReplace) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                   // isBuiltIn
+        true,                                                                   // isArrayLength
+        true,                                                                   // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                               // typeIndex
         (uint32_t) offsetof(OpcUa_UpdateStructureDataDetails, NoOfUpdateValues) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DataValue_Id, // typeIndex
+        true,                                                               // isBuiltIn
+        false,                                                              // isArrayLength
+        true,                                                               // isToEncode
+        (uint32_t) SOPC_DataValue_Id,                                       // typeIndex
         (uint32_t) offsetof(OpcUa_UpdateStructureDataDetails, UpdateValues) // offset
     },
 };
@@ -13265,8 +13033,7 @@ static const SOPC_EncodeableType_FieldDescriptor UpdateStructureDataDetails_Fiel
 /*============================================================================
  * Descriptor of the UpdateStructureDataDetails encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_UpdateStructureDataDetails_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_UpdateStructureDataDetails_EncodeableType = {
     "UpdateStructureDataDetails",
     OpcUaId_UpdateStructureDataDetails,
     OpcUaId_UpdateStructureDataDetails_Encoding_DefaultBinary,
@@ -13279,8 +13046,7 @@ SOPC_EncodeableType OpcUa_UpdateStructureDataDetails_EncodeableType =
     OpcUa_UpdateStructureDataDetails_Encode,
     OpcUa_UpdateStructureDataDetails_Decode,
     sizeof UpdateStructureDataDetails_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    UpdateStructureDataDetails_Fields
-};
+    UpdateStructureDataDetails_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_UpdateEventDetails
@@ -13321,37 +13087,37 @@ SOPC_ReturnStatus OpcUa_UpdateEventDetails_Decode(void* pValue, SOPC_Buffer* buf
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor UpdateEventDetails_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                 // isBuiltIn
+        false,                                                // isArrayLength
+        true,                                                 // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                            // typeIndex
         (uint32_t) offsetof(OpcUa_UpdateEventDetails, NodeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                               // isBuiltIn
+        false,                                                              // isArrayLength
+        true,                                                               // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                           // typeIndex
         (uint32_t) offsetof(OpcUa_UpdateEventDetails, PerformInsertReplace) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_EventFilter, // typeIndex
+        false,                                                // isBuiltIn
+        false,                                                // isArrayLength
+        true,                                                 // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_EventFilter,        // typeIndex
         (uint32_t) offsetof(OpcUa_UpdateEventDetails, Filter) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                        // isBuiltIn
+        true,                                                        // isArrayLength
+        true,                                                        // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                    // typeIndex
         (uint32_t) offsetof(OpcUa_UpdateEventDetails, NoOfEventData) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
+        false,                                                   // isBuiltIn
+        false,                                                   // isArrayLength
+        true,                                                    // isToEncode
         (uint32_t) SOPC_TypeInternalIndex_HistoryEventFieldList, // typeIndex
         (uint32_t) offsetof(OpcUa_UpdateEventDetails, EventData) // offset
     },
@@ -13360,8 +13126,7 @@ static const SOPC_EncodeableType_FieldDescriptor UpdateEventDetails_Fields[] = {
 /*============================================================================
  * Descriptor of the UpdateEventDetails encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_UpdateEventDetails_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_UpdateEventDetails_EncodeableType = {
     "UpdateEventDetails",
     OpcUaId_UpdateEventDetails,
     OpcUaId_UpdateEventDetails_Encoding_DefaultBinary,
@@ -13374,8 +13139,7 @@ SOPC_EncodeableType OpcUa_UpdateEventDetails_EncodeableType =
     OpcUa_UpdateEventDetails_Encode,
     OpcUa_UpdateEventDetails_Decode,
     sizeof UpdateEventDetails_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    UpdateEventDetails_Fields
-};
+    UpdateEventDetails_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_DeleteRawModifiedDetails
@@ -13398,7 +13162,9 @@ void OpcUa_DeleteRawModifiedDetails_Clear(void* pValue)
 /*============================================================================
  * OpcUa_DeleteRawModifiedDetails_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_DeleteRawModifiedDetails_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_DeleteRawModifiedDetails_Encode(const void* pValue,
+                                                        SOPC_Buffer* buf,
+                                                        uint32_t nestedStructLevel)
 {
     return SOPC_EncodeableObject_Encode(&OpcUa_DeleteRawModifiedDetails_EncodeableType, pValue, buf, nestedStructLevel);
 }
@@ -13416,31 +13182,31 @@ SOPC_ReturnStatus OpcUa_DeleteRawModifiedDetails_Decode(void* pValue, SOPC_Buffe
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DeleteRawModifiedDetails_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                       // isBuiltIn
+        false,                                                      // isArrayLength
+        true,                                                       // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                                  // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteRawModifiedDetails, NodeId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                                 // isBuiltIn
+        false,                                                                // isArrayLength
+        true,                                                                 // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                                           // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteRawModifiedDetails, IsDeleteModified) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DateTime_Id, // typeIndex
+        true,                                                          // isBuiltIn
+        false,                                                         // isArrayLength
+        true,                                                          // isToEncode
+        (uint32_t) SOPC_DateTime_Id,                                   // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteRawModifiedDetails, StartTime) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DateTime_Id, // typeIndex
+        true,                                                        // isBuiltIn
+        false,                                                       // isArrayLength
+        true,                                                        // isToEncode
+        (uint32_t) SOPC_DateTime_Id,                                 // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteRawModifiedDetails, EndTime) // offset
     },
 };
@@ -13448,8 +13214,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteRawModifiedDetails_Fields
 /*============================================================================
  * Descriptor of the DeleteRawModifiedDetails encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_DeleteRawModifiedDetails_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_DeleteRawModifiedDetails_EncodeableType = {
     "DeleteRawModifiedDetails",
     OpcUaId_DeleteRawModifiedDetails,
     OpcUaId_DeleteRawModifiedDetails_Encoding_DefaultBinary,
@@ -13462,8 +13227,7 @@ SOPC_EncodeableType OpcUa_DeleteRawModifiedDetails_EncodeableType =
     OpcUa_DeleteRawModifiedDetails_Encode,
     OpcUa_DeleteRawModifiedDetails_Decode,
     sizeof DeleteRawModifiedDetails_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    DeleteRawModifiedDetails_Fields
-};
+    DeleteRawModifiedDetails_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_DeleteAtTimeDetails
@@ -13504,24 +13268,24 @@ SOPC_ReturnStatus OpcUa_DeleteAtTimeDetails_Decode(void* pValue, SOPC_Buffer* bu
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DeleteAtTimeDetails_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                  // isBuiltIn
+        false,                                                 // isArrayLength
+        true,                                                  // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                             // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteAtTimeDetails, NodeId) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                        // isBuiltIn
+        true,                                                        // isArrayLength
+        true,                                                        // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                    // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteAtTimeDetails, NoOfReqTimes) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DateTime_Id, // typeIndex
+        true,                                                    // isBuiltIn
+        false,                                                   // isArrayLength
+        true,                                                    // isToEncode
+        (uint32_t) SOPC_DateTime_Id,                             // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteAtTimeDetails, ReqTimes) // offset
     },
 };
@@ -13529,8 +13293,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteAtTimeDetails_Fields[] = 
 /*============================================================================
  * Descriptor of the DeleteAtTimeDetails encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_DeleteAtTimeDetails_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_DeleteAtTimeDetails_EncodeableType = {
     "DeleteAtTimeDetails",
     OpcUaId_DeleteAtTimeDetails,
     OpcUaId_DeleteAtTimeDetails_Encoding_DefaultBinary,
@@ -13543,8 +13306,7 @@ SOPC_EncodeableType OpcUa_DeleteAtTimeDetails_EncodeableType =
     OpcUa_DeleteAtTimeDetails_Encode,
     OpcUa_DeleteAtTimeDetails_Decode,
     sizeof DeleteAtTimeDetails_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    DeleteAtTimeDetails_Fields
-};
+    DeleteAtTimeDetails_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_DeleteEventDetails
@@ -13585,24 +13347,24 @@ SOPC_ReturnStatus OpcUa_DeleteEventDetails_Decode(void* pValue, SOPC_Buffer* buf
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DeleteEventDetails_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                 // isBuiltIn
+        false,                                                // isArrayLength
+        true,                                                 // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                            // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteEventDetails, NodeId) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                       // isBuiltIn
+        true,                                                       // isArrayLength
+        true,                                                       // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                   // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteEventDetails, NoOfEventIds) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ByteString_Id, // typeIndex
+        true,                                                   // isBuiltIn
+        false,                                                  // isArrayLength
+        true,                                                   // isToEncode
+        (uint32_t) SOPC_ByteString_Id,                          // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteEventDetails, EventIds) // offset
     },
 };
@@ -13610,8 +13372,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteEventDetails_Fields[] = {
 /*============================================================================
  * Descriptor of the DeleteEventDetails encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_DeleteEventDetails_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_DeleteEventDetails_EncodeableType = {
     "DeleteEventDetails",
     OpcUaId_DeleteEventDetails,
     OpcUaId_DeleteEventDetails_Encoding_DefaultBinary,
@@ -13624,8 +13385,7 @@ SOPC_EncodeableType OpcUa_DeleteEventDetails_EncodeableType =
     OpcUa_DeleteEventDetails_Encode,
     OpcUa_DeleteEventDetails_Decode,
     sizeof DeleteEventDetails_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    DeleteEventDetails_Fields
-};
+    DeleteEventDetails_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_HistoryUpdateResult
@@ -13666,38 +13426,38 @@ SOPC_ReturnStatus OpcUa_HistoryUpdateResult_Decode(void* pValue, SOPC_Buffer* bu
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor HistoryUpdateResult_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_StatusCode_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_StatusCode_Id,                             // typeIndex
         (uint32_t) offsetof(OpcUa_HistoryUpdateResult, StatusCode) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                // isBuiltIn
+        true,                                                                // isArrayLength
+        true,                                                                // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                            // typeIndex
         (uint32_t) offsetof(OpcUa_HistoryUpdateResult, NoOfOperationResults) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_StatusCode_Id, // typeIndex
+        true,                                                            // isBuiltIn
+        false,                                                           // isArrayLength
+        true,                                                            // isToEncode
+        (uint32_t) SOPC_StatusCode_Id,                                   // typeIndex
         (uint32_t) offsetof(OpcUa_HistoryUpdateResult, OperationResults) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                               // isBuiltIn
+        true,                                                               // isArrayLength
+        true,                                                               // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                           // typeIndex
         (uint32_t) offsetof(OpcUa_HistoryUpdateResult, NoOfDiagnosticInfos) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DiagnosticInfo_Id, // typeIndex
+        true,                                                           // isBuiltIn
+        false,                                                          // isArrayLength
+        true,                                                           // isToEncode
+        (uint32_t) SOPC_DiagnosticInfo_Id,                              // typeIndex
         (uint32_t) offsetof(OpcUa_HistoryUpdateResult, DiagnosticInfos) // offset
     },
 };
@@ -13705,8 +13465,7 @@ static const SOPC_EncodeableType_FieldDescriptor HistoryUpdateResult_Fields[] = 
 /*============================================================================
  * Descriptor of the HistoryUpdateResult encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_HistoryUpdateResult_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_HistoryUpdateResult_EncodeableType = {
     "HistoryUpdateResult",
     OpcUaId_HistoryUpdateResult,
     OpcUaId_HistoryUpdateResult_Encoding_DefaultBinary,
@@ -13719,8 +13478,7 @@ SOPC_EncodeableType OpcUa_HistoryUpdateResult_EncodeableType =
     OpcUa_HistoryUpdateResult_Encode,
     OpcUa_HistoryUpdateResult_Decode,
     sizeof HistoryUpdateResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    HistoryUpdateResult_Fields
-};
+    HistoryUpdateResult_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_HistoryUpdate
@@ -13762,17 +13520,17 @@ SOPC_ReturnStatus OpcUa_HistoryUpdateRequest_Decode(void* pValue, SOPC_Buffer* b
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor HistoryUpdateRequest_Fields[] = {
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                     // isBuiltIn
+        true,                                                                     // isArrayLength
+        true,                                                                     // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                 // typeIndex
         (uint32_t) offsetof(OpcUa_HistoryUpdateRequest, NoOfHistoryUpdateDetails) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ExtensionObject_Id, // typeIndex
+        true,                                                                 // isBuiltIn
+        false,                                                                // isArrayLength
+        true,                                                                 // isToEncode
+        (uint32_t) SOPC_ExtensionObject_Id,                                   // typeIndex
         (uint32_t) offsetof(OpcUa_HistoryUpdateRequest, HistoryUpdateDetails) // offset
     },
 };
@@ -13780,8 +13538,7 @@ static const SOPC_EncodeableType_FieldDescriptor HistoryUpdateRequest_Fields[] =
 /*============================================================================
  * Descriptor of the HistoryUpdateRequest encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_HistoryUpdateRequest_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_HistoryUpdateRequest_EncodeableType = {
     "HistoryUpdateRequest",
     OpcUaId_HistoryUpdateRequest,
     OpcUaId_HistoryUpdateRequest_Encoding_DefaultBinary,
@@ -13794,8 +13551,7 @@ SOPC_EncodeableType OpcUa_HistoryUpdateRequest_EncodeableType =
     OpcUa_HistoryUpdateRequest_Encode,
     OpcUa_HistoryUpdateRequest_Decode,
     sizeof HistoryUpdateRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    HistoryUpdateRequest_Fields
-};
+    HistoryUpdateRequest_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_HistoryUpdateResponse
@@ -13836,38 +13592,38 @@ SOPC_ReturnStatus OpcUa_HistoryUpdateResponse_Decode(void* pValue, SOPC_Buffer* 
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor HistoryUpdateResponse_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        false, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader, // typeIndex
+        false,                                                           // isBuiltIn
+        false,                                                           // isArrayLength
+        false,                                                           // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader,                // typeIndex
         (uint32_t) offsetof(OpcUa_HistoryUpdateResponse, ResponseHeader) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                         // isBuiltIn
+        true,                                                         // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                     // typeIndex
         (uint32_t) offsetof(OpcUa_HistoryUpdateResponse, NoOfResults) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_HistoryUpdateResult, // typeIndex
+        false,                                                    // isBuiltIn
+        false,                                                    // isArrayLength
+        true,                                                     // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_HistoryUpdateResult,    // typeIndex
         (uint32_t) offsetof(OpcUa_HistoryUpdateResponse, Results) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                 // isBuiltIn
+        true,                                                                 // isArrayLength
+        true,                                                                 // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                             // typeIndex
         (uint32_t) offsetof(OpcUa_HistoryUpdateResponse, NoOfDiagnosticInfos) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DiagnosticInfo_Id, // typeIndex
+        true,                                                             // isBuiltIn
+        false,                                                            // isArrayLength
+        true,                                                             // isToEncode
+        (uint32_t) SOPC_DiagnosticInfo_Id,                                // typeIndex
         (uint32_t) offsetof(OpcUa_HistoryUpdateResponse, DiagnosticInfos) // offset
     },
 };
@@ -13875,8 +13631,7 @@ static const SOPC_EncodeableType_FieldDescriptor HistoryUpdateResponse_Fields[] 
 /*============================================================================
  * Descriptor of the HistoryUpdateResponse encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_HistoryUpdateResponse_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_HistoryUpdateResponse_EncodeableType = {
     "HistoryUpdateResponse",
     OpcUaId_HistoryUpdateResponse,
     OpcUaId_HistoryUpdateResponse_Encoding_DefaultBinary,
@@ -13889,8 +13644,7 @@ SOPC_EncodeableType OpcUa_HistoryUpdateResponse_EncodeableType =
     OpcUa_HistoryUpdateResponse_Encode,
     OpcUa_HistoryUpdateResponse_Decode,
     sizeof HistoryUpdateResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    HistoryUpdateResponse_Fields
-};
+    HistoryUpdateResponse_Fields};
 #endif
 
 #endif
@@ -13932,31 +13686,31 @@ SOPC_ReturnStatus OpcUa_CallMethodRequest_Decode(void* pValue, SOPC_Buffer* buf,
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor CallMethodRequest_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                  // isBuiltIn
+        false,                                                 // isArrayLength
+        true,                                                  // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                             // typeIndex
         (uint32_t) offsetof(OpcUa_CallMethodRequest, ObjectId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                  // isBuiltIn
+        false,                                                 // isArrayLength
+        true,                                                  // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                             // typeIndex
         (uint32_t) offsetof(OpcUa_CallMethodRequest, MethodId) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                            // isBuiltIn
+        true,                                                            // isArrayLength
+        true,                                                            // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                        // typeIndex
         (uint32_t) offsetof(OpcUa_CallMethodRequest, NoOfInputArguments) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Variant_Id, // typeIndex
+        true,                                                        // isBuiltIn
+        false,                                                       // isArrayLength
+        true,                                                        // isToEncode
+        (uint32_t) SOPC_Variant_Id,                                  // typeIndex
         (uint32_t) offsetof(OpcUa_CallMethodRequest, InputArguments) // offset
     },
 };
@@ -13964,8 +13718,7 @@ static const SOPC_EncodeableType_FieldDescriptor CallMethodRequest_Fields[] = {
 /*============================================================================
  * Descriptor of the CallMethodRequest encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_CallMethodRequest_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_CallMethodRequest_EncodeableType = {
     "CallMethodRequest",
     OpcUaId_CallMethodRequest,
     OpcUaId_CallMethodRequest_Encoding_DefaultBinary,
@@ -13978,8 +13731,7 @@ SOPC_EncodeableType OpcUa_CallMethodRequest_EncodeableType =
     OpcUa_CallMethodRequest_Encode,
     OpcUa_CallMethodRequest_Decode,
     sizeof CallMethodRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    CallMethodRequest_Fields
-};
+    CallMethodRequest_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_CallMethodResult
@@ -14020,52 +13772,52 @@ SOPC_ReturnStatus OpcUa_CallMethodResult_Decode(void* pValue, SOPC_Buffer* buf, 
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor CallMethodResult_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_StatusCode_Id, // typeIndex
+        true,                                                   // isBuiltIn
+        false,                                                  // isArrayLength
+        true,                                                   // isToEncode
+        (uint32_t) SOPC_StatusCode_Id,                          // typeIndex
         (uint32_t) offsetof(OpcUa_CallMethodResult, StatusCode) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                 // isBuiltIn
+        true,                                                                 // isArrayLength
+        true,                                                                 // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                             // typeIndex
         (uint32_t) offsetof(OpcUa_CallMethodResult, NoOfInputArgumentResults) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_StatusCode_Id, // typeIndex
+        true,                                                             // isBuiltIn
+        false,                                                            // isArrayLength
+        true,                                                             // isToEncode
+        (uint32_t) SOPC_StatusCode_Id,                                    // typeIndex
         (uint32_t) offsetof(OpcUa_CallMethodResult, InputArgumentResults) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                         // isBuiltIn
+        true,                                                                         // isArrayLength
+        true,                                                                         // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                     // typeIndex
         (uint32_t) offsetof(OpcUa_CallMethodResult, NoOfInputArgumentDiagnosticInfos) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DiagnosticInfo_Id, // typeIndex
+        true,                                                                     // isBuiltIn
+        false,                                                                    // isArrayLength
+        true,                                                                     // isToEncode
+        (uint32_t) SOPC_DiagnosticInfo_Id,                                        // typeIndex
         (uint32_t) offsetof(OpcUa_CallMethodResult, InputArgumentDiagnosticInfos) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                            // isBuiltIn
+        true,                                                            // isArrayLength
+        true,                                                            // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                        // typeIndex
         (uint32_t) offsetof(OpcUa_CallMethodResult, NoOfOutputArguments) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Variant_Id, // typeIndex
+        true,                                                        // isBuiltIn
+        false,                                                       // isArrayLength
+        true,                                                        // isToEncode
+        (uint32_t) SOPC_Variant_Id,                                  // typeIndex
         (uint32_t) offsetof(OpcUa_CallMethodResult, OutputArguments) // offset
     },
 };
@@ -14073,8 +13825,7 @@ static const SOPC_EncodeableType_FieldDescriptor CallMethodResult_Fields[] = {
 /*============================================================================
  * Descriptor of the CallMethodResult encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_CallMethodResult_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_CallMethodResult_EncodeableType = {
     "CallMethodResult",
     OpcUaId_CallMethodResult,
     OpcUaId_CallMethodResult_Encoding_DefaultBinary,
@@ -14087,8 +13838,7 @@ SOPC_EncodeableType OpcUa_CallMethodResult_EncodeableType =
     OpcUa_CallMethodResult_Encode,
     OpcUa_CallMethodResult_Decode,
     sizeof CallMethodResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    CallMethodResult_Fields
-};
+    CallMethodResult_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_Call
@@ -14130,17 +13880,17 @@ SOPC_ReturnStatus OpcUa_CallRequest_Decode(void* pValue, SOPC_Buffer* buf, uint3
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor CallRequest_Fields[] = {
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                     // isBuiltIn
+        true,                                                     // isArrayLength
+        true,                                                     // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                 // typeIndex
         (uint32_t) offsetof(OpcUa_CallRequest, NoOfMethodsToCall) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_CallMethodRequest, // typeIndex
+        false,                                                // isBuiltIn
+        false,                                                // isArrayLength
+        true,                                                 // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_CallMethodRequest,  // typeIndex
         (uint32_t) offsetof(OpcUa_CallRequest, MethodsToCall) // offset
     },
 };
@@ -14148,8 +13898,7 @@ static const SOPC_EncodeableType_FieldDescriptor CallRequest_Fields[] = {
 /*============================================================================
  * Descriptor of the CallRequest encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_CallRequest_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_CallRequest_EncodeableType = {
     "CallRequest",
     OpcUaId_CallRequest,
     OpcUaId_CallRequest_Encoding_DefaultBinary,
@@ -14162,8 +13911,7 @@ SOPC_EncodeableType OpcUa_CallRequest_EncodeableType =
     OpcUa_CallRequest_Encode,
     OpcUa_CallRequest_Decode,
     sizeof CallRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    CallRequest_Fields
-};
+    CallRequest_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_CallResponse
@@ -14204,38 +13952,38 @@ SOPC_ReturnStatus OpcUa_CallResponse_Decode(void* pValue, SOPC_Buffer* buf, uint
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor CallResponse_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        false, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader, // typeIndex
+        false,                                                  // isBuiltIn
+        false,                                                  // isArrayLength
+        false,                                                  // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader,       // typeIndex
         (uint32_t) offsetof(OpcUa_CallResponse, ResponseHeader) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                // isBuiltIn
+        true,                                                // isArrayLength
+        true,                                                // isToEncode
+        (uint32_t) SOPC_Int32_Id,                            // typeIndex
         (uint32_t) offsetof(OpcUa_CallResponse, NoOfResults) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
+        false,                                              // isBuiltIn
+        false,                                              // isArrayLength
+        true,                                               // isToEncode
         (uint32_t) SOPC_TypeInternalIndex_CallMethodResult, // typeIndex
-        (uint32_t) offsetof(OpcUa_CallResponse, Results) // offset
+        (uint32_t) offsetof(OpcUa_CallResponse, Results)    // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                        // isBuiltIn
+        true,                                                        // isArrayLength
+        true,                                                        // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                    // typeIndex
         (uint32_t) offsetof(OpcUa_CallResponse, NoOfDiagnosticInfos) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DiagnosticInfo_Id, // typeIndex
+        true,                                                    // isBuiltIn
+        false,                                                   // isArrayLength
+        true,                                                    // isToEncode
+        (uint32_t) SOPC_DiagnosticInfo_Id,                       // typeIndex
         (uint32_t) offsetof(OpcUa_CallResponse, DiagnosticInfos) // offset
     },
 };
@@ -14243,8 +13991,7 @@ static const SOPC_EncodeableType_FieldDescriptor CallResponse_Fields[] = {
 /*============================================================================
  * Descriptor of the CallResponse encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_CallResponse_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_CallResponse_EncodeableType = {
     "CallResponse",
     OpcUaId_CallResponse,
     OpcUaId_CallResponse_Encoding_DefaultBinary,
@@ -14257,8 +14004,7 @@ SOPC_EncodeableType OpcUa_CallResponse_EncodeableType =
     OpcUa_CallResponse_Encode,
     OpcUa_CallResponse_Decode,
     sizeof CallResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    CallResponse_Fields
-};
+    CallResponse_Fields};
 #endif
 
 #endif
@@ -14300,24 +14046,24 @@ SOPC_ReturnStatus OpcUa_DataChangeFilter_Decode(void* pValue, SOPC_Buffer* buf, 
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DataChangeFilter_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                // isBuiltIn
+        false,                                               // isArrayLength
+        true,                                                // isToEncode
+        (uint32_t) SOPC_Int32_Id,                            // typeIndex
         (uint32_t) offsetof(OpcUa_DataChangeFilter, Trigger) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                     // isBuiltIn
+        false,                                                    // isArrayLength
+        true,                                                     // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                // typeIndex
         (uint32_t) offsetof(OpcUa_DataChangeFilter, DeadbandType) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Double_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_Double_Id,                                 // typeIndex
         (uint32_t) offsetof(OpcUa_DataChangeFilter, DeadbandValue) // offset
     },
 };
@@ -14325,8 +14071,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataChangeFilter_Fields[] = {
 /*============================================================================
  * Descriptor of the DataChangeFilter encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_DataChangeFilter_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_DataChangeFilter_EncodeableType = {
     "DataChangeFilter",
     OpcUaId_DataChangeFilter,
     OpcUaId_DataChangeFilter_Encoding_DefaultBinary,
@@ -14339,8 +14084,7 @@ SOPC_EncodeableType OpcUa_DataChangeFilter_EncodeableType =
     OpcUa_DataChangeFilter_Encode,
     OpcUa_DataChangeFilter_Decode,
     sizeof DataChangeFilter_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    DataChangeFilter_Fields
-};
+    DataChangeFilter_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_AggregateFilter
@@ -14381,31 +14125,31 @@ SOPC_ReturnStatus OpcUa_AggregateFilter_Decode(void* pValue, SOPC_Buffer* buf, u
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor AggregateFilter_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DateTime_Id, // typeIndex
+        true,                                                 // isBuiltIn
+        false,                                                // isArrayLength
+        true,                                                 // isToEncode
+        (uint32_t) SOPC_DateTime_Id,                          // typeIndex
         (uint32_t) offsetof(OpcUa_AggregateFilter, StartTime) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                     // isBuiltIn
+        false,                                                    // isArrayLength
+        true,                                                     // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                                // typeIndex
         (uint32_t) offsetof(OpcUa_AggregateFilter, AggregateType) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Double_Id, // typeIndex
+        true,                                                          // isBuiltIn
+        false,                                                         // isArrayLength
+        true,                                                          // isToEncode
+        (uint32_t) SOPC_Double_Id,                                     // typeIndex
         (uint32_t) offsetof(OpcUa_AggregateFilter, ProcessingInterval) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_AggregateConfiguration, // typeIndex
+        false,                                                             // isBuiltIn
+        false,                                                             // isArrayLength
+        true,                                                              // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_AggregateConfiguration,          // typeIndex
         (uint32_t) offsetof(OpcUa_AggregateFilter, AggregateConfiguration) // offset
     },
 };
@@ -14413,8 +14157,7 @@ static const SOPC_EncodeableType_FieldDescriptor AggregateFilter_Fields[] = {
 /*============================================================================
  * Descriptor of the AggregateFilter encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_AggregateFilter_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_AggregateFilter_EncodeableType = {
     "AggregateFilter",
     OpcUaId_AggregateFilter,
     OpcUaId_AggregateFilter_Encoding_DefaultBinary,
@@ -14427,8 +14170,7 @@ SOPC_EncodeableType OpcUa_AggregateFilter_EncodeableType =
     OpcUa_AggregateFilter_Encode,
     OpcUa_AggregateFilter_Decode,
     sizeof AggregateFilter_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    AggregateFilter_Fields
-};
+    AggregateFilter_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_EventFilterResult
@@ -14469,38 +14211,38 @@ SOPC_ReturnStatus OpcUa_EventFilterResult_Decode(void* pValue, SOPC_Buffer* buf,
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor EventFilterResult_Fields[] = {
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                 // isBuiltIn
+        true,                                                                 // isArrayLength
+        true,                                                                 // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                             // typeIndex
         (uint32_t) offsetof(OpcUa_EventFilterResult, NoOfSelectClauseResults) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_StatusCode_Id, // typeIndex
+        true,                                                             // isBuiltIn
+        false,                                                            // isArrayLength
+        true,                                                             // isToEncode
+        (uint32_t) SOPC_StatusCode_Id,                                    // typeIndex
         (uint32_t) offsetof(OpcUa_EventFilterResult, SelectClauseResults) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                         // isBuiltIn
+        true,                                                                         // isArrayLength
+        true,                                                                         // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                     // typeIndex
         (uint32_t) offsetof(OpcUa_EventFilterResult, NoOfSelectClauseDiagnosticInfos) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DiagnosticInfo_Id, // typeIndex
+        true,                                                                     // isBuiltIn
+        false,                                                                    // isArrayLength
+        true,                                                                     // isToEncode
+        (uint32_t) SOPC_DiagnosticInfo_Id,                                        // typeIndex
         (uint32_t) offsetof(OpcUa_EventFilterResult, SelectClauseDiagnosticInfos) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ContentFilterResult, // typeIndex
+        false,                                                          // isBuiltIn
+        false,                                                          // isArrayLength
+        true,                                                           // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ContentFilterResult,          // typeIndex
         (uint32_t) offsetof(OpcUa_EventFilterResult, WhereClauseResult) // offset
     },
 };
@@ -14508,8 +14250,7 @@ static const SOPC_EncodeableType_FieldDescriptor EventFilterResult_Fields[] = {
 /*============================================================================
  * Descriptor of the EventFilterResult encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_EventFilterResult_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_EventFilterResult_EncodeableType = {
     "EventFilterResult",
     OpcUaId_EventFilterResult,
     OpcUaId_EventFilterResult_Encoding_DefaultBinary,
@@ -14522,8 +14263,7 @@ SOPC_EncodeableType OpcUa_EventFilterResult_EncodeableType =
     OpcUa_EventFilterResult_Encode,
     OpcUa_EventFilterResult_Decode,
     sizeof EventFilterResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    EventFilterResult_Fields
-};
+    EventFilterResult_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_AggregateFilterResult
@@ -14564,24 +14304,24 @@ SOPC_ReturnStatus OpcUa_AggregateFilterResult_Decode(void* pValue, SOPC_Buffer* 
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor AggregateFilterResult_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DateTime_Id, // typeIndex
+        true,                                                              // isBuiltIn
+        false,                                                             // isArrayLength
+        true,                                                              // isToEncode
+        (uint32_t) SOPC_DateTime_Id,                                       // typeIndex
         (uint32_t) offsetof(OpcUa_AggregateFilterResult, RevisedStartTime) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Double_Id, // typeIndex
+        true,                                                                       // isBuiltIn
+        false,                                                                      // isArrayLength
+        true,                                                                       // isToEncode
+        (uint32_t) SOPC_Double_Id,                                                  // typeIndex
         (uint32_t) offsetof(OpcUa_AggregateFilterResult, RevisedProcessingInterval) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_AggregateConfiguration, // typeIndex
+        false,                                                                          // isBuiltIn
+        false,                                                                          // isArrayLength
+        true,                                                                           // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_AggregateConfiguration,                       // typeIndex
         (uint32_t) offsetof(OpcUa_AggregateFilterResult, RevisedAggregateConfiguration) // offset
     },
 };
@@ -14589,8 +14329,7 @@ static const SOPC_EncodeableType_FieldDescriptor AggregateFilterResult_Fields[] 
 /*============================================================================
  * Descriptor of the AggregateFilterResult encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_AggregateFilterResult_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_AggregateFilterResult_EncodeableType = {
     "AggregateFilterResult",
     OpcUaId_AggregateFilterResult,
     OpcUaId_AggregateFilterResult_Encoding_DefaultBinary,
@@ -14603,8 +14342,7 @@ SOPC_EncodeableType OpcUa_AggregateFilterResult_EncodeableType =
     OpcUa_AggregateFilterResult_Encode,
     OpcUa_AggregateFilterResult_Decode,
     sizeof AggregateFilterResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    AggregateFilterResult_Fields
-};
+    AggregateFilterResult_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_MonitoringParameters
@@ -14645,38 +14383,38 @@ SOPC_ReturnStatus OpcUa_MonitoringParameters_Decode(void* pValue, SOPC_Buffer* b
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor MonitoringParameters_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                         // isBuiltIn
+        false,                                                        // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                    // typeIndex
         (uint32_t) offsetof(OpcUa_MonitoringParameters, ClientHandle) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Double_Id, // typeIndex
+        true,                                                             // isBuiltIn
+        false,                                                            // isArrayLength
+        true,                                                             // isToEncode
+        (uint32_t) SOPC_Double_Id,                                        // typeIndex
         (uint32_t) offsetof(OpcUa_MonitoringParameters, SamplingInterval) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ExtensionObject_Id, // typeIndex
+        true,                                                   // isBuiltIn
+        false,                                                  // isArrayLength
+        true,                                                   // isToEncode
+        (uint32_t) SOPC_ExtensionObject_Id,                     // typeIndex
         (uint32_t) offsetof(OpcUa_MonitoringParameters, Filter) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                 // typeIndex
         (uint32_t) offsetof(OpcUa_MonitoringParameters, QueueSize) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                          // isBuiltIn
+        false,                                                         // isArrayLength
+        true,                                                          // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                                    // typeIndex
         (uint32_t) offsetof(OpcUa_MonitoringParameters, DiscardOldest) // offset
     },
 };
@@ -14684,8 +14422,7 @@ static const SOPC_EncodeableType_FieldDescriptor MonitoringParameters_Fields[] =
 /*============================================================================
  * Descriptor of the MonitoringParameters encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_MonitoringParameters_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_MonitoringParameters_EncodeableType = {
     "MonitoringParameters",
     OpcUaId_MonitoringParameters,
     OpcUaId_MonitoringParameters_Encoding_DefaultBinary,
@@ -14698,8 +14435,7 @@ SOPC_EncodeableType OpcUa_MonitoringParameters_EncodeableType =
     OpcUa_MonitoringParameters_Encode,
     OpcUa_MonitoringParameters_Decode,
     sizeof MonitoringParameters_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    MonitoringParameters_Fields
-};
+    MonitoringParameters_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_MonitoredItemCreateRequest
@@ -14722,9 +14458,12 @@ void OpcUa_MonitoredItemCreateRequest_Clear(void* pValue)
 /*============================================================================
  * OpcUa_MonitoredItemCreateRequest_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_MonitoredItemCreateRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_MonitoredItemCreateRequest_Encode(const void* pValue,
+                                                          SOPC_Buffer* buf,
+                                                          uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Encode(&OpcUa_MonitoredItemCreateRequest_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Encode(&OpcUa_MonitoredItemCreateRequest_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -14732,7 +14471,8 @@ SOPC_ReturnStatus OpcUa_MonitoredItemCreateRequest_Encode(const void* pValue, SO
  *===========================================================================*/
 SOPC_ReturnStatus OpcUa_MonitoredItemCreateRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Decode(&OpcUa_MonitoredItemCreateRequest_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Decode(&OpcUa_MonitoredItemCreateRequest_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -14740,24 +14480,24 @@ SOPC_ReturnStatus OpcUa_MonitoredItemCreateRequest_Decode(void* pValue, SOPC_Buf
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor MonitoredItemCreateRequest_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ReadValueId, // typeIndex
+        false,                                                               // isBuiltIn
+        false,                                                               // isArrayLength
+        true,                                                                // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ReadValueId,                       // typeIndex
         (uint32_t) offsetof(OpcUa_MonitoredItemCreateRequest, ItemToMonitor) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                 // isBuiltIn
+        false,                                                                // isArrayLength
+        true,                                                                 // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                             // typeIndex
         (uint32_t) offsetof(OpcUa_MonitoredItemCreateRequest, MonitoringMode) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_MonitoringParameters, // typeIndex
+        false,                                                                     // isBuiltIn
+        false,                                                                     // isArrayLength
+        true,                                                                      // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_MonitoringParameters,                    // typeIndex
         (uint32_t) offsetof(OpcUa_MonitoredItemCreateRequest, RequestedParameters) // offset
     },
 };
@@ -14765,8 +14505,7 @@ static const SOPC_EncodeableType_FieldDescriptor MonitoredItemCreateRequest_Fiel
 /*============================================================================
  * Descriptor of the MonitoredItemCreateRequest encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_MonitoredItemCreateRequest_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_MonitoredItemCreateRequest_EncodeableType = {
     "MonitoredItemCreateRequest",
     OpcUaId_MonitoredItemCreateRequest,
     OpcUaId_MonitoredItemCreateRequest_Encoding_DefaultBinary,
@@ -14779,8 +14518,7 @@ SOPC_EncodeableType OpcUa_MonitoredItemCreateRequest_EncodeableType =
     OpcUa_MonitoredItemCreateRequest_Encode,
     OpcUa_MonitoredItemCreateRequest_Decode,
     sizeof MonitoredItemCreateRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    MonitoredItemCreateRequest_Fields
-};
+    MonitoredItemCreateRequest_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_MonitoredItemCreateResult
@@ -14803,9 +14541,12 @@ void OpcUa_MonitoredItemCreateResult_Clear(void* pValue)
 /*============================================================================
  * OpcUa_MonitoredItemCreateResult_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_MonitoredItemCreateResult_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_MonitoredItemCreateResult_Encode(const void* pValue,
+                                                         SOPC_Buffer* buf,
+                                                         uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Encode(&OpcUa_MonitoredItemCreateResult_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Encode(&OpcUa_MonitoredItemCreateResult_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -14813,7 +14554,8 @@ SOPC_ReturnStatus OpcUa_MonitoredItemCreateResult_Encode(const void* pValue, SOP
  *===========================================================================*/
 SOPC_ReturnStatus OpcUa_MonitoredItemCreateResult_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Decode(&OpcUa_MonitoredItemCreateResult_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Decode(&OpcUa_MonitoredItemCreateResult_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -14821,38 +14563,38 @@ SOPC_ReturnStatus OpcUa_MonitoredItemCreateResult_Decode(void* pValue, SOPC_Buff
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor MonitoredItemCreateResult_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_StatusCode_Id, // typeIndex
+        true,                                                            // isBuiltIn
+        false,                                                           // isArrayLength
+        true,                                                            // isToEncode
+        (uint32_t) SOPC_StatusCode_Id,                                   // typeIndex
         (uint32_t) offsetof(OpcUa_MonitoredItemCreateResult, StatusCode) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                 // isBuiltIn
+        false,                                                                // isArrayLength
+        true,                                                                 // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                            // typeIndex
         (uint32_t) offsetof(OpcUa_MonitoredItemCreateResult, MonitoredItemId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Double_Id, // typeIndex
+        true,                                                                         // isBuiltIn
+        false,                                                                        // isArrayLength
+        true,                                                                         // isToEncode
+        (uint32_t) SOPC_Double_Id,                                                    // typeIndex
         (uint32_t) offsetof(OpcUa_MonitoredItemCreateResult, RevisedSamplingInterval) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                  // isBuiltIn
+        false,                                                                 // isArrayLength
+        true,                                                                  // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                             // typeIndex
         (uint32_t) offsetof(OpcUa_MonitoredItemCreateResult, RevisedQueueSize) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ExtensionObject_Id, // typeIndex
+        true,                                                              // isBuiltIn
+        false,                                                             // isArrayLength
+        true,                                                              // isToEncode
+        (uint32_t) SOPC_ExtensionObject_Id,                                // typeIndex
         (uint32_t) offsetof(OpcUa_MonitoredItemCreateResult, FilterResult) // offset
     },
 };
@@ -14860,8 +14602,7 @@ static const SOPC_EncodeableType_FieldDescriptor MonitoredItemCreateResult_Field
 /*============================================================================
  * Descriptor of the MonitoredItemCreateResult encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_MonitoredItemCreateResult_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_MonitoredItemCreateResult_EncodeableType = {
     "MonitoredItemCreateResult",
     OpcUaId_MonitoredItemCreateResult,
     OpcUaId_MonitoredItemCreateResult_Encoding_DefaultBinary,
@@ -14874,8 +14615,7 @@ SOPC_EncodeableType OpcUa_MonitoredItemCreateResult_EncodeableType =
     OpcUa_MonitoredItemCreateResult_Encode,
     OpcUa_MonitoredItemCreateResult_Decode,
     sizeof MonitoredItemCreateResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    MonitoredItemCreateResult_Fields
-};
+    MonitoredItemCreateResult_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_CreateMonitoredItems
@@ -14899,9 +14639,12 @@ void OpcUa_CreateMonitoredItemsRequest_Clear(void* pValue)
 /*============================================================================
  * OpcUa_CreateMonitoredItemsRequest_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_CreateMonitoredItemsRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_CreateMonitoredItemsRequest_Encode(const void* pValue,
+                                                           SOPC_Buffer* buf,
+                                                           uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Encode(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Encode(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -14909,7 +14652,8 @@ SOPC_ReturnStatus OpcUa_CreateMonitoredItemsRequest_Encode(const void* pValue, S
  *===========================================================================*/
 SOPC_ReturnStatus OpcUa_CreateMonitoredItemsRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Decode(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Decode(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -14917,31 +14661,31 @@ SOPC_ReturnStatus OpcUa_CreateMonitoredItemsRequest_Decode(void* pValue, SOPC_Bu
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor CreateMonitoredItemsRequest_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                  // isBuiltIn
+        false,                                                                 // isArrayLength
+        true,                                                                  // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                             // typeIndex
         (uint32_t) offsetof(OpcUa_CreateMonitoredItemsRequest, SubscriptionId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                      // isBuiltIn
+        false,                                                                     // isArrayLength
+        true,                                                                      // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                  // typeIndex
         (uint32_t) offsetof(OpcUa_CreateMonitoredItemsRequest, TimestampsToReturn) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                     // isBuiltIn
+        true,                                                                     // isArrayLength
+        true,                                                                     // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                 // typeIndex
         (uint32_t) offsetof(OpcUa_CreateMonitoredItemsRequest, NoOfItemsToCreate) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_MonitoredItemCreateRequest, // typeIndex
+        false,                                                                // isBuiltIn
+        false,                                                                // isArrayLength
+        true,                                                                 // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_MonitoredItemCreateRequest,         // typeIndex
         (uint32_t) offsetof(OpcUa_CreateMonitoredItemsRequest, ItemsToCreate) // offset
     },
 };
@@ -14949,8 +14693,7 @@ static const SOPC_EncodeableType_FieldDescriptor CreateMonitoredItemsRequest_Fie
 /*============================================================================
  * Descriptor of the CreateMonitoredItemsRequest encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_CreateMonitoredItemsRequest_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_CreateMonitoredItemsRequest_EncodeableType = {
     "CreateMonitoredItemsRequest",
     OpcUaId_CreateMonitoredItemsRequest,
     OpcUaId_CreateMonitoredItemsRequest_Encoding_DefaultBinary,
@@ -14963,8 +14706,7 @@ SOPC_EncodeableType OpcUa_CreateMonitoredItemsRequest_EncodeableType =
     OpcUa_CreateMonitoredItemsRequest_Encode,
     OpcUa_CreateMonitoredItemsRequest_Decode,
     sizeof CreateMonitoredItemsRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    CreateMonitoredItemsRequest_Fields
-};
+    CreateMonitoredItemsRequest_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_CreateMonitoredItemsResponse
@@ -14987,9 +14729,12 @@ void OpcUa_CreateMonitoredItemsResponse_Clear(void* pValue)
 /*============================================================================
  * OpcUa_CreateMonitoredItemsResponse_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_CreateMonitoredItemsResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_CreateMonitoredItemsResponse_Encode(const void* pValue,
+                                                            SOPC_Buffer* buf,
+                                                            uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Encode(&OpcUa_CreateMonitoredItemsResponse_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Encode(&OpcUa_CreateMonitoredItemsResponse_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -14997,7 +14742,8 @@ SOPC_ReturnStatus OpcUa_CreateMonitoredItemsResponse_Encode(const void* pValue, 
  *===========================================================================*/
 SOPC_ReturnStatus OpcUa_CreateMonitoredItemsResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Decode(&OpcUa_CreateMonitoredItemsResponse_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Decode(&OpcUa_CreateMonitoredItemsResponse_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -15005,38 +14751,38 @@ SOPC_ReturnStatus OpcUa_CreateMonitoredItemsResponse_Decode(void* pValue, SOPC_B
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor CreateMonitoredItemsResponse_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        false, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader, // typeIndex
+        false,                                                                  // isBuiltIn
+        false,                                                                  // isArrayLength
+        false,                                                                  // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader,                       // typeIndex
         (uint32_t) offsetof(OpcUa_CreateMonitoredItemsResponse, ResponseHeader) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                // isBuiltIn
+        true,                                                                // isArrayLength
+        true,                                                                // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                            // typeIndex
         (uint32_t) offsetof(OpcUa_CreateMonitoredItemsResponse, NoOfResults) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_MonitoredItemCreateResult, // typeIndex
+        false,                                                           // isBuiltIn
+        false,                                                           // isArrayLength
+        true,                                                            // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_MonitoredItemCreateResult,     // typeIndex
         (uint32_t) offsetof(OpcUa_CreateMonitoredItemsResponse, Results) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                        // isBuiltIn
+        true,                                                                        // isArrayLength
+        true,                                                                        // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                    // typeIndex
         (uint32_t) offsetof(OpcUa_CreateMonitoredItemsResponse, NoOfDiagnosticInfos) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DiagnosticInfo_Id, // typeIndex
+        true,                                                                    // isBuiltIn
+        false,                                                                   // isArrayLength
+        true,                                                                    // isToEncode
+        (uint32_t) SOPC_DiagnosticInfo_Id,                                       // typeIndex
         (uint32_t) offsetof(OpcUa_CreateMonitoredItemsResponse, DiagnosticInfos) // offset
     },
 };
@@ -15044,8 +14790,7 @@ static const SOPC_EncodeableType_FieldDescriptor CreateMonitoredItemsResponse_Fi
 /*============================================================================
  * Descriptor of the CreateMonitoredItemsResponse encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_CreateMonitoredItemsResponse_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_CreateMonitoredItemsResponse_EncodeableType = {
     "CreateMonitoredItemsResponse",
     OpcUaId_CreateMonitoredItemsResponse,
     OpcUaId_CreateMonitoredItemsResponse_Encoding_DefaultBinary,
@@ -15058,8 +14803,7 @@ SOPC_EncodeableType OpcUa_CreateMonitoredItemsResponse_EncodeableType =
     OpcUa_CreateMonitoredItemsResponse_Encode,
     OpcUa_CreateMonitoredItemsResponse_Decode,
     sizeof CreateMonitoredItemsResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    CreateMonitoredItemsResponse_Fields
-};
+    CreateMonitoredItemsResponse_Fields};
 #endif
 
 #endif
@@ -15083,9 +14827,12 @@ void OpcUa_MonitoredItemModifyRequest_Clear(void* pValue)
 /*============================================================================
  * OpcUa_MonitoredItemModifyRequest_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_MonitoredItemModifyRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_MonitoredItemModifyRequest_Encode(const void* pValue,
+                                                          SOPC_Buffer* buf,
+                                                          uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Encode(&OpcUa_MonitoredItemModifyRequest_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Encode(&OpcUa_MonitoredItemModifyRequest_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -15093,7 +14840,8 @@ SOPC_ReturnStatus OpcUa_MonitoredItemModifyRequest_Encode(const void* pValue, SO
  *===========================================================================*/
 SOPC_ReturnStatus OpcUa_MonitoredItemModifyRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Decode(&OpcUa_MonitoredItemModifyRequest_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Decode(&OpcUa_MonitoredItemModifyRequest_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -15101,17 +14849,17 @@ SOPC_ReturnStatus OpcUa_MonitoredItemModifyRequest_Decode(void* pValue, SOPC_Buf
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor MonitoredItemModifyRequest_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                  // isBuiltIn
+        false,                                                                 // isArrayLength
+        true,                                                                  // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                             // typeIndex
         (uint32_t) offsetof(OpcUa_MonitoredItemModifyRequest, MonitoredItemId) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_MonitoringParameters, // typeIndex
+        false,                                                                     // isBuiltIn
+        false,                                                                     // isArrayLength
+        true,                                                                      // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_MonitoringParameters,                    // typeIndex
         (uint32_t) offsetof(OpcUa_MonitoredItemModifyRequest, RequestedParameters) // offset
     },
 };
@@ -15119,8 +14867,7 @@ static const SOPC_EncodeableType_FieldDescriptor MonitoredItemModifyRequest_Fiel
 /*============================================================================
  * Descriptor of the MonitoredItemModifyRequest encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_MonitoredItemModifyRequest_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_MonitoredItemModifyRequest_EncodeableType = {
     "MonitoredItemModifyRequest",
     OpcUaId_MonitoredItemModifyRequest,
     OpcUaId_MonitoredItemModifyRequest_Encoding_DefaultBinary,
@@ -15133,8 +14880,7 @@ SOPC_EncodeableType OpcUa_MonitoredItemModifyRequest_EncodeableType =
     OpcUa_MonitoredItemModifyRequest_Encode,
     OpcUa_MonitoredItemModifyRequest_Decode,
     sizeof MonitoredItemModifyRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    MonitoredItemModifyRequest_Fields
-};
+    MonitoredItemModifyRequest_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_MonitoredItemModifyResult
@@ -15157,9 +14903,12 @@ void OpcUa_MonitoredItemModifyResult_Clear(void* pValue)
 /*============================================================================
  * OpcUa_MonitoredItemModifyResult_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_MonitoredItemModifyResult_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_MonitoredItemModifyResult_Encode(const void* pValue,
+                                                         SOPC_Buffer* buf,
+                                                         uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Encode(&OpcUa_MonitoredItemModifyResult_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Encode(&OpcUa_MonitoredItemModifyResult_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -15167,7 +14916,8 @@ SOPC_ReturnStatus OpcUa_MonitoredItemModifyResult_Encode(const void* pValue, SOP
  *===========================================================================*/
 SOPC_ReturnStatus OpcUa_MonitoredItemModifyResult_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Decode(&OpcUa_MonitoredItemModifyResult_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Decode(&OpcUa_MonitoredItemModifyResult_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -15175,31 +14925,31 @@ SOPC_ReturnStatus OpcUa_MonitoredItemModifyResult_Decode(void* pValue, SOPC_Buff
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor MonitoredItemModifyResult_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_StatusCode_Id, // typeIndex
+        true,                                                            // isBuiltIn
+        false,                                                           // isArrayLength
+        true,                                                            // isToEncode
+        (uint32_t) SOPC_StatusCode_Id,                                   // typeIndex
         (uint32_t) offsetof(OpcUa_MonitoredItemModifyResult, StatusCode) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Double_Id, // typeIndex
+        true,                                                                         // isBuiltIn
+        false,                                                                        // isArrayLength
+        true,                                                                         // isToEncode
+        (uint32_t) SOPC_Double_Id,                                                    // typeIndex
         (uint32_t) offsetof(OpcUa_MonitoredItemModifyResult, RevisedSamplingInterval) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                  // isBuiltIn
+        false,                                                                 // isArrayLength
+        true,                                                                  // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                             // typeIndex
         (uint32_t) offsetof(OpcUa_MonitoredItemModifyResult, RevisedQueueSize) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ExtensionObject_Id, // typeIndex
+        true,                                                              // isBuiltIn
+        false,                                                             // isArrayLength
+        true,                                                              // isToEncode
+        (uint32_t) SOPC_ExtensionObject_Id,                                // typeIndex
         (uint32_t) offsetof(OpcUa_MonitoredItemModifyResult, FilterResult) // offset
     },
 };
@@ -15207,8 +14957,7 @@ static const SOPC_EncodeableType_FieldDescriptor MonitoredItemModifyResult_Field
 /*============================================================================
  * Descriptor of the MonitoredItemModifyResult encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_MonitoredItemModifyResult_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_MonitoredItemModifyResult_EncodeableType = {
     "MonitoredItemModifyResult",
     OpcUaId_MonitoredItemModifyResult,
     OpcUaId_MonitoredItemModifyResult_Encoding_DefaultBinary,
@@ -15221,8 +14970,7 @@ SOPC_EncodeableType OpcUa_MonitoredItemModifyResult_EncodeableType =
     OpcUa_MonitoredItemModifyResult_Encode,
     OpcUa_MonitoredItemModifyResult_Decode,
     sizeof MonitoredItemModifyResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    MonitoredItemModifyResult_Fields
-};
+    MonitoredItemModifyResult_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ModifyMonitoredItems
@@ -15246,9 +14994,12 @@ void OpcUa_ModifyMonitoredItemsRequest_Clear(void* pValue)
 /*============================================================================
  * OpcUa_ModifyMonitoredItemsRequest_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ModifyMonitoredItemsRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_ModifyMonitoredItemsRequest_Encode(const void* pValue,
+                                                           SOPC_Buffer* buf,
+                                                           uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Encode(&OpcUa_ModifyMonitoredItemsRequest_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Encode(&OpcUa_ModifyMonitoredItemsRequest_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -15256,7 +15007,8 @@ SOPC_ReturnStatus OpcUa_ModifyMonitoredItemsRequest_Encode(const void* pValue, S
  *===========================================================================*/
 SOPC_ReturnStatus OpcUa_ModifyMonitoredItemsRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Decode(&OpcUa_ModifyMonitoredItemsRequest_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Decode(&OpcUa_ModifyMonitoredItemsRequest_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -15264,31 +15016,31 @@ SOPC_ReturnStatus OpcUa_ModifyMonitoredItemsRequest_Decode(void* pValue, SOPC_Bu
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ModifyMonitoredItemsRequest_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                  // isBuiltIn
+        false,                                                                 // isArrayLength
+        true,                                                                  // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                             // typeIndex
         (uint32_t) offsetof(OpcUa_ModifyMonitoredItemsRequest, SubscriptionId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                      // isBuiltIn
+        false,                                                                     // isArrayLength
+        true,                                                                      // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                  // typeIndex
         (uint32_t) offsetof(OpcUa_ModifyMonitoredItemsRequest, TimestampsToReturn) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                     // isBuiltIn
+        true,                                                                     // isArrayLength
+        true,                                                                     // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                 // typeIndex
         (uint32_t) offsetof(OpcUa_ModifyMonitoredItemsRequest, NoOfItemsToModify) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_MonitoredItemModifyRequest, // typeIndex
+        false,                                                                // isBuiltIn
+        false,                                                                // isArrayLength
+        true,                                                                 // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_MonitoredItemModifyRequest,         // typeIndex
         (uint32_t) offsetof(OpcUa_ModifyMonitoredItemsRequest, ItemsToModify) // offset
     },
 };
@@ -15296,8 +15048,7 @@ static const SOPC_EncodeableType_FieldDescriptor ModifyMonitoredItemsRequest_Fie
 /*============================================================================
  * Descriptor of the ModifyMonitoredItemsRequest encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_ModifyMonitoredItemsRequest_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_ModifyMonitoredItemsRequest_EncodeableType = {
     "ModifyMonitoredItemsRequest",
     OpcUaId_ModifyMonitoredItemsRequest,
     OpcUaId_ModifyMonitoredItemsRequest_Encoding_DefaultBinary,
@@ -15310,8 +15061,7 @@ SOPC_EncodeableType OpcUa_ModifyMonitoredItemsRequest_EncodeableType =
     OpcUa_ModifyMonitoredItemsRequest_Encode,
     OpcUa_ModifyMonitoredItemsRequest_Decode,
     sizeof ModifyMonitoredItemsRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    ModifyMonitoredItemsRequest_Fields
-};
+    ModifyMonitoredItemsRequest_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ModifyMonitoredItemsResponse
@@ -15334,9 +15084,12 @@ void OpcUa_ModifyMonitoredItemsResponse_Clear(void* pValue)
 /*============================================================================
  * OpcUa_ModifyMonitoredItemsResponse_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ModifyMonitoredItemsResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_ModifyMonitoredItemsResponse_Encode(const void* pValue,
+                                                            SOPC_Buffer* buf,
+                                                            uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Encode(&OpcUa_ModifyMonitoredItemsResponse_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Encode(&OpcUa_ModifyMonitoredItemsResponse_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -15344,7 +15097,8 @@ SOPC_ReturnStatus OpcUa_ModifyMonitoredItemsResponse_Encode(const void* pValue, 
  *===========================================================================*/
 SOPC_ReturnStatus OpcUa_ModifyMonitoredItemsResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Decode(&OpcUa_ModifyMonitoredItemsResponse_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Decode(&OpcUa_ModifyMonitoredItemsResponse_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -15352,38 +15106,38 @@ SOPC_ReturnStatus OpcUa_ModifyMonitoredItemsResponse_Decode(void* pValue, SOPC_B
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ModifyMonitoredItemsResponse_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        false, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader, // typeIndex
+        false,                                                                  // isBuiltIn
+        false,                                                                  // isArrayLength
+        false,                                                                  // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader,                       // typeIndex
         (uint32_t) offsetof(OpcUa_ModifyMonitoredItemsResponse, ResponseHeader) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                // isBuiltIn
+        true,                                                                // isArrayLength
+        true,                                                                // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                            // typeIndex
         (uint32_t) offsetof(OpcUa_ModifyMonitoredItemsResponse, NoOfResults) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_MonitoredItemModifyResult, // typeIndex
+        false,                                                           // isBuiltIn
+        false,                                                           // isArrayLength
+        true,                                                            // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_MonitoredItemModifyResult,     // typeIndex
         (uint32_t) offsetof(OpcUa_ModifyMonitoredItemsResponse, Results) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                        // isBuiltIn
+        true,                                                                        // isArrayLength
+        true,                                                                        // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                    // typeIndex
         (uint32_t) offsetof(OpcUa_ModifyMonitoredItemsResponse, NoOfDiagnosticInfos) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DiagnosticInfo_Id, // typeIndex
+        true,                                                                    // isBuiltIn
+        false,                                                                   // isArrayLength
+        true,                                                                    // isToEncode
+        (uint32_t) SOPC_DiagnosticInfo_Id,                                       // typeIndex
         (uint32_t) offsetof(OpcUa_ModifyMonitoredItemsResponse, DiagnosticInfos) // offset
     },
 };
@@ -15391,8 +15145,7 @@ static const SOPC_EncodeableType_FieldDescriptor ModifyMonitoredItemsResponse_Fi
 /*============================================================================
  * Descriptor of the ModifyMonitoredItemsResponse encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_ModifyMonitoredItemsResponse_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_ModifyMonitoredItemsResponse_EncodeableType = {
     "ModifyMonitoredItemsResponse",
     OpcUaId_ModifyMonitoredItemsResponse,
     OpcUaId_ModifyMonitoredItemsResponse_Encoding_DefaultBinary,
@@ -15405,8 +15158,7 @@ SOPC_EncodeableType OpcUa_ModifyMonitoredItemsResponse_EncodeableType =
     OpcUa_ModifyMonitoredItemsResponse_Encode,
     OpcUa_ModifyMonitoredItemsResponse_Decode,
     sizeof ModifyMonitoredItemsResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    ModifyMonitoredItemsResponse_Fields
-};
+    ModifyMonitoredItemsResponse_Fields};
 #endif
 
 #endif
@@ -15431,7 +15183,9 @@ void OpcUa_SetMonitoringModeRequest_Clear(void* pValue)
 /*============================================================================
  * OpcUa_SetMonitoringModeRequest_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SetMonitoringModeRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_SetMonitoringModeRequest_Encode(const void* pValue,
+                                                        SOPC_Buffer* buf,
+                                                        uint32_t nestedStructLevel)
 {
     return SOPC_EncodeableObject_Encode(&OpcUa_SetMonitoringModeRequest_EncodeableType, pValue, buf, nestedStructLevel);
 }
@@ -15449,31 +15203,31 @@ SOPC_ReturnStatus OpcUa_SetMonitoringModeRequest_Decode(void* pValue, SOPC_Buffe
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor SetMonitoringModeRequest_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                               // isBuiltIn
+        false,                                                              // isArrayLength
+        true,                                                               // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                          // typeIndex
         (uint32_t) offsetof(OpcUa_SetMonitoringModeRequest, SubscriptionId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                               // isBuiltIn
+        false,                                                              // isArrayLength
+        true,                                                               // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                           // typeIndex
         (uint32_t) offsetof(OpcUa_SetMonitoringModeRequest, MonitoringMode) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                     // isBuiltIn
+        true,                                                                     // isArrayLength
+        true,                                                                     // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                 // typeIndex
         (uint32_t) offsetof(OpcUa_SetMonitoringModeRequest, NoOfMonitoredItemIds) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                 // isBuiltIn
+        false,                                                                // isArrayLength
+        true,                                                                 // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                            // typeIndex
         (uint32_t) offsetof(OpcUa_SetMonitoringModeRequest, MonitoredItemIds) // offset
     },
 };
@@ -15481,8 +15235,7 @@ static const SOPC_EncodeableType_FieldDescriptor SetMonitoringModeRequest_Fields
 /*============================================================================
  * Descriptor of the SetMonitoringModeRequest encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_SetMonitoringModeRequest_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_SetMonitoringModeRequest_EncodeableType = {
     "SetMonitoringModeRequest",
     OpcUaId_SetMonitoringModeRequest,
     OpcUaId_SetMonitoringModeRequest_Encoding_DefaultBinary,
@@ -15495,8 +15248,7 @@ SOPC_EncodeableType OpcUa_SetMonitoringModeRequest_EncodeableType =
     OpcUa_SetMonitoringModeRequest_Encode,
     OpcUa_SetMonitoringModeRequest_Decode,
     sizeof SetMonitoringModeRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    SetMonitoringModeRequest_Fields
-};
+    SetMonitoringModeRequest_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_SetMonitoringModeResponse
@@ -15519,9 +15271,12 @@ void OpcUa_SetMonitoringModeResponse_Clear(void* pValue)
 /*============================================================================
  * OpcUa_SetMonitoringModeResponse_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SetMonitoringModeResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_SetMonitoringModeResponse_Encode(const void* pValue,
+                                                         SOPC_Buffer* buf,
+                                                         uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Encode(&OpcUa_SetMonitoringModeResponse_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Encode(&OpcUa_SetMonitoringModeResponse_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -15529,7 +15284,8 @@ SOPC_ReturnStatus OpcUa_SetMonitoringModeResponse_Encode(const void* pValue, SOP
  *===========================================================================*/
 SOPC_ReturnStatus OpcUa_SetMonitoringModeResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Decode(&OpcUa_SetMonitoringModeResponse_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Decode(&OpcUa_SetMonitoringModeResponse_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -15537,38 +15293,38 @@ SOPC_ReturnStatus OpcUa_SetMonitoringModeResponse_Decode(void* pValue, SOPC_Buff
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor SetMonitoringModeResponse_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        false, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader, // typeIndex
+        false,                                                               // isBuiltIn
+        false,                                                               // isArrayLength
+        false,                                                               // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader,                    // typeIndex
         (uint32_t) offsetof(OpcUa_SetMonitoringModeResponse, ResponseHeader) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                             // isBuiltIn
+        true,                                                             // isArrayLength
+        true,                                                             // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                         // typeIndex
         (uint32_t) offsetof(OpcUa_SetMonitoringModeResponse, NoOfResults) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_StatusCode_Id, // typeIndex
+        true,                                                         // isBuiltIn
+        false,                                                        // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_StatusCode_Id,                                // typeIndex
         (uint32_t) offsetof(OpcUa_SetMonitoringModeResponse, Results) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                     // isBuiltIn
+        true,                                                                     // isArrayLength
+        true,                                                                     // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                 // typeIndex
         (uint32_t) offsetof(OpcUa_SetMonitoringModeResponse, NoOfDiagnosticInfos) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DiagnosticInfo_Id, // typeIndex
+        true,                                                                 // isBuiltIn
+        false,                                                                // isArrayLength
+        true,                                                                 // isToEncode
+        (uint32_t) SOPC_DiagnosticInfo_Id,                                    // typeIndex
         (uint32_t) offsetof(OpcUa_SetMonitoringModeResponse, DiagnosticInfos) // offset
     },
 };
@@ -15576,8 +15332,7 @@ static const SOPC_EncodeableType_FieldDescriptor SetMonitoringModeResponse_Field
 /*============================================================================
  * Descriptor of the SetMonitoringModeResponse encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_SetMonitoringModeResponse_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_SetMonitoringModeResponse_EncodeableType = {
     "SetMonitoringModeResponse",
     OpcUaId_SetMonitoringModeResponse,
     OpcUaId_SetMonitoringModeResponse_Encoding_DefaultBinary,
@@ -15590,8 +15345,7 @@ SOPC_EncodeableType OpcUa_SetMonitoringModeResponse_EncodeableType =
     OpcUa_SetMonitoringModeResponse_Encode,
     OpcUa_SetMonitoringModeResponse_Decode,
     sizeof SetMonitoringModeResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    SetMonitoringModeResponse_Fields
-};
+    SetMonitoringModeResponse_Fields};
 #endif
 
 #endif
@@ -15634,45 +15388,45 @@ SOPC_ReturnStatus OpcUa_SetTriggeringRequest_Decode(void* pValue, SOPC_Buffer* b
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor SetTriggeringRequest_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                           // isBuiltIn
+        false,                                                          // isArrayLength
+        true,                                                           // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                      // typeIndex
         (uint32_t) offsetof(OpcUa_SetTriggeringRequest, SubscriptionId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                             // isBuiltIn
+        false,                                                            // isArrayLength
+        true,                                                             // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                        // typeIndex
         (uint32_t) offsetof(OpcUa_SetTriggeringRequest, TriggeringItemId) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                           // isBuiltIn
+        true,                                                           // isArrayLength
+        true,                                                           // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                       // typeIndex
         (uint32_t) offsetof(OpcUa_SetTriggeringRequest, NoOfLinksToAdd) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                       // isBuiltIn
+        false,                                                      // isArrayLength
+        true,                                                       // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                  // typeIndex
         (uint32_t) offsetof(OpcUa_SetTriggeringRequest, LinksToAdd) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                              // isBuiltIn
+        true,                                                              // isArrayLength
+        true,                                                              // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                          // typeIndex
         (uint32_t) offsetof(OpcUa_SetTriggeringRequest, NoOfLinksToRemove) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                          // isBuiltIn
+        false,                                                         // isArrayLength
+        true,                                                          // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                     // typeIndex
         (uint32_t) offsetof(OpcUa_SetTriggeringRequest, LinksToRemove) // offset
     },
 };
@@ -15680,8 +15434,7 @@ static const SOPC_EncodeableType_FieldDescriptor SetTriggeringRequest_Fields[] =
 /*============================================================================
  * Descriptor of the SetTriggeringRequest encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_SetTriggeringRequest_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_SetTriggeringRequest_EncodeableType = {
     "SetTriggeringRequest",
     OpcUaId_SetTriggeringRequest,
     OpcUaId_SetTriggeringRequest_Encoding_DefaultBinary,
@@ -15694,8 +15447,7 @@ SOPC_EncodeableType OpcUa_SetTriggeringRequest_EncodeableType =
     OpcUa_SetTriggeringRequest_Encode,
     OpcUa_SetTriggeringRequest_Decode,
     sizeof SetTriggeringRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    SetTriggeringRequest_Fields
-};
+    SetTriggeringRequest_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_SetTriggeringResponse
@@ -15736,66 +15488,66 @@ SOPC_ReturnStatus OpcUa_SetTriggeringResponse_Decode(void* pValue, SOPC_Buffer* 
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor SetTriggeringResponse_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        false, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader, // typeIndex
+        false,                                                           // isBuiltIn
+        false,                                                           // isArrayLength
+        false,                                                           // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader,                // typeIndex
         (uint32_t) offsetof(OpcUa_SetTriggeringResponse, ResponseHeader) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                            // isBuiltIn
+        true,                                                            // isArrayLength
+        true,                                                            // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                        // typeIndex
         (uint32_t) offsetof(OpcUa_SetTriggeringResponse, NoOfAddResults) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_StatusCode_Id, // typeIndex
+        true,                                                        // isBuiltIn
+        false,                                                       // isArrayLength
+        true,                                                        // isToEncode
+        (uint32_t) SOPC_StatusCode_Id,                               // typeIndex
         (uint32_t) offsetof(OpcUa_SetTriggeringResponse, AddResults) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                    // isBuiltIn
+        true,                                                                    // isArrayLength
+        true,                                                                    // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                // typeIndex
         (uint32_t) offsetof(OpcUa_SetTriggeringResponse, NoOfAddDiagnosticInfos) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DiagnosticInfo_Id, // typeIndex
+        true,                                                                // isBuiltIn
+        false,                                                               // isArrayLength
+        true,                                                                // isToEncode
+        (uint32_t) SOPC_DiagnosticInfo_Id,                                   // typeIndex
         (uint32_t) offsetof(OpcUa_SetTriggeringResponse, AddDiagnosticInfos) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                               // isBuiltIn
+        true,                                                               // isArrayLength
+        true,                                                               // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                           // typeIndex
         (uint32_t) offsetof(OpcUa_SetTriggeringResponse, NoOfRemoveResults) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_StatusCode_Id, // typeIndex
+        true,                                                           // isBuiltIn
+        false,                                                          // isArrayLength
+        true,                                                           // isToEncode
+        (uint32_t) SOPC_StatusCode_Id,                                  // typeIndex
         (uint32_t) offsetof(OpcUa_SetTriggeringResponse, RemoveResults) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                       // isBuiltIn
+        true,                                                                       // isArrayLength
+        true,                                                                       // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                   // typeIndex
         (uint32_t) offsetof(OpcUa_SetTriggeringResponse, NoOfRemoveDiagnosticInfos) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DiagnosticInfo_Id, // typeIndex
+        true,                                                                   // isBuiltIn
+        false,                                                                  // isArrayLength
+        true,                                                                   // isToEncode
+        (uint32_t) SOPC_DiagnosticInfo_Id,                                      // typeIndex
         (uint32_t) offsetof(OpcUa_SetTriggeringResponse, RemoveDiagnosticInfos) // offset
     },
 };
@@ -15803,8 +15555,7 @@ static const SOPC_EncodeableType_FieldDescriptor SetTriggeringResponse_Fields[] 
 /*============================================================================
  * Descriptor of the SetTriggeringResponse encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_SetTriggeringResponse_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_SetTriggeringResponse_EncodeableType = {
     "SetTriggeringResponse",
     OpcUaId_SetTriggeringResponse,
     OpcUaId_SetTriggeringResponse_Encoding_DefaultBinary,
@@ -15817,8 +15568,7 @@ SOPC_EncodeableType OpcUa_SetTriggeringResponse_EncodeableType =
     OpcUa_SetTriggeringResponse_Encode,
     OpcUa_SetTriggeringResponse_Decode,
     sizeof SetTriggeringResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    SetTriggeringResponse_Fields
-};
+    SetTriggeringResponse_Fields};
 #endif
 
 #endif
@@ -15843,9 +15593,12 @@ void OpcUa_DeleteMonitoredItemsRequest_Clear(void* pValue)
 /*============================================================================
  * OpcUa_DeleteMonitoredItemsRequest_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_DeleteMonitoredItemsRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_DeleteMonitoredItemsRequest_Encode(const void* pValue,
+                                                           SOPC_Buffer* buf,
+                                                           uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Encode(&OpcUa_DeleteMonitoredItemsRequest_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Encode(&OpcUa_DeleteMonitoredItemsRequest_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -15853,7 +15606,8 @@ SOPC_ReturnStatus OpcUa_DeleteMonitoredItemsRequest_Encode(const void* pValue, S
  *===========================================================================*/
 SOPC_ReturnStatus OpcUa_DeleteMonitoredItemsRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Decode(&OpcUa_DeleteMonitoredItemsRequest_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Decode(&OpcUa_DeleteMonitoredItemsRequest_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -15861,24 +15615,24 @@ SOPC_ReturnStatus OpcUa_DeleteMonitoredItemsRequest_Decode(void* pValue, SOPC_Bu
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DeleteMonitoredItemsRequest_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                  // isBuiltIn
+        false,                                                                 // isArrayLength
+        true,                                                                  // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                             // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteMonitoredItemsRequest, SubscriptionId) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                        // isBuiltIn
+        true,                                                                        // isArrayLength
+        true,                                                                        // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                    // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteMonitoredItemsRequest, NoOfMonitoredItemIds) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                    // isBuiltIn
+        false,                                                                   // isArrayLength
+        true,                                                                    // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                               // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteMonitoredItemsRequest, MonitoredItemIds) // offset
     },
 };
@@ -15886,8 +15640,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteMonitoredItemsRequest_Fie
 /*============================================================================
  * Descriptor of the DeleteMonitoredItemsRequest encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_DeleteMonitoredItemsRequest_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_DeleteMonitoredItemsRequest_EncodeableType = {
     "DeleteMonitoredItemsRequest",
     OpcUaId_DeleteMonitoredItemsRequest,
     OpcUaId_DeleteMonitoredItemsRequest_Encoding_DefaultBinary,
@@ -15900,8 +15653,7 @@ SOPC_EncodeableType OpcUa_DeleteMonitoredItemsRequest_EncodeableType =
     OpcUa_DeleteMonitoredItemsRequest_Encode,
     OpcUa_DeleteMonitoredItemsRequest_Decode,
     sizeof DeleteMonitoredItemsRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    DeleteMonitoredItemsRequest_Fields
-};
+    DeleteMonitoredItemsRequest_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_DeleteMonitoredItemsResponse
@@ -15924,9 +15676,12 @@ void OpcUa_DeleteMonitoredItemsResponse_Clear(void* pValue)
 /*============================================================================
  * OpcUa_DeleteMonitoredItemsResponse_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_DeleteMonitoredItemsResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_DeleteMonitoredItemsResponse_Encode(const void* pValue,
+                                                            SOPC_Buffer* buf,
+                                                            uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Encode(&OpcUa_DeleteMonitoredItemsResponse_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Encode(&OpcUa_DeleteMonitoredItemsResponse_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -15934,7 +15689,8 @@ SOPC_ReturnStatus OpcUa_DeleteMonitoredItemsResponse_Encode(const void* pValue, 
  *===========================================================================*/
 SOPC_ReturnStatus OpcUa_DeleteMonitoredItemsResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Decode(&OpcUa_DeleteMonitoredItemsResponse_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Decode(&OpcUa_DeleteMonitoredItemsResponse_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -15942,38 +15698,38 @@ SOPC_ReturnStatus OpcUa_DeleteMonitoredItemsResponse_Decode(void* pValue, SOPC_B
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DeleteMonitoredItemsResponse_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        false, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader, // typeIndex
+        false,                                                                  // isBuiltIn
+        false,                                                                  // isArrayLength
+        false,                                                                  // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader,                       // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteMonitoredItemsResponse, ResponseHeader) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                // isBuiltIn
+        true,                                                                // isArrayLength
+        true,                                                                // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                            // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteMonitoredItemsResponse, NoOfResults) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_StatusCode_Id, // typeIndex
+        true,                                                            // isBuiltIn
+        false,                                                           // isArrayLength
+        true,                                                            // isToEncode
+        (uint32_t) SOPC_StatusCode_Id,                                   // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteMonitoredItemsResponse, Results) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                        // isBuiltIn
+        true,                                                                        // isArrayLength
+        true,                                                                        // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                    // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteMonitoredItemsResponse, NoOfDiagnosticInfos) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DiagnosticInfo_Id, // typeIndex
+        true,                                                                    // isBuiltIn
+        false,                                                                   // isArrayLength
+        true,                                                                    // isToEncode
+        (uint32_t) SOPC_DiagnosticInfo_Id,                                       // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteMonitoredItemsResponse, DiagnosticInfos) // offset
     },
 };
@@ -15981,8 +15737,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteMonitoredItemsResponse_Fi
 /*============================================================================
  * Descriptor of the DeleteMonitoredItemsResponse encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_DeleteMonitoredItemsResponse_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_DeleteMonitoredItemsResponse_EncodeableType = {
     "DeleteMonitoredItemsResponse",
     OpcUaId_DeleteMonitoredItemsResponse,
     OpcUaId_DeleteMonitoredItemsResponse_Encoding_DefaultBinary,
@@ -15995,8 +15750,7 @@ SOPC_EncodeableType OpcUa_DeleteMonitoredItemsResponse_EncodeableType =
     OpcUa_DeleteMonitoredItemsResponse_Encode,
     OpcUa_DeleteMonitoredItemsResponse_Decode,
     sizeof DeleteMonitoredItemsResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    DeleteMonitoredItemsResponse_Fields
-};
+    DeleteMonitoredItemsResponse_Fields};
 #endif
 
 #endif
@@ -16021,9 +15775,12 @@ void OpcUa_CreateSubscriptionRequest_Clear(void* pValue)
 /*============================================================================
  * OpcUa_CreateSubscriptionRequest_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_CreateSubscriptionRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_CreateSubscriptionRequest_Encode(const void* pValue,
+                                                         SOPC_Buffer* buf,
+                                                         uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Encode(&OpcUa_CreateSubscriptionRequest_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Encode(&OpcUa_CreateSubscriptionRequest_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -16031,7 +15788,8 @@ SOPC_ReturnStatus OpcUa_CreateSubscriptionRequest_Encode(const void* pValue, SOP
  *===========================================================================*/
 SOPC_ReturnStatus OpcUa_CreateSubscriptionRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Decode(&OpcUa_CreateSubscriptionRequest_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Decode(&OpcUa_CreateSubscriptionRequest_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -16039,45 +15797,45 @@ SOPC_ReturnStatus OpcUa_CreateSubscriptionRequest_Decode(void* pValue, SOPC_Buff
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor CreateSubscriptionRequest_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Double_Id, // typeIndex
+        true,                                                                             // isBuiltIn
+        false,                                                                            // isArrayLength
+        true,                                                                             // isToEncode
+        (uint32_t) SOPC_Double_Id,                                                        // typeIndex
         (uint32_t) offsetof(OpcUa_CreateSubscriptionRequest, RequestedPublishingInterval) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                        // isBuiltIn
+        false,                                                                       // isArrayLength
+        true,                                                                        // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                   // typeIndex
         (uint32_t) offsetof(OpcUa_CreateSubscriptionRequest, RequestedLifetimeCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                            // isBuiltIn
+        false,                                                                           // isArrayLength
+        true,                                                                            // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                       // typeIndex
         (uint32_t) offsetof(OpcUa_CreateSubscriptionRequest, RequestedMaxKeepAliveCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                            // isBuiltIn
+        false,                                                                           // isArrayLength
+        true,                                                                            // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                       // typeIndex
         (uint32_t) offsetof(OpcUa_CreateSubscriptionRequest, MaxNotificationsPerPublish) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                                   // isBuiltIn
+        false,                                                                  // isArrayLength
+        true,                                                                   // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                                             // typeIndex
         (uint32_t) offsetof(OpcUa_CreateSubscriptionRequest, PublishingEnabled) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Byte_Id, // typeIndex
+        true,                                                          // isBuiltIn
+        false,                                                         // isArrayLength
+        true,                                                          // isToEncode
+        (uint32_t) SOPC_Byte_Id,                                       // typeIndex
         (uint32_t) offsetof(OpcUa_CreateSubscriptionRequest, Priority) // offset
     },
 };
@@ -16085,8 +15843,7 @@ static const SOPC_EncodeableType_FieldDescriptor CreateSubscriptionRequest_Field
 /*============================================================================
  * Descriptor of the CreateSubscriptionRequest encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_CreateSubscriptionRequest_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_CreateSubscriptionRequest_EncodeableType = {
     "CreateSubscriptionRequest",
     OpcUaId_CreateSubscriptionRequest,
     OpcUaId_CreateSubscriptionRequest_Encoding_DefaultBinary,
@@ -16099,8 +15856,7 @@ SOPC_EncodeableType OpcUa_CreateSubscriptionRequest_EncodeableType =
     OpcUa_CreateSubscriptionRequest_Encode,
     OpcUa_CreateSubscriptionRequest_Decode,
     sizeof CreateSubscriptionRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    CreateSubscriptionRequest_Fields
-};
+    CreateSubscriptionRequest_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_CreateSubscriptionResponse
@@ -16123,9 +15879,12 @@ void OpcUa_CreateSubscriptionResponse_Clear(void* pValue)
 /*============================================================================
  * OpcUa_CreateSubscriptionResponse_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_CreateSubscriptionResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_CreateSubscriptionResponse_Encode(const void* pValue,
+                                                          SOPC_Buffer* buf,
+                                                          uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Encode(&OpcUa_CreateSubscriptionResponse_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Encode(&OpcUa_CreateSubscriptionResponse_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -16133,7 +15892,8 @@ SOPC_ReturnStatus OpcUa_CreateSubscriptionResponse_Encode(const void* pValue, SO
  *===========================================================================*/
 SOPC_ReturnStatus OpcUa_CreateSubscriptionResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Decode(&OpcUa_CreateSubscriptionResponse_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Decode(&OpcUa_CreateSubscriptionResponse_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -16141,38 +15901,38 @@ SOPC_ReturnStatus OpcUa_CreateSubscriptionResponse_Decode(void* pValue, SOPC_Buf
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor CreateSubscriptionResponse_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        false, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader, // typeIndex
+        false,                                                                // isBuiltIn
+        false,                                                                // isArrayLength
+        false,                                                                // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader,                     // typeIndex
         (uint32_t) offsetof(OpcUa_CreateSubscriptionResponse, ResponseHeader) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                 // isBuiltIn
+        false,                                                                // isArrayLength
+        true,                                                                 // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                            // typeIndex
         (uint32_t) offsetof(OpcUa_CreateSubscriptionResponse, SubscriptionId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Double_Id, // typeIndex
+        true,                                                                            // isBuiltIn
+        false,                                                                           // isArrayLength
+        true,                                                                            // isToEncode
+        (uint32_t) SOPC_Double_Id,                                                       // typeIndex
         (uint32_t) offsetof(OpcUa_CreateSubscriptionResponse, RevisedPublishingInterval) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                       // isBuiltIn
+        false,                                                                      // isArrayLength
+        true,                                                                       // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                  // typeIndex
         (uint32_t) offsetof(OpcUa_CreateSubscriptionResponse, RevisedLifetimeCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                           // isBuiltIn
+        false,                                                                          // isArrayLength
+        true,                                                                           // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                      // typeIndex
         (uint32_t) offsetof(OpcUa_CreateSubscriptionResponse, RevisedMaxKeepAliveCount) // offset
     },
 };
@@ -16180,8 +15940,7 @@ static const SOPC_EncodeableType_FieldDescriptor CreateSubscriptionResponse_Fiel
 /*============================================================================
  * Descriptor of the CreateSubscriptionResponse encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_CreateSubscriptionResponse_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_CreateSubscriptionResponse_EncodeableType = {
     "CreateSubscriptionResponse",
     OpcUaId_CreateSubscriptionResponse,
     OpcUaId_CreateSubscriptionResponse_Encoding_DefaultBinary,
@@ -16194,8 +15953,7 @@ SOPC_EncodeableType OpcUa_CreateSubscriptionResponse_EncodeableType =
     OpcUa_CreateSubscriptionResponse_Encode,
     OpcUa_CreateSubscriptionResponse_Decode,
     sizeof CreateSubscriptionResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    CreateSubscriptionResponse_Fields
-};
+    CreateSubscriptionResponse_Fields};
 #endif
 
 #endif
@@ -16220,9 +15978,12 @@ void OpcUa_ModifySubscriptionRequest_Clear(void* pValue)
 /*============================================================================
  * OpcUa_ModifySubscriptionRequest_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ModifySubscriptionRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_ModifySubscriptionRequest_Encode(const void* pValue,
+                                                         SOPC_Buffer* buf,
+                                                         uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Encode(&OpcUa_ModifySubscriptionRequest_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Encode(&OpcUa_ModifySubscriptionRequest_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -16230,7 +15991,8 @@ SOPC_ReturnStatus OpcUa_ModifySubscriptionRequest_Encode(const void* pValue, SOP
  *===========================================================================*/
 SOPC_ReturnStatus OpcUa_ModifySubscriptionRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Decode(&OpcUa_ModifySubscriptionRequest_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Decode(&OpcUa_ModifySubscriptionRequest_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -16238,45 +16000,45 @@ SOPC_ReturnStatus OpcUa_ModifySubscriptionRequest_Decode(void* pValue, SOPC_Buff
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ModifySubscriptionRequest_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                // isBuiltIn
+        false,                                                               // isArrayLength
+        true,                                                                // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                           // typeIndex
         (uint32_t) offsetof(OpcUa_ModifySubscriptionRequest, SubscriptionId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Double_Id, // typeIndex
+        true,                                                                             // isBuiltIn
+        false,                                                                            // isArrayLength
+        true,                                                                             // isToEncode
+        (uint32_t) SOPC_Double_Id,                                                        // typeIndex
         (uint32_t) offsetof(OpcUa_ModifySubscriptionRequest, RequestedPublishingInterval) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                        // isBuiltIn
+        false,                                                                       // isArrayLength
+        true,                                                                        // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                   // typeIndex
         (uint32_t) offsetof(OpcUa_ModifySubscriptionRequest, RequestedLifetimeCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                            // isBuiltIn
+        false,                                                                           // isArrayLength
+        true,                                                                            // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                       // typeIndex
         (uint32_t) offsetof(OpcUa_ModifySubscriptionRequest, RequestedMaxKeepAliveCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                            // isBuiltIn
+        false,                                                                           // isArrayLength
+        true,                                                                            // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                       // typeIndex
         (uint32_t) offsetof(OpcUa_ModifySubscriptionRequest, MaxNotificationsPerPublish) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Byte_Id, // typeIndex
+        true,                                                          // isBuiltIn
+        false,                                                         // isArrayLength
+        true,                                                          // isToEncode
+        (uint32_t) SOPC_Byte_Id,                                       // typeIndex
         (uint32_t) offsetof(OpcUa_ModifySubscriptionRequest, Priority) // offset
     },
 };
@@ -16284,8 +16046,7 @@ static const SOPC_EncodeableType_FieldDescriptor ModifySubscriptionRequest_Field
 /*============================================================================
  * Descriptor of the ModifySubscriptionRequest encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_ModifySubscriptionRequest_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_ModifySubscriptionRequest_EncodeableType = {
     "ModifySubscriptionRequest",
     OpcUaId_ModifySubscriptionRequest,
     OpcUaId_ModifySubscriptionRequest_Encoding_DefaultBinary,
@@ -16298,8 +16059,7 @@ SOPC_EncodeableType OpcUa_ModifySubscriptionRequest_EncodeableType =
     OpcUa_ModifySubscriptionRequest_Encode,
     OpcUa_ModifySubscriptionRequest_Decode,
     sizeof ModifySubscriptionRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    ModifySubscriptionRequest_Fields
-};
+    ModifySubscriptionRequest_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ModifySubscriptionResponse
@@ -16322,9 +16082,12 @@ void OpcUa_ModifySubscriptionResponse_Clear(void* pValue)
 /*============================================================================
  * OpcUa_ModifySubscriptionResponse_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ModifySubscriptionResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_ModifySubscriptionResponse_Encode(const void* pValue,
+                                                          SOPC_Buffer* buf,
+                                                          uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Encode(&OpcUa_ModifySubscriptionResponse_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Encode(&OpcUa_ModifySubscriptionResponse_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -16332,7 +16095,8 @@ SOPC_ReturnStatus OpcUa_ModifySubscriptionResponse_Encode(const void* pValue, SO
  *===========================================================================*/
 SOPC_ReturnStatus OpcUa_ModifySubscriptionResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Decode(&OpcUa_ModifySubscriptionResponse_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Decode(&OpcUa_ModifySubscriptionResponse_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -16340,31 +16104,31 @@ SOPC_ReturnStatus OpcUa_ModifySubscriptionResponse_Decode(void* pValue, SOPC_Buf
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ModifySubscriptionResponse_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        false, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader, // typeIndex
+        false,                                                                // isBuiltIn
+        false,                                                                // isArrayLength
+        false,                                                                // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader,                     // typeIndex
         (uint32_t) offsetof(OpcUa_ModifySubscriptionResponse, ResponseHeader) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Double_Id, // typeIndex
+        true,                                                                            // isBuiltIn
+        false,                                                                           // isArrayLength
+        true,                                                                            // isToEncode
+        (uint32_t) SOPC_Double_Id,                                                       // typeIndex
         (uint32_t) offsetof(OpcUa_ModifySubscriptionResponse, RevisedPublishingInterval) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                       // isBuiltIn
+        false,                                                                      // isArrayLength
+        true,                                                                       // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                  // typeIndex
         (uint32_t) offsetof(OpcUa_ModifySubscriptionResponse, RevisedLifetimeCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                           // isBuiltIn
+        false,                                                                          // isArrayLength
+        true,                                                                           // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                      // typeIndex
         (uint32_t) offsetof(OpcUa_ModifySubscriptionResponse, RevisedMaxKeepAliveCount) // offset
     },
 };
@@ -16372,8 +16136,7 @@ static const SOPC_EncodeableType_FieldDescriptor ModifySubscriptionResponse_Fiel
 /*============================================================================
  * Descriptor of the ModifySubscriptionResponse encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_ModifySubscriptionResponse_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_ModifySubscriptionResponse_EncodeableType = {
     "ModifySubscriptionResponse",
     OpcUaId_ModifySubscriptionResponse,
     OpcUaId_ModifySubscriptionResponse_Encoding_DefaultBinary,
@@ -16386,8 +16149,7 @@ SOPC_EncodeableType OpcUa_ModifySubscriptionResponse_EncodeableType =
     OpcUa_ModifySubscriptionResponse_Encode,
     OpcUa_ModifySubscriptionResponse_Decode,
     sizeof ModifySubscriptionResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    ModifySubscriptionResponse_Fields
-};
+    ModifySubscriptionResponse_Fields};
 #endif
 
 #endif
@@ -16412,7 +16174,9 @@ void OpcUa_SetPublishingModeRequest_Clear(void* pValue)
 /*============================================================================
  * OpcUa_SetPublishingModeRequest_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SetPublishingModeRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_SetPublishingModeRequest_Encode(const void* pValue,
+                                                        SOPC_Buffer* buf,
+                                                        uint32_t nestedStructLevel)
 {
     return SOPC_EncodeableObject_Encode(&OpcUa_SetPublishingModeRequest_EncodeableType, pValue, buf, nestedStructLevel);
 }
@@ -16430,24 +16194,24 @@ SOPC_ReturnStatus OpcUa_SetPublishingModeRequest_Decode(void* pValue, SOPC_Buffe
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor SetPublishingModeRequest_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                                  // isBuiltIn
+        false,                                                                 // isArrayLength
+        true,                                                                  // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                                            // typeIndex
         (uint32_t) offsetof(OpcUa_SetPublishingModeRequest, PublishingEnabled) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                    // isBuiltIn
+        true,                                                                    // isArrayLength
+        true,                                                                    // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                // typeIndex
         (uint32_t) offsetof(OpcUa_SetPublishingModeRequest, NoOfSubscriptionIds) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                // isBuiltIn
+        false,                                                               // isArrayLength
+        true,                                                                // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                           // typeIndex
         (uint32_t) offsetof(OpcUa_SetPublishingModeRequest, SubscriptionIds) // offset
     },
 };
@@ -16455,8 +16219,7 @@ static const SOPC_EncodeableType_FieldDescriptor SetPublishingModeRequest_Fields
 /*============================================================================
  * Descriptor of the SetPublishingModeRequest encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_SetPublishingModeRequest_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_SetPublishingModeRequest_EncodeableType = {
     "SetPublishingModeRequest",
     OpcUaId_SetPublishingModeRequest,
     OpcUaId_SetPublishingModeRequest_Encoding_DefaultBinary,
@@ -16469,8 +16232,7 @@ SOPC_EncodeableType OpcUa_SetPublishingModeRequest_EncodeableType =
     OpcUa_SetPublishingModeRequest_Encode,
     OpcUa_SetPublishingModeRequest_Decode,
     sizeof SetPublishingModeRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    SetPublishingModeRequest_Fields
-};
+    SetPublishingModeRequest_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_SetPublishingModeResponse
@@ -16493,9 +16255,12 @@ void OpcUa_SetPublishingModeResponse_Clear(void* pValue)
 /*============================================================================
  * OpcUa_SetPublishingModeResponse_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SetPublishingModeResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_SetPublishingModeResponse_Encode(const void* pValue,
+                                                         SOPC_Buffer* buf,
+                                                         uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Encode(&OpcUa_SetPublishingModeResponse_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Encode(&OpcUa_SetPublishingModeResponse_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -16503,7 +16268,8 @@ SOPC_ReturnStatus OpcUa_SetPublishingModeResponse_Encode(const void* pValue, SOP
  *===========================================================================*/
 SOPC_ReturnStatus OpcUa_SetPublishingModeResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Decode(&OpcUa_SetPublishingModeResponse_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Decode(&OpcUa_SetPublishingModeResponse_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -16511,38 +16277,38 @@ SOPC_ReturnStatus OpcUa_SetPublishingModeResponse_Decode(void* pValue, SOPC_Buff
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor SetPublishingModeResponse_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        false, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader, // typeIndex
+        false,                                                               // isBuiltIn
+        false,                                                               // isArrayLength
+        false,                                                               // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader,                    // typeIndex
         (uint32_t) offsetof(OpcUa_SetPublishingModeResponse, ResponseHeader) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                             // isBuiltIn
+        true,                                                             // isArrayLength
+        true,                                                             // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                         // typeIndex
         (uint32_t) offsetof(OpcUa_SetPublishingModeResponse, NoOfResults) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_StatusCode_Id, // typeIndex
+        true,                                                         // isBuiltIn
+        false,                                                        // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_StatusCode_Id,                                // typeIndex
         (uint32_t) offsetof(OpcUa_SetPublishingModeResponse, Results) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                     // isBuiltIn
+        true,                                                                     // isArrayLength
+        true,                                                                     // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                 // typeIndex
         (uint32_t) offsetof(OpcUa_SetPublishingModeResponse, NoOfDiagnosticInfos) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DiagnosticInfo_Id, // typeIndex
+        true,                                                                 // isBuiltIn
+        false,                                                                // isArrayLength
+        true,                                                                 // isToEncode
+        (uint32_t) SOPC_DiagnosticInfo_Id,                                    // typeIndex
         (uint32_t) offsetof(OpcUa_SetPublishingModeResponse, DiagnosticInfos) // offset
     },
 };
@@ -16550,8 +16316,7 @@ static const SOPC_EncodeableType_FieldDescriptor SetPublishingModeResponse_Field
 /*============================================================================
  * Descriptor of the SetPublishingModeResponse encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_SetPublishingModeResponse_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_SetPublishingModeResponse_EncodeableType = {
     "SetPublishingModeResponse",
     OpcUaId_SetPublishingModeResponse,
     OpcUaId_SetPublishingModeResponse_Encoding_DefaultBinary,
@@ -16564,8 +16329,7 @@ SOPC_EncodeableType OpcUa_SetPublishingModeResponse_EncodeableType =
     OpcUa_SetPublishingModeResponse_Encode,
     OpcUa_SetPublishingModeResponse_Decode,
     sizeof SetPublishingModeResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    SetPublishingModeResponse_Fields
-};
+    SetPublishingModeResponse_Fields};
 #endif
 
 #endif
@@ -16607,31 +16371,31 @@ SOPC_ReturnStatus OpcUa_NotificationMessage_Decode(void* pValue, SOPC_Buffer* bu
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor NotificationMessage_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                          // isBuiltIn
+        false,                                                         // isArrayLength
+        true,                                                          // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                     // typeIndex
         (uint32_t) offsetof(OpcUa_NotificationMessage, SequenceNumber) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DateTime_Id, // typeIndex
+        true,                                                       // isBuiltIn
+        false,                                                      // isArrayLength
+        true,                                                       // isToEncode
+        (uint32_t) SOPC_DateTime_Id,                                // typeIndex
         (uint32_t) offsetof(OpcUa_NotificationMessage, PublishTime) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                // isBuiltIn
+        true,                                                                // isArrayLength
+        true,                                                                // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                            // typeIndex
         (uint32_t) offsetof(OpcUa_NotificationMessage, NoOfNotificationData) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ExtensionObject_Id, // typeIndex
+        true,                                                            // isBuiltIn
+        false,                                                           // isArrayLength
+        true,                                                            // isToEncode
+        (uint32_t) SOPC_ExtensionObject_Id,                              // typeIndex
         (uint32_t) offsetof(OpcUa_NotificationMessage, NotificationData) // offset
     },
 };
@@ -16639,8 +16403,7 @@ static const SOPC_EncodeableType_FieldDescriptor NotificationMessage_Fields[] = 
 /*============================================================================
  * Descriptor of the NotificationMessage encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_NotificationMessage_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_NotificationMessage_EncodeableType = {
     "NotificationMessage",
     OpcUaId_NotificationMessage,
     OpcUaId_NotificationMessage_Encoding_DefaultBinary,
@@ -16653,8 +16416,7 @@ SOPC_EncodeableType OpcUa_NotificationMessage_EncodeableType =
     OpcUa_NotificationMessage_Encode,
     OpcUa_NotificationMessage_Decode,
     sizeof NotificationMessage_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    NotificationMessage_Fields
-};
+    NotificationMessage_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_MonitoredItemNotification
@@ -16677,9 +16439,12 @@ void OpcUa_MonitoredItemNotification_Clear(void* pValue)
 /*============================================================================
  * OpcUa_MonitoredItemNotification_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_MonitoredItemNotification_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_MonitoredItemNotification_Encode(const void* pValue,
+                                                         SOPC_Buffer* buf,
+                                                         uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Encode(&OpcUa_MonitoredItemNotification_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Encode(&OpcUa_MonitoredItemNotification_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -16687,7 +16452,8 @@ SOPC_ReturnStatus OpcUa_MonitoredItemNotification_Encode(const void* pValue, SOP
  *===========================================================================*/
 SOPC_ReturnStatus OpcUa_MonitoredItemNotification_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Decode(&OpcUa_MonitoredItemNotification_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Decode(&OpcUa_MonitoredItemNotification_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -16695,17 +16461,17 @@ SOPC_ReturnStatus OpcUa_MonitoredItemNotification_Decode(void* pValue, SOPC_Buff
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor MonitoredItemNotification_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                              // isBuiltIn
+        false,                                                             // isArrayLength
+        true,                                                              // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                         // typeIndex
         (uint32_t) offsetof(OpcUa_MonitoredItemNotification, ClientHandle) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DataValue_Id, // typeIndex
+        true,                                                       // isBuiltIn
+        false,                                                      // isArrayLength
+        true,                                                       // isToEncode
+        (uint32_t) SOPC_DataValue_Id,                               // typeIndex
         (uint32_t) offsetof(OpcUa_MonitoredItemNotification, Value) // offset
     },
 };
@@ -16713,8 +16479,7 @@ static const SOPC_EncodeableType_FieldDescriptor MonitoredItemNotification_Field
 /*============================================================================
  * Descriptor of the MonitoredItemNotification encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_MonitoredItemNotification_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_MonitoredItemNotification_EncodeableType = {
     "MonitoredItemNotification",
     OpcUaId_MonitoredItemNotification,
     OpcUaId_MonitoredItemNotification_Encoding_DefaultBinary,
@@ -16727,8 +16492,7 @@ SOPC_EncodeableType OpcUa_MonitoredItemNotification_EncodeableType =
     OpcUa_MonitoredItemNotification_Encode,
     OpcUa_MonitoredItemNotification_Decode,
     sizeof MonitoredItemNotification_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    MonitoredItemNotification_Fields
-};
+    MonitoredItemNotification_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_DataChangeNotification
@@ -16769,31 +16533,31 @@ SOPC_ReturnStatus OpcUa_DataChangeNotification_Decode(void* pValue, SOPC_Buffer*
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DataChangeNotification_Fields[] = {
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                 // isBuiltIn
+        true,                                                                 // isArrayLength
+        true,                                                                 // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                             // typeIndex
         (uint32_t) offsetof(OpcUa_DataChangeNotification, NoOfMonitoredItems) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_MonitoredItemNotification, // typeIndex
+        false,                                                            // isBuiltIn
+        false,                                                            // isArrayLength
+        true,                                                             // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_MonitoredItemNotification,      // typeIndex
         (uint32_t) offsetof(OpcUa_DataChangeNotification, MonitoredItems) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                  // isBuiltIn
+        true,                                                                  // isArrayLength
+        true,                                                                  // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                              // typeIndex
         (uint32_t) offsetof(OpcUa_DataChangeNotification, NoOfDiagnosticInfos) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DiagnosticInfo_Id, // typeIndex
+        true,                                                              // isBuiltIn
+        false,                                                             // isArrayLength
+        true,                                                              // isToEncode
+        (uint32_t) SOPC_DiagnosticInfo_Id,                                 // typeIndex
         (uint32_t) offsetof(OpcUa_DataChangeNotification, DiagnosticInfos) // offset
     },
 };
@@ -16801,8 +16565,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataChangeNotification_Fields[]
 /*============================================================================
  * Descriptor of the DataChangeNotification encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_DataChangeNotification_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_DataChangeNotification_EncodeableType = {
     "DataChangeNotification",
     OpcUaId_DataChangeNotification,
     OpcUaId_DataChangeNotification_Encoding_DefaultBinary,
@@ -16815,8 +16578,7 @@ SOPC_EncodeableType OpcUa_DataChangeNotification_EncodeableType =
     OpcUa_DataChangeNotification_Encode,
     OpcUa_DataChangeNotification_Decode,
     sizeof DataChangeNotification_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    DataChangeNotification_Fields
-};
+    DataChangeNotification_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_EventFieldList
@@ -16857,24 +16619,24 @@ SOPC_ReturnStatus OpcUa_EventFieldList_Decode(void* pValue, SOPC_Buffer* buf, ui
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor EventFieldList_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                   // isBuiltIn
+        false,                                                  // isArrayLength
+        true,                                                   // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                              // typeIndex
         (uint32_t) offsetof(OpcUa_EventFieldList, ClientHandle) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        true,                                                      // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                  // typeIndex
         (uint32_t) offsetof(OpcUa_EventFieldList, NoOfEventFields) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Variant_Id, // typeIndex
+        true,                                                  // isBuiltIn
+        false,                                                 // isArrayLength
+        true,                                                  // isToEncode
+        (uint32_t) SOPC_Variant_Id,                            // typeIndex
         (uint32_t) offsetof(OpcUa_EventFieldList, EventFields) // offset
     },
 };
@@ -16882,8 +16644,7 @@ static const SOPC_EncodeableType_FieldDescriptor EventFieldList_Fields[] = {
 /*============================================================================
  * Descriptor of the EventFieldList encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_EventFieldList_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_EventFieldList_EncodeableType = {
     "EventFieldList",
     OpcUaId_EventFieldList,
     OpcUaId_EventFieldList_Encoding_DefaultBinary,
@@ -16896,8 +16657,7 @@ SOPC_EncodeableType OpcUa_EventFieldList_EncodeableType =
     OpcUa_EventFieldList_Encode,
     OpcUa_EventFieldList_Decode,
     sizeof EventFieldList_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    EventFieldList_Fields
-};
+    EventFieldList_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_EventNotificationList
@@ -16938,17 +16698,17 @@ SOPC_ReturnStatus OpcUa_EventNotificationList_Decode(void* pValue, SOPC_Buffer* 
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor EventNotificationList_Fields[] = {
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                        // isBuiltIn
+        true,                                                        // isArrayLength
+        true,                                                        // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                    // typeIndex
         (uint32_t) offsetof(OpcUa_EventNotificationList, NoOfEvents) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_EventFieldList, // typeIndex
+        false,                                                   // isBuiltIn
+        false,                                                   // isArrayLength
+        true,                                                    // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_EventFieldList,        // typeIndex
         (uint32_t) offsetof(OpcUa_EventNotificationList, Events) // offset
     },
 };
@@ -16956,8 +16716,7 @@ static const SOPC_EncodeableType_FieldDescriptor EventNotificationList_Fields[] 
 /*============================================================================
  * Descriptor of the EventNotificationList encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_EventNotificationList_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_EventNotificationList_EncodeableType = {
     "EventNotificationList",
     OpcUaId_EventNotificationList,
     OpcUaId_EventNotificationList_Encoding_DefaultBinary,
@@ -16970,8 +16729,7 @@ SOPC_EncodeableType OpcUa_EventNotificationList_EncodeableType =
     OpcUa_EventNotificationList_Encode,
     OpcUa_EventNotificationList_Decode,
     sizeof EventNotificationList_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    EventNotificationList_Fields
-};
+    EventNotificationList_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_StatusChangeNotification
@@ -16994,7 +16752,9 @@ void OpcUa_StatusChangeNotification_Clear(void* pValue)
 /*============================================================================
  * OpcUa_StatusChangeNotification_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_StatusChangeNotification_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_StatusChangeNotification_Encode(const void* pValue,
+                                                        SOPC_Buffer* buf,
+                                                        uint32_t nestedStructLevel)
 {
     return SOPC_EncodeableObject_Encode(&OpcUa_StatusChangeNotification_EncodeableType, pValue, buf, nestedStructLevel);
 }
@@ -17012,17 +16772,17 @@ SOPC_ReturnStatus OpcUa_StatusChangeNotification_Decode(void* pValue, SOPC_Buffe
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor StatusChangeNotification_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_StatusCode_Id, // typeIndex
+        true,                                                       // isBuiltIn
+        false,                                                      // isArrayLength
+        true,                                                       // isToEncode
+        (uint32_t) SOPC_StatusCode_Id,                              // typeIndex
         (uint32_t) offsetof(OpcUa_StatusChangeNotification, Status) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DiagnosticInfo_Id, // typeIndex
+        true,                                                               // isBuiltIn
+        false,                                                              // isArrayLength
+        true,                                                               // isToEncode
+        (uint32_t) SOPC_DiagnosticInfo_Id,                                  // typeIndex
         (uint32_t) offsetof(OpcUa_StatusChangeNotification, DiagnosticInfo) // offset
     },
 };
@@ -17030,8 +16790,7 @@ static const SOPC_EncodeableType_FieldDescriptor StatusChangeNotification_Fields
 /*============================================================================
  * Descriptor of the StatusChangeNotification encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_StatusChangeNotification_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_StatusChangeNotification_EncodeableType = {
     "StatusChangeNotification",
     OpcUaId_StatusChangeNotification,
     OpcUaId_StatusChangeNotification_Encoding_DefaultBinary,
@@ -17044,8 +16803,7 @@ SOPC_EncodeableType OpcUa_StatusChangeNotification_EncodeableType =
     OpcUa_StatusChangeNotification_Encode,
     OpcUa_StatusChangeNotification_Decode,
     sizeof StatusChangeNotification_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    StatusChangeNotification_Fields
-};
+    StatusChangeNotification_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_SubscriptionAcknowledgement
@@ -17068,9 +16826,12 @@ void OpcUa_SubscriptionAcknowledgement_Clear(void* pValue)
 /*============================================================================
  * OpcUa_SubscriptionAcknowledgement_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SubscriptionAcknowledgement_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_SubscriptionAcknowledgement_Encode(const void* pValue,
+                                                           SOPC_Buffer* buf,
+                                                           uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Encode(&OpcUa_SubscriptionAcknowledgement_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Encode(&OpcUa_SubscriptionAcknowledgement_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -17078,7 +16839,8 @@ SOPC_ReturnStatus OpcUa_SubscriptionAcknowledgement_Encode(const void* pValue, S
  *===========================================================================*/
 SOPC_ReturnStatus OpcUa_SubscriptionAcknowledgement_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Decode(&OpcUa_SubscriptionAcknowledgement_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Decode(&OpcUa_SubscriptionAcknowledgement_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -17086,17 +16848,17 @@ SOPC_ReturnStatus OpcUa_SubscriptionAcknowledgement_Decode(void* pValue, SOPC_Bu
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor SubscriptionAcknowledgement_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                  // isBuiltIn
+        false,                                                                 // isArrayLength
+        true,                                                                  // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                             // typeIndex
         (uint32_t) offsetof(OpcUa_SubscriptionAcknowledgement, SubscriptionId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                  // isBuiltIn
+        false,                                                                 // isArrayLength
+        true,                                                                  // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                             // typeIndex
         (uint32_t) offsetof(OpcUa_SubscriptionAcknowledgement, SequenceNumber) // offset
     },
 };
@@ -17104,8 +16866,7 @@ static const SOPC_EncodeableType_FieldDescriptor SubscriptionAcknowledgement_Fie
 /*============================================================================
  * Descriptor of the SubscriptionAcknowledgement encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_SubscriptionAcknowledgement_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_SubscriptionAcknowledgement_EncodeableType = {
     "SubscriptionAcknowledgement",
     OpcUaId_SubscriptionAcknowledgement,
     OpcUaId_SubscriptionAcknowledgement_Encoding_DefaultBinary,
@@ -17118,8 +16879,7 @@ SOPC_EncodeableType OpcUa_SubscriptionAcknowledgement_EncodeableType =
     OpcUa_SubscriptionAcknowledgement_Encode,
     OpcUa_SubscriptionAcknowledgement_Decode,
     sizeof SubscriptionAcknowledgement_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    SubscriptionAcknowledgement_Fields
-};
+    SubscriptionAcknowledgement_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_Publish
@@ -17161,17 +16921,17 @@ SOPC_ReturnStatus OpcUa_PublishRequest_Decode(void* pValue, SOPC_Buffer* buf, ui
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor PublishRequest_Fields[] = {
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                       // isBuiltIn
+        true,                                                                       // isArrayLength
+        true,                                                                       // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                   // typeIndex
         (uint32_t) offsetof(OpcUa_PublishRequest, NoOfSubscriptionAcknowledgements) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_SubscriptionAcknowledgement, // typeIndex
+        false,                                                                  // isBuiltIn
+        false,                                                                  // isArrayLength
+        true,                                                                   // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_SubscriptionAcknowledgement,          // typeIndex
         (uint32_t) offsetof(OpcUa_PublishRequest, SubscriptionAcknowledgements) // offset
     },
 };
@@ -17179,8 +16939,7 @@ static const SOPC_EncodeableType_FieldDescriptor PublishRequest_Fields[] = {
 /*============================================================================
  * Descriptor of the PublishRequest encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_PublishRequest_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_PublishRequest_EncodeableType = {
     "PublishRequest",
     OpcUaId_PublishRequest,
     OpcUaId_PublishRequest_Encoding_DefaultBinary,
@@ -17193,8 +16952,7 @@ SOPC_EncodeableType OpcUa_PublishRequest_EncodeableType =
     OpcUa_PublishRequest_Encode,
     OpcUa_PublishRequest_Decode,
     sizeof PublishRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    PublishRequest_Fields
-};
+    PublishRequest_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_PublishResponse
@@ -17235,73 +16993,73 @@ SOPC_ReturnStatus OpcUa_PublishResponse_Decode(void* pValue, SOPC_Buffer* buf, u
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor PublishResponse_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        false, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader, // typeIndex
+        false,                                                     // isBuiltIn
+        false,                                                     // isArrayLength
+        false,                                                     // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader,          // typeIndex
         (uint32_t) offsetof(OpcUa_PublishResponse, ResponseHeader) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                 // typeIndex
         (uint32_t) offsetof(OpcUa_PublishResponse, SubscriptionId) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                    // isBuiltIn
+        true,                                                                    // isArrayLength
+        true,                                                                    // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                // typeIndex
         (uint32_t) offsetof(OpcUa_PublishResponse, NoOfAvailableSequenceNumbers) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                // isBuiltIn
+        false,                                                               // isArrayLength
+        true,                                                                // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                           // typeIndex
         (uint32_t) offsetof(OpcUa_PublishResponse, AvailableSequenceNumbers) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                         // isBuiltIn
+        false,                                                        // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                                   // typeIndex
         (uint32_t) offsetof(OpcUa_PublishResponse, MoreNotifications) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_NotificationMessage, // typeIndex
+        false,                                                          // isBuiltIn
+        false,                                                          // isArrayLength
+        true,                                                           // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_NotificationMessage,          // typeIndex
         (uint32_t) offsetof(OpcUa_PublishResponse, NotificationMessage) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                   // isBuiltIn
+        true,                                                   // isArrayLength
+        true,                                                   // isToEncode
+        (uint32_t) SOPC_Int32_Id,                               // typeIndex
         (uint32_t) offsetof(OpcUa_PublishResponse, NoOfResults) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_StatusCode_Id, // typeIndex
+        true,                                               // isBuiltIn
+        false,                                              // isArrayLength
+        true,                                               // isToEncode
+        (uint32_t) SOPC_StatusCode_Id,                      // typeIndex
         (uint32_t) offsetof(OpcUa_PublishResponse, Results) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                           // isBuiltIn
+        true,                                                           // isArrayLength
+        true,                                                           // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                       // typeIndex
         (uint32_t) offsetof(OpcUa_PublishResponse, NoOfDiagnosticInfos) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DiagnosticInfo_Id, // typeIndex
+        true,                                                       // isBuiltIn
+        false,                                                      // isArrayLength
+        true,                                                       // isToEncode
+        (uint32_t) SOPC_DiagnosticInfo_Id,                          // typeIndex
         (uint32_t) offsetof(OpcUa_PublishResponse, DiagnosticInfos) // offset
     },
 };
@@ -17309,8 +17067,7 @@ static const SOPC_EncodeableType_FieldDescriptor PublishResponse_Fields[] = {
 /*============================================================================
  * Descriptor of the PublishResponse encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_PublishResponse_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_PublishResponse_EncodeableType = {
     "PublishResponse",
     OpcUaId_PublishResponse,
     OpcUaId_PublishResponse_Encoding_DefaultBinary,
@@ -17323,8 +17080,7 @@ SOPC_EncodeableType OpcUa_PublishResponse_EncodeableType =
     OpcUa_PublishResponse_Encode,
     OpcUa_PublishResponse_Decode,
     sizeof PublishResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    PublishResponse_Fields
-};
+    PublishResponse_Fields};
 #endif
 
 #endif
@@ -17367,17 +17123,17 @@ SOPC_ReturnStatus OpcUa_RepublishRequest_Decode(void* pValue, SOPC_Buffer* buf, 
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor RepublishRequest_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                       // isBuiltIn
+        false,                                                      // isArrayLength
+        true,                                                       // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                  // typeIndex
         (uint32_t) offsetof(OpcUa_RepublishRequest, SubscriptionId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                 // isBuiltIn
+        false,                                                                // isArrayLength
+        true,                                                                 // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                            // typeIndex
         (uint32_t) offsetof(OpcUa_RepublishRequest, RetransmitSequenceNumber) // offset
     },
 };
@@ -17385,8 +17141,7 @@ static const SOPC_EncodeableType_FieldDescriptor RepublishRequest_Fields[] = {
 /*============================================================================
  * Descriptor of the RepublishRequest encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_RepublishRequest_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_RepublishRequest_EncodeableType = {
     "RepublishRequest",
     OpcUaId_RepublishRequest,
     OpcUaId_RepublishRequest_Encoding_DefaultBinary,
@@ -17399,8 +17154,7 @@ SOPC_EncodeableType OpcUa_RepublishRequest_EncodeableType =
     OpcUa_RepublishRequest_Encode,
     OpcUa_RepublishRequest_Decode,
     sizeof RepublishRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    RepublishRequest_Fields
-};
+    RepublishRequest_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_RepublishResponse
@@ -17441,17 +17195,17 @@ SOPC_ReturnStatus OpcUa_RepublishResponse_Decode(void* pValue, SOPC_Buffer* buf,
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor RepublishResponse_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        false, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader, // typeIndex
+        false,                                                       // isBuiltIn
+        false,                                                       // isArrayLength
+        false,                                                       // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader,            // typeIndex
         (uint32_t) offsetof(OpcUa_RepublishResponse, ResponseHeader) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_NotificationMessage, // typeIndex
+        false,                                                            // isBuiltIn
+        false,                                                            // isArrayLength
+        true,                                                             // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_NotificationMessage,            // typeIndex
         (uint32_t) offsetof(OpcUa_RepublishResponse, NotificationMessage) // offset
     },
 };
@@ -17459,8 +17213,7 @@ static const SOPC_EncodeableType_FieldDescriptor RepublishResponse_Fields[] = {
 /*============================================================================
  * Descriptor of the RepublishResponse encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_RepublishResponse_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_RepublishResponse_EncodeableType = {
     "RepublishResponse",
     OpcUaId_RepublishResponse,
     OpcUaId_RepublishResponse_Encoding_DefaultBinary,
@@ -17473,8 +17226,7 @@ SOPC_EncodeableType OpcUa_RepublishResponse_EncodeableType =
     OpcUa_RepublishResponse_Encode,
     OpcUa_RepublishResponse_Decode,
     sizeof RepublishResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    RepublishResponse_Fields
-};
+    RepublishResponse_Fields};
 #endif
 
 #endif
@@ -17516,24 +17268,24 @@ SOPC_ReturnStatus OpcUa_TransferResult_Decode(void* pValue, SOPC_Buffer* buf, ui
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor TransferResult_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_StatusCode_Id, // typeIndex
+        true,                                                 // isBuiltIn
+        false,                                                // isArrayLength
+        true,                                                 // isToEncode
+        (uint32_t) SOPC_StatusCode_Id,                        // typeIndex
         (uint32_t) offsetof(OpcUa_TransferResult, StatusCode) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                   // isBuiltIn
+        true,                                                                   // isArrayLength
+        true,                                                                   // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                               // typeIndex
         (uint32_t) offsetof(OpcUa_TransferResult, NoOfAvailableSequenceNumbers) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                               // isBuiltIn
+        false,                                                              // isArrayLength
+        true,                                                               // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                          // typeIndex
         (uint32_t) offsetof(OpcUa_TransferResult, AvailableSequenceNumbers) // offset
     },
 };
@@ -17541,8 +17293,7 @@ static const SOPC_EncodeableType_FieldDescriptor TransferResult_Fields[] = {
 /*============================================================================
  * Descriptor of the TransferResult encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_TransferResult_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_TransferResult_EncodeableType = {
     "TransferResult",
     OpcUaId_TransferResult,
     OpcUaId_TransferResult_Encoding_DefaultBinary,
@@ -17555,8 +17306,7 @@ SOPC_EncodeableType OpcUa_TransferResult_EncodeableType =
     OpcUa_TransferResult_Encode,
     OpcUa_TransferResult_Decode,
     sizeof TransferResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    TransferResult_Fields
-};
+    TransferResult_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_TransferSubscriptions
@@ -17580,9 +17330,12 @@ void OpcUa_TransferSubscriptionsRequest_Clear(void* pValue)
 /*============================================================================
  * OpcUa_TransferSubscriptionsRequest_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_TransferSubscriptionsRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_TransferSubscriptionsRequest_Encode(const void* pValue,
+                                                            SOPC_Buffer* buf,
+                                                            uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Encode(&OpcUa_TransferSubscriptionsRequest_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Encode(&OpcUa_TransferSubscriptionsRequest_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -17590,7 +17343,8 @@ SOPC_ReturnStatus OpcUa_TransferSubscriptionsRequest_Encode(const void* pValue, 
  *===========================================================================*/
 SOPC_ReturnStatus OpcUa_TransferSubscriptionsRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Decode(&OpcUa_TransferSubscriptionsRequest_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Decode(&OpcUa_TransferSubscriptionsRequest_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -17598,24 +17352,24 @@ SOPC_ReturnStatus OpcUa_TransferSubscriptionsRequest_Decode(void* pValue, SOPC_B
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor TransferSubscriptionsRequest_Fields[] = {
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                        // isBuiltIn
+        true,                                                                        // isArrayLength
+        true,                                                                        // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                    // typeIndex
         (uint32_t) offsetof(OpcUa_TransferSubscriptionsRequest, NoOfSubscriptionIds) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                    // isBuiltIn
+        false,                                                                   // isArrayLength
+        true,                                                                    // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                               // typeIndex
         (uint32_t) offsetof(OpcUa_TransferSubscriptionsRequest, SubscriptionIds) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                                      // isBuiltIn
+        false,                                                                     // isArrayLength
+        true,                                                                      // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                                                // typeIndex
         (uint32_t) offsetof(OpcUa_TransferSubscriptionsRequest, SendInitialValues) // offset
     },
 };
@@ -17623,8 +17377,7 @@ static const SOPC_EncodeableType_FieldDescriptor TransferSubscriptionsRequest_Fi
 /*============================================================================
  * Descriptor of the TransferSubscriptionsRequest encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_TransferSubscriptionsRequest_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_TransferSubscriptionsRequest_EncodeableType = {
     "TransferSubscriptionsRequest",
     OpcUaId_TransferSubscriptionsRequest,
     OpcUaId_TransferSubscriptionsRequest_Encoding_DefaultBinary,
@@ -17637,8 +17390,7 @@ SOPC_EncodeableType OpcUa_TransferSubscriptionsRequest_EncodeableType =
     OpcUa_TransferSubscriptionsRequest_Encode,
     OpcUa_TransferSubscriptionsRequest_Decode,
     sizeof TransferSubscriptionsRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    TransferSubscriptionsRequest_Fields
-};
+    TransferSubscriptionsRequest_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_TransferSubscriptionsResponse
@@ -17661,9 +17413,12 @@ void OpcUa_TransferSubscriptionsResponse_Clear(void* pValue)
 /*============================================================================
  * OpcUa_TransferSubscriptionsResponse_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_TransferSubscriptionsResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_TransferSubscriptionsResponse_Encode(const void* pValue,
+                                                             SOPC_Buffer* buf,
+                                                             uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Encode(&OpcUa_TransferSubscriptionsResponse_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Encode(&OpcUa_TransferSubscriptionsResponse_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -17671,7 +17426,8 @@ SOPC_ReturnStatus OpcUa_TransferSubscriptionsResponse_Encode(const void* pValue,
  *===========================================================================*/
 SOPC_ReturnStatus OpcUa_TransferSubscriptionsResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Decode(&OpcUa_TransferSubscriptionsResponse_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Decode(&OpcUa_TransferSubscriptionsResponse_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -17679,38 +17435,38 @@ SOPC_ReturnStatus OpcUa_TransferSubscriptionsResponse_Decode(void* pValue, SOPC_
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor TransferSubscriptionsResponse_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        false, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader, // typeIndex
+        false,                                                                   // isBuiltIn
+        false,                                                                   // isArrayLength
+        false,                                                                   // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader,                        // typeIndex
         (uint32_t) offsetof(OpcUa_TransferSubscriptionsResponse, ResponseHeader) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                 // isBuiltIn
+        true,                                                                 // isArrayLength
+        true,                                                                 // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                             // typeIndex
         (uint32_t) offsetof(OpcUa_TransferSubscriptionsResponse, NoOfResults) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_TransferResult, // typeIndex
+        false,                                                            // isBuiltIn
+        false,                                                            // isArrayLength
+        true,                                                             // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_TransferResult,                 // typeIndex
         (uint32_t) offsetof(OpcUa_TransferSubscriptionsResponse, Results) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                         // isBuiltIn
+        true,                                                                         // isArrayLength
+        true,                                                                         // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                     // typeIndex
         (uint32_t) offsetof(OpcUa_TransferSubscriptionsResponse, NoOfDiagnosticInfos) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DiagnosticInfo_Id, // typeIndex
+        true,                                                                     // isBuiltIn
+        false,                                                                    // isArrayLength
+        true,                                                                     // isToEncode
+        (uint32_t) SOPC_DiagnosticInfo_Id,                                        // typeIndex
         (uint32_t) offsetof(OpcUa_TransferSubscriptionsResponse, DiagnosticInfos) // offset
     },
 };
@@ -17718,8 +17474,7 @@ static const SOPC_EncodeableType_FieldDescriptor TransferSubscriptionsResponse_F
 /*============================================================================
  * Descriptor of the TransferSubscriptionsResponse encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_TransferSubscriptionsResponse_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_TransferSubscriptionsResponse_EncodeableType = {
     "TransferSubscriptionsResponse",
     OpcUaId_TransferSubscriptionsResponse,
     OpcUaId_TransferSubscriptionsResponse_Encoding_DefaultBinary,
@@ -17732,8 +17487,7 @@ SOPC_EncodeableType OpcUa_TransferSubscriptionsResponse_EncodeableType =
     OpcUa_TransferSubscriptionsResponse_Encode,
     OpcUa_TransferSubscriptionsResponse_Decode,
     sizeof TransferSubscriptionsResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    TransferSubscriptionsResponse_Fields
-};
+    TransferSubscriptionsResponse_Fields};
 #endif
 
 #endif
@@ -17758,9 +17512,12 @@ void OpcUa_DeleteSubscriptionsRequest_Clear(void* pValue)
 /*============================================================================
  * OpcUa_DeleteSubscriptionsRequest_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_DeleteSubscriptionsRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_DeleteSubscriptionsRequest_Encode(const void* pValue,
+                                                          SOPC_Buffer* buf,
+                                                          uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Encode(&OpcUa_DeleteSubscriptionsRequest_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Encode(&OpcUa_DeleteSubscriptionsRequest_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -17768,7 +17525,8 @@ SOPC_ReturnStatus OpcUa_DeleteSubscriptionsRequest_Encode(const void* pValue, SO
  *===========================================================================*/
 SOPC_ReturnStatus OpcUa_DeleteSubscriptionsRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Decode(&OpcUa_DeleteSubscriptionsRequest_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Decode(&OpcUa_DeleteSubscriptionsRequest_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -17776,17 +17534,17 @@ SOPC_ReturnStatus OpcUa_DeleteSubscriptionsRequest_Decode(void* pValue, SOPC_Buf
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DeleteSubscriptionsRequest_Fields[] = {
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                      // isBuiltIn
+        true,                                                                      // isArrayLength
+        true,                                                                      // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                  // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteSubscriptionsRequest, NoOfSubscriptionIds) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                  // isBuiltIn
+        false,                                                                 // isArrayLength
+        true,                                                                  // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                             // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteSubscriptionsRequest, SubscriptionIds) // offset
     },
 };
@@ -17794,8 +17552,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteSubscriptionsRequest_Fiel
 /*============================================================================
  * Descriptor of the DeleteSubscriptionsRequest encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_DeleteSubscriptionsRequest_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_DeleteSubscriptionsRequest_EncodeableType = {
     "DeleteSubscriptionsRequest",
     OpcUaId_DeleteSubscriptionsRequest,
     OpcUaId_DeleteSubscriptionsRequest_Encoding_DefaultBinary,
@@ -17808,8 +17565,7 @@ SOPC_EncodeableType OpcUa_DeleteSubscriptionsRequest_EncodeableType =
     OpcUa_DeleteSubscriptionsRequest_Encode,
     OpcUa_DeleteSubscriptionsRequest_Decode,
     sizeof DeleteSubscriptionsRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    DeleteSubscriptionsRequest_Fields
-};
+    DeleteSubscriptionsRequest_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_DeleteSubscriptionsResponse
@@ -17832,9 +17588,12 @@ void OpcUa_DeleteSubscriptionsResponse_Clear(void* pValue)
 /*============================================================================
  * OpcUa_DeleteSubscriptionsResponse_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_DeleteSubscriptionsResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_DeleteSubscriptionsResponse_Encode(const void* pValue,
+                                                           SOPC_Buffer* buf,
+                                                           uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Encode(&OpcUa_DeleteSubscriptionsResponse_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Encode(&OpcUa_DeleteSubscriptionsResponse_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -17842,7 +17601,8 @@ SOPC_ReturnStatus OpcUa_DeleteSubscriptionsResponse_Encode(const void* pValue, S
  *===========================================================================*/
 SOPC_ReturnStatus OpcUa_DeleteSubscriptionsResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Decode(&OpcUa_DeleteSubscriptionsResponse_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Decode(&OpcUa_DeleteSubscriptionsResponse_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -17850,38 +17610,38 @@ SOPC_ReturnStatus OpcUa_DeleteSubscriptionsResponse_Decode(void* pValue, SOPC_Bu
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DeleteSubscriptionsResponse_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        false, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader, // typeIndex
+        false,                                                                 // isBuiltIn
+        false,                                                                 // isArrayLength
+        false,                                                                 // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ResponseHeader,                      // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteSubscriptionsResponse, ResponseHeader) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                               // isBuiltIn
+        true,                                                               // isArrayLength
+        true,                                                               // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                           // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteSubscriptionsResponse, NoOfResults) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_StatusCode_Id, // typeIndex
+        true,                                                           // isBuiltIn
+        false,                                                          // isArrayLength
+        true,                                                           // isToEncode
+        (uint32_t) SOPC_StatusCode_Id,                                  // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteSubscriptionsResponse, Results) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                       // isBuiltIn
+        true,                                                                       // isArrayLength
+        true,                                                                       // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                   // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteSubscriptionsResponse, NoOfDiagnosticInfos) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DiagnosticInfo_Id, // typeIndex
+        true,                                                                   // isBuiltIn
+        false,                                                                  // isArrayLength
+        true,                                                                   // isToEncode
+        (uint32_t) SOPC_DiagnosticInfo_Id,                                      // typeIndex
         (uint32_t) offsetof(OpcUa_DeleteSubscriptionsResponse, DiagnosticInfos) // offset
     },
 };
@@ -17889,8 +17649,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteSubscriptionsResponse_Fie
 /*============================================================================
  * Descriptor of the DeleteSubscriptionsResponse encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_DeleteSubscriptionsResponse_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_DeleteSubscriptionsResponse_EncodeableType = {
     "DeleteSubscriptionsResponse",
     OpcUaId_DeleteSubscriptionsResponse,
     OpcUaId_DeleteSubscriptionsResponse_Encoding_DefaultBinary,
@@ -17903,8 +17662,7 @@ SOPC_EncodeableType OpcUa_DeleteSubscriptionsResponse_EncodeableType =
     OpcUa_DeleteSubscriptionsResponse_Encode,
     OpcUa_DeleteSubscriptionsResponse_Decode,
     sizeof DeleteSubscriptionsResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    DeleteSubscriptionsResponse_Fields
-};
+    DeleteSubscriptionsResponse_Fields};
 #endif
 
 #endif
@@ -17946,45 +17704,45 @@ SOPC_ReturnStatus OpcUa_BuildInfo_Decode(void* pValue, SOPC_Buffer* buf, uint32_
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor BuildInfo_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                            // isBuiltIn
+        false,                                           // isArrayLength
+        true,                                            // isToEncode
+        (uint32_t) SOPC_String_Id,                       // typeIndex
         (uint32_t) offsetof(OpcUa_BuildInfo, ProductUri) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                  // isBuiltIn
+        false,                                                 // isArrayLength
+        true,                                                  // isToEncode
+        (uint32_t) SOPC_String_Id,                             // typeIndex
         (uint32_t) offsetof(OpcUa_BuildInfo, ManufacturerName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                             // isBuiltIn
+        false,                                            // isArrayLength
+        true,                                             // isToEncode
+        (uint32_t) SOPC_String_Id,                        // typeIndex
         (uint32_t) offsetof(OpcUa_BuildInfo, ProductName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                 // isBuiltIn
+        false,                                                // isArrayLength
+        true,                                                 // isToEncode
+        (uint32_t) SOPC_String_Id,                            // typeIndex
         (uint32_t) offsetof(OpcUa_BuildInfo, SoftwareVersion) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                             // isBuiltIn
+        false,                                            // isArrayLength
+        true,                                             // isToEncode
+        (uint32_t) SOPC_String_Id,                        // typeIndex
         (uint32_t) offsetof(OpcUa_BuildInfo, BuildNumber) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DateTime_Id, // typeIndex
+        true,                                           // isBuiltIn
+        false,                                          // isArrayLength
+        true,                                           // isToEncode
+        (uint32_t) SOPC_DateTime_Id,                    // typeIndex
         (uint32_t) offsetof(OpcUa_BuildInfo, BuildDate) // offset
     },
 };
@@ -17992,8 +17750,7 @@ static const SOPC_EncodeableType_FieldDescriptor BuildInfo_Fields[] = {
 /*============================================================================
  * Descriptor of the BuildInfo encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_BuildInfo_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_BuildInfo_EncodeableType = {
     "BuildInfo",
     OpcUaId_BuildInfo,
     OpcUaId_BuildInfo_Encoding_DefaultBinary,
@@ -18006,8 +17763,7 @@ SOPC_EncodeableType OpcUa_BuildInfo_EncodeableType =
     OpcUa_BuildInfo_Encode,
     OpcUa_BuildInfo_Decode,
     sizeof BuildInfo_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    BuildInfo_Fields
-};
+    BuildInfo_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_RedundantServerDataType
@@ -18048,24 +17804,24 @@ SOPC_ReturnStatus OpcUa_RedundantServerDataType_Decode(void* pValue, SOPC_Buffer
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor RedundantServerDataType_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                        // isBuiltIn
+        false,                                                       // isArrayLength
+        true,                                                        // isToEncode
+        (uint32_t) SOPC_String_Id,                                   // typeIndex
         (uint32_t) offsetof(OpcUa_RedundantServerDataType, ServerId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Byte_Id, // typeIndex
+        true,                                                            // isBuiltIn
+        false,                                                           // isArrayLength
+        true,                                                            // isToEncode
+        (uint32_t) SOPC_Byte_Id,                                         // typeIndex
         (uint32_t) offsetof(OpcUa_RedundantServerDataType, ServiceLevel) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                           // isBuiltIn
+        false,                                                          // isArrayLength
+        true,                                                           // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                       // typeIndex
         (uint32_t) offsetof(OpcUa_RedundantServerDataType, ServerState) // offset
     },
 };
@@ -18073,8 +17829,7 @@ static const SOPC_EncodeableType_FieldDescriptor RedundantServerDataType_Fields[
 /*============================================================================
  * Descriptor of the RedundantServerDataType encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_RedundantServerDataType_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_RedundantServerDataType_EncodeableType = {
     "RedundantServerDataType",
     OpcUaId_RedundantServerDataType,
     OpcUaId_RedundantServerDataType_Encoding_DefaultBinary,
@@ -18087,8 +17842,7 @@ SOPC_EncodeableType OpcUa_RedundantServerDataType_EncodeableType =
     OpcUa_RedundantServerDataType_Encode,
     OpcUa_RedundantServerDataType_Decode,
     sizeof RedundantServerDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    RedundantServerDataType_Fields
-};
+    RedundantServerDataType_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_EndpointUrlListDataType
@@ -18129,17 +17883,17 @@ SOPC_ReturnStatus OpcUa_EndpointUrlListDataType_Decode(void* pValue, SOPC_Buffer
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor EndpointUrlListDataType_Fields[] = {
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                   // isBuiltIn
+        true,                                                                   // isArrayLength
+        true,                                                                   // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                               // typeIndex
         (uint32_t) offsetof(OpcUa_EndpointUrlListDataType, NoOfEndpointUrlList) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                               // isBuiltIn
+        false,                                                              // isArrayLength
+        true,                                                               // isToEncode
+        (uint32_t) SOPC_String_Id,                                          // typeIndex
         (uint32_t) offsetof(OpcUa_EndpointUrlListDataType, EndpointUrlList) // offset
     },
 };
@@ -18147,8 +17901,7 @@ static const SOPC_EncodeableType_FieldDescriptor EndpointUrlListDataType_Fields[
 /*============================================================================
  * Descriptor of the EndpointUrlListDataType encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_EndpointUrlListDataType_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_EndpointUrlListDataType_EncodeableType = {
     "EndpointUrlListDataType",
     OpcUaId_EndpointUrlListDataType,
     OpcUaId_EndpointUrlListDataType_Encoding_DefaultBinary,
@@ -18161,8 +17914,7 @@ SOPC_EncodeableType OpcUa_EndpointUrlListDataType_EncodeableType =
     OpcUa_EndpointUrlListDataType_Encode,
     OpcUa_EndpointUrlListDataType_Decode,
     sizeof EndpointUrlListDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    EndpointUrlListDataType_Fields
-};
+    EndpointUrlListDataType_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_NetworkGroupDataType
@@ -18203,24 +17955,24 @@ SOPC_ReturnStatus OpcUa_NetworkGroupDataType_Decode(void* pValue, SOPC_Buffer* b
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor NetworkGroupDataType_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_String_Id,                                 // typeIndex
         (uint32_t) offsetof(OpcUa_NetworkGroupDataType, ServerUri) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                             // isBuiltIn
+        true,                                                             // isArrayLength
+        true,                                                             // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                         // typeIndex
         (uint32_t) offsetof(OpcUa_NetworkGroupDataType, NoOfNetworkPaths) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_EndpointUrlListDataType, // typeIndex
+        false,                                                        // isBuiltIn
+        false,                                                        // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_EndpointUrlListDataType,    // typeIndex
         (uint32_t) offsetof(OpcUa_NetworkGroupDataType, NetworkPaths) // offset
     },
 };
@@ -18228,8 +17980,7 @@ static const SOPC_EncodeableType_FieldDescriptor NetworkGroupDataType_Fields[] =
 /*============================================================================
  * Descriptor of the NetworkGroupDataType encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_NetworkGroupDataType_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_NetworkGroupDataType_EncodeableType = {
     "NetworkGroupDataType",
     OpcUaId_NetworkGroupDataType,
     OpcUaId_NetworkGroupDataType_Encoding_DefaultBinary,
@@ -18242,8 +17993,7 @@ SOPC_EncodeableType OpcUa_NetworkGroupDataType_EncodeableType =
     OpcUa_NetworkGroupDataType_Encode,
     OpcUa_NetworkGroupDataType_Decode,
     sizeof NetworkGroupDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    NetworkGroupDataType_Fields
-};
+    NetworkGroupDataType_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_SamplingIntervalDiagnosticsDataType
@@ -18266,17 +18016,23 @@ void OpcUa_SamplingIntervalDiagnosticsDataType_Clear(void* pValue)
 /*============================================================================
  * OpcUa_SamplingIntervalDiagnosticsDataType_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SamplingIntervalDiagnosticsDataType_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_SamplingIntervalDiagnosticsDataType_Encode(const void* pValue,
+                                                                   SOPC_Buffer* buf,
+                                                                   uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Encode(&OpcUa_SamplingIntervalDiagnosticsDataType_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Encode(&OpcUa_SamplingIntervalDiagnosticsDataType_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
  * OpcUa_SamplingIntervalDiagnosticsDataType_Decode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SamplingIntervalDiagnosticsDataType_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_SamplingIntervalDiagnosticsDataType_Decode(void* pValue,
+                                                                   SOPC_Buffer* buf,
+                                                                   uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Decode(&OpcUa_SamplingIntervalDiagnosticsDataType_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Decode(&OpcUa_SamplingIntervalDiagnosticsDataType_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -18284,31 +18040,31 @@ SOPC_ReturnStatus OpcUa_SamplingIntervalDiagnosticsDataType_Decode(void* pValue,
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor SamplingIntervalDiagnosticsDataType_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Double_Id, // typeIndex
+        true,                                                                            // isBuiltIn
+        false,                                                                           // isArrayLength
+        true,                                                                            // isToEncode
+        (uint32_t) SOPC_Double_Id,                                                       // typeIndex
         (uint32_t) offsetof(OpcUa_SamplingIntervalDiagnosticsDataType, SamplingInterval) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                              // isBuiltIn
+        false,                                                                             // isArrayLength
+        true,                                                                              // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                         // typeIndex
         (uint32_t) offsetof(OpcUa_SamplingIntervalDiagnosticsDataType, MonitoredItemCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                                 // isBuiltIn
+        false,                                                                                // isArrayLength
+        true,                                                                                 // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                            // typeIndex
         (uint32_t) offsetof(OpcUa_SamplingIntervalDiagnosticsDataType, MaxMonitoredItemCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                                      // isBuiltIn
+        false,                                                                                     // isArrayLength
+        true,                                                                                      // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                                 // typeIndex
         (uint32_t) offsetof(OpcUa_SamplingIntervalDiagnosticsDataType, DisabledMonitoredItemCount) // offset
     },
 };
@@ -18316,8 +18072,7 @@ static const SOPC_EncodeableType_FieldDescriptor SamplingIntervalDiagnosticsData
 /*============================================================================
  * Descriptor of the SamplingIntervalDiagnosticsDataType encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_SamplingIntervalDiagnosticsDataType_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_SamplingIntervalDiagnosticsDataType_EncodeableType = {
     "SamplingIntervalDiagnosticsDataType",
     OpcUaId_SamplingIntervalDiagnosticsDataType,
     OpcUaId_SamplingIntervalDiagnosticsDataType_Encoding_DefaultBinary,
@@ -18330,8 +18085,7 @@ SOPC_EncodeableType OpcUa_SamplingIntervalDiagnosticsDataType_EncodeableType =
     OpcUa_SamplingIntervalDiagnosticsDataType_Encode,
     OpcUa_SamplingIntervalDiagnosticsDataType_Decode,
     sizeof SamplingIntervalDiagnosticsDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    SamplingIntervalDiagnosticsDataType_Fields
-};
+    SamplingIntervalDiagnosticsDataType_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ServerDiagnosticsSummaryDataType
@@ -18354,17 +18108,23 @@ void OpcUa_ServerDiagnosticsSummaryDataType_Clear(void* pValue)
 /*============================================================================
  * OpcUa_ServerDiagnosticsSummaryDataType_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ServerDiagnosticsSummaryDataType_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_ServerDiagnosticsSummaryDataType_Encode(const void* pValue,
+                                                                SOPC_Buffer* buf,
+                                                                uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Encode(&OpcUa_ServerDiagnosticsSummaryDataType_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Encode(&OpcUa_ServerDiagnosticsSummaryDataType_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
  * OpcUa_ServerDiagnosticsSummaryDataType_Decode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ServerDiagnosticsSummaryDataType_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_ServerDiagnosticsSummaryDataType_Decode(void* pValue,
+                                                                SOPC_Buffer* buf,
+                                                                uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Decode(&OpcUa_ServerDiagnosticsSummaryDataType_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Decode(&OpcUa_ServerDiagnosticsSummaryDataType_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -18372,87 +18132,87 @@ SOPC_ReturnStatus OpcUa_ServerDiagnosticsSummaryDataType_Decode(void* pValue, SO
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ServerDiagnosticsSummaryDataType_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                        // isBuiltIn
+        false,                                                                       // isArrayLength
+        true,                                                                        // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                   // typeIndex
         (uint32_t) offsetof(OpcUa_ServerDiagnosticsSummaryDataType, ServerViewCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                            // isBuiltIn
+        false,                                                                           // isArrayLength
+        true,                                                                            // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                       // typeIndex
         (uint32_t) offsetof(OpcUa_ServerDiagnosticsSummaryDataType, CurrentSessionCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                              // isBuiltIn
+        false,                                                                             // isArrayLength
+        true,                                                                              // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                         // typeIndex
         (uint32_t) offsetof(OpcUa_ServerDiagnosticsSummaryDataType, CumulatedSessionCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                                     // isBuiltIn
+        false,                                                                                    // isArrayLength
+        true,                                                                                     // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                                // typeIndex
         (uint32_t) offsetof(OpcUa_ServerDiagnosticsSummaryDataType, SecurityRejectedSessionCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                             // isBuiltIn
+        false,                                                                            // isArrayLength
+        true,                                                                             // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                        // typeIndex
         (uint32_t) offsetof(OpcUa_ServerDiagnosticsSummaryDataType, RejectedSessionCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                            // isBuiltIn
+        false,                                                                           // isArrayLength
+        true,                                                                            // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                       // typeIndex
         (uint32_t) offsetof(OpcUa_ServerDiagnosticsSummaryDataType, SessionTimeoutCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                          // isBuiltIn
+        false,                                                                         // isArrayLength
+        true,                                                                          // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                     // typeIndex
         (uint32_t) offsetof(OpcUa_ServerDiagnosticsSummaryDataType, SessionAbortCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                                 // isBuiltIn
+        false,                                                                                // isArrayLength
+        true,                                                                                 // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                            // typeIndex
         (uint32_t) offsetof(OpcUa_ServerDiagnosticsSummaryDataType, CurrentSubscriptionCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                                   // isBuiltIn
+        false,                                                                                  // isArrayLength
+        true,                                                                                   // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                              // typeIndex
         (uint32_t) offsetof(OpcUa_ServerDiagnosticsSummaryDataType, CumulatedSubscriptionCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                                // isBuiltIn
+        false,                                                                               // isArrayLength
+        true,                                                                                // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                           // typeIndex
         (uint32_t) offsetof(OpcUa_ServerDiagnosticsSummaryDataType, PublishingIntervalCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                                      // isBuiltIn
+        false,                                                                                     // isArrayLength
+        true,                                                                                      // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                                 // typeIndex
         (uint32_t) offsetof(OpcUa_ServerDiagnosticsSummaryDataType, SecurityRejectedRequestsCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                              // isBuiltIn
+        false,                                                                             // isArrayLength
+        true,                                                                              // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                         // typeIndex
         (uint32_t) offsetof(OpcUa_ServerDiagnosticsSummaryDataType, RejectedRequestsCount) // offset
     },
 };
@@ -18460,8 +18220,7 @@ static const SOPC_EncodeableType_FieldDescriptor ServerDiagnosticsSummaryDataTyp
 /*============================================================================
  * Descriptor of the ServerDiagnosticsSummaryDataType encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_ServerDiagnosticsSummaryDataType_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_ServerDiagnosticsSummaryDataType_EncodeableType = {
     "ServerDiagnosticsSummaryDataType",
     OpcUaId_ServerDiagnosticsSummaryDataType,
     OpcUaId_ServerDiagnosticsSummaryDataType_Encoding_DefaultBinary,
@@ -18474,8 +18233,7 @@ SOPC_EncodeableType OpcUa_ServerDiagnosticsSummaryDataType_EncodeableType =
     OpcUa_ServerDiagnosticsSummaryDataType_Encode,
     OpcUa_ServerDiagnosticsSummaryDataType_Decode,
     sizeof ServerDiagnosticsSummaryDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    ServerDiagnosticsSummaryDataType_Fields
-};
+    ServerDiagnosticsSummaryDataType_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ServerStatusDataType
@@ -18516,45 +18274,45 @@ SOPC_ReturnStatus OpcUa_ServerStatusDataType_Decode(void* pValue, SOPC_Buffer* b
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ServerStatusDataType_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DateTime_Id, // typeIndex
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_DateTime_Id,                               // typeIndex
         (uint32_t) offsetof(OpcUa_ServerStatusDataType, StartTime) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DateTime_Id, // typeIndex
+        true,                                                        // isBuiltIn
+        false,                                                       // isArrayLength
+        true,                                                        // isToEncode
+        (uint32_t) SOPC_DateTime_Id,                                 // typeIndex
         (uint32_t) offsetof(OpcUa_ServerStatusDataType, CurrentTime) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                  // isBuiltIn
+        false,                                                 // isArrayLength
+        true,                                                  // isToEncode
+        (uint32_t) SOPC_Int32_Id,                              // typeIndex
         (uint32_t) offsetof(OpcUa_ServerStatusDataType, State) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_BuildInfo, // typeIndex
+        false,                                                     // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_BuildInfo,               // typeIndex
         (uint32_t) offsetof(OpcUa_ServerStatusDataType, BuildInfo) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                // isBuiltIn
+        false,                                                               // isArrayLength
+        true,                                                                // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                           // typeIndex
         (uint32_t) offsetof(OpcUa_ServerStatusDataType, SecondsTillShutdown) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                                           // isBuiltIn
+        false,                                                          // isArrayLength
+        true,                                                           // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                               // typeIndex
         (uint32_t) offsetof(OpcUa_ServerStatusDataType, ShutdownReason) // offset
     },
 };
@@ -18562,8 +18320,7 @@ static const SOPC_EncodeableType_FieldDescriptor ServerStatusDataType_Fields[] =
 /*============================================================================
  * Descriptor of the ServerStatusDataType encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_ServerStatusDataType_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_ServerStatusDataType_EncodeableType = {
     "ServerStatusDataType",
     OpcUaId_ServerStatusDataType,
     OpcUaId_ServerStatusDataType_Encoding_DefaultBinary,
@@ -18576,8 +18333,7 @@ SOPC_EncodeableType OpcUa_ServerStatusDataType_EncodeableType =
     OpcUa_ServerStatusDataType_Encode,
     OpcUa_ServerStatusDataType_Decode,
     sizeof ServerStatusDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    ServerStatusDataType_Fields
-};
+    ServerStatusDataType_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ServiceCounterDataType
@@ -18618,17 +18374,17 @@ SOPC_ReturnStatus OpcUa_ServiceCounterDataType_Decode(void* pValue, SOPC_Buffer*
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ServiceCounterDataType_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                         // isBuiltIn
+        false,                                                        // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                    // typeIndex
         (uint32_t) offsetof(OpcUa_ServiceCounterDataType, TotalCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                         // isBuiltIn
+        false,                                                        // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                    // typeIndex
         (uint32_t) offsetof(OpcUa_ServiceCounterDataType, ErrorCount) // offset
     },
 };
@@ -18636,8 +18392,7 @@ static const SOPC_EncodeableType_FieldDescriptor ServiceCounterDataType_Fields[]
 /*============================================================================
  * Descriptor of the ServiceCounterDataType encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_ServiceCounterDataType_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_ServiceCounterDataType_EncodeableType = {
     "ServiceCounterDataType",
     OpcUaId_ServiceCounterDataType,
     OpcUaId_ServiceCounterDataType_Encoding_DefaultBinary,
@@ -18650,8 +18405,7 @@ SOPC_EncodeableType OpcUa_ServiceCounterDataType_EncodeableType =
     OpcUa_ServiceCounterDataType_Encode,
     OpcUa_ServiceCounterDataType_Decode,
     sizeof ServiceCounterDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    ServiceCounterDataType_Fields
-};
+    ServiceCounterDataType_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_SessionDiagnosticsDataType
@@ -18674,9 +18428,12 @@ void OpcUa_SessionDiagnosticsDataType_Clear(void* pValue)
 /*============================================================================
  * OpcUa_SessionDiagnosticsDataType_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SessionDiagnosticsDataType_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_SessionDiagnosticsDataType_Encode(const void* pValue,
+                                                          SOPC_Buffer* buf,
+                                                          uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Encode(&OpcUa_SessionDiagnosticsDataType_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Encode(&OpcUa_SessionDiagnosticsDataType_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -18684,7 +18441,8 @@ SOPC_ReturnStatus OpcUa_SessionDiagnosticsDataType_Encode(const void* pValue, SO
  *===========================================================================*/
 SOPC_ReturnStatus OpcUa_SessionDiagnosticsDataType_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Decode(&OpcUa_SessionDiagnosticsDataType_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Decode(&OpcUa_SessionDiagnosticsDataType_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -18692,311 +18450,311 @@ SOPC_ReturnStatus OpcUa_SessionDiagnosticsDataType_Decode(void* pValue, SOPC_Buf
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                            // isBuiltIn
+        false,                                                           // isArrayLength
+        true,                                                            // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                                       // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, SessionId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                              // isBuiltIn
+        false,                                                             // isArrayLength
+        true,                                                              // isToEncode
+        (uint32_t) SOPC_String_Id,                                         // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, SessionName) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ApplicationDescription, // typeIndex
+        false,                                                                   // isBuiltIn
+        false,                                                                   // isArrayLength
+        true,                                                                    // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ApplicationDescription,                // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, ClientDescription) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                            // isBuiltIn
+        false,                                                           // isArrayLength
+        true,                                                            // isToEncode
+        (uint32_t) SOPC_String_Id,                                       // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, ServerUri) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                              // isBuiltIn
+        false,                                                             // isArrayLength
+        true,                                                              // isToEncode
+        (uint32_t) SOPC_String_Id,                                         // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, EndpointUrl) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                // isBuiltIn
+        true,                                                                // isArrayLength
+        true,                                                                // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                            // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, NoOfLocaleIds) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                            // isBuiltIn
+        false,                                                           // isArrayLength
+        true,                                                            // isToEncode
+        (uint32_t) SOPC_String_Id,                                       // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, LocaleIds) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Double_Id, // typeIndex
+        true,                                                                       // isBuiltIn
+        false,                                                                      // isArrayLength
+        true,                                                                       // isToEncode
+        (uint32_t) SOPC_Double_Id,                                                  // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, ActualSessionTimeout) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                         // isBuiltIn
+        false,                                                                        // isArrayLength
+        true,                                                                         // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                    // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, MaxResponseMessageSize) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DateTime_Id, // typeIndex
+        true,                                                                       // isBuiltIn
+        false,                                                                      // isArrayLength
+        true,                                                                       // isToEncode
+        (uint32_t) SOPC_DateTime_Id,                                                // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, ClientConnectionTime) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DateTime_Id, // typeIndex
+        true,                                                                        // isBuiltIn
+        false,                                                                       // isArrayLength
+        true,                                                                        // isToEncode
+        (uint32_t) SOPC_DateTime_Id,                                                 // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, ClientLastContactTime) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                            // isBuiltIn
+        false,                                                                           // isArrayLength
+        true,                                                                            // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                       // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, CurrentSubscriptionsCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                             // isBuiltIn
+        false,                                                                            // isArrayLength
+        true,                                                                             // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                        // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, CurrentMonitoredItemsCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                                // isBuiltIn
+        false,                                                                               // isArrayLength
+        true,                                                                                // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                           // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, CurrentPublishRequestsInQueue) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType, // typeIndex
+        false,                                                                   // isBuiltIn
+        false,                                                                   // isArrayLength
+        true,                                                                    // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType,                // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, TotalRequestCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                           // isBuiltIn
+        false,                                                                          // isArrayLength
+        true,                                                                           // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                      // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, UnauthorizedRequestCount) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType, // typeIndex
+        false,                                                           // isBuiltIn
+        false,                                                           // isArrayLength
+        true,                                                            // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType,        // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, ReadCount) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType, // typeIndex
+        false,                                                                  // isBuiltIn
+        false,                                                                  // isArrayLength
+        true,                                                                   // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType,               // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, HistoryReadCount) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType, // typeIndex
+        false,                                                            // isBuiltIn
+        false,                                                            // isArrayLength
+        true,                                                             // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType,         // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, WriteCount) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType, // typeIndex
+        false,                                                                    // isBuiltIn
+        false,                                                                    // isArrayLength
+        true,                                                                     // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType,                 // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, HistoryUpdateCount) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType, // typeIndex
+        false,                                                           // isBuiltIn
+        false,                                                           // isArrayLength
+        true,                                                            // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType,        // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, CallCount) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType, // typeIndex
+        false,                                                                           // isBuiltIn
+        false,                                                                           // isArrayLength
+        true,                                                                            // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType,                        // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, CreateMonitoredItemsCount) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType, // typeIndex
+        false,                                                                           // isBuiltIn
+        false,                                                                           // isArrayLength
+        true,                                                                            // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType,                        // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, ModifyMonitoredItemsCount) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType, // typeIndex
+        false,                                                                        // isBuiltIn
+        false,                                                                        // isArrayLength
+        true,                                                                         // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType,                     // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, SetMonitoringModeCount) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType, // typeIndex
+        false,                                                                    // isBuiltIn
+        false,                                                                    // isArrayLength
+        true,                                                                     // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType,                 // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, SetTriggeringCount) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType, // typeIndex
+        false,                                                                           // isBuiltIn
+        false,                                                                           // isArrayLength
+        true,                                                                            // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType,                        // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, DeleteMonitoredItemsCount) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType, // typeIndex
+        false,                                                                         // isBuiltIn
+        false,                                                                         // isArrayLength
+        true,                                                                          // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType,                      // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, CreateSubscriptionCount) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType, // typeIndex
+        false,                                                                         // isBuiltIn
+        false,                                                                         // isArrayLength
+        true,                                                                          // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType,                      // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, ModifySubscriptionCount) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType, // typeIndex
+        false,                                                                        // isBuiltIn
+        false,                                                                        // isArrayLength
+        true,                                                                         // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType,                     // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, SetPublishingModeCount) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType, // typeIndex
+        false,                                                              // isBuiltIn
+        false,                                                              // isArrayLength
+        true,                                                               // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType,           // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, PublishCount) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType, // typeIndex
+        false,                                                                // isBuiltIn
+        false,                                                                // isArrayLength
+        true,                                                                 // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType,             // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, RepublishCount) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType, // typeIndex
+        false,                                                                            // isBuiltIn
+        false,                                                                            // isArrayLength
+        true,                                                                             // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType,                         // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, TransferSubscriptionsCount) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType, // typeIndex
+        false,                                                                          // isBuiltIn
+        false,                                                                          // isArrayLength
+        true,                                                                           // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType,                       // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, DeleteSubscriptionsCount) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType, // typeIndex
+        false,                                                               // isBuiltIn
+        false,                                                               // isArrayLength
+        true,                                                                // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType,            // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, AddNodesCount) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType, // typeIndex
+        false,                                                                    // isBuiltIn
+        false,                                                                    // isArrayLength
+        true,                                                                     // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType,                 // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, AddReferencesCount) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType, // typeIndex
+        false,                                                                  // isBuiltIn
+        false,                                                                  // isArrayLength
+        true,                                                                   // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType,               // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, DeleteNodesCount) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType, // typeIndex
+        false,                                                                       // isBuiltIn
+        false,                                                                       // isArrayLength
+        true,                                                                        // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType,                    // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, DeleteReferencesCount) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType, // typeIndex
+        false,                                                             // isBuiltIn
+        false,                                                             // isArrayLength
+        true,                                                              // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType,          // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, BrowseCount) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType, // typeIndex
+        false,                                                                 // isBuiltIn
+        false,                                                                 // isArrayLength
+        true,                                                                  // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType,              // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, BrowseNextCount) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType, // typeIndex
+        false,                                                                                    // isBuiltIn
+        false,                                                                                    // isArrayLength
+        true,                                                                                     // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType,                                 // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, TranslateBrowsePathsToNodeIdsCount) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType, // typeIndex
+        false,                                                                 // isBuiltIn
+        false,                                                                 // isArrayLength
+        true,                                                                  // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType,              // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, QueryFirstCount) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType, // typeIndex
+        false,                                                                // isBuiltIn
+        false,                                                                // isArrayLength
+        true,                                                                 // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType,             // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, QueryNextCount) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType, // typeIndex
+        false,                                                                    // isBuiltIn
+        false,                                                                    // isArrayLength
+        true,                                                                     // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType,                 // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, RegisterNodesCount) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType, // typeIndex
+        false,                                                                      // isBuiltIn
+        false,                                                                      // isArrayLength
+        true,                                                                       // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_ServiceCounterDataType,                   // typeIndex
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, UnregisterNodesCount) // offset
     },
 };
@@ -19004,8 +18762,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
 /*============================================================================
  * Descriptor of the SessionDiagnosticsDataType encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_SessionDiagnosticsDataType_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_SessionDiagnosticsDataType_EncodeableType = {
     "SessionDiagnosticsDataType",
     OpcUaId_SessionDiagnosticsDataType,
     OpcUaId_SessionDiagnosticsDataType_Encoding_DefaultBinary,
@@ -19018,8 +18775,7 @@ SOPC_EncodeableType OpcUa_SessionDiagnosticsDataType_EncodeableType =
     OpcUa_SessionDiagnosticsDataType_Encode,
     OpcUa_SessionDiagnosticsDataType_Decode,
     sizeof SessionDiagnosticsDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    SessionDiagnosticsDataType_Fields
-};
+    SessionDiagnosticsDataType_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_SessionSecurityDiagnosticsDataType
@@ -19042,17 +18798,23 @@ void OpcUa_SessionSecurityDiagnosticsDataType_Clear(void* pValue)
 /*============================================================================
  * OpcUa_SessionSecurityDiagnosticsDataType_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SessionSecurityDiagnosticsDataType_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_SessionSecurityDiagnosticsDataType_Encode(const void* pValue,
+                                                                  SOPC_Buffer* buf,
+                                                                  uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Encode(&OpcUa_SessionSecurityDiagnosticsDataType_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Encode(&OpcUa_SessionSecurityDiagnosticsDataType_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
  * OpcUa_SessionSecurityDiagnosticsDataType_Decode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SessionSecurityDiagnosticsDataType_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_SessionSecurityDiagnosticsDataType_Decode(void* pValue,
+                                                                  SOPC_Buffer* buf,
+                                                                  uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Decode(&OpcUa_SessionSecurityDiagnosticsDataType_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Decode(&OpcUa_SessionSecurityDiagnosticsDataType_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -19060,73 +18822,73 @@ SOPC_ReturnStatus OpcUa_SessionSecurityDiagnosticsDataType_Decode(void* pValue, 
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor SessionSecurityDiagnosticsDataType_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                                    // isBuiltIn
+        false,                                                                   // isArrayLength
+        true,                                                                    // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                                               // typeIndex
         (uint32_t) offsetof(OpcUa_SessionSecurityDiagnosticsDataType, SessionId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                                                // isBuiltIn
+        false,                                                                               // isArrayLength
+        true,                                                                                // isToEncode
+        (uint32_t) SOPC_String_Id,                                                           // typeIndex
         (uint32_t) offsetof(OpcUa_SessionSecurityDiagnosticsDataType, ClientUserIdOfSession) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                                  // isBuiltIn
+        true,                                                                                  // isArrayLength
+        true,                                                                                  // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                              // typeIndex
         (uint32_t) offsetof(OpcUa_SessionSecurityDiagnosticsDataType, NoOfClientUserIdHistory) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                                              // isBuiltIn
+        false,                                                                             // isArrayLength
+        true,                                                                              // isToEncode
+        (uint32_t) SOPC_String_Id,                                                         // typeIndex
         (uint32_t) offsetof(OpcUa_SessionSecurityDiagnosticsDataType, ClientUserIdHistory) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                                                  // isBuiltIn
+        false,                                                                                 // isArrayLength
+        true,                                                                                  // isToEncode
+        (uint32_t) SOPC_String_Id,                                                             // typeIndex
         (uint32_t) offsetof(OpcUa_SessionSecurityDiagnosticsDataType, AuthenticationMechanism) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                                   // isBuiltIn
+        false,                                                                  // isArrayLength
+        true,                                                                   // isToEncode
+        (uint32_t) SOPC_String_Id,                                              // typeIndex
         (uint32_t) offsetof(OpcUa_SessionSecurityDiagnosticsDataType, Encoding) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                                            // isBuiltIn
+        false,                                                                           // isArrayLength
+        true,                                                                            // isToEncode
+        (uint32_t) SOPC_String_Id,                                                       // typeIndex
         (uint32_t) offsetof(OpcUa_SessionSecurityDiagnosticsDataType, TransportProtocol) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                       // isBuiltIn
+        false,                                                                      // isArrayLength
+        true,                                                                       // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                   // typeIndex
         (uint32_t) offsetof(OpcUa_SessionSecurityDiagnosticsDataType, SecurityMode) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                                            // isBuiltIn
+        false,                                                                           // isArrayLength
+        true,                                                                            // isToEncode
+        (uint32_t) SOPC_String_Id,                                                       // typeIndex
         (uint32_t) offsetof(OpcUa_SessionSecurityDiagnosticsDataType, SecurityPolicyUri) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_ByteString_Id, // typeIndex
+        true,                                                                            // isBuiltIn
+        false,                                                                           // isArrayLength
+        true,                                                                            // isToEncode
+        (uint32_t) SOPC_ByteString_Id,                                                   // typeIndex
         (uint32_t) offsetof(OpcUa_SessionSecurityDiagnosticsDataType, ClientCertificate) // offset
     },
 };
@@ -19134,8 +18896,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionSecurityDiagnosticsDataT
 /*============================================================================
  * Descriptor of the SessionSecurityDiagnosticsDataType encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_SessionSecurityDiagnosticsDataType_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_SessionSecurityDiagnosticsDataType_EncodeableType = {
     "SessionSecurityDiagnosticsDataType",
     OpcUaId_SessionSecurityDiagnosticsDataType,
     OpcUaId_SessionSecurityDiagnosticsDataType_Encoding_DefaultBinary,
@@ -19148,8 +18909,7 @@ SOPC_EncodeableType OpcUa_SessionSecurityDiagnosticsDataType_EncodeableType =
     OpcUa_SessionSecurityDiagnosticsDataType_Encode,
     OpcUa_SessionSecurityDiagnosticsDataType_Decode,
     sizeof SessionSecurityDiagnosticsDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    SessionSecurityDiagnosticsDataType_Fields
-};
+    SessionSecurityDiagnosticsDataType_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_StatusResult
@@ -19190,17 +18950,17 @@ SOPC_ReturnStatus OpcUa_StatusResult_Decode(void* pValue, SOPC_Buffer* buf, uint
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor StatusResult_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_StatusCode_Id, // typeIndex
+        true,                                               // isBuiltIn
+        false,                                              // isArrayLength
+        true,                                               // isToEncode
+        (uint32_t) SOPC_StatusCode_Id,                      // typeIndex
         (uint32_t) offsetof(OpcUa_StatusResult, StatusCode) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DiagnosticInfo_Id, // typeIndex
+        true,                                                   // isBuiltIn
+        false,                                                  // isArrayLength
+        true,                                                   // isToEncode
+        (uint32_t) SOPC_DiagnosticInfo_Id,                      // typeIndex
         (uint32_t) offsetof(OpcUa_StatusResult, DiagnosticInfo) // offset
     },
 };
@@ -19208,8 +18968,7 @@ static const SOPC_EncodeableType_FieldDescriptor StatusResult_Fields[] = {
 /*============================================================================
  * Descriptor of the StatusResult encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_StatusResult_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_StatusResult_EncodeableType = {
     "StatusResult",
     OpcUaId_StatusResult,
     OpcUaId_StatusResult_Encoding_DefaultBinary,
@@ -19222,8 +18981,7 @@ SOPC_EncodeableType OpcUa_StatusResult_EncodeableType =
     OpcUa_StatusResult_Encode,
     OpcUa_StatusResult_Decode,
     sizeof StatusResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    StatusResult_Fields
-};
+    StatusResult_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_SubscriptionDiagnosticsDataType
@@ -19246,17 +19004,23 @@ void OpcUa_SubscriptionDiagnosticsDataType_Clear(void* pValue)
 /*============================================================================
  * OpcUa_SubscriptionDiagnosticsDataType_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SubscriptionDiagnosticsDataType_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_SubscriptionDiagnosticsDataType_Encode(const void* pValue,
+                                                               SOPC_Buffer* buf,
+                                                               uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Encode(&OpcUa_SubscriptionDiagnosticsDataType_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Encode(&OpcUa_SubscriptionDiagnosticsDataType_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
  * OpcUa_SubscriptionDiagnosticsDataType_Decode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SubscriptionDiagnosticsDataType_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_SubscriptionDiagnosticsDataType_Decode(void* pValue,
+                                                               SOPC_Buffer* buf,
+                                                               uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Decode(&OpcUa_SubscriptionDiagnosticsDataType_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Decode(&OpcUa_SubscriptionDiagnosticsDataType_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -19264,220 +19028,220 @@ SOPC_ReturnStatus OpcUa_SubscriptionDiagnosticsDataType_Decode(void* pValue, SOP
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor SubscriptionDiagnosticsDataType_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                                 // isBuiltIn
+        false,                                                                // isArrayLength
+        true,                                                                 // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                                            // typeIndex
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, SessionId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                      // isBuiltIn
+        false,                                                                     // isArrayLength
+        true,                                                                      // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                 // typeIndex
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, SubscriptionId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Byte_Id, // typeIndex
+        true,                                                                // isBuiltIn
+        false,                                                               // isArrayLength
+        true,                                                                // isToEncode
+        (uint32_t) SOPC_Byte_Id,                                             // typeIndex
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, Priority) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Double_Id, // typeIndex
+        true,                                                                          // isBuiltIn
+        false,                                                                         // isArrayLength
+        true,                                                                          // isToEncode
+        (uint32_t) SOPC_Double_Id,                                                     // typeIndex
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, PublishingInterval) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                         // isBuiltIn
+        false,                                                                        // isArrayLength
+        true,                                                                         // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                    // typeIndex
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, MaxKeepAliveCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                        // isBuiltIn
+        false,                                                                       // isArrayLength
+        true,                                                                        // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                   // typeIndex
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, MaxLifetimeCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                                  // isBuiltIn
+        false,                                                                                 // isArrayLength
+        true,                                                                                  // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                             // typeIndex
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, MaxNotificationsPerPublish) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Boolean_Id, // typeIndex
+        true,                                                                         // isBuiltIn
+        false,                                                                        // isArrayLength
+        true,                                                                         // isToEncode
+        (uint32_t) SOPC_Boolean_Id,                                                   // typeIndex
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, PublishingEnabled) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                   // isBuiltIn
+        false,                                                                  // isArrayLength
+        true,                                                                   // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                              // typeIndex
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, ModifyCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                   // isBuiltIn
+        false,                                                                  // isArrayLength
+        true,                                                                   // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                              // typeIndex
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, EnableCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                    // isBuiltIn
+        false,                                                                   // isArrayLength
+        true,                                                                    // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                               // typeIndex
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, DisableCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                             // isBuiltIn
+        false,                                                                            // isArrayLength
+        true,                                                                             // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                        // typeIndex
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, RepublishRequestCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                                    // isBuiltIn
+        false,                                                                                   // isArrayLength
+        true,                                                                                    // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                               // typeIndex
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, RepublishMessageRequestCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                             // isBuiltIn
+        false,                                                                            // isArrayLength
+        true,                                                                             // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                        // typeIndex
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, RepublishMessageCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                            // isBuiltIn
+        false,                                                                           // isArrayLength
+        true,                                                                            // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                       // typeIndex
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, TransferRequestCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                                   // isBuiltIn
+        false,                                                                                  // isArrayLength
+        true,                                                                                   // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                              // typeIndex
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, TransferredToAltClientCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                                    // isBuiltIn
+        false,                                                                                   // isArrayLength
+        true,                                                                                    // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                               // typeIndex
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, TransferredToSameClientCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                           // isBuiltIn
+        false,                                                                          // isArrayLength
+        true,                                                                           // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                      // typeIndex
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, PublishRequestCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                                    // isBuiltIn
+        false,                                                                                   // isArrayLength
+        true,                                                                                    // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                               // typeIndex
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, DataChangeNotificationsCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                               // isBuiltIn
+        false,                                                                              // isArrayLength
+        true,                                                                               // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                          // typeIndex
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, EventNotificationsCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                          // isBuiltIn
+        false,                                                                         // isArrayLength
+        true,                                                                          // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                     // typeIndex
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, NotificationsCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                               // isBuiltIn
+        false,                                                                              // isArrayLength
+        true,                                                                               // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                          // typeIndex
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, LatePublishRequestCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                             // isBuiltIn
+        false,                                                                            // isArrayLength
+        true,                                                                             // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                        // typeIndex
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, CurrentKeepAliveCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                            // isBuiltIn
+        false,                                                                           // isArrayLength
+        true,                                                                            // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                       // typeIndex
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, CurrentLifetimeCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                                  // isBuiltIn
+        false,                                                                                 // isArrayLength
+        true,                                                                                  // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                             // typeIndex
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, UnacknowledgedMessageCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                             // isBuiltIn
+        false,                                                                            // isArrayLength
+        true,                                                                             // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                        // typeIndex
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, DiscardedMessageCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                          // isBuiltIn
+        false,                                                                         // isArrayLength
+        true,                                                                          // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                     // typeIndex
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, MonitoredItemCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                                  // isBuiltIn
+        false,                                                                                 // isArrayLength
+        true,                                                                                  // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                             // typeIndex
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, DisabledMonitoredItemCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                                    // isBuiltIn
+        false,                                                                                   // isArrayLength
+        true,                                                                                    // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                               // typeIndex
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, MonitoringQueueOverflowCount) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                          // isBuiltIn
+        false,                                                                         // isArrayLength
+        true,                                                                          // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                     // typeIndex
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, NextSequenceNumber) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_UInt32_Id, // typeIndex
+        true,                                                                               // isBuiltIn
+        false,                                                                              // isArrayLength
+        true,                                                                               // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                                          // typeIndex
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, EventQueueOverFlowCount) // offset
     },
 };
@@ -19485,8 +19249,7 @@ static const SOPC_EncodeableType_FieldDescriptor SubscriptionDiagnosticsDataType
 /*============================================================================
  * Descriptor of the SubscriptionDiagnosticsDataType encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_SubscriptionDiagnosticsDataType_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_SubscriptionDiagnosticsDataType_EncodeableType = {
     "SubscriptionDiagnosticsDataType",
     OpcUaId_SubscriptionDiagnosticsDataType,
     OpcUaId_SubscriptionDiagnosticsDataType_Encoding_DefaultBinary,
@@ -19499,8 +19262,7 @@ SOPC_EncodeableType OpcUa_SubscriptionDiagnosticsDataType_EncodeableType =
     OpcUa_SubscriptionDiagnosticsDataType_Encode,
     OpcUa_SubscriptionDiagnosticsDataType_Decode,
     sizeof SubscriptionDiagnosticsDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    SubscriptionDiagnosticsDataType_Fields
-};
+    SubscriptionDiagnosticsDataType_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ModelChangeStructureDataType
@@ -19523,9 +19285,12 @@ void OpcUa_ModelChangeStructureDataType_Clear(void* pValue)
 /*============================================================================
  * OpcUa_ModelChangeStructureDataType_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ModelChangeStructureDataType_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_ModelChangeStructureDataType_Encode(const void* pValue,
+                                                            SOPC_Buffer* buf,
+                                                            uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Encode(&OpcUa_ModelChangeStructureDataType_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Encode(&OpcUa_ModelChangeStructureDataType_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -19533,7 +19298,8 @@ SOPC_ReturnStatus OpcUa_ModelChangeStructureDataType_Encode(const void* pValue, 
  *===========================================================================*/
 SOPC_ReturnStatus OpcUa_ModelChangeStructureDataType_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Decode(&OpcUa_ModelChangeStructureDataType_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Decode(&OpcUa_ModelChangeStructureDataType_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -19541,24 +19307,24 @@ SOPC_ReturnStatus OpcUa_ModelChangeStructureDataType_Decode(void* pValue, SOPC_B
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ModelChangeStructureDataType_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                             // isBuiltIn
+        false,                                                            // isArrayLength
+        true,                                                             // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                                        // typeIndex
         (uint32_t) offsetof(OpcUa_ModelChangeStructureDataType, Affected) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                                 // isBuiltIn
+        false,                                                                // isArrayLength
+        true,                                                                 // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                                            // typeIndex
         (uint32_t) offsetof(OpcUa_ModelChangeStructureDataType, AffectedType) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Byte_Id, // typeIndex
+        true,                                                         // isBuiltIn
+        false,                                                        // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_Byte_Id,                                      // typeIndex
         (uint32_t) offsetof(OpcUa_ModelChangeStructureDataType, Verb) // offset
     },
 };
@@ -19566,8 +19332,7 @@ static const SOPC_EncodeableType_FieldDescriptor ModelChangeStructureDataType_Fi
 /*============================================================================
  * Descriptor of the ModelChangeStructureDataType encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_ModelChangeStructureDataType_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_ModelChangeStructureDataType_EncodeableType = {
     "ModelChangeStructureDataType",
     OpcUaId_ModelChangeStructureDataType,
     OpcUaId_ModelChangeStructureDataType_Encoding_DefaultBinary,
@@ -19580,8 +19345,7 @@ SOPC_EncodeableType OpcUa_ModelChangeStructureDataType_EncodeableType =
     OpcUa_ModelChangeStructureDataType_Encode,
     OpcUa_ModelChangeStructureDataType_Decode,
     sizeof ModelChangeStructureDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    ModelChangeStructureDataType_Fields
-};
+    ModelChangeStructureDataType_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_SemanticChangeStructureDataType
@@ -19604,17 +19368,23 @@ void OpcUa_SemanticChangeStructureDataType_Clear(void* pValue)
 /*============================================================================
  * OpcUa_SemanticChangeStructureDataType_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SemanticChangeStructureDataType_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_SemanticChangeStructureDataType_Encode(const void* pValue,
+                                                               SOPC_Buffer* buf,
+                                                               uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Encode(&OpcUa_SemanticChangeStructureDataType_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Encode(&OpcUa_SemanticChangeStructureDataType_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
  * OpcUa_SemanticChangeStructureDataType_Decode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SemanticChangeStructureDataType_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_SemanticChangeStructureDataType_Decode(void* pValue,
+                                                               SOPC_Buffer* buf,
+                                                               uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Decode(&OpcUa_SemanticChangeStructureDataType_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Decode(&OpcUa_SemanticChangeStructureDataType_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -19622,17 +19392,17 @@ SOPC_ReturnStatus OpcUa_SemanticChangeStructureDataType_Decode(void* pValue, SOP
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor SemanticChangeStructureDataType_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                                // isBuiltIn
+        false,                                                               // isArrayLength
+        true,                                                                // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                                           // typeIndex
         (uint32_t) offsetof(OpcUa_SemanticChangeStructureDataType, Affected) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                                    // isBuiltIn
+        false,                                                                   // isArrayLength
+        true,                                                                    // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                                               // typeIndex
         (uint32_t) offsetof(OpcUa_SemanticChangeStructureDataType, AffectedType) // offset
     },
 };
@@ -19640,8 +19410,7 @@ static const SOPC_EncodeableType_FieldDescriptor SemanticChangeStructureDataType
 /*============================================================================
  * Descriptor of the SemanticChangeStructureDataType encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_SemanticChangeStructureDataType_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_SemanticChangeStructureDataType_EncodeableType = {
     "SemanticChangeStructureDataType",
     OpcUaId_SemanticChangeStructureDataType,
     OpcUaId_SemanticChangeStructureDataType_Encoding_DefaultBinary,
@@ -19654,8 +19423,7 @@ SOPC_EncodeableType OpcUa_SemanticChangeStructureDataType_EncodeableType =
     OpcUa_SemanticChangeStructureDataType_Encode,
     OpcUa_SemanticChangeStructureDataType_Decode,
     sizeof SemanticChangeStructureDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    SemanticChangeStructureDataType_Fields
-};
+    SemanticChangeStructureDataType_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_Range
@@ -19696,17 +19464,17 @@ SOPC_ReturnStatus OpcUa_Range_Decode(void* pValue, SOPC_Buffer* buf, uint32_t ne
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor Range_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Double_Id, // typeIndex
+        true,                                 // isBuiltIn
+        false,                                // isArrayLength
+        true,                                 // isToEncode
+        (uint32_t) SOPC_Double_Id,            // typeIndex
         (uint32_t) offsetof(OpcUa_Range, Low) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Double_Id, // typeIndex
+        true,                                  // isBuiltIn
+        false,                                 // isArrayLength
+        true,                                  // isToEncode
+        (uint32_t) SOPC_Double_Id,             // typeIndex
         (uint32_t) offsetof(OpcUa_Range, High) // offset
     },
 };
@@ -19714,22 +19482,19 @@ static const SOPC_EncodeableType_FieldDescriptor Range_Fields[] = {
 /*============================================================================
  * Descriptor of the Range encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_Range_EncodeableType =
-{
-    "Range",
-    OpcUaId_Range,
-    OpcUaId_Range_Encoding_DefaultBinary,
-    OpcUaId_Range_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_Range),
-    OpcUa_Range_Initialize,
-    OpcUa_Range_Clear,
-    NULL,
-    OpcUa_Range_Encode,
-    OpcUa_Range_Decode,
-    sizeof Range_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    Range_Fields
-};
+SOPC_EncodeableType OpcUa_Range_EncodeableType = {"Range",
+                                                  OpcUaId_Range,
+                                                  OpcUaId_Range_Encoding_DefaultBinary,
+                                                  OpcUaId_Range_Encoding_DefaultXml,
+                                                  NULL,
+                                                  sizeof(OpcUa_Range),
+                                                  OpcUa_Range_Initialize,
+                                                  OpcUa_Range_Clear,
+                                                  NULL,
+                                                  OpcUa_Range_Encode,
+                                                  OpcUa_Range_Decode,
+                                                  sizeof Range_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
+                                                  Range_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_EUInformation
@@ -19770,31 +19535,31 @@ SOPC_ReturnStatus OpcUa_EUInformation_Decode(void* pValue, SOPC_Buffer* buf, uin
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor EUInformation_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                  // isBuiltIn
+        false,                                                 // isArrayLength
+        true,                                                  // isToEncode
+        (uint32_t) SOPC_String_Id,                             // typeIndex
         (uint32_t) offsetof(OpcUa_EUInformation, NamespaceUri) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                            // isBuiltIn
+        false,                                           // isArrayLength
+        true,                                            // isToEncode
+        (uint32_t) SOPC_Int32_Id,                        // typeIndex
         (uint32_t) offsetof(OpcUa_EUInformation, UnitId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                                 // isBuiltIn
+        false,                                                // isArrayLength
+        true,                                                 // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                     // typeIndex
         (uint32_t) offsetof(OpcUa_EUInformation, DisplayName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                                 // isBuiltIn
+        false,                                                // isArrayLength
+        true,                                                 // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                     // typeIndex
         (uint32_t) offsetof(OpcUa_EUInformation, Description) // offset
     },
 };
@@ -19802,8 +19567,7 @@ static const SOPC_EncodeableType_FieldDescriptor EUInformation_Fields[] = {
 /*============================================================================
  * Descriptor of the EUInformation encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_EUInformation_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_EUInformation_EncodeableType = {
     "EUInformation",
     OpcUaId_EUInformation,
     OpcUaId_EUInformation_Encoding_DefaultBinary,
@@ -19816,8 +19580,7 @@ SOPC_EncodeableType OpcUa_EUInformation_EncodeableType =
     OpcUa_EUInformation_Encode,
     OpcUa_EUInformation_Decode,
     sizeof EUInformation_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    EUInformation_Fields
-};
+    EUInformation_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ComplexNumberType
@@ -19858,17 +19621,17 @@ SOPC_ReturnStatus OpcUa_ComplexNumberType_Decode(void* pValue, SOPC_Buffer* buf,
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ComplexNumberType_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Float_Id, // typeIndex
+        true,                                              // isBuiltIn
+        false,                                             // isArrayLength
+        true,                                              // isToEncode
+        (uint32_t) SOPC_Float_Id,                          // typeIndex
         (uint32_t) offsetof(OpcUa_ComplexNumberType, Real) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Float_Id, // typeIndex
+        true,                                                   // isBuiltIn
+        false,                                                  // isArrayLength
+        true,                                                   // isToEncode
+        (uint32_t) SOPC_Float_Id,                               // typeIndex
         (uint32_t) offsetof(OpcUa_ComplexNumberType, Imaginary) // offset
     },
 };
@@ -19876,8 +19639,7 @@ static const SOPC_EncodeableType_FieldDescriptor ComplexNumberType_Fields[] = {
 /*============================================================================
  * Descriptor of the ComplexNumberType encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_ComplexNumberType_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_ComplexNumberType_EncodeableType = {
     "ComplexNumberType",
     OpcUaId_ComplexNumberType,
     OpcUaId_ComplexNumberType_Encoding_DefaultBinary,
@@ -19890,8 +19652,7 @@ SOPC_EncodeableType OpcUa_ComplexNumberType_EncodeableType =
     OpcUa_ComplexNumberType_Encode,
     OpcUa_ComplexNumberType_Decode,
     sizeof ComplexNumberType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    ComplexNumberType_Fields
-};
+    ComplexNumberType_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_DoubleComplexNumberType
@@ -19932,17 +19693,17 @@ SOPC_ReturnStatus OpcUa_DoubleComplexNumberType_Decode(void* pValue, SOPC_Buffer
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DoubleComplexNumberType_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Double_Id, // typeIndex
+        true,                                                    // isBuiltIn
+        false,                                                   // isArrayLength
+        true,                                                    // isToEncode
+        (uint32_t) SOPC_Double_Id,                               // typeIndex
         (uint32_t) offsetof(OpcUa_DoubleComplexNumberType, Real) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Double_Id, // typeIndex
+        true,                                                         // isBuiltIn
+        false,                                                        // isArrayLength
+        true,                                                         // isToEncode
+        (uint32_t) SOPC_Double_Id,                                    // typeIndex
         (uint32_t) offsetof(OpcUa_DoubleComplexNumberType, Imaginary) // offset
     },
 };
@@ -19950,8 +19711,7 @@ static const SOPC_EncodeableType_FieldDescriptor DoubleComplexNumberType_Fields[
 /*============================================================================
  * Descriptor of the DoubleComplexNumberType encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_DoubleComplexNumberType_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_DoubleComplexNumberType_EncodeableType = {
     "DoubleComplexNumberType",
     OpcUaId_DoubleComplexNumberType,
     OpcUaId_DoubleComplexNumberType_Encoding_DefaultBinary,
@@ -19964,8 +19724,7 @@ SOPC_EncodeableType OpcUa_DoubleComplexNumberType_EncodeableType =
     OpcUa_DoubleComplexNumberType_Encode,
     OpcUa_DoubleComplexNumberType_Decode,
     sizeof DoubleComplexNumberType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    DoubleComplexNumberType_Fields
-};
+    DoubleComplexNumberType_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_AxisInformation
@@ -20006,45 +19765,45 @@ SOPC_ReturnStatus OpcUa_AxisInformation_Decode(void* pValue, SOPC_Buffer* buf, u
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor AxisInformation_Fields[] = {
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_EUInformation, // typeIndex
+        false,                                                       // isBuiltIn
+        false,                                                       // isArrayLength
+        true,                                                        // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_EUInformation,             // typeIndex
         (uint32_t) offsetof(OpcUa_AxisInformation, EngineeringUnits) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_Range, // typeIndex
+        false,                                              // isBuiltIn
+        false,                                              // isArrayLength
+        true,                                               // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_Range,            // typeIndex
         (uint32_t) offsetof(OpcUa_AxisInformation, EURange) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_LocalizedText_Id, // typeIndex
+        true,                                             // isBuiltIn
+        false,                                            // isArrayLength
+        true,                                             // isToEncode
+        (uint32_t) SOPC_LocalizedText_Id,                 // typeIndex
         (uint32_t) offsetof(OpcUa_AxisInformation, Title) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                     // isBuiltIn
+        false,                                                    // isArrayLength
+        true,                                                     // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                 // typeIndex
         (uint32_t) offsetof(OpcUa_AxisInformation, AxisScaleType) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                     // isBuiltIn
+        true,                                                     // isArrayLength
+        true,                                                     // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                 // typeIndex
         (uint32_t) offsetof(OpcUa_AxisInformation, NoOfAxisSteps) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Double_Id, // typeIndex
+        true,                                                 // isBuiltIn
+        false,                                                // isArrayLength
+        true,                                                 // isToEncode
+        (uint32_t) SOPC_Double_Id,                            // typeIndex
         (uint32_t) offsetof(OpcUa_AxisInformation, AxisSteps) // offset
     },
 };
@@ -20052,8 +19811,7 @@ static const SOPC_EncodeableType_FieldDescriptor AxisInformation_Fields[] = {
 /*============================================================================
  * Descriptor of the AxisInformation encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_AxisInformation_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_AxisInformation_EncodeableType = {
     "AxisInformation",
     OpcUaId_AxisInformation,
     OpcUaId_AxisInformation_Encoding_DefaultBinary,
@@ -20066,8 +19824,7 @@ SOPC_EncodeableType OpcUa_AxisInformation_EncodeableType =
     OpcUa_AxisInformation_Encode,
     OpcUa_AxisInformation_Decode,
     sizeof AxisInformation_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    AxisInformation_Fields
-};
+    AxisInformation_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_XVType
@@ -20108,17 +19865,17 @@ SOPC_ReturnStatus OpcUa_XVType_Decode(void* pValue, SOPC_Buffer* buf, uint32_t n
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor XVType_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Double_Id, // typeIndex
+        true,                                // isBuiltIn
+        false,                               // isArrayLength
+        true,                                // isToEncode
+        (uint32_t) SOPC_Double_Id,           // typeIndex
         (uint32_t) offsetof(OpcUa_XVType, X) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Float_Id, // typeIndex
+        true,                                    // isBuiltIn
+        false,                                   // isArrayLength
+        true,                                    // isToEncode
+        (uint32_t) SOPC_Float_Id,                // typeIndex
         (uint32_t) offsetof(OpcUa_XVType, Value) // offset
     },
 };
@@ -20126,22 +19883,19 @@ static const SOPC_EncodeableType_FieldDescriptor XVType_Fields[] = {
 /*============================================================================
  * Descriptor of the XVType encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_XVType_EncodeableType =
-{
-    "XVType",
-    OpcUaId_XVType,
-    OpcUaId_XVType_Encoding_DefaultBinary,
-    OpcUaId_XVType_Encoding_DefaultXml,
-    NULL,
-    sizeof(OpcUa_XVType),
-    OpcUa_XVType_Initialize,
-    OpcUa_XVType_Clear,
-    NULL,
-    OpcUa_XVType_Encode,
-    OpcUa_XVType_Decode,
-    sizeof XVType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    XVType_Fields
-};
+SOPC_EncodeableType OpcUa_XVType_EncodeableType = {"XVType",
+                                                   OpcUaId_XVType,
+                                                   OpcUaId_XVType_Encoding_DefaultBinary,
+                                                   OpcUaId_XVType_Encoding_DefaultXml,
+                                                   NULL,
+                                                   sizeof(OpcUa_XVType),
+                                                   OpcUa_XVType_Initialize,
+                                                   OpcUa_XVType_Clear,
+                                                   NULL,
+                                                   OpcUa_XVType_Encode,
+                                                   OpcUa_XVType_Decode,
+                                                   sizeof XVType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
+                                                   XVType_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_ProgramDiagnosticDataType
@@ -20164,9 +19918,12 @@ void OpcUa_ProgramDiagnosticDataType_Clear(void* pValue)
 /*============================================================================
  * OpcUa_ProgramDiagnosticDataType_Encode
  *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ProgramDiagnosticDataType_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+SOPC_ReturnStatus OpcUa_ProgramDiagnosticDataType_Encode(const void* pValue,
+                                                         SOPC_Buffer* buf,
+                                                         uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Encode(&OpcUa_ProgramDiagnosticDataType_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Encode(&OpcUa_ProgramDiagnosticDataType_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -20174,7 +19931,8 @@ SOPC_ReturnStatus OpcUa_ProgramDiagnosticDataType_Encode(const void* pValue, SOP
  *===========================================================================*/
 SOPC_ReturnStatus OpcUa_ProgramDiagnosticDataType_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    return SOPC_EncodeableObject_Decode(&OpcUa_ProgramDiagnosticDataType_EncodeableType, pValue, buf, nestedStructLevel);
+    return SOPC_EncodeableObject_Decode(&OpcUa_ProgramDiagnosticDataType_EncodeableType, pValue, buf,
+                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -20182,87 +19940,87 @@ SOPC_ReturnStatus OpcUa_ProgramDiagnosticDataType_Decode(void* pValue, SOPC_Buff
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ProgramDiagnosticDataType_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                                 // isBuiltIn
+        false,                                                                // isArrayLength
+        true,                                                                 // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                                            // typeIndex
         (uint32_t) offsetof(OpcUa_ProgramDiagnosticDataType, CreateSessionId) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                                  // isBuiltIn
+        false,                                                                 // isArrayLength
+        true,                                                                  // isToEncode
+        (uint32_t) SOPC_String_Id,                                             // typeIndex
         (uint32_t) offsetof(OpcUa_ProgramDiagnosticDataType, CreateClientName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DateTime_Id, // typeIndex
+        true,                                                                        // isBuiltIn
+        false,                                                                       // isArrayLength
+        true,                                                                        // isToEncode
+        (uint32_t) SOPC_DateTime_Id,                                                 // typeIndex
         (uint32_t) offsetof(OpcUa_ProgramDiagnosticDataType, InvocationCreationTime) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DateTime_Id, // typeIndex
+        true,                                                                    // isBuiltIn
+        false,                                                                   // isArrayLength
+        true,                                                                    // isToEncode
+        (uint32_t) SOPC_DateTime_Id,                                             // typeIndex
         (uint32_t) offsetof(OpcUa_ProgramDiagnosticDataType, LastTransitionTime) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                                                // isBuiltIn
+        false,                                                               // isArrayLength
+        true,                                                                // isToEncode
+        (uint32_t) SOPC_String_Id,                                           // typeIndex
         (uint32_t) offsetof(OpcUa_ProgramDiagnosticDataType, LastMethodCall) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_NodeId_Id, // typeIndex
+        true,                                                                     // isBuiltIn
+        false,                                                                    // isArrayLength
+        true,                                                                     // isToEncode
+        (uint32_t) SOPC_NodeId_Id,                                                // typeIndex
         (uint32_t) offsetof(OpcUa_ProgramDiagnosticDataType, LastMethodSessionId) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                              // isBuiltIn
+        true,                                                                              // isArrayLength
+        true,                                                                              // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                          // typeIndex
         (uint32_t) offsetof(OpcUa_ProgramDiagnosticDataType, NoOfLastMethodInputArguments) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_Argument, // typeIndex
+        false,                                                                         // isBuiltIn
+        false,                                                                         // isArrayLength
+        true,                                                                          // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_Argument,                                    // typeIndex
         (uint32_t) offsetof(OpcUa_ProgramDiagnosticDataType, LastMethodInputArguments) // offset
     },
     {
-        true,  // isBuiltIn
-        true, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_Int32_Id, // typeIndex
+        true,                                                                               // isBuiltIn
+        true,                                                                               // isArrayLength
+        true,                                                                               // isToEncode
+        (uint32_t) SOPC_Int32_Id,                                                           // typeIndex
         (uint32_t) offsetof(OpcUa_ProgramDiagnosticDataType, NoOfLastMethodOutputArguments) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_Argument, // typeIndex
+        false,                                                                          // isBuiltIn
+        false,                                                                          // isArrayLength
+        true,                                                                           // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_Argument,                                     // typeIndex
         (uint32_t) offsetof(OpcUa_ProgramDiagnosticDataType, LastMethodOutputArguments) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DateTime_Id, // typeIndex
+        true,                                                                    // isBuiltIn
+        false,                                                                   // isArrayLength
+        true,                                                                    // isToEncode
+        (uint32_t) SOPC_DateTime_Id,                                             // typeIndex
         (uint32_t) offsetof(OpcUa_ProgramDiagnosticDataType, LastMethodCallTime) // offset
     },
     {
-        false,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_TypeInternalIndex_StatusResult, // typeIndex
+        false,                                                                       // isBuiltIn
+        false,                                                                       // isArrayLength
+        true,                                                                        // isToEncode
+        (uint32_t) SOPC_TypeInternalIndex_StatusResult,                              // typeIndex
         (uint32_t) offsetof(OpcUa_ProgramDiagnosticDataType, LastMethodReturnStatus) // offset
     },
 };
@@ -20270,8 +20028,7 @@ static const SOPC_EncodeableType_FieldDescriptor ProgramDiagnosticDataType_Field
 /*============================================================================
  * Descriptor of the ProgramDiagnosticDataType encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_ProgramDiagnosticDataType_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_ProgramDiagnosticDataType_EncodeableType = {
     "ProgramDiagnosticDataType",
     OpcUaId_ProgramDiagnosticDataType,
     OpcUaId_ProgramDiagnosticDataType_Encoding_DefaultBinary,
@@ -20284,8 +20041,7 @@ SOPC_EncodeableType OpcUa_ProgramDiagnosticDataType_EncodeableType =
     OpcUa_ProgramDiagnosticDataType_Encode,
     OpcUa_ProgramDiagnosticDataType_Decode,
     sizeof ProgramDiagnosticDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    ProgramDiagnosticDataType_Fields
-};
+    ProgramDiagnosticDataType_Fields};
 #endif
 
 #ifndef OPCUA_EXCLUDE_Annotation
@@ -20326,24 +20082,24 @@ SOPC_ReturnStatus OpcUa_Annotation_Decode(void* pValue, SOPC_Buffer* buf, uint32
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor Annotation_Fields[] = {
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                          // isBuiltIn
+        false,                                         // isArrayLength
+        true,                                          // isToEncode
+        (uint32_t) SOPC_String_Id,                     // typeIndex
         (uint32_t) offsetof(OpcUa_Annotation, Message) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_String_Id, // typeIndex
+        true,                                           // isBuiltIn
+        false,                                          // isArrayLength
+        true,                                           // isToEncode
+        (uint32_t) SOPC_String_Id,                      // typeIndex
         (uint32_t) offsetof(OpcUa_Annotation, UserName) // offset
     },
     {
-        true,  // isBuiltIn
-        false, // isArrayLength
-        true, // isToEncode
-        (uint32_t) SOPC_DateTime_Id, // typeIndex
+        true,                                                 // isBuiltIn
+        false,                                                // isArrayLength
+        true,                                                 // isToEncode
+        (uint32_t) SOPC_DateTime_Id,                          // typeIndex
         (uint32_t) offsetof(OpcUa_Annotation, AnnotationTime) // offset
     },
 };
@@ -20351,8 +20107,7 @@ static const SOPC_EncodeableType_FieldDescriptor Annotation_Fields[] = {
 /*============================================================================
  * Descriptor of the Annotation encodeable type.
  *===========================================================================*/
-SOPC_EncodeableType OpcUa_Annotation_EncodeableType =
-{
+SOPC_EncodeableType OpcUa_Annotation_EncodeableType = {
     "Annotation",
     OpcUaId_Annotation,
     OpcUaId_Annotation_Encoding_DefaultBinary,
@@ -20365,8 +20120,7 @@ SOPC_EncodeableType OpcUa_Annotation_EncodeableType =
     OpcUa_Annotation_Encode,
     OpcUa_Annotation_Decode,
     sizeof Annotation_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    Annotation_Fields
-};
+    Annotation_Fields};
 #endif
 
 /*============================================================================
@@ -21099,8 +20853,7 @@ static SOPC_EncodeableType* g_KnownEncodeableTypes[SOPC_TypeInternalIndex_SIZE +
 #ifndef OPCUA_EXCLUDE_Annotation
     &OpcUa_Annotation_EncodeableType,
 #endif
-    NULL
-};
+    NULL};
 
 SOPC_EncodeableType** SOPC_KnownEncodeableTypes = g_KnownEncodeableTypes;
 
@@ -21119,7 +20872,9 @@ SOPC_ReturnStatus SOPC_Read_EnumeratedType(SOPC_Buffer* buffer, int32_t* enumera
     return SOPC_Int32_Read(enumerationValue, buffer, nestedStructLevel);
 }
 
-SOPC_ReturnStatus SOPC_Write_EnumeratedType(SOPC_Buffer* buffer, const int32_t* enumerationValue, uint32_t nestedStructLevel)
+SOPC_ReturnStatus SOPC_Write_EnumeratedType(SOPC_Buffer* buffer,
+                                            const int32_t* enumerationValue,
+                                            uint32_t nestedStructLevel)
 {
     return SOPC_Int32_Write(enumerationValue, buffer, nestedStructLevel);
 }
