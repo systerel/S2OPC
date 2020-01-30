@@ -640,14 +640,14 @@ SOPC_ReturnStatus SOPC_Int64_Read(int64_t* value, SOPC_Buffer* buf, uint32_t nes
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_Buffer_Read((SOPC_Byte*) value, buf, 8);
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        SOPC_EncodeDecode_Int64(value);
-    }
-    else
-    {
-        status = SOPC_STATUS_ENCODING_ERROR;
+        if (SOPC_STATUS_OK == status)
+        {
+            SOPC_EncodeDecode_Int64(value);
+        }
+        else
+        {
+            status = SOPC_STATUS_ENCODING_ERROR;
+        }
     }
     return status;
 }
@@ -707,14 +707,14 @@ SOPC_ReturnStatus SOPC_UInt64_Read(uint64_t* value, SOPC_Buffer* buf, uint32_t n
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_Buffer_Read((SOPC_Byte*) value, buf, 8);
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        SOPC_EncodeDecode_UInt64(value);
-    }
-    else
-    {
-        status = SOPC_STATUS_ENCODING_ERROR;
+        if (SOPC_STATUS_OK == status)
+        {
+            SOPC_EncodeDecode_UInt64(value);
+        }
+        else
+        {
+            status = SOPC_STATUS_ENCODING_ERROR;
+        }
     }
     return status;
 }
@@ -774,14 +774,14 @@ SOPC_ReturnStatus SOPC_Float_Read(float* value, SOPC_Buffer* buf, uint32_t neste
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_Buffer_Read((SOPC_Byte*) value, buf, 4);
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        SOPC_EncodeDecode_Float(value);
-    }
-    else
-    {
-        status = SOPC_STATUS_ENCODING_ERROR;
+        if (SOPC_STATUS_OK == status)
+        {
+            SOPC_EncodeDecode_Float(value);
+        }
+        else
+        {
+            status = SOPC_STATUS_ENCODING_ERROR;
+        }
     }
     return status;
 }
