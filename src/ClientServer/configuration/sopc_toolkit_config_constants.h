@@ -68,7 +68,8 @@
 #define SOPC_MAX_DIAG_INFO_NESTED_LEVEL 100
 #endif /* SOPC_MAX_DIAG_INFO_NESTED_LEVEL */
 
-/** @brief Maximum levels of nested structs */
+/** @brief Maximum levels of nested structs, excluding Diagnostic Information which is
+ * handled by SOPC_MAX_DIAG_INFO_NESTED_LEVEL */
 #ifndef SOPC_MAX_STRUCT_NESTED_LEVEL
 #define SOPC_MAX_STRUCT_NESTED_LEVEL 50
 #endif /* SOPC_MAX_STRUCT_NESTED_LEVEL */
