@@ -3523,16 +3523,21 @@ SOPC_ReturnStatus SOPC_Read_Array(SOPC_Buffer* buf,
                                   SOPC_EncodeableObject_PfnClear* clearFct,
                                   uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_Byte* byteArray = NULL;
 
     if (buf == NULL || noOfElts == NULL || eltsArray == NULL || NULL != *eltsArray || decodeFct == NULL)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    if (nestedStructLevel > SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel > SOPC_MAX_STRUCT_NESTED_LEVEL)
     {
         return SOPC_STATUS_INVALID_STATE;
+    }
+    else
+    {
+        nestedStructLevel++;
+        status = SOPC_STATUS_OK;
     }
 
     status = SOPC_Int32_Read(noOfElts, buf, nestedStructLevel);
