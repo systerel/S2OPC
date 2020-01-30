@@ -20,9 +20,6 @@
 #include <assert.h>
 #include <string.h>
 
-// DEBUG
-#include <stdio.h>
-
 #include "opcua_identifiers.h"
 #include "sopc_common_constants.h"
 #include "sopc_encodeabletype.h"
