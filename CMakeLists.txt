@@ -19,12 +19,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY $<1:${CMAKE_BINARY_DIR}/bin>)
 option(ENABLE_TESTING "Build the S2OPC tests" ON)
 option(FORCE_CHECK_STATIC_LIB "Force the use of static check lib" ON)
 
-# Python3 is mandatory for compilation
-find_package(PythonInterp 3 REQUIRED)
-
 find_package(Doxygen)
-
-find_package(EXPAT) # if not found XML loaders will not be compiled
 
 # Keep a static version of the mbedtls libraries to link the tests
 set(MBEDTLS_CUSTOM_PATH 0)
@@ -127,8 +122,6 @@ option(WITH_CLANG_SOURCE_COVERAGE "build with Clang source coverage" OFF)
 # S2OPC library extension option (also mutually exclusive with above options)
 option(WITH_OSS_FUZZ "Add the fuzzers target when building for OSS-Fuzz" OFF)
 option(WITH_PYS2OPC "Also builds PyS2OPC" OFF)
-# S2OPC library scope option
-option(WITH_NANO_EXTENDED "Use Nano profile with additional services out of Nano scope" OFF)
 
 # Check project and option(s) are compatible
 
@@ -249,75 +242,6 @@ if (WITH_CLANG_SOURCE_COVERAGE)
   list(APPEND S2OPC_COMPILER_FLAGS -fprofile-instr-generate -fcoverage-mapping)
   list(APPEND S2OPC_LINKER_FLAGS -fprofile-instr-generate -fcoverage-mapping)
 endif()
-
-# Add WITH_NANO_EXTENDED to compilation definition if option activated
-list(APPEND S2OPC_DEFINITIONS $<$<BOOL:${WITH_NANO_EXTENDED}>:WITH_NANO_EXTENDED>)
-
-### Compilation of S2OPC library source files ###
-
-## C99 compliant source code ##
-
-# Define non-platform dependent source files
-file(GLOB_RECURSE S2OPC_SRCS
-    "csrc/api_toolkit/*.c"
-    "csrc/configuration/*.c"
-    "csrc/sockets/*.c"
-    "csrc/secure_channels/*.c"
-    "csrc/services/*.c"
-)
-
-# Define S2OPC library includes
-file(GLOB S2OPC_INCLUDE_FILES
-    "csrc/api_toolkit/*.h"
-    "csrc/configuration/*.h"
-    "csrc/services/b2c/*.h")
-
-set(S2OPC_PUBLIC_INCLUDES
-    "csrc/api_toolkit"
-    "csrc/configuration"
-    "csrc/services/b2c"
-)
-
-set(S2OPC_PRIVATE_INCLUDES
-    "csrc/sockets"
-    "csrc/secure_channels"
-    "csrc/services"
-    "csrc/services/bgenc"
-)
-
-### Configure S2OPC library and its properties ###
-
-add_library(s2opc ${PLATFORM_SRCS} ${S2OPC_SRCS})
-target_include_directories(s2opc BEFORE
-  PUBLIC  ${S2OPC_PUBLIC_INCLUDES}
-  PRIVATE ${S2OPC_PRIVATE_INCLUDES} ${MBEDTLS_INCLUDE_DIRS})
-target_compile_options(s2opc PRIVATE ${S2OPC_COMPILER_FLAGS})
-target_compile_definitions(s2opc PRIVATE ${S2OPC_DEFINITIONS})
-target_link_libraries(s2opc PUBLIC ${S2OPC_LINKER_FLAGS} ${S2OPC_LINK_LIBRARIES})
-add_dependencies(s2opc build_info)
-
-# Needed if we want to use the objects in a shared library
-set_target_properties(s2opc PROPERTIES POSITION_INDEPENDENT_CODE ON)
-# TODO: Should we add POSITION_INDEPENDENT to all internal libraries onto S2OPC instead ?
-set_target_properties(s2opc PROPERTIES INTERFACE_POSITION_INDEPENDENT_CODE ON)
-
-## Define S2OPC library installation ##
-
-# retrieve public include files
-foreach(dir ${S2OPC_PUBLIC_INCLUDES})
-    file(GLOB temp_files "${dir}/*.h")
-    list(APPEND S2OPC_INCLUDE_FILES ${temp_files})
-endforeach()
-# set public header property
-set_target_properties(s2opc PROPERTIES PUBLIC_HEADER "${S2OPC_INCLUDE_FILES}")
-# install files
-install(TARGETS s2opc
-        LIBRARY DESTINATION lib # Supposedly dynamic lib
-        ARCHIVE DESTINATION lib # Supposedly static lib
-        PUBLIC_HEADER DESTINATION include
-)
-
-install(FILES ${CMAKE_SOURCE_DIR}/scripts/generate-s2opc-address-space.py DESTINATION bin)
 
 ### Compilation and configuration of S2OPC extension libraries ###
 
