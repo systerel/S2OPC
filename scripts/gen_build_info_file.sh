@@ -17,8 +17,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-BUILD_INFO_DIR=$1/csrc/configuration
-BUILD_INFO_FILE=$BUILD_INFO_DIR/sopc_toolkit_build_info.h
+BUILD_INFO_FILE=$1/sopc_toolkit_build_info.h
 
 DATE=`date +%Y-%m-%d`
 
@@ -55,7 +54,6 @@ then
     sed -i 's/.toolkitSrcCommit =.*/.toolkitSrcCommit = "'"$VERSION"'",/' $BUILD_INFO_FILE
     sed -i 's/.toolkitDockerId =.*/.toolkitDockerId = "'"$DOCKER_IMAGE"'",/' $BUILD_INFO_FILE
     sed -i 's/.toolkitBuildDate =.*/.toolkitBuildDate = "'"$DATE"'",/' $BUILD_INFO_FILE
-    sed -i 's/.toolkitSrcCommit =.*/.toolkitSrcCommit = "'"$VERSION"'",/' $BUILD_INFO_FILE
 else
     echo "ERROR: file $BUILD_INFO_FILE not found"
     exit 1

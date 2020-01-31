@@ -21,11 +21,11 @@
 #include <string.h>
 
 #include "opcua_identifiers.h"
+#include "sopc_common_constants.h"
 #include "sopc_encodeabletype.h"
 #include "sopc_encoder.h"
 #include "sopc_helper_endianness_cfg.h"
 #include "sopc_mem_alloc.h"
-#include "sopc_toolkit_config_constants.h"
 #include "sopc_types.h"
 
 void SOPC_EncodeDecode_Int16(int16_t* intv)

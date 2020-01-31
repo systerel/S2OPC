@@ -4,7 +4,6 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
 project (S2OPC LANGUAGES C)
 
 include(CheckCCompilerFlag)
-include (CheckTypeSize)
 
 #### S2OPC library and extensions ####
 
@@ -256,71 +255,12 @@ list(APPEND S2OPC_DEFINITIONS $<$<BOOL:${WITH_NANO_EXTENDED}>:WITH_NANO_EXTENDED
 
 ### Compilation of S2OPC library source files ###
 
-## Build info source file generation (version, commit checksum, docker id, date) ##
-
-if(CMAKE_HOST_UNIX)
-  add_custom_command(OUTPUT csrc/configuration/sopc_toolkit_build_info.h
-                     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/csrc/configuration/sopc_toolkit_build_info.h_ ${CMAKE_SOURCE_DIR}/csrc/configuration/sopc_toolkit_build_info.h
-                     COMMAND ${CMAKE_SOURCE_DIR}/scripts/gen_build_info_file.sh ${CMAKE_SOURCE_DIR}
-                     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
-else()
-  add_custom_command(OUTPUT csrc/configuration/sopc_toolkit_build_info.h
-                     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/csrc/configuration/sopc_toolkit_build_info.h_ ${CMAKE_SOURCE_DIR}/csrc/configuration/sopc_toolkit_build_info.h
-                     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
-endif()
-
-add_custom_target(build_info ALL
-                   DEPENDS csrc/configuration/sopc_toolkit_build_info.h
-                   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
-
-## Platform dependent source files and library dependencies ##
-
-# Define platform dependent source files and libraries/definitions associated
-if(UNIX)
-  set(PLATFORM_DIR linux)
-  set(THREAD_LIB pthread rt)
-  set(MATH_LIB m)
-elseif(WIN32)
-  set(PLATFORM_DIR windows)
-  set(SOCK_LIB ws2_32)
-else()
-  message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
-endif()
-
-# Update variable containing S2OPC library dependencies
-list(APPEND S2OPC_LINK_LIBRARIES ${MBEDTLS_LIBRARIES} ${MATH_LIB} ${THREAD_LIB} ${SOCK_LIB})
-
-file(GLOB PLATFORM_SRCS "csrc/helpers_platform_dep/*.c" "csrc/helpers_platform_dep/${PLATFORM_DIR}/*.c")
-
-# Set specialized compilation flags for platform dependent source files
-if(UNIX)
-  # add POSIX support
-  set_source_files_properties(${PLATFORM_SRCS} PROPERTIES COMPILE_FLAGS "-D_GNU_SOURCE")
-elseif(WIN32)
-  # minimum Vista for IPV6 support
-  if("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
-    # TODO: use COMPILE_FLAGS or COMPILE_DEFINITIONS with set_source_files_properties
-    add_definitions(/DWIN32_LEAN_AND_MEAN)
-    add_definitions(/D_WIN32_WINNT=0x0600)
-    add_definitions(/D_CRT_SECURE_NO_WARNINGS)
-  elseif(MINGW)
-    set_source_files_properties(${PLATFORM_SRCS} PROPERTIES COMPILE_FLAGS "-D_WIN32_WINNT=0x0600")
-  endif()
-endif()
-
-# Add definitions for platform dependant code
-check_type_size("time_t" CMAKE_TIME_T_SIZE) # retrieve time_t size
-set_source_files_properties(${PLATFORM_SRCS} PROPERTIES COMPILE_DEFINITIONS "SOPC_PTR_SIZE=${CMAKE_SIZEOF_VOID_P};SOPC_TIME_T_SIZE=${CMAKE_TIME_T_SIZE}")
-
 ## C99 compliant source code ##
 
 # Define non-platform dependent source files
 file(GLOB_RECURSE S2OPC_SRCS
     "csrc/api_toolkit/*.c"
     "csrc/configuration/*.c"
-    "csrc/helpers/*.c"
-    "csrc/crypto/*.c"
-    "csrc/opcua_types/*.c"
     "csrc/sockets/*.c"
     "csrc/secure_channels/*.c"
     "csrc/services/*.c"
@@ -330,20 +270,11 @@ file(GLOB_RECURSE S2OPC_SRCS
 file(GLOB S2OPC_INCLUDE_FILES
     "csrc/api_toolkit/*.h"
     "csrc/configuration/*.h"
-    "csrc/helpers/*.h"
-    "csrc/opcua_types/*.h"
-    "csrc/crypto/*.h"
-    "csrc/helpers_platform_dep/*.h"
     "csrc/services/b2c/*.h")
 
 set(S2OPC_PUBLIC_INCLUDES
     "csrc/api_toolkit"
     "csrc/configuration"
-    "csrc/helpers"
-    "csrc/opcua_types"
-    "csrc/crypto"
-    "csrc/helpers_platform_dep"
-    "csrc/helpers_platform_dep/${PLATFORM_DIR}"
     "csrc/services/b2c"
 )
 
@@ -351,7 +282,6 @@ set(S2OPC_PRIVATE_INCLUDES
     "csrc/sockets"
     "csrc/secure_channels"
     "csrc/services"
-    "csrc/crypto/mbedtls"
     "csrc/services/bgenc"
 )
 

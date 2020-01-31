@@ -33,8 +33,8 @@
 
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
+#include "sopc_common_constants.h"
 #include "sopc_protocol_constants.h"
-#include "sopc_toolkit_config_constants.h"
 
 // Converts if necessary the given status code to one of the tcp error code of spec part 6 (1.03) table 55
 SOPC_StatusCode SOPC_StatusCode_ToTcpErrorCode(SOPC_StatusCode status)

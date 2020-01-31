@@ -105,16 +105,6 @@
 #error "Maximum number of operations per message cannot be > INT32_MAX"
 #endif
 
-/* Check use of uintptr_t is not an issue on the current platform */
-#if UINTPTR_MAX < UINT32_MAX
-#error "UINTPTR_MAX < UINT32_MAX whereas uintptr_t are used to store uint32_t values"
-#endif
-
-/* Check casts from uint32_t / int32_t to size_t are valid without verification */
-#if SIZE_MAX < UINT32_MAX
-#error "SIZE_MAX < UINT32_MAX whereas uint32_t are casted to size_t values"
-#endif
-
 /* Check that the message buffer is large enough to hold the minimal TCP UA chunk */
 #if SOPC_TCP_UA_MAX_BUFFER_SIZE < SOPC_TCP_UA_MIN_BUFFER_SIZE
 #error "SOPC_TCP_UA_MAX_BUFFER_SIZE is not large enough, must be >= SOPC_TCP_UA_MIN_BUFFER_SIZE"

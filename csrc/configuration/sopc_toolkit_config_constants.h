@@ -28,6 +28,8 @@
 
 #include <stdbool.h>
 
+#include "sopc_common_constants.h"
+
 /* COMMON CONFIGURATION */
 
 /** @brief Maximum chunk buffer size used (must be >= SOPC_TCP_UA_MIN_BUFFER_SIZE) */
