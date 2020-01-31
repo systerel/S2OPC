@@ -21,7 +21,7 @@
 # Calls lcov/genhtml after project has been built with WITH_COVERAGE=1
 set -e
 
-SRC_DIR=build/CMakeFiles/s2opc_obj.dir/
+SRC_DIR=build/CMakeFiles/s2opc.dir/
 REPORT_DIR=./report
 REPORT_FILE=$REPORT_DIR/report.info
 
