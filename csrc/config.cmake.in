@@ -1,0 +1,11 @@
+
+@PACKAGE_INIT@
+include ("${CMAKE_CURRENT_LIST_DIR}/s2opc_common-export.cmake")
+if(@S2OPC_CLIENT_SERVER_ONLY@)
+else()
+  include ("${CMAKE_CURRENT_LIST_DIR}/s2opc_pubsub-export.cmake")
+endif()
+if(@S2OPC_PUBSUB_ONLY@)
+else()
+  include ("${CMAKE_CURRENT_LIST_DIR}/s2opc_client_server-export.cmake")
+endif()
