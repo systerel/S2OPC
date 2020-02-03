@@ -5,10 +5,11 @@ project(S2OPC_Common LANGUAGES C)
 #    S2OPC common library contains shared code     #
 # between OPC UA client/server and pub/sub modules #
 ##                                                ##
+if(NOT S2OPC_COMMON_DEFS_SET)
+  include(../../CommonDefs.cmake)
+endif()
 
 ### Dependencies ###
-set(S2OPC_ROOT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../")
-set(CMAKE_MODULE_PATH "${S2OPC_ROOT_PATH}/CMake;${CMAKE_MODULE_PATH}")
 include (CheckTypeSize)
 
 # Python3 is mandatory for compilation
@@ -77,7 +78,7 @@ else()
 endif()
 
 # Update variable containing S2OPC library dependencies
-list(APPEND S2OPC_LINK_LIBRARIES ${MBEDTLS_LIBRARIES} ${MATH_LIB} ${THREAD_LIB} ${SOCK_LIB})
+set(S2OPC_COMMON_LINK_LIBRARIES ${MBEDTLS_LIBRARIES} ${MATH_LIB} ${THREAD_LIB} ${SOCK_LIB})
 
 file(GLOB PLATFORM_SRCS "helpers_platform_dep/*.c" "helpers_platform_dep/${PLATFORM_DIR}/*.c")
 
@@ -129,7 +130,8 @@ set(S2OPC_COMMON_PRIVATE_INCLUDES
 add_library(s2opc_common ${PLATFORM_SRCS} ${S2OPC_COMMON_SRCS})
 target_compile_options(s2opc_common PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(s2opc_common PRIVATE ${S2OPC_DEFINITIONS})
-target_link_libraries(s2opc_common PUBLIC ${S2OPC_LINKER_FLAGS} ${S2OPC_LINK_LIBRARIES})
+target_link_libraries(s2opc_common PUBLIC ${S2OPC_LINKER_FLAGS} ${S2OPC_LINK_LIBRARIES}
+                                          ${S2OPC_COMMON_LINK_LIBRARIES})
 
 target_include_directories(s2opc_common
   PUBLIC

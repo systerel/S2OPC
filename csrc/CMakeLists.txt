@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 3.5)
 project(S2OPC VERSION 1.0.0 LANGUAGES C) #TODO: manage version
 
+if(NOT S2OPC_COMMON_DEFS_SET)
+  include(../CommonDefs.cmake)
+else()
+  message("csrcs: defs already set")
+endif()
+
 add_subdirectory(Common)
 #if(NOT S2OPC_CLIENTSERVER_ONLY)
 #  add_subdirectory(pubsub)

@@ -6,10 +6,11 @@ option(WITH_NANO_EXTENDED "Use Nano profile with additional services out of Nano
 ##                                    ##
 # S2OPC client/server toolkit library  #
 ##                                    ##
+if(NOT S2OPC_COMMON_DEFS_SET)
+  include(../../CommonDefs.cmake)
+endif()
 
 ### Dependencies ###
-set(S2OPC_ROOT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../")
-set(CMAKE_MODULE_PATH "${S2OPC_ROOT_PATH}/CMake;${CMAKE_MODULE_PATH}")
 
 find_package(EXPAT) # if not found XML loaders will not be compiled
 
