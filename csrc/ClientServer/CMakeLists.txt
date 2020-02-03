@@ -98,10 +98,7 @@ export(EXPORT s2opc_clientserver-export
 ## Configuration loaders backends (OPC UA address space, server configuration) ##
 
 # C generated structure address space loader
-if(${WITH_CONST_ADDSPACE})
-  set(const_addspace "--const_addspace")
-endif()
-
+# (see s2opc_embed_address_space in CommonDefs.cmake to generate the C structure from XML)
 add_library(s2opc_clientserver-loader-embedded STATIC loaders/address_space_loaders/embedded/sopc_addspace_loader.c)
 target_compile_options(s2opc_clientserver-loader-embedded PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(s2opc_clientserver-loader-embedded PRIVATE ${S2OPC_DEFINITIONS})
