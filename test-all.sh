@@ -24,9 +24,9 @@ MY_DIR=$(cd $(dirname $0) && pwd)
 BIN_DIR="${MY_DIR}/bin"
 BUILD_DIR="${MY_DIR}/build"
 VALIDATION_DIR="${MY_DIR}/validation"
-PYS2OPC_TESTS_DIR="${MY_DIR}/tests/pys2opc/tests"
+PYS2OPC_TESTS_DIR="${MY_DIR}/tests/ClientServer/pys2opc/tests"
 PYS2OPC_LIB_IS_PRESENT=$(ls ./build/lib/_pys2opc* 2> /dev/null | wc -l)
-TEST_DIR=${BUILD_DIR}
+TEST_DIR=${BUILD_DIR}/tests/ClientServer
 CTEST_FILE="${TEST_DIR}/CTestTestfile.cmake"
 TAP_DIR="${BUILD_DIR}/bin"
 

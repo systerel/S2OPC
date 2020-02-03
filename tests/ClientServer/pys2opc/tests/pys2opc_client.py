@@ -35,6 +35,10 @@ Creates a subscription with unreasonable publish cycle, longer than the request 
 (this is the (SOPC_REQUEST_TIMEOUT_MS/2) constant from csrc/configuration/sopc_toolkit_config_constants.h, defined as 5 seconds).
 """
 
+# Manage relative paths
+S2OPC_ROOT='../../../../'
+BINARY_DIR= S2OPC_ROOT + 'build/bin'
+VALIDATION_DIR= S2OPC_ROOT + 'validation'
 
 from itertools import product
 import time
@@ -42,7 +46,7 @@ import threading
 
 from pys2opc import PyS2OPC, BaseConnectionHandler, SecurityMode, SecurityPolicy, AttributeId, VariantType, Variant, NodeClass, DataValue, StatusCode
 
-import sys; sys.path.insert(0, '../../../validation')
+import sys; sys.path.insert(0, VALIDATION_DIR)
 from tap_logger import TapLogger
 # WARNING, the following import makes a dependency on freeopcua
 from common import sUri as serverUrl, variantInfoList, ua, browseSubTree
@@ -61,11 +65,11 @@ config_subscription_timeout = {'publish_period': 10000,
 config_no_security = {'add_configuration_function': PyS2OPC.add_configuration_unsecured}
 config_security = {'security_mode': SecurityMode.Sign,
                    'security_policy': SecurityPolicy.Basic256,
-                   'path_cert_auth': '../../../build/bin/trusted/cacert.der',
-                   'path_crl': '../../../build/bin/revoked/cacrl.der',
-                   'path_cert_srv': '../../../build/bin/server_public/server_2k_cert.der',
-                   'path_cert_cli': '../../../build/bin/client_public/client_2k_cert.der',
-                   'path_key_cli': '../../../build/bin/client_private/client_2k_key.pem',
+                   'path_cert_auth': BINARY_DIR + '/trusted/cacert.der',
+                   'path_crl': BINARY_DIR + '/revoked/cacrl.der',
+                   'path_cert_srv': BINARY_DIR + '/server_public/server_2k_cert.der',
+                   'path_cert_cli': BINARY_DIR + '/client_public/client_2k_cert.der',
+                   'path_key_cli': BINARY_DIR + '/client_private/client_2k_key.pem',
                    'add_configuration_function': PyS2OPC.add_configuration_secured}
 
 

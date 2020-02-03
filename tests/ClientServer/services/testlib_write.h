@@ -22,6 +22,7 @@
 
 #include <stdbool.h>
 
+#include "sopc_address_space.h"
 #include "sopc_types.h"
 
 /**

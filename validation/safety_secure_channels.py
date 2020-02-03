@@ -23,7 +23,7 @@ from opcua import ua
 from opcua.crypto import security_policies
 
 def secure_channels_connect(client, security_policy):
-    cert_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'tests', 'data', 'cert')
+    cert_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'tests', 'ClientServer', 'data', 'cert')
 
     if (security_policy == security_policies.SecurityPolicyBasic256):
         client.set_security(security_policy,

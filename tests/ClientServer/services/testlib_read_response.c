@@ -24,9 +24,7 @@
 #include <inttypes.h>
 #include <string.h>
 
-#include "constants.h"
-
-#include "address_space_impl.h"
+#include "sopc_address_space.h"
 #include "sopc_mem_alloc.h"
 #include "testlib_read_response.h"
 #include "util_variant.h"
@@ -40,11 +38,11 @@ static SOPC_Variant* get_attribute_variant(SOPC_AddressSpace_Node* node, uint32_
 {
     switch (attr_id)
     {
-    case constants__e_aid_NodeId:
+    case 1: // NodeId attribute
         return util_variant__new_Variant_from_NodeId(SOPC_AddressSpace_Get_NodeId(address_space_bs__nodes, node));
-    case constants__e_aid_NodeClass:
+    case 2: // NodeClass attribute
         return util_variant__new_Variant_from_NodeClass(node->node_class);
-    case constants__e_aid_Value:
+    case 13: // Value attribute
         return util_variant__new_Variant_from_Variant(SOPC_AddressSpace_Get_Value(address_space_bs__nodes, node));
     /* TODO: rest of mandatory attributes */
     default:

@@ -26,15 +26,6 @@
 
 #include "b2c.h"
 
-/*#include "header.h"*/
-#include "address_space.h"
-#include "address_space_bs.h"
-#include "address_space_impl.h"
-#include "constants.h"
-#include "constants_bs.h"
-#include "io_dispatch_mgr.h"
-#include "msg_read_request.h"
-#include "msg_read_request_bs.h"
 #include "sopc_mem_alloc.h"
 #include "testlib_read_response.h"
 
@@ -65,14 +56,14 @@ OpcUa_ReadRequest* read_new_read_request(void)
         lrv[2 * i + 0] = (OpcUa_ReadValueId){
             .encodeableType = &OpcUa_ReadValueId_EncodeableType,
             .NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric, .Data.Numeric = i + 1000, .Namespace = 1},
-            .AttributeId = constants__e_aid_NodeId,
+            .AttributeId = 1, // NodeId attribute
             .IndexRange = {.Length = 0},
             .DataEncoding = {.Name.Length = 0}};
         /* Request for the NodeClass */
         lrv[2 * i + 1] = (OpcUa_ReadValueId){
             .encodeableType = &OpcUa_ReadValueId_EncodeableType,
             .NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric, .Data.Numeric = i + 1000, .Namespace = 1},
-            .AttributeId = constants__e_aid_NodeClass,
+            .AttributeId = 2, // NodeClass attribute
             .IndexRange = {.Length = 0},
             .DataEncoding = {.Name.Length = 0}};
     }
@@ -86,7 +77,7 @@ OpcUa_ReadRequest* read_new_read_request(void)
                                                         .NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
                                                                    .Data.Numeric = (N_READ_NODES - 1 - i) + 1000,
                                                                    .Namespace = 1},
-                                                        .AttributeId = constants__e_aid_Value,
+                                                        .AttributeId = 13, // Value attribute
                                                         .IndexRange = {.Length = 0},
                                                         .DataEncoding = {.Name.Length = 0}};
     }

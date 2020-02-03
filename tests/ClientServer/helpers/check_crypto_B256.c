@@ -29,7 +29,6 @@
 
 #include "check_crypto_certificates.h"
 #include "check_helpers.h"
-#include "crypto_provider_lib.h"
 #include "hexlify.h"
 #include "sopc_crypto_decl.h"
 #include "sopc_crypto_profiles.h"

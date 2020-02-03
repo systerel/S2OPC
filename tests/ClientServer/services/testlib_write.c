@@ -29,13 +29,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "address_space.h"
-#include "address_space_bs.h"
-#include "address_space_impl.h"
-#include "io_dispatch_mgr.h"
+#include "opcua_statuscodes.h"
 #include "sopc_mem_alloc.h"
 #include "testlib_write.h"
-#include "util_b2c.h"
 #include "util_variant.h"
 
 /* http://stackoverflow.com/questions/7265583/combine-designated-initializers-and-malloc-in-c99 */
@@ -71,7 +67,7 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(const SOPC_AddressSpace* address_spac
                                     .NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
                                                .Data.Numeric = (uint32_t) i + 1000 + 1,
                                                .Namespace = 1},
-                                    .AttributeId = constants__e_aid_Value,
+                                    .AttributeId = 13, // Value attribute
                                     .IndexRange = {.Length = 0},
                                     .Value = {.Value = {.BuiltInTypeId = SOPC_Int64_Id,
                                                         .ArrayType = SOPC_VariantArrayType_SingleValue,
@@ -87,7 +83,7 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(const SOPC_AddressSpace* address_spac
                                .NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
                                           .Data.Numeric = (uint32_t) i + (N_VARS / N_GROUPS) + 1000 + 1,
                                           .Namespace = 1},
-                               .AttributeId = constants__e_aid_Value,
+                               .AttributeId = 13, // Value attribute
                                .IndexRange = {.Length = 0},
                                .Value = {.Value = {.BuiltInTypeId = SOPC_UInt32_Id,
                                                    .ArrayType = SOPC_VariantArrayType_SingleValue,
@@ -103,7 +99,7 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(const SOPC_AddressSpace* address_spac
                                .NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
                                           .Data.Numeric = (uint32_t) i + 2 * (N_VARS / N_GROUPS) + 1000 + 1,
                                           .Namespace = 1},
-                               .AttributeId = constants__e_aid_Value,
+                               .AttributeId = 13, // Value attribute
                                .IndexRange = {.Length = 0},
                                .Value = {.Value = {.BuiltInTypeId = SOPC_Double_Id,
                                                    .ArrayType = SOPC_VariantArrayType_SingleValue,
@@ -127,7 +123,7 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(const SOPC_AddressSpace* address_spac
                                .NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
                                           .Data.Numeric = (uint32_t) i + 3 * (N_VARS / N_GROUPS) + 1000 + 1,
                                           .Namespace = 1},
-                               .AttributeId = constants__e_aid_Value,
+                               .AttributeId = 13, // Value attribute
                                .IndexRange = {.Length = 0},
                                .Value = {.Value = {.BuiltInTypeId = SOPC_String_Id,
                                                    .ArrayType = SOPC_VariantArrayType_SingleValue,
@@ -151,7 +147,7 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(const SOPC_AddressSpace* address_spac
                                .NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
                                           .Data.Numeric = (uint32_t) i + 4 * (N_VARS / N_GROUPS) + 1000 + 1,
                                           .Namespace = 1},
-                               .AttributeId = constants__e_aid_Value,
+                               .AttributeId = 13, // Value attribute
                                .IndexRange = {.Length = 0},
                                .Value = {.Value = {.BuiltInTypeId = SOPC_ByteString_Id,
                                                    .ArrayType = SOPC_VariantArrayType_SingleValue,
@@ -175,7 +171,7 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(const SOPC_AddressSpace* address_spac
             .NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
                        .Data.Numeric = (uint32_t) i + 5 * (N_VARS / N_GROUPS) + 1000 + 1,
                        .Namespace = 1},
-            .AttributeId = constants__e_aid_Value,
+            .AttributeId = 13, // Value attribute
             .IndexRange = {.Length = 0},
             .Value = {.Value = {.BuiltInTypeId = SOPC_XmlElement_Id,
                                 .ArrayType = SOPC_VariantArrayType_SingleValue,
@@ -273,7 +269,7 @@ OpcUa_ReadRequest* tlibw_new_ReadRequest_check(void)
                                      .NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
                                                 .Data.Numeric = (uint32_t) i + 1000 + 1,
                                                 .Namespace = 1},
-                                     .AttributeId = constants__e_aid_Value,
+                                     .AttributeId = 13, // Value attribute
                                      .IndexRange = {.Length = 0},
                                      .DataEncoding = {.Name.Length = 0}};
     }
