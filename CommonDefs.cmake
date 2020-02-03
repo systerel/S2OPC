@@ -40,7 +40,7 @@ list(APPEND S2OPC_COMPILER_FLAGS $<${IS_GNU}:$<${IS_WARNINGS_AS_ERRORS}:-Werror>
 # Specific flags for CERT rules
 list(APPEND S2OPC_COMPILER_FLAGS $<${IS_GNU}:-Wimplicit -Wreturn-type -Wsequence-point -Wcast-qual -Wuninitialized -Wcast-align -Wstrict-prototypes -Wchar-subscripts -Wformat=2 -Wconversion -Wshadow -Wmissing-prototypes>)
 
-# Set Clang compiler flags 
+# Set Clang compiler flags
 list(APPEND S2OPC_COMPILER_FLAGS $<${IS_CLANG}:-std=c99 -pedantic -Wall -Wextra -Wunreachable-code>)
 list(APPEND S2OPC_COMPILER_FLAGS $<${IS_CLANG}:$<${IS_WARNINGS_AS_ERRORS}:-Werror>>)
 # Specific flags for CERT rules
@@ -199,3 +199,23 @@ if (WITH_CLANG_SOURCE_COVERAGE)
   list(APPEND S2OPC_COMPILER_FLAGS -fprofile-instr-generate -fcoverage-mapping)
   list(APPEND S2OPC_LINKER_FLAGS -fprofile-instr-generate -fcoverage-mapping)
 endif()
+
+### Define common functions ###
+
+# Function to generate a C structure address space from an XML UA nodeset file
+function(s2opc_embed_address_space c_file_name xml_uanodeset_path)
+
+  add_custom_command(
+    OUTPUT ${c_file_name}
+    DEPENDS ${xml_uanodeset_path}
+    COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/scripts/generate-s2opc-address-space.py ${xml_uanodeset_path} ${c_file_name} ${const_addspace}
+    COMMENT "Generating address space ${c_file_name}"
+    VERBATIM
+    )
+
+  set_source_files_properties(${c_file_name} PROPERTIES GENERATED TRUE)
+  if(NOT "${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
+    set_source_files_properties(${c_file_name} PROPERTIES COMPILE_FLAGS -Wno-missing-field-initializers)
+  endif()
+
+endfunction()

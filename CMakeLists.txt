@@ -59,112 +59,6 @@ endif()
 
 ### Compilation and configuration of S2OPC extension libraries ###
 
-## Configuration loaders backends (OPC UA address space, server configuration) ##
-
-# C generated structure address space loader
-if(${WITH_CONST_ADDSPACE})
-  set(const_addspace "--const_addspace")
-endif()
-
-add_library(s2opc-loader-embedded STATIC csrc/loaders/address_space_loaders/embedded/sopc_addspace_loader.c)
-target_compile_options(s2opc-loader-embedded PRIVATE ${S2OPC_COMPILER_FLAGS})
-target_compile_definitions(s2opc-loader-embedded PRIVATE ${S2OPC_DEFINITIONS})
-target_link_libraries(s2opc-loader-embedded PRIVATE s2opc)
-target_include_directories(s2opc-loader-embedded PRIVATE ${S2OPC_PUBLIC_INCLUDES} PUBLIC "csrc/loaders/address_space_loaders")
-set_target_properties(s2opc-loader-embedded PROPERTIES PUBLIC_HEADER "csrc/loaders/address_space_loaders/embedded/sopc_addspace_loader.h")
-install(TARGETS s2opc-loader-embedded
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-        PUBLIC_HEADER DESTINATION "include/embedded")
-
-# Function to generate a C structure adress space from an XML UA nodeset file
-function(s2opc_embed_address_space c_file_name xml_uanodeset_path)
-
-    add_custom_command(
-        OUTPUT ${c_file_name}
-        DEPENDS ${xml_uanodeset_path}
-        COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/scripts/generate-s2opc-address-space.py ${xml_uanodeset_path} ${c_file_name} ${const_addspace}
-        COMMENT "Generating address space ${c_file_name}"
-        VERBATIM
-    )
-
-    set_source_files_properties(${c_file_name} PROPERTIES GENERATED TRUE)
-    if(NOT "${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
-        set_source_files_properties(${c_file_name} PROPERTIES COMPILE_FLAGS -Wno-missing-field-initializers)
-    endif()
-
-endfunction()
-
-# XML addresss space loader and XML server configuration loader
-if (EXPAT_FOUND)
-  message("-- Expat library found: XML config loaders compilation active")
-  add_library(s2opc-xml-loaders-expat STATIC csrc/loaders/helpers/sopc_helper_expat.c
-                                             csrc/loaders/address_space_loaders/xml_expat/sopc_uanodeset_loader.c
-                                             csrc/loaders/config_loaders/xml_expat/sopc_config_loader.c)
-  target_compile_options(s2opc-xml-loaders-expat PRIVATE ${S2OPC_COMPILER_FLAGS})
-  target_compile_definitions(s2opc-xml-loaders-expat PRIVATE ${S2OPC_DEFINITIONS} "UANODESET_LOADER_LOG")
-  target_link_libraries(s2opc-xml-loaders-expat PUBLIC ${EXPAT_LIBRARIES} PRIVATE s2opc)
-  target_include_directories(s2opc-xml-loaders-expat PRIVATE ${S2OPC_PUBLIC_INCLUDES} ${EXPAT_INCLUDE_DIRS}
-                             PUBLIC "csrc/loaders/address_space_loaders"
-                                    "csrc/loaders/config_loaders"
-                                    "csrc/loaders/helpers")
-  set_property(TARGET s2opc-xml-loaders-expat PROPERTY
-               PUBLIC_HEADER "csrc/loaders/address_space_loaders/xml_expat/sopc_uanodeset_loader.h"
-                             "csrc/loaders/config_loaders/xml_expat/sopc_config_loader.h")
-  install(TARGETS s2opc-xml-loaders-expat
-          LIBRARY DESTINATION lib
-          ARCHIVE DESTINATION lib
-          PUBLIC_HEADER DESTINATION "include/xml_expat")
-else()
-  message("-- Expat library NOT found: XML config loaders will not be available")
-endif()
-
-## Subscribing client library ##
-
-set(LIBSUBSCRIBE_PATH "tests/client_subscription")
-add_library(client_subscription "${LIBSUBSCRIBE_PATH}/libs2opc_client.c"
-                                "${LIBSUBSCRIBE_PATH}/libs2opc_client_cmds.c"
-                                "${LIBSUBSCRIBE_PATH}/libs2opc_client_common.c"
-                                "${LIBSUBSCRIBE_PATH}/toolkit_helpers.c"
-                                "${LIBSUBSCRIBE_PATH}/state_machine.c"
-                                "${LIBSUBSCRIBE_PATH}/pki_permissive.c"
-                                )
-target_link_libraries(client_subscription PUBLIC s2opc)
-target_compile_options(client_subscription PRIVATE ${S2OPC_COMPILER_FLAGS})
-target_compile_definitions(client_subscription PRIVATE ${S2OPC_DEFINITIONS})
-target_include_directories(client_subscription PRIVATE ${S2OPC_PUBLIC_INCLUDES}
-                                                       ${S2OPC_PRIVATE_INCLUDES}
-                                                       ${LIBSUBSCRIBE_PATH})
-set_target_properties(client_subscription PROPERTIES PUBLIC_HEADER "${LIBSUBSCRIBE_PATH}/libs2opc_client.h")
-install(TARGETS client_subscription
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-        PUBLIC_HEADER DESTINATION include)
-
-## PyS2OPC library: Python 3 binding for S2OPC client ##
-
-# The library is built by python. It may use the shared library but it must not be built with ASan.
-# The problem with ASan is to embed a dynamic library compiled with ASan into Python, which is not compiled with ASan.
-# The compilation is not done with clang-analyzer either, as this would analyze CFFI-generated code.
-if(WITH_PYS2OPC)
-  set(PYS2OPC_PATH "${CMAKE_SOURCE_DIR}/tests/pys2opc")
-  set(PYS2OPC_FILES "${PYS2OPC_PATH}/pys2opc/__init__.py"
-                    "${PYS2OPC_PATH}/pys2opc/connection.py"
-                    "${PYS2OPC_PATH}/pys2opc/pys2opc_build.py"
-                    "${PYS2OPC_PATH}/pys2opc/responses.py"
-                    "${PYS2OPC_PATH}/pys2opc/s2opc.py"
-                    "${PYS2OPC_PATH}/pys2opc/types.py"
-                    )
-  set(PYS2OPC_PLACEHOLDER ${CMAKE_BINARY_DIR}/pys2opc_touch)
-  add_custom_command(OUTPUT ${PYS2OPC_PLACEHOLDER}
-                     COMMAND ${PYTHON_EXECUTABLE} setup.py build_ext -b ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} -t ${CMAKE_BINARY_DIR}
-                     COMMAND ${CMAKE_COMMAND} -E touch ${PYS2OPC_PLACEHOLDER}
-                     WORKING_DIRECTORY ${PYS2OPC_PATH})
-  add_custom_target(pys2opc ALL
-                    DEPENDS ${PYS2OPC_PLACEHOLDER}
-                    DEPENDS ${PYS2OPC_FILES})
-  add_dependencies(pys2opc client_subscription)
-endif()
 
 #### Tests / Samples for S2OPC library and extension libraries ####
 
@@ -183,7 +77,7 @@ endif()
 
 if(ENABLE_TESTING)
   enable_testing()
-  
+
   # Function to add a unit test to the set of tests: define a test generating a TAP file from a binary name
   function(s2opc_unit_test binary_name)
     set(test_name "unit::${binary_name}")
@@ -225,11 +119,11 @@ if(ENABLE_TESTING)
   file(GLOB_RECURSE INTERNAL_TESTS_SRCS "tests/helpers/*.c")
   add_executable(check_helpers ${INTERNAL_TESTS_SRCS} ${TEST_CHECK_HELPERS_ADDRESS_SPACE_C})
   target_include_directories(check_helpers PRIVATE ${S2OPC_PRIVATE_INCLUDES} ${MBEDTLS_INCLUDE_DIRS} ${CHECK_INCLUDE_DIRS})
-  target_link_libraries(check_helpers PRIVATE s2opc ${CHECK_LIBRARIES} s2opc-loader-embedded)
+  target_link_libraries(check_helpers PRIVATE s2opc ${CHECK_LIBRARIES} s2opc_clientserver-loader-embedded)
   target_compile_options(check_helpers PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(check_helpers PRIVATE ${S2OPC_DEFINITIONS})
   if (EXPAT_FOUND)
-    target_link_libraries(check_helpers PRIVATE s2opc-xml-loaders-expat)
+    target_link_libraries(check_helpers PRIVATE s2opc_clientserver-xml-loaders-expat)
     target_compile_definitions(check_helpers PRIVATE "WITH_EXPAT")
   endif()
   s2opc_unit_test(check_helpers)
@@ -330,7 +224,7 @@ if(ENABLE_TESTING)
                                                       "tests/services/test_results.c"
                                                       "tests/services/testlib_read_response.c"
                                                       ${TEST_LOCAL_DEMO_SERVER_ADDRESS_SPACE_C})
-  target_link_libraries(toolkit_test_server_local_service PRIVATE s2opc s2opc-loader-embedded)
+  target_link_libraries(toolkit_test_server_local_service PRIVATE s2opc s2opc_clientserver-loader-embedded)
   target_compile_options(toolkit_test_server_local_service PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(toolkit_test_server_local_service PRIVATE ${S2OPC_DEFINITIONS})
   target_include_directories(toolkit_test_server_local_service PRIVATE ${S2OPC_PUBLIC_INCLUDES}
@@ -389,7 +283,7 @@ if(ENABLE_TESTING)
                                      "tests/services/test_results.c"
                                      "tests/services/testlib_read_response.c"
                                      ${TEST_DEMO_CLIENT_ADDRESS_SPACE_C})
-  target_link_libraries(toolkit_test_client PRIVATE s2opc s2opc-loader-embedded)
+  target_link_libraries(toolkit_test_client PRIVATE s2opc s2opc_clientserver-loader-embedded)
   target_compile_options(toolkit_test_client PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(toolkit_test_client PRIVATE ${S2OPC_DEFINITIONS})
   target_include_directories(toolkit_test_client PRIVATE ${S2OPC_PUBLIC_INCLUDES}
@@ -426,14 +320,14 @@ if(ENABLE_TESTING)
                  "tests/services/runtime_variables.c"
                  "tests/services/toolkit_test_server.c"
                  ${TEST_DEMO_SERVER_ADDRESS_SPACE_C})
-  target_link_libraries(${TOOLKIT_TEST_SERVER} PRIVATE s2opc s2opc-loader-embedded)
+  target_link_libraries(${TOOLKIT_TEST_SERVER} PRIVATE s2opc s2opc_clientserver-loader-embedded)
   target_compile_options(${TOOLKIT_TEST_SERVER} PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(${TOOLKIT_TEST_SERVER} PRIVATE ${S2OPC_DEFINITIONS}) 
   target_include_directories(${TOOLKIT_TEST_SERVER} PRIVATE ${S2OPC_PUBLIC_INCLUDES}
                                                             ${S2OPC_PRIVATE_INCLUDES})
 
   if (EXPAT_FOUND)
-    target_link_libraries(${TOOLKIT_TEST_SERVER} PRIVATE s2opc-xml-loaders-expat)
+    target_link_libraries(${TOOLKIT_TEST_SERVER} PRIVATE s2opc_clientserver-xml-loaders-expat)
     target_compile_definitions(${TOOLKIT_TEST_SERVER} PRIVATE "WITH_EXPAT")
   endif()
 
@@ -790,7 +684,7 @@ if(ENABLE_SAMPLES)
   # TODO: XML parsing demo: make a unit test / validation test with it instead of demo
   if (EXPAT_FOUND)
     add_executable(s2opc_parse_uanodeset "tests/demo/s2opc_parse_uanodeset.c")
-    target_link_libraries(s2opc_parse_uanodeset PRIVATE s2opc s2opc-xml-loaders-expat)
+    target_link_libraries(s2opc_parse_uanodeset PRIVATE s2opc s2opc_clientserver-xml-loaders-expat)
     target_compile_options(s2opc_parse_uanodeset PRIVATE ${S2OPC_COMPILER_FLAGS})
     target_compile_definitions(s2opc_parse_uanodeset PRIVATE ${S2OPC_DEFINITIONS})
     target_include_directories(s2opc_parse_uanodeset PRIVATE ${S2OPC_PUBLIC_INCLUDES})

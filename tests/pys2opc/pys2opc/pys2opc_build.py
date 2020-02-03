@@ -57,21 +57,19 @@ if os.name == 'nt':
 # Windows
     ffibuilder.set_source('_pys2opc',
                       source,
-                      extra_link_args=['Advapi32.lib', 'ws2_32.lib', 'client_subscription.lib', 's2opc.lib', 'mbedcrypto.lib', 'mbedtls.lib', 'mbedx509.lib'],
+                      extra_link_args=['Advapi32.lib', 'ws2_32.lib', 'client_subscription.lib', 's2opc_clientserver.lib', 's2opc_common.lib', 'mbedcrypto.lib', 'mbedtls.lib', 'mbedx509.lib'],
                       include_dirs=['.'],
-                      library_dirs=['../client_subscription/',
-                                    '../../build/lib/',
-                                    '../../build/mbedtls_dir' #mbedtls libraries shall be copied here
+                      library_dirs=['../lib/', # working dir should be located in build dir
+                                    '../mbedtls_dir' #mbedtls libraries shall be copied here
                                     '.'],  # Ease compilation outside of the S2OPC project
                      )
 else:
 # Linux
     ffibuilder.set_source('_pys2opc',
                       source,
-                      extra_link_args=['-lclient_subscription', '-ls2opc', '-lmbedcrypto', '-lmbedtls', '-lmbedx509'],
+                      extra_link_args=['-lclient_subscription', '-ls2opc_clientserver', '-ls2opc_common', '-lmbedcrypto', '-lmbedtls', '-lmbedx509'],
                       include_dirs=['.'],
-                      library_dirs=['../client_subscription/',
-                                    '../../build/lib/',
+                      library_dirs=['../lib/', # working dir should be located in build dir
                                     '.'],  # Ease compilation outside of the S2OPC project
                      )
 

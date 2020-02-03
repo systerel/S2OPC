@@ -78,7 +78,7 @@ else()
 endif()
 
 # Update variable containing S2OPC library dependencies
-set(S2OPC_COMMON_LINK_LIBRARIES ${MBEDTLS_LIBRARIES} ${MATH_LIB} ${THREAD_LIB} ${SOCK_LIB})
+list(APPEND S2OPC_COMMON_LINK_LIBRARIES ${MBEDTLS_LIBRARIES} ${MATH_LIB} ${THREAD_LIB} ${SOCK_LIB})
 
 file(GLOB PLATFORM_SRCS "helpers_platform_dep/*.c" "helpers_platform_dep/${PLATFORM_DIR}/*.c")
 
