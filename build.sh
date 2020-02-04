@@ -32,7 +32,6 @@
 
 CURDIR=`pwd`
 EXEC_DIR=bin
-CERT_DIR=tests/data/cert
 
 if [[ $CMAKE_TOOLCHAIN_FILE ]]; then
     BUILD_DIR=build_toolchain

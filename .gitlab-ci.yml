@@ -47,7 +47,7 @@ generation:
   stage: build
   image: registry.gitlab.com/systerel/s2opc/build@sha256:ab28b5b22b378988e863dfdc1f1fbef78748008ff8ee56c0dd1a0a3cfa57d1b6 # digest of build:1.15
   script:
-    - &build_command_line './build.sh && cd $BUILD_DIR && cmake --build . --target install && ../tests/scripts/make-ctestfile-relative CTestTestfile.cmake > ./bin/CTestTestfile.cmake || exit 1'
+    - &build_command_line './build.sh && cd $BUILD_DIR && cmake --build . --target install && ../tests/scripts/make-ctestfile-relative tests/ClientServer/CTestTestfile.cmake > ./bin/CTestTestfile.cmake || exit 1'
   variables: &build_linux_variables
     CMAKE_INSTALL_PREFIX: '../install_linux64'
     DOCKER_IMAGE: 'c1958a853af652ee12a74d6eee23e7af746711e10ff1e2a58453cf1e21f85b49'

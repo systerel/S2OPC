@@ -197,7 +197,7 @@ git add -f install_linux install_windows &>/dev/null || exit 1
 git commit -S -m "Add toolkit binaries for version $DELIVERY_NAME" &> /dev/null || exit 1
 
 echo "Generate test script"
-./tests/scripts/make-ctestfile-relative build/CTestTestfile.cmake > bin/CTestTestfile.cmake
+./tests/scripts/make-ctestfile-relative build/tests/ClientServer/CTestTestfile.cmake > bin/CTestTestfile.cmake
 
 # The bin folder is moved to the root in releases
 sed -i 's,build/bin,bin,g' bin/CTestTestfile.cmake

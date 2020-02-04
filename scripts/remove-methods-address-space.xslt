@@ -21,7 +21,7 @@ under the License.
 This script removes the method nodes instances (but not the method nodes in type definition)
 
 Script use example:
-saxonb-xslt -s:$S2OPC_REPO/tests/data/address_space/s2opc_origin.xml -xsl:$S2OPC_REPO/scripts/remove-methods-address-space.xslt -o:$S2OPC_REPO/tests/data/address_space/s2opc_nano_tmp.xml
+saxonb-xslt -s:$S2OPC_REPO/tests/ClientServer/data/address_space/s2opc_origin.xml -xsl:$S2OPC_REPO/scripts/remove-methods-address-space.xslt -o:$S2OPC_REPO/tests/ClientServer/data/address_space/s2opc_nano_tmp.xml
 -->
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns="http://opcfoundation.org/UA/2011/03/UANodeSet.xsd" xpath-default-namespace="http://opcfoundation.org/UA/2011/03/UANodeSet.xsd" version="2.0"  >
     <xsl:output method="xml"  encoding="UTF-8" indent="yes"/>
