@@ -49,6 +49,12 @@ list(APPEND S2OPC_COMPILER_FLAGS $<${IS_CLANG}:-Wunicode -Wimplicit-int -Wreserv
 # Set MSVC compiler flags
 list(APPEND S2OPC_COMPILER_FLAGS $<${IS_MSVC}:/W3 /Zi /sdl>)
 list(APPEND S2OPC_COMPILER_FLAGS $<${IS_MSVC}:$<${IS_WARNINGS_AS_ERRORS}:/WX>>)
+# Set MSVC definitions (lean_and_mean avoid issue on order of import of Windows.h and Winsock2.h)
+# TODO: nor COMPILE_FLAGS, COMPILE_DEFINITIONS or use of ${IS_MSCV} works, to be investigated
+if("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
+  add_definitions(/DWIN32_LEAN_AND_MEAN)
+  add_definitions(/D_CRT_SECURE_NO_WARNINGS)
+endif()
 
 # Add flags when MINGW compiler (IS_GNU is also valid for MINGW)
 list(APPEND S2OPC_COMPILER_FLAGS $<${IS_MINGW}:-Wno-pedantic-ms-format>)

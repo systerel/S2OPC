@@ -30,9 +30,9 @@
 #include <assert.h>
 #include <inttypes.h>
 #include <stdio.h>
-#include <unistd.h>
 
 #include "libs2opc_client_cmds.h"
+#include "sopc_time.h"
 
 static void datachange_callback(const int32_t c_id, const char* node_id, const SOPC_DataValue* value)
 {
@@ -110,7 +110,7 @@ int main(int argc, char* const argv[])
 
     if (res == 0)
     {
-        sleep(30);
+        SOPC_Sleep(30);
         SOPC_ClientHelper_Unsubscribe(connectionId);
     }
 

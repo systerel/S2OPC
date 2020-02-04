@@ -87,9 +87,7 @@ elseif(WIN32)
   # minimum Vista for IPV6 support
   if("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
     # TODO: use COMPILE_FLAGS or COMPILE_DEFINITIONS with set_source_files_properties
-    add_definitions(/DWIN32_LEAN_AND_MEAN)
     add_definitions(/D_WIN32_WINNT=0x0600)
-    add_definitions(/D_CRT_SECURE_NO_WARNINGS)
   elseif(MINGW)
     set_source_files_properties(${PLATFORM_SRCS} PROPERTIES COMPILE_FLAGS "-D_WIN32_WINNT=0x0600")
   endif()
