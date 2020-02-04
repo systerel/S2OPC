@@ -24,6 +24,6 @@ SRCS_DIR=./csrc
 TEST_DIR=./tests
 BSRCS_DIR=./bsrc
 
-find $SRCS_DIR $TEST_DIR -name "*.[hc]" ! -path "./csrc/services/bgenc/*" -exec clang-format -style=file -i '{}' \;
+find $SRCS_DIR $TEST_DIR -name "*.[hc]" ! -path "./csrc/ClientServer/services/bgenc/*" -exec clang-format -style=file -i '{}' \;
 find $BSRCS_DIR -name "*.mch" -or -name "*.imp" -or -name "*.ref" -or -name "*.def" -exec sed 's/\t/    /g' -i '{}' \;
 find $BSRCS_DIR -name "*.mch" -or -name "*.imp" -or -name "*.ref" -or -name "*.def" -exec sed 's/\s\+$//g' -i '{}' \;

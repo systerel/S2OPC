@@ -21,7 +21,7 @@
 # script to test freshness of C generated code from B.
 CURDIR=`pwd`
 LOGPATH=$CURDIR/pre-build.log
-CSRCDIR=csrc/services/bgenc
+CSRCDIR=csrc/ClientServer/services/bgenc
 LOGPATH=$CURDIR/pre-build.log
 ifs_save=$IFS
 IFS=$'\n'

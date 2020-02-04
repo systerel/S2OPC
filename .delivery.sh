@@ -140,7 +140,7 @@ echo "Check generated C source files were up to date"
 echo "Re-Generate C source files and commit them with current date"
 # regenerate C source files to be sure we keep current date in source files
 ./.pre-build-in-docker.sh ./pre-build.sh || exit 1
-git commit csrc/services/bgenc -m "Add generated source files with up to date generation timestamp"
+git commit csrc/ClientServer/services/bgenc -m "Add generated source files with up to date generation timestamp"
 
 echo "Check code with clang tools"
 ./.check-in-docker.sh ./.check-code.sh

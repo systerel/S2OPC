@@ -35,5 +35,5 @@ if [[ -z $ISALL || $ISALL != "all" ]]; then
     echo "Do not clean generated source files"
 else
     echo "Clean generated source files from B model"
-    \rm -fr ./csrc/services/bgenc
+    \rm -fr ./csrc/ClientServer/services/bgenc
 fi
