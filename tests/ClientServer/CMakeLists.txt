@@ -59,8 +59,6 @@ set(S2OPC_CLIENTSERVER_INTERNAL_INCLUDES
   "${S2OPC_ROOT_PATH}/csrc/ClientServer/sockets"
   )
 
-
-
 if(ENABLE_TESTING)
   enable_testing()
 
@@ -448,12 +446,14 @@ if(ENABLE_TESTING)
     target_compile_options(${standalone_target_name} PRIVATE ${S2OPC_COMPILER_FLAGS})
     target_compile_definitions(${standalone_target_name} PRIVATE ${S2OPC_DEFINITIONS})
     target_link_libraries(${standalone_target_name} s2opc_clientserver)
+    target_include_directories(${standalone_target_name} PRIVATE ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
     add_dependencies(fuzzers ${standalone_target_name})
 
     add_executable(${fuzz_target_name} "${FUZZING_PATH}/${src_file}")
     set_target_properties(${fuzz_target_name} PROPERTIES COMPILE_FLAGS "-fsanitize=fuzzer")
     set_target_properties(${fuzz_target_name} PROPERTIES LINK_FLAGS "-fsanitize=fuzzer")
     target_link_libraries(${fuzz_target_name} s2opc_clientserver)
+    target_include_directories(${fuzz_target_name} PRIVATE ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
     add_dependencies(fuzzers ${fuzz_target_name})
   endfunction()
 
@@ -470,10 +470,11 @@ if(ENABLE_TESTING)
   endif()
 
   # OSS Fuzzing
-  function(s2opc_oss_fuzzer target_name src_file)
-    add_executable(${target_name} "${FUZZING_PATH}/${src_file}")
-    target_link_libraries(${target_name} s2opc_clientserver $ENV{LIB_FUZZING_ENGINE})
-    add_dependencies(fuzzers ${target_name})
+  function(s2opc_oss_fuzzer fuzz_target_name src_file)
+    add_executable(${fuzz_target_name} "${FUZZING_PATH}/${src_file}")
+    target_link_libraries(${fuzz_target_name} s2opc_clientserver $ENV{LIB_FUZZING_ENGINE})
+    target_include_directories(${fuzz_target_name} PRIVATE ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
+    add_dependencies(fuzzers ${fuzz_target_name})
   endfunction()
 
   if(WITH_OSS_FUZZ)
