@@ -14,14 +14,6 @@ endif()
 
 find_package(EXPAT) # if not found XML loaders will not be compiled
 
-### Manage options for S2OPC compilation ###
-
-# S2OPC library scope option
-option(WITH_NANO_EXTENDED "Use Nano profile with additional services out of Nano scope" OFF)
-
-# Add WITH_NANO_EXTENDED to compilation definition if option activated
-list(APPEND S2OPC_CLIENTSERVER_DEFINITIONS $<$<BOOL:${WITH_NANO_EXTENDED}>:WITH_NANO_EXTENDED>)
-
 ### Compilation of S2OPC client/server library source files ###
 
 ## C99 compliant source code ##
@@ -54,7 +46,7 @@ set(S2OPC_CLIENTSERVER_PRIVATE_INCLUDES
 
 add_library(s2opc_clientserver ${S2OPC_CLIENTSERVER_SRCS})
 target_compile_options(s2opc_clientserver PRIVATE ${S2OPC_COMPILER_FLAGS})
-target_compile_definitions(s2opc_clientserver PRIVATE ${S2OPC_DEFINITIONS} ${S2OPC_CLIENTSERVER_DEFINITIONS})
+target_compile_definitions(s2opc_clientserver PRIVATE ${S2OPC_DEFINITIONS})
 target_link_libraries(s2opc_clientserver PUBLIC s2opc_common)
 
 target_include_directories(s2opc_clientserver

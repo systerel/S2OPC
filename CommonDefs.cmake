@@ -78,6 +78,8 @@ option(WITH_CLANG_SOURCE_COVERAGE "build with Clang source coverage" OFF)
 # S2OPC library extension option (also mutually exclusive with above options)
 option(WITH_OSS_FUZZ "Add the fuzzers target when building for OSS-Fuzz" OFF)
 option(WITH_PYS2OPC "Also builds PyS2OPC" OFF)
+# S2OPC client/server library scope option
+option(WITH_NANO_EXTENDED "Use Nano profile with additional services out of Nano scope" OFF)
 
 # Check project and option(s) are compatible
 
@@ -191,7 +193,7 @@ if(WITH_GPERF_PROFILER)
   list(APPPEND S2OPC_LINK_LIBRARIES profiler)
 endif()
 
-if (WITH_CLANG_SOURCE_COVERAGE)
+if(WITH_CLANG_SOURCE_COVERAGE)
   if (NOT "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
     message(FATAL_ERROR "Clang compiler is required to enable Clang source coverage")
   endif()
@@ -199,6 +201,13 @@ if (WITH_CLANG_SOURCE_COVERAGE)
   list(APPEND S2OPC_COMPILER_FLAGS -fprofile-instr-generate -fcoverage-mapping)
   list(APPEND S2OPC_LINKER_FLAGS -fprofile-instr-generate -fcoverage-mapping)
 endif()
+
+if(WITH_PYS2OPC AND NOT WITH_NANO_EXTENDED)
+  message(WARNING "PyS2OPC validation tests will fail if S2OPC test server compiled without WITH_NANO_EXTENDED set") 
+endif()
+
+# Add WITH_NANO_EXTENDED to compilation definition if option activated
+list(APPEND S2OPC_DEFINITIONS $<$<BOOL:${WITH_NANO_EXTENDED}>:WITH_NANO_EXTENDED>)
 
 ### Define common functions ###
 
