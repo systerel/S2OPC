@@ -25,8 +25,8 @@
 
 echo "Check master branch name is valid"
 BRANCH_COMMIT=master
-VERSION_HEADER=./csrc/helpers/sopc_version.h
-LIBSUB_VERSION_HEADER=./tests/client_subscription/libs2opc_client.h
+VERSION_HEADER=./csrc/Common/helpers/sopc_version.h
+LIBSUB_VERSION_HEADER=./tests/ClientServer/client_subscription/libs2opc_client.h
 
 git show-ref refs/heads/$BRANCH_COMMIT &> /dev/null
 if [[ $? != 0 ]]; then

@@ -32,7 +32,7 @@ browse some nodes.
 Does this again with two or more connections in parallel.
 
 Creates a subscription with unreasonable publish cycle, longer than the request timeoutHint of a PublishRequest
-(this is the (SOPC_REQUEST_TIMEOUT_MS/2) constant from csrc/configuration/sopc_toolkit_config_constants.h, defined as 5 seconds).
+(this is the (SOPC_REQUEST_TIMEOUT_MS/2) constant from csrc/ClientServer/configuration/sopc_toolkit_config_constants.h, defined as 5 seconds).
 """
 
 # Manage relative paths

@@ -37,7 +37,7 @@ SKIPPED_TESTS_FILE=skipped_tests.cfg
 KNOWN_BUGS_FILES=known_bugs.cfg
 
 S2OPC_UACTT_CONFIG=Acceptation_S2OPC
-S2OPC_CERTS_CONFIG=../tests/data/cert
+S2OPC_CERTS_CONFIG=../tests/ClientServer/data/cert
 UACTT_PROJECT_PATH=/UACTT_project
 
 if [[ -z "$WITH_NANO_EXTENDED" ]] || [[ $WITH_NANO_EXTENDED -eq  0 ]]
@@ -117,7 +117,7 @@ pushd ${ROOT_DIR}/build/bin
 ./$TOOLKIT_TEST_SERVER 2> $SERVER_ERROR &
 SERVER_PID=$!
 # wait for server to be up
-${ROOT_DIR}/tests/scripts/wait_server.py
+${ROOT_DIR}/tests/ClientServer/scripts/wait_server.py
 popd
 
 echo "Launching Acceptance Test Tool: uacompliancetest -s $UACTT_PROJECT_PATH/Acceptation_S2OPC.ctt.xml --selection $SELECTION -h -c -r ./$LOG_FILE 2>$UACTT_ERROR_FILE"

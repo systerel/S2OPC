@@ -138,23 +138,23 @@ under the License.
 err=0
 # Exclude some files
 read -d '' exclusions <<-EOF
-    csrc/opcua_types/opcua_identifiers.h
-    csrc/opcua_types/opcua_statuscodes.h
-    csrc/opcua_types/sopc_types.h
-    csrc/opcua_types/sopc_types.c
-    tests/freertos/test_helpers_platform_dep/FreeRTOSConfig.h
-    tests/freertos/test_helpers_platform_dep/lwipopts.h
-    tests/freertos/test_helpers_platform_dep/semihost_hardfault.c
-    tests/freertos/test_helpers_platform_dep/board_specific/fsl_phy.h
-    tests/freertos/test_helpers_platform_dep/board_specific/peripherals.h
-    tests/freertos/test_helpers_platform_dep/board_specific/pin_mux.c
-    tests/freertos/test_helpers_platform_dep/board_specific/pin_mux.h
-    tests/freertos/test_helpers_platform_dep/board_specific/peripherals.c
-    tests/freertos/test_helpers_platform_dep/board_specific/fsl_phy.c
-    tests/freertos/test_helpers_platform_dep/board_specific/src/board.h
-    tests/freertos/test_helpers_platform_dep/board_specific/src/clock_config.h
-    tests/freertos/test_helpers_platform_dep/board_specific/src/clock_config.c
-    tests/freertos/test_helpers_platform_dep/board_specific/src/board.c
+    csrc/Common/opcua_types/opcua_identifiers.h
+    csrc/Common/opcua_types/opcua_statuscodes.h
+    csrc/Common/opcua_types/sopc_types.h
+    csrc/Common/opcua_types/sopc_types.c
+    tests/ClientServer/freertos/test_helpers_platform_dep/FreeRTOSConfig.h
+    tests/ClientServer/freertos/test_helpers_platform_dep/lwipopts.h
+    tests/ClientServer/freertos/test_helpers_platform_dep/semihost_hardfault.c
+    tests/ClientServer/freertos/test_helpers_platform_dep/board_specific/fsl_phy.h
+    tests/ClientServer/freertos/test_helpers_platform_dep/board_specific/peripherals.h
+    tests/ClientServer/freertos/test_helpers_platform_dep/board_specific/pin_mux.c
+    tests/ClientServer/freertos/test_helpers_platform_dep/board_specific/pin_mux.h
+    tests/ClientServer/freertos/test_helpers_platform_dep/board_specific/peripherals.c
+    tests/ClientServer/freertos/test_helpers_platform_dep/board_specific/fsl_phy.c
+    tests/ClientServer/freertos/test_helpers_platform_dep/board_specific/src/board.h
+    tests/ClientServer/freertos/test_helpers_platform_dep/board_specific/src/clock_config.h
+    tests/ClientServer/freertos/test_helpers_platform_dep/board_specific/src/clock_config.c
+    tests/ClientServer/freertos/test_helpers_platform_dep/board_specific/src/board.c
 EOF
 for f in $exclusions; do
     mv $f $f"_"
