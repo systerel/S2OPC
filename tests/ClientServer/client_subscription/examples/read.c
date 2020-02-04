@@ -28,6 +28,7 @@
  */
 
 #include <assert.h>
+#include <inttypes.h>
 #include <stdio.h>
 
 #include "libs2opc_client_cmds.h"
@@ -97,7 +98,7 @@ int main(int argc, char* const argv[])
                 SOPC_Variant variant = readDataValue->Value;
                 if (SOPC_UInt64_Id == variant.BuiltInTypeId)
                 {
-                    printf("NodeId:\"%s\" - Value: %ld\n", node_id, (int64_t) variant.Value.Uint64);
+                    printf("NodeId:\"%s\" - Value: %" PRIu64 "\n", node_id, variant.Value.Uint64);
                 }
             }
             free(readDataValue);
