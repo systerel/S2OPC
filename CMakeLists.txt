@@ -1,4 +1,10 @@
 cmake_minimum_required(VERSION 3.5)
+project(S2OPC VERSION 1.0.0 LANGUAGES C) #TODO: manage version
+
+# include common definitions here to share it with sources and tests
+if(NOT S2OPC_COMMON_DEFS_SET)
+  include(CommonDefs.cmake)
+endif()
 
 # Build S2OPC libraries, S2OPC libraries extensions and S2OPC tests
 
