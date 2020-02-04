@@ -12,9 +12,6 @@ endif()
 ### Dependencies ###
 include (CheckTypeSize)
 
-# Python3 is mandatory for compilation
-find_package(PythonInterp 3 REQUIRED)
-
 # Keep a static version of the mbedtls libraries to link the tests
 set(MBEDTLS_CUSTOM_PATH 0)
 
