@@ -128,6 +128,12 @@ function(check_debug_build_type option_name reason)
   endif()
 endfunction()
 
+function(print_if_activated option_name)
+  if(${${option_name}})
+    message("-- ${option_name} S2OPC option set")
+  endif()
+endfunction()
+
 # Check for incompatible options activated
 check_mutually_exclusive_options("WITH_ASAN")
 check_mutually_exclusive_options("WITH_TSAN")
@@ -150,6 +156,10 @@ endif()
 check_debug_build_type("WITH_ASAN" "to set compilation flag '-fno-omit-frame-pointer'")
 check_debug_build_type("WITH_TSAN" "to set compilation flag '-fno-omit-frame-pointer'")
 check_debug_build_type("WITH_UBSAN" "to set compilation flag '-fno-omit-frame-pointer'")
+# print options with no incompatibility
+print_if_activated("WITH_NANO_EXTENDED")
+print_if_activated("WITH_CONST_ADDSPACE")
+print_if_activated("WITH_STATIC_SECURITY_DATA")
 
 # Check specific options constraints and set necessary compilation flags
 
