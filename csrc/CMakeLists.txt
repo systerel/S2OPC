@@ -29,9 +29,11 @@ write_basic_package_version_file(
   COMPATIBILITY AnyNewerVersion
 )
 
-# install the configuration file
+# install the configuration file, version and custom find modules
 install(FILES
   ${CMAKE_BINARY_DIR}/s2opc-config.cmake
   ${CMAKE_BINARY_DIR}/s2opc-config-version.cmake
+  ${S2OPC_ROOT_PATH}/CMake/FindMbedTLS.cmake
+  ${S2OPC_ROOT_PATH}/CMake/FindCheck.cmake
   DESTINATION cmake
   )
