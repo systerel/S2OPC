@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(S2OPC_Sources LANGUAGES C)
+project(S2OPC VERSION 0.11.0 LANGUAGES C)
 
 if(NOT S2OPC_COMMON_DEFS_SET)
   include(../CommonDefs.cmake)
@@ -25,7 +25,7 @@ configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/config.cmake.in
 # generate the version file for the config file
 write_basic_package_version_file(
   "${CMAKE_BINARY_DIR}/s2opc-config-version.cmake"
-  VERSION "${s2opc_VERSION_MAJOR}.${s2opc_VERSION_MINOR}"
+  VERSION "${S2OPC_VERSION}"
   COMPATIBILITY AnyNewerVersion
 )
 

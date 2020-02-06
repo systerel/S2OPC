@@ -100,6 +100,10 @@ echo "Update to $1* version in $VERSION_HEADER in $2-update-tagged-version"
 sed -i 's/#define SOPC_TOOLKIT_VERSION_MAJOR .*/#define SOPC_TOOLKIT_VERSION_MAJOR '"$major"'/' $VERSION_HEADER || exit 1
 sed -i 's/#define SOPC_TOOLKIT_VERSION_MEDIUM .*/#define SOPC_TOOLKIT_VERSION_MEDIUM '"$medium"'/' $VERSION_HEADER || exit 1
 sed -i 's/#define SOPC_TOOLKIT_VERSION_MINOR .*/#define SOPC_TOOLKIT_VERSION_MINOR '"$minor"'/' $VERSION_HEADER || exit 1
+
+echo "Update to $1 version in src/CMakeLists.txt file"
+sed -i 's/VERSION [0-9]\+\.[0-9]\+\.[0-9]\+/VERSION '"$1"'/' src/CMakeLists.txt || exit 1
+
 echo "Update to $1 version in README.md file"
 sed -i 's/S2OPC_Toolkit_[0-9]\+\.[0-9]\+\.[0-9]\+/S2OPC_Toolkit_'"$1"'/' README.md || exit 1
 
@@ -109,7 +113,6 @@ sed -i 's/#define SOPC_LIBSUB_VERSION .*/#define SOPC_LIBSUB_VERSION "'"$libsub_
 echo "Commit updated current version in $2-update-tagged-version: it shall be pushed as MR on gitlab ASAP"
 git commit README.md $VERSION_HEADER $LIBSUB_VERSION_HEADER -S -m "Ticket #$2: Update current version of Toolkit / subscription library" &> /dev/null || exit 1
 
-
 echo "Checking out $DELIVERY_NAME"
 git checkout $DELIVERY_NAME || exit 1
 
@@ -118,6 +121,10 @@ sed -i 's/#define SOPC_TOOLKIT_VERSION_MAJOR .*/#define SOPC_TOOLKIT_VERSION_MAJ
 sed -i 's/#define SOPC_TOOLKIT_VERSION_MEDIUM .*/#define SOPC_TOOLKIT_VERSION_MEDIUM '"$medium"'/' $VERSION_HEADER || exit 1
 sed -i 's/#define SOPC_TOOLKIT_VERSION_MINOR .*/#define SOPC_TOOLKIT_VERSION_MINOR '"$minor"'/' $VERSION_HEADER || exit 1
 sed -i 's/ "\*"//' $VERSION_HEADER
+
+echo "Update to $1 version in src/CMakeLists.txt file"
+sed -i 's/VERSION [0-9]\+\.[0-9]\+\.[0-9]\+/VERSION '"$1"'/' src/CMakeLists.txt || exit 1
+
 echo "Update to $1 version in README.md file"
 sed -i 's/S2OPC_Toolkit_[0-9]\+\.[0-9]\+\.[0-9]\+/S2OPC_Toolkit_'"$1"'/' README.md || exit 1
 
