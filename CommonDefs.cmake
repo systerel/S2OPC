@@ -16,6 +16,10 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 
+### Common dependencies ###
+
+find_package(EXPAT) # if not found XML loaders will not be compiled
+
 ### Define default S2OPC compilation flags for several compilers ###
 
 # Define variables to store S2OPC specific definitions, compiler and linker flags

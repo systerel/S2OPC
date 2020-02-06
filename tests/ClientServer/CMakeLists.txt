@@ -11,6 +11,8 @@ endif()
 
 ### Dependencies ###
 
+# EXPAT dependency managed in CommonDefs
+
 # use find_package onto s2opc in case we built s2opc and tests separately
 # TODO:for samples only (tests use private headers)
 find_package(s2opc)

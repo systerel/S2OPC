@@ -6,13 +6,14 @@ option(WITH_NANO_EXTENDED "Use Nano profile with additional services out of Nano
 ##                                    ##
 # S2OPC client/server toolkit library  #
 ##                                    ##
+
 if(NOT S2OPC_COMMON_DEFS_SET)
   include(../../CommonDefs.cmake)
 endif()
 
 ### Dependencies ###
 
-find_package(EXPAT) # if not found XML loaders will not be compiled
+# EXPAT dependency managed in CommonDefs
 
 ### Compilation of S2OPC client/server library source files ###
 
