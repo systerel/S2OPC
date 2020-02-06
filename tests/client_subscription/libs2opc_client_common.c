@@ -1060,7 +1060,10 @@ static void ToolkitEventCallback(SOPC_App_Com_Event event, uint32_t IdOrStatus, 
     /* What should we do ? */
 
     /* At least one machine or a generic callback should have processed the event */
-    assert(bProcessed);
+    if (false == bProcessed)
+    {
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "No machine or generic callback to process the event");
+    }
 
     mutStatus = Mutex_Unlock(&mutex);
     assert(SOPC_STATUS_OK == mutStatus);
