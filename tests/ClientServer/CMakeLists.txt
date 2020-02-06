@@ -512,13 +512,14 @@ if(ENABLE_TESTING)
   # The problem with ASan is to embed a dynamic library compiled with ASan into Python, which is not compiled with ASan.
   # The compilation is not done with clang-analyzer either, as this would analyze CFFI-generated code.
   if(WITH_PYS2OPC)
-    set(PYS2OPC_PATH "${S2OPC_ROOT_PATH}/tests/ClientServer/pys2opc")
+    set(PYS2OPC_SRC_PATH "${S2OPC_ROOT_PATH}/src/ClientServer/frontend/pys2opc")
+    set(PYS2OPC_TEST_PATH "${S2OPC_ROOT_PATH}/tests/ClientServer/pys2opc")
     # Validation test
     function(pys2opc_validation_test name)
       get_filename_component(no_ext_name ${name} NAME_WE) # remove extension to use name for log directory
       set(test_name "validation::${name}")
       add_test(NAME "${test_name}"
-        WORKING_DIRECTORY "${PYS2OPC_PATH}/tests"
+        WORKING_DIRECTORY "${PYS2OPC_TEST_PATH}/tests"
         COMMAND
         "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/with-opc-server.py"
         "--server-wd" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
@@ -526,7 +527,7 @@ if(ENABLE_TESTING)
         "${PYTHON_EXECUTABLE}" "${name}"
         )
       # ASan requires to be the first dynamically linked library to be loaded. This is done with LD_PRELOAD.
-      set(new_env "PYTHONPATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}${ENV_PATH_SEP}${PYS2OPC_PATH}"
+      set(new_env "PYTHONPATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}${ENV_PATH_SEP}${PYS2OPC_SRC_PATH}"
         "LD_LIBRARY_PATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
       if(WITH_ASAN OR WITH_UBSAN OR WITH_TSAN)
         set(new_env ${new_env} "LD_PRELOAD=/usr/local/lib64/libasan.so")

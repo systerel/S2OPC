@@ -68,7 +68,7 @@ static SOPC_ClientCommon_DiscoveryCbk getEndpointsCbk = NULL;
 static SOPC_SLinkedList* pListConfig = NULL; /* IDs are cfgId == Toolkit cfgScId, value is SOPC_LibSub_ConnectionCfg */
 static SOPC_SLinkedList* pListClient = NULL; /* IDs are cliId, value is a StaMac */
 static SOPC_LibSub_ConnectionId nCreatedClient = 0;
-static SOPC_Array* pArrScConfig = NULL; /* Stores the created scConfig to free them in SOPC_LibSub_Clear() */
+static SOPC_Array* pArrScConfig = NULL; /* Stores the created scConfig to be freed them in SOPC_LibSub_Clear() */
 
 /* Event callback */
 static void ToolkitEventCallback(SOPC_App_Com_Event event, uint32_t IdOrStatus, void* param, uintptr_t appContext);

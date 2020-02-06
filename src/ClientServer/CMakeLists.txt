@@ -129,7 +129,7 @@ endif()
 
 ## Subscribing client library ##
 
-set(LIBSUBSCRIBE_PATH "${S2OPC_ROOT_PATH}/tests/ClientServer/client_subscription") # move into src ?
+set(LIBSUBSCRIBE_PATH "frontend/client_subscription")
 add_library(client_subscription "${LIBSUBSCRIBE_PATH}/libs2opc_client.c"
                                 "${LIBSUBSCRIBE_PATH}/libs2opc_client_cmds.c"
                                 "${LIBSUBSCRIBE_PATH}/libs2opc_client_common.c"
@@ -140,7 +140,7 @@ add_library(client_subscription "${LIBSUBSCRIBE_PATH}/libs2opc_client.c"
 target_link_libraries(client_subscription PUBLIC s2opc_clientserver)
 target_compile_options(client_subscription PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(client_subscription PRIVATE ${S2OPC_DEFINITIONS})
-target_include_directories(client_subscription PRIVATE ${LIBSUBSCRIBE_PATH})
+target_include_directories(client_subscription PUBLIC ${LIBSUBSCRIBE_PATH}) # TODO: separate PUBLIC / PRIVATE
 set_target_properties(client_subscription PROPERTIES PUBLIC_HEADER "${LIBSUBSCRIBE_PATH}/libs2opc_client.h")
 install(TARGETS client_subscription
         LIBRARY DESTINATION lib
