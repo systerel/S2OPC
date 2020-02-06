@@ -43,7 +43,7 @@ Client side (e.g.: `tests/services/toolkit_test_client.c`):
 - Send a discovery service request (getEndpoints, findServer, registerServer, etc.)
 - Automated client libraries LibSub and wrapper (simplified interface, automated subscription):
   see `tests/client_subscription/libs2opc_client.h` (e.g. `tests/client_subscription/client.c`) for LibSub or `tests/client_subscription/libs2opc_client_cmds.h` for the wrapper
-- Python wrapper PyS2OPC for a client: see  `tests/pys2opc/README.md`
+- Python wrapper PyS2OPC for a client: see  `src/ClientServer/frontend/pys2opc/README.md`
 
 Server side (e.g.: `tests/services/toolkit_test_server.c`):
 
