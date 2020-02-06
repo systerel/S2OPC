@@ -8,7 +8,7 @@
 # - jobs run in stages:
 #   - gen: generation job
 #   - build: build-linux64-ASan
-#   - tests: 
+#   - tests:
 #     - test-check
 #     - test-unit
 #     - test-uactt
@@ -90,13 +90,13 @@ generation:
     when: always
     expire_in: '1 month'
     when: always
-  except:
-    variables:
-      - $NO_GEN
-      - $WINDOWS_TEST
-      - $CROSS_COMPILE
-      - $ALL_BUILDS
-      - $ALL_TESTS
+  rules:
+    - if: "$NO_GEN == null && \
+           $WINDOWS_TEST == null && \
+           $CROSS_COMPILE == null && \
+           $ALL_BUILDS == null && \
+           $ALL_TESTS == null"
+      when: on_success
 
 ###
 # Compilation jobs
@@ -118,11 +118,9 @@ generation:
       - 'install_linux64/'
       - 'build/'  # Required when using coverage analysis
     expire_in: '1 month'
-  except:
-    variables:
-      - $WINDOWS_TEST
-      - $CROSS_COMPILE
-      - $WITH_COVERITY
+  rules: # note: to be repeated in each job using .build-linux
+    - if: "$WINDOWS_TEST == null && $CROSS_COMPILE == null && $WITH_COVERITY == null"
+      when: on_success
 
 # Used by "normal" pipeline
 build-linux64-ASan:
@@ -130,34 +128,30 @@ build-linux64-ASan:
   variables:
     <<: *build_linux_variables
     WITH_ASAN: 1
-  except:
-    variables:
-      - $NO_ASAN == "1" || $ALL_TESTS == "1"
-      - $ALL_BUILDS # build is done with static-conf for ALL_BUILDS
-      - $WINDOWS_TEST # repeat those of build_linux since it will be overwritten
-      - $CROSS_COMPILE
-      - $WITH_COVERITY
-
+  rules: # 1st line repeat .build-linux + added rules
+    - if: "$WINDOWS_TEST == null && $CROSS_COMPILE == null && $WITH_COVERITY == null && \
+           $NO_ASAN == null && $ALL_TESTS == null && $ALL_BUILDS == null"
+      when: on_success
 
 # Used by all-tests pipeline (add tests which needs NO_ASAN)
 build-linux64-pys2opc:
   <<: *build_linux
   variables:
     <<: *build_linux_variables
-    <<: *all-tests_build_variables
-  only:
-    variables:
-      - $NO_ASAN == "1" || $ALL_TESTS == "1"
+    <<: *all-tests_build_variables # add pys2opc
+  rules:
+    - if: "$NO_ASAN != null || $ALL_TESTS != null"
+      when: on_success
 
 # Used when ALL_BUILDS set (tests use static configuration)
 build-linux64-static-conf:
   <<: *build_linux
   variables:
     <<: *build_linux_variables
-    <<: *all-builds_build_variables
-  only:
-    variables:
-      - $ALL_BUILDS
+    <<: *all-builds_build_variables # add static conf
+  rules: # 1st line repeat .build-linux + added rules
+    - if: "$ALL_BUILDS != null"
+      when: on_success
 
 build-win64: &build_win64
   <<: *docker_job
@@ -179,9 +173,9 @@ build-win64: &build_win64
       - '$BUILD_DIR/bin'
       - 'install_win64/'
     expire_in: '1 month'
-  only:
-    variables:
-      - $CROSS_COMPILE == "1" || $ALL_BUILDS == "1"
+  rules:
+   - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null"
+     when: always # run even if previous job in pipeline failed
 
 build-win32:
   <<: *build_win64
@@ -195,9 +189,9 @@ build-win32:
       - '$BUILD_DIR/bin/'
       - 'install_win32/'
     expire_in: '1 month'
-  only:
-    variables:
-      - $CROSS_COMPILE == "1" || $ALL_BUILDS == "1"
+  rules:
+   - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null"
+     when: always # run even if previous job in pipeline failed
 
 # Used by coverity, also starts the analysis
 build-linux64-coverity:
@@ -211,9 +205,8 @@ build-linux64-coverity:
     /opt/cov-analysis-linux64-2017.07/bin/cov-build --dir cov-int make
     tar czf cov-int.tar.gz cov-int
     curl -k --form token=${COVERITY_TOKEN} --form email=${COVERITY_EMAIL} --form version=${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA} --form description=${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA} --form file=@cov-int.tar.gz https://scan.coverity.com/builds?project=S2OPC
-  only:
-    variables:
-      - $WITH_COVERITY
+  rules:
+    - if: "$WITH_COVERITY != null"
 
 ###
 # Test jobs
@@ -222,13 +215,10 @@ build-linux64-coverity:
 .test-linux: &test_linux
   <<: *docker_job
   stage: test
-  except:
-    variables:
-      - $NO_TESTS
-      - $CROSS_COMPILE
-      - $WINDOWS_TEST
-      - $WITH_COVERITY
-      - $WITH_COVERAGE
+  rules:
+    - if: "$NO_TESTS == null && $WINDOWS_TEST == null && $CROSS_COMPILE == null && \
+           $WITH_COVERITY == null && $WITH_COVERAGE == null"
+      when: on_success
 
 # Test check belongs to the test part, however it does not depend on linux build.
 test-check:
@@ -244,16 +234,11 @@ test-check:
       - 'build-analyzer/analyzer-report'
     when: on_failure
     expire_in: '1 month'
-  except:
-    variables: # avoid to run check in complementary pipelines (no need)
-      - $ALL_TESTS
-      - $ALL_BUILDS
-      - $NO_TESTS # repeat .test-linux variables exception since overwritten here
-      - $CROSS_COMPILE
-      - $WINDOWS_TEST
-      - $WITH_COVERITY
-      - $WITH_COVERAGE
-
+  rules: # repeat .test-linux variables exception since overwritten here
+    - if: "$NO_TESTS == null && $WINDOWS_TEST == null && $CROSS_COMPILE == null && \
+           $WITH_COVERITY == null && $WITH_COVERAGE == null && \
+           $ALL_TESTS == null && $ALL_BUILDS == null"
+      when: on_success
 
 .test-unit: &test_unit
   <<: *test_linux
@@ -266,13 +251,10 @@ test-check:
       - 'build/'
     when: always
     expire_in: '1 month'
-  except:
-    variables:
-      - $NO_TESTS
-      - $CROSS_COMPILE
-      - $WINDOWS_TEST
-      - $WITH_COVERITY
-      # Overwrite test_linux except to re-activate only test-unit for WITH_COVERAGE case
+  rules: # repeat .test-linux variables exception since overwritten here
+    - if: "$NO_TESTS == null && $WINDOWS_TEST == null && $CROSS_COMPILE == null && \
+           $WITH_COVERITY == null" # re-activate only test-unit for WITH_COVERAGE case
+      when: on_success
 
 # Test unit for ALL_TESTS variable (add dynamic configuration)
 test-unit-all-tests:
@@ -281,22 +263,18 @@ test-unit-all-tests:
     <<: *all-tests_test_variables
   script:
     - ./test-all.sh
-  only:
-    variables:
-      - $ALL_TESTS
+  rules:
+    - if: "$ALL_TESTS != null"
+      when: on_success
 
 # Test unit for NOT ALL_TESTS variable
 test-unit:
   <<: *test_unit
-  except:
-    variables:
-      - $ALL_TESTS
-      - $NO_TESTS  # repeat .test-unit variables exception since overwritten here
-      - $CROSS_COMPILE
-      - $WINDOWS_TEST
-      - $WITH_COVERITY
-      - $WITH_COVERAGE
-
+  rules: # repeat .test-linux variables exception since overwritten here
+    - if: "$NO_TESTS == null && $WINDOWS_TEST == null && $CROSS_COMPILE == null && \
+           $WITH_COVERITY == null && $WITH_COVERAGE == null && \
+           $ALL_TESTS == null" # + excludes ALL_TESTS
+      when: on_success
 
 .test-uactt: &test_uactt
   <<: *test_linux
@@ -310,36 +288,29 @@ test-unit:
       - 'acceptances_tests/*.log'
     when: always
     expire_in: '1 month'
-  except:
-    variables:
-      - $ALL_BUILDS
-      - $NO_TESTS # repeat .test-linux variables exception since overwritten here
-      - $CROSS_COMPILE
-      - $WINDOWS_TEST
-      - $WITH_COVERITY
-      - $WITH_COVERAGE
+  rules: # repeat .test-linux variables exception since overwritten here
+    - if: "$NO_TESTS == null && $WINDOWS_TEST == null && $CROSS_COMPILE == null && \
+           $WITH_COVERITY == null && $WITH_COVERAGE == null && \
+           $ALL_BUILDS == null"  # + excludes ALL_BUILDS
+      when: on_success
 
 # Test unit for ALL_TESTS variable (add dynamic configuration)
 test-uactt-all-tests:
   <<: *test_uactt
   variables:
     <<: *all-tests_test_variables
-  only:
-    variables:
-      - $ALL_TESTS
+  rules:
+    - if: "$ALL_TESTS != null"
 
 # Test unit for NOT ALL_TESTS variable
 test-uactt:
   <<: *test_uactt
-  except:
-    variables:
-      - $ALL_TESTS
-      - $ALL_BUILDS  # repeat .test-uactt variables exception since overwritten here
-      - $NO_TESTS
-      - $CROSS_COMPILE
-      - $WINDOWS_TEST
-      - $WITH_COVERITY
-      - $WITH_COVERAGE
+  rules: # repeat .test-uactt variables exception since overwritten here
+    - if: "$NO_TESTS == null && $WINDOWS_TEST == null && $CROSS_COMPILE == null && \
+           $WITH_COVERITY == null && $WITH_COVERAGE == null && \
+           $ALL_BUILDS == null && \
+           $ALL_TESTS == null"  # + excludes ALL_TESTS
+      when: on_success
 
 ##
 # Windows native build and tests (done in "build-others" stage)
@@ -352,9 +323,9 @@ windows-appveyor:
     - 'apt-get update && apt-get -y install curl && curl -H "Authorization: Bearer $APPVEYOR_TOKEN" -H "Content-Type: application/json" --request POST -d ''{"accountName" : "Systerel", "projectSlug": "s2opc", "branch": "''$CI_COMMIT_REF_NAME''"}'' https://ci.appveyor.com/api/builds'
   tags:
     - linux
-  only:
-    variables:
-      - $ALL_BUILDS == "1" || $WINDOWS_TEST == "1"
+  rules:
+    - if: "$ALL_BUILDS != null || $WINDOWS_TEST != null"
+      when: always # run even if previous job in pipeline failed
 
 ###
 # Analysis jobs
@@ -371,6 +342,5 @@ coverage-analysis:
     paths:
       - 'report'
     expire_in: '1 month'
-  only:
-    variables:
-      - $WITH_COVERAGE
+  rules:
+    - if: "$WITH_COVERAGE != null"
