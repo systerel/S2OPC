@@ -49,7 +49,8 @@
 
 // Avoid unused functions and variables when EXPAT is not available
 #ifdef WITH_EXPAT
-
+#ifdef WITH_CONST_ADDSPACE
+#else
 static const int64_t SOPC_SECOND_TO_100_NANOSECONDS = 10000000; // 10^7
 
 static void check_variable_and_type_common(SOPC_AddressSpace* leftSpace,
@@ -248,14 +249,16 @@ static void addspace_for_each_equal(const void* key, const void* value, void* us
         ck_assert(false);
     }
 }
-
-#endif
+#endif // WITH_CONST_ADDSPACE
+#endif // WITH_EXPAT
 
 START_TEST(test_same_address_space_results)
 {
 // Without EXPAT test cannot be done
 #ifdef WITH_EXPAT
-
+#ifdef WITH_CONST_ADDSPACE
+    printf("Test test_same_address_space_results ignored since WITH_CONST_ADDSPACE is set\n");
+#else
     /* Embedded address space (parsed prior to compilation) */
     SOPC_AddressSpace* spaceEmbedded = SOPC_Embedded_AddressSpace_Load();
 
@@ -278,9 +281,10 @@ START_TEST(test_same_address_space_results)
 
     SOPC_AddressSpace_Delete(spaceEmbedded);
     SOPC_AddressSpace_Delete(spaceDynamic);
+#endif // WITH_CONST_ADDSPACE
 #else
     printf("Test test_same_address_space_results ignored since EXPAT is not available\n");
-#endif
+#endif // WITH_EXPAT
 }
 END_TEST
 
@@ -579,7 +583,6 @@ START_TEST(test_XML_server_configuration)
     check_parsed_s2opc_config(&s2opcConfig);
 
     SOPC_S2OPC_Config_Clear(&s2opcConfig);
-
 #else
     printf("Test test_XML_server_configuration ignored since EXPAT is not available\n");
 #endif
