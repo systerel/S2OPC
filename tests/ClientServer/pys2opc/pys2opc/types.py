@@ -94,7 +94,7 @@ class ReturnStatus(NamedMembers):
 
 class StatusCode(NamedMembers):
     """
-    The OpcUa status codes. Directly generated from csrc/opcua_types/opcua_statuscodes.h.
+    The OpcUa status codes. Directly generated from src/opcua_types/opcua_statuscodes.h.
     Status codes are used in various places among the OPC-UA protocol.
     They usually represent the quality of a value (see DataValue),
     or the status of the execution of a service (see WriteResponse).
@@ -103,7 +103,7 @@ class StatusCode(NamedMembers):
     Good = 0x00000000
     Bad = 0x80000000
     # Obtained with the following code snippet from S2OPC sources:
-    # for com, k, v in sorted(re.findall(r'/\*=+\n \* (.*)\n \*.+\n#define OpcUa_(\w+) (\w+)', open('csrc/opcua_types/opcua_statuscodes.h').read(), re.MULTILINE), key=lambda t:int(t[2], 16)): print('    {} = {}  # {}'.format(k, v, com))
+    # for com, k, v in sorted(re.findall(r'/\*=+\n \* (.*)\n \*.+\n#define OpcUa_(\w+) (\w+)', open('src/opcua_types/opcua_statuscodes.h').read(), re.MULTILINE), key=lambda t:int(t[2], 16)): print('    {} = {}  # {}'.format(k, v, com))
     GoodSubscriptionTransferred = 0x002D0000  # The subscription was transferred to another session.
     GoodCompletesAsynchronously = 0x002E0000  # The processing will complete asynchronously.
     GoodOverload = 0x002F0000  # Sampling has slowed down due to resource limitations.

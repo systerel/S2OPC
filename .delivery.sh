@@ -25,7 +25,7 @@
 
 echo "Check master branch name is valid"
 BRANCH_COMMIT=master
-VERSION_HEADER=./csrc/Common/helpers/sopc_version.h
+VERSION_HEADER=./src/Common/helpers/sopc_version.h
 LIBSUB_VERSION_HEADER=./tests/ClientServer/client_subscription/libs2opc_client.h
 
 git show-ref refs/heads/$BRANCH_COMMIT &> /dev/null
@@ -140,7 +140,7 @@ echo "Check generated C source files were up to date"
 echo "Re-Generate C source files and commit them with current date"
 # regenerate C source files to be sure we keep current date in source files
 ./.pre-build-in-docker.sh ./pre-build.sh || exit 1
-git commit csrc/ClientServer/services/bgenc -m "Add generated source files with up to date generation timestamp"
+git commit src/ClientServer/services/bgenc -m "Add generated source files with up to date generation timestamp"
 
 echo "Check code with clang tools"
 ./.check-in-docker.sh ./.check-code.sh

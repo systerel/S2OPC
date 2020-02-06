@@ -52,13 +52,13 @@ endif()
 
 # Get S2OPC necessary internal header for unit and validation tests
 set(S2OPC_CLIENTSERVER_INTERNAL_INCLUDES
-  "${S2OPC_ROOT_PATH}/csrc/ClientServer/api_toolkit"
-  "${S2OPC_ROOT_PATH}/csrc/ClientServer/configuration"
-  "${S2OPC_ROOT_PATH}/csrc/ClientServer/secure_channels"
-  "${S2OPC_ROOT_PATH}/csrc/ClientServer/services"
-  "${S2OPC_ROOT_PATH}/csrc/ClientServer/services/b2c"
-  "${S2OPC_ROOT_PATH}/csrc/ClientServer/services/bgenc"
-  "${S2OPC_ROOT_PATH}/csrc/ClientServer/sockets"
+  "${S2OPC_ROOT_PATH}/src/ClientServer/api_toolkit"
+  "${S2OPC_ROOT_PATH}/src/ClientServer/configuration"
+  "${S2OPC_ROOT_PATH}/src/ClientServer/secure_channels"
+  "${S2OPC_ROOT_PATH}/src/ClientServer/services"
+  "${S2OPC_ROOT_PATH}/src/ClientServer/services/b2c"
+  "${S2OPC_ROOT_PATH}/src/ClientServer/services/bgenc"
+  "${S2OPC_ROOT_PATH}/src/ClientServer/sockets"
   )
 
 if(ENABLE_TESTING)
@@ -141,8 +141,8 @@ if(ENABLE_TESTING)
   s2opc_unit_test(check_sockets)
 
   # Secure channels (stubbed on services side) tests
-  file(GLOB SECURE_CHANNELS_SRC "${S2OPC_ROOT_PATH}/csrc/ClientServer/configuration/sopc_ieee_check.c"
-                                "${S2OPC_ROOT_PATH}/csrc/ClientServer/secure_channels/*.c")
+  file(GLOB SECURE_CHANNELS_SRC "${S2OPC_ROOT_PATH}/src/ClientServer/configuration/sopc_ieee_check.c"
+                                "${S2OPC_ROOT_PATH}/src/ClientServer/secure_channels/*.c")
 
   # Secure channels tests: tests on received buffer
   file(GLOB SECURE_CHANNELS_BUFFER_TEST
@@ -211,7 +211,7 @@ if(ENABLE_TESTING)
 # Tests compilation definition #
 
   # Sockets (stubbed on services side) tests
-  file(GLOB SOCKETS_SRC "${S2OPC_ROOT_PATH}/csrc/ClientServer/sockets/*.c")
+  file(GLOB SOCKETS_SRC "${S2OPC_ROOT_PATH}/src/ClientServer/sockets/*.c")
 
   file(GLOB SECURE_CHANNELS_CLIENT_TEST
     "secure_channels/event_helpers.c"

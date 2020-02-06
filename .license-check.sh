@@ -138,10 +138,10 @@ under the License.
 err=0
 # Exclude some files
 read -d '' exclusions <<-EOF
-    csrc/Common/opcua_types/opcua_identifiers.h
-    csrc/Common/opcua_types/opcua_statuscodes.h
-    csrc/Common/opcua_types/sopc_types.h
-    csrc/Common/opcua_types/sopc_types.c
+    src/Common/opcua_types/opcua_identifiers.h
+    src/Common/opcua_types/opcua_statuscodes.h
+    src/Common/opcua_types/sopc_types.h
+    src/Common/opcua_types/sopc_types.c
     tests/ClientServer/freertos/test_helpers_platform_dep/FreeRTOSConfig.h
     tests/ClientServer/freertos/test_helpers_platform_dep/lwipopts.h
     tests/ClientServer/freertos/test_helpers_platform_dep/semihost_hardfault.c
@@ -160,7 +160,7 @@ for f in $exclusions; do
     mv $f $f"_"
 done
 
-find csrc tests -name "*.[hc]" -print0 | xargs -0 -n 1 $HELPER_SCRIPT $HEADER_C || { echo 'Expected header:' ; cat $HEADER_C ; err=1 ; }
+find src tests -name "*.[hc]" -print0 | xargs -0 -n 1 $HELPER_SCRIPT $HEADER_C || { echo 'Expected header:' ; cat $HEADER_C ; err=1 ; }
 
 for f in $exclusions; do
     mv $f"_" $f

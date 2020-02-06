@@ -106,7 +106,7 @@ To do so, set `TEST_SERVER_XML_ADDRESS_SPACE` to the location of the address spa
 
 ## Server configuration
 
-The server configuration can be defined manually using the C structures defined in csrc/api_toolkit/sopc_user_app_itf.h (SOPC_S2OPC_Config).
+The server configuration can be defined manually using the C structures defined in src/api_toolkit/sopc_user_app_itf.h (SOPC_S2OPC_Config).
 It is also possible to use an XML parser for XML complying with schemas/s2opc_config.xsd.
 The S2OPC demo server use a configuration for tests by default, to use a custom XML configuraiton file set `TEST_SERVER_XML_CONFIG` to its location.
 

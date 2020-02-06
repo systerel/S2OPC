@@ -13,4 +13,4 @@ deleted/
 __pycache__/
 genc/
 *.log
-csrc/Common/configuration/sopc_toolkit_build_info.h
+src/Common/configuration/sopc_toolkit_build_info.h

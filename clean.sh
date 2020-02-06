@@ -27,7 +27,7 @@ ISALL=$1
 
 # Clean pre-build, build and bin dirs
 echo "Cleaning pre-build/, build/ and bin/ directories"
-\rm -f csrc/configuration/sopc_toolkit_build_info.h
+\rm -f src/configuration/sopc_toolkit_build_info.h
 \rm -f pre-build-check.log pre-build.log build.log clang_tidy.log
 \rm -fr pre-build build build_toolchain build-analyzer
 
@@ -35,5 +35,5 @@ if [[ -z $ISALL || $ISALL != "all" ]]; then
     echo "Do not clean generated source files"
 else
     echo "Clean generated source files from B model"
-    \rm -fr ./csrc/ClientServer/services/bgenc
+    \rm -fr ./src/ClientServer/services/bgenc
 fi

@@ -17,7 +17,7 @@ macro(find_package)
   endif()
 endmacro()
 
-add_subdirectory(csrc)
+add_subdirectory(src)
 add_subdirectory(tests)
 
 find_package(Doxygen)

@@ -30,7 +30,7 @@
 ISADVANCED=$1
 
 BSRC=bsrc
-CSRC=csrc
+CSRC=src
 TST=tests
 
 EXITCODE=0

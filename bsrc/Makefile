@@ -1,6 +1,6 @@
 PATHBMODEL=.
 PATHGENTRAD=$(PATHBMODEL)/tradc
-PATHTRAD=../csrc/ClientServer/services/bgenc
+PATHTRAD=../src/ClientServer/services/bgenc
 
 BMODEL_MCH_PATH_SRCS=$(shell find $(PATHBMODEL) -maxdepth 1 -name "*.mch")
 BMODEL_IMP_PATH_SRCS=$(shell find $(PATHBMODEL) -maxdepth 1 -name "*.imp")

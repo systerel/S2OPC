@@ -129,7 +129,7 @@ endif()
 
 ## Subscribing client library ##
 
-set(LIBSUBSCRIBE_PATH "${S2OPC_ROOT_PATH}/tests/ClientServer/client_subscription") # move into csrc ?
+set(LIBSUBSCRIBE_PATH "${S2OPC_ROOT_PATH}/tests/ClientServer/client_subscription") # move into src ?
 add_library(client_subscription "${LIBSUBSCRIBE_PATH}/libs2opc_client.c"
                                 "${LIBSUBSCRIBE_PATH}/libs2opc_client_cmds.c"
                                 "${LIBSUBSCRIBE_PATH}/libs2opc_client_common.c"
@@ -153,7 +153,7 @@ install(TARGETS client_subscription
 # The problem with ASan is to embed a dynamic library compiled with ASan into Python, which is not compiled with ASan.
 # The compilation is not done with clang-analyzer either, as this would analyze CFFI-generated code.
 if(WITH_PYS2OPC)
-  set(PYS2OPC_SRC_PATH "${S2OPC_ROOT_PATH}/tests/ClientServer/pys2opc") #TODO: move into csrcs ?
+  set(PYS2OPC_SRC_PATH "${S2OPC_ROOT_PATH}/tests/ClientServer/pys2opc") #TODO: move into srcs ?
   set(PYS2OPC_BUILD_PATH "${CMAKE_BINARY_DIR}/pys2opc")
   file(MAKE_DIRECTORY ${PYS2OPC_BUILD_PATH}) # Note: create build directory to use it as working dir
   set(PYS2OPC_FILES "${PYS2OPC_BUILD_PATH}/pys2opc/__init__.py"
