@@ -19,6 +19,7 @@ endmacro()
 
 add_subdirectory(src)
 add_subdirectory(tests)
+add_subdirectory(samples)
 
 find_package(Doxygen)
 

@@ -19,7 +19,7 @@
 
 /** \file
  *
- * \brief A client executable using the client_subscription library.
+ * \brief A client executable using the s2opc_clientwrapper subscription lib
  *
  */
 

@@ -1,5 +1,4 @@
 cmake_minimum_required (VERSION 3.5)
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
 
 project (S2OPC_ClientServer_Tests LANGUAGES C)
 
@@ -267,14 +266,20 @@ if(ENABLE_TESTING)
   target_compile_definitions(toolkit_test_client_service_faults PRIVATE ${S2OPC_DEFINITIONS})
   target_link_libraries(toolkit_test_client_service_faults PRIVATE s2opc_clientserver)
 
-  add_executable(toolkit_test_suite_client "demo/test_suite_client.c"
-                                           "demo/test_discovery.c"
-                                           "demo/config.c"
-                                           "demo/state_machine.c"
-                                           "demo/wait_machines.c"
-                                           "demo/test_session.c")
+  # Client services scenarii
+
+  # Reuse code of demo client
+  set(S2OPC_CLIENTDEMO_INCLUDES ${S2OPC_ROOT_PATH}/samples/ClientServer/demo_client)
+
+  add_executable(toolkit_test_suite_client "client/test_suite_client.c"
+                                           "client/test_discovery.c"
+                                           "client/wait_machines.c"
+                                           "client/test_session.c"
+                                           # Use code common with samples
+                                           "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_client/config.c"
+                                           "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_client/state_machine.c")
   target_link_libraries(toolkit_test_suite_client PRIVATE s2opc_clientserver ${CHECK_LIBRARIES})
-  target_include_directories(toolkit_test_suite_client PRIVATE ${CHECK_INCLUDE_DIRS})
+  target_include_directories(toolkit_test_suite_client PRIVATE ${S2OPC_CLIENTDEMO_INCLUDES} ${CHECK_INCLUDE_DIRS})
   # Server scenario (configured for UACTT)
 
   # Manage the Nano profiles extended mode
@@ -492,18 +497,18 @@ if(ENABLE_TESTING)
 ## S2OPC subscription client library validation tests ##
 
   # Helpers unit tests
-  add_executable(check_libsub "client_subscription/check_libsub.c")
+  add_executable(check_libsub "client_wrapper/check_libsub.c")
   target_include_directories(check_libsub PRIVATE ${MBEDTLS_INCLUDE_DIRS} ${CHECK_INCLUDE_DIRS})
   target_compile_options(check_libsub PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(check_libsub PRIVATE ${S2OPC_DEFINITIONS})
-  target_link_libraries(check_libsub PRIVATE client_subscription ${CHECK_LIBRARIES})
+  target_link_libraries(check_libsub PRIVATE s2opc_clientwrapper ${CHECK_LIBRARIES})
   s2opc_client_validation_test(check_libsub)
 
-  add_executable(check_wrapper "client_subscription/check_wrapper.c")
+  add_executable(check_wrapper "client_wrapper/check_wrapper.c")
   target_include_directories(check_wrapper PRIVATE ${MBEDTLS_INCLUDE_DIRS} ${CHECK_INCLUDE_DIRS})
   target_compile_options(check_wrapper PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(check_wrapper PRIVATE ${S2OPC_DEFINITIONS})
-  target_link_libraries(check_wrapper PRIVATE client_subscription ${CHECK_LIBRARIES})
+  target_link_libraries(check_wrapper PRIVATE s2opc_clientwrapper ${CHECK_LIBRARIES})
   s2opc_client_validation_test(check_wrapper)
 
 ## PyS2OPC library validation tests ##
@@ -540,108 +545,3 @@ if(ENABLE_TESTING)
   endif()
   
 endif(ENABLE_TESTING)
-
-### Samples of S2OPC library and extension libraries use ###
-
-if(ENABLE_SAMPLES)
-
-  # Demo clients (S2OPC only without extension)
-  add_executable(s2opc_browse "demo/s2opc_browse.c"
-                              "demo/state_machine.c"
-                              "demo/config.c")
-  target_link_libraries(s2opc_browse PRIVATE s2opc_clientserver)
-  target_compile_options(s2opc_browse PRIVATE ${S2OPC_COMPILER_FLAGS})
-  target_compile_definitions(s2opc_browse PRIVATE ${S2OPC_DEFINITIONS}) 
-
-  add_executable(s2opc_read "demo/s2opc_read.c"
-                            "demo/state_machine.c"
-                            "demo/config.c")
-  target_link_libraries(s2opc_read PRIVATE s2opc_clientserver)
-  target_compile_options(s2opc_read PRIVATE ${S2OPC_COMPILER_FLAGS})
-  target_compile_definitions(s2opc_read PRIVATE ${S2OPC_DEFINITIONS}) 
-
-  add_executable(s2opc_write "demo/s2opc_write.c"
-                             "demo/state_machine.c"
-                             "demo/config.c")
-  target_link_libraries(s2opc_write PRIVATE s2opc_clientserver)
-  target_compile_options(s2opc_write PRIVATE ${S2OPC_COMPILER_FLAGS})
-  target_compile_definitions(s2opc_write PRIVATE ${S2OPC_DEFINITIONS}) 
-
-  add_executable(s2opc_discovery "demo/s2opc_discovery.c"
-                                 "demo/state_machine.c"
-                                 "demo/config.c")
-  target_link_libraries(s2opc_discovery PRIVATE s2opc_clientserver)
-  target_compile_options(s2opc_discovery PRIVATE ${S2OPC_COMPILER_FLAGS})
-  target_compile_definitions(s2opc_discovery PRIVATE ${S2OPC_DEFINITIONS}) 
-
-  add_executable(s2opc_findserver "demo/s2opc_findserver.c"
-                                  "demo/state_machine.c"
-                                  "demo/config.c")
-  target_link_libraries(s2opc_findserver PRIVATE s2opc_clientserver)
-  target_compile_options(s2opc_findserver PRIVATE ${S2OPC_COMPILER_FLAGS})
-  target_compile_definitions(s2opc_findserver PRIVATE ${S2OPC_DEFINITIONS}) 
-
-  add_executable(s2opc_register "demo/s2opc_register.c"
-                                "demo/state_machine.c"
-                                "demo/config.c")
-  target_link_libraries(s2opc_register PRIVATE s2opc_clientserver)
-  target_compile_options(s2opc_register PRIVATE ${S2OPC_COMPILER_FLAGS})
-  target_compile_definitions(s2opc_register PRIVATE ${S2OPC_DEFINITIONS}) 
-
-  # Samples with S2OPC subscribing client library
-
-  # s2opc_subscription_client is not built on Windows (use getopt GNU library to parse command line)
-  if(NOT WIN32)
-    # Demo client
-    add_executable(s2opc_subscription_client "client_subscription/client.c")
-    target_compile_options(s2opc_subscription_client PRIVATE ${S2OPC_COMPILER_FLAGS})
-    target_compile_definitions(s2opc_subscription_client PRIVATE ${S2OPC_DEFINITIONS})
-    target_link_libraries(s2opc_subscription_client PRIVATE client_subscription)
-  endif(NOT WIN32)
-
-  # Samples with S2OPC client wrapper: TODO: remove dependency on client_subscription
-  add_executable(example_wrapper_write "client_subscription/examples/write.c")
-  target_include_directories(example_wrapper_write PRIVATE client_subscription)
-  target_link_libraries(example_wrapper_write PRIVATE client_subscription)
-  target_compile_options(example_wrapper_write PRIVATE ${S2OPC_COMPILER_FLAGS})
-  target_compile_definitions(example_wrapper_write PRIVATE ${S2OPC_DEFINITIONS})
-
-  add_executable(example_wrapper_read "client_subscription/examples/read.c")
-  target_include_directories(example_wrapper_read PRIVATE client_subscription)
-  target_link_libraries(example_wrapper_read PRIVATE client_subscription)
-  target_compile_options(example_wrapper_read PRIVATE ${S2OPC_COMPILER_FLAGS})
-  target_compile_definitions(example_wrapper_read PRIVATE ${S2OPC_DEFINITIONS})
-
-  add_executable(example_wrapper_browse "client_subscription/examples/browse.c")
-  target_include_directories(example_wrapper_browse PRIVATE client_subscription)
-  target_link_libraries(example_wrapper_browse PRIVATE client_subscription)
-  target_compile_options(example_wrapper_browse PRIVATE ${S2OPC_COMPILER_FLAGS})
-  target_compile_definitions(example_wrapper_browse PRIVATE ${S2OPC_DEFINITIONS})
-
-  add_executable(example_wrapper_get_endpoints "client_subscription/examples/get_endpoints.c")
-  target_include_directories(example_wrapper_get_endpoints PRIVATE client_subscription)
-  target_link_libraries(example_wrapper_get_endpoints PRIVATE client_subscription)
-  target_compile_options(example_wrapper_get_endpoints PRIVATE ${S2OPC_COMPILER_FLAGS})
-  target_compile_definitions(example_wrapper_get_endpoints PRIVATE ${S2OPC_DEFINITIONS})
-
-  add_executable(example_wrapper_subscribe "client_subscription/examples/subscribe.c")
-  target_include_directories(example_wrapper_subscribe PRIVATE client_subscription)
-  target_link_libraries(example_wrapper_subscribe PRIVATE client_subscription)
-  target_compile_options(example_wrapper_subscribe PRIVATE ${S2OPC_COMPILER_FLAGS})
-  target_compile_definitions(example_wrapper_subscribe PRIVATE ${S2OPC_DEFINITIONS})
-
-  # Benchmark tool demo
-  add_executable(bench_tool "benchmarks/bench_tool.c")
-  target_link_libraries(bench_tool PRIVATE s2opc_clientserver)
-  target_compile_options(bench_tool PRIVATE ${S2OPC_COMPILER_FLAGS})
-  target_compile_definitions(bench_tool PRIVATE ${S2OPC_DEFINITIONS})
-
-  # TODO: XML parsing demo: make a unit test / validation test with it instead of demo
-  if (EXPAT_FOUND)
-    add_executable(s2opc_parse_uanodeset "demo/s2opc_parse_uanodeset.c")
-    target_link_libraries(s2opc_parse_uanodeset PRIVATE s2opc_clientserver s2opc_clientserver-xml-loaders-expat)
-    target_compile_options(s2opc_parse_uanodeset PRIVATE ${S2OPC_COMPILER_FLAGS})
-    target_compile_definitions(s2opc_parse_uanodeset PRIVATE ${S2OPC_DEFINITIONS})
-  endif()
-
-endif(ENABLE_SAMPLES)

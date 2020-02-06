@@ -129,20 +129,20 @@ endif()
 
 ## Subscribing client library ##
 
-set(LIBSUBSCRIBE_PATH "frontend/client_subscription")
-add_library(client_subscription "${LIBSUBSCRIBE_PATH}/libs2opc_client.c"
+set(LIBSUBSCRIBE_PATH "frontend/client_wrapper")
+add_library(s2opc_clientwrapper "${LIBSUBSCRIBE_PATH}/libs2opc_client.c"
                                 "${LIBSUBSCRIBE_PATH}/libs2opc_client_cmds.c"
                                 "${LIBSUBSCRIBE_PATH}/libs2opc_client_common.c"
                                 "${LIBSUBSCRIBE_PATH}/toolkit_helpers.c"
                                 "${LIBSUBSCRIBE_PATH}/state_machine.c"
                                 "${LIBSUBSCRIBE_PATH}/pki_permissive.c"
                                 )
-target_link_libraries(client_subscription PUBLIC s2opc_clientserver)
-target_compile_options(client_subscription PRIVATE ${S2OPC_COMPILER_FLAGS})
-target_compile_definitions(client_subscription PRIVATE ${S2OPC_DEFINITIONS})
-target_include_directories(client_subscription PUBLIC ${LIBSUBSCRIBE_PATH}) # TODO: separate PUBLIC / PRIVATE
-set_target_properties(client_subscription PROPERTIES PUBLIC_HEADER "${LIBSUBSCRIBE_PATH}/libs2opc_client.h")
-install(TARGETS client_subscription
+target_link_libraries(s2opc_clientwrapper PUBLIC s2opc_clientserver)
+target_compile_options(s2opc_clientwrapper PRIVATE ${S2OPC_COMPILER_FLAGS})
+target_compile_definitions(s2opc_clientwrapper PRIVATE ${S2OPC_DEFINITIONS})
+target_include_directories(s2opc_clientwrapper PUBLIC ${LIBSUBSCRIBE_PATH}) # TODO: separate PUBLIC / PRIVATE
+set_target_properties(s2opc_clientwrapper PROPERTIES PUBLIC_HEADER "${LIBSUBSCRIBE_PATH}/libs2opc_client.h")
+install(TARGETS s2opc_clientwrapper
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
         PUBLIC_HEADER DESTINATION include)
@@ -173,5 +173,5 @@ if(WITH_PYS2OPC)
   add_custom_target(pys2opc ALL
                     DEPENDS ${PYS2OPC_PLACEHOLDER}
                     DEPENDS ${PYS2OPC_FILES})
-  add_dependencies(pys2opc client_subscription)
+  add_dependencies(pys2opc s2opc_clientwrapper)
 endif()
