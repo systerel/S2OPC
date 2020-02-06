@@ -493,6 +493,25 @@ static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_
 // or '-100' if connection failed
 int32_t SOPC_ClientHelper_Connect(const char* endpointUrl, SOPC_ClientHelper_Security security)
 {
+    int32_t cfg_id = SOPC_ClientHelper_CreateConfiguration(endpointUrl, security);
+    if (0 >= cfg_id)
+    {
+        return cfg_id;
+    }
+
+    int32_t con_id = SOPC_ClientHelper_CreateConnection(cfg_id);
+    if (0 > con_id)
+    {
+        return -100;
+    }
+
+    return con_id;
+}
+
+// Return configuration Id > 0 if succeeded, -<n> with <n> argument number (starting from 1) if invalid argument
+// detected or '-100' if configuration failed
+int32_t SOPC_ClientHelper_CreateConfiguration(const char* endpointUrl, SOPC_ClientHelper_Security security)
+{
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (NULL == endpointUrl)
     {
@@ -513,9 +532,8 @@ int32_t SOPC_ClientHelper_Connect(const char* endpointUrl, SOPC_ClientHelper_Sec
     }
 
     SOPC_LibSub_ConfigurationId cfg_id = 0;
-    SOPC_LibSub_ConnectionId con_id = 0;
 
-    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Connecting to \"%s\"", cfg_con.server_url);
+    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Configure connection to \"%s\"", cfg_con.server_url);
 
     status = SOPC_ClientCommon_ConfigureConnection(&cfg_con, &cfg_id);
     if (SOPC_STATUS_OK != status)
@@ -534,19 +552,39 @@ int32_t SOPC_ClientHelper_Connect(const char* endpointUrl, SOPC_ClientHelper_Sec
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ClientCommon_Connect(cfg_id, &con_id);
-        if (SOPC_STATUS_OK != status)
-        {
-            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not connect with given configuration id.");
-        }
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Configured.");
+    }
+    else
+    {
+        return -100;
     }
 
+    assert(cfg_id > 0);
+    assert(cfg_id <= INT32_MAX);
+    return (int32_t) cfg_id;
+}
+
+// Return connection Id > 0 if succeeded
+// or '0' if connection failed
+int32_t SOPC_ClientHelper_CreateConnection(int32_t cfg_id)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_LibSub_ConnectionId con_id = 0;
+
+    if (0 >= cfg_id)
+    {
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Configuration id %d is invalid.", cfg_id);
+        return -1;
+    }
+
+    status = SOPC_ClientCommon_Connect((SOPC_LibSub_ConfigurationId) cfg_id, &con_id);
     if (SOPC_STATUS_OK == status)
     {
         Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Connected.");
     }
     else
     {
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not connect with given configuration id.");
         return -100;
     }
 
