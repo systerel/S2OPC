@@ -401,7 +401,7 @@ int32_t SOPC_ClientHelper_CreateConfiguration(const char* endpointUrl, SOPC_Clie
     The function waits until the client is effectively connected or the Toolkit times out.
     Return a connection id or error code.
  @param cfg_id
-   Configuration Id created by SOPC_ClientHelper_CreateConnection()
+   Configuration Id created by SOPC_ClientHelper_CreateConfiguration()
  @return
     If this operation succeeded, return a connection id > 0.
     If invalid configuration detected, return -1.
