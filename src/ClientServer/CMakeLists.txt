@@ -17,6 +17,12 @@ endif()
 
 ### Compilation of S2OPC client/server library source files ###
 
+## Build info source file generation (version, commit checksum, docker id, date) ##
+# Define how to generate build info file
+set(S2OPC_TOOLKIT_BUILD_INFO_C ${CMAKE_CURRENT_BINARY_DIR}/sopc_toolkit_build_info.c)
+s2opc_gen_build_info(${CMAKE_CURRENT_SOURCE_DIR}/configuration/sopc_toolkit_build_info.c_
+                     ${S2OPC_TOOLKIT_BUILD_INFO_C})
+
 ## C99 compliant source code ##
 
 # Define non-platform dependent source files
@@ -45,7 +51,7 @@ set(S2OPC_CLIENTSERVER_PRIVATE_INCLUDES
 
 ### Configure S2OPC client/server library and its properties ###
 
-add_library(s2opc_clientserver ${S2OPC_CLIENTSERVER_SRCS})
+add_library(s2opc_clientserver ${S2OPC_CLIENTSERVER_SRCS} ${S2OPC_TOOLKIT_BUILD_INFO_C})
 target_compile_options(s2opc_clientserver PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(s2opc_clientserver PRIVATE ${S2OPC_DEFINITIONS})
 target_link_libraries(s2opc_clientserver PUBLIC s2opc_common)

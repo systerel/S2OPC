@@ -54,7 +54,7 @@ static time_t parse_build_date(const char* build_date)
     return mktime(&time);
 }
 
-RuntimeVariables build_runtime_variables(SOPC_Build_Info build_info,
+RuntimeVariables build_runtime_variables(SOPC_Toolkit_Build_Info build_info,
                                          SOPC_Server_Config* server_config,
                                          const char* manufacturer_name)
 {
@@ -85,15 +85,17 @@ RuntimeVariables build_runtime_variables(SOPC_Build_Info build_info,
                                     &server_config->serverDescription.ApplicationName.defaultText);
     assert(SOPC_STATUS_OK == status);
 
-    status =
-        SOPC_String_AttachFromCstring(&runtimeVariables.build_info.SoftwareVersion, (char*) build_info.toolkitVersion);
+    int cmp_res = strcmp(build_info.commonBuildInfo.buildVersion, build_info.toolkitBuildInfo.buildVersion);
+    assert(0 == cmp_res);
+    status = SOPC_String_AttachFromCstring(&runtimeVariables.build_info.SoftwareVersion,
+                                           (char*) build_info.toolkitBuildInfo.buildVersion);
     assert(SOPC_STATUS_OK == status);
 
-    status =
-        SOPC_String_AttachFromCstring(&runtimeVariables.build_info.BuildNumber, (char*) build_info.toolkitSrcCommit);
+    status = SOPC_String_AttachFromCstring(&runtimeVariables.build_info.BuildNumber,
+                                           (char*) build_info.toolkitBuildInfo.buildSrcCommit);
     assert(SOPC_STATUS_OK == status);
 
-    time_t buildDateAsTimet = parse_build_date(build_info.toolkitBuildDate);
+    time_t buildDateAsTimet = parse_build_date(build_info.toolkitBuildInfo.buildBuildDate);
     SOPC_DateTime buildDate;
     status = SOPC_Time_FromTimeT(buildDateAsTimet, &buildDate);
     assert(SOPC_STATUS_OK == status);

@@ -20,6 +20,7 @@
 #ifndef SOPC_RUNTIME_VARIABLES_H
 #define SOPC_RUNTIME_VARIABLES_H
 
+#include "sopc_common_build_info.h"
 #include "sopc_types.h"
 #include "sopc_user_app_itf.h"
 
@@ -47,7 +48,7 @@ typedef struct _RuntimeVariables
  * \return structure containing all runtime variables.
  *
  */
-RuntimeVariables build_runtime_variables(SOPC_Build_Info build_info,
+RuntimeVariables build_runtime_variables(SOPC_Toolkit_Build_Info build_info,
                                          SOPC_Server_Config* server_config,
                                          const char* manufacturer_name);
 

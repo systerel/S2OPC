@@ -36,6 +36,7 @@
 #include "sopc_user_app_itf.h"
 
 #include "sopc_builtintypes.h"
+#include "sopc_common_build_info.h"
 #include "sopc_types.h"
 
 /**
@@ -159,6 +160,6 @@ SOPC_ReturnStatus SOPC_ToolkitConfig_SetLogLevel(SOPC_Toolkit_Log_Level level);
  *
  * \return          Toolkit build information
  */
-SOPC_Build_Info SOPC_ToolkitConfig_GetBuildInfo(void);
+SOPC_Toolkit_Build_Info SOPC_ToolkitConfig_GetBuildInfo(void);
 
 #endif /* SOPC_TOOLKIT_CONFIG_H_ */

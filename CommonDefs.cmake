@@ -231,6 +231,21 @@ list(APPEND S2OPC_DEFINITIONS $<$<BOOL:${WITH_NANO_EXTENDED}>:WITH_NANO_EXTENDED
 
 ### Define common functions ###
 
+# Function to generate build info C structure and function
+function(s2opc_gen_build_info c_model_source_path c_file_target_path)
+  if(CMAKE_HOST_UNIX)
+    add_custom_command(OUTPUT ${c_file_target_path}
+      COMMAND ${CMAKE_COMMAND} -E copy ${c_model_source_path} ${c_file_target_path}
+      COMMAND ${S2OPC_ROOT_PATH}/scripts/gen_build_info_file.sh ${c_file_target_path}
+      WORKING_DIRECTORY ${S2OPC_ROOT_PATH})
+  else()
+    add_custom_command(OUTPUT ${c_file_target_path}
+      COMMAND ${CMAKE_COMMAND} -E copy  ${c_model_source_path} ${c_file_target_path}
+      WORKING_DIRECTORY ${S2OPC_ROOT_PATH})
+  endif()
+  set_source_files_properties(${c_file_target_path} PROPERTIES GENERATED TRUE)
+endfunction()
+
 # Function to generate a C structure address space from an XML UA nodeset file to be loaded by embedded loader
 function(s2opc_embed_address_space c_file_name xml_uanodeset_path)
 

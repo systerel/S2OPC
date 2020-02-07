@@ -28,6 +28,7 @@
 
 #include <stdbool.h>
 
+#include "sopc_common_build_info.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_key_manager.h"
 #include "sopc_types.h"
@@ -226,11 +227,9 @@ typedef enum
 /* Toolkit build information */
 typedef struct
 {
-    char* toolkitVersion;
-    char* toolkitSrcCommit;
-    char* toolkitDockerId;
-    char* toolkitBuildDate;
-} SOPC_Build_Info;
+    SOPC_Build_Info commonBuildInfo;
+    SOPC_Build_Info toolkitBuildInfo;
+} SOPC_Toolkit_Build_Info;
 
 /* \brief Initalize the content of the SOPC_S2OPC_Config
  *

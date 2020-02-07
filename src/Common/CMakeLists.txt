@@ -44,21 +44,10 @@ find_package(MbedTLS REQUIRED)
 ### Compilation of S2OPC common library source files ###
 
 ## Build info source file generation (version, commit checksum, docker id, date) ##
-
-if(CMAKE_HOST_UNIX)
-  add_custom_command(OUTPUT configuration/sopc_toolkit_build_info.h
-                     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/configuration/sopc_toolkit_build_info.h_ ${CMAKE_CURRENT_SOURCE_DIR}/configuration/sopc_toolkit_build_info.h
-                     COMMAND ${S2OPC_ROOT_PATH}/scripts/gen_build_info_file.sh ${CMAKE_CURRENT_SOURCE_DIR}/configuration
-                     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
-else()
-  add_custom_command(OUTPUT configuration/sopc_toolkit_build_info.h
-                     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/configuration/sopc_toolkit_build_info.h_ ${CMAKE_CURRENT_SOURCE_DIR}/configuration/sopc_toolkit_build_info.h
-                     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
-endif()
-
-add_custom_target(build_info ALL
-                   DEPENDS configuration/sopc_toolkit_build_info.h
-                   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+# Define how to generate build info file
+set(S2OPC_COMMON_BUILD_INFO_C ${CMAKE_CURRENT_BINARY_DIR}/sopc_common_build_info.c)
+s2opc_gen_build_info(${CMAKE_CURRENT_SOURCE_DIR}/configuration/sopc_common_build_info.c_
+                     ${S2OPC_COMMON_BUILD_INFO_C})
 
 ## Platform dependent source files and library dependencies ##
 
@@ -122,7 +111,7 @@ set(S2OPC_COMMON_PRIVATE_INCLUDES
 
 ### Configure S2OPC library and its properties ###
 
-add_library(s2opc_common ${PLATFORM_SRCS} ${S2OPC_COMMON_SRCS})
+add_library(s2opc_common ${PLATFORM_SRCS} ${S2OPC_COMMON_SRCS} ${S2OPC_COMMON_BUILD_INFO_C})
 target_compile_options(s2opc_common PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(s2opc_common PRIVATE ${S2OPC_DEFINITIONS})
 target_link_libraries(s2opc_common PUBLIC ${S2OPC_LINKER_FLAGS} ${S2OPC_LINK_LIBRARIES}
@@ -138,8 +127,6 @@ target_include_directories(s2opc_common
 set_target_properties(s2opc_common PROPERTIES POSITION_INDEPENDENT_CODE ON)
 # TODO: Should we add POSITION_INDEPENDENT to all internal libraries onto S2OPC instead ?
 set_target_properties(s2opc_common PROPERTIES INTERFACE_POSITION_INDEPENDENT_CODE ON)
-
-add_dependencies(s2opc_common build_info)
 
 ### Installation and export of S2OPC common library ###
 foreach(dir ${S2OPC_COMMON_PUBLIC_INCLUDES})

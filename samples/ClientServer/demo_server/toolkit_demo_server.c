@@ -865,11 +865,13 @@ int main(int argc, char* argv[])
 
     /* Get the toolkit build information and print it */
     RuntimeVariables runtime_vars;
-    SOPC_Build_Info build_info = SOPC_ToolkitConfig_GetBuildInfo();
-    printf("toolkitVersion: %s\n", build_info.toolkitVersion);
-    printf("toolkitSrcCommit: %s\n", build_info.toolkitSrcCommit);
-    printf("toolkitDockerId: %s\n", build_info.toolkitDockerId);
-    printf("toolkitBuildDate: %s\n", build_info.toolkitBuildDate);
+    SOPC_Toolkit_Build_Info build_info = SOPC_ToolkitConfig_GetBuildInfo();
+    printf("S2OPC_Common       - Version: %s, SrcCommit: %s, DockerId: %s, BuildDate: %s\n",
+           build_info.commonBuildInfo.buildVersion, build_info.commonBuildInfo.buildSrcCommit,
+           build_info.commonBuildInfo.buildDockerId, build_info.commonBuildInfo.buildBuildDate);
+    printf("S2OPC_ClientServer - Version: %s, SrcCommit: %s, DockerId: %s, BuildDate: %s\n",
+           build_info.toolkitBuildInfo.buildVersion, build_info.toolkitBuildInfo.buildSrcCommit,
+           build_info.toolkitBuildInfo.buildDockerId, build_info.toolkitBuildInfo.buildBuildDate);
 
     /* Initialize the server library (start library threads)
      * and define communication events callback */

@@ -17,32 +17,30 @@
  * under the License.
  */
 
-#include "sopc_toolkit_config.h"
-#include "opcua_identifiers.h"
-#include "sopc_internal_app_dispatcher.h"
-#include "sopc_services_api.h"
-#include "sopc_toolkit_config_internal.h"
-#include "sopc_user_app_itf.h"
-
 #include <assert.h>
 #include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
 
-#include "sopc_helper_endianness_cfg.h"
-#include "sopc_secure_channels_api.h"
-#include "sopc_sockets_api.h"
-#include "sopc_toolkit_build_info.h"
-
+#include "opcua_identifiers.h"
 #include "sopc_encodeable.h"
 #include "sopc_event_timer_manager.h"
 #include "sopc_filesystem.h"
+#include "sopc_helper_endianness_cfg.h"
+#include "sopc_internal_app_dispatcher.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
+#include "sopc_secure_channels_api.h"
+#include "sopc_services_api.h"
 #include "sopc_singly_linked_list.h"
+#include "sopc_sockets_api.h"
 #include "sopc_time.h"
+#include "sopc_toolkit_build_info.h"
+#include "sopc_toolkit_config.h"
+#include "sopc_toolkit_config_internal.h"
+#include "sopc_user_app_itf.h"
 
 #include "address_space_impl.h"
 #include "util_b2c.h"
@@ -138,7 +136,7 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
 SOPC_ReturnStatus SOPC_Toolkit_Configured()
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_STATE;
-    SOPC_Build_Info buildInfo;
+    SOPC_Toolkit_Build_Info toolkitBuildInfo;
     bool result = false;
     if (tConfig.initDone != false)
     {
@@ -153,11 +151,19 @@ SOPC_ReturnStatus SOPC_Toolkit_Configured()
                 result = SOPC_Logger_Initialize(tConfig.logDirPath, tConfig.logMaxBytes, tConfig.logMaxFiles);
                 if (result != false)
                 {
-                    buildInfo = SOPC_ToolkitConfig_GetBuildInfo();
+                    toolkitBuildInfo = SOPC_ToolkitConfig_GetBuildInfo();
                     SOPC_Logger_SetTraceLogLevel(SOPC_LOG_LEVEL_INFO);
-                    SOPC_Logger_TraceInfo("DATE='%s' VERSION='%s' SIGNATURE='%s' DOCKER='%s'",
-                                          buildInfo.toolkitBuildDate, buildInfo.toolkitVersion,
-                                          buildInfo.toolkitSrcCommit, buildInfo.toolkitDockerId);
+                    SOPC_Logger_TraceInfo("Common library DATE='%s' VERSION='%s' SIGNATURE='%s' DOCKER='%s'",
+                                          toolkitBuildInfo.commonBuildInfo.buildBuildDate,
+                                          toolkitBuildInfo.commonBuildInfo.buildVersion,
+                                          toolkitBuildInfo.commonBuildInfo.buildSrcCommit,
+                                          toolkitBuildInfo.commonBuildInfo.buildDockerId);
+                    SOPC_Logger_TraceInfo(
+                        "Client/Server toolkit library DATE='%s' VERSION='%s' SIGNATURE='%s' DOCKER='%s'",
+                        toolkitBuildInfo.toolkitBuildInfo.buildBuildDate,
+                        toolkitBuildInfo.toolkitBuildInfo.buildVersion,
+                        toolkitBuildInfo.toolkitBuildInfo.buildSrcCommit,
+                        toolkitBuildInfo.toolkitBuildInfo.buildDockerId);
                     SOPC_Logger_SetTraceLogLevel(tConfig.logLevel);
                 }
                 status = SOPC_STATUS_OK;
@@ -583,7 +589,7 @@ SOPC_ReturnStatus SOPC_ToolkitConfig_SetLogLevel(SOPC_Toolkit_Log_Level level)
     return status;
 }
 
-SOPC_Build_Info SOPC_ToolkitConfig_GetBuildInfo(void)
+SOPC_Toolkit_Build_Info SOPC_ToolkitConfig_GetBuildInfo(void)
 {
-    return toolkit_build_info;
+    return (SOPC_Toolkit_Build_Info){SOPC_Common_GetBuildInfo(), SOPC_ClientServer_GetBuildInfo()};
 }
