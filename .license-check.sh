@@ -142,19 +142,19 @@ read -d '' exclusions <<-EOF
     src/Common/opcua_types/opcua_statuscodes.h
     src/Common/opcua_types/sopc_types.h
     src/Common/opcua_types/sopc_types.c
-    tests/ClientServer/freertos/test_helpers_platform_dep/FreeRTOSConfig.h
-    tests/ClientServer/freertos/test_helpers_platform_dep/lwipopts.h
-    tests/ClientServer/freertos/test_helpers_platform_dep/semihost_hardfault.c
-    tests/ClientServer/freertos/test_helpers_platform_dep/board_specific/fsl_phy.h
-    tests/ClientServer/freertos/test_helpers_platform_dep/board_specific/peripherals.h
-    tests/ClientServer/freertos/test_helpers_platform_dep/board_specific/pin_mux.c
-    tests/ClientServer/freertos/test_helpers_platform_dep/board_specific/pin_mux.h
-    tests/ClientServer/freertos/test_helpers_platform_dep/board_specific/peripherals.c
-    tests/ClientServer/freertos/test_helpers_platform_dep/board_specific/fsl_phy.c
-    tests/ClientServer/freertos/test_helpers_platform_dep/board_specific/src/board.h
-    tests/ClientServer/freertos/test_helpers_platform_dep/board_specific/src/clock_config.h
-    tests/ClientServer/freertos/test_helpers_platform_dep/board_specific/src/clock_config.c
-    tests/ClientServer/freertos/test_helpers_platform_dep/board_specific/src/board.c
+    tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/FreeRTOSConfig.h
+    tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/lwipopts.h
+    tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/semihost_hardfault.c
+    tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/fsl_phy.h
+    tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/peripherals.h
+    tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/pin_mux.c
+    tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/pin_mux.h
+    tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/peripherals.c
+    tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/fsl_phy.c
+    tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/src/board.h
+    tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/src/clock_config.h
+    tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/src/clock_config.c
+    tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/src/board.c
 EOF
 for f in $exclusions; do
     mv $f $f"_"

@@ -32,6 +32,7 @@ ISADVANCED=$1
 BSRC=bsrc
 CSRC=src
 TST=tests
+DEMO=samples
 
 EXITCODE=0
 LOGPATH=$(pwd)/pre-build-check.log
@@ -70,7 +71,7 @@ fi
 
 CHECK_STD_MEM_ALLOC_ABSENCE="(\bfree\b\(|\bmalloc\b\(|\bcalloc\b\(|\brealloc\b\(|=.*\bfree\b|=.*\bmalloc\b|=.*\bcalloc\b|=.*\brealloc\b)"
 EXLUDE_STD_MEM_IMPLEM="*\/p_mem_alloc.c"
-EXCLUDED_TESTS="*\/client_subscription\/*"
+EXCLUDED_DEMO="*\/client_wrapper\/*"
 
 find $CSRC -not -path $EXLUDE_STD_MEM_IMPLEM -name "*.c" | xargs grep -E $CHECK_STD_MEM_ALLOC_ABSENCE | grep -Ec ":[^0]+" | xargs test 0 -eq
 if [[ $? != 0 ]]; then
@@ -78,10 +79,16 @@ if [[ $? != 0 ]]; then
     find $CSRC -not -path $EXLUDE_STD_MEM_IMPLEM -name "*.c" | xargs grep -nE $CHECK_STD_MEM_ALLOC_ABSENCE | tee -a $LOGPATH
     EXITCODE=1
 fi
-find $TST -not -path $EXCLUDED_TESTS -name "*.c" | xargs grep -E $CHECK_STD_MEM_ALLOC_ABSENCE | grep -Ec ":[^0]+" | xargs test 0 -eq
+find $TST -name "*.c" | xargs grep -E $CHECK_STD_MEM_ALLOC_ABSENCE | grep -Ec ":[^0]+" | xargs test 0 -eq
 if [[ $? != 0 ]]; then
     echo "ERROR: checking absence of std library use for memory allocation in tests" | tee -a $LOGPATH
-    find $TST -not -path $EXCLUDED_TESTS -name "*.c" | xargs grep -nE $CHECK_STD_MEM_ALLOC_ABSENCE | tee -a $LOGPATH
+    find $TST -name "*.c" | xargs grep -nE $CHECK_STD_MEM_ALLOC_ABSENCE | tee -a $LOGPATH
+    EXITCODE=1
+fi
+find $DEMO -not -path $EXCLUDED_DEMO -name "*.c" | xargs grep -E $CHECK_STD_MEM_ALLOC_ABSENCE | grep -Ec ":[^0]+" | xargs test 0 -eq
+if [[ $? != 0 ]]; then
+    echo "ERROR: checking absence of std library use for memory allocation in tests" | tee -a $LOGPATH
+    find $DEMO -not -path $EXCLUDED_DEMO -name "*.c" | xargs grep -nE $CHECK_STD_MEM_ALLOC_ABSENCE | tee -a $LOGPATH
     EXITCODE=1
 fi
 
@@ -129,7 +136,7 @@ fi
 
 echo "Clang automatic formatting check" | tee -a $LOGPATH
 ./.format.sh >> $LOGPATH
-ALREADY_FORMAT=`git ls-files -m $BSRC $CSRC $TST | grep -v bgenc`
+ALREADY_FORMAT=`git ls-files -m $BSRC $CSRC $TST $DEMO | grep -v bgenc`
 
 if [[ -z $ALREADY_FORMAT ]]; then
     echo "C source code formatting already done" | tee -a $LOGPATH
