@@ -1062,7 +1062,9 @@ static void ToolkitEventCallback(SOPC_App_Com_Event event, uint32_t IdOrStatus, 
     /* At least one machine or a generic callback should have processed the event */
     if (false == bProcessed)
     {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "No machine or generic callback to process the event");
+        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO,
+                    "No machine or generic callback to process the event %d. IdOrStatus is %" PRIu32 ".", event,
+                    IdOrStatus);
     }
 
     mutStatus = Mutex_Unlock(&mutex);
