@@ -39,7 +39,7 @@ export SOPC_DOCKER_NEEDS_SUDO=1
 # Run tests on Linux target
 ./.test-in-docker.sh ./test-all.sh
 # run acceptance tests on Linux target
-pushd acceptances_tests/
+pushd tests/ClientServer/acceptance_tools/
 ../.run-uactt-linux-in-docker.sh WITH_NANO_EXTENDED=1 ./launch_acceptance_tests.sh
 popd
 # Build binaries for Windows target on Linux host

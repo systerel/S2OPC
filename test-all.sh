@@ -23,8 +23,8 @@
 MY_DIR=$(cd $(dirname $0) && pwd)
 BIN_DIR="${MY_DIR}/bin"
 BUILD_DIR="${MY_DIR}/build"
-VALIDATION_DIR="${MY_DIR}/validation"
-PYS2OPC_TESTS_DIR="${MY_DIR}/tests/ClientServer/pys2opc/tests"
+INTEROP_DIR="${MY_DIR}/tests/ClientServer/interop_tools"
+PYS2OPC_TESTS_DIR="${MY_DIR}/tests/ClientServer/validation_tests/pys2opc/tests"
 PYS2OPC_LIB_IS_PRESENT=$(ls ./build/lib/_pys2opc* 2> /dev/null | wc -l)
 TEST_DIR=${BUILD_DIR}/tests/ClientServer
 CTEST_FILE="${TEST_DIR}/CTestTestfile.cmake"
@@ -80,7 +80,7 @@ else
     mv "${PYS2OPC_TESTS_DIR}"/*.tap "${TAP_DIR}"/
 fi
 
-mv "${VALIDATION_DIR}"/*.tap "${TAP_DIR}"/
+mv "${INTEROP_DIR}"/*.tap "${TAP_DIR}"/
 
 ACTUAL_TAP_FILES=$(LANG=C ls "${TAP_DIR}"/*.tap | sed "s|${TAP_DIR}/||")
 

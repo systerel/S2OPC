@@ -280,12 +280,12 @@ test-unit:
   <<: *test_linux
   image: com2.systerel.fr:5000/c838/uactt-linux@sha256:d109616f528a1d4f2e4b49d9ecc563696b8d136195c0e11d17b4425625e115f9 # digest of uactt-linux:1.2
   script:
-    - 'cd acceptances_tests/ && ./launch_acceptance_tests.sh'
+    - 'cd tests/ClientServer/acceptance_tools/ && ./launch_acceptance_tests.sh'
   artifacts:
     name: 'uactt-logs-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
     paths:
       - 'build/'
-      - 'acceptances_tests/*.log'
+      - 'tests/ClientServer/acceptance_tools/*.log'
     when: always
     expire_in: '1 month'
   rules: # repeat .test-linux variables exception since overwritten here

@@ -196,11 +196,11 @@ class PyS2OPC:
                                   token_target = 3,
                                   security_mode = SecurityMode.Sign,
                                   security_policy = SecurityPolicy.Basic256,
-                                  path_cert_auth = '../../build/bin/trusted/cacert.der',
-                                  path_crl = '../../build/bin/revoked/cacrl.der',
-                                  path_cert_srv = '../../build/bin/server_public/server_2k_cert.der',
-                                  path_cert_cli = '../../build/bin/client_public/client_2k_cert.der',
-                                  path_key_cli = '../../build/bin/client_private/client_2k_key.pem'):
+                                  path_cert_auth = '../../../../build/bin/trusted/cacert.der',
+                                  path_crl = '../../../../build/bin/revoked/cacrl.der',
+                                  path_cert_srv = '../../../../build/bin/server_public/server_2k_cert.der',
+                                  path_cert_cli = '../../../../build/bin/client_public/client_2k_cert.der',
+                                  path_key_cli = '../../../../build/bin/client_private/client_2k_key.pem'):
         """
         Returns a configuration that can be later used in connect() or get_endpoints().
 

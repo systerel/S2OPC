@@ -13,8 +13,6 @@ endif()
 # EXPAT dependency managed in CommonDefs
 
 # use find_package onto s2opc in case we built s2opc and tests separately
-# TODO:for samples only (tests use private headers)
-find_package(s2opc)
 
 # options with impact on dependencies
 option(ENABLE_TESTING "Build the S2OPC tests" ON)
@@ -34,10 +32,9 @@ if(ENABLE_TESTING)
 endif()
 
 
-#### Tests / Samples for S2OPC library and extension libraries ####
+#### Tests for S2OPC library and extension libraries ####
 
-# Options reserved to tests / samples
-option(ENABLE_SAMPLES "Build the S2OPC library and extention libraries samples" ON)
+# Options reserved to tests
 option(WITH_STATIC_SECURITY_DATA "Use static security data for test" OFF)
 
 if(WIN32)
@@ -102,7 +99,7 @@ if(ENABLE_TESTING)
 
   # Helpers tests
 
-  file(GLOB INTERNAL_TESTS_SRCS "helpers/*.c")
+  file(GLOB INTERNAL_TESTS_SRCS "unit_tests/helpers/*.c")
   add_executable(check_helpers ${INTERNAL_TESTS_SRCS} ${TEST_CHECK_HELPERS_ADDRESS_SPACE_C})
   target_include_directories(check_helpers PRIVATE ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES} ${MBEDTLS_INCLUDE_DIRS} ${CHECK_INCLUDE_DIRS})
   target_link_libraries(check_helpers PRIVATE ${CHECK_LIBRARIES} s2opc_clientserver s2opc_clientserver-loader-embedded)
@@ -131,7 +128,7 @@ if(ENABLE_TESTING)
 
   # Sockets layer tests
 
-  add_executable(check_sockets "sockets/check_sockets.c")
+  add_executable(check_sockets "unit_tests/sockets/check_sockets.c")
   target_include_directories(check_sockets PRIVATE ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES} ${CHECK_INCLUDE_DIRS})
   target_compile_options(check_sockets PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(check_sockets PRIVATE ${S2OPC_DEFINITIONS})
@@ -144,21 +141,21 @@ if(ENABLE_TESTING)
 
   # Secure channels tests: tests on received buffer
   file(GLOB SECURE_CHANNELS_BUFFER_TEST
-       "secure_channels/event_recorder.c"
-       "secure_channels/check_sc_rcv_buffer.c"
-       "secure_channels/check_sc_rcv_helpers.c"
-       "secure_channels/event_helpers.c"
-       "helpers/hexlify.c"
-       "secure_channels/stubs/*.c")
+       "unit_tests/secure_channels/event_recorder.c"
+       "unit_tests/secure_channels/check_sc_rcv_buffer.c"
+       "unit_tests/secure_channels/check_sc_rcv_helpers.c"
+       "unit_tests/secure_channels/event_helpers.c"
+       "unit_tests/helpers/hexlify.c"
+       "unit_tests/secure_channels/stubs/*.c")
 
   add_executable(check_sc_rcv_buffer ${SECURE_CHANNELS_SRC}
                                      ${SECURE_CHANNELS_BUFFER_TEST})
   target_link_libraries(check_sc_rcv_buffer PRIVATE ${CHECK_LIBRARIES} ${S2OPC_LINKER_FLAGS} ${S2OPC_LINK_LIBRARIES} s2opc_common)
   target_compile_options(check_sc_rcv_buffer PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(check_sc_rcv_buffer PRIVATE ${S2OPC_DEFINITIONS})
-  target_include_directories(check_sc_rcv_buffer PRIVATE "secure_channels/stubs"
-                                                         "secure_channels"
-                                                         "helpers"
+  target_include_directories(check_sc_rcv_buffer PRIVATE "unit_tests/secure_channels/stubs"
+                                                         "unit_tests/secure_channels"
+                                                         "unit_tests/helpers"
                                                          ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES}
                                                          ${MBEDTLS_INCLUDE_DIRS}
                                                          ${CHECK_INCLUDE_DIRS})
@@ -166,21 +163,21 @@ if(ENABLE_TESTING)
 
   # Secure channels tests: tests on received encrypted buffer
   file(GLOB SECURE_CHANNELS_ENCRYPTED_BUFFER_TEST
-       "secure_channels/event_recorder.c"
-       "secure_channels/check_sc_rcv_helpers.c"
-       "secure_channels/check_sc_rcv_encrypted_buffer.c"
-       "secure_channels/event_helpers.c"
-       "helpers/hexlify.c"
-       "secure_channels/stubs/*.c")
+       "unit_tests/secure_channels/event_recorder.c"
+       "unit_tests/secure_channels/check_sc_rcv_helpers.c"
+       "unit_tests/secure_channels/check_sc_rcv_encrypted_buffer.c"
+       "unit_tests/secure_channels/event_helpers.c"
+       "unit_tests/helpers/hexlify.c"
+       "unit_tests/secure_channels/stubs/*.c")
 
   add_executable(check_sc_rcv_encrypted_buffer ${SECURE_CHANNELS_SRC}
                                                ${SECURE_CHANNELS_ENCRYPTED_BUFFER_TEST})
   target_link_libraries(check_sc_rcv_encrypted_buffer PRIVATE ${CHECK_LIBRARIES} ${S2OPC_LINKER_FLAGS} ${S2OPC_LINK_LIBRARIES} s2opc_common)
   target_compile_options(check_sc_rcv_encrypted_buffer PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(check_sc_rcv_encrypted_buffer PRIVATE ${S2OPC_DEFINITIONS})
-  target_include_directories(check_sc_rcv_encrypted_buffer PRIVATE "secure_channels/stubs"
-                                                                   "secure_channels"
-                                                                   "helpers"
+  target_include_directories(check_sc_rcv_encrypted_buffer PRIVATE "unit_tests/secure_channels/stubs"
+                                                                   "unit_tests/secure_channels"
+                                                                   "unit_tests/helpers"
                                                                    ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES}
                                                                    ${MBEDTLS_INCLUDE_DIRS}
                                                                    ${CHECK_INCLUDE_DIRS})
@@ -192,45 +189,29 @@ if(ENABLE_TESTING)
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/check_sc_test/check_sc_server_2k_cert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/check_sc_rcv_encrypted_buffer_data/)
   s2opc_unit_test(check_sc_rcv_encrypted_buffer)
 
-  # Server running local services
-  add_executable(toolkit_test_server_local_service "services/toolkit_test_server_local_service.c"
-                                                   "services/wrap_read.c"
-                                                   "services/testlib_write.c"
-                                                   "services/test_results.c"
-                                                   "services/testlib_read_response.c"
-                                                   ${TEST_LOCAL_TEST_SERVER_ADDRESS_SPACE_C})
-  target_link_libraries(toolkit_test_server_local_service PRIVATE s2opc_clientserver s2opc_clientserver-loader-embedded)
-  target_compile_options(toolkit_test_server_local_service PRIVATE ${S2OPC_COMPILER_FLAGS})
-  target_compile_definitions(toolkit_test_server_local_service PRIVATE ${S2OPC_DEFINITIONS})
-  s2opc_unit_test(toolkit_test_server_local_service GENERATE_TAP)
-
-## S2OPC validation tests ##
-
-# Tests compilation definition #
-
   # Sockets (stubbed on services side) tests
   file(GLOB SOCKETS_SRC "${S2OPC_ROOT_PATH}/src/ClientServer/sockets/*.c")
 
   file(GLOB SECURE_CHANNELS_CLIENT_TEST
-    "secure_channels/event_helpers.c"
-    "secure_channels/event_recorder.c"
-    "secure_channels/test_secure_channels_client.c"
-    "secure_channels/stubs/stub_sc_sopc_toolkit_config.c"
-    "secure_channels/stubs/stub_sc_sopc_services_api.c")
+    "unit_tests/secure_channels/event_helpers.c"
+    "unit_tests/secure_channels/event_recorder.c"
+    "unit_tests/secure_channels/test_secure_channels_client.c"
+    "unit_tests/secure_channels/stubs/stub_sc_sopc_toolkit_config.c"
+    "unit_tests/secure_channels/stubs/stub_sc_sopc_services_api.c")
 
   file(GLOB SECURE_CHANNELS_SERVER_TEST
-    "secure_channels/event_helpers.c"
-    "secure_channels/event_recorder.c"
-    "secure_channels/test_secure_channels_server.c"
-    "secure_channels/stubs/stub_sc_sopc_toolkit_config.c"
-    "secure_channels/stubs/stub_sc_sopc_services_api.c")
+    "unit_tests/secure_channels/event_helpers.c"
+    "unit_tests/secure_channels/event_recorder.c"
+    "unit_tests/secure_channels/test_secure_channels_server.c"
+    "unit_tests/secure_channels/stubs/stub_sc_sopc_toolkit_config.c"
+    "unit_tests/secure_channels/stubs/stub_sc_sopc_services_api.c")
 
   # Secure channels (+ Sockets) layer tests: CLIENT executable
   add_executable(test_secure_channels_client ${SOCKETS_SRC}
                                              ${SECURE_CHANNELS_SRC}
                                              ${SECURE_CHANNELS_CLIENT_TEST})
 
-  target_include_directories(test_secure_channels_client PRIVATE "secure_channels/stubs"
+  target_include_directories(test_secure_channels_client PRIVATE "unit_tests/secure_channels/stubs"
                                                                  ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES}
                                                                  ${MBEDTLS_INCLUDE_DIRS})
   target_compile_options(test_secure_channels_client PRIVATE ${S2OPC_COMPILER_FLAGS})
@@ -244,23 +225,92 @@ if(ENABLE_TESTING)
   target_link_libraries(test_secure_channels_server PRIVATE ${S2OPC_LINKER_FLAGS} ${S2OPC_LINK_LIBRARIES} s2opc_common)
   target_compile_options(test_secure_channels_server PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(test_secure_channels_server PRIVATE ${S2OPC_DEFINITIONS})
-  target_include_directories(test_secure_channels_server PRIVATE "secure_channels/stubs"
+  target_include_directories(test_secure_channels_server PRIVATE "unit_tests/secure_channels/stubs"
                                                                  ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES}
                                                                  ${MBEDTLS_INCLUDE_DIRS})
 
+## S2OPC fuzzing tests: to be run manually ##
+
+  set(FUZZING_PATH "unit_tests/fuzzing")
+
+  # Local Fuzzing
+  function(s2opc_fuzzer name src_file)
+    set(standalone_target_name "${name}.standalone")
+    set(fuzz_target_name "${name}.libfuzzer")
+
+    add_executable(${standalone_target_name} "${FUZZING_PATH}/${src_file}" "${FUZZING_PATH}/standalone_fuzzer.c")
+    target_compile_options(${standalone_target_name} PRIVATE ${S2OPC_COMPILER_FLAGS})
+    target_compile_definitions(${standalone_target_name} PRIVATE ${S2OPC_DEFINITIONS})
+    target_link_libraries(${standalone_target_name} s2opc_clientserver)
+    target_include_directories(${standalone_target_name} PRIVATE ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
+    add_dependencies(fuzzers ${standalone_target_name})
+
+    add_executable(${fuzz_target_name} "${FUZZING_PATH}/${src_file}")
+    set_target_properties(${fuzz_target_name} PROPERTIES COMPILE_FLAGS "-fsanitize=fuzzer")
+    set_target_properties(${fuzz_target_name} PROPERTIES LINK_FLAGS "-fsanitize=fuzzer")
+    target_link_libraries(${fuzz_target_name} s2opc_clientserver)
+    target_include_directories(${fuzz_target_name} PRIVATE ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
+    add_dependencies(fuzzers ${fuzz_target_name})
+  endfunction()
+
+  if (NOT WITH_OSS_FUZZ AND "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
+    if (${CMAKE_C_COMPILER_VERSION} VERSION_LESS "6.0.0")
+      # We need at least CLang 6 to get LibFuzzer
+      message(STATUS "Your version of Clang (${CMAKE_C_COMPILER_ID}) is not recent enough to have LibFuzzer")
+    else()
+      add_custom_target(fuzzers)
+      s2opc_fuzzer(server_request_fuzzer "fuzz_server_request.c")
+      s2opc_fuzzer(parse_tcp_uri_fuzzer "fuzz_parse_tcp_uri.c")
+      s2opc_fuzzer(decode_fuzzer "fuzz_decoder.c")
+    endif()
+  endif()
+
+  # OSS Fuzzing
+  function(s2opc_oss_fuzzer fuzz_target_name src_file)
+    add_executable(${fuzz_target_name} "${FUZZING_PATH}/${src_file}")
+    target_link_libraries(${fuzz_target_name} s2opc_clientserver $ENV{LIB_FUZZING_ENGINE})
+    target_include_directories(${fuzz_target_name} PRIVATE ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
+    add_dependencies(fuzzers ${fuzz_target_name})
+  endfunction()
+
+  if(WITH_OSS_FUZZ)
+    add_custom_target(fuzzers)
+    s2opc_oss_fuzzer(server_request_fuzzer "fuzz_server_request.c")
+    s2opc_oss_fuzzer(parse_tcp_uri_fuzzer "fuzz_parse_tcp_uri.c")
+    s2opc_oss_fuzzer(decode_fuzzer "fuzz_decoder.c")
+  endif()
+                     
+## S2OPC validation tests ##
+
+# Tests compilation definition #
+
+
+  # Server running local services
+  add_executable(toolkit_test_server_local_service "validation_tests/server/toolkit_test_server_local_service.c"
+                                                   "validation_tests/client/wrap_read.c"
+                                                   "validation_tests/client/testlib_write.c"
+                                                   "validation_tests/client/test_results.c"
+                                                   "validation_tests/client/testlib_read_response.c"
+                                                   ${TEST_LOCAL_TEST_SERVER_ADDRESS_SPACE_C})
+  target_include_directories(toolkit_test_server_local_service PRIVATE "validation_tests/client")
+  target_link_libraries(toolkit_test_server_local_service PRIVATE s2opc_clientserver s2opc_clientserver-loader-embedded)
+  target_compile_options(toolkit_test_server_local_service PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(toolkit_test_server_local_service PRIVATE ${S2OPC_DEFINITIONS})
+  s2opc_unit_test(toolkit_test_server_local_service GENERATE_TAP)
+
   # Client scenario
-  add_executable(toolkit_test_client "services/toolkit_test_client.c"
-                                     "services/wrap_read.c"
-                                     "services/testlib_write.c"
-                                     "services/test_results.c"
-                                     "services/testlib_read_response.c"
+  add_executable(toolkit_test_client "validation_tests/client/toolkit_test_client.c"
+                                     "validation_tests/client/wrap_read.c"
+                                     "validation_tests/client/testlib_write.c"
+                                     "validation_tests/client/test_results.c"
+                                     "validation_tests/client/testlib_read_response.c"
                                      ${TEST_TEST_CLIENT_ADDRESS_SPACE_C})
   target_link_libraries(toolkit_test_client PRIVATE s2opc_clientserver s2opc_clientserver-loader-embedded)
   target_compile_options(toolkit_test_client PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(toolkit_test_client PRIVATE ${S2OPC_DEFINITIONS})
 
   # Client scenario with service faults
-  add_executable(toolkit_test_client_service_faults "services/toolkit_test_client_service_faults.c")
+  add_executable(toolkit_test_client_service_faults "validation_tests/client/toolkit_test_client_service_faults.c")
   target_compile_options(toolkit_test_client_service_faults PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(toolkit_test_client_service_faults PRIVATE ${S2OPC_DEFINITIONS})
   target_link_libraries(toolkit_test_client_service_faults PRIVATE s2opc_clientserver)
@@ -270,10 +320,10 @@ if(ENABLE_TESTING)
   # Reuse code of demo client
   set(S2OPC_CLIENTDEMO_INCLUDES ${S2OPC_ROOT_PATH}/samples/ClientServer/demo_client)
 
-  add_executable(toolkit_test_suite_client "client/test_suite_client.c"
-                                           "client/test_discovery.c"
-                                           "client/wait_machines.c"
-                                           "client/test_session.c"
+  add_executable(toolkit_test_suite_client "validation_tests/client/test_suite_client.c"
+                                           "validation_tests/client/test_discovery.c"
+                                           "validation_tests/client/wait_machines.c"
+                                           "validation_tests/client/test_session.c"
                                            # Use code common with samples
                                            "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_client/config.c"
                                            "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_client/state_machine.c")
@@ -392,7 +442,7 @@ if(ENABLE_TESTING)
     get_filename_component(no_ext_name ${name} NAME_WE) # remove extension to use name for log directory
     set(test_name "validation::${name}")
     add_test(NAME "${test_name}"
-             WORKING_DIRECTORY ${S2OPC_ROOT_PATH}/validation
+             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/interop_tools
              COMMAND
              "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/with-opc-server.py"
              "--server-wd" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
@@ -407,8 +457,8 @@ if(ENABLE_TESTING)
              WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
              COMMAND
              "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/with-opc-server.py"
-             "--server-wd" "${S2OPC_ROOT_PATH}/validation"
-             "--server-cmd" "${PYTHON_EXECUTABLE} ${S2OPC_ROOT_PATH}/validation/server.py 25000"
+             "--server-wd" "${CMAKE_CURRENT_SOURCE_DIR}/interop_tools"
+             "--server-cmd" "${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/interop_tools/server.py 25000"
              "./${name}")
     set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=${name}.tap")
   endfunction()
@@ -442,68 +492,17 @@ if(ENABLE_TESTING)
   s2opc_sc_level_test("SignAndEncrypt_B256Sha256_4096bit_server_vs_2048bit_client" "4096" "encrypt" "B256Sha256" "2048" "4096")
   s2opc_sc_level_test("SignAndEncrypt_B256Sha256_2048bit_server_vs_4096bit_client" "2048" "encrypt" "B256Sha256" "4096" "2048")
 
-## S2OPC fuzzing tests: to be run manually ##
-  
-  set(FUZZING_PATH "fuzzing")
-
-  # Local Fuzzing
-  function(s2opc_fuzzer name src_file)
-    set(standalone_target_name "${name}.standalone")
-    set(fuzz_target_name "${name}.libfuzzer")
-
-    add_executable(${standalone_target_name} "${FUZZING_PATH}/${src_file}" "fuzzing/standalone_fuzzer.c")
-    target_compile_options(${standalone_target_name} PRIVATE ${S2OPC_COMPILER_FLAGS})
-    target_compile_definitions(${standalone_target_name} PRIVATE ${S2OPC_DEFINITIONS})
-    target_link_libraries(${standalone_target_name} s2opc_clientserver)
-    target_include_directories(${standalone_target_name} PRIVATE ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
-    add_dependencies(fuzzers ${standalone_target_name})
-
-    add_executable(${fuzz_target_name} "${FUZZING_PATH}/${src_file}")
-    set_target_properties(${fuzz_target_name} PROPERTIES COMPILE_FLAGS "-fsanitize=fuzzer")
-    set_target_properties(${fuzz_target_name} PROPERTIES LINK_FLAGS "-fsanitize=fuzzer")
-    target_link_libraries(${fuzz_target_name} s2opc_clientserver)
-    target_include_directories(${fuzz_target_name} PRIVATE ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
-    add_dependencies(fuzzers ${fuzz_target_name})
-  endfunction()
-
-  if (NOT WITH_OSS_FUZZ AND "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
-    if (${CMAKE_C_COMPILER_VERSION} VERSION_LESS "6.0.0")
-      # We need at least CLang 6 to get LibFuzzer
-      message(STATUS "Your version of Clang (${CMAKE_C_COMPILER_ID}) is not recent enough to have LibFuzzer")
-    else()
-      add_custom_target(fuzzers)
-      s2opc_fuzzer(server_request_fuzzer "fuzz_server_request.c")
-      s2opc_fuzzer(parse_tcp_uri_fuzzer "fuzz_parse_tcp_uri.c")
-      s2opc_fuzzer(decode_fuzzer "fuzz_decoder.c")
-    endif()
-  endif()
-
-  # OSS Fuzzing
-  function(s2opc_oss_fuzzer fuzz_target_name src_file)
-    add_executable(${fuzz_target_name} "${FUZZING_PATH}/${src_file}")
-    target_link_libraries(${fuzz_target_name} s2opc_clientserver $ENV{LIB_FUZZING_ENGINE})
-    target_include_directories(${fuzz_target_name} PRIVATE ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
-    add_dependencies(fuzzers ${fuzz_target_name})
-  endfunction()
-
-  if(WITH_OSS_FUZZ)
-    add_custom_target(fuzzers)
-    s2opc_oss_fuzzer(server_request_fuzzer "fuzz_server_request.c")
-    s2opc_oss_fuzzer(parse_tcp_uri_fuzzer "fuzz_parse_tcp_uri.c")
-    s2opc_oss_fuzzer(decode_fuzzer "fuzz_decoder.c")
-  endif()
-
 ## S2OPC subscription client library validation tests ##
 
   # Helpers unit tests
-  add_executable(check_libsub "client_wrapper/check_libsub.c")
+  add_executable(check_libsub "validation_tests/client_wrapper/check_libsub.c")
   target_include_directories(check_libsub PRIVATE ${MBEDTLS_INCLUDE_DIRS} ${CHECK_INCLUDE_DIRS})
   target_compile_options(check_libsub PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(check_libsub PRIVATE ${S2OPC_DEFINITIONS})
   target_link_libraries(check_libsub PRIVATE s2opc_clientwrapper ${CHECK_LIBRARIES})
   s2opc_client_validation_test(check_libsub)
 
-  add_executable(check_wrapper "client_wrapper/check_wrapper.c")
+  add_executable(check_wrapper "validation_tests/client_wrapper/check_wrapper.c")
   target_include_directories(check_wrapper PRIVATE ${MBEDTLS_INCLUDE_DIRS} ${CHECK_INCLUDE_DIRS})
   target_compile_options(check_wrapper PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(check_wrapper PRIVATE ${S2OPC_DEFINITIONS})
@@ -517,7 +516,7 @@ if(ENABLE_TESTING)
   # The compilation is not done with clang-analyzer either, as this would analyze CFFI-generated code.
   if(WITH_PYS2OPC)
     set(PYS2OPC_SRC_PATH "${S2OPC_ROOT_PATH}/src/ClientServer/frontend/pys2opc")
-    set(PYS2OPC_TEST_PATH "${S2OPC_ROOT_PATH}/tests/ClientServer/pys2opc")
+    set(PYS2OPC_TEST_PATH "${S2OPC_ROOT_PATH}/tests/ClientServer/validation_tests/pys2opc")
     # Validation test
     function(pys2opc_validation_test name)
       get_filename_component(no_ext_name ${name} NAME_WE) # remove extension to use name for log directory
@@ -531,7 +530,7 @@ if(ENABLE_TESTING)
         "${PYTHON_EXECUTABLE}" "${name}"
         )
       # ASan requires to be the first dynamically linked library to be loaded. This is done with LD_PRELOAD.
-      set(new_env "PYTHONPATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}${ENV_PATH_SEP}${PYS2OPC_SRC_PATH}"
+      set(new_env "PYTHONPATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}${ENV_PATH_SEP}${PYS2OPC_SRC_PATH}${ENV_PATH_SEP}${S2OPC_ROOT_PATH}/tests/ClientServer/interop_tools"
         "LD_LIBRARY_PATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
       if(WITH_ASAN OR WITH_UBSAN OR WITH_TSAN)
         set(new_env ${new_env} "LD_PRELOAD=/usr/local/lib64/libasan.so")

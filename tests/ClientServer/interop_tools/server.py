@@ -57,7 +57,7 @@ if __name__=='__main__':
     server = Server()
     server.set_endpoint(sUri)
 
-    cert_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'samples', 'ClientServer', 'data', 'cert')
+    cert_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..', 'samples', 'ClientServer', 'data', 'cert')
     server.load_certificate(os.path.join(cert_dir, 'server_2k_cert.der'))
     server.load_private_key(os.path.join(cert_dir, 'server_2k_key.pem'))
 
