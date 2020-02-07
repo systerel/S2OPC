@@ -28,8 +28,70 @@ option(ENABLE_SAMPLES "Build the S2OPC library and extention libraries samples" 
 if(ENABLE_SAMPLES)
 
   # Demo server
-  
 
+  # Define a demo XML server configuration
+  set(SERVER_DEMO_CONFIG_XML  "${CMAKE_CURRENT_SOURCE_DIR}/data/config/S2OPC_Server_Demo_Config.xml")
+
+  # Define a demo XML address space configuration
+  if (WITH_NANO_EXTENDED)
+    set(DEMO_ADDRESS_SPACE_XML "${CMAKE_CURRENT_SOURCE_DIR}/data/address_space/s2opc.xml")
+  else()
+    set(DEMO_ADDRESS_SPACE_XML "${CMAKE_CURRENT_SOURCE_DIR}/data/address_space/s2opc_nano.xml")
+  endif()
+
+  # Generate a C structure version of the address space from XML in case of embeded address space
+  # (no XML runtime loading needed when used)
+  set(DEMO_SERVER_ADDRESS_SPACE_C "demo_server_address_space.c")
+  s2opc_embed_address_space(${DEMO_SERVER_ADDRESS_SPACE_C} ${DEMO_ADDRESS_SPACE_XML})
+  
+  # Manage the Nano profiles extended mode
+  if (WITH_NANO_EXTENDED)
+    set(TOOLKIT_DEMO_SERVER "toolkit_demo_server")
+  else()
+    set(TOOLKIT_DEMO_SERVER "toolkit_demo_nano_server")
+  endif()
+
+  add_executable(${TOOLKIT_DEMO_SERVER}
+                 "demo_server/runtime_variables.c"
+                 "demo_server/toolkit_demo_server.c"
+                 ${DEMO_SERVER_ADDRESS_SPACE_C})
+  target_link_libraries(${TOOLKIT_DEMO_SERVER} PRIVATE s2opc_clientserver s2opc_clientserver-loader-embedded)
+  target_compile_options(${TOOLKIT_DEMO_SERVER} PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(${TOOLKIT_DEMO_SERVER} PRIVATE ${S2OPC_DEFINITIONS}) 
+
+  if (EXPAT_FOUND)
+    target_link_libraries(${TOOLKIT_DEMO_SERVER} PRIVATE s2opc_clientserver-xml-loaders-expat)
+    target_compile_definitions(${TOOLKIT_DEMO_SERVER} PRIVATE "WITH_EXPAT")
+  endif()
+
+  if (WITH_STATIC_SECURITY_DATA)
+    target_compile_definitions(${TOOLKIT_DEMO_SERVER} PRIVATE "WITH_STATIC_SECURITY_DATA")
+  endif()
+
+  add_custom_command(
+    TARGET ${TOOLKIT_DEMO_SERVER} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${SERVER_DEMO_CONFIG_XML} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}    
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/trusted
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/issued
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/untrusted
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/revoked
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/client_private
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_private
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/client_public
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_public
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/cacert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/trusted/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/cacrl.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/revoked/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/client_2k_key.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/client_private/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/client_2k_cert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/client_public/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/server_2k_key.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_private/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/server_2k_cert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_public/
+    # Add 4096 client / server keys
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/client_4k_key.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/client_private/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/client_4k_cert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/client_public/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/server_4k_key.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_private/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/server_4k_cert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_public/
+    )
+  
   # Demo clients (S2OPC only without extension)
   add_executable(s2opc_browse "demo_client/s2opc_browse.c"
                               "demo_client/state_machine.c"

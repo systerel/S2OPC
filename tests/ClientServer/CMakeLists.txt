@@ -81,22 +81,22 @@ if(ENABLE_TESTING)
   endfunction()
 
   set(TEST_CONFIG_XML              "${CMAKE_CURRENT_SOURCE_DIR}/data/config/S2OPC_Test_XML_Config.xml")
-  set(TEST_SERVER_DEMO_CONFIG_XML  "${CMAKE_CURRENT_SOURCE_DIR}/data/config/S2OPC_Server_Demo_Config.xml")
   set(TEST_SERVER_UACTT_CONFIG_XML "${CMAKE_CURRENT_SOURCE_DIR}/data/config/S2OPC_Server_UACTT_Config.xml")
 
   if (WITH_NANO_EXTENDED)
-    set(TEST_ADDRESS_SPACE_XML "${CMAKE_CURRENT_SOURCE_DIR}/data/address_space/s2opc.xml")
+    set(TEST_ADDRESS_SPACE_XML "${S2OPC_ROOT_PATH}/samples/ClientServer/data/address_space/s2opc.xml")
   else()
-    set(TEST_ADDRESS_SPACE_XML "${CMAKE_CURRENT_SOURCE_DIR}/data/address_space/s2opc_nano.xml")
+    set(TEST_ADDRESS_SPACE_XML "${S2OPC_ROOT_PATH}/samples/ClientServer/data/address_space/s2opc_nano.xml")
   endif()
   set(TEST_CHECK_HELPERS_ADDRESS_SPACE_C "check_helpers_address_space.c")
-  set(TEST_DEMO_SERVER_ADDRESS_SPACE_C "demo_server_address_space.c")
-  set(TEST_LOCAL_DEMO_SERVER_ADDRESS_SPACE_C "local_demo_server_test_address_space.c")
-  set(TEST_DEMO_CLIENT_ADDRESS_SPACE_C "demo_client_address_space.c")
+  set(TEST_TEST_SERVER_ADDRESS_SPACE_C "test_server_address_space.c")
+  set(TEST_LOCAL_TEST_SERVER_ADDRESS_SPACE_C "local_test_server_test_address_space.c")
+  set(TEST_TEST_CLIENT_ADDRESS_SPACE_C "test_client_address_space.c")
+  # Note: duplication of generated address space due to concurrency issues when compiling with "-j <N>"
   s2opc_embed_address_space(${TEST_CHECK_HELPERS_ADDRESS_SPACE_C} ${TEST_ADDRESS_SPACE_XML})
-  s2opc_embed_address_space(${TEST_DEMO_SERVER_ADDRESS_SPACE_C} ${TEST_ADDRESS_SPACE_XML})
-  s2opc_embed_address_space(${TEST_LOCAL_DEMO_SERVER_ADDRESS_SPACE_C} ${TEST_ADDRESS_SPACE_XML})
-  s2opc_embed_address_space(${TEST_DEMO_CLIENT_ADDRESS_SPACE_C} ${TEST_ADDRESS_SPACE_XML})
+  s2opc_embed_address_space(${TEST_TEST_SERVER_ADDRESS_SPACE_C} ${TEST_ADDRESS_SPACE_XML})
+  s2opc_embed_address_space(${TEST_LOCAL_TEST_SERVER_ADDRESS_SPACE_C} ${TEST_ADDRESS_SPACE_XML})
+  s2opc_embed_address_space(${TEST_TEST_CLIENT_ADDRESS_SPACE_C} ${TEST_ADDRESS_SPACE_XML})
 
 ## S2OPC unit tests ##
 
@@ -126,7 +126,6 @@ if(ENABLE_TESTING)
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/logger/logTest.ref2 ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/logger/logTest.ref3 ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     COMMAND ${CMAKE_COMMAND} -E copy ${TEST_CONFIG_XML} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-    COMMAND ${CMAKE_COMMAND} -E copy ${TEST_SERVER_DEMO_CONFIG_XML} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     COMMAND ${CMAKE_COMMAND} -E copy ${TEST_SERVER_UACTT_CONFIG_XML} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     COMMAND ${CMAKE_COMMAND} -E copy ${TEST_ADDRESS_SPACE_XML} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
@@ -199,7 +198,7 @@ if(ENABLE_TESTING)
                                                    "services/testlib_write.c"
                                                    "services/test_results.c"
                                                    "services/testlib_read_response.c"
-                                                   ${TEST_LOCAL_DEMO_SERVER_ADDRESS_SPACE_C})
+                                                   ${TEST_LOCAL_TEST_SERVER_ADDRESS_SPACE_C})
   target_link_libraries(toolkit_test_server_local_service PRIVATE s2opc_clientserver s2opc_clientserver-loader-embedded)
   target_compile_options(toolkit_test_server_local_service PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(toolkit_test_server_local_service PRIVATE ${S2OPC_DEFINITIONS})
@@ -255,7 +254,7 @@ if(ENABLE_TESTING)
                                      "services/testlib_write.c"
                                      "services/test_results.c"
                                      "services/testlib_read_response.c"
-                                     ${TEST_DEMO_CLIENT_ADDRESS_SPACE_C})
+                                     ${TEST_TEST_CLIENT_ADDRESS_SPACE_C})
   target_link_libraries(toolkit_test_client PRIVATE s2opc_clientserver s2opc_clientserver-loader-embedded)
   target_compile_options(toolkit_test_client PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(toolkit_test_client PRIVATE ${S2OPC_DEFINITIONS})
@@ -290,9 +289,9 @@ if(ENABLE_TESTING)
   endif()
 
   add_executable(${TOOLKIT_TEST_SERVER}
-                 "services/runtime_variables.c"
-                 "services/toolkit_test_server.c"
-                 ${TEST_DEMO_SERVER_ADDRESS_SPACE_C})
+                 "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_server/runtime_variables.c"
+                 "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_server/toolkit_demo_server.c"
+                 ${TEST_TEST_SERVER_ADDRESS_SPACE_C})
   target_link_libraries(${TOOLKIT_TEST_SERVER} PRIVATE s2opc_clientserver s2opc_clientserver-loader-embedded)
   target_compile_options(${TOOLKIT_TEST_SERVER} PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(${TOOLKIT_TEST_SERVER} PRIVATE ${S2OPC_DEFINITIONS}) 
@@ -316,17 +315,17 @@ if(ENABLE_TESTING)
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_private
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/client_public
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_public
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/cacert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/trusted/
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/cacrl.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/revoked/
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/client_2k_key.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/client_private/
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/client_2k_cert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/client_public/
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/server_2k_key.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_private/
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/server_2k_cert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_public/
+    COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/cacert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/trusted/
+    COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/cacrl.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/revoked/
+    COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/client_2k_key.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/client_private/
+    COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/client_2k_cert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/client_public/
+    COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/server_2k_key.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_private/
+    COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/server_2k_cert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_public/
     # Add 4096 client / server keys
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/client_4k_key.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/client_private/
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/client_4k_cert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/client_public/
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/server_4k_key.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_private/
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/server_4k_cert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_public/
+    COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/client_4k_key.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/client_private/
+    COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/client_4k_cert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/client_public/
+    COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/server_4k_key.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_private/
+    COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/server_4k_cert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_public/
     # Add UaCTT CAs / CRLs
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/ApplicationInstance_PKI/trusted/certs/ctt_ca1T.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/trusted
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/ApplicationInstance_PKI/trusted/certs/ctt_ca1TC.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/trusted

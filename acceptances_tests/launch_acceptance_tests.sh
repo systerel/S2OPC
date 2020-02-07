@@ -37,7 +37,7 @@ SKIPPED_TESTS_FILE=skipped_tests.cfg
 KNOWN_BUGS_FILES=known_bugs.cfg
 
 S2OPC_UACTT_CONFIG=Acceptation_S2OPC
-S2OPC_CERTS_CONFIG=../tests/ClientServer/data/cert
+S2OPC_CERTS_CONFIG=../samples/ClientServer/data/cert
 UACTT_PROJECT_PATH=/UACTT_project
 
 if [[ -z "$WITH_NANO_EXTENDED" ]] || [[ $WITH_NANO_EXTENDED -eq  0 ]]
