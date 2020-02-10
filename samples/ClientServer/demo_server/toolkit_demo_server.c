@@ -61,49 +61,65 @@ static char* default_app_namespace_uris[] = {DEFAULT_PRODUCT_URI, DEFAULT_PRODUC
 static char* default_locale_ids[] = {"en-US", "fr-FR", NULL};
 
 static char* default_trusted_root_issuers[] = {
+    "trusted/cacert.der", /* Demo CA */
+#ifdef IS_TEST_SERVER
     "trusted/ctt_ca1TC.der", /* Will be ignored because no CRL associated. Tests 042, 043 */
-    "trusted/cacert.der",    /* Demo CA */
     "trusted/ctt_ca1T.der",  /* Tests 029, 037 */
+#endif
     NULL};
-static char* default_trusted_intermediate_issuers[] = {"trusted/ctt_ca1I_ca2T.der", NULL};
-static char* default_issued_certs[] = {"issued/ctt_appT.der",  /* Test 048 */
-                                       "issued/ctt_appTE.der", /* Test 007 */
-                                       "issued/ctt_appTSha1_1024.der",
-                                       "issued/ctt_appTSha1_2048.der",
-                                       "issued/ctt_appTSha256_2048.der", /* Test 051 */
-                                       "issued/ctt_appTSha256_4096.der", /* Test 052 still fails */
-                                       "issued/ctt_appTSincorrect.der",  /* Test 010 */
-                                       "issued/ctt_appTSip.der",
-                                       "issued/ctt_appTSuri.der",
-                                       "issued/ctt_appTV.der",     /* Test 008 */
-                                       "issued/ctt_ca1I_appT.der", /* Test 044 */
-                                       "issued/ctt_ca1I_appTR.der",
-                                       "issued/ctt_ca1I_ca2T_appT.der",
-                                       "issued/ctt_ca1I_ca2T_appTR.der",
-                                       "issued/ctt_ca1IC_appT.der",
-                                       "issued/ctt_ca1IC_appTR.der",
-                                       "issued/ctt_ca1T_appT.der",
-                                       "issued/ctt_ca1T_appTR.der",
-                                       "issued/ctt_ca1T_ca2U_appT.der",
-                                       "issued/ctt_ca1T_ca2U_appTR.der",
-                                       "issued/ctt_ca1TC_appT.der",
-                                       "issued/ctt_ca1TC_appTR.der",
-                                       "issued/ctt_ca1TC_ca2I_appT.der", /* Test 002 */
-                                       "issued/ctt_ca1TC_ca2I_appTR.der",
-                                       "issued/ctt_ca1U_appT.der", /* Test 046 */
-                                       "issued/ctt_ca1U_appTR.der",
-                                       NULL};
+static char* default_trusted_intermediate_issuers[] = {
+#ifdef IS_TEST_SERVER
+    "trusted/ctt_ca1I_ca2T.der",
+#endif
+    NULL};
+static char* default_issued_certs[] = {
+#ifdef IS_TEST_SERVER
+    "issued/ctt_appT.der",  /* Test 048 */
+    "issued/ctt_appTE.der", /* Test 007 */
+    "issued/ctt_appTSha1_1024.der",
+    "issued/ctt_appTSha1_2048.der",
+    "issued/ctt_appTSha256_2048.der", /* Test 051 */
+    "issued/ctt_appTSha256_4096.der", /* Test 052 still fails */
+    "issued/ctt_appTSincorrect.der",  /* Test 010 */
+    "issued/ctt_appTSip.der",
+    "issued/ctt_appTSuri.der",
+    "issued/ctt_appTV.der",     /* Test 008 */
+    "issued/ctt_ca1I_appT.der", /* Test 044 */
+    "issued/ctt_ca1I_appTR.der",
+    "issued/ctt_ca1I_ca2T_appT.der",
+    "issued/ctt_ca1I_ca2T_appTR.der",
+    "issued/ctt_ca1IC_appT.der",
+    "issued/ctt_ca1IC_appTR.der",
+    "issued/ctt_ca1T_appT.der",
+    "issued/ctt_ca1T_appTR.der",
+    "issued/ctt_ca1T_ca2U_appT.der",
+    "issued/ctt_ca1T_ca2U_appTR.der",
+    "issued/ctt_ca1TC_appT.der",
+    "issued/ctt_ca1TC_appTR.der",
+    "issued/ctt_ca1TC_ca2I_appT.der", /* Test 002 */
+    "issued/ctt_ca1TC_ca2I_appTR.der",
+    "issued/ctt_ca1U_appT.der", /* Test 046 */
+    "issued/ctt_ca1U_appTR.der",
+#endif
+    NULL};
 static char* default_untrusted_root_issuers[] = {
+#ifdef IS_TEST_SERVER
     "untrusted/ctt_ca1IC.der", /* Will be ignored because no CRL associated */
     "untrusted/ctt_ca1I.der",  /* Test 044 */
+#endif
     NULL};
-static char* default_untrusted_intermediate_issuers[] = {"untrusted/ctt_ca1TC_ca2I.der", /* Test 002 */
-                                                         NULL};
+static char* default_untrusted_intermediate_issuers[] = {
+#ifdef IS_TEST_SERVER
+    "untrusted/ctt_ca1TC_ca2I.der", /* Test 002 */
+#endif
+    NULL};
 static char* default_revoked_certs[] = {"revoked/cacrl.der",
+#ifdef IS_TEST_SERVER
                                         "revoked/revocation_list_ctt_ca1T.crl",
                                         "revoked/revocation_list_ctt_ca1I.crl",
                                         "revoked/revocation_list_ctt_ca1I_ca2T.crl",
                                         "revoked/revocation_list_ctt_ca1TC_ca2I.crl",
+#endif
                                         NULL};
 
 static int32_t endpointClosed = 0;
