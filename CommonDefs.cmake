@@ -18,7 +18,11 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 ### Common dependencies ###
 
-find_package(EXPAT) # if not found XML loaders will not be compiled
+if(S2OPC_CLIENTSERVER_ONLY)
+  find_package(EXPAT) # if not found XML loaders will not be compiled
+else()
+  find_package(EXPAT REQUIRED)
+endif()
 
 ### Define default S2OPC compilation flags for several compilers ###
 
