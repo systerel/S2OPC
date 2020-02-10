@@ -115,9 +115,11 @@ generation:
   artifacts:
     name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
     paths:
+      - '*.log'
       - 'install_linux64/'
       - 'build/'  # Required when using coverage analysis
     expire_in: '1 month'
+    when: always
   rules: # note: to be repeated in each job using .build-linux
     - if: "$WINDOWS_TEST == null && $CROSS_COMPILE == null && $WITH_COVERITY == null"
       when: on_success
