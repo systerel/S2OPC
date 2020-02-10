@@ -265,11 +265,25 @@ if(ENABLE_TESTING)
     s2opc_oss_fuzzer(parse_tcp_uri_fuzzer "fuzz_parse_tcp_uri.c")
     s2opc_oss_fuzzer(decode_fuzzer "fuzz_decoder.c")
   endif()
-                     
+
 ## S2OPC validation tests ##
 
 # Tests compilation definition #
 
+
+  # Client/Server test
+  add_executable(toolkit_test_server_client
+      "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_server/runtime_variables.c"
+      "validation_tests/client/toolkit_test_server_client.c"
+      ${TEST_SERVER_ADDRESS_SPACE_C})
+  target_link_libraries(toolkit_test_server_client PRIVATE
+    s2opc_clientserver
+    s2opc_clientserver-loader-embedded
+    Check::check)
+  target_include_directories(toolkit_test_server_client PRIVATE "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_server/")
+  target_compile_options(toolkit_test_server_client PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(toolkit_test_server_client PRIVATE ${S2OPC_DEFINITIONS})
+  s2opc_unit_test(toolkit_test_server_client GENERATE_TAP)
 
   # Server running local services
   add_executable(toolkit_test_server_local_service "validation_tests/server/toolkit_test_server_local_service.c"
@@ -403,7 +417,7 @@ if(ENABLE_TESTING)
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/ApplicationInstance_PKI/trusted/certs/ctt_ca1U_appT.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/issued
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/ApplicationInstance_PKI/trusted/certs/ctt_ca1U_appTR.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/issued
     )
-  
+
 # Tests run definition #
 
   #Note: use absolute path for scripts to allow ctest to be run from another another path
@@ -417,7 +431,7 @@ if(ENABLE_TESTING)
            "--server-cmd" $<TARGET_FILE:${TOOLKIT_TEST_SERVER}>
            $<TARGET_FILE:toolkit_test_client>)
   set_tests_properties("validation::client_server_test" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=client_server_test.tap")
-  
+
   add_test(NAME "validation::client_service_faults_test"
            WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
            COMMAND
@@ -530,5 +544,5 @@ if(ENABLE_TESTING)
 
     pys2opc_validation_test("pys2opc_client.py")
   endif()
-  
+
 endif(ENABLE_TESTING)

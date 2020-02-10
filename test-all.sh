@@ -49,6 +49,7 @@ secure_channel_level_SignAndEncrypt_B256Sha256_4096bit_server_vs_2048bit_client.
 secure_channel_level_Sign_B256Sha256_2048bit.tap
 secure_channel_level_Sign_B256_2048bit.tap
 session_timeout.tap
+toolkit_test_server_client.tap
 toolkit_test_server_local_service.tap
 toolkit_test_suite_client.tap
 validation.tap'
