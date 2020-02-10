@@ -79,3 +79,8 @@ SOPC_FileSystem_RemoveResult SOPC_FileSystem_rmdir(const char* directoryPath)
         return SOPC_FileSystem_Remove_Error_UnknownIssue;
     }
 }
+
+FILE* SOPC_FileSystem_fmemopen(void* buf, size_t size, const char* opentype)
+{
+    return fmemopen(buf, size, opentype);
+}

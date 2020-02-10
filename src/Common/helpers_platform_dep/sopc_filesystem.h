@@ -71,4 +71,7 @@ SOPC_FileSystem_CreationResult SOPC_FileSystem_mkdir(const char* directoryPath);
  */
 SOPC_FileSystem_RemoveResult SOPC_FileSystem_rmdir(const char* directoryPath);
 
+/* TODO: implement for other systems than Linux */
+FILE* SOPC_FileSystem_fmemopen(void* buf, size_t size, const char* opentype);
+
 #endif // SOPC_FILESYSTEM_H_
