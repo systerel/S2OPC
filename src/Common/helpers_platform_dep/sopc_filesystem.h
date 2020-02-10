@@ -26,6 +26,8 @@
 #ifndef SOPC_FILESYSTEM_H_
 #define SOPC_FILESYSTEM_H_
 
+#include <stdio.h>
+
 typedef enum
 {
     SOPC_FileSystem_Creation_OK = 0,
