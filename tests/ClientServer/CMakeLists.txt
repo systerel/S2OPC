@@ -86,14 +86,14 @@ if(ENABLE_TESTING)
     set(TEST_ADDRESS_SPACE_XML "${S2OPC_ROOT_PATH}/samples/ClientServer/data/address_space/s2opc_nano.xml")
   endif()
   set(TEST_CHECK_HELPERS_ADDRESS_SPACE_C "check_helpers_address_space.c")
-  set(TEST_TEST_SERVER_ADDRESS_SPACE_C "test_server_address_space.c")
+  set(TEST_SERVER_ADDRESS_SPACE_C "test_server_address_space.c")
   set(TEST_LOCAL_TEST_SERVER_ADDRESS_SPACE_C "local_test_server_test_address_space.c")
-  set(TEST_TEST_CLIENT_ADDRESS_SPACE_C "test_client_address_space.c")
+  set(TEST_CLIENT_ADDRESS_SPACE_C "test_client_address_space.c")
   # Note: duplication of generated address space due to concurrency issues when compiling with "-j <N>"
   s2opc_embed_address_space(${TEST_CHECK_HELPERS_ADDRESS_SPACE_C} ${TEST_ADDRESS_SPACE_XML})
-  s2opc_embed_address_space(${TEST_TEST_SERVER_ADDRESS_SPACE_C} ${TEST_ADDRESS_SPACE_XML})
+  s2opc_embed_address_space(${TEST_SERVER_ADDRESS_SPACE_C} ${TEST_ADDRESS_SPACE_XML})
   s2opc_embed_address_space(${TEST_LOCAL_TEST_SERVER_ADDRESS_SPACE_C} ${TEST_ADDRESS_SPACE_XML})
-  s2opc_embed_address_space(${TEST_TEST_CLIENT_ADDRESS_SPACE_C} ${TEST_ADDRESS_SPACE_XML})
+  s2opc_embed_address_space(${TEST_CLIENT_ADDRESS_SPACE_C} ${TEST_ADDRESS_SPACE_XML})
 
 ## S2OPC unit tests ##
 
@@ -304,7 +304,7 @@ if(ENABLE_TESTING)
                                      "validation_tests/client/testlib_write.c"
                                      "validation_tests/client/test_results.c"
                                      "validation_tests/client/testlib_read_response.c"
-                                     ${TEST_TEST_CLIENT_ADDRESS_SPACE_C})
+                                     ${TEST_CLIENT_ADDRESS_SPACE_C})
   target_link_libraries(toolkit_test_client PRIVATE s2opc_clientserver s2opc_clientserver-loader-embedded)
   target_compile_options(toolkit_test_client PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(toolkit_test_client PRIVATE ${S2OPC_DEFINITIONS})
@@ -341,7 +341,7 @@ if(ENABLE_TESTING)
   add_executable(${TOOLKIT_TEST_SERVER}
                  "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_server/runtime_variables.c"
                  "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_server/toolkit_demo_server.c"
-                 ${TEST_TEST_SERVER_ADDRESS_SPACE_C})
+                 ${TEST_SERVER_ADDRESS_SPACE_C})
   target_link_libraries(${TOOLKIT_TEST_SERVER} PRIVATE s2opc_clientserver s2opc_clientserver-loader-embedded)
   target_compile_options(${TOOLKIT_TEST_SERVER} PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(${TOOLKIT_TEST_SERVER} PRIVATE ${S2OPC_DEFINITIONS}) 
