@@ -186,7 +186,7 @@ if(ENABLE_SAMPLES)
   # TODO: XML parsing demo: make a unit test / validation test with it instead of demo
   if (EXPAT_FOUND)
     add_executable(s2opc_parse_uanodeset "loaders/s2opc_parse_uanodeset.c")
-    target_link_libraries(s2opc_parse_uanodeset PRIVATE s2opc_clientserver s2opc_clientserver-xml-loaders-expat)
+    target_link_libraries(s2opc_parse_uanodeset PRIVATE s2opc_clientserver-xml-loaders-expat)
     target_compile_options(s2opc_parse_uanodeset PRIVATE ${S2OPC_COMPILER_FLAGS})
     target_compile_definitions(s2opc_parse_uanodeset PRIVATE ${S2OPC_DEFINITIONS})
   endif()

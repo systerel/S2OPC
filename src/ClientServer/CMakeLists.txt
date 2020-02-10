@@ -101,14 +101,29 @@ export(EXPORT s2opc_clientserver-export
 add_library(s2opc_clientserver-loader-embedded STATIC loaders/address_space_loaders/embedded/sopc_addspace_loader.c)
 target_compile_options(s2opc_clientserver-loader-embedded PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(s2opc_clientserver-loader-embedded PRIVATE ${S2OPC_DEFINITIONS})
-target_link_libraries(s2opc_clientserver-loader-embedded PRIVATE s2opc_clientserver)
-target_include_directories(s2opc_clientserver-loader-embedded PUBLIC "loaders/address_space_loaders")
+target_link_libraries(s2opc_clientserver-loader-embedded PUBLIC s2opc_clientserver)
+target_include_directories(s2opc_clientserver-loader-embedded
+  PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/loaders/address_space_loaders>
+  $<INSTALL_INTERFACE:include}> # when installed
+  )
 set_target_properties(s2opc_clientserver-loader-embedded PROPERTIES PUBLIC_HEADER "loaders/address_space_loaders/embedded/sopc_addspace_loader.h")
 install(TARGETS s2opc_clientserver-loader-embedded
+        EXPORT s2opc_clientserver-loader-embedded-export # export our project to be importable after install
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
         PUBLIC_HEADER DESTINATION "include/embedded")
 
+# install the export as a cmake file
+install(EXPORT s2opc_clientserver-loader-embedded-export
+  FILE s2opc_clientserver-loader-embedded-export.cmake
+  DESTINATION cmake)
+
+# export cmake file for use in build tree without install
+export(EXPORT s2opc_clientserver-loader-embedded-export
+  FILE "${CMAKE_BINARY_DIR}/s2opc_clientserver-loader-embedded-export.cmake"
+  )
+   
 # XML addresss space loader and XML server configuration loader
 if (EXPAT_FOUND)
   message("-- Expat library found: XML config loaders compilation active")
@@ -117,18 +132,34 @@ if (EXPAT_FOUND)
                                              loaders/config_loaders/xml_expat/sopc_config_loader.c)
   target_compile_options(s2opc_clientserver-xml-loaders-expat PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(s2opc_clientserver-xml-loaders-expat PRIVATE ${S2OPC_DEFINITIONS} "UANODESET_LOADER_LOG")
-  target_link_libraries(s2opc_clientserver-xml-loaders-expat PUBLIC ${EXPAT_LIBRARIES} PRIVATE s2opc_clientserver)
-  target_include_directories(s2opc_clientserver-xml-loaders-expat PRIVATE ${EXPAT_INCLUDE_DIRS}
-                             PUBLIC "loaders/address_space_loaders"
-                                    "loaders/config_loaders"
-                                    "loaders/helpers")
+  target_link_libraries(s2opc_clientserver-xml-loaders-expat PUBLIC ${EXPAT_LIBRARIES} s2opc_clientserver)
+  set(S2OPC_XML_LOADERS_PUBLIC_INCLUDES
+      "${CMAKE_CURRENT_SOURCE_DIR}/loaders/address_space_loaders"
+      "${CMAKE_CURRENT_SOURCE_DIR}/loaders/config_loaders"
+      )
+  target_include_directories(s2opc_clientserver-xml-loaders-expat
+                             PUBLIC
+                             "$<BUILD_INTERFACE:${S2OPC_XML_LOADERS_PUBLIC_INCLUDES}>"
+                             $<INSTALL_INTERFACE:include}> # when installed
+                             PRIVATE ${EXPAT_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/loaders/helpers)
   set_property(TARGET s2opc_clientserver-xml-loaders-expat PROPERTY
                PUBLIC_HEADER "loaders/address_space_loaders/xml_expat/sopc_uanodeset_loader.h"
                              "loaders/config_loaders/xml_expat/sopc_config_loader.h")
   install(TARGETS s2opc_clientserver-xml-loaders-expat
+          EXPORT s2opc_clientserver-xml-loaders-expat-export # export our project to be importable after install
           LIBRARY DESTINATION lib
           ARCHIVE DESTINATION lib
           PUBLIC_HEADER DESTINATION "include/xml_expat")
+
+  # install the export as a cmake file
+  install(EXPORT s2opc_clientserver-xml-loaders-expat-export
+          FILE s2opc_clientserver-xml-loaders-expat-export.cmake
+          DESTINATION cmake)
+
+  # export cmake file for use in build tree without install
+  export(EXPORT s2opc_clientserver-xml-loaders-expat-export
+         FILE "${CMAKE_BINARY_DIR}/s2opc_clientserver-xml-loaders-expat-export.cmake"
+         )      
 else()
   message("-- Expat library NOT found: XML config loaders will not be available")
 endif()
@@ -146,13 +177,28 @@ add_library(s2opc_clientwrapper "${LIBSUBSCRIBE_PATH}/libs2opc_client.c"
 target_link_libraries(s2opc_clientwrapper PUBLIC s2opc_clientserver)
 target_compile_options(s2opc_clientwrapper PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(s2opc_clientwrapper PRIVATE ${S2OPC_DEFINITIONS})
-target_include_directories(s2opc_clientwrapper PUBLIC ${LIBSUBSCRIBE_PATH}) # TODO: separate PUBLIC / PRIVATE
+target_include_directories(s2opc_clientwrapper
+  PUBLIC # TODO: separate PUBLIC / PRIVATE
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${LIBSUBSCRIBE_PATH}>"
+  $<INSTALL_INTERFACE:include}> # when installed
+  )
+
 set_target_properties(s2opc_clientwrapper PROPERTIES PUBLIC_HEADER "${LIBSUBSCRIBE_PATH}/libs2opc_client.h")
 install(TARGETS s2opc_clientwrapper
+        EXPORT s2opc_clientserver-clientwrapper-export # export our project to be importable after install
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
         PUBLIC_HEADER DESTINATION include)
 
+# install the export as a cmake file
+install(EXPORT s2opc_clientserver-clientwrapper-export
+        FILE s2opc_clientserver-clientwrapper-export.cmake
+        DESTINATION cmake)
+
+# export cmake file for use in build tree without install
+export(EXPORT s2opc_clientserver-clientwrapper-export
+       FILE "${CMAKE_BINARY_DIR}/s2opc_clientserver-clientwrapper-export.cmake")
+      
 ## PyS2OPC library: Python 3 binding for S2OPC client ##
 
 # The library is built by python. It may use the shared library but it must not be built with ASan.
