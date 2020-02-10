@@ -17,14 +17,17 @@
  * under the License.
  */
 
-#ifndef _sopc_toolkit_build_info_h
-#define _sopc_toolkit_build_info_h
-#include "sopc_user_app_itf.h"
+#include "sopc_common_build_info.h"
 #include "sopc_version.h"
-const SOPC_Build_Info toolkit_build_info = {
+
+const SOPC_Build_Info sopc_common_build_info = {
     .toolkitVersion = SOPC_TOOLKIT_VERSION,
     .toolkitSrcCommit = "ECLIPSE BUILD",
     .toolkitDockerId = "",
     .toolkitBuildDate = "2019-05-29+",
 };
-#endif
+
+SOPC_Build_Info SOPC_Common_GetBuildInfo()
+{
+    return sopc_common_build_info;
+}
