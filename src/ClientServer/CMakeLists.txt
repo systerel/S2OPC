@@ -76,8 +76,6 @@ install(TARGETS s2opc_clientserver
         ARCHIVE DESTINATION lib
         PUBLIC_HEADER DESTINATION include)
 
-install(FILES ${S2OPC_ROOT_PATH}/scripts/generate-s2opc-address-space.py DESTINATION bin)
-
 # install the export as a cmake file
 install(EXPORT s2opc_clientserver-export
   FILE s2opc_clientserver-export.cmake

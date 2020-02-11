@@ -37,3 +37,11 @@ install(FILES
   ${S2OPC_ROOT_PATH}/CMake/FindCheck.cmake
   DESTINATION cmake
   )
+
+# install the common S2OPC tool scripts
+install(FILES
+  ${S2OPC_ROOT_PATH}/scripts/generate-s2opc-address-space.py
+  ${S2OPC_ROOT_PATH}/scripts/generate-s2opc_pubsub-static-config.py
+  ${S2OPC_ROOT_PATH}/scripts/gen-reciprocal-refs-address-space.xslt
+  DESTINATION bin
+  )
