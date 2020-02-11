@@ -52,14 +52,23 @@ emailAddress        = optional
 # Even if most of these parameters are already stored in the .csr,
 # and copy_extensions is set to "copy",
 # they must be repeated, as they are not copied from the .csr...
+# And this changes between "openssl ca" which doesn't need subjectAltName,
+#  but "openssl x509" does...
 [ client_signing_req ]
 subjectKeyIdentifier = hash
 authorityKeyIdentifier = keyid:always,issuer
 keyUsage = nonRepudiation, digitalSignature, keyEncipherment, dataEncipherment
 extendedKeyUsage = clientAuth
+subjectAltName = @alternate_names
 
 [ server_signing_req ]
 subjectKeyIdentifier = hash
 authorityKeyIdentifier = keyid:always,issuer
 keyUsage = nonRepudiation, digitalSignature, keyEncipherment, dataEncipherment
 extendedKeyUsage = serverAuth
+subjectAltName = @alternate_names
+
+[ alternate_names ]
+URI     = urn:S2OPC:localhost  # ApplicationUri
+DNS.1   = localhost
+
