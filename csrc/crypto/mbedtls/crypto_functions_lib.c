@@ -546,7 +546,7 @@ SOPC_ReturnStatus CryptoProvider_AsymSign_RSASSA_PKCS1_v15_w_SHA256(const SOPC_C
 {
     uint8_t* hash = NULL;
     const mbedtls_md_info_t* pmd_info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256); // Hash the message with SHA-256
-    uint32_t sigLength = 0; /* TPM2: sig length was asserted up in the calls, but it's required for pk_sign */
+    size_t sigLength = 0; /* TPM2: sig length was asserted up in the calls, but it's required for pk_sign */
 
     //SOPC_ReturnStatus status =  SOPC_CryptoProvider_AsymmetricGetLength_Signature(pProvider, pKey, &sigLength);
     //assert(SOPC_STATUS_OK == status);
@@ -559,7 +559,7 @@ SOPC_ReturnStatus CryptoProvider_AsymSign_RSASSA_PKCS1_v15_w_SHA256(const SOPC_C
     {
         // Sets the appropriate padding mode (no hash-id for PKCS_V15)
         /* TODO: TPM2 MBEDTLS_RSA_PKCS_V15, 0 */
-        int res = mbedtls_pk_sign(pk, MBEDTLS_MD_SHA256, hash, 32, pSignature, (size_t *) &sigLength,
+        int res = mbedtls_pk_sign(pk, MBEDTLS_MD_SHA256, hash, 32, pSignature, &sigLength,
                                   mbedtls_ctr_drbg_random, &pProvider->pCryptolibContext->ctxDrbg);
         if(0 != res)
         {
@@ -717,7 +717,7 @@ SOPC_ReturnStatus CryptoProvider_AsymSign_RSASSA_PKCS1_v15_w_SHA1(const SOPC_Cry
 {
     uint8_t* hash = NULL;
     const mbedtls_md_info_t* pmd_info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA1);
-    uint32_t sigLength = 0; /* TPM2: sig length was asserted up in the calls, but it's required for pk_sign */
+    size_t sigLength = 0; /* TPM2: sig length was asserted up in the calls, but it's required for pk_sign */
 
     //SOPC_ReturnStatus status =  SOPC_CryptoProvider_AsymmetricGetLength_Signature(pProvider, pKey, &sigLength);
     //assert(SOPC_STATUS_OK == status);
@@ -730,7 +730,7 @@ SOPC_ReturnStatus CryptoProvider_AsymSign_RSASSA_PKCS1_v15_w_SHA1(const SOPC_Cry
     {
         // Sets the appropriate padding mode (no hash-id for PKCS_V15)
         /* TODO: TPM2 MBEDTLS_RSA_PKCS_V15, 0 */
-        int res = mbedtls_pk_sign(pk, MBEDTLS_MD_SHA1, hash, 20, pSignature, (size_t *)&sigLength,
+        int res = mbedtls_pk_sign(pk, MBEDTLS_MD_SHA1, hash, 20, pSignature, &sigLength,
                                   mbedtls_ctr_drbg_random, &pProvider->pCryptolibContext->ctxDrbg);
         if(0 != res)
         {
