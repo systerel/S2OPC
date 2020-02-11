@@ -576,7 +576,6 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         else
         {
             assert(ctx->nb_connections > 0);
-            assert(ctx->nb_connections < SIZE_MAX);
             ctx->nb_connections++;
             ctx->connectionArr =
                 SOPC_Realloc(ctx->connectionArr, (size_t)(ctx->nb_connections - 1) * sizeof *ctx->connectionArr,
@@ -607,7 +606,6 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         else
         {
             assert(connection->nb_messages > 0);
-            assert(connection->nb_messages < SIZE_MAX);
             connection->nb_messages++;
             connection->messageArr = SOPC_Realloc(
                 connection->messageArr, (size_t)(connection->nb_messages - 1) * sizeof *connection->messageArr,
@@ -640,7 +638,6 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         else
         {
             assert(msg->nb_variables > 0);
-            assert(msg->nb_variables < SIZE_MAX);
             msg->nb_variables++;
             msg->variableArr =
                 SOPC_Realloc(msg->variableArr, (size_t)(msg->nb_variables - 1) * sizeof *msg->variableArr,
