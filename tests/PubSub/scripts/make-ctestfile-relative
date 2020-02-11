@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Copyright (C) Systerel SAS 2019, all rights reserved.
+
+CTEST_FILE=$1
+
+if [ -z "$CTEST_FILE" ]; then
+    echo "Usage: $1 CTestTestfile.cmake"
+    echo
+    echo "Transforms a CTestTestfile.cmake test plan so that all paths are"
+    echo "relative, and outputs it on STDOUT."
+    exit 1
+fi
+
+src_dir=$(grep 'Source directory: ' $CTEST_FILE | awk '{print $4}')
+sed "s|${src_dir}|..|g" $CTEST_FILE
