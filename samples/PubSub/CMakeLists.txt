@@ -84,10 +84,8 @@ if(ENABLE_SAMPLES)
     COMMAND ${CMAKE_COMMAND} -E copy  ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/server_2k_key.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_private/
     COMMAND ${CMAKE_COMMAND} -E copy  ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/server_2k_cert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_public/
     # PubSub samples specific data
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tests/data/address_space/pubsub_server.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tests/data/xml_test/config_pubsub_server.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tests/data/xml_test/config_pub_interop.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tests/bin_interop/open62541_pub${FILE_EXT} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tests/bin_interop/open62541_sub${FILE_EXT} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/)
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/address_space/pubsub_server.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/config/config_pubsub_server.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
+    )
 
 endif(ENABLE_SAMPLES)

@@ -114,6 +114,12 @@ if(ENABLE_TESTING)
 
   add_executable(udp_pub_scheduler_test "validation_tests/udp_pub_scheduler_test.c")
   target_link_libraries(udp_pub_scheduler_test PRIVATE s2opc_pubsub)
+
+  # Copy data
+  add_custom_command(
+    TARGET udp_pub_scheduler_test POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/xml_test/config_pub_interop.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
+    )
   
   add_executable(udp_sub_test "validation_tests/udp_sub_test.c")
   target_link_libraries(udp_sub_test PRIVATE s2opc_pubsub)
@@ -181,13 +187,14 @@ if(ENABLE_TESTING)
   target_link_libraries(interop_sub_test PRIVATE s2opc_pubsub)
 
   if(UNIX)
+
     # open62541_pub only for linux
     add_test(NAME "interop::open62541_pub"
       WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
       COMMAND
       "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
       "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/with-publisher.py"
-      "--publisher-cmd" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/open62541_pub${FILE_EXT}"
+      "--publisher-cmd" "${CMAKE_CURRENT_SOURCE_DIR}/bin_interop/open62541_pub"
       "./interop_sub_test${FILE_EXT}")
     set_tests_properties("interop::open62541_pub" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=interop_pub_test.tap")
 
@@ -197,7 +204,7 @@ if(ENABLE_TESTING)
       "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
       "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/with-publisher.py"
       "--publisher-cmd" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/udp_pub_scheduler_test${FILE_EXT} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/config_pub_interop.xml"
-      "./open62541_sub${FILE_EXT}")
+      "${CMAKE_CURRENT_SOURCE_DIR}/bin_interop/open62541_sub")
     set_tests_properties("interop::open62541_sub" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=interop_sub_test.tap")
 
   endif()

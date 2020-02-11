@@ -23,8 +23,8 @@ from shutil import copyfile, move
 import argparse
 
 from opcua import ua
-from pubsub_server.tap_logger import TapLogger
-from pubsub_server.pubsub_server import PubSubServer
+from tap_logger import TapLogger
+from pubsub_server import PubSubServer
 
 DEFAULT_URI = 'opc.tcp://localhost:4841'
 NID_CONFIGURATION = u"ns=1;s=PubSubConfiguration"
