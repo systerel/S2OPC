@@ -64,7 +64,7 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t* 
 
     /* TPM2: directly use pk_setup_rsa_alt to plug private keys */
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-    int res = mbedtls_pk_setup_rsa_alt(&key->pk, (char*) buffer, mbedtls_tpm2_rsa_decrypt, (mbedtls_pk_rsa_alt_sign_func)mbedtls_tpm2_rsa_sign, mbedtls_tpm2_rsa_key_len);
+    int res = mbedtls_pk_setup_rsa_alt(&key->pk, (char*) buffer, s2opc_tpm2_ext_rsa_decrypt, (mbedtls_pk_rsa_alt_sign_func)s2opc_tpm2_ext_rsa_sign, s2opc_tpm2_ext_rsa_key_len);
     SOPC_GCC_DIAGNOSTIC_RESTORE
 
     if (res != 0)

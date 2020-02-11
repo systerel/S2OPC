@@ -1089,7 +1089,7 @@ int main(int argc, char* argv[])
     printf("toolkitBuildDate: %s\n", build_info.toolkitBuildDate);
 
     /* Initialize the TPM2 module */
-    int ret = mbedtls_tpm2_init();
+    int ret = s2opc_tpm2_ext_init();
     if(ret)
     {
         printf("Could not initialize the TPM2 module.\n");
@@ -1288,7 +1288,7 @@ int main(int argc, char* argv[])
 #endif
 
     /* Deinitialize the TPM2 module */
-    mbedtls_tpm2_flush();
+    s2opc_tpm2_ext_flush();
 
     return (status == SOPC_STATUS_OK) ? 0 : 1;
 }
