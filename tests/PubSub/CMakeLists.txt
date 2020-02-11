@@ -1,0 +1,205 @@
+cmake_minimum_required (VERSION 3.5)
+
+project (S2OPC_PubSub_Tests LANGUAGES C)
+
+if(NOT S2OPC_COMMON_DEFS_SET)
+  include(../../CommonDefs.cmake)
+endif()
+
+#### S2OPC PubSub tests ####
+
+### Dependencies ###
+
+# EXPAT dependency managed in CommonDefs
+
+# use find_package onto s2opc in case we built s2opc and tests separately
+
+# options with impact on dependencies
+option(ENABLE_TESTING "Build the S2OPC tests" ON)
+option(FORCE_CHECK_STATIC_LIB "Force the use of static check lib" ON)
+
+# Python3 is mandatory for compilation
+find_package(PythonInterp 3 REQUIRED)
+
+# We always link check statically, so that our test binaries are standalone
+if(ENABLE_TESTING)
+  if(FORCE_CHECK_STATIC_LIB)
+    set(CHECK_USE_STATIC_LIBS 1)
+  else()
+    set(CHECK_USE_STATIC_LIBS 0)
+  endif()
+  find_package(Check REQUIRED)
+endif()
+
+
+#### Tests for S2OPC library and extension libraries ####
+
+# Options reserved to tests
+option(PUBSUB_STATIC_CONFIG "Load PubSub configuration statically" OFF)
+
+#option(WITH_STATIC_SECURITY_DATA "Use static security data for test" OFF)
+
+if(WIN32)
+    set(FILE_EXT .exe)
+    set(ENV_PATH_SEP "\;")
+else()
+    set(ENV_PATH_SEP ":")
+endif()
+
+### Tests and validation of S2OPC library ###
+
+if(ENABLE_TESTING)
+  enable_testing()
+
+  # Function to add a unit test to the set of tests: define a test generating a TAP file from a binary name
+  function(s2opc_unit_test binary_name)
+    set(test_name "unit::${binary_name}")
+    set(test_cmd ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${binary_name}${FILE_EXT})
+
+    foreach(arg ${ARGN})
+      if("${arg}" STREQUAL "GENERATE_TAP")
+        set(test_cmd "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py" "${test_cmd}")
+      else()
+        message(FATAL_ERROR "Unknown parameter for s2opc_unit_test: ${arg}")
+      endif()
+    endforeach()
+
+    add_test(NAME "${test_name}" WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} COMMAND ${test_cmd})
+    set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=${binary_name}.tap")
+  endfunction()
+
+  # Function to add a validatoin test using the pubsub server code
+  function(s2opc_server_validation_test name)
+    set(test_name "validation::${name}")
+    if(PUBSUB_STATIC_CONFIG)
+      set(test_server_static "--static")
+    else()
+      set(test_server_static "")
+    endif()
+
+    add_test(NAME "${test_name}"
+      WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+      COMMAND
+      "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/with-publisher.py"
+      "--publisher-cmd" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/pubsub_server${FILE_EXT}"
+      "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/validation_tools/${name}" ${test_server_static})
+  endfunction()
+  
+## S2OPC PubSub unit tests ##
+
+  add_executable(xml_parser_test "unit_tests/xml_parser_test.c")
+  target_link_libraries(xml_parser_test PRIVATE s2opc_pubsub ${CHECK_LIBRARIES})
+
+  add_custom_command(TARGET xml_parser_test POST_BUILD
+                     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/xml_test/config_sub.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+                     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/xml_test/config_pub.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+
+  s2opc_unit_test(xml_parser_test)
+
+  add_executable(pubsub_modules_test "unit_tests/pubsub_modules_test.c")
+  target_link_libraries(pubsub_modules_test PRIVATE s2opc_pubsub ${CHECK_LIBRARIES})
+
+  s2opc_unit_test(pubsub_modules_test)
+
+## S2OPC PubSub validation tests ##
+  
+  add_executable(udp_pub_test "validation_tests/udp_pub_test.c")
+  target_link_libraries(udp_pub_test PRIVATE s2opc_pubsub)
+
+  add_executable(udp_pub_conf_test "validation_tests/udp_pub_conf_test.c")
+  target_link_libraries(udp_pub_conf_test PRIVATE s2opc_pubsub)
+
+  add_executable(udp_pub_xml_test "validation_tests/udp_pub_xml_test.c")
+  target_link_libraries(udp_pub_xml_test PRIVATE s2opc_pubsub)
+
+  add_executable(udp_pub_scheduler_test "validation_tests/udp_pub_scheduler_test.c")
+  target_link_libraries(udp_pub_scheduler_test PRIVATE s2opc_pubsub)
+  
+  add_executable(udp_sub_test "validation_tests/udp_sub_test.c")
+  target_link_libraries(udp_sub_test PRIVATE s2opc_pubsub)
+
+  add_executable(udp_sub_conf_test "validation_tests/udp_sub_conf_test.c")
+  target_link_libraries(udp_sub_conf_test PRIVATE s2opc_pubsub)
+
+  add_executable(udp_multi_pub_test "validation_tests/udp_multi_pub_test.c")
+  target_link_libraries(udp_multi_pub_test PRIVATE s2opc_pubsub)
+
+  add_executable(udp_multi_sub_test "validation_tests/udp_multi_sub_test.c")
+  target_link_libraries(udp_multi_sub_test PRIVATE s2opc_pubsub)
+
+  add_test(NAME "validation::ll_pub_sub_test"
+           WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+           COMMAND
+           "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+           "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/with-publisher.py"
+           "--publisher-cmd" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/udp_pub_test${FILE_EXT}"
+           "./udp_sub_test${FILE_EXT}")
+  set_tests_properties("validation::ll_pub_sub_test" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=ll_pub_sub_test.tap")
+
+  add_test(NAME "validation::ll_pub_sub_conf_test"
+           WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+           COMMAND
+           "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+           "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/with-publisher.py"
+           "--publisher-cmd" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/udp_pub_conf_test${FILE_EXT}"
+           "./udp_sub_test${FILE_EXT}")
+  set_tests_properties("validation::ll_pub_sub_conf_test" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=ll_pub_sub_conf_test.tap")
+
+  add_test(NAME "validation::ll_pub_sub_xml_test"
+           WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+           COMMAND
+           "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+           "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/with-publisher.py"
+           "--publisher-cmd" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/udp_pub_xml_test${FILE_EXT}"
+           "./udp_sub_conf_test${FILE_EXT}")
+  set_tests_properties("validation::ll_pub_sub_xml_test" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=ll_pub_sub_xml_test.tap")
+
+  add_test(NAME "validation::publisher_scheduler_test"
+           WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+           COMMAND
+           "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+           "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/with-publisher.py"
+           "--publisher-cmd" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/udp_pub_scheduler_test${FILE_EXT}"
+           "./udp_sub_conf_test${FILE_EXT}")
+  set_tests_properties("validation::publisher_scheduler_test" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=publisher_scheduler_test.tap")
+
+  add_test(NAME "validation::ll_multi_pub_sub_test"
+           WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+           COMMAND
+           "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+           "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/with-publisher.py"
+           "--publisher-cmd" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/udp_multi_pub_test${FILE_EXT}"
+           "./udp_multi_sub_test${FILE_EXT}")
+  set_tests_properties("validation::ll_multi_pub_sub_test" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=ll_multi_pub_sub_test.tap")
+
+
+  s2opc_server_validation_test("pubsub_server_test.py")
+
+## S2OPC PubSub interoperability tests ##
+
+  add_executable(interop_sub_test "interop_tests/interop_sub_test.c")
+  target_link_libraries(interop_sub_test PRIVATE s2opc_pubsub)
+
+  if(UNIX)
+    # open62541_pub only for linux
+    add_test(NAME "interop::open62541_pub"
+      WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+      COMMAND
+      "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+      "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/with-publisher.py"
+      "--publisher-cmd" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/open62541_pub${FILE_EXT}"
+      "./interop_sub_test${FILE_EXT}")
+    set_tests_properties("interop::open62541_pub" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=interop_pub_test.tap")
+
+    add_test(NAME "interop::open62541_sub"
+      WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+      COMMAND
+      "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+      "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/with-publisher.py"
+      "--publisher-cmd" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/udp_pub_scheduler_test${FILE_EXT} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/config_pub_interop.xml"
+      "./open62541_sub${FILE_EXT}")
+    set_tests_properties("interop::open62541_sub" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=interop_sub_test.tap")
+
+  endif()
+
+endif(ENABLE_TESTING)
