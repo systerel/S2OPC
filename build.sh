@@ -73,6 +73,7 @@ else
     append_cmake_option WITH_STATIC_SECURITY_DATA
     append_cmake_option WITH_NANO_EXTENDED
     append_cmake_option WARNINGS_AS_ERRORS
+    append_cmake_option PUBSUB_STATIC_CONFIG
     append_cmake_option CMAKE_BUILD_TYPE RelWithDebInfo
     append_cmake_option CMAKE_C_FLAGS
     append_cmake_option CMAKE_EXE_LINKER_FLAGS
