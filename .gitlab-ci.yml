@@ -25,7 +25,7 @@
 # - preset variables: WITH_NANO_EXTENDED = 1 set in gitlab project
 # - jobs run in stages:
 #   - gen: generation job
-#   - build: # 'WITH_STATIC_SECURITY_DATA: 1' and 'WITH_CONST_ADDSPACE: 1'
+#   - build: # 'WITH_STATIC_SECURITY_DATA: 1', 'WITH_CONST_ADDSPACE: 1' and 'PUBSUB_STATIC_CONFIG: 1'
 #     - build-linux64-static-conf 
 #   - tests:
 #     - test-unit
@@ -122,9 +122,10 @@ generation:
       - 'build/'  # Required when using coverage analysis
     expire_in: '1 month'
     when: always
-  rules: # note: to be repeated in each job using .build-linux
-    - if: "$WINDOWS_TEST == null && $CROSS_COMPILE == null && $WITH_COVERITY == null"
-      when: on_success
+# Common rules overwritten by each job using this template
+#  rules: # note: should be repeated in each child job of *build_linux
+#    - if: "$WINDOWS_TEST == null && $CROSS_COMPILE == null && $WITH_COVERITY == null"
+#      when: on_success
 
 # Used by "normal" pipeline
 build-linux64-ASan:
@@ -132,9 +133,9 @@ build-linux64-ASan:
   variables:
     <<: *build_linux_variables
     WITH_ASAN: 1
-  rules: # 1st line repeat .build-linux + added rules
+  rules: # 1st line repeat .build-linux + added rules to avoid ASAN build
     - if: "$WINDOWS_TEST == null && $CROSS_COMPILE == null && $WITH_COVERITY == null && \
-           $NO_ASAN == null && $ALL_TESTS == null && $ALL_BUILDS == null"
+           $NO_ASAN == null && $ALL_TESTS == null && $ALL_BUILDS == null" # avoid ASAN build
       when: on_success
 
 # Used by all-tests pipeline (add tests which needs NO_ASAN)
@@ -143,7 +144,7 @@ build-linux64-pys2opc:
   variables:
     <<: *build_linux_variables
     <<: *all-tests_build_variables # add pys2opc
-  rules:
+  rules: # do not repeat .build-linux: due to disjunction + need only those 2 conditions
     - if: "$NO_ASAN != null || $ALL_TESTS != null"
       when: on_success
 
@@ -153,7 +154,7 @@ build-linux64-static-conf:
   variables:
     <<: *build_linux_variables
     <<: *all-builds_build_variables # add static conf
-  rules: # 1st line repeat .build-linux + added rules
+  rules: # do not repeat .build-linux: need only ALL_BUILDS variable
     - if: "$ALL_BUILDS != null"
       when: on_success
 
@@ -220,10 +221,11 @@ build-linux64-coverity:
 .test-linux: &test_linux
   <<: *docker_job
   stage: test
-  rules:
-    - if: "$NO_TESTS == null && $WINDOWS_TEST == null && $CROSS_COMPILE == null && \
-           $WITH_COVERITY == null && $WITH_COVERAGE == null"
-      when: on_success
+# Common rules overwritten by each job using this template
+#  rules: # note to be repeated by each child job of *test_linux
+#    - if: "$NO_TESTS == null && $WINDOWS_TEST == null && $CROSS_COMPILE == null && \
+#           $WITH_COVERITY == null && $WITH_COVERAGE == null"
+#      when: on_success
 
 # Test check belongs to the test part, however it does not depend on linux build.
 test-check:
@@ -256,10 +258,7 @@ test-check:
       - 'build/'
     when: always
     expire_in: '1 month'
-  rules: # repeat .test-linux variables exception since overwritten here
-    - if: "$NO_TESTS == null && $WINDOWS_TEST == null && $CROSS_COMPILE == null && \
-           $WITH_COVERITY == null" # re-activate only test-unit for WITH_COVERAGE case
-      when: on_success
+# Common rules defined by test-unit job below
 
 # Test unit for ALL_TESTS variable (add dynamic configuration)
 test-unit-all-tests:
@@ -293,11 +292,6 @@ test-unit:
       - 'tests/ClientServer/acceptance_tools/*.log'
     when: always
     expire_in: '1 month'
-  rules: # repeat .test-linux variables exception since overwritten here + add new variables
-    - if: "$NO_TESTS == null && $WINDOWS_TEST == null && $CROSS_COMPILE == null && \
-           $WITH_COVERITY == null && $WITH_COVERAGE == null && \
-           $S2OPC_PUBSUB_ONLY == null && $ALL_BUILDS == null"  # + no UACTT tests on PubSub + excludes ALL_BUILDS
-      when: on_success
 
 # Test unit for ALL_TESTS variable (add dynamic configuration)
 test-uactt-all-tests:
