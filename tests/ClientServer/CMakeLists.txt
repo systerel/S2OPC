@@ -416,12 +416,14 @@ if(ENABLE_TESTING)
     )
   
 # Tests run definition #
-  
+
+  #Note: use absolute path for scripts to allow ctest to be run from another another path
+
   add_test(NAME "validation::client_server_test"
            WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
            COMMAND
            "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-           "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/with-opc-server.py"
+           "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
            "--server-wd" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
            "--server-cmd" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TOOLKIT_TEST_SERVER}${FILE_EXT}"
            "./toolkit_test_client${FILE_EXT}")
@@ -431,7 +433,7 @@ if(ENABLE_TESTING)
            WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
            COMMAND
            "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-           "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/with-opc-server.py"
+           "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
            "--server-wd" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
            "--server-cmd" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TOOLKIT_TEST_SERVER}${FILE_EXT}"
            "./toolkit_test_client_service_faults${FILE_EXT}")
@@ -444,7 +446,7 @@ if(ENABLE_TESTING)
     add_test(NAME "${test_name}"
              WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/interop_tools
              COMMAND
-             "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/with-opc-server.py"
+             "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
              "--server-wd" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
              "--server-cmd" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TOOLKIT_TEST_SERVER}${FILE_EXT} ${no_ext_name}"
              "${PYTHON_EXECUTABLE}" ${name})
@@ -456,7 +458,7 @@ if(ENABLE_TESTING)
     add_test(NAME "${test_name}"
              WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
              COMMAND
-             "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/with-opc-server.py"
+             "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
              "--server-wd" "${CMAKE_CURRENT_SOURCE_DIR}/interop_tools"
              "--server-cmd" "${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/interop_tools/server.py 25000"
              "./${name}")
@@ -476,7 +478,7 @@ if(ENABLE_TESTING)
              WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
              COMMAND
              "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-             "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/with-opc-server.py"
+             "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
              "--server-wd" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
              "--server-cmd" "./test_secure_channels_server ${server_key_size}"
              "--wait-server"
@@ -524,7 +526,7 @@ if(ENABLE_TESTING)
       add_test(NAME "${test_name}"
         WORKING_DIRECTORY "${PYS2OPC_TEST_PATH}/tests"
         COMMAND
-        "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/with-opc-server.py"
+        "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
         "--server-wd" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
         "--server-cmd" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TOOLKIT_TEST_SERVER}${FILE_EXT} ${no_ext_name}"
         "${PYTHON_EXECUTABLE}" "${name}"

@@ -26,7 +26,7 @@
 echo "Check master branch name is valid"
 BRANCH_COMMIT=master
 VERSION_HEADER=./src/Common/helpers/sopc_version.h
-LIBSUB_VERSION_HEADER=./src/ClientServer/frontend/client_subscription/libs2opc_client.h
+LIBSUB_VERSION_HEADER=./src/ClientServer/frontend/client_wrapper/libs2opc_client.h
 
 git show-ref refs/heads/$BRANCH_COMMIT &> /dev/null
 if [[ $? != 0 ]]; then
@@ -111,7 +111,7 @@ echo "Update to $libsub_version* version in $LIBSUB_VERSION_HEADER"
 sed -i 's/#define SOPC_LIBSUB_VERSION .*/#define SOPC_LIBSUB_VERSION "'"$libsub_version"'*"/' $LIBSUB_VERSION_HEADER || exit 1
 
 echo "Commit updated current version in $2-update-tagged-version: it shall be pushed as MR on gitlab ASAP"
-git commit README.md $VERSION_HEADER $LIBSUB_VERSION_HEADER -S -m "Ticket #$2: Update current version of Toolkit / subscription library" &> /dev/null || exit 1
+git commit src/CMakeLists.txt README.md $VERSION_HEADER $LIBSUB_VERSION_HEADER -S -m "Ticket #$2: Update current version of Toolkit / subscription library" &> /dev/null || exit 1
 
 echo "Checking out $DELIVERY_NAME"
 git checkout $DELIVERY_NAME || exit 1
@@ -131,7 +131,7 @@ sed -i 's/S2OPC_Toolkit_[0-9]\+\.[0-9]\+\.[0-9]\+/S2OPC_Toolkit_'"$1"'/' README.
 echo "Update to $libsub_version version in $LIBSUB_VERSION_HEADER"
 sed -i 's/#define SOPC_LIBSUB_VERSION .*/#define SOPC_LIBSUB_VERSION "'"$libsub_version"'"/' $LIBSUB_VERSION_HEADER || exit 1
 
-git commit README.md $VERSION_HEADER $LIBSUB_VERSION_HEADER -S -m "Update tagged $1 S2OPC version / $libsub_version subscription library version" &> /dev/null || exit 1
+git commit src/CMakeLists.txt README.md $VERSION_HEADER $LIBSUB_VERSION_HEADER -S -m "Update tagged $1 S2OPC version / $libsub_version subscription library version" &> /dev/null || exit 1
 
 echo "Generate and commit version file 'VERSION' with '$1' content"
 echo "$1" > VERSION
@@ -162,7 +162,7 @@ rm -fr bin_windows install_windows
 echo "Generate Toolkit windows binaries (library and tests)"
 mkdir -p build_toolchain || exit 1
 cd build_toolchain || exit 1
-../.mingwbuild-in-docker.sh cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-mingw32-w64.cmake -DBUILD_SHARED_LIBS=true -DCMAKE_INSTALL_PREFIX=../install_windows -DCMAKE_BUILD_TYPE=RelWithDebInfo .. || exit 1
+../.mingwbuild-in-docker.sh cmake -DS2OPC_CLIENTSERVER_ONLY=1 -DCMAKE_TOOLCHAIN_FILE=toolchain-mingw32-w64.cmake -DBUILD_SHARED_LIBS=true -DCMAKE_INSTALL_PREFIX=../install_windows -DCMAKE_BUILD_TYPE=RelWithDebInfo .. || exit 1
 ../.mingwbuild-in-docker.sh cmake --build . --target install
 if [[ $? != 0 ]]; then
     echo "Error: Generation of Toolkit windows binaries failed";
