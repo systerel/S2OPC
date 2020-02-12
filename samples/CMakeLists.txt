@@ -7,7 +7,11 @@ endif()
 
 if(NOT S2OPC_PUBSUB_ONLY)
   add_subdirectory(ClientServer)
+  if(NOT S2OPC_CLIENTSERVER_ONLY)
+    add_subdirectory(PubSub_ClientServer)
+  endif()
 endif()
 if(NOT S2OPC_CLIENTSERVER_ONLY)
-  add_subdirectory(PubSub)
+  # Note: only PubSub_Server samples available for now
+  #add_subdirectory(PubSub)
 endif()

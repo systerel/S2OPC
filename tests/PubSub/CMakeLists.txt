@@ -37,8 +37,6 @@ endif()
 # Options reserved to tests
 option(PUBSUB_STATIC_CONFIG "Load PubSub configuration statically" OFF)
 
-#option(WITH_STATIC_SECURITY_DATA "Use static security data for test" OFF)
-
 if(WIN32)
     set(FILE_EXT .exe)
     set(ENV_PATH_SEP "\;")
@@ -178,8 +176,11 @@ if(ENABLE_TESTING)
            "./udp_multi_sub_test${FILE_EXT}")
   set_tests_properties("validation::ll_multi_pub_sub_test" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=ll_multi_pub_sub_test.tap")
 
-
-  s2opc_server_validation_test("pubsub_server_test.py")
+  if(S2OPC_PUBSUB_ONLY)
+    # it is not possible to use both PubSub and ClientServer libraries
+  else()
+    s2opc_server_validation_test("pubsub_server_test.py")
+  endif()
 
 ## S2OPC PubSub interoperability tests ##
 

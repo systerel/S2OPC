@@ -62,58 +62,71 @@ ll_pub_sub_test.tap
 ll_pub_sub_xml_test.tap
 publisher_scheduler_test.tap
 pubsub_modules_test.tap
-pubsub_server_test.tap
 xml_parser_test.tap'
+
+PUBSUB_CLIENTSERVER_TAP_FILES='pubsub_server_test.tap'
 
 
 PYS2OPC_TAP_FILES=$'\nvalidation_pys2opc.tap'
 
-if [ ! -f "${CLIENTSERVER_CTEST_FILE}" ]; then
-	CLIENTSERVER_TEST_DIR=${BIN_DIR}/ClientServer
-	CLIENTSERVER_CTEST_FILE="${CLIENTSERVER_TEST_DIR}/CTestTestfile.cmake"
-	TAP_DIR="${BIN_DIR}"
-fi
-
-if [ ! -f "${PUBSUB_CTEST_FILE}" ]; then
-	CLIENTSERVER_TEST_DIR=${BIN_DIR}/PubSub
-	CLIENTSERVER_CTEST_FILE="${PUBSUB_TEST_DIR}/CTestTestfile.cmake"
-	TAP_DIR="${BIN_DIR}"
-fi
-
-if [ ! -f "${CLIENTSERVER_CTEST_FILE}" ]; then
-	echo "No CTestTestfile in ${BIN_DIR}/ClientServer or ${BUILD_DIR}/tests/ClientServer"
-	echo "Is this a tagged release, or has CMake been run?"
-	exit 1
-fi
-
-if [ ! -f "${PUBSUB_CTEST_FILE}" ]; then
-	echo "No CTestTestfile in ${BIN_DIR}/PubSub or ${BUILD_DIR}/tests/PubSub"
-	echo "Is this a tagged release, or has CMake been run?"
-	exit 1
-fi
-
 rm -f "${TAP_DIR}"/*.tap
 
-cd "${CLIENTSERVER_TEST_DIR}"
-if [ "$PYS2OPC_LIB_IS_PRESENT" == "0" ]; then
-   EXPECTED_TAP_FILES="$CLIENTSERVER_TAP_FILES"
-    ctest -T test --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536 -E 'pys2opc*'
-    CTEST_RET1=$?
+if [ -z $S2OPC_PUBSUB_ONLY ]; then
+   if [ ! -f "${CLIENTSERVER_CTEST_FILE}" ]; then
+       CLIENTSERVER_TEST_DIR=${BIN_DIR}/ClientServer
+       CLIENTSERVER_CTEST_FILE="${CLIENTSERVER_TEST_DIR}/CTestTestfile.cmake"
+       TAP_DIR="${BIN_DIR}"
+   fi
+
+   if [ ! -f "${CLIENTSERVER_CTEST_FILE}" ]; then
+       echo "No CTestTestfile in ${BIN_DIR}/ClientServer or ${BUILD_DIR}/tests/ClientServer"
+       echo "Is this a tagged release, or has CMake been run?"
+       exit 1
+   fi
+
+   cd "${CLIENTSERVER_TEST_DIR}"
+   if [ "$PYS2OPC_LIB_IS_PRESENT" == "0" ]; then
+       EXPECTED_TAP_FILES="$CLIENTSERVER_TAP_FILES"
+       ctest -T test --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536 -E 'pys2opc*'
+       CTEST_RET1=$?
+   else
+       EXPECTED_TAP_FILES=$CLIENTSERVER_TAP_FILES$PYS2OPC_TAP_FILES
+       ctest -T test --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536
+       CTEST_RET1=$?
+       mv "${PYS2OPC_TESTS_DIR}"/*.tap "${TAP_DIR}"/
+   fi
+   mv "${INTEROP_DIR}"/*.tap "${TAP_DIR}"/
 else
-    EXPECTED_TAP_FILES=$CLIENTSERVER_TAP_FILES$PYS2OPC_TAP_FILES
-    ctest -T test --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536
-    CTEST_RET1=$?
-    mv "${PYS2OPC_TESTS_DIR}"/*.tap "${TAP_DIR}"/
+   CTEST_RET1=0
 fi
-mv "${INTEROP_DIR}"/*.tap "${TAP_DIR}"/
 
-cd "${PUBSUB_TEST_DIR}"
-EXPECTED_TAP_FILES=$EXPECTED_TAP_FILES$'\n'$PUBSUB_TAP_FILES
-ctest -T test --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536
-CTEST_RET2=$?
+if [ -z $S2OPC_CLIENTSERVER_ONLY ]; then
+   if [ ! -f "${PUBSUB_CTEST_FILE}" ]; then
+       PUBSUB_TEST_DIR=${BIN_DIR}/PubSub
+       PUBSUB_CTEST_FILE="${PUBSUB_TEST_DIR}/CTestTestfile.cmake"
+       TAP_DIR="${BIN_DIR}"
+   fi
+
+   if [ ! -f "${PUBSUB_CTEST_FILE}" ]; then
+       echo "No CTestTestfile in ${BIN_DIR}/PubSub or ${BUILD_DIR}/tests/PubSub"
+       echo "Is this a tagged release, or has CMake been run?"
+       exit 1
+   fi
+
+   cd "${PUBSUB_TEST_DIR}"
+   EXPECTED_TAP_FILES=$EXPECTED_TAP_FILES$'\n'$PUBSUB_TAP_FILES
+   if [ -z $S2OPC_PUBSUB_ONLY ]; then
+       EXPECTED_TAP_FILES=$EXPECTED_TAP_FILES$'\n'$PUBSUB_CLIENTSERVER_TAP_FILES
+   fi
+   ctest -T test --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536
+   CTEST_RET2=$?
+else
+   CTEST_RET2=0
+fi
+
 CTEST_RET=$((CTEST_RET1+CTEST_RET2))
-
-EXPECTED_TAP_FILES=$(sort <<< $EXPECTED_TAP_FILES)
+EXPECTED_TAP_FILES=$(grep -v "^$" <<< $EXPECTED_TAP_FILES) # remove blank lines
+EXPECTED_TAP_FILES=$(sort <<< $EXPECTED_TAP_FILES) # sort TAP files names
 ACTUAL_TAP_FILES=$(LANG=C ls "${TAP_DIR}"/*.tap | sed "s|${TAP_DIR}/||")
 
 if [ "$ACTUAL_TAP_FILES" != "$EXPECTED_TAP_FILES" ]; then
