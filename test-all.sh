@@ -26,11 +26,13 @@ BUILD_DIR="${MY_DIR}/build"
 INTEROP_DIR="${MY_DIR}/tests/ClientServer/interop_tools"
 PYS2OPC_TESTS_DIR="${MY_DIR}/tests/ClientServer/validation_tests/pys2opc/tests"
 PYS2OPC_LIB_IS_PRESENT=$(ls ./build/lib/_pys2opc* 2> /dev/null | wc -l)
-TEST_DIR=${BUILD_DIR}/tests/ClientServer
-CTEST_FILE="${TEST_DIR}/CTestTestfile.cmake"
+CLIENTSERVER_TEST_DIR=${BUILD_DIR}/tests/ClientServer
+CLIENTSERVER_CTEST_FILE="${CLIENTSERVER_TEST_DIR}/CTestTestfile.cmake"
+PUBSUB_TEST_DIR=${BUILD_DIR}/tests/PubSub
+PUBSUB_CTEST_FILE="${PUBSUB_TEST_DIR}/CTestTestfile.cmake"
 TAP_DIR="${BUILD_DIR}/bin"
 
-CORE_TAP_FILES='check_helpers.tap
+CLIENTSERVER_TAP_FILES='check_helpers.tap
 check_libsub.tap
 check_sc_rcv_buffer.tap
 check_sc_rcv_encrypted_buffer.tap
@@ -52,36 +54,66 @@ toolkit_test_server_local_service.tap
 toolkit_test_suite_client.tap
 validation.tap'
 
+PUBSUB_TAP_FILES='interop_pub_test.tap
+interop_sub_test.tap
+ll_multi_pub_sub_test.tap
+ll_pub_sub_conf_test.tap
+ll_pub_sub_test.tap
+ll_pub_sub_xml_test.tap
+publisher_scheduler_test.tap
+pubsub_modules_test.tap
+pubsub_server_test.tap
+xml_parser_test.tap'
+
+
 PYS2OPC_TAP_FILES=$'\nvalidation_pys2opc.tap'
 
-if [ ! -f "${CTEST_FILE}" ]; then
-	TEST_DIR=${BIN_DIR}
-	CTEST_FILE="${TEST_DIR}/CTestTestfile.cmake"
+if [ ! -f "${CLIENTSERVER_CTEST_FILE}" ]; then
+	CLIENTSERVER_TEST_DIR=${BIN_DIR}/ClientServer
+	CLIENTSERVER_CTEST_FILE="${CLIENTSERVER_TEST_DIR}/CTestTestfile.cmake"
 	TAP_DIR="${BIN_DIR}"
 fi
 
-if [ ! -f "${CTEST_FILE}" ]; then
-	echo "No CTestTestfile in ${BIN_DIR} or ${BUILD_DIR}"
+if [ ! -f "${PUBSUB_CTEST_FILE}" ]; then
+	CLIENTSERVER_TEST_DIR=${BIN_DIR}/PubSub
+	CLIENTSERVER_CTEST_FILE="${PUBSUB_TEST_DIR}/CTestTestfile.cmake"
+	TAP_DIR="${BIN_DIR}"
+fi
+
+if [ ! -f "${CLIENTSERVER_CTEST_FILE}" ]; then
+	echo "No CTestTestfile in ${BIN_DIR}/ClientServer or ${BUILD_DIR}/tests/ClientServer"
+	echo "Is this a tagged release, or has CMake been run?"
+	exit 1
+fi
+
+if [ ! -f "${PUBSUB_CTEST_FILE}" ]; then
+	echo "No CTestTestfile in ${BIN_DIR}/PubSub or ${BUILD_DIR}/tests/PubSub"
 	echo "Is this a tagged release, or has CMake been run?"
 	exit 1
 fi
 
 rm -f "${TAP_DIR}"/*.tap
 
-cd "${TEST_DIR}"
+cd "${CLIENTSERVER_TEST_DIR}"
 if [ "$PYS2OPC_LIB_IS_PRESENT" == "0" ]; then
-    EXPECTED_TAP_FILES="$CORE_TAP_FILES"
+   EXPECTED_TAP_FILES="$CLIENTSERVER_TAP_FILES"
     ctest -T test --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536 -E 'pys2opc*'
-    CTEST_RET=$?
+    CTEST_RET1=$?
 else
-    EXPECTED_TAP_FILES=$CORE_TAP_FILES$PYS2OPC_TAP_FILES
+    EXPECTED_TAP_FILES=$CLIENTSERVER_TAP_FILES$PYS2OPC_TAP_FILES
     ctest -T test --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536
-    CTEST_RET=$?
+    CTEST_RET1=$?
     mv "${PYS2OPC_TESTS_DIR}"/*.tap "${TAP_DIR}"/
 fi
-
 mv "${INTEROP_DIR}"/*.tap "${TAP_DIR}"/
 
+cd "${PUBSUB_TEST_DIR}"
+EXPECTED_TAP_FILES=$EXPECTED_TAP_FILES$'\n'$PUBSUB_TAP_FILES
+ctest -T test --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536
+CTEST_RET2=$?
+CTEST_RET=$((CTEST_RET1+CTEST_RET2))
+
+EXPECTED_TAP_FILES=$(sort <<< $EXPECTED_TAP_FILES)
 ACTUAL_TAP_FILES=$(LANG=C ls "${TAP_DIR}"/*.tap | sed "s|${TAP_DIR}/||")
 
 if [ "$ACTUAL_TAP_FILES" != "$EXPECTED_TAP_FILES" ]; then
