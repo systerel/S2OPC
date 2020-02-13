@@ -17,21 +17,10 @@
  * under the License.
  */
 
-#include <errno.h>
-#include <fcntl.h>
-#include <init.h>
-#include <inttypes.h>
-#include <limits.h>
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 #include "device.h"
 #include "drivers/entropy.h"
-#include "kernel.h"
-#include "net/net_ip.h"
-#include "net/socket.h"
 
 #if defined(CONFIG_MBEDTLS)
 #if !defined(CONFIG_MBEDTLS_CFG_FILE)
