@@ -48,9 +48,10 @@
 
 int32_t mbedtls_hardware_poll(void* data, uint8_t* output, int32_t len, int32_t* olen)
 {
+    (void) data;
     /* static to obtain it once in a first call */
-    static struct device* dev;
-    int err;
+    static struct device* dev = NULL;
+    int err = (-1);
 
     if ((NULL == output) || (NULL == olen) || (0 == len))
     {
