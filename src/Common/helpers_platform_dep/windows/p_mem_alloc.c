@@ -27,7 +27,6 @@
 #include <stdlib.h>
 
 #include "kernel.h"
-#include "sys/printk.h"
 
 #include "sopc_mem_alloc.h"
 
