@@ -38,7 +38,6 @@ endif()
 option(WITH_STATIC_SECURITY_DATA "Use static security data for test" OFF)
 
 if(WIN32)
-    set(FILE_EXT .exe)
     set(ENV_PATH_SEP "\;")
 else()
     set(ENV_PATH_SEP ":")
@@ -61,9 +60,9 @@ if(ENABLE_TESTING)
   enable_testing()
 
   # Function to add a unit test to the set of tests: define a test generating a TAP file from a binary name
-  function(s2opc_unit_test binary_name)
-    set(test_name "unit::${binary_name}")
-    set(test_cmd ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${binary_name}${FILE_EXT})
+  function(s2opc_unit_test target_name)
+    set(test_name "unit::${target_name}")
+    set(test_cmd $<TARGET_FILE:${target_name}>)
 
     foreach(arg ${ARGN})
       if("${arg}" STREQUAL "GENERATE_TAP")
@@ -74,7 +73,7 @@ if(ENABLE_TESTING)
     endforeach()
 
     add_test(NAME "${test_name}" WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} COMMAND ${test_cmd})
-    set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=${binary_name}.tap")
+    set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=${target_name}.tap")
   endfunction()
 
   set(TEST_CONFIG_XML              "${CMAKE_CURRENT_SOURCE_DIR}/data/config/S2OPC_Test_XML_Config.xml")
@@ -424,9 +423,9 @@ if(ENABLE_TESTING)
            COMMAND
            "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
            "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
-           "--server-wd" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-           "--server-cmd" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TOOLKIT_TEST_SERVER}${FILE_EXT}"
-           "./toolkit_test_client${FILE_EXT}")
+           "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_TEST_SERVER}>
+           "--server-cmd" $<TARGET_FILE:${TOOLKIT_TEST_SERVER}>
+           $<TARGET_FILE:toolkit_test_client>)
   set_tests_properties("validation::client_server_test" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=client_server_test.tap")
   
   add_test(NAME "validation::client_service_faults_test"
@@ -434,9 +433,9 @@ if(ENABLE_TESTING)
            COMMAND
            "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
            "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
-           "--server-wd" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-           "--server-cmd" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TOOLKIT_TEST_SERVER}${FILE_EXT}"
-           "./toolkit_test_client_service_faults${FILE_EXT}")
+           "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_TEST_SERVER}>
+           "--server-cmd" $<TARGET_FILE:${TOOLKIT_TEST_SERVER}>
+           $<TARGET_FILE:toolkit_test_client_service_faults>)
   set_tests_properties("validation::client_service_faults_test" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=client_service_faults_test.tap")
 
   # Function to run a validation of the S2OPC server scenario with given client scenario test
@@ -447,8 +446,8 @@ if(ENABLE_TESTING)
              WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/interop_tools
              COMMAND
              "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
-             "--server-wd" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-             "--server-cmd" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TOOLKIT_TEST_SERVER}${FILE_EXT} ${no_ext_name}"
+             "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_TEST_SERVER}>
+             "--server-cmd" "$<TARGET_FILE:${TOOLKIT_TEST_SERVER}> ${no_ext_name}"
              "${PYTHON_EXECUTABLE}" ${name})
   endfunction()
 
@@ -479,10 +478,10 @@ if(ENABLE_TESTING)
              COMMAND
              "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
              "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
-             "--server-wd" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-             "--server-cmd" "./test_secure_channels_server ${server_key_size}"
+             "--server-wd" $<TARGET_FILE_DIR:test_secure_channels_server>
+             "--server-cmd" "$<TARGET_FILE:test_secure_channels_server> ${server_key_size}"
              "--wait-server"
-             "./test_secure_channels_client${FILE_EXT}" ${ARGN})
+             $<TARGET_FILE:test_secure_channels_client> ${ARGN})
     set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=secure_channel_level_${name}.tap")
   endfunction()
 
@@ -527,8 +526,8 @@ if(ENABLE_TESTING)
         WORKING_DIRECTORY "${PYS2OPC_TEST_PATH}/tests"
         COMMAND
         "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
-        "--server-wd" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-        "--server-cmd" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TOOLKIT_TEST_SERVER}${FILE_EXT} ${no_ext_name}"
+        "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_TEST_SERVER}>
+        "--server-cmd" "$<TARGET_FILE:${TOOLKIT_TEST_SERVER}> ${no_ext_name}"
         "${PYTHON_EXECUTABLE}" "${name}"
         )
       # ASan requires to be the first dynamically linked library to be loaded. This is done with LD_PRELOAD.
