@@ -32,14 +32,6 @@
 #include "net/socket.h"
 #include "sys/printk.h"
 
-#ifndef __INT32_MAX__
-#include "toolchain/xcc_missing_defs.h"
-#endif
-
-#ifndef NULL
-#define NULL ((void*) 0)
-#endif
-
 #ifndef MY_IP_LB
 #define MY_IP_LB ((const char*) ("127.0.0.1"))
 #endif
@@ -63,11 +55,6 @@
 /* platform dep includes */
 
 #include "p_sockets.h"
-
-/* debug printk activation*/
-
-#define P_SOCKET_DEBUG (0)
-#define P_SOCKET_MCAST_DEBUG (0)
 
 /* Max pending connection based on max pending connections allowed by zephyr */
 
@@ -161,9 +148,6 @@ uint32_t P_SOCKET_increment_nb_sockets(void)
         bTransition = __sync_bool_compare_and_swap(&priv_P_SOCKET_nbSockets, currentValue, newValue);
 
     } while (!bTransition);
-#if P_SOCKET_DEBUG == 1
-    printk("\r\nP_SOCKET =====> o socket reservation exit - new value = %d\r\n", newValue);
-#endif
     return newValue;
 }
 
@@ -188,9 +172,6 @@ uint32_t P_SOCKET_decrement_nb_sockets(void)
         }
         bTransition = __sync_bool_compare_and_swap(&priv_P_SOCKET_nbSockets, currentValue, newValue);
     } while (!bTransition);
-#if P_SOCKET_DEBUG == 1
-    printk("\r\nP_SOCKET =====> + socket release exit - new value = %d\r\n", newValue);
-#endif
     return newValue;
 }
 
@@ -232,15 +213,6 @@ bool SOPC_Socket_Network_Initialize()
                 assert(NULL != ptrNetIf);
                 assert(NULL != net_if_ipv4_addr_add(ptrNetIf, &addressLoopBack, NET_ADDR_MANUAL, 0));
                 net_if_ipv4_set_netmask(ptrNetIf, &addressLoopBackNetMask);
-#if P_SOCKET_DEBUG == 1
-                printk("\r\nP_SOCKET: Loopback initialized\r\n");
-#endif
-            }
-            else
-            {
-#if P_SOCKET_DEBUG == 1
-                printk("\r\nP_SOCKET: Loopback already initialized\r\n");
-#endif
             }
 
             if (NULL == net_if_ipv4_addr_lookup(&addressInterfaceEth, &ptrNetIf))
@@ -252,15 +224,6 @@ bool SOPC_Socket_Network_Initialize()
                 assert(NULL != net_if_ipv4_addr_add(ptrNetIf, &addressInterfaceEth, NET_ADDR_MANUAL, 0));
                 net_if_ipv4_set_gw(ptrNetIf, &addressInterfaceEthGtw);
                 net_if_ipv4_set_netmask(ptrNetIf, &addressInterfaceEthMask);
-#if P_SOCKET_DEBUG == 1
-                printk("\r\nP_SOCKET: Eth0 initialized\r\n");
-#endif
-            }
-            else
-            {
-#if P_SOCKET_DEBUG == 1
-                printk("\r\nP_SOCKET: Eth0 already initialized\r\n");
-#endif
             }
 
             priv_P_SOCKET_networkConfigStatus = NETWORK_CONFIG_STATUS_INITIALIZED;
@@ -455,9 +418,6 @@ SOPC_ReturnStatus SOPC_Socket_CreateNew(SOPC_Socket_AddressInfo* addr,
     }
     else
     {
-#if P_SOCKET_DEBUG == 1
-        printk("\r\nP_SOCKET: Maximum sock reached, create refused !!!\r\n");
-#endif
         P_SOCKET_decrement_nb_sockets();
     }
     return SOPC_STATUS_NOK;
@@ -529,9 +489,6 @@ SOPC_ReturnStatus SOPC_Socket_Accept(Socket listeningSock, bool setNonBlocking, 
                 }
                 else
                 {
-#if P_SOCKET_DEBUG == 1
-                    printk("\r\nP_SOCKET: Sopc Accept to close can't be performed !!! Yield !!!\r\n");
-#endif
                     P_SOCKET_decrement_nb_sockets();
                     k_yield();
                 }
@@ -539,9 +496,6 @@ SOPC_ReturnStatus SOPC_Socket_Accept(Socket listeningSock, bool setNonBlocking, 
             } while (valAuthorization > (MAX_ZEPHYR_SOCKET + 2));
 
             P_SOCKET_decrement_nb_sockets();
-#if P_SOCKET_DEBUG == 1
-            printk("\r\nP_SOCKET: Max socket reach, accept failed !!!\r\n");
-#endif
         }
     }
     return status;
@@ -744,9 +698,6 @@ int32_t SOPC_Socket_WaitSocketEvents(SOPC_SocketSet* readSet,
     nbReady = zsock_select(fdmax + 1, readSet != NULL ? &readSet->set : NULL, writeSet != NULL ? &writeSet->set : NULL,
                            exceptSet != NULL ? &exceptSet->set : NULL, val);
 
-#if P_SOCKET_DEBUG == 1
-    printk("\r\nP_SOCKET: Sopc select result = %d\r\n", nbReady);
-#endif
     return (int32_t) nbReady;
 }
 
@@ -848,10 +799,6 @@ void SOPC_Socket_Close(Socket* sock)
 
 // *** Multicast private function definitions
 
-#if P_SOCKET_MCAST_DEBUG == 1
-static inline void P_SOCKET_MCAST_print_sock_from_mcast(void);
-#endif
-
 // Register multicast address to L1 and associate socket to this one.
 // Multicast address is added, if not already added, to ethernet interface (L2)
 SOPC_ReturnStatus P_SOCKET_MCAST_join_mcast_group(int32_t sock, struct in_addr* pAddr)
@@ -860,11 +807,6 @@ SOPC_ReturnStatus P_SOCKET_MCAST_join_mcast_group(int32_t sock, struct in_addr* 
     uint32_t indexMasock = 0;
     bool bIsFound = false;
     bool bSockIsFound = false;
-
-#if P_SOCKET_MCAST_DEBUG == 1
-    printk("\r\nP_SOCKET_UDP: Enter join_mcast_group\r\n");
-    P_SOCKET_MCAST_print_sock_from_mcast();
-#endif
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
@@ -934,15 +876,6 @@ SOPC_ReturnStatus P_SOCKET_MCAST_join_mcast_group(int32_t sock, struct in_addr* 
                 tabMCast[indexMacast].sock[j] = sock;
                 bSockIsFound = true;
                 indexMasock = j;
-#if P_SOCKET_MCAST_DEBUG == 1
-                {
-                    char addr_str[32];
-                    inet_ntop(AF_INET, pAddr, addr_str, sizeof(addr_str));
-                    printk("\r\nP_SOCKET_UDP: register socket = %d for mcast ip = %s\r\n", //
-                           sock,                                                           //
-                           addr_str);                                                      //
-                }
-#endif
                 break;
             }
         }
@@ -951,27 +884,8 @@ SOPC_ReturnStatus P_SOCKET_MCAST_join_mcast_group(int32_t sock, struct in_addr* 
     // Verify mcast is already registered by L1
     if (bIsFound && bSockIsFound)
     {
-#if P_SOCKET_MCAST_DEBUG == 1
-        {
-            char addr_str[32];
-            inet_ntop(AF_INET, pAddr, addr_str, sizeof(addr_str));
-            printk("\r\nP_SOCKET_UDP: verify for socket = %d if mcast ip = %s is already joined\r\n", //
-                   sock,                                                                              //
-                   addr_str);                                                                         //
-        }
-#endif
-
         if (!tabMCast[indexMacast].bIsJoined)
         {
-#if P_SOCKET_MCAST_DEBUG == 1
-            {
-                char addr_str[32];
-                inet_ntop(AF_INET, pAddr, addr_str, sizeof(addr_str));
-                printk("\r\nP_SOCKET_UDP: register mcast ip = %s to L1 (first register) for socket = %d\r\n", //
-                       addr_str,                                                                              //
-                       sock);                                                                                 //
-            }
-#endif
             // Register L1 multicast
             struct net_if* ptrNetIf = NULL;
 #if defined(CONFIG_NET_L2_ETHERNET)
@@ -980,9 +894,6 @@ SOPC_ReturnStatus P_SOCKET_MCAST_join_mcast_group(int32_t sock, struct in_addr* 
             if (ptrNetIf != NULL)
             {
                 ethernet_add_mcast(ptrNetIf, pAddr);
-#if P_SOCKET_MCAST_DEBUG == 1
-                printk("\r\nP_SOCKET_UDP: Call ethernet mcast\r\n");
-#endif
             }
             tabMCast[indexMacast].bIsJoined = true;
         }
@@ -994,10 +905,6 @@ SOPC_ReturnStatus P_SOCKET_MCAST_join_mcast_group(int32_t sock, struct in_addr* 
 
     P_SOCKET_UnLockMcastTable();
 
-#if P_SOCKET_MCAST_DEBUG == 1
-    printk("\r\nP_SOCKET_UDP: Exit join_mcast_group\r\n");
-    P_SOCKET_MCAST_print_sock_from_mcast();
-#endif
     return status;
 }
 
@@ -1009,11 +916,6 @@ bool P_SOCKET_MCAST_soft_filter(int sock, struct in_addr* pAddr)
     bool bIsFound = false;
     bool bSockIsFound = false;
     bool bResult = false;
-
-#if P_SOCKET_MCAST_DEBUG == 1
-    printk("\r\nP_SOCKET_UDP: Enter verify mcast group\r\n");
-    P_SOCKET_MCAST_print_sock_from_mcast();
-#endif
 
     if (SOPC_INVALID_SOCKET == sock || NULL == pAddr)
     {
@@ -1057,10 +959,6 @@ bool P_SOCKET_MCAST_soft_filter(int sock, struct in_addr* pAddr)
 
     P_SOCKET_UnLockMcastTable();
 
-#if P_SOCKET_MCAST_DEBUG == 1
-    printk("\r\nP_SOCKET_UDP: Exit verify mcast group\r\n");
-    P_SOCKET_MCAST_print_sock_from_mcast();
-#endif
     return bResult;
 }
 
@@ -1072,11 +970,6 @@ SOPC_ReturnStatus P_SOCKET_MCAST_leave_mcast_group(int sock, struct in_addr* add
     uint32_t indexMasock = 0;
     bool bIsFound = false;
     bool bSockIsFound = false;
-
-#if P_SOCKET_MCAST_DEBUG == 1
-    printk("\r\nP_SOCKET_UDP: Enter leave mcast group\r\n");
-    P_SOCKET_MCAST_print_sock_from_mcast();
-#endif
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
@@ -1133,29 +1026,9 @@ SOPC_ReturnStatus P_SOCKET_MCAST_leave_mcast_group(int sock, struct in_addr* add
                 break;
             }
         }
-#if P_SOCKET_MCAST_DEBUG == 1
-        {
-            char addr_str[32];
-            inet_ntop(AF_INET, add, addr_str, sizeof(addr_str));
-            printk("\r\nP_SOCKET_UDP: remove socket = %d for mcast ip = %s\r\n", //
-                   sock,                                                         //
-                   addr_str                                                      //
-            );                                                                   //
-        }
-#endif
+
         if (!bSockIsFound)
         {
-#if P_SOCKET_MCAST_DEBUG == 1
-            {
-                char addr_str[32];
-                inet_ntop(AF_INET, add, addr_str, sizeof(addr_str));
-                printk(
-                    "\r\nP_SOCKET_UDP: remove mcast ip = %s (L1 and L2) for socket = %d because no more joined \r\n", //
-                    addr_str,                                                                                         //
-                    sock                                                                                              //
-                );                                                                                                    //
-            }
-#endif
             // Unregister L1 and L2 multicast
             struct net_if* ptrNetIf = NULL;
 #if defined(CONFIG_NET_L2_ETHERNET)
@@ -1178,35 +1051,12 @@ SOPC_ReturnStatus P_SOCKET_MCAST_leave_mcast_group(int sock, struct in_addr* add
 
     P_SOCKET_UnLockMcastTable();
 
-#if P_SOCKET_MCAST_DEBUG == 1
-    printk("\r\nP_SOCKET_UDP: Exit leave mcast group\r\n");
-    P_SOCKET_MCAST_print_sock_from_mcast();
-#endif
     return status;
 }
-
-#if P_SOCKET_MCAST_DEBUG == 1
-void P_SOCKET_MCAST_print_sock_from_mcast(void)
-{
-    // Search mcast
-    for (int i = 0; i < 1; i++)
-    {
-        printk("\r\nP_SOCKET_UDP: tabMCast[%d].addr.s_addr=%d\r\n", i, tabMCast[i].addr.s_addr);
-        for (int j = 0; j < 2; j++)
-        {
-            printk("\r\nP_SOCKET_UDP: tabMCast[%d].sock[%d]=%d\r\n", i, j, tabMCast[i].sock[j]);
-        }
-    }
-}
-#endif
 
 // Remove socket from all mcast.
 void P_SOCKET_MCAST_remove_sock_from_mcast(int sock)
 {
-#if P_SOCKET_MCAST_DEBUG == 1
-    printk("\r\nP_SOCKET_UDP: Enter remove_sock_from_mcast\r\n");
-    P_SOCKET_MCAST_print_sock_from_mcast();
-#endif
     if (SOPC_INVALID_SOCKET == sock)
     {
         return;
@@ -1220,20 +1070,11 @@ void P_SOCKET_MCAST_remove_sock_from_mcast(int sock)
             (void) P_SOCKET_MCAST_leave_mcast_group(sock, &tabMCast[i].addr);
         }
     }
-#if P_SOCKET_MCAST_DEBUG == 1
-    printk("\r\nP_SOCKET_UDP: Exit remove_sock_from_mcast\r\n");
-    P_SOCKET_MCAST_print_sock_from_mcast();
-#endif
 }
 
 // Add socket to mcast
 SOPC_ReturnStatus P_SOCKET_MCAST_add_sock_to_mcast(int sock, struct in_addr* add)
 {
-#if P_SOCKET_MCAST_DEBUG == 1
-    printk("\r\nP_SOCKET_UDP: Enter add_sock_to_mcast\r\n");
-    P_SOCKET_MCAST_print_sock_from_mcast();
-#endif
-
     if (SOPC_INVALID_SOCKET == sock || NULL == add)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -1269,19 +1110,6 @@ SOPC_ReturnStatus P_SOCKET_MCAST_add_sock_to_mcast(int sock, struct in_addr* add
         {
             if (tabMCast[i].addr.s_addr == 0)
             {
-#if P_SOCKET_MCAST_DEBUG == 1
-                {
-                    char addr_str[32];
-                    inet_ntop(AF_INET, add, addr_str, sizeof(addr_str));
-                    printk(
-                        "\r\nP_SOCKET_UDP: add new mcast ip = %s (L2) for to allow bind socket = %d"
-                        "\r\n",   //
-                        addr_str, //
-                        sock      //
-                    );            //
-                }
-#endif
-
                 // Register L2 multicast to allow bind
 
                 struct net_if* ptrNetIf = NULL;
@@ -1311,17 +1139,11 @@ SOPC_ReturnStatus P_SOCKET_MCAST_add_sock_to_mcast(int sock, struct in_addr* add
     }
     else
     {
-#if P_SOCKET_MCAST_DEBUG == 1
-        printk("\r\nP_SOCKET_UDP: add_sock_to_mcast / mcast already registered \r\n");
-#endif
         // Search if already registered
         for (int j = 0; j < MAX_ZEPHYR_SOCKET; j++)
         {
             if (tabMCast[indexMacast].sock[j] == sock)
             {
-#if P_SOCKET_MCAST_DEBUG == 1
-                printk("\r\nP_SOCKET_UDP: add_sock_to_mcast / sock already registered \r\n");
-#endif
                 bSockIsFound = true;
                 indexMasock = j;
                 break;
@@ -1343,18 +1165,6 @@ SOPC_ReturnStatus P_SOCKET_MCAST_add_sock_to_mcast(int sock, struct in_addr* add
 
     if (bIsFound && !bSockIsFound)
     {
-#if P_SOCKET_MCAST_DEBUG == 1
-        {
-            char addr_str[32];
-
-            inet_ntop(AF_INET, add, addr_str, sizeof(addr_str));
-
-            printk("\r\nP_SOCKET_UDP: add new socket = %d to mcast = %s \r\n", //
-                   sock,                                                       //
-                   addr_str                                                    //
-            );                                                                 //
-        }
-#endif
         tabMCast[indexMacast].sock[indexMasock] = sock;
     }
     else
@@ -1363,11 +1173,6 @@ SOPC_ReturnStatus P_SOCKET_MCAST_add_sock_to_mcast(int sock, struct in_addr* add
     }
 
     P_SOCKET_UnLockMcastTable();
-
-#if P_SOCKET_MCAST_DEBUG == 1
-    printk("\r\nP_SOCKET_UDP: Exit add_sock_to_mcast\r\n");
-    P_SOCKET_MCAST_print_sock_from_mcast();
-#endif
 
     return status;
 }
