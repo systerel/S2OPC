@@ -28,20 +28,6 @@
 #include "kernel.h"
 #include "sys/printk.h"
 
-#ifndef __INT32_MAX__
-#include "toolchain/xcc_missing_defs.h"
-#endif
-
-#ifndef NULL
-#define NULL ((void*) 0)
-#endif
-#ifndef K_FOREVER
-#define K_FOREVER (-1)
-#endif
-#ifndef K_NO_WAIT
-#define K_NO_WAIT 0
-#endif
-
 /* s2opc includes */
 
 #include "sopc_enums.h"
@@ -50,8 +36,6 @@
 /* platform dep includes */
 
 #include "p_threads.h"
-
-#define P_THREAD_DEBUG (0)
 
 // *** Private enumeration definition ***
 
@@ -113,18 +97,10 @@ static void P_THREAD_InternalCallback(void* pContext, void* pNotUsed1, void* pNo
 
     tThreadWks* pWks = (tThreadWks*) pContext;
 
-#if (P_THREAD_DEBUG == 1)
-    printk("\r\nP_THREAD: Thread callback entry -> thread has been started : %d\r\n", pWks->slotId);
-#endif
-
     if (pWks->userCallback != NULL)
     {
         pWks->userCallback(pWks->userContext);
     }
-
-#if (P_THREAD_DEBUG == 1)
-    printk("\r\nP_THREAD: Thread callback exit -> thread will be ended : %d\r\n", pWks->slotId);
-#endif
 
     k_sem_give(&pWks->kSemThreadEnded);
 
@@ -179,17 +155,8 @@ eThreadResult P_THREAD_Destroy(tThreadHandle** ppWks)
 
     if (E_THREAD_RESULT_OK == result)
     {
-#if (P_THREAD_DEBUG == 1)
-        printk("\r\nP_THREAD: Thread joined, handle well destroyed\r\n");
-#endif
         SOPC_Free(*ppWks);
         *ppWks = NULL;
-    }
-    else
-    {
-#if (P_THREAD_DEBUG == 1)
-        printk("\r\nP_THREAD: Thread not joined, handle NOT destroyed\r\n");
-#endif
     }
 
     return result;
@@ -224,17 +191,10 @@ static eThreadResult P_THREAD_Init(tThreadHandle* pWks, ptrFct callback, void* p
         memset(&gGlbThreadWks, 0, sizeof(struct T_GLOBAL_THREAD_WKS));
         k_mutex_init(&gGlbThreadWks.kLock);
         gGlbThreadWks.wGlobalWksStatus = E_THREAD_WKS_STATUS_INITIALIZED;
-
-#if (P_THREAD_DEBUG == 1)
-        printk("\r\nP_THREAD: Thread middleware not initialized, so initializing it...\r\n");
-#endif
     }
 
     while (E_THREAD_WKS_STATUS_INITIALIZED != gGlbThreadWks.wGlobalWksStatus)
     {
-#if (P_THREAD_DEBUG == 1)
-        printk("\r\nP_THREAD: Thread middleware initializing, so wait...\r\n");
-#endif
         k_yield();
     }
 
@@ -248,9 +208,6 @@ static eThreadResult P_THREAD_Init(tThreadHandle* pWks, ptrFct callback, void* p
         {
             bFound = true;
             slotId = iIter + 1;
-#if (P_THREAD_DEBUG == 1)
-            printk("\r\nP_THREAD: Slot found to create new thread %d", slotId);
-#endif
         }
     }
 
@@ -303,10 +260,6 @@ static eThreadResult P_THREAD_Init(tThreadHandle* pWks, ptrFct callback, void* p
 
     k_mutex_unlock(&gGlbThreadWks.kLock);
 
-#if (P_THREAD_DEBUG == 1)
-    printk("\r\nP_THREAD: Thread slot returned = %d for thread handle %08lX", slotId, (long unsigned int) pWks);
-#endif
-
     pWks->slotId = slotId;
 
     return result;
@@ -332,24 +285,12 @@ static eThreadResult P_THREAD_Join(tThreadHandle* pWks)
         // status not initialized, unlock then return;
         if (E_THREAD_STATUS_NOT_INITIALIZED == gGlbThreadWks.tab[slotId - 1].status)
         {
-#if (P_THREAD_DEBUG == 1)
-            printk("\r\nP_THREAD: Error, thread %d not initialized - handle thread = %08lX\r\n", //
-                   slotId,                                                                       //
-                   (long unsigned int) gGlbThreadWks.tab[slotId - 1].debugExternalHandle);       //
-#endif
             result = E_THREAD_RESULT_NOK;
         }
 
         if (E_THREAD_RESULT_OK == result)
         {
             gGlbThreadWks.tab[slotId - 1].nbThreadsJoining++;
-#if (P_THREAD_DEBUG == 1)
-            printk("\r\nP_THREAD: Try to join %d, nb joining this thread = %d - handle thread = %08lX\r\n", //
-                   slotId,                                                                                  //
-                   gGlbThreadWks.tab[slotId - 1].nbThreadsJoining,                                          //
-                   (long unsigned int) gGlbThreadWks.tab[slotId - 1].debugExternalHandle                    //
-            );
-#endif
         }
     }
     k_mutex_unlock(&gGlbThreadWks.kLock);
@@ -357,19 +298,7 @@ static eThreadResult P_THREAD_Join(tThreadHandle* pWks)
     if (E_THREAD_RESULT_OK == result)
     {
         // Unlock then wait
-#if (P_THREAD_DEBUG == 1)
-        printk("\r\nP_THREAD: Waiting %d - handle thread = %08lX\r\n",                 //
-               slotId,                                                                 //
-               (long unsigned int) gGlbThreadWks.tab[slotId - 1].debugExternalHandle); //
-#endif
         k_sem_take(&gGlbThreadWks.tab[slotId - 1].kSemThreadEnded, K_FOREVER);
-
-#if (P_THREAD_DEBUG == 1)
-        printk("\r\nP_THREAD: Signal ended received for %d - handle thread = %08lX\r\n", //
-               slotId,                                                                   //
-               (long unsigned int) gGlbThreadWks.tab[slotId - 1].debugExternalHandle);   //
-#endif
-
         k_mutex_lock(&gGlbThreadWks.kLock, K_FOREVER);
         {
             // Remove joining thread using this hanlde
@@ -382,11 +311,6 @@ static eThreadResult P_THREAD_Join(tThreadHandle* pWks)
             // If end, OK, else JOINING on going...
             if (0 == gGlbThreadWks.tab[slotId - 1].nbThreadsJoining)
             {
-#if (P_THREAD_DEBUG == 1)
-                printk("\r\nP_THREAD: Last join operation on thread %d - handle thread = %08lX\r\n", //
-                       slotId,                                                                       //
-                       (long unsigned int) gGlbThreadWks.tab[slotId - 1].debugExternalHandle);       //
-#endif
                 k_thread_abort(gGlbThreadWks.tab[slotId - 1].threadHandle);
                 gGlbThreadWks.tab[slotId - 1].status = E_THREAD_STATUS_NOT_INITIALIZED;
                 memset(&gGlbThreadWks.tab[slotId - 1], 0, sizeof(tThreadWks));
@@ -435,28 +359,15 @@ SOPC_ReturnStatus SOPC_Thread_Join(Thread thread)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-#if (P_THREAD_DEBUG == 1)
-    printk("\r\nP_THREAD: Join on thread %d, handle = %08lX\r\n", //
-           thread->slotId,                                        //
-           (long unsigned int) thread);                           //
-#endif
+
     eThreadResult resultPTHREAD = P_THREAD_Destroy(&thread);
 
     if (E_THREAD_RESULT_OK == resultPTHREAD)
     {
-#if (P_THREAD_DEBUG == 1)
-        printk("\r\nP_THREAD: Destroy for thread handle = %08lX\r\n", //
-               (long unsigned int) thread);                           //
-#endif
-        // P_THREAD_Destroy(&thread);
         resultSOPC = SOPC_STATUS_OK;
     }
     else
     {
-#if (P_THREAD_DEBUG == 1)
-        printk("\r\nP_THREAD: Error on join, do not destroy thread handle = %08lX\r\n", //
-               (long unsigned int) thread);                                             //
-#endif
         resultSOPC = SOPC_STATUS_INVALID_STATE;
     }
 
