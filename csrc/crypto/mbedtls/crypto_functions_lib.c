@@ -715,6 +715,8 @@ SOPC_ReturnStatus CryptoProvider_AsymSign_RSASSA_PKCS1_v15_w_SHA1(const SOPC_Cry
                                                                   const SOPC_AsymmetricKey* pKey,
                                                                   uint8_t* pSignature)
 {
+    /* TODO: s2opc_tpm2_ext_rsa_sign should take into account the md_alg algorithm in its implementation */
+    assert(false && "The current implementation of the TPM2 library does not work with PKCS1v15 with SHA1");
     uint8_t* hash = NULL;
     const mbedtls_md_info_t* pmd_info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA1);
     size_t sigLength = 0; /* TPM2: sig length was asserted up in the calls, but it's required for pk_sign */
