@@ -22,6 +22,14 @@
 #include "device.h"
 #include "drivers/entropy.h"
 
+#ifndef __INT32_MAX__
+#include "toolchain/xcc_missing_defs.h"
+#endif
+
+#ifndef NULL
+#define NULL ((void*) 0)
+#endif
+
 #if defined(CONFIG_MBEDTLS)
 #if !defined(CONFIG_MBEDTLS_CFG_FILE)
 #include "mbedtls/config.h"
@@ -34,9 +42,14 @@
 #define CONFIG_ENTROPY_NAME ((const char*) ("TRNG"))
 #endif
 
+#define P_ENTROPY_DEBUG (0)
+
 int32_t mbedtls_hardware_poll(void* data, uint8_t* output, int32_t len, int32_t* olen)
 {
     (void) data;
+#if P_ENTROPY_DEBUG == 1
+    printk("\r\n mbedtls_hardware_poll - %d - \r\n", len);
+#endif
     /* static to obtain it once in a first call */
     static struct device* dev = NULL;
     int err = (-1);
@@ -48,9 +61,15 @@ int32_t mbedtls_hardware_poll(void* data, uint8_t* output, int32_t len, int32_t*
 
     if (NULL == dev)
     {
+#if P_ENTROPY_DEBUG == 1
+        printk("\r\nFirst call to obtain entropy device %s\r\n", CONFIG_ENTROPY_NAME);
+#endif
         dev = device_get_binding(CONFIG_ENTROPY_NAME);
         if (NULL == dev)
         {
+#if P_ENTROPY_DEBUG == 1
+            printk("\r\nFailed to obtain entropy device\r\n");
+#endif
             return -1;
         }
     }
@@ -58,8 +77,20 @@ int32_t mbedtls_hardware_poll(void* data, uint8_t* output, int32_t len, int32_t*
     err = entropy_get_entropy(dev, output, len);
     if (err != 0)
     {
+#if P_ENTROPY_DEBUG == 1
+        printk("\r\nFailed to obtain entropy, err %d\r\n", err);
+#endif
         return -1;
     }
+
+#if P_ENTROPY_DEBUG == 1
+    printk("\r\n Entropy = ");
+    for (int32_t i = 0; i < len; i++)
+    {
+        printk("%02X ", output[i]);
+    }
+    printk("\r\n");
+#endif
 
     *olen = len;
     return 0;
