@@ -831,7 +831,6 @@ eSynchroResult P_SYNCHRO_MUTEX_Unlock(tMutVarHandle slotId) // Mutex handle
         // This result indicates successful with waiters on this mutex. So, yield to avoid mutex starving
         // by a thread looping on this mutex.
         if (E_SYNCHRO_RESULT_OK == result)
-
         {
 #if P_SYNCHRO_MUTEX_DEBUG == 1
             printk("\r\nP_MUTEX: Slot id %d - UnLock - yield from %08lX\r\n", //
