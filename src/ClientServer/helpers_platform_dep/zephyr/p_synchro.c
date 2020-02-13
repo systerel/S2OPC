@@ -438,39 +438,37 @@ eSynchroResult P_SYNCHRO_MUTEX_Clear(tMutVarHandle slotId)
 
     do
     {
+        // Set quit flag
+        P_SYNCHRO_Mutex_Set_Quit_Flag(p);
+
+        // Signal all to unlock all P_SYNCHRO_MUTEX_Lock function
+        P_SYNCHRO_CONDITION_SignalAll(p->condVarHdl);
+
+        // Try to go to de initializing status
+        eSyncStatus fromStatus = __sync_val_compare_and_swap(&p->status,                                     //
+                                                             E_SYNC_STATUS_INITIALIZED | MASK_SET_QUIT_FLAG, //
+                                                             E_SYNC_STATUS_DEINITIALIZING);                  //
+
+        // If successful clear condition variable, else yield and retry
+        if (E_SYNC_STATUS_INITIALIZED == (fromStatus & ~MASK_SET_QUIT_FLAG))
         {
-            // Set quit flag
-            P_SYNCHRO_Mutex_Set_Quit_Flag(p);
-
-            // Signal all to unlock all P_SYNCHRO_MUTEX_Lock function
-            P_SYNCHRO_CONDITION_SignalAll(p->condVarHdl);
-
-            // Try to go to de initializing status
-            eSyncStatus fromStatus = __sync_val_compare_and_swap(&p->status,                                     //
-                                                                 E_SYNC_STATUS_INITIALIZED | MASK_SET_QUIT_FLAG, //
-                                                                 E_SYNC_STATUS_DEINITIALIZING);                  //
-
-            // If successful clear condition variable, else yield and retry
-            if (E_SYNC_STATUS_INITIALIZED == (fromStatus & ~MASK_SET_QUIT_FLAG))
-            {
-                P_SYNCHRO_CONDITION_Clear(p->condVarHdl);  // Clear condition variable
-                p->condVarHdl = UINT32_MAX;                // Handle set to invalid handle
-                p->lockCounter = 0;                        // Reset lock counter
-                p->ownerThread = NULL;                     // Reset owner thread
-                p->status = E_SYNC_STATUS_NOT_INITIALIZED; // Set status to not initialized
-                result = E_SYNCHRO_RESULT_OK;              // Terminates loop
-            }
-            else if ((E_SYNC_STATUS_DEINITIALIZING == (fromStatus & ~MASK_SET_QUIT_FLAG)) ||
-                     (E_SYNC_STATUS_INITIALIZING == (fromStatus & ~MASK_SET_QUIT_FLAG)) ||
-                     ((fromStatus & ~MASK_SET_QUIT_FLAG) > E_SYNC_STATUS_INITIALIZED))
-            {
-                result = E_SYNCHRO_RESULT_INVALID_STATE; // Invalid state, retry...
-                k_yield();
-            }
-            else
-            {
-                result = E_SYNCHRO_RESULT_NOK; // Already cleared, nok, terminates loop
-            }
+            P_SYNCHRO_CONDITION_Clear(p->condVarHdl);  // Clear condition variable
+            p->condVarHdl = UINT32_MAX;                // Handle set to invalid handle
+            p->lockCounter = 0;                        // Reset lock counter
+            p->ownerThread = NULL;                     // Reset owner thread
+            p->status = E_SYNC_STATUS_NOT_INITIALIZED; // Set status to not initialized
+            result = E_SYNCHRO_RESULT_OK;              // Terminates loop
+        }
+        else if ((E_SYNC_STATUS_DEINITIALIZING == (fromStatus & ~MASK_SET_QUIT_FLAG)) ||
+                 (E_SYNC_STATUS_INITIALIZING == (fromStatus & ~MASK_SET_QUIT_FLAG)) ||
+                 ((fromStatus & ~MASK_SET_QUIT_FLAG) > E_SYNC_STATUS_INITIALIZED))
+        {
+            result = E_SYNCHRO_RESULT_INVALID_STATE; // Invalid state, retry...
+            k_yield();
+        }
+        else
+        {
+            result = E_SYNCHRO_RESULT_NOK; // Already cleared, nok, terminates loop
         }
     } while (E_SYNCHRO_RESULT_INVALID_STATE == result);
 
@@ -817,7 +815,7 @@ SOPC_ReturnStatus Condition_Clear(Condition* cond)
     return resSOPC;
 }
 
-// Must be called between lock and unlock of Mutex ued to wait on condition
+// Must be called between lock and unlock of Mutex used to wait on condition
 SOPC_ReturnStatus Condition_SignalAll(Condition* cond)
 {
     if (NULL == cond)
