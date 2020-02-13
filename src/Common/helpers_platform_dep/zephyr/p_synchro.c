@@ -23,6 +23,20 @@
 
 #include "kernel.h"
 
+#ifndef __INT32_MAX__
+#include "toolchain/xcc_missing_defs.h"
+#endif
+
+#ifndef NULL
+#define NULL ((void*) 0)
+#endif
+#ifndef K_FOREVER
+#define K_FOREVER (-1)
+#endif
+#ifndef K_NO_WAIT
+#define K_NO_WAIT 0
+#endif
+
 /* s2opc includes */
 
 #include "sopc_enums.h"
@@ -30,6 +44,11 @@
 /* platform dep includes */
 
 #include "p_synchro.h"
+
+/* debug printk activation */
+
+#define P_SYNCHRO_CONDITION_DEBUG (0)
+#define P_SYNCHRO_MUTEX_DEBUG (0)
 
 /* Flag bit used into status uint32 value to indicates that quit request is on going */
 
@@ -134,6 +153,10 @@ tCondVarHandle P_SYNCHRO_CONDITION_Initialize(void)
 
             if (bTransition)
             {
+#if P_SYNCHRO_CONDITION_DEBUG == 1
+                printk("\r\nP_SYNCHRO: slot %d reserved\r\n", //
+                       i);                                    //
+#endif
                 slotId = i;
                 break;
             }
@@ -143,6 +166,9 @@ tCondVarHandle P_SYNCHRO_CONDITION_Initialize(void)
     // If slot found, slotId < MAX_COND_VAR
     if (slotId >= MAX_COND_VAR)
     {
+#if P_SYNCHRO_CONDITION_DEBUG == 1
+        printk("\r\nP_SYNCHRO: init error, no slot found\r\n");
+#endif
         result = E_SYNCHRO_RESULT_NOK;
     }
 
@@ -153,11 +179,23 @@ tCondVarHandle P_SYNCHRO_CONDITION_Initialize(void)
         tCondVar* p = &gCondVarWks.tabWks[slotId];
         for (uint32_t i = 0; i < MAX_COND_VAR_WAITERS; i++)
         {
+#if P_SYNCHRO_CONDITION_DEBUG == 1
+            printk("\r\nP_SYNCHRO: slot %d - init signal %d\r\n", //
+                   slotId,                                        //
+                   i);                                            //
+#endif
             k_sem_init(&p->tabSignals[i].signal, 0, 1);
         }
 
         eSyncStatus desiredStatus = E_SYNC_STATUS_INITIALIZED;
         __atomic_store(&p->status, &desiredStatus, __ATOMIC_SEQ_CST);
+    }
+    else
+    {
+#if P_SYNCHRO_CONDITION_DEBUG == 1
+        printk("\r\nP_SYNCHRO: slot %d - init failure, invalid state\r\n", //
+               slotId);                                                    //
+#endif
     }
 
     return slotId;
@@ -181,6 +219,10 @@ eSynchroResult P_SYNCHRO_CONDITION_SignalAll(tCondVarHandle slotId) // handle re
     __atomic_load(&p->status, &readStatus, __ATOMIC_SEQ_CST);
     if ((readStatus & MASK_SET_QUIT_FLAG) != 0)
     {
+#if P_SYNCHRO_CONDITION_DEBUG == 1
+        printk("\r\nP_SYNCHRO: slot %d - sig all - can't be performed, quit signal set\r\n", //
+               slotId);                                                                      //
+#endif
         result = E_SYNCHRO_RESULT_NOK;
     }
 
@@ -197,6 +239,11 @@ eSynchroResult P_SYNCHRO_CONDITION_SignalAll(tCondVarHandle slotId) // handle re
                 __atomic_load(&p->tabSignals[i].sigStatus, &readSignal, __ATOMIC_SEQ_CST);
                 if (E_SIG_STATUS_WAIT_FOR_SIGNAL == readSignal)
                 {
+#if P_SYNCHRO_CONDITION_DEBUG == 1
+                    printk("\r\nP_SYNCHRO: slot %d - sig all - sig %d\r\n", //
+                           slotId,                                          //
+                           i);                                              //
+#endif
                     k_sem_give(&p->tabSignals[i].signal);
                     result = E_SYNCHRO_RESULT_OK;
                 }
@@ -234,6 +281,10 @@ eSynchroResult P_SYNCHRO_CONDITION_UnlockAndWait(tCondVarHandle slotId, // Handl
     // Check if quit flag is set. If set, return NOK.
     if ((readStatus & MASK_SET_QUIT_FLAG) != 0)
     {
+#if P_SYNCHRO_CONDITION_DEBUG == 1
+        printk("\r\nP_SYNCHRO: slot %d - unlock and wait - can't be performed, quit signal set\r\n", //
+               slotId);                                                                              //
+#endif
         result = E_SYNCHRO_RESULT_NOK;
     }
 
@@ -265,6 +316,11 @@ eSynchroResult P_SYNCHRO_CONDITION_UnlockAndWait(tCondVarHandle slotId, // Handl
             if (bTransition)
             {
                 k_sem_reset(&p->tabSignals[signalId].signal);
+#if P_SYNCHRO_CONDITION_DEBUG == 1
+                printk("\r\nP_SYNCHRO: slot %d - unlock and wait - wait on %d\r\n", //
+                       slotId,                                                      //
+                       signalId);                                                   //
+#endif
 
                 // Mark signal as ready to be signaled.
                 eSigStatus sigStatus = E_SIG_STATUS_WAIT_FOR_SIGNAL;
@@ -279,6 +335,11 @@ eSynchroResult P_SYNCHRO_CONDITION_UnlockAndWait(tCondVarHandle slotId, // Handl
                 }
 
                 // Wait for signal
+#if P_SYNCHRO_CONDITION_DEBUG == 1
+                printk("\r\nP_SYNCHRO: slot %d - signal %d - unlock and wait - after cbUnlock \r\n", //
+                       slotId,                                                                       //
+                       signalId);                                                                    //
+#endif
                 int sem_take_res = 0; // Used to check timeout.
 
                 if (UINT32_MAX == timeoutMs)
@@ -296,12 +357,23 @@ eSynchroResult P_SYNCHRO_CONDITION_UnlockAndWait(tCondVarHandle slotId, // Handl
                                &sigStatus,                         //
                                __ATOMIC_SEQ_CST);                  //
 
+#if P_SYNCHRO_CONDITION_DEBUG == 1
+                printk("\r\nP_SYNCHRO: slot %d - signal %d - unlock and wait - after k_sem_take\r\n", //
+                       slotId,                                                                        //
+                       signalId);                                                                     //
+#endif
+
                 // Re lock generic mutex
                 if (cbLock != NULL && pMutex != NULL)
                 {
                     cbLock(pMutex);
                 }
 
+#if P_SYNCHRO_CONDITION_DEBUG == 1
+                printk("\r\nP_SYNCHRO: slot %d - signal %d - unlock and wait - after cbLock\r\n", //
+                       slotId,                                                                    //
+                       signalId);                                                                 //
+#endif
                 // Check if quit flag is setted. If set, result NOK.
                 readStatus = E_SYNC_STATUS_NOT_INITIALIZED;
                 __atomic_load(&p->status, &readStatus, __ATOMIC_SEQ_CST);
@@ -309,6 +381,11 @@ eSynchroResult P_SYNCHRO_CONDITION_UnlockAndWait(tCondVarHandle slotId, // Handl
                 if ((readStatus & MASK_SET_QUIT_FLAG) != 0)
                 {
                     result = E_SYNCHRO_RESULT_NOK;
+#if P_SYNCHRO_CONDITION_DEBUG == 1
+                    printk("\r\nP_SYNCHRO: slot %d - unlock and wait - signal after quit on %d\r\n", //
+                           slotId,                                                                   //
+                           signalId);                                                                //
+#endif
                 }
                 else
                 {
@@ -316,11 +393,28 @@ eSynchroResult P_SYNCHRO_CONDITION_UnlockAndWait(tCondVarHandle slotId, // Handl
                     if (sem_take_res != 0)
                     {
                         result = E_SYNCHRO_RESULT_TMO;
+#if P_SYNCHRO_CONDITION_DEBUG == 1
+                        printk("\r\nP_SYNCHRO: slot %d - unlock and wait - tmo on %d\r\n", //
+                               slotId,                                                     //
+                               signalId);                                                  //
+#endif
                     }
+#if P_SYNCHRO_CONDITION_DEBUG == 1
+                    else
+                    {
+                        printk("\r\nP_SYNCHRO: slot %d - unlock and wait - signal on %d\r\n", //
+                               slotId,                                                        //
+                               signalId);                                                     //
+                    }
+#endif
                 }
             }
             else
             {
+#if P_SYNCHRO_CONDITION_DEBUG == 1
+                printk("\r\nP_SYNCHRO: slot %d - unlock and wait - can't be performed, max signal waitings\r\n", //
+                       slotId);                                                                                  //
+#endif
                 result = E_SYNCHRO_RESULT_NOK;
             }
 
@@ -351,6 +445,11 @@ eSynchroResult P_SYNCHRO_CONDITION_Clear(tCondVarHandle slotId)
 
     do
     {
+#if P_SYNCHRO_CONDITION_DEBUG == 1
+        printk("\r\nP_SYNCHRO: slot %d - clear - set flag\r\n", //
+               slotId);                                         //
+#endif
+
         // Set quit flag
         P_SYNCHRO_Condition_Set_Quit_Flag(p);
 
@@ -362,6 +461,11 @@ eSynchroResult P_SYNCHRO_CONDITION_Clear(tCondVarHandle slotId)
                 __atomic_load(&p->tabSignals[i].sigStatus, &sigStatus, __ATOMIC_SEQ_CST);
                 if (E_SIG_STATUS_WAIT_FOR_SIGNAL == sigStatus)
                 {
+#if P_SYNCHRO_CONDITION_DEBUG == 1
+                    printk("\r\nP_SYNCHRO: slot %d - clear - set signal %d\r\n", //
+                           slotId,                                               //
+                           i);                                                   //
+#endif
                     k_sem_give(&p->tabSignals[i].signal);
                 }
             }
@@ -387,6 +491,10 @@ eSynchroResult P_SYNCHRO_CONDITION_Clear(tCondVarHandle slotId)
             }
 
             result = E_SYNCHRO_RESULT_OK;
+#if P_SYNCHRO_CONDITION_DEBUG == 1
+            printk("\r\nP_SYNCHRO: slot %d - clear - successful\r\n", //
+                   slotId);                                           //
+#endif
 
             desiredStatus = E_SYNC_STATUS_NOT_INITIALIZED;
             __atomic_store(&p->status, &desiredStatus, __ATOMIC_SEQ_CST);
@@ -397,12 +505,20 @@ eSynchroResult P_SYNCHRO_CONDITION_Clear(tCondVarHandle slotId)
                  E_SYNC_STATUS_INITIALIZED < (expectedStatus & ~MASK_SET_QUIT_FLAG) ||
                  E_SYNC_STATUS_INITIALIZING == (expectedStatus & ~MASK_SET_QUIT_FLAG))
         {
+#if P_SYNCHRO_CONDITION_DEBUG == 1
+            printk("\r\nP_SYNCHRO: slot %d - clear - some waiting on engaged, yield and retry...\r\n", //
+                   slotId);                                                                            //
+#endif
             result = E_SYNCHRO_RESULT_INVALID_STATE;
             k_yield();
         }
         // If state is not initialized, return NOK.
         else
         {
+#if P_SYNCHRO_CONDITION_DEBUG == 1
+            printk("\r\nP_SYNCHRO: slot %d - clear - error, already cleared...\r\n", //
+                   slotId);                                                          //
+#endif
             result = E_SYNCHRO_RESULT_NOK;
         }
     } while (E_SYNCHRO_RESULT_INVALID_STATE == result);
@@ -445,6 +561,9 @@ tMutVarHandle P_SYNCHRO_MUTEX_Initialize(void)
                                                          __ATOMIC_SEQ_CST);            //
             if (bTransition)
             {
+#if P_SYNCHRO_MUTEX_DEBUG == 1
+                printk("\r\nP_MUTEX: Slot id %d - Initialized\r\n", i);
+#endif
                 gMutVarWks.tabWks[i].condVarHdl = P_SYNCHRO_CONDITION_Initialize();
                 gMutVarWks.tabWks[i].lockCounter = 0;
                 gMutVarWks.tabWks[i].ownerThread = NULL;
@@ -475,9 +594,16 @@ eSynchroResult P_SYNCHRO_MUTEX_Clear(tMutVarHandle slotId)
 
     do
     {
+#if P_SYNCHRO_MUTEX_DEBUG == 1
+        printk("\r\nP_MUTEX: Slot id %d - clear set flag\r\n", //
+               slotId);                                        //
+#endif
         // Set quit flag
         P_SYNCHRO_Mutex_Set_Quit_Flag(p);
-
+#if P_SYNCHRO_MUTEX_DEBUG == 1
+        printk("\r\nP_MUTEX: Slot id %d - clear sig all to unblock waiting thread\r\n", //
+               slotId);                                                                 //
+#endif
         // Signal all to unlock all P_SYNCHRO_MUTEX_Lock function
         P_SYNCHRO_CONDITION_SignalAll(p->condVarHdl);
 
@@ -500,17 +626,29 @@ eSynchroResult P_SYNCHRO_MUTEX_Clear(tMutVarHandle slotId)
             p->ownerThread = NULL;                    // Reset owner thread
             desiredStatus = E_SYNC_STATUS_NOT_INITIALIZED;
             __atomic_store(&p->status, &desiredStatus, __ATOMIC_SEQ_CST);
+#if P_SYNCHRO_MUTEX_DEBUG == 1
+            printk("\r\nP_MUTEX: Slot id %d - clear performed successfully !!!\r\n", //
+                   slotId);                                                          //
+#endif
             result = E_SYNCHRO_RESULT_OK; // Terminates loop
         }
         else if ((E_SYNC_STATUS_DEINITIALIZING == (expectedStatus & ~MASK_SET_QUIT_FLAG)) ||
                  (E_SYNC_STATUS_INITIALIZING == (expectedStatus & ~MASK_SET_QUIT_FLAG)) ||
                  ((expectedStatus & ~MASK_SET_QUIT_FLAG) > E_SYNC_STATUS_INITIALIZED))
         {
+#if P_SYNCHRO_MUTEX_DEBUG == 1
+            printk("\r\nP_MUTEX: Slot id %d - clear can't be performed, yield and retry...\r\n", //
+                   slotId);                                                                      //
+#endif
             result = E_SYNCHRO_RESULT_INVALID_STATE; // Invalid state, retry...
             k_yield();
         }
         else
         {
+#if P_SYNCHRO_MUTEX_DEBUG == 1
+            printk("\r\nP_MUTEX: Slot id %d - clear not performed, already cleared\r\n", //
+                   slotId);                                                              //
+#endif
             result = E_SYNCHRO_RESULT_NOK; // Already cleared, nok, terminates loop
         }
     } while (E_SYNCHRO_RESULT_INVALID_STATE == result);
@@ -524,6 +662,10 @@ eSynchroResult P_SYNCHRO_MUTEX_Lock(tMutVarHandle slotId)
     eSynchroResult result = E_SYNCHRO_RESULT_OK;
     if (slotId >= MAX_MUT_VAR)
     {
+#if P_SYNCHRO_MUTEX_DEBUG == 1
+        printk("\r\nP_MUTEX: Slot id %d - Lock - Failure, invalid parameters\r\n", //
+               slotId);                                                            //
+#endif
         return E_SYNCHRO_RESULT_NOK;
     }
 
@@ -534,6 +676,10 @@ eSynchroResult P_SYNCHRO_MUTEX_Lock(tMutVarHandle slotId)
     // Verify if quit operation on going.
     if ((readStatus & MASK_SET_QUIT_FLAG) != 0)
     {
+#if P_SYNCHRO_MUTEX_DEBUG == 1
+        printk("\r\nP_MUTEX: Slot id %d - Lock - Failure, quit request set\r\n", //
+               slotId);                                                          //
+#endif
         return E_SYNCHRO_RESULT_NOK;
     }
 
@@ -549,6 +695,10 @@ eSynchroResult P_SYNCHRO_MUTEX_Lock(tMutVarHandle slotId)
             // Initialized new owner.
             if (0 == p->lockCounter)
             {
+#if P_SYNCHRO_MUTEX_DEBUG == 1
+                printk("\r\nP_MUTEX: Slot id %d - Lock - First lock\r\n", //
+                       slotId);                                           //
+#endif
                 p->ownerThread = k_current_get();
             }
 
@@ -558,6 +708,13 @@ eSynchroResult P_SYNCHRO_MUTEX_Lock(tMutVarHandle slotId)
             {
                 do
                 {
+#if P_SYNCHRO_MUTEX_DEBUG == 1
+                    printk("\r\nP_MUTEX: Slot id %d - Try Lock by thread %08lX owned by %08lX\r\n", //
+                           slotId,                                                                  //
+                           (unsigned long int) k_current_get(),                                     //
+                           (unsigned long int) p->ownerThread);                                     //
+#endif
+
                     result = P_SYNCHRO_CONDITION_UnlockAndWait(p->condVarHdl,                                         //
                                                                (void*) &p->lock,                                      //
                                                                P_SYNCHRO_MUTEX_CondVar_UnlockAndWait_Lock_Callback,   //
@@ -567,6 +724,10 @@ eSynchroResult P_SYNCHRO_MUTEX_Lock(tMutVarHandle slotId)
                     // If yes, return NOK.
                     if ((p->status & MASK_SET_QUIT_FLAG) != 0)
                     {
+#if P_SYNCHRO_MUTEX_DEBUG == 1
+                        printk("\r\nP_MUTEX: Slot id %d - Try lock - ignore, quit request set\r\n", //
+                               slotId);                                                             //
+#endif
                         result = E_SYNCHRO_RESULT_NOK;
                     }
                     else
@@ -575,6 +736,11 @@ eSynchroResult P_SYNCHRO_MUTEX_Lock(tMutVarHandle slotId)
                         // Raz lock counter and increment it.
                         if (E_SYNCHRO_RESULT_OK == result && 0 == p->lockCounter)
                         {
+#if P_SYNCHRO_MUTEX_DEBUG == 1
+                            printk("\r\nP_MUTEX: Slot id %d - Try Lock successful by %08lX \r\n", //
+                                   slotId,                                                        //
+                                   (unsigned long int) k_current_get());                          //
+#endif
                             p->ownerThread = k_current_get();
                             p->lockCounter = 1;
                         }
@@ -588,6 +754,11 @@ eSynchroResult P_SYNCHRO_MUTEX_Lock(tMutVarHandle slotId)
                             else
                             {
                                 // If condition variable invalid, returns NOK
+#if P_SYNCHRO_MUTEX_DEBUG == 1
+                                printk("\r\nP_MUTEX: Slot id %d - Try Lock failed by %08lX \r\n", //
+                                       slotId,                                                    //
+                                       (unsigned long int) k_current_get());                      //
+#endif
                                 result = E_SYNCHRO_RESULT_NOK;
                             }
                         }
@@ -598,6 +769,10 @@ eSynchroResult P_SYNCHRO_MUTEX_Lock(tMutVarHandle slotId)
             else
             {
                 // Current thread is the mutex owner, increment counter.
+#if P_SYNCHRO_MUTEX_DEBUG == 1
+                printk("\r\nP_MUTEX: Slot id %d - Lock - Recursive lock\r\n", //
+                       slotId);                                               //
+#endif
                 p->lockCounter++;
             }
         }
@@ -608,6 +783,10 @@ eSynchroResult P_SYNCHRO_MUTEX_Lock(tMutVarHandle slotId)
     }
     else
     {
+#if P_SYNCHRO_MUTEX_DEBUG == 1
+        printk("\r\nP_MUTEX: Slot id %d - Lock - Failure, invalid state\r\n", //
+               slotId);                                                       //
+#endif
         result = E_SYNCHRO_RESULT_NOK;
     }
     return result;
@@ -618,6 +797,10 @@ eSynchroResult P_SYNCHRO_MUTEX_Unlock(tMutVarHandle slotId) // Mutex handle
 {
     if (slotId >= MAX_MUT_VAR)
     {
+#if P_SYNCHRO_MUTEX_DEBUG == 1
+        printk("\r\nP_MUTEX: Slot id %d - UnLock - Failure, invalid parameters\r\n", //
+               slotId);                                                              //
+#endif
         return E_SYNCHRO_RESULT_NOK;
     }
 
@@ -628,6 +811,9 @@ eSynchroResult P_SYNCHRO_MUTEX_Unlock(tMutVarHandle slotId) // Mutex handle
     // Verify if quit operation on going.
     if ((readStatus & MASK_SET_QUIT_FLAG) != 0)
     {
+#if P_SYNCHRO_MUTEX_DEBUG == 1
+        printk("\r\nP_MUTEX: Slot id %d - UnLock - Failure, quit request set\r\n", slotId);
+#endif
         return E_SYNCHRO_RESULT_NOK;
     }
 
@@ -644,6 +830,11 @@ eSynchroResult P_SYNCHRO_MUTEX_Unlock(tMutVarHandle slotId) // Mutex handle
             // If current thread is the owner, unlock operation can be performed. Else returns NOK.
             if (p->ownerThread == k_current_get())
             {
+#if P_SYNCHRO_MUTEX_DEBUG == 1
+                printk("\r\nP_MUTEX: Slot id %d - UnLock - valid thread %08lX\r\n", //
+                       slotId,                                                      //
+                       (unsigned long int) p->ownerThread);                         //
+#endif
                 // Decrement lock counter.
                 // If reaches 0, signal to all trying lock that mutex has been unlocked by owner thread.
                 if (p->lockCounter > 0)
@@ -651,6 +842,11 @@ eSynchroResult P_SYNCHRO_MUTEX_Unlock(tMutVarHandle slotId) // Mutex handle
                     p->lockCounter--;
                     if (0 == p->lockCounter)
                     {
+#if P_SYNCHRO_MUTEX_DEBUG == 1
+                        printk("\r\nP_MUTEX: Slot id %d - UnLock - no owner, signal all from %08lX\r\n", //
+                               slotId,                                                                   //
+                               (unsigned long int) k_current_get());                                     //
+#endif
                         p->ownerThread = NULL;
                         // Result of signal all indicates NO_WAITERS if no thread are trying to lock this mutex.
                         // Else, OK is returned.
@@ -665,6 +861,10 @@ eSynchroResult P_SYNCHRO_MUTEX_Unlock(tMutVarHandle slotId) // Mutex handle
             }
             else
             {
+#if P_SYNCHRO_MUTEX_DEBUG == 1
+                printk("\r\nP_MUTEX: Slot id %d - UnLock - Failure, invalid thread\r\n", //
+                       slotId);                                                          //
+#endif
                 result = E_SYNCHRO_RESULT_NOK;
             }
         }
@@ -675,11 +875,20 @@ eSynchroResult P_SYNCHRO_MUTEX_Unlock(tMutVarHandle slotId) // Mutex handle
         // by a thread looping on this mutex.
         if (E_SYNCHRO_RESULT_OK == result)
         {
+#if P_SYNCHRO_MUTEX_DEBUG == 1
+            printk("\r\nP_MUTEX: Slot id %d - UnLock - yield from %08lX\r\n", //
+                   slotId,                                                    //
+                   (unsigned long int) k_current_get());                      //
+#endif
             k_yield();
         }
     }
     else
     {
+#if P_SYNCHRO_MUTEX_DEBUG == 1
+        printk("\r\nP_MUTEX: Slot id %d - UnLock - Failure, invalid status\r\n", //
+               slotId);                                                          //
+#endif
         result = E_SYNCHRO_RESULT_NOK;
     }
 
