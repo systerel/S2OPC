@@ -30,7 +30,6 @@
 #include "net/ethernet.h"
 #include "net/net_if.h"
 #include "net/socket.h"
-#include "sys/printk.h"
 
 #ifndef MY_IP_LB
 #define MY_IP_LB ((const char*) ("127.0.0.1"))
