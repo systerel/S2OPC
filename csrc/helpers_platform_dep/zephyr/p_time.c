@@ -129,7 +129,7 @@ int64_t SOPC_Time_GetCurrentTimeUTC()
         datetime = INT64_MAX;
     }
 
-    if (result == SOPC_STATUS_OK)
+    if (SOPC_STATUS_OK == result)
     {
         currentTimeT = (time_t) value_in_s;
         result = SOPC_Time_FromTimeT(currentTimeT, &datetime);
