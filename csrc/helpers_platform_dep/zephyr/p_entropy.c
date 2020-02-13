@@ -32,7 +32,6 @@
 #include "kernel.h"
 #include "net/net_ip.h"
 #include "net/socket.h"
-#include "sys/printk.h"
 
 #if defined(CONFIG_MBEDTLS)
 #if !defined(CONFIG_MBEDTLS_CFG_FILE)
