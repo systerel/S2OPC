@@ -17,15 +17,9 @@
  * under the License.
  */
 
-/* Zephyr includes */
-
-#include <errno.h>
-#include <inttypes.h>
-#include <limits.h>
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdio.h>
 #include <stdlib.h>
+
+/* Zephyr includes */
 
 #include "kernel.h"
 
