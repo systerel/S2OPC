@@ -27,5 +27,6 @@ if [ -z "$CTEST_FILE" ]; then
     exit 1
 fi
 
-src_dir=$(grep 'Source directory: ' $CTEST_FILE | awk '{print $4}')
-sed "s|${src_dir}|..|g" $CTEST_FILE
+root_dir=$(grep 'Build directory: ' $CTEST_FILE | awk '{print $4}' | sed 's|build.*||g')
+# Replace absolute path to root directory by an expression to substitute
+sed "s|${root_dir}\(build/\)\?|S2OPC_ROOT_DIR/|g" $CTEST_FILE

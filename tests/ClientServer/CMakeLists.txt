@@ -443,12 +443,12 @@ if(ENABLE_TESTING)
     get_filename_component(no_ext_name ${name} NAME_WE) # remove extension to use name for log directory
     set(test_name "validation::${name}")
     add_test(NAME "${test_name}"
-             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/interop_tools
+             WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
              COMMAND
              "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
              "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_TEST_SERVER}>
              "--server-cmd" "$<TARGET_FILE:${TOOLKIT_TEST_SERVER}> ${no_ext_name}"
-             "${PYTHON_EXECUTABLE}" ${name})
+             "${PYTHON_EXECUTABLE}" ${CMAKE_CURRENT_SOURCE_DIR}/interop_tools/${name})
   endfunction()
 
   # Function to run a validation of the given S2OPC client scenario with another server
