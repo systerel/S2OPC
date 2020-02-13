@@ -29,7 +29,6 @@
 
 #include "kernel.h"
 #include "net/socket.h"
-#include "sys/printk.h"
 
 /* s2opc includes */
 
