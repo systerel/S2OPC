@@ -31,14 +31,6 @@
 #include "net/socket.h"
 #include "sys/printk.h"
 
-#ifndef __INT32_MAX__
-#include "toolchain/xcc_missing_defs.h"
-#endif
-
-#ifndef NULL
-#define NULL ((void*) 0)
-#endif
-
 /* s2opc includes */
 
 #include "sopc_mem_alloc.h"
@@ -51,10 +43,6 @@
 
 #include "p_log_server.h"
 #include "p_sockets.h"
-
-/* debug printk activation */
-
-#define P_LOGSRV_DEBUG (0)
 
 /* Max pending connection based on max pending connections allowed by zephyr */
 
@@ -290,29 +278,14 @@ static inline int32_t P_LOGSRV_create_server_socket(tLogServer* pLogSrv)
         {
             pLogSrv->maxSock = pLogSrv->sockLogServer + 1;
         }
-
-#if P_LOGSRV_DEBUG == 1
-        printk("\r\nP_LOG_SRV: Go to online with sock #%d...\r\n", pLogSrv->sockLogServer);
-#endif
     }
     else // Binding or creation error, destroy socket if created
     {
-#if P_LOGSRV_DEBUG == 1
-        printk("\r\nP_LOG_SRV: Binding error !!!\r\n");
-#endif
         // If socket has been created, destroy it
         if (pLogSrv->sockLogServer >= 0)
         {
-#if P_LOGSRV_DEBUG == 1
-            printk("\r\nP_LOG_SRV: Binding error, close socket server %d\r\n", //
-                   pLogSrv->sockLogServer);                                    //
-#endif
             P_LOGSRV_destroy_server_socket(pLogSrv);
         }
-
-#if P_LOGSRV_DEBUG == 1
-        printk("\r\nP_LOG_SRV: Go to binding...\r\n");
-#endif
     }
 
     return socketResult;
@@ -326,9 +299,6 @@ static inline uint32_t P_LOGSRV_accept_client_connection(tLogServer* pLogSrv)
 
     if (valueNbSockets > MAX_LOG_SRV_CLIENTS_SOCKET) // If limit is reached, accept and destroy
     {
-#if P_LOGSRV_DEBUG == 1
-        printk("\r\nP_LOG_SRV: Log server can't accept out memory, close !!!\r\n");
-#endif
         int32_t newSocket = -1;
         struct sockaddr_in sin;
         socklen_t sockaddr_size = sizeof(struct sockaddr_in);
@@ -355,9 +325,6 @@ static inline uint32_t P_LOGSRV_accept_client_connection(tLogServer* pLogSrv)
             }
             else
             {
-#if P_LOGSRV_DEBUG == 1
-                printk("\r\nAccept to close can't be performed !!! Yield !!!\r\n");
-#endif
                 P_SOCKET_decrement_nb_sockets();
                 k_yield();
             }
@@ -382,28 +349,11 @@ static inline uint32_t P_LOGSRV_accept_client_connection(tLogServer* pLogSrv)
                                  (struct sockaddr*) &sin, //
                                  &sockaddr_size);         //
 
-#if P_LOGSRV_DEBUG == 1
-        if (newSocket >= 0)
-        {
-            char addr_str[32];
-            void* addr = &((struct sockaddr_in*) &sin)->sin_addr;
-
-            inet_ntop(sin.sin_family, addr, addr_str, sizeof(addr_str));
-
-            printk("\r\nP_LOG_SRV: Connection from %s fd=%d\r\n", //
-                   addr_str,                                      //
-                   newSocket);                                    //
-        }
-#endif
-
         // If connection valid, search empty server slot to register it.
         // Then realign event pointer for this client on oldest log event
         // in order to list an historic at the connection.
         if (newSocket < 0)
         {
-#if P_LOGSRV_DEBUG == 1
-            printk("\r\nP_LOG_SRV: Log server accept error !!!\r\n");
-#endif
             // Indicate that system socket not used
             P_SOCKET_decrement_nb_sockets();
             socketResult = -1;
@@ -431,10 +381,6 @@ static inline uint32_t P_LOGSRV_accept_client_connection(tLogServer* pLogSrv)
             // used by select function and set this socket as not blocking
             if (!bSlotFound)
             {
-#if P_LOGSRV_DEBUG == 1
-                printk("\r\nP_LOG_SRV: socket %d closed because no empty slot found\r\n", //
-                       newSocket);                                                        //
-#endif
                 zsock_shutdown(newSocket, ZSOCK_SHUT_RDWR);
                 zsock_close(newSocket);
                 newSocket = -1;
@@ -473,10 +419,6 @@ static inline void P_LOGSRV_LOGCHANNEL_Push(tLogChannel* pCh, const uint8_t* buf
             nextSize = pCh->event[nextWrite].size;
             if (nextSize > 0)
             {
-#if P_LOGSRV_DEBUG == 1
-                printk("\r\nP_LOG_SRV: remove event #%d\r\n", //
-                       nextWrite);                            //
-#endif
                 pCh->event[nextWrite].size = 0;
                 pCh->event[nextWrite].offset = 0;
                 pCh->nbData -= nextSize;
@@ -510,11 +452,6 @@ static inline void P_LOGSRV_LOGCHANNEL_Push(tLogChannel* pCh, const uint8_t* buf
         // Add new record info
         pCh->event[pCh->evtWr].size = sizeLocalTime + size;
         pCh->event[pCh->evtWr].offset = pCh->dataWr;
-
-#if P_LOGSRV_DEBUG == 1
-        printk("\r\nP_LOG_SRV: add event #%d\r\n", //
-               pCh->evtWr);                        //
-#endif
 
         pCh->evtWr = (pCh->evtWr + 1) % LOGSRV_CONFIG_MAX_EVENT_CHANNEL;
         pCh->nbEvts++;
@@ -572,12 +509,6 @@ static inline void P_LOGSRV_SendDataToClient(tLogServer* pLogSrv, uint32_t insta
                 socketByteSent = 0;
                 for (uint32_t j = 0; j < dataSize; j += socketByteSent)
                 {
-#if P_LOGSRV_DEBUG == 1
-                    printk("\r\nP_LOG_SRV: send on socket %d : event #%d - %d data\r\n", //
-                           pLogSrv->socketLogClt[instanceClient],                        //
-                           clientReadIndex,                                              //
-                           dataSize);                                                    //
-#endif
                     socketByteSent = send(pLogSrv->socketLogClt[instanceClient], //
                                           &pLogSrv->logChannel.data[offset + j], //
                                           dataSize - j,                          //
@@ -587,11 +518,6 @@ static inline void P_LOGSRV_SendDataToClient(tLogServer* pLogSrv, uint32_t insta
                     // from socket descriptor list to monitor
                     if (socketByteSent < 0)
                     {
-#if P_LOGSRV_DEBUG == 1
-                        printk("\r\nLOG_SRV: send error on socket %d\r\n", //
-                               pLogSrv->socketLogClt[instanceClient]);     //
-#endif
-
                         P_LOGSRV_close_client_connection(pLogSrv, instanceClient);
                         break;
                     }
@@ -601,13 +527,6 @@ static inline void P_LOGSRV_SendDataToClient(tLogServer* pLogSrv, uint32_t insta
                 {
                     P_LOGSRV_SOCKET_SetBlocking(pLogSrv->socketLogClt[instanceClient], false);
                 }
-            }
-            else // no date size
-            {
-#if P_LOGSRV_DEBUG == 1
-                printk("\r\nP_LOG_SRV: event #%d with no data, ignored\r\n", //
-                       clientReadIndex);                                     //
-#endif
             }
 
             // Update read index
@@ -643,9 +562,6 @@ static void* P_LOGSRV_ThreadMonitorCallback(void* pCtx)
         {
         case E_LOG_SRV_BINDING:
         {
-#if P_LOGSRV_DEBUG == 1
-            printk("\r\nP_LOG_SRV: I'm binding...\r\n");
-#endif
             int32_t socketResult = 0;
             socketResult = P_LOGSRV_create_server_socket(pLogSrv);
             if (socketResult < 0)
@@ -672,9 +588,6 @@ static void* P_LOGSRV_ThreadMonitorCallback(void* pCtx)
 
             if (socketResult < 0)
             {
-#if P_LOGSRV_DEBUG == 1
-                printk("\r\nP_LOG_SRV: Select error, close socket server before go to binding...\r\n");
-#endif
                 if (pLogSrv->sockLogServer >= 0)
                 {
                     P_LOGSRV_destroy_server_socket(pLogSrv);
@@ -684,10 +597,6 @@ static void* P_LOGSRV_ThreadMonitorCallback(void* pCtx)
                 {
                     if (pLogSrv->socketLogClt[i] >= 0)
                     {
-#if P_LOGSRV_DEBUG == 1
-                        printk("\r\nP_LOG_SRV: select error, close socket client %d before got to binding\r\n", //
-                               pLogSrv->socketLogClt[i]);                                                       //
-#endif
                         P_LOGSRV_close_client_connection(pLogSrv, i);
                     }
                 }
@@ -703,11 +612,6 @@ static void* P_LOGSRV_ThreadMonitorCallback(void* pCtx)
                     timeout.tv_sec = 0;
                     timeout.tv_usec = (LOGSRV_PERIOD_US);
                     delta = 0;
-
-#if P_LOGSRV_DEBUG == 1
-                    printk("\r\nP_LOG_SRV: periodic zone - %s\r\n",             //
-                           (char*) SOPC_Time_GetStringOfCurrentTimeUTC(false)); //
-#endif
 
                     // Parse socket list accepted by this server.
                     for (uint32_t i = 0; i < LOGSRV_MAX_CLIENTS; i++)
@@ -729,10 +633,6 @@ static void* P_LOGSRV_ThreadMonitorCallback(void* pCtx)
                     uint64_t timestamp_temp = timestamp;
                     delta = k_uptime_delta_32(&timestamp_temp);
 
-#if P_LOGSRV_DEBUG == 1
-                    printk("\r\nP_LOG_SRV: periodic zone time working load = %u ms  \r\n", //
-                           (uint32_t)(delta));                                             //
-#endif
                     if (delta <= LOGSRV_CONFIG_PERIOD_MS)
                     {
                         timeout.tv_sec = 0;
@@ -768,21 +668,7 @@ static void* P_LOGSRV_ThreadMonitorCallback(void* pCtx)
                                     if (LOGSRV_CONFIG_MAX_EVENT_CHANNEL == pLogSrv->logChannel.nbEvts)
                                     {
                                         index = (index + 1) % LOGSRV_CONFIG_MAX_EVENT_CHANNEL;
-#if P_LOGSRV_DEBUG == 1
-                                        printk(
-                                            "\r\nP_LOG_SRV:  wr = rd = %d, shift it for client %d - index "
-                                            "%d\r\n",                  //
-                                            pLogSrv->logChannel.evtWr, //
-                                            indexNewClient,            //
-                                            index);                    //
-#endif
                                     }
-
-#if P_LOGSRV_DEBUG == 1
-                                    printk("\r\nP_LOG_SRV: new rd index for client %d - index %d\r\n", //
-                                           indexNewClient,                                             //
-                                           index);                                                     //
-#endif
 
                                     pLogSrv->logCltRdIdx[indexNewClient] = index;
 
@@ -804,10 +690,6 @@ static void* P_LOGSRV_ThreadMonitorCallback(void* pCtx)
                                     {
                                         if (pLogSrv->socketLogClt[indexClient] == iterSocket)
                                         {
-#if P_LOGSRV_DEBUG == 1
-                                            printk("\r\nLOG_SRV: client %d - close socket client %d\r\n", indexClient,
-                                                   iterSocket);
-#endif
                                             P_LOGSRV_close_client_connection(pLogSrv, indexClient);
                                             break;
                                         }
@@ -820,9 +702,7 @@ static void* P_LOGSRV_ThreadMonitorCallback(void* pCtx)
                     // Verify time elapsed from last periodic
                     uint64_t timestamp_temp = timestamp;
                     delta = k_uptime_delta_32(&timestamp_temp);
-#if P_LOGSRV_DEBUG == 1
-                    printk("\r\nP_LOG_SRV: delta from last periodic tick = %u ms  \r\n", (uint32_t)(delta));
-#endif
+
                     if (delta <= LOGSRV_CONFIG_PERIOD_MS)
                     {
                         timeout.tv_sec = 0;
@@ -844,21 +724,12 @@ static void* P_LOGSRV_ThreadMonitorCallback(void* pCtx)
     {
         if (pLogSrv->socketLogClt[indexClient] >= 0)
         {
-#if P_LOGSRV_DEBUG == 1
-            printk("\r\nP_LOG_SRV: close socket client %d\r\n", //
-                   pLogSrv->socketLogClt[indexClient]);         //
-#endif
             P_LOGSRV_close_client_connection(pLogSrv, indexClient);
         }
     }
 
     if (pLogSrv->sockLogServer >= 0)
     {
-#if P_LOGSRV_DEBUG == 1
-        printk("\r\nP_LOG_SRV: close socket server %d\r\n", //
-               pLogSrv->sockLogServer);                     //
-#endif
-
         P_LOGSRV_destroy_server_socket(pLogSrv);
     }
 
@@ -1064,9 +935,6 @@ SOPC_ReturnStatus SOPC_LogServer_Create(SOPC_LogServer_Handle* pHandle, // Retur
             tLogServer* pLogSrv = P_LOGSRV_Create(port);
             if (pLogSrv != NULL)
             {
-#if P_LOGSRV_DEBUG == 1
-                printk("\r\nSOPC_LOG_SRV: Log server listen on #%d\r\n", port);
-#endif
                 gLogSrvHandles[i].pLogServer = pLogSrv;
                 handle = i;
                 gLogSrvHandles[i].status = E_LOG_SRV_SYNC_INITIALIZED;
@@ -1074,21 +942,11 @@ SOPC_ReturnStatus SOPC_LogServer_Create(SOPC_LogServer_Handle* pHandle, // Retur
             }
             else
             {
-#if P_LOGSRV_DEBUG == 1
-                printk("\r\nSOPC_LOG_SRV: Log server creation error\r\n");
-#endif
                 gLogSrvHandles[i].status = E_LOG_SRV_SYNC_NOT_INITIALIZED;
                 result = SOPC_STATUS_NOK;
             }
         }
     }
-
-#if P_LOGSRV_DEBUG == 1
-    if (SOPC_STATUS_OUT_OF_MEMORY == result)
-    {
-        printk("\r\nSOPC_LOG_SRV: Log server creation error, no free slot\r\n");
-    }
-#endif
 
     *pHandle = handle;
 
@@ -1127,25 +985,16 @@ SOPC_ReturnStatus SOPC_LogServer_Destroy(SOPC_LogServer_Handle* pHandle)
             gLogSrvHandles[handle].status = E_LOG_SRV_SYNC_NOT_INITIALIZED;
 
             result = SOPC_STATUS_OK;
-#if P_LOGSRV_DEBUG == 1
-            printk("\r\nSOPC_LOG_SRV: Log server %d destruction ok\r\n", handle);
-#endif
         }
         else if (E_LOG_SRV_SYNC_DEINITIALIZING == (fromStatus & (~0x80000000)) ||
                  E_LOG_SRV_SYNC_INITIALIZING == (fromStatus & (~0x80000000)) ||
                  (fromStatus & (~0x80000000)) > E_LOG_SRV_SYNC_INITIALIZED)
         {
-#if P_LOGSRV_DEBUG == 1
-            printk("\r\nSOPC_LOG_SRV: Log server %d destruction can't be performed... Wait and retry...\r\n", handle);
-#endif
             result = SOPC_STATUS_INVALID_STATE;
             k_yield();
         }
         else
         {
-#if P_LOGSRV_DEBUG == 1
-            printk("\r\nSOPC_LOG_SRV: Log server %d destruction ko, already destroyed\r\n", handle);
-#endif
             result = SOPC_STATUS_NOK;
         }
 
