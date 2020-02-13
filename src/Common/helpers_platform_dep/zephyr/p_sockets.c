@@ -33,6 +33,10 @@
 
 #include "p_sockets.h"
 
+/* debug printk activation*/
+
+#define P_SOCKET_DEBUG (0)
+
 /* Max pending connection based on max pending connections allowed by zephyr */
 
 #ifdef CONFIG_NET_SOCKETS_POLL_MAX
@@ -81,6 +85,9 @@ uint32_t P_SOCKET_increment_nb_sockets(void)
                                                 __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
 
     } while (!bTransition);
+#if P_SOCKET_DEBUG == 1
+    printk("\r\nP_SOCKET =====> o socket reservation exit - new value = %d\r\n", newValue);
+#endif
     return newValue;
 }
 
@@ -106,6 +113,9 @@ uint32_t P_SOCKET_decrement_nb_sockets(void)
         bTransition = __atomic_compare_exchange(&priv_P_SOCKET_nbSockets, &currentValue, &newValue, false,
                                                 __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
     } while (!bTransition);
+#if P_SOCKET_DEBUG == 1
+    printk("\r\nP_SOCKET =====> + socket release exit - new value = %d\r\n", newValue);
+#endif
     return newValue;
 }
 
@@ -286,6 +296,9 @@ SOPC_ReturnStatus SOPC_Socket_CreateNew(SOPC_Socket_AddressInfo* addr,
     }
     else
     {
+#if P_SOCKET_DEBUG == 1
+        printk("\r\nP_SOCKET: Maximum sock reached, create refused !!!\r\n");
+#endif
         P_SOCKET_decrement_nb_sockets();
     }
     return SOPC_STATUS_NOK;
@@ -357,6 +370,9 @@ SOPC_ReturnStatus SOPC_Socket_Accept(Socket listeningSock, bool setNonBlocking, 
                 }
                 else
                 {
+#if P_SOCKET_DEBUG == 1
+                    printk("\r\nP_SOCKET: Sopc Accept to close can't be performed !!! Yield !!!\r\n");
+#endif
                     P_SOCKET_decrement_nb_sockets();
                     k_yield();
                 }
@@ -364,6 +380,9 @@ SOPC_ReturnStatus SOPC_Socket_Accept(Socket listeningSock, bool setNonBlocking, 
             } while (valAuthorization > (MAX_ZEPHYR_SOCKET + 2));
 
             P_SOCKET_decrement_nb_sockets();
+#if P_SOCKET_DEBUG == 1
+            printk("\r\nP_SOCKET: Max socket reach, accept failed !!!\r\n");
+#endif
         }
     }
     return status;
@@ -566,6 +585,9 @@ int32_t SOPC_Socket_WaitSocketEvents(SOPC_SocketSet* readSet,
     nbReady = zsock_select(fdmax + 1, readSet != NULL ? &readSet->set : NULL, writeSet != NULL ? &writeSet->set : NULL,
                            exceptSet != NULL ? &exceptSet->set : NULL, val);
 
+#if P_SOCKET_DEBUG == 1
+    printk("\r\nP_SOCKET: Sopc select result = %d\r\n", nbReady);
+#endif
     return (int32_t) nbReady;
 }
 
