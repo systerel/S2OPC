@@ -26,7 +26,6 @@
 #include <stdlib.h>
 
 #include "kernel.h"
-#include "sys/printk.h"
 
 /* s2opc includes */
 
