@@ -21,12 +21,22 @@
 
 #include "kernel.h"
 
+#ifndef __INT32_MAX__
+#include "toolchain/xcc_missing_defs.h"
+#endif
+
+#ifndef NULL
+#define NULL ((void*) 0)
+#endif
+
 /* s2opc includes */
 
 #include "sopc_enums.h"
 #include "sopc_time.h"
 
 /* Private time api */
+
+#define P_TIME_DEBUG (0)
 
 #define SECOND_TO_100NS ((uint64_t) 10000000)
 #define MS_TO_100NS ((uint64_t) 10000)
@@ -73,6 +83,15 @@ int64_t SOPC_Time_GetCurrentTimeUTC()
     // compute value in second, used to compute UTC value
     uint64_t value_in_s = value / SECOND_TO_100NS;
     uint64_t value_frac_in_100ns = value % SECOND_TO_100NS;
+
+#if P_TIME_DEBUG == 1
+    printk("\r\n periodOverflowMs = %llu", periodOverflowMs);
+    printk("\r\n nbOverflows = %llu", nbOverflows);
+    printk("\r\n current = %llu", current);
+    printk("\r\n overflow = %llu", overflow);
+    printk("\r\n result = %llu", value);
+    printk("\r\n %llu", value % SECOND_TO_100NS);
+#endif
 
     // Check for overflow. Note that currentTimeFrac100NS cannot overflow.
     // Problem: we don't know the limits of time_t, and they are not #defined.
