@@ -56,8 +56,7 @@ OPERATIONS
     p_nb <-- read_variant_nb_argument(p_variant) =
     PRE
         p_variant: t_Variant_i &
-        p_variant: t_Variant &
-        p_variant : dom(Variant_Arguments)
+        p_variant: t_Variant
     THEN
         IF p_variant : dom(Variant_Arguments)
         THEN
