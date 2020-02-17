@@ -205,7 +205,7 @@ static eThreadResult P_THREAD_Init(tThreadHandle* pWks, ptrFct callback, void* p
     }
 
     // If slot found, initialize signal for join and try to launch thread
-    if (true == bFound)
+    if (bFound)
     {
         // Initialize binary semaphore, used as single signal...
         k_sem_init(&gGlbThreadWks.tab[slotId - 1].kSemThreadEnded, 0, 1);
