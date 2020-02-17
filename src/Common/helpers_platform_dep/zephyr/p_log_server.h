@@ -20,7 +20,10 @@
 #ifndef S2OPC_CSRC_HELPERS_PLATFORM_DEP_ZEPHYR_P_LOG_SERVER_H_
 #define S2OPC_CSRC_HELPERS_PLATFORM_DEP_ZEPHYR_P_LOG_SERVER_H_
 
-#include <stdint.h>
+#include <stdbool.h>
+#include <stdlib.h>
+
+#include <inttypes.h>
 
 #include "sopc_enums.h"
 
