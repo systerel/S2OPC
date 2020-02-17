@@ -18,12 +18,30 @@
  */
 
 #include <fcntl.h>
+
+#include <stdbool.h>
 #include <stdlib.h>
+
+#include <inttypes.h>
 
 #include "kernel.h"
 #include "net/ethernet.h"
 #include "net/net_if.h"
 #include "net/socket.h"
+
+#ifndef __INT32_MAX__
+#include "toolchain/xcc_missing_defs.h"
+#endif
+
+#ifndef NULL
+#define NULL ((void*) 0)
+#endif
+#ifndef K_FOREVER
+#define K_FOREVER (-1)
+#endif
+#ifndef K_NO_WAIT
+#define K_NO_WAIT 0
+#endif
 
 /* s2opc includes */
 
