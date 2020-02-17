@@ -511,7 +511,7 @@ eSynchroResult P_SYNCHRO_MUTEX_Lock(tMutVarHandle slotId)
                                                                P_SYNCHRO_MUTEX_CondVar_UnlockAndWait_Lock_Callback,   //
                                                                P_SYNCHRO_MUTEX_CondVar_UnlockAndWait_UnLock_Callback, //
                                                                UINT32_MAX);                                           //
-                    // Reentering critical section. Verify if qui status has been mounted.
+                    // Reentering critical section. Verify if quit status has been mounted.
                     // If yes, return NOK.
                     if ((p->status & MASK_SET_QUIT_FLAG) != 0)
                     {
