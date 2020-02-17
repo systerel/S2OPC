@@ -50,14 +50,6 @@ typedef struct
 __weak bool P_SOCKET_NETWORK_Initialize(void);
 __weak bool P_SOCKET_NETWORK_IsConfigured(void);
 
-/* Multicast platform dep functions used by platform dep pub sub UDP */
-
-__weak SOPC_ReturnStatus P_SOCKET_MCAST_add_sock_to_mcast(int32_t sock, struct in_addr* add);
-__weak SOPC_ReturnStatus P_SOCKET_MCAST_join_mcast_group(int32_t sock, struct in_addr* add);
-__weak SOPC_ReturnStatus P_SOCKET_MCAST_leave_mcast_group(int32_t sock, struct in_addr* add);
-__weak bool P_SOCKET_MCAST_soft_filter(int32_t sock, struct in_addr* add);
-__weak void P_SOCKET_MCAST_remove_sock_from_mcast(int32_t sock);
-
 /* Verify current number of allocated socket. Shall not > MAX_SOCKET */
 
 uint32_t P_SOCKET_increment_nb_sockets(void);
