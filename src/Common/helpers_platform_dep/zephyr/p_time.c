@@ -17,7 +17,10 @@
  * under the License.
  */
 
+#include <stdbool.h>
 #include <stdlib.h>
+
+#include <inttypes.h>
 
 #include "kernel.h"
 
@@ -27,6 +30,12 @@
 
 #ifndef NULL
 #define NULL ((void*) 0)
+#endif
+#ifndef K_FOREVER
+#define K_FOREVER (-1)
+#endif
+#ifndef K_NO_WAIT
+#define K_NO_WAIT 0
 #endif
 
 /* s2opc includes */
@@ -40,6 +49,9 @@
 
 #define SECOND_TO_100NS ((uint64_t) 10000000)
 #define MS_TO_100NS ((uint64_t) 10000)
+#ifndef CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC
+#define CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC 600000000
+#endif
 
 static inline uint64_t P_TIME_TimeReference_GetCurrent100ns(void)
 {
