@@ -264,7 +264,7 @@ static eThreadResult P_THREAD_Join(tThreadHandle* pWks)
     eThreadResult result = E_THREAD_RESULT_OK;
 
     // Check parameters validity
-    if (NULL == pWks || 0 == pWks->slotId || pWks->slotId > MAX_NB_THREADS || false == gGlbThreadWks.wGlobalWksStatus ||
+    if (NULL == pWks || 0 == pWks->slotId || pWks->slotId > MAX_NB_THREADS || !gGlbThreadWks.wGlobalWksStatus ||
         pWks != gGlbThreadWks.tab[pWks->slotId - 1].debugExternalHandle)
     {
         return E_THREAD_RESULT_INVALID_PARAMETERS;
