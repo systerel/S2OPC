@@ -618,19 +618,25 @@ SOPC_ReturnStatus SOPC_Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize
     if (sReadCount > 0)
     {
         if (readCount != NULL)
+        {
             *readCount = (uint32_t) sReadCount;
+        }
         return SOPC_STATUS_OK;
     }
 
     if (0 == sReadCount)
     {
         if (readCount != NULL)
+        {
             *readCount = 0;
+        }
         return SOPC_STATUS_CLOSED;
     }
 
     if (readCount != NULL)
+    {
         *readCount = 0;
+    }
     int optErr = 0;
     socklen_t optErrSize = sizeof(optErr);
 
@@ -669,38 +675,4 @@ void SOPC_Socket_Close(Socket* sock)
 __weak bool P_SOCKET_NETWORK_Initialize(void)
 {
     return false;
-}
-
-// Multicast private function definitions
-
-// Register multicast address to L1 and associate socket to this one.
-// Multicast address is added, if not already added, to ethernet interface (L2)
-__weak SOPC_ReturnStatus P_SOCKET_MCAST_join_mcast_group(int32_t sock, struct in_addr* pAddr)
-{
-    return SOPC_STATUS_NOK;
-}
-
-// Check if address is a knowned multicast address registered with socket in parameter
-__weak bool P_SOCKET_MCAST_soft_filter(int sock, struct in_addr* pAddr)
-{
-    return false;
-}
-
-// Unregister socket from multicast address.
-// Remove mcast from L1 if not used by any socket.
-__weak SOPC_ReturnStatus P_SOCKET_MCAST_leave_mcast_group(int sock, struct in_addr* add)
-{
-    return SOPC_STATUS_NOK;
-}
-
-// Remove socket from all mcast.
-__weak void P_SOCKET_MCAST_remove_sock_from_mcast(int sock)
-{
-    return;
-}
-
-// Add socket to mcast
-__weak SOPC_ReturnStatus P_SOCKET_MCAST_add_sock_to_mcast(int sock, struct in_addr* add)
-{
-    return SOPC_STATUS_NOK;
 }
