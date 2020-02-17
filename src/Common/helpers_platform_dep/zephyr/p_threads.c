@@ -17,7 +17,10 @@
  * under the License.
  */
 
+#include <stdbool.h>
 #include <stdlib.h>
+
+#include <inttypes.h>
 
 #include "kernel.h"
 
