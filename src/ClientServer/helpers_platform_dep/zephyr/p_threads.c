@@ -195,7 +195,7 @@ static eThreadResult P_THREAD_Init(tThreadHandle* pWks, ptrFct callback, void* p
     k_mutex_lock(&gGlbThreadWks.kLock, K_FOREVER);
 
     // Search for empty slot
-    for (uint32_t iIter = 0; false == bFound && iIter < MAX_NB_THREADS; iIter++)
+    for (uint32_t iIter = 0; !bFound && iIter < MAX_NB_THREADS; iIter++)
     {
         if (E_THREAD_STATUS_NOT_INITIALIZED == gGlbThreadWks.tab[iIter].status)
         {
