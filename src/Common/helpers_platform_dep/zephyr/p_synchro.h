@@ -21,6 +21,7 @@
 #define SOPC_SYNCHRO_H
 
 #include <stdint.h>
+#include <inttypes.h>
 
 /*****Private synchro api*****/
 
