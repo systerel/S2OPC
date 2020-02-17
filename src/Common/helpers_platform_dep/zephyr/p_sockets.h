@@ -21,7 +21,9 @@
 #define SOPC_P_SOCKETS_HEADER_
 
 #include <stdbool.h>
-#include <stdint.h>
+#include <stdlib.h>
+
+#include <inttypes.h>
 
 #include "net/socket.h"
 
