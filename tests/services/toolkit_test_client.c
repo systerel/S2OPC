@@ -273,7 +273,7 @@ int main(void)
     // Client certificate name
     char* certificateLocation = "./client_public/client_tpm2.der";
     // Server certificate name
-    char* certificateSrvLocation = "./server_public/server_2k_cert.der";
+    char* certificateSrvLocation = "./server_public/server_tpm2.der";
     // Client private key
     char* keyLocation = "unused";
     SOPC_AddressSpace* address_space = SOPC_Embedded_AddressSpace_Load();
