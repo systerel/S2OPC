@@ -761,7 +761,7 @@ static inline eSyncStatus P_SYNCHRO_Mutex_Remove_Api_User(tMutVar* p)
 
 // *** Public SOPC synchro api ***
 
-// Initilize condition variable
+// Initialize condition variable
 SOPC_ReturnStatus Condition_Init(Condition* cond)
 {
     if (NULL == cond)
