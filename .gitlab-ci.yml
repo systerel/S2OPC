@@ -324,8 +324,8 @@ windows-appveyor:
     - 'apt-get update && apt-get -y install curl && curl -H "Authorization: Bearer $APPVEYOR_TOKEN" -H "Content-Type: application/json" --request POST -d ''{"accountName" : "Systerel", "projectSlug": "s2opc", "branch": "''$CI_COMMIT_REF_NAME''"}'' https://ci.appveyor.com/api/builds'
   tags:
     - linux
-  rules: # TODO? (may be too long): add $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'master'
-    - if: "$ALL_BUILDS != null || $WINDOWS_TEST != null"
+  rules:
+    - if: "$ALL_BUILDS != null || $WINDOWS_TEST != null || $CI_COMMIT_BRANCH == 'master'"
       when: always # run even if previous job in pipeline failed
 
 ###
