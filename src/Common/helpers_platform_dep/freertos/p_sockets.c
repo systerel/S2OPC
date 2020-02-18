@@ -367,7 +367,7 @@ SOPC_ReturnStatus SOPC_Socket_Write(Socket sock, const uint8_t* data, uint32_t c
 
 SOPC_ReturnStatus SOPC_Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize, uint32_t* readCount)
 {
-    if (SOPC_INVALID_SOCKET == sock || NULL == data || 0 >= dataSize)
+    if (SOPC_INVALID_SOCKET == sock || NULL == data || 0 >= dataSize || NULL == readCount)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }

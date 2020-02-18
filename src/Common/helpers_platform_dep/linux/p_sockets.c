@@ -386,7 +386,7 @@ SOPC_ReturnStatus SOPC_Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     ssize_t sReadCount = 0;
-    if (sock != SOPC_INVALID_SOCKET && data != NULL && dataSize > 0)
+    if (sock != SOPC_INVALID_SOCKET && data != NULL && dataSize > 0 && NULL != readCount)
     {
         sReadCount = recv(sock, data, dataSize, 0);
 
