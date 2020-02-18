@@ -60,9 +60,10 @@ static bool SOPC_Sub_Filter_Reader_WriterAttr(uint32_t expectedValue, bool msgEn
 
 SOPC_ReturnStatus SOPC_Reader_Read_UADP(const SOPC_PubSubConnection* connection,
                                         SOPC_Buffer* buffer,
-                                        SOPC_SubTargetVariableConfig* config)
+                                        SOPC_SubTargetVariableConfig* config,
+                                        SOPC_UADP_GetSecurity_Func securityCBck)
 {
-    SOPC_UADP_NetworkMessage* uadp_nm = SOPC_UADP_NetworkMessage_Decode(buffer);
+    SOPC_UADP_NetworkMessage* uadp_nm = SOPC_UADP_NetworkMessage_Decode(buffer, securityCBck);
     if (NULL == uadp_nm)
     {
         return SOPC_STATUS_NOK;

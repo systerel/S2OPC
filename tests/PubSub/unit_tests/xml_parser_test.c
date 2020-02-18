@@ -61,6 +61,7 @@ START_TEST(test_pub_xml_parsing)
     // TODO: SOPC_WriterGroup_Get_NetworkMessageContentMask() ?
     ck_assert_uint_eq(50, SOPC_WriterGroup_Get_PublishingInterval(writerGroup));
     ck_assert_uint_eq(1, SOPC_WriterGroup_Get_Version(writerGroup));
+    ck_assert_uint_eq(SOPC_SecurityMode_None, SOPC_WriterGroup_Get_SecurityMode(writerGroup));
     ck_assert_uint_eq(1, SOPC_WriterGroup_Nb_DataSetWriter(writerGroup));
     // DataSetWriter
     SOPC_DataSetWriter* dataSetWriter = SOPC_WriterGroup_Get_DataSetWriter_At(writerGroup, 0);
@@ -76,6 +77,7 @@ START_TEST(test_pub_xml_parsing)
     // TODO: SOPC_WriterGroup_Get_NetworkMessageContentMask() ?
     ck_assert_uint_eq(30, SOPC_WriterGroup_Get_PublishingInterval(writerGroup));
     ck_assert_uint_eq(1, SOPC_WriterGroup_Get_Version(writerGroup));
+    ck_assert_uint_eq(SOPC_SecurityMode_SignAndEncrypt, SOPC_WriterGroup_Get_SecurityMode(writerGroup));
     ck_assert_uint_eq(1, SOPC_WriterGroup_Nb_DataSetWriter(writerGroup));
     // DataSetWriter
     dataSetWriter = SOPC_WriterGroup_Get_DataSetWriter_At(writerGroup, 0);
@@ -158,6 +160,7 @@ START_TEST(test_sub_xml_parsing)
     /* First ReaderGroup */
     SOPC_ReaderGroup* readerGroup = SOPC_PubSubConnection_Get_ReaderGroup_At(conn, 0);
     ck_assert_ptr_nonnull(readerGroup);
+    ck_assert_uint_eq(SOPC_SecurityMode_None, SOPC_ReaderGroup_Get_SecurityMode(readerGroup));
     SOPC_DataSetReader* dataSetReader = SOPC_ReaderGroup_Get_DataSetReader_At(readerGroup, 0);
     ck_assert_ptr_nonnull(dataSetReader);
 
@@ -195,6 +198,7 @@ START_TEST(test_sub_xml_parsing)
     /* Second ReaderGroup */
     readerGroup = SOPC_PubSubConnection_Get_ReaderGroup_At(conn, 1);
     ck_assert_ptr_nonnull(readerGroup);
+    ck_assert_uint_eq(SOPC_SecurityMode_Sign, SOPC_ReaderGroup_Get_SecurityMode(readerGroup));
     dataSetReader = SOPC_ReaderGroup_Get_DataSetReader_At(readerGroup, 0);
     ck_assert_ptr_nonnull(dataSetReader);
 

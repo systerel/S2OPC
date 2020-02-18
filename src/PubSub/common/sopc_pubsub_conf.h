@@ -20,7 +20,7 @@
 #ifndef SOPC_PUBSUB_CONF_H_
 #define SOPC_PUBSUB_CONF_H_
 
-#include "sopc_network_layer.h"
+#include "sopc_builtintypes.h"
 
 typedef struct SOPC_PubSubConfiguration SOPC_PubSubConfiguration;
 typedef struct SOPC_PubSubConnection SOPC_PubSubConnection;
@@ -33,6 +33,23 @@ typedef struct SOPC_SubscribedDataSet SOPC_SubscribedDataSet;
 typedef struct SOPC_DataSetMetaData SOPC_DataSetMetaData;
 typedef struct SOPC_FieldMetaData SOPC_FieldMetaData;
 typedef struct SOPC_FieldTarget SOPC_FieldTarget;
+
+typedef struct SOPC_UADP_Configuration
+{
+    bool PublisherIdFlag;
+    bool GroupHeaderFlag;
+    bool GroupIdFlag;
+    bool GroupVersionFlag;
+    bool NetworkMessageNumberFlag;
+    bool SequenceNumberFlag;
+    bool PayloadHeaderFlag;
+    bool TimestampFlag;
+    bool PicoSecondsFlag;
+    bool DataSetClassIdFlag;
+    bool SecurityFlag;
+    bool PromotedFieldsFlag;
+
+} SOPC_UADP_Configuration;
 
 typedef SOPC_UADP_Configuration SOPC_UadpNetworkMessageContentMask;
 
@@ -58,6 +75,14 @@ typedef enum
 
 typedef enum
 {
+    SOPC_SecurityMode_Invalid = 0,
+    SOPC_SecurityMode_None = 1,
+    SOPC_SecurityMode_Sign = 2,
+    SOPC_SecurityMode_SignAndEncrypt = 3
+} SOPC_SecurityMode_Type;
+
+typedef enum
+{
     SOPC_Null_PublisherId = 0,
     SOPC_UInteger_PublisherId = 1,
     SOPC_String_PublisherId = 2
@@ -75,6 +100,7 @@ typedef struct SOPC_Conf_PublisherId
 /** PubSubConfiguration **/
 SOPC_PubSubConfiguration* SOPC_PubSubConfiguration_Create(void);
 void SOPC_PubSubConfiguration_Delete(SOPC_PubSubConfiguration* configuration);
+
 // Publisher Connection
 bool SOPC_PubSubConfiguration_Allocate_PubConnection_Array(SOPC_PubSubConfiguration* configuration, uint32_t nb);
 uint32_t SOPC_PubSubConfiguration_Nb_PubConnection(const SOPC_PubSubConfiguration* configuration);
@@ -83,6 +109,7 @@ SOPC_PubSubConnection* SOPC_PubSubConfiguration_Get_PubConnection_At(const SOPC_
 // Subscriber Connection
 bool SOPC_PubSubConfiguration_Allocate_SubConnection_Array(SOPC_PubSubConfiguration* configuration, uint32_t nb);
 uint32_t SOPC_PubSubConfiguration_Nb_SubConnection(const SOPC_PubSubConfiguration* configuration);
+
 SOPC_PubSubConnection* SOPC_PubSubConfiguration_Get_SubConnection_At(const SOPC_PubSubConfiguration* configuration,
                                                                      uint32_t index);
 
@@ -120,6 +147,8 @@ uint16_t SOPC_PubSubConnection_Nb_ReaderGroup(const SOPC_PubSubConnection* conne
 SOPC_ReaderGroup* SOPC_PubSubConnection_Get_ReaderGroup_At(const SOPC_PubSubConnection* connection, uint16_t index);
 
 /** Reader Group **/
+SOPC_SecurityMode_Type SOPC_ReaderGroup_Get_SecurityMode(const SOPC_ReaderGroup* group);
+void SOPC_ReaderGroup_Set_SecurityMode(SOPC_ReaderGroup* group, SOPC_SecurityMode_Type mode);
 
 bool SOPC_ReaderGroup_Allocate_DataSetReader_Array(SOPC_ReaderGroup* group, uint8_t nb);
 uint8_t SOPC_ReaderGroup_Nb_DataSetReader(const SOPC_ReaderGroup* group);
@@ -189,6 +218,9 @@ void SOPC_WriterGroup_Set_PublishingInterval(SOPC_WriterGroup* group, uint64_t i
 SOPC_UadpNetworkMessageContentMask SOPC_WriterGroup_Get_NetworkMessageContentMask(const SOPC_WriterGroup* group);
 void SOPC_WriterGroup_Set_NetworkMessageContentMask(SOPC_WriterGroup* group,
                                                     SOPC_UadpNetworkMessageContentMask contentMask);
+
+SOPC_SecurityMode_Type SOPC_WriterGroup_Get_SecurityMode(const SOPC_WriterGroup* group);
+void SOPC_WriterGroup_Set_SecurityMode(SOPC_WriterGroup* group, SOPC_SecurityMode_Type mode);
 
 bool SOPC_WriterGroup_Allocate_DataSetWriter_Array(SOPC_WriterGroup* group, uint8_t nb);
 uint8_t SOPC_WriterGroup_Nb_DataSetWriter(const SOPC_WriterGroup* group);

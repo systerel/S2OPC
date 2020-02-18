@@ -195,7 +195,8 @@ static void readyToReceive(void* sockContext, Socket sock)
         buffer->position = 0;
         if (SOPC_STATUS_OK == status)
         {
-            SOPC_UADP_NetworkMessage* uadp_nm = SOPC_UADP_NetworkMessage_Decode(buffer);
+            // do not manage security
+            SOPC_UADP_NetworkMessage* uadp_nm = SOPC_UADP_NetworkMessage_Decode(buffer, NULL);
             returnCode = TestNetworkMessage(uadp_nm);
             SOPC_UADP_NetworkMessage_Delete(uadp_nm);
         }

@@ -13,6 +13,9 @@ endif()
 
 # EXPAT dependency managed in CommonDefs
 
+# Paho library is required
+find_package(Paho REQUIRED)
+
 ### Compilation of S2OPC client/server library source files ###
 
 ## Build info source file generation (version, commit checksum, docker id, date) ##
@@ -35,6 +38,7 @@ set(S2OPC_PUBSUB_PUBLIC_INCLUDES
     "${CMAKE_CURRENT_SOURCE_DIR}/network"
     "${CMAKE_CURRENT_SOURCE_DIR}/protocol"
     "${CMAKE_CURRENT_SOURCE_DIR}/publisher"
+    "${CMAKE_CURRENT_SOURCE_DIR}/security"
     "${CMAKE_CURRENT_SOURCE_DIR}/subscriber"
     "${CMAKE_CURRENT_SOURCE_DIR}/real_time_api"
 )
@@ -44,7 +48,11 @@ set(S2OPC_PUBSUB_PUBLIC_INCLUDES
 add_library(s2opc_pubsub ${S2OPC_PUBSUB_SRCS} ${S2OPC_PUBSUB_BUILD_INFO_C})
 target_compile_options(s2opc_pubsub PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(s2opc_pubsub PRIVATE ${S2OPC_DEFINITIONS})
+<<<<<<< HEAD
 target_link_libraries(s2opc_pubsub PUBLIC s2opc_common ${expat_LIB})
+=======
+target_link_libraries(s2opc_pubsub PUBLIC s2opc_common ${EXPAT_LIBRARIES} ${PAHO_LIBRARIES})
+>>>>>>> Integrate MQTT
 
 target_include_directories(s2opc_pubsub
   PUBLIC

@@ -103,7 +103,7 @@ int main(void)
     }
     UDP_Pub_Test_Fill_NetworkMessage(conf_group, nm);
 
-    SOPC_Buffer* buffer = SOPC_UADP_NetworkMessage_Encode(nm);
+    SOPC_Buffer* buffer = SOPC_UADP_NetworkMessage_Encode(nm, NULL);
 
     if (SOPC_STATUS_OK == status && buffer != NULL)
     {

@@ -22,35 +22,39 @@
 
 #include "sopc_buffer.h"
 #include "sopc_dataset_ll_layer.h"
+#include "sopc_pubsub_security.h"
 
 // TODO: use security mode instead of security enabled
 //
-typedef struct SOPC_UADP_Configuration
-{
-    bool PublisherIdFlag;
-    bool GroupHeaderFlag;
-    bool GroupIdFlag;
-    bool GroupVersionFlag;
-    bool NetworkMessageNumberFlag;
-    bool SequenceNumberFlag;
-    bool PayloadHeaderFlag;
-    bool TimestampFlag;
-    bool PicoSecondsFlag;
-    bool DataSetClassIdFlag;
-    bool SecurityFlag;
-    bool PromotedFieldsFlag;
-
-} SOPC_UADP_Configuration;
-
 typedef struct SOPC_UADP_Network_Message
 {
     SOPC_Dataset_LL_NetworkMessage* nm;
     SOPC_UADP_Configuration conf;
 } SOPC_UADP_NetworkMessage;
 
-SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm);
+/**
+ * \brief Encode a NetworkMessage with UADP Mapping
+ *
+ * \param nm is the NetworkMessage to encode
+ * \param securityCtx is the data use to encrypt and sign. Can be NULL if security is not used
+ *
+ * \return A buffer containing the UADP bytes or NULL if the operation does not successed
+ *
+ */
+SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm, SOPC_PubSub_SecurityType* securityCtx);
 
-SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer);
+/**
+ * \brief Decode a UADP packet into a NetworkMessage
+ *
+ * \param buffer the UADP byte to decode
+ * \param getSecurity_Func is a callback to retrieve Security information related to the security token and publisher of
+ * the message
+ *
+ * \return A NetworkMessage corresponding to the UADP packet or NULL if the operation does not successed
+ *
+ */
+SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer,
+                                                          SOPC_UADP_GetSecurity_Func getSecurity_Func);
 
 void SOPC_UADP_NetworkMessage_Delete(SOPC_UADP_NetworkMessage* uadp_nm);
 

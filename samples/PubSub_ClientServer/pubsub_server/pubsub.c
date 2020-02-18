@@ -25,13 +25,14 @@
 #include "sopc_atomic.h"
 #include "sopc_filesystem.h"
 #include "sopc_pub_scheduler.h"
+#include "sopc_pubsub_local_sks.h"
+#include "sopc_pubsub_protocol.h"
 #include "sopc_sub_scheduler.h"
 #include "sopc_udp_sockets.h"
 #include "sopc_xml_loader.h"
 
 #include "config.h"
 #include "pubsub.h"
-
 #include "server.h"
 
 #ifdef PUBSUB_STATIC_CONFIG
@@ -137,7 +138,9 @@ SOPC_ReturnStatus PubSub_Configure(void)
     SOPC_PubSourceVariableConfig* pSourceConfig = NULL;
     if (SOPC_STATUS_OK == status)
     {
-        pSourceConfig = SOPC_PubSourceVariableConfig_Create(Server_GetSourceVariables);
+        pSourceConfig = SOPC_PubSourceVariableConfig_Create(Server_GetSourceVariables,
+                                                            NULL,   //
+                                                            NULL); //
         if (NULL == pSourceConfig)
         {
             printf("# Error: Cannot create Pub configuration.\n");
@@ -176,6 +179,7 @@ bool PubSub_Start(void)
     bool pubOK = false;
     uint32_t sub_nb_connections = SOPC_PubSubConfiguration_Nb_SubConnection(g_pPubSubConfig);
     uint32_t pub_nb_connections = SOPC_PubSubConfiguration_Nb_PubConnection(g_pPubSubConfig);
+    SOPC_LocalSKS_init(PUBSUB_SKS_SIGNING_KEY, PUBSUB_SKS_ENCRYPT_KEY, PUBSUB_SKS_KEY_NONCE);
     if (sub_nb_connections > 0)
     {
         subOK = SOPC_SubScheduler_Start(g_pPubSubConfig, g_pTargetConfig, Server_SetSubStatus);
@@ -203,6 +207,7 @@ void PubSub_Stop(void)
     SOPC_Atomic_Int_Set(&pubsubOnline, 0);
     SOPC_SubScheduler_Stop();
     SOPC_PubScheduler_Stop();
+    SOPC_PubSub_Protocol_ReleaseMqttManagerHandle();
     // Force Disabled after stop in case Sub scheduler was not start (no management of the status)
     Server_SetSubStatus(SOPC_PubSubState_Disabled);
 }

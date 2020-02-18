@@ -31,11 +31,13 @@ NID_CONFIGURATION = u"ns=1;s=PubSubConfiguration"
 NID_START_STOP = u"ns=1;s=PubSubStartStop"
 NID_STATUS = u"ns=1;s=PubSubStatus"
 
+NID_SUB_STRING = u"ns=1;s=SubString"
 NID_SUB_BOOL = u"ns=1;s=SubBool"
 NID_SUB_UINT16 = u"ns=1;s=SubUInt16"
 NID_SUB_UINT = u"ns=1;s=SubUInt"
 NID_SUB_INT = u"ns=1;s=SubInt"
 
+NID_PUB_STRING = u"ns=1;s=PubString"
 NID_PUB_BOOL = u"ns=1;s=PubBool"
 NID_PUB_UINT16 = u"ns=1;s=PubUInt16"
 NID_PUB_UINT = u"ns=1;s=PubUInt"
@@ -51,10 +53,12 @@ NODE_VARIANT_TYPE = { NID_SUB_BOOL : ua.VariantType.Boolean,
                       NID_SUB_UINT16 : ua.VariantType.UInt16,
                       NID_SUB_UINT : ua.VariantType.UInt64,
                       NID_SUB_INT : ua.VariantType.Int64,
+                      NID_SUB_STRING : ua.VariantType.String, 
                       NID_PUB_BOOL : ua.VariantType.Boolean,
                       NID_PUB_UINT16 : ua.VariantType.UInt16,
                       NID_PUB_UINT : ua.VariantType.UInt64,
-                      NID_PUB_INT : ua.VariantType.Int64 }
+                      NID_PUB_INT : ua.VariantType.Int64, 
+                      NID_PUB_STRING : ua.VariantType.String }
 
 XML_EMPTY = """<PubSub publisherId="1">
 </PubSub>"""
@@ -82,6 +86,128 @@ XML_SUBSCRIBER_ONLY = """<PubSub>
 XML_PUBSUB_LOOP = """<PubSub publisherId="1">
     <connection address="opc.udp://232.1.2.100:4840" mode="publisher">
         <message id="1" publishingInterval="200" version="1">
+            <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
+            <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
+            <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+        </message>
+    </connection>
+    <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
+        <message id="1" publishingInterval="200" version="1" publisherId="1">
+            <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
+            <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
+            <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
+        </message>
+    </connection>
+</PubSub>"""
+
+XML_PUBSUB_LOOP_MQTT = """<PubSub publisherId="1">
+    <connection address="mqtts://127.0.0.1:1883" mode="publisher">
+        <message id="1" publishingInterval="200" version="1">
+            <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
+            <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
+            <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+            <variable nodeId="ns=1;s=PubString" displayName="pubVarString" dataType="String"/>
+        </message>
+    </connection>
+    <connection address="mqtts://127.0.0.1:1883" mode="subscriber">
+        <message id="1" publishingInterval="200" version="1" publisherId="1">
+            <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
+            <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
+            <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
+            <variable nodeId="ns=1;s=SubString" displayName="subVarString" dataType="String"/>
+        </message>
+    </connection>
+</PubSub>"""
+
+
+XML_PUBSUB_LOOP_SECU_ENCRYPT_SIGN_SUCCEED = """<PubSub publisherId="1">
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher">
+        <message id="1" publishingInterval="200" version="1" securityMode="signAndEncrypt">
+            <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
+            <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
+            <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+        </message>
+    </connection>
+    <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
+        <message id="1" publishingInterval="200" version="1" publisherId="1" securityMode="signAndEncrypt">
+            <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
+            <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
+            <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
+        </message>
+    </connection>
+</PubSub>"""
+
+XML_PUBSUB_LOOP_SECU_SIGN_SUCCEED = """<PubSub publisherId="1">
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher">
+        <message id="1" publishingInterval="200" version="1" securityMode="sign">
+            <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
+            <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
+            <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+        </message>
+    </connection>
+    <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
+        <message id="1" publishingInterval="200" version="1" publisherId="1" securityMode="sign">
+            <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
+            <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
+            <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
+        </message>
+    </connection>
+</PubSub>"""
+
+XML_PUBSUB_LOOP_SECU_FAIL_1 = """<PubSub publisherId="1">
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher">
+        <message id="1" publishingInterval="200" version="1" securityMode="signAndEncrypt">
+            <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
+            <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
+            <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+        </message>
+    </connection>
+    <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
+        <message id="1" publishingInterval="200" version="1" publisherId="1">
+            <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
+            <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
+            <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
+        </message>
+    </connection>
+</PubSub>"""
+
+XML_PUBSUB_LOOP_SECU_FAIL_2 = """<PubSub publisherId="1">
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher">
+        <message id="1" publishingInterval="200" version="1" securityMode="signAndEncrypt">
+            <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
+            <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
+            <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+        </message>
+    </connection>
+    <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
+        <message id="1" publishingInterval="200" version="1" publisherId="1" securityMode="sign">
+            <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
+            <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
+            <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
+        </message>
+    </connection>
+</PubSub>"""
+
+XML_PUBSUB_LOOP_SECU_FAIL_3 = """<PubSub publisherId="1">
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher">
+        <message id="1" publishingInterval="200" version="1" securityMode="sign">
+            <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
+            <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
+            <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+        </message>
+    </connection>
+    <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
+        <message id="1" publishingInterval="200" version="1" publisherId="1" securityMode="signAndEncrypt">
+            <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
+            <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
+            <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
+        </message>
+    </connection>
+</PubSub>"""
+
+XML_PUBSUB_LOOP_SECU_SIGN_FAIL_4 = """<PubSub publisherId="1">
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher">
+        <message id="1" publishingInterval="200" version="1" securityMode="sign">
             <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
             <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
             <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
@@ -331,11 +457,44 @@ def testPubSubDynamicConf():
      
         pubsubserver.stop()
         helpTestStopStart(pubsubserver, False, logger)
+
         #
-        # TC 6 : Test with configuration message not consistent between the one on Publisher
+        # TC 6 : Test with Publisher and Subscriber configuration => subscriber variables change through Pub/Sub
+        #
+        logger.begin_section("TC 6 : Test with Publisher and Subscriber configuration (MQTT) => subscriber variables change through Pub/Sub")
+
+        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP_MQTT, logger)
+        sleep(.800)
+
+        # Init Publisher variables
+        helpTestSetValue(pubsubserver, NID_PUB_BOOL, False, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_UINT16, 8500, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_INT, -300, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_STRING, "Test MQTT From Publisher", logger)
+         
+        # Init Subscriber variables
+        helpTestSetValue(pubsubserver, NID_SUB_BOOL, True, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_UINT16, 500, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_INT, 100, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_STRING, "Test MQTT Not set", logger)
+
+        sleep(.400)
+
+        logger.add_test('Subscriber bool is changed ', False == pubsubserver.getValue(NID_SUB_BOOL))
+        logger.add_test('Subscriber uint16 is changed ', 8500 == pubsubserver.getValue(NID_SUB_UINT16))
+        logger.add_test('Subscriber int is changed ', -300 == pubsubserver.getValue(NID_SUB_INT))
+        logger.add_test('Subscriber string is changed ', "Test MQTT From Publisher" == pubsubserver.getValue(NID_SUB_STRING))
+        sleep(.400)
+
+        pubsubserver.stop()
+        helpTestStopStart(pubsubserver, False, logger)
+
+
+        #
+        # TC 7 : Test with configuration message not consistent between the one on Publisher
         #        and the one on Subscriber  => subscriber variables do not change
         #
-        logger.begin_section("TC 6 : Publisher Subscriber not consistent")
+        logger.begin_section("TC 7 : Publisher Subscriber not consistent")
 
         helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP_MESSAGE_NOT_COMPATIBLE, logger)
 
@@ -355,9 +514,9 @@ def testPubSubDynamicConf():
         logger.add_test('Subscriber int is not changed ', 100 == pubsubserver.getValue(NID_SUB_INT))
 
         #
-        # TC 7 : Test with a bad formed configuration => Pub/Sub status is 0
+        # TC 8 : Test with a bad formed configuration => Pub/Sub status is 0
         #
-        logger.begin_section("TC 7 : Bad formed configuration")
+        logger.begin_section("TC 8 : Bad formed configuration")
         helpConfigurationChange(pubsubserver, XML_PUBSUB_BAD_FORMED_CONFIGURATION, logger)
 
         pubsubserver.stop()
@@ -369,12 +528,151 @@ def testPubSubDynamicConf():
         logger.add_test('PubSub Module Status should be 0 : %d' % status , 0 == status)
        
         #
-        # TC 8 : Start and Stop empty configuration
+        # TC 9 : Start and Stop empty configuration
         #
-        logger.begin_section("TC 8 : Empty configuration")
+        logger.begin_section("TC 9 : Empty configuration")
         helpConfigurationChange(pubsubserver, XML_EMPTY, logger)
         status = pubsubserver.getStatus()
         logger.add_test('PubSub Module Status should be 0 : %d' % status , 0 == status)
+
+
+        #
+        # TC 10 : Test with message configured with security mode encrypt and sign for publisher
+        #         but no security for subscriber => subscriber variables do not change
+        #
+        logger.begin_section("TC 10 : Security mode not consistent - message is encrypt and sign but no security for subscriber")
+
+        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP_SECU_FAIL_1, logger)
+
+        # Init Subscriber variables
+        helpTestSetValue(pubsubserver, NID_SUB_BOOL, False, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_UINT16, 1456, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_INT, 123654, logger)
+        
+        # Change Publisher variables
+        helpTestSetValue(pubsubserver, NID_PUB_BOOL, True, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_UINT16, 6500, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_INT, -600, logger)
+        
+        sleep(.400)
+        logger.add_test('Subscriber bool is not changed ', False == pubsubserver.getValue(NID_SUB_BOOL))
+        logger.add_test('Subscriber uint16 is not changed ', 1456 == pubsubserver.getValue(NID_SUB_UINT16))
+        logger.add_test('Subscriber int is not changed ', 123654 == pubsubserver.getValue(NID_SUB_INT))
+
+        #
+        # TC 11 : Test with message configured with security mode encrypt and sign for publisher
+        #         but only sign for subscriber => subscriber variables do not change
+        #
+        logger.begin_section("TC 11 : Security mode not consistent - message is encrypt and sign but only sign mode for subscriber")
+
+        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP_SECU_FAIL_2, logger)
+
+        # Init Subscriber variables
+        helpTestSetValue(pubsubserver, NID_SUB_BOOL, False, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_UINT16, 1456, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_INT, 123654, logger)
+        
+        # Change Publisher variables
+        helpTestSetValue(pubsubserver, NID_PUB_BOOL, True, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_UINT16, 6500, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_INT, -600, logger)
+        
+        sleep(.400)
+        logger.add_test('Subscriber bool is not changed ', False == pubsubserver.getValue(NID_SUB_BOOL))
+        logger.add_test('Subscriber uint16 is not changed ', 1456 == pubsubserver.getValue(NID_SUB_UINT16))
+        logger.add_test('Subscriber int is not changed ', 123654 == pubsubserver.getValue(NID_SUB_INT))
+
+        #
+        # TC 12 : Test with message configured with security mode sign for publisher
+        #         but encrypt and sign for subscriber => subscriber variables do not change
+        #
+        logger.begin_section("TC 12 : Security mode not consistent - message is sign but sign and encrypt for subscriber")
+
+        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP_SECU_FAIL_3, logger)
+
+        # Init Subscriber variables
+        helpTestSetValue(pubsubserver, NID_SUB_BOOL, False, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_UINT16, 1456, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_INT, 123654, logger)
+        
+        # Change Publisher variables
+        helpTestSetValue(pubsubserver, NID_PUB_BOOL, True, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_UINT16, 6500, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_INT, -600, logger)
+        
+        sleep(.400)
+        logger.add_test('Subscriber bool is not changed ', False == pubsubserver.getValue(NID_SUB_BOOL))
+        logger.add_test('Subscriber uint16 is not changed ', 1456 == pubsubserver.getValue(NID_SUB_UINT16))
+        logger.add_test('Subscriber int is not changed ', 123654 == pubsubserver.getValue(NID_SUB_INT))
+
+        #
+        # TC 13 : Test with message configured with security mode sign and encrypt
+        #         for both publisher and subscriber => subscriber variables change
+        #
+        logger.begin_section("TC 13 : Security mode sign and encrypt")
+
+        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP_SECU_ENCRYPT_SIGN_SUCCEED, logger)
+
+        # Init Subscriber variables
+        helpTestSetValue(pubsubserver, NID_SUB_BOOL, False, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_UINT16, 1456, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_INT, 123654, logger)
+        
+        # Change Publisher variables
+        helpTestSetValue(pubsubserver, NID_PUB_BOOL, True, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_UINT16, 852, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_INT, 2658, logger)
+        
+        sleep(.400)
+        logger.add_test('Subscriber bool is changed ', True == pubsubserver.getValue(NID_SUB_BOOL))
+        logger.add_test('Subscriber uint16 is changed ', 852 == pubsubserver.getValue(NID_SUB_UINT16))
+        logger.add_test('Subscriber int is changed ', 2658 == pubsubserver.getValue(NID_SUB_INT))
+
+        #
+        # TC 14 : Test with message configured with security mode sign
+        #         for both publisher and subscriber => subscriber variables change
+        #
+        logger.begin_section("TC 14 : Security mode sign")
+
+        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP_SECU_SIGN_SUCCEED, logger)
+
+        # Init Subscriber variables
+        helpTestSetValue(pubsubserver, NID_SUB_BOOL, False, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_UINT16, 1456, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_INT, 123654, logger)
+        
+        # Change Publisher variables
+        helpTestSetValue(pubsubserver, NID_PUB_BOOL, True, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_UINT16, 528, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_INT, 7896, logger)
+        
+        sleep(.400)
+        logger.add_test('Subscriber bool is changed ', True == pubsubserver.getValue(NID_SUB_BOOL))
+        logger.add_test('Subscriber uint16 is changed ', 528 == pubsubserver.getValue(NID_SUB_UINT16))
+        logger.add_test('Subscriber int is changed ', 7896 == pubsubserver.getValue(NID_SUB_INT))
+
+        #
+        # TC 15 : Test with message configured with security mode sign only
+        #         for publisher => subscriber variables do not change
+        #
+        logger.begin_section("TC 15 : Security mode sign only publisher")
+
+        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP_SECU_SIGN_FAIL_4, logger)
+
+        # Init Subscriber variables
+        helpTestSetValue(pubsubserver, NID_SUB_BOOL, False, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_UINT16, 1456, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_INT, 123654, logger)
+        
+        # Change Publisher variables
+        helpTestSetValue(pubsubserver, NID_PUB_BOOL, True, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_UINT16, 456, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_INT, 789, logger)
+        
+        sleep(.400)
+        logger.add_test('Subscriber bool is not changed ', False == pubsubserver.getValue(NID_SUB_BOOL))
+        logger.add_test('Subscriber uint16 is not changed ', 1456 == pubsubserver.getValue(NID_SUB_UINT16))
+        logger.add_test('Subscriber int is not changed ', 123654 == pubsubserver.getValue(NID_SUB_INT))
 
     finally:
         # restore default XML file

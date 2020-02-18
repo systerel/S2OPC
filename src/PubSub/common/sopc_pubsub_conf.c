@@ -120,6 +120,8 @@ struct SOPC_WriterGroup
     uint8_t dataSetWriters_length;
     SOPC_DataSetWriter* dataSetWriters;
 
+    SOPC_SecurityMode_Type securityMode;
+
     // For the next version:
     // KeepAliveTime
     // Priority
@@ -146,6 +148,8 @@ struct SOPC_DataSetWriter
 struct SOPC_ReaderGroup
 {
     SOPC_PubSubConnection* parent;
+
+    SOPC_SecurityMode_Type securityMode;
 
     uint8_t dataSetReaders_length;
     SOPC_DataSetReader* dataSetReaders;
@@ -512,6 +516,18 @@ SOPC_ReaderGroup* SOPC_PubSubConnection_Get_ReaderGroup_At(const SOPC_PubSubConn
 
 /** Reader Group **/
 
+SOPC_SecurityMode_Type SOPC_ReaderGroup_Get_SecurityMode(const SOPC_ReaderGroup* group)
+{
+    assert(NULL != group);
+    return group->securityMode;
+}
+
+void SOPC_ReaderGroup_Set_SecurityMode(SOPC_ReaderGroup* group, SOPC_SecurityMode_Type mode)
+{
+    assert(NULL != group);
+    group->securityMode = mode;
+}
+
 bool SOPC_ReaderGroup_Allocate_DataSetReader_Array(SOPC_ReaderGroup* group, uint8_t nb)
 {
     assert(NULL != group);
@@ -774,6 +790,18 @@ void SOPC_WriterGroup_Set_NetworkMessageContentMask(SOPC_WriterGroup* group,
 {
     assert(NULL != group);
     group->messageSettings.contentMask = contentMask;
+}
+
+SOPC_SecurityMode_Type SOPC_WriterGroup_Get_SecurityMode(const SOPC_WriterGroup* group)
+{
+    assert(NULL != group);
+    return group->securityMode;
+}
+
+void SOPC_WriterGroup_Set_SecurityMode(SOPC_WriterGroup* group, SOPC_SecurityMode_Type mode)
+{
+    assert(NULL != group);
+    group->securityMode = mode;
 }
 
 bool SOPC_WriterGroup_Allocate_DataSetWriter_Array(SOPC_WriterGroup* group, uint8_t nb)

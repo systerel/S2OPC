@@ -48,7 +48,8 @@ static struct
                      .nbSockets = 0,
                      .callback = NULL,
                      .tickCb = NULL,
-                     .tickCbCtx = NULL};
+                     .tickCbCtx = NULL,
+                     .thread = 0};
 
 static void* SOPC_UDP_SocketsMgr_ThreadLoop(void* nullData)
 {
@@ -160,6 +161,9 @@ static void SOPC_SocketsNetworkEventMgr_LoopThreadStop(void)
     SOPC_Atomic_Int_Set(&receptionThread.stopFlag, true);
 
     SOPC_Thread_Join(receptionThread.thread);
+
+    // set to null thread handle, because well joined
+    receptionThread.thread = 0;
 
     SOPC_Atomic_Int_Set(&receptionThread.initDone, false);
 }

@@ -22,6 +22,7 @@
 
 #include "sopc_buffer.h"
 #include "sopc_pubsub_conf.h"
+#include "sopc_pubsub_security.h"
 #include "sopc_sub_target_variable.h"
 
 /**
@@ -29,9 +30,11 @@
  * \param connection : configuration element of the connection associated to the received data
  * \param buffer : data to decode
  * \param config : configuration to provide to the target module which consumes the decoded data
+ * \param securityCBck : function to retrieve security information needed to decrypt Payload and check signature
  */
 SOPC_ReturnStatus SOPC_Reader_Read_UADP(const SOPC_PubSubConnection* connection,
                                         SOPC_Buffer* buffer,
-                                        SOPC_SubTargetVariableConfig* config);
+                                        SOPC_SubTargetVariableConfig* config,
+                                        SOPC_UADP_GetSecurity_Func securityCBck);
 
 #endif /* SOPC_SUB_READER_H_ */

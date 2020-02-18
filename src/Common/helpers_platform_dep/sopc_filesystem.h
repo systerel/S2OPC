@@ -27,6 +27,7 @@
 #define SOPC_FILESYSTEM_H_
 
 #include <stdio.h>
+#include <stdlib.h>
 
 typedef enum
 {

@@ -20,6 +20,7 @@
 #ifndef SOPC_SUB_TARGET_VARIABLE_H_
 #define SOPC_SUB_TARGET_VARIABLE_H_
 
+#include "sopc_dataset_ll_layer.h"
 #include "sopc_pubsub_conf.h"
 #include "sopc_sub_target_variable.h"
 #include "sopc_types.h"

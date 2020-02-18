@@ -31,6 +31,7 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
 #include "sopc_pki_stack.h"
+#include "sopc_pub_scheduler.h"
 #include "sopc_time.h"
 #include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config.h"
@@ -50,6 +51,7 @@ typedef struct SynchRequestContext
     Condition condition;
     OpcUa_ReadResponse* borrowedResponse;
 } SynchRequestContext;
+
 
 /* These variables could be stored in a struct Server_Context, which is then passed to all functions.
  * This would mimic class instances and avoid global variables.
@@ -588,7 +590,8 @@ static void Server_Event_AddressSpace(SOPC_App_AddSpace_Event event, void* opPar
 
     if ((opStatus & SOPC_GoodStatusOppositeMask) != 0)
     {
-        printf("# Warning: Received address space event which status code is not good: 0x%08X. Ignored\n", opStatus);
+        printf("# Warning: Received address space event which status code is not good: 0x%08X. Ignored\n",
+               (unsigned int) opStatus);
         return;
     }
 
@@ -596,19 +599,19 @@ static void Server_Event_AddressSpace(SOPC_App_AddSpace_Event event, void* opPar
 }
 
 static void Server_Event_Toolkit(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, uintptr_t appContext)
-{
-    (void) idOrStatus;
-    SOPC_EncodeableType* message_type = NULL;
+ {
+     (void) idOrStatus;
+     SOPC_EncodeableType* message_type = NULL;
 
-    switch (event)
-    {
-    case SE_CLOSED_ENDPOINT:
-        printf("# Info: Closed endpoint event.\n");
-        SOPC_Atomic_Int_Set(&serverOnline, 0);
-        return;
-    case SE_LOCAL_SERVICE_RESPONSE:
-        message_type = *((SOPC_EncodeableType**) param);
-        /* Listen for WriteResponses, which only contain status codes */
+     switch (event)
+     {
+     case SE_CLOSED_ENDPOINT:
+         printf("# Info: Closed endpoint event.\n");
+         SOPC_Atomic_Int_Set(&serverOnline, 0);
+         return;
+     case SE_LOCAL_SERVICE_RESPONSE:
+         message_type = *((SOPC_EncodeableType**) param);
+         /* Listen for WriteResponses, which only contain status codes */
         /*if (message_type == &OpcUa_WriteResponse_EncodeableType)
         {
             OpcUa_WriteResponse* write_response = param;
@@ -640,6 +643,7 @@ static void Server_Event_Toolkit(SOPC_App_Com_Event event, uint32_t idOrStatus, 
             {
                 status = Mutex_UnlockAndWaitCond(&ctx->condition, &ctx->mutex);
                 assert(SOPC_STATUS_OK == status);
+
             }
 
             /* This thread is the last to unlock the thread, so it should free the struct */
@@ -651,6 +655,7 @@ static void Server_Event_Toolkit(SOPC_App_Com_Event event, uint32_t idOrStatus, 
             assert(SOPC_STATUS_OK == status);
             SOPC_Free(ctx);
             ctx = NULL;
+
         }
         else if (message_type == &OpcUa_WriteResponse_EncodeableType)
         {
@@ -894,7 +899,6 @@ SOPC_DataValue* Server_GetSourceVariables(OpcUa_ReadValueId* lrv, int32_t nbValu
     {
         return NULL;
     }
-
     if (NULL == lrv || 0 >= nbValues)
     {
         return NULL;
@@ -963,6 +967,7 @@ SOPC_DataValue* Server_GetSourceVariables(OpcUa_ReadValueId* lrv, int32_t nbValu
     requestContext->borrowedResponse = NULL;
     statusMutex = Condition_SignalAll(&requestContext->condition);
     assert(SOPC_STATUS_OK == statusMutex);
+
 
     /* The other thread is the last one to unlock the mutex, so it should free the context */
     statusMutex = Mutex_Unlock(&requestContext->mutex);

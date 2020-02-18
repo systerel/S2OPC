@@ -25,6 +25,7 @@
 #include "sopc_helper_endianness_cfg.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_network_layer.h"
+#include "sopc_pub_scheduler.h"
 #include "sopc_pub_source_variable.h"
 #include "sopc_reader_layer.h"
 #include "sopc_sub_target_variable.h"
@@ -171,7 +172,7 @@ START_TEST(test_hl_network_msg_encode)
     // Check network message content
     check_network_msg_content_uni_dsm(nm);
 
-    SOPC_Buffer* buffer = SOPC_UADP_NetworkMessage_Encode(nm);
+    SOPC_Buffer* buffer = SOPC_UADP_NetworkMessage_Encode(nm, NULL);
 
     ck_assert_uint_eq(ENCODED_DATA_SIZE, buffer->length);
 
@@ -190,7 +191,7 @@ START_TEST(test_hl_network_msg_decode)
     // Initialize endianess for encoders
     SOPC_Helper_EndiannessCfg_Initialize();
 
-    SOPC_UADP_NetworkMessage* uadp_nm = SOPC_UADP_NetworkMessage_Decode(&encoded_network_msg);
+    SOPC_UADP_NetworkMessage* uadp_nm = SOPC_UADP_NetworkMessage_Decode(&encoded_network_msg, NULL);
     ck_assert_ptr_nonnull(uadp_nm);
 
     // Check network message content
@@ -240,7 +241,7 @@ START_TEST(test_hl_network_msg_encode_multi_dsm)
     // Check network message content
     check_network_msg_content_multi_dsm(nm);
 
-    SOPC_Buffer* buffer = SOPC_UADP_NetworkMessage_Encode(nm);
+    SOPC_Buffer* buffer = SOPC_UADP_NetworkMessage_Encode(nm, false);
 
     // NOT SUPPORTED: otherwise use encoded_network_msg_multi_dsm_data
     ck_assert_ptr_null(buffer);
@@ -255,7 +256,7 @@ START_TEST(test_hl_network_msg_decode_multi_dsm)
     // Initialize endianess for encoders
     SOPC_Helper_EndiannessCfg_Initialize();
 
-    SOPC_UADP_NetworkMessage* uadp_nm = SOPC_UADP_NetworkMessage_Decode(&encoded_network_msg_multi_dsm);
+    SOPC_UADP_NetworkMessage* uadp_nm = SOPC_UADP_NetworkMessage_Decode(&encoded_network_msg_multi_dsm, NULL);
 
     // NOT SUPPORTED
     ck_assert_ptr_null(uadp_nm);
@@ -451,7 +452,7 @@ START_TEST(test_subscriber_reader_layer)
 
     // NOMINAL
     setTargetVariablesCb_ReaderTest_called = false;
-    SOPC_ReturnStatus status = SOPC_Reader_Read_UADP(connection, &encoded_network_msg, targetConfig);
+    SOPC_ReturnStatus status = SOPC_Reader_Read_UADP(connection, &encoded_network_msg, targetConfig, NULL);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_Buffer_SetPosition(&encoded_network_msg, 0);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
@@ -462,7 +463,7 @@ START_TEST(test_subscriber_reader_layer)
     // PUBLISHER ID
     SOPC_DataSetReader_Set_PublisherId_UInteger(dsr, NETWORK_MSG_PUBLISHER_ID + 1);
 
-    status = SOPC_Reader_Read_UADP(connection, &encoded_network_msg, targetConfig);
+    status = SOPC_Reader_Read_UADP(connection, &encoded_network_msg, targetConfig, NULL);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_Buffer_SetPosition(&encoded_network_msg, 0);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
@@ -474,7 +475,7 @@ START_TEST(test_subscriber_reader_layer)
     // WRONG GROUP ID
     SOPC_DataSetReader_Set_WriterGroupId(dsr, NETWORK_MSG_GROUP_ID + 1);
 
-    status = SOPC_Reader_Read_UADP(connection, &encoded_network_msg, targetConfig);
+    status = SOPC_Reader_Read_UADP(connection, &encoded_network_msg, targetConfig, NULL);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_Buffer_SetPosition(&encoded_network_msg, 0);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
@@ -486,7 +487,7 @@ START_TEST(test_subscriber_reader_layer)
     // WRONG GROUP VERSION
     SOPC_DataSetReader_Set_WriterGroupVersion(dsr, NETWORK_MSG_GROUP_VERSION + 1);
 
-    status = SOPC_Reader_Read_UADP(connection, &encoded_network_msg, targetConfig);
+    status = SOPC_Reader_Read_UADP(connection, &encoded_network_msg, targetConfig, NULL);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_Buffer_SetPosition(&encoded_network_msg, 0);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
@@ -498,7 +499,7 @@ START_TEST(test_subscriber_reader_layer)
     // WRONG DATA SET WRITER ID
     SOPC_DataSetReader_Set_DataSetWriterId(dsr, DATASET_MSG_WRITER_ID_BASE + 1);
 
-    status = SOPC_Reader_Read_UADP(connection, &encoded_network_msg, targetConfig);
+    status = SOPC_Reader_Read_UADP(connection, &encoded_network_msg, targetConfig, NULL);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_Buffer_SetPosition(&encoded_network_msg, 0);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
@@ -512,7 +513,7 @@ START_TEST(test_subscriber_reader_layer)
     SOPC_DataSetReader_Set_WriterGroupVersion(dsr, NETWORK_MSG_GROUP_VERSION + 1);
     SOPC_DataSetReader_Set_DataSetWriterId(dsr, DATASET_MSG_WRITER_ID_BASE + 1);
 
-    status = SOPC_Reader_Read_UADP(connection, &encoded_network_msg, targetConfig);
+    status = SOPC_Reader_Read_UADP(connection, &encoded_network_msg, targetConfig, NULL);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_Buffer_SetPosition(&encoded_network_msg, 0);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
@@ -573,34 +574,6 @@ static SOPC_PubSubConfiguration* build_Pub_Config(SOPC_PublishedDataSet** out_pd
     return config;
 }
 
-static SOPC_DataValue* getSourceVariablesCb(OpcUa_ReadValueId* nodesToRead, int32_t nbValues)
-{
-    SOPC_DataValue* dataValues = SOPC_Calloc(NB_VARS, sizeof(*dataValues));
-    ck_assert_ptr_nonnull(dataValues);
-    ck_assert_int_eq(NB_VARS, nbValues);
-    for (uint16_t i = 0; i < NB_VARS; i++)
-    {
-        SOPC_DataValue* dataValue = &dataValues[i];
-        SOPC_DataValue_Initialize(dataValue);
-
-        OpcUa_ReadValueId* readValue = &nodesToRead[i];
-        ck_assert_uint_eq(13, readValue->AttributeId);     // Value => AttributeId=13
-        ck_assert_int_ge(0, readValue->IndexRange.Length); // No index range
-        ck_assert_int_eq(SOPC_IdentifierType_Numeric, readValue->NodeId.IdentifierType);
-        ck_assert_uint_eq(1, readValue->NodeId.Namespace);
-        ck_assert_uint_eq(i, readValue->NodeId.Data.Numeric);
-
-        dataValue->Value.ArrayType = varArr[i].ArrayType;
-        dataValue->Value.BuiltInTypeId = varArr[i].BuiltInTypeId;
-        dataValue->Value.Value = varArr[i].Value;
-
-        OpcUa_ReadValueId_Clear(nodesToRead);
-    }
-    SOPC_Free(nodesToRead);
-
-    return dataValues;
-}
-
 static void check_returned_DataValues(SOPC_DataValue* dataValues)
 {
     ck_assert_ptr_nonnull(dataValues);
@@ -615,10 +588,98 @@ static void check_returned_DataValues(SOPC_DataValue* dataValues)
         SOPC_ReturnStatus status = SOPC_Variant_Compare(&varArr[i], &dataValue->Value, &comp);
         ck_assert_int_eq(SOPC_STATUS_OK, status);
         ck_assert_int_eq(0, comp);
-
         SOPC_DataValue_Clear(dataValue);
     }
     SOPC_Free(dataValues);
+}
+
+static SOPC_DataValue* GetSourceVariablesResponse(SOPC_PubSheduler_GetVariableRequestContext* requestResponse)
+{
+    SOPC_DataValue* ldv = NULL;
+
+    if (NULL == requestResponse)
+    {
+        return NULL;
+    }
+
+    SOPC_PubSheduler_GetVariableRequestContext* requestContext =
+        (SOPC_PubSheduler_GetVariableRequestContext*) requestResponse;
+
+    if (NULL == requestResponse->ldv)
+    {
+        SOPC_Free(requestContext);
+        return NULL;
+    }
+
+    check_returned_DataValues(requestResponse->ldv);
+
+    ldv = requestContext->ldv;
+
+    SOPC_Free(requestContext);
+
+    ldv = NULL;
+
+    return ldv;
+}
+
+static SOPC_ReturnStatus GetSourceVariablesRequest(
+    SOPC_EventHandler* eventHandler, // message queue where response must be sent
+    uintptr_t msgCtx,                // messageCtx, used by scheduler when it received response
+    OpcUa_ReadValueId* lrv,
+    int32_t nbValues)
+{
+    // Note: Return result is mandatory. If SOPC_STATUS_OK is not returned, then
+    // READY status is set to messageCtx. So, request can be performed.
+    // Else, BUSY is set to messageCtx. Next request will be ignored.
+    // This is important to avoid memory issue in case of
+    // treatment of request by services thread takes a long time.
+
+    if (NULL == lrv || 0 >= nbValues)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    SOPC_PubSheduler_GetVariableRequestContext* requestContext =
+        SOPC_Calloc(1, sizeof(SOPC_PubSheduler_GetVariableRequestContext));
+
+    if (NULL == requestContext)
+    {
+        return SOPC_STATUS_NOK;
+    }
+    requestContext->msgCtxt = msgCtx;            // Message context, forward by "0" timer event
+    requestContext->eventHandler = eventHandler; // Message queue
+    requestContext->ldv = NULL;                  // Datavalue request result
+    requestContext->NoOfNodesToRead = nbValues;  // Use to alloc SOPC_DataValue by GetResponse
+
+    /* Simulate response */
+    ck_assert(nbValues <= NB_VARS);
+    ck_assert(0 < nbValues);
+    requestContext->ldv = SOPC_Calloc((size_t) nbValues, sizeof(*requestContext->ldv));
+    ck_assert(NULL != requestContext->ldv);
+    for (uint32_t i = 0; i < (uint32_t) nbValues; i++)
+    {
+        SOPC_DataValue* dataValue = &requestContext->ldv[i];
+        SOPC_DataValue_Initialize(dataValue);
+
+        OpcUa_ReadValueId* readValue = &lrv[i];
+        ck_assert_uint_eq(13, readValue->AttributeId);     // Value => AttributeId=13
+        ck_assert_int_ge(0, readValue->IndexRange.Length); // No index range
+        ck_assert_int_eq(SOPC_IdentifierType_Numeric, readValue->NodeId.IdentifierType);
+        ck_assert_uint_eq(1, readValue->NodeId.Namespace);
+        ck_assert_uint_eq(i, readValue->NodeId.Data.Numeric);
+
+        dataValue->Value.ArrayType = varArr[i].ArrayType;
+        dataValue->Value.BuiltInTypeId = varArr[i].BuiltInTypeId;
+        dataValue->Value.Value = varArr[i].Value;
+
+        OpcUa_ReadValueId_Clear(lrv);
+    }
+    SOPC_Free(lrv);
+
+    // Call directly response callback
+    GetSourceVariablesResponse(requestContext);
+
+    return SOPC_STATUS_OK;
 }
 
 START_TEST(test_source_variable_layer)
@@ -626,9 +687,11 @@ START_TEST(test_source_variable_layer)
     SOPC_PublishedDataSet* pds = NULL;
     SOPC_PubSubConfiguration* config = build_Pub_Config(&pds);
 
-    SOPC_PubSourceVariableConfig* sourceConfig = SOPC_PubSourceVariableConfig_Create(getSourceVariablesCb);
-    SOPC_DataValue* dataValues = SOPC_PubSourceVariable_GetVariables(sourceConfig, pds);
-    check_returned_DataValues(dataValues);
+    SOPC_PubSourceVariableConfig* sourceConfig =
+        SOPC_PubSourceVariableConfig_Create(GetSourceVariablesRequest, GetSourceVariablesResponse);
+    SOPC_ReturnStatus result = SOPC_PubSourceVariable_GetVariables(NULL, 0, sourceConfig, pds);
+
+    ck_assert(result == SOPC_STATUS_OK);
 
     SOPC_PubSourceVariableConfig_Delete(sourceConfig);
     SOPC_PubSubConfiguration_Delete(config);

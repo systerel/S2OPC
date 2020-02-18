@@ -21,15 +21,18 @@
 #include <inttypes.h>
 
 #include "sopc_atomic.h"
+#include "sopc_crypto_provider.h"
 #include "sopc_dataset_layer.h"
 #include "sopc_event_handler.h"
 #include "sopc_event_timer_manager.h"
 #include "sopc_helper_endianness_cfg.h"
 #include "sopc_logger.c"
 #include "sopc_mem_alloc.h"
+#include "sopc_mqtt_transport_layer.h"
 #include "sopc_pub_scheduler.h"
 #include "sopc_pubsub_constants.h"
 #include "sopc_pubsub_helpers.h"
+#include "sopc_pubsub_local_sks.h"
 #include "sopc_pubsub_protocol.h"
 #include "sopc_raw_sockets.h"
 #include "sopc_rt_publisher.h"
@@ -51,6 +54,18 @@ static void SOPC_PubScheduler_CtxUdp_Clear(SOPC_PubScheduler_TransportCtx* ctx);
 // Send an UDP message. Implements SOPC_PubScheduler_TransportCtx_Send
 static void SOPC_PubScheduler_CtxUdp_Send(SOPC_PubScheduler_TransportCtx* ctx, SOPC_Buffer* buffer);
 
+// Specific callback for MQTT message. No treatment for PUBLISHER.
+static void on_mqtt_message_received(MqttTransportHandle* pCtx, /* Transport context handle */
+                                     uint8_t* data,             /* Data received */
+                                     uint16_t size,             /* Size of data received, in bytes. */
+                                     void* pUserContext);       /* User context, used as pub sub connection */
+
+// Clear a Transport MQTT context. Implements SOPC_PubScheduler_TransportCtx_Clear
+static void SOPC_PubScheduler_CtxMqtt_Clear(SOPC_PubScheduler_TransportCtx* ctx);
+
+// Send an MQTT message. Implements SOPC_PubScheduler_TransportCtx_Send
+static void SOPC_PubScheduler_CtxMqtt_Send(SOPC_PubScheduler_TransportCtx* ctx, SOPC_Buffer* buffer);
+
 /* Context of a UDP Multicast Message */
 struct SOPC_PubScheduler_TransportCtx
 {
@@ -59,6 +74,9 @@ struct SOPC_PubScheduler_TransportCtx
 
     SOPC_PubScheduler_TransportCtx_Clear fctClear;
     SOPC_PubScheduler_TransportCtx_Send fctSend;
+
+    // specific to SOPC_PubSubProtocol_MQTT
+    MqttTransportHandle* mqttHandle;
 };
 
 typedef struct SOPC_PubScheduler_MessageCtx
@@ -66,13 +84,18 @@ typedef struct SOPC_PubScheduler_MessageCtx
     // do not delete
     SOPC_WriterGroup* group;
     SOPC_Dataset_NetworkMessage* message;
-
     SOPC_PubScheduler_TransportCtx* transport;
+
 
     SOPC_Buffer* postEncodeBuffer[2];
     uint32_t postEncodeBufferCurrent;
 
     uint32_t rt_publisher_msg_id;
+
+    SOPC_PubSub_SecurityType* security;
+    // status of current request (only one at same time)
+    SOPC_PubSheduler_GetVariableRequestStatus status;
+
 } SOPC_PubScheduler_MessageCtx;
 
 typedef struct SOPC_PubScheduler_MessageCtx_Array
@@ -146,6 +169,8 @@ static struct
     Thread handleThreadBeatHeart; // Handle thread simulates IRQ. This thread call HeartBeat publisher function.
     bool bQuitBeatHeart;          // Quit control of thread which simulates IRQ
 #endif
+
+
 } pubSchedulerCtx = {.isStarted = false,
                      .processingStartStop = false,
                      .config = NULL,
@@ -187,15 +212,33 @@ static void SOPC_RT_Publisher_SendPubMsgCallback(uint32_t msgId,     // Message 
                                                  void* pData,        // Data published by set data API
                                                  uint32_t size);     // Data size in bytes
 
+
+
+static uint64_t SOPC_PubScheduler_Nb_Message(SOPC_PubSubConfiguration* config);
+
+/*
+ * MessageCtx: array of context for each message
+ * Size of this array is SOPC_PubScheduler_Nb_Message
+ */
+static bool SOPC_PubScheduler_MessageCtx_Array_Initialize(SOPC_PubSubConfiguration* config);
+static void SOPC_PubScheduler_MessageCtx_Array_Clear(void);
+static bool SOPC_PubScheduler_MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx, SOPC_WriterGroup* group);
+// Get the last initialise MessageCtx
+static SOPC_PubScheduler_MessageCtx* SOPC_PubScheduler_MessageCtx_Get_Last(void);
+static void SOPC_PubScheduler_Context_Clear(void);
+static const SOPC_DataSetWriter* SOPC_PubScheduler_Group_Get_Unique_Writer(const SOPC_WriterGroup* group);
+static bool SOPC_PubScheduler_Connection_Get_Transport(uint32_t index,
+                                                       SOPC_PubSubConnection* connection,
+                                                       SOPC_PubScheduler_TransportCtx** ctx);
 // Clear pub scheduler context
 // 1) Stop beat heart thread
 // 2) Stop variable monitoring thread
 // 3) Clear (De initialize) RT Publisher
 // 4) Destroy RT Publisher
 // 5) Destory all message context
-
 static void SOPC_PubScheduler_Context_Clear(void)
 {
+<<<<<<< HEAD
     /* Stop beat heart and variable monitoring threads */
 #if SOPC_PUBSCHEDULER_BEATHEART_FROM_IRQ == 0
     printf("# Info: Stop beat heart thread\r\n");
@@ -290,6 +333,10 @@ static void SOPC_PubScheduler_MessageCtx_Array_Clear(void)
 
             SOPC_Buffer_Delete(pubSchedulerCtx.messages.array[i].postEncodeBuffer[0]);
             SOPC_Buffer_Delete(pubSchedulerCtx.messages.array[i].postEncodeBuffer[1]);
+
+            SOPC_PubSub_Security_Clear(pubSchedulerCtx.messages.array[i].security);
+            SOPC_Free(pubSchedulerCtx.messages.array[i].security);
+            pubSchedulerCtx.messages.array[i].security = NULL;
         }
 
         /* Destroy messages array */
@@ -316,6 +363,7 @@ static bool SOPC_PubScheduler_MessageCtx_Array_Init_Next(SOPC_PubScheduler_Trans
         return false;
     }
 
+
     if (result)
     {
         context->postEncodeBuffer[0] = SOPC_Buffer_Create(SOPC_PUBSUB_BUFFER_SIZE);
@@ -340,6 +388,43 @@ static bool SOPC_PubScheduler_MessageCtx_Array_Init_Next(SOPC_PubScheduler_Trans
 
     context->postEncodeBufferCurrent = 2;
 
+    if(result)
+    {
+        SOPC_SecurityMode_Type smode = SOPC_WriterGroup_Get_SecurityMode(group);
+            if (SOPC_SecurityMode_Sign == smode || SOPC_SecurityMode_SignAndEncrypt == smode)
+            {
+                context->security = SOPC_Calloc(1, sizeof(SOPC_PubSub_SecurityType));
+                if (NULL == context->security)
+                {
+                    SOPC_Dataset_LL_NetworkMessage_Delete(context->message);
+                    context->message = NULL;
+                    result = false;
+                }
+
+                if(result)
+                {
+                    context->security->mode = SOPC_WriterGroup_Get_SecurityMode(group);
+                    context->security->groupKeys =
+                        SOPC_LocalSKS_GetSecurityKeys(SOPC_PUBSUB_SKS_DEFAULT_GROUPID, SOPC_PUBSUB_SKS_CURRENT_TOKENID);
+                    context->security->provider = SOPC_CryptoProvider_CreatePubSub(SOPC_PUBSUB_SECURITY_POLICY);
+                    if (NULL == context->security->groupKeys || NULL == context->security->provider)
+                    {
+                        SOPC_Dataset_LL_NetworkMessage_Delete(context->message);
+                        context->message = NULL;
+                        SOPC_PubSub_Security_Clear(context->security);
+                        SOPC_Free(context->security);
+                        context->security = NULL;
+                        result = false;
+                    }
+                }
+            }
+            else
+            {
+                context->security = NULL;
+                result = false;
+            }
+    }
+
     if (!result)
     {
         SOPC_Dataset_LL_NetworkMessage_Delete(context->message);
@@ -359,6 +444,7 @@ static bool SOPC_PubScheduler_MessageCtx_Array_Init_Next(SOPC_PubScheduler_Trans
         pubSchedulerCtx.messages.current++;
     }
     return result;
+
 }
 
 static SOPC_PubScheduler_MessageCtx* SOPC_PubScheduler_MessageCtx_Get_Last(void)
@@ -507,8 +593,10 @@ static void* SOPC_RT_Publisher_VarMonitoringCallback(void* arg)
                 assert(SOPC_PublishedDataSet_Nb_FieldMetaData(dataset) == nbFields);
 
                 // Fill datasetmessage
-                SOPC_DataValue* values = SOPC_PubSourceVariable_GetVariables(pubSchedulerCtx.sourceConfig, //
-                                                                             dataset);                     //
+                //SOPC_DataValue* values = SOPC_PubSourceVariable_GetVariablesSynchrone(pubSchedulerCtx.sourceConfig, //
+                //                                                                      dataset);                     //
+
+                SOPC_DataValue* values = NULL;
 
                 if (NULL == values)
                 {
@@ -594,14 +682,37 @@ static void* SOPC_RT_Publisher_VarMonitoringCallback(void* arg)
                             // If successful, pre-encode message into double buffer
                             if (SOPC_STATUS_OK == status)
                             {
-                                SOPC_Buffer* pBuffer = SOPC_UADP_NetworkMessage_Encode(message);
-
-                                if (pBuffer != NULL)
+                                SOPC_PubSub_SecurityType* security = ctx->security;
+                                if (NULL != security)
                                 {
-                                    status = SOPC_Buffer_Copy(&buffer, pBuffer);
-                                    SOPC_Buffer_Delete(pBuffer);
+                                    security->msgNonceRandom = SOPC_PubSub_Security_Random(security->provider);
+                                    allocSuccess = (NULL != security->msgNonceRandom);
+                                    if (allocSuccess)
+                                    {
+                                        security->sequenceNumber = pubSchedulerCtx.sequenceNumber;
+                                        pubSchedulerCtx.sequenceNumber++;
+                                    }
+                                    else
+                                    {
+                                        status = SOPC_STATUS_NOK;
+                                    }
                                 }
 
+                                if (SOPC_STATUS_OK == status)
+                                {
+
+                                    SOPC_Buffer* pBuffer = SOPC_UADP_NetworkMessage_Encode(message,security);
+                                    if (NULL != security)
+                                    {
+                                        SOPC_Free(security->msgNonceRandom);
+                                        security->msgNonceRandom = NULL;
+                                    }
+                                    if (pBuffer != NULL)
+                                    {
+                                        status = SOPC_Buffer_Copy(&buffer, pBuffer);
+                                        SOPC_Buffer_Delete(pBuffer);
+                                    }
+                                }
                                 // Commit buffer with significant bytes
                                 bool bCancel = false;
                                 if (SOPC_STATUS_OK != status)
@@ -670,6 +781,7 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config, SOPC_PubSourceVar
     {
         SOPC_Atomic_Int_Set(&pubSchedulerCtx.processingStartStop, true);
     }
+
 
     pubSchedulerCtx.sequenceNumber = 1;
     pubSchedulerCtx.nbConnection = 0;
@@ -930,9 +1042,42 @@ static bool SOPC_PubScheduler_Connection_Get_Transport(uint32_t index,
         pubSchedulerCtx.transport[index].fctSend = &SOPC_PubScheduler_CtxUdp_Send;
         *ctx = &pubSchedulerCtx.transport[index];
         return true;
+
     }
     break;
+    case SOPC_PubSubProtocol_MQTT:
+    {
+        {
+            size_t hostnameLength = 0;
+            size_t portIdx = 0;
+            size_t portLength = 0;
+            if (SOPC_Helper_URI_ParseUri_WithPrefix(MQTT_PREFIX, address, &hostnameLength, &portIdx, &portLength) ==
+                false)
+            {
+                return false;
+            }
+        }
+        MqttManagerHandle* handleMqttManager = SOPC_PubSub_Protocol_GetMqttManagerHandle();
+        pubSchedulerCtx.transport[index].mqttHandle =
+            SOPC_MQTT_TRANSPORT_SYNCH_GetHandle(handleMqttManager,             //
+                                                &address[strlen(MQTT_PREFIX)], //
+                                                MQTT_LIB_TOPIC_NAME,           //
+                                                on_mqtt_message_received,      //
+                                                NULL);                         //
 
+        if (pubSchedulerCtx.transport[index].mqttHandle == NULL)
+        {
+            return false;
+        }
+
+        pubSchedulerCtx.transport[index].fctClear = SOPC_PubScheduler_CtxMqtt_Clear;
+        pubSchedulerCtx.transport[index].fctSend = SOPC_PubScheduler_CtxMqtt_Send;
+        pubSchedulerCtx.transport[index].multicastAddr = NULL;
+        pubSchedulerCtx.transport[index].sock = -1;
+        *ctx = &pubSchedulerCtx.transport[index];
+        return true;
+    }
+    break;
     default:
     {
         *ctx = NULL;
@@ -955,5 +1100,35 @@ static void SOPC_PubScheduler_CtxUdp_Send(SOPC_PubScheduler_TransportCtx* ctx, S
     {
         // TODO: Some verifications should maybe added...
         printf("# Error on SOPC_UDP_Socket_SendTo  ...\r\n");
+    }
+}
+
+// Specific callback for MQTT message
+static void on_mqtt_message_received(MqttTransportHandle* pCtx, /* Transport context handle */
+                                     uint8_t* data,             /* Data received */
+                                     uint16_t size,             /* Size of data received, in bytes. */
+                                     void* pUserContext)        /* User context, used as pub sub connection */
+{
+    (void) pCtx;
+    (void) data;
+    (void) size;
+    (void) pUserContext;
+    return;
+}
+
+static void SOPC_PubScheduler_CtxMqtt_Clear(SOPC_PubScheduler_TransportCtx* ctx)
+{
+    if (ctx != NULL && ctx->mqttHandle != NULL)
+    {
+        SOPC_MQTT_TRANSPORT_SYNCH_ReleaseHandle(&(ctx->mqttHandle));
+        ctx->mqttHandle = NULL;
+    }
+}
+
+static void SOPC_PubScheduler_CtxMqtt_Send(SOPC_PubScheduler_TransportCtx* ctx, SOPC_Buffer* buffer)
+{
+    if (ctx != NULL && ctx->mqttHandle != NULL && buffer != NULL && buffer->data != NULL && buffer->length > 0)
+    {
+        SOPC_MQTT_TRANSPORT_SYNCH_SendMessage(ctx->mqttHandle, buffer->data, (uint16_t) buffer->length, 0);
     }
 }

@@ -20,6 +20,8 @@
 #ifndef SOPC_PUBSUB_CONSTANTS_H_
 #define SOPC_PUBSUB_CONSTANTS_H_
 
+#include "sopc_crypto_profiles.h"
+
 // Size of buffer (max size of message)
 #ifndef SOPC_PUBSUB_BUFFER_SIZE
 #define SOPC_PUBSUB_BUFFER_SIZE 4096
@@ -29,5 +31,13 @@
 #define SOPC_PUBSUB_MAX_PUBLISHER_PER_SCHEDULER 10
 // Size of array. Use for subscriber context
 #define SOPC_PUBSUB_MAX_MESSAGE_PER_PUBLISHER 10
+
+// Size of array. Use for subscriber context
+#define SOPC_PUBSUB_MAX_PUBLISHER_PER_SCHEDULER 10
+// Size of array. Use for subscriber context
+#define SOPC_PUBSUB_MAX_MESSAGE_PER_PUBLISHER 10
+
+// Pub Sub Security Policy
+#define SOPC_PUBSUB_SECURITY_POLICY SOPC_SecurityPolicy_PubSub_Aes256_URI
 
 #endif /* SOPC_PUBSUB_CONSTANTS_H_ */

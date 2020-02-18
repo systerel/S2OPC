@@ -115,7 +115,7 @@ int main(void)
     {
         return -1;
     }
-    SOPC_Buffer* buffer = SOPC_UADP_NetworkMessage_Encode(nm);
+    SOPC_Buffer* buffer = SOPC_UADP_NetworkMessage_Encode(nm, NULL);
 
     if (SOPC_STATUS_OK == status && buffer != NULL)
     {

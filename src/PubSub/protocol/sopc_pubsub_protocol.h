@@ -23,12 +23,19 @@
 #define UADP_PREFIX "opc.udp://"
 #define MQTT_PREFIX "mqtts://"
 
+#include "sopc_mqtt_transport_layer.h"
+
 typedef enum
 {
     SOPC_PubSubProtocol_UNKOWN = 0,
     SOPC_PubSubProtocol_UDP = 1,
     SOPC_PubSubProtocol_MQTT = 2
 } SOPC_PubSubProtocol_Type;
+
+/* Returns singleton of mqtt manager. Not thread safe. */
+MqttManagerHandle* SOPC_PubSub_Protocol_GetMqttManagerHandle(void);
+/* Destroy singleton of mqtt manager. Not thread safe. */
+void SOPC_PubSub_Protocol_ReleaseMqttManagerHandle(void);
 
 SOPC_PubSubProtocol_Type SOPC_PubSub_Protocol_From_URI(const char* uri);
 

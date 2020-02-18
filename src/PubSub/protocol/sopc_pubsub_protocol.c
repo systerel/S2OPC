@@ -23,12 +23,31 @@
 #include <string.h>
 #include "sopc_helper_string.h"
 
+static MqttManagerHandle* g_ptrMqttManagerHandle = NULL;
+
 static bool SOPC_PubSub_Protocol_StartWith(const char* uri, const char* prefix);
 
 static bool SOPC_PubSub_Protocol_StartWith(const char* uri, const char* prefix)
 {
     const size_t PREFIX_LENGTH = strlen(prefix);
     return (strlen(uri) > PREFIX_LENGTH && SOPC_strncmp_ignore_case(uri, prefix, PREFIX_LENGTH) == 0);
+}
+
+MqttManagerHandle* SOPC_PubSub_Protocol_GetMqttManagerHandle(void)
+{
+    if (NULL == g_ptrMqttManagerHandle)
+    {
+        SOPC_MQTT_MGR_Create(&g_ptrMqttManagerHandle);
+    }
+    return g_ptrMqttManagerHandle;
+}
+
+void SOPC_PubSub_Protocol_ReleaseMqttManagerHandle(void)
+{
+    if (NULL != g_ptrMqttManagerHandle)
+    {
+        SOPC_MQTT_MGR_Destroy(&g_ptrMqttManagerHandle);
+    }
 }
 
 SOPC_PubSubProtocol_Type SOPC_PubSub_Protocol_From_URI(const char* uri)

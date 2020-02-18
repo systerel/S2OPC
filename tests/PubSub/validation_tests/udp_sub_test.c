@@ -113,6 +113,7 @@ static void printNetworkMessage(const SOPC_UADP_NetworkMessage* uadp_nm)
         SOPC_Dataset_LL_NetworkMessage* nm = uadp_nm->nm;
         printf("UADP Version %d\n", SOPC_Dataset_LL_NetworkMessage_Get_Version(nm));
         printPublisherId(uadp_nm);
+        printf("Security Enabled %d\n", uadp_nm->conf.SecurityFlag);
         printf("Group Header Enabled %d\n", uadp_nm->conf.GroupHeaderFlag);
         printf("Writer Group Id:\n - Enabled %d\n - Value %d\n", uadp_nm->conf.GroupIdFlag,
                SOPC_Dataset_LL_NetworkMessage_Get_GroupId(nm));
@@ -153,7 +154,7 @@ static void readyToReceive(void* sockContext, Socket sock)
         buffer->position = 0;
         if (SOPC_STATUS_OK == status)
         {
-            SOPC_UADP_NetworkMessage* uadp_nm = SOPC_UADP_NetworkMessage_Decode(buffer);
+            SOPC_UADP_NetworkMessage* uadp_nm = SOPC_UADP_NetworkMessage_Decode(buffer, NULL);
             printNetworkMessage(uadp_nm);
             if (NULL != uadp_nm)
             {

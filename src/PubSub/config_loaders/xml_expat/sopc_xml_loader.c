@@ -66,6 +66,10 @@
 #define ATTR_MESSAGE_ID "id"
 #define ATTR_MESSAGE_PUBLISHING_ITV "publishingInterval"
 #define ATTR_MESSAGE_VERSION "version"
+#define ATTR_MESSAGE_SECURITY "securityMode"
+#define ATTR_MESSAGE_SECURITY_VAL_NONE "none"
+#define ATTR_MESSAGE_SECURITY_VAL_SIGN "sign"
+#define ATTR_MESSAGE_SECURITY_VAL_SIGNANDENCRYPT "signAndEncrypt"
 #define ATTR_MESSAGE_PUBLISHER_ID "publisherId"
 
 #define ATTR_VARIABLE_NODE_ID "nodeId"
@@ -94,6 +98,7 @@ struct sopc_xml_pubsub_message_t
     uint64_t publishing_interval;
     uint64_t publisher_id;
     uint32_t version;
+    SOPC_SecurityMode_Type security_mode;
     uint16_t nb_variables;
     struct sopc_xml_pubsub_variable_t* variableArr;
 };
@@ -315,6 +320,8 @@ static bool start_message(struct parse_context_t* ctx, struct sopc_xml_pubsub_me
     bool pubId = false;
 
     memset(msg, 0, sizeof *msg);
+    // Security is disabled if it is not configured
+    msg->security_mode = SOPC_SecurityMode_None;
 
     for (size_t i = 0; attrs[i]; ++i)
     {
@@ -359,6 +366,28 @@ static bool start_message(struct parse_context_t* ctx, struct sopc_xml_pubsub_me
             }
 
             version = true;
+        }
+        else if (strcmp(ATTR_MESSAGE_SECURITY, attr) == 0)
+        {
+            const char* attr_val = attrs[++i];
+
+            if (strcmp(ATTR_MESSAGE_SECURITY_VAL_NONE, attr_val) == 0)
+            {
+                msg->security_mode = SOPC_SecurityMode_None;
+            }
+            else if (strcmp(ATTR_MESSAGE_SECURITY_VAL_SIGN, attr_val) == 0)
+            {
+                msg->security_mode = SOPC_SecurityMode_Sign;
+            }
+            else if (strcmp(ATTR_MESSAGE_SECURITY_VAL_SIGNANDENCRYPT, attr_val) == 0)
+            {
+                msg->security_mode = SOPC_SecurityMode_SignAndEncrypt;
+            }
+            else
+            {
+                LOG_XML_ERRORF("Invalid message security mode value: '%s", attr_val);
+                return false;
+            }
         }
         else if (strcmp(ATTR_MESSAGE_PUBLISHER_ID, attr) == 0)
         {
@@ -730,6 +759,7 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                 SOPC_WriterGroup_Set_Id(writerGroup, msg->id);
                 SOPC_WriterGroup_Set_PublishingInterval(writerGroup, msg->publishing_interval);
                 SOPC_WriterGroup_Set_Version(writerGroup, msg->version);
+                SOPC_WriterGroup_Set_SecurityMode(writerGroup, msg->security_mode);
 
                 // msg->publisher_id ignored if present
 
@@ -781,6 +811,7 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                 // Create writer group
                 SOPC_ReaderGroup* readerGroup = SOPC_PubSubConnection_Get_ReaderGroup_At(connection, imsg);
                 assert(readerGroup != NULL);
+                SOPC_ReaderGroup_Set_SecurityMode(readerGroup, msg->security_mode);
                 allocSuccess = SOPC_ReaderGroup_Allocate_DataSetReader_Array(readerGroup, 1);
 
                 if (allocSuccess)

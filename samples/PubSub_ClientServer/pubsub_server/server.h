@@ -29,6 +29,8 @@
 
 #include "sopc_array.h"
 #include "sopc_builtintypes.h"
+#include "sopc_event_handler.h"
+#include "sopc_pub_source_variable.h"
 #include "sopc_sub_scheduler.h"
 #include "sopc_user_app_itf.h"
 
@@ -52,6 +54,6 @@ bool Server_PubSubStart_Requested(void);
 SOPC_Array* Server_GetConfigurationPaths(void); /* Returns an array of char* */
 void Server_SetSubStatus(SOPC_PubSubState state);
 bool Server_SetTargetVariables(OpcUa_WriteValue* nodesToWrite, int32_t nbValues);
-SOPC_DataValue* Server_GetSourceVariables(OpcUa_ReadValueId* nodesToRead, int32_t nbValues);
+SOPC_DataValue* Server_GetSourceVariables(OpcUa_ReadValueId* lrv, int32_t nbValues);
 
 #endif /* SERVER_H_ */

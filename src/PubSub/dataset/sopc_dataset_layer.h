@@ -20,6 +20,7 @@
 #ifndef SOPC_DATASET_LAYER_H_
 #define SOPC_DATASET_LAYER_H_
 
+#include "sopc_network_layer.h"
 #include "sopc_pubsub_conf.h"
 
 typedef SOPC_Dataset_LL_NetworkMessage SOPC_Dataset_NetworkMessage;
