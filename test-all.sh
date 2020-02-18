@@ -128,6 +128,7 @@ CTEST_RET=$((CTEST_RET1+CTEST_RET2))
 EXPECTED_TAP_FILES=$(grep -v "^$" <<< "$EXPECTED_TAP_FILES") # remove blank lines
 EXPECTED_TAP_FILES=$(sort <<< "$EXPECTED_TAP_FILES") # sort TAP files names
 ACTUAL_TAP_FILES=$(LANG=C ls "${TAP_DIR}"/*.tap | sed "s|${TAP_DIR}/||")
+ACTUAL_TAP_FILES=$(sort <<< "$ACTUAL_TAP_FILES") # sort TAP files names
 
 if [ "$ACTUAL_TAP_FILES" != "$EXPECTED_TAP_FILES" ]; then
 	echo "Missing or extra TAP files detected"
