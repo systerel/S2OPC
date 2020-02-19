@@ -21,12 +21,14 @@
 # Calls lcov/genhtml after project has been built with WITH_COVERAGE=1
 set -e
 
-SRC_DIR=build/CMakeFiles/s2opc.dir/
+COMMON_DIR=build/src/Common/CMakeFiles/s2opc_common.dir/
+CLIENTSERVER_DIR=build/src/ClientServer/CMakeFiles/s2opc_clientserver.dir/
+PUBSUB_DIR=build/src/PubSub/CMakeFiles/s2opc_pubsub.dir/
 REPORT_DIR=./report
 REPORT_FILE=$REPORT_DIR/report.info
 
 mkdir -p $REPORT_DIR
-lcov --directory $SRC_DIR -c -o $REPORT_FILE
+lcov -d $COMMON_DIR -d $CLIENTSERVER_DIR -d $PUBSUB_DIR -c -o $REPORT_FILE
 # Remove bogus mbedtls files
 lcov -r $REPORT_FILE "/usr/*" -o $REPORT_FILE
 genhtml -o $REPORT_DIR -t "Code coverage from all tests" $REPORT_FILE

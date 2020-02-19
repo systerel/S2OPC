@@ -134,8 +134,9 @@ build-linux64-ASan:
     <<: *build_linux_variables
     WITH_ASAN: 1
   rules: # 1st line repeat .build-linux + added rules to avoid ASAN build
-    - if: "$WINDOWS_TEST == null && $CROSS_COMPILE == null && $WITH_COVERITY == null && \
-           $NO_ASAN == null && $ALL_TESTS == null && $ALL_BUILDS == null" # avoid ASAN build
+    - if: "$WINDOWS_TEST == null && $CROSS_COMPILE == null && \
+           $WITH_COVERITY == null && $WITH_COVERAGE == null && \
+           $NO_ASAN == null && $ALL_TESTS == null && $ALL_BUILDS == null" # avoid ASAN build in most of nightly builds
       when: on_success
 
 # Used by all-tests pipeline (add tests which needs NO_ASAN)
@@ -145,7 +146,7 @@ build-linux64-pys2opc:
     <<: *build_linux_variables
     <<: *all-tests_build_variables # add pys2opc
   rules: # do not repeat .build-linux: due to disjunction + need only those 2 conditions
-    - if: "$NO_ASAN != null || $ALL_TESTS != null"
+    - if: "$ALL_TESTS != null || $NO_ASAN != null && $WITH_NANO_EXTENDED == '1'" # if ASAN is deactivated build PyS2OPC by default (exclude nano scope: see TODO below)
       when: on_success
 
 # Used when ALL_BUILDS set (tests use static configuration)
@@ -154,8 +155,16 @@ build-linux64-static-conf:
   variables:
     <<: *build_linux_variables
     <<: *all-builds_build_variables # add static conf
-  rules: # do not repeat .build-linux: need only ALL_BUILDS variable
+  rules: # single case rule of ALL_BUILDS
     - if: "$ALL_BUILDS != null"
+      when: on_success
+
+build-linux64-NoASan-NoPyS2OPC:
+  <<: *build_linux
+  variables:
+    <<: *build_linux_variables
+  rules: # In case of coverage analysis or when nano scope is used (TODO: PyS2OPC shall be built but tests will fail: use another server with subscription in tests)
+    - if: "$WITH_COVERAGE != null || $NO_ASAN != null && $WITH_NANO_EXTENDED != '1'"
       when: on_success
 
 build-win64: &build_win64
@@ -276,7 +285,7 @@ test-unit:
   <<: *test_unit
   rules: # repeat .test-linux variables exception since overwritten here
     - if: "$NO_TESTS == null && $WINDOWS_TEST == null && $CROSS_COMPILE == null && \
-           $WITH_COVERITY == null && $WITH_COVERAGE == null && \
+           $WITH_COVERITY == null && \
            $ALL_TESTS == null" # + excludes ALL_TESTS
       when: on_success
 
@@ -325,7 +334,11 @@ windows-appveyor:
   tags:
     - linux
   rules:
-    - if: "$ALL_BUILDS != null || $WINDOWS_TEST != null || $CI_COMMIT_BRANCH == 'master'"
+    - if: "$ALL_BUILDS != null || $WINDOWS_TEST != null || \
+           $CI_COMMIT_BRANCH == 'master' && \
+           $ALL_TESTS == null && $WITH_COVERITY == null && $WITH_COVERAGE == null && \
+           $NO_ASAN == null && $NO_GEN == null && \
+           $S2OPC_PUBSUB_ONLY == null && $S2OPC_CLIENTSERVER_ONLY == null" # Avoid to run job on master for all nightly build except ALL_BUILDS
       when: always # run even if previous job in pipeline failed
 
 ###
