@@ -252,6 +252,11 @@ SOPC_ReturnStatus Server_CreateServerConfig(SOPC_S2OPC_Config* output_s2opcConfi
         pEpConfig->authenticationManager = authenticationManager;
         pEpConfig->authorizationManager = authorizationManager;
     }
+    else
+    {
+        SOPC_UserAuthentication_FreeManager(authenticationManager);
+        SOPC_UserAuthorization_FreeManager(authorizationManager);
+    }
 
     return status;
 }
@@ -464,7 +469,6 @@ SOPC_ReturnStatus Server_WritePubSubNodes(void)
     fseek(fd, 0, SEEK_SET);
 
     assert(fileSize >= 0);
-    assert((uint64_t) fileSize <= SIZE_MAX);
     char* XML_CONFIG = SOPC_Calloc((size_t) fileSize + 1, sizeof(char));
     size_t size = fread(XML_CONFIG, sizeof(char), (size_t) fileSize, fd);
     assert(size > 0);

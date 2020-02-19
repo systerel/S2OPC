@@ -482,5 +482,7 @@ static void SOPC_PubScheduler_CtxUdp_Clear(SOPC_PubScheduler_TransportCtx* ctx)
 
 static void SOPC_PubScheduler_CtxUdp_Send(SOPC_PubScheduler_TransportCtx* ctx, SOPC_Buffer* buffer)
 {
-    SOPC_UDP_Socket_SendTo(ctx->sock, ctx->multicastAddr, buffer);
+    SOPC_ReturnStatus status = SOPC_UDP_Socket_SendTo(ctx->sock, ctx->multicastAddr, buffer);
+    // TODO: replace by log trace ?
+    assert(SOPC_STATUS_OK == status);
 }

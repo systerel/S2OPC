@@ -92,4 +92,9 @@
 #error "SIZE_MAX < UINT32_MAX whereas uint32_t are casted to size_t values"
 #endif
 
+/* Check casts from long to size_t are valid without verification */
+#if SIZE_MAX < LONG_MAX
+#error "SIZE_MAX < LONG_MAX whereas long are casted to size_t values"
+#endif
+
 #endif /* SOPC_COMMON_CONSTANTS_H_ */

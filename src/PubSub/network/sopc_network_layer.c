@@ -463,13 +463,13 @@ SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm)
         }
     }
 
+    status = SOPC_Buffer_SetPosition(buffer, 0);
     if (SOPC_STATUS_OK != status)
     {
         SOPC_Buffer_Delete(buffer);
         return NULL;
     }
 
-    SOPC_Buffer_SetPosition(buffer, 0);
     return buffer;
 }
 
@@ -743,193 +743,185 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer)
 
     // Payload
     // Only DataSetMessage is managed and only one
-    if (1 != msg_count)
-    {
-        SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-        SOPC_Free(uadp_nm);
-        return NULL;
-    }
-    else
-    {
-        // No size if there is only one DataSetMessage
+    assert(1 == msg_count);
+    // No size if there is only one DataSetMessage
 
-        // Bit 0: DataSetMessage is valid.
-        // Bit range 1-2: Field Encoding
-        // Bit 3: DataSetMessageSequenceNumber enabled
-        // Bit 4: Status enabled
-        // Bit 5: ConfigurationVersionMajorVersion enabled
-        // Bit 6: ConfigurationVersionMinorVersion enable
-        // Bit 7: DataSetFlags2 enabled
-        for (int i = 0; i < msg_count; i++)
+    // Bit 0: DataSetMessage is valid.
+    // Bit range 1-2: Field Encoding
+    // Bit 3: DataSetMessageSequenceNumber enabled
+    // Bit 4: Status enabled
+    // Bit 5: ConfigurationVersionMajorVersion enabled
+    // Bit 6: ConfigurationVersionMinorVersion enable
+    // Bit 7: DataSetFlags2 enabled
+    for (int i = 0; i < msg_count; i++)
+    {
+        SOPC_Byte data;
+        SOPC_Boolean seq_nb_enabled = false;
+        SOPC_Boolean status_enabled = false;
+        SOPC_Boolean maj_version_enabled = false;
+        SOPC_Boolean min_version_enabled = false;
+        SOPC_Boolean dsm_flags2 = false;
+        SOPC_Boolean timestamp_enabled = false;
+        SOPC_Boolean picoseconds_enabled = false;
+        SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, i);
+
+        /* DataSetMessages Header */
+
+        /** DataSetFlags1 **/
         {
-            SOPC_Byte data;
-            SOPC_Boolean seq_nb_enabled = false;
-            SOPC_Boolean status_enabled = false;
-            SOPC_Boolean maj_version_enabled = false;
-            SOPC_Boolean min_version_enabled = false;
-            SOPC_Boolean dsm_flags2 = false;
-            SOPC_Boolean timestamp_enabled = false;
-            SOPC_Boolean picoseconds_enabled = false;
-            SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, i);
-
-            /* DataSetMessages Header */
-
-            /** DataSetFlags1 **/
-            {
-                status = SOPC_Byte_Read(&data, buffer);
-                if (SOPC_STATUS_OK != status)
-                {
-                    SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-                    SOPC_Free(uadp_nm);
-                    return NULL;
-                }
-                SOPC_Boolean isValid = Network_Message_Get_Bool_Bit(data, 0);
-                if (!isValid)
-                {
-                    SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-                    SOPC_Free(uadp_nm);
-                    return NULL;
-                }
-
-                uint8_t field_encoding = data & (uint8_t)(C_NETWORK_MESSAGE_BIT_1 + C_NETWORK_MESSAGE_BIT_2);
-                if (DATASET_LL_DSM_ENCODING_TYPE != field_encoding)
-                {
-                    // not managed yet
-                    SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-                    SOPC_Free(uadp_nm);
-                    return NULL;
-                }
-                seq_nb_enabled = Network_Message_Get_Bool_Bit(data, 3);
-                status_enabled = Network_Message_Get_Bool_Bit(data, 4);
-                maj_version_enabled = Network_Message_Get_Bool_Bit(data, 5);
-                min_version_enabled = Network_Message_Get_Bool_Bit(data, 6);
-                dsm_flags2 = Network_Message_Get_Bool_Bit(data, 7);
-                timestamp_enabled = false;
-                picoseconds_enabled = false;
-            }
-
-            /** DataSetFlags2 **/
-            if (dsm_flags2)
-            {
-                // Bit range 0-3: UADP DataSetMessage type
-                // Bit 4: Timestamp enabled
-                // Bit 5: PicoSeconds enabled
-                status = SOPC_Byte_Read(&data, buffer);
-                if (SOPC_STATUS_OK != status)
-                {
-                    SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-                    SOPC_Free(uadp_nm);
-                    return NULL;
-                }
-                uint8_t dataSmessage_type = data & (uint8_t)(C_NETWORK_MESSAGE_BIT_4 - 1);
-                if (0 != dataSmessage_type)
-                {
-                    // not managed yet
-                    SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-                    SOPC_Free(uadp_nm);
-                    return NULL;
-                }
-                timestamp_enabled = Network_Message_Get_Bool_Bit(data, 4);
-                picoseconds_enabled = Network_Message_Get_Bool_Bit(data, 5);
-            }
-
-            /** DataSetMessage SequenceNumber **/
-            if (seq_nb_enabled)
-            {
-                // not managed yet
-                uint16_t notUsed;
-                status = SOPC_UInt16_Read(&notUsed, buffer);
-                if (SOPC_STATUS_OK != status)
-                {
-                    SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-                    SOPC_Free(uadp_nm);
-                    return NULL;
-                }
-            }
-
-            /** Timestamp **/
-            if (timestamp_enabled)
-            {
-                // not managed yet
-                uint64_t timestamp;
-                status = SOPC_UInt64_Read(&timestamp, buffer);
-                if (SOPC_STATUS_OK != status)
-                {
-                    SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-                    SOPC_Free(uadp_nm);
-                    return NULL;
-                }
-            }
-
-            /** PicoSeconds **/
-            if (picoseconds_enabled)
-            {
-                // not managed yet
-                uint16_t notUsed;
-                status = SOPC_UInt16_Read(&notUsed, buffer);
-                if (SOPC_STATUS_OK != status)
-                {
-                    SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-                    SOPC_Free(uadp_nm);
-                    return NULL;
-                }
-            }
-
-            /** Status **/
-            if (status_enabled)
-            {
-                // not managed yet
-                uint16_t notUsed;
-                status = SOPC_UInt16_Read(&notUsed, buffer);
-                if (SOPC_STATUS_OK != status)
-                {
-                    SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-                    SOPC_Free(uadp_nm);
-                    return NULL;
-                }
-            }
-
-            /** ConfigurationVersion MajorVersion **/
-            if (maj_version_enabled)
-            {
-                // not managed yet
-                uint32_t not_used;
-                status = SOPC_UInt32_Read(&not_used, buffer);
-                if (SOPC_STATUS_OK != status)
-                {
-                    SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-                    SOPC_Free(uadp_nm);
-                    return NULL;
-                }
-            }
-
-            /** ConfigurationVersion MinorVersion **/
-            if (min_version_enabled)
-            {
-                // not managed yet
-                uint32_t not_used;
-                status = SOPC_UInt32_Read(&not_used, buffer);
-                if (SOPC_STATUS_OK != status)
-                {
-                    SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-                    SOPC_Free(uadp_nm);
-                    return NULL;
-                }
-            }
-
-            /* Data Key Frame DataSetMessage Data */
-            status = UADP_To_DataSetFields(buffer, dsm);
+            status = SOPC_Byte_Read(&data, buffer);
             if (SOPC_STATUS_OK != status)
             {
                 SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
                 SOPC_Free(uadp_nm);
                 return NULL;
             }
-
-            if (DATASET_LL_MANAGE_ONLY_ONE_DSM)
+            SOPC_Boolean isValid = Network_Message_Get_Bool_Bit(data, 0);
+            if (!isValid)
             {
-                break;
+                SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
+                SOPC_Free(uadp_nm);
+                return NULL;
             }
+
+            uint8_t field_encoding = data & (uint8_t)(C_NETWORK_MESSAGE_BIT_1 + C_NETWORK_MESSAGE_BIT_2);
+            if (DATASET_LL_DSM_ENCODING_TYPE != field_encoding)
+            {
+                // not managed yet
+                SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
+                SOPC_Free(uadp_nm);
+                return NULL;
+            }
+            seq_nb_enabled = Network_Message_Get_Bool_Bit(data, 3);
+            status_enabled = Network_Message_Get_Bool_Bit(data, 4);
+            maj_version_enabled = Network_Message_Get_Bool_Bit(data, 5);
+            min_version_enabled = Network_Message_Get_Bool_Bit(data, 6);
+            dsm_flags2 = Network_Message_Get_Bool_Bit(data, 7);
+            timestamp_enabled = false;
+            picoseconds_enabled = false;
+        }
+
+        /** DataSetFlags2 **/
+        if (dsm_flags2)
+        {
+            // Bit range 0-3: UADP DataSetMessage type
+            // Bit 4: Timestamp enabled
+            // Bit 5: PicoSeconds enabled
+            status = SOPC_Byte_Read(&data, buffer);
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
+                SOPC_Free(uadp_nm);
+                return NULL;
+            }
+            uint8_t dataSmessage_type = data & (uint8_t)(C_NETWORK_MESSAGE_BIT_4 - 1);
+            if (0 != dataSmessage_type)
+            {
+                // not managed yet
+                SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
+                SOPC_Free(uadp_nm);
+                return NULL;
+            }
+            timestamp_enabled = Network_Message_Get_Bool_Bit(data, 4);
+            picoseconds_enabled = Network_Message_Get_Bool_Bit(data, 5);
+        }
+
+        /** DataSetMessage SequenceNumber **/
+        if (seq_nb_enabled)
+        {
+            // not managed yet
+            uint16_t notUsed;
+            status = SOPC_UInt16_Read(&notUsed, buffer);
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
+                SOPC_Free(uadp_nm);
+                return NULL;
+            }
+        }
+
+        /** Timestamp **/
+        if (timestamp_enabled)
+        {
+            // not managed yet
+            uint64_t timestamp;
+            status = SOPC_UInt64_Read(&timestamp, buffer);
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
+                SOPC_Free(uadp_nm);
+                return NULL;
+            }
+        }
+
+        /** PicoSeconds **/
+        if (picoseconds_enabled)
+        {
+            // not managed yet
+            uint16_t notUsed;
+            status = SOPC_UInt16_Read(&notUsed, buffer);
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
+                SOPC_Free(uadp_nm);
+                return NULL;
+            }
+        }
+
+        /** Status **/
+        if (status_enabled)
+        {
+            // not managed yet
+            uint16_t notUsed;
+            status = SOPC_UInt16_Read(&notUsed, buffer);
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
+                SOPC_Free(uadp_nm);
+                return NULL;
+            }
+        }
+
+        /** ConfigurationVersion MajorVersion **/
+        if (maj_version_enabled)
+        {
+            // not managed yet
+            uint32_t not_used;
+            status = SOPC_UInt32_Read(&not_used, buffer);
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
+                SOPC_Free(uadp_nm);
+                return NULL;
+            }
+        }
+
+        /** ConfigurationVersion MinorVersion **/
+        if (min_version_enabled)
+        {
+            // not managed yet
+            uint32_t not_used;
+            status = SOPC_UInt32_Read(&not_used, buffer);
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
+                SOPC_Free(uadp_nm);
+                return NULL;
+            }
+        }
+
+        /* Data Key Frame DataSetMessage Data */
+        status = UADP_To_DataSetFields(buffer, dsm);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
+            SOPC_Free(uadp_nm);
+            return NULL;
+        }
+
+        if (DATASET_LL_MANAGE_ONLY_ONE_DSM)
+        {
+            break;
         }
     }
 
