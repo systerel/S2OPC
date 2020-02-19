@@ -78,10 +78,7 @@ SOPC_ReturnStatus SOPC_UDP_Socket_Set_MulticastTTL(Socket sock, uint8_t TTL_scop
 
     if (sock != SOPC_INVALID_SOCKET)
     {
-        if (setOptStatus != -1)
-        {
-            setOptStatus = setsockopt(sock, IPPROTO_IP, IP_MULTICAST_TTL, &TTL_scope, sizeof(TTL_scope));
-        }
+        setOptStatus = setsockopt(sock, IPPROTO_IP, IP_MULTICAST_TTL, &TTL_scope, sizeof(TTL_scope));
 
         if (setOptStatus < 0)
         {
@@ -368,8 +365,7 @@ SOPC_ReturnStatus SOPC_UDP_Socket_CreateToSend(SOPC_Socket_AddressInfo* destAddr
 
 SOPC_ReturnStatus SOPC_UDP_Socket_SendTo(Socket sock, const SOPC_Socket_AddressInfo* destAddr, SOPC_Buffer* buffer)
 {
-    assert(buffer->position == 0);
-    if (sock == SOPC_INVALID_SOCKET || destAddr == NULL || buffer == NULL)
+    if (sock == SOPC_INVALID_SOCKET || destAddr == NULL || buffer == NULL || buffer->position != 0)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
