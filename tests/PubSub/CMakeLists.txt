@@ -87,6 +87,8 @@ if(ENABLE_TESTING)
 
   add_executable(xml_parser_test "unit_tests/xml_parser_test.c")
   target_link_libraries(xml_parser_test PRIVATE s2opc_pubsub ${CHECK_LIBRARIES})
+  target_compile_options(xml_parser_test PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(xml_parser_test PRIVATE ${S2OPC_DEFINITIONS})
 
   add_custom_command(TARGET xml_parser_test POST_BUILD
                      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/xml_test/config_sub.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
@@ -96,21 +98,31 @@ if(ENABLE_TESTING)
 
   add_executable(pubsub_modules_test "unit_tests/pubsub_modules_test.c")
   target_link_libraries(pubsub_modules_test PRIVATE s2opc_pubsub ${CHECK_LIBRARIES})
+  target_compile_options(pubsub_modules_test PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(pubsub_modules_test PRIVATE ${S2OPC_DEFINITIONS})
 
   s2opc_unit_test(pubsub_modules_test)
 
 ## S2OPC PubSub validation tests ##
   
   add_executable(udp_pub_test "validation_tests/udp_pub_test.c")
+  target_compile_options(udp_pub_test PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(udp_pub_test PRIVATE ${S2OPC_DEFINITIONS})
   target_link_libraries(udp_pub_test PRIVATE s2opc_pubsub)
 
   add_executable(udp_pub_conf_test "validation_tests/udp_pub_conf_test.c")
+  target_compile_options(udp_pub_conf_test PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(udp_pub_conf_test PRIVATE ${S2OPC_DEFINITIONS})
   target_link_libraries(udp_pub_conf_test PRIVATE s2opc_pubsub)
 
   add_executable(udp_pub_xml_test "validation_tests/udp_pub_xml_test.c")
+  target_compile_options(udp_pub_xml_test PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(udp_pub_xml_test PRIVATE ${S2OPC_DEFINITIONS})
   target_link_libraries(udp_pub_xml_test PRIVATE s2opc_pubsub)
 
   add_executable(udp_pub_scheduler_test "validation_tests/udp_pub_scheduler_test.c")
+  target_compile_options(udp_pub_scheduler_test PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(udp_pub_scheduler_test PRIVATE ${S2OPC_DEFINITIONS})
   target_link_libraries(udp_pub_scheduler_test PRIVATE s2opc_pubsub)
 
   # Copy data
@@ -120,15 +132,23 @@ if(ENABLE_TESTING)
     )
   
   add_executable(udp_sub_test "validation_tests/udp_sub_test.c")
+  target_compile_options(udp_sub_test PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(udp_sub_test PRIVATE ${S2OPC_DEFINITIONS})
   target_link_libraries(udp_sub_test PRIVATE s2opc_pubsub)
 
   add_executable(udp_sub_conf_test "validation_tests/udp_sub_conf_test.c")
+  target_compile_options(udp_sub_conf_test PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(udp_sub_conf_test PRIVATE ${S2OPC_DEFINITIONS})
   target_link_libraries(udp_sub_conf_test PRIVATE s2opc_pubsub)
 
   add_executable(udp_multi_pub_test "validation_tests/udp_multi_pub_test.c")
+  target_compile_options(udp_multi_pub_test PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(udp_multi_pub_test PRIVATE ${S2OPC_DEFINITIONS})
   target_link_libraries(udp_multi_pub_test PRIVATE s2opc_pubsub)
 
   add_executable(udp_multi_sub_test "validation_tests/udp_multi_sub_test.c")
+  target_compile_options(udp_multi_sub_test PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(udp_multi_sub_test PRIVATE ${S2OPC_DEFINITIONS})
   target_link_libraries(udp_multi_sub_test PRIVATE s2opc_pubsub)
 
   add_test(NAME "validation::ll_pub_sub_test"
@@ -185,6 +205,8 @@ if(ENABLE_TESTING)
 ## S2OPC PubSub interoperability tests ##
 
   add_executable(interop_sub_test "interop_tests/interop_sub_test.c")
+  target_compile_options(interop_sub_test PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(interop_sub_test PRIVATE ${S2OPC_DEFINITIONS})
   target_link_libraries(interop_sub_test PRIVATE s2opc_pubsub)
 
   if(UNIX)

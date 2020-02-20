@@ -57,7 +57,7 @@ if(ENABLE_SAMPLES)
                  ${DEMO_SERVER_ADDRESS_SPACE_C})
   target_link_libraries(${TOOLKIT_DEMO_SERVER} PRIVATE s2opc_clientserver s2opc_clientserver-loader-embedded)
   target_compile_options(${TOOLKIT_DEMO_SERVER} PRIVATE ${S2OPC_COMPILER_FLAGS})
-  target_compile_definitions(${TOOLKIT_DEMO_SERVER} PRIVATE ${S2OPC_DEFINITIONS}) 
+  target_compile_definitions(${TOOLKIT_DEMO_SERVER} PRIVATE ${S2OPC_DEFINITIONS})
 
   if (EXPAT_FOUND)
     target_link_libraries(${TOOLKIT_DEMO_SERVER} PRIVATE s2opc_clientserver-xml-loaders-expat)
@@ -98,42 +98,42 @@ if(ENABLE_SAMPLES)
                               "demo_client/config.c")
   target_link_libraries(s2opc_browse PRIVATE s2opc_clientserver)
   target_compile_options(s2opc_browse PRIVATE ${S2OPC_COMPILER_FLAGS})
-  target_compile_definitions(s2opc_browse PRIVATE ${S2OPC_DEFINITIONS}) 
+  target_compile_definitions(s2opc_browse PRIVATE ${S2OPC_DEFINITIONS})
 
   add_executable(s2opc_read "demo_client/s2opc_read.c"
                             "demo_client/state_machine.c"
                             "demo_client/config.c")
   target_link_libraries(s2opc_read PRIVATE s2opc_clientserver)
   target_compile_options(s2opc_read PRIVATE ${S2OPC_COMPILER_FLAGS})
-  target_compile_definitions(s2opc_read PRIVATE ${S2OPC_DEFINITIONS}) 
+  target_compile_definitions(s2opc_read PRIVATE ${S2OPC_DEFINITIONS})
 
   add_executable(s2opc_write "demo_client/s2opc_write.c"
                              "demo_client/state_machine.c"
                              "demo_client/config.c")
   target_link_libraries(s2opc_write PRIVATE s2opc_clientserver)
   target_compile_options(s2opc_write PRIVATE ${S2OPC_COMPILER_FLAGS})
-  target_compile_definitions(s2opc_write PRIVATE ${S2OPC_DEFINITIONS}) 
+  target_compile_definitions(s2opc_write PRIVATE ${S2OPC_DEFINITIONS})
 
   add_executable(s2opc_discovery "demo_client/s2opc_discovery.c"
                                  "demo_client/state_machine.c"
                                  "demo_client/config.c")
   target_link_libraries(s2opc_discovery PRIVATE s2opc_clientserver)
   target_compile_options(s2opc_discovery PRIVATE ${S2OPC_COMPILER_FLAGS})
-  target_compile_definitions(s2opc_discovery PRIVATE ${S2OPC_DEFINITIONS}) 
+  target_compile_definitions(s2opc_discovery PRIVATE ${S2OPC_DEFINITIONS})
 
   add_executable(s2opc_findserver "demo_client/s2opc_findserver.c"
                                   "demo_client/state_machine.c"
                                   "demo_client/config.c")
   target_link_libraries(s2opc_findserver PRIVATE s2opc_clientserver)
   target_compile_options(s2opc_findserver PRIVATE ${S2OPC_COMPILER_FLAGS})
-  target_compile_definitions(s2opc_findserver PRIVATE ${S2OPC_DEFINITIONS}) 
+  target_compile_definitions(s2opc_findserver PRIVATE ${S2OPC_DEFINITIONS})
 
   add_executable(s2opc_register "demo_client/s2opc_register.c"
                                 "demo_client/state_machine.c"
                                 "demo_client/config.c")
   target_link_libraries(s2opc_register PRIVATE s2opc_clientserver)
   target_compile_options(s2opc_register PRIVATE ${S2OPC_COMPILER_FLAGS})
-  target_compile_definitions(s2opc_register PRIVATE ${S2OPC_DEFINITIONS}) 
+  target_compile_definitions(s2opc_register PRIVATE ${S2OPC_DEFINITIONS})
 
   # Samples with S2OPC subscribing client library
 

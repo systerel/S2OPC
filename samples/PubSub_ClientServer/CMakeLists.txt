@@ -67,7 +67,8 @@ if(ENABLE_SAMPLES)
                                "${STATIC_PUBSUB_CONFIG_C}"
                                "${STATIC_ADDRESS_SPACE_C}"
                                )
-
+  target_compile_options(pubsub_server PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(pubsub_server PRIVATE ${S2OPC_DEFINITIONS})
   target_link_libraries(pubsub_server PRIVATE s2opc_pubsub s2opc_clientserver s2opc_clientserver-loader-embedded s2opc_clientserver-xml-loaders-expat)
   target_include_directories(pubsub_server PRIVATE pubsub_server)
 
