@@ -254,8 +254,8 @@ SOPC_ReturnStatus Server_CreateServerConfig(SOPC_S2OPC_Config* output_s2opcConfi
     }
     else
     {
-        SOPC_UserAuthentication_FreeManager(authenticationManager);
-        SOPC_UserAuthorization_FreeManager(authorizationManager);
+        SOPC_UserAuthentication_FreeManager(&authenticationManager);
+        SOPC_UserAuthorization_FreeManager(&authorizationManager);
     }
 
     return status;
