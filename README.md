@@ -1,11 +1,13 @@
 ## S2OPC OPC UA Toolkit
 
-This OPC UA Toolkit project provides a C source code implementation
+This OPC UA Toolkit project provides a Client/Server C source code implementation
 including an OPC UA communication stack, B model and C source code
 implementation for a minimal set of services and a cryptographic
 library adaptation for OPC UA needs (using mbedtls).
+This OPC UA Toolkit project also provides a PubSub C source code implementation,
+it shares some components with Client/Server part (cryptographic services, OPC UA types, etc.).
 
-The S2OPC UA Toolkit is the result of the Research and Development project INGOPCS (2016-2018).
+The S2OPC OPC UA Client / server Toolkit is the result of the Research and Development project INGOPCS (2016-2018).
 Systematic and Minalogic centers of innovation supported the project as part of the French FUI CFP.
 
 INGOPCS goals:
@@ -25,7 +27,7 @@ INGOPCS initial consortium:
 - Telecom ParisTech
 - TrustInSoft
 
-## S2OPC Toolkit features
+## S2OPC Client/Server Toolkit features
 
 ### Common features:
 
@@ -63,11 +65,7 @@ Server side (e.g.: `tests/services/toolkit_test_server.c`):
   - Only if compiled with WITH_NANO_EXTENDED set to 1:
     - Subscription services (simplified: no monitoredItems filters or deletion, no subscription transfer)
 
-### Cryptography services use constraints
-- Only one authority certificate can be provided by channel (/endpoint)
-  for server (/client) certificates validation,
-
-## Current status
+### Current status
 
 - Security policies available: None, Basic256 and Basic256Sha256
 - Security modes available: None, Sign and SignAndEncrypt
@@ -84,9 +82,9 @@ Server side (e.g.: `tests/services/toolkit_test_server.c`):
 - Address space with all mandatory attributes: AccessLevel, BrowseName, ContainsNoLoop, DataType, DisplayName, EvenNotifier, Executable, Historizing,
   IsAbstract, NodeClass, NodeId, Symmetric, UserAccessLevel, UserExecutable, Value (with single value and array Variants), ValueRank (and References)
 
-## Address space definition and generation
+### Address space definition and generation
 
-### Definition of XML address space
+#### Definition of XML address space
 The address space should be defined with an XML using the UANodeSet XML format.
 All the reciprocal references between nodes shall be present in it, the script `scripts/gen-reciprocal-refs-address-space.xslt`
 might be used to generate reciprocal references missing (XSLT 2.0 processor required).
@@ -94,7 +92,7 @@ might be used to generate reciprocal references missing (XSLT 2.0 processor requ
 Once the XML address space is defined, the C structure to be used for toolkit configuration shall be generated.
 It could be done using the Python C code generator prior to compilation or using the dynamic XML loader using Expat library.
 
-### Generation of C structure address space
+#### Generation of C structure address space
 The `scripts/generate-s2opc-address-space.py` tool converts a UANodeSet XML file into a
 C file that can be compiled in the binary, and used with the embedded address
 space loader (see the `tests/data/address_space/parts/s2opc.xml`
@@ -104,11 +102,35 @@ moment.
 S2OPC server can also dynamically load a UANodeSet XML at startup.
 To do so, set `TEST_SERVER_XML_ADDRESS_SPACE` to the location of the address space and launch the sample server.
 
-## Server configuration
+### Server configuration
 
 The server configuration can be defined manually using the C structures defined in src/api_toolkit/sopc_user_app_itf.h (SOPC_S2OPC_Config).
 It is also possible to use an XML parser for XML complying with schemas/s2opc_config.xsd.
 The S2OPC demo server use a configuration for tests by default, to use a custom XML configuraiton file set `TEST_SERVER_XML_CONFIG` to its location.
+
+## S2OPC PubSub Toolkit features
+
+S2OPC PubSub implements the OPC UA publish subscribe parttern (OPC UA standard Part 14) which complements the Client/Server pattern defined by the Services (OPC UA standard Part 4).
+
+Note: PubSub is only available on S2OPC Toolkit version > 0.11.0
+
+### PubSub implemented features
+
+The S2OPC PubSub implementation properties are the following:
+- the communication layer is UDP,
+- the encoding type is UADP,
+- no implementation of security,
+- no override management (cf §6.2.10). That means LastUsableValue is used in any cases,
+- variable management only, not events,
+- no additional verification on sequence numbers,
+- the encoding of the dataset is always of type variant (see §6.2.3.2),
+- keyframecount is set to 0 (no delta message are sent),
+- no calculation of deadband (see §6.2.2.6),
+- a single level of priority for WriterGroup (see §6.5.2.4),
+- sampling of data at the time of publication instead of sampling (same for subscriptions see §6.3.1),
+- no use of SamplingOffset nor PublishingOffset,
+- no implementation of discovery requests (see §7.2.2.4).
+Note: references point to the standard OPC UA Part 14 (1.04).
 
 ## S2OPC Development
 
@@ -122,8 +144,8 @@ The S2OPC demo server use a configuration for tests by default, to use a custom 
 - all development and testing environment are bundled into [Docker](https://www.docker.com/) images
 - continuous integration with a test bench containing:
     - modular tests using libcheck
-    - validation tests using [FreeOPCUA](https://github.com/FreeOpcUa/python-opcua)
-    - interoperability tests using [UACTT] (https://opcfoundation.org/developer-tools/certification-test-tools/opc-ua-compliance-test-tool-uactt/),
+    - validation and interoperability tests using [FreeOPCUA](https://github.com/FreeOpcUa/python-opcua) for Client/Server and [Open62541](https://open62541.org/) for PubSub,
+    - certification and interoperability tests of Server using [UACTT] (https://opcfoundation.org/developer-tools/certification-test-tools/opc-ua-compliance-test-tool-uactt/),
     - fuzzing tests.
 
 ## Demo
@@ -132,18 +154,28 @@ See the [demo](https://gitlab.com/systerel/S2OPC/wikis/demo) page from the Wiki.
 
 ## Getting started
 
-For a sample server (respectively sample client), you can look at test/services/toolkit_test_server.c
- (respectively test/services/toolkit_test_client.c and tests/client_subscription/client.c).
+### Client/Server
+For a sample server, you can look at `samples/ClientServer/demo_server/toolkit_demo_server.c`.
+And for the client side, you can look either at the samples without frontend `samples/ClientServer/demo_client/s2opc_*.c` or the samples using the additional client frontend `samples/ClientServer/client_wrapper/`.
+
+At the end of build process, the binaries are available in `build/bin` directory.
+
+### PubSub
+
+For a sample PubSub-Server, you can look at `samples/PubSub_ClientServer/pubsub_server/main.c`.
+
+At the end of build process, the binary is available here `build/bin/pubsub_server`.
 
 ## S2OPC Linux compilation
 
 Tested under Ubuntu 16.04 and Debian 9.
 Prerequisites:
 - Make (tested with GNU Make version 4.2.1)
-- CMake (tested with CMake version 3.9.4)
+- CMake (>= 3.5, tested with CMake version 3.9.4)
 - GCC (tested with GCC version 8.1.0)
 - [Mbedtls](https://tls.mbed.org/)(tested with mbedtls version 2.16.0)
 - [Check](https://libcheck.github.io/check/)(tested with libcheck version 0.12)
+- [expat](https://github.com/libexpat/libexpat)(tested with libexpat version 2.2.5)
 - Python3 (tested with version 3.6.3)
 
 To build the Toolkit library and tests with default configuration on current
@@ -156,6 +188,8 @@ stable release:
 For more information, or to compile the master branch on its latest commit, please refer to the [wiki](https://gitlab.com/systerel/S2OPC/wikis/compilation).
 
 ## S2OPC Windows compilation
+
+Note: Windows compilation is only possible if S2OPC_CLIENTSERVER_ONLY variable is set during the build (only Client/Server built).
 
 Tested under Windows 7 and Windows Server 2016.
 Prerequisites:
@@ -179,7 +213,7 @@ To build the Toolkit library and tests with default configuration on current sta
   rm -rf build
   mkdir build
   cd build
-  cmake .. -G "Visual Studio 15 2017 Win64"
+  cmake .. -DS2OPC_CLIENTSERVER_ONLY=1 -G "Visual Studio 15 2017 Win64"
   cmake --build . --target ALL_BUILD --config RelWithDebInfo
 
   REM Build MbedTLS
@@ -215,26 +249,6 @@ Prerequisites (only for validation based on FreeOpcUa python client):
 Run all tests:
 - To run the S2OPC OPC UA Toolkit tests: execute the test-all.sh script: `./test-all.sh`
 - Tests results are provided in build/bin/*.tap files and shall indicate "ok" status for each test
-
-Run a particular test (build/bin/ directory):
-- Toolkit benchmark utility: execute ./bench_tool to see help
-- Toolkit helpers unit tests: execute ./check_helpers
-- Toolkit client library (LibSub) test: execute ./check_libsub
-- Toolkit sockets management layer test: execute ./check_sockets
-- Toolkit secure channel (+sockets) management layer: ./check_sc_rcv_buffer, ./check_sc_rcv_encrypted_buffer, ./test_secure_channels_server and ./test_secure_channels_client in parallel
-- Toolkit client library based command line samples: to see help execute: ./s2opc_browse, ./s2opc_discovery, ./s2opc_findserver, ./s2opc_read, ./s2opc_register, ./s2opc_subscription_client, ./s2opc_write
-- Toolkit address space parser test: execute ./s2opc_parse_uanodeset to see help
-- Toolkit client/server session and read/write service example:
-  execute ./toolkit_test_nano_server and then ./toolkit_test_client in parallel
-  (or toolkit_test_client_service_faults for service fault specialized test)
-- Toolkit server and read / write / browse service validation:
-  execute ./toolkit_test_nano_server in build/bin/ directory and python3 client.py in validation/ directory
-  (depends on FreeOpcUa python client available on github)
-- Toolkit server and secure channel security token renewal validation:
-  execute ./toolkit_test_nano_server in build/bin/ directory and python3
-  client_sc_renew.py in validation/ directory (depends on FreeOpcUa
-  python client available on github)
-- Toolkit server local services validation: execute ./toolkit_test_nano_server_local_service
 
 Run OPC UA Compliance Test Tool (UACTT: tool available for OPC foundation corporate members only):
 - Run toolkit server in build/bin/ directory: ./toolkit_test_nano_server
