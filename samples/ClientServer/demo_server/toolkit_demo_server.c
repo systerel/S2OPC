@@ -838,6 +838,7 @@ static SOPC_ReturnStatus Server_ConfigureAddressSpace(SOPC_AddressSpace** output
 
 static SOPC_StatusCode Server_InitDefaultCallMethodService(SOPC_Server_Config* serverConfig)
 {
+    char *sNodeId;
     SOPC_NodeId* methodId;
     SOPC_MethodCallFunc_Ptr methodFunc;
     serverConfig->mcm = SOPC_MethodCallManager_Create();
@@ -845,8 +846,8 @@ static SOPC_StatusCode Server_InitDefaultCallMethodService(SOPC_Server_Config* s
     if (SOPC_STATUS_OK == status)
     {
         /* No input, no output */
-        /* ApplyChanges */
-        methodId = SOPC_NodeId_FromCString("i=12740", 7);
+        sNodeId = "ns=1;s=MethodNoArg";
+        methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t)strlen(sNodeId));
         if (NULL != methodId)
         {
             methodIds[nbMethodIds] = methodId;
@@ -863,8 +864,8 @@ static SOPC_StatusCode Server_InitDefaultCallMethodService(SOPC_Server_Config* s
     if (SOPC_STATUS_OK == status)
     {
         /* Only input, no output */
-        /* ResendData */
-        methodId = SOPC_NodeId_FromCString("i=12873", 7);
+        sNodeId = "ns=1;s=MethodI";
+        methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t)strlen(sNodeId));
         if (NULL != methodId)
         {
             methodIds[nbMethodIds] = methodId;
@@ -882,8 +883,8 @@ static SOPC_StatusCode Server_InitDefaultCallMethodService(SOPC_Server_Config* s
     if (SOPC_STATUS_OK == status)
     {
         /* No input, only output */
-        /* GetRejectedList */
-        methodId = SOPC_NodeId_FromCString("i=12777", 7);
+        sNodeId = "ns=1;s=MethodO";
+        methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t)strlen(sNodeId));
         if (NULL != methodId)
         {
             methodIds[nbMethodIds] = methodId;
@@ -901,8 +902,8 @@ static SOPC_StatusCode Server_InitDefaultCallMethodService(SOPC_Server_Config* s
     if (SOPC_STATUS_OK == status)
     {
         /* Input, output */
-        /* CreateSigningRequest */
-        methodId = SOPC_NodeId_FromCString("i=12737", 7);
+        sNodeId = "ns=1;s=MethodIO";
+        methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t)strlen(sNodeId));
         if (NULL != methodId)
         {
             methodIds[nbMethodIds] = methodId;

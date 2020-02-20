@@ -28,8 +28,8 @@
 
 #include <stdbool.h>
 
-#include "sopc_common_build_info.h"
 #include "sopc_call_method_manager.h"
+#include "sopc_common_build_info.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_key_manager.h"
 #include "sopc_types.h"
