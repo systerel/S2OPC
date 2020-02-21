@@ -306,7 +306,7 @@ static SOPC_ReturnStatus Server_Initialize(void)
  *---------------------------------------------------*/
 
 /*
- * Default server configuration loader
+ * Default server configuration loader (without XML configuration)
  */
 static bool Server_LoadDefaultConfiguration(SOPC_S2OPC_Config* output_s2opcConfig)
 {
@@ -429,10 +429,6 @@ static bool Server_LoadDefaultConfiguration(SOPC_S2OPC_Config* output_s2opcConfi
         pEpConfig->nbSecuConfigs = 1;
     }
 
-    if (SOPC_STATUS_OK == status)
-    {
-        status = Server_InitDefaultCallMethodService(&output_s2opcConfig->serverConfig);
-    }
     return SOPC_STATUS_OK == status;
 }
 
@@ -838,7 +834,7 @@ static SOPC_ReturnStatus Server_ConfigureAddressSpace(SOPC_AddressSpace** output
 
 static SOPC_StatusCode Server_InitDefaultCallMethodService(SOPC_Server_Config* serverConfig)
 {
-    char *sNodeId;
+    char* sNodeId;
     SOPC_NodeId* methodId;
     SOPC_MethodCallFunc_Ptr methodFunc;
     serverConfig->mcm = SOPC_MethodCallManager_Create();
@@ -847,7 +843,7 @@ static SOPC_StatusCode Server_InitDefaultCallMethodService(SOPC_Server_Config* s
     {
         /* No input, no output */
         sNodeId = "ns=1;s=MethodNoArg";
-        methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t)strlen(sNodeId));
+        methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t) strlen(sNodeId));
         if (NULL != methodId)
         {
             methodIds[nbMethodIds] = methodId;
@@ -865,7 +861,7 @@ static SOPC_StatusCode Server_InitDefaultCallMethodService(SOPC_Server_Config* s
     {
         /* Only input, no output */
         sNodeId = "ns=1;s=MethodI";
-        methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t)strlen(sNodeId));
+        methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t) strlen(sNodeId));
         if (NULL != methodId)
         {
             methodIds[nbMethodIds] = methodId;
@@ -884,7 +880,7 @@ static SOPC_StatusCode Server_InitDefaultCallMethodService(SOPC_Server_Config* s
     {
         /* No input, only output */
         sNodeId = "ns=1;s=MethodO";
-        methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t)strlen(sNodeId));
+        methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t) strlen(sNodeId));
         if (NULL != methodId)
         {
             methodIds[nbMethodIds] = methodId;
@@ -903,7 +899,7 @@ static SOPC_StatusCode Server_InitDefaultCallMethodService(SOPC_Server_Config* s
     {
         /* Input, output */
         sNodeId = "ns=1;s=MethodIO";
-        methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t)strlen(sNodeId));
+        methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t) strlen(sNodeId));
         if (NULL != methodId)
         {
             methodIds[nbMethodIds] = methodId;
@@ -1054,9 +1050,16 @@ int main(int argc, char* argv[])
         status = Server_SetCryptographicConfig(serverConfig);
     }
 
+    // Define demo implementation of user authentication and authorization
     if (SOPC_STATUS_OK == status)
     {
         status = Server_SetUserManagementConfig(epConfig, &authenticationManager, &authorizationManager);
+    }
+
+    // Define demo implementation of functions called for method call service
+    if (SOPC_STATUS_OK == status)
+    {
+        status = Server_InitDefaultCallMethodService(serverConfig);
     }
 
     /* Set endpoint configuration: keep endpoint configuration identifier for opening it later */
