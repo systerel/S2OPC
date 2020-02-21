@@ -72,7 +72,9 @@ Server side (e.g.: `tests/services/toolkit_test_server.c`):
 - Server instantiation: several endpoint descriptions, 1 address space, multiple secure channel instances and session instances
 - Server discovery services: getEndpoints, findServers
 - Server Nano profile services: read, write, browse, browseNext (1 continuation point per session), translateBrowsePath, registerNodes
-- Server extended services (only if compiled with WITH_NANO_EXTENDED set to 1): subscription (no monitoredItems deletion, no subscription transfer)
+- Server extended services (only if compiled with WITH_NANO_EXTENDED set to 1):
+  - subscription (no monitoredItems deletion, no subscription transfer),
+  - method call (no access to node object nor address space during call, any other event blocked during function execution).
 - Server local services: read, write, browse and discovery services
 - Server address space modification:
   - mechanisms implemented for remote modification: variables modification with typechecking (data type and value rank), access level and user access level control
