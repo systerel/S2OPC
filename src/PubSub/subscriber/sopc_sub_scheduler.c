@@ -21,14 +21,18 @@
 #include <stdbool.h>
 
 #include "sopc_atomic.h"
+#include "sopc_event_timer_manager.h"
 #include "sopc_helper_endianness_cfg.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_mutexes.h"
 #include "sopc_pubsub_constants.h"
 #include "sopc_pubsub_helpers.h"
 #include "sopc_pubsub_protocol.h"
 #include "sopc_reader_layer.h"
+#include "sopc_rt_subscriber.h"
 #include "sopc_sub_scheduler.h"
 #include "sopc_sub_udp_sockets_mgr.h"
+#include "sopc_threads.h"
 #include "sopc_udp_sockets.h"
 
 char* ENDPOINT_URL = NULL;
@@ -51,6 +55,7 @@ struct SOPC_SubScheduler_TransportCtx
 
     // specific to SOPC_PubSubProtocol_UDP
     Socket sock;
+    uint32_t inputNumber;
 };
 
 static struct
@@ -66,7 +71,7 @@ static struct
 
     /* Internal context */
     SOPC_PubSubState state;
-    SOPC_Buffer* receptionBuffer;
+    SOPC_Buffer* receptionBufferUDP; /*For all UDP connections*/
 
     uint32_t nbConnections;
     // size is nbConnections
@@ -74,9 +79,12 @@ static struct
 
     // specific to SOPC_PubSubProtocol_UDP
     uint16_t nbSockets;
-    SOPC_PubSubConnection** connectionArray;
+    uint32_t** sockInputNumbers;
     Socket* sockArray;
 
+    SOPC_RT_Subscriber* pRTSubscriber;
+    Thread handleRTSubscriberBeatHeart;
+    volatile bool bQuitSubcriberBeatHeart;
 } schedulerCtx = {.isStarted = false,
                   .processingStartStop = false,
                   .stateCallback = NULL,
@@ -84,7 +92,12 @@ static struct
                   .nbConnections = 0,
                   .nbSockets = 0,
                   .transport = NULL,
-                  .receptionBuffer = NULL};
+                  .sockInputNumbers = NULL,
+                  .sockArray = NULL,
+                  .receptionBufferUDP = NULL,
+                  .pRTSubscriber = NULL,
+                  .handleRTSubscriberBeatHeart = (Thread) NULL,
+                  .bQuitSubcriberBeatHeart = false};
 
 static void set_new_state(SOPC_PubSubState new)
 {
@@ -96,19 +109,98 @@ static void set_new_state(SOPC_PubSubState new)
     schedulerCtx.state = new;
 }
 
-// Common fonction to process received message
-static void SOPC_SubScheduler_Read_UADP(SOPC_ReturnStatus pstatus, SOPC_PubSubConnection* connection);
-
 // Specific callback for UDP message
-static void on_udp_message_received(void* sockContext, Socket sock)
+static void on_udp_message_received(void* pInputIdentifier, Socket sock)
 {
-    assert(NULL != sockContext);
+    assert(NULL != pInputIdentifier);
 
-    SOPC_PubSubConnection* connection = (SOPC_PubSubConnection*) sockContext;
+    // Get input
+    uint32_t inputIdentifier = *((uint32_t*) pInputIdentifier);
 
-    SOPC_ReturnStatus status = SOPC_UDP_Socket_ReceiveFrom(sock, schedulerCtx.receptionBuffer);
+    SOPC_Buffer_SetPosition(schedulerCtx.receptionBufferUDP, 0);
+    SOPC_ReturnStatus status = SOPC_UDP_Socket_ReceiveFrom(sock, schedulerCtx.receptionBufferUDP);
 
-    SOPC_SubScheduler_Read_UADP(status, connection);
+    // Write input
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_RT_Subscriber_Input_Write(schedulerCtx.pRTSubscriber,               //
+                                       inputIdentifier,                          //
+                                       schedulerCtx.receptionBufferUDP->data,    //
+                                       schedulerCtx.receptionBufferUDP->length); //
+    }
+}
+
+static SOPC_ReturnStatus SOPC_RT_Subscriber_Callback(SOPC_RT_Subscriber* pSub, // RT Subscriber object
+                                                     void* pContext,           // User context
+                                                     void* pInputContext,      // Decode context
+                                                     uint32_t input_number,    // Input pin number
+                                                     uint8_t* pData,           // Data received
+                                                     uint32_t size)            // Size of data
+{
+    (void) input_number;
+    (void) pContext;
+    (void) pSub;
+
+    SOPC_ReturnStatus result = SOPC_STATUS_OK;
+
+    SOPC_PubSubConnection* pDecoderContext = (SOPC_PubSubConnection*) pInputContext;
+
+#if DEBUG_PUBSUB_SCHEDULER_INFO
+    printf("# RT Subscriber callback - receive data on input number = %u - size = %u - context = %08lx\r\n", //
+           input_number,                                                                                     //
+           size,                                                                                             //
+           (uint64_t) pInputContext);                                                                        //
+#endif
+
+    if (NULL == pDecoderContext)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_Buffer buffer;
+    buffer.position = 0;
+    buffer.length = size;
+    buffer.maximum_size = size;
+    buffer.current_size = size;
+    buffer.data = pData;
+
+    if (SOPC_PubSubState_Operational == schedulerCtx.state)
+    {
+        result = SOPC_Reader_Read_UADP(pDecoderContext,            //
+                                       &buffer,                    //
+                                       schedulerCtx.targetConfig); //
+
+        if (SOPC_STATUS_OK != result)
+        {
+            set_new_state(SOPC_PubSubState_Error);
+        }
+    }
+
+    return result;
+}
+
+// Beat heart thread
+static void* cbBeatHeartThreadCallback(void* arg)
+{
+    (void) arg;
+    SOPC_ReturnStatus result = SOPC_STATUS_OK;
+
+    printf("# RT Subscriber beat heart thread launched !!!\r\n");
+
+    while (!schedulerCtx.bQuitSubcriberBeatHeart)
+    {
+        result = SOPC_RT_Subscriber_BeatHeart(schedulerCtx.pRTSubscriber);
+        if (SOPC_STATUS_OK != result)
+        {
+            printf("# RT Subscriber beat heart thread error : %u\r\n", result);
+        }
+
+        SOPC_Sleep(SOPC_TIMER_RESOLUTION_MS);
+    }
+
+    printf("# RT Subscriber beat heart thread exit !!!\r\n");
+
+    return NULL;
 }
 
 static void uninit_sub_scheduler_ctx(void)
@@ -117,20 +209,49 @@ static void uninit_sub_scheduler_ctx(void)
     schedulerCtx.targetConfig = NULL;
     schedulerCtx.stateCallback = NULL;
 
+    printf("# Info: Stop RT Subscriber thread. \r\n");
+    schedulerCtx.bQuitSubcriberBeatHeart = true;
+    if (schedulerCtx.handleRTSubscriberBeatHeart != (Thread) NULL)
+    {
+        SOPC_Thread_Join(schedulerCtx.handleRTSubscriberBeatHeart);
+        schedulerCtx.handleRTSubscriberBeatHeart = (Thread) NULL;
+    }
+
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_STATE;
+    while (SOPC_STATUS_INVALID_STATE == status)
+    {
+        printf("# Info: DeInitialize RT Subscriber. \r\n");
+        status = SOPC_RT_Subscriber_DeInitialize(schedulerCtx.pRTSubscriber);
+    }
     for (uint32_t i = 0; i < schedulerCtx.nbConnections; i++)
     {
         schedulerCtx.transport[i].fctClear(&schedulerCtx.transport[i]);
+        printf("# Info: transport context destroyed for connection #%d (subscriber). \n", i);
     }
+    printf("# Info: Destroy RT Subscriber. \r\n");
+    SOPC_RT_Subscriber_Destroy(&schedulerCtx.pRTSubscriber);
     schedulerCtx.nbConnections = 0;
     schedulerCtx.nbSockets = 0;
-    SOPC_Free(schedulerCtx.transport);
-    SOPC_Free(schedulerCtx.connectionArray);
-    SOPC_Free(schedulerCtx.sockArray);
+    if (schedulerCtx.transport != NULL)
+    {
+        SOPC_Free(schedulerCtx.transport);
+        schedulerCtx.transport = NULL;
+    }
+    if (schedulerCtx.sockInputNumbers)
+    {
+        SOPC_Free(schedulerCtx.sockInputNumbers);
+        schedulerCtx.sockInputNumbers = NULL;
+    }
+    if (schedulerCtx.sockArray)
+    {
+        SOPC_Free(schedulerCtx.sockArray);
+        schedulerCtx.sockArray = NULL;
+    }
     schedulerCtx.transport = NULL;
-    schedulerCtx.connectionArray = NULL;
+    schedulerCtx.sockInputNumbers = NULL;
     schedulerCtx.sockArray = NULL;
-    SOPC_Buffer_Delete(schedulerCtx.receptionBuffer);
-    schedulerCtx.receptionBuffer = NULL;
+    SOPC_Buffer_Delete(schedulerCtx.receptionBufferUDP);
+    schedulerCtx.receptionBufferUDP = NULL;
 }
 
 static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config,
@@ -147,25 +268,51 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
     schedulerCtx.targetConfig = targetConfig;
     schedulerCtx.stateCallback = stateChangedCb;
 
-    // Allocate the subscriber scheduler context
-    schedulerCtx.nbConnections = nb_connections;
-    schedulerCtx.nbSockets = 0;
-    schedulerCtx.transport = SOPC_Calloc(schedulerCtx.nbConnections, sizeof(*schedulerCtx.transport));
-    result = (NULL != schedulerCtx.transport);
+    schedulerCtx.receptionBufferUDP = SOPC_Buffer_Create(SOPC_PUBSUB_BUFFER_SIZE);
+    result = (NULL != schedulerCtx.receptionBufferUDP);
+
+    if (result)
+    {
+        // Allocate the subscriber scheduler context
+        schedulerCtx.nbConnections = nb_connections;
+        schedulerCtx.nbSockets = 0;
+        schedulerCtx.transport = SOPC_Calloc(schedulerCtx.nbConnections, sizeof(SOPC_SubScheduler_TransportCtx));
+        result = (NULL != schedulerCtx.transport);
+    }
 
     if (!result)
     {
         status = SOPC_STATUS_OUT_OF_MEMORY;
-        SOPC_Free(schedulerCtx.transport);
-        schedulerCtx.nbConnections = 0;
-        schedulerCtx.nbSockets = 0;
+    }
+
+    SOPC_RT_Subscriber_Initializer* pRTInitializer = NULL;
+
+    if (result)
+    {
+        pRTInitializer = SOPC_RT_Subscriber_Initializer_Create(SOPC_RT_Subscriber_Callback, NULL);
+        result = (NULL != pRTInitializer);
+        if (!result)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+
+    if (result)
+    {
+        schedulerCtx.pRTSubscriber = SOPC_RT_Subscriber_Create();
+        result = (NULL != schedulerCtx.pRTSubscriber);
+        if (!result)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
     }
 
     // Initialize the subscriber scheduler context: create socket + associated Sub connection config
-    for (uint32_t i = 0; i < nb_connections && SOPC_STATUS_OK == status; i++)
+    for (uint32_t iIter = 0; iIter < nb_connections && result; iIter++)
     {
-        SOPC_PubSubConnection* connection = SOPC_PubSubConfiguration_Get_SubConnection_At(config, i);
+        SOPC_PubSubConnection* connection = SOPC_PubSubConfiguration_Get_SubConnection_At(config, iIter);
         const SOPC_Conf_PublisherId* pubId = SOPC_PubSubConnection_Get_PublisherId(connection);
+
         if (SOPC_Null_PublisherId == pubId->type)
         {
             assert(SOPC_PubSubConnection_Nb_WriterGroup(connection) == 0);
@@ -174,58 +321,126 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
             uint16_t nbReaderGroups = SOPC_PubSubConnection_Nb_ReaderGroup(connection);
             if (nbReaderGroups > 0)
             {
-                schedulerCtx.transport[i].connection = connection;
+                schedulerCtx.transport[iIter].connection = connection;
 
-                // Parse connection multicast address
-                const char* address = SOPC_PubSubConnection_Get_Address(connection);
+                printf("# Add input with context %08lx\r\n", (uint64_t) connection);
 
-                SOPC_PubSubProtocol_Type protocol = SOPC_PubSub_Protocol_From_URI(address);
+                status = SOPC_RT_Subscriber_Initializer_AddInput(pRTInitializer,                        //
+                                                                 SOPC_PUBSUB_MAX_MESSAGE_PER_PUBLISHER, //
+                                                                 SOPC_PUBSUB_BUFFER_SIZE,               //
+                                                                 SOPC_PIN_MODE_GET_NORMAL,              //
+                                                                 (void*) connection,
+                                                                 &schedulerCtx.transport[iIter].inputNumber); //
 
-                SOPC_Socket_AddressInfo* multicastAddr = NULL;
-                SOPC_Socket_AddressInfo* localAddr = NULL;
-
-                switch (protocol)
+                if (SOPC_STATUS_OK != status)
                 {
-                case SOPC_PubSubProtocol_UDP:
-                    result = SOPC_PubSubHelpers_Subscriber_ParseMulticastAddress(address, &multicastAddr, &localAddr);
+                    printf("# RT Subscriber initializer add input failed !!!\n");
+                    result = false;
+                }
+                else
+                {
+                    printf("# RT Subscriber initializer add input %u\r\n", schedulerCtx.transport[iIter].inputNumber);
+                }
 
-                    // Create reception socket
-                    if (result)
+                if (result)
+                {
+                    // Parse connection multicast address
+                    const char* address = SOPC_PubSubConnection_Get_Address(connection);
+
+                    SOPC_PubSubProtocol_Type protocol = SOPC_PubSub_Protocol_From_URI(address);
+
+                    SOPC_Socket_AddressInfo* multicastAddr = NULL;
+                    SOPC_Socket_AddressInfo* localAddr = NULL;
+
+                    switch (protocol)
                     {
-                        Socket* sock = &schedulerCtx.transport[i].sock;
-                        schedulerCtx.transport[i].fctClear = &SOPC_SubScheduler_CtxUdp_Clear;
-                        schedulerCtx.transport[i].protocol = SOPC_PubSubProtocol_UDP;
+                    case SOPC_PubSubProtocol_UDP:
+                        result =
+                            SOPC_PubSubHelpers_Subscriber_ParseMulticastAddress(address, &multicastAddr, &localAddr);
 
-                        schedulerCtx.nbSockets++;
-                        status = SOPC_UDP_Socket_CreateToReceive(multicastAddr, true, sock);
-                        // Add socket to multicast group
-                        if (SOPC_STATUS_OK == status)
+                        // Create reception socket
+                        if (result)
                         {
-                            status = SOPC_UDP_Socket_AddMembership(*sock, multicastAddr, localAddr);
-                        }
-                    }
-                    else
-                    {
-                        status = SOPC_STATUS_INVALID_PARAMETERS;
-                    }
+                            Socket* sock = &schedulerCtx.transport[iIter].sock;
+                            schedulerCtx.transport[iIter].fctClear = &SOPC_SubScheduler_CtxUdp_Clear;
+                            schedulerCtx.transport[iIter].protocol = SOPC_PubSubProtocol_UDP;
 
-                    SOPC_Socket_AddrInfoDelete(&multicastAddr);
-                    SOPC_Socket_AddrInfoDelete(&localAddr);
-                    break;
-                case SOPC_PubSubProtocol_MQTT:
-                case SOPC_PubSubProtocol_UNKOWN:
-                default:
-                    status = SOPC_STATUS_INVALID_PARAMETERS;
+                            schedulerCtx.nbSockets++;
+                            status = SOPC_UDP_Socket_CreateToReceive(multicastAddr, true, sock);
+                            // Add socket to multicast group
+                            if (SOPC_STATUS_OK == status)
+                            {
+                                status = SOPC_UDP_Socket_AddMembership(*sock, multicastAddr, localAddr);
+                            }
+                            else
+                            {
+                                status = SOPC_STATUS_NOK;
+                            }
+                        }
+                        else
+                        {
+                            status = SOPC_STATUS_INVALID_PARAMETERS;
+                        }
+
+                        if (SOPC_STATUS_OK != status)
+                        {
+                            /* Call uninit because at least one error */
+                            result = false;
+                        }
+
+                        SOPC_Socket_AddrInfoDelete(&multicastAddr);
+                        SOPC_Socket_AddrInfoDelete(&localAddr);
+                        break;
+
+                    case SOPC_PubSubProtocol_UNKOWN:
+                    default:
+                        status = SOPC_STATUS_INVALID_PARAMETERS;
+                        result = false;
+                    }
                 }
             }
         }
     }
 
+    if (result)
+    {
+        uint32_t out = 0;
+        SOPC_RT_Subscriber_Initializer_AddOutput(pRTInitializer, 1, 1, 1, &out);
+        status = SOPC_RT_Subscriber_Initialize(schedulerCtx.pRTSubscriber, pRTInitializer);
+        if (status != SOPC_STATUS_OK)
+        {
+            printf("# Rt subscriber initialization failed !!!\r\n");
+            result = false;
+        }
+        else
+        {
+            printf("# Rt subscriber initialized\r\n");
+        }
+    }
+
+    if (pRTInitializer != NULL)
+    {
+        SOPC_RT_Subscriber_Initializer_Destroy(&pRTInitializer);
+    }
+
     // Create reception buffer
     if (result)
     {
-        schedulerCtx.receptionBuffer = SOPC_Buffer_Create(SOPC_PUBSUB_BUFFER_SIZE);
-        result = (NULL != schedulerCtx.receptionBuffer);
+        schedulerCtx.bQuitSubcriberBeatHeart = false;
+        status = SOPC_Thread_Create(&schedulerCtx.handleRTSubscriberBeatHeart, //
+                                    cbBeatHeartThreadCallback,                 //
+                                    NULL,                                      //
+                                    "SubHeart");                               //
+
+        if (SOPC_STATUS_OK != status)
+        {
+            result = false;
+            printf("# Error creation of rt subscriber beat heart thread\r\n");
+        }
+        else
+        {
+            printf("# Rt subscriber beat heart thread created\r\n");
+        }
     }
 
     if (false == result)
@@ -319,57 +534,35 @@ void SOPC_SubScheduler_Stop(void)
 static bool SOPC_SubScheduler_Start_UDP(void)
 {
     assert(0 < schedulerCtx.nbSockets);
-    assert(NULL == schedulerCtx.sockArray && NULL == schedulerCtx.connectionArray);
+    assert(NULL == schedulerCtx.sockArray && NULL == schedulerCtx.sockInputNumbers);
 
     uint16_t nb_socket = schedulerCtx.nbSockets;
     schedulerCtx.sockArray = SOPC_Calloc(nb_socket, sizeof(*schedulerCtx.sockArray));
-    schedulerCtx.connectionArray = SOPC_Calloc(nb_socket, sizeof(*schedulerCtx.connectionArray));
-    if (NULL == schedulerCtx.sockArray || NULL == schedulerCtx.connectionArray)
+    schedulerCtx.sockInputNumbers = SOPC_Calloc(nb_socket, sizeof(uint32_t*));
+    if (NULL == schedulerCtx.sockArray || NULL == schedulerCtx.sockInputNumbers)
     {
         SOPC_Free(schedulerCtx.sockArray);
-        SOPC_Free(schedulerCtx.connectionArray);
+        SOPC_Free(schedulerCtx.sockInputNumbers);
         return false;
     }
     uint16_t sockIdx = 0;
     // Initialize the subscriber scheduler context: create socket + associated Sub connection config
-    for (uint32_t i = 0; i < schedulerCtx.nbConnections; i++)
+    for (uint32_t iIter = 0; iIter < schedulerCtx.nbConnections; iIter++)
     {
-        if (SOPC_PubSubProtocol_UDP == schedulerCtx.transport[i].protocol)
+        if (SOPC_PubSubProtocol_UDP == schedulerCtx.transport[iIter].protocol)
         {
-            schedulerCtx.sockArray[sockIdx] = schedulerCtx.transport[i].sock;
-            schedulerCtx.connectionArray[sockIdx] = schedulerCtx.transport[i].connection;
+            schedulerCtx.sockArray[sockIdx] = schedulerCtx.transport[iIter].sock;
+            schedulerCtx.sockInputNumbers[sockIdx] =
+                &schedulerCtx.transport[iIter].inputNumber; // Connection input number
             sockIdx++;
         }
     }
 
     assert(nb_socket == sockIdx);
-    SOPC_UDP_SocketsMgr_Initialize((void**) schedulerCtx.connectionArray, schedulerCtx.sockArray, nb_socket,
+    SOPC_UPD_SocketsMgr_Initialize((void**) schedulerCtx.sockInputNumbers, schedulerCtx.sockArray, nb_socket,
                                    on_udp_message_received, NULL, NULL);
 
     return true;
-}
-
-static void SOPC_SubScheduler_Read_UADP(SOPC_ReturnStatus pstatus, SOPC_PubSubConnection* connection)
-{
-    SOPC_ReturnStatus status = pstatus;
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_Reader_Read_UADP(connection, schedulerCtx.receptionBuffer, schedulerCtx.targetConfig);
-        if (SOPC_STATUS_OK != status)
-        {
-            set_new_state(SOPC_PubSubState_Error);
-        }
-        else
-        {
-            set_new_state(SOPC_PubSubState_Operational);
-        }
-    }
-    else
-    {
-        set_new_state(SOPC_PubSubState_Error);
-    }
-    status = SOPC_Buffer_SetPosition(schedulerCtx.receptionBuffer, 0);
-    assert(SOPC_STATUS_OK == status);
 }
 
 static void SOPC_SubScheduler_CtxUdp_Clear(SOPC_SubScheduler_TransportCtx* ctx)
