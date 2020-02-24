@@ -97,6 +97,13 @@ if(ENABLE_TESTING)
 
   s2opc_unit_test(pubsub_modules_test)
 
+  add_executable(rt_api_test "unit_tests/rt_api_test.c")
+  target_link_libraries(rt_api_test PRIVATE s2opc_pubsub ${CHECK_LIBRARIES})
+  target_compile_options(rt_api_test PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(rt_api_test PRIVATE ${S2OPC_DEFINITIONS})
+
+  s2opc_unit_test(rt_api_test)
+
 ## S2OPC PubSub validation tests ##
   
   add_executable(udp_pub_test "validation_tests/udp_pub_test.c")
