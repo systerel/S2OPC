@@ -24,6 +24,7 @@ set -e
 
 # Raspi build with mbedtls with RSA_ALT_SUPPORT
 DOCKER_IMAGE=sha256:0c9b68b812479cf3530114c34c5bf84b662943033f286a6ee166c3154a9487fa  # rpi-build:1.0
+DOCKER_IMAGE=sha256:5f3e9321f7d999ddc3b4df3c035f1eb1a2baa585ef4aacda80807c79239f1c0c  # build:1.15c
 
 if [[ -z $SOPC_DOCKER_NEEDS_SUDO ]]; then
     /etc/scripts/run-in-docker $DOCKER_IMAGE DOCKER_IMAGE=$DOCKER_IMAGE "$@"
