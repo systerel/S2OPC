@@ -36,6 +36,7 @@ set(S2OPC_PUBSUB_PUBLIC_INCLUDES
     "${CMAKE_CURRENT_SOURCE_DIR}/protocol"
     "${CMAKE_CURRENT_SOURCE_DIR}/publisher"
     "${CMAKE_CURRENT_SOURCE_DIR}/subscriber"
+    "${CMAKE_CURRENT_SOURCE_DIR}/real_time_api"
 )
 
 ### Configure S2OPC client/server library and its properties ###
