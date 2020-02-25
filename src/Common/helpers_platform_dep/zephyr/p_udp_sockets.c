@@ -17,40 +17,19 @@
  * under the License.
  */
 
-#include <errno.h>
 #include <fcntl.h>
-#include <inttypes.h>
-#include <limits.h>
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 #include "kernel.h"
 #include "net/ethernet.h"
 #include "net/net_if.h"
 #include "net/socket.h"
-#include "sys/printk.h"
-
-#ifndef __INT32_MAX__
-#include "toolchain/xcc_missing_defs.h"
-#endif
-
-#ifndef NULL
-#define NULL ((void*) 0)
-#endif
-
-#ifndef K_FOREVER
-#define K_FOREVER ((void*) -1)
-#endif
 
 #include "sopc_udp_sockets.h"
 
 #include "p_sockets.h"
 
 #include "p_udp_sockets.h"
-
-#define P_SOCKET_UDP_DEBUG (0)
 
 /* Max socket based on max connections allowed by zephyr */
 
@@ -135,15 +114,6 @@ static SOPC_ReturnStatus P_SOCKET_UDP_CreateSocket(const SOPC_Socket_AddressInfo
             P_SOCKET_decrement_nb_sockets();
             status = SOPC_STATUS_NOK;
         }
-#if P_SOCKET_UDP_DEBUG == 1
-        printk("\r\nP_SOCKET_UDP: Creation of socket %d\r\n", *pSock);
-#endif
-    }
-    else
-    {
-#if P_SOCKET_UDP_DEBUG == 1
-        printk("\r\nP_SOCKET_UDP: Creation of socket error, invalid parameters\r\n");
-#endif
     }
 
     return status;
@@ -358,11 +328,6 @@ SOPC_ReturnStatus SOPC_UDP_Socket_SendTo(Socket sock, const SOPC_Socket_AddressI
                                        0,                     //
                                        &destAddr->_ai_addr,   //
                                        destAddr->ai_addrlen); //
-#if P_SOCKET_UDP_DEBUG == 1
-    printk("\r\nP_SOCKET_UDP: SendTo on %d : sent_length = %d\r\n", //
-           sock,                                                    //
-           send_length);                                            //
-#endif
 
     if (send_length < 0 || (uint32_t) send_length != buffer->length)
     {
@@ -422,17 +387,6 @@ SOPC_ReturnStatus SOPC_UDP_Socket_ReceiveFrom(Socket sock, SOPC_Buffer* buffer)
 
                 if (shallBeDropped)
                 {
-#if P_SOCKET_UDP_DEBUG == 1
-                    {
-                        char addr_str[32];
-                        inet_ntop(AF_INET, &saddr.sin_addr, addr_str, sizeof(addr_str));
-                        printk("\r\nP_SOCKET_UDP: receive ip = %s port = %d - dropped : %d - block mode enabled\r\n", //
-                               addr_str,                                                                              //
-                               ntohs(saddr.sin_port),                                                                 //
-                               shallBeDropped);                                                                       //
-                    }
-#endif
-
                     fl = -1;
 
                     fl = fcntl(sock, F_GETFL, 0);
@@ -446,17 +400,6 @@ SOPC_ReturnStatus SOPC_UDP_Socket_ReceiveFrom(Socket sock, SOPC_Buffer* buffer)
             }
         }
     } while (bLoop);
-
-#if P_SOCKET_UDP_DEBUG == 1
-    {
-        char addr_str[32];
-        inet_ntop(AF_INET, &saddr.sin_addr, addr_str, sizeof(addr_str));
-        printk("\r\nP_SOCKET_UDP: receive ip = %s port = %d - dropped : %d\r\n", //
-               addr_str,                                                         //
-               ntohs(saddr.sin_port),                                            //
-               shallBeDropped);                                                  //
-    }
-#endif
 
     if (recv_len < 0 || shallBeDropped)
     {
@@ -491,9 +434,6 @@ void SOPC_UDP_Socket_Close(Socket* pSock)
         if (zsock_close(sock) == 0)
         {
             P_SOCKET_MCAST_remove_sock_from_mcast(sock);
-#if P_SOCKET_UDP_DEBUG == 1
-            printk("\r\nP_SOCKET_UDP: Socket closed : %d\r\n", *pSock);
-#endif
             *pSock = SOPC_INVALID_SOCKET;
             P_SOCKET_decrement_nb_sockets();
         }
