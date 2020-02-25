@@ -549,7 +549,10 @@ static void* P_LOGSRV_ThreadMonitorCallback(void* pCtx)
     ZSOCK_FD_ZERO(&pLogSrv->readfs);
     ZSOCK_FD_ZERO(&pLogSrv->workfs);
 
-    while (false == pLogSrv->bQuit)
+    bool bQuit = false;
+    __atomic_load(&pLogSrv->bQuit, &bQuit, __ATOMIC_SEQ_CST);
+
+    while (false == bQuit)
     {
         switch (pLogSrv->status)
         {
@@ -709,7 +712,7 @@ static void* P_LOGSRV_ThreadMonitorCallback(void* pCtx)
         default:
             break;
         }
-
+        __atomic_load(&pLogSrv->bQuit, &bQuit, __ATOMIC_SEQ_CST);
     } // While bQuit == false
 
     // Quit flag is set, close all active connections
@@ -758,7 +761,8 @@ static inline void P_LOGSRV_Destroy(tLogServer** p)
         tLogServer* pLogSrv = *p;
         if (pLogSrv != NULL)
         {
-            pLogSrv->bQuit = true;
+            bool bQuit = true;
+            __atomic_store(&pLogSrv->bQuit, &bQuit, __ATOMIC_SEQ_CST);
             SOPC_Thread_Join(pLogSrv->threadMonitor);
             pLogSrv->threadMonitor = (Thread) NULL;
 
@@ -831,9 +835,10 @@ static inline void P_LOGSRV_SYNC_STATUS_set_quit_flag(SOPC_LogServer_Handle hand
         eLogSrvSyncStatus newStatus = 0;
         do
         {
-            currentStatus = pHandle->status;
+            __atomic_load(&pHandle->status, &currentStatus, __ATOMIC_SEQ_CST);
             newStatus = currentStatus | 0x80000000;
-            bTransition = __sync_bool_compare_and_swap(&pHandle->status, currentStatus, newStatus);
+            bTransition = __atomic_compare_exchange(&pHandle->status, &currentStatus, &newStatus, false,
+                                                    __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
 
         } while (!bTransition);
     }
@@ -852,8 +857,7 @@ static inline eLogSrvSyncStatus P_LOGSRV_SYNC_STATUS_increment_in_use(SOPC_LogSe
 
         do
         {
-            currentStatus = pHandle->status;
-
+            __atomic_load(&pHandle->status, &currentStatus, __ATOMIC_SEQ_CST);
             if ((currentStatus & (~0x80000000)) >= E_LOG_SRV_SYNC_INITIALIZED)
             {
                 newStatus = currentStatus + 1;
@@ -863,7 +867,8 @@ static inline eLogSrvSyncStatus P_LOGSRV_SYNC_STATUS_increment_in_use(SOPC_LogSe
                 newStatus = currentStatus;
             }
 
-            bTransition = __sync_bool_compare_and_swap(&pHandle->status, currentStatus, newStatus);
+            bTransition = __atomic_compare_exchange(&pHandle->status, &currentStatus, &newStatus, false,
+                                                    __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
 
         } while (!bTransition);
     }
@@ -883,8 +888,7 @@ static inline eLogSrvSyncStatus P_LOGSRV_SYNC_STATUS_decrement_in_use(SOPC_LogSe
         do
         {
             // Load current status
-            currentStatus = pHandle->status;
-
+            __atomic_load(&pHandle->status, &currentStatus, __ATOMIC_SEQ_CST);
             if ((currentStatus & (~0x80000000)) > E_LOG_SRV_SYNC_INITIALIZED)
             {
                 newStatus = currentStatus - 1;
@@ -894,7 +898,8 @@ static inline eLogSrvSyncStatus P_LOGSRV_SYNC_STATUS_decrement_in_use(SOPC_LogSe
                 newStatus = currentStatus;
             }
 
-            bTransition = __sync_bool_compare_and_swap(&pHandle->status, currentStatus, newStatus);
+            bTransition = __atomic_compare_exchange(&pHandle->status, &currentStatus, &newStatus, false,
+                                                    __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
 
         } while (!bTransition);
     }
@@ -915,27 +920,34 @@ SOPC_ReturnStatus SOPC_LogServer_Create(SOPC_LogServer_Handle* pHandle, // Retur
     SOPC_ReturnStatus result = SOPC_STATUS_OUT_OF_MEMORY;
     SOPC_LogServer_Handle handle = SOPC_LOGSRV_INVALID_HANDLE;
 
-    eLogSrvSyncStatus status = E_LOG_SRV_SYNC_NOT_INITIALIZED;
+    bool bTransition = false;
+    eLogSrvSyncStatus expectedStatus = E_LOG_SRV_SYNC_NOT_INITIALIZED;
+    eLogSrvSyncStatus desiredStatus = E_LOG_SRV_SYNC_INITIALIZING;
 
     for (uint32_t i = 0; i < LOGSRV_CONFIG_MAX_LOG_SRV && SOPC_LOGSRV_INVALID_HANDLE == handle; i++)
     {
-        status = __sync_val_compare_and_swap(&gLogSrvHandles[i].status,      //
-                                             E_LOG_SRV_SYNC_NOT_INITIALIZED, //
-                                             E_LOG_SRV_SYNC_INITIALIZING);   //
+        bTransition = __atomic_compare_exchange(&gLogSrvHandles[i].status, //
+                                                &expectedStatus,           //
+                                                &desiredStatus,            //
+                                                false,                     //
+                                                __ATOMIC_SEQ_CST,          //
+                                                __ATOMIC_SEQ_CST);         //
 
-        if (E_LOG_SRV_SYNC_NOT_INITIALIZED == status)
+        if (bTransition)
         {
             tLogServer* pLogSrv = P_LOGSRV_Create(port);
             if (pLogSrv != NULL)
             {
                 gLogSrvHandles[i].pLogServer = pLogSrv;
                 handle = i;
-                gLogSrvHandles[i].status = E_LOG_SRV_SYNC_INITIALIZED;
+                desiredStatus = E_LOG_SRV_SYNC_INITIALIZED;
+                __atomic_store(&gLogSrvHandles[i].status, &desiredStatus, __ATOMIC_SEQ_CST);
                 result = SOPC_STATUS_OK;
             }
             else
             {
-                gLogSrvHandles[i].status = E_LOG_SRV_SYNC_NOT_INITIALIZED;
+                desiredStatus = E_LOG_SRV_SYNC_NOT_INITIALIZED;
+                __atomic_store(&gLogSrvHandles[i].status, &desiredStatus, __ATOMIC_SEQ_CST);
                 result = SOPC_STATUS_NOK;
             }
         }
@@ -963,25 +975,35 @@ SOPC_ReturnStatus SOPC_LogServer_Destroy(SOPC_LogServer_Handle* pHandle)
 
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
-    eLogSrvSyncStatus fromStatus = E_LOG_SRV_SYNC_NOT_INITIALIZED;
+    eLogSrvSyncStatus expectedStatus = E_LOG_SRV_SYNC_NOT_INITIALIZED;
+    eLogSrvSyncStatus desiredStatus = E_LOG_SRV_SYNC_NOT_INITIALIZED;
 
     do
     {
-        P_LOGSRV_SYNC_STATUS_set_quit_flag(handle);
-        fromStatus = __sync_val_compare_and_swap(&gLogSrvHandles[handle].status,          //
-                                                 E_LOG_SRV_SYNC_INITIALIZED | 0x80000000, //
-                                                 E_LOG_SRV_SYNC_DEINITIALIZING);          //
+        expectedStatus = E_LOG_SRV_SYNC_INITIALIZED | 0x80000000;
+        desiredStatus = E_LOG_SRV_SYNC_DEINITIALIZING;
+        bool bTransition = false;
 
-        if (E_LOG_SRV_SYNC_INITIALIZED == (fromStatus & (~0x80000000)))
+        P_LOGSRV_SYNC_STATUS_set_quit_flag(handle);
+        bTransition = __atomic_compare_exchange(&gLogSrvHandles[handle].status, //
+                                                &expectedStatus,                //
+                                                &desiredStatus,                 //
+                                                false,                          //
+                                                __ATOMIC_SEQ_CST,
+                                                __ATOMIC_SEQ_CST); //
+
+        if (bTransition)
         {
             P_LOGSRV_Destroy(&gLogSrvHandles[handle].pLogServer);
-            gLogSrvHandles[handle].status = E_LOG_SRV_SYNC_NOT_INITIALIZED;
+
+            desiredStatus = E_LOG_SRV_SYNC_NOT_INITIALIZED;
+            __atomic_store(&gLogSrvHandles[handle].status, &desiredStatus, __ATOMIC_SEQ_CST);
 
             result = SOPC_STATUS_OK;
         }
-        else if (E_LOG_SRV_SYNC_DEINITIALIZING == (fromStatus & (~0x80000000)) ||
-                 E_LOG_SRV_SYNC_INITIALIZING == (fromStatus & (~0x80000000)) ||
-                 (fromStatus & (~0x80000000)) > E_LOG_SRV_SYNC_INITIALIZED)
+        else if (E_LOG_SRV_SYNC_DEINITIALIZING == (expectedStatus & (~0x80000000)) ||
+                 E_LOG_SRV_SYNC_INITIALIZING == (expectedStatus & (~0x80000000)) ||
+                 (expectedStatus & (~0x80000000)) > E_LOG_SRV_SYNC_INITIALIZED)
         {
             result = SOPC_STATUS_INVALID_STATE;
             k_yield();
