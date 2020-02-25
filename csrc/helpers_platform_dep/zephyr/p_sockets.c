@@ -75,9 +75,10 @@ uint32_t P_SOCKET_increment_nb_sockets(void)
     bool bTransition = false;
     do
     {
-        currentValue = priv_P_SOCKET_nbSockets;
+        __atomic_load(&priv_P_SOCKET_nbSockets, &currentValue, __ATOMIC_SEQ_CST);
         newValue = currentValue + 1;
-        bTransition = __sync_bool_compare_and_swap(&priv_P_SOCKET_nbSockets, currentValue, newValue);
+        bTransition = __atomic_compare_exchange(&priv_P_SOCKET_nbSockets, &currentValue, &newValue, false,
+                                                __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
 
     } while (!bTransition);
     return newValue;
@@ -93,7 +94,7 @@ uint32_t P_SOCKET_decrement_nb_sockets(void)
     bool bTransition = false;
     do
     {
-        currentValue = priv_P_SOCKET_nbSockets;
+        __atomic_load(&priv_P_SOCKET_nbSockets, &currentValue, __ATOMIC_SEQ_CST);
         if (currentValue > 0)
         {
             newValue = currentValue - 1;
@@ -102,7 +103,8 @@ uint32_t P_SOCKET_decrement_nb_sockets(void)
         {
             newValue = currentValue;
         }
-        bTransition = __sync_bool_compare_and_swap(&priv_P_SOCKET_nbSockets, currentValue, newValue);
+        bTransition = __atomic_compare_exchange(&priv_P_SOCKET_nbSockets, &currentValue, &newValue, false,
+                                                __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
     } while (!bTransition);
     return newValue;
 }
