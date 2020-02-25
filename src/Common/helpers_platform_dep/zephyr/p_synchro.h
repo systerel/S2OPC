@@ -20,8 +20,8 @@
 #ifndef SOPC_SYNCHRO_H
 #define SOPC_SYNCHRO_H
 
-#include <stdint.h>
 #include <inttypes.h>
+#include <stdint.h>
 
 /*****Private synchro api*****/
 
