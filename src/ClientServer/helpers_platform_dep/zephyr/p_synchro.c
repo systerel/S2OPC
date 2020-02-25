@@ -123,11 +123,16 @@ tCondVarHandle P_SYNCHRO_CONDITION_Initialize(void)
     {
         {
             // Try to mark as initializing from not initialized
-            eSyncStatus fromStatus = __sync_val_compare_and_swap(&gCondVarWks.tabWks[i].status, //
-                                                                 E_SYNC_STATUS_NOT_INITIALIZED, //
-                                                                 E_SYNC_STATUS_INITIALIZING);   //
+            eSyncStatus expectedStatus = E_SYNC_STATUS_NOT_INITIALIZED;
+            eSyncStatus desiredStatus = E_SYNC_STATUS_INITIALIZING;
+            bool bTransition = __atomic_compare_exchange(&gCondVarWks.tabWks[i].status, //
+                                                         &expectedStatus,               //
+                                                         &desiredStatus,                //
+                                                         false,                         //
+                                                         __ATOMIC_SEQ_CST,              //
+                                                         __ATOMIC_SEQ_CST);             //
 
-            if (E_SYNC_STATUS_NOT_INITIALIZED == fromStatus)
+            if (bTransition)
             {
                 slotId = i;
                 break;
@@ -151,7 +156,8 @@ tCondVarHandle P_SYNCHRO_CONDITION_Initialize(void)
             k_sem_init(&p->tabSignals[i].signal, 0, 1);
         }
 
-        p->status = E_SYNC_STATUS_INITIALIZED;
+        eSyncStatus desiredStatus = E_SYNC_STATUS_INITIALIZED;
+        __atomic_store(&p->status, &desiredStatus, __ATOMIC_SEQ_CST);
     }
 
     return slotId;
@@ -171,7 +177,9 @@ eSynchroResult P_SYNCHRO_CONDITION_SignalAll(tCondVarHandle slotId) // handle re
     tCondVar* p = &gCondVarWks.tabWks[slotId];
 
     // Test de-initializing flag. if set, avoid new API call. Return NOK if set.
-    if ((p->status & MASK_SET_QUIT_FLAG) != 0)
+    eSyncStatus readStatus = E_SYNC_STATUS_NOT_INITIALIZED;
+    __atomic_load(&p->status, &readStatus, __ATOMIC_SEQ_CST);
+    if ((readStatus & MASK_SET_QUIT_FLAG) != 0)
     {
         result = E_SYNCHRO_RESULT_NOK;
     }
@@ -182,10 +190,12 @@ eSynchroResult P_SYNCHRO_CONDITION_SignalAll(tCondVarHandle slotId) // handle re
         eSyncStatus newStatus = P_SYNCHRO_Condition_Add_Api_User(p);
         if ((newStatus & ~MASK_SET_QUIT_FLAG) > E_SYNC_STATUS_INITIALIZED)
         {
+            eSigStatus readSignal = E_SIG_STATUS_NOT_RESERVED;
             for (uint32_t i = 0; i < MAX_COND_VAR_WAITERS; i++)
             {
                 // If signal is waiting state, send signal
-                if (E_SIG_STATUS_WAIT_FOR_SIGNAL == p->tabSignals[i].sigStatus)
+                __atomic_load(&p->tabSignals[i].sigStatus, &readSignal, __ATOMIC_SEQ_CST);
+                if (E_SIG_STATUS_WAIT_FOR_SIGNAL == readSignal)
                 {
                     k_sem_give(&p->tabSignals[i].signal);
                     result = E_SYNCHRO_RESULT_OK;
@@ -219,8 +229,10 @@ eSynchroResult P_SYNCHRO_CONDITION_UnlockAndWait(tCondVarHandle slotId, // Handl
 
     tCondVar* p = &gCondVarWks.tabWks[slotId];
 
+    eSyncStatus readStatus = E_SYNC_STATUS_NOT_INITIALIZED;
+    __atomic_load(&p->status, &readStatus, __ATOMIC_SEQ_CST);
     // Check if quit flag is set. If set, return NOK.
-    if ((p->status & MASK_SET_QUIT_FLAG) != 0)
+    if ((readStatus & MASK_SET_QUIT_FLAG) != 0)
     {
         result = E_SYNCHRO_RESULT_NOK;
     }
@@ -233,12 +245,19 @@ eSynchroResult P_SYNCHRO_CONDITION_UnlockAndWait(tCondVarHandle slotId, // Handl
         {
             bool bTransition = false;
             uint32_t signalId = 0;
+
             for (uint32_t i = 0; i < MAX_COND_VAR_WAITERS && !bTransition; i++)
             {
-                bTransition = __sync_bool_compare_and_swap(&p->tabSignals[i].sigStatus, //
-                                                           E_SIG_STATUS_NOT_RESERVED,   //
-                                                           E_SIG_STATUS_RESERVING);     //
-
+                {
+                    eSigStatus expectedStatus = E_SIG_STATUS_NOT_RESERVED;
+                    eSigStatus desiredStatus = E_SIG_STATUS_RESERVING;
+                    bTransition = __atomic_compare_exchange(&p->tabSignals[i].sigStatus, //
+                                                            &expectedStatus,             //
+                                                            &desiredStatus,              //
+                                                            false,                       //
+                                                            __ATOMIC_SEQ_CST,            //
+                                                            __ATOMIC_SEQ_CST);           //
+                }
                 signalId = i;
             }
 
@@ -247,8 +266,11 @@ eSynchroResult P_SYNCHRO_CONDITION_UnlockAndWait(tCondVarHandle slotId, // Handl
             {
                 k_sem_reset(&p->tabSignals[signalId].signal);
 
-                // Mar signal as ready to be signaled.
-                p->tabSignals[signalId].sigStatus = E_SIG_STATUS_WAIT_FOR_SIGNAL;
+                // Mark signal as ready to be signaled.
+                eSigStatus sigStatus = E_SIG_STATUS_WAIT_FOR_SIGNAL;
+                __atomic_store(&p->tabSignals[signalId].sigStatus, //
+                               &sigStatus,                         //
+                               __ATOMIC_SEQ_CST);                  //
 
                 // Unlock generic mutex.
                 if (cbUnlock != NULL && pMutex != NULL)
@@ -269,7 +291,10 @@ eSynchroResult P_SYNCHRO_CONDITION_UnlockAndWait(tCondVarHandle slotId, // Handl
                 }
 
                 // Mark signal as not reserved
-                p->tabSignals[signalId].sigStatus = E_SIG_STATUS_NOT_RESERVED;
+                sigStatus = E_SIG_STATUS_NOT_RESERVED;
+                __atomic_store(&p->tabSignals[signalId].sigStatus, //
+                               &sigStatus,                         //
+                               __ATOMIC_SEQ_CST);                  //
 
                 // Re lock generic mutex
                 if (cbLock != NULL && pMutex != NULL)
@@ -278,7 +303,10 @@ eSynchroResult P_SYNCHRO_CONDITION_UnlockAndWait(tCondVarHandle slotId, // Handl
                 }
 
                 // Check if quit flag is setted. If set, result NOK.
-                if ((p->status & MASK_SET_QUIT_FLAG) != 0)
+                readStatus = E_SYNC_STATUS_NOT_INITIALIZED;
+                __atomic_load(&p->status, &readStatus, __ATOMIC_SEQ_CST);
+                // Check if quit flag is set. If set, return NOK.
+                if ((readStatus & MASK_SET_QUIT_FLAG) != 0)
                 {
                     result = E_SYNCHRO_RESULT_NOK;
                 }
@@ -329,20 +357,29 @@ eSynchroResult P_SYNCHRO_CONDITION_Clear(tCondVarHandle slotId)
         // Signal all thread waiting for this condition variable
         for (uint32_t i = 0; i < MAX_COND_VAR_WAITERS; i++)
         {
-            if (E_SIG_STATUS_WAIT_FOR_SIGNAL == p->tabSignals[i].sigStatus)
             {
-                k_sem_give(&p->tabSignals[i].signal);
+                eSigStatus sigStatus = E_SIG_STATUS_NOT_RESERVED;
+                __atomic_load(&p->tabSignals[i].sigStatus, &sigStatus, __ATOMIC_SEQ_CST);
+                if (E_SIG_STATUS_WAIT_FOR_SIGNAL == sigStatus)
+                {
+                    k_sem_give(&p->tabSignals[i].signal);
+                }
             }
         }
 
         // Try to go to de initializing state
-        eSyncStatus fromStatus = __sync_val_compare_and_swap(&p->status,                                     //
-                                                             E_SYNC_STATUS_INITIALIZED | MASK_SET_QUIT_FLAG, //
-                                                             E_SYNC_STATUS_DEINITIALIZING);                  //
+        eSyncStatus expectedStatus = E_SYNC_STATUS_INITIALIZED | MASK_SET_QUIT_FLAG;
+        eSyncStatus desiredStatus = E_SYNC_STATUS_DEINITIALIZING;
+        bool bTransition = __atomic_compare_exchange(&p->status,        //
+                                                     &expectedStatus,   //
+                                                     &desiredStatus,    //
+                                                     false,             //
+                                                     __ATOMIC_SEQ_CST,  //
+                                                     __ATOMIC_SEQ_CST); //
 
         // If deinitializing state reach, reset all signals, set result OK to stop retry loop
         // then mark new status as not initialized.
-        if (E_SYNC_STATUS_INITIALIZED == (fromStatus & ~MASK_SET_QUIT_FLAG))
+        if (bTransition)
         {
             for (uint32_t i = 0; i < MAX_COND_VAR_WAITERS; i++)
             {
@@ -351,13 +388,14 @@ eSynchroResult P_SYNCHRO_CONDITION_Clear(tCondVarHandle slotId)
 
             result = E_SYNCHRO_RESULT_OK;
 
-            p->status = E_SYNC_STATUS_NOT_INITIALIZED;
+            desiredStatus = E_SYNC_STATUS_NOT_INITIALIZED;
+            __atomic_store(&p->status, &desiredStatus, __ATOMIC_SEQ_CST);
         }
         // Others status indicates that operation is on going or API is in use.
         // Set result to invalid state, then yield.
-        else if (E_SYNC_STATUS_DEINITIALIZING == (fromStatus & ~MASK_SET_QUIT_FLAG) ||
-                 E_SYNC_STATUS_INITIALIZED < (fromStatus & ~MASK_SET_QUIT_FLAG) ||
-                 E_SYNC_STATUS_INITIALIZING == (fromStatus & ~MASK_SET_QUIT_FLAG))
+        else if (E_SYNC_STATUS_DEINITIALIZING == (expectedStatus & ~MASK_SET_QUIT_FLAG) ||
+                 E_SYNC_STATUS_INITIALIZED < (expectedStatus & ~MASK_SET_QUIT_FLAG) ||
+                 E_SYNC_STATUS_INITIALIZING == (expectedStatus & ~MASK_SET_QUIT_FLAG))
         {
             result = E_SYNCHRO_RESULT_INVALID_STATE;
             k_yield();
@@ -397,17 +435,23 @@ tMutVarHandle P_SYNCHRO_MUTEX_Initialize(void)
     for (uint32_t i = 0; i < MAX_MUT_VAR; i++)
     {
         {
-            eSyncStatus fromStatus = __sync_val_compare_and_swap(&gMutVarWks.tabWks[i].status,  //
-                                                                 E_SYNC_STATUS_NOT_INITIALIZED, //
-                                                                 E_SYNC_STATUS_INITIALIZING);   //
-            if (E_SYNC_STATUS_NOT_INITIALIZED == fromStatus)
+            eSyncStatus expectedStatus = E_SYNC_STATUS_NOT_INITIALIZED;
+            eSyncStatus desiredStatus = E_SYNC_STATUS_INITIALIZING;
+            bool bTransition = __sync_val_compare_and_swap(&gMutVarWks.tabWks[i].status, //
+                                                           &expectedStatus,              //
+                                                           &desiredStatus,               //
+                                                           false,                        //
+                                                           __ATOMIC_SEQ_CST,             //
+                                                           __ATOMIC_SEQ_CST);            //
+            if (bTransition)
             {
                 gMutVarWks.tabWks[i].condVarHdl = P_SYNCHRO_CONDITION_Initialize();
                 gMutVarWks.tabWks[i].lockCounter = 0;
                 gMutVarWks.tabWks[i].ownerThread = NULL;
                 k_mutex_init(&gMutVarWks.tabWks[i].lock);
                 slotId = i;
-                gMutVarWks.tabWks[i].status = E_SYNC_STATUS_INITIALIZED;
+                desiredStatus = E_SYNC_STATUS_INITIALIZED;
+                __atomic_store(&gMutVarWks.tabWks[i].status, &desiredStatus, __ATOMIC_SEQ_CST);
                 break;
             }
         }
@@ -438,23 +482,29 @@ eSynchroResult P_SYNCHRO_MUTEX_Clear(tMutVarHandle slotId)
         P_SYNCHRO_CONDITION_SignalAll(p->condVarHdl);
 
         // Try to go to de initializing status
-        eSyncStatus fromStatus = __sync_val_compare_and_swap(&p->status,                                     //
-                                                             E_SYNC_STATUS_INITIALIZED | MASK_SET_QUIT_FLAG, //
-                                                             E_SYNC_STATUS_DEINITIALIZING);                  //
+        eSyncStatus expectedStatus = E_SYNC_STATUS_INITIALIZED | MASK_SET_QUIT_FLAG;
+        eSyncStatus desiredStatus = E_SYNC_STATUS_DEINITIALIZING;
+        bool bTransition = __atomic_compare_exchange(&p->status,        //
+                                                     &expectedStatus,   //
+                                                     &desiredStatus,    //
+                                                     false,             //
+                                                     __ATOMIC_SEQ_CST,  //
+                                                     __ATOMIC_SEQ_CST); //
 
         // If successful clear condition variable, else yield and retry
-        if (E_SYNC_STATUS_INITIALIZED == (fromStatus & ~MASK_SET_QUIT_FLAG))
+        if (bTransition)
         {
-            P_SYNCHRO_CONDITION_Clear(p->condVarHdl);  // Clear condition variable
-            p->condVarHdl = UINT32_MAX;                // Handle set to invalid handle
-            p->lockCounter = 0;                        // Reset lock counter
-            p->ownerThread = NULL;                     // Reset owner thread
-            p->status = E_SYNC_STATUS_NOT_INITIALIZED; // Set status to not initialized
-            result = E_SYNCHRO_RESULT_OK;              // Terminates loop
+            P_SYNCHRO_CONDITION_Clear(p->condVarHdl); // Clear condition variable
+            p->condVarHdl = UINT32_MAX;               // Handle set to invalid handle
+            p->lockCounter = 0;                       // Reset lock counter
+            p->ownerThread = NULL;                    // Reset owner thread
+            desiredStatus = E_SYNC_STATUS_NOT_INITIALIZED;
+            __atomic_store(&p->status, &desiredStatus, __ATOMIC_SEQ_CST);
+            result = E_SYNCHRO_RESULT_OK; // Terminates loop
         }
-        else if ((E_SYNC_STATUS_DEINITIALIZING == (fromStatus & ~MASK_SET_QUIT_FLAG)) ||
-                 (E_SYNC_STATUS_INITIALIZING == (fromStatus & ~MASK_SET_QUIT_FLAG)) ||
-                 ((fromStatus & ~MASK_SET_QUIT_FLAG) > E_SYNC_STATUS_INITIALIZED))
+        else if ((E_SYNC_STATUS_DEINITIALIZING == (expectedStatus & ~MASK_SET_QUIT_FLAG)) ||
+                 (E_SYNC_STATUS_INITIALIZING == (expectedStatus & ~MASK_SET_QUIT_FLAG)) ||
+                 ((expectedStatus & ~MASK_SET_QUIT_FLAG) > E_SYNC_STATUS_INITIALIZED))
         {
             result = E_SYNCHRO_RESULT_INVALID_STATE; // Invalid state, retry...
             k_yield();
@@ -479,8 +529,10 @@ eSynchroResult P_SYNCHRO_MUTEX_Lock(tMutVarHandle slotId)
 
     tMutVar* p = &gMutVarWks.tabWks[slotId];
 
+    eSyncStatus readStatus = E_SYNC_STATUS_NOT_INITIALIZED;
+    __atomic_load(&p->status, &readStatus, __ATOMIC_SEQ_CST);
     // Verify if quit operation on going.
-    if ((p->status & MASK_SET_QUIT_FLAG) != 0)
+    if ((readStatus & MASK_SET_QUIT_FLAG) != 0)
     {
         return E_SYNCHRO_RESULT_NOK;
     }
@@ -571,7 +623,10 @@ eSynchroResult P_SYNCHRO_MUTEX_Unlock(tMutVarHandle slotId) // Mutex handle
 
     tMutVar* p = &gMutVarWks.tabWks[slotId];
 
-    if ((p->status & MASK_SET_QUIT_FLAG) != 0)
+    eSyncStatus readStatus = E_SYNC_STATUS_NOT_INITIALIZED;
+    __atomic_load(&p->status, &readStatus, __ATOMIC_SEQ_CST);
+    // Verify if quit operation on going.
+    if ((readStatus & MASK_SET_QUIT_FLAG) != 0)
     {
         return E_SYNCHRO_RESULT_NOK;
     }
@@ -634,15 +689,20 @@ eSynchroResult P_SYNCHRO_MUTEX_Unlock(tMutVarHandle slotId) // Mutex handle
 // Set quit flag and returns new status with quit flag
 static inline eSyncStatus P_SYNCHRO_Condition_Set_Quit_Flag(tCondVar* p)
 {
-    eSyncStatus currentStatus = p->status;
-    eSyncStatus newStatus = 0;
+    eSyncStatus currentStatus = E_SYNC_STATUS_NOT_INITIALIZED;
+    eSyncStatus newStatus = E_SYNC_STATUS_NOT_INITIALIZED;
     bool bTransition = false;
     do
     {
-        currentStatus = p->status;
+        __atomic_load(&p->status, &currentStatus, __ATOMIC_SEQ_CST);
         newStatus = currentStatus | 0x80000000;
 
-        bTransition = __sync_bool_compare_and_swap(&p->status, currentStatus, newStatus);
+        bTransition = __atomic_compare_exchange(&p->status,        //
+                                                &currentStatus,    //
+                                                &newStatus,        //
+                                                false,             //
+                                                __ATOMIC_SEQ_CST,  //
+                                                __ATOMIC_SEQ_CST); //
 
     } while (!bTransition);
     return newStatus;
@@ -651,12 +711,12 @@ static inline eSyncStatus P_SYNCHRO_Condition_Set_Quit_Flag(tCondVar* p)
 // Returns new status with quit flag
 static inline eSyncStatus P_SYNCHRO_Condition_Add_Api_User(tCondVar* p)
 {
-    eSyncStatus currentStatus = p->status;
-    eSyncStatus newStatus = 0;
+    eSyncStatus currentStatus = E_SYNC_STATUS_NOT_INITIALIZED;
+    eSyncStatus newStatus = E_SYNC_STATUS_NOT_INITIALIZED;
     bool bTransition = false;
     do
     {
-        currentStatus = p->status;
+        __atomic_load(&p->status, &currentStatus, __ATOMIC_SEQ_CST);
         if ((currentStatus & ~MASK_SET_QUIT_FLAG) >= E_SYNC_STATUS_INITIALIZED)
         {
             newStatus = currentStatus + 1;
@@ -665,7 +725,12 @@ static inline eSyncStatus P_SYNCHRO_Condition_Add_Api_User(tCondVar* p)
         {
             newStatus = currentStatus;
         }
-        bTransition = __sync_bool_compare_and_swap(&p->status, currentStatus, newStatus);
+        bTransition = __atomic_compare_exchange(&p->status,        //
+                                                &currentStatus,    //
+                                                &newStatus,        //
+                                                false,             //
+                                                __ATOMIC_SEQ_CST,  //
+                                                __ATOMIC_SEQ_CST); //
 
     } while (!bTransition);
     return newStatus;
@@ -674,12 +739,12 @@ static inline eSyncStatus P_SYNCHRO_Condition_Add_Api_User(tCondVar* p)
 // Returns new status with quit flag
 static inline eSyncStatus P_SYNCHRO_Condition_Remove_Api_User(tCondVar* p)
 {
-    eSyncStatus currentStatus = p->status;
-    eSyncStatus newStatus = 0;
+    eSyncStatus currentStatus = E_SYNC_STATUS_NOT_INITIALIZED;
+    eSyncStatus newStatus = E_SYNC_STATUS_NOT_INITIALIZED;
     bool bTransition = false;
     do
     {
-        currentStatus = p->status;
+        __atomic_load(&p->status, &currentStatus, __ATOMIC_SEQ_CST);
         if ((currentStatus & ~MASK_SET_QUIT_FLAG) > E_SYNC_STATUS_INITIALIZED)
         {
             newStatus = currentStatus - 1;
@@ -688,7 +753,12 @@ static inline eSyncStatus P_SYNCHRO_Condition_Remove_Api_User(tCondVar* p)
         {
             newStatus = currentStatus;
         }
-        bTransition = __sync_bool_compare_and_swap(&p->status, currentStatus, newStatus);
+        bTransition = __atomic_compare_exchange(&p->status,        //
+                                                &currentStatus,    //
+                                                &newStatus,        //
+                                                false,             //
+                                                __ATOMIC_SEQ_CST,  //
+                                                __ATOMIC_SEQ_CST); //
 
     } while (!bTransition);
 
@@ -698,15 +768,20 @@ static inline eSyncStatus P_SYNCHRO_Condition_Remove_Api_User(tCondVar* p)
 // Set quit flag and returns new status with quit flag
 static inline eSyncStatus P_SYNCHRO_Mutex_Set_Quit_Flag(tMutVar* p)
 {
-    eSyncStatus currentStatus = p->status;
-    eSyncStatus newStatus = 0;
+    eSyncStatus currentStatus = E_SYNC_STATUS_NOT_INITIALIZED;
+    eSyncStatus newStatus = E_SYNC_STATUS_NOT_INITIALIZED;
     bool bTransition = false;
     do
     {
-        currentStatus = p->status;
+        __atomic_load(&p->status, &currentStatus, __ATOMIC_SEQ_CST);
         newStatus = currentStatus | 0x80000000;
 
-        bTransition = __sync_bool_compare_and_swap(&p->status, currentStatus, newStatus);
+        bTransition = __atomic_compare_exchange(&p->status,        //
+                                                &currentStatus,    //
+                                                &newStatus,        //
+                                                false,             //
+                                                __ATOMIC_SEQ_CST,  //
+                                                __ATOMIC_SEQ_CST); //
 
     } while (!bTransition);
     return newStatus;
@@ -715,12 +790,12 @@ static inline eSyncStatus P_SYNCHRO_Mutex_Set_Quit_Flag(tMutVar* p)
 // Returns new status with quit flag
 static inline eSyncStatus P_SYNCHRO_Mutex_Add_Api_User(tMutVar* p)
 {
-    eSyncStatus currentStatus = p->status;
-    eSyncStatus newStatus = 0;
+    eSyncStatus currentStatus = E_SYNC_STATUS_NOT_INITIALIZED;
+    eSyncStatus newStatus = E_SYNC_STATUS_NOT_INITIALIZED;
     bool bTransition = false;
     do
     {
-        currentStatus = p->status;
+        __atomic_load(&p->status, &currentStatus, __ATOMIC_SEQ_CST);
         if ((currentStatus & ~MASK_SET_QUIT_FLAG) >= E_SYNC_STATUS_INITIALIZED)
         {
             newStatus = currentStatus + 1;
@@ -729,7 +804,12 @@ static inline eSyncStatus P_SYNCHRO_Mutex_Add_Api_User(tMutVar* p)
         {
             newStatus = currentStatus;
         }
-        bTransition = __sync_bool_compare_and_swap(&p->status, currentStatus, newStatus);
+        bTransition = __atomic_compare_exchange(&p->status,        //
+                                                &currentStatus,    //
+                                                &newStatus,        //
+                                                false,             //
+                                                __ATOMIC_SEQ_CST,  //
+                                                __ATOMIC_SEQ_CST); //
 
     } while (!bTransition);
     return newStatus;
@@ -738,12 +818,12 @@ static inline eSyncStatus P_SYNCHRO_Mutex_Add_Api_User(tMutVar* p)
 // Returns new status with quit flag
 static inline eSyncStatus P_SYNCHRO_Mutex_Remove_Api_User(tMutVar* p)
 {
-    eSyncStatus currentStatus = p->status;
-    eSyncStatus newStatus = 0;
+    eSyncStatus currentStatus = E_SYNC_STATUS_NOT_INITIALIZED;
+    eSyncStatus newStatus = E_SYNC_STATUS_NOT_INITIALIZED;
     bool bTransition = false;
     do
     {
-        currentStatus = p->status;
+        __atomic_load(&p->status, &currentStatus, __ATOMIC_SEQ_CST);
         if ((currentStatus & ~MASK_SET_QUIT_FLAG) > E_SYNC_STATUS_INITIALIZED)
         {
             newStatus = currentStatus - 1;
@@ -752,7 +832,12 @@ static inline eSyncStatus P_SYNCHRO_Mutex_Remove_Api_User(tMutVar* p)
         {
             newStatus = currentStatus;
         }
-        bTransition = __sync_bool_compare_and_swap(&p->status, currentStatus, newStatus);
+        bTransition = __atomic_compare_exchange(&p->status,        //
+                                                &currentStatus,    //
+                                                &newStatus,        //
+                                                false,             //
+                                                __ATOMIC_SEQ_CST,  //
+                                                __ATOMIC_SEQ_CST); //
 
     } while (!bTransition);
 
