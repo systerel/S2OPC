@@ -175,20 +175,29 @@ static eThreadResult P_THREAD_Init(tThreadHandle* pWks, ptrFct callback, void* p
     }
     // Check first thread creation, if yes create workspace critical section
 
-    eThreadWksStatus fromStatus = __sync_val_compare_and_swap(&gGlbThreadWks.wGlobalWksStatus,     //
-                                                              E_THREAD_WKS_STATUS_NOT_INITIALIZED, //
-                                                              E_THREAD_WKS_STATUS_INITIALIZING);   //
+    eThreadWksStatus expectedStatus = E_THREAD_WKS_STATUS_NOT_INITIALIZED;
+    eThreadWksStatus desiredStatus = E_THREAD_WKS_STATUS_INITIALIZING;
+    bool bTransition = __atomic_compare_exchange(&gGlbThreadWks.wGlobalWksStatus, //
+                                                 &expectedStatus,                 //
+                                                 &desiredStatus,                  //
+                                                 false,                           //
+                                                 __ATOMIC_SEQ_CST,                //
+                                                 __ATOMIC_SEQ_CST);               //
 
-    if (E_THREAD_WKS_STATUS_NOT_INITIALIZED == fromStatus)
+    if (bTransition)
     {
         memset(&gGlbThreadWks, 0, sizeof(struct T_GLOBAL_THREAD_WKS));
         k_mutex_init(&gGlbThreadWks.kLock);
-        gGlbThreadWks.wGlobalWksStatus = E_THREAD_WKS_STATUS_INITIALIZED;
+        desiredStatus = E_THREAD_WKS_STATUS_INITIALIZED;
+        __atomic_store(&gGlbThreadWks.wGlobalWksStatus, &desiredStatus, __ATOMIC_SEQ_CST);
     }
 
-    while (E_THREAD_WKS_STATUS_INITIALIZED != gGlbThreadWks.wGlobalWksStatus)
+    __atomic_load(&gGlbThreadWks.wGlobalWksStatus, &expectedStatus, __ATOMIC_SEQ_CST);
+
+    while (E_THREAD_WKS_STATUS_INITIALIZED != expectedStatus)
     {
         k_yield();
+        __atomic_load(&gGlbThreadWks.wGlobalWksStatus, &expectedStatus, __ATOMIC_SEQ_CST);
     }
 
     // Lock workspace
@@ -264,7 +273,11 @@ static eThreadResult P_THREAD_Join(tThreadHandle* pWks)
     eThreadResult result = E_THREAD_RESULT_OK;
 
     // Check parameters validity
-    if (NULL == pWks || 0 == pWks->slotId || pWks->slotId > MAX_NB_THREADS || !gGlbThreadWks.wGlobalWksStatus ||
+
+    eThreadWksStatus readStatus = E_THREAD_WKS_STATUS_NOT_INITIALIZED;
+    __atomic_load(&gGlbThreadWks.wGlobalWksStatus, &readStatus, __ATOMIC_SEQ_CST);
+
+    if (NULL == pWks || 0 == pWks->slotId || pWks->slotId > MAX_NB_THREADS || !readStatus ||
         pWks != gGlbThreadWks.tab[pWks->slotId - 1].debugExternalHandle)
     {
         return E_THREAD_RESULT_INVALID_PARAMETERS;
