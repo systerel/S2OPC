@@ -18,7 +18,7 @@
  */
 
 MACHINE
-    service_register_server2_set_it_bs
+    service_register_server2_set_bs
 
 SEES
     constants
@@ -112,7 +112,7 @@ OPERATIONS
     END
     ;
 
-    continue, p_registeredServerInfo <-- continue_iter_monitored_item =
+    continue, p_registeredServerInfo <-- continue_iter_registered_server2_set =
     PRE
         s_registered_server2_to_iterate_it /= {}
     THEN
@@ -232,7 +232,7 @@ OPERATIONS
     END
     ;
 
-    service_register_server2_set_it_bs_UNINITIALISATION =
+    service_register_server2_set_bs_UNINITIALISATION =
     BEGIN
         skip
     END

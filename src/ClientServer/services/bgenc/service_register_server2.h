@@ -21,7 +21,7 @@
 
  File Name            : service_register_server2.h
 
- Date                 : 04/12/2019 17:12:36
+ Date                 : 26/02/2020 09:12:47
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -38,7 +38,7 @@
 /*-----------------
    IMPORTS Clause
   -----------------*/
-#include "service_register_server2_set_it_bs.h"
+#include "service_register_server2_set_bs.h"
 
 /*--------------
    SEES Clause
@@ -60,14 +60,14 @@ extern void service_register_server2__INITIALISATION(void);
 /*-------------------------------
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
-#define service_register_server2__clear_iter_registered_server2_set service_register_server2_set_it_bs__clear_iter_registered_server2_set
-#define service_register_server2__continue_iter_monitored_item service_register_server2_set_it_bs__continue_iter_monitored_item
-#define service_register_server2__get_card_register2_set service_register_server2_set_it_bs__get_card_register2_set
-#define service_register_server2__get_registered_server2_counter_reset_time service_register_server2_set_it_bs__get_registered_server2_counter_reset_time
-#define service_register_server2__get_registered_server2_mdns_config service_register_server2_set_it_bs__get_registered_server2_mdns_config
-#define service_register_server2__get_registered_server2_recordId service_register_server2_set_it_bs__get_registered_server2_recordId
-#define service_register_server2__get_registered_server2_registered_server service_register_server2_set_it_bs__get_registered_server2_registered_server
-#define service_register_server2__init_iter_registered_server2_set service_register_server2_set_it_bs__init_iter_registered_server2_set
+#define service_register_server2__clear_iter_registered_server2_set service_register_server2_set_bs__clear_iter_registered_server2_set
+#define service_register_server2__continue_iter_registered_server2_set service_register_server2_set_bs__continue_iter_registered_server2_set
+#define service_register_server2__get_card_register2_set service_register_server2_set_bs__get_card_register2_set
+#define service_register_server2__get_registered_server2_counter_reset_time service_register_server2_set_bs__get_registered_server2_counter_reset_time
+#define service_register_server2__get_registered_server2_mdns_config service_register_server2_set_bs__get_registered_server2_mdns_config
+#define service_register_server2__get_registered_server2_recordId service_register_server2_set_bs__get_registered_server2_recordId
+#define service_register_server2__get_registered_server2_registered_server service_register_server2_set_bs__get_registered_server2_registered_server
+#define service_register_server2__init_iter_registered_server2_set service_register_server2_set_bs__init_iter_registered_server2_set
 
 /*--------------------------
    LOCAL_OPERATIONS Clause
@@ -80,7 +80,7 @@ extern void service_register_server2__local_need_register_server2_update(
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-extern void service_register_server2__register_server2_create_or_update(
+extern void service_register_server2__register_server2_create(
    const constants__t_RegisteredServer_i service_register_server2__p_registered_server,
    const constants__t_MdnsDiscoveryConfig_i service_register_server2__p_mdns_config,
    constants_statuscodes_bs__t_StatusCode_i * const service_register_server2__p_sc);

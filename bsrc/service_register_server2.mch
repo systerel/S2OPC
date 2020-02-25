@@ -91,12 +91,15 @@ INITIALISATION
 
 OPERATIONS
 
-    p_sc <-- register_server2_create_or_update (p_registered_server, p_mdns_config) =
+    p_sc <-- register_server2_create (p_registered_server, p_mdns_config) =
     PRE
         p_registered_server : t_RegisteredServer_i &
         p_registered_server : t_RegisteredServer &
         p_mdns_config : t_MdnsDiscoveryConfig_i &
-        p_mdns_config : t_MdnsDiscoveryConfig
+        p_mdns_config : t_MdnsDiscoveryConfig &
+        /* If same server URI already recorded, it shall have been removed previously */
+        RegisteredServer_ServerUri(p_registered_server) /:
+         RegisteredServer_ServerUri[ran(a_RegisteredServer2_RegisteredServer)]
     THEN
         IF t_RegisteredServer2Info = s_RegisteredServer2
         THEN
@@ -123,38 +126,14 @@ OPERATIONS
                     ) &
                     (RegisteredServer2_Counter /= MAXINT =>  /* Create or update record */
                         RegisteredServer2_Counter = RegisteredServer2_Counter$0 + 1 &
-                        /* Create new server info: serverUri was not recorded yet */
-                        (RegisteredServer_ServerUri(p_registered_server) /:
-                         RegisteredServer_ServerUri[ran(a_RegisteredServer2_RegisteredServer$0)] =>
-                            s_RegisteredServer2 = s_RegisteredServer2$0 \/ {l_registerInfo} &
-                            a_RegisteredServer2_RecordId = 
-                              a_RegisteredServer2_RecordId$0 <+ {l_registerInfo |-> RegisteredServer2_Counter} &
-                            a_RegisteredServer2_RegisteredServer = 
-                              a_RegisteredServer2_RegisteredServer$0 <+ {l_registerInfo |-> p_registered_server} &
-                            a_RegisteredServer2_mDNSconfig = 
-                              a_RegisteredServer2_mDNSconfig$0 <+ {l_registerInfo |-> p_mdns_config}
-                        ) &
-                        /* Update existing server info */
-                       (RegisteredServer_ServerUri(p_registered_server) :
-                          RegisteredServer_ServerUri[ran(a_RegisteredServer2_RegisteredServer$0)] =>
-                            s_RegisteredServer2 = s_RegisteredServer2$0
-                              /* Remove from set the record with same server Uri as new new record */
-                              - a_RegisteredServer2_RegisteredServer$0~
-                                 [RegisteredServer_ServerUri~[{RegisteredServer_ServerUri(p_registered_server)}]]
-                              /* Add the new record */
-                              \/ {l_registerInfo} &
-                            /* Restrict previous relations to the new set of records (removing old record with same serverUri)
-                               and add the new record in each relation */
-                            a_RegisteredServer2_RecordId =
-                              s_RegisteredServer2 <| 
-                               a_RegisteredServer2_RecordId$0 <+ {l_registerInfo |-> RegisteredServer2_Counter} &
-                            a_RegisteredServer2_RegisteredServer =
-                              s_RegisteredServer2 <| 
-                               a_RegisteredServer2_RegisteredServer$0 <+ {l_registerInfo |-> p_registered_server} &
-                            a_RegisteredServer2_mDNSconfig =
-                              s_RegisteredServer2 <| 
-                               a_RegisteredServer2_mDNSconfig$0 <+ {l_registerInfo |-> p_mdns_config}
-                        )
+                        /* Create new server info: */
+                        s_RegisteredServer2 = s_RegisteredServer2$0 \/ {l_registerInfo} &
+                        a_RegisteredServer2_RecordId = 
+                          a_RegisteredServer2_RecordId$0 <+ {l_registerInfo |-> RegisteredServer2_Counter} &
+                        a_RegisteredServer2_RegisteredServer = 
+                          a_RegisteredServer2_RegisteredServer$0 <+ {l_registerInfo |-> p_registered_server} &
+                        a_RegisteredServer2_mDNSconfig = 
+                          a_RegisteredServer2_mDNSconfig$0 <+ {l_registerInfo |-> p_mdns_config}
                     )
                 )
             END
@@ -231,7 +210,7 @@ OPERATIONS
     END
     ;
 
-    continue, p_registeredServerInfo <-- continue_iter_monitored_item =
+    continue, p_registeredServerInfo <-- continue_iter_registered_server2_set =
     PRE
         s_registered_server2_to_iterate_it /= {}
     THEN

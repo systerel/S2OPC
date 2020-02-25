@@ -28,12 +28,12 @@ SEES
    service_set_discovery_server_data_bs
 
 IMPORTS
-    service_register_server2_set_it_bs
+    service_register_server2_set_bs
     
 PROMOTES
     init_iter_registered_server2_set,
     clear_iter_registered_server2_set,
-    continue_iter_monitored_item,
+    continue_iter_registered_server2_set,
     get_card_register2_set,
     get_registered_server2_counter_reset_time,
     get_registered_server2_registered_server,
@@ -93,7 +93,7 @@ OPERATIONS
         l_continue <-- init_iter_registered_server2_set;
         l_newServerUri <-- get_RegisteredServer_ServerUri (p_registered_server);
         WHILE l_continue = TRUE & hasServerUri = FALSE DO
-            l_continue, l_registeredServerInfo <-- continue_iter_monitored_item;
+            l_continue, l_registeredServerInfo <-- continue_iter_registered_server2_set;
             l_registeredServer <-- get_registered_server2_registered_server (l_registeredServerInfo);
             l_recordedServerUri <-- get_RegisteredServer_ServerUri (l_registeredServer);
             hasServerUri <-- is_equal_ServerUri (l_newServerUri, l_recordedServerUri);
@@ -125,10 +125,8 @@ OPERATIONS
     ;
 
     /* OPERATIONS */
-    p_sc <-- register_server2_create_or_update (p_registered_server , p_mdns_config) =
+    p_sc <-- register_server2_create (p_registered_server , p_mdns_config) =
     VAR
-        l_hasAlreadyServerUri,
-        l_recordIdToRemove,
         l_allocSuccess
     IN
         p_sc := e_sc_ok;
@@ -139,13 +137,9 @@ OPERATIONS
         ;
         /* Generate new recordId */
         RegisteredServer2_Counter_i := RegisteredServer2_Counter_i + 1;
-        l_hasAlreadyServerUri, l_recordIdToRemove <-- local_need_register_server2_update (p_registered_server);
         l_allocSuccess <-- add_to_registered_server2_set (p_registered_server, p_mdns_config, RegisteredServer2_Counter_i);
-        IF l_hasAlreadyServerUri = TRUE & l_allocSuccess = TRUE
-        THEN
-            /* Remove the old record since new one has been added */
-            remove_from_registered_server2_set (l_recordIdToRemove)
-        ELSIF l_allocSuccess = FALSE
+        /* Note: p_registered_server property has been */
+        IF l_allocSuccess = FALSE
         THEN
             /* Restore counter in case of error */
             RegisteredServer2_Counter_i := RegisteredServer2_Counter_i - 1;
@@ -170,7 +164,7 @@ OPERATIONS
 
     service_register_server2_UNINITIALISATION =
     BEGIN
-        service_register_server2_set_it_bs_UNINITIALISATION
+        service_register_server2_set_bs_UNINITIALISATION
     END
 
 END

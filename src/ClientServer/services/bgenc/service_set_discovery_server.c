@@ -21,7 +21,7 @@
 
  File Name            : service_set_discovery_server.c
 
- Date                 : 05/12/2019 09:57:14
+ Date                 : 26/02/2020 09:12:48
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -58,7 +58,7 @@ void service_set_discovery_server__local_get_nb_servers_on_network_to_return(
       while ((service_set_discovery_server__l_continue == true) &&
          ((service_set_discovery_server__p_max_records_to_return == 0) ||
          (*service_set_discovery_server__p_nb_servers < service_set_discovery_server__p_max_records_to_return))) {
-         service_register_server2__continue_iter_monitored_item(&service_set_discovery_server__l_continue,
+         service_register_server2__continue_iter_registered_server2_set(&service_set_discovery_server__l_continue,
             &service_set_discovery_server__l_registeredServerInfo);
          service_register_server2__get_registered_server2_recordId(service_set_discovery_server__l_registeredServerInfo,
             &service_set_discovery_server__l_recordId);
@@ -96,7 +96,7 @@ void service_set_discovery_server__local_set_servers_on_network_to_return(
       service_register_server2__init_iter_registered_server2_set(&service_set_discovery_server__l_continue);
       while ((service_set_discovery_server__l_continue == true) &&
          (service_set_discovery_server__l_nb_servers < service_set_discovery_server__p_nb_servers)) {
-         service_register_server2__continue_iter_monitored_item(&service_set_discovery_server__l_continue,
+         service_register_server2__continue_iter_registered_server2_set(&service_set_discovery_server__l_continue,
             &service_set_discovery_server__l_registeredServerInfo);
          service_register_server2__get_registered_server2_recordId(service_set_discovery_server__l_registeredServerInfo,
             &service_set_discovery_server__l_recordId);
@@ -141,7 +141,7 @@ void service_set_discovery_server__local_get_nb_servers_to_return(
          *service_set_discovery_server__p_nb_servers = 0;
          service_register_server2__init_iter_registered_server2_set(&service_set_discovery_server__l_continue);
          while (service_set_discovery_server__l_continue == true) {
-            service_register_server2__continue_iter_monitored_item(&service_set_discovery_server__l_continue,
+            service_register_server2__continue_iter_registered_server2_set(&service_set_discovery_server__l_continue,
                &service_set_discovery_server__l_registeredServerInfo);
             service_register_server2__get_registered_server2_registered_server(service_set_discovery_server__l_registeredServerInfo,
                &service_set_discovery_server__l_registeredServer);
@@ -219,7 +219,7 @@ void service_set_discovery_server__local_set_servers_to_return(
       while (((*service_set_discovery_server__ret == constants_statuscodes_bs__e_sc_ok) &&
          (service_set_discovery_server__l_continue == true)) &&
          (service_set_discovery_server__l_nb_servers < service_set_discovery_server__p_nb_servers)) {
-         service_register_server2__continue_iter_monitored_item(&service_set_discovery_server__l_continue,
+         service_register_server2__continue_iter_registered_server2_set(&service_set_discovery_server__l_continue,
             &service_set_discovery_server__l_registeredServerInfo);
          service_register_server2__get_registered_server2_registered_server(service_set_discovery_server__l_registeredServerInfo,
             &service_set_discovery_server__l_registeredServer);
@@ -314,13 +314,11 @@ void service_set_discovery_server__treat_register_server2_request(
          &service_set_discovery_server__l_registered_server,
          &service_set_discovery_server__l_mdns_config);
       if (*service_set_discovery_server__ret == constants_statuscodes_bs__e_sc_ok) {
+         service_register_server2__register_server2_remove(service_set_discovery_server__l_registered_server);
          if (service_set_discovery_server__l_is_online == true) {
-            service_register_server2__register_server2_create_or_update(service_set_discovery_server__l_registered_server,
+            service_register_server2__register_server2_create(service_set_discovery_server__l_registered_server,
                service_set_discovery_server__l_mdns_config,
                service_set_discovery_server__ret);
-         }
-         else {
-            service_register_server2__register_server2_remove(service_set_discovery_server__l_registered_server);
          }
       }
       if (*service_set_discovery_server__ret == constants_statuscodes_bs__e_sc_ok) {

@@ -46,7 +46,7 @@ OPERATIONS
         p_registered_server : t_RegisteredServer
     THEN
         p_valid_server_uri :: BOOL
-        /* <=> has a valid URI ? */
+        /* <=> serverUri not empty (TODO: has a valid URI format ?) */
     END;
 
     p_valid_product_uri <-- check_registered_product_uri (p_registered_server) =
@@ -55,7 +55,7 @@ OPERATIONS
         p_registered_server : t_RegisteredServer
     THEN
         p_valid_product_uri :: BOOL
-        /* <=> has a valid URI ? */
+        /* <=> productUri not empty (TODO: has a valid URI format ?) */
     END;
 
     p_valid_server_names <-- check_registered_server_names (p_registered_server) =
@@ -64,7 +64,7 @@ OPERATIONS
         p_registered_server : t_RegisteredServer
     THEN
         p_valid_server_names :: BOOL
-        /* <=> has at least one non-empty name */
+        /* <=> at least first server name is not empty */
     END;
 
     p_valid_server_type <-- check_registered_server_type (p_registered_server) =
@@ -82,7 +82,7 @@ OPERATIONS
         p_registered_server : t_RegisteredServer
     THEN
         p_valid_discovery_url :: BOOL
-        /* <=> has at least 1 valid discovery URL */
+        /* <=> at least first discovery URL is  not empty (TODO: has a valid URL format ?) */
     END;
 
     p_valid_semaphore_file <-- check_registered_semaphore_file (p_registered_server) =
@@ -140,7 +140,7 @@ OPERATIONS
         p_mdns_discovery_configuration : t_MdnsDiscoveryConfig
     THEN
         p_valid_mdns_server_name :: BOOL
-        /* <=> not empty name */
+        /* <=> not empty name && name length < 64 bytes */
     END;
 
     p_valid_server_capabilities <-- check_mdns_server_capabilities (p_mdns_discovery_configuration) =

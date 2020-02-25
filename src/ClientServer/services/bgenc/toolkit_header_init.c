@@ -21,7 +21,7 @@
 
  File Name            : toolkit_header_init.c
 
- Date                 : 26/02/2020 11:05:45
+ Date                 : 26/02/2020 11:14:56
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -109,7 +109,7 @@
 #include "service_read_it.h"
 #include "service_register_nodes.h"
 #include "service_register_server2.h"
-#include "service_register_server2_set_it_bs.h"
+#include "service_register_server2_set_bs.h"
 #include "service_response_cb_bs.h"
 #include "service_set_discovery_server.h"
 #include "service_set_discovery_server_data_bs.h"
@@ -237,7 +237,7 @@ void INITIALISATION(void) {
    subscription_mgr__INITIALISATION();
    msg_register_server2_bs__INITIALISATION();
    msg_register_server2__INITIALISATION();
-   service_register_server2_set_it_bs__INITIALISATION();
+   service_register_server2_set_bs__INITIALISATION();
    service_set_discovery_server_data_bs__INITIALISATION();
    service_register_server2__INITIALISATION();
    msg_find_servers_on_network_bs__INITIALISATION();

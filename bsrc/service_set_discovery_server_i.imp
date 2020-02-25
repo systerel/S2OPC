@@ -98,7 +98,8 @@ LOCAL_OPERATIONS
             /* We set the config associated to each recordId returned */
             !p_index.(p_index : 0 .. p_nb_servers - 1 =>
                 /* Numercial order compliant */
-                FindServersOnNetworkResp_ServerRecordId(p_index) = max(FindServersOnNetworkResp_ServerRecordId[0..p_index]) &
+                (p_index > 0 =>
+                  FindServersOnNetworkResp_ServerRecordId(p_index) > max(FindServersOnNetworkResp_ServerRecordId[0..p_index-1])) &
                 /* For a given index we have the configuration associated to the recordId */
                 FindServersOnNetworkResp_ServerRegisteredConfig(p_index) =
                  a_RegisteredServer2_RegisteredServer(a_RegisteredServer2_RecordId~(FindServersOnNetworkResp_ServerRecordId(p_index))) &
@@ -202,7 +203,7 @@ OPERATIONS
         p_nb_servers := 0;
         l_continue <-- init_iter_registered_server2_set;
         WHILE l_continue = TRUE & (p_max_records_to_return = 0 or p_nb_servers < p_max_records_to_return) DO
-            l_continue, l_registeredServerInfo <-- continue_iter_monitored_item;
+            l_continue, l_registeredServerInfo <-- continue_iter_registered_server2_set;
             l_recordId <-- get_registered_server2_recordId (l_registeredServerInfo);
             IF l_recordId >= p_starting_record_id
             THEN
@@ -239,7 +240,7 @@ OPERATIONS
         l_nb_servers := 0;
         l_continue <-- init_iter_registered_server2_set;
         WHILE l_continue = TRUE & l_nb_servers < p_nb_servers DO
-            l_continue, l_registeredServerInfo <-- continue_iter_monitored_item;
+            l_continue, l_registeredServerInfo <-- continue_iter_registered_server2_set;
             l_recordId <-- get_registered_server2_recordId (l_registeredServerInfo);
             IF l_recordId >= p_starting_record_id
             THEN
@@ -271,7 +272,8 @@ OPERATIONS
             !p_index.(p_index : 0 .. l_nb_servers - 1 =>
                 FindServersOnNetworkResp_ServerRecordId(p_index) : a_RegisteredServer2_RecordId[s_registered_server2_iterated_it] &
                 /* Numercial order compliant */
-                FindServersOnNetworkResp_ServerRecordId(p_index) = max(FindServersOnNetworkResp_ServerRecordId[0..p_index]) &
+                (p_index > 0 => 
+                  FindServersOnNetworkResp_ServerRecordId(p_index) > max(FindServersOnNetworkResp_ServerRecordId[0..p_index-1])) &
                 /* For a given index we have the configuration associated to the recordId */
                 FindServersOnNetworkResp_ServerRegisteredConfig(p_index) =
                  a_RegisteredServer2_RegisteredServer(a_RegisteredServer2_RecordId~(FindServersOnNetworkResp_ServerRecordId(p_index))) &
@@ -301,7 +303,7 @@ OPERATIONS
             p_nb_servers := 0;
             l_continue <-- init_iter_registered_server2_set;
             WHILE l_continue = TRUE DO
-                l_continue, l_registeredServerInfo <-- continue_iter_monitored_item;
+                l_continue, l_registeredServerInfo <-- continue_iter_registered_server2_set;
                 l_registeredServer <-- get_registered_server2_registered_server (l_registeredServerInfo);
                 l_serverUri <-- get_RegisteredServer_ServerUri (l_registeredServer);
                 l_compatServerUri <-- has_ServerUri (l_serverUri, p_nbServerUri, p_ServerUris);
@@ -360,7 +362,7 @@ OPERATIONS
         l_nb_servers := 0;
         l_continue <-- init_iter_registered_server2_set;
         WHILE ret = e_sc_ok & l_continue = TRUE & l_nb_servers < p_nb_servers DO
-            l_continue, l_registeredServerInfo <-- continue_iter_monitored_item;
+            l_continue, l_registeredServerInfo <-- continue_iter_registered_server2_set;
             l_registeredServer <-- get_registered_server2_registered_server (l_registeredServerInfo);
             IF p_nbServerUri > 0
             THEN
@@ -435,12 +437,12 @@ OPERATIONS
         ret, l_is_online, l_nb_discovery_config, l_mdns_config_index, l_registered_server, l_mdns_config
           <-- check_register_server2_req (req_msg);
         IF ret = e_sc_ok THEN
+            /* Note: if registered server already exists (same serverUri), remove it first to update. Otherwise no effect. */
+            register_server2_remove (l_registered_server);
             IF l_is_online = TRUE
             THEN
-                ret <-- register_server2_create_or_update (l_registered_server, l_mdns_config)
-            ELSE
-                register_server2_remove (l_registered_server)
-            END
+                ret <-- register_server2_create (l_registered_server, l_mdns_config)
+            END // ELSE: already removed
         END
         ;
         IF ret = e_sc_ok THEN

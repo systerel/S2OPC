@@ -75,8 +75,9 @@ void msg_register_server2_bs__check_mdns_server_name(
     t_bool* const msg_register_server2_bs__p_valid_mdns_server_name)
 {
     const OpcUa_MdnsDiscoveryConfiguration* mdnsCfg = msg_register_server2_bs__p_mdns_discovery_configuration;
-    // Name not empty
-    *msg_register_server2_bs__p_valid_mdns_server_name = mdnsCfg->MdnsServerName.Length > 0;
+    // Name not empty and < 64 bytes (see Part4 v1.03, Table 103)
+    *msg_register_server2_bs__p_valid_mdns_server_name =
+        mdnsCfg->MdnsServerName.Length > 0 && mdnsCfg->MdnsServerName.Length < 64;
 }
 
 void msg_register_server2_bs__check_registered_discovery_url(
@@ -172,6 +173,7 @@ void msg_register_server2_bs__getall_register_server2_req_msdn_discovery_config(
     *msg_register_server2_bs__p_has_one_and_only_one_mdns_config = false;
     *msg_register_server2_bs__p_nb_discovery_config = 0;
     *msg_register_server2_bs__p_mdns_discovery_config_index = 0;
+    *msg_register_server2_bs__p_mdns_discovery_configuration = constants__c_MdnsDiscoveryConfig_indet;
     if (req->NoOfDiscoveryConfiguration > 0)
     {
         *msg_register_server2_bs__p_has_discovery_configuration = true;
