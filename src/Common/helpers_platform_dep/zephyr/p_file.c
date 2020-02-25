@@ -17,7 +17,7 @@
  * under the License.
  */
 
-#include "sopc_file.h"
+#include "sopc_filesystem.h"
 
 FILE* SOPC_File_fmemopen(void* buf, size_t size, const char* opentype)
 {
