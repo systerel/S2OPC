@@ -2730,6 +2730,7 @@ SOPC_ReturnStatus SOPC_LocalizedText_CopyFromArray(SOPC_LocalizedText* destSetOf
         for (int32_t i = 1; SOPC_STATUS_OK == status && i < nbElts; i++)
         {
             SOPC_LocalizedText* lt = SOPC_Calloc(1, sizeof(SOPC_LocalizedText));
+            SOPC_LocalizedText_Initialize(lt);
             if (NULL == lt)
             {
                 status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -2777,6 +2778,14 @@ SOPC_ReturnStatus SOPC_LocalizedText_CopyToArray(SOPC_LocalizedText** dstArray,
     *dstArray = SOPC_Calloc(sizeof(*nbElts), sizeof(SOPC_LocalizedText));
 
     SOPC_ReturnStatus status = (NULL == *dstArray ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK);
+    if (SOPC_STATUS_OK == status)
+    {
+        for (int32_t i = 0; i < *nbElts; i++)
+        {
+            SOPC_LocalizedText_Initialize(&(*dstArray)[i]);
+        }
+    }
+
     if (SOPC_STATUS_OK == status)
     {
         // Avoid copying the list in root LocalizedText
@@ -3141,6 +3150,7 @@ SOPC_ReturnStatus SOPC_LocalizedTextArray_GetPreferredLocale(SOPC_LocalizedText*
     bool cmpWithCountryRegion = true;
     bool localeMatch = false;
 
+    // Note: if there is only 1 locale (nbLocalizedText == 1) we only set the default locale (done after the loop)
     while (nbLocalizedText > 1 && !localeMatch && comparisonCounter < 2)
     {
         int index = 0;
