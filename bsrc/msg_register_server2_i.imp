@@ -56,6 +56,7 @@ OPERATIONS
         l_valid_product_uri <-- check_registered_product_uri (p_registered_server);
         l_valid_server_names <-- check_registered_server_names (p_registered_server);
         l_valid_server_type <-- check_registered_server_type (p_registered_server);
+        // Note: gateway URI not checked since it might be NULL or not depending on cases
         l_valid_discovery_url <-- check_registered_discovery_url (p_registered_server);
         l_valid_semaphore_file <-- check_registered_semaphore_file (p_registered_server);
         p_is_online <-- get_registered_server_is_online (p_registered_server);

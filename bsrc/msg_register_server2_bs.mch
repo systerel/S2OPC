@@ -123,8 +123,8 @@ OPERATIONS
             p_mdns_discovery_configuration : t_MdnsDiscoveryConfig_i &
             p_nb_discovery_config : NAT &
             p_mdns_discovery_config_index : NAT &
-            (p_has_discovery_configuration = FALSE => p_has_one_and_only_one_mdns_config = FALSE & p_mdns_discovery_configuration = c_MdnsDiscoveryConfig_indet) &
-            (p_has_discovery_configuration = TRUE & p_has_one_and_only_one_mdns_config = FALSE => p_mdns_discovery_configuration = c_MdnsDiscoveryConfig_indet) &
+            (not (p_has_discovery_configuration = TRUE & p_has_one_and_only_one_mdns_config = TRUE) =>
+                p_mdns_discovery_configuration = c_MdnsDiscoveryConfig_indet) &
             (p_has_discovery_configuration = TRUE & p_has_one_and_only_one_mdns_config = TRUE => 
                 p_mdns_discovery_configuration : t_MdnsDiscoveryConfig &
                 /* There must be a unique mdns config but not supported configuration might exist too */
