@@ -95,7 +95,8 @@ SETS
                       e_sc_bad_server_name_missing, 
                       e_sc_bad_discovery_url_missing,
                       e_sc_bad_semaphore_file_missing,
-                      e_sc_bad_not_supported}
+                      e_sc_bad_not_supported,
+                      e_sc_bad_nonce_invalid}
 
 ABSTRACT_CONSTANTS
     c_RawStatusCode_BadInvalidState,

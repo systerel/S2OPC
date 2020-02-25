@@ -834,6 +834,9 @@ void util_status_code__B_to_C(constants_statuscodes_bs__t_StatusCode_i bstatus, 
     case constants_statuscodes_bs__e_sc_bad_not_implemented:
         *status = OpcUa_BadNotImplemented;
         break;
+    case constants_statuscodes_bs__e_sc_bad_nonce_invalid:
+        *status = OpcUa_BadNonceInvalid;
+        break;
     default:
         *status = OpcUa_BadInternalError;
     }
@@ -1131,7 +1134,9 @@ void util_status_code__C_to_B(SOPC_StatusCode status, constants_statuscodes_bs__
     case OpcUa_BadNotImplemented:
         *bstatus = constants_statuscodes_bs__e_sc_bad_not_implemented;
         break;
-
+    case OpcUa_BadNonceInvalid:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_nonce_invalid;
+        break;
     default:
         if ((status & SOPC_GoodStatusOppositeMask) == 0)
         {

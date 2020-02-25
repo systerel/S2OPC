@@ -425,6 +425,12 @@ void session_core_bs__server_create_session_req_do_crypto(
         pNonce = &pSession->nonceServer;
         pSign = &pSession->signatureData;
 
+        if (pReq->ClientNonce.Length < LENGTH_NONCE)
+        {
+            *session_core_bs__status = constants_statuscodes_bs__e_sc_bad_nonce_invalid;
+            return;
+        }
+
         /* Create the CryptoProvider */
         /* TODO: don't create it each time, maybe add it to the session */
         pProvider = SOPC_CryptoProvider_Create(pSCCfg->reqSecuPolicyUri);
@@ -438,13 +444,6 @@ void session_core_bs__server_create_session_req_do_crypto(
         /* Use the server private key to sign the client certificate + client nonce */
         /* TODO: check client certificate is the one provided for the Secure Channel */
         /* a) Prepare the buffer to sign */
-        if (SOPC_STATUS_OK == status)
-        {
-            if (pReq->ClientNonce.Length <= 0)
-            {
-                status = SOPC_STATUS_NOK;
-            }
-        }
 
         if (SOPC_STATUS_OK == status)
         {
@@ -926,7 +925,7 @@ void session_core_bs__client_create_session_check_crypto(
 
     /* TODO: Verify that the server certificate in the Response is the same as the one stored with the SecureChannel */
 
-    if (pResp->ServerNonce.Length <= 0 ||
+    if (pResp->ServerNonce.Length < LENGTH_NONCE ||
         SOPC_ByteString_Copy(&pSession->nonceServer, &pResp->ServerNonce) != SOPC_STATUS_OK)
     {
         return;
