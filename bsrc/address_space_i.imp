@@ -123,7 +123,7 @@ DEFINITIONS
         dvAid = e_aid_IsAbstract
     ) or
     (dvNcl = e_ncl_Method & /* METHOD */
-        dvAid = e_aid_UserExecutable or dvAid = e_aid_UserExecutable
+        (dvAid = e_aid_UserExecutable or dvAid = e_aid_Executable)
     ) or
     (dvNcl = e_ncl_View & /* VIEW */
         (dvAid = e_aid_EventNotifier or dvAid = e_aid_ContainsNoLoops))

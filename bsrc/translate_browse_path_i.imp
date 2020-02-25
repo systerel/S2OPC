@@ -929,10 +929,10 @@ OPERATIONS
     IN
         // No nodeId is found
         statusCode_operation := e_sc_bad_no_match;
-        l_continue <-- init_iter_browseResult(nbReferences);
+        l_continue <-- init_iter_translate_browseResult(nbReferences);
         WHILE l_continue = TRUE
         DO
-            l_continue, l_browseResult_index <-- continue_iter_browseResult;
+            l_continue, l_browseResult_index <-- continue_iter_translate_browseResult;
             l_res_refTypeId,
             l_res_isForward,
             l_res_ExpandedNodeId,
@@ -968,14 +968,14 @@ OPERATIONS
                     statusCode_operation =  e_sc_bad_no_match))
 
         INVARIANT
-            l_continue = bool(browseResult_to_iterate = {}) &
-            nb_browseResult_max_refs : NAT &
-            browseResult_to_iterate <: NAT &
-            browseResult_iterated   <: NAT &
-            browseResult_to_iterate /\ browseResult_iterated = {} &
-            nb_browseResult_max_refs = card(browseResult_to_iterate \/ browseResult_iterated)
+            l_continue = bool(translate_browseResult_to_iterate = {}) &
+            nb_translate_browseResult_max_refs : NAT &
+            translate_browseResult_to_iterate <: NAT &
+            translate_browseResult_iterated   <: NAT &
+            translate_browseResult_to_iterate /\ translate_browseResult_iterated = {} &
+            nb_translate_browseResult_max_refs = card(translate_browseResult_to_iterate \/ translate_browseResult_iterated)
         VARIANT
-            card(browseResult_to_iterate)
+            card(translate_browseResult_to_iterate)
         END
     END
 

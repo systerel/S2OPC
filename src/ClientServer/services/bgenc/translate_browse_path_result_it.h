@@ -21,7 +21,7 @@
 
  File Name            : translate_browse_path_result_it.h
 
- Date                 : 26/11/2019 10:33:17
+ Date                 : 25/02/2020 13:38:36
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -44,7 +44,7 @@
    CONCRETE_VARIABLES Clause
   ----------------------------*/
 extern t_entier4 translate_browse_path_result_it__currentBrowseResultIdx_i;
-extern t_entier4 translate_browse_path_result_it__nb_browseResult_max_refs_i;
+extern t_entier4 translate_browse_path_result_it__nb_translate_browseResult_max_refs_i;
 
 /*------------------------
    INITIALISATION Clause
@@ -54,10 +54,10 @@ extern void translate_browse_path_result_it__INITIALISATION(void);
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-extern void translate_browse_path_result_it__continue_iter_browseResult(
+extern void translate_browse_path_result_it__continue_iter_translate_browseResult(
    t_bool * const translate_browse_path_result_it__p_continue,
    t_entier4 * const translate_browse_path_result_it__p_browseResultIdx);
-extern void translate_browse_path_result_it__init_iter_browseResult(
+extern void translate_browse_path_result_it__init_iter_translate_browseResult(
    const t_entier4 translate_browse_path_result_it__p_nb_browseResult_max_refs,
    t_bool * const translate_browse_path_result_it__p_continue);
 

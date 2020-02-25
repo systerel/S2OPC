@@ -29,43 +29,43 @@ SEES
 CONCRETE_VARIABLES
 
     currentBrowseResultIdx_i,
-    nb_browseResult_max_refs_i
+    nb_translate_browseResult_max_refs_i
 
 INVARIANT
     currentBrowseResultIdx_i : NAT &
-    nb_browseResult_max_refs_i : NAT &
+    nb_translate_browseResult_max_refs_i : NAT &
 
-    nb_browseResult_max_refs = nb_browseResult_max_refs_i &
-    currentBrowseResultIdx_i : 0..nb_browseResult_max_refs_i &
+    nb_translate_browseResult_max_refs = nb_translate_browseResult_max_refs_i &
+    currentBrowseResultIdx_i : 0..nb_translate_browseResult_max_refs_i &
 
-    (nb_browseResult_max_refs_i = 0 =>
-        browseResult_to_iterate = {} &
-        browseResult_iterated = {}
+    (nb_translate_browseResult_max_refs_i = 0 =>
+        translate_browseResult_to_iterate = {} &
+        translate_browseResult_iterated = {}
     ) &
-    (nb_browseResult_max_refs_i /= 0 =>
-        browseResult_to_iterate = currentBrowseResultIdx_i+1..nb_browseResult_max_refs_i &
-        browseResult_iterated = 1..currentBrowseResultIdx_i)
+    (nb_translate_browseResult_max_refs_i /= 0 =>
+        translate_browseResult_to_iterate = currentBrowseResultIdx_i+1..nb_translate_browseResult_max_refs_i &
+        translate_browseResult_iterated = 1..currentBrowseResultIdx_i)
 
 INITIALISATION
     currentBrowseResultIdx_i := 0;
-    nb_browseResult_max_refs_i := 0
+    nb_translate_browseResult_max_refs_i := 0
 
 OPERATIONS
 
 
-    p_continue <-- init_iter_browseResult(p_nb_browseResult_max_refs) =
+    p_continue <-- init_iter_translate_browseResult(p_nb_browseResult_max_refs) =
     BEGIN
-        nb_browseResult_max_refs_i := p_nb_browseResult_max_refs;
+        nb_translate_browseResult_max_refs_i := p_nb_browseResult_max_refs;
         currentBrowseResultIdx_i := 0;
         p_continue := bool (0 < p_nb_browseResult_max_refs)
     END
     ;
 
-    p_continue, p_browseResultIdx <-- continue_iter_browseResult =
+    p_continue, p_browseResultIdx <-- continue_iter_translate_browseResult =
     BEGIN
         currentBrowseResultIdx_i := currentBrowseResultIdx_i + 1;
         p_browseResultIdx := currentBrowseResultIdx_i;
-        p_continue := bool (currentBrowseResultIdx_i < nb_browseResult_max_refs_i)
+        p_continue := bool (currentBrowseResultIdx_i < nb_translate_browseResult_max_refs_i)
     END
 
 END

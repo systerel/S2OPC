@@ -25,18 +25,18 @@ SEES
 
 DEFINITIONS
     d_variables ==
-        browseResult_to_iterate,
-        browseResult_iterated,
-        nb_browseResult_max_refs
+        translate_browseResult_to_iterate,
+        translate_browseResult_iterated,
+        nb_translate_browseResult_max_refs
     ;
 
     d_inv ==
     (
-    nb_browseResult_max_refs : NAT &
-    browseResult_to_iterate <: NAT1 &
-    browseResult_iterated   <: NAT1 &
-    browseResult_to_iterate /\ browseResult_iterated = {} &
-    nb_browseResult_max_refs = card(browseResult_to_iterate \/ browseResult_iterated)
+    nb_translate_browseResult_max_refs : NAT &
+    translate_browseResult_to_iterate <: NAT1 &
+    translate_browseResult_iterated   <: NAT1 &
+    translate_browseResult_to_iterate /\ translate_browseResult_iterated = {} &
+    nb_translate_browseResult_max_refs = card(translate_browseResult_to_iterate \/ translate_browseResult_iterated)
     )
 
 ABSTRACT_VARIABLES
@@ -50,29 +50,29 @@ INITIALISATION
 
 OPERATIONS
 
-    p_continue <-- init_iter_browseResult(p_nb_browseResult_max_refs) =
+    p_continue <-- init_iter_translate_browseResult(p_nb_browseResult_max_refs) =
     PRE
         p_nb_browseResult_max_refs : NAT
     THEN
-        browseResult_iterated    := {}        ||
-        browseResult_to_iterate  := 1..p_nb_browseResult_max_refs ||
-        nb_browseResult_max_refs := p_nb_browseResult_max_refs ||
+        translate_browseResult_iterated    := {}        ||
+        translate_browseResult_to_iterate  := 1..p_nb_browseResult_max_refs ||
+        nb_translate_browseResult_max_refs := p_nb_browseResult_max_refs ||
         p_continue               := bool(p_nb_browseResult_max_refs > 0)
     END
     ;
 
-    p_continue, p_browseResultIdx <-- continue_iter_browseResult =
+    p_continue, p_browseResultIdx <-- continue_iter_translate_browseResult =
     PRE
-        browseResult_to_iterate /= {}
+        translate_browseResult_to_iterate /= {}
     THEN
         ANY l_browseResult WHERE
             l_browseResult : NAT &
-            l_browseResult : browseResult_to_iterate
+            l_browseResult : translate_browseResult_to_iterate
         THEN
-            browseResult_iterated   := browseResult_iterated   \/ {l_browseResult} ||
-            browseResult_to_iterate := browseResult_to_iterate -  {l_browseResult} ||
+            translate_browseResult_iterated   := translate_browseResult_iterated   \/ {l_browseResult} ||
+            translate_browseResult_to_iterate := translate_browseResult_to_iterate -  {l_browseResult} ||
             p_browseResultIdx        := l_browseResult                               ||
-            p_continue               := bool(browseResult_to_iterate /= {l_browseResult})
+            p_continue               := bool(translate_browseResult_to_iterate /= {l_browseResult})
         END
     END
 
