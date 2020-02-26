@@ -303,7 +303,10 @@ void service_register_server2_set_bs__get_registered_server2_counter_reset_time(
 
 void service_register_server2_set_bs__service_register_server2_set_bs_UNINITIALISATION()
 {
-    SOPC_SLinkedList_Apply(registeredServer2List, freeRecord);
+    if (NULL != registeredServer2List)
+    {
+        SOPC_SLinkedList_Apply(registeredServer2List, freeRecord);
+    }
     SOPC_SLinkedList_Delete(registeredServer2List);
     registeredServer2List = NULL;
 }
