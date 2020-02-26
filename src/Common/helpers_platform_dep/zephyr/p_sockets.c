@@ -604,7 +604,7 @@ SOPC_ReturnStatus SOPC_Socket_Write(Socket sock, const uint8_t* data, uint32_t c
 
 SOPC_ReturnStatus SOPC_Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize, uint32_t* readCount)
 {
-    if (SOPC_INVALID_SOCKET == sock || NULL == data || 0 >= dataSize)
+    if (SOPC_INVALID_SOCKET == sock || NULL == data || 0 >= dataSize || NULL == readCount)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -619,26 +619,20 @@ SOPC_ReturnStatus SOPC_Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize
 
     if (sReadCount > 0)
     {
-        if (readCount != NULL)
-        {
-            *readCount = (uint32_t) sReadCount;
-        }
+        *readCount = (uint32_t) sReadCount;
+
         return SOPC_STATUS_OK;
     }
 
     if (0 == sReadCount)
     {
-        if (readCount != NULL)
-        {
-            *readCount = 0;
-        }
+        *readCount = 0;
+
         return SOPC_STATUS_CLOSED;
     }
 
-    if (readCount != NULL)
-    {
-        *readCount = 0;
-    }
+    *readCount = 0;
+
     int optErr = 0;
     socklen_t optErrSize = sizeof(optErr);
 
