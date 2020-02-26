@@ -647,7 +647,8 @@ SOPC_ReturnStatus SOPC_Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize
 
 SOPC_ReturnStatus SOPC_Socket_BytesToRead(Socket sock, uint32_t* bytesToRead)
 {
-    // TODO: to be implemented
+    (void) sock;
+    (void) bytesToRead;
     return SOPC_STATUS_NOK;
 }
 
