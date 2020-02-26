@@ -1224,5 +1224,11 @@ OPERATIONS
     THEN
         p_localeIds :(p_localeIds : t_LocaleIds_i & p_localeIds : t_LocaleIds)
     END
+    ;
+    
+    p_currentTs <-- get_CurrentTimestamp =
+    BEGIN
+        p_currentTs :(p_currentTs : t_Timestamp & p_currentTs /= c_Timestamp_null)
+    END
 
 END

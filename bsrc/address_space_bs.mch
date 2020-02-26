@@ -467,7 +467,7 @@ OPERATIONS
     END
     ;
 
-    sc, variant, val_sc, val_ts_src, val_ts_srv <-- read_AddressSpace_Value_value(p_locales, p_node, index_range) =
+    sc, variant, val_sc, val_ts_src <-- read_AddressSpace_Value_value(p_locales, p_node, index_range) =
     PRE
         p_locales : t_LocaleIds_i &
         p_locales : t_LocaleIds   &
@@ -482,7 +482,6 @@ OPERATIONS
             variant := c_Variant_indet ||
             val_sc := c_RawStatusCode_BadInvalidState ||
             val_ts_src := c_Timestamp_null ||
-            val_ts_srv := c_Timestamp_null ||
             sc := e_sc_bad_out_of_memory
         OR
             IF IsValid_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> index_range) = TRUE &
@@ -492,26 +491,22 @@ OPERATIONS
                 sc := e_sc_ok ||
                 IF a_NodeClass(p_node) = e_ncl_Variable THEN
                     val_sc := a_Value_StatusCode(p_node) ||
-                    val_ts_src := a_Value_SourceTimestamp(p_node) ||
-                    val_ts_srv :(val_ts_srv : t_Timestamp & val_ts_srv /= c_Timestamp_null)
+                    val_ts_src := a_Value_SourceTimestamp(p_node)
                 ELSE
                     /* VariableType */
                     val_sc := c_RawStatusCode_Good ||
-                    val_ts_src := c_Timestamp_null ||
-                    val_ts_srv := c_Timestamp_null
+                    val_ts_src := c_Timestamp_null
                 END
             ELSIF IsValid_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> index_range) = FALSE
             THEN
                 variant := c_Variant_indet ||
                 val_sc := c_RawStatusCode_BadInvalidState ||
                 val_ts_src := c_Timestamp_null ||
-                val_ts_srv := c_Timestamp_null ||
                 sc := e_sc_bad_index_range_invalid
             ELSE
                 variant := c_Variant_indet ||
                 val_sc := c_RawStatusCode_BadInvalidState ||
                 val_ts_src := c_Timestamp_null ||
-                val_ts_srv := c_Timestamp_null ||
                 sc := e_sc_bad_index_range_no_data
             END
         END

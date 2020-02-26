@@ -388,15 +388,13 @@ void address_space_bs__read_AddressSpace_Value_value(
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
     constants__t_Variant_i* const address_space_bs__variant,
     constants__t_RawStatusCode* const address_space_bs__val_sc,
-    constants__t_Timestamp* const address_space_bs__val_ts_src,
-    constants__t_Timestamp* const address_space_bs__val_ts_srv)
+    constants__t_Timestamp* const address_space_bs__val_ts_src)
 {
     (void) address_space_bs__p_locales;
     assert(address_space_bs__p_node->node_class == OpcUa_NodeClass_Variable ||
            address_space_bs__p_node->node_class == OpcUa_NodeClass_VariableType);
     *address_space_bs__val_sc = OpcUa_BadInvalidState;
     *address_space_bs__val_ts_src = constants_bs__c_Timestamp_null;
-    *address_space_bs__val_ts_srv = constants_bs__c_Timestamp_null;
 
     SOPC_Variant* value = util_variant__new_Variant_from_Variant(
         SOPC_AddressSpace_Get_Value(address_space_bs__nodes, address_space_bs__p_node));
@@ -453,8 +451,6 @@ void address_space_bs__read_AddressSpace_Value_value(
                 SOPC_AddressSpace_Get_StatusCode(address_space_bs__nodes, address_space_bs__p_node);
             *address_space_bs__val_ts_src =
                 SOPC_AddressSpace_Get_SourceTs(address_space_bs__nodes, address_space_bs__p_node);
-            address_space_bs__val_ts_srv->timestamp = SOPC_Time_GetCurrentTimeUTC();
-            address_space_bs__val_ts_srv->picoSeconds = 0;
         }
         else
         {

@@ -30,6 +30,7 @@
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_time.h"
 #include "sopc_toolkit_config_internal.h"
 #include "sopc_types.h"
 
@@ -225,6 +226,12 @@ void constants_bs__free_LocaleIds(const constants_bs__t_LocaleIds_i constants_bs
     }
     SOPC_GCC_DIAGNOSTIC_RESTORE
     SOPC_Free(constants_bs__p_in);
+}
+
+void constants_bs__get_CurrentTimestamp(constants_bs__t_Timestamp* const constants_bs__p_currentTs)
+{
+    constants_bs__p_currentTs->picoSeconds = 0;
+    constants_bs__p_currentTs->timestamp = SOPC_Time_GetCurrentTimeUTC();
 }
 
 void constants_bs__get_SupportedLocales(const constants_bs__t_endpoint_config_idx_i constants_bs__p_in,

@@ -21,7 +21,7 @@
 
  File Name            : address_space.c
 
- Date                 : 25/02/2020 14:25:08
+ Date                 : 26/02/2020 16:20:17
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -462,8 +462,8 @@ void address_space__read_AddressSpace_Attribute_value(
       *address_space__sc = constants_statuscodes_bs__e_sc_ok;
       constants_statuscodes_bs__get_const_RawStatusCode_Good(address_space__val_sc);
       *address_space__val = constants__c_Variant_indet;
+      constants__get_CurrentTimestamp(address_space__val_ts_srv);
       *address_space__val_ts_src = constants__c_Timestamp_null;
-      *address_space__val_ts_srv = constants__c_Timestamp_null;
       address_space_bs__is_IndexRangeDefined(address_space__p_index_range,
          &address_space__l_is_range_defined);
       if ((address_space__p_aid != constants__e_aid_Value) &&
@@ -568,8 +568,7 @@ void address_space__read_AddressSpace_Attribute_value(
                address_space__sc,
                address_space__val,
                address_space__val_sc,
-               address_space__val_ts_src,
-               address_space__val_ts_srv);
+               address_space__val_ts_src);
             break;
          case constants__e_aid_ValueRank:
             address_space_bs__read_AddressSpace_ValueRank_value(address_space__p_node,

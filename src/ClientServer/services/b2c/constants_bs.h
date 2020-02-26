@@ -231,6 +231,7 @@ extern void constants_bs__INITIALISATION(void);
   --------------------*/
 extern void constants_bs__free_ExpandedNodeId(const constants_bs__t_ExpandedNodeId_i constants_bs__p_in);
 extern void constants_bs__free_LocaleIds(const constants_bs__t_LocaleIds_i constants_bs__p_in);
+extern void constants_bs__get_CurrentTimestamp(constants_bs__t_Timestamp* const constants_bs__p_currentTs);
 extern void constants_bs__get_SupportedLocales(const constants_bs__t_endpoint_config_idx_i constants_bs__p_in,
                                                constants_bs__t_LocaleIds_i* const constants_bs__p_localeIds);
 extern void constants_bs__get_card_t_channel(t_entier4* const constants_bs__p_card_channel);
