@@ -437,12 +437,12 @@ tMutVarHandle P_SYNCHRO_MUTEX_Initialize(void)
         {
             eSyncStatus expectedStatus = E_SYNC_STATUS_NOT_INITIALIZED;
             eSyncStatus desiredStatus = E_SYNC_STATUS_INITIALIZING;
-            bool bTransition = __sync_val_compare_and_swap(&gMutVarWks.tabWks[i].status, //
-                                                           &expectedStatus,              //
-                                                           &desiredStatus,               //
-                                                           false,                        //
-                                                           __ATOMIC_SEQ_CST,             //
-                                                           __ATOMIC_SEQ_CST);            //
+            bool bTransition = __atomic_compare_exchange(&gMutVarWks.tabWks[i].status, //
+                                                         &expectedStatus,              //
+                                                         &desiredStatus,               //
+                                                         false,                        //
+                                                         __ATOMIC_SEQ_CST,             //
+                                                         __ATOMIC_SEQ_CST);            //
             if (bTransition)
             {
                 gMutVarWks.tabWks[i].condVarHdl = P_SYNCHRO_CONDITION_Initialize();
