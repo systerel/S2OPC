@@ -48,7 +48,6 @@ int32_t SOPC_Atomic_Int_Add(int32_t* atomic, int32_t val)
     return __sync_fetch_and_add(atomic, val);
 #endif
 }
-
 void* SOPC_Atomic_Ptr_Get(void** atomic)
 {
 #if !defined(__clang__) && (__GNUC__ > 4)
