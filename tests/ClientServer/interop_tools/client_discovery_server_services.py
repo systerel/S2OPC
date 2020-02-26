@@ -472,6 +472,10 @@ def find_servers_on_network_test(client, logger):
     local_register_server2(client, logger, "TestServer2", defaultAddress, [], False)
     local_register_server2(client, logger, "TestServer3", defaultAddress, [], False)
 
+def check_self_in_find_servers_response(defaultAddress, server):
+    return ("urn:S2OPC:localhost" == server.ApplicationUri and
+            1 == len(server.DiscoveryUrls) and
+            defaultAddress == server.DiscoveryUrls[0])
 
 def find_servers_test(client, logger):
     # Note: LocaleIds are not tested here because it is already done in UACTT
@@ -485,10 +489,8 @@ def find_servers_test(client, logger):
     logger.add_test('FindServers test - expect 0 registered server but self returned "{}"'
                     .format("urn:S2OPC:localhost"),
                     (1 == len(Servers) and
-                     "urn:S2OPC:localhost" == Servers[0].ApplicationUri and
-                     1 == len(Servers[0].DiscoveryUrls) and
-                     defaultAddress == Servers[0].DiscoveryUrls[0])
-                    )  
+                     check_self_in_find_servers_response(defaultAddress, Servers[0]))
+                    )
     
     # Register 1 server and retrieve it
     local_register_server2(client, logger, "TestServer1", defaultAddress, allServerCapabilities, True)
@@ -497,14 +499,16 @@ def find_servers_test(client, logger):
                     .format("urn:S2OPC:TestServer1"),
                     (2 == len(Servers) and
                      "urn:S2OPC:TestServer1" == Servers[0].ApplicationUri and
-                     defaultAddress == Servers[0].DiscoveryUrls[0])
+                     defaultAddress == Servers[0].DiscoveryUrls[0] and
+                     check_self_in_find_servers_response(defaultAddress, Servers[1]))
                     )
 
     # UnRegister 1 server and check not present anymore
     local_register_server2(client, logger, "TestServer1", defaultAddress, allServerCapabilities, False)
     Servers = client.uaclient.find_servers(params)
     logger.add_test('FindServers test - expect 0 registered server + self',
-                    1 == len(Servers))
+                    1 == len(Servers) and
+                    check_self_in_find_servers_response(defaultAddress, Servers[0]))
 
     # Register 2 times same server name: expect only last record to be returned
     local_register_server2(client, logger, "TestServer1", defaultAddress, allServerCapabilities, True)
@@ -514,7 +518,8 @@ def find_servers_test(client, logger):
                     .format("urn:S2OPC:TestServer1"),
                     (2 == len(Servers) and
                      "urn:S2OPC:TestServer1" == Servers[0].ApplicationUri and
-                     "opc.tcp://test:1000" == Servers[0].DiscoveryUrls[0])
+                     "opc.tcp://test:1000" == Servers[0].DiscoveryUrls[0] and
+                     check_self_in_find_servers_response(defaultAddress, Servers[1]))
                     )
 
     # Register a second server with unknown capabilities
@@ -523,7 +528,8 @@ def find_servers_test(client, logger):
     logger.add_test('FindServers test - expect 2 registered server 1 with all and 1 without capabilities',
                     (3 == len(Servers) and
                      "urn:S2OPC:TestServer1" == Servers[0].ApplicationUri and
-                     "urn:S2OPC:TestServer2" == Servers[1].ApplicationUri)
+                     "urn:S2OPC:TestServer2" == Servers[1].ApplicationUri and
+                     check_self_in_find_servers_response(defaultAddress, Servers[2]))
                     )
 
     # Register a third server with only 'LDS' capability
@@ -533,7 +539,8 @@ def find_servers_test(client, logger):
                     (4 == len(Servers) and
                      "urn:S2OPC:TestServer1" == Servers[0].ApplicationUri and
                      "urn:S2OPC:TestServer2" == Servers[1].ApplicationUri and
-                     "urn:S2OPC:TestServer3" == Servers[2].ApplicationUri)
+                     "urn:S2OPC:TestServer3" == Servers[2].ApplicationUri and
+                     check_self_in_find_servers_response(defaultAddress, Servers[3]))
                     )
 
     # Filter using the serverUri: request server 1
