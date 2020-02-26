@@ -359,7 +359,7 @@ SOPC_ReturnStatus SOPC_UDP_Socket_ReceiveFrom(Socket sock, SOPC_Buffer* buffer)
     ssize_t recv_len = 0;
     int ret = -1;
     int fl = -1;
-    bool bLoop = true;
+    bool bLoop = false;
     do
     {
         slen = sizeof(saddr);
@@ -373,28 +373,30 @@ SOPC_ReturnStatus SOPC_UDP_Socket_ReceiveFrom(Socket sock, SOPC_Buffer* buffer)
                             0,                         //
                             (struct sockaddr*) &saddr, //
                             &slen);                    //
-
-        slen2 = sizeof(saddr2);
-        memset(&saddr2, 0, slen2);
-
-        // Check if binding on mcast @.
-        ret = zsock_getsockname(sock, (struct sockaddr*) &saddr2, &slen2);
-        if ((saddr2.sin_family == AF_INET) && (ret == 0))
+        if (recv_len >= 0)
         {
-            if (net_ipv4_is_addr_mcast(&saddr2.sin_addr))
+            slen2 = sizeof(saddr2);
+            memset(&saddr2, 0, slen2);
+
+            // Check if binding on mcast @.
+            ret = zsock_getsockname(sock, (struct sockaddr*) &saddr2, &slen2);
+            if ((saddr2.sin_family == AF_INET) && (ret == 0))
             {
-                shallBeDropped = !P_SOCKET_MCAST_soft_filter(sock, &saddr2.sin_addr);
-
-                if (shallBeDropped)
+                if (net_ipv4_is_addr_mcast(&saddr2.sin_addr))
                 {
-                    fl = -1;
+                    shallBeDropped = !P_SOCKET_MCAST_soft_filter(sock, &saddr2.sin_addr);
 
-                    fl = fcntl(sock, F_GETFL, 0);
-                    assert(-1 != fl);
-
-                    if ((fl & O_NONBLOCK) != 0)
+                    if (shallBeDropped)
                     {
-                        bLoop = false;
+                        fl = -1;
+
+                        fl = fcntl(sock, F_GETFL, 0);
+                        assert(-1 != fl);
+
+                        if ((fl & O_NONBLOCK) == 0)
+                        {
+                            bLoop = true;
+                        }
                     }
                 }
             }
