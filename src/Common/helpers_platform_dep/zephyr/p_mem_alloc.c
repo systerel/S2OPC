@@ -17,22 +17,85 @@
  * under the License.
  */
 
+#include <stdbool.h>
 #include <stdlib.h>
+
+#include <inttypes.h>
+
+#include "kernel.h"
+
+#ifndef __INT32_MAX__
+#include "toolchain/xcc_missing_defs.h"
+#endif
+
+#ifndef NULL
+#define NULL ((void*) 0)
+#endif
+#ifndef K_FOREVER
+#define K_FOREVER (-1)
+#endif
+#ifndef K_NO_WAIT
+#define K_NO_WAIT 0
+#endif
+
+#define P_MEM_ALLOC_DEBUG (0)
+#if P_MEM_ALLOC_DEBUG == 1
+volatile uint32_t counterAlloc = 0;
+#endif
 
 #include "sopc_mem_alloc.h"
 
 void* SOPC_Malloc(size_t size)
 {
+#if P_MEM_ALLOC_DEBUG == 1
+    bool bTransition = false;
+    uint32_t currentVal = 0;
+    uint32_t newVal = 0;
+    do
+    {
+        currentVal = counterAlloc;
+        newVal = counterAlloc + 1;
+        bTransition = __sync_bool_compare_and_swap(&counterAlloc, currentVal, newVal);
+    } while (!bTransition);
+    printk("\r\nP_MEM_ALLOC %d\r\n", counterAlloc);
+#endif
     return malloc(size);
 }
 
 void SOPC_Free(void* ptr)
 {
+#if P_MEM_ALLOC_DEBUG == 1
+    bool bTransition = false;
+    uint32_t currentVal = 0;
+    uint32_t newVal = 0;
+    do
+    {
+        currentVal = counterAlloc;
+        if (currentVal > 0)
+        {
+            newVal = counterAlloc - 1;
+        }
+        bTransition = __sync_bool_compare_and_swap(&counterAlloc, currentVal, newVal);
+    } while (!bTransition);
+    printk("\r\nP_MEM_ALLOC %d\r\n", counterAlloc);
+#endif
     free(ptr);
 }
 
 void* SOPC_Calloc(size_t nmemb, size_t size)
 {
+#if P_MEM_ALLOC_DEBUG == 1
+    bool bTransition = false;
+    uint32_t currentVal = 0;
+    uint32_t newVal = 0;
+    do
+    {
+        currentVal = counterAlloc;
+        newVal = counterAlloc + 1;
+        bTransition = __sync_bool_compare_and_swap(&counterAlloc, currentVal, newVal);
+    } while (!bTransition);
+    printk("\r\nP_MEM_ALLOC %d\r\n", counterAlloc);
+#endif
     return calloc(nmemb, size);
 }
 
