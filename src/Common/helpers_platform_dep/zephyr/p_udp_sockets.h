@@ -26,10 +26,10 @@
 
 /* Multicast platform dep functions used by platform dep pub sub UDP */
 
-__weak SOPC_ReturnStatus P_SOCKET_MCAST_add_sock_to_mcast(int32_t sock, struct in_addr* add);
-__weak SOPC_ReturnStatus P_SOCKET_MCAST_join_mcast_group(int32_t sock, struct in_addr* add);
-__weak SOPC_ReturnStatus P_SOCKET_MCAST_leave_mcast_group(int32_t sock, struct in_addr* add);
-__weak bool P_SOCKET_MCAST_soft_filter(int32_t sock, struct in_addr* add);
-__weak void P_SOCKET_MCAST_remove_sock_from_mcast(int32_t sock);
+SOPC_ReturnStatus P_SOCKET_MCAST_add_sock_to_mcast(int32_t sock, struct in_addr* add);
+SOPC_ReturnStatus P_SOCKET_MCAST_join_mcast_group(int32_t sock, struct in_addr* add);
+SOPC_ReturnStatus P_SOCKET_MCAST_leave_mcast_group(int32_t sock, struct in_addr* add);
+bool P_SOCKET_MCAST_soft_filter(int32_t sock, struct in_addr* add);
+void P_SOCKET_MCAST_remove_sock_from_mcast(int32_t sock);
 
 #endif /* PUBSUB_S2OPC_PUBSUB_SRC_DEP_PLATFORM_ZEPHYR_P_UDP_SOCKETS_H_ */

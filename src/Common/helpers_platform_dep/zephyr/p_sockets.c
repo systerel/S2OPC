@@ -60,7 +60,7 @@ static inline SOPC_ReturnStatus P_SOCKET_Configure(Socket sock, bool setNonBlock
 // *** Private api functions definitions used by P_SOCKET and P_SOCKET_UDP ***
 
 // Get configuration status. True if configured (ip, gw, mask...) Declared as weak function
-__weak bool P_SOCKET_NETWORK_IsConfigured(void)
+bool __attribute__((weak)) P_SOCKET_NETWORK_IsConfigured(void)
 {
     return true;
 }
@@ -674,7 +674,7 @@ void SOPC_Socket_Close(Socket* sock)
 
 // Initialize ethernet and loopback interface
 // Returns true if well configured.
-__weak bool P_SOCKET_NETWORK_Initialize(void)
+bool __attribute__((weak)) P_SOCKET_NETWORK_Initialize(void)
 {
     return false;
 }

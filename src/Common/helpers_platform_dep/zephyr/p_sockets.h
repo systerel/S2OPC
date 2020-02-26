@@ -47,8 +47,8 @@ typedef struct
 
 /* Network initialized verification */
 
-__weak bool P_SOCKET_NETWORK_Initialize(void);
-__weak bool P_SOCKET_NETWORK_IsConfigured(void);
+bool P_SOCKET_NETWORK_Initialize(void);
+bool P_SOCKET_NETWORK_IsConfigured(void);
 
 /* Verify current number of allocated socket. Shall not > MAX_SOCKET */
 
