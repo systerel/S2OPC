@@ -29,18 +29,18 @@ saxonb-xslt -s:$S2OPC_REPO/tests/ClientServer/data/address_space/s2opc_origin.xm
     <!-- delete all method with a methodDeclarationId (others are in type definition) -->
     <xsl:template match="UAMethod[not(count(@MethodDeclarationId)=0)]"/>
 
-    <!-- delete all references to the method deleted + reference to MaxNodesPerMethodCall -->
+    <!-- delete all references to the method deleted + reference to MaxNodesPerMethodCall and MaxMonitoredItemsPerCall -->
     <xsl:template match="Reference">
-      <xsl:if test="not(current() = //UAMethod[not(count(@MethodDeclarationId)=0)]/@NodeId) and not(current() = 'i=11709')">
+      <xsl:if test="not(current() = //UAMethod[not(count(@MethodDeclarationId)=0)]/@NodeId) and not(current() = 'i=11709') and not(current() = 'i=11714')">
         <xsl:copy>
             <xsl:apply-templates select="@*|node()"/>
         </xsl:copy>
       </xsl:if>
     </xsl:template>
 
-    <!-- delete children variables of method nodes deleted + MaxNodesPerMethodCall -->
+    <!-- delete children variables of method nodes deleted + MaxNodesPerMethodCall + MaxMonitoredItemsPerCall -->
     <xsl:template match="UAVariable">
-      <xsl:if test="not(@ParentNodeId = //UAMethod[not(count(@MethodDeclarationId)=0)]/@NodeId) and not(@NodeId = 'i=11709')">
+      <xsl:if test="not(@ParentNodeId = //UAMethod[not(count(@MethodDeclarationId)=0)]/@NodeId) and not(@NodeId = 'i=11709') and not(@NodeId = 'i=11714')">
         <xsl:copy>
             <xsl:apply-templates select="@*|node()"/>
         </xsl:copy>
