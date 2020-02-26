@@ -142,7 +142,7 @@ OPERATIONS
     ;
     
     /* Duplicate of set_find_servers_server used only for setting the current endpoint application description */
-    ret <-- set_find_servers_server_ApplicationDescription (p_resp, p_srv_index, p_localeIds, p_app_desc) =
+    ret <-- set_find_servers_server_ApplicationDescription (p_resp, p_srv_index, p_localeIds, p_endpoint_config_idx, p_app_desc) =
     PRE
         p_resp : t_msg_i &
         FindServersResp = p_resp &
@@ -151,6 +151,8 @@ OPERATIONS
         p_localeIds : t_LocaleIds_i &
         p_localeIds : t_LocaleIds &
         p_localeIds = FindServersReq_LocaleIds &
+        p_endpoint_config_idx : t_endpoint_config_idx_i &
+        p_endpoint_config_idx : t_endpoint_config_idx &
         p_app_desc : t_ApplicationDescription_i &
         p_app_desc : t_ApplicationDescription
     THEN

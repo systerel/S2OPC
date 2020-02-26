@@ -21,7 +21,7 @@
 
  File Name            : service_set_discovery_server.c
 
- Date                 : 26/02/2020 09:12:48
+ Date                 : 26/02/2020 09:33:23
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -166,7 +166,6 @@ void service_set_discovery_server__local_add_self_server_to_return(
    const t_entier4 service_set_discovery_server__p_nbServerUri,
    const constants__t_ServerUris service_set_discovery_server__p_ServerUris,
    const t_entier4 service_set_discovery_server__p_nbServersIn,
-   t_bool * const service_set_discovery_server__p_allocSuccess,
    t_bool * const service_set_discovery_server__p_compatSelf,
    constants__t_ApplicationDescription_i * const service_set_discovery_server__p_appDesc,
    t_entier4 * const service_set_discovery_server__p_nbServersOut) {
@@ -176,24 +175,21 @@ void service_set_discovery_server__local_add_self_server_to_return(
       *service_set_discovery_server__p_nbServersOut = service_set_discovery_server__p_nbServersIn;
       *service_set_discovery_server__p_compatSelf = false;
       service_set_discovery_server_data_bs__get_ApplicationDescription(service_set_discovery_server__p_endpoint_config_idx,
-         service_set_discovery_server__p_allocSuccess,
          service_set_discovery_server__p_appDesc);
-      if (*service_set_discovery_server__p_allocSuccess == true) {
-         service_set_discovery_server_data_bs__get_ApplicationDescription_ServerUri(*service_set_discovery_server__p_appDesc,
-            &service_set_discovery_server__l_serverUri);
-         if (service_set_discovery_server__p_nbServerUri > 0) {
-            service_set_discovery_server_data_bs__has_ServerUri(service_set_discovery_server__l_serverUri,
-               service_set_discovery_server__p_nbServerUri,
-               service_set_discovery_server__p_ServerUris,
-               service_set_discovery_server__p_compatSelf);
-         }
-         else {
-            *service_set_discovery_server__p_compatSelf = true;
-         }
-         if (*service_set_discovery_server__p_compatSelf == true) {
-            *service_set_discovery_server__p_nbServersOut = service_set_discovery_server__p_nbServersIn +
-               1;
-         }
+      service_set_discovery_server_data_bs__get_ApplicationDescription_ServerUri(*service_set_discovery_server__p_appDesc,
+         &service_set_discovery_server__l_serverUri);
+      if (service_set_discovery_server__p_nbServerUri > 0) {
+         service_set_discovery_server_data_bs__has_ServerUri(service_set_discovery_server__l_serverUri,
+            service_set_discovery_server__p_nbServerUri,
+            service_set_discovery_server__p_ServerUris,
+            service_set_discovery_server__p_compatSelf);
+      }
+      else {
+         *service_set_discovery_server__p_compatSelf = true;
+      }
+      if (*service_set_discovery_server__p_compatSelf == true) {
+         *service_set_discovery_server__p_nbServersOut = service_set_discovery_server__p_nbServersIn +
+            1;
       }
    }
 }
@@ -357,12 +353,10 @@ void service_set_discovery_server__treat_find_servers_request(
          service_set_discovery_server__l_nbServerUri,
          service_set_discovery_server__l_ServerUris,
          service_set_discovery_server__l_nbServers,
-         &service_set_discovery_server__l_allocSuccess,
          &service_set_discovery_server__l_isCurrentCompat,
          &service_set_discovery_server__l_appDesc,
          &service_set_discovery_server__l_nbServersPlusSelf);
-      if ((service_set_discovery_server__l_allocSuccess == true) &&
-         (service_set_discovery_server__l_nbServersPlusSelf > 0)) {
+      if (service_set_discovery_server__l_nbServersPlusSelf > 0) {
          msg_find_servers_bs__alloc_find_servers(service_set_discovery_server__resp_msg,
             service_set_discovery_server__l_nbServersPlusSelf,
             &service_set_discovery_server__l_allocSuccess);
@@ -379,6 +373,7 @@ void service_set_discovery_server__treat_find_servers_request(
                   service_set_discovery_server__l_nbServersPlusSelf -
                   1,
                   service_set_discovery_server__l_LocaleIds,
+                  service_set_discovery_server__endpoint_config_idx,
                   service_set_discovery_server__l_appDesc,
                   service_set_discovery_server__ret);
             }

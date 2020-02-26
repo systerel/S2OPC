@@ -21,7 +21,7 @@
 
  File Name            : service_set_discovery_server.h
 
- Date                 : 05/12/2019 08:48:30
+ Date                 : 26/02/2020 09:33:23
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -65,7 +65,6 @@ extern void service_set_discovery_server__local_add_self_server_to_return(
    const t_entier4 service_set_discovery_server__p_nbServerUri,
    const constants__t_ServerUris service_set_discovery_server__p_ServerUris,
    const t_entier4 service_set_discovery_server__p_nbServersIn,
-   t_bool * const service_set_discovery_server__p_allocSuccess,
    t_bool * const service_set_discovery_server__p_compatSelf,
    constants__t_ApplicationDescription_i * const service_set_discovery_server__p_appDesc,
    t_entier4 * const service_set_discovery_server__p_nbServersOut);

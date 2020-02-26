@@ -21,7 +21,7 @@
 
  File Name            : msg_find_servers_bs.h
 
- Date                 : 04/12/2019 17:12:54
+ Date                 : 26/02/2020 09:33:41
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -70,6 +70,7 @@ extern void msg_find_servers_bs__set_find_servers_server_ApplicationDescription(
    const constants__t_msg_i msg_find_servers_bs__p_resp,
    const t_entier4 msg_find_servers_bs__p_srv_index,
    const constants__t_LocaleIds_i msg_find_servers_bs__p_localeIds,
+   const constants__t_endpoint_config_idx_i msg_find_servers_bs__p_endpoint_config_idx,
    const constants__t_ApplicationDescription_i msg_find_servers_bs__p_app_desc,
    constants_statuscodes_bs__t_StatusCode_i * const msg_find_servers_bs__ret);
 

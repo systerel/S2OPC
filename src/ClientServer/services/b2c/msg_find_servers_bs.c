@@ -24,6 +24,7 @@
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_toolkit_config_internal.h"
 
 /*------------------------
    INITIALISATION Clause
@@ -142,10 +143,60 @@ void msg_find_servers_bs__set_find_servers_server(
     }
 }
 
+static bool has_none_security_mode(SOPC_Endpoint_Config* epConfig)
+{
+    for (int i = 0; i < epConfig->nbSecuConfigs; i++)
+    {
+        if ((epConfig->secuConfigurations[i].securityModes & SOPC_SECURITY_MODE_NONE_MASK) != 0)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+static bool util_ApplicationDescription_addImplicitDiscoveryEndpoint(OpcUa_ApplicationDescription* dst,
+                                                                     SOPC_Endpoint_Config* endpoint_config)
+{
+    assert(NULL != dst);
+    assert(NULL != endpoint_config);
+    assert(dst->NoOfDiscoveryUrls <= 0);
+
+    /* If no discovery URL already defined for the current endpoint, try to find one.
+     * It has one, if either the current endpoint has an implicit discovery endpoint
+     * or the current endpoint accepts None security mode.
+     * Otherwise we are not able to define automatically a discovery endpoint.
+     *
+     */
+    if (endpoint_config->hasDiscoveryEndpoint || has_none_security_mode(endpoint_config))
+    {
+        // There is an endpoint with SecurityMode None allowed or an implicit discovery endpoint is added
+        dst->DiscoveryUrls = SOPC_Calloc(1, sizeof(SOPC_String));
+        SOPC_String_Initialize(dst->DiscoveryUrls);
+
+        if (dst->DiscoveryUrls == NULL)
+        {
+            return false;
+        }
+
+        if (SOPC_STATUS_OK != SOPC_String_CopyFromCString(&dst->DiscoveryUrls[0], endpoint_config->endpointURL))
+        {
+            SOPC_Free(dst->DiscoveryUrls);
+            dst->DiscoveryUrls = NULL;
+            return false;
+        }
+
+        dst->NoOfDiscoveryUrls = 1;
+    }
+
+    return true;
+}
+
 void msg_find_servers_bs__set_find_servers_server_ApplicationDescription(
     const constants__t_msg_i msg_find_servers_bs__p_resp,
     const t_entier4 msg_find_servers_bs__p_srv_index,
     const constants__t_LocaleIds_i msg_find_servers_bs__p_localeIds,
+    const constants__t_endpoint_config_idx_i msg_find_servers_bs__p_endpoint_config_idx,
     const constants__t_ApplicationDescription_i msg_find_servers_bs__p_app_desc,
     constants_statuscodes_bs__t_StatusCode_i* const msg_find_servers_bs__ret)
 {
@@ -183,6 +234,22 @@ void msg_find_servers_bs__set_find_servers_server_ApplicationDescription(
             return;
         }
     }
+    else
+    {
+        // Attempt to add implicit discovery URL of current endpoint to the application description
+        SOPC_Endpoint_Config* endpoint_config =
+            SOPC_ToolkitServer_GetEndpointConfig(msg_find_servers_bs__p_endpoint_config_idx);
+        if (endpoint_config == NULL)
+        {
+            return;
+        }
+
+        if (!util_ApplicationDescription_addImplicitDiscoveryEndpoint(dest, endpoint_config))
+        {
+            return;
+        }
+    }
+
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
     dest->ApplicationType = src->ApplicationType;
     status = SOPC_String_AttachFrom(&dest->ApplicationUri, (SOPC_String*) &src->ApplicationUri);

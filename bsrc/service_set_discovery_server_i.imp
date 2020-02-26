@@ -126,7 +126,7 @@ LOCAL_OPERATIONS
     END
     ;
     
-    p_allocSuccess, p_compatSelf, p_appDesc, p_nbServersOut
+    p_compatSelf, p_appDesc, p_nbServersOut
       <-- local_add_self_server_to_return (p_endpoint_config_idx, p_nbServerUri, p_ServerUris, p_nbServersIn) =
     PRE
         p_endpoint_config_idx : t_endpoint_config_idx_i &
@@ -137,21 +137,17 @@ LOCAL_OPERATIONS
         p_ServerUris = FindServersReq_ServerUris &
         p_nbServersIn : NAT
     THEN
-        p_allocSuccess,
         p_compatSelf,
         p_appDesc,
         p_nbServersOut
-        :(p_allocSuccess : BOOL &
-          p_compatSelf : BOOL &
+        :(p_compatSelf : BOOL &
           p_appDesc : t_ApplicationDescription_i &
           p_nbServersOut : NAT &
-            (p_allocSuccess = TRUE =>
-                (p_compatSelf = TRUE =>
-                    p_nbServersOut = p_nbServersIn + 1 &
-                    p_appDesc : t_ApplicationDescription) &
-                (p_compatSelf = FALSE =>
-                    p_nbServersOut = p_nbServersIn)
-            )
+            (p_compatSelf = TRUE =>
+                p_nbServersOut = p_nbServersIn + 1 &
+                p_appDesc : t_ApplicationDescription) &
+            (p_compatSelf = FALSE =>
+                p_nbServersOut = p_nbServersIn)
           )
     END
     ;
@@ -323,28 +319,25 @@ OPERATIONS
     END
     ;
 
-    p_allocSuccess, p_compatSelf, p_appDesc, p_nbServersOut
+    p_compatSelf, p_appDesc, p_nbServersOut
       <-- local_add_self_server_to_return (p_endpoint_config_idx, p_nbServerUri, p_ServerUris, p_nbServersIn) =
     VAR
         l_serverUri
     IN
         p_nbServersOut := p_nbServersIn;
         p_compatSelf := FALSE;
-        p_allocSuccess, p_appDesc <-- get_ApplicationDescription (p_endpoint_config_idx);
-        IF p_allocSuccess = TRUE
+        p_appDesc <-- get_ApplicationDescription (p_endpoint_config_idx);
+        l_serverUri <-- get_ApplicationDescription_ServerUri (p_appDesc);
+        IF p_nbServerUri > 0
         THEN
-            l_serverUri <-- get_ApplicationDescription_ServerUri (p_appDesc);
-            IF p_nbServerUri > 0
-            THEN
-                p_compatSelf <-- has_ServerUri (l_serverUri, p_nbServerUri, p_ServerUris)
-            ELSE
-                p_compatSelf := TRUE
-            END
-            ;
-            IF p_compatSelf = TRUE
-            THEN
-                p_nbServersOut := p_nbServersIn + 1
-            END
+            p_compatSelf <-- has_ServerUri (l_serverUri, p_nbServerUri, p_ServerUris)
+        ELSE
+            p_compatSelf := TRUE
+        END
+        ;
+        IF p_compatSelf = TRUE
+        THEN
+            p_nbServersOut := p_nbServersIn + 1
         END
     END
     ;
@@ -466,10 +459,10 @@ OPERATIONS
         l_LocaleIds, l_nbServerUri, l_ServerUris <-- get_find_servers_req_params (req_msg);
         l_nbServers <-- local_get_nb_servers_to_return (l_nbServerUri, l_ServerUris);
         // Check if we add the current endpoint server information
-        l_allocSuccess, l_isCurrentCompat, l_appDesc, l_nbServersPlusSelf 
+        l_isCurrentCompat, l_appDesc, l_nbServersPlusSelf 
           <-- local_add_self_server_to_return (endpoint_config_idx, l_nbServerUri, l_ServerUris, l_nbServers);
         
-        IF l_allocSuccess = TRUE & l_nbServersPlusSelf > 0 
+        IF l_nbServersPlusSelf > 0 
         THEN
             l_allocSuccess <-- alloc_find_servers (resp_msg, l_nbServersPlusSelf);
             IF l_allocSuccess = TRUE
@@ -477,7 +470,7 @@ OPERATIONS
                 ret <-- local_set_servers_to_return (resp_msg, l_LocaleIds, l_nbServerUri, l_ServerUris, l_nbServers);
                 IF ret = e_sc_ok & l_isCurrentCompat = TRUE
                 THEN
-                    ret <-- set_find_servers_server_ApplicationDescription (resp_msg, l_nbServersPlusSelf - 1, l_LocaleIds, l_appDesc)
+                    ret <-- set_find_servers_server_ApplicationDescription (resp_msg, l_nbServersPlusSelf - 1, l_LocaleIds, endpoint_config_idx, l_appDesc)
                 END
             ELSE
                 ret := e_sc_bad_out_of_memory

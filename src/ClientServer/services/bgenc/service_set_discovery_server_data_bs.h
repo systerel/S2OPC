@@ -21,7 +21,7 @@
 
  File Name            : service_set_discovery_server_data_bs.h
 
- Date                 : 04/12/2019 17:13:03
+ Date                 : 26/02/2020 09:33:51
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -50,7 +50,6 @@ extern void service_set_discovery_server_data_bs__INITIALISATION(void);
   --------------------*/
 extern void service_set_discovery_server_data_bs__get_ApplicationDescription(
    const constants__t_endpoint_config_idx_i service_set_discovery_server_data_bs__p_endpoint_config_idx,
-   t_bool * const service_set_discovery_server_data_bs__p_bres,
    constants__t_ApplicationDescription_i * const service_set_discovery_server_data_bs__p_app_desc);
 extern void service_set_discovery_server_data_bs__get_ApplicationDescription_ServerUri(
    const constants__t_ApplicationDescription_i service_set_discovery_server_data_bs__p_app_desc,

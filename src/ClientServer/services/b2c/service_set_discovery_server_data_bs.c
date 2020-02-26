@@ -41,25 +41,11 @@ void service_set_discovery_server_data_bs__get_RegisteredServer_ServerUri(
         &service_set_discovery_server_data_bs__p_reg_server->ServerUri;
 }
 
-static bool has_none_security_mode(SOPC_Endpoint_Config* epConfig)
-{
-    for (int i = 0; i < epConfig->nbSecuConfigs; i++)
-    {
-        if ((epConfig->secuConfigurations[i].securityModes & SOPC_SECURITY_MODE_NONE_MASK) != 0)
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
 void service_set_discovery_server_data_bs__get_ApplicationDescription(
     const constants__t_endpoint_config_idx_i service_set_discovery_server_data_bs__p_endpoint_config_idx,
-    t_bool* const service_set_discovery_server_data_bs__p_bres,
     constants__t_ApplicationDescription_i* const service_set_discovery_server_data_bs__p_app_desc)
 {
     *service_set_discovery_server_data_bs__p_app_desc = constants__c_ApplicationDescription_indet;
-    *service_set_discovery_server_data_bs__p_bres = false;
 
     SOPC_Endpoint_Config* endpoint_config =
         SOPC_ToolkitServer_GetEndpointConfig(service_set_discovery_server_data_bs__p_endpoint_config_idx);
@@ -69,42 +55,7 @@ void service_set_discovery_server_data_bs__get_ApplicationDescription(
         return;
     }
 
-    OpcUa_ApplicationDescription* dst_desc = &endpoint_config->serverConfigPtr->serverDescription;
-
-    if (dst_desc->NoOfDiscoveryUrls <= 0)
-    {
-        /* If no discovery URL already defined for the current endpoint, try to find one.
-         * It has one, if either the current endpoint has an implicit discovery endpoint
-         * or the current endpoint accepts None security mode.
-         * Otherwise we are not able to define automatically a discovery endpoint.
-         *
-         */
-        if (endpoint_config->hasDiscoveryEndpoint || has_none_security_mode(endpoint_config))
-        {
-            // There is an endpoint with SecurityMode None allowed or an implicit discovery endpoint is added
-            dst_desc->DiscoveryUrls = SOPC_Calloc(1, sizeof(SOPC_String));
-            SOPC_String_Initialize(dst_desc->DiscoveryUrls);
-
-            if (dst_desc->DiscoveryUrls == NULL)
-            {
-                *service_set_discovery_server_data_bs__p_bres = false;
-                return;
-            }
-
-            if (SOPC_STATUS_OK !=
-                SOPC_String_CopyFromCString(&dst_desc->DiscoveryUrls[0], endpoint_config->endpointURL))
-            {
-                *service_set_discovery_server_data_bs__p_bres = false;
-                SOPC_Free(dst_desc->DiscoveryUrls);
-                dst_desc->DiscoveryUrls = NULL;
-                return;
-            }
-
-            dst_desc->NoOfDiscoveryUrls = 1;
-        }
-    }
-    *service_set_discovery_server_data_bs__p_bres = true;
-    *service_set_discovery_server_data_bs__p_app_desc = dst_desc;
+    *service_set_discovery_server_data_bs__p_app_desc = &endpoint_config->serverConfigPtr->serverDescription;
 }
 
 void service_set_discovery_server_data_bs__get_ApplicationDescription_ServerUri(

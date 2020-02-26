@@ -86,17 +86,14 @@ OPERATIONS
     END
     ;
 
-    p_bres, p_app_desc <-- get_ApplicationDescription (p_endpoint_config_idx) =
+    p_app_desc <-- get_ApplicationDescription (p_endpoint_config_idx) =
     PRE
         p_endpoint_config_idx : t_endpoint_config_idx_i &
         p_endpoint_config_idx : t_endpoint_config_idx
     THEN
-        p_bres,
-        p_app_desc 
-        :(p_bres : BOOL &
-          p_app_desc : t_ApplicationDescription_i &
-          (p_bres = TRUE => p_app_desc : t_ApplicationDescription)
-        )
+        p_app_desc
+        :(p_app_desc : t_ApplicationDescription_i &
+          p_app_desc : t_ApplicationDescription)
     END
     ;
     
