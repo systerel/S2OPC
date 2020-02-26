@@ -19,8 +19,6 @@
 
 #include <stdlib.h>
 
-#include "kernel.h"
-
 #include "sopc_mem_alloc.h"
 
 void* SOPC_Malloc(size_t size)
