@@ -29,9 +29,9 @@ saxonb-xslt -s:$S2OPC_REPO/tests/ClientServer/data/address_space/s2opc_origin.xm
     <!-- delete all method with a methodDeclarationId (others are in type definition) -->
     <xsl:template match="UAMethod[not(count(@MethodDeclarationId)=0)]"/>
 
-    <!-- delete all references to the method deleted -->
+    <!-- delete all references to the method deleted + reference to MaxNodesPerMethodCall -->
     <xsl:template match="Reference">
-      <xsl:if test="not(current() = //UAMethod[not(count(@MethodDeclarationId)=0)]/@NodeId)">
+      <xsl:if test="not(current() = //UAMethod[not(count(@MethodDeclarationId)=0)]/@NodeId) and not(current() = 'i=11709')">
         <xsl:copy>
             <xsl:apply-templates select="@*|node()"/>
         </xsl:copy>
