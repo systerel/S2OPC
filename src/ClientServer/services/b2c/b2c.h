@@ -34,13 +34,13 @@ typedef bool t_bool;
 typedef int32_t t_entier4;
 #endif /* t_entier4 */
 
-/* MAXINT (already defined for MSVC) */
-#if !defined(_MSC_VER) && !defined(MAXINT)
+/* MAXINT */
+#if !defined(MAXINT)
 #define MAXINT (2147483647)
 #endif /* MAXINT */
 
-/* MININT (already defined for MSVC) */
-#if !defined(_MSC_VER) && !defined(MININT)
+/* MININT */
+#if !defined(MININT)
 #define MININT (-MAXINT)
 #endif /* MININT */
 
