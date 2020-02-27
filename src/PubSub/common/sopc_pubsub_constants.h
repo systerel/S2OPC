@@ -21,6 +21,8 @@
 #define SOPC_PUBSUB_CONSTANTS_H_
 
 // Size of buffer (max size of message)
+#ifndef SOPC_PUBSUB_BUFFER_SIZE
 #define SOPC_PUBSUB_BUFFER_SIZE 4096
+#endif /* SOPC_PUBSUB_BUFFER_SIZE */
 
 #endif /* SOPC_PUBSUB_CONSTANTS_H_ */
