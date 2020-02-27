@@ -300,7 +300,7 @@ OPERATIONS
           /* Generic treatement for status code and timestamps     */
           (sc = e_sc_ok & not (ncl = e_ncl_Variable & p_aid = e_aid_Value) =>
            val_sc = c_RawStatusCode_Good &
-           val_ts_src /= c_Timestamp_null /* current date on S2OPC server*/ &
+           val_ts_src = c_Timestamp_null &
            val_ts_srv /= c_Timestamp_null /* current date on S2OPC server*/)
           ) &
           /* Invalid attribute for the given node */
