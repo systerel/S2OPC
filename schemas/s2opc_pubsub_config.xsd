@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+     <xs:element name="PubSub">
+           <xs:complexType>
+                 <xs:sequence>
+                       <xs:element name="connection" maxOccurs="unbounded">
+                             <xs:complexType>
+                                   <xs:sequence>
+                                         <xs:element name="message" maxOccurs="unbounded">
+                                               <xs:complexType>
+                                                     <xs:sequence>
+                                                           <xs:element name="variable" maxOccurs="unbounded">
+                                                                 <xs:complexType>
+                                                                       <xs:attribute name="nodeId" type="xs:string" use="required"/>
+                                                                       <xs:attribute name="displayName" type="xs:string" use="required"/>
+                                                                       <xs:attribute name="dataType" type="dataType" use="required"/>
+                                                                 </xs:complexType>
+                                                           </xs:element>
+                                                     </xs:sequence>
+                                                     <xs:attribute name="id" type="xs:unsignedInt" use="required"/>
+                                                     <xs:attribute name="publishingInterval" type="xs:unsignedLong" use="required"/>
+                                                     <xs:attribute name="version" type="xs:unsignedInt" use="required"/>
+                                                     <xs:attribute name="publisherId" type="xs:unsignedLong"/> <!-- required if subscriber mode -->
+                                               </xs:complexType>
+                                         </xs:element>
+                                   </xs:sequence>
+                                   <xs:attribute name="address" type="xs:string" use="required"/>
+                                   <xs:attribute name="mode" type="modeType" use="required"/>
+                             </xs:complexType>
+                       </xs:element>
+                 </xs:sequence>
+                 <xs:attribute name="publisherId" type="xs:unsignedLong"/> <!-- required if publisher connection defined -->
+           </xs:complexType>
+     </xs:element>
+     <xs:simpleType name="modeType">
+       <xs:restriction base="xs:string">
+         <xs:enumeration value="publisher"/>
+         <xs:enumeration value="subscriber"/>
+       </xs:restriction>
+     </xs:simpleType>
+     <xs:simpleType name="dataType">
+       <xs:restriction base="xs:string">
+         <xs:enumeration value="Null"/>
+         <xs:enumeration value="Boolean"/>
+         <xs:enumeration value="SByte"/>
+         <xs:enumeration value="Byte"/>
+         <xs:enumeration value="Int16"/>
+         <xs:enumeration value="UInt16"/>
+         <xs:enumeration value="Int32"/>
+         <xs:enumeration value="UInt32"/>
+         <xs:enumeration value="Int64"/>
+         <xs:enumeration value="UInt64"/>
+         <xs:enumeration value="Float"/>
+         <xs:enumeration value="Double"/>
+         <xs:enumeration value="DateTime"/>
+         <xs:enumeration value="String"/>
+         <xs:enumeration value="ByteString"/>
+         <xs:enumeration value="Guid"/>
+         <xs:enumeration value="XmlElement"/>
+         <xs:enumeration value="NodeId"/>
+         <xs:enumeration value="ExpandedNodeId"/>
+         <xs:enumeration value="QualifiedName"/>
+         <xs:enumeration value="LocalizedText"/>
+         <xs:enumeration value="StatusCode"/>
+         <xs:enumeration value="Structure"/>
+       </xs:restriction>
+     </xs:simpleType>
+ </xs:schema>
