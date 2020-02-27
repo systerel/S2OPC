@@ -79,6 +79,8 @@ static bool internal_registered_server_copy(OpcUa_RegisteredServer* dst, OpcUa_R
         }
     }
 
+    dst->ServerType = src->ServerType;
+
     status = SOPC_String_Copy(&dst->GatewayServerUri, &src->GatewayServerUri);
     if (SOPC_STATUS_OK != status)
     {
@@ -87,7 +89,7 @@ static bool internal_registered_server_copy(OpcUa_RegisteredServer* dst, OpcUa_R
 
     if (src->NoOfDiscoveryUrls > 0)
     {
-        dst->DiscoveryUrls = SOPC_Calloc((size_t) src->NoOfDiscoveryUrls, sizeof(SOPC_LocalizedText));
+        dst->DiscoveryUrls = SOPC_Calloc((size_t) src->NoOfDiscoveryUrls, sizeof(SOPC_String));
         if (NULL != dst->DiscoveryUrls)
         {
             dst->NoOfDiscoveryUrls = src->NoOfDiscoveryUrls;
@@ -130,7 +132,7 @@ static bool internal_mdns_config_copy(OpcUa_MdnsDiscoveryConfiguration* dst, Opc
 
     if (src->NoOfServerCapabilities > 0)
     {
-        dst->ServerCapabilities = SOPC_Calloc((size_t) src->NoOfServerCapabilities, sizeof(SOPC_LocalizedText));
+        dst->ServerCapabilities = SOPC_Calloc((size_t) src->NoOfServerCapabilities, sizeof(SOPC_String));
         if (NULL != dst->ServerCapabilities)
         {
             dst->NoOfServerCapabilities = src->NoOfServerCapabilities;

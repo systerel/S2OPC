@@ -179,7 +179,8 @@ static bool util_ApplicationDescription_addImplicitDiscoveryEndpoint(OpcUa_Appli
             return false;
         }
 
-        if (SOPC_STATUS_OK != SOPC_String_CopyFromCString(&dst->DiscoveryUrls[0], endpoint_config->endpointURL))
+        SOPC_ReturnStatus status = SOPC_String_CopyFromCString(&dst->DiscoveryUrls[0], endpoint_config->endpointURL);
+        if (SOPC_STATUS_OK != status)
         {
             SOPC_Free(dst->DiscoveryUrls);
             dst->DiscoveryUrls = NULL;
