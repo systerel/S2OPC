@@ -514,7 +514,7 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Write(SOPC_RT_Subscriber* in_sub, //
 
 // Beat heart. Use to read each input.
 // For each read input, user callback is invoked.
-SOPC_ReturnStatus SOPC_RT_Subscriber_BeatHeart(SOPC_RT_Subscriber* in_sub)
+SOPC_ReturnStatus SOPC_RT_Subscriber_HeartBeat(SOPC_RT_Subscriber* in_sub)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
     if (NULL == in_sub)

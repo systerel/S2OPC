@@ -139,8 +139,8 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Write(SOPC_RT_Subscriber* in_sub, //
                                                   uint8_t* in_data,           // Data to write
                                                   uint32_t in_size);          // Size to write
 
-// Beat heart. Use to read each input.
+// Heart beat. Use to read each input.
 // For each read input, user callback is invoked.
-SOPC_ReturnStatus SOPC_RT_Subscriber_BeatHeart(SOPC_RT_Subscriber* in_sub);
+SOPC_ReturnStatus SOPC_RT_Subscriber_HeartBeat(SOPC_RT_Subscriber* in_sub);
 
 #endif /* SOPC_RT_SUBSCRIBER_H_ */
