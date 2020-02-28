@@ -28,7 +28,7 @@
 #include "sopc_enums.h"
 #include "sopc_mem_alloc.h"
 
-#include "sopc_mailbox.h"
+#include "sopc_msgbox.h"
 
 // Pin direction enumeration.
 typedef enum SOPC_Pin_Direction
