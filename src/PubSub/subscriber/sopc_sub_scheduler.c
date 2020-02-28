@@ -189,7 +189,7 @@ static void* cbBeatHeartThreadCallback(void* arg)
 
     while (!schedulerCtx.bQuitSubcriberBeatHeart)
     {
-        result = SOPC_RT_Subscriber_BeatHeart(schedulerCtx.pRTSubscriber);
+        result = SOPC_RT_Subscriber_HeartBeat(schedulerCtx.pRTSubscriber);
         if (SOPC_STATUS_OK != result)
         {
             printf("# RT Subscriber beat heart thread error : %u\r\n", result);
