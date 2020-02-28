@@ -17,7 +17,7 @@
  * under the License.
  */
 
-#include "sopc_mailbox.h"
+#include "sopc_msgbox.h"
 
 // Private types definitions
 
