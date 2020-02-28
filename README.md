@@ -37,17 +37,17 @@ INGOPCS initial consortium:
     - http://opcfoundation.org/UA/SecurityPolicy#Basic256,
     - http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256.
 
-Client side (e.g.: `tests/services/toolkit_test_client.c`):
+Client side (e.g.: `samples/ClientServer/demo_client`):
 
 - Secure Channel configuration
 - Activate a session with an anonymous use or user identified by username/password
 - Send a service on session request (read, write, browse, subscribe, etc.)
 - Send a discovery service request (getEndpoints, findServer, registerServer, etc.)
-- Automated client libraries LibSub and wrapper (simplified interface, automated subscription):
-  see `tests/client_subscription/libs2opc_client.h` (e.g. `tests/client_subscription/client.c`) for LibSub or `tests/client_subscription/libs2opc_client_cmds.h` for the wrapper
+- Automated client libraries wrapper and LibSub (simplified interface, automated subscription):
+  see `src/ClientServer/frontend/client_wrapper/libs2opc_client_cmds.h` (e.g. `samples/ClientServer/client_wrapper`) for wrapper or `src/ClientServer/frontend/client_wrapper/libs2opc_client.h` for the LibSub
 - Python wrapper PyS2OPC for a client: see  `src/ClientServer/frontend/pys2opc/README.md`
 
-Server side (e.g.: `tests/services/toolkit_test_server.c`):
+Server side (e.g.: `samples/ClientServer/demo_server/toolkit_demo_server.c`):
 
 - Endpoint descriptions configuration on Toolkit initialization
 - 1 address space configuration on Toolkit initialization
@@ -97,16 +97,16 @@ It could be done using the Python C code generator prior to compilation or using
 #### Generation of C structure address space
 The `scripts/generate-s2opc-address-space.py` tool converts a UANodeSet XML file into a
 C file that can be compiled in the binary, and used with the embedded address
-space loader (see the `tests/data/address_space/parts/s2opc.xml`
+space loader (see the `samples/ClientServer/address_space/s2opc.xml`
 file for example). Not all the features of the schema are supported at the
 moment.
 
-S2OPC server can also dynamically load a UANodeSet XML at startup.
+S2OPC demo server can also dynamically load a UANodeSet XML at startup.
 To do so, set `TEST_SERVER_XML_ADDRESS_SPACE` to the location of the address space and launch the sample server.
 
 ### Server configuration
 
-The server configuration can be defined manually using the C structures defined in src/api_toolkit/sopc_user_app_itf.h (SOPC_S2OPC_Config).
+The server configuration can be defined manually using the C structures defined in src/ClientServer/api_toolkit/sopc_user_app_itf.h (SOPC_S2OPC_Config).
 It is also possible to use an XML parser for XML complying with schemas/s2opc_clientserver_config.xsd.
 The S2OPC demo server use a configuration for tests by default, to use a custom XML configuraiton file set `TEST_SERVER_XML_CONFIG` to its location.
 
@@ -254,7 +254,7 @@ Run all tests:
 
 Run OPC UA Compliance Test Tool (UACTT: tool available for OPC foundation corporate members only):
 - Run toolkit server in build/bin/ directory: ./toolkit_test_nano_server
-- Run the UACTT tests using the UACTT project configuration file acceptances_tests/Acceptation_S2OPC/Acceptation_S2OPC.ctt.xml
+- Run the UACTT tests using the UACTT project configuration file `tests/ClientServer/acceptance_tools/Acceptation_S2OPC/Acceptation_S2OPC.ctt.xml`
 
 Note: ./toolkit_test_nano_server shall be killed when test is finished
 Note 2: if compiled with WITH_NANO_EXTENDED set to 1, ./toolkit_test_nano_server binary name is changed to ./toolkit_test_server
