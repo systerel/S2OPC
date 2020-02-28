@@ -2748,7 +2748,16 @@ SOPC_ReturnStatus SOPC_LocalizedText_CopyFromArray(SOPC_LocalizedText* destSetOf
             if (SOPC_STATUS_OK == status)
             {
                 void* added = SOPC_SLinkedList_Append(destSetOfLt->localizedTextList, 0, lt);
-                status = (lt != added ? SOPC_STATUS_NOK : SOPC_STATUS_OK);
+                if (lt != added)
+                {
+                    status = SOPC_STATUS_OUT_OF_MEMORY;
+                }
+            }
+
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_LocalizedText_Clear(lt);
+                SOPC_Free(lt);
             }
         }
     }

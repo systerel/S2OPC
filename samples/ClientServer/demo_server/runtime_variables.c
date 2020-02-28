@@ -665,9 +665,10 @@ bool register_server(SOPC_Endpoint_Config* epConfig, uint32_t endpoint_config_id
                 {
                     status = SOPC_STATUS_OUT_OF_MEMORY;
                 }
-
-                status = (SOPC_STATUS_OK !=
-                          SOPC_String_AttachFromCstring(&request->Server.DiscoveryUrls[0], epConfig->endpointURL));
+                else
+                {
+                    status = SOPC_String_AttachFromCstring(&request->Server.DiscoveryUrls[0], epConfig->endpointURL);
+                }
 
                 if (SOPC_STATUS_OK == status)
                 {
