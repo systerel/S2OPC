@@ -32,7 +32,7 @@
 #include "sopc_types.h"
 
 #include "sopc_interrupttimer.h"
-#include "sopc_mailbox.h"
+#include "sopc_msgbox.h"
 #include "sopc_rt_publisher.h"
 #include "sopc_rt_subscriber.h"
 
