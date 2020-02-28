@@ -421,7 +421,7 @@ static void* cbBeatHeart(void* arg)
 #endif
     while (!bQuit)
     {
-        resultUpdateThread = SOPC_RT_Publisher_BeatHeart(myRTPub, beatHeart++);
+        resultUpdateThread = SOPC_RT_Publisher_HeartBeat(myRTPub, beatHeart++);
         if (resultUpdateThread != SOPC_STATUS_OK)
         {
 #ifdef DEBUG_RT_TEST
@@ -499,7 +499,7 @@ static void* cbBeatHeartThreadCallback(void* arg)
 
     while (!bQuit)
     {
-        result = SOPC_RT_Subscriber_BeatHeart(myRTSub);
+        result = SOPC_RT_Subscriber_HeartBeat(myRTSub);
         if (SOPC_STATUS_OK != result)
         {
 #ifdef DEBUG_RT_TEST
