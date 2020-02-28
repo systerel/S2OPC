@@ -26,7 +26,7 @@ from opcua import ua
 from tap_logger import TapLogger
 from pubsub_server import PubSubServer, PubSubState
 
-DEFAULT_URI = 'opc.tcp://localhost:4841'
+DEFAULT_URI = 'opc.tcp://localhost:4843'
 NID_CONFIGURATION = u"ns=1;s=PubSubConfiguration"
 NID_START_STOP = u"ns=1;s=PubSubStartStop"
 NID_STATUS = u"ns=1;s=PubSubStatus"
