@@ -447,7 +447,7 @@ static void* SOPC_RT_Publisher_ThreadBeatHeartCallback(void* arg)
 
     while (!pubSchedulerCtx.bQuitBeatHeart)
     {
-        resultUpdateThread = SOPC_RT_Publisher_BeatHeart(pubSchedulerCtx.pRTPublisher, beatHeart++);
+        resultUpdateThread = SOPC_RT_Publisher_HeartBeat(pubSchedulerCtx.pRTPublisher, beatHeart++);
         if (resultUpdateThread != SOPC_STATUS_OK)
         {
             printf("# RT Publisher tick thread: SOPC_RT_Publisher_BeatHeart error = %d\r\n", resultUpdateThread);
