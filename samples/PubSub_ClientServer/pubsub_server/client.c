@@ -33,7 +33,7 @@ typedef struct s_Cerkey
     SOPC_SerializedCertificate* client_cert;
     SOPC_SerializedAsymmetricKey* client_key;
     SOPC_SerializedCertificate* server_cert;
-    SOPC_SerializedCertificate* crt_ca;
+  //SOPC_SerializedCertificate* crt_ca;
     SOPC_PKIProvider* pkiProvider;
 } t_CerKey;
 
@@ -139,7 +139,7 @@ static SOPC_ReturnStatus CerAndKeyLoader_client()
         }
     }
 
-    if (SOPC_STATUS_OK == status)
+    /*    if (SOPC_STATUS_OK == status)
     {
         // Certificate Authority: load
         if (SOPC_STATUS_OK !=
@@ -160,7 +160,31 @@ static SOPC_ReturnStatus CerAndKeyLoader_client()
         {
             scConfigs[scConfigs_idx].pki = ck_cli[scConfigs_idx].pkiProvider;
         }
-    }
+        } */
+
+
+
+        if (SOPC_STATUS_OK == status)
+        {
+            char* lPathsTrustedRoots[] = {CA_CERT_PATH, NULL};
+            char* lPathsTrustedLinks[] = {NULL};
+            char* lPathsUntrustedRoots[] = {NULL};
+            char* lPathsUntrustedLinks[] = {NULL};
+            char* lPathsIssuedCerts[] = {NULL};
+            char* lPathsCRL[] = {CA_CRL_PATH, NULL};
+            status = SOPC_PKIProviderStack_CreateFromPaths(lPathsTrustedRoots, lPathsTrustedLinks, lPathsUntrustedRoots,
+                                                           lPathsUntrustedLinks, lPathsIssuedCerts, lPathsCRL, &ck_cli[scConfigs_idx].pkiProvider);
+            if (SOPC_STATUS_OK != status)
+            {
+                printf("# Error: Failed to create PKI\n");
+            } else {
+                scConfigs[scConfigs_idx].pki = ck_cli[scConfigs_idx].pkiProvider;
+            }
+              
+        }
+    
+
+
     if (SOPC_STATUS_OK != status)
     {
         printf("# Error: Client failed loading certificates and key (check paths are valid)\n");
@@ -421,7 +445,7 @@ void Client_Teardown()
         SOPC_KeyManager_SerializedAsymmetricKey_Delete((SOPC_SerializedAsymmetricKey*) scConfigs[i].key_priv_cli);
         SOPC_KeyManager_SerializedCertificate_Delete((SOPC_SerializedCertificate*) scConfigs[i].crt_srv);
         SOPC_PKIProvider_Free((SOPC_PKIProvider**) &(scConfigs[i].pki));
-        SOPC_KeyManager_SerializedCertificate_Delete((SOPC_SerializedCertificate*) ck_cli[i].crt_ca);
+        //SOPC_KeyManager_SerializedCertificate_Delete((SOPC_SerializedCertificate*) ck_cli[i].crt_ca);
         SOPC_GCC_DIAGNOSTIC_RESTORE
 
         scConfigs[i].crt_cli = NULL;
@@ -431,7 +455,7 @@ void Client_Teardown()
         ck_cli[i].client_cert = NULL;
         ck_cli[i].client_key = NULL;
         ck_cli[i].server_cert = NULL;
-        ck_cli[i].crt_ca = NULL;
+        //ck_cli[i].crt_ca = NULL;
         ck_cli[i].pkiProvider = NULL;
     }
 
