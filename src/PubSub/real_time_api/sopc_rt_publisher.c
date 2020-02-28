@@ -570,7 +570,7 @@ SOPC_ReturnStatus SOPC_RT_Publisher_SetMessageValue(SOPC_RT_Publisher* pPub, // 
 // Beat heart, this function invoke update function of interrupt timer. It should be called from IRQ or high priority
 // task. This function invoke user callback. So, this function should not take more time that period set and don't be
 // blocking.
-SOPC_ReturnStatus SOPC_RT_Publisher_BeatHeart(SOPC_RT_Publisher* pPub, // RT Publisher object
+SOPC_ReturnStatus SOPC_RT_Publisher_HeartBeat(SOPC_RT_Publisher* pPub, // RT Publisher object
                                               uint32_t tickValue)      // Cumulative tick value
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;

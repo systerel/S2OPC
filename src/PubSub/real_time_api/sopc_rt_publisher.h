@@ -96,10 +96,10 @@ void SOPC_RT_Publisher_Destroy(SOPC_RT_Publisher** ppPubRt);
 SOPC_ReturnStatus SOPC_RT_Publisher_Initialize(SOPC_RT_Publisher* pPub,                      // RT Publisher object
                                                SOPC_RT_Publisher_Initializer* pInitializer); // RT Publisher initializer
 
-// Beat heart, this function invoke update function of interrupt timer. It should be called from IRQ or high priority
+// Heart beat, this function invoke update function of interrupt timer. It should be called from IRQ or high priority
 // task. This function invoke user callback. So, this function should not take more time that period set and don't be
 // blocking.
-SOPC_ReturnStatus SOPC_RT_Publisher_BeatHeart(SOPC_RT_Publisher* pPub, // RT Publisher object
+SOPC_ReturnStatus SOPC_RT_Publisher_HeartBeat(SOPC_RT_Publisher* pPub, // RT Publisher object
                                               uint32_t tickValue);     // Cumulative tick value
 
 // Stop RT publisher
