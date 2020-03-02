@@ -1137,8 +1137,6 @@ START_TEST(test_server_client)
     // Install signal handler to close the server gracefully when server needs to stop
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
-    char* logDirPath = NULL;
-
     SOPC_S2OPC_Config s2opcConfig;
     SOPC_S2OPC_Config_Initialize(&s2opcConfig);
     SOPC_Server_Config* serverConfig = &s2opcConfig.serverConfig;
@@ -1163,6 +1161,11 @@ START_TEST(test_server_client)
     /* Initialize the server library (start library threads)
      * and define communication events callback */
     status = Server_Initialize();
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ToolkitConfig_SetCircularLogPath("./toolkit_test_server_client_logs", true);
+    }
 
     /* Configuration of server endpoint:
        - Enpoint URL,
@@ -1314,6 +1317,13 @@ START_TEST(test_server_client)
         }
     }
 
+    /* client request to close the connection */
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_ToolkitClient_AsyncCloseSession((uint32_t) SOPC_Atomic_Int_Get((int32_t*) &session));
+        SOPC_Sleep(2000);
+    }
+
     /* Asynchronous request to close the endpoint */
     if (SOPC_STATUS_OK == status)
     {
@@ -1343,7 +1353,6 @@ START_TEST(test_server_client)
 
     SOPC_AddressSpace_Delete(address_space);
     SOPC_S2OPC_Config_Clear(&s2opcConfig);
-    SOPC_Free(logDirPath);
 #ifdef WITH_STATIC_SECURITY_DATA
     SOPC_KeyManager_SerializedCertificate_Delete(static_cacert);
 #endif
