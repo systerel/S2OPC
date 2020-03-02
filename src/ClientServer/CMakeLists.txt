@@ -96,7 +96,13 @@ export(EXPORT s2opc_clientserver-export
 
 # C generated structure address space loader
 # (see s2opc_embed_address_space in CommonDefs.cmake to generate the C structure from XML)
-add_library(s2opc_clientserver-loader-embedded STATIC loaders/address_space_loaders/embedded/sopc_addspace_loader.c)
+# Note: this library is never compiled as a dynamic library on windows platform because it does not link
+#       due to the use of extern variables not defined during library linking phase
+if(WIN32)
+  add_library(s2opc_clientserver-loader-embedded STATIC loaders/address_space_loaders/embedded/sopc_addspace_loader.c)
+else()
+  add_library(s2opc_clientserver-loader-embedded loaders/address_space_loaders/embedded/sopc_addspace_loader.c)
+endif()
 target_compile_options(s2opc_clientserver-loader-embedded PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(s2opc_clientserver-loader-embedded PRIVATE ${S2OPC_DEFINITIONS})
 target_link_libraries(s2opc_clientserver-loader-embedded PUBLIC s2opc_clientserver)
@@ -121,11 +127,11 @@ install(EXPORT s2opc_clientserver-loader-embedded-export
 export(EXPORT s2opc_clientserver-loader-embedded-export
   FILE "${CMAKE_BINARY_DIR}/s2opc_clientserver-loader-embedded-export.cmake"
   )
-   
+
 # XML addresss space loader and XML server configuration loader
 if (EXPAT_FOUND)
   message(STATUS "Expat library found: XML server config loaders compilation active")
-  add_library(s2opc_clientserver-xml-loaders-expat STATIC loaders/helpers/sopc_helper_expat.c
+  add_library(s2opc_clientserver-xml-loaders-expat loaders/helpers/sopc_helper_expat.c
                                              loaders/address_space_loaders/xml_expat/sopc_uanodeset_loader.c
                                              loaders/config_loaders/xml_expat/sopc_config_loader.c)
   target_compile_options(s2opc_clientserver-xml-loaders-expat PRIVATE ${S2OPC_COMPILER_FLAGS})
