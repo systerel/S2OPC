@@ -121,7 +121,7 @@ target_include_directories(s2opc_common
   PUBLIC
   "$<BUILD_INTERFACE:${S2OPC_COMMON_PUBLIC_INCLUDES}>" # when building (quotes needed to interpret list correclty)
   $<INSTALL_INTERFACE:include> # when installed
-  PRIVATE ${S2OPC_COMMON_PRIVATE_INCLUDES} ${MBEDTLS_INCLUDE_DIRS})
+  PRIVATE ${S2OPC_COMMON_PRIVATE_INCLUDES})
 
 # Needed if we want to use the objects in a shared library
 set_target_properties(s2opc_common PROPERTIES POSITION_INDEPENDENT_CODE ON)
