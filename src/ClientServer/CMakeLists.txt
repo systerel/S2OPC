@@ -124,7 +124,7 @@ export(EXPORT s2opc_clientserver-loader-embedded-export
    
 # XML addresss space loader and XML server configuration loader
 if (EXPAT_FOUND)
-  message("-- Expat library found: XML server config loaders compilation active")
+  message(STATUS "Expat library found: XML server config loaders compilation active")
   add_library(s2opc_clientserver-xml-loaders-expat STATIC loaders/helpers/sopc_helper_expat.c
                                              loaders/address_space_loaders/xml_expat/sopc_uanodeset_loader.c
                                              loaders/config_loaders/xml_expat/sopc_config_loader.c)
@@ -139,7 +139,7 @@ if (EXPAT_FOUND)
                              PUBLIC
                              "$<BUILD_INTERFACE:${S2OPC_XML_LOADERS_PUBLIC_INCLUDES}>"
                              $<INSTALL_INTERFACE:include}> # when installed
-                             PRIVATE ${EXPAT_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/loaders/helpers)
+                             PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/loaders/helpers)
   set_property(TARGET s2opc_clientserver-xml-loaders-expat PROPERTY
                PUBLIC_HEADER "loaders/address_space_loaders/xml_expat/sopc_uanodeset_loader.h"
                              "loaders/config_loaders/xml_expat/sopc_config_loader.h")
