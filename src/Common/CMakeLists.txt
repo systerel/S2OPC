@@ -12,33 +12,6 @@ endif()
 ### Dependencies ###
 include (CheckTypeSize)
 
-# Keep a static version of the mbedtls libraries to link the tests
-set(MBEDTLS_CUSTOM_PATH 0)
-
-if(DEFINED MBEDTLS_LIBRARY)
-  set(MBEDTLS_CUSTOM_PATH 1)
-endif()
-
-set(MBEDTLS_USE_STATIC_LIBS 1)
-find_package(MbedTLS QUIET)
-set(MBEDTLS_STATIC_LIBRARIES ${MBEDTLS_LIBRARIES})
-
-# If the path to MbedTLS was not given manually by the user, we need to clear
-# those variables so that the second call to find_package below does a new
-# search.
-if (NOT ${MBEDTLS_CUSTOM_PATH})
-  unset(MBEDTLS_LIBRARY CACHE)
-  unset(MBEDX509_LIBRARY CACHE)
-  unset(MBEDCRYPTO_LIBRARY CACHE)
-endif()
-
-# Mandatory dependencies
-if (${BUILD_SHARED_LIBS})
-  set(MBEDTLS_USE_STATIC_LIBS 0)
-else()
-  set(MBEDTLS_USE_STATIC_LIBS 1)
-endif()
-
 find_package(MbedTLS REQUIRED)
 
 ### Compilation of S2OPC common library source files ###
@@ -64,7 +37,7 @@ else()
 endif()
 
 # Update variable containing S2OPC library dependencies
-list(APPEND S2OPC_COMMON_LINK_LIBRARIES ${MBEDTLS_LIBRARIES} ${MATH_LIB} ${THREAD_LIB} ${SOCK_LIB})
+list(APPEND S2OPC_COMMON_LINK_LIBRARIES MBEDTLS MBEDX509 MBEDCRYPTO ${MATH_LIB} ${THREAD_LIB} ${SOCK_LIB})
 
 file(GLOB PLATFORM_SRCS "helpers_platform_dep/*.c" "helpers_platform_dep/${PLATFORM_DIR}/*.c")
 

@@ -81,6 +81,7 @@ else
     append_cmake_option S2OPC_PUBSUB_ONLY
     append_cmake_option ENABLE_TESTING
     append_cmake_option ENABLE_SAMPLES
+    append_cmake_option USE_STATIC_EXT_LIBS
     echo "cmake $CMAKE_OPTIONS .." >> $CURDIR/build.log
     cmake $CMAKE_OPTIONS .. >> $CURDIR/build.log
     cd - > /dev/null || exit 1

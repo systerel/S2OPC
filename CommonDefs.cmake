@@ -26,10 +26,44 @@ endforeach(OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES)
 
 ### Common dependencies ###
 
+## Manage static/shared property of external libraries
+
+# Make CMake use static version of all dependencies by default
+option(USE_STATIC_EXT_LIBS "S2OPC libraries and binaries depend on static version of external libraries " ON)
+if(USE_STATIC_EXT_LIBS)
+  set(USE_STATIC_MBEDTLS_LIB ${USE_STATIC_EXT_LIBS})
+  set(USE_STATIC_EXPAT_LIB ${USE_STATIC_EXT_LIBS})
+  set(USE_STATIC_CHECK_LIB ${USE_STATIC_EXT_LIBS})
+
+  if(BUILD_SHARED_LIBS)
+    message("Both BUILD_SHARED_LIBS and USE_STATIC_EXT_LIBS are active: external libraries will still be linked statically")
+  endif()
+
+# else: USE_STATIC_<LIBNAME>_LIB can be set in a custom way, otherwise default CMake behavior is kept
+endif()
+
+## Expat dependency management
+
+# redefine CMake behavior for find_package(EXPAT ...) calling find_library(...) if needed
+if (USE_STATIC_EXPAT_LIB)
+  set(_expat_orig_lib_suffixes ${CMAKE_FIND_LIBRARY_SUFFIXES})
+
+  if(WIN32)
+    list(INSERT CMAKE_FIND_LIBRARY_SUFFIXES 0 .lib .a)
+  else()
+    set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
+  endif()
+endif()
+
 if(S2OPC_CLIENTSERVER_ONLY)
   find_package(EXPAT) # if not found XML loaders will not be compiled
 else()
   find_package(EXPAT REQUIRED)
+endif()
+
+# redefine CMake behavior for find_library(*)
+if (USE_STATIC_EXPAT_LIB)
+  set(CMAKE_FIND_LIBRARY_SUFFIXES ${_expat_orig_lib_suffixes})
 endif()
 
 ### Define default S2OPC compilation flags for several compilers ###
