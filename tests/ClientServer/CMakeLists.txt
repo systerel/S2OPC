@@ -100,7 +100,7 @@ if(ENABLE_TESTING)
 
   file(GLOB INTERNAL_TESTS_SRCS "unit_tests/helpers/*.c")
   add_executable(check_helpers ${INTERNAL_TESTS_SRCS} ${TEST_CHECK_HELPERS_ADDRESS_SPACE_C})
-  target_include_directories(check_helpers PRIVATE ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES} ${MBEDTLS_INCLUDE_DIRS} ${CHECK_INCLUDE_DIRS})
+  target_include_directories(check_helpers PRIVATE ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES} ${CHECK_INCLUDE_DIRS})
   target_link_libraries(check_helpers PRIVATE ${CHECK_LIBRARIES} s2opc_clientserver s2opc_clientserver-loader-embedded)
   target_compile_options(check_helpers PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(check_helpers PRIVATE ${S2OPC_DEFINITIONS})
@@ -156,7 +156,6 @@ if(ENABLE_TESTING)
                                                          "unit_tests/secure_channels"
                                                          "unit_tests/helpers"
                                                          ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES}
-                                                         ${MBEDTLS_INCLUDE_DIRS}
                                                          ${CHECK_INCLUDE_DIRS})
   s2opc_unit_test(check_sc_rcv_buffer)
 
@@ -178,7 +177,6 @@ if(ENABLE_TESTING)
                                                                    "unit_tests/secure_channels"
                                                                    "unit_tests/helpers"
                                                                    ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES}
-                                                                   ${MBEDTLS_INCLUDE_DIRS}
                                                                    ${CHECK_INCLUDE_DIRS})
   add_custom_command(
     TARGET check_sc_rcv_encrypted_buffer POST_BUILD
@@ -211,8 +209,7 @@ if(ENABLE_TESTING)
                                              ${SECURE_CHANNELS_CLIENT_TEST})
 
   target_include_directories(test_secure_channels_client PRIVATE "unit_tests/secure_channels/stubs"
-                                                                 ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES}
-                                                                 ${MBEDTLS_INCLUDE_DIRS})
+                                                                 ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
   target_compile_options(test_secure_channels_client PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(test_secure_channels_client PRIVATE ${S2OPC_DEFINITIONS})
   target_link_libraries(test_secure_channels_client PRIVATE ${S2OPC_LINKER_FLAGS} ${S2OPC_LINK_LIBRARIES} s2opc_common)
@@ -225,8 +222,7 @@ if(ENABLE_TESTING)
   target_compile_options(test_secure_channels_server PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(test_secure_channels_server PRIVATE ${S2OPC_DEFINITIONS})
   target_include_directories(test_secure_channels_server PRIVATE "unit_tests/secure_channels/stubs"
-                                                                 ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES}
-                                                                 ${MBEDTLS_INCLUDE_DIRS})
+                                                                 ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
 
 ## S2OPC fuzzing tests: to be run manually ##
 
@@ -500,14 +496,14 @@ if(ENABLE_TESTING)
 
   # Helpers unit tests
   add_executable(check_libsub "validation_tests/client_wrapper/check_libsub.c")
-  target_include_directories(check_libsub PRIVATE ${MBEDTLS_INCLUDE_DIRS} ${CHECK_INCLUDE_DIRS})
+  target_include_directories(check_libsub PRIVATE ${CHECK_INCLUDE_DIRS})
   target_compile_options(check_libsub PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(check_libsub PRIVATE ${S2OPC_DEFINITIONS})
   target_link_libraries(check_libsub PRIVATE s2opc_clientwrapper ${CHECK_LIBRARIES})
   s2opc_client_validation_test(check_libsub)
 
   add_executable(check_wrapper "validation_tests/client_wrapper/check_wrapper.c")
-  target_include_directories(check_wrapper PRIVATE ${MBEDTLS_INCLUDE_DIRS} ${CHECK_INCLUDE_DIRS})
+  target_include_directories(check_wrapper PRIVATE ${CHECK_INCLUDE_DIRS})
   target_compile_options(check_wrapper PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(check_wrapper PRIVATE ${S2OPC_DEFINITIONS})
   target_link_libraries(check_wrapper PRIVATE s2opc_clientwrapper ${CHECK_LIBRARIES})
