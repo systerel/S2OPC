@@ -44,12 +44,6 @@
 #include "test_results.h"
 #include "testlib_read_response.h"
 
-#ifdef WITH_STATIC_SECURITY_DATA
-#include "static_security_data.h"
-static SOPC_SerializedCertificate* static_cacert = NULL;
-static SOPC_CRLList* static_cacrl = NULL;
-#endif
-
 #define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"
 #define DEFAULT_APPLICATION_URI "urn:S2OPC:localhost"
 #define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost"
@@ -754,32 +748,6 @@ static SOPC_ReturnStatus Server_SetCryptographicConfig(SOPC_Server_Config* serve
 
     if (secuActive)
     {
-#ifdef WITH_STATIC_SECURITY_DATA
-        /* Load client/server certificates and server key from C source files (no filesystem needed) */
-        status = SOPC_KeyManager_SerializedCertificate_CreateFromDER(server_2k_cert, sizeof(server_2k_cert),
-                                                                     &serverConfig->serverCertificate);
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromData(server_2k_key, sizeof(server_2k_key),
-                                                                            &serverConfig->serverKey);
-        }
-
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_KeyManager_SerializedCertificate_CreateFromDER(cacert, sizeof(cacert), &static_cacert);
-        }
-
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_KeyManager_CRL_CreateOrAddFromDER(cacrl, sizeof(cacrl), &static_cacrl);
-        }
-
-        /* Create the PKI (Public Key Infrastructure) provider */
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_PKIProviderStack_Create(static_cacert, static_cacrl, &serverConfig->pki);
-        }
-#else // WITH_STATIC_SECURITY_DATA == false
         /* Load client/server certificates and server key from files */
         status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(serverConfig->serverCertPath,
                                                                       &serverConfig->serverCertificate);
@@ -797,7 +765,6 @@ static SOPC_ReturnStatus Server_SetCryptographicConfig(SOPC_Server_Config* serve
                 serverConfig->untrustedRootIssuersList, serverConfig->untrustedIntermediateIssuersList,
                 serverConfig->issuedCertificatesList, serverConfig->certificateRevocationPathList, &serverConfig->pki);
         }
-#endif
 
         if (SOPC_STATUS_OK != status)
         {
@@ -1163,9 +1130,6 @@ START_TEST(test_server_client)
 
     SOPC_AddressSpace_Delete(address_space);
     SOPC_S2OPC_Config_Clear(&s2opcConfig);
-#ifdef WITH_STATIC_SECURITY_DATA
-    SOPC_KeyManager_SerializedCertificate_Delete(static_cacert);
-#endif
 }
 END_TEST
 
