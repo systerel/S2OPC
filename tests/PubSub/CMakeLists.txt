@@ -22,7 +22,7 @@ find_package(PythonInterp 3 REQUIRED)
 
 # We always link check statically, so that our test binaries are standalone
 if(ENABLE_TESTING)
-  find_package(Check REQUIRED)
+  find_package(check REQUIRED)
 endif()
 
 
@@ -80,7 +80,7 @@ if(ENABLE_TESTING)
 ## S2OPC PubSub unit tests ##
 
   add_executable(xml_parser_test "unit_tests/xml_parser_test.c")
-  target_link_libraries(xml_parser_test PRIVATE s2opc_pubsub CHECK)
+  target_link_libraries(xml_parser_test PRIVATE s2opc_pubsub Check::check)
   target_compile_options(xml_parser_test PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(xml_parser_test PRIVATE ${S2OPC_DEFINITIONS})
 
@@ -91,7 +91,7 @@ if(ENABLE_TESTING)
   s2opc_unit_test(xml_parser_test)
 
   add_executable(pubsub_modules_test "unit_tests/pubsub_modules_test.c")
-  target_link_libraries(pubsub_modules_test PRIVATE s2opc_pubsub CHECK)
+  target_link_libraries(pubsub_modules_test PRIVATE s2opc_pubsub Check::check)
   target_compile_options(pubsub_modules_test PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(pubsub_modules_test PRIVATE ${S2OPC_DEFINITIONS})
 

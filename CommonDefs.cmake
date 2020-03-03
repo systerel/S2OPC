@@ -33,7 +33,6 @@ option(USE_STATIC_EXT_LIBS "S2OPC libraries and binaries depend on static versio
 if(USE_STATIC_EXT_LIBS)
   set(USE_STATIC_MBEDTLS_LIB ${USE_STATIC_EXT_LIBS})
   set(USE_STATIC_EXPAT_LIB ${USE_STATIC_EXT_LIBS})
-  set(USE_STATIC_CHECK_LIB ${USE_STATIC_EXT_LIBS})
 
   if(BUILD_SHARED_LIBS)
     message("Both BUILD_SHARED_LIBS and USE_STATIC_EXT_LIBS are active: external libraries will still be linked statically")

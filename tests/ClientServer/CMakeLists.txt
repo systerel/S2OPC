@@ -22,9 +22,8 @@ find_package(PythonInterp 3 REQUIRED)
 
 # We always link check statically, so that our test binaries are standalone
 if(ENABLE_TESTING)
-  find_package(Check REQUIRED)
+  find_package(check REQUIRED)
 endif()
-
 
 #### Tests for S2OPC library and extension libraries ####
 
@@ -95,7 +94,7 @@ if(ENABLE_TESTING)
   file(GLOB INTERNAL_TESTS_SRCS "unit_tests/helpers/*.c")
   add_executable(check_helpers ${INTERNAL_TESTS_SRCS} ${TEST_CHECK_HELPERS_ADDRESS_SPACE_C})
   target_include_directories(check_helpers PRIVATE ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
-  target_link_libraries(check_helpers PRIVATE CHECK s2opc_clientserver s2opc_clientserver-loader-embedded)
+  target_link_libraries(check_helpers PRIVATE Check::check s2opc_clientserver s2opc_clientserver-loader-embedded)
   target_compile_options(check_helpers PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(check_helpers PRIVATE ${S2OPC_DEFINITIONS})
   if(EXPAT_FOUND)
@@ -125,7 +124,7 @@ if(ENABLE_TESTING)
   target_include_directories(check_sockets PRIVATE ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
   target_compile_options(check_sockets PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(check_sockets PRIVATE ${S2OPC_DEFINITIONS})
-  target_link_libraries(check_sockets PRIVATE CHECK s2opc_clientserver)
+  target_link_libraries(check_sockets PRIVATE Check::check s2opc_clientserver)
   s2opc_unit_test(check_sockets)
 
   # Secure channels (stubbed on services side) tests
@@ -143,7 +142,7 @@ if(ENABLE_TESTING)
 
   add_executable(check_sc_rcv_buffer ${SECURE_CHANNELS_SRC}
                                      ${SECURE_CHANNELS_BUFFER_TEST})
-  target_link_libraries(check_sc_rcv_buffer PRIVATE CHECK ${S2OPC_LINKER_FLAGS} ${S2OPC_LINK_LIBRARIES} s2opc_common)
+  target_link_libraries(check_sc_rcv_buffer PRIVATE Check::check ${S2OPC_LINKER_FLAGS} ${S2OPC_LINK_LIBRARIES} s2opc_common)
   target_compile_options(check_sc_rcv_buffer PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(check_sc_rcv_buffer PRIVATE ${S2OPC_DEFINITIONS})
   target_include_directories(check_sc_rcv_buffer PRIVATE "unit_tests/secure_channels/stubs"
@@ -163,7 +162,7 @@ if(ENABLE_TESTING)
 
   add_executable(check_sc_rcv_encrypted_buffer ${SECURE_CHANNELS_SRC}
                                                ${SECURE_CHANNELS_ENCRYPTED_BUFFER_TEST})
-  target_link_libraries(check_sc_rcv_encrypted_buffer PRIVATE CHECK ${S2OPC_LINKER_FLAGS} ${S2OPC_LINK_LIBRARIES} s2opc_common)
+  target_link_libraries(check_sc_rcv_encrypted_buffer PRIVATE Check::check ${S2OPC_LINKER_FLAGS} ${S2OPC_LINK_LIBRARIES} s2opc_common)
   target_compile_options(check_sc_rcv_encrypted_buffer PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(check_sc_rcv_encrypted_buffer PRIVATE ${S2OPC_DEFINITIONS})
   target_include_directories(check_sc_rcv_encrypted_buffer PRIVATE "unit_tests/secure_channels/stubs"
@@ -314,7 +313,7 @@ if(ENABLE_TESTING)
                                            # Use code common with samples
                                            "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_client/config.c"
                                            "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_client/state_machine.c")
-  target_link_libraries(toolkit_test_suite_client PRIVATE s2opc_clientserver CHECK)
+  target_link_libraries(toolkit_test_suite_client PRIVATE s2opc_clientserver Check::check)
   target_include_directories(toolkit_test_suite_client PRIVATE ${S2OPC_CLIENTDEMO_INCLUDES})
   target_compile_options(toolkit_test_suite_client PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(toolkit_test_suite_client PRIVATE ${S2OPC_DEFINITIONS})
@@ -490,13 +489,13 @@ if(ENABLE_TESTING)
   add_executable(check_libsub "validation_tests/client_wrapper/check_libsub.c")
   target_compile_options(check_libsub PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(check_libsub PRIVATE ${S2OPC_DEFINITIONS})
-  target_link_libraries(check_libsub PRIVATE s2opc_clientwrapper CHECK)
+  target_link_libraries(check_libsub PRIVATE s2opc_clientwrapper Check::check)
   s2opc_client_validation_test(check_libsub)
 
   add_executable(check_wrapper "validation_tests/client_wrapper/check_wrapper.c")
   target_compile_options(check_wrapper PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(check_wrapper PRIVATE ${S2OPC_DEFINITIONS})
-  target_link_libraries(check_wrapper PRIVATE s2opc_clientwrapper CHECK)
+  target_link_libraries(check_wrapper PRIVATE s2opc_clientwrapper Check::check)
   s2opc_client_validation_test(check_wrapper)
 
 ## PyS2OPC library validation tests ##
