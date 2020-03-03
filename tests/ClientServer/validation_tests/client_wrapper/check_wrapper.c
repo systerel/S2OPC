@@ -128,6 +128,70 @@ START_TEST(test_wrapper_initialize_finalize)
 }
 END_TEST
 
+START_TEST(test_wrapper_create_configuration)
+{
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0, NULL));
+
+    /* configuration of a valid endpoint */
+    int32_t valid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, valid_security_none);
+    ck_assert_int_gt(valid_conf_id, 0);
+
+    /* check multiple configurations */
+    int32_t conf_ids[5];
+    conf_ids[0] = SOPC_ClientHelper_CreateConfiguration(valid_url, valid_security_none);
+    ck_assert_int_gt(conf_ids[0], 0);
+    conf_ids[1] = SOPC_ClientHelper_CreateConfiguration(valid_url, valid_security_none);
+    ck_assert_int_gt(conf_ids[1], 0);
+    conf_ids[2] = SOPC_ClientHelper_CreateConfiguration(valid_url, valid_security_none);
+    ck_assert_int_gt(conf_ids[2], 0);
+    conf_ids[3] = SOPC_ClientHelper_CreateConfiguration(valid_url, valid_security_none);
+    ck_assert_int_gt(conf_ids[3], 0);
+    conf_ids[4] = SOPC_ClientHelper_CreateConfiguration(valid_url, valid_security_none);
+    ck_assert_int_gt(conf_ids[4], 0);
+
+    SOPC_ClientHelper_Finalize();
+
+    /* configure a connection without wrapper being initialized */
+    ck_assert_int_eq(-100, SOPC_ClientHelper_CreateConfiguration(valid_url, valid_security_none));
+}
+END_TEST
+
+START_TEST(test_wrapper_create_connection)
+{
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0, NULL));
+
+    /* configuration of a valid endpoint */
+    int32_t valid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, valid_security_none);
+    ck_assert_int_gt(valid_conf_id, 0);
+
+    /* configuration of an invalid url */
+    int32_t invalid_conf_id = SOPC_ClientHelper_CreateConfiguration(invalid_url, valid_security_none);
+    ck_assert_int_gt(invalid_conf_id, 0);
+
+    /* connect using a valid configuration */
+    int32_t valid_con_id = SOPC_ClientHelper_CreateConnection(valid_conf_id);
+    ck_assert_int_gt(valid_con_id, 0);
+    ck_assert_int_eq(0, SOPC_ClientHelper_Disconnect(valid_con_id));
+
+    /* connect using an invalid configuration */
+    int32_t invalid_con_id = SOPC_ClientHelper_CreateConnection(invalid_conf_id);
+    ck_assert_int_eq(invalid_con_id, -100);
+
+    /* connect using a non-existing configuration */
+    int32_t invalid_con_id_2 = SOPC_ClientHelper_CreateConnection(valid_conf_id + invalid_conf_id);
+    ck_assert_int_eq(invalid_con_id_2, -100);
+
+    /* connect using a non-existing configuration */
+    int32_t invalid_con_id_3 = SOPC_ClientHelper_CreateConnection(-1);
+    ck_assert_int_eq(invalid_con_id_3, -1);
+
+    SOPC_ClientHelper_Finalize();
+
+    /* connect without wrapper being initialized */
+    ck_assert_int_eq(-100, SOPC_ClientHelper_CreateConnection(valid_conf_id));
+}
+END_TEST
+
 START_TEST(test_wrapper_connect)
 {
     ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0, NULL));
@@ -1086,6 +1150,8 @@ static Suite* tests_make_suite_wrapper(void)
     // Add a teardown to guarantee the call to SOPC_ClientHelper_Finalize after each test
     tcase_add_checked_fixture(tc_wrapper, setup, teardown);
     tcase_add_test(tc_wrapper, test_wrapper_initialize_finalize);
+    tcase_add_test(tc_wrapper, test_wrapper_create_configuration);
+    tcase_add_test(tc_wrapper, test_wrapper_create_connection);
     tcase_add_test(tc_wrapper, test_wrapper_connect);
     tcase_add_test(tc_wrapper, test_wrapper_connect_invalid_arguments);
     tcase_add_test(tc_wrapper, test_wrapper_disconnect);
