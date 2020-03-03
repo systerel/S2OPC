@@ -64,12 +64,21 @@ int main(int argc, char* const argv[])
 
     /* connect to the endpoint */
     int32_t configurationId = SOPC_ClientHelper_CreateConfiguration(endpoint_url, security);
-    int32_t connectionId = SOPC_ClientHelper_CreateConnection(configurationId);
-
-    if (connectionId <= 0)
+    if (configurationId <= 0)
     {
-        /* connectionId is invalid */
         res = -1;
+    }
+
+    int32_t connectionId = 0;
+    if (0 == res)
+    {
+        connectionId = SOPC_ClientHelper_CreateConnection(configurationId);
+
+        if (connectionId <= 0)
+        {
+            /* connectionId is invalid */
+            res = -1;
+        }
     }
 
     if (0 == res)
