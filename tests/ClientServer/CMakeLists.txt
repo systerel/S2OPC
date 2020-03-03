@@ -130,6 +130,16 @@ if(ENABLE_TESTING)
     COMMAND ${CMAKE_COMMAND} -E copy ${TEST_USERS_UACTT_CONFIG_XML} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     COMMAND ${CMAKE_COMMAND} -E copy ${TEST_ADDRESS_SPACE_XML} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
+  # SKS tests
+
+  file(GLOB INTERNAL_TESTS_SKS_SRCS "unit_tests/sks/*.c")
+  add_executable(check_sks ${INTERNAL_TESTS_SKS_SRCS})
+  target_include_directories(check_sks PRIVATE ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
+  target_compile_options(check_sks PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(check_sks PRIVATE ${S2OPC_DEFINITIONS})
+  target_link_libraries(check_sks PRIVATE Check::check s2opc_clientserver)
+  s2opc_unit_test(check_sks)
+
   # Sockets layer tests
 
   add_executable(check_sockets "unit_tests/sockets/check_sockets.c")

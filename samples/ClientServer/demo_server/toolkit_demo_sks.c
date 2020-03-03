@@ -33,6 +33,10 @@
 #include "sopc_encodeable.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
+#include "sopc_sk_builder.h"
+#include "sopc_sk_manager.h"
+#include "sopc_sk_ordonnancer.h"
+#include "sopc_sk_provider.h"
 #include "sopc_time.h"
 #include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config.h"
@@ -156,50 +160,15 @@ typedef enum
 SOPC_NodeId* methodIds[1] = {NULL};
 uint32_t nbMethodIds = 0;
 
+/* SKS Data  */
+SOPC_SKManager* skManager;
+SOPC_SKOrdonnancer* skOrdonnancer;
+
 static SOPC_StatusCode Server_InitDefaultCallMethodService(SOPC_Server_Config* serverConfig);
 
 /*---------------------------------------------------------------------------
  *                          Callbacks definition
  *---------------------------------------------------------------------------*/
-
-static SOPC_StatusCode SOPC_SKS_CopyKeyFromFile(const char* path, const uint32_t size, SOPC_Byte* keys)
-{
-    SOPC_StatusCode status = SOPC_GoodGenericStatus;
-    SOPC_SecretBuffer* secret_buffer = SOPC_SecretBuffer_NewFromFile(path);
-    if (NULL == secret_buffer)
-    {
-        status = OpcUa_BadInternalError;
-    }
-
-    if (SOPC_GoodGenericStatus == status)
-    {
-        if (size != SOPC_SecretBuffer_GetLength(secret_buffer))
-        {
-            printf("<Security Key Service: Bad key size\n");
-            status = OpcUa_BadInternalError;
-        }
-    }
-
-    if (SOPC_GoodGenericStatus == status)
-    {
-        const SOPC_ExposedBuffer* buffer = SOPC_SecretBuffer_Expose(secret_buffer);
-
-        if (NULL == buffer)
-        {
-            status = OpcUa_BadInternalError;
-        }
-        else
-        {
-            memcpy(keys, buffer, size);
-            SOPC_SecretBuffer_Unexpose(buffer, secret_buffer);
-        }
-    }
-    if (NULL != secret_buffer)
-    {
-        SOPC_SecretBuffer_DeleteClear(secret_buffer);
-    }
-    return status;
-}
 
 static SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_getSecurityKeys(const SOPC_CallContext* callContextPtr,
                                                                          const SOPC_NodeId* objectId,
@@ -232,6 +201,13 @@ static SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_getSecurityKeys(const S
         return OpcUa_BadNotFound;
     }
 
+    if (SOPC_UInt32_Id != inputArgs[1].BuiltInTypeId || SOPC_VariantArrayType_SingleValue != inputArgs[1].ArrayType)
+    {
+        return OpcUa_BadInternalError;
+    }
+
+    uint32_t requestedStartingTokenId = inputArgs[1].Value.Uint32;
+
     const SOPC_User* user = SOPC_CallContext_GetUser(callContextPtr);
     /* Check if the user is authorized to call the method for this Security Group */
     if (SOPC_User_IsUsername(user))
@@ -263,13 +239,64 @@ static SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_getSecurityKeys(const S
         SOPC_Variant_Initialize(variant);
     }
 
+    SOPC_String* SecurityPolicyUri = NULL;
+    uint32_t FirstTokenId = 0;
+    SOPC_ByteString* Keys = NULL;
+    uint32_t NbToken = 0;
+    uint32_t TimeToNextKey = 0;
+    uint32_t KeyLifetime = 0;
+
+    if (SOPC_GoodGenericStatus == status)
+    {
+        status = SOPC_SKManager_GetKeys(skManager, requestedStartingTokenId, &SecurityPolicyUri, &FirstTokenId, &Keys,
+                                        &NbToken, &TimeToNextKey, &KeyLifetime);
+        if (SOPC_GoodGenericStatus == status)
+        {
+            printf("<Security Key Service: key retrieved\n");
+        }
+        else
+        {
+            printf("<Security Key Service: Error in SK Manager when get keys\n");
+        }
+
+        if (NULL == SecurityPolicyUri)
+        {
+            printf("<Security Key Service: Error with securitypolicy\n");
+        }
+
+        if (NULL == Keys || 0 == NbToken)
+        {
+            printf("<Security Key Service: Error with Keys\n");
+        }
+        if (0 == FirstTokenId)
+        {
+            printf("<Security Key Service: Error with First token id\n");
+        }
+        if (0 == TimeToNextKey)
+        {
+            printf("<Security Key Service: Error with TimeToNextKey\n");
+        }
+        else
+        {
+            printf("<Security Key Service: TimeToNextKey is %u\n", TimeToNextKey);
+        }
+        if (0 == KeyLifetime)
+        {
+            printf("<Security Key Service: Error with KeyLifetime\n");
+        }
+        else
+        {
+            printf("<Security Key Service: KeyLifetime is %u\n", KeyLifetime);
+        }
+    }
+
     if (SOPC_GoodGenericStatus == status)
     {
         /* SecurityPolicyUri */
         variant = &((*outputArgs)[0]);
         variant->BuiltInTypeId = SOPC_String_Id;
         variant->ArrayType = SOPC_VariantArrayType_SingleValue;
-        SOPC_String_CopyFromCString(&variant->Value.String, SOPC_SecurityPolicy_PubSub_Aes256_URI);
+        SOPC_String_Copy(&variant->Value.String, SecurityPolicyUri);
     }
 
     if (SOPC_GoodGenericStatus == status)
@@ -278,7 +305,7 @@ static SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_getSecurityKeys(const S
         variant = &((*outputArgs)[1]);
         variant->BuiltInTypeId = SOPC_UInt32_Id; /* IntegerId */
         variant->ArrayType = SOPC_VariantArrayType_SingleValue;
-        variant->Value.Uint32 = 1;
+        variant->Value.Uint32 = FirstTokenId;
     }
 
     if (SOPC_GoodGenericStatus == status)
@@ -296,39 +323,14 @@ static SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_getSecurityKeys(const S
         }
         else
         {
-            uint32_t size = 32 + 32 + 4;
-            SOPC_Byte* keys = SOPC_Calloc(size, sizeof(SOPC_Byte));
-
-            if (NULL != keys)
-            {
-                status = SOPC_SKS_CopyKeyFromFile(SKS_KEYS_FILES_SIGNING_KEY, 32, keys);
-            }
             if (SOPC_GoodGenericStatus == status)
             {
-                status = SOPC_SKS_CopyKeyFromFile(SKS_KEYS_FILES_ENCRYPT_KEY, 32, &keys[32]);
-            }
-            else
-            {
-                printf("<Security Key Service: cannont load signing key\n");
-            }
-
-            if (SOPC_GoodGenericStatus == status)
-            {
-                status = SOPC_SKS_CopyKeyFromFile(SKS_KEYS_FILES_KEY_NONCE, 4, &keys[64]);
-            }
-            else
-            {
-                printf("<Security Key Service: cannont load encrypt key\n");
-            }
-            if (SOPC_GoodGenericStatus == status)
-            {
-                SOPC_ByteString_CopyFromBytes(&variant->Value.Array.Content.BstringArr[0], keys, 32 + 32 + 4);
+                SOPC_ByteString_Copy(&variant->Value.Array.Content.BstringArr[0], &Keys[0]);
             }
             else
             {
                 printf("<Security Key Service: cannont load key nonce\n");
             }
-            SOPC_Free(keys);
         }
     }
 
@@ -338,7 +340,7 @@ static SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_getSecurityKeys(const S
         variant = &((*outputArgs)[3]);
         variant->BuiltInTypeId = SOPC_Double_Id; /* Duration */
         variant->ArrayType = SOPC_VariantArrayType_SingleValue;
-        variant->Value.Doublev = 0;
+        variant->Value.Doublev = (double) TimeToNextKey;
     }
 
     if (SOPC_GoodGenericStatus == status)
@@ -347,9 +349,10 @@ static SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_getSecurityKeys(const S
         variant = &((*outputArgs)[4]);
         variant->BuiltInTypeId = SOPC_Double_Id; /* Duration */
         variant->ArrayType = SOPC_VariantArrayType_SingleValue;
-        variant->Value.Doublev = 0;
+        variant->Value.Doublev = (double) KeyLifetime;
     }
 
+    /* If bad status, delete output */
     if (SOPC_GoodGenericStatus != status)
     {
         for (uint32_t i = 0; i < 5; i++)
@@ -360,6 +363,15 @@ static SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_getSecurityKeys(const S
         SOPC_Free(*outputArgs);
         *outputArgs = NULL;
     }
+
+    /* Delete Keys */
+    for (uint32_t i = 0; i < NbToken; i++)
+    {
+        SOPC_ByteString_Clear(&Keys[i]);
+    }
+    SOPC_Free(Keys);
+    SOPC_String_Clear(SecurityPolicyUri);
+    SOPC_Free(SecurityPolicyUri);
 
     return SOPC_GoodGenericStatus;
 }
@@ -504,6 +516,93 @@ static SOPC_StatusCode Server_InitDefaultCallMethodService(SOPC_Server_Config* s
             status = SOPC_STATUS_NOK;
         }
     }
+
+    /* Init SK Manager */
+    if (SOPC_STATUS_OK == status)
+    {
+        skManager = SOPC_SKManager_Create();
+        if (NULL == skManager)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_SKManager_SetKeyLifetime(skManager, 3 * 1000); /* 3s */
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_String policy;
+        SOPC_String_Initialize(&policy);
+        SOPC_String_CopyFromCString(&policy, SOPC_SecurityPolicy_PubSub_Aes256_URI);
+        status = SOPC_SKManager_SetSecurityPolicyUri(skManager, &policy);
+        SOPC_String_Clear(&policy);
+    }
+
+    SOPC_SKProvider* skProvider;
+    if (SOPC_STATUS_OK == status)
+    {
+        skProvider = SOPC_SKProvider_RandomPubSub_Create();
+        if (NULL == skProvider)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+    // fill with one token
+
+    SOPC_SKBuilder* skbAppend;
+    if (SOPC_STATUS_OK == status)
+    {
+        skbAppend = SOPC_SKBuilder_Append_Create();
+        if (NULL == skbAppend)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+
+    SOPC_SKBuilder* skbTruncate;
+    if (SOPC_STATUS_OK == status)
+    {
+        skbTruncate = SOPC_SKBuilder_Truncate_Create(skbAppend, 20);
+        if (NULL == skbTruncate)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        skOrdonnancer = SOPC_SKOrdonnancer_Create();
+        if (NULL == skOrdonnancer)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        /* Init the task with 1s */
+        status = SOPC_SKOrdonnancer_AddTask(skOrdonnancer, skbTruncate, skProvider, skManager, 1 * 1000);
+        if (SOPC_STATUS_OK != status)
+        {
+            printf("<Security Keys Service : adding task to ordonnancer failed\n");
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_SKOrdonnancer_Start(skOrdonnancer);
+        if (SOPC_STATUS_OK != status)
+        {
+            printf("<Security Keys Service : Starting ordonnancer failed\n");
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        printf("<Security Keys Service : Initialized\n");
+    }
+
     return status;
 }
 
@@ -1191,6 +1290,11 @@ int main(int argc, char* argv[])
             SOPC_Free(methodIds[i]);
         }
     }
+
+    SOPC_SKOrdonnancer_StopAndClear(skOrdonnancer);
+    SOPC_Free(skOrdonnancer);
+    SOPC_SKManager_Clear(skManager);
+    SOPC_Free(skManager);
 
     SOPC_AddressSpace_Delete(address_space);
     SOPC_S2OPC_Config_Clear(&s2opcConfig);

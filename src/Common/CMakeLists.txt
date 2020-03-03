@@ -67,6 +67,7 @@ file(GLOB_RECURSE S2OPC_COMMON_SRCS
     "configuration/*.c"
     "helpers/*.c"
     "crypto/*.c"
+    "sks/*.c"
     "opcua_types/*.c"
 )
 
@@ -75,6 +76,7 @@ set(S2OPC_COMMON_PUBLIC_INCLUDES
     "${CMAKE_CURRENT_SOURCE_DIR}/helpers"
     "${CMAKE_CURRENT_SOURCE_DIR}/opcua_types"
     "${CMAKE_CURRENT_SOURCE_DIR}/crypto"
+    "${CMAKE_CURRENT_SOURCE_DIR}/sks"
     "${CMAKE_CURRENT_SOURCE_DIR}/helpers_platform_dep"
     "${CMAKE_CURRENT_SOURCE_DIR}/helpers_platform_dep/${PLATFORM_DIR}"
 )
