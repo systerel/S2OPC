@@ -44,11 +44,6 @@
 #include "test_results.h"
 #include "testlib_read_response.h"
 
-#ifdef WITH_EXPAT
-#include "xml_expat/sopc_config_loader.h"
-#include "xml_expat/sopc_uanodeset_loader.h"
-#endif
-
 #ifdef WITH_STATIC_SECURITY_DATA
 #include "static_security_data.h"
 static SOPC_SerializedCertificate* static_cacert = NULL;
@@ -124,22 +119,6 @@ static int32_t write_test_status = 0;
 
 // Sleep timeout in milliseconds
 static const uint32_t sleepTimeout = 500;
-
-typedef enum
-{
-    AS_LOADER_EMBEDDED,
-#ifdef WITH_EXPAT
-    AS_LOADER_EXPAT,
-#endif
-} AddressSpaceLoader;
-
-typedef enum
-{
-    SRV_LOADER_DEFAULT_CONFIG,
-#ifdef WITH_EXPAT
-    SRV_LOADER_EXPAT_XML_CONFIG,
-#endif
-} ServerConfigLoader;
 
 #define SHUTDOWN_PHASE_IN_SECONDS 5
 
@@ -732,71 +711,17 @@ static bool Server_LoadDefaultConfiguration(SOPC_S2OPC_Config* output_s2opcConfi
     return SOPC_STATUS_OK == status;
 }
 
-#ifdef WITH_EXPAT
-static bool load_config_from_file(const char* filename, SOPC_S2OPC_Config* s2opcConfig)
-{
-    FILE* fd = fopen(filename, "r");
-
-    if (fd == NULL)
-    {
-        printf("<Test_Server_Toolkit: Error while opening %s: %s\n", filename, strerror(errno));
-        return false;
-    }
-
-    bool res = SOPC_Config_Parse(fd, s2opcConfig);
-    fclose(fd);
-
-    if (res)
-    {
-        printf("<Test_Server_Toolkit: Loaded configuration from %s\n", filename);
-    }
-    else
-    {
-        printf("<Test_Server_Toolkit: Error while parsing XML configuration file\n");
-    }
-
-    return res;
-}
-#endif
-
 static SOPC_ReturnStatus Server_LoadServerConfiguration(SOPC_S2OPC_Config* output_s2opcConfig)
 {
     /* Load server endpoints configuration
-     * If WITH_EXPAT environment variable defined,
-     * retrieve XML file path from environment variable TEST_SERVER_XML_CONFIG.
-     * In case of success, use the dynamic server configuration loader from an XML file.
-     *
-     * Otherwise use an embedded default demo server configuration.
+     * use an embedded default demo server configuration.
      */
     assert(NULL != output_s2opcConfig);
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    ServerConfigLoader config_loader = SRV_LOADER_DEFAULT_CONFIG;
 
-#ifdef WITH_EXPAT
-    const char* xml_file_path = getenv("TEST_SERVER_XML_CONFIG");
-
-    if (xml_file_path != NULL)
-    {
-        config_loader = SRV_LOADER_EXPAT_XML_CONFIG;
-    }
-#endif
-
-    bool res = false;
     /* Load the address space using loader */
-    switch (config_loader)
-    {
-    case SRV_LOADER_DEFAULT_CONFIG:
-        res = Server_LoadDefaultConfiguration(output_s2opcConfig);
-        break;
-#ifdef WITH_EXPAT
-    case SRV_LOADER_EXPAT_XML_CONFIG:
-        res = load_config_from_file(xml_file_path, output_s2opcConfig);
-        break;
-#endif
-    default:
-        assert(false);
-    }
+    bool res = Server_LoadDefaultConfiguration(output_s2opcConfig);
 
     /* Check properties on configuration */
     if (res)
@@ -1019,96 +944,19 @@ static SOPC_ReturnStatus Server_SetUserManagementConfig(SOPC_Endpoint_Config* pE
  * Address space configuraiton :
  *------------------------------*/
 
-/*
- * XML dynamic loader use for parsing an XML address space defintion file
- */
-#ifdef WITH_EXPAT
-static SOPC_AddressSpace* load_nodeset_from_file(const char* filename)
-{
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_AddressSpace* space = NULL;
-    FILE* fd = fopen(filename, "r");
-
-    if (fd == NULL)
-    {
-        printf("<Test_Server_Toolkit: Error while opening %s: %s\n", filename, strerror(errno));
-        status = SOPC_STATUS_NOK;
-    }
-
-    if (status == SOPC_STATUS_OK)
-    {
-        space = SOPC_UANodeSet_Parse(fd);
-
-        if (space == NULL)
-        {
-            status = SOPC_STATUS_NOK;
-        }
-    }
-
-    if (status != SOPC_STATUS_OK)
-    {
-        printf("<Test_Server_Toolkit: Error while parsing XML address space\n");
-    }
-
-    if (fd != NULL)
-    {
-        fclose(fd);
-    }
-
-    if (status == SOPC_STATUS_OK)
-    {
-        printf("<Test_Server_Toolkit: Loaded address space from %s\n", filename);
-        return space;
-    }
-    else
-    {
-        SOPC_AddressSpace_Delete(space);
-        return NULL;
-    }
-}
-#endif
-
 static SOPC_ReturnStatus Server_ConfigureAddressSpace(SOPC_AddressSpace** output_addressSpace)
 {
     /* Define server address space loader:
-     * If WITH_EXPAT environment variable defined,
-     * retrieve XML file path from environment variable TEST_SERVER_XML_ADDRESS_SPACE.
-     * In case of success, use the dynamic address space loader from an XML file.
-     *
-     * Otherwise use the embedded address space (already defined as C code) loader.
+     * use the embedded address space (already defined as C code) loader.
      * For this latter case the address space C structure shall have been generated prior to compilation.
      * This should be done using the script ./scripts/generate-s2opc-address-space.py
      */
     assert(NULL != output_addressSpace);
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    AddressSpaceLoader address_space_loader = AS_LOADER_EMBEDDED;
 
-#ifdef WITH_EXPAT
-    const char* xml_file_path = getenv("TEST_SERVER_XML_ADDRESS_SPACE");
-
-    if (xml_file_path != NULL)
-    {
-        address_space_loader = AS_LOADER_EXPAT;
-    }
-#endif
-
-    /* Load the address space using loader */
-    switch (address_space_loader)
-    {
-    case AS_LOADER_EMBEDDED:
-        *output_addressSpace = SOPC_Embedded_AddressSpace_Load();
-        status = NULL != *output_addressSpace ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
-        break;
-#ifdef WITH_EXPAT
-    case AS_LOADER_EXPAT:
-        *output_addressSpace = load_nodeset_from_file(xml_file_path);
-        status = (NULL != *output_addressSpace) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
-        break;
-#endif
-    default:
-        assert(false);
-    }
+    *output_addressSpace = SOPC_Embedded_AddressSpace_Load();
+    status = NULL != *output_addressSpace ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
 
     /* Set the loaded address space as the current server address space configuration */
     if (SOPC_STATUS_OK == status)
