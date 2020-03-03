@@ -17,107 +17,135 @@
  * under the License.
  */
 
+/// @file sopc_interrupttimer.c
+
 #include "sopc_interrupttimer.h"
 
-// Status of an interrupt timer workspace
-// ORDER of those status is important. INITIALIZED SHALL BE THE LAST STATUS !!!
-typedef enum
+/// @brief Sync status of an interrupt timer workspace
+/// @brief ORDER of those status is important. INITIALIZED SHALL BE THE LAST STATUS !!!
+/// @brief This status is used to verify initialization and the using of the workspace without blocking algorithm usage.
+typedef enum E_INTERRUPT_TIMER_SYNC_STATUS
 {
-    SOPC_INTERRUPT_TIMER_SYNC_STATUS_NOT_INITIALIZED, // Workspace is created and not initialized
-    SOPC_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZING,    // Initializing on going...
-    SOPC_INTERRUPT_TIMER_SYNC_STATUS_DEINITIALIZING,  // Resetting on going...
-    SOPC_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZED,     // Workspace is initialized, timer instance can be used
-    SOPC_INTERRUPT_TIMER_SYNC_STATUS_LOCKED, // Workspace is in use, some timer instances are called by their API
-    SOPC_INTERRUPT_TIMER_SYNC_STATUS_SIZE = INT32_MAX
-} SOPC_InterruptTimerStatus;
+    E_INTERRUPT_TIMER_SYNC_STATUS_NOT_INITIALIZED, ///< Workspace is created and not initialized
+    E_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZING,    ///< Initializing on going...
+    E_INTERRUPT_TIMER_SYNC_STATUS_DEINITIALIZING,  ///< Resetting on going...
+    E_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZED,     ///< Workspace is initialized, timer instance can be used
+    E_INTERRUPT_TIMER_SYNC_STATUS_LOCKED, ///< Workspace is in use, some timer instances are called by their API
+    E_INTERRUPT_TIMER_SYNC_STATUS_SIZE = INT32_MAX
+} eInterruptTimerSyncStatus;
 
-typedef enum
+/// @brief Sync status of an interrupt timer instance
+typedef enum E_INTERRUPT_TIMER_INST_SYNC_STATUS
 {
-    SOPC_INTERRUPT_TIMER_STATUS_NOT_USED,
-    SOPC_INTERRUPT_TIMER_STATUS_RESERVING,
-    SOPC_INTERRUPT_TIMER_STATUS_RESERVED,
-    SOPC_INTERRUPT_TIMER_STATUS_RELEASING,
-    SOPC_INTERRUPT_TIMER_STATUS_SIZE = INT32_MAX
-} E_API_IN_USE_STATUS;
+    E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED,  ///< Timer instance is not in use
+    E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_RESERVING, ///< Timer instance is initializing / in use (Data handle
+                                                      ///< initialize concurrent protection)
+    E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_RESERVED,  ///< Timer instance is reserved. (Data Handle Initialize and
+                                                      ///< Finalize concurrent protection)
+    E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_RELEASING, ///< Timer instance is releasing / in use (Data handle finalize
+                                                      ///< concurrent protection)
+    E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_SIZE = INT32_MAX
+} eInterruptTimerInstanceSyncStatus;
 
+/// @brief Get member size of a structure
 #define member_size(type, member) sizeof(((type*) 0)->member)
 
-// Header data of a timer instance information.
+/// @brief Header data of a timer instance information.
 typedef struct T_TIMER_INSTANCE_INFO
 {
-    SOPC_IrqTimer_InstanceStatus wStatus;       // Timer status, 0 or 1
-    uint32_t wPeriod;                           // Period in ticks (1 tick = 100µs)
-    uint32_t wOffset;                           // Absolute offset in ticks
-    void* pUserContext;                         // User context
-    sopc_irq_timer_cb_start cbStart;            // User start callback
-    sopc_irq_timer_cb_period_elapsed cbElapsed; // User period elapsed callback
-    sopc_irq_timer_cb_stop cbStop;              // User stop callback. SHALL BE LAST FIELD
+    SOPC_IrqTimer_InstanceStatus wStatus;       ///< Timer status, 0 or 1
+    uint32_t wPeriod;                           ///< Period in ticks (1 tick = 100µs)
+    uint32_t wOffset;                           ///< Absolute offset in ticks
+    void* pUserContext;                         ///< User context
+    sopc_irq_timer_cb_start cbStart;            ///< User start callback
+    sopc_irq_timer_cb_period_elapsed cbElapsed; ///< User period elapsed callback
+    sopc_irq_timer_cb_stop cbStop;              ///< User stop callback. SHALL BE LAST FIELD
 } __attribute__((packed)) tTimerInstanceInfo;
 
-// Type which indicates if the API is in use.
-typedef struct T_API_IN_USE
+/// @brief Type which indicates if the API is in use.
+typedef struct T_INTERRUPT_TIMER_API_STATUS
 {
-    E_API_IN_USE_STATUS instanceStatus;
-} SOPC_InterruptTimerAPIStatus;
+    eInterruptTimerInstanceSyncStatus instanceStatus; ///< Timer instance sync status
+} tInterruptTimerAPIStatus;
 
-// Data of an interrupt timer workspace. It can contain several timer instances
-typedef struct SOPC_INTERRUPT_TIMER_DATA
+/// @brief Data of an interrupt timer workspace. It can contain several timer instances.
+typedef struct T_INTERRUPT_TIMER_DATA
 {
-    uint32_t nbInstances;      // Maximum of timer instances
-    uint32_t maxTimerDataSize; // Max of data hold by a timer instance
-    uint64_t irqTicks;         // Current tick value.
+    uint32_t nbInstances;      ///< Maximum of timer instances
+    uint32_t maxTimerDataSize; ///< Max of data hold by a timer instance
+    uint64_t irqTicks;         ///< Current tick value.
 
-    SOPC_InterruptTimerAPIStatus bTickIsUpdating; // Indicates if tick and timer evaluation function (update) is in use
+    tInterruptTimerAPIStatus bTickIsUpdating; ///< Indicates if tick and timer evaluation function (update) is in use
 
-    SOPC_InterruptTimerAPIStatus*
-        pTimerInstanceInUse; // Indicates if set data, stop, start... function for a instance is in use
+    tInterruptTimerAPIStatus*
+        pTimerInstanceInUse; ///< Indicates if set data, stop, start... function for a instance is in use
     SOPC_IrqTimer_InstanceStatus*
-        pTimerInstancePreviousStatus;               // Table of previous status, used to generate start or stop event
-    SOPC_DoubleBuffer** pTimerInstanceDoubleBuffer; // Table of DBO, one by timer instance.
-} SOPC_InterruptTimerData;
+        pTimerInstancePreviousStatus;               ///< Table of previous status, used to generate start or stop event
+    SOPC_DoubleBuffer** pTimerInstanceDoubleBuffer; ///< Table of DBO, one by timer instance.
+} tInterruptTimerData;
 
-// Interrupt timer definition
+/// @brief Interrupt timer workspace definition
 struct SOPC_InterruptTimer
 {
-    SOPC_InterruptTimerStatus status; // Status of the workspace
-    SOPC_InterruptTimerData* pData;   // Timer interrupt workspace
+    eInterruptTimerSyncStatus status; ///< Status of the workspace
+    tInterruptTimerData* pData;       ///< Timer interrupt workspace
 };
 
+/// @brief Interrupt timer instance data handle
+/// @brief Used to expose interrupt timer instance data handle
 struct SOPC_InterruptTimer_DataHandle
 {
-    struct SOPC_InterruptTimer* pTimer;
-    uint32_t maxAllowedSize;
-    uint32_t currentSize;
-    uint8_t* pPublishedData;
+    struct SOPC_InterruptTimer* pTimer; ///< Linked workspace, set by SOPC_InterruptTimer_DataHandle_Create
+    uint32_t maxAllowedSize;            ///< Max allowed size retrieved by SOPC_InterruptTimer_DataHandle_Initialize
+    uint32_t currentSize;    ///< Current significant bytes retrieved by SOPC_InterruptTimer_DataHandle_Initialize
+    uint8_t* pPublishedData; ///< Pointer on timer data buffer
 
-    uint32_t idInstanceTimer;
-    uint32_t idContainer;
-    uint8_t* pDboData;
-    uint32_t* pDboSize;
+    uint32_t idInstanceTimer; ///< Timer instance identifier, set by SOPC_InterruptTimer_DataHandle_Create
+    uint32_t idContainer;     ///< Double buffer reserved buffer used by timer instance identifier, returned by
+                              ///< SOPC_DoubleBuffer_GetWriteBuffer
+    uint8_t* pDboData;        ///< Double buffer data buffer field, returned by SOPC_DoubleBuffer_WriteBufferGetPtr
+    uint32_t* pDboSize;       ///< Double buffer size field linked to reserved data buffer, returned by
+                              ///< SOPC_DoubleBuffer_WriteBufferPtr
 };
 
 // Declaration of private function
 
-// Workspace creation
-static inline SOPC_InterruptTimerData* SOPC_InterruptTimer_Workspace_Create(
+/// @brief Internal interrupt timer workspace creation
+/// @warning Not thread safe!
+/// @param [in] nbInstances Maximum of timer instances (timer identifiers between 0 and nbInstances - 1)
+/// @param [in] maxDataSize Maximum of data in bytes hold by each timer
+/// @return Internal timer workspace
+static inline tInterruptTimerData* SOPC_InterruptTimer_Workspace_Create(
     uint32_t nbInstances,  // Maximum of timer instances (timer identifiers between 0 and nbInstances - 1)
     uint32_t maxDataSize); // Maximum of data in bytes hold by each timer
 
-// Workspace destruction
-static inline void SOPC_InterruptTimer_Workspace_Destroy(SOPC_InterruptTimerData** pWks);
+/// @brief Internal interrupt timer workspace destruction
+/// @param [inout] ppWks Interrupt timer private workspace
+static inline void SOPC_InterruptTimer_Workspace_Destroy(tInterruptTimerData** ppWks);
 
-// Increment number of API clients
-static inline SOPC_InterruptTimerStatus SOPC_InterruptTimer_IncrementInUseStatus(SOPC_InterruptTimer* pTimer);
+/// @brief Increment number of API clients
+/// @param [in] pTimer Interrupt timer workspace
+/// @return Current status.
+static inline eInterruptTimerSyncStatus SOPC_InterruptTimer_IncrementInUseStatus(SOPC_InterruptTimer* pTimer);
 
-// Decrement number of API clients
-static inline SOPC_InterruptTimerStatus SOPC_InterruptTimer_DecrementInUseStatus(SOPC_InterruptTimer* pTimer);
+/// @brief Decrement number of API clients
+/// @param [in] pTimer Interrupt timer workspace
+/// @return Current status.
+static inline eInterruptTimerSyncStatus SOPC_InterruptTimer_DecrementInUseStatus(SOPC_InterruptTimer* pTimer);
 
-// Enable or disable timer instance
+/// @brief Enable or disable timer instance
+/// @param [in] pTimer Interrupt timer object
+/// @param [in] idInstanceTimer Timer instance identifier
+/// @param [in] status Status to set
+/// @return SOPC_STATUS_INVALID_STATE if workspace is not initialized or API for this instance is currently in use.
+/// @return SOPC_STATUS_NOK for others error. Else SOPC_STATUS_OK.
 static inline SOPC_ReturnStatus SOPC_InterruptTimer_SetStatus(SOPC_InterruptTimer* pTimer, // Interrupt timer object
                                                               uint32_t idInstanceTimer,    // Id of timer
                                                               SOPC_IrqTimer_InstanceStatus status); // Status to set
 
-// Create interrupt timer. This function shall be followed by initialize function to use the timer.
+/// @brief Create interrupt timer. This function shall be followed by initialize function to use the timer.
+/// @warning Not thread safe!
+/// @return Returns pointer on SOPC_InterruptTimer.
 SOPC_InterruptTimer* SOPC_InterruptTimer_Create(void)
 {
     SOPC_InterruptTimer* pTimer = NULL;
@@ -132,7 +160,10 @@ SOPC_InterruptTimer* SOPC_InterruptTimer_Create(void)
     return pTimer;
 }
 
-// Destroy interrupt timer. This function shall be called only if de initialized ended with OK result.
+/// @brief Destroy interrupt timer. This function shall be called only if SOPC_InterruptTimer_DeInitialize returns
+/// SOPC_STATUS_OK.
+/// @warning Not thread safe!
+/// @param [inout] ppTimer Address from where SOPC_InterruptTimer object will be deleted. Set to NULL.
 void SOPC_InterruptTimer_Destroy(SOPC_InterruptTimer** ppTimer)
 {
     if (NULL != ppTimer)
@@ -145,9 +176,12 @@ void SOPC_InterruptTimer_Destroy(SOPC_InterruptTimer** ppTimer)
     }
 }
 
-// Initialize interrupt timer
-// Returns : SOPC_STATUS_INVALID_STATE if interrupt timer is in use, initializing or resetting state.
-// SOPC_STATUS_NOK for others error. Else SOPC_STATUS_OK.
+/// @brief Initialize interrupt timer workspace
+/// @param [in] pTimer Interrupt timer object
+/// @param [in] nbInstances Maximum of timer instances (timer identifiers will be between 0 and nbInstances - 1)
+/// @param [in] maxInstanceDataSize Maximum of data in bytes hold by each timer
+/// @return SOPC_STATUS_INVALID_STATE if interrupt timer is in use, initializing or resetting state.
+/// @return SOPC_STATUS_NOK for others error. Else SOPC_STATUS_OK.
 SOPC_ReturnStatus SOPC_InterruptTimer_Initialize(
     SOPC_InterruptTimer* pTimer,  // Interrupt timer object
     uint32_t nbInstances,         // Maximum of timer instances (timer identifiers between 0 and nbInstances - 1)
@@ -161,8 +195,8 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Initialize(
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
     // Try to go to INITILIZING from NOT INITIALIZED state
-    SOPC_InterruptTimerStatus expectedStatus = SOPC_INTERRUPT_TIMER_SYNC_STATUS_NOT_INITIALIZED;
-    SOPC_InterruptTimerStatus desiredStatus = SOPC_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZING;
+    eInterruptTimerSyncStatus expectedStatus = E_INTERRUPT_TIMER_SYNC_STATUS_NOT_INITIALIZED;
+    eInterruptTimerSyncStatus desiredStatus = E_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZING;
     bool bTransition = __atomic_compare_exchange(&pTimer->status,
                                                  &expectedStatus,   //
                                                  &desiredStatus,    //
@@ -173,7 +207,7 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Initialize(
     // If status from NOT INITIALIZED, so create interrupt timer workspace.
     if (bTransition)
     {
-        SOPC_InterruptTimerData* pWks = SOPC_InterruptTimer_Workspace_Create(nbInstances, maxInstanceDataSize);
+        tInterruptTimerData* pWks = SOPC_InterruptTimer_Workspace_Create(nbInstances, maxInstanceDataSize);
 
         if (NULL == pWks)
         {
@@ -184,21 +218,21 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Initialize(
         {
             pTimer->pData = pWks;
             // Update status from INITIALIZING to INITIALIZED
-            desiredStatus = SOPC_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZED;
+            desiredStatus = E_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZED;
             __atomic_store(&pTimer->status, &desiredStatus, __ATOMIC_SEQ_CST);
         }
         else
         {
             pTimer->pData = NULL;
             // Update status from INITIALIZING to NOT INTIALIZED
-            desiredStatus = SOPC_INTERRUPT_TIMER_SYNC_STATUS_NOT_INITIALIZED;
+            desiredStatus = E_INTERRUPT_TIMER_SYNC_STATUS_NOT_INITIALIZED;
             __atomic_store(&pTimer->status, &desiredStatus, __ATOMIC_SEQ_CST);
         }
     }
     // Invalid state : initializing, resetting or in use status.
-    else if (SOPC_INTERRUPT_TIMER_SYNC_STATUS_LOCKED <= expectedStatus ||
-             SOPC_INTERRUPT_TIMER_SYNC_STATUS_DEINITIALIZING == expectedStatus ||
-             SOPC_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZING == expectedStatus)
+    else if (E_INTERRUPT_TIMER_SYNC_STATUS_LOCKED <= expectedStatus ||
+             E_INTERRUPT_TIMER_SYNC_STATUS_DEINITIALIZING == expectedStatus ||
+             E_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZING == expectedStatus)
     {
         result = SOPC_STATUS_INVALID_STATE;
     }
@@ -211,9 +245,10 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Initialize(
     return result;
 }
 
-// DeInitialize interrupt timer
-// Returns : SOPC_STATUS_INVALID_STATE if interrupt timer is in other state that initialized (in use, resetting,
-// initializing). SOPC_STATUS_NOK for others error or already not initialized. Else SOPC_STATUS_OK.
+/// @brief DeInitialize interrupt timer workspace
+/// @param [in] pTimer Interrupt timer object
+/// @return SOPC_STATUS_INVALID_STATE if interrupt timer is in other state that initialized (in use, resetting,
+/// @return initializing). SOPC_STATUS_NOK for others error or already not initialized. Else SOPC_STATUS_OK.
 SOPC_ReturnStatus SOPC_InterruptTimer_DeInitialize(SOPC_InterruptTimer* pTimer)
 {
     if (NULL == pTimer)
@@ -224,8 +259,8 @@ SOPC_ReturnStatus SOPC_InterruptTimer_DeInitialize(SOPC_InterruptTimer* pTimer)
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
     // Try to go to DEINITIALIZED from INITIALIZED state
-    SOPC_InterruptTimerStatus expectedStatus = SOPC_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZED;
-    SOPC_InterruptTimerStatus desiredStatus = SOPC_INTERRUPT_TIMER_SYNC_STATUS_DEINITIALIZING;
+    eInterruptTimerSyncStatus expectedStatus = E_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZED;
+    eInterruptTimerSyncStatus desiredStatus = E_INTERRUPT_TIMER_SYNC_STATUS_DEINITIALIZING;
     bool bTransition = __atomic_compare_exchange(&pTimer->status,   //
                                                  &expectedStatus,   //
                                                  &desiredStatus,    //
@@ -239,12 +274,12 @@ SOPC_ReturnStatus SOPC_InterruptTimer_DeInitialize(SOPC_InterruptTimer* pTimer)
         SOPC_InterruptTimer_Workspace_Destroy(&pTimer->pData);
 
         // Update status from  DEINITIALIZING to NOT INITIALIZED
-        desiredStatus = SOPC_INTERRUPT_TIMER_SYNC_STATUS_NOT_INITIALIZED;
+        desiredStatus = E_INTERRUPT_TIMER_SYNC_STATUS_NOT_INITIALIZED;
         __atomic_store(&pTimer->status, &desiredStatus, __ATOMIC_SEQ_CST);
     }
-    else if (SOPC_INTERRUPT_TIMER_SYNC_STATUS_LOCKED <= expectedStatus ||
-             SOPC_INTERRUPT_TIMER_SYNC_STATUS_DEINITIALIZING == expectedStatus ||
-             SOPC_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZING == expectedStatus)
+    else if (E_INTERRUPT_TIMER_SYNC_STATUS_LOCKED <= expectedStatus ||
+             E_INTERRUPT_TIMER_SYNC_STATUS_DEINITIALIZING == expectedStatus ||
+             E_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZING == expectedStatus)
     {
         result = SOPC_STATUS_INVALID_STATE;
     }
@@ -256,14 +291,23 @@ SOPC_ReturnStatus SOPC_InterruptTimer_DeInitialize(SOPC_InterruptTimer* pTimer)
     return result;
 }
 
-// Reset timer and initialize it on next update
-// Returns : SOPC_STATUS_INVALID_STATE if workspace is not initialized or API for this instance is currently in use.
-// SOPC_STATUS_NOK for others error. Else SOPC_STATUS_OK.
+/// @brief Reset timer instance and initialize it on next SOPC_InterruptTimer_Update call
+/// @param [in] pTimer Interrupt timer workspace
+/// @param [in] idInstanceTimer Interrupt timer instance
+/// @param [in] period Timer period (tick)
+/// @param [in] offset Timer offset (tick)
+/// @param [in] pUserContext Use context
+/// @param [in] cbStart Start event callback
+/// @param [in] cbElapsed Elapsed event callback
+/// @param [in] cbStop Stop event callback
+/// @param [in] initStatus Initial status, set STARTED or STOPPED status
+/// @return SOPC_STATUS_INVALID_STATE if workspace is not initialized or API for this instance is currently in use.
+/// @return SOPC_STATUS_NOK for others error. Else SOPC_STATUS_OK.
 SOPC_ReturnStatus SOPC_InterruptTimer_Instance_Init(
     SOPC_InterruptTimer* pTimer,                // Interrupt timer object
     uint32_t idInstanceTimer,                   // Id of timer instance
     uint32_t period,                            // Timer Period
-    uint32_t wOffset,                           // Timer offset
+    uint32_t offset,                            // Timer offset
     void* pUserContext,                         // Free user context
     sopc_irq_timer_cb_start cbStart,            // Start event callback
     sopc_irq_timer_cb_period_elapsed cbElapsed, // Elapsed event callback
@@ -280,16 +324,16 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_Init(
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
     // Try to update status from a status (if this is the case) INITIALIZED or BEYOND this status to this status + 1
-    SOPC_InterruptTimerStatus currentStatus = SOPC_InterruptTimer_IncrementInUseStatus(pTimer);
+    eInterruptTimerSyncStatus currentStatus = SOPC_InterruptTimer_IncrementInUseStatus(pTimer);
 
     // If current status is a "in use" status, try to mark api as in use
-    if (currentStatus > SOPC_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZED)
+    if (currentStatus > E_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZED)
     {
-        SOPC_InterruptTimerData* pWks = pTimer->pData;
+        tInterruptTimerData* pWks = pTimer->pData;
 
         // Try to go from not in use to in use status for the specified instance
-        E_API_IN_USE_STATUS expectedValue = SOPC_INTERRUPT_TIMER_STATUS_NOT_USED;
-        E_API_IN_USE_STATUS desiredValue = SOPC_INTERRUPT_TIMER_STATUS_RESERVING;
+        eInterruptTimerInstanceSyncStatus expectedValue = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED;
+        eInterruptTimerInstanceSyncStatus desiredValue = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_RESERVING;
         bool bTransition = __atomic_compare_exchange(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, //
                                                      &expectedValue,                                             //
                                                      &desiredValue,                                              //
@@ -313,7 +357,7 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_Init(
             tTimerInstanceInfo timerInfo;
             timerInfo.wStatus = initStatus;
             timerInfo.wPeriod = period;
-            timerInfo.wOffset = wOffset;
+            timerInfo.wOffset = offset;
             timerInfo.pUserContext = pUserContext;
             timerInfo.cbElapsed = cbElapsed;
             timerInfo.cbStart = cbStart;
@@ -335,7 +379,7 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_Init(
             SOPC_DoubleBuffer_ReleaseWriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], &idBuffer);
 
             // Go from in use to not in use status for this timer instance
-            desiredValue = SOPC_INTERRUPT_TIMER_STATUS_NOT_USED;
+            desiredValue = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED;
             __atomic_store(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, &desiredValue, __ATOMIC_SEQ_CST);
 
             // Check if result is OK
@@ -361,9 +405,11 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_Init(
     return result;
 }
 
-// Force next update of timer to stop without calling any intermediate callback (stop/start/elapsed)
-// Returns : SOPC_STATUS_INVALID_STATE if workspace is not initialized or API for this instance is currently in use.
-// SOPC_STATUS_NOK for others error. Else SOPC_STATUS_OK.
+/// @brief Force next update of timer to stop without calling any intermediate callback (stop/start/elapsed)
+/// @param [in] pTimer Interrupt timer workspace
+/// @param [in] idInstanceTimer Interrupt timer instance
+/// @return SOPC_STATUS_INVALID_STATE if workspace is not initialized or API for this instance is currently in use.
+/// @return SOPC_STATUS_NOK for others error. Else SOPC_STATUS_OK.
 SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DeInit(SOPC_InterruptTimer* pTimer, // Interrupt timer object
                                                       uint32_t idInstanceTimer)    // Timer instance identifier
 {
@@ -376,15 +422,15 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DeInit(SOPC_InterruptTimer* pTime
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
     // Try to go current initialized status to this + 1
-    SOPC_InterruptTimerStatus currentStatus = SOPC_InterruptTimer_IncrementInUseStatus(pTimer);
+    eInterruptTimerSyncStatus currentStatus = SOPC_InterruptTimer_IncrementInUseStatus(pTimer);
 
     // If valid status, try to erase timer configuration for specified instance
-    if (currentStatus > SOPC_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZED)
+    if (currentStatus > E_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZED)
     {
-        SOPC_InterruptTimerData* pWks = pTimer->pData;
+        tInterruptTimerData* pWks = pTimer->pData;
 
-        E_API_IN_USE_STATUS expectedValue = SOPC_INTERRUPT_TIMER_STATUS_NOT_USED;
-        E_API_IN_USE_STATUS desiredValue = SOPC_INTERRUPT_TIMER_STATUS_RESERVING;
+        eInterruptTimerInstanceSyncStatus expectedValue = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED;
+        eInterruptTimerInstanceSyncStatus desiredValue = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_RESERVING;
         bool bTransition = __atomic_compare_exchange(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, //
                                                      &expectedValue,                                             //
                                                      &desiredValue,                                              //
@@ -407,7 +453,7 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DeInit(SOPC_InterruptTimer* pTime
             SOPC_DoubleBuffer_ReleaseWriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], &idBuffer);
 
             // Mark API as not in use.
-            desiredValue = SOPC_INTERRUPT_TIMER_STATUS_NOT_USED;
+            desiredValue = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED;
             __atomic_store(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, &desiredValue, __ATOMIC_SEQ_CST);
         }
         else
@@ -427,9 +473,12 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DeInit(SOPC_InterruptTimer* pTime
     return result;
 }
 
-// Set a timer instance status : started or stopped. Used by Stop and Start public API.
-// Returns : SOPC_STATUS_INVALID_STATE if workspace is not initialized or API for this instance is currently in use.
-// SOPC_STATUS_NOK for others error. Else SOPC_STATUS_OK.
+/// @brief Enable or disable timer instance
+/// @param [in] pTimer Interrupt timer object
+/// @param [in] idInstanceTimer Timer instance identifier
+/// @param [in] status Status to set
+/// @return SOPC_STATUS_INVALID_STATE if workspace is not initialized or API for this instance is currently in use.
+/// @return SOPC_STATUS_NOK for others error. Else SOPC_STATUS_OK.
 static inline SOPC_ReturnStatus SOPC_InterruptTimer_SetStatus(
     SOPC_InterruptTimer* pTimer,         // Interrupt timer object
     uint32_t idInstanceTimer,            // Timer instance identifier
@@ -443,15 +492,15 @@ static inline SOPC_ReturnStatus SOPC_InterruptTimer_SetStatus(
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
     // Try to go current initialized status to this + 1
-    SOPC_InterruptTimerStatus currentStatus = SOPC_InterruptTimer_IncrementInUseStatus(pTimer);
+    eInterruptTimerSyncStatus currentStatus = SOPC_InterruptTimer_IncrementInUseStatus(pTimer);
 
     // If valid status, try to set timer status for specified instance
-    if (currentStatus > SOPC_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZED)
+    if (currentStatus > E_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZED)
     {
-        SOPC_InterruptTimerData* pWks = pTimer->pData;
+        tInterruptTimerData* pWks = pTimer->pData;
 
-        E_API_IN_USE_STATUS expectedValue = SOPC_INTERRUPT_TIMER_STATUS_NOT_USED;
-        E_API_IN_USE_STATUS desiredValue = SOPC_INTERRUPT_TIMER_STATUS_RESERVED;
+        eInterruptTimerInstanceSyncStatus expectedValue = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED;
+        eInterruptTimerInstanceSyncStatus desiredValue = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_RESERVED;
 
         bool bTransition = __atomic_compare_exchange(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, //
                                                      &expectedValue,                                             //
@@ -497,7 +546,7 @@ static inline SOPC_ReturnStatus SOPC_InterruptTimer_SetStatus(
             }
 
             // Mark API as not in use.
-            desiredValue = SOPC_INTERRUPT_TIMER_STATUS_NOT_USED;
+            desiredValue = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED;
             __atomic_store(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, &desiredValue, __ATOMIC_SEQ_CST);
         }
         else
@@ -516,9 +565,12 @@ static inline SOPC_ReturnStatus SOPC_InterruptTimer_SetStatus(
     return result;
 }
 
-// Get a timer instance status : started or stopped.
-// Returns : SOPC_STATUS_INVALID_STATE if workspace is not initialized or API for this instance is currently in use.
-// SOPC_STATUS_NOK for others error. Else SOPC_STATUS_OK.
+/// @brief Get a timer instance status : started or stopped.
+/// @param [in] pTimer Interrupt timer workspace
+/// @param [in] idInstanceTimer Interrupt timer instance
+/// @param [out] status Address where is returned timer instance status
+/// @return SOPC_STATUS_INVALID_STATE if workspace is not initialized or API for this instance is currently in use.
+/// @return SOPC_STATUS_NOK for others error. Else SOPC_STATUS_OK.
 SOPC_ReturnStatus SOPC_InterruptTimer_Instance_LastStatus(
     SOPC_InterruptTimer* pTimer,          // Interrupt timer object
     uint32_t idInstanceTimer,             // Timer instance identifier
@@ -533,15 +585,15 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_LastStatus(
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
     // Try to go current initialized status to this + 1
-    SOPC_InterruptTimerStatus currentStatus = SOPC_InterruptTimer_IncrementInUseStatus(pTimer);
+    eInterruptTimerSyncStatus currentStatus = SOPC_InterruptTimer_IncrementInUseStatus(pTimer);
 
     // If valid status, try to set timer status for specified instance
-    if (currentStatus > SOPC_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZED)
+    if (currentStatus > E_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZED)
     {
-        SOPC_InterruptTimerData* pWks = pTimer->pData;
+        tInterruptTimerData* pWks = pTimer->pData;
 
-        E_API_IN_USE_STATUS expectedStatus = SOPC_INTERRUPT_TIMER_STATUS_NOT_USED;
-        E_API_IN_USE_STATUS desiredStatus = SOPC_INTERRUPT_TIMER_STATUS_RESERVED;
+        eInterruptTimerInstanceSyncStatus expectedStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED;
+        eInterruptTimerInstanceSyncStatus desiredStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_RESERVED;
 
         bool bTransition = __atomic_compare_exchange(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, //
                                                      &expectedStatus,                                            //
@@ -581,7 +633,7 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_LastStatus(
             }
 
             // Mark API as not in use.
-            desiredStatus = SOPC_INTERRUPT_TIMER_STATUS_NOT_USED;
+            desiredStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED;
             __atomic_store(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, //
                            &desiredStatus,                                             //
                            __ATOMIC_SEQ_CST);                                          //
@@ -602,27 +654,34 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_LastStatus(
     return result;
 }
 
-// Next update of timer will start it
-// Returns : SOPC_STATUS_INVALID_STATE if workspace is not initialized or API for this instance is currently in use.
-// SOPC_STATUS_NOK for others error. Else SOPC_STATUS_OK.
+/// @brief Next update of timer instance will start it
+/// @param [in] pTimer Interrupt timer workspace
+/// @param [in] idInstanceTimer Interrupt timer instance
+/// @return SOPC_STATUS_INVALID_STATE if workspace is not initialized or API for this instance is currently in use.
+/// @return SOPC_STATUS_NOK for others error. Else SOPC_STATUS_OK.
 SOPC_ReturnStatus SOPC_InterruptTimer_Instance_Start(SOPC_InterruptTimer* pTimer, // Interrupt timer object
                                                      uint32_t idInstanceTimer)    // Timer instance identifier
 {
     return SOPC_InterruptTimer_SetStatus(pTimer, idInstanceTimer, SOPC_INTERRUPT_TIMER_STATUS_ENABLED);
 }
 
-// Next update of timer will stop it
-// Returns : SOPC_STATUS_INVALID_STATE if workspace is not initialized or API for this instance is currently in use.
-// SOPC_STATUS_NOK for others error. Else SOPC_STATUS_OK.
+/// @brief Next update of timer will stop it
+/// @param [in] pTimer Interrupt timer workspace
+/// @param [in] idInstanceTimer Interrupt timer instance
+/// @return SOPC_STATUS_INVALID_STATE if workspace is not initialized or API for this instance is currently in use.
+/// @return SOPC_STATUS_NOK for others error. Else SOPC_STATUS_OK.
 SOPC_ReturnStatus SOPC_InterruptTimer_Instance_Stop(SOPC_InterruptTimer* pTimer, // Interrupt timer object
                                                     uint32_t idInstanceTimer)    // Timer instance identifier
 {
     return SOPC_InterruptTimer_SetStatus(pTimer, idInstanceTimer, SOPC_INTERRUPT_TIMER_STATUS_DISABLED);
 }
 
-// Next update of timer will set new period
-// Returns : SOPC_STATUS_INVALID_STATE if workspace is not initialized or API for this instance is currently in use.
-// SOPC_STATUS_NOK for others error. Else SOPC_STATUS_OK.
+/// @brief Next update of timer will set new period
+/// @param [in] pTimer Interrupt timer workspace
+/// @param [in] idInstanceTimer Interrupt timer instance
+/// @param [in] period Period in ticks
+/// @return SOPC_STATUS_INVALID_STATE if workspace is not initialized or API for this instance is currently in use.
+/// @return SOPC_STATUS_NOK for others error. Else SOPC_STATUS_OK.
 SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetPeriod(SOPC_InterruptTimer* pTimer, // Interrupt timer object
                                                          uint32_t idInstanceTimer,    // Timer instance identifier
                                                          uint32_t period)             // Period in ticks
@@ -635,15 +694,15 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetPeriod(SOPC_InterruptTimer* pT
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
     // Try to go current initialized status to this + 1
-    SOPC_InterruptTimerStatus currentStatus = SOPC_InterruptTimer_IncrementInUseStatus(pTimer);
+    eInterruptTimerSyncStatus currentStatus = SOPC_InterruptTimer_IncrementInUseStatus(pTimer);
 
     // If valid status, try to set timer period for specified instance
-    if (currentStatus > SOPC_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZED)
+    if (currentStatus > E_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZED)
     {
-        SOPC_InterruptTimerData* pWks = pTimer->pData;
+        tInterruptTimerData* pWks = pTimer->pData;
 
-        E_API_IN_USE_STATUS expectedStatus = SOPC_INTERRUPT_TIMER_STATUS_NOT_USED;
-        E_API_IN_USE_STATUS desiredStatus = SOPC_INTERRUPT_TIMER_STATUS_RESERVED;
+        eInterruptTimerInstanceSyncStatus expectedStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED;
+        eInterruptTimerInstanceSyncStatus desiredStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_RESERVED;
         bool bTransition = __atomic_compare_exchange(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, //
                                                      &expectedStatus,                                            //
                                                      &desiredStatus,                                             //
@@ -688,7 +747,7 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetPeriod(SOPC_InterruptTimer* pT
             }
 
             // Mark API as not in use.
-            desiredStatus = SOPC_INTERRUPT_TIMER_STATUS_NOT_USED;
+            desiredStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED;
             __atomic_store(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, //
                            &desiredStatus,                                             //
                            __ATOMIC_SEQ_CST);                                          //
@@ -709,12 +768,15 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetPeriod(SOPC_InterruptTimer* pT
     return result;
 }
 
-// Next update of timer will set new period
-// Returns : SOPC_STATUS_INVALID_STATE if workspace is not initialized or API for this instance is currently in use.
-// SOPC_STATUS_NOK for others error. Else SOPC_STATUS_OK.
+/// @brief Next update of timer will set new offset
+/// @param [in] pTimer Interrupt timer workspace
+/// @param [in] idInstanceTimer Interrupt timer instance
+/// @param [in] offset Offset in ticks
+/// @return SOPC_STATUS_INVALID_STATE if workspace is not initialized or API for this instance is currently in use.
+/// @return SOPC_STATUS_NOK for others error. Else SOPC_STATUS_OK.
 SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetOffset(SOPC_InterruptTimer* pTimer, // Interrupt timer object
                                                          uint32_t idInstanceTimer,    // Timer instance identifier
-                                                         uint32_t wOffset)            // offset in ticks
+                                                         uint32_t offset)             // offset in ticks
 {
     if ((NULL == pTimer) || (NULL == pTimer->pData) || (idInstanceTimer >= pTimer->pData->nbInstances))
     {
@@ -724,15 +786,15 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetOffset(SOPC_InterruptTimer* pT
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
     // Try to go current initialized status to this + 1
-    SOPC_InterruptTimerStatus currentStatus = SOPC_InterruptTimer_IncrementInUseStatus(pTimer);
+    eInterruptTimerSyncStatus currentStatus = SOPC_InterruptTimer_IncrementInUseStatus(pTimer);
 
     // If valid status, try to set timer period for specified instance
-    if (currentStatus > SOPC_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZED)
+    if (currentStatus > E_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZED)
     {
-        SOPC_InterruptTimerData* pWks = pTimer->pData;
+        tInterruptTimerData* pWks = pTimer->pData;
 
-        E_API_IN_USE_STATUS expectedStatus = SOPC_INTERRUPT_TIMER_STATUS_NOT_USED;
-        E_API_IN_USE_STATUS desiredStatus = SOPC_INTERRUPT_TIMER_STATUS_RESERVED;
+        eInterruptTimerInstanceSyncStatus expectedStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED;
+        eInterruptTimerInstanceSyncStatus desiredStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_RESERVED;
         bool bTransition = __atomic_compare_exchange(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, //
                                                      &expectedStatus,                                            //
                                                      &desiredStatus,                                             //
@@ -745,7 +807,7 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetOffset(SOPC_InterruptTimer* pT
         {
             // New period to take into account by next update call
             tTimerInstanceInfo timerInfo;
-            timerInfo.wOffset = wOffset;
+            timerInfo.wOffset = offset;
 
             // Reserve buffer
             uint32_t idBuffer = UINT32_MAX;
@@ -777,7 +839,7 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetOffset(SOPC_InterruptTimer* pT
             }
 
             // Mark API as not in use.
-            desiredStatus = SOPC_INTERRUPT_TIMER_STATUS_NOT_USED;
+            desiredStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED;
             __atomic_store(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, //
                            &desiredStatus,                                             //
                            __ATOMIC_SEQ_CST);                                          //
@@ -798,9 +860,15 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetOffset(SOPC_InterruptTimer* pT
     return result;
 }
 
-// Next update of timer will set callback linked to start, stop, elapsed event
-// Returns : SOPC_STATUS_INVALID_STATE if workspace is not initialized or API for this instance is currently in use.
-// SOPC_STATUS_NOK for others error. Else SOPC_STATUS_OK.
+/// @brief Next update of timer will set callback linked to start, stop, elapsed event
+/// @param [in] pTimer Interrupt timer workspace
+/// @param [in] idInstanceTimer Interrupt timer instance
+/// @param [in] pUserContext Use context
+/// @param [in] cbStart Callback called when timer is started
+/// @param [in] cbElapsed Callback called when timer is elapsed
+/// @param [in] cbStop Callback called when timer is stopped
+/// @return SOPC_STATUS_INVALID_STATE if workspace is not initialized or API for this instance is currently in use.
+/// @return SOPC_STATUS_NOK for others error. Else SOPC_STATUS_OK.
 SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetCallback(
     SOPC_InterruptTimer* pTimer,                // Interrupt timer object
     uint32_t idInstanceTimer,                   // Timer instance identifier
@@ -817,15 +885,15 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetCallback(
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
     // Try to go current initialized status to this + 1
-    SOPC_InterruptTimerStatus currentStatus = SOPC_InterruptTimer_IncrementInUseStatus(pTimer);
+    eInterruptTimerSyncStatus currentStatus = SOPC_InterruptTimer_IncrementInUseStatus(pTimer);
 
     // If valid status, try to set timer period for specified instance
-    if (currentStatus > SOPC_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZED)
+    if (currentStatus > E_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZED)
     {
-        SOPC_InterruptTimerData* pWks = pTimer->pData;
+        tInterruptTimerData* pWks = pTimer->pData;
 
-        E_API_IN_USE_STATUS expectedStatus = SOPC_INTERRUPT_TIMER_STATUS_NOT_USED;
-        E_API_IN_USE_STATUS desiredStatus = SOPC_INTERRUPT_TIMER_STATUS_RESERVED;
+        eInterruptTimerInstanceSyncStatus expectedStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED;
+        eInterruptTimerInstanceSyncStatus desiredStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_RESERVED;
         bool bTransition = __atomic_compare_exchange(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, //
                                                      &expectedStatus,                                            //
                                                      &desiredStatus,                                             //
@@ -876,7 +944,7 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetCallback(
             }
 
             // Mark API as not in use.
-            desiredStatus = SOPC_INTERRUPT_TIMER_STATUS_NOT_USED;
+            desiredStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED;
             __atomic_store(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, //
                            &desiredStatus,                                             //
                            __ATOMIC_SEQ_CST);                                          //
@@ -897,9 +965,13 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetCallback(
     return result;
 }
 
-// Publish new data to the timer instance, take into account by next update call.
-// Returns : SOPC_STATUS_INVALID_STATE if workspace is not initialized or API for this instance is currently in use.
-// SOPC_STATUS_NOK for others error. Else SOPC_STATUS_OK.
+/// @brief Publish new data to the timer instance, take into account by next update call.
+/// @param [in] pTimer Interrupt timer workspace
+/// @param [in] idInstanceTimer Timer instance identifier
+/// @param [in] pData Data to publish
+/// @param [in] sizeToWrite Data size
+/// @return SOPC_STATUS_INVALID_STATE if workspace is not initialized or API for this instance is currently in use.
+/// @return SOPC_STATUS_NOK for others error. Else SOPC_STATUS_OK.
 SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetData(SOPC_InterruptTimer* pTimer, // Interrupt timer object
                                                        uint32_t idInstanceTimer,    // Timer instance identifier
                                                        uint8_t* pData,              // Data to publish
@@ -913,15 +985,15 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetData(SOPC_InterruptTimer* pTim
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
     // Try to go current initialized status to this + 1
-    SOPC_InterruptTimerStatus currentStatus = SOPC_InterruptTimer_IncrementInUseStatus(pTimer);
+    eInterruptTimerSyncStatus currentStatus = SOPC_InterruptTimer_IncrementInUseStatus(pTimer);
 
     // If valid status, try to set timer period for specified instance
-    if (currentStatus > SOPC_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZED)
+    if (currentStatus > E_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZED)
     {
-        SOPC_InterruptTimerData* pWks = pTimer->pData;
+        tInterruptTimerData* pWks = pTimer->pData;
 
-        E_API_IN_USE_STATUS expectedStatus = SOPC_INTERRUPT_TIMER_STATUS_NOT_USED;
-        E_API_IN_USE_STATUS desiredStatus = SOPC_INTERRUPT_TIMER_STATUS_RESERVED;
+        eInterruptTimerInstanceSyncStatus expectedStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED;
+        eInterruptTimerInstanceSyncStatus desiredStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_RESERVED;
         bool bTransition = __atomic_compare_exchange(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, //
                                                      &expectedStatus,                                            //
                                                      &desiredStatus,                                             //
@@ -959,7 +1031,7 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetData(SOPC_InterruptTimer* pTim
                 SOPC_DoubleBuffer_ReleaseWriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], &idBuffer);
             }
             // Mark API as not in use.
-            desiredStatus = SOPC_INTERRUPT_TIMER_STATUS_NOT_USED;
+            desiredStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED;
             __atomic_store(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, //
                            &desiredStatus,                                             //
                            __ATOMIC_SEQ_CST);                                          //
@@ -982,7 +1054,10 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetData(SOPC_InterruptTimer* pTim
 
 //*** Specific API get data container ***
 
-// Create data container for an interrupt timer object and one of its instances
+/// @brief Create data handle for an interrupt timer workspace and one of its instances
+/// @param [in] pTimer Interrupt timer workspace
+/// @param [in] idInstanceTimer
+/// @return SOPC_InterruptTimer_DataHandle object
 SOPC_InterruptTimer_DataHandle* SOPC_InterruptTimer_Instance_DataHandle_Create(SOPC_InterruptTimer* pTimer, //
                                                                                uint32_t idInstanceTimer)    //
 {
@@ -996,10 +1071,10 @@ SOPC_InterruptTimer_DataHandle* SOPC_InterruptTimer_Instance_DataHandle_Create(S
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
     // Try to go current initialized status to this + 1
-    SOPC_InterruptTimerStatus currentStatus = SOPC_InterruptTimer_IncrementInUseStatus(pTimer);
+    eInterruptTimerSyncStatus currentStatus = SOPC_InterruptTimer_IncrementInUseStatus(pTimer);
 
     // If valid status, try to set timer period for specified instance
-    if (currentStatus > SOPC_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZED)
+    if (currentStatus > E_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZED)
     {
         pContainer = SOPC_Calloc(1, sizeof(struct SOPC_InterruptTimer_DataHandle));
         if (NULL == pContainer)
@@ -1021,7 +1096,8 @@ SOPC_InterruptTimer_DataHandle* SOPC_InterruptTimer_Instance_DataHandle_Create(S
     return pContainer;
 }
 
-// Destroy data container
+/// @brief Destroy data handle
+/// @param [inout] ppDataContainer Address where Interrupt timer data handle shall be destroyed. Set to NULL.
 void SOPC_InterruptTimer_DestroyDataContainer(SOPC_InterruptTimer_DataHandle** ppDataContainer)
 {
     if (NULL != ppDataContainer)
@@ -1034,33 +1110,38 @@ void SOPC_InterruptTimer_DestroyDataContainer(SOPC_InterruptTimer_DataHandle** p
     }
 }
 
-// Initialize data handle used to publish data.
-// This function shall be followed by Commit in order to take into account new data size
+/// @brief Initialize data handle used to publish data.
+/// @warning This function shall be called before GetBufferInfo and SetNewSize
+/// @warning After modification, SOPC_InterruptTimer_DataHandle_Finalize shall be called in order to take into account
+/// new data with new size
+/// @param [in] pDataContainer Interrupt timer data handle
+/// @return SOPC_STATUS_INVALID_STATE if workspace is not initialized or API for this instance is currently in use.
+/// @return SOPC_STATUS_NOK for others error. Else SOPC_STATUS_OK.
 SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_Initialize(
-    SOPC_InterruptTimer_DataHandle* pDataHandle // Data handle
+    SOPC_InterruptTimer_DataHandle* pDataContainer // Data handle
 )
 {
-    if ((NULL == pDataHandle) || (NULL == (pDataHandle)->pTimer) || (NULL == (pDataHandle)->pTimer->pData) ||
-        ((pDataHandle)->idInstanceTimer >= (pDataHandle)->pTimer->pData->nbInstances))
+    if ((NULL == pDataContainer) || (NULL == (pDataContainer)->pTimer) || (NULL == (pDataContainer)->pTimer->pData) ||
+        ((pDataContainer)->idInstanceTimer >= (pDataContainer)->pTimer->pData->nbInstances))
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    uint32_t idInstanceTimer = pDataHandle->idInstanceTimer;
-    SOPC_InterruptTimer* pTimer = pDataHandle->pTimer;
-    SOPC_InterruptTimerData* pTimerData = pDataHandle->pTimer->pData;
+    uint32_t idInstanceTimer = pDataContainer->idInstanceTimer;
+    SOPC_InterruptTimer* pTimer = pDataContainer->pTimer;
+    tInterruptTimerData* pTimerData = pDataContainer->pTimer->pData;
     SOPC_DoubleBuffer* pDbo = pTimer->pData->pTimerInstanceDoubleBuffer[idInstanceTimer];
 
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
     // Try to go current initialized status to this + 1
-    SOPC_InterruptTimerStatus currentStatus = SOPC_InterruptTimer_IncrementInUseStatus(pTimer);
+    eInterruptTimerSyncStatus currentStatus = SOPC_InterruptTimer_IncrementInUseStatus(pTimer);
 
     // If valid status, try to set timer period for specified instance
-    if (currentStatus > SOPC_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZED)
+    if (currentStatus > E_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZED)
     {
-        E_API_IN_USE_STATUS expectedStatus = SOPC_INTERRUPT_TIMER_STATUS_NOT_USED;
-        E_API_IN_USE_STATUS desiredStatus = SOPC_INTERRUPT_TIMER_STATUS_RESERVING;
+        eInterruptTimerInstanceSyncStatus expectedStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED;
+        eInterruptTimerInstanceSyncStatus desiredStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_RESERVING;
         bool bTransition =
             __atomic_compare_exchange(&pTimerData->pTimerInstanceInUse[idInstanceTimer].instanceStatus, //
                                       &expectedStatus,                                                  //
@@ -1072,38 +1153,38 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_Initialize(
         // If API is not in use for this instance, set timer status
         if (bTransition)
         {
-            pDataHandle->idContainer = UINT32_MAX;
+            pDataContainer->idContainer = UINT32_MAX;
 
-            result = SOPC_DoubleBuffer_GetWriteBuffer(pDbo,                      //
-                                                      &pDataHandle->idContainer, //
-                                                      NULL);                     //
+            result = SOPC_DoubleBuffer_GetWriteBuffer(pDbo,                         //
+                                                      &pDataContainer->idContainer, //
+                                                      NULL);                        //
 
             if (SOPC_STATUS_OK == result)
             {
-                result = SOPC_DoubleBuffer_WriteBufferGetPtr(pDbo,                     //
-                                                             pDataHandle->idContainer, //
-                                                             &pDataHandle->pDboData,   //
-                                                             &pDataHandle->pDboSize,   //
-                                                             false);                   //
+                result = SOPC_DoubleBuffer_WriteBufferGetPtr(pDbo,                        //
+                                                             pDataContainer->idContainer, //
+                                                             &pDataContainer->pDboData,   //
+                                                             &pDataContainer->pDboSize,   //
+                                                             false);                      //
             }
 
             if (SOPC_STATUS_OK == result)
             {
-                pDataHandle->currentSize = (uint32_t)((*pDataHandle->pDboSize) - sizeof(tTimerInstanceInfo));
-                pDataHandle->pPublishedData = (pDataHandle->pDboData + sizeof(tTimerInstanceInfo));
+                pDataContainer->currentSize = (uint32_t)((*pDataContainer->pDboSize) - sizeof(tTimerInstanceInfo));
+                pDataContainer->pPublishedData = (pDataContainer->pDboData + sizeof(tTimerInstanceInfo));
             }
 
             if (SOPC_STATUS_OK != result)
             {
-                pDataHandle->idContainer = UINT32_MAX;
-                pDataHandle->pDboData = NULL;
-                pDataHandle->pDboSize = 0;
-                pDataHandle->pPublishedData = NULL;
-                pDataHandle->currentSize = 0;
+                pDataContainer->idContainer = UINT32_MAX;
+                pDataContainer->pDboData = NULL;
+                pDataContainer->pDboSize = 0;
+                pDataContainer->pPublishedData = NULL;
+                pDataContainer->currentSize = 0;
 
                 result = SOPC_STATUS_NOK;
 
-                desiredStatus = SOPC_INTERRUPT_TIMER_STATUS_NOT_USED;
+                desiredStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED;
                 __atomic_store(&pTimerData->pTimerInstanceInUse[idInstanceTimer].instanceStatus, //
                                &desiredStatus,                                                   //
                                __ATOMIC_SEQ_CST);                                                //
@@ -1111,7 +1192,7 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_Initialize(
             else
             {
                 SOPC_InterruptTimer_IncrementInUseStatus(pTimer);
-                desiredStatus = SOPC_INTERRUPT_TIMER_STATUS_RESERVED;
+                desiredStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_RESERVED;
                 __atomic_store(&pTimerData->pTimerInstanceInUse[idInstanceTimer].instanceStatus, //
                                &desiredStatus,                                                   //
                                __ATOMIC_SEQ_CST);                                                //
@@ -1122,7 +1203,7 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_Initialize(
             result = SOPC_STATUS_INVALID_STATE;
         }
 
-        SOPC_InterruptTimer_DecrementInUseStatus(pDataHandle->pTimer);
+        SOPC_InterruptTimer_DecrementInUseStatus(pDataContainer->pTimer);
     }
     else
     {
@@ -1132,31 +1213,35 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_Initialize(
     return result;
 }
 
-// Commit data container with new data
-SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_Finalize(SOPC_InterruptTimer_DataHandle* pDataHandle, //
-                                                                   bool bCancel)                                //
+/// @brief Commit data container with new data and its new size
+/// @param [in] pDataContainer Interrupt timer instance data handle
+/// @param [in] bCancel Modification canceled
+/// @return SOPC_STATUS_INVALID_STATE if workspace is not initialized or API for this instance is currently in use.
+/// @return SOPC_STATUS_NOK for others error. Else SOPC_STATUS_OK.
+SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_Finalize(SOPC_InterruptTimer_DataHandle* pDataContainer, //
+                                                                   bool bCancel)                                   //
 {
-    if ((NULL == pDataHandle) || (NULL == pDataHandle->pTimer) || (NULL == pDataHandle->pTimer->pData) ||
-        (pDataHandle->idInstanceTimer >= pDataHandle->pTimer->pData->nbInstances))
+    if ((NULL == pDataContainer) || (NULL == pDataContainer->pTimer) || (NULL == pDataContainer->pTimer->pData) ||
+        (pDataContainer->idInstanceTimer >= pDataContainer->pTimer->pData->nbInstances))
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    uint32_t idInstanceTimer = pDataHandle->idInstanceTimer;
-    SOPC_InterruptTimer* pTimer = pDataHandle->pTimer;
-    SOPC_InterruptTimerData* pTimerData = pDataHandle->pTimer->pData;
+    uint32_t idInstanceTimer = pDataContainer->idInstanceTimer;
+    SOPC_InterruptTimer* pTimer = pDataContainer->pTimer;
+    tInterruptTimerData* pTimerData = pDataContainer->pTimer->pData;
     SOPC_DoubleBuffer* pDbo = pTimer->pData->pTimerInstanceDoubleBuffer[idInstanceTimer];
 
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
     // Try to go current initialized status to this + 1
-    SOPC_InterruptTimerStatus currentStatus = SOPC_InterruptTimer_IncrementInUseStatus(pTimer);
+    eInterruptTimerSyncStatus currentStatus = SOPC_InterruptTimer_IncrementInUseStatus(pTimer);
 
     // If valid status, try to set timer period for specified instance
-    if (currentStatus > SOPC_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZED)
+    if (currentStatus > E_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZED)
     {
-        E_API_IN_USE_STATUS expectedStatus = SOPC_INTERRUPT_TIMER_STATUS_RESERVED;
-        E_API_IN_USE_STATUS desiredStatus = SOPC_INTERRUPT_TIMER_STATUS_RELEASING;
+        eInterruptTimerInstanceSyncStatus expectedStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_RESERVED;
+        eInterruptTimerInstanceSyncStatus desiredStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_RELEASING;
         bool bTransition =
             __atomic_compare_exchange(&pTimerData->pTimerInstanceInUse[idInstanceTimer].instanceStatus, //
                                       &expectedStatus,                                                  //
@@ -1168,22 +1253,22 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_Finalize(SOPC_Interrup
         // If API is not in use for this instance, set timer status
         if (bTransition)
         {
-            if (pDataHandle->currentSize > pTimerData->maxTimerDataSize && !bCancel)
+            if (pDataContainer->currentSize > pTimerData->maxTimerDataSize && !bCancel)
             {
                 result = SOPC_STATUS_OUT_OF_MEMORY;
             }
 
             if (SOPC_STATUS_OK == result && !bCancel)
             {
-                *(pDataHandle->pDboSize) = (uint32_t)(pDataHandle->currentSize + sizeof(tTimerInstanceInfo));
+                *(pDataContainer->pDboSize) = (uint32_t)(pDataContainer->currentSize + sizeof(tTimerInstanceInfo));
 
-                result = SOPC_DoubleBuffer_ReleaseWriteBuffer(pDbo,                         //
-                                                              &(pDataHandle->idContainer)); //
+                result = SOPC_DoubleBuffer_ReleaseWriteBuffer(pDbo,                            //
+                                                              &(pDataContainer->idContainer)); //
             }
 
-            pDataHandle->idContainer = UINT32_MAX;
+            pDataContainer->idContainer = UINT32_MAX;
 
-            desiredStatus = SOPC_INTERRUPT_TIMER_STATUS_NOT_USED;
+            desiredStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED;
 
             __atomic_store(&pTimerData->pTimerInstanceInUse[idInstanceTimer].instanceStatus, //
                            &desiredStatus,                                                   //
@@ -1206,8 +1291,15 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_Finalize(SOPC_Interrup
     return result;
 }
 
-// Expose data container.
-// This function shall be used between InitDataContainer and CommitDataContainer.
+/// @brief Expose data handle buffer informations
+/// @warning This function shall be used between SOPC_InterruptTimer_Instance_DataHandle_Initialize  and
+/// SOPC_InterruptTimer_Instance_DataHandle_Finalize
+/// @warning User becomes the "owner" of the exposed data. He doesn't shall write above *pMaxAllowedSize.
+/// @param [in] pContainer Interrupt timer instance data handle
+/// @param [out] pMaxAllowedSize Function returns max allowed size of returned exposed buffer
+/// @param [out] pCurrentSize Function returns current significant bytes present in the returned exposed buffer
+/// @param [out] ppData Address where is returned pointer on exposed buffer. Do not free this value.
+/// @return SOPC_STATUS_OK in case of success.
 SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_GetBufferInfo(SOPC_InterruptTimer_DataHandle* pContainer,
                                                                         uint32_t* pMaxAllowedSize,
                                                                         uint32_t* pCurrentSize,
@@ -1227,8 +1319,14 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_GetBufferInfo(SOPC_Int
     return result;
 }
 
-// Update data handle size via SOPC_Buffer structure currentSize field.
-// This function shall be used between Initialize  and Finalize
+/// @brief Update data handle size with newSize parameter.
+/// @warning This function shall be used between SOPC_InterruptTimer_Instance_DataHandle_Initialize  and
+/// SOPC_InterruptTimer_Instance_DataHandle_Finalize
+/// @param [in] pContainer Interrupt timer instance data handle
+/// @param [in] newSize Significant bytes to take into account.
+/// @return SOPC_STATUS_OK in case of success.
+/// @return SOPC_INVALID_PARAMETERS if newSize > max allowed size returned by
+/// SOPC_InterruptTimer_Instance_DataHandle_GetBufferInfo
 SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_SetNewSize(SOPC_InterruptTimer_DataHandle* pContainer, //
                                                                      uint32_t newSize)                           //
 
@@ -1245,9 +1343,11 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_SetNewSize(SOPC_Interr
 
 //*** -- ***
 
-// Update timer tick with external tick value. Invoke callback if necessary.
-// Returns : SOPC_STATUS_INVALID_STATE if workspace is not initialized or API for this instance is currently in use.
-// SOPC_STATUS_NOK for others error. Else SOPC_STATUS_OK.
+/// @brief Update timer tick with external tick value. Invoke callback if necessary.
+/// @param [in] pTimer Interrupt timer workspace
+/// @param [in] externalTickValue value. Shall be always incremented. Internally, tick value is declared as uint64_t
+/// @return SOPC_STATUS_INVALID_STATE if workspace is not initialized or API for this instance is currently in use.
+/// @return SOPC_STATUS_NOK for others error. Else SOPC_STATUS_OK.
 SOPC_ReturnStatus SOPC_InterruptTimer_Update(SOPC_InterruptTimer* pTimer, // Interrupt timer object
                                              uint32_t externalTickValue)  // Tick value. Shall be always incremented.
 {
@@ -1258,16 +1358,16 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Update(SOPC_InterruptTimer* pTimer, // Int
 
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
-    SOPC_InterruptTimerStatus currentStatus = SOPC_InterruptTimer_IncrementInUseStatus(pTimer);
+    eInterruptTimerSyncStatus currentStatus = SOPC_InterruptTimer_IncrementInUseStatus(pTimer);
 
     // Check current workspace status
-    if (currentStatus > SOPC_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZED)
+    if (currentStatus > E_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZED)
     {
-        SOPC_InterruptTimerData* pWks = pTimer->pData;
+        tInterruptTimerData* pWks = pTimer->pData;
 
         // Check if UDPATE API is not in use.
-        E_API_IN_USE_STATUS expectedStatus = SOPC_INTERRUPT_TIMER_STATUS_NOT_USED;
-        E_API_IN_USE_STATUS desiredStatus = SOPC_INTERRUPT_TIMER_STATUS_RESERVED;
+        eInterruptTimerInstanceSyncStatus expectedStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED;
+        eInterruptTimerInstanceSyncStatus desiredStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_RESERVED;
         bool bTransition = __atomic_compare_exchange(&pWks->bTickIsUpdating.instanceStatus, //
                                                      &expectedStatus,                       //
                                                      &desiredStatus,                        //
@@ -1370,7 +1470,7 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Update(SOPC_InterruptTimer* pTimer, // Int
             } // End of parsing all instances
 
             // Indicate that UPDATE API is ready.
-            desiredStatus = SOPC_INTERRUPT_TIMER_STATUS_NOT_USED;
+            desiredStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED;
             __atomic_store(&pWks->bTickIsUpdating.instanceStatus, &desiredStatus, __ATOMIC_SEQ_CST);
         }
         else
@@ -1387,13 +1487,17 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Update(SOPC_InterruptTimer* pTimer, // Int
     return result;
 }
 
-// Creation of interrupt timer workspace, called by SOPC_InterruptTimer_Initialize.
-static inline SOPC_InterruptTimerData* SOPC_InterruptTimer_Workspace_Create(
+/// @brief Internal interrupt timer workspace creation
+/// @warning Not thread safe!
+/// @param [in] nbInstances Maximum of timer instances (timer identifiers between 0 and nbInstances - 1)
+/// @param [in] maxDataSize Maximum of data in bytes hold by each timer
+/// @return Internal timer workspace
+static inline tInterruptTimerData* SOPC_InterruptTimer_Workspace_Create(
     uint32_t nbInstances, // Max instanciable timer
     uint32_t maxDataSize) // Max size of data hold by each timer
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
-    SOPC_InterruptTimerData* pWks = SOPC_Calloc(1, sizeof(SOPC_InterruptTimerData));
+    tInterruptTimerData* pWks = SOPC_Calloc(1, sizeof(tInterruptTimerData));
 
     if (NULL == pWks || nbInstances < 1)
     {
@@ -1414,7 +1518,7 @@ static inline SOPC_InterruptTimerData* SOPC_InterruptTimer_Workspace_Create(
 
     if (SOPC_STATUS_OK == result)
     {
-        pWks->pTimerInstanceInUse = SOPC_Calloc(1, nbInstances * sizeof(struct T_API_IN_USE));
+        pWks->pTimerInstanceInUse = SOPC_Calloc(1, nbInstances * sizeof(struct T_INTERRUPT_TIMER_API_STATUS));
         if (NULL == pWks->pTimerInstanceInUse)
         {
             result = SOPC_STATUS_NOK;
@@ -1448,15 +1552,16 @@ static inline SOPC_InterruptTimerData* SOPC_InterruptTimer_Workspace_Create(
     return pWks;
 }
 
-// Destroy interrupt timer workspace. Called by SOPC_InterruptTimer_DeInitialize.
-static inline void SOPC_InterruptTimer_Workspace_Destroy(SOPC_InterruptTimerData** ppWks)
+/// @brief Internal interrupt timer workspace destruction
+/// @param [inout] ppWks Interrupt timer private workspace
+static inline void SOPC_InterruptTimer_Workspace_Destroy(tInterruptTimerData** ppWks)
 {
     if (NULL == ppWks)
     {
         return;
     }
 
-    SOPC_InterruptTimerData* pWks = *ppWks;
+    tInterruptTimerData* pWks = *ppWks;
 
     if (NULL != pWks)
     {
@@ -1489,19 +1594,21 @@ static inline void SOPC_InterruptTimer_Workspace_Destroy(SOPC_InterruptTimerData
     *ppWks = NULL;
 }
 
-// Increment utilization of module counter. Try to pass INITIALIZED STATUS or beyond to this status + 1.
-static inline SOPC_InterruptTimerStatus SOPC_InterruptTimer_IncrementInUseStatus(SOPC_InterruptTimer* pTimer)
+/// @brief Increment number of API clients
+/// @param [in] pTimer Interrupt timer workspace
+/// @return Current status.
+static inline eInterruptTimerSyncStatus SOPC_InterruptTimer_IncrementInUseStatus(SOPC_InterruptTimer* pTimer)
 {
     {
         bool result = false;
-        SOPC_InterruptTimerStatus currentValue = 0;
-        SOPC_InterruptTimerStatus newValue = 0;
+        eInterruptTimerSyncStatus currentValue = 0;
+        eInterruptTimerSyncStatus newValue = 0;
 
         do
         {
             // Load current counter and atomic increment it if possible
             __atomic_load(&pTimer->status, &currentValue, __ATOMIC_SEQ_CST);
-            if (currentValue >= SOPC_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZED)
+            if (currentValue >= E_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZED)
             {
                 newValue = currentValue + 1;
             }
@@ -1521,19 +1628,21 @@ static inline SOPC_InterruptTimerStatus SOPC_InterruptTimer_IncrementInUseStatus
     }
 }
 
-// Decrement utilization of module counter.  Try to pass INITIALIZED STATUS + 1 or beyond to this status - 1.
-static inline SOPC_InterruptTimerStatus SOPC_InterruptTimer_DecrementInUseStatus(SOPC_InterruptTimer* pTimer)
+/// @brief Decrement number of API clients
+/// @param [in] pTimer Interrupt timer workspace
+/// @return Current status.
+static inline eInterruptTimerSyncStatus SOPC_InterruptTimer_DecrementInUseStatus(SOPC_InterruptTimer* pTimer)
 {
     {
         bool result = false;
-        SOPC_InterruptTimerStatus currentValue = 0;
-        SOPC_InterruptTimerStatus newValue = 0;
+        eInterruptTimerSyncStatus currentValue = 0;
+        eInterruptTimerSyncStatus newValue = 0;
 
         do
         {
             // Load current counter and atomic increment it if possible
             __atomic_load(&pTimer->status, &currentValue, __ATOMIC_SEQ_CST);
-            if (currentValue > SOPC_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZED)
+            if (currentValue > E_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZED)
             {
                 newValue = currentValue - 1;
             }
