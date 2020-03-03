@@ -90,7 +90,8 @@ int main(int argc, char* const argv[])
     char* node_id = "ns=1;i=1012";
 
     /* connect to the endpoint */
-    int32_t connectionId = SOPC_ClientHelper_Connect(endpoint_url, security);
+    int32_t configurationId = SOPC_ClientHelper_CreateConfiguration(endpoint_url, security);
+    int32_t connectionId = SOPC_ClientHelper_CreateConnection(configurationId);
 
     if (connectionId <= 0)
     {
