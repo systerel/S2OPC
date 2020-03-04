@@ -241,7 +241,7 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Encode(const SOPC_EncodeableType* type,
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel > SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -306,7 +306,7 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Decode(SOPC_EncodeableType* type,
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel > SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
