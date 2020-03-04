@@ -239,17 +239,15 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Encode(const SOPC_EncodeableType* type,
 
     if (NULL == type || NULL == pValue || NULL == buf || *((SOPC_EncodeableType* const*) pValue) != type)
     {
-        status = SOPC_STATUS_INVALID_PARAMETERS;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
     else if (nestedStructLevel > SOPC_MAX_STRUCT_NESTED_LEVEL)
     {
-        status = SOPC_STATUS_INVALID_STATE;
+        return SOPC_STATUS_INVALID_STATE;
     }
-    else
-    {
-        nestedStructLevel++;
-        status = SOPC_STATUS_OK;
-    }
+
+    nestedStructLevel++;
+    status = SOPC_STATUS_OK;
 
     if (type != NULL && pValue != NULL && *((SOPC_EncodeableType* const*) pValue) != type)
     {
@@ -302,21 +300,19 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Decode(SOPC_EncodeableType* type,
                                                SOPC_Buffer* buf,
                                                uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
-    if (type != NULL && pValue != NULL && buf != NULL)
+    if (NULL == type && NULL == pValue && NULL == buf)
     {
-        status = SOPC_STATUS_OK;
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    else if (nestedStructLevel > SOPC_MAX_STRUCT_NESTED_LEVEL)
+    {
+        return SOPC_STATUS_INVALID_STATE;
     }
 
-    if (nestedStructLevel <= SOPC_MAX_STRUCT_NESTED_LEVEL)
-    {
-        nestedStructLevel++; // increment for future calls
-    }
-    else
-    {
-        status = SOPC_STATUS_INVALID_STATE;
-    }
+    nestedStructLevel++; // increment for future calls
+    status = SOPC_STATUS_OK;
 
     if (SOPC_STATUS_OK == status)
     {
