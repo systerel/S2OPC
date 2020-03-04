@@ -1409,7 +1409,7 @@ void SOPC_Guid_InitializeAux(void* value)
 
 SOPC_ReturnStatus SOPC_Guid_FromCString(SOPC_Guid* guid, const char* str, size_t len)
 {
-    if (guid == NULL || str == NULL)
+    if (NULL == guid || NULL == str)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -2481,7 +2481,7 @@ SOPC_ReturnStatus SOPC_QualifiedName_ParseCString(SOPC_QualifiedName* qname, con
 {
     SOPC_StatusCode status = SOPC_STATUS_OK;
 
-    if (qname == NULL || str == NULL)
+    if (NULL == qname || NULL == str)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -2491,7 +2491,7 @@ SOPC_ReturnStatus SOPC_QualifiedName_ParseCString(SOPC_QualifiedName* qname, con
         char* colon = strchr(str, ':');
         qname->NamespaceIndex = 0;
 
-        if (colon == NULL)
+        if (NULL == colon)
         {
             status = SOPC_String_CopyFromCString(&qname->Name, str);
         }
@@ -4135,7 +4135,7 @@ SOPC_Variant* SOPC_Variant_Create()
 {
     SOPC_Variant* variant = SOPC_Calloc(1, sizeof(SOPC_Variant));
 
-    if (variant == NULL)
+    if (NULL == variant)
     {
         return NULL;
     }
@@ -4684,20 +4684,20 @@ SOPC_ReturnStatus SOPC_Variant_CompareRange(const SOPC_Variant* left,
                                             const SOPC_NumericRange* range,
                                             int32_t* comparison)
 {
-    if (left == NULL || right == NULL)
+    if (NULL == left || NULL == right)
     {
         // To be consistent with SOPC_Variant_Compare
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    if (range == NULL)
+    if (NULL == range)
     {
         return SOPC_Variant_Compare(left, right, comparison);
     }
 
     SOPC_Variant *left_sub = SOPC_Variant_Create(), *right_sub = SOPC_Variant_Create();
 
-    if (left_sub == NULL || right_sub == NULL)
+    if (NULL == left_sub || NULL == right_sub)
     {
         SOPC_Variant_Delete(left_sub);
         SOPC_Variant_Delete(right_sub);
@@ -4793,7 +4793,7 @@ void SOPC_Variant_Clear(SOPC_Variant* variant)
 
 void SOPC_Variant_Delete(SOPC_Variant* variant)
 {
-    if (variant == NULL)
+    if (NULL == variant)
     {
         return;
     }
@@ -5100,7 +5100,7 @@ static SOPC_ReturnStatus get_range_string_helper(SOPC_String* dst,
 
     dst->Data = SOPC_Calloc(1 + dst_len, sizeof(SOPC_Byte));
 
-    if (dst->Data == NULL)
+    if (NULL == dst->Data)
     {
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
@@ -5325,7 +5325,7 @@ static SOPC_ReturnStatus set_range_array(SOPC_Variant* variant, const SOPC_Varia
     SOPC_EncodeableObject_PfnCopy* copyFunction = GetBuiltInTypeCopyFunction(src->BuiltInTypeId);
     SOPC_EncodeableObject_PfnClear* clearFunction = GetBuiltInTypeClearFunction(src->BuiltInTypeId);
 
-    if (copyFunction == NULL || clearFunction == NULL)
+    if (NULL == copyFunction || NULL == clearFunction)
     {
         return SOPC_STATUS_NOK;
     }

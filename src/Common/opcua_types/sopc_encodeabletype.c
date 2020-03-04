@@ -61,11 +61,11 @@ SOPC_EncodeableType* SOPC_EncodeableType_GetEncodeableType(uint32_t typeId)
 const char* SOPC_EncodeableType_GetName(SOPC_EncodeableType* encType)
 {
     const char* result = NULL;
-    if (encType == NULL)
+    if (NULL == encType)
     {
         result = nullType;
     }
-    else if (encType->TypeName == NULL)
+    else if (NULL == encType->TypeName)
     {
         result = noNameType;
     }
@@ -237,7 +237,7 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Encode(const SOPC_EncodeableType* type,
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
-    if (type == NULL || pValue == NULL || buf == NULL || *((SOPC_EncodeableType* const*) pValue) != type)
+    if (NULL == type || NULL == pValue || NULL == buf || *((SOPC_EncodeableType* const*) pValue) != type)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }

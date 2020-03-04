@@ -322,7 +322,7 @@ SOPC_ReturnStatus SOPC_Int16_WriteAux(const void* value, SOPC_Buffer* buf, uint3
 SOPC_ReturnStatus SOPC_Int16_Write(const int16_t* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    if (value == NULL || buf == NULL)
+    if (NULL == value || NULL == buf)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -391,7 +391,7 @@ SOPC_ReturnStatus SOPC_UInt16_WriteAux(const void* value, SOPC_Buffer* buf, uint
 SOPC_ReturnStatus SOPC_UInt16_Write(const uint16_t* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    if (value == NULL || buf == NULL)
+    if (NULL == value || NULL == buf)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -458,7 +458,7 @@ SOPC_ReturnStatus SOPC_Int32_WriteAux(const void* value, SOPC_Buffer* buf, uint3
 SOPC_ReturnStatus SOPC_Int32_Write(const int32_t* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    if (value == NULL || buf == NULL)
+    if (NULL == value || NULL == buf)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -494,7 +494,7 @@ SOPC_ReturnStatus SOPC_Int32_ReadAux(void* value, SOPC_Buffer* buf, uint32_t nes
 SOPC_ReturnStatus SOPC_Int32_Read(int32_t* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    if (value == NULL || buf == NULL)
+    if (NULL == value || NULL == buf)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -525,7 +525,7 @@ SOPC_ReturnStatus SOPC_UInt32_WriteAux(const void* value, SOPC_Buffer* buf, uint
 SOPC_ReturnStatus SOPC_UInt32_Write(const uint32_t* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    if (value == NULL || buf == NULL)
+    if (NULL == value || NULL == buf)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -561,7 +561,7 @@ SOPC_ReturnStatus SOPC_UInt32_ReadAux(void* value, SOPC_Buffer* buf, uint32_t ne
 SOPC_ReturnStatus SOPC_UInt32_Read(uint32_t* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    if (value == NULL || buf == NULL)
+    if (NULL == value || NULL == buf)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -593,7 +593,7 @@ SOPC_ReturnStatus SOPC_Int64_WriteAux(const void* value, SOPC_Buffer* buf, uint3
 SOPC_ReturnStatus SOPC_Int64_Write(const int64_t* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    if (value == NULL || buf == NULL)
+    if (NULL == value || NULL == buf)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -629,7 +629,7 @@ SOPC_ReturnStatus SOPC_Int64_ReadAux(void* value, SOPC_Buffer* buf, uint32_t nes
 SOPC_ReturnStatus SOPC_Int64_Read(int64_t* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    if (value == NULL || buf == NULL)
+    if (NULL == value || NULL == buf)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -660,7 +660,7 @@ SOPC_ReturnStatus SOPC_UInt64_WriteAux(const void* value, SOPC_Buffer* buf, uint
 SOPC_ReturnStatus SOPC_UInt64_Write(const uint64_t* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    if (value == NULL || buf == NULL)
+    if (NULL == value || NULL == buf)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -696,7 +696,7 @@ SOPC_ReturnStatus SOPC_UInt64_ReadAux(void* value, SOPC_Buffer* buf, uint32_t ne
 SOPC_ReturnStatus SOPC_UInt64_Read(uint64_t* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    if (value == NULL || buf == NULL)
+    if (NULL == value || NULL == buf)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -727,7 +727,7 @@ SOPC_ReturnStatus SOPC_Float_WriteAux(const void* value, SOPC_Buffer* buf, uint3
 SOPC_ReturnStatus SOPC_Float_Write(const float* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (value == NULL || buf == NULL)
+    if (NULL == value || NULL == buf)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -763,7 +763,7 @@ SOPC_ReturnStatus SOPC_Float_ReadAux(void* value, SOPC_Buffer* buf, uint32_t nes
 SOPC_ReturnStatus SOPC_Float_Read(float* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    if (value == NULL || buf == NULL)
+    if (NULL == value || NULL == buf)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -794,7 +794,7 @@ SOPC_ReturnStatus SOPC_Double_WriteAux(const void* value, SOPC_Buffer* buf, uint
 SOPC_ReturnStatus SOPC_Double_Write(const double* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    if (value == NULL || buf == NULL)
+    if (NULL == value || NULL == buf)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -830,7 +830,7 @@ SOPC_ReturnStatus SOPC_Double_ReadAux(void* value, SOPC_Buffer* buf, uint32_t ne
 SOPC_ReturnStatus SOPC_Double_Read(double* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    if (value == NULL || buf == NULL)
+    if (NULL == value || NULL == buf)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -913,7 +913,7 @@ SOPC_ReturnStatus SOPC_ByteString_Read(SOPC_ByteString* str, SOPC_Buffer* buf, u
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     int32_t length;
-    if (NULL == str || str->Data != NULL || str->Length > 0 || buf == NULL)
+    if (NULL == str || str->Data != NULL || str->Length > 0 || NULL == buf)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -1023,7 +1023,7 @@ SOPC_ReturnStatus SOPC_String_ReadWithLimitedLength(SOPC_String* str,
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     int32_t length;
-    if (NULL == str || str->Data != NULL || str->Length > 0 || buf == NULL)
+    if (NULL == str || str->Data != NULL || str->Length > 0 || NULL == buf)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -1171,7 +1171,7 @@ SOPC_ReturnStatus SOPC_Guid_WriteAux(const void* value, SOPC_Buffer* buf, uint32
 SOPC_ReturnStatus SOPC_Guid_Write(const SOPC_Guid* guid, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    if (guid == NULL || buf == NULL)
+    if (NULL == guid || NULL == buf)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -1216,7 +1216,7 @@ SOPC_ReturnStatus SOPC_Guid_ReadAux(void* value, SOPC_Buffer* buf, uint32_t nest
 SOPC_ReturnStatus SOPC_Guid_Read(SOPC_Guid* guid, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    if (guid == NULL || buf == NULL)
+    if (NULL == guid || NULL == buf)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -1372,7 +1372,7 @@ SOPC_ReturnStatus SOPC_NodeId_WriteAux(const void* value, SOPC_Buffer* buf, uint
 SOPC_ReturnStatus SOPC_NodeId_Write(const SOPC_NodeId* nodeId, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (nodeId == NULL)
+    if (NULL == nodeId)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -1497,7 +1497,7 @@ SOPC_ReturnStatus SOPC_NodeId_Read(SOPC_NodeId* nodeId, SOPC_Buffer* buf, uint32
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_Byte encodingByte = 0;
-    if (nodeId == NULL)
+    if (NULL == nodeId)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -1524,7 +1524,7 @@ SOPC_ReturnStatus SOPC_ExpandedNodeId_Write(const SOPC_ExpandedNodeId* expNodeId
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_Byte encodingByte = 0xFF;
-    if (expNodeId == NULL)
+    if (NULL == expNodeId)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -1572,7 +1572,7 @@ SOPC_ReturnStatus SOPC_ExpandedNodeId_Read(SOPC_ExpandedNodeId* expNodeId, SOPC_
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_Byte encodingByte = 0;
-    if (expNodeId == NULL)
+    if (NULL == expNodeId)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -1844,7 +1844,7 @@ SOPC_ReturnStatus SOPC_QualifiedName_Write(const SOPC_QualifiedName* qname,
                                            uint32_t nestedStructLevel)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    if (qname == NULL)
+    if (NULL == qname)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -1873,7 +1873,7 @@ SOPC_ReturnStatus SOPC_QualifiedName_ReadAux(void* value, SOPC_Buffer* buf, uint
 SOPC_ReturnStatus SOPC_QualifiedName_Read(SOPC_QualifiedName* qname, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    if (qname == NULL)
+    if (NULL == qname)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -1931,7 +1931,7 @@ SOPC_ReturnStatus SOPC_LocalizedText_Write(const SOPC_LocalizedText* localizedTe
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_Byte encodingByte = 0;
-    if (localizedText == NULL)
+    if (NULL == localizedText)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -1972,7 +1972,7 @@ SOPC_ReturnStatus SOPC_LocalizedText_Read(SOPC_LocalizedText* localizedText,
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_Byte encodingByte = 0;
-    if (localizedText == NULL)
+    if (NULL == localizedText)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -2024,7 +2024,7 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Write(const SOPC_ExtensionObject* extObj,
     int32_t length;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_Byte encodingByte = 0;
-    if (extObj == NULL)
+    if (NULL == extObj)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -2118,7 +2118,7 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_B
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_EncodeableType* encType = NULL;
     SOPC_Byte encodingByte = 0;
-    if (extObj == NULL)
+    if (NULL == extObj)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -2244,7 +2244,7 @@ static SOPC_ReturnStatus SOPC_Read_Array_WithNestedLevel(SOPC_Buffer* buf,
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_Byte* byteArray = NULL;
 
-    if (buf == NULL || noOfElts == NULL || eltsArray == NULL || NULL != *eltsArray || decodeFct == NULL)
+    if (NULL == buf || NULL == noOfElts || NULL == eltsArray || NULL != *eltsArray || NULL == decodeFct)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -2332,8 +2332,8 @@ static SOPC_ReturnStatus SOPC_Write_Array_WithNestedLevel(SOPC_Buffer* buf,
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
-    if (buf == NULL || noOfElts == NULL || eltsArray == NULL || encodeFct == NULL ||
-        (*noOfElts > 0 && *eltsArray == NULL))
+    if (NULL == buf || NULL == noOfElts || NULL == eltsArray || NULL == encodeFct ||
+        (*noOfElts > 0 && NULL == *eltsArray))
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -2650,7 +2650,7 @@ static SOPC_ReturnStatus SOPC_Variant_Write_Internal(const SOPC_Variant* variant
     int64_t matrixLength = 1;
     int32_t idx = 0;
 
-    if (variant == NULL)
+    if (NULL == variant)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -3121,7 +3121,7 @@ static SOPC_ReturnStatus SOPC_Variant_Read_Internal(SOPC_Variant* variant, SOPC_
     SOPC_Byte encodingByte = 0;
     int32_t arrayLength = 0;
     int64_t matrixLength = 1;
-    if (variant == NULL)
+    if (NULL == variant)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -3347,7 +3347,7 @@ static SOPC_ReturnStatus SOPC_DataValue_Write_Internal(const SOPC_DataValue* dat
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_Byte encodingMask = 0;
-    if (dataValue == NULL)
+    if (NULL == dataValue)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -3424,7 +3424,7 @@ static SOPC_ReturnStatus SOPC_DataValue_Read_Internal(SOPC_DataValue* dataValue,
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_Byte encodingMask = 0;
-    if (dataValue == NULL)
+    if (NULL == dataValue)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -3526,7 +3526,7 @@ SOPC_ReturnStatus SOPC_Read_Array(SOPC_Buffer* buf,
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_Byte* byteArray = NULL;
 
-    if (buf == NULL || noOfElts == NULL || eltsArray == NULL || NULL != *eltsArray || decodeFct == NULL)
+    if (NULL == buf || NULL == noOfElts || NULL == eltsArray || NULL != *eltsArray || NULL == decodeFct)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -3604,8 +3604,8 @@ SOPC_ReturnStatus SOPC_Write_Array(SOPC_Buffer* msgBuf,
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
-    if (msgBuf == NULL || noOfElts == NULL || eltsArray == NULL || encodeFct == NULL ||
-        (*noOfElts > 0 && *eltsArray == NULL))
+    if (NULL == msgBuf || NULL == noOfElts || NULL == eltsArray || NULL == encodeFct ||
+        (*noOfElts > 0 && NULL == *eltsArray))
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
