@@ -50,19 +50,19 @@ static void printVariant(const SOPC_Variant* variant)
     switch (variant->BuiltInTypeId)
     {
     case SOPC_Byte_Id:
-        printf("   - Variant Value %d\n", variant->Value.Byte);
+        printf("   - Variant Value %" PRIu8 "\n", variant->Value.Byte);
         break;
     case SOPC_UInt16_Id:
-        printf("   - Variant Value %u\n", variant->Value.Uint16);
+        printf("   - Variant Value %" PRIu16 "\n", variant->Value.Uint16);
         break;
     case SOPC_UInt32_Id:
-        printf("   - Variant Value %u\n", variant->Value.Uint32);
+        printf("   - Variant Value %" PRIu32 "\n", variant->Value.Uint32);
         break;
     case SOPC_UInt64_Id:
-        printf("   - Variant Value %lu\n", variant->Value.Uint64);
+        printf("   - Variant Value %" PRIu64 "\n", variant->Value.Uint64);
         break;
     case SOPC_Int64_Id:
-        printf("   - Variant Value %ld\n", variant->Value.Int64);
+        printf("   - Variant Value %" PRIi64 "\n", variant->Value.Int64);
         break;
     case SOPC_DateTime_Id:
         SOPC_Time_ToTimeT(variant->Value.Date, &time);
@@ -82,15 +82,15 @@ static void printPublisherId(const SOPC_UADP_NetworkMessage* uadp_nm)
     switch (publisher_id->type)
     {
     case DataSet_LL_PubId_Byte_Id:
-        printf("Publisher Id:\n - Enabled %d\n - Type Byte - Value %d\n", uadp_nm->conf.GroupIdFlag,
+        printf("Publisher Id:\n - Enabled %d\n - Type Byte - Value %" PRIu8 "\n", uadp_nm->conf.GroupIdFlag,
                publisher_id->data.byte);
         break;
     case DataSet_LL_PubId_UInt16_Id:
-        printf("Publisher Id:\n - Enabled %d\n - Type UInt16 - Value %d\n", uadp_nm->conf.GroupIdFlag,
+        printf("Publisher Id:\n - Enabled %d\n - Type UInt16 - Value %" PRIu16 "\n", uadp_nm->conf.GroupIdFlag,
                publisher_id->data.uint16);
         break;
     case DataSet_LL_PubId_UInt32_Id:
-        printf("Publisher Id:\n - Enabled %d\n - Type UInt32 - Value %d\n", uadp_nm->conf.GroupIdFlag,
+        printf("Publisher Id:\n - Enabled %d\n - Type UInt32 - Value %" PRIu32 "\n", uadp_nm->conf.GroupIdFlag,
                publisher_id->data.uint32);
         break;
     case DataSet_LL_PubId_UInt64_Id:
@@ -130,7 +130,7 @@ static void printNetworkMessage(const SOPC_UADP_NetworkMessage* uadp_nm)
             for (uint16_t j = 0; j < nbDsf; j++)
             {
                 const SOPC_Variant* variant = SOPC_Dataset_LL_DataSetMsg_Get_Variant_At(dsm, j);
-                printf(" - DataSetField %d\n", j);
+                printf(" - DataSetField %" PRIu16 "\n", j);
                 printVariant(variant);
             }
         }
