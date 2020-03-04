@@ -249,12 +249,6 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Encode(const SOPC_EncodeableType* type,
     nestedStructLevel++;
     status = SOPC_STATUS_OK;
 
-    if (type != NULL && pValue != NULL && *((SOPC_EncodeableType* const*) pValue) != type)
-    {
-        SOPC_Logger_TraceWarning(
-            "Problem encoding type %s value. Value 'encodeableType' field incorrectly initialized.", type->TypeName);
-    }
-
     for (int32_t i = 0; SOPC_STATUS_OK == status && i < type->NoOfFields; ++i)
     {
         const SOPC_EncodeableType_FieldDescriptor* desc = &type->Fields[i];
