@@ -96,13 +96,8 @@ export(EXPORT s2opc_clientserver-export
 
 # C generated structure address space loader
 # (see s2opc_embed_address_space in CommonDefs.cmake to generate the C structure from XML)
-# Note: this library is never compiled as a dynamic library on windows platform because it does not link
-#       due to the use of extern variables not defined during library linking phase
-if(WIN32)
-  add_library(s2opc_clientserver-loader-embedded STATIC loaders/address_space_loaders/embedded/sopc_addspace_loader.c)
-else()
-  add_library(s2opc_clientserver-loader-embedded loaders/address_space_loaders/embedded/sopc_addspace_loader.c)
-endif()
+# Note: this library is never compiled as a dynamic library due to the use of extern variables not defined during library linking
+add_library(s2opc_clientserver-loader-embedded STATIC loaders/address_space_loaders/embedded/sopc_addspace_loader.c)
 target_compile_options(s2opc_clientserver-loader-embedded PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(s2opc_clientserver-loader-embedded PRIVATE ${S2OPC_DEFINITIONS})
 target_link_libraries(s2opc_clientserver-loader-embedded PUBLIC s2opc_clientserver)
