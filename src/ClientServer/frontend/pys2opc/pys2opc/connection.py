@@ -51,6 +51,13 @@ class BaseConnectionHandler:
         assert dataId in self._dSubscription, 'Data change notification on unknown NodeId'
         self.on_datachanged(self._dSubscription[dataId], value)
 
+    def _on_disconnect(self):
+        """
+        Internal wrapper, calls on_disconnect()
+        """
+        self._connected = False
+        self.on_disconnect()
+
     _dResponseClasses = {EncodeableType.ReadResponse: ReadResponse,
                          EncodeableType.WriteResponse: WriteResponse,
                          EncodeableType.BrowseResponse: BrowseResponse,
@@ -109,7 +116,7 @@ class BaseConnectionHandler:
         """
         Called when the disconnection of this connection is effective.
         """
-        self._connected = False
+        pass
 
     def on_generic_response(self, request, response):
         """

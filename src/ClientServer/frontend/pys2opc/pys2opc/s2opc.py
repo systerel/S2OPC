@@ -318,7 +318,7 @@ class PyS2OPC:
             print('# Warning: Disconnected unknown client', clientId, file=sys.stderr)
             return
         connection = PyS2OPC._dConnections.pop(clientId)
-        connection.on_disconnect()
+        connection._on_disconnect()
 
     @staticmethod
     def _callback_datachanged(connectionId, dataId, c_value):
