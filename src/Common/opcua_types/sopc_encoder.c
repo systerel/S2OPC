@@ -3209,10 +3209,6 @@ SOPC_ReturnStatus SOPC_DataValue_WriteAux_Nested(const void* value, SOPC_Buffer*
 SOPC_ReturnStatus SOPC_DataValue_Write(const SOPC_DataValue* dataValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    if (nestedStructLevel > SOPC_MAX_STRUCT_NESTED_LEVEL)
-    {
-        return SOPC_STATUS_INVALID_STATE;
-    }
 
     // Manage variant nested level (data value could be contained in a variant)
     status = SOPC_DataValue_Write_Internal(dataValue, buf, nestedStructLevel);
