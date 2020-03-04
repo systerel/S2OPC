@@ -177,7 +177,7 @@ Prerequisites:
 - GCC (tested with GCC version 8.1.0)
 - [Mbedtls](https://tls.mbed.org/)(tested with mbedtls version 2.16.0)
 - [Check](https://libcheck.github.io/check/)(tested with libcheck version 0.14)
-- [expat](https://github.com/libexpat/libexpat)(tested with libexpat version 2.2.5)
+- [expat](https://github.com/libexpat/libexpat)(tested with libexpat version 2.2.9)
 - Python3 (tested with version 3.6.3)
 
 To build the Toolkit library and tests with default configuration on current

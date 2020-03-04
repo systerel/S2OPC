@@ -59,7 +59,7 @@ if(ENABLE_SAMPLES)
   target_compile_options(${TOOLKIT_DEMO_SERVER} PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(${TOOLKIT_DEMO_SERVER} PRIVATE ${S2OPC_DEFINITIONS})
 
-  if (EXPAT_FOUND)
+  if (expat_FOUND)
     target_link_libraries(${TOOLKIT_DEMO_SERVER} PRIVATE s2opc_clientserver-xml-loaders-expat)
     target_compile_definitions(${TOOLKIT_DEMO_SERVER} PRIVATE "WITH_EXPAT")
   endif()
@@ -184,7 +184,7 @@ if(ENABLE_SAMPLES)
   target_compile_definitions(bench_tool PRIVATE ${S2OPC_DEFINITIONS})
 
   # TODO: XML parsing demo: make a unit test / validation test with it instead of demo
-  if (EXPAT_FOUND)
+  if (expat_FOUND)
     add_executable(s2opc_parse_uanodeset "loaders/s2opc_parse_uanodeset.c")
     target_link_libraries(s2opc_parse_uanodeset PRIVATE s2opc_clientserver-xml-loaders-expat)
     target_compile_options(s2opc_parse_uanodeset PRIVATE ${S2OPC_COMPILER_FLAGS})

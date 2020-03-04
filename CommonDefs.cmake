@@ -35,7 +35,7 @@ if(USE_STATIC_EXT_LIBS)
   set(USE_STATIC_EXPAT_LIB ${USE_STATIC_EXT_LIBS})
 
   if(BUILD_SHARED_LIBS)
-    message(WARNING "Both BUILD_SHARED_LIBS and USE_STATIC_EXT_LIBS are active: external libraries will still be linked statically")
+    message(WARNING "Both BUILD_SHARED_LIBS and USE_STATIC_EXT_LIBS are active: external libraries will still be linked statically (if available)")
   endif()
 
 # else: USE_STATIC_<LIBNAME>_LIB can be set in a custom way, otherwise default CMake behavior is kept
@@ -55,9 +55,9 @@ if (USE_STATIC_EXPAT_LIB)
 endif()
 
 if(S2OPC_CLIENTSERVER_ONLY)
-  find_package(EXPAT) # if not found XML loaders will not be compiled
+  find_package(expat) # if not found XML loaders will not be compiled
 else()
-  find_package(EXPAT REQUIRED)
+  find_package(expat REQUIRED)
 endif()
 
 # redefine CMake behavior for find_library(*)
