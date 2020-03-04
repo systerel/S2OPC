@@ -22,7 +22,7 @@
 #
 set -e
 
-DOCKER_IMAGE=sha256:bbbb6dad58c377f0d341279687e84b7d6d69972d7032f13885f0af4502094c2e # mingw_build:1.7
+DOCKER_IMAGE=sha256:3808353ec9f3f7dda2bcd9a874a74b2534020adb7f5103f181fc427cc3f94b9f # mingw_build:1.8
 
 if [[ -z $SOPC_DOCKER_NEEDS_SUDO ]]; then
     /etc/scripts/run-in-docker $DOCKER_IMAGE CMAKE_TOOLCHAIN_FILE=toolchain-mingw32-w64.cmake BUILD_SHARED_LIBS=true DOCKER_IMAGE=$DOCKER_IMAGE "$@"
