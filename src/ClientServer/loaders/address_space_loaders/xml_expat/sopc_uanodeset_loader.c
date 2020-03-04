@@ -1114,6 +1114,7 @@ static SOPC_LocalizedText* element_localized_text_for_state(struct parse_context
     default:
         assert(false && "Unexpected state");
     }
+    return NULL;
 }
 
 static uint8_t type_width(SOPC_BuiltinId ty)
@@ -1135,6 +1136,7 @@ static uint8_t type_width(SOPC_BuiltinId ty)
     default:
         assert(false && "Non numeric type");
     }
+    return 0;
 }
 
 #define FOREACH_SIGNED_VALUE_TYPE(x) \
