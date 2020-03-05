@@ -70,7 +70,7 @@ install(FILES ${S2OPC_ROOT_PATH}/scripts/generate-s2opc-address-space.py DESTINA
 # install the export as a cmake file
 install(EXPORT s2opc_pubsub-export
   FILE s2opc_pubsub-export.cmake
-  DESTINATION lib/cmake)
+  DESTINATION lib/cmake/s2opc)
 
 # export cmake file for use in build tree without install
 export(EXPORT s2opc_pubsub-export

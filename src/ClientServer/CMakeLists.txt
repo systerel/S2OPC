@@ -79,7 +79,7 @@ install(TARGETS s2opc_clientserver
 # install the export as a cmake file
 install(EXPORT s2opc_clientserver-export
   FILE s2opc_clientserver-export.cmake
-  DESTINATION lib/cmake)
+  DESTINATION lib/cmake/s2opc)
 
 # export cmake file for use in build tree without install
 export(EXPORT s2opc_clientserver-export
@@ -116,7 +116,7 @@ install(TARGETS s2opc_clientserver-loader-embedded
 # install the export as a cmake file
 install(EXPORT s2opc_clientserver-loader-embedded-export
   FILE s2opc_clientserver-loader-embedded-export.cmake
-  DESTINATION lib/cmake)
+  DESTINATION lib/cmake/s2opc)
 
 # export cmake file for use in build tree without install
 export(EXPORT s2opc_clientserver-loader-embedded-export
@@ -153,7 +153,7 @@ if (expat_FOUND)
   # install the export as a cmake file
   install(EXPORT s2opc_clientserver-xml-loaders-expat-export
           FILE s2opc_clientserver-xml-loaders-expat-export.cmake
-          DESTINATION lib/cmake)
+          DESTINATION lib/cmake/s2opc)
 
   # export cmake file for use in build tree without install
   export(EXPORT s2opc_clientserver-xml-loaders-expat-export
@@ -192,7 +192,7 @@ install(TARGETS s2opc_clientwrapper
 # install the export as a cmake file
 install(EXPORT s2opc_clientserver-clientwrapper-export
         FILE s2opc_clientserver-clientwrapper-export.cmake
-        DESTINATION lib/cmake)
+        DESTINATION lib/cmake/s2opc)
 
 # export cmake file for use in build tree without install
 export(EXPORT s2opc_clientserver-clientwrapper-export

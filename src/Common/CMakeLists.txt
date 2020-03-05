@@ -118,7 +118,7 @@ install(TARGETS s2opc_common
 # install the export as a cmake file
 install(EXPORT s2opc_common-export
   FILE s2opc_common-export.cmake
-  DESTINATION lib/cmake)
+  DESTINATION lib/cmake/s2opc)
 
 # export cmake file for use in build tree without install
 export(EXPORT s2opc_common-export
