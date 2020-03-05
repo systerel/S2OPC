@@ -50,7 +50,7 @@ static struct
                      .tickCb = NULL,
                      .tickCbCtx = NULL};
 
-static void* SOPC_UPD_SocketsMgr_ThreadLoop(void* nullData)
+static void* SOPC_UDP_SocketsMgr_ThreadLoop(void* nullData)
 {
     (void) nullData;
     int32_t nbReady = 0;
@@ -117,7 +117,7 @@ static void* SOPC_UPD_SocketsMgr_ThreadLoop(void* nullData)
     return NULL;
 }
 
-static bool SOPC_UPD_SocketsMgr_LoopThreadStart(void** sockContextArray,
+static bool SOPC_UDP_SocketsMgr_LoopThreadStart(void** sockContextArray,
                                                 Socket* socketArray,
                                                 uint16_t nbSockets,
                                                 SOPC_UDP_ReadyToReceive callback,
@@ -138,7 +138,7 @@ static bool SOPC_UPD_SocketsMgr_LoopThreadStart(void** sockContextArray,
 
     receptionThread.stopFlag = 0;
 
-    if (SOPC_Thread_Create(&receptionThread.thread, SOPC_UPD_SocketsMgr_ThreadLoop, NULL, "SubscriberSocketMgr") !=
+    if (SOPC_Thread_Create(&receptionThread.thread, SOPC_UDP_SocketsMgr_ThreadLoop, NULL, "SubscriberSocketMgr") !=
         SOPC_STATUS_OK)
     {
         return false;
@@ -164,7 +164,7 @@ static void SOPC_SocketsNetworkEventMgr_LoopThreadStop(void)
     SOPC_Atomic_Int_Set(&receptionThread.initDone, false);
 }
 
-void SOPC_UPD_SocketsMgr_Initialize(void** sockContextArray,
+void SOPC_UDP_SocketsMgr_Initialize(void** sockContextArray,
                                     Socket* socketArray,
                                     uint16_t nbSockets,
                                     SOPC_UDP_ReadyToReceive callback,
@@ -174,11 +174,11 @@ void SOPC_UPD_SocketsMgr_Initialize(void** sockContextArray,
     assert(NULL != socketArray);
     assert(NULL != callback);
     bool result =
-        SOPC_UPD_SocketsMgr_LoopThreadStart(sockContextArray, socketArray, nbSockets, callback, tickCb, tickCbCtx);
+        SOPC_UDP_SocketsMgr_LoopThreadStart(sockContextArray, socketArray, nbSockets, callback, tickCb, tickCbCtx);
     assert(result);
 }
 
-void SOPC_UPD_SocketsMgr_Clear()
+void SOPC_UDP_SocketsMgr_Clear()
 {
     SOPC_SocketsNetworkEventMgr_LoopThreadStop();
 }

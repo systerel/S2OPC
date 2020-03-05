@@ -243,7 +243,7 @@ int main(void)
     }
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_UPD_SocketsMgr_Initialize(NULL, &sock, 1, readyToReceive, tick, (void*) CTX_VALUE);
+        SOPC_UDP_SocketsMgr_Initialize(NULL, &sock, 1, readyToReceive, tick, (void*) CTX_VALUE);
     }
 
     while (SOPC_STATUS_OK == status && false == SOPC_Atomic_Int_Get(&stop) && sleepCount > 0)
@@ -251,7 +251,7 @@ int main(void)
         SOPC_Sleep(100);
         sleepCount--;
     }
-    SOPC_UPD_SocketsMgr_Clear();
+    SOPC_UDP_SocketsMgr_Clear();
 
     SOPC_Buffer_Delete(buffer);
     SOPC_UDP_Socket_Close(&sock);

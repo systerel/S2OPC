@@ -131,7 +131,7 @@ int main(void)
 
     if (buffer != NULL)
     {
-        SOPC_UPD_SocketsMgr_Initialize((void**) sockIdxArr, socketArr, NB_ADDRS, readyToReceive, NULL, NULL);
+        SOPC_UDP_SocketsMgr_Initialize((void**) sockIdxArr, socketArr, NB_ADDRS, readyToReceive, NULL, NULL);
         printf("Received from pub:");
         while (false == SOPC_Atomic_Int_Get(&stop) && sleepCount > 0)
         {
@@ -139,7 +139,7 @@ int main(void)
             sleepCount--;
         }
         printf("\n");
-        SOPC_UPD_SocketsMgr_Clear();
+        SOPC_UDP_SocketsMgr_Clear();
     }
     else
     {

@@ -38,7 +38,7 @@ typedef void (*SOPC_UDP_PeriodicTick)(void* ctx);
  * \param tickCb            the callback called in a periodic way (each 500ms) to could check keep alive timeout
  * \param tickCbCtx         the callback context pointer provided on call to \p tickCb callback
  * */
-void SOPC_UPD_SocketsMgr_Initialize(void** sockContextArray,
+void SOPC_UDP_SocketsMgr_Initialize(void** sockContextArray,
                                     Socket* socketArray,
                                     uint16_t nbSockets,
                                     SOPC_UDP_ReadyToReceive callback,
@@ -48,6 +48,6 @@ void SOPC_UPD_SocketsMgr_Initialize(void** sockContextArray,
 /**
  * Awaits the dedicated thread to stop, clear the context and return.
  */
-void SOPC_UPD_SocketsMgr_Clear(void);
+void SOPC_UDP_SocketsMgr_Clear(void);
 
 #endif /* SOPC_SUB_UDP_SOCKETS_MGR_H_ */

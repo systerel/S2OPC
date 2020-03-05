@@ -302,7 +302,7 @@ void SOPC_SubScheduler_Stop(void)
     // true because isStarted is false
     assert(schedulerCtx.nbConnections > 0);
     SOPC_Atomic_Int_Set(&schedulerCtx.processingStartStop, true);
-    SOPC_UPD_SocketsMgr_Clear();
+    SOPC_UDP_SocketsMgr_Clear();
     set_new_state(SOPC_PubSubState_Disabled);
     uninit_sub_scheduler_ctx();
 
@@ -343,7 +343,7 @@ static bool SOPC_SubScheduler_Start_UDP(void)
     }
 
     assert(nb_socket == sockIdx);
-    SOPC_UPD_SocketsMgr_Initialize((void**) schedulerCtx.connectionArray, schedulerCtx.sockArray, nb_socket,
+    SOPC_UDP_SocketsMgr_Initialize((void**) schedulerCtx.connectionArray, schedulerCtx.sockArray, nb_socket,
                                    on_udp_message_received, NULL, NULL);
 
     return true;
