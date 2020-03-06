@@ -328,7 +328,8 @@ static SOPC_ReturnStatus SOPC_SocketsEventMgr_Socket_WriteAll(SOPC_Socket* sock,
     if (sentBytes == 0 && SOPC_STATUS_OK == status) // Consider that 0 bytes sent without blocking is an error on socket
     {
         status = SOPC_STATUS_NOK;
-        SOPC_Logger_TraceError("Non blocking call to Socket_Write returned 0 bytes written (socketIdx=%" PRIu32
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "Non blocking call to Socket_Write returned 0 bytes written (socketIdx=%" PRIu32
                                ", connectionId=%" PRIu32,
                                sock->socketIdx, sock->connectionId);
     }
@@ -475,7 +476,8 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_Sockets_InputEvent socketEvent,
     switch (socketEvent)
     {
     case SOCKET_CREATE_SERVER:
-        SOPC_Logger_TraceDebug("SocketEvent: SOCKET_CREATE_SERVER epCfgIdx=%" PRIu32 " URI=%s allItfs=%s", eltId,
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "SocketEvent: SOCKET_CREATE_SERVER epCfgIdx=%" PRIu32 " URI=%s allItfs=%s", eltId,
                                (char*) params, auxParam ? "true" : "false");
         /*
         id = endpoint description config index,
@@ -494,7 +496,8 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_Sockets_InputEvent socketEvent,
         }
         break;
     case SOCKET_ACCEPTED_CONNECTION:
-        SOPC_Logger_TraceDebug("SocketEvent: SOCKET_ACCEPTED_CONNECTION socketIdx=%" PRIu32 " scIdx=%" PRIuPTR, eltId,
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "SocketEvent: SOCKET_ACCEPTED_CONNECTION socketIdx=%" PRIu32 " scIdx=%" PRIuPTR, eltId,
                                auxParam);
 
         /* id = socket index,
@@ -514,7 +517,8 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_Sockets_InputEvent socketEvent,
         }
         break;
     case SOCKET_CREATE_CLIENT:
-        SOPC_Logger_TraceDebug("SocketEvent: SOCKET_CREATE_CLIENT scIdx=%" PRIu32 " URI=%s", eltId, (char*) params);
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "SocketEvent: SOCKET_CREATE_CLIENT scIdx=%" PRIu32 " URI=%s", eltId, (char*) params);
         /*
         id = secure channel connection index,
         params = (const char*) URI
@@ -531,7 +535,8 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_Sockets_InputEvent socketEvent,
         break;
     case SOCKET_CLOSE:
         assert(eltId < SOPC_MAX_SOCKETS);
-        SOPC_Logger_TraceDebug("SocketEvent: SOCKET_CLOSE socketIdx=%" PRIu32 " connectionIdx=%" PRIuPTR, eltId,
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "SocketEvent: SOCKET_CLOSE socketIdx=%" PRIu32 " connectionIdx=%" PRIuPTR, eltId,
                                auxParam);
         /* id = socket index */
         socketElt = &socketsArray[eltId];
@@ -544,13 +549,15 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_Sockets_InputEvent socketEvent,
         }
         else
         {
-            SOPC_Logger_TraceDebug("SocketEvent: SOCKET_CLOSE ignored due to socketState=%d connectionIdx=%" PRIu32,
+            SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "SocketEvent: SOCKET_CLOSE ignored due to socketState=%d connectionIdx=%" PRIu32,
                                    socketElt->state, socketElt->connectionId);
         }
         break;
     case SOCKET_CLOSE_SERVER:
         assert(eltId < SOPC_MAX_SOCKETS);
-        SOPC_Logger_TraceDebug("SocketEvent: SOCKET_CLOSE_SERVER socketIdx=%" PRIu32 " endpointIdx=%" PRIuPTR, eltId,
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "SocketEvent: SOCKET_CLOSE_SERVER socketIdx=%" PRIu32 " endpointIdx=%" PRIuPTR, eltId,
                                auxParam);
         /* id = socket index */
         socketElt = &socketsArray[eltId];
@@ -562,13 +569,14 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_Sockets_InputEvent socketEvent,
         }
         else
         {
-            SOPC_Logger_TraceDebug("SocketEvent: SOCKET_CLOSE ignored due to socketState=%d connectionIdx=%" PRIu32,
+            SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "SocketEvent: SOCKET_CLOSE ignored due to socketState=%d connectionIdx=%" PRIu32,
                                    socketElt->state, socketElt->connectionId);
         }
         break;
     case SOCKET_WRITE:
         assert(eltId < SOPC_MAX_SOCKETS);
-        SOPC_Logger_TraceDebug("SocketEvent: SOCKET_WRITE socketIdx=%" PRIu32, eltId);
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "SocketEvent: SOCKET_WRITE socketIdx=%" PRIu32, eltId);
         /*
         id = socket index,
         params = (SOPC_Buffer*) msg buffer
@@ -624,7 +632,8 @@ void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent eve
     switch (event)
     {
     case INT_SOCKET_LISTENER_CONNECTION_ATTEMPT:
-        SOPC_Logger_TraceDebug("SocketEvent: INT_SOCKET_LISTENER_CONNECTION_ATTEMPT socketIdx=%" PRIu32, socketIdx);
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "SocketEvent: INT_SOCKET_LISTENER_CONNECTION_ATTEMPT socketIdx=%" PRIu32, socketIdx);
 
         // State was set to accepted by network event manager
         assert(socketElt->state == SOCKET_STATE_LISTENING);
@@ -636,6 +645,7 @@ void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent eve
         if (NULL == acceptSock)
         {
             SOPC_Logger_TraceWarning(
+                SOPC_LOG_MODULE_CLIENTSERVER,
                 "SocketsMgr: refusing new connection since maximum number of socket reached (%" PRIu32 "/%u)",
                 socketElt->listenerConnections, SOPC_MAX_SOCKETS_CONNECTIONS);
         }
@@ -668,7 +678,8 @@ void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent eve
 
         break;
     case INT_SOCKET_CONNECTION_ATTEMPT_FAILED:
-        SOPC_Logger_TraceDebug("SocketEvent: INT_SOCKET_CONNECTION_ATTEMPT_FAILED socketIdx=%" PRIu32, socketIdx);
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "SocketEvent: INT_SOCKET_CONNECTION_ATTEMPT_FAILED socketIdx=%" PRIu32, socketIdx);
 
         // State is connecting
         assert(socketElt->state == SOCKET_STATE_CONNECTING);
@@ -687,7 +698,8 @@ void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent eve
 
         break;
     case INT_SOCKET_CONNECTED:
-        SOPC_Logger_TraceDebug("SocketEvent: INT_SOCKET_CONNECTED socketIdx=%" PRIu32, socketIdx);
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "SocketEvent: INT_SOCKET_CONNECTED socketIdx=%" PRIu32,
+                               socketIdx);
 
         // State was set to connected by network manager
         assert(socketElt->state == SOCKET_STATE_CONNECTING);
@@ -708,7 +720,8 @@ void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent eve
 
         break;
     case INT_SOCKET_CLOSE:
-        SOPC_Logger_TraceDebug("SocketEvent: INT_SOCKET_CLOSE socketIdx=%" PRIu32, socketIdx);
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "SocketEvent: INT_SOCKET_CLOSE socketIdx=%" PRIu32,
+                               socketIdx);
 
         if (socketElt->state == SOCKET_STATE_LISTENING)
         {
@@ -723,7 +736,8 @@ void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent eve
 
         break;
     case INT_SOCKET_READY_TO_READ:
-        SOPC_Logger_TraceDebug("SocketEvent: INT_SOCKET_READY_TO_READ socketIdx=%" PRIu32, socketIdx);
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "SocketEvent: INT_SOCKET_READY_TO_READ socketIdx=%" PRIu32,
+                               socketIdx);
 
         status = on_ready_read(socketElt, socketIdx);
 
@@ -735,7 +749,8 @@ void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent eve
 
         break;
     case INT_SOCKET_READY_TO_WRITE:
-        SOPC_Logger_TraceDebug("SocketEvent: INT_SOCKET_READY_TO_WRITE socketIdx=%" PRIu32, socketIdx);
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "SocketEvent: INT_SOCKET_READY_TO_WRITE socketIdx=%" PRIu32, socketIdx);
 
         // Socket is connected
         if (socketElt->state == SOCKET_STATE_CONNECTED)

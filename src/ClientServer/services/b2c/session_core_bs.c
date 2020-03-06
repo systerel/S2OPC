@@ -177,7 +177,8 @@ void session_core_bs__notify_set_session_state(
         {
             SOPC_StatusCode scReason;
             util_status_code__B_to_C(session_core_bs__sc_reason, &scReason);
-            SOPC_Logger_TraceInfo("Services: session=%" PRId32 " closed with bad status code '%X'",
+            SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER,
+                                  "Services: session=%" PRId32 " closed with bad status code '%X'",
                                   session_core_bs__session, scReason);
         }
     }
@@ -1171,14 +1172,16 @@ void session_core_bs__server_session_timeout_evaluation(const constants__t_sessi
                 session_expiration_timer[session_core_bs__session] = timerId;
                 if (0 == timerId)
                 {
-                    SOPC_Logger_TraceWarning("Services: session=%" PRId32 " expiration timer renew failed",
+                    SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                             "Services: session=%" PRId32 " expiration timer renew failed",
                                              session_core_bs__session);
                 }
             }
         }
         if (*session_core_bs__expired != false)
         {
-            SOPC_Logger_TraceDebug("Services: session=%" PRId32 " expired on timeout evaluation",
+            SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "Services: session=%" PRId32 " expired on timeout evaluation",
                                    session_core_bs__session);
         }
     }
@@ -1218,7 +1221,8 @@ void session_core_bs__server_session_timeout_start_timer(const constants__t_sess
         session_expiration_timer[session_core_bs__session] = timerId;
         if (0 == timerId)
         {
-            SOPC_Logger_TraceWarning("Services: session=%" PRId32 " expiration timer creation failed",
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                     "Services: session=%" PRId32 " expiration timer creation failed",
                                      session_core_bs__session);
         }
     }

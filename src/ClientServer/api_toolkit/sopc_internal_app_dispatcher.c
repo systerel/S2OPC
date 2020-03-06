@@ -44,51 +44,60 @@ static void onComEvent(SOPC_EventHandler* handler, int32_t event, uint32_t id, u
     switch (comEvent)
     {
     case SE_SESSION_ACTIVATION_FAILURE:
-        SOPC_Logger_TraceDebug("App: SE_SESSION_ACTIVATION_FAILURE session=%" PRIu32 " context=%" PRIuPTR, id,
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "App: SE_SESSION_ACTIVATION_FAILURE session=%" PRIu32 " context=%" PRIuPTR, id,
                                auxParam);
         break;
     case SE_ACTIVATED_SESSION:
-        SOPC_Logger_TraceDebug("App: SE_ACTIVATED_SESSION session=%" PRIu32 " context=%" PRIuPTR, id, auxParam);
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "App: SE_ACTIVATED_SESSION session=%" PRIu32 " context=%" PRIuPTR, id, auxParam);
         break;
     case SE_SESSION_REACTIVATING:
-        SOPC_Logger_TraceDebug("App: SE_SESSION_REACTIVATING session=%" PRIu32 " context=%" PRIuPTR, id, auxParam);
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "App: SE_SESSION_REACTIVATING session=%" PRIu32 " context=%" PRIuPTR, id, auxParam);
         break;
     case SE_RCV_SESSION_RESPONSE:
         if (params != NULL)
         {
             encType = *(SOPC_EncodeableType**) params;
         }
-        SOPC_Logger_TraceDebug("App: SE_RCV_SESSION_RESPONSE  session=%" PRIu32 " msgTyp=%s context=%" PRIuPTR, id,
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "App: SE_RCV_SESSION_RESPONSE  session=%" PRIu32 " msgTyp=%s context=%" PRIuPTR, id,
                                SOPC_EncodeableType_GetName(encType), auxParam);
         break;
     case SE_CLOSED_SESSION:
-        SOPC_Logger_TraceDebug("App: SE_CLOSED_SESSION session=%" PRIu32 " context=%" PRIuPTR, id, auxParam);
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "App: SE_CLOSED_SESSION session=%" PRIu32 " context=%" PRIuPTR, id, auxParam);
         break;
     case SE_RCV_DISCOVERY_RESPONSE:
         if (params != NULL)
         {
             encType = *(SOPC_EncodeableType**) params;
         }
-        SOPC_Logger_TraceDebug("App: SE_RCV_DISCOVERY_RESPONSE msgTyp=%s context=%" PRIuPTR,
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "App: SE_RCV_DISCOVERY_RESPONSE msgTyp=%s context=%" PRIuPTR,
                                SOPC_EncodeableType_GetName(encType), auxParam);
         break;
     case SE_SND_REQUEST_FAILED:
-        SOPC_Logger_TraceDebug("App: SE_SND_REQUEST_FAILED retStatus=%" PRIu32 " msgTyp=%s context=%" PRIuPTR, id,
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "App: SE_SND_REQUEST_FAILED retStatus=%" PRIu32 " msgTyp=%s context=%" PRIuPTR, id,
                                SOPC_EncodeableType_GetName((SOPC_EncodeableType*) params), auxParam);
         break;
     case SE_CLOSED_ENDPOINT:
-        SOPC_Logger_TraceDebug("App: SE_CLOSED_ENDPOINT idx=%" PRIu32 " retStatus=%" PRIuPTR, id, auxParam);
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "App: SE_CLOSED_ENDPOINT idx=%" PRIu32 " retStatus=%" PRIuPTR, id, auxParam);
         break;
     case SE_LOCAL_SERVICE_RESPONSE:
         if (params != NULL)
         {
             encType = *(SOPC_EncodeableType**) params;
         }
-        SOPC_Logger_TraceDebug("App: SE_LOCAL_SERVICE_RESPONSE  idx=%" PRIu32 " msgTyp=%s context=%" PRIuPTR, id,
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "App: SE_LOCAL_SERVICE_RESPONSE  idx=%" PRIu32 " msgTyp=%s context=%" PRIuPTR, id,
                                SOPC_EncodeableType_GetName(encType), auxParam);
         break;
     default:
-        SOPC_Logger_TraceDebug("App: UNKOWN EVENT");
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "App: UNKOWN EVENT");
         break;
     }
 
@@ -140,14 +149,16 @@ static void onAddressSpaceNotification(SOPC_EventHandler* handler,
 
             if (nodeId != NULL)
             {
-                SOPC_Logger_TraceDebug("App: AS_WRITE_EVENT on NodeId: %s, AttributeId: %" PRIu32
+                SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "App: AS_WRITE_EVENT on NodeId: %s, AttributeId: %" PRIu32
                                        ", Write status: %" PRIX32,
                                        nodeId, wv->AttributeId, (SOPC_StatusCode) auxParam);
                 SOPC_Free(nodeId);
             }
             else
             {
-                SOPC_Logger_TraceDebug("App: AS_WRITE_EVENT (WriteValue or NodeId string invalid)");
+                SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "App: AS_WRITE_EVENT (WriteValue or NodeId string invalid)");
             }
         }
 
@@ -164,7 +175,7 @@ static void onAddressSpaceNotification(SOPC_EventHandler* handler,
         break;
     }
     default:
-        SOPC_Logger_TraceDebug("App: UNKOWN AS EVENT");
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "App: UNKOWN AS EVENT");
         break;
     }
 }

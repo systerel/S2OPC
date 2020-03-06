@@ -65,7 +65,8 @@ void msg_read_request_bs__getall_req_ReadValue_AttributeId(
         *msg_read_request_bs__sc = constants_statuscodes_bs__e_sc_bad_attribute_id_invalid;
         if (!bWarned)
         {
-            SOPC_Logger_TraceWarning("msg_read_request_bs__getall_req_ReadValue_AttributeId: unsupported attribute id");
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                     "msg_read_request_bs__getall_req_ReadValue_AttributeId: unsupported attribute id");
             bWarned = true;
         }
     }

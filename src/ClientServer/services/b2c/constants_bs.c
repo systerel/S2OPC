@@ -72,6 +72,7 @@ void constants_bs__getall_conv_ExpandedNodeId_NodeId(const constants_bs__t_Expan
         {
             // Should be a local namespace URI but we do not manage it
             SOPC_Logger_TraceWarning(
+                SOPC_LOG_MODULE_CLIENTSERVER,
                 "Conversion of Namespace URI %s from ExpandedNodeId not managed => considered as external server node.",
                 SOPC_String_GetRawCString(&constants_bs__p_expnid->NamespaceUri));
         }

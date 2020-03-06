@@ -162,12 +162,14 @@ SOPC_ReturnStatus SOPC_Toolkit_Configured()
                 {
                     toolkitBuildInfo = SOPC_ToolkitConfig_GetBuildInfo();
                     SOPC_Logger_SetTraceLogLevel(SOPC_LOG_LEVEL_INFO);
-                    SOPC_Logger_TraceInfo("Common library DATE='%s' VERSION='%s' SIGNATURE='%s' DOCKER='%s'",
+                    SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER,
+                                          "Common library DATE='%s' VERSION='%s' SIGNATURE='%s' DOCKER='%s'",
                                           toolkitBuildInfo.commonBuildInfo.buildBuildDate,
                                           toolkitBuildInfo.commonBuildInfo.buildVersion,
                                           toolkitBuildInfo.commonBuildInfo.buildSrcCommit,
                                           toolkitBuildInfo.commonBuildInfo.buildDockerId);
                     SOPC_Logger_TraceInfo(
+                        SOPC_LOG_MODULE_CLIENTSERVER,
                         "Client/Server toolkit library DATE='%s' VERSION='%s' SIGNATURE='%s' DOCKER='%s'",
                         toolkitBuildInfo.toolkitBuildInfo.buildBuildDate,
                         toolkitBuildInfo.toolkitBuildInfo.buildVersion,

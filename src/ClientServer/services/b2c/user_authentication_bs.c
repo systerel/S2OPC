@@ -242,7 +242,7 @@ void user_authentication_bs__is_user_token_supported(
 
     if (!compliantPolicy)
     {
-        SOPC_Logger_TraceWarning("User token not compliant with userTokenPolicies.");
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, "User token not compliant with userTokenPolicies.");
     }
 
     *user_authentication_bs__p_supported_user_token_type = compliantPolicy;
@@ -273,6 +273,7 @@ void user_authentication_bs__is_valid_user_authentication(
         /* Failure of the authentication manager: we do not know if the token was rejected or user denied */
         *user_authentication_bs__p_sc_valid_user = constants_statuscodes_bs__e_sc_bad_user_access_denied;
         SOPC_Logger_TraceWarning(
+            SOPC_LOG_MODULE_CLIENTSERVER,
             "User authentication manager failed to check user validity on endpoint config idx %" PRIu32,
             user_authentication_bs__p_endpoint_config_idx);
     }
@@ -285,20 +286,23 @@ void user_authentication_bs__is_valid_user_authentication(
             break;
         case SOPC_USER_AUTHENTICATION_INVALID_TOKEN:
             *user_authentication_bs__p_sc_valid_user = constants_statuscodes_bs__e_sc_bad_identity_token_invalid;
-            SOPC_Logger_TraceWarning("User identification failed: identity_token_invalid");
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                     "User identification failed: identity_token_invalid");
             break;
         case SOPC_USER_AUTHENTICATION_REJECTED_TOKEN:
             *user_authentication_bs__p_sc_valid_user = constants_statuscodes_bs__e_sc_bad_identity_token_rejected;
-            SOPC_Logger_TraceWarning("User identification failed: identity_token_rejected");
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                     "User identification failed: identity_token_rejected");
             break;
         case SOPC_USER_AUTHENTICATION_ACCESS_DENIED:
             *user_authentication_bs__p_sc_valid_user = constants_statuscodes_bs__e_sc_bad_user_access_denied;
-            SOPC_Logger_TraceWarning("User identification failed: identity_token_denied");
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, "User identification failed: identity_token_denied");
             break;
         default:
             /* Invalid of the authentication manager: we do not know if the token was rejected or user denied */
             *user_authentication_bs__p_sc_valid_user = constants_statuscodes_bs__e_sc_bad_user_access_denied;
             SOPC_Logger_TraceWarning(
+                SOPC_LOG_MODULE_CLIENTSERVER,
                 "User authentication manager returned an invalid authentication status on endpoint config idx %" PRIu32,
                 user_authentication_bs__p_endpoint_config_idx);
             break;

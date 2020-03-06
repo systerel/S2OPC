@@ -209,7 +209,8 @@ bool SC_CloseConnection(uint32_t connectionIdx, bool socketFailure)
                     scConnection->state != SECURE_CONNECTION_STATE_SC_INIT)
                 {
                     // Note: configuration is only added after treatment of OPN request: do not consider previous states
-                    SOPC_Logger_TraceError("ScStateMgr: SC_CloseConnection: scCfgIdx=%" PRIu32 " not found",
+                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                           "ScStateMgr: SC_CloseConnection: scCfgIdx=%" PRIu32 " not found",
                                            scConnection->endpointConnectionConfigIdx);
                 }
             }
@@ -936,7 +937,8 @@ static bool SC_ClientTransitionHelper_SendOPN(SOPC_SecureConnection* scConnectio
         }
         else
         {
-            SOPC_Logger_TraceWarning("ScStateMgr: OPN requested lifetime set to minimum value %d instead of %" PRIu32,
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                     "ScStateMgr: OPN requested lifetime set to minimum value %d instead of %" PRIu32,
                                      SOPC_MINIMUM_SECURE_CONNECTION_LIFETIME, config->requestedLifetime);
             opnReq.RequestedLifetime = SOPC_MINIMUM_SECURE_CONNECTION_LIFETIME;
         }
@@ -1102,7 +1104,8 @@ static bool SC_ClientTransitionHelper_ReceiveOPN(SOPC_SecureConnection* scConnec
             if (opnResp->ServerNonce.Length > 0)
             {
                 // Unexpected token
-                SOPC_Logger_TraceWarning("ScStateMgr: OPN resp decoding: unexpected token in None security mode");
+                SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                         "ScStateMgr: OPN resp decoding: unexpected token in None security mode");
             }
         }
         else
@@ -1390,7 +1393,8 @@ static bool SC_ServerTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
                 {
                     if (compareValue != 0)
                     {
-                        SOPC_Logger_TraceWarning("Endpoint URL is not identical to requested URL : %s instead of %s",
+                        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                                 "Endpoint URL is not identical to requested URL : %s instead of %s",
                                                  epConfig->endpointURL, (char*) url.Data);
                     }
                 }
@@ -1576,7 +1580,8 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
         assert(opnReq != NULL);
         if (scConnection->tcpMsgProperties.protocolVersion != opnReq->ClientProtocolVersion)
         {
-            SOPC_Logger_TraceError("ScStateMgr OPN: different protocol version expected=%" PRIu32 " received=%" PRIu32
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "ScStateMgr OPN: different protocol version expected=%" PRIu32 " received=%" PRIu32
                                    " epCfgIdx=%" PRIu32 " scCfgIdx=%" PRIu32,
                                    scConnection->tcpMsgProperties.protocolVersion, opnReq->ClientProtocolVersion,
                                    scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
@@ -1588,7 +1593,8 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
         }
         if (result && opnReq->RequestType != OpcUa_SecurityTokenRequestType_Issue)
         {
-            SOPC_Logger_TraceError("ScStateMgr OPN: invalid request type epCfgIdx=%" PRIu32 " scCfgIdx=%" PRIu32,
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "ScStateMgr OPN: invalid request type epCfgIdx=%" PRIu32 " scCfgIdx=%" PRIu32,
                                    scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
             // Cannot renew in SC_Init state
             *errorStatus = OpcUa_BadTcpSecureChannelUnknown;
@@ -1619,6 +1625,7 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
         if (!validSecurityRequested)
         {
             SOPC_Logger_TraceError(
+                SOPC_LOG_MODULE_CLIENTSERVER,
                 "ScStateMgr OPN: invalid security parameters requested=%d epCfgIdx=%" PRIu32 " scCfgIdx=%" PRIu32,
                 opnReq->SecurityMode, scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
             result = false;
@@ -1628,7 +1635,8 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
         else if (!scConnection->serverAsymmSecuInfo.isSecureModeActive &&
                  opnReq->SecurityMode != OpcUa_MessageSecurityMode_None)
         {
-            SOPC_Logger_TraceError("ScStateMgr OPN: certificates expected epCfgIdx=%" PRIu32 " scCfgIdx=%" PRIu32,
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "ScStateMgr OPN: certificates expected epCfgIdx=%" PRIu32 " scCfgIdx=%" PRIu32,
                                    scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
             // Certificates were absent in asym. header and it is not compatible with the security mode requested
             *errorStatus = OpcUa_BadSecurityChecksFailed;
@@ -1652,6 +1660,7 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
                 {
                     // Nonce unexpected
                     SOPC_Logger_TraceWarning(
+                        SOPC_LOG_MODULE_CLIENTSERVER,
                         "ScStateMgr: Nonce unexpected in OPN req for None security mode epCfgIdx=%" PRIu32
                         " scCfgIdx=%" PRIu32,
                         scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
@@ -1675,6 +1684,7 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
                 {
                     // Nonce expected
                     SOPC_Logger_TraceError(
+                        SOPC_LOG_MODULE_CLIENTSERVER,
                         "ScStateMgr OPN: unexpected Nonce length=0 epCfgIdx=%" PRIu32 " scCfgIdx=%" PRIu32,
                         scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
                     result = false;
@@ -1950,6 +1960,7 @@ static bool SC_ServerTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
                 {
                     // Nonce invalid : security issue shall not report detailed status code
                     SOPC_Logger_TraceError(
+                        SOPC_LOG_MODULE_CLIENTSERVER,
                         "ScStateMgr: invalid Nonce in OPN request epCfgIdx=%" PRIu32 " scCfgIdx=%" PRIu32,
                         scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
                     *errorStatus = OpcUa_BadSecurityChecksFailed;
@@ -2126,6 +2137,7 @@ static bool SC_ServerTransition_ScConnected_To_ScConnectedRenew(SOPC_SecureConne
                 {
                     // Nonce unexpected
                     SOPC_Logger_TraceWarning(
+                        SOPC_LOG_MODULE_CLIENTSERVER,
                         "ScStateMgr: Nonce unexpected in OPN req for None security mode epCfgIdx=%" PRIu32
                         " scCfgIdx=%" PRIu32,
                         scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
@@ -2574,7 +2586,8 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
            auxParam = socket index */
 
         assert(auxParam <= UINT32_MAX);
-        SOPC_Logger_TraceDebug("ScStateMgr: INT_EP_SC_CREATE epCfgIdx=%" PRIu32 " socketIdx=%" PRIuPTR, eltId,
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ScStateMgr: INT_EP_SC_CREATE epCfgIdx=%" PRIu32 " socketIdx=%" PRIuPTR, eltId,
                                auxParam);
 
         uint32_t conn_idx = 0;
@@ -2592,7 +2605,8 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
             //             / nothing to send to SC listener state manager (no record of new connection in it for
             //             now)
             SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, (uint32_t) auxParam, (uintptr_t) NULL, 0);
-            SOPC_Logger_TraceWarning("ScStateMgr: INT_EP_SC_CREATE failed (no more SCs available) epCfgIdx=%" PRIu32
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                     "ScStateMgr: INT_EP_SC_CREATE failed (no more SCs available) epCfgIdx=%" PRIu32
                                      " socketIdx=%" PRIuPTR,
                                      eltId, auxParam);
         }
@@ -2601,7 +2615,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
     /* OPC UA chunks message manager -> SC connection manager */
     case INT_SC_RCV_HEL:
     {
-        SOPC_Logger_TraceDebug("ScStateMgr: INT_SC_RCV_HEL scIdx=%" PRIu32, eltId);
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "ScStateMgr: INT_SC_RCV_HEL scIdx=%" PRIu32, eltId);
 
         buffer = (void*) params;
         scConnection = SC_GetConnection(eltId);
@@ -2629,7 +2643,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
     }
     case INT_SC_RCV_ACK:
     {
-        SOPC_Logger_TraceDebug("ScStateMgr: INT_SC_RCV_ACK scIdx=%" PRIu32, eltId);
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "ScStateMgr: INT_SC_RCV_ACK scIdx=%" PRIu32, eltId);
 
         buffer = (void*) params;
         scConnection = SC_GetConnection(eltId);
@@ -2658,7 +2672,8 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
     {
         buffer = (void*) params;
 
-        SOPC_Logger_TraceDebug("ScStateMgr: INT_SC_RCV_OPN scIdx=%" PRIu32 " reqId=%" PRIuPTR, eltId, auxParam);
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ScStateMgr: INT_SC_RCV_OPN scIdx=%" PRIu32 " reqId=%" PRIuPTR, eltId, auxParam);
 
         scConnection = SC_GetConnection(eltId);
 
@@ -2684,7 +2699,8 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
     }
     case INT_SC_RCV_CLO:
     {
-        SOPC_Logger_TraceDebug("ScStateMgr: INT_SC_RCV_CLO scIdx=%" PRIu32 " reqId=%" PRIuPTR, eltId, auxParam);
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ScStateMgr: INT_SC_RCV_CLO scIdx=%" PRIu32 " reqId=%" PRIuPTR, eltId, auxParam);
 
         scConnection = SC_GetConnection(eltId);
         buffer = (void*) params;
@@ -2730,7 +2746,8 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
         /* eltId = secure channel connection index,
            params = (SOPC_Buffer*) buffer,
            auxParam = requestId (server) or requestHandle (client)*/
-        SOPC_Logger_TraceDebug("ScStateMgr: INT_SC_RCV_MSG_CHUNKS scIdx=%" PRIu32 " reqId/Handle=%" PRIuPTR, eltId,
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ScStateMgr: INT_SC_RCV_MSG_CHUNKS scIdx=%" PRIu32 " reqId/Handle=%" PRIuPTR, eltId,
                                auxParam);
 
         scConnection = SC_GetConnection(eltId);
@@ -2767,7 +2784,8 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
         break;
     }
     case INT_SC_RCV_MSG_CHUNK_ABORT:
-        SOPC_Logger_TraceDebug("ScStateMgr: INT_SC_RCV_MSG_CHUNK_ABORT scIdx=%" PRIu32, eltId);
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "ScStateMgr: INT_SC_RCV_MSG_CHUNK_ABORT scIdx=%" PRIu32,
+                               eltId);
 
         /* eltId = secure channel connection index,
            params = (SOPC_Buffer*) buffer,
@@ -2792,7 +2810,8 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
             if (scConnection->isServerConnection)
             {
                 // Log a warning, client request is aborted
-                SOPC_Logger_TraceWarning("ScStateMgr: abort chunk message received with status=%" PRIX32
+                SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                         "ScStateMgr: abort chunk message received with status=%" PRIX32
                                          " and reason=%s (scIdx=%" PRIu32 ")",
                                          errorStatus, errorReason, eltId);
             }
@@ -2810,7 +2829,8 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
         else
         {
             // Uncertain errorStatus value printed here:
-            SOPC_Logger_TraceError("ScStateMgr: Abort message received: error decoding status (%" PRIX32
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "ScStateMgr: Abort message received: error decoding status (%" PRIX32
                                    ") / reason (scIdx=%" PRIu32 ")",
                                    errorStatus, eltId);
             SC_CloseSecureConnection(scConnection, eltId, false, false, OpcUa_BadDecodingError,
@@ -2822,7 +2842,8 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
         break;
     case INT_SC_RCV_FAILURE:
     {
-        SOPC_Logger_TraceDebug("ScStateMgr: INT_SC_RCV_FAILURE scIdx=%" PRIu32 " statusCode=%" PRIXPTR, eltId,
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ScStateMgr: INT_SC_RCV_FAILURE scIdx=%" PRIu32 " statusCode=%" PRIXPTR, eltId,
                                auxParam);
 
         scConnection = SC_GetConnection(eltId);
@@ -2837,7 +2858,8 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
     case INT_SC_SND_FATAL_FAILURE:
     {
         // An error occurred and SC connection shall be closed
-        SOPC_Logger_TraceDebug("ScStateMgr: INT_SC_SND_FATAL_FAILURE scIdx=%" PRIu32 " reqId/Handle=%" PRIuPTR
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ScStateMgr: INT_SC_SND_FATAL_FAILURE scIdx=%" PRIu32 " reqId/Handle=%" PRIuPTR
                                " statusCode=%" PRIXPTR,
                                eltId, params, auxParam);
 
@@ -2859,7 +2881,8 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
     case INT_SC_SENT_ABORT_FAILURE:
     {
         // An abort final chunk has been sent and SC connection shall not be closed
-        SOPC_Logger_TraceDebug("ScStateMgr: INT_SC_SENT_ABORT_FAILURE scIdx=%" PRIu32 " reqId/Handle=%" PRIuPTR
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ScStateMgr: INT_SC_SENT_ABORT_FAILURE scIdx=%" PRIu32 " reqId/Handle=%" PRIuPTR
                                " statusCode=%" PRIXPTR,
                                eltId, params, auxParam);
 
@@ -2871,7 +2894,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
     }
     case INT_SC_RCV_ERR:
     {
-        SOPC_Logger_TraceDebug("ScStateMgr: INT_SC_RCV_ERR scIdx=%" PRIu32, eltId);
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "ScStateMgr: INT_SC_RCV_ERR scIdx=%" PRIu32, eltId);
 
         /* id = secure channel connection index,
            auxParam = params = (SOPC_Buffer*) buffer */
@@ -2889,7 +2912,8 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
         if (SOPC_STATUS_OK == status)
         {
             assert(errorReason != NULL);
-            SOPC_Logger_TraceError("ScStateMgr: ERR message received with status=%" PRIX32
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "ScStateMgr: ERR message received with status=%" PRIX32
                                    " and reason=%s (scIdx=%" PRIu32 ")",
                                    errorStatus, errorReason, eltId);
             SC_CloseSecureConnection(scConnection, eltId,
@@ -2901,7 +2925,8 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
         else
         {
             // Uncertain errorStatus value printed here:
-            SOPC_Logger_TraceError("ScStateMgr: ERR message received: error decoding status (%" PRIX32
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "ScStateMgr: ERR message received: error decoding status (%" PRIX32
                                    ") / reason (scIdx=%" PRIu32 ")",
                                    errorStatus, eltId);
             SC_CloseSecureConnection(scConnection, eltId,
@@ -2916,7 +2941,8 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
     }
     case INT_EP_SC_CLOSE:
     {
-        SOPC_Logger_TraceDebug("ScStateMgr: INT_EP_SC_CLOSE scIdx=%" PRIu32 " epCfgIdx=%" PRIuPTR, eltId, auxParam);
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ScStateMgr: INT_EP_SC_CLOSE scIdx=%" PRIu32 " epCfgIdx=%" PRIuPTR, eltId, auxParam);
 
         /* id = secure channel connection index,
            auxParam = endpoint description configuration index */
@@ -2931,7 +2957,8 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
     }
     case INT_SC_CLOSE:
     {
-        SOPC_Logger_TraceDebug("ScStateMgr: INT_SC_CLOSE scIdx=%" PRIu32 " reason=%s statusCode=%" PRIXPTR, eltId,
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ScStateMgr: INT_SC_CLOSE scIdx=%" PRIu32 " reason=%s statusCode=%" PRIXPTR, eltId,
                                (void*) params == NULL ? "NULL" : (char*) params, auxParam);
 
         /* id = secure channel connection index */
@@ -2964,7 +2991,8 @@ void SOPC_SecureConnectionStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
         /* id = secure channel connection index,
            auxParam = socket index */
 
-        SOPC_Logger_TraceDebug("ScStateMgr: SOCKET_CONNECTION scIdx=%" PRIu32 " socketIdx=%" PRIuPTR, eltId, auxParam);
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ScStateMgr: SOCKET_CONNECTION scIdx=%" PRIu32 " socketIdx=%" PRIuPTR, eltId, auxParam);
         assert(auxParam <= UINT32_MAX);
 
         SOPC_SecureConnection* scConnection = SC_GetConnection(eltId);
@@ -2987,7 +3015,8 @@ void SOPC_SecureConnectionStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
 
         break;
     case SOCKET_FAILURE:
-        SOPC_Logger_TraceDebug("ScStateMgr: SOCKET_FAILURE scIdx=%" PRIu32 " socketIdx=%" PRIuPTR, eltId, auxParam);
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ScStateMgr: SOCKET_FAILURE scIdx=%" PRIu32 " socketIdx=%" PRIuPTR, eltId, auxParam);
 
         /* id = secure channel connection index,
            auxParam = socket index */
@@ -3017,7 +3046,8 @@ void SOPC_SecureConnectionStateMgr_OnTimerEvent(SOPC_SecureChannels_TimerEvent e
     /* Timer events */
     case TIMER_SC_CONNECTION_TIMEOUT:
     {
-        SOPC_Logger_TraceDebug("ScStateMgr: TIMER_SC_CONNECTION_TIMEOUT scIdx=%" PRIu32, eltId);
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "ScStateMgr: TIMER_SC_CONNECTION_TIMEOUT scIdx=%" PRIu32,
+                               eltId);
 
         /* id = secure channel connection index*/
         SOPC_SecureConnection* scConnection = SC_GetConnection(eltId);
@@ -3041,7 +3071,8 @@ void SOPC_SecureConnectionStateMgr_OnTimerEvent(SOPC_SecureChannels_TimerEvent e
     }
     case TIMER_SC_CLIENT_OPN_RENEW:
     {
-        SOPC_Logger_TraceDebug("ScStateMgr: TIMER_SC_CLIENT_OPN_RENEW scIdx=%" PRIu32, eltId);
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "ScStateMgr: TIMER_SC_CLIENT_OPN_RENEW scIdx=%" PRIu32,
+                               eltId);
 
         SOPC_SecureConnection* scConnection = SC_GetConnection(eltId);
 
@@ -3065,7 +3096,8 @@ void SOPC_SecureConnectionStateMgr_OnTimerEvent(SOPC_SecureChannels_TimerEvent e
     {
         assert(auxParam <= UINT32_MAX);
 
-        SOPC_Logger_TraceDebug("ScStateMgr: TIMER_SC_REQUEST_TIMEOUT scIdx=%" PRIu32 " reqId=%" PRIuPTR
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ScStateMgr: TIMER_SC_REQUEST_TIMEOUT scIdx=%" PRIu32 " reqId=%" PRIuPTR
                                " reqHandle=%" PRIuPTR,
                                eltId, auxParam, params);
 
@@ -3092,7 +3124,8 @@ void SOPC_SecureConnectionStateMgr_OnTimerEvent(SOPC_SecureChannels_TimerEvent e
                                    msgCtx->requestHandle);
             break;
         case SOPC_MSG_TYPE_SC_OPN:
-            SOPC_Logger_TraceError("ScStateMgr: OPN request timeout for response on scId=%" PRIu32, eltId);
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "ScStateMgr: OPN request timeout for response on scId=%" PRIu32, eltId);
             // The secure channel will then stay in RENEW if no response received
             break;
         default:
@@ -3128,7 +3161,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
     /* Services events: */
     /* Services manager -> SC connection state manager */
     case SC_CONNECT:
-        SOPC_Logger_TraceDebug("ScStateMgr: SC_CONNECT scCfgIdx=%" PRIu32, eltId);
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "ScStateMgr: SC_CONNECT scCfgIdx=%" PRIu32, eltId);
 
         /* id = secure channel connection configuration index */
 
@@ -3139,7 +3172,8 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
             result = SC_InitNewConnection(&idx);
             if (result)
             {
-                SOPC_Logger_TraceDebug("ScStateMgr: SC_CONNECT scCfgIdx=%" PRIu32 " => new scIdx=%" PRIu32, eltId, idx);
+                SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "ScStateMgr: SC_CONNECT scCfgIdx=%" PRIu32 " => new scIdx=%" PRIu32, eltId, idx);
 
                 scConnection = SC_GetConnection(idx);
                 assert(scConnection != NULL);
@@ -3153,7 +3187,8 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         {
             // Error case: notify services that it failed
             // TODO: add a connection failure ? (with config idx + (optional) connection id)
-            SOPC_Logger_TraceError("ScStateMgr: SC_CONNECT scCfgIdx=%" PRIu32 " failed to create new connection",
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "ScStateMgr: SC_CONNECT scCfgIdx=%" PRIu32 " failed to create new connection",
                                    eltId);
             SOPC_EventHandler_Post(secureChannelsEventHandler, SC_CONNECTION_TIMEOUT, eltId, (uintptr_t) NULL, 0);
         }
@@ -3171,7 +3206,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         }
         break;
     case SC_DISCONNECT:
-        SOPC_Logger_TraceDebug("ScStateMgr: SC_DISCONNECT scIdx=%" PRIu32, eltId);
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "ScStateMgr: SC_DISCONNECT scIdx=%" PRIu32, eltId);
 
         /* id = secure channel connection index */
         scConnection = SC_GetConnection(eltId);
@@ -3207,7 +3242,8 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         break;
 
     case SC_SERVICE_SND_MSG:
-        SOPC_Logger_TraceDebug("ScStateMgr: SC_SERVICE_SND_MSG scIdx=%" PRIu32 " reqId/Handle=%" PRIuPTR, eltId,
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ScStateMgr: SC_SERVICE_SND_MSG scIdx=%" PRIu32 " reqId/Handle=%" PRIuPTR, eltId,
                                auxParam);
 
         /* id = secure channel connection index,
@@ -3240,7 +3276,8 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         }
         break;
     case SC_SERVICE_SND_ERR:
-        SOPC_Logger_TraceDebug("ScStateMgr: SC_SERVICE_SND_ERR scIdx=%" PRIu32 " sc=%X reqId/Handle=%" PRIuPTR, eltId,
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ScStateMgr: SC_SERVICE_SND_ERR scIdx=%" PRIu32 " sc=%X reqId/Handle=%" PRIuPTR, eltId,
                                (SOPC_StatusCode) params, auxParam);
 
         /* id = secure channel connection index,

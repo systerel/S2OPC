@@ -37,7 +37,9 @@
 #define ATTR_FORMAT(archetype, string_index, first)
 #endif
 
-#define LOGGER_FUNC_FORMAT ATTR_FORMAT(printf, 1, 2)
+// TODO
+//#define LOGGER_FUNC_FORMAT ATTR_FORMAT(printf, 1, 2)
+#define LOGGER_FUNC_FORMAT
 
 /**
  * \brief enumerate to define log modules

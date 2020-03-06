@@ -123,13 +123,14 @@ static SOPC_ReturnStatus SOPC_AsyncQueue_BlockingEnqueueFirstOrLast(SOPC_AsyncQu
             if (queue->maxListLengthForWarning != 0 && queueLength > queue->maxListLengthForWarning &&
                 queueLength % ((SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE / 10) + 1) == 0)
             {
-                SOPC_Logger_TraceWarning("Maximum length of queue '%s' exceeded: %" PRIu32 " (>%" PRIu32 ")",
+                SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_COMMON,
+                                         "Maximum length of queue '%s' exceeded: %" PRIu32 " (>%" PRIu32 ")",
                                          queue->debugQueueName, queueLength, queue->maxListLengthForWarning);
             }
         }
         else
         {
-            SOPC_Logger_TraceError("Unable to Enqueue on queue %s", queue->debugQueueName);
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "Unable to Enqueue on queue %s", queue->debugQueueName);
             status = SOPC_STATUS_NOK;
         }
         Mutex_Unlock(&queue->queueMutex);

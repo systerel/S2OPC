@@ -99,7 +99,8 @@ void message_in_bs__decode_msg_type(const constants__t_byte_buffer_i message_in_
     SOPC_ReturnStatus status = SOPC_MsgBodyType_Read(message_in_bs__msg_buffer, &encType);
     if (SOPC_STATUS_OK == status && encType != NULL)
     {
-        SOPC_Logger_TraceDebug("Services: decoded input message type = '%s'", SOPC_EncodeableType_GetName(encType));
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "Services: decoded input message type = '%s'",
+                               SOPC_EncodeableType_GetName(encType));
 
         util_message__get_message_type(encType, message_in_bs__msg_type);
     }
@@ -127,7 +128,8 @@ void message_in_bs__decode_msg_header(const t_bool message_in_bs__is_request,
 
         if (SOPC_STATUS_OK == status)
         {
-            SOPC_Logger_TraceDebug("Services: decoded input message header statusCode= '%X'",
+            SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "Services: decoded input message header statusCode= '%X'",
                                    ((OpcUa_ResponseHeader*) header)->ServiceResult);
         }
     }
@@ -188,7 +190,7 @@ void message_in_bs__decode_msg(const constants__t_msg_type_i message_in_bs__msg_
     }
     else
     {
-        SOPC_Logger_TraceError("Services: Failed to decode input message type = '%s'",
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Services: Failed to decode input message type = '%s'",
                                SOPC_EncodeableType_GetName(encType));
     }
 }

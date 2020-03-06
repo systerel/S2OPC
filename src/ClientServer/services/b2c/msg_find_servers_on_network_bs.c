@@ -107,13 +107,15 @@ void msg_find_servers_on_network_bs__set_find_servers_on_network_server(
         SOPC_String_AttachFrom(&server->ServerName, &msg_find_servers_on_network_bs__p_mdns_config->MdnsServerName);
     if (SOPC_STATUS_OK != status)
     {
-        SOPC_Logger_TraceWarning("Failed to set ServerName in registered server of response");
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                 "Failed to set ServerName in registered server of response");
     }
     status = SOPC_String_AttachFrom(&server->DiscoveryUrl,
                                     &msg_find_servers_on_network_bs__p_registered_server->DiscoveryUrls[0]);
     if (SOPC_STATUS_OK != status)
     {
-        SOPC_Logger_TraceWarning("Failed to set DiscoveryUrl in registered server of response");
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                 "Failed to set DiscoveryUrl in registered server of response");
     }
     if (SOPC_STATUS_OK == status && msg_find_servers_on_network_bs__p_mdns_config->NoOfServerCapabilities > 0)
     {
@@ -128,7 +130,8 @@ void msg_find_servers_on_network_bs__set_find_servers_on_network_server(
                                                 &msg_find_servers_on_network_bs__p_mdns_config->ServerCapabilities[i]);
                 if (SOPC_STATUS_OK != status)
                 {
-                    SOPC_Logger_TraceWarning("Failed to set ServerCapability in registered server of response");
+                    SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                             "Failed to set ServerCapability in registered server of response");
                 }
             }
             server->NoOfServerCapabilities = msg_find_servers_on_network_bs__p_mdns_config->NoOfServerCapabilities;

@@ -51,17 +51,20 @@ static void log_error_for_unknown_node(const SOPC_NodeId* nodeId, const char* no
 {
     if (nodeId->IdentifierType == SOPC_IdentifierType_Numeric)
     {
-        SOPC_Logger_TraceError("address_space_typing_bs__is_transitive_child: %s, %s node: ns=%" PRIu16 ";i=%" PRIu32,
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "address_space_typing_bs__is_transitive_child: %s, %s node: ns=%" PRIu16 ";i=%" PRIu32,
                                error, node_adjective, nodeId->Namespace, nodeId->Data.Numeric);
     }
     else if (nodeId->IdentifierType == SOPC_IdentifierType_String)
     {
-        SOPC_Logger_TraceError("address_space_typing_bs__is_transitive_child: %s, %s node: ns=%" PRIu16 ";s=%s", error,
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "address_space_typing_bs__is_transitive_child: %s, %s node: ns=%" PRIu16 ";s=%s", error,
                                node_adjective, nodeId->Namespace, SOPC_String_GetRawCString(&nodeId->Data.String));
     }
     else
     {
-        SOPC_Logger_TraceError("address_space_typing_bs__is_transitive_child: %s node: %s", node_adjective, error);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "address_space_typing_bs__is_transitive_child: %s node: %s", node_adjective, error);
     }
 }
 

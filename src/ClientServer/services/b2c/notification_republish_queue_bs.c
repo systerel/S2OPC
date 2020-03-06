@@ -75,6 +75,7 @@ void notification_republish_queue_bs__add_republish_notif_to_queue(
     if (notifMsgCpy == NULL || !notification_message_copy(notifMsgCpy, notification_republish_queue_bs__p_notif_msg))
     {
         SOPC_Logger_TraceError(
+            SOPC_LOG_MODULE_CLIENTSERVER,
             "notification_republish_queue_bs__add_republish_notif_to_queue: Error while copying notification message");
         SOPC_Free(notifMsgCpy);
         return;

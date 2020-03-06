@@ -153,7 +153,8 @@ static void SOPC_InternalEventTimer_RestartPeriodicTimer_WithoutLock(SOPC_EventT
         if (result != timer)
         {
             usedTimerIds[timer->id] = false;
-            SOPC_Logger_TraceError("EventTimerManager: failed to restart the periodic timer on insertion id=%" PRIu32
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                                   "EventTimerManager: failed to restart the periodic timer on insertion id=%" PRIu32
                                    " with event=%" PRIi32 " and associated id=%" PRIu32,
                                    timer->id, timer->event.event, timer->event.eltId);
             SOPC_Free(timer);
@@ -161,7 +162,8 @@ static void SOPC_InternalEventTimer_RestartPeriodicTimer_WithoutLock(SOPC_EventT
     }
     else
     {
-        SOPC_Logger_TraceError("EventTimerManager: failed to restart the disabled periodic timer id=%" PRIu32
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                               "EventTimerManager: failed to restart the disabled periodic timer id=%" PRIu32
                                " with event=%" PRIi32 " and associated id=%" PRIu32,
                                timer->id, timer->event.event, timer->event.eltId);
         SOPC_Free(timer);
@@ -216,6 +218,7 @@ static void SOPC_EventTimer_CyclicTimersEvaluation(void)
             if (timer != SOPC_SLinkedList_Append(periodicTimersToRestart, timer->id, (void*) timer))
             {
                 SOPC_Logger_TraceError(
+                    SOPC_LOG_MODULE_COMMON,
                     "EventTimerManager: failed to restart the periodic timer on insertion id=%" PRIu32
                     " with event=%" PRIi32 " and associated id=%" PRIu32,
                     timer->id, timer->event.event, timer->event.eltId);
@@ -357,7 +360,8 @@ static uint32_t SOPC_InternalEventTimer_Create(SOPC_EventHandler* eventHandler,
     {
         if (!timerCreationFailed) // Log only on first failure due to no timer available
         {
-            SOPC_Logger_TraceError("EventTimerManager: failed to create a new timer since no timer available");
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                                   "EventTimerManager: failed to create a new timer since no timer available");
         }
         SOPC_Free(newTimer);
     }

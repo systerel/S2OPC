@@ -53,7 +53,8 @@ void user_authorization_bs__get_user_authorization(
     /* Log failures */
     if (SOPC_STATUS_OK != status)
     {
-        SOPC_Logger_TraceError("SOPC_UserAuthorization_IsAuthorizedOperation failed with status %i\n", status);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "SOPC_UserAuthorization_IsAuthorizedOperation failed with status %i\n", status);
         *user_authorization_bs__p_authorized = false;
     }
     else if (!*user_authorization_bs__p_authorized)
@@ -76,6 +77,7 @@ void user_authorization_bs__get_user_authorization(
             break;
         }
         SOPC_Logger_TraceWarning(
+            SOPC_LOG_MODULE_CLIENTSERVER,
             "SOPC_UserAuthorization_IsAuthorizedOperation did not authorize %s operation on value \"%s\"\n", operation,
             s_node_id);
         SOPC_Free(s_node_id);

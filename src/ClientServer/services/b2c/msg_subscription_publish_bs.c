@@ -134,6 +134,7 @@ void msg_subscription_publish_bs__generate_internal_send_publish_response_event(
     else
     {
         SOPC_Logger_TraceError(
+            SOPC_LOG_MODULE_CLIENTSERVER,
             "generate_internal_send_publish_response_event: out of memory error sending publish response "
             "session=%" PRIu32 ", requestId/Handle=%" PRIu32 "/%" PRIu32 "",
             msg_subscription_publish_bs__p_session, msg_subscription_publish_bs__p_req_context,

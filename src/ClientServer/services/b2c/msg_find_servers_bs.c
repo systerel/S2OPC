@@ -88,7 +88,8 @@ static bool registerServerToApplicationDescription(const OpcUa_RegisteredServer*
                 status = SOPC_String_AttachFrom(&appDesc->DiscoveryUrls[i], &regServ->DiscoveryUrls[i]);
                 if (SOPC_STATUS_OK != status)
                 {
-                    SOPC_Logger_TraceWarning("Failed to set DiscoveryUrl in registered server of response");
+                    SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                             "Failed to set DiscoveryUrl in registered server of response");
                 }
             }
         }
@@ -104,7 +105,8 @@ static bool registerServerToApplicationDescription(const OpcUa_RegisteredServer*
     status = SOPC_String_AttachFrom(&appDesc->ApplicationUri, (SOPC_String*) &regServ->ServerUri);
     if (SOPC_STATUS_OK != status)
     {
-        SOPC_Logger_TraceWarning("Failed to set Application URI in application description of response");
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                 "Failed to set Application URI in application description of response");
     }
     // not managed: appDesc->DiscoveryProfileUri
     if (regServ->GatewayServerUri.Length > 0)
@@ -112,13 +114,15 @@ static bool registerServerToApplicationDescription(const OpcUa_RegisteredServer*
         status = SOPC_String_AttachFrom(&appDesc->GatewayServerUri, (SOPC_String*) &regServ->GatewayServerUri);
         if (SOPC_STATUS_OK != status)
         {
-            SOPC_Logger_TraceWarning("Failed to set GatewayServerUri in application description of response");
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                     "Failed to set GatewayServerUri in application description of response");
         }
     }
     status = SOPC_String_AttachFrom(&appDesc->ProductUri, (SOPC_String*) &regServ->ProductUri);
     if (SOPC_STATUS_OK != status)
     {
-        SOPC_Logger_TraceWarning("Failed to set Product URI in application description of response");
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                 "Failed to set Product URI in application description of response");
     }
     SOPC_GCC_DIAGNOSTIC_RESTORE
     return true;
@@ -225,7 +229,8 @@ void msg_find_servers_bs__set_find_servers_server_ApplicationDescription(
                 status = SOPC_String_AttachFrom(&dest->DiscoveryUrls[i], &src->DiscoveryUrls[i]);
                 if (SOPC_STATUS_OK != status)
                 {
-                    SOPC_Logger_TraceWarning("Failed to set DiscoveryUrls in application description of response");
+                    SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                             "Failed to set DiscoveryUrls in application description of response");
                 }
             }
         }
@@ -256,14 +261,16 @@ void msg_find_servers_bs__set_find_servers_server_ApplicationDescription(
     status = SOPC_String_AttachFrom(&dest->ApplicationUri, (SOPC_String*) &src->ApplicationUri);
     if (SOPC_STATUS_OK != status)
     {
-        SOPC_Logger_TraceWarning("Failed to set Application URI in application description of response");
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                 "Failed to set Application URI in application description of response");
     }
     if (src->DiscoveryProfileUri.Length > 0)
     {
         status = SOPC_String_AttachFrom(&dest->DiscoveryProfileUri, (SOPC_String*) &src->DiscoveryProfileUri);
         if (SOPC_STATUS_OK != status)
         {
-            SOPC_Logger_TraceWarning("Failed to set DiscoveryProfileURI in application description of response");
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                     "Failed to set DiscoveryProfileURI in application description of response");
         }
     }
     if (src->GatewayServerUri.Length > 0)
@@ -271,13 +278,15 @@ void msg_find_servers_bs__set_find_servers_server_ApplicationDescription(
         status = SOPC_String_AttachFrom(&dest->GatewayServerUri, (SOPC_String*) &src->GatewayServerUri);
         if (SOPC_STATUS_OK != status)
         {
-            SOPC_Logger_TraceWarning("Failed to set GatewayServerUri in application description of response");
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                     "Failed to set GatewayServerUri in application description of response");
         }
     }
     status = SOPC_String_AttachFrom(&dest->ProductUri, (SOPC_String*) &src->ProductUri);
     if (SOPC_STATUS_OK != status)
     {
-        SOPC_Logger_TraceWarning("Failed to set Product URI in application description of response");
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                 "Failed to set Product URI in application description of response");
     }
     SOPC_GCC_DIAGNOSTIC_RESTORE
     *msg_find_servers_bs__ret = constants_statuscodes_bs__e_sc_ok;

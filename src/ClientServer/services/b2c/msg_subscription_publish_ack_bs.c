@@ -164,6 +164,7 @@ void msg_subscription_publish_ack_bs__setall_msg_republish_response(
                                   msg_subscription_publish_ack_bs__p_notifMsg->NotificationData) != SOPC_STATUS_OK)
     {
         SOPC_Logger_TraceError(
+            SOPC_LOG_MODULE_CLIENTSERVER,
             "msg_subscription_publish_ack_bs__setall_msg_republish_response: SOPC_ExtensionObject_Copy failure");
         return;
     }

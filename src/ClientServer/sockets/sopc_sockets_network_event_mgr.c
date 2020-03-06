@@ -234,7 +234,8 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(Socket sigSocket)
                         }
                         else
                         {
-                            SOPC_Logger_TraceError("SocketNetworkMgr: unexpected read event on socketIdx=%" PRIu32,
+                            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                                   "SocketNetworkMgr: unexpected read event on socketIdx=%" PRIu32,
                                                    idx);
                             SOPC_SocketsInternalEventMgr_Dispatcher(INT_SOCKET_CLOSE, uaSock);
                         }
@@ -247,7 +248,8 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(Socket sigSocket)
                         }
                         else
                         {
-                            SOPC_Logger_TraceError("SocketNetworkMgr: unexpected write event on socketIdx=%" PRIu32,
+                            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                                   "SocketNetworkMgr: unexpected write event on socketIdx=%" PRIu32,
                                                    idx);
                             SOPC_SocketsInternalEventMgr_Dispatcher(INT_SOCKET_CLOSE, uaSock);
                         }
@@ -258,7 +260,8 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(Socket sigSocket)
                 if (SOPC_SocketSet_IsPresent(uaSock->sock, &exceptSet) != false)
                 {
                     // TODO: retrieve exception code
-                    SOPC_Logger_TraceError("SocketNetworkMgr: exception event on socketIdx=%" PRIu32, idx);
+                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                           "SocketNetworkMgr: exception event on socketIdx=%" PRIu32, idx);
                     SOPC_SocketsInternalEventMgr_Dispatcher(INT_SOCKET_CLOSE, uaSock);
                 }
             }

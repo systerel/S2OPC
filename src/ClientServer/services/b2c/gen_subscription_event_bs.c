@@ -105,6 +105,7 @@ void gen_subscription_event_bs__gen_data_changed_event(
         SOPC_Free(newValue);
 
         SOPC_Logger_TraceError(
+            SOPC_LOG_MODULE_CLIENTSERVER,
             "gen_subscription_event_bs__gen_data_changed_event: failed to generate a data changed event (out of "
             "memory for wv alloc)");
     }
@@ -113,6 +114,7 @@ void gen_subscription_event_bs__gen_data_changed_event(
 void gen_subscription_event_bs__gen_data_changed_event_failed(void)
 {
     SOPC_Logger_TraceError(
+        SOPC_LOG_MODULE_CLIENTSERVER,
         "gen_subscription_event_bs__gen_data_changed_event_failed: failed to generate a data changed event (out of "
         "memory ?)");
 }

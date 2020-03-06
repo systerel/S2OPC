@@ -90,6 +90,7 @@ void service_response_cb_bs__srv_write_notification(
     }
     else
     {
-        SOPC_Logger_TraceError("AddressSpace write notification: unexpected NULL pointer avoids notification");
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "AddressSpace write notification: unexpected NULL pointer avoids notification");
     }
 }

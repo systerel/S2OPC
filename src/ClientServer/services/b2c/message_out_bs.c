@@ -279,14 +279,15 @@ static void internal__message_out_bs__encode_msg(const constants__t_channel_conf
 
         if (message_out_bs__msg_type == constants__e_msg_service_fault_resp)
         {
-            SOPC_Logger_TraceDebug("Services: encoded output message type = '%s' with statusCode= '%X'",
+            SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "Services: encoded output message type = '%s' with statusCode= '%X'",
                                    SOPC_EncodeableType_GetName(encType),
                                    ((OpcUa_ResponseHeader*) message_out_bs__msg_header)->ServiceResult);
         }
         else
         {
             // Note: no status in case of request and good status mandatory for not faulty response
-            SOPC_Logger_TraceDebug("Services: encoded output message type = '%s'",
+            SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "Services: encoded output message type = '%s'",
                                    SOPC_EncodeableType_GetName(encType));
         }
     }
@@ -457,7 +458,8 @@ void message_out_bs__write_activate_msg_user(const constants__t_msg_i message_ou
     SOPC_ReturnStatus status = SOPC_ExtensionObject_Copy(&req->UserIdentityToken, message_out_bs__p_user_token);
     if (SOPC_STATUS_OK != status)
     {
-        SOPC_Logger_TraceError("message_out_bs__write_activate_msg_user: userToken copy failed");
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "message_out_bs__write_activate_msg_user: userToken copy failed");
         assert(false);
     }
 }
@@ -545,6 +547,7 @@ void message_out_bs__write_create_session_req_msg_crypto(
     else
     {
         SOPC_Logger_TraceError(
+            SOPC_LOG_MODULE_CLIENTSERVER,
             "write_create_session_req_msg_crypto: Failed to extract ApplicationUri from client certificate on "
             "scConfigIdx=%" PRIu32,
             message_out_bs__p_channel_config_idx);

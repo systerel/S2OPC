@@ -624,7 +624,8 @@ static constants_statuscodes_bs__t_StatusCode_i set_value_indexed_helper(SOPC_Va
     {
         if (SOPC_STATUS_NOT_SUPPORTED == status)
         {
-            SOPC_Logger_TraceWarning("set_value_indexed: matrix index range not supported");
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                     "set_value_indexed: matrix index range not supported");
         }
 
         return constants_statuscodes_bs__e_sc_bad_index_range_invalid; // In case we do not support  the range either
@@ -807,10 +808,10 @@ void address_space_bs__set_Value_SourceTimestamp(const constants__t_user_i addre
     if (!result)
     {
         char* nodeId = SOPC_NodeId_ToCString(SOPC_AddressSpace_Get_NodeId(address_space_bs__nodes, node));
-        SOPC_Logger_TraceWarning(
-            "SourceTimestamp write on NodeId=%s failed due to constant metadata in address space. "
-            "It should be forbidden by AccessLevel.",
-            nodeId);
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                 "SourceTimestamp write on NodeId=%s failed due to constant metadata in address space. "
+                                 "It should be forbidden by AccessLevel.",
+                                 nodeId);
         SOPC_Free(nodeId);
     }
 }
@@ -827,10 +828,10 @@ void address_space_bs__set_Value_StatusCode(const constants__t_user_i address_sp
     if (!result)
     {
         char* nodeId = SOPC_NodeId_ToCString(SOPC_AddressSpace_Get_NodeId(address_space_bs__nodes, node));
-        SOPC_Logger_TraceWarning(
-            "StatusCode write on NodeId=%s failed due to constant metadata in address space."
-            "It should be forbidden by AccessLevel.",
-            nodeId);
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                 "StatusCode write on NodeId=%s failed due to constant metadata in address space."
+                                 "It should be forbidden by AccessLevel.",
+                                 nodeId);
         SOPC_Free(nodeId);
     }
 }

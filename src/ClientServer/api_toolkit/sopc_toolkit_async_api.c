@@ -84,7 +84,7 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Anonymous(uint32_t end
     }
     else
     {
-        SOPC_Logger_TraceError("Failed to create anonymous UserIdentityToken.");
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Failed to create anonymous UserIdentityToken.");
         SOPC_ExtensionObject_Clear(user);
         SOPC_Free(user);
     }
@@ -136,7 +136,7 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(uint3
     }
     else
     {
-        SOPC_Logger_TraceError("Failed to create username UserIdentityToken.");
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Failed to create username UserIdentityToken.");
         SOPC_ExtensionObject_Clear(user);
         SOPC_Free(user);
     }

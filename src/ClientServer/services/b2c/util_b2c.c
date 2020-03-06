@@ -373,7 +373,8 @@ void util_message__get_encodeable_type(const constants__t_msg_type_i message__ms
         *respEncType = &OpcUa_ServiceFault_EncodeableType;
         break;
     default:
-        SOPC_Logger_TraceError("util_message__get_encodeable_type: unknown type %d", message__msg_type);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "util_message__get_encodeable_type: unknown type %d",
+                               message__msg_type);
         *reqEncType = NULL;
         *respEncType = NULL;
     }
@@ -930,6 +931,7 @@ constants_statuscodes_bs__t_StatusCode_i util_return_status__C_to_status_code_B(
         return constants_statuscodes_bs__e_sc_bad_out_of_memory;
     default:
         SOPC_Logger_TraceWarning(
+            SOPC_LOG_MODULE_CLIENTSERVER,
             "util_return_status__C_to_status_code_B: internal error generated from return status code %d", status);
         return constants_statuscodes_bs__e_sc_bad_internal_error;
     }
@@ -1421,7 +1423,8 @@ constants_statuscodes_bs__t_StatusCode_i util_read_value_indexed_helper(SOPC_Var
     {
         if (SOPC_STATUS_NOT_SUPPORTED == status)
         {
-            SOPC_Logger_TraceWarning("read_value_indexed: matrix index range not supported");
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                     "read_value_indexed: matrix index range not supported");
         }
 
         return constants_statuscodes_bs__e_sc_bad_index_range_invalid; // In case we do not support  the range

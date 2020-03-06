@@ -231,7 +231,8 @@ void subscription_core_bs__modify_publish_timer_period(
     bool res = SOPC_EventTimer_ModifyPeriodic(subscription_core_bs__p_timerId, msCycle);
     if (!res)
     {
-        SOPC_Logger_TraceError("Subscription modify publish timer: failed to modify period of time %" PRIu32,
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "Subscription modify publish timer: failed to modify period of time %" PRIu32,
                                subscription_core_bs__p_timerId);
     }
 }
