@@ -30,9 +30,9 @@
  */
 typedef struct SOPC_LogSystem_File_Configuration
 {
-    const char* logDirPath;     /**< path of the log directory */
-    uint32_t logMaxBytes; /**< max bytes per log file */
-    uint16_t logMaxFiles; /**< max number of log files */
+    const char* logDirPath; /**< path of the log directory */
+    uint32_t logMaxBytes;   /**< max bytes per log file */
+    uint16_t logMaxFiles;   /**< max number of log files */
 } SOPC_LogSystem_File_Configuration;
 
 /**

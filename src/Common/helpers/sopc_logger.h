@@ -39,6 +39,16 @@
 
 #define LOGGER_FUNC_FORMAT ATTR_FORMAT(printf, 1, 2)
 
+/**
+ * \brief enumerate to define log modules
+ */
+typedef enum SOPC_Log_Module
+{
+    SOPC_LOG_MODULE_COMMON,       /**< Common log module */
+    SOPC_LOG_MODULE_CLIENTSERVER, /**< ClientServer log module */
+    SOPC_LOG_MODULE_PUBSUB        /**< PubSub log module */
+} SOPC_Log_Module;
+
 /*
  * \brief Initializes the logger and create the necessary log file(s)
  *
@@ -75,28 +85,28 @@ void SOPC_Logger_SetConsoleOutput(bool activate);
  *
  * \param format    String specifying how subsequent arguments are converted for output
  */
-void SOPC_Logger_TraceError(const char* format, ...) LOGGER_FUNC_FORMAT;
+void SOPC_Logger_TraceError(SOPC_Log_Module logModule, const char* format, ...) LOGGER_FUNC_FORMAT;
 
 /*
  * \brief Log a trace with the warning level
  *
  * \param format    String specifying how subsequent arguments are converted for output
  */
-void SOPC_Logger_TraceWarning(const char* format, ...) LOGGER_FUNC_FORMAT;
+void SOPC_Logger_TraceWarning(SOPC_Log_Module logModule, const char* format, ...) LOGGER_FUNC_FORMAT;
 
 /*
  * \brief Log a trace with the info level
  *
  * \param format    String specifying how subsequent arguments are converted for output
  */
-void SOPC_Logger_TraceInfo(const char* format, ...) LOGGER_FUNC_FORMAT;
+void SOPC_Logger_TraceInfo(SOPC_Log_Module logModule, const char* format, ...) LOGGER_FUNC_FORMAT;
 
 /*
  * \brief Log a trace with the debug level
  *
  * \param format    String specifying how subsequent arguments are converted for output
  */
-void SOPC_Logger_TraceDebug(const char* format, ...) LOGGER_FUNC_FORMAT;
+void SOPC_Logger_TraceDebug(SOPC_Log_Module logModule, const char* format, ...) LOGGER_FUNC_FORMAT;
 
 /*
  * \brief Log a trace for the security audit log

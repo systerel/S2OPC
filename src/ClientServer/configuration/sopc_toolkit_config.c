@@ -23,6 +23,7 @@
 #include <string.h>
 
 #include "opcua_identifiers.h"
+#include "sopc_common.h"
 #include "sopc_encodeable.h"
 #include "sopc_event_timer_manager.h"
 #include "sopc_filesystem.h"
@@ -41,7 +42,6 @@
 #include "sopc_toolkit_config.h"
 #include "sopc_toolkit_config_internal.h"
 #include "sopc_user_app_itf.h"
-#include "sopc_common.h"
 
 #include "address_space_impl.h"
 #include "util_b2c.h"
@@ -154,14 +154,9 @@ SOPC_ReturnStatus SOPC_Toolkit_Configured()
                 SOPC_Log_Configuration logConfiguration = {
                     .logLevel = tConfig.logLevel,
                     .logSystem = SOPC_LOG_SYSTEM_FILE,
-                    .logSysConfig = {
-                        .fileSystemLogConfig = {
-                            .logDirPath = tConfig.logDirPath,
-                            .logMaxBytes = tConfig.logMaxBytes,
-                            .logMaxFiles = tConfig.logMaxFiles
-                        }
-                    }
-                };
+                    .logSysConfig = {.fileSystemLogConfig = {.logDirPath = tConfig.logDirPath,
+                                                             .logMaxBytes = tConfig.logMaxBytes,
+                                                             .logMaxFiles = tConfig.logMaxFiles}}};
                 status = SOPC_Common_Initialize(logConfiguration);
                 if (SOPC_STATUS_OK == status)
                 {
