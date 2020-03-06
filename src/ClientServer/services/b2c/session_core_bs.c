@@ -77,26 +77,23 @@ static SOPC_TimeReference server_session_latest_msg_receveived[SOPC_MAX_SESSIONS
   ------------------------*/
 void session_core_bs__INITIALISATION(void)
 {
-    SessionData* sData = NULL;
     for (int32_t idx = 0; idx <= constants__t_session_i_max; idx++)
     {
-        for (int8_t j = 0; j < 2; j++)
-        {
-            if (j == 0)
-            {
-                sData = &(serverSessionDataArray[idx]);
-            }
-            else
-            {
-                sData = &(clientSessionDataArray[idx]);
-            }
-        }
-        SOPC_NodeId_Initialize(&sData->sessionToken);
-        SOPC_ByteString_Initialize(&sData->nonceClient);
-        SOPC_ByteString_Initialize(&sData->nonceServer);
-        OpcUa_SignatureData_Initialize(&sData->signatureData);
-        sData->user_server = constants__c_user_indet;
-        sData->user_client = constants__c_user_token_indet;
+        SessionData* serverSessionData = &(serverSessionDataArray[idx]);
+        SOPC_NodeId_Initialize(&serverSessionData->sessionToken);
+        SOPC_ByteString_Initialize(&serverSessionData->nonceClient);
+        SOPC_ByteString_Initialize(&serverSessionData->nonceServer);
+        OpcUa_SignatureData_Initialize(&serverSessionData->signatureData);
+        serverSessionData->user_server = constants__c_user_indet;
+        serverSessionData->user_client = constants__c_user_token_indet;
+
+        SessionData* clientSessionData = &(clientSessionDataArray[idx]);
+        SOPC_NodeId_Initialize(&clientSessionData->sessionToken);
+        SOPC_ByteString_Initialize(&clientSessionData->nonceClient);
+        SOPC_ByteString_Initialize(&clientSessionData->nonceServer);
+        OpcUa_SignatureData_Initialize(&clientSessionData->signatureData);
+        clientSessionData->user_server = constants__c_user_indet;
+        clientSessionData->user_client = constants__c_user_token_indet;
     }
 
     assert(SOPC_MAX_SESSIONS + 1 <= SIZE_MAX / sizeof(constants__t_user_i));
