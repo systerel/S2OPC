@@ -16,6 +16,7 @@ endif()
 
 # options with impact on dependencies
 option(ENABLE_TESTING "Build the S2OPC tests" ON)
+option(ENABLE_FUZZING "Build the S2OPC fuzzers" OFF)
 
 # Python3 is mandatory for compilation
 find_package(PythonInterp 3 REQUIRED)
@@ -23,6 +24,7 @@ find_package(PythonInterp 3 REQUIRED)
 # We always link check statically, so that our test binaries are standalone
 if(ENABLE_TESTING)
   find_package(check REQUIRED)
+  set(ENABLE_FUZZING ON)
 endif()
 
 #### Tests for S2OPC library and extension libraries ####
@@ -73,13 +75,13 @@ if(ENABLE_TESTING)
   set(TEST_SERVER_UACTT_CONFIG_XML "${CMAKE_CURRENT_SOURCE_DIR}/data/config/S2OPC_Server_UACTT_Config.xml")
 
   set(TEST_LIGHT_ADDRESS_SPACE_XML "${S2OPC_ROOT_PATH}/tests/ClientServer/data/address_space/s2opc_no_base_info.xml")
-  
+
   if (WITH_NANO_EXTENDED)
     set(TEST_ADDRESS_SPACE_XML "${S2OPC_ROOT_PATH}/samples/ClientServer/data/address_space/s2opc.xml")
   else()
     set(TEST_ADDRESS_SPACE_XML "${S2OPC_ROOT_PATH}/samples/ClientServer/data/address_space/s2opc_nano.xml")
   endif()
-  
+
   set(TEST_SERVER_ADDRESS_SPACE_C "test_server_address_space.c")
   set(TEST_LIGHT_ADDRESS_SPACE_C "s2opc_no_base_info_address_space.c")
 
@@ -217,58 +219,6 @@ if(ENABLE_TESTING)
   target_compile_definitions(test_secure_channels_server PRIVATE ${S2OPC_DEFINITIONS})
   target_include_directories(test_secure_channels_server PRIVATE "unit_tests/secure_channels/stubs"
                                                                  ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
-
-## S2OPC fuzzing tests: to be run manually ##
-
-  set(FUZZING_PATH "unit_tests/fuzzing")
-
-  # Local Fuzzing
-  function(s2opc_fuzzer name src_file)
-    set(standalone_target_name "${name}.standalone")
-    set(fuzz_target_name "${name}.libfuzzer")
-
-    add_executable(${standalone_target_name} "${FUZZING_PATH}/${src_file}" "${FUZZING_PATH}/standalone_fuzzer.c")
-    target_compile_options(${standalone_target_name} PRIVATE ${S2OPC_COMPILER_FLAGS})
-    target_compile_definitions(${standalone_target_name} PRIVATE ${S2OPC_DEFINITIONS})
-    target_link_libraries(${standalone_target_name} s2opc_clientserver)
-    target_include_directories(${standalone_target_name} PRIVATE ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
-    add_dependencies(fuzzers ${standalone_target_name})
-
-    add_executable(${fuzz_target_name} "${FUZZING_PATH}/${src_file}")
-    set_target_properties(${fuzz_target_name} PROPERTIES COMPILE_FLAGS "-fsanitize=fuzzer")
-    set_target_properties(${fuzz_target_name} PROPERTIES LINK_FLAGS "-fsanitize=fuzzer")
-    target_link_libraries(${fuzz_target_name} s2opc_clientserver)
-    target_include_directories(${fuzz_target_name} PRIVATE ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
-    add_dependencies(fuzzers ${fuzz_target_name})
-  endfunction()
-
-  if (NOT WITH_OSS_FUZZ AND "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
-    if (${CMAKE_C_COMPILER_VERSION} VERSION_LESS "6.0.0")
-      # We need at least CLang 6 to get LibFuzzer
-      message(STATUS "Your version of Clang (${CMAKE_C_COMPILER_ID}) is not recent enough to have LibFuzzer")
-    else()
-      add_custom_target(fuzzers)
-      s2opc_fuzzer(server_request_fuzzer "fuzz_server_request.c")
-      s2opc_fuzzer(parse_tcp_uri_fuzzer "fuzz_parse_tcp_uri.c")
-      s2opc_fuzzer(decode_fuzzer "fuzz_decoder.c")
-    endif()
-  endif()
-
-  # OSS Fuzzing
-  function(s2opc_oss_fuzzer fuzz_target_name src_file)
-    add_executable(${fuzz_target_name} "${FUZZING_PATH}/${src_file}")
-    target_link_libraries(${fuzz_target_name} s2opc_clientserver $ENV{LIB_FUZZING_ENGINE})
-    target_include_directories(${fuzz_target_name} PRIVATE ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
-    add_dependencies(fuzzers ${fuzz_target_name})
-  endfunction()
-
-  if(WITH_OSS_FUZZ)
-    add_custom_target(fuzzers)
-    s2opc_oss_fuzzer(server_request_fuzzer "fuzz_server_request.c")
-    s2opc_oss_fuzzer(parse_tcp_uri_fuzzer "fuzz_parse_tcp_uri.c")
-    s2opc_oss_fuzzer(decode_fuzzer "fuzz_decoder.c")
-  endif()
-
 ## S2OPC validation tests ##
 
 # Tests compilation definition #
@@ -553,3 +503,58 @@ if(ENABLE_TESTING)
   endif()
 
 endif(ENABLE_TESTING)
+
+
+## S2OPC fuzzing tests: to be run manually ##
+
+if(ENABLE_FUZZING)
+  set(FUZZING_PATH "unit_tests/fuzzing")
+
+  # Local Fuzzing
+  function(s2opc_fuzzer name src_file)
+    set(standalone_target_name "${name}.standalone")
+    set(fuzz_target_name "${name}.libfuzzer")
+
+    add_executable(${standalone_target_name} "${FUZZING_PATH}/${src_file}" "${FUZZING_PATH}/standalone_fuzzer.c")
+    target_compile_options(${standalone_target_name} PRIVATE ${S2OPC_COMPILER_FLAGS})
+    target_compile_definitions(${standalone_target_name} PRIVATE ${S2OPC_DEFINITIONS})
+    target_link_libraries(${standalone_target_name} s2opc_clientserver)
+    target_include_directories(${standalone_target_name} PRIVATE ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
+    add_dependencies(fuzzers ${standalone_target_name})
+
+    add_executable(${fuzz_target_name} "${FUZZING_PATH}/${src_file}")
+    set_target_properties(${fuzz_target_name} PROPERTIES COMPILE_FLAGS "-fsanitize=fuzzer")
+    set_target_properties(${fuzz_target_name} PROPERTIES LINK_FLAGS "-fsanitize=fuzzer")
+    target_link_libraries(${fuzz_target_name} s2opc_clientserver)
+    target_include_directories(${fuzz_target_name} PRIVATE ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
+    add_dependencies(fuzzers ${fuzz_target_name})
+  endfunction()
+
+  if (NOT WITH_OSS_FUZZ AND "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
+    if (${CMAKE_C_COMPILER_VERSION} VERSION_LESS "6.0.0")
+      # We need at least CLang 6 to get LibFuzzer
+      message(STATUS "Your version of Clang (${CMAKE_C_COMPILER_ID}) is not recent enough to have LibFuzzer")
+    else()
+      add_custom_target(fuzzers)
+      s2opc_fuzzer(server_request_fuzzer "fuzz_server_request.c")
+      s2opc_fuzzer(parse_tcp_uri_fuzzer "fuzz_parse_tcp_uri.c")
+      s2opc_fuzzer(decode_fuzzer "fuzz_decoder.c")
+    endif()
+  endif()
+
+  # OSS Fuzzing
+  function(s2opc_oss_fuzzer fuzz_target_name src_file)
+    add_executable(${fuzz_target_name} "${FUZZING_PATH}/${src_file}")
+    target_link_libraries(${fuzz_target_name} s2opc_clientserver $ENV{LIB_FUZZING_ENGINE})
+    target_include_directories(${fuzz_target_name} PRIVATE ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
+    add_dependencies(fuzzers ${fuzz_target_name})
+  endfunction()
+
+  if(WITH_OSS_FUZZ)
+    add_custom_target(fuzzers)
+    s2opc_oss_fuzzer(server_request_fuzzer "fuzz_server_request.c")
+    s2opc_oss_fuzzer(parse_tcp_uri_fuzzer "fuzz_parse_tcp_uri.c")
+    s2opc_oss_fuzzer(decode_fuzzer "fuzz_decoder.c")
+  endif()
+endif(ENABLE_FUZZING)
+
