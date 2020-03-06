@@ -803,8 +803,8 @@ static bool SC_ClientTransition_TcpNegotiate_To_ScInit(SOPC_SecureConnection* sc
         status = SOPC_UInt32_Read(&tempValue, ackMsgBuffer, 0);
         if (SOPC_STATUS_OK == status)
         {
-            if (scConnection->tcpMsgProperties.sendMaxMessageSize > tempValue ||
-                scConnection->tcpMsgProperties.sendMaxMessageSize == 0)
+            if (tempValue != 0 && (scConnection->tcpMsgProperties.sendMaxMessageSize > tempValue ||
+                                   scConnection->tcpMsgProperties.sendMaxMessageSize == 0))
             {
                 scConnection->tcpMsgProperties.sendMaxMessageSize = tempValue;
             }
@@ -818,8 +818,8 @@ static bool SC_ClientTransition_TcpNegotiate_To_ScInit(SOPC_SecureConnection* sc
         status = SOPC_UInt32_Read(&tempValue, ackMsgBuffer, 0);
         if (SOPC_STATUS_OK == status)
         {
-            if (scConnection->tcpMsgProperties.sendMaxChunkCount > tempValue ||
-                scConnection->tcpMsgProperties.sendMaxChunkCount == 0)
+            if (tempValue != 0 && (scConnection->tcpMsgProperties.sendMaxChunkCount > tempValue ||
+                                   scConnection->tcpMsgProperties.sendMaxChunkCount == 0))
             {
                 scConnection->tcpMsgProperties.sendMaxChunkCount = tempValue;
             }
@@ -1189,6 +1189,8 @@ static bool SC_ClientTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
 
     if (result)
     {
+        // Set the maximum message length
+        scConfig->internalProtocolData = scConnection->tcpMsgProperties.sendMaxMessageSize;
         scConnection->state = SECURE_CONNECTION_STATE_SC_CONNECTED;
     }
 
@@ -1335,8 +1337,8 @@ static bool SC_ServerTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
         status = SOPC_UInt32_Read(&tempValue, helloMsgBuffer, 0);
         if (SOPC_STATUS_OK == status)
         {
-            if (scConnection->tcpMsgProperties.sendMaxMessageSize > tempValue ||
-                scConnection->tcpMsgProperties.sendMaxMessageSize == 0)
+            if (tempValue != 0 && (scConnection->tcpMsgProperties.sendMaxMessageSize > tempValue ||
+                                   scConnection->tcpMsgProperties.sendMaxMessageSize == 0))
             {
                 scConnection->tcpMsgProperties.sendMaxMessageSize = tempValue;
             }
@@ -1354,8 +1356,8 @@ static bool SC_ServerTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
         status = SOPC_UInt32_Read(&tempValue, helloMsgBuffer, 0);
         if (SOPC_STATUS_OK == status)
         {
-            if (scConnection->tcpMsgProperties.sendMaxChunkCount > tempValue ||
-                scConnection->tcpMsgProperties.sendMaxChunkCount == 0)
+            if (tempValue != 0 && (scConnection->tcpMsgProperties.sendMaxChunkCount > tempValue ||
+                                   scConnection->tcpMsgProperties.sendMaxChunkCount == 0))
             {
                 scConnection->tcpMsgProperties.sendMaxChunkCount = tempValue;
             }
@@ -1698,6 +1700,8 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
             nconfig->reqSecuPolicyUri = scConnection->serverAsymmSecuInfo.securityPolicyUri;
             nconfig->requestedLifetime = opnReq->RequestedLifetime;
             nconfig->url = epConfig->endpointURL;
+            // Set maximum send message size
+            nconfig->internalProtocolData = scConnection->tcpMsgProperties.sendMaxMessageSize;
             idx = SOPC_ToolkitServer_AddSecureChannelConfig(nconfig);
             result = (idx > 0);
         }

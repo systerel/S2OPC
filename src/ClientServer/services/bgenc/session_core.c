@@ -21,7 +21,7 @@
 
  File Name            : session_core.c
 
- Date                 : 06/03/2020 14:49:20
+ Date                 : 13/03/2020 10:56:05
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -184,6 +184,8 @@ void session_core__server_create_session_req_and_resp_sm(
                session_core__l_nsession_token);
             message_out_bs__write_create_session_msg_session_revised_timeout(session_core__create_req_msg,
                session_core__create_resp_msg);
+            message_out_bs__minimize_max_message_length_create_session_msg(session_core__l_channel_config_idx,
+               session_core__create_req_msg);
             message_out_bs__write_create_session_msg_server_endpoints(session_core__create_req_msg,
                session_core__create_resp_msg,
                session_core__l_endpoint_config_idx,

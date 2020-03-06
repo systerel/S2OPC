@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 06/03/2020 14:49:15
+ Date                 : 13/03/2020 10:56:00
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -521,6 +521,7 @@ void service_mgr__local_client_discovery_service_request(
       t_bool service_mgr__l_valid_req_handle;
       constants__t_byte_buffer_i service_mgr__l_buffer;
       t_bool service_mgr__l_valid_buffer;
+      constants__t_channel_config_idx_i service_mgr__l_channel_cfg;
       
       service_mgr__l_buffer = constants__c_byte_buffer_indet;
       service_mgr__l_req_handle = constants__c_client_request_handle_indet;
@@ -551,7 +552,10 @@ void service_mgr__local_client_discovery_service_request(
                service_mgr__channel);
             message_out_bs__client_write_msg_out_header_req_handle(service_mgr__l_msg_header,
                service_mgr__l_req_handle);
-            message_out_bs__encode_msg(constants__e_msg_request_type,
+            channel_mgr__get_channel_info(service_mgr__channel,
+               &service_mgr__l_channel_cfg);
+            message_out_bs__encode_msg(service_mgr__l_channel_cfg,
+               constants__e_msg_request_type,
                service_mgr__l_req_typ,
                service_mgr__l_msg_header,
                service_mgr__req_msg,
@@ -632,6 +636,7 @@ void service_mgr__server_receive_session_treatment_req(
       constants_statuscodes_bs__t_StatusCode_i service_mgr__l_ret;
       constants__t_byte_buffer_i service_mgr__l_buffer_out;
       t_bool service_mgr__l_valid_buffer;
+      constants__t_channel_config_idx_i service_mgr__l_channel_cfg;
       
       service_mgr__l_valid_req = false;
       *service_mgr__sc = constants_statuscodes_bs__c_StatusCode_indet;
@@ -677,7 +682,10 @@ void service_mgr__server_receive_session_treatment_req(
                   service_mgr__l_ret);
                message_out_bs__server_write_msg_out_header_req_handle(service_mgr__l_resp_msg_header,
                   service_mgr__l_request_handle);
-               message_out_bs__encode_msg(constants__e_msg_response_type,
+               channel_mgr__get_channel_info(service_mgr__channel,
+                  &service_mgr__l_channel_cfg);
+               message_out_bs__encode_msg(service_mgr__l_channel_cfg,
+                  constants__e_msg_response_type,
                   service_mgr__l_resp_msg_typ,
                   service_mgr__l_resp_msg_header,
                   service_mgr__l_resp_msg,
@@ -790,6 +798,7 @@ void service_mgr__server_receive_session_service_req(
       constants__t_channel_i service_mgr__l_session_channel;
       constants__t_endpoint_config_idx_i service_mgr__l_endpoint_config_idx;
       t_bool service_mgr__l_is_valid_ep_config_idx;
+      constants__t_channel_config_idx_i service_mgr__l_channel_cfg;
       
       *service_mgr__sc = constants_statuscodes_bs__c_StatusCode_indet;
       service_mgr__l_is_valid_req_on_session = false;
@@ -890,7 +899,10 @@ void service_mgr__server_receive_session_service_req(
                service_mgr__l_request_handle);
             message_out_bs__write_msg_resp_header_service_status(service_mgr__l_resp_msg_header,
                service_mgr__l_ret);
-            message_out_bs__encode_msg(constants__e_msg_response_type,
+            channel_mgr__get_channel_info(service_mgr__channel,
+               &service_mgr__l_channel_cfg);
+            message_out_bs__encode_msg(service_mgr__l_channel_cfg,
+               constants__e_msg_response_type,
                service_mgr__l_resp_msg_typ,
                service_mgr__l_resp_msg_header,
                service_mgr__l_resp_msg,
@@ -1009,6 +1021,7 @@ void service_mgr__server_receive_discovery_service_req(
       constants__t_endpoint_config_idx_i service_mgr__l_endpoint_config_idx;
       constants_statuscodes_bs__t_StatusCode_i service_mgr__l_ret;
       constants__t_byte_buffer_i service_mgr__l_buffer_out;
+      constants__t_channel_config_idx_i service_mgr__l_channel_cfg;
       
       *service_mgr__sc = constants_statuscodes_bs__c_StatusCode_indet;
       service_mgr__l_valid_req = false;
@@ -1052,7 +1065,10 @@ void service_mgr__server_receive_discovery_service_req(
                }
                message_out_bs__server_write_msg_out_header_req_handle(service_mgr__l_resp_msg_header,
                   service_mgr__l_request_handle);
-               message_out_bs__encode_msg(constants__e_msg_response_type,
+               channel_mgr__get_channel_info(service_mgr__channel,
+                  &service_mgr__l_channel_cfg);
+               message_out_bs__encode_msg(service_mgr__l_channel_cfg,
+                  constants__e_msg_response_type,
                   service_mgr__l_resp_msg_typ,
                   service_mgr__l_resp_msg_header,
                   service_mgr__l_resp_msg,
@@ -1231,6 +1247,7 @@ void service_mgr__client_service_create_session(
       constants_statuscodes_bs__t_StatusCode_i service_mgr__l_sc;
       t_bool service_mgr__l_valid_buffer;
       t_bool service_mgr__l_bret;
+      constants__t_channel_config_idx_i service_mgr__l_channel_cfg;
       
       service_mgr__l_buffer = constants__c_byte_buffer_indet;
       service_mgr__l_req_handle = constants__c_client_request_handle_indet;
@@ -1261,7 +1278,10 @@ void service_mgr__client_service_create_session(
             if (service_mgr__l_bret == true) {
                message_out_bs__client_write_msg_out_header_req_handle(service_mgr__l_msg_header,
                   service_mgr__l_req_handle);
-               message_out_bs__encode_msg(constants__e_msg_request_type,
+               channel_mgr__get_channel_info(service_mgr__channel,
+                  &service_mgr__l_channel_cfg);
+               message_out_bs__encode_msg(service_mgr__l_channel_cfg,
+                  constants__e_msg_request_type,
                   constants__e_msg_session_create_req,
                   service_mgr__l_msg_header,
                   service_mgr__l_req_msg,
@@ -1310,6 +1330,7 @@ void service_mgr__client_service_activate_orphaned_session(
       constants__t_byte_buffer_i service_mgr__l_buffer;
       constants_statuscodes_bs__t_StatusCode_i service_mgr__l_sc;
       t_bool service_mgr__l_valid_buffer;
+      constants__t_channel_config_idx_i service_mgr__l_channel_cfg;
       
       service_mgr__l_buffer = constants__c_byte_buffer_indet;
       service_mgr__l_req_handle = constants__c_client_request_handle_indet;
@@ -1343,7 +1364,10 @@ void service_mgr__client_service_activate_orphaned_session(
                   service_mgr__l_req_handle);
                message_out_bs__write_msg_out_header_session_token(service_mgr__l_msg_header,
                   service_mgr__l_session_token);
-               message_out_bs__encode_msg(constants__e_msg_request_type,
+               channel_mgr__get_channel_info(service_mgr__channel,
+                  &service_mgr__l_channel_cfg);
+               message_out_bs__encode_msg(service_mgr__l_channel_cfg,
+                  constants__e_msg_request_type,
                   constants__e_msg_session_activate_req,
                   service_mgr__l_msg_header,
                   service_mgr__l_req_msg,
@@ -1389,6 +1413,7 @@ void service_mgr__client_service_activate_session(
       constants__t_session_token_i service_mgr__l_session_token;
       constants__t_byte_buffer_i service_mgr__l_buffer;
       t_bool service_mgr__l_valid_buffer;
+      constants__t_channel_config_idx_i service_mgr__l_channel_cfg;
       
       service_mgr__l_channel = constants__c_channel_indet;
       service_mgr__l_buffer = constants__c_byte_buffer_indet;
@@ -1424,7 +1449,10 @@ void service_mgr__client_service_activate_session(
                   service_mgr__l_req_handle);
                message_out_bs__write_msg_out_header_session_token(service_mgr__l_msg_header,
                   service_mgr__l_session_token);
-               message_out_bs__encode_msg(constants__e_msg_request_type,
+               channel_mgr__get_channel_info(service_mgr__l_channel,
+                  &service_mgr__l_channel_cfg);
+               message_out_bs__encode_msg(service_mgr__l_channel_cfg,
+                  constants__e_msg_request_type,
                   constants__e_msg_session_activate_req,
                   service_mgr__l_msg_header,
                   service_mgr__l_req_msg,
@@ -1481,6 +1509,7 @@ void service_mgr__client_service_close_session(
       constants__t_session_token_i service_mgr__l_session_token;
       constants__t_byte_buffer_i service_mgr__l_buffer;
       t_bool service_mgr__l_valid_buffer;
+      constants__t_channel_config_idx_i service_mgr__l_channel_cfg;
       
       service_mgr__l_channel = constants__c_channel_indet;
       service_mgr__l_buffer = constants__c_byte_buffer_indet;
@@ -1515,7 +1544,10 @@ void service_mgr__client_service_close_session(
                   service_mgr__l_req_handle);
                message_out_bs__write_msg_out_header_session_token(service_mgr__l_msg_header,
                   service_mgr__l_session_token);
-               message_out_bs__encode_msg(constants__e_msg_request_type,
+               channel_mgr__get_channel_info(service_mgr__l_channel,
+                  &service_mgr__l_channel_cfg);
+               message_out_bs__encode_msg(service_mgr__l_channel_cfg,
+                  constants__e_msg_request_type,
                   constants__e_msg_session_close_req,
                   service_mgr__l_msg_header,
                   service_mgr__l_req_msg,
@@ -1567,6 +1599,7 @@ void service_mgr__client_service_request(
       constants__t_byte_buffer_i service_mgr__l_buffer;
       t_bool service_mgr__l_valid_buffer;
       t_bool service_mgr__l_valid_channel;
+      constants__t_channel_config_idx_i service_mgr__l_channel_cfg;
       
       service_mgr__l_channel = constants__c_channel_indet;
       service_mgr__l_buffer = constants__c_byte_buffer_indet;
@@ -1634,7 +1667,10 @@ void service_mgr__client_service_request(
                      service_mgr__l_req_handle);
                   message_out_bs__write_msg_out_header_session_token(service_mgr__l_msg_header,
                      service_mgr__l_session_token);
-                  message_out_bs__encode_msg(constants__e_msg_request_type,
+                  channel_mgr__get_channel_info(service_mgr__l_channel,
+                     &service_mgr__l_channel_cfg);
+                  message_out_bs__encode_msg(service_mgr__l_channel_cfg,
+                     constants__e_msg_request_type,
                      constants__e_msg_session_close_req,
                      service_mgr__l_msg_header,
                      service_mgr__req_msg,
@@ -1793,6 +1829,7 @@ void service_mgr__server_send_publish_response(
       constants__t_msg_header_i service_mgr__l_resp_msg_header;
       constants__t_byte_buffer_i service_mgr__l_buffer_out;
       t_bool service_mgr__l_valid_buffer;
+      constants__t_channel_config_idx_i service_mgr__l_channel_cfg;
       
       *service_mgr__sc = constants_statuscodes_bs__e_sc_bad_session_id_invalid;
       *service_mgr__bres = false;
@@ -1813,7 +1850,10 @@ void service_mgr__server_send_publish_response(
                service_mgr__req_handle);
             message_out_bs__write_msg_resp_header_service_status(service_mgr__l_resp_msg_header,
                service_mgr__statusCode);
-            message_out_bs__encode_msg(constants__e_msg_response_type,
+            channel_mgr__get_channel_info(*service_mgr__channel,
+               &service_mgr__l_channel_cfg);
+            message_out_bs__encode_msg(service_mgr__l_channel_cfg,
+               constants__e_msg_response_type,
                service_mgr__resp_typ,
                service_mgr__l_resp_msg_header,
                service_mgr__publish_resp_msg,

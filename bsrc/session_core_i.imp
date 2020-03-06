@@ -381,6 +381,8 @@ OPERATIONS
                 write_create_session_msg_session_token (create_resp_msg, l_nsession, l_nsession_token);
                 /* Set revised timeout to : MIN <= requested timeout <= MAX */
                 write_create_session_msg_session_revised_timeout (create_req_msg, create_resp_msg);
+                /* Minimize the channel sendMaxMessageSize with the maxResponseMessageSize of the session */
+                minimize_max_message_length_create_session_msg (l_channel_config_idx, create_req_msg);
                 service_ret <-- write_create_session_msg_server_endpoints (create_req_msg, create_resp_msg, l_endpoint_config_idx);
                 /* TODO: populate msg with remaining parameters: MaxRequestSize, RevisedSessionTimeout, CertServer, ... */
                 IF service_ret = e_sc_ok THEN

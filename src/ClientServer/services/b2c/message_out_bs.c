@@ -191,7 +191,8 @@ void message_out_bs__dealloc_msg_out(const constants__t_msg_i message_out_bs__ms
     }
 }
 
-static void internal__message_out_bs__encode_msg(const constants__t_msg_header_type_i message_out_bs__header_type,
+static void internal__message_out_bs__encode_msg(const constants__t_channel_config_idx_i message_out_bs__channel_cfg,
+                                                 const constants__t_msg_header_type_i message_out_bs__header_type,
                                                  const constants__t_msg_type_i message_out_bs__msg_type,
                                                  const constants__t_msg_header_i message_out_bs__msg_header,
                                                  const constants__t_msg_i message_out_bs__msg,
@@ -205,8 +206,29 @@ static void internal__message_out_bs__encode_msg(const constants__t_msg_header_t
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_EncodeableType* encType = *(SOPC_EncodeableType**) message_out_bs__msg;
     SOPC_EncodeableType* headerType = *(SOPC_EncodeableType**) message_out_bs__msg_header;
+    SOPC_SecureChannel_Config* chConfig = NULL;
+    if (&OpcUa_RequestHeader_EncodeableType == headerType)
+    {
+        chConfig = SOPC_ToolkitClient_GetSecureChannelConfig(message_out_bs__channel_cfg);
+    }
+    else if (&OpcUa_ResponseHeader_EncodeableType == headerType)
+    {
+        chConfig = SOPC_ToolkitServer_GetSecureChannelConfig(message_out_bs__channel_cfg);
+    }
+    else
+    {
+        assert(false);
+    }
+
+    if (NULL == chConfig)
+    {
+        *message_out_bs__sc = constants_statuscodes_bs__e_sc_bad_encoding_error;
+        return;
+    }
+
+    uint32_t sendMessageMaxSize = (uint32_t) chConfig->internalProtocolData;
     SOPC_Buffer* buffer = SOPC_Buffer_CreateResizable(
-        SOPC_TCP_UA_MIN_BUFFER_SIZE, SOPC_MAX_MESSAGE_LENGTH + SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
+        SOPC_TCP_UA_MIN_BUFFER_SIZE, sendMessageMaxSize + SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
     if (NULL != buffer)
     {
         status = SOPC_STATUS_OK;
@@ -285,7 +307,16 @@ static void internal__message_out_bs__encode_msg(const constants__t_msg_header_t
                 *message_out_bs__sc = constants_statuscodes_bs__e_sc_bad_request_too_large;
                 break;
             case constants__e_msg_response_type:
-                *message_out_bs__sc = constants_statuscodes_bs__e_sc_bad_response_too_large;
+                if (SOPC_SEND_MAX_MESSAGE_LENGTH == sendMessageMaxSize)
+                {
+                    /* Internal limit */
+                    *message_out_bs__sc = constants_statuscodes_bs__e_sc_bad_encoding_limits_exceeded;
+                }
+                else
+                {
+                    /* Client limit */
+                    *message_out_bs__sc = constants_statuscodes_bs__e_sc_bad_response_too_large;
+                }
                 break;
             default:
                 assert(false);
@@ -306,16 +337,17 @@ static void internal__message_out_bs__encode_msg(const constants__t_msg_header_t
     }
 }
 
-void message_out_bs__encode_msg(const constants__t_msg_header_type_i message_out_bs__header_type,
+void message_out_bs__encode_msg(const constants__t_channel_config_idx_i message_out_bs__channel_cfg,
+                                const constants__t_msg_header_type_i message_out_bs__header_type,
                                 const constants__t_msg_type_i message_out_bs__msg_type,
                                 const constants__t_msg_header_i message_out_bs__msg_header,
                                 const constants__t_msg_i message_out_bs__msg,
                                 constants_statuscodes_bs__t_StatusCode_i* const message_out_bs__sc,
                                 constants__t_byte_buffer_i* const message_out_bs__buffer)
 {
-    internal__message_out_bs__encode_msg(message_out_bs__header_type, message_out_bs__msg_type,
-                                         message_out_bs__msg_header, message_out_bs__msg, message_out_bs__sc,
-                                         message_out_bs__buffer);
+    internal__message_out_bs__encode_msg(message_out_bs__channel_cfg, message_out_bs__header_type,
+                                         message_out_bs__msg_type, message_out_bs__msg_header, message_out_bs__msg,
+                                         message_out_bs__sc, message_out_bs__buffer);
 
     if (constants_statuscodes_bs__e_sc_ok != *message_out_bs__sc &&
         constants__e_msg_response_type == message_out_bs__header_type)
@@ -334,9 +366,9 @@ void message_out_bs__encode_msg(const constants__t_msg_header_type_i message_out
         default:
             respHeader->ServiceResult = OpcUa_BadEncodingError;
         }
-        internal__message_out_bs__encode_msg(message_out_bs__header_type, constants__e_msg_service_fault_resp,
-                                             message_out_bs__msg_header, message_out_bs__msg, message_out_bs__sc,
-                                             message_out_bs__buffer);
+        internal__message_out_bs__encode_msg(message_out_bs__channel_cfg, message_out_bs__header_type,
+                                             constants__e_msg_service_fault_resp, message_out_bs__msg_header,
+                                             message_out_bs__msg, message_out_bs__sc, message_out_bs__buffer);
     }
 }
 
@@ -672,6 +704,23 @@ void message_out_bs__write_activate_session_resp_msg_crypto(const constants__t_m
     /* TODO: this can also fail because of the malloc */
     status = SOPC_ByteString_Copy(&pResp->ServerNonce, message_out_bs__nonce);
     assert(SOPC_STATUS_OK == status);
+}
+
+void message_out_bs__minimize_max_message_length_create_session_msg(
+    const constants__t_channel_config_idx_i message_out_bs__p_channel_config_idx,
+    const constants__t_msg_i message_out_bs__p_create_session_req)
+{
+    SOPC_SecureChannel_Config* chConfig =
+        SOPC_ToolkitServer_GetSecureChannelConfig(message_out_bs__p_channel_config_idx);
+    uint32_t maxResponseMessageSize =
+        ((OpcUa_CreateSessionRequest*) message_out_bs__p_create_session_req)->MaxResponseMessageSize;
+
+    /* Update sendMaxMessageSize if new value is more restrictive */
+    if (NULL != chConfig && maxResponseMessageSize != 0 &&
+        maxResponseMessageSize < (uint32_t) chConfig->internalProtocolData)
+    {
+        chConfig->internalProtocolData = (uintptr_t) maxResponseMessageSize;
+    }
 }
 
 void message_out_bs__server_write_msg_out_header_req_handle(

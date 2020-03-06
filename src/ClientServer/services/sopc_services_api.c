@@ -85,13 +85,13 @@ static void onSecureChannelEvent(SOPC_EventHandler* handler,
     case EP_CONNECTED:
         SOPC_Logger_TraceDebug("ServicesMgr: SC_EP_SC_CONNECTED epCfgIdx=%" PRIu32 " scCfgIdx=%" PRIuPTR
                                " scIdx=%" PRIuPTR,
-                               id, (uintptr_t) params, auxParam);
+                               id, params, auxParam);
 
         // id ==  endpoint configuration index
-        // params = channel configuration index POINTER
+        // params = channel configuration index
         // auxParam == connection Id
         assert(id <= INT32_MAX);
-        uint32_t channel_config_idx = (uint32_t)(uintptr_t) params;
+        uint32_t channel_config_idx = (uint32_t) params;
         assert(channel_config_idx <= constants__t_channel_config_idx_i_max);
         assert(auxParam <= constants__t_channel_i_max);
 

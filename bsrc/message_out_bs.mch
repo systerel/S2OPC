@@ -173,8 +173,9 @@ OPERATIONS
     END
     ;
 
-    sc, buffer <-- encode_msg (header_type, msg_type, msg_header, msg) =
+    sc, buffer <-- encode_msg (channel_cfg, header_type, msg_type, msg_header, msg) =
     PRE
+        channel_cfg : t_channel_config_idx_i &
         a_buffer_out_state = c_buffer_out_state_indet &
         header_type : t_msg_header_type_i &
         header_type : t_msg_header_type &
@@ -357,6 +358,18 @@ OPERATIONS
         resp_msg = c_msg_out &
         c_msg_out : t_msg &
         a_msg_out_type = e_msg_session_create_resp
+    THEN
+        skip
+    END
+    ;
+
+    minimize_max_message_length_create_session_msg (p_channel_config_idx, p_create_session_req) =
+    PRE
+        p_channel_config_idx : t_channel_config_idx_i &
+        p_channel_config_idx : t_channel_config_idx &
+        p_create_session_req : t_msg_i &
+        p_create_session_req = c_msg_in &
+        a_msg_in_type = e_msg_session_create_req
     THEN
         skip
     END

@@ -47,6 +47,9 @@ typedef struct SOPC_SecureChannel_Config
     const char* reqSecuPolicyUri;
     uint32_t requestedLifetime;
     OpcUa_MessageSecurityMode msgSecurityMode;
+
+    /* Internal use only: may be left uninitialized */
+    uintptr_t internalProtocolData; // used to store internal protocol data (set only during connecting phase)
 } SOPC_SecureChannel_Config;
 
 #define SOPC_SECURITY_MODE_NONE_MASK 0x01

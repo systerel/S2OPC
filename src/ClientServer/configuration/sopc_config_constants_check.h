@@ -111,15 +111,28 @@
 #endif
 
 /* Check that the message buffer is large enough to hold the minimal TCP UA chunk */
-#if SOPC_MAX_MESSAGE_LENGTH < SOPC_TCP_UA_MAX_BUFFER_SIZE
+#if SOPC_RECEIVE_MAX_MESSAGE_LENGTH < SOPC_TCP_UA_MAX_BUFFER_SIZE
 #error "SOPC_MAX_MESSAGE_LENGTH is not large enough, must be >= SOPC_TCP_UA_MAX_BUFFER_SIZE"
 #endif
 
 /* Check that both number of chunks and message length are not defined to 0
  * Note: it is required to have a maximum size of message body buffer defined
  */
-#if 0 == SOPC_MAX_MESSAGE_LENGTH && 0 == SOPC_MAX_NB_CHUNKS
-#error "It is forbidden to define both SOPC_MAX_MESSAGE_LENGTH and SOPC_MAX_NB_CHUNKS to value 0 (no limit)"
+#if 0 == SOPC_RECEIVE_MAX_MESSAGE_LENGTH && 0 == SOPC_RECEIVE_MAX_NB_CHUNKS
+#error \
+    "It is forbidden to define both SOPC_RECEIVE_MAX_MESSAGE_LENGTH and SOPC_RECEIVE_MAX_NB_CHUNKS to value 0 (no limit)"
+#endif
+
+/* Check that the message buffer is large enough to hold the minimal TCP UA chunk */
+#if SOPC_SEND_MAX_MESSAGE_LENGTH < SOPC_TCP_UA_MAX_BUFFER_SIZE
+#error "SOPC_SEND_MAX_MESSAGE_LENGTH is not large enough, must be >= SOPC_TCP_UA_MAX_BUFFER_SIZE"
+#endif
+
+/* Check that both number of chunks and message length are not defined to 0
+ * Note: it is required to have a maximum size of message body buffer defined
+ */
+#if 0 == SOPC_SEND_MAX_MESSAGE_LENGTH && 0 == SOPC_SEND_MAX_NB_CHUNKS
+#error "It is forbidden to define both SOPC_SEND_MAX_MESSAGE_LENGTH and SOPC_SEND_MAX_NB_CHUNKS to value 0 (no limit)"
 #endif
 
 #endif

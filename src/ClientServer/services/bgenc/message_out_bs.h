@@ -21,7 +21,7 @@
 
  File Name            : message_out_bs.h
 
- Date                 : 06/03/2020 14:49:35
+ Date                 : 13/03/2020 10:56:18
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -75,6 +75,7 @@ extern void message_out_bs__dealloc_msg_header_out(
 extern void message_out_bs__dealloc_msg_out(
    const constants__t_msg_i message_out_bs__msg);
 extern void message_out_bs__encode_msg(
+   const constants__t_channel_config_idx_i message_out_bs__channel_cfg,
    const constants__t_msg_header_type_i message_out_bs__header_type,
    const constants__t_msg_type_i message_out_bs__msg_type,
    const constants__t_msg_header_i message_out_bs__msg_header,
@@ -100,6 +101,9 @@ extern void message_out_bs__is_valid_msg_out(
 extern void message_out_bs__is_valid_msg_out_header(
    const constants__t_msg_header_i message_out_bs__msg_header,
    t_bool * const message_out_bs__bres);
+extern void message_out_bs__minimize_max_message_length_create_session_msg(
+   const constants__t_channel_config_idx_i message_out_bs__p_channel_config_idx,
+   const constants__t_msg_i message_out_bs__p_create_session_req);
 extern void message_out_bs__server_write_msg_out_header_req_handle(
    const constants__t_msg_header_i message_out_bs__msg_header,
    const constants__t_server_request_handle_i message_out_bs__req_handle);
