@@ -41,6 +41,7 @@
 #include "sopc_toolkit_config.h"
 #include "sopc_toolkit_config_internal.h"
 #include "sopc_user_app_itf.h"
+#include "sopc_common.h"
 
 #include "address_space_impl.h"
 #include "util_b2c.h"
@@ -139,7 +140,6 @@ SOPC_ReturnStatus SOPC_Toolkit_Configured()
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_STATE;
     SOPC_Toolkit_Build_Info toolkitBuildInfo;
-    bool result = false;
     if (tConfig.initDone != false)
     {
         Mutex_Lock(&tConfig.mut);
@@ -150,8 +150,20 @@ SOPC_ReturnStatus SOPC_Toolkit_Configured()
             {
                 tConfig.locked = true;
                 SOPC_Services_ToolkitConfigured();
-                result = SOPC_Logger_Initialize(tConfig.logDirPath, tConfig.logMaxBytes, tConfig.logMaxFiles);
-                if (result != false)
+
+                SOPC_Log_Configuration logConfiguration = {
+                    .logLevel = tConfig.logLevel,
+                    .logSystem = SOPC_LOG_SYSTEM_FILE,
+                    .logSysConfig = {
+                        .fileSystemLogConfig = {
+                            .logDirPath = tConfig.logDirPath,
+                            .logMaxBytes = tConfig.logMaxBytes,
+                            .logMaxFiles = tConfig.logMaxFiles
+                        }
+                    }
+                };
+                status = SOPC_Common_Initialize(logConfiguration);
+                if (SOPC_STATUS_OK == status)
                 {
                     toolkitBuildInfo = SOPC_ToolkitConfig_GetBuildInfo();
                     SOPC_Logger_SetTraceLogLevel(SOPC_LOG_LEVEL_INFO);
@@ -166,9 +178,7 @@ SOPC_ReturnStatus SOPC_Toolkit_Configured()
                         toolkitBuildInfo.toolkitBuildInfo.buildVersion,
                         toolkitBuildInfo.toolkitBuildInfo.buildSrcCommit,
                         toolkitBuildInfo.toolkitBuildInfo.buildDockerId);
-                    SOPC_Logger_SetTraceLogLevel(tConfig.logLevel);
                 }
-                status = SOPC_STATUS_OK;
             }
             else
             {
