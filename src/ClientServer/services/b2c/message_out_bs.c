@@ -283,6 +283,11 @@ void message_out_bs__encode_msg(const constants__t_msg_header_type_i message_out
             default:
                 assert(false);
             }
+
+            SOPC_Logger_TraceWarning(
+                "Services: encoding of message failed (type = '%s') because it is too large: max size %" PRIu32
+                " reached",
+                SOPC_EncodeableType_GetName(encType), buffer->maximum_size);
         }
         else
         {
