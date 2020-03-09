@@ -186,10 +186,10 @@ START_TEST(test_logger_categories_and_files)
     ck_assert(testLog != NULL);
 
     testLog2 = SOPC_Log_CreateInstanceAssociation(testLog, "Category2");
-    ck_assert(testLog != NULL);
+    ck_assert(testLog2 != NULL);
 
     testLog3 = SOPC_Log_CreateInstanceAssociation(testLog, "Category9999"); // Truncated after 9 characters
-    ck_assert(testLog != NULL);
+    ck_assert(testLog3 != NULL);
 
     SOPC_Log_Trace(testLog, SOPC_LOG_LEVEL_ERROR, "This is a test "); // 1st message (60 characters for each)
 
