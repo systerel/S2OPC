@@ -48,7 +48,7 @@ SOPC_ReturnStatus SOPC_Common_Initialize(SOPC_Log_Configuration logConfiguration
     /* Check IEEE-754 compliance */
     if (!SOPC_IEEE_Check())
     {
-        status = SOPC_STATUS_NOK;
+        return SOPC_STATUS_NOK;
     }
 
     /* Initialize endianness */

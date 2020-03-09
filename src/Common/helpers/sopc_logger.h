@@ -37,9 +37,8 @@
 #define ATTR_FORMAT(archetype, string_index, first)
 #endif
 
-// TODO
-//#define LOGGER_FUNC_FORMAT ATTR_FORMAT(printf, 1, 2)
-#define LOGGER_FUNC_FORMAT
+#define LOGGER_FUNC_FORMAT_ENUM ATTR_FORMAT(printf, 2, 3)
+#define LOGGER_FUNC_FORMAT ATTR_FORMAT(printf, 1, 2)
 
 /**
  * \brief enumerate to define log modules
@@ -87,28 +86,28 @@ void SOPC_Logger_SetConsoleOutput(bool activate);
  *
  * \param format    String specifying how subsequent arguments are converted for output
  */
-void SOPC_Logger_TraceError(SOPC_Log_Module logModule, const char* format, ...) LOGGER_FUNC_FORMAT;
+void SOPC_Logger_TraceError(SOPC_Log_Module logModule, const char* format, ...) LOGGER_FUNC_FORMAT_ENUM;
 
 /*
  * \brief Log a trace with the warning level
  *
  * \param format    String specifying how subsequent arguments are converted for output
  */
-void SOPC_Logger_TraceWarning(SOPC_Log_Module logModule, const char* format, ...) LOGGER_FUNC_FORMAT;
+void SOPC_Logger_TraceWarning(SOPC_Log_Module logModule, const char* format, ...) LOGGER_FUNC_FORMAT_ENUM;
 
 /*
  * \brief Log a trace with the info level
  *
  * \param format    String specifying how subsequent arguments are converted for output
  */
-void SOPC_Logger_TraceInfo(SOPC_Log_Module logModule, const char* format, ...) LOGGER_FUNC_FORMAT;
+void SOPC_Logger_TraceInfo(SOPC_Log_Module logModule, const char* format, ...) LOGGER_FUNC_FORMAT_ENUM;
 
 /*
  * \brief Log a trace with the debug level
  *
  * \param format    String specifying how subsequent arguments are converted for output
  */
-void SOPC_Logger_TraceDebug(SOPC_Log_Module logModule, const char* format, ...) LOGGER_FUNC_FORMAT;
+void SOPC_Logger_TraceDebug(SOPC_Log_Module logModule, const char* format, ...) LOGGER_FUNC_FORMAT_ENUM;
 
 /*
  * \brief Log a trace for the security audit log

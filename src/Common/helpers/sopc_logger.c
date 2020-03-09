@@ -114,10 +114,8 @@ void SOPC_Logger_SetConsoleOutput(bool activate)
     }
 }
 
-static void logger_Trace(SOPC_Log_Module logModule, SOPC_Log_Level logLevel, const char* format, ...)
+static void logger_Trace(SOPC_Log_Module logModule, SOPC_Log_Level logLevel, const char* format, va_list args)
 {
-    va_list args;
-    va_start(args, format);
     switch (logModule)
     {
     case SOPC_LOG_MODULE_COMMON:
@@ -141,7 +139,6 @@ static void logger_Trace(SOPC_Log_Module logModule, SOPC_Log_Level logLevel, con
     default:
         break;
     }
-    va_end(args);
 }
 
 void SOPC_Logger_TraceError(SOPC_Log_Module logModule, const char* format, ...)
