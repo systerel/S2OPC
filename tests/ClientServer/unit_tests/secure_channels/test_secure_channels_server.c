@@ -28,6 +28,7 @@
 
 #include "opcua_statuscodes.h"
 #include "sopc_async_queue.h"
+#include "sopc_common.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_encoder.h"
 #include "sopc_key_manager.h"
@@ -126,6 +127,15 @@ int main(int argc, char* argv[])
     epConfig.authenticationManager = NULL;
     epConfig.authorizationManager = NULL;
 
+    // Initialize SOPC_Common
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
+        logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./test_secure_channel_server_logs/";
+        logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
+        SOPC_Common_Initialize(logConfiguration);
+    }
+
     // Init toolkit configuration
     if (SOPC_STATUS_OK == status)
     {
@@ -207,9 +217,6 @@ int main(int argc, char* argv[])
         epConfigIdx = SOPC_ToolkitServer_AddEndpointConfig(&epConfig);
 
         assert(epConfigIdx != 0);
-
-        SOPC_ToolkitConfig_SetCircularLogPath("./test_secure_channel_server_logs/", true);
-        SOPC_ToolkitConfig_SetLogLevel(SOPC_TOOLKIT_LOG_LEVEL_DEBUG);
 
         status = SOPC_Toolkit_Configured();
         assert(status == SOPC_STATUS_OK);

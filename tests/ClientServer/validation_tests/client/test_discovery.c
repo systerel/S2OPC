@@ -21,6 +21,7 @@
 #include <stdbool.h>
 
 #include "sopc_atomic.h"
+#include "sopc_common.h"
 #include "sopc_time.h"
 #include "sopc_toolkit_config.h"
 
@@ -37,12 +38,15 @@ static void EventDispatcher_ValidateGetEndpoints(SOPC_App_Com_Event event, uint3
 
 START_TEST(test_getEndpoints)
 {
+    SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
+    logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./test_discovery_getEndpoints_logs/";
+    logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
+    ck_assert(SOPC_STATUS_OK == SOPC_Common_Initialize(logConfiguration));
+
     ck_assert(SOPC_Toolkit_Initialize(EventDispatcher_ValidateGetEndpoints) == SOPC_STATUS_OK);
     g_pSM = StateMachine_Create();
     ck_assert(NULL != g_pSM);
     ck_assert(StateMachine_ConfigureMachine(g_pSM) == SOPC_STATUS_OK);
-    ck_assert(SOPC_ToolkitConfig_SetCircularLogPath("./test_discovery_getEndpoints_logs/", true) == SOPC_STATUS_OK);
-    ck_assert(SOPC_ToolkitConfig_SetLogLevel(SOPC_TOOLKIT_LOG_LEVEL_DEBUG) == SOPC_STATUS_OK);
     ck_assert(SOPC_Toolkit_Configured() == SOPC_STATUS_OK);
 
     ck_assert(StateMachine_StartDiscovery(g_pSM) == SOPC_STATUS_OK);
@@ -162,12 +166,15 @@ static void EventDispatcher_ValidateRegisterServer(SOPC_App_Com_Event event,
 
 START_TEST(test_registerServer)
 {
+    SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
+    logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./test_discovery_registerServer_logs/";
+    logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
+    ck_assert(SOPC_STATUS_OK == SOPC_Common_Initialize(logConfiguration));
+
     ck_assert(SOPC_Toolkit_Initialize(EventDispatcher_ValidateRegisterServer) == SOPC_STATUS_OK);
     g_pSM = StateMachine_Create();
     ck_assert(NULL != g_pSM);
     ck_assert(StateMachine_ConfigureMachine(g_pSM) == SOPC_STATUS_OK);
-    ck_assert(SOPC_ToolkitConfig_SetCircularLogPath("./test_discovery_registerServer_logs/", true) == SOPC_STATUS_OK);
-    ck_assert(SOPC_ToolkitConfig_SetLogLevel(SOPC_TOOLKIT_LOG_LEVEL_DEBUG) == SOPC_STATUS_OK);
     ck_assert(SOPC_Toolkit_Configured() == SOPC_STATUS_OK);
 
     ck_assert(StateMachine_StartRegisterServer(g_pSM) == SOPC_STATUS_OK);

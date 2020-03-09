@@ -138,24 +138,19 @@ SOPC_ReturnStatus SOPC_Toolkit_Configured()
                 tConfig.locked = true;
                 SOPC_Services_ToolkitConfigured();
 
-                if (SOPC_STATUS_OK == status)
-                {
-                    toolkitBuildInfo = SOPC_ToolkitConfig_GetBuildInfo();
-                    SOPC_Logger_SetTraceLogLevel(SOPC_LOG_LEVEL_INFO);
-                    SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER,
-                                          "Common library DATE='%s' VERSION='%s' SIGNATURE='%s' DOCKER='%s'",
-                                          toolkitBuildInfo.commonBuildInfo.buildBuildDate,
-                                          toolkitBuildInfo.commonBuildInfo.buildVersion,
-                                          toolkitBuildInfo.commonBuildInfo.buildSrcCommit,
-                                          toolkitBuildInfo.commonBuildInfo.buildDockerId);
-                    SOPC_Logger_TraceInfo(
-                        SOPC_LOG_MODULE_CLIENTSERVER,
-                        "Client/Server toolkit library DATE='%s' VERSION='%s' SIGNATURE='%s' DOCKER='%s'",
-                        toolkitBuildInfo.toolkitBuildInfo.buildBuildDate,
-                        toolkitBuildInfo.toolkitBuildInfo.buildVersion,
-                        toolkitBuildInfo.toolkitBuildInfo.buildSrcCommit,
-                        toolkitBuildInfo.toolkitBuildInfo.buildDockerId);
-                }
+                toolkitBuildInfo = SOPC_ToolkitConfig_GetBuildInfo();
+                SOPC_Logger_SetTraceLogLevel(SOPC_LOG_LEVEL_INFO);
+                SOPC_Logger_TraceInfo(
+                    SOPC_LOG_MODULE_CLIENTSERVER, "Common library DATE='%s' VERSION='%s' SIGNATURE='%s' DOCKER='%s'",
+                    toolkitBuildInfo.commonBuildInfo.buildBuildDate, toolkitBuildInfo.commonBuildInfo.buildVersion,
+                    toolkitBuildInfo.commonBuildInfo.buildSrcCommit, toolkitBuildInfo.commonBuildInfo.buildDockerId);
+                SOPC_Logger_TraceInfo(
+                    SOPC_LOG_MODULE_CLIENTSERVER,
+                    "Client/Server toolkit library DATE='%s' VERSION='%s' SIGNATURE='%s' DOCKER='%s'",
+                    toolkitBuildInfo.toolkitBuildInfo.buildBuildDate, toolkitBuildInfo.toolkitBuildInfo.buildVersion,
+                    toolkitBuildInfo.toolkitBuildInfo.buildSrcCommit, toolkitBuildInfo.toolkitBuildInfo.buildDockerId);
+
+                status = SOPC_STATUS_OK;
             }
             else
             {
@@ -224,9 +219,8 @@ void SOPC_Toolkit_Clear()
         tConfig.epConfigIdxMax = 0;
         Mutex_Unlock(&tConfig.mut);
         Mutex_Clear(&tConfig.mut);
-
-        SOPC_Common_Clear();
     }
+    SOPC_Common_Clear();
 }
 
 uint32_t SOPC_ToolkitClient_AddSecureChannelConfig(SOPC_SecureChannel_Config* scConfig)

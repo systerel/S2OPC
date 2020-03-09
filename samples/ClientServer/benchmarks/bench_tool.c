@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <sopc_common.h>
 #include <sopc_crypto_profiles.h>
 #include <sopc_mem_alloc.h>
 #include <sopc_mutexes.h>
@@ -600,13 +601,14 @@ int main(int argc, char** argv)
     ctx.bench_func = bench_func;
     ctx.status = BENCH_RUNNING;
 
-    SOPC_StatusCode status = SOPC_Toolkit_Initialize(event_handler);
-    assert(status == SOPC_STATUS_OK);
+    /* Initialize SOPC_Common */
+    SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
+    logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./bench_tool_logs/";
+    logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
+    SOPC_StatusCode status = SOPC_Common_Initialize(logConfiguration);
+    assert(SOPC_STATUS_OK == status);
 
-    status = SOPC_ToolkitConfig_SetCircularLogPath("./bench_tool_logs/", true);
-    assert(status == SOPC_STATUS_OK);
-
-    status = SOPC_ToolkitConfig_SetLogLevel(SOPC_TOOLKIT_LOG_LEVEL_DEBUG);
+    status = SOPC_Toolkit_Initialize(event_handler);
     assert(status == SOPC_STATUS_OK);
 
     status = SOPC_Toolkit_Configured();

@@ -26,6 +26,7 @@
 #include "embedded/sopc_addspace_loader.h"
 #include "sopc_address_space.h"
 #include "sopc_atomic.h"
+#include "sopc_common.h"
 #include "sopc_encodeable.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
@@ -73,7 +74,15 @@ static void Server_Event_Write(OpcUa_WriteValue* pwv);
 
 SOPC_ReturnStatus Server_Initialize(void)
 {
-    SOPC_ReturnStatus status = SOPC_Toolkit_Initialize(Server_Event_Toolkit);
+    SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
+    logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = LOG_PATH;
+    logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
+    SOPC_ReturnStatus status = SOPC_Common_Initialize(logConfiguration);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_Toolkit_Initialize(Server_Event_Toolkit);
+    }
 
     if (SOPC_STATUS_OK == status)
     {
@@ -350,31 +359,17 @@ SOPC_ReturnStatus Server_LoadAddressSpace(void)
 
 SOPC_ReturnStatus Server_ConfigureStartServer(SOPC_Endpoint_Config* pEpConfig)
 {
-    SOPC_ReturnStatus status = SOPC_ToolkitConfig_SetCircularLogPath(LOG_PATH, true);
-
-    if (SOPC_STATUS_OK != status)
-    {
-        printf("# Error: Failed to initialize logs.\n");
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_ToolkitConfig_SetLogLevel(SOPC_TOOLKIT_LOG_LEVEL_DEBUG);
-    }
-
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     /* Add endpoint description configuration and set the Toolkit as configured */
-    if (SOPC_STATUS_OK == status)
+    epConfigIdx = SOPC_ToolkitServer_AddEndpointConfig(pEpConfig);
+    if (epConfigIdx != 0)
     {
-        epConfigIdx = SOPC_ToolkitServer_AddEndpointConfig(pEpConfig);
-        if (epConfigIdx != 0)
-        {
-            status = SOPC_Toolkit_Configured();
-        }
-        else
-        {
-            printf("# Error: Failed to configure the endpoint.\n");
-            status = SOPC_STATUS_NOK;
-        }
+        status = SOPC_Toolkit_Configured();
+    }
+    else
+    {
+        printf("# Error: Failed to configure the endpoint.\n");
+        status = SOPC_STATUS_NOK;
     }
 
     if (SOPC_STATUS_OK == status)

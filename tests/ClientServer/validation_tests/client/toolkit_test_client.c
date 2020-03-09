@@ -29,6 +29,7 @@
 
 #include "opcua_statuscodes.h"
 #include "sopc_atomic.h"
+#include "sopc_common.h"
 #include "sopc_encodeable.h"
 #include "sopc_time.h"
 #include "sopc_toolkit_async_api.h"
@@ -353,6 +354,15 @@ int main(void)
         }
     }
 
+    /* Initialize SOPC_Common */
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
+        logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./toolkit_test_client_logs/";
+        logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
+        status = SOPC_Common_Initialize(logConfiguration);
+    }
+
     /* Init stack configuration */
     if (SOPC_STATUS_OK == status)
     {
@@ -365,16 +375,6 @@ int main(void)
         {
             printf(">>Test_Client_Toolkit: Stack initialized\n");
         }
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_ToolkitConfig_SetCircularLogPath("./toolkit_test_client_logs/", true);
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_ToolkitConfig_SetLogLevel(SOPC_TOOLKIT_LOG_LEVEL_DEBUG);
     }
 
     // Set an address space (to check test result valid)

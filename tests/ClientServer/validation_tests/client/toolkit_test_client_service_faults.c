@@ -30,6 +30,7 @@
 
 #include "opcua_statuscodes.h"
 #include "sopc_atomic.h"
+#include "sopc_common.h"
 #include "sopc_encodeable.h"
 #include "sopc_time.h"
 #include "sopc_toolkit_async_api.h"
@@ -192,25 +193,33 @@ int main(void)
 
     uint32_t channel_config_idx = 0;
 
-    /* Init stack configuration */
-    SOPC_ReturnStatus status = SOPC_Toolkit_Initialize(Test_ComEvent_FctClient);
+    /* Initialize SOPC_Common */
+
+    SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
+    logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./toolkit_test_client_service_faults_logs/";
+    logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
+    SOPC_ReturnStatus status = SOPC_Common_Initialize(logConfiguration);
     if (SOPC_STATUS_OK != status)
     {
-        printf(">>Test_Client_Toolkit: Failed initializing\n");
+        printf(">>Test_Client_Toolkit: Common initialization Failed\n");
     }
     else
     {
-        printf(">>Test_Client_Toolkit: Stack initialized\n");
+        printf(">>Test_Client_Toolkit: Common initialized\n");
     }
 
+    /* Init stack configuration */
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ToolkitConfig_SetCircularLogPath("./toolkit_test_client_service_faults_logs/", true);
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_ToolkitConfig_SetLogLevel(SOPC_TOOLKIT_LOG_LEVEL_DEBUG);
+        status = SOPC_Toolkit_Initialize(Test_ComEvent_FctClient);
+        if (SOPC_STATUS_OK != status)
+        {
+            printf(">>Test_Client_Toolkit: Failed initializing\n");
+        }
+        else
+        {
+            printf(">>Test_Client_Toolkit: Stack initialized\n");
+        }
     }
 
     // Configure the secure channel connection and retrieve associated channel configuration index

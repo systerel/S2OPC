@@ -35,6 +35,7 @@
 
 #include "check_sc_rcv_helpers.h"
 #include "hexlify.h"
+#include "sopc_common.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_encoder.h"
 #include "sopc_mem_alloc.h"
@@ -95,6 +96,13 @@ static void establishSC(void)
     // Message security mode: None
     OpcUa_MessageSecurityMode messageSecurityMode = OpcUa_MessageSecurityMode_None;
 
+    SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
+    logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./check_sc_rcv_buffer_logs/";
+    logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
+    status = SOPC_Common_Initialize(logConfiguration);
+
+    ck_assert(SOPC_STATUS_OK == status);
+
     // Init toolkit configuration
     status = SOPC_Toolkit_Initialize(NULL);
     if (SOPC_STATUS_OK != status)
@@ -122,8 +130,6 @@ static void establishSC(void)
     scConfigIdx = SOPC_ToolkitClient_AddSecureChannelConfig(&scConfig);
     ck_assert(scConfigIdx != 0);
 
-    SOPC_ToolkitConfig_SetCircularLogPath("./check_sc_rcv_buffer_logs/", true);
-    ck_assert(SOPC_ToolkitConfig_SetLogLevel(SOPC_TOOLKIT_LOG_LEVEL_DEBUG) == SOPC_STATUS_OK);
     ck_assert(SOPC_STATUS_OK == SOPC_Toolkit_Configured());
 
     printf("SC_Rcv_Buffer Init: request connection to SC layer\n");

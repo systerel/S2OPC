@@ -25,6 +25,7 @@
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
 #include "sopc_atomic.h"
+#include "sopc_common.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_crypto_provider.h"
 #include "sopc_encodeable.h"
@@ -269,6 +270,15 @@ int main(int argc, char* argv[])
         epConfig->authorizationManager = authorizationManager;
     }
 
+    /* Initialize SOPC Common */
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
+        logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./toolkit_test_server_local_service_logs/";
+        logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
+        status = SOPC_Common_Initialize(logConfiguration);
+    }
+
     // Init stack configuration
     if (SOPC_STATUS_OK == status)
     {
@@ -281,16 +291,6 @@ int main(int argc, char* argv[])
         {
             printf("<Test_Server_Local_Service: initialized\n");
         }
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_ToolkitConfig_SetCircularLogPath("./toolkit_test_server_local_service_logs/", true);
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_ToolkitConfig_SetLogLevel(SOPC_TOOLKIT_LOG_LEVEL_DEBUG);
     }
 
     // Define server address space

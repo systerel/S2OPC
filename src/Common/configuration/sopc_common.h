@@ -91,15 +91,15 @@ void SOPC_Common_Clear(void);
  * \param level [in] target log level
  * \return SOPC_STATUS_OK
  */
-SOPC_ReturnStatus SOPC_Common_SetLogLevel(SOPC_Log_Level level)
+SOPC_ReturnStatus SOPC_Common_SetLogLevel(SOPC_Log_Level level);
 
-    /**
-     * \brief retrieve the default log configuration
-     *
-     * The configuration can be used directly, or modified as the user desires.
-     *
-     * \return the default log configuration
-     */
-    SOPC_Log_Configuration SOPC_Common_GetDefaultLogConfiguration(void)
+/**
+ * \brief retrieve the default log configuration
+ *
+ * The configuration can be used directly, or modified as the user desires.
+ *
+ * \return the default log configuration
+ */
+SOPC_Log_Configuration SOPC_Common_GetDefaultLogConfiguration(void);
 
 #endif /* SOPC_COMMON_H_ */

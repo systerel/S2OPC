@@ -19,6 +19,7 @@
 
 #include "sopc_common.h"
 
+#include "sopc_filesystem.h"
 #include "sopc_helper_endianness_cfg.h"
 #include "sopc_ieee_check.h"
 #include "sopc_logger.h"
@@ -36,8 +37,6 @@ bool SOPC_Common_IsInitialized(void)
 
 SOPC_ReturnStatus SOPC_Common_Initialize(SOPC_Log_Configuration logConfiguration)
 {
-    (void) logConfiguration;
-
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     if (bCommon_IsInitialized)
@@ -59,7 +58,9 @@ SOPC_ReturnStatus SOPC_Common_Initialize(SOPC_Log_Configuration logConfiguration
     switch (logConfiguration.logSystem)
     {
     case SOPC_LOG_SYSTEM_FILE:
-        SOPC_FileSystem_CreationResult mkdirRes = SOPC_FileSystem_mkdir(logDirPath);
+    {
+        SOPC_FileSystem_CreationResult mkdirRes =
+            SOPC_FileSystem_mkdir(logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath);
         if (SOPC_FileSystem_Creation_OK != mkdirRes && SOPC_FileSystem_Creation_Error_PathAlreadyExists != mkdirRes)
         {
             status = SOPC_STATUS_INVALID_STATE;
@@ -73,13 +74,15 @@ SOPC_ReturnStatus SOPC_Common_Initialize(SOPC_Log_Configuration logConfiguration
             if (result)
             {
                 SOPC_Logger_SetTraceLogLevel(logConfiguration.logLevel);
+                status = SOPC_STATUS_OK;
             }
             else
             {
                 status = SOPC_STATUS_NOK;
             }
         }
-        break;
+    }
+    break;
     default:
         status = SOPC_STATUS_INVALID_PARAMETERS;
         break;
@@ -111,6 +114,6 @@ SOPC_Log_Configuration SOPC_Common_GetDefaultLogConfiguration(void)
         .logLevel = SOPC_LOG_LEVEL_INFO,
         .logSystem = SOPC_LOG_SYSTEM_FILE,
         .logSysConfig = {
-            .fileSystemLogConfig = {.logDirPath = "./s2opc_logs/", .logMaxBytes = "1048576", .logMaxFiles = 50}}};
+            .fileSystemLogConfig = {.logDirPath = "./s2opc_logs/", .logMaxBytes = 1048576, .logMaxFiles = 50}}};
     return defaultLogConfiguration;
 }

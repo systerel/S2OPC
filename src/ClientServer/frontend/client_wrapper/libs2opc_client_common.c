@@ -30,6 +30,7 @@
 
 #include "sopc_array.h"
 #include "sopc_atomic.h"
+#include "sopc_common.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
@@ -104,26 +105,13 @@ SOPC_ReturnStatus SOPC_ClientCommon_Initialize(const SOPC_LibSub_StaticCfg* pCfg
         }
     }
 
+    /* Initialize SOPC_Common */
     if (SOPC_STATUS_OK == status)
     {
-        Helpers_SetLogger(pCfg->host_log_callback);
-        cbkDisco = pCfg->disconnect_callback;
-        status = SOPC_Toolkit_Initialize(ToolkitEventCallback);
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_ToolkitConfig_SetLogLevel(pCfg->toolkit_logger.level);
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status =
-            SOPC_ToolkitConfig_SetCircularLogProperties(pCfg->toolkit_logger.maxBytes, pCfg->toolkit_logger.maxFiles);
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
+        SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
+        logConfiguration.logLevel = pCfg->toolkit_logger.level;
+        logConfiguration.logSysConfig.fileSystemLogConfig.logMaxBytes = pCfg->toolkit_logger.maxBytes;
+        logConfiguration.logSysConfig.fileSystemLogConfig.logMaxFiles = pCfg->toolkit_logger.maxFiles;
         if (NULL == pCfg->toolkit_logger.log_path)
         {
             Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Log Path is set to null.");
@@ -131,12 +119,17 @@ SOPC_ReturnStatus SOPC_ClientCommon_Initialize(const SOPC_LibSub_StaticCfg* pCfg
         }
         else
         {
-            status = SOPC_ToolkitConfig_SetCircularLogPath(pCfg->toolkit_logger.log_path, true);
+            logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = pCfg->toolkit_logger.log_path;
         }
-        if (SOPC_STATUS_OK != status)
-        {
-            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not configure SDK logger.");
-        }
+
+        status = SOPC_Common_Initialize(logConfiguration);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        Helpers_SetLogger(pCfg->host_log_callback);
+        cbkDisco = pCfg->disconnect_callback;
+        status = SOPC_Toolkit_Initialize(ToolkitEventCallback);
     }
 
     if (SOPC_STATUS_OK == status)

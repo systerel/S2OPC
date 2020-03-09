@@ -25,6 +25,7 @@
 
 #include "event_helpers.h"
 #include "event_recorder.h"
+#include "sopc_common.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_encoder.h"
 #include "sopc_mem_alloc.h"
@@ -229,6 +230,14 @@ int main(int argc, char* argv[])
         }
     }
 
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
+        logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./test_secure_channels_client_logs/";
+        logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
+        status = SOPC_Common_Initialize(logConfiguration);
+    }
+
     // Init toolkit configuration
     if (SOPC_STATUS_OK == status)
     {
@@ -270,9 +279,6 @@ int main(int argc, char* argv[])
 
         scConfigIdx = SOPC_ToolkitClient_AddSecureChannelConfig(&scConfig);
         assert(scConfigIdx != 0);
-
-        SOPC_ToolkitConfig_SetCircularLogPath("./test_secure_channels_client_logs/", true);
-        SOPC_ToolkitConfig_SetLogLevel(SOPC_TOOLKIT_LOG_LEVEL_DEBUG);
 
         status = SOPC_Toolkit_Configured();
         assert(status == SOPC_STATUS_OK);

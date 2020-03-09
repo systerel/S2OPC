@@ -83,7 +83,6 @@ bool SOPC_Logger_Initialize(const char* logDirPath, uint32_t maxBytes, uint16_t 
 
 void SOPC_Logger_SetTraceLogLevel(SOPC_Log_Level level)
 {
-    /* TODO add a parameter module */
     if (commonTrace != NULL)
     {
         SOPC_Log_SetLogLevel(commonTrace, level);
@@ -229,11 +228,11 @@ void SOPC_Logger_Clear(void)
     }
     if (clientServerTrace != NULL)
     {
-        SOPC_Log_ClearInstance(&commonTrace);
+        SOPC_Log_ClearInstance(&clientServerTrace);
     }
     if (pubSubTrace != NULL)
     {
-        SOPC_Log_ClearInstance(&commonTrace);
+        SOPC_Log_ClearInstance(&pubSubTrace);
     }
     if (opcUaAudit != NULL)
     {

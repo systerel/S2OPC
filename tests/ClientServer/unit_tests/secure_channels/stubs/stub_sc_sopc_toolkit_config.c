@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "sopc_common.h"
 #include "sopc_encodeable.h"
 #include "sopc_event_timer_manager.h"
 #include "sopc_filesystem.h"
@@ -42,9 +43,6 @@
 
 #include "util_b2c.h"
 
-/* Check IEEE-754 compliance */
-#include "sopc_ieee_check.h"
-
 static struct
 {
     uint8_t initDone;
@@ -56,23 +54,8 @@ static struct
     uint32_t scConfigIdxMax;
     uint32_t serverScLastConfigIdx;
     uint32_t epConfigIdxMax;
-
-    /* Log configuration */
-    const char* logDirPath;
-    uint32_t logMaxBytes;
-    uint16_t logMaxFiles;
-    SOPC_Log_Level logLevel;
-
 } // Any change in values below shall be also done in SOPC_Toolkit_Clear
-tConfig = {.initDone = false,
-           .locked = false,
-           .scConfigIdxMax = 0,
-           .serverScLastConfigIdx = 0,
-           .epConfigIdxMax = 0,
-           .logDirPath = "",
-           .logMaxBytes = 1048576, // 1 MB
-           .logMaxFiles = 50,
-           .logLevel = SOPC_LOG_LEVEL_ERROR};
+tConfig = {.initDone = false, .locked = false, .scConfigIdxMax = 0, .serverScLastConfigIdx = 0, .epConfigIdxMax = 0};
 
 SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
 {
@@ -83,9 +66,11 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
         status = SOPC_STATUS_NOT_SUPPORTED;
     }
 
-    if (false == SOPC_IEEE_Check())
+    if (SOPC_STATUS_OK == status && !SOPC_Common_IsInitialized())
     {
-        status = SOPC_STATUS_NOK;
+        /* Initialize with default log configuration */
+        SOPC_Log_Configuration defaultLogConfiguration = SOPC_Common_GetDefaultLogConfiguration();
+        status = SOPC_Common_Initialize(defaultLogConfiguration);
     }
 
     if (SOPC_STATUS_OK == status && false != tConfig.initDone)
@@ -98,8 +83,6 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
         Mutex_Initialization(&tConfig.mut);
         Mutex_Lock(&tConfig.mut);
         tConfig.initDone = true;
-
-        SOPC_Helper_EndiannessCfg_Initialize();
 
         if (SIZE_MAX / (SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED + 1) < sizeof(SOPC_SecureChannel_Config*) ||
             SIZE_MAX / (SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS + 1) < sizeof(SOPC_Endpoint_Config*))
@@ -138,8 +121,6 @@ SOPC_ReturnStatus SOPC_Toolkit_Configured()
             if (tConfig.epConfigIdxMax == 0 || tConfig.epConfigIdxMax > 0)
             {
                 tConfig.locked = true;
-                SOPC_Logger_Initialize(tConfig.logDirPath, tConfig.logMaxBytes, tConfig.logMaxFiles);
-                SOPC_Logger_SetTraceLogLevel(tConfig.logLevel);
                 status = SOPC_STATUS_OK;
             }
             else
@@ -198,13 +179,10 @@ void SOPC_Toolkit_Clear()
         tConfig.scConfigIdxMax = 0;
         tConfig.serverScLastConfigIdx = 0;
         tConfig.epConfigIdxMax = 0;
-        tConfig.logDirPath = "";
-        tConfig.logMaxBytes = 1048576; // 1 MB
-        tConfig.logMaxFiles = 50;
-        tConfig.logLevel = SOPC_LOG_LEVEL_ERROR;
         Mutex_Unlock(&tConfig.mut);
         Mutex_Clear(&tConfig.mut);
     }
+    SOPC_Common_Clear();
 }
 
 uint32_t SOPC_ToolkitClient_AddSecureChannelConfig(SOPC_SecureChannel_Config* scConfig)

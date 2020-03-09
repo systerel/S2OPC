@@ -29,6 +29,7 @@
 #include "opcua_statuscodes.h"
 #include "sopc_atomic.h"
 #include "sopc_common_constants.h"
+#include "sopc_common.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_crypto_provider.h"
 #include "sopc_encodeable.h"
@@ -283,7 +284,7 @@ static void Test_AddressSpaceNotif_Fct(SOPC_App_AddSpace_Event event, void* opPa
  *                          Server initialization
  *---------------------------------------------------------------------------*/
 
-static SOPC_ReturnStatus Server_Initialize(void)
+static SOPC_ReturnStatus Server_Initialize(const char* logDirPath)
 {
 #ifdef IS_TEST_SERVER
     // Due to issue in certification tool for View Basic 005/015/020 number of chunks shall be the same and at least 12
@@ -297,11 +298,26 @@ static SOPC_ReturnStatus Server_Initialize(void)
     SOPC_ReturnStatus status = SOPC_Toolkit_Initialize(Test_ComEvent_FctServer);
     if (SOPC_STATUS_OK != status)
     {
-        printf("<Test_Server_Toolkit: Failed initializing\n");
+        logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = logDirPath;
     }
     else
     {
-        printf("<Test_Server_Toolkit: initialized\n");
+        logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./toolkit_test_server_logs/";
+    }
+    logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
+    SOPC_ReturnStatus status = SOPC_Common_Initialize(logConfiguration);
+    // Initialize the toolkit library and define the communication events callback
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_Toolkit_Initialize(Test_ComEvent_FctServer);
+        if (SOPC_STATUS_OK != status)
+        {
+            printf("<Test_Server_Toolkit: Failed initializing\n");
+        }
+        else
+        {
+            printf("<Test_Server_Toolkit: initialized\n");
+        }
     }
     return status;
 }
@@ -936,7 +952,6 @@ static char* Config_SetLogPath(int argc, char* argv[])
     char* underscore = "_";
     char* suffix = NULL;
     char* logDirPath = NULL;
-    SOPC_StatusCode status = SOPC_STATUS_NOK;
 
     if (argc > 1)
     {
@@ -957,15 +972,6 @@ static char* Config_SetLogPath(int argc, char* argv[])
     if (NULL != logDirPath && (int) (logDirPathSize - 1) == snprintf(logDirPath, logDirPathSize, "./%s%s%s_logs/",
                                                                      logDirName, underscore, suffix))
     {
-        status = SOPC_ToolkitConfig_SetCircularLogPath(logDirPath, true);
-    }
-    else
-    {
-        status = SOPC_ToolkitConfig_SetCircularLogPath("./toolkit_test_server_logs", true);
-    }
-
-    if (SOPC_STATUS_OK != status)
-    {
         SOPC_Free(logDirPath);
         logDirPath = NULL;
     }
@@ -977,16 +983,6 @@ static char* Server_ConfigureLogger(int argc, char* argv[])
 {
     // Define directoy path for log traces: ./toolkit_server_argv[1]_logs/
     char* logDirPath = Config_SetLogPath(argc, argv);
-
-    if (NULL != logDirPath)
-    {
-        // Set log traces to DEBUG level: displays DEBUG, INFO, WARNING and ERROR
-        if (SOPC_STATUS_OK != SOPC_ToolkitConfig_SetLogLevel(SOPC_TOOLKIT_LOG_LEVEL_DEBUG))
-        {
-            SOPC_Free(logDirPath);
-            logDirPath = NULL;
-        }
-    }
 
     return logDirPath;
 }
@@ -1030,13 +1026,13 @@ int main(int argc, char* argv[])
            build_info.toolkitBuildInfo.buildVersion, build_info.toolkitBuildInfo.buildSrcCommit,
            build_info.toolkitBuildInfo.buildDockerId, build_info.toolkitBuildInfo.buildBuildDate);
 
-    /* Initialize the server library (start library threads)
-     * and define communication events callback */
-    status = Server_Initialize();
-
     /* Configure the server logger:
      * DEBUG traces generated in ./toolkit_server_<argv[1]>_logs/ */
     logDirPath = Server_ConfigureLogger(argc, argv);
+
+    /* Initialize the server library (start library threads)
+     * and define communication events callback */
+    status = Server_Initialize(logDirPath);
 
     /* Configuration of server endpoint:
        - Enpoint URL,

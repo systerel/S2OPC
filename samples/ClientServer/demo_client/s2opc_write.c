@@ -24,6 +24,7 @@
 #include <string.h>
 
 #include "sopc_builtintypes.h"
+#include "sopc_common.h"
 #include "sopc_helper_uri.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_time.h"
@@ -146,6 +147,14 @@ int main(int argc, char* argv[])
         printf("  - the value.\n");
     }
 
+    /* Initialize SOPC Common */
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
+        logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./s2opc_write_logs/";
+        logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
+        status = SOPC_Common_Initialize(logConfiguration);
+    }
     /* Init */
     if (SOPC_STATUS_OK == status)
     {
@@ -161,16 +170,6 @@ int main(int argc, char* argv[])
     if (SOPC_STATUS_OK == status)
     {
         status = StateMachine_ConfigureMachine(g_pSM);
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_ToolkitConfig_SetCircularLogPath("./s2opc_write_logs/", true);
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_ToolkitConfig_SetLogLevel(SOPC_TOOLKIT_LOG_LEVEL_DEBUG);
     }
 
     if (SOPC_STATUS_OK == status)

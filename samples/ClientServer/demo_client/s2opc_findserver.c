@@ -23,6 +23,7 @@
 #include <string.h>
 
 #include "sopc_builtintypes.h"
+#include "sopc_common.h"
 #include "sopc_crypto_provider.h"
 #include "sopc_time.h"
 #include "sopc_toolkit_async_api.h"
@@ -53,9 +54,18 @@ int main(int argc, char* argv[])
     uint32_t iWait = 0;
 
     printf("S2OPC find server demo.\n");
+
+    /* Initialize SOPC_Common */
+    SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
+    logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./s2opc_findserver_logs/";
+    logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
+    status = SOPC_Common_Initialize(logConfiguration);
     /* Init */
-    status = SOPC_Toolkit_Initialize(EventDispatcher_Discovery);
-    g_pSM = StateMachine_Create();
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_Toolkit_Initialize(EventDispatcher_Discovery);
+        g_pSM = StateMachine_Create();
+    }
 
     if (SOPC_STATUS_OK == status && NULL == g_pSM)
     {
@@ -66,16 +76,6 @@ int main(int argc, char* argv[])
     if (SOPC_STATUS_OK == status)
     {
         status = StateMachine_ConfigureMachine(g_pSM);
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_ToolkitConfig_SetCircularLogPath("./s2opc_findserver_logs/", true);
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_ToolkitConfig_SetLogLevel(SOPC_TOOLKIT_LOG_LEVEL_DEBUG);
     }
 
     if (SOPC_STATUS_OK == status)
