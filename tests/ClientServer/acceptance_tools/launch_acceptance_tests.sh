@@ -120,9 +120,19 @@ SERVER_PID=$!
 ${ROOT_DIR}/tests/ClientServer/scripts/wait_server.py
 popd
 
-echo "Launching Acceptance Test Tool: uacompliancetest -s $UACTT_PROJECT_PATH/Acceptation_S2OPC.ctt.xml --selection $SELECTION -h -c -r ./$LOG_FILE 2>$UACTT_ERROR_FILE"
-
-/opt/opcfoundation/uactt_1.03/bin/uacompliancetest -s $UACTT_PROJECT_PATH/Acceptation_S2OPC.ctt.xml --selection $SELECTION -h -c -r ./$LOG_FILE 2>$UACTT_ERROR_FILE
+if [[ -z "$LINUX_UACTT" ]]
+then
+    mkdir -p /tmp/wineprefix
+    export WINEPREFIX="/tmp/wineprefix"
+    export WINEARCH="win32"
+    # Run windows UACTT with wine: see <uactt>/help/index.htm#t=command_line_interface.htm for parameters
+    echo "Launching Acceptance Test Tool: wine /opt/uactt/uacompliancetest.exe --settings $(winepath -w $UACTT_PROJECT_PATH/Acceptation_S2OPC/Acceptation_S2OPC.ctt.xml) --selection $(winepath -w $SELECTION) --hidden --close --result $(winepath -w ./$LOG_FILE) 2>$UACTT_ERROR_FILE"
+    wine /opt/uactt/uacompliancetest.exe --settings $(winepath -w $UACTT_PROJECT_PATH/Acceptation_S2OPC.ctt.xml) --selection $(winepath -w $SELECTION) --hidden --close --result $(winepath -w ./$LOG_FILE) 2>$UACTT_ERROR_FILE
+else
+    # Run linux UACTT
+    echo "Launching Acceptance Test Tool: uacompliancetest -s $UACTT_PROJECT_PATH/Acceptation_S2OPC.ctt.xml --selection $SELECTION -h -c -r ./$LOG_FILE 2>$UACTT_ERROR_FILE"
+    /opt/opcfoundation/uactt_1.03/bin/uacompliancetest -s $UACTT_PROJECT_PATH/Acceptation_S2OPC.ctt.xml --selection $SELECTION -h -c -r ./$LOG_FILE 2>$UACTT_ERROR_FILE
+fi
 
 echo "Closing Acceptance Test Tool"
 
