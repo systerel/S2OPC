@@ -30,57 +30,12 @@
 
 #include "sopc_common_constants.h"
 
-/* COMMON CONFIGURATION */
-
-/** @brief Maximum chunk buffer size used (must be >= SOPC_TCP_UA_MIN_BUFFER_SIZE) */
-#ifndef SOPC_TCP_UA_MAX_BUFFER_SIZE
-#define SOPC_TCP_UA_MAX_BUFFER_SIZE UINT16_MAX
-#endif /* SOPC_TCP_UA_MAX_BUFFER_SIZE */
-
-/** @brief Maximum number of chunks accepted for 1 message, 0 means no limit.
- *  Note: if 0 is chosen SOPC_MAX_MESSAGE_LENGTH definition shall be changed not to use it and shall not be 0.
- */
-#ifndef SOPC_MAX_NB_CHUNKS
-#define SOPC_MAX_NB_CHUNKS 5
-#endif /* SOPC_MAX_NB_CHUNKS */
-
-/** @brief Maximum message length used (must be >= SOPC_TCP_UA_MAX_BUFFER_SIZE), 0 means no limit.
- *  Note: if 0 is chosen SOPC_MAX_NB_CHUNK shall not be 0.
- * */
-#ifndef SOPC_MAX_MESSAGE_LENGTH
-#define SOPC_MAX_MESSAGE_LENGTH SOPC_TCP_UA_MAX_BUFFER_SIZE* SOPC_MAX_NB_CHUNKS
-#endif /* SOPC_MAX_MESSAGE_LENGTH */
-
-/** @brief Maximum ByteString/String/XmlElement length in bytes used */
-#ifndef SOPC_MAX_STRING_LENGTH
-#define SOPC_MAX_STRING_LENGTH UINT16_MAX
-#endif /* SOPC_MAX_STRING_LENGTH */
-
-/** @brief Maximum array length that could be stored in a variant */
-#ifndef SOPC_MAX_ARRAY_LENGTH
-#define SOPC_MAX_ARRAY_LENGTH 1000000
-#endif /* SOPC_MAX_ARRAY_LENGTH */
-
-/** @brief Maximum levels of nested diagnostic information structure
- *  Note: OPC UA specification v1.03 part 6 §5.2.2.12 indicates
- *  "Decoders shall support at least 100 nesting levels ..."*/
-#ifndef SOPC_MAX_DIAG_INFO_NESTED_LEVEL
-#define SOPC_MAX_DIAG_INFO_NESTED_LEVEL 100
-#endif /* SOPC_MAX_DIAG_INFO_NESTED_LEVEL */
+/* See sopc_common_constants.h for common part constants */
 
 /* @brief Maximum number of operations in a request accepted by server (Read, Write, etc.) */
 #ifndef SOPC_MAX_OPERATIONS_PER_MSG
 #define SOPC_MAX_OPERATIONS_PER_MSG 5000
 #endif /* SOPC_MAX_OPERATIONS_PER_MSG */
-
-/* @brief Maximum number of elements in Async Queue */
-#ifndef SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE
-#define SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE 5000
-#endif /* SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE */
-
-#ifndef SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE_WARNING_ONLY
-#define SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE_WARNING_ONLY true
-#endif /* SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE_WARNING_ONLY */
 
 /* TCP SOCKETS CONFIGURATION */
 
