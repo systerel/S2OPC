@@ -60,23 +60,8 @@ static struct
     uint32_t scConfigIdxMax;
     uint32_t serverScLastConfigIdx;
     uint32_t epConfigIdxMax;
-
-    /* Log configuration */
-    const char* logDirPath;
-    uint32_t logMaxBytes;
-    uint16_t logMaxFiles;
-    SOPC_Log_Level logLevel;
-
 } // Any change in values below shall be also done in SOPC_Toolkit_Clear
-tConfig = {.initDone = false,
-           .locked = false,
-           .scConfigIdxMax = 0,
-           .serverScLastConfigIdx = 0,
-           .epConfigIdxMax = 0,
-           .logDirPath = "",
-           .logMaxBytes = 1048576, // 1 MB
-           .logMaxFiles = 50,
-           .logLevel = SOPC_LOG_LEVEL_ERROR};
+tConfig = {.initDone = false, .locked = false, .scConfigIdxMax = 0, .serverScLastConfigIdx = 0, .epConfigIdxMax = 0};
 
 SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
 {
@@ -153,13 +138,6 @@ SOPC_ReturnStatus SOPC_Toolkit_Configured()
                 tConfig.locked = true;
                 SOPC_Services_ToolkitConfigured();
 
-                SOPC_Log_Configuration logConfiguration = {
-                    .logLevel = tConfig.logLevel,
-                    .logSystem = SOPC_LOG_SYSTEM_FILE,
-                    .logSysConfig = {.fileSystemLogConfig = {.logDirPath = tConfig.logDirPath,
-                                                             .logMaxBytes = tConfig.logMaxBytes,
-                                                             .logMaxFiles = tConfig.logMaxFiles}}};
-                status = SOPC_Common_Initialize(logConfiguration);
                 if (SOPC_STATUS_OK == status)
                 {
                     toolkitBuildInfo = SOPC_ToolkitConfig_GetBuildInfo();
@@ -234,7 +212,6 @@ void SOPC_Toolkit_Clear()
         Mutex_Lock(&tConfig.mut);
 
         SOPC_Toolkit_ClearServerScConfigs_WithoutLock();
-        SOPC_Logger_Clear();
         appEventCallback = NULL;
         appAddressSpaceNotificationCallback = NULL;
         address_space_bs__nodes = NULL;
@@ -245,12 +222,10 @@ void SOPC_Toolkit_Clear()
         tConfig.scConfigIdxMax = 0;
         tConfig.serverScLastConfigIdx = 0;
         tConfig.epConfigIdxMax = 0;
-        tConfig.logDirPath = "";
-        tConfig.logMaxBytes = 1048576; // 1 MB
-        tConfig.logMaxFiles = 50;
-        tConfig.logLevel = SOPC_LOG_LEVEL_ERROR;
         Mutex_Unlock(&tConfig.mut);
         Mutex_Clear(&tConfig.mut);
+
+        SOPC_Common_Clear();
     }
 }
 
