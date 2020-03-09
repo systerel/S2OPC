@@ -227,6 +227,14 @@ void SOPC_Logger_Clear(void)
     {
         SOPC_Log_ClearInstance(&commonTrace);
     }
+    if (clientServerTrace != NULL)
+    {
+        SOPC_Log_ClearInstance(&commonTrace);
+    }
+    if (pubSubTrace != NULL)
+    {
+        SOPC_Log_ClearInstance(&commonTrace);
+    }
     if (opcUaAudit != NULL)
     {
         SOPC_Log_ClearInstance(&opcUaAudit);

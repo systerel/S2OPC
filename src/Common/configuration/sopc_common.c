@@ -95,6 +95,11 @@ SOPC_ReturnStatus SOPC_Common_Initialize(SOPC_Log_Configuration logConfiguration
     return status;
 }
 
+void SOPC_Common_Clear(void)
+{
+    SOPC_Logger_Clear();
+}
+
 SOPC_ReturnStatus SOPC_Common_SetLogLevel(SOPC_Log_Level level)
 {
     SOPC_Logger_SetTraceLogLevel(level);
