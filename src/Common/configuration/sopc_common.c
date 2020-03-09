@@ -59,7 +59,6 @@ SOPC_ReturnStatus SOPC_Common_Initialize(SOPC_Log_Configuration logConfiguration
     switch (logConfiguration.logSystem)
     {
     case SOPC_LOG_SYSTEM_FILE:
-        //TODO create circular log directory
         SOPC_FileSystem_CreationResult mkdirRes = SOPC_FileSystem_mkdir(logDirPath);
         if (SOPC_FileSystem_Creation_OK != mkdirRes && SOPC_FileSystem_Creation_Error_PathAlreadyExists != mkdirRes)
         {
@@ -106,3 +105,12 @@ SOPC_ReturnStatus SOPC_Common_SetLogLevel(SOPC_Log_Level level)
     return SOPC_STATUS_OK;
 }
 
+SOPC_Log_Configuration SOPC_Common_GetDefaultLogConfiguration(void)
+{
+    SOPC_Log_Configuration defaultLogConfiguration = {
+        .logLevel = SOPC_LOG_LEVEL_INFO,
+        .logSystem = SOPC_LOG_SYSTEM_FILE,
+        .logSysConfig = {
+            .fileSystemLogConfig = {.logDirPath = "./s2opc_logs/", .logMaxBytes = "1048576", .logMaxFiles = 50}}};
+    return defaultLogConfiguration;
+}

@@ -87,9 +87,11 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    if (false == SOPC_IEEE_Check())
+    if (SOPC_STATUS_OK == status && !SOPC_Common_IsInitialized())
     {
-        status = SOPC_STATUS_NOK;
+        /* Initialize with default log configuration */
+        SOPC_Log_Configuration defaultLogConfiguration = SOPC_Common_GetDefaultLogConfiguration();
+        status = SOPC_Common_Initialize(defaultLogConfiguration);
     }
 
     if (SOPC_STATUS_OK == status && false != tConfig.initDone)
