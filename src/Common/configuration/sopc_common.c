@@ -59,16 +59,26 @@ SOPC_ReturnStatus SOPC_Common_Initialize(SOPC_Log_Configuration logConfiguration
     switch (logConfiguration.logSystem)
     {
     case SOPC_LOG_SYSTEM_FILE:
-        result = SOPC_Logger_Initialize(logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath,
-                                        logConfiguration.logSysConfig.fileSystemLogConfig.logMaxBytes,
-                                        logConfiguration.logSysConfig.fileSystemLogConfig.logMaxFiles);
-        if (result)
+        //TODO create circular log directory
+        SOPC_FileSystem_CreationResult mkdirRes = SOPC_FileSystem_mkdir(logDirPath);
+        if (SOPC_FileSystem_Creation_OK != mkdirRes && SOPC_FileSystem_Creation_Error_PathAlreadyExists != mkdirRes)
         {
-            SOPC_Logger_SetTraceLogLevel(logConfiguration.logLevel);
+            status = SOPC_STATUS_INVALID_STATE;
         }
-        else
+
+        if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_STATUS_NOK;
+            result = SOPC_Logger_Initialize(logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath,
+                                            logConfiguration.logSysConfig.fileSystemLogConfig.logMaxBytes,
+                                            logConfiguration.logSysConfig.fileSystemLogConfig.logMaxFiles);
+            if (result)
+            {
+                SOPC_Logger_SetTraceLogLevel(logConfiguration.logLevel);
+            }
+            else
+            {
+                status = SOPC_STATUS_NOK;
+            }
         }
         break;
     default:
@@ -84,3 +94,10 @@ SOPC_ReturnStatus SOPC_Common_Initialize(SOPC_Log_Configuration logConfiguration
 
     return status;
 }
+
+SOPC_ReturnStatus SOPC_Common_SetLogLevel(SOPC_Log_Level level)
+{
+    SOPC_Logger_SetTraceLogLevel(level);
+    return SOPC_STATUS_OK;
+}
+

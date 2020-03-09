@@ -81,4 +81,12 @@ bool SOPC_Common_IsInitialized(void);
  */
 SOPC_ReturnStatus SOPC_Common_Initialize(SOPC_Log_Configuration logConfiguration);
 
+/**
+ * \brief set general log level
+ *
+ * \param level [in] target log level
+ * \return SOPC_STATUS_OK
+ */
+SOPC_ReturnStatus SOPC_Common_SetLogLevel(SOPC_Log_Level level)
+
 #endif /* SOPC_COMMON_H_ */
