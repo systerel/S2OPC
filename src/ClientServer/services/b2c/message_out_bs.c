@@ -492,7 +492,7 @@ void message_out_bs__write_create_session_msg_session_token(
     assert(SOPC_STATUS_OK == status);
     createSessionResp->SessionId.IdentifierType = SOPC_IdentifierType_Numeric;
     createSessionResp->SessionId.Data.Numeric = message_out_bs__session;
-    createSessionResp->SessionId.Data.Numeric += 10000;
+    createSessionResp->SessionId.Data.Numeric += 100000;
 }
 
 void message_out_bs__write_create_session_msg_session_revised_timeout(const constants__t_msg_i message_out_bs__req_msg,
