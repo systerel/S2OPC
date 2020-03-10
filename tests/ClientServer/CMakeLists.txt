@@ -283,7 +283,7 @@ if(ENABLE_TESTING)
   target_include_directories(toolkit_test_server_client PRIVATE "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_server/")
   target_compile_options(toolkit_test_server_client PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(toolkit_test_server_client PRIVATE ${S2OPC_DEFINITIONS})
-  s2opc_unit_test(toolkit_test_server_client GENERATE_TAP)
+  s2opc_unit_test(toolkit_test_server_client)
 
   # Server running local services
   add_executable(toolkit_test_server_local_service "validation_tests/server/toolkit_test_server_local_service.c"
