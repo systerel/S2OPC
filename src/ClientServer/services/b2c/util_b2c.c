@@ -837,6 +837,9 @@ void util_status_code__B_to_C(constants_statuscodes_bs__t_StatusCode_i bstatus, 
     case constants_statuscodes_bs__e_sc_bad_nonce_invalid:
         *status = OpcUa_BadNonceInvalid;
         break;
+    case constants_statuscodes_bs__e_sc_bad_encoding_limits_exceeded:
+        *status = OpcUa_BadEncodingLimitsExceeded;
+        break;
     default:
         *status = OpcUa_BadInternalError;
     }
@@ -896,6 +899,9 @@ SOPC_ReturnStatus util_status_code__B_to_return_status_C(constants_statuscodes_b
         result = SOPC_STATUS_ENCODING_ERROR;
         break;
     case constants_statuscodes_bs__e_sc_bad_response_too_large:
+        result = SOPC_STATUS_ENCODING_ERROR;
+        break;
+    case constants_statuscodes_bs__e_sc_bad_encoding_limits_exceeded:
         result = SOPC_STATUS_ENCODING_ERROR;
         break;
     case constants_statuscodes_bs__e_sc_bad_invalid_argument:
@@ -1136,6 +1142,9 @@ void util_status_code__C_to_B(SOPC_StatusCode status, constants_statuscodes_bs__
         break;
     case OpcUa_BadNonceInvalid:
         *bstatus = constants_statuscodes_bs__e_sc_bad_nonce_invalid;
+        break;
+    case OpcUa_BadEncodingLimitsExceeded:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_encoding_limits_exceeded;
         break;
     default:
         if ((status & SOPC_GoodStatusOppositeMask) == 0)
