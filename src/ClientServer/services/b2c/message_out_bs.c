@@ -191,12 +191,12 @@ void message_out_bs__dealloc_msg_out(const constants__t_msg_i message_out_bs__ms
     }
 }
 
-void message_out_bs__encode_msg(const constants__t_msg_header_type_i message_out_bs__header_type,
-                                const constants__t_msg_type_i message_out_bs__msg_type,
-                                const constants__t_msg_header_i message_out_bs__msg_header,
-                                const constants__t_msg_i message_out_bs__msg,
-                                constants_statuscodes_bs__t_StatusCode_i* const message_out_bs__sc,
-                                constants__t_byte_buffer_i* const message_out_bs__buffer)
+static void internal__message_out_bs__encode_msg(const constants__t_msg_header_type_i message_out_bs__header_type,
+                                                 const constants__t_msg_type_i message_out_bs__msg_type,
+                                                 const constants__t_msg_header_i message_out_bs__msg_header,
+                                                 const constants__t_msg_i message_out_bs__msg,
+                                                 constants_statuscodes_bs__t_StatusCode_i* const message_out_bs__sc,
+                                                 constants__t_byte_buffer_i* const message_out_bs__buffer)
 {
     *message_out_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
     *message_out_bs__buffer = constants__c_byte_buffer_indet;
@@ -270,8 +270,15 @@ void message_out_bs__encode_msg(const constants__t_msg_header_type_i message_out
     }
     else
     {
-        if (SOPC_STATUS_WOULD_BLOCK == status)
+        switch (status)
         {
+        case SOPC_STATUS_WOULD_BLOCK:
+            SOPC_Logger_TraceWarning(
+                "Services: encoding of message failed (type = '%s') because it is too large: max size %" PRIu32
+                " reached",
+                SOPC_EncodeableType_GetName(encType), buffer->maximum_size);
+
+            // Limit of buffer reached
             switch (message_out_bs__header_type)
             {
             case constants__e_msg_request_type:
@@ -283,19 +290,53 @@ void message_out_bs__encode_msg(const constants__t_msg_header_type_i message_out
             default:
                 assert(false);
             }
+            break;
+        // TODO: add a SOPC_STATUS_ENCODING_LIMIT for errors due to limits
+        case SOPC_STATUS_ENCODING_ERROR:
+        default:
+            SOPC_Logger_TraceWarning("Services: encoding of message failed (type = '%s')",
+                                     SOPC_EncodeableType_GetName(encType));
 
-            SOPC_Logger_TraceWarning(
-                "Services: encoding of message failed (type = '%s') because it is too large: max size %" PRIu32
-                " reached",
-                SOPC_EncodeableType_GetName(encType), buffer->maximum_size);
-        }
-        else
-        {
             *message_out_bs__sc = constants_statuscodes_bs__e_sc_bad_encoding_error;
         }
+
         // if buffer is not used, it must be freed
         SOPC_Buffer_Delete(buffer);
         buffer = NULL;
+    }
+}
+
+void message_out_bs__encode_msg(const constants__t_msg_header_type_i message_out_bs__header_type,
+                                const constants__t_msg_type_i message_out_bs__msg_type,
+                                const constants__t_msg_header_i message_out_bs__msg_header,
+                                const constants__t_msg_i message_out_bs__msg,
+                                constants_statuscodes_bs__t_StatusCode_i* const message_out_bs__sc,
+                                constants__t_byte_buffer_i* const message_out_bs__buffer)
+{
+    internal__message_out_bs__encode_msg(message_out_bs__header_type, message_out_bs__msg_type,
+                                         message_out_bs__msg_header, message_out_bs__msg, message_out_bs__sc,
+                                         message_out_bs__buffer);
+
+    if (constants_statuscodes_bs__e_sc_ok != *message_out_bs__sc &&
+        constants__e_msg_response_type == message_out_bs__header_type)
+    {
+        // In this case we should send a ServiceFault instead of failing
+        OpcUa_ResponseHeader* respHeader = (OpcUa_ResponseHeader*) message_out_bs__msg_header;
+        switch (*message_out_bs__sc)
+        {
+        case constants_statuscodes_bs__e_sc_bad_response_too_large:
+            respHeader->ServiceResult = OpcUa_BadResponseTooLarge;
+            break;
+        case constants_statuscodes_bs__e_sc_bad_encoding_limits_exceeded:
+            respHeader->ServiceResult = OpcUa_BadEncodingLimitsExceeded;
+            break;
+        case constants_statuscodes_bs__e_sc_bad_encoding_error:
+        default:
+            respHeader->ServiceResult = OpcUa_BadEncodingError;
+        }
+        internal__message_out_bs__encode_msg(message_out_bs__header_type, constants__e_msg_service_fault_resp,
+                                             message_out_bs__msg_header, message_out_bs__msg, message_out_bs__sc,
+                                             message_out_bs__buffer);
     }
 }
 

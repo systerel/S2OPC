@@ -179,7 +179,8 @@ OPERATIONS
         header_type : t_msg_header_type_i &
         header_type : t_msg_header_type &
         msg_type : t_msg_type_i &
-        msg_type = a_msg_out_type &
+        /* Note: msg_type might also become e_msg_service_fault_resp during encoding_msg in case of encoding failure */
+        msg_type : {a_msg_out_type, e_msg_service_fault_resp} &
         a_msg_out_type : t_msg_type &
         msg_header : t_msg_header_i &
         msg_header = c_msg_out_header &
