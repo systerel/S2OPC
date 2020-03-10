@@ -923,6 +923,7 @@ static SOPC_StatusCode Server_InitDefaultCallMethodService(SOPC_Server_Config* s
  *  + first argument of main */
 static char* Config_SetLogPath(int argc, char* argv[])
 {
+    const char* logDirName = "toolkit_server";
     char* underscore = "_";
     char* suffix = NULL;
     char* logDirPath = NULL;
@@ -938,14 +939,14 @@ static char* Config_SetLogPath(int argc, char* argv[])
         underscore = "";
     }
 
-    size_t logDirPathSize = 2 + strlen(argv[0]) + strlen(underscore) + strlen(suffix) +
-                            7; // "./" + exec_name + _ + test_name + _logs/ + '\0'
+    size_t logDirPathSize = 2 + strlen(logDirName) + strlen(underscore) + strlen(suffix) +
+                            7; // "./" + logDirName + _ + test_name + _logs/ + '\0'
     if (logDirPathSize < 200)
     {
         logDirPath = SOPC_Malloc(logDirPathSize * sizeof(char));
     }
     if (NULL != logDirPath && (int) (logDirPathSize - 1) ==
-                                  snprintf(logDirPath, logDirPathSize, "./%s%s%s_logs/", argv[0], underscore, suffix))
+                                  snprintf(logDirPath, logDirPathSize, "./%s%s%s_logs/", logDirName, underscore, suffix))
     {
         status = SOPC_ToolkitConfig_SetCircularLogPath(logDirPath, true);
     }
@@ -965,7 +966,7 @@ static char* Config_SetLogPath(int argc, char* argv[])
 
 static char* Server_ConfigureLogger(int argc, char* argv[])
 {
-    // Define directoy path for log traces: ./<exec_name>_argv[1]_logs/
+    // Define directoy path for log traces: ./toolkit_server_argv[1]_logs/
     char* logDirPath = Config_SetLogPath(argc, argv);
 
     if (NULL != logDirPath)
@@ -1025,7 +1026,7 @@ int main(int argc, char* argv[])
     status = Server_Initialize();
 
     /* Configure the server logger:
-     * DEBUG traces generated in ./<argv[0]>_<argv[1]>_logs/ */
+     * DEBUG traces generated in ./toolkit_server_<argv[1]>_logs/ */
     logDirPath = Server_ConfigureLogger(argc, argv);
 
     /* Configuration of server endpoint:
