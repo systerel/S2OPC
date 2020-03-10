@@ -109,7 +109,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_Initialize(const SOPC_LibSub_StaticCfg* pCfg
     if (SOPC_STATUS_OK == status)
     {
         SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
-        logConfiguration.logLevel = pCfg->toolkit_logger.level;
+        logConfiguration.logLevel = Helpers_ToolkitLogToCommonLog(pCfg->toolkit_logger.level);
         logConfiguration.logSysConfig.fileSystemLogConfig.logMaxBytes = pCfg->toolkit_logger.maxBytes;
         logConfiguration.logSysConfig.fileSystemLogConfig.logMaxFiles = pCfg->toolkit_logger.maxFiles;
         if (NULL == pCfg->toolkit_logger.log_path)
