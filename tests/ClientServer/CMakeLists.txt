@@ -72,29 +72,30 @@ if(ENABLE_TESTING)
   set(TEST_CONFIG_XML              "${CMAKE_CURRENT_SOURCE_DIR}/data/config/S2OPC_Test_XML_Config.xml")
   set(TEST_SERVER_UACTT_CONFIG_XML "${CMAKE_CURRENT_SOURCE_DIR}/data/config/S2OPC_Server_UACTT_Config.xml")
 
+  set(TEST_LIGHT_ADDRESS_SPACE_XML "${S2OPC_ROOT_PATH}/tests/ClientServer/data/address_space/s2opc_no_base_info.xml")
+  
   if (WITH_NANO_EXTENDED)
     set(TEST_ADDRESS_SPACE_XML "${S2OPC_ROOT_PATH}/samples/ClientServer/data/address_space/s2opc.xml")
   else()
     set(TEST_ADDRESS_SPACE_XML "${S2OPC_ROOT_PATH}/samples/ClientServer/data/address_space/s2opc_nano.xml")
   endif()
-  set(TEST_CHECK_HELPERS_ADDRESS_SPACE_C "check_helpers_address_space.c")
+  
   set(TEST_SERVER_ADDRESS_SPACE_C "test_server_address_space.c")
-  set(TEST_LOCAL_TEST_SERVER_ADDRESS_SPACE_C "local_test_server_test_address_space.c")
-  set(TEST_CLIENT_ADDRESS_SPACE_C "test_client_address_space.c")
-  set(TEST_SERVER_CLIENT_ADDRESS_SPACE_C "test_server_client_address_space.c")
-  # Note: duplication of generated address space due to concurrency issues when compiling with "-j <N>"
-  s2opc_embed_address_space(${TEST_CHECK_HELPERS_ADDRESS_SPACE_C} ${TEST_ADDRESS_SPACE_XML})
+  set(TEST_LIGHT_ADDRESS_SPACE_C "s2opc_no_base_info_address_space.c")
+
+  s2opc_embed_address_space(${TEST_LIGHT_ADDRESS_SPACE_C} ${TEST_LIGHT_ADDRESS_SPACE_XML})
+  add_custom_target(make-light-address-space DEPENDS ${TEST_LIGHT_ADDRESS_SPACE_C})
+
   s2opc_embed_address_space(${TEST_SERVER_ADDRESS_SPACE_C} ${TEST_ADDRESS_SPACE_XML})
-  s2opc_embed_address_space(${TEST_LOCAL_TEST_SERVER_ADDRESS_SPACE_C} ${TEST_ADDRESS_SPACE_XML})
-  s2opc_embed_address_space(${TEST_CLIENT_ADDRESS_SPACE_C} ${TEST_ADDRESS_SPACE_XML})
-  s2opc_embed_address_space(${TEST_SERVER_CLIENT_ADDRESS_SPACE_C} ${TEST_ADDRESS_SPACE_XML})
+  add_custom_target(make-server-address-space DEPENDS ${TEST_SERVER_ADDRESS_SPACE_C})
 
 ## S2OPC unit tests ##
 
   # Helpers tests
 
   file(GLOB INTERNAL_TESTS_SRCS "unit_tests/helpers/*.c")
-  add_executable(check_helpers ${INTERNAL_TESTS_SRCS} ${TEST_CHECK_HELPERS_ADDRESS_SPACE_C})
+  add_executable(check_helpers ${INTERNAL_TESTS_SRCS} ${TEST_SERVER_ADDRESS_SPACE_C})
+  add_dependencies(check_helpers make-server-address-space)
   target_include_directories(check_helpers PRIVATE ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
   target_link_libraries(check_helpers PRIVATE Check::check s2opc_clientserver s2opc_clientserver-loader-embedded)
   target_compile_options(check_helpers PRIVATE ${S2OPC_COMPILER_FLAGS})
@@ -277,7 +278,8 @@ if(ENABLE_TESTING)
   add_executable(toolkit_test_server_client
       "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_server/runtime_variables.c"
       "validation_tests/client/toolkit_test_server_client.c"
-      ${TEST_SERVER_CLIENT_ADDRESS_SPACE_C})
+      ${TEST_LIGHT_ADDRESS_SPACE_C})
+  add_dependencies(toolkit_test_server_client make-light-address-space)
   target_link_libraries(toolkit_test_server_client PRIVATE
     s2opc_clientserver
     s2opc_clientserver-loader-embedded
@@ -293,7 +295,8 @@ if(ENABLE_TESTING)
                                                    "validation_tests/client/testlib_write.c"
                                                    "validation_tests/client/test_results.c"
                                                    "validation_tests/client/testlib_read_response.c"
-                                                   ${TEST_LOCAL_TEST_SERVER_ADDRESS_SPACE_C})
+                                                   ${TEST_LIGHT_ADDRESS_SPACE_C})
+  add_dependencies(toolkit_test_server_local_service make-light-address-space)
   target_include_directories(toolkit_test_server_local_service PRIVATE "validation_tests/client")
   target_link_libraries(toolkit_test_server_local_service PRIVATE s2opc_clientserver s2opc_clientserver-loader-embedded)
   target_compile_options(toolkit_test_server_local_service PRIVATE ${S2OPC_COMPILER_FLAGS})
@@ -306,7 +309,8 @@ if(ENABLE_TESTING)
                                      "validation_tests/client/testlib_write.c"
                                      "validation_tests/client/test_results.c"
                                      "validation_tests/client/testlib_read_response.c"
-                                     ${TEST_CLIENT_ADDRESS_SPACE_C})
+                                     ${TEST_LIGHT_ADDRESS_SPACE_C})
+  add_dependencies(toolkit_test_server_local_service make-light-address-space)
   target_link_libraries(toolkit_test_client PRIVATE s2opc_clientserver s2opc_clientserver-loader-embedded)
   target_compile_options(toolkit_test_client PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(toolkit_test_client PRIVATE ${S2OPC_DEFINITIONS})
@@ -347,6 +351,7 @@ if(ENABLE_TESTING)
                  "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_server/runtime_variables.c"
                  "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_server/toolkit_demo_server.c"
                  ${TEST_SERVER_ADDRESS_SPACE_C})
+  add_dependencies(toolkit_test_server_local_service make-server-address-space)
   target_link_libraries(${TOOLKIT_TEST_SERVER} PRIVATE s2opc_clientserver s2opc_clientserver-loader-embedded)
   target_compile_options(${TOOLKIT_TEST_SERVER} PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(${TOOLKIT_TEST_SERVER} PRIVATE ${S2OPC_DEFINITIONS})

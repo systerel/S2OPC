@@ -43,7 +43,8 @@ if(ENABLE_SAMPLES)
   # (no XML runtime loading needed when used)
   set(DEMO_SERVER_ADDRESS_SPACE_C "demo_server_address_space.c")
   s2opc_embed_address_space(${DEMO_SERVER_ADDRESS_SPACE_C} ${DEMO_ADDRESS_SPACE_XML})
-  
+  add_custom_target(make-demo-address-space DEPENDS ${DEMO_SERVER_ADDRESS_SPACE_C})
+
   # Manage the Nano profiles extended mode
   if (WITH_NANO_EXTENDED)
     set(TOOLKIT_DEMO_SERVER "toolkit_demo_server")
@@ -55,6 +56,7 @@ if(ENABLE_SAMPLES)
                  "demo_server/runtime_variables.c"
                  "demo_server/toolkit_demo_server.c"
                  ${DEMO_SERVER_ADDRESS_SPACE_C})
+  add_dependencies(${TOOLKIT_DEMO_SERVER} make-demo-address-space)
   target_link_libraries(${TOOLKIT_DEMO_SERVER} PRIVATE s2opc_clientserver s2opc_clientserver-loader-embedded)
   target_compile_options(${TOOLKIT_DEMO_SERVER} PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(${TOOLKIT_DEMO_SERVER} PRIVATE ${S2OPC_DEFINITIONS})
