@@ -24,6 +24,7 @@
 #include "sopc_event_handler.h"
 #include "sopc_event_timer_manager.h"
 #include "sopc_helper_endianness_cfg.h"
+#include "sopc_logger.c"
 #include "sopc_mem_alloc.h"
 #include "sopc_pub_scheduler.h"
 #include "sopc_pubsub_constants.h"
