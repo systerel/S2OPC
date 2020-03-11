@@ -783,66 +783,11 @@ static SOPC_ReturnStatus Server_SetCryptographicConfig(SOPC_Server_Config* serve
  * Users authentication and authorization:
  *----------------------------------------*/
 
-/* The toolkit test servers shall pass the UACTT tests. Hence it shall authenticate
- * (ids and passwords can be changed in the UACTT settings/Server Test/Session):
- *  - anonymous users
- *  - user1:password
- *  - user2:password1
- * Then it shall accept username:password, but return "access denied".
- * Otherwise it shall be "identity token rejected".
- */
-static SOPC_ReturnStatus authentication_uactt(SOPC_UserAuthentication_Manager* authn,
-                                              const SOPC_ExtensionObject* token,
-                                              SOPC_UserAuthentication_Status* authenticated)
-{
-    /* avoid unused parameter compiler warning */
-    (void) (authn);
-
-    assert(NULL != token && NULL != authenticated);
-
-    *authenticated = SOPC_USER_AUTHENTICATION_REJECTED_TOKEN;
-    assert(SOPC_ExtObjBodyEncoding_Object == token->Encoding);
-    if (&OpcUa_UserNameIdentityToken_EncodeableType == token->Body.Object.ObjType)
-    {
-        OpcUa_UserNameIdentityToken* userToken = token->Body.Object.Value;
-        SOPC_String* username = &userToken->UserName;
-        if (strcmp(SOPC_String_GetRawCString(username), "user1") == 0)
-        {
-            SOPC_ByteString* pwd = &userToken->Password;
-            if (pwd->Length == strlen("password") && memcmp(pwd->Data, "password", strlen("password")) == 0)
-            {
-                *authenticated = SOPC_USER_AUTHENTICATION_OK;
-            }
-        }
-        else if (strcmp(SOPC_String_GetRawCString(username), "user2") == 0)
-        {
-            SOPC_ByteString* pwd = &userToken->Password;
-            if (pwd->Length == strlen("password1") && memcmp(pwd->Data, "password1", strlen("password1")) == 0)
-            {
-                *authenticated = SOPC_USER_AUTHENTICATION_OK;
-            }
-        }
-        else if (strcmp(SOPC_String_GetRawCString(username), "username") == 0)
-        {
-            SOPC_ByteString* pwd = &userToken->Password;
-            if (pwd->Length == strlen("password") && memcmp(pwd->Data, "password", strlen("password")) == 0)
-            {
-                *authenticated = SOPC_USER_AUTHENTICATION_ACCESS_DENIED;
-            }
-        }
-    }
-
-    return SOPC_STATUS_OK;
-}
-
-static const SOPC_UserAuthentication_Functions authentication_uactt_functions = {
-    .pFuncFree = (SOPC_UserAuthentication_Free_Func) SOPC_Free,
-    .pFuncValidateUserIdentity = authentication_uactt};
-
 static SOPC_ReturnStatus Server_SetUserManagementConfig(SOPC_Endpoint_Config* pEpConfig,
                                                         SOPC_UserAuthentication_Manager** output_authenticationManager,
                                                         SOPC_UserAuthorization_Manager** output_authorizationManager)
 {
+    assert(NULL != pEpConfig);
     assert(NULL != output_authenticationManager);
     assert(NULL != output_authorizationManager);
 
@@ -851,17 +796,21 @@ static SOPC_ReturnStatus Server_SetUserManagementConfig(SOPC_Endpoint_Config* pE
     /* Create an user authorization manager which accepts any user.
      * i.e.: UserAccessLevel right == AccessLevel right for any user for a given node of address space */
     *output_authorizationManager = SOPC_UserAuthorization_CreateManager_AllowAll();
-    *output_authenticationManager = SOPC_Calloc(1, sizeof(SOPC_UserAuthentication_Manager));
-    if (NULL == *output_authenticationManager || NULL == *output_authorizationManager)
+    if (NULL == output_authorizationManager)
     {
-        status = SOPC_STATUS_OUT_OF_MEMORY;
-        printf("<Test_Server_Toolkit: Failed to create the user manager\n");
+        status = SOPC_STATUS_NOK;
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        *output_authenticationManager = SOPC_UserAuthentication_CreateManager_AllowAll();
+        if (NULL == output_authenticationManager)
+        {
+            status = SOPC_STATUS_NOK;
+        }
     }
 
     if (SOPC_STATUS_OK == status)
     {
-        /* Set a user authentication function that complies with UACTT tests expectations */
-        (*output_authenticationManager)->pFunctions = &authentication_uactt_functions;
         pEpConfig->authenticationManager = *output_authenticationManager;
         pEpConfig->authorizationManager = *output_authorizationManager;
     }
