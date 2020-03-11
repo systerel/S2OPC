@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 06/03/2020 14:49:10
+ Date                 : 13/03/2020 10:52:37
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -327,7 +327,7 @@ void io_dispatch_mgr__receive_msg_buffer(
                }
                else if ((io_dispatch_mgr__l_valid_req == true) &&
                   (io_dispatch_mgr__l_async_resp == false)) {
-                  channel_mgr__send_channel_abort_chunk(io_dispatch_mgr__channel,
+                  channel_mgr__send_channel_error_msg(io_dispatch_mgr__channel,
                      io_dispatch_mgr__l_sc,
                      io_dispatch_mgr__request_context);
                }
@@ -987,7 +987,7 @@ void io_dispatch_mgr__internal_server_send_publish_response_prio_event(
                io_dispatch_mgr__p_req_context);
          }
          else if (io_dispatch_mgr__l_connected_channel == true) {
-            channel_mgr__send_channel_abort_chunk(io_dispatch_mgr__l_channel,
+            channel_mgr__send_channel_error_msg(io_dispatch_mgr__l_channel,
                io_dispatch_mgr__l_sc,
                io_dispatch_mgr__p_req_context);
          }

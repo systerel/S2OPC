@@ -41,6 +41,7 @@
 #include "sopc_pki_stack.h"
 #include "sopc_protocol_constants.h"
 #include "sopc_secure_channels_api.h"
+#include "sopc_secure_channels_internal_ctx.h"
 #include "sopc_time.h"
 #include "sopc_toolkit_config.h"
 #include "sopc_toolkit_config_constants.h"
@@ -646,11 +647,14 @@ START_TEST(test_expected_send_abort_chunk)
 }
 END_TEST
 
-START_TEST(test_expected_forced_send_abort_chunk)
+START_TEST(test_expected_forced_send_err)
 {
+    // Create a fake server connection to could send an error message (client does not)
+    secureConnectionsArray[scConfigIdx + 1] = secureConnectionsArray[scConfigIdx];
+    secureConnectionsArray[scConfigIdx + 1].isServerConnection = true;
+
     // In this test the service layer explicitly requests to send an abort message because encoding failed earlier
     SOPC_Event* socketEvent = NULL;
-    SOPC_Event* serviceEvent = NULL;
     SOPC_Buffer* buffer = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     int res = 0;
@@ -660,11 +664,12 @@ START_TEST(test_expected_forced_send_abort_chunk)
 
     const uint32_t newPendingRequestHandle = 10;
     // Note: should be used only as server but it is functional
-    SOPC_SecureChannels_EnqueueEvent(SC_SERVICE_SND_MSG_ABORT, scConfigIdx, (uintptr_t) OpcUa_BadRequestTooLarge,
+    SOPC_SecureChannels_EnqueueEvent(SC_SERVICE_SND_ERR, scConfigIdx + 1, (uintptr_t) OpcUa_BadResponseTooLarge,
                                      newPendingRequestHandle);
 
     // Check first message is a partial chunk of maxSendingBufferSize length
-    socketEvent = Check_Socket_Event_Received(SOCKET_WRITE, scConfigIdx, 0);
+    socketEvent =
+        Check_Socket_Event_Received(SOCKET_WRITE, scConfigIdx, 0); // Note: socket is still scConfigIdx (copy of config)
     ck_assert_ptr_nonnull(socketEvent);
     ck_assert_ptr_nonnull((void*) socketEvent->params);
 
@@ -673,28 +678,22 @@ START_TEST(test_expected_forced_send_abort_chunk)
 
     ck_assert((uint32_t) res == buffer->length);
 
-    // Check typ = MSG final = A
-    res = memcmp(hexOutput, "4d534741", 8);
+    // Check typ = ERR final = F
+    res = memcmp(hexOutput, "45525246", 8);
     ck_assert(res == 0);
 
     // retrieve error status in MSG
-    status = SOPC_Buffer_SetPosition(buffer, SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
+    status = SOPC_Buffer_SetPosition(buffer, SOPC_TCP_UA_HEADER_LENGTH);
     ck_assert(SOPC_STATUS_OK == status);
 
     SOPC_StatusCode errorStatus;
     status = SOPC_UInt32_Read(&errorStatus, buffer, 0);
     ck_assert(SOPC_STATUS_OK == status);
-    ck_assert_uint_eq(errorStatus, OpcUa_BadTcpMessageTooLarge);
+    ck_assert_uint_eq(errorStatus, OpcUa_BadTcpMessageTooLarge); // Tcp error level (initial status code not authorized)
 
     SOPC_Buffer_Delete(buffer);
     SOPC_Free(socketEvent);
     socketEvent = NULL;
-
-    serviceEvent = Check_Service_Event_Received(SC_SND_FAILURE, scConfigIdx, OpcUa_BadRequestTooLarge);
-    ck_assert_uint_eq(newPendingRequestHandle, (uintptr_t) serviceEvent->params);
-    ck_assert_ptr_nonnull(serviceEvent);
-    SOPC_Free(serviceEvent);
-    serviceEvent = NULL;
 }
 END_TEST
 
@@ -881,7 +880,7 @@ static Suite* tests_make_suite_invalid_buffers(void)
     tcase_add_test(tc_multichunks, test_receive_only_abort_chunk);
     tcase_add_test(tc_multichunks, test_expected_send_multi_chunks);
     tcase_add_test(tc_multichunks, test_expected_send_abort_chunk);
-    tcase_add_test(tc_multichunks, test_expected_forced_send_abort_chunk);
+    tcase_add_test(tc_multichunks, test_expected_forced_send_err);
     suite_add_tcase(s, tc_multichunks);
 
     return s;

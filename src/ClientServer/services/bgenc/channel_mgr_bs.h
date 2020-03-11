@@ -21,7 +21,7 @@
 
  File Name            : channel_mgr_bs.h
 
- Date                 : 06/03/2020 14:49:32
+ Date                 : 13/03/2020 10:52:59
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -70,7 +70,7 @@ extern void channel_mgr_bs__prepare_cli_open_secure_channel(
    const constants__t_channel_config_idx_i channel_mgr_bs__p_config_idx);
 extern void channel_mgr_bs__reset_SecurityPolicy(
    const constants__t_channel_i channel_mgr_bs__channel);
-extern void channel_mgr_bs__send_channel_abort_chunk(
+extern void channel_mgr_bs__send_channel_error_msg(
    const constants__t_channel_i channel_mgr_bs__channel,
    const constants_statuscodes_bs__t_StatusCode_i channel_mgr_bs__status_code,
    const constants__t_request_context_i channel_mgr_bs__request_context);

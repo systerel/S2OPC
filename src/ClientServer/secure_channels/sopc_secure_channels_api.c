@@ -75,7 +75,6 @@ void SOPC_SecureChannels_OnInternalEvent(SOPC_EventHandler* handler,
     case INT_SC_SND_OPN:
     case INT_SC_SND_CLO:
     case INT_SC_SND_MSG_CHUNKS:
-    case INT_SC_SND_ABORT_CHUNK:
         SOPC_ChunksMgr_Dispatcher(internalEvent, eltId, params, auxParam);
         break;
     }
@@ -146,7 +145,7 @@ void SOPC_SecureChannels_OnInputEvent(SOPC_EventHandler* handler,
     case SC_SERVICE_SND_MSG:
         SOPC_SecureConnectionStateMgr_Dispatcher(scEvent, eltId, params, auxParam);
         break;
-    case SC_SERVICE_SND_MSG_ABORT:
+    case SC_SERVICE_SND_ERR:
         SOPC_SecureConnectionStateMgr_Dispatcher(scEvent, eltId, params, auxParam);
         break;
     default:
@@ -170,7 +169,7 @@ SOPC_ReturnStatus SOPC_SecureChannels_EnqueueEvent(SOPC_SecureChannels_InputEven
     case SC_CONNECT:
     case SC_DISCONNECT:
     case SC_SERVICE_SND_MSG:
-    case SC_SERVICE_SND_MSG_ABORT:
+    case SC_SERVICE_SND_ERR:
         status = SOPC_EventHandler_Post(secureChannelsInputEventHandler, (int32_t) scEvent, id, params, auxParam);
         break;
     default:

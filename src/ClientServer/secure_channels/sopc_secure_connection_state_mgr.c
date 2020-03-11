@@ -3233,9 +3233,9 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
             SOPC_SecureChannels_EnqueueInternalEvent(INT_SC_SND_MSG_CHUNKS, eltId, params, auxParam);
         }
         break;
-    case SC_SERVICE_SND_MSG_ABORT:
-        SOPC_Logger_TraceDebug("ScStateMgr: SC_SERVICE_SND_MSG_ABORT scIdx=%" PRIu32 " sc=%X reqId/Handle=%" PRIuPTR,
-                               eltId, (SOPC_StatusCode) params, auxParam);
+    case SC_SERVICE_SND_ERR:
+        SOPC_Logger_TraceDebug("ScStateMgr: SC_SERVICE_SND_ERR scIdx=%" PRIu32 " sc=%X reqId/Handle=%" PRIuPTR, eltId,
+                               (SOPC_StatusCode) params, auxParam);
 
         /* id = secure channel connection index,
            params = (SOPC_StatusCode) encoding failure status code (response too large, etc)
@@ -3244,7 +3244,8 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         if (NULL != scConnection && (scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED ||
                                      scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW))
         {
-            SOPC_SecureChannels_EnqueueInternalEvent(INT_SC_SND_ABORT_CHUNK, eltId, params, auxParam);
+            SC_CloseSecureConnection(scConnection, eltId, false, false, (SOPC_StatusCode) params,
+                                     "Error requested by services layer");
         } // else: this event is only used by server and send failure on abort message should be ignored
         break;
     default:

@@ -21,7 +21,7 @@
 
  File Name            : channel_mgr.h
 
- Date                 : 06/03/2020 14:49:09
+ Date                 : 13/03/2020 10:52:36
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -72,7 +72,7 @@ extern void channel_mgr__INITIALISATION(void);
 #define channel_mgr__is_disconnecting_channel channel_mgr_1__is_disconnecting_channel
 #define channel_mgr__is_valid_channel_config_idx channel_mgr_bs__is_valid_channel_config_idx
 #define channel_mgr__is_valid_endpoint_config_idx channel_mgr_bs__is_valid_endpoint_config_idx
-#define channel_mgr__send_channel_abort_chunk channel_mgr_bs__send_channel_abort_chunk
+#define channel_mgr__send_channel_error_msg channel_mgr_bs__send_channel_error_msg
 #define channel_mgr__send_channel_msg_buffer channel_mgr_bs__send_channel_msg_buffer
 #define channel_mgr__server_get_endpoint_config channel_mgr_1__server_get_endpoint_config
 

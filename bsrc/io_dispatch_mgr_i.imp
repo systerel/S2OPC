@@ -360,7 +360,7 @@ OPERATIONS
                         ELSIF l_valid_req = TRUE & l_async_resp = FALSE
                         THEN
                             /* Unexpected invalid buffer, it should lead to an Abort chunk */
-                            send_channel_abort_chunk(channel, l_sc, request_context)
+                            send_channel_error_msg(channel, l_sc, request_context)
                         END
                     ELSE
                         /* Server receiving a response: close secure channel since it is not expected from client */
@@ -871,7 +871,7 @@ OPERATIONS
             ELSIF l_connected_channel = TRUE
             THEN
                 /* Unexpected invalid buffer, it should lead to an Abort chunk */
-                send_channel_abort_chunk(l_channel, l_sc, p_req_context)
+                send_channel_error_msg(l_channel, l_sc, p_req_context)
                 // Note: keep bres = FALSE, it will generate a log error
             END
         ELSE

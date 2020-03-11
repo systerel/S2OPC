@@ -37,19 +37,19 @@
  *  */
 typedef enum
 {
-    EP_OPEN = 0x200,          /* id = endpoint description configuration index */
-    EP_CLOSE,                 /* id = endpoint description configuration index */
-    SC_CONNECT,               /* id = secure channel configuration index */
-    SC_DISCONNECT,            /* id = secure channel connection index */
-    SC_SERVICE_SND_MSG,       /* id = secure channel connection index,
-                                params = (SOPC_Buffer*) buffer to send containing empty space for TCP UA header (24 bytes)
-                                followed by encoded OpcUa message,
-                                auxParam = (uint32_t) request Id context if response (server) / request Handle context if
-                                request (client) */
-    SC_SERVICE_SND_MSG_ABORT, /* id = secure channel connection index,
-                                 params = (SOPC_StatusCode) encoding failure status code (response too large, etc)
-                                 auxParam = (uint32_t) request Id context of response (server)
-                               */
+    EP_OPEN = 0x200,    /* id = endpoint description configuration index */
+    EP_CLOSE,           /* id = endpoint description configuration index */
+    SC_CONNECT,         /* id = secure channel configuration index */
+    SC_DISCONNECT,      /* id = secure channel connection index */
+    SC_SERVICE_SND_MSG, /* id = secure channel connection index,
+                          params = (SOPC_Buffer*) buffer to send containing empty space for TCP UA header (24 bytes)
+                          followed by encoded OpcUa message,
+                          auxParam = (uint32_t) request Id context if response (server) / request Handle context if
+                          request (client) */
+    SC_SERVICE_SND_ERR, /* id = secure channel connection index,
+                           params = (SOPC_StatusCode) encoding failure status code
+                           auxParam = (uint32_t) request Id context of response (Debug info only)
+                         */
 } SOPC_SecureChannels_InputEvent;
 
 typedef enum

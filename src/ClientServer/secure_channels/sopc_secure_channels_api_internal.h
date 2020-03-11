@@ -63,15 +63,11 @@ typedef enum
                     // params = (SOPC_Buffer*) buffer positioned to message payload
                     /* -------------------------< */
     INT_SC_SND_ERR,
-    INT_SC_SND_OPN,         /* >------------------------- */
-                            // id = secure channel connection index,
-                            // params = (SOPC_Buffer*) buffer positioned to message payload,
-    INT_SC_SND_CLO,         // auxParam = (uint32_t) request Id context if response / request Handle if request when MSG
-    INT_SC_SND_MSG_CHUNKS,  /* -------------------------< */
-    INT_SC_SND_ABORT_CHUNK, /* id = secure channel connection index,
-                               params = (SOPC_StatusCode) encoding failure status code (response too large, etc)
-                               auxParam = (uint32_t) request Id context of response (server)
-                            */
+    INT_SC_SND_OPN,        /* >------------------------- */
+                           // id = secure channel connection index,
+                           // params = (SOPC_Buffer*) buffer positioned to message payload,
+    INT_SC_SND_CLO,        // auxParam = (uint32_t) request Id context if response / request Handle if request when MSG
+    INT_SC_SND_MSG_CHUNKS, /* -------------------------< */
 
     /* SC connection manager -> SC connection manager */
     INT_SC_CLOSE // id = secure channel connection index,

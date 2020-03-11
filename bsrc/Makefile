@@ -35,12 +35,12 @@ $(TARGET_GENERATED_FILES): $(SOURCE_FILES)
 	m -c -a
 	$(RM) -f ./bdp/*.nf
 	m -lonely -incomplete -pchk -tc -b0 | tee tc.log
-	grep -iEc '(warning|error|\bfailed\b|\berrno\b)' tc.log | xargs test 0 -eq
+	grep -iEc '(\bwarning|\berror|\bfailed\b|\berrno\b)' tc.log | xargs test 0 -eq
 	$(RM) tc.log
 	$(RM) -fr ./$(PATHTRAD)
 	$(RM) -fr ./$(PATHGENTRAD)
 	m -tr | tee tr.log
-	grep -iEc '(warning|error|\bfailed\b|\berrno\b)' tr.log | xargs test 0 -eq
+	grep -iEc '(\bwarning|\berror|\bfailed\b|\berrno\b)' tr.log | xargs test 0 -eq
 	$(RM) tr.log
 #	# Copy files and prepend them with copyright
 	mkdir $(PATHTRAD)

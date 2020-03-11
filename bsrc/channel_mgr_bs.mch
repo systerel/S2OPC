@@ -66,7 +66,7 @@ OPERATIONS
     END
     ;
     
-    send_channel_abort_chunk (channel, status_code, request_context) =
+    send_channel_error_msg (channel, status_code, request_context) =
     PRE
         channel         : t_channel_i &
         channel         : s_channel_connected &
