@@ -81,11 +81,13 @@ if(ENABLE_TESTING)
   set(TEST_SERVER_ADDRESS_SPACE_C "test_server_address_space.c")
   set(TEST_LOCAL_TEST_SERVER_ADDRESS_SPACE_C "local_test_server_test_address_space.c")
   set(TEST_CLIENT_ADDRESS_SPACE_C "test_client_address_space.c")
+  set(TEST_SERVER_CLIENT_ADDRESS_SPACE_C "test_server_client_address_space.c")
   # Note: duplication of generated address space due to concurrency issues when compiling with "-j <N>"
   s2opc_embed_address_space(${TEST_CHECK_HELPERS_ADDRESS_SPACE_C} ${TEST_ADDRESS_SPACE_XML})
   s2opc_embed_address_space(${TEST_SERVER_ADDRESS_SPACE_C} ${TEST_ADDRESS_SPACE_XML})
   s2opc_embed_address_space(${TEST_LOCAL_TEST_SERVER_ADDRESS_SPACE_C} ${TEST_ADDRESS_SPACE_XML})
   s2opc_embed_address_space(${TEST_CLIENT_ADDRESS_SPACE_C} ${TEST_ADDRESS_SPACE_XML})
+  s2opc_embed_address_space(${TEST_SERVER_CLIENT_ADDRESS_SPACE_C} ${TEST_ADDRESS_SPACE_XML})
 
 ## S2OPC unit tests ##
 
@@ -275,7 +277,7 @@ if(ENABLE_TESTING)
   add_executable(toolkit_test_server_client
       "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_server/runtime_variables.c"
       "validation_tests/client/toolkit_test_server_client.c"
-      ${TEST_SERVER_ADDRESS_SPACE_C})
+      ${TEST_SERVER_CLIENT_ADDRESS_SPACE_C})
   target_link_libraries(toolkit_test_server_client PRIVATE
     s2opc_clientserver
     s2opc_clientserver-loader-embedded
