@@ -28,6 +28,7 @@
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
 #include "sopc_atomic.h"
+#include "sopc_common_constants.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_crypto_provider.h"
 #include "sopc_encodeable.h"
@@ -284,6 +285,14 @@ static void Test_AddressSpaceNotif_Fct(SOPC_App_AddSpace_Event event, void* opPa
 
 static SOPC_ReturnStatus Server_Initialize(void)
 {
+#ifdef IS_TEST_SERVER
+    // Due to issue in certification tool for View Basic 005/015/020 number of chunks shall be the same and at least 12
+    SOPC_Common_EncodingConstants encConf = SOPC_Common_GetDefaultEncodingConstants();
+    encConf.receive_max_nb_chunks = 12;
+    encConf.send_max_nb_chunks = 12;
+    bool res = SOPC_Common_SetEncodingConstants(encConf);
+    assert(res);
+#endif
     // Initialize the toolkit library and define the communication events callback
     SOPC_ReturnStatus status = SOPC_Toolkit_Initialize(Test_ComEvent_FctServer);
     if (SOPC_STATUS_OK != status)
@@ -945,8 +954,8 @@ static char* Config_SetLogPath(int argc, char* argv[])
     {
         logDirPath = SOPC_Malloc(logDirPathSize * sizeof(char));
     }
-    if (NULL != logDirPath && (int) (logDirPathSize - 1) ==
-                                  snprintf(logDirPath, logDirPathSize, "./%s%s%s_logs/", logDirName, underscore, suffix))
+    if (NULL != logDirPath && (int) (logDirPathSize - 1) == snprintf(logDirPath, logDirPathSize, "./%s%s%s_logs/",
+                                                                     logDirName, underscore, suffix))
     {
         status = SOPC_ToolkitConfig_SetCircularLogPath(logDirPath, true);
     }
