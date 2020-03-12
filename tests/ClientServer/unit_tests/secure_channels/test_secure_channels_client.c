@@ -322,7 +322,7 @@ int main(int argc, char* argv[])
         cRequest.NoOfProfileUris = 0;
         cRequest.ProfileUris = NULL;
 
-        SOPC_Buffer* buffer = SOPC_Buffer_Create(SOPC_MAX_MESSAGE_LENGTH);
+        SOPC_Buffer* buffer = SOPC_Buffer_Create(SOPC_DEFAULT_RECEIVE_MAX_MESSAGE_LENGTH);
         assert(NULL != buffer);
         status = SOPC_Buffer_SetDataLength(buffer, SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
         assert(SOPC_STATUS_OK == status);

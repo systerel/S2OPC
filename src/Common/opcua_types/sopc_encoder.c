@@ -133,7 +133,7 @@ SOPC_ReturnStatus SOPC_Byte_Write(const SOPC_Byte* value, SOPC_Buffer* buf, uint
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -160,7 +160,7 @@ SOPC_ReturnStatus SOPC_Byte_Read(SOPC_Byte* value, SOPC_Buffer* buf, uint32_t ne
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -188,7 +188,7 @@ SOPC_ReturnStatus SOPC_Boolean_Write(const SOPC_Boolean* value, SOPC_Buffer* buf
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -221,7 +221,7 @@ SOPC_ReturnStatus SOPC_Boolean_Read(SOPC_Boolean* value, SOPC_Buffer* buf, uint3
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -251,7 +251,7 @@ SOPC_ReturnStatus SOPC_SByte_Write(const SOPC_SByte* value, SOPC_Buffer* buf, ui
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -278,7 +278,7 @@ SOPC_ReturnStatus SOPC_SByte_Read(SOPC_SByte* value, SOPC_Buffer* buf, uint32_t 
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -305,7 +305,7 @@ SOPC_ReturnStatus SOPC_Int16_Write(const int16_t* value, SOPC_Buffer* buf, uint3
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -336,7 +336,7 @@ SOPC_ReturnStatus SOPC_Int16_Read(int16_t* value, SOPC_Buffer* buf, uint32_t nes
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -368,7 +368,7 @@ SOPC_ReturnStatus SOPC_UInt16_Write(const uint16_t* value, SOPC_Buffer* buf, uin
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -397,7 +397,7 @@ SOPC_ReturnStatus SOPC_UInt16_Read(uint16_t* value, SOPC_Buffer* buf, uint32_t n
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -428,7 +428,7 @@ SOPC_ReturnStatus SOPC_Int32_Write(const int32_t* value, SOPC_Buffer* buf, uint3
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -457,7 +457,7 @@ SOPC_ReturnStatus SOPC_Int32_Read(int32_t* value, SOPC_Buffer* buf, uint32_t nes
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -488,7 +488,7 @@ SOPC_ReturnStatus SOPC_UInt32_Write(const uint32_t* value, SOPC_Buffer* buf, uin
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -516,7 +516,7 @@ SOPC_ReturnStatus SOPC_UInt32_Read(uint32_t* value, SOPC_Buffer* buf, uint32_t n
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -547,7 +547,7 @@ SOPC_ReturnStatus SOPC_Int64_Write(const int64_t* value, SOPC_Buffer* buf, uint3
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -576,7 +576,7 @@ SOPC_ReturnStatus SOPC_Int64_Read(int64_t* value, SOPC_Buffer* buf, uint32_t nes
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -607,7 +607,7 @@ SOPC_ReturnStatus SOPC_UInt64_Write(const uint64_t* value, SOPC_Buffer* buf, uin
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -636,7 +636,7 @@ SOPC_ReturnStatus SOPC_UInt64_Read(uint64_t* value, SOPC_Buffer* buf, uint32_t n
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -667,7 +667,7 @@ SOPC_ReturnStatus SOPC_Float_Write(const float* value, SOPC_Buffer* buf, uint32_
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -697,7 +697,7 @@ SOPC_ReturnStatus SOPC_Float_Read(float* value, SOPC_Buffer* buf, uint32_t neste
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -728,7 +728,7 @@ SOPC_ReturnStatus SOPC_Double_Write(const double* value, SOPC_Buffer* buf, uint3
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -757,7 +757,7 @@ SOPC_ReturnStatus SOPC_Double_Read(double* value, SOPC_Buffer* buf, uint32_t nes
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -787,7 +787,7 @@ SOPC_ReturnStatus SOPC_ByteString_Write(const SOPC_ByteString* str, SOPC_Buffer*
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -832,7 +832,7 @@ SOPC_ReturnStatus SOPC_ByteString_Read(SOPC_ByteString* str, SOPC_Buffer* buf, u
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -844,7 +844,8 @@ SOPC_ReturnStatus SOPC_ByteString_Read(SOPC_ByteString* str, SOPC_Buffer* buf, u
     {
         if (length > 0)
         {
-            if (length <= SOPC_MAX_STRING_LENGTH && (uint64_t) length * sizeof(SOPC_Byte) <= SIZE_MAX)
+            if (length <= SOPC_Internal_Common_GetEncodingConstants()->max_string_length &&
+                (uint64_t) length * sizeof(SOPC_Byte) <= SIZE_MAX)
             {
                 str->Length = length;
                 str->Data = SOPC_Malloc(sizeof(SOPC_Byte) * (size_t) length);
@@ -890,7 +891,7 @@ SOPC_ReturnStatus SOPC_String_Write(const SOPC_String* str, SOPC_Buffer* buf, ui
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -935,7 +936,7 @@ SOPC_ReturnStatus SOPC_String_ReadWithLimitedLength(SOPC_String* str,
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -947,7 +948,8 @@ SOPC_ReturnStatus SOPC_String_ReadWithLimitedLength(SOPC_String* str,
     {
         if (length > 0)
         {
-            if (length <= SOPC_MAX_STRING_LENGTH && (uint64_t) length + 1 <= SIZE_MAX)
+            if (length <= SOPC_Internal_Common_GetEncodingConstants()->max_string_length &&
+                (uint64_t) length + 1 <= SIZE_MAX)
             {
                 if (0 == maxLength || length <= maxLength)
                 {
@@ -1034,7 +1036,7 @@ SOPC_ReturnStatus SOPC_DateTime_Write(const SOPC_DateTime* date, SOPC_Buffer* bu
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -1057,7 +1059,7 @@ SOPC_ReturnStatus SOPC_DateTime_Read(SOPC_DateTime* date, SOPC_Buffer* buf, uint
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -1080,7 +1082,7 @@ SOPC_ReturnStatus SOPC_Guid_Write(const SOPC_Guid* guid, SOPC_Buffer* buf, uint3
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -1119,7 +1121,7 @@ SOPC_ReturnStatus SOPC_Guid_Read(SOPC_Guid* guid, SOPC_Buffer* buf, uint32_t nes
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -1273,7 +1275,7 @@ SOPC_ReturnStatus SOPC_NodeId_Write(const SOPC_NodeId* nodeId, SOPC_Buffer* buf,
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -1296,7 +1298,7 @@ static SOPC_ReturnStatus Internal_NodeId_Read(SOPC_Buffer* buf,
     SOPC_Byte byte = 0;
     uint16_t twoBytes = 0;
 
-    if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -1394,7 +1396,7 @@ SOPC_ReturnStatus SOPC_NodeId_Read(SOPC_NodeId* nodeId, SOPC_Buffer* buf, uint32
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -1420,7 +1422,7 @@ SOPC_ReturnStatus SOPC_ExpandedNodeId_Write(const SOPC_ExpandedNodeId* expNodeId
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -1462,7 +1464,7 @@ SOPC_ReturnStatus SOPC_ExpandedNodeId_Read(SOPC_ExpandedNodeId* expNodeId, SOPC_
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -1592,7 +1594,7 @@ static SOPC_ReturnStatus SOPC_DiagnosticInfo_Write_Internal(const SOPC_Diagnosti
     if (SOPC_STATUS_OK == status && (encodingByte & SOPC_DiagInfoEncoding_InnerDianosticInfo) != 0x00)
     {
         nestedLevel++;
-        if (nestedLevel > SOPC_MAX_DIAG_INFO_NESTED_LEVEL)
+        if (nestedLevel > SOPC_Internal_Common_GetEncodingConstants()->max_nested_diag_info)
         {
             status = SOPC_STATUS_ENCODING_ERROR;
         }
@@ -1609,7 +1611,7 @@ SOPC_ReturnStatus SOPC_DiagnosticInfo_Write(const SOPC_DiagnosticInfo* diagInfo,
                                             uint32_t nestedStructLevel)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -1664,7 +1666,7 @@ static SOPC_ReturnStatus SOPC_DiagnosticInfo_Read_Internal(SOPC_DiagnosticInfo* 
     if (SOPC_STATUS_OK == status && (encodingByte & SOPC_DiagInfoEncoding_InnerDianosticInfo) != 0x00)
     {
         nestedLevel++;
-        if (nestedLevel > SOPC_MAX_DIAG_INFO_NESTED_LEVEL)
+        if (nestedLevel > SOPC_Internal_Common_GetEncodingConstants()->max_nested_diag_info)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
@@ -1706,7 +1708,7 @@ SOPC_ReturnStatus SOPC_DiagnosticInfo_Read(SOPC_DiagnosticInfo* diagInfo, SOPC_B
 {
     // Manage diagnostic information nested level
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -1731,7 +1733,7 @@ SOPC_ReturnStatus SOPC_QualifiedName_Write(const SOPC_QualifiedName* qname,
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -1758,7 +1760,7 @@ SOPC_ReturnStatus SOPC_QualifiedName_Read(SOPC_QualifiedName* qname, SOPC_Buffer
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -1810,7 +1812,7 @@ SOPC_ReturnStatus SOPC_LocalizedText_Write(const SOPC_LocalizedText* localizedTe
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -1845,7 +1847,7 @@ SOPC_ReturnStatus SOPC_LocalizedText_Read(SOPC_LocalizedText* localizedText,
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -1891,7 +1893,7 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Write(const SOPC_ExtensionObject* extObj,
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -1978,7 +1980,7 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_B
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -2098,7 +2100,7 @@ static SOPC_ReturnStatus SOPC_Read_Array_WithNestedLevel(SOPC_Buffer* buf,
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -2108,7 +2110,8 @@ static SOPC_ReturnStatus SOPC_Read_Array_WithNestedLevel(SOPC_Buffer* buf,
 
     if (SOPC_STATUS_OK == status)
     {
-        if ((*noOfElts >= 0) && (*noOfElts <= SOPC_MAX_ARRAY_LENGTH) && ((uint64_t) *noOfElts * sizeOfElt <= SIZE_MAX))
+        if ((*noOfElts >= 0) && (*noOfElts <= SOPC_Internal_Common_GetEncodingConstants()->max_array_length) &&
+            ((uint64_t) *noOfElts * sizeOfElt <= SIZE_MAX))
         {
             // OK: number of elements valid
         }
@@ -2180,7 +2183,7 @@ static SOPC_ReturnStatus SOPC_Write_Array_WithNestedLevel(SOPC_Buffer* buf,
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -2225,7 +2228,7 @@ static SOPC_ReturnStatus WriteVariantNonArrayBuiltInType(SOPC_Buffer* buf,
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
-    if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -2336,7 +2339,7 @@ static SOPC_ReturnStatus WriteVariantArrayBuiltInType(SOPC_Buffer* buf,
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     const void* arr = NULL;
 
-    if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -2476,11 +2479,13 @@ static SOPC_ReturnStatus SOPC_Variant_Write_Internal(const SOPC_Variant* variant
     int64_t matrixLength = 1;
     int32_t idx = 0;
 
+    const uint32_t max_nested_struct_level = SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct;
+
     if (NULL == variant)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= max_nested_struct_level)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -2569,7 +2574,7 @@ SOPC_ReturnStatus SOPC_Variant_WriteAux_Nested(const void* value, SOPC_Buffer* b
 SOPC_ReturnStatus SOPC_Variant_Write(const SOPC_Variant* variant, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -2586,7 +2591,7 @@ static SOPC_ReturnStatus ReadVariantNonArrayBuiltInType(SOPC_Buffer* buf,
                                                         uint32_t nestedStructLevel)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -2937,11 +2942,14 @@ static SOPC_ReturnStatus SOPC_Variant_Read_Internal(SOPC_Variant* variant, SOPC_
     SOPC_Byte encodingByte = 0;
     int32_t arrayLength = 0;
     int64_t matrixLength = 1;
+
+    const SOPC_Common_EncodingConstants* encCfg = SOPC_Internal_Common_GetEncodingConstants();
+
     if (NULL == variant)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= encCfg->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -3005,7 +3013,7 @@ static SOPC_ReturnStatus SOPC_Variant_Read_Internal(SOPC_Variant* variant, SOPC_
             }
 
             if (SOPC_STATUS_OK == status &&
-                (variant->Value.Matrix.Dimensions < 0 || variant->Value.Matrix.Dimensions > SOPC_MAX_ARRAY_LENGTH ||
+                (variant->Value.Matrix.Dimensions < 0 || variant->Value.Matrix.Dimensions > encCfg->max_array_length ||
                  (uint64_t) variant->Value.Matrix.Dimensions * 1 > SIZE_MAX))
             {
                 status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -3165,7 +3173,7 @@ static SOPC_ReturnStatus SOPC_DataValue_Write_Internal(const SOPC_DataValue* dat
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -3231,7 +3239,7 @@ static SOPC_ReturnStatus SOPC_DataValue_Read_Internal(SOPC_DataValue* dataValue,
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -3326,7 +3334,7 @@ SOPC_ReturnStatus SOPC_Read_Array(SOPC_Buffer* buf,
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -3344,7 +3352,7 @@ SOPC_ReturnStatus SOPC_Read_Array(SOPC_Buffer* buf,
         *noOfElts = 0;
     }
 
-    if (*noOfElts > SOPC_MAX_ARRAY_LENGTH)
+    if (*noOfElts > SOPC_Internal_Common_GetEncodingConstants()->max_array_length)
     {
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
@@ -3401,7 +3409,7 @@ SOPC_ReturnStatus SOPC_Write_Array(SOPC_Buffer* msgBuf,
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    else if (nestedStructLevel >= SOPC_MAX_STRUCT_NESTED_LEVEL)
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }

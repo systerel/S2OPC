@@ -624,7 +624,7 @@ START_TEST(test_too_large_msg_size)
     byte = 'F';
     status = SOPC_Byte_Write(&byte, buffer, 0);
     ck_assert(SOPC_STATUS_OK == status);
-    ui32 = SOPC_TCP_UA_MAX_BUFFER_SIZE + 1;
+    ui32 = SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE + 1;
     status = SOPC_UInt32_Write(&ui32, buffer, 0);
     ck_assert(SOPC_STATUS_OK == status);
     ui32 = 833084066;

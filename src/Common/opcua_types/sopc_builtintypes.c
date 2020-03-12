@@ -3222,6 +3222,7 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Copy(SOPC_ExtensionObject* dest, const SO
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     SOPC_Buffer* encodedObject = NULL;
     SOPC_ExtObjectBodyEncoding encoding = SOPC_ExtObjBodyEncoding_None;
+    const SOPC_Common_EncodingConstants* encCfg;
 
     if (NULL == dest || NULL == src)
     {
@@ -3246,9 +3247,10 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Copy(SOPC_ExtensionObject* dest, const SO
         {
             status = SOPC_STATUS_OK;
 
+            encCfg = SOPC_Internal_Common_GetEncodingConstants();
             /* We do not have the copy method for the object but we can encode it */
             encoding = SOPC_ExtObjBodyEncoding_ByteString;
-            encodedObject = SOPC_Buffer_CreateResizable(SOPC_TCP_UA_MAX_BUFFER_SIZE, SOPC_MAX_MESSAGE_LENGTH);
+            encodedObject = SOPC_Buffer_CreateResizable(encCfg->buffer_size, encCfg->send_max_msg_size);
             if (NULL == encodedObject)
             {
                 status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -3261,7 +3263,7 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Copy(SOPC_ExtensionObject* dest, const SO
             if (SOPC_STATUS_OK == status)
             {
                 SOPC_ByteString_Initialize(&dest->Body.Bstring);
-                assert(SOPC_MAX_STRING_LENGTH + 4 <= INT32_MAX); // Ensure conversion to int32_t is valid
+                assert(encCfg->max_string_length + 4 <= INT32_MAX); // Ensure conversion to int32_t is valid
                 // Do a copy to keep only used data in buffer
                 status = SOPC_ByteString_CopyFromBytes(&dest->Body.Bstring, encodedObject->data,
                                                        (int32_t) encodedObject->length);

@@ -267,15 +267,15 @@ START_TEST(test_sockets)
 
     /* CLIENT SIDE: send a msg buffer through connection with a length greater than maximum buffer size for socket
      * => the socket layer shall provide it in several buffers  */
-    sendBuffer = SOPC_Buffer_Create(2 * SOPC_TCP_UA_MAX_BUFFER_SIZE);
+    sendBuffer = SOPC_Buffer_Create(2 * SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE);
     ck_assert_ptr_nonnull(sendBuffer);
     // Use a copy of buffer to compare with result to avoid byte-to-byte comparison on long length buffer
-    SOPC_Buffer* sendBufferCopy = SOPC_Buffer_Create(2 * SOPC_TCP_UA_MAX_BUFFER_SIZE);
+    SOPC_Buffer* sendBufferCopy = SOPC_Buffer_Create(2 * SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE);
     ck_assert_ptr_nonnull(sendBufferCopy);
-    accBuffer = SOPC_Buffer_Create(2 * SOPC_TCP_UA_MAX_BUFFER_SIZE);
+    accBuffer = SOPC_Buffer_Create(2 * SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE);
     ck_assert_ptr_nonnull(accBuffer);
 
-    for (idx = 0; idx < 2 * SOPC_TCP_UA_MAX_BUFFER_SIZE; idx++)
+    for (idx = 0; idx < 2 * SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE; idx++)
     {
         byte = (uint8_t)(idx % 256);
         status = SOPC_Buffer_Write(sendBuffer, &byte, 1);
@@ -290,13 +290,13 @@ START_TEST(test_sockets)
     // Accumulate received bytes in a unique buffer
     totalReceivedBytes = 0;
     receivedBytes = 1;
-    while (totalReceivedBytes < 2 * SOPC_TCP_UA_MAX_BUFFER_SIZE && receivedBytes != 0)
+    while (totalReceivedBytes < 2 * SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE && receivedBytes != 0)
     {
         SOPC_Event* ev = expect_event(SOCKET_RCV_BYTES, serverSecureChannelConnectionId);
         receivedBuffer = (SOPC_Buffer*) ev->params;
         SOPC_Free(ev);
 
-        ck_assert(receivedBuffer->length <= 2 * SOPC_TCP_UA_MAX_BUFFER_SIZE);
+        ck_assert(receivedBuffer->length <= 2 * SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE);
         receivedBytes = receivedBuffer->length;
         totalReceivedBytes = totalReceivedBytes + receivedBytes;
         status = SOPC_Buffer_Write(accBuffer, receivedBuffer->data, receivedBuffer->length);
@@ -304,15 +304,15 @@ START_TEST(test_sockets)
         SOPC_Buffer_Delete(receivedBuffer);
     }
 
-    ck_assert(totalReceivedBytes == 2 * SOPC_TCP_UA_MAX_BUFFER_SIZE &&
-              accBuffer->length == 2 * SOPC_TCP_UA_MAX_BUFFER_SIZE);
+    ck_assert(totalReceivedBytes == 2 * SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE &&
+              accBuffer->length == 2 * SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE);
     ck_assert(receivedBytes != totalReceivedBytes);
     receivedBuffer = NULL;
     status = SOPC_Buffer_SetPosition(accBuffer, 0);
     ck_assert(SOPC_STATUS_OK == status);
 
     // Check acc buffer content
-    int compareResult = memcmp(sendBufferCopy->data, accBuffer->data, 2 * SOPC_TCP_UA_MAX_BUFFER_SIZE);
+    int compareResult = memcmp(sendBufferCopy->data, accBuffer->data, 2 * SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE);
     ck_assert_int_eq(0, compareResult);
     SOPC_Buffer_Delete(sendBufferCopy);
     SOPC_Buffer_Delete(accBuffer);

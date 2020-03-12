@@ -469,7 +469,7 @@ START_TEST(test_unexpected_receive_too_many_intermediate_chunks)
     printf("SC_Rcv_Buffer: Simulate too many intermediate chunks message received\n");
 
     // SOPC_MAX_NB_CHUNKS intermediate chunks starting from SN=2
-    const uint8_t nb_intermediate_chunks = SOPC_MAX_NB_CHUNKS;
+    const uint8_t nb_intermediate_chunks = SOPC_DEFAULT_RECEIVE_MAX_NB_CHUNKS;
     simulate_N_chunks('C', 2, nb_intermediate_chunks, false);
 
     // Since MAX_NB_CHUNKS intermediate chunks were received no more chunks can be received and message is incomplete
@@ -535,7 +535,7 @@ START_TEST(test_expected_send_multi_chunks)
     SOPC_Buffer* buffer = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     int res = 0;
-    char hexOutput[(SOPC_MAX_MESSAGE_LENGTH + 1) * 2];
+    char hexOutput[(SOPC_DEFAULT_RECEIVE_MAX_MESSAGE_LENGTH + 1) * 2];
 
     printf("SC_Rcv_Buffer: Simulate multi-chunks message sent\n");
 
@@ -598,7 +598,7 @@ START_TEST(test_expected_send_abort_chunk)
     SOPC_Buffer* buffer = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     int res = 0;
-    char hexOutput[(SOPC_MAX_MESSAGE_LENGTH + 1) * 2];
+    char hexOutput[(SOPC_DEFAULT_RECEIVE_MAX_MESSAGE_LENGTH + 1) * 2];
 
     printf("SC_Rcv_Buffer: Simulate abort chunk message sent\n");
 
@@ -658,7 +658,7 @@ START_TEST(test_expected_forced_send_err)
     SOPC_Buffer* buffer = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     int res = 0;
-    char hexOutput[(SOPC_MAX_MESSAGE_LENGTH + 1) * 2];
+    char hexOutput[(SOPC_DEFAULT_RECEIVE_MAX_MESSAGE_LENGTH + 1) * 2];
 
     printf("SC_Rcv_Buffer: Simulate abort chunk message sent\n");
 
@@ -735,7 +735,7 @@ START_TEST(test_too_large_msg_size)
     byte = 'F';
     status = SOPC_Byte_Write(&byte, buffer, 0);
     ck_assert(SOPC_STATUS_OK == status);
-    ui32 = SOPC_TCP_UA_MAX_BUFFER_SIZE + 1;
+    ui32 = SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE + 1;
     status = SOPC_UInt32_Write(&ui32, buffer, 0);
     ck_assert(SOPC_STATUS_OK == status);
     ui32 = 833084066;

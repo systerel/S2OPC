@@ -67,6 +67,8 @@ extern SOPC_Socket socketsArray[SOPC_MAX_SOCKETS];
 
 extern SOPC_EventHandler* socketsEventHandler;
 
+extern uint32_t maxBufferSize;
+
 /** @brief Initialize the array of sockets */
 void SOPC_SocketsInternalContext_Initialize(void);
 

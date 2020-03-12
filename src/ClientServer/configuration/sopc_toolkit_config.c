@@ -104,6 +104,8 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
 
         appEventCallback = pAppFct;
 
+        // Ensure constants cannot be modified later
+        SOPC_Common_SetEncodingConstants(SOPC_Common_GetDefaultEncodingConstants());
         SOPC_Helper_EndiannessCfg_Initialize();
 
         if (SIZE_MAX / (SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED + 1) < sizeof(SOPC_SecureChannel_Config*) ||

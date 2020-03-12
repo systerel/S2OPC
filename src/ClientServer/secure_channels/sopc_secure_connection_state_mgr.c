@@ -71,14 +71,16 @@ bool SC_InitNewConnection(uint32_t* newConnectionIdx)
     {
         scConnection = &(secureConnectionsArray[connectionIdx]);
 
+        const SOPC_Common_EncodingConstants* encCfg = SOPC_Internal_Common_GetEncodingConstants();
+
         // Initialize TCP message properties
         scConnection->tcpMsgProperties.protocolVersion = SOPC_PROTOCOL_VERSION;
-        scConnection->tcpMsgProperties.receiveBufferSize = SOPC_TCP_UA_MAX_BUFFER_SIZE;
-        scConnection->tcpMsgProperties.sendBufferSize = SOPC_TCP_UA_MAX_BUFFER_SIZE;
-        scConnection->tcpMsgProperties.receiveMaxMessageSize = SOPC_MAX_MESSAGE_LENGTH;
-        scConnection->tcpMsgProperties.sendMaxMessageSize = SOPC_MAX_MESSAGE_LENGTH;
-        scConnection->tcpMsgProperties.receiveMaxChunkCount = SOPC_MAX_NB_CHUNKS;
-        scConnection->tcpMsgProperties.sendMaxChunkCount = SOPC_MAX_NB_CHUNKS;
+        scConnection->tcpMsgProperties.receiveBufferSize = encCfg->buffer_size;
+        scConnection->tcpMsgProperties.sendBufferSize = encCfg->buffer_size;
+        scConnection->tcpMsgProperties.receiveMaxMessageSize = encCfg->receive_max_msg_size;
+        scConnection->tcpMsgProperties.sendMaxMessageSize = encCfg->send_max_msg_size;
+        scConnection->tcpMsgProperties.receiveMaxChunkCount = encCfg->receive_max_nb_chunks;
+        scConnection->tcpMsgProperties.sendMaxChunkCount = encCfg->send_max_nb_chunks;
 
         // Initialize TCP sequence properties
         scConnection->tcpSeqProperties.sentRequestIds = SOPC_SLinkedList_Create(0);

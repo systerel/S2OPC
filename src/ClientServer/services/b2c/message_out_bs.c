@@ -307,7 +307,7 @@ static void internal__message_out_bs__encode_msg(const constants__t_channel_conf
                 *message_out_bs__sc = constants_statuscodes_bs__e_sc_bad_request_too_large;
                 break;
             case constants__e_msg_response_type:
-                if (SOPC_SEND_MAX_MESSAGE_LENGTH == sendMessageMaxSize)
+                if (SOPC_Internal_Common_GetEncodingConstants()->send_max_msg_size == sendMessageMaxSize)
                 {
                     /* Internal limit */
                     *message_out_bs__sc = constants_statuscodes_bs__e_sc_bad_encoding_limits_exceeded;

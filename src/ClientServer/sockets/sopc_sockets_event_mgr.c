@@ -433,10 +433,10 @@ static SOPC_ReturnStatus on_ready_read(SOPC_Socket* socket, uint32_t socket_id)
             // Nothing to read, still allocate minimum size and make an attempt to at least check the socket closed case
             bytesToRead = SOPC_MIN_BYTE_BUFFER_SIZE_READ_SOCKET;
         }
-        else if (bytesToRead > SOPC_TCP_UA_MAX_BUFFER_SIZE)
+        else if (bytesToRead > maxBufferSize)
         {
             // Too many bytes to read for a chunk maximum size, allocate the maximum chunk size
-            bytesToRead = SOPC_TCP_UA_MAX_BUFFER_SIZE;
+            bytesToRead = maxBufferSize;
         }
 
         buffer = SOPC_Buffer_Create(bytesToRead);

@@ -33,6 +33,7 @@ Mutex socketsMutex;
 SOPC_Looper* socketsLooper = NULL;
 SOPC_AsyncQueue* socketsInputEventQueue = NULL;
 SOPC_EventHandler* socketsEventHandler = NULL;
+uint32_t maxBufferSize = SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE;
 
 struct Event
 {
@@ -54,6 +55,7 @@ void SOPC_SocketsInternalContext_Initialize()
 
     SOPC_ReturnStatus status = SOPC_AsyncQueue_Init(&socketsInputEventQueue, "SocketsInternalContext");
     assert(SOPC_STATUS_OK == status);
+    maxBufferSize = SOPC_Internal_Common_GetEncodingConstants()->buffer_size;
 }
 
 void SOPC_SocketsInternalContext_Clear()
