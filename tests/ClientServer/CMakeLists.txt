@@ -21,6 +21,12 @@ option(ENABLE_FUZZING "Build the S2OPC fuzzers" OFF)
 # Python3 is mandatory for compilation
 find_package(PythonInterp 3 REQUIRED)
 
+# Enable fuzzing if WITH_OSS_FUZZ is ON
+if(WITH_OSS_FUZZ)
+    set(ENABLE_TESTING OFF)
+    set(ENABLE_FUZZING ON)
+endif()
+
 # We always link check statically, so that our test binaries are standalone
 if(ENABLE_TESTING)
   find_package(check REQUIRED)
