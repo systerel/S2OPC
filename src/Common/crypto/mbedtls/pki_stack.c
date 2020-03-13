@@ -59,49 +59,12 @@ static const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_minimal = {
 
 static uint32_t PKIProviderStack_GetCertificateValidationError(uint32_t failure_reasons)
 {
-    if ((failure_reasons & MBEDTLS_X509_BADCERT_EXPIRED) != 0)
-    {
-        return SOPC_CertificateValidationError_TimeInvalid;
-    }
-    else if ((failure_reasons & MBEDTLS_X509_BADCERT_REVOKED) != 0)
-    {
-        return SOPC_CertificateValidationError_Revoked;
-    }
-    else if ((failure_reasons & MBEDTLS_X509_BADCERT_CN_MISMATCH) != 0)
-    {
-        return SOPC_CertificateValidationError_HostNameInvalid;
-    }
-    else if ((failure_reasons & MBEDTLS_X509_BADCERT_NOT_TRUSTED) != 0)
-    {
-        return SOPC_CertificateValidationError_Untrusted;
-    }
-    else if ((failure_reasons & MBEDTLS_X509_BADCRL_NOT_TRUSTED) != 0)
-    {
-        return SOPC_CertificateValidationError_RevocationUnknown;
-    }
-    else if ((failure_reasons & MBEDTLS_X509_BADCRL_EXPIRED) != 0)
-    {
-        return SOPC_CertificateValidationError_RevocationUnknown;
-    }
-    else if ((failure_reasons & MBEDTLS_X509_BADCERT_MISSING) != 0)
+    // Order compliant with part 4 (1.03) Table 104
+
+    /* Certificate structure */
+    if ((failure_reasons & MBEDTLS_X509_BADCERT_MISSING) != 0)
     {
         return SOPC_CertificateValidationError_Invalid;
-    }
-    else if ((failure_reasons & MBEDTLS_X509_BADCERT_SKIP_VERIFY) != 0)
-    {
-        return SOPC_CertificateValidationError_UseNotAllowed;
-    }
-    else if ((failure_reasons & MBEDTLS_X509_BADCERT_OTHER) != 0)
-    {
-        return SOPC_CertificateValidationError_Untrusted;
-    }
-    else if ((failure_reasons & MBEDTLS_X509_BADCERT_FUTURE) != 0)
-    {
-        return SOPC_CertificateValidationError_TimeInvalid;
-    }
-    else if ((failure_reasons & MBEDTLS_X509_BADCRL_FUTURE) != 0)
-    {
-        return SOPC_CertificateValidationError_RevocationUnknown;
     }
     else if ((failure_reasons & MBEDTLS_X509_BADCERT_KEY_USAGE) != 0)
     {
@@ -115,6 +78,16 @@ static uint32_t PKIProviderStack_GetCertificateValidationError(uint32_t failure_
     {
         return SOPC_CertificateValidationError_Invalid;
     }
+    else if ((failure_reasons & MBEDTLS_X509_BADCERT_SKIP_VERIFY) != 0)
+    {
+        return SOPC_CertificateValidationError_UseNotAllowed;
+    }
+
+    /* Signature */
+    else if ((failure_reasons & MBEDTLS_X509_BADCERT_BAD_KEY) != 0)
+    {
+        return SOPC_CertificateValidationError_Invalid;
+    }
     else if ((failure_reasons & MBEDTLS_X509_BADCERT_BAD_MD) != 0)
     {
         return SOPC_CertificateValidationError_Invalid;
@@ -123,9 +96,48 @@ static uint32_t PKIProviderStack_GetCertificateValidationError(uint32_t failure_
     {
         return SOPC_CertificateValidationError_Invalid;
     }
-    else if ((failure_reasons & MBEDTLS_X509_BADCERT_BAD_KEY) != 0)
+
+    /* Trust list check*/
+    // Cf. generic error below: validity period hidden if generic error used here
+
+    /* Validity period */
+    else if ((failure_reasons & MBEDTLS_X509_BADCERT_EXPIRED) != 0)
     {
-        return SOPC_CertificateValidationError_Invalid;
+        return SOPC_CertificateValidationError_TimeInvalid;
+    }
+    else if ((failure_reasons & MBEDTLS_X509_BADCERT_FUTURE) != 0)
+    {
+        return SOPC_CertificateValidationError_TimeInvalid;
+    }
+
+    /* Generic signature error (may include validity period) */
+    if ((failure_reasons & MBEDTLS_X509_BADCERT_NOT_TRUSTED) != 0)
+    {
+        return SOPC_CertificateValidationError_Untrusted;
+    }
+
+    /* Host Name */
+    else if ((failure_reasons & MBEDTLS_X509_BADCERT_CN_MISMATCH) != 0)
+    {
+        return SOPC_CertificateValidationError_HostNameInvalid;
+    }
+    /* URI */
+
+    /* Certificate Usage */
+    // Checked in PKIProviderStack_ValidateCertificate
+
+    /* (Find) Revocation List */
+    else if ((failure_reasons & MBEDTLS_X509_BADCRL_NOT_TRUSTED) != 0)
+    {
+        return SOPC_CertificateValidationError_RevocationUnknown;
+    }
+    else if ((failure_reasons & MBEDTLS_X509_BADCRL_EXPIRED) != 0)
+    {
+        return SOPC_CertificateValidationError_RevocationUnknown;
+    }
+    else if ((failure_reasons & MBEDTLS_X509_BADCRL_FUTURE) != 0)
+    {
+        return SOPC_CertificateValidationError_RevocationUnknown;
     }
     else if ((failure_reasons & MBEDTLS_X509_BADCRL_BAD_MD) != 0)
     {
@@ -138,6 +150,16 @@ static uint32_t PKIProviderStack_GetCertificateValidationError(uint32_t failure_
     else if ((failure_reasons & MBEDTLS_X509_BADCRL_BAD_KEY) != 0)
     {
         return SOPC_CertificateValidationError_RevocationUnknown;
+    }
+
+    /* Revocation check */
+    else if ((failure_reasons & MBEDTLS_X509_BADCERT_REVOKED) != 0)
+    {
+        return SOPC_CertificateValidationError_Revoked;
+    }
+    else if ((failure_reasons & MBEDTLS_X509_BADCERT_OTHER) != 0)
+    {
+        return SOPC_CertificateValidationError_Untrusted;
     }
 
     return SOPC_CertificateValidationError_Unkown;
