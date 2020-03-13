@@ -167,14 +167,16 @@ int main(int argc, char* const argv[])
     /* Also print the save-file prefix */
     printf("CSV_PREFIX: %s\n", getenv_default("CSV_PREFIX", CSV_PREFIX));
 
-    /* Don't forget the SKS */
-    const char* signing_key = getenv_default("SKS_SIGNING_KEY", SKS_SIGNING_KEY);
-    const char* encryption_key = getenv_default("SKS_ENCRYPTION_KEY", SKS_ENCRYPTION_KEY);
-    const char* nonce = getenv_default("SKS_KEY_NONCE", SKS_KEY_NONCE);
-    printf("SKS_SIGNING_KEY: %s\n", signing_key);
-    printf("SKS_ENCRYPTION_KEY: %s\n", encryption_key);
-    printf("SKS_KEY_NONCE: %s\n", nonce);
-    SOPC_LocalSKS_init(signing_key, encryption_key, nonce);
+    // TODO : Migration of SKS configuration
+
+    ///* Don't forget the SKS */
+    // const char* signing_key = getenv_default("SKS_SIGNING_KEY", SKS_SIGNING_KEY);
+    // const char* encryption_key = getenv_default("SKS_ENCRYPTION_KEY", SKS_ENCRYPTION_KEY);
+    // const char* nonce = getenv_default("SKS_KEY_NONCE", SKS_KEY_NONCE);
+    // printf("SKS_SIGNING_KEY: %s\n", signing_key);
+    // printf("SKS_ENCRYPTION_KEY: %s\n", encryption_key);
+    // printf("SKS_KEY_NONCE: %s\n", nonce);
+    // SOPC_LocalSKS_init(signing_key, encryption_key, nonce);
 
     /* Initialize the Cache with the PubSub configuration */
     if (SOPC_STATUS_OK == status)

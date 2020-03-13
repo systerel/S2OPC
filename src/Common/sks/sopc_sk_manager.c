@@ -648,7 +648,7 @@ uint32_t SOPC_SKManager_GetAllKeysLifeTime(SOPC_SKManager* skm)
 
 void SOPC_SKManager_Clear(SOPC_SKManager* skm)
 {
-    if (NULL != skm)
+    if (NULL != skm && NULL != skm->ptrClear)
     {
         skm->ptrClear(skm);
     }

@@ -73,7 +73,7 @@ SOPC_SKProvider* SOPC_SKProvider_BySKS_Create(void);
  */
 SOPC_SKProvider* SOPC_SKProvider_RandomPubSub_Create(void);
 
-/**
+/** TODO add nb requested keys
  *  \brief          Get Keys of a Security Keys Provider for a given security group.
  *                  All returned data are copied by this function. The caller is reponsible for deleting these data.
  *                  Output parameters may be NULL exept Keys and NbKeys

@@ -283,10 +283,9 @@ static bool SOPC_PubScheduler_MessageCtx_Array_Init_Next(SOPC_PubScheduler_Trans
     if (SOPC_SecurityMode_Sign == smode || SOPC_SecurityMode_SignAndEncrypt == smode)
     {
         context->security->mode = SOPC_WriterGroup_Get_SecurityMode(group);
-        context->security->groupKeys =
-            SOPC_LocalSKS_GetSecurityKeys(SOPC_PUBSUB_SKS_DEFAULT_GROUPID, SOPC_PUBSUB_SKS_CURRENT_TOKENID);
+        context->security->groupKeys = NULL;
         context->security->provider = SOPC_CryptoProvider_CreatePubSub(SOPC_PUBSUB_SECURITY_POLICY);
-        if (NULL == context->security->groupKeys || NULL == context->security->provider)
+        if (NULL == context->security->provider)
         {
             log_error("# Error Publisher: cannot create security provider\n");
             result = false; /* TODO: it should be possible to avoid this variable and the partial frees when false */
@@ -467,10 +466,32 @@ static void* thread_start_publish(void* arg)
                 SOPC_PubSub_SecurityType* security = context->security;
                 if (NULL != security)
                 {
-                    security->msgNonceRandom = SOPC_PubSub_Security_Random(security->provider);
-                    assert(NULL != security->msgNonceRandom); /* TODO: Fail sooner, don't call GetVariables */
-                    security->sequenceNumber = pubSchedulerCtx.sequenceNumber;
-                    pubSchedulerCtx.sequenceNumber++;
+                    // Update keys
+                    if (NULL != security->groupKeys)
+                    {
+                        SOPC_LocalSKS_Keys_Delete(security->groupKeys);
+                        SOPC_Free(security->groupKeys);
+                    }
+                    security->groupKeys =
+                        SOPC_LocalSKS_GetSecurityKeys(SOPC_PUBSUB_SKS_DEFAULT_GROUPID, SOPC_PUBSUB_SKS_CURRENT_TOKENID);
+                    bool allocSuccess = (NULL != security->groupKeys);
+
+                    // Update Nonce Random part
+                    if (allocSuccess)
+                    {
+                        printf("# Info: Publisher Succeed to get security keys \n");
+                        security->msgNonceRandom = SOPC_PubSub_Security_Random(security->provider);
+                        allocSuccess = (NULL != security->msgNonceRandom);
+                        if (allocSuccess)
+                        {
+                            security->sequenceNumber = pubSchedulerCtx.sequenceNumber;
+                            pubSchedulerCtx.sequenceNumber++;
+                        }
+                    }
+                    else
+                    {
+                        printf("# ERROR: Publisher failed to get security keys \n");
+                    }
                 }
                 SOPC_Buffer* buffer = SOPC_UADP_NetworkMessage_Encode(message, security);
                 if (NULL != security)

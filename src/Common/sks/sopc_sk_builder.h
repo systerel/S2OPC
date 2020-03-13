@@ -71,14 +71,6 @@ SOPC_SKBuilder* SOPC_SKBuilder_Append_Create(void);
 SOPC_SKBuilder* SOPC_SKBuilder_Truncate_Create(SOPC_SKBuilder* skb, uint32_t sizeMax);
 
 /**
- * \brief  Create an instance of a default SOPC_SKBuilder which call 2 builders
- *
- *
- * \return a SOPC_SKBuilder object or NULL if not enough memory
- */
-SOPC_SKBuilder* SOPC_SKBuilder_Sequence_Create(SOPC_SKBuilder* skb1, SOPC_SKBuilder* skb2);
-
-/**
  * \brief  Create an instance of a default SOPC_SKBuilder which replace all the keys.
  *
  * \return a SOPC_SKBuilder object or NULL if not enough memory

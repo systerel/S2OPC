@@ -29,6 +29,10 @@
 #include "sopc_pub_scheduler.h"
 #include "sopc_pubsub_local_sks.h"
 #include "sopc_pubsub_protocol.h"
+#include "sopc_sk_builder.h"
+#include "sopc_sk_manager.h"
+#include "sopc_sk_ordonnancer.h"
+#include "sopc_sk_provider.h"
 #include "sopc_sub_scheduler.h"
 #include "sopc_udp_sockets.h"
 #include "sopc_xml_loader.h"
@@ -42,14 +46,19 @@
 #include "pubsub_config_static.h"
 #endif
 
-#ifdef WITH_STATIC_SECURITY_DATA
-#include "static_security_data.h"
-#endif
+// First MS Period of ordonnancer task. 3s
+#define PUBSUB_ORDONNANCER_FIRST_MSPERIOD 3000
 
 static int32_t pubsubOnline = 0;
 static SOPC_PubSubConfiguration* g_pPubSubConfig = NULL;
 static SOPC_SubTargetVariableConfig* g_pTargetConfig = NULL;
 static SOPC_PubSourceVariableConfig* g_pSourceConfig = NULL;
+static SOPC_SKOrdonnancer* g_skOrdonnancer = NULL;
+static SOPC_SKManager* g_skManager = NULL;
+static bool g_isSecurity = false;
+
+/* Initialise and start SK Ordonnancer and SK Manager if security is needed */
+static bool PubSub_local_SKS_Start(void);
 
 static void free_global_configurations(void);
 
@@ -158,38 +167,33 @@ SOPC_ReturnStatus PubSub_Configure(void)
     }
 
     /* at least one message with encrypt and/or sign security  */
-    bool isSecurity = false;
+    g_isSecurity = false;
     /* first SKS address found */
     const char* sksAddress = NULL;
     if (SOPC_STATUS_OK == status)
     {
-        status = get_sks_address(pPubSubConfig, &isSecurity, &sksAddress);
+        status = get_sks_address(pPubSubConfig, &g_isSecurity, &sksAddress);
         if (SOPC_STATUS_OK != status)
         {
             printf("# Error: Cannot retrieve PubSub Security Mode information.\n");
         }
-        else if (isSecurity && NULL == sksAddress)
+        else if (g_isSecurity && NULL == sksAddress)
         {
             printf("# Warning: PubSub Security is used but no SKS address provided.\n");
         }
     }
 
-    /* Retrieve Security Keys from SKS */
-    if (SOPC_STATUS_OK == status && isSecurity && NULL != sksAddress)
+    /* TODO multi sks. Keep SC config */
+    if (SOPC_STATUS_OK == status && g_isSecurity && NULL != sksAddress)
     {
         if (SOPC_STATUS_OK == status)
         {
             status = Client_AddSecureChannelconfig(sksAddress);
         }
 
-        if (SOPC_STATUS_OK == status)
-        {
-            status = Client_GetSecurityKeys();
-        }
-
         if (SOPC_STATUS_OK != status)
         {
-            printf("# Error: PubSub Security Keys cannot be retrieved from SKS\n");
+            printf("# Error: PubSub Cannot configure Get Security Keys\n");
         }
     }
 
@@ -224,22 +228,83 @@ bool PubSub_IsRunning(void)
     return SOPC_Atomic_Int_Get(&pubsubOnline);
 }
 
+bool PubSub_local_SKS_Start()
+{
+    if (!g_isSecurity)
+    {
+        return true;
+    }
+
+    SOPC_SKBuilder* builder = NULL;
+    SOPC_SKProvider* provider = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    // Initialise SK Manager
+    g_skManager = SOPC_SKManager_Create();
+    bool sksOK = (NULL != g_skManager);
+    if (sksOK)
+    {
+        g_skOrdonnancer = SOPC_SKOrdonnancer_Create();
+        sksOK = (NULL != g_skOrdonnancer);
+    }
+
+    // Create a SK Builder which replace all Keys of a SK Manager
+    if (sksOK)
+    {
+        builder = SOPC_SKBuilder_Setter_Create();
+        sksOK = (NULL != builder);
+    }
+
+    // Create a SK Provider which get Keys from a GetSecurityKeys request
+    if (sksOK)
+    {
+        provider = Client_Provider_BySKS_Create();
+        sksOK = (NULL != provider);
+    }
+
+    // Create a SK Ordonnancer with a single task : call GetSecurityKeys and replace all keys
+    if (sksOK)
+    {
+        status = SOPC_SKOrdonnancer_AddTask(g_skOrdonnancer, builder, provider, g_skManager,
+                                            PUBSUB_ORDONNANCER_FIRST_MSPERIOD); // Start with 3s
+        sksOK = (SOPC_STATUS_OK == status);
+    }
+
+    if (!sksOK)
+    {
+        // Delete Builder and Provider. Manager and Ordonnancer are delete in Global Context Clear
+        SOPC_SKBuilder_Clear(builder);
+        SOPC_Free(builder);
+        SOPC_SKProvider_Clear(provider);
+        SOPC_Free(provider);
+        printf("# Error: Local SKS cannot be init with Security Keys\n");
+    }
+
+    if (sksOK)
+    {
+        // If it fails, builder and provider are deleted in Ordonnacer Clear function.
+        status = SOPC_SKOrdonnancer_Start(g_skOrdonnancer);
+        sksOK = (SOPC_STATUS_OK == status);
+    }
+
+    if (sksOK)
+    {
+        SOPC_LocalSKS_init(g_skManager);
+    }
+
+    return sksOK;
+}
+
 bool PubSub_Start(void)
 {
     bool subOK = false;
     bool pubOK = false;
+    bool sksOK = false;
     uint32_t sub_nb_connections = SOPC_PubSubConfiguration_Nb_SubConnection(g_pPubSubConfig);
     uint32_t pub_nb_connections = SOPC_PubSubConfiguration_Nb_PubConnection(g_pPubSubConfig);
-#ifdef WITH_STATIC_SECURITY_DATA
-    printf("# Info: initialize local SKS with static security data\n");
 
-    SOPC_LocalSKS_init_static(pubSub_keySign, sizeof(pubSub_keySign),       //
-                              pubSub_keyEncrypt, sizeof(pubSub_keyEncrypt), //
-                              pubSub_keyNonce, sizeof(pubSub_keyNonce));    //
-#else
-    printf("# Info: initialize local SKS with dynamic security data\n");
-    SOPC_LocalSKS_init(PUBSUB_SKS_SIGNING_KEY, PUBSUB_SKS_ENCRYPT_KEY, PUBSUB_SKS_KEY_NONCE);
-#endif
+    sksOK = PubSub_local_SKS_Start();
+
     if (sub_nb_connections > 0)
     {
         subOK = SOPC_SubScheduler_Start(g_pPubSubConfig, g_pTargetConfig, Server_SetSubStatus);
@@ -260,7 +325,7 @@ bool PubSub_Start(void)
         }
     }
 
-    return subOK || pubOK;
+    return sksOK && (subOK || pubOK);
 }
 
 void PubSub_Stop(void)
@@ -269,6 +334,12 @@ void PubSub_Stop(void)
     SOPC_SubScheduler_Stop();
     SOPC_PubScheduler_Stop();
     SOPC_PubSub_Protocol_ReleaseMqttManagerHandle();
+
+    SOPC_SKOrdonnancer_StopAndClear(g_skOrdonnancer);
+    SOPC_Free(g_skOrdonnancer);
+    SOPC_SKManager_Clear(g_skManager);
+    SOPC_Free(g_skManager);
+
     // Force Disabled after stop in case Sub scheduler was not start (no management of the status)
     Server_SetSubStatus(SOPC_PubSubState_Disabled);
 }

@@ -8,6 +8,22 @@
 #ifndef CLIENT_H_
 #define CLIENT_H_
 
+#include "sopc_sk_builder.h"
+#include "sopc_sk_manager.h"
+
+/* TODO multi key : ajouter une structure ( peut etre caché )
+ qui contient le configuration et le numéro de session (utilisation interne) */
+
+typedef struct Client_SKS_GetKeys_Response
+{
+    SOPC_String* SecurityPolicyUri;
+    uint32_t FirstTokenId;
+    SOPC_ByteString* Keys;
+    uint32_t NbKeys;
+    uint32_t TimeToNextKey;
+    uint32_t KeyLifetime;
+} Client_SKS_GetKeys_Response;
+
 typedef struct Client_Keys_Type
 {
     bool init;
@@ -29,10 +45,25 @@ typedef enum
 
 SOPC_ReturnStatus Client_Setup(void);
 SOPC_ReturnStatus Client_AddSecureChannelconfig(const char* endpoint_url);
-SOPC_ReturnStatus Client_GetSecurityKeys(void);
+SOPC_ReturnStatus Client_GetSecurityKeys(uint32_t StartingTokenId,
+                                         uint32_t requestedKeys,
+                                         Client_SKS_GetKeys_Response* response);
 void Client_Teardown(void);
 void Client_KeysClear(void);
-void Client_Treat_Session_Response(void* param);
+void Client_Treat_Session_Response(void* param, uintptr_t appContext);
+
+/*
+ * \brief Create a Security Keys Provider to get Keys using SKS Get Security Keys request
+ * TODO SKS : For multi SKS : give a SCConfig as parameter
+ */
+SOPC_SKProvider* Client_Provider_BySKS_Create(void);
+
+/*
+ * \brief Create a Security Keys Builder to set Keys of a SKManager after a get security keys request
+ *  Update function calls SOPC_SKManager_SetKeys() on the given SKManager.
+ * TODO SKS : For multi SKS : give a SCConfig as parameter
+ */
+SOPC_SKBuilder* Client_Create_Builder(void);
 
 // channel identifier
 extern uint32_t channel_config_idx;

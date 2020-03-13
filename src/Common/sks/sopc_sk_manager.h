@@ -134,7 +134,7 @@ SOPC_ReturnStatus SOPC_SKManager_SetKeys(SOPC_SKManager* skm,
  */
 uint32_t SOPC_SKManager_AddKeys(SOPC_SKManager* skm, SOPC_ByteString* Keys, uint32_t NbToken);
 
-/**
+/** TODO add nb requested keys
  *  \brief          Get Keys of a Security Keys Manager for a given security group.
  *                  All returned data are copied by this function. The caller is reponsible for deleting these data.
  *

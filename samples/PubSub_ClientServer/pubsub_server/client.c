@@ -26,14 +26,14 @@
 
 #define CLIENT_SECURITY_GROUPID "sgid_1"
 #define CLIENT_STARTING_TOKENID 0
-#define CLIENT_REQUESTED_KEY_COUNT 0
+#define CLIENT_REQUESTED_KEY_COUNT 5
 
 typedef struct s_Cerkey
 {
     SOPC_SerializedCertificate* client_cert;
     SOPC_SerializedAsymmetricKey* client_key;
     SOPC_SerializedCertificate* server_cert;
-  //SOPC_SerializedCertificate* crt_ca;
+    // SOPC_SerializedCertificate* crt_ca;
     SOPC_PKIProvider* pkiProvider;
 } t_CerKey;
 
@@ -53,6 +53,8 @@ t_CerKey ck_cli[SOPC_MAX_SECURE_CONNECTIONS];
 bool isScCreated = false;
 int32_t sendFailures = 0;
 
+static void Client_Copy_CallResponse_To_GetKeysResponse(Client_SKS_GetKeys_Response* response,
+                                                        OpcUa_CallResponse* callResp);
 static SOPC_ReturnStatus CerAndKeyLoader_client(void);
 static SOPC_ReturnStatus Wait_response_client(void);
 static SOPC_ReturnStatus Client_SaveKeys(SOPC_ByteString* key, char* path);
@@ -162,28 +164,26 @@ static SOPC_ReturnStatus CerAndKeyLoader_client()
         }
         } */
 
-
-
-        if (SOPC_STATUS_OK == status)
+    if (SOPC_STATUS_OK == status)
+    {
+        char* lPathsTrustedRoots[] = {CA_CERT_PATH, NULL};
+        char* lPathsTrustedLinks[] = {NULL};
+        char* lPathsUntrustedRoots[] = {NULL};
+        char* lPathsUntrustedLinks[] = {NULL};
+        char* lPathsIssuedCerts[] = {NULL};
+        char* lPathsCRL[] = {CA_CRL_PATH, NULL};
+        status = SOPC_PKIProviderStack_CreateFromPaths(lPathsTrustedRoots, lPathsTrustedLinks, lPathsUntrustedRoots,
+                                                       lPathsUntrustedLinks, lPathsIssuedCerts, lPathsCRL,
+                                                       &ck_cli[scConfigs_idx].pkiProvider);
+        if (SOPC_STATUS_OK != status)
         {
-            char* lPathsTrustedRoots[] = {CA_CERT_PATH, NULL};
-            char* lPathsTrustedLinks[] = {NULL};
-            char* lPathsUntrustedRoots[] = {NULL};
-            char* lPathsUntrustedLinks[] = {NULL};
-            char* lPathsIssuedCerts[] = {NULL};
-            char* lPathsCRL[] = {CA_CRL_PATH, NULL};
-            status = SOPC_PKIProviderStack_CreateFromPaths(lPathsTrustedRoots, lPathsTrustedLinks, lPathsUntrustedRoots,
-                                                           lPathsUntrustedLinks, lPathsIssuedCerts, lPathsCRL, &ck_cli[scConfigs_idx].pkiProvider);
-            if (SOPC_STATUS_OK != status)
-            {
-                printf("# Error: Failed to create PKI\n");
-            } else {
-                scConfigs[scConfigs_idx].pki = ck_cli[scConfigs_idx].pkiProvider;
-            }
-              
+            printf("# Error: Failed to create PKI\n");
         }
-    
-
+        else
+        {
+            scConfigs[scConfigs_idx].pki = ck_cli[scConfigs_idx].pkiProvider;
+        }
+    }
 
     if (SOPC_STATUS_OK != status)
     {
@@ -332,7 +332,7 @@ static OpcUa_CallRequest* newCallRequest_client(const char* securityGroupId,
     variant->Value.Uint32 = startingTokenId;
 
     // Starting Token Id
-    variant = &arguments[1];
+    variant = &arguments[2];
     SOPC_Variant_Initialize(variant);
     variant->BuiltInTypeId = SOPC_UInt32_Id;
     variant->ArrayType = SOPC_VariantArrayType_SingleValue;
@@ -374,13 +374,22 @@ static OpcUa_CallRequest* newCallRequest_client(const char* securityGroupId,
     return req;
 }
 
-SOPC_ReturnStatus Client_GetSecurityKeys(void)
+SOPC_ReturnStatus Client_GetSecurityKeys(uint32_t StartingTokenId,
+                                         uint32_t requestedKeys,
+                                         Client_SKS_GetKeys_Response* response)
 {
+    if (0 == requestedKeys || NULL == response)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     const char* pwd = "password";
     // status = SOPC_ToolkitClient_AsyncActivateSession_Anonymous(channel_config_idx, Client_SessionContext,
     // "anonymous");
+    // TODO use Client_SessionContext instead of 1 as 2e parameter. It will be use to identify the current session
+    // For next step, with multiple client, use a object with is own state.
     status = SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(channel_config_idx, 1, "username", "user1",
                                                                       (const uint8_t*) pwd, (int32_t) strlen(pwd));
     if (SOPC_STATUS_OK == status)
@@ -391,9 +400,9 @@ SOPC_ReturnStatus Client_GetSecurityKeys(void)
     if (SOPC_STATUS_OK == status)
     {
         // Create CallRequest to be sent (deallocated by toolkit)
-        OpcUa_CallRequest* callReq =
-            newCallRequest_client(CLIENT_SECURITY_GROUPID, CLIENT_STARTING_TOKENID, CLIENT_REQUESTED_KEY_COUNT);
-        SOPC_ToolkitClient_AsyncSendRequestOnSession((uint32_t) SOPC_Atomic_Int_Get((int32_t*) &session), callReq, 1);
+        OpcUa_CallRequest* callReq = newCallRequest_client(CLIENT_SECURITY_GROUPID, StartingTokenId, requestedKeys);
+        SOPC_ToolkitClient_AsyncSendRequestOnSession((uint32_t) SOPC_Atomic_Int_Get((int32_t*) &session), callReq,
+                                                     (uintptr_t) response);
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -445,7 +454,7 @@ void Client_Teardown()
         SOPC_KeyManager_SerializedAsymmetricKey_Delete((SOPC_SerializedAsymmetricKey*) scConfigs[i].key_priv_cli);
         SOPC_KeyManager_SerializedCertificate_Delete((SOPC_SerializedCertificate*) scConfigs[i].crt_srv);
         SOPC_PKIProvider_Free((SOPC_PKIProvider**) &(scConfigs[i].pki));
-        //SOPC_KeyManager_SerializedCertificate_Delete((SOPC_SerializedCertificate*) ck_cli[i].crt_ca);
+        // SOPC_KeyManager_SerializedCertificate_Delete((SOPC_SerializedCertificate*) ck_cli[i].crt_ca);
         SOPC_GCC_DIAGNOSTIC_RESTORE
 
         scConfigs[i].crt_cli = NULL;
@@ -455,7 +464,7 @@ void Client_Teardown()
         ck_cli[i].client_cert = NULL;
         ck_cli[i].client_key = NULL;
         ck_cli[i].server_cert = NULL;
-        //ck_cli[i].crt_ca = NULL;
+        // ck_cli[i].crt_ca = NULL;
         ck_cli[i].pkiProvider = NULL;
     }
 
@@ -473,7 +482,7 @@ void Client_KeysClear(void)
     Client_Keys.init = false;
 }
 
-void Client_Treat_Session_Response(void* param)
+void Client_Treat_Session_Response(void* param, uintptr_t appContext)
 {
     if (NULL != param)
     {
@@ -483,166 +492,262 @@ void Client_Treat_Session_Response(void* param)
         {
             SOPC_Atomic_Int_Set((SessionConnectedState*) &scState, (SessionConnectedState) SESSION_CONN_MSG_RECEIVED);
             OpcUa_CallResponse* callResp = (OpcUa_CallResponse*) param;
-
-            if (NULL != callResp && 1 == callResp->NoOfResults)
-            {
-                OpcUa_CallMethodResult* callResult = &callResp->Results[0];
-                if (SOPC_STATUS_OK == callResult->StatusCode)
-                {
-                    if (5 == callResult->NoOfOutputArguments && NULL != callResult->OutputArguments)
-                    {
-                        SOPC_Variant* variant;
-                        bool isValid = true;
-                        /* SecurityPolicyUri */
-                        variant = &(callResult->OutputArguments[0]);
-                        if (SOPC_String_Id == variant->BuiltInTypeId &&
-                            variant->ArrayType == SOPC_VariantArrayType_SingleValue)
-                        {
-                            if (0 != strcmp(SOPC_String_GetRawCString(&variant->Value.String),
-                                            SOPC_SecurityPolicy_PubSub_Aes256_URI))
-                            {
-                                printf("# Warning: GetSecurityKeys SecurityPolicyUri is not valid : %s .\n",
-                                       SOPC_String_GetRawCString(&variant->Value.String));
-                                isValid = false;
-                            }
-                        }
-                        else
-                        {
-                            printf("# Warning: GetSecurityKeys output argument 1 is not valid.\n");
-                            isValid = false;
-                        }
-
-                        if (isValid)
-                        {
-                            /* FirstTokenId */
-                            variant = &(callResult->OutputArguments[1]);
-                            if (SOPC_UInt32_Id == variant->BuiltInTypeId &&
-                                variant->ArrayType == SOPC_VariantArrayType_SingleValue)
-                            {
-                                if (1 != variant->Value.Uint32)
-                                {
-                                    printf("# Warning: GetSecurityKeys FirstTokenId is not valid : %d .\n",
-                                           variant->Value.Uint32);
-                                    isValid = false;
-                                }
-                            }
-                            else
-                            {
-                                printf("# Warning: GetSecurityKeys output argument 2 is not valid.\n");
-                                isValid = false;
-                            }
-                        }
-                        if (isValid)
-                        {
-                            /* Keys */
-                            variant = &(callResult->OutputArguments[2]);
-
-                            /* ByteString Array of 1 element */
-                            if (SOPC_ByteString_Id == variant->BuiltInTypeId &&
-                                variant->ArrayType == SOPC_VariantArrayType_Array && 1 == variant->Value.Array.Length &&
-                                NULL != variant->Value.Array.Content.BstringArr)
-                            {
-                                SOPC_ByteString* byteString = &(variant->Value.Array.Content.BstringArr[0]);
-                                if (32 + 32 + 4 == byteString->Length)
-                                {
-                                    SOPC_ReturnStatus status;
-                                    Client_KeysClear();
-                                    SOPC_ByteString_Initialize(&(Client_Keys.SigningKey));
-                                    SOPC_ByteString_Initialize(&(Client_Keys.EncryptingKey));
-                                    SOPC_ByteString_Initialize(&(Client_Keys.KeyNonce));
-                                    Client_Keys.init = true;
-                                    status =
-                                        SOPC_ByteString_CopyFromBytes(&(Client_Keys.SigningKey), byteString->Data, 32);
-                                    if (SOPC_STATUS_OK == status)
-                                    {
-                                        status = SOPC_ByteString_CopyFromBytes(&(Client_Keys.EncryptingKey),
-                                                                               &(byteString->Data[32]), 32);
-                                    }
-                                    if (SOPC_STATUS_OK == status)
-                                    {
-                                        status = SOPC_ByteString_CopyFromBytes(&(Client_Keys.KeyNonce),
-                                                                               &(byteString->Data[64]), 4);
-                                    }
-                                    if (SOPC_STATUS_OK != status)
-                                    {
-                                        Client_KeysClear();
-                                        isValid = false;
-                                    }
-                                }
-                                else
-                                {
-                                    printf("# Warning: GetSecurityKeys Keys size is not valid : %d .\n",
-                                           byteString->Length);
-                                    isValid = false;
-                                }
-                            }
-                            else
-                            {
-                                printf("# Warning: GetSecurityKeys output argument 3 is not valid.\n");
-                                isValid = false;
-                            }
-                        }
-
-                        if (isValid)
-                        {
-                            /* TimeToNextKey */
-                            variant = &(callResult->OutputArguments[3]);
-                            if (SOPC_Double_Id == variant->BuiltInTypeId &&
-                                variant->ArrayType == SOPC_VariantArrayType_SingleValue)
-                            {
-                                if (0 != variant->Value.Doublev)
-                                {
-                                    printf("# Warning: GetSecurityKeys TimeToNextKey is not valid : %d .\n",
-                                           variant->Value.Uint32);
-                                    isValid = false;
-                                }
-                            }
-                            else
-                            {
-                                printf("# Warning: GetSecurityKeys output argument 3 is not valid.\n");
-                                isValid = false;
-                            }
-                        }
-                        if (isValid)
-                        {
-                            /* KeyLifetime */
-                            variant = &(callResult->OutputArguments[4]);
-                            if (SOPC_Double_Id == variant->BuiltInTypeId &&
-                                variant->ArrayType == SOPC_VariantArrayType_SingleValue)
-                            {
-                                if (0 != variant->Value.Doublev)
-                                {
-                                    printf("# Warning: GetSecurityKeys KeyLifetime is not valid : %d .\n",
-                                           variant->Value.Uint32);
-                                    isValid = false;
-                                }
-                            }
-                            else
-                            {
-                                printf("# Warning: GetSecurityKeys output argument 4 is not valid.\n");
-                                isValid = false;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        printf("# Warning: GetSecurityKeys does not return expected arguments.\n");
-                    }
-                }
-                else
-                {
-                    printf("# Warning: GetSecurityKeys failed. Returned status is %d.\n", callResult->StatusCode);
-                }
-            }
-            else
-            {
-                printf("# Warning: Call request should have returned one result but returned %d instead of.\n",
-                       callResp->NoOfResults);
-            }
+            Client_SKS_GetKeys_Response* response = (Client_SKS_GetKeys_Response*) appContext;
+            Client_Copy_CallResponse_To_GetKeysResponse(response, callResp);
         }
         else
         {
             printf("# Warning: Type of receive message not managed in client side.\n");
         }
     }
+}
+
+void Client_Copy_CallResponse_To_GetKeysResponse(Client_SKS_GetKeys_Response* response, OpcUa_CallResponse* callResp)
+{
+    assert(NULL != callResp);
+    if (1 == callResp->NoOfResults)
+    {
+        OpcUa_CallMethodResult* callResult = &callResp->Results[0];
+        if (SOPC_STATUS_OK == callResult->StatusCode)
+        {
+            if (5 == callResult->NoOfOutputArguments && NULL != callResult->OutputArguments)
+            {
+                SOPC_Variant* variant;
+                bool isValid = true;
+                /* SecurityPolicyUri */
+                variant = &(callResult->OutputArguments[0]);
+                if (SOPC_String_Id == variant->BuiltInTypeId && variant->ArrayType == SOPC_VariantArrayType_SingleValue)
+                {
+                    if (0 != strcmp(SOPC_String_GetRawCString(&variant->Value.String),
+                                    SOPC_SecurityPolicy_PubSub_Aes256_URI))
+                    {
+                        printf("# Warning: GetSecurityKeys SecurityPolicyUri is not valid : %s .\n",
+                               SOPC_String_GetRawCString(&variant->Value.String));
+                        isValid = false;
+                    }
+                    else
+                    {
+                        response->SecurityPolicyUri = SOPC_Calloc(1, sizeof(SOPC_String));
+                        isValid = (NULL != response->SecurityPolicyUri);
+                        if (isValid)
+                        {
+                            SOPC_String_Initialize(response->SecurityPolicyUri);
+
+                            SOPC_String_Copy(response->SecurityPolicyUri, &variant->Value.String);
+                        }
+                    }
+                }
+                else
+                {
+                    printf("# Warning: GetSecurityKeys output argument 1 is not valid.\n");
+                    isValid = false;
+                }
+
+                if (isValid)
+                {
+                    /* FirstTokenId */
+                    variant = &(callResult->OutputArguments[1]);
+                    if (SOPC_UInt32_Id == variant->BuiltInTypeId &&
+                        variant->ArrayType == SOPC_VariantArrayType_SingleValue)
+                    {
+                        response->FirstTokenId = variant->Value.Uint32;
+                    }
+                    else
+                    {
+                        printf("# Warning: GetSecurityKeys output argument 2 is not valid.\n");
+                        isValid = false;
+                    }
+                }
+                if (isValid)
+                {
+                    /* Keys */
+                    variant = &(callResult->OutputArguments[2]);
+
+                    /* ByteString Array of 1 element */
+                    if (SOPC_ByteString_Id == variant->BuiltInTypeId &&
+                        variant->ArrayType == SOPC_VariantArrayType_Array && 0 < variant->Value.Array.Length &&
+                        NULL != variant->Value.Array.Content.BstringArr)
+                    {
+                        response->NbKeys = (uint32_t) variant->Value.Array.Length;
+                        response->Keys = SOPC_Calloc(response->NbKeys, sizeof(SOPC_ByteString));
+                        isValid = (NULL != response->Keys);
+                        // Initialize all Keys first (to be delete properly if next allocation failed)
+                        for (uint32_t index = 0; index < response->NbKeys && isValid; index++)
+                        {
+                            SOPC_ByteString_Initialize(&response->Keys[index]);
+                        }
+                        // Then copy the Keys
+                        for (uint32_t index = 0; index < response->NbKeys && isValid; index++)
+                        {
+                            SOPC_ByteString* byteString = &(variant->Value.Array.Content.BstringArr[index]);
+                            if (32 + 32 + 4 == byteString->Length) // check size define by security policy
+                            {
+                                SOPC_ReturnStatus status;
+                                SOPC_ByteString_Initialize(&response->Keys[index]);
+                                status = SOPC_ByteString_Copy(&response->Keys[index], byteString);
+                                isValid = (SOPC_STATUS_OK == status);
+                            }
+                            else
+                            {
+                                isValid = false;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        printf("# Warning: GetSecurityKeys output argument 3 is not valid.\n");
+                        isValid = false;
+                    }
+                }
+
+                if (isValid)
+                {
+                    /* TimeToNextKey */
+                    variant = &(callResult->OutputArguments[3]);
+                    if (SOPC_Double_Id == variant->BuiltInTypeId &&
+                        variant->ArrayType == SOPC_VariantArrayType_SingleValue && 0 <= variant->Value.Doublev &&
+                        UINT32_MAX >= variant->Value.Doublev)
+                    {
+                        response->TimeToNextKey = (uint32_t) variant->Value.Doublev;
+                        if (0 == response->TimeToNextKey)
+                        {
+                            printf("# Warning: GetSecurityKeys TimeToNextKey is not valid. Should be not 0.\n");
+                            isValid = false;
+                        }
+                    }
+                    else
+                    {
+                        printf("# Warning: GetSecurityKeys output argument 3 is not valid.\n");
+                        isValid = false;
+                    }
+                }
+                if (isValid)
+                {
+                    /* KeyLifetime */
+                    variant = &(callResult->OutputArguments[4]);
+                    if (SOPC_Double_Id == variant->BuiltInTypeId &&
+                        variant->ArrayType == SOPC_VariantArrayType_SingleValue && 0 <= variant->Value.Doublev &&
+                        UINT32_MAX >= variant->Value.Doublev)
+                    {
+                        response->KeyLifetime = (uint32_t) variant->Value.Doublev;
+                        if (0 == response->KeyLifetime)
+                        {
+                            printf("# Warning: GetSecurityKeys KeyLifetime is not valid. Should be not 0.\n");
+                            isValid = false;
+                        }
+                    }
+                    else
+                    {
+                        printf("# Warning: GetSecurityKeys output argument 4 is not valid.\n");
+                        isValid = false;
+                    }
+                }
+
+                if (!isValid)
+                {
+                    // Clear response if something failed
+                    SOPC_String_Clear(response->SecurityPolicyUri);
+                    response->SecurityPolicyUri = NULL;
+                    response->FirstTokenId = 0;
+                    if (NULL != response->Keys)
+                    {
+                        for (uint32_t index = 0; index < response->NbKeys; index++)
+                        {
+                            SOPC_ByteString_Clear(&response->Keys[index]);
+                        }
+                        SOPC_Free(response->Keys);
+                    }
+                    response->NbKeys = 0;
+                    response->TimeToNextKey = 0;
+                    ;
+                    response->KeyLifetime = 0;
+                }
+            }
+            else
+            {
+                printf("# Warning: GetSecurityKeys does not return expected arguments.\n");
+            }
+        }
+        else
+        {
+            printf("# Warning: GetSecurityKeys failed. Returned status is %d.\n", callResult->StatusCode);
+        }
+    }
+    else
+    {
+        printf("# Warning: Call request should have returned one result but returned %d instead of.\n",
+               callResp->NoOfResults);
+    }
+}
+
+/* SKS part */
+
+static SOPC_ReturnStatus Client_Provider_GetKeys_BySKS(SOPC_SKProvider* skp,
+                                                       uint32_t StartingTokenId,
+                                                       SOPC_String** SecurityPolicyUri,
+                                                       uint32_t* FirstTokenId,
+                                                       SOPC_ByteString** Keys,
+                                                       uint32_t* NbToken,
+                                                       uint32_t* TimeToNextKey,
+                                                       uint32_t* KeyLifetime)
+{
+    /* Not used*/
+    (void) StartingTokenId;
+    if (NULL == skp || NULL == SecurityPolicyUri || NULL == FirstTokenId || NULL == Keys || NULL == NbToken ||
+        NULL == TimeToNextKey || NULL == KeyLifetime)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    Client_SKS_GetKeys_Response* response = SOPC_Calloc(1, sizeof(Client_SKS_GetKeys_Response));
+    if (NULL == response)
+    {
+        status = SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        /* Retrieve Security Keys from SKS.
+           This function wait SKS server response or timeout */
+        status = Client_GetSecurityKeys(0, 5, response);
+        if (0 == response->NbKeys || NULL == response->Keys)
+        {
+            SOPC_String_Clear(response->SecurityPolicyUri);
+            SOPC_Free(response->SecurityPolicyUri);
+            status = SOPC_STATUS_NOK;
+        }
+        else
+        {
+            *SecurityPolicyUri = response->SecurityPolicyUri;
+            *FirstTokenId = response->FirstTokenId;
+            *Keys = response->Keys;
+            *NbToken = response->NbKeys;
+            *TimeToNextKey = response->TimeToNextKey;
+            *KeyLifetime = response->KeyLifetime;
+        }
+    }
+
+    SOPC_Free(response);
+    if (SOPC_STATUS_OK != status)
+    {
+        printf("# Error: PubSub Security Keys cannot be retrieved from SKS\n");
+    }
+    return status;
+}
+
+SOPC_SKProvider* Client_Provider_BySKS_Create()
+{
+    SOPC_SKProvider* skp = SOPC_Malloc(sizeof(SOPC_SKProvider));
+    if (NULL == skp)
+    {
+        return NULL;
+    }
+
+    skp->data = NULL;
+
+    skp->ptrGetKeys = Client_Provider_GetKeys_BySKS;
+    skp->ptrClear = NULL; // Data is NULL
+
+    return skp;
 }

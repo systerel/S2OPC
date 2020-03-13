@@ -21,11 +21,12 @@
 #define SOPC_PUBSUB_LOCAL_SKS_H_
 
 #include "sopc_secret_buffer.h"
+#include "sopc_sk_manager.h"
 
 #define SOPC_PUBSUB_SKS_DEFAULT_GROUPID 1
 #define SOPC_PUBSUB_SKS_DEFAULT_TOKENID 1
 // To requested current token in getSecurityKey
-#define SOPC_PUBSUB_SKS_CURRENT_TOKENID 0
+#define SOPC_PUBSUB_SKS_CURRENT_TOKENID SOPC_SK_MANAGER_CURRENT_TOKEN_ID
 
 typedef struct SOPC_LocalSKS_Keys
 {
@@ -42,7 +43,7 @@ typedef struct SOPC_LocalSKS_Keys
  * \brief Initialise the LocalSKS with keys file path
  *
  */
-void SOPC_LocalSKS_init(const char* pathSigningKey, const char* pathEncryptKey, const char* pathKeyNonce);
+void SOPC_LocalSKS_init(SOPC_SKManager* skm);
 
 /**
  * \brief Initialise the LocalSKS with static keys values

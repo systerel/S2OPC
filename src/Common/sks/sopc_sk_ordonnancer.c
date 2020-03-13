@@ -242,6 +242,10 @@ SOPC_SKOrdonnancer* SOPC_SKOrdonnancer_Create()
     }
     SOPC_SKOrdonnancer_DefaultData* data = (SOPC_SKOrdonnancer_DefaultData*) sko->data;
     data->isInitialized = false;
+    data->task.builder = NULL;
+    data->task.provider = NULL;
+    data->task.manager = NULL;
+    data->task.msPeriod = 0;
 
     sko->ptrAddTask = SOPC_SKOrdonnancer_AddTask_Default;
     sko->ptrStart = SOPC_SKOrdonnancer_Start_Default;
@@ -274,7 +278,7 @@ SOPC_ReturnStatus SOPC_SKOrdonnancer_Start(SOPC_SKOrdonnancer* sko)
 
 void SOPC_SKOrdonnancer_StopAndClear(SOPC_SKOrdonnancer* sko)
 {
-    if (NULL == sko)
+    if (NULL == sko || NULL == sko->ptrClear)
     {
         return;
     }

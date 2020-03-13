@@ -129,11 +129,6 @@ static void SOPC_SKProvider_Clear_RandomPubSub_Aes256(SOPC_SKProvider* skp)
 
 /*** API FUNCTIONS ***/
 
-SOPC_SKProvider* SOPC_SKProvider_BySKS_Create()
-{
-    assert(false); // TODO
-}
-
 SOPC_SKProvider* SOPC_SKProvider_RandomPubSub_Create()
 {
     SOPC_SKProvider* skp = SOPC_Malloc(sizeof(SOPC_SKProvider));
@@ -174,7 +169,7 @@ SOPC_ReturnStatus SOPC_SKProvider_GetKeys(SOPC_SKProvider* skp,
 
 void SOPC_SKProvider_Clear(SOPC_SKProvider* skp)
 {
-    if (NULL != skp)
+    if (NULL != skp && NULL != skp->ptrClear)
     {
         skp->ptrClear(skp);
     }

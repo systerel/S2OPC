@@ -96,7 +96,7 @@ static void ClientServer_Event_Toolkit(SOPC_App_Com_Event event, uint32_t idOrSt
         {
             printf(">>Client debug : SE_RCV_SESSION_RESPONSE RECEIVED\n");
         }
-        Client_Treat_Session_Response(param);
+        Client_Treat_Session_Response(param, appContext);
         break;
     case SE_CLOSED_SESSION:
         if (debug == true)

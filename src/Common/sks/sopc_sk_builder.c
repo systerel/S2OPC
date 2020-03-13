@@ -29,42 +29,50 @@
 
 /*** DEFAULT IMPLEMENTATION FUNCTIONS ***/
 
-/*SOPC_ReturnStatus SOPC_SKBuilder_Update_Default_Setter(SOPC_SKBuilder* skb, SOPC_SKProvider* skp, SOPC_SKManager*
-  skm){ assert(NULL != skb && NULL != skp && NULL != skm);
+static SOPC_ReturnStatus SOPC_SKBuilder_Update_Default_Setter(SOPC_SKBuilder* skb,
+                                                              SOPC_SKProvider* skp,
+                                                              SOPC_SKManager* skm)
+{
+    assert(NULL != skb && NULL != skp && NULL != skm);
 
-  SOPC_ByteString* Keys=NULL;
-  uint32_t NbKeys=0;
+    SOPC_String* SecurityPolicyUri = NULL;
+    uint32_t FirstTokenId = 0;
+    SOPC_ByteString* Keys = NULL;
+    uint32_t NbToken = 0;
+    uint32_t TimeToNextKey = 0;
+    uint32_t KeyLifetime = 0;
 
-  // TODO mettre une liste de security group dans data, current token
-  status = SOPC_SKProvider_GetKeys(skp, "sgid_1", 0, NULL, NULL, &Keys, &NbKeys, NULL, NULL);
+    SOPC_ReturnStatus status = SOPC_SKProvider_GetKeys(skp, SOPC_SK_MANAGER_CURRENT_TOKEN_ID, &SecurityPolicyUri,
+                                                       &FirstTokenId, &Keys, &NbToken, &TimeToNextKey, &KeyLifetime);
 
-  if(SOPC_STATUS_OK == status && NULL != Keys && 0 < NbKeys){
+    if (SOPC_STATUS_OK == status && NULL != Keys && 0 < NbToken)
+    {
+        status =
+            SOPC_SKManager_SetKeys(skm, SecurityPolicyUri, FirstTokenId, Keys, NbToken, TimeToNextKey, KeyLifetime);
 
-    SOPC_String groupId;
-    SOPC_String_Initialize(&groupId);
-    SOPC_String_CopyFromCString(&groupId, "sgid_1");
-    SOPC_String policy;
-    SOPC_String_Initialize(&policy);
-    SOPC_String_CopyFromCString(&policy, SOPC_SecurityPolicy_PubSub_Aes256_URI);
-    status = SOPC_SKManager_SetKeys(skManager, &groupId, &policy,
-                                    1, Keys, NbKeys, 24*60*60*1000, 24*60*60*1000);
+        if (SOPC_GoodGenericStatus == status)
+        {
+            printf("<Security Key Service: Keys setted in Builder By SKS\n");
+        }
+        else
+        {
+            printf("<Security Key Service: Error in Builder By SKS - cannot set Keys\n");
+        }
 
-    if (SOPC_GoodGenericStatus == status)
-      {
-        printf("<Security Key Service: key added\n");
-      } else {
-      printf("<Security Key Service: Error in SK Manager\n");
+        for (uint32_t i = 0; i < NbToken; i++)
+        {
+            SOPC_ByteString_Clear(Keys);
+        }
+        SOPC_Free(Keys);
+        SOPC_String_Clear(SecurityPolicyUri);
+        SOPC_Free(SecurityPolicyUri);
     }
-    for (uint32_t i=0 ; i <  NbKeys; i++){
-      SOPC_ByteString_Clear(Keys);
+    else
+    {
+        printf("<Security Key Service: Error in Builder By SKS - cannot load keys\n");
     }
-    SOPC_Free(Keys);
-
-  } else {
-    printf("<Security Key Service: Error in SK Provider - cannont load keys\n");
-  }
-
-  }*/
+    return status;
+}
 
 typedef struct SOPC_SKBuilder_TruncateData
 {
@@ -206,6 +214,22 @@ SOPC_SKBuilder* SOPC_SKBuilder_Truncate_Create(SOPC_SKBuilder* skb, uint32_t siz
     result->ptrClear = SOPC_SKBuilder_Clear_Truncate;
 
     return result;
+}
+
+SOPC_SKBuilder* SOPC_SKBuilder_Setter_Create(void)
+{
+    SOPC_SKBuilder* skb = SOPC_Malloc(sizeof(SOPC_SKBuilder));
+    if (NULL == skb)
+    {
+        return NULL;
+    }
+
+    skb->data = NULL;
+
+    skb->ptrUpdate = SOPC_SKBuilder_Update_Default_Setter;
+    skb->ptrClear = NULL;
+
+    return skb;
 }
 
 SOPC_ReturnStatus SOPC_SKBuilder_Update(SOPC_SKBuilder* skb, SOPC_SKProvider* skp, SOPC_SKManager* skm)
