@@ -272,6 +272,10 @@ static SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_getSecurityKeys(const S
         {
             printf("<Security Key Service: Error with First token id\n");
         }
+        else
+        {
+            printf("<Security Key Service: FirstTokenId is %u\n", FirstTokenId);
+        }
         if (0 == TimeToNextKey)
         {
             printf("<Security Key Service: Error with TimeToNextKey\n");
@@ -528,7 +532,7 @@ static SOPC_StatusCode Server_InitDefaultCallMethodService(SOPC_Server_Config* s
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_SKManager_SetKeyLifetime(skManager, 3 * 1000); /* 3s */
+        status = SOPC_SKManager_SetKeyLifetime(skManager, 600 * 1000); /* 10m */
     }
     if (SOPC_STATUS_OK == status)
     {

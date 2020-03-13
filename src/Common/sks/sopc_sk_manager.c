@@ -356,7 +356,6 @@ static SOPC_ReturnStatus SOPC_SKManager_GetKeys_Default(SOPC_SKManager* skm,
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    Mutex_Lock(&data->mutex);
     if (SOPC_SK_MANAGER_CURRENT_TOKEN_ID == data->FirstTokenId)
     {
         /* Return empty if no keys are managed */
