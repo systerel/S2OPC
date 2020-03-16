@@ -232,10 +232,13 @@ SOPC_DataSet_LL_PublisherIdType SOPC_Dataset_LL_NetworkMessage_Get_PublisherIdTy
 bool SOPC_Dataset_LL_DataSetMsg_Allocate_DataSetField_Array(SOPC_Dataset_LL_DataSetMessage* dsm, uint16_t dsf_nb)
 {
     assert(NULL != dsm);
-    dsm->dataset_fields = SOPC_Calloc(dsf_nb, sizeof(SOPC_Dataset_LL_DataSetField));
-    if (NULL == dsm->dataset_fields)
+    if (dsf_nb > 0)
     {
-        return false;
+        dsm->dataset_fields = SOPC_Calloc(dsf_nb, sizeof(SOPC_Dataset_LL_DataSetField));
+        if (NULL == dsm->dataset_fields)
+        {
+            return false;
+        }
     }
     dsm->dataset_fields_length = dsf_nb;
     return true;
