@@ -106,27 +106,20 @@ static void Test_ComEvent_FctServerClient(SOPC_App_Com_Event event,
                 int32_t test_status = 1;
                 OpcUa_ReadResponse* readResp = (OpcUa_ReadResponse*) param;
                 // perform verifications
-                if (NULL == readResp)
+                if (readResp->NoOfResults != 1)
                 {
                     test_status = -1;
                 }
                 else
                 {
-                    if (readResp->NoOfResults != 1)
+                    /* Verify Read Result */
+                    SOPC_Variant read_value = readResp->Results[0].Value;
+
+                    if (read_value.BuiltInTypeId != SOPC_UInt64_Id ||
+                        read_value.ArrayType != SOPC_VariantArrayType_SingleValue ||
+                        read_value.Value.Uint64 != write_value)
                     {
                         test_status = -1;
-                    }
-                    else
-                    {
-                        /* Verify Read Result */
-                        SOPC_Variant read_value = readResp->Results[0].Value;
-
-                        if (read_value.BuiltInTypeId != SOPC_UInt64_Id ||
-                            read_value.ArrayType != SOPC_VariantArrayType_SingleValue ||
-                            read_value.Value.Uint64 != write_value)
-                        {
-                            test_status = -1;
-                        }
                     }
                 }
                 SOPC_Atomic_Int_Set(&read_test_status, test_status);
@@ -138,16 +131,9 @@ static void Test_ComEvent_FctServerClient(SOPC_App_Com_Event event,
                 int32_t test_status = 1;
                 OpcUa_WriteResponse* writeResp = (OpcUa_WriteResponse*) param;
 
-                if (NULL == writeResp)
+                if (writeResp->NoOfResults != 1 || SOPC_STATUS_OK != writeResp->Results[0])
                 {
                     test_status = -1;
-                }
-                else
-                {
-                    if (writeResp->NoOfResults != 1 || SOPC_STATUS_OK != writeResp->Results[0])
-                    {
-                        test_status = -1;
-                    }
                 }
                 SOPC_Atomic_Int_Set(&write_test_status, test_status);
             }
@@ -393,9 +379,7 @@ static SOPC_ReturnStatus client_send_write_req_test(uint32_t session_id)
             if (SOPC_STATUS_OK == status)
             {
                 status = SOPC_NodeId_Copy(&node_to_write->NodeId, node_id_ptr);
-                SOPC_Free(node_id_ptr);
                 node_to_write->AttributeId = 13;
-
                 SOPC_DataValue_Initialize(&node_to_write->Value);
                 node_to_write->Value.Value.BuiltInTypeId = SOPC_UInt64_Id;
                 node_to_write->Value.Value.ArrayType = SOPC_VariantArrayType_SingleValue;
@@ -404,6 +388,8 @@ static SOPC_ReturnStatus client_send_write_req_test(uint32_t session_id)
                 write_request->NoOfNodesToWrite = 1;
                 write_request->NodesToWrite = node_to_write;
             }
+
+            SOPC_Free(node_id_ptr);
         }
     }
 
@@ -411,7 +397,6 @@ static SOPC_ReturnStatus client_send_write_req_test(uint32_t session_id)
     {
         SOPC_Free(node_to_write);
         SOPC_Free(write_request);
-        SOPC_Free(node_id_ptr);
     }
 
     /* send the request */
@@ -796,14 +781,14 @@ static SOPC_ReturnStatus Server_SetUserManagementConfig(SOPC_Endpoint_Config* pE
     /* Create an user authorization manager which accepts any user.
      * i.e.: UserAccessLevel right == AccessLevel right for any user for a given node of address space */
     *output_authorizationManager = SOPC_UserAuthorization_CreateManager_AllowAll();
-    if (NULL == output_authorizationManager)
+    if (NULL == *output_authorizationManager)
     {
         status = SOPC_STATUS_NOK;
     }
     if (SOPC_STATUS_OK == status)
     {
         *output_authenticationManager = SOPC_UserAuthentication_CreateManager_AllowAll();
-        if (NULL == output_authenticationManager)
+        if (NULL == *output_authenticationManager)
         {
             status = SOPC_STATUS_NOK;
         }

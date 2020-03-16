@@ -646,10 +646,10 @@ bool register_server(SOPC_Endpoint_Config* epConfig, uint32_t endpoint_config_id
             if (request->Server.DiscoveryUrls != NULL)
             {
                 request->Server.NoOfDiscoveryUrls = srcDesc->NoOfDiscoveryUrls;
-            }
-            for (int32_t i = 0; SOPC_STATUS_OK == status && i < srcDesc->NoOfDiscoveryUrls; i++)
-            {
-                status = SOPC_String_AttachFrom(&request->Server.DiscoveryUrls[i], &srcDesc->DiscoveryUrls[i]);
+                for (int32_t i = 0; SOPC_STATUS_OK == status && i < srcDesc->NoOfDiscoveryUrls; i++)
+                {
+                    status = SOPC_String_AttachFrom(&request->Server.DiscoveryUrls[i], &srcDesc->DiscoveryUrls[i]);
+                }
             }
         }
         else
