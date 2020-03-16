@@ -17,85 +17,107 @@
  * under the License.
  */
 
+/// @file sopc_msgbox.c
+
 #include "sopc_msgbox.h"
 
 // Private types definitions
 
+/// @brief Message box sync status, used to protect API concurrent accesses (SOPC_MsgBox_DataHandle API)
 typedef enum E_MSG_BOX_INFO_SYNC
 {
-    E_MSG_BOX_INFO_SYNC_NOT_USED,
-    E_MSG_BOX_INFO_SYNC_USED,
-    E_MSG_BOX_INFO_SYNC_RESERVING,
-    E_MSG_BOX_INFO_SYNC_RESERVED,
-    E_MSG_BOX_INFO_SYNC_RESERVED_USED,
-    E_MSG_BOX_INFO_SYNC_RELEASING,
+    E_MSG_BOX_INFO_SYNC_NOT_USED,      ///< Message box data handle is created and not initialized
+    E_MSG_BOX_INFO_SYNC_USED,          ///< Message box data handle is in used
+    E_MSG_BOX_INFO_SYNC_RESERVING,     ///< Message box data handle is initializing
+    E_MSG_BOX_INFO_SYNC_RESERVED,      ///< Status after SOPC_MsgBox_DataHandle_Initialize
+    E_MSG_BOX_INFO_SYNC_RESERVED_USED, ///< Status after SOPC_MsgBox_DataHandle_Get and Update function calling
+    E_MSG_BOX_INFO_SYNC_RELEASING,     ///< Status after SOPC_MsgBox_DataHandle_Finalize
     E_MSG_BOX_INFO_SYNC_SIZE = INT32_MAX
 } eMsgBoxInfoSync;
 
-// This structure contains volatile inUse flag used by mutual exclusion of API usage for same client id.
+/// @brief This structure contains inUse flag used by mutual exclusion of API usage for same client id.
 typedef struct T_MSG_BOX_INFO_SYNC
 {
-    eMsgBoxInfoSync eIsInUse;
-    bool bIsInUse;
+    eMsgBoxInfoSync eIsInUse; ///< Workspace using status for SOPC_MsgBox_DataHandle_XXX functions (writer side)
+    bool bIsInUse; ///< Workspace using status for SOPC_MsgBox_Push and SOPC_MsgBox_GetEvtPtr API. (writer and reader
+                   ///< sides)
 } tMsgBoxInfoSync;
 
-// Message box FIFO events, which contains size and offset in the buffer of data
+/// @brief Message box FIFO events, which contains size and offset in the buffer of data
 typedef struct T_MSG_BOX_FIFO_EVENTS
 {
-    uint32_t size;
-    uint32_t offset;
+    uint32_t size;   ///< Size of an event
+    uint32_t offset; ///< Offset of the data
 } __attribute__((packed)) tMsgBoxFifoEvents;
 
-// Message box FIFO header, which contains indexes of next write of event and linked data, free space, space bounds
+/// @brief Message box FIFO header, which contains indexes of next write of event and linked data, free space, space
+/// bounds
 typedef struct T_MSG_BOX_FIFO_HEADER
 {
-    uint32_t nbEvts;    // Current total events
-    uint32_t nbData;    // Current total of data in bytes
-    uint32_t idxWrEvt;  // Index of next event write
-    uint32_t idxWrData; // Index of next data write
-    uint32_t maxEvts;   // Maximum of events
-    uint32_t maxData;   // Maximum of cumulated data
+    uint32_t nbEvts;    ///< Current total events
+    uint32_t nbData;    ///< Current total of data in bytes
+    uint32_t idxWrEvt;  ///< Index of next event write
+    uint32_t idxWrData; ///< Index of next data write
+    uint32_t maxEvts;   ///< Maximum of events
+    uint32_t maxData;   ///< Maximum of cumulative data
 } __attribute__((packed)) tMsgBoxFifoHeader;
 
+/// @brief Message box handle
 struct SOPC_MsgBox
 {
-    /*
+    /* Internal structure contained by an SOPC_DoubleBuffer
     tMsgBoxFifoHeader fifoHeader; // FIFO header
     tMsgBoxFifoEvents* pEvents;   // FIFO events buffer
     uint8_t* pData;               // FIFO data buffer
      */
 
-    uint32_t doubleBufferFieldSize;
+    uint32_t doubleBufferFieldSize; ///< Double buffer size
 
-    uint32_t nbMaxClts;           // Maximum of concurrent clients of message box API (Get read pointer)
-    uint32_t* idxEvtReader;       // Table of index used by concurrent clients to identify if new event is arrived.
-    tMsgBoxInfoSync* pLockReader; // Table of inUse flags used by concurrent clients
+    uint32_t nbMaxClts;           ///< Maximum of concurrent clients of message box API (Get read pointer)
+    uint32_t* idxEvtReader;       ///< Table of index used by concurrent clients to identify if new event is arrived.
+    tMsgBoxInfoSync* pLockReader; ///< Table of inUse flags used by concurrent clients
 
-    tMsgBoxInfoSync lockWriter; // In use flag used by writer.
+    tMsgBoxInfoSync lockWriter; ///< In use flag used by writer.
 
-    SOPC_DoubleBuffer* pFifoPublisher; // Double buffer used to publish coherent FIFO image.
+    SOPC_DoubleBuffer* pFifoPublisher; ///< Double buffer used to publish coherent FIFO image : tMsgBoxFifoHeader +
+                                       ///< tMsgBoxFifoEvents[] + uint8_t[]
 };
 
 // Private functions declaration
 
-// Message box reset
+/// @brief Message box reset
+/// @param [in] pMsgBox Message box handle
 static void SOPC_MsgBox_DeInitialize(SOPC_MsgBox* pMsgBox);
 
-// Message box initialization
+/// @brief Message box initialization
+/// @param [in] pMsgBox Message box handle
+/// @param [in] max_clients Max message box concurrent client. Client identifier between 0 -> max-1
+/// @param [in] max_evts Max events to manage writer burst.
+/// @param [in] max_data_evt Max cumulative data in bytes.
 static SOPC_ReturnStatus SOPC_MsgBox_Initialize(
     SOPC_MsgBox* pMsgBox,   // Message box object
     uint32_t max_clients,   // Max message box concurrent client. Client identifier between 0 -> max-1
     uint32_t max_evts,      // Max events to manage writer burst.
     uint32_t max_data_evt); // Max cumulative data in bytes.
 
-// Message box FIFO header update function
+/// @brief Message box FIFO header update function
+/// @param [inout] pFifoHeader Header structure
+/// @param [inout] pFifoEvts Buffer of events
+/// @param [inout] pFifoData Buffer of data
+/// @param [in] pData Data to push
+/// @param [in] size Size of data to push
 static SOPC_ReturnStatus SOPC_MsgBox_UpdateFifoHeader(tMsgBoxFifoHeader* pFifoHeader, // Header structure
                                                       tMsgBoxFifoEvents* pFifoEvts,   // Buffer of events
                                                       uint8_t* pFifoData,             // Buffer of data
                                                       uint8_t* pData,                 // Data to push
                                                       uint32_t size);                 // Size of data to push
 
-// Message box FIFO header update function
+/// @brief Message box FIFO header update function
+/// @param [inout] pFifoHeader Header structure
+/// @param [inout] pFifoEvts Buffer of events
+/// @param [inout] pFifoData Buffer of data
+/// @param [in] pData Data to push
+/// @param [in] size Size of data to push
 static SOPC_ReturnStatus SOPC_MsgBox_UpdateFifoHeader(tMsgBoxFifoHeader* pFifoHeader, // Header structure
                                                       tMsgBoxFifoEvents* pFifoEvts,   // Buffer of events
                                                       uint8_t* pFifoData,             // Buffer of data
@@ -174,7 +196,11 @@ static SOPC_ReturnStatus SOPC_MsgBox_UpdateFifoHeader(tMsgBoxFifoHeader* pFifoHe
     return result;
 }
 
-// Message box FIFO header update function
+/// @brief Message box FIFO header reset function
+/// @param [in] pFifoHeader Header structure
+/// @param [in] pFifoEvts Buffer of events
+/// @param [in] pFifoData Buffer of data
+/// @return SOPC_STATUS_OK
 static SOPC_ReturnStatus SOPC_MsgBox_ResetFifoHeader(tMsgBoxFifoHeader* pFifoHeader, // Header structure
                                                      tMsgBoxFifoEvents* pFifoEvts,   // Buffer of events
                                                      uint8_t* pFifoData)             // Buffer of data
@@ -194,10 +220,13 @@ static SOPC_ReturnStatus SOPC_MsgBox_ResetFifoHeader(tMsgBoxFifoHeader* pFifoHea
     return result;
 }
 
-// Message Box Creation
-// Returns : NULL if invalid parameters or not enough memory. Else SOPC_MsgBox object.
+/// @brief Message Box Creation
+/// @param [in] max_clients Max message box concurrent client. Client identifier between 0 to max-1
+/// @param [in] max_evts Max events to manage writer burst.
+/// @param [in] max_data_evt max cumulative data in bytes
+/// @return NULL if invalid parameters or not enough memory. Else SOPC_MsgBox object.
 SOPC_MsgBox* SOPC_MsgBox_Create(
-    uint32_t max_clients,  // Max message box concurrent client. Client identifier between 0 -> max-1
+    uint32_t max_clients,  // Max message box concurrent client. Client identifier between 0 to max-1
     uint32_t max_evts,     // Max events to manage writer burst.
     uint32_t max_data_evt) // Max cumulative data in bytes.
 {
@@ -212,7 +241,8 @@ SOPC_MsgBox* SOPC_MsgBox_Create(
     return pMsgBox;
 }
 
-// Message Box Destruction
+/// @brief Message Box Destruction
+/// @param [inout] ppMsgBox Message box handle to destroy. Set to NULL after free.
 void SOPC_MsgBox_Destroy(SOPC_MsgBox** ppMsgBox)
 {
     if (ppMsgBox != NULL)
@@ -361,10 +391,14 @@ static SOPC_ReturnStatus SOPC_MsgBox_Initialize(
     return result;
 }
 
-// Push data to message box
-// Returns : SOPC_STATUS_OK if data well pushed
-// SOPC_INVALID_STATE if API is in use concurrently by for same client id.
-// SOPC_STATUS_NOK in case of invalid parameters : size < 1, data = NULL, to big atomic data size
+/// @brief Push data to message box.
+/// If you want write directly without copy into message box, use data handle.
+/// @param [in] pMsgBox Message box handle
+/// @param [in] data Data to push (copy input buffer into internal buffer)
+/// @param [in] size Size of data
+/// @return SOPC_STATUS_OK if data well pushed.
+/// SOPC_INVALID_STATE if API is in use concurrently by for same client id.
+/// SOPC_STATUS_NOK in case of invalid parameters : size is 0 or data is null pointer
 SOPC_ReturnStatus SOPC_MsgBox_Push(SOPC_MsgBox* pMsgBox, // Message box
                                    uint8_t* data,        // Data to push
                                    uint32_t size)        // Size of data
@@ -446,9 +480,10 @@ SOPC_ReturnStatus SOPC_MsgBox_Push(SOPC_MsgBox* pMsgBox, // Message box
     return result;
 }
 
-// Reset message box
-// Returns : SOPC_STATUS_OK if data well pushed
-// SOPC_INVALID_STATE if API is in use concurrently by for same client id.
+/// @brief Reset message box
+/// @param [in] pMsgBox Message box handle
+/// @return Returns : SOPC_STATUS_OK if data well pushed
+/// SOPC_INVALID_STATE if API is in use concurrently by for same client id.
 SOPC_ReturnStatus SOPC_MsgBox_Reset(SOPC_MsgBox* pMsgBox)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
@@ -526,18 +561,22 @@ SOPC_ReturnStatus SOPC_MsgBox_Reset(SOPC_MsgBox* pMsgBox)
     return result;
 }
 
-// Write operation directly to event buffer. API not tested.
-
+/// @brief Message box data handle, which allow a write operation directly to event buffer.
+/// @warning API not tested!
 struct SOPC_MsgBox_DataHandle
 {
-    SOPC_MsgBox* pMsgBox;
-    uint32_t idBuffer;
+    SOPC_MsgBox* pMsgBox; ///< Message box handle, linked to this data handle
+    uint32_t idBuffer;    ///< Buffer retrieved by SOPC_DoubleBuffer_GetWriteBuffer
 
-    tMsgBoxFifoHeader* pHeader;
-    tMsgBoxFifoEvents* pEvtsBuffer;
-    uint8_t* pDataToUpdate;
+    tMsgBoxFifoHeader* pHeader;     ///< Pointer on buffer where fifo header start
+    tMsgBoxFifoEvents* pEvtsBuffer; ///< Pointer on buffer where event buffer start
+    uint8_t* pDataToUpdate;         ///< Pointer on buffer where event data buffer start
 };
 
+/// @brief Message box data handle creation. Used to directly write into event buffer.
+/// @warning Not tested API!
+/// @param [in] pMsgBox Message box handle
+/// @return Message box data handle used to expose an event buffer for write operation,
 SOPC_MsgBox_DataHandle* SOPC_MsgBox_DataHandle_Create(SOPC_MsgBox* pMsgBox)
 {
     SOPC_MsgBox_DataHandle* p = SOPC_Calloc(1, sizeof(SOPC_MsgBox_DataHandle));
@@ -551,6 +590,14 @@ SOPC_MsgBox_DataHandle* SOPC_MsgBox_DataHandle_Create(SOPC_MsgBox* pMsgBox)
     return p;
 }
 
+/// @brief Message box data handle - Initialization.
+/// @warning Not tested API!
+/// @brief After initialization, SOPC_MsgBox_DataHandle_GetDataEvt shall be used to expose buffer informations.
+/// @brief SOPC_MsgBox_DataHandle_UpdateDataEvtSize is used to write number of signficant bytes contained by exposed
+/// buffer.
+/// @brief To commit write operation, SOPC_MsgBox_DataHandle_Finalize shall be used.
+/// @param [in] pDataHandle Message box data handle.
+/// @return SOPC_STATUS_OK if data handle is valid and not not initialized or finalized.
 SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Initialize(SOPC_MsgBox_DataHandle* pDataHandle)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
@@ -605,14 +652,14 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Initialize(SOPC_MsgBox_DataHandle* pDat
             pDataHandle->pHeader = NULL;
             pDataHandle->pDataToUpdate = NULL;
             pDataHandle->pEvtsBuffer = NULL;
-            desiredStatus = E_MSG_BOX_INFO_SYNC_RESERVED;
+            desiredStatus = E_MSG_BOX_INFO_SYNC_NOT_USED;
             __atomic_store(&pDataHandle->pMsgBox->lockWriter.eIsInUse, //
                            &desiredStatus,                             //
                            __ATOMIC_SEQ_CST);                          //
         }
         else
         {
-            desiredStatus = E_MSG_BOX_INFO_SYNC_NOT_USED;
+            desiredStatus = E_MSG_BOX_INFO_SYNC_RESERVED;
             __atomic_store(&pDataHandle->pMsgBox->lockWriter.eIsInUse, //
                            &desiredStatus,                             //
                            __ATOMIC_SEQ_CST);                          //
@@ -626,6 +673,13 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Initialize(SOPC_MsgBox_DataHandle* pDat
     return result;
 }
 
+/// @brief Expose event buffer information
+/// @warning Not tested API!!!
+/// @param [in] pDataHandle Message box data handle
+/// @param [out] ppData Exposed data event buffer
+/// @param [out] pMaxAllowedSize Max allowed data size
+/// @return SOPC_STATUS_OK if event retrieved.
+/// SOPC_INVALID_STATE if API is in use concurrently.
 SOPC_ReturnStatus SOPC_MsgBox_DataHandle_GetDataEvt(SOPC_MsgBox_DataHandle* pDataHandle,
                                                     uint8_t** ppData,
                                                     uint32_t* pMaxAllowedSize)
@@ -665,6 +719,12 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_GetDataEvt(SOPC_MsgBox_DataHandle* pDat
     return result;
 }
 
+/// @brief Update event data size (number of effective significant bytes)
+/// @warning Not tested API!!!
+/// @param [in] pDataHandle Message box data handle
+/// @param [in] size Number of significant bytes
+/// @return SOPC_STATUS_OK if event retrieved.
+/// SOPC_INVALID_STATE if API is in use concurrently.
 SOPC_ReturnStatus SOPC_MsgBox_DataHandle_UpdateDataEvtSize(SOPC_MsgBox_DataHandle* pDataHandle, uint32_t size)
 {
     if (NULL == pDataHandle || NULL == pDataHandle->pDataToUpdate || NULL == pDataHandle->pEvtsBuffer ||
@@ -741,6 +801,12 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_UpdateDataEvtSize(SOPC_MsgBox_DataHandl
     return result;
 }
 
+/// @brief Message box data handle - Finalize write operation (commit modification)
+/// @warning Not tested API!!!
+/// @param [in] pDataHandle Message box data Handle
+/// @param [in] bCancel Write operation canceled if true.
+/// @return SOPC_STATUS_OK if event retrieved.
+/// SOPC_INVALID_STATE if API is in use concurrently.
 SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Finalize(SOPC_MsgBox_DataHandle* pDataHandle, bool bCancel)
 {
     if (NULL == pDataHandle || NULL == pDataHandle->pDataToUpdate || NULL == pDataHandle->pEvtsBuffer ||
@@ -779,6 +845,9 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Finalize(SOPC_MsgBox_DataHandle* pDataH
     return result;
 }
 
+/// @brief Message box data handle destruction.
+/// @param [inout] ppDataHandle Message box data handle. Set to NULL.
+/// @return SOPC_STATUS_OK if valid handle, well finalized.
 SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Destroy(SOPC_MsgBox_DataHandle** ppDataHandle)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_INVALID_PARAMETERS;
@@ -792,9 +861,11 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Destroy(SOPC_MsgBox_DataHandle** ppData
     return result;
 }
 
-// Message box pop initialization. Shall be called before Pop_GetEvtPtr.
-// Returns : SOPC_STATUS_OK if a valid idBuffer is returned. This id shall be used by GetEvtPtr function.
-// It reset idBuffer to UINT32_MAX in case of error.
+/// @brief Message box pop initialization. Shall be called before SOPC_MsgBox_Pop_GetEvtPtr.
+/// @param [in] pMsgBox Message box handle
+/// @param [out] pIdBuffer Buffer identifier to use with SOPC_MsgBox_Pop_GetEvtPtr and SOPC_MsgBox_Pop_Finalize.
+/// @return SOPC_STATUS_OK if a valid idBuffer is returned. This id shall be used by SOPC_MsgBox_Pop_GetEvtPtr function.
+/// It reset idBuffer to UINT32_MAX in case of error.
 SOPC_ReturnStatus SOPC_MsgBox_Pop_Initialize(
     SOPC_MsgBox* pMsgBox, // Message box object
     uint32_t* pIdBuffer)  // Buffer identifier to use with Pop_GetEvtPtr and Pop_Finalize
@@ -809,14 +880,22 @@ SOPC_ReturnStatus SOPC_MsgBox_Pop_Initialize(
     return result;
 }
 
-// Message box pop operation. Used to get an event.
-// This function shall be used AFTER a Pop_Initialize.
-// Multiple calls can be performed.
-// After all calls, Pop_Finalize shall be called.
-// Returns : SOPC_STATUS_OK if data is returned via ppData
-// If mode GET_NORMAL, reader pop a new event from its point of view.
-// If mode GET_NEW_LAST, reader pop the last event if it is new from its point of view.
-// If mode GET_LAST, reader pop the last event even if not new (read several time the same last event)
+/// @brief Message box pop operation. Used to get an event.
+/// @brief This function shall be used AFTER a Pop_Initialize.
+/// @brief Multiple calls can be performed.
+/// @brief After all calls, SOPC_MsgBox_Pop_Finalize shall be called.
+/// @param [in] pMsgBox Message box object
+/// @param [in] idBuffer Identifier returned by SOPC_MsgBox_Pop_Initialize
+/// @param [in] idclient Client identifier
+/// @param [out] ppData Pointer on data of an event. Shall not be freed or written.
+/// @param [out] pSize Size of data event returned
+/// @param [out] pNbPendOrIgnoreEvents Number of pending events
+/// @param [in] mode Mode GET_NORMAL, GET_LAST or GET_NEW_LAST
+/// * If mode GET_NORMAL, reader pop a new event from its point of view.
+/// * If mode GET_NEW_LAST, reader pop the last event if it is new from its point of view.
+/// * If mode GET_LAST, reader pop the last event even if not new (read several time the same last event)
+/// @return SOPC_STATUS_OK if data is returned via ppData.
+/// SOPC_INVALID_STATE if API is in use concurrently by for same client id.
 SOPC_ReturnStatus SOPC_MsgBox_Pop_GetEvtPtr(SOPC_MsgBox* pMsgBox,            // Message box object
                                             uint32_t idBuffer,               // Identifier returned by Pop_Initialize
                                             uint32_t idclient,               // Client identifier
@@ -977,9 +1056,12 @@ SOPC_ReturnStatus SOPC_MsgBox_Pop_GetEvtPtr(SOPC_MsgBox* pMsgBox,            // 
     return result;
 }
 
-// Message box pop finalization.
-// Shall be called after a sequence Pop_Initialize - Pop_GetEvtPtr ... Pop_GetEvtPtr
-// It reset idBuffer to UINT32_MAX value.
+/// @brief Message box pop finalization.
+/// @brief Shall be called after a sequence Pop_Initialize - Pop_GetEvtPtr ... Pop_GetEvtPtr
+/// @brief It reset idBuffer to UINT32_MAX value.
+/// @param [in] pMsgBox Message box handle
+/// @param [inout] pIdBuffer Buffer identifier returned by SOPC_MsgBox_Pop_Initialize
+/// @return SOPC_STATUS_OK if buffer identifier is valid.
 SOPC_ReturnStatus SOPC_MsgBox_Pop_Finalize(SOPC_MsgBox* pMsgBox, // Message box object
                                            uint32_t* pIdBuffer)  // @ point on uin32_t id returned by Pop_Initialize
 {
