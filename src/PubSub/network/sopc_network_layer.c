@@ -165,11 +165,11 @@ static SOPC_ReturnStatus Network_DataSetFields_To_UADP(SOPC_Buffer* buffer, SOPC
 {
     uint16_t length = SOPC_Dataset_LL_DataSetMsg_Nb_DataSetField(dsm);
 
-    SOPC_ReturnStatus status = SOPC_UInt16_Write(&length, buffer);
+    SOPC_ReturnStatus status = SOPC_UInt16_Write(&length, buffer, 0);
     for (uint16_t i = 0; i < length && SOPC_STATUS_OK == status; i++)
     {
         const SOPC_Variant* variant = SOPC_Dataset_LL_DataSetMsg_Get_Variant_At(dsm, i);
-        status = SOPC_Variant_Write(variant, buffer);
+        status = SOPC_Variant_Write(variant, buffer, 0);
     }
     return status;
 }
@@ -180,7 +180,7 @@ static SOPC_ReturnStatus UADP_To_DataSetFields(SOPC_Buffer* buffer, SOPC_Dataset
     SOPC_ReturnStatus status;
     bool allocStatus;
 
-    status = SOPC_UInt16_Read(&length, buffer);
+    status = SOPC_UInt16_Read(&length, buffer, 0);
     if (SOPC_STATUS_OK != status)
     {
         return status;
@@ -203,7 +203,7 @@ static SOPC_ReturnStatus UADP_To_DataSetFields(SOPC_Buffer* buffer, SOPC_Dataset
         {
             bool res = SOPC_Dataset_LL_DataSetMsg_Set_DataSetField_Variant_At(dsm, variant, i);
             assert(res); // valid index
-            status = SOPC_Variant_Read(variant, buffer);
+            status = SOPC_Variant_Read(variant, buffer, 0);
         }
     }
 
@@ -224,16 +224,16 @@ static SOPC_ReturnStatus Network_Layer_PublisherId_Write(SOPC_Buffer* buffer, SO
     switch (pub_id->type)
     {
     case DataSet_LL_PubId_Byte_Id:
-        status = SOPC_Byte_Write(&(pub_id->data.byte), buffer);
+        status = SOPC_Byte_Write(&(pub_id->data.byte), buffer, 0);
         break;
     case DataSet_LL_PubId_UInt16_Id:
-        status = SOPC_UInt16_Write(&(pub_id->data.uint16), buffer);
+        status = SOPC_UInt16_Write(&(pub_id->data.uint16), buffer, 0);
         break;
     case DataSet_LL_PubId_UInt32_Id:
-        status = SOPC_UInt32_Write(&(pub_id->data.uint32), buffer);
+        status = SOPC_UInt32_Write(&(pub_id->data.uint32), buffer, 0);
         break;
     case DataSet_LL_PubId_UInt64_Id:
-        status = SOPC_UInt64_Write(&(pub_id->data.uint64), buffer);
+        status = SOPC_UInt64_Write(&(pub_id->data.uint64), buffer, 0);
         break;
     case DataSet_LL_PubId_String_Id:
     default:
@@ -255,28 +255,28 @@ static SOPC_ReturnStatus Network_Layer_PublisherId_Read(SOPC_Buffer* buffer,
     case DataSet_LL_PubId_Byte_Id:
     {
         SOPC_Byte id;
-        status = SOPC_Byte_Read(&id, buffer);
+        status = SOPC_Byte_Read(&id, buffer, 0);
         SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_Byte(nm, id);
         break;
     }
     case DataSet_LL_PubId_UInt16_Id:
     {
         uint16_t id;
-        status = SOPC_UInt16_Read(&id, buffer);
+        status = SOPC_UInt16_Read(&id, buffer, 0);
         SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt16(nm, id);
         break;
     }
     case DataSet_LL_PubId_UInt32_Id:
     {
         uint32_t id;
-        status = SOPC_UInt32_Read(&id, buffer);
+        status = SOPC_UInt32_Read(&id, buffer, 0);
         SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt32(nm, id);
         break;
     }
     case DataSet_LL_PubId_UInt64_Id:
     {
         uint64_t id;
-        status = SOPC_UInt64_Read(&id, buffer);
+        status = SOPC_UInt64_Read(&id, buffer, 0);
         SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt64(nm, id);
         break;
     }
@@ -369,7 +369,7 @@ SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm)
     if (DATASET_LL_WRITER_GROUP_ID_ENABLED)
     {
         uint16_t byte_2 = SOPC_Dataset_LL_NetworkMessage_Get_GroupId(nm);
-        status = SOPC_UInt16_Write(&byte_2, buffer);
+        status = SOPC_UInt16_Write(&byte_2, buffer, 0);
         if (SOPC_STATUS_OK != status)
         {
             SOPC_Buffer_Delete(buffer);
@@ -380,7 +380,7 @@ SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm)
     if (DATASET_LL_WRITER_GROUP_VERSION_ENABLED)
     {
         uint32_t version = SOPC_Dataset_LL_NetworkMessage_Get_GroupVersion(nm);
-        status = SOPC_UInt32_Write(&version, buffer);
+        status = SOPC_UInt32_Write(&version, buffer, 0);
         if (SOPC_STATUS_OK != status)
         {
             SOPC_Buffer_Delete(buffer);
@@ -408,7 +408,7 @@ SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm)
         SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, i);
         // - writer id
         uint16_t byte_2 = SOPC_Dataset_LL_DataSetMsg_Get_WriterId(dsm);
-        status = SOPC_UInt16_Write(&byte_2, buffer);
+        status = SOPC_UInt16_Write(&byte_2, buffer, 0);
         if (SOPC_STATUS_OK != status)
         {
             SOPC_Buffer_Delete(buffer);
@@ -495,7 +495,7 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer)
     {
         SOPC_Byte data;
         SOPC_Byte version;
-        status = SOPC_Byte_Read(&data, buffer);
+        status = SOPC_Byte_Read(&data, buffer, 0);
         if (SOPC_STATUS_OK != status)
         {
             SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
@@ -519,7 +519,7 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer)
     if (flags1_enabled)
     {
         SOPC_Byte data;
-        status = SOPC_Byte_Read(&data, buffer);
+        status = SOPC_Byte_Read(&data, buffer, 0);
         if (SOPC_STATUS_OK != status)
         {
             SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
@@ -597,7 +597,7 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer)
         // Others: not used
         {
             SOPC_Byte data;
-            status = SOPC_Byte_Read(&data, buffer);
+            status = SOPC_Byte_Read(&data, buffer, 0);
             if (SOPC_STATUS_OK != status)
             {
                 SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
@@ -613,7 +613,7 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer)
         if (conf->GroupIdFlag)
         {
             uint16_t group_id;
-            status = SOPC_UInt16_Read(&group_id, buffer);
+            status = SOPC_UInt16_Read(&group_id, buffer, 0);
             if (SOPC_STATUS_OK != status)
             {
                 SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
@@ -626,7 +626,7 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer)
         if (conf->GroupVersionFlag)
         {
             uint32_t group_version;
-            status = SOPC_UInt32_Read(&group_version, buffer);
+            status = SOPC_UInt32_Read(&group_version, buffer, 0);
             if (SOPC_STATUS_OK != status)
             {
                 SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
@@ -656,7 +656,7 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer)
     if (conf->PayloadHeaderFlag)
     {
         uint16_t writer_id;
-        status = SOPC_Byte_Read(&msg_count, buffer);
+        status = SOPC_Byte_Read(&msg_count, buffer, 0);
         if (SOPC_STATUS_OK != status)
         {
             SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
@@ -681,7 +681,7 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer)
         }
         SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, 0);
 
-        status = SOPC_UInt16_Read(&writer_id, buffer);
+        status = SOPC_UInt16_Read(&writer_id, buffer, 0);
         if (SOPC_STATUS_OK != status)
         {
             SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
@@ -769,7 +769,7 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer)
 
         /** DataSetFlags1 **/
         {
-            status = SOPC_Byte_Read(&data, buffer);
+            status = SOPC_Byte_Read(&data, buffer, 0);
             if (SOPC_STATUS_OK != status)
             {
                 SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
@@ -807,7 +807,7 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer)
             // Bit range 0-3: UADP DataSetMessage type
             // Bit 4: Timestamp enabled
             // Bit 5: PicoSeconds enabled
-            status = SOPC_Byte_Read(&data, buffer);
+            status = SOPC_Byte_Read(&data, buffer, 0);
             if (SOPC_STATUS_OK != status)
             {
                 SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
@@ -831,7 +831,7 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer)
         {
             // not managed yet
             uint16_t notUsed;
-            status = SOPC_UInt16_Read(&notUsed, buffer);
+            status = SOPC_UInt16_Read(&notUsed, buffer, 0);
             if (SOPC_STATUS_OK != status)
             {
                 SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
@@ -845,7 +845,7 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer)
         {
             // not managed yet
             uint64_t timestamp;
-            status = SOPC_UInt64_Read(&timestamp, buffer);
+            status = SOPC_UInt64_Read(&timestamp, buffer, 0);
             if (SOPC_STATUS_OK != status)
             {
                 SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
@@ -859,7 +859,7 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer)
         {
             // not managed yet
             uint16_t notUsed;
-            status = SOPC_UInt16_Read(&notUsed, buffer);
+            status = SOPC_UInt16_Read(&notUsed, buffer, 0);
             if (SOPC_STATUS_OK != status)
             {
                 SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
@@ -873,7 +873,7 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer)
         {
             // not managed yet
             uint16_t notUsed;
-            status = SOPC_UInt16_Read(&notUsed, buffer);
+            status = SOPC_UInt16_Read(&notUsed, buffer, 0);
             if (SOPC_STATUS_OK != status)
             {
                 SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
@@ -887,7 +887,7 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer)
         {
             // not managed yet
             uint32_t not_used;
-            status = SOPC_UInt32_Read(&not_used, buffer);
+            status = SOPC_UInt32_Read(&not_used, buffer, 0);
             if (SOPC_STATUS_OK != status)
             {
                 SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
@@ -901,7 +901,7 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer)
         {
             // not managed yet
             uint32_t not_used;
-            status = SOPC_UInt32_Read(&not_used, buffer);
+            status = SOPC_UInt32_Read(&not_used, buffer, 0);
             if (SOPC_STATUS_OK != status)
             {
                 SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);

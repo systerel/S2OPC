@@ -23,11 +23,11 @@
 #include <string.h>
 
 #include "sopc_builtintypes.h"
+#include "sopc_common_constants.h"
 #include "sopc_encoder.h"
 #include "sopc_helper_string.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
-#include "sopc_toolkit_config_constants.h"
 #include "sopc_types.h"
 
 const char* nullType = "NULL";

@@ -68,12 +68,6 @@
 #define SOPC_MAX_DIAG_INFO_NESTED_LEVEL 100
 #endif /* SOPC_MAX_DIAG_INFO_NESTED_LEVEL */
 
-/** @brief Maximum levels of nested structs, excluding Diagnostic Information which is
- * handled by SOPC_MAX_DIAG_INFO_NESTED_LEVEL */
-#ifndef SOPC_MAX_STRUCT_NESTED_LEVEL
-#define SOPC_MAX_STRUCT_NESTED_LEVEL 50
-#endif /* SOPC_MAX_STRUCT_NESTED_LEVEL */
-
 /* @brief Maximum number of operations in a request accepted by server (Read, Write, etc.) */
 #ifndef SOPC_MAX_OPERATIONS_PER_MSG
 #define SOPC_MAX_OPERATIONS_PER_MSG 5000

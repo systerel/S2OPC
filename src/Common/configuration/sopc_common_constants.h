@@ -67,11 +67,11 @@
 #define SOPC_MAX_DIAG_INFO_NESTED_LEVEL 100
 #endif /* SOPC_MAX_DIAG_INFO_NESTED_LEVEL */
 
-/** @brief Maximum levels of nested variant
- * (e.g.: variant containing array of variants / data value) */
-#ifndef SOPC_MAX_VARIANT_NESTED_LEVEL
-#define SOPC_MAX_VARIANT_NESTED_LEVEL 10
-#endif /* SOPC_MAX_VARIANT_NESTED_LEVEL */
+/** @brief Maximum levels of nested structs, excluding Diagnostic Information which is
+ * handled by SOPC_MAX_DIAG_INFO_NESTED_LEVEL */
+#ifndef SOPC_MAX_STRUCT_NESTED_LEVEL
+#define SOPC_MAX_STRUCT_NESTED_LEVEL 50
+#endif /* SOPC_MAX_STRUCT_NESTED_LEVEL */
 
 /* @brief Maximum number of elements in Async Queue */
 #ifndef SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE
