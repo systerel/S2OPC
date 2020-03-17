@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(S2OPC VERSION 0.11.0 LANGUAGES C)
+project(S2OPC VERSION 1.0.0 LANGUAGES C)
 
 if(NOT S2OPC_COMMON_DEFS_SET)
   include(../CommonDefs.cmake)

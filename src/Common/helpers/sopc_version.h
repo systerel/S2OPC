@@ -27,8 +27,8 @@
 #define SOPC_VERSION_H_
 
 /** @brief Version of the toolkit */
-#define SOPC_TOOLKIT_VERSION_MAJOR 0
-#define SOPC_TOOLKIT_VERSION_MEDIUM 11
+#define SOPC_TOOLKIT_VERSION_MAJOR 1
+#define SOPC_TOOLKIT_VERSION_MEDIUM 0
 #define SOPC_TOOLKIT_VERSION_MINOR 0
 
 #define Q(x) #x
