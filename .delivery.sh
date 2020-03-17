@@ -21,12 +21,10 @@
 #  Script to produce toolkit delivery archive
 #  $1 must be the delivery version number (e.g.: 1.0.0)
 #  $2 must be the current minor modification issue number
-#  $3 must be the LibSub delivery version number (e.g.: 1.0.0)
 
 echo "Check master branch name is valid"
 BRANCH_COMMIT=master
 VERSION_HEADER=./src/Common/helpers/sopc_version.h
-LIBSUB_VERSION_HEADER=./src/ClientServer/frontend/client_wrapper/libs2opc_client.h
 
 git show-ref refs/heads/$BRANCH_COMMIT &> /dev/null
 if [[ $? != 0 ]]; then
@@ -55,14 +53,6 @@ regexpTicket='^[0-9]+$'
 if ! [[ $2 =~ $regexpTicket ]] ; then
    echo "Error: '$2' is not a correct ticket number";
    exit 1
-fi
-
-echo "Check LibSub version number is correct: $3"
-if ! [[ $3 =~ $regexp ]] ; then
-   echo "Error: '$3' is not a correct version number X.Y.Z";
-   exit 1
-else
-   libsub_version=$3
 fi
 
 echo "Check branch and tag does not exist: $DELIVERY_NAME"
@@ -107,11 +97,8 @@ sed -i 's/VERSION [0-9]\+\.[0-9]\+\.[0-9]\+/VERSION '"$1"'/' src/CMakeLists.txt 
 echo "Update to $1 version in README.md file"
 sed -i 's/S2OPC_Toolkit_[0-9]\+\.[0-9]\+\.[0-9]\+/S2OPC_Toolkit_'"$1"'/' README.md || exit 1
 
-echo "Update to $libsub_version* version in $LIBSUB_VERSION_HEADER"
-sed -i 's/#define SOPC_LIBSUB_VERSION .*/#define SOPC_LIBSUB_VERSION "'"$libsub_version"'*"/' $LIBSUB_VERSION_HEADER || exit 1
-
 echo "Commit updated current version in $2-update-tagged-version: it shall be pushed as MR on gitlab ASAP"
-git commit src/CMakeLists.txt README.md $VERSION_HEADER $LIBSUB_VERSION_HEADER -S -m "Ticket #$2: Update current version of Toolkit / subscription library" &> /dev/null || exit 1
+git commit src/CMakeLists.txt README.md $VERSION_HEADER -S -m "Ticket #$2: Update current version of Toolkit / subscription library" &> /dev/null || exit 1
 
 echo "Checking out $DELIVERY_NAME"
 git checkout $DELIVERY_NAME || exit 1
@@ -128,10 +115,7 @@ sed -i 's/VERSION [0-9]\+\.[0-9]\+\.[0-9]\+/VERSION '"$1"'/' src/CMakeLists.txt 
 echo "Update to $1 version in README.md file"
 sed -i 's/S2OPC_Toolkit_[0-9]\+\.[0-9]\+\.[0-9]\+/S2OPC_Toolkit_'"$1"'/' README.md || exit 1
 
-echo "Update to $libsub_version version in $LIBSUB_VERSION_HEADER"
-sed -i 's/#define SOPC_LIBSUB_VERSION .*/#define SOPC_LIBSUB_VERSION "'"$libsub_version"'"/' $LIBSUB_VERSION_HEADER || exit 1
-
-git commit src/CMakeLists.txt README.md $VERSION_HEADER $LIBSUB_VERSION_HEADER -S -m "Update tagged $1 S2OPC version / $libsub_version subscription library version" &> /dev/null || exit 1
+git commit src/CMakeLists.txt README.md $VERSION_HEADER -S -m "Update tagged $1 S2OPC version" &> /dev/null || exit 1
 
 echo "Generate and commit version file 'VERSION' with '$1' content"
 echo "$1" > VERSION
@@ -236,7 +220,7 @@ if [ $? -eq 0 ]; then
     echo "Creation of delivery archive '$DELIVERY_NAME.tar.gz' succeeded"
     echo "PLEASE USE ARCHIVE ONLY FOR TESTING PURPOSE: retrieve the final archive from gitlab directly to avoid md5sum possible issue (--prefix choice)"
     echo "Please push the $2-update-tagged-version branch as MR on gitlab closing issue #$2"
-    echo "Please tag the $DELIVERY_NAME branch on bare repository WITH SIGNATURE: $DELIVERY_NAME and S2OPC_LibSub_$libsub_version"
+    echo "Please tag the $DELIVERY_NAME branch on bare repository WITH SIGNATURE: $DELIVERY_NAME"
 else
     echo "==========================================================="
     echo "Creation of delivery archive '$DELIVERY_NAME.tar.gz' FAILED"
