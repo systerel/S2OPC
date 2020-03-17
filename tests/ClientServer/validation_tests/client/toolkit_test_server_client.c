@@ -799,6 +799,11 @@ static SOPC_ReturnStatus Server_SetUserManagementConfig(SOPC_Endpoint_Config* pE
         pEpConfig->authenticationManager = *output_authenticationManager;
         pEpConfig->authorizationManager = *output_authorizationManager;
     }
+    else
+    {
+        SOPC_UserAuthorization_FreeManager(output_authorizationManager);
+        SOPC_UserAuthentication_FreeManager(output_authenticationManager);
+    }
 
     return status;
 }

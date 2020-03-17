@@ -3262,11 +3262,17 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Copy(SOPC_ExtensionObject* dest, const SO
             }
             if (SOPC_STATUS_OK == status)
             {
-                SOPC_ByteString_Initialize(&dest->Body.Bstring);
-                assert(encCfg->max_string_length + 4 <= INT32_MAX); // Ensure conversion to int32_t is valid
-                // Do a copy to keep only used data in buffer
-                status = SOPC_ByteString_CopyFromBytes(&dest->Body.Bstring, encodedObject->data,
-                                                       (int32_t) encodedObject->length);
+                if (encodedObject->length <= INT32_MAX)
+                {
+                    SOPC_ByteString_Initialize(&dest->Body.Bstring);
+                    // Do a copy to keep only used data in buffer
+                    status = SOPC_ByteString_CopyFromBytes(&dest->Body.Bstring, encodedObject->data,
+                                                           (int32_t) encodedObject->length);
+                }
+                else
+                {
+                    status = SOPC_STATUS_ENCODING_ERROR;
+                }
             }
             SOPC_Buffer_Delete(encodedObject);
             encodedObject = NULL;
