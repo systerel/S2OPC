@@ -17,61 +17,86 @@
  * under the License.
  */
 
+/// @file sopc_rt_publisher.c
+
 #include "sopc_rt_publisher.h"
 
-// Private status of RT Publisher
+/// @brief Private status of RT Publisher
 typedef enum E_PUBLISHER_SYNC_STATUS
 {
-    E_PUBLISHER_SYNC_STATUS_NOT_INITIALIZED,
-    E_PUBLISHER_SYNC_STATUS_INITIALIZING,
-    E_PUBLISHER_SYNC_STATUS_DEINITIALIZING,
-    E_PUBLISHER_SYNC_STATUS_INITIALIZED,
-    E_PUBLUSHER_SYNC_STATUS_LOCKED,
+    E_PUBLISHER_SYNC_STATUS_NOT_INITIALIZED, ///< RT Publisher not initialized
+    E_PUBLISHER_SYNC_STATUS_INITIALIZING,    ///< RT Publisher initializing
+    E_PUBLISHER_SYNC_STATUS_DEINITIALIZING,  ///< RT Publisher deinitializing
+    E_PUBLISHER_SYNC_STATUS_INITIALIZED,     ///< RT Publisher well initialized
+    E_PUBLUSHER_SYNC_STATUS_LOCKED, ///< RT Publisher with this status and beyond can't be de initialized (in use)
     E_PUBLISHER_SYNC_STATUS_SIZE = INT32_MAX
 } ePublisherSyncStatus;
 
-// Private message publication configuration
+/// @brief Private message publication configuration
 typedef struct SOPC_RT_Publisher_Message_Config
 {
-    uint32_t period;                             // Period in beat heart
-    uint32_t offset;                             // Offset in beat heart
-    void* pUserContext;                          // User context.
-    ptrCallbackStart cbMessagePublishingStarted; // Message publishing status change from STOP to START
-    ptrCallbackSend cbMessageSend;               // Message data should be sent
-    ptrCallbackStop cbMessagePublishingStopped;  // Message publishing status change from START to STOP
-    SOPC_RT_Publisher_MessageStatus initialStatus;
-    struct SOPC_RT_Publisher_Message_Config* next;
+    uint32_t period;                               ///< Period in beat heart
+    uint32_t offset;                               ///< Offset in beat heart
+    void* pUserContext;                            ///< User context.
+    ptrCallbackStart cbMessagePublishingStarted;   ///< Message publishing status change from STOP to START
+    ptrCallbackSend cbMessageSend;                 ///< Message data should be sent
+    ptrCallbackStop cbMessagePublishingStopped;    ///< Message publishing status change from START to STOP
+    SOPC_RT_Publisher_MessageStatus initialStatus; ///< Message initial status after SOPC_RT_Publisher_Create
+    struct SOPC_RT_Publisher_Message_Config* next; ///< Next message configuration
 } SOPC_RT_Publisher_Message_Config;
 
-// RT Publisher Initializer
+/// @brief RT Publisher Initializer
 struct SOPC_RT_Publisher_Initializer
 {
-    uint32_t nbMessages;                              // Number of messages handled
-    uint32_t maxSizeOfMessage;                        // Max size of a message
-    SOPC_RT_Publisher_Message_Config* pMessageConfig; // Message configuration list
+    uint32_t nbMessages;                              ///< Number of messages handled
+    uint32_t maxSizeOfMessage;                        ///< Max size of a message
+    SOPC_RT_Publisher_Message_Config* pMessageConfig; ///< Message configuration list
 };
 
+/// @brief RT Publisher object
 struct SOPC_RT_Publisher
 {
-    ePublisherSyncStatus status; // RT publisher status
-    uint32_t nbMessages;
-    uint32_t maxSizeOfMessage;
-    SOPC_InterruptTimer* pInterruptTimer; // Interrupt Timer workspace
-    SOPC_InterruptTimer_DataHandle** ppTmrDataHandle;
+    ePublisherSyncStatus status;          ///< RT publisher status
+    uint32_t nbMessages;                  ///< Number of messages
+    uint32_t maxSizeOfMessage;            ///< Max significant bytes, common to all messages
+    SOPC_InterruptTimer* pInterruptTimer; ///< Interrupt Timer workspace
+    SOPC_InterruptTimer_DataHandle**
+        ppTmrDataHandle; ///< Interrupt timer data handle used to publish data without intermediate buffer
 };
 
 // Private functions declarations
 
+/// @brief Version of SOPC_RT_Publisher_DeInitialize without concurrent protection
+/// @param [in] pPub RT Publisher object
 static void _SOPC_RT_Publisher_DeInitialize(SOPC_RT_Publisher* pPub);
+
+/// @brief Version of SOPC_RT_Publisher_Initialize without concurrent protection
+/// @param [in] pPub RT Publisher object
+/// @param [in] pConfig RT Initializer object, well initialized
+/// @return SOPC_STATUS_OK if well initialized. Else SOPC_STATUS_INVALID_STATE in case of bad status (well initialized
+/// or initializing)
 static SOPC_ReturnStatus _SOPC_RT_Publisher_Initialize(SOPC_RT_Publisher* pPub, SOPC_RT_Publisher_Initializer* pConfig);
+
+/// @brief Increment status of RT Publisher object if well initialized. Status indicates the current number of API using
+/// level, tested to authorize deinitialization.
+/// @param [in] pRtPub RT Publisher object
+/// @return RT Publisher sync status, INITIALIZED and beyond.
 static inline ePublisherSyncStatus SOPC_RT_Publisher_IncrementInUseStatus(SOPC_RT_Publisher* pRtPub);
+
+/// @brief Decrement status of RT Publisher object if beyond initialized status. Status indicates the current number of
+/// API using level, tested to authorize deinitialization.
+/// @param [in] pRtPub RT Publisher object
+/// @return RT Publisher sync status, INITIALIZED and beyond.
 static inline ePublisherSyncStatus SOPC_RT_Publisher_DecrementInUseStatus(SOPC_RT_Publisher* pRtPub);
 
 // Public functions definitions
 
-// Creation of initializer. It will be used by a RT publisher initialization. After used by RT publisher function, this
-// one can be destroyed. Configuration will be initialized with Initializer_AddMessage function.
-// Returns : NULL if invalid  parameters or out of memory.
+/// @brief Creation of an initializer. It will be used by a RT publisher initialization. After used by RT publisher
+/// creation function, this one can be destroyed. Configuration will be initialized with
+/// SOPC_RT_Publisher_Initializer_AddMessage function. After initialization of the initializer, this one shall be passed
+/// to SOPC_RT_Publisher_Create function.
+/// @param [in] maxSizeOfMessage Max size of a message, common to all message
+/// @return NULL if invalid  parameters or out of memory.
 SOPC_RT_Publisher_Initializer* SOPC_RT_Publisher_Initializer_Create(
     uint32_t maxSizeOfMessage) // Max size of a message, common to all messages
 {
@@ -95,7 +120,8 @@ SOPC_RT_Publisher_Initializer* SOPC_RT_Publisher_Initializer_Create(
     return pInitializer;
 }
 
-// Destroy initializer.
+/// @brief Destroy initializer.
+/// @param [inout] ppInitializer Initializer to destroy. Set to NULL on return.
 void SOPC_RT_Publisher_Initializer_Destroy(SOPC_RT_Publisher_Initializer** ppInitializer)
 {
     if (NULL != ppInitializer)
@@ -119,8 +145,17 @@ void SOPC_RT_Publisher_Initializer_Destroy(SOPC_RT_Publisher_Initializer** ppIni
     }
 }
 
-// Adding message publishing configuration to publisher initializer
-// Returns : SOPC_STATUS_OK if valid message identifier is returned.
+/// @brief Adding message publishing configuration to publisher initializer
+/// @param [in] pConfig RT publisher configuration
+/// @param [in] period Period in heart beats
+/// @param [in] offset Offset in heart beats
+/// @param [in] pContext User context
+/// @param [in] cbStart Start callback
+/// @param [in] cbSend Elapsed period callback
+/// @param [in] cbStop Stop callback
+/// @param [in] initialStatus Message publication initial status after SOPC_RT_Publisher creation.
+/// @param [out] pOutMsgId Message identifier on return
+/// @return SOPC_STATUS_OK if valid message identifier is returned.
 SOPC_ReturnStatus SOPC_RT_Publisher_Initializer_AddMessage(
     SOPC_RT_Publisher_Initializer* pConfig,        // RT publisher configuration
     uint32_t period,                               // Period in heart beats
@@ -188,10 +223,12 @@ SOPC_ReturnStatus SOPC_RT_Publisher_Initializer_AddMessage(
     return result;
 }
 
-// Start RT publisher with initializer in parameter
-// Returns : SOPC_STATUS_OK if switches to initialized from not initialized status.
-// NOK if already initialized.
-// INVALID STATE in the other status
+/// @brief Start RT publisher with initializer in parameter. Initializer shall be well initialized with all messages.
+/// @param [in] pPub RT Publisher object
+/// @param [in] pInitializer RT Publisher initializer
+/// @return SOPC_STATUS_OK if switches to initialized from not initialized status.
+/// NOK if already initialized.
+/// INVALID STATE in the other status
 SOPC_ReturnStatus SOPC_RT_Publisher_Initialize(SOPC_RT_Publisher* pPub,                     // RT Publisher object
                                                SOPC_RT_Publisher_Initializer* pInitializer) // RT Publisher initializer
 {
@@ -238,11 +275,12 @@ SOPC_ReturnStatus SOPC_RT_Publisher_Initialize(SOPC_RT_Publisher* pPub,         
     return result;
 }
 
-// Stop RT publisher
-// Returns : SOPC_STATUS_OK if switches to no initialized from initialized status.
-// NOK if already stopped.
-// SOPC_INVALID_STATE could be returned if API is in use or if already stopped(BeatHeart, MessageSetValue... )
-// In that case, retry to stop.
+/// @brief Stop RT publisher
+/// @param [in] pPub RT Publisher object
+/// @return Returns : SOPC_STATUS_OK if switches to no initialized from initialized status.
+/// SOPC_STATUS_NOK if already stopped.
+/// SOPC_INVALID_STATE could be returned if API is in use or if already stopped(HeartBeat, MessageSetValue... )
+/// In that case, you should retry to call it.
 SOPC_ReturnStatus SOPC_RT_Publisher_DeInitialize(SOPC_RT_Publisher* pPub)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
@@ -281,13 +319,15 @@ SOPC_ReturnStatus SOPC_RT_Publisher_DeInitialize(SOPC_RT_Publisher* pPub)
     return result;
 }
 
-// RT Publisher object creation.
+/// @brief RT Publisher object creation.
+/// @return SOPC_RT_Publisher handle
 SOPC_RT_Publisher* SOPC_RT_Publisher_Create(void)
 {
     return (SOPC_RT_Publisher*) SOPC_Calloc(1, sizeof(struct SOPC_RT_Publisher));
 }
 
-// RT Publisher object destruction.
+/// @brief RT Publisher object destruction.
+/// @param [inout] ppPubRt RT Publisher object to destroy. Set to NULL on return.
 void SOPC_RT_Publisher_Destroy(SOPC_RT_Publisher** ppPubRt)
 {
     if (NULL != ppPubRt)
@@ -301,7 +341,11 @@ void SOPC_RT_Publisher_Destroy(SOPC_RT_Publisher** ppPubRt)
     return;
 }
 
-// Get the next message publishing status, which will be taken into account by the next heart beat.
+/// @brief Get the next message publishing status, which will be taken into account by the next heart beat.
+/// @param [in] pPub RT Publisher object
+/// @param [in] msgIdentifier Message identifier returned by SOPC_RT_Publisher_Initializer_AddMessage
+/// @param [out] pStatus Next status will be taken into account by next heart beat.
+/// @return SOPC_STATUS_OK if status well returned
 SOPC_ReturnStatus SOPC_RT_Publisher_GetMessagePubStatus(
     SOPC_RT_Publisher* pPub,                  // Publisher object
     uint32_t msgIdentifier,                   // Message identifier
@@ -347,7 +391,17 @@ SOPC_ReturnStatus SOPC_RT_Publisher_GetMessagePubStatus(
     return result;
 }
 
-// Configure a message in the case of already started publisher.
+/// @brief Configure a message in the case of already initialized publisher.
+/// @param [in] pPub RT Publisher object
+/// @param [in] messageIdentifier Message identifier returned by SOPC_RT_Publisher_Initializer_AddMessage
+/// @param [in] period Period in heart beats taken into account on the next call of Heart Beat function
+/// @param [in] offset Offset in heart beats taken into account on the next call of Heart Beat function
+/// @param [in] pContext User context taken into account on the next call of Heart Beat function
+/// @param [in] cbStart Start callback taken into account on the next call of Heart Beat function
+/// @param [in] cbSend Elapsed period callback taken into account on the next call of Heart Beat function
+/// @param [in] cbStop Stop callback taken into account on the next call of Heart Beat function
+/// @param [in] initialStatus Initial status taken into account on the next call of Heart Beat function
+/// @return SOPC_STATUS_OK if well configured.
 SOPC_ReturnStatus SOPC_RT_Publisher_ConfigureMessage(SOPC_RT_Publisher* pPub,    // RT Publisher object
                                                      uint32_t messageIdentifier, // Message identifier
                                                      uint32_t period,            // Period in heart beats
@@ -388,7 +442,10 @@ SOPC_ReturnStatus SOPC_RT_Publisher_ConfigureMessage(SOPC_RT_Publisher* pPub,   
     return result;
 }
 
-// Start message publishing for a given message identifier. RT Publisher should be started.
+/// @brief Start message publishing for a given message identifier.
+/// @param [in] pPub RT Publisher object well initialized.
+/// @param [in] msgIdentifier Message identifier returned by SOPC_RT_Publisher_Initializer_AddMessage
+/// @return SOPC_STATUS_OK if well started.
 SOPC_ReturnStatus SOPC_RT_Publisher_StartMessagePublishing(SOPC_RT_Publisher* pPub, // RT Publisher object
                                                            uint32_t msgIdentifier)  // Message identifier
 {
@@ -415,7 +472,10 @@ SOPC_ReturnStatus SOPC_RT_Publisher_StartMessagePublishing(SOPC_RT_Publisher* pP
     return result;
 }
 
-// Stop message publishing for a given message identifier. RT Publisher should be started
+/// @brief Stop message publishing for a given message identifier.
+/// @param [in] pPub RT Publisher object well initialized.
+/// @param [in] msgIdentifier Message identifier returned by SOPC_RT_Publisher_Initializer_AddMessage
+/// @return SOPC_STATUS_OK if well stopped.
 SOPC_ReturnStatus SOPC_RT_Publisher_StopMessagePublishing(SOPC_RT_Publisher* pPub, // RT Publisher object
                                                           uint32_t msgIdentifier)  // Message identifier
 {
@@ -443,9 +503,11 @@ SOPC_ReturnStatus SOPC_RT_Publisher_StopMessagePublishing(SOPC_RT_Publisher* pPu
     return result;
 }
 
-// Get buffer handle to write directly to DBO.
-// Returns : SOPC_STATUS_OK : data pointer and maximum size are updated
-// with pointer where write and max size allowed
+/// @brief Get buffer handle to write directly to DBO.
+/// @param [in] pPub RT Publisher object
+/// @param [in] msgIdentifier Message identifier returned by SOPC_RT_Publisher_Initializer_AddMessage
+/// @param [inout] pBuffer SOPC_Buffer structure, with data pointer set to NULL.
+/// @return SOPC_STATUS_OK : data pointer and maximum size are updated with pointer where write and max size allowed
 SOPC_ReturnStatus SOPC_RT_Publisher_GetBuffer(SOPC_RT_Publisher* pPub, // RT Publisher object
                                               uint32_t msgIdentifier,  // message identifier
                                               SOPC_Buffer* pBuffer)    // SOPC Buffer with unallocated data pointer
@@ -497,9 +559,12 @@ SOPC_ReturnStatus SOPC_RT_Publisher_GetBuffer(SOPC_RT_Publisher* pPub, // RT Pub
     return result;
 }
 
-// Commit data to publish and release buffer
-// Returns : SOPC_STATUS_OK if data well commit.
-// SOPC_Buffer contains current size to take into account.
+/// @brief Commit data to publish and release buffer
+/// @param [in] pPub RT Publisher object
+/// @param [in] msgIdentifier Message identifier returned by SOPC_RT_Publisher_Initializer_AddMessage
+/// @param [inout] pBuffer SOPC_Buffer structure, with data pointer set by GetBuffer and new size (number of significant
+/// bytes). On return, data pointer is set to NULL.
+/// @return SOPC_STATUS_OK if data well committed. SOPC_Buffer data pointer is set to NULL.
 SOPC_ReturnStatus SOPC_RT_Publisher_ReleaseBuffer(SOPC_RT_Publisher* pPub, // RT Publisher object
                                                   uint32_t msgIdentifier,  // Message identifier
                                                   SOPC_Buffer* pBuffer)    // Buffer with current size to commit
@@ -533,12 +598,25 @@ SOPC_ReturnStatus SOPC_RT_Publisher_ReleaseBuffer(SOPC_RT_Publisher* pPub, // RT
         result = SOPC_STATUS_INVALID_STATE;
     }
 
+    pBuffer->data = NULL;
+    pBuffer->current_size = 0;
+    pBuffer->maximum_size = 0;
+    pBuffer->initial_size = 0;
+    pBuffer->position = 0;
+
     return result;
 }
 
-// Set message publishing value for a given message identifier.
-// After start, if message value is not set, if valid period and timer started, elapsed callback will
-// called with size = 0. Event if size = 0, value point always on valid space, but bytes are not significant !!!
+/// @brief Set message publishing value for a given message identifier.
+/// This function can be replace by SOPC_RT_Publiser_GetBuffer and OPC_RT_Publiser_ReleaseBuffer if you want externally
+/// update data via SOPC_Buffer API.
+/// @warning After start, if message value is not set, if valid period and timer started, elapsed callback will be
+/// called with size = 0. Even if size = 0, value point always on valid space, but bytes are not significant !!!
+/// @param [in] pPub RT Publisher object
+/// @param [in] msgIdentifier Message identifier returned by SOPC_RT_Publisher_Initializer_AddMessage.
+/// @param [in] value Value to publish
+/// @param [in] size Size of value
+/// @return SOPC_STATUS_OK if message value well configured.
 SOPC_ReturnStatus SOPC_RT_Publisher_SetMessageValue(SOPC_RT_Publisher* pPub, // RT Publisher object
                                                     uint32_t msgIdentifier,  // Message identifier
                                                     uint8_t* value,          // Value to publish
@@ -567,9 +645,12 @@ SOPC_ReturnStatus SOPC_RT_Publisher_SetMessageValue(SOPC_RT_Publisher* pPub, // 
     return result;
 }
 
-// Beat heart, this function invoke update function of interrupt timer. It should be called from IRQ or high priority
-// task. This function invoke user callback. So, this function should not take more time that period set and don't be
-// blocking.
+/// @brief Heart beat, this function invoke update function of internal interrupt timer workspace. It should be called
+/// from IRQ or high priority task. This function invoke user callback. So, this function should not take more time that
+/// period set and don't be blocking.
+/// @param [in] pPub RT Publisher object
+/// @param [in] tickValue Cumulative tick value
+/// @return SOPC_STATUS_OK if well initialized and not called by another process, else SOPT_STATUS_INVALID_STATE.
 SOPC_ReturnStatus SOPC_RT_Publisher_HeartBeat(SOPC_RT_Publisher* pPub, // RT Publisher object
                                               uint32_t tickValue)      // Cumulative tick value
 {
@@ -597,7 +678,8 @@ SOPC_ReturnStatus SOPC_RT_Publisher_HeartBeat(SOPC_RT_Publisher* pPub, // RT Pub
 
 // Private functions definitions
 
-// Resetting RT Publisher. Protected by RT Publisher Sync Status
+/// @brief Version of SOPC_RT_Publisher_DeInitialize without concurrent protection
+/// @param [in] pPub RT Publisher object
 static void _SOPC_RT_Publisher_DeInitialize(SOPC_RT_Publisher* pPub)
 {
     SOPC_InterruptTimer_DeInitialize(pPub->pInterruptTimer);
@@ -613,7 +695,11 @@ static void _SOPC_RT_Publisher_DeInitialize(SOPC_RT_Publisher* pPub)
     }
 }
 
-// Initialize RT Publisher. Protected by RT Publisher Sync Status
+/// @brief Version of SOPC_RT_Publisher_Initialize without concurrent protection
+/// @param [in] pPub RT Publisher object
+/// @param [in] pConfig RT Initializer object, well initialized
+/// @return SOPC_STATUS_OK if well initialized. Else SOPC_STATUS_INVALID_STATE in case of bad status (well initialized
+/// or initializing)
 static SOPC_ReturnStatus _SOPC_RT_Publisher_Initialize(
     SOPC_RT_Publisher* pPub,                // RT Publisher object
     SOPC_RT_Publisher_Initializer* pConfig) // RT Publisher configuration
@@ -688,7 +774,10 @@ static SOPC_ReturnStatus _SOPC_RT_Publisher_Initialize(
     return result;
 }
 
-// Increment utilization of module counter. Try to pass INITIALIZED STATUS or beyond to this status + 1.
+/// @brief Increment status of RT Publisher object if well initialized. Status indicates the current number of API using
+/// level, tested to authorize deinitialization.
+/// @param [in] pRtPub RT Publisher object
+/// @return RT Publisher sync status, INITIALIZED and beyond.
 static inline ePublisherSyncStatus SOPC_RT_Publisher_IncrementInUseStatus(SOPC_RT_Publisher* pRtPub)
 {
     {
@@ -723,7 +812,10 @@ static inline ePublisherSyncStatus SOPC_RT_Publisher_IncrementInUseStatus(SOPC_R
     }
 }
 
-// Decrement utilization of module counter.  Try to pass INITIALIZED STATUS + 1 or beyond to this status - 1.
+/// @brief Decrement status of RT Publisher object if beyond initialized status. Status indicates the current number of
+/// API using level, tested to authorize deinitialization.
+/// @param [in] pRtPub RT Publisher object
+/// @return RT Publisher sync status, INITIALIZED and beyond.
 static inline ePublisherSyncStatus SOPC_RT_Publisher_DecrementInUseStatus(SOPC_RT_Publisher* pRtPub)
 {
     {
