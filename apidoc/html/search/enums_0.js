@@ -1,0 +1,27 @@
+var searchData=
+[
+  ['_5fopcua_5fapplicationtype',['_OpcUa_ApplicationType',['../sopc__types_8h.html#a34a7d78a309d6e23859b612a1b4ea3c6',1,'sopc_types.h']]],
+  ['_5fopcua_5fattributewritemask',['_OpcUa_AttributeWriteMask',['../sopc__types_8h.html#a5291bd479582a60d972169d619074286',1,'sopc_types.h']]],
+  ['_5fopcua_5faxisscaleenumeration',['_OpcUa_AxisScaleEnumeration',['../sopc__types_8h.html#ae967aaf22026cab95ee7c9f72536dfe5',1,'sopc_types.h']]],
+  ['_5fopcua_5fbrowsedirection',['_OpcUa_BrowseDirection',['../libs2opc__client__cffi_8h.html#a00cb360a35a4d0a9aa8be07acd26e54d',1,'_OpcUa_BrowseDirection():&#160;libs2opc_client_cffi.h'],['../sopc__types_8h.html#a00cb360a35a4d0a9aa8be07acd26e54d',1,'_OpcUa_BrowseDirection():&#160;sopc_types.h']]],
+  ['_5fopcua_5fbrowseresultmask',['_OpcUa_BrowseResultMask',['../libs2opc__client__cffi_8h.html#af69a19e9fd367c3701531d298235e5d3',1,'_OpcUa_BrowseResultMask():&#160;libs2opc_client_cffi.h'],['../sopc__types_8h.html#af69a19e9fd367c3701531d298235e5d3',1,'_OpcUa_BrowseResultMask():&#160;sopc_types.h']]],
+  ['_5fopcua_5fcompliancelevel',['_OpcUa_ComplianceLevel',['../sopc__types_8h.html#a672dd753e0dfee0d15c4df54c1d0d5ed',1,'sopc_types.h']]],
+  ['_5fopcua_5fdatachangetrigger',['_OpcUa_DataChangeTrigger',['../sopc__types_8h.html#a22b495193dfc3b2218a708c18c653aad',1,'sopc_types.h']]],
+  ['_5fopcua_5fdeadbandtype',['_OpcUa_DeadbandType',['../sopc__types_8h.html#a403d98d6da9ba96ab478cd67ac54c662',1,'sopc_types.h']]],
+  ['_5fopcua_5fenumeratedtesttype',['_OpcUa_EnumeratedTestType',['../sopc__types_8h.html#af6b8d084199133efc53e9f589fca2591',1,'sopc_types.h']]],
+  ['_5fopcua_5fexceptiondeviationformat',['_OpcUa_ExceptionDeviationFormat',['../sopc__types_8h.html#aa095029ec6644458c67332eb89afaa61',1,'sopc_types.h']]],
+  ['_5fopcua_5ffilteroperator',['_OpcUa_FilterOperator',['../sopc__types_8h.html#ada64711f72ae55de05140722aecacc07',1,'sopc_types.h']]],
+  ['_5fopcua_5fhistoryupdatetype',['_OpcUa_HistoryUpdateType',['../sopc__types_8h.html#af2540ab905fd0e1b3d24ca2bc6df8d9b',1,'sopc_types.h']]],
+  ['_5fopcua_5fidtype',['_OpcUa_IdType',['../sopc__types_8h.html#af543e3709ae8a1a68690e080308ce635',1,'sopc_types.h']]],
+  ['_5fopcua_5fmessagesecuritymode',['_OpcUa_MessageSecurityMode',['../sopc__types_8h.html#ae9437be2c74011a688eac523cdada99a',1,'sopc_types.h']]],
+  ['_5fopcua_5fmodelchangestructureverbmask',['_OpcUa_ModelChangeStructureVerbMask',['../sopc__types_8h.html#a1c78ab2490fd743017fc13ec37016e47',1,'sopc_types.h']]],
+  ['_5fopcua_5fmonitoringmode',['_OpcUa_MonitoringMode',['../sopc__types_8h.html#a0b94c6e24eecd4c2a5caf0a91637d182',1,'sopc_types.h']]],
+  ['_5fopcua_5fnodeattributesmask',['_OpcUa_NodeAttributesMask',['../sopc__types_8h.html#af439d75f84f48ce7b014a14f4455c23f',1,'sopc_types.h']]],
+  ['_5fopcua_5fnodeclass',['_OpcUa_NodeClass',['../libs2opc__client__cffi_8h.html#ac5a42dfb6113fd396c6fee6fea037ad7',1,'_OpcUa_NodeClass():&#160;libs2opc_client_cffi.h'],['../sopc__types_8h.html#ac5a42dfb6113fd396c6fee6fea037ad7',1,'_OpcUa_NodeClass():&#160;sopc_types.h']]],
+  ['_5fopcua_5fperformupdatetype',['_OpcUa_PerformUpdateType',['../sopc__types_8h.html#a7274c1ff4f272e2ec539588c4684f4a9',1,'sopc_types.h']]],
+  ['_5fopcua_5fredundancysupport',['_OpcUa_RedundancySupport',['../sopc__types_8h.html#a89a60879484d41b0b3f580fdbe233347',1,'sopc_types.h']]],
+  ['_5fopcua_5fsecuritytokenrequesttype',['_OpcUa_SecurityTokenRequestType',['../sopc__types_8h.html#ab9527b87b84d0cc5fd058680006c50fa',1,'sopc_types.h']]],
+  ['_5fopcua_5fserverstate',['_OpcUa_ServerState',['../sopc__types_8h.html#a382691115c7dda7e977ce3fb9449db49',1,'sopc_types.h']]],
+  ['_5fopcua_5ftimestampstoreturn',['_OpcUa_TimestampsToReturn',['../libs2opc__client__cffi_8h.html#a5939f53044b66b44f93a8aa1f0905990',1,'_OpcUa_TimestampsToReturn():&#160;libs2opc_client_cffi.h'],['../sopc__types_8h.html#a5939f53044b66b44f93a8aa1f0905990',1,'_OpcUa_TimestampsToReturn():&#160;sopc_types.h']]],
+  ['_5fopcua_5fusertokentype',['_OpcUa_UserTokenType',['../sopc__types_8h.html#ae16044cebbd64011920ce89ff0221c0c',1,'sopc_types.h']]]
+];
