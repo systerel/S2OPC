@@ -27,8 +27,8 @@ from collections import OrderedDict
 import xml.etree.ElementTree as ET
 import sys
 
-H_FILE_PATH = 'src/opcua_types/sopc_types.h'
-C_FILE_PATH = 'src/opcua_types/sopc_types.c'
+H_FILE_PATH = 'src/Common/opcua_types/sopc_types.h'
+C_FILE_PATH = 'src/Common/opcua_types/sopc_types.c'
 
 
 def main():
