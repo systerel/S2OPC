@@ -18,7 +18,7 @@
  */
 
 /// @file sopc_rt_publisher.h
-/// RT Publisher object is used to declare several messages
+/// RT Publisher object is used to declare several messages. It calls callbacks periodically on those messages.
 /// 3 callbacks are added to each message:
 /// * Start callback
 /// * Stop callback
