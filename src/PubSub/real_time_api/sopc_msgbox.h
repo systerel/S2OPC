@@ -142,7 +142,6 @@ SOPC_ReturnStatus SOPC_MsgBox_Pop_Finalize(SOPC_MsgBox* pMsgBox, // Message box 
 SOPC_MsgBox_DataHandle* SOPC_MsgBox_DataHandle_Create(SOPC_MsgBox* pMsgBox);
 
 /// @brief Message box data handle - Initialization.
-/// @warning Not tested API!
 /// @brief After initialization, SOPC_MsgBox_DataHandle_GetDataEvt shall be used to expose buffer informations.
 /// @brief SOPC_MsgBox_DataHandle_UpdateDataEvtSize is used to write number of signficant bytes contained by exposed
 /// buffer.
@@ -152,7 +151,6 @@ SOPC_MsgBox_DataHandle* SOPC_MsgBox_DataHandle_Create(SOPC_MsgBox* pMsgBox);
 SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Initialize(SOPC_MsgBox_DataHandle* pDataHandle);
 
 /// @brief Expose event buffer information
-/// @warning Not tested API!!!
 /// @param [in] pDataHandle Message box data handle
 /// @param [out] ppData Exposed data event buffer
 /// @param [out] pMaxAllowedSize Max allowed data size
@@ -163,7 +161,6 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_GetDataEvt(SOPC_MsgBox_DataHandle* pDat
                                                     uint32_t* pMaxAllowedSize);          //
 
 /// @brief Update event data size (number of effective significant bytes)
-/// @warning Not tested API!!!
 /// @param [in] pDataHandle Message box data handle
 /// @param [in] size Number of significant bytes
 /// @return SOPC_STATUS_OK if event retrieved.
@@ -172,7 +169,6 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_UpdateDataEvtSize(SOPC_MsgBox_DataHandl
                                                            uint32_t size);                      //
 
 /// @brief Message box data handle - Finalize write operation (commit modification)
-/// @warning Not tested API!!!
 /// @param [in] pDataHandle Message box data Handle
 /// @param [in] bCancel Write operation canceled if true.
 /// @return SOPC_STATUS_OK if event retrieved.

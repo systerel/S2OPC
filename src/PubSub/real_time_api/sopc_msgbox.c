@@ -562,7 +562,6 @@ SOPC_ReturnStatus SOPC_MsgBox_Reset(SOPC_MsgBox* pMsgBox)
 }
 
 /// @brief Message box data handle, which allow a write operation directly to event buffer.
-/// @warning API not tested!
 struct SOPC_MsgBox_DataHandle
 {
     SOPC_MsgBox* pMsgBox; ///< Message box handle, linked to this data handle
@@ -574,7 +573,6 @@ struct SOPC_MsgBox_DataHandle
 };
 
 /// @brief Message box data handle creation. Used to directly write into event buffer.
-/// @warning Not tested API!
 /// @param [in] pMsgBox Message box handle
 /// @return Message box data handle used to expose an event buffer for write operation,
 SOPC_MsgBox_DataHandle* SOPC_MsgBox_DataHandle_Create(SOPC_MsgBox* pMsgBox)
@@ -591,7 +589,6 @@ SOPC_MsgBox_DataHandle* SOPC_MsgBox_DataHandle_Create(SOPC_MsgBox* pMsgBox)
 }
 
 /// @brief Message box data handle - Initialization.
-/// @warning Not tested API!
 /// @brief After initialization, SOPC_MsgBox_DataHandle_GetDataEvt shall be used to expose buffer informations.
 /// @brief SOPC_MsgBox_DataHandle_UpdateDataEvtSize is used to write number of signficant bytes contained by exposed
 /// buffer.
@@ -678,7 +675,6 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Initialize(SOPC_MsgBox_DataHandle* pDat
 }
 
 /// @brief Expose event buffer information
-/// @warning Not tested API!!!
 /// @param [in] pDataHandle Message box data handle
 /// @param [out] ppData Exposed data event buffer
 /// @param [out] pMaxAllowedSize Max allowed data size
@@ -724,7 +720,6 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_GetDataEvt(SOPC_MsgBox_DataHandle* pDat
 }
 
 /// @brief Update event data size (number of effective significant bytes)
-/// @warning Not tested API!!!
 /// @param [in] pDataHandle Message box data handle
 /// @param [in] size Number of significant bytes
 /// @return SOPC_STATUS_OK if event retrieved.
@@ -815,7 +810,6 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_UpdateDataEvtSize(SOPC_MsgBox_DataHandl
 }
 
 /// @brief Message box data handle - Finalize write operation (commit modification)
-/// @warning Not tested API!!!
 /// @param [in] pDataHandle Message box data Handle
 /// @param [in] bCancel Write operation canceled if true.
 /// @return SOPC_STATUS_OK if event retrieved.
