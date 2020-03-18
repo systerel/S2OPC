@@ -977,6 +977,7 @@ static int SOPC_TEST_MSG_BOX(void)
     bFreeze = false;
 
     // Push data each 50 ms
+
     for (volatile uint32_t i = 0; i < 10 && result == SOPC_STATUS_OK; i++)
     {
         sprintf(msgWrite1, "\r\nHello world %d", i);
@@ -1045,6 +1046,75 @@ static int SOPC_TEST_MSG_BOX(void)
         }
 
         printf("\r\n===>MSGBOX FAST READER TEST RESULT = %d\r\n", res);
+    }
+
+    SOPC_Sleep(PERIOD_MS_READER_200MS);
+
+    if (res == 0)
+    {
+        printf("\r\n===>START MSGBOX TEST WITH 2 FAST READERS AND WITH DATA HANDLE WRITE\r\n");
+
+        cptMsgRead1 = 0;
+        cptMsgRead2 = 0;
+        cptMsgDiffRead1 = 0;
+        cptMsgDiffRead2 = 0;
+
+        period = PERIOD_MS_READER_50MS;
+
+        SOPC_Sleep(PERIOD_MS_READER_200MS);
+
+        bFreeze = false;
+
+        SOPC_MsgBox_DataHandle* pDataHandle = SOPC_MsgBox_DataHandle_Create(myMsgBox);
+
+        if (pDataHandle != NULL)
+        {
+            // Set data each 50 ms
+            for (volatile uint32_t i = 0; i < 10 && result == SOPC_STATUS_OK; i++)
+            {
+                result = SOPC_MsgBox_DataHandle_Initialize(pDataHandle);
+                if (SOPC_STATUS_OK == result)
+                {
+                    uint8_t* pData;
+                    uint32_t max_allowed_size;
+                    result = SOPC_MsgBox_DataHandle_GetDataEvt(pDataHandle, &pData, &max_allowed_size);
+                    if (SOPC_STATUS_OK == result)
+                    {
+                        snprintf((char*) pData, max_allowed_size, "\r\nHello world %d", i);
+                        result = SOPC_MsgBox_DataHandle_UpdateDataEvtSize(pDataHandle,
+                                                                          (uint32_t)(strlen((char*) pData) + 1));
+                    }
+                    if (SOPC_STATUS_OK == result)
+                    {
+                        result = SOPC_MsgBox_DataHandle_Finalize(pDataHandle, false);
+                    }
+                    else
+                    {
+                        result = SOPC_MsgBox_DataHandle_Finalize(pDataHandle, true);
+                    }
+                }
+                SOPC_Sleep(PERIOD_MS_WRITER_50MS);
+            }
+        }
+
+        SOPC_Sleep(PERIOD_MS_READER_200MS);
+
+        SOPC_MsgBox_Reset(myMsgBox);
+
+        bFreeze = true;
+
+        SOPC_Sleep(PERIOD_MS_READER_200MS);
+
+        if ((cptMsgRead1 == cptMsgRead2) && (cptMsgRead1 == 10))
+        {
+            res = 0;
+        }
+        else
+        {
+            res = -1;
+        }
+
+        printf("\r\n===>MSGBOX FAST READER WITH DATA HANDLE WRITE TEST RESULT = %d\r\n", res);
     }
 
     SOPC_Sleep(PERIOD_MS_READER_200MS);
