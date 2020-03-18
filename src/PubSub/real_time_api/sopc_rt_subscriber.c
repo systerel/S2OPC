@@ -17,97 +17,143 @@
  * under the License.
  */
 
+/// @file sopc_rt_subscriber.c
+
 #include "sopc_rt_subscriber.h"
 
-// Private status of RT Publisher
+/// @brief Private status of RT Subscriber
 typedef enum E_SUBSCRIBER_SYNC_STATUS
 {
-    E_SUBSCRIBER_SYNC_STATUS_NOT_INITIALIZED,
-    E_SUBSCRIBER_SYNC_STATUS_INITIALIZING,
-    E_SUBSCRIBER_SYNC_STATUS_DEINITIALIZING,
-    E_SUBSCRIBER_SYNC_STATUS_INITIALIZED,
-    E_SUBSCRIBER_SYNC_STATUS_LOCKED,
+    E_SUBSCRIBER_SYNC_STATUS_NOT_INITIALIZED, ///< RT Subscriber not initialized
+    E_SUBSCRIBER_SYNC_STATUS_INITIALIZING,    ///< RT Subscriber is initializing
+    E_SUBSCRIBER_SYNC_STATUS_DEINITIALIZING,  ///< RT Subscriber is deinitializing
+    E_SUBSCRIBER_SYNC_STATUS_INITIALIZED,     ///< RT Subscriber initialized
+    E_SUBSCRIBER_SYNC_STATUS_LOCKED,          ///< RT Subscriber can't be deinitialized because in use.
     E_SUBSCRIBER_SYNC_STATUS_SIZE = INT32_MAX
 } eSubscriberSyncStatus;
 
-// Inputs table definition
+/// @brief Inputs table definition
 typedef struct SOPC_RT_Subscriber_Inputs
 {
-    uint32_t nbInputs;          // Number of inputs
-    SOPC_MsgBox** pMsgBox;      // Table of inputs
-    SOPC_Pin_Access* pReadMode; // Table of scan mode for each input
-    void** ppContext;           // Table of user context for each input
+    uint32_t nbInputs;                    ///< Number of inputs
+    SOPC_MsgBox** pMsgBox;                ///< Table of inputs
+    SOPC_MsgBox_DataHandle** pDataHandle; ///< Table of input write without copy handle
+    SOPC_Pin_Access* pReadMode;           ///< Table of scan mode for each input
+    void** ppContext;                     ///< Table of user context for each input
 } SOPC_RT_Subscriber_Inputs;
 
-// Output table definition
+/// @brief Output table definition
 typedef struct SOPC_RT_Subscriber_Outputs
 {
-    uint32_t nbOutputs;    // Number of outputs
-    SOPC_MsgBox** pMsgBox; // Table of outputs
+    uint32_t nbOutputs;                   ///< Number of outputs
+    SOPC_MsgBox** pMsgBox;                ///< Table of outputs
+    SOPC_MsgBox_DataHandle** pDataHandle; ///< Table of output write without copy handle
 } SOPC_RT_Subscriber_Outputs;
 
-// Subscriber definition
+/// @brief RT Subscriber definition
 struct SOPC_RT_Subscriber
 {
-    eSubscriberSyncStatus status;       // RT subscriber status
-    SOPC_RT_Subscriber_Inputs inputs;   // Inputs
-    SOPC_RT_Subscriber_Outputs outputs; // Outputs
-    ptrBeatHeartCallback cbStep;        // Step callback
-    void* pUserContext;                 // User context
+    eSubscriberSyncStatus status;       ///< RT subscriber status
+    SOPC_RT_Subscriber_Inputs inputs;   ///< Inputs
+    SOPC_RT_Subscriber_Outputs outputs; ///< Outputs
+    ptrBeatHeartCallback cbStep;        ///< Step callback
+    void* pUserContext;                 ///< User context
 };
 
-// Subscriber configuration
-
+/// @brief Subscriber configuration list element
 typedef struct SOPC_RT_Subscriber_Initializer_PinConfig
 {
-    uint32_t max_evts;        // Max events supported by pin before overflow
-    uint32_t max_data;        // Max data supported by pin before overflow
-    uint32_t nbClients;       // Max concurrent clients which can read same pin.
-    SOPC_Pin_Access scanMode; // Used only for inputs.
-    void* inputContext;       // Used only for inputs.
-    struct SOPC_RT_Subscriber_Initializer_PinConfig* next;
+    uint32_t max_evts;                                     ///< Max events supported by pin before overflow
+    uint32_t max_data;                                     ///< Max data supported by pin before overflow
+    uint32_t nbClients;                                    ///< Max concurrent clients which can read same pin.
+    SOPC_Pin_Access scanMode;                              ///< Used only for inputs.
+    void* inputContext;                                    ///< Used only for inputs.
+    struct SOPC_RT_Subscriber_Initializer_PinConfig* next; ///< Pointer on next pin configuration.
 } SOPC_RT_Subscriber_Initializer_PinConfig;
 
+/// @brief RT Subscriber initializer object
 struct SOPC_RT_Subscriber_Initializer
 {
-    uint32_t nbInputs;
-    SOPC_RT_Subscriber_Initializer_PinConfig* pInputsList;
+    uint32_t nbInputs;                                     ///< Number of inputs in the inputs list
+    SOPC_RT_Subscriber_Initializer_PinConfig* pInputsList; ///< Inputs list
 
-    uint32_t nbOutputs;
-    SOPC_RT_Subscriber_Initializer_PinConfig* pOutputsList;
+    uint32_t nbOutputs;                                     ///< Number of outputs lists
+    SOPC_RT_Subscriber_Initializer_PinConfig* pOutputsList; ///< Outputs list
 
-    ptrBeatHeartCallback cbStep;
-    void* pUserContext;
+    ptrBeatHeartCallback cbStep; ///< Heart beat callback
+    void* pUserContext;          ///< Global User context
 };
 
 // Declarations of private functions
 
-static inline eSubscriberSyncStatus __sync_increment_subscriber_in_use_counter(SOPC_RT_Subscriber* in_sub);
+/// @brief Try to increment RT Subscriber status. Allow to define if API is in use.
+/// @param [in] in_sub RT Subscriber object.
+/// @return Incremented status by 1 if initial status was equal or greater than initialized
+static inline eSubscriberSyncStatus _SOPC_RT_Subscriber_IncrementInUseStatus(SOPC_RT_Subscriber* in_sub);
 
-static inline eSubscriberSyncStatus __sync_decrement_subscriber_in_use_counter(SOPC_RT_Subscriber* in_sub);
+/// @brief Try to decrement RT Subscriber status. Allow to define if API is in use.
+/// @param [in] in_sub RT Subscriber object.
+/// @return Decremented status by 1 if initial status was greater than initialized
+static inline eSubscriberSyncStatus _SOPC_RT_Subscriber_DecrementInUseStatus(SOPC_RT_Subscriber* in_sub);
 
-static inline SOPC_ReturnStatus __sopc_rt_subscriber_initialize(SOPC_RT_Subscriber* in_out_sub,           //
-                                                                SOPC_RT_Subscriber_Initializer* in_init); //
+/// @brief Initialize RT Subscriber object without API concurrent accesses protection.
+/// @param [inout] in_out_sub RT Subscriber object
+/// @param [in] in_init RT Subscriber initializer object
+/// @return SOPC_STATUS_OK if successful.
+static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Initialize(SOPC_RT_Subscriber* in_out_sub,           //
+                                                               SOPC_RT_Subscriber_Initializer* in_init); //
 
-static inline void __sopc_rt_subscriber_deinitialize(SOPC_RT_Subscriber* in_sub);
+/// @brief DeInitialize RT Subscriber object without API concurrent accesses protection.
+/// @param [inout] in_out_sub RT Subscriber object to deinitialize
+/// @return SOPC_STATUS_OK if successful.
+static inline void _SOPC_RT_Subscriber_DeInitialize(SOPC_RT_Subscriber* in_out_sub);
 
-static inline SOPC_ReturnStatus __sopc_rt_subscriber_initializer_addpin(
+/// @brief Add pin to an initializer. Called by SOPC_RT_Subscriber_Initializer_AddInput
+/// and SOPC_RT_Subscriber_Initializer_AddInput
+/// @param [inout] in_out_init Initializer object
+/// @param [in] in_max_clients Max number of simultaneous clients accesses
+/// @param [in] in_max_evts Max events supported by this pin before overflow
+/// @param [in] in_max_data Max data supported by this pin
+/// @param [in] in_mode Direction, output or input
+/// @param [in] in_scanmode Scan mode, only taken into account for input pin
+/// @param [in] in_input_context User context linked to this pin
+/// @param [out] out_pinNumber Pin number allocated for this pin.
+/// @return SOPC_STATUS_OK if successful.
+static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Initializer_AddPin(
     SOPC_RT_Subscriber_Initializer* in_out_init, // Initializer object
     uint32_t in_max_clients,                     // Max client
     uint32_t in_max_evts,                        // Max events supported by this output before overflow
     uint32_t in_max_data,                        // Max data supported by this output
     SOPC_Pin_Direction in_mode,                  // Direction
     SOPC_Pin_Access in_scanmode,                 // Scan mode
-    void* in_input_context,
-    uint32_t* out_pinNumber); // pin number.
+    void* in_input_context,                      // User context linked to this pin
+    uint32_t* out_pinNumber);                    // pin number.
 
-static inline SOPC_ReturnStatus __sopc_rt_subscriber_pinreadinitialize(
+/// @brief Read pin sequence initialization, used by SOPC_RT_Subscriber_Input_Read_Initialize
+/// and SOPC_RT_Subscriber_Output_Read_Initialize.
+/// @param [in] in_sub RT Subscriber object
+/// @param [in] in_dir Pin direction, input or output
+/// @param [in] in_pin Pin number
+/// @param [out] out_token Token of read sequence
+/// @return SOPC_STATUS_OK if successful.
+static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Pin_Read_Initialize(
     SOPC_RT_Subscriber* in_sub, // RT subscriber object
     SOPC_Pin_Direction in_dir,  // Pin direction
     uint32_t in_pin,            // pin number
     uint32_t* out_token);       // token of read sequence
 
-static inline SOPC_ReturnStatus __sopc_rt_subscriber_pinread(SOPC_RT_Subscriber* in_pSub, // RT Subscriber object
+/// @brief Read pin sequence, without API concurrent accesses protection
+/// @param [in] in_itf Pin direction
+/// @param [in] in_pSub RT Subscriber object
+/// @param [in] in_pin Pin number returned by SOPC_RT_Subscriber_Initializer_AddPin
+/// @param [in] in_clt Client number, shall be between 0 and max client - 1
+/// @param [in] in_token Token which identify read output sequence. Returned by
+/// SOPC_RT_Subscriber_Pin_Read_Initialize
+/// @param [in] in_mode Access mode. Get normal, get new last, get last...
+/// @param [out] out_pData Data pointer. @warning Don't write to this location.
+/// @param [out] out_size Data size (significant bytes) pointed by *out_pData.
+/// @return SOPC_STATUS_OK if successful.
+static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Pin_Read(SOPC_RT_Subscriber* in_pSub, // RT Subscriber object
                                                              SOPC_Pin_Direction in_itf,   // pin direction
                                                              uint32_t in_pin,             // Pin number
                                                              uint32_t in_clt,             // Client number
@@ -116,29 +162,52 @@ static inline SOPC_ReturnStatus __sopc_rt_subscriber_pinread(SOPC_RT_Subscriber*
                                                              uint8_t** out_pData,         // Pointer on data
                                                              uint32_t* out_size);         // Size of data
 
-static inline SOPC_ReturnStatus __sopc_rt_subscriber_pinreadfinalize(SOPC_RT_Subscriber* in_sub, // RT Subscriber object
-                                                                     SOPC_Pin_Direction in_itf,  // Pin direction
-                                                                     uint32_t in_pin,            // Pin number
-                                                                     uint32_t* in_out_token);    // token
+/// @brief Read pin sequence finalization.
+/// @param [in] in_sub RT Subscriber object
+/// @param [in] in_itf Pin direction
+/// @param [in] in_pin Pin number, returned by SOPC_RT_Subscriber_Initializer_AddPin
+/// @param [inout] in_out_token Token which identify read output sequence. Returned by
+/// SOPC_RT_Subscriber_Output_Read_Initialize. Set to UINT32_MAX on return (invalid sequence)
+/// @return SOPC_STATUS_OK if successful.
+static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Pin_Read_Finalize(
+    SOPC_RT_Subscriber* in_sub, // RT Subscriber object
+    SOPC_Pin_Direction in_itf,  // Pin direction
+    uint32_t in_pin,            // Pin number
+    uint32_t* in_out_token);    // token
 
-static inline SOPC_ReturnStatus __sopc_rt_subscriber_pinwrite(SOPC_RT_Subscriber* in_sub, // RT Subscriber object
+/// @brief Write pin, without API concurrent accesses protection.
+/// @param [in] in_sub RT Subscriber object
+/// @param [in] in_itf Pin direction
+/// @param [in] in_pin Pin number returned by SOPC_RT_Subscriber_Initializer_AddInput
+/// @param [in] in_data Data to write (buffer will be copied to internal buffer)
+/// @param [in] in_size Size to write
+/// @return SOPC_STATUS_OK if successful.
+static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Pin_Write(SOPC_RT_Subscriber* in_sub, // RT Subscriber object
                                                               SOPC_Pin_Direction in_itf,  // Pin direction
                                                               uint32_t in_pin,            // Pin number
                                                               uint8_t* in_data,           // Data to write
                                                               uint32_t in_size);          // Size to write
 
-static inline SOPC_ReturnStatus __sopc_rt_subscriber_beatheart(SOPC_RT_Subscriber* in_sub);
+/// @brief Heart beat. Use to read each input.
+/// For each read input, user callback is invoked.
+/// No concurrent accesses protection.
+/// @param [in] in_sub RT Subscriber object
+/// @return SOPC_STATUS_OK if successful. SOPC_STATUS_INVALID_STATE if not initialized.
+/// SOPC_STATUS_NOK or other error can be returned in case of an error on an input read or input treatment.
+static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_HeartBeat(SOPC_RT_Subscriber* in_sub);
 
 // *** Definitions of public functions ***
 
-// RT Subscriber object creation
+/// @brief RT Subscriber object creation
+/// @return SOPC_RT_Subscriber object
 SOPC_RT_Subscriber* SOPC_RT_Subscriber_Create(void)
 {
     SOPC_RT_Subscriber* pSub = SOPC_Calloc(1, sizeof(SOPC_RT_Subscriber));
     return pSub;
 }
 
-// RT Subscriber object destruction
+/// @brief RT Subscriber object destruction
+/// @param [inout] in_out_sub RT Subscriber object to destroy. Set to NULL on return.
 void SOPC_RT_Subscriber_Destroy(SOPC_RT_Subscriber** in_out_sub)
 {
     if (NULL != in_out_sub)
@@ -152,7 +221,11 @@ void SOPC_RT_Subscriber_Destroy(SOPC_RT_Subscriber** in_out_sub)
     }
 }
 
-// RT Subscriber object initialization
+/// @brief RT Subscriber object initialization
+/// @param [inout] in_out_sub RT Subscriber object to initialize
+/// @param [in] in_init RT Subscriber Initializer object initialized with a minimum of minimum 1 input / 1 output
+/// @return SOPC_STATUS_OK if initialized.
+/// SOPC_INVALID_STATE in the case of unexpected current status (initializing, in use...)
 SOPC_ReturnStatus SOPC_RT_Subscriber_Initialize(SOPC_RT_Subscriber* in_out_sub,          // RT Subscriber object
                                                 SOPC_RT_Subscriber_Initializer* in_init) // Initializer object
 {
@@ -174,7 +247,7 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Initialize(SOPC_RT_Subscriber* in_out_sub, 
 
     if (bTransition)
     {
-        result = __sopc_rt_subscriber_initialize(in_out_sub, in_init);
+        result = _SOPC_RT_Subscriber_Initialize(in_out_sub, in_init);
         if (SOPC_STATUS_OK == result)
         {
             desiredStatus = E_SUBSCRIBER_SYNC_STATUS_INITIALIZED;
@@ -182,7 +255,7 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Initialize(SOPC_RT_Subscriber* in_out_sub, 
         }
         else
         {
-            __sopc_rt_subscriber_deinitialize(in_out_sub);
+            _SOPC_RT_Subscriber_DeInitialize(in_out_sub);
             desiredStatus = E_SUBSCRIBER_SYNC_STATUS_NOT_INITIALIZED;
             __atomic_store(&in_out_sub->status, &desiredStatus, __ATOMIC_SEQ_CST);
         }
@@ -201,7 +274,11 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Initialize(SOPC_RT_Subscriber* in_out_sub, 
     return result;
 }
 
-// RT Subscriber de-initialization
+/// @brief RT Subscriber de-initialization
+/// @param [inout] in_out_sub RT Subscriber object to de initialize.
+/// @return SOPC_STATUS_OK if uninitialized.
+/// SOPC_INVALID_STATE is returned if RT Subscriber is currently in use, initializing or de initializing.
+/// SOPC_STATUS_NOK if already uninitialized.
 SOPC_ReturnStatus SOPC_RT_Subscriber_DeInitialize(SOPC_RT_Subscriber* in_out_sub)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
@@ -222,7 +299,7 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_DeInitialize(SOPC_RT_Subscriber* in_out_sub
 
     if (bTransition)
     {
-        __sopc_rt_subscriber_deinitialize(in_out_sub);
+        _SOPC_RT_Subscriber_DeInitialize(in_out_sub);
 
         desiredStatus = E_SUBSCRIBER_SYNC_STATUS_NOT_INITIALIZED;
         __atomic_store(&in_out_sub->status, &desiredStatus, __ATOMIC_SEQ_CST);
@@ -241,8 +318,11 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_DeInitialize(SOPC_RT_Subscriber* in_out_sub
     return result;
 }
 
-// RT Subscriber Initializer Creation
-SOPC_RT_Subscriber_Initializer* SOPC_RT_Subscriber_Initializer_Create(ptrBeatHeartCallback cbStep, void* pContext)
+/// @brief RT Subscriber Initializer Creation
+/// @param [in] cbStep User callback will be called for each input by SOPC_RT_Subscriber_HeartBeat
+/// @param [in] pGlobalContext A global context which will be passed to callback for all input
+/// @return SOPC_RT_Subscriber_Initializer object
+SOPC_RT_Subscriber_Initializer* SOPC_RT_Subscriber_Initializer_Create(ptrBeatHeartCallback cbStep, void* pGlobalContext)
 {
     if (NULL == cbStep)
     {
@@ -252,12 +332,13 @@ SOPC_RT_Subscriber_Initializer* SOPC_RT_Subscriber_Initializer_Create(ptrBeatHea
     if (NULL != pInit)
     {
         pInit->cbStep = cbStep;
-        pInit->pUserContext = pContext;
+        pInit->pUserContext = pGlobalContext;
     }
     return pInit;
 }
 
-// RT Subscriber Initializer Destruction
+/// @brief RT Subscriber Initializer Destruction
+/// @param [in] in_out_p_init RT Subscriber Initializer object to destroy
 void SOPC_RT_Subscriber_Initializer_Destroy(SOPC_RT_Subscriber_Initializer** in_out_p_init)
 {
     if (NULL != in_out_p_init)
@@ -286,7 +367,14 @@ void SOPC_RT_Subscriber_Initializer_Destroy(SOPC_RT_Subscriber_Initializer** in_
     }
 }
 
-// Add input definition to initializer object
+/// @brief Add input definition to initializer object
+/// @param [inout] in_out_init Initializer object
+/// @param [in] in_max_evts Max events supported by this input before overflow
+/// @param [in] in_max_data Max data supported by this input before overflow
+/// @param [in] in_scanmode Get last, get last new, get normal
+/// @param [in] in_input_context User context
+/// @param [out] out_pin Pin number associated to this input.
+/// @return SOPC_STATUS_OK if successful.
 SOPC_ReturnStatus SOPC_RT_Subscriber_Initializer_AddInput(
     SOPC_RT_Subscriber_Initializer* in_out_init, // Initializer object
     uint32_t in_max_evts,                        // Max events supported by this input before overflow
@@ -298,19 +386,25 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Initializer_AddInput(
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
-    result = __sopc_rt_subscriber_initializer_addpin(in_out_init,           //
-                                                     1,                     //
-                                                     in_max_evts,           //
-                                                     in_max_data,           //
-                                                     SOPC_PIN_DIRECTION_IN, //
-                                                     in_scanmode,           //
-                                                     in_input_context,      //
-                                                     out_pin);              //
+    result = _SOPC_RT_Subscriber_Initializer_AddPin(in_out_init,           //
+                                                    1,                     //
+                                                    in_max_evts,           //
+                                                    in_max_data,           //
+                                                    SOPC_PIN_DIRECTION_IN, //
+                                                    in_scanmode,           //
+                                                    in_input_context,      //
+                                                    out_pin);              //
 
     return result;
 }
 
-// Add output definition to initialize object
+/// @brief Add output definition to initialize object
+/// @param [in] in_out_init Initializer object
+/// @param [in] in_max_clients Max concurrent clients supported by this output
+/// @param [in] in_max_evts Max events supported by this output before overflow
+/// @param [in] in_max_data Max data supported by this output before overflow
+/// @param [in] out_pin Pin number associated to this output
+/// @return SOPC_STATUS_OK if successful.
 SOPC_ReturnStatus SOPC_RT_Subscriber_Initializer_AddOutput(
     SOPC_RT_Subscriber_Initializer* in_out_init, // Initializer object
     uint32_t in_max_clients,                     // Max concurrent clients supported by this output
@@ -321,19 +415,24 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Initializer_AddOutput(
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
-    result = __sopc_rt_subscriber_initializer_addpin(in_out_init,              //
-                                                     in_max_clients,           //
-                                                     in_max_evts,              //
-                                                     in_max_data,              //
-                                                     SOPC_PIN_DIRECTION_OUT,   //
-                                                     SOPC_PIN_MODE_GET_NORMAL, // Not used
-                                                     NULL,                     // Not used
-                                                     out_pin);                 //
+    result = _SOPC_RT_Subscriber_Initializer_AddPin(in_out_init,              //
+                                                    in_max_clients,           //
+                                                    in_max_evts,              //
+                                                    in_max_data,              //
+                                                    SOPC_PIN_DIRECTION_OUT,   //
+                                                    SOPC_PIN_MODE_GET_NORMAL, // Not used
+                                                    NULL,                     // Not used
+                                                    out_pin);                 //
 
     return result;
 }
 
-// Read output sequence initialization. Used outside RT Subscriber.
+/// @brief Read output sequence initialization. Used outside RT Subscriber.
+/// @param [in] in_sub RT Subscriber object
+/// @param [in] in_pin Pin number to read (identifier returned by SOPC_RT_Subscriber_Initializer_AddOutput)
+/// @param [out] out_token Token which identify read output sequence. Will be used by SOPC_RT_Subscriber_Output_Read and
+/// SOPC_RT_Subscriber_Output_Read_Finalize
+/// @return SOPC_STATUS_OK if successful.
 SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Read_Initialize(SOPC_RT_Subscriber* in_sub, // RT Subscriber object
                                                             uint32_t in_pin,            // Pin number to read
                                                             uint32_t* out_token) // Token to use with read function
@@ -344,14 +443,14 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Read_Initialize(SOPC_RT_Subscriber* 
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    eSubscriberSyncStatus status = __sync_increment_subscriber_in_use_counter(in_sub);
+    eSubscriberSyncStatus status = _SOPC_RT_Subscriber_IncrementInUseStatus(in_sub);
 
     if (status > E_SUBSCRIBER_SYNC_STATUS_INITIALIZED)
     {
-        result = __sopc_rt_subscriber_pinreadinitialize(in_sub,                 //
-                                                        SOPC_PIN_DIRECTION_OUT, //
-                                                        in_pin,                 //
-                                                        out_token);             //
+        result = _SOPC_RT_Subscriber_Pin_Read_Initialize(in_sub,                 //
+                                                         SOPC_PIN_DIRECTION_OUT, //
+                                                         in_pin,                 //
+                                                         out_token);             //
 
         // Do not restore previous state. Mark as "in use" until that finalize call.
         if (SOPC_STATUS_OK == result)
@@ -359,10 +458,10 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Read_Initialize(SOPC_RT_Subscriber* 
             // A successful initialization indicates that message box pointer can be used out of protection
             // phase whereas a de initialization phase try to start.
             // Increment this counter. Decremented after successful finalization.
-            __sync_increment_subscriber_in_use_counter(in_sub);
+            _SOPC_RT_Subscriber_IncrementInUseStatus(in_sub);
         }
 
-        __sync_decrement_subscriber_in_use_counter(in_sub);
+        _SOPC_RT_Subscriber_DecrementInUseStatus(in_sub);
     }
     else
     {
@@ -372,7 +471,17 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Read_Initialize(SOPC_RT_Subscriber* 
     return result;
 }
 
-// Read output sequence. Used outside RT Subscriber.
+/// @brief Read output sequence. Used outside RT Subscriber.
+/// @param [in] in_sub RT Subscriber object
+/// @param [in] in_pin Pin number returned by SOPC_RT_Subscriber_Initializer_AddOutput
+/// @param [in] in_clt Client number, shall be between 0 and max client - 1
+/// @param [in] in_token Token which identify read output sequence. Returned by
+/// SOPC_RT_Subscriber_Output_Read_Initialize
+/// @param [in] in_scanmode Scanning mode. Get normal, get new last, get last...
+/// @param [out] out_pData Data pointer. @warning Don't write to this location.
+/// @param [out] out_size Data size (significant bytes) pointed by *out_pData.
+/// @return SOPC_STATUS_OK if successful.
+/// SOPC_STATUS_INVALID_STATE if read sequence is performing for the same client identifier in other context.
 SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Read(SOPC_RT_Subscriber* in_sub,  // RT Subscriber object
                                                  uint32_t in_pin,             // Pin number
                                                  uint32_t in_clt,             // Client number
@@ -387,11 +496,11 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Read(SOPC_RT_Subscriber* in_sub,  //
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    eSubscriberSyncStatus status = __sync_increment_subscriber_in_use_counter(in_sub);
+    eSubscriberSyncStatus status = _SOPC_RT_Subscriber_IncrementInUseStatus(in_sub);
 
     if (status > E_SUBSCRIBER_SYNC_STATUS_INITIALIZED)
     {
-        result = __sopc_rt_subscriber_pinread(in_sub,                 //
+        result = _SOPC_RT_Subscriber_Pin_Read(in_sub,                 //
                                               SOPC_PIN_DIRECTION_OUT, //
                                               in_pin,                 //
                                               in_clt,                 //
@@ -400,7 +509,7 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Read(SOPC_RT_Subscriber* in_sub,  //
                                               out_pData,              //
                                               out_size);              //
 
-        __sync_decrement_subscriber_in_use_counter(in_sub);
+        _SOPC_RT_Subscriber_DecrementInUseStatus(in_sub);
     }
     else
     {
@@ -410,35 +519,40 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Read(SOPC_RT_Subscriber* in_sub,  //
     return result;
 }
 
-// Read output sequence finalization. Used outside RT Subscriber.
+/// @brief Read output sequence finalization. Used outside RT Subscriber.
+/// @param [in] in_sub RT Subscriber object
+/// @param [in] in_pin Pin number, returned by SOPC_RT_Subscriber_Initializer_AddOutput
+/// @param [inout] in_out_token Token which identify read output sequence. Returned by
+/// SOPC_RT_Subscriber_Output_Read_Initialize. Set to UINT32_MAX on return (invalid sequence)
+/// @return SOPC_STATUS_OK if successful.
 SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Read_Finalize(SOPC_RT_Subscriber* in_sub, // RT Subscriber object
                                                           uint32_t in_pin,            // Pin number
-                                                          uint32_t* out_token)        // Token
+                                                          uint32_t* in_out_token)     // Token
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
-    if (NULL == in_sub || NULL == out_token)
+    if (NULL == in_sub || NULL == in_out_token)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    eSubscriberSyncStatus status = __sync_increment_subscriber_in_use_counter(in_sub);
+    eSubscriberSyncStatus status = _SOPC_RT_Subscriber_IncrementInUseStatus(in_sub);
 
     if (status > E_SUBSCRIBER_SYNC_STATUS_INITIALIZED)
     {
-        result = __sopc_rt_subscriber_pinreadfinalize(in_sub,                 //
-                                                      SOPC_PIN_DIRECTION_OUT, //
-                                                      in_pin,                 //
-                                                      out_token);             //
+        result = _SOPC_RT_Subscriber_Pin_Read_Finalize(in_sub,                 //
+                                                       SOPC_PIN_DIRECTION_OUT, //
+                                                       in_pin,                 //
+                                                       in_out_token);          //
 
         if (SOPC_STATUS_OK == result)
         {
             // A successful finalization indicates that message box pointer will not be further
             // used out of protection
             // De initialization phase  is allowed.
-            __sync_decrement_subscriber_in_use_counter(in_sub);
+            _SOPC_RT_Subscriber_DecrementInUseStatus(in_sub);
         }
 
-        __sync_decrement_subscriber_in_use_counter(in_sub);
+        _SOPC_RT_Subscriber_DecrementInUseStatus(in_sub);
     }
     else
     {
@@ -448,7 +562,13 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Read_Finalize(SOPC_RT_Subscriber* in
     return result;
 }
 
-// Write input. Used outside RT Subscriber.
+/// @brief Write input. Used outside RT Subscriber.
+/// @param [in] in_sub RT Subscriber object
+/// @param [in] in_pin Pin number returned by SOPC_RT_Subscriber_Initializer_AddInput
+/// @param [in] in_data Data to write (buffer will be copied to internal buffer)
+/// @param [in] in_size Size to write
+/// @return SOPC_STATUS_OK if successful.
+/// SOPC_STATUS_INVALID_STATE if used by another process.
 SOPC_ReturnStatus SOPC_RT_Subscriber_Input_Write(SOPC_RT_Subscriber* in_sub, // RT Subscriber object
                                                  uint32_t in_pin,            // Input pin number
                                                  uint8_t* in_data,           // Data to write
@@ -460,17 +580,17 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Input_Write(SOPC_RT_Subscriber* in_sub, // 
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    eSubscriberSyncStatus status = __sync_increment_subscriber_in_use_counter(in_sub);
+    eSubscriberSyncStatus status = _SOPC_RT_Subscriber_IncrementInUseStatus(in_sub);
 
     if (status > E_SUBSCRIBER_SYNC_STATUS_INITIALIZED)
     {
-        result = __sopc_rt_subscriber_pinwrite(in_sub,                //
+        result = _SOPC_RT_Subscriber_Pin_Write(in_sub,                //
                                                SOPC_PIN_DIRECTION_IN, //
                                                in_pin,                //
                                                in_data,               //
                                                in_size);              //
 
-        __sync_decrement_subscriber_in_use_counter(in_sub);
+        _SOPC_RT_Subscriber_DecrementInUseStatus(in_sub);
     }
     else
     {
@@ -480,7 +600,11 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Input_Write(SOPC_RT_Subscriber* in_sub, // 
     return result;
 }
 
-// Write output. Used inside RT Subscriber, in the user callback to update an output.
+/// @brief Write output. Used inside RT Subscriber, in the user callback to update an output.
+/// @param [in] in_sub RT Subscriber object
+/// @param [in] in_pin Pin number
+/// @param [in] in_data Data to write
+/// @param [in] in_size Size to write
 SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Write(SOPC_RT_Subscriber* in_sub, // RT Subscriber
                                                   uint32_t in_pin,            // Pin number
                                                   uint8_t* in_data,           // Data to write
@@ -492,17 +616,17 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Write(SOPC_RT_Subscriber* in_sub, //
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    eSubscriberSyncStatus status = __sync_increment_subscriber_in_use_counter(in_sub);
+    eSubscriberSyncStatus status = _SOPC_RT_Subscriber_IncrementInUseStatus(in_sub);
 
     if (status > E_SUBSCRIBER_SYNC_STATUS_INITIALIZED)
     {
-        result = __sopc_rt_subscriber_pinwrite(in_sub,                 //
+        result = _SOPC_RT_Subscriber_Pin_Write(in_sub,                 //
                                                SOPC_PIN_DIRECTION_OUT, //
                                                in_pin,                 //
                                                in_data,                //
                                                in_size);               //
 
-        __sync_decrement_subscriber_in_use_counter(in_sub);
+        _SOPC_RT_Subscriber_DecrementInUseStatus(in_sub);
     }
     else
     {
@@ -512,8 +636,11 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Write(SOPC_RT_Subscriber* in_sub, //
     return result;
 }
 
-// Beat heart. Use to read each input.
-// For each read input, user callback is invoked.
+/// @brief Heart beat. Use to read each input.
+/// For each read input, user callback is invoked.
+/// @param [in] in_sub RT Subscriber object
+/// @return SOPC_STATUS_OK if successful. SOPC_STATUS_INVALID_STATE if not initialized.
+/// SOPC_STATUS_NOK or other error can be returned in case of an error on an input read or input treatment.
 SOPC_ReturnStatus SOPC_RT_Subscriber_HeartBeat(SOPC_RT_Subscriber* in_sub)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
@@ -522,12 +649,12 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_HeartBeat(SOPC_RT_Subscriber* in_sub)
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    eSubscriberSyncStatus status = __sync_increment_subscriber_in_use_counter(in_sub);
+    eSubscriberSyncStatus status = _SOPC_RT_Subscriber_IncrementInUseStatus(in_sub);
 
     if (status > E_SUBSCRIBER_SYNC_STATUS_INITIALIZED)
     {
-        result = __sopc_rt_subscriber_beatheart(in_sub);
-        __sync_decrement_subscriber_in_use_counter(in_sub);
+        result = _SOPC_RT_Subscriber_HeartBeat(in_sub);
+        _SOPC_RT_Subscriber_DecrementInUseStatus(in_sub);
     }
     else
     {
@@ -539,9 +666,16 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_HeartBeat(SOPC_RT_Subscriber* in_sub)
 
 // Private functions definitions
 
-static inline SOPC_ReturnStatus __sopc_rt_subscriber_beatheart(SOPC_RT_Subscriber* in_sub)
+/// @brief Heart beat. Use to read each input.
+/// For each read input, user callback is invoked.
+/// No concurrent accesses protection.
+/// @param [in] in_sub RT Subscriber object
+/// @return SOPC_STATUS_OK if successful. SOPC_STATUS_INVALID_STATE if not initialized.
+/// SOPC_STATUS_NOK or other error can be returned in case of an error on an input read or input treatment.
+static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_HeartBeat(SOPC_RT_Subscriber* in_sub)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
+    SOPC_ReturnStatus globalResult = SOPC_STATUS_OK;
 
     if (NULL == in_sub || NULL == in_sub->cbStep)
     {
@@ -558,16 +692,16 @@ static inline SOPC_ReturnStatus __sopc_rt_subscriber_beatheart(SOPC_RT_Subscribe
         size = 0;
         pData = NULL;
 
-        result = __sopc_rt_subscriber_pinreadinitialize(in_sub,                //
-                                                        SOPC_PIN_DIRECTION_IN, //
-                                                        pin,                   //
-                                                        &token);               //
+        result = _SOPC_RT_Subscriber_Pin_Read_Initialize(in_sub,                //
+                                                         SOPC_PIN_DIRECTION_IN, //
+                                                         pin,                   //
+                                                         &token);               //
 
         if (SOPC_STATUS_OK == result)
         {
             do
             {
-                result = __sopc_rt_subscriber_pinread(in_sub,                        //
+                result = _SOPC_RT_Subscriber_Pin_Read(in_sub,                        //
                                                       SOPC_PIN_DIRECTION_IN,         //
                                                       pin,                           //
                                                       0,                             //
@@ -591,15 +725,24 @@ static inline SOPC_ReturnStatus __sopc_rt_subscriber_beatheart(SOPC_RT_Subscribe
                      && (SOPC_STATUS_OK == result)                                  //
                      && (in_sub->inputs.pReadMode[pin] != SOPC_PIN_MODE_GET_LAST)); //
 
-            __sopc_rt_subscriber_pinreadfinalize(in_sub, SOPC_PIN_DIRECTION_IN, pin, &token);
+            _SOPC_RT_Subscriber_Pin_Read_Finalize(in_sub, SOPC_PIN_DIRECTION_IN, pin, &token);
+        }
+
+        if (SOPC_STATUS_OK != result)
+        {
+            globalResult = result;
         }
     }
 
-    return result;
+    return globalResult;
 }
 
-static inline SOPC_ReturnStatus __sopc_rt_subscriber_initialize(SOPC_RT_Subscriber* in_out_sub,          //
-                                                                SOPC_RT_Subscriber_Initializer* in_init) //
+/// @brief Initialize RT Subscriber object without API concurrent accesses protection.
+/// @param [inout] in_out_sub RT Subscriber object
+/// @param [in] in_init RT Subscriber initializer object
+/// @return SOPC_STATUS_OK if successful.
+static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Initialize(SOPC_RT_Subscriber* in_out_sub,          //
+                                                               SOPC_RT_Subscriber_Initializer* in_init) //
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
     if (in_init->nbInputs < 1 || in_init->nbOutputs < 1 || in_init->cbStep == NULL)
@@ -622,6 +765,26 @@ static inline SOPC_ReturnStatus __sopc_rt_subscriber_initialize(SOPC_RT_Subscrib
     {
         in_out_sub->outputs.pMsgBox = (SOPC_MsgBox**) SOPC_Calloc(1, sizeof(SOPC_MsgBox*) * in_init->nbOutputs);
         if (NULL == in_out_sub->outputs.pMsgBox)
+        {
+            result = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+
+    if (result == SOPC_STATUS_OK)
+    {
+        in_out_sub->inputs.pDataHandle =
+            (SOPC_MsgBox_DataHandle**) SOPC_Calloc(1, sizeof(SOPC_MsgBox_DataHandle*) * in_init->nbInputs);
+        if (NULL == in_out_sub->inputs.pDataHandle)
+        {
+            result = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+
+    if (result == SOPC_STATUS_OK)
+    {
+        in_out_sub->outputs.pDataHandle =
+            (SOPC_MsgBox_DataHandle**) SOPC_Calloc(1, sizeof(SOPC_MsgBox_DataHandle*) * in_init->nbOutputs);
+        if (NULL == in_out_sub->outputs.pDataHandle)
         {
             result = SOPC_STATUS_OUT_OF_MEMORY;
         }
@@ -655,9 +818,14 @@ static inline SOPC_ReturnStatus __sopc_rt_subscriber_initialize(SOPC_RT_Subscrib
             in_out_sub->inputs.pMsgBox[in_out_sub->inputs.nbInputs] = SOPC_MsgBox_Create(p->nbClients, //
                                                                                          p->max_evts,  //
                                                                                          p->max_data); //
+
+            in_out_sub->inputs.pDataHandle[in_out_sub->inputs.nbInputs] =
+                SOPC_MsgBox_DataHandle_Create(in_out_sub->inputs.pMsgBox[in_out_sub->inputs.nbInputs]);
+
             p = p->next;
 
-            if (in_out_sub->inputs.pMsgBox[in_out_sub->inputs.nbInputs] == NULL)
+            if (in_out_sub->inputs.pMsgBox[in_out_sub->inputs.nbInputs] == NULL ||
+                in_out_sub->inputs.pDataHandle[in_out_sub->inputs.nbInputs] == NULL)
             {
                 result = SOPC_STATUS_NOK;
             }
@@ -673,9 +841,14 @@ static inline SOPC_ReturnStatus __sopc_rt_subscriber_initialize(SOPC_RT_Subscrib
             in_out_sub->outputs.pMsgBox[in_out_sub->outputs.nbOutputs] = SOPC_MsgBox_Create(p->nbClients, //
                                                                                             p->max_evts,  //
                                                                                             p->max_data); //
+
+            in_out_sub->outputs.pDataHandle[in_out_sub->outputs.nbOutputs] =
+                SOPC_MsgBox_DataHandle_Create(in_out_sub->outputs.pMsgBox[in_out_sub->outputs.nbOutputs]);
+
             p = p->next;
 
-            if (in_out_sub->outputs.pMsgBox[in_out_sub->outputs.nbOutputs] == NULL)
+            if (in_out_sub->outputs.pMsgBox[in_out_sub->outputs.nbOutputs] == NULL ||
+                in_out_sub->outputs.pDataHandle[in_out_sub->outputs.nbOutputs] == NULL)
             {
                 result = SOPC_STATUS_NOK;
             }
@@ -688,44 +861,74 @@ static inline SOPC_ReturnStatus __sopc_rt_subscriber_initialize(SOPC_RT_Subscrib
     return result;
 }
 
-static inline void __sopc_rt_subscriber_deinitialize(SOPC_RT_Subscriber* in_sub)
+/// @brief DeInitialize RT Subscriber object without API concurrent accesses protection.
+/// @param [inout] in_out_sub RT Subscriber object to deinitialize
+/// @return SOPC_STATUS_OK if successful.
+static inline void _SOPC_RT_Subscriber_DeInitialize(SOPC_RT_Subscriber* in_out_sub)
 {
-    if (in_sub->inputs.pMsgBox != NULL)
+    if (in_out_sub->inputs.pDataHandle != NULL)
     {
-        for (uint32_t i = 0; i < in_sub->inputs.nbInputs; i++)
+        for (uint32_t i = 0; i < in_out_sub->inputs.nbInputs; i++)
         {
-            SOPC_MsgBox_Destroy(&in_sub->inputs.pMsgBox[i]);
+            SOPC_MsgBox_DataHandle_Destroy(&in_out_sub->inputs.pDataHandle[i]);
         }
-        SOPC_Free(in_sub->inputs.pMsgBox);
-        in_sub->inputs.pMsgBox = NULL;
-        in_sub->inputs.nbInputs = 0;
+        SOPC_Free(in_out_sub->inputs.pDataHandle);
+        in_out_sub->inputs.pDataHandle = NULL;
     }
 
-    if (in_sub->inputs.pReadMode != NULL)
+    if (in_out_sub->inputs.pMsgBox != NULL)
     {
-        SOPC_Free(in_sub->inputs.pReadMode);
-        in_sub->inputs.pReadMode = NULL;
-    }
-
-    if (in_sub->inputs.ppContext != NULL)
-    {
-        SOPC_Free(in_sub->inputs.ppContext);
-        in_sub->inputs.ppContext = NULL;
-    }
-
-    if (in_sub->outputs.pMsgBox != NULL)
-    {
-        for (uint32_t i = 0; i < in_sub->outputs.nbOutputs; i++)
+        for (uint32_t i = 0; i < in_out_sub->inputs.nbInputs; i++)
         {
-            SOPC_MsgBox_Destroy(&in_sub->outputs.pMsgBox[i]);
+            SOPC_MsgBox_Destroy(&in_out_sub->inputs.pMsgBox[i]);
         }
-        SOPC_Free(in_sub->outputs.pMsgBox);
-        in_sub->outputs.pMsgBox = NULL;
-        in_sub->outputs.nbOutputs = 0;
+        SOPC_Free(in_out_sub->inputs.pMsgBox);
+        in_out_sub->inputs.pMsgBox = NULL;
+        in_out_sub->inputs.nbInputs = 0;
+    }
+
+    if (in_out_sub->inputs.pReadMode != NULL)
+    {
+        SOPC_Free(in_out_sub->inputs.pReadMode);
+        in_out_sub->inputs.pReadMode = NULL;
+    }
+
+    if (in_out_sub->inputs.ppContext != NULL)
+    {
+        SOPC_Free(in_out_sub->inputs.ppContext);
+        in_out_sub->inputs.ppContext = NULL;
+    }
+
+    if (in_out_sub->outputs.pDataHandle != NULL)
+    {
+        for (uint32_t i = 0; i < in_out_sub->outputs.nbOutputs; i++)
+        {
+            SOPC_MsgBox_DataHandle_Destroy(&in_out_sub->outputs.pDataHandle[i]);
+        }
+        SOPC_Free(in_out_sub->outputs.pDataHandle);
+        in_out_sub->outputs.pDataHandle = NULL;
+    }
+
+    if (in_out_sub->outputs.pMsgBox != NULL)
+    {
+        for (uint32_t i = 0; i < in_out_sub->outputs.nbOutputs; i++)
+        {
+            SOPC_MsgBox_Destroy(&in_out_sub->outputs.pMsgBox[i]);
+        }
+        SOPC_Free(in_out_sub->outputs.pMsgBox);
+        in_out_sub->outputs.pMsgBox = NULL;
+        in_out_sub->outputs.nbOutputs = 0;
     }
 }
 
-static inline SOPC_ReturnStatus __sopc_rt_subscriber_pinwrite(SOPC_RT_Subscriber* in_sub, //
+/// @brief Write pin, without API concurrent accesses protection.
+/// @param [in] in_sub RT Subscriber object
+/// @param [in] in_itf Pin direction
+/// @param [in] in_pin Pin number returned by SOPC_RT_Subscriber_Initializer_AddInput
+/// @param [in] in_data Data to write (buffer will be copied to internal buffer)
+/// @param [in] in_size Size to write
+/// @return SOPC_STATUS_OK if successful.
+static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Pin_Write(SOPC_RT_Subscriber* in_sub, //
                                                               SOPC_Pin_Direction in_itf,  //
                                                               uint32_t in_pin,
                                                               uint8_t* in_data, //
@@ -784,11 +987,17 @@ static inline SOPC_ReturnStatus __sopc_rt_subscriber_pinwrite(SOPC_RT_Subscriber
     return result;
 }
 
-// Initialize read sequence for handle
-static inline SOPC_ReturnStatus __sopc_rt_subscriber_pinreadinitialize(SOPC_RT_Subscriber* in_sub, //
-                                                                       SOPC_Pin_Direction in_dir,  //
-                                                                       uint32_t in_pin,            //
-                                                                       uint32_t* out_token)        //
+/// @brief Read pin sequence initialization, used by SOPC_RT_Subscriber_Input_Read_Initialize
+/// and SOPC_RT_Subscriber_Output_Read_Initialize.
+/// @param [in] in_sub RT Subscriber object
+/// @param [in] in_dir Pin direction, input or output
+/// @param [in] in_pin Pin number
+/// @param [out] out_token Token of read sequence
+/// @return SOPC_STATUS_OK if successful.
+static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Pin_Read_Initialize(SOPC_RT_Subscriber* in_sub, //
+                                                                        SOPC_Pin_Direction in_dir,  //
+                                                                        uint32_t in_pin,            //
+                                                                        uint32_t* out_token)        //
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
@@ -843,7 +1052,18 @@ static inline SOPC_ReturnStatus __sopc_rt_subscriber_pinreadinitialize(SOPC_RT_S
     return result;
 }
 
-static inline SOPC_ReturnStatus __sopc_rt_subscriber_pinread(SOPC_RT_Subscriber* in_pSub, //
+/// @brief Read pin sequence, without API concurrent accesses protection
+/// @param [in] in_itf Pin direction
+/// @param [in] in_pSub RT Subscriber object
+/// @param [in] in_pin Pin number returned by SOPC_RT_Subscriber_Initializer_AddPin
+/// @param [in] in_clt Client number, shall be between 0 and max client - 1
+/// @param [in] in_token Token which identify read output sequence. Returned by
+/// SOPC_RT_Subscriber_Pin_Read_Initialize
+/// @param [in] in_mode Access mode. Get normal, get new last, get last...
+/// @param [out] out_pData Data pointer. @warning Don't write to this location.
+/// @param [out] out_size Data size (significant bytes) pointed by *out_pData.
+/// @return SOPC_STATUS_OK if successful.
+static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Pin_Read(SOPC_RT_Subscriber* in_pSub, //
                                                              SOPC_Pin_Direction in_itf,   //
                                                              uint32_t in_pin,             //
                                                              uint32_t in_clt,             //
@@ -910,10 +1130,17 @@ static inline SOPC_ReturnStatus __sopc_rt_subscriber_pinread(SOPC_RT_Subscriber*
     return result;
 }
 
-static inline SOPC_ReturnStatus __sopc_rt_subscriber_pinreadfinalize(SOPC_RT_Subscriber* in_sub, //
-                                                                     SOPC_Pin_Direction in_itf,  //
-                                                                     uint32_t in_pin,            //
-                                                                     uint32_t* in_out_token)     //
+/// @brief Read pin sequence finalization.
+/// @param [in] in_sub RT Subscriber object
+/// @param [in] in_itf Pin direction
+/// @param [in] in_pin Pin number, returned by SOPC_RT_Subscriber_Initializer_AddPin
+/// @param [inout] in_out_token Token which identify read output sequence. Returned by
+/// SOPC_RT_Subscriber_Output_Read_Initialize. Set to UINT32_MAX on return (invalid sequence)
+/// @return SOPC_STATUS_OK if successful.
+static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Pin_Read_Finalize(SOPC_RT_Subscriber* in_sub, //
+                                                                      SOPC_Pin_Direction in_itf,  //
+                                                                      uint32_t in_pin,            //
+                                                                      uint32_t* in_out_token)     //
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
@@ -967,16 +1194,26 @@ static inline SOPC_ReturnStatus __sopc_rt_subscriber_pinreadfinalize(SOPC_RT_Sub
     return result;
 }
 
-// Add an output to initializer
-static inline SOPC_ReturnStatus __sopc_rt_subscriber_initializer_addpin(
+/// @brief Add pin to an initializer. Called by SOPC_RT_Subscriber_Initializer_AddInput
+/// and SOPC_RT_Subscriber_Initializer_AddInput
+/// @param [inout] in_out_init Initializer object
+/// @param [in] in_max_clients Max number of simultaneous clients accesses
+/// @param [in] in_max_evts Max events supported by this pin before overflow
+/// @param [in] in_max_data Max data supported by this pin
+/// @param [in] in_mode Direction, output or input
+/// @param [in] in_scanmode Scan mode, only taken into account for input pin
+/// @param [in] in_input_context User context linked to this pin
+/// @param [out] out_pinNumber Pin number allocated for this pin.
+/// @return SOPC_STATUS_OK if successful.
+static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Initializer_AddPin(
     SOPC_RT_Subscriber_Initializer* in_out_init, // Initializer object
-    uint32_t in_max_clients,                     //
+    uint32_t in_max_clients,                     // Max number of simultaneous clients accesses
     uint32_t in_max_evts,                        // Max events supported by this output before overflow
     uint32_t in_max_data,                        // Max data supported by this output
     SOPC_Pin_Direction in_mode,                  // Direction
-    SOPC_Pin_Access accessMode,                  // Used only by RT Subscriber Step function which scan inputs.
+    SOPC_Pin_Access in_scanmode,                 // Used only by RT Subscriber Step function which scan inputs.
     void* in_input_context,                      // Used only by RT Subscriber Step function which can inputs
-    uint32_t* pinNumber)                         // Output number. Used inside user callback to update output.
+    uint32_t* out_pinNumber)                     // Output number. Used inside user callback to update output.
 
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
@@ -1020,7 +1257,7 @@ static inline SOPC_ReturnStatus __sopc_rt_subscriber_initializer_addpin(
         pNewPin->nbClients = in_max_clients;
         pNewPin->max_evts = in_max_evts;
         pNewPin->max_data = in_max_data;
-        pNewPin->scanMode = accessMode;
+        pNewPin->scanMode = in_scanmode;
         pNewPin->inputContext = in_input_context;
 
         while (pIter != NULL)
@@ -1052,11 +1289,11 @@ static inline SOPC_ReturnStatus __sopc_rt_subscriber_initializer_addpin(
         switch (in_mode)
         {
         case SOPC_PIN_DIRECTION_OUT:
-            *pinNumber = in_out_init->nbOutputs;
+            *out_pinNumber = in_out_init->nbOutputs;
             in_out_init->nbOutputs++;
             break;
         case SOPC_PIN_DIRECTION_IN:
-            *pinNumber = in_out_init->nbInputs;
+            *out_pinNumber = in_out_init->nbInputs;
             in_out_init->nbInputs++;
             break;
         default:
@@ -1078,7 +1315,10 @@ static inline SOPC_ReturnStatus __sopc_rt_subscriber_initializer_addpin(
     return result;
 }
 
-static inline eSubscriberSyncStatus __sync_increment_subscriber_in_use_counter(SOPC_RT_Subscriber* in_sub)
+/// @brief Try to increment RT Subscriber status. Allow to define if API is in use.
+/// @param [in] in_sub RT Subscriber object.
+/// @return Incremented status by 1 if initial status was equal or greater than initialized
+static inline eSubscriberSyncStatus _SOPC_RT_Subscriber_IncrementInUseStatus(SOPC_RT_Subscriber* in_sub)
 {
     if (NULL == in_sub)
     {
@@ -1107,7 +1347,10 @@ static inline eSubscriberSyncStatus __sync_increment_subscriber_in_use_counter(S
     return newStatus;
 }
 
-static inline eSubscriberSyncStatus __sync_decrement_subscriber_in_use_counter(SOPC_RT_Subscriber* in_sub)
+/// @brief Try to decrement RT Subscriber status. Allow to define if API is in use.
+/// @param [in] in_sub RT Subscriber object.
+/// @return Decremented status by 1 if initial status was greater than initialized
+static inline eSubscriberSyncStatus _SOPC_RT_Subscriber_DecrementInUseStatus(SOPC_RT_Subscriber* in_sub)
 {
     if (NULL == in_sub)
     {
