@@ -25,6 +25,7 @@
 #include <stdlib.h> /* getenv, exit */
 #include <string.h>
 
+#include "client.h"
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
 #include "sopc_atomic.h"
@@ -65,11 +66,15 @@ static SOPC_CRLList* static_cacrl = NULL;
 #define SKS_KEYS_FILES_SIGNING_KEY "./sks_private/signingKey.key"
 #define SKS_KEYS_FILES_ENCRYPT_KEY "./sks_private/encryptKey.key"
 #define SKS_KEYS_FILES_KEY_NONCE "./sks_private/keyNonce.key"
+// Key Lifetime is 10s
+#define SKS_KEYLIFETIME 10000
+#define SKS_NB_MAX_KEYS 20
+
 #define SKS_SECURITY_GROUPID "sgid_1"
 #define SKS_ARG_MODE_MASTER "master"
 #define SKS_ARG_MODE_SLAVE "slave"
 
-static char* sks_server_endpoint_uris[] = {"opc.tcp://localhost:4841", "opc.tcp://localhost:4842",
+static char* sks_server_endpoint_uris[] = {"opc.tcp://localhost:4842", "opc.tcp://localhost:4841",
                                            "opc.tcp://localhost:4843"};
 static const uint64_t sks_server_endpoint_uris_size = 3;
 
@@ -177,9 +182,9 @@ uint32_t nbMethodIds = 0;
 SOPC_SKManager* skManager;
 SOPC_SKOrdonnancer* skOrdonnancer;
 SKS_ServerModeType sksServerMode;
-SKS_ServerModeType sksServerIndex;
+uint64_t sksServerIndex;
 
-static SOPC_StatusCode Server_InitDefaultCallMethodService(SOPC_Server_Config* serverConfig);
+static SOPC_StatusCode Server_SKS_Init(SOPC_Server_Config* serverConfig);
 
 /*---------------------------------------------------------------------------
  *                          Callbacks definition
@@ -432,24 +437,88 @@ static void Test_ComEvent_FctServer(SOPC_App_Com_Event event, uint32_t idOrStatu
     /* avoid unused parameter compiler warning */
     (void) idOrStatus;
     (void) appContext;
+    bool debug = false;
+    SOPC_EncodeableType* message_type = NULL;
+    OpcUa_WriteResponse* write_response = NULL;
+    bool ok = false;
 
-    if (event == SE_CLOSED_ENDPOINT)
+    switch (event)
     {
+        /* Client application events */
+    case SE_SESSION_ACTIVATION_FAILURE:
+        if (debug)
+        {
+            printf(">>Client debug : SE_SESSION_ACTIVATION_FAILURE RECEIVED\n");
+            printf(">>Client debug : appContext: %lu\n", appContext);
+        }
+        if (0 != appContext && appContext == Client_SessionContext)
+        {
+            SOPC_Atomic_Int_Set((SessionConnectedState*) &scState, (SessionConnectedState) SESSION_CONN_FAILED);
+        }
+        else
+        {
+            assert(false && ">>Client : bad app context");
+        }
+        break;
+    case SE_ACTIVATED_SESSION:
+        SOPC_Atomic_Int_Set((int32_t*) &session, (int32_t) idOrStatus);
+        if (debug)
+        {
+            printf(">>Client debug : SE_ACTIVATED_SESSION RECEIVED\n");
+        }
+        SOPC_Atomic_Int_Set((SessionConnectedState*) &scState, (SessionConnectedState) SESSION_CONN_CONNECTED);
+        break;
+    case SE_SESSION_REACTIVATING:
+        if (debug)
+        {
+            printf(">>Client debug : SE_SESSION_REACTIVATING RECEIVED\n");
+        }
+        break;
+    case SE_RCV_SESSION_RESPONSE:
+        if (debug)
+        {
+            printf(">>Client debug : SE_RCV_SESSION_RESPONSE RECEIVED\n");
+        }
+        Client_Treat_Session_Response(param, appContext);
+        break;
+    case SE_CLOSED_SESSION:
+        if (debug == true)
+        {
+            printf(">>Client debug : SE_CLOSED_SESSION RECEIVED\n");
+        }
+        break;
+
+    case SE_RCV_DISCOVERY_RESPONSE:
+        if (debug == true)
+        {
+            printf(">>Client debug : SE_RCV_DISCOVERY_RESPONSE RECEIVED\n");
+        }
+        break;
+
+    case SE_SND_REQUEST_FAILED:
+        if (debug == true)
+        {
+            printf(">>Client debug : SE_SND_REQUEST_FAILED RECEIVED\n");
+        }
+        SOPC_Atomic_Int_Add(&sendFailures, 1);
+        break;
+
+    /* SERVER EVENT */
+    case SE_CLOSED_ENDPOINT:
         printf("<Test_Server_Toolkit: closed endpoint event: OK\n");
         SOPC_Atomic_Int_Set(&endpointClosed, 1);
-    }
-    else if (event == SE_LOCAL_SERVICE_RESPONSE)
-    {
-        SOPC_EncodeableType* message_type = *((SOPC_EncodeableType**) param);
+        break;
+    case SE_LOCAL_SERVICE_RESPONSE:
+        message_type = *((SOPC_EncodeableType**) param);
 
         if (message_type != &OpcUa_WriteResponse_EncodeableType)
         {
             return;
         }
 
-        OpcUa_WriteResponse* write_response = param;
+        write_response = param;
 
-        bool ok = (write_response->ResponseHeader.ServiceResult == SOPC_GoodGenericStatus);
+        ok = (write_response->ResponseHeader.ServiceResult == SOPC_GoodGenericStatus);
 
         for (int32_t i = 0; i < write_response->NoOfResults; ++i)
         {
@@ -461,11 +530,8 @@ static void Test_ComEvent_FctServer(SOPC_App_Com_Event event, uint32_t idOrStatu
             printf("<Test_Server_Toolkit: Error while updating address space\n");
         }
 
-        return;
-    }
-
-    else
-    {
+        break;
+    default:
         printf("<Test_Server_Toolkit: unexpected endpoint event %d : NOK\n", event);
     }
 }
@@ -516,12 +582,109 @@ static SOPC_ReturnStatus Server_Initialize(void)
  * Application description and endpoint configuration:
  *---------------------------------------------------*/
 
-static SOPC_StatusCode Server_InitDefaultCallMethodService(SOPC_Server_Config* serverConfig)
+static SOPC_StatusCode Server_SKS_CreateBuilder(SOPC_SKBuilder** builder, SOPC_SKProvider** provider)
+{
+    *builder = NULL;
+    *provider = NULL;
+    SOPC_StatusCode status = SOPC_STATUS_OK;
+    switch (sksServerMode)
+    {
+    case SKS_ServerMode_Master:
+
+        /* Init SK Provider : Create Random Keys */
+        *provider = SOPC_SKProvider_RandomPubSub_Create();
+        if (NULL == *provider)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+
+        /* Init SK Builder : adds Keys to Manager and removes obsolete Keys when maximum size is reached */
+        SOPC_SKBuilder* skbAppend;
+        if (SOPC_STATUS_OK == status)
+        {
+            skbAppend = SOPC_SKBuilder_Append_Create();
+            if (NULL == skbAppend)
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            *builder = SOPC_SKBuilder_Truncate_Create(skbAppend, SKS_NB_MAX_KEYS);
+            if (NULL == *builder)
+            {
+                SOPC_SKBuilder_Clear(skbAppend);
+                SOPC_Free(skbAppend);
+                skbAppend = NULL;
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+        }
+        break;
+    case SKS_ServerMode_Slave:
+
+        /* Create a SK Builder which replace all Keys of a SK Manager */
+
+        // Configure Client with Master uri
+        status = Client_AddSecureChannelconfig(sks_server_endpoint_uris[0]);
+        if (SOPC_STATUS_OK == status)
+        {
+            // Create a SK Provider which get Keys from a GetSecurityKeys request
+            *provider = Client_Provider_BySKS_Create();
+            if (NULL == *provider)
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+        }
+        else
+        {
+            printf("# Error: Slave Server cannot configure channel to Master Server\n");
+        }
+
+        if (SOPC_STATUS_OK == status)
+        {
+            // Create Builder to replace all Keys
+            *builder = SOPC_SKBuilder_Setter_Create();
+            if (NULL == *builder)
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+        }
+
+        break;
+    default:
+        // should not happen
+        status = SOPC_STATUS_NOK;
+        break;
+    }
+
+    if (SOPC_STATUS_OK != status)
+    {
+        if (NULL != *provider)
+        {
+            SOPC_SKProvider_Clear(*provider);
+            SOPC_Free(*provider);
+            *provider = NULL;
+        }
+
+        if (NULL != *builder)
+        {
+            SOPC_SKBuilder_Clear(*builder);
+            SOPC_Free(*builder);
+            *builder = NULL;
+        }
+    }
+
+    return status;
+}
+
+static SOPC_StatusCode Server_SKS_Init(SOPC_Server_Config* serverConfig)
 {
     SOPC_NodeId* methodId;
     SOPC_MethodCallFunc_Ptr methodFunc;
     serverConfig->mcm = SOPC_MethodCallManager_Create();
     SOPC_StatusCode status = (NULL != serverConfig->mcm) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+
+    /* Init Method Call Manager */
     if (SOPC_STATUS_OK == status)
     {
         /* Input, output */
@@ -551,8 +714,7 @@ static SOPC_StatusCode Server_InitDefaultCallMethodService(SOPC_Server_Config* s
     }
     if (SOPC_STATUS_OK == status)
     {
-        // status = SOPC_SKManager_SetKeyLifetime(skManager, 600 * 1000); /* 10m */
-        status = SOPC_SKManager_SetKeyLifetime(skManager, 10 * 1000); /* 10s */
+        status = SOPC_SKManager_SetKeyLifetime(skManager, SKS_KEYLIFETIME);
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -563,37 +725,13 @@ static SOPC_StatusCode Server_InitDefaultCallMethodService(SOPC_Server_Config* s
         SOPC_String_Clear(&policy);
     }
 
+    /* Init SK Manager */
+    SOPC_SKBuilder* skBuilder;
     SOPC_SKProvider* skProvider;
-    if (SOPC_STATUS_OK == status)
-    {
-        skProvider = SOPC_SKProvider_RandomPubSub_Create();
-        if (NULL == skProvider)
-        {
-            status = SOPC_STATUS_OUT_OF_MEMORY;
-        }
-    }
-    // fill with one token
+    /* Init SK Builder : adds Keys to Manager and removes obsolete Keys when maximum size is reached */
+    status = Server_SKS_CreateBuilder(&skBuilder, &skProvider);
 
-    SOPC_SKBuilder* skbAppend;
-    if (SOPC_STATUS_OK == status)
-    {
-        skbAppend = SOPC_SKBuilder_Append_Create();
-        if (NULL == skbAppend)
-        {
-            status = SOPC_STATUS_OUT_OF_MEMORY;
-        }
-    }
-
-    SOPC_SKBuilder* skbTruncate;
-    if (SOPC_STATUS_OK == status)
-    {
-        skbTruncate = SOPC_SKBuilder_Truncate_Create(skbAppend, 20);
-        if (NULL == skbTruncate)
-        {
-            status = SOPC_STATUS_OUT_OF_MEMORY;
-        }
-    }
-
+    /* Init SK Ordonnancer */
     if (SOPC_STATUS_OK == status)
     {
         skOrdonnancer = SOPC_SKOrdonnancer_Create();
@@ -606,7 +744,7 @@ static SOPC_StatusCode Server_InitDefaultCallMethodService(SOPC_Server_Config* s
     if (SOPC_STATUS_OK == status)
     {
         /* Init the task with 1s */
-        status = SOPC_SKOrdonnancer_AddTask(skOrdonnancer, skbTruncate, skProvider, skManager, 1 * 1000);
+        status = SOPC_SKOrdonnancer_AddTask(skOrdonnancer, skBuilder, skProvider, skManager, 1 * 1000);
         if (SOPC_STATUS_OK != status)
         {
             printf("<Security Keys Service : adding task to ordonnancer failed\n");
@@ -676,6 +814,7 @@ static bool Server_LoadDefaultConfiguration(SOPC_S2OPC_Config* output_s2opcConfi
     output_s2opcConfig->serverConfig.nbEndpoints = 1;
     SOPC_Endpoint_Config* pEpConfig = &output_s2opcConfig->serverConfig.endpoints[0];
     pEpConfig->serverConfigPtr = &output_s2opcConfig->serverConfig;
+    assert(sks_server_endpoint_uris_size > sksServerIndex);
     pEpConfig->endpointURL = sks_server_endpoint_uris[sksServerIndex];
     pEpConfig->hasDiscoveryEndpoint = true;
 
@@ -1264,7 +1403,7 @@ int main(int argc, char* argv[])
     // Define demo implementation of functions called for method call service
     if (SOPC_STATUS_OK == status)
     {
-        status = Server_InitDefaultCallMethodService(serverConfig);
+        status = Server_SKS_Init(serverConfig);
     }
 
     /* Set endpoint configuration: keep endpoint configuration identifier for opening it later */
@@ -1331,6 +1470,8 @@ int main(int argc, char* argv[])
         }
     }
     */
+
+    /* Start Client Side to get Security Keys */
 
     /* Run the server until notification that endpoint is closed received
      *  or stop server signal detected (Ctrl-C) */

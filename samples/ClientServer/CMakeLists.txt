@@ -94,7 +94,10 @@ if(ENABLE_SAMPLES)
     set(TOOLKIT_DEMO_SKS "toolkit_demo_sks")
     add_executable(${TOOLKIT_DEMO_SKS}
       "demo_server/toolkit_demo_sks.c"
+      "${S2OPC_ROOT_PATH}/samples/PubSub_ClientServer/pubsub_server/client.c"
       ${TEST_SERVER_ADDRESS_SPACE_C})
+    set(S2OPC_PUBSUB_CLIENT_INCLUDES ${S2OPC_ROOT_PATH}/samples/PubSub_ClientServer/pubsub_server)
+    target_include_directories(${TOOLKIT_DEMO_SKS} PRIVATE ${S2OPC_PUBSUB_CLIENT_INCLUDES})
     target_link_libraries(${TOOLKIT_DEMO_SKS} PRIVATE s2opc_clientserver s2opc_clientserver-loader-embedded)
     target_compile_options(${TOOLKIT_DEMO_SKS} PRIVATE ${S2OPC_COMPILER_FLAGS})
     target_compile_definitions(${TOOLKIT_DEMO_SKS} PRIVATE ${S2OPC_DEFINITIONS})
