@@ -641,8 +641,8 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Initialize(SOPC_MsgBox_DataHandle* pDat
         {
             tMsgBoxFifoHeader* pHead = (void*) pDataField;
             tMsgBoxFifoEvents* pEvts = (void*) (pDataField + sizeof(tMsgBoxFifoHeader));
-            uint8_t* pData = (void*) (pDataField + sizeof(tMsgBoxFifoHeader) +
-                                      sizeof(tMsgBoxFifoEvents) * pDataHandle->pHeader->maxEvts);
+            uint8_t* pData =
+                (void*) (pDataField + sizeof(tMsgBoxFifoHeader) + sizeof(tMsgBoxFifoEvents) * pHead->maxEvts);
 
             pDataHandle->pHeader = pHead;
             pDataHandle->pEvtsBuffer = pEvts;
