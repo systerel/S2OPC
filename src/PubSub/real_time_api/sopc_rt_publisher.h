@@ -98,7 +98,8 @@ typedef void (*ptrCallbackSend)(uint32_t msgId,     // Message instance identifi
 /// @brief RT Publisher handle
 typedef struct SOPC_RT_Publisher SOPC_RT_Publisher;
 
-/// @brief RT Publisher initializer handle
+/// @brief RT Publisher initializer handle.
+/// @warning Initializer object API is not thread safe.
 typedef struct SOPC_RT_Publisher_Initializer SOPC_RT_Publisher_Initializer;
 
 /// @brief Creation of an initializer. It will be used by a RT publisher initialization. After used by RT publisher
