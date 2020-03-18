@@ -66,6 +66,19 @@ static SOPC_CRLList* static_cacrl = NULL;
 #define SKS_KEYS_FILES_ENCRYPT_KEY "./sks_private/encryptKey.key"
 #define SKS_KEYS_FILES_KEY_NONCE "./sks_private/keyNonce.key"
 #define SKS_SECURITY_GROUPID "sgid_1"
+#define SKS_ARG_MODE_MASTER "master"
+#define SKS_ARG_MODE_SLAVE "slave"
+
+static char* sks_server_endpoint_uris[] = {"opc.tcp://localhost:4841", "opc.tcp://localhost:4842",
+                                           "opc.tcp://localhost:4843"};
+static const uint64_t sks_server_endpoint_uris_size = 3;
+
+typedef enum SKS_ServerModeType
+{
+    SKS_ServerMode_Indet = 0,
+    SKS_ServerMode_Master = 1,
+    SKS_ServerMode_Slave = 2
+} SKS_ServerModeType;
 
 /* Define application namespaces: ns=1 and ns=2 (NULL terminated array) */
 static char* default_app_namespace_uris[] = {DEFAULT_PRODUCT_URI, DEFAULT_PRODUCT_URI_2, NULL};
@@ -163,6 +176,8 @@ uint32_t nbMethodIds = 0;
 /* SKS Data  */
 SOPC_SKManager* skManager;
 SOPC_SKOrdonnancer* skOrdonnancer;
+SKS_ServerModeType sksServerMode;
+SKS_ServerModeType sksServerIndex;
 
 static SOPC_StatusCode Server_InitDefaultCallMethodService(SOPC_Server_Config* serverConfig);
 
@@ -264,7 +279,7 @@ static SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_getSecurityKeys(const S
             printf("<Security Key Service: Error with securitypolicy\n");
         }
 
-        if (NULL == Keys || 0 == NbToken)
+        if (NULL == Keys || 0 == NbToken || INT32_MAX < NbToken)
         {
             printf("<Security Key Service: Error with Keys\n");
         }
@@ -319,22 +334,26 @@ static SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_getSecurityKeys(const S
         variant->BuiltInTypeId = SOPC_ByteString_Id;
         variant->ArrayType = SOPC_VariantArrayType_Array;
         // SigningKey + EncryptingKey + KeyNonce
-        variant->Value.Array.Length = 1;
-        variant->Value.Array.Content.BstringArr = SOPC_Calloc(1, sizeof(SOPC_ByteString));
+        variant->Value.Array.Content.BstringArr = SOPC_Calloc(NbToken, sizeof(SOPC_ByteString));
         if (NULL == *outputArgs)
         {
             status = OpcUa_BadOutOfMemory;
         }
         else
         {
-            if (SOPC_GoodGenericStatus == status)
+            for (uint32_t i = 0; i < NbToken && SOPC_GoodGenericStatus == status; i++)
             {
-                SOPC_ByteString_Copy(&variant->Value.Array.Content.BstringArr[0], &Keys[0]);
+                SOPC_ByteString_Clear(&variant->Value.Array.Content.BstringArr[i]);
+                status = SOPC_ByteString_Copy(&variant->Value.Array.Content.BstringArr[i], &Keys[i]);
             }
-            else
-            {
-                printf("<Security Key Service: cannont load key nonce\n");
-            }
+        }
+        if (SOPC_GoodGenericStatus == status)
+        {
+            variant->Value.Array.Length = (int32_t) NbToken;
+        }
+        else
+        {
+            printf("<Security Key Service: cannont load key nonce\n");
         }
     }
 
@@ -532,7 +551,8 @@ static SOPC_StatusCode Server_InitDefaultCallMethodService(SOPC_Server_Config* s
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_SKManager_SetKeyLifetime(skManager, 600 * 1000); /* 10m */
+        // status = SOPC_SKManager_SetKeyLifetime(skManager, 600 * 1000); /* 10m */
+        status = SOPC_SKManager_SetKeyLifetime(skManager, 10 * 1000); /* 10s */
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -656,7 +676,7 @@ static bool Server_LoadDefaultConfiguration(SOPC_S2OPC_Config* output_s2opcConfi
     output_s2opcConfig->serverConfig.nbEndpoints = 1;
     SOPC_Endpoint_Config* pEpConfig = &output_s2opcConfig->serverConfig.endpoints[0];
     pEpConfig->serverConfigPtr = &output_s2opcConfig->serverConfig;
-    pEpConfig->endpointURL = DEFAULT_ENDPOINT_URL;
+    pEpConfig->endpointURL = sks_server_endpoint_uris[sksServerIndex];
     pEpConfig->hasDiscoveryEndpoint = true;
 
     /*
@@ -1103,6 +1123,55 @@ static SOPC_ReturnStatus Server_ConfigureAddressSpace(SOPC_AddressSpace** output
     return status;
 }
 
+static SOPC_ReturnStatus Config_ConfigureSKSServerMode(int argc, char* argv[])
+{
+    sksServerIndex = 0;
+    sksServerMode = SKS_ServerMode_Indet;
+
+    if (argc < 2)
+    {
+        /* Server Mode is mandatory */
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    char* serverMode = argv[1];
+    if (0 == strcmp(SKS_ARG_MODE_MASTER, serverMode))
+    {
+        /* Master address is at first index */
+        sksServerMode = SKS_ServerMode_Master;
+        sksServerIndex = 0;
+    }
+    else if (0 == strcmp(SKS_ARG_MODE_SLAVE, serverMode) && 2 < argc)
+    {
+        sksServerMode = SKS_ServerMode_Slave;
+
+        /* Slave address index is given as second parameter */
+
+        char* endptr;
+        char* strIndex = argv[2];
+        uint64_t val = strtoul(strIndex, &endptr, 10);
+
+        /* Check that all characters are valid and in array bounds */
+        if (endptr == (strIndex + strlen(strIndex)) && 0 < val && sks_server_endpoint_uris_size > val)
+        {
+            sksServerIndex = val;
+        }
+        else
+        {
+            /* Index of slave is not valid */
+            status = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+    }
+    else
+    {
+        /* Server Mode is not valid or Index of slave is missing */
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    return status;
+}
+
 /*---------------------------------------------------------------------------
  *                             Server main function
  *---------------------------------------------------------------------------*/
@@ -1117,6 +1186,19 @@ int main(int argc, char* argv[])
     signal(SIGTERM, Test_StopSignal);
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    status = Config_ConfigureSKSServerMode(argc, argv);
+    if (SOPC_STATUS_OK == status)
+    {
+        printf("<Test_Server_Toolkit: SKS Server %s configured\n", argv[1]);
+    }
+    else
+    {
+        printf("<Test_Server_Toolkit: Error Invalid parameters.\n");
+        printf("<Test_Server_Toolkit: toolkit_demo_sks SERVER_MODE ADRESS_INDEX.\n");
+        printf("<Test_Server_Toolkit:   - SERVER_MODE should be master or slave.\n");
+        printf("<Test_Server_Toolkit:   - ADRESS_INDEX should setted only for slave. The value should be 1 or 2.\n");
+    }
 
     SOPC_S2OPC_Config s2opcConfig;
     SOPC_S2OPC_Config_Initialize(&s2opcConfig);
@@ -1145,7 +1227,11 @@ int main(int argc, char* argv[])
 
     /* Initialize the server library (start library threads)
      * and define communication events callback */
-    status = Server_Initialize();
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = Server_Initialize();
+    }
 
     /* Configuration of server endpoint:
        - Enpoint URL,
