@@ -620,10 +620,12 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Initialize(SOPC_MsgBox_DataHandle* pDat
     {
         uint8_t* pDataField = NULL;
 
+        // Reserve buffer to write
         result = SOPC_DoubleBuffer_GetWriteBuffer(pDataHandle->pMsgBox->pFifoPublisher, //
                                                   &pDataHandle->idBuffer,               //
                                                   NULL);                                //
 
+        // Retrieve buffer informations
         if (SOPC_STATUS_OK == result)
         {
             uint32_t* pCurrentSizeField = NULL;
@@ -634,6 +636,7 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Initialize(SOPC_MsgBox_DataHandle* pDat
                                                          false);                               //
         }
 
+        // Set shortcut pointer on header, events buffer and current free data buffer
         if (SOPC_STATUS_OK == result)
         {
             tMsgBoxFifoHeader* pHead = (void*) pDataField;
@@ -646,6 +649,7 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Initialize(SOPC_MsgBox_DataHandle* pDat
             pDataHandle->pDataToUpdate = pData + pHead->idxWrData;
         }
 
+        // Status set to reserved if successfull
         if (SOPC_STATUS_OK != result)
         {
             pDataHandle->idBuffer = UINT32_MAX;
@@ -751,6 +755,7 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_UpdateDataEvtSize(SOPC_MsgBox_DataHandl
             result = SOPC_STATUS_NOK;
         }
 
+        // Delete records if not enough space (at least one event with enough free data size)
         if (SOPC_STATUS_OK == result)
         {
             uint32_t iterEvent = pDataHandle->pHeader->idxWrEvt;
@@ -759,6 +764,7 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_UpdateDataEvtSize(SOPC_MsgBox_DataHandl
                    pDataHandle->pHeader->nbEvts + 1 > pDataHandle->pHeader->maxEvts)
             {
                 nextSize = pDataHandle->pEvtsBuffer[iterEvent].size;
+                // Delete record informations
                 if (nextSize > 0)
                 {
                     pDataHandle->pEvtsBuffer[iterEvent].offset = 0;
@@ -770,18 +776,25 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_UpdateDataEvtSize(SOPC_MsgBox_DataHandl
             }
         }
 
+        // Update record
         if (SOPC_STATUS_OK == result)
         {
+            // Offset of record is saved, used to duplicate data to conserved linear buffer
             uint32_t offset = pDataHandle->pHeader->idxWrData;
+            // Update event record information with data write index before update this one
+            // Update event record information with new data size
             pDataHandle->pEvtsBuffer[pDataHandle->pHeader->idxWrEvt].offset = pDataHandle->pHeader->idxWrData;
             pDataHandle->pEvtsBuffer[pDataHandle->pHeader->idxWrEvt].size = size;
 
+            // Update write event index and write data index
             pDataHandle->pHeader->idxWrEvt = (pDataHandle->pHeader->idxWrEvt + 1) % pDataHandle->pHeader->maxEvts;
             pDataHandle->pHeader->idxWrData = (pDataHandle->pHeader->idxWrData + size) % pDataHandle->pHeader->maxData;
 
+            // Update event and data counter
             pDataHandle->pHeader->nbEvts++;
             pDataHandle->pHeader->nbData += size;
 
+            // If wrap around, calculate overhead size and copy it from offset 0 to overhead size.
             if (size + offset >= pDataHandle->pHeader->maxData)
             {
                 uint32_t sizeToDup = size - (pDataHandle->pHeader->maxData - offset);
