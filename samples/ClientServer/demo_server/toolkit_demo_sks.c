@@ -67,14 +67,15 @@ static SOPC_CRLList* static_cacrl = NULL;
 #define SKS_KEYS_FILES_ENCRYPT_KEY "./sks_private/encryptKey.key"
 #define SKS_KEYS_FILES_KEY_NONCE "./sks_private/keyNonce.key"
 // Key Lifetime is 10s
-#define SKS_KEYLIFETIME 10000
+#define SKS_KEYLIFETIME 100000
 #define SKS_NB_MAX_KEYS 20
 
 #define SKS_SECURITY_GROUPID "sgid_1"
 #define SKS_ARG_MODE_MASTER "master"
 #define SKS_ARG_MODE_SLAVE "slave"
+#define SKS_ARG_RESTART "--restart"
 
-static char* sks_server_endpoint_uris[] = {"opc.tcp://localhost:4842", "opc.tcp://localhost:4841",
+static char* sks_server_endpoint_uris[] = {"opc.tcp://localhost:4841", "opc.tcp://localhost:4842",
                                            "opc.tcp://localhost:4843"};
 static const uint64_t sks_server_endpoint_uris_size = 3;
 
@@ -183,8 +184,10 @@ SOPC_SKManager* skManager;
 SOPC_SKOrdonnancer* skOrdonnancer;
 SKS_ServerModeType sksServerMode;
 uint64_t sksServerIndex;
+bool sksRestart = false;
 
-static SOPC_StatusCode Server_SKS_Init(SOPC_Server_Config* serverConfig);
+static SOPC_StatusCode Server_SKS_Configure(SOPC_Server_Config* serverConfig);
+static SOPC_StatusCode Server_SKS_Start(void);
 
 /*---------------------------------------------------------------------------
  *                          Callbacks definition
@@ -278,43 +281,40 @@ static SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_getSecurityKeys(const S
         {
             printf("<Security Key Service: Error in SK Manager when get keys\n");
         }
-
-        if (NULL == SecurityPolicyUri)
-        {
-            printf("<Security Key Service: Error with securitypolicy\n");
-        }
-
-        if (NULL == Keys || 0 == NbToken || INT32_MAX < NbToken)
-        {
-            printf("<Security Key Service: Error with Keys\n");
-        }
-        if (0 == FirstTokenId)
-        {
-            printf("<Security Key Service: Error with First token id\n");
-        }
-        else
-        {
-            printf("<Security Key Service: FirstTokenId is %u\n", FirstTokenId);
-        }
-        if (0 == TimeToNextKey)
-        {
-            printf("<Security Key Service: Error with TimeToNextKey\n");
-        }
-        else
-        {
-            printf("<Security Key Service: TimeToNextKey is %u\n", TimeToNextKey);
-        }
-        if (0 == KeyLifetime)
-        {
-            printf("<Security Key Service: Error with KeyLifetime\n");
-        }
-        else
-        {
-            printf("<Security Key Service: KeyLifetime is %u\n", KeyLifetime);
-        }
     }
 
-    if (SOPC_GoodGenericStatus == status)
+    bool keysValid = (NULL != Keys && 0 < NbToken && INT32_MAX >= NbToken);
+
+    if (!keysValid)
+    {
+        printf("<Security Key Service: Error with Keys\n");
+    }
+    if (0 == FirstTokenId && keysValid)
+    {
+        printf("<Security Key Service: Error with First token id\n");
+    }
+    else
+    {
+        printf("<Security Key Service: FirstTokenId is %u\n", FirstTokenId);
+    }
+    if (0 == TimeToNextKey && keysValid)
+    {
+        printf("<Security Key Service: Error with TimeToNextKey\n");
+    }
+    else
+    {
+        printf("<Security Key Service: TimeToNextKey is %u\n", TimeToNextKey);
+    }
+    if (0 == KeyLifetime && keysValid)
+    {
+        printf("<Security Key Service: Error with KeyLifetime\n");
+    }
+    else
+    {
+        printf("<Security Key Service: KeyLifetime is %u\n", KeyLifetime);
+    }
+
+    if (SOPC_GoodGenericStatus == status && keysValid)
     {
         /* SecurityPolicyUri */
         variant = &((*outputArgs)[0]);
@@ -323,7 +323,7 @@ static SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_getSecurityKeys(const S
         SOPC_String_Copy(&variant->Value.String, SecurityPolicyUri);
     }
 
-    if (SOPC_GoodGenericStatus == status)
+    if (SOPC_GoodGenericStatus == status && keysValid)
     {
         /* FirstTokenId */
         variant = &((*outputArgs)[1]);
@@ -332,7 +332,7 @@ static SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_getSecurityKeys(const S
         variant->Value.Uint32 = FirstTokenId;
     }
 
-    if (SOPC_GoodGenericStatus == status)
+    if (SOPC_GoodGenericStatus == status && keysValid)
     {
         /* Keys */
         variant = &((*outputArgs)[2]);
@@ -362,7 +362,7 @@ static SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_getSecurityKeys(const S
         }
     }
 
-    if (SOPC_GoodGenericStatus == status)
+    if (SOPC_GoodGenericStatus == status && keysValid)
     {
         /* TimeToNextKey */
         variant = &((*outputArgs)[3]);
@@ -371,7 +371,7 @@ static SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_getSecurityKeys(const S
         variant->Value.Doublev = (double) TimeToNextKey;
     }
 
-    if (SOPC_GoodGenericStatus == status)
+    if (SOPC_GoodGenericStatus == status && keysValid)
     {
         /* KeyLifetime */
         variant = &((*outputArgs)[4]);
@@ -401,7 +401,7 @@ static SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_getSecurityKeys(const S
     SOPC_String_Clear(SecurityPolicyUri);
     SOPC_Free(SecurityPolicyUri);
 
-    return SOPC_GoodGenericStatus;
+    return status;
 }
 
 /*
@@ -582,12 +582,19 @@ static SOPC_ReturnStatus Server_Initialize(void)
  * Application description and endpoint configuration:
  *---------------------------------------------------*/
 
-static SOPC_StatusCode Server_SKS_CreateBuilder(SOPC_SKBuilder** builder, SOPC_SKProvider** provider)
+static SOPC_StatusCode Server_SKS_CreateBuilder(SKS_ServerModeType mode,
+                                                SOPC_SKBuilder** builder,
+                                                SOPC_SKProvider** provider)
 {
+    if (NULL == builder || NULL == provider)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
     *builder = NULL;
     *provider = NULL;
     SOPC_StatusCode status = SOPC_STATUS_OK;
-    switch (sksServerMode)
+    switch (mode)
     {
     case SKS_ServerMode_Master:
 
@@ -624,20 +631,11 @@ static SOPC_StatusCode Server_SKS_CreateBuilder(SOPC_SKBuilder** builder, SOPC_S
 
         /* Create a SK Builder which replace all Keys of a SK Manager */
 
-        // Configure Client with Master uri
-        status = Client_AddSecureChannelconfig(sks_server_endpoint_uris[0]);
-        if (SOPC_STATUS_OK == status)
+        // Create a SK Provider which get Keys from a GetSecurityKeys request
+        *provider = Client_Provider_BySKS_Create();
+        if (NULL == *provider)
         {
-            // Create a SK Provider which get Keys from a GetSecurityKeys request
-            *provider = Client_Provider_BySKS_Create();
-            if (NULL == *provider)
-            {
-                status = SOPC_STATUS_OUT_OF_MEMORY;
-            }
-        }
-        else
-        {
-            printf("# Error: Slave Server cannot configure channel to Master Server\n");
+            status = SOPC_STATUS_OUT_OF_MEMORY;
         }
 
         if (SOPC_STATUS_OK == status)
@@ -677,7 +675,139 @@ static SOPC_StatusCode Server_SKS_CreateBuilder(SOPC_SKBuilder** builder, SOPC_S
     return status;
 }
 
-static SOPC_StatusCode Server_SKS_Init(SOPC_Server_Config* serverConfig)
+static SOPC_StatusCode Server_SKManager_Init(SOPC_SKManager* manager)
+{
+    if (SKS_ServerMode_Master != sksServerMode || false == sksRestart)
+    {
+        return SOPC_STATUS_OK;
+    }
+
+    if (NULL == manager)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_StatusCode status = SOPC_STATUS_OK;
+    SOPC_SKBuilder* builder = NULL;
+    SOPC_SKProvider* provider = NULL;
+    bool isInit = false;
+
+    status = Server_SKS_CreateBuilder(SKS_ServerMode_Slave, &builder, &provider);
+
+    uint64_t i = 0;
+    // Stop if add SC failed or Keys are found
+    for (i = 1; i < sks_server_endpoint_uris_size && SOPC_STATUS_OK == status && !isInit; i++)
+    {
+        printf("   => Debug Redondance : SC Configuration %s\n", sks_server_endpoint_uris[i]);
+        status = Client_AddSecureChannelconfig(sks_server_endpoint_uris[i]);
+        if (SOPC_STATUS_OK == status)
+        {
+            printf("   => Debug Redondance : SC Configuration succeed\n");
+            SOPC_SKBuilder_Update(builder, provider, manager);
+            uint32_t size = SOPC_SKManager_Size(manager);
+            isInit = size > 0;
+            printf("   => Debug Redondance : Builder finish. Manager size is %u\n", size);
+        }
+        else
+        {
+            printf("   => Debug Redondance : SC Configuration failed\n");
+        }
+    }
+    if (isInit)
+    {
+        assert(0 < i);
+        assert(i <= sks_server_endpoint_uris_size);
+        printf("<Security Keys Service : Master retrieve Keys from Slave %s\n", sks_server_endpoint_uris[i - i]);
+    }
+
+    return status;
+}
+
+static SOPC_StatusCode Server_SKS_Start()
+{
+    SOPC_StatusCode status = SOPC_STATUS_OK;
+
+    /* Init SK Manager */
+    skManager = SOPC_SKManager_Create();
+    if (NULL == skManager)
+    {
+        status = SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = Server_SKManager_Init(skManager);
+    }
+
+    // Set KeyLifeTime only if SK Manager didn't get Keys from Slave
+    if (SOPC_STATUS_OK == status && 0 == SOPC_SKManager_Size(skManager))
+    {
+        status = SOPC_SKManager_SetKeyLifetime(skManager, SKS_KEYLIFETIME);
+        if (SOPC_STATUS_OK == status)
+        {
+            SOPC_String policy;
+            SOPC_String_Initialize(&policy);
+            SOPC_String_CopyFromCString(&policy, SOPC_SecurityPolicy_PubSub_Aes256_URI);
+            status = SOPC_SKManager_SetSecurityPolicyUri(skManager, &policy);
+            SOPC_String_Clear(&policy);
+        }
+    }
+
+    /* Init SK Builder and SK Provider */
+    SOPC_SKBuilder* skBuilder;
+    SOPC_SKProvider* skProvider;
+    /* Init SK Builder : adds Keys to Manager and removes obsolete Keys when maximum size is reached */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = Server_SKS_CreateBuilder(sksServerMode, &skBuilder, &skProvider);
+    }
+    /* Init SK Ordonnancer */
+    if (SOPC_STATUS_OK == status)
+    {
+        skOrdonnancer = SOPC_SKOrdonnancer_Create();
+        if (NULL == skOrdonnancer)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        /* Init the task with 1s */
+        status = SOPC_SKOrdonnancer_AddTask(skOrdonnancer, skBuilder, skProvider, skManager, 1 * 1000);
+        if (SOPC_STATUS_OK != status)
+        {
+            printf("<Security Keys Service : adding task to ordonnancer failed\n");
+        }
+    }
+
+    if (SOPC_STATUS_OK == status && SKS_ServerMode_Slave == sksServerMode)
+    {
+        // Configure Client module with Master uri
+        status = Client_AddSecureChannelconfig(sks_server_endpoint_uris[0]);
+        if (SOPC_STATUS_OK != status)
+        {
+            printf("# Error: Slave Server cannot configure channel to Master Server\n");
+        }
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_SKOrdonnancer_Start(skOrdonnancer);
+        if (SOPC_STATUS_OK != status)
+        {
+            printf("<Security Keys Service : Starting ordonnancer failed\n");
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        printf("<Security Keys Service : Started\n");
+    }
+
+    return status;
+}
+
+static SOPC_StatusCode Server_SKS_Configure(SOPC_Server_Config* serverConfig)
 {
     SOPC_NodeId* methodId;
     SOPC_MethodCallFunc_Ptr methodFunc;
@@ -701,68 +831,6 @@ static SOPC_StatusCode Server_SKS_Init(SOPC_Server_Config* serverConfig)
         {
             status = SOPC_STATUS_NOK;
         }
-    }
-
-    /* Init SK Manager */
-    if (SOPC_STATUS_OK == status)
-    {
-        skManager = SOPC_SKManager_Create();
-        if (NULL == skManager)
-        {
-            status = SOPC_STATUS_OUT_OF_MEMORY;
-        }
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_SKManager_SetKeyLifetime(skManager, SKS_KEYLIFETIME);
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        SOPC_String policy;
-        SOPC_String_Initialize(&policy);
-        SOPC_String_CopyFromCString(&policy, SOPC_SecurityPolicy_PubSub_Aes256_URI);
-        status = SOPC_SKManager_SetSecurityPolicyUri(skManager, &policy);
-        SOPC_String_Clear(&policy);
-    }
-
-    /* Init SK Manager */
-    SOPC_SKBuilder* skBuilder;
-    SOPC_SKProvider* skProvider;
-    /* Init SK Builder : adds Keys to Manager and removes obsolete Keys when maximum size is reached */
-    status = Server_SKS_CreateBuilder(&skBuilder, &skProvider);
-
-    /* Init SK Ordonnancer */
-    if (SOPC_STATUS_OK == status)
-    {
-        skOrdonnancer = SOPC_SKOrdonnancer_Create();
-        if (NULL == skOrdonnancer)
-        {
-            status = SOPC_STATUS_OUT_OF_MEMORY;
-        }
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        /* Init the task with 1s */
-        status = SOPC_SKOrdonnancer_AddTask(skOrdonnancer, skBuilder, skProvider, skManager, 1 * 1000);
-        if (SOPC_STATUS_OK != status)
-        {
-            printf("<Security Keys Service : adding task to ordonnancer failed\n");
-        }
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_SKOrdonnancer_Start(skOrdonnancer);
-        if (SOPC_STATUS_OK != status)
-        {
-            printf("<Security Keys Service : Starting ordonnancer failed\n");
-        }
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        printf("<Security Keys Service : Initialized\n");
     }
 
     return status;
@@ -1308,6 +1376,9 @@ static SOPC_ReturnStatus Config_ConfigureSKSServerMode(int argc, char* argv[])
         /* Server Mode is not valid or Index of slave is missing */
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
+
+    // Only Master as a restart mode. Find SKS restart keyword in last parameter
+    sksRestart = (sksServerMode == SKS_ServerMode_Master && argc > 2 && 0 == strcmp(SKS_ARG_RESTART, argv[argc - 1]));
     return status;
 }
 
@@ -1403,7 +1474,7 @@ int main(int argc, char* argv[])
     // Define demo implementation of functions called for method call service
     if (SOPC_STATUS_OK == status)
     {
-        status = Server_SKS_Init(serverConfig);
+        status = Server_SKS_Configure(serverConfig);
     }
 
     /* Set endpoint configuration: keep endpoint configuration identifier for opening it later */
@@ -1470,6 +1541,12 @@ int main(int argc, char* argv[])
         }
     }
     */
+
+    /* Master retrieve Keys from Slave and start Ordonnancer */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = Server_SKS_Start();
+    }
 
     /* Start Client Side to get Security Keys */
 
