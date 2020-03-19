@@ -35,7 +35,6 @@
 #define CLIENT_KEY_PATH "./client_private/client_2k_key.pem"
 #define SKS_SERVER_CERT_PATH "./client_public/sks_2k_cert.der"
 #define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4843"
-#define SKS_ENDPOINT_URL "opc.tcp://localhost:4841"
 #define APPLICATION_URI "urn:S2OPC:localhost"
 #define PRODUCT_URI "urn:S2OPC:localhost"
 #define SERVER_DESCRIPTION "S2OPC Server + PubSub"

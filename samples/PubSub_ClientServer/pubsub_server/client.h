@@ -44,7 +44,7 @@ typedef enum
 } SessionConnectedState;
 
 SOPC_ReturnStatus Client_Setup(void);
-SOPC_ReturnStatus Client_AddSecureChannelconfig(const char* endpoint_url);
+SOPC_ReturnStatus Client_AddSecureChannelconfig(const char* endpoint_url, const char* server_cert_path);
 SOPC_ReturnStatus Client_GetSecurityKeys(uint32_t StartingTokenId,
                                          uint32_t requestedKeys,
                                          Client_SKS_GetKeys_Response* response);

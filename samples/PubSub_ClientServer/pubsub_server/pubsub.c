@@ -188,7 +188,7 @@ SOPC_ReturnStatus PubSub_Configure(void)
     {
         if (SOPC_STATUS_OK == status)
         {
-            status = Client_AddSecureChannelconfig(sksAddress);
+            status = Client_AddSecureChannelconfig(sksAddress, SKS_SERVER_CERT_PATH);
         }
 
         if (SOPC_STATUS_OK != status)

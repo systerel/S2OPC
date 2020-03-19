@@ -55,7 +55,9 @@ int32_t sendFailures = 0;
 
 static void Client_Copy_CallResponse_To_GetKeysResponse(Client_SKS_GetKeys_Response* response,
                                                         OpcUa_CallResponse* callResp);
-static SOPC_ReturnStatus CerAndKeyLoader_client(void);
+static SOPC_ReturnStatus CerAndKeyLoader_client(const char* client_key_path,
+                                                const char* client_cert_path,
+                                                const char* sks_server_cert_path);
 static SOPC_ReturnStatus Wait_response_client(void);
 static SOPC_ReturnStatus Client_SaveKeys(SOPC_ByteString* key, char* path);
 SOPC_ReturnStatus Client_CloseSession(void);
@@ -101,10 +103,12 @@ static SOPC_ReturnStatus Client_SaveKeys(SOPC_ByteString* key, char* path)
 }
 
 // Configure the 2 secure channel connections to use and retrieve channel configuration index
-static SOPC_ReturnStatus CerAndKeyLoader_client()
+static SOPC_ReturnStatus CerAndKeyLoader_client(const char* client_key_path,
+                                                const char* client_cert_path,
+                                                const char* sks_server_cert_path)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(CLIENT_CERT_PATH, &ck_cli[scConfigs_idx].client_cert);
+    status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(client_cert_path, &ck_cli[scConfigs_idx].client_cert);
     if (SOPC_STATUS_OK != status)
     {
         printf("# Error: Client failed to load client certificate\n");
@@ -117,7 +121,7 @@ static SOPC_ReturnStatus CerAndKeyLoader_client()
     if (SOPC_STATUS_OK == status)
     {
         status =
-            SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(CLIENT_KEY_PATH, &ck_cli[scConfigs_idx].client_key);
+            SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(client_key_path, &ck_cli[scConfigs_idx].client_key);
         if (SOPC_STATUS_OK != status)
         {
             printf("# Error: Client failed to load private key\n");
@@ -129,7 +133,7 @@ static SOPC_ReturnStatus CerAndKeyLoader_client()
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(SKS_SERVER_CERT_PATH,
+        status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(sks_server_cert_path,
                                                                       &ck_cli[scConfigs_idx].server_cert);
         if (SOPC_STATUS_OK != status)
         {
@@ -198,7 +202,7 @@ SOPC_ReturnStatus Client_Setup()
     return (status);
 }
 
-SOPC_ReturnStatus Client_AddSecureChannelconfig(const char* endpoint_url)
+SOPC_ReturnStatus Client_AddSecureChannelconfig(const char* endpoint_url, const char* server_cert_path)
 {
     assert(NULL != endpoint_url);
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -221,7 +225,7 @@ SOPC_ReturnStatus Client_AddSecureChannelconfig(const char* endpoint_url)
     scConfigs[scConfigs_idx].requestedLifetime = 20000;
     scConfigs[scConfigs_idx].msgSecurityMode = OpcUa_MessageSecurityMode_SignAndEncrypt;
 
-    status = CerAndKeyLoader_client();
+    status = CerAndKeyLoader_client(CLIENT_KEY_PATH, CLIENT_CERT_PATH, server_cert_path);
     if (SOPC_STATUS_OK != status)
     {
         printf("# Error: FAILED on configuring Certificate, key and Sc\n");

@@ -75,10 +75,19 @@ static SOPC_CRLList* static_cacrl = NULL;
 #define SKS_ARG_MODE_SLAVE "slave"
 #define SKS_ARG_RESTART "--restart"
 
+// Number of SKS Server ( Master + Slaves )
+#define nb_sks_server 3
+/* SKS server endpoint: 1st is uri of master, others are uris of slave (depending of the main parameters)
+   It is use by all Servers to get their own uris.
+   Master get the uris of Slaves.
+   Slave get the one of Master.
+   Slave don't need uris of the others Slaves
+*/
 static char* sks_server_endpoint_uris[] = {"opc.tcp://localhost:4841", "opc.tcp://localhost:4842",
                                            "opc.tcp://localhost:4843"};
-static const uint64_t sks_server_endpoint_uris_size = 3;
-
+/* SKS server certificate: 1st is cert of master, others are certs of slave */
+static char* sks_server_cert_pathes[] = {"./server_public/server_2k_cert.der", "./server_public/server_2k_cert.der",
+                                         "./server_public/server_2k_cert.der"};
 typedef enum SKS_ServerModeType
 {
     SKS_ServerMode_Indet = 0,
@@ -696,10 +705,10 @@ static SOPC_StatusCode Server_SKManager_Init(SOPC_SKManager* manager)
 
     uint64_t i = 0;
     // Stop if add SC failed or Keys are found
-    for (i = 1; i < sks_server_endpoint_uris_size && SOPC_STATUS_OK == status && !isInit; i++)
+    for (i = 1; i < nb_sks_server && SOPC_STATUS_OK == status && !isInit; i++)
     {
         printf("   => Debug Redondance : SC Configuration %s\n", sks_server_endpoint_uris[i]);
-        status = Client_AddSecureChannelconfig(sks_server_endpoint_uris[i]);
+        status = Client_AddSecureChannelconfig(sks_server_endpoint_uris[i], sks_server_cert_pathes[i]);
         if (SOPC_STATUS_OK == status)
         {
             printf("   => Debug Redondance : SC Configuration succeed\n");
@@ -716,7 +725,7 @@ static SOPC_StatusCode Server_SKManager_Init(SOPC_SKManager* manager)
     if (isInit)
     {
         assert(0 < i);
-        assert(i <= sks_server_endpoint_uris_size);
+        assert(i <= nb_sks_server);
         printf("<Security Keys Service : Master retrieve Keys from Slave %s\n", sks_server_endpoint_uris[i - i]);
     }
 
@@ -784,7 +793,7 @@ static SOPC_StatusCode Server_SKS_Start()
     if (SOPC_STATUS_OK == status && SKS_ServerMode_Slave == sksServerMode)
     {
         // Configure Client module with Master uri
-        status = Client_AddSecureChannelconfig(sks_server_endpoint_uris[0]);
+        status = Client_AddSecureChannelconfig(sks_server_endpoint_uris[0], sks_server_cert_pathes[0]);
         if (SOPC_STATUS_OK != status)
         {
             printf("# Error: Slave Server cannot configure channel to Master Server\n");
@@ -882,7 +891,7 @@ static bool Server_LoadDefaultConfiguration(SOPC_S2OPC_Config* output_s2opcConfi
     output_s2opcConfig->serverConfig.nbEndpoints = 1;
     SOPC_Endpoint_Config* pEpConfig = &output_s2opcConfig->serverConfig.endpoints[0];
     pEpConfig->serverConfigPtr = &output_s2opcConfig->serverConfig;
-    assert(sks_server_endpoint_uris_size > sksServerIndex);
+    assert(nb_sks_server > sksServerIndex);
     pEpConfig->endpointURL = sks_server_endpoint_uris[sksServerIndex];
     pEpConfig->hasDiscoveryEndpoint = true;
 
@@ -1361,7 +1370,7 @@ static SOPC_ReturnStatus Config_ConfigureSKSServerMode(int argc, char* argv[])
         uint64_t val = strtoul(strIndex, &endptr, 10);
 
         /* Check that all characters are valid and in array bounds */
-        if (endptr == (strIndex + strlen(strIndex)) && 0 < val && sks_server_endpoint_uris_size > val)
+        if (endptr == (strIndex + strlen(strIndex)) && 0 < val && nb_sks_server > val)
         {
             sksServerIndex = val;
         }
