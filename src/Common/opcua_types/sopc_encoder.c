@@ -128,7 +128,6 @@ SOPC_ReturnStatus SOPC_Byte_WriteAux(const void* value, SOPC_Buffer* buf, uint32
 
 SOPC_ReturnStatus SOPC_Byte_Write(const SOPC_Byte* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (NULL == value || NULL == buf)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -139,7 +138,7 @@ SOPC_ReturnStatus SOPC_Byte_Write(const SOPC_Byte* value, SOPC_Buffer* buf, uint
     }
 
     nestedStructLevel++;
-    status = SOPC_Buffer_Write(buf, value, 1);
+    SOPC_ReturnStatus status = SOPC_Buffer_Write(buf, value, 1);
     if (SOPC_STATUS_OK != status)
     {
         status = SOPC_STATUS_OUT_OF_MEMORY == status ? SOPC_STATUS_WOULD_BLOCK : SOPC_STATUS_ENCODING_ERROR;
@@ -155,7 +154,6 @@ SOPC_ReturnStatus SOPC_Byte_ReadAux(void* value, SOPC_Buffer* buf, uint32_t nest
 
 SOPC_ReturnStatus SOPC_Byte_Read(SOPC_Byte* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (NULL == value || NULL == buf)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -166,7 +164,7 @@ SOPC_ReturnStatus SOPC_Byte_Read(SOPC_Byte* value, SOPC_Buffer* buf, uint32_t ne
     }
 
     nestedStructLevel++;
-    status = SOPC_Buffer_Read(value, buf, 1);
+    SOPC_ReturnStatus status = SOPC_Buffer_Read(value, buf, 1);
     if (status != SOPC_STATUS_OK)
     {
         status = SOPC_STATUS_ENCODING_ERROR;
@@ -182,7 +180,6 @@ SOPC_ReturnStatus SOPC_Boolean_WriteAux(const void* value, SOPC_Buffer* buf, uin
 
 SOPC_ReturnStatus SOPC_Boolean_Write(const SOPC_Boolean* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_Byte encodedValue;
     if (NULL == value || NULL == buf)
     {
@@ -204,9 +201,7 @@ SOPC_ReturnStatus SOPC_Boolean_Write(const SOPC_Boolean* value, SOPC_Buffer* buf
         // Encoder should use 1 as True value
         encodedValue = 1;
     }
-    status = SOPC_Byte_Write(&encodedValue, buf, nestedStructLevel);
-
-    return status;
+    return SOPC_Byte_Write(&encodedValue, buf, nestedStructLevel);
 }
 
 SOPC_ReturnStatus SOPC_Boolean_ReadAux(void* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
@@ -216,7 +211,6 @@ SOPC_ReturnStatus SOPC_Boolean_ReadAux(void* value, SOPC_Buffer* buf, uint32_t n
 
 SOPC_ReturnStatus SOPC_Boolean_Read(SOPC_Boolean* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (NULL == value)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -227,7 +221,7 @@ SOPC_ReturnStatus SOPC_Boolean_Read(SOPC_Boolean* value, SOPC_Buffer* buf, uint3
     }
 
     nestedStructLevel++;
-    status = SOPC_Byte_Read(value, buf, nestedStructLevel);
+    SOPC_ReturnStatus status = SOPC_Byte_Read(value, buf, nestedStructLevel);
     if (SOPC_STATUS_OK == status)
     {
         if (false != *value)
@@ -246,7 +240,6 @@ SOPC_ReturnStatus SOPC_SByte_WriteAux(const void* value, SOPC_Buffer* buf, uint3
 
 SOPC_ReturnStatus SOPC_SByte_Write(const SOPC_SByte* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (NULL == value || NULL == buf)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -257,7 +250,7 @@ SOPC_ReturnStatus SOPC_SByte_Write(const SOPC_SByte* value, SOPC_Buffer* buf, ui
     }
 
     nestedStructLevel++;
-    status = SOPC_Buffer_Write(buf, (const SOPC_Byte*) value, 1);
+    SOPC_ReturnStatus status = SOPC_Buffer_Write(buf, (const SOPC_Byte*) value, 1);
 
     if (SOPC_STATUS_OK != status)
     {
@@ -273,7 +266,6 @@ SOPC_ReturnStatus SOPC_SByte_ReadAux(void* value, SOPC_Buffer* buf, uint32_t nes
 
 SOPC_ReturnStatus SOPC_SByte_Read(SOPC_SByte* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (NULL == value || NULL == buf)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -284,7 +276,7 @@ SOPC_ReturnStatus SOPC_SByte_Read(SOPC_SByte* value, SOPC_Buffer* buf, uint32_t 
     }
 
     nestedStructLevel++;
-    status = SOPC_Buffer_Read((SOPC_Byte*) value, buf, 1);
+    SOPC_ReturnStatus status = SOPC_Buffer_Read((SOPC_Byte*) value, buf, 1);
 
     if (SOPC_STATUS_OK != status)
     {
@@ -300,7 +292,6 @@ SOPC_ReturnStatus SOPC_Int16_WriteAux(const void* value, SOPC_Buffer* buf, uint3
 
 SOPC_ReturnStatus SOPC_Int16_Write(const int16_t* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (NULL == value || NULL == buf)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -314,7 +305,7 @@ SOPC_ReturnStatus SOPC_Int16_Write(const int16_t* value, SOPC_Buffer* buf, uint3
 
     int16_t encodedValue = *value;
     SOPC_EncodeDecode_Int16(&encodedValue);
-    status = SOPC_Buffer_Write(buf, (SOPC_Byte*) &encodedValue, 2);
+    SOPC_ReturnStatus status = SOPC_Buffer_Write(buf, (SOPC_Byte*) &encodedValue, 2);
 
     if (SOPC_STATUS_OK != status)
     {
@@ -330,7 +321,6 @@ SOPC_ReturnStatus SOPC_Int16_ReadAux(void* value, SOPC_Buffer* buf, uint32_t nes
 
 SOPC_ReturnStatus SOPC_Int16_Read(int16_t* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     int16_t readValue;
     if (NULL == value || NULL == buf)
     {
@@ -343,7 +333,7 @@ SOPC_ReturnStatus SOPC_Int16_Read(int16_t* value, SOPC_Buffer* buf, uint32_t nes
 
     nestedStructLevel++;
 
-    status = SOPC_Buffer_Read((SOPC_Byte*) &readValue, buf, 2);
+    SOPC_ReturnStatus status = SOPC_Buffer_Read((SOPC_Byte*) &readValue, buf, 2);
     if (SOPC_STATUS_OK == status)
     {
         SOPC_EncodeDecode_Int16(&readValue);
@@ -363,7 +353,6 @@ SOPC_ReturnStatus SOPC_UInt16_WriteAux(const void* value, SOPC_Buffer* buf, uint
 
 SOPC_ReturnStatus SOPC_UInt16_Write(const uint16_t* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (NULL == value || NULL == buf)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -376,7 +365,7 @@ SOPC_ReturnStatus SOPC_UInt16_Write(const uint16_t* value, SOPC_Buffer* buf, uin
     nestedStructLevel++;
     uint16_t encodedValue = *value;
     SOPC_EncodeDecode_UInt16(&encodedValue);
-    status = SOPC_Buffer_Write(buf, (SOPC_Byte*) &encodedValue, 2);
+    SOPC_ReturnStatus status = SOPC_Buffer_Write(buf, (SOPC_Byte*) &encodedValue, 2);
 
     if (SOPC_STATUS_OK != status)
     {
@@ -392,7 +381,6 @@ SOPC_ReturnStatus SOPC_UInt16_ReadAux(void* value, SOPC_Buffer* buf, uint32_t ne
 
 SOPC_ReturnStatus SOPC_UInt16_Read(uint16_t* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (NULL == value || NULL == buf)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -404,7 +392,7 @@ SOPC_ReturnStatus SOPC_UInt16_Read(uint16_t* value, SOPC_Buffer* buf, uint32_t n
 
     nestedStructLevel++;
 
-    status = SOPC_Buffer_Read((SOPC_Byte*) value, buf, 2);
+    SOPC_ReturnStatus status = SOPC_Buffer_Read((SOPC_Byte*) value, buf, 2);
     if (SOPC_STATUS_OK == status)
     {
         SOPC_EncodeDecode_UInt16(value);
@@ -423,7 +411,6 @@ SOPC_ReturnStatus SOPC_Int32_WriteAux(const void* value, SOPC_Buffer* buf, uint3
 
 SOPC_ReturnStatus SOPC_Int32_Write(const int32_t* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (NULL == value || NULL == buf)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -435,7 +422,7 @@ SOPC_ReturnStatus SOPC_Int32_Write(const int32_t* value, SOPC_Buffer* buf, uint3
     nestedStructLevel++;
     int32_t encodedValue = *value;
     SOPC_EncodeDecode_Int32(&encodedValue);
-    status = SOPC_Buffer_Write(buf, (SOPC_Byte*) &encodedValue, 4);
+    SOPC_ReturnStatus status = SOPC_Buffer_Write(buf, (SOPC_Byte*) &encodedValue, 4);
 
     if (SOPC_STATUS_OK != status)
     {
@@ -452,7 +439,6 @@ SOPC_ReturnStatus SOPC_Int32_ReadAux(void* value, SOPC_Buffer* buf, uint32_t nes
 
 SOPC_ReturnStatus SOPC_Int32_Read(int32_t* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (NULL == value || NULL == buf)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -463,7 +449,7 @@ SOPC_ReturnStatus SOPC_Int32_Read(int32_t* value, SOPC_Buffer* buf, uint32_t nes
     }
 
     nestedStructLevel++;
-    status = SOPC_Buffer_Read((SOPC_Byte*) value, buf, 4);
+    SOPC_ReturnStatus status = SOPC_Buffer_Read((SOPC_Byte*) value, buf, 4);
     if (SOPC_STATUS_OK == status)
     {
         SOPC_EncodeDecode_Int32(value);
@@ -483,7 +469,6 @@ SOPC_ReturnStatus SOPC_UInt32_WriteAux(const void* value, SOPC_Buffer* buf, uint
 
 SOPC_ReturnStatus SOPC_UInt32_Write(const uint32_t* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (NULL == value || NULL == buf)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -495,7 +480,7 @@ SOPC_ReturnStatus SOPC_UInt32_Write(const uint32_t* value, SOPC_Buffer* buf, uin
     nestedStructLevel++;
     uint32_t encodedValue = *value;
     SOPC_EncodeDecode_UInt32(&encodedValue);
-    status = SOPC_Buffer_Write(buf, (SOPC_Byte*) &encodedValue, 4);
+    SOPC_ReturnStatus status = SOPC_Buffer_Write(buf, (SOPC_Byte*) &encodedValue, 4);
 
     if (SOPC_STATUS_OK != status)
     {
@@ -511,7 +496,6 @@ SOPC_ReturnStatus SOPC_UInt32_ReadAux(void* value, SOPC_Buffer* buf, uint32_t ne
 
 SOPC_ReturnStatus SOPC_UInt32_Read(uint32_t* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (NULL == value || NULL == buf)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -522,7 +506,7 @@ SOPC_ReturnStatus SOPC_UInt32_Read(uint32_t* value, SOPC_Buffer* buf, uint32_t n
     }
 
     nestedStructLevel++;
-    status = SOPC_Buffer_Read((SOPC_Byte*) value, buf, 4);
+    SOPC_ReturnStatus status = SOPC_Buffer_Read((SOPC_Byte*) value, buf, 4);
     if (SOPC_STATUS_OK == status)
     {
         SOPC_EncodeDecode_UInt32(value);
@@ -542,7 +526,6 @@ SOPC_ReturnStatus SOPC_Int64_WriteAux(const void* value, SOPC_Buffer* buf, uint3
 
 SOPC_ReturnStatus SOPC_Int64_Write(const int64_t* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (NULL == value || NULL == buf)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -554,7 +537,7 @@ SOPC_ReturnStatus SOPC_Int64_Write(const int64_t* value, SOPC_Buffer* buf, uint3
     nestedStructLevel++;
     int64_t encodedValue = *value;
     SOPC_EncodeDecode_Int64(&encodedValue);
-    status = SOPC_Buffer_Write(buf, (SOPC_Byte*) &encodedValue, 8);
+    SOPC_ReturnStatus status = SOPC_Buffer_Write(buf, (SOPC_Byte*) &encodedValue, 8);
 
     if (SOPC_STATUS_OK != status)
     {
@@ -571,7 +554,6 @@ SOPC_ReturnStatus SOPC_Int64_ReadAux(void* value, SOPC_Buffer* buf, uint32_t nes
 
 SOPC_ReturnStatus SOPC_Int64_Read(int64_t* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (NULL == value || NULL == buf)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -582,7 +564,7 @@ SOPC_ReturnStatus SOPC_Int64_Read(int64_t* value, SOPC_Buffer* buf, uint32_t nes
     }
 
     nestedStructLevel++;
-    status = SOPC_Buffer_Read((SOPC_Byte*) value, buf, 8);
+    SOPC_ReturnStatus status = SOPC_Buffer_Read((SOPC_Byte*) value, buf, 8);
     if (SOPC_STATUS_OK == status)
     {
         SOPC_EncodeDecode_Int64(value);
@@ -602,7 +584,6 @@ SOPC_ReturnStatus SOPC_UInt64_WriteAux(const void* value, SOPC_Buffer* buf, uint
 
 SOPC_ReturnStatus SOPC_UInt64_Write(const uint64_t* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (NULL == value || NULL == buf)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -614,7 +595,7 @@ SOPC_ReturnStatus SOPC_UInt64_Write(const uint64_t* value, SOPC_Buffer* buf, uin
     nestedStructLevel++;
     uint64_t encodedValue = *value;
     SOPC_EncodeDecode_UInt64(&encodedValue);
-    status = SOPC_Buffer_Write(buf, (SOPC_Byte*) &encodedValue, 8);
+    SOPC_ReturnStatus status = SOPC_Buffer_Write(buf, (SOPC_Byte*) &encodedValue, 8);
 
     if (SOPC_STATUS_OK != status)
     {
@@ -631,7 +612,6 @@ SOPC_ReturnStatus SOPC_UInt64_ReadAux(void* value, SOPC_Buffer* buf, uint32_t ne
 
 SOPC_ReturnStatus SOPC_UInt64_Read(uint64_t* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (NULL == value || NULL == buf)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -642,7 +622,7 @@ SOPC_ReturnStatus SOPC_UInt64_Read(uint64_t* value, SOPC_Buffer* buf, uint32_t n
     }
 
     nestedStructLevel++;
-    status = SOPC_Buffer_Read((SOPC_Byte*) value, buf, 8);
+    SOPC_ReturnStatus status = SOPC_Buffer_Read((SOPC_Byte*) value, buf, 8);
     if (SOPC_STATUS_OK == status)
     {
         SOPC_EncodeDecode_UInt64(value);
@@ -662,7 +642,6 @@ SOPC_ReturnStatus SOPC_Float_WriteAux(const void* value, SOPC_Buffer* buf, uint3
 
 SOPC_ReturnStatus SOPC_Float_Write(const float* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (NULL == value || NULL == buf)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -675,7 +654,7 @@ SOPC_ReturnStatus SOPC_Float_Write(const float* value, SOPC_Buffer* buf, uint32_
     nestedStructLevel++;
     float encodedValue = *value;
     SOPC_EncodeDecode_Float(&encodedValue);
-    status = SOPC_Buffer_Write(buf, (SOPC_Byte*) &encodedValue, 4);
+    SOPC_ReturnStatus status = SOPC_Buffer_Write(buf, (SOPC_Byte*) &encodedValue, 4);
 
     if (SOPC_STATUS_OK != status)
     {
@@ -692,7 +671,6 @@ SOPC_ReturnStatus SOPC_Float_ReadAux(void* value, SOPC_Buffer* buf, uint32_t nes
 
 SOPC_ReturnStatus SOPC_Float_Read(float* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (NULL == value || NULL == buf)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -703,7 +681,7 @@ SOPC_ReturnStatus SOPC_Float_Read(float* value, SOPC_Buffer* buf, uint32_t neste
     }
 
     nestedStructLevel++;
-    status = SOPC_Buffer_Read((SOPC_Byte*) value, buf, 4);
+    SOPC_ReturnStatus status = SOPC_Buffer_Read((SOPC_Byte*) value, buf, 4);
     if (SOPC_STATUS_OK == status)
     {
         SOPC_EncodeDecode_Float(value);
@@ -723,7 +701,6 @@ SOPC_ReturnStatus SOPC_Double_WriteAux(const void* value, SOPC_Buffer* buf, uint
 
 SOPC_ReturnStatus SOPC_Double_Write(const double* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (NULL == value || NULL == buf)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -736,7 +713,7 @@ SOPC_ReturnStatus SOPC_Double_Write(const double* value, SOPC_Buffer* buf, uint3
     nestedStructLevel++;
     double encodedValue = *value;
     SOPC_EncodeDecode_Double(&encodedValue);
-    status = SOPC_Buffer_Write(buf, (SOPC_Byte*) &encodedValue, 8);
+    SOPC_ReturnStatus status = SOPC_Buffer_Write(buf, (SOPC_Byte*) &encodedValue, 8);
 
     if (SOPC_STATUS_OK != status)
     {
@@ -752,7 +729,6 @@ SOPC_ReturnStatus SOPC_Double_ReadAux(void* value, SOPC_Buffer* buf, uint32_t ne
 
 SOPC_ReturnStatus SOPC_Double_Read(double* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (NULL == value || NULL == buf)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -763,7 +739,7 @@ SOPC_ReturnStatus SOPC_Double_Read(double* value, SOPC_Buffer* buf, uint32_t nes
     }
     nestedStructLevel++;
 
-    status = SOPC_Buffer_Read((SOPC_Byte*) value, buf, 8);
+    SOPC_ReturnStatus status = SOPC_Buffer_Read((SOPC_Byte*) value, buf, 8);
     if (SOPC_STATUS_OK == status)
     {
         SOPC_EncodeDecode_Double(value);
@@ -782,7 +758,6 @@ SOPC_ReturnStatus SOPC_ByteString_WriteAux(const void* value, SOPC_Buffer* buf, 
 
 SOPC_ReturnStatus SOPC_ByteString_Write(const SOPC_ByteString* str, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (NULL == str || NULL == buf)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -801,7 +776,7 @@ SOPC_ReturnStatus SOPC_ByteString_Write(const SOPC_ByteString* str, SOPC_Buffer*
     {
         length = -1;
     }
-    status = SOPC_Int32_Write(&length, buf, nestedStructLevel);
+    SOPC_ReturnStatus status = SOPC_Int32_Write(&length, buf, nestedStructLevel);
     if (SOPC_STATUS_OK == status && str->Length > 0)
     {
         status = SOPC_Buffer_Write(buf, str->Data, (uint32_t) str->Length);
@@ -826,7 +801,6 @@ SOPC_ReturnStatus SOPC_ByteString_ReadAux(void* value, SOPC_Buffer* buf, uint32_
 
 SOPC_ReturnStatus SOPC_ByteString_Read(SOPC_ByteString* str, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     int32_t length;
     if (NULL == str || NULL != str->Data || str->Length > 0 || NULL == buf)
     {
@@ -838,7 +812,7 @@ SOPC_ReturnStatus SOPC_ByteString_Read(SOPC_ByteString* str, SOPC_Buffer* buf, u
     }
 
     nestedStructLevel++;
-    status = SOPC_Int32_Read(&length, buf, nestedStructLevel);
+    SOPC_ReturnStatus status = SOPC_Int32_Read(&length, buf, nestedStructLevel);
 
     if (SOPC_STATUS_OK == status)
     {
@@ -886,7 +860,6 @@ SOPC_ReturnStatus SOPC_String_WriteAux(const void* value, SOPC_Buffer* buf, uint
 
 SOPC_ReturnStatus SOPC_String_Write(const SOPC_String* str, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (NULL == str || NULL == buf)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -906,7 +879,7 @@ SOPC_ReturnStatus SOPC_String_Write(const SOPC_String* str, SOPC_Buffer* buf, ui
     {
         length = -1;
     }
-    status = SOPC_Int32_Write(&length, buf, nestedStructLevel);
+    SOPC_ReturnStatus status = SOPC_Int32_Write(&length, buf, nestedStructLevel);
     if (SOPC_STATUS_OK == status && str->Length > 0)
     {
         status = SOPC_Buffer_Write(buf, str->Data, (uint32_t) str->Length);
@@ -930,7 +903,6 @@ SOPC_ReturnStatus SOPC_String_ReadWithLimitedLength(SOPC_String* str,
                                                     SOPC_Buffer* buf,
                                                     uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     int32_t length;
     if (NULL == str || NULL != str->Data || str->Length > 0 || NULL == buf)
     {
@@ -942,7 +914,7 @@ SOPC_ReturnStatus SOPC_String_ReadWithLimitedLength(SOPC_String* str,
     }
 
     nestedStructLevel++;
-    status = SOPC_Int32_Read(&length, buf, nestedStructLevel);
+    SOPC_ReturnStatus status = SOPC_Int32_Read(&length, buf, nestedStructLevel);
 
     if (SOPC_STATUS_OK == status)
     {
@@ -1031,7 +1003,6 @@ SOPC_ReturnStatus SOPC_DateTime_WriteAux(const void* value, SOPC_Buffer* buf, ui
 
 SOPC_ReturnStatus SOPC_DateTime_Write(const SOPC_DateTime* date, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (NULL == date || NULL == buf)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -1042,9 +1013,7 @@ SOPC_ReturnStatus SOPC_DateTime_Write(const SOPC_DateTime* date, SOPC_Buffer* bu
     }
 
     nestedStructLevel++;
-    status = SOPC_Int64_Write(date, buf, nestedStructLevel);
-
-    return status;
+    return SOPC_Int64_Write(date, buf, nestedStructLevel);
 }
 
 SOPC_ReturnStatus SOPC_DateTime_ReadAux(void* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
@@ -1054,7 +1023,6 @@ SOPC_ReturnStatus SOPC_DateTime_ReadAux(void* value, SOPC_Buffer* buf, uint32_t 
 
 SOPC_ReturnStatus SOPC_DateTime_Read(SOPC_DateTime* date, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (NULL == date)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -1065,9 +1033,7 @@ SOPC_ReturnStatus SOPC_DateTime_Read(SOPC_DateTime* date, SOPC_Buffer* buf, uint
     }
 
     nestedStructLevel++;
-    status = SOPC_Int64_Read(date, buf, nestedStructLevel);
-
-    return status;
+    return SOPC_Int64_Read(date, buf, nestedStructLevel);
 }
 
 SOPC_ReturnStatus SOPC_Guid_WriteAux(const void* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
@@ -1077,7 +1043,6 @@ SOPC_ReturnStatus SOPC_Guid_WriteAux(const void* value, SOPC_Buffer* buf, uint32
 
 SOPC_ReturnStatus SOPC_Guid_Write(const SOPC_Guid* guid, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (NULL == guid || NULL == buf)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -1088,7 +1053,7 @@ SOPC_ReturnStatus SOPC_Guid_Write(const SOPC_Guid* guid, SOPC_Buffer* buf, uint3
     }
 
     nestedStructLevel++;
-    status = SOPC_UInt32_Write(&guid->Data1, buf, nestedStructLevel);
+    SOPC_ReturnStatus status = SOPC_UInt32_Write(&guid->Data1, buf, nestedStructLevel);
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_UInt16_Write(&guid->Data2, buf, nestedStructLevel);
@@ -1116,7 +1081,6 @@ SOPC_ReturnStatus SOPC_Guid_ReadAux(void* value, SOPC_Buffer* buf, uint32_t nest
 
 SOPC_ReturnStatus SOPC_Guid_Read(SOPC_Guid* guid, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (NULL == guid || NULL == buf)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -1128,7 +1092,7 @@ SOPC_ReturnStatus SOPC_Guid_Read(SOPC_Guid* guid, SOPC_Buffer* buf, uint32_t nes
 
     nestedStructLevel++;
 
-    status = SOPC_UInt32_Read(&guid->Data1, buf, nestedStructLevel);
+    SOPC_ReturnStatus status = SOPC_UInt32_Read(&guid->Data1, buf, nestedStructLevel);
 
     if (SOPC_STATUS_OK == status)
     {
@@ -1194,13 +1158,12 @@ static SOPC_ReturnStatus Internal_NodeId_Write(SOPC_Buffer* buf,
                                                uint32_t nestedStructLevel)
 {
     assert(NULL != nodeId);
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     SOPC_NodeId_DataEncoding encodingType = 0x0F & encodingByte; // Eliminate flags
 
     SOPC_Byte byte = 0;
     uint16_t twoBytes = 0;
 
-    status = SOPC_Byte_Write(&encodingByte, buf, nestedStructLevel);
+    SOPC_ReturnStatus status = SOPC_Byte_Write(&encodingByte, buf, nestedStructLevel);
     if (SOPC_STATUS_OK == status)
     {
         switch (encodingType)
@@ -1270,7 +1233,6 @@ SOPC_ReturnStatus SOPC_NodeId_WriteAux(const void* value, SOPC_Buffer* buf, uint
 
 SOPC_ReturnStatus SOPC_NodeId_Write(const SOPC_NodeId* nodeId, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (NULL == nodeId)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -1281,9 +1243,7 @@ SOPC_ReturnStatus SOPC_NodeId_Write(const SOPC_NodeId* nodeId, SOPC_Buffer* buf,
     }
 
     nestedStructLevel++;
-    status = Internal_NodeId_Write(buf, (SOPC_Byte) GetNodeIdDataEncoding(nodeId), nodeId, nestedStructLevel);
-
-    return status;
+    return Internal_NodeId_Write(buf, (SOPC_Byte) GetNodeIdDataEncoding(nodeId), nodeId, nestedStructLevel);
 }
 
 static SOPC_ReturnStatus Internal_NodeId_Read(SOPC_Buffer* buf,
@@ -1292,7 +1252,6 @@ static SOPC_ReturnStatus Internal_NodeId_Read(SOPC_Buffer* buf,
                                               uint32_t nestedStructLevel)
 {
     assert(NULL != nodeId);
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     SOPC_NodeId_DataEncoding encodingType = 0x0F;
 
     SOPC_Byte byte = 0;
@@ -1303,7 +1262,7 @@ static SOPC_ReturnStatus Internal_NodeId_Read(SOPC_Buffer* buf,
         return SOPC_STATUS_INVALID_STATE;
     }
 
-    status = SOPC_Byte_Read(encodingByte, buf, nestedStructLevel);
+    SOPC_ReturnStatus status = SOPC_Byte_Read(encodingByte, buf, nestedStructLevel);
 
     if (SOPC_STATUS_OK == status)
     {
@@ -1390,7 +1349,6 @@ SOPC_ReturnStatus SOPC_NodeId_ReadAux(void* value, SOPC_Buffer* buf, uint32_t ne
 
 SOPC_ReturnStatus SOPC_NodeId_Read(SOPC_NodeId* nodeId, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_Byte encodingByte = 0;
     if (NULL == nodeId)
     {
@@ -1402,9 +1360,7 @@ SOPC_ReturnStatus SOPC_NodeId_Read(SOPC_NodeId* nodeId, SOPC_Buffer* buf, uint32
     }
 
     nestedStructLevel++;
-    status = Internal_NodeId_Read(buf, nodeId, &encodingByte, nestedStructLevel);
-
-    return status;
+    return Internal_NodeId_Read(buf, nodeId, &encodingByte, nestedStructLevel);
 }
 
 SOPC_ReturnStatus SOPC_ExpandedNodeId_WriteAux(const void* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
@@ -1416,7 +1372,6 @@ SOPC_ReturnStatus SOPC_ExpandedNodeId_Write(const SOPC_ExpandedNodeId* expNodeId
                                             SOPC_Buffer* buf,
                                             uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_Byte encodingByte = 0xFF;
     if (NULL == expNodeId)
     {
@@ -1437,7 +1392,7 @@ SOPC_ReturnStatus SOPC_ExpandedNodeId_Write(const SOPC_ExpandedNodeId* expNodeId
     {
         encodingByte |= SOPC_NodeIdEncoding_ServerIndexFlag;
     }
-    status = Internal_NodeId_Write(buf, encodingByte, &expNodeId->NodeId, nestedStructLevel);
+    SOPC_ReturnStatus status = Internal_NodeId_Write(buf, encodingByte, &expNodeId->NodeId, nestedStructLevel);
 
     if (SOPC_STATUS_OK == status && expNodeId->NamespaceUri.Length > 0)
     {
@@ -1458,7 +1413,6 @@ SOPC_ReturnStatus SOPC_ExpandedNodeId_ReadAux(void* value, SOPC_Buffer* buf, uin
 
 SOPC_ReturnStatus SOPC_ExpandedNodeId_Read(SOPC_ExpandedNodeId* expNodeId, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_Byte encodingByte = 0;
     if (NULL == expNodeId)
     {
@@ -1470,7 +1424,7 @@ SOPC_ReturnStatus SOPC_ExpandedNodeId_Read(SOPC_ExpandedNodeId* expNodeId, SOPC_
     }
 
     nestedStructLevel++;
-    status = Internal_NodeId_Read(buf, &expNodeId->NodeId, &encodingByte, nestedStructLevel);
+    SOPC_ReturnStatus status = Internal_NodeId_Read(buf, &expNodeId->NodeId, &encodingByte, nestedStructLevel);
 
     if (SOPC_STATUS_OK == status && (encodingByte & SOPC_NodeIdEncoding_NamespaceUriFlag) != 0x00)
     {
@@ -1610,7 +1564,6 @@ SOPC_ReturnStatus SOPC_DiagnosticInfo_Write(const SOPC_DiagnosticInfo* diagInfo,
                                             SOPC_Buffer* buf,
                                             uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
@@ -1619,9 +1572,7 @@ SOPC_ReturnStatus SOPC_DiagnosticInfo_Write(const SOPC_DiagnosticInfo* diagInfo,
     nestedStructLevel++;
 
     // Manage diagnostic information nested level
-    status = SOPC_DiagnosticInfo_Write_Internal(diagInfo, buf, 0);
-
-    return status;
+    return SOPC_DiagnosticInfo_Write_Internal(diagInfo, buf, 0);
 }
 
 SOPC_ReturnStatus SOPC_DiagnosticInfo_ReadAux(void* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
@@ -1707,16 +1658,13 @@ static SOPC_ReturnStatus SOPC_DiagnosticInfo_Read_Internal(SOPC_DiagnosticInfo* 
 SOPC_ReturnStatus SOPC_DiagnosticInfo_Read(SOPC_DiagnosticInfo* diagInfo, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
     // Manage diagnostic information nested level
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
 
     nestedStructLevel++;
-    status = SOPC_DiagnosticInfo_Read_Internal(diagInfo, buf, 0);
-
-    return status;
+    return SOPC_DiagnosticInfo_Read_Internal(diagInfo, buf, 0);
 }
 
 SOPC_ReturnStatus SOPC_QualifiedName_WriteAux(const void* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
@@ -1728,7 +1676,6 @@ SOPC_ReturnStatus SOPC_QualifiedName_Write(const SOPC_QualifiedName* qname,
                                            SOPC_Buffer* buf,
                                            uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (NULL == qname)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -1739,7 +1686,7 @@ SOPC_ReturnStatus SOPC_QualifiedName_Write(const SOPC_QualifiedName* qname,
     }
 
     nestedStructLevel++;
-    status = SOPC_UInt16_Write(&qname->NamespaceIndex, buf, nestedStructLevel);
+    SOPC_ReturnStatus status = SOPC_UInt16_Write(&qname->NamespaceIndex, buf, nestedStructLevel);
 
     if (SOPC_STATUS_OK == status)
     {
@@ -1755,7 +1702,6 @@ SOPC_ReturnStatus SOPC_QualifiedName_ReadAux(void* value, SOPC_Buffer* buf, uint
 
 SOPC_ReturnStatus SOPC_QualifiedName_Read(SOPC_QualifiedName* qname, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (NULL == qname)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -1766,7 +1712,7 @@ SOPC_ReturnStatus SOPC_QualifiedName_Read(SOPC_QualifiedName* qname, SOPC_Buffer
     }
 
     nestedStructLevel++;
-    status = SOPC_UInt16_Read(&qname->NamespaceIndex, buf, nestedStructLevel);
+    SOPC_ReturnStatus status = SOPC_UInt16_Read(&qname->NamespaceIndex, buf, nestedStructLevel);
 
     if (SOPC_STATUS_OK == status)
     {
@@ -1806,7 +1752,6 @@ SOPC_ReturnStatus SOPC_LocalizedText_Write(const SOPC_LocalizedText* localizedTe
                                            SOPC_Buffer* buf,
                                            uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_Byte encodingByte = 0;
     if (NULL == localizedText)
     {
@@ -1819,7 +1764,7 @@ SOPC_ReturnStatus SOPC_LocalizedText_Write(const SOPC_LocalizedText* localizedTe
 
     nestedStructLevel++;
     encodingByte = GetLocalizedTextEncodingByte(localizedText);
-    status = SOPC_Byte_Write(&encodingByte, buf, nestedStructLevel);
+    SOPC_ReturnStatus status = SOPC_Byte_Write(&encodingByte, buf, nestedStructLevel);
 
     if (SOPC_STATUS_OK == status && (encodingByte & SOPC_LocalizedText_Locale) != 0)
     {
@@ -1841,7 +1786,6 @@ SOPC_ReturnStatus SOPC_LocalizedText_Read(SOPC_LocalizedText* localizedText,
                                           SOPC_Buffer* buf,
                                           uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_Byte encodingByte = 0;
     if (NULL == localizedText)
     {
@@ -1853,7 +1797,7 @@ SOPC_ReturnStatus SOPC_LocalizedText_Read(SOPC_LocalizedText* localizedText,
     }
 
     nestedStructLevel++;
-    status = SOPC_Byte_Read(&encodingByte, buf, nestedStructLevel);
+    SOPC_ReturnStatus status = SOPC_Byte_Read(&encodingByte, buf, nestedStructLevel);
 
     if (SOPC_STATUS_OK == status && (encodingByte & SOPC_LocalizedText_Locale) != 0)
     {
@@ -1887,7 +1831,6 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Write(const SOPC_ExtensionObject* extObj,
     uint32_t lengthPos;
     uint32_t curPos;
     int32_t length;
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_Byte encodingByte = 0;
     if (NULL == extObj)
     {
@@ -1901,7 +1844,7 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Write(const SOPC_ExtensionObject* extObj,
     nestedStructLevel++;
     encodingByte = (SOPC_Byte) extObj->Encoding;
     nodeId = extObj->TypeId.NodeId;
-    status = SOPC_STATUS_OK;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     if (SOPC_STATUS_OK == status && encodingByte == SOPC_ExtObjBodyEncoding_Object)
     {
@@ -1973,7 +1916,6 @@ SOPC_ReturnStatus SOPC_ExtensionObject_ReadAux(void* value, SOPC_Buffer* buf, ui
 
 SOPC_ReturnStatus SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_EncodeableType* encType = NULL;
     SOPC_Byte encodingByte = 0;
     if (NULL == extObj)
@@ -1986,7 +1928,7 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_B
     }
 
     nestedStructLevel++;
-    status = SOPC_NodeId_Read(&extObj->TypeId.NodeId, buf, nestedStructLevel);
+    SOPC_ReturnStatus status = SOPC_NodeId_Read(&extObj->TypeId.NodeId, buf, nestedStructLevel);
 
     if (SOPC_STATUS_OK == status)
     {
@@ -2093,7 +2035,6 @@ static SOPC_ReturnStatus SOPC_Read_Array_WithNestedLevel(SOPC_Buffer* buf,
                                                          SOPC_EncodeableObject_PfnClear* clearFct,
                                                          uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_Byte* byteArray = NULL;
 
     if (NULL == buf || NULL == noOfElts || NULL == eltsArray || NULL != *eltsArray || NULL == decodeFct)
@@ -2106,7 +2047,7 @@ static SOPC_ReturnStatus SOPC_Read_Array_WithNestedLevel(SOPC_Buffer* buf,
     }
 
     nestedStructLevel++;
-    status = SOPC_Int32_Read(noOfElts, buf, nestedStructLevel);
+    SOPC_ReturnStatus status = SOPC_Int32_Read(noOfElts, buf, nestedStructLevel);
 
     if (SOPC_STATUS_OK == status)
     {
@@ -2176,8 +2117,6 @@ static SOPC_ReturnStatus SOPC_Write_Array_WithNestedLevel(SOPC_Buffer* buf,
                                                           SOPC_PfnEncode_WithNestedLevel* encodeFct,
                                                           uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-
     if (NULL == buf || NULL == noOfElts || NULL == eltsArray || NULL == encodeFct ||
         (*noOfElts > 0 && NULL == *eltsArray))
     {
@@ -2189,7 +2128,7 @@ static SOPC_ReturnStatus SOPC_Write_Array_WithNestedLevel(SOPC_Buffer* buf,
     }
 
     nestedStructLevel++;
-    status = SOPC_Int32_Write(noOfElts, buf, nestedStructLevel);
+    SOPC_ReturnStatus status = SOPC_Int32_Write(noOfElts, buf, nestedStructLevel);
 
     if (SOPC_STATUS_OK == status && *noOfElts > 0)
     {
@@ -2226,8 +2165,6 @@ static SOPC_ReturnStatus WriteVariantNonArrayBuiltInType(SOPC_Buffer* buf,
                                                          const SOPC_VariantValue* val,
                                                          uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-
     if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
@@ -2235,97 +2172,94 @@ static SOPC_ReturnStatus WriteVariantNonArrayBuiltInType(SOPC_Buffer* buf,
 
     // nestedStructLevel is not incremented here
     // it is incremented in sub-functions
-    status = SOPC_STATUS_OK;
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
 
-    if (SOPC_STATUS_OK == status)
+    switch (builtInTypeId)
     {
-        switch (builtInTypeId)
-        {
-        case SOPC_Boolean_Id:
-            status = SOPC_Boolean_Write(&val->Boolean, buf, nestedStructLevel);
-            break;
-        case SOPC_SByte_Id:
-            status = SOPC_SByte_Write(&val->Sbyte, buf, nestedStructLevel);
-            break;
-        case SOPC_Byte_Id:
-            status = SOPC_Byte_Write(&val->Byte, buf, nestedStructLevel);
-            break;
-        case SOPC_Int16_Id:
-            status = SOPC_Int16_Write(&val->Int16, buf, nestedStructLevel);
-            break;
-        case SOPC_UInt16_Id:
-            status = SOPC_UInt16_Write(&val->Uint16, buf, nestedStructLevel);
-            break;
-        case SOPC_Int32_Id:
-            status = SOPC_Int32_Write(&val->Int32, buf, nestedStructLevel);
-            break;
-        case SOPC_UInt32_Id:
-            status = SOPC_UInt32_Write(&val->Uint32, buf, nestedStructLevel);
-            break;
-        case SOPC_Int64_Id:
-            status = SOPC_Int64_Write(&val->Int64, buf, nestedStructLevel);
-            break;
-        case SOPC_UInt64_Id:
-            status = SOPC_UInt64_Write(&val->Uint64, buf, nestedStructLevel);
-            break;
-        case SOPC_Float_Id:
-            status = SOPC_Float_Write(&val->Floatv, buf, nestedStructLevel);
-            break;
-        case SOPC_Double_Id:
-            status = SOPC_Double_Write(&val->Doublev, buf, nestedStructLevel);
-            break;
-        case SOPC_String_Id:
-            status = SOPC_String_Write(&val->String, buf, nestedStructLevel);
-            break;
-        case SOPC_DateTime_Id:
-            status = SOPC_DateTime_Write(&val->Date, buf, nestedStructLevel);
-            break;
-        case SOPC_Guid_Id:
-            status = SOPC_Guid_Write(val->Guid, buf, nestedStructLevel);
-            break;
-        case SOPC_ByteString_Id:
-            status = SOPC_ByteString_Write(&val->Bstring, buf, nestedStructLevel);
-            break;
-        case SOPC_XmlElement_Id:
-            status = SOPC_XmlElement_Write(&val->XmlElt, buf, nestedStructLevel);
-            break;
-        case SOPC_NodeId_Id:
-            status = SOPC_NodeId_Write(val->NodeId, buf, nestedStructLevel);
-            break;
-        case SOPC_ExpandedNodeId_Id:
-            status = SOPC_ExpandedNodeId_Write(val->ExpNodeId, buf, nestedStructLevel);
-            break;
-        case SOPC_StatusCode_Id:
-            status = SOPC_StatusCode_Write(&val->Status, buf, nestedStructLevel);
-            break;
-        case SOPC_QualifiedName_Id:
-            status = SOPC_QualifiedName_Write(val->Qname, buf, nestedStructLevel);
-            break;
-        case SOPC_LocalizedText_Id:
-            status = SOPC_LocalizedText_Write(val->LocalizedText, buf, nestedStructLevel);
-            break;
-        case SOPC_ExtensionObject_Id:
-            status = SOPC_ExtensionObject_Write(val->ExtObject, buf, nestedStructLevel);
-            break;
-        case SOPC_DataValue_Id:
-            status = SOPC_DataValue_WriteAux_Nested((void*) val->DataValue, buf, nestedStructLevel);
-            break;
-        case SOPC_Variant_Id:
-            // Part 6 Table 14 (v1.03): "The value shall not be a Variant
-            //                           but it could be an array of Variants."
-            status = SOPC_STATUS_INVALID_PARAMETERS;
-            break;
-        case SOPC_DiagnosticInfo_Id:
-            status = SOPC_DiagnosticInfo_Write(val->DiagInfo, buf, nestedStructLevel);
-            break;
-        case SOPC_Null_Id:
-            // mantis #0003682: errata for 1.03: NULL value encoding (no value to encode)
-            status = SOPC_STATUS_OK;
-            break;
-        default:
-            // SOPC_STATUS = INVALID PARAM
-            break;
-        }
+    case SOPC_Boolean_Id:
+        status = SOPC_Boolean_Write(&val->Boolean, buf, nestedStructLevel);
+        break;
+    case SOPC_SByte_Id:
+        status = SOPC_SByte_Write(&val->Sbyte, buf, nestedStructLevel);
+        break;
+    case SOPC_Byte_Id:
+        status = SOPC_Byte_Write(&val->Byte, buf, nestedStructLevel);
+        break;
+    case SOPC_Int16_Id:
+        status = SOPC_Int16_Write(&val->Int16, buf, nestedStructLevel);
+        break;
+    case SOPC_UInt16_Id:
+        status = SOPC_UInt16_Write(&val->Uint16, buf, nestedStructLevel);
+        break;
+    case SOPC_Int32_Id:
+        status = SOPC_Int32_Write(&val->Int32, buf, nestedStructLevel);
+        break;
+    case SOPC_UInt32_Id:
+        status = SOPC_UInt32_Write(&val->Uint32, buf, nestedStructLevel);
+        break;
+    case SOPC_Int64_Id:
+        status = SOPC_Int64_Write(&val->Int64, buf, nestedStructLevel);
+        break;
+    case SOPC_UInt64_Id:
+        status = SOPC_UInt64_Write(&val->Uint64, buf, nestedStructLevel);
+        break;
+    case SOPC_Float_Id:
+        status = SOPC_Float_Write(&val->Floatv, buf, nestedStructLevel);
+        break;
+    case SOPC_Double_Id:
+        status = SOPC_Double_Write(&val->Doublev, buf, nestedStructLevel);
+        break;
+    case SOPC_String_Id:
+        status = SOPC_String_Write(&val->String, buf, nestedStructLevel);
+        break;
+    case SOPC_DateTime_Id:
+        status = SOPC_DateTime_Write(&val->Date, buf, nestedStructLevel);
+        break;
+    case SOPC_Guid_Id:
+        status = SOPC_Guid_Write(val->Guid, buf, nestedStructLevel);
+        break;
+    case SOPC_ByteString_Id:
+        status = SOPC_ByteString_Write(&val->Bstring, buf, nestedStructLevel);
+        break;
+    case SOPC_XmlElement_Id:
+        status = SOPC_XmlElement_Write(&val->XmlElt, buf, nestedStructLevel);
+        break;
+    case SOPC_NodeId_Id:
+        status = SOPC_NodeId_Write(val->NodeId, buf, nestedStructLevel);
+        break;
+    case SOPC_ExpandedNodeId_Id:
+        status = SOPC_ExpandedNodeId_Write(val->ExpNodeId, buf, nestedStructLevel);
+        break;
+    case SOPC_StatusCode_Id:
+        status = SOPC_StatusCode_Write(&val->Status, buf, nestedStructLevel);
+        break;
+    case SOPC_QualifiedName_Id:
+        status = SOPC_QualifiedName_Write(val->Qname, buf, nestedStructLevel);
+        break;
+    case SOPC_LocalizedText_Id:
+        status = SOPC_LocalizedText_Write(val->LocalizedText, buf, nestedStructLevel);
+        break;
+    case SOPC_ExtensionObject_Id:
+        status = SOPC_ExtensionObject_Write(val->ExtObject, buf, nestedStructLevel);
+        break;
+    case SOPC_DataValue_Id:
+        status = SOPC_DataValue_WriteAux_Nested((void*) val->DataValue, buf, nestedStructLevel);
+        break;
+    case SOPC_Variant_Id:
+        // Part 6 Table 14 (v1.03): "The value shall not be a Variant
+        //                           but it could be an array of Variants."
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+        break;
+    case SOPC_DiagnosticInfo_Id:
+        status = SOPC_DiagnosticInfo_Write(val->DiagInfo, buf, nestedStructLevel);
+        break;
+    case SOPC_Null_Id:
+        // mantis #0003682: errata for 1.03: NULL value encoding (no value to encode)
+        status = SOPC_STATUS_OK;
+        break;
+    default:
+        // SOPC_STATUS = INVALID PARAM
+        break;
     }
     return status;
 }
@@ -2473,7 +2407,6 @@ static SOPC_ReturnStatus SOPC_Variant_Write_Internal(const SOPC_Variant* variant
                                                      SOPC_Buffer* buf,
                                                      uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     SOPC_Byte encodingByte = 0;
     int32_t arrayLength = 0;
     int64_t matrixLength = 1;
@@ -2492,7 +2425,7 @@ static SOPC_ReturnStatus SOPC_Variant_Write_Internal(const SOPC_Variant* variant
 
     nestedStructLevel++;
     encodingByte = GetVariantEncodingMask(variant);
-    status = SOPC_Byte_Write(&encodingByte, buf, nestedStructLevel);
+    SOPC_ReturnStatus status = SOPC_Byte_Write(&encodingByte, buf, nestedStructLevel);
 
     if (SOPC_STATUS_OK == status)
     {
@@ -2573,16 +2506,13 @@ SOPC_ReturnStatus SOPC_Variant_WriteAux_Nested(const void* value, SOPC_Buffer* b
 
 SOPC_ReturnStatus SOPC_Variant_Write(const SOPC_Variant* variant, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
 
     // Manage variant nested level (data value could be contained in a variant)
-    status = SOPC_Variant_Write_Internal(variant, buf, nestedStructLevel);
-
-    return status;
+    return SOPC_Variant_Write_Internal(variant, buf, nestedStructLevel);
 }
 
 static SOPC_ReturnStatus ReadVariantNonArrayBuiltInType(SOPC_Buffer* buf,
@@ -2590,217 +2520,213 @@ static SOPC_ReturnStatus ReadVariantNonArrayBuiltInType(SOPC_Buffer* buf,
                                                         SOPC_VariantValue* val,
                                                         uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
 
     // nestedStructLevel is handled by subcalls
-    status = SOPC_STATUS_OK;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
-    if (SOPC_STATUS_OK == status)
+    switch (builtInTypeId)
     {
-        switch (builtInTypeId)
+    case SOPC_Boolean_Id:
+        status = SOPC_Boolean_Read(&val->Boolean, buf, nestedStructLevel);
+        break;
+    case SOPC_SByte_Id:
+        status = SOPC_SByte_Read(&val->Sbyte, buf, nestedStructLevel);
+        break;
+    case SOPC_Byte_Id:
+        status = SOPC_Byte_Read(&val->Byte, buf, nestedStructLevel);
+        break;
+    case SOPC_Int16_Id:
+        status = SOPC_Int16_Read(&val->Int16, buf, nestedStructLevel);
+        break;
+    case SOPC_UInt16_Id:
+        status = SOPC_UInt16_Read(&val->Uint16, buf, nestedStructLevel);
+        break;
+    case SOPC_Int32_Id:
+        status = SOPC_Int32_Read(&val->Int32, buf, nestedStructLevel);
+        break;
+    case SOPC_UInt32_Id:
+        status = SOPC_UInt32_Read(&val->Uint32, buf, nestedStructLevel);
+        break;
+    case SOPC_Int64_Id:
+        status = SOPC_Int64_Read(&val->Int64, buf, nestedStructLevel);
+        break;
+    case SOPC_UInt64_Id:
+        status = SOPC_UInt64_Read(&val->Uint64, buf, nestedStructLevel);
+        break;
+    case SOPC_Float_Id:
+        status = SOPC_Float_Read(&val->Floatv, buf, nestedStructLevel);
+        break;
+    case SOPC_Double_Id:
+        status = SOPC_Double_Read(&val->Doublev, buf, nestedStructLevel);
+        break;
+    case SOPC_String_Id:
+        status = SOPC_String_Read(&val->String, buf, nestedStructLevel);
+        break;
+    case SOPC_DateTime_Id:
+        status = SOPC_DateTime_Read(&val->Date, buf, nestedStructLevel);
+        break;
+    case SOPC_Guid_Id:
+        val->Guid = SOPC_Malloc(sizeof(SOPC_Guid));
+        if (NULL != val->Guid)
         {
-        case SOPC_Boolean_Id:
-            status = SOPC_Boolean_Read(&val->Boolean, buf, nestedStructLevel);
-            break;
-        case SOPC_SByte_Id:
-            status = SOPC_SByte_Read(&val->Sbyte, buf, nestedStructLevel);
-            break;
-        case SOPC_Byte_Id:
-            status = SOPC_Byte_Read(&val->Byte, buf, nestedStructLevel);
-            break;
-        case SOPC_Int16_Id:
-            status = SOPC_Int16_Read(&val->Int16, buf, nestedStructLevel);
-            break;
-        case SOPC_UInt16_Id:
-            status = SOPC_UInt16_Read(&val->Uint16, buf, nestedStructLevel);
-            break;
-        case SOPC_Int32_Id:
-            status = SOPC_Int32_Read(&val->Int32, buf, nestedStructLevel);
-            break;
-        case SOPC_UInt32_Id:
-            status = SOPC_UInt32_Read(&val->Uint32, buf, nestedStructLevel);
-            break;
-        case SOPC_Int64_Id:
-            status = SOPC_Int64_Read(&val->Int64, buf, nestedStructLevel);
-            break;
-        case SOPC_UInt64_Id:
-            status = SOPC_UInt64_Read(&val->Uint64, buf, nestedStructLevel);
-            break;
-        case SOPC_Float_Id:
-            status = SOPC_Float_Read(&val->Floatv, buf, nestedStructLevel);
-            break;
-        case SOPC_Double_Id:
-            status = SOPC_Double_Read(&val->Doublev, buf, nestedStructLevel);
-            break;
-        case SOPC_String_Id:
-            status = SOPC_String_Read(&val->String, buf, nestedStructLevel);
-            break;
-        case SOPC_DateTime_Id:
-            status = SOPC_DateTime_Read(&val->Date, buf, nestedStructLevel);
-            break;
-        case SOPC_Guid_Id:
-            val->Guid = SOPC_Malloc(sizeof(SOPC_Guid));
-            if (NULL != val->Guid)
+            SOPC_Guid_Initialize(val->Guid);
+            status = SOPC_Guid_Read(val->Guid, buf, nestedStructLevel);
+            if (SOPC_STATUS_OK != status)
             {
-                SOPC_Guid_Initialize(val->Guid);
-                status = SOPC_Guid_Read(val->Guid, buf, nestedStructLevel);
-                if (SOPC_STATUS_OK != status)
-                {
-                    SOPC_Free(val->Guid);
-                    val->Guid = NULL;
-                }
+                SOPC_Free(val->Guid);
+                val->Guid = NULL;
             }
-            else
-            {
-                status = SOPC_STATUS_NOK;
-            }
-            break;
-        case SOPC_ByteString_Id:
-            status = SOPC_ByteString_Read(&val->Bstring, buf, nestedStructLevel);
-            break;
-        case SOPC_XmlElement_Id:
-            status = SOPC_XmlElement_Read(&val->XmlElt, buf, nestedStructLevel);
-            break;
-        case SOPC_NodeId_Id:
-            val->NodeId = SOPC_Malloc(sizeof(SOPC_NodeId));
-            if (NULL != val->NodeId)
-            {
-                SOPC_NodeId_Initialize(val->NodeId);
-                status = SOPC_NodeId_Read(val->NodeId, buf, nestedStructLevel);
-                if (SOPC_STATUS_OK != status)
-                {
-                    SOPC_Free(val->NodeId);
-                    val->NodeId = NULL;
-                }
-            }
-            else
-            {
-                status = SOPC_STATUS_NOK;
-            }
-            break;
-        case SOPC_ExpandedNodeId_Id:
-            val->ExpNodeId = SOPC_Malloc(sizeof(SOPC_ExpandedNodeId));
-            if (NULL != val->ExpNodeId)
-            {
-                SOPC_ExpandedNodeId_Initialize(val->ExpNodeId);
-                status = SOPC_ExpandedNodeId_Read(val->ExpNodeId, buf, nestedStructLevel);
-                if (SOPC_STATUS_OK != status)
-                {
-                    SOPC_Free(val->ExpNodeId);
-                    val->ExpNodeId = NULL;
-                }
-            }
-            else
-            {
-                status = SOPC_STATUS_NOK;
-            }
-            break;
-        case SOPC_StatusCode_Id:
-            status = SOPC_StatusCode_Read(&val->Status, buf, nestedStructLevel);
-            break;
-        case SOPC_QualifiedName_Id:
-            val->Qname = SOPC_Malloc(sizeof(SOPC_QualifiedName));
-            if (NULL != val->Qname)
-            {
-                SOPC_QualifiedName_Initialize(val->Qname);
-                status = SOPC_QualifiedName_Read(val->Qname, buf, nestedStructLevel);
-                if (SOPC_STATUS_OK != status)
-                {
-                    SOPC_Free(val->Qname);
-                    val->Qname = NULL;
-                }
-            }
-            else
-            {
-                status = SOPC_STATUS_NOK;
-            }
-            break;
-        case SOPC_LocalizedText_Id:
-            val->LocalizedText = SOPC_Malloc(sizeof(SOPC_LocalizedText));
-            if (NULL != val->LocalizedText)
-            {
-                SOPC_LocalizedText_Initialize(val->LocalizedText);
-                status = SOPC_LocalizedText_Read(val->LocalizedText, buf, nestedStructLevel);
-                if (SOPC_STATUS_OK != status)
-                {
-                    SOPC_Free(val->LocalizedText);
-                    val->LocalizedText = NULL;
-                }
-            }
-            else
-            {
-                status = SOPC_STATUS_NOK;
-            }
-            break;
-        case SOPC_ExtensionObject_Id:
-            val->ExtObject = SOPC_Malloc(sizeof(SOPC_ExtensionObject));
-            if (NULL != val->ExtObject)
-            {
-                SOPC_ExtensionObject_Initialize(val->ExtObject);
-                status = SOPC_ExtensionObject_Read(val->ExtObject, buf, nestedStructLevel);
-                if (SOPC_STATUS_OK != status)
-                {
-                    SOPC_Free(val->ExtObject);
-                    val->ExtObject = NULL;
-                }
-            }
-            else
-            {
-                status = SOPC_STATUS_NOK;
-            }
-            break;
-        case SOPC_DataValue_Id:
-            val->DataValue = SOPC_Malloc(sizeof(SOPC_DataValue));
-            if (NULL != val->DataValue)
-            {
-                SOPC_DataValue_Initialize(val->DataValue);
-                status = SOPC_DataValue_ReadAux_Nested((void*) val->DataValue, buf, nestedStructLevel);
-                if (SOPC_STATUS_OK != status)
-                {
-                    SOPC_Free(val->DataValue);
-                    val->DataValue = NULL;
-                }
-            }
-            else
-            {
-                status = SOPC_STATUS_NOK;
-            }
-            break;
-        case SOPC_Variant_Id:
-            // Part 6 Table 14 (v1.03): "The value shall not be a Variant
-            //                           but it could be an array of Variants."
-            status = SOPC_STATUS_ENCODING_ERROR;
-            break;
-        case SOPC_DiagnosticInfo_Id:
-            val->DiagInfo = SOPC_Malloc(sizeof(SOPC_DiagnosticInfo));
-            if (NULL != val->DiagInfo)
-            {
-                SOPC_DiagnosticInfo_Initialize(val->DiagInfo);
-                status = SOPC_DiagnosticInfo_Read(val->DiagInfo, buf, nestedStructLevel);
-                if (SOPC_STATUS_OK != status)
-                {
-                    SOPC_DiagnosticInfo_Clear(val->DiagInfo);
-                    SOPC_Free(val->DiagInfo);
-                    val->DiagInfo = NULL;
-                }
-            }
-            else
-            {
-                status = SOPC_STATUS_NOK;
-            }
-            break;
-        case SOPC_Null_Id:
-            // mantis #0003682: errata for 1.03: NULL value encoding (no value to decode)
-            status = SOPC_STATUS_OK;
-            break;
-        default:
-            status = SOPC_STATUS_NOK;
-            break;
         }
+        else
+        {
+            status = SOPC_STATUS_NOK;
+        }
+        break;
+    case SOPC_ByteString_Id:
+        status = SOPC_ByteString_Read(&val->Bstring, buf, nestedStructLevel);
+        break;
+    case SOPC_XmlElement_Id:
+        status = SOPC_XmlElement_Read(&val->XmlElt, buf, nestedStructLevel);
+        break;
+    case SOPC_NodeId_Id:
+        val->NodeId = SOPC_Malloc(sizeof(SOPC_NodeId));
+        if (NULL != val->NodeId)
+        {
+            SOPC_NodeId_Initialize(val->NodeId);
+            status = SOPC_NodeId_Read(val->NodeId, buf, nestedStructLevel);
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_Free(val->NodeId);
+                val->NodeId = NULL;
+            }
+        }
+        else
+        {
+            status = SOPC_STATUS_NOK;
+        }
+        break;
+    case SOPC_ExpandedNodeId_Id:
+        val->ExpNodeId = SOPC_Malloc(sizeof(SOPC_ExpandedNodeId));
+        if (NULL != val->ExpNodeId)
+        {
+            SOPC_ExpandedNodeId_Initialize(val->ExpNodeId);
+            status = SOPC_ExpandedNodeId_Read(val->ExpNodeId, buf, nestedStructLevel);
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_Free(val->ExpNodeId);
+                val->ExpNodeId = NULL;
+            }
+        }
+        else
+        {
+            status = SOPC_STATUS_NOK;
+        }
+        break;
+    case SOPC_StatusCode_Id:
+        status = SOPC_StatusCode_Read(&val->Status, buf, nestedStructLevel);
+        break;
+    case SOPC_QualifiedName_Id:
+        val->Qname = SOPC_Malloc(sizeof(SOPC_QualifiedName));
+        if (NULL != val->Qname)
+        {
+            SOPC_QualifiedName_Initialize(val->Qname);
+            status = SOPC_QualifiedName_Read(val->Qname, buf, nestedStructLevel);
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_Free(val->Qname);
+                val->Qname = NULL;
+            }
+        }
+        else
+        {
+            status = SOPC_STATUS_NOK;
+        }
+        break;
+    case SOPC_LocalizedText_Id:
+        val->LocalizedText = SOPC_Malloc(sizeof(SOPC_LocalizedText));
+        if (NULL != val->LocalizedText)
+        {
+            SOPC_LocalizedText_Initialize(val->LocalizedText);
+            status = SOPC_LocalizedText_Read(val->LocalizedText, buf, nestedStructLevel);
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_Free(val->LocalizedText);
+                val->LocalizedText = NULL;
+            }
+        }
+        else
+        {
+            status = SOPC_STATUS_NOK;
+        }
+        break;
+    case SOPC_ExtensionObject_Id:
+        val->ExtObject = SOPC_Malloc(sizeof(SOPC_ExtensionObject));
+        if (NULL != val->ExtObject)
+        {
+            SOPC_ExtensionObject_Initialize(val->ExtObject);
+            status = SOPC_ExtensionObject_Read(val->ExtObject, buf, nestedStructLevel);
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_Free(val->ExtObject);
+                val->ExtObject = NULL;
+            }
+        }
+        else
+        {
+            status = SOPC_STATUS_NOK;
+        }
+        break;
+    case SOPC_DataValue_Id:
+        val->DataValue = SOPC_Malloc(sizeof(SOPC_DataValue));
+        if (NULL != val->DataValue)
+        {
+            SOPC_DataValue_Initialize(val->DataValue);
+            status = SOPC_DataValue_ReadAux_Nested((void*) val->DataValue, buf, nestedStructLevel);
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_Free(val->DataValue);
+                val->DataValue = NULL;
+            }
+        }
+        else
+        {
+            status = SOPC_STATUS_NOK;
+        }
+        break;
+    case SOPC_Variant_Id:
+        // Part 6 Table 14 (v1.03): "The value shall not be a Variant
+        //                           but it could be an array of Variants."
+        status = SOPC_STATUS_ENCODING_ERROR;
+        break;
+    case SOPC_DiagnosticInfo_Id:
+        val->DiagInfo = SOPC_Malloc(sizeof(SOPC_DiagnosticInfo));
+        if (NULL != val->DiagInfo)
+        {
+            SOPC_DiagnosticInfo_Initialize(val->DiagInfo);
+            status = SOPC_DiagnosticInfo_Read(val->DiagInfo, buf, nestedStructLevel);
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_DiagnosticInfo_Clear(val->DiagInfo);
+                SOPC_Free(val->DiagInfo);
+                val->DiagInfo = NULL;
+            }
+        }
+        else
+        {
+            status = SOPC_STATUS_NOK;
+        }
+        break;
+    case SOPC_Null_Id:
+        // mantis #0003682: errata for 1.03: NULL value encoding (no value to decode)
+        status = SOPC_STATUS_OK;
+        break;
+    default:
+        status = SOPC_STATUS_NOK;
+        break;
     }
     return status;
 }
@@ -2938,7 +2864,6 @@ SOPC_ReturnStatus SOPC_Variant_ReadAux(void* value, SOPC_Buffer* buf, uint32_t n
 
 static SOPC_ReturnStatus SOPC_Variant_Read_Internal(SOPC_Variant* variant, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_Byte encodingByte = 0;
     int32_t arrayLength = 0;
     int64_t matrixLength = 1;
@@ -2955,7 +2880,7 @@ static SOPC_ReturnStatus SOPC_Variant_Read_Internal(SOPC_Variant* variant, SOPC_
     }
 
     nestedStructLevel++;
-    status = SOPC_Byte_Read(&encodingByte, buf, nestedStructLevel);
+    SOPC_ReturnStatus status = SOPC_Byte_Read(&encodingByte, buf, nestedStructLevel);
 
     if (SOPC_STATUS_OK == status)
     {
@@ -3167,7 +3092,6 @@ static SOPC_ReturnStatus SOPC_DataValue_Write_Internal(const SOPC_DataValue* dat
                                                        SOPC_Buffer* buf,
                                                        uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_Byte encodingMask = 0;
     if (NULL == dataValue)
     {
@@ -3180,7 +3104,7 @@ static SOPC_ReturnStatus SOPC_DataValue_Write_Internal(const SOPC_DataValue* dat
 
     nestedStructLevel++;
     encodingMask = GetDataValueEncodingMask(dataValue);
-    status = SOPC_Byte_Write(&encodingMask, buf, nestedStructLevel);
+    SOPC_ReturnStatus status = SOPC_Byte_Write(&encodingMask, buf, nestedStructLevel);
 
     if (SOPC_STATUS_OK == status && (encodingMask & SOPC_DataValue_NotNullValue) != 0)
     {
@@ -3216,12 +3140,8 @@ SOPC_ReturnStatus SOPC_DataValue_WriteAux_Nested(const void* value, SOPC_Buffer*
 
 SOPC_ReturnStatus SOPC_DataValue_Write(const SOPC_DataValue* dataValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-
     // Manage variant nested level (data value could be contained in a variant)
-    status = SOPC_DataValue_Write_Internal(dataValue, buf, nestedStructLevel);
-
-    return status;
+    return SOPC_DataValue_Write_Internal(dataValue, buf, nestedStructLevel);
 }
 
 SOPC_ReturnStatus SOPC_DataValue_ReadAux(void* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
@@ -3233,7 +3153,6 @@ static SOPC_ReturnStatus SOPC_DataValue_Read_Internal(SOPC_DataValue* dataValue,
                                                       SOPC_Buffer* buf,
                                                       uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_Byte encodingMask = 0;
     if (NULL == dataValue)
     {
@@ -3245,7 +3164,7 @@ static SOPC_ReturnStatus SOPC_DataValue_Read_Internal(SOPC_DataValue* dataValue,
     }
 
     nestedStructLevel++;
-    status = SOPC_Byte_Read(&encodingMask, buf, nestedStructLevel);
+    SOPC_ReturnStatus status = SOPC_Byte_Read(&encodingMask, buf, nestedStructLevel);
     if (SOPC_STATUS_OK == status && (encodingMask & SOPC_DataValue_NotNullValue) != 0)
     {
         status = SOPC_Variant_Read_Internal(&dataValue->Value, buf, nestedStructLevel);
@@ -3327,7 +3246,6 @@ SOPC_ReturnStatus SOPC_Read_Array(SOPC_Buffer* buf,
                                   SOPC_EncodeableObject_PfnClear* clearFct,
                                   uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_Byte* byteArray = NULL;
 
     if (NULL == buf || NULL == noOfElts || NULL == eltsArray || NULL != *eltsArray || NULL == decodeFct)
@@ -3340,7 +3258,7 @@ SOPC_ReturnStatus SOPC_Read_Array(SOPC_Buffer* buf,
     }
 
     nestedStructLevel++;
-    status = SOPC_Int32_Read(noOfElts, buf, nestedStructLevel);
+    SOPC_ReturnStatus status = SOPC_Int32_Read(noOfElts, buf, nestedStructLevel);
 
     if (SOPC_STATUS_OK != status)
     {
@@ -3402,8 +3320,6 @@ SOPC_ReturnStatus SOPC_Write_Array(SOPC_Buffer* msgBuf,
                                    SOPC_EncodeableObject_PfnEncode* encodeFct,
                                    uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-
     if (NULL == msgBuf || NULL == noOfElts || NULL == eltsArray || NULL == encodeFct ||
         (*noOfElts > 0 && NULL == *eltsArray))
     {
@@ -3415,7 +3331,7 @@ SOPC_ReturnStatus SOPC_Write_Array(SOPC_Buffer* msgBuf,
     }
 
     nestedStructLevel++;
-    status = SOPC_Int32_Write(noOfElts, msgBuf, nestedStructLevel);
+    SOPC_ReturnStatus status = SOPC_Int32_Write(noOfElts, msgBuf, nestedStructLevel);
 
     if (SOPC_STATUS_OK == status && *noOfElts > 0)
     {
