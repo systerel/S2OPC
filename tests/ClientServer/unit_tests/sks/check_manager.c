@@ -25,6 +25,7 @@
 #include "sopc_crypto_profiles.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_sk_manager.h"
+#include "sopc_time.h"
 
 START_TEST(test_default_manager_create)
 {
@@ -282,6 +283,51 @@ START_TEST(test_default_manager_setkeys)
 }
 END_TEST
 
+START_TEST(test_default_manager_getAllKeysLifeTime)
+{
+    SOPC_SKManager* skm = SOPC_SKManager_Create();
+
+    ck_assert_uint_eq(0, SOPC_SKManager_Size(skm));
+
+    uint32_t allKeysLifetime = SOPC_SKManager_GetAllKeysLifeTime(skm);
+    ck_assert_uint_eq(0, allKeysLifetime);
+
+    uint32_t expectedKeyLifetime = 5000;
+    SOPC_ReturnStatus res = SOPC_SKManager_SetKeyLifetime(skm, expectedKeyLifetime);
+    ck_assert(SOPC_STATUS_OK == res);
+
+    //
+    SOPC_ByteString* expectedKeys = SOPC_Calloc(3, sizeof(SOPC_ByteString));
+    SOPC_ByteString_Initialize(&expectedKeys[0]);
+    ck_assert(SOPC_STATUS_OK == SOPC_ByteString_CopyFromBytes(&expectedKeys[0], (const SOPC_Byte*) "Bytes 1", 7));
+    SOPC_ByteString_Initialize(&expectedKeys[1]);
+    ck_assert(SOPC_STATUS_OK == SOPC_ByteString_CopyFromBytes(&expectedKeys[1], (const SOPC_Byte*) "Bytes 2", 7));
+    SOPC_ByteString_Initialize(&expectedKeys[2]);
+    ck_assert(SOPC_STATUS_OK == SOPC_ByteString_CopyFromBytes(&expectedKeys[2], (const SOPC_Byte*) "Bytes 3", 7));
+
+    uint32_t nbAddedKeys = SOPC_SKManager_AddKeys(skm, expectedKeys, 3);
+    ck_assert_uint_eq(3, nbAddedKeys);
+
+    // If there is not Keys, sum of lifetime is 0
+    allKeysLifetime = SOPC_SKManager_GetAllKeysLifeTime(skm);
+    ck_assert(allKeysLifetime <= expectedKeyLifetime * 3);
+    ck_assert(allKeysLifetime > expectedKeyLifetime * 2);
+    SOPC_Sleep(50);
+    uint32_t allKeysLifetime2 = SOPC_SKManager_GetAllKeysLifeTime(skm);
+    ck_assert(allKeysLifetime2 < allKeysLifetime);
+    ck_assert(allKeysLifetime - 1000 < allKeysLifetime2);
+
+    for (int i = 0; i < 3; i++)
+    {
+        SOPC_ByteString_Clear(&expectedKeys[i]);
+    }
+    SOPC_Free(expectedKeys);
+
+    SOPC_SKManager_Clear(skm);
+    SOPC_Free(skm);
+}
+END_TEST
+
 Suite* tests_make_suite_manager(void)
 {
     Suite* s;
@@ -293,6 +339,7 @@ Suite* tests_make_suite_manager(void)
     tcase_add_test(tc_manager, test_default_manager_create);
     tcase_add_test(tc_manager, test_default_manager_add);
     tcase_add_test(tc_manager, test_default_manager_setkeys);
+    tcase_add_test(tc_manager, test_default_manager_getAllKeysLifeTime);
 
     suite_add_tcase(s, tc_manager);
 

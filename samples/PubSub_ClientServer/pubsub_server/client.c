@@ -504,8 +504,9 @@ void Client_Treat_Session_Response(void* param, uintptr_t appContext)
 
 void Client_Copy_CallResponse_To_GetKeysResponse(Client_SKS_GetKeys_Response* response, OpcUa_CallResponse* callResp)
 {
+    assert(NULL != response);
     assert(NULL != callResp);
-    if (1 == callResp->NoOfResults)
+    if (1 == callResp->NoOfResults && NULL != callResp->Results)
     {
         OpcUa_CallMethodResult* callResult = &callResp->Results[0];
         if (SOPC_STATUS_OK == callResult->StatusCode)
@@ -659,7 +660,6 @@ void Client_Copy_CallResponse_To_GetKeysResponse(Client_SKS_GetKeys_Response* re
                     }
                     response->NbKeys = 0;
                     response->TimeToNextKey = 0;
-                    ;
                     response->KeyLifetime = 0;
                 }
             }
