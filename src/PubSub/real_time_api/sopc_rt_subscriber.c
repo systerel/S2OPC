@@ -175,6 +175,34 @@ static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Pin_Read_Finalize(
     uint32_t in_pin,            // Pin number
     uint32_t* in_out_token);    // token
 
+/// @brief Get direct data pointer for selected pin, without API concurrent accesses protection.
+/// @param [in] in_sub RT Subscriber object
+/// @param [in] in_itf Pin direction
+/// @param [in] in_pin Pin number returned by SOPC_RT_Subscriber_Initializer_AddPin
+/// @param [inout] in_out_sopc_buffer SOPC Buffer structure,
+/// with data pointer set to internal buffer on return.
+/// On entry, data pointer of SOPC_Buffer shall be set to NULL.
+/// @return SOPC_STATUS_OK if successful.
+static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Pin_WriteDataHandle_GetBuffer(
+    SOPC_RT_Subscriber* in_sub,       // RT Subscriber object
+    SOPC_Pin_Direction in_itf,        // Pin direction
+    uint32_t in_pin,                  // Pin number returned by SOPC_RT_Subscriber_Initializer_AddPin
+    SOPC_Buffer* in_out_sopc_buffer); // SOPC Buffer structure, with data pointer set to internal buffer on return
+
+/// @brief Release direct data pointer for selected pin, without API concurrent accesses protection.
+/// @param [in] in_sub RT Subscriber object
+/// @param [in] in_itf Pin direction
+/// @param [in] in_pin Pin number returned by SOPC_RT_Subscriber_Initializer_AddPin
+/// @param [inout] in_out_sopc_buffer Size field is use to update significant bytes.
+/// SOPC Buffer structure, with data pointer set to NULL on return.
+/// On entry, SOPC_Buffer data pointer is normally not NULL if GetBuffer was successful.
+/// @return SOPC_STATUS_OK if successful.
+static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Pin_WriteDataHandle_ReleaseBuffer(
+    SOPC_RT_Subscriber* in_sub,       // RT Subscriber object
+    SOPC_Pin_Direction in_itf,        // Pin direction
+    uint32_t in_pin,                  // Pin number returned by SOPC_RT_Subscriber_Initializer_AddPin
+    SOPC_Buffer* in_out_sopc_buffer); // SOPC Buffer structure, with data pointer set to NULL on return
+
 /// @brief Write pin, without API concurrent accesses protection.
 /// @param [in] in_sub RT Subscriber object
 /// @param [in] in_itf Pin direction
@@ -636,6 +664,184 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Write(SOPC_RT_Subscriber* in_sub, //
     return result;
 }
 
+/// @brief Get direct data pointer for output selected pin
+/// @param [in] in_sub RT Subscriber object
+/// @param [in] in_pin Pin number returned by SOPC_RT_Subscriber_Initializer_AddPin
+/// @param [inout] in_out_sopc_buffer SOPC Buffer structure,
+/// with data pointer set to internal buffer on return.
+/// On entry, data pointer of SOPC_Buffer shall be set to NULL.
+/// @return SOPC_STATUS_OK if successful.
+SOPC_ReturnStatus SOPC_RT_Subscriber_Output_WriteDataHandle_GetBuffer(SOPC_RT_Subscriber* in_sub,      //
+                                                                      uint32_t in_pin,                 //
+                                                                      SOPC_Buffer* in_out_sopc_buffer) //
+{
+    SOPC_ReturnStatus result = SOPC_STATUS_OK;
+    if (NULL == in_sub || NULL == in_out_sopc_buffer || NULL != in_out_sopc_buffer->data)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    eSubscriberSyncStatus status = _SOPC_RT_Subscriber_IncrementInUseStatus(in_sub);
+
+    if (status > E_SUBSCRIBER_SYNC_STATUS_INITIALIZED)
+    {
+        result = _SOPC_RT_Subscriber_Pin_WriteDataHandle_GetBuffer(in_sub,                 //
+                                                                   SOPC_PIN_DIRECTION_OUT, //
+                                                                   in_pin,                 //
+                                                                   in_out_sopc_buffer);    //
+
+        // Do not restore previous state. Mark as "in use" until that finalize call.
+        if (SOPC_STATUS_OK == result)
+        {
+            // A successful initialization indicates that message box pointer can be used out of protection
+            // phase whereas a de initialization phase try to start.
+            // Increment this counter. Decremented after successful finalization.
+            _SOPC_RT_Subscriber_IncrementInUseStatus(in_sub);
+        }
+
+        _SOPC_RT_Subscriber_DecrementInUseStatus(in_sub);
+    }
+    else
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+
+    return result;
+}
+
+/// @brief Get direct data pointer for input selected pin
+/// @param [in] in_sub RT Subscriber object
+/// @param [in] in_pin Pin number returned by SOPC_RT_Subscriber_Initializer_AddPin
+/// @param [inout] in_out_sopc_buffer SOPC Buffer structure,
+/// with data pointer set to internal buffer on return.
+/// On entry, data pointer of SOPC_Buffer shall be set to NULL.
+/// @return SOPC_STATUS_OK if successful.
+SOPC_ReturnStatus SOPC_RT_Subscriber_Input_WriteDataHandle_GetBuffer(SOPC_RT_Subscriber* in_sub,      //
+                                                                     uint32_t in_pin,                 //
+                                                                     SOPC_Buffer* in_out_sopc_buffer) //
+{
+    SOPC_ReturnStatus result = SOPC_STATUS_OK;
+    if (NULL == in_sub || NULL == in_out_sopc_buffer || NULL != in_out_sopc_buffer->data)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    eSubscriberSyncStatus status = _SOPC_RT_Subscriber_IncrementInUseStatus(in_sub);
+
+    if (status > E_SUBSCRIBER_SYNC_STATUS_INITIALIZED)
+    {
+        result = _SOPC_RT_Subscriber_Pin_WriteDataHandle_GetBuffer(in_sub,                //
+                                                                   SOPC_PIN_DIRECTION_IN, //
+                                                                   in_pin,                //
+                                                                   in_out_sopc_buffer);   //
+
+        // Do not restore previous state. Mark as "in use" until that finalize call.
+        if (SOPC_STATUS_OK == result)
+        {
+            // A successful initialization indicates that message box pointer can be used out of protection
+            // phase whereas a de initialization phase try to start.
+            // Increment this counter. Decremented after successful finalization.
+            _SOPC_RT_Subscriber_IncrementInUseStatus(in_sub);
+        }
+
+        _SOPC_RT_Subscriber_DecrementInUseStatus(in_sub);
+    }
+    else
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+
+    return result;
+}
+
+/// @brief Release direct data pointer for output selected pin, without API concurrent accesses protection.
+/// @param [in] in_sub RT Subscriber object
+/// @param [in] in_pin Pin number returned by SOPC_RT_Subscriber_Initializer_AddPin
+/// @param [inout] in_out_sopc_buffer Size field is use to update significant bytes.
+/// SOPC Buffer structure, with data pointer set to NULL on return.
+/// On entry, SOPC_Buffer data pointer is normally not NULL if GetBuffer was successful.
+/// @return SOPC_STATUS_OK if successful.
+SOPC_ReturnStatus SOPC_RT_Subscriber_Output_WriteDataHandle_ReleaseBuffer(SOPC_RT_Subscriber* in_sub,      //
+                                                                          uint32_t in_pin,                 //
+                                                                          SOPC_Buffer* in_out_sopc_buffer) //
+{
+    SOPC_ReturnStatus result = SOPC_STATUS_OK;
+    if (NULL == in_sub || NULL == in_out_sopc_buffer || NULL == in_out_sopc_buffer->data)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    eSubscriberSyncStatus status = _SOPC_RT_Subscriber_IncrementInUseStatus(in_sub);
+
+    if (status > E_SUBSCRIBER_SYNC_STATUS_INITIALIZED)
+    {
+        result = _SOPC_RT_Subscriber_Pin_WriteDataHandle_ReleaseBuffer(in_sub,                 //
+                                                                       SOPC_PIN_DIRECTION_OUT, //
+                                                                       in_pin,                 //
+                                                                       in_out_sopc_buffer);    //
+
+        if (SOPC_STATUS_OK == result)
+        {
+            // A successful finalization indicates that message box pointer will not be further
+            // used out of protection
+            // De initialization phase  is allowed.
+            _SOPC_RT_Subscriber_DecrementInUseStatus(in_sub);
+        }
+
+        _SOPC_RT_Subscriber_DecrementInUseStatus(in_sub);
+    }
+    else
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+
+    return result;
+}
+
+/// @brief Release direct data pointer for input selected pin, without API concurrent accesses protection.
+/// @param [in] in_sub RT Subscriber object
+/// @param [in] in_pin Pin number returned by SOPC_RT_Subscriber_Initializer_AddPin
+/// @param [inout] in_out_sopc_buffer Size field is use to update significant bytes.
+/// SOPC Buffer structure, with data pointer set to NULL on return.
+/// On entry, SOPC_Buffer data pointer is normally not NULL if GetBuffer was successful.
+/// @return SOPC_STATUS_OK if successful.
+SOPC_ReturnStatus SOPC_RT_Subscriber_Input_WriteDataHandle_ReleaseBuffer(SOPC_RT_Subscriber* in_sub,      //
+                                                                         uint32_t in_pin,                 //
+                                                                         SOPC_Buffer* in_out_sopc_buffer) //
+{
+    SOPC_ReturnStatus result = SOPC_STATUS_OK;
+    if (NULL == in_sub || NULL == in_out_sopc_buffer || NULL == in_out_sopc_buffer->data)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    eSubscriberSyncStatus status = _SOPC_RT_Subscriber_IncrementInUseStatus(in_sub);
+
+    if (status > E_SUBSCRIBER_SYNC_STATUS_INITIALIZED)
+    {
+        result = _SOPC_RT_Subscriber_Pin_WriteDataHandle_ReleaseBuffer(in_sub,                //
+                                                                       SOPC_PIN_DIRECTION_IN, //
+                                                                       in_pin,                //
+                                                                       in_out_sopc_buffer);   //
+
+        if (SOPC_STATUS_OK == result)
+        {
+            // A successful finalization indicates that message box pointer will not be further
+            // used out of protection
+            // De initialization phase  is allowed.
+            _SOPC_RT_Subscriber_DecrementInUseStatus(in_sub);
+        }
+
+        _SOPC_RT_Subscriber_DecrementInUseStatus(in_sub);
+    }
+    else
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+
+    return result;
+}
+
 /// @brief Heart beat. Use to read each input.
 /// For each read input, user callback is invoked.
 /// @param [in] in_sub RT Subscriber object
@@ -919,6 +1125,184 @@ static inline void _SOPC_RT_Subscriber_DeInitialize(SOPC_RT_Subscriber* in_out_s
         in_out_sub->outputs.pMsgBox = NULL;
         in_out_sub->outputs.nbOutputs = 0;
     }
+}
+
+/// @brief Get direct data pointer for selected pin, without API concurrent accesses protection.
+/// @param [in] in_sub RT Subscriber object
+/// @param [in] in_itf Pin direction
+/// @param [in] in_pin Pin number returned by SOPC_RT_Subscriber_Initializer_AddPin
+/// @param [inout] in_out_sopc_buffer SOPC Buffer structure,
+/// with data pointer set to internal buffer on return.
+/// On entry, data pointer of SOPC_Buffer shall be set to NULL.
+/// @return SOPC_STATUS_OK if successful.
+static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Pin_WriteDataHandle_GetBuffer(SOPC_RT_Subscriber* in_sub,
+                                                                                  SOPC_Pin_Direction in_itf,
+                                                                                  uint32_t in_pin,
+                                                                                  SOPC_Buffer* in_out_sopc_buffer)
+{
+    if (NULL == in_sub || NULL == in_out_sopc_buffer || in_out_sopc_buffer->data != NULL)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_ReturnStatus result = SOPC_STATUS_OK;
+
+    switch (in_itf)
+    {
+    case SOPC_PIN_DIRECTION_IN:
+        if (in_pin >= in_sub->inputs.nbInputs)
+        {
+            result = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+        break;
+    case SOPC_PIN_DIRECTION_OUT:
+        if (in_pin >= in_sub->outputs.nbOutputs)
+        {
+            result = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+        break;
+    default:
+        result = SOPC_STATUS_INVALID_PARAMETERS;
+        break;
+    }
+    SOPC_MsgBox_DataHandle* pDataHandle = NULL;
+
+    if (SOPC_STATUS_OK == result)
+    {
+        switch (in_itf)
+        {
+        case SOPC_PIN_DIRECTION_OUT:
+            pDataHandle = in_sub->outputs.pDataHandle[in_pin];
+            break;
+        case SOPC_PIN_DIRECTION_IN:
+            pDataHandle = in_sub->inputs.pDataHandle[in_pin];
+            break;
+        default:
+            result = SOPC_STATUS_INVALID_PARAMETERS;
+            break;
+        }
+    }
+
+    // Try initialization of data handle
+    uint8_t* buffer = NULL;
+    uint32_t maximumAllowedSize = 0;
+
+    result = SOPC_MsgBox_DataHandle_Initialize(pDataHandle);
+
+    if (SOPC_STATUS_OK == result)
+    {
+        result = SOPC_MsgBox_DataHandle_GetDataEvt(pDataHandle,          //
+                                                   &buffer,              //
+                                                   &maximumAllowedSize); //
+    }
+
+    if (SOPC_STATUS_OK == result)
+    {
+        in_out_sopc_buffer->maximum_size = maximumAllowedSize;
+        in_out_sopc_buffer->initial_size = maximumAllowedSize;
+        in_out_sopc_buffer->current_size = maximumAllowedSize;
+        in_out_sopc_buffer->length = 0;
+        in_out_sopc_buffer->position = 0;
+        in_out_sopc_buffer->data = buffer;
+    }
+    else
+    {
+        in_out_sopc_buffer->maximum_size = 0;
+        in_out_sopc_buffer->current_size = 0;
+        in_out_sopc_buffer->initial_size = 0;
+        in_out_sopc_buffer->length = 0;
+        in_out_sopc_buffer->position = 0;
+        in_out_sopc_buffer->data = NULL;
+    }
+
+    return result;
+}
+
+/// @brief Release direct data pointer for selected pin, without API concurrent accesses protection.
+/// @param [in] in_sub RT Subscriber object
+/// @param [in] in_itf Pin direction
+/// @param [in] in_pin Pin number returned by SOPC_RT_Subscriber_Initializer_AddPin
+/// @param [inout] in_out_sopc_buffer Size field is use to update significant bytes.
+/// SOPC Buffer structure, with data pointer set to NULL on return.
+/// On entry, SOPC_Buffer data pointer is normally not NULL if GetBuffer was successful.
+/// @return SOPC_STATUS_OK if successful.
+static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Pin_WriteDataHandle_ReleaseBuffer(
+    SOPC_RT_Subscriber* in_sub,      //
+    SOPC_Pin_Direction in_itf,       //
+    uint32_t in_pin,                 //
+    SOPC_Buffer* in_out_sopc_buffer) //
+{
+    if (NULL == in_sub || NULL == in_out_sopc_buffer || in_out_sopc_buffer->data == NULL)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_ReturnStatus result = SOPC_STATUS_OK;
+
+    switch (in_itf)
+    {
+    case SOPC_PIN_DIRECTION_IN:
+        if (in_pin >= in_sub->inputs.nbInputs)
+        {
+            result = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+        break;
+    case SOPC_PIN_DIRECTION_OUT:
+        if (in_pin >= in_sub->outputs.nbOutputs)
+        {
+            result = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+        break;
+    default:
+        result = SOPC_STATUS_INVALID_PARAMETERS;
+        break;
+    }
+    SOPC_MsgBox_DataHandle* pDataHandle = NULL;
+
+    if (SOPC_STATUS_OK == result)
+    {
+        switch (in_itf)
+        {
+        case SOPC_PIN_DIRECTION_OUT:
+            pDataHandle = in_sub->outputs.pDataHandle[in_pin];
+            break;
+        case SOPC_PIN_DIRECTION_IN:
+            pDataHandle = in_sub->inputs.pDataHandle[in_pin];
+            break;
+        default:
+            result = SOPC_STATUS_INVALID_PARAMETERS;
+            break;
+        }
+    }
+
+    // Try to update data size
+    bool bCancel = false;
+
+    result = SOPC_MsgBox_DataHandle_UpdateDataEvtSize(pDataHandle,                 //
+                                                      in_out_sopc_buffer->length); //
+
+    // Cancel commit in case of error
+    if (SOPC_STATUS_OK == result)
+    {
+        bCancel = false;
+    }
+    else
+    {
+        bCancel = true;
+    }
+
+    // Only result of finalize is returned. If pDataHandle is NULL, return INVALID_PARAM
+    result = SOPC_MsgBox_DataHandle_Finalize(pDataHandle, //
+                                             bCancel);    //
+
+    in_out_sopc_buffer->maximum_size = 0;
+    in_out_sopc_buffer->current_size = 0;
+    in_out_sopc_buffer->initial_size = 0;
+    in_out_sopc_buffer->length = 0;
+    in_out_sopc_buffer->position = 0;
+    in_out_sopc_buffer->data = NULL;
+
+    return result;
 }
 
 /// @brief Write pin, without API concurrent accesses protection.

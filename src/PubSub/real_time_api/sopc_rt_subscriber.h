@@ -71,6 +71,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "sopc_buffer.h"
 #include "sopc_enums.h"
 #include "sopc_mem_alloc.h"
 
@@ -247,6 +248,50 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Write(SOPC_RT_Subscriber* in_sub, //
                                                   uint32_t in_pin,            // Pin number
                                                   uint8_t* in_data,           // Data to write
                                                   uint32_t in_size);          // Size to write
+
+/// @brief Get direct data pointer for output selected pin
+/// @param [in] in_sub RT Subscriber object
+/// @param [in] in_pin Pin number returned by SOPC_RT_Subscriber_Initializer_AddPin
+/// @param [inout] in_out_sopc_buffer SOPC Buffer structure,
+/// with data pointer set to internal buffer on return.
+/// On entry, data pointer of SOPC_Buffer shall be set to NULL.
+/// @return SOPC_STATUS_OK if successful.
+SOPC_ReturnStatus SOPC_RT_Subscriber_Output_WriteDataHandle_GetBuffer(SOPC_RT_Subscriber* in_sub,       //
+                                                                      uint32_t in_pin,                  //
+                                                                      SOPC_Buffer* in_out_sopc_buffer); //
+
+/// @brief Get direct data pointer for input selected pin
+/// @param [in] in_sub RT Subscriber object
+/// @param [in] in_pin Pin number returned by SOPC_RT_Subscriber_Initializer_AddPin
+/// @param [inout] in_out_sopc_buffer SOPC Buffer structure,
+/// with data pointer set to internal buffer on return.
+/// On entry, data pointer of SOPC_Buffer shall be set to NULL.
+/// @return SOPC_STATUS_OK if successful.
+SOPC_ReturnStatus SOPC_RT_Subscriber_Input_WriteDataHandle_GetBuffer(SOPC_RT_Subscriber* in_sub,       //
+                                                                     uint32_t in_pin,                  //
+                                                                     SOPC_Buffer* in_out_sopc_buffer); //
+
+/// @brief Release direct data pointer for output selected pin, without API concurrent accesses protection.
+/// @param [in] in_sub RT Subscriber object
+/// @param [in] in_pin Pin number returned by SOPC_RT_Subscriber_Initializer_AddPin
+/// @param [inout] in_out_sopc_buffer Size field is use to update significant bytes.
+/// SOPC Buffer structure, with data pointer set to NULL on return.
+/// On entry, SOPC_Buffer data pointer is normally not NULL if GetBuffer was successful.
+/// @return SOPC_STATUS_OK if successful.
+SOPC_ReturnStatus SOPC_RT_Subscriber_Output_WriteDataHandle_ReleaseBuffer(SOPC_RT_Subscriber* in_sub,       //
+                                                                          uint32_t in_pin,                  //
+                                                                          SOPC_Buffer* in_out_sopc_buffer); //
+
+/// @brief Release direct data pointer for input selected pin, without API concurrent accesses protection.
+/// @param [in] in_sub RT Subscriber object
+/// @param [in] in_pin Pin number returned by SOPC_RT_Subscriber_Initializer_AddPin
+/// @param [inout] in_out_sopc_buffer Size field is use to update significant bytes.
+/// SOPC Buffer structure, with data pointer set to NULL on return.
+/// On entry, SOPC_Buffer data pointer is normally not NULL if GetBuffer was successful.
+/// @return SOPC_STATUS_OK if successful.
+SOPC_ReturnStatus SOPC_RT_Subscriber_Input_WriteDataHandle_ReleaseBuffer(SOPC_RT_Subscriber* in_sub,       //
+                                                                         uint32_t in_pin,                  //
+                                                                         SOPC_Buffer* in_out_sopc_buffer); //
 
 /// @brief Heart beat. Use to read each input.
 /// For each read input, user callback is invoked.
