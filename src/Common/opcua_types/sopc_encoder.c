@@ -230,7 +230,7 @@ SOPC_ReturnStatus SOPC_Boolean_Read(SOPC_Boolean* value, SOPC_Buffer* buf, uint3
     status = SOPC_Byte_Read(value, buf, nestedStructLevel);
     if (SOPC_STATUS_OK == status)
     {
-        if (*value != false)
+        if (false != *value)
         {
             // Decoder should use 1 as True value
             *value = 1;
@@ -259,7 +259,7 @@ SOPC_ReturnStatus SOPC_SByte_Write(const SOPC_SByte* value, SOPC_Buffer* buf, ui
     nestedStructLevel++;
     status = SOPC_Buffer_Write(buf, (const SOPC_Byte*) value, 1);
 
-    if (status != SOPC_STATUS_OK)
+    if (SOPC_STATUS_OK != status)
     {
         status = SOPC_STATUS_OUT_OF_MEMORY == status ? SOPC_STATUS_WOULD_BLOCK : SOPC_STATUS_ENCODING_ERROR;
     }
@@ -286,7 +286,7 @@ SOPC_ReturnStatus SOPC_SByte_Read(SOPC_SByte* value, SOPC_Buffer* buf, uint32_t 
     nestedStructLevel++;
     status = SOPC_Buffer_Read((SOPC_Byte*) value, buf, 1);
 
-    if (status != SOPC_STATUS_OK)
+    if (SOPC_STATUS_OK != status)
     {
         status = SOPC_STATUS_ENCODING_ERROR;
     }
@@ -316,7 +316,7 @@ SOPC_ReturnStatus SOPC_Int16_Write(const int16_t* value, SOPC_Buffer* buf, uint3
     SOPC_EncodeDecode_Int16(&encodedValue);
     status = SOPC_Buffer_Write(buf, (SOPC_Byte*) &encodedValue, 2);
 
-    if (status != SOPC_STATUS_OK)
+    if (SOPC_STATUS_OK != status)
     {
         status = SOPC_STATUS_OUT_OF_MEMORY == status ? SOPC_STATUS_WOULD_BLOCK : SOPC_STATUS_ENCODING_ERROR;
     }
@@ -378,7 +378,7 @@ SOPC_ReturnStatus SOPC_UInt16_Write(const uint16_t* value, SOPC_Buffer* buf, uin
     SOPC_EncodeDecode_UInt16(&encodedValue);
     status = SOPC_Buffer_Write(buf, (SOPC_Byte*) &encodedValue, 2);
 
-    if (status != SOPC_STATUS_OK)
+    if (SOPC_STATUS_OK != status)
     {
         status = SOPC_STATUS_OUT_OF_MEMORY == status ? SOPC_STATUS_WOULD_BLOCK : SOPC_STATUS_ENCODING_ERROR;
     }
@@ -437,7 +437,7 @@ SOPC_ReturnStatus SOPC_Int32_Write(const int32_t* value, SOPC_Buffer* buf, uint3
     SOPC_EncodeDecode_Int32(&encodedValue);
     status = SOPC_Buffer_Write(buf, (SOPC_Byte*) &encodedValue, 4);
 
-    if (status != SOPC_STATUS_OK)
+    if (SOPC_STATUS_OK != status)
     {
         status = SOPC_STATUS_OUT_OF_MEMORY == status ? SOPC_STATUS_WOULD_BLOCK : SOPC_STATUS_ENCODING_ERROR;
     }
@@ -497,7 +497,7 @@ SOPC_ReturnStatus SOPC_UInt32_Write(const uint32_t* value, SOPC_Buffer* buf, uin
     SOPC_EncodeDecode_UInt32(&encodedValue);
     status = SOPC_Buffer_Write(buf, (SOPC_Byte*) &encodedValue, 4);
 
-    if (status != SOPC_STATUS_OK)
+    if (SOPC_STATUS_OK != status)
     {
         status = SOPC_STATUS_OUT_OF_MEMORY == status ? SOPC_STATUS_WOULD_BLOCK : SOPC_STATUS_ENCODING_ERROR;
     }
@@ -556,7 +556,7 @@ SOPC_ReturnStatus SOPC_Int64_Write(const int64_t* value, SOPC_Buffer* buf, uint3
     SOPC_EncodeDecode_Int64(&encodedValue);
     status = SOPC_Buffer_Write(buf, (SOPC_Byte*) &encodedValue, 8);
 
-    if (status != SOPC_STATUS_OK)
+    if (SOPC_STATUS_OK != status)
     {
         status = SOPC_STATUS_OUT_OF_MEMORY == status ? SOPC_STATUS_WOULD_BLOCK : SOPC_STATUS_ENCODING_ERROR;
     }
@@ -616,7 +616,7 @@ SOPC_ReturnStatus SOPC_UInt64_Write(const uint64_t* value, SOPC_Buffer* buf, uin
     SOPC_EncodeDecode_UInt64(&encodedValue);
     status = SOPC_Buffer_Write(buf, (SOPC_Byte*) &encodedValue, 8);
 
-    if (status != SOPC_STATUS_OK)
+    if (SOPC_STATUS_OK != status)
     {
         status = SOPC_STATUS_OUT_OF_MEMORY == status ? SOPC_STATUS_WOULD_BLOCK : SOPC_STATUS_ENCODING_ERROR;
     }
@@ -677,7 +677,7 @@ SOPC_ReturnStatus SOPC_Float_Write(const float* value, SOPC_Buffer* buf, uint32_
     SOPC_EncodeDecode_Float(&encodedValue);
     status = SOPC_Buffer_Write(buf, (SOPC_Byte*) &encodedValue, 4);
 
-    if (status != SOPC_STATUS_OK)
+    if (SOPC_STATUS_OK != status)
     {
         status = SOPC_STATUS_OUT_OF_MEMORY == status ? SOPC_STATUS_WOULD_BLOCK : SOPC_STATUS_ENCODING_ERROR;
     }
@@ -738,7 +738,7 @@ SOPC_ReturnStatus SOPC_Double_Write(const double* value, SOPC_Buffer* buf, uint3
     SOPC_EncodeDecode_Double(&encodedValue);
     status = SOPC_Buffer_Write(buf, (SOPC_Byte*) &encodedValue, 8);
 
-    if (status != SOPC_STATUS_OK)
+    if (SOPC_STATUS_OK != status)
     {
         status = SOPC_STATUS_OUT_OF_MEMORY == status ? SOPC_STATUS_WOULD_BLOCK : SOPC_STATUS_ENCODING_ERROR;
     }
@@ -806,7 +806,7 @@ SOPC_ReturnStatus SOPC_ByteString_Write(const SOPC_ByteString* str, SOPC_Buffer*
     {
         status = SOPC_Buffer_Write(buf, str->Data, (uint32_t) str->Length);
 
-        if (status != SOPC_STATUS_OK)
+        if (SOPC_STATUS_OK != status)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY == status ? SOPC_STATUS_WOULD_BLOCK : SOPC_STATUS_ENCODING_ERROR;
         }
@@ -828,7 +828,7 @@ SOPC_ReturnStatus SOPC_ByteString_Read(SOPC_ByteString* str, SOPC_Buffer* buf, u
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     int32_t length;
-    if (NULL == str || str->Data != NULL || str->Length > 0 || NULL == buf)
+    if (NULL == str || NULL != str->Data || str->Length > 0 || NULL == buf)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -849,10 +849,10 @@ SOPC_ReturnStatus SOPC_ByteString_Read(SOPC_ByteString* str, SOPC_Buffer* buf, u
             {
                 str->Length = length;
                 str->Data = SOPC_Malloc(sizeof(SOPC_Byte) * (size_t) length);
-                if (str->Data != NULL)
+                if (NULL != str->Data)
                 {
                     status = SOPC_Buffer_Read(str->Data, buf, (uint32_t) length);
-                    if (status != SOPC_STATUS_OK)
+                    if (SOPC_STATUS_OK != status)
                     {
                         status = SOPC_STATUS_ENCODING_ERROR;
                         SOPC_Free(str->Data);
@@ -911,7 +911,7 @@ SOPC_ReturnStatus SOPC_String_Write(const SOPC_String* str, SOPC_Buffer* buf, ui
     {
         status = SOPC_Buffer_Write(buf, str->Data, (uint32_t) str->Length);
 
-        if (status != SOPC_STATUS_OK)
+        if (SOPC_STATUS_OK != status)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY == status ? SOPC_STATUS_WOULD_BLOCK : SOPC_STATUS_ENCODING_ERROR;
         }
@@ -932,7 +932,7 @@ SOPC_ReturnStatus SOPC_String_ReadWithLimitedLength(SOPC_String* str,
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     int32_t length;
-    if (NULL == str || str->Data != NULL || str->Length > 0 || NULL == buf)
+    if (NULL == str || NULL != str->Data || str->Length > 0 || NULL == buf)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -956,10 +956,10 @@ SOPC_ReturnStatus SOPC_String_ReadWithLimitedLength(SOPC_String* str,
                     str->Length = length;
                     // +1 to add '\0' character for CString compatibility
                     str->Data = SOPC_Malloc(sizeof(SOPC_Byte) * (size_t)(length + 1));
-                    if (str->Data != NULL)
+                    if (NULL != str->Data)
                     {
                         status = SOPC_Buffer_Read(str->Data, buf, (uint32_t) length);
-                        if (status != SOPC_STATUS_OK)
+                        if (SOPC_STATUS_OK != status)
                         {
                             status = SOPC_STATUS_ENCODING_ERROR;
                             SOPC_Free(str->Data);
@@ -1101,7 +1101,7 @@ SOPC_ReturnStatus SOPC_Guid_Write(const SOPC_Guid* guid, SOPC_Buffer* buf, uint3
     {
         status = SOPC_Buffer_Write(buf, &(guid->Data4[0]), 8);
     }
-    if (status != SOPC_STATUS_OK)
+    if (SOPC_STATUS_OK != status)
     {
         status = SOPC_STATUS_OUT_OF_MEMORY == status ? SOPC_STATUS_WOULD_BLOCK : SOPC_STATUS_ENCODING_ERROR;
     }
@@ -1143,7 +1143,7 @@ SOPC_ReturnStatus SOPC_Guid_Read(SOPC_Guid* guid, SOPC_Buffer* buf, uint32_t nes
         status = SOPC_Buffer_Read(&(guid->Data4[0]), buf, 8);
     }
 
-    if (status != SOPC_STATUS_OK)
+    if (SOPC_STATUS_OK != status)
     {
         status = SOPC_STATUS_ENCODING_ERROR;
         SOPC_UInt32_Clear(&guid->Data1);
@@ -1193,7 +1193,7 @@ static SOPC_ReturnStatus Internal_NodeId_Write(SOPC_Buffer* buf,
                                                const SOPC_NodeId* nodeId,
                                                uint32_t nestedStructLevel)
 {
-    assert(nodeId != NULL);
+    assert(NULL != nodeId);
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     SOPC_NodeId_DataEncoding encodingType = 0x0F & encodingByte; // Eliminate flags
 
@@ -1291,7 +1291,7 @@ static SOPC_ReturnStatus Internal_NodeId_Read(SOPC_Buffer* buf,
                                               SOPC_Byte* encodingByte,
                                               uint32_t nestedStructLevel)
 {
-    assert(nodeId != NULL);
+    assert(NULL != nodeId);
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     SOPC_NodeId_DataEncoding encodingType = 0x0F;
 
@@ -1359,7 +1359,7 @@ static SOPC_ReturnStatus Internal_NodeId_Read(SOPC_Buffer* buf,
                 {
                     SOPC_Guid_Initialize(nodeId->Data.Guid);
                     status = SOPC_Guid_Read(nodeId->Data.Guid, buf, nestedStructLevel);
-                    if (status != SOPC_STATUS_OK)
+                    if (SOPC_STATUS_OK != status)
                     {
                         SOPC_Free(nodeId->Data.Guid);
                         nodeId->Data.Guid = NULL;
@@ -1482,7 +1482,7 @@ SOPC_ReturnStatus SOPC_ExpandedNodeId_Read(SOPC_ExpandedNodeId* expNodeId, SOPC_
         status = SOPC_UInt32_Read(&expNodeId->ServerIndex, buf, nestedStructLevel);
     }
 
-    if (status != SOPC_STATUS_OK && expNodeId != NULL)
+    if (SOPC_STATUS_OK != status && NULL != expNodeId)
     {
         SOPC_NodeId_Clear(&expNodeId->NodeId);
         SOPC_String_Clear(&expNodeId->NamespaceUri);
@@ -1514,7 +1514,7 @@ SOPC_ReturnStatus SOPC_StatusCode_Read(SOPC_StatusCode* status, SOPC_Buffer* buf
 
 static SOPC_Byte GetDiagInfoEncodingByte(const SOPC_DiagnosticInfo* diagInfo)
 {
-    assert(diagInfo != NULL);
+    assert(NULL != diagInfo);
     SOPC_Byte encodingByte = 0x00;
     if (diagInfo->SymbolicId > -1)
     {
@@ -1540,7 +1540,7 @@ static SOPC_Byte GetDiagInfoEncodingByte(const SOPC_DiagnosticInfo* diagInfo)
     { // OK status code does not provide information
         encodingByte |= SOPC_DiagInfoEncoding_InnerStatusCode;
     }
-    if (diagInfo->InnerDiagnosticInfo != NULL)
+    if (NULL != diagInfo->InnerDiagnosticInfo)
     {
         encodingByte |= SOPC_DiagInfoEncoding_InnerDianosticInfo;
     }
@@ -1558,7 +1558,7 @@ static SOPC_ReturnStatus SOPC_DiagnosticInfo_Write_Internal(const SOPC_Diagnosti
 {
     SOPC_Byte encodingByte = 0x00;
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (diagInfo != NULL)
+    if (NULL != diagInfo)
     {
         status = SOPC_STATUS_OK;
         encodingByte = GetDiagInfoEncodingByte(diagInfo);
@@ -1635,7 +1635,7 @@ static SOPC_ReturnStatus SOPC_DiagnosticInfo_Read_Internal(SOPC_DiagnosticInfo* 
 {
     SOPC_Byte encodingByte = 0x00;
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (diagInfo != NULL)
+    if (NULL != diagInfo)
     {
         status = SOPC_Byte_Read(&encodingByte, buf, 0);
     }
@@ -1691,7 +1691,7 @@ static SOPC_ReturnStatus SOPC_DiagnosticInfo_Read_Internal(SOPC_DiagnosticInfo* 
             }
         }
     }
-    if (status != SOPC_STATUS_OK && diagInfo != NULL)
+    if (SOPC_STATUS_OK != status && NULL != diagInfo)
     {
         SOPC_Int32_Clear(&diagInfo->SymbolicId);
         SOPC_Int32_Clear(&diagInfo->NamespaceUri);
@@ -1773,7 +1773,7 @@ SOPC_ReturnStatus SOPC_QualifiedName_Read(SOPC_QualifiedName* qname, SOPC_Buffer
         status = SOPC_String_Read(&qname->Name, buf, nestedStructLevel);
     }
 
-    if (status != SOPC_STATUS_OK && qname != NULL)
+    if (SOPC_STATUS_OK != status && NULL != qname)
     {
         SOPC_UInt16_Clear(&qname->NamespaceIndex);
         // No clear for last since it should manage it itself in case of failure
@@ -1784,7 +1784,7 @@ SOPC_ReturnStatus SOPC_QualifiedName_Read(SOPC_QualifiedName* qname, SOPC_Buffer
 
 static SOPC_Byte GetLocalizedTextEncodingByte(const SOPC_LocalizedText* ltext)
 {
-    assert(ltext != NULL);
+    assert(NULL != ltext);
     SOPC_Byte encodingByte = 0;
     if (ltext->defaultLocale.Length > 0)
     {
@@ -1864,7 +1864,7 @@ SOPC_ReturnStatus SOPC_LocalizedText_Read(SOPC_LocalizedText* localizedText,
         status = SOPC_String_Read(&localizedText->defaultText, buf, nestedStructLevel);
     }
 
-    if (status != SOPC_STATUS_OK && localizedText != NULL)
+    if (SOPC_STATUS_OK != status && NULL != localizedText)
     {
         SOPC_String_Clear(&localizedText->defaultLocale);
         // No clear for last since it should manage it itself in case of failure
@@ -2043,7 +2043,7 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_B
                 /* Allocation size value comes from types defined in Toolkit and is considered as not excessive
                  * value */
                 extObj->Body.Object.Value = SOPC_Malloc(extObj->Body.Object.ObjType->AllocationSize);
-                if (extObj->Body.Object.Value != NULL)
+                if (NULL != extObj->Body.Object.Value)
                 {
                     extObj->Body.Object.ObjType->Initialize(extObj->Body.Object.Value);
                     status = extObj->Body.Object.ObjType->Decode(extObj->Body.Object.Value, buf, nestedStructLevel);
@@ -2068,7 +2068,7 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_B
         }
     }
 
-    if (status != SOPC_STATUS_OK && extObj != NULL)
+    if (SOPC_STATUS_OK != status && NULL != extObj)
     {
         SOPC_NodeId_Clear(&extObj->TypeId.NodeId);
         // No clear for last since it should manage it itself in case of failure
@@ -2207,7 +2207,7 @@ static SOPC_ReturnStatus SOPC_Write_Array_WithNestedLevel(SOPC_Buffer* buf,
 
 static SOPC_Byte GetVariantEncodingMask(const SOPC_Variant* variant)
 {
-    assert(variant != NULL);
+    assert(NULL != variant);
     SOPC_Byte encodingByte = (SOPC_Byte) variant->BuiltInTypeId;
     if (variant->ArrayType == SOPC_VariantArrayType_Matrix)
     {
@@ -2644,11 +2644,11 @@ static SOPC_ReturnStatus ReadVariantNonArrayBuiltInType(SOPC_Buffer* buf,
             break;
         case SOPC_Guid_Id:
             val->Guid = SOPC_Malloc(sizeof(SOPC_Guid));
-            if (val->Guid != NULL)
+            if (NULL != val->Guid)
             {
                 SOPC_Guid_Initialize(val->Guid);
                 status = SOPC_Guid_Read(val->Guid, buf, nestedStructLevel);
-                if (status != SOPC_STATUS_OK)
+                if (SOPC_STATUS_OK != status)
                 {
                     SOPC_Free(val->Guid);
                     val->Guid = NULL;
@@ -2667,11 +2667,11 @@ static SOPC_ReturnStatus ReadVariantNonArrayBuiltInType(SOPC_Buffer* buf,
             break;
         case SOPC_NodeId_Id:
             val->NodeId = SOPC_Malloc(sizeof(SOPC_NodeId));
-            if (val->NodeId != NULL)
+            if (NULL != val->NodeId)
             {
                 SOPC_NodeId_Initialize(val->NodeId);
                 status = SOPC_NodeId_Read(val->NodeId, buf, nestedStructLevel);
-                if (status != SOPC_STATUS_OK)
+                if (SOPC_STATUS_OK != status)
                 {
                     SOPC_Free(val->NodeId);
                     val->NodeId = NULL;
@@ -2684,11 +2684,11 @@ static SOPC_ReturnStatus ReadVariantNonArrayBuiltInType(SOPC_Buffer* buf,
             break;
         case SOPC_ExpandedNodeId_Id:
             val->ExpNodeId = SOPC_Malloc(sizeof(SOPC_ExpandedNodeId));
-            if (val->ExpNodeId != NULL)
+            if (NULL != val->ExpNodeId)
             {
                 SOPC_ExpandedNodeId_Initialize(val->ExpNodeId);
                 status = SOPC_ExpandedNodeId_Read(val->ExpNodeId, buf, nestedStructLevel);
-                if (status != SOPC_STATUS_OK)
+                if (SOPC_STATUS_OK != status)
                 {
                     SOPC_Free(val->ExpNodeId);
                     val->ExpNodeId = NULL;
@@ -2704,11 +2704,11 @@ static SOPC_ReturnStatus ReadVariantNonArrayBuiltInType(SOPC_Buffer* buf,
             break;
         case SOPC_QualifiedName_Id:
             val->Qname = SOPC_Malloc(sizeof(SOPC_QualifiedName));
-            if (val->Qname != NULL)
+            if (NULL != val->Qname)
             {
                 SOPC_QualifiedName_Initialize(val->Qname);
                 status = SOPC_QualifiedName_Read(val->Qname, buf, nestedStructLevel);
-                if (status != SOPC_STATUS_OK)
+                if (SOPC_STATUS_OK != status)
                 {
                     SOPC_Free(val->Qname);
                     val->Qname = NULL;
@@ -2721,11 +2721,11 @@ static SOPC_ReturnStatus ReadVariantNonArrayBuiltInType(SOPC_Buffer* buf,
             break;
         case SOPC_LocalizedText_Id:
             val->LocalizedText = SOPC_Malloc(sizeof(SOPC_LocalizedText));
-            if (val->LocalizedText != NULL)
+            if (NULL != val->LocalizedText)
             {
                 SOPC_LocalizedText_Initialize(val->LocalizedText);
                 status = SOPC_LocalizedText_Read(val->LocalizedText, buf, nestedStructLevel);
-                if (status != SOPC_STATUS_OK)
+                if (SOPC_STATUS_OK != status)
                 {
                     SOPC_Free(val->LocalizedText);
                     val->LocalizedText = NULL;
@@ -2738,11 +2738,11 @@ static SOPC_ReturnStatus ReadVariantNonArrayBuiltInType(SOPC_Buffer* buf,
             break;
         case SOPC_ExtensionObject_Id:
             val->ExtObject = SOPC_Malloc(sizeof(SOPC_ExtensionObject));
-            if (val->ExtObject != NULL)
+            if (NULL != val->ExtObject)
             {
                 SOPC_ExtensionObject_Initialize(val->ExtObject);
                 status = SOPC_ExtensionObject_Read(val->ExtObject, buf, nestedStructLevel);
-                if (status != SOPC_STATUS_OK)
+                if (SOPC_STATUS_OK != status)
                 {
                     SOPC_Free(val->ExtObject);
                     val->ExtObject = NULL;
@@ -2755,11 +2755,11 @@ static SOPC_ReturnStatus ReadVariantNonArrayBuiltInType(SOPC_Buffer* buf,
             break;
         case SOPC_DataValue_Id:
             val->DataValue = SOPC_Malloc(sizeof(SOPC_DataValue));
-            if (val->DataValue != NULL)
+            if (NULL != val->DataValue)
             {
                 SOPC_DataValue_Initialize(val->DataValue);
                 status = SOPC_DataValue_ReadAux_Nested((void*) val->DataValue, buf, nestedStructLevel);
-                if (status != SOPC_STATUS_OK)
+                if (SOPC_STATUS_OK != status)
                 {
                     SOPC_Free(val->DataValue);
                     val->DataValue = NULL;
@@ -2777,11 +2777,11 @@ static SOPC_ReturnStatus ReadVariantNonArrayBuiltInType(SOPC_Buffer* buf,
             break;
         case SOPC_DiagnosticInfo_Id:
             val->DiagInfo = SOPC_Malloc(sizeof(SOPC_DiagnosticInfo));
-            if (val->DiagInfo != NULL)
+            if (NULL != val->DiagInfo)
             {
                 SOPC_DiagnosticInfo_Initialize(val->DiagInfo);
                 status = SOPC_DiagnosticInfo_Read(val->DiagInfo, buf, nestedStructLevel);
-                if (status != SOPC_STATUS_OK)
+                if (SOPC_STATUS_OK != status)
                 {
                     SOPC_DiagnosticInfo_Clear(val->DiagInfo);
                     SOPC_Free(val->DiagInfo);
@@ -3028,7 +3028,7 @@ static SOPC_ReturnStatus SOPC_Variant_Read_Internal(SOPC_Variant* variant, SOPC_
                 {
                     matrixLength = 0;
                 }
-                if (variant->Value.Matrix.ArrayDimensions != NULL)
+                if (NULL != variant->Value.Matrix.ArrayDimensions)
                 {
                     int32_t idx = 0;
                     for (idx = 0; idx < variant->Value.Matrix.Dimensions && SOPC_STATUS_OK == status; idx++)
@@ -3108,7 +3108,7 @@ static SOPC_ReturnStatus SOPC_Variant_Read_Internal(SOPC_Variant* variant, SOPC_
         }
     }
 
-    if (status != SOPC_STATUS_OK && variant != NULL)
+    if (SOPC_STATUS_OK != status && NULL != variant)
     {
         variant->BuiltInTypeId = SOPC_Null_Id; // encoding byte read assignement
         SOPC_Int32_Clear(&variant->Value.Matrix.Dimensions);
@@ -3129,13 +3129,13 @@ SOPC_ReturnStatus SOPC_Variant_Read(SOPC_Variant* variant, SOPC_Buffer* buf, uin
 
 static SOPC_Byte GetDataValueEncodingMask(const SOPC_DataValue* dataValue)
 {
-    assert(dataValue != NULL);
+    assert(NULL != dataValue);
     SOPC_Byte mask = 0;
     if (dataValue->Value.BuiltInTypeId != SOPC_Null_Id && dataValue->Value.BuiltInTypeId <= SOPC_BUILTINID_MAX)
     {
         mask |= SOPC_DataValue_NotNullValue;
     }
-    if (dataValue->Status != SOPC_STATUS_OK)
+    if (SOPC_STATUS_OK != dataValue->Status)
     {
         mask |= SOPC_DataValue_NotGoodStatusCode;
     }
@@ -3295,7 +3295,7 @@ static SOPC_ReturnStatus SOPC_DataValue_Read_Internal(SOPC_DataValue* dataValue,
         dataValue->ServerPicoSeconds = 0;
     }
 
-    if (status != SOPC_STATUS_OK)
+    if (SOPC_STATUS_OK != status)
     {
         SOPC_Variant_Clear(&dataValue->Value);
         SOPC_StatusCode_Clear(&dataValue->Status);
@@ -3342,7 +3342,7 @@ SOPC_ReturnStatus SOPC_Read_Array(SOPC_Buffer* buf,
     nestedStructLevel++;
     status = SOPC_Int32_Read(noOfElts, buf, nestedStructLevel);
 
-    if (status != SOPC_STATUS_OK)
+    if (SOPC_STATUS_OK != status)
     {
         return status;
     }
@@ -3441,10 +3441,10 @@ SOPC_ReturnStatus SOPC_EncodeMsg_Type_Header_Body(SOPC_Buffer* buf,
     SOPC_NodeId nodeId;
     SOPC_NodeId_Initialize(&nodeId);
 
-    if (buf != NULL &&
+    if (NULL != buf &&
         // Body cannot be null except in case of service fault message
-        (msgBody != NULL || encType->TypeId == OpcUaId_ServiceFault) && encType != NULL && headerType != NULL &&
-        msgHeader != NULL)
+        (NULL != msgBody || encType->TypeId == OpcUaId_ServiceFault) && NULL != encType && NULL != headerType &&
+        NULL != msgHeader)
     {
         nodeId.IdentifierType = SOPC_IdentifierType_Numeric;
         if (NULL == encType->NamespaceUri)
@@ -3476,7 +3476,7 @@ SOPC_ReturnStatus SOPC_MsgBodyType_Read(SOPC_Buffer* buf, SOPC_EncodeableType** 
     SOPC_EncodeableType* recEncType = NULL;
     SOPC_NodeId nodeId;
     SOPC_NodeId_Initialize(&nodeId);
-    if (buf != NULL)
+    if (NULL != buf)
     {
         status = SOPC_NodeId_Read(&nodeId, buf, 0);
     }
@@ -3504,10 +3504,10 @@ SOPC_ReturnStatus SOPC_DecodeMsg_HeaderOrBody(SOPC_Buffer* buffer,
                                               void** encodeableObj)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (buffer != NULL && encodeableObj != NULL && msgEncType != NULL)
+    if (NULL != buffer && NULL != encodeableObj && NULL != msgEncType)
     {
         *encodeableObj = SOPC_Malloc(msgEncType->AllocationSize);
-        if (*encodeableObj != NULL)
+        if (NULL != *encodeableObj)
         {
             status = msgEncType->Decode(*encodeableObj, buffer, 0);
             if (SOPC_STATUS_OK != status)
