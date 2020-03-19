@@ -570,6 +570,7 @@ struct SOPC_MsgBox_DataHandle
     tMsgBoxFifoHeader* pHeader;     ///< Pointer on buffer where fifo header start
     tMsgBoxFifoEvents* pEvtsBuffer; ///< Pointer on buffer where event buffer start
     uint8_t* pDataToUpdate;         ///< Pointer on buffer where event data buffer start
+    uint8_t* pData;                 ///< Pointer on buffer position 0, used to deal with wrap around use case.
 };
 
 /// @brief Message box data handle creation. Used to directly write into event buffer.
@@ -644,6 +645,7 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Initialize(SOPC_MsgBox_DataHandle* pDat
             pDataHandle->pHeader = pHead;
             pDataHandle->pEvtsBuffer = pEvts;
             pDataHandle->pDataToUpdate = pData + pHead->idxWrData;
+            pDataHandle->pData = pData;
         }
 
         // Status set to reserved if successfull
@@ -652,6 +654,7 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Initialize(SOPC_MsgBox_DataHandle* pDat
             pDataHandle->idBuffer = UINT32_MAX;
             pDataHandle->pHeader = NULL;
             pDataHandle->pDataToUpdate = NULL;
+            pDataHandle->pData = NULL;
             pDataHandle->pEvtsBuffer = NULL;
             desiredStatus = E_MSG_BOX_INFO_SYNC_NOT_USED;
             __atomic_store(&pDataHandle->pMsgBox->lockWriter.eIsInUse, //
@@ -686,8 +689,9 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_GetDataEvt(SOPC_MsgBox_DataHandle* pDat
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
-    if (NULL == pDataHandle || NULL == pDataHandle->pDataToUpdate || NULL == pDataHandle->pEvtsBuffer ||
-        NULL == pDataHandle->pHeader || UINT32_MAX == pDataHandle->idBuffer || NULL == pDataHandle->pMsgBox)
+    if (NULL == pDataHandle || NULL == pDataHandle->pDataToUpdate || NULL == pDataHandle->pData ||
+        NULL == pDataHandle->pEvtsBuffer || NULL == pDataHandle->pHeader || UINT32_MAX == pDataHandle->idBuffer ||
+        NULL == pDataHandle->pMsgBox)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -726,8 +730,9 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_GetDataEvt(SOPC_MsgBox_DataHandle* pDat
 /// SOPC_INVALID_STATE if API is in use concurrently.
 SOPC_ReturnStatus SOPC_MsgBox_DataHandle_UpdateDataEvtSize(SOPC_MsgBox_DataHandle* pDataHandle, uint32_t size)
 {
-    if (NULL == pDataHandle || NULL == pDataHandle->pDataToUpdate || NULL == pDataHandle->pEvtsBuffer ||
-        NULL == pDataHandle->pHeader || UINT32_MAX == pDataHandle->idBuffer || NULL == pDataHandle->pMsgBox)
+    if (NULL == pDataHandle || NULL == pDataHandle->pDataToUpdate || NULL == pDataHandle->pData ||
+        NULL == pDataHandle->pEvtsBuffer || NULL == pDataHandle->pHeader || UINT32_MAX == pDataHandle->idBuffer ||
+        NULL == pDataHandle->pMsgBox)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -744,8 +749,7 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_UpdateDataEvtSize(SOPC_MsgBox_DataHandl
 
     if (bTransition)
     {
-        if (size + pDataHandle->pHeader->nbData > pDataHandle->pHeader->maxData)
-
+        if ((size > pDataHandle->pHeader->maxData) || (size < 1))
         {
             result = SOPC_STATUS_NOK;
         }
@@ -755,8 +759,8 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_UpdateDataEvtSize(SOPC_MsgBox_DataHandl
         {
             uint32_t iterEvent = pDataHandle->pHeader->idxWrEvt;
             uint32_t nextSize = 0;
-            while (pDataHandle->pHeader->nbData + size > pDataHandle->pHeader->maxData &&
-                   pDataHandle->pHeader->nbEvts + 1 > pDataHandle->pHeader->maxEvts)
+            while (((pDataHandle->pHeader->nbData + size) > pDataHandle->pHeader->maxData) &&
+                   ((pDataHandle->pHeader->nbEvts + 1) > pDataHandle->pHeader->maxEvts))
             {
                 nextSize = pDataHandle->pEvtsBuffer[iterEvent].size;
                 // Delete record informations
@@ -790,13 +794,13 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_UpdateDataEvtSize(SOPC_MsgBox_DataHandl
             pDataHandle->pHeader->nbData += size;
 
             // If wrap around, calculate overhead size and copy it from offset 0 to overhead size.
-            if (size + offset >= pDataHandle->pHeader->maxData)
+            if ((size + offset) >= pDataHandle->pHeader->maxData)
             {
                 uint32_t sizeToDup = size - (pDataHandle->pHeader->maxData - offset);
 
                 for (uint32_t i = 0; i < sizeToDup; i++)
                 {
-                    pDataHandle->pDataToUpdate[i] = pDataHandle->pDataToUpdate[pDataHandle->pHeader->maxData + i];
+                    pDataHandle->pData[i] = pDataHandle->pData[pDataHandle->pHeader->maxData + i];
                 }
             }
         }
@@ -816,8 +820,9 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_UpdateDataEvtSize(SOPC_MsgBox_DataHandl
 /// SOPC_INVALID_STATE if API is in use concurrently.
 SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Finalize(SOPC_MsgBox_DataHandle* pDataHandle, bool bCancel)
 {
-    if (NULL == pDataHandle || NULL == pDataHandle->pDataToUpdate || NULL == pDataHandle->pEvtsBuffer ||
-        NULL == pDataHandle->pHeader || UINT32_MAX == pDataHandle->idBuffer || NULL == pDataHandle->pMsgBox)
+    if (NULL == pDataHandle || NULL == pDataHandle->pDataToUpdate || NULL == pDataHandle->pData ||
+        NULL == pDataHandle->pEvtsBuffer || NULL == pDataHandle->pHeader || UINT32_MAX == pDataHandle->idBuffer ||
+        NULL == pDataHandle->pMsgBox)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -842,6 +847,7 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Finalize(SOPC_MsgBox_DataHandle* pDataH
         pDataHandle->idBuffer = UINT32_MAX;
         pDataHandle->pHeader = NULL;
         pDataHandle->pDataToUpdate = NULL;
+        pDataHandle->pData = NULL;
         pDataHandle->pEvtsBuffer = NULL;
 
         desiredStatus = E_MSG_BOX_INFO_SYNC_NOT_USED;
