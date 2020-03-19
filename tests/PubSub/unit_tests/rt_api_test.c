@@ -1097,6 +1097,8 @@ static int SOPC_TEST_MSG_BOX(void)
             }
         }
 
+        SOPC_MsgBox_DataHandle_Destroy(&pDataHandle);
+
         SOPC_Sleep(PERIOD_MS_READER_200MS);
 
         SOPC_MsgBox_Reset(myMsgBox);
