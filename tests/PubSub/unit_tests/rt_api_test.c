@@ -739,6 +739,176 @@ static int SOPC_TEST_RT_SUBSCRIBER(void)
     return res;
 }
 
+static int SOPC_TEST_RT_SUBSCRIBER_WITH_DATAHANDLE_WRITER(void)
+{
+    int res = 0;
+    SOPC_ReturnStatus result = SOPC_STATUS_OK;
+    bQuit = false;
+    uint32_t clientId1 = 0;
+    uint32_t clientId2 = 1;
+    cptMsgRead2 = 0;
+    cptMsgRead1 = 0;
+
+    printf("\r\nRT SUBSCRIBER CREATION ...\r\n");
+    myRTSub = SOPC_RT_Subscriber_Create();
+
+    if (myRTSub == NULL)
+    {
+        result = SOPC_STATUS_NOK;
+    }
+
+    if (result == SOPC_STATUS_OK)
+    {
+        printf("\r\nRT SUBSCRIBER INITIALIZER CREATION ...\r\n");
+        myRTSubInit = SOPC_RT_Subscriber_Initializer_Create(cbBeatHeartCallback, NULL);
+        if (myRTSubInit == NULL)
+        {
+            result = SOPC_STATUS_NOK;
+        }
+    }
+
+    if (result == SOPC_STATUS_OK)
+    {
+        printf("\r\nRT SUBSCRIBER INITIALIZER ADD INPUT ...\r\n");
+        result = SOPC_RT_Subscriber_Initializer_AddInput(myRTSubInit, 16, 256, SOPC_PIN_MODE_GET_NORMAL, NULL,
+                                                         &input_num[0]);
+    }
+
+    if (result == SOPC_STATUS_OK)
+    {
+        printf("\r\nRT SUBSCRIBER INITIALIZER ADD OUTPUT ...\r\n");
+        result = SOPC_RT_Subscriber_Initializer_AddOutput(myRTSubInit, 2, 16, 256, &output_num[0]);
+    }
+
+    if (result == SOPC_STATUS_OK)
+    {
+        printf("\r\nRT SUBSCRIBER INITIALIZER ADD OUTPUT ...\r\n");
+        result = SOPC_RT_Subscriber_Initializer_AddOutput(myRTSubInit, 2, 16, 256, &output_num[1]);
+    }
+
+    if (SOPC_STATUS_OK == result)
+    {
+        printf("\r\nRT SUBSCRIBER : Beat heart thread launch\r\n");
+        // Thread slept each 400ms
+        SOPC_Thread_Create(&handleThreadBeatHeatSubscriber, cbBeatHeartThreadCallback, NULL, "Test thread 1");
+        if (handleThreadBeatHeatSubscriber == (Thread) NULL)
+        {
+            result = SOPC_STATUS_NOK;
+        }
+    }
+
+    if (SOPC_STATUS_OK == result)
+    {
+        printf("\r\nRT SUBSCRIBER : Reader 0\r\n");
+        // Thread slept each 400ms
+        SOPC_Thread_Create(&handleThreadOutputReader1, cbSubscriberReaderCallback, &clientId1, "Test read 0");
+        if (handleThreadOutputReader1 == (Thread) NULL)
+        {
+            result = SOPC_STATUS_NOK;
+        }
+    }
+
+    if (SOPC_STATUS_OK == result)
+    {
+        printf("\r\nRT SUBSCRIBER : Reader 1\r\n");
+        // Thread slept each 10ms
+        SOPC_Thread_Create(&handleThreadOutputReader2, cbSubscriberReaderCallback, &clientId2, "Test read 1");
+        if (handleThreadOutputReader2 == (Thread) NULL)
+        {
+            result = SOPC_STATUS_NOK;
+        }
+    }
+
+    printf("\r\nRT SUBSCRIBER : Wait 1 s before init\r\n");
+    SOPC_Sleep(1000);
+
+    if (result == SOPC_STATUS_OK)
+    {
+        printf("\r\nRT SUBSCRIBER INITIALIZATION ...\r\n");
+        result = SOPC_RT_Subscriber_Initialize(myRTSub, myRTSubInit);
+    }
+
+    if (result == SOPC_STATUS_OK)
+    {
+        printf("\r\nRT SUBSCRIBER TEST WITH WRITE DATA HANDLE ...\r\n");
+
+        for (volatile uint32_t i = 0; (i < 50) && (SOPC_STATUS_OK == result); i++)
+        {
+            // Create SOPC Buffer structure with data pointer set to NULL
+            SOPC_Buffer buffer;
+            memset(&buffer, 0, sizeof(SOPC_Buffer));
+
+            // Initialize the data pointer and max allowed data
+            result = SOPC_RT_Subscriber_Input_WriteDataHandle_GetBuffer(myRTSub,      //
+                                                                        input_num[0], //
+                                                                        &buffer);     //
+            if (SOPC_STATUS_OK == result)
+            {
+                // If successful, work on the buffer
+                sprintf(msgWrite1, "Hello world %d", i);
+                result = SOPC_Buffer_Write(&buffer, (const uint8_t*) msgWrite1, (uint32_t)(strlen(msgWrite1) + 1));
+                // printf("\r\nSOPC_Buffer_Write result = %d\r\n",result);
+                //                result = SOPC_RT_Subscriber_Input_Write(myRTSub,                            //
+                //                        input_num[0],                       //
+                //                        (uint8_t*) msgWrite1,               //
+                //                        (uint32_t)(strlen(msgWrite1) + 1)); //
+
+                // Shall be always released.
+                SOPC_RT_Subscriber_Input_WriteDataHandle_ReleaseBuffer(myRTSub, input_num[0], &buffer);
+            }
+
+            SOPC_Sleep(100);
+        }
+    }
+
+    SOPC_Sleep(1000);
+
+    while (SOPC_RT_Subscriber_DeInitialize(myRTSub) == SOPC_STATUS_INVALID_STATE)
+    {
+        printf("\r\nRT SUBSCRIBER DE INITIALIZATION FAILED, RETRY\r\n");
+        SOPC_Sleep(10);
+    }
+
+    if (!(cptMsgRead1 == cptMsgRead2 && cptMsgRead1 == 100))
+    {
+        result = SOPC_STATUS_NOK;
+    }
+
+    bQuit = true;
+
+    if (handleThreadBeatHeatSubscriber != (Thread) NULL)
+    {
+        SOPC_Thread_Join(handleThreadBeatHeatSubscriber);
+        handleThreadBeatHeatSubscriber = (Thread) NULL;
+    }
+    if (handleThreadOutputReader1 != (Thread) NULL)
+    {
+        SOPC_Thread_Join(handleThreadOutputReader1);
+        handleThreadOutputReader1 = (Thread) NULL;
+    }
+    if (handleThreadOutputReader2 != (Thread) NULL)
+    {
+        SOPC_Thread_Join(handleThreadOutputReader2);
+        handleThreadOutputReader2 = (Thread) NULL;
+    }
+
+    SOPC_RT_Subscriber_Initializer_Destroy(&myRTSubInit);
+    SOPC_RT_Subscriber_Destroy(&myRTSub);
+
+    if (result == SOPC_STATUS_NOK)
+    {
+        res = -1;
+    }
+    else
+    {
+        res = 0;
+    }
+
+    printf("\r\nRT SUBSCRIBER TEST RESULT = %d\r\n", res);
+
+    return res;
+}
+
 /*** ***/
 
 static int SOPC_TEST_RT_PUBLISHER(void)
@@ -1070,7 +1240,7 @@ static int SOPC_TEST_MSG_BOX(void)
         if (pDataHandle != NULL)
         {
             // Set data each 50 ms
-            for (volatile uint32_t i = 0; i < 10 && result == SOPC_STATUS_OK; i++)
+            for (volatile uint32_t i = 0; i < 80 && result == SOPC_STATUS_OK; i++)
             {
                 result = SOPC_MsgBox_DataHandle_Initialize(pDataHandle);
                 if (SOPC_STATUS_OK == result)
@@ -1107,7 +1277,7 @@ static int SOPC_TEST_MSG_BOX(void)
 
         SOPC_Sleep(PERIOD_MS_READER_200MS);
 
-        if ((cptMsgRead1 == cptMsgRead2) && (cptMsgRead1 == 10))
+        if ((cptMsgRead1 == cptMsgRead2) && (cptMsgRead1 == 80))
         {
             res = 0;
         }
@@ -1568,6 +1738,10 @@ int main(void)
     if (res == 0)
     {
         res = SOPC_TEST_RT_SUBSCRIBER();
+    }
+    if (res == 0)
+    {
+        res = SOPC_TEST_RT_SUBSCRIBER_WITH_DATAHANDLE_WRITER();
     }
 
     return res;
