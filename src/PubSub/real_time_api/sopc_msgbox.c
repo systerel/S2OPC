@@ -857,13 +857,25 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Finalize(SOPC_MsgBox_DataHandle* pDataH
 /// @return SOPC_STATUS_OK if valid handle, well finalized.
 SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Destroy(SOPC_MsgBox_DataHandle** ppDataHandle)
 {
+    if (ppDataHandle == NULL)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
     SOPC_ReturnStatus result = SOPC_STATUS_INVALID_PARAMETERS;
     SOPC_MsgBox_DataHandle* pDataHandle = *ppDataHandle;
-    if (NULL == pDataHandle || NULL == pDataHandle->pMsgBox || pDataHandle->idBuffer != UINT32_MAX)
+    if (NULL != pDataHandle)
     {
-        SOPC_Free(pDataHandle);
-        *ppDataHandle = NULL;
-        result = SOPC_STATUS_OK;
+        if (pDataHandle->idBuffer == UINT32_MAX)
+        {
+            SOPC_Free(pDataHandle);
+            *ppDataHandle = NULL;
+            result = SOPC_STATUS_OK;
+        }
+        else
+        {
+            result = SOPC_STATUS_INVALID_STATE;
+        }
     }
     return result;
 }
