@@ -121,11 +121,11 @@ static SOPC_ReturnStatus SOPC_MsgBox_ResetFifoHeader(tMsgBoxFifoHeader* pFifoHea
                                                      tMsgBoxFifoEvents* pFifoEvts,   // Buffer of events
                                                      uint8_t* pFifoData);            // Buffer of data
 
-static SOPC_ReturnStatus SOPC_MsgBox_UpdateFifoHeader(tMsgBoxFifoHeader* pFifoHeader, // Header structure
-                                                      tMsgBoxFifoEvents* pFifoEvts,   // Buffer of events
-                                                      uint8_t* pFifoData,             // Buffer of data
-                                                      uint8_t* pData,                 // Data to push
-                                                      uint32_t size)                  // Size of data to push
+static SOPC_ReturnStatus SOPC_MsgBox_UpdateFifoHeader(tMsgBoxFifoHeader* pFifoHeader, //
+                                                      tMsgBoxFifoEvents* pFifoEvts,   //
+                                                      uint8_t* pFifoData,             //
+                                                      uint8_t* pData,                 //
+                                                      uint32_t size)                  //
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
@@ -199,9 +199,9 @@ static SOPC_ReturnStatus SOPC_MsgBox_UpdateFifoHeader(tMsgBoxFifoHeader* pFifoHe
     return result;
 }
 
-static SOPC_ReturnStatus SOPC_MsgBox_ResetFifoHeader(tMsgBoxFifoHeader* pFifoHeader, // Header structure
-                                                     tMsgBoxFifoEvents* pFifoEvts,   // Buffer of events
-                                                     uint8_t* pFifoData)             // Buffer of data
+static SOPC_ReturnStatus SOPC_MsgBox_ResetFifoHeader(tMsgBoxFifoHeader* pFifoHeader, //
+                                                     tMsgBoxFifoEvents* pFifoEvts,   //
+                                                     uint8_t* pFifoData)             //
 
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
@@ -270,11 +270,10 @@ static void SOPC_MsgBox_DeInitialize(SOPC_MsgBox* pMsgBox)
     }
 }
 
-static SOPC_ReturnStatus SOPC_MsgBox_Initialize(
-    SOPC_MsgBox* pMsgBox,  // Message box object
-    uint32_t max_clients,  // Max message box concurrent client. Client identifier between 0 -> max-1
-    uint32_t max_evts,     // Max events to manage writer burst.
-    uint32_t max_data_evt) // Max cumulative data in bytes.
+static SOPC_ReturnStatus SOPC_MsgBox_Initialize(SOPC_MsgBox* pMsgBox,  //
+                                                uint32_t max_clients,  //
+                                                uint32_t max_evts,     //
+                                                uint32_t max_data_evt) //
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
@@ -379,9 +378,9 @@ static SOPC_ReturnStatus SOPC_MsgBox_Initialize(
     return result;
 }
 
-SOPC_ReturnStatus SOPC_MsgBox_Push(SOPC_MsgBox* pMsgBox, // Message box
-                                   uint8_t* data,        // Data to push
-                                   uint32_t size)        // Size of data
+SOPC_ReturnStatus SOPC_MsgBox_Push(SOPC_MsgBox* pMsgBox, //
+                                   uint8_t* data,        //
+                                   uint32_t size)        //
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
@@ -643,9 +642,9 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Initialize(SOPC_MsgBox_DataHandle* pDat
     return result;
 }
 
-SOPC_ReturnStatus SOPC_MsgBox_DataHandle_GetDataEvt(SOPC_MsgBox_DataHandle* pDataHandle,
-                                                    uint8_t** ppData,
-                                                    uint32_t* pMaxAllowedSize)
+SOPC_ReturnStatus SOPC_MsgBox_DataHandle_GetDataEvt(SOPC_MsgBox_DataHandle* pDataHandle, //
+                                                    uint8_t** ppData,                    //
+                                                    uint32_t* pMaxAllowedSize)           //
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
@@ -683,7 +682,8 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_GetDataEvt(SOPC_MsgBox_DataHandle* pDat
     return result;
 }
 
-SOPC_ReturnStatus SOPC_MsgBox_DataHandle_UpdateDataEvtSize(SOPC_MsgBox_DataHandle* pDataHandle, uint32_t size)
+SOPC_ReturnStatus SOPC_MsgBox_DataHandle_UpdateDataEvtSize(SOPC_MsgBox_DataHandle* pDataHandle, //
+                                                           uint32_t size)                       //
 {
     if (NULL == pDataHandle || NULL == pDataHandle->pDataToUpdate || NULL == pDataHandle->pData ||
         NULL == pDataHandle->pEvtsBuffer || NULL == pDataHandle->pHeader || UINT32_MAX == pDataHandle->idBuffer ||
@@ -768,7 +768,8 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_UpdateDataEvtSize(SOPC_MsgBox_DataHandl
     return result;
 }
 
-SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Finalize(SOPC_MsgBox_DataHandle* pDataHandle, bool bCancel)
+SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Finalize(SOPC_MsgBox_DataHandle* pDataHandle, //
+                                                  bool bCancel)                        //
 {
     if (NULL == pDataHandle || NULL == pDataHandle->pDataToUpdate || NULL == pDataHandle->pData ||
         NULL == pDataHandle->pEvtsBuffer || NULL == pDataHandle->pHeader || UINT32_MAX == pDataHandle->idBuffer ||
@@ -833,9 +834,8 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Destroy(SOPC_MsgBox_DataHandle** ppData
     return result;
 }
 
-SOPC_ReturnStatus SOPC_MsgBox_Pop_Initialize(
-    SOPC_MsgBox* pMsgBox, // Message box object
-    uint32_t* pIdBuffer)  // Buffer identifier to use with Pop_GetEvtPtr and Pop_Finalize
+SOPC_ReturnStatus SOPC_MsgBox_Pop_Initialize(SOPC_MsgBox* pMsgBox, //
+                                             uint32_t* pIdBuffer)  //
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
@@ -847,13 +847,13 @@ SOPC_ReturnStatus SOPC_MsgBox_Pop_Initialize(
     return result;
 }
 
-SOPC_ReturnStatus SOPC_MsgBox_Pop_GetEvtPtr(SOPC_MsgBox* pMsgBox,            // Message box object
-                                            uint32_t idBuffer,               // Identifier returned by Pop_Initialize
-                                            uint32_t idclient,               // Client identifier
-                                            uint8_t** ppData,                // Data of an event
-                                            uint32_t* pSize,                 // Size of data event returned
-                                            uint32_t* pNbPendOrIgnoreEvents, // Number of pending events
-                                            SOPC_MsgBox_Mode mode) // Mode GET_NORMAL, GET_LAST or GET_NEW_LAST
+SOPC_ReturnStatus SOPC_MsgBox_Pop_GetEvtPtr(SOPC_MsgBox* pMsgBox,            //
+                                            uint32_t idBuffer,               //
+                                            uint32_t idclient,               //
+                                            uint8_t** ppData,                //
+                                            uint32_t* pSize,                 //
+                                            uint32_t* pNbPendOrIgnoreEvents, //
+                                            SOPC_MsgBox_Mode mode)           //
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
@@ -1007,8 +1007,8 @@ SOPC_ReturnStatus SOPC_MsgBox_Pop_GetEvtPtr(SOPC_MsgBox* pMsgBox,            // 
     return result;
 }
 
-SOPC_ReturnStatus SOPC_MsgBox_Pop_Finalize(SOPC_MsgBox* pMsgBox, // Message box object
-                                           uint32_t* pIdBuffer)  // @ point on uin32_t id returned by Pop_Initialize
+SOPC_ReturnStatus SOPC_MsgBox_Pop_Finalize(SOPC_MsgBox* pMsgBox, //
+                                           uint32_t* pIdBuffer)  //
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
