@@ -40,8 +40,8 @@ struct SOPC_DoubleBuffer
     */
 };
 
-SOPC_DoubleBuffer* SOPC_DoubleBuffer_Create(uint32_t nbReaders,       // Nb of readers
-                                            uint32_t atomic_elt_size) // Size of an atomic element
+SOPC_DoubleBuffer* SOPC_DoubleBuffer_Create(uint32_t nbReaders,       //
+                                            uint32_t atomic_elt_size) //
 {
     int result = 0;
     SOPC_DoubleBuffer* pBuffer = (SOPC_DoubleBuffer*) SOPC_Malloc(sizeof(SOPC_DoubleBuffer));
@@ -117,9 +117,9 @@ void SOPC_DoubleBuffer_Destroy(SOPC_DoubleBuffer** p)
     }
 }
 
-SOPC_ReturnStatus SOPC_DoubleBuffer_GetWriteBuffer(SOPC_DoubleBuffer* p, // DBO object
-                                                   uint32_t* pIdBuffer,  // Address to write idBuffer
-                                                   uint32_t* pMaxSize)   // Max allowed size
+SOPC_ReturnStatus SOPC_DoubleBuffer_GetWriteBuffer(SOPC_DoubleBuffer* p, //
+                                                   uint32_t* pIdBuffer,  //
+                                                   uint32_t* pMaxSize)   //
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
@@ -152,8 +152,8 @@ SOPC_ReturnStatus SOPC_DoubleBuffer_GetWriteBuffer(SOPC_DoubleBuffer* p, // DBO 
     return result;
 }
 
-SOPC_ReturnStatus SOPC_DoubleBuffer_ReleaseWriteBuffer(SOPC_DoubleBuffer* p, // DBO buffer object reference
-                                                       uint32_t* pIdBuffer)  // Id of buffer return by GetWriteBuffer
+SOPC_ReturnStatus SOPC_DoubleBuffer_ReleaseWriteBuffer(SOPC_DoubleBuffer* p, //
+                                                       uint32_t* pIdBuffer)  //
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
     if (NULL == p || NULL == pIdBuffer)
@@ -179,8 +179,8 @@ SOPC_ReturnStatus SOPC_DoubleBuffer_ReleaseWriteBuffer(SOPC_DoubleBuffer* p, // 
     return result;
 }
 
-SOPC_ReturnStatus SOPC_DoubleBuffer_WriteBufferErase(SOPC_DoubleBuffer* p, // DBO object
-                                                     uint32_t idBuffer)    // Id of buffer returned by GetWriteBuffer
+SOPC_ReturnStatus SOPC_DoubleBuffer_WriteBufferErase(SOPC_DoubleBuffer* p, //
+                                                     uint32_t idBuffer)    //
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
     if (NULL == p || idBuffer >= p->nbBuffers)
@@ -250,15 +250,14 @@ SOPC_ReturnStatus SOPC_DoubleBuffer_WriteBufferGetPtr(
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_DoubleBuffer_WriteBuffer(
-    SOPC_DoubleBuffer* p,   // DBO object
-    uint32_t idBuffer,      // Id of buffer
-    uint32_t offset,        // Offset of writing start. Total size = current size + offset + size of data to write
-    uint8_t* data,          // Data to write
-    uint32_t size,          // Size of data to write
-    uint32_t* pWrittenSize, // Size written
-    bool ignorePrevious,    // Ignore previous data : don't copy previous record information before offset
-    bool ignoreAfter)       // Ignore previous data after offset + size
+SOPC_ReturnStatus SOPC_DoubleBuffer_WriteBuffer(SOPC_DoubleBuffer* p,   //
+                                                uint32_t idBuffer,      //
+                                                uint32_t offset,        //
+                                                uint8_t* data,          //
+                                                uint32_t size,          //
+                                                uint32_t* pWrittenSize, //
+                                                bool ignorePrevious,    //
+                                                bool ignoreAfter)       //
 {
     if (NULL == p || NULL == pWrittenSize || idBuffer >= p->nbBuffers || ((NULL == data) && (size > 0)))
     {
@@ -336,8 +335,8 @@ SOPC_ReturnStatus SOPC_DoubleBuffer_WriteBuffer(
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_DoubleBuffer_GetReadBuffer(SOPC_DoubleBuffer* p, // DBO Object
-                                                  uint32_t* pIdBuffer)  // Address point to id buffer
+SOPC_ReturnStatus SOPC_DoubleBuffer_GetReadBuffer(SOPC_DoubleBuffer* p, //
+                                                  uint32_t* pIdBuffer)  //
 {
     if (NULL == p || NULL == pIdBuffer)
     {
@@ -377,10 +376,10 @@ SOPC_ReturnStatus SOPC_DoubleBuffer_GetReadBuffer(SOPC_DoubleBuffer* p, // DBO O
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_DoubleBuffer_ReadBufferPtr(SOPC_DoubleBuffer* p,  // DBO object
-                                                  uint32_t idBuffer,     // Buffer identifier
-                                                  uint8_t** pData,       // Pointer on data buffer
-                                                  uint32_t* pDataToRead) // Returns data size can be read from offset 0
+SOPC_ReturnStatus SOPC_DoubleBuffer_ReadBufferPtr(SOPC_DoubleBuffer* p,  //
+                                                  uint32_t idBuffer,     //
+                                                  uint8_t** pData,       //
+                                                  uint32_t* pDataToRead) //
 {
     if (NULL == p || NULL == pDataToRead || idBuffer >= p->nbBuffers || NULL == pData)
     {
@@ -408,12 +407,12 @@ SOPC_ReturnStatus SOPC_DoubleBuffer_ReadBufferPtr(SOPC_DoubleBuffer* p,  // DBO 
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_DoubleBuffer_ReadBuffer(SOPC_DoubleBuffer* p, // DBO object
-                                               uint32_t idBuffer,    // Buffer identifier
-                                               uint32_t offset,      // Offset from start read
-                                               uint8_t* data,        // Data output
-                                               uint32_t sizeRequest, // Request of read
-                                               uint32_t* pReadData)  // Returns size of data read
+SOPC_ReturnStatus SOPC_DoubleBuffer_ReadBuffer(SOPC_DoubleBuffer* p, //
+                                               uint32_t idBuffer,    //
+                                               uint32_t offset,      //
+                                               uint8_t* data,        //
+                                               uint32_t sizeRequest, //
+                                               uint32_t* pReadData)  //
 {
     if (NULL == p || NULL == pReadData || idBuffer >= p->nbBuffers || NULL == data)
     {
@@ -454,8 +453,8 @@ SOPC_ReturnStatus SOPC_DoubleBuffer_ReadBuffer(SOPC_DoubleBuffer* p, // DBO obje
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_DoubleBuffer_ReleaseReadBuffer(SOPC_DoubleBuffer* p, // DBO object
-                                                      uint32_t* pIdBuffer)  // Buffer identifier
+SOPC_ReturnStatus SOPC_DoubleBuffer_ReleaseReadBuffer(SOPC_DoubleBuffer* p, //
+                                                      uint32_t* pIdBuffer)  //
 {
     if (NULL == p || NULL == pIdBuffer)
     {
