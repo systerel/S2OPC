@@ -143,9 +143,6 @@ static inline SOPC_ReturnStatus SOPC_InterruptTimer_SetStatus(SOPC_InterruptTime
                                                               uint32_t idInstanceTimer,    // Id of timer
                                                               SOPC_IrqTimer_InstanceStatus status); // Status to set
 
-/// @brief Create interrupt timer. This function shall be followed by initialize function to use the timer.
-/// @warning Not thread safe!
-/// @return Returns pointer on SOPC_InterruptTimer.
 SOPC_InterruptTimer* SOPC_InterruptTimer_Create(void)
 {
     SOPC_InterruptTimer* pTimer = NULL;
@@ -160,10 +157,6 @@ SOPC_InterruptTimer* SOPC_InterruptTimer_Create(void)
     return pTimer;
 }
 
-/// @brief Destroy interrupt timer. This function shall be called only if SOPC_InterruptTimer_DeInitialize returns
-/// SOPC_STATUS_OK.
-/// @warning Not thread safe!
-/// @param [inout] ppTimer Address from where SOPC_InterruptTimer object will be deleted. Set to NULL.
 void SOPC_InterruptTimer_Destroy(SOPC_InterruptTimer** ppTimer)
 {
     if (NULL != ppTimer)
@@ -176,12 +169,6 @@ void SOPC_InterruptTimer_Destroy(SOPC_InterruptTimer** ppTimer)
     }
 }
 
-/// @brief Initialize interrupt timer workspace
-/// @param [in] pTimer Interrupt timer object
-/// @param [in] nbInstances Maximum of timer instances (timer identifiers will be between 0 and nbInstances - 1)
-/// @param [in] maxInstanceDataSize Maximum of data in bytes hold by each timer
-/// @return SOPC_STATUS_INVALID_STATE if interrupt timer is in use, initializing or resetting state.
-/// @return SOPC_STATUS_NOK for others error. Else SOPC_STATUS_OK.
 SOPC_ReturnStatus SOPC_InterruptTimer_Initialize(
     SOPC_InterruptTimer* pTimer,  // Interrupt timer object
     uint32_t nbInstances,         // Maximum of timer instances (timer identifiers between 0 and nbInstances - 1)
@@ -245,10 +232,6 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Initialize(
     return result;
 }
 
-/// @brief DeInitialize interrupt timer workspace
-/// @param [in] pTimer Interrupt timer object
-/// @return SOPC_STATUS_INVALID_STATE if interrupt timer is in other state that initialized (in use, resetting,
-/// @return initializing). SOPC_STATUS_NOK for others error or already not initialized. Else SOPC_STATUS_OK.
 SOPC_ReturnStatus SOPC_InterruptTimer_DeInitialize(SOPC_InterruptTimer* pTimer)
 {
     if (NULL == pTimer)
@@ -291,18 +274,6 @@ SOPC_ReturnStatus SOPC_InterruptTimer_DeInitialize(SOPC_InterruptTimer* pTimer)
     return result;
 }
 
-/// @brief Reset timer instance and initialize it on next SOPC_InterruptTimer_Update call
-/// @param [in] pTimer Interrupt timer workspace
-/// @param [in] idInstanceTimer Interrupt timer instance
-/// @param [in] period Timer period (tick)
-/// @param [in] offset Timer offset (tick)
-/// @param [in] pUserContext Use context
-/// @param [in] cbStart Start event callback
-/// @param [in] cbElapsed Elapsed event callback
-/// @param [in] cbStop Stop event callback
-/// @param [in] initStatus Initial status, set STARTED or STOPPED status
-/// @return SOPC_STATUS_INVALID_STATE if workspace is not initialized or API for this instance is currently in use.
-/// @return SOPC_STATUS_NOK for others error. Else SOPC_STATUS_OK.
 SOPC_ReturnStatus SOPC_InterruptTimer_Instance_Init(
     SOPC_InterruptTimer* pTimer,                // Interrupt timer object
     uint32_t idInstanceTimer,                   // Id of timer instance
@@ -405,11 +376,6 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_Init(
     return result;
 }
 
-/// @brief Force next update of timer to stop without calling any intermediate callback (stop/start/elapsed)
-/// @param [in] pTimer Interrupt timer workspace
-/// @param [in] idInstanceTimer Interrupt timer instance
-/// @return SOPC_STATUS_INVALID_STATE if workspace is not initialized or API for this instance is currently in use.
-/// @return SOPC_STATUS_NOK for others error. Else SOPC_STATUS_OK.
 SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DeInit(SOPC_InterruptTimer* pTimer, // Interrupt timer object
                                                       uint32_t idInstanceTimer)    // Timer instance identifier
 {
@@ -473,12 +439,6 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DeInit(SOPC_InterruptTimer* pTime
     return result;
 }
 
-/// @brief Enable or disable timer instance
-/// @param [in] pTimer Interrupt timer object
-/// @param [in] idInstanceTimer Timer instance identifier
-/// @param [in] status Status to set
-/// @return SOPC_STATUS_INVALID_STATE if workspace is not initialized or API for this instance is currently in use.
-/// @return SOPC_STATUS_NOK for others error. Else SOPC_STATUS_OK.
 static inline SOPC_ReturnStatus SOPC_InterruptTimer_SetStatus(
     SOPC_InterruptTimer* pTimer,         // Interrupt timer object
     uint32_t idInstanceTimer,            // Timer instance identifier
@@ -565,12 +525,6 @@ static inline SOPC_ReturnStatus SOPC_InterruptTimer_SetStatus(
     return result;
 }
 
-/// @brief Get a timer instance status : started or stopped.
-/// @param [in] pTimer Interrupt timer workspace
-/// @param [in] idInstanceTimer Interrupt timer instance
-/// @param [out] status Address where is returned timer instance status
-/// @return SOPC_STATUS_INVALID_STATE if workspace is not initialized or API for this instance is currently in use.
-/// @return SOPC_STATUS_NOK for others error. Else SOPC_STATUS_OK.
 SOPC_ReturnStatus SOPC_InterruptTimer_Instance_LastStatus(
     SOPC_InterruptTimer* pTimer,          // Interrupt timer object
     uint32_t idInstanceTimer,             // Timer instance identifier
@@ -654,34 +608,18 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_LastStatus(
     return result;
 }
 
-/// @brief Next update of timer instance will start it
-/// @param [in] pTimer Interrupt timer workspace
-/// @param [in] idInstanceTimer Interrupt timer instance
-/// @return SOPC_STATUS_INVALID_STATE if workspace is not initialized or API for this instance is currently in use.
-/// @return SOPC_STATUS_NOK for others error. Else SOPC_STATUS_OK.
 SOPC_ReturnStatus SOPC_InterruptTimer_Instance_Start(SOPC_InterruptTimer* pTimer, // Interrupt timer object
                                                      uint32_t idInstanceTimer)    // Timer instance identifier
 {
     return SOPC_InterruptTimer_SetStatus(pTimer, idInstanceTimer, SOPC_INTERRUPT_TIMER_STATUS_ENABLED);
 }
 
-/// @brief Next update of timer will stop it
-/// @param [in] pTimer Interrupt timer workspace
-/// @param [in] idInstanceTimer Interrupt timer instance
-/// @return SOPC_STATUS_INVALID_STATE if workspace is not initialized or API for this instance is currently in use.
-/// @return SOPC_STATUS_NOK for others error. Else SOPC_STATUS_OK.
 SOPC_ReturnStatus SOPC_InterruptTimer_Instance_Stop(SOPC_InterruptTimer* pTimer, // Interrupt timer object
                                                     uint32_t idInstanceTimer)    // Timer instance identifier
 {
     return SOPC_InterruptTimer_SetStatus(pTimer, idInstanceTimer, SOPC_INTERRUPT_TIMER_STATUS_DISABLED);
 }
 
-/// @brief Next update of timer will set new period
-/// @param [in] pTimer Interrupt timer workspace
-/// @param [in] idInstanceTimer Interrupt timer instance
-/// @param [in] period Period in ticks
-/// @return SOPC_STATUS_INVALID_STATE if workspace is not initialized or API for this instance is currently in use.
-/// @return SOPC_STATUS_NOK for others error. Else SOPC_STATUS_OK.
 SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetPeriod(SOPC_InterruptTimer* pTimer, // Interrupt timer object
                                                          uint32_t idInstanceTimer,    // Timer instance identifier
                                                          uint32_t period)             // Period in ticks
@@ -768,12 +706,6 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetPeriod(SOPC_InterruptTimer* pT
     return result;
 }
 
-/// @brief Next update of timer will set new offset
-/// @param [in] pTimer Interrupt timer workspace
-/// @param [in] idInstanceTimer Interrupt timer instance
-/// @param [in] offset Offset in ticks
-/// @return SOPC_STATUS_INVALID_STATE if workspace is not initialized or API for this instance is currently in use.
-/// @return SOPC_STATUS_NOK for others error. Else SOPC_STATUS_OK.
 SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetOffset(SOPC_InterruptTimer* pTimer, // Interrupt timer object
                                                          uint32_t idInstanceTimer,    // Timer instance identifier
                                                          uint32_t offset)             // offset in ticks
@@ -860,15 +792,6 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetOffset(SOPC_InterruptTimer* pT
     return result;
 }
 
-/// @brief Next update of timer will set callback linked to start, stop, elapsed event
-/// @param [in] pTimer Interrupt timer workspace
-/// @param [in] idInstanceTimer Interrupt timer instance
-/// @param [in] pUserContext Use context
-/// @param [in] cbStart Callback called when timer is started
-/// @param [in] cbElapsed Callback called when timer is elapsed
-/// @param [in] cbStop Callback called when timer is stopped
-/// @return SOPC_STATUS_INVALID_STATE if workspace is not initialized or API for this instance is currently in use.
-/// @return SOPC_STATUS_NOK for others error. Else SOPC_STATUS_OK.
 SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetCallback(
     SOPC_InterruptTimer* pTimer,                // Interrupt timer object
     uint32_t idInstanceTimer,                   // Timer instance identifier
@@ -965,13 +888,6 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetCallback(
     return result;
 }
 
-/// @brief Publish new data to the timer instance, take into account by next update call.
-/// @param [in] pTimer Interrupt timer workspace
-/// @param [in] idInstanceTimer Timer instance identifier
-/// @param [in] pData Data to publish
-/// @param [in] sizeToWrite Data size
-/// @return SOPC_STATUS_INVALID_STATE if workspace is not initialized or API for this instance is currently in use.
-/// @return SOPC_STATUS_NOK for others error. Else SOPC_STATUS_OK.
 SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetData(SOPC_InterruptTimer* pTimer, // Interrupt timer object
                                                        uint32_t idInstanceTimer,    // Timer instance identifier
                                                        uint8_t* pData,              // Data to publish
@@ -1052,12 +968,6 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetData(SOPC_InterruptTimer* pTim
     return result;
 }
 
-//*** Specific API get data container ***
-
-/// @brief Create data handle for an interrupt timer workspace and one of its instances
-/// @param [in] pTimer Interrupt timer workspace
-/// @param [in] idInstanceTimer
-/// @return SOPC_InterruptTimer_DataHandle object
 SOPC_InterruptTimer_DataHandle* SOPC_InterruptTimer_Instance_DataHandle_Create(SOPC_InterruptTimer* pTimer, //
                                                                                uint32_t idInstanceTimer)    //
 {
@@ -1096,8 +1006,6 @@ SOPC_InterruptTimer_DataHandle* SOPC_InterruptTimer_Instance_DataHandle_Create(S
     return pContainer;
 }
 
-/// @brief Destroy data handle
-/// @param [inout] ppDataContainer Address where Interrupt timer data handle shall be destroyed. Set to NULL.
 void SOPC_InterruptTimer_DestroyDataContainer(SOPC_InterruptTimer_DataHandle** ppDataContainer)
 {
     if (NULL != ppDataContainer)
@@ -1110,13 +1018,6 @@ void SOPC_InterruptTimer_DestroyDataContainer(SOPC_InterruptTimer_DataHandle** p
     }
 }
 
-/// @brief Initialize data handle used to publish data.
-/// @warning This function shall be called before GetBufferInfo and SetNewSize
-/// @warning After modification, SOPC_InterruptTimer_DataHandle_Finalize shall be called in order to take into account
-/// new data with new size
-/// @param [in] pDataContainer Interrupt timer data handle
-/// @return SOPC_STATUS_INVALID_STATE if workspace is not initialized or API for this instance is currently in use.
-/// @return SOPC_STATUS_NOK for others error. Else SOPC_STATUS_OK.
 SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_Initialize(
     SOPC_InterruptTimer_DataHandle* pDataContainer // Data handle
 )
@@ -1213,11 +1114,6 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_Initialize(
     return result;
 }
 
-/// @brief Commit data container with new data and its new size
-/// @param [in] pDataContainer Interrupt timer instance data handle
-/// @param [in] bCancel Modification canceled
-/// @return SOPC_STATUS_INVALID_STATE if workspace is not initialized or API for this instance is currently in use.
-/// @return SOPC_STATUS_NOK for others error. Else SOPC_STATUS_OK.
 SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_Finalize(SOPC_InterruptTimer_DataHandle* pDataContainer, //
                                                                    bool bCancel)                                   //
 {
@@ -1291,15 +1187,6 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_Finalize(SOPC_Interrup
     return result;
 }
 
-/// @brief Expose data handle buffer informations
-/// @warning This function shall be used between SOPC_InterruptTimer_Instance_DataHandle_Initialize  and
-/// SOPC_InterruptTimer_Instance_DataHandle_Finalize
-/// @warning User becomes the "owner" of the exposed data. He doesn't shall write above *pMaxAllowedSize.
-/// @param [in] pContainer Interrupt timer instance data handle
-/// @param [out] pMaxAllowedSize Function returns max allowed size of returned exposed buffer
-/// @param [out] pCurrentSize Function returns current significant bytes present in the returned exposed buffer
-/// @param [out] ppData Address where is returned pointer on exposed buffer. Do not free this value.
-/// @return SOPC_STATUS_OK in case of success.
 SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_GetBufferInfo(SOPC_InterruptTimer_DataHandle* pContainer,
                                                                         uint32_t* pMaxAllowedSize,
                                                                         uint32_t* pCurrentSize,
@@ -1319,14 +1206,6 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_GetBufferInfo(SOPC_Int
     return result;
 }
 
-/// @brief Update data handle size with newSize parameter.
-/// @warning This function shall be used between SOPC_InterruptTimer_Instance_DataHandle_Initialize  and
-/// SOPC_InterruptTimer_Instance_DataHandle_Finalize
-/// @param [in] pContainer Interrupt timer instance data handle
-/// @param [in] newSize Significant bytes to take into account.
-/// @return SOPC_STATUS_OK in case of success.
-/// @return SOPC_INVALID_PARAMETERS if newSize > max allowed size returned by
-/// SOPC_InterruptTimer_Instance_DataHandle_GetBufferInfo
 SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_SetNewSize(SOPC_InterruptTimer_DataHandle* pContainer, //
                                                                      uint32_t newSize)                           //
 
@@ -1341,13 +1220,6 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_SetNewSize(SOPC_Interr
     return result;
 }
 
-//*** -- ***
-
-/// @brief Update timer tick with external tick value. Invoke callback if necessary.
-/// @param [in] pTimer Interrupt timer workspace
-/// @param [in] externalTickValue value. Shall be always incremented. Internally, tick value is declared as uint64_t
-/// @return SOPC_STATUS_INVALID_STATE if workspace is not initialized or API for this instance is currently in use.
-/// @return SOPC_STATUS_NOK for others error. Else SOPC_STATUS_OK.
 SOPC_ReturnStatus SOPC_InterruptTimer_Update(SOPC_InterruptTimer* pTimer, // Interrupt timer object
                                              uint32_t externalTickValue)  // Tick value. Shall be always incremented.
 {
@@ -1487,11 +1359,6 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Update(SOPC_InterruptTimer* pTimer, // Int
     return result;
 }
 
-/// @brief Internal interrupt timer workspace creation
-/// @warning Not thread safe!
-/// @param [in] nbInstances Maximum of timer instances (timer identifiers between 0 and nbInstances - 1)
-/// @param [in] maxDataSize Maximum of data in bytes hold by each timer
-/// @return Internal timer workspace
 static inline tInterruptTimerData* SOPC_InterruptTimer_Workspace_Create(
     uint32_t nbInstances, // Max instanciable timer
     uint32_t maxDataSize) // Max size of data hold by each timer
@@ -1552,8 +1419,6 @@ static inline tInterruptTimerData* SOPC_InterruptTimer_Workspace_Create(
     return pWks;
 }
 
-/// @brief Internal interrupt timer workspace destruction
-/// @param [inout] ppWks Interrupt timer private workspace
 static inline void SOPC_InterruptTimer_Workspace_Destroy(tInterruptTimerData** ppWks)
 {
     if (NULL == ppWks)
@@ -1594,9 +1459,6 @@ static inline void SOPC_InterruptTimer_Workspace_Destroy(tInterruptTimerData** p
     *ppWks = NULL;
 }
 
-/// @brief Increment number of API clients
-/// @param [in] pTimer Interrupt timer workspace
-/// @return Current status.
 static inline eInterruptTimerSyncStatus SOPC_InterruptTimer_IncrementInUseStatus(SOPC_InterruptTimer* pTimer)
 {
     {
@@ -1628,9 +1490,6 @@ static inline eInterruptTimerSyncStatus SOPC_InterruptTimer_IncrementInUseStatus
     }
 }
 
-/// @brief Decrement number of API clients
-/// @param [in] pTimer Interrupt timer workspace
-/// @return Current status.
 static inline eInterruptTimerSyncStatus SOPC_InterruptTimer_DecrementInUseStatus(SOPC_InterruptTimer* pTimer)
 {
     {
