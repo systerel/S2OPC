@@ -112,12 +112,15 @@ static SOPC_ReturnStatus SOPC_MsgBox_UpdateFifoHeader(tMsgBoxFifoHeader* pFifoHe
                                                       uint8_t* pData,                 // Data to push
                                                       uint32_t size);                 // Size of data to push
 
-/// @brief Message box FIFO header update function
-/// @param [inout] pFifoHeader Header structure
-/// @param [inout] pFifoEvts Buffer of events
-/// @param [inout] pFifoData Buffer of data
-/// @param [in] pData Data to push
-/// @param [in] size Size of data to push
+/// @brief Message box FIFO header reset function
+/// @param [in] pFifoHeader Header structure
+/// @param [in] pFifoEvts Buffer of events
+/// @param [in] pFifoData Buffer of data
+/// @return SOPC_STATUS_OK
+static SOPC_ReturnStatus SOPC_MsgBox_ResetFifoHeader(tMsgBoxFifoHeader* pFifoHeader, // Header structure
+                                                     tMsgBoxFifoEvents* pFifoEvts,   // Buffer of events
+                                                     uint8_t* pFifoData);            // Buffer of data
+
 static SOPC_ReturnStatus SOPC_MsgBox_UpdateFifoHeader(tMsgBoxFifoHeader* pFifoHeader, // Header structure
                                                       tMsgBoxFifoEvents* pFifoEvts,   // Buffer of events
                                                       uint8_t* pFifoData,             // Buffer of data
@@ -196,11 +199,6 @@ static SOPC_ReturnStatus SOPC_MsgBox_UpdateFifoHeader(tMsgBoxFifoHeader* pFifoHe
     return result;
 }
 
-/// @brief Message box FIFO header reset function
-/// @param [in] pFifoHeader Header structure
-/// @param [in] pFifoEvts Buffer of events
-/// @param [in] pFifoData Buffer of data
-/// @return SOPC_STATUS_OK
 static SOPC_ReturnStatus SOPC_MsgBox_ResetFifoHeader(tMsgBoxFifoHeader* pFifoHeader, // Header structure
                                                      tMsgBoxFifoEvents* pFifoEvts,   // Buffer of events
                                                      uint8_t* pFifoData)             // Buffer of data
@@ -220,11 +218,6 @@ static SOPC_ReturnStatus SOPC_MsgBox_ResetFifoHeader(tMsgBoxFifoHeader* pFifoHea
     return result;
 }
 
-/// @brief Message Box Creation
-/// @param [in] max_clients Max message box concurrent client. Client identifier between 0 to max-1
-/// @param [in] max_evts Max events to manage writer burst.
-/// @param [in] max_data_evt max cumulative data in bytes
-/// @return NULL if invalid parameters or not enough memory. Else SOPC_MsgBox object.
 SOPC_MsgBox* SOPC_MsgBox_Create(
     uint32_t max_clients,  // Max message box concurrent client. Client identifier between 0 to max-1
     uint32_t max_evts,     // Max events to manage writer burst.
@@ -241,8 +234,6 @@ SOPC_MsgBox* SOPC_MsgBox_Create(
     return pMsgBox;
 }
 
-/// @brief Message Box Destruction
-/// @param [inout] ppMsgBox Message box handle to destroy. Set to NULL after free.
 void SOPC_MsgBox_Destroy(SOPC_MsgBox** ppMsgBox)
 {
     if (ppMsgBox != NULL)
@@ -255,7 +246,6 @@ void SOPC_MsgBox_Destroy(SOPC_MsgBox** ppMsgBox)
     return;
 }
 
-// Message Box Resetting. Called by Message Box Destruction.
 static void SOPC_MsgBox_DeInitialize(SOPC_MsgBox* pMsgBox)
 {
     if (pMsgBox != NULL)
@@ -280,8 +270,6 @@ static void SOPC_MsgBox_DeInitialize(SOPC_MsgBox* pMsgBox)
     }
 }
 
-// Message box initialization
-// Returns : SOPC_STATUS_OK if initialization successful.
 static SOPC_ReturnStatus SOPC_MsgBox_Initialize(
     SOPC_MsgBox* pMsgBox,  // Message box object
     uint32_t max_clients,  // Max message box concurrent client. Client identifier between 0 -> max-1
@@ -391,14 +379,6 @@ static SOPC_ReturnStatus SOPC_MsgBox_Initialize(
     return result;
 }
 
-/// @brief Push data to message box.
-/// If you want write directly without copy into message box, use data handle.
-/// @param [in] pMsgBox Message box handle
-/// @param [in] data Data to push (copy input buffer into internal buffer)
-/// @param [in] size Size of data
-/// @return SOPC_STATUS_OK if data well pushed.
-/// SOPC_INVALID_STATE if API is in use concurrently by for same client id.
-/// SOPC_STATUS_NOK in case of invalid parameters : size is 0 or data is null pointer
 SOPC_ReturnStatus SOPC_MsgBox_Push(SOPC_MsgBox* pMsgBox, // Message box
                                    uint8_t* data,        // Data to push
                                    uint32_t size)        // Size of data
@@ -480,10 +460,6 @@ SOPC_ReturnStatus SOPC_MsgBox_Push(SOPC_MsgBox* pMsgBox, // Message box
     return result;
 }
 
-/// @brief Reset message box
-/// @param [in] pMsgBox Message box handle
-/// @return Returns : SOPC_STATUS_OK if data well pushed
-/// SOPC_INVALID_STATE if API is in use concurrently by for same client id.
 SOPC_ReturnStatus SOPC_MsgBox_Reset(SOPC_MsgBox* pMsgBox)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
@@ -573,9 +549,6 @@ struct SOPC_MsgBox_DataHandle
     uint8_t* pData;                 ///< Pointer on buffer position 0, used to deal with wrap around use case.
 };
 
-/// @brief Message box data handle creation. Used to directly write into event buffer.
-/// @param [in] pMsgBox Message box handle
-/// @return Message box data handle used to expose an event buffer for write operation,
 SOPC_MsgBox_DataHandle* SOPC_MsgBox_DataHandle_Create(SOPC_MsgBox* pMsgBox)
 {
     SOPC_MsgBox_DataHandle* p = SOPC_Calloc(1, sizeof(SOPC_MsgBox_DataHandle));
@@ -589,13 +562,6 @@ SOPC_MsgBox_DataHandle* SOPC_MsgBox_DataHandle_Create(SOPC_MsgBox* pMsgBox)
     return p;
 }
 
-/// @brief Message box data handle - Initialization.
-/// @brief After initialization, SOPC_MsgBox_DataHandle_GetDataEvt shall be used to expose buffer informations.
-/// @brief SOPC_MsgBox_DataHandle_UpdateDataEvtSize is used to write number of signficant bytes contained by exposed
-/// buffer.
-/// @brief To commit write operation, SOPC_MsgBox_DataHandle_Finalize shall be used.
-/// @param [in] pDataHandle Message box data handle.
-/// @return SOPC_STATUS_OK if data handle is valid and not not initialized or finalized.
 SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Initialize(SOPC_MsgBox_DataHandle* pDataHandle)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
@@ -677,12 +643,6 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Initialize(SOPC_MsgBox_DataHandle* pDat
     return result;
 }
 
-/// @brief Expose event buffer information
-/// @param [in] pDataHandle Message box data handle
-/// @param [out] ppData Exposed data event buffer
-/// @param [out] pMaxAllowedSize Max allowed data size
-/// @return SOPC_STATUS_OK if event retrieved.
-/// SOPC_INVALID_STATE if API is in use concurrently.
 SOPC_ReturnStatus SOPC_MsgBox_DataHandle_GetDataEvt(SOPC_MsgBox_DataHandle* pDataHandle,
                                                     uint8_t** ppData,
                                                     uint32_t* pMaxAllowedSize)
@@ -723,11 +683,6 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_GetDataEvt(SOPC_MsgBox_DataHandle* pDat
     return result;
 }
 
-/// @brief Update event data size (number of effective significant bytes)
-/// @param [in] pDataHandle Message box data handle
-/// @param [in] size Number of significant bytes
-/// @return SOPC_STATUS_OK if event retrieved.
-/// SOPC_INVALID_STATE if API is in use concurrently.
 SOPC_ReturnStatus SOPC_MsgBox_DataHandle_UpdateDataEvtSize(SOPC_MsgBox_DataHandle* pDataHandle, uint32_t size)
 {
     if (NULL == pDataHandle || NULL == pDataHandle->pDataToUpdate || NULL == pDataHandle->pData ||
@@ -813,11 +768,6 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_UpdateDataEvtSize(SOPC_MsgBox_DataHandl
     return result;
 }
 
-/// @brief Message box data handle - Finalize write operation (commit modification)
-/// @param [in] pDataHandle Message box data Handle
-/// @param [in] bCancel Write operation canceled if true.
-/// @return SOPC_STATUS_OK if event retrieved.
-/// SOPC_INVALID_STATE if API is in use concurrently.
 SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Finalize(SOPC_MsgBox_DataHandle* pDataHandle, bool bCancel)
 {
     if (NULL == pDataHandle || NULL == pDataHandle->pDataToUpdate || NULL == pDataHandle->pData ||
@@ -858,9 +808,6 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Finalize(SOPC_MsgBox_DataHandle* pDataH
     return result;
 }
 
-/// @brief Message box data handle destruction.
-/// @param [inout] ppDataHandle Message box data handle. Set to NULL.
-/// @return SOPC_STATUS_OK if valid handle, well finalized.
 SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Destroy(SOPC_MsgBox_DataHandle** ppDataHandle)
 {
     if (ppDataHandle == NULL)
@@ -886,11 +833,6 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Destroy(SOPC_MsgBox_DataHandle** ppData
     return result;
 }
 
-/// @brief Message box pop initialization. Shall be called before SOPC_MsgBox_Pop_GetEvtPtr.
-/// @param [in] pMsgBox Message box handle
-/// @param [out] pIdBuffer Buffer identifier to use with SOPC_MsgBox_Pop_GetEvtPtr and SOPC_MsgBox_Pop_Finalize.
-/// @return SOPC_STATUS_OK if a valid idBuffer is returned. This id shall be used by SOPC_MsgBox_Pop_GetEvtPtr function.
-/// It reset idBuffer to UINT32_MAX in case of error.
 SOPC_ReturnStatus SOPC_MsgBox_Pop_Initialize(
     SOPC_MsgBox* pMsgBox, // Message box object
     uint32_t* pIdBuffer)  // Buffer identifier to use with Pop_GetEvtPtr and Pop_Finalize
@@ -905,22 +847,6 @@ SOPC_ReturnStatus SOPC_MsgBox_Pop_Initialize(
     return result;
 }
 
-/// @brief Message box pop operation. Used to get an event.
-/// @brief This function shall be used AFTER a Pop_Initialize.
-/// @brief Multiple calls can be performed.
-/// @brief After all calls, SOPC_MsgBox_Pop_Finalize shall be called.
-/// @param [in] pMsgBox Message box object
-/// @param [in] idBuffer Identifier returned by SOPC_MsgBox_Pop_Initialize
-/// @param [in] idclient Client identifier
-/// @param [out] ppData Pointer on data of an event. Shall not be freed or written.
-/// @param [out] pSize Size of data event returned
-/// @param [out] pNbPendOrIgnoreEvents Number of pending events
-/// @param [in] mode Mode GET_NORMAL, GET_LAST or GET_NEW_LAST
-/// * If mode GET_NORMAL, reader pop a new event from its point of view.
-/// * If mode GET_NEW_LAST, reader pop the last event if it is new from its point of view.
-/// * If mode GET_LAST, reader pop the last event even if not new (read several time the same last event)
-/// @return SOPC_STATUS_OK if data is returned via ppData.
-/// SOPC_INVALID_STATE if API is in use concurrently by for same client id.
 SOPC_ReturnStatus SOPC_MsgBox_Pop_GetEvtPtr(SOPC_MsgBox* pMsgBox,            // Message box object
                                             uint32_t idBuffer,               // Identifier returned by Pop_Initialize
                                             uint32_t idclient,               // Client identifier
@@ -1081,12 +1007,6 @@ SOPC_ReturnStatus SOPC_MsgBox_Pop_GetEvtPtr(SOPC_MsgBox* pMsgBox,            // 
     return result;
 }
 
-/// @brief Message box pop finalization.
-/// @brief Shall be called after a sequence Pop_Initialize - Pop_GetEvtPtr ... Pop_GetEvtPtr
-/// @brief It reset idBuffer to UINT32_MAX value.
-/// @param [in] pMsgBox Message box handle
-/// @param [inout] pIdBuffer Buffer identifier returned by SOPC_MsgBox_Pop_Initialize
-/// @return SOPC_STATUS_OK if buffer identifier is valid.
 SOPC_ReturnStatus SOPC_MsgBox_Pop_Finalize(SOPC_MsgBox* pMsgBox, // Message box object
                                            uint32_t* pIdBuffer)  // @ point on uin32_t id returned by Pop_Initialize
 {
