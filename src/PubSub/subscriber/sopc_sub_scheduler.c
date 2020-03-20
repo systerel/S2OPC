@@ -84,7 +84,7 @@ static struct
 
     SOPC_RT_Subscriber* pRTSubscriber;
     Thread handleRTSubscriberBeatHeart;
-    volatile bool bQuitSubcriberBeatHeart;
+    bool bQuitSubcriberBeatHeart;
 } schedulerCtx = {.isStarted = false,
                   .processingStartStop = false,
                   .stateCallback = NULL,
@@ -187,7 +187,10 @@ static void* cbBeatHeartThreadCallback(void* arg)
 
     printf("# RT Subscriber beat heart thread launched !!!\r\n");
 
-    while (!schedulerCtx.bQuitSubcriberBeatHeart)
+    bool readValue = false;
+    __atomic_load(&schedulerCtx.bQuitSubcriberBeatHeart, &readValue, __ATOMIC_SEQ_CST);
+
+    while (!readValue)
     {
         result = SOPC_RT_Subscriber_HeartBeat(schedulerCtx.pRTSubscriber);
         if (SOPC_STATUS_OK != result)
@@ -196,6 +199,7 @@ static void* cbBeatHeartThreadCallback(void* arg)
         }
 
         SOPC_Sleep(SOPC_TIMER_RESOLUTION_MS);
+        __atomic_load(&schedulerCtx.bQuitSubcriberBeatHeart, &readValue, __ATOMIC_SEQ_CST);
     }
 
     printf("# RT Subscriber beat heart thread exit !!!\r\n");
@@ -210,7 +214,8 @@ static void uninit_sub_scheduler_ctx(void)
     schedulerCtx.stateCallback = NULL;
 
     printf("# Info: Stop RT Subscriber thread. \r\n");
-    schedulerCtx.bQuitSubcriberBeatHeart = true;
+    bool newValue = true;
+    __atomic_store(&schedulerCtx.bQuitSubcriberBeatHeart, &newValue, __ATOMIC_SEQ_CST);
     if (schedulerCtx.handleRTSubscriberBeatHeart != (Thread) NULL)
     {
         SOPC_Thread_Join(schedulerCtx.handleRTSubscriberBeatHeart);
@@ -426,7 +431,8 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
     // Create reception buffer
     if (result)
     {
-        schedulerCtx.bQuitSubcriberBeatHeart = false;
+        bool newValue = false;
+        __atomic_store(&schedulerCtx.bQuitSubcriberBeatHeart, &newValue, __ATOMIC_SEQ_CST);
         status = SOPC_Thread_Create(&schedulerCtx.handleRTSubscriberBeatHeart, //
                                     cbBeatHeartThreadCallback,                 //
                                     NULL,                                      //
