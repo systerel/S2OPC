@@ -559,7 +559,7 @@ static bool SOPC_SubScheduler_Start_UDP(void)
     }
 
     assert(nb_socket == sockIdx);
-    SOPC_UPD_SocketsMgr_Initialize((void**) schedulerCtx.sockInputNumbers, schedulerCtx.sockArray, nb_socket,
+    SOPC_UDP_SocketsMgr_Initialize((void**) schedulerCtx.sockInputNumbers, schedulerCtx.sockArray, nb_socket,
                                    on_udp_message_received, NULL, NULL);
 
     return true;
