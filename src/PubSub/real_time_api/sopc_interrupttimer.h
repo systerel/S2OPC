@@ -35,8 +35,8 @@
 /// @brief Status of a timer instance
 typedef enum
 {
-    SOPC_INTERRUPT_TIMER_STATUS_DISABLED, ///< Timer instance is started
-    SOPC_INTERRUPT_TIMER_STATUS_ENABLED,  ///< Timer instance is stopped
+    SOPC_INTERRUPT_TIMER_STATUS_DISABLED, ///< Timer instance is stopped
+    SOPC_INTERRUPT_TIMER_STATUS_ENABLED,  ///< Timer instance is started
     SOPC_INTERRUPT_TIMER_STATUS_INVALID = INT32_MAX
 } SOPC_IrqTimer_InstanceStatus;
 
