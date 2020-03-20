@@ -169,10 +169,9 @@ void SOPC_InterruptTimer_Destroy(SOPC_InterruptTimer** ppTimer)
     }
 }
 
-SOPC_ReturnStatus SOPC_InterruptTimer_Initialize(
-    SOPC_InterruptTimer* pTimer,  // Interrupt timer object
-    uint32_t nbInstances,         // Maximum of timer instances (timer identifiers between 0 and nbInstances - 1)
-    uint32_t maxInstanceDataSize) // Maximum of data in bytes hold by each timer
+SOPC_ReturnStatus SOPC_InterruptTimer_Initialize(SOPC_InterruptTimer* pTimer,  //
+                                                 uint32_t nbInstances,         //
+                                                 uint32_t maxInstanceDataSize) //
 {
     if (NULL == pTimer || nbInstances < 1)
     {
@@ -274,16 +273,15 @@ SOPC_ReturnStatus SOPC_InterruptTimer_DeInitialize(SOPC_InterruptTimer* pTimer)
     return result;
 }
 
-SOPC_ReturnStatus SOPC_InterruptTimer_Instance_Init(
-    SOPC_InterruptTimer* pTimer,                // Interrupt timer object
-    uint32_t idInstanceTimer,                   // Id of timer instance
-    uint32_t period,                            // Timer Period
-    uint32_t offset,                            // Timer offset
-    void* pUserContext,                         // Free user context
-    sopc_irq_timer_cb_start cbStart,            // Start event callback
-    sopc_irq_timer_cb_period_elapsed cbElapsed, // Elapsed event callback
-    sopc_irq_timer_cb_stop cbStop,
-    SOPC_IrqTimer_InstanceStatus initStatus) // Stop event callback
+SOPC_ReturnStatus SOPC_InterruptTimer_Instance_Init(SOPC_InterruptTimer* pTimer,                //
+                                                    uint32_t idInstanceTimer,                   //
+                                                    uint32_t period,                            //
+                                                    uint32_t offset,                            //
+                                                    void* pUserContext,                         //
+                                                    sopc_irq_timer_cb_start cbStart,            //
+                                                    sopc_irq_timer_cb_period_elapsed cbElapsed, //
+                                                    sopc_irq_timer_cb_stop cbStop,              //
+                                                    SOPC_IrqTimer_InstanceStatus initStatus)    //
 {
     // Check for incorrect parameters
     if ((NULL == pTimer) || (NULL == pTimer->pData) || (idInstanceTimer >= pTimer->pData->nbInstances) ||
@@ -376,8 +374,8 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_Init(
     return result;
 }
 
-SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DeInit(SOPC_InterruptTimer* pTimer, // Interrupt timer object
-                                                      uint32_t idInstanceTimer)    // Timer instance identifier
+SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DeInit(SOPC_InterruptTimer* pTimer, //
+                                                      uint32_t idInstanceTimer)    //
 {
     // Check for incorrect parameters
     if ((NULL == pTimer) || (NULL == pTimer->pData) || (idInstanceTimer >= pTimer->pData->nbInstances))
@@ -439,10 +437,9 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DeInit(SOPC_InterruptTimer* pTime
     return result;
 }
 
-static inline SOPC_ReturnStatus SOPC_InterruptTimer_SetStatus(
-    SOPC_InterruptTimer* pTimer,         // Interrupt timer object
-    uint32_t idInstanceTimer,            // Timer instance identifier
-    SOPC_IrqTimer_InstanceStatus status) // Status ENABLED or DISABLED
+static inline SOPC_ReturnStatus SOPC_InterruptTimer_SetStatus(SOPC_InterruptTimer* pTimer,         //
+                                                              uint32_t idInstanceTimer,            //
+                                                              SOPC_IrqTimer_InstanceStatus status) //
 {
     if ((NULL == pTimer) || (NULL == pTimer->pData) || (idInstanceTimer >= pTimer->pData->nbInstances))
     {
@@ -525,10 +522,9 @@ static inline SOPC_ReturnStatus SOPC_InterruptTimer_SetStatus(
     return result;
 }
 
-SOPC_ReturnStatus SOPC_InterruptTimer_Instance_LastStatus(
-    SOPC_InterruptTimer* pTimer,          // Interrupt timer object
-    uint32_t idInstanceTimer,             // Timer instance identifier
-    SOPC_IrqTimer_InstanceStatus* status) // Status ENABLED or DISABLED
+SOPC_ReturnStatus SOPC_InterruptTimer_Instance_LastStatus(SOPC_InterruptTimer* pTimer,          //
+                                                          uint32_t idInstanceTimer,             //
+                                                          SOPC_IrqTimer_InstanceStatus* status) //
 {
     if ((NULL == pTimer) || (NULL == status) || (NULL == pTimer->pData) ||
         (idInstanceTimer >= pTimer->pData->nbInstances))
@@ -608,21 +604,21 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_LastStatus(
     return result;
 }
 
-SOPC_ReturnStatus SOPC_InterruptTimer_Instance_Start(SOPC_InterruptTimer* pTimer, // Interrupt timer object
-                                                     uint32_t idInstanceTimer)    // Timer instance identifier
+SOPC_ReturnStatus SOPC_InterruptTimer_Instance_Start(SOPC_InterruptTimer* pTimer, //
+                                                     uint32_t idInstanceTimer)    //
 {
     return SOPC_InterruptTimer_SetStatus(pTimer, idInstanceTimer, SOPC_INTERRUPT_TIMER_STATUS_ENABLED);
 }
 
-SOPC_ReturnStatus SOPC_InterruptTimer_Instance_Stop(SOPC_InterruptTimer* pTimer, // Interrupt timer object
-                                                    uint32_t idInstanceTimer)    // Timer instance identifier
+SOPC_ReturnStatus SOPC_InterruptTimer_Instance_Stop(SOPC_InterruptTimer* pTimer, //
+                                                    uint32_t idInstanceTimer)    //
 {
     return SOPC_InterruptTimer_SetStatus(pTimer, idInstanceTimer, SOPC_INTERRUPT_TIMER_STATUS_DISABLED);
 }
 
-SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetPeriod(SOPC_InterruptTimer* pTimer, // Interrupt timer object
-                                                         uint32_t idInstanceTimer,    // Timer instance identifier
-                                                         uint32_t period)             // Period in ticks
+SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetPeriod(SOPC_InterruptTimer* pTimer, //
+                                                         uint32_t idInstanceTimer,    //
+                                                         uint32_t period)             //
 {
     if ((NULL == pTimer) || (NULL == pTimer->pData) || (idInstanceTimer >= pTimer->pData->nbInstances) || (period < 1))
     {
@@ -706,9 +702,9 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetPeriod(SOPC_InterruptTimer* pT
     return result;
 }
 
-SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetOffset(SOPC_InterruptTimer* pTimer, // Interrupt timer object
-                                                         uint32_t idInstanceTimer,    // Timer instance identifier
-                                                         uint32_t offset)             // offset in ticks
+SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetOffset(SOPC_InterruptTimer* pTimer, //
+                                                         uint32_t idInstanceTimer,    //
+                                                         uint32_t offset)             //
 {
     if ((NULL == pTimer) || (NULL == pTimer->pData) || (idInstanceTimer >= pTimer->pData->nbInstances))
     {
@@ -792,13 +788,12 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetOffset(SOPC_InterruptTimer* pT
     return result;
 }
 
-SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetCallback(
-    SOPC_InterruptTimer* pTimer,                // Interrupt timer object
-    uint32_t idInstanceTimer,                   // Timer instance identifier
-    void* pUserContext,                         // User context
-    sopc_irq_timer_cb_start cbStart,            // Callback called when timer is started
-    sopc_irq_timer_cb_period_elapsed cbElapsed, // Callback called when timer is elapsed
-    sopc_irq_timer_cb_stop cbStop)              // Callback called when timer is stopped
+SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetCallback(SOPC_InterruptTimer* pTimer,                //
+                                                           uint32_t idInstanceTimer,                   //
+                                                           void* pUserContext,                         //
+                                                           sopc_irq_timer_cb_start cbStart,            //
+                                                           sopc_irq_timer_cb_period_elapsed cbElapsed, //
+                                                           sopc_irq_timer_cb_stop cbStop)              //
 {
     if ((NULL == pTimer) || (NULL == pTimer->pData) || (idInstanceTimer >= pTimer->pData->nbInstances))
     {
@@ -888,10 +883,10 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetCallback(
     return result;
 }
 
-SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetData(SOPC_InterruptTimer* pTimer, // Interrupt timer object
-                                                       uint32_t idInstanceTimer,    // Timer instance identifier
-                                                       uint8_t* pData,              // Data to publish
-                                                       uint32_t sizeToWrite)        // Data size
+SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetData(SOPC_InterruptTimer* pTimer, //
+                                                       uint32_t idInstanceTimer,    //
+                                                       uint8_t* pData,              //
+                                                       uint32_t sizeToWrite)        //
 {
     if ((NULL == pTimer) || (NULL == pTimer->pData) || (idInstanceTimer >= pTimer->pData->nbInstances))
     {
@@ -1018,8 +1013,7 @@ void SOPC_InterruptTimer_DestroyDataContainer(SOPC_InterruptTimer_DataHandle** p
     }
 }
 
-SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_Initialize(
-    SOPC_InterruptTimer_DataHandle* pDataContainer // Data handle
+SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_Initialize(SOPC_InterruptTimer_DataHandle* pDataContainer //
 )
 {
     if ((NULL == pDataContainer) || (NULL == (pDataContainer)->pTimer) || (NULL == (pDataContainer)->pTimer->pData) ||
@@ -1220,8 +1214,8 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_SetNewSize(SOPC_Interr
     return result;
 }
 
-SOPC_ReturnStatus SOPC_InterruptTimer_Update(SOPC_InterruptTimer* pTimer, // Interrupt timer object
-                                             uint32_t externalTickValue)  // Tick value. Shall be always incremented.
+SOPC_ReturnStatus SOPC_InterruptTimer_Update(SOPC_InterruptTimer* pTimer, //
+                                             uint32_t externalTickValue)  //
 {
     if ((NULL == pTimer) || (NULL == pTimer->pData))
     {
@@ -1359,9 +1353,8 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Update(SOPC_InterruptTimer* pTimer, // Int
     return result;
 }
 
-static inline tInterruptTimerData* SOPC_InterruptTimer_Workspace_Create(
-    uint32_t nbInstances, // Max instanciable timer
-    uint32_t maxDataSize) // Max size of data hold by each timer
+static inline tInterruptTimerData* SOPC_InterruptTimer_Workspace_Create(uint32_t nbInstances, //
+                                                                        uint32_t maxDataSize) //
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
     tInterruptTimerData* pWks = SOPC_Calloc(1, sizeof(tInterruptTimerData));
