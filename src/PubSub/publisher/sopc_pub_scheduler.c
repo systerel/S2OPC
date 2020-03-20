@@ -134,7 +134,7 @@ static struct
     // Thread variable monitoring
 
     Thread handleThreadVarMonitoring;
-    volatile bool bQuitVarMonitoring;
+    bool bQuitVarMonitoring;
 
     // Thread which call beat heart function of RT Publisher
 
@@ -142,7 +142,7 @@ static struct
 
 #if SOPC_PUBSCHEDULER_BEATHEART_FROM_IRQ == 0
     Thread handleThreadBeatHeart; // Handle thread simulates IRQ. This thread call HeartBeat publisher function.
-    volatile bool bQuitBeatHeart; // Quit control of thread which simulates IRQ
+    bool bQuitBeatHeart;          // Quit control of thread which simulates IRQ
 #endif
 } pubSchedulerCtx = {.isStarted = false,
                      .processingStartStop = false,
@@ -197,7 +197,10 @@ static void SOPC_PubScheduler_Context_Clear(void)
     /* Stop beat heart and variable monitoring threads */
 #if SOPC_PUBSCHEDULER_BEATHEART_FROM_IRQ == 0
     printf("# Info: Stop beat heart thread\r\n");
-    pubSchedulerCtx.bQuitBeatHeart = true;
+
+    bool newQuitBeatHeart = true;
+
+    __atomic_store(&pubSchedulerCtx.bQuitBeatHeart, &newQuitBeatHeart, __ATOMIC_SEQ_CST);
 
     if (pubSchedulerCtx.handleThreadBeatHeart != (Thread) NULL)
     {
@@ -207,7 +210,9 @@ static void SOPC_PubScheduler_Context_Clear(void)
 #endif
 
     printf("# Info: Stop var monitoring thread\r\n");
-    pubSchedulerCtx.bQuitVarMonitoring = true;
+
+    bool newVarMonitoringStatus = true;
+    __atomic_store(&pubSchedulerCtx.bQuitVarMonitoring, &newVarMonitoringStatus, __ATOMIC_SEQ_CST);
 
     if (pubSchedulerCtx.handleThreadVarMonitoring != (Thread) NULL)
     {
@@ -445,7 +450,9 @@ static void* SOPC_RT_Publisher_ThreadBeatHeartCallback(void* arg)
 
     printf("# RT Publisher tick thread: Beat heart thread launched !!!\r\n");
 
-    while (!pubSchedulerCtx.bQuitBeatHeart)
+    bool readQuitHeartBeat = false;
+    __atomic_load(&pubSchedulerCtx.bQuitBeatHeart, &readQuitHeartBeat, __ATOMIC_SEQ_CST);
+    while (!readQuitHeartBeat)
     {
         resultUpdateThread = SOPC_RT_Publisher_HeartBeat(pubSchedulerCtx.pRTPublisher, beatHeart++);
         if (resultUpdateThread != SOPC_STATUS_OK)
@@ -454,6 +461,7 @@ static void* SOPC_RT_Publisher_ThreadBeatHeartCallback(void* arg)
         }
 
         SOPC_Sleep(SOPC_TIMER_RESOLUTION_MS);
+        __atomic_load(&pubSchedulerCtx.bQuitBeatHeart, &readQuitHeartBeat, __ATOMIC_SEQ_CST);
     }
 
     printf("# RT Publisher tick thread: Quit Beat heart thread !!!\r\n");
@@ -469,7 +477,10 @@ static void* SOPC_RT_Publisher_VarMonitoringCallback(void* arg)
 
     printf("# Publisher variables monitoring: thread launched !!!\r\n");
 
-    while (!pubSchedulerCtx.bQuitVarMonitoring)
+    bool readVarMonitoringStatus = false;
+    __atomic_load(&pubSchedulerCtx.bQuitVarMonitoring, &readVarMonitoringStatus, __ATOMIC_SEQ_CST);
+
+    while (!readVarMonitoringStatus)
     {
         for (uint32_t iIterMsg = 0; iIterMsg < pubSchedulerCtx.messages.current; iIterMsg++)
         {
@@ -597,6 +608,8 @@ static void* SOPC_RT_Publisher_VarMonitoringCallback(void* arg)
         }
 
         SOPC_Sleep(SOPC_TIMER_RESOLUTION_MS);
+
+        __atomic_load(&pubSchedulerCtx.bQuitVarMonitoring, &readVarMonitoringStatus, __ATOMIC_SEQ_CST);
     }
 
     printf("# Publisher variables monitoring: quit variable monitoring thread !!!\r\n");
@@ -770,7 +783,8 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config, SOPC_PubSourceVar
 
         if (allocSuccess)
         {
-            pubSchedulerCtx.bQuitBeatHeart = false;
+            bool newQuitHeartBeat = false;
+            __atomic_store(&pubSchedulerCtx.bQuitBeatHeart, &newQuitHeartBeat, __ATOMIC_SEQ_CST);
             resultSOPC = SOPC_Thread_Create(&pubSchedulerCtx.handleThreadBeatHeart,    //
                                             SOPC_RT_Publisher_ThreadBeatHeartCallback, //
                                             NULL,                                      //
@@ -788,7 +802,9 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config, SOPC_PubSourceVar
 
         if (allocSuccess)
         {
-            pubSchedulerCtx.bQuitVarMonitoring = false;
+            bool newVarMonitoringStatus = false;
+            __atomic_store(&pubSchedulerCtx.bQuitVarMonitoring, &newVarMonitoringStatus, __ATOMIC_SEQ_CST);
+
             resultSOPC = SOPC_Thread_Create(&pubSchedulerCtx.handleThreadVarMonitoring, //
                                             SOPC_RT_Publisher_VarMonitoringCallback,    //
                                             NULL,                                       //
