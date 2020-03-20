@@ -89,8 +89,7 @@ static inline ePublisherSyncStatus SOPC_RT_Publisher_IncrementInUseStatus(SOPC_R
 /// @return RT Publisher sync status, INITIALIZED and beyond.
 static inline ePublisherSyncStatus SOPC_RT_Publisher_DecrementInUseStatus(SOPC_RT_Publisher* pRtPub);
 
-SOPC_RT_Publisher_Initializer* SOPC_RT_Publisher_Initializer_Create(
-    uint32_t maxSizeOfMessage) // Max size of a message, common to all messages
+SOPC_RT_Publisher_Initializer* SOPC_RT_Publisher_Initializer_Create(uint32_t maxSizeOfMessage) //
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
     SOPC_RT_Publisher_Initializer* pInitializer = SOPC_Calloc(1, sizeof(SOPC_RT_Publisher_Initializer));
@@ -135,16 +134,15 @@ void SOPC_RT_Publisher_Initializer_Destroy(SOPC_RT_Publisher_Initializer** ppIni
     }
 }
 
-SOPC_ReturnStatus SOPC_RT_Publisher_Initializer_AddMessage(
-    SOPC_RT_Publisher_Initializer* pConfig,        // RT publisher configuration
-    uint32_t period,                               // Period in heart beats
-    uint32_t offset,                               // Offset in heart beats
-    void* pContext,                                // User context
-    ptrCallbackStart cbStart,                      // Start callback
-    ptrCallbackSend cbSend,                        // Send callback
-    ptrCallbackStop cbStop,                        // Stop callback
-    SOPC_RT_Publisher_MessageStatus initialStatus, // initial status
-    uint32_t* pOutMsgId)                           // ===> Message Identifier
+SOPC_ReturnStatus SOPC_RT_Publisher_Initializer_AddMessage(SOPC_RT_Publisher_Initializer* pConfig,        //
+                                                           uint32_t period,                               //
+                                                           uint32_t offset,                               //
+                                                           void* pContext,                                //
+                                                           ptrCallbackStart cbStart,                      //
+                                                           ptrCallbackSend cbSend,                        //
+                                                           ptrCallbackStop cbStop,                        //
+                                                           SOPC_RT_Publisher_MessageStatus initialStatus, //
+                                                           uint32_t* pOutMsgId)                           //
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
@@ -202,8 +200,8 @@ SOPC_ReturnStatus SOPC_RT_Publisher_Initializer_AddMessage(
     return result;
 }
 
-SOPC_ReturnStatus SOPC_RT_Publisher_Initialize(SOPC_RT_Publisher* pPub,                     // RT Publisher object
-                                               SOPC_RT_Publisher_Initializer* pInitializer) // RT Publisher initializer
+SOPC_ReturnStatus SOPC_RT_Publisher_Initialize(SOPC_RT_Publisher* pPub,                     //
+                                               SOPC_RT_Publisher_Initializer* pInitializer) //
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
     if (NULL == pPub || NULL == pInitializer)
@@ -304,10 +302,9 @@ void SOPC_RT_Publisher_Destroy(SOPC_RT_Publisher** ppPubRt)
     return;
 }
 
-SOPC_ReturnStatus SOPC_RT_Publisher_GetMessagePubStatus(
-    SOPC_RT_Publisher* pPub,                  // Publisher object
-    uint32_t msgIdentifier,                   // Message identifier
-    SOPC_RT_Publisher_MessageStatus* pStatus) // Next status will be taken into account by next heart beat
+SOPC_ReturnStatus SOPC_RT_Publisher_GetMessagePubStatus(SOPC_RT_Publisher* pPub,                  //
+                                                        uint32_t msgIdentifier,                   //
+                                                        SOPC_RT_Publisher_MessageStatus* pStatus) //
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
     if (NULL == pPub || NULL == pStatus)
@@ -349,15 +346,15 @@ SOPC_ReturnStatus SOPC_RT_Publisher_GetMessagePubStatus(
     return result;
 }
 
-SOPC_ReturnStatus SOPC_RT_Publisher_ConfigureMessage(SOPC_RT_Publisher* pPub,    // RT Publisher object
-                                                     uint32_t messageIdentifier, // Message identifier
-                                                     uint32_t period,            // Period in heart beats
-                                                     uint32_t offset,            // offset in beat hearts
-                                                     void* pContext,             // User context
-                                                     ptrCallbackStart cbStart,   // Start callback
-                                                     ptrCallbackSend cbSend,     // Send callback
-                                                     ptrCallbackStart cbStop,    // Stop callback)
-                                                     SOPC_RT_Publisher_MessageStatus initialStatus) // initial status
+SOPC_ReturnStatus SOPC_RT_Publisher_ConfigureMessage(SOPC_RT_Publisher* pPub,                       //
+                                                     uint32_t messageIdentifier,                    //
+                                                     uint32_t period,                               //
+                                                     uint32_t offset,                               //
+                                                     void* pContext,                                //
+                                                     ptrCallbackStart cbStart,                      //
+                                                     ptrCallbackSend cbSend,                        //
+                                                     ptrCallbackStart cbStop,                       //
+                                                     SOPC_RT_Publisher_MessageStatus initialStatus) //
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
     if (NULL == pPub)
@@ -389,8 +386,8 @@ SOPC_ReturnStatus SOPC_RT_Publisher_ConfigureMessage(SOPC_RT_Publisher* pPub,   
     return result;
 }
 
-SOPC_ReturnStatus SOPC_RT_Publisher_StartMessagePublishing(SOPC_RT_Publisher* pPub, // RT Publisher object
-                                                           uint32_t msgIdentifier)  // Message identifier
+SOPC_ReturnStatus SOPC_RT_Publisher_StartMessagePublishing(SOPC_RT_Publisher* pPub, //
+                                                           uint32_t msgIdentifier)  //
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
@@ -442,9 +439,9 @@ SOPC_ReturnStatus SOPC_RT_Publisher_StopMessagePublishing(SOPC_RT_Publisher* pPu
     return result;
 }
 
-SOPC_ReturnStatus SOPC_RT_Publisher_GetBuffer(SOPC_RT_Publisher* pPub, // RT Publisher object
-                                              uint32_t msgIdentifier,  // message identifier
-                                              SOPC_Buffer* pBuffer)    // SOPC Buffer with unallocated data pointer
+SOPC_ReturnStatus SOPC_RT_Publisher_GetBuffer(SOPC_RT_Publisher* pPub, //
+                                              uint32_t msgIdentifier,  //
+                                              SOPC_Buffer* pBuffer)    //
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
@@ -493,9 +490,9 @@ SOPC_ReturnStatus SOPC_RT_Publisher_GetBuffer(SOPC_RT_Publisher* pPub, // RT Pub
     return result;
 }
 
-SOPC_ReturnStatus SOPC_RT_Publisher_ReleaseBuffer(SOPC_RT_Publisher* pPub, // RT Publisher object
-                                                  uint32_t msgIdentifier,  // Message identifier
-                                                  SOPC_Buffer* pBuffer)    // Buffer with current size to commit
+SOPC_ReturnStatus SOPC_RT_Publisher_ReleaseBuffer(SOPC_RT_Publisher* pPub, //
+                                                  uint32_t msgIdentifier,  //
+                                                  SOPC_Buffer* pBuffer)    //
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
@@ -535,10 +532,10 @@ SOPC_ReturnStatus SOPC_RT_Publisher_ReleaseBuffer(SOPC_RT_Publisher* pPub, // RT
     return result;
 }
 
-SOPC_ReturnStatus SOPC_RT_Publisher_SetMessageValue(SOPC_RT_Publisher* pPub, // RT Publisher object
-                                                    uint32_t msgIdentifier,  // Message identifier
-                                                    uint8_t* value,          // Value to publish
-                                                    uint32_t size)           // Size of value
+SOPC_ReturnStatus SOPC_RT_Publisher_SetMessageValue(SOPC_RT_Publisher* pPub, //
+                                                    uint32_t msgIdentifier,  //
+                                                    uint8_t* value,          //
+                                                    uint32_t size)           //
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
@@ -563,8 +560,8 @@ SOPC_ReturnStatus SOPC_RT_Publisher_SetMessageValue(SOPC_RT_Publisher* pPub, // 
     return result;
 }
 
-SOPC_ReturnStatus SOPC_RT_Publisher_HeartBeat(SOPC_RT_Publisher* pPub, // RT Publisher object
-                                              uint32_t tickValue)      // Cumulative tick value
+SOPC_ReturnStatus SOPC_RT_Publisher_HeartBeat(SOPC_RT_Publisher* pPub, //
+                                              uint32_t tickValue)      //
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
     if (NULL == pPub)
@@ -603,9 +600,8 @@ static void _SOPC_RT_Publisher_DeInitialize(SOPC_RT_Publisher* pPub)
     }
 }
 
-static SOPC_ReturnStatus _SOPC_RT_Publisher_Initialize(
-    SOPC_RT_Publisher* pPub,                // RT Publisher object
-    SOPC_RT_Publisher_Initializer* pConfig) // RT Publisher configuration
+static SOPC_ReturnStatus _SOPC_RT_Publisher_Initialize(SOPC_RT_Publisher* pPub,                //
+                                                       SOPC_RT_Publisher_Initializer* pConfig) //
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
