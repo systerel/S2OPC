@@ -592,7 +592,7 @@ static void* SOPC_RT_Publisher_VarMonitoringCallback(void* arg)
 
                                 if (pBuffer != NULL)
                                 {
-                                    status = SOPC_Buffer_Copy(&buffer, pBuffer);
+                                    (void) SOPC_Buffer_Copy(&buffer, pBuffer);
                                     SOPC_Buffer_Delete(pBuffer);
                                 }
 
@@ -911,5 +911,9 @@ static void SOPC_PubScheduler_CtxUdp_Clear(SOPC_PubScheduler_TransportCtx* ctx)
 
 static void SOPC_PubScheduler_CtxUdp_Send(SOPC_PubScheduler_TransportCtx* ctx, SOPC_Buffer* buffer)
 {
-    SOPC_UDP_Socket_SendTo(ctx->sock, ctx->multicastAddr, buffer);
+    SOPC_ReturnStatus result = SOPC_UDP_Socket_SendTo(ctx->sock, ctx->multicastAddr, buffer);
+    if (SOPC_STATUS_OK != result)
+    {
+        // TODO: Some verifications should maybe added...
+    }
 }
