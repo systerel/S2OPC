@@ -374,7 +374,7 @@ static void cbSendPubMsg(uint32_t msgId,     // Message instance identifier
             {
                 cptMsgRead1++;
             }
-            strcpy(msgRead1, pData);
+            strncpy(msgRead1, pData, 255);
         }
     }
 
@@ -387,7 +387,7 @@ static void cbSendPubMsg(uint32_t msgId,     // Message instance identifier
             {
                 cptMsgRead2++;
             }
-            strcpy(msgRead2, pData);
+            strncpy(msgRead2, pData, 255);
         }
     }
 
@@ -400,7 +400,7 @@ static void cbSendPubMsg(uint32_t msgId,     // Message instance identifier
             {
                 cptMsgRead3++;
             }
-            strcpy(msgRead3, pData);
+            strncpy(msgRead3, pData, 255);
         }
     }
 #ifdef DEBUG_RT_TEST
@@ -1623,22 +1623,20 @@ static int SOPC_TEST_IRQ_TIMER(void)
         result = SOPC_InterruptTimer_Instance_LastStatus(myTimer, 0, &status);
 
         printf("\r\n===>STOP TIMER 0 NEXT STATUS BEFORE STOP CMD = %d\r\n", status);
-        if (status != SOPC_INTERRUPT_TIMER_STATUS_ENABLED)
+        if (SOPC_STATUS_OK == result && SOPC_INTERRUPT_TIMER_STATUS_ENABLED == status)
         {
-            result = SOPC_STATUS_NOK;
-        }
+            result = SOPC_InterruptTimer_Instance_Stop(myTimer, 0);
 
-        result = SOPC_InterruptTimer_Instance_Stop(myTimer, 0);
-
-        if (result == SOPC_STATUS_OK)
-        {
-            status = 0xFFFFFFFF;
-            result = SOPC_InterruptTimer_Instance_LastStatus(myTimer, 0, &status);
-            printf("\r\n===>STOP TIMER 0 NEXT STATUS AFTER STOP CMD = %d\r\n", status);
-
-            if (status != SOPC_INTERRUPT_TIMER_STATUS_DISABLED)
+            if (SOPC_STATUS_OK == result)
             {
-                result = SOPC_STATUS_NOK;
+                status = 0xFFFFFFFF;
+                result = SOPC_InterruptTimer_Instance_LastStatus(myTimer, 0, &status);
+                printf("\r\n===>STOP TIMER 0 NEXT STATUS AFTER STOP CMD = %d\r\n", status);
+
+                if (status != SOPC_INTERRUPT_TIMER_STATUS_DISABLED)
+                {
+                    result = SOPC_STATUS_NOK;
+                }
             }
         }
 
@@ -1649,6 +1647,7 @@ static int SOPC_TEST_IRQ_TIMER(void)
             printf("\r\n===>ERROR STOP TIMER 0 - STATUS = %d\r\n", status);
             res = -1;
         }
+
         result = SOPC_InterruptTimer_Instance_Stop(myTimer, 1);
         if (result != SOPC_STATUS_OK)
         {
