@@ -91,22 +91,21 @@ static inline ePublisherSyncStatus SOPC_RT_Publisher_DecrementInUseStatus(SOPC_R
 
 SOPC_RT_Publisher_Initializer* SOPC_RT_Publisher_Initializer_Create(uint32_t maxSizeOfMessage) //
 {
-    SOPC_ReturnStatus result = SOPC_STATUS_OK;
     SOPC_RT_Publisher_Initializer* pInitializer = SOPC_Calloc(1, sizeof(SOPC_RT_Publisher_Initializer));
-    if (NULL == pInitializer || maxSizeOfMessage < 1)
+    if (NULL == pInitializer)
     {
+        return NULL;
+    }
+
+    if (maxSizeOfMessage < 1)
+    {
+        SOPC_Free(pInitializer);
         return NULL;
     }
 
     pInitializer->nbMessages = 0;
     pInitializer->maxSizeOfMessage = maxSizeOfMessage;
     pInitializer->pMessageConfig = NULL;
-
-    if (SOPC_STATUS_OK != result)
-    {
-        SOPC_Free(pInitializer);
-        pInitializer = NULL;
-    }
 
     return pInitializer;
 }
