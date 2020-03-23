@@ -566,20 +566,24 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_LastStatus(SOPC_InterruptTimer* p
 
             // Try to write DBO
 
-            SOPC_DoubleBuffer_WriteBufferGetPtr(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], // DBO object
-                                                idBuffer,                                          // Reserved buffer
-                                                (uint8_t**) &pTimerInfo, // Pointer on data field
-                                                &pSize,                  // Pointer on size field
-                                                false); // Don't ignore the least old data after written data
+            result =
+                SOPC_DoubleBuffer_WriteBufferGetPtr(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], // DBO object
+                                                    idBuffer,                // Reserved buffer
+                                                    (uint8_t**) &pTimerInfo, // Pointer on data field
+                                                    &pSize,                  // Pointer on size field
+                                                    false); // Don't ignore the least old data after written data
 
-            // Check written size. Until wStatus field included minimum.
-            if (*pSize < offsetof(tTimerInstanceInfo, wStatus) + member_size(tTimerInstanceInfo, wStatus))
+            if (SOPC_STATUS_OK == result)
             {
-                result = SOPC_STATUS_NOK;
-            }
-            else
-            {
-                *status = pTimerInfo->wStatus;
+                // Check written size. Until wStatus field included minimum.
+                if (*pSize < offsetof(tTimerInstanceInfo, wStatus) + member_size(tTimerInstanceInfo, wStatus))
+                {
+                    result = SOPC_STATUS_NOK;
+                }
+                else
+                {
+                    *status = pTimerInfo->wStatus;
+                }
             }
 
             // Mark API as not in use.
