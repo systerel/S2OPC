@@ -1055,38 +1055,42 @@ static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Pin_WriteDataHandle_GetBuffe
         }
     }
 
-    // Try initialization of data handle
-    uint8_t* buffer = NULL;
-    uint32_t maximumAllowedSize = 0;
-
-    result = SOPC_MsgBox_DataHandle_Initialize(pDataHandle);
-
-    if (SOPC_STATUS_OK == result)
     {
-        result = SOPC_MsgBox_DataHandle_GetDataEvt(pDataHandle,          //
-                                                   &buffer,              //
-                                                   &maximumAllowedSize); //
-    }
+        // Try initialization of data handle
+        uint8_t* buffer = NULL;
+        uint32_t maximumAllowedSize = 0;
 
-    if (SOPC_STATUS_OK == result)
-    {
-        in_out_sopc_buffer->maximum_size = maximumAllowedSize;
-        in_out_sopc_buffer->initial_size = maximumAllowedSize;
-        in_out_sopc_buffer->current_size = maximumAllowedSize;
-        in_out_sopc_buffer->length = 0;
-        in_out_sopc_buffer->position = 0;
-        in_out_sopc_buffer->data = buffer;
-    }
-    else
-    {
-        in_out_sopc_buffer->maximum_size = 0;
-        in_out_sopc_buffer->current_size = 0;
-        in_out_sopc_buffer->initial_size = 0;
-        in_out_sopc_buffer->length = 0;
-        in_out_sopc_buffer->position = 0;
-        in_out_sopc_buffer->data = NULL;
-    }
+        if (SOPC_STATUS_OK == result)
+        {
+            result = SOPC_MsgBox_DataHandle_Initialize(pDataHandle);
 
+            if (SOPC_STATUS_OK == result)
+            {
+                result = SOPC_MsgBox_DataHandle_GetDataEvt(pDataHandle,          //
+                                                           &buffer,              //
+                                                           &maximumAllowedSize); //
+            }
+        }
+
+        if (SOPC_STATUS_OK == result)
+        {
+            in_out_sopc_buffer->maximum_size = maximumAllowedSize;
+            in_out_sopc_buffer->initial_size = maximumAllowedSize;
+            in_out_sopc_buffer->current_size = maximumAllowedSize;
+            in_out_sopc_buffer->length = 0;
+            in_out_sopc_buffer->position = 0;
+            in_out_sopc_buffer->data = buffer;
+        }
+        else
+        {
+            in_out_sopc_buffer->maximum_size = 0;
+            in_out_sopc_buffer->current_size = 0;
+            in_out_sopc_buffer->initial_size = 0;
+            in_out_sopc_buffer->length = 0;
+            in_out_sopc_buffer->position = 0;
+            in_out_sopc_buffer->data = NULL;
+        }
+    }
     return result;
 }
 
@@ -1139,25 +1143,28 @@ static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Pin_WriteDataHandle_ReleaseB
         }
     }
 
-    // Try to update data size
-    bool bCancel = false;
-
-    result = SOPC_MsgBox_DataHandle_UpdateDataEvtSize(pDataHandle,                 //
-                                                      in_out_sopc_buffer->length); //
-
-    // Cancel commit in case of error
     if (SOPC_STATUS_OK == result)
     {
-        bCancel = false;
-    }
-    else
-    {
-        bCancel = true;
-    }
+        // Try to update data size
+        bool bCancel = false;
 
-    // Only result of finalize is returned. If pDataHandle is NULL, return INVALID_PARAM
-    result = SOPC_MsgBox_DataHandle_Finalize(pDataHandle, //
-                                             bCancel);    //
+        result = SOPC_MsgBox_DataHandle_UpdateDataEvtSize(pDataHandle,                 //
+                                                          in_out_sopc_buffer->length); //
+
+        // Cancel commit in case of error
+        if (SOPC_STATUS_OK == result)
+        {
+            bCancel = false;
+        }
+        else
+        {
+            bCancel = true;
+        }
+
+        // Only result of finalize is returned. If pDataHandle is NULL, return INVALID_PARAM
+        result = SOPC_MsgBox_DataHandle_Finalize(pDataHandle, //
+                                                 bCancel);    //
+    }
 
     in_out_sopc_buffer->maximum_size = 0;
     in_out_sopc_buffer->current_size = 0;
