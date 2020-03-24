@@ -491,7 +491,8 @@ SOPC_ReturnStatus SOPC_RT_Publisher_GetBuffer(SOPC_RT_Publisher* pPub, //
 
 SOPC_ReturnStatus SOPC_RT_Publisher_ReleaseBuffer(SOPC_RT_Publisher* pPub, //
                                                   uint32_t msgIdentifier,  //
-                                                  SOPC_Buffer* pBuffer)    //
+                                                  SOPC_Buffer* pBuffer,    //
+                                                  bool bCancel)            //
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
@@ -507,13 +508,13 @@ SOPC_ReturnStatus SOPC_RT_Publisher_ReleaseBuffer(SOPC_RT_Publisher* pPub, //
         result = SOPC_InterruptTimer_Instance_DataHandle_SetNewSize(pPub->ppTmrDataHandle[msgIdentifier], //
                                                                     pBuffer->length);                     //
 
-        bool bCancel = false;
+        bool bLocalCancel = bCancel;
         if (SOPC_STATUS_OK != result)
         {
-            bCancel = true;
+            bLocalCancel = true;
         }
 
-        SOPC_InterruptTimer_Instance_DataHandle_Finalize(pPub->ppTmrDataHandle[msgIdentifier], bCancel);
+        SOPC_InterruptTimer_Instance_DataHandle_Finalize(pPub->ppTmrDataHandle[msgIdentifier], bLocalCancel);
 
         SOPC_RT_Publisher_DecrementInUseStatus(pPub);
     }

@@ -241,10 +241,12 @@ SOPC_ReturnStatus SOPC_RT_Publisher_GetBuffer(SOPC_RT_Publisher* pPub, //
 /// @param [in] pPub RT Publisher object
 /// @param [in] msgIdentifier Message identifier returned by SOPC_RT_Publisher_Initializer_AddMessage
 /// @param [inout] pBuffer SOPC_Buffer structure, with data pointer set by GetBuffer and new size (number of significant
+/// @param [in] bCancel Cancel commit
 /// bytes). On return, data pointer is set to NULL.
 /// @return SOPC_STATUS_OK if data well committed. SOPC_Buffer data pointer is set to NULL.
 SOPC_ReturnStatus SOPC_RT_Publisher_ReleaseBuffer(SOPC_RT_Publisher* pPub, //
                                                   uint32_t msgIdentifier,  //
-                                                  SOPC_Buffer* pBuffer);   //
+                                                  SOPC_Buffer* pBuffer,    //
+                                                  bool bCancel);           //
 
 #endif /* SOPC_RT_PUBLISHER_H_ */
