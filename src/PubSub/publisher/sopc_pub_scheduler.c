@@ -951,5 +951,6 @@ static void SOPC_PubScheduler_CtxUdp_Send(SOPC_PubScheduler_TransportCtx* ctx, S
     if (SOPC_STATUS_OK != result)
     {
         // TODO: Some verifications should maybe added...
+        printf("# Error on SOPC_UDP_Socket_SendTo  ...\r\n");
     }
 }
