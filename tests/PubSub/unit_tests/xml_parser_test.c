@@ -63,6 +63,10 @@ START_TEST(test_pub_xml_parsing)
     ck_assert_uint_eq(1, SOPC_WriterGroup_Get_Version(writerGroup));
     ck_assert_uint_eq(SOPC_SecurityMode_None, SOPC_WriterGroup_Get_SecurityMode(writerGroup));
     ck_assert_uint_eq(1, SOPC_WriterGroup_Nb_DataSetWriter(writerGroup));
+
+    // Test sks
+    ck_assert_uint_eq(0, SOPC_WriterGroup_Nb_SecurityKeyServices(writerGroup));
+
     // DataSetWriter
     SOPC_DataSetWriter* dataSetWriter = SOPC_WriterGroup_Get_DataSetWriter_At(writerGroup, 0);
     ck_assert_uint_eq(SOPC_WriterGroup_Get_Id(writerGroup), SOPC_DataSetWriter_Get_Id(dataSetWriter));
@@ -79,6 +83,19 @@ START_TEST(test_pub_xml_parsing)
     ck_assert_uint_eq(1, SOPC_WriterGroup_Get_Version(writerGroup));
     ck_assert_uint_eq(SOPC_SecurityMode_SignAndEncrypt, SOPC_WriterGroup_Get_SecurityMode(writerGroup));
     ck_assert_uint_eq(1, SOPC_WriterGroup_Nb_DataSetWriter(writerGroup));
+
+    // Test sks
+    ck_assert_uint_eq(2, SOPC_WriterGroup_Nb_SecurityKeyServices(writerGroup));
+    SOPC_SecurityKeyServices* sks = SOPC_WriterGroup_Get_SecurityKeyServices_At(writerGroup, 0);
+    ck_assert_ptr_nonnull(sks);
+    ck_assert_str_eq("opc.tcp://localhost:4841", SOPC_SecurityKeyServices_Get_EndpointUrl(sks));
+    ck_assert_ptr_nonnull(SOPC_SecurityKeyServices_Get_ServerCertificate(sks));
+
+    sks = SOPC_WriterGroup_Get_SecurityKeyServices_At(writerGroup, 1);
+    ck_assert_ptr_nonnull(sks);
+    ck_assert_str_eq("opc.tcp://localhost:4842", SOPC_SecurityKeyServices_Get_EndpointUrl(sks));
+    ck_assert_ptr_nonnull(SOPC_SecurityKeyServices_Get_ServerCertificate(sks));
+
     // DataSetWriter
     dataSetWriter = SOPC_WriterGroup_Get_DataSetWriter_At(writerGroup, 0);
     ck_assert_uint_eq(SOPC_WriterGroup_Get_Id(writerGroup), SOPC_DataSetWriter_Get_Id(dataSetWriter));

@@ -22,11 +22,13 @@
 
 #include "sopc_builtintypes.h"
 #include "sopc_types.h"
+#include "sopc_key_manager.h"
 
 typedef struct SOPC_PubSubConfiguration SOPC_PubSubConfiguration;
 typedef struct SOPC_PubSubConnection SOPC_PubSubConnection;
 typedef struct SOPC_PublishedDataSet SOPC_PublishedDataSet;
 typedef struct SOPC_WriterGroup SOPC_WriterGroup;
+typedef struct SOPC_SecurityKeyServices SOPC_SecurityKeyServices;
 typedef struct SOPC_DataSetWriter SOPC_DataSetWriter;
 typedef struct SOPC_ReaderGroup SOPC_ReaderGroup;
 typedef struct SOPC_DataSetReader SOPC_DataSetReader;
@@ -152,11 +154,9 @@ SOPC_SecurityMode_Type SOPC_ReaderGroup_Get_SecurityMode(const SOPC_ReaderGroup*
 void SOPC_ReaderGroup_Set_SecurityMode(SOPC_ReaderGroup* group, SOPC_SecurityMode_Type mode);
 // make a copy of id
 bool SOPC_ReaderGroup_Set_SecurityGroupId(SOPC_ReaderGroup* group, char* securityGroupId);
-void SOPC_ReaderGroup_Set_EndPointDescription(SOPC_ReaderGroup* group,
-                                              OpcUa_EndpointDescription* endpoints,
-                                              uint32_t nb);
-uint32_t SOPC_ReaderGroup_Nb_EndPointDescription(SOPC_ReaderGroup* group);
-OpcUa_EndpointDescription* SOPC_ReaderGroup_Get_EndPointDescription(SOPC_ReaderGroup* group, uint32_t index);
+bool SOPC_ReaderGroup_Allocate_SecurityKeyServices_Array(SOPC_ReaderGroup* group, uint32_t nb);
+uint32_t SOPC_ReaderGroup_Nb_SecurityKeyServices(const SOPC_ReaderGroup* group);
+SOPC_SecurityKeyServices* SOPC_ReaderGroup_Get_SecurityKeyServices_At(const SOPC_ReaderGroup* group, uint32_t index);
 
 bool SOPC_ReaderGroup_Allocate_DataSetReader_Array(SOPC_ReaderGroup* group, uint8_t nb);
 uint8_t SOPC_ReaderGroup_Nb_DataSetReader(const SOPC_ReaderGroup* group);
@@ -231,11 +231,9 @@ SOPC_SecurityMode_Type SOPC_WriterGroup_Get_SecurityMode(const SOPC_WriterGroup*
 void SOPC_WriterGroup_Set_SecurityMode(SOPC_WriterGroup* group, SOPC_SecurityMode_Type mode);
 // make a copy of id
 bool SOPC_WriterGroup_Set_SecurityGroupId(SOPC_WriterGroup* group, char* securityGroupId);
-void SOPC_WriterGroup_Set_EndPointDescription(SOPC_WriterGroup* group,
-                                              OpcUa_EndpointDescription* endpoint,
-                                              uint32_t nb);
-uint32_t SOPC_WriterGroup_Nb_EndPointDescription(SOPC_WriterGroup* group);
-OpcUa_EndpointDescription* SOPC_WriterGroup_Get_EndPointDescription(SOPC_WriterGroup* group, uint32_t index);
+bool SOPC_WriterGroup_Allocate_SecurityKeyServices_Array(SOPC_WriterGroup* group, uint32_t nb);
+uint32_t SOPC_WriterGroup_Nb_SecurityKeyServices(const SOPC_WriterGroup* group);
+SOPC_SecurityKeyServices* SOPC_WriterGroup_Get_SecurityKeyServices_At(const SOPC_WriterGroup* group, uint32_t index);
 
 bool SOPC_WriterGroup_Allocate_DataSetWriter_Array(SOPC_WriterGroup* group, uint8_t nb);
 uint8_t SOPC_WriterGroup_Nb_DataSetWriter(const SOPC_WriterGroup* group);
@@ -291,7 +289,15 @@ SOPC_FieldTarget* SOPC_FieldMetaData_Get_TargetVariable(const SOPC_FieldMetaData
 // only for Publisher
 SOPC_PublishedVariable* SOPC_FieldMetaData_Get_PublishedVariable(const SOPC_FieldMetaData* fieldMetaData);
 
-/* Helper Functions*/
+
+/** SOPC_SecurityKeyServices **/
+const char* SOPC_SecurityKeyServices_Get_EndpointUrl(const SOPC_SecurityKeyServices* sks);
+/* Data are copied */
+bool SOPC_SecurityKeyServices_Set_EndpointUrl(SOPC_SecurityKeyServices* sks, const char* uri);
+const SOPC_SerializedCertificate* SOPC_SecurityKeyServices_Get_ServerCertificate(const SOPC_SecurityKeyServices* sks);
+/* ServerCertificate data ownership moves to SOPC_SecurityKeyServices */
+bool SOPC_SecurityKeyServices_Set_ServerCertificate(SOPC_SecurityKeyServices* sks, SOPC_SerializedCertificate* serverCertificate);
+
 
 /* Create an endpoint description and set the url. Other field values are 0
    return True if url is NULL or EndpointDescription is created and initialized.

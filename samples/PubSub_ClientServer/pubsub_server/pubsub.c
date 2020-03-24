@@ -385,26 +385,26 @@ static SOPC_ReturnStatus get_sks_address(SOPC_PubSubConfiguration* pPubSubConfig
                 *isSecurity = true; /* at least one group with security */
             }
 
-            uint32_t nbEndpoint = SOPC_WriterGroup_Nb_EndPointDescription(group);
-            if (SOPC_SecurityMode_None == securityMode && 0 < nbEndpoint)
+            uint32_t nbSKS = SOPC_WriterGroup_Nb_SecurityKeyServices(group);
+            if (SOPC_SecurityMode_None == securityMode && 0 < nbSKS)
             {
                 printf("# Error: SKS address but security mode is none\n");
                 result = SOPC_STATUS_NOK;
             }
-            else if (SOPC_SecurityMode_None != securityMode && 1 == nbEndpoint)
+            else if (SOPC_SecurityMode_None != securityMode && 1 == nbSKS)
             {
-                OpcUa_EndpointDescription* desc = SOPC_WriterGroup_Get_EndPointDescription(group, 0);
+                SOPC_SecurityKeyServices* desc = SOPC_WriterGroup_Get_SecurityKeyServices_At(group, 0);
                 assert(NULL != desc);
                 if (NULL == *sksAddress)
                 {
-                    *sksAddress = SOPC_String_GetRawCString(&desc->EndpointUrl);
+                    *sksAddress = SOPC_SecurityKeyServices_Get_EndpointUrl(desc);
                 }
-                else if (0 != strcmp(*sksAddress, SOPC_String_GetRawCString(&desc->EndpointUrl)))
+                else if (0 != strcmp(*sksAddress, SOPC_SecurityKeyServices_Get_EndpointUrl(desc)))
                 {
                     printf("# Warning: Different SKS address in PubSub configuration\n");
                 }
             }
-            else if (1 < nbEndpoint)
+            else if (1 < nbSKS)
             {
                 /* Filtered by XML loader : should not happen */
                 printf("# Error: Only one SKS address is managed per Group\n");
@@ -429,26 +429,26 @@ static SOPC_ReturnStatus get_sks_address(SOPC_PubSubConfiguration* pPubSubConfig
                 *isSecurity = true; /* at least one group with security */
             }
 
-            uint32_t nbEndpoint = SOPC_ReaderGroup_Nb_EndPointDescription(group);
-            if (SOPC_SecurityMode_None == securityMode && 0 < nbEndpoint)
+            uint32_t nbSKS = SOPC_ReaderGroup_Nb_SecurityKeyServices(group);
+            if (SOPC_SecurityMode_None == securityMode && 0 < nbSKS)
             {
                 printf("# Error: SKS address but security mode is none\n");
                 result = SOPC_STATUS_NOK;
             }
-            else if (SOPC_SecurityMode_None != securityMode && 1 == nbEndpoint)
+            else if (SOPC_SecurityMode_None != securityMode && 1 == nbSKS)
             {
-                OpcUa_EndpointDescription* desc = SOPC_ReaderGroup_Get_EndPointDescription(group, 0);
+                SOPC_SecurityKeyServices* desc = SOPC_ReaderGroup_Get_SecurityKeyServices_At(group, 0);
                 assert(NULL != desc);
                 if (NULL == *sksAddress)
                 {
-                    *sksAddress = SOPC_String_GetRawCString(&desc->EndpointUrl);
+                    *sksAddress = SOPC_SecurityKeyServices_Get_EndpointUrl(desc);
                 }
-                else if (0 != strcmp(*sksAddress, SOPC_String_GetRawCString(&desc->EndpointUrl)))
+                else if (0 != strcmp(*sksAddress, SOPC_SecurityKeyServices_Get_EndpointUrl(desc)))
                 {
                     printf("# Warning: Different SKS address in PubSub configuration\n");
                 }
             }
-            else if (1 < nbEndpoint)
+            else if (1 < nbSKS)
             {
                 /* Filtered by XML loader : should not happen */
                 printf("# Error: Only one SKS address is managed per Group\n");

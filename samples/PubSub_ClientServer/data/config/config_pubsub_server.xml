@@ -3,7 +3,8 @@
     <connection address="opc.udp://232.1.2.100:4840" mode="publisher">
         <!-- one to many -->
         <message id="14" version="1" publishingInterval="100." securityMode="signAndEncrypt" sksAddress="opc.tcp://localhost:4841">
-          <!-- one to many -->
+            <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/server_2k_cert.der" />
+            <!-- one to many -->
             <variable nodeId="ns=1;s=PubBool" displayName="varBool" dataType="Boolean"/>
             <variable nodeId="ns=1;s=PubString" displayName="varString" dataType="String"/>
             <!-- the nodeId is used to retrieve the variable in the adresse space -->

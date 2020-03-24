@@ -122,13 +122,18 @@ struct SOPC_WriterGroup
 
     SOPC_SecurityMode_Type securityMode;
     char* securityGroupId;
-    OpcUa_EndpointDescription* endpoints;
-    uint32_t nbOfEndpoint;
+    SOPC_SecurityKeyServices* securityKeyServices;
+    uint32_t securityKeyServices_length;
     // For the next version:
     // KeepAliveTime
     // Priority
     // LocaleIds
     // transportSettings
+};
+
+struct SOPC_SecurityKeyServices {
+  char *endpointUrl;
+  SOPC_SerializedCertificate* serverCertificate;
 };
 
 struct SOPC_DataSetWriter
@@ -153,8 +158,9 @@ struct SOPC_ReaderGroup
 
     SOPC_SecurityMode_Type securityMode;
     char* securityGroupId;
-    OpcUa_EndpointDescription* endpoints;
-    uint32_t nbOfEndpoint;
+  
+    SOPC_SecurityKeyServices* securityKeyServices;
+    uint32_t securityKeyServices_length;
 
     uint8_t dataSetReaders_length;
     SOPC_DataSetReader* dataSetReaders;
@@ -222,6 +228,8 @@ static void SOPC_PubSubConnection_Clear(SOPC_PubSubConnection* connection);
 static void SOPC_PublishedDataSet_Clear(SOPC_PublishedDataSet* dataset);
 
 static void SOPC_WriterGroup_Clear(SOPC_WriterGroup* group);
+
+static void SOPC_SecurityKeyServices_Clear(SOPC_SecurityKeyServices* sks);
 
 static void SOPC_ReaderGroup_Clear(SOPC_ReaderGroup* group);
 
@@ -540,27 +548,31 @@ bool SOPC_ReaderGroup_Set_SecurityGroupId(SOPC_ReaderGroup* group, char* securit
     return (NULL != group->securityGroupId);
 }
 
-void SOPC_ReaderGroup_Set_EndPointDescription(SOPC_ReaderGroup* group,
-                                              OpcUa_EndpointDescription* endpoints,
-                                              uint32_t nb)
+bool SOPC_ReaderGroup_Allocate_SecurityKeyServices_Array(SOPC_ReaderGroup* group, uint32_t nb)
 {
     assert(NULL != group);
-    group->endpoints = endpoints;
-    group->nbOfEndpoint = nb;
+    // free in SOPC_ReaderGroup_Clear
+    group->securityKeyServices = SOPC_Calloc(nb, sizeof(SOPC_SecurityKeyServices));
+    if (NULL == group->securityKeyServices)
+    {
+        return false;
+    }
+    group->securityKeyServices_length = nb;
+    return true;
 }
 
-uint32_t SOPC_ReaderGroup_Nb_EndPointDescription(SOPC_ReaderGroup* group)
+uint32_t SOPC_ReaderGroup_Nb_SecurityKeyServices(const SOPC_ReaderGroup* group)
 {
     assert(NULL != group);
-    return group->nbOfEndpoint;
+    return group->securityKeyServices_length;
 }
 
-OpcUa_EndpointDescription* SOPC_ReaderGroup_Get_EndPointDescription(SOPC_ReaderGroup* group, uint32_t index)
+SOPC_SecurityKeyServices* SOPC_ReaderGroup_Get_SecurityKeyServices_At(const SOPC_ReaderGroup* group, uint32_t index)
 {
     assert(NULL != group);
-    assert(index < group->nbOfEndpoint);
-    assert(NULL != group->endpoints);
-    return &group->endpoints[index];
+    assert(index < group->securityKeyServices_length);
+    assert(NULL != group->securityKeyServices);
+    return &group->securityKeyServices[index];
 }
 
 bool SOPC_ReaderGroup_Allocate_DataSetReader_Array(SOPC_ReaderGroup* group, uint8_t nb)
@@ -846,27 +858,59 @@ bool SOPC_WriterGroup_Set_SecurityGroupId(SOPC_WriterGroup* group, char* securit
     return (NULL != group->securityGroupId);
 }
 
-void SOPC_WriterGroup_Set_EndPointDescription(SOPC_WriterGroup* group,
-                                              OpcUa_EndpointDescription* endpoints,
-                                              uint32_t nb)
+bool SOPC_WriterGroup_Allocate_SecurityKeyServices_Array(SOPC_WriterGroup* group, uint32_t nb)
 {
     assert(NULL != group);
-    group->endpoints = endpoints;
-    group->nbOfEndpoint = nb;
+    // free in SOPC_WriterGroup_Clear
+    group->securityKeyServices = SOPC_Calloc(nb, sizeof(SOPC_SecurityKeyServices));
+    if (NULL == group->securityKeyServices)
+    {
+        return false;
+    }
+    group->securityKeyServices_length = nb;
+    return true;
 }
 
-uint32_t SOPC_WriterGroup_Nb_EndPointDescription(SOPC_WriterGroup* group)
+uint32_t SOPC_WriterGroup_Nb_SecurityKeyServices(const SOPC_WriterGroup* group)
 {
     assert(NULL != group);
-    return group->nbOfEndpoint;
+    return group->securityKeyServices_length;
 }
 
-OpcUa_EndpointDescription* SOPC_WriterGroup_Get_EndPointDescription(SOPC_WriterGroup* group, uint32_t index)
+SOPC_SecurityKeyServices* SOPC_WriterGroup_Get_SecurityKeyServices_At(const SOPC_WriterGroup* group, uint32_t index)
 {
     assert(NULL != group);
-    assert(index < group->nbOfEndpoint);
-    assert(NULL != group->endpoints);
-    return &group->endpoints[index];
+    assert(index < group->securityKeyServices_length);
+    assert(NULL != group->securityKeyServices);
+    return &group->securityKeyServices[index];
+}
+
+/** SecurityKeyServices **/
+
+const char* SOPC_SecurityKeyServices_Get_EndpointUrl(const SOPC_SecurityKeyServices* sks)
+{
+    assert(NULL != sks);
+    return sks->endpointUrl;
+}
+
+bool SOPC_SecurityKeyServices_Set_EndpointUrl(SOPC_SecurityKeyServices* sks, const char* uri)
+{
+    assert(NULL != sks);
+    sks->endpointUrl = SOPC_PubSub_String_Copy(uri);
+    return (NULL != sks->endpointUrl);
+}
+
+const SOPC_SerializedCertificate* SOPC_SecurityKeyServices_Get_ServerCertificate(const SOPC_SecurityKeyServices* sks)
+{
+    assert(NULL != sks);
+    return sks->serverCertificate;
+}
+
+bool SOPC_SecurityKeyServices_Set_ServerCertificate(SOPC_SecurityKeyServices* sks, SOPC_SerializedCertificate* serverCertificate)
+{
+    assert(NULL != sks);
+    sks->serverCertificate = serverCertificate;
+    return (NULL != sks->serverCertificate);
 }
 
 bool SOPC_WriterGroup_Allocate_DataSetWriter_Array(SOPC_WriterGroup* group, uint8_t nb)
@@ -1078,18 +1122,32 @@ static void SOPC_WriterGroup_Clear(SOPC_WriterGroup* group)
     if (NULL != group)
     {
         SOPC_Free(group->securityGroupId);
-        // nbOfEndpoint /= 0 => endpoints /= NULL
-        assert(0 == group->nbOfEndpoint || NULL != group->endpoints);
-        for (uint32_t i = 0; i < group->nbOfEndpoint; i++)
+        // securityKeyServices_length /= 0 => securityKeyServices /= NULL
+        assert(0 == group->securityKeyServices_length || NULL != group->securityKeyServices);
+        for (uint32_t i = 0; i < group->securityKeyServices_length; i++)
         {
-            OpcUa_EndpointDescription_Clear(group->endpoints);
+            SOPC_SecurityKeyServices_Clear(&group->securityKeyServices[i]);
         }
-        SOPC_Free(group->endpoints);
+        SOPC_Free(group->securityKeyServices);
+        group->securityKeyServices = NULL;
+        group->securityKeyServices_length = 0;
         group->dataSetWriters_length = 0;
         /* IMPORTANT NOTE: No memory management to do in dataSetWriter(s), publishedDataSet managed in config struct
          * => no need to iterate on array */
         SOPC_Free(group->dataSetWriters);
+        group->dataSetWriters = NULL;
     }
+}
+
+static void SOPC_SecurityKeyServices_Clear(SOPC_SecurityKeyServices* sks) {
+  if(NULL == sks) {
+    return;
+  }
+  
+  SOPC_Free(sks->endpointUrl);
+  sks->endpointUrl = NULL;
+  SOPC_KeyManager_SerializedCertificate_Delete(sks->serverCertificate);
+  sks->serverCertificate = NULL;
 }
 
 static void SOPC_ReaderGroup_Clear(SOPC_ReaderGroup* group)
@@ -1097,13 +1155,17 @@ static void SOPC_ReaderGroup_Clear(SOPC_ReaderGroup* group)
     if (NULL != group)
     {
         SOPC_Free(group->securityGroupId);
-        // nbOfEndpoint /= 0 => endpoints /= NULL
-        assert(0 == group->nbOfEndpoint || NULL != group->endpoints);
-        for (uint32_t i = 0; i < group->nbOfEndpoint; i++)
+
+        // securityKeyServices_length /= 0 => securityKeyServices /= NULL
+        assert(0 == group->securityKeyServices_length || NULL != group->securityKeyServices);
+        for (uint32_t i = 0; i < group->securityKeyServices_length; i++)
         {
-            OpcUa_EndpointDescription_Clear(&group->endpoints[i]);
+            SOPC_SecurityKeyServices_Clear(&group->securityKeyServices[i]);
         }
-        SOPC_Free(group->endpoints);
+        SOPC_Free(group->securityKeyServices);
+        group->securityKeyServices = NULL;
+        group->securityKeyServices_length = 0;
+
         for (int i = 0; i < group->dataSetReaders_length; i++)
         {
             SOPC_Conf_PublisherId_Clear(&(group->dataSetReaders[i].publisherId));
@@ -1140,19 +1202,19 @@ bool SOPC_EndpointDescription_Create_From_URL(char* url, OpcUa_EndpointDescripti
 {
     assert(NULL != endpoint_out);
     *endpoint_out = NULL;
-
+ 
     bool allocSuccess = true;
     OpcUa_EndpointDescription* endpoint;
     if (NULL == url)
     {
         return true;
     }
-
     endpoint = SOPC_Calloc(1, sizeof(OpcUa_EndpointDescription));
     if (NULL == endpoint)
     {
         return false;
     }
+
     OpcUa_EndpointDescription_Initialize(endpoint);
     SOPC_String_Initialize(&endpoint->EndpointUrl);
     SOPC_ReturnStatus status = SOPC_String_CopyFromCString(&endpoint->EndpointUrl, url);
