@@ -41,7 +41,8 @@ START_TEST(test_getEndpoints)
     SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
     logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./test_discovery_getEndpoints_logs/";
     logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
-    ck_assert(SOPC_STATUS_OK == SOPC_Common_Initialize(logConfiguration));
+    SOPC_ReturnStatus status = SOPC_Common_Initialize(logConfiguration);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     ck_assert(SOPC_Toolkit_Initialize(EventDispatcher_ValidateGetEndpoints) == SOPC_STATUS_OK);
     g_pSM = StateMachine_Create();
@@ -169,7 +170,8 @@ START_TEST(test_registerServer)
     SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
     logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./test_discovery_registerServer_logs/";
     logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
-    ck_assert(SOPC_STATUS_OK == SOPC_Common_Initialize(logConfiguration));
+    SOPC_ReturnStatus status = SOPC_Common_Initialize(logConfiguration);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     ck_assert(SOPC_Toolkit_Initialize(EventDispatcher_ValidateRegisterServer) == SOPC_STATUS_OK);
     g_pSM = StateMachine_Create();
