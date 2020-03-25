@@ -353,31 +353,6 @@ void SOPC_ClientHelper_Finalize(void);
 int32_t SOPC_ClientHelper_GetEndpoints(const char* endpointUrl, SOPC_ClientHelper_GetEndpointsResult** result);
 
 /*
- @deprecated
-    This function is replaced by SOPC_ClientHelper_CreateConfiguration() and SOPC_ClientHelper_CreateConnection()
-
- @description
-    Creates a new connection to a remote OPC server.
-    The connection represent the whole client and is later identified by the returned connectionId.
-    The function waits until the client is effectively connected or the Toolkit times out.
-    Return a connection id or error code.
-    All parameters are copied and can be freed by the caller.
- @param endpointUrl
-   Zero-terminated path to server URL
- @param security
-    security configuration to use (policy, mode, certificates, ...)
- @return
-    If this operation succeeded, return a connection id > 0.
-    If invalid endpointUrl detected, return -1.
-    If invalid security detected, return -<10+n> with <n> field number (starting from 1).
-    If connection failed, return '-100'.
- @warning
-    The disconnect callback might be called before the function returns if connection succeeds and then fails
-    immediately (in this case the connection id used in callback is not yet returned)
- */
-int32_t SOPC_ClientHelper_Connect(const char* endpointUrl, SOPC_ClientHelper_Security security);
-
-/*
  @description
     Creates a new configuration to connect to a remote OPC server.
     Return a configuration id or error code.

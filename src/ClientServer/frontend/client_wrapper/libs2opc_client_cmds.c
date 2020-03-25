@@ -489,25 +489,6 @@ static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_
     return 0;
 }
 
-// Return connection Id > 0 if succeeded, -<n> with <n> argument number (starting from 1) if invalid argument detected
-// or '-100' if connection failed
-int32_t SOPC_ClientHelper_Connect(const char* endpointUrl, SOPC_ClientHelper_Security security)
-{
-    int32_t cfg_id = SOPC_ClientHelper_CreateConfiguration(endpointUrl, security);
-    if (0 >= cfg_id)
-    {
-        return cfg_id;
-    }
-
-    int32_t con_id = SOPC_ClientHelper_CreateConnection(cfg_id);
-    if (0 > con_id)
-    {
-        return -100;
-    }
-
-    return con_id;
-}
-
 // Return configuration Id > 0 if succeeded, -<n> with <n> argument number (starting from 1) if invalid argument
 // detected or '-100' if configuration failed
 int32_t SOPC_ClientHelper_CreateConfiguration(const char* endpointUrl, SOPC_ClientHelper_Security security)
