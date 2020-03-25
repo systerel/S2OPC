@@ -111,6 +111,14 @@ void SOPC_Logger_SetConsoleOutput(bool activate)
     {
         SOPC_Log_SetConsoleOutput(opcUaAudit, activate);
     }
+    if (clientServerTrace != NULL)
+    {
+        SOPC_Log_SetConsoleOutput(clientServerTrace, activate);
+    }
+    if (pubSubTrace != NULL)
+    {
+        SOPC_Log_SetConsoleOutput(pubSubTrace, activate);
+    }
 }
 
 static void logger_Trace(SOPC_Log_Module logModule, SOPC_Log_Level logLevel, const char* format, va_list args)
