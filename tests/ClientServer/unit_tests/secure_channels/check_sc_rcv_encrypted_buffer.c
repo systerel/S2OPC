@@ -198,7 +198,7 @@ static void establishSC(void)
         logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
         status = SOPC_Common_Initialize(logConfiguration);
     }
-    ck_assert(SOPC_STATUS_OK == status);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     // Init toolkit configuration
     status = SOPC_Toolkit_Initialize(NULL);
