@@ -113,7 +113,6 @@ SOPC_Log_Configuration SOPC_Common_GetDefaultLogConfiguration(void)
     SOPC_Log_Configuration defaultLogConfiguration = {
         .logLevel = SOPC_LOG_LEVEL_INFO,
         .logSystem = SOPC_LOG_SYSTEM_FILE,
-        .logSysConfig = {
-            .fileSystemLogConfig = {.logDirPath = "./s2opc_logs/", .logMaxBytes = 1048576, .logMaxFiles = 50}}};
+        .logSysConfig = {.fileSystemLogConfig = {.logDirPath = "", .logMaxBytes = 1048576, .logMaxFiles = 50}}};
     return defaultLogConfiguration;
 }
