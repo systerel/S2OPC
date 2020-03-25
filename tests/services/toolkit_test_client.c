@@ -42,8 +42,6 @@
 
 #include "embedded/sopc_addspace_loader.h"
 
-#include "crypto_tpm2.h"
-
 #define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"
 
 static int32_t sessionsActivated = 0;
@@ -284,14 +282,6 @@ int main(void)
     printf("toolkitSrcCommit: %s\n", build_info.toolkitSrcCommit);
     printf("toolkitDockerId: %s\n", build_info.toolkitDockerId);
     printf("toolkitBuildDate: %s\n", build_info.toolkitBuildDate);
-
-    /* Initialize the TPM2 module */
-    int ret = s2opc_tpm2_ext_init();
-    if(ret)
-    {
-        printf("Could not initialize the TPM2 module.\n");
-        return ret;
-    }
 
     // If security mode is set, load certificates and key
 
@@ -691,7 +681,4 @@ int main(void)
         printf(">>Test_Client_Toolkit final result: NOK (BAD status: %" PRIu32 ")\n", status);
         return 1;
     }
-
-    /* Deinitialize the TPM2 module */
-    s2opc_tpm2_ext_flush();
 }

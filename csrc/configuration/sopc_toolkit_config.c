@@ -47,6 +47,8 @@
 #include "address_space_impl.h"
 #include "util_b2c.h"
 
+#include "crypto_tpm2.h"
+
 /* Check IEEE-754 compliance */
 #include "sopc_ieee_check.h"
 
@@ -130,6 +132,17 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
         }
 
         Mutex_Unlock(&tConfig.mut);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        /* Initialize the TPM2 module */
+        int ret = s2opc_tpm2_ext_init();
+        if (0 != ret)
+        {
+            printf("Could not initialize the TPM2 module.\n");
+            status = SOPC_STATUS_NOK;
+        }
     }
 
     return status;
@@ -234,6 +247,9 @@ void SOPC_Toolkit_Clear()
         tConfig.logLevel = SOPC_LOG_LEVEL_ERROR;
         Mutex_Unlock(&tConfig.mut);
         Mutex_Clear(&tConfig.mut);
+
+        /* Deinitialize the TPM2 module */
+        s2opc_tpm2_ext_flush();
     }
 }
 
