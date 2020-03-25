@@ -137,17 +137,17 @@ START_TEST(test_wrapper_create_configuration)
     ck_assert_int_gt(valid_conf_id, 0);
 
     /* check multiple configurations */
-    int32_t conf_ids[5];
-    conf_ids[0] = SOPC_ClientHelper_CreateConfiguration(valid_url, valid_security_none);
-    ck_assert_int_gt(conf_ids[0], 0);
-    conf_ids[1] = SOPC_ClientHelper_CreateConfiguration(valid_url, valid_security_none);
-    ck_assert_int_gt(conf_ids[1], 0);
-    conf_ids[2] = SOPC_ClientHelper_CreateConfiguration(valid_url, valid_security_none);
-    ck_assert_int_gt(conf_ids[2], 0);
-    conf_ids[3] = SOPC_ClientHelper_CreateConfiguration(valid_url, valid_security_none);
-    ck_assert_int_gt(conf_ids[3], 0);
-    conf_ids[4] = SOPC_ClientHelper_CreateConfiguration(valid_url, valid_security_none);
-    ck_assert_int_gt(conf_ids[4], 0);
+    int32_t conf_ids;
+    conf_ids = SOPC_ClientHelper_CreateConfiguration(valid_url, valid_security_none);
+    ck_assert_int_gt(conf_ids, 0);
+    conf_ids = SOPC_ClientHelper_CreateConfiguration(valid_url, valid_security_none);
+    ck_assert_int_gt(conf_ids, 0);
+    conf_ids = SOPC_ClientHelper_CreateConfiguration(valid_url, valid_security_none);
+    ck_assert_int_gt(conf_ids, 0);
+    conf_ids = SOPC_ClientHelper_CreateConfiguration(valid_url, valid_security_none);
+    ck_assert_int_gt(conf_ids, 0);
+    conf_ids = SOPC_ClientHelper_CreateConfiguration(valid_url, valid_security_none);
+    ck_assert_int_gt(conf_ids, 0);
 
     SOPC_ClientHelper_Finalize();
 
