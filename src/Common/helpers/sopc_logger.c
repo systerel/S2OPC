@@ -183,10 +183,10 @@ void SOPC_Logger_TraceDebug(SOPC_Log_Module logModule, const char* format, ...)
 void SOPC_Logger_TraceSecurityAudit(const char* format, ...)
 {
     va_list args;
-    if (commonTrace != NULL)
+    if (secuAudit != NULL)
     {
         va_start(args, format);
-        SOPC_Log_VTrace(commonTrace, SOPC_LOG_LEVEL_INFO, format, args);
+        SOPC_Log_VTrace(secuAudit, SOPC_LOG_LEVEL_INFO, format, args);
         va_end(args);
     }
 }
@@ -194,10 +194,10 @@ void SOPC_Logger_TraceSecurityAudit(const char* format, ...)
 void SOPC_Logger_TraceSecurityAuditWarning(const char* format, ...)
 {
     va_list args;
-    if (commonTrace != NULL)
+    if (secuAudit != NULL)
     {
         va_start(args, format);
-        SOPC_Log_VTrace(commonTrace, SOPC_LOG_LEVEL_WARNING, format, args);
+        SOPC_Log_VTrace(secuAudit, SOPC_LOG_LEVEL_WARNING, format, args);
         va_end(args);
     }
 }
@@ -205,10 +205,10 @@ void SOPC_Logger_TraceSecurityAuditWarning(const char* format, ...)
 void SOPC_Logger_TraceOpcUaAudit(const char* format, ...)
 {
     va_list args;
-    if (commonTrace != NULL)
+    if (opcUaAudit != NULL)
     {
         va_start(args, format);
-        SOPC_Log_VTrace(commonTrace, SOPC_LOG_LEVEL_INFO, format, args);
+        SOPC_Log_VTrace(opcUaAudit, SOPC_LOG_LEVEL_INFO, format, args);
         va_end(args);
     }
 }
@@ -216,10 +216,10 @@ void SOPC_Logger_TraceOpcUaAudit(const char* format, ...)
 void SOPC_Logger_TraceOpcUaAuditWarning(const char* format, ...)
 {
     va_list args;
-    if (commonTrace != NULL)
+    if (opcUaAudit != NULL)
     {
         va_start(args, format);
-        SOPC_Log_VTrace(commonTrace, SOPC_LOG_LEVEL_WARNING, format, args);
+        SOPC_Log_VTrace(opcUaAudit, SOPC_LOG_LEVEL_WARNING, format, args);
         va_end(args);
     }
 }
