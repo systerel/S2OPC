@@ -26,7 +26,7 @@
 # - jobs run in stages:
 #   - gen: generation job
 #   - build: # 'WITH_STATIC_SECURITY_DATA: 1', 'WITH_CONST_ADDSPACE: 1' and 'PUBSUB_STATIC_CONFIG: 1'
-#     - build-linux64-static-conf 
+#     - build-linux64-static-conf
 #   - tests:
 #     - test-unit
 #   - build-others:
@@ -107,12 +107,12 @@ generation:
 .build-linux: &build_linux
   <<: *docker_job
   stage: build
-  image: registry.gitlab.com/systerel/s2opc/build@sha256:95baec93582d1ad6f278bf2fe32926db3d84474cb0435e97fd44535187b8e420 # digest of build:1.16
+  image: registry.gitlab.com/systerel/s2opc/build@sha256:66b648b78cc69397f95f025dfb34a4d7d1548c8364063aade1f44300b4f03a3f # digest of build:1.17
   script:
     - &build_command_line './build.sh && cd $BUILD_DIR && cmake --build . --target install || exit 1'
   variables: &build_linux_variables
     CMAKE_INSTALL_PREFIX: '../install_linux64'
-    DOCKER_IMAGE: 'fb01c859b43fe39673f455f0ef022396699264e5d96b848cc41cd16c3436d5ce'
+    DOCKER_IMAGE: 'sha256:8898243017e0e43fff262fc11a8c1ae6b9284764fb4d6ee5a117696daeff5588'
     BUILD_DIR: build
   artifacts:
     name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
@@ -170,7 +170,7 @@ build-linux64-NoASan-NoPyS2OPC:
 build-win64: &build_win64
   <<: *docker_job
   stage: build-others
-  image: registry.gitlab.com/systerel/s2opc/mingw_build@sha256:4b6947299942745f03439761e702bd33b60737c0ce320ec5e35f89ddbcc596e2 # digest of mingw_build:1.8
+  image: registry.gitlab.com/systerel/s2opc/mingw_build@sha256:5f172f83a860caa75366e2ab14676be6f1d825441b0c61d363a6f872d1fb95c4 # digest of mingw_build:1.9
   script:
     # Manually disable PyS2OPC for windows cross builds. When set in "variables:", the value is overwritten.
     - 'export WITH_PYS2OPC=OFF'
@@ -178,7 +178,7 @@ build-win64: &build_win64
   variables: &build_win64_variables
     CMAKE_INSTALL_PREFIX: '../install_win64'
     CMAKE_TOOLCHAIN_FILE: 'toolchain-mingw32-w64_x86_64.cmake'
-    DOCKER_IMAGE: 'sha256:3808353ec9f3f7dda2bcd9a874a74b2534020adb7f5103f181fc427cc3f94b9f'
+    DOCKER_IMAGE: 'sha256:dea49d2f60f0b9c2cff484d01f7372935d0e25dee3445909479b99d61530d1a8'
     BUILD_SHARED_LIBS: 'true'
     BUILD_DIR: build_toolchain
     S2OPC_CLIENTSERVER_ONLY: 1 # PubSub is not compatible with windows platform
