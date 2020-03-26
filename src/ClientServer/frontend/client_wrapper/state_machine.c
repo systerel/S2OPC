@@ -332,7 +332,7 @@ SOPC_ReturnStatus SOPC_StaMac_StartSession(SOPC_StaMac_Machine* pSM)
 
     if (pSM->state != stInit)
     {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "The state machine shall be in stInit state to start a session.");
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "The state machine shall be in stInit state to start a session.");
         status = SOPC_STATUS_INVALID_STATE;
     }
 
@@ -377,7 +377,7 @@ SOPC_ReturnStatus SOPC_StaMac_StopSession(SOPC_StaMac_Machine* pSM)
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (!SOPC_StaMac_IsConnected(pSM))
     {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "StopSession on a disconnected machine.");
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "StopSession on a disconnected machine.");
         pSM->state = stError;
         status = SOPC_STATUS_NOK;
     }
@@ -461,7 +461,7 @@ SOPC_ReturnStatus SOPC_StaMac_CreateSubscription(SOPC_StaMac_Machine* pSM)
         /* Creates the subscription */
         /* The request is freed by the Toolkit */
         /* TODO: make all value configurable */
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Creating subscription.");
+        Helpers_Log(SOPC_LOG_LEVEL_INFO, "Creating subscription.");
         status = Helpers_NewCreateSubscriptionRequest(pSM->fPublishInterval, pSM->iCntMaxKeepAlive, pSM->iCntLifetime,
                                                       &pRequest);
         if (SOPC_STATUS_OK == status)
@@ -492,7 +492,7 @@ SOPC_ReturnStatus SOPC_StaMac_DeleteSubscription(SOPC_StaMac_Machine* pSM)
 
     if (SOPC_StaMac_HasSubscription(pSM) && stActivated == pSM->state)
     {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Deleting subscription.");
+        Helpers_Log(SOPC_LOG_LEVEL_INFO, "Deleting subscription.");
 
         if (SOPC_STATUS_OK == status)
         {
@@ -535,12 +535,12 @@ SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
 
     if (!SOPC_StaMac_HasSubscription(pSM))
     {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "the machine shall have a created subscription.");
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "the machine shall have a created subscription.");
         return SOPC_STATUS_INVALID_STATE;
     }
     if (INT32_MAX == nSentReqs)
     {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "creating monitored item, too much sent requests.");
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "creating monitored item, too much sent requests.");
         return SOPC_STATUS_INVALID_STATE;
     }
 
@@ -557,13 +557,13 @@ SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
         size_t szLen = strlen(lszNodeId[i]);
         if (INT32_MAX < szLen)
         {
-            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "creating monitored item, NodeId string is too long.");
+            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "creating monitored item, NodeId string is too long.");
             status = SOPC_STATUS_INVALID_PARAMETERS;
         }
         lpNid[i] = SOPC_NodeId_FromCString(lszNodeId[i], (int32_t) szLen);
         if (NULL == lpNid[i])
         {
-            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "creating monitored item, could not convert \"%s\" to NodeId.",
+            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "creating monitored item, could not convert \"%s\" to NodeId.",
                         lszNodeId[i]);
             status = SOPC_STATUS_NOK;
         }
@@ -574,7 +574,7 @@ SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
 
     if (stActivated != pSM->state)
     {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR,
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR,
                     "creating monitored item, the machine should be in the stActivated state (is in %i).", pSM->state);
         status = SOPC_STATUS_INVALID_STATE;
     }
@@ -1023,22 +1023,21 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
             case stInit:
             default:
                 processingAuthorization = false;
-                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Dispatching in unknown state %i, event %i.", pSM->state,
-                            event);
+                Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Dispatching in unknown state %i, event %i.", pSM->state, event);
                 break;
             }
 
             /* always authorize processing of service faults */
             if (&OpcUa_ServiceFault_EncodeableType == pEncType)
             {
-                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Received ServiceFault");
+                Helpers_Log(SOPC_LOG_LEVEL_INFO, "Received ServiceFault");
                 processingAuthorization = true;
             }
 
             /* Authorize processing of send request failed if it is a timeout of PublishRequest */
             if (SE_SND_REQUEST_FAILED == event)
             {
-                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Dispatching event SE_SND_REQUEST_FAILED");
+                Helpers_Log(SOPC_LOG_LEVEL_INFO, "Dispatching event SE_SND_REQUEST_FAILED");
                 processingAuthorization =
                     StaMac_GiveAuthorization_SendRequestFailed(pSM, event, (SOPC_ReturnStatus) arg, pEncType);
             }
@@ -1079,7 +1078,7 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                     }
                     else
                     {
-                        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Received unknown message in event %d", event);
+                        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Received unknown message in event %d", event);
                         pSM->state = stError;
                     }
                 }
@@ -1090,14 +1089,14 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                 }
                 else
                 {
-                    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Received unexpected event %d", event);
+                    Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Received unexpected event %d", event);
                     pSM->state = stError;
                 }
             }
             else
             {
-                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR,
-                            "Received unexpected message in state %d, switching to error state", pSM->state);
+                Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Received unexpected message in state %d, switching to error state",
+                            pSM->state);
                 pSM->state = stError;
             }
         }
@@ -1108,8 +1107,7 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
             if (SE_SND_REQUEST_FAILED == event)
             {
                 pSM->state = stClosing;
-                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR,
-                            "Applicative message could not be sent, closing the connection.");
+                Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Applicative message could not be sent, closing the connection.");
                 if (NULL != pSM->cbkGenericEvent)
                 {
                     pSM->cbkGenericEvent(pSM->iCliId, SOPC_LibSub_ApplicativeEvent_SendFailed, arg, NULL, intAppCtx);
@@ -1198,7 +1196,7 @@ static bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
                 }
                 if (NULL == SOPC_SLinkedList_RemoveFromId(pSM->pListReqCtx, ((SOPC_StaMac_ReqCtx*) appCtx)->uid))
                 {
-                    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_WARNING, "failed to pop the request from the pListReqCtx.");
+                    Helpers_Log(SOPC_LOG_LEVEL_WARNING, "failed to pop the request from the pListReqCtx.");
                 }
                 SOPC_Free((void*) appCtx);
                 appCtx = 0;
@@ -1217,7 +1215,7 @@ static bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
         break;
     default:
         bProcess = false;
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Unexpected event received by a machine.");
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Unexpected event received by a machine.");
         break;
     }
 
@@ -1234,7 +1232,7 @@ static void StaMac_ProcessMsg_ActivateSessionResponse(SOPC_StaMac_Machine* pSM,
 
     pSM->state = stActivated;
     pSM->iSessionID = arg;
-    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Session activated.");
+    Helpers_Log(SOPC_LOG_LEVEL_INFO, "Session activated.");
 }
 
 static void StaMac_ProcessMsg_CloseSessionResponse(SOPC_StaMac_Machine* pSM,
@@ -1264,7 +1262,7 @@ static void StaMac_ProcessMsg_PublishResponse(SOPC_StaMac_Machine* pSM, uint32_t
     SOPC_LibSub_Value* plsVal = NULL;
 
     /* There should be an EncodeableType pointer in the first field of the message struct */
-    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "PublishResponse received.");
+    Helpers_Log(SOPC_LOG_LEVEL_INFO, "PublishResponse received.");
     pPubResp = (OpcUa_PublishResponse*) pParam;
     /* Take note to acknowledge later. There is no ack with KeepAlive. */
     /* TODO: this limits the benefits of having multiple pending PublishRequest, maybe
@@ -1282,7 +1280,7 @@ static void StaMac_ProcessMsg_PublishResponse(SOPC_StaMac_Machine* pSM, uint32_t
     }
     else
     {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_WARNING, "Unexpected number of PublishResponse received.");
+        Helpers_Log(SOPC_LOG_LEVEL_WARNING, "Unexpected number of PublishResponse received.");
     }
 
     /* Traverse the notifications and calls the callback */
@@ -1334,7 +1332,7 @@ static void StaMac_ProcessMsg_CreateSubscriptionResponse(SOPC_StaMac_Machine* pS
 
     assert(0 == pSM->iSubscriptionID);
     pSM->iSubscriptionID = ((OpcUa_CreateSubscriptionResponse*) pParam)->SubscriptionId;
-    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Subscription created.");
+    Helpers_Log(SOPC_LOG_LEVEL_INFO, "Subscription created.");
     pSM->state = stActivated;
 }
 
@@ -1362,7 +1360,7 @@ static void StaMac_ProcessMsg_DeleteSubscriptionResponse(SOPC_StaMac_Machine* pS
     SOPC_SLinkedList_Apply(pSM->dataIdToNodeIdList, SOPC_SLinkedList_EltGenericFree);
     SOPC_SLinkedList_Clear(pSM->dataIdToNodeIdList);
 
-    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Subscription deleted.");
+    Helpers_Log(SOPC_LOG_LEVEL_INFO, "Subscription deleted.");
     pSM->state = stActivated;
 }
 
@@ -1386,7 +1384,7 @@ static void StaMac_ProcessMsg_CreateMonitoredItemsResponse(SOPC_StaMac_Machine* 
         if (0 != pMonItResp->Results[i].StatusCode) /* OpcUa_Good does not exist... */
         {
             status = SOPC_STATUS_NOK;
-            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Server could not create monitored item, sc = 0x%08" PRIX32 ".",
+            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Server could not create monitored item, sc = 0x%08" PRIX32 ".",
                         pMonItResp->Results[i].StatusCode);
         }
         else
@@ -1399,7 +1397,7 @@ static void StaMac_ProcessMsg_CreateMonitoredItemsResponse(SOPC_StaMac_Machine* 
         }
         if (SOPC_STATUS_OK == status)
         {
-            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "MonitoredItem created.");
+            Helpers_Log(SOPC_LOG_LEVEL_INFO, "MonitoredItem created.");
         }
     }
     if (SOPC_STATUS_OK == status)
@@ -1436,7 +1434,7 @@ static void StaMac_ProcessMsg_ServiceFault(SOPC_StaMac_Machine* pSM, uint32_t ar
             }
             else
             {
-                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_WARNING, "Unexpected number of PublishResponse received.");
+                Helpers_Log(SOPC_LOG_LEVEL_WARNING, "Unexpected number of PublishResponse received.");
             }
             break;
         default:
@@ -1473,7 +1471,7 @@ static void StaMac_ProcessEvent_SendRequestFailed(SOPC_StaMac_Machine* pSM,
             }
             else
             {
-                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_WARNING, "Unexpected number of PublishResponse received.");
+                Helpers_Log(SOPC_LOG_LEVEL_WARNING, "Unexpected number of PublishResponse received.");
             }
         }
         else
@@ -1498,27 +1496,24 @@ static void StaMac_ProcessEvent_stError(SOPC_StaMac_Machine* pSM,
     {
     case SE_SESSION_ACTIVATION_FAILURE:
     case SE_CLOSED_SESSION:
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Received post-closed closed event or activation failure, ignored.");
+        Helpers_Log(SOPC_LOG_LEVEL_INFO, "Received post-closed closed event or activation failure, ignored.");
         break;
     case SE_SND_REQUEST_FAILED:
         if (NULL != pParam)
         {
-            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO,
-                        "Received post-closed send request failure for message of type %s.",
+            Helpers_Log(SOPC_LOG_LEVEL_INFO, "Received post-closed send request failure for message of type %s.",
                         ((SOPC_EncodeableType*) pParam)->TypeName);
         }
         else
         {
-            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO,
-                        "Received post-closed send request failure for message of unknown type");
+            Helpers_Log(SOPC_LOG_LEVEL_INFO, "Received post-closed send request failure for message of unknown type");
         }
         break;
     case SE_SESSION_REACTIVATING:
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO,
-                    "Reactivating event received, but closed connection are considered lost.");
+        Helpers_Log(SOPC_LOG_LEVEL_INFO, "Reactivating event received, but closed connection are considered lost.");
         break;
     default:
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_WARNING, "Receiving unexpected event %i in closed state, ignored.", event);
+        Helpers_Log(SOPC_LOG_LEVEL_WARNING, "Receiving unexpected event %i in closed state, ignored.", event);
         break;
     }
 }
@@ -1545,7 +1540,7 @@ static void StaMac_PostProcessActions(SOPC_StaMac_Machine* pSM, SOPC_StaMac_Stat
             while (SOPC_STATUS_OK == status && pSM->nTokenUsable < pSM->nTokenTarget)
             {
                 /* Send a PublishRequest */
-                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Adding publish token.");
+                Helpers_Log(SOPC_LOG_LEVEL_INFO, "Adding publish token.");
                 status = Helpers_NewPublishRequest(pSM->bAckSubscr, pSM->iSubscriptionID, pSM->iAckSeqNum, &pRequest);
                 if (SOPC_STATUS_OK == status)
                 {
@@ -1590,7 +1585,7 @@ static void StaMac_PostProcessActions(SOPC_StaMac_Machine* pSM, SOPC_StaMac_Stat
                 }
                 else
                 {
-                    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Closing the connection because of the previous error.");
+                    Helpers_Log(SOPC_LOG_LEVEL_INFO, "Closing the connection because of the previous error.");
                 }
             }
             else

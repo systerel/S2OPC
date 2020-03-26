@@ -29,6 +29,7 @@
 #include <string.h>
 
 #include "sopc_builtintypes.h"
+#include "sopc_log_manager.h"
 #include "sopc_types.h"
 #include "sopc_version.h"
 #include "toolkit_helpers.h"

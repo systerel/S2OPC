@@ -71,7 +71,7 @@ int main(int argc, char* const argv[])
     int res = 0;
 
     /* Initialize the toolkit */
-    SOPC_ClientHelper_Initialize("./s2opc_wrapper_subscribe_logs/", SOPC_TOOLKIT_LOG_LEVEL_DEBUG, disconnect_callback);
+    SOPC_ClientHelper_Initialize("./s2opc_wrapper_subscribe_logs/", SOPC_LOG_LEVEL_DEBUG, disconnect_callback);
 
     SOPC_ClientHelper_Security security = {
         .security_policy = SOPC_SecurityPolicy_None_URI,

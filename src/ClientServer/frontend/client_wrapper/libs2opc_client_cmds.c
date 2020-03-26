@@ -22,6 +22,7 @@
 
 #include "sopc_array.h"
 #include "sopc_builtintypes.h"
+#include "sopc_log_manager.h"
 #include "sopc_mutexes.h"
 #include "sopc_toolkit_config.h"
 #include "sopc_types.h"
@@ -200,7 +201,7 @@ static SOPC_ReturnStatus SOPC_GetEndpointsContext_Initialization(GetEndpointsCon
 }
 
 /* Callbacks */
-static void log_callback(const SOPC_Toolkit_Log_Level log_level, SOPC_LibSub_CstString text);
+static void log_callback(const SOPC_Log_Level log_level, SOPC_LibSub_CstString text);
 static void default_disconnect_callback(const SOPC_LibSub_ConnectionId c_id);
 static void SOPC_ClientHelper_GenericCallback(SOPC_LibSub_ConnectionId c_id,
                                               SOPC_LibSub_ApplicativeEvent event,
@@ -253,23 +254,23 @@ int32_t SOPC_ClientHelper_Initialize(const char* log_path,
                                      int32_t log_level,
                                      const SOPC_ClientHelper_DisconnectCbk disconnect_callback)
 {
-    SOPC_Toolkit_Log_Level level = SOPC_TOOLKIT_LOG_LEVEL_DEBUG;
+    SOPC_Log_Level level = SOPC_LOG_LEVEL_DEBUG;
     bool log_level_set = true;
     bool log_path_set = true;
 
     switch (log_level)
     {
     case 0:
-        level = SOPC_TOOLKIT_LOG_LEVEL_ERROR;
+        level = SOPC_LOG_LEVEL_ERROR;
         break;
     case 1:
-        level = SOPC_TOOLKIT_LOG_LEVEL_WARNING;
+        level = SOPC_LOG_LEVEL_WARNING;
         break;
     case 2:
-        level = SOPC_TOOLKIT_LOG_LEVEL_INFO;
+        level = SOPC_LOG_LEVEL_INFO;
         break;
     case 3:
-        level = SOPC_TOOLKIT_LOG_LEVEL_DEBUG;
+        level = SOPC_LOG_LEVEL_DEBUG;
         break;
     default:
         log_level_set = false;
@@ -291,17 +292,17 @@ int32_t SOPC_ClientHelper_Initialize(const char* log_path,
 
     if (!log_level_set)
     {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_WARNING, "Invalid log level provided, set to level 3 (debug) by default.");
+        Helpers_Log(SOPC_LOG_LEVEL_WARNING, "Invalid log level provided, set to level 3 (debug) by default.");
     }
 
     if (!log_path_set)
     {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_WARNING, "No log path provided, set to './logs/' by default.");
+        Helpers_Log(SOPC_LOG_LEVEL_WARNING, "No log path provided, set to './logs/' by default.");
     }
 
     if (SOPC_STATUS_OK != status)
     {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not initialize library.");
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Could not initialize library.");
         return -2;
     }
 
@@ -310,9 +311,9 @@ int32_t SOPC_ClientHelper_Initialize(const char* log_path,
 
 void SOPC_ClientHelper_Finalize(void)
 {
-    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Closing the Toolkit.");
+    Helpers_Log(SOPC_LOG_LEVEL_INFO, "Closing the Toolkit.");
     SOPC_ClientCommon_Clear();
-    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Toolkit closed.");
+    Helpers_Log(SOPC_LOG_LEVEL_INFO, "Toolkit closed.");
 }
 
 int32_t SOPC_ClientHelper_GetEndpoints(const char* endpointUrl, SOPC_ClientHelper_GetEndpointsResult** result)
@@ -334,7 +335,7 @@ int32_t SOPC_ClientHelper_GetEndpoints(const char* endpointUrl, SOPC_ClientHelpe
     status = SOPC_ClientCommon_Configured();
     if (SOPC_STATUS_OK != status)
     {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not configure the toolkit");
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Could not configure the toolkit");
         res = -100;
     }
 
@@ -514,12 +515,12 @@ int32_t SOPC_ClientHelper_CreateConfiguration(const char* endpointUrl, SOPC_Clie
 
     SOPC_LibSub_ConfigurationId cfg_id = 0;
 
-    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Configure connection to \"%s\"", cfg_con.server_url);
+    Helpers_Log(SOPC_LOG_LEVEL_INFO, "Configure connection to \"%s\"", cfg_con.server_url);
 
     status = SOPC_ClientCommon_ConfigureConnection(&cfg_con, &cfg_id);
     if (SOPC_STATUS_OK != status)
     {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not configure connection.");
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Could not configure connection.");
     }
 
     if (SOPC_STATUS_OK == status)
@@ -527,13 +528,13 @@ int32_t SOPC_ClientHelper_CreateConfiguration(const char* endpointUrl, SOPC_Clie
         status = SOPC_ClientCommon_Configured();
         if (SOPC_STATUS_OK != status)
         {
-            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not configure the toolkit.");
+            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Could not configure the toolkit.");
         }
     }
 
     if (SOPC_STATUS_OK == status)
     {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Configured.");
+        Helpers_Log(SOPC_LOG_LEVEL_INFO, "Configured.");
     }
     else
     {
@@ -554,18 +555,18 @@ int32_t SOPC_ClientHelper_CreateConnection(int32_t cfg_id)
 
     if (0 >= cfg_id)
     {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Configuration id %d is invalid.", cfg_id);
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Configuration id %d is invalid.", cfg_id);
         return -1;
     }
 
     status = SOPC_ClientCommon_Connect((SOPC_LibSub_ConfigurationId) cfg_id, &con_id);
     if (SOPC_STATUS_OK == status)
     {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Connected.");
+        Helpers_Log(SOPC_LOG_LEVEL_INFO, "Connected.");
     }
     else
     {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not connect with given configuration id.");
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Could not connect with given configuration id.");
         return -100;
     }
 
@@ -708,7 +709,7 @@ static void GenericCallbackHelper_Read(SOPC_StatusCode status, const void* respo
     ctx->status = status;
     if (ctx->nbElements != readResp->NoOfResults)
     {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Invalid number of elements in ReadResponse.");
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Invalid number of elements in ReadResponse.");
         ctx->status = SOPC_STATUS_NOK;
     }
     if (SOPC_STATUS_OK == ctx->status)
@@ -746,7 +747,7 @@ static void GenericCallbackHelper_Write(SOPC_StatusCode status, const void* resp
     ctx->status = status;
     if (ctx->nbElements != writeResp->NoOfResults)
     {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Invalid number of elements in WriteResponse.");
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Invalid number of elements in WriteResponse.");
         ctx->status = SOPC_STATUS_NOK;
     }
     if (SOPC_STATUS_OK == ctx->status)
@@ -783,7 +784,7 @@ static void GenericCallbackHelper_Browse(SOPC_StatusCode status, const void* res
     ctx->status = status;
     if (ctx->nbElements != browseResp->NoOfResults)
     {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Invalid number of elements in BrowseResponse.");
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Invalid number of elements in BrowseResponse.");
         ctx->status = SOPC_STATUS_NOK;
     }
     if (SOPC_STATUS_OK == ctx->status)
@@ -847,7 +848,7 @@ static void GenericCallbackHelper_BrowseNext(SOPC_StatusCode status, const void*
     ctx->status = status;
     if (ctx->nbElements < browseNextResp->NoOfResults)
     {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Invalid number of elements in BrowseNextResponse.");
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Invalid number of elements in BrowseNextResponse.");
         ctx->status = SOPC_STATUS_NOK;
     }
     if (SOPC_STATUS_OK == ctx->status)
@@ -1233,7 +1234,7 @@ int32_t SOPC_ClientHelper_AddMonitoredItems(int32_t connectionId, char** nodeIds
     {
         for (size_t i = 0; i < nbNodeIds; ++i)
         {
-            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Created MonIt for \"%s\" with data_id %" PRIu32 ".", nodeIds[i],
+            Helpers_Log(SOPC_LOG_LEVEL_INFO, "Created MonIt for \"%s\" with data_id %" PRIu32 ".", nodeIds[i],
                         lDataId[i]);
         }
     }
@@ -1243,7 +1244,7 @@ int32_t SOPC_ClientHelper_AddMonitoredItems(int32_t connectionId, char** nodeIds
 
     if (SOPC_STATUS_OK != status)
     {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Could not create monitored items.");
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Could not create monitored items.");
         return -100;
     }
 
@@ -1276,7 +1277,7 @@ int32_t SOPC_ClientHelper_Disconnect(int32_t connectionId)
         return -1;
     }
 
-    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Closing the connection %" PRIi32, connectionId);
+    Helpers_Log(SOPC_LOG_LEVEL_INFO, "Closing the connection %" PRIi32, connectionId);
     SOPC_ReturnStatus status = SOPC_ClientCommon_Disconnect((SOPC_LibSub_ConnectionId) connectionId);
 
     if (SOPC_STATUS_INVALID_STATE == status)
@@ -1298,14 +1299,14 @@ int32_t SOPC_ClientHelper_Disconnect(int32_t connectionId)
     return 0;
 }
 
-static void log_callback(const SOPC_Toolkit_Log_Level log_level, SOPC_LibSub_CstString text)
+static void log_callback(const SOPC_Log_Level log_level, SOPC_LibSub_CstString text)
 {
     Helpers_LoggerStdout(log_level, text);
 }
 
 static void default_disconnect_callback(const uint32_t c_id)
 {
-    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "Client %" PRIu32 " disconnected.", c_id);
+    Helpers_Log(SOPC_LOG_LEVEL_INFO, "Client %" PRIu32 " disconnected.", c_id);
 }
 
 static SOPC_ReturnStatus WriteHelper_InitializeValues(size_t nbElements,
@@ -1337,7 +1338,7 @@ static SOPC_ReturnStatus WriteHelper_InitializeValues(size_t nbElements,
                     SOPC_NodeId_FromCString(writeValues[i].nodeId, (int) strlen(writeValues[i].nodeId));
                 if (NULL == nodeId)
                 {
-                    Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "nodeId NULL");
+                    Helpers_Log(SOPC_LOG_LEVEL_INFO, "nodeId NULL");
                 }
                 status = SOPC_NodeId_Copy(&nodesToWrite[i].NodeId, nodeId);
                 SOPC_NodeId_Clear(nodeId);
@@ -1508,7 +1509,7 @@ static SOPC_ReturnStatus BrowseHelper_InitializeNodesToBrowse(size_t nbElements,
         SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(browseRequests[i].nodeId, (int) strlen(browseRequests[i].nodeId));
         if (NULL == nodeId)
         {
-            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "nodeId NULL");
+            Helpers_Log(SOPC_LOG_LEVEL_INFO, "nodeId NULL");
         }
         status = SOPC_NodeId_Copy(&nodesToBrowse[i].NodeId, nodeId);
         SOPC_NodeId_Clear(nodeId);
@@ -1520,7 +1521,7 @@ static SOPC_ReturnStatus BrowseHelper_InitializeNodesToBrowse(size_t nbElements,
                                                              (int) strlen(browseRequests[i].referenceTypeId));
             if (NULL == refNodeId)
             {
-                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "refNodeId NULL");
+                Helpers_Log(SOPC_LOG_LEVEL_INFO, "refNodeId NULL");
             }
             status = SOPC_NodeId_Copy(&nodesToBrowse[i].ReferenceTypeId, refNodeId);
             SOPC_NodeId_Clear(refNodeId);

@@ -224,14 +224,6 @@ typedef void SOPC_ComEvent_Fct(SOPC_App_Com_Event event, uint32_t IdOrStatus, vo
 /* Toolkit address space notification events callback type */
 typedef void SOPC_AddressSpaceNotif_Fct(SOPC_App_AddSpace_Event event, void* opParam, SOPC_StatusCode opStatus);
 
-typedef enum
-{
-    SOPC_TOOLKIT_LOG_LEVEL_ERROR,
-    SOPC_TOOLKIT_LOG_LEVEL_WARNING,
-    SOPC_TOOLKIT_LOG_LEVEL_INFO,
-    SOPC_TOOLKIT_LOG_LEVEL_DEBUG
-} SOPC_Toolkit_Log_Level;
-
 /* Toolkit build information */
 typedef struct
 {

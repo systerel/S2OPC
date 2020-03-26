@@ -119,7 +119,7 @@ SOPC_LibSub_Timestamp Helpers_OPCTimeToNTP(SOPC_DateTime ts);
  * See Helpers_SetLogger().
  *
  */
-void Helpers_Log(const SOPC_Toolkit_Log_Level log_level, const char* format, ...);
+void Helpers_Log(const SOPC_Log_Level log_level, const char* format, ...);
 
 /**
  * \brief Sets the \p cbk function as the called callback by Helpers_Log().
@@ -131,7 +131,7 @@ void Helpers_SetLogger(SOPC_LibSub_LogCbk cbk);
 /**
  * \brief Prints a log message to stdout, with the following format "# log_level: text\n".
  */
-void Helpers_LoggerStdout(const SOPC_Toolkit_Log_Level log_level, const SOPC_LibSub_CstString text);
+void Helpers_LoggerStdout(const SOPC_Log_Level log_level, const SOPC_LibSub_CstString text);
 
 /**
  * \brief translate Toolkit log level to SOPC_Log_Level
@@ -140,6 +140,6 @@ void Helpers_LoggerStdout(const SOPC_Toolkit_Log_Level log_level, const SOPC_Lib
  *
  * \return the equivalent SOPC_Common log level
  */
-SOPC_Log_Level Helpers_ToolkitLogToCommonLog(SOPC_Toolkit_Log_Level logLevel);
+SOPC_Log_Level Helpers_ToolkitLogToCommonLog(SOPC_Log_Level logLevel);
 
 #endif /* TOOLKIT_HELPERS_H_ */

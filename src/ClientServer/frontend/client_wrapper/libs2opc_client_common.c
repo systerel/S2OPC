@@ -114,7 +114,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_Initialize(const SOPC_LibSub_StaticCfg* pCfg
         logConfiguration.logSysConfig.fileSystemLogConfig.logMaxFiles = pCfg->toolkit_logger.maxFiles;
         if (NULL == pCfg->toolkit_logger.log_path)
         {
-            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Log Path is set to null.");
+            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Log Path is set to null.");
             status = SOPC_STATUS_INVALID_PARAMETERS;
         }
         else
@@ -235,7 +235,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_ConfigureConnection(const SOPC_LibSub_Connec
 
     if (NULL == pCfg->policyId)
     {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Cannot configure connection with NULL policyId.");
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Cannot configure connection with NULL policyId.");
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
@@ -487,7 +487,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConfigurationId cf
         if (pCfg == NULL)
         {
             status = SOPC_STATUS_INVALID_PARAMETERS;
-            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Connect: unknown configuration id: %" PRIu32 ".", cfgId);
+            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Connect: unknown configuration id: %" PRIu32 ".", cfgId);
         }
     }
 
@@ -729,7 +729,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendGetEndpointsRequest(const char* end
         }
         if (SOPC_STATUS_OK != status)
         {
-            Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "# Error: Could not create the GetEndpointsRequest.\n");
+            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "# Error: Could not create the GetEndpointsRequest.\n");
         }
     }
 
@@ -982,7 +982,7 @@ static bool LibCommon_IsDiscoveryEvent(SOPC_App_Com_Event event, uintptr_t appCt
         break;
     default:
         bDiscovery = false;
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_ERROR, "Unexpected event %d received.", event);
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Unexpected event %d received.", event);
         break;
     }
 
@@ -1055,7 +1055,7 @@ static void ToolkitEventCallback(SOPC_App_Com_Event event, uint32_t IdOrStatus, 
     /* At least one machine or a generic callback should have processed the event */
     if (false == bProcessed)
     {
-        Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO,
+        Helpers_Log(SOPC_LOG_LEVEL_INFO,
                     "No machine or generic callback to process the event %d. IdOrStatus is %" PRIu32 ".", event,
                     IdOrStatus);
     }

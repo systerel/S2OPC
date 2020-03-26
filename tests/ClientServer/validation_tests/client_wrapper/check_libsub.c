@@ -33,6 +33,7 @@
 #include "sopc_builtintypes.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_encodeable.h"
+#include "sopc_log_manager.h"
 #include "sopc_time.h" /* SOPC_Sleep, SOPC_TimeReference */
 #include "sopc_toolkit_config.h"
 #include "sopc_types.h"
@@ -130,7 +131,7 @@ START_TEST(test_subscription)
 {
     SOPC_LibSub_StaticCfg cfg_cli = {.host_log_callback = Helpers_LoggerStdout,
                                      .disconnect_callback = disconnect_callback,
-                                     .toolkit_logger = {.level = SOPC_TOOLKIT_LOG_LEVEL_DEBUG,
+                                     .toolkit_logger = {.level = SOPC_LOG_LEVEL_DEBUG,
                                                         .log_path = "./check_libsub_subscription_logs/",
                                                         .maxBytes = 1048576,
                                                         .maxFiles = 50}};
@@ -243,7 +244,7 @@ START_TEST(test_half_broken_subscriptions)
 {
     SOPC_LibSub_StaticCfg cfg_cli = {.host_log_callback = Helpers_LoggerStdout,
                                      .disconnect_callback = disconnect_callback_multi,
-                                     .toolkit_logger = {.level = SOPC_TOOLKIT_LOG_LEVEL_DEBUG,
+                                     .toolkit_logger = {.level = SOPC_LOG_LEVEL_DEBUG,
                                                         .log_path = "./check_libsub_subscription_logs/",
                                                         .maxBytes = 1048576,
                                                         .maxFiles = 50}};
@@ -329,7 +330,7 @@ START_TEST(test_half_broken_subscriptions)
                 SOPC_TimeReference_Compare(
                     SOPC_TimeReference_AddMilliseconds(disconnect_times[i], ROBUSTNESS_RETRY_PERIOD), curTime) <= 0)
             {
-                Helpers_Log(SOPC_TOOLKIT_LOG_LEVEL_INFO, "New connection with cfg_id %i.", cfg_ids[i]);
+                Helpers_Log(SOPC_LOG_LEVEL_INFO, "New connection with cfg_id %i.", cfg_ids[i]);
                 if (SOPC_LibSub_Connect(cfg_ids[i], &con_ids[i]) == SOPC_STATUS_OK)
                 {
                     ck_assert(SOPC_LibSub_AddToSubscription(con_ids[i], &nid, &attribute_id_value, 1, &dat_ids[i]) ==

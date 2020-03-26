@@ -99,7 +99,7 @@ int main(int argc, char* const argv[])
     int res = 0;
 
     /* Initialize the toolkit */
-    SOPC_ClientHelper_Initialize("./s2opc_wrapper_get_endpoints_logs/", SOPC_TOOLKIT_LOG_LEVEL_DEBUG, NULL);
+    SOPC_ClientHelper_Initialize("./s2opc_wrapper_get_endpoints_logs/", SOPC_LOG_LEVEL_DEBUG, NULL);
 
     const char* endpoint_url = "opc.tcp://localhost:4841";
 

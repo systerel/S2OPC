@@ -33,6 +33,7 @@
 #include <stdlib.h>
 
 #include "sopc_builtintypes.h"
+#include "sopc_log_manager.h"
 #include "sopc_user_app_itf.h"
 
 /* Security policies, taken from "sopc_crypto_profiles.h" */
