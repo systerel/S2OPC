@@ -77,6 +77,7 @@ bool SOPC_Common_IsInitialized(void);
  *
  * \return SOPC_STATUS_OK if initialization is a success
  *         SOPC_STATUS_INVALID_PARAMETERS if logConfiguration is invalid
+ *         SOPC_STATUS_INVALID_STATE if initialization has already been done.
  *         SOPC_STATUS_NOK else
  */
 SOPC_ReturnStatus SOPC_Common_Initialize(SOPC_Log_Configuration logConfiguration);

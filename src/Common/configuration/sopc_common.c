@@ -41,7 +41,7 @@ SOPC_ReturnStatus SOPC_Common_Initialize(SOPC_Log_Configuration logConfiguration
 
     if (bCommon_IsInitialized)
     {
-        return SOPC_STATUS_OK;
+        return SOPC_STATUS_INVALID_STATE;
     }
 
     /* Check IEEE-754 compliance */
@@ -63,7 +63,8 @@ SOPC_ReturnStatus SOPC_Common_Initialize(SOPC_Log_Configuration logConfiguration
             SOPC_FileSystem_mkdir(logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath);
         if (SOPC_FileSystem_Creation_OK != mkdirRes && SOPC_FileSystem_Creation_Error_PathAlreadyExists != mkdirRes)
         {
-            status = SOPC_STATUS_INVALID_STATE;
+            fprintf(stderr, "WARNING: Cannot create log directory, defaulting to current directory\n");
+            logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "";
         }
 
         if (SOPC_STATUS_OK == status)
@@ -98,6 +99,7 @@ SOPC_ReturnStatus SOPC_Common_Initialize(SOPC_Log_Configuration logConfiguration
 
 void SOPC_Common_Clear(void)
 {
+    bCommon_IsInitialized = false;
     SOPC_Logger_Clear();
 }
 
