@@ -36,17 +36,17 @@ VERSION = json.load(open(os.path.join(os.path.dirname(os.path.realpath(__file__)
 NULL = ffi.NULL
 
 # TODO: make this configurable
-LOG_LEVEL = libsub.SOPC_TOOLKIT_LOG_LEVEL_DEBUG
+LOG_LEVEL = libsub.SOPC_LOG_LEVEL_DEBUG
 
 @ffi.def_extern()
 def _callback_log(level, text):
     """
     Receives log information from the LibSub (not from the S2OPC toolkit).
     """
-    dLevel = {libsub.SOPC_TOOLKIT_LOG_LEVEL_ERROR: '# Error: ',
-              libsub.SOPC_TOOLKIT_LOG_LEVEL_WARNING: '# Warning: ',
-              libsub.SOPC_TOOLKIT_LOG_LEVEL_INFO: '# Info: ',
-              libsub.SOPC_TOOLKIT_LOG_LEVEL_DEBUG: '# Debug: '}
+    dLevel = {libsub.SOPC_LOG_LEVEL_ERROR: '# Error: ',
+              libsub.SOPC_LOG_LEVEL_WARNING: '# Warning: ',
+              libsub.SOPC_LOG_LEVEL_INFO: '# Info: ',
+              libsub.SOPC_LOG_LEVEL_DEBUG: '# Debug: '}
     if level <= LOG_LEVEL:
         print(dLevel[level] + ffi.string(text).decode(), file=sys.stderr)
 
