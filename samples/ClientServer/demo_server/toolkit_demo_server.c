@@ -296,12 +296,19 @@ static SOPC_ReturnStatus Server_Initialize(const char* logDirPath)
 #endif
     /* Initialize SOPC Common */
     SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
+    if (NULL != logDirPath)
+    {
+        logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = logDirPath;
+    }
+    else
+    {
 #ifdef IS_TEST_SERVER
-    logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = logDirPath;
+        logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./toolkit_test_server_logs/";
 #else
-    (void) logDirPath;
-    logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./toolkit_test_server_logs/";
+        (void) logDirPath;
+        logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./toolkit_demo_server_logs/";
 #endif
+    }
     logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
     SOPC_ReturnStatus status = SOPC_Common_Initialize(logConfiguration);
     // Initialize the toolkit library and define the communication events callback
