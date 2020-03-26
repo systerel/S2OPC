@@ -297,6 +297,7 @@ static void internal__message_out_bs__encode_msg(const constants__t_channel_conf
         {
         case SOPC_STATUS_WOULD_BLOCK:
             SOPC_Logger_TraceWarning(
+                SOPC_LOG_MODULE_CLIENTSERVER,
                 "Services: encoding of message failed (type = '%s') because it is too large: max size %" PRIu32
                 " reached",
                 SOPC_EncodeableType_GetName(encType), buffer->maximum_size);
@@ -326,7 +327,7 @@ static void internal__message_out_bs__encode_msg(const constants__t_channel_conf
         // TODO: add a SOPC_STATUS_ENCODING_LIMIT for errors due to limits
         case SOPC_STATUS_ENCODING_ERROR:
         default:
-            SOPC_Logger_TraceWarning("Services: encoding of message failed (type = '%s')",
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, "Services: encoding of message failed (type = '%s')",
                                      SOPC_EncodeableType_GetName(encType));
 
             *message_out_bs__sc = constants_statuscodes_bs__e_sc_bad_encoding_error;

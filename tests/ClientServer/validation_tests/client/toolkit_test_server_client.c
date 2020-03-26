@@ -29,6 +29,7 @@
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
 #include "sopc_atomic.h"
+#include "sopc_common.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_crypto_provider.h"
 #include "sopc_encodeable.h"
@@ -505,7 +506,15 @@ static SOPC_ReturnStatus client_send_read_req_test(uint32_t session_id)
 static SOPC_ReturnStatus Server_Initialize(void)
 {
     // Initialize the toolkit library and define the communication events callback
-    SOPC_ReturnStatus status = SOPC_Toolkit_Initialize(Test_ComEvent_FctServerClient);
+
+    SOPC_Log_Configuration log_config = SOPC_Common_GetDefaultLogConfiguration();
+    log_config.logSysConfig.fileSystemLogConfig.logDirPath = "./toolkit_test_server_client_logs";
+
+    SOPC_ReturnStatus status = SOPC_Common_Initialize(log_config);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_Toolkit_Initialize(Test_ComEvent_FctServerClient);
+    }
     if (SOPC_STATUS_OK != status)
     {
         printf("<Test_Server_Toolkit: Failed initializing\n");
@@ -877,11 +886,6 @@ START_TEST(test_server_client)
     /* Initialize the server library (start library threads)
      * and define communication events callback */
     status = Server_Initialize();
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_ToolkitConfig_SetCircularLogPath("./toolkit_test_server_client_logs", true);
-    }
 
     /* Configuration of server endpoint:
        - Enpoint URL,
