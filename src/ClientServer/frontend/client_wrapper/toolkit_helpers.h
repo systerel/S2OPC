@@ -133,13 +133,4 @@ void Helpers_SetLogger(SOPC_LibSub_LogCbk cbk);
  */
 void Helpers_LoggerStdout(const SOPC_Log_Level log_level, const SOPC_LibSub_CstString text);
 
-/**
- * \brief translate Toolkit log level to SOPC_Log_Level
- *
- * \param logLevel [in] the toolkit log level
- *
- * \return the equivalent SOPC_Common log level
- */
-SOPC_Log_Level Helpers_ToolkitLogToCommonLog(SOPC_Log_Level logLevel);
-
 #endif /* TOOLKIT_HELPERS_H_ */

@@ -653,27 +653,3 @@ void Helpers_LoggerStdout(const SOPC_Log_Level log_level, const SOPC_LibSub_CstS
     }
     printf(": %s\n", text);
 }
-
-SOPC_Log_Level Helpers_ToolkitLogToCommonLog(SOPC_Log_Level logLevel)
-{
-    SOPC_Log_Level resultLogLevel = SOPC_LOG_LEVEL_INFO;
-    switch (logLevel)
-    {
-    case SOPC_LOG_LEVEL_ERROR:
-        resultLogLevel = SOPC_LOG_LEVEL_ERROR;
-        break;
-    case SOPC_LOG_LEVEL_WARNING:
-        resultLogLevel = SOPC_LOG_LEVEL_WARNING;
-        break;
-    case SOPC_LOG_LEVEL_INFO:
-        resultLogLevel = SOPC_LOG_LEVEL_INFO;
-        break;
-    case SOPC_LOG_LEVEL_DEBUG:
-        resultLogLevel = SOPC_LOG_LEVEL_DEBUG;
-        break;
-    default:
-        resultLogLevel = SOPC_LOG_LEVEL_INFO;
-        break;
-    }
-    return resultLogLevel;
-}
