@@ -294,16 +294,14 @@ static SOPC_ReturnStatus Server_Initialize(const char* logDirPath)
     bool res = SOPC_Common_SetEncodingConstants(encConf);
     assert(res);
 #endif
-    // Initialize the toolkit library and define the communication events callback
-    SOPC_ReturnStatus status = SOPC_Toolkit_Initialize(Test_ComEvent_FctServer);
-    if (SOPC_STATUS_OK != status)
-    {
-        logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = logDirPath;
-    }
-    else
-    {
-        logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./toolkit_test_server_logs/";
-    }
+    /* Initialize SOPC Common */
+    SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
+#ifdef IS_TEST_SERVER
+    logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = logDirPath;
+#else
+    (void) logDirPath;
+    logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./toolkit_test_server_logs/";
+#endif
     logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
     SOPC_ReturnStatus status = SOPC_Common_Initialize(logConfiguration);
     // Initialize the toolkit library and define the communication events callback
@@ -946,7 +944,7 @@ static SOPC_StatusCode Server_InitDefaultCallMethodService(SOPC_Server_Config* s
 
 /* Set the log path and create (or keep existing) directory path built on executable path
  *  + first argument of main */
-static char* Config_SetLogPath(int argc, char* argv[])
+static char* Server_ConfigLogPath(int argc, char* argv[])
 {
     const char* logDirName = "toolkit_server";
     char* underscore = "_";
@@ -975,14 +973,6 @@ static char* Config_SetLogPath(int argc, char* argv[])
         SOPC_Free(logDirPath);
         logDirPath = NULL;
     }
-
-    return logDirPath;
-}
-
-static char* Server_ConfigureLogger(int argc, char* argv[])
-{
-    // Define directoy path for log traces: ./toolkit_server_argv[1]_logs/
-    char* logDirPath = Config_SetLogPath(argc, argv);
 
     return logDirPath;
 }
@@ -1028,7 +1018,7 @@ int main(int argc, char* argv[])
 
     /* Configure the server logger:
      * DEBUG traces generated in ./toolkit_server_<argv[1]>_logs/ */
-    logDirPath = Server_ConfigureLogger(argc, argv);
+    logDirPath = Server_ConfigLogPath(argc, argv);
 
     /* Initialize the server library (start library threads)
      * and define communication events callback */
