@@ -74,11 +74,10 @@ SOPC_ReturnStatus SOPC_Common_Initialize(SOPC_Log_Configuration logConfiguration
             if (result)
             {
                 SOPC_Logger_SetTraceLogLevel(logConfiguration.logLevel);
-                status = SOPC_STATUS_OK;
             }
             else
             {
-                status = SOPC_STATUS_NOK;
+                fprintf(stderr, "ERROR: S2OPC Logs initialization failed!\n");
             }
         }
     }
