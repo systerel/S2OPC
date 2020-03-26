@@ -44,7 +44,7 @@ typedef SOPC_ReturnStatus (*SOPC_SKProvider_GetKeys_Func)(SOPC_SKProvider* skp,
                                                           uint32_t* NbKeys,
                                                           uint32_t* TimeToNextKey,
                                                           uint32_t* KeyLifetime);
-typedef void (*SOPC_SKProvider_Clear_Func)(SOPC_SKProvider* skp);
+typedef void (*SOPC_SKProvider_Clear_Func)(void* data);
 
 /**
  *  \brief Bytes Security Keys Provider structure
@@ -59,12 +59,13 @@ struct SOPC_SKProvider
 };
 
 /**
- * \brief  Create an instance of SOPC_SKProvider which get data using Security Keys services.
+ * \brief  Create an instance of SOPC_SKProvider which call sequentially all provider of a list until one returns valid Keys
  *
- * \param config      Pointer to Configuration. TODO to complete
+ * \param providers       A valid pointer of SOPC_SKProvider array. Should not be NULL
+ * \param nbProviders     The number of element of the the given array. Should not be 0
  * \return a SOPC_SKProvider object or NULL if not enough memory
  */
-SOPC_SKProvider* SOPC_SKProvider_BySKS_Create(void);
+SOPC_SKProvider* SOPC_SKProvider_TryList_Create(SOPC_SKProvider** providers, uint32_t nbProviders);
 
 /**
  * \brief  Create an instance of SOPC_SKProvider which return random Keys for PubSub Policy. TODO to complete

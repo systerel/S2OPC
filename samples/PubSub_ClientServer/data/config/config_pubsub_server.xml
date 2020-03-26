@@ -4,6 +4,7 @@
         <!-- one to many -->
         <message id="14" version="1" publishingInterval="100." securityMode="signAndEncrypt" sksAddress="opc.tcp://localhost:4841">
             <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/server_2k_cert.der" />
+            <skserver endpointUrl="opc.tcp://localhost:4842" serverCertPath="./server_public/server_2k_cert.der" />
             <!-- one to many -->
             <variable nodeId="ns=1;s=PubBool" displayName="varBool" dataType="Boolean"/>
             <variable nodeId="ns=1;s=PubString" displayName="varString" dataType="String"/>

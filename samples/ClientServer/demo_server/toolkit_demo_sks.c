@@ -591,9 +591,8 @@ static SOPC_ReturnStatus Server_Initialize(void)
  * Application description and endpoint configuration:
  *---------------------------------------------------*/
 
-static SOPC_StatusCode Server_SKS_CreateBuilder(SKS_ServerModeType mode,
-                                                SOPC_SKBuilder** builder,
-                                                SOPC_SKProvider** provider)
+static SOPC_StatusCode Server_SKS_CreateMasterBuilder(SOPC_SKBuilder** builder, SOPC_SKProvider** provider)
+
 {
     if (NULL == builder || NULL == provider)
     {
@@ -603,65 +602,86 @@ static SOPC_StatusCode Server_SKS_CreateBuilder(SKS_ServerModeType mode,
     *builder = NULL;
     *provider = NULL;
     SOPC_StatusCode status = SOPC_STATUS_OK;
-    switch (mode)
+
+    /* Init SK Provider : Create Random Keys */
+    *provider = SOPC_SKProvider_RandomPubSub_Create();
+    if (NULL == *provider)
     {
-    case SKS_ServerMode_Master:
+        status = SOPC_STATUS_OUT_OF_MEMORY;
+    }
 
-        /* Init SK Provider : Create Random Keys */
-        *provider = SOPC_SKProvider_RandomPubSub_Create();
-        if (NULL == *provider)
+    /* Init SK Builder : adds Keys to Manager and removes obsolete Keys when maximum size is reached */
+    SOPC_SKBuilder* skbAppend;
+    if (SOPC_STATUS_OK == status)
+    {
+        skbAppend = SOPC_SKBuilder_Append_Create();
+        if (NULL == skbAppend)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
-
-        /* Init SK Builder : adds Keys to Manager and removes obsolete Keys when maximum size is reached */
-        SOPC_SKBuilder* skbAppend;
-        if (SOPC_STATUS_OK == status)
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        *builder = SOPC_SKBuilder_Truncate_Create(skbAppend, SKS_NB_MAX_KEYS);
+        if (NULL == *builder)
         {
-            skbAppend = SOPC_SKBuilder_Append_Create();
-            if (NULL == skbAppend)
-            {
-                status = SOPC_STATUS_OUT_OF_MEMORY;
-            }
+            SOPC_SKBuilder_Clear(skbAppend);
+            SOPC_Free(skbAppend);
+            skbAppend = NULL;
+            status = SOPC_STATUS_OUT_OF_MEMORY;
         }
-        if (SOPC_STATUS_OK == status)
+    }
+
+    if (SOPC_STATUS_OK != status)
+    {
+        if (NULL != *provider)
         {
-            *builder = SOPC_SKBuilder_Truncate_Create(skbAppend, SKS_NB_MAX_KEYS);
-            if (NULL == *builder)
-            {
-                SOPC_SKBuilder_Clear(skbAppend);
-                SOPC_Free(skbAppend);
-                skbAppend = NULL;
-                status = SOPC_STATUS_OUT_OF_MEMORY;
-            }
+            SOPC_SKProvider_Clear(*provider);
+            SOPC_Free(*provider);
+            *provider = NULL;
         }
-        break;
-    case SKS_ServerMode_Slave:
 
-        /* Create a SK Builder which replace all Keys of a SK Manager */
+        if (NULL != *builder)
+        {
+            SOPC_SKBuilder_Clear(*builder);
+            SOPC_Free(*builder);
+            *builder = NULL;
+        }
+    }
 
-        // Create a SK Provider which get Keys from a GetSecurityKeys request
-        *provider = Client_Provider_BySKS_Create();
-        if (NULL == *provider)
+    return status;
+}
+
+static SOPC_StatusCode Server_SKS_CreateSlaveBuilder(uint32_t SecureChannel_Id,
+                                                     SOPC_SKBuilder** builder,
+                                                     SOPC_SKProvider** provider)
+{
+    if (NULL == builder || NULL == provider)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    *builder = NULL;
+    *provider = NULL;
+    SOPC_StatusCode status = SOPC_STATUS_OK;
+
+    /* Create a SK Builder which replace all Keys of a SK Manager */
+
+    // Create a SK Provider which get Keys from a GetSecurityKeys request
+    *provider = Client_Provider_BySKS_Create(SecureChannel_Id);
+    if (NULL == *provider)
+    {
+        status = SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        // Create Builder to replace all Keys
+        *builder = SOPC_SKBuilder_Setter_Create();
+        if (NULL == *builder)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
-
-        if (SOPC_STATUS_OK == status)
-        {
-            // Create Builder to replace all Keys
-            *builder = SOPC_SKBuilder_Setter_Create();
-            if (NULL == *builder)
-            {
-                status = SOPC_STATUS_OUT_OF_MEMORY;
-            }
-        }
-
-        break;
-    default:
-        // should not happen
-        status = SOPC_STATUS_NOK;
-        break;
     }
 
     if (SOPC_STATUS_OK != status)
@@ -700,15 +720,37 @@ static SOPC_StatusCode Server_SKManager_Init(SOPC_SKManager* manager)
     SOPC_SKBuilder* builder = NULL;
     SOPC_SKProvider* provider = NULL;
     bool isInit = false;
-
-    status = Server_SKS_CreateBuilder(SKS_ServerMode_Slave, &builder, &provider);
+    uint32_t SecureChannel_Id = 0;
 
     uint64_t i = 0;
     // Stop if add SC failed or Keys are found
     for (i = 1; i < nb_sks_server && SOPC_STATUS_OK == status && !isInit; i++)
     {
         printf("   => Debug Redondance : SC Configuration %s\n", sks_server_endpoint_uris[i]);
-        status = Client_AddSecureChannelconfig(sks_server_endpoint_uris[i], sks_server_cert_pathes[i]);
+        SOPC_SerializedCertificate* server_cert = NULL;
+        status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(sks_server_cert_pathes[i], &server_cert);
+        if (SOPC_STATUS_OK == status)
+        {
+            SecureChannel_Id = Client_AddSecureChannelconfig(sks_server_endpoint_uris[i], server_cert);
+            if (0 == SecureChannel_Id)
+            {
+                status = SOPC_STATUS_NOK;
+            }
+            SOPC_KeyManager_SerializedCertificate_Delete(server_cert);
+        }
+        else
+        {
+            printf("   => Debug Redondance : Cannot create Server Certificate\n");
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            status = Server_SKS_CreateSlaveBuilder(SecureChannel_Id, &builder, &provider);
+        }
+        else
+        {
+            printf("   => Debug Redondance : SC Configuration failed\n");
+        }
+
         if (SOPC_STATUS_OK == status)
         {
             printf("   => Debug Redondance : SC Configuration succeed\n");
@@ -719,8 +761,12 @@ static SOPC_StatusCode Server_SKManager_Init(SOPC_SKManager* manager)
         }
         else
         {
-            printf("   => Debug Redondance : SC Configuration failed\n");
+            printf("   => Debug Redondance : SC Create Builder failed\n");
         }
+        SOPC_SKBuilder_Clear(builder);
+        SOPC_Free(builder);
+        SOPC_SKProvider_Clear(provider);
+        SOPC_Free(provider);
     }
     if (isInit)
     {
@@ -762,14 +808,6 @@ static SOPC_StatusCode Server_SKS_Start()
         }
     }
 
-    /* Init SK Builder and SK Provider */
-    SOPC_SKBuilder* skBuilder;
-    SOPC_SKProvider* skProvider;
-    /* Init SK Builder : adds Keys to Manager and removes obsolete Keys when maximum size is reached */
-    if (SOPC_STATUS_OK == status)
-    {
-        status = Server_SKS_CreateBuilder(sksServerMode, &skBuilder, &skProvider);
-    }
     /* Init SK Ordonnancer */
     if (SOPC_STATUS_OK == status)
     {
@@ -777,6 +815,53 @@ static SOPC_StatusCode Server_SKS_Start()
         if (NULL == skOrdonnancer)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+
+    /* Init SK Builder and SK Provider */
+    SOPC_SKBuilder* skBuilder;
+    SOPC_SKProvider* skProvider;
+    uint32_t SecureChannel_Id = 0;
+    /* Init SK Builder : adds Keys to Manager and removes obsolete Keys when maximum size is reached */
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_SerializedCertificate* server_cert = NULL;
+        switch (sksServerMode)
+        {
+        case SKS_ServerMode_Master:
+            status = Server_SKS_CreateMasterBuilder(&skBuilder, &skProvider);
+            break;
+        case SKS_ServerMode_Slave:
+            // Configure Client module with Master uri
+
+            status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(sks_server_cert_pathes[0], &server_cert);
+            if (SOPC_STATUS_OK == status)
+            {
+                SecureChannel_Id = Client_AddSecureChannelconfig(sks_server_endpoint_uris[0], server_cert);
+                if (0 == SecureChannel_Id)
+                {
+                    status = SOPC_STATUS_NOK;
+                }
+                SOPC_KeyManager_SerializedCertificate_Delete(server_cert);
+            }
+            else
+            {
+                printf("   => Debug Redondance : Cannot create Server Certificate\n");
+            }
+
+            if (SOPC_STATUS_OK == status)
+            {
+                status = Server_SKS_CreateSlaveBuilder(SecureChannel_Id, &skBuilder, &skProvider);
+            }
+            else
+            {
+                printf("# Error: Slave Server cannot configure channel to Master Server\n");
+            }
+            break;
+        default:
+            // should not happen
+            status = SOPC_STATUS_NOK;
+            break;
         }
     }
 
@@ -790,15 +875,6 @@ static SOPC_StatusCode Server_SKS_Start()
         }
     }
 
-    if (SOPC_STATUS_OK == status && SKS_ServerMode_Slave == sksServerMode)
-    {
-        // Configure Client module with Master uri
-        status = Client_AddSecureChannelconfig(sks_server_endpoint_uris[0], sks_server_cert_pathes[0]);
-        if (SOPC_STATUS_OK != status)
-        {
-            printf("# Error: Slave Server cannot configure channel to Master Server\n");
-        }
-    }
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_SKOrdonnancer_Start(skOrdonnancer);
@@ -1612,7 +1688,7 @@ int main(int argc, char* argv[])
     SOPC_Free(skOrdonnancer);
     SOPC_SKManager_Clear(skManager);
     SOPC_Free(skManager);
-
+    Client_Teardown();
     SOPC_AddressSpace_Delete(address_space);
     SOPC_S2OPC_Config_Clear(&s2opcConfig);
 #ifdef WITH_STATIC_SECURITY_DATA

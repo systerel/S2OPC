@@ -900,7 +900,7 @@ bool SOPC_SecurityKeyServices_Set_EndpointUrl(SOPC_SecurityKeyServices* sks, con
     return (NULL != sks->endpointUrl);
 }
 
-const SOPC_SerializedCertificate* SOPC_SecurityKeyServices_Get_ServerCertificate(const SOPC_SecurityKeyServices* sks)
+SOPC_SerializedCertificate* SOPC_SecurityKeyServices_Get_ServerCertificate(const SOPC_SecurityKeyServices* sks)
 {
     assert(NULL != sks);
     return sks->serverCertificate;

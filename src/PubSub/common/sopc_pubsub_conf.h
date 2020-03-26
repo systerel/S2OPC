@@ -294,7 +294,7 @@ SOPC_PublishedVariable* SOPC_FieldMetaData_Get_PublishedVariable(const SOPC_Fiel
 const char* SOPC_SecurityKeyServices_Get_EndpointUrl(const SOPC_SecurityKeyServices* sks);
 /* Data are copied */
 bool SOPC_SecurityKeyServices_Set_EndpointUrl(SOPC_SecurityKeyServices* sks, const char* uri);
-const SOPC_SerializedCertificate* SOPC_SecurityKeyServices_Get_ServerCertificate(const SOPC_SecurityKeyServices* sks);
+SOPC_SerializedCertificate* SOPC_SecurityKeyServices_Get_ServerCertificate(const SOPC_SecurityKeyServices* sks);
 /* ServerCertificate data ownership moves to SOPC_SecurityKeyServices */
 bool SOPC_SecurityKeyServices_Set_ServerCertificate(SOPC_SecurityKeyServices* sks, SOPC_SerializedCertificate* serverCertificate);
 

@@ -52,16 +52,16 @@ static SOPC_ReturnStatus SOPC_SKBuilder_Update_Default_Setter(SOPC_SKBuilder* sk
 
         if (SOPC_GoodGenericStatus == status)
         {
-            printf("<Security Key Service: Keys setted in Builder By SKS\n");
+          printf("<Security Key Service: Keys setted in Builder\n");
         }
         else
         {
-            printf("<Security Key Service: Error in Builder By SKS - cannot set Keys\n");
+            printf("<Security Key Service: Error Builder cannot set Keys\n");
         }
 
         for (uint32_t i = 0; i < NbToken; i++)
         {
-            SOPC_ByteString_Clear(Keys);
+            SOPC_ByteString_Clear(&Keys[i]);
         }
         SOPC_Free(Keys);
         SOPC_String_Clear(SecurityPolicyUri);
@@ -243,10 +243,10 @@ SOPC_ReturnStatus SOPC_SKBuilder_Update(SOPC_SKBuilder* skb, SOPC_SKProvider* sk
 
 void SOPC_SKBuilder_Clear(SOPC_SKBuilder* skb)
 {
-    if (NULL != skb && NULL != skb->ptrClear)
+  if (NULL != skb && NULL != skb->ptrClear)
     {
-        skb->ptrClear(skb->data);
-        SOPC_Free(skb->data);
-        skb->data = NULL;
+      skb->ptrClear(skb->data);
     }
+  SOPC_Free(skb->data);
+  skb->data = NULL;
 }

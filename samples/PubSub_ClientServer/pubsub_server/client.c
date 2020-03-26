@@ -41,23 +41,37 @@ Client_Keys_Type Client_Keys = {.init = false};
 
 uint32_t session = 0;
 SessionConnectedState scState = SESSION_CONN_NEW;
-uint32_t channel_config_idx = 0;
 // use to identify the active session response
 uintptr_t Client_SessionContext = 1;
 
-int32_t scConfigs_idx = -1;
-SOPC_SecureChannel_Config scConfigs[SOPC_MAX_SECURE_CONNECTIONS];
+/* Secure Channel Configurations */
+// Current and last secure channel registered
+int64_t Client_SecureChannel_Current = -1;
+// channel configuration
+SOPC_SecureChannel_Config Client_SecureChannel_Config[SOPC_MAX_SECURE_CONNECTIONS];
+// channel identifier
+uint32_t Client_SecureChannel_Id[SOPC_MAX_SECURE_CONNECTIONS];
+
 /* only one Secure Channel is used, keep all config to free memory when quit */
 t_CerKey ck_cli[SOPC_MAX_SECURE_CONNECTIONS];
 
 bool isScCreated = false;
 int32_t sendFailures = 0;
 
+/*
+ * \brief Retrieve a the Secure Channel Configuration associated to the given endpoint url
+ *        The Secure Channel Configuration should have been previously created using Client_AddSecureChannelconfig()
+ *
+ * \param endpoint_url     Endpoint Url of the SKS Server
+ * \return                 A Secure Channel configuration ID or 0 if failed.
+ */
+static uint32_t Client_GetSecureChannelconfig(const char* endpoint_url);
+
 static void Client_Copy_CallResponse_To_GetKeysResponse(Client_SKS_GetKeys_Response* response,
                                                         OpcUa_CallResponse* callResp);
 static SOPC_ReturnStatus CerAndKeyLoader_client(const char* client_key_path,
                                                 const char* client_cert_path,
-                                                const char* sks_server_cert_path);
+                                                SOPC_SerializedCertificate* sks_server_cert);
 static SOPC_ReturnStatus Wait_response_client(void);
 static SOPC_ReturnStatus Client_SaveKeys(SOPC_ByteString* key, char* path);
 SOPC_ReturnStatus Client_CloseSession(void);
@@ -105,68 +119,56 @@ static SOPC_ReturnStatus Client_SaveKeys(SOPC_ByteString* key, char* path)
 // Configure the 2 secure channel connections to use and retrieve channel configuration index
 static SOPC_ReturnStatus CerAndKeyLoader_client(const char* client_key_path,
                                                 const char* client_cert_path,
-                                                const char* sks_server_cert_path)
+                                                SOPC_SerializedCertificate* sks_server_cert)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(client_cert_path, &ck_cli[scConfigs_idx].client_cert);
+    status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(client_cert_path,
+                                                                  &ck_cli[Client_SecureChannel_Current].client_cert);
     if (SOPC_STATUS_OK != status)
     {
         printf("# Error: Client failed to load client certificate\n");
     }
     else
     {
-        scConfigs[scConfigs_idx].crt_cli = ck_cli[scConfigs_idx].client_cert;
+        Client_SecureChannel_Config[Client_SecureChannel_Current].crt_cli =
+            ck_cli[Client_SecureChannel_Current].client_cert;
     }
 
     if (SOPC_STATUS_OK == status)
     {
-        status =
-            SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(client_key_path, &ck_cli[scConfigs_idx].client_key);
+        status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(
+            client_key_path, &ck_cli[Client_SecureChannel_Current].client_key);
         if (SOPC_STATUS_OK != status)
         {
             printf("# Error: Client failed to load private key\n");
         }
         else
         {
-            scConfigs[scConfigs_idx].key_priv_cli = ck_cli[scConfigs_idx].client_key;
+            Client_SecureChannel_Config[Client_SecureChannel_Current].key_priv_cli =
+                ck_cli[Client_SecureChannel_Current].client_key;
         }
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(sks_server_cert_path,
-                                                                      &ck_cli[scConfigs_idx].server_cert);
+        ck_cli[Client_SecureChannel_Current].server_cert = SOPC_Buffer_Create(sks_server_cert->length);
+        if (NULL == ck_cli[Client_SecureChannel_Current].server_cert)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        else
+        {
+            status = SOPC_Buffer_Copy(ck_cli[Client_SecureChannel_Current].server_cert, sks_server_cert);
+        }
         if (SOPC_STATUS_OK != status)
         {
             printf("# Error: Client failed to load server certificate\n");
         }
         else
         {
-            scConfigs[scConfigs_idx].crt_srv = ck_cli[scConfigs_idx].server_cert;
+            Client_SecureChannel_Config[Client_SecureChannel_Current].crt_srv =
+                ck_cli[Client_SecureChannel_Current].server_cert;
         }
     }
-
-    /*    if (SOPC_STATUS_OK == status)
-    {
-        // Certificate Authority: load
-        if (SOPC_STATUS_OK !=
-            SOPC_KeyManager_SerializedCertificate_CreateFromFile(CA_CERT_PATH, &ck_cli[scConfigs_idx].crt_ca))
-        {
-            printf("# Error : Client failed to load Certificate Authority\n");
-        }
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_PKIProviderStack_Create(ck_cli[scConfigs_idx].crt_ca, NULL, &ck_cli[scConfigs_idx].pkiProvider);
-        if (SOPC_STATUS_OK != status)
-        {
-            printf("# Error: Client failed to create PKI\n");
-        }
-        else
-        {
-            scConfigs[scConfigs_idx].pki = ck_cli[scConfigs_idx].pkiProvider;
-        }
-        } */
 
     if (SOPC_STATUS_OK == status)
     {
@@ -178,14 +180,15 @@ static SOPC_ReturnStatus CerAndKeyLoader_client(const char* client_key_path,
         char* lPathsCRL[] = {CA_CRL_PATH, NULL};
         status = SOPC_PKIProviderStack_CreateFromPaths(lPathsTrustedRoots, lPathsTrustedLinks, lPathsUntrustedRoots,
                                                        lPathsUntrustedLinks, lPathsIssuedCerts, lPathsCRL,
-                                                       &ck_cli[scConfigs_idx].pkiProvider);
+                                                       &ck_cli[Client_SecureChannel_Current].pkiProvider);
         if (SOPC_STATUS_OK != status)
         {
             printf("# Error: Failed to create PKI\n");
         }
         else
         {
-            scConfigs[scConfigs_idx].pki = ck_cli[scConfigs_idx].pkiProvider;
+            Client_SecureChannel_Config[Client_SecureChannel_Current].pki =
+                ck_cli[Client_SecureChannel_Current].pkiProvider;
         }
     }
 
@@ -202,44 +205,72 @@ SOPC_ReturnStatus Client_Setup()
     return (status);
 }
 
-SOPC_ReturnStatus Client_AddSecureChannelconfig(const char* endpoint_url, const char* server_cert_path)
+uint32_t Client_AddSecureChannelconfig(const char* endpoint_url, SOPC_SerializedCertificate* server_cert)
 {
     assert(NULL != endpoint_url);
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
-    if (SOPC_MAX_SECURE_CONNECTIONS <= scConfigs_idx + 1)
+    uint32_t scId = Client_GetSecureChannelconfig(endpoint_url);
+
+    if (scId > 0)
+    {
+        return scId;
+    }
+
+    if (SOPC_MAX_SECURE_CONNECTIONS <= Client_SecureChannel_Current + 1)
     {
         printf("# Error : Too many secure channel created\n");
         return SOPC_STATUS_NOK;
     }
-    scConfigs_idx++;
+    Client_SecureChannel_Current++;
 
     // A Secure channel connection configuration
-    scConfigs[scConfigs_idx].isClientSc = true;
-    scConfigs[scConfigs_idx].url = NULL;
-    scConfigs[scConfigs_idx].crt_cli = NULL;
-    scConfigs[scConfigs_idx].key_priv_cli = NULL;
-    scConfigs[scConfigs_idx].crt_srv = NULL;
-    scConfigs[scConfigs_idx].pki = NULL;
-    scConfigs[scConfigs_idx].reqSecuPolicyUri = SOPC_SecurityPolicy_Basic256Sha256_URI;
-    scConfigs[scConfigs_idx].requestedLifetime = 20000;
-    scConfigs[scConfigs_idx].msgSecurityMode = OpcUa_MessageSecurityMode_SignAndEncrypt;
+    Client_SecureChannel_Config[Client_SecureChannel_Current].isClientSc = true;
+    Client_SecureChannel_Config[Client_SecureChannel_Current].url = NULL;
+    Client_SecureChannel_Config[Client_SecureChannel_Current].crt_cli = NULL;
+    Client_SecureChannel_Config[Client_SecureChannel_Current].key_priv_cli = NULL;
+    Client_SecureChannel_Config[Client_SecureChannel_Current].crt_srv = NULL;
+    Client_SecureChannel_Config[Client_SecureChannel_Current].pki = NULL;
+    Client_SecureChannel_Config[Client_SecureChannel_Current].reqSecuPolicyUri = SOPC_SecurityPolicy_Basic256Sha256_URI;
+    Client_SecureChannel_Config[Client_SecureChannel_Current].requestedLifetime = 20000;
+    Client_SecureChannel_Config[Client_SecureChannel_Current].msgSecurityMode =
+        OpcUa_MessageSecurityMode_SignAndEncrypt;
 
-    status = CerAndKeyLoader_client(CLIENT_KEY_PATH, CLIENT_CERT_PATH, server_cert_path);
+    status = CerAndKeyLoader_client(CLIENT_KEY_PATH, CLIENT_CERT_PATH, server_cert);
     if (SOPC_STATUS_OK != status)
     {
         printf("# Error: FAILED on configuring Certificate, key and Sc\n");
     }
 
-    scConfigs[scConfigs_idx].url = endpoint_url;
+    Client_SecureChannel_Config[Client_SecureChannel_Current].url = endpoint_url;
 
-    channel_config_idx = SOPC_ToolkitClient_AddSecureChannelConfig(&(scConfigs[scConfigs_idx]));
-    if (0 == channel_config_idx)
+    Client_SecureChannel_Id[Client_SecureChannel_Current] =
+        SOPC_ToolkitClient_AddSecureChannelConfig(&(Client_SecureChannel_Config[Client_SecureChannel_Current]));
+    if (0 == Client_SecureChannel_Id[Client_SecureChannel_Current])
     {
         printf("# Error: Failed to configure the secure channel connections\n");
         status = SOPC_STATUS_NOK;
     }
-    return status;
+    if (SOPC_STATUS_OK != status)
+    {
+        return 0;
+    }
+    else
+    {
+        return Client_SecureChannel_Id[Client_SecureChannel_Current];
+    }
+}
+
+static uint32_t Client_GetSecureChannelconfig(const char* endpoint_url)
+{
+    for (uint32_t i = 0; i <= Client_SecureChannel_Current; i++)
+    {
+        if (0 == strcmp(Client_SecureChannel_Config[Client_SecureChannel_Current].url, endpoint_url))
+        {
+            return Client_SecureChannel_Id[Client_SecureChannel_Current];
+        }
+    }
+    return 0;
 }
 
 SOPC_ReturnStatus Wait_response_client()
@@ -378,7 +409,8 @@ static OpcUa_CallRequest* newCallRequest_client(const char* securityGroupId,
     return req;
 }
 
-SOPC_ReturnStatus Client_GetSecurityKeys(uint32_t StartingTokenId,
+SOPC_ReturnStatus Client_GetSecurityKeys(uint32_t SecureChannel_Id,
+                                         uint32_t StartingTokenId,
                                          uint32_t requestedKeys,
                                          Client_SKS_GetKeys_Response* response)
 {
@@ -389,12 +421,14 @@ SOPC_ReturnStatus Client_GetSecurityKeys(uint32_t StartingTokenId,
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
+    printf("Client_GetSecurityKeys %u\n", SecureChannel_Id);
+
     const char* pwd = "password";
     // status = SOPC_ToolkitClient_AsyncActivateSession_Anonymous(channel_config_idx, Client_SessionContext,
     // "anonymous");
     // TODO use Client_SessionContext instead of 1 as 2e parameter. It will be use to identify the current session
     // For next step, with multiple client, use a object with is own state.
-    status = SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(channel_config_idx, 1, "username", "user1",
+    status = SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(SecureChannel_Id, 1, "username", "user1",
                                                                       (const uint8_t*) pwd, (int32_t) strlen(pwd));
     if (SOPC_STATUS_OK == status)
     {
@@ -451,20 +485,23 @@ SOPC_ReturnStatus Client_CloseSession(void)
 
 void Client_Teardown()
 {
-    for (int32_t i = 0; i <= scConfigs_idx; i++)
+    for (int32_t i = 0; i <= Client_SecureChannel_Current; i++)
     {
         SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-        SOPC_KeyManager_SerializedCertificate_Delete((SOPC_SerializedCertificate*) scConfigs[i].crt_cli);
-        SOPC_KeyManager_SerializedAsymmetricKey_Delete((SOPC_SerializedAsymmetricKey*) scConfigs[i].key_priv_cli);
-        SOPC_KeyManager_SerializedCertificate_Delete((SOPC_SerializedCertificate*) scConfigs[i].crt_srv);
-        SOPC_PKIProvider_Free((SOPC_PKIProvider**) &(scConfigs[i].pki));
+        SOPC_KeyManager_SerializedCertificate_Delete(
+            (SOPC_SerializedCertificate*) Client_SecureChannel_Config[i].crt_cli);
+        SOPC_KeyManager_SerializedAsymmetricKey_Delete(
+            (SOPC_SerializedAsymmetricKey*) Client_SecureChannel_Config[i].key_priv_cli);
+        SOPC_KeyManager_SerializedCertificate_Delete(
+            (SOPC_SerializedCertificate*) Client_SecureChannel_Config[i].crt_srv);
+        SOPC_PKIProvider_Free((SOPC_PKIProvider**) &(Client_SecureChannel_Config[i].pki));
         // SOPC_KeyManager_SerializedCertificate_Delete((SOPC_SerializedCertificate*) ck_cli[i].crt_ca);
         SOPC_GCC_DIAGNOSTIC_RESTORE
 
-        scConfigs[i].crt_cli = NULL;
-        scConfigs[i].key_priv_cli = NULL;
-        scConfigs[i].crt_srv = NULL;
-        scConfigs[i].pki = NULL;
+        Client_SecureChannel_Config[i].crt_cli = NULL;
+        Client_SecureChannel_Config[i].key_priv_cli = NULL;
+        Client_SecureChannel_Config[i].crt_srv = NULL;
+        Client_SecureChannel_Config[i].pki = NULL;
         ck_cli[i].client_cert = NULL;
         ck_cli[i].client_key = NULL;
         ck_cli[i].server_cert = NULL;
@@ -703,6 +740,9 @@ static SOPC_ReturnStatus Client_Provider_GetKeys_BySKS(SOPC_SKProvider* skp,
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
+    uint32_t SecureChannel_Id = *((uint32_t*) skp->data);
+    assert(0 < SecureChannel_Id);
+
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     Client_SKS_GetKeys_Response* response = SOPC_Calloc(1, sizeof(Client_SKS_GetKeys_Response));
     if (NULL == response)
@@ -714,12 +754,12 @@ static SOPC_ReturnStatus Client_Provider_GetKeys_BySKS(SOPC_SKProvider* skp,
     {
         /* Retrieve Security Keys from SKS.
            This function wait SKS server response or timeout */
-        status = Client_GetSecurityKeys(0, 5, response);
+        status = Client_GetSecurityKeys(SecureChannel_Id, 0, 5, response);
         if (0 == response->NbKeys || NULL == response->Keys)
         {
+            status = SOPC_STATUS_NOK;
             SOPC_String_Clear(response->SecurityPolicyUri);
             SOPC_Free(response->SecurityPolicyUri);
-            status = SOPC_STATUS_NOK;
         }
         else
         {
@@ -732,7 +772,9 @@ static SOPC_ReturnStatus Client_Provider_GetKeys_BySKS(SOPC_SKProvider* skp,
         }
     }
 
+    /* Free response: response data are moved in output parameters */
     SOPC_Free(response);
+
     if (SOPC_STATUS_OK != status)
     {
         printf("# Error: PubSub Security Keys cannot be retrieved from SKS\n");
@@ -740,18 +782,24 @@ static SOPC_ReturnStatus Client_Provider_GetKeys_BySKS(SOPC_SKProvider* skp,
     return status;
 }
 
-SOPC_SKProvider* Client_Provider_BySKS_Create()
+SOPC_SKProvider* Client_Provider_BySKS_Create(uint32_t SecureChannel_Id)
 {
-    SOPC_SKProvider* skp = SOPC_Malloc(sizeof(SOPC_SKProvider));
+    SOPC_SKProvider* skp = SOPC_Calloc(1, sizeof(SOPC_SKProvider));
     if (NULL == skp)
     {
         return NULL;
     }
 
-    skp->data = NULL;
+    skp->data = SOPC_Calloc(1, sizeof(uint32_t));
+    if (NULL == skp->data)
+    {
+        SOPC_Free(skp);
+        return NULL;
+    }
 
+    *(uint32_t*) skp->data = SecureChannel_Id; // index of the SC Channel in Client module context
     skp->ptrGetKeys = Client_Provider_GetKeys_BySKS;
-    skp->ptrClear = NULL; // Data is NULL
+    skp->ptrClear = NULL; // Data point on an integer
 
     return skp;
 }

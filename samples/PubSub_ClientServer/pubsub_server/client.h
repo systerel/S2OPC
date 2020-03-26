@@ -8,6 +8,7 @@
 #ifndef CLIENT_H_
 #define CLIENT_H_
 
+#include "sopc_key_manager.h"
 #include "sopc_sk_builder.h"
 #include "sopc_sk_manager.h"
 
@@ -44,29 +45,46 @@ typedef enum
 } SessionConnectedState;
 
 SOPC_ReturnStatus Client_Setup(void);
-SOPC_ReturnStatus Client_AddSecureChannelconfig(const char* endpoint_url, const char* server_cert_path);
-SOPC_ReturnStatus Client_GetSecurityKeys(uint32_t StartingTokenId,
+
+/*
+ * \brief Add a new Secure Channel Configration to connect to a SKS server.
+ *        Security Policy is Basic256Sha256
+ * \param endpoint_url     Endpoint Url of the SKS Server
+ * \param server_cert      A server certificate
+ * \return                 A Secure Channel configuration ID or 0 if failed.
+ */
+uint32_t Client_AddSecureChannelconfig(const char* endpoint_url, SOPC_SerializedCertificate* server_cert);
+
+/*
+ * \brief Get Security Keys using a Security Keys Service.
+ *  This function create a Session and send a Call Method request.
+ *  It returns when the response is received or on timeout.
+ *
+ * \param SecureChannel_Id    Endpoint connection configuration index provided by Client_AddSecureChannelconfig()
+ * \param StartingTokenId     Requested Staring Token ID
+ * \param RequestedKeys       Number of requested Keys
+ * \param response            A valid pointer of a Structure where received data will be copied
+ */
+SOPC_ReturnStatus Client_GetSecurityKeys(uint32_t SecureChannel_Id,
+                                         uint32_t StartingTokenId,
                                          uint32_t requestedKeys,
                                          Client_SKS_GetKeys_Response* response);
 void Client_Teardown(void);
 void Client_KeysClear(void);
+
+/*
+ * To be call only by Toolkit callback when received response of Client_GetSecurityKeys() request
+ */
 void Client_Treat_Session_Response(void* param, uintptr_t appContext);
 
 /*
- * \brief Create a Security Keys Provider to get Keys using SKS Get Security Keys request
- * TODO SKS : For multi SKS : give a SCConfig as parameter
+ * \brief  Create an instance of SOPC_SKProvider to get Keys using SKS Get Security Keys request
+ *
+ * \param SecureChannel_Id    Endpoint connection configuration index provided by Client_AddSecureChannelconfig()
+ * \return a SOPC_SKProvider object or NULL if not enough memory
  */
-SOPC_SKProvider* Client_Provider_BySKS_Create(void);
+SOPC_SKProvider* Client_Provider_BySKS_Create(uint32_t SecureChannel_Id);
 
-/*
- * \brief Create a Security Keys Builder to set Keys of a SKManager after a get security keys request
- *  Update function calls SOPC_SKManager_SetKeys() on the given SKManager.
- * TODO SKS : For multi SKS : give a SCConfig as parameter
- */
-SOPC_SKBuilder* Client_Create_Builder(void);
-
-// channel identifier
-extern uint32_t channel_config_idx;
 // session identifier
 extern uint32_t session;
 // use to identify the active session response

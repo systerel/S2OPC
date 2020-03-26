@@ -1072,13 +1072,24 @@ static void clear_xml_pubsub_config(struct parse_context_t* ctx)
                 SOPC_Free(var->nodeId);
                 var->nodeId = NULL;
             }
-
+            SOPC_Free(msg->variableArr);
+            msg->variableArr = NULL;
+            msg->nb_variables = 0;
+  
             if (NULL != msg->sks_address)
             {
                 SOPC_Free(msg->sks_address);
             }
-            SOPC_Free(msg->variableArr);
-            msg->variableArr = NULL;
+
+            for (uint16_t isks = 0; isks < msg->nb_sks; isks++)
+            {
+                struct sopc_xml_pubsub_sks_t* sks = &msg->sksArr[isks];
+                SOPC_Free(sks->endpointUrl);
+                SOPC_Free(sks->serverCertPath);
+            }
+            SOPC_Free(msg->sksArr);
+            msg->sksArr = NULL;
+            msg->nb_sks = 0;
         }
 
         SOPC_Free(p_connection->address);

@@ -49,22 +49,43 @@
 // First MS Period of ordonnancer task. 3s
 #define PUBSUB_ORDONNANCER_FIRST_MSPERIOD 3000
 
+typedef struct SOPC_SKS_Local_Configuration
+{
+    char* securityGroupId;
+
+    // array of SOPC_SecurityKeyServices. Data should not be cleared.
+    SOPC_Array* sksArray;
+
+    // array of SOPC_ReaderGroup. Data should not be cleared.
+    SOPC_Array* readerGroupArray;
+
+    // array of SOPC_WriterGroup. Data should not be cleared.
+    SOPC_Array* writerGroupArray;
+
+} SOPC_SKS_Local_Configuration;
+
 static int32_t pubsubOnline = 0;
 static SOPC_PubSubConfiguration* g_pPubSubConfig = NULL;
 static SOPC_SubTargetVariableConfig* g_pTargetConfig = NULL;
 static SOPC_PubSourceVariableConfig* g_pSourceConfig = NULL;
 static SOPC_SKOrdonnancer* g_skOrdonnancer = NULL;
 static SOPC_SKManager* g_skManager = NULL;
+static SOPC_SKProvider* g_skProvider = NULL;
 static bool g_isSecurity = false;
+static bool g_isSks = false;
 
 /* Initialise and start SK Ordonnancer and SK Manager if security is needed */
 static bool PubSub_local_SKS_Start(void);
 
 static void free_global_configurations(void);
 
-static SOPC_ReturnStatus get_sks_address(SOPC_PubSubConfiguration* pPubSubConfig,
-                                         bool* isSecurity,
-                                         const char** sksAddress);
+static SOPC_SKS_Local_Configuration* SOPC_SKS_Local_Configuration_Create(void);
+static void SOPC_SKS_Local_Configuration_Clear(SOPC_SKS_Local_Configuration* config);
+
+static SOPC_ReturnStatus get_sks_config(SOPC_PubSubConfiguration* pPubSubConfig,
+                                        bool* isSecurity,
+                                        SOPC_SKS_Local_Configuration** sksConfigArray,
+                                        uint32_t* length);
 
 #ifndef PUBSUB_STATIC_CONFIG
 static void PubSub_SaveConfiguration(char* configBuffer);
@@ -168,33 +189,90 @@ SOPC_ReturnStatus PubSub_Configure(void)
 
     /* at least one message with encrypt and/or sign security  */
     g_isSecurity = false;
-    /* first SKS address found */
-    const char* sksAddress = NULL;
+    g_isSks = false;
+    /* List of SKS servers configurations. */
+    SOPC_SKS_Local_Configuration* sksConfigArray;
+    uint32_t sksConfigLength;
     if (SOPC_STATUS_OK == status)
     {
-        status = get_sks_address(pPubSubConfig, &g_isSecurity, &sksAddress);
+        status = get_sks_config(pPubSubConfig, &g_isSecurity, &sksConfigArray, &sksConfigLength);
+        assert(2 > sksConfigLength); /* Only one SKS configuration is managed */
+        // Check if configuration provides a SKS
+        g_isSks = (NULL != sksConfigArray && 0 < sksConfigLength && 0 < SOPC_Array_Size(sksConfigArray->sksArray));
         if (SOPC_STATUS_OK != status)
         {
             printf("# Error: Cannot retrieve PubSub Security Mode information.\n");
         }
-        else if (g_isSecurity && NULL == sksAddress)
+        else if (g_isSecurity && !g_isSks)
         {
             printf("# Warning: PubSub Security is used but no SKS address provided.\n");
         }
     }
 
-    /* TODO multi sks. Keep SC config */
-    if (SOPC_STATUS_OK == status && g_isSecurity && NULL != sksAddress)
+    if (SOPC_STATUS_OK == status && g_isSecurity && g_isSks)
     {
-        if (SOPC_STATUS_OK == status)
+        assert(UINT32_MAX > SOPC_Array_Size(sksConfigArray->sksArray));
+        uint32_t nbSks = (uint32_t) SOPC_Array_Size(sksConfigArray->sksArray);
+        SOPC_SKProvider** providers = SOPC_Calloc(nbSks, sizeof(SOPC_SKProvider*));
+
+        if (NULL == providers)
         {
-            status = Client_AddSecureChannelconfig(sksAddress, SKS_SERVER_CERT_PATH);
+            status = SOPC_STATUS_OUT_OF_MEMORY;
         }
 
-        if (SOPC_STATUS_OK != status)
+        /* 1. Create one instance of BySKS SKProvider for each Sks description */
+        for (uint32_t i = 0; i < nbSks && SOPC_STATUS_OK == status; i++)
         {
-            printf("# Error: PubSub Cannot configure Get Security Keys\n");
+            SOPC_SecurityKeyServices* sksElt = SOPC_Array_Get(sksConfigArray->sksArray, SOPC_SecurityKeyServices*, i);
+            assert(NULL != sksElt);
+            uint32_t SecureChannel_Id =
+                Client_AddSecureChannelconfig(SOPC_SecurityKeyServices_Get_EndpointUrl(sksElt),
+                                              SOPC_SecurityKeyServices_Get_ServerCertificate(sksElt));
+            if (0 < SecureChannel_Id)
+            {
+                // Create a SK Provider which get Keys from a GetSecurityKeys request
+                providers[i] = Client_Provider_BySKS_Create(SecureChannel_Id);
+                if (NULL == providers[i])
+                {
+                    status = SOPC_STATUS_OUT_OF_MEMORY;
+                }
+            }
+            else
+            {
+                status = SOPC_STATUS_NOK;
+                printf("# Error: PubSub Cannot configure Get Security Keys\n");
+            }
         }
+
+        /* 2. Then wrap these instances in at TryList SKProvider */
+        if (SOPC_STATUS_OK == status)
+        {
+            g_skProvider = SOPC_SKProvider_TryList_Create(providers, nbSks);
+        }
+
+        if (NULL == g_skProvider)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+            for (uint32_t i = 0; i < nbSks; i++)
+            {
+                // Create a SK Provider which get Keys from a GetSecurityKeys request
+                SOPC_SKProvider_Clear(providers[i]);
+                SOPC_Free(providers[i]);
+            }
+            SOPC_Free(providers);
+        }
+    }
+
+    // Clean sks config data
+    if (g_isSks)
+    {
+        for (uint32_t i = 0; i < sksConfigLength; i++)
+        {
+            SOPC_SKS_Local_Configuration_Clear(&sksConfigArray[i]);
+        }
+        SOPC_Free(sksConfigArray);
+        sksConfigArray = 0;
+        sksConfigLength = 0;
     }
 
     if (SOPC_STATUS_OK == status)
@@ -230,18 +308,20 @@ bool PubSub_IsRunning(void)
 
 bool PubSub_local_SKS_Start()
 {
-    if (!g_isSecurity)
+    if (!g_isSecurity || !g_isSks)
     {
         return true;
     }
 
     SOPC_SKBuilder* builder = NULL;
-    SOPC_SKProvider* provider = NULL;
+    SOPC_SKProvider* provider = g_skProvider;
+    g_skProvider = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     // Initialise SK Manager
     g_skManager = SOPC_SKManager_Create();
     bool sksOK = (NULL != g_skManager);
+    sksOK = sksOK && (NULL != provider);
     if (sksOK)
     {
         g_skOrdonnancer = SOPC_SKOrdonnancer_Create();
@@ -253,13 +333,6 @@ bool PubSub_local_SKS_Start()
     {
         builder = SOPC_SKBuilder_Setter_Create();
         sksOK = (NULL != builder);
-    }
-
-    // Create a SK Provider which get Keys from a GetSecurityKeys request
-    if (sksOK)
-    {
-        provider = Client_Provider_BySKS_Create();
-        sksOK = (NULL != provider);
     }
 
     // Create a SK Ordonnancer with a single task : call GetSecurityKeys and replace all keys
@@ -360,15 +433,44 @@ static void free_global_configurations(void)
     g_pPubSubConfig = NULL;
 }
 
-static SOPC_ReturnStatus get_sks_address(SOPC_PubSubConfiguration* pPubSubConfig,
-                                         bool* isSecurity,
-                                         const char** sksAddress)
+static bool PubSub_SearchSKSInArray(SOPC_Array* array, SOPC_SecurityKeyServices* sks)
+{
+    if (NULL == array || NULL == sks)
+    {
+        return false;
+    }
+    size_t size = SOPC_Array_Size(array);
+    for (size_t i = 0; i < size; i++)
+    {
+        SOPC_SecurityKeyServices* elt = SOPC_Array_Get(array, SOPC_SecurityKeyServices*, i);
+        assert(NULL != elt);
+        if (0 == strcmp(SOPC_SecurityKeyServices_Get_EndpointUrl(elt), SOPC_SecurityKeyServices_Get_EndpointUrl(sks)))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+static SOPC_ReturnStatus get_sks_config(SOPC_PubSubConfiguration* pPubSubConfig,
+                                        bool* isSecurity,
+                                        SOPC_SKS_Local_Configuration** sksConfigArray,
+                                        uint32_t* length)
 {
     assert(NULL != isSecurity);
-    assert(NULL != sksAddress);
+    assert(NULL != sksConfigArray);
+    assert(NULL != length);
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
     *isSecurity = false;
-    *sksAddress = NULL;
+    *sksConfigArray = SOPC_SKS_Local_Configuration_Create();
+
+    if (NULL == *sksConfigArray)
+    {
+        *length = 0;
+        return SOPC_STATUS_NOK;
+    }
+    *length = 1;
+
     uint32_t pub_nb_connections = SOPC_PubSubConfiguration_Nb_PubConnection(pPubSubConfig);
     for (uint32_t i = 0; i < pub_nb_connections && SOPC_STATUS_OK == result; i++)
     {
@@ -391,24 +493,27 @@ static SOPC_ReturnStatus get_sks_address(SOPC_PubSubConfiguration* pPubSubConfig
                 printf("# Error: SKS address but security mode is none\n");
                 result = SOPC_STATUS_NOK;
             }
-            else if (SOPC_SecurityMode_None != securityMode && 1 == nbSKS)
+            else if (SOPC_SecurityMode_None != securityMode)
             {
-                SOPC_SecurityKeyServices* desc = SOPC_WriterGroup_Get_SecurityKeyServices_At(group, 0);
-                assert(NULL != desc);
-                if (NULL == *sksAddress)
+                // use to check that all sks list are the same
+                size_t sksArraySize = SOPC_Array_Size((*sksConfigArray)->sksArray);
+
+                // add all Sks
+                for (uint16_t sksIndex = 0; sksIndex < nbSKS; sksIndex++)
                 {
-                    *sksAddress = SOPC_SecurityKeyServices_Get_EndpointUrl(desc);
+                    SOPC_SecurityKeyServices* desc = SOPC_WriterGroup_Get_SecurityKeyServices_At(group, sksIndex);
+                    assert(NULL != desc);
+                    if (!PubSub_SearchSKSInArray((*sksConfigArray)->sksArray, desc))
+                    {
+                        SOPC_Array_Append((*sksConfigArray)->sksArray, desc);
+                        SOPC_Array_Append((*sksConfigArray)->writerGroupArray, group);
+                        if (0 < sksArraySize)
+                        {
+                            // 2 groups have different SKS list. All list are merged
+                            printf("# Warning: Different SKS addresses in PubSub configuration\n");
+                        }
+                    }
                 }
-                else if (0 != strcmp(*sksAddress, SOPC_SecurityKeyServices_Get_EndpointUrl(desc)))
-                {
-                    printf("# Warning: Different SKS address in PubSub configuration\n");
-                }
-            }
-            else if (1 < nbSKS)
-            {
-                /* Filtered by XML loader : should not happen */
-                printf("# Error: Only one SKS address is managed per Group\n");
-                result = SOPC_STATUS_NOK;
             }
         }
     }
@@ -437,25 +542,74 @@ static SOPC_ReturnStatus get_sks_address(SOPC_PubSubConfiguration* pPubSubConfig
             }
             else if (SOPC_SecurityMode_None != securityMode && 1 == nbSKS)
             {
-                SOPC_SecurityKeyServices* desc = SOPC_ReaderGroup_Get_SecurityKeyServices_At(group, 0);
-                assert(NULL != desc);
-                if (NULL == *sksAddress)
+                // use to check that all sks list are the same
+                size_t sksArraySize = SOPC_Array_Size((*sksConfigArray)->sksArray);
+
+                // add all Sks
+                for (uint16_t sksIndex = 0; sksIndex < nbSKS; sksIndex++)
                 {
-                    *sksAddress = SOPC_SecurityKeyServices_Get_EndpointUrl(desc);
+                    SOPC_SecurityKeyServices* desc = SOPC_ReaderGroup_Get_SecurityKeyServices_At(group, sksIndex);
+                    assert(NULL != desc);
+                    if (!PubSub_SearchSKSInArray((*sksConfigArray)->sksArray, desc))
+                    {
+                        SOPC_Array_Append((*sksConfigArray)->sksArray, desc);
+                        SOPC_Array_Append((*sksConfigArray)->readerGroupArray, group);
+                        if (0 < sksArraySize)
+                        {
+                            // 2 groups have different SKS list. All list are merged
+                            printf("# Warning: Different SKS addresses in PubSub configuration\n");
+                        }
+                    }
                 }
-                else if (0 != strcmp(*sksAddress, SOPC_SecurityKeyServices_Get_EndpointUrl(desc)))
-                {
-                    printf("# Warning: Different SKS address in PubSub configuration\n");
-                }
-            }
-            else if (1 < nbSKS)
-            {
-                /* Filtered by XML loader : should not happen */
-                printf("# Error: Only one SKS address is managed per Group\n");
-                result = SOPC_STATUS_NOK;
             }
         }
     }
 
     return result;
+}
+
+static SOPC_SKS_Local_Configuration* SOPC_SKS_Local_Configuration_Create()
+{
+    bool allocSuccess = true;
+    SOPC_SKS_Local_Configuration* result = SOPC_Calloc(1, sizeof(SOPC_SKS_Local_Configuration));
+    allocSuccess = (NULL != result);
+    if (allocSuccess)
+    {
+        result->sksArray = SOPC_Array_Create(sizeof(SOPC_SecurityKeyServices*), 1, NULL);
+    }
+
+    result->securityGroupId = NULL; /* Security group id are not managed */
+
+    if (allocSuccess)
+    {
+        result->readerGroupArray = SOPC_Array_Create(sizeof(SOPC_ReaderGroup*), 10, NULL);
+    }
+    if (allocSuccess)
+    {
+        result->writerGroupArray = SOPC_Array_Create(sizeof(SOPC_WriterGroup*), 10, NULL);
+    }
+    if (!allocSuccess)
+    {
+        SOPC_SKS_Local_Configuration_Clear(result);
+        SOPC_Free(result);
+        result = NULL;
+    }
+    return result;
+}
+
+static void SOPC_SKS_Local_Configuration_Clear(SOPC_SKS_Local_Configuration* config)
+{
+    if (NULL == config)
+    {
+        return;
+    }
+
+    SOPC_Free(config->securityGroupId);
+    config->securityGroupId = NULL;
+    SOPC_Array_Delete(config->sksArray);
+    config->sksArray = NULL;
+    SOPC_Array_Delete(config->readerGroupArray);
+    config->readerGroupArray = NULL;
+    SOPC_Array_Delete(config->writerGroupArray);
+    config->writerGroupArray = NULL;
 }
