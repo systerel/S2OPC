@@ -122,7 +122,10 @@ SOPC_ReturnStatus SOPC_ClientCommon_Initialize(const SOPC_LibSub_StaticCfg* pCfg
             logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = pCfg->toolkit_logger.log_path;
         }
 
-        status = SOPC_Common_Initialize(logConfiguration);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_Common_Initialize(logConfiguration);
+        }
     }
 
     if (SOPC_STATUS_OK == status)
