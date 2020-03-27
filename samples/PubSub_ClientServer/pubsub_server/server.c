@@ -455,28 +455,68 @@ SOPC_ReturnStatus Server_WritePubSubNodes(void)
     vConfig->BuiltInTypeId = SOPC_String_Id;
     vConfig->ArrayType = SOPC_VariantArrayType_SingleValue;
 
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
 #ifndef PUBSUB_STATIC_CONFIG
     // Load XML file
     FILE* fd = fopen(PUBSUB_CONFIG_PATH, "r");
-    assert(NULL != fd);
-    fseek(fd, 0, SEEK_END);
-    long fileSize = ftell(fd);
-    fseek(fd, 0, SEEK_SET);
+    if (NULL == fd)
+    {
+        printf("# Error: could not open configuration (file: %s).\n", PUBSUB_CONFIG_PATH);
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    assert(fileSize >= 0);
-    char* XML_CONFIG = SOPC_Calloc((size_t) fileSize + 1, sizeof(char));
-    size_t size = fread(XML_CONFIG, sizeof(char), (size_t) fileSize, fd);
-    assert(size > 0);
-    XML_CONFIG[size] = '\0';
-    int closed = fclose(fd);
-    assert(closed == 0);
-    SOPC_ReturnStatus status = SOPC_String_InitializeFromCString(&vConfig->Value.String, XML_CONFIG);
-    assert(SOPC_STATUS_OK == status);
-    SOPC_Free(XML_CONFIG);
+    if (SOPC_STATUS_OK == status)
+    {
+        fseek(fd, 0, SEEK_END);
+        long fileSize = ftell(fd);
+        fseek(fd, 0, SEEK_SET);
+
+        if (fileSize < 0)
+        {
+            printf("# Error: invalid configuration file size (file: %s)\n", PUBSUB_CONFIG_PATH);
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+
+        if (SOPC_STATUS_OK == status)
+        {
+            char* Xml_config = SOPC_Calloc((size_t) fileSize + 1, sizeof(char));
+            if (NULL == Xml_config)
+            {
+                printf("# Error: while allocating memory for xml configuration\n");
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+
+            if (SOPC_STATUS_OK == status)
+            {
+                size_t size = fread(Xml_config, sizeof(char), (size_t) fileSize, fd);
+                if (size <= 0)
+                {
+                    printf("# Error: while reading xml configuration (file: %s)\n", PUBSUB_CONFIG_PATH);
+                    status = SOPC_STATUS_INVALID_STATE;
+                }
+                else
+                {
+                    Xml_config[size] = '\0';
+                }
+            }
+
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_String_InitializeFromCString(&vConfig->Value.String, Xml_config);
+            }
+            SOPC_Free(Xml_config);
+        }
+    }
+
+    if (NULL != fd)
+    {
+        int closed = fclose(fd);
+        assert(closed == 0);
+    }
 #else
     /* configuration is static. No value for the XML file */
     SOPC_String_Initialize(&vConfig->Value.String);
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    status = SOPC_STATUS_OK;
 #endif
 
     vCommand->BuiltInTypeId = SOPC_Byte_Id;
