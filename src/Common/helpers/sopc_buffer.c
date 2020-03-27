@@ -413,7 +413,7 @@ SOPC_ReturnStatus SOPC_Buffer_ReadFile(const char* path, SOPC_Buffer** buf)
 
     long size = get_file_size(fd);
 
-    if ((size == -1 || ((unsigned long) size) > UINT32_MAX))
+    if ((-1 == size || 0 == size || ((unsigned long) size) > UINT32_MAX))
     {
         fclose(fd);
         return SOPC_STATUS_NOK;
