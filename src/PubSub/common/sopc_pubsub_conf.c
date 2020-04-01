@@ -131,9 +131,10 @@ struct SOPC_WriterGroup
     // transportSettings
 };
 
-struct SOPC_SecurityKeyServices {
-  char *endpointUrl;
-  SOPC_SerializedCertificate* serverCertificate;
+struct SOPC_SecurityKeyServices
+{
+    char* endpointUrl;
+    SOPC_SerializedCertificate* serverCertificate;
 };
 
 struct SOPC_DataSetWriter
@@ -158,7 +159,7 @@ struct SOPC_ReaderGroup
 
     SOPC_SecurityMode_Type securityMode;
     char* securityGroupId;
-  
+
     SOPC_SecurityKeyServices* securityKeyServices;
     uint32_t securityKeyServices_length;
 
@@ -906,7 +907,8 @@ SOPC_SerializedCertificate* SOPC_SecurityKeyServices_Get_ServerCertificate(const
     return sks->serverCertificate;
 }
 
-bool SOPC_SecurityKeyServices_Set_ServerCertificate(SOPC_SecurityKeyServices* sks, SOPC_SerializedCertificate* serverCertificate)
+bool SOPC_SecurityKeyServices_Set_ServerCertificate(SOPC_SecurityKeyServices* sks,
+                                                    SOPC_SerializedCertificate* serverCertificate)
 {
     assert(NULL != sks);
     sks->serverCertificate = serverCertificate;
@@ -1139,15 +1141,17 @@ static void SOPC_WriterGroup_Clear(SOPC_WriterGroup* group)
     }
 }
 
-static void SOPC_SecurityKeyServices_Clear(SOPC_SecurityKeyServices* sks) {
-  if(NULL == sks) {
-    return;
-  }
-  
-  SOPC_Free(sks->endpointUrl);
-  sks->endpointUrl = NULL;
-  SOPC_KeyManager_SerializedCertificate_Delete(sks->serverCertificate);
-  sks->serverCertificate = NULL;
+static void SOPC_SecurityKeyServices_Clear(SOPC_SecurityKeyServices* sks)
+{
+    if (NULL == sks)
+    {
+        return;
+    }
+
+    SOPC_Free(sks->endpointUrl);
+    sks->endpointUrl = NULL;
+    SOPC_KeyManager_SerializedCertificate_Delete(sks->serverCertificate);
+    sks->serverCertificate = NULL;
 }
 
 static void SOPC_ReaderGroup_Clear(SOPC_ReaderGroup* group)
@@ -1202,7 +1206,7 @@ bool SOPC_EndpointDescription_Create_From_URL(char* url, OpcUa_EndpointDescripti
 {
     assert(NULL != endpoint_out);
     *endpoint_out = NULL;
- 
+
     bool allocSuccess = true;
     OpcUa_EndpointDescription* endpoint;
     if (NULL == url)

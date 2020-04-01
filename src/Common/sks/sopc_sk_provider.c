@@ -40,10 +40,9 @@ static void SOPC_SKProvider_Clear_RandomPubSub_Aes256(void* data);
 
 typedef struct SOPC_SKProvider_TryList
 {
-  SOPC_SKProvider** providers;
-  uint32_t nbProviders;
+    SOPC_SKProvider** providers;
+    uint32_t nbProviders;
 } SOPC_SKProvider_TryList;
-
 
 /* TryList internal functions */
 
@@ -60,7 +59,6 @@ static SOPC_ReturnStatus SOPC_SKProvider_GetKeys_TryList(SOPC_SKProvider* skp,
                                                          uint32_t* TimeToNextKey,
                                                          uint32_t* KeyLifetime)
 {
-
     if (NULL == skp || NULL == skp->data || NULL == Keys || NULL == NbToken)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -70,21 +68,17 @@ static SOPC_ReturnStatus SOPC_SKProvider_GetKeys_TryList(SOPC_SKProvider* skp,
     SOPC_SKProvider_TryList* data = (SOPC_SKProvider_TryList*) skp->data;
     assert(NULL != data);
     assert(NULL != data->providers);
-    for(uint32_t i=0;i<data->nbProviders;i++){
-      printf("Try GetKeys with provider %u\n", i+1);
-      status = SOPC_SKProvider_GetKeys(data->providers[i],
-                                       StartingTokenId,
-                                       SecurityPolicyUri,
-                                       FirstTokenId,
-                                       Keys,
-                                       NbToken,
-                                       TimeToNextKey,
-                                       KeyLifetime);
-      if(SOPC_STATUS_OK == status && 0 < *NbToken) {
-        break;
-      }
+    for (uint32_t i = 0; i < data->nbProviders; i++)
+    {
+        printf("Try GetKeys with provider %u\n", i + 1);
+        status = SOPC_SKProvider_GetKeys(data->providers[i], StartingTokenId, SecurityPolicyUri, FirstTokenId, Keys,
+                                         NbToken, TimeToNextKey, KeyLifetime);
+        if (SOPC_STATUS_OK == status && 0 < *NbToken)
+        {
+            break;
+        }
     }
-    
+
     return status;
 }
 
@@ -97,19 +91,16 @@ static void SOPC_SKProvider_Clear_TryList(void* pdata)
 
     SOPC_SKProvider_TryList* data = (SOPC_SKProvider_TryList*) pdata;
     assert(NULL != data->providers);
-    for(uint32_t i=0;i<data->nbProviders;i++){
-      SOPC_SKProvider_Clear(data->providers[i]);
-      SOPC_Free(data->providers[i]);
+    for (uint32_t i = 0; i < data->nbProviders; i++)
+    {
+        SOPC_SKProvider_Clear(data->providers[i]);
+        SOPC_Free(data->providers[i]);
     }
     SOPC_Free(data->providers);
     data->providers = NULL;
 }
 
-
-
-
 /* RandomPubSub internal functions */
-
 
 /**
  * \brief GetKeys function for SK Provider default implementation
@@ -195,13 +186,14 @@ static void SOPC_SKProvider_Clear_RandomPubSub_Aes256(void* pdata)
 
 /*** API FUNCTIONS ***/
 
-SOPC_SKProvider* SOPC_SKProvider_TryList_Create(SOPC_SKProvider** providers, uint32_t nbProviders) {
+SOPC_SKProvider* SOPC_SKProvider_TryList_Create(SOPC_SKProvider** providers, uint32_t nbProviders)
+{
+    if (NULL == providers || 0 == nbProviders)
+    {
+        return NULL;
+    }
 
-  if(NULL == providers || 0 == nbProviders) {
-    return NULL;
-  }
-  
-  SOPC_SKProvider* skp = SOPC_Malloc(sizeof(SOPC_SKProvider));
+    SOPC_SKProvider* skp = SOPC_Malloc(sizeof(SOPC_SKProvider));
     if (NULL == skp)
     {
         return NULL;
@@ -222,7 +214,6 @@ SOPC_SKProvider* SOPC_SKProvider_TryList_Create(SOPC_SKProvider** providers, uin
     skp->ptrClear = SOPC_SKProvider_Clear_TryList;
 
     return skp;
-
 }
 
 SOPC_SKProvider* SOPC_SKProvider_RandomPubSub_Create()

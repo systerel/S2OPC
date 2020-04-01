@@ -250,7 +250,7 @@ SOPC_ReturnStatus PubSub_Configure(void)
             g_skProvider = SOPC_SKProvider_TryList_Create(providers, nbSks);
         }
 
-        if (NULL == g_skProvider)
+        if (NULL == g_skProvider && NULL != providers)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
             for (uint32_t i = 0; i < nbSks; i++)
@@ -577,18 +577,21 @@ static SOPC_SKS_Local_Configuration* SOPC_SKS_Local_Configuration_Create()
     allocSuccess = (NULL != result);
     if (allocSuccess)
     {
+        result->securityGroupId = NULL; /* Security group id are not managed */
         result->sksArray = SOPC_Array_Create(sizeof(SOPC_SecurityKeyServices*), 1, NULL);
+        allocSuccess = (NULL != result->sksArray);
     }
-
-    result->securityGroupId = NULL; /* Security group id are not managed */
 
     if (allocSuccess)
     {
         result->readerGroupArray = SOPC_Array_Create(sizeof(SOPC_ReaderGroup*), 10, NULL);
+        allocSuccess = (NULL != result->readerGroupArray);
     }
+    
     if (allocSuccess)
     {
         result->writerGroupArray = SOPC_Array_Create(sizeof(SOPC_WriterGroup*), 10, NULL);
+        allocSuccess = (NULL != result->writerGroupArray);
     }
     if (!allocSuccess)
     {

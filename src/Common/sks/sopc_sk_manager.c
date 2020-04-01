@@ -279,10 +279,11 @@ static uint32_t SOPC_SKManager_AddKeys_Default(SOPC_SKManager* skm, SOPC_ByteStr
 static void SOPC_SKManager_UpdateCurrentToken_Default(SOPC_SKManager_DefaultData* data)
 {
     assert(NULL != data);
-    if(0 == data->CurrentTokenId) {
-      return;
+    if (0 == data->CurrentTokenId)
+    {
+        return;
     }
-    
+
     SOPC_TimeReference currentTime = SOPC_TimeReference_GetCurrent();
     SOPC_TimeReference timeElapsed = currentTime - data->CurrentTokenTime;
 

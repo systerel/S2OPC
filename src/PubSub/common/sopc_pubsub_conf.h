@@ -21,8 +21,8 @@
 #define SOPC_PUBSUB_CONF_H_
 
 #include "sopc_builtintypes.h"
-#include "sopc_types.h"
 #include "sopc_key_manager.h"
+#include "sopc_types.h"
 
 typedef struct SOPC_PubSubConfiguration SOPC_PubSubConfiguration;
 typedef struct SOPC_PubSubConnection SOPC_PubSubConnection;
@@ -289,15 +289,14 @@ SOPC_FieldTarget* SOPC_FieldMetaData_Get_TargetVariable(const SOPC_FieldMetaData
 // only for Publisher
 SOPC_PublishedVariable* SOPC_FieldMetaData_Get_PublishedVariable(const SOPC_FieldMetaData* fieldMetaData);
 
-
 /** SOPC_SecurityKeyServices **/
 const char* SOPC_SecurityKeyServices_Get_EndpointUrl(const SOPC_SecurityKeyServices* sks);
 /* Data are copied */
 bool SOPC_SecurityKeyServices_Set_EndpointUrl(SOPC_SecurityKeyServices* sks, const char* uri);
 SOPC_SerializedCertificate* SOPC_SecurityKeyServices_Get_ServerCertificate(const SOPC_SecurityKeyServices* sks);
 /* ServerCertificate data ownership moves to SOPC_SecurityKeyServices */
-bool SOPC_SecurityKeyServices_Set_ServerCertificate(SOPC_SecurityKeyServices* sks, SOPC_SerializedCertificate* serverCertificate);
-
+bool SOPC_SecurityKeyServices_Set_ServerCertificate(SOPC_SecurityKeyServices* sks,
+                                                    SOPC_SerializedCertificate* serverCertificate);
 
 /* Create an endpoint description and set the url. Other field values are 0
    return True if url is NULL or EndpointDescription is created and initialized.

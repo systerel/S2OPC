@@ -59,7 +59,8 @@ struct SOPC_SKProvider
 };
 
 /**
- * \brief  Create an instance of SOPC_SKProvider which call sequentially all provider of a list until one returns valid Keys
+ * \brief  Create an instance of SOPC_SKProvider which call sequentially all provider of a list until one returns valid
+ * Keys
  *
  * \param providers       A valid pointer of SOPC_SKProvider array. Should not be NULL
  * \param nbProviders     The number of element of the the given array. Should not be 0

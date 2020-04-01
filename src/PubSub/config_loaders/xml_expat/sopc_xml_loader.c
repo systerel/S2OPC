@@ -83,7 +83,6 @@
 #define ATTR_SKS_ENDPOINT_URL "endpointUrl"
 #define ATTR_SKS_SERVER_CERT_PATH "serverCertPath"
 
-
 typedef enum
 {
     PARSE_START,      // Beginning of file
@@ -91,7 +90,7 @@ typedef enum
     PARSE_CONNECTION, // In a Connection
     PARSE_MESSAGE,    // In a connection message
     PARSE_VARIABLE,   // In a message variable
-    PARSE_SKS, // In a SKS Server
+    PARSE_SKS,        // In a SKS Server
 } parse_state_t;
 
 struct sopc_xml_pubsub_variable_t
@@ -107,7 +106,7 @@ struct sopc_xml_pubsub_variable_t
 struct sopc_xml_pubsub_sks_t
 {
     char* endpointUrl;
-  char* serverCertPath;
+    char* serverCertPath;
 };
 
 struct sopc_xml_pubsub_message_t
@@ -688,7 +687,7 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
     struct sopc_xml_pubsub_message_t* msg = NULL;
     bool isVariable = false;
     bool isSkserver = false;
-      
+
     switch (ctx->state)
     {
     case PARSE_START:
@@ -765,9 +764,9 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         }
         break;
     case PARSE_MESSAGE:
-      isVariable = (strcmp(name, TAG_VARIABLE) == 0);
-      isSkserver = (strcmp(name, TAG_SKS_SERVER) == 0);
-      if (! (isVariable || isSkserver))
+        isVariable = (strcmp(name, TAG_VARIABLE) == 0);
+        isSkserver = (strcmp(name, TAG_SKS_SERVER) == 0);
+        if (!(isVariable || isSkserver))
         {
             LOG_XML_ERRORF("Unexpected tag %s", name);
             XML_StopParser(ctx->parser, 0);
@@ -777,54 +776,53 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         assert(NULL != connection);
         msg = &connection->messageArr[connection->nb_messages - 1];
 
-        if(isVariable) {
-        
-          if (NULL == msg->variableArr)
+        if (isVariable)
+        {
+            if (NULL == msg->variableArr)
             {
-              assert(msg->nb_variables == 0);
-              msg->variableArr = SOPC_Malloc(sizeof *msg->variableArr);
-              msg->nb_variables = 1;
-              assert(NULL != msg->variableArr);
+                assert(msg->nb_variables == 0);
+                msg->variableArr = SOPC_Malloc(sizeof *msg->variableArr);
+                msg->nb_variables = 1;
+                assert(NULL != msg->variableArr);
             }
-          else
+            else
             {
-              assert(msg->nb_variables > 0);
-              msg->nb_variables++;
-              msg->variableArr =
-                SOPC_Realloc(msg->variableArr, (size_t)(msg->nb_variables - 1) * sizeof *msg->variableArr,
-                             msg->nb_variables * sizeof *msg->variableArr);
-              assert(NULL != msg->variableArr);
+                assert(msg->nb_variables > 0);
+                msg->nb_variables++;
+                msg->variableArr =
+                    SOPC_Realloc(msg->variableArr, (size_t)(msg->nb_variables - 1) * sizeof *msg->variableArr,
+                                 msg->nb_variables * sizeof *msg->variableArr);
+                assert(NULL != msg->variableArr);
             }
-          if (!start_variable(ctx, &msg->variableArr[msg->nb_variables - 1], attrs))
+            if (!start_variable(ctx, &msg->variableArr[msg->nb_variables - 1], attrs))
             {
-              XML_StopParser(ctx->parser, 0);
-              return;
+                XML_StopParser(ctx->parser, 0);
+                return;
             }
-        } else {
-          assert(isSkserver);
-          if (NULL == msg->sksArr)
+        }
+        else
+        {
+            assert(isSkserver);
+            if (NULL == msg->sksArr)
             {
-              assert(msg->nb_sks == 0);
-              msg->sksArr = SOPC_Malloc(sizeof *msg->sksArr);
-              msg->nb_sks = 1;
-              assert(NULL != msg->sksArr);
+                assert(msg->nb_sks == 0);
+                msg->sksArr = SOPC_Malloc(sizeof *msg->sksArr);
+                msg->nb_sks = 1;
+                assert(NULL != msg->sksArr);
             }
-          else
+            else
             {
-              assert(msg->nb_sks > 0);
-              msg->nb_sks++;
-              msg->sksArr =
-                SOPC_Realloc(msg->sksArr, (size_t)(msg->nb_sks - 1) * sizeof *msg->sksArr,
-                             msg->nb_sks * sizeof *msg->sksArr);
-              assert(NULL != msg->sksArr);
+                assert(msg->nb_sks > 0);
+                msg->nb_sks++;
+                msg->sksArr = SOPC_Realloc(msg->sksArr, (size_t)(msg->nb_sks - 1) * sizeof *msg->sksArr,
+                                           msg->nb_sks * sizeof *msg->sksArr);
+                assert(NULL != msg->sksArr);
             }
-          if (!start_sks(ctx, &msg->sksArr[msg->nb_sks - 1], attrs))
+            if (!start_sks(ctx, &msg->sksArr[msg->nb_sks - 1], attrs))
             {
-              XML_StopParser(ctx->parser, 0);
-              return;
+                XML_StopParser(ctx->parser, 0);
+                return;
             }
-          
-
         }
         break;
     default:
@@ -924,11 +922,12 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                     SOPC_SecurityKeyServices* sks = SOPC_WriterGroup_Get_SecurityKeyServices_At(writerGroup, isks);
                     assert(sks != NULL);
                     allocSuccess = SOPC_SecurityKeyServices_Set_EndpointUrl(sks, xmlsks->endpointUrl);
-                    SOPC_ReturnStatus status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(xmlsks->serverCertPath, &cert);
+                    SOPC_ReturnStatus status =
+                        SOPC_KeyManager_SerializedCertificate_CreateFromFile(xmlsks->serverCertPath, &cert);
                     SOPC_SecurityKeyServices_Set_ServerCertificate(sks, cert);
                     allocSuccess = (allocSuccess && SOPC_STATUS_OK == status);
                 }
-                
+
                 // msg->publisher_id ignored if present
 
                 SOPC_PublishedDataSet* pubDataSet;
@@ -992,7 +991,8 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                     SOPC_SecurityKeyServices* sks = SOPC_ReaderGroup_Get_SecurityKeyServices_At(readerGroup, isks);
                     assert(sks != NULL);
                     allocSuccess = SOPC_SecurityKeyServices_Set_EndpointUrl(sks, xmlsks->endpointUrl);
-                    SOPC_ReturnStatus status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(xmlsks->serverCertPath, &cert);
+                    SOPC_ReturnStatus status =
+                        SOPC_KeyManager_SerializedCertificate_CreateFromFile(xmlsks->serverCertPath, &cert);
                     SOPC_SecurityKeyServices_Set_ServerCertificate(sks, cert);
                     allocSuccess = (allocSuccess && SOPC_STATUS_OK == status);
                 }
@@ -1075,7 +1075,7 @@ static void clear_xml_pubsub_config(struct parse_context_t* ctx)
             SOPC_Free(msg->variableArr);
             msg->variableArr = NULL;
             msg->nb_variables = 0;
-  
+
             if (NULL != msg->sks_address)
             {
                 SOPC_Free(msg->sks_address);
