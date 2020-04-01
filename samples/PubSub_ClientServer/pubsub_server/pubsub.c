@@ -46,8 +46,8 @@
 #include "pubsub_config_static.h"
 #endif
 
-// First MS Period of ordonnancer task. 3s
-#define PUBSUB_ORDONNANCER_FIRST_MSPERIOD 3000
+// First MS Period of ordonnancer task. 500ms
+#define PUBSUB_ORDONNANCER_FIRST_MSPERIOD 500
 
 typedef struct SOPC_SKS_Local_Configuration
 {
@@ -355,7 +355,8 @@ bool PubSub_local_SKS_Start()
 
     if (sksOK)
     {
-        // If it fails, builder and provider are deleted in Ordonnacer Clear function.
+        // If it fails, builder and provider are deleted in Ordonnancer Clear function.
+        Client_Start();
         status = SOPC_SKOrdonnancer_Start(g_skOrdonnancer);
         sksOK = (SOPC_STATUS_OK == status);
     }
@@ -408,6 +409,7 @@ void PubSub_Stop(void)
     SOPC_PubScheduler_Stop();
     SOPC_PubSub_Protocol_ReleaseMqttManagerHandle();
 
+    Client_Stop();
     SOPC_SKOrdonnancer_StopAndClear(g_skOrdonnancer);
     SOPC_Free(g_skOrdonnancer);
     SOPC_SKManager_Clear(g_skManager);
@@ -540,7 +542,7 @@ static SOPC_ReturnStatus get_sks_config(SOPC_PubSubConfiguration* pPubSubConfig,
                 printf("# Error: SKS address but security mode is none\n");
                 result = SOPC_STATUS_NOK;
             }
-            else if (SOPC_SecurityMode_None != securityMode && 1 == nbSKS)
+            else if (SOPC_SecurityMode_None != securityMode)
             {
                 // use to check that all sks list are the same
                 size_t sksArraySize = SOPC_Array_Size((*sksConfigArray)->sksArray);

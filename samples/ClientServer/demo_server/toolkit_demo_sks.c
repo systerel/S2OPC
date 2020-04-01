@@ -782,6 +782,8 @@ static SOPC_StatusCode Server_SKS_Start()
 {
     SOPC_StatusCode status = SOPC_STATUS_OK;
 
+    Client_Start();
+
     /* Init SK Manager */
     skManager = SOPC_SKManager_Create();
     if (NULL == skManager)
@@ -1684,6 +1686,7 @@ int main(int argc, char* argv[])
         }
     }
 
+    Client_Stop();
     SOPC_SKOrdonnancer_StopAndClear(skOrdonnancer);
     SOPC_Free(skOrdonnancer);
     SOPC_SKManager_Clear(skManager);

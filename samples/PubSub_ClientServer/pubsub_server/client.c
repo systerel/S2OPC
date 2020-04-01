@@ -28,6 +28,9 @@
 #define CLIENT_STARTING_TOKENID 0
 #define CLIENT_REQUESTED_KEY_COUNT 5
 
+#define CLIENT_TIMEOUT_ACTIVATE_SESSION 10000
+#define CLIENT_TIMEOUT_CALL_REQUEST 10000
+
 typedef struct s_Cerkey
 {
     SOPC_SerializedCertificate* client_cert;
@@ -38,6 +41,9 @@ typedef struct s_Cerkey
 } t_CerKey;
 
 Client_Keys_Type Client_Keys = {.init = false};
+
+/* Should be true to use functionnality */
+int32_t Client_Started = 0;
 
 uint32_t session = 0;
 SessionConnectedState scState = SESSION_CONN_NEW;
@@ -205,6 +211,16 @@ SOPC_ReturnStatus Client_Setup()
     return (status);
 }
 
+void Client_Start(void)
+{
+    SOPC_Atomic_Int_Set(&Client_Started, 1);
+}
+
+void Client_Stop(void)
+{
+    SOPC_Atomic_Int_Set(&Client_Started, 0);
+}
+
 uint32_t Client_AddSecureChannelconfig(const char* endpoint_url, SOPC_SerializedCertificate* server_cert)
 {
     assert(NULL != endpoint_url);
@@ -279,13 +295,13 @@ SOPC_ReturnStatus Wait_response_client()
     // Sleep timeout in milliseconds
     const uint32_t sleepTimeout = 20;
     // Loop timeout in milliseconds
-    const uint32_t loopTimeout = 30000;
+    const uint32_t loopTimeout = CLIENT_TIMEOUT_CALL_REQUEST;
     // Counter to stop waiting on timeout
     uint32_t loopCpt = 0;
 
     loopCpt = 0;
-    while (SOPC_STATUS_OK == status && SOPC_Atomic_Int_Get(&scState) != SESSION_CONN_MSG_RECEIVED &&
-           loopCpt * sleepTimeout <= loopTimeout)
+    while (SOPC_STATUS_OK == status && 1 == SOPC_Atomic_Int_Get(&Client_Started) &&
+           SOPC_Atomic_Int_Get(&scState) != SESSION_CONN_MSG_RECEIVED && loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
         SOPC_Sleep(sleepTimeout);
@@ -299,6 +315,11 @@ SOPC_ReturnStatus Wait_response_client()
     {
         status = SOPC_STATUS_NOK;
     }
+    else if (0 == SOPC_Atomic_Int_Get(&Client_Started))
+    {
+        printf("# Info: Client is stopped while waiting response'\n");
+        status = SOPC_STATUS_NOK;
+    }
 
     return (status);
 }
@@ -309,12 +330,13 @@ static SOPC_ReturnStatus ActivateSessionWait_client(void)
     // Sleep timeout in milliseconds
     const uint32_t sleepTimeout = 20;
     // Loop timeout in milliseconds
-    const uint32_t loopTimeout = 30000;
+    const uint32_t loopTimeout = CLIENT_TIMEOUT_ACTIVATE_SESSION;
     // Counter to stop waiting on timeout
     uint32_t loopCpt = 0;
 
     /* Wait until session is activated or timeout */
-    while (SOPC_Atomic_Int_Get(&scState) != SESSION_CONN_CONNECTED && loopCpt * sleepTimeout <= loopTimeout)
+    while (1 == SOPC_Atomic_Int_Get(&Client_Started) && SOPC_Atomic_Int_Get(&scState) != SESSION_CONN_CONNECTED &&
+           loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
         // Retrieve received messages on socket
@@ -323,6 +345,11 @@ static SOPC_ReturnStatus ActivateSessionWait_client(void)
     if (loopCpt * sleepTimeout > loopTimeout)
     {
         status = SOPC_STATUS_TIMEOUT;
+    }
+    else if (0 == SOPC_Atomic_Int_Get(&Client_Started))
+    {
+        printf("# Info: Client is stopped while connecting'\n");
+        status = SOPC_STATUS_NOK;
     }
 
     if (SOPC_Atomic_Int_Get(&scState) == SESSION_CONN_CONNECTED && SOPC_Atomic_Int_Get(&sendFailures) == 0)
@@ -419,6 +446,11 @@ SOPC_ReturnStatus Client_GetSecurityKeys(uint32_t SecureChannel_Id,
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
+    if (0 == SOPC_Atomic_Int_Get(&Client_Started))
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     printf("Client_GetSecurityKeys %u\n", SecureChannel_Id);
@@ -448,6 +480,7 @@ SOPC_ReturnStatus Client_GetSecurityKeys(uint32_t SecureChannel_Id,
     }
 
     /* Save received keys */
+    /* TODO Remove ? */
     if (SOPC_STATUS_OK == status && Client_Keys.init)
     {
         status = Client_SaveKeys(&(Client_Keys.SigningKey), PUBSUB_SKS_SIGNING_KEY);

@@ -47,6 +47,16 @@ typedef enum
 SOPC_ReturnStatus Client_Setup(void);
 
 /*
+ * \brief Start Client service. To be called before Client_GetSecurityKeys()
+ */
+void Client_Start(void);
+
+/*
+ * \brief Stop Client service.
+ */
+void Client_Stop(void);
+
+/*
  * \brief Add a new Secure Channel Configration to connect to a SKS server.
  *        Security Policy is Basic256Sha256
  * \param endpoint_url     Endpoint Url of the SKS Server
@@ -59,6 +69,8 @@ uint32_t Client_AddSecureChannelconfig(const char* endpoint_url, SOPC_Serialized
  * \brief Get Security Keys using a Security Keys Service.
  *  This function create a Session and send a Call Method request.
  *  It returns when the response is received or on timeout.
+ *  Service should be started with Client_Start() before calling this function.
+ *  If Client_GetSecurityKeys() is running when Client_Stop() is called, it return a bad status.
  *
  * \param SecureChannel_Id    Endpoint connection configuration index provided by Client_AddSecureChannelconfig()
  * \param StartingTokenId     Requested Staring Token ID
