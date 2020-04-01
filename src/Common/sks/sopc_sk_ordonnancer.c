@@ -34,6 +34,7 @@ typedef struct SOPC_SKOrdonnancer_Task
     SOPC_SKProvider* provider;
     SOPC_SKManager* manager;
 
+    bool run;
     uint32_t timerId;
     uint32_t msPeriod;
 
@@ -63,32 +64,51 @@ static void SOPC_SKOrdonnancer_EventHandler_Callback_Default(SOPC_EventHandler* 
     (void) event;
     (void) eltId;
     (void) auxParam;
+
+    (void) params;
     SOPC_SKOrdonnancer_Task* task = (SOPC_SKOrdonnancer_Task*) params;
     assert(NULL != task);
     assert(NULL != task->builder || NULL != task->provider || NULL != task->manager);
-    assert(0 < task->timerId);
 
+
+        SOPC_EventTimer_Cancel(task->timerId);
+          task->timerId = 0;
+
+    printf("      => Process Event in SOPC_SKOrdonnancer_EventHandler_Callback_Default\n");
+    
+    if( ! task->run) {
+      //SOPC_EventTimer_Cancel(task->timerId);
+      //task->timerId = 0;
+      return;
+    }
+
+    //assert(0 < task->timerId);
+    
     SOPC_SKBuilder_Update(task->builder, task->provider, task->manager);
 
     /* Get the remaining time to use all available keys */
     uint32_t halfAllKeysLifeTime = SOPC_SKManager_GetAllKeysLifeTime(task->manager) / 2;
     if (halfAllKeysLifeTime < SOPC_SK_ORDONNACER_UPDATE_TIMER_MIN)
-    {
+      {
         halfAllKeysLifeTime = SOPC_SK_ORDONNACER_UPDATE_TIMER_MIN;
-    }
+      }
     else if (halfAllKeysLifeTime > SOPC_SK_ORDONNACER_UPDATE_TIMER_MAX)
-    {
+      {
         halfAllKeysLifeTime = SOPC_SK_ORDONNACER_UPDATE_TIMER_MAX;
-    }
+      }
 
     // Replace the timer by a new one with period updated ( half the Keys Life Time )
-    SOPC_Event periodicEvent = {.event = 0, .eltId = 0, .params = (uintptr_t) task};
-    uint32_t timerId = SOPC_EventTimer_CreatePeriodic(handler, periodicEvent, halfAllKeysLifeTime);
-    if (0 != timerId)
-    {
-        SOPC_EventTimer_Cancel(task->timerId);
-        task->msPeriod = halfAllKeysLifeTime;
-        task->timerId = timerId;
+    if( task->run) {
+            
+      SOPC_Event periodicEvent = {.event = 0, .eltId = 0, .params = (uintptr_t) task};
+      uint32_t timerId = SOPC_EventTimer_CreatePeriodic(handler, periodicEvent, halfAllKeysLifeTime);
+      if (0 != timerId)
+        {
+          task->msPeriod = halfAllKeysLifeTime;
+          task->timerId = timerId;
+        } else {
+        task->run = false;
+      }
     }
 }
 
@@ -192,9 +212,10 @@ static SOPC_ReturnStatus SOPC_SKOrdonnancer_Start_Default(SOPC_SKOrdonnancer* sk
     {
         SOPC_Event event = {.event = 0, .eltId = 0, .params = (uintptr_t) &data->task};
         data->task.timerId = SOPC_EventTimer_CreatePeriodic(data->handler, event, data->task.msPeriod);
-        if (0 == data->task.timerId)
+        data->task.run = (0 != data->task.timerId);
+        if (! data->task.run)
         {
-            status = SOPC_STATUS_NOK;
+              status = SOPC_STATUS_NOK;
         }
     }
     return status;
@@ -209,6 +230,9 @@ static void SOPC_SKOrdonnancer_StopAndClear_Default(SOPC_SKOrdonnancer* sko)
 
     SOPC_SKOrdonnancer_DefaultData* data = (SOPC_SKOrdonnancer_DefaultData*) sko->data;
 
+    // Cancel the task
+    data->task.run = false;
+    
     // delete looper => delete handler
     SOPC_Looper_Delete(data->looper);
 
