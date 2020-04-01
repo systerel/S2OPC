@@ -27,7 +27,7 @@ import time
 import socket
 from urllib.parse import urlparse
 
-TIMEOUT = 1.0
+TIMEOUT = 2.0
 DEFAULT_URL = 'opc.udp://232.1.2.100:4840'
 
 def wait_publisher(url, timeout):

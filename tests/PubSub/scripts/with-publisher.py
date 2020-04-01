@@ -39,6 +39,7 @@ def log(msg):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument('--publisher-cmd', metavar='CMD', help='The command to start the background publisher')
+    parser.add_argument('--sks-cmd', metavar='CMD', help='The command to start the background Security Keys Server')
     parser.add_argument('--wait-publisher', action='store_true', default=False,
                         help='Wait for the publisher to exit instead of killing it when the client is done')
     parser.add_argument('cmd', metavar='CMD', help='The command to run')
@@ -51,6 +52,14 @@ if __name__ == '__main__':
         sys.stderr.write('Missing publisher command.\n')
         sys.exit(1)
 
+    sks_process = None
+    if args.sks_cmd is None:
+        log('No Security Keys Server')
+    else:
+        log('Starting Security Keys Server')
+        sks_process = subprocess.Popen([args.sks_cmd, "master"])
+
+        
     log('Starting publisher')
     publisher_process = subprocess.Popen(shlex.split(args.publisher_cmd))
 
@@ -58,6 +67,10 @@ if __name__ == '__main__':
         log('Timeout for starting publisher')
         publisher_process.kill()
         publisher_process.wait()
+        if sks_process is not None:
+            sks_process.kill()
+            sks_process.wait()
+            
         sys.exit(1)
 
     cmd = [args.cmd] + args.args
@@ -77,10 +90,15 @@ if __name__ == '__main__':
     if not args.wait_publisher:
         log('Test finished, killing publisher')
         publisher_process.terminate()
-
+    
     log('Waiting for publisher to exit')
     publisher_ret = publisher_process.wait()
 
+    if sks_process is not None:
+        log('killing Security Keys Server')
+        sks_process.kill()
+        sks_process.wait()
+        
     log('Done')
     running_in_windows = sys.platform.startswith('win32')
     if test_ret == 0:

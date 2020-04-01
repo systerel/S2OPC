@@ -50,6 +50,9 @@ STATIC_CONF_PUB_INTERVAL = 2.1
 DYN_CONF_PUB_INTERVAL_1000 = 2.1
 DYN_CONF_PUB_INTERVAL_200 = 0.5
 
+# Time to sleep in order to receive Keys and pubsub message
+DYNAMIC_CONF_SKS_INTERVAL = 0.8
+
 NODE_VARIANT_TYPE = { NID_SUB_BOOL : ua.VariantType.Boolean,
                       NID_SUB_UINT16 : ua.VariantType.UInt16,
                       NID_SUB_UINT : ua.VariantType.UInt64,
@@ -124,6 +127,7 @@ XML_PUBSUB_LOOP_MQTT = """<PubSub publisherId="1">
 XML_PUBSUB_LOOP_SECU_ENCRYPT_SIGN_SUCCEED = """<PubSub publisherId="1">
     <connection address="opc.udp://232.1.2.100:4840" mode="publisher">
         <message id="1" publishingInterval="200" version="1" securityMode="signAndEncrypt">
+            <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/server_2k_cert.der" />
             <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
             <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
             <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
@@ -131,6 +135,7 @@ XML_PUBSUB_LOOP_SECU_ENCRYPT_SIGN_SUCCEED = """<PubSub publisherId="1">
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
         <message id="1" publishingInterval="200" version="1" publisherId="1" securityMode="signAndEncrypt">
+            <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/server_2k_cert.der" />
             <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
             <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
             <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
@@ -141,6 +146,7 @@ XML_PUBSUB_LOOP_SECU_ENCRYPT_SIGN_SUCCEED = """<PubSub publisherId="1">
 XML_PUBSUB_LOOP_SECU_SIGN_SUCCEED = """<PubSub publisherId="1">
     <connection address="opc.udp://232.1.2.100:4840" mode="publisher">
         <message id="1" publishingInterval="200" version="1" securityMode="sign">
+            <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/server_2k_cert.der" />
             <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
             <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
             <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
@@ -148,6 +154,7 @@ XML_PUBSUB_LOOP_SECU_SIGN_SUCCEED = """<PubSub publisherId="1">
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
         <message id="1" publishingInterval="200" version="1" publisherId="1" securityMode="sign">
+            <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/server_2k_cert.der" />
             <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
             <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
             <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
@@ -158,6 +165,7 @@ XML_PUBSUB_LOOP_SECU_SIGN_SUCCEED = """<PubSub publisherId="1">
 XML_PUBSUB_LOOP_SECU_FAIL_1 = """<PubSub publisherId="1">
     <connection address="opc.udp://232.1.2.100:4840" mode="publisher">
         <message id="1" publishingInterval="200" version="1" securityMode="signAndEncrypt">
+            <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/server_2k_cert.der" />
             <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
             <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
             <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
@@ -175,6 +183,7 @@ XML_PUBSUB_LOOP_SECU_FAIL_1 = """<PubSub publisherId="1">
 XML_PUBSUB_LOOP_SECU_FAIL_2 = """<PubSub publisherId="1">
     <connection address="opc.udp://232.1.2.100:4840" mode="publisher">
         <message id="1" publishingInterval="200" version="1" securityMode="signAndEncrypt">
+            <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/server_2k_cert.der" />
             <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
             <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
             <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
@@ -182,6 +191,7 @@ XML_PUBSUB_LOOP_SECU_FAIL_2 = """<PubSub publisherId="1">
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
         <message id="1" publishingInterval="200" version="1" publisherId="1" securityMode="sign">
+            <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/server_2k_cert.der" />
             <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
             <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
             <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
@@ -192,6 +202,7 @@ XML_PUBSUB_LOOP_SECU_FAIL_2 = """<PubSub publisherId="1">
 XML_PUBSUB_LOOP_SECU_FAIL_3 = """<PubSub publisherId="1">
     <connection address="opc.udp://232.1.2.100:4840" mode="publisher">
         <message id="1" publishingInterval="200" version="1" securityMode="sign">
+            <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/server_2k_cert.der" />
             <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
             <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
             <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
@@ -199,6 +210,7 @@ XML_PUBSUB_LOOP_SECU_FAIL_3 = """<PubSub publisherId="1">
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
         <message id="1" publishingInterval="200" version="1" publisherId="1" securityMode="signAndEncrypt">
+            <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/server_2k_cert.der" />
             <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
             <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
             <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
@@ -209,6 +221,7 @@ XML_PUBSUB_LOOP_SECU_FAIL_3 = """<PubSub publisherId="1">
 XML_PUBSUB_LOOP_SECU_SIGN_FAIL_4 = """<PubSub publisherId="1">
     <connection address="opc.udp://232.1.2.100:4840" mode="publisher">
         <message id="1" publishingInterval="200" version="1" securityMode="sign">
+            <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/server_2k_cert.der" />
             <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
             <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
             <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
@@ -562,7 +575,7 @@ def testPubSubDynamicConf():
         helpTestSetValue(pubsubserver, NID_PUB_UINT16, 6500, logger)
         helpTestSetValue(pubsubserver, NID_PUB_INT, -600, logger)
 
-        sleep(DYN_CONF_PUB_INTERVAL_200)
+        sleep(DYNAMIC_CONF_SKS_INTERVAL) # because > DYN_CONF_PUB_INTERVAL_200
         logger.add_test('Subscriber bool should not change', False == pubsubserver.getValue(NID_SUB_BOOL))
         logger.add_test('Subscriber uint16 should not change', 1456 == pubsubserver.getValue(NID_SUB_UINT16))
         logger.add_test('Subscriber int should not change', 123654 == pubsubserver.getValue(NID_SUB_INT))
@@ -587,7 +600,7 @@ def testPubSubDynamicConf():
         helpTestSetValue(pubsubserver, NID_PUB_UINT16, 6500, logger)
         helpTestSetValue(pubsubserver, NID_PUB_INT, -600, logger)
 
-        sleep(DYN_CONF_PUB_INTERVAL_200)
+        sleep(DYNAMIC_CONF_SKS_INTERVAL) # because > DYN_CONF_PUB_INTERVAL_200
         logger.add_test('Subscriber bool is not changed', False == pubsubserver.getValue(NID_SUB_BOOL))
         logger.add_test('Subscriber uint16 is not changed', 1456 == pubsubserver.getValue(NID_SUB_UINT16))
         logger.add_test('Subscriber int is not changed', 123654 == pubsubserver.getValue(NID_SUB_INT))
@@ -612,7 +625,7 @@ def testPubSubDynamicConf():
         helpTestSetValue(pubsubserver, NID_PUB_UINT16, 6500, logger)
         helpTestSetValue(pubsubserver, NID_PUB_INT, -600, logger)
 
-        sleep(DYN_CONF_PUB_INTERVAL_200)
+        sleep(DYNAMIC_CONF_SKS_INTERVAL) # because > DYN_CONF_PUB_INTERVAL_200
         logger.add_test('Subscriber bool is not changed', False == pubsubserver.getValue(NID_SUB_BOOL))
         logger.add_test('Subscriber uint16 is not changed', 1456 == pubsubserver.getValue(NID_SUB_UINT16))
         logger.add_test('Subscriber int is not changed', 123654 == pubsubserver.getValue(NID_SUB_INT))
@@ -637,7 +650,7 @@ def testPubSubDynamicConf():
         helpTestSetValue(pubsubserver, NID_PUB_UINT16, 852, logger)
         helpTestSetValue(pubsubserver, NID_PUB_INT, 2658, logger)
 
-        sleep(DYN_CONF_PUB_INTERVAL_200)
+        sleep(DYNAMIC_CONF_SKS_INTERVAL) # because > DYN_CONF_PUB_INTERVAL_200
         logger.add_test('Subscriber bool is changed', True == pubsubserver.getValue(NID_SUB_BOOL))
         logger.add_test('Subscriber uint16 is changed', 852 == pubsubserver.getValue(NID_SUB_UINT16))
         logger.add_test('Subscriber int is changed', 2658 == pubsubserver.getValue(NID_SUB_INT))
@@ -660,7 +673,7 @@ def testPubSubDynamicConf():
         helpTestSetValue(pubsubserver, NID_PUB_UINT16, 528, logger)
         helpTestSetValue(pubsubserver, NID_PUB_INT, 7896, logger)
 
-        sleep(DYN_CONF_PUB_INTERVAL_200)
+        sleep(DYNAMIC_CONF_SKS_INTERVAL) # because > DYN_CONF_PUB_INTERVAL_200
         logger.add_test('Subscriber bool is changed', True == pubsubserver.getValue(NID_SUB_BOOL))
         logger.add_test('Subscriber uint16 is changed', 528 == pubsubserver.getValue(NID_SUB_UINT16))
         logger.add_test('Subscriber int is changed', 7896 == pubsubserver.getValue(NID_SUB_INT))
@@ -683,7 +696,7 @@ def testPubSubDynamicConf():
         helpTestSetValue(pubsubserver, NID_PUB_UINT16, 456, logger)
         helpTestSetValue(pubsubserver, NID_PUB_INT, 789, logger)
 
-        sleep(DYN_CONF_PUB_INTERVAL_200)
+        sleep(DYNAMIC_CONF_SKS_INTERVAL) # because > DYN_CONF_PUB_INTERVAL_200
         logger.add_test('Subscriber bool is not changed', False == pubsubserver.getValue(NID_SUB_BOOL))
         logger.add_test('Subscriber uint16 is not changed', 1456 == pubsubserver.getValue(NID_SUB_UINT16))
         logger.add_test('Subscriber int is not changed', 123654 == pubsubserver.getValue(NID_SUB_INT))

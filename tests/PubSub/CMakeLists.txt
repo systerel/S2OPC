@@ -73,6 +73,7 @@ if(ENABLE_TESTING)
       WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
       COMMAND
       "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
+      "--sks-cmd" $<TARGET_FILE:toolkit_demo_sks>
       "--publisher-cmd" $<TARGET_FILE:pubsub_server>
       "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/validation_tools/${name}" ${test_server_static})
   endfunction()
