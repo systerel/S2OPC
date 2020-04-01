@@ -181,6 +181,9 @@ START_TEST(test_sub_xml_parsing)
     SOPC_DataSetReader* dataSetReader = SOPC_ReaderGroup_Get_DataSetReader_At(readerGroup, 0);
     ck_assert_ptr_nonnull(dataSetReader);
 
+    // Test sks
+    ck_assert_uint_eq(0, SOPC_ReaderGroup_Nb_SecurityKeyServices(readerGroup));
+
     ck_assert_uint_eq(1, SOPC_DataSetReader_Get_WriterGroupVersion(dataSetReader));
     uint16_t writerGroupId = SOPC_DataSetReader_Get_WriterGroupId(dataSetReader);
     ck_assert_uint_eq(14, writerGroupId); // message Id
@@ -218,6 +221,18 @@ START_TEST(test_sub_xml_parsing)
     ck_assert_uint_eq(SOPC_SecurityMode_Sign, SOPC_ReaderGroup_Get_SecurityMode(readerGroup));
     dataSetReader = SOPC_ReaderGroup_Get_DataSetReader_At(readerGroup, 0);
     ck_assert_ptr_nonnull(dataSetReader);
+
+    // Test sks
+    ck_assert_uint_eq(2, SOPC_ReaderGroup_Nb_SecurityKeyServices(readerGroup));
+    SOPC_SecurityKeyServices* sks = SOPC_ReaderGroup_Get_SecurityKeyServices_At(readerGroup, 0);
+    ck_assert_ptr_nonnull(sks);
+    ck_assert_str_eq("opc.tcp://localhost:4851", SOPC_SecurityKeyServices_Get_EndpointUrl(sks));
+    ck_assert_ptr_nonnull(SOPC_SecurityKeyServices_Get_ServerCertificate(sks));
+
+    sks = SOPC_ReaderGroup_Get_SecurityKeyServices_At(readerGroup, 1);
+    ck_assert_ptr_nonnull(sks);
+    ck_assert_str_eq("opc.tcp://localhost:4852", SOPC_SecurityKeyServices_Get_EndpointUrl(sks));
+    ck_assert_ptr_nonnull(SOPC_SecurityKeyServices_Get_ServerCertificate(sks));
 
     ck_assert_uint_eq(1, SOPC_DataSetReader_Get_WriterGroupVersion(dataSetReader));
     writerGroupId = SOPC_DataSetReader_Get_WriterGroupId(dataSetReader);

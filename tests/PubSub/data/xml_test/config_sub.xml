@@ -10,6 +10,8 @@
         <message id="15" version="1" publishingInterval="100." publisherId="456" securityMode="sign">
             <!-- one to many -->
             <variable nodeId="ns=1;s=Tata" displayName="Tata" dataType="Int16"/>
+            <skserver endpointUrl="opc.tcp://localhost:4851" serverCertPath="./server_public/server_2k_cert.der" />
+            <skserver endpointUrl="opc.tcp://localhost:4852" serverCertPath="./server_public/server_2k_cert.der" />
         </message>
     </connection>
 </PubSub>
