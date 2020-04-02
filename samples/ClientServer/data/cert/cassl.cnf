@@ -28,7 +28,6 @@ prompt = no
 distinguished_name  = ca_distinguished_name
 x509_extensions     = ca_extensions
 string_mask         = utf8only
-req_extensions      = req_ext
 
 ####################################################################
 [ ca_distinguished_name ]
