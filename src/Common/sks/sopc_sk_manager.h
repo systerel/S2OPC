@@ -63,6 +63,7 @@ typedef uint32_t (*SOPC_SKManager_AddKeys_Func)(SOPC_SKManager* skm, SOPC_ByteSt
 
 typedef SOPC_ReturnStatus (*SOPC_SKManager_GetKeys_Func)(SOPC_SKManager* skm,
                                                          uint32_t StartingTokenId,
+                                                         uint32_t NbRequestedToken,
                                                          SOPC_String** SecurityPolicyUri,
                                                          uint32_t* FirstTokenId,
                                                          SOPC_ByteString** Keys,
@@ -134,7 +135,7 @@ SOPC_ReturnStatus SOPC_SKManager_SetKeys(SOPC_SKManager* skm,
  */
 uint32_t SOPC_SKManager_AddKeys(SOPC_SKManager* skm, SOPC_ByteString* Keys, uint32_t NbToken);
 
-/** TODO add nb requested keys
+/**
  *  \brief          Get Keys of a Security Keys Manager for a given security group.
  *                  All returned data are copied by this function. The caller is reponsible for deleting these data.
  *
@@ -143,6 +144,7 @@ uint32_t SOPC_SKManager_AddKeys(SOPC_SKManager* skm, SOPC_ByteString* Keys, uint
  */
 SOPC_ReturnStatus SOPC_SKManager_GetKeys(SOPC_SKManager* skm,
                                          uint32_t StartingTokenId,
+                                         uint32_t NbRequestedToken,
                                          SOPC_String** SecurityPolicyUri,
                                          uint32_t* FirstTokenId,
                                          SOPC_ByteString** Keys,

@@ -758,6 +758,7 @@ void Client_Copy_CallResponse_To_GetKeysResponse(Client_SKS_GetKeys_Response* re
 
 static SOPC_ReturnStatus Client_Provider_GetKeys_BySKS(SOPC_SKProvider* skp,
                                                        uint32_t StartingTokenId,
+                                                       uint32_t NbRequestedToken,
                                                        SOPC_String** SecurityPolicyUri,
                                                        uint32_t* FirstTokenId,
                                                        SOPC_ByteString** Keys,
@@ -787,7 +788,7 @@ static SOPC_ReturnStatus Client_Provider_GetKeys_BySKS(SOPC_SKProvider* skp,
     {
         /* Retrieve Security Keys from SKS.
            This function wait SKS server response or timeout */
-        status = Client_GetSecurityKeys(SecureChannel_Id, 0, 5, response);
+        status = Client_GetSecurityKeys(SecureChannel_Id, 0, NbRequestedToken, response);
         if (0 == response->NbKeys || NULL == response->Keys)
         {
             status = SOPC_STATUS_NOK;

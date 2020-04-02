@@ -51,7 +51,7 @@ START_TEST(test_default_manager_create)
     uint32_t TimeToNextKey = 0;
     uint32_t KeyLifetime = 0;
     res = SOPC_SKManager_GetKeys(skm, 0, /* current token id */
-                                 &SecurityPolicyUri, &FirstTokenId, &Keys, &NbToken, &TimeToNextKey, &KeyLifetime);
+                                 10, &SecurityPolicyUri, &FirstTokenId, &Keys, &NbToken, &TimeToNextKey, &KeyLifetime);
     ck_assert(SOPC_STATUS_OK == res);
 
     /* No managed Keys => return empty  */
@@ -112,7 +112,7 @@ START_TEST(test_default_manager_add)
     ck_assert_uint_eq(3, nbAddedKeys);
 
     res = SOPC_SKManager_GetKeys(skm, 0, /* current token id */
-                                 &SecurityPolicyUri, &FirstTokenId, &Keys, &NbToken, &TimeToNextKey, &KeyLifetime);
+                                 10, &SecurityPolicyUri, &FirstTokenId, &Keys, &NbToken, &TimeToNextKey, &KeyLifetime);
     ck_assert(SOPC_STATUS_OK == res);
 
     ck_assert_str_eq(SOPC_SecurityPolicy_PubSub_Aes256_URI, SOPC_String_GetRawCString(SecurityPolicyUri));
@@ -139,9 +139,9 @@ START_TEST(test_default_manager_add)
     nbAddedKeys = SOPC_SKManager_AddKeys(skm, expectedKeys + 3, 3);
     ck_assert_uint_eq(3, nbAddedKeys);
 
-    /* Get Keys. Should return 6 Token */
+    /* Get Keys. Manager Should return 5 Token */
     res = SOPC_SKManager_GetKeys(skm, 0, /* current token id */
-                                 &SecurityPolicyUri, &FirstTokenId, &Keys, &NbToken, &TimeToNextKey, &KeyLifetime);
+                                 10, &SecurityPolicyUri, &FirstTokenId, &Keys, &NbToken, &TimeToNextKey, &KeyLifetime);
     ck_assert(SOPC_STATUS_OK == res);
     ck_assert_str_eq(SOPC_SecurityPolicy_PubSub_Aes256_URI, SOPC_String_GetRawCString(SecurityPolicyUri));
     ck_assert_uint_eq(1, FirstTokenId); /* First Token Id */
@@ -219,7 +219,7 @@ START_TEST(test_default_manager_setkeys)
     ck_assert(SOPC_STATUS_OK == res);
 
     res = SOPC_SKManager_GetKeys(skm, 0, /* current token id */
-                                 &SecurityPolicyUri, &FirstTokenId, &Keys, &NbToken, &TimeToNextKey, &KeyLifetime);
+                                 10, &SecurityPolicyUri, &FirstTokenId, &Keys, &NbToken, &TimeToNextKey, &KeyLifetime);
     ck_assert(SOPC_STATUS_OK == res);
 
     ck_assert_str_eq(SOPC_SecurityPolicy_PubSub_Aes256_URI, SOPC_String_GetRawCString(SecurityPolicyUri));
@@ -248,7 +248,7 @@ START_TEST(test_default_manager_setkeys)
     ck_assert(SOPC_STATUS_OK == res);
 
     res = SOPC_SKManager_GetKeys(skm, 0, /* current token id */
-                                 &SecurityPolicyUri, &FirstTokenId, &Keys, &NbToken, &TimeToNextKey, &KeyLifetime);
+                                 10, &SecurityPolicyUri, &FirstTokenId, &Keys, &NbToken, &TimeToNextKey, &KeyLifetime);
     ck_assert(SOPC_STATUS_OK == res);
     ck_assert_str_eq(SOPC_SecurityPolicy_PubSub_Aes256_URI, SOPC_String_GetRawCString(SecurityPolicyUri));
     ck_assert_uint_eq(50, FirstTokenId); /* First Token Id */
@@ -260,6 +260,85 @@ START_TEST(test_default_manager_setkeys)
     for (int i = 0; i < 4; i++)
     {
         ck_assert(SOPC_ByteString_Equal(&expectedKeys[i + 2], &Keys[i]));
+    }
+
+    /* Clear data */
+    for (int i = 0; i < 6; i++)
+    {
+        SOPC_ByteString_Clear(&expectedKeys[i]);
+    }
+    SOPC_Free(expectedKeys);
+
+    for (int i = 0; i < 4; i++)
+    {
+        SOPC_ByteString_Clear(&Keys[i]);
+    }
+    SOPC_Free(Keys);
+
+    SOPC_String_Clear(SecurityPolicyUri);
+    SOPC_Free(SecurityPolicyUri);
+    SOPC_String_Clear(&expectedPolicy);
+    SOPC_SKManager_Clear(skm);
+    SOPC_Free(skm);
+}
+END_TEST
+
+START_TEST(test_default_manager_getkeys)
+{
+    SOPC_String* SecurityPolicyUri = NULL;
+    uint32_t FirstTokenId = 0;
+    SOPC_ByteString* Keys = NULL;
+    uint32_t NbToken = 0;
+    uint32_t TimeToNextKey = 0;
+    uint32_t KeyLifetime = 0;
+
+    SOPC_SKManager* skm = SOPC_SKManager_Create();
+
+    ck_assert_uint_eq(0, SOPC_SKManager_Size(skm));
+
+    uint32_t expectedKeyLifetime = 5000;
+    SOPC_ReturnStatus res = SOPC_SKManager_SetKeyLifetime(skm, expectedKeyLifetime);
+    ck_assert(SOPC_STATUS_OK == res);
+
+    // add policy
+    SOPC_String expectedPolicy;
+    SOPC_String_Initialize(&expectedPolicy);
+    SOPC_String_CopyFromCString(&expectedPolicy, SOPC_SecurityPolicy_PubSub_Aes256_URI);
+    res = SOPC_SKManager_SetSecurityPolicyUri(skm, &expectedPolicy);
+    ck_assert(SOPC_STATUS_OK == res);
+
+    SOPC_ByteString* expectedKeys = SOPC_Calloc(6, sizeof(SOPC_ByteString));
+    SOPC_ByteString_Initialize(&expectedKeys[0]);
+    ck_assert(SOPC_STATUS_OK == SOPC_ByteString_CopyFromBytes(&expectedKeys[0], (const SOPC_Byte*) "Bytes 1", 7));
+    SOPC_ByteString_Initialize(&expectedKeys[1]);
+    ck_assert(SOPC_STATUS_OK == SOPC_ByteString_CopyFromBytes(&expectedKeys[1], (const SOPC_Byte*) "Bytes 2", 7));
+    SOPC_ByteString_Initialize(&expectedKeys[2]);
+    ck_assert(SOPC_STATUS_OK == SOPC_ByteString_CopyFromBytes(&expectedKeys[2], (const SOPC_Byte*) "Bytes 3", 7));
+    SOPC_ByteString_Initialize(&expectedKeys[3]);
+    ck_assert(SOPC_STATUS_OK == SOPC_ByteString_CopyFromBytes(&expectedKeys[3], (const SOPC_Byte*) "Bytes 4", 7));
+    SOPC_ByteString_Initialize(&expectedKeys[4]);
+    ck_assert(SOPC_STATUS_OK == SOPC_ByteString_CopyFromBytes(&expectedKeys[4], (const SOPC_Byte*) "Bytes 5", 7));
+    SOPC_ByteString_Initialize(&expectedKeys[5]);
+    ck_assert(SOPC_STATUS_OK == SOPC_ByteString_CopyFromBytes(&expectedKeys[5], (const SOPC_Byte*) "Bytes 6", 7));
+
+    /* Set all Keys */
+    res = SOPC_SKManager_SetKeys(skm, &expectedPolicy, 5, expectedKeys, 6, 6000, 20000);
+    ck_assert(SOPC_STATUS_OK == res);
+
+    res = SOPC_SKManager_GetKeys(skm, 0, /* current token id */
+                                 4, &SecurityPolicyUri, &FirstTokenId, &Keys, &NbToken, &TimeToNextKey, &KeyLifetime);
+    ck_assert(SOPC_STATUS_OK == res);
+
+    ck_assert_str_eq(SOPC_SecurityPolicy_PubSub_Aes256_URI, SOPC_String_GetRawCString(SecurityPolicyUri));
+    ck_assert_uint_eq(5, FirstTokenId); /* First Token Id */
+    ck_assert_ptr_nonnull(Keys);
+    ck_assert_uint_eq(4, NbToken);
+    ck_assert(0 < TimeToNextKey);
+    ck_assert(TimeToNextKey <= 6000);
+    ck_assert_uint_eq(20000, KeyLifetime);
+    for (int i = 0; i < 2; i++)
+    {
+        ck_assert(SOPC_ByteString_Equal(&expectedKeys[i], &Keys[i]));
     }
 
     /* Clear data */
@@ -339,6 +418,7 @@ Suite* tests_make_suite_manager(void)
     tcase_add_test(tc_manager, test_default_manager_create);
     tcase_add_test(tc_manager, test_default_manager_add);
     tcase_add_test(tc_manager, test_default_manager_setkeys);
+    tcase_add_test(tc_manager, test_default_manager_getkeys);
     tcase_add_test(tc_manager, test_default_manager_getAllKeysLifeTime);
 
     suite_add_tcase(s, tc_manager);

@@ -32,12 +32,11 @@
 #include "sopc_builtintypes.h"
 #include "sopc_enums.h"
 
-#define SOPC_SK_PROVIDER_NB_GENERATED_KEYS 5
-
 typedef struct SOPC_SKProvider SOPC_SKProvider;
 
 typedef SOPC_ReturnStatus (*SOPC_SKProvider_GetKeys_Func)(SOPC_SKProvider* skp,
                                                           uint32_t StartingTokenId,
+                                                          uint32_t NbRequestedToken,
                                                           SOPC_String** SecurityPolicyUri,
                                                           uint32_t* FirstTokenId,
                                                           SOPC_ByteString** Keys,
@@ -69,13 +68,14 @@ struct SOPC_SKProvider
 SOPC_SKProvider* SOPC_SKProvider_TryList_Create(SOPC_SKProvider** providers, uint32_t nbProviders);
 
 /**
- * \brief  Create an instance of SOPC_SKProvider which return random Keys for PubSub Policy. TODO to complete
+ * \brief  Create an instance of SOPC_SKProvider which return random Keys for PubSub Policy.
  *
+ * \param   maxKeys  Maximum number of Keys returned by SOPC_SKProvider_GetKeys()
  * \return a SOPC_SKProvider object or NULL if not enough memory
  */
-SOPC_SKProvider* SOPC_SKProvider_RandomPubSub_Create(void);
+SOPC_SKProvider* SOPC_SKProvider_RandomPubSub_Create(uint32_t maxKeys);
 
-/** TODO add nb requested keys
+/**
  *  \brief          Get Keys of a Security Keys Provider for a given security group.
  *                  All returned data are copied by this function. The caller is reponsible for deleting these data.
  *                  Output parameters may be NULL exept Keys and NbKeys
@@ -85,6 +85,7 @@ SOPC_SKProvider* SOPC_SKProvider_RandomPubSub_Create(void);
  */
 SOPC_ReturnStatus SOPC_SKProvider_GetKeys(SOPC_SKProvider* skp,
                                           uint32_t StartingTokenId,
+                                          uint32_t NbRequestedToken,
                                           SOPC_String** SecurityPolicyUri,
                                           uint32_t* FirstTokenId,
                                           SOPC_ByteString** Keys,

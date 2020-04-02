@@ -30,6 +30,9 @@
 // Size of array. Use for subscriber context
 #define SOPC_PUBSUB_MAX_MESSAGE_PER_PUBLISHER 10
 
+// Number of requested token per getSecurityKeys call
+#define SOPC_PUBSUB_SKS_MAX_TOKEN_PER_CALL 5
+
 // Pub Sub Security Policy
 #define SOPC_PUBSUB_SECURITY_POLICY SOPC_SecurityPolicy_PubSub_Aes256_URI
 

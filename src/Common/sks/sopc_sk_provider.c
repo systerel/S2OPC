@@ -30,10 +30,12 @@
 #define SOPC_SK_PROVIDER_INTERNAL_PUBSUB_KEYS_SIZE (32 + 32 + 4)
 #define SOPC_SK_PROVIDER_INTERNAL_PUBSUB_SECURITY_POLICY SOPC_SecurityPolicy_PubSub_Aes256_URI
 
-/*
- * Data is SOPC_CryptoProvider
- *
- */
+typedef struct SOPC_SKProvider_RandomPubSub
+{
+    SOPC_CryptoProvider* cryptoProvider;
+    uint32_t nbMaxKeys;
+} SOPC_SKProvider_RandomPubSub;
+
 static void SOPC_SKProvider_Clear_RandomPubSub_Aes256(void* data);
 
 /*** DEFAULT IMPLEMENTATION FUNCTIONS ***/
@@ -52,6 +54,7 @@ typedef struct SOPC_SKProvider_TryList
  */
 static SOPC_ReturnStatus SOPC_SKProvider_GetKeys_TryList(SOPC_SKProvider* skp,
                                                          uint32_t StartingTokenId,
+                                                         uint32_t NbRequestedToken,
                                                          SOPC_String** SecurityPolicyUri,
                                                          uint32_t* FirstTokenId,
                                                          SOPC_ByteString** Keys,
@@ -59,7 +62,7 @@ static SOPC_ReturnStatus SOPC_SKProvider_GetKeys_TryList(SOPC_SKProvider* skp,
                                                          uint32_t* TimeToNextKey,
                                                          uint32_t* KeyLifetime)
 {
-    if (NULL == skp || NULL == skp->data || NULL == Keys || NULL == NbToken)
+    if (NULL == skp || NULL == skp->data || NULL == Keys || NULL == NbToken || 0 == NbRequestedToken)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -71,8 +74,8 @@ static SOPC_ReturnStatus SOPC_SKProvider_GetKeys_TryList(SOPC_SKProvider* skp,
     for (uint32_t i = 0; i < data->nbProviders; i++)
     {
         printf("Try GetKeys with provider %u\n", i + 1);
-        status = SOPC_SKProvider_GetKeys(data->providers[i], StartingTokenId, SecurityPolicyUri, FirstTokenId, Keys,
-                                         NbToken, TimeToNextKey, KeyLifetime);
+        status = SOPC_SKProvider_GetKeys(data->providers[i], StartingTokenId, NbRequestedToken, SecurityPolicyUri,
+                                         FirstTokenId, Keys, NbToken, TimeToNextKey, KeyLifetime);
         if (SOPC_STATUS_OK == status && 0 < *NbToken)
         {
             break;
@@ -108,6 +111,7 @@ static void SOPC_SKProvider_Clear_TryList(void* pdata)
  */
 static SOPC_ReturnStatus SOPC_SKProvider_GetKeys_RandomPubSub_Aes256(SOPC_SKProvider* skp,
                                                                      uint32_t StartingTokenId,
+                                                                     uint32_t NbRequestedToken,
                                                                      SOPC_String** SecurityPolicyUri,
                                                                      uint32_t* FirstTokenId,
                                                                      SOPC_ByteString** Keys,
@@ -124,30 +128,37 @@ static SOPC_ReturnStatus SOPC_SKProvider_GetKeys_RandomPubSub_Aes256(SOPC_SKProv
     (void) KeyLifetime;
 
     /* Only skp */
-    if (NULL == skp || NULL == skp->data || NULL == Keys || NULL == NbToken)
+    if (NULL == skp || NULL == skp->data || NULL == Keys || NULL == NbToken || 0 == NbRequestedToken)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    int keyIndex;
+    uint32_t keyIndex;
+    uint32_t nbKeys;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_ExposedBuffer* ppBuffer;
 
-    SOPC_CryptoProvider* provider = (SOPC_CryptoProvider*) skp->data;
+    SOPC_SKProvider_RandomPubSub* data = (SOPC_SKProvider_RandomPubSub*) skp->data;
 
-    SOPC_ByteString* generatedKeys = SOPC_Calloc(SOPC_SK_PROVIDER_NB_GENERATED_KEYS, sizeof(SOPC_ByteString));
+    if (0 == data->nbMaxKeys)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    nbKeys = (NbRequestedToken < data->nbMaxKeys) ? NbRequestedToken : data->nbMaxKeys;
+
+    SOPC_ByteString* generatedKeys = SOPC_Calloc(nbKeys, sizeof(SOPC_ByteString));
     if (NULL == generatedKeys)
     {
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
 
     /* Generate Random Keys and copy in out parameter */
-    *NbToken = SOPC_SK_PROVIDER_NB_GENERATED_KEYS;
-    for (keyIndex = 0; keyIndex < SOPC_SK_PROVIDER_NB_GENERATED_KEYS && SOPC_STATUS_OK == status; keyIndex++)
+    for (keyIndex = 0; keyIndex < nbKeys && SOPC_STATUS_OK == status; keyIndex++)
     {
         SOPC_ByteString_Initialize(&generatedKeys[keyIndex]);
-        status =
-            SOPC_CryptoProvider_GenerateRandomBytes(provider, SOPC_SK_PROVIDER_INTERNAL_PUBSUB_KEYS_SIZE, &ppBuffer);
+        status = SOPC_CryptoProvider_GenerateRandomBytes(data->cryptoProvider,
+                                                         SOPC_SK_PROVIDER_INTERNAL_PUBSUB_KEYS_SIZE, &ppBuffer);
         if (SOPC_STATUS_OK == status)
         {
             status = SOPC_ByteString_CopyFromBytes((&generatedKeys[keyIndex]), ppBuffer,
@@ -160,7 +171,7 @@ static SOPC_ReturnStatus SOPC_SKProvider_GetKeys_RandomPubSub_Aes256(SOPC_SKProv
     {
         *NbToken = 0;
         /* Clear only initialized Keys */
-        for (int i = 0; i < keyIndex && SOPC_STATUS_OK == status; i++)
+        for (uint32_t i = 0; i < keyIndex && SOPC_STATUS_OK == status; i++)
         {
             SOPC_ByteString_Clear(&generatedKeys[i]);
         }
@@ -168,7 +179,7 @@ static SOPC_ReturnStatus SOPC_SKProvider_GetKeys_RandomPubSub_Aes256(SOPC_SKProv
     else
     {
         *Keys = generatedKeys;
-        *NbToken = SOPC_SK_PROVIDER_NB_GENERATED_KEYS;
+        *NbToken = nbKeys;
     }
     return status;
 }
@@ -180,8 +191,11 @@ static void SOPC_SKProvider_Clear_RandomPubSub_Aes256(void* pdata)
         return;
     }
 
-    SOPC_CryptoProvider* data = (SOPC_CryptoProvider*) pdata;
-    SOPC_CryptoProvider_Deinit(data);
+    SOPC_SKProvider_RandomPubSub* data = (SOPC_SKProvider_RandomPubSub*) pdata;
+    SOPC_CryptoProvider_Deinit(data->cryptoProvider);
+    SOPC_Free(data->cryptoProvider);
+    data->cryptoProvider = NULL;
+    data->nbMaxKeys = 0;
 }
 
 /*** API FUNCTIONS ***/
@@ -216,7 +230,7 @@ SOPC_SKProvider* SOPC_SKProvider_TryList_Create(SOPC_SKProvider** providers, uin
     return skp;
 }
 
-SOPC_SKProvider* SOPC_SKProvider_RandomPubSub_Create()
+SOPC_SKProvider* SOPC_SKProvider_RandomPubSub_Create(uint32_t maxKeys)
 {
     SOPC_SKProvider* skp = SOPC_Malloc(sizeof(SOPC_SKProvider));
     if (NULL == skp)
@@ -224,12 +238,22 @@ SOPC_SKProvider* SOPC_SKProvider_RandomPubSub_Create()
         return NULL;
     }
 
-    skp->data = (void*) SOPC_CryptoProvider_CreatePubSub(SOPC_SK_PROVIDER_INTERNAL_PUBSUB_SECURITY_POLICY);
+    skp->data = SOPC_Calloc(1, sizeof(SOPC_SKProvider_RandomPubSub));
     if (NULL == skp->data)
     {
         SOPC_Free(skp);
         return NULL;
     }
+
+    SOPC_SKProvider_RandomPubSub* data = (SOPC_SKProvider_RandomPubSub*) skp->data;
+    data->cryptoProvider = SOPC_CryptoProvider_CreatePubSub(SOPC_SK_PROVIDER_INTERNAL_PUBSUB_SECURITY_POLICY);
+    if (NULL == data->cryptoProvider)
+    {
+        SOPC_Free(skp->data);
+        SOPC_Free(skp);
+        return NULL;
+    }
+    data->nbMaxKeys = maxKeys;
 
     skp->ptrGetKeys = SOPC_SKProvider_GetKeys_RandomPubSub_Aes256;
     skp->ptrClear = SOPC_SKProvider_Clear_RandomPubSub_Aes256;
@@ -239,6 +263,7 @@ SOPC_SKProvider* SOPC_SKProvider_RandomPubSub_Create()
 
 SOPC_ReturnStatus SOPC_SKProvider_GetKeys(SOPC_SKProvider* skp,
                                           uint32_t StartingTokenId,
+                                          uint32_t NbRequestedToken,
                                           SOPC_String** SecurityPolicyUri,
                                           uint32_t* FirstTokenId,
                                           SOPC_ByteString** Keys,
@@ -250,8 +275,8 @@ SOPC_ReturnStatus SOPC_SKProvider_GetKeys(SOPC_SKProvider* skp,
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    return skp->ptrGetKeys(skp, StartingTokenId, SecurityPolicyUri, FirstTokenId, Keys, NbKeys, TimeToNextKey,
-                           KeyLifetime);
+    return skp->ptrGetKeys(skp, StartingTokenId, NbRequestedToken, SecurityPolicyUri, FirstTokenId, Keys, NbKeys,
+                           TimeToNextKey, KeyLifetime);
 }
 
 void SOPC_SKProvider_Clear(SOPC_SKProvider* skp)

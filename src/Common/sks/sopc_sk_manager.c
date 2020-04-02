@@ -330,6 +330,7 @@ static void SOPC_SKManager_UpdateCurrentToken_Default(SOPC_SKManager_DefaultData
  */
 static SOPC_ReturnStatus SOPC_SKManager_GetKeys_Default(SOPC_SKManager* skm,
                                                         uint32_t StartingTokenId,
+                                                        uint32_t NbRequestedToken,
                                                         SOPC_String** SecurityPolicyUri,
                                                         uint32_t* FirstTokenId,
                                                         SOPC_ByteString** Keys,
@@ -346,7 +347,7 @@ static SOPC_ReturnStatus SOPC_SKManager_GetKeys_Default(SOPC_SKManager* skm,
     }
 
     if (NULL == SecurityPolicyUri || NULL == FirstTokenId || NULL == Keys || NULL == NbToken || NULL == TimeToNextKey ||
-        NULL == KeyLifetime)
+        NULL == KeyLifetime || 0 == NbRequestedToken)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -434,6 +435,10 @@ static SOPC_ReturnStatus SOPC_SKManager_GetKeys_Default(SOPC_SKManager* skm,
         uint32_t indexOfFirstToken = *FirstTokenId - data->FirstTokenId;
 
         *NbToken = nbManagedKeys - indexOfFirstToken;
+        if (*NbToken > NbRequestedToken)
+        {
+            *NbToken = NbRequestedToken;
+        }
 
         if (0 < *NbToken)
         {
@@ -626,6 +631,7 @@ uint32_t SOPC_SKManager_AddKeys(SOPC_SKManager* skm, SOPC_ByteString* Keys, uint
 
 SOPC_ReturnStatus SOPC_SKManager_GetKeys(SOPC_SKManager* skm,
                                          uint32_t StartingTokenId,
+                                         uint32_t NbRequestedToken,
                                          SOPC_String** SecurityPolicyUri,
                                          uint32_t* FirstTokenId,
                                          SOPC_ByteString** Keys,
@@ -637,8 +643,8 @@ SOPC_ReturnStatus SOPC_SKManager_GetKeys(SOPC_SKManager* skm,
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    return skm->ptrGetKeys(skm, StartingTokenId, SecurityPolicyUri, FirstTokenId, Keys, NbKeys, TimeToNextKey,
-                           KeyLifetime);
+    return skm->ptrGetKeys(skm, StartingTokenId, NbRequestedToken, SecurityPolicyUri, FirstTokenId, Keys, NbKeys,
+                           TimeToNextKey, KeyLifetime);
 }
 
 uint32_t SOPC_SKManager_GetAllKeysLifeTime(SOPC_SKManager* skm)

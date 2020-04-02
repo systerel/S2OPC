@@ -23,6 +23,7 @@
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pubsub_local_sks.h"
+#include "sopc_pubsub_constants.h"
 
 static SOPC_SKManager* g_skManager = NULL;
 
@@ -51,8 +52,9 @@ SOPC_LocalSKS_Keys* SOPC_LocalSKS_GetSecurityKeys(uint32_t groupid, uint32_t tok
     uint32_t NbKeys = 0;
     uint32_t TimeToNextKey = 0;
     uint32_t KeyLifetime = 0;
-    SOPC_ReturnStatus status = SOPC_SKManager_GetKeys(g_skManager, tokenId, &SecurityPolicyUri, &FirstTokenId, &Keys,
-                                                      &NbKeys, &TimeToNextKey, &KeyLifetime);
+    SOPC_ReturnStatus status =
+        SOPC_SKManager_GetKeys(g_skManager, tokenId, SOPC_PUBSUB_SKS_MAX_TOKEN_PER_CALL, &SecurityPolicyUri,
+                               &FirstTokenId, &Keys, &NbKeys, &TimeToNextKey, &KeyLifetime);
 
     // Initialiser returnedkeys is GetKeys return valid Keys corresponding to requested token
     SOPC_ByteString* byteString = NULL;

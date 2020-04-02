@@ -42,8 +42,9 @@ static SOPC_ReturnStatus SOPC_SKBuilder_Update_Default_Setter(SOPC_SKBuilder* sk
     uint32_t TimeToNextKey = 0;
     uint32_t KeyLifetime = 0;
 
-    SOPC_ReturnStatus status = SOPC_SKProvider_GetKeys(skp, SOPC_SK_MANAGER_CURRENT_TOKEN_ID, &SecurityPolicyUri,
-                                                       &FirstTokenId, &Keys, &NbToken, &TimeToNextKey, &KeyLifetime);
+    SOPC_ReturnStatus status =
+        SOPC_SKProvider_GetKeys(skp, SOPC_SK_MANAGER_CURRENT_TOKEN_ID, UINT32_MAX, &SecurityPolicyUri, &FirstTokenId,
+                                &Keys, &NbToken, &TimeToNextKey, &KeyLifetime);
 
     if (SOPC_STATUS_OK == status && NULL != Keys && 0 < NbToken)
     {
@@ -99,8 +100,8 @@ static SOPC_ReturnStatus SOPC_SKBuilder_Update_Truncate(SOPC_SKBuilder* skb, SOP
         uint32_t TimeToNextKey = 0;
         uint32_t KeyLifetime = 0;
 
-        status = SOPC_SKManager_GetKeys(skm, SOPC_SK_MANAGER_CURRENT_TOKEN_ID, &SecurityPolicyUri, &FirstTokenId, &Keys,
-                                        &NbToken, &TimeToNextKey, &KeyLifetime);
+        status = SOPC_SKManager_GetKeys(skm, SOPC_SK_MANAGER_CURRENT_TOKEN_ID, data->sizeMax, &SecurityPolicyUri,
+                                        &FirstTokenId, &Keys, &NbToken, &TimeToNextKey, &KeyLifetime);
         if (SOPC_STATUS_OK == status)
         {
             status =
@@ -135,7 +136,7 @@ static SOPC_ReturnStatus SOPC_SKBuilder_Update_Default_Append(SOPC_SKBuilder* sk
     uint32_t NbKeys = 0;
 
     // TODO mettre une liste de security group dans data, current token
-    SOPC_ReturnStatus status = SOPC_SKProvider_GetKeys(skp, 0, NULL, NULL, &Keys, &NbKeys, NULL, NULL);
+    SOPC_ReturnStatus status = SOPC_SKProvider_GetKeys(skp, 0, UINT32_MAX, NULL, NULL, &Keys, &NbKeys, NULL, NULL);
 
     if (SOPC_STATUS_OK == status && NULL != Keys && 0 < NbKeys)
     {

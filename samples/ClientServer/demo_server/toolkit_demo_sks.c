@@ -67,6 +67,8 @@ static SOPC_CRLList* static_cacrl = NULL;
 #define SKS_ORDONANCER_INIT_MSPERIOD 1000
 // Key Lifetime is 10s
 #define SKS_KEYLIFETIME 100000
+// Number of keys generated randomly
+#define SKS_NB_GENERATED_KEYS 5
 // Maximum number of Security Keys managed. When the number of keys exceed this limit, only the valid Keys are keept
 #define SKS_NB_MAX_KEYS 20
 
@@ -240,7 +242,15 @@ static SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_getSecurityKeys(const S
 
     uint32_t requestedStartingTokenId = inputArgs[1].Value.Uint32;
 
+    if (SOPC_UInt32_Id != inputArgs[2].BuiltInTypeId || SOPC_VariantArrayType_SingleValue != inputArgs[2].ArrayType)
+    {
+        return OpcUa_BadInternalError;
+    }
+
+    uint32_t requestedNbKeys = inputArgs[2].Value.Uint32;
+
     const SOPC_User* user = SOPC_CallContext_GetUser(callContextPtr);
+
     /* Check if the user is authorized to call the method for this Security Group */
     if (SOPC_User_IsUsername(user))
     { /* Type of user should be username */
@@ -280,8 +290,8 @@ static SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_getSecurityKeys(const S
 
     if (SOPC_GoodGenericStatus == status)
     {
-        status = SOPC_SKManager_GetKeys(skManager, requestedStartingTokenId, &SecurityPolicyUri, &FirstTokenId, &Keys,
-                                        &NbToken, &TimeToNextKey, &KeyLifetime);
+        status = SOPC_SKManager_GetKeys(skManager, requestedStartingTokenId, requestedNbKeys, &SecurityPolicyUri,
+                                        &FirstTokenId, &Keys, &NbToken, &TimeToNextKey, &KeyLifetime);
         if (SOPC_GoodGenericStatus != status)
         {
             printf("<Security Key Service: Error in SK Manager when get keys\n");
@@ -588,7 +598,7 @@ static SOPC_StatusCode Server_SKS_CreateMasterBuilder(SOPC_SKBuilder** builder, 
     SOPC_StatusCode status = SOPC_STATUS_OK;
 
     /* Init SK Provider : Create Random Keys */
-    *provider = SOPC_SKProvider_RandomPubSub_Create();
+    *provider = SOPC_SKProvider_RandomPubSub_Create(SKS_NB_GENERATED_KEYS);
     if (NULL == *provider)
     {
         status = SOPC_STATUS_OUT_OF_MEMORY;
