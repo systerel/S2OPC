@@ -587,7 +587,7 @@ static SOPC_SKS_Local_Configuration* SOPC_SKS_Local_Configuration_Create()
         result->readerGroupArray = SOPC_Array_Create(sizeof(SOPC_ReaderGroup*), 10, NULL);
         allocSuccess = (NULL != result->readerGroupArray);
     }
-    
+
     if (allocSuccess)
     {
         result->writerGroupArray = SOPC_Array_Create(sizeof(SOPC_WriterGroup*), 10, NULL);

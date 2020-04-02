@@ -63,11 +63,11 @@ static SOPC_CRLList* static_cacrl = NULL;
 #define DEFAULT_PRODUCT_URI_2 "urn:S2OPC:localhost_2"
 
 /* SKS Constants */
-#define SKS_KEYS_FILES_SIGNING_KEY "./sks_private/signingKey.key"
-#define SKS_KEYS_FILES_ENCRYPT_KEY "./sks_private/encryptKey.key"
-#define SKS_KEYS_FILES_KEY_NONCE "./sks_private/keyNonce.key"
+// Period to init the ordonnancer. Then the Keys are generated when half-time
+#define SKS_ORDONANCER_INIT_MSPERIOD 1000
 // Key Lifetime is 10s
 #define SKS_KEYLIFETIME 100000
+// Maximum number of Security Keys managed. When the number of keys exceed this limit, only the valid Keys are keept
 #define SKS_NB_MAX_KEYS 20
 
 #define SKS_SECURITY_GROUPID "sgid_1"
@@ -282,11 +282,7 @@ static SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_getSecurityKeys(const S
     {
         status = SOPC_SKManager_GetKeys(skManager, requestedStartingTokenId, &SecurityPolicyUri, &FirstTokenId, &Keys,
                                         &NbToken, &TimeToNextKey, &KeyLifetime);
-        if (SOPC_GoodGenericStatus == status)
-        {
-            printf("<Security Key Service: key retrieved\n");
-        }
-        else
+        if (SOPC_GoodGenericStatus != status)
         {
             printf("<Security Key Service: Error in SK Manager when get keys\n");
         }
@@ -296,31 +292,19 @@ static SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_getSecurityKeys(const S
 
     if (!keysValid)
     {
-        printf("<Security Key Service: Error with Keys\n");
+        printf("<Security Key Service Error: Retrieved Keys are not valid\n");
     }
     if (0 == FirstTokenId && keysValid)
     {
-        printf("<Security Key Service: Error with First token id\n");
-    }
-    else
-    {
-        printf("<Security Key Service: FirstTokenId is %u\n", FirstTokenId);
+        printf("<Security Key Service Error: First Token id is not valid\n");
     }
     if (0 == TimeToNextKey && keysValid)
     {
-        printf("<Security Key Service: Error with TimeToNextKey\n");
-    }
-    else
-    {
-        printf("<Security Key Service: TimeToNextKey is %u\n", TimeToNextKey);
+        printf("<Security Key Service Error: TimeToNextKey is not valid\n");
     }
     if (0 == KeyLifetime && keysValid)
     {
-        printf("<Security Key Service: Error with KeyLifetime\n");
-    }
-    else
-    {
-        printf("<Security Key Service: KeyLifetime is %u\n", KeyLifetime);
+        printf("<Security Key Service Error: KeyLifetime is not valid\n");
     }
 
     if (SOPC_GoodGenericStatus == status && keysValid)
@@ -367,7 +351,7 @@ static SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_getSecurityKeys(const S
         }
         else
         {
-            printf("<Security Key Service: cannont load key nonce\n");
+            printf("<Security Key Service Error: Cannot save Keys\n");
         }
     }
 
@@ -726,7 +710,6 @@ static SOPC_StatusCode Server_SKManager_Init(SOPC_SKManager* manager)
     // Stop if add SC failed or Keys are found
     for (i = 1; i < nb_sks_server && SOPC_STATUS_OK == status && !isInit; i++)
     {
-        printf("   => Debug Redondance : SC Configuration %s\n", sks_server_endpoint_uris[i]);
         SOPC_SerializedCertificate* server_cert = NULL;
         status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(sks_server_cert_pathes[i], &server_cert);
         if (SOPC_STATUS_OK == status)
@@ -740,29 +723,21 @@ static SOPC_StatusCode Server_SKManager_Init(SOPC_SKManager* manager)
         }
         else
         {
-            printf("   => Debug Redondance : Cannot create Server Certificate\n");
-        }
-        if (SOPC_STATUS_OK == status)
-        {
-            status = Server_SKS_CreateSlaveBuilder(SecureChannel_Id, &builder, &provider);
-        }
-        else
-        {
-            printf("   => Debug Redondance : SC Configuration failed\n");
+            printf("<Security Key Service Error: Cannot create Server Certificate\n");
         }
 
         if (SOPC_STATUS_OK == status)
         {
-            printf("   => Debug Redondance : SC Configuration succeed\n");
+            status = Server_SKS_CreateSlaveBuilder(SecureChannel_Id, &builder, &provider);
+        }
+
+        if (SOPC_STATUS_OK == status)
+        {
             SOPC_SKBuilder_Update(builder, provider, manager);
             uint32_t size = SOPC_SKManager_Size(manager);
             isInit = size > 0;
-            printf("   => Debug Redondance : Builder finish. Manager size is %u\n", size);
         }
-        else
-        {
-            printf("   => Debug Redondance : SC Create Builder failed\n");
-        }
+
         SOPC_SKBuilder_Clear(builder);
         SOPC_Free(builder);
         SOPC_SKProvider_Clear(provider);
@@ -848,7 +823,7 @@ static SOPC_StatusCode Server_SKS_Start()
             }
             else
             {
-                printf("   => Debug Redondance : Cannot create Server Certificate\n");
+                printf("<Security Key Service Error: Cannot create Server Certificate\n");
             }
 
             if (SOPC_STATUS_OK == status)
@@ -857,7 +832,7 @@ static SOPC_StatusCode Server_SKS_Start()
             }
             else
             {
-                printf("# Error: Slave Server cannot configure channel to Master Server\n");
+                printf("<Security Key Service Error: Slave Server cannot configure channel to Master Server\n");
             }
             break;
         default:
@@ -870,25 +845,22 @@ static SOPC_StatusCode Server_SKS_Start()
     if (SOPC_STATUS_OK == status)
     {
         /* Init the task with 1s */
-        status = SOPC_SKOrdonnancer_AddTask(skOrdonnancer, skBuilder, skProvider, skManager, 1 * 1000);
-        if (SOPC_STATUS_OK != status)
-        {
-            printf("<Security Keys Service : adding task to ordonnancer failed\n");
-        }
+        status =
+            SOPC_SKOrdonnancer_AddTask(skOrdonnancer, skBuilder, skProvider, skManager, SKS_ORDONANCER_INIT_MSPERIOD);
     }
 
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_SKOrdonnancer_Start(skOrdonnancer);
-        if (SOPC_STATUS_OK != status)
-        {
-            printf("<Security Keys Service : Starting ordonnancer failed\n");
-        }
     }
 
     if (SOPC_STATUS_OK == status)
     {
-        printf("<Security Keys Service : Started\n");
+        printf("<Security Keys Service: Started\n");
+    }
+    else
+    {
+        printf("<Security Keys Service Error: Start failed\n");
     }
 
     return status;
@@ -904,8 +876,7 @@ static SOPC_StatusCode Server_SKS_Configure(SOPC_Server_Config* serverConfig)
     /* Init Method Call Manager */
     if (SOPC_STATUS_OK == status)
     {
-        /* Input, output */
-        /* CreateSigningRequest */
+        // getSecurityKeys method node
         methodId = SOPC_NodeId_FromCString("i=15001", 7);
         if (NULL != methodId)
         {

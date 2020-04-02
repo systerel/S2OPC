@@ -50,11 +50,7 @@ static SOPC_ReturnStatus SOPC_SKBuilder_Update_Default_Setter(SOPC_SKBuilder* sk
         status =
             SOPC_SKManager_SetKeys(skm, SecurityPolicyUri, FirstTokenId, Keys, NbToken, TimeToNextKey, KeyLifetime);
 
-        if (SOPC_GoodGenericStatus == status)
-        {
-            printf("<Security Key Service: Keys setted in Builder\n");
-        }
-        else
+        if (SOPC_GoodGenericStatus != status)
         {
             printf("<Security Key Service: Error Builder cannot set Keys\n");
         }
@@ -94,8 +90,6 @@ static SOPC_ReturnStatus SOPC_SKBuilder_Update_Truncate(SOPC_SKBuilder* skb, SOP
 
     uint32_t size = SOPC_SKManager_Size(skm);
 
-    printf("<Security Keys Builder : Size is  %u\n", size);
-
     if (size > data->sizeMax)
     {
         SOPC_String* SecurityPolicyUri = NULL;
@@ -112,7 +106,6 @@ static SOPC_ReturnStatus SOPC_SKBuilder_Update_Truncate(SOPC_SKBuilder* skb, SOP
             status =
                 SOPC_SKManager_SetKeys(skm, SecurityPolicyUri, FirstTokenId, Keys, NbToken, TimeToNextKey, KeyLifetime);
         }
-        printf("<Security Keys Builder : Truncate, first token is %u\n", FirstTokenId);
 
         SOPC_String_Clear(SecurityPolicyUri);
         SOPC_Free(SecurityPolicyUri);
@@ -148,12 +141,7 @@ static SOPC_ReturnStatus SOPC_SKBuilder_Update_Default_Append(SOPC_SKBuilder* sk
     {
         uint32_t addedKeys = SOPC_SKManager_AddKeys(skm, Keys, NbKeys);
 
-        if (addedKeys == NbKeys)
-        {
-            SOPC_TimeReference currentTime = SOPC_TimeReference_GetCurrent() / 1000;
-            printf("<Security Keys Builder : key added at %lu\n", currentTime);
-        }
-        else
+        if (addedKeys != NbKeys)
         {
             status = SOPC_STATUS_NOK;
             printf("<Security Key Builder: Error with SK Manager\n");

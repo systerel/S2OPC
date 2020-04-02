@@ -73,16 +73,10 @@ static void SOPC_SKOrdonnancer_EventHandler_Callback_Default(SOPC_EventHandler* 
     SOPC_EventTimer_Cancel(task->timerId);
     task->timerId = 0;
 
-    printf("      => Process Event in SOPC_SKOrdonnancer_EventHandler_Callback_Default\n");
-
     if (!task->run)
     {
-        // SOPC_EventTimer_Cancel(task->timerId);
-        // task->timerId = 0;
         return;
     }
-
-    // assert(0 < task->timerId);
 
     SOPC_SKBuilder_Update(task->builder, task->provider, task->manager);
 

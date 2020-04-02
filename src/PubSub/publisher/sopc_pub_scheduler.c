@@ -479,7 +479,6 @@ static void* thread_start_publish(void* arg)
                     // Update Nonce Random part
                     if (allocSuccess)
                     {
-                        printf("# Info: Publisher Succeed to get security keys \n");
                         security->msgNonceRandom = SOPC_PubSub_Security_Random(security->provider);
                         allocSuccess = (NULL != security->msgNonceRandom);
                         if (allocSuccess)
