@@ -20,6 +20,7 @@
 #include <assert.h>
 #include <inttypes.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "sopc_encodeable.h"
 #include "sopc_mem_alloc.h"
@@ -60,7 +61,9 @@ StateMachine_Machine* StateMachine_Create(void)
     return pSM;
 }
 
-SOPC_ReturnStatus StateMachine_ConfigureMachine(StateMachine_Machine* pSM)
+static SOPC_ReturnStatus StateMachine_ConfigureMachine(StateMachine_Machine* pSM,
+                                                       const char* reqSecuPolicyUri,
+                                                       OpcUa_MessageSecurityMode msgSecurityMode)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
@@ -75,7 +78,8 @@ SOPC_ReturnStatus StateMachine_ConfigureMachine(StateMachine_Machine* pSM)
     /* Add the SecureChannel configuration */
     if (SOPC_STATUS_OK == status)
     {
-        pSM->pscConfig = Config_NewSCConfig(SECURITY_POLICY, SECURITY_MODE);
+        pSM->pscConfig = Config_NewSCConfig(reqSecuPolicyUri, msgSecurityMode);
+
         if (NULL == pSM->pscConfig)
         {
             status = SOPC_STATUS_NOK;
@@ -105,6 +109,26 @@ SOPC_ReturnStatus StateMachine_ConfigureMachine(StateMachine_Machine* pSM)
     assert(SOPC_STATUS_OK == mutStatus);
 
     return status;
+}
+
+SOPC_ReturnStatus StateMachine_ConfigureMachineNoSecurity(StateMachine_Machine* pSM)
+{
+    return StateMachine_ConfigureMachine(pSM, SOPC_SecurityPolicy_None_URI, OpcUa_MessageSecurityMode_None);
+}
+
+SOPC_ReturnStatus StateMachine_ConfigureMachineWithSecurity(StateMachine_Machine* pSM)
+{
+    const char* xml_file_path = getenv("TEST_DEMO_CLIENT_ENCRYPT");
+    if (xml_file_path != NULL)
+    {
+        return StateMachine_ConfigureMachine(pSM, SOPC_SecurityPolicy_Basic256Sha256_URI,
+                                             OpcUa_MessageSecurityMode_SignAndEncrypt);
+    }
+    else
+    {
+        return StateMachine_ConfigureMachine(pSM, SOPC_SecurityPolicy_Basic256Sha256_URI,
+                                             OpcUa_MessageSecurityMode_Sign);
+    }
 }
 
 typedef struct

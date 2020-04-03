@@ -36,11 +36,6 @@ extern char* ENDPOINT_URL; // See config.c, possible override by main
 #define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost"
 #define GATEWAY_SERVER_URI ""
 
-/* Security Policy is None or Basic256 or Basic256Sha256 */
-#define SECURITY_POLICY SOPC_SecurityPolicy_None_URI
-/* Security Mode is None or Sign or SignAndEncrypt */
-#define SECURITY_MODE OpcUa_MessageSecurityMode_None
-
 /* Secure Channel lifetime */
 #define SC_LIFETIME 60000
 /* Active wait sleep, in ms */

@@ -23,8 +23,8 @@
 #include <string.h>
 
 #include "sopc_atomic.h"
-#include "sopc_common.h"
 #include "sopc_builtintypes.h"
+#include "sopc_common.h"
 #include "sopc_crypto_provider.h"
 #include "sopc_encodeable.h"
 #include "sopc_time.h"
@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
     /* Configuration, which include Secure Channel configuration. */
     if (SOPC_STATUS_OK == status)
     {
-        status = StateMachine_ConfigureMachine(g_pSM);
+        status = StateMachine_ConfigureMachineWithSecurity(g_pSM);
     }
 
     if (SOPC_STATUS_OK == status)

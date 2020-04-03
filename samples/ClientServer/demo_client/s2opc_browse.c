@@ -96,7 +96,7 @@ int main(int argc, char* argv[])
     /* Configuration, which include Secure Channel configuration. */
     if (SOPC_STATUS_OK == status)
     {
-        status = StateMachine_ConfigureMachine(g_pSM);
+        status = StateMachine_ConfigureMachineWithSecurity(g_pSM);
     }
 
     if (SOPC_STATUS_OK == status)

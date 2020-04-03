@@ -143,7 +143,7 @@ int main(int argc, char* argv[])
         printf("# Error: Expects exactly 3 arguments:\n");
         printf("  - the server TCP UA address URL: 'opc.tcp://<ip>:<port>[/<name>]'\n");
         printf("  - the node id XML formatted: [ns=<digits>;]<i, s, g or b>=<nodeid>,\n");
-        printf("  - the type \"-d\" for a floating point value or \"-i\" for signed integer,\n");
+        printf("  - the type \"-d\" for a floating point value or \"-i\" for 64 bits signed integer,\n");
         printf("  - the value.\n");
     }
 
@@ -169,7 +169,7 @@ int main(int argc, char* argv[])
     /* Configuration, which include Secure Channel configuration. */
     if (SOPC_STATUS_OK == status)
     {
-        status = StateMachine_ConfigureMachine(g_pSM);
+        status = StateMachine_ConfigureMachineWithSecurity(g_pSM);
     }
 
     if (SOPC_STATUS_OK == status)
