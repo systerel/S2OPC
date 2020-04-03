@@ -9,8 +9,8 @@
       <Locale id="fr-FR"/>
     </Locales>
     <ApplicationCertificates>
-      <ServerCertificate path="server_public/server_2k_cert.der"/>
-      <ServerKey path="server_private/server_2k_key.pem"/>
+      <ServerCertificate path="server_public/server_4k_cert.der"/>
+      <ServerKey path="server_private/server_4k_key.pem"/>
       <TrustedIssuers>
         <!-- List of CAs or trusted certicates -->
         <TrustedIssuer root="true" cert_path="trusted/cacert.der" revocation_list_path="revoked/cacrl.der"/>

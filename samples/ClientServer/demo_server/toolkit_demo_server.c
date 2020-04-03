@@ -28,8 +28,8 @@
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
 #include "sopc_atomic.h"
-#include "sopc_common_constants.h"
 #include "sopc_common.h"
+#include "sopc_common_constants.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_crypto_provider.h"
 #include "sopc_encodeable.h"
@@ -510,6 +510,16 @@ static SOPC_ReturnStatus Server_LoadServerConfiguration(SOPC_S2OPC_Config* outpu
     {
         config_loader = SRV_LOADER_EXPAT_XML_CONFIG;
     }
+#ifndef IS_TEST_SERVER
+    // Forbids to use default configuration when compiled with EXPAT and it is the demo binary
+    else
+    {
+        printf(
+            "Error: an XML server configuration file path shall be provided, e.g.: "
+            "TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml ./toolkit_demo_server");
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+#endif
 #endif
 
     bool res = false;
