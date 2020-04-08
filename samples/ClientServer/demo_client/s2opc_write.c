@@ -397,7 +397,7 @@ static SOPC_ReturnStatus SendWriteRequest(StateMachine_Machine* pSM)
     {
         if (NULL != pReq)
         {
-            OpcUa_BrowseRequest_Clear(pReq);
+            OpcUa_WriteRequest_Clear(pReq);
             SOPC_Free(pReq);
         }
         if (NULL != lwv)
