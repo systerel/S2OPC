@@ -22,24 +22,47 @@
 
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
-#include "sopc_pubsub_local_sks.h"
+#include "sopc_mutexes.h"
 #include "sopc_pubsub_constants.h"
+#include "sopc_pubsub_local_sks.h"
 
 static SOPC_SKManager* g_skManager = NULL;
+// Mutex to protect access to g_skManager;
+Mutex g_mutex;
 
-void SOPC_LocalSKS_init(SOPC_SKManager* skm)
+// indicate this service is initialized
+bool g_init = false;
+
+void SOPC_LocalSKS_init()
 {
+    if (g_init)
+    {
+        return;
+    }
+    Mutex_Initialization(&g_mutex);
+    g_init = true;
+}
+
+void SOPC_LocalSKS_setSkManager(SOPC_SKManager* skm)
+{
+    Mutex_Lock(&g_mutex);
     g_skManager = skm;
+    Mutex_Unlock(&g_mutex);
 }
 
 SOPC_LocalSKS_Keys* SOPC_LocalSKS_GetSecurityKeys(uint32_t groupid, uint32_t tokenId)
 {
-    if (NULL == g_skManager)
+    if (SOPC_PUBSUB_SKS_DEFAULT_GROUPID != groupid)
     {
         return NULL;
     }
-    if (SOPC_PUBSUB_SKS_DEFAULT_GROUPID != groupid)
+
+    /** Get Keys from SK Manager **/
+
+    Mutex_Lock(&g_mutex);
+    if (NULL == g_skManager)
     {
+        Mutex_Unlock(&g_mutex);
         return NULL;
     }
     // result
@@ -56,7 +79,11 @@ SOPC_LocalSKS_Keys* SOPC_LocalSKS_GetSecurityKeys(uint32_t groupid, uint32_t tok
         SOPC_SKManager_GetKeys(g_skManager, tokenId, SOPC_PUBSUB_SKS_MAX_TOKEN_PER_CALL, &SecurityPolicyUri,
                                &FirstTokenId, &Keys, &NbKeys, &TimeToNextKey, &KeyLifetime);
 
-    // Initialiser returnedkeys is GetKeys return valid Keys corresponding to requested token
+    Mutex_Unlock(&g_mutex);
+
+    /** Fill Outputs **/
+
+    // Initialize returnedkeys if GetKeys returned valid Keys corresponding to requested token
     SOPC_ByteString* byteString = NULL;
     if (SOPC_STATUS_OK == status && 0 < NbKeys &&
         (SOPC_PUBSUB_SKS_CURRENT_TOKENID == tokenId || tokenId == FirstTokenId))

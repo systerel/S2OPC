@@ -363,7 +363,8 @@ bool PubSub_local_SKS_Start()
 
     if (sksOK)
     {
-        SOPC_LocalSKS_init(g_skManager);
+        SOPC_LocalSKS_init();
+        SOPC_LocalSKS_setSkManager(g_skManager);
     }
 
     return sksOK;
@@ -410,11 +411,13 @@ void PubSub_Stop(void)
     SOPC_PubSub_Protocol_ReleaseMqttManagerHandle();
 
     Client_Stop();
+    SOPC_LocalSKS_setSkManager(NULL);
     SOPC_SKOrdonnancer_StopAndClear(g_skOrdonnancer);
     SOPC_Free(g_skOrdonnancer);
+    g_skOrdonnancer = NULL;
     SOPC_SKManager_Clear(g_skManager);
     SOPC_Free(g_skManager);
-
+    g_skManager = NULL;
     // Force Disabled after stop in case Sub scheduler was not start (no management of the status)
     Server_SetSubStatus(SOPC_PubSubState_Disabled);
 }

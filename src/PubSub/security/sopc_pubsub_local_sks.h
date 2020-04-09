@@ -40,10 +40,18 @@ typedef struct SOPC_LocalSKS_Keys
 } SOPC_LocalSKS_Keys;
 
 /**
- * \brief Initialise the LocalSKS with keys file path
+ * \brief Initialise the LocalSKS
+ */
+void SOPC_LocalSKS_init(void);
+
+/**
+ * \brief Set the Security Keys Manager
+ * Only one SK Manager is used. Set to NULL to stop the service.
+ *
+ * \param skm a Security Keys Manager to use to get keys.
  *
  */
-void SOPC_LocalSKS_init(SOPC_SKManager* skm);
+void SOPC_LocalSKS_setSkManager(SOPC_SKManager* skm);
 
 /**
  * \brief Initialise the LocalSKS with static keys values
