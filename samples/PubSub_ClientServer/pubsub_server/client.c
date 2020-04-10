@@ -242,7 +242,6 @@ uint32_t Client_AddSecureChannelconfig(const char* endpoint_url, SOPC_Serialized
 
     // A Secure channel connection configuration
     Client_SecureChannel_Config[Client_SecureChannel_Current].isClientSc = true;
-    Client_SecureChannel_Config[Client_SecureChannel_Current].url = NULL;
     Client_SecureChannel_Config[Client_SecureChannel_Current].crt_cli = NULL;
     Client_SecureChannel_Config[Client_SecureChannel_Current].key_priv_cli = NULL;
     Client_SecureChannel_Config[Client_SecureChannel_Current].crt_srv = NULL;
@@ -251,22 +250,38 @@ uint32_t Client_AddSecureChannelconfig(const char* endpoint_url, SOPC_Serialized
     Client_SecureChannel_Config[Client_SecureChannel_Current].requestedLifetime = 20000;
     Client_SecureChannel_Config[Client_SecureChannel_Current].msgSecurityMode =
         OpcUa_MessageSecurityMode_SignAndEncrypt;
-
-    status = CerAndKeyLoader_client(CLIENT_KEY_PATH, CLIENT_CERT_PATH, server_cert);
-    if (SOPC_STATUS_OK != status)
+    // Copy Endpoint URL
+    char* endpoint_url_copy = SOPC_Calloc(strlen(endpoint_url) + 1, sizeof(char));
+    Client_SecureChannel_Config[Client_SecureChannel_Current].url = endpoint_url_copy;
+    if (NULL == endpoint_url_copy)
     {
-        printf("# Error: FAILED on configuring Certificate, key and Sc\n");
+        status = SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    else
+    {
+        strcpy(endpoint_url_copy, endpoint_url);
     }
 
-    Client_SecureChannel_Config[Client_SecureChannel_Current].url = endpoint_url;
-
-    Client_SecureChannel_Id[Client_SecureChannel_Current] =
-        SOPC_ToolkitClient_AddSecureChannelConfig(&(Client_SecureChannel_Config[Client_SecureChannel_Current]));
-    if (0 == Client_SecureChannel_Id[Client_SecureChannel_Current])
+    if (SOPC_STATUS_OK == status)
     {
-        printf("# Error: Failed to configure the secure channel connections\n");
-        status = SOPC_STATUS_NOK;
+        status = CerAndKeyLoader_client(CLIENT_KEY_PATH, CLIENT_CERT_PATH, server_cert);
+        if (SOPC_STATUS_OK != status)
+        {
+            printf("# Error: FAILED on configuring Certificate, key and Sc\n");
+        }
     }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        Client_SecureChannel_Id[Client_SecureChannel_Current] =
+            SOPC_ToolkitClient_AddSecureChannelConfig(&(Client_SecureChannel_Config[Client_SecureChannel_Current]));
+        if (0 == Client_SecureChannel_Id[Client_SecureChannel_Current])
+        {
+            printf("# Error: Failed to configure the secure channel connections\n");
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
     if (SOPC_STATUS_OK != status)
     {
         return 0;
@@ -529,12 +544,14 @@ void Client_Teardown()
             (SOPC_SerializedCertificate*) Client_SecureChannel_Config[i].crt_srv);
         SOPC_PKIProvider_Free((SOPC_PKIProvider**) &(Client_SecureChannel_Config[i].pki));
         // SOPC_KeyManager_SerializedCertificate_Delete((SOPC_SerializedCertificate*) ck_cli[i].crt_ca);
+        SOPC_Free((char*) Client_SecureChannel_Config[i].url);
         SOPC_GCC_DIAGNOSTIC_RESTORE
 
         Client_SecureChannel_Config[i].crt_cli = NULL;
         Client_SecureChannel_Config[i].key_priv_cli = NULL;
         Client_SecureChannel_Config[i].crt_srv = NULL;
         Client_SecureChannel_Config[i].pki = NULL;
+        Client_SecureChannel_Config[i].url = NULL;
         ck_cli[i].client_cert = NULL;
         ck_cli[i].client_key = NULL;
         ck_cli[i].server_cert = NULL;

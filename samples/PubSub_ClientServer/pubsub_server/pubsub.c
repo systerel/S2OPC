@@ -191,8 +191,8 @@ SOPC_ReturnStatus PubSub_Configure(void)
     g_isSecurity = false;
     g_isSks = false;
     /* List of SKS servers configurations. */
-    SOPC_SKS_Local_Configuration* sksConfigArray;
-    uint32_t sksConfigLength;
+    SOPC_SKS_Local_Configuration* sksConfigArray = NULL;
+    uint32_t sksConfigLength = 0;
     if (SOPC_STATUS_OK == status)
     {
         status = get_sks_config(pPubSubConfig, &g_isSecurity, &sksConfigArray, &sksConfigLength);
@@ -264,7 +264,7 @@ SOPC_ReturnStatus PubSub_Configure(void)
     }
 
     // Clean sks config data
-    if (g_isSks)
+    if (NULL != sksConfigArray)
     {
         for (uint32_t i = 0; i < sksConfigLength; i++)
         {

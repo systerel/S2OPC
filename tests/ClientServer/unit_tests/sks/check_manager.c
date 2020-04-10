@@ -132,6 +132,7 @@ START_TEST(test_default_manager_add)
     {
         SOPC_ByteString_Clear(&Keys[i]);
     }
+    SOPC_Free(Keys);
     SOPC_String_Clear(SecurityPolicyUri);
     SOPC_Free(SecurityPolicyUri);
 
