@@ -143,8 +143,7 @@ if(ENABLE_SAMPLES)
   target_compile_definitions(s2opc_read PRIVATE ${S2OPC_DEFINITIONS})
 
   add_executable(s2opc_read_cyclic "demo_client/s2opc_read_cyclic.c"
-                            ${S2OPC_DEMOCLIENT_COMMON}
-                            "demo_client/config_cyclic.c")
+                            ${S2OPC_DEMOCLIENT_COMMON})
   target_link_libraries(s2opc_read_cyclic PRIVATE s2opc_clientserver)
   target_compile_options(s2opc_read_cyclic PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(s2opc_read_cyclic PRIVATE ${S2OPC_DEFINITIONS})
@@ -156,8 +155,7 @@ if(ENABLE_SAMPLES)
   target_compile_definitions(s2opc_write PRIVATE ${S2OPC_DEFINITIONS})
 
   add_executable(s2opc_write_cyclic "demo_client/s2opc_write_cyclic.c"
-                             ${S2OPC_DEMOCLIENT_COMMON}
-                             "demo_client/config_cyclic.c")
+                             ${S2OPC_DEMOCLIENT_COMMON})
   target_link_libraries(s2opc_write_cyclic PRIVATE s2opc_clientserver)
   target_compile_options(s2opc_write_cyclic PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(s2opc_write_cyclic PRIVATE ${S2OPC_DEFINITIONS})

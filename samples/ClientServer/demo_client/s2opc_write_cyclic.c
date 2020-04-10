@@ -25,7 +25,6 @@
 
 #include "sopc_builtintypes.h"
 #include "sopc_common.h"
-#include "sopc_helper_uri.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_time.h"
 #include "sopc_toolkit_async_api.h"
@@ -34,16 +33,59 @@
 
 #include "argparse.h"
 #include "config.h"
-#include "config_cyclic.h"
 #include "state_machine.h"
+
+/* Configuration :
+ * The configuration is composed of 3 elements :
+ * - Lifetime of the execution
+ * - Period to send write request
+ * - Number of elements to write
+ * - Array of Builtin Type Id of the elements to write
+ * - Array of Node Id of the elements to write
+ */
+
+// time in MS
+#define CONF_LIFETIME 1000000
+
+// time in MS. 1s
+#define CONF_SEND_MS_PERIOD 1000
+
+#define CONF_NB_NODE_TO_WRITE 8
+
+// Data Values Type of the Node to write
+static SOPC_BuiltinId CONF_DV_TYPE_ARRAY[CONF_NB_NODE_TO_WRITE] = {SOPC_SByte_Id,  SOPC_Byte_Id,  SOPC_Int16_Id,
+                                                                   SOPC_UInt16_Id, SOPC_Int32_Id, SOPC_UInt32_Id,
+                                                                   SOPC_Int64_Id,  SOPC_UInt64_Id};
+
+// Node ID the Node to write.
+static char* CONF_NODE_ID_ARRAY[CONF_NB_NODE_TO_WRITE] = {
+    "ns=1;i=1007", // SByte
+    "ns=1;i=1008", // Byte
+    "ns=1;i=1009", // Int16
+    "ns=1;i=1010", // UInt16
+    "ns=1;i=1011", // Int32
+    "ns=1;i=1002", // UInt32
+    "ns=1;i=1001", // Int64
+    "ns=1;i=1012"  // UInt64
+};
+
+/* The Attribute to write */
+static uint32_t g_iAttr = 13;
+
+/* Commom Variables
+   Uses by Read and Write.
+   Do not touch
+ */
+
+/* The start NodeId is global, so that it is accessible to the Print function in the other thread. */
+SOPC_NodeId* g_nodeIdArray[CONF_NB_NODE_TO_WRITE];
 
 /* The state machine which handles async events.
  * It is shared between the main thread and the Toolkit event thread.
  * It should be protected by a Mutex.
  */
 static StateMachine_Machine* g_pSM = NULL;
-/* So is the Attribute to write */
-static uint32_t g_iAttr = 13;
+
 /* And the value to write */
 static SOPC_DataValue g_dvArray[CONF_NB_NODE_TO_WRITE];
 
@@ -54,9 +96,28 @@ static SOPC_ReturnStatus SendWriteRequest(StateMachine_Machine* pSM);
 static void PrintWriteResponse(OpcUa_WriteResponse* pReadResp);
 
 static const char* const usage[] = {
-    "s2opc_write [options] <value>",
+    "s2opc_write_cyclic [options] <value>",
     NULL,
 };
+
+static SOPC_ReturnStatus conf_initialize_nodeid_array(void)
+{
+    memset(g_nodeIdArray, 0, CONF_NB_NODE_TO_WRITE * sizeof(SOPC_NodeId*));
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    for (uint32_t i = 0; i < CONF_NB_NODE_TO_WRITE; i++)
+    {
+        assert(strlen(CONF_NODE_ID_ARRAY[i]) <= INT32_MAX);
+
+        g_nodeIdArray[i] = SOPC_NodeId_FromCString(CONF_NODE_ID_ARRAY[i], (int32_t) strlen(CONF_NODE_ID_ARRAY[i]));
+        if (NULL == g_nodeIdArray[i])
+        {
+            printf("# Error: nodeid %d not recognized: \"%s\"\n", i, CONF_NODE_ID_ARRAY[i]);
+            status = SOPC_STATUS_NOK;
+        }
+    }
+    return status;
+}
 
 int main(int argc, char* argv[])
 {
@@ -77,7 +138,7 @@ int main(int argc, char* argv[])
     argparse_init(&argparse, options, usage, 0);
     argparse_describe(&argparse,
                       "\nS2OPC periodic write demo: write configured integer variables periodically (increment)",
-                      "\nSee the config_cyclic.c file to configure the Variable nodes to write."
+                      "\nSee the s2opc_write_cyclic.c file to configure the Variable nodes to write."
                       "\n E.g.: ./s2opc_write_cyclic -u user1 -p password");
     int restArgc = argparse_parse(&argparse, argc, argv);
 
