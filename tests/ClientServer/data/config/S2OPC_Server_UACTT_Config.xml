@@ -13,10 +13,10 @@
       <ServerKey path="./server_private/server_2k_key.pem"/>
       <TrustedIssuers>
         <TrustedIssuer root="true" cert_path="trusted/cacert.der" revocation_list_path="revoked/cacrl.der"/>
-        <TrustedIssuer root="true" cert_path="trusted/ctt_ca1T.der" revocation_list_path="revoked/revocation_list_ctt_ca1T.crl"/>
+        <TrustedIssuer root="true" cert_path="trusted/ctt_ca1T.der" revocation_list_path="revoked/ctt_ca1T.crl"/>
         <!-- following root certificate without CRL will be ignored by PKI and is forbiden by XSD schema -->
         <TrustedIssuer root="true" cert_path="trusted/ctt_ca1TC.der"/>
-        <TrustedIssuer root="false" cert_path="trusted/ctt_ca1I_ca2T.der" revocation_list_path="revoked/revocation_list_ctt_ca1I_ca2T.crl"/>
+        <TrustedIssuer root="false" cert_path="trusted/ctt_ca1I_ca2T.der" revocation_list_path="revoked/ctt_ca1I_ca2T.crl"/>
       </TrustedIssuers>
       <IssuedCertificates>
         <IssuedCertificate path="issued/ctt_appT.der"/>
@@ -49,8 +49,8 @@
       <UntrustedIssuers>
         <!-- following root certificate without CRL will be ignored by PKI and is forbiden by XSD schema -->
         <UntrustedIssuer root="true" cert_path="untrusted/ctt_ca1IC.der"/>
-        <UntrustedIssuer root="true" cert_path="untrusted/ctt_ca1I.der" revocation_list_path="revoked/revocation_list_ctt_ca1I.crl"/>
-        <UntrustedIssuer root="false" cert_path="untrusted/ctt_ca1TC_ca2I.der" revocation_list_path="revoked/revocation_list_ctt_ca1TC_ca2I.crl"/>
+        <UntrustedIssuer root="true" cert_path="untrusted/ctt_ca1I.der" revocation_list_path="revoked/ctt_ca1I.crl"/>
+        <UntrustedIssuer root="false" cert_path="untrusted/ctt_ca1TC_ca2I.der" revocation_list_path="revoked/ctt_ca1TC_ca2I.crl"/>
       </UntrustedIssuers>
     </ApplicationCertificates>
     <ApplicationDescription>

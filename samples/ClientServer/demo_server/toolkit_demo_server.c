@@ -118,10 +118,10 @@ static char* default_untrusted_intermediate_issuers[] = {
     NULL};
 static char* default_revoked_certs[] = {"revoked/cacrl.der",
 #ifdef IS_TEST_SERVER
-                                        "revoked/revocation_list_ctt_ca1T.crl",
-                                        "revoked/revocation_list_ctt_ca1I.crl",
-                                        "revoked/revocation_list_ctt_ca1I_ca2T.crl",
-                                        "revoked/revocation_list_ctt_ca1TC_ca2I.crl",
+                                        "revoked/ctt_ca1T.crl",
+                                        "revoked/ctt_ca1I.crl",
+                                        "revoked/ctt_ca1I_ca2T.crl",
+                                        "revoked/ctt_ca1TC_ca2I.crl",
 #endif
                                         NULL};
 
