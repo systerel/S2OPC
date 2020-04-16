@@ -63,79 +63,9 @@
 #define MAX_PENDING_CONNECTION 4
 #endif
 
-/* Max socket based on max connections allowed by zephyr */
-
-#ifdef CONFIG_NET_MAX_CONN
-#define MAX_ZEPHYR_SOCKET (CONFIG_NET_MAX_CONN - 2)
-#else
-#define MAX_ZEPHYR_SOCKET 4
-#endif
-
-/* Private global definitions */
-
-static volatile uint32_t priv_P_SOCKET_nbSockets = 0; // Allow to avoid max socket allocation
-
 // *** Socket internal functions definitions
 
 static inline SOPC_ReturnStatus P_SOCKET_Configure(Socket sock, bool setNonBlocking);
-
-// *** Private api functions definitions used by P_SOCKET and P_SOCKET_UDP ***
-
-// Get configuration status. True if configured (ip, gw, mask...) Declared as weak function
-bool __attribute__((weak)) P_SOCKET_NETWORK_IsConfigured(void)
-{
-    return true;
-}
-
-// Increment socket counter. Can be compared to CONFIG_NET_MAX_CONN - 2
-// If result is above this value, user shall close one socket before continue.
-// Returns socket counter
-uint32_t P_SOCKET_increment_nb_sockets(void)
-{
-    uint32_t currentValue = 0;
-    uint32_t newValue = 0;
-    bool bTransition = false;
-    do
-    {
-        __atomic_load(&priv_P_SOCKET_nbSockets, &currentValue, __ATOMIC_SEQ_CST);
-        newValue = currentValue + 1;
-        bTransition = __atomic_compare_exchange(&priv_P_SOCKET_nbSockets, &currentValue, &newValue, false,
-                                                __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
-
-    } while (!bTransition);
-#if P_SOCKET_DEBUG == 1
-    printk("\r\nP_SOCKET =====> o socket reservation exit - new value = %d\r\n", newValue);
-#endif
-    return newValue;
-}
-
-// Decrment socket counter. Can be compared to CONFIG_NET_MAX_CONN - 2
-// If result is above this value, user shall close one socket before continue.
-// Returns socket counter
-uint32_t P_SOCKET_decrement_nb_sockets(void)
-{
-    uint32_t currentValue = 0;
-    uint32_t newValue = 0;
-    bool bTransition = false;
-    do
-    {
-        __atomic_load(&priv_P_SOCKET_nbSockets, &currentValue, __ATOMIC_SEQ_CST);
-        if (currentValue > 0)
-        {
-            newValue = currentValue - 1;
-        }
-        else
-        {
-            newValue = currentValue;
-        }
-        bTransition = __atomic_compare_exchange(&priv_P_SOCKET_nbSockets, &currentValue, &newValue, false,
-                                                __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
-    } while (!bTransition);
-#if P_SOCKET_DEBUG == 1
-    printk("\r\nP_SOCKET =====> + socket release exit - new value = %d\r\n", newValue);
-#endif
-    return newValue;
-}
 
 // *** Public SOCKET API functions definitions ***
 
@@ -143,7 +73,7 @@ uint32_t P_SOCKET_decrement_nb_sockets(void)
 // Returns true if well configured.
 bool SOPC_Socket_Network_Initialize()
 {
-    return P_SOCKET_NETWORK_Initialize();
+    return true;
 }
 
 // Not implmented, return always true.
@@ -157,11 +87,6 @@ SOPC_ReturnStatus SOPC_Socket_AddrInfo_Get(char* hostname,                  // H
                                            char* port,                      // Port
                                            SOPC_Socket_AddressInfo** addrs) // Socket address info object
 {
-    if (!P_SOCKET_NETWORK_IsConfigured())
-    {
-        return SOPC_STATUS_INVALID_STATE;
-    }
-
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     SOPC_Socket_AddressInfo hints;
     memset(&hints, 0, sizeof(SOPC_Socket_AddressInfo));
@@ -186,11 +111,6 @@ SOPC_ReturnStatus SOPC_Socket_AddrInfo_Get(char* hostname,                  // H
 
 SOPC_Socket_AddressInfo* SOPC_Socket_AddrInfo_IterNext(SOPC_Socket_AddressInfo* addr)
 {
-    if (!P_SOCKET_NETWORK_IsConfigured())
-    {
-        return NULL;
-    }
-
     SOPC_Socket_AddressInfo* res = NULL;
     if (NULL != addr)
     {
@@ -220,11 +140,6 @@ void SOPC_Socket_Clear(Socket* sock)
 
 static inline SOPC_ReturnStatus P_SOCKET_Configure(Socket sock, bool setNonBlocking)
 {
-    if (!P_SOCKET_NETWORK_IsConfigured())
-    {
-        return SOPC_STATUS_INVALID_STATE;
-    }
-
     if (SOPC_INVALID_SOCKET == sock)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -257,78 +172,51 @@ SOPC_ReturnStatus SOPC_Socket_CreateNew(SOPC_Socket_AddressInfo* addr,
                                         bool setNonBlocking,
                                         Socket* sock)
 {
-    if (!P_SOCKET_NETWORK_IsConfigured())
-    {
-        return SOPC_STATUS_INVALID_STATE;
-    }
-
     if (NULL == addr || NULL == sock)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    uint32_t valAuthorization = P_SOCKET_increment_nb_sockets();
-    if (valAuthorization <= MAX_ZEPHYR_SOCKET)
-    {
-        SOPC_ReturnStatus status = SOPC_STATUS_OK;
-        int setOptStatus = 0;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    int setOptStatus = 0;
 
-        *sock = zsock_socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
-        if (SOPC_INVALID_SOCKET == *sock)
+    *sock = zsock_socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
+    if (SOPC_INVALID_SOCKET == *sock)
+    {
+        status = SOPC_STATUS_NOK;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = P_SOCKET_Configure(*sock, setNonBlocking);
+    }
+
+    if (SOPC_STATUS_OK == status && setReuseAddr != false)
+    {
+        const int trueInt = true;
+        setOptStatus = zsock_setsockopt(*sock, SOL_SOCKET, SO_REUSEADDR, (const void*) &trueInt, sizeof(int));
+        if (0 != setOptStatus)
         {
             status = SOPC_STATUS_NOK;
         }
-
-        if (SOPC_STATUS_OK == status)
-        {
-            status = P_SOCKET_Configure(*sock, setNonBlocking);
-        }
-
-        if (SOPC_STATUS_OK == status && setReuseAddr != false)
-        {
-            const int trueInt = true;
-            setOptStatus = zsock_setsockopt(*sock, SOL_SOCKET, SO_REUSEADDR, (const void*) &trueInt, sizeof(int));
-            if (0 != setOptStatus)
-            {
-                status = SOPC_STATUS_NOK;
-            }
-        }
-
-        // Enforce IPV6 sockets can be used for IPV4 connections (if socket is IPV6)
-        if (SOPC_STATUS_OK == status && AF_INET6 == addr->ai_family)
-        {
-            const int falseInt = false;
-            setOptStatus = zsock_setsockopt(*sock, IPPROTO_IPV6, IPV6_V6ONLY, (const void*) &falseInt, sizeof(int));
-            if (0 != setOptStatus)
-            {
-                status = SOPC_STATUS_NOK;
-            }
-        }
-
-        if (status != SOPC_STATUS_OK)
-        {
-            P_SOCKET_decrement_nb_sockets();
-        }
-
-        return status;
     }
-    else
+
+    // Enforce IPV6 sockets can be used for IPV4 connections (if socket is IPV6)
+    if (SOPC_STATUS_OK == status && AF_INET6 == addr->ai_family)
     {
-#if P_SOCKET_DEBUG == 1
-        printk("\r\nP_SOCKET: Maximum sock reached, create refused !!!\r\n");
-#endif
-        P_SOCKET_decrement_nb_sockets();
+        const int falseInt = false;
+        setOptStatus = zsock_setsockopt(*sock, IPPROTO_IPV6, IPV6_V6ONLY, (const void*) &falseInt, sizeof(int));
+        if (0 != setOptStatus)
+        {
+            status = SOPC_STATUS_NOK;
+        }
     }
-    return SOPC_STATUS_NOK;
+
+    return status;
 }
 
 SOPC_ReturnStatus SOPC_Socket_Listen(Socket sock, SOPC_Socket_AddressInfo* addr)
 {
-    if (!P_SOCKET_NETWORK_IsConfigured())
-    {
-        return SOPC_STATUS_INVALID_STATE;
-    }
-
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     int bindListenStatus = -1;
     if (NULL != addr)
@@ -348,59 +236,15 @@ SOPC_ReturnStatus SOPC_Socket_Listen(Socket sock, SOPC_Socket_AddressInfo* addr)
 
 SOPC_ReturnStatus SOPC_Socket_Accept(Socket listeningSock, bool setNonBlocking, Socket* acceptedSock)
 {
-    if (!P_SOCKET_NETWORK_IsConfigured())
-    {
-        return SOPC_STATUS_INVALID_STATE;
-    }
-
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     struct sockaddr remoteAddr;
     socklen_t addrLen = 0;
     if (SOPC_INVALID_SOCKET != listeningSock && NULL != acceptedSock)
     {
-        uint32_t valAuthorization = P_SOCKET_increment_nb_sockets();
-        if (valAuthorization <= MAX_ZEPHYR_SOCKET)
+        *acceptedSock = zsock_accept(listeningSock, &remoteAddr, &addrLen);
+        if (SOPC_INVALID_SOCKET != *acceptedSock)
         {
-            *acceptedSock = zsock_accept(listeningSock, &remoteAddr, &addrLen);
-            if (SOPC_INVALID_SOCKET != *acceptedSock)
-            {
-                status = P_SOCKET_Configure(*acceptedSock, setNonBlocking);
-            }
-            else
-            {
-                P_SOCKET_decrement_nb_sockets();
-            }
-        }
-        else
-        {
-            do
-            {
-                valAuthorization = P_SOCKET_increment_nb_sockets();
-                if ((MAX_ZEPHYR_SOCKET + 2) >= valAuthorization)
-                {
-                    *acceptedSock = zsock_accept(listeningSock, &remoteAddr, &addrLen);
-                    if (*acceptedSock >= 0)
-                    {
-                        zsock_close(*acceptedSock);
-                    }
-                    *acceptedSock = SOPC_INVALID_SOCKET;
-                    P_SOCKET_decrement_nb_sockets();
-                }
-                else
-                {
-#if P_SOCKET_DEBUG == 1
-                    printk("\r\nP_SOCKET: Sopc Accept to close can't be performed !!! Yield !!!\r\n");
-#endif
-                    P_SOCKET_decrement_nb_sockets();
-                    k_yield();
-                }
-
-            } while (valAuthorization > (MAX_ZEPHYR_SOCKET + 2));
-
-            P_SOCKET_decrement_nb_sockets();
-#if P_SOCKET_DEBUG == 1
-            printk("\r\nP_SOCKET: Max socket reach, accept failed !!!\r\n");
-#endif
+            status = P_SOCKET_Configure(*acceptedSock, setNonBlocking);
         }
     }
     return status;
@@ -408,11 +252,6 @@ SOPC_ReturnStatus SOPC_Socket_Accept(Socket listeningSock, bool setNonBlocking, 
 
 SOPC_ReturnStatus SOPC_Socket_Connect(Socket sock, SOPC_Socket_AddressInfo* addr)
 {
-    if (!P_SOCKET_NETWORK_IsConfigured())
-    {
-        return SOPC_STATUS_INVALID_STATE;
-    }
-
     if (NULL == addr || SOPC_INVALID_SOCKET == sock)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -445,11 +284,6 @@ SOPC_ReturnStatus SOPC_Socket_Connect(Socket sock, SOPC_Socket_AddressInfo* addr
 
 SOPC_ReturnStatus SOPC_Socket_ConnectToLocal(Socket from, Socket to)
 {
-    if (!P_SOCKET_NETWORK_IsConfigured())
-    {
-        return SOPC_STATUS_INVALID_STATE;
-    }
-
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     SOPC_Socket_AddressInfo addr;
     struct sockaddr saddr;
@@ -468,11 +302,6 @@ SOPC_ReturnStatus SOPC_Socket_ConnectToLocal(Socket from, Socket to)
 
 SOPC_ReturnStatus SOPC_Socket_CheckAckConnect(Socket sock)
 {
-    if (!P_SOCKET_NETWORK_IsConfigured())
-    {
-        return SOPC_STATUS_INVALID_STATE;
-    }
-
     if (SOPC_INVALID_SOCKET == sock)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -490,11 +319,6 @@ SOPC_ReturnStatus SOPC_Socket_CheckAckConnect(Socket sock)
 
 void SOPC_SocketSet_Add(Socket sock, SOPC_SocketSet* sockSet)
 {
-    if (!P_SOCKET_NETWORK_IsConfigured())
-    {
-        return;
-    }
-
     if (SOPC_INVALID_SOCKET != sock && NULL != sockSet)
     {
         ZSOCK_FD_SET(sock, &sockSet->set);
@@ -507,11 +331,6 @@ void SOPC_SocketSet_Add(Socket sock, SOPC_SocketSet* sockSet)
 
 void SOPC_SocketSet_Remove(Socket sock, SOPC_SocketSet* sockSet)
 {
-    if (!P_SOCKET_NETWORK_IsConfigured())
-    {
-        return;
-    }
-
     if (SOPC_INVALID_SOCKET != sock && NULL != sockSet)
     {
         ZSOCK_FD_CLR(sock, &sockSet->set);
@@ -520,11 +339,6 @@ void SOPC_SocketSet_Remove(Socket sock, SOPC_SocketSet* sockSet)
 
 bool SOPC_SocketSet_IsPresent(Socket sock, SOPC_SocketSet* sockSet)
 {
-    if (!P_SOCKET_NETWORK_IsConfigured())
-    {
-        return false;
-    }
-
     if (SOPC_INVALID_SOCKET != sock && NULL != sockSet)
     {
         if (false == ZSOCK_FD_ISSET(sock, &sockSet->set))
@@ -541,11 +355,6 @@ bool SOPC_SocketSet_IsPresent(Socket sock, SOPC_SocketSet* sockSet)
 
 void SOPC_SocketSet_Clear(SOPC_SocketSet* sockSet)
 {
-    if (!P_SOCKET_NETWORK_IsConfigured())
-    {
-        return;
-    }
-
     if (NULL != sockSet)
     {
         ZSOCK_FD_ZERO(&sockSet->set);
@@ -558,11 +367,6 @@ int32_t SOPC_Socket_WaitSocketEvents(SOPC_SocketSet* readSet,
                                      SOPC_SocketSet* exceptSet,
                                      uint32_t waitMs)
 {
-    if (!P_SOCKET_NETWORK_IsConfigured())
-    {
-        return SOPC_STATUS_INVALID_STATE;
-    }
-
     int32_t nbReady = 0;
     struct timeval timeout;
     struct timeval* val;
@@ -616,11 +420,6 @@ SOPC_ReturnStatus SOPC_Socket_Write(Socket sock, const uint8_t* data, uint32_t c
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    if (!P_SOCKET_NETWORK_IsConfigured())
-    {
-        return SOPC_STATUS_INVALID_STATE;
-    }
-
     ssize_t res = 0;
     res = send(sock, data, count, 0);
 
@@ -647,11 +446,6 @@ SOPC_ReturnStatus SOPC_Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize
     if (SOPC_INVALID_SOCKET == sock || NULL == data || 0 >= dataSize || NULL == readCount)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-
-    if (!P_SOCKET_NETWORK_IsConfigured())
-    {
-        return SOPC_STATUS_INVALID_STATE;
     }
 
     ssize_t sReadCount = 0;
@@ -694,22 +488,12 @@ SOPC_ReturnStatus SOPC_Socket_BytesToRead(Socket sock, uint32_t* bytesToRead)
 
 void SOPC_Socket_Close(Socket* sock)
 {
-    if (NULL != sock && SOPC_INVALID_SOCKET != *sock && P_SOCKET_NETWORK_IsConfigured())
+    if (NULL != sock && SOPC_INVALID_SOCKET != *sock)
     {
         zsock_shutdown(*sock, ZSOCK_SHUT_RDWR);
         if (0 == zsock_close(*sock))
         {
             *sock = SOPC_INVALID_SOCKET;
-            P_SOCKET_decrement_nb_sockets();
         }
     }
-}
-
-// *** Weak functions : mcast and network initialization ***/
-
-// Initialize ethernet and loopback interface
-// Returns true if well configured.
-bool __attribute__((weak)) P_SOCKET_NETWORK_Initialize(void)
-{
-    return false;
 }
