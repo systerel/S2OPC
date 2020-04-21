@@ -176,8 +176,8 @@ Prerequisites:
 - CMake (>= 3.5, tested with CMake version 3.9.4)
 - GCC (tested with GCC version 8.1.0)
 - [Mbedtls](https://tls.mbed.org/)(tested with mbedtls version 2.16.0)
-- [Check](https://libcheck.github.io/check/)(tested with libcheck version 0.14)
-- [expat](https://github.com/libexpat/libexpat)(tested with libexpat version 2.2.9)
+- [Check](https://libcheck.github.io/check/)(tested with libcheck version 0.14 compiled with CMake)
+- [expat](https://github.com/libexpat/libexpat)(tested with libexpat version 2.2.9 compiled with CMake)
 - Python3 (tested with version 3.6.3)
 
 To build the Toolkit library and tests with default configuration on current
