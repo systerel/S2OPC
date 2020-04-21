@@ -118,8 +118,8 @@ SOPC_ReturnStatus StateMachine_ConfigureMachineNoSecurity(StateMachine_Machine* 
 
 SOPC_ReturnStatus StateMachine_ConfigureMachineWithSecurity(StateMachine_Machine* pSM)
 {
-    const char* xml_file_path = getenv("TEST_DEMO_CLIENT_ENCRYPT");
-    if (xml_file_path != NULL)
+    const char* encrypt_var_set = getenv("TEST_DEMO_CLIENT_ENCRYPT");
+    if (encrypt_var_set != NULL)
     {
         return StateMachine_ConfigureMachine(pSM, SOPC_SecurityPolicy_Basic256Sha256_URI,
                                              OpcUa_MessageSecurityMode_SignAndEncrypt);
