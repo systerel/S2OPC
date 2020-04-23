@@ -47,14 +47,4 @@ typedef struct
     zsock_fd_set set; /**< set */
 } SOPC_SocketSet;
 
-/* Network initialized verification */
-
-bool P_SOCKET_NETWORK_Initialize(void);
-bool P_SOCKET_NETWORK_IsConfigured(void);
-
-/* Verify current number of allocated socket. Shall not > MAX_SOCKET */
-
-uint32_t P_SOCKET_increment_nb_sockets(void);
-uint32_t P_SOCKET_decrement_nb_sockets(void);
-
 #endif /* SOPC_P_SOCKETS_H_ */
