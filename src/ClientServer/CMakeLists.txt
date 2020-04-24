@@ -206,7 +206,6 @@ export(EXPORT s2opc_clientserver-clientwrapper-export
 # The compilation is not done with clang-analyzer either, as this would analyze CFFI-generated code.
 if(WITH_PYS2OPC)
   # TODO:
-  # - build wheel
   # - don't use the placeholder
   # - do a pys2opc_build.py.in to configure the lib through CMake
   set(PYS2OPC_SRC_PATH "${S2OPC_ROOT_PATH}/src/ClientServer/frontend/pys2opc")
@@ -232,10 +231,11 @@ if(WITH_PYS2OPC)
                      DEPENDS ${PYS2OPC_INCLUDE}
                      # Note: sources copied to build dir to avoid relative path issues in pys2opc_build.py
                      COMMAND ${CMAKE_COMMAND} -E copy_directory ${PYS2OPC_SRC_PATH} ${PYS2OPC_BUILD_PATH}
-                     COMMAND ${PYTHON_EXECUTABLE} ${PYS2OPC_BUILD_PATH}/setup.py build_ext
-                             -b ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} -t ${CMAKE_BINARY_DIR}
+                     COMMAND ${PYTHON_EXECUTABLE} ${PYS2OPC_BUILD_PATH}/setup.py -q bdist_wheel
+                             -d ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
                      COMMAND ${CMAKE_COMMAND} -E touch ${PYS2OPC_PLACEHOLDER}
                      WORKING_DIRECTORY ${PYS2OPC_BUILD_PATH}
+                     COMMENT "Build PyS2OPC Wheel"
                      )
 
   # TODO: there should be a single target per dependency to avoid concurrent and parallel builds for them
