@@ -24,8 +24,9 @@ import os
 
 ffibuilder = FFI()
 # TODO: generate this file
-header = open('./libs2opc_client_cffi.h').read()
+header = open('./s2opc_expanded.h').read()
 ffibuilder.cdef(header + r'''
+    # 1 "cffi-cdef"
     extern "Python" void _callback_log(SOPC_Log_Level log_level, SOPC_LibSub_CstString text);
     extern "Python" void _callback_disconnected(SOPC_LibSub_ConnectionId c_id);
     extern "Python" void _callback_datachanged(SOPC_LibSub_ConnectionId c_id, SOPC_LibSub_DataId d_id, SOPC_LibSub_Value* value);
@@ -35,7 +36,7 @@ ffibuilder.cdef(header + r'''
 ''')
 
 source = r'''
-    #include "libs2opc_client_cffi.h"
+    #include "s2opc_expanded.h"
 
     const char* SOPC_SecurityPolicy_None_URI = "http://opcfoundation.org/UA/SecurityPolicy#None";
     const char* SOPC_SecurityPolicy_Basic256_URI = "http://opcfoundation.org/UA/SecurityPolicy#Basic256";

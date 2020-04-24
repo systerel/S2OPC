@@ -341,3 +341,36 @@ function(s2opc_embed_address_space c_file_name xml_uanodeset_path)
   endif()
 
 endfunction()
+
+# Function that generates the expanded include required by CFFI to compile PyS2OPC
+function(s2opc_expand_header h_input context_target h_expanded)
+  # Note: this function may seem overkill, as there are only a few PyS2OPC headers.
+  # It was the basis of tests to avoid manual maintenance of the PyS2OPC's headers, required by CFFI.
+  # CFFI is based on pycparser, and their combined purposes make this clearly and intentionally unfeasible.
+  # pycparser does not do preprocessing work and does not support all tweaks that may reside in the standard library headers.
+  # It results that it can parse C with tweaks, such as using fake stdlib headers.
+  # However CFFI uses pycparser to obtain real types and generate some C afterwards with them.
+  # This makes it clear that we cannot fake types of the stdlib
+  # (otherwise, there are be conflicting types definitions at compile time).
+
+  # To conclude, we shall only use CFFI on headers that don't rely on the libc,
+  # except for the types it already knows: [u]int(8|16|32|64)_t.
+  # (Even bool is not supported and its support in our headers should be platform-dependent)
+
+  # Evaluate properties of target to get the ;-list, and produce the '-I;'-list,
+  # that will be expanded as MULTIPLE ARGUMENTS thanks to the COMMAND_EXPAND_LISTS
+  set(_expand_eval_includes "$<TARGET_PROPERTY:${context_target},INCLUDE_DIRECTORIES>")
+  set(_expand_includes "$<$<BOOL:${_expand_eval_includes}>:-I$<JOIN:${_expand_eval_includes},\;-I>>")
+  # Same for defines
+  set(_expand_eval_defines "$<TARGET_PROPERTY:${context_target},COMPILE_DEFINITIONS>")
+  set(_expand_defines "$<$<BOOL:${_expand_eval_defines}>:-D$<JOIN:${_expand_eval_defines},\;-D>>")
+
+  add_custom_command(DEPENDS ${h_input}
+                     OUTPUT ${h_expanded}
+                     COMMAND ${CMAKE_C_COMPILER} ${_expand_includes} ${_expand_defines}
+                             -E ${h_input} -o ${h_expanded}
+                     COMMENT "Expending header file to ${h_expanded}"
+                     VERBATIM
+                     COMMAND_EXPAND_LISTS
+                     )
+endfunction()
