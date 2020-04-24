@@ -17,42 +17,158 @@
  * under the License.
  */
 
-/**
- * This file is used to expand headers because pycparser (hence CFFI) does not
- * support pre-processor directives.
+/*
+ * Note: this function may seem overkill, as there are only a few PyS2OPC headers.
+ * It was the basis of tests to avoid manual maintenance of the PyS2OPC's headers, required by CFFI.
+ * CFFI is based on pycparser, and their combined purposes make this clearly and intentionally unfeasible.
+ * pycparser does not do preprocessing work and does not support all tweaks that may reside in the standard library
+ * headers. It results that it can parse C with tweaks, such as using fake stdlib headers.
+ * However CFFI uses pycparser to obtain real types and generate some C afterwards with them.
+ * This makes it clear that we cannot fake types of the stdlib
+ * (otherwise, there are be conflicting types definitions at compile time).
  *
- * This requires to avoid std includes,
- * but also to redefine (at least by name) some of the required values.
+ * To conclude, we shall only use CFFI on headers that don't rely on the libc,
+ * except for the types it already knows: [u]int(8|16|32|64)_t.
+ * (Even bool is not supported and its support in our headers should be platform-dependent)
+ *
+ * Here we make the manual includes when possible, and the copy-paste when not.
+ * We make subfiles for copies to clarify where things come from and ease the maintenance.
  */
 
-/* Avoid these includes (TODO: this is not portable) */
-//#define _ASSERT_H_DECLS
-//#define _FLOAT_H___
-//#define _INTTYPES_H
-//#define _GCC_LIMITS_H_
-//#define _PTHREAD_H
-//#define _STDARG_H
-//#define _STDBOOL_H
-//#define _STDDEF_H
-//#define _STDIO_H
-//#define _STDLIB_H
-//#define _STDINT_H
-//#define _STRING_H
-//#define _TIME_H
+#include <stdbool.h>
+#include <stdint.h>
 
-/* We also need to define some of the numerical constants from these includes */
-#define INT32_MAX   (2147483647)
-#define UINT32_MAX  (4294967295U)
-#define UINTPTR_MAX (18446744073709551615UL)
-#define SIZE_MAX    (18446744073709551615UL)
+/* The following may crash as they are not standard... But stddef cannot be included... */
+typedef uintptr_t size_t;
 
-/* Variadic macro used in logger */
-#define __attribute__(...)
+/* sopc_builtintypes.h */
+typedef uint32_t SOPC_StatusCode;
 
-/* Now the includes of the project */
-#include "sopc_user_app_itf.h"
-#include "sopc_log_manager.h"
-//#include "sopc_version.h"
-//#include "toolkit_helpers.h"
+#include "sopc_enums.h"
+//#include "sopc_builtintypes.h"  // includes stdio
+//#include "sopc_time.h"  // includes <times.h>
+//#include "sopc_log_manager.h"  // uses var_args
+//#include <sopc_types.h>  // includes stdio
+
+/* sopc_time.h */
+int64_t SOPC_Time_GetCurrentTimeUTC(void);
+
+/* sopc_log_manager.h */
+typedef enum
+{
+    SOPC_LOG_LEVEL_ERROR = 0,
+    SOPC_LOG_LEVEL_WARNING = 1,
+    SOPC_LOG_LEVEL_INFO = 2,
+    SOPC_LOG_LEVEL_DEBUG = 3
+} SOPC_Log_Level;
+
+/* sopc_mem_alloc.h */
+void* SOPC_Malloc(size_t size);
+void SOPC_Free(void* ptr);
+void* SOPC_Calloc(size_t nmemb, size_t size);
+void* SOPC_Realloc(void* ptr, size_t old_size, size_t new_size);
+
+/* sopc_buffer.h */
+typedef struct
+{
+    uint32_t initial_size; /**< initial size (also used as size increment step) */
+    uint32_t current_size; /**< current size */
+    uint32_t maximum_size; /**< maximum size */
+    uint32_t position;     /**< read/write position */
+    uint32_t length;       /**< data length */
+    uint8_t* data;         /**< data bytes */
+} SOPC_Buffer;
+
+/* sopc_encodeabletype.h */
+typedef void(SOPC_EncodeableObject_PfnInitialize)(void* value);
+typedef void(SOPC_EncodeableObject_PfnClear)(void* value);
+typedef void(SOPC_EncodeableObject_PfnGetSize)(void);
+typedef SOPC_ReturnStatus(SOPC_EncodeableObject_PfnEncode)(const void* value,
+                                                           SOPC_Buffer* msgBuffer,
+                                                           uint32_t nestedStructLevel);
+typedef SOPC_ReturnStatus(SOPC_EncodeableObject_PfnDecode)(void* value,
+                                                           SOPC_Buffer* msgBuffer,
+                                                           uint32_t nestedStructLevel);
+typedef struct SOPC_EncodeableType
+{
+    char* TypeName;
+    uint32_t TypeId;
+    uint32_t BinaryEncodingTypeId;
+    uint32_t XmlEncodingTypeId;
+    char* NamespaceUri;
+    size_t AllocationSize;
+    SOPC_EncodeableObject_PfnInitialize* Initialize;
+    SOPC_EncodeableObject_PfnClear* Clear;
+    SOPC_EncodeableObject_PfnGetSize* GetSize;
+    SOPC_EncodeableObject_PfnEncode* Encode;
+    SOPC_EncodeableObject_PfnDecode* Decode;
+} SOPC_EncodeableType;
+
+/* sopc_singly_linked_list.h */
+typedef struct SOPC_SLinkedList SOPC_SLinkedList;
+
+#include "sopc_builtintypes_cffi.h"
+#include "sopc_types_cffi.h"
+
 #define SKIP_S2OPC_DEFINITIONS
 #include "libs2opc_client.h"
+
+/* As defines are ignored, we should replace them with constants.
+ * (and we must still undef them, otherwise gcc -E replaces them in the following definition).
+ */
+#undef SOPC_LibSub_AttributeId_NodeId
+#undef SOPC_LibSub_AttributeId_NodeClass
+#undef SOPC_LibSub_AttributeId_BrowseName
+#undef SOPC_LibSub_AttributeId_DisplayName
+#undef SOPC_LibSub_AttributeId_Description
+#undef SOPC_LibSub_AttributeId_WriteMask
+#undef SOPC_LibSub_AttributeId_UserWriteMask
+#undef SOPC_LibSub_AttributeId_IsAbstract
+#undef SOPC_LibSub_AttributeId_Symmetric
+#undef SOPC_LibSub_AttributeId_InverseName
+#undef SOPC_LibSub_AttributeId_ContainsNoLoops
+#undef SOPC_LibSub_AttributeId_EventNotifier
+#undef SOPC_LibSub_AttributeId_Value
+#undef SOPC_LibSub_AttributeId_DataType
+#undef SOPC_LibSub_AttributeId_ValueRank
+#undef SOPC_LibSub_AttributeId_ArrayDimensions
+#undef SOPC_LibSub_AttributeId_AccessLevel
+#undef SOPC_LibSub_AttributeId_UserAccessLevel
+#undef SOPC_LibSub_AttributeId_MinimumSamplingInterval
+#undef SOPC_LibSub_AttributeId_Historizing
+#undef SOPC_LibSub_AttributeId_Executable
+#undef SOPC_LibSub_AttributeId_UserExecutable
+typedef enum
+{
+    SOPC_LibSub_AttributeId_NodeId = 1,
+    SOPC_LibSub_AttributeId_NodeClass = 2,
+    SOPC_LibSub_AttributeId_BrowseName = 3,
+    SOPC_LibSub_AttributeId_DisplayName = 4,
+    SOPC_LibSub_AttributeId_Description = 5,
+    SOPC_LibSub_AttributeId_WriteMask = 6,
+    SOPC_LibSub_AttributeId_UserWriteMask = 7,
+    SOPC_LibSub_AttributeId_IsAbstract = 8,
+    SOPC_LibSub_AttributeId_Symmetric = 9,
+    SOPC_LibSub_AttributeId_InverseName = 10,
+    SOPC_LibSub_AttributeId_ContainsNoLoops = 11,
+    SOPC_LibSub_AttributeId_EventNotifier = 12,
+    SOPC_LibSub_AttributeId_Value = 13,
+    SOPC_LibSub_AttributeId_DataType = 14,
+    SOPC_LibSub_AttributeId_ValueRank = 15,
+    SOPC_LibSub_AttributeId_ArrayDimensions = 16,
+    SOPC_LibSub_AttributeId_AccessLevel = 17,
+    SOPC_LibSub_AttributeId_UserAccessLevel = 18,
+    SOPC_LibSub_AttributeId_MinimumSamplingInterval = 19,
+    SOPC_LibSub_AttributeId_Historizing = 20,
+    SOPC_LibSub_AttributeId_Executable = 21,
+    SOPC_LibSub_AttributeId_UserExecutable = 22
+} SOPC_LibSub_AttributeId_e; /* Type SOPC_LibSub_AttributeId already exists */
+
+//#undef SECURITY_POLICY_NONE
+//#undef SECURITY_POLICY_BASIC128RSA15
+//#undef SECURITY_POLICY_BASIC256
+//#undef SECURITY_POLICY_BASIC256SHA256
+extern const char* SOPC_SecurityPolicy_None_URI;
+extern const char* SOPC_SecurityPolicy_Basic128Rsa15;
+extern const char* SOPC_SecurityPolicy_Basic256_URI;
+extern const char* SOPC_SecurityPolicy_Basic256Sha256_URI;

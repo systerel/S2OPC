@@ -39,6 +39,7 @@ source = r'''
     #include "s2opc_expanded.h"
 
     const char* SOPC_SecurityPolicy_None_URI = "http://opcfoundation.org/UA/SecurityPolicy#None";
+    const char* SOPC_SecurityPolicy_Basic128Rsa15 = "http://opcfoundation.org/UA/SecurityPolicy#Basic128Rsa15";
     const char* SOPC_SecurityPolicy_Basic256_URI = "http://opcfoundation.org/UA/SecurityPolicy#Basic256";
     const char* SOPC_SecurityPolicy_Basic256Sha256_URI = "http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256";
 
