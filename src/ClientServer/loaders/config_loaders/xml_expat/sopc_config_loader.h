@@ -17,6 +17,9 @@
  * under the License.
  */
 
+#ifndef SOPC_CONFIG_LOADER_H_
+#define SOPC_CONFIG_LOADER_H_
+
 #include <stdio.h>
 
 #include "sopc_user_app_itf.h"
@@ -29,3 +32,5 @@
  * \return        true if the parsing succeeded, false otherwise
  * */
 bool SOPC_Config_Parse(FILE* fd, SOPC_S2OPC_Config* config);
+
+#endif /* SOPC_CONFIG_LOADER_H_ */

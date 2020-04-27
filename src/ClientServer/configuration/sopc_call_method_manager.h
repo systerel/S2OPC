@@ -23,6 +23,9 @@
  *
  */
 
+#ifndef SOPC_CALL_METHOD_MANAGER_H_
+#define SOPC_CALL_METHOD_MANAGER_H_
+
 #include "sopc_builtintypes.h"
 
 typedef struct SOPC_MethodCallManager SOPC_MethodCallManager;
@@ -150,3 +153,5 @@ SOPC_ReturnStatus SOPC_MethodCallManager_AddMethod(SOPC_MethodCallManager* mcm,
                                                    SOPC_MethodCallFunc_Ptr methodFunc,
                                                    void* param,
                                                    SOPC_MethodCallFunc_Free_Func fnFree);
+
+#endif /* SOPC_CALL_METHOD_MANAGER_H_ */
