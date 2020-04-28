@@ -48,7 +48,8 @@ typedef uint32_t SOPC_StatusCode;
 //#include "sopc_builtintypes.h"  // includes stdio
 //#include "sopc_time.h"  // includes <times.h>
 //#include "sopc_log_manager.h"  // uses var_args
-//#include <sopc_types.h>  // includes stdio
+//#include "sopc_types.h"  // includes stdio
+//#include "sopc_mem_alloc.h"  // includes stdio
 
 /* sopc_time.h */
 int64_t SOPC_Time_GetCurrentTimeUTC(void);
@@ -69,15 +70,7 @@ void* SOPC_Calloc(size_t nmemb, size_t size);
 void* SOPC_Realloc(void* ptr, size_t old_size, size_t new_size);
 
 /* sopc_buffer.h */
-typedef struct
-{
-    uint32_t initial_size; /**< initial size (also used as size increment step) */
-    uint32_t current_size; /**< current size */
-    uint32_t maximum_size; /**< maximum size */
-    uint32_t position;     /**< read/write position */
-    uint32_t length;       /**< data length */
-    uint8_t* data;         /**< data bytes */
-} SOPC_Buffer;
+#include "sopc_buffer.h"
 
 /* sopc_encodeabletype.h */
 typedef void(SOPC_EncodeableObject_PfnInitialize)(void* value);
@@ -172,3 +165,59 @@ extern const char* SOPC_SecurityPolicy_None_URI;
 extern const char* SOPC_SecurityPolicy_Basic128Rsa15;
 extern const char* SOPC_SecurityPolicy_Basic256_URI;
 extern const char* SOPC_SecurityPolicy_Basic256Sha256_URI;
+
+/* Additions for server */
+#include "sopc_secret_buffer.h"
+
+/* sopc_key_manager.h */
+typedef SOPC_SecretBuffer SOPC_SerializedAsymmetricKey;
+typedef SOPC_Buffer SOPC_SerializedCertificate;
+
+/* sopc_user.h */
+typedef struct SOPC_User SOPC_User;
+bool SOPC_User_IsAnonymous(const SOPC_User* user);
+bool SOPC_User_IsUsername(const SOPC_User* user);
+const SOPC_String* SOPC_User_GetUsername(const SOPC_User* user);
+
+/* sopc_address_space.h */
+typedef struct _SOPC_AddressSpace SOPC_AddressSpace;
+
+/* Altered includes */
+#include "sopc_call_method_manager_cffi.h"
+#include "sopc_common_cffi.h"
+#include "sopc_toolkit_async_api_cffi.h"
+#include "sopc_user_manager_cffi.h"
+
+#include "sopc_user_app_itf_cffi.h"
+
+#include "sopc_toolkit_config_cffi.h"
+
+/* Defines converted to constants */
+//#undef SOPC_SECURITY_MODE_NONE_MASK 0x01
+//#undef SOPC_SECURITY_MODE_SIGN_MASK 0x02
+//#undef SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK 0x04
+//#undef SOPC_SECURITY_MODE_ANY_MASK 0x07
+//#undef SOPC_MAX_SECU_POLICIES_CFG 5
+extern const uint8_t SOPC_SecurityMode_None_Mask;
+extern const uint8_t SOPC_SecurityMode_Sign_Mask;
+extern const uint8_t SOPC_SecurityMode_SignAndEncrypt_Mask;
+extern const uint8_t SOPC_SecurityMode_Any_Mask;
+extern const uint8_t SOPC_MaxSecuPolicies_CFG;
+
+/* sopc_pki.h */
+void SOPC_PKIProvider_Free(SOPC_PKIProvider** ppPKI);
+
+/* sopc_pki_stack.h */
+SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_SerializedCertificate* pCertAuth,
+                                               struct SOPC_CRLList* pRevocationList,
+                                               SOPC_PKIProvider** ppPKI);
+SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssuerRoots,
+                                                        char** lPathTrustedIssuerLinks,
+                                                        char** lPathUntrustedIssuerRoots,
+                                                        char** lPathUntrustedIssuerLinks,
+                                                        char** lPathIssuedCerts,
+                                                        char** lPathCRL,
+                                                        SOPC_PKIProvider** ppPKI);
+
+/* pki_permissive.h */
+// SOPC_ReturnStatus SOPC_PKIPermissive_Create(SOPC_PKIProvider** ppPKI);

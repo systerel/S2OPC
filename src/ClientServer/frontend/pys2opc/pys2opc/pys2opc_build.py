@@ -42,6 +42,11 @@ source = r'''
     const char* SOPC_SecurityPolicy_Basic128Rsa15 = "http://opcfoundation.org/UA/SecurityPolicy#Basic128Rsa15";
     const char* SOPC_SecurityPolicy_Basic256_URI = "http://opcfoundation.org/UA/SecurityPolicy#Basic256";
     const char* SOPC_SecurityPolicy_Basic256Sha256_URI = "http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256";
+    const uint8_t SOPC_SecurityMode_None_Mask = 0x01;
+    const uint8_t SOPC_SecurityMode_Sign_Mask = 0x02;
+    const uint8_t SOPC_SecurityMode_SignAndEncrypt_Mask = 0x04;
+    const uint8_t SOPC_SecurityMode_Any_Mask = 0x07;
+    const uint8_t SOPC_MaxSecuPolicies_CFG = 5;
 
     void SOPC_DataValue_Delete(SOPC_DataValue *datavalue)
     {

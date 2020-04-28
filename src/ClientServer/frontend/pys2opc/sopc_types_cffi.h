@@ -68,6 +68,50 @@ typedef enum _OpcUa_NodeClass
     OpcUa_NodeClass_SizeOf = INT32_MAX
 } OpcUa_NodeClass;
 
+/* API structures */
+
+typedef enum _OpcUa_UserTokenType
+{
+    OpcUa_UserTokenType_Anonymous = 0,
+    OpcUa_UserTokenType_UserName = 1,
+    OpcUa_UserTokenType_Certificate = 2,
+    OpcUa_UserTokenType_IssuedToken = 3,
+    OpcUa_UserTokenType_Kerberos = 4,
+    OpcUa_UserTokenType_SizeOf = INT32_MAX
+} OpcUa_UserTokenType;
+
+typedef struct _OpcUa_UserTokenPolicy
+{
+    SOPC_EncodeableType* encodeableType;
+    SOPC_String PolicyId;
+    OpcUa_UserTokenType TokenType;
+    SOPC_String IssuedTokenType;
+    SOPC_String IssuerEndpointUrl;
+    SOPC_String SecurityPolicyUri;
+} OpcUa_UserTokenPolicy;
+
+typedef enum _OpcUa_ApplicationType
+{
+    OpcUa_ApplicationType_Server = 0,
+    OpcUa_ApplicationType_Client = 1,
+    OpcUa_ApplicationType_ClientAndServer = 2,
+    OpcUa_ApplicationType_DiscoveryServer = 3,
+    OpcUa_ApplicationType_SizeOf = INT32_MAX
+} OpcUa_ApplicationType;
+
+typedef struct _OpcUa_ApplicationDescription
+{
+    SOPC_EncodeableType* encodeableType;
+    SOPC_String ApplicationUri;
+    SOPC_String ProductUri;
+    SOPC_LocalizedText ApplicationName;
+    OpcUa_ApplicationType ApplicationType;
+    SOPC_String GatewayServerUri;
+    SOPC_String DiscoveryProfileUri;
+    int32_t NoOfDiscoveryUrls;
+    SOPC_String* DiscoveryUrls;
+} OpcUa_ApplicationDescription;
+
 /* Read structures */
 
 extern struct SOPC_EncodeableType OpcUa_ReadValueId_EncodeableType;
