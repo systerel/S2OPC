@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
@@ -53,9 +54,104 @@
 #define CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC 600000000
 #endif
 
+static time_t gBuildDate = 0;
+
+// Temporary workaround while waiting for Zephyr to fix POSIX time.h issue
+time_t P_TIME_GetBuildDate(void)
+{
+    if (0 == gBuildDate)
+    {
+        // Get today date numerics values
+        struct tm today = {};
+        static char buffer[12] = {0};
+
+        // Initial date set to build value, always "MMM DD YYYY",
+        // DD is left padded with a space if it is less than 10.
+        sprintf(buffer, "%s", __DATE__);
+        buffer[3] = '\0';
+        buffer[6] = '\0';
+        char* ptrMonth = buffer;
+        char* ptrDay = &buffer[4];
+        char* ptrYear = &buffer[7];
+
+        if (strcmp(ptrMonth, "Jan") == 0)
+        {
+            today.tm_mon = 0; /* Month starts from 0 in C99 */
+        }
+        else if (strcmp(ptrMonth, "Feb") == 0)
+        {
+            today.tm_mon = 1;
+        }
+        else if (strcmp(ptrMonth, "Mar") == 0)
+        {
+            today.tm_mon = 2;
+        }
+        else if (strcmp(ptrMonth, "Apr") == 0)
+        {
+            today.tm_mon = 3;
+        }
+        else if (strcmp(ptrMonth, "May") == 0)
+        {
+            today.tm_mon = 4;
+        }
+        else if (strcmp(ptrMonth, "Jun") == 0)
+        {
+            today.tm_mon = 5;
+        }
+        else if (strcmp(ptrMonth, "Jul") == 0)
+        {
+            today.tm_mon = 6;
+        }
+        else if (strcmp(ptrMonth, "Aug") == 0)
+        {
+            today.tm_mon = 7;
+        }
+        else if (strcmp(ptrMonth, "Sep") == 0)
+        {
+            today.tm_mon = 8;
+        }
+        else if (strcmp(ptrMonth, "Oct") == 0)
+        {
+            today.tm_mon = 9;
+        }
+        else if (strcmp(ptrMonth, "Nov") == 0)
+        {
+            today.tm_mon = 10;
+        }
+        else if (strcmp(ptrMonth, "Dec") == 0)
+        {
+            today.tm_mon = 11;
+        }
+        else
+        {
+            assert(false); /* Could not parse compilation date */
+        }
+
+        today.tm_year = atoi(ptrYear) - 1900; /* C99 specifies that tm_year begins in 1900 */
+        today.tm_mday = atoi(ptrDay);
+
+        // Initial time set to build value, always "HH:MM:SS",
+        sprintf(buffer, "%s", __TIME__);
+        char* ptrH = strtok(buffer, ":");
+        char* ptrM = strtok(NULL, ":");
+        char* ptrS = strtok(NULL, ":");
+
+        today.tm_hour = (atoi(ptrH));
+        today.tm_min = (atoi(ptrM));
+        today.tm_sec = (atoi(ptrS));
+
+        // Newlib uses the same time_t precision and reference as Linux.
+        // Compute nb seconds since Unix EPOCH.
+        // Warn, mktime use libc malloc
+        gBuildDate = mktime(&today);
+    }
+
+    return gBuildDate;
+}
+
 static inline uint64_t P_TIME_TimeReference_GetCurrent100ns(void)
 {
-    uint64_t soft_clock_ms = (SOPC_TimeReference) k_uptime_get();
+    uint64_t soft_clock_ms = (SOPC_TimeReference) (P_TIME_GetBuildDate() * 1000 + k_uptime_get());
     // Get associated hardware clock counter
     uint64_t kernel_clock_ticks = k_cycle_get_32();
 
