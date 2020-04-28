@@ -32,7 +32,7 @@ import argparse
 import re
 import pickle
 
-from pys2opc import PyS2OPC, BaseConnectionHandler, AttributeId, NodeClass
+from pys2opc import PyS2OPC_Client as PyS2OPC, BaseConnectionHandler, AttributeId, NodeClass
 from _connection_configuration import configuration_parameters_no_subscription
 from utils import ReconnectingContext
 

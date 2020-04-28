@@ -487,6 +487,15 @@ if(ENABLE_TESTING)
   if(WITH_PYS2OPC)
     set(PYS2OPC_SRC_PATH "${S2OPC_ROOT_PATH}/src/ClientServer/frontend/pys2opc")
     set(PYS2OPC_TEST_PATH "${S2OPC_ROOT_PATH}/tests/ClientServer/validation_tests/pys2opc")
+    file(GLOB PYS2OPC_WHEEL "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/pys2opc*.whl")
+    set(PYS2OPC_TEST_INSTALL_PATH "${CMAKE_BINARY_DIR}/pys2opc_install")
+
+    # Installation test
+    # This is both required to test the installation of the wheel AND to be able to run the other tests...
+    add_test(pys2opc_install
+             "${PYTHON_EXECUTABLE}" -m pip install -t "${PYS2OPC_TEST_INSTALL_PATH}" --upgrade "${PYS2OPC_WHEEL}"
+             )
+
     # Validation test
     function(pys2opc_validation_test name)
       get_filename_component(no_ext_name ${name} NAME_WE) # remove extension to use name for log directory
@@ -500,13 +509,15 @@ if(ENABLE_TESTING)
         "${PYTHON_EXECUTABLE}" "${name}"
         )
       # ASan requires to be the first dynamically linked library to be loaded. This is done with LD_PRELOAD.
-      set(new_env "PYTHONPATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}${ENV_PATH_SEP}${PYS2OPC_SRC_PATH}${ENV_PATH_SEP}${S2OPC_ROOT_PATH}/tests/ClientServer/interop_tools"
+      set(new_env "PYTHONPATH=${PYS2OPC_TEST_INSTALL_PATH}${ENV_PATH_SEP}${PYS2OPC_SRC_PATH}${ENV_PATH_SEP}${S2OPC_ROOT_PATH}/tests/ClientServer/interop_tools"
         "LD_LIBRARY_PATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
       if(WITH_ASAN OR WITH_UBSAN OR WITH_TSAN)
         set(new_env ${new_env} "LD_PRELOAD=/usr/local/lib64/libasan.so")
       endif()
+      # The test depends on the install
       set_tests_properties(${test_name} PROPERTIES
-        ENVIRONMENT "${new_env}")
+                           DEPENDS pys2opc_install
+                           ENVIRONMENT "${new_env}")
     endfunction()
 
     pys2opc_validation_test("pys2opc_client.py")

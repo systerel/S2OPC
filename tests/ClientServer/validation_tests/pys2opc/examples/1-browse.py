@@ -26,7 +26,7 @@ Only displays the following reference types: "Organizes", "HasComponent", and "H
 """
 
 
-from pys2opc import PyS2OPC, BaseConnectionHandler, AttributeId
+from pys2opc import PyS2OPC_Client as PyS2OPC, BaseConnectionHandler, AttributeId
 from _connection_configuration import configuration_parameters_no_subscription
 
 

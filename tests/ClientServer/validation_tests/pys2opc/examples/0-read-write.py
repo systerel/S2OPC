@@ -30,7 +30,7 @@ import time
 import tempfile
 import random
 
-from pys2opc import PyS2OPC, BaseConnectionHandler, DataValue, StatusCode, Variant, VariantType
+from pys2opc import PyS2OPC_Client as PyS2OPC, BaseConnectionHandler, DataValue, StatusCode, Variant, VariantType
 from _connection_configuration import configuration_parameters_no_subscription
 
 

@@ -44,7 +44,7 @@ from itertools import product
 import time
 import threading
 
-from pys2opc import PyS2OPC, BaseConnectionHandler, SecurityMode, SecurityPolicy, AttributeId, VariantType, Variant, NodeClass, DataValue, StatusCode
+from pys2opc import PyS2OPC_Client as PyS2OPC, BaseConnectionHandler, SecurityMode, SecurityPolicy, AttributeId, VariantType, Variant, NodeClass, DataValue, StatusCode
 
 import sys; sys.path.insert(0, VALIDATION_DIR)
 from tap_logger import TapLogger

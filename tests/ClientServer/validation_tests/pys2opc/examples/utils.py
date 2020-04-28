@@ -19,7 +19,7 @@
 # under the License.
 
 
-from pys2opc import PyS2OPC
+from pys2opc import PyS2OPC_Client as PyS2OPC
 
 
 class ReconnectingContext:

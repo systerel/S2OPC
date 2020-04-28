@@ -27,7 +27,7 @@ Some connections are secured and some unsecured. A subscription is made on the s
 
 import time
 
-from pys2opc import PyS2OPC, BaseConnectionHandler
+from pys2opc import PyS2OPC_Client as PyS2OPC, BaseConnectionHandler
 from _connection_configuration import configuration_parameters_no_subscription, configuration_parameters_subscription, configuration_parameters_security, join_configs
 
 

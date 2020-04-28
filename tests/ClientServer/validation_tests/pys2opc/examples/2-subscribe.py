@@ -29,7 +29,7 @@ This is mostly illustrative, as the nodes do not change in value.
 
 import time
 
-from pys2opc import PyS2OPC, BaseConnectionHandler
+from pys2opc import PyS2OPC_Client as PyS2OPC, BaseConnectionHandler
 from _connection_configuration import configuration_parameters_subscription
 
 

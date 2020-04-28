@@ -160,7 +160,7 @@ if (expat_FOUND)
   # export cmake file for use in build tree without install
   export(EXPORT s2opc_clientserver-xml-loaders-expat-export
          FILE "${CMAKE_BINARY_DIR}/s2opc_clientserver-xml-loaders-expat-export.cmake"
-         )      
+         )
 else()
   message("-- Expat library NOT found: XML config loaders will not be available")
 endif()
@@ -229,6 +229,7 @@ if(WITH_PYS2OPC)
 
   add_custom_command(OUTPUT ${PYS2OPC_PLACEHOLDER}
                      DEPENDS ${PYS2OPC_INCLUDE}
+                             ${PYS2OPC_FILES}
                      # Note: sources copied to build dir to avoid relative path issues in pys2opc_build.py
                      COMMAND ${CMAKE_COMMAND} -E copy_directory ${PYS2OPC_SRC_PATH} ${PYS2OPC_BUILD_PATH}
                      COMMAND ${PYTHON_EXECUTABLE} ${PYS2OPC_BUILD_PATH}/setup.py -q bdist_wheel
@@ -243,7 +244,6 @@ if(WITH_PYS2OPC)
   # (see add_custom_command and add_custom_target, or the target make-light-address-space)
   add_custom_target(pys2opc ALL
                     DEPENDS ${PYS2OPC_PLACEHOLDER}
-                    DEPENDS ${PYS2OPC_FILES}
                     )
   add_dependencies(pys2opc s2opc_clientwrapper)
 endif()
