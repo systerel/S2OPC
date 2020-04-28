@@ -59,9 +59,9 @@ def _callback_datachanged(connectionId, dataId, c_value):
     return PyS2OPC._callback_datachanged(connectionId, dataId, c_value)
 
 @ffi.def_extern()
-def _callback_generic_event(connectionId, event, status, responsePayload, responseContext):
+def _callback_client_event(connectionId, event, status, responsePayload, responseContext):
     timestamp = time.time()
-    return PyS2OPC._callback_generic_event(connectionId, event, status, responsePayload, responseContext, timestamp)
+    return PyS2OPC._callback_client_event(connectionId, event, status, responsePayload, responseContext, timestamp)
 
 
 
@@ -176,7 +176,7 @@ class PyS2OPC:
                                  'timeout_ms': timeout_ms,
                                  'sc_lifetime': sc_lifetime,
                                  'token_target': token_target,
-                                 'generic_response_callback': libsub._callback_generic_event}
+                                 'generic_response_callback': libsub._callback_client_event}
         status = libsub.SOPC_LibSub_ConfigureConnection([dConnectionParameters], pCfgId)
         assert status == ReturnStatus.OK, 'Configuration failed with status {}.'.format(status)
 
@@ -249,7 +249,7 @@ class PyS2OPC:
                                  'timeout_ms': timeout_ms,
                                  'sc_lifetime': sc_lifetime,
                                  'token_target': token_target,
-                                 'generic_response_callback': libsub._callback_generic_event}
+                                 'generic_response_callback': libsub._callback_client_event}
         status = libsub.SOPC_LibSub_ConfigureConnection([dConnectionParameters], pCfgId)
         assert status == ReturnStatus.OK, 'Configuration failed with status {}.'.format(status)
 
@@ -329,7 +329,7 @@ class PyS2OPC:
         connection._on_datachanged(dataId, value)
 
     @staticmethod
-    def _callback_generic_event(connectionId, event, status, responsePayload, responseContext, timestamp):
+    def _callback_client_event(connectionId, event, status, responsePayload, responseContext, timestamp):
         assert connectionId in PyS2OPC._dConnections, 'Event notification on unknown connection'
         connection = PyS2OPC._dConnections[connectionId]
         # It is not possible to store the payload, as it is freed by the caller of the callback.
