@@ -61,7 +61,7 @@ The NodeId type `x=` is either:
 
 """
 
-from .s2opc import PyS2OPC, ClientConfiguration, VERSION
+from .s2opc import PyS2OPC_Client, PyS2OPC_Server, ClientConfiguration, VERSION
 from .connection import BaseConnectionHandler
 from .types import Request, Variant, VariantType, DataValue, AttributeId, ReturnStatus, StatusCode, SecurityPolicy, SecurityMode, NodeClass
 

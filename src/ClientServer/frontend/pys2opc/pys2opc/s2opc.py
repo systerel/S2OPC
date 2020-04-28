@@ -52,40 +52,80 @@ def _callback_log(level, text):
 
 @ffi.def_extern()
 def _callback_disconnected(clientId):
-    return PyS2OPC._callback_disconnected(clientId)
+    return PyS2OPC_Client._callback_disconnected(clientId)
 
 @ffi.def_extern()
 def _callback_datachanged(connectionId, dataId, c_value):
-    return PyS2OPC._callback_datachanged(connectionId, dataId, c_value)
+    return PyS2OPC_Client._callback_datachanged(connectionId, dataId, c_value)
 
 @ffi.def_extern()
 def _callback_client_event(connectionId, event, status, responsePayload, responseContext):
     timestamp = time.time()
-    return PyS2OPC._callback_client_event(connectionId, event, status, responsePayload, responseContext, timestamp)
+    return PyS2OPC_Client._callback_client_event(connectionId, event, status, responsePayload, responseContext, timestamp)
 
 
 
 class PyS2OPC:
     """
     Python version of the S2OPC + client subscription libraries.
+    Base class for components that are common to both Clients and Servers.
+
+    For now, only either a :class:`PyS2OPC_Client` or a :class:`PyS2OPC_Server`
+    can be initialized in a process.
     """
-    _initialized = False
+    _initialized_cli = False
+    _initialized_srv = False
     _configured = False
-    _dConfigurations = {}  # Stores known configurations {Id: configurationParameters}
-    _dConnections = {}  # Stores known active connections {Id: ConnectionHandler()}
     _pathLog = None  # Avoid garbage collection of the configured log path
 
     @staticmethod
+    def _assert_not_init():
+        assert not PyS2OPC._initialized_cli, 'This PyS2OPC process is alread initialized as a Client'
+        assert not PyS2OPC._initialized_srv, 'This PyS2OPC process is alread initialized as a Server'
+
+
+    @staticmethod
     def get_version():
+        # TODO: use build infos
         """Returns complete version string (PyS2OPC, LibSub, S2OPC)"""
         return 'PyS2OPC v' + VERSION + ' on ' + ffi.string(libsub.SOPC_LibSub_GetVersion()).decode()
+
+    @staticmethod
+    def mark_configured():
+        """
+        Must be called after all calls to `pys2opc.s2opc.PyS2OPC.add_configuration_unsecured` and `pys2opc.s2opc.PyS2OPC.add_configuration_secured`,
+        and before `pys2opc.s2opc.PyS2OPC.connect` or `pys2opc.s2opc.PyS2OPC.get_endpoints`.
+
+        This tells S2OPC that the configuration phase is over.
+        """
+        assert (PyS2OPC._initialized_cli or PyS2OPC._initialized_srv) and not PyS2OPC._configured,\
+            'Toolkit is not initialized or already configured, cannot add new configurations.'
+        assert libsub.SOPC_LibSub_Configured() == ReturnStatus.OK
+        PyS2OPC._configured = True
+
+
+class PyS2OPC_Client(PyS2OPC):
+    """
+    The Client side of the PyS2OPC library.
+    Used to create clients only.
+    """
+    _dConfigurations = {}  # Stores client known configurations {Id: configurationParameters} (client and server configurations may have the same index)
+    _dConnections = {}  # Stores known active connections {Id: ConnectionHandler()}
 
     @staticmethod
     @contextmanager
     def initialize(logLevel=0, logPath='logs/', logFileMaxBytes=1048576, logMaxFileNumber=50):
         """
-        Toolkit and LibSub initializations.
-        Must be called exactly once per process.
+        Toolkit and LibSub initializations for Clients.
+        When the toolkit is initialized for clients, it cannot be used to make a server before a `clear()`.
+
+        This function supports the context management:
+        >>> with PyS2OPC_Client.initialize():
+        ...     # Do things here
+        ...     pass
+
+        When reaching out of the `with` statement, the Toolkit is automatically cleared.
+        See `clear()`.
 
         Args:
             logLevel: log level (0: error, 1: warning, 2: info, 3: debug)
@@ -94,15 +134,8 @@ class PyS2OPC:
             logFileMAxBytes: The maximum size (best effort) of the log files, before changing the log index.
             logMaxFileNumber: The maximum number of log indexes before cycling logs and reusing the first log.
 
-        This function supports the context management:
-        >>> with PyS2OPC.initialize():
-        ...     # Do things here
-        ...     pass
-
-        When reaching out of the `with` statement, the Toolkit is automatically cleared.
-        See clear().
         """
-        assert not PyS2OPC._initialized, 'Library is alread initialized'
+        PyS2OPC._assert_not_init()
 
         status = libsub.SOPC_LibSub_Initialize([(libsub._callback_log,
                                                  libsub._callback_disconnected,
@@ -111,12 +144,12 @@ class PyS2OPC:
                                                   logFileMaxBytes,
                                                   logMaxFileNumber))])
         assert status == ReturnStatus.OK, 'Library initialization failed with status code {}.'.format(status)
-        PyS2OPC._initialized = True
+        PyS2OPC._initialized_cli = True
 
         try:
             yield
         finally:
-            PyS2OPC.clear()
+            PyS2OPC_Client.clear()
 
     @staticmethod
     def clear():
@@ -126,7 +159,7 @@ class PyS2OPC:
         """
         # TODO: Disconnect existing clients
         libsub.SOPC_LibSub_Clear()
-        PyS2OPC._initialized = False
+        PyS2OPC._initialized_cli = False
 
     @staticmethod
     def add_configuration_unsecured(*,
@@ -153,7 +186,7 @@ class PyS2OPC:
             token_target: The number of subscription tokens (PublishRequest) that should be
                           made available to the server at anytime.
         """
-        assert PyS2OPC._initialized and not PyS2OPC._configured,\
+        assert PyS2OPC._initialized_cli and not PyS2OPC._configured,\
             'Toolkit is not initialized or already configured, cannot add new configurations.'
 
         pCfgId = ffi.new('SOPC_LibSub_ConfigurationId *')
@@ -182,7 +215,7 @@ class PyS2OPC:
 
         cfgId = pCfgId[0]
         config = ClientConfiguration(cfgId, dConnectionParameters)
-        PyS2OPC._dConfigurations[cfgId] = config
+        PyS2OPC_Client._dConfigurations[cfgId] = config
         return config
 
     @staticmethod
@@ -226,7 +259,7 @@ class PyS2OPC:
             path_key_cli: The path to the private key of the client certificate.
         """
         # TODO: factorize code with add_configuration_unsecured
-        assert PyS2OPC._initialized and not PyS2OPC._configured,\
+        assert PyS2OPC._initialized_cli and not PyS2OPC._configured,\
             'Toolkit is not initialized or already configured, cannot add new configurations.'
 
         pCfgId = ffi.new('SOPC_LibSub_ConfigurationId *')
@@ -255,22 +288,8 @@ class PyS2OPC:
 
         cfgId = pCfgId[0]
         config = ClientConfiguration(cfgId, dConnectionParameters)
-        PyS2OPC._dConfigurations[cfgId] = config
+        PyS2OPC_Client._dConfigurations[cfgId] = config
         return config
-
-    @staticmethod
-    def mark_configured():
-        """
-        Must be called after all calls to `pys2opc.s2opc.PyS2OPC.add_configuration_unsecured` and `pys2opc.s2opc.PyS2OPC.add_configuration_secured`,
-        and before `pys2opc.s2opc.PyS2OPC.connect` or `pys2opc.s2opc.PyS2OPC.get_endpoints`.
-
-        This tells S2OPC that the configuration phase is over.
-        """
-        assert PyS2OPC._initialized and not PyS2OPC._configured,\
-            'Toolkit is not initialized or already configured, cannot add new configurations.'
-        assert libsub.SOPC_LibSub_Configured() == ReturnStatus.OK
-        PyS2OPC._configured = True
-
 
     @staticmethod
     def get_endpoints(configuration):
@@ -279,7 +298,8 @@ class PyS2OPC:
 
         Not implemented yet.
         """
-        pass
+        assert isinstance(configuration, ClientConfiguration)
+        raise NotImplementedError()
 
 
     @staticmethod
@@ -293,10 +313,10 @@ class PyS2OPC:
 
         It can be optionally used in a `with` statement, which automatically disconnects the connection.
         """
-        assert PyS2OPC._initialized and PyS2OPC._configured, 'Toolkit not configured, cannot connect().'
+        assert PyS2OPC._initialized_cli and PyS2OPC._configured, 'Toolkit not configured, cannot connect().'
         assert isinstance(configuration, ClientConfiguration)
         cfgId = configuration._id
-        assert cfgId in PyS2OPC._dConfigurations, 'Unknown configuration, see add_configuration_unsecured().'
+        assert cfgId in PyS2OPC_Client._dConfigurations, 'Unknown configuration, see add_configuration_unsecured().'
         assert issubclass(ConnectionHandlerClass, BaseConnectionHandler)
 
         pConId = ffi.new('SOPC_LibSub_DataId *')
@@ -305,39 +325,46 @@ class PyS2OPC:
             raise ConnectionError('Could not connect to the server with the given configuration with status {}.'.format(ReturnStatus.get_name_from_id(status)))
 
         connectionId = pConId[0]
-        assert connectionId not in PyS2OPC._dConnections,\
+        assert connectionId not in PyS2OPC_Client._dConnections,\
             'Subscription library returned a connection id that is already taken by an active connection.'
 
         connection = ConnectionHandlerClass(connectionId, configuration)
-        PyS2OPC._dConnections[connectionId] = connection
+        PyS2OPC_Client._dConnections[connectionId] = connection
         return connection
 
     @staticmethod
     def _callback_disconnected(clientId):
-        if clientId not in PyS2OPC._dConnections:
+        if clientId not in PyS2OPC_Client._dConnections:
             print('# Warning: Disconnected unknown client', clientId, file=sys.stderr)
             return
-        connection = PyS2OPC._dConnections.pop(clientId)
+        connection = PyS2OPC_Client._dConnections.pop(clientId)
         connection._on_disconnect()
 
     @staticmethod
     def _callback_datachanged(connectionId, dataId, c_value):
         value = DataValue.from_sopc_libsub_value(c_value)
         #print('Data changed (connection {}, data_id {}), new value {}'.format(connection_id, data_id, value.value))
-        assert connectionId in PyS2OPC._dConnections, 'Data change notification on unknown connection'
-        connection = PyS2OPC._dConnections[connectionId]
+        assert connectionId in PyS2OPC_Client._dConnections, 'Data change notification on unknown connection'
+        connection = PyS2OPC_Client._dConnections[connectionId]
         connection._on_datachanged(dataId, value)
 
     @staticmethod
     def _callback_client_event(connectionId, event, status, responsePayload, responseContext, timestamp):
-        assert connectionId in PyS2OPC._dConnections, 'Event notification on unknown connection'
-        connection = PyS2OPC._dConnections[connectionId]
+        assert connectionId in PyS2OPC_Client._dConnections, 'Event notification on unknown connection'
+        connection = PyS2OPC_Client._dConnections[connectionId]
         # It is not possible to store the payload, as it is freed by the caller of the callback.
         connection._on_response(event, status, responsePayload, responseContext, timestamp)
 
 
+class PyS2OPC_Server(PyS2OPC):
+    """
+    """
+    _dConfigurations = {}  # Stores server known configurations {Id: configurationParameters} (client and server configurations may have the same index)
 
-class ClientConfiguration:
+
+
+
+class Configuration:
     """
     Stores configuration given to the subscription library.
     Such configurations should not be modified, as modifying these will have no impact on the Toolkit.
@@ -354,4 +381,8 @@ class ClientConfiguration:
         """
         return self._parameters.copy()
 
+class ClientConfiguration(Configuration):
+    pass
 
+class ServerConfiguration(Configuration):
+    pass
