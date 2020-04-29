@@ -63,6 +63,10 @@ def _callback_client_event(connectionId, event, status, responsePayload, respons
     timestamp = time.time()
     return PyS2OPC_Client._callback_client_event(connectionId, event, status, responsePayload, responseContext, timestamp)
 
+@ffi.def_extern()
+def _callback_toolkit_event(event, status, param, appContext):
+    return PyS2OPC._callback_toolkit_event(event, status, param, appContext)
+
 
 
 class PyS2OPC:
@@ -70,13 +74,21 @@ class PyS2OPC:
     Python version of the S2OPC + client subscription libraries.
     Base class for components that are common to both Clients and Servers.
 
-    For now, only either a :class:`PyS2OPC_Client` or a :class:`PyS2OPC_Server`
+    For now, only either a `PyS2OPC_Client` or a `PyS2OPC_Server`
     can be initialized in a process.
     """
     _initialized_cli = False
     _initialized_srv = False
     _configured = False
-    _pathLog = None  # Avoid garbage collection of the configured log path
+    _events_client = {libsub.SE_SESSION_ACTIVATION_FAILURE,
+                      libsub.SE_ACTIVATED_SESSION,
+                      libsub.SE_SESSION_REACTIVATING,
+                      libsub.SE_RCV_SESSION_RESPONSE,
+                      libsub.SE_CLOSED_SESSION,
+                      libsub.SE_RCV_DISCOVERY_RESPONSE,
+                      libsub.SE_SND_REQUEST_FAILED}
+    _events_server = {libsub.SE_CLOSED_ENDPOINT,
+                      libsub.SE_LOCAL_SERVICE_RESPONSE}
 
     @staticmethod
     def _assert_not_init():
@@ -102,6 +114,14 @@ class PyS2OPC:
             'Toolkit is not initialized or already configured, cannot add new configurations.'
         assert libsub.SOPC_LibSub_Configured() == ReturnStatus.OK
         PyS2OPC._configured = True
+
+    @staticmethod
+    def _callback_toolkit_event(event, status, param, appContext):
+        assert event in PyS2OPC._events_clients | PyS2OPC._events_server, 'Unknown event received from Toolkit "{}"'.format(event)
+        if event in PyS2OPC._events_server:
+            PyS2OPC_Server._callback_toolkit_event(event, status, param, appContext)
+        else:
+            assert event not in PyS2OPC._events_client, 'Only server events are supported yet'
 
 
 class PyS2OPC_Client(PyS2OPC):
@@ -143,7 +163,7 @@ class PyS2OPC_Client(PyS2OPC):
                                                   ffi.new('char[]', logPath.encode()),
                                                   logFileMaxBytes,
                                                   logMaxFileNumber))])
-        assert status == ReturnStatus.OK, 'Library initialization failed with status code {}.'.format(status)
+        assert status == ReturnStatus.OK, 'Library initialization failed with status {}.'.format(ReturnStatus.get_both_from_id(status))
         PyS2OPC._initialized_cli = True
 
         try:
@@ -155,7 +175,7 @@ class PyS2OPC_Client(PyS2OPC):
     def clear():
         """
         Disconnect current servers and clears the Toolkit.
-        Existing Configurations and Connections are then invalid and may be freed.
+        Existing `ClientConfiguration`s and Connections are then invalid and should be freed.
         """
         # TODO: Disconnect existing clients
         libsub.SOPC_LibSub_Clear()
@@ -358,9 +378,77 @@ class PyS2OPC_Client(PyS2OPC):
 
 class PyS2OPC_Server(PyS2OPC):
     """
+    The Server side of the PyS2OPC library.
+    When the toolkit is `PyS2OPC_Server.initialize`d for a server, it cannot be `PyS2OPC_Client.initialize`d for a client before it is `PyS2OPC_Server.clear`ed.
     """
     _dConfigurations = {}  # Stores server known configurations {Id: configurationParameters} (client and server configurations may have the same index)
 
+    @staticmethod
+    @contextmanager
+    def initialize(logLevel=libsub.SOPC_LOG_LEVEL_DEBUG, logPath='logs/', logFileMaxBytes=1048576, logMaxFileNumber=50):
+        """
+        Toolkit initialization for Server.
+        When the toolkit is initialized for servers, it cannot be used to make a server before a call to `PyS2OPC_Server.clear`.
+
+        This function supports the context management:
+        >>> with PyS2OPC_Server.initialize():
+        ...     # Do things here, namely configure then wait
+        ...     pass
+
+        When reaching out of the `with` statement, the Toolkit is automatically cleared.
+        See `PyS2OPC_Server.clear`.
+
+        Args:
+            logLevel: log level (0: error, 1: warning, 2: info, 3: debug)
+            logPath: the path for logs (the current working directory) to logPath.
+                     logPath is created if it does not exist.
+            logFileMAxBytes: The maximum size (best effort) of the log files, before changing the log index.
+            logMaxFileNumber: The maximum number of log indexes before cycling logs and reusing the first log.
+
+        """
+        PyS2OPC._assert_not_init()
+
+        logConfig = libsub.SOPC_Common_GetDefaultLogConfiguration()
+        logConfig.logLevel = logLevel
+        # Note: we don't keep a copy of logDirPath as the string content copied internally in SOPC_Log_CreateInstance
+        logConfig.logSysConfig.fileSystemLogConfig.logDirPath = ffi.new('char[]', logPath.encode())
+        logConfig.logSysConfig.fileSystemLogConfig.logMaxBytes = logFileMaxBytes
+        logConfig.logSysConfig.fileSystemLogConfig.logMaxFiles = logMaxFileNumber
+
+        status = libsub.SOPC_Common_Initialize(logConfig)
+        assert status == ReturnStatus.OK, 'Common initialization failed with status {}'.format(ReturnStatus.get_both_from_id(status))
+        status = libsub.SOPC_Toolkit_Initialize(libsub._callback_toolkit_event)
+        assert status == ReturnStatus.OK, 'Toolkit initialization failed with status {}.'.format(ReturnStatus.get_both_from_id(status))
+        PyS2OPC._initialized_srv = True
+
+        try:
+            yield
+        finally:
+            PyS2OPC_Server.clear()
+
+    @staticmethod
+    def clear():
+        """
+        Disconnect current servers and clears the Toolkit.
+        Existing `ServerConfiguration`s are then invalid and should be freed.
+        """
+        # TODO: Disconnect existing clients
+        libsub.SOPC_Toolkit_Clear()  # Calls SOPC_Common_Clear
+        PyS2OPC._initialized_srv = False
+
+    @staticmethod
+    def _callback_toolkit_event(event, status, param, appContext):
+        # For now, only support server events
+        if event == libsub.SE_CLOSED_ENDPOINT:
+            # id = endpoint configuration index,
+            # auxParam = SOPC_ReturnStatus
+            pass
+        elif event == libsub.SE_LOCAL_SERVICE_RESPONSE:
+            # id = endpoint configuration index,
+            # params = (OpcUa_<MessageStruct>*) OPC UA message header + payload structure
+            #          (deallocated by toolkit after callback call ends)
+            # auxParam = user application request context
+            pass
 
 
 

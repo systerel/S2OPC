@@ -19,15 +19,21 @@
 # under the License.
 
 """
-The `pys2opc` module is a Python3 wrapper of the client library `client_subscription`, based on `s2opc`.
-It uses CFFI to bind Python and C.
+The `pys2opc` module is a Python3 wrapper of the client library `s2opc_clientwrapper`, based on `s2opc`.
+It uses CFFI to bind Python with C.
 The wrapper provides Python classes for OPC UA concepts.
 
-The `pys2opc.s2opc.PyS2OPC` represents the `SOPC_Toolkit` and gathers its top level functionalities
-(see `pys2opc.s2opc.PyS2OPC.initialize`, `pys2opc.s2opc.PyS2OPC.add_configuration_unsecured`, ...).
+The `pys2opc.s2opc.PyS2OPC` represents the `SOPC_Toolkit*_*` API and gathers its top level functionalities,
+which are split in `pys2opc.s2opc.PyS2OPC_Client` and `pys2opc.s2opc.PyS2OPC_Server`.
+(see `pys2opc.s2opc.PyS2OPC_Client.initialize`, `pys2opc.s2opc.PyS2OPC_Client.add_configuration_unsecured`, `pys2opc.s2opc.PyS2OPC_Server.initialize`, ...).
+
+For now, the module can be used either as a Server or one or more Clients.
+
+
+### Client use
 
 Once a configuration is created and the toolkit is `pys2opc.s2opc.PyS2OPC.mark_configured`,
-new connections are created with `pys2opc.s2opc.PyS2OPC.connect`.
+new connections are created with `pys2opc.s2opc.PyS2OPC_Client.connect`.
 Connection objects are instances of the `pys2opc.connection.BaseClientConnectionHandler`.
 
 With connections, you can `pys2opc.connection.BaseClientConnectionHandler.read_nodes`,
@@ -35,6 +41,7 @@ With connections, you can `pys2opc.connection.BaseClientConnectionHandler.read_n
 You can also `pys2opc.connection.BaseClientConnectionHandler.add_nodes_to_subscription`,
 and receive notifications through `pys2opc.connection.BaseClientConnectionHandler.on_datachanged`.
 
+>>> from pys2opc import PyS2OPC_Client as PyS2OPC
 >>> PyS2OPC.get_version()
 >>> with PyS2OPC.initialize():
 >>>     config = PyS2OPC.add_configuration_unsecured()
@@ -42,6 +49,14 @@ and receive notifications through `pys2opc.connection.BaseClientConnectionHandle
 >>>     with PyS2OPC.connect(config, BaseClientConnectionHandler) as connection:
 >>>         connection.read_nodes()
 
+
+## Server use
+
+TODO
+
+>>> from pys2opc import PyS2OPC_Server as PyS2OPC
+>>> PyS2OPC.get_version()
+>>> with PyS2OPC.initialize():
 
 ## NodeId concept
 
