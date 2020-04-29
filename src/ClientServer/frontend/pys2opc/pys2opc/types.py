@@ -62,7 +62,8 @@ class Request:
 class NamedMembers:
     """
     This class or its subclass is capable of returning the name of a member of this class from an id.
-    `pys2opc.types.NamedMembers.get_name_from_id` is particularly useful to translate OPC UA constants to readable strings.
+    `NamedMembers.get_name_from_id` is particularly useful to translate OPC UA constants to readable strings.
+    The function `NamedMembers.get_both_from_id` returns a string which contains both the formatted code and its string decode.
     """
     _dCodeNames = None
     @classmethod
@@ -74,6 +75,13 @@ class NamedMembers:
         if cls._dCodeNames is None:
             cls._dCodeNames = {getattr(cls, name): name for name in dir(cls) if not name.startswith('get_') and not name.startswith('_')}
         return cls._dCodeNames[memberId]
+
+    @classmethod
+    def get_both_from_id(cls, memberId):
+        """
+        Returns a string "0x01234567 (NAME_OF_ID)" which gives both the hexa-formatted Id ans its name.
+        """
+        return '0x{:08X} ({})'.format(memberId, cls.get_name_from_id(memberId))
 
 
 class ReturnStatus(NamedMembers):
