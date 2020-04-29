@@ -213,10 +213,11 @@ if(WITH_PYS2OPC)
   file(MAKE_DIRECTORY ${PYS2OPC_BUILD_PATH}) # Note: create build directory to use it as working dir
   set(PYS2OPC_FILES "${PYS2OPC_SRC_PATH}/pys2opc/__init__.py"
                     "${PYS2OPC_SRC_PATH}/pys2opc/connection.py"
-                    "${PYS2OPC_SRC_PATH}/pys2opc/pys2opc_build.py"
                     "${PYS2OPC_SRC_PATH}/pys2opc/responses.py"
                     "${PYS2OPC_SRC_PATH}/pys2opc/s2opc.py"
                     "${PYS2OPC_SRC_PATH}/pys2opc/types.py"
+                    "${PYS2OPC_SRC_PATH}/pys2opc_build.py"
+                    "${PYS2OPC_SRC_PATH}/setup.py"
                     )
   set(PYS2OPC_PLACEHOLDER ${CMAKE_BINARY_DIR}/pys2opc_touch)
   set(PYS2OPC_INCLUDE "${PYS2OPC_BUILD_PATH}/s2opc_expanded.h")

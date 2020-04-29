@@ -31,6 +31,8 @@ ffibuilder.cdef(header + r'''
     extern "Python" void _callback_disconnected(SOPC_LibSub_ConnectionId c_id);
     extern "Python" void _callback_datachanged(SOPC_LibSub_ConnectionId c_id, SOPC_LibSub_DataId d_id, SOPC_LibSub_Value* value);
     extern "Python" void _callback_client_event(SOPC_LibSub_ConnectionId c_id, SOPC_LibSub_ApplicativeEvent event, SOPC_StatusCode status, const void* response, uintptr_t responseContext);
+    extern "Python" void _callback_toolkit_event(SOPC_App_Com_Event event, uint32_t IdOrStatus, void* param, uintptr_t appContext);
+    extern "Python" void _callback_address_space_event(SOPC_App_AddSpace_Event event, void* opParam, SOPC_StatusCode opStatus);
 
     void SOPC_DataValue_Delete(SOPC_DataValue *datavalue);
 ''')

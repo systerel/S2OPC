@@ -26,7 +26,7 @@ import os
 setup(
     setup_requires=['cffi>=1.4.0'],
     install_requires=['cffi>=1.4.0'],
-    cffi_modules=['pys2opc/pys2opc_build.py:ffibuilder'],
+    cffi_modules=['pys2opc_build.py:ffibuilder'],
     packages=['pys2opc'],
     package_dir={'pys2opc': 'pys2opc'},
     package_data={'pys2opc': ['version.json']},
