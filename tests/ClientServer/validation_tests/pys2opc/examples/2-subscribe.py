@@ -29,13 +29,13 @@ This is mostly illustrative, as the nodes do not change in value.
 
 import time
 
-from pys2opc import PyS2OPC_Client as PyS2OPC, BaseConnectionHandler
+from pys2opc import PyS2OPC_Client as PyS2OPC, BaseClientConnectionHandler
 from _connection_configuration import configuration_parameters_subscription
 
 
-class PrintSubs(BaseConnectionHandler):
+class PrintSubs(BaseClientConnectionHandler):
     """
-    Derivates from BaseConnectionHandler to print values on datachange notifications.
+    Derivates from BaseClientConnectionHandler to print values on datachange notifications.
     """
     def on_datachanged(self, nodeId, dataValue):
         #  dataValue contains the source and server timestamps, as well as the new value.

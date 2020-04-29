@@ -27,7 +27,7 @@ Some connections are secured and some unsecured. A subscription is made on the s
 
 import time
 
-from pys2opc import PyS2OPC_Client as PyS2OPC, BaseConnectionHandler
+from pys2opc import PyS2OPC_Client as PyS2OPC, BaseClientConnectionHandler
 from _connection_configuration import configuration_parameters_no_subscription, configuration_parameters_subscription, configuration_parameters_security, join_configs
 
 
@@ -38,7 +38,7 @@ NODES_B = ['s=BRD.NC_000.VP_96.TC.OBC_TC_LOAD_NTEL.CHIFFRE03_RAW',
            's=BRD.NC_000.VP_96.TM.TMAI.POBC_MA_CALL_PERIOD_RAW',
            's=BRD.NC_000.VP_96.TM.TSEN2.PTSE_TS2_DP_SIGN_D20_RAW']
 
-class PrintSubs(BaseConnectionHandler):
+class PrintSubs(BaseClientConnectionHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.tag = ''  # Will use this tag to differentiate connections with subscriptions

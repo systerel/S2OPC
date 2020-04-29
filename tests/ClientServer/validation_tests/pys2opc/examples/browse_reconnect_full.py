@@ -32,7 +32,7 @@ import argparse
 import re
 import pickle
 
-from pys2opc import PyS2OPC_Client as PyS2OPC, BaseConnectionHandler, AttributeId, NodeClass
+from pys2opc import PyS2OPC_Client as PyS2OPC, BaseClientConnectionHandler, AttributeId, NodeClass
 from _connection_configuration import configuration_parameters_no_subscription
 from utils import ReconnectingContext
 
@@ -99,7 +99,7 @@ if __name__ == '__main__':
                         dCls[b] = ref.nodeClass
                     # Compute node depth
 
-        context = ReconnectingContext(config, BaseConnectionHandler)
+        context = ReconnectingContext(config, BaseClientConnectionHandler)
         while sCandidates and nRetry:
             connection = context.get_connection()
             lToBrowse = list(random.sample(sCandidates, min(len(sCandidates), [3, 6, 12, 25, 50][nRetry-1])))  # Make a request of max 50 nodes

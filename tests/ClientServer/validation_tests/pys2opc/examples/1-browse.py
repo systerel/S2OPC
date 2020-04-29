@@ -26,7 +26,7 @@ Only displays the following reference types: "Organizes", "HasComponent", and "H
 """
 
 
-from pys2opc import PyS2OPC_Client as PyS2OPC, BaseConnectionHandler, AttributeId
+from pys2opc import PyS2OPC_Client as PyS2OPC, BaseClientConnectionHandler, AttributeId
 from _connection_configuration import configuration_parameters_no_subscription
 
 
@@ -45,7 +45,7 @@ if __name__ == '__main__':
         dNodes['i=87'] = []  # Views
         # The structure to store known-but-yet-to-be-explored nodes
         sCandidates = {ROOT_ID}  # The Root node
-        with PyS2OPC.connect(config, BaseConnectionHandler) as connection:
+        with PyS2OPC.connect(config, BaseClientConnectionHandler) as connection:
             try:
                 while sCandidates:
                     lToBrowse = list(sCandidates)[:50]  # Make a request of max 50 nodes

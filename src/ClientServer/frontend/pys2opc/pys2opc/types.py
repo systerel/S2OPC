@@ -39,7 +39,7 @@ class Request:
         payload: An OpcUa_*Request.
 
     Attributes:
-        eventResponseReceived: Event that is set when the response is received and the `pys2opc.connection.BaseConnectionHandler.on_generic_response`
+        eventResponseReceived: Event that is set when the response is received and the `pys2opc.connection.BaseClientConnectionHandler.on_generic_response`
                                of the connection has been called.
         requestContext: A (unique) identifier for the request (read-only).
     """

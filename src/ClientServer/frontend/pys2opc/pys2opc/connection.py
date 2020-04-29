@@ -26,7 +26,7 @@ from .types import Request, AttributeId, allocator_no_gc, EncodeableType, str_to
 from .responses import Response, ReadResponse, WriteResponse, BrowseResponse
 
 
-class BaseConnectionHandler:
+class BaseClientConnectionHandler:
     """
     Base class giving the prototypes of the callbacks,
     and implements the subscription-library connection wrappers.
@@ -109,7 +109,7 @@ class BaseConnectionHandler:
     def on_datachanged(self, nodeId, dataValue):
         """
         This callback is called upon reception of a value change for a node.
-        See `pys2opc.connection.BaseConnectionHandler.add_nodes_to_subscription`.
+        See `pys2opc.connection.BaseClientConnectionHandler.add_nodes_to_subscription`.
 
         `nodeId` is the string containing the NodeId of the changed node and
         `dataValue` is the new value (see `pys2opc.types.DataValue`).
@@ -157,7 +157,7 @@ class BaseConnectionHandler:
         Subscribe to a list of string of NodeIds in the OPC-UA format (see `pys2opc` module documentation).
         This call is always synchroneous, so that the Toolkit waits for the server response to return.
 
-        The callback `pys2opc.connection.BaseConnectionHandler.on_datachanged` will be called once for each new value of the nodes.
+        The callback `pys2opc.connection.BaseClientConnectionHandler.on_datachanged` will be called once for each new value of the nodes.
         In particular, the callback is at least called once for the initial value.
         """
         # TODO: check format?
@@ -176,7 +176,7 @@ class BaseConnectionHandler:
     def send_generic_request(self, request, bWaitResponse):
         """
         Sends a request. When `bWaitResponse`, waits for the response and returns it.
-        Otherwise, returns the `request`, and the response will be available through `pys2opc.connection.BaseConnectionHandler.get_response`.
+        Otherwise, returns the `request`, and the response will be available through `pys2opc.connection.BaseClientConnectionHandler.get_response`.
         """
         reqCtx = int(request.requestContext)
         self._dRequestContexts[reqCtx] = request

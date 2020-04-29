@@ -28,24 +28,24 @@ The `pys2opc.s2opc.PyS2OPC` represents the `SOPC_Toolkit` and gathers its top le
 
 Once a configuration is created and the toolkit is `pys2opc.s2opc.PyS2OPC.mark_configured`,
 new connections are created with `pys2opc.s2opc.PyS2OPC.connect`.
-Connection objects are instances of the `pys2opc.connection.BaseConnectionHandler`.
+Connection objects are instances of the `pys2opc.connection.BaseClientConnectionHandler`.
 
-With connections, you can `pys2opc.connection.BaseConnectionHandler.read_nodes`,
-`pys2opc.connection.BaseConnectionHandler.write_nodes` and `pys2opc.connection.BaseConnectionHandler.browse_nodes`.
-You can also `pys2opc.connection.BaseConnectionHandler.add_nodes_to_subscription`,
-and receive notifications through `pys2opc.connection.BaseConnectionHandler.on_datachanged`.
+With connections, you can `pys2opc.connection.BaseClientConnectionHandler.read_nodes`,
+`pys2opc.connection.BaseClientConnectionHandler.write_nodes` and `pys2opc.connection.BaseClientConnectionHandler.browse_nodes`.
+You can also `pys2opc.connection.BaseClientConnectionHandler.add_nodes_to_subscription`,
+and receive notifications through `pys2opc.connection.BaseClientConnectionHandler.on_datachanged`.
 
 >>> PyS2OPC.get_version()
 >>> with PyS2OPC.initialize():
 >>>     config = PyS2OPC.add_configuration_unsecured()
 >>>     PyS2OPC.mark_configured()
->>>     with PyS2OPC.connect(config, BaseConnectionHandler) as connection:
+>>>     with PyS2OPC.connect(config, BaseClientConnectionHandler) as connection:
 >>>         connection.read_nodes()
 
 
 ## NodeId concept
 
-Throughout the module (e.g. `pys2opc.connection.BaseConnectionHandler.read_nodes`),
+Throughout the module (e.g. `pys2opc.connection.BaseClientConnectionHandler.read_nodes`),
 when the interface requires a NodeId, the following syntax is used:
 
 >>> node_id = 'ns=1;x=qualifier'
@@ -62,6 +62,6 @@ The NodeId type `x=` is either:
 """
 
 from .s2opc import PyS2OPC_Client, PyS2OPC_Server, ClientConfiguration, VERSION
-from .connection import BaseConnectionHandler
+from .connection import BaseClientConnectionHandler
 from .types import Request, Variant, VariantType, DataValue, AttributeId, ReturnStatus, StatusCode, SecurityPolicy, SecurityMode, NodeClass
 

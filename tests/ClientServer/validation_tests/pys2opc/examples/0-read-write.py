@@ -30,7 +30,7 @@ import time
 import tempfile
 import random
 
-from pys2opc import PyS2OPC_Client as PyS2OPC, BaseConnectionHandler, DataValue, StatusCode, Variant, VariantType
+from pys2opc import PyS2OPC_Client as PyS2OPC, BaseClientConnectionHandler, DataValue, StatusCode, Variant, VariantType
 from _connection_configuration import configuration_parameters_no_subscription
 
 
@@ -59,8 +59,8 @@ if __name__ == '__main__':
         PyS2OPC.mark_configured()
         # Use the configuration to create a new connection.
         # The connection is automatically closed when reaching out of the with context.
-        # The default BaseConnectionHandler is used, as we do not intent to use subscription.
-        with PyS2OPC.connect(config, BaseConnectionHandler) as connection:
+        # The default BaseClientConnectionHandler is used, as we do not intent to use subscription.
+        with PyS2OPC.connect(config, BaseClientConnectionHandler) as connection:
             # Make a read. Responses are in the same order. By default, reads the Value attribute.
             respRead = connection.read_nodes(NODES_TO_READ)
             for node, datavalue in zip(NODES_TO_READ, respRead.results):

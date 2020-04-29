@@ -44,7 +44,7 @@ from itertools import product
 import time
 import threading
 
-from pys2opc import PyS2OPC_Client as PyS2OPC, BaseConnectionHandler, SecurityMode, SecurityPolicy, AttributeId, VariantType, Variant, NodeClass, DataValue, StatusCode
+from pys2opc import PyS2OPC_Client as PyS2OPC, BaseClientConnectionHandler, SecurityMode, SecurityPolicy, AttributeId, VariantType, Variant, NodeClass, DataValue, StatusCode
 
 import sys; sys.path.insert(0, VALIDATION_DIR)
 from tap_logger import TapLogger
@@ -89,9 +89,9 @@ PYS2OPC_TYPES = {ua.VariantType.Int64: VariantType.Int64,
                  ua.VariantType.Float: VariantType.Float}
 
 
-class ConnectionHandler(BaseConnectionHandler):
+class ConnectionHandler(BaseClientConnectionHandler):
     """
-    BaseConnectionHandler with datachange callback and new methods which implement the tests.
+    BaseClientConnectionHandler with datachange callback and new methods which implement the tests.
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

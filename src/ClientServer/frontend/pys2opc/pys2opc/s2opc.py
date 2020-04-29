@@ -26,7 +26,7 @@ import sys
 import json
 
 from _pys2opc import ffi, lib as libsub
-from .connection import BaseConnectionHandler
+from .connection import BaseClientConnectionHandler
 from .types import DataValue, ReturnStatus, SecurityPolicy, SecurityMode
 from .responses import Response
 
@@ -307,7 +307,7 @@ class PyS2OPC_Client(PyS2OPC):
         """
         Connects to the server with the given `configuration`.
         The configuration is returned by a call to add_configuration_unsecured().
-        The ConnectionHandlerClass is a class that must be inherited from BaseConnectionHandler,
+        The ConnectionHandlerClass is a class that must be inherited from BaseClientConnectionHandler,
         and that at least overrides the callbacks.
         It will be instantiated and the instance is returned.
 
@@ -317,7 +317,7 @@ class PyS2OPC_Client(PyS2OPC):
         assert isinstance(configuration, ClientConfiguration)
         cfgId = configuration._id
         assert cfgId in PyS2OPC_Client._dConfigurations, 'Unknown configuration, see add_configuration_unsecured().'
-        assert issubclass(ConnectionHandlerClass, BaseConnectionHandler)
+        assert issubclass(ConnectionHandlerClass, BaseClientConnectionHandler)
 
         pConId = ffi.new('SOPC_LibSub_DataId *')
         status = libsub.SOPC_LibSub_Connect(cfgId, pConId)
