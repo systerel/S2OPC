@@ -80,7 +80,6 @@ zephyr_library_sources(
 ../src/Common/helpers_platform_dep/sopc_time.c
 ../src/Common/helpers_platform_dep/zephyr/p_mem_alloc.c
 ../src/Common/helpers_platform_dep/zephyr/p_threads.c
-../src/Common/helpers_platform_dep/zephyr/p_file.c
 ../src/Common/helpers_platform_dep/zephyr/p_filesystem.c
 ../src/Common/helpers_platform_dep/zephyr/p_sockets.c
 ../src/Common/helpers_platform_dep/zephyr/p_synchro.c
