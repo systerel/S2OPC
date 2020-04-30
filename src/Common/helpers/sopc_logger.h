@@ -75,12 +75,11 @@ bool SOPC_Logger_Initialize(const char* logDirPath, uint32_t maxBytes, uint16_t 
 void SOPC_Logger_SetTraceLogLevel(SOPC_Log_Level level);
 
 /*
- * \brief getter for the log level of a module
+ * \brief getter for the log level
  *
- * \param module [in] log module
- * \return the trace log level of the module
+ * \return the trace log level
  */
-SOPC_Log_Level SOPC_Logger_GetTraceLogLevel(SOPC_Log_Module module);
+SOPC_Log_Level SOPC_Logger_GetTraceLogLevel(void);
 
 /*
  * \brief Activates the console output for logged traces (same active level as log file)

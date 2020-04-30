@@ -141,7 +141,7 @@ SOPC_ReturnStatus SOPC_Toolkit_Configured()
                 toolkitBuildInfo = SOPC_ToolkitConfig_GetBuildInfo();
 
                 /* set log level to INFO for version logging, then restore it */
-                SOPC_Log_Level level = SOPC_Logger_GetTraceLogLevel(SOPC_LOG_MODULE_CLIENTSERVER);
+                SOPC_Log_Level level = SOPC_Logger_GetTraceLogLevel();
                 SOPC_Logger_SetTraceLogLevel(SOPC_LOG_LEVEL_INFO);
                 SOPC_Logger_TraceInfo(
                     SOPC_LOG_MODULE_CLIENTSERVER, "Common library DATE='%s' VERSION='%s' SIGNATURE='%s' DOCKER='%s'",

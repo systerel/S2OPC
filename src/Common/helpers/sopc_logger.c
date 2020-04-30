@@ -97,27 +97,9 @@ void SOPC_Logger_SetTraceLogLevel(SOPC_Log_Level level)
     }
 }
 
-SOPC_Log_Level SOPC_Logger_GetTraceLogLevel(SOPC_Log_Module module)
+SOPC_Log_Level SOPC_Logger_GetTraceLogLevel(void)
 {
-    SOPC_Log_Instance* instance;
-
-    switch (module)
-    {
-    case SOPC_LOG_MODULE_CLIENTSERVER:
-        instance = clientServerTrace;
-        break;
-    case SOPC_LOG_MODULE_PUBSUB:
-        instance = pubSubTrace;
-        break;
-    case SOPC_LOG_MODULE_COMMON:
-        instance = commonTrace;
-        break;
-    default:
-        instance = NULL;
-        break;
-    }
-
-    return SOPC_Log_GetLogLevel(instance);
+    return SOPC_Log_GetLogLevel(commonTrace);
 }
 
 void SOPC_Logger_SetConsoleOutput(bool activate)
