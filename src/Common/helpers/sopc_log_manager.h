@@ -92,6 +92,15 @@ SOPC_Log_Instance* SOPC_Log_CreateInstanceAssociation(SOPC_Log_Instance* pLogIns
 bool SOPC_Log_SetLogLevel(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level);
 
 /*
+ * \brief getter for the log level of an instance
+ *
+ * \param pLogInst  An existing log instance
+ *
+ * \return the log level for the specified instance
+ */
+SOPC_Log_Level SOPC_Log_GetLogLevel(SOPC_Log_Instance* pLogInst);
+
+/*
  * \brief Activates the console output for logged traces (same active level as log file)
  *
  * \param pLogInst  An existing log instance

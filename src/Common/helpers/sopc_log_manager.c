@@ -391,6 +391,16 @@ bool SOPC_Log_SetLogLevel(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level)
     return result;
 }
 
+SOPC_Log_Level SOPC_Log_GetLogLevel(SOPC_Log_Instance* pLogInst)
+{
+    SOPC_Log_Level level = SOPC_LOG_LEVEL_ERROR;
+    if (NULL != pLogInst)
+    {
+        level = pLogInst->level;
+    }
+    return level;
+}
+
 // Activate output in console
 bool SOPC_Log_SetConsoleOutput(SOPC_Log_Instance* pLogInst, bool activate)
 {
