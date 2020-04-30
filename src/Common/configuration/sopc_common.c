@@ -54,35 +54,31 @@ SOPC_ReturnStatus SOPC_Common_Initialize(SOPC_Log_Configuration logConfiguration
     SOPC_Helper_EndiannessCfg_Initialize();
 
     bool result = false;
+    SOPC_FileSystem_CreationResult mkdirRes = SOPC_FileSystem_Creation_Error_UnknownIssue;
     /* Initialize logs */
     switch (logConfiguration.logSystem)
     {
     case SOPC_LOG_SYSTEM_FILE:
-    {
-        SOPC_FileSystem_CreationResult mkdirRes =
-            SOPC_FileSystem_mkdir(logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath);
+        mkdirRes = SOPC_FileSystem_mkdir(logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath);
         if (SOPC_FileSystem_Creation_OK != mkdirRes && SOPC_FileSystem_Creation_Error_PathAlreadyExists != mkdirRes)
         {
             fprintf(stderr, "WARNING: Cannot create log directory, defaulting to current directory\n");
             logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "";
         }
 
-        if (SOPC_STATUS_OK == status)
+        result = SOPC_Logger_Initialize(logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath,
+                                        logConfiguration.logSysConfig.fileSystemLogConfig.logMaxBytes,
+                                        logConfiguration.logSysConfig.fileSystemLogConfig.logMaxFiles);
+        if (result)
         {
-            result = SOPC_Logger_Initialize(logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath,
-                                            logConfiguration.logSysConfig.fileSystemLogConfig.logMaxBytes,
-                                            logConfiguration.logSysConfig.fileSystemLogConfig.logMaxFiles);
-            if (result)
-            {
-                SOPC_Logger_SetTraceLogLevel(logConfiguration.logLevel);
-            }
-            else
-            {
-                fprintf(stderr, "ERROR: S2OPC Logs initialization failed!\n");
-            }
+            SOPC_Logger_SetTraceLogLevel(logConfiguration.logLevel);
         }
-    }
-    break;
+        else
+        {
+            /* Status stays OK given that we don't have other alternatives for now */
+            fprintf(stderr, "ERROR: S2OPC Logs initialization failed!\n");
+        }
+        break;
     default:
         status = SOPC_STATUS_INVALID_PARAMETERS;
         break;
