@@ -984,7 +984,7 @@ static char* Server_ConfigLogPath(int argc, char* argv[])
     {
         logDirPath = SOPC_Malloc(logDirPathSize * sizeof(char));
     }
-    if (NULL != logDirPath && (int) (logDirPathSize - 1) == snprintf(logDirPath, logDirPathSize, "./%s%s%s_logs/",
+    if (NULL != logDirPath && (int) (logDirPathSize - 1) != snprintf(logDirPath, logDirPathSize, "./%s%s%s_logs/",
                                                                      logDirName, underscore, suffix))
     {
         SOPC_Free(logDirPath);
