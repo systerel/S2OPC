@@ -238,6 +238,6 @@ SOPC_UserAuthorization_Manager* SOPC_UserWithAuthorization_GetManager(
 const SOPC_User* SOPC_UserWithAuthorization_GetUser(SOPC_UserWithAuthorization* userWithAuthorization);
 
 /** \brief Free a \p SOPC_UserWithAuthorization and its embedded user when needed. */
-void SOPC_UserWithAuthorization_Free(SOPC_UserWithAuthorization** ppUserWithAutorization);
+void SOPC_UserWithAuthorization_Free(SOPC_UserWithAuthorization** ppUserWithAuthorization);
 
 #endif /* SOPC_USER_MANAGER_H_ */

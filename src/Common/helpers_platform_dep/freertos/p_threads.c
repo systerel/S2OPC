@@ -54,7 +54,7 @@ typedef struct T_THREAD_WKS
     TaskHandle_t handleTask;              // Handle freeRtos task
     SemaphoreHandle_t lockRecHandle;      // Critical section
     SemaphoreHandle_t signalReadyToWait;  // Task wait for at least one join call
-    SemaphoreHandle_t signalReadyToStart; // Autorize user callback execution
+    SemaphoreHandle_t signalReadyToStart; // Authorize user callback execution
     Condition* pSignalThreadJoined;       // Cond var used to signal task end
     tThreadArgs args;
 } tThreadWks;

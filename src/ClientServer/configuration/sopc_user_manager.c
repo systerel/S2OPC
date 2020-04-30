@@ -236,15 +236,15 @@ const SOPC_User* SOPC_UserWithAuthorization_GetUser(SOPC_UserWithAuthorization* 
     return userWithAuthorization->user;
 }
 
-void SOPC_UserWithAuthorization_Free(SOPC_UserWithAuthorization** ppUserWithAutorization)
+void SOPC_UserWithAuthorization_Free(SOPC_UserWithAuthorization** ppUserWithAuthorization)
 {
-    if (NULL == ppUserWithAutorization || NULL == *ppUserWithAutorization)
+    if (NULL == ppUserWithAuthorization || NULL == *ppUserWithAuthorization)
     {
         return;
     }
 
-    SOPC_UserWithAuthorization* userauthz = *ppUserWithAutorization;
+    SOPC_UserWithAuthorization* userauthz = *ppUserWithAuthorization;
     SOPC_User_Free(&userauthz->user);
     SOPC_Free(userauthz);
-    *ppUserWithAutorization = NULL;
+    *ppUserWithAuthorization = NULL;
 }
