@@ -431,7 +431,7 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
                 if (status != SOPC_STATUS_OK || otherAppCertComparison != 0)
                 {
                     *errorStatus = OpcUa_BadCertificateInvalid;
-                    status = OpcUa_BadCertificateInvalid;
+                    status = SOPC_STATUS_NOK;
 
                     SOPC_Logger_TraceError(
                         SOPC_LOG_MODULE_CLIENTSERVER,
