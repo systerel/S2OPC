@@ -79,7 +79,7 @@ stages:
 generation:
   <<: *docker_job
   stage: gen
-  image: com2.systerel.fr:5000/c765/gen-ext@sha256:29c8f93dfce606b86133605ee367c14e3b4b978eebe4181e42e9b826db06b06c # digest of gen-ext:1.3
+  image: com.systerel.fr:5000/c765/gen-ext@sha256:29c8f93dfce606b86133605ee367c14e3b4b978eebe4181e42e9b826db06b06c # digest of gen-ext:1.3
   script:
     - ./clean.sh all
     - ./.pre-build-ext.sh
@@ -291,7 +291,7 @@ test-unit:
 
 .test-uactt: &test_uactt
   <<: *test_linux
-  image: com2.systerel.fr:5000/c838/uactt-win@sha256:e8a51f56722873c5752f8e50f33e557db426a14460558bc5931b9d24e7a9b540 # digest of uactt-win:1.7
+  image: com.systerel.fr:5000/c838/uactt-win@sha256:e8a51f56722873c5752f8e50f33e557db426a14460558bc5931b9d24e7a9b540 # digest of uactt-win:1.7
   script:
     - 'cd tests/ClientServer/acceptance_tools/ && ./launch_acceptance_tests.sh'
   artifacts:
