@@ -29,6 +29,7 @@ from _pys2opc import ffi, lib as libsub
 from .connection import BaseClientConnectionHandler
 from .types import DataValue, ReturnStatus, SecurityPolicy, SecurityMode
 from .responses import Response
+from .server_callbacks import BaseAddressSpaceHandler
 
 
 VERSION = json.load(open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'version.json')))['version']
@@ -66,6 +67,10 @@ def _callback_client_event(connectionId, event, status, responsePayload, respons
 @ffi.def_extern()
 def _callback_toolkit_event(event, status, param, appContext):
     return PyS2OPC._callback_toolkit_event(event, status, param, appContext)
+
+@ffi.def_extern()
+def _callback_address_space_event(event, operationParam, operationStatus):
+    return PyS2OPC_Server._callback_address_space_event(event, operationParam, operationStatus)
 
 
 
@@ -382,6 +387,7 @@ class PyS2OPC_Server(PyS2OPC):
     When the toolkit is `PyS2OPC_Server.initialize`d for a server, it cannot be `PyS2OPC_Client.initialize`d for a client before it is `PyS2OPC_Server.clear`ed.
     """
     _dConfigurations = {}  # Stores server known configurations {Id: configurationParameters} (client and server configurations may have the same index)
+    _callbacks_configured = False
 
     @staticmethod
     @contextmanager
@@ -435,6 +441,7 @@ class PyS2OPC_Server(PyS2OPC):
         # TODO: Disconnect existing clients
         libsub.SOPC_Toolkit_Clear()  # Calls SOPC_Common_Clear
         PyS2OPC._initialized_srv = False
+        PyS2OPC_Server._callbacks_configured = False
 
     @staticmethod
     def _callback_toolkit_event(event, status, param, appContext):
@@ -449,6 +456,49 @@ class PyS2OPC_Server(PyS2OPC):
             #          (deallocated by toolkit after callback call ends)
             # auxParam = user application request context
             pass
+
+    @staticmethod
+    def _callback_address_space_event(event, operationParam, operationStatus):
+        assert PyS2OPC_Server._adds_notifier is not None
+        PyS2OPC_Server._adds_notifier.on_datachanged(event, operationParam, operationStatus)
+
+    @staticmethod
+    def set_connection_handlers(address_space_notifier=None, user_handler=None, method_handler=None):
+        """
+        Configure the callbacks of the server.
+        This step is optional.
+        If it is not called, defaults values are used:
+        - no notification of address space events,
+        - "allow all" for user policy,
+        - no callable methods.
+
+        This function must be called after `PyS2OPC_Server.initialize`, and before `PyS2OPC_Server.mark_configured`.
+        It must be called at most once.
+
+        Note: limitation: for now, only address space notfications are available.
+
+        Args:
+            address_space_notifier: None (no notification) or an instance of a subclass of
+                                    `pys2opc.server_callbacks.BaseAddressSpaceHandler`
+            user_handler: None (authenticate all user and authorize all operations)
+            method_handler: None (no method available)
+        """
+        assert PyS2OPC._initialized_srv and not PyS2OPC._configured,\
+            'Toolkit is either not initialized, initialized as a Client, or already marked_configured.'
+        assert not PyS2OPC_Server._callbacks_configured,\
+            'Callbacks are already configured by a previous call to set_connection_handlers.'
+        # TODO:
+        assert user_handler is None, 'User Manager not implemented yet'
+        assert method_handler is None, 'Method Manager not implemented yet'
+        # Address Space
+        if address_space_notifier is not None:
+            assert isinstance(address_space_notifier, BaseAddressSpaceHandler)
+            PyS2OPC_Server._adds_notifier = address_space_notifier
+            # Note: SetAddressSpaceNotifCb cannot be called with NULL
+            assert libsub.SOPC_ToolkitServer_SetAddressSpaceNotifCb(libsub._callback_address_space_event) == ReturnStatus.OK
+        # In case previous calls fails, this is not reached and leaves the server in an half-configured state
+        # However, this approximation is required to a have a higher-level server API...
+        PyS2OPC_Server._callbacks_configured = True
 
 
 
