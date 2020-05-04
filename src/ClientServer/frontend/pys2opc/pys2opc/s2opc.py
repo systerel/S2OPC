@@ -388,6 +388,8 @@ class PyS2OPC_Server(PyS2OPC):
     """
     _dConfigurations = {}  # Stores server known configurations {Id: configurationParameters} (client and server configurations may have the same index)
     _callbacks_configured = False
+    _adds_notifier = None  # Instance of BaseAddressSpaceHandler
+    _adds = None  # The address space loaded through the xml loader
 
     @staticmethod
     @contextmanager
@@ -442,6 +444,9 @@ class PyS2OPC_Server(PyS2OPC):
         libsub.SOPC_Toolkit_Clear()  # Calls SOPC_Common_Clear
         PyS2OPC._initialized_srv = False
         PyS2OPC_Server._callbacks_configured = False
+        PyS2OPC_Server._adds_notifier = None
+        if PyS2OPC_Server._adds is not None:
+            libsub.SOPC_AddressSpace_Delete(PyS2OPC_Server._adds)
 
     @staticmethod
     def _callback_toolkit_event(event, status, param, appContext):
@@ -461,6 +466,29 @@ class PyS2OPC_Server(PyS2OPC):
     def _callback_address_space_event(event, operationParam, operationStatus):
         assert PyS2OPC_Server._adds_notifier is not None
         PyS2OPC_Server._adds_notifier.on_datachanged(event, operationParam, operationStatus)
+
+    @staticmethod
+    def load_address_space(xml_path):
+        """
+        Loads an address space from the XML file `xml_path`.
+        This must be done after `PyS2OPC_Server.initialize`, and before `PyS2OPC_Server.mark_configured`.
+
+        Note: only one address space can be loaded. Once an address space is loaded, this function is not callable anymore.
+
+        Args:
+            xml_path: Path to an Address Space in the format specified by the OPC Foundation
+                      (see also http://opcfoundation.org/UA/2011/03/UANodeSet.xsd).
+        """
+        assert PyS2OPC._initialized_srv and not PyS2OPC._configured,\
+            'Toolkit is either not initialized, initialized as a Client, or already marked_configured.'
+        assert PyS2OPC_Server._adds is None, 'Only one address space can be loaded.'
+
+        with open(xml_path, 'r') as fd:
+            space = libsub.SOPC_UANodeSet_Parse(fd)
+        assert space != ffi.NULL,\
+            'Cannot load address space from file {}'.format(xml_path)
+        assert libsub.SOPC_ToolkitServer_SetAddressSpaceConfig(space) == ReturnStatus.OK
+        PyS2OPC_Server._adds = space  # Kept to avoid double inits, and to clear it
 
     @staticmethod
     def set_connection_handlers(address_space_notifier=None, user_handler=None, method_handler=None):

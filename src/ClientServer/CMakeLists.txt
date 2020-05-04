@@ -224,7 +224,7 @@ if(WITH_PYS2OPC)
 
   # Produce the expanded header
   s2opc_expand_header(${PYS2OPC_SRC_PATH}/s2opc_headers.h
-                      s2opc_clientwrapper
+                      "s2opc_clientwrapper;s2opc_clientserver-xml-loaders-expat"
                       ${PYS2OPC_INCLUDE}
                       )
 
@@ -247,4 +247,5 @@ if(WITH_PYS2OPC)
                     DEPENDS ${PYS2OPC_PLACEHOLDER}
                     )
   add_dependencies(pys2opc s2opc_clientwrapper)
+  add_dependencies(pys2opc s2opc_clientserver-xml-loaders-expat)
 endif()

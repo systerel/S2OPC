@@ -40,6 +40,7 @@
 
 /* The following may crash as they are not standard... But stddef cannot be included... */
 typedef uintptr_t size_t;
+typedef struct _IO_FILE FILE;
 
 /* sopc_builtintypes.h */
 typedef uint32_t SOPC_StatusCode;
@@ -181,6 +182,7 @@ const SOPC_String* SOPC_User_GetUsername(const SOPC_User* user);
 
 /* sopc_address_space.h */
 typedef struct _SOPC_AddressSpace SOPC_AddressSpace;
+void SOPC_AddressSpace_Delete(SOPC_AddressSpace* space);
 
 /* Altered includes */
 #include "sopc_call_method_manager_cffi.h"
@@ -221,3 +223,7 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
 
 /* pki_permissive.h */
 // SOPC_ReturnStatus SOPC_PKIPermissive_Create(SOPC_PKIProvider** ppPKI);
+
+/* XML Expat: Config and Address Space */
+bool SOPC_Config_Parse(FILE* fd, SOPC_S2OPC_Config* config);
+SOPC_AddressSpace* SOPC_UANodeSet_Parse(FILE* fd);

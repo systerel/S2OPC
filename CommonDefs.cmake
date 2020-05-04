@@ -54,7 +54,7 @@ if (USE_STATIC_EXPAT_LIB)
   endif()
 endif()
 
-if(S2OPC_CLIENTSERVER_ONLY)
+if(S2OPC_CLIENTSERVER_ONLY AND NOT WITH_PYS2OPC)
   find_package(expat CONFIG) # if not found XML loaders will not be compiled
 else()
   find_package(expat REQUIRED CONFIG)
@@ -343,7 +343,7 @@ function(s2opc_embed_address_space c_file_name xml_uanodeset_path)
 endfunction()
 
 # Function that generates the expanded include required by CFFI to compile PyS2OPC
-function(s2opc_expand_header h_input context_target h_expanded)
+function(s2opc_expand_header h_input context_targets h_expanded)
   # Note: this function may seem overkill, as there are only a few PyS2OPC headers.
   # It was the basis of tests to avoid manual maintenance of the PyS2OPC's headers, required by CFFI.
   # CFFI is based on pycparser, and their combined purposes make this clearly and intentionally unfeasible.
@@ -359,11 +359,13 @@ function(s2opc_expand_header h_input context_target h_expanded)
 
   # Evaluate properties of target to get the ;-list, and produce the '-I;'-list,
   # that will be expanded as MULTIPLE ARGUMENTS thanks to the COMMAND_EXPAND_LISTS
-  set(_expand_eval_includes "$<TARGET_PROPERTY:${context_target},INCLUDE_DIRECTORIES>")
-  set(_expand_includes "$<$<BOOL:${_expand_eval_includes}>:-I$<JOIN:${_expand_eval_includes},\;-I>>")
-  # Same for defines
-  set(_expand_eval_defines "$<TARGET_PROPERTY:${context_target},COMPILE_DEFINITIONS>")
-  set(_expand_defines "$<$<BOOL:${_expand_eval_defines}>:-D$<JOIN:${_expand_eval_defines},\;-D>>")
+  foreach(_context_target IN LISTS context_targets)
+    set(_expand_eval_includes "$<TARGET_PROPERTY:${_context_target},INCLUDE_DIRECTORIES>")
+    list(APPEND _expand_includes "$<$<BOOL:${_expand_eval_includes}>:-I$<JOIN:${_expand_eval_includes},\;-I>>")
+    # Same for defines
+    set(_expand_eval_defines "$<TARGET_PROPERTY:${_context_target},COMPILE_DEFINITIONS>")
+    list(APPEND _expand_defines "$<$<BOOL:${_expand_eval_defines}>:-D$<JOIN:${_expand_eval_defines},\;-D>>")
+  endforeach(_context_target)
 
   add_custom_command(DEPENDS ${h_input}
                      OUTPUT ${h_expanded}

@@ -42,8 +42,8 @@ if __name__ == '__main__':
     with PyS2OPC.initialize(logPath='/tmp/pys2opc_logs'):
         print('Initialized')
         # Thread safety on callbacks?
-        #PyS2OPC.load_address_space(xml_path)  # Only one
         #config = PyS2OPC.load_configuration(xml_path, pki_allow_all=False)  # Endpoint, XML ? PKI ?
+        PyS2OPC.load_address_space('build/bin/s2opc.xml')
         PyS2OPC.set_connection_handlers(address_space_notifier=AddressSpaceHandler(),
                                         user_handler=None,
                                         method_handler=None)
