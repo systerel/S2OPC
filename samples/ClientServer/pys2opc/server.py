@@ -26,13 +26,13 @@ Example script: this script initializes the toolkit as a server.
 
 import time
 
-from pys2opc import PyS2OPC_Server as PyS2OPC, BaseAddressSpaceHandler#, DataValue, StatusCode, Variant, VariantType
+from pys2opc import PyS2OPC_Server as PyS2OPC, BaseAddressSpaceHandler, DataValue, StatusCode, AttributeId#, Variant, VariantType
 #from _connection_configuration import configuration_parameters_no_subscription
 
 
 class AddressSpaceHandler(BaseAddressSpaceHandler):
     def on_datachanged(self, nodeId, attrId, dataValue, indexRange, status):
-        print(nodeId, attrId, dataValue, indexRange, status)
+        print(nodeId, AttributeId.get_name_from_id(attrId), dataValue, indexRange, StatusCode.get_name_from_id(status))
 
 
 if __name__ == '__main__':

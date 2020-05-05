@@ -23,7 +23,7 @@ Server side callbacks base classes.
 """
 
 from . import ffi, libsub
-from .types import EncodeableType, nodeid_to_str, UserAuthentication, UserAuthorization
+from .types import EncodeableType, nodeid_to_str, string_to_str, DataValue#, UserAuthentication, UserAuthorization
 
 
 class BaseAddressSpaceHandler:
@@ -31,14 +31,17 @@ class BaseAddressSpaceHandler:
     Base class for the Address Space notification callback.
     You should derive this class and re-implement its `BaseAddressSpaceHandler.on_datachanged`.
     """
-    # Internal, translates the input from the C call to something easier to use
-    def _on_datachanged(self, event, wvi, status):
+    def _on_datachanged(self, event, write_value, status):
+        """
+        Internal, translates the input from the C call to something easier to use.
+        Please see `BaseAddressSpaceHandler.on_datachanged`.
+        """
         assert event == libsub.AS_WRITE_EVENT, 'Only address space write events are supported for now, received 0x{:X}'.format(event)
+        wvi = ffi.cast('OpcUa_WriteValue *', write_value)
         assert wvi.encodeableType == EncodeableType.WriteValue
-        # TODO:
-        print(type(wvi.AttributeId))
-        print(wvi.IndexRange)
-        self.on_datachanged(nodei_to_str(wvi.NodeId), wvi.AttributeId, wvi.Value, wvi.IndexRange, status)
+        self.on_datachanged(nodeid_to_str(ffi.addressof(wvi.NodeId)), wvi.AttributeId,
+                            DataValue.from_sopc_datavalue(wvi.Value),
+                            string_to_str(wvi.IndexRange), status)
 
     def on_datachanged(self, nodeId, attrId, dataValue, indexRange, status):
         """

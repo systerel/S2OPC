@@ -480,7 +480,7 @@ class PyS2OPC_Server(PyS2OPC):
     @staticmethod
     def _callback_address_space_event(event, operationParam, operationStatus):
         assert PyS2OPC_Server._adds_handler is not None
-        PyS2OPC_Server._adds_handler.on_datachanged(event, operationParam, operationStatus)
+        PyS2OPC_Server._adds_handler._on_datachanged(event, operationParam, operationStatus)
 
     @staticmethod
     def load_address_space(xml_path):
