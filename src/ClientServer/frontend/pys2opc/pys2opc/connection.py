@@ -43,6 +43,11 @@ class BaseClientConnectionHandler:
         self._connected = True
         self._dSubscription = {}  # Associates data_id to string NodeId
 
+    def __enter__(self):
+        return self
+    def __exit__(self, *exc):
+        self.disconnect()
+
     # Internals
     def _on_datachanged(self, dataId, value):
         """
@@ -97,13 +102,10 @@ class BaseClientConnectionHandler:
             # Hopefully the Toolkit always notifies the application, and it is caught here.
             # Also, if the processing of the response fails, it is caught here.
             request.eventResponseReceived.set()
+
     def _wait_for_response(self, request):
         request.eventResponseReceived.wait()
         return request.response
-    def __enter__(self):
-        return self
-    def __exit__(self, *exc):
-        self.disconnect()
 
     # Callbacks
     def on_datachanged(self, nodeId, dataValue):

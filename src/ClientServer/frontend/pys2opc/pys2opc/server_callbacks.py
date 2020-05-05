@@ -49,16 +49,16 @@ class BaseAddressSpaceHandler:
         The notification is called each time a `WriteRequest` is treated by the server.
         The corresponding `OpcUa_WriteValue` is split accross the arguments for convenience.
 
-        There are no notifications from local writes (see `pys2opc.PyS2OPC_Server.local_write_nodes`),
+        There are no notifications from local writes,
         as they are suppressed by the C library.
 
         You must re-implement this callback.
 
         Args:
-            nodeId: The written NodeId as a string (see `pys2opc.nodeif-concept`)
+            nodeId: The written NodeId as a string (see [NodeId Concept](/pys2opc#nodeid-concept))
             attrId: The written `pys2opc.types.AttributeId`
             value: The new `pys2opc.types.DataValue`
-            indexRange: An index range for the DataValue (if any, the DataValue should only have this length)
+            indexRange: An index range (string) for the DataValue (if any, the DataValue should only have this length)
             status: The `pys2opc.types.StatusCode` of this operation that will be returned to the client.
                     This differs from the status code of the value, which is contained in the DataValue.
         """

@@ -25,9 +25,8 @@ The wrapper provides Python classes for OPC UA concepts.
 
 The `pys2opc.s2opc.PyS2OPC` represents the `SOPC_Toolkit*_*` API and gathers its top level functionalities,
 which are split in `pys2opc.s2opc.PyS2OPC_Client` and `pys2opc.s2opc.PyS2OPC_Server`.
-(see `pys2opc.s2opc.PyS2OPC_Client.initialize`, `pys2opc.s2opc.PyS2OPC_Client.add_configuration_unsecured`, `pys2opc.s2opc.PyS2OPC_Server.initialize`, ...).
 
-For now, the module can be used either as a Server or one or more Clients.
+For now, the module can be used exclusively either as a Server or one or more Clients.
 
 
 ### Client use
@@ -52,11 +51,25 @@ and receive notifications through `pys2opc.connection.BaseClientConnectionHandle
 
 ## Server use
 
-TODO
+Servers are mainly configured by XML files: one for the structure and content of the address space,
+the other for the endpoint configuration, which specifies who can connect, and which security keys are used.
+The configuration is also the place to register callbacks
+(see `pys2opc.server_callbacks.BaseAddressSpaceHandler`).
+
+There are two main ways to start the server once configured.
+An "all-in-one" `pys2opc.s2opc.PyS2OPC_Server.serve_forever`,
+and a more permissive one using a `with` statement `pys2opc.s2opc.PyS2OPC_Server.serve`.
+In the `with` statement, the application code can be started alongside the S2OPC server.
 
 >>> from pys2opc import PyS2OPC_Server as PyS2OPC
 >>> PyS2OPC.get_version()
 >>> with PyS2OPC.initialize():
+>>>     PyS2OPC.load_address_space('address_space.xml')
+>>>     PyS2OPC.load_configuration('server_configuration.xml')
+>>>     PyS2OPC.mark_configured()
+>>>     with PyS2OPC.serve():
+>>>         # The main loop of the application
+>>>         while 'Serving': pass
 
 ## NodeId concept
 
@@ -81,4 +94,4 @@ from .s2opc import VERSION, PyS2OPC_Client, PyS2OPC_Server, ClientConfiguration,
 from .connection import BaseClientConnectionHandler
 from .types import Request, Variant, VariantType, DataValue, AttributeId, ReturnStatus, StatusCode, SecurityPolicy, SecurityMode, NodeClass
 
-del ffi, libsub
+#del ffi, libsub  # This makes pdoc bug

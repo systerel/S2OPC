@@ -96,6 +96,10 @@ class PyS2OPC:
                       libsub.SE_LOCAL_SERVICE_RESPONSE}
 
     @staticmethod
+    def initialize():
+        raise NotImplementedError
+
+    @staticmethod
     def _assert_not_init():
         assert not PyS2OPC._initialized_cli, 'This PyS2OPC process is alread initialized as a Client'
         assert not PyS2OPC._initialized_srv, 'This PyS2OPC process is alread initialized as a Server'
@@ -110,10 +114,16 @@ class PyS2OPC:
     @staticmethod
     def mark_configured():
         """
-        Must be called after all calls to `pys2opc.s2opc.PyS2OPC.add_configuration_unsecured` and `pys2opc.s2opc.PyS2OPC.add_configuration_secured`,
-        and before `pys2opc.s2opc.PyS2OPC.connect` or `pys2opc.s2opc.PyS2OPC.get_endpoints`.
+        Freeze the configuration of the toolkit.
+        Must be called after all calls to:
 
-        This tells S2OPC that the configuration phase is over.
+        - `PyS2OPC_Client.add_configuration_unsecured`, `PyS2OPC_Client.add_configuration_secured`,
+        - `PyS2OPC_Server.load_address_space`, and `PyS2OPC_Server.load_configuration`,
+
+        and before calls to:
+
+        - `PyS2OPC_Client.connect`, `PyS2OPC_Client.get_endpoints`,
+        - `PyS2OPC_Server.serve`, and `PyS2OPC_Server.serve_forever`.
         """
         assert (PyS2OPC._initialized_cli or PyS2OPC._initialized_srv) and not PyS2OPC._configured,\
             'Toolkit is not initialized or already configured, cannot add new configurations.'
@@ -516,6 +526,7 @@ class PyS2OPC_Server(PyS2OPC):
 
         Optionally configure the callbacks of the server.
         If handlers are left None, the following default behaviors are used:
+
         - address space: no notification of address space events,
         - user authentications and authorizations: allow all user and all operations,
         - methods: no callable methods,
