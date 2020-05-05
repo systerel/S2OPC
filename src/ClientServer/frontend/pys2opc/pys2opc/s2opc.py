@@ -117,7 +117,6 @@ class PyS2OPC:
         """
         assert (PyS2OPC._initialized_cli or PyS2OPC._initialized_srv) and not PyS2OPC._configured,\
             'Toolkit is not initialized or already configured, cannot add new configurations.'
-        assert libsub.SOPC_LibSub_Configured() == ReturnStatus.OK
         PyS2OPC._configured = True
 
     @staticmethod
@@ -315,6 +314,15 @@ class PyS2OPC_Client(PyS2OPC):
         config = ClientConfiguration(cfgId, dConnectionParameters)
         PyS2OPC_Client._dConfigurations[cfgId] = config
         return config
+
+    @staticmethod
+    def mark_configured():
+        PyS2OPC.mark_configured()
+        try:
+            assert libsub.SOPC_LibSub_Configured() == ReturnStatus.OK
+        except:
+            PyS2OPC._configured = False
+            raise
 
     @staticmethod
     def get_endpoints(configuration):
@@ -598,6 +606,15 @@ class PyS2OPC_Server(PyS2OPC):
             PyS2OPC_Server._adds_handler = address_space_handler
             # Note: SetAddressSpaceNotifCb cannot be called twice, or with NULL
             assert libsub.SOPC_ToolkitServer_SetAddressSpaceNotifCb(libsub._callback_address_space_event) == ReturnStatus.OK
+
+    @staticmethod
+    def mark_configured():
+        PyS2OPC.mark_configured()
+        try:
+            assert libsub.SOPC_Toolkit_Configured() == ReturnStatus.OK
+        except:
+            PyS2OPC._configured = False
+            raise
 
 
 
