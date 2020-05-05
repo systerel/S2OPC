@@ -40,16 +40,14 @@ if __name__ == '__main__':
     print()
 
     with PyS2OPC.initialize(logPath='/tmp/pys2opc_logs'):
-        print('Initialized')
         # Thread safety on callbacks?
         PyS2OPC.load_address_space('s2opc.xml')
-        config = PyS2OPC.load_configuration('S2OPC_Server_Demo_Config.xml',
-                                            address_space_handler=AddressSpaceHandler(),
-                                            user_handler=None,
-                                            method_handler=None,
-                                            pki_handler=None)
+        PyS2OPC.load_configuration('S2OPC_Server_Demo_Config.xml',
+                                   address_space_handler=AddressSpaceHandler(),
+                                   user_handler=None,
+                                   method_handler=None,
+                                   pki_handler=None)
         PyS2OPC.mark_configured()
-        #PyS2OPC.serve_forever(config)  # Should return exit reason
-        ## AsyncClose()
-        ## Clear()
-        time.sleep(1.)
+        #PyS2OPC.serve_forever()  # Should return exit reason
+        with PyS2OPC.serve():
+            time.sleep(1.)

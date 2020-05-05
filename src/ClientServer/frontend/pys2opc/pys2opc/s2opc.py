@@ -121,7 +121,7 @@ class PyS2OPC:
 
     @staticmethod
     def _callback_toolkit_event(event, status, param, appContext):
-        assert event in PyS2OPC._events_clients | PyS2OPC._events_server, 'Unknown event received from Toolkit "{}"'.format(event)
+        assert event in PyS2OPC._events_client | PyS2OPC._events_server, 'Unknown event received from Toolkit "{}"'.format(event)
         if event in PyS2OPC._events_server:
             PyS2OPC_Server._callback_toolkit_event(event, status, param, appContext)
         else:
@@ -464,12 +464,12 @@ class PyS2OPC_Server(PyS2OPC):
             PyS2OPC_Server._config = None
 
     @staticmethod
-    def _callback_toolkit_event(event, status, param, appContext):
+    def _callback_toolkit_event(event, epIdx, param, appContext):
         # For now, only support server events
         if event == libsub.SE_CLOSED_ENDPOINT:
             # id = endpoint configuration index,
             # auxParam = SOPC_ReturnStatus
-            pass
+            print(epIdx, 'closed')
         elif event == libsub.SE_LOCAL_SERVICE_RESPONSE:
             # id = endpoint configuration index,
             # params = (OpcUa_<MessageStruct>*) OPC UA message header + payload structure
@@ -615,6 +615,45 @@ class PyS2OPC_Server(PyS2OPC):
         except:
             PyS2OPC._configured = False
             raise
+
+    @staticmethod
+    @contextmanager
+    def serve(endpointIndexes=None):
+        """
+        Open the configured endpoint(s).
+        If no endpoints are given, all configured endpoints are opened.
+
+        Supports the context management facilities to close the endpoint(s):
+        >>> with PyS2OPC_Server.serve():
+        ...     # All applicative code may live here
+        ...     pass
+        ... # Endpoint and server capabilities are cleanly stoped upon context exit
+
+        If you don't have applicative application, and callbacks are enough,
+        see instead `PyS2OPC_Server.serve_forever()`.
+        """
+        for epIdx in (endpointIndexes or PyS2OPC_Server._dEpIdx):
+            libsub.SOPC_ToolkitServer_AsyncOpenEndpoint(epIdx)
+        print('Opening server')
+        try:
+            yield
+        finally:
+            for epIdx in (endpointIndexes or PyS2OPC_Server._dEpIdx):
+                libsub.SOPC_ToolkitServer_AsyncCloseEndpoint(epIdx)
+        print('Server stopped')
+
+    @staticmethod
+    def serve_forever(endpointIndexes=None):
+        """
+        Open and serve endpoint(s) forever.
+        Can be interrupted with a `KeyboardInterrupt` (`SIGINT`).
+        """
+        with PyS2OPC_Server.serve(endpointIndexes=endpointIndexes):
+            try:
+                while 'Waiting for an interrupt':
+                    time.sleep(.1)  # Sleepy wait
+            except KeyboardInterrupt:
+                pass
 
 
 
