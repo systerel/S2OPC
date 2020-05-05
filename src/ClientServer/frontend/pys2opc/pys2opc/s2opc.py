@@ -491,6 +491,33 @@ class PyS2OPC_Server(PyS2OPC):
         PyS2OPC_Server._adds = space  # Kept to avoid double inits, and to clear it
 
     @staticmethod
+    def load_configuration(xml_path):
+        """
+        Creates from the XML a configuration structure for a server.
+        This configuration is later used to open an endpoint.
+
+        The XML configuration format is specific to S2OPC and follows the s2opc_config.xsd scheme.
+
+        Args:
+            xml_path: Path to the configuration in the s2opc_config.xsd format.
+
+        Return:
+            A `ServerConfiguration` instance.
+        """
+        assert PyS2OPC._initialized_srv and not PyS2OPC._configured,\
+            'Toolkit is either not initialized, initialized as a Client, or already marked_configured.'
+
+        config = ffi.new('SOPC_S2OPC_Config *')
+        with open(xml_path, 'r') as fd:
+            assert libsub.SOPC_Config_Parse(fd, config)
+
+        # Finish the configuration by setting the manual fields: server certificate and key, create the pki, the method call manager, and the user auth* manager
+
+        # TODO: Maybe we should not give the config pointer to the server configuration,
+        #  as config.parameters() will return it, which allows the user to modify its content.
+        return ServerConfiguration({'pS2opcConfig': config, 'xml_path': xml_path})
+
+    @staticmethod
     def set_connection_handlers(address_space_notifier=None, user_handler=None, method_handler=None):
         """
         Configure the callbacks of the server.

@@ -42,12 +42,12 @@ if __name__ == '__main__':
     with PyS2OPC.initialize(logPath='/tmp/pys2opc_logs'):
         print('Initialized')
         # Thread safety on callbacks?
-        #config = PyS2OPC.load_configuration(xml_path, pki_allow_all=False)  # Endpoint, XML ? PKI ?
         PyS2OPC.load_address_space('build/bin/s2opc.xml')
+        config = PyS2OPC.load_configuration('build/bin/S2OPC_Server_Demo_Config.xml')
         PyS2OPC.set_connection_handlers(address_space_notifier=AddressSpaceHandler(),
                                         user_handler=None,
                                         method_handler=None)
-        #PyS2OPC.mark_configured()
+        PyS2OPC.mark_configured()
         #PyS2OPC.serve_forever(config)  # Should return exit reason
         ## AsyncClose()
         ## Clear()
