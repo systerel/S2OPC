@@ -63,3 +63,21 @@ class BaseAddressSpaceHandler:
                     This differs from the status code of the value, which is contained in the DataValue.
         """
         raise NotImplementedError()
+
+
+class BaseUserHandler:
+    """
+    Base class for the authentications and authorizations of users.
+    You should derive this class and re-implement its `BaseUserHandler.on_user_authentication` and `BaseUserHandler.on_user_authorization`.
+    """
+    pass
+    #def _on_user_authentication(self, authenticationManager, pUser, pUserAuthenticated):
+    #    # TODO: This call must be as fast as possible, to avoid stalling the toolkit
+    #    return ReturnStatus.NOT_SUPPORTED
+
+    #def _on_user_authorisation(self, authorizationManager, operationType, nodeId, attributeId, pUser, pbOperationAuthorized):
+    #    # TODO: This call must be as fast as possible, to avoid stalling the toolkit
+    #    return ReturnStatus.NOT_SUPPORTED
+
+
+# TODO: class BaseMethodHandler:

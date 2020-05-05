@@ -72,6 +72,14 @@ def _callback_toolkit_event(event, status, param, appContext):
 def _callback_address_space_event(event, operationParam, operationStatus):
     return PyS2OPC_Server._callback_address_space_event(event, operationParam, operationStatus)
 
+@ffi.def_extern()
+def _callback_validate_user_identity(authenticationManager, pUser, pUserAuthenticated):
+    return PyS2OPC_Server._callback_validate_user_identity(authenticationManager, pUser, pUserAuthenticated)
+
+@ffi.def_extern()
+def _callback_authorize_operation(authorizationManager, operationType, nodeId, attributeId, pUser, pbOperationAuthorized):
+    return PyS2OPC_Server._callback_authorize_operation(authorizationManager, operationType, nodeId, attributeId, pUser, pbOperationAuthorized);
+
 
 
 class PyS2OPC:
@@ -491,6 +499,16 @@ class PyS2OPC_Server(PyS2OPC):
     def _callback_address_space_event(event, operationParam, operationStatus):
         assert PyS2OPC_Server._adds_handler is not None
         PyS2OPC_Server._adds_handler._on_datachanged(event, operationParam, operationStatus)
+
+    @staticmethod
+    def _callback_validate_user_identity(authenticationManager, pUser, pUserAuthenticated):
+        # TODO: This call must be as fast as possible, to avoid stalling the toolkit
+        return ReturnStatus.NOT_SUPPORTED
+
+    @staticmethod
+    def _callback_authorize_operation(authorizationManager, operationType, nodeId, attributeId, pUser, pbOperationAuthorized):
+        # TODO: This call must be as fast as possible, to avoid stalling the toolkit
+        return ReturnStatus.NOT_SUPPORTED
 
     @staticmethod
     def load_address_space(xml_path):

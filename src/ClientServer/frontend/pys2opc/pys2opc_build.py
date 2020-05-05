@@ -36,6 +36,15 @@ ffibuilder.cdef(header + r'''
         void _callback_client_event(SOPC_LibSub_ConnectionId c_id, SOPC_LibSub_ApplicativeEvent event, SOPC_StatusCode status, const void* response, uintptr_t responseContext);
         void _callback_toolkit_event(SOPC_App_Com_Event event, uint32_t IdOrStatus, void* param, uintptr_t appContext);
         void _callback_address_space_event(SOPC_App_AddSpace_Event event, void* opParam, SOPC_StatusCode opStatus);
+        SOPC_ReturnStatus _callback_validate_user_identity(SOPC_UserAuthentication_Manager* authenticationManager,
+                                                           const SOPC_ExtensionObject* pUser,
+                                                           SOPC_UserAuthentication_Status* pUserAuthenticated);
+        SOPC_ReturnStatus _callback_authorize_operation(SOPC_UserAuthorization_Manager* authorizationManager,
+                                                        SOPC_UserAuthorization_OperationType operationType,
+                                                        const SOPC_NodeId* nodeId,
+                                                        uint32_t attributeId,
+                                                        const SOPC_User* pUser,
+                                                        bool* pbOperationAuthorized);
     }
 
     void SOPC_DataValue_Delete(SOPC_DataValue *datavalue);

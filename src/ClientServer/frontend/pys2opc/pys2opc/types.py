@@ -1272,6 +1272,28 @@ class NodeClass(NamedMembers):
     DataType      = libsub.OpcUa_NodeClass_DataType
     View          = libsub.OpcUa_NodeClass_View
 
+class UserAuthorization(NamedMembers):
+    """
+    The possible requested user authorization Operation types.
+    These are accessors to the SOPC_UserAuthorization_OperationType enum.
+    They are used for the user authorization callback (see `pys2opc.server_callbacks.BaseUserHandler`).
+    """
+    Read       = libsub.SOPC_USER_AUTHORIZATION_OPERATION_READ
+    Write      = libsub.SOPC_USER_AUTHORIZATION_OPERATION_WRITE
+    Executable = libsub.SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE
+
+class UserAuthentication(NamedMembers):
+    """
+    The possible requested user authentication Status types.
+    These are accessors to the SOPC_UserAuthentication_Status enum.
+    They are used as answer to the user authentication callback (see `pys2opc.server_callbacks.BaseUserHandler`).
+    """
+    InvalidToken  = libsub.SOPC_USER_AUTHENTICATION_INVALID_TOKEN
+    RejectedToken = libsub.SOPC_USER_AUTHENTICATION_REJECTED_TOKEN
+    AccessDenied  = libsub.SOPC_USER_AUTHENTICATION_ACCESS_DENIED
+    """It is strongly discouraged to use ACCESS_DENIED, prefer REJECTED_TOKEN"""
+    Ok            = libsub.SOPC_USER_AUTHENTICATION_OK
+
 
 if __name__ == '__main__':
     # Auto-test
