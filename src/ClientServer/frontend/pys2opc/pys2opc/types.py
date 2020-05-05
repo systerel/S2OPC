@@ -338,7 +338,7 @@ def bytestring_to_bytes(bstring):
     """SOPC_ByteString or SOPC_ByteString* to python bytes()"""
     if bstring == ffi.NULL or bstring.Data == ffi.NULL or bstring.Length <= 0:
         return b''
-    return ffi.string(bstring.Data, bstring.Length)
+    return ffi.unpack(bstring.Data, bstring.Length)
 def bytes_to_bytestring(b, no_gc=False):
     """
     Python bytes to SOPC_ByteString*.
