@@ -386,10 +386,13 @@ class PyS2OPC_Server(PyS2OPC):
     The Server side of the PyS2OPC library.
     When the toolkit is `PyS2OPC_Server.initialize`d for a server, it cannot be `PyS2OPC_Client.initialize`d for a client before it is `PyS2OPC_Server.clear`ed.
     """
-    _dConfigurations = {}  # Stores server known configurations {Id: configurationParameters} (client and server configurations may have the same index)
-    _callbacks_configured = False
-    _adds_notifier = None  # Instance of BaseAddressSpaceHandler
+    #_dConfigurations = {}  # Stores server known configurations {Id: configurationParameters} (client and server configurations may have the same index)
+    _adds_handler = None  # Instance of BaseAddressSpaceHandler
     _adds = None  # The address space loaded through the xml loader
+    _config = None  # SOPC_S2OPC_Config
+    # Stores endpoint indexes and the corresponding configurations {Id: config.serverConfig.endpoint}
+    # (note that endpoint.serverConfigPtr points to its parent serverConfig, which is the only field in config yet)
+    _dEpIdx = {}
 
     @staticmethod
     @contextmanager
@@ -443,10 +446,14 @@ class PyS2OPC_Server(PyS2OPC):
         # TODO: Disconnect existing clients
         libsub.SOPC_Toolkit_Clear()  # Calls SOPC_Common_Clear
         PyS2OPC._initialized_srv = False
-        PyS2OPC_Server._callbacks_configured = False
-        PyS2OPC_Server._adds_notifier = None
+        PyS2OPC_Server._adds_handler = None
         if PyS2OPC_Server._adds is not None:
             libsub.SOPC_AddressSpace_Delete(PyS2OPC_Server._adds)
+            PyS2OPC_Server._adds = None
+        PyS2OPC_Server._dEpIdx = {}
+        if PyS2OPC_Server._config is not None:
+            libsub.SOPC_S2OPC_Config_Clear(PyS2OPC_Server._config)
+            PyS2OPC_Server._config = None
 
     @staticmethod
     def _callback_toolkit_event(event, status, param, appContext):
@@ -464,8 +471,8 @@ class PyS2OPC_Server(PyS2OPC):
 
     @staticmethod
     def _callback_address_space_event(event, operationParam, operationStatus):
-        assert PyS2OPC_Server._adds_notifier is not None
-        PyS2OPC_Server._adds_notifier.on_datachanged(event, operationParam, operationStatus)
+        assert PyS2OPC_Server._adds_handler is not None
+        PyS2OPC_Server._adds_handler.on_datachanged(event, operationParam, operationStatus)
 
     @staticmethod
     def load_address_space(xml_path):
@@ -491,69 +498,106 @@ class PyS2OPC_Server(PyS2OPC):
         PyS2OPC_Server._adds = space  # Kept to avoid double inits, and to clear it
 
     @staticmethod
-    def load_configuration(xml_path):
+    def load_configuration(xml_path, address_space_handler=None, user_handler=None, method_handler=None, pki_handler=None):
         """
-        Creates from the XML a configuration structure for a server.
+        Creates a configuration structure for a server from an XML file.
         This configuration is later used to open an endpoint.
+        There should be only one created configuration.
 
         The XML configuration format is specific to S2OPC and follows the s2opc_config.xsd scheme.
 
-        Args:
-            xml_path: Path to the configuration in the s2opc_config.xsd format.
-
-        Return:
-            A `ServerConfiguration` instance.
-        """
-        assert PyS2OPC._initialized_srv and not PyS2OPC._configured,\
-            'Toolkit is either not initialized, initialized as a Client, or already marked_configured.'
-
-        config = ffi.new('SOPC_S2OPC_Config *')
-        with open(xml_path, 'r') as fd:
-            assert libsub.SOPC_Config_Parse(fd, config)
-
-        # Finish the configuration by setting the manual fields: server certificate and key, create the pki, the method call manager, and the user auth* manager
-
-        # TODO: Maybe we should not give the config pointer to the server configuration,
-        #  as config.parameters() will return it, which allows the user to modify its content.
-        return ServerConfiguration({'pS2opcConfig': config, 'xml_path': xml_path})
-
-    @staticmethod
-    def set_connection_handlers(address_space_notifier=None, user_handler=None, method_handler=None):
-        """
-        Configure the callbacks of the server.
-        This step is optional.
-        If it is not called, defaults values are used:
-        - no notification of address space events,
-        - "allow all" for user policy,
-        - no callable methods.
+        Optionally configure the callbacks of the server.
+        If handlers are left None, the following default behaviors are used:
+        - address space: no notification of address space events,
+        - user authentications and authorizations: allow all user and all operations,
+        - methods: no callable methods,
+        - pki: the default secure Public Key Infrastructure,
+          which thoroughly checks the validity of certificates based on trusted issuers, untrusted issuers, and issued certificates.
 
         This function must be called after `PyS2OPC_Server.initialize`, and before `PyS2OPC_Server.mark_configured`.
         It must be called at most once.
 
-        Note: limitation: for now, only address space notfications are available.
+        Note: limitation: for now, changes in user authentications and authorizations, methods, and pki, are not supported.
 
         Args:
-            address_space_notifier: None (no notification) or an instance of a subclass of
-                                    `pys2opc.server_callbacks.BaseAddressSpaceHandler`
+            xml_path: Path to the configuration in the s2opc_config.xsd format
+            address_space_handler: None (no notification) or an instance of a subclass of
+                                   `pys2opc.server_callbacks.BaseAddressSpaceHandler`
             user_handler: None (authenticate all user and authorize all operations)
             method_handler: None (no method available)
+            pki_handler: None (certificate authentications based on certificate authorities)
         """
-        assert PyS2OPC._initialized_srv and not PyS2OPC._configured,\
-            'Toolkit is either not initialized, initialized as a Client, or already marked_configured.'
-        assert not PyS2OPC_Server._callbacks_configured,\
-            'Callbacks are already configured by a previous call to set_connection_handlers.'
-        # TODO:
-        assert user_handler is None, 'User Manager not implemented yet'
-        assert method_handler is None, 'Method Manager not implemented yet'
-        # Address Space
-        if address_space_notifier is not None:
-            assert isinstance(address_space_notifier, BaseAddressSpaceHandler)
-            PyS2OPC_Server._adds_notifier = address_space_notifier
-            # Note: SetAddressSpaceNotifCb cannot be called with NULL
+        assert PyS2OPC._initialized_srv and not PyS2OPC._configured and PyS2OPC_Server._config is None,\
+            'Toolkit is either not initialized, initialized as a Client, or already configured.'
+
+        assert user_handler is None, 'Custom User Manager not implemented yet'
+        assert method_handler is None, 'Custom Method Manager not implemented yet'
+        assert pki_handler is None, 'Custom PKI Manager not implemented yet'
+        if address_space_handler is not None:
+            assert isinstance(address_space_handler, BaseAddressSpaceHandler)
+
+        # Note: if part of the configuration fails, this leaves the toolkit in an half-configured configuration.
+        # In this case, a Clear is required before trying to configure it again.
+
+        # Creates the configuration
+        config = ffi.new('SOPC_S2OPC_Config *')
+        with open(xml_path, 'r') as fd:
+            assert libsub.SOPC_Config_Parse(fd, config)
+
+        # Finish the configuration by setting the manual fields: server certificate and key, create the pki,
+        #  the user auth* managers, and the method call manager
+        # If any of them fails, we must still clear the config!
+        try:
+            # Cryptography
+            serverCfg = config.serverConfig
+            ppCert = ffi.addressof(serverCfg, 'serverCertificate')
+            status = libsub.SOPC_KeyManager_SerializedCertificate_CreateFromFile(serverCfg.serverCertPath, ppCert)
+            assert status == ReturnStatus.OK,\
+                'Cannot load server certificate file {} with status {}. Is path correct?'\
+                .format(ffi.string(serverCfg.serverCertPath), ReturnStatus.get_both_from_id(status))
+
+            ppKey = ffi.addressof(serverCfg, 'serverKey')
+            status = libsub.SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(serverCfg.serverKeyPath, ppKey)
+            assert status == ReturnStatus.OK,\
+                'Cannot load secret key file {} with status {}. Is path correct?'\
+                .format(ffi.string(serverCfg.serverKeyPath), ReturnStatus.get_both_from_id(status))
+
+            ppPki = ffi.addressof(serverCfg, 'pki')
+            status = libsub.SOPC_PKIProviderStack_CreateFromPaths(
+                serverCfg.trustedRootIssuersList, serverCfg.trustedIntermediateIssuersList,
+                serverCfg.untrustedRootIssuersList, serverCfg.untrustedIntermediateIssuersList,
+                serverCfg.issuedCertificatesList, serverCfg.certificateRevocationPathList,
+                ppPki)
+
+            # Methods
+            serverCfg.mcm  # Leave NULL
+
+            # Endpoints have the user management
+            for i in range(serverCfg.nbEndpoints):
+                endpoint = serverCfg.endpoints[i]
+                # By default, creates user managers that accept all users and allow all operations
+                endpoint.authenticationManager = libsub.SOPC_UserAuthentication_CreateManager_AllowAll()
+                endpoint.authorizationManager = libsub.SOPC_UserAuthorization_CreateManager_AllowAll()
+                assert endpoint.authenticationManager != ffi.NULL and endpoint.authorizationManager != ffi.NULL
+
+                # Register endpoint
+                epConfigIdx = libsub.SOPC_ToolkitServer_AddEndpointConfig(ffi.addressof(endpoint))
+                assert epConfigIdx,\
+                    'Cannot add endpoint configuration. There may be no more endpoint left, or the configuration parameters are incorrect.'
+                assert epConfigIdx not in PyS2OPC_Server._dEpIdx,\
+                    'Internal failure, epConfigIdx already reserved by another configuration.'
+                PyS2OPC_Server._dEpIdx[epConfigIdx] = endpoint
+        except:
+            libsub.SOPC_S2OPC_Config_Clear(config)
+            config = None
+            raise
+        PyS2OPC_Server._config = config
+
+        # Set address space handler
+        if address_space_handler is not None:
+            PyS2OPC_Server._adds_handler = address_space_handler
+            # Note: SetAddressSpaceNotifCb cannot be called twice, or with NULL
             assert libsub.SOPC_ToolkitServer_SetAddressSpaceNotifCb(libsub._callback_address_space_event) == ReturnStatus.OK
-        # In case previous calls fails, this is not reached and leaves the server in an half-configured state
-        # However, this approximation is required to a have a higher-level server API...
-        PyS2OPC_Server._callbacks_configured = True
 
 
 

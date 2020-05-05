@@ -173,6 +173,10 @@ extern const char* SOPC_SecurityPolicy_Basic256Sha256_URI;
 /* sopc_key_manager.h */
 typedef SOPC_SecretBuffer SOPC_SerializedAsymmetricKey;
 typedef SOPC_Buffer SOPC_SerializedCertificate;
+SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(const char* path,
+                                                                         SOPC_SerializedAsymmetricKey** key);
+SOPC_ReturnStatus SOPC_KeyManager_SerializedCertificate_CreateFromFile(const char* path,
+                                                                       SOPC_SerializedCertificate** cert);
 
 /* sopc_user.h */
 typedef struct SOPC_User SOPC_User;
