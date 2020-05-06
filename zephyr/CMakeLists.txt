@@ -1,5 +1,7 @@
 if (CONFIG_S2OPC)
 
+#TODO make this a wrapper around the main CMakeLists.txt
+
 zephyr_interface_library_named(S2OPC)
 
 add_definitions (-DSOPC_PTR_SIZE=4)
