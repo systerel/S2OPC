@@ -602,72 +602,6 @@ static SOPC_ReturnStatus Server_ConfigureAddressSpace(SOPC_AddressSpace** output
     return status;
 }
 
-/*-----------------------
- * Logger configuration :
- *-----------------------*/
-
-/* Set the log path and create (or keep existing) directory path built on executable path
- *  + first argument of main */
-static char* Config_SetLogPath(int argc, char* argv[])
-{
-    char* underscore = "_";
-    char* suffix = NULL;
-    char* logDirPath = NULL;
-    SOPC_StatusCode status = SOPC_STATUS_NOK;
-
-    if (argc > 1)
-    {
-        suffix = argv[1];
-    }
-    else
-    {
-        suffix = "";
-        underscore = "";
-    }
-
-    int logDirPathSize = 2 + strlen(argv[0]) + strlen(underscore) + strlen(suffix) +
-                         7; // "./" + exec_name + _ + test_name + _logs/ + '\0'
-    if (logDirPathSize < 200)
-    {
-        logDirPath = SOPC_Malloc(logDirPathSize * sizeof(char));
-    }
-    if (NULL != logDirPath && (int) (logDirPathSize - 1) ==
-                                  snprintf(logDirPath, logDirPathSize, "./%s%s%s_logs/", argv[0], underscore, suffix))
-    {
-        status = SOPC_ToolkitConfig_SetCircularLogPath(logDirPath, true);
-    }
-    else
-    {
-        status = SOPC_ToolkitConfig_SetCircularLogPath("./toolkit_test_server_logs", true);
-    }
-
-    if (SOPC_STATUS_OK != status)
-    {
-        SOPC_Free(logDirPath);
-        logDirPath = NULL;
-    }
-
-    return logDirPath;
-}
-
-static char* Server_ConfigureLogger(int argc, char* argv[])
-{
-    // Define directoy path for log traces: ./<exec_name>_argv[1]_logs/
-    char* logDirPath = Config_SetLogPath(argc, argv);
-
-    if (NULL != logDirPath)
-    {
-        // Set log traces to DEBUG level: displays DEBUG, INFO, WARNING and ERROR
-        if (SOPC_STATUS_OK != SOPC_ToolkitConfig_SetLogLevel(SOPC_TOOLKIT_LOG_LEVEL_ERROR))
-        {
-            SOPC_Free(logDirPath);
-            logDirPath = NULL;
-        }
-    }
-
-    return logDirPath;
-}
-
 /*---------------------------------------------------------------------------
  *                             Server main function
  *---------------------------------------------------------------------------*/
@@ -705,20 +639,6 @@ static void* Server_Main(void* pCtx)
     /* Initialize the server library (start library threads)
      * and define communication events callback */
     status = Server_Initialize();
-
-    int argc = 1;
-    char** argv = SOPC_Calloc(1, sizeof(char*));
-    assert(argv != NULL);
-    argv[0] = SOPC_Calloc(1, 16);
-    assert(argv[0] != NULL);
-    snprintf(argv[0], 16, "%s", "toolkit_test");
-
-    /* Configure the server logger:
-     * DEBUG traces generated in ./<argv[0]>_<argv[1]>_logs/ */
-    logDirPath = Server_ConfigureLogger(argc, argv);
-
-    SOPC_Free(argv[0]);
-    SOPC_Free(argv);
 
     /* Configuration of server endpoint:
        - Enpoint URL,
@@ -916,7 +836,7 @@ int main(void)
     while(true)
     {
         printf("\r\nThread quit, error and go to idle...\r\n");
-        SOPC_Sleep(1000);   
+        SOPC_Sleep(1000);
     }
     return 0;
 }
