@@ -1,7 +1,6 @@
 # S2OPC Toolkit Test Server
 
-This folder contains the code to run a simple OPC UA server on Zephyr (by
-default, uses NXP MIMXRT1064-EVK board).
+This folder contains the code to run a simple OPC UA server on Zephyr.
 
 It is known to be working with Zephyr tag `zephyr-v2.2.0`.
 
@@ -44,13 +43,11 @@ to Zephyr `west.yml` (in `projects`) and run `west update`.
 
 ## Compile
 
-By default, the application is compiled for the MIMXRT1064-EVK board.
-
 ```
-west build
+west build -b <your_board>
 ```
 
-To specify your board, use the `-b` option or the `BOARD` environment varible.
+It has been tested with `mimxrt1064_evk`.
 
 ## Flash
 
