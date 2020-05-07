@@ -17,10 +17,10 @@
  * under the License.
  */
 
-#include <stdio.h>
-#include <stdbool.h>
-#include <stdlib.h>
 #include <assert.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include <inttypes.h>
@@ -153,7 +153,7 @@ time_t P_TIME_GetBuildDate(void)
 
 static inline uint64_t P_TIME_TimeReference_GetCurrent100ns(void)
 {
-    uint64_t soft_clock_ms = (SOPC_TimeReference) (P_TIME_GetBuildDate() * 1000 + k_uptime_get());
+    uint64_t soft_clock_ms = (SOPC_TimeReference)(P_TIME_GetBuildDate() * 1000 + k_uptime_get());
     // Get associated hardware clock counter
     uint64_t kernel_clock_ticks = k_cycle_get_32();
 
