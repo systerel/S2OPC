@@ -28,8 +28,3 @@ SOPC_FileSystem_RemoveResult SOPC_FileSystem_rmdir(const char* directoryPath)
 {
     return SOPC_FileSystem_Creation_OK;
 }
-
-FILE* SOPC_File_fmemopen(void* buf, size_t size, const char* opentype)
-{
-    return fmemopen(buf, size, opentype);
-}
