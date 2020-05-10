@@ -829,7 +829,7 @@ static void Launch_Server(void)
     return;
 }
 
-int main(void)
+void main(void)
 {
     Launch_Server();
 
@@ -838,5 +838,4 @@ int main(void)
         printf("\r\nThread quit, error and go to idle...\r\n");
         SOPC_Sleep(1000);
     }
-    return 0;
 }
