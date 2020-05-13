@@ -123,12 +123,13 @@ export(EXPORT s2opc_clientserver-loader-embedded-export
   FILE "${CMAKE_BINARY_DIR}/s2opc_clientserver-loader-embedded-export.cmake"
   )
 
-# XML addresss space loader and XML server configuration loader
+# XML addresss space loader, XML server configuration loader and XML server users configuration loader
 if (expat_FOUND)
   message(STATUS "Expat library found: XML server config loaders compilation active")
   add_library(s2opc_clientserver-xml-loaders-expat loaders/helpers/sopc_helper_expat.c
                                              loaders/address_space_loaders/xml_expat/sopc_uanodeset_loader.c
-                                             loaders/config_loaders/xml_expat/sopc_config_loader.c)
+                                             loaders/config_loaders/xml_expat/sopc_config_loader.c
+                                             loaders/config_loaders/xml_expat/sopc_users_loader.c)
   target_compile_options(s2opc_clientserver-xml-loaders-expat PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(s2opc_clientserver-xml-loaders-expat PRIVATE ${S2OPC_DEFINITIONS} "UANODESET_LOADER_LOG")
   target_link_libraries(s2opc_clientserver-xml-loaders-expat PUBLIC expat::expat s2opc_clientserver)
@@ -143,7 +144,8 @@ if (expat_FOUND)
                              PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/loaders/helpers)
   set_property(TARGET s2opc_clientserver-xml-loaders-expat PROPERTY
                PUBLIC_HEADER "loaders/address_space_loaders/xml_expat/sopc_uanodeset_loader.h"
-                             "loaders/config_loaders/xml_expat/sopc_config_loader.h")
+                             "loaders/config_loaders/xml_expat/sopc_config_loader.h"
+                             "loaders/config_loaders/xml_expat/sopc_users_loader.h")
   install(TARGETS s2opc_clientserver-xml-loaders-expat
           EXPORT s2opc_clientserver-xml-loaders-expat-export # export our project to be importable after install
           LIBRARY DESTINATION lib

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="S2OPC_Users" type="S2OPC_UsersType"/>
+  <xs:complexType name="UserAuthorizationType">
+    <xs:attribute type="xs:boolean" name="read" default="false"/>
+    <xs:attribute type="xs:boolean" name="write" default="false"/>
+    <xs:attribute type="xs:boolean" name="execute" default="false"/>
+  </xs:complexType>
+  <xs:complexType name="AnonymousType">
+    <xs:sequence>
+          <xs:element type="UserAuthorizationType" name="UserAuthorization"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="UserPasswordType">
+    <xs:sequence>
+          <xs:element type="UserAuthorizationType" name="UserAuthorization"/>
+    </xs:sequence>
+    <xs:attribute type="xs:string" name="user" use="required"/>
+    <xs:attribute type="xs:string" name="pwd" use="required"/>
+  </xs:complexType>
+  <xs:complexType name="S2OPC_UsersType">
+    <xs:sequence>
+      <xs:element type="AnonymousType" name="Anonymous" minOccurs="0"/>
+      <xs:element type="UserPasswordType" name="UserPassword" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

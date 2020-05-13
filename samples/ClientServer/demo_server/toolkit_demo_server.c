@@ -46,6 +46,7 @@
 #ifdef WITH_EXPAT
 #include "xml_expat/sopc_config_loader.h"
 #include "xml_expat/sopc_uanodeset_loader.h"
+#include "xml_expat/sopc_users_loader.h"
 #endif
 
 #ifdef WITH_STATIC_SECURITY_DATA
@@ -496,7 +497,7 @@ static SOPC_ReturnStatus Server_LoadServerConfiguration(SOPC_S2OPC_Config* outpu
      * retrieve XML file path from environment variable TEST_SERVER_XML_CONFIG.
      * In case of success, use the dynamic server configuration loader from an XML file.
      *
-     * Otherwise use an embedded default demo server configuration.
+     * Otherwise use an embedded default test server configuration for test server, or fail for demo server.
      */
     assert(NULL != output_s2opcConfig);
 
@@ -523,7 +524,7 @@ static SOPC_ReturnStatus Server_LoadServerConfiguration(SOPC_S2OPC_Config* outpu
 #endif
 
     bool res = false;
-    /* Load the address space using loader */
+    /* Load the server configuration using loader */
     switch (config_loader)
     {
     case SRV_LOADER_DEFAULT_CONFIG:
@@ -725,20 +726,15 @@ static const SOPC_UserAuthentication_Functions authentication_uactt_functions = 
     .pFuncFree = (SOPC_UserAuthentication_Free_Func) SOPC_Free,
     .pFuncValidateUserIdentity = authentication_uactt};
 
-static SOPC_ReturnStatus Server_SetUserManagementConfig(SOPC_Endpoint_Config* pEpConfig,
-                                                        SOPC_UserAuthentication_Manager** output_authenticationManager,
-                                                        SOPC_UserAuthorization_Manager** output_authorizationManager)
+static SOPC_ReturnStatus Server_SetDefaultUserManagementConfig(SOPC_Endpoint_Config* pEpConfig)
 {
-    assert(NULL != output_authenticationManager);
-    assert(NULL != output_authorizationManager);
-
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     /* Create an user authorization manager which accepts any user.
      * i.e.: UserAccessLevel right == AccessLevel right for any user for a given node of address space */
-    *output_authorizationManager = SOPC_UserAuthorization_CreateManager_AllowAll();
-    *output_authenticationManager = SOPC_Calloc(1, sizeof(SOPC_UserAuthentication_Manager));
-    if (NULL == *output_authenticationManager || NULL == *output_authorizationManager)
+    SOPC_UserAuthorization_Manager* authorizationManager = SOPC_UserAuthorization_CreateManager_AllowAll();
+    SOPC_UserAuthentication_Manager* authenticationManager = SOPC_Calloc(1, sizeof(SOPC_UserAuthentication_Manager));
+    if (NULL == authenticationManager || NULL == authorizationManager)
     {
         status = SOPC_STATUS_OUT_OF_MEMORY;
         printf("<Test_Server_Toolkit: Failed to create the user manager\n");
@@ -747,9 +743,86 @@ static SOPC_ReturnStatus Server_SetUserManagementConfig(SOPC_Endpoint_Config* pE
     if (SOPC_STATUS_OK == status)
     {
         /* Set a user authentication function that complies with UACTT tests expectations */
-        (*output_authenticationManager)->pFunctions = &authentication_uactt_functions;
-        pEpConfig->authenticationManager = *output_authenticationManager;
-        pEpConfig->authorizationManager = *output_authorizationManager;
+        authenticationManager->pFunctions = &authentication_uactt_functions;
+        pEpConfig->authenticationManager = authenticationManager;
+        pEpConfig->authorizationManager = authorizationManager;
+    }
+
+    return status;
+}
+
+#ifdef WITH_EXPAT
+static bool load_users_config_from_file(const char* filename,
+                                        SOPC_UserAuthentication_Manager** authentication,
+                                        SOPC_UserAuthorization_Manager** authorization,
+                                        SOPC_UsersConfig** config)
+{
+    FILE* fd = fopen(filename, "r");
+
+    if (fd == NULL)
+    {
+        printf("<Test_Server_Toolkit: Error while opening %s: %s\n", filename, strerror(errno));
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    bool res = SOPC_UsersConfig_Parse(fd, authentication, authorization, config);
+    fclose(fd);
+    return res;
+}
+#endif
+
+static SOPC_ReturnStatus Server_LoadUserManagementConfiguration(SOPC_Endpoint_Config* pEpConfig, void** usersConfig)
+{
+    /* Load server users management configuration
+     * If WITH_EXPAT environment variable defined,
+     * retrieve XML file path from environment variable TEST_USERS_XML_CONFIG.
+     * In case of success, use the dynamic server configuration loader from an XML file.
+     *
+     * Otherwise use an embedded default test server configuration for test server, or fail for demo server.
+     */
+    assert(NULL != usersConfig);
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    ServerConfigLoader config_loader = SRV_LOADER_DEFAULT_CONFIG;
+
+#ifdef WITH_EXPAT
+    const char* xml_file_path = getenv("TEST_USERS_XML_CONFIG");
+
+    if (xml_file_path != NULL)
+    {
+        config_loader = SRV_LOADER_EXPAT_XML_CONFIG;
+    }
+#ifndef IS_TEST_SERVER
+    // Forbids to use default configuration when compiled with EXPAT and it is the demo binary
+    else
+    {
+        printf(
+            "Error: an XML users configuration file path shall be provided, e.g.: "
+            "TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml ./toolkit_demo_server");
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+#endif
+#endif
+
+    /* Load the address space using loader */
+    switch (config_loader)
+    {
+    case SRV_LOADER_DEFAULT_CONFIG:
+        status = Server_SetDefaultUserManagementConfig(pEpConfig);
+        *usersConfig = NULL;
+        break;
+#ifdef WITH_EXPAT
+    case SRV_LOADER_EXPAT_XML_CONFIG:
+        if (!load_users_config_from_file(xml_file_path, &pEpConfig->authenticationManager,
+                                         &pEpConfig->authorizationManager, (SOPC_UsersConfig**) usersConfig))
+        {
+            status = SOPC_STATUS_NOK;
+        }
+        break;
+#endif
+    default:
+        assert(false);
     }
 
     return status;
@@ -1015,8 +1088,7 @@ int main(int argc, char* argv[])
     SOPC_Endpoint_Config* epConfig = NULL;
     uint32_t epConfigIdx = 0;
 
-    SOPC_UserAuthentication_Manager* authenticationManager = NULL;
-    SOPC_UserAuthorization_Manager* authorizationManager = NULL;
+    void* usersConfig = NULL;
 
     SOPC_AddressSpace* address_space = NULL;
 
@@ -1066,7 +1138,7 @@ int main(int argc, char* argv[])
     // Define demo implementation of user authentication and authorization
     if (SOPC_STATUS_OK == status)
     {
-        status = Server_SetUserManagementConfig(epConfig, &authenticationManager, &authorizationManager);
+        status = Server_LoadUserManagementConfiguration(epConfig, &usersConfig);
     }
 
     // Define demo implementation of functions called for method call service
@@ -1227,6 +1299,9 @@ int main(int argc, char* argv[])
     SOPC_AddressSpace_Delete(address_space);
     SOPC_S2OPC_Config_Clear(&s2opcConfig);
     SOPC_Free(logDirPath);
+#ifdef WITH_EXPAT
+    SOPC_UsersConfig_Free(usersConfig);
+#endif
 #ifdef WITH_STATIC_SECURITY_DATA
     SOPC_KeyManager_SerializedCertificate_Delete(static_cacert);
 #endif

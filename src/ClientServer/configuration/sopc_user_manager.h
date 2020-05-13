@@ -60,7 +60,11 @@ typedef enum
 {
     SOPC_USER_AUTHENTICATION_INVALID_TOKEN,
     SOPC_USER_AUTHENTICATION_REJECTED_TOKEN,
-    /** It is strongly discouraged to use this value, prefer \p SOPC_USER_AUTHENTICATION_REJECTED_TOKEN. */
+    /** It is strongly discouraged to use this value,
+     * prefer \p SOPC_USER_AUTHENTICATION_REJECTED_TOKEN.
+     * This value is described by OPC UA part 4 and tested by UACTT
+     * but access evaluation shall be enforced on other services calls
+     * (read, write, callmethod, etc.) */
     SOPC_USER_AUTHENTICATION_ACCESS_DENIED,
     SOPC_USER_AUTHENTICATION_OK
 } SOPC_UserAuthentication_Status;

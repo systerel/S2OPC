@@ -108,7 +108,11 @@ To do so, set `TEST_SERVER_XML_ADDRESS_SPACE` to the location of the address spa
 
 The server configuration can be defined manually using the C structures defined in src/ClientServer/api_toolkit/sopc_user_app_itf.h (SOPC_S2OPC_Config).
 It is also possible to use an XML parser for XML complying with schemas/s2opc_clientserver_config.xsd.
-The S2OPC demo server use a configuration for tests by default, to use a custom XML configuraiton file set `TEST_SERVER_XML_CONFIG` to its location.
+The S2OPC demo server uses the custom XML configuration file path set `TEST_SERVER_XML_CONFIG`.
+
+The users authentication and authorization functions should be implemented by applicative code and be compliant with src/ClientServer/configuration/sopc_user_manager.h
+It is also possible to use a default implementation defining the list of valid users with global rights on address space based on XML file complying with schemas/s2opc_clientserver_users_config.xsd.
+The S2OPC demo server uses the custom XML configuration file path set `TEST_USERS_XML_CONFIG`.
 
 ## S2OPC PubSub Toolkit features
 

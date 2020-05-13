@@ -26,7 +26,7 @@
 
 /* Parse the XML configuration file
  *
- * \param fd      Path to XML file compliant with s2opc_config.xsd schema
+ * \param fd      Path to XML file compliant with s2opc_clientserver_config.xsd schema
  * \param config  (ouput) Server configuration structure to be filled
  *
  * \return        true if the parsing succeeded, false otherwise
