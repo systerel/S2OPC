@@ -71,7 +71,7 @@ typedef struct SOPC_Log_Configuration
 bool SOPC_Common_IsInitialized(void);
 
 /**
- * \brief Initalizes Common module
+ * \brief Initializes Common module
  *
  * \param logConfiguration [in] log configuration
  *
