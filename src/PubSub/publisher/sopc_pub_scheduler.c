@@ -18,6 +18,7 @@
  */
 
 #include <assert.h>
+#include <inttypes.h>
 
 #include "sopc_atomic.h"
 #include "sopc_dataset_layer.h"
@@ -384,8 +385,8 @@ static uint64_t SOPC_PubScheduler_Nb_Message(SOPC_PubSubConfiguration* config)
 static void SOPC_RT_Publisher_StartPubMsgCallback(uint32_t msgId,     // Message instance identifier
                                                   void* pUserContext) // User context
 {
-    printf("# RT Publisher start callback: Msg id = %u - User context %lu - Started\r\n", msgId,
-           (uint64_t) pUserContext);
+    (void) pUserContext; // avoid unused warning
+    printf("# RT Publisher start callback: Msg id = %" PRIu32 " - Started\r\n", msgId);
     return;
 }
 
@@ -393,8 +394,8 @@ static void SOPC_RT_Publisher_StartPubMsgCallback(uint32_t msgId,     // Message
 static void SOPC_RT_Publisher_StopPubMsgCallback(uint32_t msgId,     // Message instance identifier
                                                  void* pUserContext) // User context
 {
-    printf("# RT Publisher stop callback:  Msg id = %u - User context %lu - Stopped\r\n", msgId,
-           (uint64_t) pUserContext);
+    (void) pUserContext; // avoid unused warning
+    printf("# RT Publisher stop callback:  Msg id = %" PRIu32 " - Stopped\r\n", msgId);
     return;
 }
 
@@ -761,8 +762,9 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config, SOPC_PubSourceVar
 
                             // Add a message to rt publisher initializer
 
-                            printf("# RT Publisher initializer : Creation of message with publishing value = %lu\r\n",
-                                   (uint64_t) publishingInterval);
+                            printf("# RT Publisher initializer : Creation of message with publishing value = %" PRIu64
+                                   "\r\n",
+                                   publishingInterval);
 
                             resultSOPC = SOPC_RT_Publisher_Initializer_AddMessage(
                                 pRTInitializer, //
