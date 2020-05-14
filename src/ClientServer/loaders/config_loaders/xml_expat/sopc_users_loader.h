@@ -24,22 +24,16 @@
 
 #include "sopc_user_manager_internal.h"
 
-typedef struct _SOPC_UsersConfig SOPC_UsersConfig;
-
 /* Parse the XML users configuration file and provide resulting user authentication and authorization managers
  *
  * \param fd              Path to XML file compliant with s2opc_clientserver_users_config.xsd schema
  * \param authentication  (ouput) user authentication manager compliant with XML users configuration
  * \param authorization   (ouput) user authorization manager compliant with XML users configuration
- * \param usersConfig     (output) users configuration data, it shall be freed by user when user management ends
  *
  * \return        true if the parsing succeeded, false otherwise
  * */
 bool SOPC_UsersConfig_Parse(FILE* fd,
                             SOPC_UserAuthentication_Manager** authentication,
-                            SOPC_UserAuthorization_Manager** authorization,
-                            SOPC_UsersConfig** usersConfig);
-
-void SOPC_UsersConfig_Free(SOPC_UsersConfig* usersConfig);
+                            SOPC_UserAuthorization_Manager** authorization);
 
 #endif /* SOPC_USERS_LOADER_H_ */

@@ -754,8 +754,7 @@ static SOPC_ReturnStatus Server_SetDefaultUserManagementConfig(SOPC_Endpoint_Con
 #ifdef WITH_EXPAT
 static bool load_users_config_from_file(const char* filename,
                                         SOPC_UserAuthentication_Manager** authentication,
-                                        SOPC_UserAuthorization_Manager** authorization,
-                                        SOPC_UsersConfig** config)
+                                        SOPC_UserAuthorization_Manager** authorization)
 {
     FILE* fd = fopen(filename, "r");
 
@@ -765,13 +764,13 @@ static bool load_users_config_from_file(const char* filename,
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    bool res = SOPC_UsersConfig_Parse(fd, authentication, authorization, config);
+    bool res = SOPC_UsersConfig_Parse(fd, authentication, authorization);
     fclose(fd);
     return res;
 }
 #endif
 
-static SOPC_ReturnStatus Server_LoadUserManagementConfiguration(SOPC_Endpoint_Config* pEpConfig, void** usersConfig)
+static SOPC_ReturnStatus Server_LoadUserManagementConfiguration(SOPC_Endpoint_Config* pEpConfig)
 {
     /* Load server users management configuration
      * If WITH_EXPAT environment variable defined,
@@ -780,7 +779,6 @@ static SOPC_ReturnStatus Server_LoadUserManagementConfiguration(SOPC_Endpoint_Co
      *
      * Otherwise use an embedded default test server configuration for test server, or fail for demo server.
      */
-    assert(NULL != usersConfig);
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
@@ -810,12 +808,11 @@ static SOPC_ReturnStatus Server_LoadUserManagementConfiguration(SOPC_Endpoint_Co
     {
     case SRV_LOADER_DEFAULT_CONFIG:
         status = Server_SetDefaultUserManagementConfig(pEpConfig);
-        *usersConfig = NULL;
         break;
 #ifdef WITH_EXPAT
     case SRV_LOADER_EXPAT_XML_CONFIG:
         if (!load_users_config_from_file(xml_file_path, &pEpConfig->authenticationManager,
-                                         &pEpConfig->authorizationManager, (SOPC_UsersConfig**) usersConfig))
+                                         &pEpConfig->authorizationManager))
         {
             status = SOPC_STATUS_NOK;
         }
@@ -1088,8 +1085,6 @@ int main(int argc, char* argv[])
     SOPC_Endpoint_Config* epConfig = NULL;
     uint32_t epConfigIdx = 0;
 
-    void* usersConfig = NULL;
-
     SOPC_AddressSpace* address_space = NULL;
 
     // Sleep timeout in milliseconds
@@ -1138,7 +1133,7 @@ int main(int argc, char* argv[])
     // Define demo implementation of user authentication and authorization
     if (SOPC_STATUS_OK == status)
     {
-        status = Server_LoadUserManagementConfiguration(epConfig, &usersConfig);
+        status = Server_LoadUserManagementConfiguration(epConfig);
     }
 
     // Define demo implementation of functions called for method call service
@@ -1299,9 +1294,6 @@ int main(int argc, char* argv[])
     SOPC_AddressSpace_Delete(address_space);
     SOPC_S2OPC_Config_Clear(&s2opcConfig);
     SOPC_Free(logDirPath);
-#ifdef WITH_EXPAT
-    SOPC_UsersConfig_Free(usersConfig);
-#endif
 #ifdef WITH_STATIC_SECURITY_DATA
     SOPC_KeyManager_SerializedCertificate_Delete(static_cacert);
 #endif

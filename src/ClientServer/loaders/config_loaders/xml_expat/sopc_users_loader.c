@@ -56,11 +56,11 @@ typedef struct user_password
 
 } user_password;
 
-struct _SOPC_UsersConfig
+typedef struct _SOPC_UsersConfig
 {
     SOPC_Dict* users;
     user_rights anonRights;
-};
+} SOPC_UsersConfig;
 
 struct parse_context_t
 {
@@ -497,22 +497,34 @@ static SOPC_ReturnStatus authorization_fct(SOPC_UserAuthorization_Manager* autho
     return SOPC_STATUS_OK;
 }
 
+static void UserAuthentication_Free(SOPC_UserAuthentication_Manager* authentication)
+{
+    if (NULL != authentication && NULL != authentication->pData)
+    {
+        SOPC_Dict_Delete(((SOPC_UsersConfig*) authentication->pData)->users);
+        SOPC_Free(authentication->pData);
+    }
+    SOPC_Free(authentication);
+}
+
+static void UserAuthorization_Free(SOPC_UserAuthorization_Manager* authorization)
+{
+    SOPC_Free(authorization);
+}
+
 static const SOPC_UserAuthentication_Functions authentication_functions = {
-    .pFuncFree = (SOPC_UserAuthentication_Free_Func) SOPC_Free,
+    .pFuncFree = UserAuthentication_Free,
     .pFuncValidateUserIdentity = authentication_fct};
 
-static const SOPC_UserAuthorization_Functions authorization_functions = {
-    .pFuncFree = (SOPC_UserAuthorization_Free_Func) SOPC_Free,
-    .pFuncAuthorizeOperation = authorization_fct};
+static const SOPC_UserAuthorization_Functions authorization_functions = {.pFuncFree = UserAuthorization_Free,
+                                                                         .pFuncAuthorizeOperation = authorization_fct};
 
 bool SOPC_UsersConfig_Parse(FILE* fd,
                             SOPC_UserAuthentication_Manager** authentication,
-                            SOPC_UserAuthorization_Manager** authorization,
-                            SOPC_UsersConfig** config)
+                            SOPC_UserAuthorization_Manager** authorization)
 {
     assert(NULL != authentication);
     assert(NULL != authorization);
-    assert(NULL != config);
 
     XML_Parser parser = XML_ParserCreateNS(NULL, NS_SEPARATOR[0]);
 
@@ -547,24 +559,24 @@ bool SOPC_UsersConfig_Parse(FILE* fd,
     {
         *authentication = SOPC_Calloc(1, sizeof(SOPC_UserAuthentication_Manager));
         *authorization = SOPC_Calloc(1, sizeof(SOPC_UserAuthorization_Manager));
-        *config = SOPC_Calloc(1, sizeof(SOPC_UsersConfig));
-        if (NULL == *authentication || NULL == *authorization || NULL == *config)
+        SOPC_UsersConfig* config = SOPC_Calloc(1, sizeof(SOPC_UsersConfig));
+        if (NULL == *authentication || NULL == *authorization || NULL == config)
         {
             SOPC_Free(*authentication);
             *authentication = NULL;
             SOPC_Free(*authorization);
             *authorization = NULL;
-            SOPC_Free(*config);
-            *config = NULL;
+            SOPC_Free(config);
+            config = NULL;
             res = SOPC_STATUS_OUT_OF_MEMORY;
         }
         else
         {
-            (*config)->users = users;
-            (*config)->anonRights = ctx.anonymousRights;
-            (*authentication)->pData = *config;
+            config->users = users;
+            config->anonRights = ctx.anonymousRights;
+            (*authentication)->pData = config;
             (*authentication)->pFunctions = &authentication_functions;
-            (*authorization)->pData = *config;
+            (*authorization)->pData = config;
             (*authorization)->pFunctions = &authorization_functions;
         }
     }
@@ -581,12 +593,4 @@ bool SOPC_UsersConfig_Parse(FILE* fd,
     }
 
     return true;
-}
-
-void SOPC_UsersConfig_Free(SOPC_UsersConfig* usersConfig)
-{
-    if (NULL != usersConfig)
-    {
-        SOPC_Dict_Delete(usersConfig->users);
-    }
 }
