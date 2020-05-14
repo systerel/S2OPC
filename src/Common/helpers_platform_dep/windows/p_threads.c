@@ -192,9 +192,10 @@ SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), v
         if (NULL != funcAddress)
         {
             size_t returnValue;
-            size_t targetSize = (strlen(taskName) + 1) * sizeof(wchar_t);
-            wchar_t* wcstr = SOPC_Malloc(targetSize);
-            errno_t ret = mbstowcs_s(&returnValue, wcstr, targetSize, taskName, strlen(taskName));
+            size_t taskNameLength = strlen(taskName);
+            size_t bytesRequired = (taskNameLength + 1) * sizeof(wchar_t);
+            wchar_t* wcstr = SOPC_Malloc(bytesRequired);
+            errno_t ret = mbstowcs_s(&returnValue, wcstr, taskNameLength + 1, taskName, taskNameLength);
 
             if (0 == ret)
             {
