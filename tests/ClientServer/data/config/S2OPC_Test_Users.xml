@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='utf-8'?>
+<S2OPC_Users xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s2opc_clientserver_users_config.xsd">
+  <Anonymous>
+    <UserAuthorization/>
+  </Anonymous>
+  <UserPassword user="noaccess" pwd="secret">
+    <UserAuthorization/>
+  </UserPassword>
+  <UserPassword user="user1" pwd="12345">
+    <UserAuthorization write="true" read="false" execute="true" />
+  </UserPassword>
+  <UserPassword user="user2" pwd="password2">
+    <UserAuthorization write="false" read="true" execute="true" />
+  </UserPassword>
+  <UserPassword user="user3" pwd="42">
+    <UserAuthorization  write="true" read="true" execute="false" />
+  </UserPassword>
+
+</S2OPC_Users>

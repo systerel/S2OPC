@@ -34,9 +34,13 @@
 #ifdef WITH_EXPAT
 #include "xml_expat/sopc_config_loader.h"
 #include "xml_expat/sopc_uanodeset_loader.h"
+#include "xml_expat/sopc_users_loader.h"
 #endif
 
+#include "opcua_identifiers.h"
+#include "sopc_encodeable.h"
 #include "sopc_macros.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_user_app_itf.h"
 
 #if 0 == WITH_NANO_EXTENDED
@@ -46,6 +50,7 @@
 #endif
 
 #define XML_SRV_CONFIG_NAME "S2OPC_Test_XML_Config.xml"
+#define XML_USERS_CONFIG_NAME "S2OPC_Test_Users.xml"
 
 // Avoid unused functions and variables when EXPAT is not available
 #ifdef WITH_EXPAT
@@ -589,6 +594,235 @@ START_TEST(test_XML_server_configuration)
 }
 END_TEST
 
+// Without EXPAT function is detected as unused and compilation fails
+#ifdef WITH_EXPAT
+static SOPC_ExtensionObject* build_user_token(char* username, char* password)
+{
+    SOPC_ExtensionObject* extObject = SOPC_Calloc(1, sizeof(SOPC_ExtensionObject));
+    SOPC_ReturnStatus status;
+    OpcUa_UserNameIdentityToken* token = NULL;
+
+    ck_assert_ptr_nonnull(extObject);
+    SOPC_ExtensionObject_Initialize(extObject);
+    status = SOPC_Encodeable_CreateExtension(extObject, &OpcUa_UserNameIdentityToken_EncodeableType, (void**) &token);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    status = SOPC_String_AttachFromCstring(&token->UserName, username);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    status = SOPC_String_AttachFromCstring((SOPC_String*) &token->Password, password);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    return extObject;
+}
+
+static const SOPC_ExtensionObject anonymousIdentityToken = {
+    .Encoding = SOPC_ExtObjBodyEncoding_Object,
+    .TypeId.NodeId.IdentifierType = SOPC_IdentifierType_Numeric,
+    .TypeId.NodeId.Data.Numeric = OpcUaId_AnonymousIdentityToken_Encoding_DefaultBinary,
+    .Body.Object.ObjType = &OpcUa_AnonymousIdentityToken_EncodeableType,
+    .Body.Object.Value = NULL};
+
+static void check_parsed_users_config(SOPC_UserAuthentication_Manager* authenticationManager,
+                                      SOPC_UserAuthorization_Manager* authorizationManager)
+{
+    (void) authorizationManager;
+    SOPC_ExtensionObject* invalidUserNameToken = build_user_token("invalid user name", "12345");
+    SOPC_ExtensionObject* invalidPasswordToken = build_user_token("user1", "01234");
+    SOPC_ExtensionObject* noAccessToken = build_user_token("noaccess", "secret");
+    SOPC_ExtensionObject* writeExecToken = build_user_token("user1", "12345");
+    SOPC_ExtensionObject* readExecToken = build_user_token("user2", "password2");
+    SOPC_ExtensionObject* readWriteToken = build_user_token("user3", "42");
+    SOPC_UserAuthentication_Status authenticationRes;
+    SOPC_ReturnStatus status =
+        SOPC_UserAuthentication_IsValidUserIdentity(authenticationManager, invalidUserNameToken, &authenticationRes);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(SOPC_USER_AUTHENTICATION_REJECTED_TOKEN, authenticationRes);
+    status =
+        SOPC_UserAuthentication_IsValidUserIdentity(authenticationManager, invalidPasswordToken, &authenticationRes);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(SOPC_USER_AUTHENTICATION_REJECTED_TOKEN, authenticationRes);
+    status = SOPC_UserAuthentication_IsValidUserIdentity(authenticationManager, noAccessToken, &authenticationRes);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(SOPC_USER_AUTHENTICATION_ACCESS_DENIED, authenticationRes);
+    status = SOPC_UserAuthentication_IsValidUserIdentity(authenticationManager, writeExecToken, &authenticationRes);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(SOPC_USER_AUTHENTICATION_OK, authenticationRes);
+    status = SOPC_UserAuthentication_IsValidUserIdentity(authenticationManager, readExecToken, &authenticationRes);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(SOPC_USER_AUTHENTICATION_OK, authenticationRes);
+    status = SOPC_UserAuthentication_IsValidUserIdentity(authenticationManager, readWriteToken, &authenticationRes);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(SOPC_USER_AUTHENTICATION_OK, authenticationRes);
+
+    SOPC_UserWithAuthorization* invalidNoAccesses =
+        SOPC_UserWithAuthorization_CreateFromIdentityToken(invalidUserNameToken, authorizationManager);
+    ck_assert_ptr_nonnull(invalidNoAccesses);
+    SOPC_UserWithAuthorization* anonNoAccesses =
+        SOPC_UserWithAuthorization_CreateFromIdentityToken(&anonymousIdentityToken, authorizationManager);
+    ck_assert_ptr_nonnull(anonNoAccesses);
+    SOPC_UserWithAuthorization* noAccess =
+        SOPC_UserWithAuthorization_CreateFromIdentityToken(noAccessToken, authorizationManager);
+    ck_assert_ptr_nonnull(noAccess);
+    SOPC_UserWithAuthorization* writeExec =
+        SOPC_UserWithAuthorization_CreateFromIdentityToken(writeExecToken, authorizationManager);
+    ck_assert_ptr_nonnull(writeExec);
+    SOPC_UserWithAuthorization* readExec =
+        SOPC_UserWithAuthorization_CreateFromIdentityToken(readExecToken, authorizationManager);
+    ck_assert_ptr_nonnull(readExec);
+    SOPC_UserWithAuthorization* readWrite =
+        SOPC_UserWithAuthorization_CreateFromIdentityToken(readWriteToken, authorizationManager);
+    ck_assert_ptr_nonnull(readWrite);
+
+    const SOPC_NodeId node = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 29};
+    uint32_t attr = 13;
+    bool authorized = false;
+    // invalidNoAccesses
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(invalidNoAccesses, SOPC_USER_AUTHORIZATION_OPERATION_READ,
+                                                          &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(!authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(invalidNoAccesses, SOPC_USER_AUTHORIZATION_OPERATION_WRITE,
+                                                          &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(!authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        invalidNoAccesses, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(!authorized);
+
+    // anonNoAccesses
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(anonNoAccesses, SOPC_USER_AUTHORIZATION_OPERATION_READ, &node,
+                                                          attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(!authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(anonNoAccesses, SOPC_USER_AUTHORIZATION_OPERATION_WRITE,
+                                                          &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(!authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(anonNoAccesses, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE,
+                                                          &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(!authorized);
+
+    // anonNoAccesses
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(invalidNoAccesses, SOPC_USER_AUTHORIZATION_OPERATION_READ,
+                                                          &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(!authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(invalidNoAccesses, SOPC_USER_AUTHORIZATION_OPERATION_WRITE,
+                                                          &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(!authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        invalidNoAccesses, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(!authorized);
+
+    // noAccess
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(noAccess, SOPC_USER_AUTHORIZATION_OPERATION_READ, &node, attr,
+                                                          &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(!authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(noAccess, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &node,
+                                                          attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(!authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        invalidNoAccesses, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(!authorized);
+
+    // writeExec
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(writeExec, SOPC_USER_AUTHORIZATION_OPERATION_READ, &node,
+                                                          attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(!authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(writeExec, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &node,
+                                                          attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(writeExec, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE,
+                                                          &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(authorized);
+
+    // readExec
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(readExec, SOPC_USER_AUTHORIZATION_OPERATION_READ, &node, attr,
+                                                          &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(readExec, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &node,
+                                                          attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(!authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(readExec, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &node,
+                                                          attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(authorized);
+
+    // readWrite
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(readWrite, SOPC_USER_AUTHORIZATION_OPERATION_READ, &node,
+                                                          attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(readWrite, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &node,
+                                                          attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(readWrite, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE,
+                                                          &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(!authorized);
+
+    SOPC_UserWithAuthorization_Free(&invalidNoAccesses);
+    SOPC_UserWithAuthorization_Free(&anonNoAccesses);
+    SOPC_UserWithAuthorization_Free(&noAccess);
+    SOPC_UserWithAuthorization_Free(&writeExec);
+    SOPC_UserWithAuthorization_Free(&readExec);
+    SOPC_UserWithAuthorization_Free(&readWrite);
+
+    SOPC_ExtensionObject_Clear(invalidUserNameToken);
+    SOPC_ExtensionObject_Clear(invalidPasswordToken);
+    SOPC_ExtensionObject_Clear(noAccessToken);
+    SOPC_ExtensionObject_Clear(writeExecToken);
+    SOPC_ExtensionObject_Clear(readExecToken);
+    SOPC_ExtensionObject_Clear(readWriteToken);
+    SOPC_Free(invalidUserNameToken);
+    SOPC_Free(invalidPasswordToken);
+    SOPC_Free(noAccessToken);
+    SOPC_Free(writeExecToken);
+    SOPC_Free(readExecToken);
+    SOPC_Free(readWriteToken);
+}
+#endif
+
+START_TEST(test_XML_users_configuration)
+{
+// Without EXPAT test cannot be done
+#ifdef WITH_EXPAT
+    FILE* fd = fopen(XML_USERS_CONFIG_NAME, "r");
+
+    ck_assert_ptr_nonnull(fd);
+
+    SOPC_UserAuthentication_Manager* authenticationManager = NULL;
+    SOPC_UserAuthorization_Manager* authorizationManager = NULL;
+
+    bool result = SOPC_UsersConfig_Parse(fd, &authenticationManager, &authorizationManager);
+    fclose(fd);
+    ck_assert(result);
+
+    check_parsed_users_config(authenticationManager, authorizationManager);
+
+    SOPC_UserAuthentication_FreeManager(&authenticationManager);
+    SOPC_UserAuthorization_FreeManager(&authorizationManager);
+
+#else
+    printf("Test test_XML_users_configuration ignored since EXPAT is not available\n");
+#endif
+}
+END_TEST
+
 Suite* tests_make_suite_XML_parsers(void)
 {
     Suite* s;
@@ -598,6 +832,7 @@ Suite* tests_make_suite_XML_parsers(void)
     tc_XML_parsers = tcase_create("XML parsers");
     tcase_add_test(tc_XML_parsers, test_same_address_space_results);
     tcase_add_test(tc_XML_parsers, test_XML_server_configuration);
+    tcase_add_test(tc_XML_parsers, test_XML_users_configuration);
     suite_add_tcase(s, tc_XML_parsers);
 
     return s;
