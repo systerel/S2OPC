@@ -3359,7 +3359,7 @@ SOPC_ReturnStatus SOPC_EncodeMsg_Type_Header_Body(SOPC_Buffer* buf,
 
     if (NULL != buf &&
         // Body cannot be null except in case of service fault message
-        (NULL != msgBody || encType->TypeId == OpcUaId_ServiceFault) && NULL != encType && NULL != headerType &&
+        NULL != encType && (NULL != msgBody || encType->TypeId == OpcUaId_ServiceFault) && NULL != headerType &&
         NULL != msgHeader)
     {
         nodeId.IdentifierType = SOPC_IdentifierType_Numeric;

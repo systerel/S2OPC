@@ -130,7 +130,6 @@ bool SC_CloseConnection(uint32_t connectionIdx, bool socketFailure)
 {
     SOPC_SecureConnection* scConnection = NULL;
     bool result = false;
-    bool configRes = false;
     if (connectionIdx > 0 && connectionIdx <= SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED)
     {
         scConnection = &(secureConnectionsArray[connectionIdx]);
@@ -203,7 +202,8 @@ bool SC_CloseConnection(uint32_t connectionIdx, bool socketFailure)
             if (scConnection->isServerConnection)
             {
                 // Remove the connection configuration created on connection establishment
-                configRes = SOPC_ToolkitServer_RemoveSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+                bool configRes =
+                    SOPC_ToolkitServer_RemoveSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
                 if (!configRes && scConnection->state != SECURE_CONNECTION_STATE_TCP_INIT &&
                     scConnection->state != SECURE_CONNECTION_STATE_TCP_NEGOTIATE &&
                     scConnection->state != SECURE_CONNECTION_STATE_SC_INIT)
@@ -317,7 +317,7 @@ static bool SC_Server_SendErrorMsgAndClose(uint32_t scConnectionIdx, SOPC_Status
     }
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_String_AttachFromCstring(&tempString, reason);
+        status = SOPC_String_AttachFromCstring(&tempString, reason);
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -639,7 +639,6 @@ static bool SC_ClientTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
         SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
     bool result = false;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    assert(scConnection != NULL);
     assert(scConnection->state == SECURE_CONNECTION_STATE_TCP_INIT);
 
     // Create OPC UA TCP Hello message
@@ -652,7 +651,7 @@ static bool SC_ClientTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
         status = SOPC_Buffer_SetDataLength(msgBuffer, SOPC_TCP_UA_HEADER_LENGTH);
         if (SOPC_STATUS_OK == status)
         {
-            SOPC_Buffer_SetPosition(msgBuffer, SOPC_TCP_UA_HEADER_LENGTH);
+            status = SOPC_Buffer_SetPosition(msgBuffer, SOPC_TCP_UA_HEADER_LENGTH);
         }
         // Encode Hello message body
         if (SOPC_STATUS_OK == status)
@@ -856,7 +855,6 @@ static bool SC_ClientTransitionHelper_SendOPN(SOPC_SecureConnection* scConnectio
     OpcUa_OpenSecureChannelRequest opnReq;
     OpcUa_OpenSecureChannelRequest_Initialize(&opnReq);
     const uint8_t* bytes = NULL;
-    uint32_t length = 0;
 
     config = SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
     assert(config != NULL);
@@ -913,7 +911,7 @@ static bool SC_ClientTransitionHelper_SendOPN(SOPC_SecureConnection* scConnectio
 
             if (SOPC_STATUS_OK == status)
             {
-                length = SOPC_SecretBuffer_GetLength(scConnection->clientNonce);
+                uint32_t length = SOPC_SecretBuffer_GetLength(scConnection->clientNonce);
                 if (length <= INT32_MAX)
                 {
                     bytes = SOPC_SecretBuffer_Expose(scConnection->clientNonce);
@@ -1542,7 +1540,6 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
     assert(NULL != errorStatus);
 
     bool result = false;
-    uint32_t idx;
     bool validSecurityRequested = false;
     SOPC_Endpoint_Config* epConfig = NULL;
     OpcUa_RequestHeader* reqHeader = NULL;
@@ -1695,6 +1692,7 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
 
         SOPC_SecureChannel_Config* nconfig = SOPC_Calloc(1, sizeof(SOPC_SecureChannel_Config));
         SOPC_Buffer* cert_buffer = NULL;
+        uint32_t idx = 0;
 
         if (nconfig == NULL || !get_certificate_der(scConnection->serverAsymmSecuInfo.clientCertificate, &cert_buffer))
         {
@@ -1757,13 +1755,13 @@ static bool SC_Server_GenerateFreshSecureChannelAndTokenId(SOPC_SecureConnection
     assert(tokenId != NULL);
 
     bool result = false;
-    uint32_t resultTokenId = 0;
-    uint32_t resultSecureChannelId = 0;
     SOPC_SecureListener* scListener = &secureListenersArray[scConnection->serverEndpointConfigIdx];
 
     if (scListener->state == SECURE_LISTENER_STATE_OPENED)
     {
         // Randomize secure channel ids (table 26 part 6)
+        uint32_t resultTokenId = 0;
+        uint32_t resultSecureChannelId = 0;
         uint32_t newSecureChannelId = 0;
         uint32_t newTokenId = 0;
         uint32_t idx = 0;
@@ -1908,7 +1906,6 @@ static bool SC_ServerTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
     SOPC_Buffer* opnRespBuffer = NULL;
     SOPC_SecureChannel_Config* scConfig = NULL;
     const uint8_t* bytes = NULL;
-    uint32_t length = 0;
 
     scConfig = SOPC_ToolkitServer_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
     assert(scConfig != NULL);
@@ -1974,7 +1971,7 @@ static bool SC_ServerTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
 
             if (result)
             {
-                length = SOPC_SecretBuffer_GetLength(serverNonce);
+                uint32_t length = SOPC_SecretBuffer_GetLength(serverNonce);
                 if (length <= INT32_MAX)
                 {
                     bytes = SOPC_SecretBuffer_Expose(serverNonce);
@@ -2201,9 +2198,9 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
     SOPC_SecureConnection_SecurityToken newSecuToken;
     SOPC_SC_SecurityKeySets newSecuKeySets;
     const uint8_t* bytes = NULL;
-    uint32_t length = 0;
 
     memset(&newSecuKeySets, 0, sizeof(SOPC_SC_SecurityKeySets));
+    memset(&newSecuToken, 0, sizeof(SOPC_SecureConnection_SecurityToken));
 
     scConfig = SOPC_ToolkitServer_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
     assert(scConfig != NULL);
@@ -2257,7 +2254,7 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
 
             if (result)
             {
-                length = SOPC_SecretBuffer_GetLength(serverNonce);
+                uint32_t length = SOPC_SecretBuffer_GetLength(serverNonce);
                 result = length <= INT32_MAX;
 
                 if (result)

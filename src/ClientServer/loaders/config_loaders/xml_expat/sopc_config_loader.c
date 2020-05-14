@@ -181,7 +181,7 @@ static const char* get_attr(struct parse_context_t* ctx, const char* attr_name, 
             if (attr_val == NULL)
             {
                 LOG_XML_ERRORF(ctx->helper_ctx.parser, "Missing value for %s attribute", attr_name);
-                return false;
+                return NULL;
             }
             return attr_val;
         }
