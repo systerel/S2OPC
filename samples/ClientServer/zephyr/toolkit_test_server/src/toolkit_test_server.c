@@ -39,6 +39,7 @@
 #define NULL ((void*) 0)
 #endif
 
+#include "sopc_common.h"
 #include "sopc_mutexes.h"
 #include "sopc_raw_sockets.h"
 #include "sopc_threads.h"
@@ -48,6 +49,7 @@
 #include <errno.h>
 #include <inttypes.h>
 #include <signal.h>
+#include <sopc_logger.h>
 #include <stdio.h>
 #include <stdlib.h> /* getenv, exit */
 #include <string.h>
@@ -210,6 +212,8 @@ static SOPC_ReturnStatus Server_Initialize(void)
 {
     // Initialize the toolkit library and define the communication events callback
     SOPC_ReturnStatus status = SOPC_Toolkit_Initialize(Test_ComEvent_FctServer);
+    SOPC_Logger_SetConsoleOutput(true);
+
     if (SOPC_STATUS_OK != status)
     {
         printf("<Test_Server_Toolkit: Failed initializing\n");
@@ -567,7 +571,7 @@ static SOPC_ReturnStatus Server_SetUserManagementConfig(SOPC_Endpoint_Config* pE
 }
 
 /*------------------------------
- * Address space configuraiton :
+ * Address space configuration :
  *------------------------------*/
 
 static SOPC_ReturnStatus Server_ConfigureAddressSpace(SOPC_AddressSpace** output_addressSpace)
@@ -627,14 +631,14 @@ static void* Server_Main(void* pCtx)
     const uint32_t sleepTimeout = 500;
 
     /* Get the toolkit build information and print it */
-    RuntimeVariables runtime_vars;
+    /*RuntimeVariables runtime_vars;
     SOPC_Toolkit_Build_Info build_info = SOPC_ToolkitConfig_GetBuildInfo();
     printf("S2OPC_Common       - Version: %s, SrcCommit: %s, DockerId: %s, BuildDate: %s\n",
            build_info.commonBuildInfo.buildVersion, build_info.commonBuildInfo.buildSrcCommit,
            build_info.commonBuildInfo.buildDockerId, build_info.commonBuildInfo.buildBuildDate);
     printf("S2OPC_ClientServer - Version: %s, SrcCommit: %s, DockerId: %s, BuildDate: %s\n",
            build_info.toolkitBuildInfo.buildVersion, build_info.toolkitBuildInfo.buildSrcCommit,
-           build_info.toolkitBuildInfo.buildDockerId, build_info.toolkitBuildInfo.buildBuildDate);
+           build_info.toolkitBuildInfo.buildDockerId, build_info.toolkitBuildInfo.buildBuildDate);*/
 
     /* Initialize the server library (start library threads)
      * and define communication events callback */
@@ -719,7 +723,7 @@ static void* Server_Main(void* pCtx)
     }
 
     /* Update server information runtime variables in address space */
-    if (SOPC_STATUS_OK == status)
+    /*if (SOPC_STATUS_OK == status)
     {
         runtime_vars = build_runtime_variables(build_info, serverConfig, "Systerel");
 
@@ -728,7 +732,7 @@ static void* Server_Main(void* pCtx)
             printf("<Test_Server_Toolkit: Failed to populate Server object");
             status = SOPC_STATUS_NOK;
         }
-    }
+    }*/
 
     /* Run the server until notification that endpoint is closed received
      *  or stop server signal detected (Ctrl-C) */
@@ -741,7 +745,7 @@ static void* Server_Main(void* pCtx)
      * On first stop signal received, the OPC UA server indicate it will shutdown during
      * <SHUTDOWN_PHASE_IN_SECONDS>s and then stop.
      */
-    SOPC_TimeReference targetTime = SOPC_TimeReference_GetCurrent() + SHUTDOWN_PHASE_IN_SECONDS * 1000;
+    /*SOPC_TimeReference targetTime = SOPC_TimeReference_GetCurrent() + SHUTDOWN_PHASE_IN_SECONDS * 1000;
     bool targetTimeReached = false;
     uint32_t secondsTillShutdown = SHUTDOWN_PHASE_IN_SECONDS;
     // From part 5: "The server has shut down or is in the process of shutting down."
@@ -772,7 +776,7 @@ static void* Server_Main(void* pCtx)
         {
             targetTimeReached = true;
         }
-    }
+    }*/
 
     /* Asynchronous request to close the endpoint */
     if (SOPC_STATUS_OK == status && SOPC_Atomic_Int_Get(&endpointClosed) == 0)
