@@ -1144,6 +1144,16 @@ class DataValue:
         return self.variant.get_python()
 
 
+class LogLevel(NamedMembers):
+    """
+    Accessors to SOPC_Log_Level enum.
+    """
+    Error = libsub.SOPC_LOG_LEVEL_ERROR
+    Warning = libsub.SOPC_LOG_LEVEL_WARNING
+    Info = libsub.SOPC_LOG_LEVEL_INFO
+    Debug = libsub.SOPC_LOG_LEVEL_DEBUG
+
+
 class AttributeId(NamedMembers):
     """
     The constants to use for the attributes to read or write.

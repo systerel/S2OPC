@@ -27,7 +27,7 @@ import json
 
 from _pys2opc import ffi, lib as libsub
 from .connection import BaseClientConnectionHandler
-from .types import DataValue, ReturnStatus, SecurityPolicy, SecurityMode
+from .types import DataValue, ReturnStatus, SecurityPolicy, SecurityMode, LogLevel
 from .responses import Response
 from .server_callbacks import BaseAddressSpaceHandler
 
@@ -36,9 +36,11 @@ VERSION = json.load(open(os.path.join(os.path.dirname(os.path.realpath(__file__)
 
 NULL = ffi.NULL
 
-# TODO: make this configurable
+# Note: this level only concerns the following function _callback_log
+# TODO: make this configurable for the end user
 LOG_LEVEL = libsub.SOPC_LOG_LEVEL_DEBUG
 
+# TODO: merge all logs system
 @ffi.def_extern()
 def _callback_log(level, text):
     """
@@ -156,7 +158,7 @@ class PyS2OPC_Client(PyS2OPC):
 
     @staticmethod
     @contextmanager
-    def initialize(logLevel=0, logPath='logs/', logFileMaxBytes=1048576, logMaxFileNumber=50):
+    def initialize(logLevel=LogLevel.Debug, logPath='logs/', logFileMaxBytes=1048576, logMaxFileNumber=50):
         """
         Toolkit and LibSub initializations for Clients.
         When the toolkit is initialized for clients, it cannot be used to make a server before a `clear()`.
@@ -170,7 +172,7 @@ class PyS2OPC_Client(PyS2OPC):
         See `clear()`.
 
         Args:
-            logLevel: log level (0: error, 1: warning, 2: info, 3: debug)
+            logLevel: log level for the toolkit logs (one of the `pys2opc.types.LogLevel` values).
             logPath: the path for logs (the current working directory) to logPath.
                      logPath is created if it does not exist.
             logFileMAxBytes: The maximum size (best effort) of the log files, before changing the log index.
@@ -213,7 +215,7 @@ class PyS2OPC_Client(PyS2OPC):
                                     sc_lifetime = 3600000,
                                     token_target = 3):
         """
-        Returns a configuration that can be later used in `pys2opc.s2opc.PyS2OPC.connect` or `pys2opc.s2opc.PyS2OPC.get_endpoints`.
+        Returns a configuration that can be later used in `PyS2OPC_Client.connect` or `PyS2OPC_Client.get_endpoints`.
 
         Args:
             server_url: The endpoint and server url to connect to.
@@ -223,7 +225,7 @@ class PyS2OPC_Client(PyS2OPC):
                              to keep `n_max_keepalive*timeout_ms*token_target < REQUEST_TIMEOUT (5000ms)`.
             n_max_lifetime: The maximum number of times a subscription has notifications to send
                             but no available token. In this case, the subscription is destroyed.
-            timeout_ms: The `pys2opc.s2opc.PyS2OPC.connect` timeout, in ms.
+            timeout_ms: The `PyS2OPC_Client.connect` timeout, in ms.
             sc_lifetime: The target lifetime of the secure channel, before renewal, in ms.
             token_target: The number of subscription tokens (PublishRequest) that should be
                           made available to the server at anytime.
@@ -277,7 +279,7 @@ class PyS2OPC_Client(PyS2OPC):
                                   path_cert_cli = '../../../../build/bin/client_public/client_2k_cert.der',
                                   path_key_cli = '../../../../build/bin/client_private/client_2k_key.pem'):
         """
-        Returns a configuration that can be later used in `pys2opc.s2opc.PyS2OPC.connect` or `pys2opc.s2opc.PyS2OPC.get_endpoints`.
+        Returns a configuration that can be later used in `PyS2OPC_Client.connect` or `PyS2OPC_Client.get_endpoints`.
 
         Args:
             server_url: The endpoint and server url to connect to.
@@ -287,7 +289,7 @@ class PyS2OPC_Client(PyS2OPC):
                              to keep `n_max_keepalive*timeout_ms*token_target < 5000ms`.
             n_max_lifetime: The maximum number of times a subscription has notifications to send
                             but no available token. In this case, the subscription is destroyed.
-            timeout_ms: The `pys2opc.s2opc.PyS2OPC.connect` timeout, in ms.
+            timeout_ms: The `PyS2OPC_Client.connect` timeout, in ms.
             sc_lifetime: The target lifetime of the secure channel, before renewal, in ms.
             token_target: The number of subscription tokens (PublishRequest) that should be
                           made available to the server at anytime.
@@ -422,7 +424,7 @@ class PyS2OPC_Server(PyS2OPC):
 
     @staticmethod
     @contextmanager
-    def initialize(logLevel=libsub.SOPC_LOG_LEVEL_DEBUG, logPath='logs/', logFileMaxBytes=1048576, logMaxFileNumber=50):
+    def initialize(logLevel=LogLevel.Debug, logPath='logs/', logFileMaxBytes=1048576, logMaxFileNumber=50):
         """
         Toolkit initialization for Server.
         When the toolkit is initialized for servers, it cannot be used to make a server before a call to `PyS2OPC_Server.clear`.
@@ -656,7 +658,7 @@ class PyS2OPC_Server(PyS2OPC):
         >>> with PyS2OPC_Server.serve():
         ...     # All applicative code may live here
         ...     pass
-        ... # Endpoint and server capabilities are cleanly stoped upon context exit
+        ... # Endpoint and server capabilities are cleanly stopped upon context exit
 
         If you don't have applicative application, and callbacks are enough,
         see instead `PyS2OPC_Server.serve_forever()`.
