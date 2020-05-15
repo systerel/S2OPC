@@ -77,7 +77,8 @@ struct tThreadHandle
 
 typedef struct T_THREAD_WKS
 {
-    struct _k_thread_stack_element sym[MAX_STACK_SIZE] __attribute__((aligned(STACK_ALIGN)));
+	/* TODO: use K_THREAD_STACK_DEFINE function instead */
+    struct z_thread_stack_element sym[MAX_STACK_SIZE] __attribute__((aligned(ARCH_STACK_PTR_ALIGN)));
     struct k_thread threadControlBlock;
     k_tid_t threadHandle;
     uint32_t slotId;
@@ -87,7 +88,7 @@ typedef struct T_THREAD_WKS
     volatile struct tThreadHandle* debugExternalHandle;
     ptrFct userCallback;
     void* userContext;
-} tThreadWks __attribute__((aligned(STACK_ALIGN)));
+} tThreadWks;
 
 // *** Private threads workspaces tab ***
 
