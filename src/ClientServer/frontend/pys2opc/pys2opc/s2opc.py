@@ -589,24 +589,30 @@ class PyS2OPC_Server(PyS2OPC):
         try:
             # Cryptography
             serverCfg = config.serverConfig
-            ppCert = ffi.addressof(serverCfg, 'serverCertificate')
-            status = libsub.SOPC_KeyManager_SerializedCertificate_CreateFromFile(serverCfg.serverCertPath, ppCert)
-            assert status == ReturnStatus.OK,\
-                'Cannot load server certificate file {} with status {}. Is path correct?'\
-                .format(ffi.string(serverCfg.serverCertPath), ReturnStatus.get_both_from_id(status))
+            if serverCfg.serverCertPath != NULL or serverCfg.serverKeyPath != NULL:
+                assert serverCfg.serverCertPath != NULL and serverCfg.serverKeyPath != NULL,\
+                    'The server private key and server certificate work by pair. Either configure them both of them or none of them.'
+                ppCert = ffi.addressof(serverCfg, 'serverCertificate')
+                status = libsub.SOPC_KeyManager_SerializedCertificate_CreateFromFile(serverCfg.serverCertPath, ppCert)
+                assert status == ReturnStatus.OK,\
+                    'Cannot load server certificate file {} with status {}. Is path correct?'\
+                    .format(ffi.string(serverCfg.serverCertPath), ReturnStatus.get_both_from_id(status))
 
-            ppKey = ffi.addressof(serverCfg, 'serverKey')
-            status = libsub.SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(serverCfg.serverKeyPath, ppKey)
-            assert status == ReturnStatus.OK,\
-                'Cannot load secret key file {} with status {}. Is path correct?'\
-                .format(ffi.string(serverCfg.serverKeyPath), ReturnStatus.get_both_from_id(status))
+                ppKey = ffi.addressof(serverCfg, 'serverKey')
+                status = libsub.SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(serverCfg.serverKeyPath, ppKey)
+                assert status == ReturnStatus.OK,\
+                    'Cannot load secret key file {} with status {}. Is path correct?'\
+                    .format(ffi.string(serverCfg.serverKeyPath), ReturnStatus.get_both_from_id(status))
 
-            ppPki = ffi.addressof(serverCfg, 'pki')
-            status = libsub.SOPC_PKIProviderStack_CreateFromPaths(
-                serverCfg.trustedRootIssuersList, serverCfg.trustedIntermediateIssuersList,
-                serverCfg.untrustedRootIssuersList, serverCfg.untrustedIntermediateIssuersList,
-                serverCfg.issuedCertificatesList, serverCfg.certificateRevocationPathList,
-                ppPki)
+            # PKI is not required if no CA is configured
+            if (serverCfg.trustedRootIssuersList != NULL and serverCfg.trustedRootIssuersList[0] != NULL) or\
+               (serverCfg.issuedCertificatesList != NULL and serverCfg.issuedCertificatesList[0] != NULL):
+                ppPki = ffi.addressof(serverCfg, 'pki')
+                status = libsub.SOPC_PKIProviderStack_CreateFromPaths(
+                    serverCfg.trustedRootIssuersList, serverCfg.trustedIntermediateIssuersList,
+                    serverCfg.untrustedRootIssuersList, serverCfg.untrustedIntermediateIssuersList,
+                    serverCfg.issuedCertificatesList, serverCfg.certificateRevocationPathList,
+                    ppPki)
 
             # Methods
             serverCfg.mcm  # Leave NULL
