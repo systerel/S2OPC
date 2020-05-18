@@ -530,7 +530,7 @@ class PyS2OPC_Server(PyS2OPC):
 
         with open(xml_path, 'r') as fd:
             space = libsub.SOPC_UANodeSet_Parse(fd)
-        assert space != ffi.NULL,\
+        assert space != NULL,\
             'Cannot load address space from file {}'.format(xml_path)
         assert libsub.SOPC_ToolkitServer_SetAddressSpaceConfig(space) == ReturnStatus.OK
         PyS2OPC_Server._adds = space  # Kept to avoid double inits, and to clear it
@@ -617,7 +617,7 @@ class PyS2OPC_Server(PyS2OPC):
                 # By default, creates user managers that accept all users and allow all operations
                 endpoint.authenticationManager = libsub.SOPC_UserAuthentication_CreateManager_AllowAll()
                 endpoint.authorizationManager = libsub.SOPC_UserAuthorization_CreateManager_AllowAll()
-                assert endpoint.authenticationManager != ffi.NULL and endpoint.authorizationManager != ffi.NULL
+                assert endpoint.authenticationManager != NULL and endpoint.authorizationManager != NULL
 
                 # Register endpoint
                 epConfigIdx = libsub.SOPC_ToolkitServer_AddEndpointConfig(ffi.addressof(endpoint))
