@@ -84,49 +84,53 @@ static void SOPC_ServerConfig_Clear(SOPC_Server_Config* config)
     assert(NULL != config);
     if (config->freeCstringsFlag)
     {
-        for (int i = 0; NULL != config->namespaces[i]; i++)
+        for (int i = 0; NULL != config->namespaces && NULL != config->namespaces[i]; i++)
         {
             SOPC_Free(config->namespaces[i]);
         }
         SOPC_Free(config->namespaces);
 
-        for (int i = 0; NULL != config->localeIds[i]; i++)
+        for (int i = 0; NULL != config->localeIds && NULL != config->localeIds[i]; i++)
         {
             SOPC_Free(config->localeIds[i]);
         }
         SOPC_Free(config->localeIds);
 
-        for (int i = 0; NULL != config->trustedRootIssuersList[i]; i++)
+        for (int i = 0; NULL != config->trustedRootIssuersList && NULL != config->trustedRootIssuersList[i]; i++)
         {
             SOPC_Free(config->trustedRootIssuersList[i]);
         }
         SOPC_Free(config->trustedRootIssuersList);
 
-        for (int i = 0; NULL != config->trustedIntermediateIssuersList[i]; i++)
+        for (int i = 0;
+             NULL != config->trustedIntermediateIssuersList && NULL != config->trustedIntermediateIssuersList[i]; i++)
         {
             SOPC_Free(config->trustedIntermediateIssuersList[i]);
         }
         SOPC_Free(config->trustedIntermediateIssuersList);
 
-        for (int i = 0; NULL != config->issuedCertificatesList[i]; i++)
+        for (int i = 0; NULL != config->issuedCertificatesList && NULL != config->issuedCertificatesList[i]; i++)
         {
             SOPC_Free(config->issuedCertificatesList[i]);
         }
         SOPC_Free(config->issuedCertificatesList);
 
-        for (int i = 0; NULL != config->untrustedRootIssuersList[i]; i++)
+        for (int i = 0; NULL != config->untrustedRootIssuersList && NULL != config->untrustedRootIssuersList[i]; i++)
         {
             SOPC_Free(config->untrustedRootIssuersList[i]);
         }
         SOPC_Free(config->untrustedRootIssuersList);
 
-        for (int i = 0; NULL != config->untrustedIntermediateIssuersList[i]; i++)
+        for (int i = 0;
+             NULL != config->untrustedIntermediateIssuersList && NULL != config->untrustedIntermediateIssuersList[i];
+             i++)
         {
             SOPC_Free(config->untrustedIntermediateIssuersList[i]);
         }
         SOPC_Free(config->untrustedIntermediateIssuersList);
 
-        for (int i = 0; NULL != config->certificateRevocationPathList[i]; i++)
+        for (int i = 0;
+             NULL != config->certificateRevocationPathList && NULL != config->certificateRevocationPathList[i]; i++)
         {
             SOPC_Free(config->certificateRevocationPathList[i]);
         }
