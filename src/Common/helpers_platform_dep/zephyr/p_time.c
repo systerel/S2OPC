@@ -270,7 +270,6 @@ SOPC_ReturnStatus SOPC_Time_Breakdown_UTC(time_t t, struct tm* tm)
 
 void SOPC_Sleep(unsigned int milliseconds)
 {
-
     k_sleep(K_MSEC(milliseconds));
     return;
 }

@@ -105,8 +105,8 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromFile(const char* szPat
                                                                uint32_t lenPassword)
 {
 #ifdef WITH_STATIC_SECURITY_DATA
-	/* Load client/server certificates and server key from C source files (no filesystem needed) */
-	return SOPC_STATUS_NOK;
+    /* Load client/server certificates and server key from C source files (no filesystem needed) */
+    return SOPC_STATUS_NOK;
 #else
     SOPC_AsymmetricKey* key = NULL;
 
@@ -295,8 +295,8 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromDER(const uint8_t* 
 SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromFile(const char* szPath, SOPC_CertificateList** ppCert)
 {
 #ifdef WITH_STATIC_SECURITY_DATA
-     /* Load client/server certificates and server key from C source files (no filesystem needed) */
-	return SOPC_STATUS_NOK;
+    /* Load client/server certificates and server key from C source files (no filesystem needed) */
+    return SOPC_STATUS_NOK;
 #else
     if (NULL == szPath || NULL == ppCert)
     {
@@ -965,8 +965,8 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromDER(const uint8_t* bufferDE
 SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromFile(const char* szPath, SOPC_CRLList** ppCRL)
 {
 #ifdef WITH_STATIC_SECURITY_DATA
-     /* Load client/server certificates and server key from C source files (no filesystem needed) */
-	return SOPC_STATUS_NOK;
+    /* Load client/server certificates and server key from C source files (no filesystem needed) */
+    return SOPC_STATUS_NOK;
 #else
     if (NULL == szPath || NULL == ppCRL)
     {
