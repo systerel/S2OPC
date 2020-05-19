@@ -73,12 +73,13 @@ struct tThreadHandle
     volatile uint32_t slotId;
 };
 
+/* Stack memory definition */
+K_THREAD_STACK_ARRAY_DEFINE(gThreadStacks, MAX_NB_THREADS, MAX_STACK_SIZE);
+
 // *** Private thread workspace definition ***
 
 typedef struct T_THREAD_WKS
 {
-	/* TODO: use K_THREAD_STACK_DEFINE function instead */
-    struct z_thread_stack_element sym[MAX_STACK_SIZE] __attribute__((aligned(ARCH_STACK_PTR_ALIGN)));
     struct k_thread threadControlBlock;
     k_tid_t threadHandle;
     uint32_t slotId;
@@ -273,7 +274,7 @@ static eThreadResult P_THREAD_Init(tThreadHandle* pWks, ptrFct callback, void* p
         gGlbThreadWks.tab[slotId - 1].slotId = slotId;
         gGlbThreadWks.tab[slotId - 1].threadHandle =
             k_thread_create(&gGlbThreadWks.tab[slotId - 1].threadControlBlock, //
-                            gGlbThreadWks.tab[slotId - 1].sym,                 //
+            				gThreadStacks[slotId - 1],                         //
                             sizeof(gGlbThreadWks.tab[slotId - 1].sym),         //
                             P_THREAD_InternalCallback,                         //
                             &gGlbThreadWks.tab[slotId - 1],                    //
