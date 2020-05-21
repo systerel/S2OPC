@@ -69,7 +69,8 @@ def _callback_client_event(connectionId, event, status, responsePayload, respons
 
 @ffi.def_extern()
 def _callback_toolkit_event(event, status, param, appContext):
-    return PyS2OPC._callback_toolkit_event(event, status, param, appContext)
+    timestamp = time.time()
+    return PyS2OPC._callback_toolkit_event(event, status, param, appContext, timestamp)
 
 @ffi.def_extern()
 def _callback_address_space_event(event, operationParam, operationStatus):
@@ -141,10 +142,10 @@ class PyS2OPC:
         PyS2OPC._configured = True
 
     @staticmethod
-    def _callback_toolkit_event(event, status, param, appContext):
+    def _callback_toolkit_event(event, status, param, appContext, timestamp):
         assert event in PyS2OPC._events_client | PyS2OPC._events_server, 'Unknown event received from Toolkit "{}"'.format(event)
         if event in PyS2OPC._events_server:
-            PyS2OPC_Server._callback_toolkit_event(event, status, param, appContext)
+            PyS2OPC_Server._callback_toolkit_event(event, status, param, appContext, timestamp)
         else:
             assert event not in PyS2OPC._events_client, 'Only server events are supported yet'
 
@@ -486,7 +487,7 @@ class PyS2OPC_Server(PyS2OPC):
             PyS2OPC_Server._config = None
 
     @staticmethod
-    def _callback_toolkit_event(event, epIdx, param, appContext):
+    def _callback_toolkit_event(event, epIdx, param, appContext, timestamp):
         # For now, only support server events
         if event == libsub.SE_CLOSED_ENDPOINT:
             # id = endpoint configuration index,
