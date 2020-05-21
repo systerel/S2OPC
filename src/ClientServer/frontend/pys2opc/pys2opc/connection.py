@@ -24,10 +24,10 @@ import time
 from _pys2opc import ffi, lib as libsub
 from .types import AttributeId, allocator_no_gc, EncodeableType, str_to_nodeid, ReturnStatus, VariantType
 from .responses import Response, ReadResponse, WriteResponse, BrowseResponse
-from .request import Request, AsyncRequestHandler
+from .request import Request, LibSubAsyncRequestHandler
 
 
-class BaseClientConnectionHandler(AsyncRequestHandler):
+class BaseClientConnectionHandler(LibSubAsyncRequestHandler):
     """
     Base class giving the prototypes of the callbacks,
     and implements the subscription-library connection wrappers.
@@ -36,6 +36,7 @@ class BaseClientConnectionHandler(AsyncRequestHandler):
     In this case, the connection is automatically closed upon exit of the context.
     """
     def __init__(self, connId, configuration):
+        super().__init__()
         self._id = connId
         self.configuration = configuration
         self._connected = True
@@ -60,6 +61,15 @@ class BaseClientConnectionHandler(AsyncRequestHandler):
         """
         self._connected = False
         self.on_disconnect()
+
+    def _on_response(self, event, status, responsePayload, responseContext, timestamp):
+        if event == libsub.SOPC_LibSub_ApplicativeEvent_SendFailed:
+            self._connected = False  # Prevent further sends
+            self.disconnect()  # Explicitly disconnects to free S²OPC resources
+            super._on_response(None, responseContext, timestamp)  # Still signal that the response is received
+            raise RuntimeError('Request was not sent with status 0x{:08X}'.format(status))
+        assert event == libsub.SOPC_LibSub_ApplicativeEvent_Response
+        super()._on_response(responsePayload, responseContext, timestamp)
 
     # Callbacks
     def on_datachanged(self, nodeId, dataValue):
@@ -145,7 +155,7 @@ class BaseClientConnectionHandler(AsyncRequestHandler):
         payload.NodesToRead = nodesToRead
 
         request = Request(payload)
-        return self.send_generic_request(request, bWaitResponse=bWaitResponse)
+        return self.send_generic_request(self._id, request, bWaitResponse=bWaitResponse)
 
     def write_nodes(self, nodeIds, datavalues, attributes=None, types=None, bWaitResponse=True):
         """
@@ -213,7 +223,7 @@ class BaseClientConnectionHandler(AsyncRequestHandler):
         payload.NodesToWrite = nodesToWrite
 
         request = Request(payload)
-        return self.send_generic_request(request, bWaitResponse=bWaitResponse)
+        return self.send_generic_request(self._id, request, bWaitResponse=bWaitResponse)
 
     def browse_nodes(self, nodeIds, maxReferencesPerNode=1000, bWaitResponse=True):
         """
@@ -245,7 +255,7 @@ class BaseClientConnectionHandler(AsyncRequestHandler):
         payload.NodesToBrowse = nodesToBrowse
 
         request = Request(payload)
-        return self.send_generic_request(request, bWaitResponse=bWaitResponse)
+        return self.send_generic_request(self._id, request, bWaitResponse=bWaitResponse)
 
     #def history_read_nodes(self, nodeIds, bWaitResponse=True):
-    #    return self.send_generic_request(request, bWaitResponse=bWaitResponse)
+    #    return self.send_generic_request(self._id, request, bWaitResponse=bWaitResponse)

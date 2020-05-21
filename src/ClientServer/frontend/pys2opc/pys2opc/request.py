@@ -20,6 +20,7 @@
 
 
 from _pys2opc import ffi, lib as libsub
+from .types import ReturnStatus
 
 
 allocator_no_gc = ffi.new_allocator(alloc=libsub.SOPC_Malloc, free=None, should_clear_after_alloc=True)
@@ -55,7 +56,10 @@ class Request:
 
 class AsyncRequestHandler:
     """
-    Mixin that implements asynchronous request handling: associates a response to a request.
+    MixIn that implements asynchronous request handling: associates a response to a request.
+
+    This should be derived to implement the `_send_request` method.
+    See `request.LibSubAsyncRequestHandler` and `request.LocalAsyncRequestHandler`.
     """
     _dResponseClasses = {EncodeableType.ReadResponse: ReadResponse,
                          EncodeableType.WriteResponse: WriteResponse,
@@ -68,24 +72,30 @@ class AsyncRequestHandler:
         self._dPendingResponses = {}  # Stores available responses {requestContext: Response()}. See get_response()
         self._sSkipResponse = set()  # Stores the requestContext of Responses that shall not be stored in _dequeResponses.
 
-    # Generic request sender
-    def send_generic_request(self, request, bWaitResponse):
+    def _send_request(self, idx, request):
         """
-        Sends a request. When `bWaitResponse`, waits for the response and returns it.
+        Wrapper to the C-function that effectively send the request.
+        This must be re-implemented and may change according to the API used to send the request.
+        """
+        raise NotImplementedError
+
+    def send_generic_request(self, idx, request, bWaitResponse):
+        """
+        Sends a `request` on link with index `idx` (either a connection id or an endpoint id).
+        When `bWaitResponse`, waits for the response and returns it.
         Otherwise, returns the `request`, and the response will be available through `pys2opc.connection.BaseClientConnectionHandler.get_response`.
         """
         reqCtx = int(request.requestContext)
         self._dRequestContexts[reqCtx] = request
         request.timestampSent = time.time()
-        status = libsub.SOPC_LibSub_AsyncSendRequestOnSession(self._id, request.payload, request.requestContext)
-        assert status == ReturnStatus.OK, 'AsyncSendRequestOnSession failed with status {}'.format(status)
+        self._send_request(idx, request)
         if bWaitResponse:
             self._sSkipResponse.add(reqCtx)
             return self._wait_for_response(request)
         else:
             return request
 
-    def _on_response(self, event, status, responsePayload, responseContext, timestamp):
+    def _on_response(self, responsePayload, responseContext, timestamp):
         """
         Receives an OpcUa_*Response, creates a Response, associates it to a Request both-ways.
         It is called for every response received through the LibSub callback_generic_event.
@@ -100,11 +110,8 @@ class AsyncRequestHandler:
         assert responseContext in self._dRequestContexts, 'Unknown requestContext {}.'.format(responseContext)
         request = self._dRequestContexts.pop(responseContext)
         try:
-            if event == libsub.SOPC_LibSub_ApplicativeEvent_SendFailed:
-                self._connected = False  # Prevent further sends
-                self.disconnect()  # Explicitly disconnects to free S²OPC resources
-                raise RuntimeError('Request was not sent with status 0x{:08X}'.format(status))
-            assert event == libsub.SOPC_LibSub_ApplicativeEvent_Response
+            if responsePayload is None:
+                return
             # Build typed response
             encType = ffi.cast('SOPC_EncodeableType**', responsePayload)
             response = self._dResponseClasses.get(encType[0], Response)(responsePayload)
@@ -148,3 +155,21 @@ class AsyncRequestHandler:
         # TODO: Rework and simplify the distinction between skipped responses / waited response / generic response
         return self._dPendingResponses.pop(request.requestContext, None)
 
+
+class LibSubAsyncRequestHandler(AsyncRequestHandler):
+    """
+    MixIn that implements asynchronous request handling: associates a response to a request.
+    Specialized to use the client API.
+    """
+    def _send_request(self, connId, request):
+        status = libsub.SOPC_LibSub_AsyncSendRequestOnSession(connId, request.payload, request.requestContext)
+        assert status == ReturnStatus.OK, 'AsyncSendRequestOnSession failed with status {}'.format(ReturnStatus.get_both_from_id(status))
+
+
+class LocalAsyncRequestHandler(AsyncRequestHandler):
+    """
+    MixIn that implements asynchronous request handling: associates a response to a request.
+    Specialized to use the "local request" API.
+    """
+    def _send_request(self, epId, request):
+        libsub.SOPC_ToolkitServer_AsyncLocalServiceRequest(epId, request.payload, request.requestContext)
