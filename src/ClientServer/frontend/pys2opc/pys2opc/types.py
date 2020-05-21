@@ -31,34 +31,6 @@ from _pys2opc import ffi, lib as libsub
 allocator_no_gc = ffi.new_allocator(alloc=libsub.SOPC_Malloc, free=None, should_clear_after_alloc=True)
 
 
-class Request:
-    """
-    Base class for Requests. Adds a timestamp to ease the performance measurement.
-
-    Args:
-        payload: An OpcUa_*Request.
-
-    Attributes:
-        eventResponseReceived: Event that is set when the response is received and the `pys2opc.connection.BaseClientConnectionHandler.on_generic_response`
-                               of the connection has been called.
-        requestContext: A (unique) identifier for the request (read-only).
-    """
-    def __init__(self, payload):
-        self.timestampSent = None  # The sender of the request sets the timestamp
-        self.response = None
-        self.eventResponseReceived = threading.Event()
-        # Does not use the ffi.new_handle and from_handle capabilities because from_handle is subject to "undefined behavior"
-        #  when it is given an unknown pointer...
-        self._requestContextVoid = ffi.new_handle(self)  # Keep the void* to avoid garbage collection, ...
-        self._requestContext = ffi.cast('uintptr_t', self._requestContextVoid)  # ... but only use the casted value.
-        self.payload = payload
-
-    @property
-    def requestContext(self):
-        """Returns an uintptr_t, that is castable to Python int and usable by the libsub API"""
-        return self._requestContext
-
-
 class NamedMembers:
     """
     This class or its subclass is capable of returning the name of a member of this class from an id.

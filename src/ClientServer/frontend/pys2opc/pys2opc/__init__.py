@@ -92,6 +92,7 @@ The NodeId type `x=` is either:
 from _pys2opc import ffi, lib as libsub
 from .s2opc import VERSION, PyS2OPC_Client, PyS2OPC_Server, ClientConfiguration, ServerConfiguration, BaseAddressSpaceHandler
 from .connection import BaseClientConnectionHandler
-from .types import Request, Variant, VariantType, DataValue, AttributeId, ReturnStatus, StatusCode, SecurityPolicy, SecurityMode, NodeClass, LogLevel
+from .types import Variant, VariantType, DataValue, AttributeId, ReturnStatus, StatusCode, SecurityPolicy, SecurityMode, NodeClass, LogLevel
+from .request import Request
 
 #del ffi, libsub  # This makes pdoc bug
