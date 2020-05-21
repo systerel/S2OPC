@@ -30,6 +30,7 @@ from .connection import BaseClientConnectionHandler
 from .types import DataValue, ReturnStatus, SecurityPolicy, SecurityMode, LogLevel
 from .responses import Response
 from .server_callbacks import BaseAddressSpaceHandler
+from .request import LocalAsyncRequestHandler
 
 
 VERSION = json.load(open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'version.json')))['version']
@@ -420,7 +421,8 @@ class PyS2OPC_Server(PyS2OPC):
     _config = None  # SOPC_S2OPC_Config
     # Stores endpoint indexes and the corresponding configurations {Id: config.serverConfig.endpoint}
     # (note that endpoint.serverConfigPtr points to its parent serverConfig, which is the only field in config yet)
-    _dEpIdx = {}
+    _dEpIdx = {}  # {endpoint_index: SOPC_S2OPC_Config}
+    _req_hdler = LocalAsyncRequestHandler()
 
     @staticmethod
     @contextmanager
@@ -492,10 +494,10 @@ class PyS2OPC_Server(PyS2OPC):
             print(epIdx, 'closed')
         elif event == libsub.SE_LOCAL_SERVICE_RESPONSE:
             # id = endpoint configuration index,
-            # params = (OpcUa_<MessageStruct>*) OPC UA message header + payload structure
-            #          (deallocated by toolkit after callback call ends)
+            # param = (OpcUa_<MessageStruct>*) OPC UA message header + payload structure
+            #         (deallocated by toolkit after callback call ends)
             # auxParam = user application request context
-            pass
+            PyS2OPC_Server._req_hdler._on_response(param, appContext, timestamp)
 
     @staticmethod
     def _callback_address_space_event(event, operationParam, operationStatus):
@@ -692,6 +694,36 @@ class PyS2OPC_Server(PyS2OPC):
             except KeyboardInterrupt:
                 pass
 
+    # -----------------------------
+    # Local services implementation
+
+    @staticmethod
+    def _send_request(request, bWaitResponse, epIdx):
+        if epIdx is None:
+            for epIdx in PyS2OPC_Server._dEpIdx:
+                break
+        assert epIdx is not None, 'No configured endpoint'
+        return PyS2OPC_Server._req_hdler.send_generic_request(epIdx, request, bWaitResponse)
+
+    # TODO: factorize request creations with connection.py
+    @staticmethod
+    def read_nodes(nodeIds, attributes=None, bWaitResponse=True, epIdx=None):
+        """
+        Forges an OpcUa_ReadRequest and sends it.
+        When `bWaitResponse`, waits for and returns the `pys2opc.responses.ReadResponse`,
+        which contains the attribute results storing the read value for the ith element.
+        Otherwise, returns the `pys2opc.types.Request`.
+
+        Args:
+            nodeIds: A list of NodeIds described as a strings (see `pys2opc` module documentation).
+            attributes: Optional: a list of attributes to read. The list has the same length as nodeIds. When omited,
+                        reads the attribute Value (see `pys2opc.types.AttributeId` for a list of attributes).
+            epIdx: The index of the local endpoint on which the request is issued.
+                   If None, one is chosen in the opened endpoints.
+        """
+
+        request = Request(payload)
+        return PyS2OPC_Server._send_request(request, bWaitResponse, epIdx)
 
 
 class Configuration:

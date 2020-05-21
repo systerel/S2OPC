@@ -126,6 +126,7 @@ class AsyncRequestHandler:
             # Hopefully the Toolkit always notifies the application, and it is caught here.
             # Also, if the processing of the response fails, it is caught here.
             request.eventResponseReceived.set()
+        return response
 
     def on_generic_response(self, request, response):
         """
