@@ -167,6 +167,36 @@ class Request:
 
         return Request(payload)
 
+    def helper_maybe_read_types(nodeIds, datavalues, attributes, types, sendFct):
+        """
+        Internal helper that makes a `Request` to read the missing types, if any, in the provided `datavalues` and `types` list.
+        Return the type list.
+        Used by `write_nodes` implementations.
+        """
+        # Note: this function is here to avoid copy/paste in users of new_write_request that wish to use the "auto-type" functionality.
+        #  The sendFct hints that this function may not be in the optimal place.
+
+        if attributes is None:
+            attributes = [AttributeId.Value for _ in nodeIds]
+        assert len(nodeIds) == len(attributes) == len(datavalues)
+        if types:
+            assert len(nodeIds) == len(types)
+        else:
+            types = [None] * len(nodeIds)
+
+        # Compute missing types, send the request, and update the missing types.
+        sopc_types = [dv.variantType if dv.variantType is not None else ty for dv,ty in zip(datavalues, types)]
+        missingTypesInfo = [(i, snid, attr) for i,(snid,attr,ty) in enumerate(zip(nodeIds, attributes, sopc_types)) if ty is None]
+        if missingTypesInfo:
+            _, readNids, readAttrs = zip(*missingTypesInfo)
+            request = Request.new_read_request(readNids, readAttrs)
+            readDatavalues = sendFct(request, bWaitResponse=True)
+            for (i, _, _), dv in zip(missingTypesInfo, readDatavalues.results):
+                assert dv.variantType != VariantType.Null, 'Automatic type detection failed, null type read.'
+                sopc_types[i] = dv.variantType
+
+        return sopc_types
+
 
 class AsyncRequestHandler:
     """

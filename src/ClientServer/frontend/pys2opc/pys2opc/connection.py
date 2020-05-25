@@ -157,22 +157,10 @@ class BaseClientConnectionHandler(LibSubAsyncRequestHandler):
         Note:
             The `datavalue.variantType` is updated with elements from the `types` or from the automatic read request.
         """
-        # Where there are unknown types, make a read request first
+        # Where there are unknown types, makes a read request first
         if bAutoTypeWithRead:
-            if types:
-                assert len(nodeIds) == len(types)
-            else:
-                types = [None] * len(nodeIds)
-
-            # Compute missing types
-            s2opc_types = [dv.variantType if dv.variantType is not None else ty for dv,ty in zip(datavalues, types)]
-            missingTypesInfo = [(i, snid, attr) for i,(snid,attr,ty) in enumerate(zip(nodeIds, attributes, sopc_types)) if ty is None]
-            if missingTypesInfo:
-                _, readNids, readAttrs = zip(*missingTypesInfo)
-                readDatavalues = self.read_nodes(readNids, readAttrs, bWaitResponse=True)
-                for (i, _, _), dv in zip(missingTypesInfo, readDatavalues.results):
-                    assert dv.variantType != VariantType.Null, 'Automatic type detection failed, null type read.'
-                    sopc_types[i] = dv.variantType
+            sendFct = lambda request,**kwargs: self.send_generic_request(self._id, request, **kwargs)
+            types = Request.helper_maybe_read_types(nodeIds, datavalues, attributes, types, sendFct)
 
         # Make the actual write request
         request = Request.new_write_request(nodeIds, datavalues, attributes=attributes, types=types)
