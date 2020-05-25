@@ -19,11 +19,8 @@
 # under the License.
 
 
-import time
-
 from _pys2opc import ffi, lib as libsub
-from .types import AttributeId, allocator_no_gc, str_to_nodeid, ReturnStatus, VariantType
-from .responses import Response, ReadResponse, WriteResponse, BrowseResponse
+from .types import ReturnStatus
 from .request import Request, LibSubAsyncRequestHandler
 
 

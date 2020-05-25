@@ -19,7 +19,6 @@
 # under the License.
 
 
-import threading
 from functools import total_ordering
 import uuid
 from binascii import hexlify, unhexlify

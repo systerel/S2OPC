@@ -30,7 +30,7 @@ from .connection import BaseClientConnectionHandler
 from .types import DataValue, ReturnStatus, SecurityPolicy, SecurityMode, LogLevel
 from .responses import Response
 from .server_callbacks import BaseAddressSpaceHandler
-from .request import LocalAsyncRequestHandler
+from .request import LocalAsyncRequestHandler, Request
 
 
 VERSION = json.load(open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'version.json')))['version']
