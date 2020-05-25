@@ -709,19 +709,42 @@ class PyS2OPC_Server(PyS2OPC):
     @staticmethod
     def read_nodes(nodeIds, attributes=None, bWaitResponse=True, epIdx=None):
         """
-        Forges an OpcUa_ReadRequest and sends it.
-        When `bWaitResponse`, waits for and returns the `pys2opc.responses.ReadResponse`,
-        which contains the attribute results storing the read value for the ith element.
-        Otherwise, returns the `pys2opc.types.Request`.
+        Forges an `OpcUa_ReadRequest` and sends it as a local request.
+        `epIdx` is the local endpoint index to send this request to.
+        If `None`, this function chooses an endpoint.
 
-        Args:
-            nodeIds: A list of NodeIds described as a strings (see `pys2opc` module documentation).
-            attributes: Optional: a list of attributes to read. The list has the same length as nodeIds. When omited,
-                        reads the attribute Value (see `pys2opc.types.AttributeId` for a list of attributes).
-            epIdx: The index of the local endpoint on which the request is issued.
-                   If None, one is chosen in the opened endpoints.
+        See `pys2opc.connection.BaseConnectionHandler.read_nodes` for more details.
         """
         request = Request.new_read_request(nodeIds, attributes=attributes)
+        return PyS2OPC_Server._send_request(request, bWaitResponse, epIdx)
+
+    @staticmethod
+    def write_nodes(nodeIds, datavalues, attributes=None, types=None, bWaitResponse=True, bAutoTypeWithRead=True, epIdx=None):
+        """
+        Forges an `OpcUa_WriteRequest` and sends it as a local request.
+        `epIdx` is the local endpoint index to send this request to.
+        If `None`, this function chooses an endpoint.
+
+        See `pys2opc.connection.BaseConnectionHandler.write_nodes` for more details.
+        """
+        # Where there are unknown types, makes a read request first
+        if bAutoTypeWithRead:
+            sendFct = lambda request,**kwargs: PyS2OPC_Server._send_request(request, epIdx=epIdx, **kwargs)
+            types = Request.helper_maybe_read_types(nodeIds, datavalues, attributes, types, sendFct)
+
+        # Make the actual write request
+        request = Request.new_write_request(nodeIds, datavalues, attributes=attributes, types=types)
+        return PyS2OPC_Server._send_request(request, bWaitResponse, epIdx)
+
+    def browse_nodes(self, nodeIds, maxReferencesPerNode=1000, bWaitResponse=True, epIdx=None):
+        """
+        Forges an `OpcUa_BrowseRequest` and sends it as a local request.
+        `epIdx` is the local endpoint index to send this request to.
+        If `None`, this function chooses an endpoint.
+
+        See `pys2opc.connection.BaseConnectionHandler.browse_nodes` for more details.
+        """
+        request = Request.new_browse_request(nodeIds, maxReferencesPerNode=maxReferencesPerNode)
         return PyS2OPC_Server._send_request(request, bWaitResponse, epIdx)
 
 
