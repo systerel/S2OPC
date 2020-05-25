@@ -706,7 +706,6 @@ class PyS2OPC_Server(PyS2OPC):
         assert epIdx is not None, 'No configured endpoint'
         return PyS2OPC_Server._req_hdler.send_generic_request(epIdx, request, bWaitResponse)
 
-    # TODO: factorize request creations with connection.py
     @staticmethod
     def read_nodes(nodeIds, attributes=None, bWaitResponse=True, epIdx=None):
         """
@@ -722,8 +721,7 @@ class PyS2OPC_Server(PyS2OPC):
             epIdx: The index of the local endpoint on which the request is issued.
                    If None, one is chosen in the opened endpoints.
         """
-
-        request = Request(payload)
+        request = Request.new_read_request(nodeIds, attributes=attributes)
         return PyS2OPC_Server._send_request(request, bWaitResponse, epIdx)
 
 

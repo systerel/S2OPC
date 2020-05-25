@@ -20,7 +20,8 @@
 
 
 from _pys2opc import ffi, lib as libsub
-from .types import ReturnStatus
+from .types import ReturnStatus, EncodeableType
+from .responses import Response, ReadResponse, WriteResponse, BrowseResponse
 
 
 allocator_no_gc = ffi.new_allocator(alloc=libsub.SOPC_Malloc, free=None, should_clear_after_alloc=True)
@@ -29,9 +30,10 @@ allocator_no_gc = ffi.new_allocator(alloc=libsub.SOPC_Malloc, free=None, should_
 class Request:
     """
     Base class for Requests. Adds a timestamp to ease the performance measurement.
+    Also provides class functions to create new requests more easily.
 
     Args:
-        payload: An OpcUa_*Request.
+        payload: An `OpcUa_*Request`.
 
     Attributes:
         eventResponseReceived: Event that is set when the response is received and the `pys2opc.connection.BaseClientConnectionHandler.on_generic_response`
@@ -52,6 +54,118 @@ class Request:
     def requestContext(self):
         """Returns an uintptr_t, that is castable to Python int and usable by the libsub API"""
         return self._requestContext
+
+    @staticmethod
+    def new_read_request(nodeIds, attributes=None):
+        """
+        Forges an `OpcUa_ReadRequest` and returns the corresponding `Request`.
+
+        Args:
+            nodeIds: A list of NodeIds described as a strings (see `pys2opc` module documentation).
+            attributes: Optional: a list of attributes to read. The list has the same length as nodeIds. When omited,
+                        reads the `Value` attribute (see `pys2opc.types.AttributeId` for a list of attributes).
+        """
+        if attributes is None:
+            attributes = [AttributeId.Value for _ in nodeIds]
+        assert len(nodeIds) == len(attributes)
+        # TODO: protect this from invalid attributes ?
+        payload = allocator_no_gc('OpcUa_ReadRequest *')  # The Toolkit takes ownership of this struct
+        payload.encodeableType = EncodeableType.ReadRequest
+        payload.MaxAge = 0.
+        payload.TimestampsToReturn = libsub.OpcUa_TimestampsToReturn_Both
+        payload.NoOfNodesToRead = len(nodeIds)
+        nodesToRead = allocator_no_gc('OpcUa_ReadValueId[]', len(nodeIds))
+        for i, (snid, attr) in enumerate(zip(nodeIds, attributes)):
+            nodesToRead[i].encodeableType = EncodeableType.ReadValueId
+            nodesToRead[i].NodeId = str_to_nodeid(snid, no_gc=True)[0]
+            nodesToRead[i].AttributeId = attr
+        payload.NodesToRead = nodesToRead
+
+        return Request(payload)
+
+    @staticmethod
+    def new_write_request(nodeIds, datavalues, attributes=None, types=None):
+        """
+        Forges an `OpcUa_WriteResponse` and returns the corresponding `Request`.
+
+        Types for `datavalues` must be provided.
+        For each `pys2opc.types.DataValue`, the type is either found in `datavalue.variantType`, or in the `types` list.
+        If both `datavalue.variantType` and the type in `types` are given, they must be equal.
+
+        Note:
+            The `datavalue.variantType` is updated with elements from the `types`.
+
+        Args:
+            nodeIds: A list of NodeIds described as a strings (see `pys2opc` module documentation).
+            datavalues: A list of `pys2opc.types.DataValue` to write for each NodeId, see `pys2opc.types.DataValue.from_python`
+            attributes: Optional: a list of attributes to write. The list has the same length as nodeIds. When omitted,
+                        writes the `Value` attribute (see `pys2opc.types.AttributeId` for a list of attributes).
+            types: Optional: a list of `pys2opc.types.VariantType` for each value to write.
+        """
+        if attributes is None:
+            attributes = [AttributeId.Value for _ in nodeIds]
+        assert len(nodeIds) == len(attributes) == len(datavalues)
+        if types:
+            assert len(nodeIds) == len(types)
+
+        # Compute types
+        sopc_types = []
+        types = types or [None] * len(nodeIds)
+        for dv, ty in zip(datavalues, types):
+            if dv.variantType is not None:
+                if ty is not None and ty != dv.variantType:
+                    raise ValueError('Inconsistent type, type of datavalue is different from type given in types list')
+                sopc_types.append(dv.variantType)
+            else:
+                sopc_types.append(ty)
+        assert None not in sopc_types, 'Incomplete type information, cannot create write request'
+
+        # Overwrite values' type
+        for dv, ty in zip(datavalues, sopc_types):
+            dv.variantType = ty
+
+        # Prepare the request, it will be freed by the Toolkit
+        payload = allocator_no_gc('OpcUa_WriteRequest *')
+        payload.encodeableType = EncodeableType.WriteRequest
+        payload.NoOfNodesToWrite = len(nodeIds)
+        nodesToWrite = allocator_no_gc('OpcUa_WriteValue[]', len(nodeIds))
+        for i, (snid, attr, val) in enumerate(zip(nodeIds, attributes, datavalues)):
+            nodesToWrite[i].encodeableType = EncodeableType.WriteValue
+            nodesToWrite[i].NodeId = str_to_nodeid(snid, no_gc=True)[0]
+            nodesToWrite[i].AttributeId = attr
+            nodesToWrite[i].Value = val.to_sopc_datavalue(no_gc=True)[0]
+        payload.NodesToWrite = nodesToWrite
+
+        return Request(payload)
+
+    @staticmethod
+    def new_browse_request(nodeIds, maxReferencesPerNode=1000):
+        """
+        Forges an `OpcUa_BrowseResponseè and returns the corresponding `Request`.
+
+        Args:
+            nodeIds: A list of NodeIds described as a strings (see `pys2opc` module documentation).
+            maxReferencesPerNode: Optional: The maximum number of returned references per node to browse.
+        """
+        # Prepare the request, it will be freed by the Toolkit
+        payload = allocator_no_gc('OpcUa_BrowseRequest *')
+        payload.encodeableType = EncodeableType.BrowseRequest
+        view = allocator_no_gc('OpcUa_ViewDescription *')
+        view.encodeableType = EncodeableType.ViewDescription  # Leave the ViewDescription filled with NULLs
+        payload.View = view[0]
+        payload.RequestedMaxReferencesPerNode = maxReferencesPerNode
+        payload.NoOfNodesToBrowse = len(nodeIds)
+        nodesToBrowse = allocator_no_gc('OpcUa_BrowseDescription[]', len(nodeIds))
+        for i, snid in enumerate(nodeIds):
+            nodesToBrowse[i].encodeableType = EncodeableType.BrowseDescription
+            nodesToBrowse[i].NodeId = str_to_nodeid(snid, no_gc=True)[0]
+            nodesToBrowse[i].BrowseDirection = libsub.OpcUa_BrowseDirection_Both
+            nodesToBrowse[i].IncludeSubtypes = False
+            nodesToBrowse[i].NodeClassMask = 0xFF  # See Part4 §5.8.2 Browse, §.2 Parameters
+            nodesToBrowse[i].ResultMask = libsub.OpcUa_BrowseResultMask_All
+        payload.NodesToBrowse = nodesToBrowse
+
+        return Request(payload)
 
 
 class AsyncRequestHandler:
