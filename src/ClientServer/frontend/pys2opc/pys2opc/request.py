@@ -36,8 +36,7 @@ class Request:
         payload: An `OpcUa_*Request`.
 
     Attributes:
-        eventResponseReceived: Event that is set when the response is received and the `pys2opc.connection.BaseClientConnectionHandler.on_generic_response`
-                               of the connection has been called.
+        eventResponseReceived: Event that is set when the response is received (`AsyncRequestHandler.on_generic_response` called for this `Request`).
         requestContext: A (unique) identifier for the request (read-only).
     """
     def __init__(self, payload):
@@ -52,7 +51,7 @@ class Request:
 
     @property
     def requestContext(self):
-        """Returns an uintptr_t, that is castable to Python int and usable by the libsub API"""
+        """Returns an `uintptr_t`, that is castable to Python int and usable by the libsub API"""
         return self._requestContext
 
     @staticmethod
@@ -141,7 +140,7 @@ class Request:
     @staticmethod
     def new_browse_request(nodeIds, maxReferencesPerNode=1000):
         """
-        Forges an `OpcUa_BrowseResponseè and returns the corresponding `Request`.
+        Forges an `OpcUa_BrowseResponse` and returns the corresponding `Request`.
 
         Args:
             nodeIds: A list of NodeIds described as a strings (see `pys2opc` module documentation).
@@ -227,7 +226,7 @@ class AsyncRequestHandler:
         """
         Sends a `request` on link with index `idx` (either a connection id or an endpoint id).
         When `bWaitResponse`, waits for the response and returns it.
-        Otherwise, returns the `request`, and the response will be available through `pys2opc.connection.BaseClientConnectionHandler.get_response`.
+        Otherwise, returns the `request`, and the response will be available through `get_response`.
         """
         reqCtx = int(request.requestContext)
         self._dRequestContexts[reqCtx] = request
