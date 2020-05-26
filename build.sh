@@ -82,6 +82,7 @@ else
     append_cmake_option ENABLE_TESTING
     append_cmake_option ENABLE_SAMPLES
     append_cmake_option USE_STATIC_EXT_LIBS
+    append_cmake_option POSITION_INDEPENDENT_EXECUTABLE
     echo "cmake $CMAKE_OPTIONS .." >> $CURDIR/build.log
     cmake $CMAKE_OPTIONS .. >> $CURDIR/build.log
     cd - > /dev/null || exit 1

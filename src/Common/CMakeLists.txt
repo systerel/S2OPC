@@ -98,7 +98,6 @@ target_include_directories(s2opc_common
 
 # Needed if we want to use the objects in a shared library
 set_target_properties(s2opc_common PROPERTIES POSITION_INDEPENDENT_CODE ON)
-# TODO: Should we add POSITION_INDEPENDENT to all internal libraries onto S2OPC instead ?
 set_target_properties(s2opc_common PROPERTIES INTERFACE_POSITION_INDEPENDENT_CODE ON)
 
 ### Installation and export of S2OPC common library ###

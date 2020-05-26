@@ -153,7 +153,7 @@ if(ENABLE_TESTING)
 
   add_executable(check_sc_rcv_buffer ${SECURE_CHANNELS_SRC}
                                      ${SECURE_CHANNELS_BUFFER_TEST})
-  target_link_libraries(check_sc_rcv_buffer PRIVATE Check::check ${S2OPC_LINKER_FLAGS} ${S2OPC_LINK_LIBRARIES} s2opc_common)
+  target_link_libraries(check_sc_rcv_buffer PRIVATE Check::check s2opc_common)
   target_compile_options(check_sc_rcv_buffer PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(check_sc_rcv_buffer PRIVATE ${S2OPC_DEFINITIONS})
   target_include_directories(check_sc_rcv_buffer PRIVATE "unit_tests/secure_channels/stubs"
@@ -173,7 +173,7 @@ if(ENABLE_TESTING)
 
   add_executable(check_sc_rcv_encrypted_buffer ${SECURE_CHANNELS_SRC}
                                                ${SECURE_CHANNELS_ENCRYPTED_BUFFER_TEST})
-  target_link_libraries(check_sc_rcv_encrypted_buffer PRIVATE Check::check ${S2OPC_LINKER_FLAGS} ${S2OPC_LINK_LIBRARIES} s2opc_common)
+  target_link_libraries(check_sc_rcv_encrypted_buffer PRIVATE Check::check s2opc_common)
   target_compile_options(check_sc_rcv_encrypted_buffer PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(check_sc_rcv_encrypted_buffer PRIVATE ${S2OPC_DEFINITIONS})
   target_include_directories(check_sc_rcv_encrypted_buffer PRIVATE "unit_tests/secure_channels/stubs"
@@ -214,13 +214,13 @@ if(ENABLE_TESTING)
                                                                  ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
   target_compile_options(test_secure_channels_client PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(test_secure_channels_client PRIVATE ${S2OPC_DEFINITIONS})
-  target_link_libraries(test_secure_channels_client PRIVATE ${S2OPC_LINKER_FLAGS} ${S2OPC_LINK_LIBRARIES} s2opc_common)
+  target_link_libraries(test_secure_channels_client PRIVATE s2opc_common)
 
   # Secure channels (+ Sockets) layer tests: SERVER executable
   add_executable(test_secure_channels_server ${SOCKETS_SRC}
                                              ${SECURE_CHANNELS_SRC}
                                              ${SECURE_CHANNELS_SERVER_TEST})
-  target_link_libraries(test_secure_channels_server PRIVATE ${S2OPC_LINKER_FLAGS} ${S2OPC_LINK_LIBRARIES} s2opc_common)
+  target_link_libraries(test_secure_channels_server PRIVATE s2opc_common)
   target_compile_options(test_secure_channels_server PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(test_secure_channels_server PRIVATE ${S2OPC_DEFINITIONS})
   target_include_directories(test_secure_channels_server PRIVATE "unit_tests/secure_channels/stubs"
