@@ -94,11 +94,11 @@ static SOPC_ReturnStatus parse(XML_Parser parser, FILE* fd)
             return SOPC_STATUS_NOK;
         }
 
-        if (XML_Parse(parser, buf, (int) r, 0) != XML_STATUS_OK)
+        if (XML_STATUS_OK != XML_Parse(parser, buf, (int) r, 0))
         {
             enum XML_Error parser_error = XML_GetErrorCode(parser);
 
-            if (parser_error != XML_ERROR_NONE)
+            if (XML_ERROR_NONE != parser_error)
             {
                 fprintf(stderr, "XML parsing failed at line %lu, column %lu. Error code is %d.\n",
                         XML_GetCurrentLineNumber(parser), XML_GetCurrentColumnNumber(parser), XML_GetErrorCode(parser));
@@ -112,7 +112,7 @@ static SOPC_ReturnStatus parse(XML_Parser parser, FILE* fd)
     }
 
     // Tell the parser that we are at the end of the file
-    if (XML_Parse(parser, "", 0, 1) != XML_STATUS_OK)
+    if (XML_STATUS_OK != XML_Parse(parser, "", 0, 1))
     {
         return SOPC_STATUS_NOK;
     }
@@ -126,11 +126,11 @@ static const char* get_attr(struct parse_context_t* ctx, const char* attr_name, 
     {
         const char* attr = attrs[i];
 
-        if (strcmp(attr_name, attr) == 0)
+        if (0 == strcmp(attr_name, attr))
         {
             const char* attr_val = attrs[++i];
 
-            if (attr_val == NULL)
+            if (NULL == attr_val)
             {
                 LOG_XML_ERRORF(ctx->helper_ctx.parser, "Missing value for %s attribute", attr_name);
                 return NULL;
@@ -271,7 +271,7 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         }
 
         ctx->state = PARSE_S2OPC_USERS;
-        return;
+        break;
     case PARSE_S2OPC_USERS:
         if (0 == strcmp(name, "UserPassword"))
         {
@@ -298,7 +298,7 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
             return;
         }
 
-        return;
+        break;
     case PARSE_ANONYMOUS:
     case PARSE_USERPASSWORD:
     {
@@ -319,8 +319,8 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
 
         break;
     }
-    default:
-        return;
+    case PARSE_USERAUTHORIZATION:
+        break;
     }
 }
 
@@ -471,8 +471,6 @@ static SOPC_ReturnStatus authorization_fct(SOPC_UserAuthorization_Manager* autho
             case SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE:
                 *pbOperationAuthorized = up->rights.exec;
                 break;
-            default:
-                break;
             }
         }
     }
@@ -488,8 +486,6 @@ static SOPC_ReturnStatus authorization_fct(SOPC_UserAuthorization_Manager* autho
             break;
         case SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE:
             *pbOperationAuthorized = config->anonRights.exec;
-            break;
-        default:
             break;
         }
     }
@@ -555,7 +551,7 @@ bool SOPC_UsersConfig_Parse(FILE* fd,
     SOPC_ReturnStatus res = parse(parser, fd);
     XML_ParserFree(parser);
 
-    if (res == SOPC_STATUS_OK)
+    if (SOPC_STATUS_OK == res)
     {
         *authentication = SOPC_Calloc(1, sizeof(SOPC_UserAuthentication_Manager));
         *authorization = SOPC_Calloc(1, sizeof(SOPC_UserAuthorization_Manager));

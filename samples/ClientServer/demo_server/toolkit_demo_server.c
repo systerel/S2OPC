@@ -761,7 +761,7 @@ static bool load_users_config_from_file(const char* filename,
     if (fd == NULL)
     {
         printf("<Test_Server_Toolkit: Error while opening %s: %s\n", filename, strerror(errno));
-        return SOPC_STATUS_INVALID_PARAMETERS;
+        return false;
     }
 
     bool res = SOPC_UsersConfig_Parse(fd, authentication, authorization);
