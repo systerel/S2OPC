@@ -8,7 +8,7 @@ req_extensions      = req_ext
 countryName         = FR
 stateOrProvinceName = France
 organizationName    = Systerel
-commonName          = S2OPC Century Certificate for Test Clients
+commonName          = S2OPC Demo Certificate for Client Tests
 emailAddress        = s2opc-support@systerel.fr
 
 [ client_cert ]

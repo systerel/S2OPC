@@ -34,7 +34,7 @@ string_mask         = utf8only
 countryName         = FR
 stateOrProvinceName = France
 organizationName    = Systerel
-commonName          = S2OPC Century Certificate Authority for Tests
+commonName          = S2OPC Demo Certificate Authority for Tests
 emailAddress        = s2opc-support@systerel.fr
 
 ####################################################################
