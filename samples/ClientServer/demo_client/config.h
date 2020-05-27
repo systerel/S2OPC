@@ -26,29 +26,42 @@
 #ifndef CONFIG_H_
 #define CONFIG_H_
 
+#include "argparse.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_types.h"
 #include "sopc_user_app_itf.h"
 
+/* Connection configuration variables with default values */
+
 /* Secure Channel configuration */
-extern char* ENDPOINT_URL; // See config.c, possible override by main
-#define DEFAULT_APPLICATION_URI "urn:S2OPC:localhost"
-#define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost"
-#define GATEWAY_SERVER_URI ""
+extern char* ENDPOINT_URL;
 
 /* Secure Channel lifetime */
-#define SC_LIFETIME 60000
+extern uint32_t SC_LIFETIME;
+
+extern char* PATH_CLIENT_PUBL;
+extern char* PATH_CLIENT_PRIV;
+extern char* PATH_SERVER_PUBL;
+extern char* PATH_CACERT_PUBL;
+extern char* PATH_CACRL;
+
+extern char* USER_POLICY_ID;
+extern char* USER_NAME;
+extern char* USER_PWD;
+
+/* Options to include in command line tool for connection management */
+extern struct argparse_option CONN_OPTIONS[11];
+
 /* Active wait sleep, in ms */
 #define SLEEP_LENGTH 200
 
-#define PATH_CLIENT_PUBL "./client_public/client_4k_cert.der"
-#define PATH_CLIENT_PRIV "./client_private/client_4k_key.pem"
-#define PATH_SERVER_PUBL "./server_public/server_4k_cert.der"
-#define PATH_CACERT_PUBL "./trusted/cacert.der"
-#define PATH_CACRL "./revoked/cacrl.der"
-
 /* The policyId of the chosen IdentityToken */
 #define ANONYMOUS_POLICY_ID "anonymous"
+
+/* For register server service only */
+#define DEFAULT_APPLICATION_URI "urn:S2OPC:localhost"
+#define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost"
+#define GATEWAY_SERVER_URI ""
 
 /**
  * \brief   Creates a new SecureChannel configuration, which shall be freed with Config_DeleteSCConfig().

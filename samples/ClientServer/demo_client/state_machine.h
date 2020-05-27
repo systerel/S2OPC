@@ -98,8 +98,7 @@ SOPC_ReturnStatus StateMachine_StartSession_Anonymous(StateMachine_Machine* pSM,
 SOPC_ReturnStatus StateMachine_StartSession_UsernamePassword(StateMachine_Machine* pSM,
                                                              const char* policyId,
                                                              const char* username,
-                                                             const uint8_t* password,
-                                                             int32_t length_password);
+                                                             const char* password);
 
 /**
  * \brief Send a GetEndpointsRequest.

@@ -32,6 +32,7 @@
 #include "sopc_types.h"
 #include "util_variant.h"
 
+#include "argparse.h"
 #include "config.h"
 #include "state_machine.h"
 
@@ -51,66 +52,97 @@ static void EventDispatcher_Read(SOPC_App_Com_Event event, uint32_t arg, void* p
 static SOPC_ReturnStatus SendReadRequest(StateMachine_Machine* pSM);
 static void PrintReadResponse(OpcUa_ReadResponse* pReadResp);
 
-int main(int argc, char* argv[])
+static const char* const usage[] = {
+    "s2opc_read [options]",
+    NULL,
+};
+
+int main(int argc, const char* argv[])
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     uint32_t iWait = 0;
 
-    printf("S2OPC read demo.\n");
-    /* Read the start node id from the command line */
-    if (argc != 3)
-    {
-        status = SOPC_STATUS_INVALID_PARAMETERS;
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        assert(strlen(argv[1]) <= INT32_MAX);
+    char* nid = NULL;
+    int attr = 0;
 
-        /* argv are always null-terminated */
-        g_pNid = SOPC_NodeId_FromCString(argv[1], (int32_t) strlen(argv[1]));
-        if (NULL == g_pNid)
-        {
-            printf("# Error: nodeid not recognized: \"%s\"\n", argv[1]);
-            status = SOPC_STATUS_NOK;
-        }
+    struct argparse_option options[] = {OPT_HELP(),
+                                        OPT_GROUP("Read options"),
+                                        OPT_STRING('n', "node_id", &nid, "node id to read", NULL, 0, 0),
+                                        OPT_INTEGER('a', "attribute_id", &attr, "attribute id to read", NULL, 0, 0),
+                                        CONN_OPTIONS[0],
+                                        CONN_OPTIONS[1],
+                                        CONN_OPTIONS[2],
+                                        CONN_OPTIONS[3],
+                                        CONN_OPTIONS[4],
+                                        CONN_OPTIONS[5],
+                                        CONN_OPTIONS[6],
+                                        CONN_OPTIONS[7],
+                                        CONN_OPTIONS[8],
+                                        CONN_OPTIONS[9],
+                                        CONN_OPTIONS[10],
+                                        OPT_END()};
+
+    struct argparse argparse;
+
+    argparse_init(&argparse, options, usage, 0);
+    argparse_describe(&argparse, "\nS2OPC read demo: read a node attribute",
+                      "\nExpects at least 2 arguments:"
+                      "\n -n: the Node id XML formatted [ns=<digits>;]<i, s, g or b>=<nodeid>,"
+                      "\n -a: the Attribute id as an int: "
+                      "\n                     NodeId |  1"
+                      "\n                  NodeClass |  2"
+                      "\n                 BrowseName |  3"
+                      "\n                DisplayName |  4"
+                      "\n                Description |  5"
+                      "\n                  WriteMask |  6"
+                      "\n              UserWriteMask |  7"
+                      "\n                 IsAbstract |  8"
+                      "\n                  Symmetric |  9"
+                      "\n                InverseName | 10"
+                      "\n            ContainsNoLoops | 11"
+                      "\n              EventNotifier | 12"
+                      "\n                      Value | 13"
+                      "\n                   DataType | 14"
+                      "\n                  ValueRank | 15"
+                      "\n            ArrayDimensions | 16"
+                      "\n                AccessLevel | 17"
+                      "\n            UserAccessLevel | 18"
+                      "\n    MinimumSamplingInterval | 19"
+                      "\n                Historizing | 20"
+                      "\n                 Executable | 21"
+                      "\n             UserExecutable | 22"
+                      "\n E.g.: ./s2opc_read -n i=2259 -a 13");
+    argc = argparse_parse(&argparse, argc, argv);
+
+    printf("S2OPC read demo.\n");
+
+    if (NULL != nid)
+    {
+        g_pNid = SOPC_NodeId_FromCString(nid, (int32_t) strlen(nid));
     }
+    if (NULL == g_pNid)
+    {
+        printf("# Error: nodeid not recognized: \"%s\"\n", nid);
+        status = SOPC_STATUS_NOK;
+    }
+
     if (SOPC_STATUS_OK == status)
     {
-        if (sscanf(argv[2], "%" SCNu32, &g_iAttr) == 0 || g_iAttr < 1 || g_iAttr > 22)
+        if (attr < 1 || attr > 22)
         {
-            printf("# Error: invalid attribute id: \"%s\"\n", argv[2]);
+            printf("# Error: invalid attribute id: \"%d\"\n", attr);
             printf("   Expecting an integer in the range 1..22\n");
             status = SOPC_STATUS_NOK;
+        }
+        else
+        {
+            g_iAttr = (uint32_t) attr;
         }
     }
 
     if (SOPC_STATUS_OK != status)
     {
-        printf("# Error: Expects exactly 2 arguments:\n");
-        printf("  - the node id XML formatted: [ns=<digits>;]<i, s, g or b>=<nodeid>,\n");
-        printf("  - the AttributeId as an int:\n");
-        printf("                     NodeId |  1\n");
-        printf("                  NodeClass |  2\n");
-        printf("                 BrowseName |  3\n");
-        printf("                DisplayName |  4\n");
-        printf("                Description |  5\n");
-        printf("                  WriteMask |  6\n");
-        printf("              UserWriteMask |  7\n");
-        printf("                 IsAbstract |  8\n");
-        printf("                  Symmetric |  9\n");
-        printf("                InverseName | 10\n");
-        printf("            ContainsNoLoops | 11\n");
-        printf("              EventNotifier | 12\n");
-        printf("                      Value | 13\n");
-        printf("                   DataType | 14\n");
-        printf("                  ValueRank | 15\n");
-        printf("            ArrayDimensions | 16\n");
-        printf("                AccessLevel | 17\n");
-        printf("            UserAccessLevel | 18\n");
-        printf("    MinimumSamplingInterval | 19\n");
-        printf("                Historizing | 20\n");
-        printf("                 Executable | 21\n");
-        printf("             UserExecutable | 22\n");
+        argparse_usage(&argparse);
     }
 
     /* Initialize SOPC_Common */
@@ -155,7 +187,14 @@ int main(int argc, char* argv[])
     /* Secure Channel and Session creation */
     if (SOPC_STATUS_OK == status)
     {
-        status = StateMachine_StartSession_Anonymous(g_pSM, ANONYMOUS_POLICY_ID);
+        if (NULL != USER_NAME)
+        {
+            status = StateMachine_StartSession_UsernamePassword(g_pSM, USER_POLICY_ID, USER_NAME, USER_PWD);
+        }
+        else
+        {
+            status = StateMachine_StartSession_Anonymous(g_pSM, ANONYMOUS_POLICY_ID);
+        }
     }
 
     /* Active wait */

@@ -517,7 +517,8 @@ static SOPC_ReturnStatus Server_LoadServerConfiguration(SOPC_S2OPC_Config* outpu
     {
         printf(
             "Error: an XML server configuration file path shall be provided, e.g.: "
-            "TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml ./toolkit_demo_server");
+            "TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml "
+            "./toolkit_demo_server\n");
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 #endif
@@ -797,7 +798,8 @@ static SOPC_ReturnStatus Server_LoadUserManagementConfiguration(SOPC_Endpoint_Co
     {
         printf(
             "Error: an XML users configuration file path shall be provided, e.g.: "
-            "TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml ./toolkit_demo_server");
+            "TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml "
+            "./toolkit_demo_server\n");
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 #endif

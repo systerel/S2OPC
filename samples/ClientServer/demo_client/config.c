@@ -27,6 +27,91 @@
 #include "config.h"
 
 char* ENDPOINT_URL = "opc.tcp://localhost:4841";
+uint32_t SC_LIFETIME = 60000;
+
+char* PATH_CLIENT_PUBL = "./client_public/client_4k_cert.der";
+char* PATH_CLIENT_PRIV = "./client_private/client_4k_key.pem";
+char* PATH_SERVER_PUBL = "./server_public/server_4k_cert.der";
+char* PATH_CACERT_PUBL = "./trusted/cacert.der";
+char* PATH_CACRL = "./revoked/cacrl.der";
+
+char* USER_POLICY_ID = "user";
+char* USER_NAME = NULL;
+char* USER_PWD = NULL;
+
+struct argparse_option CONN_OPTIONS[11] = {
+    OPT_GROUP("Connection options"),
+    OPT_STRING('e',
+               "endpointURL",
+               &ENDPOINT_URL,
+               "(default: opc.tcp://localhost:4841) endpoint URL in format: opc.tcp://<ip>:<port>[/<name>]",
+               NULL,
+               0,
+               0),
+
+    OPT_INTEGER(0,
+                "scLifetime",
+                &SC_LIFETIME,
+                "(default: 60000 ms) secure channel lifetime (symmetric key renewal)",
+                NULL,
+                0,
+                0),
+    OPT_STRING(0,
+               "client_cert",
+               &PATH_CLIENT_PUBL,
+               "(default: ./client_public/client_4k_cert.der) path to the client certificate to use (public key)",
+               NULL,
+               0,
+               0),
+    OPT_STRING(0,
+               "client_key",
+               &PATH_CLIENT_PRIV,
+               "(default: ./client_private/client_4k_key.pem) path to the client private key to use",
+               NULL,
+               0,
+               0),
+    OPT_STRING(0,
+               "server_cert",
+               &PATH_SERVER_PUBL,
+               "(default: ./server_public/server_4k_cert.der) path to the server certificate to use",
+               NULL,
+               0,
+               0),
+    OPT_STRING(0,
+               "ca",
+               &PATH_CACERT_PUBL,
+               "(default: ./trusted/cacert.der) path to the certificate authority (CA)",
+               NULL,
+               0,
+               0),
+    OPT_STRING(0,
+               "crl",
+               &PATH_CACRL,
+               "(default: ./revoked/cacrl.der) path to the certificate authority revocation list (CRL)",
+               NULL,
+               0,
+               0),
+    OPT_STRING(0,
+               "user_policy_id",
+               &USER_POLICY_ID,
+               "(default: 'user') user policy id used to establish session",
+               NULL,
+               0,
+               0),
+    OPT_STRING('u',
+               "username",
+               &USER_NAME,
+               "(if not set anonymous mode is active) the username of the user used to establish session",
+               NULL,
+               0,
+               0),
+    OPT_STRING('p',
+               "password",
+               &USER_PWD,
+               "(if not set anonymous mode is active) the username of the user used to establish session",
+               NULL,
+               0,
+               0)};
 
 /* Only supports one set of certificates at a time. They are all shared by the configs. */
 int nCfgCreated = 0; /* Number of created configs with certificates, to remember when to release certificates */

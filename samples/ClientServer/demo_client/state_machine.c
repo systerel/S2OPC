@@ -21,6 +21,7 @@
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "sopc_encodeable.h"
 #include "sopc_mem_alloc.h"
@@ -187,14 +188,13 @@ SOPC_ReturnStatus StateMachine_StartSession_Anonymous(StateMachine_Machine* pSM,
 SOPC_ReturnStatus StateMachine_StartSession_UsernamePassword(StateMachine_Machine* pSM,
                                                              const char* policyId,
                                                              const char* username,
-                                                             const uint8_t* password,
-                                                             int32_t length_password)
+                                                             const char* password)
 {
     activation_type activ = {.anonymous = false,
                              .policyId = policyId,
                              .username = username,
-                             .password = password,
-                             .length = length_password};
+                             .password = (const uint8_t*) password,
+                             .length = (int32_t) strlen(password)};
     return ActivateSession(pSM, activ);
 }
 

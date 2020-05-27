@@ -105,6 +105,7 @@ if(ENABLE_SAMPLES)
   target_compile_definitions(s2opc_browse PRIVATE ${S2OPC_DEFINITIONS})
 
   add_executable(s2opc_read "demo_client/s2opc_read.c"
+                            "demo_client/argparse.c"
                             "demo_client/state_machine.c"
                             "demo_client/config.c")
   target_link_libraries(s2opc_read PRIVATE s2opc_clientserver)
