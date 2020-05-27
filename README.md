@@ -202,8 +202,8 @@ Prerequisites:
 - Visual Studio (tested with Visual Studio 2017)
 - CMake (tested with CMake version 3.11.1)
 - Python3 (tested with Python version >= 3.6.3)
-- [mbedtls](https://tls.mbed.org/) (tested with mbedtls version 2.12.0)
-- [check](https://libcheck.github.io/check/) (tested with libcheck version 0.14)
+- [mbedtls](https://tls.mbed.org/) (tested with mbedtls version 2.16.0)
+- [check](https://libcheck.github.io/check/) (tested with libcheck version 0.14 compiled with CMake)
 
 To build the Toolkit library and tests with default configuration on current stable release, you can adapt the bat script below:
 ```
