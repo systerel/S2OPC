@@ -97,45 +97,46 @@ if(ENABLE_SAMPLES)
     )
   
   # Demo clients (S2OPC only without extension)
+  set(S2OPC_DEMOCLIENT_COMMON
+    "demo_client/argparse.c"
+    "demo_client/state_machine.c"
+    "demo_client/config.c"
+    )
+
   add_executable(s2opc_browse "demo_client/s2opc_browse.c"
-                              "demo_client/state_machine.c"
-                              "demo_client/config.c")
+                              ${S2OPC_DEMOCLIENT_COMMON})
+
   target_link_libraries(s2opc_browse PRIVATE s2opc_clientserver)
   target_compile_options(s2opc_browse PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(s2opc_browse PRIVATE ${S2OPC_DEFINITIONS})
 
   add_executable(s2opc_read "demo_client/s2opc_read.c"
-                            "demo_client/argparse.c"
-                            "demo_client/state_machine.c"
-                            "demo_client/config.c")
+                            ${S2OPC_DEMOCLIENT_COMMON})
   target_link_libraries(s2opc_read PRIVATE s2opc_clientserver)
   target_compile_options(s2opc_read PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(s2opc_read PRIVATE ${S2OPC_DEFINITIONS})
 
   add_executable(s2opc_write "demo_client/s2opc_write.c"
-                             "demo_client/state_machine.c"
-                             "demo_client/config.c")
+                             ${S2OPC_DEMOCLIENT_COMMON})
   target_link_libraries(s2opc_write PRIVATE s2opc_clientserver)
   target_compile_options(s2opc_write PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(s2opc_write PRIVATE ${S2OPC_DEFINITIONS})
 
   add_executable(s2opc_discovery "demo_client/s2opc_discovery.c"
-                                 "demo_client/state_machine.c"
-                                 "demo_client/config.c")
+                                 ${S2OPC_DEMOCLIENT_COMMON})
   target_link_libraries(s2opc_discovery PRIVATE s2opc_clientserver)
   target_compile_options(s2opc_discovery PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(s2opc_discovery PRIVATE ${S2OPC_DEFINITIONS})
 
   add_executable(s2opc_findserver "demo_client/s2opc_findserver.c"
-                                  "demo_client/state_machine.c"
-                                  "demo_client/config.c")
+                                  ${S2OPC_DEMOCLIENT_COMMON})
   target_link_libraries(s2opc_findserver PRIVATE s2opc_clientserver)
   target_compile_options(s2opc_findserver PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(s2opc_findserver PRIVATE ${S2OPC_DEFINITIONS})
 
   add_executable(s2opc_register "demo_client/s2opc_register.c"
-                                "demo_client/state_machine.c"
-                                "demo_client/config.c")
+                                ${S2OPC_DEMOCLIENT_COMMON})
+
   target_link_libraries(s2opc_register PRIVATE s2opc_clientserver)
   target_compile_options(s2opc_register PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(s2opc_register PRIVATE ${S2OPC_DEFINITIONS})

@@ -47,32 +47,56 @@ static void EventDispatcher_Browse(SOPC_App_Com_Event event, uint32_t arg, void*
 static SOPC_ReturnStatus SendBrowseRequest(StateMachine_Machine* pSM);
 static void PrintBrowseResponse(OpcUa_BrowseResponse* pBwseResp);
 
-int main(int argc, char* argv[])
+static const char* const usage[] = {
+    "s2opc_browse [options]",
+    NULL,
+};
+
+int main(int argc, const char* argv[])
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     uint32_t iWait = 0;
 
+    char* nid = NULL;
+
+    struct argparse_option options[] = {OPT_HELP(),
+                                        OPT_GROUP("Browse options"),
+                                        OPT_STRING('n', "node_id", &nid, "node id to browse", NULL, 0, 0),
+                                        CONN_OPTIONS[0],
+                                        CONN_OPTIONS[1],
+                                        CONN_OPTIONS[2],
+                                        CONN_OPTIONS[3],
+                                        CONN_OPTIONS[4],
+                                        CONN_OPTIONS[5],
+                                        CONN_OPTIONS[6],
+                                        CONN_OPTIONS[7],
+                                        CONN_OPTIONS[8],
+                                        CONN_OPTIONS[9],
+                                        CONN_OPTIONS[10],
+                                        OPT_END()};
+    struct argparse argparse;
+
+    argparse_init(&argparse, options, usage, 0);
+    argparse_describe(&argparse, "\nS2OPC browse demo: browse a node in address space",
+                      "\nExpects at least 1 argument:"
+                      "\n -n: the Node id XML formatted [ns=<digits>;]<i, s, g or b>=<nodeid>,"
+                      "\n E.g.: ./s2opc_browse -n i=85");
+    argc = argparse_parse(&argparse, argc, argv);
+
     printf("S2OPC browse demo.\n");
-    /* Read the start node id from the command line */
-    if (argc != 2)
+
+    if (NULL != nid)
     {
-        status = SOPC_STATUS_INVALID_PARAMETERS;
+        g_pNid = SOPC_NodeId_FromCString(nid, (int32_t) strlen(nid));
     }
-    if (SOPC_STATUS_OK == status)
+    if (NULL == g_pNid)
     {
-        assert(strlen(argv[1]) <= INT32_MAX);
-        /* argv are always null-terminated */
-        g_pNid = SOPC_NodeId_FromCString(argv[1], (int32_t) strlen(argv[1]));
-        if (NULL == g_pNid)
-        {
-            status = SOPC_STATUS_NOK;
-        }
+        status = SOPC_STATUS_NOK;
     }
 
     if (SOPC_STATUS_OK != status)
     {
-        printf("# Error: Expects exactly 1 argument, the node id as the XML format\n");
-        printf("    [ns=<digits>;]<i, s, g or b>=<nodeid>\n");
+        argparse_usage(&argparse);
     }
 
     if (SOPC_STATUS_OK == status)
@@ -116,7 +140,14 @@ int main(int argc, char* argv[])
     /* Secure Channel and Session creation */
     if (SOPC_STATUS_OK == status)
     {
-        status = StateMachine_StartSession_Anonymous(g_pSM, ANONYMOUS_POLICY_ID);
+        if (NULL != USER_NAME)
+        {
+            status = StateMachine_StartSession_UsernamePassword(g_pSM, USER_POLICY_ID, USER_NAME, USER_PWD);
+        }
+        else
+        {
+            status = StateMachine_StartSession_Anonymous(g_pSM, ANONYMOUS_POLICY_ID);
+        }
     }
 
     /* Active wait */

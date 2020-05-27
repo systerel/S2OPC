@@ -189,7 +189,14 @@ int main(int argc, char* argv[])
     /* Secure Channel and Session creation */
     if (SOPC_STATUS_OK == status)
     {
-        status = StateMachine_StartSession_Anonymous(g_pSM, ANONYMOUS_POLICY_ID);
+        if (NULL != USER_NAME)
+        {
+            status = StateMachine_StartSession_UsernamePassword(g_pSM, USER_POLICY_ID, USER_NAME, USER_PWD);
+        }
+        else
+        {
+            status = StateMachine_StartSession_Anonymous(g_pSM, ANONYMOUS_POLICY_ID);
+        }
     }
 
     /* Active wait */
