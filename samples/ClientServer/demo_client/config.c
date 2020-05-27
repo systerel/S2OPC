@@ -17,7 +17,6 @@
  * under the License.
  */
 
-#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -27,6 +26,8 @@
 #include "config.h"
 
 char* ENDPOINT_URL = "opc.tcp://localhost:4841";
+bool NONE = false;
+bool ENCRYPT = false;
 uint32_t SC_LIFETIME = 60000;
 
 char* PATH_CLIENT_PUBL = "./client_public/client_4k_cert.der";
@@ -39,7 +40,7 @@ char* USER_POLICY_ID = "user";
 char* USER_NAME = NULL;
 char* USER_PWD = NULL;
 
-struct argparse_option CONN_OPTIONS[11] = {
+struct argparse_option CONN_OPTIONS[13] = {
     OPT_GROUP("Connection options"),
     OPT_STRING('e',
                "endpointURL",
@@ -48,7 +49,22 @@ struct argparse_option CONN_OPTIONS[11] = {
                NULL,
                0,
                0),
-
+    OPT_BOOLEAN(0,
+                "none",
+                &NONE,
+                "(default: false) use None mode and policy for the connection. Otherwise Sign mode is used with policy "
+                "Basic256Sha256.",
+                NULL,
+                0,
+                0),
+    OPT_BOOLEAN(
+        0,
+        "encrypt",
+        &ENCRYPT,
+        "(default: false) use SignAndEncrypt (!none required) mode for the connection with policy Basic256Sha256",
+        NULL,
+        0,
+        0),
     OPT_INTEGER(0,
                 "scLifetime",
                 &SC_LIFETIME,

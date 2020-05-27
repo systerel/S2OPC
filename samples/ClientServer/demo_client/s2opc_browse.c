@@ -73,6 +73,8 @@ int main(int argc, const char* argv[])
                                         CONN_OPTIONS[8],
                                         CONN_OPTIONS[9],
                                         CONN_OPTIONS[10],
+                                        CONN_OPTIONS[11],
+                                        CONN_OPTIONS[12],
                                         OPT_END()};
     struct argparse argparse;
 
@@ -120,7 +122,7 @@ int main(int argc, const char* argv[])
     /* Configuration, which include Secure Channel configuration. */
     if (SOPC_STATUS_OK == status)
     {
-        status = StateMachine_ConfigureMachineWithSecurity(g_pSM);
+        status = StateMachine_ConfigureMachine(g_pSM, !NONE, ENCRYPT);
     }
 
     if (SOPC_STATUS_OK == status)

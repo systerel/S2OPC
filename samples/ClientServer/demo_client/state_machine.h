@@ -72,18 +72,13 @@ typedef struct
 StateMachine_Machine* StateMachine_Create(void);
 
 /**
- * \brief Creates a secure channel configuration with security mode None and policy None and add it to the toolkit.
- *  State machines shall be configured before the call to SOPC_Toolkit_Configured().
- */
-SOPC_ReturnStatus StateMachine_ConfigureMachineNoSecurity(StateMachine_Machine* pSM);
-
-/**
- * \brief Creates a secure channel configuration with security policy Basic256Sha256 with mode "Sign" and add it to the
- * toolkit. State machines shall be configured before the call to SOPC_Toolkit_Configured().
+ * \brief Creates a secure channel configuration depending on sign and encrypt boolean option.
+ * If both sign and encrypt are false, security mode is None and policy is None.
+ * If sign and/or encrypt are true, security policy is Basic256Sha256 and mode is "Sign" or "SignAndEncrypt".
  *
- * Note: mode "SignAndEncrypt" can be activated if the environment variable TEST_DEMO_CLIENT_ENCRYPT is defined
+ * State machines shall be configured before the call to SOPC_Toolkit_Configured().
  */
-SOPC_ReturnStatus StateMachine_ConfigureMachineWithSecurity(StateMachine_Machine* pSM);
+SOPC_ReturnStatus StateMachine_ConfigureMachine(StateMachine_Machine* pSM, bool sign, bool encrypt);
 
 /**
  * \brief Creates an anonymous session. See SOPC_ToolkitClient_AsyncActivateSession().

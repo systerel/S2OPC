@@ -47,7 +47,7 @@ START_TEST(test_getEndpoints)
     ck_assert(SOPC_Toolkit_Initialize(EventDispatcher_ValidateGetEndpoints) == SOPC_STATUS_OK);
     g_pSM = StateMachine_Create();
     ck_assert(NULL != g_pSM);
-    ck_assert(StateMachine_ConfigureMachineNoSecurity(g_pSM) == SOPC_STATUS_OK);
+    ck_assert(StateMachine_ConfigureMachine(g_pSM, false, false) == SOPC_STATUS_OK);
     ck_assert(SOPC_Toolkit_Configured() == SOPC_STATUS_OK);
 
     ck_assert(StateMachine_StartDiscovery(g_pSM) == SOPC_STATUS_OK);
@@ -176,7 +176,7 @@ START_TEST(test_registerServer)
     ck_assert(SOPC_Toolkit_Initialize(EventDispatcher_ValidateRegisterServer) == SOPC_STATUS_OK);
     g_pSM = StateMachine_Create();
     ck_assert(NULL != g_pSM);
-    ck_assert(StateMachine_ConfigureMachineNoSecurity(g_pSM) == SOPC_STATUS_OK);
+    ck_assert(StateMachine_ConfigureMachine(g_pSM, false, false) == SOPC_STATUS_OK);
     ck_assert(SOPC_Toolkit_Configured() == SOPC_STATUS_OK);
 
     ck_assert(StateMachine_StartRegisterServer(g_pSM) == SOPC_STATUS_OK);

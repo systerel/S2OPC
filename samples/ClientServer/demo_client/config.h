@@ -26,6 +26,8 @@
 #ifndef CONFIG_H_
 #define CONFIG_H_
 
+#include <stdbool.h>
+
 #include "argparse.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_types.h"
@@ -35,6 +37,8 @@
 
 /* Secure Channel configuration */
 extern char* ENDPOINT_URL;
+extern bool NONE;
+extern bool ENCRYPT;
 
 /* Secure Channel lifetime */
 extern uint32_t SC_LIFETIME;
@@ -50,7 +54,7 @@ extern char* USER_NAME;
 extern char* USER_PWD;
 
 /* Options to include in command line tool for connection management */
-extern struct argparse_option CONN_OPTIONS[11];
+extern struct argparse_option CONN_OPTIONS[13];
 
 /* Active wait sleep, in ms */
 #define SLEEP_LENGTH 200

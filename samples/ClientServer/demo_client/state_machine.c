@@ -19,6 +19,7 @@
 
 #include <assert.h>
 #include <inttypes.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -62,9 +63,9 @@ StateMachine_Machine* StateMachine_Create(void)
     return pSM;
 }
 
-static SOPC_ReturnStatus StateMachine_ConfigureMachine(StateMachine_Machine* pSM,
-                                                       const char* reqSecuPolicyUri,
-                                                       OpcUa_MessageSecurityMode msgSecurityMode)
+static SOPC_ReturnStatus StateMachine_InternalConfigureMachine(StateMachine_Machine* pSM,
+                                                               const char* reqSecuPolicyUri,
+                                                               OpcUa_MessageSecurityMode msgSecurityMode)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
@@ -112,23 +113,21 @@ static SOPC_ReturnStatus StateMachine_ConfigureMachine(StateMachine_Machine* pSM
     return status;
 }
 
-SOPC_ReturnStatus StateMachine_ConfigureMachineNoSecurity(StateMachine_Machine* pSM)
+SOPC_ReturnStatus StateMachine_ConfigureMachine(StateMachine_Machine* pSM, bool sign, bool encrypt)
 {
-    return StateMachine_ConfigureMachine(pSM, SOPC_SecurityPolicy_None_URI, OpcUa_MessageSecurityMode_None);
-}
-
-SOPC_ReturnStatus StateMachine_ConfigureMachineWithSecurity(StateMachine_Machine* pSM)
-{
-    const char* encrypt_var_set = getenv("TEST_DEMO_CLIENT_ENCRYPT");
-    if (encrypt_var_set != NULL)
+    if (sign && encrypt)
     {
-        return StateMachine_ConfigureMachine(pSM, SOPC_SecurityPolicy_Basic256Sha256_URI,
-                                             OpcUa_MessageSecurityMode_SignAndEncrypt);
+        return StateMachine_InternalConfigureMachine(pSM, SOPC_SecurityPolicy_Basic256Sha256_URI,
+                                                     OpcUa_MessageSecurityMode_SignAndEncrypt);
+    }
+    else if (sign)
+    {
+        return StateMachine_InternalConfigureMachine(pSM, SOPC_SecurityPolicy_Basic256Sha256_URI,
+                                                     OpcUa_MessageSecurityMode_Sign);
     }
     else
     {
-        return StateMachine_ConfigureMachine(pSM, SOPC_SecurityPolicy_Basic256Sha256_URI,
-                                             OpcUa_MessageSecurityMode_Sign);
+        return StateMachine_InternalConfigureMachine(pSM, SOPC_SecurityPolicy_None_URI, OpcUa_MessageSecurityMode_None);
     }
 }
 
