@@ -44,14 +44,24 @@ static void EventDispatcher_Discovery(SOPC_App_Com_Event event, uint32_t arg, vo
 
 static void PrintServers(OpcUa_FindServersResponse* pResp);
 
-int main(int argc, char* argv[])
-{
-    /* avoid unused parameter compiler warning */
-    (void) argc;
-    (void) argv;
+static const char* const usage[] = {
+    "s2opc_findserver [options]",
+    NULL,
+};
 
+int main(int argc, const char* argv[])
+{
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     uint32_t iWait = 0;
+
+    struct argparse_option options[] = {OPT_HELP(),      CONN_OPTIONS[0], CONN_OPTIONS[1], CONN_OPTIONS[2],
+                                        CONN_OPTIONS[3], CONN_OPTIONS[4], CONN_OPTIONS[5], CONN_OPTIONS[6],
+                                        CONN_OPTIONS[7], CONN_OPTIONS[8], CONN_OPTIONS[9], OPT_END()};
+    struct argparse argparse;
+
+    argparse_init(&argparse, options, usage, 0);
+    argparse_describe(&argparse, "\nS2OPC discovery demo: get endpoints from a server", NULL);
+    argc = argparse_parse(&argparse, argc, argv);
 
     printf("S2OPC find server demo.\n");
 
