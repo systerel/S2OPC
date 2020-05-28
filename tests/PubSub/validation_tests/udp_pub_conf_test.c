@@ -162,7 +162,8 @@ static void UDP_Pub_Test_Fill_NetworkMessage(SOPC_WriterGroup* group, SOPC_Datas
     variant->BuiltInTypeId = SOPC_String_Id;
     variant->ArrayType = SOPC_VariantArrayType_SingleValue;
     SOPC_String_Initialize(&(variant->Value.String));
-    SOPC_String_CopyFromCString(&(variant->Value.String), "Ma chaine de caractère");
+    SOPC_ReturnStatus status = SOPC_String_CopyFromCString(&(variant->Value.String), "Ma chaine de caractère");
+    assert(SOPC_STATUS_OK == status);
     metadata = SOPC_PublishedDataSet_Get_FieldMetaData_At(conf_dataset, 3);
     SOPC_NetworkMessage_Set_Variant_At(nm, 0, 3, variant, metadata);
 }

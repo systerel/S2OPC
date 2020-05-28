@@ -737,6 +737,8 @@ static SOPC_ReturnStatus Server_SetDefaultUserManagementConfig(SOPC_Endpoint_Con
     SOPC_UserAuthentication_Manager* authenticationManager = SOPC_Calloc(1, sizeof(SOPC_UserAuthentication_Manager));
     if (NULL == authenticationManager || NULL == authorizationManager)
     {
+        SOPC_UserAuthorization_FreeManager(&authorizationManager);
+        SOPC_UserAuthentication_FreeManager(&authenticationManager);
         status = SOPC_STATUS_OUT_OF_MEMORY;
         printf("<Test_Server_Toolkit: Failed to create the user manager\n");
     }
