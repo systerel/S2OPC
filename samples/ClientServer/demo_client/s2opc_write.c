@@ -44,6 +44,8 @@ static StateMachine_Machine* g_pSM = NULL;
 static SOPC_NodeId* g_pNid = NULL;
 /* So is the Attribute to write */
 static uint32_t g_iAttr = 13;
+/* The builtin id defining type of value to write */
+static SOPC_BuiltinId g_builtInId = SOPC_Null_Id;
 /* And the value to write */
 static SOPC_DataValue g_dv;
 
@@ -53,98 +55,112 @@ static void EventDispatcher_Write(SOPC_App_Com_Event event, uint32_t arg, void* 
 static SOPC_ReturnStatus SendWriteRequest(StateMachine_Machine* pSM);
 static void PrintWriteResponse(OpcUa_WriteResponse* pReadResp);
 
-int main(int argc, char* argv[])
+static bool ParseValue(const char* val);
+
+static const char* const usage[] = {
+    "s2opc_write [options] <value>",
+    NULL,
+};
+
+int main(int argc, const char* argv[])
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     uint32_t iWait = 0;
-    double dVal = 0.;
-    int64_t iVal = 0;
 
-    printf("S2OPC write demo (only the Value attribute).\n");
-    /* Read the start node id from the command line */
-    if (argc != 5)
+    char* nid = NULL;
+    int builtInId = 0;
+
+    struct argparse_option options[] = {
+        OPT_HELP(),
+        OPT_GROUP("Write options"),
+        OPT_STRING('n', "node_id", &nid, "node id to read", NULL, 0, 0),
+        OPT_INTEGER('t', "builtin_id", &builtInId, "OPC UA built in id type to write", NULL, 0, 0),
+        CONN_OPTIONS[0],
+        CONN_OPTIONS[1],
+        CONN_OPTIONS[2],
+        CONN_OPTIONS[3],
+        CONN_OPTIONS[4],
+        CONN_OPTIONS[5],
+        CONN_OPTIONS[6],
+        CONN_OPTIONS[7],
+        CONN_OPTIONS[8],
+        CONN_OPTIONS[9],
+        CONN_OPTIONS[10],
+        CONN_OPTIONS[11],
+        CONN_OPTIONS[12],
+        OPT_END()};
+
+    struct argparse argparse;
+
+    argparse_init(&argparse, options, usage, 0);
+    argparse_describe(&argparse, "\nS2OPC write demo: write a node Value attribute with numerical type",
+                      "\nExpects at least 2 arguments:"
+                      "\n -n: the Node id XML formatted [ns=<digits>;]<i, s, g or b>=<nodeid>,"
+                      "\n -t: the BuiltInType id (only numeric type allowed): "
+                      "\n       SOPC_Boolean_Id | 1"
+                      "\n       SOPC_SByte_Id   | 2"
+                      "\n       SOPC_Byte_Id    | 3"
+                      "\n       SOPC_Int16_Id   | 4"
+                      "\n       SOPC_UInt16_Id  | 5"
+                      "\n       SOPC_Int32_Id   | 6"
+                      "\n       SOPC_UInt32_Id  | 7"
+                      "\n       SOPC_Int64_Id   | 8"
+                      "\n       SOPC_UInt64_Id  | 9"
+                      "\n       SOPC_Float_Id   | 10"
+                      "\n       SOPC_Double_Id  | 11"
+                      "\n E.g.: ./s2opc_write -u user1 -p password -n \"ns=1;s=Byte_001\" -t 3 42");
+    int restArgc = argparse_parse(&argparse, argc, argv);
+
+    printf("S2OPC write demo\n");
+
+    if (NULL != nid)
     {
-        status = SOPC_STATUS_INVALID_PARAMETERS;
+        g_pNid = SOPC_NodeId_FromCString(nid, (int32_t) strlen(nid));
+    }
+    if (NULL == g_pNid)
+    {
+        printf("# Error: nodeid not recognized: \"%s\"\n", nid);
+        status = SOPC_STATUS_NOK;
     }
     if (SOPC_STATUS_OK == status)
     {
-        assert(strlen(argv[1]) <= 100);
-
-        SOPC_UriType tmp = SOPC_URI_UNDETERMINED;
-        char* tmp2 = NULL;
-        char* tmp3 = NULL;
-        status = SOPC_Helper_URI_SplitUri(argv[1], &tmp, &tmp2, &tmp3);
-        if (SOPC_STATUS_OK == status)
+        if (builtInId >= SOPC_Boolean_Id || builtInId <= SOPC_Double_Id)
         {
-            SOPC_Free(tmp2);
-            SOPC_Free(tmp3);
+            g_builtInId = (SOPC_BuiltinId) builtInId;
         }
         else
         {
-            printf("# Error: invalid OPC UA server address\n");
+            printf("# Error: builtin id not recognized: \"%d\"\n", builtInId);
+            status = SOPC_STATUS_NOK;
         }
-        ENDPOINT_URL = argv[1];
     }
     if (SOPC_STATUS_OK == status)
     {
-        assert(strlen(argv[2]) <= INT32_MAX);
+        if (1 != restArgc)
+        {
+            if (0 == restArgc)
+            {
+                printf("# Error: no value provided\n");
+            }
+            else
+            {
+                printf("# Error: too many arguments provided for value: \"%d\"\n", restArgc);
+            }
+        }
+    }
 
-        /* argv are always null-terminated */
-        g_pNid = SOPC_NodeId_FromCString(argv[2], (int32_t) strlen(argv[2]));
-        if (NULL == g_pNid)
-        {
-            printf("# Error: nodeid not recognized: \"%s\"\n", argv[2]);
-            status = SOPC_STATUS_NOK;
-        }
-    }
     if (SOPC_STATUS_OK == status)
     {
-        if (strstr(argv[3], "-d") == NULL && strstr(argv[3], "-i") == NULL)
+        if (!ParseValue(argv[argc - 1]))
         {
-            printf("# Error: type qualifier not recognized: \"%s\"\n", argv[3]);
             status = SOPC_STATUS_NOK;
-        }
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        SOPC_DataValue_Initialize(&g_dv);
-        if (strstr(argv[3], "-d") != NULL)
-        {
-            if (sscanf(argv[4], "%lf", &dVal) == 0)
-            {
-                printf("# Error: failed to read a double \"%s\"\n", argv[4]);
-                status = SOPC_STATUS_NOK;
-            }
-            if (SOPC_STATUS_OK == status)
-            {
-                g_dv.Value.BuiltInTypeId = SOPC_Double_Id;
-                g_dv.Value.ArrayType = SOPC_VariantArrayType_SingleValue;
-                g_dv.Value.Value.Doublev = dVal;
-            }
-        }
-        else if (strstr(argv[3], "-i") != NULL)
-        {
-            if (sscanf(argv[4], "%" SCNd64, &iVal) == 0)
-            {
-                printf("# Error: failed to read an integer \"%s\"\n", argv[4]);
-                status = SOPC_STATUS_NOK;
-            }
-            if (SOPC_STATUS_OK == status)
-            {
-                g_dv.Value.BuiltInTypeId = SOPC_Int64_Id;
-                g_dv.Value.ArrayType = SOPC_VariantArrayType_SingleValue;
-                g_dv.Value.Value.Int64 = iVal;
-            }
+            printf("# Error: failed parsing value provided\n");
         }
     }
 
     if (SOPC_STATUS_OK != status)
     {
-        printf("# Error: Expects exactly 3 arguments:\n");
-        printf("  - the server TCP UA address URL: 'opc.tcp://<ip>:<port>[/<name>]'\n");
-        printf("  - the node id XML formatted: [ns=<digits>;]<i, s, g or b>=<nodeid>,\n");
-        printf("  - the type \"-d\" for a floating point value or \"-i\" for 64 bits signed integer,\n");
-        printf("  - the value.\n");
+        argparse_usage(&argparse);
     }
 
     /* Initialize SOPC Common */
@@ -215,6 +231,54 @@ int main(int argc, char* argv[])
     StateMachine_Delete(&g_pSM);
 
     return (status == SOPC_STATUS_OK) ? 0 : 1;
+}
+
+static bool ParseValue(const char* val)
+{
+    SOPC_DataValue_Initialize(&g_dv);
+    g_dv.Value.BuiltInTypeId = g_builtInId;
+    g_dv.Value.ArrayType = SOPC_VariantArrayType_SingleValue;
+    int scanRes = 0;
+    switch (g_builtInId)
+    {
+    case SOPC_Boolean_Id:
+        scanRes = sscanf(val, "%" SCNu8, &g_dv.Value.Value.Boolean);
+        break;
+    case SOPC_SByte_Id:
+        scanRes = sscanf(val, "%" SCNi8, &g_dv.Value.Value.Sbyte);
+        break;
+    case SOPC_Byte_Id:
+        scanRes = sscanf(val, "%" SCNu8, &g_dv.Value.Value.Byte);
+        break;
+    case SOPC_Int16_Id:
+        scanRes = sscanf(val, "%" SCNi16, &g_dv.Value.Value.Int16);
+        break;
+    case SOPC_UInt16_Id:
+        scanRes = sscanf(val, "%" SCNu16, &g_dv.Value.Value.Uint16);
+        break;
+    case SOPC_Int32_Id:
+        scanRes = sscanf(val, "%" SCNi32, &g_dv.Value.Value.Int32);
+        break;
+    case SOPC_UInt32_Id:
+        scanRes = sscanf(val, "%" SCNu32, &g_dv.Value.Value.Uint32);
+        break;
+    case SOPC_Int64_Id:
+        scanRes = sscanf(val, "%" SCNi64, &g_dv.Value.Value.Int64);
+        break;
+    case SOPC_UInt64_Id:
+        scanRes = sscanf(val, "%" SCNu64, &g_dv.Value.Value.Uint64);
+        break;
+    case SOPC_Float_Id:
+        scanRes = sscanf(val, "%f", &g_dv.Value.Value.Floatv);
+        break;
+    case SOPC_Double_Id:
+        scanRes = sscanf(val, "%lf", &g_dv.Value.Value.Doublev);
+        break;
+    default:
+        assert(false);
+    }
+
+    return 0 != scanRes;
 }
 
 static void EventDispatcher_Write(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t smCtx)
