@@ -341,6 +341,18 @@ void util_variant__print_SOPC_Variant(SOPC_Variant* pvar)
     case SOPC_Boolean_Id:
         printf("Boolean\n  Value: %" PRIu8 "\n", pvar->Value.Boolean);
         break;
+    case SOPC_SByte_Id:
+        printf("SByte\n  Value: %" PRIi8 "\n", pvar->Value.Sbyte);
+        break;
+    case SOPC_Byte_Id:
+        printf("Byte\n  Value: %" PRIu8 "\n", pvar->Value.Byte);
+        break;
+    case SOPC_Int16_Id:
+        printf("Int16\n  Value: %" PRIi16 "\n", pvar->Value.Int16);
+        break;
+    case SOPC_UInt16_Id:
+        printf("UInt16\n  Value: %" PRIu16 "\n", pvar->Value.Uint16);
+        break;
     case SOPC_Int32_Id:
         printf("Int32\n  Value: %" PRIi32 "\n", pvar->Value.Int32);
         break;
@@ -349,6 +361,9 @@ void util_variant__print_SOPC_Variant(SOPC_Variant* pvar)
         break;
     case SOPC_Int64_Id:
         printf("Int64\n  Value: %" PRIi64 "\n", pvar->Value.Int64);
+        break;
+    case SOPC_UInt64_Id:
+        printf("UInt64\n  Value: %" PRIu64 "\n", pvar->Value.Uint64);
         break;
     case SOPC_Float_Id:
         printf("Float\n  Value: %g\n", pvar->Value.Floatv);
@@ -399,11 +414,6 @@ void util_variant__print_SOPC_Variant(SOPC_Variant* pvar)
     case SOPC_StatusCode_Id:
         printf("StatusCode\n  Value: %" PRIu32 "\n", pvar->Value.Status);
         break;
-    case SOPC_SByte_Id:
-    case SOPC_Byte_Id:
-    case SOPC_Int16_Id:
-    case SOPC_UInt16_Id:
-    case SOPC_UInt64_Id:
     case SOPC_DateTime_Id:
     case SOPC_Guid_Id:
     case SOPC_ExpandedNodeId_Id:

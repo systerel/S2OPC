@@ -96,7 +96,7 @@ int main(int argc, const char* argv[])
     argparse_describe(&argparse, "\nS2OPC write demo: write a node Value attribute with numerical type",
                       "\nExpects at least 2 arguments:"
                       "\n -n: the Node id XML formatted [ns=<digits>;]<i, s, g or b>=<nodeid>,"
-                      "\n -t: the BuiltInType id (only numeric type allowed): "
+                      "\n -t: the BuiltInType id: "
                       "\n       SOPC_Boolean_Id | 1"
                       "\n       SOPC_SByte_Id   | 2"
                       "\n       SOPC_Byte_Id    | 3"
@@ -108,6 +108,8 @@ int main(int argc, const char* argv[])
                       "\n       SOPC_UInt64_Id  | 9"
                       "\n       SOPC_Float_Id   | 10"
                       "\n       SOPC_Double_Id  | 11"
+                      "\n       SOPC_String_Id  | 12"
+
                       "\n E.g.: ./s2opc_write -u user1 -p password -n \"ns=1;s=Byte_001\" -t 3 42");
     int restArgc = argparse_parse(&argparse, argc, argv);
 
@@ -124,7 +126,7 @@ int main(int argc, const char* argv[])
     }
     if (SOPC_STATUS_OK == status)
     {
-        if (builtInId >= SOPC_Boolean_Id || builtInId <= SOPC_Double_Id)
+        if (builtInId >= SOPC_Boolean_Id && builtInId <= SOPC_String_Id)
         {
             g_builtInId = (SOPC_BuiltinId) builtInId;
         }
@@ -239,16 +241,40 @@ static bool ParseValue(const char* val)
     g_dv.Value.BuiltInTypeId = g_builtInId;
     g_dv.Value.ArrayType = SOPC_VariantArrayType_SingleValue;
     int scanRes = 0;
+    /* Note: SCNu8 / SCNi8 not managed by mingw, use int and uint and then check max values */
+    int i8 = 0;
+    unsigned int u8 = 0;
     switch (g_builtInId)
     {
     case SOPC_Boolean_Id:
-        scanRes = sscanf(val, "%" SCNu8, &g_dv.Value.Value.Boolean);
+    case SOPC_Byte_Id:
+        scanRes = sscanf(val, "%u", &u8);
+        if (0 != scanRes && u8 <= UINT8_MAX)
+        {
+            if (SOPC_Byte_Id == g_builtInId)
+            {
+                g_dv.Value.Value.Byte = (SOPC_Byte) u8;
+            }
+            else
+            {
+                g_dv.Value.Value.Boolean = (SOPC_Boolean) u8;
+            }
+        }
+        else
+        {
+            scanRes = 0;
+        }
         break;
     case SOPC_SByte_Id:
-        scanRes = sscanf(val, "%" SCNi8, &g_dv.Value.Value.Sbyte);
-        break;
-    case SOPC_Byte_Id:
-        scanRes = sscanf(val, "%" SCNu8, &g_dv.Value.Value.Byte);
+        scanRes = sscanf(val, "%d", &i8);
+        if (0 != scanRes && i8 <= INT8_MAX && i8 >= INT8_MIN)
+        {
+            g_dv.Value.Value.Sbyte = (SOPC_SByte) i8;
+        }
+        else
+        {
+            scanRes = 0;
+        }
         break;
     case SOPC_Int16_Id:
         scanRes = sscanf(val, "%" SCNi16, &g_dv.Value.Value.Int16);
@@ -273,6 +299,13 @@ static bool ParseValue(const char* val)
         break;
     case SOPC_Double_Id:
         scanRes = sscanf(val, "%lf", &g_dv.Value.Value.Doublev);
+        break;
+    case SOPC_String_Id:
+        SOPC_String_Initialize(&g_dv.Value.Value.String);
+        if (SOPC_STATUS_OK == SOPC_String_CopyFromCString(&g_dv.Value.Value.String, val))
+        {
+            scanRes = true;
+        }
         break;
     default:
         assert(false);
