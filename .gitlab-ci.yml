@@ -108,12 +108,12 @@ generation:
 .build-linux: &build_linux
   <<: *docker_job
   stage: build
-  image: registry.gitlab.com/systerel/s2opc/build@sha256:66b648b78cc69397f95f025dfb34a4d7d1548c8364063aade1f44300b4f03a3f # digest of build:1.17
+  image: registry.gitlab.com/systerel/s2opc/build@sha256:029dc162c9b8a2334cb2a5bc4e2bd7648091e08161fae4465cf381057511d62b # digest of build:1.19
   script:
     - &build_command_line './build.sh && cd $BUILD_DIR && cmake --build . --target install || exit 1'
   variables: &build_linux_variables
     CMAKE_INSTALL_PREFIX: '../install_linux64'
-    DOCKER_IMAGE: 'sha256:8898243017e0e43fff262fc11a8c1ae6b9284764fb4d6ee5a117696daeff5588'
+    DOCKER_IMAGE: 'sha256:4de7d77b75ede10ba54b52d241f8e65ed273c4c1ff0b79b0922d7b8814b245d2'
     BUILD_DIR: build
   artifacts:
     name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
