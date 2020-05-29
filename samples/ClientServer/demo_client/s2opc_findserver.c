@@ -60,7 +60,7 @@ int main(int argc, const char* argv[])
     struct argparse argparse;
 
     argparse_init(&argparse, options, usage, 0);
-    argparse_describe(&argparse, "\nS2OPC discovery demo: get endpoints from a server", NULL);
+    argparse_describe(&argparse, "\nS2OPC find server: send a find server request to server", NULL);
     argc = argparse_parse(&argparse, argc, argv);
 
     printf("S2OPC find server demo.\n");
