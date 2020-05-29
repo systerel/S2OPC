@@ -62,7 +62,7 @@ static const char* const usage[] = {
     NULL,
 };
 
-int main(int argc, const char* argv[])
+int main(int argc, char* argv[])
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     uint32_t iWait = 0;

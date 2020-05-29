@@ -121,8 +121,8 @@ extern "C"
         const char* epilog;      // a description at the end
         // internal context
         int argc;
-        const char** argv;
-        const char** out;
+        char** argv;
+        char** out;
         int cpidx;
         const char* optvalue; // current option value
     };
@@ -163,7 +163,7 @@ extern "C"
 
     int argparse_init(struct argparse* self, struct argparse_option* options, const char* const* usages, int flags);
     void argparse_describe(struct argparse* self, const char* description, const char* epilog);
-    int argparse_parse(struct argparse* self, int argc, const char** argv);
+    int argparse_parse(struct argparse* self, int argc, char** argv);
     void argparse_usage(struct argparse* self);
 
 #ifdef __cplusplus
