@@ -4,7 +4,6 @@ cmake_minimum_required(VERSION 3.13.1)
 include($ENV{ZEPHYR_BASE}/cmake/app/boilerplate.cmake NO_POLICY_SCOPE)
 project(s2opcPortageZephyr)
 
-add_definitions (-DSOPC_PTR_SIZE={${CMAKE_SIZEOF_VOID_P}})
 add_definitions (-DS2OPC_CLIENTSERVER_ONLY=1)
 add_definitions (-DWITH_STATIC_SECURITY_DATA=1 -DPUBSUB_STATIC_CONFIG=1 -DWITH_NANO_EXTENDED=1)
 add_definitions (-DMY_IP_MASK="255.255.255.0" -DMY_IP_ETH0="192.0.2.10" -DMY_IP_GW="192.0.2.1" -DMY_IP6_ETH0="2001:db8::2" -DMY_IP6_MASK="ffff:ffff:")
