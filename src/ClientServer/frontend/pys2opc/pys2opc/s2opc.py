@@ -206,6 +206,7 @@ class PyS2OPC_Client(PyS2OPC):
         # TODO: Disconnect existing clients
         libsub.SOPC_LibSub_Clear()
         PyS2OPC._initialized_cli = False
+        PyS2OPC._configured = False
 
     @staticmethod
     def add_configuration_unsecured(*,
@@ -477,6 +478,7 @@ class PyS2OPC_Server(PyS2OPC):
         # TODO: Disconnect existing clients
         libsub.SOPC_Toolkit_Clear()  # Calls SOPC_Common_Clear
         PyS2OPC._initialized_srv = False
+        PyS2OPC._configured = False
         PyS2OPC_Server._adds_handler = None
         if PyS2OPC_Server._adds is not None:
             libsub.SOPC_AddressSpace_Delete(PyS2OPC_Server._adds)
