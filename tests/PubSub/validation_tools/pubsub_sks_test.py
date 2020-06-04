@@ -18,13 +18,15 @@
 # specific language governing permissions and limitations
 # under the License.
 
+import os
+import argparse
+import pathlib
 import sys
 import traceback
 from abc import ABC, abstractmethod
 import atexit
 import subprocess
 import time
-from pathlib import PurePosixPath
 from tap_logger import TapLogger
 from pubsub_server import PubSubServer
 from pubsub_server_test import helpConfigurationChangeAndStart, helpTestSetValue
@@ -58,11 +60,11 @@ class AbstractBenchmarkManager(ABC):
     @abstractmethod
     def start_sks_master(self, restart=False):
         None
-        
+
     @abstractmethod
     def stop_sks_master(self):
         None
-        
+
     @abstractmethod
     def start_sks_slave(self, num):
         None
@@ -108,7 +110,7 @@ class LocalBenchmarkManager(AbstractBenchmarkManager):
         self.command_subscriber = [str(binary_pubsub_server), 'opc.tcp://localhost:%s' % port_sub]
 
         self.max_slave = max_slave
-        
+
         # list of subprocess
         self.all_processes = []
         self.sks_master = None
@@ -128,18 +130,18 @@ class LocalBenchmarkManager(AbstractBenchmarkManager):
             print("Popen with output")
             proc = subprocess.Popen(cmd)
         else:
-        
+
             print("Popen without output")
             # open a file to redirect stdout
             self.fileCount = self.fileCount + 1
             outfile = open('%s_%s' % (filename, self.fileCount), "w")
             self.output.append(outfile)
-            
+
             # run the command
             proc = subprocess.Popen(cmd, stdout = outfile, encoding = 'utf8')
 
         self.all_processes.append(proc)
-        
+
         return proc
 
     def __stop_proc__(self, proc):
@@ -172,7 +174,7 @@ class LocalBenchmarkManager(AbstractBenchmarkManager):
             print("close file")
             output.close()
         self.output = []
-        
+
     def start_sks_master(self, restart=False):
         log_test("Start SKS Master")
         if self.sks_master is None:
@@ -182,7 +184,7 @@ class LocalBenchmarkManager(AbstractBenchmarkManager):
             self.sks_master = self.__start_proc__(master, 'master', True)
         else:
             log_test("Warning : SKS Master is already running")
-            
+
     def stop_sks_master(self):
         log_test("Stop SKS Master")
         if not self.sks_master is None:
@@ -196,7 +198,7 @@ class LocalBenchmarkManager(AbstractBenchmarkManager):
         if num < 1 or num > self.max_slave:
             log_test("Error : %d is not a valid id for Slave. It should be between 1 and %d" % (num, self.max_slave))
             return
-        
+
         if not num in self.sks_slave :
             slave = self.command_sks_slave.copy()
             slave.append(str(num))
@@ -223,7 +225,7 @@ class LocalBenchmarkManager(AbstractBenchmarkManager):
 
     def pause_publisher(self):
         None
-        
+
     def stop_publisher(self):
         log_test("Stop SKS Publisher")
         if not self.publisher is None:
@@ -239,7 +241,7 @@ class LocalBenchmarkManager(AbstractBenchmarkManager):
 
     def pause_subscriber(self):
         None
-        
+
     def stop_subscriber(self):
         log_test("Stop SKS Subscriber")
         if not self.subscriber is None:
@@ -249,10 +251,8 @@ class LocalBenchmarkManager(AbstractBenchmarkManager):
 
 # To be called on exit to close all process
 def killchild():
+    global localbenchmark 
     localbenchmark.stop_all()
-    
-# Register in call on exist
-atexit.register(killchild)
 
 # Set variables in a PubSub server
 def __set_variables(pubsubserver, nid_bool, val_bool, nid_uint16, val_uint16, nid_int, val_int):
@@ -370,8 +370,9 @@ NID_PUB_UINT16 = u"ns=1;s=PubUInt16"
 NID_PUB_INT = u"ns=1;s=PubInt"
 
 
-BINARY_DIRECTORY = PurePosixPath('/users/aurelien/git/S2OPC_new/build/bin/')
-localbenchmark = LocalBenchmarkManager(bindir=BINARY_DIRECTORY, max_slave=2, port_pub='4851', port_sub='4852')
+#PurePosixPath('/users/vla/Private/03_DEV/INGOPCS/build/bin/')
+#BINARY_DIRECTORY = PurePosixPath('/users/aurelien/git/S2OPC_new/build/bin/')
+#localbenchmark = LocalBenchmarkManager(bindir=BINARY_DIRECTORY, max_slave=2, port_pub='4851', port_sub='4852')
 
 logger = TapLogger("sks_redundancy_test.tap")
 
@@ -619,30 +620,47 @@ def integration_TC5(benchmark):
     benchmark.stop_all()
 
 
+def execute_tests(lbenchmark):
 
-# Start Local Benchmark Test
-try:
-    log_test(" ---> TEST INTEGRATION TC1 <---")
-    integration_TC1(localbenchmark)
-
-    log_test(" ---> TEST INTEGRATION TC2 <---")
-    integration_TC2(localbenchmark)
-
-    log_test(" ---> TEST INTEGRATION TC3 <---")
-    integration_TC3(localbenchmark)
-
-    log_test(" ---> TEST INTEGRATION TC4 <---")
-    integration_TC4(localbenchmark)
-
-    log_test(" ---> TEST INTEGRATION TC5 <---")
-    integration_TC5(localbenchmark)
-
-except:
-    traceback.print_exc(file=sys.stdout)
+    # Start Local Benchmark Test
+    try:
+        log_test(" ---> TEST INTEGRATION TC1 <---")
+        integration_TC1(lbenchmark)
     
-logger.finalize_report()
+        log_test(" ---> TEST INTEGRATION TC2 <---")
+        integration_TC2(lbenchmark)
+    
+        log_test(" ---> TEST INTEGRATION TC3 <---")
+        integration_TC3(lbenchmark)
+    
+        log_test(" ---> TEST INTEGRATION TC4 <---")
+        integration_TC4(lbenchmark)
+    
+        log_test(" ---> TEST INTEGRATION TC5 <---")
+        integration_TC5(lbenchmark)
+    
+    except:
+        traceback.print_exc(file=sys.stdout)
+        
+    logger.finalize_report()
+    
+    log_test(" ---> EXIT <---")
+    killchild()
+    sys.exit(0)
+    log_test(" ---> END OF SCRIPT <---")
 
-log_test(" ---> EXIT <---")
-killchild()
-sys.exit(0)
-log_test(" ---> END OF SCRIPT <---")
+
+if __name__=='__main__':
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument('--binary_dir', required=True, action='store', default="",
+                           help='Directory containing binaries to test.')
+    args = argparser.parse_args()
+    
+    BINARY_DIRECTORY=pathlib.PurePosixPath(args.binary_dir)
+    localbenchmark = LocalBenchmarkManager(bindir=BINARY_DIRECTORY, max_slave=2, port_pub='4851', port_sub='4852')
+    
+    # Register in call on exist
+    atexit.register(killchild)
+    
+    execute_tests(localbenchmark);
+
