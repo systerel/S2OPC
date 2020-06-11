@@ -25,7 +25,11 @@ test_script:
     - set MBEDTLS_DIR_NAME=mbedtls-2.16.0
     - set MBEDTLS_DIR="%ROOT_DIR%\%MBEDTLS_DIR_NAME%"
     - set MBEDTLS_BUILD_DIR="%MBEDTLS_DIR%\build"
+    - set EXPAT_DIR_NAME=expat-2.9.0
+    - set EXPAT_DIR="%ROOT_DIR%\libexpat-R_2_2_9\expat"
+    - set EXPAT_BUILD_DIR="%EXPAT_DIR%\build"
     - set S2OPC_CLIENTSERVER_ONLY=1
+    - set CONFIG=RelWithDebInfo
 
     # download and build libcheck
     - cd %ROOT_DIR%
@@ -36,7 +40,7 @@ test_script:
         mkdir build
         cd build
         cmake .. -G "Visual Studio 15 2017 Win64"
-        cmake --build . --target ALL_BUILD --config RelWithDebInfo
+        cmake --build . --target ALL_BUILD --config %CONFIG%
     # download and build mbedtls
     - cd %ROOT_DIR%
     - "appveyor.exe DownloadFile https://tls.mbed.org/download/%MBEDTLS_DIR_NAME%-apache.tgz -FileName %MBEDTLS_DIR_NAME%-apache.tgz"
@@ -46,20 +50,31 @@ test_script:
         mkdir build
         cd build
         cmake .. -G "Visual Studio 15 2017 Win64"
-        cmake --build . --target ALL_BUILD --config RelWithDebInfo
+        cmake --build . --target ALL_BUILD --config %CONFIG%
+    # download and build expat
+    - cd %ROOT_DIR%
+    - "appveyor.exe DownloadFile https://github.com/libexpat/libexpat/archive/R_2_2_9.zip -FileName %EXPAT_DIR_NAME%.zip"
+    - "unzip %EXPAT_DIR_NAME%.zip"
+    - |-
+        cd %EXPAT_DIR%
+        mkdir build
+        cd build
+        cmake .. -G "Visual Studio 15 2017 Win64"
+        cmake --build . --target ALL_BUILD --config %CONFIG%
+
     # configure, build and test S2OPC project
     - |-
         cd %ROOT_DIR%
         mkdir build
         cd build
         mkdir lib
-        cp %MBEDTLS_DIR%\build\library\RelWithDebInfo\mbedtls.lib lib
-        cp %MBEDTLS_DIR%\build\library\RelWithDebInfo\mbedx509.lib lib
-        cp %MBEDTLS_DIR%\build\library\RelWithDebInfo\mbedcrypto.lib lib
-        cmake -DS2OPC_CLIENTSERVER_ONLY=%S2OPC_CLIENTSERVER_ONLY% -DMBEDTLS_INCLUDE_DIR=%MBEDTLS_BUILD_DIR%/../include -DMBEDTLS_LIBRARY=%MBEDTLS_BUILD_DIR%/library/RelWithDebInfo/mbedtls.lib -DMBEDX509_LIBRARY=%MBEDTLS_BUILD_DIR%/library/RelWithDebInfo/mbedx509.lib -DMBEDCRYPTO_LIBRARY=%MBEDTLS_BUILD_DIR%/library/RelWithDebInfo/mbedcrypto.lib -DCMAKE_PREFIX_PATH=%CHECK_BUILD_DIR% .. -G "Visual Studio 15 2017 Win64"
-        cmake --build . --config RelWithDebInfo
+        cp %MBEDTLS_DIR%\build\library\%CONFIG%\mbedtls.lib lib
+        cp %MBEDTLS_DIR%\build\library\%CONFIG%\mbedx509.lib lib
+        cp %MBEDTLS_DIR%\build\library\%CONFIG%\mbedcrypto.lib lib
+        cmake -DS2OPC_CLIENTSERVER_ONLY=%S2OPC_CLIENTSERVER_ONLY% -DMBEDTLS_INCLUDE_DIR=%MBEDTLS_BUILD_DIR%/../include -DMBEDTLS_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedtls.lib -DMBEDX509_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedx509.lib -DMBEDCRYPTO_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedcrypto.lib -DEXPAT_INCLUDE_DIR=%EXPAT_DIR%/lib -DEXPAT_LIBRARY=%EXPAT_BUILD_DIR%/%CONFIG% -DCMAKE_PREFIX_PATH=%CHECK_BUILD_DIR% .. -G "Visual Studio 15 2017 Win64"
+        cmake --build . --config %CONFIG%
     - cd %ROOT_DIR%\build\tests\ClientServer
-    - "ctest -T test -C RelWithDebInfo --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536 -V"
+    - "ctest -T test -C %CONFIG% --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536 -V"
 
 build: off
 
