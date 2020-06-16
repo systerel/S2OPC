@@ -1,5 +1,5 @@
 ##                                   ##
-# S2OPC libraries common definitions  # 
+# S2OPC libraries common definitions  #
 ##                                   ##
 
 set(S2OPC_COMMON_DEFS_SET TRUE)
@@ -43,7 +43,7 @@ endif()
 
 ## Expat dependency management
 
-# redefine CMake behavior for find_package(EXPAT ...) calling find_library(...) if needed
+# redefine CMake behavior for find_package(expat ...) calling find_library(...) if needed
 if (USE_STATIC_EXPAT_LIB)
   set(_expat_orig_lib_suffixes ${CMAKE_FIND_LIBRARY_SUFFIXES})
 
@@ -58,6 +58,18 @@ if(S2OPC_CLIENTSERVER_ONLY)
   find_package(expat CONFIG) # if not found XML loaders will not be compiled
 else()
   find_package(expat REQUIRED CONFIG)
+endif()
+
+# Expat changes name under native windows
+# ${expat_LIB} contains the target name of the library to avoid misspells
+if(expat_FOUND)
+  if(WIN32 AND NOT MINGW)
+    set(expat_LIB expat::libexpat)
+    # Windows definition of cmake-expat lacks the headers
+    target_include_directories(${expat_LIB} INTERFACE "${expat_DIR}\\..\\..\\..\\include")
+  else()
+    set(expat_LIB expat::expat)
+  endif()
 endif()
 
 # redefine CMake behavior for find_library(*)
@@ -214,7 +226,7 @@ if(NOT UNIX)
   check_not_activated_option("WITH_COVERAGE" "not a unix system")
   check_not_activated_option("WITH_COVERITY" "not a unix system")
   check_not_activated_option("WITH_GPERF_PROFILER" "not a unix system")
-  check_not_activated_option("WITH_CLANG_SOURCE_COVERAGE" "not a unix system") 
+  check_not_activated_option("WITH_CLANG_SOURCE_COVERAGE" "not a unix system")
 endif()
 check_debug_build_type("WITH_ASAN" "to set compilation flag '-fno-omit-frame-pointer'")
 check_debug_build_type("WITH_TSAN" "to set compilation flag '-fno-omit-frame-pointer'")
@@ -282,7 +294,7 @@ if(WITH_CLANG_SOURCE_COVERAGE)
 endif()
 
 if(WITH_PYS2OPC AND NOT WITH_NANO_EXTENDED)
-  message(WARNING "PyS2OPC validation tests will fail if S2OPC test server compiled without WITH_NANO_EXTENDED set") 
+  message(WARNING "PyS2OPC validation tests will fail if S2OPC test server compiled without WITH_NANO_EXTENDED set")
 endif()
 
 # Add WITH_NANO_EXTENDED to compilation definition if option activated
