@@ -30,6 +30,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "sopc_protocol_constants.h"
+
 /** @brief Configuration structure of message and types encoding limits **/
 typedef struct SOPC_Common_EncodingConstants
 {
@@ -147,7 +149,7 @@ bool SOPC_Common_SetEncodingConstants(SOPC_Common_EncodingConstants config);
 #endif
 
 /* Check that the message buffer is large enough to hold the minimal TCP UA chunk */
-#if SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE < SOPC_DEFAULT_TCP_UA_MIN_BUFFER_SIZE
+#if SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE < SOPC_TCP_UA_MIN_BUFFER_SIZE
 #error "SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE is not large enough, must be >= SOPC_TCP_UA_MIN_BUFFER_SIZE"
 #endif
 
