@@ -12,7 +12,7 @@ endif()
 ### Dependencies ###
 include (CheckTypeSize)
 
-find_package(MbedTLS REQUIRED)
+find_package(MBEDTLS REQUIRED)
 
 ### Compilation of S2OPC common library source files ###
 
@@ -37,7 +37,7 @@ else()
 endif()
 
 # Update variable containing S2OPC library dependencies
-list(APPEND S2OPC_COMMON_LINK_LIBRARIES MBEDTLS MBEDX509 MBEDCRYPTO ${MATH_LIB} ${THREAD_LIB} ${SOCK_LIB})
+list(APPEND S2OPC_COMMON_LINK_LIBRARIES mbedtls mbedx509 mbedcrypto ${MATH_LIB} ${THREAD_LIB} ${SOCK_LIB})
 
 file(GLOB PLATFORM_SRCS "helpers_platform_dep/*.c" "helpers_platform_dep/${PLATFORM_DIR}/*.c")
 

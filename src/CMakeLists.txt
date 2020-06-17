@@ -37,7 +37,7 @@ write_basic_package_version_file(
 install(FILES
   ${CMAKE_BINARY_DIR}/s2opc-config.cmake
   ${CMAKE_BINARY_DIR}/s2opc-config-version.cmake
-  ${S2OPC_ROOT_PATH}/CMake/FindMbedTLS.cmake
+  ${S2OPC_ROOT_PATH}/CMake/FindMBEDTLS.cmake
   DESTINATION lib/cmake/s2opc
   )
 

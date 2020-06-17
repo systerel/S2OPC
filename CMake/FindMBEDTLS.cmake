@@ -44,18 +44,18 @@ find_package_handle_standard_args(MBEDTLS
 mark_as_advanced(MBEDTLS_INCLUDE_DIR MBEDTLS_LIBRARY MBEDX509_LIBRARY MBEDCRYPTO_LIBRARY)
 
 if(MBEDTLS_FOUND AND NOT TARGET MBEDTLS)
-    add_library(MBEDTLS UNKNOWN IMPORTED)
-    set_target_properties(MBEDTLS PROPERTIES
+    add_library(mbedtls UNKNOWN IMPORTED)
+    set_target_properties(mbedtls PROPERTIES
       INTERFACE_INCLUDE_DIRECTORIES ${MBEDTLS_INCLUDE_DIR}
       IMPORTED_LOCATION "${MBEDTLS_LIBRARY}"
       )
-    add_library(MBEDX509 UNKNOWN IMPORTED)
-    set_target_properties(MBEDX509 PROPERTIES
+    add_library(mbedx509 UNKNOWN IMPORTED)
+    set_target_properties(mbedx509 PROPERTIES
       INTERFACE_INCLUDE_DIRECTORIES ${MBEDTLS_INCLUDE_DIR}
       IMPORTED_LOCATION "${MBEDX509_LIBRARY}"
       )
-    add_library(MBEDCRYPTO UNKNOWN IMPORTED)
-    set_target_properties(MBEDCRYPTO PROPERTIES
+    add_library(mbedcrypto UNKNOWN IMPORTED)
+    set_target_properties(mbedcrypto PROPERTIES
       INTERFACE_INCLUDE_DIRECTORIES ${MBEDTLS_INCLUDE_DIR}
       IMPORTED_LOCATION "${MBEDCRYPTO_LIBRARY}"
       )
