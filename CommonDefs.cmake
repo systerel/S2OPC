@@ -367,10 +367,16 @@ function(s2opc_expand_header h_input context_targets h_expanded)
     list(APPEND _expand_defines "$<$<BOOL:${_expand_eval_defines}>:-D$<JOIN:${_expand_eval_defines},\;-D>>")
   endforeach(_context_target)
 
+  # Of course, M$ deprecated '-o', so we have to handle this manually... But at least there exists equivalents.
+  if(WIN32 AND NOT MINGW)
+    set(_output_switches /P /Fi${h_expanded})
+  else()
+    set(_output_switches -o ${h_expanded})
+  endif()
   add_custom_command(DEPENDS ${h_input}
                      OUTPUT ${h_expanded}
                      COMMAND ${CMAKE_C_COMPILER} ${_expand_includes} ${_expand_defines}
-                             -E ${h_input} -o ${h_expanded}
+                             -E ${h_input} ${_output_switches}
                      COMMENT "Expending header file to ${h_expanded}"
                      VERBATIM
                      COMMAND_EXPAND_LISTS

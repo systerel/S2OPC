@@ -36,11 +36,7 @@
  */
 
 #include <stdbool.h>
-#include <stdint.h>
-
-/* The following may crash as they are not standard... But stddef cannot be included... */
-typedef uintptr_t size_t;
-typedef struct _IO_FILE FILE;
+#include "sopc_stdint_cffi.h"
 
 /* sopc_builtintypes.h */
 typedef uint32_t SOPC_StatusCode;
