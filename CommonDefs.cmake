@@ -55,9 +55,9 @@ if (USE_STATIC_EXPAT_LIB)
 endif()
 
 if(S2OPC_CLIENTSERVER_ONLY)
-  find_package(expat) # if not found XML loaders will not be compiled
+  find_package(expat CONFIG) # if not found XML loaders will not be compiled
 else()
-  find_package(expat REQUIRED)
+  find_package(expat REQUIRED CONFIG)
 endif()
 
 # redefine CMake behavior for find_library(*)
