@@ -61,6 +61,8 @@ Server side (e.g.: `samples/ClientServer/demo_server/toolkit_demo_server.c`):
   - TranslateBrowsePathToNodeIds service
   - GetEndpoints service
   - FindServers service
+  - FindServersOnNetwork service
+  - RegisterServer2 service
   - RegisterNodes service
   - Only if compiled with WITH_NANO_EXTENDED set to 1:
     - Subscription services (simplified: no monitoredItems filters or deletion, no subscription transfer)
