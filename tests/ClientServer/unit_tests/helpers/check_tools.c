@@ -1403,6 +1403,255 @@ START_TEST(test_strtouint)
 }
 END_TEST
 
+START_TEST(test_strtouint2)
+{
+    uint8_t a = 0;
+    uint16_t b = 0;
+    uint32_t c = 0;
+    uint64_t d = 0;
+
+    /* 8 */
+    ck_assert(SOPC_strtouint("0", strlen("0"), 8, &a));
+    ck_assert(0 == a);
+    ck_assert(SOPC_strtouint("42", strlen("42"), 8, &a));
+    ck_assert(42 == a);
+    ck_assert(!SOPC_strtouint("42;3", strlen("42;3"), 8, &a));
+    ck_assert(SOPC_strtouint("42;3", 2, 8, &a));
+    ck_assert(42 == a);
+    ck_assert(!SOPC_strtouint("42zz-24", strlen("42zz-24"), 8, &a));
+    ck_assert(SOPC_strtouint("42zz-24", 2, 8, &a));
+    ck_assert(42 == a);
+
+    ck_assert(!SOPC_strtouint("", strlen(""), 8, &a));
+    ck_assert(!SOPC_strtouint(NULL, 0, 8, &a));
+    ck_assert(!SOPC_strtouint("42", strlen("42"), 8, NULL));
+
+    ck_assert(SOPC_strtouint("255", strlen("255"), 8, &a));
+    ck_assert(0xFF == a);
+    ck_assert(!SOPC_strtouint("256", strlen("256"), 8, &a));
+
+    /* 16 */
+    ck_assert(SOPC_strtouint("0", strlen("0"), 16, &b));
+    ck_assert(0 == b);
+    ck_assert(SOPC_strtouint("42", strlen("42"), 16, &b));
+    ck_assert(42 == b);
+
+    ck_assert(!SOPC_strtouint("", strlen(""), 16, &b));
+    ck_assert(!SOPC_strtouint(NULL, 0, 16, &b));
+    ck_assert(!SOPC_strtouint("42", strlen("42"), 16, NULL));
+
+    ck_assert(SOPC_strtouint("255", strlen("255"), 16, &b));
+    ck_assert(0xFF == b);
+    ck_assert(SOPC_strtouint("256", strlen("256"), 16, &b));
+    ck_assert(0x100 == b);
+
+    ck_assert(SOPC_strtouint("65535", strlen("65535"), 16, &b));
+    ck_assert(0xFFFF == b);
+    ck_assert(!SOPC_strtouint("65536", strlen("65536"), 16, &b));
+
+    /* 32 */
+    ck_assert(SOPC_strtouint("0", strlen("0"), 32, &c));
+    ck_assert(0 == c);
+    ck_assert(SOPC_strtouint("42", strlen("42"), 32, &c));
+    ck_assert(42 == c);
+
+    ck_assert(!SOPC_strtouint("", strlen(""), 32, &c));
+    ck_assert(!SOPC_strtouint(NULL, 0, 32, &c));
+    ck_assert(!SOPC_strtouint("42", strlen("42"), 32, NULL));
+
+    ck_assert(SOPC_strtouint("255", strlen("255"), 32, &c));
+    ck_assert(0xFF == c);
+    ck_assert(SOPC_strtouint("256", strlen("256"), 32, &c));
+    ck_assert(0x100 == c);
+
+    ck_assert(SOPC_strtouint("65535", strlen("65535"), 32, &c));
+    ck_assert(0xFFFF == c);
+    ck_assert(SOPC_strtouint("65536", strlen("65536"), 32, &c));
+    ck_assert(0x10000 == c);
+
+    ck_assert(SOPC_strtouint("4294967295", strlen("4294967295"), 32, &c));
+    ck_assert(0xFFFFFFFF == c);
+    ck_assert(!SOPC_strtouint("4294967296", strlen("4294967296"), 32, &c));
+
+    /* 64 */
+    ck_assert(SOPC_strtouint("0", strlen("0"), 64, &d));
+    ck_assert(0 == d);
+    ck_assert(SOPC_strtouint("42", strlen("42"), 64, &d));
+    ck_assert(42 == d);
+
+    ck_assert(!SOPC_strtouint("", strlen(""), 64, &d));
+    ck_assert(!SOPC_strtouint(NULL, 0, 64, &d));
+    ck_assert(!SOPC_strtouint("42", strlen("42"), 64, NULL));
+
+    ck_assert(SOPC_strtouint("255", strlen("255"), 64, &d));
+    ck_assert(0xFF == d);
+    ck_assert(SOPC_strtouint("256", strlen("256"), 64, &d));
+    ck_assert(0x100 == d);
+
+    ck_assert(SOPC_strtouint("65535", strlen("65535"), 64, &d));
+    ck_assert(0xFFFF == d);
+    ck_assert(SOPC_strtouint("65536", strlen("65536"), 64, &d));
+    ck_assert(0x10000 == d);
+
+    ck_assert(SOPC_strtouint("4294967295", strlen("4294967295"), 64, &d));
+    ck_assert(0xFFFFFFFF == d);
+    ck_assert(SOPC_strtouint("4294967296", strlen("4294967296"), 64, &d));
+    ck_assert(0x100000000 == d);
+
+    ck_assert(SOPC_strtouint("18446744073709551615", strlen("18446744073709551615"), 64, &d));
+    ck_assert(0xFFFFFFFFFFFFFFFF == d);
+    ck_assert(!SOPC_strtouint("18446744073709551616", strlen("18446744073709551616"), 64, &d));
+}
+END_TEST
+
+START_TEST(test_strtoint)
+{
+    int8_t a = 0;
+    int16_t b = 0;
+    int32_t c = 0;
+    int64_t d = 0;
+
+    /* 8 */
+    ck_assert(SOPC_strtoint("0", strlen("0"), 8, &a));
+    ck_assert(0 == a);
+    ck_assert(SOPC_strtoint("42", strlen("42"), 8, &a));
+    ck_assert(42 == a);
+
+    ck_assert(!SOPC_strtoint("", strlen(""), 8, &a));
+    ck_assert(!SOPC_strtoint(NULL, 0, 8, &a));
+    ck_assert(!SOPC_strtoint("42", strlen("42"), 8, NULL));
+
+    ck_assert(!SOPC_strtouint("42;3", strlen("42;3"), 8, &a));
+    ck_assert(SOPC_strtouint("42;3", 2, 8, &a));
+    ck_assert(42 == a);
+    ck_assert(!SOPC_strtouint("42zz-24", strlen("42zz-24"), 8, &a));
+    ck_assert(SOPC_strtouint("42zz-24", 2, 8, &a));
+    ck_assert(42 == a);
+
+    ck_assert(SOPC_strtoint("-128", strlen("-128"), 8, &a));
+    ck_assert(INT8_MIN == a);
+    ck_assert(!SOPC_strtoint("-129", strlen("-129"), 8, &a));
+
+    ck_assert(SOPC_strtoint("127", strlen("127"), 8, &a));
+    ck_assert(INT8_MAX == a);
+    ck_assert(!SOPC_strtoint("128", strlen("128"), 8, &a));
+
+    /* 16 */
+    ck_assert(SOPC_strtoint("0", strlen("0"), 16, &b));
+    ck_assert(0 == b);
+    ck_assert(SOPC_strtoint("42", strlen("42"), 16, &b));
+    ck_assert(42 == b);
+
+    ck_assert(!SOPC_strtoint("", strlen(""), 16, &b));
+    ck_assert(!SOPC_strtoint(NULL, 0, 16, &b));
+    ck_assert(!SOPC_strtoint("42", strlen("42"), 16, NULL));
+
+    ck_assert(SOPC_strtoint("-128", strlen("-128"), 16, &b));
+    ck_assert(INT8_MIN == b);
+    ck_assert(SOPC_strtoint("-129", strlen("-129"), 16, &b));
+    ck_assert(INT8_MIN - 1 == b);
+
+    ck_assert(SOPC_strtoint("127", strlen("127"), 16, &b));
+    ck_assert(INT8_MAX == b);
+    ck_assert(SOPC_strtoint("128", strlen("128"), 16, &b));
+    ck_assert(INT8_MAX + 1 == b);
+
+    ck_assert(SOPC_strtoint("-32768", strlen("-32768"), 16, &b));
+    ck_assert(INT16_MIN == b);
+    ck_assert(!SOPC_strtoint("-32769", strlen("-32769"), 16, &b));
+
+    ck_assert(SOPC_strtoint("32767", strlen("32767"), 16, &b));
+    ck_assert(INT16_MAX == b);
+    ck_assert(!SOPC_strtoint("32768", strlen("32768"), 16, &b));
+
+    /* 32 */
+    ck_assert(SOPC_strtoint("0", strlen("0"), 32, &c));
+    ck_assert(0 == c);
+    ck_assert(SOPC_strtoint("42", strlen("42"), 32, &c));
+    ck_assert(42 == c);
+
+    ck_assert(!SOPC_strtoint("", strlen(""), 32, &c));
+    ck_assert(!SOPC_strtoint(NULL, 0, 32, &c));
+    ck_assert(!SOPC_strtoint("42", strlen("42"), 32, NULL));
+
+    ck_assert(SOPC_strtoint("-128", strlen("-128"), 32, &c));
+    ck_assert(INT8_MIN == c);
+    ck_assert(SOPC_strtoint("-129", strlen("-129"), 32, &c));
+    ck_assert(INT8_MIN - 1 == c);
+
+    ck_assert(SOPC_strtoint("127", strlen("127"), 32, &c));
+    ck_assert(INT8_MAX == c);
+    ck_assert(SOPC_strtoint("128", strlen("128"), 32, &c));
+    ck_assert(INT8_MAX + 1 == c);
+
+    ck_assert(SOPC_strtoint("-32768", strlen("-32768"), 32, &c));
+    ck_assert(INT16_MIN == c);
+    ck_assert(SOPC_strtoint("-32769", strlen("-32769"), 32, &c));
+    ck_assert(INT16_MIN - 1 == c);
+
+    ck_assert(SOPC_strtoint("32767", strlen("32767"), 32, &c));
+    ck_assert(INT16_MAX == c);
+    ck_assert(SOPC_strtoint("32768", strlen("32768"), 32, &c));
+    ck_assert(INT16_MAX + 1 == c);
+
+    ck_assert(SOPC_strtoint("-2147483648", strlen("-2147483648"), 32, &c));
+    ck_assert(INT32_MIN == c);
+    ck_assert(!SOPC_strtoint("-2147483649", strlen("-2147483649"), 32, &c));
+
+    ck_assert(SOPC_strtoint("2147483647", strlen("2147483647"), 32, &c));
+    ck_assert(INT32_MAX == c);
+    ck_assert(!SOPC_strtoint("2147483648", strlen("2147483648"), 32, &c));
+
+    /* 64 */
+    ck_assert(SOPC_strtoint("0", strlen("0"), 64, &d));
+    ck_assert(0 == d);
+    ck_assert(SOPC_strtoint("42", strlen("42"), 64, &d));
+    ck_assert(42 == d);
+
+    ck_assert(!SOPC_strtoint("", strlen(""), 64, &d));
+    ck_assert(!SOPC_strtoint(NULL, 0, 64, &d));
+    ck_assert(!SOPC_strtoint("42", strlen("42"), 64, NULL));
+
+    ck_assert(SOPC_strtoint("-128", strlen("-128"), 64, &d));
+    ck_assert(INT8_MIN == d);
+    ck_assert(SOPC_strtoint("-129", strlen("-129"), 64, &d));
+    ck_assert(INT8_MIN - 1 == d);
+
+    ck_assert(SOPC_strtoint("127", strlen("127"), 64, &d));
+    ck_assert(INT8_MAX == d);
+    ck_assert(SOPC_strtoint("128", strlen("128"), 64, &d));
+    ck_assert(INT8_MAX + 1 == d);
+
+    ck_assert(SOPC_strtoint("-32768", strlen("-32768"), 64, &d));
+    ck_assert(INT16_MIN == d);
+    ck_assert(SOPC_strtoint("-32769", strlen("-32769"), 64, &d));
+    ck_assert(INT16_MIN - 1 == d);
+
+    ck_assert(SOPC_strtoint("32767", strlen("32767"), 64, &d));
+    ck_assert(INT16_MAX == d);
+    ck_assert(SOPC_strtoint("32768", strlen("32768"), 64, &d));
+    ck_assert(INT16_MAX + 1 == d);
+
+    ck_assert(SOPC_strtoint("-2147483648", strlen("-2147483648"), 64, &d));
+    ck_assert(INT32_MIN == d);
+    ck_assert(SOPC_strtoint("-2147483649", strlen("-2147483649"), 64, &d));
+    ck_assert(-2147483649LL == d);
+
+    ck_assert(SOPC_strtoint("2147483647", strlen("2147483647"), 64, &d));
+    ck_assert(INT32_MAX == d);
+    ck_assert(SOPC_strtoint("2147483648", strlen("2147483648"), 64, &d));
+    ck_assert(2147483648LL == d);
+
+    ck_assert(SOPC_strtoint("-9223372036854775808", strlen("-9223372036854775808"), 64, &d));
+    ck_assert(INT64_MIN == d);
+    ck_assert(!SOPC_strtoint("-9223372036854775809", strlen("-9223372036854775809"), 64, &d));
+
+    ck_assert(SOPC_strtoint("9223372036854775807", strlen("9223372036854775807"), 64, &d));
+    ck_assert(INT64_MAX == d);
+    ck_assert(!SOPC_strtoint("9223372036854775808", strlen("9223372036854775808"), 64, &d));
+}
+END_TEST
+
 START_TEST(test_string_nodeid)
 {
     SOPC_NodeId nid;
@@ -4306,6 +4555,8 @@ Suite* tests_make_suite_tools(void)
     tcase_add_test(tc_basetools, test_strcmp_ignore_case_alt_end);
     tcase_add_test(tc_basetools, test_helper_uri);
     tcase_add_test(tc_basetools, test_strtouint);
+    tcase_add_test(tc_basetools, test_strtouint2);
+    tcase_add_test(tc_basetools, test_strtoint);
     tcase_add_test(tc_basetools, test_string_nodeid);
     suite_add_tcase(s, tc_basetools);
     tc_buffer = tcase_create("Buffer");

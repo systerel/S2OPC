@@ -106,7 +106,7 @@ SOPC_ReturnStatus SOPC_strtouint16_t(const char* sz, uint16_t* n, int base, char
 SOPC_ReturnStatus SOPC_strtouint32_t(const char* sz, uint32_t* n, int base, char cEnd);
 
 /**
- * \brief        Read a signed integer from the string with strtol.
+ * \brief        Read a signed integer from the string with strtoll.
  *
  * \param data   A pointer to the CString containing the number in base 10
  * \param len    The length of the CString to use for parsing, it shall be <= 20
@@ -118,7 +118,7 @@ SOPC_ReturnStatus SOPC_strtouint32_t(const char* sz, uint32_t* n, int base, char
 bool SOPC_strtoint(const char* data, size_t len, uint8_t width, void* dest);
 
 /**
- * \brief        Read an unsigned integer from the string with strtoul.
+ * \brief        Read an unsigned integer from the string with strtoull.
  *
  * \param data   A pointer to the CString containing the number in base 10
  * \param len    The length of the CString to use for parsing, it shall be <= 20

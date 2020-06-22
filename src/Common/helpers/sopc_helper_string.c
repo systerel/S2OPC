@@ -253,7 +253,7 @@ bool SOPC_strtoint(const char* data, size_t len, uint8_t width, void* dest)
 {
     char buf[21];
 
-    if (len > (sizeof(buf) / sizeof(char) - 1))
+    if (NULL == dest || len == 0 || len > (sizeof(buf) / sizeof(char) - 1))
     {
         return false;
     }
@@ -261,46 +261,48 @@ bool SOPC_strtoint(const char* data, size_t len, uint8_t width, void* dest)
     memcpy(buf, data, len);
     buf[len] = '\0';
 
+    errno = 0;
+
     char* endptr;
-    int64_t val = strtol(buf, &endptr, 10);
+    long long int val = strtoll(buf, &endptr, 10);
 
     if (endptr != (buf + len))
     {
         return false;
     }
 
+    bool res = true;
     if (width == 8 && val >= INT8_MIN && val <= INT8_MAX)
     {
         *((int8_t*) dest) = (int8_t) val;
-        return true;
     }
     else if (width == 16 && val >= INT16_MIN && val <= INT16_MAX)
     {
         *((int16_t*) dest) = (int16_t) val;
-        return true;
     }
     else if (width == 32 && val >= INT32_MIN && val <= INT32_MAX)
     {
         *((int32_t*) dest) = (int32_t) val;
-        return true;
     }
-    else if (width == 64)
+    else if (width == 64 && val >= INT64_MIN && val <= INT64_MAX &&
+             !((LLONG_MAX == val || LLONG_MIN == val) && ERANGE == errno))
     {
         *((int64_t*) dest) = (int64_t) val;
-        return true;
     }
     else
     {
         // Invalid width and/or out of bounds value
-        return false;
+        res = false;
     }
+
+    return res;
 }
 
 bool SOPC_strtouint(const char* data, size_t len, uint8_t width, void* dest)
 {
     char buf[21];
 
-    if (len > (sizeof(buf) / sizeof(char) - 1))
+    if (NULL == dest || len == 0 || len > (sizeof(buf) / sizeof(char) - 1))
     {
         return false;
     }
@@ -309,45 +311,45 @@ bool SOPC_strtouint(const char* data, size_t len, uint8_t width, void* dest)
     buf[len] = '\0';
 
     char* endptr;
-    uint64_t val = strtoul(buf, &endptr, 10);
+    errno = 0;
+    unsigned long long int val = strtoull(buf, &endptr, 10);
 
     if (endptr != (buf + len))
     {
         return false;
     }
 
+    bool res = true;
     if (width == 8 && val <= UINT8_MAX)
     {
         *((uint8_t*) dest) = (uint8_t) val;
-        return true;
     }
     else if (width == 16 && val <= UINT16_MAX)
     {
         *((uint16_t*) dest) = (uint16_t) val;
-        return true;
     }
     else if (width == 32 && val <= UINT32_MAX)
     {
         *((uint32_t*) dest) = (uint32_t) val;
-        return true;
     }
-    else if (width == 64)
+    else if (width == 64 && val <= UINT64_MAX && !(ULLONG_MAX == val && ERANGE == errno))
     {
         *((uint64_t*) dest) = (uint64_t) val;
-        return true;
     }
     else
     {
         // Invalid width and/or out of bounds value
-        return false;
+        res = false;
     }
+
+    return res;
 }
 
 bool SOPC_strtodouble(const char* data, size_t len, uint8_t width, void* dest)
 {
     char buf[340];
 
-    if (len > (sizeof(buf) / sizeof(char) - 1))
+    if (NULL == dest || len <= 0 || len > (sizeof(buf) / sizeof(char) - 1))
     {
         return false;
     }
@@ -356,6 +358,7 @@ bool SOPC_strtodouble(const char* data, size_t len, uint8_t width, void* dest)
     buf[len] = '\0';
 
     char* endptr;
+    errno = 0;
     double val = strtod(buf, &endptr);
 
     if (endptr != (buf + len))
@@ -363,21 +366,22 @@ bool SOPC_strtodouble(const char* data, size_t len, uint8_t width, void* dest)
         return false;
     }
 
-    if (width == 32 && val >= -FLT_MAX && val <= FLT_MAX)
+    bool res = true;
+    if (width == 32 && val >= -FLT_MAX && val <= FLT_MAX && ERANGE != errno)
     {
         *((float*) dest) = (float) val;
-        return true;
     }
-    else if (width == 64 && val >= -DBL_MAX && val <= DBL_MAX)
+    else if (width == 64 && val >= -DBL_MAX && val <= DBL_MAX && ERANGE != errno)
     {
         *((double*) dest) = val;
-        return true;
     }
     else
     {
         // Invalid width and/or out of bounds value
-        return false;
+        res = false;
     }
+
+    return res;
 }
 
 char* SOPC_strdup(const char* s)
