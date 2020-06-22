@@ -19,6 +19,8 @@
 
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
+#include <random/rand32.h>
 
 #include <inttypes.h>
 
@@ -38,10 +40,6 @@
 #endif /* CONFIG_MBEDTLS_CFG_FILE */
 #endif
 
-#ifndef CONFIG_ENTROPY_NAME
-#define CONFIG_ENTROPY_NAME ((const char*) ("TRNG"))
-#endif
-
 #define P_ENTROPY_DEBUG (0)
 
 int32_t mbedtls_hardware_poll(void* data, uint8_t* output, int32_t len, int32_t* olen)
@@ -50,39 +48,52 @@ int32_t mbedtls_hardware_poll(void* data, uint8_t* output, int32_t len, int32_t*
 #if P_ENTROPY_DEBUG == 1
     printk("\r\n mbedtls_hardware_poll - %d - \r\n", len);
 #endif
-    /* static to obtain it once in a first call */
-    static struct device* dev = NULL;
+
     int err = (-1);
 
     if ((NULL == output) || (NULL == olen) || (0 == len))
     {
         return -1;
     }
-
+#ifdef DT_CHOSEN_ZEPHYR_ENTROPY_LABEL
+    /* static to obtain it once in a first call */
+    static struct device* dev = NULL;
     if (NULL == dev)
     {
 #if P_ENTROPY_DEBUG == 1
-        printk("\r\nFirst call to obtain entropy device %s\r\n", CONFIG_ENTROPY_NAME);
+        printk("\r\nFirst call to obtain entropy device %s\r\n", DT_CHOSEN_ZEPHYR_ENTROPY_LABEL);
 #endif
-        dev = device_get_binding(CONFIG_ENTROPY_NAME);
+        dev = device_get_binding(DT_CHOSEN_ZEPHYR_ENTROPY_LABEL);
         if (NULL == dev)
         {
 #if P_ENTROPY_DEBUG == 1
             printk("\r\nFailed to obtain entropy device\r\n");
 #endif
-            return -1;
         }
     }
-
     err = entropy_get_entropy(dev, output, len);
+#endif
     if (err != 0)
     {
-#if P_ENTROPY_DEBUG == 1
-        printk("\r\nFailed to obtain entropy, err %d\r\n", err);
-#endif
-        return -1;
-    }
 
+#if P_ENTROPY_DEBUG == 1
+        printk("\r\nFailed to obtain entropy, err %d, software mode engaged !!!\r\n", err);
+#endif
+        uint32_t lenIter = 0;
+        uint32_t blocksize = 4;
+        uint32_t random_num = 0;
+        while (lenIter < len) {
+            random_num = k_cycle_get_32();
+            if ((len-lenIter) < sizeof(random_num)) {
+                blocksize = lenIter;
+                (void)memcpy(&(output[random_num]),
+                        &random_num, blocksize);
+            } else {
+                *((uint32_t *)&output[lenIter]) = random_num;
+            }
+            lenIter += blocksize;
+        }
+    }
 #if P_ENTROPY_DEBUG == 1
     printk("\r\n Entropy = ");
     for (int32_t i = 0; i < len; i++)
@@ -91,7 +102,6 @@ int32_t mbedtls_hardware_poll(void* data, uint8_t* output, int32_t len, int32_t*
     }
     printk("\r\n");
 #endif
-
     *olen = len;
     return 0;
 }
