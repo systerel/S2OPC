@@ -70,10 +70,12 @@ test_script:
         mkdir build
         cd build
         mkdir lib
+        mkdir bin
         copy %MBEDTLS_DIR%\build\library\%CONFIG%\mbedtls.lib lib
         copy %MBEDTLS_DIR%\build\library\%CONFIG%\mbedx509.lib lib
         copy %MBEDTLS_DIR%\build\library\%CONFIG%\mbedcrypto.lib lib
         copy %EXPAT_INSTALL_DIR%\lib\libexpat.lib lib
+        copy %EXPAT_INSTALL_DIR%\bin\libexpat.dll bin
         cmake -DS2OPC_CLIENTSERVER_ONLY=%S2OPC_CLIENTSERVER_ONLY% -DMBEDTLS_INCLUDE_DIR=%MBEDTLS_BUILD_DIR%/../include -DMBEDTLS_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedtls.lib -DMBEDX509_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedx509.lib -DMBEDCRYPTO_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedcrypto.lib -DCMAKE_PREFIX_PATH=%LIBS_DIRS% .. -G "Visual Studio 15 2017 Win64"
         cmake --build . --config %CONFIG%
     - cd %ROOT_DIR%\build\tests\ClientServer
