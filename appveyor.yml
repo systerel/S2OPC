@@ -61,7 +61,7 @@ test_script:
         cd %EXPAT_DIR%
         mkdir build
         cd build
-        cmake -DCMAKE_INSTALL_PREFIX=%EXPAT_INSTALL_DIR% .. -G "Visual Studio 15 2017 Win64"
+        cmake -DEXPAT_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX=%EXPAT_INSTALL_DIR% .. -G "Visual Studio 15 2017 Win64"
         cmake --build . --target install --config %CONFIG%
 
     # configure, build and test S2OPC project
@@ -70,12 +70,10 @@ test_script:
         mkdir build
         cd build
         mkdir lib
-        mkdir bin
         copy %MBEDTLS_DIR%\build\library\%CONFIG%\mbedtls.lib lib
         copy %MBEDTLS_DIR%\build\library\%CONFIG%\mbedx509.lib lib
         copy %MBEDTLS_DIR%\build\library\%CONFIG%\mbedcrypto.lib lib
-        copy %EXPAT_INSTALL_DIR%\lib\libexpat.lib lib
-        copy %EXPAT_INSTALL_DIR%\bin\libexpat.dll bin
+        copy %EXPAT_INSTALL_DIR%\lib\libexpatMD.lib lib\libexpat.lib
         cmake -DS2OPC_CLIENTSERVER_ONLY=%S2OPC_CLIENTSERVER_ONLY% -DMBEDTLS_INCLUDE_DIR=%MBEDTLS_BUILD_DIR%/../include -DMBEDTLS_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedtls.lib -DMBEDX509_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedx509.lib -DMBEDCRYPTO_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedcrypto.lib -DCMAKE_PREFIX_PATH=%LIBS_DIRS% .. -G "Visual Studio 15 2017 Win64"
         cmake --build . --config %CONFIG%
     - cd %ROOT_DIR%\build\tests\ClientServer
