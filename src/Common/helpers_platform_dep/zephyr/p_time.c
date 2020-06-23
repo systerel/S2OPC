@@ -52,9 +52,6 @@
 
 #define SECOND_TO_100NS ((uint64_t) 10000000)
 #define MS_TO_100NS ((uint64_t) 10000)
-#ifndef CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC
-#define CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC 600000000
-#endif
 
 static time_t gBuildDate = 0;
 
@@ -159,19 +156,28 @@ static inline uint64_t P_TIME_TimeReference_GetCurrent100ns(void)
 
     // compute overflow period for tick counter, kernel millisecond counter point of view
 
-    uint64_t periodOverflowMs = ((uint64_t) UINT32_MAX + 1) * SECOND_TO_100NS / CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC;
+    uint64_t periodOverflowMs = ((uint64_t) UINT32_MAX + 1) * SECOND_TO_100NS / sys_clock_hw_cycles_per_sec();
 
     // compute number of overflows, kernel millisecond counter point of view
     uint64_t nbOverflows = soft_clock_ms * MS_TO_100NS / periodOverflowMs;
 
     // compute monotonic high precision value in 100NS
-    uint64_t current = ((uint64_t) kernel_clock_ticks * SECOND_TO_100NS) / CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC;
+    uint64_t current = ((uint64_t) kernel_clock_ticks * SECOND_TO_100NS) / sys_clock_hw_cycles_per_sec();
 
     // compute 100NS overflowed cumulated values
     uint64_t overflow = nbOverflows * periodOverflowMs;
 
     // add to high precision counter
     uint64_t value = current + overflow;
+
+#if P_TIME_DEBUG == 1
+    printk("\r\n periodOverflowMs = %llu", periodOverflowMs);
+    printk("\r\n nbOverflows = %llu", nbOverflows);
+    printk("\r\n current = %llu", current);
+    printk("\r\n overflow = %llu", overflow);
+    printk("\r\n result = %llu", value);
+    printk("\r\n %llu", value % SECOND_TO_100NS);
+#endif
 
     return value;
 }
@@ -193,15 +199,6 @@ int64_t SOPC_Time_GetCurrentTimeUTC()
     // compute value in second, used to compute UTC value
     uint64_t value_in_s = value / SECOND_TO_100NS;
     uint64_t value_frac_in_100ns = value % SECOND_TO_100NS;
-
-#if P_TIME_DEBUG == 1
-    printk("\r\n periodOverflowMs = %llu", periodOverflowMs);
-    printk("\r\n nbOverflows = %llu", nbOverflows);
-    printk("\r\n current = %llu", current);
-    printk("\r\n overflow = %llu", overflow);
-    printk("\r\n result = %llu", value);
-    printk("\r\n %llu", value % SECOND_TO_100NS);
-#endif
 
     // Check for overflow. Note that currentTimeFrac100NS cannot overflow.
     // Problem: we don't know the limits of time_t, and they are not #defined.
