@@ -53,12 +53,25 @@
 #define SECOND_TO_100NS ((uint64_t) 10000000)
 #define MS_TO_100NS ((uint64_t) 10000)
 
-static time_t gBuildDate = 0;
-
-// Temporary workaround while waiting for Zephyr to fix POSIX time.h issue
-time_t P_TIME_GetBuildDate(void)
+typedef enum P_TIME_STATUS
 {
-    if (0 == gBuildDate)
+    P_TIME_STATUS_NOT_INITIALIZED,
+    P_TIME_STATUS_INITIALIZING,
+    P_TIME_STATUS_INITIALIZED
+} ePTimeStatus;
+
+static ePTimeStatus gTimeStatus = P_TIME_STATUS_NOT_INITIALIZED;
+static uint64_t gVal = 0;
+
+static uint64_t P_TIME_TimeReference_GetCurrent100ns(void)
+{
+    ePTimeStatus expectedStatus = P_TIME_STATUS_NOT_INITIALIZED;
+    ePTimeStatus desiredStatus = P_TIME_STATUS_INITIALIZING;
+
+    bool bTransition = __atomic_compare_exchange(&gTimeStatus, &expectedStatus, &desiredStatus, false, __ATOMIC_SEQ_CST,
+                                                 __ATOMIC_SEQ_CST);
+
+    if (bTransition)
     {
         // Get today date numerics values
         struct tm today = {};
@@ -139,18 +152,21 @@ time_t P_TIME_GetBuildDate(void)
         today.tm_min = (atoi(ptrM));
         today.tm_sec = (atoi(ptrS));
 
-        // Newlib uses the same time_t precision and reference as Linux.
-        // Compute nb seconds since Unix EPOCH.
-        // Warn, mktime use libc malloc
-        gBuildDate = mktime(&today);
+        gVal = mktime(&today);
+
+        desiredStatus = P_TIME_STATUS_INITIALIZED;
+        __atomic_store(&gTimeStatus, &desiredStatus, __ATOMIC_SEQ_CST);
     }
 
-    return gBuildDate;
-}
+    __atomic_load(&gTimeStatus, &expectedStatus, __ATOMIC_SEQ_CST);
 
-static inline uint64_t P_TIME_TimeReference_GetCurrent100ns(void)
-{
-    uint64_t soft_clock_ms = (SOPC_TimeReference)(P_TIME_GetBuildDate() * 1000 + k_uptime_get());
+    while (expectedStatus != P_TIME_STATUS_INITIALIZED)
+    {
+        k_yield();
+        __atomic_load(&gTimeStatus, &expectedStatus, __ATOMIC_SEQ_CST);
+    }
+
+    uint64_t soft_clock_ms = (SOPC_TimeReference)(gVal * 1000 + k_uptime_get());
     // Get associated hardware clock counter
     uint64_t kernel_clock_ticks = k_cycle_get_32();
 
@@ -191,7 +207,6 @@ int64_t SOPC_Time_GetCurrentTimeUTC()
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
     /*==========================================================*/
-
     // Get current ms counter
 
     uint64_t value = P_TIME_TimeReference_GetCurrent100ns();
@@ -248,9 +263,9 @@ SOPC_TimeReference SOPC_TimeReference_GetCurrent()
 {
     SOPC_TimeReference currentTimeInMs = 0;
 
-    uint64_t value = P_TIME_TimeReference_GetCurrent100ns();
+    /*uint64_t value = P_TIME_TimeReference_GetCurrent100ns();
 
-    currentTimeInMs = (SOPC_TimeReference)(value / MS_TO_100NS);
+    currentTimeInMs = (SOPC_TimeReference)(value / MS_TO_100NS);*/
 
     return currentTimeInMs;
 }
