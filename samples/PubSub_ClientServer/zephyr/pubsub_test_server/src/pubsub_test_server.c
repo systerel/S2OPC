@@ -278,6 +278,9 @@ static void TEST_LAUNCH(void)
     bool netInit = Network_Initialize();
     assert(netInit == true);
 
+    /* Initialize MbedTLS */
+    tls_threading_initialize();
+
     Thread sopcThreadHandle1 = NULL;
 
     printk("\r\nReady to launch application :)\r\n");
