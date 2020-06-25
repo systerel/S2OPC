@@ -512,7 +512,7 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
             {
                 schedulerCtx.transport[iIter].connection = connection;
 
-                printf("# Add input with context %p\n", (void*) connection);
+                printf("# Add input with context %p\r\n", (void*) connection);
 
                 status = SOPC_RT_Subscriber_Initializer_AddInput(pRTInitializer,                        //
                                                                  SOPC_PUBSUB_MAX_MESSAGE_PER_PUBLISHER, //
