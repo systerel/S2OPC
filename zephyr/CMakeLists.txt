@@ -90,6 +90,8 @@ zephyr_library_sources(
 ../src/Common/helpers_platform_dep/zephyr/p_synchro.c
 ../src/Common/helpers_platform_dep/zephyr/p_time.c
 ../src/Common/helpers_platform_dep/zephyr/p_atomic.c
+../src/Common/helpers_platform_dep/zephyr/p_udp_sockets.c
+../src/Common/helpers_platform_dep/zephyr/p_multicast.c
 ../src/ClientServer/sockets/sopc_sockets_network_event_mgr.c
 ../src/ClientServer/sockets/sopc_sockets_api.c
 ../src/ClientServer/sockets/sopc_sockets_internal_ctx.c
