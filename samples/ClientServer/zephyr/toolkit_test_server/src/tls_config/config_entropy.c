@@ -86,8 +86,8 @@ int32_t mbedtls_hardware_poll(void* data, uint8_t* output, int32_t len, int32_t*
             random_num = k_cycle_get_32();
             if ((len-lenIter) < sizeof(random_num)) {
                 blocksize = lenIter;
-                (void)memcpy(&(output[random_num]),
-                        &random_num, blocksize);
+                (void)memcpy(&(output[lenIter]),
+                        &random_num, len-lenIter);
             } else {
                 *((uint32_t *)&output[lenIter]) = random_num;
             }
