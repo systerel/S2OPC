@@ -275,7 +275,7 @@ static eThreadResult P_THREAD_Init(tThreadHandle* pWks, ptrFct callback, void* p
         gGlbThreadWks.tab[slotId - 1].threadHandle =
             k_thread_create(&gGlbThreadWks.tab[slotId - 1].threadControlBlock, //
                             gThreadStacks[slotId - 1],                         //
-							K_THREAD_STACK_SIZEOF(gThreadStacks[slotId - 1]),         //
+                            K_THREAD_STACK_SIZEOF(gThreadStacks[slotId - 1]),  //
                             P_THREAD_InternalCallback,                         //
                             &gGlbThreadWks.tab[slotId - 1],                    //
                             NULL,                                              //
