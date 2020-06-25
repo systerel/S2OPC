@@ -18,30 +18,12 @@
  */
 
 #include <fcntl.h>
-
-#include <stdbool.h>
 #include <stdlib.h>
-
-#include <inttypes.h>
 
 #include "kernel.h"
 #include "net/ethernet.h"
 #include "net/net_if.h"
 #include "net/socket.h"
-
-#ifndef __INT32_MAX__
-#include "toolchain/xcc_missing_defs.h"
-#endif
-
-#ifndef NULL
-#define NULL ((void*) 0)
-#endif
-#ifndef K_FOREVER
-#define K_FOREVER (-1)
-#endif
-#ifndef K_NO_WAIT
-#define K_NO_WAIT 0
-#endif
 
 /* s2opc includes */
 
@@ -49,11 +31,8 @@
 
 /* platform dep includes */
 
+#include "p_multicast.h"
 #include "p_sockets.h"
-
-/* debug printk activation*/
-
-#define P_SOCKET_DEBUG (0)
 
 /* Max pending connection based on max pending connections allowed by zephyr */
 
@@ -63,9 +42,65 @@
 #define MAX_PENDING_CONNECTION 4
 #endif
 
+/* Max socket based on max connections allowed by zephyr */
+
+#ifdef CONFIG_NET_MAX_CONN
+#define MAX_ZEPHYR_SOCKET (CONFIG_NET_MAX_CONN - 2)
+#else
+#define MAX_ZEPHYR_SOCKET 4
+#endif
+
+/* Private global definitions */
+
+static volatile uint32_t priv_P_SOCKET_nbSockets = 0; // Allow to avoid max socket allocation
+
 // *** Socket internal functions definitions
 
 static inline SOPC_ReturnStatus P_SOCKET_Configure(Socket sock, bool setNonBlocking);
+
+// Increment socket counter. Can be compared to CONFIG_NET_MAX_CONN - 2
+// If result is above this value, user shall close one socket before continue.
+// Returns socket counter
+uint32_t P_SOCKET_increment_nb_sockets(void)
+{
+    uint32_t currentValue = 0;
+    uint32_t newValue = 0;
+    bool bTransition = false;
+    do
+    {
+        __atomic_load(&priv_P_SOCKET_nbSockets, &currentValue, __ATOMIC_SEQ_CST);
+        newValue = currentValue + 1;
+        bTransition = __atomic_compare_exchange(&priv_P_SOCKET_nbSockets, &currentValue, &newValue, false,
+                                                __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
+
+    } while (!bTransition);
+    return newValue;
+}
+
+// Decrment socket counter. Can be compared to CONFIG_NET_MAX_CONN - 2
+// If result is above this value, user shall close one socket before continue.
+// Returns socket counter
+uint32_t P_SOCKET_decrement_nb_sockets(void)
+{
+    uint32_t currentValue = 0;
+    uint32_t newValue = 0;
+    bool bTransition = false;
+    do
+    {
+        __atomic_load(&priv_P_SOCKET_nbSockets, &currentValue, __ATOMIC_SEQ_CST);
+        if (currentValue > 0)
+        {
+            newValue = currentValue - 1;
+        }
+        else
+        {
+            newValue = currentValue;
+        }
+        bTransition = __atomic_compare_exchange(&priv_P_SOCKET_nbSockets, &currentValue, &newValue, false,
+                                                __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
+    } while (!bTransition);
+    return newValue;
+}
 
 // *** Public SOCKET API functions definitions ***
 
@@ -73,6 +108,7 @@ static inline SOPC_ReturnStatus P_SOCKET_Configure(Socket sock, bool setNonBlock
 // Returns true if well configured.
 bool SOPC_Socket_Network_Initialize()
 {
+    P_MULTICAST_Initialize();
     return true;
 }
 
@@ -177,42 +213,56 @@ SOPC_ReturnStatus SOPC_Socket_CreateNew(SOPC_Socket_AddressInfo* addr,
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    int setOptStatus = 0;
-
-    *sock = zsock_socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
-    if (SOPC_INVALID_SOCKET == *sock)
+    uint32_t valAuthorization = P_SOCKET_increment_nb_sockets();
+    if (valAuthorization <= MAX_ZEPHYR_SOCKET)
     {
-        status = SOPC_STATUS_NOK;
-    }
+        SOPC_ReturnStatus status = SOPC_STATUS_OK;
+        int setOptStatus = 0;
 
-    if (SOPC_STATUS_OK == status)
-    {
-        status = P_SOCKET_Configure(*sock, setNonBlocking);
-    }
-
-    if (SOPC_STATUS_OK == status && setReuseAddr != false)
-    {
-        const int trueInt = true;
-        setOptStatus = zsock_setsockopt(*sock, SOL_SOCKET, SO_REUSEADDR, (const void*) &trueInt, sizeof(int));
-        if (0 != setOptStatus)
+        *sock = zsock_socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
+        if (SOPC_INVALID_SOCKET == *sock)
         {
             status = SOPC_STATUS_NOK;
         }
-    }
 
-    // Enforce IPV6 sockets can be used for IPV4 connections (if socket is IPV6)
-    if (SOPC_STATUS_OK == status && AF_INET6 == addr->ai_family)
-    {
-        const int falseInt = false;
-        setOptStatus = zsock_setsockopt(*sock, IPPROTO_IPV6, IPV6_V6ONLY, (const void*) &falseInt, sizeof(int));
-        if (0 != setOptStatus)
+        if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_STATUS_NOK;
+            status = P_SOCKET_Configure(*sock, setNonBlocking);
         }
-    }
 
-    return status;
+        if (SOPC_STATUS_OK == status && setReuseAddr != false)
+        {
+            const int trueInt = true;
+            setOptStatus = zsock_setsockopt(*sock, SOL_SOCKET, SO_REUSEADDR, (const void*) &trueInt, sizeof(int));
+            if (0 != setOptStatus)
+            {
+                status = SOPC_STATUS_NOK;
+            }
+        }
+
+        // Enforce IPV6 sockets can be used for IPV4 connections (if socket is IPV6)
+        if (SOPC_STATUS_OK == status && AF_INET6 == addr->ai_family)
+        {
+            const int falseInt = false;
+            setOptStatus = zsock_setsockopt(*sock, IPPROTO_IPV6, IPV6_V6ONLY, (const void*) &falseInt, sizeof(int));
+            if (0 != setOptStatus)
+            {
+                status = SOPC_STATUS_NOK;
+            }
+        }
+
+        if (status != SOPC_STATUS_OK)
+        {
+            P_SOCKET_decrement_nb_sockets();
+        }
+
+        return status;
+    }
+    else
+    {
+        P_SOCKET_decrement_nb_sockets();
+    }
+    return SOPC_STATUS_NOK;
 }
 
 SOPC_ReturnStatus SOPC_Socket_Listen(Socket sock, SOPC_Socket_AddressInfo* addr)
@@ -241,10 +291,43 @@ SOPC_ReturnStatus SOPC_Socket_Accept(Socket listeningSock, bool setNonBlocking, 
     socklen_t addrLen = 0;
     if (SOPC_INVALID_SOCKET != listeningSock && NULL != acceptedSock)
     {
-        *acceptedSock = zsock_accept(listeningSock, &remoteAddr, &addrLen);
-        if (SOPC_INVALID_SOCKET != *acceptedSock)
+        uint32_t valAuthorization = P_SOCKET_increment_nb_sockets();
+        if (valAuthorization <= MAX_ZEPHYR_SOCKET)
         {
-            status = P_SOCKET_Configure(*acceptedSock, setNonBlocking);
+            *acceptedSock = zsock_accept(listeningSock, &remoteAddr, &addrLen);
+            if (SOPC_INVALID_SOCKET != *acceptedSock)
+            {
+                status = P_SOCKET_Configure(*acceptedSock, setNonBlocking);
+            }
+            else
+            {
+                P_SOCKET_decrement_nb_sockets();
+            }
+        }
+        else
+        {
+            do
+            {
+                valAuthorization = P_SOCKET_increment_nb_sockets();
+                if ((MAX_ZEPHYR_SOCKET + 2) >= valAuthorization)
+                {
+                    *acceptedSock = zsock_accept(listeningSock, &remoteAddr, &addrLen);
+                    if (*acceptedSock >= 0)
+                    {
+                        zsock_close(*acceptedSock);
+                    }
+                    *acceptedSock = SOPC_INVALID_SOCKET;
+                    P_SOCKET_decrement_nb_sockets();
+                }
+                else
+                {
+                    P_SOCKET_decrement_nb_sockets();
+                    k_yield();
+                }
+
+            } while (valAuthorization > (MAX_ZEPHYR_SOCKET + 2));
+
+            P_SOCKET_decrement_nb_sockets();
         }
     }
     return status;
@@ -407,9 +490,6 @@ int32_t SOPC_Socket_WaitSocketEvents(SOPC_SocketSet* readSet,
     nbReady = zsock_select(fdmax + 1, readSet != NULL ? &readSet->set : NULL, writeSet != NULL ? &writeSet->set : NULL,
                            exceptSet != NULL ? &exceptSet->set : NULL, val);
 
-#if P_SOCKET_DEBUG == 1
-    printk("\r\nP_SOCKET: Sopc select result = %d\r\n", nbReady);
-#endif
     return (int32_t) nbReady;
 }
 
@@ -494,6 +574,7 @@ void SOPC_Socket_Close(Socket* sock)
         if (0 == zsock_close(*sock))
         {
             *sock = SOPC_INVALID_SOCKET;
+            P_SOCKET_decrement_nb_sockets();
         }
     }
 }

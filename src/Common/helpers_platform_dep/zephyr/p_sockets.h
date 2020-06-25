@@ -21,9 +21,7 @@
 #define SOPC_P_SOCKETS_HEADER_
 
 #include <stdbool.h>
-#include <stdlib.h>
-
-#include <inttypes.h>
+#include <stdint.h>
 
 #include "net/socket.h"
 
@@ -46,5 +44,10 @@ typedef struct
     int32_t fdmax;    /**< max of the set */
     zsock_fd_set set; /**< set */
 } SOPC_SocketSet;
+
+/* Verify current number of allocated socket. Shall not > MAX_SOCKET */
+
+uint32_t P_SOCKET_increment_nb_sockets(void);
+uint32_t P_SOCKET_decrement_nb_sockets(void);
 
 #endif /* SOPC_P_SOCKETS_H_ */
