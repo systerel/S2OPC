@@ -26,6 +26,15 @@ zephyr_include_directories(
     ../src/ClientServer/configuration
     ../src/Common/configuration
     ../src/Common/opcua_types
+    ../src/PubSub
+    ../src/PubSub/common
+    ../src/PubSub/config_loaders/xml_expat
+    ../src/PubSub/dataset
+    ../src/PubSub/network
+    ../src/PubSub/protocol
+    ../src/PubSub/publisher
+    ../src/PubSub/subscriber
+    ../src/PubSub/real_time_api
 )
 
 # Add S2OPC sources
@@ -233,6 +242,24 @@ zephyr_library_sources(
 ../src/ClientServer/secure_channels/sopc_secure_channels_internal_ctx.c
 ../src/ClientServer/secure_channels/sopc_secure_listener_state_mgr.c
 ../src/ClientServer/secure_channels/sopc_secure_channels_api.c
+../src/PubSub/common/sopc_pubsub_helpers.c
+../src/PubSub/common/sopc_pubsub_conf.c
+../src/PubSub/config_loaders/xml_expat/sopc_xml_loader.c
+../src/PubSub/real_time_api/sopc_rt_subscriber.c
+../src/PubSub/real_time_api/sopc_msgbox.c
+../src/PubSub/real_time_api/sopc_rt_publisher.c
+../src/PubSub/real_time_api/sopc_interrupttimer.c
+../src/PubSub/real_time_api/sopc_doublebuffer.c
+../src/PubSub/network/sopc_network_layer.c
+../src/PubSub/publisher/sopc_pub_source_variable.c
+../src/PubSub/publisher/sopc_pub_scheduler.c
+../src/PubSub/subscriber/sopc_reader_layer.c
+../src/PubSub/subscriber/sopc_sub_scheduler.c
+../src/PubSub/subscriber/sopc_sub_target_variable.c
+../src/PubSub/dataset/sopc_dataset_ll_layer.c
+../src/PubSub/dataset/sopc_dataset_layer.c
+../src/PubSub/protocol/sopc_pubsub_protocol.c
+../src/PubSub/protocol/sopc_sub_udp_sockets_mgr.c
 )
 
 zephyr_library_link_libraries(S2OPC)
