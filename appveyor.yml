@@ -4,6 +4,7 @@ environment:
         - CC_NAME: Visual Studio 15 2017
           CC_SHORTNAME: vs2017
           PYTHON: "C:\\Python36-x64"
+          PYTHONB: "C:\\Python38-x64"
 image:
     - Visual Studio 2017
 
@@ -78,8 +79,19 @@ test_script:
         copy %EXPAT_INSTALL_DIR%\lib\libexpatMD.lib lib\libexpat.lib
         cmake -DWITH_NANO_EXTENDED=on -DWITH_PYS2OPC=%WITH_PYS2OPC% -DS2OPC_CLIENTSERVER_ONLY=%S2OPC_CLIENTSERVER_ONLY% -DMBEDTLS_INCLUDE_DIR=%MBEDTLS_BUILD_DIR%/../include -DMBEDTLS_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedtls.lib -DMBEDX509_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedx509.lib -DMBEDCRYPTO_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedcrypto.lib -DCMAKE_PREFIX_PATH=%LIBS_DIRS% -DPYTHON_EXECUTABLE=%PYTHON%\python.exe .. -G "Visual Studio 15 2017 Win64"
         cmake --build . --config %CONFIG%
-    - cd %ROOT_DIR%\build\tests\ClientServer
-    - "ctest -T test -C %CONFIG% --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536 -V"
+    #- cd %ROOT_DIR%\build\tests\ClientServer
+    #- "ctest -T test -C %CONFIG% --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536 -V"
+
+    # Only build pys2opc for Py38
+    - |-
+        set PATH=%PYTHONB%;%PYTHONB%\\Scripts;%PATH%
+        pip --version
+        pip install --upgrade wheel setuptools
+        cd %ROOT_DIR%\build
+        rm CMakeCache.txt
+        cmake -DWITH_NANO_EXTENDED=on -DWITH_PYS2OPC=%WITH_PYS2OPC% -DS2OPC_CLIENTSERVER_ONLY=%S2OPC_CLIENTSERVER_ONLY% -DMBEDTLS_INCLUDE_DIR=%MBEDTLS_BUILD_DIR%/../include -DMBEDTLS_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedtls.lib -DMBEDX509_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedx509.lib -DMBEDCRYPTO_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedcrypto.lib -DCMAKE_PREFIX_PATH=%LIBS_DIRS% -DPYTHON_EXECUTABLE=%PYTHONB%\python.exe .. -G "Visual Studio 15 2017 Win64"
+        cmake --build . --target pys2opc --config %CONFIG%
+
 
 build: off
 
