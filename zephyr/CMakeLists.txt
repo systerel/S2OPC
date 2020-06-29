@@ -6,8 +6,7 @@ zephyr_interface_library_named(S2OPC)
 
 add_definitions (-DSOPC_PTR_SIZE=4)
 add_definitions (-DS2OPC_CLIENTSERVER_ONLY=1)
-add_definitions (-DWITH_STATIC_SECURITY_DATA=1 -DPUBSUB_STATIC_CONFIG=1 -DUSE_RTOS=1 -DWITH_NANO_EXTENDED=1)
-add_definitions (-DMY_IP_MASK="255.255.255.0" -DMY_IP_ETH0="192.0.2.10" -DMY_IP_GW="192.0.2.1" -DMY_IP6_ETH0="2001:db8::2" -DMY_IP6_MASK="ffff:ffff:")
+add_definitions (-DWITH_STATIC_SECURITY_DATA=1 -DPUBSUB_STATIC_CONFIG=1 -DWITH_NANO_EXTENDED=1)
 
 # Add S2OPC includes directories
 zephyr_include_directories(
@@ -28,7 +27,6 @@ zephyr_include_directories(
     ../src/Common/opcua_types
     ../src/PubSub
     ../src/PubSub/common
-    ../src/PubSub/config_loaders/xml_expat
     ../src/PubSub/dataset
     ../src/PubSub/network
     ../src/PubSub/protocol
@@ -244,7 +242,6 @@ zephyr_library_sources(
 ../src/ClientServer/secure_channels/sopc_secure_channels_api.c
 ../src/PubSub/common/sopc_pubsub_helpers.c
 ../src/PubSub/common/sopc_pubsub_conf.c
-../src/PubSub/config_loaders/xml_expat/sopc_xml_loader.c
 ../src/PubSub/real_time_api/sopc_rt_subscriber.c
 ../src/PubSub/real_time_api/sopc_msgbox.c
 ../src/PubSub/real_time_api/sopc_rt_publisher.c
