@@ -36,6 +36,8 @@
 #include "sopc_toolkit_config.h"
 #include "xml_expat/sopc_uanodeset_loader.h"
 
+#include "sopc_logger.h"
+
 #ifdef WITH_STATIC_SECURITY_DATA
 #include "static_security_data.h"
 #endif
@@ -76,12 +78,13 @@ SOPC_ReturnStatus Server_Initialize(void)
 {
     SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
     logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = LOG_PATH;
-    logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
+    logConfiguration.logLevel = SOPC_LOG_LEVEL_ERROR;
     SOPC_ReturnStatus status = SOPC_Common_Initialize(logConfiguration);
 
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_Toolkit_Initialize(Server_Event_Toolkit);
+        SOPC_Logger_SetConsoleOutput(true);
     }
 
     if (SOPC_STATUS_OK == status)

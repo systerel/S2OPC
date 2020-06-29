@@ -35,7 +35,7 @@
 #define APPLICATION_URI "urn:S2OPC:localhost"
 #define PRODUCT_URI "urn:S2OPC:localhost"
 #define SERVER_DESCRIPTION "S2OPC Server + PubSub"
-#define LOG_PATH "./logs/"
+#define LOG_PATH ""
 #define ADDRESS_SPACE_PATH "./pubsub_server.xml"
 #define SLEEP_TIMEOUT 100
 #define NODEID_PUBSUB_STATUS "ns=1;s=PubSubStatus"
