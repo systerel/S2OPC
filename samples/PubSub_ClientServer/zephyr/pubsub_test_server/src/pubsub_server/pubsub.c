@@ -27,7 +27,6 @@
 #include "sopc_pub_scheduler.h"
 #include "sopc_sub_scheduler.h"
 #include "sopc_udp_sockets.h"
-#include "sopc_xml_loader.h"
 
 #include "config.h"
 #include "pubsub.h"
