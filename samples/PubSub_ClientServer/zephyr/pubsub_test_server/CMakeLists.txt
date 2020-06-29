@@ -5,7 +5,6 @@ include($ENV{ZEPHYR_BASE}/cmake/app/boilerplate.cmake NO_POLICY_SCOPE)
 project(pubsub_test_server)
 
 add_definitions (-DWITH_STATIC_SECURITY_DATA=1 -DPUBSUB_STATIC_CONFIG=1 -DWITH_NANO_EXTENDED=1)
-add_definitions (-DMY_IP_MASK="255.255.255.0" -DMY_IP_ETH0="192.0.2.10" -DMY_IP_GW="192.0.2.2" -DMY_IP6_ETH0="2001:db8::2" -DMY_IP6_MASK="ffff:ffff:")
 add_definitions (-DPUBLISHER_ADDRESS="232.1.2.100:4840" -DSUBSCRIBER_ADDRESS="232.1.2.101:4840")
 add_definitions (-DPUBLISH_PERIOD=1000 -DSUBSCRIBE_PERIOD=1000)
 
