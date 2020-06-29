@@ -1,8 +1,20 @@
 /*
- * network_init.c
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
  *
- *  Created on: 17 f�vr. 2020
- *      Author: nottin
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 #include "network_init.h"
@@ -31,16 +43,20 @@
 #define MY_IP_LB ((const char*) ("127.0.0.1"))
 #endif
 
-#ifndef MY_IP_ETH0
-#define MY_IP_ETH0 ((const char*) ("192.168.1.102"))
+#ifndef MY_IP_LB_MASK
+#define MY_IP_LB_MASK ((const char*) ("255.255.255.0"))
 #endif
 
-#ifndef MY_IP_MASK
-#define MY_IP_MASK ((const char*) ("255.255.255.0"))
+#ifndef CONFIG_NET_CONFIG_MY_IPV4_ADDR
+#define CONFIG_NET_CONFIG_MY_IPV4_ADDR ((const char*) ("192.168.1.102"))
 #endif
 
-#ifndef MY_IP_GW
-#define MY_IP_GW ((const char*) ("192.168.1.111"))
+#ifndef CONFIG_NET_CONFIG_MY_IPV4_NETMASK
+#define CONFIG_NET_CONFIG_MY_IPV4_NETMASK ((const char*) ("255.255.255.0"))
+#endif
+
+#ifndef CONFIG_NET_CONFIG_MY_IPV4_GW
+#define CONFIG_NET_CONFIG_MY_IPV4_GW ((const char*) ("192.168.1.111"))
 #endif
 
 typedef enum E_NETWORK_CONFIG_STATUS
@@ -88,11 +104,11 @@ bool Network_Initialize(void)
             struct in_addr addressInterfaceEthMask;
             struct in_addr addressInterfaceEthGtw;
             net_addr_pton(AF_INET, MY_IP_LB, (void*) &addressLoopBack);
-            net_addr_pton(AF_INET, MY_IP_MASK, (void*) &addressLoopBackNetMask);
+            net_addr_pton(AF_INET, MY_IP_LB_MASK, (void*) &addressLoopBackNetMask);
 
-            net_addr_pton(AF_INET, MY_IP_ETH0, (void*) &addressInterfaceEth);
-            net_addr_pton(AF_INET, MY_IP_MASK, (void*) &addressInterfaceEthMask);
-            net_addr_pton(AF_INET, MY_IP_GW, (void*) &addressInterfaceEthGtw);
+            net_addr_pton(AF_INET, CONFIG_NET_CONFIG_MY_IPV4_ADDR, (void*) &addressInterfaceEth);
+            net_addr_pton(AF_INET, CONFIG_NET_CONFIG_MY_IPV4_NETMASK, (void*) &addressInterfaceEthMask);
+            net_addr_pton(AF_INET, CONFIG_NET_CONFIG_MY_IPV4_GW, (void*) &addressInterfaceEthGtw);
             if (NULL == net_if_ipv4_addr_lookup(&addressLoopBack, &ptrNetIf))
             {
 #if defined(CONFIG_NET_L2_DUMMY)

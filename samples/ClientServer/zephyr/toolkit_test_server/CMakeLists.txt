@@ -6,7 +6,6 @@ project(toolkit_test_server)
 
 add_definitions (-DS2OPC_CLIENTSERVER_ONLY=1)
 add_definitions (-DWITH_STATIC_SECURITY_DATA=1 -DPUBSUB_STATIC_CONFIG=1 -DWITH_NANO_EXTENDED=1)
-add_definitions (-DMY_IP_MASK="255.255.255.0" -DMY_IP_ETH0="192.0.2.10" -DMY_IP_GW="192.0.2.2" -DMY_IP6_ETH0="2001:db8::2" -DMY_IP6_MASK="ffff:ffff:")
 
 # Add TEST include directory
 
