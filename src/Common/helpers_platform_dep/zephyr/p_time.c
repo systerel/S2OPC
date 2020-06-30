@@ -263,9 +263,9 @@ SOPC_TimeReference SOPC_TimeReference_GetCurrent()
 {
     SOPC_TimeReference currentTimeInMs = 0;
 
-    /*uint64_t value = P_TIME_TimeReference_GetCurrent100ns();
+    uint64_t value = P_TIME_TimeReference_GetCurrent100ns();
 
-    currentTimeInMs = (SOPC_TimeReference)(value / MS_TO_100NS);*/
+    currentTimeInMs = (SOPC_TimeReference)(value / MS_TO_100NS);
 
     return currentTimeInMs;
 }
