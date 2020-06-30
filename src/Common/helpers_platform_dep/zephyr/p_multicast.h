@@ -30,7 +30,5 @@ SOPC_ReturnStatus P_MULTICAST_join_or_leave_mcast_group(int32_t sock, struct in_
 bool P_MULTICAST_soft_filter(int32_t sock, struct in_addr* add);
 void P_MULTICAST_remove_sock_from_mcast(int32_t sock);
 void P_MULTICAST_Initialize(void);
-void P_MULTICAST_enet_add_mcast(struct net_if* ptrNetIf, struct in_addr* pAddr);
-void P_MULTICAST_enet_rm_mcast(struct net_if* ptrNetIf, struct in_addr* pAddr);
 
 #endif /* P_MCAST_H_ */

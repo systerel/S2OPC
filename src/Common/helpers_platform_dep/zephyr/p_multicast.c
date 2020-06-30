@@ -73,7 +73,10 @@ typedef struct mCastRegistered
 
 static mCastRegistered tabMCast[MAX_MCAST];
 
-// *** Weak p_sockets functions definitions ***//
+// *** multicast private functions ***
+
+static void P_MULTICAST_enet_add_mcast(struct net_if* ptrNetIf, struct in_addr* pAddr);
+static void P_MULTICAST_enet_rm_mcast(struct net_if* ptrNetIf, struct in_addr* pAddr);
 
 void P_MULTICAST_Initialize(void)
 {
@@ -496,13 +499,96 @@ void P_MULTICAST_remove_sock_from_mcast(int32_t sock)
 
 // *** Multicast private weak functions definitions
 
-void __attribute__((weak)) P_MULTICAST_enet_add_mcast(struct net_if* ptrNetIf, struct in_addr* pAddr)
+static void P_MULTICAST_enet_add_mcast(struct net_if* ptrNetIf, struct in_addr* pAddr)
 {
-    (void) ptrNetIf;
-    (void) pAddr;
+    const struct ethernet_api* api = net_if_get_device(ptrNetIf)->driver_api;
+
+    if (net_ipv4_is_addr_mcast(pAddr))
+    {
+        const struct ethernet_config ethernetconfig = {
+            .filter =
+                {
+                    .set = 1,                                        //
+                    .type = ETHERNET_FILTER_TYPE_SRC_MAC_ADDRESS,    //
+                    .mac_address = {{0x01U,                          //
+                                     0x00U,                          //
+                                     0x5EU,                          //
+                                     (pAddr->s_addr >> 8) & 0x7FU,   //
+                                     (pAddr->s_addr >> 16) & 0xFFU,  //
+                                     (pAddr->s_addr >> 24) & 0xFFU}} //
+                },                                                   //
+        };
+
+        if (api->set_config != 0)
+        {
+            int res = api->set_config(net_if_get_device(ptrNetIf), //
+                                      ETHERNET_CONFIG_TYPE_FILTER, //
+                                      &ethernetconfig);            //
+            (void) res;
+#if P_MULTICAST_DEBUG == 1
+            if (res != 0)
+            {
+                printk("\r\nP_MULTICAST: Error on set config driver api with SET ETHERNET_CONFIG_TYPE_FILTER\r\n"); //
+            }
+            else
+            {
+                printk("\r\nP_MULTICAST: Set config driver api with SET ETHERNET_CONFIG_TYPE_FILTER :-)\r\n"); //
+            }
+#endif
+        }
+        else
+        {
+#if P_MULTICAST_DEBUG == 1
+            printk("\r\nP_MULTICAST: Error set config driver api not defined\r\n"); //
+#endif
+        }
+    }
 }
-void __attribute__((weak)) P_MULTICAST_enet_rm_mcast(struct net_if* ptrNetIf, struct in_addr* pAddr)
+
+static void P_MULTICAST_enet_rm_mcast(struct net_if* ptrNetIf, struct in_addr* pAddr)
 {
-    (void) ptrNetIf;
-    (void) pAddr;
+    const struct ethernet_api* api = net_if_get_device(ptrNetIf)->driver_api;
+
+    if (net_ipv4_is_addr_mcast(pAddr))
+    {
+        const struct ethernet_config ethernetconfig = {
+            .filter =
+                {
+                    .set = 0,                                        //
+                    .type = ETHERNET_FILTER_TYPE_SRC_MAC_ADDRESS,    //
+                    .mac_address = {{0x01U,                          //
+                                     0x00U,                          //
+                                     0x5EU,                          //
+                                     (pAddr->s_addr >> 8) & 0x7FU,   //
+                                     (pAddr->s_addr >> 16) & 0xFFU,  //
+                                     (pAddr->s_addr >> 24) & 0xFFU}} //
+                },                                                   //
+
+        };
+
+        if (api->set_config != 0)
+        {
+            int res = api->set_config(net_if_get_device(ptrNetIf), //
+                                      ETHERNET_CONFIG_TYPE_FILTER, //
+                                      &ethernetconfig);            //
+
+            (void) res;
+#if P_MULTICAST_DEBUG == 1
+            if (res != 0)
+            {
+                printk("\r\nP_MULTICAST: Error on set config driver api with RESET ETHERNET_CONFIG_TYPE_FILTER\r\n"); //
+            }
+            else
+            {
+                printk("\r\nP_MULTICAST: Set config driver api with RESET ETHERNET_CONFIG_TYPE_FILTER :-)\r\n"); //
+            }
+#endif
+        }
+        else
+        {
+#if P_MULTICAST_DEBUG == 1
+            printk("\r\nP_MULTICAST: Error set config driver api not defined\r\n"); //
+#endif
+        }
+    }
 }
