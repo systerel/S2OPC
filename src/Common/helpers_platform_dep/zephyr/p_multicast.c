@@ -140,11 +140,17 @@ SOPC_ReturnStatus P_MULTICAST_join_or_leave_mcast_group(int32_t sock, struct in_
 
     if (SOPC_INVALID_SOCKET == sock || NULL == pAddr)
     {
+#if P_MULTICAST_DEBUG == 1
+        printk("\r\nP_MULTICAST: Enter join_mcast_group invalid socket\r\n");
+#endif
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     if (!net_ipv4_is_addr_mcast(pAddr))
     {
+#if P_MULTICAST_DEBUG == 1
+        printk("\r\nP_MULTICAST: Enter join_mcast_group not mcast addr\r\n");
+#endif
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
@@ -377,6 +383,10 @@ SOPC_ReturnStatus P_MULTICAST_join_or_leave_mcast_group(int32_t sock, struct in_
         }
     } while ((MULTCAST_STATUS_INITIALIZED != expectedStatus) && (status != SOPC_STATUS_INVALID_STATE));
 
+#if P_MULTICAST_DEBUG == 1
+    printk("\r\nP_MULTICAST: Exit join_mcast_group\r\n");
+#endif
+
     return status;
 }
 
@@ -483,13 +493,18 @@ void P_MULTICAST_remove_sock_from_mcast(int32_t sock)
     {
         return;
     }
-
+    struct in_addr addr;
+    addr.s_addr = 0;
     // Remove socket from mcast and remove mcast if necessary
     for (uint32_t i = 0; i < MAX_MCAST; i++)
     {
         for (uint32_t j = 0; j < MAX_ZEPHYR_SOCKET; j++)
         {
-            (void) P_MULTICAST_join_or_leave_mcast_group(sock, &tabMCast[i].addr, false);
+            __atomic_load(&tabMCast[i].addr.s_addr, &addr.s_addr, __ATOMIC_SEQ_CST);
+            if (addr.s_addr != 0)
+            {
+                (void) P_MULTICAST_join_or_leave_mcast_group(sock, &addr, false);
+            }
         }
     }
 #if P_MULTICAST_DEBUG == 1
