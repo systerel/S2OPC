@@ -42,63 +42,122 @@ def parse_xmlns(source):
             prefix, uri = elem
             if prefix not in ns_map:
                 ns_map[prefix] = uri
-    #if '' in ns_map:
-    #    ns_map['default'] = ns_map['']
     return ns_map
 
 # We should test another parser, such as lxml parser...
 #NAMESPACEs = {
 #    'xsd': 'http://www.w3.org/2001/XMLSchema',
 #    'xsi': 'http://www.w3.org/2001/XMLSchema-instance',
-#    'default': 'http://opcfoundation.org/UA/2011/03/UANodeSet.xsd',
+#    'uanodeset': 'http://opcfoundation.org/UA/2011/03/UANodeSet.xsd',
 #    'uax': 'http://opcfoundation.org/UA/2008/02/Types.xsd',
 #    }
 
 
-def remove_max_monit(tree):
-    #<!-- delete references to MaxMonitoredItemsPerCall -->
-    #<xsl:template match="Reference">
-    #  <xsl:if test="not(current() = 'i=11714')">
-    #    <xsl:copy>
-    #        <xsl:apply-templates select="@*|node()"/>
-    #    </xsl:copy>
-    #  </xsl:if>
-    #</xsl:template>
+def _remove_nids(tree, nids):
+    # Remove nodes that matches all NodeIds in nids
+    root = tree.getroot()
+    for nid in nids:
+        node = root.find('*[@NodeId="{}"]'.format(nid))
+        if node is not None:
+            print('RemoveNode: {}'.format(nid), file=sys.stderr)
+            root.remove(node)
 
-    #<!-- delete MaxMonitoredItemsPerCall -->
-    #<xsl:template match="UAVariable">
-    #  <xsl:if test="not(@NodeId = 'i=11714')">
-    #    <xsl:copy>
-    #        <xsl:apply-templates select="@*|node()"/>
-    #    </xsl:copy>
-    #  </xsl:if>
-    #</xsl:template>
-    pass
+def _remove_refs_to_nids(tree, nids, namespaces):
+    # Remove Reference elements from all nodes that go to the NodeIds in nids
+    root = tree.getroot()
+    for node in tree.iterfind('./*[uanodeset:References]', namespaces):
+        nida = node.get('NodeId')  # The starting node of the references below
+        refs, = node.iterfind('uanodeset:References', namespaces)
+        for ref in list(refs):  # Make a list so that we can remove elements while iterating
+            if ref.text in nids:  # The destination node of this reference
+                print('RemoveRef: {} -> {}'.format(nida, ref.text), file=sys.stderr)
+                refs.remove(ref)
 
-def remove_methods(tree):
-    #<!-- delete all method with a methodDeclarationId (others are in type definition) -->
-    #<xsl:template match="UAMethod[not(count(@MethodDeclarationId)=0)]"/>
+def _add_ref(node, ref_type, tgt, is_forward=True):
+    # Add a reference from a node to the other NodeId nid in the given direction
+    refs_nodes = node.findall('uanodeset:References', namespaces)
+    if len(refs_nodes) < 1:
+        refs = ET.Element('uanodeset:References', namespaces)
+        # Manual identation with ET... This might not adjust well, we should also indent the latest brother
+        refs.text = '\n'
+        refs.tail = '\n'
+        node.append(refs)
+    else:
+        refs, = refs_nodes
+    attribs = {'ReferenceType': ref_type}
+    if not is_forward:
+        attribs['IsForward'] = 'false'
+    elem = ET.Element('Reference', attribs)
+    elem.text = tgt
+    elem.tail = '\n'
+    refs.append(elem)
 
-    #<!-- delete all references to the method deleted + reference to MaxNodesPerMethodCall -->
-    #<xsl:template match="Reference">
-    #  <xsl:if test="not(current() = //UAMethod[not(count(@MethodDeclarationId)=0)]/@NodeId) and not(current() = 'i=11709')">
-    #    <xsl:copy>
-    #        <xsl:apply-templates select="@*|node()"/>
-    #    </xsl:copy>
-    #  </xsl:if>
-    #</xsl:template>
 
-    #<!-- delete children variables of method nodes deleted + MaxNodesPerMethodCall -->
-    #<xsl:template match="UAVariable">
-    #  <xsl:if test="not(@ParentNodeId = //UAMethod[not(count(@MethodDeclarationId)=0)]/@NodeId) and not(@NodeId = 'i=11709')">
-    #    <xsl:copy>
-    #        <xsl:apply-templates select="@*|node()"/>
-    #    </xsl:copy>
-    #  </xsl:if>
-    #</xsl:template>
-    pass
+def merge(tree, new, namespaces):
+    # Merge new tree into tree
+    # The merge is restricted to tags for which we know the semantics
+    # There are also some (maybe redundant) informations that are ignored by the S2OPC parser.
 
-def sanitize(tree):
+    # Merge Aliases
+    tree_aliases = tree.find('uanodeset:Aliases', namespaces)
+    new_aliases = new.find('uanodeset:Aliases', namespaces)
+    tree_alias_dict = {alias.get('Alias'):alias.text for alias in tree_aliases}  # Assumes that the model does not have the same alias defined multiple times
+    new_alias_dict = {alias.get('Alias'):alias.text for alias in new_aliases}
+    # Assert existing aliases are the same
+    res = True
+    for alias in set(tree_alias_dict)&set(new_alias_dict):
+        if tree_alias_dict[alias] != new_alias_dict[alias]:
+            print('Merge: Alias used for different NodeId ({} is {} or {})'
+                  .format(alias, tree_alias_dict[alias], new_alias_dict[alias]), file=sys.stderr)
+            res = False
+    if not res:
+        return res
+
+    # Add new aliases
+    for alias in set(new_alias_dict)-set(tree_alias_dict):
+        elem = ET.Element('Alias', {'Alias': alias})
+        elem.text = new_alias_dict[alias]
+        elem.tail = '\n'
+        tree_aliases.append(elem)
+
+    # Merge Nodes
+    tree_nodes = {node.get('NodeId'):node for node in tree.iterfind('*[@NodeId]')}
+    new_nodes = {node.get('NodeId'):node for node in new.iterfind('*[@NodeId]')}
+    # New nodes are copied
+    tree_root = tree.getroot()
+    for nid in set(new_nodes)-set(tree_nodes):
+        print('Merge: add node {}'.format(nid), file=sys.stderr)
+        tree_root.append(new_nodes[nid])
+    # References of common nodes are merged
+    for nid in set(tree_nodes)&set(new_nodes):
+        nodeb = new_nodes[nid]
+        refsb = nodeb.find('./uanodeset:References', namespaces)
+        if refsb is None:
+            continue
+        nodea = tree_nodes[nid]
+        for ref in refsb:
+            _add_ref(nodea, ref.get('ReferenceType'), ref.text, is_forward=(ref.get('IsForward') != 'false'))
+
+    return True
+
+def remove_max_monit(tree, namespaces):
+    # Delete MaxMonitoredItemsPerCall
+    _remove_nids(tree, ['i=11714'])
+
+    # We have to remove references to MaxMonitoredItemsPerCall manually,
+    #  as there may exist references to unknown nodes in an address space.
+    _remove_refs_to_nids(tree, ['i=11714'], namespaces)
+
+def remove_methods(tree, namespaces):
+    # Delete methods that are instances of other methods.
+    # For now, this difference between instantiated methods or not is solely based on the MethodDeclarationId.
+    # See Part 3 §6 for more information.
+    # (also delete MaxNodesPerMethodCall and its references)
+    methods = [node.get('NodeId') for node in tree.findall('*[@MethodDeclarationId]')]
+    _remove_nids(tree, methods+['i=11709'])
+    _remove_refs_to_nids(tree, methods+['i=11709'], namespaces)
+
+def sanitize(tree, namespaces):
     """
     Returns True if the sanitation is a success.
     Otherwise there is an unrecoverable error which requires more user input (two nodes with the same nodeid, ...).
@@ -129,9 +188,9 @@ def sanitize(tree):
     # In the Address Space, b <- a References are stored in b, hence the difficulty
     refs_fwd = {node: set() for node in nodes}  # {a: {(type, b), ...}}
     refs_inv = {node: set() for node in nodes}  # {a: {(type, b), ...}}, already existing inverse references b <- a are stored in refs_inv[a]
-    for node in tree.iterfind('./*[References]'):
+    for node in tree.iterfind('./*[uanodeset:References]', namespaces):
         nida = node.get('NodeId')  # The starting node of the references below
-        refs, = node.iterfind('References')
+        refs, = node.iterfind('uanodeset:References', namespaces)
         for ref in list(refs):  # Make a list so that we can remove elements while iterating
             type_ref = ref.get('ReferenceType')
             nidb = ref.text  # The destination node of this reference
@@ -143,8 +202,10 @@ def sanitize(tree):
                     refs.remove(ref)
                 fwds.add((type_ref, nidb))
             else:  # b <- a is stored in refs_inv[a]
-                if nidb == 'None' or nidb is None:
-                    print(nida)
+                if nidb not in nodes:
+                    print('Sanitize: inverse Reference from unknown node, cannot add forward reciprocal ({} -> {}, type {})'
+                          .format(nida, nidb, type_ref), file=sys.stderr)
+                    continue
                 invs = refs_inv[nidb]
                 if (type_ref, nida) in invs:
                     print('Sanitize: duplicate inverse Reference {} <- {} (type {})'.format(nidb, nida, type_ref), file=sys.stderr)
@@ -160,39 +221,21 @@ def sanitize(tree):
         else:
             print('Sanitize: add inverse reciprocal Reference {} <- {} (type {})'.format(b, a, t), file=sys.stderr)
             node = nodes[b]
-            # TODO: This is the "add_reference" function, do not copy paste it, factorize it
-            refs_nodes = node.findall('References')
-            if len(refs_nodes) < 1:
-                refs = ET.Element('References')
-                node.append(refs)
-            else:
-                refs, = refs_nodes
-            elem = ET.Element('Reference', {'ReferenceType': t, 'IsForward': 'false'})
-            elem.text = a
-            refs.append(elem)
+            _add_ref(node, t, a, is_forward=False)
     # Add forward refs (there should be less)
     for a, t, b in trs_inv - trs_fwd:
         if a not in nodes:
-            print('Sanitize: inverse Reference to unknown node, cannot add forward reciprocal ({} -> {}, type {})'.format(a, b, t), file=sys.stderr)
+            print('Sanitize: inverse Reference from unknown node, cannot add forward reciprocal ({} -> {}, type {})'.format(a, b, t), file=sys.stderr)
         else:
             print('Sanitize: add forward reciprocal Reference {} -> {} (type {})'.format(a, b, t), file=sys.stderr)
             node = nodes[a]
-            # TODO: This is the "add_reference" function, do not copy paste it, factorize it
-            refs_nodes = node.findall('References')
-            if len(refs_nodes) < 1:
-                refs = ET.Element('References')
-                node.append(refs)
-            else:
-                refs, = refs_nodes
-            elem = ET.Element('Reference', {'ReferenceType': t})
-            elem.text = b
-            refs.append(elem)
+            _add_ref(node, t, b, is_forward=True)
 
     # Note: ParentNodeId are optional. We add the inverse reference if it is mentioned.
     #  A ParentNodeId is an inverse reference typed "HasComponent"
     for node in tree.iterfind('./*[@ParentNodeId]'):
         # There may be no reference at all
-        refs_nodes = node.findall('References')
+        refs_nodes = node.findall('uanodeset:References', namespaces)
         if len(refs_nodes) < 1:
             print('Sanitize: child Node without references (Node {} has an attribute ParentNodeId but no reference)'
                   .format(node.get('NodeId')), file=sys.stderr)
@@ -212,6 +255,8 @@ def sanitize(tree):
 
     # Note: we don't check that the Address Space Model specified in Part 3 is valid.
 
+    # TODO: Remove empty <References />
+
     return True
 
 
@@ -221,9 +266,11 @@ if __name__ == '__main__':
     #                    help='Path the address spaces to merge. In case of conflicting elements, '+
     #                         'the element from the first address space in the argument order is kept.')
     parser.add_argument('fns_adds', nargs='+', metavar='XML',
-                        help='Path (or - for stind) the address spaces to merge. '+
-                             'In case of conflicting elements, '+
-                             'the element from the first address space in the argument order is kept.')
+                        help='''
+            Path (or - for stind) the address spaces to merge. In case of conflicting elements,
+            the element from the first address space in the argument order is kept.
+            The models must be for the same OPC UA version (e.g. 1.03).
+                             ''')
     parser.add_argument('--output', '-o', metavar='XML', dest='fn_out', #required=True,
                         help='Path to the output file')# (default to stdout)')
     #parser.add_argument('--no-gen-reciprocal', action='store_false', dest='reciprocal',
@@ -245,7 +292,6 @@ if __name__ == '__main__':
     tree = None
     namespaces = {}
     for fname in args.fns_adds:
-        # TODO: Merge
         source = fname if fname != '-' else sys.stdin
         new_ns = parse_xmlns(source)
         for k,v in new_ns.items():
@@ -253,17 +299,27 @@ if __name__ == '__main__':
                 # Keep first version of the namespaces
                 ET.register_namespace(k, v)
                 namespaces[k] = v
-        tree = ET.parse(source)
+        new_tree = ET.parse(source)
+        if tree is None:
+            tree = new_tree
+            # ElementTree does not support XPath search with the default namespace.
+            # We have to name it to be able to use it.
+            if '' in namespaces:
+                namespaces['uanodeset'] = namespaces['']
+        else:
+            merge(tree, new_tree, namespaces)
 
     # Apply options afterwards
     if args.remove_max_monit:
-        remove_max_monit(tree)
+        remove_max_monit(tree, namespaces)
 
     if args.remove_methods:
-        remove_methods(tree)
+        remove_methods(tree, namespaces)
 
     if args.sanitize:
-        res = sanitize(tree)
+        res = sanitize(tree, namespaces)
+    else:
+        res = True
 
     if res:
         tree.write(args.fn_out or sys.stdout)
