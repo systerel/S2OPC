@@ -7,3 +7,18 @@ menuconfig S2OPC
 	bool "S2OPC Support"
 	help
 	  This option enables the S2OPC library.
+
+config PUBLISHER_ADDRESS
+	string "Publisher address"
+	default "232.1.2.100:4840"
+	depends on S2OPC
+	help
+	  This value is used by PubSub sample
+
+config SUBSCRIBER_ADDRESS
+	string "Subscriber address"
+	default "232.1.2.101:4840"
+	depends on S2OPC
+	help
+	  This value is used by PubSub sample
+
