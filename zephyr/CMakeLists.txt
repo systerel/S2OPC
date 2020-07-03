@@ -17,7 +17,7 @@ add_definitions (-DSOPC_DEFAULT_MAX_ARRAY_LENGTH=128)
 #add_definitions (-DSOPC_DEFAULT_MAX_DIAG_INFO_NESTED_LEVEL=100)
 #add_definitions (-DSOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL=50)
 add_definitions (-DSOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE=128)
-
+add_definitions (-DUSE_MQTT_PAHO=0)
 
 
 # Add S2OPC includes directories
