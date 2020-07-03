@@ -20,21 +20,17 @@
 #ifndef SOPC_PUB_SCHEDULER_H_
 #define SOPC_PUB_SCHEDULER_H_
 
-#include "sopc_event_handler.h"
 #include "sopc_pub_source_variable.h"
 #include "sopc_pubsub_conf.h"
+
+#define SOPC_PUBSCHEDULER_BEATHEART_FROM_IRQ (0)
 
 bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config, SOPC_PubSourceVariableConfig* sourceConfig);
 
 void SOPC_PubScheduler_Stop(void);
 
-// To be called to close Event Timer Service
-void SOPC_PubScheduler_Finalize(void);
-
-// To be called from application to notify response
-SOPC_ReturnStatus SOPC_PubScheduler_EnqueueComEvent(SOPC_PubScheduler_Event event,
-                                                    uint32_t id,
-                                                    uintptr_t params,
-                                                    uintptr_t auxParam);
+#if SOPC_PUBSCHEDULER_BEATHEART_FROM_IRQ == 1
+SOPC_ReturnStatus SOPC_PubScheduler_BeatHeartFromIRQ(uint32_t tickValue);
+#endif
 
 #endif /* SOPC_PUB_SCHEDULER_H_ */

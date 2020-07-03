@@ -45,14 +45,6 @@
 #include "helpers.h"
 #include "server.h"
 
-typedef struct SynchRequestContext
-{
-    Mutex mutex;
-    Condition condition;
-    OpcUa_ReadResponse* borrowedResponse;
-} SynchRequestContext;
-
-
 /* These variables could be stored in a struct Server_Context, which is then passed to all functions.
  * This would mimic class instances and avoid global variables.
  */
@@ -623,39 +615,43 @@ static void Server_Event_Toolkit(SOPC_App_Com_Event event, uint32_t idOrStatus, 
             }
         }*/
         /* Listen for ReadResponses, used in GetSourceVariables */
-        SynchRequestContext* ctx = (SynchRequestContext*) appContext;
+        SOPC_PubSheduler_GetVariableRequestContext* ctx = (SOPC_PubSheduler_GetVariableRequestContext*) appContext;
         if (message_type == &OpcUa_ReadResponse_EncodeableType && NULL != ctx)
         {
-            /* Take the strong hypothesis that the appContext is a (SynchRequestContext*) */
-            SOPC_ReturnStatus status = Mutex_Lock(&ctx->mutex);
-            assert(SOPC_STATUS_OK == status);
+            Mutex_Lock(&ctx->mut);
 
-            /* OpcUa_ReadResponse *response = param; */
-            ctx->borrowedResponse = param;
-            /* Signal that the response is available */
-            status = Condition_SignalAll(&ctx->condition);
-            assert(SOPC_STATUS_OK == status);
+            SOPC_ReturnStatus statusCopy = SOPC_STATUS_OK;
+            OpcUa_ReadResponse* response = (OpcUa_ReadResponse*) param;
 
-            /* Waits for the response to be used before releasing this lock */
-            /* This may prevent future messages to be processed by this thread,
-             * but this avoids the deep copy of the ReadResponse */
-            while (NULL != ctx->borrowedResponse)
+            if (NULL != response) // Response if deleted by scheduler !!!
             {
-                status = Mutex_UnlockAndWaitCond(&ctx->condition, &ctx->mutex);
-                assert(SOPC_STATUS_OK == status);
+                // Allocate data values
+                ctx->ldv = SOPC_Calloc((size_t) ctx->NoOfNodesToRead, sizeof(SOPC_DataValue));
 
+                // Copy to response
+                if (NULL != ctx->ldv)
+                {
+                    for (size_t i = 0; i < (size_t) ctx->NoOfNodesToRead && SOPC_STATUS_OK == statusCopy; ++i)
+                    {
+                        statusCopy = SOPC_DataValue_Copy(&ctx->ldv[i], &response->Results[i]);
+                    }
+
+                    // Error, free allocated data values
+                    if (SOPC_STATUS_OK != statusCopy)
+                    {
+                        for (size_t i = 0; i < (size_t) ctx->NoOfNodesToRead; ++i)
+                        {
+                            SOPC_DataValue_Clear(&ctx->ldv[i]);
+                        }
+                        SOPC_Free(ctx->ldv);
+                        ctx->ldv = NULL;
+                    }
+                }
             }
 
-            /* This thread is the last to unlock the thread, so it should free the struct */
-            status = Mutex_Unlock(&ctx->mutex);
-            assert(SOPC_STATUS_OK == status);
-            status = Condition_Clear(&ctx->condition);
-            assert(SOPC_STATUS_OK == status);
-            status = Mutex_Clear(&ctx->mutex);
-            assert(SOPC_STATUS_OK == status);
-            SOPC_Free(ctx);
-            ctx = NULL;
+            Condition_SignalAll(&ctx->cond);
 
+            Mutex_Unlock(&ctx->mut);
         }
         else if (message_type == &OpcUa_WriteResponse_EncodeableType)
         {
@@ -899,24 +895,31 @@ SOPC_DataValue* Server_GetSourceVariables(OpcUa_ReadValueId* lrv, int32_t nbValu
     {
         return NULL;
     }
+
     if (NULL == lrv || 0 >= nbValues)
     {
         return NULL;
     }
 
-    SOPC_DataValue* ldv = SOPC_Calloc((size_t) nbValues, sizeof(SOPC_DataValue));
     OpcUa_ReadRequest* request = NULL;
     SOPC_ReturnStatus status = SOPC_Encodeable_Create(&OpcUa_ReadRequest_EncodeableType, (void**) &request);
     assert(SOPC_STATUS_OK == status);
 
-    SynchRequestContext* requestContext = SOPC_Calloc(1, sizeof(SynchRequestContext));
-    if (NULL == ldv || NULL == request || NULL == requestContext)
+    SOPC_PubSheduler_GetVariableRequestContext* requestContext =
+        SOPC_Calloc(1, sizeof(SOPC_PubSheduler_GetVariableRequestContext));
+
+    if (NULL == request || NULL == requestContext)
     {
-        SOPC_Free(ldv);
         (void) SOPC_Encodeable_Delete(&OpcUa_ReadRequest_EncodeableType, (void**) &request);
         SOPC_Free(requestContext);
+
         return NULL;
     }
+
+    requestContext->ldv = NULL;                 // Datavalue request result
+    requestContext->NoOfNodesToRead = nbValues; // Use to alloc SOPC_DataValue by GetResponse
+    Condition_Init(&requestContext->cond);
+    Mutex_Initialization(&requestContext->mut);
 
     /* Encapsulate the ReadValues in a ReadRequest, awaits the Response */
     request->MaxAge = 0.;
@@ -924,54 +927,28 @@ SOPC_DataValue* Server_GetSourceVariables(OpcUa_ReadValueId* lrv, int32_t nbValu
     request->NoOfNodesToRead = nbValues;
     request->NodesToRead = lrv;
 
-    /* Prepare the synchronous context */
-    /* TODO: assert that the SOPC_STATUS_OK != statusMutex always avoid deadlocks in production code */
-    SOPC_ReturnStatus statusMutex = Mutex_Initialization(&requestContext->mutex);
-    assert(SOPC_STATUS_OK == statusMutex);
-    statusMutex = Condition_Init(&requestContext->condition);
-    assert(SOPC_STATUS_OK == statusMutex);
-    statusMutex = Mutex_Lock(&requestContext->mutex);
-    assert(SOPC_STATUS_OK == statusMutex);
+    Mutex_Lock(&requestContext->mut);
 
     SOPC_ToolkitServer_AsyncLocalServiceRequest(epConfigIdx, request, (uintptr_t) requestContext);
 
-    /* Wait for the response */
-    while (NULL == requestContext->borrowedResponse)
+    Mutex_UnlockAndWaitCond(&requestContext->cond, &requestContext->mut);
+
+    Mutex_Unlock(&requestContext->mut);
+
+    if (NULL == requestContext->ldv)
     {
-        statusMutex =
-            Mutex_UnlockAndTimedWaitCond(&requestContext->condition, &requestContext->mutex, SYNCHRONOUS_READ_TIMEOUT);
-        assert(SOPC_STATUS_TIMEOUT != statusMutex);
-        assert(SOPC_STATUS_OK == statusMutex);
+        Mutex_Clear(&requestContext->mut);
+        Condition_Clear(&requestContext->cond);
+        SOPC_Free(requestContext);
+        return NULL;
     }
+    SOPC_DataValue* ldv = NULL;
 
-    OpcUa_ReadResponse* response = requestContext->borrowedResponse;
+    ldv = requestContext->ldv;
 
-    /* The response list is a simple copy of the DataValues of the ReadResponse */
-    SOPC_ReturnStatus statusCopy = SOPC_STATUS_OK;
-    for (size_t i = 0; i < (size_t) nbValues && SOPC_STATUS_OK == statusCopy; ++i)
-    {
-        statusCopy = SOPC_DataValue_Copy(&ldv[i], &response->Results[i]);
-    }
-
-    if (SOPC_STATUS_OK != statusCopy)
-    {
-        for (size_t i = 0; i < (size_t) nbValues; ++i)
-        {
-            SOPC_DataValue_Clear(&ldv[i]);
-        }
-        SOPC_Free(ldv);
-        ldv = NULL;
-    }
-
-    /* Signal that we finished using the borrowed response */
-    requestContext->borrowedResponse = NULL;
-    statusMutex = Condition_SignalAll(&requestContext->condition);
-    assert(SOPC_STATUS_OK == statusMutex);
-
-
-    /* The other thread is the last one to unlock the mutex, so it should free the context */
-    statusMutex = Mutex_Unlock(&requestContext->mutex);
-    assert(SOPC_STATUS_OK == statusMutex);
+    Mutex_Clear(&requestContext->mut);
+    Condition_Clear(&requestContext->cond);
+    SOPC_Free(requestContext);
 
     return ldv;
 }

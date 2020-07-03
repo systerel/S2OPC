@@ -54,8 +54,8 @@ void SOPC_PubSourceVariableConfig_Delete(SOPC_PubSourceVariableConfig* sourceCon
     SOPC_Free(sourceConfig);
 }
 
-SOPC_DataValue* SOPC_PubSourceVariable_GetVariablesSync(const SOPC_PubSourceVariableConfig* sourceConfig,
-                                                    const SOPC_PublishedDataSet* pubDataset)
+SOPC_DataValue* SOPC_PubSourceVariable_GetVariablesSync(const SOPC_PubSourceVariableConfig* sourceConfig, //
+                                                        const SOPC_PublishedDataSet* pubDataset)          //
 {
     if (NULL == sourceConfig || NULL == pubDataset)
     {

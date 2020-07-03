@@ -50,6 +50,9 @@ int main(int argc, char* const argv[])
     /* Signal handling: close the server gracefully when interrupted */
     signal(SIGINT, signal_stop_server);
     signal(SIGTERM, signal_stop_server);
+#if SOPC_PUBSCHEDULER_BEATHEART_FROM_IRQ == 1
+    uint32_t tickValue = 0;
+#endif
 
     /* Parse command line arguments ? */
     if (argc > 1)
@@ -111,7 +114,15 @@ int main(int argc, char* const argv[])
     /* Wait for a signal */
     while (SOPC_STATUS_OK == status && Server_IsRunning() && stopSignal == 0)
     {
-        SOPC_Sleep(SLEEP_TIMEOUT);
+        //  Beat heart. Simple pause during SOPC_TIMER_RESOLUTION_MS if
+        //  SOPC_PUBSCHEDULER_BEATHEART_FROM_IRQ #define is set to 0
+        //  in the sopc_pub_scheduler header file.
+        //  Else, SOPC_PubScheduler_BeatHeartFromIRQ is defined and called
+        //  with a monotonic uint32_t counter, followed by a pause of
+        //  SOPC_TIMER_RESOLTION_MS
+
+        Pub_BeatHeart();
+
         if (Server_PubSubStop_Requested())
         {
             PubSub_Stop();

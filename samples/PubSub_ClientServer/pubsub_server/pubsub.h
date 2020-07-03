@@ -34,5 +34,6 @@ bool PubSub_Start(void);
 bool PubSub_IsRunning(void);
 void PubSub_Stop(void);
 void PubSub_StopAndClear(void);
+void Pub_BeatHeart(void);
 
 #endif /* PUBSUB_H */

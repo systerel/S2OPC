@@ -41,7 +41,8 @@ typedef struct SOPC_UADP_Network_Message
  * \return A buffer containing the UADP bytes or NULL if the operation does not successed
  *
  */
-SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm, SOPC_PubSub_SecurityType* securityCtx);
+SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm,     //
+                                             SOPC_PubSub_SecurityType* securityCtx); //
 
 /**
  * \brief Decode a UADP packet into a NetworkMessage

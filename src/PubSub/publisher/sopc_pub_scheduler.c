@@ -81,28 +81,20 @@ struct SOPC_PubScheduler_TransportCtx
 
 typedef struct SOPC_PubScheduler_MessageCtx
 {
-    // do not delete
     SOPC_WriterGroup* group;
     SOPC_Dataset_NetworkMessage* message;
     SOPC_PubScheduler_TransportCtx* transport;
-
-
+    SOPC_PubSub_SecurityType* security;
     SOPC_Buffer* postEncodeBuffer[2];
     uint32_t postEncodeBufferCurrent;
-
     uint32_t rt_publisher_msg_id;
-
-    SOPC_PubSub_SecurityType* security;
-    // status of current request (only one at same time)
-    SOPC_PubSheduler_GetVariableRequestStatus status;
-
 } SOPC_PubScheduler_MessageCtx;
 
 typedef struct SOPC_PubScheduler_MessageCtx_Array
 {
-    uint64_t length;
-    uint64_t current;
-    SOPC_PubScheduler_MessageCtx* array;
+    uint64_t length;                     // Size of this array is SOPC_PubScheduler_Nb_Message
+    uint64_t current;                    // Nb of messages already initialized. Monotonic.
+    SOPC_PubScheduler_MessageCtx* array; // MessageCtx: array of context for each message
 } SOPC_PubScheduler_MessageCtx_Array;
 
 // Total of message
@@ -132,8 +124,6 @@ static bool SOPC_PubScheduler_Connection_Get_Transport(uint32_t index,
                                                        SOPC_PubScheduler_TransportCtx** ctx);
 static struct
 {
-    SOPC_Looper* looper;
-    SOPC_EventHandler* handler;
     /* Managing start / stop phase */
     int32_t isStarted;
     int32_t processingStartStop;
@@ -153,7 +143,8 @@ static struct
     // One per connection
     SOPC_PubScheduler_TransportCtx* transport;
 
-    // A strictly monotonically increasing sequence number
+    //  SOPC_LocalSKS_Keys *keys;
+    // A strictly monotonically increasing sequence number for a SecurityTokenId and PublisherId combination.
     uint32_t sequenceNumber;
 
     // Thread variable monitoring
@@ -170,7 +161,6 @@ static struct
     bool bQuitBeatHeart;          // Quit control of thread which simulates IRQ
 #endif
 
-
 } pubSchedulerCtx = {.isStarted = false,
                      .processingStartStop = false,
                      .config = NULL,
@@ -180,6 +170,8 @@ static struct
                      .messages.length = 0,
                      .messages.current = 0,
                      .messages.array = NULL,
+                     .sequenceNumber = 1,
+
                      .pRTPublisher = NULL,
 #if SOPC_PUBSCHEDULER_BEATHEART_FROM_IRQ == 0
                      .bQuitBeatHeart = true,
@@ -187,6 +179,7 @@ static struct
 #endif
                      .bQuitVarMonitoring = true,
                      .handleThreadVarMonitoring = (Thread) NULL};
+
 // This callback of thread var monitoring is porting from code of old event_timer callback
 static void* SOPC_RT_Publisher_VarMonitoringCallback(void* arg);
 
@@ -212,24 +205,6 @@ static void SOPC_RT_Publisher_SendPubMsgCallback(uint32_t msgId,     // Message 
                                                  void* pData,        // Data published by set data API
                                                  uint32_t size);     // Data size in bytes
 
-
-
-static uint64_t SOPC_PubScheduler_Nb_Message(SOPC_PubSubConfiguration* config);
-
-/*
- * MessageCtx: array of context for each message
- * Size of this array is SOPC_PubScheduler_Nb_Message
- */
-static bool SOPC_PubScheduler_MessageCtx_Array_Initialize(SOPC_PubSubConfiguration* config);
-static void SOPC_PubScheduler_MessageCtx_Array_Clear(void);
-static bool SOPC_PubScheduler_MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx, SOPC_WriterGroup* group);
-// Get the last initialise MessageCtx
-static SOPC_PubScheduler_MessageCtx* SOPC_PubScheduler_MessageCtx_Get_Last(void);
-static void SOPC_PubScheduler_Context_Clear(void);
-static const SOPC_DataSetWriter* SOPC_PubScheduler_Group_Get_Unique_Writer(const SOPC_WriterGroup* group);
-static bool SOPC_PubScheduler_Connection_Get_Transport(uint32_t index,
-                                                       SOPC_PubSubConnection* connection,
-                                                       SOPC_PubScheduler_TransportCtx** ctx);
 // Clear pub scheduler context
 // 1) Stop beat heart thread
 // 2) Stop variable monitoring thread
@@ -238,7 +213,6 @@ static bool SOPC_PubScheduler_Connection_Get_Transport(uint32_t index,
 // 5) Destory all message context
 static void SOPC_PubScheduler_Context_Clear(void)
 {
-<<<<<<< HEAD
     /* Stop beat heart and variable monitoring threads */
 #if SOPC_PUBSCHEDULER_BEATHEART_FROM_IRQ == 0
     printf("# Info: Stop beat heart thread\r\n");
@@ -304,6 +278,7 @@ static void SOPC_PubScheduler_Context_Clear(void)
     pubSchedulerCtx.nbConnection = 0;
     pubSchedulerCtx.config = NULL;
     pubSchedulerCtx.sourceConfig = NULL;
+    // TODO SOPC_LocalSKS_Keys_Delete(pubSchedulerCtx.keys);
     pubSchedulerCtx.sequenceNumber = 1;
 }
 
@@ -330,13 +305,12 @@ static void SOPC_PubScheduler_MessageCtx_Array_Clear(void)
             printf("# Info: Network message #%d. destroyed \n", i);
             SOPC_Dataset_LL_NetworkMessage_Delete(pubSchedulerCtx.messages.array[i].message);
             pubSchedulerCtx.messages.array[i].message = NULL;
-
-            SOPC_Buffer_Delete(pubSchedulerCtx.messages.array[i].postEncodeBuffer[0]);
-            SOPC_Buffer_Delete(pubSchedulerCtx.messages.array[i].postEncodeBuffer[1]);
-
             SOPC_PubSub_Security_Clear(pubSchedulerCtx.messages.array[i].security);
             SOPC_Free(pubSchedulerCtx.messages.array[i].security);
             pubSchedulerCtx.messages.array[i].security = NULL;
+
+            SOPC_Buffer_Delete(pubSchedulerCtx.messages.array[i].postEncodeBuffer[0]);
+            SOPC_Buffer_Delete(pubSchedulerCtx.messages.array[i].postEncodeBuffer[1]);
         }
 
         /* Destroy messages array */
@@ -358,11 +332,11 @@ static bool SOPC_PubScheduler_MessageCtx_Array_Init_Next(SOPC_PubScheduler_Trans
     context->transport = ctx;
     context->group = group;
     context->message = SOPC_Create_NetworkMessage_From_WriterGroup(group);
+
     if (NULL == context->message)
     {
         return false;
     }
-
 
     if (result)
     {
@@ -388,47 +362,43 @@ static bool SOPC_PubScheduler_MessageCtx_Array_Init_Next(SOPC_PubScheduler_Trans
 
     context->postEncodeBufferCurrent = 2;
 
-    if(result)
+    if (result)
     {
         SOPC_SecurityMode_Type smode = SOPC_WriterGroup_Get_SecurityMode(group);
-            if (SOPC_SecurityMode_Sign == smode || SOPC_SecurityMode_SignAndEncrypt == smode)
+        if (SOPC_SecurityMode_Sign == smode || SOPC_SecurityMode_SignAndEncrypt == smode)
+        {
+            context->security = SOPC_Calloc(1, sizeof(SOPC_PubSub_SecurityType));
+            if (NULL == context->security)
             {
-                context->security = SOPC_Calloc(1, sizeof(SOPC_PubSub_SecurityType));
-                if (NULL == context->security)
-                {
-                    SOPC_Dataset_LL_NetworkMessage_Delete(context->message);
-                    context->message = NULL;
-                    result = false;
-                }
-
-                if(result)
-                {
-                    context->security->mode = SOPC_WriterGroup_Get_SecurityMode(group);
-                    context->security->groupKeys =
-                        SOPC_LocalSKS_GetSecurityKeys(SOPC_PUBSUB_SKS_DEFAULT_GROUPID, SOPC_PUBSUB_SKS_CURRENT_TOKENID);
-                    context->security->provider = SOPC_CryptoProvider_CreatePubSub(SOPC_PUBSUB_SECURITY_POLICY);
-                    if (NULL == context->security->groupKeys || NULL == context->security->provider)
-                    {
-                        SOPC_Dataset_LL_NetworkMessage_Delete(context->message);
-                        context->message = NULL;
-                        SOPC_PubSub_Security_Clear(context->security);
-                        SOPC_Free(context->security);
-                        context->security = NULL;
-                        result = false;
-                    }
-                }
-            }
-            else
-            {
-                context->security = NULL;
+                printf("# Error Publisher : can't alloc security context !\n");
                 result = false;
             }
+
+            if (result)
+            {
+                context->security->mode = SOPC_WriterGroup_Get_SecurityMode(group);
+                context->security->groupKeys =
+                    SOPC_LocalSKS_GetSecurityKeys(SOPC_PUBSUB_SKS_DEFAULT_GROUPID, SOPC_PUBSUB_SKS_CURRENT_TOKENID);
+                context->security->provider = SOPC_CryptoProvider_CreatePubSub(SOPC_PUBSUB_SECURITY_POLICY);
+                if (NULL == context->security->groupKeys || NULL == context->security->provider)
+                {
+                    printf("# Error Publisher : can't create provider !\n");
+                    result = false;
+                }
+            }
+        }
     }
 
     if (!result)
     {
         SOPC_Dataset_LL_NetworkMessage_Delete(context->message);
         context->message = NULL;
+        if (context->security != NULL)
+        {
+            SOPC_PubSub_Security_Clear(context->security);
+            SOPC_Free(context->security);
+            context->security = NULL;
+        }
 
         SOPC_Buffer_Delete(context->postEncodeBuffer[0]);
         SOPC_Buffer_Delete(context->postEncodeBuffer[1]);
@@ -444,7 +414,6 @@ static bool SOPC_PubScheduler_MessageCtx_Array_Init_Next(SOPC_PubScheduler_Trans
         pubSchedulerCtx.messages.current++;
     }
     return result;
-
 }
 
 static SOPC_PubScheduler_MessageCtx* SOPC_PubScheduler_MessageCtx_Get_Last(void)
@@ -593,10 +562,8 @@ static void* SOPC_RT_Publisher_VarMonitoringCallback(void* arg)
                 assert(SOPC_PublishedDataSet_Nb_FieldMetaData(dataset) == nbFields);
 
                 // Fill datasetmessage
-                //SOPC_DataValue* values = SOPC_PubSourceVariable_GetVariablesSynchrone(pubSchedulerCtx.sourceConfig, //
-                //                                                                      dataset);                     //
-
-                SOPC_DataValue* values = NULL;
+                SOPC_DataValue* values = SOPC_PubSourceVariable_GetVariablesSync(pubSchedulerCtx.sourceConfig, //
+                                                                                 dataset);                     //
 
                 if (NULL == values)
                 {
@@ -668,6 +635,8 @@ static void* SOPC_RT_Publisher_VarMonitoringCallback(void* arg)
                     // send message
                     if (allocSuccess && typeCheckingSuccess)
                     {
+                        SOPC_PubSub_SecurityType* security = ctx->security;
+
                         if (allocSuccess)
                         {
                             SOPC_Buffer buffer;
@@ -682,7 +651,6 @@ static void* SOPC_RT_Publisher_VarMonitoringCallback(void* arg)
                             // If successful, pre-encode message into double buffer
                             if (SOPC_STATUS_OK == status)
                             {
-                                SOPC_PubSub_SecurityType* security = ctx->security;
                                 if (NULL != security)
                                 {
                                     security->msgNonceRandom = SOPC_PubSub_Security_Random(security->provider);
@@ -700,8 +668,7 @@ static void* SOPC_RT_Publisher_VarMonitoringCallback(void* arg)
 
                                 if (SOPC_STATUS_OK == status)
                                 {
-
-                                    SOPC_Buffer* pBuffer = SOPC_UADP_NetworkMessage_Encode(message,security);
+                                    SOPC_Buffer* pBuffer = SOPC_UADP_NetworkMessage_Encode(message, security);
                                     if (NULL != security)
                                     {
                                         SOPC_Free(security->msgNonceRandom);
@@ -782,7 +749,7 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config, SOPC_PubSourceVar
         SOPC_Atomic_Int_Set(&pubSchedulerCtx.processingStartStop, true);
     }
 
-
+    // Security : init the sequence number
     pubSchedulerCtx.sequenceNumber = 1;
     pubSchedulerCtx.nbConnection = 0;
 
@@ -998,11 +965,6 @@ void SOPC_PubScheduler_Stop(void)
     printf("# Scheduler stopped ...\r\n");
 }
 
-void SOPC_PubScheduler_Finalize(void)
-{
-    return;
-}
-
 static const SOPC_DataSetWriter* SOPC_PubScheduler_Group_Get_Unique_Writer(const SOPC_WriterGroup* group)
 {
     assert(NULL != group);
@@ -1042,7 +1004,6 @@ static bool SOPC_PubScheduler_Connection_Get_Transport(uint32_t index,
         pubSchedulerCtx.transport[index].fctSend = &SOPC_PubScheduler_CtxUdp_Send;
         *ctx = &pubSchedulerCtx.transport[index];
         return true;
-
     }
     break;
     case SOPC_PubSubProtocol_MQTT:

@@ -23,6 +23,7 @@
 
 #include "sopc_array.h"
 #include "sopc_atomic.h"
+#include "sopc_event_timer_manager.h"
 #include "sopc_filesystem.h"
 #include "sopc_pub_scheduler.h"
 #include "sopc_pubsub_local_sks.h"
@@ -210,6 +211,15 @@ void PubSub_Stop(void)
     SOPC_PubSub_Protocol_ReleaseMqttManagerHandle();
     // Force Disabled after stop in case Sub scheduler was not start (no management of the status)
     Server_SetSubStatus(SOPC_PubSubState_Disabled);
+}
+
+void Pub_BeatHeart(void)
+{
+#if SOPC_PUBSCHEDULER_BEATHEART_FROM_IRQ == 1
+    static uint32_t tickValue = 0;
+    SOPC_PubScheduler_BeatHeartFromIRQ(tickValue++);
+#endif
+    SOPC_Sleep(SOPC_TIMER_RESOLUTION_MS);
 }
 
 void PubSub_StopAndClear(void)

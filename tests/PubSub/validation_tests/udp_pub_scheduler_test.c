@@ -62,46 +62,24 @@ SOPC_Variant varArr[NB_VARS] = {
     {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}}      // 6
 };
 
-static SOPC_ReturnStatus GetSourceVariablesRequest(
-    SOPC_EventHandler* eventHandler, // message queue where response must be sent
-    uintptr_t msgCtx,                // messageCtx, used by scheduler when it received response
-    OpcUa_ReadValueId* lrv,
-    int32_t nbValues)
+SOPC_DataValue* SOPC_GetSourceVariables_TestFunc(OpcUa_ReadValueId* nodesToRead, int32_t nbValues);
+
+SOPC_DataValue* SOPC_GetSourceVariables_TestFunc(OpcUa_ReadValueId* nodesToRead, int32_t nbValues)
+
 {
-    // Note: Return result is mandatory. If SOPC_STATUS_OK is not returned, then
-    // READY status is set to messageCtx. So, request can be performed.
-    // Else, BUSY is set to messageCtx. Next request will be ignored.
-    // This is important to avoid memory issue in case of
-    // treatment of request by services thread takes a long time.
-
-    if (NULL == lrv || 0 >= nbValues)
-    {
-        return SOPC_STATUS_NOK;
-    }
-
-    SOPC_PubSheduler_GetVariableRequestContext* requestContext =
-        SOPC_Calloc(1, sizeof(SOPC_PubSheduler_GetVariableRequestContext));
-
-    if (NULL == requestContext)
-    {
-        return SOPC_STATUS_NOK;
-    }
-    requestContext->msgCtxt = msgCtx;            // Message context, forward by "0" timer event
-    requestContext->eventHandler = eventHandler; // Message queue
-    requestContext->ldv = NULL;                  // Datavalue request result
-    requestContext->NoOfNodesToRead = nbValues;  // Use to alloc SOPC_DataValue by GetResponse
-
-    /* Simulate response */
     assert(nbValues <= NB_VARS);
     assert(0 < nbValues);
-    requestContext->ldv = SOPC_Calloc((size_t) nbValues, sizeof(*requestContext->ldv));
-    assert(NULL != requestContext->ldv);
+    SOPC_DataValue* dataValues = SOPC_Calloc((size_t) nbValues, sizeof(*dataValues));
+    assert(NULL != dataValues);
+
     for (int32_t i = 0; i < nbValues; i++)
     {
-        SOPC_DataValue* dataValue = &requestContext->ldv[i];
+        SOPC_DataValue* dataValue = &dataValues[i];
+
         SOPC_DataValue_Initialize(dataValue);
 
-        OpcUa_ReadValueId* readValue = &lrv[i];
+        OpcUa_ReadValueId* readValue = &nodesToRead[i];
+
         uint32_t index = readValue->NodeId.Data.Numeric;
         assert(13 == readValue->AttributeId); // Value => AttributeId=13
         assert(SOPC_IdentifierType_Numeric == readValue->NodeId.IdentifierType);
@@ -112,38 +90,11 @@ static SOPC_ReturnStatus GetSourceVariablesRequest(
         dataValue->Value.BuiltInTypeId = varArr[index].BuiltInTypeId;
         dataValue->Value.Value = varArr[index].Value;
 
-        OpcUa_ReadValueId_Clear(lrv);
+        OpcUa_ReadValueId_Clear(nodesToRead);
     }
-    SOPC_Free(lrv);
+    SOPC_Free(nodesToRead);
 
-    SOPC_PubScheduler_EnqueueComEvent(SOPC_PUBSCHEDULER_EVENT_PUBLISH_RESPONSE, 0, (uintptr_t) requestContext, 0);
-
-    return SOPC_STATUS_OK;
-}
-
-static SOPC_DataValue* GetSourceVariablesResponse(SOPC_PubSheduler_GetVariableRequestContext* requestResponse)
-{
-    SOPC_DataValue* ldv = NULL;
-
-    if (NULL == requestResponse)
-    {
-        return NULL;
-    }
-
-    SOPC_PubSheduler_GetVariableRequestContext* requestContext =
-        (SOPC_PubSheduler_GetVariableRequestContext*) requestResponse;
-
-    if (NULL == requestResponse->ldv)
-    {
-        SOPC_Free(requestContext);
-        return NULL;
-    }
-
-    ldv = requestContext->ldv;
-
-    SOPC_Free(requestContext);
-
-    return ldv;
+    return dataValues;
 }
 
 /* Give XML file name as unique parameter
@@ -175,7 +126,7 @@ int main(int argc, char** argv)
 
     // Get Source Configuration
     SOPC_PubSourceVariableConfig* sourceConfig =
-        SOPC_PubSourceVariableConfig_Create(GetSourceVariablesRequest, GetSourceVariablesResponse);
+        SOPC_PubSourceVariableConfig_Create(SOPC_GetSourceVariables_TestFunc, NULL, NULL);
     assert(NULL != sourceConfig);
 
     // Start
@@ -191,7 +142,6 @@ int main(int argc, char** argv)
 
     // Stop
     SOPC_PubScheduler_Stop();
-    SOPC_PubScheduler_Finalize();
 
     // Clear config
     SOPC_PubSubConfiguration_Delete(config);

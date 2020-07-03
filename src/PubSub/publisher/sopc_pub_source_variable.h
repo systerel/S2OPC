@@ -21,6 +21,7 @@
 #define SOPC_PUB_SOURCE_VARIABLE_H_
 
 #include "sopc_event_handler.h"
+#include "sopc_mutexes.h"
 #include "sopc_pubsub_conf.h"
 #include "sopc_types.h"
 
@@ -31,6 +32,8 @@ typedef struct TSOPC_PubSheduler_GetVariableRequestContext
     SOPC_EventHandler* eventHandler; // Event handler where to send result
     int32_t NoOfNodesToRead;         // Size of ldv
     uintptr_t msgCtxt;               // context of request
+    Condition cond;
+    Mutex mut;
 } SOPC_PubSheduler_GetVariableRequestContext;
 
 // Status of a request for a message context
@@ -59,8 +62,7 @@ typedef struct _SOPC_PubSourceVariableConfig SOPC_PubSourceVariableConfig;
  *
  * \return  status code indicating the success or failure of request sending
  */
-typedef SOPC_ReturnStatus (*SOPC_GetSourceVariables_Func)(OpcUa_ReadValueId* nodesToRead,
-                                                                 int32_t nbValues);
+typedef SOPC_DataValue* (*SOPC_GetSourceVariables_Func)(OpcUa_ReadValueId* nodesToRead, int32_t nbValues);
 
 /**
  *  Callback function called by publisher on publishingInterval to send a request on date variable values.
@@ -84,10 +86,20 @@ typedef SOPC_DataValue* (*SOPC_GetSourceVariablesResponse_Func)(
     SOPC_PubSheduler_GetVariableRequestContext* requestContext);
 
 SOPC_PubSourceVariableConfig* SOPC_PubSourceVariableConfig_Create(
-    SOPC_GetSourceVariablesRequest_Func callbackRequest,    //
-    SOPC_GetSourceVariablesResponse_Func callbackResponse); //
+    SOPC_GetSourceVariables_Func callback,
+    SOPC_GetSourceVariablesRequest_Func callbackRequest,
+    SOPC_GetSourceVariablesResponse_Func callbackResponse);
 
 void SOPC_PubSourceVariableConfig_Delete(SOPC_PubSourceVariableConfig* sourceConfig);
+
+/**
+ *  Function used by publisher scheduler to get source variables
+ *
+ * \return an array of DataValue of the size of the PublishedDataSet (number of fields) or NULL in case of error
+ */
+
+SOPC_DataValue* SOPC_PubSourceVariable_GetVariablesSync(const SOPC_PubSourceVariableConfig* sourceConfig, //
+                                                        const SOPC_PublishedDataSet* pubDataset);         //
 
 /**
  *  Function used by publisher scheduler to request source variables:

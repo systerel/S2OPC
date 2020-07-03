@@ -688,7 +688,7 @@ START_TEST(test_source_variable_layer)
     SOPC_PubSubConfiguration* config = build_Pub_Config(&pds);
 
     SOPC_PubSourceVariableConfig* sourceConfig =
-        SOPC_PubSourceVariableConfig_Create(GetSourceVariablesRequest, GetSourceVariablesResponse);
+        SOPC_PubSourceVariableConfig_Create(NULL, GetSourceVariablesRequest, GetSourceVariablesResponse);
     SOPC_ReturnStatus result = SOPC_PubSourceVariable_GetVariables(NULL, 0, sourceConfig, pds);
 
     ck_assert(result == SOPC_STATUS_OK);
