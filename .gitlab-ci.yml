@@ -373,16 +373,19 @@ coverage-analysis:
 pages:
   <<: *build_linux
   stage: doc
+  dependencies: []
   rules:
     - if: "$WITH_DOC != null"
   variables:
     <<: *build_linux_variables
-    WITH_NANO_EXTENDED: 1 # PyS2OPC relies on subscriptions
-    WITH_PYS2OPC: 1
   script:
-    - './build.sh && cd $BUILD_DIR && cmake --build . --target doc'
-    - mv apidoc/html public/
+    - mkdir $BUILD_DIR
+    - cd $BUILD_DIR
+    # PyS2OPC relies on subscriptions
+    - cmake -DWITH_NANO_EXTENDED=yes -DWITH_PYS2OPC=yes ..
+    - cmake --build . --target doc
+    - mv apidoc/html ../public/
   artifacts:
     paths:
     - public
-    expire_in: 1 hour
+    expire_in: 30 days

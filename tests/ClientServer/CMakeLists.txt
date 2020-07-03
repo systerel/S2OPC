@@ -487,15 +487,6 @@ if(ENABLE_TESTING)
   if(WITH_PYS2OPC)
     set(PYS2OPC_SRC_PATH "${S2OPC_ROOT_PATH}/src/ClientServer/frontend/pys2opc")
     set(PYS2OPC_TEST_PATH "${S2OPC_ROOT_PATH}/tests/ClientServer/validation_tests/pys2opc")
-    # pip lacks the ability to produce the name of the output library before it is done,
-    # so it is hardcoded.
-    set(PYS2OPC_TEST_INSTALL_PATH "${CMAKE_BINARY_DIR}/pys2opc_install")
-
-    # Installation test
-    # This is both required to test the installation of the wheel AND to be able to run the other tests...
-    add_test(pys2opc_install
-             "${PYTHON_EXECUTABLE}" -m pip install -t "${PYS2OPC_TEST_INSTALL_PATH}" --upgrade "${PYS2OPC_WHEEL_PATH}"
-             )
 
     # Validation test
     function(pys2opc_validation_test name)

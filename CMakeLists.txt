@@ -17,14 +17,9 @@ macro(find_package)
   endif()
 endmacro()
 
-add_subdirectory(src)
-add_subdirectory(tests)
-add_subdirectory(samples)
-
-find_package(Doxygen)
-
 # S2OPC code documentation #
 
+find_package(Doxygen)
 if(DOXYGEN_FOUND)
     add_custom_target(doc
         COMMAND ${CMAKE_COMMAND} -E env DOXYGEN_SOURCE_PREFIX=${CMAKE_SOURCE_DIR}/ ${DOXYGEN_EXECUTABLE} ${CMAKE_SOURCE_DIR}/doxygen/s2opc-toolkit.doxyfile
@@ -33,3 +28,8 @@ if(DOXYGEN_FOUND)
     )
 endif()
 
+# S2OPC #
+
+add_subdirectory(src)
+add_subdirectory(tests)
+add_subdirectory(samples)
