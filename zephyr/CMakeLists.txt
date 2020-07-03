@@ -7,6 +7,18 @@ zephyr_interface_library_named(S2OPC)
 add_definitions (-DSOPC_PTR_SIZE=4)
 add_definitions (-DS2OPC_CLIENTSERVER_ONLY=1)
 add_definitions (-DWITH_STATIC_SECURITY_DATA=1 -DPUBSUB_STATIC_CONFIG=1 -DWITH_NANO_EXTENDED=1)
+add_definitions (-DSOPC_TIMER_RESOLUTION_MS=50)
+add_definitions (-DSOPC_SC_CONNECTION_TIMEOUT_MS=60000)
+add_definitions (-DSOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE=8192)
+add_definitions (-DSOPC_DEFAULT_RECEIVE_MAX_NB_CHUNKS=1)
+add_definitions (-DSOPC_DEFAULT_SEND_MAX_NB_CHUNKS=1)
+add_definitions (-DSOPC_DEFAULT_MAX_STRING_LENGTH=8192)
+add_definitions (-DSOPC_DEFAULT_MAX_ARRAY_LENGTH=128)
+#add_definitions (-DSOPC_DEFAULT_MAX_DIAG_INFO_NESTED_LEVEL=100)
+#add_definitions (-DSOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL=50)
+add_definitions (-DSOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE=128)
+
+
 
 # Add S2OPC includes directories
 zephyr_include_directories(
