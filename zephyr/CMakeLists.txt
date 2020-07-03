@@ -38,6 +38,7 @@ zephyr_include_directories(
     ../src/Common/configuration
     ../src/Common/opcua_types
     ../src/PubSub
+    ../src/PubSub/config_loaders/xml_expat
     ../src/PubSub/common
     ../src/PubSub/dataset
     ../src/PubSub/network
@@ -45,6 +46,7 @@ zephyr_include_directories(
     ../src/PubSub/publisher
     ../src/PubSub/subscriber
     ../src/PubSub/real_time_api
+    ../src/PubSub/security
 )
 
 # Add S2OPC sources
@@ -269,6 +271,11 @@ zephyr_library_sources(
 ../src/PubSub/dataset/sopc_dataset_layer.c
 ../src/PubSub/protocol/sopc_pubsub_protocol.c
 ../src/PubSub/protocol/sopc_sub_udp_sockets_mgr.c
+#Add security module files
+../src/PubSub/security/sopc_pubsub_security.c
+../src/PubSub/security/sopc_pubsub_local_sks.c
+#Add mqtt module files
+../src/PubSub/protocol/sopc_mqtt_transport_layer.c
 )
 
 zephyr_library_link_libraries(S2OPC)

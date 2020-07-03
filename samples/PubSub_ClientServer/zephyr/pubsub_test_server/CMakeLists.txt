@@ -32,22 +32,22 @@ target_sources(app PRIVATE ${tls_files})
 
 # Add PUBSUB APPS includes directories
 
-FILE(GLOB app_headers_pubsub_src_apps_pubsub_server ${CMAKE_CURRENT_SOURCE_DIR}/src/pubsub_server)
+FILE(GLOB app_headers_pubsub_src_apps_pubsub_server ${CMAKE_CURRENT_SOURCE_DIR}/../../pubsub_server)
 
 target_include_directories(app PRIVATE ${app_headers_pubsub_src_apps_pubsub_server})
 
 
 # Add PUBSUB APPS sources directories
 
-FILE(GLOB app_sources_pubsub_src_apps_pubsub_server_helpers_c ${CMAKE_CURRENT_SOURCE_DIR}/src/pubsub_server/helpers.c)
+FILE(GLOB app_sources_pubsub_src_apps_pubsub_server_helpers_c ${CMAKE_CURRENT_SOURCE_DIR}/../../pubsub_server/helpers.c)
 
 target_sources(app PRIVATE ${app_sources_pubsub_src_apps_pubsub_server_helpers_c})
 
-FILE(GLOB app_sources_pubsub_src_apps_pubsub_server_pubsub_c ${CMAKE_CURRENT_SOURCE_DIR}/src/pubsub_server/pubsub.c)
+FILE(GLOB app_sources_pubsub_src_apps_pubsub_server_pubsub_c ${CMAKE_CURRENT_SOURCE_DIR}/../../pubsub_server/pubsub.c)
 
 target_sources(app PRIVATE ${app_sources_pubsub_src_apps_pubsub_server_pubsub_c})
 
-FILE(GLOB app_sources_pubsub_src_apps_pubsub_server_server_c ${CMAKE_CURRENT_SOURCE_DIR}/src/pubsub_server/server.c)
+FILE(GLOB app_sources_pubsub_src_apps_pubsub_server_server_c ${CMAKE_CURRENT_SOURCE_DIR}/../../pubsub_server/server.c)
 
 target_sources(app PRIVATE ${app_sources_pubsub_src_apps_pubsub_server_server_c})
 
