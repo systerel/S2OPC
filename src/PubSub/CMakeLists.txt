@@ -14,7 +14,15 @@ endif()
 # EXPAT dependency managed in CommonDefs
 
 # Paho library is required
-find_package(Paho REQUIRED)
+find_package(Paho)
+
+if (DEFINED PAHO_FOUND)
+message ( "-- MQTT PUBSUB: Paho library found so will be used by MQTT Pubsub Protocol extension")
+add_definitions(-DUSE_MQTT_PAHO=1)
+else ()
+message ( "-- MQTT PUBSUB: No supported MQTT library found")
+add_definitions(-DUSE_MQTT_PAHO=0)
+endif ()
 
 ### Compilation of S2OPC client/server library source files ###
 

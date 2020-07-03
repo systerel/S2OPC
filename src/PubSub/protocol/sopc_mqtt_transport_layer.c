@@ -18,7 +18,10 @@
  */
 
 #include "sopc_mqtt_transport_layer.h"
-#ifndef USE_RTOS
+#ifndef USE_MQTT_PAHO
+#define USE_MQTT_PAHO 0
+#endif
+#if USE_MQTT_PAHO == 1
 #include "MQTTAsync.h"
 #endif
 
@@ -523,7 +526,7 @@ static void TransportContext_GetPendingMsg(tMqttTransportContext* pClt, char** m
 
 /*=== Declarations of callbacks used by PAHO MQTT library ===*/
 
-#ifndef USE_RTOS
+#if USE_MQTT_PAHO == 1
 static void cb_lib_onConnect(void* context, MQTTAsync_successData* response);
 static void cb_lib_onConnectFailure(void* context, MQTTAsync_failureData* response);
 static void cb_lib_onConnLost(void* context, char* cause);
@@ -2361,7 +2364,7 @@ static void TransportContext_GetPendingMsg(tMqttTransportContext* pClt, char** m
 
 /*=== Definition of callbacks used by PAHO MQTT library ===*/
 
-#ifndef USE_RTOS
+#if USE_MQTT_PAHO == 1
 static void cb_lib_onConnLost(void* context, char* cause)
 {
     (void) cause;
@@ -2553,7 +2556,7 @@ static int api_lib_create(tMqttTransportContext* pCtx)
     char clientIdStrFromIdx[24] = {0};
     snprintf(clientIdStrFromIdx, 23, "%lu", (long unsigned int) random);
 
-#ifndef USE_RTOS
+#if USE_MQTT_PAHO == 1
 
     int MQTTAsyncResult = MQTTAsync_create(&pCtx->clientHandle,         //
                                            pCtx->connexionConfig.uri,   //
@@ -2582,7 +2585,7 @@ static void api_lib_destroy(tMqttTransportContext* pCtx)
     {
         return;
     }
-#ifndef USE_RTOS
+#if USE_MQTT_PAHO == 1
     MQTTAsync_destroy(&pCtx->clientHandle);
 #endif
     pCtx->clientHandle = NULL;
@@ -2599,7 +2602,7 @@ static int api_lib_connect(tMqttTransportContext* pCtx)
     {
         return -1;
     }
-#ifndef USE_RTOS
+#if USE_MQTT_PAHO == 1
     /* Set library connection and reception callbacks, set lost connection detection interval, connection
      * timeout and context */
     MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
@@ -2649,7 +2652,7 @@ static int api_lib_subscribe(tMqttTransportContext* pCtx)
     {
         return -1;
     }
-#ifndef USE_RTOS
+#if USE_MQTT_PAHO == 1
     MQTTAsync_responseOptions sub_opts = MQTTAsync_responseOptions_initializer;
     sub_opts.onSuccess = cb_lib_onSubscribe;
     sub_opts.onFailure = cb_lib_onSubscribeFailure;
@@ -2682,7 +2685,7 @@ static int api_lib_send_msg(tMqttTransportContext* pCtx, uint8_t* data, uint16_t
     {
         return -1;
     }
-#ifndef USE_RTOS
+#if USE_MQTT_PAHO == 1
     MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
     MQTTAsync_message pubmsg = MQTTAsync_message_initializer;
 
@@ -2708,6 +2711,8 @@ static int api_lib_send_msg(tMqttTransportContext* pCtx, uint8_t* data, uint16_t
 
     return 0;
 #else
+    (void) data;
+    (void) dataSize;
     return -1;
 #endif
 }
@@ -2723,7 +2728,7 @@ static int api_lib_disconnect(tMqttTransportContext* pCtx)
     {
         return -1;
     }
-#ifndef USE_RTOS
+#if USE_MQTT_PAHO == 1
     MQTTAsync_disconnectOptions disc_opts = MQTTAsync_disconnectOptions_initializer5;
     disc_opts.onSuccess = cb_lib_onDisconnect; /* Disconnect callback */
     disc_opts.context = &pCtx->identification; /* Context shall be transport context identification */
