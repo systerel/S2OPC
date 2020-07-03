@@ -181,8 +181,7 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic()
     SOPC_DataSetWriter* writer = NULL;
     if (alloc)
     {
-        writer =
-            SOPC_PubSubConfig_SetPubMessageAt(connection, 0, 14, 1, PUBLISH_PERIOD, SOPC_SecurityMode_SignAndEncrypt);
+        writer = SOPC_PubSubConfig_SetPubMessageAt(connection, 0, 14, 1, PUBLISH_PERIOD,SOPC_SecurityMode_None);
         alloc = NULL != writer;
     }
 
@@ -240,8 +239,7 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic()
 
     if (alloc)
     {
-        reader = SOPC_PubSubConfig_SetSubMessageAt(connection, 0, 42, 14, 1, SUBSCRIBE_PERIOD,
-                                                   SOPC_SecurityMode_SignAndEncrypt);
+        reader = SOPC_PubSubConfig_SetSubMessageAt(connection, 0, 42, 14, 1, SUBSCRIBE_PERIOD,SOPC_SecurityMode_None);
         alloc = NULL != reader;
     }
 
@@ -259,7 +257,7 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic()
 
     if (alloc)
     {
-        reader = SOPC_PubSubConfig_SetSubMessageAt(connection, 1, 42, 15, 1, SUBSCRIBE_PERIOD, SOPC_SecurityMode_None);
+        reader = SOPC_PubSubConfig_SetSubMessageAt(connection, 1, 42, 15, 1, SUBSCRIBE_PERIOD,SOPC_SecurityMode_None);
         alloc = NULL != reader;
     }
 
