@@ -58,7 +58,7 @@ endif()
 # Add definitions for platform dependant code
 check_type_size("time_t" CMAKE_TIME_T_SIZE) # retrieve time_t size
 set_source_files_properties(${PLATFORM_SRCS} PROPERTIES COMPILE_DEFINITIONS "SOPC_PTR_SIZE=${CMAKE_SIZEOF_VOID_P};SOPC_TIME_T_SIZE=${CMAKE_TIME_T_SIZE}")
-                 
+
 ## C99 compliant source code ##
 
 # Define non-platform dependent source files

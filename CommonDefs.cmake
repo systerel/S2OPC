@@ -296,10 +296,6 @@ if(WITH_CLANG_SOURCE_COVERAGE)
   list(APPEND S2OPC_LINKER_FLAGS -fprofile-instr-generate -fcoverage-mapping)
 endif()
 
-if(WITH_PYS2OPC AND NOT WITH_NANO_EXTENDED)
-  message(WARNING "PyS2OPC validation tests will fail if S2OPC test server compiled without WITH_NANO_EXTENDED set")
-endif()
-
 # Add WITH_NANO_EXTENDED to compilation definition if option activated
 list(APPEND S2OPC_DEFINITIONS $<$<BOOL:${WITH_NANO_EXTENDED}>:WITH_NANO_EXTENDED>)
 

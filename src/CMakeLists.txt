@@ -10,6 +10,11 @@ if(NOT S2OPC_PUBSUB_ONLY)
   add_subdirectory(ClientServer)
 else()
   message("-- S2OPC_PUBSUB_ONLY set")
+  if(WITH_PYS2OPC)
+    # When not adding ClientServer subdirectory, pys2opc is never included,
+    #  and the script cannot expresses its requirements.
+    message(SEND_ERROR "-- WITH_PYS2OPC requires Client and Server capabilities")
+  endif()
 endif()
 if(NOT S2OPC_CLIENTSERVER_ONLY)
   add_subdirectory(PubSub)

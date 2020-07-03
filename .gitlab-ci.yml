@@ -67,6 +67,7 @@ stages:
   - test
   - build-others
   - analyses
+  - doc
 
 .docker-job: &docker_job
   tags:
@@ -370,10 +371,16 @@ coverage-analysis:
 
 # The job name must be "pages", and the html must be in "public/" and put in an artifact.
 pages:
-  image: docker.io/library/debian@sha256:de3eac83cd481c04c5d6c7344cd7327625a1d8b2540e82a8231b5675cef0ae5f  # debian:9
+  <<: *build_linux
+  stage: doc
+  rules:
+    - if: "$WITH_DOC != null"
+  variables:
+    <<: *build_linux_variables
+    WITH_NANO_EXTENDED: 1 # PyS2OPC relies on subscriptions
+    WITH_PYS2OPC: 1
   script:
-    - apt-get update && apt-get -y install doxygen graphviz
-    - doxygen doxygen/ingopcs-toolkit.doxyfile
+    - './build.sh && cd $BUILD_DIR && cmake --build . --target doc'
     - mv apidoc/html public/
   artifacts:
     paths:
