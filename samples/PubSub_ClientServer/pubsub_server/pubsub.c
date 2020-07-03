@@ -139,9 +139,7 @@ SOPC_ReturnStatus PubSub_Configure(void)
     SOPC_PubSourceVariableConfig* pSourceConfig = NULL;
     if (SOPC_STATUS_OK == status)
     {
-        pSourceConfig = SOPC_PubSourceVariableConfig_Create(Server_GetSourceVariables,
-                                                            NULL,   //
-                                                            NULL); //
+        pSourceConfig = SOPC_PubSourceVariableConfig_Create(Server_GetSourceVariables);
         if (NULL == pSourceConfig)
         {
             printf("# Error: Cannot create Pub configuration.\n");

@@ -125,8 +125,7 @@ int main(int argc, char** argv)
     assert(NULL != config);
 
     // Get Source Configuration
-    SOPC_PubSourceVariableConfig* sourceConfig =
-        SOPC_PubSourceVariableConfig_Create(SOPC_GetSourceVariables_TestFunc, NULL, NULL);
+    SOPC_PubSourceVariableConfig* sourceConfig = SOPC_PubSourceVariableConfig_Create(SOPC_GetSourceVariables_TestFunc);
     assert(NULL != sourceConfig);
 
     // Start

@@ -171,7 +171,6 @@ static struct
                      .messages.current = 0,
                      .messages.array = NULL,
                      .sequenceNumber = 1,
-
                      .pRTPublisher = NULL,
 #if SOPC_PUBSCHEDULER_BEATHEART_FROM_IRQ == 0
                      .bQuitBeatHeart = true,
@@ -562,8 +561,8 @@ static void* SOPC_RT_Publisher_VarMonitoringCallback(void* arg)
                 assert(SOPC_PublishedDataSet_Nb_FieldMetaData(dataset) == nbFields);
 
                 // Fill datasetmessage
-                SOPC_DataValue* values = SOPC_PubSourceVariable_GetVariablesSync(pubSchedulerCtx.sourceConfig, //
-                                                                                 dataset);                     //
+                SOPC_DataValue* values = SOPC_PubSourceVariable_GetVariables(pubSchedulerCtx.sourceConfig, //
+                                                                             dataset);                     //
 
                 if (NULL == values)
                 {
