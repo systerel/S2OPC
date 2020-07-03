@@ -487,6 +487,8 @@ if(ENABLE_TESTING)
   if(WITH_PYS2OPC)
     set(PYS2OPC_SRC_PATH "${S2OPC_ROOT_PATH}/src/ClientServer/frontend/pys2opc")
     set(PYS2OPC_TEST_PATH "${S2OPC_ROOT_PATH}/tests/ClientServer/validation_tests/pys2opc")
+    # TODO: This variable must be the one defined in ../src/ClientServer/frontend/pys2opc/CMakeLists.txt
+    set(PYS2OPC_TEST_INSTALL_PATH "${CMAKE_BINARY_DIR}/pys2opc_install")
 
     # Validation test
     function(pys2opc_validation_test name)
@@ -506,9 +508,8 @@ if(ENABLE_TESTING)
       if(WITH_ASAN OR WITH_UBSAN OR WITH_TSAN)
         set(new_env ${new_env} "LD_PRELOAD=/usr/local/lib64/libasan.so")
       endif()
-      # The test depends on the install
+      # TODO: make the test depends on pys2opc_install
       set_tests_properties(${test_name} PROPERTIES
-                           DEPENDS pys2opc_install
                            ENVIRONMENT "${new_env}")
     endfunction()
 
