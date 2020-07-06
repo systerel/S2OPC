@@ -45,6 +45,17 @@ typedef struct SOPC_LocalSKS_Keys
 void SOPC_LocalSKS_init(const char* pathSigningKey, const char* pathEncryptKey, const char* pathKeyNonce);
 
 /**
+ * \brief Initialise the LocalSKS with static keys values
+ *
+ */
+void SOPC_LocalSKS_init_static(const uint8_t* signingKey, //
+                               uint32_t lenSigningKey,    //
+                               const uint8_t* encryptKey, //
+                               uint32_t lenEncryptKey,    //
+                               const uint8_t* keyNonce,   //
+                               uint32_t lenKeyNonce);     //
+
+/**
  * \brief Return security key from a security group id.
  *
  * Only SOPC_PUBSUB_SKS_DEFAULT_GROUPID is accepted in this version

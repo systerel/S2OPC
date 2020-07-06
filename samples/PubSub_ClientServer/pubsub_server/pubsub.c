@@ -40,6 +40,10 @@
 #include "pubsub_config_static.h"
 #endif
 
+#ifdef WITH_STATIC_SECURITY_DATA
+#include "static_security_data.h"
+#endif
+
 static int32_t pubsubOnline = 0;
 static SOPC_PubSubConfiguration* g_pPubSubConfig = NULL;
 static SOPC_SubTargetVariableConfig* g_pTargetConfig = NULL;
@@ -178,7 +182,16 @@ bool PubSub_Start(void)
     bool pubOK = false;
     uint32_t sub_nb_connections = SOPC_PubSubConfiguration_Nb_SubConnection(g_pPubSubConfig);
     uint32_t pub_nb_connections = SOPC_PubSubConfiguration_Nb_PubConnection(g_pPubSubConfig);
+#ifdef WITH_STATIC_SECURITY_DATA
+    printf("# Info: initialize local SKS with static security data\n");
+
+    SOPC_LocalSKS_init_static(pubSub_keySign, sizeof(pubSub_keySign),       //
+                              pubSub_keyEncrypt, sizeof(pubSub_keyEncrypt), //
+                              pubSub_keyNonce, sizeof(pubSub_keyNonce));    //
+#else
+    printf("# Info: initialize local SKS with dynamic security data\n");
     SOPC_LocalSKS_init(PUBSUB_SKS_SIGNING_KEY, PUBSUB_SKS_ENCRYPT_KEY, PUBSUB_SKS_KEY_NONCE);
+#endif
     if (sub_nb_connections > 0)
     {
         subOK = SOPC_SubScheduler_Start(g_pPubSubConfig, g_pTargetConfig, Server_SetSubStatus);
