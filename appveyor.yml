@@ -137,6 +137,8 @@ artifacts:
     type: zip
 
 on_failure:
- - ps: $root = Resolve-Path $Env:APPVEYOR_BUILD_FOLDER\build; [IO.Directory]::GetFiles($root.Path, '*.*', 'AllDirectories') | % { Push-AppveyorArtifact $_ -FileName $_.Substring($root.Path.Length + 1) -DeploymentName to-publish }
+  - ps: |-
+      Compress-Archive -DestinationPath "build.zip" -Path $Env:APPVEYOR_BUILD_FOLDER\build
+      Push-AppveyorArtifact "build.zip" -FileName "build.zip" -DeploymentName to-publish
 #on_finish:
 #  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
