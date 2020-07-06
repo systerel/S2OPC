@@ -601,6 +601,7 @@ static void Server_Event_Toolkit(SOPC_App_Com_Event event, uint32_t idOrStatus, 
 {
     (void) idOrStatus;
     SOPC_EncodeableType* message_type = NULL;
+
     OpcUa_WriteResponse* writeResponse = NULL;
     OpcUa_ReadResponse* response = NULL;
     SOPC_ReturnStatus statusCopy = SOPC_STATUS_NOK;
@@ -614,7 +615,12 @@ static void Server_Event_Toolkit(SOPC_App_Com_Event event, uint32_t idOrStatus, 
         return;
     case SE_LOCAL_SERVICE_RESPONSE:
         message_type = *((SOPC_EncodeableType**) param);
-
+        /* Listen for WriteResponses, which only contain status codes */
+        /*if (message_type == &OpcUa_WriteResponse_EncodeableType)
+        {
+            OpcUa_WriteResponse* write_response = param;
+            bool ok = (write_response->ResponseHeader.ServiceResult == SOPC_GoodGenericStatus);
+        }*/
         /* Listen for ReadResponses, used in GetSourceVariables */
         ctx = (SOPC_PubSheduler_GetVariableRequestContext*) appContext;
         if (message_type == &OpcUa_ReadResponse_EncodeableType && NULL != ctx)
