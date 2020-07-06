@@ -36,6 +36,9 @@ FILE(GLOB app_headers_pubsub_src_apps_pubsub_server ${CMAKE_CURRENT_SOURCE_DIR}/
 
 target_include_directories(app PRIVATE ${app_headers_pubsub_src_apps_pubsub_server})
 
+FILE(GLOB app_headers_static_security_data ${CMAKE_CURRENT_SOURCE_DIR}/../../../ClientServer/demo_server)
+
+target_include_directories(app PRIVATE ${app_headers_static_security_data})
 
 # Add PUBSUB APPS sources directories
 
