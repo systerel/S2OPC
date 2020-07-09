@@ -37,7 +37,8 @@ MqttManagerHandle* SOPC_PubSub_Protocol_GetMqttManagerHandle(void)
 {
     if (NULL == g_ptrMqttManagerHandle)
     {
-        SOPC_MQTT_MGR_Create(&g_ptrMqttManagerHandle);
+        // Ignore the function return since in case of failure g_ptrMqttManagerHandle will remain NULL
+        (void) SOPC_MQTT_MGR_Create(&g_ptrMqttManagerHandle);
     }
     return g_ptrMqttManagerHandle;
 }

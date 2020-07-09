@@ -904,7 +904,7 @@ static void SOPC_SubScheduler_Add_Security_Ctx(SOPC_ReaderGroup* group)
             pubCtx = SOPC_SubScheduler_Pub_Ctx_Create(pubId);
             if (NULL != pubCtx)
             {
-                SOPC_Array_Append(schedulerCtx.securityCtx, pubCtx);
+                (void) SOPC_Array_Append(schedulerCtx.securityCtx, pubCtx);
             }
         }
 
@@ -922,7 +922,7 @@ static void SOPC_SubScheduler_Add_Security_Ctx(SOPC_ReaderGroup* group)
                     SOPC_SubScheduler_Reader_Ctx_Create(pubId, writerGroupId, SOPC_ReaderGroup_Get_SecurityMode(group));
                 if (NULL != readerCtx)
                 {
-                    SOPC_Array_Append(pubCtx->readers, readerCtx);
+                    (void) SOPC_Array_Append(pubCtx->readers, readerCtx);
                 }
             }
         }
