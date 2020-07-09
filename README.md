@@ -125,9 +125,9 @@ Note: PubSub is only available on S2OPC Toolkit version > 0.11.0
 ### PubSub implemented features
 
 The S2OPC PubSub implementation properties are the following:
-- the communication layer is UDP,
+- the communication layer is UDP or MQTT (Paho library required),
 - the encoding type is UADP,
-- no implementation of security,
+- security is available (with a local SKS implementation),
 - no override management (cf §6.2.10). That means LastUsableValue is used in any cases,
 - variable management only, not events,
 - no additional verification on sequence numbers,
@@ -185,6 +185,7 @@ Prerequisites:
 - [Check](https://libcheck.github.io/check/)(tested with libcheck version 0.14 compiled with CMake)
 - [expat](https://github.com/libexpat/libexpat)(tested with libexpat version 2.2.9 compiled with CMake)
 - Python3 (tested with version 3.6.3)
+- [Paho](https://github.com/eclipse/paho.mqtt.c) only needed for PubSub with MQTT (tested with version 1.3.4 compiled with CMake)
 
 To build the Toolkit library and tests with default configuration on current
 stable release:
