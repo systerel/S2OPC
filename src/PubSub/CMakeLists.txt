@@ -14,13 +14,19 @@ endif()
 # EXPAT dependency managed in CommonDefs
 
 # Paho library is required
-find_package(Paho)
+find_package(eclipse-paho-mqtt-c CONFIG)
 
-if (DEFINED PAHO_FOUND)
-message ( "-- MQTT PUBSUB: Paho library found so will be used by MQTT Pubsub Protocol extension")
+if (eclipse-paho-mqtt-c_FOUND)
+message ( "-- MQTT PUBSUB: Paho library found, it will be used by MQTT Pubsub Protocol extension")
 add_definitions(-DUSE_MQTT_PAHO=1)
+# Choose static library in priority since Paho export only static or shared version but never both
+if (TARGET eclipse-paho-mqtt-c::paho-mqtt3c-static)
+  set(PAHO_LIBRARIES eclipse-paho-mqtt-c::paho-mqtt3c-static eclipse-paho-mqtt-c::paho-mqtt3a-static)
+else()
+  set(PAHO_LIBRARIES eclipse-paho-mqtt-c::paho-mqtt3c eclipse-paho-mqtt-c::paho-mqtt3a)
+endif()
 else ()
-message ( "-- MQTT PUBSUB: No supported MQTT library found")
+message ( "-- MQTT PUBSUB: no supported MQTT library found (Paho)")
 add_definitions(-DUSE_MQTT_PAHO=0)
 endif ()
 
@@ -56,8 +62,7 @@ set(S2OPC_PUBSUB_PUBLIC_INCLUDES
 add_library(s2opc_pubsub ${S2OPC_PUBSUB_SRCS} ${S2OPC_PUBSUB_BUILD_INFO_C})
 target_compile_options(s2opc_pubsub PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(s2opc_pubsub PRIVATE ${S2OPC_DEFINITIONS})
-target_link_libraries(s2opc_pubsub PUBLIC s2opc_common ${expat_LIB})
-target_link_libraries(s2opc_pubsub PUBLIC s2opc_common ${EXPAT_LIBRARIES} ${PAHO_LIBRARIES})
+target_link_libraries(s2opc_pubsub PUBLIC s2opc_common ${expat_LIB} ${PAHO_LIBRARIES})
 
 
 target_include_directories(s2opc_pubsub
