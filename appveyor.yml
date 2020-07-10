@@ -34,7 +34,7 @@ test_script:
     - set CONFIG=RelWithDebInfo
     - set LIBS_DIRS=%CHECK_BUILD_DIR%;%EXPAT_INSTALL_DIR%
     - set WITH_PYS2OPC=1
-    - set PYS2OPC_WHEEL_NAME=pys2opc-0.1.0.dev2-cp36-cp36m-win_amd64.whl
+    - set PYS2OPC_WHEEL_NAME=pys2opc-0.1.0.dev3-cp36-cp36m-win_amd64.whl
 
     # download and build libcheck
     - cd %ROOT_DIR%
@@ -86,7 +86,7 @@ test_script:
     - |-
         set PYTHON="C:\\Python38-x64"
         set PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
-        set PYS2OPC_WHEEL_NAME=pys2opc-0.1.0.dev2-cp38-cp38-win_amd64.whl
+        set PYS2OPC_WHEEL_NAME=pys2opc-0.1.0.dev3-cp38-cp38-win_amd64.whl
         pip --version
         pip install --upgrade wheel setuptools
         cd %ROOT_DIR%\build
@@ -96,7 +96,7 @@ test_script:
     - |-
         set PYTHON="C:\\Python37-x64"
         set PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
-        set PYS2OPC_WHEEL_NAME=pys2opc-0.1.0.dev2-cp37-cp37m-win_amd64.whl
+        set PYS2OPC_WHEEL_NAME=pys2opc-0.1.0.dev3-cp37-cp37m-win_amd64.whl
         pip --version
         pip install --upgrade wheel setuptools
         cd %ROOT_DIR%\build
@@ -106,7 +106,7 @@ test_script:
     - |-
         set PYTHON="C:\\Python35-x64"
         set PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
-        set PYS2OPC_WHEEL_NAME=pys2opc-0.1.0.dev2-cp35-cp35m-win_amd64.whl
+        set PYS2OPC_WHEEL_NAME=pys2opc-0.1.0.dev3-cp35-cp35m-win_amd64.whl
         pip --version
         pip install --upgrade wheel setuptools
         cd %ROOT_DIR%\build
@@ -117,7 +117,7 @@ test_script:
     #- |-
     #    set PYTHON="C:\\Python34-x64"
     #    set PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
-    #    set PYS2OPC_WHEEL_NAME=pys2opc-0.1.0.dev2-cp34-cp34m-win_amd64.whl
+    #    set PYS2OPC_WHEEL_NAME=pys2opc-0.1.0.dev3-cp34-cp34m-win_amd64.whl
     #    pip --version
     #    pip install --upgrade wheel setuptools
     #    cd %ROOT_DIR%\build
