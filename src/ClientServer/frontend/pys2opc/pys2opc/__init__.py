@@ -49,7 +49,7 @@ and receive notifications through `pys2opc.connection.BaseClientConnectionHandle
 >>>         connection.read_nodes()
 
 
-## Server use
+### Server use
 
 Servers are mainly configured by XML files: one for the structure and content of the address space,
 the other for the endpoint configuration, which specifies who can connect, and which security keys are used.
@@ -71,7 +71,8 @@ In the `with` statement, the application code can be started alongside the S2OPC
 >>>         # The main loop of the application
 >>>         while 'Serving': pass
 
-## NodeId concept
+
+### NodeId concept
 
 Throughout the module (e.g. `pys2opc.connection.BaseClientConnectionHandler.read_nodes`),
 when the interface requires a NodeId, the following syntax is used:
@@ -87,6 +88,32 @@ The NodeId type `x=` is either:
 - `g=` followed by an OPC UA GUID (16 bytes hex string, e.g. "72962B91-FA75-4ae6-8D28-B404DC7DAF63"),
 - `b=` followed by a bytestring.
 
+
+### Types in OPC UA
+
+All values in OPC UA are typed.
+You cannot write a value of a variable if you don't send the correctly typed value to write.
+Mostly used types are signed or unsigned integers of various sizes (8, 16, 32, 64 bits), single or double precision floating point values,
+and string or bytes (bytes may contain \\0 values).
+
+Also, arrays are handled at the value level, and values can be array of integers (or other types).
+
+However, values in Python are more flexible.
+Integers are unbound, floating point are always double, arrays may contain different types of values.
+The class `pys2opc.types.Variant` represent objects that have the properties of python values (e.g. addition/difference/multiplication/division of numbers),
+but the types of OPC UA values (see `pys2opc.types.VariantType`).
+
+When creating `Variant`, there is no need to specify its type.
+It can be changed later, and will be checked only when encoding the value.
+
+DataValue is another OPC UA concept that encapsulates `Variant` to add timestamps and a quality (see `pys2opc.types.DataValue`).
+It is DataValues that are used to store values (when reading or writing values).
+There are helpers to convert Python values to OPC UA values (`pys2opc.types.DataValue.from_python`).
+The other way around is simpler (just use the `pys2opc.types.DataValue.variant` as if it was a Python value).
+
+When writing nodes to a server, PyS2OPC is able to compute the type of a Variant by making a read beforehand
+(see `pys2opc.connection.BaseClientConnectionHandler.write_nodes`) and deducing the right types.
+Once the types are deduced, values may be modified and they will keep their type, so that it is not necessary to make the deduction again.
 """
 
 from _pys2opc import ffi, lib as libsub
