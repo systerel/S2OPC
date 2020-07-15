@@ -37,7 +37,7 @@ export SOPC_DOCKER_NEEDS_SUDO=1
 # Build binaries for Linux target
 ./clean.sh && ./.build-in-docker.sh WITH_NANO_EXTENDED=1 ./build.sh
 # Run tests on Linux target
-./.test-in-docker.sh ./test-all.sh
+./.test-in-docker.sh "mosquitto -d && ./test-all.sh"
 # run acceptance tests on Linux target
 pushd tests/ClientServer/acceptance_tools/
 ../../../.run-uactt-win-in-docker.sh WITH_NANO_EXTENDED=1 ./launch_acceptance_tests.sh
