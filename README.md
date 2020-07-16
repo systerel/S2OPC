@@ -27,6 +27,20 @@ INGOPCS initial consortium:
 - Telecom ParisTech
 - TrustInSoft
 
+## Certification
+
+The sample server application (toolkit_test_nano_server) created using S2OPC toolkit has been certified by OPC Foundation independent test lab according to the following OPC UA profiles:
+- Nano Embedded Device Server
+- SecurityPolicy - Basic256
+- SecurityPolicy - Basic256Sha256
+- User Token-Anonymous Facet
+- User Token - User Name
+- Password Server Facet
+
+For details, see:
+- https://opcfoundation.org/products/view/safe-and-secure-opc
+- https://www.s2opc.com/wp-content/uploads/2020/07/comm-systerel-s2opc-certifopc-en-a.pdf
+
 ## S2OPC Client/Server Toolkit features
 
 ### Common features:
