@@ -31,12 +31,11 @@ from pys2opc import PyS2OPC_Client as PyS2OPC, BaseClientConnectionHandler
 from _connection_configuration import configuration_parameters_no_subscription, configuration_parameters_subscription, configuration_parameters_security, join_configs
 
 
-NODES_A = ['s=BRD.NC_000.VP_96.TM.TSEN1.PTSE_TS1_DELTAP_P20_RAW',
-           's=BRD.NC_000.VP_96.TM.TF.PMC2_TF_MODE_MPPT_RAW']
-NODES_B = ['s=BRD.NC_000.VP_96.TC.OBC_TC_LOAD_NTEL.CHIFFRE03_RAW',
-           's=BRD.NC_000.VP_96.TC.MC2_TC_MODE_SELECT_GS.MC2_AR_ID_MODE_SELECT_GS_RAW',
-           's=BRD.NC_000.VP_96.TM.TMAI.POBC_MA_CALL_PERIOD_RAW',
-           's=BRD.NC_000.VP_96.TM.TSEN2.PTSE_TS2_DP_SIGN_D20_RAW']
+NODES_A = ['ns=1;s=Int32_007',
+           'ns=1;s=UInt64_099']
+NODES_B = ['ns=1;s=Double_032',
+           'ns=1;i=1004',
+           'ns=1;i=1003']
 
 class PrintSubs(BaseClientConnectionHandler):
     def __init__(self, *args, **kwargs):

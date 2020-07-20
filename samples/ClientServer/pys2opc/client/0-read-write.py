@@ -34,13 +34,12 @@ from pys2opc import PyS2OPC_Client as PyS2OPC, BaseClientConnectionHandler, Data
 from _connection_configuration import configuration_parameters_no_subscription
 
 
-# All those nodes are Variable nodes.
-NODES_TO_READ = ['s=BRD.NC_000.VP_96.TM.TSEN1.PTSE_TS1_DELTAP_P20_RAW',
-                 's=BRD.NC_000.VP_96.TM.TF.PMC2_TF_MODE_MPPT_RAW',
-                 's=BRD.NC_000.VP_96.TC.OBC_TC_LOAD_NTEL.CHIFFRE03_RAW',
-                 's=BRD.NC_000.VP_96.TC.MC2_TC_MODE_SELECT_GS.MC2_AR_ID_MODE_SELECT_GS_RAW',
-                 's=BRD.NC_000.VP_96.TM.TMAI.POBC_MA_CALL_PERIOD_RAW',
-                 's=BRD.NC_000.VP_96.TM.TSEN2.PTSE_TS2_DP_SIGN_D20_RAW'
+# All those nodes are Variable nodes. They are demo nodes which have the name of the type it contains.
+NODES_TO_READ = ['ns=1;s=Int32_007',
+                 'ns=1;s=UInt64_099',
+                 'ns=1;s=Double_032',  # A Double that is R/W but not TimestampWrite
+                 'ns=1;i=1004',  # A String
+                 'ns=1;i=1003',  # A Double that is R/W and TimestampWrite
                 ]
 
 
@@ -65,16 +64,16 @@ if __name__ == '__main__':
             respRead = connection.read_nodes(NODES_TO_READ)
             for node, datavalue in zip(NODES_TO_READ, respRead.results):
                 print('  Value of {} is {}, status code is {} (0x{:08X}), timestamp is {}'.format(node, str(datavalue.variant), StatusCode.get_name_from_id(datavalue.statusCode), datavalue.statusCode, time.ctime(datavalue.timestampSource)))
-            # Make a write. Choose random values.
-            newValues = [DataValue.from_python(Variant(10*random.random(), variantType=VariantType.Double)) for dv in respRead.results]
-            for dv in newValues:
-                # timestampSource is set to 0 for UA Gateway compatibility
-                dv.timestampSource = 0
-                # For test purposes, status code and variant type can be changed
-                #dv.statusCode = StatusCode.Bad
-                #dv.variant.variantType = VariantType.Null
+            # Make a write. Choose random values for doubles.
+            nodes = [node for node,dv in zip(NODES_TO_READ, respRead.results) if dv.variantType == VariantType.Double]
+            newValues = [DataValue.from_python(Variant(10*random.random(), variantType=VariantType.Double))
+                         for dv in respRead.results if dv.variantType == VariantType.Double]
+            # It is also possible to change the source timestamp manually, ot the status code
+            #for dv in newValues:
+            #    dv.timestampSource = 0
+            #    dv.statusCode = StatusCode.Bad
 
-            respWrite = connection.write_nodes(NODES_TO_READ, newValues)
+            respWrite = connection.write_nodes(nodes, newValues)
             print('Written.')
             try:
                 assert respWrite.is_ok()
@@ -82,8 +81,8 @@ if __name__ == '__main__':
                 print(', '.join(map(lambda sc: '{} (0x{:08X})'.format(StatusCode.get_name_from_id(sc), sc), respWrite.results)))
                 raise
             # Make a new read, expect the values to have changed.
-            respRead = connection.read_nodes(NODES_TO_READ)
-            for node, datavalue, expected in zip(NODES_TO_READ, respRead.results, newValues):
-                assert expected.variant == datavalue.variant
+            respRead = connection.read_nodes(nodes)
+            for node, datavalue, expected in zip(nodes, respRead.results, newValues):
+                assert expected.variant == datavalue.variant, expected.variant - datavalue.variant
                 print('  Value of {} is {}, timestamp is {}'.format(node, str(datavalue.variant), time.ctime(datavalue.timestampSource)))
 

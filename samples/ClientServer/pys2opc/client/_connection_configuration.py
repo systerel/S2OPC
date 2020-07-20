@@ -26,7 +26,7 @@ Defines the configurations used by the examples.
 
 import os
 
-SERVER_URL = 'opc.tcp://132.149.208.33:48050'
+SERVER_URL = 'opc.tcp://localhost:4841'
 CERT_BASE_PATH = '/bin-s2opc'
 
 # See the documentation of pys2opc.PyS2OPC.add_configuration_unsecured for more parameters.

@@ -42,12 +42,12 @@ class PrintSubs(BaseClientConnectionHandler):
         print('Data changed "{}" -> {}, '.format(nodeId, dataValue.variant) + time.ctime(dataValue.timestampServer))
 
 
-NODES = ['s=BRD.NC_000.VP_96.TM.TSEN1.PTSE_TS1_DELTAP_P20_RAW',
-         's=BRD.NC_000.VP_96.TM.TF.PMC2_TF_MODE_MPPT_RAW',
-         's=BRD.NC_000.VP_96.TC.OBC_TC_LOAD_NTEL.CHIFFRE03_RAW',
-         's=BRD.NC_000.VP_96.TC.MC2_TC_MODE_SELECT_GS.MC2_AR_ID_MODE_SELECT_GS_RAW',
-         's=BRD.NC_000.VP_96.TM.TMAI.POBC_MA_CALL_PERIOD_RAW',
-         's=BRD.NC_000.VP_96.TM.TSEN2.PTSE_TS2_DP_SIGN_D20_RAW']
+NODES = ['ns=1;s=Int32_007',
+         'ns=1;s=UInt64_099',
+         'ns=1;s=Double_032',  # A Double that is R/W but not TimestampWrite
+         'ns=1;i=1004',  # A String
+         'ns=1;i=1003',  # A Double that is R/W and TimestampWrite
+        ]
 
 
 if __name__ == '__main__':

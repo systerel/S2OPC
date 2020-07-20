@@ -30,7 +30,7 @@ from pys2opc import PyS2OPC_Client as PyS2OPC, BaseClientConnectionHandler, Attr
 from _connection_configuration import configuration_parameters_no_subscription
 
 
-ROOT_ID = 'ns=1;i=15361'
+ROOT_ID = 'i=84'
 
 if __name__ == '__main__':
     with PyS2OPC.initialize():
