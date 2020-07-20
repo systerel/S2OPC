@@ -221,9 +221,6 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
                                                         char** lPathCRL,
                                                         SOPC_PKIProvider** ppPKI);
 
-/* pki_permissive.h */
-// SOPC_ReturnStatus SOPC_PKIPermissive_Create(SOPC_PKIProvider** ppPKI);
-
 /* XML Expat: Config and Address Space */
 bool SOPC_Config_Parse(FILE* fd, SOPC_S2OPC_Config* config);
 SOPC_AddressSpace* SOPC_UANodeSet_Parse(FILE* fd);

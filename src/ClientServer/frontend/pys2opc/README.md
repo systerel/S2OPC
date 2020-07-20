@@ -39,6 +39,3 @@ The path can be changed with `-o` or `--out-dir` option given to `pdoc`.
 
 - `pys2opc.PyS2OPC` is now split into two halves: `PyS2OPC_Client` and `PyS2OPC_Server`
 - `BaseConnectionHandler` is renamed to `BaseClientConnectionHandler`
-
-
-[modeline]: # ( vim: set syntax=markdown spell spelllang=en: )

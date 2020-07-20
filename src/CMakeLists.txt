@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(S2OPC VERSION 1.0.0 LANGUAGES C)
+project(S2OPC VERSION 1.0.0 LANGUAGES C Python)
 
 if(NOT S2OPC_COMMON_DEFS_SET)
   include(../CommonDefs.cmake)
@@ -12,7 +12,7 @@ else()
   message("-- S2OPC_PUBSUB_ONLY set")
   if(WITH_PYS2OPC)
     # When not adding ClientServer subdirectory, pys2opc is never included,
-    #  and the script cannot expresses its requirements.
+    #  and the script cannot express its requirements.
     message(SEND_ERROR "-- WITH_PYS2OPC requires Client and Server capabilities")
   endif()
 endif()

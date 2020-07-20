@@ -29,7 +29,7 @@ find_package(PythonInterp 3 REQUIRED)
 # The compilation is not done with clang-analyzer either, as this would analyze CFFI-generated code.
 if(WITH_PYS2OPC)
   # TODO:
-  # - don't use the placeholder
+  # - find how to predict the wheel name and remove the PYS2OPC_WHEEL_NAME option
   # - do a pys2opc_build.py.in to configure the lib through CMake, remove manual copy of pys2opc
   # - check library presence from s2opc's exports and not from flags defined in CommonDefs
   # - make this file really independent from the rest of the project, but this requires more properties to be exported from clientwrapper.

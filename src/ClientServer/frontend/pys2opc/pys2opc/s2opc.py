@@ -417,7 +417,6 @@ class PyS2OPC_Server(PyS2OPC):
     The Server side of the PyS2OPC library.
     When the toolkit is `PyS2OPC_Server.initialize`d for a server, it cannot be `PyS2OPC_Client.initialize`d for a client before it is `PyS2OPC_Server.clear`ed.
     """
-    #_dConfigurations = {}  # Stores server known configurations {Id: configurationParameters} (client and server configurations may have the same index)
     _adds_handler = None  # Instance of BaseAddressSpaceHandler
     _adds = None  # The address space loaded through the xml loader
     _config = None  # SOPC_S2OPC_Config

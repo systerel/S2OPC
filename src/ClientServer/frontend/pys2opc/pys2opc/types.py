@@ -457,6 +457,11 @@ class Variant:
     A SOPC_Variant can be converted to a Variant with the static method `pys2opc.types.Variant.from_sopc_variant`.
     A `Variant` can be converted to a SOPC_Variant with the method `pys2opc.types.Variant.to_sopc_variant`.
 
+    Please note that, for now, this object lacks the support for some of the types that can normally be encapsulated in OPC UA Variants:
+    ExpandedNodeId, ExtensionObject, DiagnosticInfo, Variant (you cannot have a Variant encapsulated in a Variant), or DataValue
+    (you cannot have a DataValue encapsulated in a Variant, but `DataValue` are available).
+    It fails for both parsing received OPC UA Variants and encoding `Variant`s to be sent.
+
     Attributes:
         variantType: Optional: The type of the `Variant` (see `pys2opc.types.VariantType`) when the value is produced from a SOPC_Variant*.
     """
