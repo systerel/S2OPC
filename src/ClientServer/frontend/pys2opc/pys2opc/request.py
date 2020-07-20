@@ -66,7 +66,8 @@ class Request:
         """
         if attributes is None:
             attributes = [AttributeId.Value for _ in nodeIds]
-        assert len(nodeIds) == len(attributes)
+        assert len(nodeIds) == len(attributes),\
+            'There should the same number of NodeIds, attributes, and datavalues when reading nodes'
         # TODO: protect this from invalid attributes ?
         payload = allocator_no_gc('OpcUa_ReadRequest *')  # The Toolkit takes ownership of this struct
         payload.encodeableType = EncodeableType.ReadRequest
@@ -103,7 +104,8 @@ class Request:
         """
         if attributes is None:
             attributes = [AttributeId.Value for _ in nodeIds]
-        assert len(nodeIds) == len(attributes) == len(datavalues)
+        assert len(nodeIds) == len(attributes) == len(datavalues),\
+            'There should the same number of NodeIds, attributes, and datavalues when writing nodes'
         if types:
             assert len(nodeIds) == len(types)
 
@@ -177,7 +179,8 @@ class Request:
 
         if attributes is None:
             attributes = [AttributeId.Value for _ in nodeIds]
-        assert len(nodeIds) == len(attributes) == len(datavalues)
+        assert len(nodeIds) == len(attributes) == len(datavalues),\
+            'There should the same number of NodeIds, attributes, and datavalues when reading nodes'
         if types:
             assert len(nodeIds) == len(types)
         else:

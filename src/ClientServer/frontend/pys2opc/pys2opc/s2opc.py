@@ -258,7 +258,7 @@ class PyS2OPC_Client(PyS2OPC):
                                  'token_target': token_target,
                                  'generic_response_callback': libsub._callback_client_event}
         status = libsub.SOPC_LibSub_ConfigureConnection([dConnectionParameters], pCfgId)
-        assert status == ReturnStatus.OK, 'Configuration failed with status {}.'.format(status)
+        assert status == ReturnStatus.OK, 'Configuration failed with status {}.'.format(ReturnStatus.get_both_from_id(status))
 
         cfgId = pCfgId[0]
         config = ClientConfiguration(cfgId, dConnectionParameters)
@@ -331,7 +331,7 @@ class PyS2OPC_Client(PyS2OPC):
                                  'token_target': token_target,
                                  'generic_response_callback': libsub._callback_client_event}
         status = libsub.SOPC_LibSub_ConfigureConnection([dConnectionParameters], pCfgId)
-        assert status == ReturnStatus.OK, 'Configuration failed with status {}.'.format(status)
+        assert status == ReturnStatus.OK, 'Configuration failed with status {}.'.format(ReturnStatus.get_both_from_id(status))
 
         cfgId = pCfgId[0]
         config = ClientConfiguration(cfgId, dConnectionParameters)
