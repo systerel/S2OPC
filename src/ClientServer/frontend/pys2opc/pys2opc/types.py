@@ -405,12 +405,14 @@ def uuid_to_guid(uid, no_gc=False):
 
 def datetime_to_float(datetime):
     """
-    SOPC_DateTime* (the number of 100 nanosecond intervals since January 1, 1601)
+    SOPC_DateTime (the number of 100 nanosecond intervals since January 1, 1601)
     to Python time (the floating point number of seconds since 01/01/1970, see help(time)).
+
+    Warning, as opposed to other sopc_type_to_python_type functions, this one does not accept pointers.
     """
-    nsec = datetime[0]
     # (datetime.date(1970,1,1) - datetime.date(1601,1,1)).total_seconds() * 1000 * 1000 * 10
-    return (nsec - 116444736000000000)/1e7
+    # When datetime is NULL, this results in some minutes that are due to the int->double conversion.
+    return (datetime - 116444736000000000)/1e7
 def float_to_datetime(t, no_gc=True):
     """
     Python timestamp to SOPC_DateTime*.
@@ -1070,8 +1072,8 @@ class DataValue:
         """
         Converts a SOPC_DataValue* or SOPC_DataValue to a Python `DataValue`.
         """
-        return DataValue(datetime_to_float(ffi.new('SOPC_DateTime*', datavalue.SourceTimestamp)),
-                         datetime_to_float(ffi.new('SOPC_DateTime*', datavalue.ServerTimestamp)),
+        return DataValue(datetime_to_float(datavalue.SourceTimestamp),
+                         datetime_to_float(datavalue.ServerTimestamp),
                          datavalue.Status, Variant.from_sopc_variant(ffi.addressof(datavalue.Value)))
 
     @staticmethod
@@ -1313,8 +1315,8 @@ if __name__ == '__main__':
     t = time.time()
     datetime = ffi.new('SOPC_DateTime*')
     datetime[0] = libsub.SOPC_Time_GetCurrentTimeUTC()
-    assert abs(datetime_to_float(datetime) - t) < .1
-    assert datetime_to_float(float_to_datetime(t)) == t
+    assert abs(datetime_to_float(datetime[0]) - t) < .1
+    assert datetime_to_float(float_to_datetime(t)[0]) == t
 
     # Thu Nov 30 04:57:25.694287 2034 UTC, unix timestamp is 2048471845.694287
     assert ntp_to_python(18285654237264005879) == 2048471845.694287  # Hopefully with this one there is no float-rounding errors.
