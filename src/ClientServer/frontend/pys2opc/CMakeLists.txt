@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.5)
-project (S2OPC_ClientServer_Samples LANGUAGES C)
+project (S2OPC_PyS2OPC)
 
 if(NOT S2OPC_COMMON_DEFS_SET)
   include(../../../../CommonDefs.cmake)
