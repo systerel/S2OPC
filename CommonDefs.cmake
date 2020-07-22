@@ -164,6 +164,8 @@ option(WITH_OSS_FUZZ "Add the fuzzers target when building for OSS-Fuzz" OFF)
 option(WITH_PYS2OPC "Also builds PyS2OPC" OFF)
 # S2OPC client/server library scope option
 option(WITH_NANO_EXTENDED "Use Nano profile with additional services out of Nano scope" OFF)
+# option to load static security data for embedded systems without filesystems
+option(WITH_STATIC_SECURITY_DATA "Use static security data" OFF)
 
 # Check project and option(s) are compatible
 

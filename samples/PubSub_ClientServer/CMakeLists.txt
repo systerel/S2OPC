@@ -25,8 +25,6 @@ option(ENABLE_SAMPLES "Build the S2OPC PubSub library samples" ON)
 
 option(PUBSUB_STATIC_CONFIG "Load PubSub configuration statically" OFF)
 
-option(WITH_STATIC_SECURITY_DATA "Load PubSub security keys statically" OFF)
-
 ## Functions used to generate config data for samples ##
 
 # S2OPC PubSub XML config static parser

@@ -35,9 +35,6 @@ endif()
 
 #### Tests for S2OPC library and extension libraries ####
 
-# Options reserved to tests
-option(WITH_STATIC_SECURITY_DATA "Use static security data for test" OFF)
-
 if(WIN32)
     set(ENV_PATH_SEP "\;")
 else()
