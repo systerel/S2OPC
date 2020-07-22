@@ -54,7 +54,7 @@ void user_authorization_bs__get_user_authorization(
     if (SOPC_STATUS_OK != status)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "SOPC_UserAuthorization_IsAuthorizedOperation failed with status %i\n", status);
+                               "SOPC_UserAuthorization_IsAuthorizedOperation failed with status %i\n", (int) status);
         *user_authorization_bs__p_authorized = false;
     }
     else if (!*user_authorization_bs__p_authorized)

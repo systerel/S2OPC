@@ -23,7 +23,7 @@
 
 static WSADATA wsaData;
 
-bool SOPC_Socket_Network_Initialize()
+bool SOPC_Socket_Network_Initialize(void)
 {
     bool status = true;
     int result = WSAStartup(MAKEWORD(2, 2), &wsaData);
@@ -34,7 +34,7 @@ bool SOPC_Socket_Network_Initialize()
     return status;
 }
 
-bool SOPC_Socket_Network_Clear()
+bool SOPC_Socket_Network_Clear(void)
 {
     bool status = true;
     int result = WSACleanup();

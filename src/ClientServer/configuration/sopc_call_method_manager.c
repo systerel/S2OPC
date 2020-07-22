@@ -64,7 +64,7 @@ static SOPC_MethodCallFunc* SOPC_MethodCallManager_Get(SOPC_MethodCallManager* m
     return methodFunc;
 }
 
-SOPC_MethodCallManager* SOPC_MethodCallManager_Create()
+SOPC_MethodCallManager* SOPC_MethodCallManager_Create(void)
 {
     SOPC_MethodCallManager* mcm = SOPC_Calloc(1, sizeof(SOPC_MethodCallManager));
     if (NULL == mcm)

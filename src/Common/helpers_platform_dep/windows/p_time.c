@@ -23,7 +23,7 @@
 #include "sopc_builtintypes.h"
 #include "sopc_time.h"
 
-int64_t SOPC_Time_GetCurrentTimeUTC()
+int64_t SOPC_Time_GetCurrentTimeUTC(void)
 {
     int64_t result = 0;
     FILETIME fileCurrentTime;
@@ -45,7 +45,7 @@ int64_t SOPC_Time_GetCurrentTimeUTC()
     return result;
 }
 
-SOPC_TimeReference SOPC_TimeReference_GetCurrent()
+SOPC_TimeReference SOPC_TimeReference_GetCurrent(void)
 {
     /* Extract of GetTickCount64 function documentation:
      *

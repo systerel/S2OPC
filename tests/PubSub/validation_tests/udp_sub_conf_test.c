@@ -76,7 +76,7 @@ static bool SOPC_SetTargetVariables_Test(OpcUa_WriteValue* nodesToWrite, int32_t
 static void stateChangedCb(SOPC_PubSubState state)
 {
     stateChanged++;
-    printf("state changed to '%d' !\n", state);
+    printf("state changed to '%u' !\n", state);
     if (SOPC_Atomic_Int_Get(&stop))
     {
         if (SOPC_PubSubState_Disabled != state)

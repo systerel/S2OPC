@@ -30,6 +30,7 @@
 #include "argparse.h"
 #include <assert.h>
 #include <errno.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -297,6 +298,9 @@ int argparse_parse(struct argparse* self, int argc, char** argv)
                 break;
             case -2:
                 goto unknown;
+            default:
+            	assert(false);
+            	break;
             }
             while (self->optvalue)
             {
@@ -306,6 +310,9 @@ int argparse_parse(struct argparse* self, int argc, char** argv)
                     break;
                 case -2:
                     goto unknown;
+                default:
+                	assert(false);
+                	break;
                 }
             }
             continue;
@@ -324,6 +331,9 @@ int argparse_parse(struct argparse* self, int argc, char** argv)
             break;
         case -2:
             goto unknown;
+        default:
+        	assert(false);
+        	break;
         }
         continue;
 

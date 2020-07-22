@@ -27,7 +27,7 @@ const SOPC_Build_Info sopc_common_build_info = {
     .buildBuildDate = ""
 };
 
-SOPC_Build_Info SOPC_Common_GetBuildInfo()
+SOPC_Build_Info SOPC_Common_GetBuildInfo(void)
 {
     return sopc_common_build_info;
 }

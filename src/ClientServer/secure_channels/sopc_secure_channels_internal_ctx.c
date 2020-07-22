@@ -71,7 +71,7 @@ SOPC_SecureConnection* SC_GetConnection(uint32_t connectionIdx)
     return scConnection;
 }
 
-void SOPC_SecureChannelsInternalContext_Clear()
+void SOPC_SecureChannelsInternalContext_Clear(void)
 {
     SOPC_Looper_Delete(secureChannelsLooper);
 }

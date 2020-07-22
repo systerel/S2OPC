@@ -35,7 +35,7 @@ void SOPC_Sockets_EnqueueEvent(SOPC_Sockets_InputEvent socketEvent, uint32_t id,
     }
 }
 
-void SOPC_Sockets_Initialize()
+void SOPC_Sockets_Initialize(void)
 {
     bool init = SOPC_Socket_Network_Initialize();
     assert(true == init);
@@ -48,7 +48,7 @@ void SOPC_Sockets_SetEventHandler(SOPC_EventHandler* handler)
     SOPC_Atomic_Ptr_Set((void**) &socketsEventHandler, handler);
 }
 
-void SOPC_Sockets_Clear()
+void SOPC_Sockets_Clear(void)
 {
     SOPC_SocketsNetworkEventMgr_Clear();
     SOPC_SocketsInternalContext_Clear();

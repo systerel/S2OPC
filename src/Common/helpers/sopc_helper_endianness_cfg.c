@@ -76,7 +76,7 @@ static SOPC_Endianness compute_endianness_float(void)
     return endianness;
 }
 
-void SOPC_Helper_EndiannessCfg_Initialize()
+void SOPC_Helper_EndiannessCfg_Initialize(void)
 {
     endianness_integer = compute_endianness_integer();
     endianness_float = compute_endianness_float();

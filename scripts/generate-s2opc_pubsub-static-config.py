@@ -124,7 +124,7 @@ def handlePubSub(pubSub, result):
     # Create configuration and define local variable
     ##
     result.add("""
-SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic()
+SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
 {
     bool alloc = true;
     SOPC_PubSubConfiguration* config = SOPC_PubSubConfiguration_Create();

@@ -1623,7 +1623,7 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
         {
             SOPC_Logger_TraceError(
                 SOPC_LOG_MODULE_CLIENTSERVER,
-                "ScStateMgr OPN: invalid security parameters requested=%d epCfgIdx=%" PRIu32 " scCfgIdx=%" PRIu32,
+                "ScStateMgr OPN: invalid security parameters requested=%u epCfgIdx=%" PRIu32 " scCfgIdx=%" PRIu32,
                 opnReq->SecurityMode, scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
             result = false;
             //*errorStatus = OpcUa_BadSecurityModeRejected; => not a TCP error message authorized error
@@ -2980,6 +2980,7 @@ void SOPC_SecureConnectionStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
                                                  uintptr_t auxParam)
 {
     (void) params;
+    SOPC_SecureConnection* scConnection = NULL;
 
     switch (event)
     {
@@ -2992,7 +2993,7 @@ void SOPC_SecureConnectionStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
                                "ScStateMgr: SOCKET_CONNECTION scIdx=%" PRIu32 " socketIdx=%" PRIuPTR, eltId, auxParam);
         assert(auxParam <= UINT32_MAX);
 
-        SOPC_SecureConnection* scConnection = SC_GetConnection(eltId);
+        scConnection = SC_GetConnection(eltId);
 
         if (scConnection == NULL || scConnection->state != SECURE_CONNECTION_STATE_TCP_INIT)
         {

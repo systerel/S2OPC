@@ -108,6 +108,9 @@ bool SOPC_User_Equal(const SOPC_User* left, const SOPC_User* right)
             return true;
         case USER_USERNAME:
             return SOPC_String_Equal(&left->data.username, &right->data.username);
+        default:
+            assert(false && "Unknown Type");
+            break;
         }
     }
     return false;

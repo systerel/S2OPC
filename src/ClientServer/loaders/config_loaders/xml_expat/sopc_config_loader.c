@@ -1387,6 +1387,9 @@ static void end_element_handler(void* user_data, const XML_Char* name)
     case PARSE_START:
         assert(false && "Got end_element callback when in PARSE_START state.");
         break;
+    default:
+        assert(false && "Unknown state.");
+        break;
     }
 }
 

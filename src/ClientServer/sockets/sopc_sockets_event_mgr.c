@@ -551,7 +551,7 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_Sockets_InputEvent socketEvent,
         {
             SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "SocketEvent: SOCKET_CLOSE ignored due to socketState=%d connectionIdx=%" PRIu32,
-                                   socketElt->state, socketElt->connectionId);
+                                   (int) socketElt->state, socketElt->connectionId);
         }
         break;
     case SOCKET_CLOSE_SERVER:
@@ -571,7 +571,7 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_Sockets_InputEvent socketEvent,
         {
             SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "SocketEvent: SOCKET_CLOSE ignored due to socketState=%d connectionIdx=%" PRIu32,
-                                   socketElt->state, socketElt->connectionId);
+                                   (int) socketElt->state, socketElt->connectionId);
         }
         break;
     case SOCKET_WRITE:
@@ -646,7 +646,7 @@ void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent eve
         {
             SOPC_Logger_TraceWarning(
                 SOPC_LOG_MODULE_CLIENTSERVER,
-                "SocketsMgr: refusing new connection since maximum number of socket reached (%" PRIu32 "/%u)",
+                "SocketsMgr: refusing new connection since maximum number of socket reached (%" PRIu32 "/%d)",
                 socketElt->listenerConnections, SOPC_MAX_SOCKETS_CONNECTIONS);
         }
         else

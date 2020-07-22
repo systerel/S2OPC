@@ -265,7 +265,7 @@ static void* SOPC_Internal_ThreadLoop(void* arg)
     return NULL;
 }
 
-void SOPC_EventTimer_Initialize()
+void SOPC_EventTimer_Initialize(void)
 {
     if (is_initialized())
     {
@@ -293,7 +293,7 @@ void SOPC_EventTimer_Initialize()
     }
 }
 
-void SOPC_EventTimer_Clear()
+void SOPC_EventTimer_Clear(void)
 {
     SOPC_Atomic_Int_Set(&stop, 1);
     Mutex_Lock(&timersMutex);

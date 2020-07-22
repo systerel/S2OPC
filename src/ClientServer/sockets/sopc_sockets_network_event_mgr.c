@@ -336,18 +336,18 @@ static void SOPC_SocketsNetworkEventMgr_LoopThreadStop(void)
     SOPC_Atomic_Int_Set(&receptionThread.initDone, false);
 }
 
-void SOPC_SocketsNetworkEventMgr_Initialize()
+void SOPC_SocketsNetworkEventMgr_Initialize(void)
 {
     bool result = SOPC_SocketsNetworkEventMgr_LoopThreadStart();
     assert(result);
 }
 
-void SOPC_SocketsNetworkEventMgr_Clear()
+void SOPC_SocketsNetworkEventMgr_Clear(void)
 {
     SOPC_SocketsNetworkEventMgr_LoopThreadStop();
 }
 
-void SOPC_SocketsNetworkEventMgr_InterruptForInputEvent()
+void SOPC_SocketsNetworkEventMgr_InterruptForInputEvent(void)
 {
     const uint8_t data = 0;
     uint32_t length = 1;

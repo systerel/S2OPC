@@ -55,7 +55,7 @@ static void init_mcast_addrs(void)
     char* addr = SOPC_Calloc(1, sizeof(MCAST_ADDR));
     for (int i = 0; i < NB_ADDRS; i++)
     {
-        int res = snprintf(addr, sizeof(MCAST_ADDR), "232.1.2.%03u", i + 100);
+        int res = snprintf(addr, sizeof(MCAST_ADDR), "232.1.2.%03d", i + 100);
         assert(sizeof(MCAST_ADDR) - 1 == res);
         addressArr[i] = SOPC_UDP_SocketAddress_Create(false, addr, MCAST_PORT);
         assert(NULL != addressArr[i]);

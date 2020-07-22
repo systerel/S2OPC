@@ -151,7 +151,7 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
         if (0 == SOPC_SLinkedList_GetLength(monitoredItemIdFreed))
         {
             // No free unique Id, create a new one
-            if (monitoredItemIdMax < UINTPTR_MAX && monitoredItemIdMax < UINT32_MAX)
+            if (monitoredItemIdMax < UINTPTR_MAX) // Note: we already enforced that UINTPTR_MAX >= UINT32_MAX
             {
                 monitoredItemIdMax++;
                 monitItem->monitoredItemId = (uint32_t) monitoredItemIdMax;
@@ -283,8 +283,8 @@ void monitored_item_pointer_bs__is_notification_triggered(
             SOPC_Logger_TraceError(
                 SOPC_LOG_MODULE_CLIENTSERVER,
                 "MonitoredItem notification trigger: comparison of data values failed with (type, array type)=(%d, %d)",
-                monitored_item_pointer_bs__p_new_wv_pointer->Value.Value.BuiltInTypeId,
-                monitored_item_pointer_bs__p_new_wv_pointer->Value.Value.ArrayType);
+                (int) monitored_item_pointer_bs__p_new_wv_pointer->Value.Value.BuiltInTypeId,
+                (int) monitored_item_pointer_bs__p_new_wv_pointer->Value.Value.ArrayType);
         }
     }
 }

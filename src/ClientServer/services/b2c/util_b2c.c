@@ -374,7 +374,7 @@ void util_message__get_encodeable_type(const constants__t_msg_type_i message__ms
         break;
     default:
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "util_message__get_encodeable_type: unknown type %d",
-                               message__msg_type);
+                               (int) message__msg_type);
         *reqEncType = NULL;
         *respEncType = NULL;
     }
@@ -932,7 +932,8 @@ constants_statuscodes_bs__t_StatusCode_i util_return_status__C_to_status_code_B(
     default:
         SOPC_Logger_TraceWarning(
             SOPC_LOG_MODULE_CLIENTSERVER,
-            "util_return_status__C_to_status_code_B: internal error generated from return status code %d", status);
+            "util_return_status__C_to_status_code_B: internal error generated from return status code %d",
+            (int) status);
         return constants_statuscodes_bs__e_sc_bad_internal_error;
     }
 }

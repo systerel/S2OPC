@@ -182,7 +182,7 @@ void SOPC_UDP_SocketsMgr_Initialize(void** sockContextArray,
     assert(result);
 }
 
-void SOPC_UDP_SocketsMgr_Clear()
+void SOPC_UDP_SocketsMgr_Clear(void)
 {
     SOPC_SocketsNetworkEventMgr_LoopThreadStop();
 }

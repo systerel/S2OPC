@@ -303,7 +303,7 @@ void service_register_server2_set_bs__get_registered_server2_counter_reset_time(
     *service_register_server2_set_bs__p_timestamp = resetTime;
 }
 
-void service_register_server2_set_bs__service_register_server2_set_bs_UNINITIALISATION()
+void service_register_server2_set_bs__service_register_server2_set_bs_UNINITIALISATION(void)
 {
     if (NULL != registeredServer2List)
     {

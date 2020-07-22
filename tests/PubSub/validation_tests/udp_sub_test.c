@@ -45,8 +45,8 @@ static void printVariant(const SOPC_Variant* variant)
 {
     time_t time;
 
-    printf("   - Variant Type %d\n", variant->BuiltInTypeId);
-    printf("   - Variant Array Type %d\n", variant->ArrayType);
+    printf("   - Variant Type %d\n", (int) variant->BuiltInTypeId);
+    printf("   - Variant Array Type %d\n", (int) variant->ArrayType);
     switch (variant->BuiltInTypeId)
     {
     case SOPC_Byte_Id:
@@ -101,7 +101,7 @@ static void printPublisherId(const SOPC_UADP_NetworkMessage* uadp_nm)
         printf("Publisher Id:\n - Enabled %d\n - Type String not managed\n", uadp_nm->conf.PublisherIdFlag);
         break;
     default:
-        printf("Publisher Id:\n - Enabled %d\n - Type not managed %d\n", uadp_nm->conf.PublisherIdFlag,
+        printf("Publisher Id:\n - Enabled %d\n - Type not managed %u\n", uadp_nm->conf.PublisherIdFlag,
                publisher_id->type);
     }
 }
@@ -117,7 +117,7 @@ static void printNetworkMessage(const SOPC_UADP_NetworkMessage* uadp_nm)
         printf("Group Header Enabled %d\n", uadp_nm->conf.GroupHeaderFlag);
         printf("Writer Group Id:\n - Enabled %d\n - Value %d\n", uadp_nm->conf.GroupIdFlag,
                SOPC_Dataset_LL_NetworkMessage_Get_GroupId(nm));
-        printf("Writer Group Version:\n - Enabled %d\n - Value %d\n", uadp_nm->conf.GroupVersionFlag,
+        printf("Writer Group Version:\n - Enabled %d\n - Value %u\n", uadp_nm->conf.GroupVersionFlag,
                SOPC_Dataset_LL_NetworkMessage_Get_GroupVersion(nm));
         uint8_t nbDsm = SOPC_Dataset_LL_NetworkMessage_Nb_DataSetMsg(nm);
         printf("Nb DataSetMessage %d\n", nbDsm);

@@ -38,7 +38,7 @@ static uint32_t session_pending_requests_nb[SOPC_MAX_SESSIONS + 1];
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
-void session_request_handle_bs__INITIALISATION()
+void session_request_handle_bs__INITIALISATION(void)
 {
     memset(client_requests, constants__c_session_indet,
            (SOPC_MAX_PENDING_REQUESTS + 1) * sizeof(constants__t_session_i));

@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
 #include "sopc_time.h"
@@ -40,7 +41,10 @@ const char* SOPC_CSTRING_LEVEL_DEBUG = "(Debug) ";
 const char* SOPC_CSTRING_LEVEL_UNKNOWN = "(?) ";
 
 static bool uniquePrefixSet = false;
+
+SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
 static char* SOPC_CSTRING_UNIQUE_LOG_PREFIX = "UNINIT_LOG";
+SOPC_GCC_DIAGNOSTIC_RESTORE
 
 typedef struct SOPC_Log_File
 {
@@ -64,7 +68,7 @@ struct SOPC_Log_Instance
     bool started;
 };
 
-void SOPC_Log_Initialize()
+void SOPC_Log_Initialize(void)
 {
     SOPC_CSTRING_UNIQUE_LOG_PREFIX = SOPC_Time_GetStringOfCurrentTimeUTC(true);
     uniquePrefixSet = true;
@@ -371,7 +375,7 @@ bool SOPC_Log_SetLogLevel(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level)
                 res = fprintf(pLogInst->file->pFile, "LOG LEVEL SET TO 'DEBUG'\n");
                 break;
             default:
-                res = fprintf(pLogInst->file->pFile, "LOG LEVEL SET TO '?(%d)'\n", level);
+                res = fprintf(pLogInst->file->pFile, "LOG LEVEL SET TO '?(%u)'\n", level);
                 break;
             }
             if (res > 0)

@@ -650,6 +650,9 @@ void Helpers_LoggerStdout(const SOPC_Log_Level log_level, const SOPC_LibSub_CstS
     case SOPC_LOG_LEVEL_DEBUG:
         printf("Debug");
         break;
+    default:
+        assert(false && "Unkown log level.");
+        break;
     }
     printf(": %s\n", text);
 }

@@ -32,7 +32,7 @@
 static const uint64_t SOPC_SECOND_TO_NANOSECONDS = 1000000000;   // 10^9
 static const uint64_t SOPC_MILLISECOND_TO_NANOSECONDS = 1000000; // 10^6
 
-int64_t SOPC_Time_GetCurrentTimeUTC()
+int64_t SOPC_Time_GetCurrentTimeUTC(void)
 {
     struct timespec currentTime;
     int64_t dt = 0;
@@ -61,7 +61,7 @@ int64_t SOPC_Time_GetCurrentTimeUTC()
     return dt;
 }
 
-SOPC_TimeReference SOPC_TimeReference_GetCurrent()
+SOPC_TimeReference SOPC_TimeReference_GetCurrent(void)
 {
     /* Extract of clock_gettime documentation:
      *

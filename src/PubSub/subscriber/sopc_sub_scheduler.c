@@ -379,7 +379,7 @@ static void uninit_sub_scheduler_ctx(void)
     for (uint32_t i = 0; i < schedulerCtx.nbConnections; i++)
     {
         schedulerCtx.transport[i].fctClear(&schedulerCtx.transport[i]);
-        printf("# Info: transport context destroyed for connection #%d (subscriber). \n", i);
+        printf("# Info: transport context destroyed for connection #%u (subscriber). \n", i);
     }
     printf("# Info: Destroy RT Subscriber. \r\n");
     SOPC_RT_Subscriber_Destroy(&schedulerCtx.pRTSubscriber);

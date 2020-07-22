@@ -594,6 +594,10 @@ static void Server_Event_Toolkit(SOPC_App_Com_Event event, uint32_t idOrStatus, 
  {
      (void) idOrStatus;
      SOPC_EncodeableType* message_type = NULL;
+     OpcUa_WriteResponse* writeResponse = NULL;
+     OpcUa_ReadResponse* response = NULL;
+     SOPC_ReturnStatus statusCopy = SOPC_STATUS_NOK;
+     SOPC_PubSheduler_GetVariableRequestContext* ctx = NULL;
 
      switch (event)
      {
@@ -603,25 +607,15 @@ static void Server_Event_Toolkit(SOPC_App_Com_Event event, uint32_t idOrStatus, 
          return;
      case SE_LOCAL_SERVICE_RESPONSE:
          message_type = *((SOPC_EncodeableType**) param);
-         /* Listen for WriteResponses, which only contain status codes */
-        /*if (message_type == &OpcUa_WriteResponse_EncodeableType)
-        {
-            OpcUa_WriteResponse* write_response = param;
-            bool ok = (write_response->ResponseHeader.ServiceResult == SOPC_GoodGenericStatus);
 
-            for (int32_t i = 0; i < write_response->NoOfResults && ok; ++i)
-            {
-                ok &= (write_response->Results[i] == SOPC_GoodGenericStatus);
-            }
-        }*/
         /* Listen for ReadResponses, used in GetSourceVariables */
-        SOPC_PubSheduler_GetVariableRequestContext* ctx = (SOPC_PubSheduler_GetVariableRequestContext*) appContext;
+        ctx = (SOPC_PubSheduler_GetVariableRequestContext*) appContext;
         if (message_type == &OpcUa_ReadResponse_EncodeableType && NULL != ctx)
         {
             Mutex_Lock(&ctx->mut);
 
-            SOPC_ReturnStatus statusCopy = SOPC_STATUS_OK;
-            OpcUa_ReadResponse* response = (OpcUa_ReadResponse*) param;
+            statusCopy = SOPC_STATUS_OK;
+            response = (OpcUa_ReadResponse*) param;
 
             if (NULL != response) // Response if deleted by scheduler !!!
             {
@@ -655,7 +649,7 @@ static void Server_Event_Toolkit(SOPC_App_Com_Event event, uint32_t idOrStatus, 
         }
         else if (message_type == &OpcUa_WriteResponse_EncodeableType)
         {
-            OpcUa_WriteResponse* writeResponse = param;
+            writeResponse = param;
             // Service should have succeeded
             assert(0 == (SOPC_GoodStatusOppositeMask & writeResponse->ResponseHeader.ServiceResult));
         }
@@ -789,7 +783,7 @@ static void Server_Event_Write(OpcUa_WriteValue* pwv)
     }
 }
 
-SOPC_Array* Server_GetConfigurationPaths()
+SOPC_Array* Server_GetConfigurationPaths(void)
 {
     SOPC_Array* array = SOPC_Array_Create(sizeof(char*), 1, NULL);
 

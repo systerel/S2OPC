@@ -2439,7 +2439,7 @@ START_TEST(test_ua_encoder_basic_types)
     SOPC_Buffer_SetPosition(buffer, 0); // Reset position for reading
     status = SOPC_Float_Read(&vfloat, buffer, 0);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-    ck_assert(vfloat == -6.5);
+    ck_assert(fabsf(vfloat + (float) 6.5) <= 0);
     //// Degraded read
     status = SOPC_Float_Read(NULL, buffer, 0);
     ck_assert(status != SOPC_STATUS_OK);
@@ -2473,7 +2473,8 @@ START_TEST(test_ua_encoder_basic_types)
     SOPC_Buffer_SetPosition(buffer, 0); // Reset position for reading
     status = SOPC_Double_Read(&vdouble, buffer, 0);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-    ck_assert(vdouble == -6.5);
+    ck_assert(fabs(vdouble + (double) 6.5) <= 0);
+
     //// Degraded read
     status = SOPC_Double_Read(NULL, buffer, 0);
     ck_assert(status != SOPC_STATUS_OK);

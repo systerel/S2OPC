@@ -264,7 +264,7 @@ static void SOPC_PubScheduler_Context_Clear(void)
             if (pubSchedulerCtx.transport[i].fctClear != NULL)
             {
                 pubSchedulerCtx.transport[i].fctClear(&pubSchedulerCtx.transport[i]);
-                printf("# Info: transport context destroyed for connection #%d (publisher). \n",
+                printf("# Info: transport context destroyed for connection #%u (publisher). \n",
                        pubSchedulerCtx.nbConnection);
             }
         }
@@ -300,7 +300,7 @@ static void SOPC_PubScheduler_MessageCtx_Array_Clear(void)
         /* Destroy message */
         for (uint32_t i = 0; i < pubSchedulerCtx.messages.current; i++)
         {
-            printf("# Info: Network message #%d. destroyed \n", i);
+            printf("# Info: Network message #%u. destroyed \n", i);
             SOPC_Dataset_LL_NetworkMessage_Delete(pubSchedulerCtx.messages.array[i].message);
             pubSchedulerCtx.messages.array[i].message = NULL;
             SOPC_PubSub_Security_Clear(pubSchedulerCtx.messages.array[i].security);
@@ -516,7 +516,7 @@ static void* SOPC_RT_Publisher_ThreadBeatHeartCallback(void* arg)
         resultUpdateThread = SOPC_RT_Publisher_HeartBeat(pubSchedulerCtx.pRTPublisher, beatHeart++);
         if (resultUpdateThread != SOPC_STATUS_OK)
         {
-            printf("# RT Publisher tick thread: SOPC_RT_Publisher_BeatHeart error = %d\r\n", resultUpdateThread);
+            printf("# RT Publisher tick thread: SOPC_RT_Publisher_BeatHeart error = %d\r\n", (int) resultUpdateThread);
         }
 
         SOPC_Sleep(SOPC_TIMER_RESOLUTION_MS);
@@ -862,7 +862,7 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config, SOPC_PubSourceVar
                             }
                             else
                             {
-                                printf("# RT Publisher initializer : Creation of rt publisher message handle = %d\r\n",
+                                printf("# RT Publisher initializer : Creation of rt publisher message handle = %u\r\n",
                                        msgctx->rt_publisher_msg_id);
                             }
                         }
@@ -879,7 +879,7 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config, SOPC_PubSourceVar
 
             if (SOPC_STATUS_OK != resultSOPC)
             {
-                printf("# Error, can't initialize RT Publisher : %d", resultSOPC);
+                printf("# Error, can't initialize RT Publisher : %d", (int) resultSOPC);
             }
             else
             {

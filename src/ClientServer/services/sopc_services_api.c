@@ -54,7 +54,7 @@ static struct
     bool requestedFlag;
 } closeAllConnectionsSync = {.requestedFlag = false, .allDisconnectedFlag = false};
 
-SOPC_EventHandler* SOPC_Services_GetEventHandler()
+SOPC_EventHandler* SOPC_Services_GetEventHandler(void)
 {
     return servicesEventHandler;
 }
@@ -79,6 +79,8 @@ static void onSecureChannelEvent(SOPC_EventHandler* handler,
     (void) handler;
     SOPC_SecureChannels_OutputEvent scEvent = (SOPC_SecureChannels_OutputEvent) event;
     bool bres = false;
+    uint32_t channel_config_idx = 0;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     switch (scEvent)
     {
@@ -92,7 +94,7 @@ static void onSecureChannelEvent(SOPC_EventHandler* handler,
         // params = channel configuration index
         // auxParam == connection Id
         assert(id <= INT32_MAX);
-        uint32_t channel_config_idx = (uint32_t) params;
+        channel_config_idx = (uint32_t) params;
         assert(channel_config_idx <= constants__t_channel_config_idx_i_max);
         assert(auxParam <= constants__t_channel_i_max);
 
@@ -110,12 +112,12 @@ static void onSecureChannelEvent(SOPC_EventHandler* handler,
         break;
     case EP_CLOSED:
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "ServicesMgr: SC_EP_CLOSED epCfgIdx=%" PRIu32 " returnStatus=%" PRIdPTR, id, auxParam);
+                               "ServicesMgr: SC_EP_CLOSED epCfgIdx=%" PRIu32 " returnStatus=%" PRIuPTR, id, auxParam);
         // id == endpoint configuration index
         // params = NULL
         // auxParam == status
         // => B model entry point to add
-        SOPC_ReturnStatus status = SOPC_App_EnqueueComEvent(SE_CLOSED_ENDPOINT, id, (uintptr_t) NULL, auxParam);
+        status = SOPC_App_EnqueueComEvent(SE_CLOSED_ENDPOINT, id, (uintptr_t) NULL, auxParam);
         assert(status == SOPC_STATUS_OK);
         break;
     case SC_CONNECTED:
@@ -184,6 +186,8 @@ static void onSecureChannelEvent(SOPC_EventHandler* handler,
         assert(auxParam <= SOPC_MAX_PENDING_REQUESTS);
         io_dispatch_mgr__client_request_timeout(id, (uint32_t) auxParam);
         break;
+    default:
+        assert(false && "Unknown event");
     }
 }
 
@@ -200,6 +204,10 @@ static void onServiceEvent(SOPC_EventHandler* handler,
     SOPC_EncodeableType* encType = NULL;
     bool bres = false;
     void* msg = NULL;
+    OpcUa_WriteValue* old_value = NULL;
+    OpcUa_WriteValue* new_value = NULL;
+    SOPC_Internal_AsyncSendMsgData* msg_data;
+
     switch (event)
     {
     case SE_TO_SE_SC_ALL_DISCONNECTED:
@@ -250,8 +258,8 @@ static void onServiceEvent(SOPC_EventHandler* handler,
 
         assert((void*) params != NULL);
 
-        OpcUa_WriteValue* old_value = (void*) params;
-        OpcUa_WriteValue* new_value = (void*) auxParam;
+        old_value = (void*) params;
+        new_value = (void*) auxParam;
         assert(old_value != NULL);
         assert(new_value != NULL);
 
@@ -272,7 +280,7 @@ static void onServiceEvent(SOPC_EventHandler* handler,
          */
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
                                "ServicesMgr: SE_TO_SE_SERVER_INACTIVATED_SESSION_PRIO session=%" PRIu32
-                               " sessionState=%" PRIdPTR,
+                               " sessionState=%" PRIuPTR,
                                id, auxParam);
 
         io_dispatch_mgr__internal_server_inactive_session_prio_event((constants__t_session_i) id,
@@ -294,7 +302,7 @@ static void onServiceEvent(SOPC_EventHandler* handler,
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
                                "ServicesMgr: SE_TO_SE_SERVER_SEND_ASYNC_PUB_RESP_PRIO session=%" PRIu32, id);
 
-        SOPC_Internal_AsyncSendMsgData* msg_data = (void*) params;
+        msg_data = (void*) params;
         assert(msg_data != NULL);
 
         io_dispatch_mgr__internal_server_send_publish_response_prio_event(
@@ -539,13 +547,13 @@ void SOPC_Services_Initialize(SOPC_SetListenerFunc setSecureChannelsListener)
     setSecureChannelsListener(secureChannelsEventHandler);
 }
 
-void SOPC_Services_ToolkitConfigured()
+void SOPC_Services_ToolkitConfigured(void)
 {
     /* Init B model */
     INITIALISATION();
 }
 
-void SOPC_Services_PreClear()
+void SOPC_Services_PreClear(void)
 {
     Mutex_Lock(&closeAllConnectionsSync.mutex);
     closeAllConnectionsSync.requestedFlag = true;
@@ -560,7 +568,7 @@ void SOPC_Services_PreClear()
     Condition_Clear(&closeAllConnectionsSync.cond);
 }
 
-void SOPC_Services_Clear()
+void SOPC_Services_Clear(void)
 {
     io_dispatch_mgr__UNINITIALISATION();
 

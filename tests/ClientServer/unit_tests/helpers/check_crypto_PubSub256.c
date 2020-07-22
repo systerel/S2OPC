@@ -290,7 +290,7 @@ START_TEST(test_crypto_generate_nbytes_PubSub256)
 }
 END_TEST
 
-Suite* tests_make_suite_crypto_PubSub256()
+Suite* tests_make_suite_crypto_PubSub256(void)
 {
     Suite* s = NULL;
     TCase *tc_crypto_symm = NULL, *tc_rands = NULL;

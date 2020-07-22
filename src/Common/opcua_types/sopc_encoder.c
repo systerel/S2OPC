@@ -1148,6 +1148,8 @@ static SOPC_NodeId_DataEncoding GetNodeIdDataEncoding(const SOPC_NodeId* nodeId)
     case SOPC_IdentifierType_ByteString:
         encodingEnum = SOPC_NodeIdEncoding_ByteString;
         break;
+    default:
+        break;
     }
     return encodingEnum;
 }
@@ -1902,6 +1904,8 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Write(const SOPC_ExtensionObject* extObj,
                     SOPC_Buffer_SetPosition(buf, curPos);
                 }
             }
+            break;
+        default:
             break;
         }
     }

@@ -244,6 +244,9 @@ static void* cbmsgBoxRead1(void* arg)
         case PERIOD_MS_READER_200MS:
             SOPC_Sleep(PERIOD_MS_READER_200MS);
             break;
+        default:
+            assert(false && "Unexpected periopd.");
+            break;
         }
     }
     return NULL;
@@ -325,6 +328,9 @@ static void* cbmsgBoxRead2(void* arg)
             break;
         case PERIOD_MS_READER_200MS:
             SOPC_Sleep(PERIOD_MS_READER_200MS);
+            break;
+        default:
+            assert(false && "Unexpected periopd.");
             break;
         }
     }
@@ -554,7 +560,7 @@ static void* cbSubscriberReaderCallback(void* arg)
                         switch (clientId)
                         {
                         case 1:
-                            sprintf(msgCmpRead2, "Forward on output %d : %s %d", i + 1, "Hello world", cpt[i]++);
+                            sprintf(msgCmpRead2, "Forward on output %u : %s %u", i + 1, "Hello world", cpt[i]++);
                             if (strcmp((char*) pData, msgCmpRead2) == 0)
                             {
                                 cptMsgRead2++;
@@ -565,7 +571,7 @@ static void* cbSubscriberReaderCallback(void* arg)
 #endif
                             break;
                         case 0:
-                            sprintf(msgCmpRead1, "Forward on output %d : %s %d", i + 1, "Hello world", cpt[i]++);
+                            sprintf(msgCmpRead1, "Forward on output %u : %s %u", i + 1, "Hello world", cpt[i]++);
                             if (strcmp((char*) pData, msgCmpRead1) == 0)
                             {
                                 cptMsgRead1++;
@@ -574,6 +580,9 @@ static void* cbSubscriberReaderCallback(void* arg)
                             printf("\r\nRT SUBSCRIBER | READER | success = %d | pin num = %d | client %u read %s\r\n",
                                    cptMsgRead1, i, clientId, (char*) pData);
 #endif
+                            break;
+                        default:
+                            assert(false && "unknown client id");
                             break;
                         }
                     }
@@ -682,7 +691,7 @@ static int SOPC_TEST_RT_SUBSCRIBER(void)
         printf("\r\nRT SUBSCRIBER TEST ...\r\n");
         for (volatile uint32_t i = 0; (i < 50) && (SOPC_STATUS_OK == result); i++)
         {
-            sprintf(msgWrite1, "Hello world %d", i);
+            sprintf(msgWrite1, "Hello world %u", i);
             result = SOPC_RT_Subscriber_Input_Write(myRTSub,                            //
                                                     input_num[0],                       //
                                                     (uint8_t*) msgWrite1,               //
@@ -845,7 +854,7 @@ static int SOPC_TEST_RT_SUBSCRIBER_WITH_DATAHANDLE_WRITER(void)
             if (SOPC_STATUS_OK == result)
             {
                 // If successful, work on the buffer
-                sprintf(msgWrite1, "Hello world %d", i);
+                sprintf(msgWrite1, "Hello world %u", i);
                 result = SOPC_Buffer_Write(&buffer, (const uint8_t*) msgWrite1, (uint32_t)(strlen(msgWrite1) + 1));
                 // printf("\r\nSOPC_Buffer_Write result = %d\r\n",result);
                 //                result = SOPC_RT_Subscriber_Input_Write(myRTSub,                            //
@@ -1150,7 +1159,7 @@ static int SOPC_TEST_MSG_BOX(void)
 
     for (volatile uint32_t i = 0; i < 10 && result == SOPC_STATUS_OK; i++)
     {
-        sprintf(msgWrite1, "\r\nHello world %d", i);
+        sprintf(msgWrite1, "\r\nHello world %u", i);
         SOPC_MsgBox_Push(myMsgBox, (uint8_t*) msgWrite1, (uint32_t)(strlen(msgWrite1) + 1));
 
         SOPC_Sleep(PERIOD_MS_WRITER_50MS);
@@ -1193,7 +1202,7 @@ static int SOPC_TEST_MSG_BOX(void)
         // Set data each 50 ms
         for (volatile uint32_t i = 0; i < 10 && result == SOPC_STATUS_OK; i++)
         {
-            sprintf(msgWrite1, "\r\nHello world %d", i);
+            sprintf(msgWrite1, "\r\nHello world %u", i);
             SOPC_MsgBox_Push(myMsgBox, (uint8_t*) msgWrite1, (uint32_t)(strlen(msgWrite1) + 1));
             SOPC_Sleep(PERIOD_MS_WRITER_50MS);
         }
@@ -1250,7 +1259,7 @@ static int SOPC_TEST_MSG_BOX(void)
                     result = SOPC_MsgBox_DataHandle_GetDataEvt(pDataHandle, &pData, &max_allowed_size);
                     if (SOPC_STATUS_OK == result)
                     {
-                        snprintf((char*) pData, max_allowed_size, "\r\nHello world %d", i);
+                        snprintf((char*) pData, max_allowed_size, "\r\nHello world %u", i);
                         result = SOPC_MsgBox_DataHandle_UpdateDataEvtSize(pDataHandle,
                                                                           (uint32_t)(strlen((char*) pData) + 1));
                     }
@@ -1310,7 +1319,7 @@ static int SOPC_TEST_MSG_BOX(void)
         // Push data each 50 ms
         for (volatile uint32_t i = 0; i < 10 && result == SOPC_STATUS_OK; i++)
         {
-            sprintf(msgWrite1, "\r\nHello world %d", i);
+            sprintf(msgWrite1, "\r\nHello world %u", i);
             SOPC_MsgBox_Push(myMsgBox, (uint8_t*) msgWrite1, (uint32_t)(strlen(msgWrite1) + 1));
             SOPC_Sleep(PERIOD_MS_WRITER_50MS);
         }
@@ -1353,7 +1362,7 @@ static int SOPC_TEST_MSG_BOX(void)
         // Push data each 50 ms
         for (volatile uint32_t i = 0; i < 10 && result == SOPC_STATUS_OK; i++)
         {
-            sprintf(msgWrite1, "\r\nHello world %d", i);
+            sprintf(msgWrite1, "\r\nHello world %u", i);
             SOPC_MsgBox_Push(myMsgBox, (uint8_t*) msgWrite1, (uint32_t)(strlen(msgWrite1) + 1));
 
             SOPC_Sleep(PERIOD_MS_WRITER_50MS);
@@ -1398,7 +1407,7 @@ static int SOPC_TEST_MSG_BOX(void)
         // Push data each 200 ms
         for (volatile uint32_t i = 0; i < 10 && result == SOPC_STATUS_OK; i++)
         {
-            sprintf(msgWrite1, "\r\nHello world %d", i);
+            sprintf(msgWrite1, "\r\nHello world %u", i);
             SOPC_MsgBox_Push(myMsgBox, (uint8_t*) msgWrite1, (uint32_t)(strlen(msgWrite1) + 1));
 
             SOPC_Sleep(PERIOD_MS_WRITER_200MS);
@@ -1622,7 +1631,7 @@ static int SOPC_TEST_IRQ_TIMER(void)
         SOPC_IrqTimer_InstanceStatus status = 0xFFFFFFFF;
         result = SOPC_InterruptTimer_Instance_LastStatus(myTimer, 0, &status);
 
-        printf("\r\n===>STOP TIMER 0 NEXT STATUS BEFORE STOP CMD = %d\r\n", status);
+        printf("\r\n===>STOP TIMER 0 NEXT STATUS BEFORE STOP CMD = %u\r\n", status);
         if (SOPC_STATUS_OK == result && SOPC_INTERRUPT_TIMER_STATUS_ENABLED == status)
         {
             result = SOPC_InterruptTimer_Instance_Stop(myTimer, 0);
@@ -1631,7 +1640,7 @@ static int SOPC_TEST_IRQ_TIMER(void)
             {
                 status = 0xFFFFFFFF;
                 result = SOPC_InterruptTimer_Instance_LastStatus(myTimer, 0, &status);
-                printf("\r\n===>STOP TIMER 0 NEXT STATUS AFTER STOP CMD = %d\r\n", status);
+                printf("\r\n===>STOP TIMER 0 NEXT STATUS AFTER STOP CMD = %u\r\n", status);
 
                 if (status != SOPC_INTERRUPT_TIMER_STATUS_DISABLED)
                 {
@@ -1644,7 +1653,7 @@ static int SOPC_TEST_IRQ_TIMER(void)
         {
             status = 0xFFFFFFFF;
             SOPC_InterruptTimer_Instance_LastStatus(myTimer, 0, &status);
-            printf("\r\n===>ERROR STOP TIMER 0 - STATUS = %d\r\n", status);
+            printf("\r\n===>ERROR STOP TIMER 0 - STATUS = %u\r\n", status);
             res = -1;
         }
 
@@ -1657,10 +1666,10 @@ static int SOPC_TEST_IRQ_TIMER(void)
 
         SOPC_Sleep(400);
 
-        printf("\r\n T0 NB START = %d , T1 NB START = %d  \r\n", bTest01_TestStart[0], bTest01_TestStart[1]);
-        printf("\r\n T0 NB TICKS = %d , T1 NB TICKS = %d , GLOBAL TICK = %d\r\n", bTest02_TestPeriod[0],
+        printf("\r\n T0 NB START = %u , T1 NB START = %u  \r\n", bTest01_TestStart[0], bTest01_TestStart[1]);
+        printf("\r\n T0 NB TICKS = %u , T1 NB TICKS = %u , GLOBAL TICK = %u\r\n", bTest02_TestPeriod[0],
                bTest02_TestPeriod[1], globalTick);
-        printf("\r\n T0 NB CORRUPTED DATA = %d , T1 NB CORRUPTED DATA = %d  \r\n", bTest04_TestCorrupted[0],
+        printf("\r\n T0 NB CORRUPTED DATA = %u , T1 NB CORRUPTED DATA = %u  \r\n", bTest04_TestCorrupted[0],
                bTest04_TestCorrupted[1]);
 
         if (!((globalTick == bTest02_TestPeriod[1])          //
@@ -1678,7 +1687,7 @@ static int SOPC_TEST_IRQ_TIMER(void)
         bFreezeTickRequest = true;
         SOPC_Sleep(200);
 
-        printf("\r\n T0 NB STOP = %d , T1 NB STOP = %d  \r\n", bTest03_TestStop[0], bTest03_TestStop[1]);
+        printf("\r\n T0 NB STOP = %u , T1 NB STOP = %u  \r\n", bTest03_TestStop[0], bTest03_TestStop[1]);
 
         if (!((1 == bTest03_TestStop[1])     //
               && (1 == bTest03_TestStop[0])) //

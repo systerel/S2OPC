@@ -37,7 +37,7 @@ static SOPC_Common_EncodingConstants globalEncodingConfig = {
 
 int32_t globalEncodingConfigSet = false;
 
-SOPC_Common_EncodingConstants SOPC_Common_GetDefaultEncodingConstants()
+SOPC_Common_EncodingConstants SOPC_Common_GetDefaultEncodingConstants(void)
 {
     return (SOPC_Common_EncodingConstants){.buffer_size = SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE,
                                            .receive_max_msg_size = SOPC_DEFAULT_RECEIVE_MAX_MESSAGE_LENGTH,
@@ -51,7 +51,7 @@ SOPC_Common_EncodingConstants SOPC_Common_GetDefaultEncodingConstants()
                                            .max_nested_struct = SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL};
 }
 
-const SOPC_Common_EncodingConstants* SOPC_Internal_Common_GetEncodingConstants()
+const SOPC_Common_EncodingConstants* SOPC_Internal_Common_GetEncodingConstants(void)
 {
     return &globalEncodingConfig;
 }

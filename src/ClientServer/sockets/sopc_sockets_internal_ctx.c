@@ -43,7 +43,7 @@ struct Event
     uintptr_t auxParam;
 };
 
-void SOPC_SocketsInternalContext_Initialize()
+void SOPC_SocketsInternalContext_Initialize(void)
 {
     uint32_t idx = 0;
     memset(socketsArray, 0, sizeof(SOPC_Socket) * SOPC_MAX_SOCKETS);
@@ -58,7 +58,7 @@ void SOPC_SocketsInternalContext_Initialize()
     maxBufferSize = SOPC_Internal_Common_GetEncodingConstants()->buffer_size;
 }
 
-void SOPC_SocketsInternalContext_Clear()
+void SOPC_SocketsInternalContext_Clear(void)
 {
     // Close any not closed remaining socket
     uint32_t idx = 0;
@@ -182,7 +182,7 @@ SOPC_ReturnStatus SOPC_Sockets_EnqueueInputEvent(SOPC_Sockets_InputEvent socketE
     return status;
 }
 
-SOPC_ReturnStatus SOPC_Sockets_DequeueAndDispatchInputEvent()
+SOPC_ReturnStatus SOPC_Sockets_DequeueAndDispatchInputEvent(void)
 {
     struct Event* ev = NULL;
     SOPC_ReturnStatus status = SOPC_AsyncQueue_NonBlockingDequeue(socketsInputEventQueue, (void**) &ev);

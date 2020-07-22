@@ -33,12 +33,12 @@
 
 #include "sopc_threads.h"
 
-bool SOPC_Socket_Network_Initialize()
+bool SOPC_Socket_Network_Initialize(void)
 {
     return true;
 }
 
-bool SOPC_Socket_Network_Clear()
+bool SOPC_Socket_Network_Clear(void)
 {
     return true;
 }
@@ -372,7 +372,11 @@ SOPC_ReturnStatus SOPC_Socket_Write(Socket sock, const uint8_t* data, uint32_t c
             *sentBytes = 0;
 
             // ERROR CASE
-            if (errno == EAGAIN || errno == EWOULDBLOCK)
+#if EWOULDBLOCK == EAGAIN
+            if ((EAGAIN == errno))
+#else
+            if ((EAGAIN == errno) || (EWOULDBLOCK == errno))
+#endif
             {
                 // Try again in those cases
                 status = SOPC_STATUS_WOULD_BLOCK;
@@ -416,7 +420,11 @@ SOPC_ReturnStatus SOPC_Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize
              * errno is set to EAGAIN or  WOULDBLOCK.  The receive calls normally return any data available, up to the
              * requested amount, rather than waiting for receipt of the full amount requested.*/
 
-            if (errno == EAGAIN || errno == EWOULDBLOCK)
+#if EWOULDBLOCK == EAGAIN
+            if ((EAGAIN == errno))
+#else
+            if ((EAGAIN == errno) || (EWOULDBLOCK == errno))
+#endif
             {
                 status = SOPC_STATUS_WOULD_BLOCK;
             }

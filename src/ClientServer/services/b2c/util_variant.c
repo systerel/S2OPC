@@ -331,7 +331,7 @@ void util_variant__print_SOPC_Variant(SOPC_Variant* pvar)
 
     if (NULL == pvar)
         return;
-    printf(":\n  TypeId %i: ", pvar->BuiltInTypeId);
+    printf(":\n  TypeId %i: ", (int) pvar->BuiltInTypeId);
 
     switch (pvar->BuiltInTypeId)
     {

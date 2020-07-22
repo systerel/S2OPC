@@ -77,6 +77,9 @@ void SOPC_SecureChannels_OnInternalEvent(SOPC_EventHandler* handler,
     case INT_SC_SND_MSG_CHUNKS:
         SOPC_ChunksMgr_Dispatcher(internalEvent, eltId, params, auxParam);
         break;
+    default:
+        assert(false && "Unknown internal event.");
+        break;
     }
 }
 
@@ -108,7 +111,7 @@ void SOPC_SecureChannels_OnSocketsEvent(SOPC_EventHandler* handler,
         SOPC_ChunksMgr_OnSocketEvent(sockEvent, eltId, params, auxParam);
         break;
     default:
-        assert(false);
+        assert(false && "Unknown socket event.");
     }
 }
 
@@ -149,7 +152,7 @@ void SOPC_SecureChannels_OnInputEvent(SOPC_EventHandler* handler,
         SOPC_SecureConnectionStateMgr_Dispatcher(scEvent, eltId, params, auxParam);
         break;
     default:
-        assert(false);
+        assert(false && "Unknown input event.");
     }
 }
 
@@ -173,7 +176,7 @@ SOPC_ReturnStatus SOPC_SecureChannels_EnqueueEvent(SOPC_SecureChannels_InputEven
         status = SOPC_EventHandler_Post(secureChannelsInputEventHandler, (int32_t) scEvent, id, params, auxParam);
         break;
     default:
-        assert(false);
+        assert(false && "Unknown event.");
     }
     return status;
 }
@@ -206,7 +209,7 @@ void SOPC_SecureChannels_SetEventHandler(SOPC_EventHandler* handler)
     SOPC_Atomic_Ptr_Set((void**) &secureChannelsEventHandler, handler);
 }
 
-void SOPC_SecureChannels_Clear()
+void SOPC_SecureChannels_Clear(void)
 {
     SOPC_SecureChannelsInternalContext_Clear();
 }

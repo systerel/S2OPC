@@ -321,6 +321,9 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
     }
     case PARSE_USERAUTHORIZATION:
         break;
+    default:
+        assert(false && "Unknown state.");
+        break;
     }
 }
 
@@ -363,6 +366,9 @@ static void end_element_handler(void* user_data, const XML_Char* name)
         break;
     case PARSE_START:
         assert(false && "Got end_element callback when in PARSE_START state.");
+        break;
+    default:
+        assert(false && "Unknown state.");
         break;
     }
 }
@@ -471,6 +477,9 @@ static SOPC_ReturnStatus authorization_fct(SOPC_UserAuthorization_Manager* autho
             case SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE:
                 *pbOperationAuthorized = up->rights.exec;
                 break;
+            default:
+                assert(false && "Unknown operation type.");
+                break;
             }
         }
     }
@@ -486,6 +495,9 @@ static SOPC_ReturnStatus authorization_fct(SOPC_UserAuthorization_Manager* autho
             break;
         case SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE:
             *pbOperationAuthorized = config->anonRights.exec;
+            break;
+        default:
+            assert(false && "Unknown operation type.");
             break;
         }
     }

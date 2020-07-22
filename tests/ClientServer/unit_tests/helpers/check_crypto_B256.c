@@ -1049,7 +1049,7 @@ START_TEST(test_cert_copyder_B256)
 }
 END_TEST
 
-Suite* tests_make_suite_crypto_B256()
+Suite* tests_make_suite_crypto_B256(void)
 {
     Suite* s = NULL;
     TCase *tc_crypto_symm = NULL, *tc_providers = NULL, *tc_rands = NULL, *tc_derives = NULL, *tc_km = NULL,

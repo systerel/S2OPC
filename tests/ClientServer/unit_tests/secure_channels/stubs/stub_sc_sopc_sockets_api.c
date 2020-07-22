@@ -46,13 +46,13 @@ void SOPC_Sockets_EnqueueEvent(SOPC_Sockets_InputEvent scEvent, uint32_t id, uin
     assert(status == SOPC_STATUS_OK);
 }
 
-void SOPC_Sockets_Initialize()
+void SOPC_Sockets_Initialize(void)
 {
     SOPC_ReturnStatus status = SOPC_AsyncQueue_Init(&socketsInputEvents, "StubsSC_SocketsEventQueue");
     assert(status == SOPC_STATUS_OK);
 }
 
-void SOPC_Sockets_Clear()
+void SOPC_Sockets_Clear(void)
 {
     SOPC_AsyncQueue_Free(&socketsInputEvents);
 }

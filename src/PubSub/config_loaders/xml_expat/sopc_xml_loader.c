@@ -143,7 +143,7 @@ static bool parse(XML_Parser parser, FILE* fd)
 
             if (parser_error != XML_ERROR_NONE)
             {
-                fprintf(stderr, "XML parsing failed at line %lu, column %lu. Error code is %d.\n",
+                fprintf(stderr, "XML parsing failed at line %lu, column %lu. Error code is %u.\n",
                         XML_GetCurrentLineNumber(parser), XML_GetCurrentColumnNumber(parser), XML_GetErrorCode(parser));
             }
 
@@ -707,6 +707,9 @@ static void end_element_handler(void* user_data, const XML_Char* name)
         break;
     case PARSE_START:
         assert(false && "Got end_element callback when in PARSE_START state.");
+        break;
+    default:
+        assert(false && "Unknown state.");
         break;
     }
 }

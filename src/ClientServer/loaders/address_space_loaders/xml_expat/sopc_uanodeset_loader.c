@@ -130,7 +130,8 @@ static SOPC_ReturnStatus parse(XML_Parser parser, FILE* fd)
             if (parser_error != XML_ERROR_NONE)
             {
                 fprintf(stderr, "XML parsing failed at line %lu, column %lu. Error code is %d.\n",
-                        XML_GetCurrentLineNumber(parser), XML_GetCurrentColumnNumber(parser), XML_GetErrorCode(parser));
+                        XML_GetCurrentLineNumber(parser), XML_GetCurrentColumnNumber(parser),
+                        (int) XML_GetErrorCode(parser));
             }
 
             // else, the error comes from one of the callbacks, that log an error
@@ -825,6 +826,12 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
 {
     struct parse_context_t* ctx = user_data;
     SOPC_HelperExpatCtx* helperCtx = &ctx->helper_ctx;
+    uint32_t element_type = 0;
+    SOPC_BuiltinId type_id = SOPC_Null_Id;
+    SOPC_VariantArrayType array_type = SOPC_VariantArrayType_SingleValue;
+    bool is_simple_type = false;
+    parse_complex_value_tag_array_t complex_type_tags = NULL;
+    parse_complex_value_tag_t* currentTagCtx = NULL;
 
     if (SOPC_HelperExpat_IsSkipTagActive(helperCtx))
     {
@@ -845,7 +852,7 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         return;
     case PARSE_NODESET:
     {
-        uint32_t element_type = element_id_from_tag(name);
+        element_type = element_id_from_tag(name);
 
         if (element_type > 0)
         {
@@ -919,11 +926,6 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
     {
         assert(current_element_has_value(ctx));
 
-        SOPC_BuiltinId type_id;
-        SOPC_VariantArrayType array_type;
-        bool is_simple_type;
-        parse_complex_value_tag_array_t complex_type_tags = NULL;
-
         if (!type_id_from_tag(name, &type_id, &array_type, &is_simple_type, &complex_type_tags))
         {
             LOG_XML_ERRORF(helperCtx->parser, "Unsupported value type: %s", name);
@@ -973,11 +975,6 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         assert(current_element_has_value(ctx));
         assert(ctx->current_array_type == SOPC_VariantArrayType_Array);
 
-        SOPC_BuiltinId type_id;
-        SOPC_VariantArrayType array_type;
-        bool is_simple_type;
-        parse_complex_value_tag_t* complex_type_tags = NULL;
-
         if (!type_id_from_tag(name, &type_id, &array_type, &is_simple_type, &complex_type_tags))
         {
             LOG_XML_ERRORF(helperCtx->parser, "Unsupported value type: %s", name);
@@ -1017,7 +1014,6 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         assert(NULL != ctx->complex_value_ctx.tags);
         assert(NULL != ctx->complex_value_ctx.end_element_restore_context);
 
-        parse_complex_value_tag_t* currentTagCtx = NULL;
         if (!complex_value_tag_from_tag(name, ctx->complex_value_ctx.tags, &currentTagCtx))
         {
             LOG_XML_ERRORF(helperCtx->parser, "Unexpected tag in complex value: %s for BuiltInId type %d", name,
@@ -1936,6 +1932,11 @@ static void end_element_handler(void* user_data, const XML_Char* name)
 {
     struct parse_context_t* ctx = user_data;
     bool appended = false;
+    SOPC_LocalizedText* lt;
+    const char* stripped = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    bool ok = false;
+    parse_complex_value_tag_t* currentTagCtx = NULL;
 
     if (SOPC_HelperExpat_PopSkipTag(&ctx->helper_ctx, name))
     {
@@ -1949,7 +1950,7 @@ static void end_element_handler(void* user_data, const XML_Char* name)
         break;
     case PARSE_ALIAS:
     {
-        bool ok = finalize_alias(ctx);
+        ok = finalize_alias(ctx);
 
         SOPC_Free(ctx->current_alias_alias);
         ctx->current_alias_alias = NULL;
@@ -1966,11 +1967,10 @@ static void end_element_handler(void* user_data, const XML_Char* name)
     case PARSE_NODE_DISPLAYNAME:
     case PARSE_NODE_DESCRIPTION:
     {
-        SOPC_LocalizedText* lt = element_localized_text_for_state(ctx);
+        lt = element_localized_text_for_state(ctx);
         SOPC_String_Clear(&lt->defaultText);
-        const char* stripped = SOPC_HelperExpat_CharDataStripped(&ctx->helper_ctx);
-        SOPC_ReturnStatus status =
-            (strlen(stripped) == 0) ? SOPC_STATUS_OK : SOPC_String_CopyFromCString(&lt->defaultText, stripped);
+        stripped = SOPC_HelperExpat_CharDataStripped(&ctx->helper_ctx);
+        status = (strlen(stripped) == 0) ? SOPC_STATUS_OK : SOPC_String_CopyFromCString(&lt->defaultText, stripped);
         SOPC_HelperExpat_CharDataReset(&ctx->helper_ctx);
 
         if (status != SOPC_STATUS_OK)
@@ -2011,7 +2011,6 @@ static void end_element_handler(void* user_data, const XML_Char* name)
         // else: it is still internal treatment of complex value
 
         /* Retrieve current tag name in expected children of parent tag*/
-        parse_complex_value_tag_t* currentTagCtx = NULL;
         if (!complex_value_tag_from_tag(name, ctx->complex_value_ctx.tags, &currentTagCtx))
         {
             LOG_XML_ERRORF(ctx->helper_ctx.parser, "Unexpected end tag in complex value: %s for BuiltInId type %d",
@@ -2077,7 +2076,7 @@ static void end_element_handler(void* user_data, const XML_Char* name)
         break;
     case PARSE_NODE:
     {
-        bool ok = finalize_node(ctx);
+        ok = finalize_node(ctx);
 
         if (!ok)
         {
@@ -2104,6 +2103,8 @@ static void end_element_handler(void* user_data, const XML_Char* name)
     case PARSE_START:
         assert(false && "Got end_element callback when in PARSE_START state.");
         break;
+    default:
+        assert(false && "Unknown state.");
     }
 }
 

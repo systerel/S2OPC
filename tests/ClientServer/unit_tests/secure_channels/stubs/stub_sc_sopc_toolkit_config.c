@@ -109,7 +109,7 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
     return status;
 }
 
-SOPC_ReturnStatus SOPC_Toolkit_Configured()
+SOPC_ReturnStatus SOPC_Toolkit_Configured(void)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_STATE;
     if (tConfig.initDone != false)
@@ -117,17 +117,8 @@ SOPC_ReturnStatus SOPC_Toolkit_Configured()
         Mutex_Lock(&tConfig.mut);
         if (false == tConfig.locked)
         {
-            // Check an address space is defined in case a endpoint configuration exists
-            if (tConfig.epConfigIdxMax == 0 || tConfig.epConfigIdxMax > 0)
-            {
-                tConfig.locked = true;
-                status = SOPC_STATUS_OK;
-            }
-            else
-            {
-                // No address space defined whereas a server configuration exists
-                status = SOPC_STATUS_INVALID_PARAMETERS;
-            }
+            tConfig.locked = true;
+            status = SOPC_STATUS_OK;
         }
         Mutex_Unlock(&tConfig.mut);
     }
@@ -161,7 +152,7 @@ static void SOPC_Toolkit_ClearServerScConfigs_WithoutLock(void)
     }
 }
 
-void SOPC_Toolkit_Clear()
+void SOPC_Toolkit_Clear(void)
 {
     if (tConfig.initDone != false)
     {

@@ -786,7 +786,7 @@ void SOPC_ByteString_Initialize(SOPC_ByteString* bstring)
     SOPC_String_Initialize((SOPC_String*) bstring);
 }
 
-SOPC_ByteString* SOPC_ByteString_Create()
+SOPC_ByteString* SOPC_ByteString_Create(void)
 {
     return (SOPC_ByteString*) SOPC_String_Create();
 }
@@ -964,7 +964,7 @@ void SOPC_String_Initialize(SOPC_String* string)
     }
 }
 
-SOPC_String* SOPC_String_Create()
+SOPC_String* SOPC_String_Create(void)
 {
     SOPC_String* string = NULL;
     string = SOPC_Malloc(sizeof(SOPC_String));
@@ -1593,6 +1593,8 @@ SOPC_ReturnStatus SOPC_NodeId_Copy(SOPC_NodeId* dest, const SOPC_NodeId* src)
             SOPC_ByteString_Initialize(&dest->Data.Bstring);
             status = SOPC_ByteString_Copy(&dest->Data.Bstring, &src->Data.Bstring);
             break;
+        default:
+            break;
         }
         if (SOPC_STATUS_OK != status)
         {
@@ -1635,6 +1637,8 @@ void SOPC_NodeId_Clear(SOPC_NodeId* nodeId)
             break;
         case SOPC_IdentifierType_ByteString:
             SOPC_ByteString_Clear(&nodeId->Data.Bstring);
+            break;
+        default:
             break;
         }
         nodeId->IdentifierType = SOPC_IdentifierType_Numeric;
@@ -1682,6 +1686,8 @@ SOPC_ReturnStatus SOPC_NodeId_Compare(const SOPC_NodeId* left, const SOPC_NodeId
                 break;
             case SOPC_IdentifierType_ByteString:
                 status = SOPC_ByteString_Compare(&left->Data.Bstring, &right->Data.Bstring, comparison);
+                break;
+            default:
                 break;
             }
         }
@@ -4121,7 +4127,7 @@ static SOPC_ReturnStatus CompareVariantArrayBuiltInType(SOPC_BuiltinId builtInTy
     return status;
 }
 
-SOPC_Variant* SOPC_Variant_Create()
+SOPC_Variant* SOPC_Variant_Create(void)
 {
     SOPC_Variant* variant = SOPC_Calloc(1, sizeof(SOPC_Variant));
 
@@ -4329,6 +4335,9 @@ static SOPC_ReturnStatus AllocVariantNonArrayBuiltInType(SOPC_BuiltinId builtInT
         //                           but it could be an array of Variants."
         // Note: Variant is not encoded in S2OPC stack for this case
         break;
+    default:
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+        break;
     }
     return status;
 }
@@ -4415,6 +4424,8 @@ static void FreeVariantNonArrayBuiltInType(SOPC_BuiltinId builtInTypeId, SOPC_Va
         // Part 6 Table 14 (v1.03): "The value shall not be a Variant
         //                           but it could be an array of Variants."
         // Note: Variant is not encoded in S2OPC stack for this case
+        break;
+    default:
         break;
     }
 }

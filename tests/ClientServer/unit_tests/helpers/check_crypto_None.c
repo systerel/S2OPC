@@ -764,7 +764,7 @@ START_TEST(test_cert_copyder_None)
 }
 END_TEST
 
-Suite* tests_make_suite_crypto_None()
+Suite* tests_make_suite_crypto_None(void)
 {
     Suite* s = NULL;
     TCase *tc_crypto_symm = NULL, *tc_providers = NULL, *tc_rands = NULL, *tc_derives = NULL, *tc_km = NULL,

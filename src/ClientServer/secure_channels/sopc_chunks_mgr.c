@@ -2137,7 +2137,7 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
 
         SOPC_Logger_TraceDebug(
             SOPC_LOG_MODULE_CLIENTSERVER,
-            "ChunksMgr: received TCP UA message type SOPC_Msg_Type=%d SOPC_Msg_IsFinal=%d (epCfgIdx=%" PRIu32
+            "ChunksMgr: received TCP UA message type SOPC_Msg_Type=%u SOPC_Msg_IsFinal=%u (epCfgIdx=%" PRIu32
             ", scCfgIdx=%" PRIu32 ")",
             chunkCtx->currentMsgType, chunkCtx->currentMsgIsFinal, scConnection->serverEndpointConfigIdx,
             scConnection->endpointConnectionConfigIdx);
@@ -2292,7 +2292,7 @@ static bool SC_Chunks_EncodeTcpMsgHeader(uint32_t scConnectionIdx,
 
         SOPC_Logger_TraceError(
             SOPC_LOG_MODULE_CLIENTSERVER,
-            "ChunksMgr: treat send buffer: failed to encode message header (msgType=%d, scIdx=%" PRIu32
+            "ChunksMgr: treat send buffer: failed to encode message header (msgType=%u, scIdx=%" PRIu32
             ", scCfgIdx=%" PRIu32 ")",
             sendMsgType, scConnectionIdx, scConnection->endpointConnectionConfigIdx);
     }
@@ -4471,7 +4471,7 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InternalEvent event,
             else
             {
                 SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                       "ScChunksMgr: Failed sending message type SOPC_Msg_Type=%d before socket closed "
+                                       "ScChunksMgr: Failed sending message type SOPC_Msg_Type=%u before socket closed "
                                        "scIdx=%" PRIu32,
                                        sendMsgType, eltId);
             }

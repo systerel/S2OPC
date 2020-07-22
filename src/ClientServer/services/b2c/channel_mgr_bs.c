@@ -114,7 +114,7 @@ void channel_mgr_bs__finalize_close_secure_channel(const constants__t_channel_i 
     SOPC_SecureChannels_EnqueueEvent(SC_DISCONNECT, channel_mgr_bs__channel, (uintptr_t) NULL, 0);
 }
 
-void channel_mgr_bs__last_connected_channel_lost()
+void channel_mgr_bs__last_connected_channel_lost(void)
 {
     SOPC_EventHandler_Post(SOPC_Services_GetEventHandler(), SE_TO_SE_SC_ALL_DISCONNECTED, 0, (uintptr_t) NULL, 0);
 }
@@ -164,7 +164,11 @@ void channel_mgr_bs__get_SecurityPolicy(const constants__t_channel_i channel_mgr
     }
     assert(pSCCfg != NULL);
 
-    util_channel__SecurityPolicy_C_to_B(pSCCfg->reqSecuPolicyUri, channel_mgr_bs__secpol);
+    // Note: this conditional branch is only needed for mingw compiler that did not take assert into account
+    if (pSCCfg != NULL)
+    {
+        util_channel__SecurityPolicy_C_to_B(pSCCfg->reqSecuPolicyUri, channel_mgr_bs__secpol);
+    }
 }
 
 void channel_mgr_bs__channel_do_nothing(const constants__t_channel_i channel_mgr_bs__channel)

@@ -59,7 +59,7 @@ static int sleepCount = 20;
 static void printVariant(const SOPC_Variant* variant)
 {
     printf("DataSetField NOK\n");
-    printf("   - Variant Type %d\n", variant->BuiltInTypeId);
+    printf("   - Variant Type %d\n", (int) variant->BuiltInTypeId);
     switch (variant->BuiltInTypeId)
     {
     case SOPC_Boolean_Id:
@@ -69,13 +69,13 @@ static void printVariant(const SOPC_Variant* variant)
         printf("   - Variant Value %d\n", variant->Value.Int16);
         break;
     case SOPC_UInt32_Id:
-        printf("   - Variant Value %d\n", variant->Value.Uint32);
+        printf("   - Variant Value %u\n", variant->Value.Uint32);
         break;
     case SOPC_String_Id:
         printf("   - Variant Value %s\n", SOPC_String_GetRawCString(&(variant->Value.String)));
         break;
     default:
-        printf("   - Variant type not managed: %d\n", variant->BuiltInTypeId);
+        printf("   - Variant type not managed: %d\n", (int) variant->BuiltInTypeId);
     }
 }
 
@@ -99,7 +99,7 @@ static int TestNetworkMessage(const SOPC_UADP_NetworkMessage* uadp_nm)
             3 != publisher_id->data.uint16)
         {
             printf("Publisher Id NOK :\n - Enabled %d\n - Type %d\n - Value %d\n", uadp_nm->conf.GroupIdFlag,
-                   publisher_id->type, publisher_id->data.byte);
+                   (int) publisher_id->type, publisher_id->data.byte);
             result = -1;
         }
     }
@@ -117,7 +117,7 @@ static int TestNetworkMessage(const SOPC_UADP_NetworkMessage* uadp_nm)
 
     if (false == uadp_nm->conf.GroupVersionFlag || 0 != SOPC_Dataset_LL_NetworkMessage_Get_GroupVersion(nm))
     {
-        printf("Writer Group Version NOK:\n - Enabled %d\n - Value %d\n", uadp_nm->conf.GroupVersionFlag,
+        printf("Writer Group Version NOK:\n - Enabled %d\n - Value %u\n", uadp_nm->conf.GroupVersionFlag,
                SOPC_Dataset_LL_NetworkMessage_Get_GroupVersion(nm));
         result = -1;
     }

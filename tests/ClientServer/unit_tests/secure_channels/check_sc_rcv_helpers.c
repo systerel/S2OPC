@@ -38,14 +38,14 @@
 
 SOPC_EventRecorder* servicesEvents = NULL;
 
-void Check_SC_Init()
+void Check_SC_Init(void)
 {
     servicesEvents = SOPC_EventRecorder_Create();
     assert(servicesEvents != NULL);
     SOPC_SecureChannels_SetEventHandler(servicesEvents->eventHandler);
 }
 
-void Check_SC_Clear()
+void Check_SC_Clear(void)
 {
     SOPC_SecureChannels_SetEventHandler(NULL);
     SOPC_EventRecorder_Delete(servicesEvents);

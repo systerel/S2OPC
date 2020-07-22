@@ -115,8 +115,7 @@ void request_handle_bs__client_fresh_req_handle(
 void request_handle_bs__is_valid_req_handle(const constants__t_client_request_handle_i request_handle_bs__req_handle,
                                             t_bool* const request_handle_bs__ret)
 {
-    if (request_handle_bs__req_handle != constants__c_client_request_handle_indet &&
-        request_handle_bs__req_handle > 0 && request_handle_bs__req_handle <= SOPC_MAX_PENDING_REQUESTS)
+    if (request_handle_bs__req_handle > 0 && request_handle_bs__req_handle <= SOPC_MAX_PENDING_REQUESTS)
     {
         *request_handle_bs__ret = true;
     }

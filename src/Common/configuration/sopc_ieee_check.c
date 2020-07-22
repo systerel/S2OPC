@@ -21,7 +21,7 @@
 
 #include "sopc_ieee_check.h"
 
-bool SOPC_IEEE_Check()
+bool SOPC_IEEE_Check(void)
 {
     bool bFltRadixStatus = (FLT_RADIX == 2);
     bool bFltRounds = (FLT_ROUNDS == 1);

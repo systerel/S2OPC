@@ -123,7 +123,7 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
     return status;
 }
 
-SOPC_ReturnStatus SOPC_Toolkit_Configured()
+SOPC_ReturnStatus SOPC_Toolkit_Configured(void)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_STATE;
     SOPC_Toolkit_Build_Info toolkitBuildInfo;
@@ -193,7 +193,7 @@ static void SOPC_Toolkit_ClearServerScConfigs_WithoutLock(void)
     }
 }
 
-void SOPC_Toolkit_Clear()
+void SOPC_Toolkit_Clear(void)
 {
     if (tConfig.initDone != false)
     {
