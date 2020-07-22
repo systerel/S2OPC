@@ -36,7 +36,7 @@ Creates a subscription with unreasonable publish cycle, longer than the request 
 """
 
 # Manage relative paths
-S2OPC_ROOT='../../../../../'
+S2OPC_ROOT='../../../../'
 BINARY_DIR= S2OPC_ROOT + 'build/bin'
 VALIDATION_DIR= S2OPC_ROOT + 'validation'
 
