@@ -99,7 +99,8 @@ generation:
            $CROSS_COMPILE == null && \
            $S2OPC_PUBSUB_ONLY == null &&\
            $ALL_BUILDS == null && \
-           $ALL_TESTS == null"
+           $ALL_TESTS == null && \
+           $WITH_DOC == null"
       when: on_success
 
 ###
@@ -126,7 +127,7 @@ generation:
     when: always
 # Common rules overwritten by each job using this template
 #  rules: # note: should be repeated in each child job of *build_linux
-#    - if: "$WINDOWS_TEST == null && $CROSS_COMPILE == null && $WITH_COVERITY == null"
+#    - if: "$WINDOWS_TEST == null && $CROSS_COMPILE == null && $WITH_COVERITY == null && $WITH_DOC == null"
 #      when: on_success
 
 # Used by "normal" pipeline
@@ -137,7 +138,7 @@ build-linux64-ASan:
     WITH_ASAN: 1
   rules: # 1st line repeat .build-linux + added rules to avoid ASAN build
     - if: "$WINDOWS_TEST == null && $CROSS_COMPILE == null && \
-           $WITH_COVERITY == null && $WITH_COVERAGE == null && \
+           $WITH_COVERITY == null && $WITH_COVERAGE == null && $WITH_DOC == null && \
            $NO_ASAN == null && $ALL_TESTS == null && $ALL_BUILDS == null" # avoid ASAN build in most of nightly builds
       when: on_success
 
@@ -254,7 +255,7 @@ test-check:
     expire_in: '1 month'
   rules: # repeat .test-linux variables exception since overwritten here
     - if: "$NO_TESTS == null && $WINDOWS_TEST == null && $CROSS_COMPILE == null && \
-           $WITH_COVERITY == null && $WITH_COVERAGE == null && \
+           $WITH_COVERITY == null && $WITH_COVERAGE == null && $WITH_DOC == null && \
            $ALL_TESTS == null && $ALL_BUILDS == null"
       when: on_success
 
@@ -291,7 +292,7 @@ test-unit:
   <<: *test_unit
   rules: # repeat .test-linux variables exception since overwritten here
     - if: "$NO_TESTS == null && $WINDOWS_TEST == null && $CROSS_COMPILE == null && \
-           $WITH_COVERITY == null && \
+           $WITH_COVERITY == null && $WITH_DOC == null && \
            $ALL_TESTS == null" # + excludes ALL_TESTS
       when: on_success
 
@@ -323,7 +324,7 @@ test-uactt:
   <<: *test_uactt
   rules: # repeat .test-uactt variables exception since overwritten here
     - if: "$NO_TESTS == null && $WINDOWS_TEST == null && $CROSS_COMPILE == null && \
-           $WITH_COVERITY == null && $WITH_COVERAGE == null && \
+           $WITH_COVERITY == null && $WITH_COVERAGE == null && $WITH_DOC == null && \
            $S2OPC_PUBSUB_ONLY == null && $ALL_BUILDS == null && $ALL_TESTS == null"
            # + no UACTT tests on PubSub + excludes ALL_BUILDS + excludes ALL_TESTS
       when: on_success
@@ -375,7 +376,7 @@ pages:
   stage: doc
   dependencies: []
   rules:
-    - if: "$WITH_DOC != null"
+    - if: "$WITH_DOC != null || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'master'"
   variables:
     <<: *build_linux_variables
   script:
