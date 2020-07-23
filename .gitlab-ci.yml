@@ -376,7 +376,7 @@ pages:
   stage: doc
   dependencies: []
   rules:
-    - if: "$WITH_DOC != null || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'master'"
+    - if: "$WITH_DOC != null || $CI_COMMIT_BRANCH == 'master'"
   variables:
     <<: *build_linux_variables
   script:
