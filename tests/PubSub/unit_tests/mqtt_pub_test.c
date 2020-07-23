@@ -29,7 +29,7 @@
 
 static const char* ADRESSE_MQTT_BROKER = "127.0.0.1:1883";
 
-/**** Variables for tests asynchrone API *****/
+/**** Variables for tests asynchronous API *****/
 
 typedef struct T_ID
 {
@@ -107,7 +107,7 @@ static void pFctReleaseHandle(MqttTransportAsyncHandle idx, void* pCtx)
     ((t_id*) pCtx)->bTestEnded2 = false;
 }
 
-/**** Variables for tests of synchrone API *****/
+/**** Variables for tests of synchronous API *****/
 
 static Thread receiveThread;
 volatile bool bQuit = false;
@@ -211,7 +211,7 @@ int main(void)
                         printf("\r\nThread test to receive message created\r\n");
                         while (bQuit == false)
                         {
-                            SOPC_Sleep(1);
+                            SOPC_Sleep(100);
                             if (pHandleSynchroContext != NULL)
                             {
                                 uint8_t buffer[32];
@@ -227,7 +227,7 @@ int main(void)
                                 else
                                 {
                                     cptBeforeQuit++;
-                                    printf("\r\nSOPC MQTT Message not sent, mqtt connexion not ready...\r\n");
+                                    printf("\r\nSOPC MQTT Message not sent, MQTT connection not ready...\r\n");
                                     bResult = false;
                                 }
                             }
@@ -337,7 +337,7 @@ int main(void)
 
                     while (bQuit == false)
                     {
-                        SOPC_Sleep(10);
+                        SOPC_Sleep(100);
                         if (pHandleSynchroContext != NULL)
                         {
                             uint8_t buffer[32];
@@ -353,7 +353,7 @@ int main(void)
                             else
                             {
                                 cptBeforeQuit++;
-                                printf("\r\nSOPC MQTT Message not sent, mqtt connexion not ready...\r\n");
+                                printf("\r\nSOPC MQTT Message not sent, MQTT connection not ready...\r\n");
                                 bResult = false;
                             }
                         }
@@ -443,6 +443,10 @@ int main(void)
                                 {
                                     printf("\r\nMessage sent to client 1\r\n");
                                 }
+                                else
+                                {
+                                    printf("\r\nMessage not sent to client 1\r\n");
+                                }
                             }
                         }
 
@@ -455,6 +459,10 @@ int main(void)
                                 if (result == SOPC_STATUS_OK)
                                 {
                                     printf("\r\nMessage sent to client 2\r\n");
+                                }
+                                else
+                                {
+                                    printf("\r\nMessage not sent to client 2\r\n");
                                 }
                             }
                         }
@@ -473,37 +481,6 @@ int main(void)
                         SOPC_MQTT_MGR_Destroy(&pWks);
                         bQuit = true;
                     }
-
-                    //        if ((cptBeforeQuit % 20) == 0)
-                    //        {
-                    //            if (id2.idx < 0xFFFF)
-                    //            {
-                    //                SOPC_MQTT_AsyncReleaseHandle(pWks, id2.idx);
-                    //            }
-                    //            else
-                    //            {
-                    //                SOPC_MQTT_AsyncGetHandle(pWks, &id2, "tcp://192.168.56.1", pFctGetHandleSuccess,
-                    //                pFctGetHandleFailure,
-                    //                                         pFctHandleRdy, pFctHandleNotRdy, pFctMessageRcv,
-                    //                                         pFctReleaseHandle);
-                    //            }
-                    //        }
-
-                    //    	if( cptBeforeQuit == 20)
-                    //		{
-                    //			SOPC_MQTT_Destroy(&pWks);
-                    //		}
-
-                    //    	if( cptBeforeQuit == 20)
-                    //    	{
-                    //    		SOPC_MQTT_AsyncReleaseHandle(pWks,*((uint16_t*)request1.pCtx));
-                    //    	}
-                    //
-                    //    	if( cptBeforeQuit == 40)
-                    //		{
-                    //			SOPC_MQTT_AsyncReleaseHandle(pWks,*((uint16_t*)request2.pCtx));
-                    //		}
-                    //
                 }
             }
 
