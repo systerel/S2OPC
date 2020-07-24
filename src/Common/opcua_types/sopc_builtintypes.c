@@ -18,6 +18,7 @@
  */
 
 #include "sopc_builtintypes.h"
+#include "sopc_encoder.h"
 
 #include <assert.h>
 #include <inttypes.h>
@@ -3249,31 +3250,20 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Copy(SOPC_ExtensionObject* dest, const SO
 
             encCfg = SOPC_Internal_Common_GetEncodingConstants();
             /* We do not have the copy method for the object but we can encode it */
-            encoding = SOPC_ExtObjBodyEncoding_ByteString;
             encodedObject = SOPC_Buffer_CreateResizable(encCfg->buffer_size, encCfg->send_max_msg_size);
-            if (NULL == encodedObject)
-            {
-                status = SOPC_STATUS_OUT_OF_MEMORY;
-            }
-
             if (SOPC_STATUS_OK == status)
             {
-                status = src->Body.Object.ObjType->Encode(src->Body.Object.Value, encodedObject, 0);
+                status = SOPC_ExtensionObject_Write(src, encodedObject, 0);
             }
             if (SOPC_STATUS_OK == status)
             {
-                if (encodedObject->length <= INT32_MAX)
-                {
-                    SOPC_ByteString_Initialize(&dest->Body.Bstring);
-                    // Do a copy to keep only used data in buffer
-                    status = SOPC_ByteString_CopyFromBytes(&dest->Body.Bstring, encodedObject->data,
-                                                           (int32_t) encodedObject->length);
-                }
-                else
-                {
-                    status = SOPC_STATUS_ENCODING_ERROR;
-                }
+                status = SOPC_Buffer_SetPosition(encodedObject, 0);
             }
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_ExtensionObject_Read(dest, encodedObject, 0);
+            }
+            encoding = SOPC_ExtObjBodyEncoding_Object;
             SOPC_Buffer_Delete(encodedObject);
             encodedObject = NULL;
         }
@@ -3284,14 +3274,6 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Copy(SOPC_ExtensionObject* dest, const SO
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_ExpandedNodeId_Copy(&dest->TypeId, &src->TypeId);
-
-        /* Since we have encoded Object into ByteString for copy, ensure the type NodeId is correct */
-        if (SOPC_STATUS_OK == status && src->Encoding == SOPC_ExtObjBodyEncoding_Object)
-        {
-            dest->TypeId.NodeId.IdentifierType = SOPC_IdentifierType_Numeric;
-            dest->TypeId.NodeId.Namespace = OPCUA_NAMESPACE_INDEX;
-            dest->TypeId.NodeId.Data.Numeric = src->Body.Object.ObjType->BinaryEncodingTypeId;
-        }
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -5670,16 +5652,15 @@ const SOPC_NodeId* SOPC_Variant_Get_DataType(const SOPC_Variant* var)
             }
             else
             {
-                // TODO / Note: if the type is unknown we cannot guarantee here the NodeId is a DataType, since it could
-                // be the DefaultEncoding Object instead.
-                // Returns the generic Structure type instead
+                // TODO / Note: if the type is unknown we cannot guarantee here the NodeId is a DataType, since it
+                // could be the DefaultEncoding Object instead. Returns the generic Structure type instead
                 return &SOPC_Structure_Type;
             }
         }
         else
         {
-            /* If type defined in another server or variant is an array, no guarantee that all are of same type. Keep
-             * "Structure" generic type. */
+            /* If type defined in another server or variant is an array, no guarantee that all are of same type.
+             * Keep "Structure" generic type. */
             return &SOPC_Structure_Type;
         }
     default:
