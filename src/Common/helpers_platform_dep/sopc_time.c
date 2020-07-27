@@ -30,22 +30,20 @@
 static const int64_t SOPC_SECONDS_BETWEEN_EPOCHS = 11644473600;
 static const int64_t SOPC_SECOND_TO_100_NANOSECONDS = 10000000; // 10^7
 
-static char* get_time_string(bool local, bool compact)
+char* SOPC_Time_GetString(int64_t time, bool local, bool compact)
 {
     static const size_t buf_size = 24;
 
-    int64_t dt_100ns = SOPC_Time_GetCurrentTimeUTC();
-
-    if (dt_100ns == 0)
+    if (time == 0)
     {
         return NULL;
     }
 
     time_t seconds = 0;
-    SOPC_ReturnStatus status = SOPC_Time_ToTimeT(dt_100ns, &seconds);
+    SOPC_ReturnStatus status = SOPC_Time_ToTimeT(time, &seconds);
     assert(status == SOPC_STATUS_OK);
 
-    uint32_t milliseconds = (uint32_t)((dt_100ns / 10000) % 1000);
+    uint32_t milliseconds = (uint32_t)((time / 10000) % 1000);
     struct tm tm;
 
     if (local)
@@ -83,14 +81,19 @@ static char* get_time_string(bool local, bool compact)
     return buf;
 }
 
+static char* get_current_time_string(bool local, bool compact)
+{
+    return SOPC_Time_GetString(SOPC_Time_GetCurrentTimeUTC(), local, compact);
+}
+
 char* SOPC_Time_GetStringOfCurrentLocalTime(bool compact)
 {
-    return get_time_string(true, compact);
+    return get_current_time_string(true, compact);
 }
 
 char* SOPC_Time_GetStringOfCurrentTimeUTC(bool compact)
 {
-    return get_time_string(false, compact);
+    return get_current_time_string(false, compact);
 }
 
 SOPC_TimeReference SOPC_TimeReference_AddMilliseconds(SOPC_TimeReference timeRef, uint64_t ms)

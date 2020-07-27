@@ -23,9 +23,9 @@
 #include "sopc_builtintypes.h"
 #include "sopc_time.h"
 
-SOPC_DateTime SOPC_Time_GetCurrentTimeUTC()
+int64_t SOPC_Time_GetCurrentTimeUTC()
 {
-    SOPC_DateTime result = 0;
+    int64_t result = 0;
     FILETIME fileCurrentTime;
     ULARGE_INTEGER currentTime;
 

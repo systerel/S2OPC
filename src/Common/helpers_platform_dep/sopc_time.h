@@ -64,6 +64,19 @@ void SOPC_Sleep(unsigned int milliseconds);
 int64_t SOPC_Time_GetCurrentTimeUTC(void);
 
 /**
+ * \brief returns a C string representation of the given time in DateTime format
+ * E.g.:
+ * - compact == false: "2018/01/30 13:15:52.694\0"
+ * - compact == true: "20180130_131552_694\0"
+ *
+ * \param time     time value in DataTime format, which is 100 nanoseconds from 1601/01/01 00:00:00 UTC
+ * \param local    provides local time if set, UTC time otherwise
+ * \param compact  provides compact version when flag is set
+ *
+ */
+char* SOPC_Time_GetString(int64_t time, bool local, bool compact);
+
+/**
  * \brief return the current local time as a C String, e.g.:
  * - compact == false: "2018/01/30 13:15:52.694\0"
  * - compact == true: "20180130_131552_694\0"
