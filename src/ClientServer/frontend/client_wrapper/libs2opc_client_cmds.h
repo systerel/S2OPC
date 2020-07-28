@@ -224,6 +224,45 @@ typedef struct
 } SOPC_ClientHelper_BrowseResult;
 
 /**
+ * @struct SOPC_ClientHelper_CallMethodRequest
+ * @brief
+ *   structure containing the requested method to call and input parameters
+ * @var SOPC_ClientHelper_CallMethodRequest::objectNodeId
+ *   nodeId of the object on which method is called
+ * @var SOPC_ClientHelper_CallMethodRequest::methodNodeId
+ *   nodeId of the called method
+ * @var SOPC_ClientHelper_CallMethodRequest::nbOfInputParams
+ *   number of input parameters provided in \p SOPC_ClientHelper_CallMethodRequest::inputParams
+ * @var SOPC_ClientHelper_CallMethodRequest::inputParams
+ *   ordered input parameters values for the the method called (array of SOPC_Variant)
+ */
+typedef struct
+{
+    char* objectNodeId;
+    char* methodNodeId;
+    int32_t nbOfInputParams;
+    SOPC_Variant* inputParams;
+} SOPC_ClientHelper_CallMethodRequest;
+
+/**
+ * @struct SOPC_ClientHelper_CallMethodResult
+ * @brief
+ *   structure containing the result of a method call
+ * @var SOPC_ClientHelper_CallMethodResult::status
+ *   status of the method call
+ * @var SOPC_ClientHelper_CallMethodResult::nbOfOutputParams
+ *   number of output parameters provided in \p SOPC_ClientHelper_CallMethodResult::outputParams
+ * @var SOPC_ClientHelper_CallMethodResult::outputParams
+ *   ordered output parameters values as result of method call (SOPC_Variant array)
+ */
+typedef struct
+{
+    SOPC_StatusCode status;
+    int32_t nbOfOuputParams;
+    SOPC_Variant* outputParams;
+} SOPC_ClientHelper_CallMethodResult;
+
+/**
  * @struct SOPC_ClientHelper_UserIdentityToken
  * @brief
  *   structure containing a user identity token
@@ -575,5 +614,30 @@ int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
                                  SOPC_ClientHelper_BrowseRequest* browseRequests,
                                  size_t nbElements,
                                  SOPC_ClientHelper_BrowseResult* browseResults);
+
+/**
+ @brief
+    Call a method
+
+ @param connectionId
+    The connection id. It shall be > 0
+ @param callRequests
+    An array of SOPC_ClientHelper_CallMethodRequest describing the method called with input parameters
+ @param nbOfElements
+    number of elements in the \p callRequests and \p callResults arrays
+ @param[out] callResults
+    A pre-allocated array of SOPC_ClientHelper_CallMethodeResult structures
+
+ @return
+   '0' if operation succeed
+   '-1' if connectionId not valid
+   '-2' if input or output parameters not valid
+   '-3' if out of memory or internal error issue
+   '-100' if operation failed
+*/
+int32_t SOPC_ClientHelper_CallMethod(int32_t connectionId,
+                                     SOPC_ClientHelper_CallMethodRequest* callRequests,
+                                     int32_t nbOfElements,
+                                     SOPC_ClientHelper_CallMethodResult* callResults);
 
 #endif /* LIBS2OPC_CLIENT_CMDS_H_ */
