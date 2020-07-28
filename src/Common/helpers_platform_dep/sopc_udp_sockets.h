@@ -52,9 +52,9 @@ void SOPC_UDP_SocketAddress_Delete(SOPC_Socket_AddressInfo** addr);
 /**
  *  \brief Create a new UDP socket and bind it
  *
- *  \param IPv6              Flag to activate IPv6
+ *  \param listenAddress     Address on which the socket shall listen for input data
  *  \param setReuseAddr      If value is not false (0) the socket is configured to be reused
- *  \param sock              (Out) Value pointed is set with the newly created socket
+ *  \param[out] sock         Value pointed is set with the newly created socket
  *
  *  \return                  SOPC_STATUS_OK if operation succeeded, SOPC_STATUS_NOK otherwise.
  */
@@ -65,8 +65,8 @@ SOPC_ReturnStatus SOPC_UDP_Socket_CreateToReceive(SOPC_Socket_AddressInfo* liste
 /**
  *  \brief Create a new UDP socket and do not bind it
  *
- *  \param dest  Destination IP address, used to determine version of the protocol
- *  \param sock  (Out) Value pointed is set with the newly created socket
+ *  \param destAddress  Destination IP address, used to determine version of the protocol
+ *  \param[out] sock    Value pointed is set with the newly created socket
  *
  *  \return                  SOPC_STATUS_OK if operation succeeded, SOPC_STATUS_NOK otherwise.
  */
@@ -75,10 +75,9 @@ SOPC_ReturnStatus SOPC_UDP_Socket_CreateToSend(SOPC_Socket_AddressInfo* destAddr
 /**
  *  \brief Send data through the UDP socket to given IP address and port
  *
- *  \param sock    The socket used for sending
- *  \param addr    The destination IPv4 address
- *  \param port    The destination port
- *  \param buffer  The buffer containing data to be sent. Buffer considered with buffer->position 0 and containing
+ *  \param sock     The socket used for sending
+ *  \param destAddr The destination IPv4 address
+ *  \param buffer   The buffer containing data to be sent. Buffer considered with buffer->position 0 and containing
  * buffer->length bytes.
  *
  *  \return        SOPC_STATUS_OK if operation succeeded, SOPC_STATUS_WOULD_BLOCK if partially sent, SOPC_STATUS_NOK
@@ -90,8 +89,6 @@ SOPC_ReturnStatus SOPC_UDP_Socket_SendTo(Socket sock, const SOPC_Socket_AddressI
  *  \brief Receive data on the UDP socket from given IP address and port
  *
  *  \param sock    The socket used for receiving
- *  \param addr    The destination IPv4 address
- *  \param port    The destination port
  *  \param buffer  The buffer with buffer->current_size bytes
  *
  *  \return        SOPC_STATUS_OK if operation succeeded, SOPC_STATUS_OUT_OF_MEMORY if possible partial reception,

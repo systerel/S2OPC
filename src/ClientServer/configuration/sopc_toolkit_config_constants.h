@@ -32,7 +32,7 @@
 
 /* See sopc_common_constants.h for common part constants */
 
-/* @brief Maximum number of operations in a request accepted by server (Read, Write, etc.) */
+/** @brief Maximum number of operations in a request accepted by server (Read, Write, etc.) */
 #ifndef SOPC_MAX_OPERATIONS_PER_MSG
 #define SOPC_MAX_OPERATIONS_PER_MSG 5000
 #endif /* SOPC_MAX_OPERATIONS_PER_MSG */
@@ -77,7 +77,7 @@
  */
 #define SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED (5 * SOPC_MAX_SECURE_CONNECTIONS / 4)
 
-/* Minimum value for OPN requestedLifetime parameter */
+/** @brief Minimum value for OPN requestedLifetime parameter */
 #ifndef SOPC_MINIMUM_SECURE_CONNECTION_LIFETIME
 #define SOPC_MINIMUM_SECURE_CONNECTION_LIFETIME 1000
 #endif
@@ -108,17 +108,17 @@
 #define SOPC_MAX_SESSIONS 20
 #endif /* SOPC_MAX_SESSIONS */
 
-/* @brief Client requested timeout for which a session shall remain open without activity */
+/** @brief Client requested timeout for which a session shall remain open without activity */
 #ifndef SOPC_REQUESTED_SESSION_TIMEOUT
 #define SOPC_REQUESTED_SESSION_TIMEOUT 60000 // 60 seconds
 #endif
 
-/* @brief Minimum session timeout accepted by server */
+/** @brief Minimum session timeout accepted by server */
 #ifndef SOPC_MIN_SESSION_TIMEOUT
 #define SOPC_MIN_SESSION_TIMEOUT 10000 // 10 seconds
 #endif
 
-/* @brief Maximum session timeout accepted by server */
+/** @brief Maximum session timeout accepted by server */
 #ifndef SOPC_MAX_SESSION_TIMEOUT
 #define SOPC_MAX_SESSION_TIMEOUT 600000 // 10 minutes
 #endif

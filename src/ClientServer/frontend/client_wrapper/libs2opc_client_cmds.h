@@ -41,8 +41,8 @@
 #define SOPC_SecurityPolicy_Basic256_URI "http://opcfoundation.org/UA/SecurityPolicy#Basic256"
 #define SOPC_SecurityPolicy_Basic256Sha256_URI "http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"
 
-/*
-  @description
+/**
+  @brief
     Callback type for data change event (related to a subscription)
   @param connectionId
     The connection id on which the datachange happened
@@ -56,45 +56,46 @@ typedef void (*SOPC_ClientHelper_DataChangeCbk)(const int32_t connectionId,
                                                 const SOPC_DataValue* value);
 
 /**
- * @description
+ * @brief
  *   Callback type for disconnection
  * @param connectionId
  *   The disconnected connection id
  */
 typedef void (*SOPC_ClientHelper_DisconnectCbk)(const uint32_t connectionId);
 
-/*
- @description
+/**
+ @struct SOPC_ClientHelper_Security
+ @brief
    Connection configuration to a remote OPC server
- @field security_policy
+ @var SOPC_ClientHelper_Security::security_policy
    The chosen OPC-UA security policy for the connection, one of the SOPC_SecurityPolicy_*_URI string.
    zero-terminated string
- @field security_mode
+ @var SOPC_ClientHelper_Security::security_mode
    The chosen OPC-UA security mode for the connection.
    The list of accepted values is:
    - 1: no security mode,
    - 2: only signature,
    - 3: signature and encryption.
- @field path_cert_auth
+ @var SOPC_ClientHelper_Security::path_cert_auth
    Zero-terminated path to the root certificate authority in the DER format
- @field path_crl
+ @var SOPC_ClientHelper_Security::path_crl
    Zero-terminated path to the Certificate Revocation List (CRL) of the certificate authority in the DER format
- @field path_cert_srv
+ @var SOPC_ClientHelper_Security::path_cert_srv
    Zero-terminated path to the server certificate in the DER format, signed by the root certificate authority
- @field path_cert_cli
+ @var SOPC_ClientHelper_Security::path_cert_cli
    Zero-terminated path to the client certificate in the DER format, signed by the root certificate authority
- @field path_key_cli
+ @var SOPC_ClientHelper_Security::path_key_cli
    Zero-terminated path to the client private key which is paired to the public key signed client certificate,
    in the DER format
- @field policyId
+ @var SOPC_ClientHelper_Security::policyId
    Zero-terminated policy id. To know which policy id to use, please read a
    GetEndpointsResponse or a CreateSessionResponse. When username is NULL, the
    AnonymousIdentityToken is used and the policy id must correspond to an
    anonymous UserIdentityPolicy. Otherwise, the UserNameIdentityToken is used
    and the policy id must correspond to an username UserIdentityPolicy.
- @field username
+ @var SOPC_ClientHelper_Security::username
    Zero-terminated username, NULL for anonymous access, see policyId
- @field password
+ @var SOPC_ClientHelper_Security::password
    Zero-terminated password, ignored when username is NULL. Password is kept in memory for future reconnections.
 */
 typedef struct
@@ -111,17 +112,18 @@ typedef struct
     const char* password;
 } SOPC_ClientHelper_Security;
 
-/*
-  @description
+/**
+  @struct SOPC_ClientHelper_WriteValue
+  @brief
     Structure defining a node and value to write.
     Value should be single value or one-dimensional array: value.value.ArrayType should be SingleValue or Array.
-  @field nodeId
+  @var SOPC_ClientHelper_WriteValue::nodeId
     NodeId of the Node that contains the value to write. zero-terminated string
-  @field indexRange
+  @var SOPC_ClientHelper_WriteValue::indexRange
     Used only if the attribute 'Value' is an array. Otherwise, it should be NULL.
     Index of a single value or range of value in the array.
     See NumericRange defined in the OPC UA Reference, Part 4 Chapter 7.
-  @field value
+  @var SOPC_ClientHelper_WriteValue::value
     Value to write in the attribute 'Value'.
     If indexRange is specified, value should be an array (value.value.ArrayType = Array).
 */
@@ -132,15 +134,16 @@ typedef struct
     SOPC_DataValue* value;
 } SOPC_ClientHelper_WriteValue;
 
-/*
-  @description
+/**
+  @struct SOPC_ClientHelper_ReadValue
+  @brief
     Structure defining a node, an attribute.
-  @field nodeId
+  @var SOPC_ClientHelper_ReadValue::nodeId
     NodeId of the Node that contains the attribute to read. zero-terminated string
-  @field attributeId
+  @var SOPC_ClientHelper_ReadValue::attributeId
     AttributeId of the Node that contains the value to read. 0 is not valid.
     Ids of attributes are defined in Part 6.
-  @field indexRange
+  @var SOPC_ClientHelper_ReadValue::indexRange
     Used only if the attribute 'Value' is an array. Otherwise, it should be NULL.
     Index of a single value or range of value in the array.
     See NumericRange defined in the OPC UA Reference, Part 4 Chapter 7.
@@ -152,20 +155,21 @@ typedef struct
     char* indexRange;
 } SOPC_ClientHelper_ReadValue;
 
-/*
-  @description
+/**
+  @struct SOPC_ClientHelper_BrowseRequest
+  @brief
     Structure defining a node, an attribute and a value.
-  @field nodeId
+  @var SOPC_ClientHelper_BrowseRequest::nodeId
     NodeId of the Node to be browsed. zero-terminated string
-  @field direction
+  @var SOPC_ClientHelper_BrowseRequest::direction
     The direction of References to follow.
     The list of accepted values is:
     - 0: Forward references,
     - 1: Inverse references,
     - 2: Forward and inverse references.
-  @field referenceTypeId
+  @var SOPC_ClientHelper_BrowseRequest::referenceTypeId
     NodeId of the ReferenceType to follow. zero-terminated string
-  @field includeSubTypes
+  @var SOPC_ClientHelper_BrowseRequest::includeSubtypes
     Indicates whether subtypes of the ReferenceType should be included.
 */
 typedef struct
@@ -176,21 +180,22 @@ typedef struct
     bool includeSubtypes;
 } SOPC_ClientHelper_BrowseRequest;
 
-/*
-  @description
+/**
+  @struct SOPC_ClientHelper_BrowseResultReference
+  @brief
     Structure defining a node, an attribute and a value.
-  @field referenceTypeId
+  @var SOPC_ClientHelper_BrowseResultReference::referenceTypeId
     NodeId of the ReferenceType to follow. zero-terminated string.
-  @field isForward
+  @var SOPC_ClientHelper_BrowseResultReference::isForward
     If True, the server follow a forward reference. Otherwise, it follow an inverse.
-  @field nodeId
+  @var SOPC_ClientHelper_BrowseResultReference::nodeId
     ExpandedNodeId (see OPC Unified Architecture, Part 4) of the target node following the Reference defined by the
   returned ReferenceTypeId.
-  @field browseName
+  @var SOPC_ClientHelper_BrowseResultReference::browseName
     BrowseName of the target node. zero-terminated string or NULL.
-  @field DisplayName
+  @var SOPC_ClientHelper_BrowseResultReference::displayName
     DisplayName of the target node. zero-terminated string.
-  @field nodeClass
+  @var SOPC_ClientHelper_BrowseResultReference::nodeClass
     NodeClass identifier of the target node.
 */
 typedef struct
@@ -203,14 +208,15 @@ typedef struct
     int32_t nodeClass;
 } SOPC_ClientHelper_BrowseResultReference;
 
-/*
- * @description
+/**
+ * @struct SOPC_ClientHelper_BrowseResult
+ * @brief
  *   structure containing the result of a browse request
- * @field statusCode
+ * @var SOPC_ClientHelper_BrowseResult::statusCode
  *   status code of the browse operation
- * @field NbOfReferences
+ * @var SOPC_ClientHelper_BrowseResult::nbOfReferences
  *   number of references
- * @field references
+ * @var SOPC_ClientHelper_BrowseResult::references
  *   references return by the browse request
  */
 typedef struct
@@ -220,23 +226,24 @@ typedef struct
     SOPC_ClientHelper_BrowseResultReference* references;
 } SOPC_ClientHelper_BrowseResult;
 
-/*
- * @description
+/**
+ * @struct SOPC_ClientHelper_UserIdentityToken
+ * @brief
  *   structure containing a user identity token
- * @field policyId
+ * @var SOPC_ClientHelper_UserIdentityToken::policyId
  *   policy id
- * @field tokenType
+ * @var SOPC_ClientHelper_UserIdentityToken::tokenType
  *   type of token:
  *    - 0: anonymous
  *    - 1: username
  *    - 2: certificate
  *    - 3: IssuedToken
  *    - 4: Kerberos
- * @field issuedTokenType
+ * @var SOPC_ClientHelper_UserIdentityToken::issuedTokenType
  *   name of the token type
- * @field issuerEndpointUrl
+ * @var SOPC_ClientHelper_UserIdentityToken::issuerEndpointUrl
  *   endpoint Url of the issuer
- * @field securityPolicyUri
+ * @var SOPC_ClientHelper_UserIdentityToken::securityPolicyUri
  *   Uri of the security policy
  */
 typedef struct
@@ -248,26 +255,27 @@ typedef struct
     char* securityPolicyUri;
 } SOPC_ClientHelper_UserIdentityToken;
 
-/*
- * @description
+/**
+ * @struct SOPC_ClientHelper_EndpointDescription
+ * @brief
  *   structure containing an endpoint description
- * @field endpointUrl
+ * @var SOPC_ClientHelper_EndpointDescription::endpointUrl
  *   url of the endpoint
- * @field security_mode
+ * @var SOPC_ClientHelper_EndpointDescription::security_mode
  *   the security mode of the endpoint:
  *    - 0: invalid
  *    - 1: None
  *    - 2: Sign
  *    - 3: SignAndEncrypt
- * @field security_policyUri
+ * @var SOPC_ClientHelper_EndpointDescription::security_policyUri
  *   Uri of the security policy
- * @field nbOfUserIdentityTokens
+ * @var SOPC_ClientHelper_EndpointDescription::nbOfUserIdentityTokens
  *   The number of user identity tokens in userIdentityTokens array
- * @field userIdentityTokens
+ * @var SOPC_ClientHelper_EndpointDescription::userIdentityTokens
  *   The array containing user identity tokens
- * @field transportProfileUri
+ * @var SOPC_ClientHelper_EndpointDescription::transportProfileUri
  *   Uri of the transport profile
- * @field securityLevel
+ * @var SOPC_ClientHelper_EndpointDescription::securityLevel
  *   the security level of the endpoint relative to other available endpoints
  *   on the server (the higher the better)
  */
@@ -282,13 +290,14 @@ typedef struct
     int32_t securityLevel;
 } SOPC_ClientHelper_EndpointDescription;
 
-/*
- * @description
+/**
+ * @struct SOPC_ClientHelper_GetEndpointsResult
+ * @brief
  *   structure containing the result of a GetEndpoints request
  *
- * @field nbOfEndpoints
+ * @var SOPC_ClientHelper_GetEndpointsResult::nbOfEndpoints
  *   the number of endpoints in the endpoints array
- * @field endpoints
+ * @var SOPC_ClientHelper_GetEndpointsResult::endpoints
  *   array of endpoints
  */
 typedef struct
@@ -297,8 +306,8 @@ typedef struct
     SOPC_ClientHelper_EndpointDescription* endpoints;
 } SOPC_ClientHelper_GetEndpointsResult;
 
-/*
- @description
+/**
+ @brief
     Configure the library. This function shall be called once by the host application
     before any other service can be used.
  @param log_path
@@ -327,15 +336,15 @@ int32_t SOPC_ClientHelper_Initialize(const char* log_path,
                                      int32_t log_level,
                                      const SOPC_ClientHelper_DisconnectCbk disconnect_callback);
 
-/*
- @description
+/**
+ @brief
     Clears the connections, configurations, and clears the Toolkit.
  @warning
     As this function should be called only once, it is not threadsafe. */
 void SOPC_ClientHelper_Finalize(void);
 
-/*
- * @description
+/**
+ * @brief
  *   Sends a GetEndpoints request to the endpointUrl and provide the results
  * @param endpointUrl
  *   Url of the endpoint
@@ -353,8 +362,8 @@ void SOPC_ClientHelper_Finalize(void);
  */
 int32_t SOPC_ClientHelper_GetEndpoints(const char* endpointUrl, SOPC_ClientHelper_GetEndpointsResult** result);
 
-/*
- @description
+/**
+ @brief
     Creates a new configuration to connect to a remote OPC server.
     Return a configuration id or error code.
     All parameters are copied and can be freed by the caller.
@@ -370,8 +379,8 @@ int32_t SOPC_ClientHelper_GetEndpoints(const char* endpointUrl, SOPC_ClientHelpe
  */
 int32_t SOPC_ClientHelper_CreateConfiguration(const char* endpointUrl, SOPC_ClientHelper_Security security);
 
-/*
- @description
+/**
+ @brief
     Creates a new connection to a remote OPC server.
     The connection represent the whole client and is later identified by the returned connectionId.
     The function waits until the client is effectively connected or the Toolkit times out.
@@ -388,8 +397,8 @@ int32_t SOPC_ClientHelper_CreateConfiguration(const char* endpointUrl, SOPC_Clie
  */
 int32_t SOPC_ClientHelper_CreateConnection(int32_t cfg_id);
 
-/*
- @description
+/**
+ @brief
     Create a subscription associated to the given connection
     The given callback will be called on data changes.
 
@@ -410,8 +419,8 @@ int32_t SOPC_ClientHelper_CreateConnection(int32_t cfg_id);
 */
 int32_t SOPC_ClientHelper_CreateSubscription(int32_t connectionId, SOPC_ClientHelper_DataChangeCbk callback);
 
-/*
- @description
+/**
+ @brief
     Adds monitored items to the subscription associated to the given connection.
     SOPC_ClientHelper_CreateSubscription() should have been called previously.
 
@@ -436,8 +445,8 @@ int32_t SOPC_ClientHelper_CreateSubscription(int32_t connectionId, SOPC_ClientHe
 */
 int32_t SOPC_ClientHelper_AddMonitoredItems(int32_t connectionId, char** nodeIds, size_t nbNodeIds);
 
-/*
- @description
+/**
+ @brief
     Delete subscription associated to the given connection.
     If this function succeed, no more data changes notification is received about this connection until
     SOPC_ClientHelper_CreateSubscription() and SOPC_ClientHelper_AddMonitorItems() are called.
@@ -451,11 +460,11 @@ int32_t SOPC_ClientHelper_AddMonitoredItems(int32_t connectionId, char** nodeIds
 */
 int32_t SOPC_ClientHelper_Unsubscribe(int32_t connectionId);
 
-/*
- @description
+/**
+ @brief
     Disconnect from a remote OPC server.
     The function waits until the client is effectively disconnected, or the Toolkit times out.
- @param c_id
+ @param connectionId
     The connection id to disconnect
  @return
    '0' if operation succeed
@@ -466,8 +475,8 @@ int32_t SOPC_ClientHelper_Unsubscribe(int32_t connectionId);
 */
 int32_t SOPC_ClientHelper_Disconnect(int32_t connectionId);
 
-/*
- @description
+/**
+ @brief
     Write values to attributes "Value" of one or more Nodes.
     This function waits for the server response, or the Toolkit times out.
 
@@ -496,8 +505,8 @@ int32_t SOPC_ClientHelper_Write(int32_t connectionId,
                                 size_t nbElements,
                                 SOPC_StatusCode* writeResults);
 
-/*
- @description
+/**
+ @brief
     Read one or more attributes of one or more Nodes.
     Return both the source and Server timestamps for each requested Variable Value Attribute.
 
@@ -512,7 +521,7 @@ int32_t SOPC_ClientHelper_Write(int32_t connectionId,
     It should be not NULL and be at least \p nbElements long.
  @param nbElements
     Number of elements to read. It should be between 1 and INT32_MAX
- @param values [out, not null]
+ @param[out] values
     A pre-allocated array to the output list of pointers of Attribute values.
     It should be at least \p nElements long.
     When return, the order of this list matches the order of \p readValues.
@@ -531,8 +540,8 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
                                size_t nbElements,
                                SOPC_DataValue** values);
 
-/*
- @description
+/**
+ @brief
     Discover the references of a Node using Browse and browseNext services.
     If Browse Response returns ContinuationPoint, a BrowseNext Request is sent until no ContinuationPoint is returned.
 
@@ -551,7 +560,7 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
     It should be not NULL and be at least \p nbElements long.
  @param nbElements
     Number of elements to browse. It should be between 1 and INT32_MAX
- @param browseResults [out, not null]
+ @param[out] browseResults
     A pre-allocated array to the output list of BrowseResult.
     It should be at least \p nElements long.
     When return, the order of this list matches the order of \p browseRequests.

@@ -132,19 +132,20 @@ typedef enum
     SOPC_LibSub_DataType_other = 5
 } SOPC_LibSub_DataType;
 
-/*
-  @description
+/**
+  @struct SOPC_LibSub_Value
+  @brief
     Structure defining the value of a node
-  @field quality
+  @var SOPC_LibSub_Value::quality
     The value quality.
-  @field type
+  @var SOPC_LibSub_Value::type
     The value type. Specifies the type of '*value' amongst:
     - SOPC_LibSub_CstString (SOPC_LibSub_DataType_string / SOPC_LibSub_DataType_bytestring)
     - int64_t (SOPC_LibSub_DataType_bool / SOPC_LibSub_DataType_integer)
     - NULL (SOPC_LibSub_DataType_other)
-  @field length
+  @var SOPC_LibSub_Value::length
     The length of the value, in case it is a bytestring. 0 otherwise.
-  @field raw_value
+  @var SOPC_LibSub_Value::raw_value
     A pointer to a copy of the SOPC_Variant.
 */
 typedef struct
@@ -158,8 +159,8 @@ typedef struct
     void* raw_value;
 } SOPC_LibSub_Value;
 
-/*
-  @description
+/**
+  @brief
     AttributeIds, as defined in the OPC UA Reference, Part 6 Annex A */
 typedef uint32_t SOPC_LibSub_AttributeId;
 
@@ -186,8 +187,8 @@ typedef uint32_t SOPC_LibSub_AttributeId;
 #define SOPC_LibSub_AttributeId_Executable 21
 #define SOPC_LibSub_AttributeId_UserExecutable 22
 
-/*
-  @description
+/**
+  @brief
     The event passed to the connection SOPC_LibSub_EventCbk.
     Either an error or a valid response notification.
 */
@@ -197,8 +198,8 @@ typedef enum SOPC_LibSub_ApplicativeEvent
     SOPC_LibSub_ApplicativeEvent_Response
 } SOPC_LibSub_ApplicativeEvent;
 
-/*
-  @description
+/**
+  @brief
     Log callback type
   @param log_level
     The Log level (SOPC_Log_Level). Note: SOPC_log_error shall be non-returning.
@@ -206,15 +207,15 @@ typedef enum SOPC_LibSub_ApplicativeEvent
     The text string to log (shall not be null) */
 typedef void (*SOPC_LibSub_LogCbk)(const SOPC_Log_Level log_level, SOPC_LibSub_CstString text);
 
-/*
-  @description
+/**
+  @brief
     Callback type for disconnect event
   @param c_id
     The connection id that has been disconnected */
 typedef void (*SOPC_LibSub_DisconnectCbk)(const SOPC_LibSub_ConnectionId c_id);
 
-/*
-  @description
+/**
+  @brief
     Callback type for data change event (related to a subscription)
   @param c_id
     The connection id on which the datachange happened
@@ -229,8 +230,8 @@ typedef void (*SOPC_LibSub_DataChangeCbk)(const SOPC_LibSub_ConnectionId c_id,
                                           const SOPC_LibSub_DataId d_id,
                                           const SOPC_LibSub_Value* value);
 
-/*
-  @description
+/**
+  @brief
     Callback for generic responses to a call to SOPC_LibSub_AsyncSendRequestOnSession().
   @param c_id
     The connection id on which the event happened
@@ -260,12 +261,13 @@ typedef void (*SOPC_LibSub_EventCbk)(SOPC_LibSub_ConnectionId c_id,
  STRUCTURES DEFINITION
  ===================== */
 
-/*
- @description
-   Static configuration of OPC client libray
- @field host_log_callback
+/**
+ @struct SOPC_LibSub_StaticCfg
+ @brief
+   Static configuration of OPC client library
+ @var SOPC_LibSub_StaticCfg::host_log_callback
    Host log callback
- @field disconnect_callback
+ @var SOPC_LibSub_StaticCfg::disconnect_callback
    Notification event for disconnection from server */
 typedef struct
 {
@@ -280,58 +282,59 @@ typedef struct
     } toolkit_logger;
 } SOPC_LibSub_StaticCfg;
 
-/*
- @description
+/**
+ @struct SOPC_LibSub_ConnectionCfg
+ @brief
    Connection configuration to a remote OPC server
- @field server_url
+ @var SOPC_LibSub_ConnectionCfg::server_url
    Zero-terminated path to server URL
- @field security_policy
+ @var SOPC_LibSub_ConnectionCfg::security_policy
    The chosen OPC-UA security policy for the connection, one of the SOPC_SecurityPolicy_*_URI string
- @field security_mode
+ @var SOPC_LibSub_ConnectionCfg::security_mode
    The chosen OPC-UA security mode for the connection, one of the OpcUa_MessageSecurityMode constant
- @field disable_certificate_verification
+ @var SOPC_LibSub_ConnectionCfg::disable_certificate_verification
    Uses a PKIProvider which does not verify the certificates against a certificate authority.
    Setting this flag to not 0 severely harms security. The certificate authority is not required in this case.
    Other certificates are still required when using an encrypted or signed secure channel.
- @field path_cert_auth
+ @var SOPC_LibSub_ConnectionCfg::path_cert_auth
    Zero-terminated path to the root certificate authority in the DER format
- @field path_cert_srv
+ @var SOPC_LibSub_ConnectionCfg::path_cert_srv
    Zero-terminated path to the server certificate in the DER format, signed by the root certificate authority
- @field path_cert_cli
+ @var SOPC_LibSub_ConnectionCfg::path_cert_cli
    Zero-terminated path to the client certificate in the DER format, signed by the root certificate authority
- @field path_key_cli
+ @var SOPC_LibSub_ConnectionCfg::path_key_cli
    Zero-terminated path to the client private key which is paired to the public key signed server certificate,
    in the DER format
- @field path_crl
+ @var SOPC_LibSub_ConnectionCfg::path_crl
    Zero-terminated path to the certificate revocation list in the DER format
- @field policyId
+ @var SOPC_LibSub_ConnectionCfg::policyId
    Zero-terminated policy id. To know which policy id to use, please read a
    GetEndpointsResponse or a CreateSessionResponse. When username is NULL, the
    AnonymousIdentityToken is used and the policy id must correspond to an
    anonymous UserIdentityPolicy. Otherwise, the UserNameIdentityToken is used
    and the policy id must correspond to an username UserIdentityPolicy.
- @field username
+ @var SOPC_LibSub_ConnectionCfg::username
    Zero-terminated username, NULL for anonymous access, see policyId
- @field password
+ @var SOPC_LibSub_ConnectionCfg::password
    Zero-terminated password, ignored when username is NULL. Password is kept in memory for future reconnections.
- @field publish_period_ms
+ @var SOPC_LibSub_ConnectionCfg::publish_period_ms
    The requested publish period for the created subscription (in milliseconds)
- @field n_max_keepalive
+ @var SOPC_LibSub_ConnectionCfg::n_max_keepalive
    The max keep alive count for the subscription. When there is no notification to send, the subscription waits
    at most the number of publish cycle before sending a publish response (which is then empty).
- @field n_max_lifetime
+ @var SOPC_LibSub_ConnectionCfg::n_max_lifetime
    The max number of time that a subscription may timeout its publish cycle without being able to send a
    response (because there is no publish request to answer to). In this case, the subscription is killed by the
    server. A large value is recommended (e.g. 1000).
- @field data_change_callback
+ @var SOPC_LibSub_ConnectionCfg::data_change_callback
    The callback for data change notification
- @field timeout_ms
+ @var SOPC_LibSub_ConnectionCfg::timeout_ms
    Connection timeout (milliseconds)
- @field sc_lifetime
+ @var SOPC_LibSub_ConnectionCfg::sc_lifetime
    Time before secure channel renewal (milliseconds). A parameter larger than 60000 is recommended.
- @field token_target
+ @var SOPC_LibSub_ConnectionCfg::token_target
    Number of tokens (PublishRequest) that the client tries to maintain throughout the connection
- @field generic_response_callback
+ @var SOPC_LibSub_ConnectionCfg::generic_response_callback
    The callback used to transmit generic responses to request passed
    through SOPC_LibSub_AsyncSendRequestOnSession.
  */
@@ -364,13 +367,13 @@ typedef struct
  SERVICES DEFINITION
  =================== */
 
-/*
-    Return the current version of the library
+/**
+    \brief Return the current version of the library
 */
 SOPC_LibSub_CstString SOPC_LibSub_GetVersion(void);
 
-/*
- @description
+/**
+ @brief
     Configure the library. This function shall be called once by the host application
     before any other service can be used.
  @warning
@@ -382,29 +385,29 @@ SOPC_LibSub_CstString SOPC_LibSub_GetVersion(void);
     The operation status */
 SOPC_ReturnStatus SOPC_LibSub_Initialize(const SOPC_LibSub_StaticCfg* pCfg);
 
-/*
- @description
+/**
+ @brief
     Clears the connections, configurations, and clears the Toolkit.
  @warning
     As this function should be called only once, it is not threadsafe. */
 void SOPC_LibSub_Clear(void);
 
-/*
- @description
+/**
+ @brief
     Configure a future connection. This function shall be called once per connection before
     a call to SOPC_LibSub_Configured(). The given /p pCfgId is later used to create connections.
  @param pCfg
     Non null pointer to the connection configuration. The content of the configuration is copied
     and the object pointed by /p pCfg can be freed by the caller.
- @param pCfgId [out, not null]
+ @param[out] pCfgId
     The configuration connection id. Set when the value returned is "SOPC_STATUS_OK".
  @return
     The operation status */
 SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCfg* pCfg,
                                                   SOPC_LibSub_ConfigurationId* pCfgId);
 
-/*
- @description
+/**
+ @brief
     Mark the library as configured. All calls to SOPC_LibSub_ConfigureConnection() shall
     be done prior to calling this function. All calls to SOPC_LibSub_Connect() shall be done
     after calling this function.
@@ -414,8 +417,8 @@ SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCf
     The operation status */
 SOPC_ReturnStatus SOPC_LibSub_Configured(void);
 
-/*
- @description
+/**
+ @brief
     Creates a new connection to a remote OPC server from configuration id cfg_id.
     The connection represent the whole client and is later identified by the returned cli_id.
     A subscription is created and associated with this client.
@@ -423,7 +426,7 @@ SOPC_ReturnStatus SOPC_LibSub_Configured(void);
     or the Toolkit times out.
  @param cfgId
     The parameters of the connection to create, return by SOPC_LibSub_ConfigureConnection().
- @param pCliId [out, not null]
+ @param[out] pCliId
     The connection id of the newly created client, set when return is SOPC_STATUS_OK.
  @return
     The operation status and SOPC_STATUS_TIMEOUT when connection hanged for more than
@@ -433,8 +436,8 @@ SOPC_ReturnStatus SOPC_LibSub_Configured(void);
  */
 SOPC_ReturnStatus SOPC_LibSub_Connect(const SOPC_LibSub_ConfigurationId cfgId, SOPC_LibSub_ConnectionId* pCliId);
 
-/*
- @description
+/**
+ @brief
     Add variables to the subscription of the connection.
     This call is synchroneous: it waits for the server response, or the Toolkit times out.
     The connection timeout is also used for this function.
@@ -447,7 +450,9 @@ SOPC_ReturnStatus SOPC_LibSub_Connect(const SOPC_LibSub_ConfigurationId cfgId, S
     An array of attributes id. The subscription is created for the attribute lAttrId[i]
     for the node id lszNodeId[i].
     It should be at least \p nElements long.
- @param lDataId [out, not null]
+ @param nElements
+    The number of elements in previous arrays.
+ @param[out] lDataId
     A pre-allocated array to the output unique variable data identifiers.
     It should be at least \p nElements long.
     The values will be used in call to data_change_callback.
@@ -460,8 +465,8 @@ SOPC_ReturnStatus SOPC_LibSub_AddToSubscription(const SOPC_LibSub_ConnectionId c
                                                 int32_t nElements,
                                                 SOPC_LibSub_DataId* lDataId);
 
-/*
- @description
+/**
+ @brief
     Sends a generic request on the connection. The request must be accepted by the SOPC encoders
  (OpcUa_<MessageStruct>*) which are defined in "sopc_types.h". Upon response, the SOPC_LibSub_EventCbk callback
  configured with this connection is called with the OpcUa response.
@@ -475,11 +480,11 @@ SOPC_ReturnStatus SOPC_LibSub_AddToSubscription(const SOPC_LibSub_ConnectionId c
 SOPC_ReturnStatus SOPC_LibSub_AsyncSendRequestOnSession(SOPC_LibSub_ConnectionId cliId,
                                                         void* requestStruct,
                                                         uintptr_t requestContext);
-/*
- @description
+/**
+ @brief
     Disconnect from a remote OPC server.
     The function waits until the client is effectively disconnected, or the Toolkit times out.
- @param c_id
+ @param cliId
     The connection id to disconnect
  @return
     The operation status. Erroneous case are:

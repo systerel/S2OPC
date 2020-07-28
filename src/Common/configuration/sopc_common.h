@@ -79,7 +79,7 @@ bool SOPC_Common_IsInitialized(void);
 /**
  * \brief Initializes Common module
  *
- * \param logConfiguration [in] log configuration
+ * \param[in] logConfiguration  log configuration
  *
  * \return SOPC_STATUS_OK if initialization is a success
  *         SOPC_STATUS_INVALID_PARAMETERS if logConfiguration is invalid
@@ -96,7 +96,7 @@ void SOPC_Common_Clear(void);
 /**
  * \brief set general log level
  *
- * \param level [in] target log level
+ * \param[in] level  target log level
  * \return SOPC_STATUS_OK
  */
 SOPC_ReturnStatus SOPC_Common_SetLogLevel(SOPC_Log_Level level);

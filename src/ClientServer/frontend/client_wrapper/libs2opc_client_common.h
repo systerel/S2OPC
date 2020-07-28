@@ -38,7 +38,7 @@
  */
 
 /**
- * @description
+ * @brief
  *   Callback type for discovery events
  * @param requestStatus
  *   status code of the request
@@ -58,8 +58,8 @@ typedef void (*SOPC_ClientCommon_DiscoveryCbk)(const SOPC_StatusCode requestStat
  SERVICES DEFINITION
  =================== */
 
-/*
- @description
+/**
+ @brief
     Configure the library. This function shall be called once by the host application
     before any other service can be used.
  @warning
@@ -74,29 +74,29 @@ typedef void (*SOPC_ClientCommon_DiscoveryCbk)(const SOPC_StatusCode requestStat
 SOPC_ReturnStatus SOPC_ClientCommon_Initialize(const SOPC_LibSub_StaticCfg* pCfg,
                                                const SOPC_ClientCommon_DiscoveryCbk cbkGetEndpoints);
 
-/*
- @description
+/**
+ @brief
     Clears the connections, configurations, and clears the Toolkit.
  @warning
     As this function should be called only once, it is not threadsafe. */
 void SOPC_ClientCommon_Clear(void);
 
-/*
- @description
+/**
+ @brief
     Configure a future connection. This function shall be called once per connection before
     a call to SOPC_ClientCommon_Configured(). The given /p pCfgId is later used to create connections.
  @param pCfg
     Non null pointer to the connection configuration. The content of the configuration is copied
     and the object pointed by /p pCfg can be freed by the caller.
- @param pCfgId [out, not null]
+ @param[out] pCfgId
     The configuration connection id. Set when the value returned is "SOPC_STATUS_OK".
  @return
     The operation status */
 SOPC_ReturnStatus SOPC_ClientCommon_ConfigureConnection(const SOPC_LibSub_ConnectionCfg* pCfg,
                                                         SOPC_LibSub_ConfigurationId* pCfgId);
 
-/*
- @description
+/**
+ @brief
     Mark the library as configured. All calls to SOPC_ClientCommon_ConfigureConnection() shall
     be done prior to calling this function. All calls to SOPC_ClientCommon_Connect() shall be done
     after calling this function.
@@ -106,14 +106,14 @@ SOPC_ReturnStatus SOPC_ClientCommon_ConfigureConnection(const SOPC_LibSub_Connec
     The operation status */
 SOPC_ReturnStatus SOPC_ClientCommon_Configured(void);
 
-/*
- @description
+/**
+ @brief
     Creates a new connection to a remote OPC server from configuration id cfg_id.
     The connection represent the whole client and is later identified by the returned cli_id.
     The function waits until the client is effectively connected, or the Toolkit times out.
  @param cfgId
     The parameters of the connection to create, return by SOPC_ClientCommon_ConfigureConnection().
- @param pCliId [out, not null]
+ @param[out] pCliId
     The connection id of the newly created client, set when returned status is SOPC_STATUS_OK
  @return
     The operation status and SOPC_STATUS_TIMEOUT when connection hanged for more than
@@ -124,8 +124,8 @@ SOPC_ReturnStatus SOPC_ClientCommon_Configured(void);
  */
 SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConnectionId cfgId, SOPC_LibSub_ConnectionId* pCliId);
 
-/*
- * @description
+/**
+ * @brief
  *    Create a subscription.
  * @param cliId
  *    The connection id.
@@ -137,15 +137,15 @@ SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConnectionId cfgId
 SOPC_ReturnStatus SOPC_ClientCommon_CreateSubscription(const SOPC_LibSub_ConnectionId cliId,
                                                        SOPC_ClientHelper_DataChangeCbk cbkWrapper);
 /**
- * @description
+ * @brief
  *    deletes a subscription
  * @param cliId
  *    connection id
  */
 SOPC_ReturnStatus SOPC_ClientCommon_DeleteSubscription(const SOPC_LibSub_ConnectionId cliId);
 
-/*
- @description
+/**
+ @brief
     Add variables to the subscription of the connection.
     This call is synchroneous: it waits for the server response, or the Toolkit times out.
     The connection timeout is also used for this function.
@@ -158,7 +158,9 @@ SOPC_ReturnStatus SOPC_ClientCommon_DeleteSubscription(const SOPC_LibSub_Connect
     An array of attributes id. The subscription is created for the attribute lAttrId[i]
     for the node id lszNodeId[i].
     It should be at least \p nElements long.
- @param lDataId [out, not null]
+ @param nElements
+    The number of elements in previous arrays.
+ @param[out] lDataId
     A pre-allocated array to the output unique variable data identifiers.
     It should be at least \p nElements long.
     The values will be used in call to SOPC_LibSub_DataChangeCbk data_change_callback.
@@ -171,8 +173,8 @@ SOPC_ReturnStatus SOPC_ClientCommon_AddToSubscription(const SOPC_LibSub_Configur
                                                       int32_t nElements,
                                                       SOPC_LibSub_DataId* lDataId);
 
-/*
- * @description
+/**
+ * @brief
  *    Delete subscription
  * @param cliId
  *    The connection id.
@@ -181,8 +183,8 @@ SOPC_ReturnStatus SOPC_ClientCommon_AddToSubscription(const SOPC_LibSub_Configur
  */
 SOPC_ReturnStatus SOPC_ClientCommon_DeleteSubscription(const SOPC_LibSub_ConnectionId cliId);
 
-/*
- @description
+/**
+ @brief
     Sends a generic request on the connection. The request must be accepted by the SOPC encoders
  (OpcUa_<MessageStruct>*) which are defined in "sopc_types.h". Upon response, the SOPC_ClientCommon_EventCbk callback
  configured with this connection is called with the OpcUa response.
@@ -198,7 +200,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendRequestOnSession(SOPC_LibSub_Connec
                                                               uintptr_t requestContext);
 
 /**
- * @description
+ * @brief
  *    sends a GetEndpoints request
  * @param endpointUrl
  *    url of the endpoint
@@ -209,11 +211,11 @@ SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendRequestOnSession(SOPC_LibSub_Connec
  */
 SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendGetEndpointsRequest(const char* endpointUrl, uintptr_t requestContext);
 
-/*
- @description
+/**
+ @brief
     Disconnect from a remote OPC server.
     The function waits until the client is effectively disconnected, or the Toolkit times out.
- @param c_id
+ @param cliId
     The connection id to disconnect
  @return
     The operation status. Erroneous case are:

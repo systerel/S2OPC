@@ -87,7 +87,7 @@ void SOPC_Socket_AddrInfoDelete(SOPC_Socket_AddressInfo** addrs);
 /**
  *  \brief Clear socket state to an invalid socket
  *
- *  \param sock              (Out) Value pointed is set to invalid socket value
+ *  \param[out] sock  Value pointed is set to invalid socket value
  */
 void SOPC_Socket_Clear(Socket* sock);
 
@@ -97,7 +97,7 @@ void SOPC_Socket_Clear(Socket* sock);
  *  \param addr              The addressing information used to instantiate a TCP/IP socket
  *  \param setReuseAddr      If value is not false (0) the socket is configured to be reused
  *  \param setNonBlocking    If value is not false (0) the socket is configured to be non blocking
- *  \param sock              (Out) Value pointed is set with the newly created socket
+ *  \param[out] sock         Value pointed is set with the newly created socket
  *
  *  \return                  GOOD if operation succeeded, BAD otherwise.
  */
@@ -120,9 +120,9 @@ SOPC_ReturnStatus SOPC_Socket_Listen(Socket sock, SOPC_Socket_AddressInfo* addr)
  *  \brief Operation to accept a connection on a listening socket
  *  Connection on a listening socket is detected when receiving a read event on the socket.
  *
- *  \param listeningSock    The listening socket on which a read event has been received.
- *  \param setNonBlocking   If value is not false (0) the connection socket is configured to be non blocking
- *  \param acceptedSock     (Out) Value pointed is set with the newly created socket for accepted connection
+ *  \param listeningSock      The listening socket on which a read event has been received.
+ *  \param setNonBlocking     If value is not false (0) the connection socket is configured to be non blocking
+ *  \param[out] acceptedSock  Value pointed is set with the newly created socket for accepted connection
  *
  *  \return        GOOD if operation succeeded, BAD otherwise.
  */
@@ -238,9 +238,9 @@ SOPC_ReturnStatus SOPC_Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize
 /**
  *  \brief Retrieve number of bytes available to read on the socket
  *
- *  \param sock         The socket on which data might be available to read
- *  \param bytesToRead  (out) Pointer to the number of bytes available to read on the socket.
- *                      To be considered only if returned status is SOPC_STATUS_OK
+ *  \param sock              The socket on which data might be available to read
+ *  \param[out] bytesToRead  Pointer to the number of bytes available to read on the socket.
+ *                           To be considered only if returned status is SOPC_STATUS_OK
  *
  *  \return             SOPC_STATUS_OK if operation succeeded,
  *                      SOPC_STATUS_INVALID_PARAMETERS if parameters are not valid, SOPC_STATUS_NOK otherwise.

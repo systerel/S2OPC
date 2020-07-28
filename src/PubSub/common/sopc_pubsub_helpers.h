@@ -32,8 +32,8 @@
  *
  * Limitation: IP are limited to IPv4 for now (detection function missing)
  *
- * \param address        Cstring address with format opc.udp://<IP>:<PORT>
- * \param multicastAddr  (out) the multicast address to send data through socket
+ * \param address             Cstring address with format opc.udp://<IP>:<PORT>
+ * \param[out] multicastAddr  the multicast address to send data through socket
  *
  * \return true in case of success, false otherwise
  */
@@ -45,9 +45,9 @@ bool SOPC_PubSubHelpers_Publisher_ParseMulticastAddress(const char* address, SOP
  *
  * Limitation: IP are limited to IPv4 for now (detection function missing)
  *
- * \param address        Cstring address with format opc.udp://<IP>:<PORT>
- * \param multicastAddr  (out) the multicast address to could add local address as member of multicadt group
- * \param localAddr      (out) the local address to receive data through socket (choose automatically on multicast port)
+ * \param address             Cstring address with format opc.udp://<IP>:<PORT>
+ * \param[out] multicastAddr  the multicast address to could add local address as member of multicadt group
+ * \param[out] localAddr      the local address to receive data through socket (choose automatically on multicast port)
  *
  * \return true in case of success, false otherwise
  */
