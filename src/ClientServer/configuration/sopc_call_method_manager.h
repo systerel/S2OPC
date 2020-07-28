@@ -43,7 +43,9 @@ typedef struct SOPC_MethodCallFunc SOPC_MethodCallFunc;
  * \param nbInputArgs     number of input argument
  * \param inputArgs       an array of input argument of the method. The size is nbInputArgs.
  * \param nbOutputArgs    a valid pointer in which the number of output argument is written by the function
- * \param outputArgs      a valid pointer in which the output argument is written by the function
+ * \param outputArgs      a valid pointer to an SOPC_Variant[] in which the output argument is allocated and written by
+ * the function
+ *
  * \return status code of the function. Should be SOPC_STATUS_OK if succeeded.
  */
 typedef SOPC_StatusCode (*SOPC_MethodCallFunc_Ptr)(const SOPC_NodeId* objectId,
