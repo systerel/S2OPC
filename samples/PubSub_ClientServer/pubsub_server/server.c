@@ -73,7 +73,7 @@ SOPC_ReturnStatus Server_Initialize(void)
 {
     SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
     logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = LOG_PATH;
-    logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
+    logConfiguration.logLevel = SOPC_LOG_LEVEL_ERROR;
     SOPC_ReturnStatus status = SOPC_Common_Initialize(logConfiguration);
 
     if (SOPC_STATUS_OK == status)
