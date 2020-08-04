@@ -451,7 +451,11 @@ static void SOPC_RT_Publisher_SendPubMsgCallback(uint32_t msgId,     // Message 
            size);                                                                                         //
 #endif
 
-    pCtx->transport->fctSend(pCtx->transport, &buffer);
+    if (size > 0 && pCtx != NULL && pCtx->transport != NULL && pCtx->transport->fctSend != NULL)
+    {
+        pCtx->transport->fctSend(pCtx->transport, &buffer);
+        pubSchedulerCtx.sequenceNumber++;
+    }
 
     return;
 }
