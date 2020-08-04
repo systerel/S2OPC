@@ -1,0 +1,4 @@
+using sysbus
+
+mach rem $name_pubsub1
+mach rem $name_pubsub2

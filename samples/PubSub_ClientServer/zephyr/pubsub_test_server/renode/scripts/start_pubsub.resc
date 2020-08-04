@@ -1,0 +1,19 @@
+using sysbus
+
+mach create $name_pubsub1
+#chargement board
+machine LoadPlatformDescription @../renode/platforms/cpus/sam_e70.repl
+cpu PerformanceInMips 125
+#Affichage de l'uart
+showAnalyzer sysbus.usart1
+logLevel 3 nvic
+#chargement binaire PUBSUB_1 side
+sysbus LoadELF $bin_pubsub1
+#connection PUBSUB_1 side au switch
+connector Connect gem switch
+#demarrage
+start
+
+mach clear
+
+

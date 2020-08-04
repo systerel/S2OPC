@@ -1,0 +1,37 @@
+using sysbus
+
+$bin_pubsub1?=@./build/pubsub_sam_1/zephyr/zephyr.elf
+$name_pubsub1?="PUBSUB1"
+mach create $name_pubsub1
+#chargement board
+machine LoadPlatformDescription @../renode/platforms/cpus/sam_e70.repl
+cpu PerformanceInMips 125
+#Affichage de l'uart
+showAnalyzer sysbus.usart1
+logLevel 3 nvic
+#chargement binaire PUBSUB_1 side
+sysbus LoadELF $bin_pubsub1
+#connection PUBSUB_1 side au switch
+connector Connect gem switch
+#demarrage
+start
+
+mach clear
+
+$bin_pubsub2?=@./build/pubsub_sam_2/zephyr/zephyr.elf
+$name_pubsub2?="PUBSUB2"
+mach create $name_pubsub2
+#chargement board
+machine LoadPlatformDescription @../renode/platforms/cpus/sam_e70.repl
+cpu PerformanceInMips 125
+#Affichage de l'uart
+showAnalyzer sysbus.usart1
+logLevel 3 nvic
+#chargement binaire PUBSUB_2 side
+sysbus LoadELF $bin_pubsub2
+#connection PUBSUB_1 side au switch
+connector Connect gem switch
+#demarrage
+start
+
+mach clear
