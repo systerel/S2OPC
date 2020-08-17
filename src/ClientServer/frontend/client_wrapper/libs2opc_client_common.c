@@ -1042,7 +1042,7 @@ static void ToolkitEventCallback(SOPC_App_Com_Event event, uint32_t IdOrStatus, 
                 {
                     bool inhibitDisconnectCallback = (bool) SOPC_StaMac_GetUserContext(pSM);
                     /* Check if the disconnection callback shall be inhibited (Connect operation still running) */
-                    if (!inhibitDisconnectCallback)
+                    if (!inhibitDisconnectCallback && NULL != cbkDisco)
                     {
                         /* The disconnect callback shall be called after the client has been destroyed */
                         cbkDisco(cliId);
