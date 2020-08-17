@@ -642,7 +642,7 @@ static void GenericCallback_GetEndpoints(const SOPC_StatusCode requestStatus,
                         {
                             /* convert OpcUa_UserTokenPolicy to SOPC_ClientHelper_UserIdentityToken */
                             userIds[j].policyId = SOPC_String_GetCString(&tokensPolicies[j].PolicyId);
-                            userIds[j].tokenType = (int32_t) tokensPolicies[j].TokenType;
+                            userIds[j].tokenType = tokensPolicies[j].TokenType;
                             userIds[j].issuedTokenType = SOPC_String_GetCString(&tokensPolicies[j].IssuedTokenType);
                             userIds[j].issuerEndpointUrl = SOPC_String_GetCString(&tokensPolicies[j].IssuerEndpointUrl);
                             userIds[j].securityPolicyUri = SOPC_String_GetCString(&tokensPolicies[j].SecurityPolicyUri);

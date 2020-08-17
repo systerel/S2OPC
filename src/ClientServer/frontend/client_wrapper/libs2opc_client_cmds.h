@@ -230,12 +230,12 @@ typedef struct
  * @var SOPC_ClientHelper_UserIdentityToken::policyId
  *   policy id
  * @var SOPC_ClientHelper_UserIdentityToken::tokenType
- *   type of token:
- *    - 0: anonymous
- *    - 1: username
- *    - 2: certificate
- *    - 3: IssuedToken
- *    - 4: Kerberos
+ *   The list of accepted values is one of the following OpcUa_UserTokenType values:
+ *    - OpcUa_UserTokenType_Anonymous: anonymous
+ *    - OpcUa_UserTokenType_UserName: username
+ *    - OpcUa_UserTokenType_Certificate: certificate
+ *    - OpcUa_UserTokenType_IssuedToken: IssuedToken
+ *    - OpcUa_UserTokenType_Kerberos: Kerberos
  * @var SOPC_ClientHelper_UserIdentityToken::issuedTokenType
  *   name of the token type
  * @var SOPC_ClientHelper_UserIdentityToken::issuerEndpointUrl
@@ -246,7 +246,7 @@ typedef struct
 typedef struct
 {
     char* policyId;
-    int32_t tokenType;
+    OpcUa_UserTokenType tokenType;
     char* issuedTokenType;
     char* issuerEndpointUrl;
     char* securityPolicyUri;
