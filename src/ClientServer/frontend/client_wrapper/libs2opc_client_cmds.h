@@ -34,6 +34,7 @@
 
 #include "sopc_builtintypes.h"
 #include "sopc_crypto_profiles.h"
+#include "sopc_enum_types.h"
 #include "sopc_log_manager.h"
 #include "sopc_user_app_itf.h"
 
@@ -68,10 +69,10 @@ typedef void (*SOPC_ClientHelper_DisconnectCbk)(const uint32_t connectionId);
  "sopc_crypto_profiles.h". zero-terminated string
  @var SOPC_ClientHelper_Security::security_mode
    The chosen OPC-UA security mode for the connection.
-   The list of accepted values is:
-   - 1: no security mode,
-   - 2: only signature,
-   - 3: signature and encryption.
+   The list of accepted values is one of the following OpcUa_MessageSecurityMode values:
+   - OpcUa_MessageSecurityMode_None: no security mode,
+   - OpcUa_MessageSecurityMode_Sign: only signature,
+   - OpcUa_MessageSecurityMode_SignAndEncrypt: signature and encryption.
  @var SOPC_ClientHelper_Security::path_cert_auth
    Zero-terminated path to the root certificate authority in the DER format
  @var SOPC_ClientHelper_Security::path_crl
@@ -97,7 +98,7 @@ typedef void (*SOPC_ClientHelper_DisconnectCbk)(const uint32_t connectionId);
 typedef struct
 {
     const char* security_policy;
-    int32_t security_mode;
+    OpcUa_MessageSecurityMode security_mode;
     const char* path_cert_auth;
     const char* path_crl;
     const char* path_cert_srv;
@@ -259,10 +260,10 @@ typedef struct
  *   url of the endpoint
  * @var SOPC_ClientHelper_EndpointDescription::security_mode
  *   the security mode of the endpoint:
- *    - 0: invalid
- *    - 1: None
- *    - 2: Sign
- *    - 3: SignAndEncrypt
+ *   The list of accepted values is one of the following OpcUa_MessageSecurityMode values:
+ *    - OpcUa_MessageSecurityMode_None: no security mode,
+ *    - OpcUa_MessageSecurityMode_Sign: only signature,
+ *    - OpcUa_MessageSecurityMode_SignAndEncrypt: signature and encryption.
  * @var SOPC_ClientHelper_EndpointDescription::security_policyUri
  *   Uri of the security policy
  * @var SOPC_ClientHelper_EndpointDescription::nbOfUserIdentityTokens

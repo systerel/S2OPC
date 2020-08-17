@@ -402,7 +402,6 @@ static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_
                                                  const char* endpointUrl,
                                                  SOPC_ClientHelper_Security* security)
 {
-    OpcUa_MessageSecurityMode secuMode = OpcUa_MessageSecurityMode_Invalid;
     bool disable_verification = false;
     const char* cert_auth = security->path_cert_auth;
     const char* ca_crl = security->path_crl;
@@ -424,7 +423,6 @@ static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_
             return -11;
         }
         disable_verification = true;
-        secuMode = OpcUa_MessageSecurityMode_None;
         cert_auth = NULL;
         ca_crl = NULL;
         cert_srv = NULL;
@@ -432,10 +430,8 @@ static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_
         key_cli = NULL;
         break;
     case OpcUa_MessageSecurityMode_Sign:
-        secuMode = OpcUa_MessageSecurityMode_Sign;
         break;
     case OpcUa_MessageSecurityMode_SignAndEncrypt:
-        secuMode = OpcUa_MessageSecurityMode_SignAndEncrypt;
         break;
     default:
         return -12;
@@ -468,7 +464,7 @@ static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_
 
     cfg_con->server_url = endpointUrl;
     cfg_con->security_policy = security->security_policy;
-    cfg_con->security_mode = secuMode;
+    cfg_con->security_mode = security->security_mode;
     cfg_con->disable_certificate_verification = disable_verification;
     cfg_con->path_cert_auth = cert_auth;
     cfg_con->path_cert_srv = cert_srv;
