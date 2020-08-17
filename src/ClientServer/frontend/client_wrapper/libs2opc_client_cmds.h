@@ -33,13 +33,9 @@
 #include <stdlib.h>
 
 #include "sopc_builtintypes.h"
+#include "sopc_crypto_profiles.h"
 #include "sopc_log_manager.h"
 #include "sopc_user_app_itf.h"
-
-/* Security policies, taken from "sopc_crypto_profiles.h" */
-#define SOPC_SecurityPolicy_None_URI "http://opcfoundation.org/UA/SecurityPolicy#None"
-#define SOPC_SecurityPolicy_Basic256_URI "http://opcfoundation.org/UA/SecurityPolicy#Basic256"
-#define SOPC_SecurityPolicy_Basic256Sha256_URI "http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"
 
 /**
   @brief
@@ -68,8 +64,8 @@ typedef void (*SOPC_ClientHelper_DisconnectCbk)(const uint32_t connectionId);
  @brief
    Connection configuration to a remote OPC server
  @var SOPC_ClientHelper_Security::security_policy
-   The chosen OPC-UA security policy for the connection, one of the SOPC_SecurityPolicy_*_URI string.
-   zero-terminated string
+   The chosen OPC-UA security policy for the connection, one of the SOPC_SecurityPolicy_*_URI string from
+ "sopc_crypto_profiles.h". zero-terminated string
  @var SOPC_ClientHelper_Security::security_mode
    The chosen OPC-UA security mode for the connection.
    The list of accepted values is:
@@ -377,7 +373,7 @@ int32_t SOPC_ClientHelper_GetEndpoints(const char* endpointUrl, SOPC_ClientHelpe
     If invalid security detected, return -<10+n> with <n> field number (starting from 1).
     If configuration failed, return '-100'.
  */
-int32_t SOPC_ClientHelper_CreateConfiguration(const char* endpointUrl, SOPC_ClientHelper_Security security);
+int32_t SOPC_ClientHelper_CreateConfiguration(const char* endpointUrl, SOPC_ClientHelper_Security* security);
 
 /**
  @brief

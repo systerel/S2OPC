@@ -212,7 +212,7 @@ static void SOPC_ClientHelper_GenericCallback(SOPC_LibSub_ConnectionId c_id,
 
 static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_con,
                                                  const char* endpointUrl,
-                                                 SOPC_ClientHelper_Security security);
+                                                 SOPC_ClientHelper_Security* security);
 static SOPC_ReturnStatus ReadHelper_Initialize(SOPC_ReturnStatus status,
                                                size_t nbElements,
                                                OpcUa_ReadValueId* nodesToRead,
@@ -400,26 +400,26 @@ int32_t SOPC_ClientHelper_GetEndpoints(const char* endpointUrl, SOPC_ClientHelpe
 
 static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_con,
                                                  const char* endpointUrl,
-                                                 SOPC_ClientHelper_Security security)
+                                                 SOPC_ClientHelper_Security* security)
 {
     OpcUa_MessageSecurityMode secuMode = OpcUa_MessageSecurityMode_Invalid;
     bool disable_verification = false;
-    const char* cert_auth = security.path_cert_auth;
-    const char* ca_crl = security.path_crl;
-    const char* cert_srv = security.path_cert_srv;
-    const char* cert_cli = security.path_cert_cli;
-    const char* key_cli = security.path_key_cli;
+    const char* cert_auth = security->path_cert_auth;
+    const char* ca_crl = security->path_crl;
+    const char* cert_srv = security->path_cert_srv;
+    const char* cert_cli = security->path_cert_cli;
+    const char* key_cli = security->path_key_cli;
 
     if (NULL == cfg_con)
     {
         return -1;
     }
 
-    switch (security.security_mode)
+    switch (security->security_mode)
     {
     case OpcUa_MessageSecurityMode_None:
-        if (strncmp(security.security_policy, SOPC_SecurityPolicy_None_URI, strlen(SOPC_SecurityPolicy_None_URI) + 1) !=
-            0)
+        if (strncmp(security->security_policy, SOPC_SecurityPolicy_None_URI,
+                    strlen(SOPC_SecurityPolicy_None_URI) + 1) != 0)
         {
             return -11;
         }
@@ -461,13 +461,13 @@ static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_
     {
         return -17;
     }
-    if (NULL == security.policyId)
+    if (NULL == security->policyId)
     {
         return -18;
     }
 
     cfg_con->server_url = endpointUrl;
-    cfg_con->security_policy = security.security_policy;
+    cfg_con->security_policy = security->security_policy;
     cfg_con->security_mode = secuMode;
     cfg_con->disable_certificate_verification = disable_verification;
     cfg_con->path_cert_auth = cert_auth;
@@ -475,9 +475,9 @@ static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_
     cfg_con->path_cert_cli = cert_cli;
     cfg_con->path_key_cli = key_cli;
     cfg_con->path_crl = ca_crl;
-    cfg_con->policyId = security.policyId;
-    cfg_con->username = security.username;
-    cfg_con->password = security.password;
+    cfg_con->policyId = security->policyId;
+    cfg_con->username = security->username;
+    cfg_con->password = security->password;
     cfg_con->publish_period_ms = PUBLISH_PERIOD_MS;
     cfg_con->n_max_keepalive = MAX_KEEP_ALIVE_COUNT;
     cfg_con->n_max_lifetime = MAX_LIFETIME_COUNT;
@@ -492,7 +492,7 @@ static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_
 
 // Return configuration Id > 0 if succeeded, -<n> with <n> argument number (starting from 1) if invalid argument
 // detected or '-100' if configuration failed
-int32_t SOPC_ClientHelper_CreateConfiguration(const char* endpointUrl, SOPC_ClientHelper_Security security)
+int32_t SOPC_ClientHelper_CreateConfiguration(const char* endpointUrl, SOPC_ClientHelper_Security* security)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (NULL == endpointUrl)
@@ -500,7 +500,7 @@ int32_t SOPC_ClientHelper_CreateConfiguration(const char* endpointUrl, SOPC_Clie
         return -1;
     }
 
-    if (NULL == security.security_policy)
+    if (NULL == security->security_policy)
     {
         return -11;
     }
