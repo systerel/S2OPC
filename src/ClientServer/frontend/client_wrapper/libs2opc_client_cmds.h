@@ -160,10 +160,10 @@ typedef struct
     NodeId of the Node to be browsed. zero-terminated string
   @var SOPC_ClientHelper_BrowseRequest::direction
     The direction of References to follow.
-    The list of accepted values is:
-    - 0: Forward references,
-    - 1: Inverse references,
-    - 2: Forward and inverse references.
+    The list of accepted values is one of the following OpcUa_BrowseDirection values:
+    - OpcUa_BrowseDirection_Forward: Forward references,
+    - OpcUa_BrowseDirection_Inverse: Inverse references,
+    - OpcUa_BrowseDirection_Both: Forward and inverse references.
   @var SOPC_ClientHelper_BrowseRequest::referenceTypeId
     NodeId of the ReferenceType to follow. zero-terminated string
   @var SOPC_ClientHelper_BrowseRequest::includeSubtypes
@@ -172,7 +172,7 @@ typedef struct
 typedef struct
 {
     char* nodeId;
-    int32_t direction;
+    OpcUa_BrowseDirection direction;
     char* referenceTypeId;
     bool includeSubtypes;
 } SOPC_ClientHelper_BrowseRequest;

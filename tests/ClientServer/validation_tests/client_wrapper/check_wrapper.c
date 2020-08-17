@@ -862,8 +862,10 @@ START_TEST(test_wrapper_browse)
     /* browse before initialization */
     {
         // Root/ - Hierarchical references
-        SOPC_ClientHelper_BrowseRequest browseRequest[1] = {
-            {.nodeId = "ns=0;i=84", .direction = 0, .referenceTypeId = "ns=0;i=33", .includeSubtypes = true}};
+        SOPC_ClientHelper_BrowseRequest browseRequest[1] = {{.nodeId = "ns=0;i=84",
+                                                             .direction = OpcUa_BrowseDirection_Forward,
+                                                             .referenceTypeId = "ns=0;i=33",
+                                                             .includeSubtypes = true}};
         SOPC_ClientHelper_BrowseResult browseResult[1];
 
         ck_assert_int_eq(-100, SOPC_ClientHelper_Browse(1, browseRequest, 1, browseResult));
@@ -875,8 +877,10 @@ START_TEST(test_wrapper_browse)
     /* browse before connection */
     {
         // Root/ - Hierarchical references
-        SOPC_ClientHelper_BrowseRequest browseRequest[1] = {
-            {.nodeId = "ns=0;i=84", .direction = 0, .referenceTypeId = "ns=0;i=33", .includeSubtypes = true}};
+        SOPC_ClientHelper_BrowseRequest browseRequest[1] = {{.nodeId = "ns=0;i=84",
+                                                             .direction = OpcUa_BrowseDirection_Forward,
+                                                             .referenceTypeId = "ns=0;i=33",
+                                                             .includeSubtypes = true}};
         SOPC_ClientHelper_BrowseResult browseResult[1];
 
         ck_assert_int_eq(-100, SOPC_ClientHelper_Browse(1, browseRequest, 1, browseResult));
@@ -891,8 +895,10 @@ START_TEST(test_wrapper_browse)
     /* invalid arguments */
     {
         // Root/ - Hierarchical references
-        SOPC_ClientHelper_BrowseRequest browseRequest[1] = {
-            {.nodeId = "ns=0;i=84", .direction = 0, .referenceTypeId = "ns=0;i=33", .includeSubtypes = true}};
+        SOPC_ClientHelper_BrowseRequest browseRequest[1] = {{.nodeId = "ns=0;i=84",
+                                                             .direction = OpcUa_BrowseDirection_Forward,
+                                                             .referenceTypeId = "ns=0;i=33",
+                                                             .includeSubtypes = true}};
         SOPC_ClientHelper_BrowseResult browseResult[1];
 
         /* invalid connection id */
@@ -907,8 +913,10 @@ START_TEST(test_wrapper_browse)
     /* browse */
     {
         // Root/ - Hierarchical references
-        SOPC_ClientHelper_BrowseRequest browseRequest[1] = {
-            {.nodeId = "ns=0;i=84", .direction = 0, .referenceTypeId = "ns=0;i=33", .includeSubtypes = true}};
+        SOPC_ClientHelper_BrowseRequest browseRequest[1] = {{.nodeId = "ns=0;i=84",
+                                                             .direction = OpcUa_BrowseDirection_Forward,
+                                                             .referenceTypeId = "ns=0;i=33",
+                                                             .includeSubtypes = true}};
         SOPC_ClientHelper_BrowseResult browseResult[1];
 
         ck_assert_int_eq(0, SOPC_ClientHelper_Browse(valid_con_id, browseRequest, 1, browseResult));
@@ -964,7 +972,8 @@ START_TEST(test_wrapper_browse)
         // This test should work with a server that is not ignoring maxReferencesPerNode.
         // TODO see if upgrading FreeOPCUA solves the problem, else use another one
         // SOPC_ClientHelper_BrowseRequest browseRequest[1] = {
-        //        { .nodeId = "ns=0;i=7617", .direction = 0, .referenceTypeId = "ns=0;i=33", .includeSubtypes = true }
+        //        { .nodeId = "ns=0;i=7617", .direction = OpcUa_BrowseDirection_Forward, .referenceTypeId = "ns=0;i=33",
+        //        .includeSubtypes = true }
         //};
         // SOPC_ClientHelper_BrowseResult browseResult[1];
         // CfgMaxReferencesPerNode = 1;
@@ -974,9 +983,14 @@ START_TEST(test_wrapper_browse)
     } /* browse multiple nodes */
     {
         // Root/ and Root/Objects - Hierarchical references
-        SOPC_ClientHelper_BrowseRequest browseRequest[2] = {
-            {.nodeId = "ns=0;i=84", .direction = 0, .referenceTypeId = "ns=0;i=33", .includeSubtypes = true},
-            {.nodeId = "ns=0;i=85", .direction = 0, .referenceTypeId = "ns=0;i=33", .includeSubtypes = true}};
+        SOPC_ClientHelper_BrowseRequest browseRequest[2] = {{.nodeId = "ns=0;i=84",
+                                                             .direction = OpcUa_BrowseDirection_Forward,
+                                                             .referenceTypeId = "ns=0;i=33",
+                                                             .includeSubtypes = true},
+                                                            {.nodeId = "ns=0;i=85",
+                                                             .direction = OpcUa_BrowseDirection_Forward,
+                                                             .referenceTypeId = "ns=0;i=33",
+                                                             .includeSubtypes = true}};
         SOPC_ClientHelper_BrowseResult browseResult[2];
 
         ck_assert_int_eq(0, SOPC_ClientHelper_Browse(valid_con_id, browseRequest, 2, browseResult));
@@ -1024,8 +1038,10 @@ START_TEST(test_wrapper_browse)
     /* browse after disconnection */
     {
         // Root/ - Hierarchical references
-        SOPC_ClientHelper_BrowseRequest browseRequest[1] = {
-            {.nodeId = "ns=0;i=84", .direction = 0, .referenceTypeId = "ns=0;i=33", .includeSubtypes = true}};
+        SOPC_ClientHelper_BrowseRequest browseRequest[1] = {{.nodeId = "ns=0;i=84",
+                                                             .direction = OpcUa_BrowseDirection_Forward,
+                                                             .referenceTypeId = "ns=0;i=33",
+                                                             .includeSubtypes = true}};
         SOPC_ClientHelper_BrowseResult browseResult[1];
 
         ck_assert_int_eq(-100, SOPC_ClientHelper_Browse(valid_con_id, browseRequest, 1, browseResult));
@@ -1037,8 +1053,10 @@ START_TEST(test_wrapper_browse)
     /* browse after toolkit is closed */
     {
         // Root/ - Hierarchical references
-        SOPC_ClientHelper_BrowseRequest browseRequest[1] = {
-            {.nodeId = "ns=0;i=84", .direction = 0, .referenceTypeId = "ns=0;i=33", .includeSubtypes = true}};
+        SOPC_ClientHelper_BrowseRequest browseRequest[1] = {{.nodeId = "ns=0;i=84",
+                                                             .direction = OpcUa_BrowseDirection_Forward,
+                                                             .referenceTypeId = "ns=0;i=33",
+                                                             .includeSubtypes = true}};
         SOPC_ClientHelper_BrowseResult browseResult[1];
 
         ck_assert_int_eq(-100, SOPC_ClientHelper_Browse(valid_con_id, browseRequest, 1, browseResult));

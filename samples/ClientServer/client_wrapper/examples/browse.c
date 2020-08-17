@@ -86,9 +86,9 @@ int main(int argc, char* const argv[])
         SOPC_ClientHelper_BrowseRequest browseRequest;
         SOPC_ClientHelper_BrowseResult browseResult;
 
-        browseRequest.nodeId = "ns=0;i=85"; // Root/Objects/
-        browseRequest.direction = 0;        // forward
-        browseRequest.referenceTypeId = ""; // all reference types
+        browseRequest.nodeId = "ns=0;i=85";                      // Root/Objects/
+        browseRequest.direction = OpcUa_BrowseDirection_Forward; // forward
+        browseRequest.referenceTypeId = "";                      // all reference types
         browseRequest.includeSubtypes = true;
 
         /* Browse specified node */
