@@ -61,7 +61,10 @@ SOPC_ReturnStatus SOPC_Common_Initialize(SOPC_Log_Configuration logConfiguration
     switch (logConfiguration.logSystem)
     {
     case SOPC_LOG_SYSTEM_FILE:
-        cmpRes = SOPC_strcmp_ignore_case("", logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath);
+        if (NULL != logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath)
+        {
+            cmpRes = SOPC_strcmp_ignore_case("", logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath);
+        } // else: nothing to compare and no directory to create
         if (0 == cmpRes)
         {
             // Nothing to create

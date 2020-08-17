@@ -46,8 +46,8 @@ bool SOPC_PubSubHelpers_Publisher_ParseMulticastAddress(const char* address, SOP
  * Limitation: IP are limited to IPv4 for now (detection function missing)
  *
  * \param address             Cstring address with format opc.udp://<IP>:<PORT>
- * \param[out] multicastAddr  the multicast address to could add local address as member of multicadt group
- * \param[out] localAddr      the local address to receive data through socket (choose automatically on multicast port)
+ * \param[out] multicastAddr  the multicast address to join
+ * \param[out] localAddr      the local address to listen to (bound automatically on the multicast port)
  *
  * \return true in case of success, false otherwise
  */
