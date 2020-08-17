@@ -618,6 +618,11 @@ SOPC_LibSub_Timestamp Helpers_OPCTimeToNTP(SOPC_DateTime ts)
 
 void Helpers_Log(const SOPC_Log_Level log_level, const char* format, ...)
 {
+    if (NULL == cbkLog)
+    {
+        return;
+    }
+
     va_list args;
     char buffer[2048];
 
