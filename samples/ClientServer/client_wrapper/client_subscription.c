@@ -102,7 +102,6 @@ static void free_options(cmd_line_options_t* o);
 static void print_usage(const char* exe);
 
 /* Callbacks */
-static void log_callback(const SOPC_Log_Level log_level, SOPC_LibSub_CstString text);
 static void disconnect_callback(const SOPC_LibSub_ConnectionId c_id);
 static void datachange_callback(const SOPC_LibSub_ConnectionId c_id,
                                 const SOPC_LibSub_DataId d_id,
@@ -119,7 +118,7 @@ int main(int argc, char* const argv[])
     }
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_LibSub_StaticCfg cfg_cli = {.host_log_callback = log_callback,
+    SOPC_LibSub_StaticCfg cfg_cli = {.host_log_callback = Helpers_LoggerStdout,
                                      .disconnect_callback = disconnect_callback,
                                      .toolkit_logger = {.level = SOPC_LOG_LEVEL_INFO,
                                                         .log_path = "./client_subscription_logs/",
@@ -247,11 +246,6 @@ int main(int argc, char* const argv[])
     return 0;
 }
 
-static void log_callback(const SOPC_Log_Level log_level, SOPC_LibSub_CstString text)
-{
-    Helpers_LoggerStdout(log_level, text);
-}
-
 static void disconnect_callback(const SOPC_LibSub_ConnectionId c_id)
 {
     Helpers_Log(SOPC_LOG_LEVEL_INFO, "Client %" PRIu32 " disconnected.", c_id);
@@ -283,7 +277,7 @@ static void datachange_callback(const SOPC_LibSub_ConnectionId c_id,
         snprintf(sz + n, sizeof(sz) / sizeof(sz[0]) - n, "%s", (SOPC_LibSub_CstString) value->value);
     }
 
-    log_callback(SOPC_LOG_LEVEL_INFO, sz);
+    Helpers_LoggerStdout(SOPC_LOG_LEVEL_INFO, sz);
 }
 
 #define FOREACH_OPT(x)                                                                                            \
@@ -336,33 +330,33 @@ static bool parse_options(cmd_line_options_t* o, int argc, char* const* argv)
     }
 #undef STR_OPT_CASE
 
-#define CHECK_REQUIRED_STR_OPT(name, req, arg_req, val, field)                    \
-    if (req && o->field == NULL)                                                  \
-    {                                                                             \
+#define CHECK_REQUIRED_STR_OPT(name, req, arg_req, val, field)            \
+    if (req && o->field == NULL)                                          \
+    {                                                                     \
         Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Missing option: --" name "."); \
-        print_usage(argv[0]);                                                     \
-        return false;                                                             \
+        print_usage(argv[0]);                                             \
+        return false;                                                     \
     }
 
     FOREACH_OPT(CHECK_REQUIRED_STR_OPT)
 
 #undef CHECK_REQUIRED_STR_OPT
 
-#define CONVERT_STR_OPT(name, type, default_val)                                             \
-    if (o->name##_str != NULL)                                                               \
-    {                                                                                        \
-        char* endptr;                                                                        \
-        o->name = (type) strtoul(o->name##_str, &endptr, 10);                                \
-                                                                                             \
-        if (*endptr != '\0')                                                                 \
-        {                                                                                    \
+#define CONVERT_STR_OPT(name, type, default_val)                                     \
+    if (o->name##_str != NULL)                                                       \
+    {                                                                                \
+        char* endptr;                                                                \
+        o->name = (type) strtoul(o->name##_str, &endptr, 10);                        \
+                                                                                     \
+        if (*endptr != '\0')                                                         \
+        {                                                                            \
             Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Invalid name: %s.\n", o->name##_str); \
-            return false;                                                                    \
-        }                                                                                    \
-    }                                                                                        \
-    else                                                                                     \
-    {                                                                                        \
-        o->name = default_val;                                                               \
+            return false;                                                            \
+        }                                                                            \
+    }                                                                                \
+    else                                                                             \
+    {                                                                                \
+        o->name = default_val;                                                       \
     }
 
     if (NULL == o->endpoint_url)

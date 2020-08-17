@@ -201,7 +201,6 @@ static SOPC_ReturnStatus SOPC_GetEndpointsContext_Initialization(GetEndpointsCon
 }
 
 /* Callbacks */
-static void log_callback(const SOPC_Log_Level log_level, SOPC_LibSub_CstString text);
 static void default_disconnect_callback(const SOPC_LibSub_ConnectionId c_id);
 static void SOPC_ClientHelper_GenericCallback(SOPC_LibSub_ConnectionId c_id,
                                               SOPC_LibSub_ApplicativeEvent event,
@@ -284,7 +283,7 @@ int32_t SOPC_ClientHelper_Initialize(const char* log_path,
     }
 
     SOPC_LibSub_StaticCfg cfg_cli = {
-        .host_log_callback = log_callback,
+        .host_log_callback = Helpers_LoggerStdout,
         .disconnect_callback = disconnect_callback != NULL ? disconnect_callback : default_disconnect_callback,
         .toolkit_logger = {.level = level, .log_path = log_path, .maxBytes = 1048576, .maxFiles = 50}};
 
@@ -1293,11 +1292,6 @@ int32_t SOPC_ClientHelper_Disconnect(int32_t connectionId)
     }
 
     return 0;
-}
-
-static void log_callback(const SOPC_Log_Level log_level, SOPC_LibSub_CstString text)
-{
-    Helpers_LoggerStdout(log_level, text);
 }
 
 static void default_disconnect_callback(const uint32_t c_id)
