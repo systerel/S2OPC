@@ -141,6 +141,7 @@ read -d '' exclusions <<-EOF
     src/Common/opcua_types/opcua_identifiers.h
     src/Common/opcua_types/opcua_statuscodes.h
     src/Common/opcua_types/sopc_types.h
+    src/Common/opcua_types/sopc_enum_types.h
     src/Common/opcua_types/sopc_types.c
     tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/FreeRTOSConfig.h
     tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/lwipopts.h
