@@ -30,7 +30,8 @@ class Response:
 
     Args:
         payload: An OpcUa_*Response. The payload is optional. If the payload is given, its content
-                 is shallow copied, if known.
+                 is shallow copied, if known. The payload is not given for known responses, such
+                 as `ReadResponse`, `WriteResponse`, or `BrowseResponse`.
     """
     def __init__(self, payload):
         self.timestampReceived = None  # The receiver sets the timestamp

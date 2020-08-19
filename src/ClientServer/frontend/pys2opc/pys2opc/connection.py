@@ -140,9 +140,9 @@ class BaseClientConnectionHandler(LibSubAsyncRequestHandler):
         Forges an `OpcUa_WriteResponse` and sends it.
         When `bWaitResponse`, waits for  and returns the `pys2opc.responses.WriteResponse`,
         which has accessors to check whether the writes were successful or not.
-        Otherwise, returns the `pys2opc.types.Request`.
+        Otherwise, returns the `pys2opc.request.Request`.
 
-        When `bAutoTypeWithRead`, this method tries to determine missing `datavalues` types.
+        When `bAutoTypeWithRead`, this method tries to determine missing `datavalues` types (see `pys2opc.types.DataValues`).
         It sends a blocking `ReadRequest` first on the `nodeIds` and `attributes`, and deduce the types from the response.
         The request is only sent when at least one datavalue lacks type in both `datavalue.variantType` and `types`.
         The type deduction may fail if the node does not exist or if the value is a `null`.
@@ -169,7 +169,7 @@ class BaseClientConnectionHandler(LibSubAsyncRequestHandler):
         Forges an `OpcUa_BrowseResponse` and sends it.
         When `bWaitResponse`, waits for  and returns the `pys2opc.responses.BrowseResponse`,
         which has a list `pys2opc.types.BrowseResult`s in its `results` attribute.
-        Otherwise, returns the `pys2opc.types.Request`.
+        Otherwise, returns the `pys2opc.request.Request`.
 
         See `pys2opc.request.Request.new_browse_request` for details on the other arguments.
         """

@@ -987,9 +987,7 @@ class Variant:
     def get_python(self):
         """
         Returns the python object wrapped by this Variant.
-        Use this when it is known that the Variant object will not be reused (e.g. by a future call to write_nodes).
-
-        Does not copy the object before returning it.
+        Does not copy the object before returning it, hence modifying it will modify the `Variant`'s value.
         """
         return self._value
 
@@ -1181,8 +1179,12 @@ class EncodeableType(NamedMembers):
 
 class BrowseResult:
     """
-    The `BrowseResult` is a low-level structures that contains the list of `pys2opc.types.Reference`s for a node,
-    but also the status code of the Browse operation, and, if needed, a continuation point.
+    The `BrowseResult` is a low-level structures that contains the results of browsing a single node.
+
+    Attributes:
+        status: the status code of the browse operation.
+        continuationPoint: whether the browse is incomplete (continuationPoint not empty) or not.
+        references: list of outgoing `pys2opc.types.Reference`s.
     """
     def __init__(self, sopc_browseresult):
         assert sopc_browseresult.encodeableType == EncodeableType.BrowseResult
