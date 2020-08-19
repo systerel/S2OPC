@@ -623,6 +623,7 @@ int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
     The connection id. It shall be > 0
  @param callRequests
     An array of SOPC_ClientHelper_CallMethodRequest describing the method called with input parameters
+    Note: inputParams are moved using SOPC_Variant_Move and should not be used after this function call
  @param nbOfElements
     number of elements in the \p callRequests and \p callResults arrays
  @param[out] callResults

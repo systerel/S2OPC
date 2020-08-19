@@ -178,12 +178,12 @@ typedef struct
     Mutex mutex; /* protect this context */
     Condition condition;
 
-    int32_t nbElements;
-    SOPC_ClientHelper_CallMethodResult* results;
+    int32_t nbElements; /* (input) the number of result elements expected in results received */
+    SOPC_ClientHelper_CallMethodResult* results; /* (output) results filled using service results received */
 
-    SOPC_StatusCode status;
+    SOPC_StatusCode status; /* (output) service status or service results treatment status in case of failure */
 
-    bool finish;
+    bool finish; /* (output) flag indicating the service treatment state */
 } CallMethodContext;
 
 static SOPC_ReturnStatus SOPC_CallMethodContext_Initialization(CallMethodContext* ctx)
@@ -201,6 +201,14 @@ static SOPC_ReturnStatus SOPC_CallMethodContext_Initialization(CallMethodContext
         }
     }
     return status;
+}
+
+static void SOPC_CallMethodContext_Clear(CallMethodContext* ctx)
+{
+    SOPC_ReturnStatus statusMutex = Condition_Clear(&ctx->condition);
+    assert(SOPC_STATUS_OK == statusMutex);
+    statusMutex = Mutex_Clear(&ctx->mutex);
+    assert(SOPC_STATUS_OK == statusMutex);
 }
 
 typedef struct
@@ -963,25 +971,15 @@ static void GenericCallbackHelper_CallMethod(SOPC_StatusCode status, const void*
     SOPC_ReturnStatus mutStatus = Mutex_Lock(&ctx->mutex);
     assert(SOPC_STATUS_OK == mutStatus);
 
-    ctx->status = status;
+    SOPC_ReturnStatus localStatus = status;
 
-    if (SOPC_STATUS_OK != ctx->status)
-    {
-        return;
-    }
-
-    if (ctx->nbElements < callRes->NoOfResults)
+    if (SOPC_STATUS_OK == localStatus && ctx->nbElements < callRes->NoOfResults)
     {
         Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Invalid number of elements in CallResponse.");
-        ctx->status = SOPC_STATUS_NOK;
+        localStatus = SOPC_STATUS_NOK;
     }
 
-    if (SOPC_STATUS_OK != ctx->status)
-    {
-        return;
-    }
-
-    for (int32_t i = 0; i < ctx->nbElements; i++)
+    for (int32_t i = 0; SOPC_STATUS_OK == localStatus && i < ctx->nbElements; i++)
     {
         SOPC_ClientHelper_CallMethodResult* cres = &ctx->results[i];
         OpcUa_CallMethodResult* res = &callRes->Results[i];
@@ -993,6 +991,8 @@ static void GenericCallbackHelper_CallMethod(SOPC_StatusCode status, const void*
         res->OutputArguments = NULL;
     }
     ctx->finish = true;
+
+    ctx->status = localStatus;
 
     mutStatus = Mutex_Unlock(&ctx->mutex);
     assert(SOPC_STATUS_OK == mutStatus);
@@ -1987,25 +1987,24 @@ int32_t SOPC_ClientHelper_CallMethod(int32_t connectionId,
         return -2;
     }
 
+    CallMethodContext ctx;
     OpcUa_CallRequest* callReqs = SOPC_Malloc(sizeof(OpcUa_CallRequest));
-    OpcUa_CallRequest_Initialize(callReqs);
-    if (NULL == callReqs)
+    OpcUa_CallMethodRequest* lrs = SOPC_Calloc((size_t) nbOfElements, sizeof(OpcUa_CallMethodRequest));
+    if (NULL == callReqs || NULL == lrs)
     {
+        SOPC_Free(callReqs);
+        SOPC_Free(lrs);
         return -3;
     }
 
-    callReqs->MethodsToCall = SOPC_Calloc((size_t) nbOfElements, sizeof(OpcUa_CallMethodRequest));
-    if (NULL == callReqs)
-    {
-        SOPC_Free(callReqs);
-        return 3;
-    }
+    OpcUa_CallRequest_Initialize(callReqs);
+    callReqs->MethodsToCall = lrs;
     callReqs->NoOfMethodsToCall = nbOfElements;
 
     for (int32_t i = 0; SOPC_STATUS_OK == status && i < nbOfElements; i++)
     {
         SOPC_ClientHelper_CallMethodRequest* creq = &callRequests[i];
-        OpcUa_CallMethodRequest* req = &callReqs->MethodsToCall[i];
+        OpcUa_CallMethodRequest* req = &lrs[i];
 
         OpcUa_CallMethodRequest_Initialize(req);
 
@@ -2015,83 +2014,71 @@ int32_t SOPC_ClientHelper_CallMethod(int32_t connectionId,
             status = SOPC_STATUS_INVALID_PARAMETERS;
         }
 
-        SOPC_NodeId* tmpNodeId = NULL;
         if (SOPC_STATUS_OK == status)
         {
-            tmpNodeId = SOPC_NodeId_FromCString(creq->objectNodeId, (int) strlen(creq->objectNodeId));
-            status = SOPC_NodeId_Copy(&req->ObjectId, tmpNodeId);
-            SOPC_NodeId_Clear(tmpNodeId);
-            SOPC_Free(tmpNodeId);
+            status =
+                SOPC_NodeId_InitializeFromCString(&req->ObjectId, creq->objectNodeId, (int) strlen(creq->objectNodeId));
         }
         if (SOPC_STATUS_OK == status)
         {
-            tmpNodeId = SOPC_NodeId_FromCString(creq->methodNodeId, (int) strlen(creq->methodNodeId));
-            status = SOPC_NodeId_Copy(&req->MethodId, tmpNodeId);
-            SOPC_NodeId_Clear(tmpNodeId);
-            SOPC_Free(tmpNodeId);
+            status =
+                SOPC_NodeId_InitializeFromCString(&req->MethodId, creq->methodNodeId, (int) strlen(creq->methodNodeId));
         }
 
-        req->NoOfInputArguments = creq->nbOfInputParams;
-        req->InputArguments = creq->inputParams;
-    }
-
-    CallMethodContext* ctx = NULL;
-    if (SOPC_STATUS_OK == status)
-    {
-        ctx = SOPC_Malloc(sizeof(CallMethodContext));
-        if (NULL == ctx)
+        req->InputArguments = SOPC_Calloc((size_t) creq->nbOfInputParams, sizeof(SOPC_Variant));
+        if (NULL == req->InputArguments)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
         else
         {
-            SOPC_CallMethodContext_Initialization(ctx);
-            ctx->nbElements = nbOfElements;
-            ctx->results = callResults;
+            for (int32_t j = 0; j < creq->nbOfInputParams; j++)
+            {
+                SOPC_Variant_Move(&req->InputArguments[j], &creq->inputParams[j]);
+            }
+            req->NoOfInputArguments = creq->nbOfInputParams;
         }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_CallMethodContext_Initialization(&ctx);
+        ctx.nbElements = nbOfElements;
+        ctx.results = callResults;
     }
 
     /* wait for the request result */
     if (SOPC_STATUS_OK == status)
     {
         /* Prepare the synchronous context */
-        SOPC_ReturnStatus statusMutex = Mutex_Lock(&ctx->mutex);
+        SOPC_ReturnStatus statusMutex = Mutex_Lock(&ctx.mutex);
         assert(SOPC_STATUS_OK == statusMutex);
 
         status = SOPC_ClientCommon_AsyncSendRequestOnSession((SOPC_LibSub_ConnectionId) connectionId, (void*) callReqs,
-                                                             (uintptr_t) ctx);
+                                                             (uintptr_t) &ctx);
 
         /* Wait for the response */
-        while (SOPC_STATUS_OK == status && !ctx->finish)
+        while (SOPC_STATUS_OK == status && !ctx.finish)
         {
-            statusMutex = Mutex_UnlockAndTimedWaitCond(&ctx->condition, &ctx->mutex, SYNCHRONOUS_REQUEST_TIMEOUT);
+            statusMutex = Mutex_UnlockAndTimedWaitCond(&ctx.condition, &ctx.mutex, SYNCHRONOUS_REQUEST_TIMEOUT);
             assert(SOPC_STATUS_TIMEOUT != statusMutex); /* TODO return error */
             assert(SOPC_STATUS_OK == statusMutex);
         }
-        // Note: ctx->status and generical callback signature should be a ReturnStatus and not a StatusCode
-        status = ctx->status;
+        // Note: ctx.status and generical callback signature should be a ReturnStatus and not a StatusCode
+        status = ctx.status;
 
-        /* Free the context */
-        statusMutex = Mutex_Unlock(&ctx->mutex);
+        /* Clear the context */
+        statusMutex = Mutex_Unlock(&ctx.mutex);
         assert(SOPC_STATUS_OK == statusMutex);
-        statusMutex = Condition_Clear(&ctx->condition);
-        assert(SOPC_STATUS_OK == statusMutex);
-        statusMutex = Mutex_Clear(&ctx->mutex);
-        assert(SOPC_STATUS_OK == statusMutex);
-    }
-    else
-    {
-        OpcUa_CallRequest_Clear(callReqs);
-        SOPC_Free(callReqs);
-        return -3;
+        SOPC_CallMethodContext_Clear(&ctx);
     }
 
     if (SOPC_STATUS_OK != status)
     {
+        OpcUa_CallRequest_Clear(callReqs);
+        SOPC_Free(callReqs);
         return -100;
     }
-
-    SOPC_Free(ctx);
 
     return 0;
 }
